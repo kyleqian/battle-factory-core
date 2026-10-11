@@ -4,6 +4,7 @@ import frontSpritesData from "../assets/gen/battle-opponent-front-sprites.json" 
 import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
 import substituteDollAsset from "../animation/assets/substitute.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
+import castformFormsData from "../assets/gen/castform-forms.json" with { type: "json" };
 import type { BattleCommandPresentationState } from "./battleCommandPresentation.ts";
 import type { RgbColor } from "./bg.ts";
 
@@ -37,6 +38,12 @@ export type BattleCommandFieldArtBattler = Readonly<{
    * hidden. `species` / `speciesSymbol` / `coords` stay the mon's.
    */
   substituteDoll?: true;
+  /**
+   * cast83 (ISSUES #143): a CASTFORM shown in a weather form (the field battler's presentation-only `castformForm`, 1..3): `pic` is
+   * the form's frame + castformPalette[form], the opponent's `coords` are gCastformFrontSpriteCoords[form], and the origin / elevation
+   * follow the form (castformFieldArtForm). Absent for every other battler and for the normal form.
+   */
+  castformForm?: number;
 }>;
 
 export type BattleCommandFieldArtView = Readonly<{
@@ -65,6 +72,27 @@ const coords = monPicCoordsData as CoordsAsset;
  * (:72-79, all 0, normal form modelled) for a player CASTFORM instead of gMonBackPicCoords y_offset (13). */
 const SOURCE_BACK_Y_DELTA: Readonly<Record<string, number>> = { CASTFORM: 0 };
 
+type CastformFormArt = Readonly<{
+  form: number;
+  front: BattleCommandMonPic;
+  back: BattleCommandMonPic;
+  frontCoords: BattleCommandMonPicCoords;
+  elevation: number;
+  backYDelta: number;
+}>;
+/** cast83: src/assets/gen/castform-forms.json (tools/extract/cast83-extract-castform-forms.ts), indexed by CASTFORM_NORMAL .. _ICE. */
+const castformForms = (castformFormsData as unknown as Readonly<{ forms: readonly CastformFormArt[] }>).forms;
+
+/**
+ * cast83: the weather form whose art the field draws for a CASTFORM, or undefined (every other species, the normal form, and an
+ * unknown form, which keeps the normal art; liveCastformFormDeclines still declines it). The ROM loads the form's frame and
+ * castformPalette[form] (HandleSpeciesGfxDataChange / BattleLoad*MonSpriteGfx, battle_gfx_sfx_util.c:615-620 / :678-682 / :945-947).
+ */
+export function castformFieldArtForm(speciesSymbol: string, castformForm: number | undefined): CastformFormArt | undefined {
+  if (speciesSymbol !== "CASTFORM" || castformForm === undefined || castformForm === 0) return undefined;
+  return castformForms[castformForm];
+}
+
 type SubstituteDollAsset = Readonly<{
   front: BattleCommandMonPicTileset;
   back: BattleCommandMonPicTileset;
@@ -89,6 +117,7 @@ function fieldArtBattler(
   species: number,
   side: "player" | "opponent",
   doll = false,
+  castformForm?: number,
 ): BattleCommandFieldArtBattler {
   const speciesSymbol = speciesSymbolById.get(species);
   if (speciesSymbol === undefined) {
@@ -106,10 +135,25 @@ function fieldArtBattler(
     );
   }
 
+  const form = castformFieldArtForm(speciesSymbol, castformForm);
   if (doll) {
     return Object.freeze({
       species, speciesSymbol, pic: SUBSTITUTE_DOLL_PIC[side], coords: picCoords, origin: SUBSTITUTE_DOLL_ORIGIN[side],
-      substituteDoll: true as const,
+      substituteDoll: true as const, ...(form === undefined ? {} : { castformForm: form.form }),
+    });
+  }
+  if (form !== undefined) {
+    // GetBattlerYDelta: sCastformBackSpriteYCoords[form] (player) / gCastformFrontSpriteCoords[form].y_offset (opponent);
+    // GetBattlerSpriteCoordAttr reads gMonBackPicCoords for the player and gCastformFrontSpriteCoords[form] for the opponent
+    // (battle_anim_mons.c:206-208 / :235-237 / :2252-2254).
+    const formCoords = side === "player" ? picCoords : Object.freeze({ ...form.frontCoords });
+    return Object.freeze({
+      species,
+      speciesSymbol,
+      pic: side === "player" ? form.back : form.front,
+      coords: formCoords,
+      origin: Object.freeze({ x: side === "player" ? 40 : 144, y: side === "player" ? 48 + form.backYDelta : 8 + form.frontCoords.yOffset }),
+      castformForm: form.form,
     });
   }
   // GetBattlerSpriteCoord(BATTLER_COORD_X_2/Y_PIC_OFFSET) places both
@@ -137,8 +181,8 @@ export function createBattleCommandFieldArtView(
   field: BattleCommandPresentationState["field"],
 ): BattleCommandFieldArtView {
   return Object.freeze({
-    player: fieldArtBattler(field.player.species, "player", field.player.substituteDoll === true),
-    opponent: fieldArtBattler(field.opponent.species, "opponent", field.opponent.substituteDoll === true),
+    player: fieldArtBattler(field.player.species, "player", field.player.substituteDoll === true, field.player.castformForm),
+    opponent: fieldArtBattler(field.opponent.species, "opponent", field.opponent.substituteDoll === true, field.opponent.castformForm),
   });
 }
 
@@ -166,7 +210,7 @@ export function battleCommandFieldSpeciesSpriteOrigin(
   side: "player" | "opponent",
 ): Readonly<{ x: number; y: number }> {
   return battler.substituteDoll === true
-    ? battleCommandFieldSpriteOrigin(fieldArtBattler(battler.species, side), side)
+    ? battleCommandFieldSpriteOrigin(fieldArtBattler(battler.species, side, false, battler.castformForm), side)
     : battleCommandFieldSpriteOrigin(battler, side);
 }
 
@@ -176,7 +220,8 @@ export function battleCommandFieldArtElevation(
   battler: BattleCommandFieldArtBattler,
   side: "player" | "opponent",
 ): number {
-  return side === "opponent" && battler.substituteDoll !== true
-    ? (enemyElevations as Readonly<Record<string, number>>)[battler.speciesSymbol] ?? 0
-    : 0;
+  if (side !== "opponent" || battler.substituteDoll === true) return 0;
+  // cast83: sCastformElevations[form] (GetBattlerElevation, battle_anim_mons.c:258-259).
+  const form = castformFieldArtForm(battler.speciesSymbol, battler.castformForm);
+  return form?.elevation ?? (enemyElevations as Readonly<Record<string, number>>)[battler.speciesSymbol] ?? 0;
 }

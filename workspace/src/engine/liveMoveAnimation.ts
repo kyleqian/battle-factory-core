@@ -91,7 +91,7 @@ import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/wate
 import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
 import type { FlailPower } from "../animation/flail.ts";
 import type { HailProfile } from "../animation/hail.ts";
-import { composeLiveFieldPalettes, composeLivePalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
+import { composeLiveArtPalettes, composeLiveFieldPalettes, liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 import lovelyKissAsset from "../animation/assets/lovely-kiss.json" with { type: "json" };
 import octazookaAsset from "../animation/assets/octazooka.json" with { type: "json" };
 import spikesAsset from "../animation/assets/spikes.json" with { type: "json" };
@@ -944,7 +944,7 @@ function liveShockWaveSpriteOrderPlanText(
   try {
     const activationOrder = spriteOrderWithOccupiedPrefix({ known: true as const, free: lentFree, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
     const art = createBattleCommandFieldArtView(field);
-    const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+    const palettes = composeLiveArtPalettes(art);
     if (activationOrder !== null && palettes !== null) {
       const targetSide = attackerSide === "player" ? "opponent" : "player";
       const attacker = liveBattlerAnchors(attackerSide, art), target = liveBattlerAnchors(targetSide, art);
@@ -974,7 +974,7 @@ const eruptionProfileCache = new Map<string, ReturnType<typeof liveEruptionProfi
  */
 function liveEruptionProfileFor(field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent", activationOrder: readonly number[]) {
   const art = createBattleCommandFieldArtView(field);
-  const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  const palettes = composeLiveArtPalettes(art);
   if (palettes === null) return null;
   const anchors = { player: liveBattlerAnchors("player", art), opponent: liveBattlerAnchors("opponent", art) };
   const key = JSON.stringify([attackerSide, art.player.speciesSymbol, art.opponent.speciesSymbol, anchors, activationOrder]);
@@ -1566,7 +1566,7 @@ export function liveIceBallWordsPostFree(
   } catch {
     return null;
   }
-  const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  const palettes = composeLiveArtPalettes(art);
   const activationOrder = spriteOrderWithOccupiedPrefix({ known: true as const, free: activationFree, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
   if (palettes === null || activationOrder === null) return null;
   const side = unit.attackerSide, foe = side === "player" ? "opponent" as const : "player" as const;
@@ -3301,7 +3301,7 @@ export function liveMoveAnimationPresentation(
       // Lovely Kiss reads its activation value from the presentation host (the four `% 180` draws replay from it); no host = decline.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       if (palettes === null) return null;
       const targetSide = target.geometry.side;
       const base = { free: KNOWN_ENTRY_FREE_SPRITE_SLOTS, targetSide, palettes };
@@ -3327,7 +3327,7 @@ export function liveMoveAnimationPresentation(
       // x2 rest, so a later body declines unless both species rests are {0,0} (an opponent ONIX after its Quick Attack: 40,367 px).
       if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || lentOrder === null) return null;
@@ -3362,7 +3362,7 @@ export function liveMoveAnimationPresentation(
       const strike = (request.turn & 1) === 1;
       if (!spriteOrderInput?.known || (!strike && !spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || lentOrder === null) return null;
@@ -3413,7 +3413,7 @@ export function liveMoveAnimationPresentation(
       // battler x2 rests are read, so a later body needs both species rests {0,0}.
       if (spriteOrderInput?.known !== true || (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || lentOrder === null) return null;
@@ -3435,7 +3435,7 @@ export function liveMoveAnimationPresentation(
       // windows are exact in the policy phase and differ only on the documented lag rows in the other. Later: both species rests {0,0}.
       if (spriteOrderInput?.known !== true || (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || lentOrder === null) return null;
@@ -3452,7 +3452,7 @@ export function liveMoveAnimationPresentation(
       // No first-body gate: the registers follow the body history (firstBody false once any unit ran).
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || lentOrder === null) return null;
@@ -3479,7 +3479,7 @@ export function liveMoveAnimationPresentation(
       // prep25 Q2: Smog. No WIN0 input (the BG control registers are S0 plus the monbg / split writes); lent order + non-shiny + composite.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || lentOrder === null) return null;
@@ -3492,7 +3492,7 @@ export function liveMoveAnimationPresentation(
       // prep25 Q2: Hyper Voice. No register input; the lent order (any known history) and the assets-only composite are the inputs.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || lentOrder === null) return null;
@@ -3669,7 +3669,7 @@ export function liveMoveAnimationPresentation(
       // Everything else is the measured first-body constant set (liveBgSnapshotMoves.ts) + anchors + the assets-only composite.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       if (palettes === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const args = { attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes };
@@ -3710,7 +3710,7 @@ export function liveMoveAnimationPresentation(
       // sides (docs/later-bodies-curse-oam.md; the unfaded palette / known-entry allocator hold across those predecessors).
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -3735,7 +3735,7 @@ export function liveMoveAnimationPresentation(
       // palette from curseModel.ts; non-shiny (no shiny battle palette); zero idle rests (liveCurseStatsInputs).
       if ((request.turn & 1) !== 1 || !spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -3761,7 +3761,7 @@ export function liveMoveAnimationPresentation(
       // the assembler; palette / BLDY / monbg / shake registers from the source schedule (liveOamMoves.ts livePursuitInputs).
       if ((request.turn & 1) !== 0 || !spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -3786,7 +3786,7 @@ export function liveMoveAnimationPresentation(
       if (!spriteOrderInput?.known) return null;
       if (!spriteOrderInput.firstBody && (!liveBattlersRestFree(art) || (request.power !== 10 && request.power !== 15))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -3808,7 +3808,7 @@ export function liveMoveAnimationPresentation(
       if (!spriteOrderInput?.known) return null;
       if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -3826,7 +3826,7 @@ export function liveMoveAnimationPresentation(
       // banks 7 / 8 / 9, matrix 0), non-shiny, zero idle rests. The monbg write row (10 | 11) is the policy's, per side.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       const monbgCntRow = liveMoveBgWriteRow(276, attacker.geometry.side);
@@ -3845,7 +3845,7 @@ export function liveMoveAnimationPresentation(
       // host's lent 64-slot order is the L input), known-entry allocator, non-shiny, zero idle rests. Registers never change (prep31 s2.1).
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -3884,7 +3884,7 @@ export function liveMoveAnimationPresentation(
       // target ShakeMon x2 start from the sprite centre). The reducer derives its timing from the seam geometry (shockWaveTimingFor).
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -3915,7 +3915,7 @@ export function liveMoveAnimationPresentation(
       // rests (the ShakeMon x2 program starts from 0). Both CPU-phase bits come from the timing policy (lag at 149; BG-palette restore row).
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       const restoreRow = liveMovePaletteTransferRow(171);
@@ -3941,7 +3941,7 @@ export function liveMoveAnimationPresentation(
       // battler OBJ keeps its idle rest (battlerObject; the accepted ONIX opponent target rests at a non-zero x2 / y2). The late lag is the policy's.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -3966,7 +3966,7 @@ export function liveMoveAnimationPresentation(
       if (rng === null || rng.words.length !== 114) return null;
       if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !spriteAllocatorInput?.historyKnown)) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -3999,7 +3999,7 @@ export function liveMoveAnimationPresentation(
       // (lag at 176; the display-neutral bank-2 restore row).
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       const restoreRow = liveMovePaletteTransferRow(285);
@@ -4031,7 +4031,7 @@ export function liveMoveAnimationPresentation(
       if (!spriteOrderInput?.known) return null;
       if (!spriteOrderInput.firstBody && (attacker.geometry.side !== "opponent" || !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -4053,7 +4053,7 @@ export function liveMoveAnimationPresentation(
       // alternates follow a Tackle), known-entry allocator, non-shiny, a zero TARGET idle rest (an attacker rest is exact, species audit 9). The monbg BGnCNT write row comes from the timing policy.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
@@ -4144,7 +4144,7 @@ export function liveMoveAnimationPresentation(
       if (counter === null || !spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const rng = liveMovePresentationRngWords(presentationRngInput);
-      const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+      const palettes = composeLiveArtPalettes(art);
       if (rng === null || palettes === null) return null;
       const iceBallArgs = (side: "player" | "opponent", c: 0 | 1 | 2 | 3 | 4, words: NonNullable<typeof rng>, activationOrder: readonly number[]) => {
         const foe = side === "player" ? "opponent" as const : "player" as const;
