@@ -33,7 +33,9 @@ copy() { # copy <dir> <diff>
   mkdir -p "$1"; git archive HEAD | tar -x -C "$1"
   ln -s "$ROOT/node_modules" "$1/node_modules"; ln -s "$ROOT/reference" "$1/reference"
   [ -e "$ROOT/artifacts" ] && ln -s "$ROOT/artifacts" "$1/artifacts"
-  (cd "$1" && git apply --whitespace=nowarn "$ROOT/$2")
+  # A copy nested inside the repo needs its own git dir, or git apply silently skips the (repo-root-relative) paths.
+  (cd "$1" && git init -q && git apply --whitespace=nowarn "$ROOT/$2")
+  [ -f "$1/src/engine/liveScanlineHistory.ts" ] || { echo "patch $2 not applied in $1" >&2; exit 1; }
 }
 echo "== 4. patched copies + windows"
 copy "$OUT/A" $F/scan93-temp-src-A.diff
@@ -51,8 +53,11 @@ PY
 node_ts tools/integration/later58Check.ts "$OUT/liveonly-base.json" $F/live/*.json --live-only 2> /dev/null
 for t in A B S0; do
   (cd "$OUT/$t" && node_ts tools/integration/later58Check.ts "$OUT/liveonly-$t.json" $F/live/*.json --live-only 2> /dev/null)
+done
+for t in A B S0; do
+  sel=$t; [ $t = S0 ] && sel=B
   mkdir -p "$OUT/$t/$F/sel"
-  python3 - "$OUT/liveonly-B.json" "$F/live" "$OUT/$t/$F/sel" <<'PY'
+  python3 - "$OUT/liveonly-$sel.json" "$F/live" "$OUT/$t/$F/sel" <<'PY'
 import json, shutil, sys
 rows = json.load(open(sys.argv[1]))["rows"]
 for r in rows:
