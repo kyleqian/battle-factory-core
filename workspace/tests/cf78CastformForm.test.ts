@@ -58,26 +58,29 @@ describe("cf78: the slot's Castform form (presentation-only gBattleMonForms)", (
       expect(Math.max(...forms), name).toBe(name.startsWith("cast-sun-") ? 1 : 2);
     }
   });
-  it("every Castform window's live body declines with the slot's weather form; Swift (order lend only) presents without it", () => {
-    let controls = 0;
+  // cast83 (docs/cast83-castform-forms.md): the field art draws the form; every one of these windows' (move, Castform role, form) is
+  // ROM-proven (cast83Check.ts: 44 / 44 live windows 0 px), so the form gate passes for each body; without a body request (the
+  // Substitute swap composite) it still declines.
+  it("cast83: every Castform window's (move, role, form) is ROM-proven, so the form gate passes; Swift (order lend only) presents with the form", () => {
+    let swift = 0;
     for (const name of cast) {
       const f = fixture(name);
       const view = liveView(f, 0);
       const e = view.effect;
       if (e?.type !== "move") throw new Error("expected a move effect");
-      const call = (field: typeof view.field) => liveMoveAnimationPresentation(e.request, field, 0, e.paletteInput, e.spriteAllocatorInput,
-        ORDER, e.presentationRng, e.battlerX2Input, liveMoveHiddenSides(view.visibility, e.request));
       const field = withLiveCastformForms(view.field, windowForms(f));
       expect(field[f.target.species === "CASTFORM" ? f.target.geometry.side : f.attacker.geometry.side].castformForm, name).toBeDefined();
-      expect(call(field), name).toBeNull();
+      expect(liveCastformFormDeclines(field, e.request), name).toBe(false);
+      expect(liveCastformFormDeclines(field), name).toBe(true);
       // The fixture view alone carries no lend / words context for Shock Wave, Thunderbolt and Water Pulse (they decline on their own
-      // here); Swift needs only the order lend, so without the form it presents: the decline above is the form gate.
+      // here); Swift needs only the order lend, so it presents with the form.
       if (e.request.moveId === 129) {
-        expect(call(view.field), name).not.toBeNull();
-        controls += 1;
+        expect(liveMoveAnimationPresentation(e.request, field, 0, e.paletteInput, e.spriteAllocatorInput, ORDER, e.presentationRng,
+          e.battlerX2Input, liveMoveHiddenSides(view.visibility, e.request)), name).not.toBeNull();
+        swift += 1;
       }
     }
-    expect(controls).toBe(12);
+    expect(swift).toBe(12);
   });
   it("the other 551 audit-19 windows carry no Castform form (the gate leaves them alone)", () => {
     const others = readdirSync(FIXTURES).filter((name) => name.endsWith(".json") && !name.startsWith("cast-"));
@@ -87,13 +90,15 @@ describe("cf78: the slot's Castform form (presentation-only gBattleMonForms)", (
 });
 
 describe("cf78: census route 950 through the production orchestrator, Scene ON / OFF parity", () => {
-  it("battle 950 (seed 950, streak 13): the player's CASTFORM in hail; all 19 bodies with it transformed decline", () => {
+  it("battle 950 (seed 950, streak 13): the player's CASTFORM in hail; the ROM-proven bodies with it transformed are live (cast83)", () => {
     const r = cf78Parity(950, 13);
     expect(r.rngEqual && r.rulesEqual && r.boundaryEqual && r.facilityEqual).toBe(true);
     expect(r.castformBodiesOn).toBe(19);
-    expect(r.castformLiveBodiesOn).toBe(0);
+    // cast83: Shock Wave / Icy Wind / Water Pulse by the ice-form CASTFORM (351 / 196 / 352 :by:3) are live; Ember (residual), Rest,
+    // Hail, Ice Ball and Fly at it still decline (docs/cast83-castform-forms.md).
+    expect(r.castformLiveBodiesOn).toBe(9);
     // Every other body keeps its decision: the 9 live on c68111480 (census battle 950, docs/cf78-castform-needle-arm.md).
-    expect(r.liveBodiesOn).toBe(9);
+    expect(r.liveBodiesOn - r.castformLiveBodiesOn).toBe(9);
     // The form at every one of them: hail (3), on the player's slot (SEALEO's Hail from turn 6).
     expect(new Set(r.bodies.flatMap((b) => b.castformForm[0] !== 0 || b.castformForm[1] !== 0 ? [b.castformForm.join(",")] : [])))
       .toEqual(new Set(["3,0"]));

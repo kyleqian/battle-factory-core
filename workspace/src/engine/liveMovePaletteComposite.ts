@@ -27,15 +27,37 @@ export function composeLivePalettes(playerSpecies: string, opponentSpecies: stri
   return Object.freeze({ unfaded: out.slice(), faded: out.slice(), hardware: out.slice() });
 }
 
+type LiveArtPaletteBattler = Readonly<{
+  speciesSymbol: string; substituteDoll?: true; castformForm?: number; pic: Readonly<{ palette: readonly Rgb[] }>;
+}>;
+
+/**
+ * cast83 (ISSUES #143): composeLivePalettes for the displayed field art's species, with a CASTFORM shown in a weather form loading
+ * castformPalette[form] (its art's palette) into its OBJ bank (16 player / 17 opponent; battle_gfx_sfx_util.c:619 / :682 / :947).
+ * Identical to composeLivePalettes when neither battler carries a form.
+ */
+export function composeLiveArtPalettes(art: Readonly<Record<"player" | "opponent", LiveArtPaletteBattler>>): LivePaletteComposite | null {
+  const composite = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  if (composite === null || (art.player.castformForm === undefined && art.opponent.castformForm === undefined)) return composite;
+  const patch = (words: readonly number[]) => {
+    const out = words.slice();
+    for (const side of ["player", "opponent"] as const) {
+      if (art[side].castformForm !== undefined && art[side].substituteDoll !== true) {
+        art[side].pic.palette.forEach((c, i) => { out[(side === "player" ? 16 : 17) * 16 + i] = bgr555(c); });
+      }
+    }
+    return out;
+  };
+  return Object.freeze({ unfaded: patch(composite.unfaded), faded: patch(composite.faded), hardware: patch(composite.hardware) });
+}
+
 /**
  * composeLivePalettes for the displayed field art: a battler shown as the Substitute doll has gSubstituteDollPal in its OBJ bank
  * (16 player / 17 opponent; BattleLoadSubstituteOrMonSpriteGfx). docs/next-adapters-prep38.md s1 NEEDS-PALETTE-COMPOSITE: Megahorn's
  * monbg draws the doll tiles with that bank (95k..105k px with the species palette, 0 px with the doll's).
  */
-export function composeLiveFieldPalettes(art: Readonly<Record<"player" | "opponent", Readonly<{
-  speciesSymbol: string; substituteDoll?: true; pic: Readonly<{ palette: readonly Rgb[] }>;
-}>>>): LivePaletteComposite | null {
-  const composite = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+export function composeLiveFieldPalettes(art: Readonly<Record<"player" | "opponent", LiveArtPaletteBattler>>): LivePaletteComposite | null {
+  const composite = composeLiveArtPalettes(art);
   if (composite === null || (art.player.substituteDoll !== true && art.opponent.substituteDoll !== true)) return composite;
   const patch = (words: readonly number[]) => {
     const out = words.slice();
