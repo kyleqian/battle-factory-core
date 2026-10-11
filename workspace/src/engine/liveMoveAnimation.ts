@@ -1632,15 +1632,54 @@ export function liveMoveHiddenTargetDeclines(request: BattleMoveAnimationRequest
 }
 
 /**
- * cf78 (ISSUES #143 remainder, live audit 19 DEFECT): every live body fails closed while the field displays a CASTFORM in a weather
- * form (`castformForm`, the slot's presentation-only gBattleMonForms; battleResolutionPresentationRender.ts withLiveCastformForms).
- * The field art has no form input (battleCommandFieldArt.ts builds the battler pic from the species only), but the ROM draws the
- * per-form palette and front coords / elevation (battle_gfx_sfx_util.c:615-620, gCastformFrontSpriteCoords): audit 19 measured
- * 998..2,312 px per row in 44 live windows. A live body must not claim pixels it draws wrong; the duration is unchanged (the scene-off
- * fallback presents the same rows).
+ * cast83 (ISSUES #143; docs/cast83-castform-forms.md): the field art draws a CASTFORM's weather form (battleCommandFieldArt.ts
+ * castformFieldArtForm: the form frame, castformPalette[form], gCastformFrontSpriteCoords / sCastformElevations /
+ * sCastformBackSpriteYCoords[form]), and the live renderer's species sheets and palette banks read it. A body is live with a CASTFORM
+ * in a weather form only where its (moveId, Castform role, form) was measured 0 px against direct-mGBA windows (two fresh runs,
+ * r1 == r2, both orientations; tools/integration/fixtures/cast83/): role "by" = the CASTFORM is the attacker, "at" = the other battler
+ * attacks (its target or a self-target body). Form 1 FIRE (sun), 2 WATER (rain), 3 ICE (hail).
  */
-export function liveCastformFormDeclines(field: BattleResolutionDisplayedField): boolean {
-  return field.player.castformForm !== undefined || field.opponent.castformForm !== undefined;
+const LIVE_CASTFORM_FORM_PROVEN: ReadonlySet<string> = new Set([
+  "196:by:3", "58:by:2", "58:by:3", "352:by:2", "352:by:3", "85:by:2", "351:by:2", "351:by:3",
+  "351:at:1", "351:at:2", "351:at:3", "129:at:1", "129:at:2", "85:at:1", "85:at:2", "352:at:1", "352:at:2", "196:at:3", "58:at:2",
+  "61:at:2", "332:at:1", "332:at:2", "57:at:1", "57:at:2", "162:at:1", "162:at:2", "86:at:2", "182:at:2", "38:at:2",
+]);
+/** Measured, not proven (cast83 windows): these keep declining with the residual named. */
+const LIVE_CASTFORM_FORM_RESIDUAL: ReadonlyMap<string, string> = new Map([
+  ["52:by:1", "Ember's own residual (11,651 / 12,314 px; the normal-form control 11,653 / 12,310 px)"],
+  ["53:by:1", "Flamethrower's own residual (252,460 / 241,491 px; the normal-form control 231,701 / 208,281 px)"],
+  ["184:at:3", "Scary Face's own residual (1,371,492 / 1,409,982 px; the normal-form control 1,422,030 / 1,461,108 px)"],
+  ["196:by:2", "Icy Wind in rain: 335,691 / 332,548 px (unexplained, no normal-form control)"],
+  ["196:at:2", "Icy Wind in rain: 335,022 / 337,522 px (unexplained, no normal-form control)"],
+]);
+
+/**
+ * Why a live body declines for a displayed CASTFORM in a weather form (`castformForm`, the slot's presentation-only gBattleMonForms;
+ * battleResolutionPresentationRender.ts withLiveCastformForms), or null when it does not: an unknown form (no art), no body request
+ * (the Substitute swap composite, liveSubstituteSwapView: not measured), a measured residual, or a (move, role, form) not measured.
+ */
+export function liveCastformFormDeclineReason(
+  field: BattleResolutionDisplayedField,
+  request?: Readonly<{ moveId: number; attacker: number }>,
+): string | null {
+  for (const [battler, mon] of [[0, field.player], [1, field.opponent]] as const) {
+    const form = mon.castformForm;
+    if (form === undefined) continue;
+    if (!(form >= 1 && form <= 3)) return `unknown form ${form}: no form art`;
+    if (request === undefined) return "Substitute swap composite not measured";
+    const key = `${request.moveId}:${request.attacker === battler ? "by" : "at"}:${form}`;
+    const residual = LIVE_CASTFORM_FORM_RESIDUAL.get(key);
+    if (residual !== undefined) return `measured residual ${key}: ${residual}`;
+    if (!LIVE_CASTFORM_FORM_PROVEN.has(key)) return `body not ROM-proven for ${key}`;
+  }
+  return null;
+}
+
+export function liveCastformFormDeclines(
+  field: BattleResolutionDisplayedField,
+  request?: Readonly<{ moveId: number; attacker: number }>,
+): boolean {
+  return liveCastformFormDeclineReason(field, request) !== null;
 }
 
 export function liveMoveAnimationPresentation(
@@ -1657,7 +1696,7 @@ export function liveMoveAnimationPresentation(
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request, field) === null) return null;
   if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return null;
-  if (liveCastformFormDeclines(field)) return null;
+  if (liveCastformFormDeclines(field, request)) return null;
   const art = createBattleCommandFieldArtView(field);
   // prep46: after a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) ANY consumer's lend is the
   // word-free deferred marker; resolve it here, render-pure: carry the unit's activation order through the unit with ITS recorded

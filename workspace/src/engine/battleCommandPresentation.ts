@@ -101,7 +101,7 @@ export type BattleCommandFieldBattler = Readonly<{
    * cf78 (ISSUES #143 remainder): presentation-only ROM `gBattleMonForms` of a displayed CASTFORM in a non-normal form
    * (1 sun / 2 rain / 3 hail; any other non-zero value is an unrecognised form argument). Set only by the resolution render
    * view (battleResolutionPresentationRender.ts withLiveCastformForms) from the CASTFORM_CHANGE animation events; the field
-   * art has no form input, so every live body declines while it is set (liveCastformFormDeclines). Never read by rules, RNG
+   * art draws the form (cast83: battleCommandFieldArt.ts castformFieldArtForm); a live body declines unless its (move, Castform role, form) is ROM-proven (liveCastformFormDeclines). Never read by rules, RNG
    * or the queue. Absent = the normal form.
    */
   castformForm?: number;
