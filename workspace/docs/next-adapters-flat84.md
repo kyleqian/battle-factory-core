@@ -160,8 +160,11 @@ sequence and battle digests are identical, and so is ON / OFF parity.
 ## Open (not lifted / not proven here)
 
 - **Player Quick Attack 98 residual (pre-existing, not Flatter):** 14,223 px at ages 14..32 in the opponent box, at the FIRST body of
-  `c-quick-attack-ply` (NIDORINA → NIDORINO, lab seed 305420349) and identical with the entry lend. A candidate for an ISSUES entry: a
-  first-body player Quick Attack in production renders this.
+  `c-quick-attack-ply` (NIDORINA → NIDORINO, lab seed 305420349) and identical with the entry lend.
+  - Where it is: the rows of `AnimTask_ShakeMon` on the target (`delay 4` then the shake). The bbox alternates x 152 / 157, with 636..639 px
+    per row on ages 14..23, then a constant 872 px on ages 24..32. The ROM shows background (`f7f7ff`) where live draws the NIDORINO
+    (`bd63bd`), i.e. a target-shake offset or phase difference.
+  - A candidate for an ISSUES entry: a first-body player Quick Attack on an opponent NIDORINO renders this in production today.
 - **The player-side KO** (the player's Flatter target faints): `ko-water-pulse-opp` stalls at the forced party menu, because the probe
   trace has no menu input. Only the opponent-side faint + summary + send-out is proven here.
 - **The 9 remaining census Flatter fallbacks** sit at the case-local gate (an unknown lend or allocator history). An allocator audit of
