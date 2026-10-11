@@ -1,4 +1,0 @@
-a21-self-sunny-day-opponent-azurill swap opponent SUNNY_DAY t0 rows 239 body 157 D 158 prodDur 239 order fixture presented true prod 0/0 exact 239 tail {"rowK1":{"production":[0,0],"withoutLatch":[679,679]},"rowK2":{"production":[0,0]}}
-a21-self-sunny-day-opponent-azurill plain player SUNNY_DAY t0 rows 157 body 156 D 158 prodDur 158 order fixture presented false prod 207095/207095 exact 0 tail null
-a21-self-sunny-day-opponent-azurill plain player SUNNY_DAY t0 rows 157 body 156 D 158 prodDur 158 order fixture presented false prod 346230/346230 exact 0 tail null
-a21-self-sunny-day-opponent-azurill plain player SUNNY_DAY t0 rows 157 body 156 D 158 prodDur 158 order fixture presented false prod 207095/207095 exact 0 tail null

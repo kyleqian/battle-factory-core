@@ -1,4 +1,0 @@
-a21-att-solar-beam-opponent-crobat swap opponent SOLAR_BEAM t0 rows 189 body 107 D 108 prodDur 189 order fixture presented true prod 0/0 exact 189 tail {"rowK1":{"production":[0,0],"withoutLatch":[679,679]},"rowK2":{"production":[0,0]}}
-a21-att-solar-beam-opponent-crobat plain opponent SOLAR_BEAM t1 rows 238 body 237 D 160 prodDur 160 order fixture presented false prod 2302303/2302303 exact 15 tail null
-a21-att-solar-beam-opponent-crobat plain opponent SOLAR_BEAM t0 rows 108 body 107 D 108 prodDur 108 order fixture presented false prod 0/0 exact 108 tail null
-a21-att-solar-beam-opponent-crobat plain opponent SOLAR_BEAM t1 rows 238 body 237 D 160 prodDur 160 order fixture presented false prod 2302303/2302303 exact 15 tail null

@@ -1,0 +1,1476 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-cf-change-at-cfopp-snorlax",
+ "rows": [
+  {
+   "fixture": "a21-cf-change-at-cfopp-snorlax-c0.json",
+   "move": "SHOCK_WAVE",
+   "side": "player",
+   "species": "SNORLAX/CASTFORM",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@1 351@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 582,
+    "endFrame": 848
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 267,
+    "px": 0,
+    "digests": [
+     "8bd19e84cd06fccb",
+     "8bd19e84cd06fccb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 267,
+    "px": 0,
+    "digests": [
+     "8bd19e84cd06fccb",
+     "8bd19e84cd06fccb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cf-change-at-cfopp-snorlax-c1.json",
+   "move": "SHOCK_WAVE",
+   "side": "player",
+   "species": "SNORLAX/CASTFORM",
+   "units": 7,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@1 351@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "240@1 CASTFORM_CHANGE(2)@1 351@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1940,
+    "endFrame": 2206
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 267,
+    "px": 0,
+    "digests": [
+     "8bd19e84cd06fccb",
+     "8bd19e84cd06fccb"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 267,
+    "px": 0,
+    "digests": [
+     "8bd19e84cd06fccb",
+     "8bd19e84cd06fccb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cf-change-at-cfopp-snorlax-c2.json",
+   "move": "SHOCK_WAVE",
+   "side": "player",
+   "species": "SNORLAX/CASTFORM",
+   "units": 12,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@1 351@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "240@1 CASTFORM_CHANGE(2)@1 351@0 HIT_ANIMATION@1 RAIN_CONTINUES@0",
+    "241@1 CASTFORM_CHANGE(1)@1 351@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3250,
+    "endFrame": 3516
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (case-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 1,
+    "px": 3645169,
+    "digests": [
+     "a8f868a4aa0d76f6",
+     "a8f868a4aa0d76f6"
+    ],
+    "residualRows": [
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      200
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      7,
+      200
+     ],
+     [
+      8,
+      200
+     ],
+     [
+      9,
+      200
+     ],
+     [
+      10,
+      200
+     ],
+     [
+      11,
+      200
+     ],
+     [
+      12,
+      200
+     ],
+     [
+      13,
+      200
+     ],
+     [
+      14,
+      200
+     ],
+     [
+      15,
+      200
+     ],
+     [
+      16,
+      200
+     ],
+     [
+      17,
+      200
+     ],
+     [
+      18,
+      200
+     ],
+     [
+      19,
+      200
+     ],
+     [
+      20,
+      18097
+     ],
+     [
+      21,
+      18097
+     ],
+     [
+      22,
+      18097
+     ],
+     [
+      23,
+      18097
+     ],
+     [
+      24,
+      18097
+     ],
+     [
+      25,
+      18097
+     ],
+     [
+      26,
+      18097
+     ],
+     [
+      27,
+      18097
+     ],
+     [
+      28,
+      18097
+     ],
+     [
+      29,
+      18097
+     ],
+     [
+      30,
+      18097
+     ],
+     [
+      31,
+      18097
+     ],
+     [
+      32,
+      18097
+     ],
+     [
+      33,
+      18097
+     ],
+     [
+      34,
+      18097
+     ],
+     [
+      35,
+      18097
+     ],
+     [
+      36,
+      18097
+     ],
+     [
+      37,
+      18097
+     ],
+     [
+      38,
+      18097
+     ],
+     [
+      39,
+      18097
+     ],
+     [
+      40,
+      18097
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 267,
+    "px": 0,
+    "digests": [
+     "8bd19e84cd06fccb",
+     "8bd19e84cd06fccb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cf-change-at-cfopp-snorlax-c3.json",
+   "move": "SHOCK_WAVE",
+   "side": "player",
+   "species": "SNORLAX/CASTFORM",
+   "units": 17,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@1 351@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "240@1 CASTFORM_CHANGE(2)@1 351@0 HIT_ANIMATION@1 RAIN_CONTINUES@0",
+    "241@1 CASTFORM_CHANGE(1)@1 351@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "240@1 CASTFORM_CHANGE(2)@1 351@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4608,
+    "endFrame": 4874
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (case-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 1,
+    "px": 3676211,
+    "digests": [
+     "2042f02f0757bc10",
+     "2042f02f0757bc10"
+    ],
+    "residualRows": [
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      200
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      7,
+      200
+     ],
+     [
+      8,
+      200
+     ],
+     [
+      9,
+      200
+     ],
+     [
+      10,
+      200
+     ],
+     [
+      11,
+      200
+     ],
+     [
+      12,
+      200
+     ],
+     [
+      13,
+      200
+     ],
+     [
+      14,
+      200
+     ],
+     [
+      15,
+      200
+     ],
+     [
+      16,
+      200
+     ],
+     [
+      17,
+      200
+     ],
+     [
+      18,
+      200
+     ],
+     [
+      19,
+      200
+     ],
+     [
+      20,
+      18312
+     ],
+     [
+      21,
+      18312
+     ],
+     [
+      22,
+      18312
+     ],
+     [
+      23,
+      18312
+     ],
+     [
+      24,
+      18312
+     ],
+     [
+      25,
+      18312
+     ],
+     [
+      26,
+      18312
+     ],
+     [
+      27,
+      18312
+     ],
+     [
+      28,
+      18312
+     ],
+     [
+      29,
+      18312
+     ],
+     [
+      30,
+      18312
+     ],
+     [
+      31,
+      18312
+     ],
+     [
+      32,
+      18312
+     ],
+     [
+      33,
+      18312
+     ],
+     [
+      34,
+      18312
+     ],
+     [
+      35,
+      18312
+     ],
+     [
+      36,
+      18312
+     ],
+     [
+      37,
+      18312
+     ],
+     [
+      38,
+      18312
+     ],
+     [
+      39,
+      18312
+     ],
+     [
+      40,
+      18312
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 267,
+    "px": 0,
+    "digests": [
+     "8bd19e84cd06fccb",
+     "8bd19e84cd06fccb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cf-change-at-cfopp-snorlax-c4.json",
+   "move": "SHOCK_WAVE",
+   "side": "player",
+   "species": "SNORLAX/CASTFORM",
+   "units": 22,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@1 351@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "240@1 CASTFORM_CHANGE(2)@1 351@0 HIT_ANIMATION@1 RAIN_CONTINUES@0",
+    "241@1 CASTFORM_CHANGE(1)@1 351@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "240@1 CASTFORM_CHANGE(2)@1 351@0 HIT_ANIMATION@1 RAIN_CONTINUES@0",
+    "241@1 CASTFORM_CHANGE(1)@1 351@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5918,
+    "endFrame": 6184
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (case-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 1,
+    "px": 3645169,
+    "digests": [
+     "a8f868a4aa0d76f6",
+     "a8f868a4aa0d76f6"
+    ],
+    "residualRows": [
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      200
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      7,
+      200
+     ],
+     [
+      8,
+      200
+     ],
+     [
+      9,
+      200
+     ],
+     [
+      10,
+      200
+     ],
+     [
+      11,
+      200
+     ],
+     [
+      12,
+      200
+     ],
+     [
+      13,
+      200
+     ],
+     [
+      14,
+      200
+     ],
+     [
+      15,
+      200
+     ],
+     [
+      16,
+      200
+     ],
+     [
+      17,
+      200
+     ],
+     [
+      18,
+      200
+     ],
+     [
+      19,
+      200
+     ],
+     [
+      20,
+      18097
+     ],
+     [
+      21,
+      18097
+     ],
+     [
+      22,
+      18097
+     ],
+     [
+      23,
+      18097
+     ],
+     [
+      24,
+      18097
+     ],
+     [
+      25,
+      18097
+     ],
+     [
+      26,
+      18097
+     ],
+     [
+      27,
+      18097
+     ],
+     [
+      28,
+      18097
+     ],
+     [
+      29,
+      18097
+     ],
+     [
+      30,
+      18097
+     ],
+     [
+      31,
+      18097
+     ],
+     [
+      32,
+      18097
+     ],
+     [
+      33,
+      18097
+     ],
+     [
+      34,
+      18097
+     ],
+     [
+      35,
+      18097
+     ],
+     [
+      36,
+      18097
+     ],
+     [
+      37,
+      18097
+     ],
+     [
+      38,
+      18097
+     ],
+     [
+      39,
+      18097
+     ],
+     [
+      40,
+      18097
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 267,
+    "px": 0,
+    "digests": [
+     "8bd19e84cd06fccb",
+     "8bd19e84cd06fccb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cf-change-at-cfopp-snorlax-c5.json",
+   "move": "SHOCK_WAVE",
+   "side": "player",
+   "species": "SNORLAX/CASTFORM",
+   "units": 27,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@1 351@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "240@1 CASTFORM_CHANGE(2)@1 351@0 HIT_ANIMATION@1 RAIN_CONTINUES@0",
+    "241@1 CASTFORM_CHANGE(1)@1 351@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "240@1 CASTFORM_CHANGE(2)@1 351@0 HIT_ANIMATION@1 RAIN_CONTINUES@0",
+    "241@1 CASTFORM_CHANGE(1)@1 351@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "240@1 CASTFORM_CHANGE(2)@1 351@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 7276,
+    "endFrame": 7542
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "unclassified (case-local gate)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 1,
+    "px": 3676211,
+    "digests": [
+     "2042f02f0757bc10",
+     "2042f02f0757bc10"
+    ],
+    "residualRows": [
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      200
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      7,
+      200
+     ],
+     [
+      8,
+      200
+     ],
+     [
+      9,
+      200
+     ],
+     [
+      10,
+      200
+     ],
+     [
+      11,
+      200
+     ],
+     [
+      12,
+      200
+     ],
+     [
+      13,
+      200
+     ],
+     [
+      14,
+      200
+     ],
+     [
+      15,
+      200
+     ],
+     [
+      16,
+      200
+     ],
+     [
+      17,
+      200
+     ],
+     [
+      18,
+      200
+     ],
+     [
+      19,
+      200
+     ],
+     [
+      20,
+      18312
+     ],
+     [
+      21,
+      18312
+     ],
+     [
+      22,
+      18312
+     ],
+     [
+      23,
+      18312
+     ],
+     [
+      24,
+      18312
+     ],
+     [
+      25,
+      18312
+     ],
+     [
+      26,
+      18312
+     ],
+     [
+      27,
+      18312
+     ],
+     [
+      28,
+      18312
+     ],
+     [
+      29,
+      18312
+     ],
+     [
+      30,
+      18312
+     ],
+     [
+      31,
+      18312
+     ],
+     [
+      32,
+      18312
+     ],
+     [
+      33,
+      18312
+     ],
+     [
+      34,
+      18312
+     ],
+     [
+      35,
+      18312
+     ],
+     [
+      36,
+      18312
+     ],
+     [
+      37,
+      18312
+     ],
+     [
+      38,
+      18312
+     ],
+     [
+      39,
+      18312
+     ],
+     [
+      40,
+      18312
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 267,
+    "exactRows": 267,
+    "px": 0,
+    "digests": [
+     "8bd19e84cd06fccb",
+     "8bd19e84cd06fccb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

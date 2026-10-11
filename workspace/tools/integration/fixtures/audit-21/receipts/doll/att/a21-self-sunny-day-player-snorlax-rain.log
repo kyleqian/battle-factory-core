@@ -1,7 +1,0 @@
-a21-self-sunny-day-player-snorlax-rain plain opponent RAIN_DANCE t0 rows 187 body 186 D 187 prodDur 187 order fixture presented false prod 299743/299743 exact 0 tail null
-a21-self-sunny-day-player-snorlax-rain swap player SUNNY_DAY t0 rows 243 body 157 D 158 prodDur 243 order none presented true prod 766746/766746 exact 133 tail {"rowK1":{"production":[0,0],"withoutLatch":[600,600]},"rowK2":{"production":[0,0]}}
-a21-self-sunny-day-player-snorlax-rain plain opponent RAIN_DANCE t0 rows 187 body 186 D 187 prodDur 187 order none presented false prod 299669/299669 exact 0 tail null
-a21-self-sunny-day-player-snorlax-rain swap player SUNNY_DAY t0 rows 243 body 157 D 158 prodDur 243 order none presented true prod 766746/766746 exact 133 tail {"rowK1":{"production":[0,0],"withoutLatch":[600,600]},"rowK2":{"production":[0,0]}}
-a21-self-sunny-day-player-snorlax-rain plain opponent RAIN_DANCE t0 rows 187 body 186 D 187 prodDur 187 order none presented false prod 299553/299553 exact 0 tail null
-a21-self-sunny-day-player-snorlax-rain swap player SUNNY_DAY t0 rows 243 body 157 D 158 prodDur 243 order none presented true prod 766746/766746 exact 133 tail {"rowK1":{"production":[0,0],"withoutLatch":[600,600]},"rowK2":{"production":[0,0]}}
-a21-self-sunny-day-player-snorlax-rain plain opponent RAIN_DANCE t0 rows 187 body 186 D 187 prodDur 187 order none presented false prod 299379/299379 exact 0 tail null

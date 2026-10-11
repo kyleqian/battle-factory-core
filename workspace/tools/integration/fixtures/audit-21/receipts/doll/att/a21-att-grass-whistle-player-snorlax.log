@@ -1,1 +1,0 @@
-a21-att-grass-whistle-player-snorlax swap player GRASS_WHISTLE t0 rows 306 body 220 D 225 prodDur 306 order fixture presented true prod 0/0 exact 306 tail {"rowK1":{"production":[0,0],"withoutLatch":[600,600]},"rowK2":{"production":[0,0]}}

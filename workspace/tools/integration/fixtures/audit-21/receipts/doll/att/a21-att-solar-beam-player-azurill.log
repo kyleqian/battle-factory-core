@@ -1,5 +1,0 @@
-a21-att-solar-beam-player-azurill swap player SOLAR_BEAM t0 rows 193 body 107 D 108 prodDur 193 order fixture presented true prod 0/0 exact 193 tail {"rowK1":{"production":[200,200],"withoutLatch":[800,800]},"rowK2":{"production":[0,0]}}
-a21-att-solar-beam-player-azurill plain player SOLAR_BEAM t1 rows 238 body 237 D 160 prodDur 160 order fixture presented false prod 2306265/2306265 exact 15 tail null
-a21-att-solar-beam-player-azurill plain player SOLAR_BEAM t0 rows 108 body 107 D 108 prodDur 108 order fixture presented false prod 0/0 exact 108 tail null
-a21-att-solar-beam-player-azurill plain player SOLAR_BEAM t1 rows 238 body 237 D 160 prodDur 160 order fixture presented false prod 2306265/2306265 exact 15 tail null
-a21-att-solar-beam-player-azurill plain player SOLAR_BEAM t0 rows 108 body 107 D 108 prodDur 108 order fixture presented false prod 0/0 exact 108 tail null

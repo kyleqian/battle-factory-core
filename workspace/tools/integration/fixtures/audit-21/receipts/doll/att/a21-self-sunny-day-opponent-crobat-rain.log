@@ -1,7 +1,0 @@
-a21-self-sunny-day-opponent-crobat-rain plain player RAIN_DANCE t0 rows 187 body 186 D 187 prodDur 187 order fixture presented false prod 302612/302612 exact 0 tail null
-a21-self-sunny-day-opponent-crobat-rain swap opponent SUNNY_DAY t0 rows 239 body 157 D 158 prodDur 239 order none presented true prod 851601/851601 exact 82 tail {"rowK1":{"production":[0,0],"withoutLatch":[679,679]},"rowK2":{"production":[0,0]}}
-a21-self-sunny-day-opponent-crobat-rain plain player RAIN_DANCE t0 rows 187 body 186 D 187 prodDur 187 order none presented false prod 302307/302307 exact 0 tail null
-a21-self-sunny-day-opponent-crobat-rain swap opponent SUNNY_DAY t0 rows 239 body 157 D 158 prodDur 239 order none presented true prod 851601/851601 exact 82 tail {"rowK1":{"production":[0,0],"withoutLatch":[679,679]},"rowK2":{"production":[0,0]}}
-a21-self-sunny-day-opponent-crobat-rain plain player RAIN_DANCE t0 rows 187 body 186 D 187 prodDur 187 order none presented false prod 302636/302636 exact 0 tail null
-a21-self-sunny-day-opponent-crobat-rain swap opponent SUNNY_DAY t0 rows 239 body 157 D 158 prodDur 239 order none presented true prod 851601/851601 exact 82 tail {"rowK1":{"production":[0,0],"withoutLatch":[679,679]},"rowK2":{"production":[0,0]}}
-a21-self-sunny-day-opponent-crobat-rain plain player RAIN_DANCE t0 rows 187 body 186 D 187 prodDur 187 order none presented false prod 302106/302106 exact 0 tail null
