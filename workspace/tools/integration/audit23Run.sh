@@ -12,7 +12,7 @@
 #     2. audit23Check.ts per scenario (the history replayed through the production hosts as the orchestrator does, the consumer request
 #        from its own kernel arguments; CHAIN = the claim, ENTRY = the no-history control; two more fresh probe processes, r1 == r2):
 #        check (aligned), level (levelled fixtures, the CLEFFA route), fixreq (AUDIT23_FIXTURE_REQUEST=1 on the Fury Cutter routes: the
-#        ablation without the orchestrator's counter argument);
+#        ablation without the orchestrator's counter argument); audit23GwRestore.ts (GrassWhistle's restore-blend rows per window);
 #  d  (the doll cells, doll90 / ctl95's instruments): audit23DollStage.py (doll81-format labs, lab seed 305419897) -> prep40Probe.py
 #     (self / att) / prep38Probe.py (def) twice (r1 == r2 gated), doll90Personality.py twice -> speciesAudit14SwapCheck.ts
 #     --personalities (attdollLiveCheck.ts: every swap composite + tail rows) / audit23DollDefFixtures.py + prep38Check.ts (Psych Up
@@ -55,6 +55,7 @@ names() { ls "$1" | grep -E "$2" | sed 's/-c[0-9]*\.json$//' | sort -u; }
 mkdir -p $O/logs
 xargs -n 4 -P "$J" sh -c 'AUDIT23_FIXTURE_REQUEST=$([ "$0" = 1 ] && echo 1 || echo 0) node --experimental-strip-types --no-warnings \
   tools/integration/audit23Check.ts "$1" "$2" "'"$REC"'/$3/check-$2.json" > "a23/logs/$(echo $3 | tr / -)-$2.log" 2>&1 || echo "FAILED $3 $2"' < $O/jobs.txt
+node --experimental-strip-types --no-warnings tools/integration/audit23GwRestore.ts $O/m/chk > "$REC/m/gw-restore.txt"
 # ---- d: doll cells
 python3 tools/integration/audit23DollStage.py $O/d/sc > /dev/null
 mkdir -p $O/d/probes $O/d/pers
