@@ -66,6 +66,19 @@
   call site; an unused import fails noUnusedLocals). Supervisor: census on the worker tree vs `302e39bdb` +58 / +6,955, 0 regressions.
 - Census on `9df9b234a` (src `615e6cb3`; all folds so far) vs the session baseline: **+335 commands / +48,264 live frames, 0 live ->
   fallback, keys identical except seed 881's budget-cut tail: 95.01 % / 98.60 %** (start 93.79 / 97.37); 0 errors.
+- Supervisor union gates on `9df9b234a` (src `615e6cb3`; + ret88 + land87): typecheck, full suite 1,619 files / 13,291 tests, build,
+  differential 624 / 624 vs `b05d384ca` (`.integration/validation/union-9df9b234a/`).
+- Folded Opus worker `66904f6d5` (SIDE, narrow grant, stacked on audit 21) with audit 21 as `66e4ad7a4` (src `a9290e8d`): qa91 — the
+  Quick Attack target offset is `-(target's tracked rest)` from the impact age (RAM, r1 == r2: ONIX x2 +1 at its first activation, 0 at
+  later ones; NIDORINO 0; AnimTask_ShakeMon writes x2 absolutely), not prep7's fitted -1: all 18 audit-21 player windows CHAIN 0 px
+  (the ONIX later-body ENTRY rows 0..13 keep 15,274 px — the audit's single-body ENTRY history never learns ONIX was zeroed;
+  production always runs CHAIN); prep7 comparators still exact; opponent side unchanged; +2 lines in sceneOnPresentation.ts to pass
+  the rest (outside the grant, needed). Census 0..999 identical (no claim moves: the 144 live player Quick Attack bodies now draw
+  the target where the ROM does — they were 1 px left). Castform proven keys += 52:by:1 / 53:by:1 / 184:at:3 (audit 21 ARTIFACT;
+  14 / 14 windows 0 px); rain Icy Wind stays declined as TIMING-PHASE. Worker gates: full suite 1,617 files / 13,278 tests, build,
+  differential 624; qa91Run.sh run B == committed.
+- Live audit 22 (MAIN lane, Opus, in progress): ret88's Double Team "residual" = ARTIFACT (audit20Fixtures.py writes no ageOffset;
+  production's accepted DT framing starts at the ROM activation) — no defect.
 - prep reseed85 (MAIN lane, Opus, `4f4828f3b` .. `d46cdfff1`, new files only): the post-KO send-out allocator reseed after a words-order
   unit. The reseed reads slot OCCUPANCY only and every words unit is allocator-net-zero, so the order host can keep a word-free
   occupancy shadow while the free order stays deferred. ROM: 13 routes x 2 probes x 2 runs A == B; 4 / 4 words-vs-control pairs SAME
