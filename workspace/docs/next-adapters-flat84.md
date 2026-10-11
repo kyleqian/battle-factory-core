@@ -55,6 +55,17 @@ runs in one batch. Receipts: `tools/integration/fixtures/flat84/`. Runner: `tool
 - **Test pins: none move.** The 24 related test files (`tests-related-files.txt`: words-unit / deferred-lend / order-host / Flatter tests)
   pass on the patched copy: **24 files, 199 tests, 0 failed** (`tests-patched-summary.txt`).
 
+- **Gates (this evidence step).**
+  - Every new check passes. `git diff --check b05d384ca HEAD` is clean; 135 files were added and no tracked file was modified.
+  - Smoke on the patched copy: 8 files / 448 tests.
+  - FULL suite on the patched copy (`tests-patched-full-summary.txt`): 12,373 passed, 20 failed. All 20 are environmental to an archive copy,
+    the same set flat77 recorded: 19 WASM parity tests need `artifacts/wasm/factory_wasm.wasm` ("Build it with: core-rs/build-wasm.sh"), and
+    `appDifferential` needs git history.
+  - Runner `flat84Run.sh` into a fresh dir with `FLAT84_CENSUS=1 FLAT84_TESTS=1`: **38 / 38 receipts byte-identical** (`runner-run2.txt`).
+    It re-staged, re-probed, re-derived, re-checked, re-ran the KO chain, parity, the 20 census shards and the related tests.
+  - Not run on the checkout: `npm test` / `npm run build` (the supervisor runs gates on master during this step). This step adds no file
+    under `src/` or `tests/`.
+
 ### Plan == ROM (`plan-check.txt`; the vectors with full orders are in `flatter-vectors.json`)
 
 | scenarios | side | first bodies | later bodies | after a Flatter | plan == ROM |
