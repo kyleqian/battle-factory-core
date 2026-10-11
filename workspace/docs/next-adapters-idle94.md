@@ -17,7 +17,7 @@ processes, r1 == r2 byte for byte (138 / 138 outputs, `receipts/probe-sha256.jso
 | **BANKED temp patch** | `liveMoveIdleLeadRows` + `LIVE_MOVE_IDLE_LEAD_ROWS` (40 ids). A live move-animation command lasts D + N, and its effect age is max(0, elapsed - N): rows 0..N-1 show the age-0 frame, then the unchanged body. A Substitute-swap composite keeps 0 | `idle94-lead-rows.diff` (1 file, +25 / -5) |
 | Patch proof | **Routes 8 / 8** (Bulk Up / Swagger / Taunt / Scary Face x player / opponent, census battles 154 / 398 / 3 / 6 / 286 / 165 / 6 / 24). Patched lead rows equal the base age-0 framebuffer (live, age 0). Patched row N+k equals base row k (sha, age, live) for every k. The next command's first row is equal. r1 == r2 in both trees. With the ROM's lead row == window row 0 (above) and that row's accepted 0 px dense proof, **the lead rows are 0 px by transitivity**. This is not a direct dense ROM-vs-production diff of the lab scenarios | `receipts/render-check.json` |
 | Census delta (seeds 0..999, ten `--index-from` shards per tree) | **27,516 commands in both trees. The command KEY sequence and battleDigestExcludingFrames are identical (10 / 10 shards). 0 status changes (live 26,181 both). 3,842 commands moved by exactly +N** (3,835 live, plus 7 presentation-stage fallbacks: Castform-form Ember x6 and one Scary Face, which present the field for the adapter's duration). One Substitute-swap command stays at +0. Every other command is +0 (0 mismatches). **+20,853 frames** (3,959,685 -> 3,980,538). Largest movers: Bite +3,230, Psychic +3,100, Shadow Ball +2,410, Toxic +1,134 | `census-delta.json`, `census-base-summary.json`, `census-patched-digests.json` |
-| Test pins the patch moves | see section 4 | patched-copy `npm test` |
+| Test pins the patch moves | **30 tests in 16 files**, all ordinary-route age / row sequences of lead moves, e.g. Bulk Up `expected [ Array(108) ] to deeply equal [ Array(104) ]`. One more failure is environment-only (below). Patched copy: 17 files / 31 tests failed, 1,604 files / 13,277 tests passed | `pins.json` |
 
 **Flagged for the supervisor (out of this step, not investigated further):**
 
@@ -70,7 +70,31 @@ ROM rows after production's last row up to F_after: static (equal to production'
 
 ## 4. Pins the patch moves
 
-(Patched-copy `npm test`; see the commit that adds this section's numbers.)
+Patched copy (`git archive 3a76cb3e6` + the diff), `npm test`: **17 files / 31 tests failed, 1,604 files / 13,277 tests passed**
+(44 / 223 skipped). Each of the 30 pins asserts a lead move's ordinary-route per-row age sequence `[0..D-1]` (or its row count).
+After the fold they become `[0 x (N+1), 1..D-1]` (N + D rows). They are listed in `tools/integration/fixtures/idle94/pins.json`, which
+also gives each assertion's first line:
+
+- `tests/animation/liveAnchor2MoveAdapters.test.ts` (1): completes ordinary 'TAIL_GLOW' and preserves ON/OFF rules and RNG
+- `tests/animation/liveAnchor3MoveAdapters.test.ts` (2): completes ordinary 'BULK_UP' and preserves ON/OFF rules and RNG; completes ordinary 'SWAGGER' and preserves ON/OFF rules and RNG
+- `tests/animation/liveAnchorMoveAdapters.test.ts` (7): completes ordinary 'ACID' and preserves ON/OFF rules and RNG; completes ordinary 'HARDEN' and preserves ON/OFF rules and RNG; completes ordinary 'IRON_DEFENSE' and preserves ON/OFF rules and RNG; completes ordinary 'METAL_CLAW' and preserves ON/OFF rules and RNG; completes ordinary 'SLUDGE' and preserves ON/OFF rules and RNG; completes ordinary 'SLUDGE_BOMB' and preserves ON/OFF rules and RNG; completes ordinary 'WATER_GUN' and preserves ON/OFF rules and RNG
+- `tests/animation/liveHBufferS1MoveAdapters.test.ts` (1): completes ordinary 'DRAGON_BREATH' and preserves ON/OFF rules and RNG
+- `tests/animation/liveNext5MoveAdapters.test.ts` (2): completes ordinary 'DIZZY_PUNCH' and preserves ON/OFF rules and RNG; completes ordinary 'SCARY_FACE' and preserves ON/OFF rules and RNG
+- `tests/animation/liveOrderConsumerMoveAdapters.test.ts` (4): plays ordinary BLAZE_KICK (seed 322, streak 28, slot 0, BLAZIKEN) with the adapter active every age; plays ordinary DRAGON_RAGE (seed 37, streak 14, slot 3, CHARMELEON) with the adapter active every age; plays ordinary EMBER (seed 4, streak 7, slot 1, MAGCARGO) with the adapter active every age; renders Blaze Kick as a LATER body after a modelled opponent Sunny Day (seed 43, streak 28, slot 0)
+- `tests/animation/livePhysical2bMoveAdapters.test.ts` (1): reaches and completes ordinary 'RAZOR_LEAF' requests with ON/OFF state and RNG parity
+- `tests/animation/livePhysical2cMoveAdapters.test.ts` (2): completes ordinary 'COVET' and preserves ON/OFF rules and RNG; restarts Super Fang and Covet through complete fresh bodies on consecutive commands
+- `tests/animation/livePrep2MoveAdapters.test.ts` (2): Explosion: the body ages with the attacker at HP 0, then the replacement screen is the documented boundary; completes ordinary 'FUTURE_SIGHT' and preserves ON/OFF rules and RNG
+- `tests/animation/livePrep5MoveAdapters.test.ts` (1): completes ordinary 'TAUNT' and preserves ON/OFF rules and RNG
+- `tests/animation/livePrep6MoveAdapters.test.ts` (2): completes ordinary 'KNOCK_OFF' and preserves ON/OFF rules and RNG; completes ordinary 'SELF_DESTRUCT' and preserves ON/OFF rules and RNG
+- `tests/animation/livePrep7MoveAdapters.test.ts` (1): completes ordinary 'FAKE_TEARS' and preserves ON/OFF rules and RNG
+- `tests/animation/livePrep9MoveAdapters.test.ts` (1): completes ordinary 'ABSORB' and preserves ON/OFF rules and RNG
+- `tests/animation/liveStatusMoveAdapters.test.ts` (1): restarts a legal generated Confusion command with the current displayed field
+- `tests/playableAnimationIntegration.test.ts` (1): renders both opponent damaging and no-hit moves from generated command input through cleanup
+- `tests/playableContactAnimationLifecycle.test.ts` (1): renders each Twineedle hit, then KO/replacement before the next target's hits
+
+Environment-only, NOT a pin: `tests/appDifferential.test.ts > app-differential CLI guards > reports a missing trace before creating
+a worktree`. The patched copy carried a local one-commit `git init` (used to cut the diff), so `--base 'HEAD^'` does not name a commit.
+The plain HEAD archive copy passes it.
 
 ## 5. Reproduction (from workspace/)
 
