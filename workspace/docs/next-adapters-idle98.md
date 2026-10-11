@@ -10,7 +10,7 @@ processes, r1 == r2 byte for byte (36 / 36 scenario outputs + 8 / 8 STATS_CHANGE
 
 | Question | Answer | Evidence |
 |---|---|---|
-| Is pre = 3 / post = 2 universal? | **Yes: 37 / 37 Scene ON bodies.** 8 damaging moves x both sides (Karate Chop, Psychic, Bite, Earthquake = hit; Double Kick = multi-hit, both bodies; Razor Wind = two-turn, charge on both sides + the player's strike; Water Pulse = KO on the opponent side, the player-side target survived its damage roll; Dynamic Punch = a miss on both sides, so no body), plus the targets' 17 Tackle bodies and the Bulk Up control. Pre rows F_att..A-1 are one static image equal to F_att-1 and to row A on 37 / 37. Post rows E..F_after-1 equal the first inactive row E on 37 / 37. On every hit body (33 / 33) the screen stays equal to E for 5 rows (E..E+4); Cmd_hitanimation runs on E+4 | `receipts/compare-r1.json` (r2 identical), `table/classes.tsv` |
+| Is pre = 3 / post = 2 universal? | **Yes: 37 / 37 Scene ON bodies.** 8 damaging moves x both sides (Karate Chop, Psychic, Bite, Earthquake = hit; Double Kick = multi-hit, both bodies; Razor Wind = two-turn, charge on both sides + the player's strike; Water Pulse = KO on the opponent side (the player's GOLEM faints before its Tackle), the player-side target survived its damage roll; Dynamic Punch = a miss on both sides, so no body), plus the targets' 18 Tackle bodies and the Bulk Up control. Pre rows F_att..A-1 are one static image equal to F_att-1 and to row A on 37 / 37. Post rows E..F_after-1 equal the first inactive row E on 37 / 37. On every hit body (33 / 33) the screen stays equal to E for 5 rows (E..E+4); Cmd_hitanimation runs on E+4 | `receipts/compare-r1.json` (r2 identical), `table/classes.tsv` |
 | Scene OFF | **F_after - F_att = 35 on 37 / 37** (Cmd_attackanimation -> BattleScript_Pausex20). F_att - G and F_es - F_after are identical ON vs OFF on 37 / 37: only attackanimation..waitanimation depends on the scene | same |
 | Production's OFF hit path | **Exact (L_OFF = 0) on all 12 paired first bodies**: its `1 + interveningInstructions + 32` equals the ROM's G+1 -> Cmd_hitanimation span, attG + 36 (42 for BattleScript_EffectHit moves, 48 Earthquake, 53 Double Kick hit 1). G = the final glyph of "X used Y!", so production's move-animation command starts on the ROM frame G+1 in both scenes (same 24-frame message command) | `table/classes.json` (`romOffG1ToHit` == `prodOff`) |
 | Frames production loses per body (Scene ON) | **hit / KO: L_ON = prodOff - 30 + N + trail**: Karate Chop 11, Water Pulse 11, Psychic 16, Bite 26, Earthquake 27, Double Kick hit 1 22. **Later multi-hit body: 84** (Double Kick hit 2: ON command 36 vs OFF 115). **No-hit (status, two-turn charge): L_ON = L_OFF - 27 (Bulk Up) / - 30 (Razor Wind charge)**, where L_OFF = (attG - 1) + 35 + k (no OFF command at all). Miss: no body, production ON == OFF on 31 / 31 misses (14 routes) | `table/classes.tsv`, routes `receipts/route-sha256.json` |
@@ -56,10 +56,10 @@ Scene OFF: hit-path L_OFF = 0. A no-hit body has no OFF command: L_OFF = (attG -
    - **Full hit-path accounting** (exact alignment of the next command): pre = attG + 2 + N rows instead of 3. Production already has attG on the hit
      path: OFF `1 + I + 32` = attG + 36, so pre = (1 + I + 32) - 34 + N. The ON MOVE_ANIMATION branch needs the same
      `nextHitAnimation` / `instructionExecutionOf` provenance as the OFF branch. Tail = trail + 4 rows (3 for trail -1: E+1..E+3 == E on 33 / 33).
-     This removes the residual L_ON - P - T (Karate Chop 6, Psychic 11, Bite 21, Earthquake 22).
+     This removes the residual L_ON - P - T (Karate Chop 6, Psychic 11 with P + T = 5; Bite 23, Earthquake 24 with P + T = 3, as their trail is not -1).
    - Later multi-hit bodies (84 frames each). ON-only; the span is not static, so it needs a per-row study. Census exposure: 1,952 adjacent same-move
      hit bodies (an upper bound: repeated turns count too; Struggle 578, Double Kick 116).
-   - Tails on trail != -1 sides (95 known sides) and the no-hit class's k (the frames from F_after to the next production anchor).
+   - Tails on trail != -1 sides (96 known sides) and the no-hit class's k (the frames from F_after to the next production anchor).
 
 ## 4. Pins the patch moves
 
@@ -166,7 +166,15 @@ pause was not anchored here (it needs the message command's first-glyph frame). 
 
 ## 6. Gates (evidence only)
 
-GATES_SECTION
+- `sh tools/integration/idle98Run.sh <fresh>` (no census), in a fresh dir inside the repo after the pins commit: **ALL SAME**. That covers
+  scenarios 18, scenario index, probes 36 / 36 r1 == r2, 72 / 72 outputs == the committed sha256, compare r1 == committed == r2, STATS_CHANGE,
+  32 / 32 routes == committed sha256, class table json + tsv, and 14 / 14 render routes x2 x2 == the committed render check.
+- The census (`--census`) was run by hand on both trees with the runner's exact commands (section 1 numbers). The exposure run also used the
+  runner's commands (base copy, five shards).
+- `npm test` in a git-archive copy of `ca0add97f` (its own two-commit git repo; HEAD also carries the supervisor's interleaved ctl95 merge):
+  HEAD_TEST. `npm run build` in the same copy: HEAD_BUILD. Later commits add only `pins.json`, `idle98Pins.py` and this doc (no TypeScript).
+- `git diff --check` is clean at every commit. `git status --short` listed only new idle98 files, staged by explicit path. The live checkout's git
+  still resolves to the repo top (no nested `.git` was created).
 
 ## 7. Reproduction (from workspace/)
 
