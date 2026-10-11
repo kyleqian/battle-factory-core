@@ -45,7 +45,7 @@ The kernel deltas equal the ROM rows on every class: attack receipt (3, 4, 4, 7,
 **Status class caveat (new, not banked).** In Scene OFF `Cmd_statusanimation` is skipped (HITMARKER_NO_ANIMATIONS,
 `battle_script_commands.c:5753`): the print runs on the next row and its glyph lands 2 rows after the status command's start. Production's
 `status` command is 32 frames in both scenes (STATUS_TIMING). With this patch its START is exact, but the following message is then
-+30 late (Toxic G+81 vs G+51, Thunder Wave G+80 vs G+50; base: −17 / −18 early). Fix shape: an OFF `status` command of 2 frames
++30 late (Toxic G+81 vs G+51, Thunder Wave G+80 vs G+50; base: −18 / −17 early). Fix shape: an OFF `status` command of 2 frames
 (ROM ON plays it: Paralysis 40 rows, Toxic 72). Exposure: 805 census bodies (+ every other OFF status command).
 
 **Other observations (not anchored here).** The "used" message is a 24-frame floor; the ROM's 21-glyph "PRIMEAPE used\nPROTECT!" runs first
@@ -105,7 +105,7 @@ one-commit copy repo); with a second commit the file passes 10 / 10. **5 moved p
 ## 6. Gates
 
 - `sh tools/integration/off108Run.sh <fresh>` (no census), fresh dir inside the repo, after the patch / table commits: **ALL SAME** (14:55 -> 14:59): scenarios 15 + index, probes 30 / 30 r1 == r2, 60 / 60 outputs == the committed sha256, rom-r1 SAME and r2 == r1, routes 10 / 10 == the committed sha256, classes.json / .tsv SAME, verify-off / verify-on SAME.
-- `sh tools/integration/off108Run.sh <fresh> --census`: CENSUS_PLACEHOLDER
+- `sh tools/integration/off108Run.sh <fresh> --census` (14:59 -> 15:14, a second fresh dir): **ALL SAME**: everything above plus both censuses (ON liveShareCensus and OFF off108Route, seeds 0..999, ten shards per tree) -> census-delta.json byte-identical to the committed receipt.
 - Patched copy (git archive 52c181d54 + the diff, its own git repo): `npm run typecheck` green. `npm test`: §4.
 - `git diff --check` clean at every commit; only new off108 files, staged by explicit path.
 
