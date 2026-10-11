@@ -176,14 +176,23 @@
 - FINDING (supervisor, from the census + source): the live Return 216 body adapter renders ReturnStrongest for every request and never
   reads `request.friendship`; the kernel sends friendship 0 (ret80 / #165), where Move_RETURN plays ReturnWeak (two dips + one hitsplat).
   37 census Return bodies were therefore wrong live claims. ret88 (MAIN lane) fails them closed first, then builds the Weak body + plan.
-- Supervisor FINAL gates on `89d1cf258` (src `dc6c756a`; every fold + the audit-24 fix): typecheck, full suite **1,627 files / 13,387
+- prep shadow105 (MAIN lane, Opus, `a230c4a44` .. `8a79dec01`, new files only): the ROM shows an elevated opponent's enemy shadow on idle
+  LEAD row 0 only (N = 4 / 8 / 10 measured), WHICHEVER side attacks — so a PLAYER attacker into an elevated opponent was also 200 px wrong
+  on row 0 (219 live census commands; audit 24's decline covered only opponent attackers). BANKED `shadow105-lead-row0-shadow.diff`
+  (keeps the move effect, draws the shadow on row 0, removes the decline): every lead row 0 px on 11 bodies / 5 census routes; census
+  239 + 219 commands regain +N, 0 status changes. **Supervisor fix `4bf782115`**: no lead rows while an elevated opponent is on the field
+  (either attacker) — census vs `89d1cf258`: exactly 219 more commands back to the pre-land97 presentation, 0 status changes, 0 errors.
+- prep sp103 (SIDE, Opus, `84559e822` .. `dd386fb68`, new files only; merged `4db123313`): Shadow Punch 325's age-90 lag is DOMINANT on
+  both sides (fresh 11 : 1 player, 10 : 2 opponent; pooled with audit 24 13 : 3 / 12 : 4); BANKED D4 patch `sp103-shadow-punch-d4.diff`
+  (237 + 13 + 26 if landed): lag-phase opponent windows 10 / 10 0 px, player lag rows 0 px (a known trail row aside).
+- Supervisor FINAL gates on `4bf782115` (src `14d1be15`; every fold + the audit-24 / shadow105 lead-row fixes): typecheck, full suite **1,627 files / 13,387
   tests** (2 shards, 0 failed), build; differential vs `b05d384ca` (session start): `fight-submenu` 235 / 235 and `battle1-postwin-next-prompt`
   216 / 216 byte-identical; `presentation-rng-playable-live-bodies-seeded-on` 10 / 173 (163 differ = land97's 8 Shadow Punch lead rows by
-  the player HAUNTER shifting every later capture; intended). Census seeds 0..999 (10 `--index-from` shards, two runs byte-identical,
-  `report-seeds0-999-final-20261011-night.json`): **95.38 % of move-animation commands / 98.72 % of frames** (start 93.79 / 97.37);
+  the player HAUNTER shifting every later capture; intended). Census seeds 0..999 (10 `--index-from` shards; two runs on `89d1cf258` byte-identical, re-run on `4bf782115` = 219 lead-row commands
+  -0 status changes; `report-seeds0-999-final-20261011-night.json` is the `4bf782115` run): **95.38 % of move-animation commands / 98.72 % of frames** (start 93.79 / 97.37);
   excluding Struggle (1,089 commands, outside the 276) **99.32 % / 99.59 %**; +436 commands vs session start, 0 live -> fallback,
   0 errors, keys identical except two Struggle stalls' budget-cut tails (seeds 796 / 881, prefixes identical); seeds 0..299 **99.12 % /
-  99.68 %** (start 97.98 / 98.40); seeds 50000..50999 96.67 / 98.84 % (start 95.20 / 97.18). Preview <http://127.0.0.1:5191/> serves `e9933518a` (src `dc6c756a`):
+  99.68 %** (start 97.98 / 98.40; on `89d1cf258`); seeds 50000..50999 96.67 / 98.84 % (start 95.20 / 97.18). Preview <http://127.0.0.1:5191/> serves `e9933518a` (src `dc6c756a`):
   4 samples hash-equal (canvas == ABI == screenshot), session export + ON -> OFF restart passed, no browser errors
   (`playable-preview-e9933518a-receipt.json`). Soak gates not run (S10A scoped policy; no kernel / rules / RNG file changed tonight).
 

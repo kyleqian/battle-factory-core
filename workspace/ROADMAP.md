@@ -2223,7 +2223,7 @@ the post-KO reseed through a words-unit occupancy shadow (land87), ReturnWeak fo
 ReturnStrongest claims corrected first), a scanline-buffer history (land96: Memento later bodies), Fury Cutter counters 2..5 (fury99),
 source fixes for live DEFECTS found by audits / controls (Quick Attack's target offset, GrassWhistle's position-dependent fade-back, Iron
 Tail's band mask), Focus Punch D4 (fp100), and idle94's static lead rows for 40 adapters (land97: Scene ON bodies no longer N frames short).
-Live audits 21..24 (audit 24's land97 row-0 shadow defect fixed narrowly: an elevated opponent attacker keeps no lead rows). Ordinary-play census (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261011-night.json`,
+Live audits 21..24 (audit 24 / shadow105's land97 row-0 shadow defect fixed narrowly: no lead rows while an elevated opponent is on the field). Ordinary-play census (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261011-night.json`,
 src `8706d10c`): **95.38 % of move-animation commands / 98.72 % of frames live** (session start 93.79 / 97.37); excluding Struggle (1,089 commands),
 99.32 % of commands / 99.59 % of frames. Resume points:
 0. ISSUES #165 (GAMEPLAY, outside S10A's presentation-only mandate — needs a run where gameplay changes are in scope): the ROM Factory
@@ -2239,8 +2239,10 @@ src `8706d10c`): **95.38 % of move-animation commands / 98.72 % of frames live**
 3. Remaining fallbacks (non-Struggle 181 commands / 16,268 frames on 0..999): Extrasensory player later bodies (a per-row scanout split,
    scan93 patch B not D4-eligible), Hyper Beam / Astonish / Odor Sleuth order plans (plans69 negatives), Endeavor stale power, the
    remaining Castform keys (#143), doll cells Focus Punch / Dream Eater player / Dig / Double-Edge / Iron Tail, Memento after a Dragon Dance.
-4. Shadow Punch 325 has an optional lag at body age 90 (audit 24: 4 : 4 pooled; the Focus Punch class) — a D4 phase census first; the
-   elevated-opponent lead row 0 shadow (then lift the land97 elevated-attacker decline); #161, #152 remainder, #154 / #157; the app-only differential trace `presentation-rng-playable-live-bodies-seeded-on` samples Shadow
+4. Two BANKED patches ready to land: `tools/integration/fixtures/shadow105/shadow105-lead-row0-shadow.diff` (draw the elevated opponent's
+   shadow on lead row 0, lift the elevated decline: 458 commands regain their lead rows; docs/next-adapters-shadow105.md) and
+   `tools/integration/fixtures/sp103/sp103-shadow-punch-d4.diff` (Shadow Punch age-90 lag as D4 faithful timing, dominant 13 : 3 / 12 : 4;
+   docs/next-adapters-sp103.md); #161, #152 remainder, #154 / #157; the app-only differential trace `presentation-rng-playable-live-bodies-seeded-on` samples Shadow
    Punch whose lead rows moved its later captures (163 / 173 differ vs pre-land97 bases; regenerate its capture frames with
    tools/integration/presentationRngTraces.ts if it should re-center on the bodies).
 5. A live audit after every batch (audits 21..24 tools; ALWAYS on production accepted windows: tools/integration/audit21Align.py).

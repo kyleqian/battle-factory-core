@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-10 (night) — S10A: 12 production folds + 4 live audits; live share 0..999 93.79 -> 95.38 % of commands (97.37 -> 98.72 % of frames; 99.32 / 99.59 % excluding Struggle); 238 + 13 + 25
 
-- **State:** local master, production src `dc6c756a` (gated on `89d1cf258`; later commits are docs / receipts). Adapter census
+- **State:** local master, production src `14d1be15` (gated on `4bf782115`; later commits are docs / receipts / evidence). Adapter census
   `238+13+25+0+0=276` (Focus Punch scoped exact -> faithful timing under the standing D4 approval). Supervisor FINAL gates: typecheck,
   full suite 1,627 files / 13,387 tests, build; differential vs session start `b05d384ca`: the two canonical railroad traces byte-identical,
   the app-only `presentation-rng-playable-live-bodies-seeded-on` 163 / 173 captures shifted by land97's intended Shadow Punch lead rows.
@@ -21,9 +21,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   live bodies per 1,000 battles were 1 px off; 3 Castform keys), doll90 (Psych Up / Double Team / Sing doll cells, +37), land96 (scanline
   history: Memento later bodies, +4), ctl95 (live DEFECTS fixed: GrassWhistle's position-dependent fade-back, Iron Tail's band mask;
   Recover / GrassWhistle doll cells, +24), fury99 (Fury Cutter counters 2..5, +36), fp100 (Focus Punch D4), land97 (40 adapters present
-  their static lead rows: Scene ON timeline +N frames) + the supervisor's narrow audit-24 fix (elevated opponent attackers keep no lead).
+  their static lead rows: Scene ON timeline +N frames) + the supervisor's narrow audit-24 / shadow105 fix (no lead rows while an
+  elevated opponent is on the field; shadow105's banked patch restores them properly).
 - **Did (evidence / audits):** flat84, reseed85, scan93, idle94, idle98 (universal pre / post rows banked), stat101 + stat102 (#166 design
-  pack; the stat-change reducer + comparator DONE, unwired); live audits 21 (Quick Attack DEFECT), 22 (none), 23 (none), 24 (land97 row 0).
+  pack; the stat-change reducer + comparator DONE, unwired), shadow105 + sp103 (banked patches: lead row-0 shadow; Shadow Punch D4);
+  live audits 21 (Quick Attack DEFECT), 22 (none), 23 (none), 24 (land97 row 0).
 - **Next:** ROADMAP S10A "Next (2026-10-11 night)": #166 slice (c) (the missing stat-change animation, both scenes, ~8.6 % of the
   timeline) is the headline; then the banked universal pre / post rows, #167, the remaining 181 non-Struggle fallbacks.
 - **Notes:** no DEFERRED entries; ISSUES #166 / #167 new, #143 / #165 updated. #165 (Return -> Frustration) still needs a run where gameplay

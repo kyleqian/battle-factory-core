@@ -4,7 +4,7 @@ How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
 `tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
 
-## Latest (2026-10-11 night, production src `dc6c756a`, master `89d1cf258`)
+## Latest (2026-10-11 night, production src `14d1be15`, master `4bf782115`; 0..299 and 50000.. on `dc6c756a`)
 
 | seeds | commands | live | **live by count** | **live by frames** |
 |---|---:|---:|---:|---:|
