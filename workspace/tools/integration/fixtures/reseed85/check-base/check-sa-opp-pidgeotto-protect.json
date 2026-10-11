@@ -1,0 +1,342 @@
+{
+ "schema": "reseed85-chain-check/v1",
+ "scenario": "sa-opp-pidgeotto-protect",
+ "rows": [
+  {
+   "fixture": "sa-opp-pidgeotto-protect-c0.json",
+   "move": "PROTECT",
+   "side": "opponent",
+   "species": "LICKITUNG/SNORLAX",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "28@1 STATS_CHANGE(27)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "182@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4941,
+    "endFrame": 5063
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 28:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 15,
+    "px": 326341,
+    "digests": [
+     "5a3d438f7dee9790",
+     "5a3d438f7dee9790"
+    ],
+    "residualRows": [
+     [
+      8,
+      2818
+     ],
+     [
+      9,
+      2884
+     ],
+     [
+      10,
+      3017
+     ],
+     [
+      11,
+      3027
+     ],
+     [
+      12,
+      3027
+     ],
+     [
+      13,
+      3026
+     ],
+     [
+      14,
+      3026
+     ],
+     [
+      15,
+      3027
+     ],
+     [
+      16,
+      3027
+     ],
+     [
+      17,
+      3018
+     ],
+     [
+      18,
+      3021
+     ],
+     [
+      19,
+      3014
+     ],
+     [
+      20,
+      3014
+     ],
+     [
+      21,
+      2993
+     ],
+     [
+      22,
+      2993
+     ],
+     [
+      23,
+      3021
+     ],
+     [
+      24,
+      3021
+     ],
+     [
+      25,
+      3030
+     ],
+     [
+      26,
+      3030
+     ],
+     [
+      27,
+      3030
+     ],
+     [
+      28,
+      3030
+     ],
+     [
+      29,
+      3037
+     ],
+     [
+      30,
+      3037
+     ],
+     [
+      31,
+      3022
+     ],
+     [
+      32,
+      3022
+     ],
+     [
+      33,
+      3016
+     ],
+     [
+      34,
+      3015
+     ],
+     [
+      35,
+      2994
+     ],
+     [
+      36,
+      2994
+     ],
+     [
+      37,
+      3024
+     ],
+     [
+      38,
+      3024
+     ],
+     [
+      39,
+      3035
+     ],
+     [
+      40,
+      3035
+     ],
+     [
+      41,
+      3041
+     ],
+     [
+      42,
+      3043
+     ],
+     [
+      43,
+      3040
+     ],
+     [
+      44,
+      3040
+     ],
+     [
+      45,
+      3023
+     ],
+     [
+      46,
+      3023
+     ],
+     [
+      47,
+      3018
+     ]
+    ],
+    "detail": [
+     {
+      "age": 8,
+      "px": 2818,
+      "bbox": [
+       168,
+       230,
+       10,
+       69
+      ],
+      "sample": "185,10 rom dce8e5 live e7efef"
+     },
+     {
+      "age": 9,
+      "px": 2884,
+      "bbox": [
+       168,
+       230,
+       10,
+       69
+      ],
+      "sample": "185,10 rom e8f0f0 live e7efef"
+     },
+     {
+      "age": 10,
+      "px": 3017,
+      "bbox": [
+       167,
+       229,
+       10,
+       69
+      ],
+      "sample": "184,10 rom eaf1f1 live e7efef"
+     },
+     {
+      "age": 11,
+      "px": 3027,
+      "bbox": [
+       167,
+       229,
+       10,
+       69
+      ],
+      "sample": "184,10 rom e1f1ec live e7efef"
+     },
+     {
+      "age": 12,
+      "px": 3027,
+      "bbox": [
+       167,
+       229,
+       10,
+       69
+      ],
+      "sample": "184,10 rom dff2eb live e7efef"
+     },
+     {
+      "age": 13,
+      "px": 3026,
+      "bbox": [
+       166,
+       228,
+       10,
+       69
+      ],
+      "sample": "183,10 rom d2f2e5 live e7efef"
+     }
+    ],
+    "allocatorKnown": false,
+    "reseeds": [
+     false
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

@@ -1,0 +1,450 @@
+{
+ "schema": "reseed85-chain-check/v1",
+ "scenario": "rd-opp-poliwag-reflect",
+ "rows": [
+  {
+   "fixture": "rd-opp-poliwag-reflect-c0.json",
+   "move": "REFLECT",
+   "side": "opponent",
+   "species": "CHIKORITA/SNORLAX",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "240@1 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1 RAIN_CONTINUES@0",
+    "115@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4941,
+    "endFrame": 5019
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 79,
+    "exactRows": 21,
+    "px": 156036,
+    "digests": [
+     "21dac03c48371ce5",
+     "21dac03c48371ce5"
+    ],
+    "residualRows": [
+     [
+      9,
+      2685
+     ],
+     [
+      10,
+      2685
+     ],
+     [
+      11,
+      2685
+     ],
+     [
+      12,
+      2685
+     ],
+     [
+      13,
+      2685
+     ],
+     [
+      14,
+      2685
+     ],
+     [
+      15,
+      2685
+     ],
+     [
+      16,
+      2685
+     ],
+     [
+      17,
+      2685
+     ],
+     [
+      18,
+      2685
+     ],
+     [
+      19,
+      2685
+     ],
+     [
+      20,
+      2685
+     ],
+     [
+      21,
+      2685
+     ],
+     [
+      22,
+      2685
+     ],
+     [
+      23,
+      2685
+     ],
+     [
+      24,
+      2595
+     ],
+     [
+      25,
+      2595
+     ],
+     [
+      26,
+      2590
+     ],
+     [
+      27,
+      2590
+     ],
+     [
+      28,
+      2606
+     ],
+     [
+      29,
+      2606
+     ],
+     [
+      30,
+      2626
+     ],
+     [
+      31,
+      2626
+     ],
+     [
+      32,
+      2645
+     ],
+     [
+      33,
+      2645
+     ],
+     [
+      34,
+      2628
+     ],
+     [
+      35,
+      2664
+     ],
+     [
+      36,
+      2674
+     ],
+     [
+      37,
+      2674
+     ],
+     [
+      38,
+      2685
+     ],
+     [
+      39,
+      2700
+     ],
+     [
+      40,
+      2611
+     ],
+     [
+      41,
+      2647
+     ],
+     [
+      42,
+      2651
+     ],
+     [
+      43,
+      2651
+     ],
+     [
+      44,
+      2664
+     ],
+     [
+      45,
+      2661
+     ],
+     [
+      46,
+      2680
+     ],
+     [
+      47,
+      2665
+     ],
+     [
+      48,
+      2751
+     ]
+    ],
+    "detail": [
+     {
+      "age": 9,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom fbfbff live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom f8f8ff live ffffff"
+     },
+     {
+      "age": 11,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom f5f5ff live ffffff"
+     },
+     {
+      "age": 12,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom f2f2ff live ffffff"
+     },
+     {
+      "age": 13,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom efefff live ffffff"
+     },
+     {
+      "age": 14,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom ececff live ffffff"
+     }
+    ],
+    "allocatorKnown": false,
+    "reseeds": [
+     false
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "rd-opp-poliwag-reflect-c1.json",
+   "move": "SWIFT",
+   "side": "player",
+   "species": "SNORLAX/CHIKORITA",
+   "units": 9,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "240@1 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1 RAIN_CONTINUES@0",
+    "115@1 129@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5154,
+    "endFrame": 5231
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": false,
+    "reseeds": [
+     false
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

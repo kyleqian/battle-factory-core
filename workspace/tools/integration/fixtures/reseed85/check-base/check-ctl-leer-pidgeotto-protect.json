@@ -1,0 +1,118 @@
+{
+ "schema": "reseed85-chain-check/v1",
+ "scenario": "ctl-leer-pidgeotto-protect",
+ "rows": [
+  {
+   "fixture": "ctl-leer-pidgeotto-protect-c0.json",
+   "move": "PROTECT",
+   "side": "opponent",
+   "species": "LICKITUNG/SNORLAX",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "43@1 STATS_CHANGE(23)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "182@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4941,
+    "endFrame": 5063
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "reseeds": [
+     true
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

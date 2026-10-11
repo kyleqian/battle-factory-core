@@ -1,0 +1,655 @@
+{
+ "schema": "reseed85-windows/v1",
+ "summary": {
+  "windows": 20,
+  "wordsAllocatorConsumers": 10,
+  "unchangedExpected": 10,
+  "patchedLiveZeroPx": 20,
+  "patchedRows": 1948,
+  "baseAllocatorDeclines": 10,
+  "unchanged": 10,
+  "pass": true
+ },
+ "windows": [
+  {
+   "fixture": "ctl-leer-pidgeotto-lightscreen-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "species": "CHIKORITA/SNORLAX",
+   "units": 8,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": false,
+    "rows": 86,
+    "exactRows": 86,
+    "px": 0,
+    "digests": [
+     "43dc6770d7d00214",
+     "43dc6770d7d00214"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ctl-leer-pidgeotto-lightscreen-c1.json",
+   "move": "SWIFT",
+   "side": "player",
+   "species": "SNORLAX/CHIKORITA",
+   "units": 9,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": false,
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ctl-leer-pidgeotto-protect-c0.json",
+   "move": "PROTECT",
+   "side": "opponent",
+   "species": "LICKITUNG/SNORLAX",
+   "units": 8,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": false,
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ctl-leer-snorlax-protect-c0.json",
+   "move": "PROTECT",
+   "side": "player",
+   "species": "SNORLAX/LICKITUNG",
+   "units": 8,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": false,
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ctl-leer-snorlax-protect-c1.json",
+   "move": "PROTECT",
+   "side": "player",
+   "species": "SNORLAX/LICKITUNG",
+   "units": 9,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": false,
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ctl-sunny-poliwag-reflect-c0.json",
+   "move": "REFLECT",
+   "side": "opponent",
+   "species": "CHIKORITA/SNORLAX",
+   "units": 8,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": false,
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ctl-sunny-poliwag-reflect-c1.json",
+   "move": "SWIFT",
+   "side": "player",
+   "species": "SNORLAX/CHIKORITA",
+   "units": 9,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": false,
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ms-opp-diglett-protect-c0.json",
+   "move": "PROTECT",
+   "side": "opponent",
+   "species": "LICKITUNG/SNORLAX",
+   "units": 9,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 326341,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ms-opp-pidgeotto-lightscreen-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "species": "CHIKORITA/SNORLAX",
+   "units": 9,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 155093,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 86,
+    "exactRows": 86,
+    "px": 0,
+    "digests": [
+     "43dc6770d7d00214",
+     "43dc6770d7d00214"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ms-opp-pidgeotto-lightscreen-c1.json",
+   "move": "SWIFT",
+   "side": "player",
+   "species": "SNORLAX/CHIKORITA",
+   "units": 10,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     false
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "ms-ply-snorlax-lightscreen-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "player",
+   "species": "SNORLAX/LICKITUNG",
+   "units": 11,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 149507,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 86,
+    "exactRows": 86,
+    "px": 0,
+    "digests": [
+     "43dc6770d7d00214",
+     "43dc6770d7d00214"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "rd-opp-horsea-protect-c0.json",
+   "move": "PROTECT",
+   "side": "opponent",
+   "species": "LICKITUNG/SNORLAX",
+   "units": 8,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 326341,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "rd-opp-poliwag-reflect-c0.json",
+   "move": "REFLECT",
+   "side": "opponent",
+   "species": "CHIKORITA/SNORLAX",
+   "units": 8,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 156036,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "rd-opp-poliwag-reflect-c1.json",
+   "move": "SWIFT",
+   "side": "player",
+   "species": "SNORLAX/CHIKORITA",
+   "units": 9,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     false
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "rd-ply-snorlax-reflect-c0.json",
+   "move": "REFLECT",
+   "side": "player",
+   "species": "SNORLAX/LICKITUNG",
+   "units": 10,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 150516,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "sa-opp-diglett-reflect-c0.json",
+   "move": "REFLECT",
+   "side": "opponent",
+   "species": "CHIKORITA/SNORLAX",
+   "units": 8,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 156036,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "sa-opp-diglett-reflect-c1.json",
+   "move": "SWIFT",
+   "side": "player",
+   "species": "SNORLAX/CHIKORITA",
+   "units": 9,
+   "base": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     false
+    ],
+    "px": 0,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "sa-opp-pidgeotto-protect-c0.json",
+   "move": "PROTECT",
+   "side": "opponent",
+   "species": "LICKITUNG/SNORLAX",
+   "units": 8,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 326341,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "sa-ply-snorlax-protect-c0.json",
+   "move": "PROTECT",
+   "side": "player",
+   "species": "SNORLAX/LICKITUNG",
+   "units": 8,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 200743,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "same": true
+   }
+  },
+  {
+   "fixture": "sa-ply-snorlax-protect-c1.json",
+   "move": "PROTECT",
+   "side": "player",
+   "species": "SNORLAX/LICKITUNG",
+   "units": 9,
+   "base": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "reseeds": [
+     false
+    ],
+    "px": 200743,
+    "same": true
+   },
+   "patched": {
+    "live": true,
+    "decline": null,
+    "reseeds": [
+     true
+    ],
+    "orderDeferred": true,
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "same": true
+   }
+  }
+ ]
+}

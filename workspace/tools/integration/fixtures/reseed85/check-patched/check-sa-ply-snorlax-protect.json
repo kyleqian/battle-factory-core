@@ -1,0 +1,224 @@
+{
+ "schema": "reseed85-chain-check/v1",
+ "scenario": "sa-ply-snorlax-protect",
+ "rows": [
+  {
+   "fixture": "sa-ply-snorlax-protect-c0.json",
+   "move": "PROTECT",
+   "side": "player",
+   "species": "SNORLAX/LICKITUNG",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "28@1 STATS_CHANGE(27)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "182@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4957,
+    "endFrame": 5079
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 28:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "reseeds": [
+     true
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "sa-ply-snorlax-protect-c1.json",
+   "move": "PROTECT",
+   "side": "player",
+   "species": "SNORLAX/LICKITUNG",
+   "units": 9,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "28@1 STATS_CHANGE(27)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "182@0",
+    "182@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 7391,
+    "endFrame": 7513
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 28:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "reseeds": [
+     true
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

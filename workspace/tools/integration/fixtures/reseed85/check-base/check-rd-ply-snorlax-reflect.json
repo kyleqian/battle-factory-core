@@ -1,0 +1,346 @@
+{
+ "schema": "reseed85-chain-check/v1",
+ "scenario": "rd-ply-snorlax-reflect",
+ "rows": [
+  {
+   "fixture": "rd-ply-snorlax-reflect-c0.json",
+   "move": "REFLECT",
+   "side": "player",
+   "species": "SNORLAX/LICKITUNG",
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "240@1 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1 RAIN_CONTINUES@0",
+    "43@1 STATS_CHANGE(23)@0 115@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5239,
+    "endFrame": 5317
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 79,
+    "exactRows": 21,
+    "px": 150516,
+    "digests": [
+     "2e06c5f84dccfd2a",
+     "2e06c5f84dccfd2a"
+    ],
+    "residualRows": [
+     [
+      9,
+      2570
+     ],
+     [
+      10,
+      2594
+     ],
+     [
+      11,
+      2594
+     ],
+     [
+      12,
+      2594
+     ],
+     [
+      13,
+      2594
+     ],
+     [
+      14,
+      2594
+     ],
+     [
+      15,
+      2594
+     ],
+     [
+      16,
+      2594
+     ],
+     [
+      17,
+      2594
+     ],
+     [
+      18,
+      2594
+     ],
+     [
+      19,
+      2594
+     ],
+     [
+      20,
+      2594
+     ],
+     [
+      21,
+      2594
+     ],
+     [
+      22,
+      2594
+     ],
+     [
+      23,
+      2594
+     ],
+     [
+      24,
+      2523
+     ],
+     [
+      25,
+      2523
+     ],
+     [
+      26,
+      2511
+     ],
+     [
+      27,
+      2511
+     ],
+     [
+      28,
+      2505
+     ],
+     [
+      29,
+      2505
+     ],
+     [
+      30,
+      2517
+     ],
+     [
+      31,
+      2517
+     ],
+     [
+      32,
+      2551
+     ],
+     [
+      33,
+      2551
+     ],
+     [
+      34,
+      2512
+     ],
+     [
+      35,
+      2550
+     ],
+     [
+      36,
+      2569
+     ],
+     [
+      37,
+      2569
+     ],
+     [
+      38,
+      2594
+     ],
+     [
+      39,
+      2609
+     ],
+     [
+      40,
+      2539
+     ],
+     [
+      41,
+      2571
+     ],
+     [
+      42,
+      2561
+     ],
+     [
+      43,
+      2561
+     ],
+     [
+      44,
+      2561
+     ],
+     [
+      45,
+      2556
+     ],
+     [
+      46,
+      2567
+     ],
+     [
+      47,
+      2556
+     ],
+     [
+      48,
+      2658
+     ]
+    ],
+    "detail": [
+     {
+      "age": 9,
+      "px": 2570,
+      "bbox": [
+       91,
+       132,
+       48,
+       111
+      ],
+      "sample": "91,48 rom fbfbff live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 2594,
+      "bbox": [
+       91,
+       132,
+       48,
+       111
+      ],
+      "sample": "91,48 rom f8f8ff live ffffff"
+     },
+     {
+      "age": 11,
+      "px": 2594,
+      "bbox": [
+       91,
+       132,
+       48,
+       111
+      ],
+      "sample": "91,48 rom f5f5ff live ffffff"
+     },
+     {
+      "age": 12,
+      "px": 2594,
+      "bbox": [
+       91,
+       132,
+       48,
+       111
+      ],
+      "sample": "91,48 rom f2f2ff live ffffff"
+     },
+     {
+      "age": 13,
+      "px": 2594,
+      "bbox": [
+       91,
+       132,
+       48,
+       111
+      ],
+      "sample": "91,48 rom efefff live ffffff"
+     },
+     {
+      "age": 14,
+      "px": 2594,
+      "bbox": [
+       91,
+       132,
+       48,
+       111
+      ],
+      "sample": "91,48 rom ececff live ffffff"
+     }
+    ],
+    "allocatorKnown": false,
+    "reseeds": [
+     false
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 79,
+    "exactRows": 79,
+    "px": 0,
+    "digests": [
+     "131a00e1da38986b",
+     "131a00e1da38986b"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

@@ -1,0 +1,458 @@
+{
+ "schema": "reseed85-chain-check/v1",
+ "scenario": "ms-opp-pidgeotto-lightscreen",
+ "rows": [
+  {
+   "fixture": "ms-opp-pidgeotto-lightscreen-c0.json",
+   "move": "LIGHT_SCREEN",
+   "side": "opponent",
+   "species": "CHIKORITA/SNORLAX",
+   "units": 9,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "189@1 HIT_ANIMATION@0 STATS_CHANGE(27)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "113@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4947,
+    "endFrame": 5032
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "sprite allocator history unknown",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 189:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 13,
+    "px": 155093,
+    "digests": [
+     "b1eb41bd03212a2d",
+     "b1eb41bd03212a2d"
+    ],
+    "residualRows": [
+     [
+      9,
+      2685
+     ],
+     [
+      10,
+      2685
+     ],
+     [
+      11,
+      2685
+     ],
+     [
+      12,
+      2685
+     ],
+     [
+      13,
+      2685
+     ],
+     [
+      14,
+      2685
+     ],
+     [
+      15,
+      2685
+     ],
+     [
+      16,
+      2685
+     ],
+     [
+      17,
+      2685
+     ],
+     [
+      18,
+      2685
+     ],
+     [
+      19,
+      2685
+     ],
+     [
+      20,
+      2685
+     ],
+     [
+      21,
+      2685
+     ],
+     [
+      22,
+      2685
+     ],
+     [
+      23,
+      2685
+     ],
+     [
+      24,
+      2585
+     ],
+     [
+      25,
+      2585
+     ],
+     [
+      26,
+      2580
+     ],
+     [
+      27,
+      2580
+     ],
+     [
+      28,
+      2597
+     ],
+     [
+      29,
+      2606
+     ],
+     [
+      30,
+      2631
+     ],
+     [
+      31,
+      2631
+     ],
+     [
+      32,
+      2671
+     ],
+     [
+      33,
+      2671
+     ],
+     [
+      34,
+      2653
+     ],
+     [
+      35,
+      2653
+     ],
+     [
+      36,
+      2663
+     ],
+     [
+      37,
+      2674
+     ],
+     [
+      38,
+      2685
+     ],
+     [
+      39,
+      2685
+     ],
+     [
+      40,
+      2599
+     ],
+     [
+      41,
+      2599
+     ],
+     [
+      42,
+      2592
+     ],
+     [
+      43,
+      2592
+     ],
+     [
+      44,
+      2611
+     ],
+     [
+      45,
+      2611
+     ],
+     [
+      46,
+      2630
+     ],
+     [
+      47,
+      2630
+     ],
+     [
+      48,
+      2710
+     ]
+    ],
+    "detail": [
+     {
+      "age": 9,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom fbfdfa live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom f8fcf5 live ffffff"
+     },
+     {
+      "age": 11,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom f5faf1 live ffffff"
+     },
+     {
+      "age": 12,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom f2f9ec live ffffff"
+     },
+     {
+      "age": 13,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom eff7e7 live ffffff"
+     },
+     {
+      "age": 14,
+      "px": 2685,
+      "bbox": [
+       115,
+       156,
+       8,
+       71
+      ],
+      "sample": "115,8 rom ecf6e3 live ffffff"
+     }
+    ],
+    "allocatorKnown": false,
+    "reseeds": [
+     false
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 86,
+    "exactRows": 86,
+    "px": 0,
+    "digests": [
+     "43dc6770d7d00214",
+     "43dc6770d7d00214"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "ms-opp-pidgeotto-lightscreen-c1.json",
+   "move": "SWIFT",
+   "side": "player",
+   "species": "SNORLAX/CHIKORITA",
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "189@1 HIT_ANIMATION@0 STATS_CHANGE(27)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "113@1 129@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5172,
+    "endFrame": 5249
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 189:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": false,
+    "reseeds": [
+     false
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}
