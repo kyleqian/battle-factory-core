@@ -1,0 +1,40 @@
+live count 25886 -> 25930 (94.08 % -> 94.24 %), live frames 3867171 -> 3873572 (97.45 % -> 97.61 %)
+stalled in both runs: [(434, 21), (796, 34), (881, 38)] | truncated tails: []
+command keys identical (outside stalled tails) True | battleDigestExcludingFrames identical True | battles played / terminal / stalled (1000, 997, 3) == (1000, 997, 3) | live -> non-live 0
+Substitute-doll declines (all commands): 178 commands / 5696 frames -> 178 / 5696
+newly live (move, side): commands / live frames gained
+  352 player: 10 / 1600
+  260 player: 5 / 1095
+  352 opponent: 5 / 800
+  260 opponent: 3 / 657
+  189 player: 10 / 510
+  318 player: 2 / 386
+  80 opponent: 1 / 244
+  72 player: 1 / 218
+  288 opponent: 1 / 209
+  291 opponent: 2 / 208
+  149 opponent: 1 / 205
+  209 player: 1 / 115
+  228 opponent: 1 / 103
+  189 opponent: 1 / 51
+remaining doll declines (move, side, reason) >= 3:
+  165 opponent 24  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  104 opponent 15  attacker doll: self-target body
+  165 opponent 12  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  320 opponent 11  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  76 opponent 10  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  105 opponent 10  attacker doll: self-target body
+  244 player 9  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  264 opponent 9  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  104 player 8  attacker doll: self-target body
+  76 player 7  attacker doll: both battlers shown as dolls
+  91 player 7  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  165 player 7  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  47 opponent 5  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  38 player 4  defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  8 opponent 3  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  76 player 3  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  91 opponent 3  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  105 player 3  attacker doll: self-target body
+  138 player 3  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  231 opponent 3  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)

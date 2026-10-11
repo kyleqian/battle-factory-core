@@ -102,7 +102,8 @@ function withoutDeferred(host: LiveSpriteOrderHost): LiveSpriteOrderHost {
  * Record the deferred-lend marker at a DEFERRED_LEND_MOVE_IDS body's activation edge (orchestrator, right after lendLiveSpriteOrder): its
  * presentation body key, request fields and its own lend, which must be a known-entry-occupancy free order (battler slots and occupant
  * roles the entry ones: the lend is the raw free order) or itself deferred. Anything else records nothing (later bodies decline).
- * `bodySpecies` (words59): the species displayed on each side at the body, recorded for Sand-Attack / Mud-Slap / Dive / Ice Ball (ice72).
+ * `bodySpecies` (words59): the species displayed on each side at the body, recorded for Sand-Attack / Mud-Slap / Flatter (flat84) / Dive /
+ * Ice Ball (ice72).
  */
 export function markLiveSpriteOrderDeferredBody(
   host: LiveSpriteOrderHost, lend: LiveMoveSpriteOrderInput | undefined,
@@ -126,8 +127,8 @@ export function markLiveSpriteOrderDeferredBody(
     ...(body.rolloutCounter === undefined ? {} : { rolloutCounter: body.rolloutCounter }),
     ...(body.turn === undefined ? {} : { turn: body.turn }),
     // words59: the dirt units' carry reads the body's displayed species (the consumer's field may show a replacement); ice72: Ice Ball's
-    // shards sort on the target's Y_PIC_OFFSET point
-    ...(bodySpecies === undefined || (body.moveId !== 28 && body.moveId !== 189 && body.moveId !== 291 && body.moveId !== 301) ? {}
+    // shards sort on the target's Y_PIC_OFFSET point; flat84: Flatter's carry builds its adapter inputs at the body's species
+    ...(bodySpecies === undefined || (body.moveId !== 28 && body.moveId !== 189 && body.moveId !== 260 && body.moveId !== 291 && body.moveId !== 301) ? {}
       : { bodySpecies: Object.freeze({ player: bodySpecies.player, opponent: bodySpecies.opponent }) }),
     activation }) });
 }

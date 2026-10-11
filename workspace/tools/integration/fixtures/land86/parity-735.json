@@ -1,0 +1,113 @@
+{
+ "schema": "flat77-parity/v1",
+ "seed": 735,
+ "streak": 0,
+ "turnBoundariesCompared": 34,
+ "playerTurns": 34,
+ "framesOn": 23626,
+ "framesOff": 20058,
+ "logicalDigest": "9ae9a6d417c0951e635ff42866f10ba24ea2dc4007cfe4fde6ad14cf62e2e0e6",
+ "rngEqual": true,
+ "rulesEqual": true,
+ "boundaryEqual": true,
+ "bodiesOn": 59,
+ "orderKnownBodiesOn": 8,
+ "allocatorKnownBodiesOn": 41,
+ "orderStopsOn": [
+  "no EXACT plan: body 189:player",
+  "no EXACT plan: body 301:player"
+ ],
+ "flatterBodiesOn": [
+  {
+   "turn": 4,
+   "moveId": 260,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 189:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 8,
+   "moveId": 260,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 189:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 12,
+   "moveId": 260,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 189:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 16,
+   "moveId": 260,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 189:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 20,
+   "moveId": 260,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 189:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 24,
+   "moveId": 260,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 189:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  },
+  {
+   "turn": 28,
+   "moveId": 260,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 189:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": false
+  }
+ ]
+}

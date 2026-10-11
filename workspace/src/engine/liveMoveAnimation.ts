@@ -1531,6 +1531,10 @@ export function liveWordsOrderDeferredCarry(
     if (unit.generalAnimation === undefined && unit.moveId === 301) {
       return unit.bodySpecies === undefined ? null : liveIceBallWordsPostFree(unit, activationFree, wordsOf(unit.key), unit.bodySpecies);
     }
+    // flat84: Flatter carries through liveFlatterInputs at the body's displayed species only.
+    if (unit.generalAnimation === undefined && unit.moveId === 260) {
+      return unit.bodySpecies === undefined ? null : liveFlatterWordsPostFree(unit, activationFree, wordsOf(unit.key), unit.bodySpecies);
+    }
     const dirt = unit.generalAnimation === undefined && unit.moveId !== 240;
     if (dirt && unit.bodySpecies !== undefined) {
       const bodyAnchors = liveWordsBodyAnchors(unit.bodySpecies);
@@ -1579,6 +1583,47 @@ export function liveIceBallWordsPostFree(
     words: words.words, activationValue: words.activationValue, lagRows: liveIceBallLagRows(counter + 1), sort: sortGbaSpriteOrder,
     linear: { deltaQ8: linearTranslationDeltaQ8, offsetAfterCallbacks: linearTranslationOffsetAfterCallbacks },
     chunkPalette: iceBallAsset.chunk.palette, icePalette: icyWindAsset.background.palette })?.postBodyFree ?? null;
+}
+
+/**
+ * flat84: the free order after a Flatter 260 body (docs/next-adapters-flat84.md). Move_FLATTER creates its 38 confetti on one frame (body
+ * row 65; CreateFlatterConfetti x19, no delay) and every one destroys itself on its 31st step (AnimFlatterConfetti_Step; FLATTER_K end row 97), so their
+ * slots free together and keep the SortSprites (priority, y) order of their last live frame: the y of each follows its own words (data[1]
+ * = 0x480 +/- (w2 & 0xff)). The spotlight / dips free on fixed rows. The post-body free order is the Flatter adapter's own carried order at
+ * its last row (liveFlatterInputs, the same rows it renders) without the known-entry occupied slots, from the activation free order (entry
+ * labels), the body's recorded words and its displayed species (anchors / palettes only; no idle-rest history). Null when the words,
+ * species art, palettes or the activation order are unavailable.
+ */
+export function liveFlatterWordsPostFree(
+  unit: Readonly<{ attackerSide: WordsSide }>, activationFree: readonly number[], words: PresentationRngWords | null,
+  bodySpecies: Readonly<Record<WordsSide, number>>,
+): readonly number[] | null {
+  if (words === null || words.words.length !== 114) return null;
+  let art: ReturnType<typeof createBattleCommandFieldArtView>;
+  try {
+    art = createBattleCommandFieldArtView({ player: { species: bodySpecies.player }, opponent: { species: bodySpecies.opponent } } as never);
+  } catch {
+    return null;
+  }
+  const palettes = composeLivePalettes(art.player.speciesSymbol, art.opponent.speciesSymbol);
+  const activationOrder = spriteOrderWithOccupiedPrefix({ known: true as const, free: activationFree, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+  if (palettes === null || activationOrder === null) return null;
+  const attackerSide = unit.attackerSide, targetSide: WordsSide = attackerSide === "player" ? "opponent" : "player";
+  const targetAnchors = liveBattlerAnchors(targetSide, art);
+  const asset = flatterAsset as unknown as Record<"spotlight" | "confetti", { palette: { r: number; g: number; b: number }[] }>;
+  const inputs = liveFlatterInputs({ attackerSide, attacker: liveBattlerAnchors(attackerSide, art), target: targetAnchors, palettes, activationOrder,
+    sort: sortGbaSpriteOrder, words: words.words, animationRng: words.activationValue, firstBody: true,
+    spotlightPalette: asset.spotlight.palette, confettiPalette: asset.confetti.palette,
+    stateAt: (state, programInput) => {
+      const st = flatterAtAge(state, { ...(programInput as unknown as FlatterLiveInputs), attackerSide, targetSide,
+        attackerSpecies: art[attackerSide].speciesSymbol, targetSpecies: art[targetSide].speciesSymbol });
+      return { spotlight: st.spotlight, verticalDipSlots: st.verticalDips.map((d) => d.slot), confetti: st.confetti,
+        targetDipY2: st.battlers.target.offset.y2 - targetAnchors.frontIdleRest.y2 };
+    } });
+  const order = inputs?.animationInputsAt(FLATTER_ROWS - 1).spriteOrder as readonly number[] | undefined;
+  if (order === undefined) return null;
+  const occupied = new Set(KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+  return Object.freeze(order.filter((slot) => !occupied.has(slot)));
 }
 
 /**
