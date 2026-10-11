@@ -10,12 +10,12 @@ the PRODUCTION live renderer (`renderBattleResolutionLiveView` through audit20Ch
 
 **The two flagged windows are ARTIFACTS: 29.5k px (Taunt 269) and 9.3k..15.9k px (Harden 106) were checker window alignment, 0 px once aligned.**
 The widened sweep then found **three real DEFECTS** (new, none in stg107's routes' flagged first bodies); each has a source mechanism and a
-banked one-file-class patch proven 0 px on every flagged and widened window.
+banked patch proven 0 px on every flagged and widened window.
 
 | # | Window class | Unaligned (stg107's view) | Aligned, base 5c050b765 | Verdict | Aligned + patches |
 |---|---|---|---|---|---|
 | 1 | Taunt 269, stg107 routes, player Taunter (6 windows: Snorlax / Onix / Golbat / Jolteon -> Snorlax / Onix / Shedinja / Golbat) | 29.5k..29.9k px, ages 0..48, 16..19 exact rows of 135 | 125 / 125 rows, **0 px** | **ARTIFACT** | 0 px |
-| 2 | Taunt 269, stg107 routes, opponent Taunter, 4 windows (Shedinja -> Snorlax, Snorlax -> Shuckle: first + later body) | 29.5k..29.7k px | **0 px** | **ARTIFACT** | 0 px |
+| 2 | Taunt 269, stg107 routes, opponent Taunter, 3 windows (Shedinja -> Snorlax, Snorlax -> Shuckle x2: first + later body) | 29.5k..29.7k px | **0 px** | **ARTIFACT** | 0 px |
 | 3 | Taunt 269, opponent Golbat -> player Onix / Shedinja (stg107 ply-95-42 #1 / #2, ply-303-42) | 29.6k px | **216 / 216 / 283 px** (ages 75..123 / 107..123) | **DEFECT A** (below) after the artifact is removed | **0 px** |
 | 4 | Harden 106, stg107 routes (opp-143-42-sub x3, opp-pp x6, ply-pp x6; Snorlax / Dusclops / Onix) | 9.3k..15.9k px, ages 3..62, 56..60 exact rows of 102 | 101 / 101 rows, **0 px** | **ARTIFACT** | 0 px |
 | 5 | Mean Look 212 (stg107 PP routes + 2 widened) | 0 px (171 rows) | 0 px | clean | 0 px |
@@ -54,7 +54,7 @@ subpriority `GetBattlerSpriteSubpriority(target) - 2`: target opponent (40) -> 3
 front of the player battler**. The branch hard-coded "anger = 38" (the staged player -> Murkrow/Shuckle order) and drew the marks between the opponent
 and the player battler for both orientations. Pixels: 3..12 px per row on the two anger-mark rows (ROM 0xff3108 red, live the target's own gray) where the
 mark overlaps the target (Onix, Shedinja: 216..568 px; Snorlax / Shuckle targets do not overlap: 0 px). Patch
-`fixtures/aud110/aud110-taunt-anger-front.diff` (+10 / -2): draw the marks after the player battler (and after the bubble, 29 > 28) when the target is
+`fixtures/aud110/aud110-taunt-anger-front.diff`: draw the marks after the player battler (and after the bubble, 29 > 28) when the target is
 the player. The Swagger branch draws its marks after everything for both orientations; it shares the same source rule and no overlap residual was seen
 (Swagger's anger rows are inside its separate residual C; **not** audited for the mark order here: a note, not a verdict).
 
@@ -62,16 +62,16 @@ the player. The Swagger branch draws its marks after everything for both orienta
 to the target only (`view.target.geometry.side === "opponent"`), the attacker is drawn at `spriteCorner` plain. Opponent ONIX (rest x2 = 1) is drawn 1 px
 left of the ROM on every row: shifting the live frame by one px matches the ROM except 39 px (the Harden shine); 1,091 px per row x 101 rows. This is the same
 class as altspecies S2 (docs/altspecies-live-evidence.md: Sandstorm ONIX, "opponent-attacker front-idle rest offset missing"). Patch
-`aud110-harden-opponent-attacker-idle.diff` (+7 / -3): the attacker corner (also the metallic-shine mask corner) adds the attacker's rest when it is the opponent.
+`aud110-harden-opponent-attacker-idle.diff`: the attacker corner (also the metallic-shine mask corner) adds the attacker's rest when it is the opponent.
 
 **C. Swagger 207: the grow-and-shrink uses the Rattata picture height 38 / 32 for every species** (`src/animation/swagger.ts`, `battlerHeight = side === "player" ? 38 : 32`).
 ROM: `SetBattlerSpriteYOffsetFromYScale` (battle_anim_mons.c:1873) uses `MON_PIC_HEIGHT - 2 * GetBattlerYDeltaFromSpriteId` = the attacker's pic-coords y_offset
 (`64 - 2 * yOffset`). Bulk Up already receives `battlerHeight: attackerAnchors.pictureHeight`; Swagger never did. Rattata is the pair the 38 / 32 came from (0 px
-base and patched). Patch `aud110-swagger-picture-height.diff` (3 files, +9 / -2): optional `battlerHeight` on `SceneOnSwaggerConfig`, passed from `attackerAnchors.pictureHeight`
+base and patched). Patch `aud110-swagger-picture-height.diff` (3 files): optional `battlerHeight` on `SceneOnSwaggerConfig`, passed from `attackerAnchors.pictureHeight`
 in `liveMoveAnimation.ts` (default unchanged for the staged Rattata pair). Not a timing phase: the alignment is the measured best and every row after the first
 squash differs.
 
-No TIMING-PHASE (D4-class) verdict anywhere: in all 75 windows the aligned rows are exact or the residual is a drawn-shape residual above.
+No TIMING-PHASE (D4-class) verdict anywhere: in all 69 windows the aligned rows are exact or the residual is a drawn-shape residual above.
 
 ## 3. Census exposure (base 5c050b765, seeds 0..999, `ret88Census.sh shards`: 27,515 commands; `fixtures/aud110/exposure-base-5c050b765.json`)
 
@@ -79,7 +79,7 @@ The census counts every one of these bodies as **live** today (live = by status,
 
 | Body | Commands | Live | Exposed to the defect |
 |---|---|---|---|
-| Taunt 269 | 28 | 28 | A: **18 commands in 11 battles** have an opponent Taunter (Murkrow x13, Mightyena x5) whose mark can overlap the player target; the overlap (so the px) depends on the target's picture: 216..568 px on Onix / Shedinja / Kingler / Golbat targets, 0 px on Snorlax / Shuckle |
+| Taunt 269 | 28 | 28 | A: **18 commands in 11 battles** have an opponent Taunter (Murkrow x14, Mightyena x4) whose mark can overlap the player target; the overlap (so the px) depends on the target's picture: 216..568 px on Onix / Shedinja / Kingler / Golbat targets, 0 px on Snorlax / Shuckle |
 | Harden 106 | 38 | 38 | B: **0**: all 16 opponent Harden commands are RELICANTH (rest x2 = y2 = 0) |
 | Swagger 207 | 127 | 127 | C: **100 commands in 59 battles** have an attacker whose `64 - 2 * yOffset` differs from 38 / 32 (5 more attacker symbols not looked up by this tool's name match) |
 | Mean Look 212 / Substitute 164 | 27 / 47 | all live | none found |
