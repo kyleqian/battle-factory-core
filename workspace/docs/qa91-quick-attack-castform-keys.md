@@ -151,6 +151,9 @@ FLAT84_CENSUS_JOBS=10 sh tools/integration/flat84Census.sh $C/base $C/final $C/o
 npm run compare:quick-attack-portable; npm run compare:quick-attack-opposite; npm run compare:quick-attack-opposite-controller
 ```
 
+Run B of `qa91Run.sh` (fresh dirs, 23:04..23:06): the staged scenarios, the derived fixtures, and every x2 / qa / castform / opp /
+opp-before receipt and summary were **== committed (byte-identical)**.
+
 ## 3. Not reached
 
 - An **opponent ONIX / RATTATA attacker**: Quick Attack's absolute attacker travel against a non-zero attacker rest. Its probe crashes
