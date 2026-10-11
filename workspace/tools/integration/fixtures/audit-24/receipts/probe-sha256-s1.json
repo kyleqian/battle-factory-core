@@ -1,124 +1,148 @@
 {
- "schema": "audit24-probe-sha256/v1",
+ "schema": "audit24-probe-sha256/v2",
  "sha256": {
   "audit24-fp-opponent-hitmonlee-skarmory": {
-   "r1": "3c0ed1fba18985b3d6480325e6a1e0350c9110b547fb02f0d824092636e5dd16",
-   "r2": "3c0ed1fba18985b3d6480325e6a1e0350c9110b547fb02f0d824092636e5dd16",
+   "framesR1": "98b1743fc0234c754b077a692ad5e690f73e66abbe0bd987db15294ecb5e2c84",
+   "framesR2": "98b1743fc0234c754b077a692ad5e690f73e66abbe0bd987db15294ecb5e2c84",
+   "fileSame": true,
    "same": true
   },
   "audit24-fp-opponent-poliwrath-quagsire": {
-   "r1": "33e0ee01e37dc937adec2d97c718eef78e410db1debdd07cb9be535b18480dbf",
-   "r2": "33e0ee01e37dc937adec2d97c718eef78e410db1debdd07cb9be535b18480dbf",
+   "framesR1": "885b5edcc5778c80c8ebfd419e59cd1c73496b3b3072cfee56ac07914d282649",
+   "framesR2": "885b5edcc5778c80c8ebfd419e59cd1c73496b3b3072cfee56ac07914d282649",
+   "fileSame": true,
    "same": true
   },
   "audit24-fp-player-hitmonlee-steelix": {
-   "r1": "cb6ffb600842980543530c724fa2f5caad00d3af26e2a7f5aad226c5922c28b9",
-   "r2": "cb6ffb600842980543530c724fa2f5caad00d3af26e2a7f5aad226c5922c28b9",
+   "framesR1": "b093cef788ec8ac93821929773d4c1e9f2d5b5196d34358bcdf13b42f69ac174",
+   "framesR2": "b093cef788ec8ac93821929773d4c1e9f2d5b5196d34358bcdf13b42f69ac174",
+   "fileSame": true,
    "same": true
   },
   "audit24-fp-player-poliwrath-lapras": {
-   "r1": "e5ed529bab8c9b0cefee7134a4350c9565641607dd3b72c0e7f74e3f5d31cab8",
-   "r2": "e5ed529bab8c9b0cefee7134a4350c9565641607dd3b72c0e7f74e3f5d31cab8",
+   "framesR1": "86ab2cf0da7a726c56465c56d1577979839a90d27c1359856e65d2e3ec3f1017",
+   "framesR2": "86ab2cf0da7a726c56465c56d1577979839a90d27c1359856e65d2e3ec3f1017",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-bite-opponent-crobat-lapras": {
-   "r1": "3080a4eedba5159c597c7bc7b51b3f0475b8103ee7bffe623242b05b5b062a57",
-   "r2": "3080a4eedba5159c597c7bc7b51b3f0475b8103ee7bffe623242b05b5b062a57",
+   "framesR1": "3f949b03195cff0fcb2f11c318266826969eaac0154aad798ce7815bfcbcc359",
+   "framesR2": "3f949b03195cff0fcb2f11c318266826969eaac0154aad798ce7815bfcbcc359",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-bite-opponent-raticate-skarmory": {
-   "r1": "ed3f6127a0f059314e427af05a675e57ee7b21fb908a1c25839857a685a748f4",
-   "r2": "ed3f6127a0f059314e427af05a675e57ee7b21fb908a1c25839857a685a748f4",
+   "framesR1": "b4df16f6ba42fa6f3bc5e868a659785bb40489d34dec221cf20c38a7e2563afe",
+   "framesR2": "b4df16f6ba42fa6f3bc5e868a659785bb40489d34dec221cf20c38a7e2563afe",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-bite-player-raticate-skarmory": {
-   "r1": "5743b7725add4892deac2d408884c4b3b72b0267069d72cefcc29018459bee93",
-   "r2": "5743b7725add4892deac2d408884c4b3b72b0267069d72cefcc29018459bee93",
+   "framesR1": "5e95e9d6e7e05521e0d3113a6756641ac5af692508eaef537d6f82c6857890f3",
+   "framesR2": "5e95e9d6e7e05521e0d3113a6756641ac5af692508eaef537d6f82c6857890f3",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-dizzy-punch-opponent-kangaskhan-steelix": {
-   "r1": "9cc95fa7001dc7fec7314236e50bc57a52bf3a4a6eda675f807f20d98ce071a1",
-   "r2": "9cc95fa7001dc7fec7314236e50bc57a52bf3a4a6eda675f807f20d98ce071a1",
+   "framesR1": "57e21b09f9bbe5269db8f9e0dec2a059ab91b958b57377694bbc12b3fd626ea6",
+   "framesR2": "57e21b09f9bbe5269db8f9e0dec2a059ab91b958b57377694bbc12b3fd626ea6",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-dizzy-punch-player-kangaskhan-steelix": {
-   "r1": "5fb2a9521533ae9a3e1e7f985ac26a5e4f4169f285bb66a4a845b805a5ea7a19",
-   "r2": "5fb2a9521533ae9a3e1e7f985ac26a5e4f4169f285bb66a4a845b805a5ea7a19",
+   "framesR1": "fae1fa3cb953212c2aa16e31b429e6080b7aef81dd0a2a163031316d26c9f089",
+   "framesR2": "fae1fa3cb953212c2aa16e31b429e6080b7aef81dd0a2a163031316d26c9f089",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-ember-opponent-ninetales-snorlax": {
-   "r1": "6be8487ad5a94ded9d4ee32e94d0196ae653272e3b6ab8de140f512947282c6f",
-   "r2": "6be8487ad5a94ded9d4ee32e94d0196ae653272e3b6ab8de140f512947282c6f",
+   "framesR1": "89c29f2c86e343b8bbe6084ad9bdc858fe63202e7e082426efe7689147e93852",
+   "framesR2": "89c29f2c86e343b8bbe6084ad9bdc858fe63202e7e082426efe7689147e93852",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-ember-player-ninetales-snorlax": {
-   "r1": "d8dc60b09281ad18f2481869e92582649138f116018ffae04ad02e3b03dd0113",
-   "r2": "d8dc60b09281ad18f2481869e92582649138f116018ffae04ad02e3b03dd0113",
+   "framesR1": "f126e28438f0fb89bd6e081e16d89e378e777ce0e455993696080d8650a8653d",
+   "framesR2": "f126e28438f0fb89bd6e081e16d89e378e777ce0e455993696080d8650a8653d",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-harden-opponent-kingler-snorlax": {
-   "r1": "b28c294c52e8b6c02c9d2ad35127f74859e9d21d5585b673139fa04867e1f527",
-   "r2": "b28c294c52e8b6c02c9d2ad35127f74859e9d21d5585b673139fa04867e1f527",
+   "framesR1": "0eec974bc86d6fa12b283672d620a7eeb78ac6435a45bc580b3b8d2311b20507",
+   "framesR2": "0eec974bc86d6fa12b283672d620a7eeb78ac6435a45bc580b3b8d2311b20507",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-harden-player-kingler-snorlax": {
-   "r1": "1bfbec3327ae1e472930a0f6db5499db5a298465cec209531e8de9fceea5929b",
-   "r2": "1bfbec3327ae1e472930a0f6db5499db5a298465cec209531e8de9fceea5929b",
+   "framesR1": "f22c79f84c52d5e1d81a4f62b794cdfdbcaceb8dad985f3f13ee021f17118dc8",
+   "framesR2": "f22c79f84c52d5e1d81a4f62b794cdfdbcaceb8dad985f3f13ee021f17118dc8",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-razor-leaf-opponent-venusaur-quagsire": {
-   "r1": "8b7a8d2a80faff08f789d85a7429d87572bbc7cfc49b325971059083e5442409",
-   "r2": "8b7a8d2a80faff08f789d85a7429d87572bbc7cfc49b325971059083e5442409",
+   "framesR1": "eaac39501cbf70a48f3f65b6bfc6f02c5311f569a89fd4ef42d75dde4f85c6e3",
+   "framesR2": "eaac39501cbf70a48f3f65b6bfc6f02c5311f569a89fd4ef42d75dde4f85c6e3",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-razor-leaf-player-venusaur-quagsire": {
-   "r1": "7f750487c49013812c2125b31ee5f4781a22270070446af6d8b46c515d85eb19",
-   "r2": "7f750487c49013812c2125b31ee5f4781a22270070446af6d8b46c515d85eb19",
+   "framesR1": "ea7257cb70fe037c6d4af2bbbee41dab644849715233ab853ab613a1352f86cd",
+   "framesR2": "ea7257cb70fe037c6d4af2bbbee41dab644849715233ab853ab613a1352f86cd",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-shadow-punch-opponent-gengar-lapras": {
-   "r1": "9b8213dfbcc0bb3bd80d3f39cc9a6480eda7318e6f9dd48c5cd2ec966ed64dd3",
-   "r2": "9b8213dfbcc0bb3bd80d3f39cc9a6480eda7318e6f9dd48c5cd2ec966ed64dd3",
+   "framesR1": "d8f945838fadd4f45dbb018b4334e012cf56e875dade69dfa4916b4c7327f462",
+   "framesR2": "d8f945838fadd4f45dbb018b4334e012cf56e875dade69dfa4916b4c7327f462",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-shadow-punch-opponent-haunter-lapras": {
-   "r1": "059b258e557cf418ea29d879d6c1f1ad68df551e0d2384f7498634edba3e6a2b",
-   "r2": "059b258e557cf418ea29d879d6c1f1ad68df551e0d2384f7498634edba3e6a2b",
+   "framesR1": "890e27d705d8b0abcfca234d0aa07821c9e04d03550a5997df4a93039a21f078",
+   "framesR2": "890e27d705d8b0abcfca234d0aa07821c9e04d03550a5997df4a93039a21f078",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-shadow-punch-opponent-haunter-skarmory": {
-   "r1": "46a991ed0b627ebb6a75923f5eddfdd5cf981087dc6cb7315b44a5b310661e3f",
-   "r2": "46a991ed0b627ebb6a75923f5eddfdd5cf981087dc6cb7315b44a5b310661e3f",
+   "framesR1": "a2447c69d64ac42198cda5845104ca243170cffdca25d582a94252b2dd7c3668",
+   "framesR2": "a2447c69d64ac42198cda5845104ca243170cffdca25d582a94252b2dd7c3668",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-shadow-punch-player-gengar-lapras": {
-   "r1": "ad4fb8e7f913f6d3831452d587b5244614183ce5a11bdaf36b54c621bca2f0b0",
-   "r2": "ad4fb8e7f913f6d3831452d587b5244614183ce5a11bdaf36b54c621bca2f0b0",
+   "framesR1": "c8c5a5d807ee66280a8b9b251e92d41464e45d5426449c481d23cf9b7ff31efc",
+   "framesR2": "c8c5a5d807ee66280a8b9b251e92d41464e45d5426449c481d23cf9b7ff31efc",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-shadow-punch-player-haunter-lapras": {
-   "r1": "373d379b060194b7789a3cf5ab0eb2a49f6e877bb0a0f34d72834739f6634f77",
-   "r2": "373d379b060194b7789a3cf5ab0eb2a49f6e877bb0a0f34d72834739f6634f77",
+   "framesR1": "3381cdb8e56039807c2362925ed7eeafa234ec3526baf17e38b98e068197c664",
+   "framesR2": "3381cdb8e56039807c2362925ed7eeafa234ec3526baf17e38b98e068197c664",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-shadow-punch-player-haunter-skarmory": {
-   "r1": "8b7afeed66a1bd6d79f4751196f9c60551e176515483066e8f89da52cebf5e54",
-   "r2": "8b7afeed66a1bd6d79f4751196f9c60551e176515483066e8f89da52cebf5e54",
+   "framesR1": "724b4cd950930b34d60f0a2642c7222c10e0a3dbc8fcc5ee8e9ecbe8da07318f",
+   "framesR2": "724b4cd950930b34d60f0a2642c7222c10e0a3dbc8fcc5ee8e9ecbe8da07318f",
+   "fileSame": true,
    "same": true
   },
   "audit24-lead-sludge-bomb-opponent-golbat-snorlax": {
-   "r1": "11b72e431d84bfb8a88054369cc35a874a40a49b5330fd30d778e72adcab06c6",
-   "r2": "11b72e431d84bfb8a88054369cc35a874a40a49b5330fd30d778e72adcab06c6",
+   "framesR1": "2a55840728b057e5723d4fccf46859bdfe846ca98e95d03d061674926be097cf",
+   "framesR2": "2a55840728b057e5723d4fccf46859bdfe846ca98e95d03d061674926be097cf",
+   "fileSame": true,
    "same": true
   },
   "audit24-swap-bite-opponent-raticate": {
-   "r1": "ec34d68189a0b0cfdf011974e537c29ed1b6aadeb8f30fe49db52d0355ed0071",
-   "r2": "ec34d68189a0b0cfdf011974e537c29ed1b6aadeb8f30fe49db52d0355ed0071",
+   "framesR1": "c15c68ac36bdb45b578b6283e6e5dbe9b7e6ff11a826acba1557dabdda53d2df",
+   "framesR2": "c15c68ac36bdb45b578b6283e6e5dbe9b7e6ff11a826acba1557dabdda53d2df",
+   "fileSame": true,
    "same": true
   },
   "audit24-swap-bite-player-raticate": {
-   "r1": "0b32c0d7615c0b943031a1a79250d840e61edbdca69089a39af5ac45243751f7",
-   "r2": "0b32c0d7615c0b943031a1a79250d840e61edbdca69089a39af5ac45243751f7",
+   "framesR1": "58586c919d40326944d56c83cb9bec31663bb4b688489381b5b6f8fded00bdc0",
+   "framesR2": "58586c919d40326944d56c83cb9bec31663bb4b688489381b5b6f8fded00bdc0",
+   "fileSame": true,
    "same": true
   }
  }

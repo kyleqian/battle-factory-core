@@ -3,8 +3,8 @@
  "route": "census battle 38 (seed 38, streak 26), idle94Route.ts",
  "trees": {
   "preland97": "64f0ae997",
-  "base": "HEAD",
-  "patched": "HEAD + audit24-lead-row0.diff"
+  "base": "ae0eb8ed3",
+  "patched": "ae0eb8ed3 + audit24-lead-row0.diff"
  },
  "runs": {
   "preland97-off": {

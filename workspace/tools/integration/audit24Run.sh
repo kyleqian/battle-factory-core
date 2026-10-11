@@ -37,10 +37,12 @@ d, out = sys.argv[1], sys.argv[2]
 res = {}
 for f in sorted(glob.glob(f"{d}/*-r1.json")):
     s = os.path.basename(f)[:-8]
-    h = [hashlib.sha256(open(f"{d}/{s}-r{r}.json", "rb").read()).hexdigest() for r in (1, 2)]
-    res[s] = {"r1": h[0], "r2": h[1], "same": h[0] == h[1]}
-json.dump({"schema": "audit24-probe-sha256/v1", "sha256": res}, open(out, "w"), indent=1); open(out, "a").write("\n")
-print("probes r1 == r2:", sum(v["same"] for v in res.values()), "/", len(res))
+    raw = [open(f"{d}/{s}-r{r}.json", "rb").read() for r in (1, 2)]
+    # the output also records the scenario path (the scratch dir); the receipt hashes the frame rows only (path-independent)
+    fr = [hashlib.sha256(json.dumps(json.loads(x)["frames"], sort_keys=True).encode()).hexdigest() for x in raw]
+    res[s] = {"framesR1": fr[0], "framesR2": fr[1], "fileSame": raw[0] == raw[1], "same": fr[0] == fr[1] and raw[0] == raw[1]}
+json.dump({"schema": "audit24-probe-sha256/v2", "sha256": res}, open(out, "w"), indent=1); open(out, "a").write("\n")
+print("probes r1 == r2 (byte for byte):", sum(v["same"] for v in res.values()), "/", len(res))
 PY
 
 # 3. land97 lead rows
