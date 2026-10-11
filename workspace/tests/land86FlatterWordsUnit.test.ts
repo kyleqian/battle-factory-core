@@ -58,7 +58,7 @@ describe("land86: Flatter 260 words-order unit", () => {
     expect(marked.deferredBody).toMatchObject({ moveId: 260, attackerSide: "player", bodySpecies: species });
     const free = BODIES.bodies[0]!;
     const carry = liveWordsOrderDeferredCarry(() => null, { player: { x: 0, y: 0 }, opponent: { x: 0, y: 0 } } as never);
-    expect(carry({ key: "k", moveId: 260, attackerSide: free.attackerSide } as never, free.activationFree)).toBeNull();
+    expect(carry({ key: "k", moveId: 260, attackerSide: free.attackerSide } as never, free.activationFree, false)).toBeNull();
   });
 
   it("a consumer after a Flatter marker gets the resolved lend == the ROM activation order (KO chain, 9 consumers)", () => {
