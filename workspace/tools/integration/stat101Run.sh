@@ -7,6 +7,8 @@
 # 2. re-stage the 11 scenarios (== the committed ones and scenario-index.json);
 # 3. probes: 11 scenarios x {ON, OFF} x {r1, r2} (stat101Job.sh, 8 parallel; a crashed job reruns once), r1 == r2 byte for byte and
 #    == receipts/probe-sha256.txt; stat101Receipts.py == receipts/ (stat-anim.json + rows/*.tsv);
+# 3b. prototype: r1 jobs also dump the window frames (STAT101_DUMP, inside <out-dir>), stat101NpzToRaw.py + stat101ProtoCompare.ts (production
+#    banner helpers over the ROM's own pre-banner row) == proto-compare.json;
 # 4. --census: stat101Exposure.ts seeds 0..999 (ten shards, base copy), stat101ExposureSummary.py == exposure.json.
 set -eu
 OUT=${1:?usage: stat101Run.sh <fresh-out-dir> [--census]}
@@ -39,7 +41,10 @@ check "$F/scenario-index.json" "$OUT/stage/scenario-index.json" scenario-index
 # 3. probes + receipts
 mkdir -p "$OUT/probes/r1" "$OUT/probes/r2"
 export STAT101_PY="$PY"
-(cd "$B" && for r in r1 r2; do for m in on off; do for f in "$F"/scenarios/*.json; do echo "$OUT/probes/$r $m $f"; done; done; done \
+mkdir -p "$OUT/dump"
+(cd "$B" && for m in on off; do for f in "$F"/scenarios/*.json; do echo "$OUT/probes/r1 $m $f"; done; done \
+  | STAT101_DUMP="$OUT/dump" xargs -n 3 -P 8 sh tools/integration/stat101Job.sh)
+(cd "$B" && for m in on off; do for f in "$F"/scenarios/*.json; do echo "$OUT/probes/r2 $m $f"; done; done \
   | xargs -n 3 -P 8 sh tools/integration/stat101Job.sh)
 n=0; t=0
 for f in "$OUT"/probes/r1/*.json; do t=$((t + 1)); cmp -s "$f" "$OUT/probes/r2/$(basename "$f")" && n=$((n + 1)); done
@@ -49,6 +54,11 @@ check "$F/receipts/probe-sha256.txt" "$OUT/probe-sha256.txt" probe-sha256
 python3 "$B/tools/integration/stat101Receipts.py" "$OUT/probes/r1" "$OUT/probes/r2" "$F/scenario-index.json" "$OUT/receipts" > /dev/null
 check "$F/receipts/stat-anim.json" "$OUT/receipts/stat-anim.json" stat-anim.json
 diff -r "$F/receipts/rows" "$OUT/receipts/rows" > /dev/null && echo "SAME rows ($(ls "$OUT/receipts/rows" | wc -l | tr -d ' ') TSVs)" || { echo "DIFF rows"; fail=1; }
+
+# 3b. prototype comparison
+python3 "$B/tools/integration/stat101NpzToRaw.py" "$OUT/dump" "$F/receipts/stat-anim.json" "$OUT/raw" > /dev/null
+(cd "$B" && node --experimental-strip-types --no-warnings tools/integration/stat101ProtoCompare.ts "$OUT/raw" "$OUT/proto-compare.json" > /dev/null)
+check "$F/proto-compare.json" "$OUT/proto-compare.json" proto-compare.json
 
 # 4. census exposure
 if [ "$CENSUS" = "--census" ]; then

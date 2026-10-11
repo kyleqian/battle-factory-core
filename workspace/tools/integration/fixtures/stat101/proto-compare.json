@@ -1,0 +1,882 @@
+{
+ "stat101-agility-opp-golbat-snorlax-on": {
+  "arg": 41,
+  "species": 42,
+  "side": "opponent",
+  "maskRect": [
+   144,
+   3,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 85,
+   "mismatchedRows": 1,
+   "px": 38,
+   "firstBad": 91
+  },
+  "helper-lag0": {
+   "rows": 85,
+   "mismatchedRows": 81,
+   "px": 50308,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 85,
+   "mismatchedRows": 81,
+   "px": 105405,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 85,
+   "mismatchedRows": 81,
+   "px": 105894,
+   "firstBad": 7
+  }
+ },
+ "stat101-agility-opp-golbat-snorlax-off": {
+  "arg": 41,
+  "species": 42,
+  "side": "opponent",
+  "maskRect": [
+   144,
+   3,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 85,
+   "mismatchedRows": 1,
+   "px": 38,
+   "firstBad": 91
+  },
+  "helper-lag0": {
+   "rows": 85,
+   "mismatchedRows": 81,
+   "px": 50308,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 85,
+   "mismatchedRows": 81,
+   "px": 105405,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 85,
+   "mismatchedRows": 81,
+   "px": 105894,
+   "firstBad": 7
+  }
+ },
+ "stat101-cosmic-power-ply-snorlax-golbat-on": {
+  "arg": 55,
+  "species": 143,
+  "side": "player",
+  "maskRect": [
+   40,
+   59,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 44082,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 91538,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 91986,
+   "firstBad": 7
+  }
+ },
+ "stat101-cosmic-power-ply-snorlax-golbat-off": {
+  "arg": 55,
+  "species": 143,
+  "side": "player",
+  "maskRect": [
+   40,
+   59,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 44082,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 91538,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 91986,
+   "firstBad": 7
+  }
+ },
+ "stat101-growl-ply-primeape-onix-on": {
+  "arg": 22,
+  "species": 95,
+  "side": "opponent",
+  "maskRect": [
+   144,
+   10,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 50783,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 103204,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 104531,
+   "firstBad": 7
+  }
+ },
+ "stat101-growl-ply-primeape-onix-off": {
+  "arg": 22,
+  "species": 95,
+  "side": "opponent",
+  "maskRect": [
+   144,
+   10,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 50783,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 103204,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 104531,
+   "firstBad": 7
+  }
+ },
+ "stat101-harden-ply-primeape-onix-on": {
+  "arg": 16,
+  "species": 57,
+  "side": "player",
+  "maskRect": [
+   40,
+   55,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 51871,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 107818,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 108912,
+   "firstBad": 7
+  }
+ },
+ "stat101-harden-ply-primeape-onix-off": {
+  "arg": 16,
+  "species": 57,
+  "side": "player",
+  "maskRect": [
+   40,
+   55,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 51871,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 107818,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 108912,
+   "firstBad": 7
+  }
+ },
+ "stat101-icy-wind-ply-primeape-golbat-on": {
+  "arg": 24,
+  "species": 42,
+  "side": "opponent",
+  "maskRect": [
+   144,
+   3,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 1,
+   "px": 38,
+   "firstBad": 77
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 59,
+   "px": 36513,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 59,
+   "px": 76185,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 59,
+   "px": 76604,
+   "firstBad": 7
+  }
+ },
+ "stat101-icy-wind-ply-primeape-golbat-off": {
+  "arg": 24,
+  "species": 42,
+  "side": "opponent",
+  "maskRect": [
+   144,
+   3,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 1,
+   "px": 38,
+   "firstBad": 77
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 59,
+   "px": 36513,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 59,
+   "px": 76185,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 59,
+   "px": 76604,
+   "firstBad": 7
+  }
+ },
+ "stat101-memento-ply-primeape-onix-on": {
+  "arg": 58,
+  "species": 95,
+  "side": "opponent",
+  "maskRect": [
+   145,
+   10,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "liveX2Y2": [
+   1,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 85,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 70139,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 146768,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 147127,
+   "firstBad": 7
+  }
+ },
+ "stat101-memento-ply-primeape-onix-off": {
+  "arg": 58,
+  "species": 95,
+  "side": "opponent",
+  "maskRect": [
+   144,
+   10,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 85,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 69960,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 146769,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 147121,
+   "firstBad": 7
+  }
+ },
+ "stat101-roar-intimidate-ply-primeape-onix-on": {
+  "arg": 22,
+  "species": 57,
+  "side": "player",
+  "maskRect": [
+   40,
+   55,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 51387,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 103054,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 105362,
+   "firstBad": 7
+  }
+ },
+ "stat101-roar-intimidate-ply-primeape-onix-off": {
+  "arg": 22,
+  "species": 57,
+  "side": "player",
+  "maskRect": [
+   40,
+   55,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 51387,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 103054,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 105362,
+   "firstBad": 7
+  }
+ },
+ "stat101-screech-opp-golbat-onix-on": {
+  "arg": 47,
+  "species": 95,
+  "side": "player",
+  "maskRect": [
+   40,
+   48,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 48
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 85,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 62856,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 132556,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 132790,
+   "firstBad": 7
+  }
+ },
+ "stat101-screech-opp-golbat-onix-off": {
+  "arg": 47,
+  "species": 95,
+  "side": "player",
+  "maskRect": [
+   40,
+   48,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 48
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 85,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 62856,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 132556,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 85,
+   "mismatchedRows": 80,
+   "px": 132790,
+   "firstBad": 7
+  }
+ },
+ "stat101-superpower-opp-machamp-snorlax-on": {
+  "arg": 57,
+  "species": 68,
+  "side": "opponent",
+  "maskRect": [
+   144,
+   9,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 9
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 64943,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 132490,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 135495,
+   "firstBad": 7
+  }
+ },
+ "stat101-superpower-opp-machamp-snorlax-off": {
+  "arg": 57,
+  "species": 68,
+  "side": "opponent",
+  "maskRect": [
+   144,
+   9,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 144,
+   "y": 9
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 64943,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 132490,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 135495,
+   "firstBad": 7
+  }
+ },
+ "stat101-tickle-opp-golbat-snorlax-on": {
+  "arg": 57,
+  "species": 143,
+  "side": "player",
+  "maskRect": [
+   40,
+   59,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 43799,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 91548,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 92023,
+   "firstBad": 7
+  }
+ },
+ "stat101-tickle-opp-golbat-snorlax-off": {
+  "arg": 57,
+  "species": 143,
+  "side": "player",
+  "maskRect": [
+   40,
+   59,
+   64,
+   64
+  ],
+  "productionCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "cornerPlusX2Y2EqualsRect": true,
+  "helper-lag1": {
+   "rows": 71,
+   "mismatchedRows": 0,
+   "px": 0,
+   "firstBad": null
+  },
+  "helper-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 43799,
+   "firstBad": 7
+  },
+  "gba-lag1": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 91548,
+   "firstBad": 7
+  },
+  "gba-lag0": {
+   "rows": 71,
+   "mismatchedRows": 58,
+   "px": 92023,
+   "firstBad": 7
+  }
+ }
+}
