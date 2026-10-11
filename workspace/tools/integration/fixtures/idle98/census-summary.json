@@ -865,7 +865,7 @@
  },
  "shard4Battle434": {
   "stall": "frame budget (liveShareCensus FRAME_BUDGET 200000): base 339 turns, patched 338",
-  "keyPrefixIdentical": false,
+  "keyPrefixIdentical": true,
   "base434Commands": 266,
   "patched434Commands": 265,
   "droppedTail": {
@@ -886,6 +886,7 @@
     "reason": "no adapter (no liveMoveAnimationDuration case)",
     "gate": "liveMoveAnimation.ts:1510"
    }
-  }
+  },
+  "otherBattlesKeyIdentical": true
  }
 }
