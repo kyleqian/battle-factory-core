@@ -1,0 +1,1061 @@
+{
+ "schema": "scan93-predictions/v1",
+ "rows": [
+  {
+   "scenario": "mem-opp-weezing-onix-dd.json",
+   "player": "ONIX",
+   "opponent": "WEEZING",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "c5bcb527"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "93 runs; lines differing from S0: 111",
+     "bank1": "92 runs; lines differing from S0: 111",
+     "banksEqualOn0to159": false,
+     "digest": "c195ba9e"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-psywave.json",
+   "player": "ONIX",
+   "opponent": "WEEZING",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "c5bcb527"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "93 runs; lines differing from S0: 111",
+     "bank1": "92 runs; lines differing from S0: 111",
+     "banksEqualOn0to159": false,
+     "digest": "c195ba9e"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-qa.json",
+   "player": "ONIX",
+   "opponent": "WEEZING",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "c5bcb527"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "93 runs; lines differing from S0: 111",
+     "bank1": "92 runs; lines differing from S0: 111",
+     "banksEqualOn0to159": false,
+     "digest": "c195ba9e"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-xs.json",
+   "player": "ONIX",
+   "opponent": "WEEZING",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "c5bcb527"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "93 runs; lines differing from S0: 111",
+     "bank1": "92 runs; lines differing from S0: 111",
+     "banksEqualOn0to159": false,
+     "digest": "c195ba9e"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-dd.json",
+   "player": "WEEZING",
+   "opponent": "ONIX",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-psywave.json",
+   "player": "WEEZING",
+   "opponent": "ONIX",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-qa.json",
+   "player": "WEEZING",
+   "opponent": "ONIX",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-xs.json",
+   "player": "WEEZING",
+   "opponent": "ONIX",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "player": "SHUCKLE",
+   "opponent": "NUZLEAF",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-memento.json",
+   "player": "SHUCKLE",
+   "opponent": "NUZLEAF",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-psywave.json",
+   "player": "SHUCKLE",
+   "opponent": "NUZLEAF",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-qa.json",
+   "player": "SHUCKLE",
+   "opponent": "NUZLEAF",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-splash.json",
+   "player": "SHUCKLE",
+   "opponent": "NUZLEAF",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-xs.json",
+   "player": "SHUCKLE",
+   "opponent": "NUZLEAF",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-pla-espeon-crobat-qa.json",
+   "player": "ESPEON",
+   "opponent": "CROBAT",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "c5bcb527"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "93 runs; lines differing from S0: 111",
+     "bank1": "92 runs; lines differing from S0: 111",
+     "banksEqualOn0to159": false,
+     "digest": "c195ba9e"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-pla-espeon-crobat-xs.json",
+   "player": "ESPEON",
+   "opponent": "CROBAT",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "c5bcb527"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "93 runs; lines differing from S0: 111",
+     "bank1": "92 runs; lines differing from S0: 111",
+     "banksEqualOn0to159": false,
+     "digest": "c195ba9e"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "player": "NUZLEAF",
+   "opponent": "SHUCKLE",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-memento.json",
+   "player": "NUZLEAF",
+   "opponent": "SHUCKLE",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-psywave.json",
+   "player": "NUZLEAF",
+   "opponent": "SHUCKLE",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-qa.json",
+   "player": "NUZLEAF",
+   "opponent": "SHUCKLE",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-splash.json",
+   "player": "NUZLEAF",
+   "opponent": "SHUCKLE",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-xs.json",
+   "player": "NUZLEAF",
+   "opponent": "SHUCKLE",
+   "classes": {
+    "intro / non-scanline": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x400001c",
+     "dmaControl": "0xa2600001",
+     "bank0": "0..79:2 80..159:-2 160..319:0",
+     "bank1": "0..319:0",
+     "banksEqualOn0to159": false,
+     "digest": "3719ab75"
+    },
+    "after player Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000014",
+     "dmaControl": "0xa2600001",
+     "bank0": "55 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "6c766d87"
+    },
+    "after opponent Extrasensory": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "54 runs; lines differing from S0: 65",
+     "bank1": "53 runs; lines differing from S0: 65",
+     "banksEqualOn0to159": false,
+     "digest": "46a04f42"
+    },
+    "after both (player then opponent)": {
+     "state": 0,
+     "srcBuffer": 1,
+     "dmaDest": "0x4000018",
+     "dmaControl": "0xa2600001",
+     "bank0": "88 runs; lines differing from S0: 105",
+     "bank1": "87 runs; lines differing from S0: 105",
+     "banksEqualOn0to159": false,
+     "digest": "ee524ea6"
+    },
+    "after Memento / Dragon Dance / other writer": null
+   }
+  }
+ ]
+}
