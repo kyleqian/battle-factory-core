@@ -1,0 +1,1064 @@
+{
+ "schema": "ctl95-control-check/v1",
+ "results": [
+  {
+   "stem": "sp103-player-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 77,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    85,
+    191
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    1440,
+    1440
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [
+    "106"
+   ],
+   "badPx": [
+    [
+     106,
+     1440
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 1743,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    1751,
+    1857
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    1440,
+    1440
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [
+    "106"
+   ],
+   "badPx": [
+    [
+     106,
+     1440
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 3409,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    3417,
+    3523
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    1440,
+    1440
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [
+    "106"
+   ],
+   "badPx": [
+    [
+     106,
+     1440
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 5075,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    5083,
+    5189
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    1440,
+    1440
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [
+    "106"
+   ],
+   "badPx": [
+    [
+     106,
+     1440
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 77,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    85,
+    191
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    2409,
+    2409
+   ],
+   "identical": true,
+   "exactRows": 102,
+   "badAges": [
+    "102..106"
+   ],
+   "badPx": [
+    [
+     102,
+     200
+    ],
+    [
+     103,
+     200
+    ],
+    [
+     104,
+     200
+    ],
+    [
+     105,
+     200
+    ],
+    [
+     106,
+     1609
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 1743,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    1751,
+    1857
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    2409,
+    2409
+   ],
+   "identical": true,
+   "exactRows": 102,
+   "badAges": [
+    "102..106"
+   ],
+   "badPx": [
+    [
+     102,
+     200
+    ],
+    [
+     103,
+     200
+    ],
+    [
+     104,
+     200
+    ],
+    [
+     105,
+     200
+    ],
+    [
+     106,
+     1609
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 3409,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    3417,
+    3523
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    2409,
+    2409
+   ],
+   "identical": true,
+   "exactRows": 102,
+   "badAges": [
+    "102..106"
+   ],
+   "badPx": [
+    [
+     102,
+     200
+    ],
+    [
+     103,
+     200
+    ],
+    [
+     104,
+     200
+    ],
+    [
+     105,
+     200
+    ],
+    [
+     106,
+     1609
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 5075,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    5083,
+    5189
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    2409,
+    2409
+   ],
+   "identical": true,
+   "exactRows": 102,
+   "badAges": [
+    "102..106"
+   ],
+   "badPx": [
+    [
+     102,
+     200
+    ],
+    [
+     103,
+     200
+    ],
+    [
+     104,
+     200
+    ],
+    [
+     105,
+     200
+    ],
+    [
+     106,
+     1609
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-quagsire",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "QUAGSIRE",
+   "activation": 81,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    89,
+    194
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "sp103-opponent-haunter-quagsire",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "QUAGSIRE",
+   "activation": 1747,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    1755,
+    1860
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "sp103-opponent-haunter-quagsire",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "QUAGSIRE",
+   "activation": 3413,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    3421,
+    3526
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "sp103-opponent-haunter-quagsire",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "QUAGSIRE",
+   "activation": 5079,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    5087,
+    5192
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "sp103-opponent-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 81,
+   "romBodyRows": 108,
+   "shift": 8,
+   "window": [
+    89,
+    194
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    278756,
+    278756
+   ],
+   "identical": true,
+   "exactRows": 88,
+   "badAges": [
+    "83..98",
+    "101",
+    "105"
+   ],
+   "badPx": [
+    [
+     83,
+     17303
+    ],
+    [
+     84,
+     17303
+    ],
+    [
+     85,
+     17303
+    ],
+    [
+     86,
+     17303
+    ],
+    [
+     87,
+     17303
+    ],
+    [
+     88,
+     17303
+    ],
+    [
+     89,
+     17303
+    ],
+    [
+     90,
+     17303
+    ],
+    [
+     91,
+     17303
+    ],
+    [
+     92,
+     17303
+    ],
+    [
+     93,
+     17303
+    ],
+    [
+     94,
+     17303
+    ],
+    [
+     95,
+     17303
+    ],
+    [
+     96,
+     17303
+    ],
+    [
+     97,
+     17303
+    ],
+    [
+     98,
+     17303
+    ],
+    [
+     101,
+     200
+    ],
+    [
+     105,
+     1708
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 1747,
+   "romBodyRows": 108,
+   "shift": 8,
+   "window": [
+    1755,
+    1860
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    278743,
+    278743
+   ],
+   "identical": true,
+   "exactRows": 88,
+   "badAges": [
+    "83..98",
+    "101",
+    "105"
+   ],
+   "badPx": [
+    [
+     83,
+     17303
+    ],
+    [
+     84,
+     17303
+    ],
+    [
+     85,
+     17303
+    ],
+    [
+     86,
+     17303
+    ],
+    [
+     87,
+     17303
+    ],
+    [
+     88,
+     17303
+    ],
+    [
+     89,
+     17303
+    ],
+    [
+     90,
+     17303
+    ],
+    [
+     91,
+     17303
+    ],
+    [
+     92,
+     17303
+    ],
+    [
+     93,
+     17303
+    ],
+    [
+     94,
+     17303
+    ],
+    [
+     95,
+     17303
+    ],
+    [
+     96,
+     17303
+    ],
+    [
+     97,
+     17303
+    ],
+    [
+     98,
+     17303
+    ],
+    [
+     101,
+     200
+    ],
+    [
+     105,
+     1695
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 3413,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    3421,
+    3526
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "sp103-opponent-haunter-steelix",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "STEELIX",
+   "activation": 5079,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    5087,
+    5192
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "sp103-player-haunter-crobat-slow",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 390,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    398,
+    504
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    2409,
+    2409
+   ],
+   "identical": true,
+   "exactRows": 102,
+   "badAges": [
+    "102..106"
+   ],
+   "badPx": [
+    [
+     102,
+     200
+    ],
+    [
+     103,
+     200
+    ],
+    [
+     104,
+     200
+    ],
+    [
+     105,
+     200
+    ],
+    [
+     106,
+     1609
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat-slow",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 2056,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    2064,
+    2170
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    2409,
+    2409
+   ],
+   "identical": true,
+   "exactRows": 102,
+   "badAges": [
+    "102..106"
+   ],
+   "badPx": [
+    [
+     102,
+     200
+    ],
+    [
+     103,
+     200
+    ],
+    [
+     104,
+     200
+    ],
+    [
+     105,
+     200
+    ],
+    [
+     106,
+     1609
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat-slow",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 3722,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    3730,
+    3836
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    2409,
+    2409
+   ],
+   "identical": true,
+   "exactRows": 102,
+   "badAges": [
+    "102..106"
+   ],
+   "badPx": [
+    [
+     102,
+     200
+    ],
+    [
+     103,
+     200
+    ],
+    [
+     104,
+     200
+    ],
+    [
+     105,
+     200
+    ],
+    [
+     106,
+     1609
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-player-haunter-crobat-slow",
+   "move": "SHADOW_PUNCH",
+   "side": "player",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "CROBAT",
+   "activation": 5388,
+   "romBodyRows": 108,
+   "shift": 8,
+   "window": [
+    5396,
+    5502
+   ],
+   "rows": 107,
+   "duration": 107,
+   "personality": null,
+   "px": [
+    295861,
+    295861
+   ],
+   "identical": true,
+   "exactRows": 85,
+   "badAges": [
+    "83..98",
+    "101..106"
+   ],
+   "badPx": [
+    [
+     83,
+     18176
+    ],
+    [
+     84,
+     18176
+    ],
+    [
+     85,
+     18176
+    ],
+    [
+     86,
+     18176
+    ],
+    [
+     87,
+     18176
+    ],
+    [
+     88,
+     18176
+    ],
+    [
+     89,
+     18176
+    ],
+    [
+     90,
+     18176
+    ],
+    [
+     91,
+     18176
+    ],
+    [
+     92,
+     18176
+    ],
+    [
+     93,
+     18176
+    ],
+    [
+     94,
+     18176
+    ],
+    [
+     95,
+     18176
+    ],
+    [
+     96,
+     18176
+    ],
+    [
+     97,
+     18176
+    ],
+    [
+     98,
+     18176
+    ],
+    [
+     101,
+     200
+    ],
+    [
+     102,
+     200
+    ],
+    [
+     103,
+     200
+    ],
+    [
+     104,
+     200
+    ],
+    [
+     105,
+     1609
+    ],
+    [
+     106,
+     2636
+    ]
+   ]
+  },
+  {
+   "stem": "sp103-opponent-haunter-aerodactyl-slow",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "AERODACTYL",
+   "activation": 394,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    402,
+    507
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "sp103-opponent-haunter-aerodactyl-slow",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 1,
+   "attacker": "HAUNTER",
+   "target": "AERODACTYL",
+   "activation": 2060,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    2068,
+    2173
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "sp103-opponent-haunter-aerodactyl-slow",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 2,
+   "attacker": "HAUNTER",
+   "target": "AERODACTYL",
+   "activation": 3726,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    3734,
+    3839
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "sp103-opponent-haunter-aerodactyl-slow",
+   "move": "SHADOW_PUNCH",
+   "side": "opponent",
+   "body": 3,
+   "attacker": "HAUNTER",
+   "target": "AERODACTYL",
+   "activation": 5392,
+   "romBodyRows": 109,
+   "shift": 8,
+   "window": [
+    5400,
+    5505
+   ],
+   "rows": 106,
+   "duration": 106,
+   "personality": null,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 106,
+   "badAges": [],
+   "badPx": []
+  }
+ ]
+}
