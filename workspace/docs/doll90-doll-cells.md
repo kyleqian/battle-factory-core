@@ -105,5 +105,7 @@ node --experimental-strip-types --no-warnings tools/integration/land82Parity.ts 
 node --experimental-strip-types --no-warnings tools/integration/land82Parity.ts 506 30 47:opponent
 ```
 
+Runner verified in a fresh dir on the final src tree `d3e66c8b` (commit `65f1de763`): 12 + 8 scenarios r1 == r2, `same summary.tsv`.
+
 Receipts: `tools/integration/fixtures/doll90-live-receipt.json`, `tools/integration/fixtures/doll90/receipts/`. The doll-free control and
 prediction scenarios are in `tools/integration/fixtures/doll90/scenarios/`.
