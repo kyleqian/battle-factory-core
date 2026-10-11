@@ -1,0 +1,51 @@
+{
+ "schema": "ret88-check/v1",
+ "jobs": 12,
+ "notIdenticalAB": 0,
+ "plans": {
+  "body 216 weak": "Cf;D0;Cf;Cf;D2;D1"
+ },
+ "results": {
+  "body 216 weak": {
+   "instances": 24,
+   "matched": 24,
+   "matchedCreateMerged": 24,
+   "framesChecked": 144,
+   "carries": 0,
+   "sides": [
+    "opponent",
+    "player"
+   ],
+   "species": [
+    "opp-143-42-s305420349",
+    "opp-143-42-s7",
+    "opp-148-95-s305420349",
+    "opp-148-95-s7",
+    "opp-42-143-s305420349",
+    "opp-42-143-s7",
+    "ply-143-42-s305420349",
+    "ply-143-42-s7",
+    "ply-148-95-s305420349",
+    "ply-148-95-s7",
+    "ply-42-143-s305420349",
+    "ply-42-143-s7"
+   ],
+   "jobs": [
+    "ret88-weak-opp-143-42-s305420349",
+    "ret88-weak-opp-143-42-s7",
+    "ret88-weak-opp-148-95-s305420349",
+    "ret88-weak-opp-148-95-s7",
+    "ret88-weak-opp-42-143-s305420349",
+    "ret88-weak-opp-42-143-s7",
+    "ret88-weak-ply-143-42-s305420349",
+    "ret88-weak-ply-143-42-s7",
+    "ret88-weak-ply-148-95-s305420349",
+    "ret88-weak-ply-148-95-s7",
+    "ret88-weak-ply-42-143-s305420349",
+    "ret88-weak-ply-42-143-s7"
+   ],
+   "mismatches": []
+  }
+ },
+ "classified": {}
+}

@@ -197,6 +197,10 @@ export function classifyDurationDecline(request: BattleMoveAnimationRequest, fie
     return { stage: "duration", reason: `${prefix}rollout counter ${String(request.rolloutCounter)}`, gate: at };
   }
   if ([20, 40, 70, 110, 150].some((p) => p !== request.power && live({ ...request, power: p }))) return { stage: "duration", reason: `${prefix}power branch ${request.power}`, gate: at };
+  // ret88: Move_RETURN / Frustration branch on gAnimFriendship (AnimTask_GetReturnPowerLevel / _GetFrustrationPowerLevel).
+  if ([0, 70, 150, 255].some((f) => f !== request.friendship && live({ ...request, friendship: f }))) {
+    return { stage: "duration", reason: `${prefix}friendship branch ${request.friendship}`, gate: at };
+  }
   return { stage: "duration", reason: `${prefix}unclassified duration null`, gate: at };
 }
 

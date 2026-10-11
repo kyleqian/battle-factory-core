@@ -7,7 +7,8 @@
  *   animation MOVE_ANIMATION                         move-animation (moveId, attacker side; an odd request turn of
  *                                                    Razor Wind / Solar Beam / Sky Attack / Dig / Brick Break is 10000 + moveId: choosetwoturnanim;
  *                                                    Present with damage <= 0, the PresentHeal branch, is 20217; Fury Cutter
- *                                                    by the payload's furyCutterCounter 1 / 2 / 3 / 4+: 210 / 10210 / 20210 / 30210)
+ *                                                    by the payload's furyCutterCounter 1 / 2 / 3 / 4+: 210 / 10210 / 20210 / 30210;
+ *                                                    Return by AnimTask_GetReturnPowerLevel: Weak 40216 / Medium 216 / Strongest 30216)
  *   animation HIT_ANIMATION                          hit-animation (target visibility from the toggles below)
  *   animation STATS_CHANGE                           stat-animation (B_ANIM_STATS_CHANGE argument)
  *   animation WEATHER_VAR argument 12 / 13           general-animation SANDSTORM_CONTINUES / HAIL_CONTINUES
@@ -412,11 +413,13 @@ function orderEventOf(
             : { kind: "invalidate", reason: "Fury Cutter body without furyCutterCounter" } };
         }
         // Move_RETURN branches on gAnimFriendship (AnimTask_GetReturnPowerLevel, battle_anim_effects_3.c:5060-5073; ret80): 216's plan 117
-        // is ReturnMedium's (61..91; dip, dip, lunge, hitsplat); ReturnStrongest (> 200, the Factory's 255) is 30000 + 216 (31 creates).
-        // Weak / Strong have no plan (invalidates).
+        // is ReturnMedium's (61..91; dip, dip, lunge, hitsplat); ReturnStrongest (> 200) is 30000 + 216 (31 creates); ReturnWeak (< 61, the
+        // kernel's friendship 0; dip, dip, hitsplat) is 40000 + 216 (ret88). Strong has no plan (invalidates).
         if (request.moveId === 216) {
           const level = returnPowerLevel(request.friendship);
-          if (level === 3) return { event: { kind: "move-animation", moveId: 30216, attackerSide: battler === 0 ? "player" : "opponent" } };
+          if (level === 3 || level === 0) {
+            return { event: { kind: "move-animation", moveId: level === 3 ? 30216 : 40216, attackerSide: battler === 0 ? "player" : "opponent" } };
+          }
           if (level !== 1) return { event: { kind: "invalidate", reason: `Return power level ${level} body` } };
         }
         const event = { kind: "move-animation", moveId: presentHeal ? 20217 : magnitudeIntense ? 20222 : secondBranch ? 10000 + request.moveId : request.moveId,

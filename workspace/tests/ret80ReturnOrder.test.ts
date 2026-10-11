@@ -49,7 +49,7 @@ describe("ret80: Return 216 keys its sprite-order plan on the power level", () =
     expect(tracker.cursor.order.free.slice(0, 8)).toEqual([3, 4, 5, 7, 21, 20, 19, 18]);
   });
 
-  it("the host lends 117 for Medium, 30216 for Strongest (> 200) and invalidates Weak / Strong", () => {
+  it("the host lends 117 for Medium, 30216 for Strongest (> 200) and invalidates Strong", () => {
     for (const battler of [0, 1] as const) {
       const attackerSide = battler === 0 ? "player" as const : "opponent" as const;
       const want = (moveId: number) => applySpriteOrderPresentationEvent(start(), { kind: "move-animation", moveId, attackerSide }).cursor.order;
@@ -66,7 +66,8 @@ describe("ret80: Return 216 keys its sprite-order plan on the power level", () =
         expect(tracker.cursor.order.known, `${battler}/${friendship}`).toBe(true);
         expect(tracker.cursor.order.free, `${battler}/${friendship}`).toEqual(strongest.free);
       }
-      for (const friendship of [0, 60, 92, 200]) {
+      // ret88 (tests/ret88ReturnWeak.test.ts): Weak (0, 60) lends 40216; Strong still invalidates.
+      for (const friendship of [92, 200]) {
         const tracker = after([ret(battler, friendship)]);
         expect(tracker.cursor.order.known, `${battler}/${friendship}`).toBe(false);
         expect(tracker.invalidReason, `${battler}/${friendship}`).toBe(`Return power level ${returnPowerLevel(friendship)} body`);

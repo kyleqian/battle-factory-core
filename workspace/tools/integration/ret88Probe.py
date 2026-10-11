@@ -37,14 +37,14 @@ def scenario(out: Path, job) -> Path:
     return target
 
 
-P43.scenario = scenario  # prep43Probe.run resolves the scenario through its module global
-
 if __name__ == "__main__":
     argv = sys.argv[1:]
     out = Path(argv[0])
     jobs = int(argv[argv.index("--jobs") + 1]) if "--jobs" in argv else 12
     for job in JOBS:
         scenario(out, job)
+    # prep43Probe.run resolves the scenario through its module global; the A / B threads only read the file written above
+    P43.scenario = lambda out_dir, job: out_dir / "scenarios" / f"{job[1]}.json"
     with ThreadPoolExecutor(jobs) as ex:
         results = list(ex.map(P43.run, [(out, j, r) for j in JOBS for r in ("A", "B")]))
     missing = [f"{i}-{r}" for i, r, ok in results if not ok]
