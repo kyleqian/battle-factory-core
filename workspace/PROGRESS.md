@@ -13,7 +13,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the app-only `presentation-rng-playable-live-bodies-seeded-on` 163 / 173 captures shifted by land97's intended Shadow Punch lead rows.
   Census seeds 0..999 (two runs byte-identical): **95.38 % of move-animation commands / 98.72 % of frames** (start 93.79 / 97.37; +436
   commands, 0 live -> fallback, 0 errors, gameplay keys identical); seeds 0..299 99.12 / 99.68 %; seeds 50000..50999 96.67 / 98.84 % (start 95.20 / 97.18).
-  Preview <http://127.0.0.1:5191/> serves `e9933518a` (4 samples hash-equal, export + ON -> OFF restart passed, no errors).
+  Preview <http://127.0.0.1:5191/> serves `66dbf4973` (src `14d1be15`; 4 samples hash-equal, export + ON -> OFF restart passed, no errors).
 - **Did (production, each supervisor-reproduced by census on the worker tree + an evidence rerun):** land82 (13 Substitute-doll cells,
   +77), cast83 (#143 per-form Castform art, +32), land86 (Flatter words unit, +44), union fix `302e39bdb` (land86 x cast83 semantic break,
   caught by the union census), ret88 (Return at the kernel's friendship 0: 37 wrong ReturnStrongest claims corrected, then ReturnWeak live,

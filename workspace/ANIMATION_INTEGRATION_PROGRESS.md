@@ -192,9 +192,9 @@
   -0 status changes; `report-seeds0-999-final-20261011-night.json` is the `4bf782115` run): **95.38 % of move-animation commands / 98.72 % of frames** (start 93.79 / 97.37);
   excluding Struggle (1,089 commands, outside the 276) **99.32 % / 99.59 %**; +436 commands vs session start, 0 live -> fallback,
   0 errors, keys identical except two Struggle stalls' budget-cut tails (seeds 796 / 881, prefixes identical); seeds 0..299 **99.12 % /
-  99.68 %** (start 97.98 / 98.40; on `89d1cf258`); seeds 50000..50999 96.67 / 98.84 % (start 95.20 / 97.18). Preview <http://127.0.0.1:5191/> serves `e9933518a` (src `dc6c756a`):
+  99.68 %** (start 97.98 / 98.40; on `89d1cf258`); seeds 50000..50999 96.67 / 98.84 % (start 95.20 / 97.18). Preview <http://127.0.0.1:5191/> serves `66dbf4973` (src `14d1be15`):
   4 samples hash-equal (canvas == ABI == screenshot), session export + ON -> OFF restart passed, no browser errors
-  (`playable-preview-e9933518a-receipt.json`). Soak gates not run (S10A scoped policy; no kernel / rules / RNG file changed tonight).
+  (`playable-preview-66dbf4973-receipt.json`). Soak gates not run (S10A scoped policy; no kernel / rules / RNG file changed tonight).
 
 ## 2026-10-10 (day) — S10A: #159 fixed, 12 production folds + 7 audit / evidence steps; honest corrections (Castform, Return); ordinary-play live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 
