@@ -55,7 +55,7 @@ describe("fix114 A: Taunt's anger marks are created at the TARGET's subpriority 
   // Opponent Taunter -> a BIG (Steelix, back 64) and a SMALL (Diglett, back 32) player target, plus the aud110 Onix target.
   for (const [taunter, target, fixture] of [["MURKROW", "STEELIX", "pb-fix114-taunt-opp-198-208"],
     ["MIGHTYENA", "DIGLETT", "pb-fix114-taunt-opp-287-50"], ["GOLBAT", "ONIX", "pb-stg107-ply-95-42"]] as const) {
-    it(`opponent ${taunter} -> player ${target}: every anger-mark pixel is on top of the frame`, () => {
+    it(`opponent ${taunter} -> player ${target} (${fixture}): every anger-mark pixel is on top of the frame`, () => {
       const field = displayed(target, taunter);
       let covered = 0, overPlayer = 0;
       const mismatches: string[] = [];
