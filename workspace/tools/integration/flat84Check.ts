@@ -1,6 +1,6 @@
 // flat84 (S10A, evidence only): flat77Check.ts unchanged except (1) the D3 register / allocator block runs for FLATTER windows only (a
 // non-Flatter consumer's animationInputs carry no Flatter rows; flat84's Quick Attack / Water Pulse / Mega Drain / Spark windows are
-// checked in pixels and lends), (2) the temp-dir prefix. Run INSIDE the patched git-archive copy (the flat84 temp patch).
+// checked in pixels and lends), (2) the temp-dir prefix, (3) a window's probe body is found by `bodyStartFrame` when set (Spark). Run INSIDE the patched git-archive copy (the flat84 temp patch).
 //   node --experimental-strip-types --no-warnings tools/integration/flat84Check.ts <fixture-dir> <scenario-name> <out.json>
 // flat77 (S10A, evidence only): audit19Check.ts (the production hosts fed AS THE ORCHESTRATOR DOES; CHAIN + ENTRY lends; two FRESH
 // direct-mGBA probe processes per scenario, r1 == r2 per-row digests) for the flat77 later-body FLATTER 260 windows (flat77Probe.py), plus
@@ -254,7 +254,9 @@ for (let run = 0; run < 2; run++) {
   const perFixture: Json = {};
   for (const v of variants) {
     const w = v.f.denseWindow!;
-    const body = (probe.bodies as Json[]).find((b) => b.startFrame === w.startFrame && b.endFrame === w.endFrame);
+    // flat84: a window that starts after its body's activation (Spark: activation + 9) names the body by `bodyStartFrame`
+    const bodyStart = (w as Json).bodyStartFrame as number | undefined;
+    const body = (probe.bodies as Json[]).find((b) => bodyStart !== undefined ? b.startFrame === bodyStart : b.startFrame === w.startFrame && b.endFrame === w.endFrame);
     const res: Json = { sameWindow: body !== undefined };
     // A fresh probe run whose ROM trajectory diverged (ISSUES #154 class: the window's body is not where the fixture says, its frames
     // were not dumped) is recorded as diverged (digest "diverged", px -1), not rendered.

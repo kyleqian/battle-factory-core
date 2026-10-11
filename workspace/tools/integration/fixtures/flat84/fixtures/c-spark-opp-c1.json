@@ -6,7 +6,8 @@
  "scenario": "tools/integration/fixtures/flat84/scenarios/c-spark-opp.json",
  "denseWindow": {
   "startFrame": 914,
-  "endFrame": 1028
+  "endFrame": 1028,
+  "bodyStartFrame": 905
  },
  "attacker": {
   "species": "NIDORINA",
