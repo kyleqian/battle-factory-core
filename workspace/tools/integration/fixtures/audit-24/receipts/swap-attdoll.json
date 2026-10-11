@@ -1,0 +1,419 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "audit24-swap-bite-player-raticate",
+   "kind": "swap",
+   "side": "player",
+   "move": "BITE",
+   "moveId": 44,
+   "turn": 0,
+   "frame": 1769,
+   "activation": 1812,
+   "window": [
+    1769,
+    1894
+   ],
+   "rows": 126,
+   "swapInRows": 42,
+   "romBodyRows": 40,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3519035328,
+   "adapterDuration": 26,
+   "multihit": 0,
+   "productionDuration": 126,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 41,
+    "shift": -10
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 126,
+    "digests": [
+     "4200d98266280b47",
+     "4200d98266280b47"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    600,
+    0,
+    0,
+    1436
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      600,
+      600
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit24-swap-bite-player-raticate",
+   "kind": "swap",
+   "side": "player",
+   "move": "BITE",
+   "moveId": 44,
+   "turn": 0,
+   "frame": 3467,
+   "activation": 3510,
+   "window": [
+    3467,
+    3592
+   ],
+   "rows": 126,
+   "swapInRows": 42,
+   "romBodyRows": 40,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3580663845,
+   "adapterDuration": 26,
+   "multihit": 0,
+   "productionDuration": 126,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 41,
+    "shift": -10
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 126,
+    "digests": [
+     "4200d98266280b47",
+     "4200d98266280b47"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    600,
+    0,
+    0,
+    1436
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      600,
+      600
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit24-swap-bite-player-raticate",
+   "kind": "swap",
+   "side": "player",
+   "move": "BITE",
+   "moveId": 44,
+   "turn": 0,
+   "frame": 5165,
+   "activation": 5208,
+   "window": [
+    5165,
+    5290
+   ],
+   "rows": 126,
+   "swapInRows": 42,
+   "romBodyRows": 40,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 2697131240,
+   "adapterDuration": 26,
+   "multihit": 0,
+   "productionDuration": 126,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 41,
+    "shift": -10
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 126,
+    "digests": [
+     "4200d98266280b47",
+     "4200d98266280b47"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    600,
+    0,
+    0,
+    1436
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      600,
+      600
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit24-swap-bite-opponent-raticate",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "BITE",
+   "moveId": 44,
+   "turn": 0,
+   "frame": 1741,
+   "activation": 1782,
+   "window": [
+    1741,
+    1862
+   ],
+   "rows": 122,
+   "swapInRows": 40,
+   "romBodyRows": 40,
+   "swapBackRows": 40,
+   "orderInput": "fixture",
+   "pinnedRng2": 1930105486,
+   "adapterDuration": 26,
+   "multihit": 0,
+   "productionDuration": 122,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 41,
+    "shift": -10
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 122,
+    "digests": [
+     "a7c1e8c12024c36c",
+     "a7c1e8c12024c36c"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    0,
+    1716
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit24-swap-bite-opponent-raticate",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "BITE",
+   "moveId": 44,
+   "turn": 0,
+   "frame": 3407,
+   "activation": 3448,
+   "window": [
+    3407,
+    3528
+   ],
+   "rows": 122,
+   "swapInRows": 40,
+   "romBodyRows": 40,
+   "swapBackRows": 40,
+   "orderInput": "fixture",
+   "pinnedRng2": 1389323334,
+   "adapterDuration": 26,
+   "multihit": 0,
+   "productionDuration": 122,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 41,
+    "shift": -10
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 122,
+    "digests": [
+     "a7c1e8c12024c36c",
+     "a7c1e8c12024c36c"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    0,
+    1702
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit24-swap-bite-opponent-raticate",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "BITE",
+   "moveId": 44,
+   "turn": 0,
+   "frame": 5073,
+   "activation": 5114,
+   "window": [
+    5073,
+    5194
+   ],
+   "rows": 122,
+   "swapInRows": 40,
+   "romBodyRows": 40,
+   "swapBackRows": 40,
+   "orderInput": "fixture",
+   "pinnedRng2": 2702001918,
+   "adapterDuration": 26,
+   "multihit": 0,
+   "productionDuration": 122,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 41,
+    "shift": -10
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 122,
+    "digests": [
+     "a7c1e8c12024c36c",
+     "a7c1e8c12024c36c"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    0,
+    1710
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  }
+ ]
+}
