@@ -84,6 +84,10 @@ describe("animation/engine boundary ratchet", () => {
       // (gSubstituteDoll{Front,Back}Gfx / gSubstituteDollPal, src/animation/assets/substitute.json) only; presentation
       // field art, never imported by battle rules or AI.
       join("src", "engine", "battleCommandFieldArt.ts"),
+      // sc106 (S10A ISSUES #166 slice c, brief: minimumFrames = statsChangeSpan(params).addedRows): the presentation builder's
+      // stats-change command reads only the pure General_StatsChange reducer's statsChangeParams / statsChangeSpan
+      // (src/animation/statsChange.ts, no imports); presentation timing only, never battle rules, RNG or AI.
+      join("src", "engine", "battleResolutionPresentation.ts"),
     ]);
     const violations: string[] = [];
     for (const file of collectTsFiles("src")) {
