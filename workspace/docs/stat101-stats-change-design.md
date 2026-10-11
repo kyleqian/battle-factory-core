@@ -16,6 +16,7 @@ outputs). Production was read only in a git-archive copy of the base. Files: `to
 | Production today | A 2-frame `stat` command per kernel stat-stage-change (STAT_TIMING / BATTLE_RESOLUTION_STAT_CHANGE_FRAMES = 2). It draws **no pixels**: `sceneOffStatStageBannerView` samples source ages 94 / 96, before the 118 ramp start, so eva = null. The kernel's STATS_CHANGE `animation` event is ignored by the presentation builder. Exception: **Double Team's live window (230 / 240 frames) already contains the stats change** (`liveMoveAnimation.ts:3233` statsBannerStartAge 163..229). All other status stat moves' live windows are body-only | section 3 |
 | Exposure (census seeds 0..999) | **4,552 STATS_CHANGE animations in 878 / 1,000 battles** (5,698 `stat` commands: Curse's stat changes have no animation, so idle98's 4,689 "groups" overcounted). 23 are behind a Substitute (no ROM animation). **4,529 play: 3,125 non-sharp + 1,404 sharply = +363,860 frames** (2.5 % of the 14.6 M census frames). By class: up1 1,439 (Double Team's arg 21 alone 948), down1 1,299, up2 715, down2 685, multiple-up1 386, multiple-down1 24, multiple-down2 4, multiple-up2 0. Player 2,186 / opponent 2,366. 321 on elevated opponents (Ninjask 85, Jumpluff 32, ...). No non-normal Castform form at a stat change | `fixtures/stat101/exposure.json` |
 | Sprite slots | The OBJ-window copy takes the **lowest free gSprites slot (3 in 10 / 10) and one OAM entry**. It is freed at task state 3: rel 67 (non-sharp, 8 rows before the fall) / rel 89 (sharply, the fall row). The order host already models this as STATS_CHANGE_CLASS_1 / _2 (`spriteOrderProductionPlans.ts:307`). `spriteOrderStatAnimationPlan` returns null for 56 / 58. **Memento (58) behaves exactly like class 2** (slot 3, freed on the fall row 89) | rows TSV `slots` / `inUse` |
+| **Prototype: are the existing helpers exact?** | **Yes: 0 px on 20 / 20 windows.** `stat101ProtoCompare.ts` composites with the production helpers (`drawStatIncreaseBannerForBattler` / `drawStatDecreaseBannerForBattlerPalette`: 8-bit `blendChannel`, palette from `stat-anim-banner.json`, mask = the species pic tileset). It draws over the ROM's own last pre-banner row (rel 6), with per-row EVA from the receipts and visible BG1 Y = RAM of the previous row. Result: 0 px in the OBJ-window rect on every row through E+1, for all 10 scenarios x ON / OFF (incl. Memento ON x2 = 1 and the elevated GOLBAT). Same-row BG1 Y fails on every banner row (lag is 1). A hand-written 5-bit blend fails too. **Production's `battleCommandFieldSpriteOrigin` (elevation-aware) + the battler's live x2 / y2 == the ROM mask corner 20 / 20.** The only diff: the elevated opponent's enemy shadow (x 160..191, y 65..72, 200 px, 38 in the rect) comes back on row E+2. It is hidden for the whole animation (rows 0..E+1), like move bodies (`LIVE_MOVE_OPPONENT_SHADOW_GAP_ROWS`) | `fixtures/stat101/proto-compare.json` |
 | Cross-check | `docs/issue69-omniboost-off-ground-truth.md` says Scene OFF skips `playstatchangeanimation`. The receipts contradict this: Cosmic Power / Tickle / Superpower / Memento play it in OFF. issue69's own 73-frame RNG-pinned gap before the first write (210 -> 283) is that animation. Its 2-frame write -> box-clear measurement stays valid | `stat-anim.json` (OFF windows) |
 
 ### 1a. ROM receipts (`receipts/stat-anim.json`, Scene ON row shown; OFF is identical except where noted)
@@ -79,7 +80,7 @@ move x4, the other lead keeps Tackle x4. Intimidate: the player Roars, both oppo
 | Event order (census dump, `stat101Exposure.ts` debug) | | status stat move: `stat-stage-change > MOVE_ANIMATION > STATS_CHANGE > message`; secondary: `hp-change > stat-stage-change > STATS_CHANGE > message`; Intimidate: `stat-stage-change > STATS_CHANGE`; playstatchangeanimation: `STATS_CHANGE > (stat-stage-change > message) x N`; Curse: stat changes with NO STATS_CHANGE | the new command goes at the STATS_CHANGE event position. For status moves that is AFTER the move-animation command (production presents `stat` before the body, the RAM write order) |
 | Presentation builder | `battleResolutionPresentation.ts:3500-3528` (`stat`, STAT_TIMING 2) | STATS_CHANGE `animation` events fall through (no branch) | add a branch like SUBSTITUTE_FADE (`:3387` records `at: commands.length`; `:3740-3745` splices the command): a new `stats-change` command {eventSequence, battler, argument, timing {minimumFrames 76 / 90}}. Skip it when the battler is behind a Substitute: field `substituteDoll` / beforeRules STATUS2_SUBSTITUTE, or better a kernel-side behindSubstitute fact. Keep the 2-frame `stat` command as is: its write -> box-clear frames are accepted (issue69) |
 | Duration | `battleResolutionPresentationRender.ts:945` (`case "stat"`), the per-type duration switch | stat = max(2, 2) | `case "stats-change"`: timing.minimumFrames (76 / 90) |
-| Render ON | `battleScene.ts` `renderBattleResolutionLiveView:55235` -> non-move effects -> `renderBattleResolutionSceneOffView` | `stat` effect -> `sceneOffStatStageBannerView` (eva null at its ages: no pixels) | a `stats-change` effect drawn over the live field: banner rows rel 7..64 / 7..86 with the 1b model, mask = the battler's live art (`liveSceneOnBattlerArt`) at its live position incl. residual x2 (`liveBattlerX2History`, already "keep" for STATS_CHANGE) and elevation |
+| Render ON | `battleScene.ts` `renderBattleResolutionLiveView:55235` -> non-move effects -> `renderBattleResolutionSceneOffView` | `stat` effect -> `sceneOffStatStageBannerView` (eva null at its ages: no pixels) | a `stats-change` effect drawn over the live field: banner rows rel 7..64 / 7..86 with the 1b model, mask = the battler's pic at `battleCommandFieldSpriteOrigin` (elevation) + live x2 / y2 (`liveBattlerX2History`, already "keep" for STATS_CHANGE), via the existing exact helpers (prototype 0 px); hide the elevated opponent's shadow through E+1 |
 | Render OFF | the same `renderBattleResolutionSceneOffView` (OFF and ON share it for non-move commands) | as above | the same effect. OFF has no residual x2 (no move bodies) |
 | Live move windows that already own it | Double Team 104 (`liveMoveAnimation.ts:3233`, 230 / 240 frames incl. the banner at ages 163..229). Sand Attack's `accuracyBanner` (ages 112..171) lies outside its 58-frame live window: never drawn live. Feather Dance's banner is skipped under liveField | | Decide in slice (c): (1) exempt the STATS_CHANGE after a LIVE Double Team body in Scene ON, or (2) trim the Double Team window to its body (script end row 157, activation row 161) and let the generic command own the banner. (2) is uniform but moves the Double Team pins. In Scene OFF there is no Double Team window, so the command is always emitted |
 | Sprite order host | `liveSpriteOrderHost.ts:453` consumes STATS_CHANGE (plan via `spriteOrderStatAnimationPlan`, class 1 / 2; 56 / 58 -> null) | already advances order state per event | extend the plan to 58 (and 56) = class 2 (Memento receipt). Check that the host binds the unit to the new command's rows (rel 2 alloc, freed rel 67 / 89), not to the `stat` command |
@@ -92,19 +93,20 @@ kernel events already exist.
 
 ## 4. Slice plan (each <= 60 min; run from `workspace/`; prototypes on git-archive copies, never the live checkout)
 
+Slices (a) + (b) are de-risked by the prototype: the pixel path already exists and is exact. The new work is the per-row reducer, the
+command, the mask corner (sprite origin + live x2 / y2) and the shadow hide.
+
 **(a) Pure reducer + assets binding (no timeline change).** Add a pure module (e.g. `src/animation/statsChange.ts`):
 `statsChangeParams(animArg)` -> {direction, palette key, sharply} (section 2 of the source table; 56 = multiple up2) and
 `statsChangeRow(params, rel)` -> {eva, evb, bg1X, bg1YRam, bg1YVisible, copyAlive, maskOamVisible, active} (1b). Tier-1 test pinning every row of
 all 20 committed TSVs (`fixtures/stat101/receipts/rows/*.tsv`: EVA / EVB / bg1x / bg1y from Step2 on / slots / act).
 Acceptance: `npx vitest run tests/statsChangeReducer.test.ts`, `npm run typecheck`, `npm run test:smoke`, `npm run build`.
 
-**(b) Dense ROM comparator (production pixels vs ROM, no timeline change).** `tools/integration/stat101Compare.ts`: for each of the 10
-windows x 2 scenes take the ROM's reference row A-1 (from `STAT101_DUMP` npz in scratch: rerun `stat101Run.sh` with it set). For every row,
-composite the banner with the (a) reducer and the existing `statAnimBg1PixelAt` / blend helpers, through a mask built from production art for the
-lab species at the receipt's mask rect (x2 included). Compare the crop sha with the receipt's `mc` (and px diffs on mismatch). Target 0 px on
-all 22 x rows. Expected risk: the affine OBJ-window shape of the back pic vs the tileset mask the helpers use (the copy is affine, identity
-matrix). Acceptance: `node --experimental-strip-types --no-warnings tools/integration/stat101Compare.ts <npz-dir> tools/integration/fixtures/stat101/receipts/stat-anim.json`
--> 20 / 20 windows, every row `mc` equal.
+**(b) Dense ROM comparator on the reducer (no timeline change).** Switch `stat101ProtoCompare.ts` (already 0 px with receipt-driven
+EVA / BG1) to the (a) reducer's rows and to the production corner (`battleCommandFieldSpriteOrigin` + x2 / y2) instead of the ROM rect.
+Hide the elevated-opponent shadow through E+1 and compare the whole window incl. E+2.
+Acceptance: `sh tools/integration/stat101Run.sh <fresh>` (dumps + comparator) -> 20 / 20 windows 0 px on every row, `proto-compare.json`
+regenerated with a reducer column.
 
 **(c) Presentation command + duration, both scenes.** `stats-change` command at the STATS_CHANGE event (SUBSTITUTE_FADE pattern), 76 / 90
 frames, none behind a Substitute, Double Team decision (section 3). Tier-1: command order for the five paths (status move, secondary, Intimidate,
@@ -145,7 +147,8 @@ liveShareCensus delta, and ANIMATION_VERIFICATION claims (one general animation,
 
 ```
 sh tools/integration/stat101Run.sh <fresh-out-dir-inside-the-repo>            # archive copy of a36a956ac, re-stage (== committed), 22 probe jobs x2
-                                                                                # (r1 == r2, == receipts/probe-sha256.txt), receipts == committed
+                                                                                # (r1 == r2, == receipts/probe-sha256.txt), receipts == committed,
+                                                                                # prototype (r1 dumps -> stat101ProtoCompare.ts) == proto-compare.json
 sh tools/integration/stat101Run.sh <fresh-out-dir-inside-the-repo> --census   # + the census exposure (seeds 0..999, 10 shards) == exposure.json
 # pieces:
 python3 tools/integration/stat101Stage.py <dir>/scenarios
@@ -153,4 +156,9 @@ STAT101_PY=<mgba-venv python> sh tools/integration/stat101Job.sh <outdir> on|off
 python3 tools/integration/stat101Receipts.py <probe-r1> <probe-r2> tools/integration/fixtures/stat101/scenario-index.json <out-dir>
 node --experimental-strip-types --no-warnings tools/integration/stat101Exposure.ts --seeds=A..B --out=<f.jsonl>   # in the archive copy
 python3 tools/integration/stat101ExposureSummary.py <exposure-dir> <out.json>
+STAT101_DUMP=<dir> ... stat101Job.sh ...; python3 tools/integration/stat101NpzToRaw.py <dir> tools/integration/fixtures/stat101/receipts/stat-anim.json <raw>
+node --experimental-strip-types --no-warnings tools/integration/stat101ProtoCompare.ts <raw> <out.json>                  # in the archive copy
 ```
+
+Gates run: `sh tools/integration/stat101Run.sh <fresh> --census` ALL SAME twice (02:13 -> 02:15 without the prototype step, 02:17 -> 02:19
+with it). `git diff --check` clean and `git status --short` = only new stat101 files at every commit (explicit paths).
