@@ -12,7 +12,7 @@ from pathlib import Path
 
 probe_dir, check, out = Path(sys.argv[1]), json.loads(Path(sys.argv[2]).read_text()), Path(sys.argv[3])
 PINNED = ["fury-cutter-pla-grovyle-blissey-splash-1", "fury-cutter-opp-scyther-golem-growl-2", "fury-cutter-opp-grovyle-blissey-splash-3",
-          "fury-cutter-pla-scyther-golem-growl-4"]
+          "fury-cutter-pla-scyther-golem-growl-4", "fury-cutter-pla-scyther-onix-splash-2"]
 probes, blend, pinned = {}, {}, {}
 for p1 in sorted((probe_dir / "r1").glob("*.json")):
     a = p1.read_bytes()
@@ -39,9 +39,11 @@ windows = [{"fixture": r["fixture"].removesuffix(".json"), "side": r["side"], "a
 receipt = {
     "schema": "fury99-live-receipt/v1",
     "doc": "docs/fury99-fury-cutter-counters.md",
-    "gate": "case 210: counter = request.rolloutCounter (plans54 payload; else the later58 power rule) in 1..5; known lend; firstBody or both rests {0,0}; non-shiny",
+    "gate": ("case 210: counter = request.rolloutCounter (plans54 payload; else the later58 power rule) in 1..5; known lend; firstBody, or both"
+             " species rests {0,0} (counter 1), or both rests {0,0} after the x2 tracker's zeroing (counter 2+); non-shiny"),
     "summary": {"probesR1EqualsR2": f"{sum(probes.values())}/{len(probes)}", "windows": len(windows),
                 "exactBothRuns": sum(1 for w in windows if w["verdict"] == "exact" and all(r[2] == 0 and r[0] == r[1] for r in w["runs"])),
+                "declined": [w["fixture"] for w in windows if not w["live"]],
                 "digestsAgree": sum(1 for w in windows if w["runs"][0][3] == w["runs"][1][3])},
     "probes": probes,
     "blendRows": {c: [json.loads(v) for v in sorted(vs)] for c, vs in sorted(blend.items())},

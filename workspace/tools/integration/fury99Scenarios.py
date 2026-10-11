@@ -34,3 +34,19 @@ for path, foe in BASES:
         s["trace"] = {"segments": seg}
         (OUT / f"fury-cutter-{tag}-{variant}.json").write_text(json.dumps(s, indent=1) + "\n")
 print(len(list(OUT.glob("*.json"))))
+# Idle-rest target batch: the SCYTHER bases with the foe lead replaced by ONIX (internal 95; front idle rest, the census's remaining
+# ANORITH -> ONIX declines), Splash x4. Same seeds, same five-turn trace.
+for path, foe in BASES[2:]:
+    base = json.loads(Path(path).read_text())
+    atk = "player" if foe == "opponent" else "opponent"
+    s = json.loads(json.dumps(base))
+    s["seed"] = base["seed"]  # explicit lab seed (ISSUES #154)
+    s["overrides"]["parties"][foe][0]["species"] = 95
+    s["overrides"]["parties"][foe][0]["moves"] = [150, 150, 150, 150]
+    seg = []
+    for turn in range(TURNS):
+        seg += [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]},
+                {"frames": 1300 if turn == TURNS - 1 else 1100, "buttons": []}]
+    s["trace"] = {"segments": seg}
+    (OUT / f"fury-cutter-{atk[:3]}-scyther-onix-splash.json").write_text(json.dumps(s, indent=1) + "\n")
+print(len(list(OUT.glob("*.json"))))

@@ -1,0 +1,64 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "bodyIndex": 1,
+ "furyCutterCounter": 2,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/fury99/scenarios/fury-cutter-pla-scyther-onix-splash.json",
+ "denseWindow": {
+  "startFrame": 1212,
+  "endFrame": 1254
+ },
+ "attacker": {
+  "species": "SCYTHER",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2654435782,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 177,
+  "playerMaxHp": 177,
+  "opponentHp": 129,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 20,
+  "rolloutCounter": 2
+ },
+ "precedingBodies": [
+  {
+   "moveId": 210,
+   "side": "player"
+  },
+  {
+   "moveId": 150,
+   "side": "opponent"
+  }
+ ],
+ "precedingX2Events": [
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 150,
+   "attackerSide": "opponent"
+  }
+ ]
+}

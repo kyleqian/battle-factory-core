@@ -9,11 +9,12 @@ import { liveView, type Fixture } from "../../tools/integration/liveAdapterFrame
 
 // docs/fury99-fury-cutter-counters.md + tools/integration/fixtures/fury99-live-receipt.json: Fury Cutter 210 at counters 2..5 (later bodies after
 // the user's own Fury Cutter body; plans54's furyCutterCounter payload = request.rolloutCounter). Consecutive Fury Cutters, both attacker sides,
-// GROVYLE -> BLISSEY and SCYTHER -> GOLEM, the foe using Growl / Splash; direct mGBA twice fresh (8 / 8 probes r1 == r2), 40 / 40 windows 0 px
-// through the production renderer in two more fresh probes. The pinned rows are the ROM RGB sha256 of the r1 probe (all 43 rows).
+// GROVYLE -> BLISSEY, SCYTHER -> GOLEM and SCYTHER -> ONIX (an idle-rest target), the foe using Growl / Splash; direct mGBA twice fresh (10 / 10
+// probes r1 == r2), 49 / 50 windows 0 px through the production renderer in two more fresh probes (the 50th: the opponent ONIX counter-1 first
+// body, which still declines on its rest). The pinned rows are the ROM RGB sha256 of the r1 probe (all 43 rows).
 type Pinned = { fixture: string; counter: number; rows: [age: number, frame: number, sha256: string][] };
 const receipt = JSON.parse(readFileSync("tools/integration/fixtures/fury99-live-receipt.json", "utf8")) as {
-  pinned: Record<string, Pinned>; blendRows: Record<string, Record<string, number[]>[]>; windows: { verdict: string; runs: number[][] }[] };
+  pinned: Record<string, Pinned>; blendRows: Record<string, Record<string, number[]>[]>; windows: { fixture: string; verdict: string; runs: number[][] }[] };
 const LIVE = "tools/integration/fixtures/fury99/live";
 type F = Fixture & { precedingBodies?: unknown[]; furyCutterCounter: number };
 const fixture = (name: string) => JSON.parse(readFileSync(`${LIVE}/${name}.json`, "utf8")) as F;
@@ -52,13 +53,15 @@ describe("fury99 Fury Cutter 210 counters 2..5 at a later body", () => {
     expect(rows.filter(([age, , sha]) => rowSha(f, age) !== sha).map(([age]) => age)).toEqual([]);
   }, 180000);
 
-  it("every probed counter 1..5 body is live and the receipt has every window 0 px in both runs", () => {
+  it("every probed counter 1..5 body is live (but the rest-carrying first body) and every live window is 0 px in both runs", () => {
     const names = readdirSync(LIVE).map((n) => n.replace(/\.json$/, ""));
-    expect(names).toHaveLength(40);
+    expect(names).toHaveLength(50);
     expect(new Set(names.map((n) => fixture(n).furyCutterCounter))).toEqual(new Set([1, 2, 3, 4, 5]));
-    for (const name of names) expect(presentation(fixture(name))?.config.move).toBe("FURY_CUTTER");
-    expect(receipt.windows).toHaveLength(40);
+    const declined = "fury-cutter-pla-scyther-onix-splash-0";
+    for (const name of names) expect(presentation(fixture(name))?.config.move).toBe(name === declined ? undefined : "FURY_CUTTER");
+    expect(receipt.windows).toHaveLength(50);
     for (const w of receipt.windows) {
+      if (w.fixture === declined) { expect(w.verdict).toBe("declined"); continue; }
       expect(w.verdict).toBe("exact");
       for (const [exact, rows, px] of w.runs) expect([exact, rows, px]).toEqual([43, 43, 0]);
     }
@@ -73,8 +76,15 @@ describe("fury99 Fury Cutter 210 counters 2..5 at a later body", () => {
     const { rolloutCounter: _omit, ...noCounter } = later.requestFields!;
     expect(presentation({ ...later, requestFields: { ...noCounter, power: 40 } })).toBeNull();
     expect(presentation({ ...later, requestFields: { ...noCounter, power: 15 } })?.config.move).toBe("FURY_CUTTER");
-    // A rest-carrying species (ONIX) still declines at a later body.
-    expect(presentation({ ...later, target: { ...later.target, species: "ONIX" } })).toBeNull();
+    // An opponent ONIX (front idle rest x2 1) at counter 2+: live once the x2 tracker has it zeroed by the user's earlier Fury Cutter
+    // body (the ROM x2 is 0 there); not without that zeroing event, and never at a later counter-1 body (the species rule).
+    const onix = fixture("fury-cutter-pla-scyther-onix-splash-1");
+    expect([onix.target.species, onix.target.geometry.side, onix.furyCutterCounter]).toEqual(["ONIX", "opponent", 2]);
+    expect(presentation(onix)?.config.move).toBe("FURY_CUTTER");
+    expect(presentation({ ...onix, precedingX2Events: [{ kind: "move-body", moveId: 150, attackerSide: "opponent" }] })).toBeNull();
+    expect(presentation({ ...onix, requestFields: { ...onix.requestFields, rolloutCounter: 1 } })).toBeNull();
+    expect(presentation({ ...later, target: { ...later.target, species: "ONIX" } })?.config.move).toBe("FURY_CUTTER");
+    expect(presentation({ ...later, target: { ...later.target, species: "ONIX" }, precedingX2Events: [] })).toBeNull();
     // The counter reaches the inputs (direction + blend).
     const inputs = (f: Fixture, age: number) => (presentation(f, age)?.config as unknown as { animationInputs: { counter: number; palette: { hardware: number[] } } } | undefined)?.animationInputs;
     expect(inputs(later, 0)?.counter).toBe(3);

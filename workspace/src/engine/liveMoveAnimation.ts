@@ -3924,7 +3924,13 @@ export function liveMoveAnimationPresentation(
         ?? (spriteOrderInput.firstBody || request.power === 10 || request.power === 15 ? 1 : undefined);
       if (furyCutterCounter !== 1 && furyCutterCounter !== 2 && furyCutterCounter !== 3 && furyCutterCounter !== 4
         && furyCutterCounter !== 5) return null;
-      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
+      // fury99: at counter 2+ the user's previous Fury Cutter body zeroed its target's x2 (ShakeMon; the x2 tracker's "zeroed" target role):
+      // a species rest counts only while the tracker does not have it zeroed (ROM opponent ONIX x2 1 at counter 1, 0 at counters 2..5;
+      // 4 / 4 windows 0 px). Counter 1 keeps the species rule.
+      const restFree = (side: "player" | "opponent") => { const rest = liveBattlerAnchors(side, art, battlerX2Input).frontIdleRest;
+        return rest.x2 === 0 && rest.y2 === 0; };
+      if (!spriteOrderInput.firstBody
+        && !(furyCutterCounter >= 2 ? restFree("player") && restFree("opponent") : liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(

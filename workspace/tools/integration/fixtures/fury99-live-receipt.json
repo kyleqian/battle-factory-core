@@ -1,22 +1,27 @@
 {
  "schema": "fury99-live-receipt/v1",
  "doc": "docs/fury99-fury-cutter-counters.md",
- "gate": "case 210: counter = request.rolloutCounter (plans54 payload; else the later58 power rule) in 1..5; known lend; firstBody or both rests {0,0}; non-shiny",
+ "gate": "case 210: counter = request.rolloutCounter (plans54 payload; else the later58 power rule) in 1..5; known lend; firstBody, or both species rests {0,0} (counter 1), or both rests {0,0} after the x2 tracker's zeroing (counter 2+); non-shiny",
  "summary": {
-  "probesR1EqualsR2": "8/8",
-  "windows": 40,
-  "exactBothRuns": 40,
-  "digestsAgree": 40
+  "probesR1EqualsR2": "10/10",
+  "windows": 50,
+  "exactBothRuns": 49,
+  "declined": [
+   "fury-cutter-pla-scyther-onix-splash-0"
+  ],
+  "digestsAgree": 50
  },
  "probes": {
   "fury-cutter-opp-grovyle-blissey-growl": true,
   "fury-cutter-opp-grovyle-blissey-splash": true,
   "fury-cutter-opp-scyther-golem-growl": true,
   "fury-cutter-opp-scyther-golem-splash": true,
+  "fury-cutter-opp-scyther-onix-splash": true,
   "fury-cutter-pla-grovyle-blissey-growl": true,
   "fury-cutter-pla-grovyle-blissey-splash": true,
   "fury-cutter-pla-scyther-golem-growl": true,
-  "fury-cutter-pla-scyther-golem-splash": true
+  "fury-cutter-pla-scyther-golem-splash": true,
+  "fury-cutter-pla-scyther-onix-splash": true
  },
  "blendRows": {
   "1": [
@@ -887,6 +892,176 @@
    ]
   },
   {
+   "fixture": "fury-cutter-opp-scyther-onix-splash-0",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "51c4062f1e84b40d"
+    ],
+    [
+     43,
+     43,
+     0,
+     "51c4062f1e84b40d"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-onix-splash-1",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "B210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "c973ef2e2e8c469a"
+    ],
+    [
+     43,
+     43,
+     0,
+     "c973ef2e2e8c469a"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-onix-splash-2",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "B210o B150p B10210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "7d8742f43e6216ce"
+    ],
+    [
+     43,
+     43,
+     0,
+     "7d8742f43e6216ce"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-onix-splash-3",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "B210o B150p B10210o B150p B20210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "89fcdb7628efe2c5"
+    ],
+    [
+     43,
+     43,
+     0,
+     "89fcdb7628efe2c5"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-opp-scyther-onix-splash-4",
+   "side": "opponent",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "B210o B150p B10210o B150p B20210o B150p B30210o B150p",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "0f4c30efe2908dfb"
+    ],
+    [
+     43,
+     43,
+     0,
+     "0f4c30efe2908dfb"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
    "fixture": "fury-cutter-pla-grovyle-blissey-growl-0",
    "side": "player",
    "attacker": "GROVYLE",
@@ -1552,6 +1727,176 @@
      43,
      0,
      "07f67aeef99f5417"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-onix-splash-0",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "",
+   "live": false,
+   "verdict": "declined",
+   "runs": [
+    [
+     11,
+     43,
+     31105,
+     "4c1c317275570005"
+    ],
+    [
+     11,
+     43,
+     31105,
+     "4c1c317275570005"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-onix-splash-1",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "B210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "457da07402a1cc2b"
+    ],
+    [
+     43,
+     43,
+     0,
+     "457da07402a1cc2b"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-onix-splash-2",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "B210p B150o B10210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "9bbba52db6a9506b"
+    ],
+    [
+     43,
+     43,
+     0,
+     "9bbba52db6a9506b"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-onix-splash-3",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "B210p B150o B10210p B150o B20210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "6382c6a5dd3a3d05"
+    ],
+    [
+     43,
+     43,
+     0,
+     "6382c6a5dd3a3d05"
+    ]
+   ],
+   "lentOrderEqualsRom": true,
+   "romX2": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "fixture": "fury-cutter-pla-scyther-onix-splash-4",
+   "side": "player",
+   "attacker": "SCYTHER",
+   "target": "ONIX",
+   "preceding": "B210p B150o B10210p B150o B20210p B150o B30210p B150o",
+   "live": true,
+   "verdict": "exact",
+   "runs": [
+    [
+     43,
+     43,
+     0,
+     "94c81a56af2585e0"
+    ],
+    [
+     43,
+     43,
+     0,
+     "94c81a56af2585e0"
     ]
    ],
    "lentOrderEqualsRom": true,
@@ -2453,6 +2798,228 @@
      42,
      4656,
      "d6027217883b150ad20f52c0d62b356d2c14959fef5e7c09af2dd9897ac79ecb"
+    ]
+   ]
+  },
+  "fury-cutter-pla-scyther-onix-splash-2": {
+   "fixture": "fury-cutter-pla-scyther-onix-splash-2",
+   "counter": 3,
+   "verdict": "exact",
+   "rows": [
+    [
+     0,
+     2346,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     1,
+     2347,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     2,
+     2348,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     3,
+     2349,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     4,
+     2350,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     5,
+     2351,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     6,
+     2352,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     7,
+     2353,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     8,
+     2354,
+     "f6701dc3c7fcbf62970c9ea74d8e489922a33507ec63aa2d933e8f7d5c9b72e3"
+    ],
+    [
+     9,
+     2355,
+     "2983ae10cb83ba7969b9477472584a4e5485bc5f85186c71bedfa036528b853b"
+    ],
+    [
+     10,
+     2356,
+     "4aed71705389d2371d28e262be154b6a52c84bf74f698103afbdcb9372c931a3"
+    ],
+    [
+     11,
+     2357,
+     "3935a95dbb7c10161fd020441bbd3625d9643925607d08718f16e28534e1005f"
+    ],
+    [
+     12,
+     2358,
+     "5dadf457f3d7d64759266f5059e32b6f8ef4dd30e9526446a17ea28b5cb92b27"
+    ],
+    [
+     13,
+     2359,
+     "876ad95f9f4683670be6e1d12f132fa98b1a460a0e10dc1f0e6777c59e7538a6"
+    ],
+    [
+     14,
+     2360,
+     "1119ab13ae0388d42c41a7579b50b0ae7304895e9818ac4d376b16ba829fed63"
+    ],
+    [
+     15,
+     2361,
+     "45e2b03c8863a34afcdf35357043413bc640fc738ae87f1881bff9cb5496c5bd"
+    ],
+    [
+     16,
+     2362,
+     "d513b1b9687077bfe95e0c72af482ab33589fb8abf1180fb187e8f2b2259b365"
+    ],
+    [
+     17,
+     2363,
+     "3bb2aee7c0d5c36e7dcfdfb1675b681d1263f3cf7863ab35da39a9ae966f02c0"
+    ],
+    [
+     18,
+     2364,
+     "d28e223e5ecdec070a099b1d08f5f88d522de354f07504e0c5f9d2e422072320"
+    ],
+    [
+     19,
+     2365,
+     "190aceb51c4cc5d269ea2a04b20aa60f4aae1c0896f036af220bc61e964a631e"
+    ],
+    [
+     20,
+     2366,
+     "ab08df31d80b6fe2470932caf57aa7102d92fcbd4ac7e2b328abef2b3e2f9cbc"
+    ],
+    [
+     21,
+     2367,
+     "36fb9c48f16058f8dbf78935427bc22ce685dde5483d27295a257da3c9ec7109"
+    ],
+    [
+     22,
+     2368,
+     "e171a80f39104b12abea8dc48dcf5713ba8f16cfbb872ec5496ca32a804258ec"
+    ],
+    [
+     23,
+     2369,
+     "98fff57a222e9ed1a00a22f4e14b9ab88bae464e8704f31fbbc62b37e5396279"
+    ],
+    [
+     24,
+     2370,
+     "2cc808896929db8db81ee5495a013a2689115e91d711ef48f23756975ea0ff7b"
+    ],
+    [
+     25,
+     2371,
+     "d752467158bfc22a3d5e4f75bd9cd67ddd6359f6005a320ad508235b1420c2df"
+    ],
+    [
+     26,
+     2372,
+     "b62532fca4041c64c81df2b6289fd3fb477371ace9c5ca6e62c805540c1524b8"
+    ],
+    [
+     27,
+     2373,
+     "ce23d252f7350693afe5e152ded58b1e21c9dd42f9b6f733ae4501812616f9a9"
+    ],
+    [
+     28,
+     2374,
+     "ce23d252f7350693afe5e152ded58b1e21c9dd42f9b6f733ae4501812616f9a9"
+    ],
+    [
+     29,
+     2375,
+     "05e43417d1a4e0d6155e5920bbaef40b81fdf815587927c0b4d296619e20f00e"
+    ],
+    [
+     30,
+     2376,
+     "05e43417d1a4e0d6155e5920bbaef40b81fdf815587927c0b4d296619e20f00e"
+    ],
+    [
+     31,
+     2377,
+     "ce23d252f7350693afe5e152ded58b1e21c9dd42f9b6f733ae4501812616f9a9"
+    ],
+    [
+     32,
+     2378,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     33,
+     2379,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     34,
+     2380,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     35,
+     2381,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     36,
+     2382,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     37,
+     2383,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     38,
+     2384,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     39,
+     2385,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     40,
+     2386,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     41,
+     2387,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
+    ],
+    [
+     42,
+     2388,
+     "23cda2458871302897177cb16c312cf722783b0d4ac59f114981971e943c7336"
     ]
    ]
   }
