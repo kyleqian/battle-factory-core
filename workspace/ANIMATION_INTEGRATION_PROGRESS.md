@@ -114,9 +114,27 @@
   3,842 commands +N frames, 0 status changes, keys identical; 30 pins in 16 files) -> land97. Flagged: STATS_CHANGE (production's `stat`
   command 2 frames vs the ROM's 75-frame General_StatsChange, Scene ON and OFF) and the Scene OFF status-move pause (35 frames, no
   production command) -> idle98 measures them.
-- In flight: ctl95 (INTEGRATION: are the LIVE doll-free Recover / GrassWhistle / Focus Punch / Iron Tail bodies wrong, or the doll
-  labs' controls mis-staged?), scan93 (SIDE: scanline-buffer history for Extrasensory player / Memento later bodies; census +16 / +2,657
-  on its patch), idle94 (MAIN: the accepted-window-after-activation convention — bodies N frames shorter than the ROM).
+- Folded Opus worker `5da95bb35` (INTEGRATION) as `406bfc999` (src `e3c8092c`): ctl95 — doll81 / doll90's DOLL-FREE control residuals
+  classified: **GrassWhistle 320 DEFECT fixed** (the BG fade-back starts 2 rows after the last on-screen note — position-dependent;
+  production used fixed per-side ages 163 / 166; four new pairs predicted before probing, all matched; + the elevated opponent's shadow
+  on rows 221..224): 12 bodies 228k / 181k -> 0 px, accepted fixtures still exact; **Iron Tail 231 DEFECT fixed** (the metal band is
+  masked by the attacker from the first step, not from a scroll gate fitted to AZUMARILL): 14 bodies 8..244 -> 0 px; **Recover 105
+  ARTIFACT** (the adapter's age 0 is the first orb, 10 rows after activation; the doll labs started at the activation) -> its doll cell
+  lands both sides {184, -10}; GrassWhistle opponent doll cell; **Focus Punch 264 = CPU-timing** (a dropped frame at age 131 varies per
+  body, `gRng2Value` repeats exactly in the 154-row bodies; production's fixed per-side phase is right on 3 / 13 opponent and 5 / 9
+  player lab bodies) -> D4 entry (fp100, in flight; the standing D4 approval covers it). Census vs `d46da5755` **+24 / +6,779**
+  (GrassWhistle opponent 11, Recover 13), 0 live -> fallback; seed 796 (a Struggle stall) cut one command earlier (prefix identical).
+  Supervisor: census reproduced, ctl95Run.sh fresh: 30 scenarios r1 == r2, `same summary.tsv`; union `406bfc999` census 95.25 / 98.67 %.
+- Folded Opus worker `3ad7e99c8` (SIDE, narrow grant) as `32eb03d65` (src `47b5b0c8`): fury99 — Fury Cutter 210 counters 2..5 at later
+  bodies: the counter is `request.rolloutCounter` (plans54); only the slice direction (counter & 1) and the palette blend (none / once /
+  three times, from source; the target's bg copy blends too) change; no history to carry (the blend sprite restores the palettes);
+  ONIX-type rests zeroed by the previous hit. 49 / 50 ROM windows 0 px (r1 == r2; the 50th is a counter-1 first body that still
+  declines). Census vs `46d64a860` **+36 / +1,548**, 0 regressions, keys + digests identical. Supervisor: census reproduced.
+- prep idle98 (MAIN lane, Opus, new files only): pre (3) / post (2) rows are universal (37 / 37 damaging + status bodies); BANKED
+  `idle98-universal-rows.diff` (23,814 commands +3 / +5 frames, keys identical; 273 timing pins in 65 files — next session). Filed ISSUES
+  **#166** (General_StatsChange is MISSING in both scenes: 75 / 89-frame stat-arrow overlay vs a 2-frame `stat` command; 897 / 1,000
+  battles, ~8.6 % of the timeline) and **#167** (Scene OFF no-hit pause, 36 % of move bodies; miss pause to anchor).
+- In flight: fp100 (INTEGRATION: Focus Punch D4), audit 23 (SIDE: ctl95 / doll90 / land96 / fury99), stat101 (MAIN: #166 prep pack).
 - prep reseed85 (MAIN lane, Opus, `4f4828f3b` .. `d46cdfff1`, new files only): the post-KO send-out allocator reseed after a words-order
   unit. The reseed reads slot OCCUPANCY only and every words unit is allocator-net-zero, so the order host can keep a word-free
   occupancy shadow while the free order stays deferred. ROM: 13 routes x 2 probes x 2 runs A == B; 4 / 4 words-vs-control pairs SAME
