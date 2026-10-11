@@ -13,12 +13,13 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 
-// docs/next-adapters-prep24.md s2 + return-live: MOVE_RETURN (216), the strongest branch (friendship 255, the only one the
-// Factory reaches). Dense framebuffer proofs: tools/integration/fixtures/return-live/*.json (return-live-adapter-receipt.json).
+// docs/next-adapters-prep24.md s2 + return-live: MOVE_RETURN (216), the strongest branch (friendship > 200; every committed
+// fixture was staged at 255). Dense framebuffer proofs: tools/integration/fixtures/return-live/*.json (return-live-adapter-receipt.json).
+// ret88 (docs/ret88-return-weak.md): the kernel sends friendship 0 (ReturnWeak), so the strongest body declines at any other level.
 type Json = Record<string, any>;
 const corpus = (path: string): Json[] => JSON.parse(gunzipSync(readFileSync(path)).toString("utf8")).frames;
 const request = (attacker: 0 | 1, extra: Partial<BattleMoveAnimationRequest> = {}): BattleMoveAnimationRequest => ({
-  moveId: 216, attacker, target: attacker === 0 ? 1 : 0, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0, ...extra,
+  moveId: 216, attacker, target: attacker === 0 ? 1 : 0, turn: 0, power: 0, damage: 0, friendship: 255, multihit: 0, ...extra,
 });
 function displayed(player: string, opponent: string, personality?: number): BattleResolutionDisplayedField {
   const mon = (name: string, side: "player" | "opponent") => ({
@@ -88,15 +89,30 @@ describe("return-live: MOVE_RETURN strongest branch", () => {
     expect(liveMoveAnimationPresentation(request(0), displayed("SNORLAX", "PIDGEOT", shiny), 50, undefined, undefined, firstBodyOrder())).toBeNull();
   });
 
-  // Ordinary generated-rental routes (orderConsumerRouteScan.ts RETURN 216): the first body, adapter active every age.
+  it("ret88: AnimTask_GetReturnPowerLevel gates duration and presentation: only Strongest (> 200) is live; 0..200 decline", () => {
+    const field = displayed("SNORLAX", "PIDGEOT");
+    for (const friendship of [0, 59, 60, 61, 91, 92, 150, 200]) {
+      expect(liveMoveAnimationDuration(request(0, { friendship }))).toBeNull();
+      expect(liveMoveAnimationDuration(request(1, { friendship }))).toBeNull();
+      expect(liveMoveAnimationPresentation(request(0, { friendship }), field, 50, undefined, undefined, firstBodyOrder())).toBeNull();
+      expect(liveMoveAnimationPresentation(request(1, { friendship }), field, 50, undefined, undefined, firstBodyOrder())).toBeNull();
+    }
+    for (const friendship of [201, 255]) {
+      expect(liveMoveAnimationDuration(request(0, { friendship }))).toBe(282);
+      expect(liveMoveAnimationPresentation(request(0, { friendship }), field, 50, undefined, undefined, firstBodyOrder())?.config.move).toBe("RETURN");
+    }
+  });
+
+  // Ordinary generated-rental routes (orderConsumerRouteScan.ts RETURN 216). The kernel sends friendship 0 (ret80 / ISSUES #165), so
+  // the ROM draws ReturnWeak; ret88 rung 1: the strongest body no longer claims it (fallback every age), gameplay unchanged.
   it.each([[24, 14, "PIDGEOT"], [51, 28, "EXEGGUTOR"]] as const)(
-    "route %i/%i %s: adapter active every age, prompt reached; Scene ON/OFF boundaries, RNG and rules identical", (seed, streak, _species) => {
+    "route %i/%i %s: the friendship-0 Return declines (no live body), prompt reached; Scene ON/OFF boundaries, RNG and rules identical", (seed, streak, _species) => {
       const on = generatedCommandAnimationReplay(seed, "on", [0], streak);
       const off = generatedCommandAnimationReplay(seed, "off", [0], streak);
-      const bodies = on.animations.filter(a => a.moveId === 216 && a.attacker === 0);
-      expect(bodies.map(b => b.ages.length)).toEqual([282]);
-      expect(bodies[0]!.ages).toEqual(Array.from({ length: 282 }, (_, age) => age));
-      expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
+      const returns = on.requests.filter(r => r.moveId === 216 && r.attacker === 0);
+      expect(returns.length).toBeGreaterThan(0);
+      expect(returns.every(r => r.friendship === 0)).toBe(true);
+      expect(on.animations.filter(a => a.moveId === 216)).toEqual([]);
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
       expect(on.stalled).toBe(off.stalled);
       expect(off.boundaries).toHaveLength(on.boundaries.length);

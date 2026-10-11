@@ -75,7 +75,7 @@ export interface Fixture {
   /** Controller arguments the ROM held at this body (gAnimMoveTurn/Power/Dmg). */
   /** Source text box content during this body (default: the move-used banner). */
   messageLines?: [string, string];
-  requestFields?: { turn?: number; power?: number; damage?: number; rolloutCounter?: number };
+  requestFields?: { turn?: number; power?: number; damage?: number; friendship?: number; rolloutCounter?: number };
   /**
    * Units that ran before this body in the scenario (docs/sprite-order-body-plans.md §2/§5): bodies by move id and
    * ATTACKER side, in order. Omitted = this is the scenario's first body after the known entry. The harness replays
@@ -452,7 +452,9 @@ export function liveView(f: Fixture, age: number): BattleResolutionPresentationR
   const request: BattleMoveAnimationRequest = {
     moveId: ids[f.move]!, attacker,
     target: SELF_TARGET_MOVES.has(f.move) ? attacker : attacker === 0 ? 1 : 0,
-    turn: f.body === "shattered-wall" ? 1 : 0, power: 0, damage: 0, friendship: 70, multihit: 0,
+    // ret88: every committed Return fixture (return-live, prep48, later48) was staged with a friendship-255 attacker (ReturnStrongest);
+    // a fixture of another power level names its friendship in requestFields.
+    turn: f.body === "shattered-wall" ? 1 : 0, power: 0, damage: 0, friendship: f.move === "RETURN" ? 255 : 70, multihit: 0,
     ...f.requestFields,
   };
   if (liveMoveAnimationDuration(request, field) === null) throw new Error(`No live adapter for ${f.move}`);
