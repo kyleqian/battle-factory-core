@@ -1,0 +1,61 @@
+[
+ {
+  "fixture": "a21-def-thunder-punch-opponent-crobat-break-control.json",
+  "stem": "a21-def-thunder-punch-opponent-crobat-break",
+  "kind": "control",
+  "move": "THUNDER_PUNCH",
+  "attackerSide": "opponent",
+  "defenderDoll": false,
+  "window": [
+   82,
+   217
+  ],
+  "rows": 136,
+  "orderInput": "fixture",
+  "shift": -10,
+  "calibration": [
+   [
+    -10,
+    200
+   ]
+  ],
+  "liveDuration": 104,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 200,
+    "exactRows": 135,
+    "digest": "f78e0836bb2916bc3de00e8f53926c4db0d85943a413e985dfd23b6ab6ca0084"
+   },
+   {
+    "run": 2,
+    "residualPixels": 200,
+    "exactRows": 135,
+    "digest": "f78e0836bb2916bc3de00e8f53926c4db0d85943a413e985dfd23b6ab6ca0084"
+   }
+  ],
+  "affectedAges": "0",
+  "maxPxRow": 200,
+  "fieldPx": 200,
+  "bbox": [
+   160,
+   65,
+   191,
+   72
+  ],
+  "perRow": [
+   [
+    0,
+    200,
+    [
+     160,
+     65,
+     191,
+     72
+    ]
+   ]
+  ]
+ }
+]

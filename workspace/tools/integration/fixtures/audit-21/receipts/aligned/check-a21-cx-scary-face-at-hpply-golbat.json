@@ -1,0 +1,293 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-cx-scary-face-at-hpply-golbat",
+ "rows": [
+  {
+   "fixture": "a21-cx-scary-face-at-hpply-golbat-c0.json",
+   "move": "SCARY_FACE",
+   "side": "opponent",
+   "species": "GOLBAT/HOPPIP",
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "184@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 82,
+    "endFrame": 271,
+    "ageOffset": 0,
+    "bodyStartFrame": 78,
+    "bodyEndFrame": 285
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cx-scary-face-at-hpply-golbat-c1.json",
+   "move": "SCARY_FACE",
+   "side": "opponent",
+   "species": "GOLBAT/HOPPIP",
+   "units": 4,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "184@1 STATS_CHANGE(48)@0 351@0 HIT_ANIMATION@1",
+    "184@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1416,
+    "endFrame": 1605,
+    "ageOffset": 0,
+    "bodyStartFrame": 1412,
+    "bodyEndFrame": 1619
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cx-scary-face-at-hpply-golbat-c2.json",
+   "move": "SCARY_FACE",
+   "side": "opponent",
+   "species": "GOLBAT/HOPPIP",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "184@1 STATS_CHANGE(48)@0 351@0 HIT_ANIMATION@1",
+    "184@1 STATS_CHANGE(48)@0 351@0 HIT_ANIMATION@1",
+    "184@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2750,
+    "endFrame": 2939,
+    "ageOffset": 0,
+    "bodyStartFrame": 2746,
+    "bodyEndFrame": 2953
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

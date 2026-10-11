@@ -1,0 +1,1658 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-cx-ember-by-hpply-crobat",
+ "rows": [
+  {
+   "fixture": "a21-cx-ember-by-hpply-crobat-c0.json",
+   "move": "EMBER",
+   "side": "player",
+   "species": "HOPPIP/CROBAT",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 52@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 457,
+    "endFrame": 526
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 70,
+    "exactRows": 2,
+    "px": 11492,
+    "digests": [
+     "9a11280c0cf64609",
+     "9a11280c0cf64609"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      18
+     ],
+     [
+      2,
+      18
+     ],
+     [
+      3,
+      18
+     ],
+     [
+      4,
+      18
+     ],
+     [
+      5,
+      36
+     ],
+     [
+      6,
+      36
+     ],
+     [
+      7,
+      54
+     ],
+     [
+      8,
+      54
+     ],
+     [
+      9,
+      54
+     ],
+     [
+      10,
+      54
+     ],
+     [
+      11,
+      72
+     ],
+     [
+      12,
+      67
+     ],
+     [
+      13,
+      68
+     ],
+     [
+      14,
+      65
+     ],
+     [
+      15,
+      73
+     ],
+     [
+      16,
+      80
+     ],
+     [
+      17,
+      74
+     ],
+     [
+      18,
+      73
+     ],
+     [
+      19,
+      72
+     ],
+     [
+      20,
+      77
+     ],
+     [
+      21,
+      57
+     ],
+     [
+      22,
+      48
+     ],
+     [
+      23,
+      52
+     ],
+     [
+      24,
+      55
+     ],
+     [
+      25,
+      41
+     ],
+     [
+      26,
+      31
+     ],
+     [
+      27,
+      39
+     ],
+     [
+      28,
+      30
+     ],
+     [
+      29,
+      34
+     ],
+     [
+      30,
+      37
+     ],
+     [
+      31,
+      59
+     ],
+     [
+      32,
+      48
+     ],
+     [
+      33,
+      52
+     ],
+     [
+      34,
+      103
+     ],
+     [
+      35,
+      121
+     ],
+     [
+      36,
+      121
+     ],
+     [
+      37,
+      139
+     ],
+     [
+      38,
+      291
+     ],
+     [
+      39,
+      289
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 1,
+      "px": 18,
+      "bbox": [
+       93,
+       96,
+       96,
+       102
+      ],
+      "sample": "95,96 rom ffffff live ff0000"
+     },
+     {
+      "age": 2,
+      "px": 18,
+      "bbox": [
+       96,
+       99,
+       94,
+       100
+      ],
+      "sample": "98,94 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 3,
+      "px": 18,
+      "bbox": [
+       100,
+       103,
+       92,
+       98
+      ],
+      "sample": "102,92 rom ffffff live ff0000"
+     },
+     {
+      "age": 4,
+      "px": 18,
+      "bbox": [
+       103,
+       106,
+       90,
+       96
+      ],
+      "sample": "105,90 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 5,
+      "px": 36,
+      "bbox": [
+       93,
+       109,
+       89,
+       102
+      ],
+      "sample": "108,89 rom f7f7ff live ff0000"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 70,
+    "exactRows": 2,
+    "px": 11492,
+    "digests": [
+     "9a11280c0cf64609",
+     "9a11280c0cf64609"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      18
+     ],
+     [
+      2,
+      18
+     ],
+     [
+      3,
+      18
+     ],
+     [
+      4,
+      18
+     ],
+     [
+      5,
+      36
+     ],
+     [
+      6,
+      36
+     ],
+     [
+      7,
+      54
+     ],
+     [
+      8,
+      54
+     ],
+     [
+      9,
+      54
+     ],
+     [
+      10,
+      54
+     ],
+     [
+      11,
+      72
+     ],
+     [
+      12,
+      67
+     ],
+     [
+      13,
+      68
+     ],
+     [
+      14,
+      65
+     ],
+     [
+      15,
+      73
+     ],
+     [
+      16,
+      80
+     ],
+     [
+      17,
+      74
+     ],
+     [
+      18,
+      73
+     ],
+     [
+      19,
+      72
+     ],
+     [
+      20,
+      77
+     ],
+     [
+      21,
+      57
+     ],
+     [
+      22,
+      48
+     ],
+     [
+      23,
+      52
+     ],
+     [
+      24,
+      55
+     ],
+     [
+      25,
+      41
+     ],
+     [
+      26,
+      31
+     ],
+     [
+      27,
+      39
+     ],
+     [
+      28,
+      30
+     ],
+     [
+      29,
+      34
+     ],
+     [
+      30,
+      37
+     ],
+     [
+      31,
+      59
+     ],
+     [
+      32,
+      48
+     ],
+     [
+      33,
+      52
+     ],
+     [
+      34,
+      103
+     ],
+     [
+      35,
+      121
+     ],
+     [
+      36,
+      121
+     ],
+     [
+      37,
+      139
+     ],
+     [
+      38,
+      291
+     ],
+     [
+      39,
+      289
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 1,
+      "px": 18,
+      "bbox": [
+       93,
+       96,
+       96,
+       102
+      ],
+      "sample": "95,96 rom ffffff live ff0000"
+     },
+     {
+      "age": 2,
+      "px": 18,
+      "bbox": [
+       96,
+       99,
+       94,
+       100
+      ],
+      "sample": "98,94 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 3,
+      "px": 18,
+      "bbox": [
+       100,
+       103,
+       92,
+       98
+      ],
+      "sample": "102,92 rom ffffff live ff0000"
+     },
+     {
+      "age": 4,
+      "px": 18,
+      "bbox": [
+       103,
+       106,
+       90,
+       96
+      ],
+      "sample": "105,90 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 5,
+      "px": 36,
+      "bbox": [
+       93,
+       109,
+       89,
+       102
+      ],
+      "sample": "108,89 rom f7f7ff live ff0000"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "a21-cx-ember-by-hpply-crobat-c1.json",
+   "move": "EMBER",
+   "side": "player",
+   "species": "HOPPIP/CROBAT",
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 52@0 HIT_ANIMATION@1",
+    "351@1 HIT_ANIMATION@0 52@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1791,
+    "endFrame": 1860
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 70,
+    "exactRows": 2,
+    "px": 11492,
+    "digests": [
+     "9a11280c0cf64609",
+     "9a11280c0cf64609"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      18
+     ],
+     [
+      2,
+      18
+     ],
+     [
+      3,
+      18
+     ],
+     [
+      4,
+      18
+     ],
+     [
+      5,
+      36
+     ],
+     [
+      6,
+      36
+     ],
+     [
+      7,
+      54
+     ],
+     [
+      8,
+      54
+     ],
+     [
+      9,
+      54
+     ],
+     [
+      10,
+      54
+     ],
+     [
+      11,
+      72
+     ],
+     [
+      12,
+      67
+     ],
+     [
+      13,
+      68
+     ],
+     [
+      14,
+      65
+     ],
+     [
+      15,
+      73
+     ],
+     [
+      16,
+      80
+     ],
+     [
+      17,
+      74
+     ],
+     [
+      18,
+      73
+     ],
+     [
+      19,
+      72
+     ],
+     [
+      20,
+      77
+     ],
+     [
+      21,
+      57
+     ],
+     [
+      22,
+      48
+     ],
+     [
+      23,
+      52
+     ],
+     [
+      24,
+      55
+     ],
+     [
+      25,
+      41
+     ],
+     [
+      26,
+      31
+     ],
+     [
+      27,
+      39
+     ],
+     [
+      28,
+      30
+     ],
+     [
+      29,
+      34
+     ],
+     [
+      30,
+      37
+     ],
+     [
+      31,
+      59
+     ],
+     [
+      32,
+      48
+     ],
+     [
+      33,
+      52
+     ],
+     [
+      34,
+      103
+     ],
+     [
+      35,
+      121
+     ],
+     [
+      36,
+      121
+     ],
+     [
+      37,
+      139
+     ],
+     [
+      38,
+      291
+     ],
+     [
+      39,
+      289
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 1,
+      "px": 18,
+      "bbox": [
+       93,
+       96,
+       96,
+       102
+      ],
+      "sample": "95,96 rom ffffff live ff0000"
+     },
+     {
+      "age": 2,
+      "px": 18,
+      "bbox": [
+       96,
+       99,
+       94,
+       100
+      ],
+      "sample": "98,94 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 3,
+      "px": 18,
+      "bbox": [
+       100,
+       103,
+       92,
+       98
+      ],
+      "sample": "102,92 rom ffffff live ff0000"
+     },
+     {
+      "age": 4,
+      "px": 18,
+      "bbox": [
+       103,
+       106,
+       90,
+       96
+      ],
+      "sample": "105,90 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 5,
+      "px": 36,
+      "bbox": [
+       93,
+       109,
+       89,
+       102
+      ],
+      "sample": "108,89 rom f7f7ff live ff0000"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 70,
+    "exactRows": 2,
+    "px": 11492,
+    "digests": [
+     "9a11280c0cf64609",
+     "9a11280c0cf64609"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      18
+     ],
+     [
+      2,
+      18
+     ],
+     [
+      3,
+      18
+     ],
+     [
+      4,
+      18
+     ],
+     [
+      5,
+      36
+     ],
+     [
+      6,
+      36
+     ],
+     [
+      7,
+      54
+     ],
+     [
+      8,
+      54
+     ],
+     [
+      9,
+      54
+     ],
+     [
+      10,
+      54
+     ],
+     [
+      11,
+      72
+     ],
+     [
+      12,
+      67
+     ],
+     [
+      13,
+      68
+     ],
+     [
+      14,
+      65
+     ],
+     [
+      15,
+      73
+     ],
+     [
+      16,
+      80
+     ],
+     [
+      17,
+      74
+     ],
+     [
+      18,
+      73
+     ],
+     [
+      19,
+      72
+     ],
+     [
+      20,
+      77
+     ],
+     [
+      21,
+      57
+     ],
+     [
+      22,
+      48
+     ],
+     [
+      23,
+      52
+     ],
+     [
+      24,
+      55
+     ],
+     [
+      25,
+      41
+     ],
+     [
+      26,
+      31
+     ],
+     [
+      27,
+      39
+     ],
+     [
+      28,
+      30
+     ],
+     [
+      29,
+      34
+     ],
+     [
+      30,
+      37
+     ],
+     [
+      31,
+      59
+     ],
+     [
+      32,
+      48
+     ],
+     [
+      33,
+      52
+     ],
+     [
+      34,
+      103
+     ],
+     [
+      35,
+      121
+     ],
+     [
+      36,
+      121
+     ],
+     [
+      37,
+      139
+     ],
+     [
+      38,
+      291
+     ],
+     [
+      39,
+      289
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 1,
+      "px": 18,
+      "bbox": [
+       93,
+       96,
+       96,
+       102
+      ],
+      "sample": "95,96 rom ffffff live ff0000"
+     },
+     {
+      "age": 2,
+      "px": 18,
+      "bbox": [
+       96,
+       99,
+       94,
+       100
+      ],
+      "sample": "98,94 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 3,
+      "px": 18,
+      "bbox": [
+       100,
+       103,
+       92,
+       98
+      ],
+      "sample": "102,92 rom ffffff live ff0000"
+     },
+     {
+      "age": 4,
+      "px": 18,
+      "bbox": [
+       103,
+       106,
+       90,
+       96
+      ],
+      "sample": "105,90 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 5,
+      "px": 36,
+      "bbox": [
+       93,
+       109,
+       89,
+       102
+      ],
+      "sample": "108,89 rom f7f7ff live ff0000"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "a21-cx-ember-by-hpply-crobat-c2.json",
+   "move": "EMBER",
+   "side": "player",
+   "species": "HOPPIP/CROBAT",
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 52@0 HIT_ANIMATION@1",
+    "351@1 HIT_ANIMATION@0 52@0 HIT_ANIMATION@1",
+    "351@1 HIT_ANIMATION@0 52@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3123,
+    "endFrame": 3192
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 70,
+    "exactRows": 2,
+    "px": 11492,
+    "digests": [
+     "9a11280c0cf64609",
+     "9a11280c0cf64609"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      18
+     ],
+     [
+      2,
+      18
+     ],
+     [
+      3,
+      18
+     ],
+     [
+      4,
+      18
+     ],
+     [
+      5,
+      36
+     ],
+     [
+      6,
+      36
+     ],
+     [
+      7,
+      54
+     ],
+     [
+      8,
+      54
+     ],
+     [
+      9,
+      54
+     ],
+     [
+      10,
+      54
+     ],
+     [
+      11,
+      72
+     ],
+     [
+      12,
+      67
+     ],
+     [
+      13,
+      68
+     ],
+     [
+      14,
+      65
+     ],
+     [
+      15,
+      73
+     ],
+     [
+      16,
+      80
+     ],
+     [
+      17,
+      74
+     ],
+     [
+      18,
+      73
+     ],
+     [
+      19,
+      72
+     ],
+     [
+      20,
+      77
+     ],
+     [
+      21,
+      57
+     ],
+     [
+      22,
+      48
+     ],
+     [
+      23,
+      52
+     ],
+     [
+      24,
+      55
+     ],
+     [
+      25,
+      41
+     ],
+     [
+      26,
+      31
+     ],
+     [
+      27,
+      39
+     ],
+     [
+      28,
+      30
+     ],
+     [
+      29,
+      34
+     ],
+     [
+      30,
+      37
+     ],
+     [
+      31,
+      59
+     ],
+     [
+      32,
+      48
+     ],
+     [
+      33,
+      52
+     ],
+     [
+      34,
+      103
+     ],
+     [
+      35,
+      121
+     ],
+     [
+      36,
+      121
+     ],
+     [
+      37,
+      139
+     ],
+     [
+      38,
+      291
+     ],
+     [
+      39,
+      289
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 1,
+      "px": 18,
+      "bbox": [
+       93,
+       96,
+       96,
+       102
+      ],
+      "sample": "95,96 rom ffffff live ff0000"
+     },
+     {
+      "age": 2,
+      "px": 18,
+      "bbox": [
+       96,
+       99,
+       94,
+       100
+      ],
+      "sample": "98,94 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 3,
+      "px": 18,
+      "bbox": [
+       100,
+       103,
+       92,
+       98
+      ],
+      "sample": "102,92 rom ffffff live ff0000"
+     },
+     {
+      "age": 4,
+      "px": 18,
+      "bbox": [
+       103,
+       106,
+       90,
+       96
+      ],
+      "sample": "105,90 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 5,
+      "px": 36,
+      "bbox": [
+       93,
+       109,
+       89,
+       102
+      ],
+      "sample": "108,89 rom f7f7ff live ff0000"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 70,
+    "exactRows": 2,
+    "px": 11492,
+    "digests": [
+     "9a11280c0cf64609",
+     "9a11280c0cf64609"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      18
+     ],
+     [
+      2,
+      18
+     ],
+     [
+      3,
+      18
+     ],
+     [
+      4,
+      18
+     ],
+     [
+      5,
+      36
+     ],
+     [
+      6,
+      36
+     ],
+     [
+      7,
+      54
+     ],
+     [
+      8,
+      54
+     ],
+     [
+      9,
+      54
+     ],
+     [
+      10,
+      54
+     ],
+     [
+      11,
+      72
+     ],
+     [
+      12,
+      67
+     ],
+     [
+      13,
+      68
+     ],
+     [
+      14,
+      65
+     ],
+     [
+      15,
+      73
+     ],
+     [
+      16,
+      80
+     ],
+     [
+      17,
+      74
+     ],
+     [
+      18,
+      73
+     ],
+     [
+      19,
+      72
+     ],
+     [
+      20,
+      77
+     ],
+     [
+      21,
+      57
+     ],
+     [
+      22,
+      48
+     ],
+     [
+      23,
+      52
+     ],
+     [
+      24,
+      55
+     ],
+     [
+      25,
+      41
+     ],
+     [
+      26,
+      31
+     ],
+     [
+      27,
+      39
+     ],
+     [
+      28,
+      30
+     ],
+     [
+      29,
+      34
+     ],
+     [
+      30,
+      37
+     ],
+     [
+      31,
+      59
+     ],
+     [
+      32,
+      48
+     ],
+     [
+      33,
+      52
+     ],
+     [
+      34,
+      103
+     ],
+     [
+      35,
+      121
+     ],
+     [
+      36,
+      121
+     ],
+     [
+      37,
+      139
+     ],
+     [
+      38,
+      291
+     ],
+     [
+      39,
+      289
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 1,
+      "px": 18,
+      "bbox": [
+       93,
+       96,
+       96,
+       102
+      ],
+      "sample": "95,96 rom ffffff live ff0000"
+     },
+     {
+      "age": 2,
+      "px": 18,
+      "bbox": [
+       96,
+       99,
+       94,
+       100
+      ],
+      "sample": "98,94 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 3,
+      "px": 18,
+      "bbox": [
+       100,
+       103,
+       92,
+       98
+      ],
+      "sample": "102,92 rom ffffff live ff0000"
+     },
+     {
+      "age": 4,
+      "px": 18,
+      "bbox": [
+       103,
+       106,
+       90,
+       96
+      ],
+      "sample": "105,90 rom f7f7ff live ff0000"
+     },
+     {
+      "age": 5,
+      "px": 36,
+      "bbox": [
+       93,
+       109,
+       89,
+       102
+      ],
+      "sample": "108,89 rom f7f7ff live ff0000"
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,97 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "c83-hail-scary-face-at-cfply",
+ "rows": [
+  {
+   "fixture": "c83-hail-scary-face-at-cfply-c0.json",
+   "move": "SCARY_FACE",
+   "side": "opponent",
+   "species": "GOLBAT/CASTFORM",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "258@0 CASTFORM_CHANGE(3)@0 184@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 571,
+    "endFrame": 760,
+    "ageOffset": 0,
+    "bodyStartFrame": 567,
+    "bodyEndFrame": 774
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 190,
+    "exactRows": 190,
+    "px": 0,
+    "digests": [
+     "81b2342403002e07",
+     "81b2342403002e07"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

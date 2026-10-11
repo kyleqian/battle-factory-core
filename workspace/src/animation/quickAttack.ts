@@ -13,7 +13,10 @@ export interface QuickAttackAnimationState {
   readonly attackerOffset: QuickAttackOffset;
   readonly afterimages: readonly QuickAttackAfterimage[];
   readonly targetShakeX2: number;
-  /** Side-specific live battler x2 reset performed as the impact begins. */
+  /**
+   * Offset from the target's drawn rest once the impact begins: AnimTask_ShakeMon writes the target's x2 absolutely
+   * (its rest is replaced, ending at 0), so a target resting at a non-zero x2 moves by -rest (qa91).
+   */
   readonly targetBaseX2: number;
   readonly impactVisible: boolean;
 }
@@ -134,17 +137,24 @@ function quickAttackTargetShakeX2(age: number): number {
   ).x2;
 }
 
+/**
+ * `targetRestX2` is the target battler's x2 at the activation, i.e. the rest the renderer draws it at: the opponent's tracked front
+ * idle rest (ONIX / RATTATA 1 until a body zeroes it, liveBattlerX2History.ts), 0 for a player-side target. qa91 RAM probe
+ * (tools/integration/fixtures/qa91/x2/): opponent ONIX holds x2 1 through the activation of its first Quick Attack body and 0 on the
+ * later ones; NIDORINO 0 throughout. prep7's former constant -1 (player attacker) was ONIX's first-body -rest.
+ */
 export function quickAttackAnimationAtAge(
   age: number,
   attackerSide: "player" | "opponent",
+  targetRestX2: number,
 ): QuickAttackAnimationState {
   return {
     attackerOffset: quickAttackTravelAtAge(age, attackerSide),
     afterimages: quickAttackAfterimagesAtAge(age, attackerSide),
     targetShakeX2: quickAttackTargetShakeX2(age),
     targetBaseX2:
-      attackerSide === "player" && age >= QUICK_ATTACK_IMPACT_FIRST_AGE
-        ? -1
+      age >= QUICK_ATTACK_IMPACT_FIRST_AGE && targetRestX2 !== 0
+        ? -targetRestX2
         : 0,
     impactVisible:
       age >= QUICK_ATTACK_IMPACT_FIRST_AGE

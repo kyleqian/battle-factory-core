@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "a21-def-leaf-blade-player-snorlax-test3.json",
+  "stem": "a21-def-leaf-blade-player-snorlax",
+  "kind": "test3",
+  "move": "LEAF_BLADE",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   5073,
+   5296
+  ],
+  "rows": 224,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 224,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 224,
+    "digest": "c19e2995b074357c69174aee85700d0169165874891e6f87afb689008e711f46"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 224,
+    "digest": "c19e2995b074357c69174aee85700d0169165874891e6f87afb689008e711f46"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

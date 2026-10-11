@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "a21-def-leaf-blade-player-snorlax-break-test2.json",
+  "stem": "a21-def-leaf-blade-player-snorlax-break",
+  "kind": "test2",
+  "move": "LEAF_BLADE",
+  "attackerSide": "player",
+  "defenderDoll": true,
+  "window": [
+   3407,
+   3630
+  ],
+  "rows": 224,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 224,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 224,
+    "digest": "3544e910d9bf88684a19eccb81fa103da9717cb83a01cc15d873c139a30134d4"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 224,
+    "digest": "3544e910d9bf88684a19eccb81fa103da9717cb83a01cc15d873c139a30134d4"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

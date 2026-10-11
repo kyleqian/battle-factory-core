@@ -1,0 +1,1106 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-cn-scary-face-at-cfopp-azurill",
+ "rows": [
+  {
+   "fixture": "a21-cn-scary-face-at-cfopp-azurill-c0.json",
+   "move": "SCARY_FACE",
+   "side": "player",
+   "species": "AZURILL/CASTFORM",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 184@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 466,
+    "endFrame": 673
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 208,
+    "exactRows": 58,
+    "px": 1456532,
+    "digests": [
+     "c7ee83585200e52b",
+     "c7ee83585200e52b"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      5,
+      19009
+     ],
+     [
+      6,
+      20356
+     ],
+     [
+      7,
+      20356
+     ],
+     [
+      8,
+      20356
+     ],
+     [
+      9,
+      1347
+     ],
+     [
+      10,
+      19009
+     ],
+     [
+      11,
+      20356
+     ],
+     [
+      12,
+      20356
+     ],
+     [
+      13,
+      20356
+     ],
+     [
+      14,
+      1347
+     ],
+     [
+      15,
+      19009
+     ],
+     [
+      16,
+      20356
+     ],
+     [
+      17,
+      20356
+     ],
+     [
+      18,
+      20356
+     ],
+     [
+      19,
+      1347
+     ],
+     [
+      20,
+      19009
+     ],
+     [
+      21,
+      20356
+     ],
+     [
+      22,
+      20356
+     ],
+     [
+      23,
+      20356
+     ],
+     [
+      24,
+      1347
+     ],
+     [
+      25,
+      19009
+     ],
+     [
+      26,
+      20356
+     ],
+     [
+      27,
+      20356
+     ],
+     [
+      28,
+      20356
+     ],
+     [
+      29,
+      1347
+     ],
+     [
+      30,
+      19009
+     ],
+     [
+      31,
+      20356
+     ],
+     [
+      32,
+      20356
+     ],
+     [
+      33,
+      20356
+     ],
+     [
+      34,
+      1347
+     ],
+     [
+      35,
+      19009
+     ],
+     [
+      36,
+      20356
+     ],
+     [
+      37,
+      20356
+     ],
+     [
+      38,
+      20356
+     ],
+     [
+      39,
+      1347
+     ],
+     [
+      40,
+      19009
+     ],
+     [
+      41,
+      20356
+     ],
+     [
+      42,
+      20356
+     ],
+     [
+      43,
+      20356
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 5,
+      "px": 19009,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 6,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 7,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 8,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 9,
+      "px": 1347,
+      "bbox": [
+       41,
+       93,
+       68,
+       111
+      ],
+      "sample": "62,68 rom 395abd live 314aa5"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 208,
+    "exactRows": 58,
+    "px": 1456532,
+    "digests": [
+     "c7ee83585200e52b",
+     "c7ee83585200e52b"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      5,
+      19009
+     ],
+     [
+      6,
+      20356
+     ],
+     [
+      7,
+      20356
+     ],
+     [
+      8,
+      20356
+     ],
+     [
+      9,
+      1347
+     ],
+     [
+      10,
+      19009
+     ],
+     [
+      11,
+      20356
+     ],
+     [
+      12,
+      20356
+     ],
+     [
+      13,
+      20356
+     ],
+     [
+      14,
+      1347
+     ],
+     [
+      15,
+      19009
+     ],
+     [
+      16,
+      20356
+     ],
+     [
+      17,
+      20356
+     ],
+     [
+      18,
+      20356
+     ],
+     [
+      19,
+      1347
+     ],
+     [
+      20,
+      19009
+     ],
+     [
+      21,
+      20356
+     ],
+     [
+      22,
+      20356
+     ],
+     [
+      23,
+      20356
+     ],
+     [
+      24,
+      1347
+     ],
+     [
+      25,
+      19009
+     ],
+     [
+      26,
+      20356
+     ],
+     [
+      27,
+      20356
+     ],
+     [
+      28,
+      20356
+     ],
+     [
+      29,
+      1347
+     ],
+     [
+      30,
+      19009
+     ],
+     [
+      31,
+      20356
+     ],
+     [
+      32,
+      20356
+     ],
+     [
+      33,
+      20356
+     ],
+     [
+      34,
+      1347
+     ],
+     [
+      35,
+      19009
+     ],
+     [
+      36,
+      20356
+     ],
+     [
+      37,
+      20356
+     ],
+     [
+      38,
+      20356
+     ],
+     [
+      39,
+      1347
+     ],
+     [
+      40,
+      19009
+     ],
+     [
+      41,
+      20356
+     ],
+     [
+      42,
+      20356
+     ],
+     [
+      43,
+      20356
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 5,
+      "px": 19009,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 6,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 7,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 8,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 9,
+      "px": 1347,
+      "bbox": [
+       41,
+       93,
+       68,
+       111
+      ],
+      "sample": "62,68 rom 395abd live 314aa5"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "a21-cn-scary-face-at-cfopp-azurill-c1.json",
+   "move": "SCARY_FACE",
+   "side": "player",
+   "species": "AZURILL/CASTFORM",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 184@0 STATS_CHANGE(48)@1",
+    "351@1 HIT_ANIMATION@0",
+    "351@1 HIT_ANIMATION@0 184@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3138,
+    "endFrame": 3345
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 208,
+    "exactRows": 58,
+    "px": 1456532,
+    "digests": [
+     "c7ee83585200e52b",
+     "c7ee83585200e52b"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      5,
+      19009
+     ],
+     [
+      6,
+      20356
+     ],
+     [
+      7,
+      20356
+     ],
+     [
+      8,
+      20356
+     ],
+     [
+      9,
+      1347
+     ],
+     [
+      10,
+      19009
+     ],
+     [
+      11,
+      20356
+     ],
+     [
+      12,
+      20356
+     ],
+     [
+      13,
+      20356
+     ],
+     [
+      14,
+      1347
+     ],
+     [
+      15,
+      19009
+     ],
+     [
+      16,
+      20356
+     ],
+     [
+      17,
+      20356
+     ],
+     [
+      18,
+      20356
+     ],
+     [
+      19,
+      1347
+     ],
+     [
+      20,
+      19009
+     ],
+     [
+      21,
+      20356
+     ],
+     [
+      22,
+      20356
+     ],
+     [
+      23,
+      20356
+     ],
+     [
+      24,
+      1347
+     ],
+     [
+      25,
+      19009
+     ],
+     [
+      26,
+      20356
+     ],
+     [
+      27,
+      20356
+     ],
+     [
+      28,
+      20356
+     ],
+     [
+      29,
+      1347
+     ],
+     [
+      30,
+      19009
+     ],
+     [
+      31,
+      20356
+     ],
+     [
+      32,
+      20356
+     ],
+     [
+      33,
+      20356
+     ],
+     [
+      34,
+      1347
+     ],
+     [
+      35,
+      19009
+     ],
+     [
+      36,
+      20356
+     ],
+     [
+      37,
+      20356
+     ],
+     [
+      38,
+      20356
+     ],
+     [
+      39,
+      1347
+     ],
+     [
+      40,
+      19009
+     ],
+     [
+      41,
+      20356
+     ],
+     [
+      42,
+      20356
+     ],
+     [
+      43,
+      20356
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 5,
+      "px": 19009,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 6,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 7,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 8,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 9,
+      "px": 1347,
+      "bbox": [
+       41,
+       93,
+       68,
+       111
+      ],
+      "sample": "62,68 rom 395abd live 314aa5"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 208,
+    "exactRows": 58,
+    "px": 1456532,
+    "digests": [
+     "c7ee83585200e52b",
+     "c7ee83585200e52b"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      5,
+      19009
+     ],
+     [
+      6,
+      20356
+     ],
+     [
+      7,
+      20356
+     ],
+     [
+      8,
+      20356
+     ],
+     [
+      9,
+      1347
+     ],
+     [
+      10,
+      19009
+     ],
+     [
+      11,
+      20356
+     ],
+     [
+      12,
+      20356
+     ],
+     [
+      13,
+      20356
+     ],
+     [
+      14,
+      1347
+     ],
+     [
+      15,
+      19009
+     ],
+     [
+      16,
+      20356
+     ],
+     [
+      17,
+      20356
+     ],
+     [
+      18,
+      20356
+     ],
+     [
+      19,
+      1347
+     ],
+     [
+      20,
+      19009
+     ],
+     [
+      21,
+      20356
+     ],
+     [
+      22,
+      20356
+     ],
+     [
+      23,
+      20356
+     ],
+     [
+      24,
+      1347
+     ],
+     [
+      25,
+      19009
+     ],
+     [
+      26,
+      20356
+     ],
+     [
+      27,
+      20356
+     ],
+     [
+      28,
+      20356
+     ],
+     [
+      29,
+      1347
+     ],
+     [
+      30,
+      19009
+     ],
+     [
+      31,
+      20356
+     ],
+     [
+      32,
+      20356
+     ],
+     [
+      33,
+      20356
+     ],
+     [
+      34,
+      1347
+     ],
+     [
+      35,
+      19009
+     ],
+     [
+      36,
+      20356
+     ],
+     [
+      37,
+      20356
+     ],
+     [
+      38,
+      20356
+     ],
+     [
+      39,
+      1347
+     ],
+     [
+      40,
+      19009
+     ],
+     [
+      41,
+      20356
+     ],
+     [
+      42,
+      20356
+     ],
+     [
+      43,
+      20356
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 5,
+      "px": 19009,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 6,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 7,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 8,
+      "px": 20356,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 9,
+      "px": 1347,
+      "bbox": [
+       41,
+       93,
+       68,
+       111
+      ],
+      "sample": "62,68 rom 395abd live 314aa5"
+     }
+    ]
+   }
+  }
+ ]
+}

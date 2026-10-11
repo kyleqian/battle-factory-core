@@ -1,0 +1,1106 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-cx-scary-face-at-hpopp-lapras",
+ "rows": [
+  {
+   "fixture": "a21-cx-scary-face-at-hpopp-lapras-c0.json",
+   "move": "SCARY_FACE",
+   "side": "player",
+   "species": "LAPRAS/HOPPIP",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 184@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 539,
+    "endFrame": 746
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 208,
+    "exactRows": 58,
+    "px": 1442692,
+    "digests": [
+     "6500bcd1ce47d02f",
+     "6500bcd1ce47d02f"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      5,
+      18620
+     ],
+     [
+      6,
+      20110
+     ],
+     [
+      7,
+      20110
+     ],
+     [
+      8,
+      20110
+     ],
+     [
+      9,
+      1490
+     ],
+     [
+      10,
+      18620
+     ],
+     [
+      11,
+      20110
+     ],
+     [
+      12,
+      20110
+     ],
+     [
+      13,
+      20110
+     ],
+     [
+      14,
+      1490
+     ],
+     [
+      15,
+      18620
+     ],
+     [
+      16,
+      19994
+     ],
+     [
+      17,
+      19994
+     ],
+     [
+      18,
+      19994
+     ],
+     [
+      19,
+      1374
+     ],
+     [
+      20,
+      18620
+     ],
+     [
+      21,
+      20110
+     ],
+     [
+      22,
+      20110
+     ],
+     [
+      23,
+      20110
+     ],
+     [
+      24,
+      1490
+     ],
+     [
+      25,
+      18620
+     ],
+     [
+      26,
+      20110
+     ],
+     [
+      27,
+      20110
+     ],
+     [
+      28,
+      20110
+     ],
+     [
+      29,
+      1490
+     ],
+     [
+      30,
+      18620
+     ],
+     [
+      31,
+      19994
+     ],
+     [
+      32,
+      19994
+     ],
+     [
+      33,
+      19994
+     ],
+     [
+      34,
+      1374
+     ],
+     [
+      35,
+      18620
+     ],
+     [
+      36,
+      20110
+     ],
+     [
+      37,
+      20110
+     ],
+     [
+      38,
+      20110
+     ],
+     [
+      39,
+      1490
+     ],
+     [
+      40,
+      18620
+     ],
+     [
+      41,
+      19994
+     ],
+     [
+      42,
+      19994
+     ],
+     [
+      43,
+      19994
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 5,
+      "px": 18620,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 6,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 7,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 8,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 9,
+      "px": 1490,
+      "bbox": [
+       45,
+       98,
+       56,
+       111
+      ],
+      "sample": "92,56 rom 7394ce live 637bad"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 208,
+    "exactRows": 58,
+    "px": 1442692,
+    "digests": [
+     "6500bcd1ce47d02f",
+     "6500bcd1ce47d02f"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      5,
+      18620
+     ],
+     [
+      6,
+      20110
+     ],
+     [
+      7,
+      20110
+     ],
+     [
+      8,
+      20110
+     ],
+     [
+      9,
+      1490
+     ],
+     [
+      10,
+      18620
+     ],
+     [
+      11,
+      20110
+     ],
+     [
+      12,
+      20110
+     ],
+     [
+      13,
+      20110
+     ],
+     [
+      14,
+      1490
+     ],
+     [
+      15,
+      18620
+     ],
+     [
+      16,
+      19994
+     ],
+     [
+      17,
+      19994
+     ],
+     [
+      18,
+      19994
+     ],
+     [
+      19,
+      1374
+     ],
+     [
+      20,
+      18620
+     ],
+     [
+      21,
+      20110
+     ],
+     [
+      22,
+      20110
+     ],
+     [
+      23,
+      20110
+     ],
+     [
+      24,
+      1490
+     ],
+     [
+      25,
+      18620
+     ],
+     [
+      26,
+      20110
+     ],
+     [
+      27,
+      20110
+     ],
+     [
+      28,
+      20110
+     ],
+     [
+      29,
+      1490
+     ],
+     [
+      30,
+      18620
+     ],
+     [
+      31,
+      19994
+     ],
+     [
+      32,
+      19994
+     ],
+     [
+      33,
+      19994
+     ],
+     [
+      34,
+      1374
+     ],
+     [
+      35,
+      18620
+     ],
+     [
+      36,
+      20110
+     ],
+     [
+      37,
+      20110
+     ],
+     [
+      38,
+      20110
+     ],
+     [
+      39,
+      1490
+     ],
+     [
+      40,
+      18620
+     ],
+     [
+      41,
+      19994
+     ],
+     [
+      42,
+      19994
+     ],
+     [
+      43,
+      19994
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 5,
+      "px": 18620,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 6,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 7,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 8,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 9,
+      "px": 1490,
+      "bbox": [
+       45,
+       98,
+       56,
+       111
+      ],
+      "sample": "92,56 rom 7394ce live 637bad"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "a21-cx-scary-face-at-hpopp-lapras-c1.json",
+   "move": "SCARY_FACE",
+   "side": "player",
+   "species": "LAPRAS/HOPPIP",
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 184@0 STATS_CHANGE(48)@1",
+    "351@1 HIT_ANIMATION@0",
+    "184@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2742,
+    "endFrame": 2949
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 208,
+    "exactRows": 58,
+    "px": 1442692,
+    "digests": [
+     "6500bcd1ce47d02f",
+     "6500bcd1ce47d02f"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      5,
+      18620
+     ],
+     [
+      6,
+      20110
+     ],
+     [
+      7,
+      20110
+     ],
+     [
+      8,
+      20110
+     ],
+     [
+      9,
+      1490
+     ],
+     [
+      10,
+      18620
+     ],
+     [
+      11,
+      20110
+     ],
+     [
+      12,
+      20110
+     ],
+     [
+      13,
+      20110
+     ],
+     [
+      14,
+      1490
+     ],
+     [
+      15,
+      18620
+     ],
+     [
+      16,
+      19994
+     ],
+     [
+      17,
+      19994
+     ],
+     [
+      18,
+      19994
+     ],
+     [
+      19,
+      1374
+     ],
+     [
+      20,
+      18620
+     ],
+     [
+      21,
+      20110
+     ],
+     [
+      22,
+      20110
+     ],
+     [
+      23,
+      20110
+     ],
+     [
+      24,
+      1490
+     ],
+     [
+      25,
+      18620
+     ],
+     [
+      26,
+      20110
+     ],
+     [
+      27,
+      20110
+     ],
+     [
+      28,
+      20110
+     ],
+     [
+      29,
+      1490
+     ],
+     [
+      30,
+      18620
+     ],
+     [
+      31,
+      19994
+     ],
+     [
+      32,
+      19994
+     ],
+     [
+      33,
+      19994
+     ],
+     [
+      34,
+      1374
+     ],
+     [
+      35,
+      18620
+     ],
+     [
+      36,
+      20110
+     ],
+     [
+      37,
+      20110
+     ],
+     [
+      38,
+      20110
+     ],
+     [
+      39,
+      1490
+     ],
+     [
+      40,
+      18620
+     ],
+     [
+      41,
+      19994
+     ],
+     [
+      42,
+      19994
+     ],
+     [
+      43,
+      19994
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 5,
+      "px": 18620,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 6,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 7,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 8,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 9,
+      "px": 1490,
+      "bbox": [
+       45,
+       98,
+       56,
+       111
+      ],
+      "sample": "92,56 rom 7394ce live 637bad"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 208,
+    "exactRows": 58,
+    "px": 1442692,
+    "digests": [
+     "6500bcd1ce47d02f",
+     "6500bcd1ce47d02f"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      5,
+      18620
+     ],
+     [
+      6,
+      20110
+     ],
+     [
+      7,
+      20110
+     ],
+     [
+      8,
+      20110
+     ],
+     [
+      9,
+      1490
+     ],
+     [
+      10,
+      18620
+     ],
+     [
+      11,
+      20110
+     ],
+     [
+      12,
+      20110
+     ],
+     [
+      13,
+      20110
+     ],
+     [
+      14,
+      1490
+     ],
+     [
+      15,
+      18620
+     ],
+     [
+      16,
+      19994
+     ],
+     [
+      17,
+      19994
+     ],
+     [
+      18,
+      19994
+     ],
+     [
+      19,
+      1374
+     ],
+     [
+      20,
+      18620
+     ],
+     [
+      21,
+      20110
+     ],
+     [
+      22,
+      20110
+     ],
+     [
+      23,
+      20110
+     ],
+     [
+      24,
+      1490
+     ],
+     [
+      25,
+      18620
+     ],
+     [
+      26,
+      20110
+     ],
+     [
+      27,
+      20110
+     ],
+     [
+      28,
+      20110
+     ],
+     [
+      29,
+      1490
+     ],
+     [
+      30,
+      18620
+     ],
+     [
+      31,
+      19994
+     ],
+     [
+      32,
+      19994
+     ],
+     [
+      33,
+      19994
+     ],
+     [
+      34,
+      1374
+     ],
+     [
+      35,
+      18620
+     ],
+     [
+      36,
+      20110
+     ],
+     [
+      37,
+      20110
+     ],
+     [
+      38,
+      20110
+     ],
+     [
+      39,
+      1490
+     ],
+     [
+      40,
+      18620
+     ],
+     [
+      41,
+      19994
+     ],
+     [
+      42,
+      19994
+     ],
+     [
+      43,
+      19994
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom 526b63 live bdbd9c"
+     },
+     {
+      "age": 5,
+      "px": 18620,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 6,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 7,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 8,
+      "px": 20110,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom ffffff live dedede"
+     },
+     {
+      "age": 9,
+      "px": 1490,
+      "bbox": [
+       45,
+       98,
+       56,
+       111
+      ],
+      "sample": "92,56 rom 7394ce live 637bad"
+     }
+    ]
+   }
+  }
+ ]
+}

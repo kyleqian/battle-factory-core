@@ -1,0 +1,18 @@
+a21-qa-ply-azurill-crobat-c0.json QUICK_ATTACK player AZURILL/CROBAT units=0 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-azurill-crobat-c1.json QUICK_ATTACK player AZURILL/CROBAT units=4 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-azurill-crobat-c2.json QUICK_ATTACK player AZURILL/CROBAT units=8 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-nidorina-nidorino-c0.json QUICK_ATTACK player NIDORINA/NIDORINO units=0 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-nidorina-nidorino-c1.json QUICK_ATTACK player NIDORINA/NIDORINO units=4 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-nidorina-nidorino-c2.json QUICK_ATTACK player NIDORINA/NIDORINO units=8 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-nidorina-onix-c0.json QUICK_ATTACK player NIDORINA/ONIX units=0 live=True rows=33 px=18724 same=True entryLive=True entryPx=18724 ages=14..32(19) first=14:[154, 209, 12, 71]:182,12 rom bdb5b5 live ffffff
+a21-qa-ply-nidorina-onix-c1.json QUICK_ATTACK player NIDORINA/ONIX units=4 live=True rows=33 px=0 same=True entryLive=True entryPx=33998 ages=-
+a21-qa-ply-nidorina-onix-c2.json QUICK_ATTACK player NIDORINA/ONIX units=8 live=True rows=33 px=0 same=True entryLive=True entryPx=33998 ages=-
+a21-qa-ply-nidorina-snorlax-c0.json QUICK_ATTACK player NIDORINA/SNORLAX units=0 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-nidorina-snorlax-c1.json QUICK_ATTACK player NIDORINA/SNORLAX units=4 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-nidorina-snorlax-c2.json QUICK_ATTACK player NIDORINA/SNORLAX units=8 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-persian-nidorino-c0.json QUICK_ATTACK player PERSIAN/NIDORINO units=0 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-persian-nidorino-c1.json QUICK_ATTACK player PERSIAN/NIDORINO units=4 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-persian-nidorino-c2.json QUICK_ATTACK player PERSIAN/NIDORINO units=8 live=True rows=33 px=0 same=True entryLive=True entryPx=0 ages=-
+a21-qa-ply-pidgeotto-onix-c0.json QUICK_ATTACK player PIDGEOTTO/ONIX units=0 live=True rows=33 px=18724 same=True entryLive=True entryPx=18724 ages=14..32(19) first=14:[154, 209, 12, 71]:182,12 rom bdb5b5 live ffffff
+a21-qa-ply-pidgeotto-onix-c1.json QUICK_ATTACK player PIDGEOTTO/ONIX units=4 live=True rows=33 px=0 same=True entryLive=True entryPx=33998 ages=-
+a21-qa-ply-pidgeotto-onix-c2.json QUICK_ATTACK player PIDGEOTTO/ONIX units=8 live=True rows=33 px=0 same=True entryLive=True entryPx=33998 ages=-

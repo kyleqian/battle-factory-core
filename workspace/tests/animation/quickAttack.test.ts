@@ -65,14 +65,14 @@ describe("portable QUICK ATTACK presentation", () => {
   });
 
   it("pins the opposite monbg/TraceMon/target/impact ordering boundary", () => {
-    expect(quickAttackAnimationAtAge(52, "player")).toEqual({
+    expect(quickAttackAnimationAtAge(52, "player", 1)).toEqual({
       attackerOffset: { x2: 16, y2: 2 },
       afterimages: [],
       targetShakeX2: 0,
       targetBaseX2: 0,
       impactVisible: false,
     });
-    expect(quickAttackAnimationAtAge(58, "player")).toEqual({
+    expect(quickAttackAnimationAtAge(58, "player", 1)).toEqual({
       attackerOffset: { x2: 0, y2: 0 },
       afterimages: [
         { slot: 3, x2: 16, y2: 2 },
@@ -87,21 +87,21 @@ describe("portable QUICK ATTACK presentation", () => {
   it("pins the shared impact lifetime and source shake display latch", () => {
     expect(QUICK_ATTACK_IMPACT_FIRST_AGE).toBe(58);
     expect(QUICK_ATTACK_IMPACT_LAST_AGE).toBe(67);
-    expect(quickAttackAnimationAtAge(57, "opponent").impactVisible).toBe(false);
-    expect(quickAttackAnimationAtAge(58, "opponent")).toMatchObject({
+    expect(quickAttackAnimationAtAge(57, "opponent", 0).impactVisible).toBe(false);
+    expect(quickAttackAnimationAtAge(58, "opponent", 0)).toMatchObject({
       targetShakeX2: 5,
       impactVisible: true,
     });
-    expect(quickAttackAnimationAtAge(59, "opponent")).toMatchObject({
+    expect(quickAttackAnimationAtAge(59, "opponent", 0)).toMatchObject({
       targetShakeX2: 0,
       impactVisible: true,
     });
     expect(
       [58, 61, 62, 65, 66].map(
-        (age) => quickAttackAnimationAtAge(age, "opponent").targetShakeX2,
+        (age) => quickAttackAnimationAtAge(age, "opponent", 0).targetShakeX2,
       ),
     ).toEqual([5, 5, 5, 5, 5]);
-    expect(quickAttackAnimationAtAge(68, "opponent")).toMatchObject({
+    expect(quickAttackAnimationAtAge(68, "opponent", 0)).toMatchObject({
       targetShakeX2: 0,
       impactVisible: false,
     });

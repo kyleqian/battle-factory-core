@@ -1,0 +1,39 @@
+c83-ctl-ember-by-cfopp-c0.json EMBER opponent CASTFORM/MANTINE units=2 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfopp-c1.json EMBER opponent CASTFORM/MANTINE units=6 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfopp-c2.json EMBER opponent CASTFORM/MANTINE units=10 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfply-c0.json EMBER player CASTFORM/CROBAT units=2 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfply-c1.json EMBER player CASTFORM/CROBAT units=6 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfply-c2.json EMBER player CASTFORM/CROBAT units=10 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfopp-c0.json FLAMETHROWER opponent CASTFORM/MANTINE units=2 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfopp-c1.json FLAMETHROWER opponent CASTFORM/MANTINE units=6 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfopp-c2.json FLAMETHROWER opponent CASTFORM/MANTINE units=10 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfply-c0.json FLAMETHROWER player CASTFORM/GOLBAT units=2 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfply-c1.json FLAMETHROWER player CASTFORM/GOLBAT units=6 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfply-c2.json FLAMETHROWER player CASTFORM/GOLBAT units=10 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfopp-c0.json SCARY_FACE player LAPRAS/CASTFORM units=2 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfopp-c1.json SCARY_FACE player LAPRAS/CASTFORM units=6 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfply-c0.json SCARY_FACE opponent GOLBAT/CASTFORM units=2 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfply-c1.json SCARY_FACE opponent GOLBAT/CASTFORM units=4 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfply-c2.json SCARY_FACE opponent GOLBAT/CASTFORM units=8 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-hail-scary-face-at-cfopp-c0.json SCARY_FACE player LAPRAS/CASTFORM units=2 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-hail-scary-face-at-cfply-c0.json SCARY_FACE opponent GOLBAT/CASTFORM units=2 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-rain-icy-wind-at-cfopp-c0.json ICY_WIND player LAPRAS/CASTFORM units=2 live=True rows=287 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-rain-icy-wind-at-cfopp-c1.json ICY_WIND player LAPRAS/CASTFORM units=6 live=True rows=286 px=337522 same=True entryLive=True entryPx=337522 ages=263..285(18) first=263:[0, 239, 0, 111]:0,0 rom 100f0f live 000000
+c83-rain-icy-wind-at-cfply-c0.json ICY_WIND opponent GOLBAT/CASTFORM units=2 live=True rows=286 px=335022 same=True entryLive=True entryPx=335022 ages=263..285(18) first=263:[0, 239, 0, 111]:0,0 rom 100f0f live 000000
+c83-rain-icy-wind-at-cfply-c1.json ICY_WIND opponent GOLBAT/CASTFORM units=6 live=True rows=286 px=335022 same=True entryLive=True entryPx=335022 ages=263..285(18) first=263:[0, 239, 0, 111]:0,0 rom 100f0f live 000000
+c83-rain-icy-wind-by-cfopp-c0.json ICY_WIND opponent CASTFORM/MANTINE units=2 live=True rows=287 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-rain-icy-wind-by-cfopp-c1.json ICY_WIND opponent CASTFORM/MANTINE units=6 live=True rows=286 px=332548 same=True entryLive=True entryPx=332548 ages=263..285(18) first=263:[0, 239, 0, 111]:0,0 rom 100f0f live 000000
+c83-rain-icy-wind-by-cfply-c0.json ICY_WIND player CASTFORM/GOLBAT units=2 live=True rows=286 px=335691 same=True entryLive=True entryPx=335691 ages=263..285(18) first=263:[0, 239, 0, 111]:0,0 rom 100f0f live 000000
+c83-rain-icy-wind-by-cfply-c1.json ICY_WIND player CASTFORM/GOLBAT units=6 live=True rows=286 px=335691 same=True entryLive=True entryPx=335691 ages=263..285(18) first=263:[0, 239, 0, 111]:0,0 rom 100f0f live 000000
+c83-sun-ember-by-cfopp-c0.json EMBER opponent CASTFORM/MANTINE units=2 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfopp-c1.json EMBER opponent CASTFORM/MANTINE units=5 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfopp-c2.json EMBER opponent CASTFORM/MANTINE units=8 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfply-c0.json EMBER player CASTFORM/CROBAT units=2 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfply-c1.json EMBER player CASTFORM/CROBAT units=5 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfply-c2.json EMBER player CASTFORM/CROBAT units=8 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfopp-c0.json FLAMETHROWER opponent CASTFORM/MANTINE units=2 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfopp-c1.json FLAMETHROWER opponent CASTFORM/MANTINE units=5 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfopp-c2.json FLAMETHROWER opponent CASTFORM/MANTINE units=8 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfply-c0.json FLAMETHROWER player CASTFORM/GOLBAT units=2 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfply-c1.json FLAMETHROWER player CASTFORM/GOLBAT units=5 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfply-c2.json FLAMETHROWER player CASTFORM/GOLBAT units=8 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-

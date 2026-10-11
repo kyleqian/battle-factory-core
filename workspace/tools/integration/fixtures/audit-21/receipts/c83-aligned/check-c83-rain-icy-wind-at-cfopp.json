@@ -1,0 +1,1096 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "c83-rain-icy-wind-at-cfopp",
+ "rows": [
+  {
+   "fixture": "c83-rain-icy-wind-at-cfopp-c0.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "species": "LAPRAS/CASTFORM",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "240@1 CASTFORM_CHANGE(2)@1 196@0"
+   ],
+   "romPower": 55,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 55
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 605,
+    "endFrame": 891
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 196:at:2: Icy Wind in rain: 335,022 / 337,522 px (unexplained, no normal-form control) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 1,
+    "px": 5456848,
+    "digests": [
+     "77afe584e68ec27f",
+     "77afe584e68ec27f"
+    ],
+    "residualRows": [
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      200
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      7,
+      200
+     ],
+     [
+      8,
+      200
+     ],
+     [
+      9,
+      200
+     ],
+     [
+      10,
+      200
+     ],
+     [
+      11,
+      200
+     ],
+     [
+      12,
+      18433
+     ],
+     [
+      13,
+      18433
+     ],
+     [
+      14,
+      18433
+     ],
+     [
+      15,
+      18433
+     ],
+     [
+      16,
+      18433
+     ],
+     [
+      17,
+      18433
+     ],
+     [
+      18,
+      18433
+     ],
+     [
+      19,
+      19923
+     ],
+     [
+      20,
+      19923
+     ],
+     [
+      21,
+      19923
+     ],
+     [
+      22,
+      19923
+     ],
+     [
+      23,
+      19923
+     ],
+     [
+      24,
+      19923
+     ],
+     [
+      25,
+      19923
+     ],
+     [
+      26,
+      19923
+     ],
+     [
+      27,
+      19923
+     ],
+     [
+      28,
+      19923
+     ],
+     [
+      29,
+      19923
+     ],
+     [
+      30,
+      19923
+     ],
+     [
+      31,
+      19923
+     ],
+     [
+      32,
+      19923
+     ],
+     [
+      33,
+      19923
+     ],
+     [
+      34,
+      19923
+     ],
+     [
+      35,
+      19923
+     ],
+     [
+      36,
+      19923
+     ],
+     [
+      37,
+      19923
+     ],
+     [
+      38,
+      19923
+     ],
+     [
+      39,
+      19923
+     ],
+     [
+      40,
+      19923
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 196:at:2: Icy Wind in rain: 335,022 / 337,522 px (unexplained, no normal-form control) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 1,
+    "px": 5456848,
+    "digests": [
+     "77afe584e68ec27f",
+     "77afe584e68ec27f"
+    ],
+    "residualRows": [
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      200
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      7,
+      200
+     ],
+     [
+      8,
+      200
+     ],
+     [
+      9,
+      200
+     ],
+     [
+      10,
+      200
+     ],
+     [
+      11,
+      200
+     ],
+     [
+      12,
+      18433
+     ],
+     [
+      13,
+      18433
+     ],
+     [
+      14,
+      18433
+     ],
+     [
+      15,
+      18433
+     ],
+     [
+      16,
+      18433
+     ],
+     [
+      17,
+      18433
+     ],
+     [
+      18,
+      18433
+     ],
+     [
+      19,
+      19923
+     ],
+     [
+      20,
+      19923
+     ],
+     [
+      21,
+      19923
+     ],
+     [
+      22,
+      19923
+     ],
+     [
+      23,
+      19923
+     ],
+     [
+      24,
+      19923
+     ],
+     [
+      25,
+      19923
+     ],
+     [
+      26,
+      19923
+     ],
+     [
+      27,
+      19923
+     ],
+     [
+      28,
+      19923
+     ],
+     [
+      29,
+      19923
+     ],
+     [
+      30,
+      19923
+     ],
+     [
+      31,
+      19923
+     ],
+     [
+      32,
+      19923
+     ],
+     [
+      33,
+      19923
+     ],
+     [
+      34,
+      19923
+     ],
+     [
+      35,
+      19923
+     ],
+     [
+      36,
+      19923
+     ],
+     [
+      37,
+      19923
+     ],
+     [
+      38,
+      19923
+     ],
+     [
+      39,
+      19923
+     ],
+     [
+      40,
+      19923
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "c83-rain-icy-wind-at-cfopp-c1.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "species": "LAPRAS/CASTFORM",
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "240@1 CASTFORM_CHANGE(2)@1 196@0 HIT_ANIMATION@1 STATS_CHANGE(24)@1 RAIN_CONTINUES@0",
+    "196@0"
+   ],
+   "romPower": 55,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 55
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2907,
+    "endFrame": 3192
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 196:at:2: Icy Wind in rain: 335,022 / 337,522 px (unexplained, no normal-form control) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 286,
+    "exactRows": 1,
+    "px": 5436925,
+    "digests": [
+     "2923a2175fe0e08a",
+     "2923a2175fe0e08a"
+    ],
+    "residualRows": [
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      200
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      7,
+      200
+     ],
+     [
+      8,
+      200
+     ],
+     [
+      9,
+      200
+     ],
+     [
+      10,
+      200
+     ],
+     [
+      11,
+      200
+     ],
+     [
+      12,
+      18433
+     ],
+     [
+      13,
+      18433
+     ],
+     [
+      14,
+      18433
+     ],
+     [
+      15,
+      18433
+     ],
+     [
+      16,
+      18433
+     ],
+     [
+      17,
+      18433
+     ],
+     [
+      18,
+      18433
+     ],
+     [
+      19,
+      19923
+     ],
+     [
+      20,
+      19923
+     ],
+     [
+      21,
+      19923
+     ],
+     [
+      22,
+      19923
+     ],
+     [
+      23,
+      19923
+     ],
+     [
+      24,
+      19923
+     ],
+     [
+      25,
+      19923
+     ],
+     [
+      26,
+      19923
+     ],
+     [
+      27,
+      19923
+     ],
+     [
+      28,
+      19923
+     ],
+     [
+      29,
+      19923
+     ],
+     [
+      30,
+      19923
+     ],
+     [
+      31,
+      19923
+     ],
+     [
+      32,
+      19923
+     ],
+     [
+      33,
+      19923
+     ],
+     [
+      34,
+      19923
+     ],
+     [
+      35,
+      19923
+     ],
+     [
+      36,
+      19923
+     ],
+     [
+      37,
+      19923
+     ],
+     [
+      38,
+      19923
+     ],
+     [
+      39,
+      19923
+     ],
+     [
+      40,
+      19923
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 196:at:2: Icy Wind in rain: 335,022 / 337,522 px (unexplained, no normal-form control) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 286,
+    "exactRows": 1,
+    "px": 5436925,
+    "digests": [
+     "2923a2175fe0e08a",
+     "2923a2175fe0e08a"
+    ],
+    "residualRows": [
+     [
+      1,
+      200
+     ],
+     [
+      2,
+      200
+     ],
+     [
+      3,
+      200
+     ],
+     [
+      4,
+      200
+     ],
+     [
+      5,
+      200
+     ],
+     [
+      6,
+      200
+     ],
+     [
+      7,
+      200
+     ],
+     [
+      8,
+      200
+     ],
+     [
+      9,
+      200
+     ],
+     [
+      10,
+      200
+     ],
+     [
+      11,
+      200
+     ],
+     [
+      12,
+      18433
+     ],
+     [
+      13,
+      18433
+     ],
+     [
+      14,
+      18433
+     ],
+     [
+      15,
+      18433
+     ],
+     [
+      16,
+      18433
+     ],
+     [
+      17,
+      18433
+     ],
+     [
+      18,
+      18433
+     ],
+     [
+      19,
+      19923
+     ],
+     [
+      20,
+      19923
+     ],
+     [
+      21,
+      19923
+     ],
+     [
+      22,
+      19923
+     ],
+     [
+      23,
+      19923
+     ],
+     [
+      24,
+      19923
+     ],
+     [
+      25,
+      19923
+     ],
+     [
+      26,
+      19923
+     ],
+     [
+      27,
+      19923
+     ],
+     [
+      28,
+      19923
+     ],
+     [
+      29,
+      19923
+     ],
+     [
+      30,
+      19923
+     ],
+     [
+      31,
+      19923
+     ],
+     [
+      32,
+      19923
+     ],
+     [
+      33,
+      19923
+     ],
+     [
+      34,
+      19923
+     ],
+     [
+      35,
+      19923
+     ],
+     [
+      36,
+      19923
+     ],
+     [
+      37,
+      19923
+     ],
+     [
+      38,
+      19923
+     ],
+     [
+      39,
+      19923
+     ],
+     [
+      40,
+      19923
+     ]
+    ],
+    "detail": [
+     {
+      "age": 1,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 2,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 3,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 4,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 5,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 6,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     }
+    ]
+   }
+  }
+ ]
+}

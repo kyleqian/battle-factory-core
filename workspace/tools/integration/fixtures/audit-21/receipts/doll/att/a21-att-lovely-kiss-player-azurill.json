@@ -1,0 +1,125 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "a21-att-lovely-kiss-player-azurill",
+   "kind": "swap",
+   "side": "player",
+   "move": "LOVELY_KISS",
+   "moveId": 142,
+   "turn": 0,
+   "frame": 2686,
+   "activation": 2729,
+   "window": [
+    2686,
+    2923
+   ],
+   "rows": 238,
+   "swapInRows": 42,
+   "romBodyRows": 152,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3661159043,
+   "adapterDuration": 152,
+   "multihit": 0,
+   "productionDuration": 238,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 153,
+    "shift": 0
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 238,
+    "digests": [
+     "619192403f4954e8",
+     "619192403f4954e8"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-att-lovely-kiss-player-azurill",
+   "kind": "plain",
+   "side": "player",
+   "move": "LOVELY_KISS",
+   "moveId": 142,
+   "turn": 0,
+   "frame": 8088,
+   "activation": 8088,
+   "window": [
+    8088,
+    8240
+   ],
+   "rows": 153,
+   "swapInRows": -1,
+   "romBodyRows": 152,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 4261724284,
+   "adapterDuration": 152,
+   "multihit": 0,
+   "productionDuration": 152,
+   "swapPresented": false,
+   "cell": true,
+   "framing": {
+    "rows": 153,
+    "shift": 0
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 153,
+    "digests": [
+     "bc51185c60ec44fa",
+     "bc51185c60ec44fa"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    200,
+    0,
+    0,
+    0,
+    0
+   ]
+  }
+ ]
+}

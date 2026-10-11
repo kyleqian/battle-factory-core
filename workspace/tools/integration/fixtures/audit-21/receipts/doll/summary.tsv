@@ -1,0 +1,136 @@
+att	a21-att-dream-eater-opponent-azurill	plain	BELLY_DRUM	player	t0	342	110	body 109	D 110	order fixture	presented false	cell false	px 104830/104830	identical true	bad 0..109	tail -
+att	a21-att-dream-eater-opponent-azurill	plain	REST	player	t0	2053	110	body 109	D 110	order fixture	presented false	cell false	px 146520/146520	identical true	bad 0..109	tail -
+att	a21-att-dream-eater-opponent-azurill	swap	DREAM_EATER	opponent	t0	3476	348	body 266	D 267	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-att-dream-eater-opponent-azurill	swap	DREAM_EATER	opponent	t0	5174	348	body 266	D 267	order none	presented true	cell true	px 4867493/4867493	identical true	bad 53..304	tail k1 0/0 k2 0
+att	a21-att-dream-eater-opponent-azurill	swap	DREAM_EATER	opponent	t0	6872	347	body 265	D 267	order none	presented true	cell true	px 4868342/4868342	identical true	bad 53..303,308..324,333..346	tail k1 0/0 k2 0
+att	a21-att-dream-eater-opponent-azurill	plain	REST	player	t0	7628	110	body 109	D 110	order none	presented false	cell false	px 146520/146520	identical true	bad 0..109	tail -
+att	a21-att-dream-eater-opponent-crobat	plain	BELLY_DRUM	player	t0	349	110	body 109	D 110	order fixture	presented false	cell false	px 178603/178603	identical true	bad 0..109	tail -
+att	a21-att-dream-eater-opponent-crobat	plain	REST	player	t0	2052	110	body 109	D 110	order fixture	presented false	cell false	px 220293/220293	identical true	bad 0..109	tail -
+att	a21-att-dream-eater-opponent-crobat	swap	DREAM_EATER	opponent	t0	3475	348	body 266	D 267	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-att-dream-eater-opponent-crobat	swap	DREAM_EATER	opponent	t0	5173	347	body 265	D 267	order none	presented true	cell true	px 4595760/4595760	identical true	bad 42..327,333..346	tail k1 0/0 k2 0
+att	a21-att-dream-eater-opponent-crobat	swap	DREAM_EATER	opponent	t0	6871	347	body 265	D 267	order none	presented true	cell true	px 4595760/4595760	identical true	bad 42..327,333..346	tail k1 0/0 k2 0
+att	a21-att-dream-eater-opponent-crobat	plain	REST	player	t0	7640	110	body 109	D 110	order none	presented false	cell false	px 220293/220293	identical true	bad 0..109	tail -
+att	a21-att-grass-whistle-player-azurill	plain	GRASS_WHISTLE	player	t0	4693	221	body 220	D 225	order fixture	presented false	cell true	px 0/0	identical true	bad -	tail -
+att	a21-att-grass-whistle-player-snorlax	swap	GRASS_WHISTLE	player	t0	1774	306	body 220	D 225	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-att-lovely-kiss-opponent-azurill	plain	LOVELY_KISS	opponent	t0	3412	153	body 152	D 152	order fixture	presented false	cell true	px 0/0	identical true	bad -	tail -
+att	a21-att-lovely-kiss-opponent-crobat	plain	LOVELY_KISS	opponent	t0	3411	153	body 152	D 152	order fixture	presented false	cell true	px 0/0	identical true	bad -	tail -
+att	a21-att-lovely-kiss-player-azurill	swap	LOVELY_KISS	player	t0	2686	238	body 152	D 152	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 200/200 k2 0
+att	a21-att-lovely-kiss-player-azurill	plain	LOVELY_KISS	player	t0	8088	153	body 152	D 152	order fixture	presented false	cell true	px 0/0	identical true	bad -	tail -
+att	a21-att-lovely-kiss-player-snorlax	swap	LOVELY_KISS	player	t0	1773	238	body 152	D 152	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-att-sing-player-azurill	plain	SING	player	t0	4685	246	body 245	D 245	order fixture	presented false	cell true	px 0/0	identical true	bad -	tail -
+att	a21-att-sing-player-snorlax	swap	SING	player	t0	1766	331	body 245	D 245	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-att-solar-beam-opponent-azurill	swap	SOLAR_BEAM	opponent	t0	1718	189	body 107	D 108	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-att-solar-beam-opponent-azurill	plain	SOLAR_BEAM	opponent	t1	3418	238	body 237	D 160	order fixture	presented false	cell true	px 2327786/2327786	identical true	bad 4..226	tail -
+att	a21-att-solar-beam-opponent-azurill	plain	SOLAR_BEAM	opponent	t0	5051	108	body 107	D 108	order fixture	presented false	cell true	px 0/0	identical true	bad -	tail -
+att	a21-att-solar-beam-opponent-azurill	plain	SOLAR_BEAM	opponent	t1	6750	238	body 237	D 160	order fixture	presented false	cell true	px 2327786/2327786	identical true	bad 4..226	tail -
+att	a21-att-solar-beam-opponent-crobat	swap	SOLAR_BEAM	opponent	t0	1718	189	body 107	D 108	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-att-solar-beam-opponent-crobat	plain	SOLAR_BEAM	opponent	t1	3417	238	body 237	D 160	order fixture	presented false	cell true	px 2302303/2302303	identical true	bad 4..226	tail -
+att	a21-att-solar-beam-opponent-crobat	plain	SOLAR_BEAM	opponent	t0	5051	108	body 107	D 108	order fixture	presented false	cell true	px 0/0	identical true	bad -	tail -
+att	a21-att-solar-beam-opponent-crobat	plain	SOLAR_BEAM	opponent	t1	6749	238	body 237	D 160	order fixture	presented false	cell true	px 2302303/2302303	identical true	bad 4..226	tail -
+att	a21-att-solar-beam-player-azurill	swap	SOLAR_BEAM	player	t0	2663	193	body 107	D 108	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 200/200 k2 0
+att	a21-att-solar-beam-player-azurill	plain	SOLAR_BEAM	player	t1	3552	238	body 237	D 160	order fixture	presented false	cell true	px 2306265/2306265	identical true	bad 4..226	tail -
+att	a21-att-solar-beam-player-azurill	plain	SOLAR_BEAM	player	t0	5304	108	body 107	D 108	order fixture	presented false	cell true	px 0/0	identical true	bad -	tail -
+att	a21-att-solar-beam-player-azurill	plain	SOLAR_BEAM	player	t1	5734	238	body 237	D 160	order fixture	presented false	cell true	px 2306265/2306265	identical true	bad 4..226	tail -
+att	a21-att-solar-beam-player-azurill	plain	SOLAR_BEAM	player	t0	6999	108	body 107	D 108	order fixture	presented false	cell true	px 0/0	identical true	bad -	tail -
+att	a21-att-solar-beam-player-snorlax	swap	SOLAR_BEAM	player	t0	1750	193	body 107	D 108	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-att-solar-beam-player-snorlax	swap	SOLAR_BEAM	player	t1	2709	323	body 237	D 160	order fixture	presented false	cell true	px 4644451/4644451	identical true	bad 2..322	tail -
+att	a21-self-sunny-day-opponent-azurill	swap	SUNNY_DAY	opponent	t0	1739	239	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-self-sunny-day-opponent-azurill	plain	SUNNY_DAY	player	t0	3016	157	body 156	D 158	order fixture	presented false	cell true	px 207095/207095	identical true	bad 0..156	tail -
+att	a21-self-sunny-day-opponent-azurill	plain	SUNNY_DAY	player	t0	4375	157	body 156	D 158	order fixture	presented false	cell true	px 346230/346230	identical true	bad 0..156	tail -
+att	a21-self-sunny-day-opponent-azurill	plain	SUNNY_DAY	player	t0	6348	157	body 156	D 158	order fixture	presented false	cell true	px 207095/207095	identical true	bad 0..156	tail -
+att	a21-self-sunny-day-opponent-crobat-rain	plain	RAIN_DANCE	player	t0	348	187	body 186	D 187	order fixture	presented false	cell false	px 302612/302612	identical true	bad 0..186	tail -
+att	a21-self-sunny-day-opponent-crobat-rain	swap	SUNNY_DAY	opponent	t0	1738	239	body 157	D 158	order none	presented true	cell true	px 851601/851601	identical true	bad 42..198	tail k1 0/0 k2 0
+att	a21-self-sunny-day-opponent-crobat-rain	plain	RAIN_DANCE	player	t0	2116	187	body 186	D 187	order none	presented false	cell false	px 302307/302307	identical true	bad 0..186	tail -
+att	a21-self-sunny-day-opponent-crobat-rain	swap	SUNNY_DAY	opponent	t0	3404	239	body 157	D 158	order none	presented true	cell true	px 851601/851601	identical true	bad 42..198	tail k1 0/0 k2 0
+att	a21-self-sunny-day-opponent-crobat-rain	plain	RAIN_DANCE	player	t0	3782	187	body 186	D 187	order none	presented false	cell false	px 302636/302636	identical true	bad 0..186	tail -
+att	a21-self-sunny-day-opponent-crobat-rain	swap	SUNNY_DAY	opponent	t0	5070	239	body 157	D 158	order none	presented true	cell true	px 851601/851601	identical true	bad 42..198	tail k1 0/0 k2 0
+att	a21-self-sunny-day-opponent-crobat-rain	plain	RAIN_DANCE	player	t0	5448	187	body 186	D 187	order none	presented false	cell false	px 302106/302106	identical true	bad 0..186	tail -
+att	a21-self-sunny-day-opponent-crobat-sand	plain	SANDSTORM	player	t0	348	168	body 167	D 168	order fixture	presented false	cell false	px 268483/268483	identical true	bad 0..167	tail -
+att	a21-self-sunny-day-opponent-crobat-sand	plain	SANDSTORM	player	t0	707	167	body 166	D 168	order fixture	presented false	cell false	px 429852/429852	identical true	bad 0..166	tail -
+att	a21-self-sunny-day-opponent-crobat-sand	swap	SUNNY_DAY	opponent	t0	1738	239	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-self-sunny-day-opponent-crobat-sand	plain	SANDSTORM	player	t0	2116	168	body 167	D 168	order fixture	presented false	cell false	px 268483/268483	identical true	bad 0..167	tail -
+att	a21-self-sunny-day-opponent-crobat-sand	plain	SANDSTORM	player	t0	2475	167	body 166	D 168	order fixture	presented false	cell false	px 429852/429852	identical true	bad 0..166	tail -
+att	a21-self-sunny-day-opponent-crobat-sand	swap	SUNNY_DAY	opponent	t0	3404	239	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-self-sunny-day-opponent-crobat-sand	plain	SANDSTORM	player	t0	3782	168	body 167	D 168	order fixture	presented false	cell false	px 268483/268483	identical true	bad 0..167	tail -
+att	a21-self-sunny-day-opponent-crobat-sand	plain	SANDSTORM	player	t0	4141	167	body 166	D 168	order fixture	presented false	cell false	px 429852/429852	identical true	bad 0..166	tail -
+att	a21-self-sunny-day-opponent-crobat-sand	swap	SUNNY_DAY	opponent	t0	5070	239	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-self-sunny-day-opponent-crobat-sand	plain	SANDSTORM	player	t0	5448	168	body 167	D 168	order fixture	presented false	cell false	px 268483/268483	identical true	bad 0..167	tail -
+att	a21-self-sunny-day-opponent-crobat-sand	plain	SANDSTORM	player	t0	5807	167	body 166	D 168	order fixture	presented false	cell false	px 429852/429852	identical true	bad 0..166	tail -
+att	a21-self-sunny-day-opponent-crobat	swap	SUNNY_DAY	opponent	t0	1738	239	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-self-sunny-day-opponent-crobat	plain	SUNNY_DAY	player	t0	3016	157	body 156	D 158	order fixture	presented false	cell true	px 220069/220069	identical true	bad 0..156	tail -
+att	a21-self-sunny-day-opponent-crobat	plain	SUNNY_DAY	player	t0	4375	157	body 156	D 158	order fixture	presented false	cell true	px 457351/457351	identical true	bad 0..156	tail -
+att	a21-self-sunny-day-opponent-crobat	plain	SUNNY_DAY	player	t0	6348	157	body 156	D 158	order fixture	presented false	cell true	px 220069/220069	identical true	bad 0..156	tail -
+att	a21-self-sunny-day-player-azurill	swap	SUNNY_DAY	player	t0	2680	243	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 200/200 k2 0
+att	a21-self-sunny-day-player-azurill	plain	SUNNY_DAY	player	t0	4906	157	body 156	D 158	order fixture	presented false	cell true	px 225842/225842	identical true	bad 0..156	tail -
+att	a21-self-sunny-day-player-snorlax-rain	plain	RAIN_DANCE	opponent	t0	364	187	body 186	D 187	order fixture	presented false	cell false	px 299743/299743	identical true	bad 0..186	tail -
+att	a21-self-sunny-day-player-snorlax-rain	swap	SUNNY_DAY	player	t0	1767	243	body 157	D 158	order none	presented true	cell true	px 766746/766746	identical true	bad 53..162	tail k1 0/0 k2 0
+att	a21-self-sunny-day-player-snorlax-rain	plain	RAIN_DANCE	opponent	t0	2153	187	body 186	D 187	order none	presented false	cell false	px 299669/299669	identical true	bad 0..186	tail -
+att	a21-self-sunny-day-player-snorlax-rain	swap	SUNNY_DAY	player	t0	3465	243	body 157	D 158	order none	presented true	cell true	px 766746/766746	identical true	bad 53..162	tail k1 0/0 k2 0
+att	a21-self-sunny-day-player-snorlax-rain	plain	RAIN_DANCE	opponent	t0	3851	187	body 186	D 187	order none	presented false	cell false	px 299553/299553	identical true	bad 0..186	tail -
+att	a21-self-sunny-day-player-snorlax-rain	swap	SUNNY_DAY	player	t0	5163	243	body 157	D 158	order none	presented true	cell true	px 766746/766746	identical true	bad 53..162	tail k1 0/0 k2 0
+att	a21-self-sunny-day-player-snorlax-rain	plain	RAIN_DANCE	opponent	t0	5549	187	body 186	D 187	order none	presented false	cell false	px 299379/299379	identical true	bad 0..186	tail -
+att	a21-self-sunny-day-player-snorlax-sand	plain	SANDSTORM	opponent	t0	364	168	body 167	D 168	order fixture	presented false	cell false	px 265928/265928	identical true	bad 0..167	tail -
+att	a21-self-sunny-day-player-snorlax-sand	swap	SUNNY_DAY	player	t0	1767	243	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-self-sunny-day-player-snorlax-sand	plain	SANDSTORM	opponent	t0	2153	168	body 167	D 168	order fixture	presented false	cell false	px 265928/265928	identical true	bad 0..167	tail -
+att	a21-self-sunny-day-player-snorlax-sand	swap	SUNNY_DAY	player	t0	3465	243	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-self-sunny-day-player-snorlax-sand	plain	SANDSTORM	opponent	t0	3851	168	body 167	D 168	order fixture	presented false	cell false	px 285238/285238	identical true	bad 0..167	tail -
+att	a21-self-sunny-day-player-snorlax-sand	swap	SUNNY_DAY	player	t0	5163	243	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+att	a21-self-sunny-day-player-snorlax-sand	plain	SANDSTORM	opponent	t0	5549	168	body 167	D 168	order fixture	presented false	cell false	px 265928/265928	identical true	bad 0..167	tail -
+att	a21-self-sunny-day-player-snorlax	swap	SUNNY_DAY	player	t0	1767	243	body 157	D 158	order fixture	presented true	cell true	px 0/0	identical true	bad -	tail k1 0/0 k2 0
+d81	doll81-att-lovely-kiss-player-gengar	LOVELY_KISS	player	t0	1772	px 0/0	tail k1 200/200 k2 0
+d81	doll81-att-lovely-kiss-player-gengar	LOVELY_KISS	player	t0	5168	px 0/0	tail k1 200/200 k2 0
+d81	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t0	1750	px 0/0	tail k1 200/200 k2 0
+d81	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t0	3448	px 0/0	tail k1 200/200 k2 0
+d81	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t0	5146	px 0/0	tail k1 200/200 k2 0
+d81	doll81-att-solar-beam-player-gengar	SOLAR_BEAM	player	t0	6844	px 0/0	tail k1 200/200 k2 0
+d81	doll81-self-sunny-day-player-gengar	SUNNY_DAY	player	t0	1766	px 0/0	tail k1 200/200 k2 0
+later	a21-def-leaf-blade-opponent-azurill-test1	LEAF_BLADE	opponent	1745	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-opponent-azurill-test2	LEAF_BLADE	opponent	3411	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-opponent-azurill-test3	LEAF_BLADE	opponent	5077	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-opponent-crobat-break-test1	LEAF_BLADE	opponent	1744	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-opponent-crobat-break-test2	LEAF_BLADE	opponent	3410	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-opponent-crobat-break-test3	LEAF_BLADE	opponent	5076	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-opponent-crobat-test1	LEAF_BLADE	opponent	1744	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-opponent-crobat-test2	LEAF_BLADE	opponent	3410	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-opponent-crobat-test3	LEAF_BLADE	opponent	5076	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-azurill-test1	LEAF_BLADE	player	353	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-azurill-test2	LEAF_BLADE	player	1915	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-azurill-test3	LEAF_BLADE	player	3581	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-azurill-test4	LEAF_BLADE	player	5247	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-snorlax-break-test1	LEAF_BLADE	player	1741	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-snorlax-break-test2	LEAF_BLADE	player	3407	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-snorlax-break-test3	LEAF_BLADE	player	5073	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-snorlax-test1	LEAF_BLADE	player	1741	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-snorlax-test2	LEAF_BLADE	player	3407	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-leaf-blade-player-snorlax-test3	LEAF_BLADE	player	5073	224	shift 0	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-opponent-azurill-test1	THUNDER_PUNCH	opponent	1749	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-opponent-azurill-test2	THUNDER_PUNCH	opponent	3415	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-opponent-azurill-test3	THUNDER_PUNCH	opponent	5081	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-opponent-crobat-break-test1	THUNDER_PUNCH	opponent	1748	136	shift -10	live true	order fixture	px 200/200	identical true	bad 0
+later	a21-def-thunder-punch-opponent-crobat-break-test2	THUNDER_PUNCH	opponent	3414	136	shift -10	live true	order fixture	px 200/200	identical true	bad 0
+later	a21-def-thunder-punch-opponent-crobat-break-test3	THUNDER_PUNCH	opponent	5080	136	shift -10	live true	order fixture	px 200/200	identical true	bad 0
+later	a21-def-thunder-punch-opponent-crobat-test1	THUNDER_PUNCH	opponent	1748	136	shift -10	live true	order fixture	px 200/200	identical true	bad 0
+later	a21-def-thunder-punch-opponent-crobat-test2	THUNDER_PUNCH	opponent	3414	136	shift -10	live true	order fixture	px 200/200	identical true	bad 0
+later	a21-def-thunder-punch-opponent-crobat-test3	THUNDER_PUNCH	opponent	5080	136	shift -10	live true	order fixture	px 200/200	identical true	bad 0
+later	a21-def-thunder-punch-player-azurill-test1	THUNDER_PUNCH	player	357	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-player-azurill-test2	THUNDER_PUNCH	player	1919	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-player-azurill-test3	THUNDER_PUNCH	player	3585	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-player-azurill-test4	THUNDER_PUNCH	player	5251	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-player-snorlax-break-test1	THUNDER_PUNCH	player	1745	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-player-snorlax-break-test2	THUNDER_PUNCH	player	3411	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-player-snorlax-break-test3	THUNDER_PUNCH	player	5077	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-player-snorlax-test1	THUNDER_PUNCH	player	1745	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-player-snorlax-test2	THUNDER_PUNCH	player	3411	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+later	a21-def-thunder-punch-player-snorlax-test3	THUNDER_PUNCH	player	5077	136	shift -10	live true	order fixture	px 0/0	identical true	bad -
+def	a21-def-leaf-blade-opponent-azurill	LEAF_BLADE	opponent	1745	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -
+def	a21-def-leaf-blade-opponent-crobat-break	LEAF_BLADE	opponent	1744	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -
+def	a21-def-leaf-blade-opponent-crobat	LEAF_BLADE	opponent	1744	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -
+def	a21-def-leaf-blade-player-azurill	LEAF_BLADE	player	353	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control MISSING (the doll is up before the first body)
+def	a21-def-leaf-blade-player-snorlax-break	LEAF_BLADE	player	1741	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -
+def	a21-def-leaf-blade-player-snorlax	LEAF_BLADE	player	1741	224	shift 0	D 224	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -
+def	a21-def-thunder-punch-opponent-azurill	THUNDER_PUNCH	opponent	1749	136	shift -10	D 104	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -
+def	a21-def-thunder-punch-opponent-crobat-break	THUNDER_PUNCH	opponent	1748	136	shift -10	D 104	order fixture	live true	px 200/200	identical true	bad 0	control px 200/200 bad 0
+def	a21-def-thunder-punch-opponent-crobat	THUNDER_PUNCH	opponent	1748	136	shift -10	D 104	order fixture	live true	px 200/200	identical true	bad 0	control px 200/200 bad 0
+def	a21-def-thunder-punch-player-azurill	THUNDER_PUNCH	player	357	136	shift -10	D 104	order fixture	live true	px 0/0	identical true	bad -	control MISSING (the doll is up before the first body)
+def	a21-def-thunder-punch-player-snorlax-break	THUNDER_PUNCH	player	1745	136	shift -10	D 104	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -
+def	a21-def-thunder-punch-player-snorlax	THUNDER_PUNCH	player	1745	136	shift -10	D 104	order fixture	live true	px 0/0	identical true	bad -	control px 0/0 bad -

@@ -1,0 +1,94 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-iw-rain-at-hpopp-lapras",
+ "rows": [
+  {
+   "fixture": "a21-iw-rain-at-hpopp-lapras-c0.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "species": "LAPRAS/HOPPIP",
+   "units": 1,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "240@1 196@0"
+   ],
+   "romPower": 55,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 55
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 398,
+    "endFrame": 684
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 240:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

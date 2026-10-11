@@ -1,0 +1,568 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-iw-normal-by-cfply-golbat",
+ "rows": [
+  {
+   "fixture": "a21-iw-normal-by-cfply-golbat-c0.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "species": "CASTFORM/GOLBAT",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 196@0"
+   ],
+   "romPower": 55,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 55
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 456,
+    "endFrame": 741
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 286,
+    "exactRows": 268,
+    "px": 341790,
+    "digests": [
+     "2e7092eac495386f",
+     "2e7092eac495386f"
+    ],
+    "residualRows": [
+     [
+      263,
+      18822
+     ],
+     [
+      264,
+      18822
+     ],
+     [
+      265,
+      18822
+     ],
+     [
+      266,
+      18822
+     ],
+     [
+      267,
+      18822
+     ],
+     [
+      268,
+      18822
+     ],
+     [
+      269,
+      18822
+     ],
+     [
+      270,
+      19563
+     ],
+     [
+      271,
+      18822
+     ],
+     [
+      272,
+      18822
+     ],
+     [
+      273,
+      18822
+     ],
+     [
+      274,
+      18822
+     ],
+     [
+      275,
+      19561
+     ],
+     [
+      276,
+      18822
+     ],
+     [
+      277,
+      18822
+     ],
+     [
+      278,
+      18822
+     ],
+     [
+      280,
+      19563
+     ],
+     [
+      285,
+      19595
+     ]
+    ],
+    "detail": [
+     {
+      "age": 263,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 100f0f live 000000"
+     },
+     {
+      "age": 264,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 201f1f live 100f0f"
+     },
+     {
+      "age": 265,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 242323 live 201f1f"
+     },
+     {
+      "age": 266,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 302f2f live 242323"
+     },
+     {
+      "age": 267,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 3c3b3b live 302f2f"
+     },
+     {
+      "age": 268,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 474646 live 3c3b3b"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 286,
+    "exactRows": 268,
+    "px": 341790,
+    "digests": [
+     "2e7092eac495386f",
+     "2e7092eac495386f"
+    ],
+    "residualRows": [
+     [
+      263,
+      18822
+     ],
+     [
+      264,
+      18822
+     ],
+     [
+      265,
+      18822
+     ],
+     [
+      266,
+      18822
+     ],
+     [
+      267,
+      18822
+     ],
+     [
+      268,
+      18822
+     ],
+     [
+      269,
+      18822
+     ],
+     [
+      270,
+      19563
+     ],
+     [
+      271,
+      18822
+     ],
+     [
+      272,
+      18822
+     ],
+     [
+      273,
+      18822
+     ],
+     [
+      274,
+      18822
+     ],
+     [
+      275,
+      19561
+     ],
+     [
+      276,
+      18822
+     ],
+     [
+      277,
+      18822
+     ],
+     [
+      278,
+      18822
+     ],
+     [
+      280,
+      19563
+     ],
+     [
+      285,
+      19595
+     ]
+    ],
+    "detail": [
+     {
+      "age": 263,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 100f0f live 000000"
+     },
+     {
+      "age": 264,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 201f1f live 100f0f"
+     },
+     {
+      "age": 265,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 242323 live 201f1f"
+     },
+     {
+      "age": 266,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 302f2f live 242323"
+     },
+     {
+      "age": 267,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 3c3b3b live 302f2f"
+     },
+     {
+      "age": 268,
+      "px": 18822,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom 474646 live 3c3b3b"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "a21-iw-normal-by-cfply-golbat-c1.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "species": "CASTFORM/GOLBAT",
+   "units": 7,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 196@0 HIT_ANIMATION@1 STATS_CHANGE(24)@1",
+    "351@1 HIT_ANIMATION@0 196@0"
+   ],
+   "romPower": 55,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 55
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1790,
+    "endFrame": 2076
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-iw-normal-by-cfply-golbat-c2.json",
+   "move": "ICY_WIND",
+   "side": "player",
+   "species": "CASTFORM/GOLBAT",
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 196@0 HIT_ANIMATION@1 STATS_CHANGE(24)@1",
+    "351@1 HIT_ANIMATION@0 196@0 HIT_ANIMATION@1 STATS_CHANGE(24)@1",
+    "196@0"
+   ],
+   "romPower": 55,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 55
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2744,
+    "endFrame": 3030
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 287,
+    "exactRows": 287,
+    "px": 0,
+    "digests": [
+     "86c8d5f4d156e929",
+     "86c8d5f4d156e929"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

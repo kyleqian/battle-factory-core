@@ -1,0 +1,1661 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "c83-sun-ember-by-cfopp",
+ "rows": [
+  {
+   "fixture": "c83-sun-ember-by-cfopp-c0.json",
+   "move": "EMBER",
+   "side": "opponent",
+   "species": "CASTFORM/MANTINE",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "241@0 CASTFORM_CHANGE(1)@1 52@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 583,
+    "endFrame": 645,
+    "ageOffset": 0,
+    "bodyStartFrame": 579,
+    "bodyEndFrame": 648
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 52:by:1: Ember's own residual (11,651 / 12,314 px; the normal-form control 11,653 / 12,310 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 0,
+    "px": 20110,
+    "digests": [
+     "41e81590ce0d45f1",
+     "41e81590ce0d45f1"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      218
+     ],
+     [
+      2,
+      218
+     ],
+     [
+      3,
+      218
+     ],
+     [
+      4,
+      218
+     ],
+     [
+      5,
+      218
+     ],
+     [
+      6,
+      218
+     ],
+     [
+      7,
+      236
+     ],
+     [
+      8,
+      236
+     ],
+     [
+      9,
+      236
+     ],
+     [
+      10,
+      236
+     ],
+     [
+      11,
+      236
+     ],
+     [
+      12,
+      236
+     ],
+     [
+      13,
+      254
+     ],
+     [
+      14,
+      254
+     ],
+     [
+      15,
+      254
+     ],
+     [
+      16,
+      254
+     ],
+     [
+      17,
+      254
+     ],
+     [
+      18,
+      254
+     ],
+     [
+      19,
+      254
+     ],
+     [
+      20,
+      254
+     ],
+     [
+      21,
+      254
+     ],
+     [
+      22,
+      236
+     ],
+     [
+      23,
+      236
+     ],
+     [
+      24,
+      236
+     ],
+     [
+      25,
+      236
+     ],
+     [
+      26,
+      236
+     ],
+     [
+      27,
+      236
+     ],
+     [
+      28,
+      218
+     ],
+     [
+      29,
+      218
+     ],
+     [
+      30,
+      218
+     ],
+     [
+      31,
+      236
+     ],
+     [
+      32,
+      236
+     ],
+     [
+      33,
+      236
+     ],
+     [
+      34,
+      285
+     ],
+     [
+      35,
+      285
+     ],
+     [
+      36,
+      285
+     ],
+     [
+      37,
+      303
+     ],
+     [
+      38,
+      417
+     ],
+     [
+      39,
+      417
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 1,
+      "px": 218,
+      "bbox": [
+       151,
+       191,
+       36,
+       72
+      ],
+      "sample": "153,36 rom ff0000 live ffffff"
+     },
+     {
+      "age": 2,
+      "px": 218,
+      "bbox": [
+       148,
+       191,
+       39,
+       72
+      ],
+      "sample": "150,39 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 3,
+      "px": 218,
+      "bbox": [
+       144,
+       191,
+       43,
+       72
+      ],
+      "sample": "146,43 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 4,
+      "px": 218,
+      "bbox": [
+       141,
+       191,
+       46,
+       72
+      ],
+      "sample": "143,46 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 5,
+      "px": 218,
+      "bbox": [
+       137,
+       191,
+       50,
+       72
+      ],
+      "sample": "139,50 rom ff0000 live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 52:by:1: Ember's own residual (11,651 / 12,314 px; the normal-form control 11,653 / 12,310 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 0,
+    "px": 20110,
+    "digests": [
+     "41e81590ce0d45f1",
+     "41e81590ce0d45f1"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      218
+     ],
+     [
+      2,
+      218
+     ],
+     [
+      3,
+      218
+     ],
+     [
+      4,
+      218
+     ],
+     [
+      5,
+      218
+     ],
+     [
+      6,
+      218
+     ],
+     [
+      7,
+      236
+     ],
+     [
+      8,
+      236
+     ],
+     [
+      9,
+      236
+     ],
+     [
+      10,
+      236
+     ],
+     [
+      11,
+      236
+     ],
+     [
+      12,
+      236
+     ],
+     [
+      13,
+      254
+     ],
+     [
+      14,
+      254
+     ],
+     [
+      15,
+      254
+     ],
+     [
+      16,
+      254
+     ],
+     [
+      17,
+      254
+     ],
+     [
+      18,
+      254
+     ],
+     [
+      19,
+      254
+     ],
+     [
+      20,
+      254
+     ],
+     [
+      21,
+      254
+     ],
+     [
+      22,
+      236
+     ],
+     [
+      23,
+      236
+     ],
+     [
+      24,
+      236
+     ],
+     [
+      25,
+      236
+     ],
+     [
+      26,
+      236
+     ],
+     [
+      27,
+      236
+     ],
+     [
+      28,
+      218
+     ],
+     [
+      29,
+      218
+     ],
+     [
+      30,
+      218
+     ],
+     [
+      31,
+      236
+     ],
+     [
+      32,
+      236
+     ],
+     [
+      33,
+      236
+     ],
+     [
+      34,
+      285
+     ],
+     [
+      35,
+      285
+     ],
+     [
+      36,
+      285
+     ],
+     [
+      37,
+      303
+     ],
+     [
+      38,
+      417
+     ],
+     [
+      39,
+      417
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 1,
+      "px": 218,
+      "bbox": [
+       151,
+       191,
+       36,
+       72
+      ],
+      "sample": "153,36 rom ff0000 live ffffff"
+     },
+     {
+      "age": 2,
+      "px": 218,
+      "bbox": [
+       148,
+       191,
+       39,
+       72
+      ],
+      "sample": "150,39 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 3,
+      "px": 218,
+      "bbox": [
+       144,
+       191,
+       43,
+       72
+      ],
+      "sample": "146,43 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 4,
+      "px": 218,
+      "bbox": [
+       141,
+       191,
+       46,
+       72
+      ],
+      "sample": "143,46 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 5,
+      "px": 218,
+      "bbox": [
+       137,
+       191,
+       50,
+       72
+      ],
+      "sample": "139,50 rom ff0000 live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "c83-sun-ember-by-cfopp-c1.json",
+   "move": "EMBER",
+   "side": "opponent",
+   "species": "CASTFORM/MANTINE",
+   "units": 5,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "241@0 CASTFORM_CHANGE(1)@1 52@1 HIT_ANIMATION@0 SUN_CONTINUES@0",
+    "52@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1575,
+    "endFrame": 1637,
+    "ageOffset": 0,
+    "bodyStartFrame": 1571,
+    "bodyEndFrame": 1640
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 52:by:1: Ember's own residual (11,651 / 12,314 px; the normal-form control 11,653 / 12,310 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 0,
+    "px": 20110,
+    "digests": [
+     "41e81590ce0d45f1",
+     "41e81590ce0d45f1"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      218
+     ],
+     [
+      2,
+      218
+     ],
+     [
+      3,
+      218
+     ],
+     [
+      4,
+      218
+     ],
+     [
+      5,
+      218
+     ],
+     [
+      6,
+      218
+     ],
+     [
+      7,
+      236
+     ],
+     [
+      8,
+      236
+     ],
+     [
+      9,
+      236
+     ],
+     [
+      10,
+      236
+     ],
+     [
+      11,
+      236
+     ],
+     [
+      12,
+      236
+     ],
+     [
+      13,
+      254
+     ],
+     [
+      14,
+      254
+     ],
+     [
+      15,
+      254
+     ],
+     [
+      16,
+      254
+     ],
+     [
+      17,
+      254
+     ],
+     [
+      18,
+      254
+     ],
+     [
+      19,
+      254
+     ],
+     [
+      20,
+      254
+     ],
+     [
+      21,
+      254
+     ],
+     [
+      22,
+      236
+     ],
+     [
+      23,
+      236
+     ],
+     [
+      24,
+      236
+     ],
+     [
+      25,
+      236
+     ],
+     [
+      26,
+      236
+     ],
+     [
+      27,
+      236
+     ],
+     [
+      28,
+      218
+     ],
+     [
+      29,
+      218
+     ],
+     [
+      30,
+      218
+     ],
+     [
+      31,
+      236
+     ],
+     [
+      32,
+      236
+     ],
+     [
+      33,
+      236
+     ],
+     [
+      34,
+      285
+     ],
+     [
+      35,
+      285
+     ],
+     [
+      36,
+      285
+     ],
+     [
+      37,
+      303
+     ],
+     [
+      38,
+      417
+     ],
+     [
+      39,
+      417
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 1,
+      "px": 218,
+      "bbox": [
+       151,
+       191,
+       36,
+       72
+      ],
+      "sample": "153,36 rom ff0000 live ffffff"
+     },
+     {
+      "age": 2,
+      "px": 218,
+      "bbox": [
+       148,
+       191,
+       39,
+       72
+      ],
+      "sample": "150,39 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 3,
+      "px": 218,
+      "bbox": [
+       144,
+       191,
+       43,
+       72
+      ],
+      "sample": "146,43 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 4,
+      "px": 218,
+      "bbox": [
+       141,
+       191,
+       46,
+       72
+      ],
+      "sample": "143,46 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 5,
+      "px": 218,
+      "bbox": [
+       137,
+       191,
+       50,
+       72
+      ],
+      "sample": "139,50 rom ff0000 live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 52:by:1: Ember's own residual (11,651 / 12,314 px; the normal-form control 11,653 / 12,310 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 0,
+    "px": 20110,
+    "digests": [
+     "41e81590ce0d45f1",
+     "41e81590ce0d45f1"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      218
+     ],
+     [
+      2,
+      218
+     ],
+     [
+      3,
+      218
+     ],
+     [
+      4,
+      218
+     ],
+     [
+      5,
+      218
+     ],
+     [
+      6,
+      218
+     ],
+     [
+      7,
+      236
+     ],
+     [
+      8,
+      236
+     ],
+     [
+      9,
+      236
+     ],
+     [
+      10,
+      236
+     ],
+     [
+      11,
+      236
+     ],
+     [
+      12,
+      236
+     ],
+     [
+      13,
+      254
+     ],
+     [
+      14,
+      254
+     ],
+     [
+      15,
+      254
+     ],
+     [
+      16,
+      254
+     ],
+     [
+      17,
+      254
+     ],
+     [
+      18,
+      254
+     ],
+     [
+      19,
+      254
+     ],
+     [
+      20,
+      254
+     ],
+     [
+      21,
+      254
+     ],
+     [
+      22,
+      236
+     ],
+     [
+      23,
+      236
+     ],
+     [
+      24,
+      236
+     ],
+     [
+      25,
+      236
+     ],
+     [
+      26,
+      236
+     ],
+     [
+      27,
+      236
+     ],
+     [
+      28,
+      218
+     ],
+     [
+      29,
+      218
+     ],
+     [
+      30,
+      218
+     ],
+     [
+      31,
+      236
+     ],
+     [
+      32,
+      236
+     ],
+     [
+      33,
+      236
+     ],
+     [
+      34,
+      285
+     ],
+     [
+      35,
+      285
+     ],
+     [
+      36,
+      285
+     ],
+     [
+      37,
+      303
+     ],
+     [
+      38,
+      417
+     ],
+     [
+      39,
+      417
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 1,
+      "px": 218,
+      "bbox": [
+       151,
+       191,
+       36,
+       72
+      ],
+      "sample": "153,36 rom ff0000 live ffffff"
+     },
+     {
+      "age": 2,
+      "px": 218,
+      "bbox": [
+       148,
+       191,
+       39,
+       72
+      ],
+      "sample": "150,39 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 3,
+      "px": 218,
+      "bbox": [
+       144,
+       191,
+       43,
+       72
+      ],
+      "sample": "146,43 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 4,
+      "px": 218,
+      "bbox": [
+       141,
+       191,
+       46,
+       72
+      ],
+      "sample": "143,46 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 5,
+      "px": 218,
+      "bbox": [
+       137,
+       191,
+       50,
+       72
+      ],
+      "sample": "139,50 rom ff0000 live f7f7ff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "c83-sun-ember-by-cfopp-c2.json",
+   "move": "EMBER",
+   "side": "opponent",
+   "species": "CASTFORM/MANTINE",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "241@0 CASTFORM_CHANGE(1)@1 52@1 HIT_ANIMATION@0 SUN_CONTINUES@0",
+    "52@1 HIT_ANIMATION@0 SUN_CONTINUES@0",
+    "52@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2909,
+    "endFrame": 2971,
+    "ageOffset": 0,
+    "bodyStartFrame": 2905,
+    "bodyEndFrame": 2974
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 52:by:1: Ember's own residual (11,651 / 12,314 px; the normal-form control 11,653 / 12,310 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 0,
+    "px": 20110,
+    "digests": [
+     "41e81590ce0d45f1",
+     "41e81590ce0d45f1"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      218
+     ],
+     [
+      2,
+      218
+     ],
+     [
+      3,
+      218
+     ],
+     [
+      4,
+      218
+     ],
+     [
+      5,
+      218
+     ],
+     [
+      6,
+      218
+     ],
+     [
+      7,
+      236
+     ],
+     [
+      8,
+      236
+     ],
+     [
+      9,
+      236
+     ],
+     [
+      10,
+      236
+     ],
+     [
+      11,
+      236
+     ],
+     [
+      12,
+      236
+     ],
+     [
+      13,
+      254
+     ],
+     [
+      14,
+      254
+     ],
+     [
+      15,
+      254
+     ],
+     [
+      16,
+      254
+     ],
+     [
+      17,
+      254
+     ],
+     [
+      18,
+      254
+     ],
+     [
+      19,
+      254
+     ],
+     [
+      20,
+      254
+     ],
+     [
+      21,
+      254
+     ],
+     [
+      22,
+      236
+     ],
+     [
+      23,
+      236
+     ],
+     [
+      24,
+      236
+     ],
+     [
+      25,
+      236
+     ],
+     [
+      26,
+      236
+     ],
+     [
+      27,
+      236
+     ],
+     [
+      28,
+      218
+     ],
+     [
+      29,
+      218
+     ],
+     [
+      30,
+      218
+     ],
+     [
+      31,
+      236
+     ],
+     [
+      32,
+      236
+     ],
+     [
+      33,
+      236
+     ],
+     [
+      34,
+      285
+     ],
+     [
+      35,
+      285
+     ],
+     [
+      36,
+      285
+     ],
+     [
+      37,
+      303
+     ],
+     [
+      38,
+      417
+     ],
+     [
+      39,
+      417
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 1,
+      "px": 218,
+      "bbox": [
+       151,
+       191,
+       36,
+       72
+      ],
+      "sample": "153,36 rom ff0000 live ffffff"
+     },
+     {
+      "age": 2,
+      "px": 218,
+      "bbox": [
+       148,
+       191,
+       39,
+       72
+      ],
+      "sample": "150,39 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 3,
+      "px": 218,
+      "bbox": [
+       144,
+       191,
+       43,
+       72
+      ],
+      "sample": "146,43 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 4,
+      "px": 218,
+      "bbox": [
+       141,
+       191,
+       46,
+       72
+      ],
+      "sample": "143,46 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 5,
+      "px": 218,
+      "bbox": [
+       137,
+       191,
+       50,
+       72
+      ],
+      "sample": "139,50 rom ff0000 live f7f7ff"
+     }
+    ]
+   },
+   "entry": {
+    "live": false,
+    "decline": "CASTFORM shown in a weather form: measured residual 52:by:1: Ember's own residual (11,651 / 12,314 px; the normal-form control 11,653 / 12,310 px) (cast83, ISSUES #143)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 0,
+    "px": 20110,
+    "digests": [
+     "41e81590ce0d45f1",
+     "41e81590ce0d45f1"
+    ],
+    "residualRows": [
+     [
+      0,
+      200
+     ],
+     [
+      1,
+      218
+     ],
+     [
+      2,
+      218
+     ],
+     [
+      3,
+      218
+     ],
+     [
+      4,
+      218
+     ],
+     [
+      5,
+      218
+     ],
+     [
+      6,
+      218
+     ],
+     [
+      7,
+      236
+     ],
+     [
+      8,
+      236
+     ],
+     [
+      9,
+      236
+     ],
+     [
+      10,
+      236
+     ],
+     [
+      11,
+      236
+     ],
+     [
+      12,
+      236
+     ],
+     [
+      13,
+      254
+     ],
+     [
+      14,
+      254
+     ],
+     [
+      15,
+      254
+     ],
+     [
+      16,
+      254
+     ],
+     [
+      17,
+      254
+     ],
+     [
+      18,
+      254
+     ],
+     [
+      19,
+      254
+     ],
+     [
+      20,
+      254
+     ],
+     [
+      21,
+      254
+     ],
+     [
+      22,
+      236
+     ],
+     [
+      23,
+      236
+     ],
+     [
+      24,
+      236
+     ],
+     [
+      25,
+      236
+     ],
+     [
+      26,
+      236
+     ],
+     [
+      27,
+      236
+     ],
+     [
+      28,
+      218
+     ],
+     [
+      29,
+      218
+     ],
+     [
+      30,
+      218
+     ],
+     [
+      31,
+      236
+     ],
+     [
+      32,
+      236
+     ],
+     [
+      33,
+      236
+     ],
+     [
+      34,
+      285
+     ],
+     [
+      35,
+      285
+     ],
+     [
+      36,
+      285
+     ],
+     [
+      37,
+      303
+     ],
+     [
+      38,
+      417
+     ],
+     [
+      39,
+      417
+     ]
+    ],
+    "detail": [
+     {
+      "age": 0,
+      "px": 200,
+      "bbox": [
+       160,
+       191,
+       65,
+       72
+      ],
+      "sample": "169,65 rom bdbd9c live 526b63"
+     },
+     {
+      "age": 1,
+      "px": 218,
+      "bbox": [
+       151,
+       191,
+       36,
+       72
+      ],
+      "sample": "153,36 rom ff0000 live ffffff"
+     },
+     {
+      "age": 2,
+      "px": 218,
+      "bbox": [
+       148,
+       191,
+       39,
+       72
+      ],
+      "sample": "150,39 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 3,
+      "px": 218,
+      "bbox": [
+       144,
+       191,
+       43,
+       72
+      ],
+      "sample": "146,43 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 4,
+      "px": 218,
+      "bbox": [
+       141,
+       191,
+       46,
+       72
+      ],
+      "sample": "143,46 rom ff0000 live f7f7ff"
+     },
+     {
+      "age": 5,
+      "px": 218,
+      "bbox": [
+       137,
+       191,
+       50,
+       72
+      ],
+      "sample": "139,50 rom ff0000 live f7f7ff"
+     }
+    ]
+   }
+  }
+ ]
+}

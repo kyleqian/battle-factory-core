@@ -1,0 +1,162 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "a21-self-sunny-day-player-azurill",
+   "kind": "swap",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 2680,
+   "activation": 2723,
+   "window": [
+    2680,
+    2922
+   ],
+   "rows": 243,
+   "swapInRows": 42,
+   "romBodyRows": 157,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3511631997,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 243,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 243,
+    "digests": [
+     "1bc79a801e5baff1",
+     "1bc79a801e5baff1"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    775,
+    37
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-self-sunny-day-player-azurill",
+   "kind": "plain",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 4906,
+   "activation": 4906,
+   "window": [
+    4906,
+    5062
+   ],
+   "rows": 157,
+   "swapInRows": -1,
+   "romBodyRows": 156,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 2496299968,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     225842,
+     225842
+    ],
+    "exactRows": 0,
+    "digests": [
+     "84753e538b6369de",
+     "84753e538b6369de"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..156"
+    ],
+    "maxPxRow": 6902,
+    "firstBad": [
+     [
+      0,
+      1046,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ],
+     [
+      1,
+      1046,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ],
+     [
+      2,
+      1046,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ],
+     [
+      3,
+      1046,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    200,
+    0,
+    0,
+    589
+   ]
+  }
+ ]
+}

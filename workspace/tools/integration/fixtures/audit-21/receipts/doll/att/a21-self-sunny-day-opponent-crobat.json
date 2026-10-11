@@ -1,0 +1,344 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 1738,
+   "activation": 1779,
+   "window": [
+    1738,
+    1976
+   ],
+   "rows": 239,
+   "swapInRows": 40,
+   "romBodyRows": 157,
+   "swapBackRows": 40,
+   "orderInput": "fixture",
+   "pinnedRng2": 1930105486,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 239,
+   "swapPresented": true,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 239,
+    "digests": [
+     "b994043e74c43245",
+     "b994043e74c43245"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    853,
+    37
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat",
+   "kind": "plain",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 3016,
+   "activation": 3016,
+   "window": [
+    3016,
+    3172
+   ],
+   "rows": 157,
+   "swapInRows": -1,
+   "romBodyRows": 156,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 233050167,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     220069,
+     220069
+    ],
+    "exactRows": 0,
+    "digests": [
+     "58ac8afa21b8b0c0",
+     "58ac8afa21b8b0c0"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..156"
+    ],
+    "maxPxRow": 6695,
+    "firstBad": [
+     [
+      0,
+      1007,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ],
+     [
+      1,
+      1007,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ],
+     [
+      2,
+      1007,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ],
+     [
+      3,
+      1007,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    200,
+    0,
+    0,
+    589
+   ]
+  },
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat",
+   "kind": "plain",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 4375,
+   "activation": 4375,
+   "window": [
+    4375,
+    4531
+   ],
+   "rows": 157,
+   "swapInRows": -1,
+   "romBodyRows": 156,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 3004717771,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     457351,
+     457351
+    ],
+    "exactRows": 0,
+    "digests": [
+     "132e3019ef39b0ff",
+     "132e3019ef39b0ff"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..156"
+    ],
+    "maxPxRow": 6727,
+    "firstBad": [
+     [
+      0,
+      2703,
+      [
+       16,
+       3,
+       206,
+       149
+      ]
+     ],
+     [
+      1,
+      2630,
+      [
+       16,
+       3,
+       206,
+       149
+      ]
+     ],
+     [
+      2,
+      2630,
+      [
+       16,
+       3,
+       206,
+       149
+      ]
+     ],
+     [
+      3,
+      2630,
+      [
+       16,
+       3,
+       206,
+       149
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    0,
+    0,
+    0,
+    589
+   ]
+  },
+  {
+   "stem": "a21-self-sunny-day-opponent-crobat",
+   "kind": "plain",
+   "side": "player",
+   "move": "SUNNY_DAY",
+   "moveId": 241,
+   "turn": 0,
+   "frame": 6348,
+   "activation": 6348,
+   "window": [
+    6348,
+    6504
+   ],
+   "rows": 157,
+   "swapInRows": -1,
+   "romBodyRows": 156,
+   "swapBackRows": 0,
+   "orderInput": "fixture",
+   "pinnedRng2": 1071922259,
+   "adapterDuration": 158,
+   "multihit": 0,
+   "productionDuration": 158,
+   "swapPresented": false,
+   "cell": true,
+   "framing": null,
+   "prod": {
+    "px": [
+     220069,
+     220069
+    ],
+    "exactRows": 0,
+    "digests": [
+     "58ac8afa21b8b0c0",
+     "58ac8afa21b8b0c0"
+    ],
+    "identical": true,
+    "badAges": [
+     "0..156"
+    ],
+    "maxPxRow": 6695,
+    "firstBad": [
+     [
+      0,
+      1007,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ],
+     [
+      1,
+      1007,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ],
+     [
+      2,
+      1007,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ],
+     [
+      3,
+      1007,
+      [
+       16,
+       124,
+       134,
+       149
+      ]
+     ]
+    ]
+   },
+   "romChangesAfter": [
+    0,
+    200,
+    0,
+    0,
+    589
+   ]
+  }
+ ]
+}

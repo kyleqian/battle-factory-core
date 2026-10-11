@@ -1,0 +1,299 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "a21-cx-ember-by-hpply-crobat",
+ "rows": [
+  {
+   "fixture": "a21-cx-ember-by-hpply-crobat-c0.json",
+   "move": "EMBER",
+   "side": "player",
+   "species": "HOPPIP/CROBAT",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 52@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 461,
+    "endFrame": 523,
+    "ageOffset": 0,
+    "bodyStartFrame": 457,
+    "bodyEndFrame": 526
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 63,
+    "px": 0,
+    "digests": [
+     "3e9498459eefc103",
+     "3e9498459eefc103"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 63,
+    "px": 0,
+    "digests": [
+     "3e9498459eefc103",
+     "3e9498459eefc103"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cx-ember-by-hpply-crobat-c1.json",
+   "move": "EMBER",
+   "side": "player",
+   "species": "HOPPIP/CROBAT",
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 52@0 HIT_ANIMATION@1",
+    "351@1 HIT_ANIMATION@0 52@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1795,
+    "endFrame": 1857,
+    "ageOffset": 0,
+    "bodyStartFrame": 1791,
+    "bodyEndFrame": 1860
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 63,
+    "px": 0,
+    "digests": [
+     "3e9498459eefc103",
+     "3e9498459eefc103"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 63,
+    "px": 0,
+    "digests": [
+     "3e9498459eefc103",
+     "3e9498459eefc103"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a21-cx-ember-by-hpply-crobat-c2.json",
+   "move": "EMBER",
+   "side": "player",
+   "species": "HOPPIP/CROBAT",
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "351@1 HIT_ANIMATION@0 52@0 HIT_ANIMATION@1",
+    "351@1 HIT_ANIMATION@0 52@0 HIT_ANIMATION@1",
+    "351@1 HIT_ANIMATION@0 52@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3127,
+    "endFrame": 3189,
+    "ageOffset": 0,
+    "bodyStartFrame": 3123,
+    "bodyEndFrame": 3192
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 63,
+    "px": 0,
+    "digests": [
+     "3e9498459eefc103",
+     "3e9498459eefc103"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 63,
+    "exactRows": 63,
+    "px": 0,
+    "digests": [
+     "3e9498459eefc103",
+     "3e9498459eefc103"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}
