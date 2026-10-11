@@ -132,7 +132,9 @@ Tested code `640b0bdbe` (production `0473845bc`, src tree `26b82677`); the docs 
 - `npm run build`: exit 0.
 - `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base d46da5755`: **PASS, 624 / 624 captures byte-identical**.
 - `git diff --check`: clean.
-- **Runner** `ctl95Run.sh` into a fresh dir on src `26b82677`: same scenarios, 30 scenarios r1 == r2, every row as committed in `receipts/summary.tsv`.
+- **Runner** `ctl95Run.sh`, run twice into fresh dirs on src `26b82677`, each time: same scenarios, 30 scenarios r1 == r2.
+  - Run 1 (`640b0bdbe`) produced `receipts/summary.tsv`.
+  - Run 2 (`0bc6e2516`, after the receipts were committed) printed **same summary.tsv**.
 
 ## Reproduce
 
