@@ -69,3 +69,17 @@ node --experimental-strip-types --no-warnings tools/integration/sc106LiveShareCe
 python3 tools/integration/sc106CensusDelta.py <base-dir> <final-dir> tools/integration/fixtures/stat101/exposure.json <out.json>
 python3 tools/integration/sc106Pins.py <patched-npm-test.log> "<tree>" tools/integration/fixtures/sc106/pins.json
 ```
+
+## 5. Gates (final code: production == `563eebd0a`, tests / tools / docs through this commit)
+
+- Targeted (serialized, 4 workers): sc106StatsChangeCommand, battleTurnPortability, liveSpriteOrderHost, animationBoundaryRatchet,
+  battleResolutionPresentation, statsChangeReducer, factoryAnimationInventory, playableAnimationIntegration, substituteFadePresentation:
+  **9 files / 125 tests passed**.
+- `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
+- Full suite, two foreground shards (4 workers): shard 1 **814 files / 6,992 tests passed**. Shard 2 **813 files passed, 1 failed:
+  6,402 tests passed, 4 failed** = the 4 reported `randomRoundSoak` pins (section 3), nothing else.
+- `npm run build`: green.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 52c181d54`:
+  **PASS, 624 / 624 captures byte-identical** (both canonical railroad traces and the app-only presentation-rng trace; no capture moved).
+- `sh tools/integration/sc106Run.sh <fresh>`: **ALL SAME** (receipt reproduced from fresh archives of 52c181d54 and HEAD, census included).
+- Patched-copy enumeration (`fixtures/sc106/pins.json`): 1,625 files / 13,392 tests passed, 6 failed (2 moved, 4 reported).
