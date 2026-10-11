@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
-import { land97Ages } from "./helpers/land97LeadAges.ts";
 
 describe("ordinary contact animation command lifecycle", () => {
   it("renders each Twineedle hit, then KO/replacement before the next target's hits", () => {
