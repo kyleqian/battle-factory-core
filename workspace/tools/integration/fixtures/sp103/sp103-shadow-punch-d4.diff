@@ -1,0 +1,333 @@
+diff --git a/docs/animation-integration-live-status.json b/docs/animation-integration-live-status.json
+index 417c4d0d..9376766c 100644
+--- a/docs/animation-integration-live-status.json
++++ b/docs/animation-integration-live-status.json
+@@ -752,21 +752,6 @@
+         "ordinary command-input replay"
+       ]
+     },
+-    {
+-      "move": "MOVE_SHADOW_PUNCH",
+-      "id": 325,
+-      "liveEvidence": [
+-        "opening-draft input: HAUNTER -> GROVYLE",
+-        "generated seed 54 command input: HAUNTER -> WAILMER"
+-      ],
+-      "remaining": [
+-        "source BG restore / VBlank timing and final cleanup under changed battle history",
+-        "persistent palette/resource allocation through switch and unknown graphics",
+-        "whole-playable arbitrary-history source comparison"
+-      ],
+-      "paletteHistoryEvidence": "../tools/integration/fixtures/live-palette-history-receipt.json",
+-      "framebufferDiagnosis": "../tools/integration/fixtures/live-palette-framebuffer-diagnosis.json"
+-    },
+     {
+       "move": "MOVE_HOWL",
+       "id": 336,
+@@ -3643,7 +3628,7 @@
+   "foldedVerifiedSnapshot": "8fb2afbc1",
+   "currentAcceptedFactoryMoves": 276,
+   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
+-  "implementedCount": 238,
++  "implementedCount": 237,
+   "playableExactCount": 0,
+   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
+   "faithfulRandomCount": 13,
+@@ -3820,7 +3805,7 @@
+     },
+     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
+   },
+-  "faithfulTimingCount": 25,
++  "faithfulTimingCount": 26,
+   "faithfulTimingAdapters": [
+     {
+       "id": 183,
+@@ -6289,6 +6274,99 @@
+         "sh tools/integration/fp100Run.sh .integration/validation/<fresh>",
+         "npx vitest run tests/animation/fp100FocusPunchTiming.test.ts tests/animation/focusPunch.test.ts"
+       ]
++    },
++    {
++      "id": 325,
++      "move": "MOVE_SHADOW_PUNCH",
++      "timingParameters": [
++        {
++          "kind": "optional-lag-age",
++          "age": 90,
++          "fixedLagAges": [
++            27,
++            70,
++            71
++          ],
++          "iterations": 105,
++          "side": "opponent",
++          "alternatives": [
++            {
++              "phase": "event",
++              "bodyRows": 109,
++              "measured": 12
++            },
++            {
++              "phase": "no-event",
++              "bodyRows": 108,
++              "measured": 4
++            }
++          ],
++          "chosen": "event",
++          "tieRuleUsed": false
++        },
++        {
++          "kind": "optional-lag-age",
++          "age": 90,
++          "fixedLagAges": [
++            27,
++            70,
++            71
++          ],
++          "iterations": 105,
++          "side": "player",
++          "alternatives": [
++            {
++              "phase": "event",
++              "bodyRows": 109,
++              "measured": 13
++            },
++            {
++              "phase": "no-event",
++              "bodyRows": 108,
++              "measured": 3
++            }
++          ],
++          "chosen": "event",
++          "tieRuleUsed": false
++        }
++      ],
++      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
++      "alternatePhaseResidual": {
++        "ages": [
++          83,
++          84,
++          85,
++          86,
++          87,
++          88,
++          89,
++          90,
++          91,
++          92,
++          93,
++          94,
++          95,
++          96,
++          97,
++          98,
++          101
++        ],
++        "rows": 17,
++        "maxPixelsPerRow": 18176,
++        "cause": "the restorebg Task_FadeToBg frame (LoadDefaultBg's battle-terrain decompress) does not overrun in the other phase: no lag at body row 90 (production age 82), so the return-to-field fade-in starts at age 83 instead of 84 and every fade-in age 83..98 is one BLDY step brighter in the ROM (16 whole-field rows, 17,096..18,176 px/row: the accepted HAUNTER -> ONIX fixtures, sp103 HAUNTER -> STEELIX opponent, HAUNTER -> CROBAT player); the elevated opponent HAUNTER's shadow also returns one row earlier, age 101 (200 px); every other row as the policy phase"
++      },
++      "d3": false,
++      "evidence": [
++        "reclassified from scoped exact (S10A sp103, fp100 precedent: the adapter gained a measured CPU-phase parameter, both sides; the live adapter renders the dominant phase, liveMoveAnimation.ts case 325 liveFadeHost restoreTaskStartCallbackDeferrals 1 = the policy phase, duration 107 player / 106 opponent); the existing exact fixture proofs stay valid in their proved scope (the accepted HAUNTER -> ONIX fixtures (108 active rows) are now the documented other phase)",
++        "tools/integration/fixtures/sp103/receipts/phase.tsv (sp103Run.sh: fresh direct-mGBA ctl95Probe.py, explicit lab seeds 305419897 / 38177486, r1 == r2 6/6 scenarios; 24 HAUNTER bodies, 5 foes, first and later bodies, after Light Screen / Shadow Punch / Harden): lag at 90 (gRng2Value repeat 89/90, ROM body 109 rows) in player 11 of 12, opponent 10 of 12; fixed lags 27, 70, 71 in every body; + docs/live-audit-24.md TIMING-PHASE (6 fresh bodies) + the 2 accepted fixtures",
++        "tools/integration/fixtures/sp103/receipts/body-patch.json: every policy-phase opponent window 0 px on every row through the patched production live renderer (ctl95ControlCheck.ts --shift=8, two fresh runs): 10 / 10; player policy-phase windows exact except the pre-existing E+5 trail row 106 (live audit 24 ARTIFACT) and the elevated-target shadow rows 102..105 (CROBAT)",
++        "scoped-exact liveEvidence (kept, now in its proved scope): opening-draft input HAUNTER -> GROVYLE; generated seed 54 command input HAUNTER -> WAILMER",
++        "scoped-exact remaining (kept): persistent palette/resource allocation through switch and unknown graphics",
++        "scoped-exact remaining (kept): whole-playable arbitrary-history source comparison"
++      ],
++      "proofCommands": [
++        "sh tools/integration/sp103Run.sh .integration/validation/<fresh>"
++      ]
+     }
+   ],
+   "faithfulTimingClaim": {
+diff --git a/docs/remaining-adapters-census.md b/docs/remaining-adapters-census.md
+index 889141bd..77d768d0 100644
+--- a/docs/remaining-adapters-census.md
++++ b/docs/remaining-adapters-census.md
+@@ -8,19 +8,19 @@ node tools/integration/censusActivationSummary.mjs                    # fixtures
+ tools/integration/censusActivation.sh; tools/integration/censusStagedActivation.sh   # direct-mGBA probes (optional, regenerates the receipts)
+ ```
+ 
+-Inputs: `docs/animation-integration-live-status.json` (238 live, 13 faithful random, 25 faithful timing), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + faithful-timing + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md; faithful-timing = the disjoint D4 bucket `faithfulTimingAdapters`, docs/faithful-timing.md, where a D3+D4 adapter is counted once with `d3: true`) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
++Inputs: `docs/animation-integration-live-status.json` (237 live, 13 faithful random, 26 faithful timing), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + faithful-timing + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md; faithful-timing = the disjoint D4 bucket `faithfulTimingAdapters`, docs/faithful-timing.md, where a D3+D4 adapter is counted once with `d3: true`) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
+ 
+ ## 1. Summary
+ 
+ | Bucket | Moves | Weight |
+ |---|---:|---:|
+ | accepted Factory moves | 276 | 100% |
+-| live adapters (scoped exact) | 238 | 85.62% |
++| live adapters (scoped exact) | 237 | 85.55% |
+ | faithful-random adapters (ASTONISH, DOUBLE_KICK, FLAIL, FLATTER, HYPER_BEAM, LOVELY_KISS, LUSTER_PURGE, MUD_SLAP, RAIN_DANCE, SAND_ATTACK, THRASH, WATER_PULSE, WISH) | 13 | 3.84% |
+-| faithful-timing adapters (BLIZZARD, CONFUSE_RAY, CRUNCH, DIVE, EXTRASENSORY, EXTREME_SPEED, FAINT_ATTACK, FOCUS_PUNCH, HIDDEN_POWER, HYPER_VOICE, ICE_BALL, ICY_WIND, LIGHT_SCREEN, MACH_PUNCH, MEGAHORN, METEOR_MASH, NIGHTMARE, PSYCHIC, PSYWAVE, PURSUIT, REVENGE, SHEER_COLD, SKILL_SWAP, SKY_ATTACK, SUPERPOWER) | 25 | 10.05% |
++| faithful-timing adapters (BLIZZARD, CONFUSE_RAY, CRUNCH, DIVE, EXTRASENSORY, EXTREME_SPEED, FAINT_ATTACK, FOCUS_PUNCH, HIDDEN_POWER, HYPER_VOICE, ICE_BALL, ICY_WIND, LIGHT_SCREEN, MACH_PUNCH, MEGAHORN, METEOR_MASH, NIGHTMARE, PSYCHIC, PSYWAVE, PURSUIT, REVENGE, SHADOW_PUNCH, SHEER_COLD, SKILL_SWAP, SKY_ATTACK, SUPERPOWER) | 26 | 10.12% |
+ | in flight (0 order-consumer + 0 prep6) | 0 | 0.00% |
+ | **remaining (this census)** | **0** | **0.00%** |
+-| check | 238+13+25+0+0=276 | |
++| check | 237+13+26+0+0=276 | |
+ 
+ Remaining moves by group:
+ 
+diff --git a/src/engine/battleScene.ts b/src/engine/battleScene.ts
+index 037500c8..ae8a68ff 100644
+--- a/src/engine/battleScene.ts
++++ b/src/engine/battleScene.ts
+@@ -51499,7 +51499,8 @@ export function renderSceneOnMovePresentation(
+         ).x2;
+     // `SpriteCB_EnemyShadow` unhides elevated opponent shadows only after
+     // the animation script clears; hardware OAM exposes it one frame later.
+-    if (opponentToPlayer && view.animationAge >= 101) {
++    if (opponentToPlayer && view.animationAge >= 101
++      + (liveField ? state.config.liveFadeHost?.restoreTaskStartCallbackDeferrals ?? 0 : 0)) {
+       drawSpriteSheet(
+         fb,
+         battleAnimGhostBg.opponentShadow.tileset,
+diff --git a/src/engine/liveMoveAnimation.ts b/src/engine/liveMoveAnimation.ts
+index 1ecc2d4e..2ba89487 100644
+--- a/src/engine/liveMoveAnimation.ts
++++ b/src/engine/liveMoveAnimation.ts
+@@ -234,7 +234,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
+   // Focus Punch 264 reclassified to faithful timing (fp100, liveMoveTimingPolicy.ts 264, the age-131 restore lag); its exact fixtures
+   // stay valid in scope.
+   272, 277, 280, 281, 287, 290, 302,
+-  305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
++  // Shadow Punch 325 reclassified to faithful timing (sp103, liveMoveTimingPolicy.ts 325, the age-90 restore lag); its exact fixtures
++  // stay valid in scope.
++  305, 306, 319, 320, 321, 334, 335, 336, 337, 342, 343, 347,
+   56, 61, 197, 238, 259, 294, 341,
+   // prep11 (docs/next-adapters-prep11.md): Leech Seed main body.
+   73, 80, 161, 169, 193, 194, 278, 314, 327,
+@@ -1259,8 +1261,9 @@ export function liveMoveAnimationDuration(
+     // The opponent-front script drops its final wave one source row earlier.
+     case 319: return request.attacker === 0 ? 86 : 85;
+     case 321: return TICKLE_FRAME_COUNT;
+-    // Source restorebg fade, then inactive display. Both orientations restore.
+-    case 325: return request.attacker === 0 ? 106 : 105;
++    // Source restorebg fade, then inactive display. Both orientations restore; sp103 (D4): + the age-90 restore lag row.
++    case 325: return (request.attacker === 0 ? 106 : 105)
++      + (liveMoveOptionalLagAge(325, request.attacker === 0 ? "player" : "opponent") !== null ? 1 : 0);
+     // The source Block script is two rows longer on the opponent-front side.
+     case 335: return request.attacker === 0 ? 141 : 146;
+     case 334: return 101; // Iron Defense source body through its final blend row.
+@@ -2267,6 +2270,8 @@ export function liveMoveAnimationPresentation(
+       config = {
+         move: "SHADOW_PUNCH", attacker, target,
+         traceScratchUnfadedPalette: paletteInput?.traceScratchUnfadedPalette,
++        // sp103 (D4, liveMoveTimingPolicy.ts 325): the age-90 restore lag defers the restore fade (and the shadow return) one row.
++        liveFadeHost: { restoreTaskStartCallbackDeferrals: liveMoveOptionalLagAge(325, attacker.geometry.side) !== null ? 1 : 0 },
+         fieldProfile: { ...fieldProfile, playerStatus: "none" },
+         attackerSpriteId: request.attacker === 0 ? 6 : 8,
+         attackerMoveSpeed: request.attacker === 0 ? 8 : -8,
+diff --git a/src/engine/liveMoveTimingPolicy.ts b/src/engine/liveMoveTimingPolicy.ts
+index b9520ca3..d046cf5b 100644
+--- a/src/engine/liveMoveTimingPolicy.ts
++++ b/src/engine/liveMoveTimingPolicy.ts
+@@ -577,6 +577,35 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
+         "accepted player fixture (154 rows: lag; production exact before fp100)", "tools/integration/fixtures/fp100-live-receipt.json"],
+     }],
+   },
++  /**
++   * S10A sp103 (docs/next-adapters-sp103.md; live audit 24 "TIMING-PHASE"): Move_SHADOW_PUNCH ends `clearmonbg; blendoff; restorebg;
++   * waitbgfadein`, Focus Punch's tail: the Task_FadeToBg frame (LoadDefaultBg's battle-terrain decompress) overruns VBlank in some
++   * bodies, gRng2Value repeats between body rows 89 and 90 (ROM rows from the activation; production age 82, after the 8 idle lead
++   * rows). The restore fade-in (production ages 83..98) and the elevated opponent HAUNTER's shadow return (101) come one row later:
++   * 109 active rows with it, 108 without (shadowPunchFadeHost.ts restoreTaskStartCallbackDeferrals 1). Fixed lags at 27, 70, 71.
++   * HAUNTER is the only Factory user. Measured (fresh direct mGBA, r1 == r2, tools/integration/fixtures/sp103/receipts/phase.tsv +
++   * live audit 24's 6 fresh bodies and the 2 accepted HAUNTER -> ONIX fixtures): player 13 : 3, opponent 12 : 4. Neither side, foe,
++   * body index nor predecessor decides it (same lab, same pair: opponent HAUNTER -> STEELIX 108, 108, 109, 109). Wrong phase: the
++   * fade-in ages 83..98 (+ 101 for the opponent attacker).
++   */
++  325: {
++    move: "MOVE_SHADOW_PUNCH",
++    parameters: [{
++      kind: "optional-lag-age", age: 90, fixedLagAges: [27, 70, 71], iterations: 105, side: "opponent",
++      alternatives: [{ phase: "event", bodyRows: 109, measured: 12 }, { phase: "no-event", bodyRows: 108, measured: 4 }],
++      chosen: "event", tieRuleUsed: false,
++      evidence: ["tools/integration/fixtures/sp103/receipts/phase.tsv (opponent: lag at 90 in 10 of 12 fresh HAUNTER bodies, 3 foes, first and later)",
++        "docs/live-audit-24.md TIMING-PHASE (opponent: HAUNTER -> LAPRAS, SKARMORY lag; GENGAR -> LAPRAS no lag)",
++        "accepted opponent fixture HAUNTER -> ONIX (108 rows: no lag; production exact before sp103)"],
++    }, {
++      kind: "optional-lag-age", age: 90, fixedLagAges: [27, 70, 71], iterations: 105, side: "player",
++      alternatives: [{ phase: "event", bodyRows: 109, measured: 13 }, { phase: "no-event", bodyRows: 108, measured: 3 }],
++      chosen: "event", tieRuleUsed: false,
++      evidence: ["tools/integration/fixtures/sp103/receipts/phase.tsv (player: lag at 90 in 11 of 12 fresh HAUNTER bodies, 2 foes, first and later)",
++        "docs/live-audit-24.md TIMING-PHASE (player: HAUNTER -> LAPRAS, GENGAR -> LAPRAS lag; HAUNTER -> SKARMORY no lag)",
++        "accepted player fixture HAUNTER -> ONIX (108 rows: no lag; production exact before sp103)"],
++    }],
++  },
+   /**
+    * S10A Ice Ball (docs/next-adapters-prep26.md s1.4 H / s4 item 6; tools/integration/fixtures/prep26/iceball-check.json lagRows): 0-step lag rows
+    * (an animationRng stall: VBlank overrun), measured PER COUNTER BODY (request.rolloutCounter 1..5; 18 bodies): none in any counter 0..2 body
+@@ -727,6 +756,10 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
+   // S10A fp100 (reclassified from scoped exact, lsbz precedent): Focus Punch, the age-131 restore lag (lag on both sides, 154 active rows;
+   // focusPunch.ts restoreLag); exact fixtures stay valid in scope; other-phase windows tools/integration/fixtures/fp100/windows/*.
+   264,
++  // S10A sp103 (reclassified from scoped exact, fp100 precedent): Shadow Punch, the age-90 restore lag (lag on both sides, 109 active rows;
++  // shadowPunchFadeHost.ts restoreTaskStartCallbackDeferrals 1); exact fixtures stay valid in scope; other-phase windows
++  // tools/integration/fixtures/sp103/windows/*.
++  325,
+ ]);
+ 
+ /**
+diff --git a/tools/integration/fixtures/remaining-adapters-census.json b/tools/integration/fixtures/remaining-adapters-census.json
+index 56449a87..76e9e3be 100644
+--- a/tools/integration/fixtures/remaining-adapters-census.json
++++ b/tools/integration/fixtures/remaining-adapters-census.json
+@@ -10,7 +10,7 @@
+   "src/data/gen/battle-frontier-mons.json",
+   "src/data/gen/factory-round-policy.json"
+  ],
+- "liveStatusImplementedCount": 238,
++ "liveStatusImplementedCount": 237,
+  "staleCodesCorrected": [
+   "B (sSpriteOrder): was 'first body only'; production now lends the order and tracks it across bodies (liveSpriteOrderHost.ts / spriteOrderProvider.ts, merged cross-body tracker + post-KO rung 1), so B no longer blocks anything; recipe work only (falls back after an unmodelled graphics command)",
+   "F-AFFINE / E-TASK: were provider blockers; docs/allocator-plan-v2-evidence.md measured gOamMatrixAllocBitmap 0x6 + no tasks at all 481 known-entry bodies, so the accepted constants gated on the lent order suffice for first bodies (invalidated after a faint/switch)",
+@@ -23,7 +23,7 @@
+  "inFlightMoves": {},
+  "summary": {
+   "accepted": 276,
+-  "live": 238,
++  "live": 237,
+   "faithfulRandom": 13,
+   "faithfulRandomMoves": [
+    "MOVE_ASTONISH",
+@@ -40,7 +40,7 @@
+    "MOVE_WATER_PULSE",
+    "MOVE_WISH"
+   ],
+-  "faithfulTiming": 25,
++  "faithfulTiming": 26,
+   "faithfulTimingMoves": [
+    "MOVE_BLIZZARD",
+    "MOVE_CONFUSE_RAY",
+@@ -63,6 +63,7 @@
+    "MOVE_PSYWAVE",
+    "MOVE_PURSUIT",
+    "MOVE_REVENGE",
++   "MOVE_SHADOW_PUNCH",
+    "MOVE_SHEER_COLD",
+    "MOVE_SKILL_SWAP",
+    "MOVE_SKY_ATTACK",
+@@ -75,9 +76,9 @@
+    "prep6Ready": 0
+   },
+   "weightPct": {
+-   "live": 85.623,
++   "live": 85.549,
+    "faithfulRandom": 3.84,
+-   "faithfulTiming": 10.05,
++   "faithfulTiming": 10.124,
+    "inFlight": 0,
+    "remaining": 0
+   },
+@@ -85,7 +86,7 @@
+   "remainingByHostClass": {},
+   "orderFirstBodyOnlyMoves": 0,
+   "slotPlanNeededMoves": 0,
+-  "sumsTo": "238+13+25+0+0=276",
++  "sumsTo": "237+13+26+0+0=276",
+   "triageCiteDrift": 0,
+   "triageCiteDriftList": []
+  },
