@@ -49,7 +49,7 @@ describe("fp100: Focus Punch age-131 restore lag (D4)", () => {
     expect([liveMoveAnimationDuration(req(0)), liveMoveAnimationDuration(req(1))]).toEqual([155, 155]);
     for (const name of ["fp100-opponent-machamp-snorlax-b0", "fp100-player-heracross-lapras-b0"]) {
       const v = liveView(readCtl95ControlFixture(`tools/integration/fixtures/fp100/windows/${name}.json`).fixture, 140);
-      const config = liveMoveAnimationPresentation((v.effect as { request: never }).request, v.field, 140)?.config as { move: string; restoreLag?: boolean };
+      const config = liveMoveAnimationPresentation((v.effect as unknown as { request: never }).request, v.field, 140)?.config as { move: string; restoreLag?: boolean };
       expect([config.move, config.restoreLag]).toEqual(["FOCUS_PUNCH", true]);
     }
   });
