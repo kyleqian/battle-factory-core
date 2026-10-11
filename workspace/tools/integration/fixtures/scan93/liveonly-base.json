@@ -1,0 +1,621 @@
+{
+ "schema": "later58-check/v1",
+ "rows": [
+  {
+   "fixture": "mem-opp-weezing-onix-dd-0.json",
+   "move": "MEMENTO",
+   "side": "opponent",
+   "attacker": "WEEZING",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B349p S22",
+   "window": [
+    506,
+    680
+   ],
+   "live": false
+  },
+  {
+   "fixture": "mem-opp-weezing-onix-psywave-0.json",
+   "move": "MEMENTO",
+   "side": "opponent",
+   "attacker": "WEEZING",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B149p",
+   "window": [
+    423,
+    597
+   ],
+   "live": false
+  },
+  {
+   "fixture": "mem-opp-weezing-onix-qa-0.json",
+   "move": "MEMENTO",
+   "side": "opponent",
+   "attacker": "WEEZING",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B98p",
+   "window": [
+    205,
+    379
+   ],
+   "live": false
+  },
+  {
+   "fixture": "mem-opp-weezing-onix-xs-0.json",
+   "move": "MEMENTO",
+   "side": "opponent",
+   "attacker": "WEEZING",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B326p",
+   "window": [
+    452,
+    626
+   ],
+   "live": false
+  },
+  {
+   "fixture": "mem-pla-weezing-onix-dd-0.json",
+   "move": "MEMENTO",
+   "side": "player",
+   "attacker": "WEEZING",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B349o S22",
+   "window": [
+    514,
+    691
+   ],
+   "live": false
+  },
+  {
+   "fixture": "mem-pla-weezing-onix-psywave-0.json",
+   "move": "MEMENTO",
+   "side": "player",
+   "attacker": "WEEZING",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B149o",
+   "window": [
+    388,
+    565
+   ],
+   "live": false
+  },
+  {
+   "fixture": "mem-pla-weezing-onix-qa-0.json",
+   "move": "MEMENTO",
+   "side": "player",
+   "attacker": "WEEZING",
+   "target": "ONIX",
+   "firstBody": false,
+   "preceding": "B98o",
+   "window": [
+    294,
+    471
+   ],
+   "live": false
+  },
+  {
+   "fixture": "mem-pla-weezing-onix-xs-0.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "ONIX",
+   "target": "WEEZING",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    81,
+    241
+   ],
+   "live": true
+  },
+  {
+   "fixture": "mem-pla-weezing-onix-xs-1.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "ONIX",
+   "target": "WEEZING",
+   "firstBody": false,
+   "preceding": "B326o",
+   "window": [
+    1215,
+    1376
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-dd-0.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    84,
+    244
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-dd-1.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326o B349p S22",
+   "window": [
+    1218,
+    1379
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-dd-2.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326o B349p S22 B326o B349p S22",
+   "window": [
+    2352,
+    2513
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-memento-0.json",
+   "move": "MEMENTO",
+   "side": "player",
+   "attacker": "SHUCKLE",
+   "target": "NUZLEAF",
+   "firstBody": false,
+   "preceding": "B326o",
+   "window": [
+    345,
+    526
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-psywave-0.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    84,
+    244
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-psywave-1.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326o",
+   "window": [
+    1218,
+    1379
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-psywave-2.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326o B326o",
+   "window": [
+    2352,
+    2513
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-qa-0.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B98p",
+   "window": [
+    218,
+    379
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-qa-1.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B98p B326o B98p",
+   "window": [
+    1352,
+    1513
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-qa-2.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B98p B326o B98p B326o B98p",
+   "window": [
+    2486,
+    2647
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-splash-0.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    84,
+    244
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-splash-1.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326o B150p",
+   "window": [
+    1218,
+    1379
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-splash-2.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326o B150p B326o B150p",
+   "window": [
+    2352,
+    2513
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-xs-0.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    84,
+    244
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-xs-1.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326o",
+   "window": [
+    1218,
+    1379
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-opp-nuzleaf-shuckle-xs-2.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326o B326o",
+   "window": [
+    2352,
+    2513
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-pla-espeon-crobat-qa-0.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "ESPEON",
+   "target": "CROBAT",
+   "firstBody": false,
+   "preceding": "B98o",
+   "window": [
+    231,
+    392
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-espeon-crobat-xs-0.json",
+   "move": "EXTRASENSORY",
+   "side": "opponent",
+   "attacker": "CROBAT",
+   "target": "ESPEON",
+   "firstBody": false,
+   "preceding": "B326p",
+   "window": [
+    594,
+    755
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-pla-espeon-crobat-xs-1.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "ESPEON",
+   "target": "CROBAT",
+   "firstBody": false,
+   "preceding": "B326p B326o",
+   "window": [
+    1213,
+    1374
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-dd-0.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    80,
+    240
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-dd-1.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326p B349o S22",
+   "window": [
+    1214,
+    1375
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-dd-2.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326p B349o S22 B326p B349o S22",
+   "window": [
+    2348,
+    2509
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-memento-0.json",
+   "move": "MEMENTO",
+   "side": "opponent",
+   "attacker": "SHUCKLE",
+   "target": "NUZLEAF",
+   "firstBody": false,
+   "preceding": "B326p",
+   "window": [
+    347,
+    526
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-psywave-0.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    80,
+    240
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-psywave-1.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326p",
+   "window": [
+    1214,
+    1375
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-psywave-2.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326p B326p",
+   "window": [
+    2348,
+    2509
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-0.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B98o",
+   "window": [
+    218,
+    378
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-1.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B98o B326p B98o",
+   "window": [
+    1352,
+    1512
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-2.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B98o B326p B98o B326p B98o",
+   "window": [
+    2486,
+    2647
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-splash-0.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    80,
+    240
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-splash-1.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326p B150o",
+   "window": [
+    1214,
+    1375
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-splash-2.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326p B150o B326p B150o",
+   "window": [
+    2348,
+    2509
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-xs-0.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": true,
+   "preceding": "",
+   "window": [
+    80,
+    240
+   ],
+   "live": true
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-xs-1.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326p",
+   "window": [
+    1214,
+    1375
+   ],
+   "live": false
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-xs-2.json",
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "attacker": "NUZLEAF",
+   "target": "SHUCKLE",
+   "firstBody": false,
+   "preceding": "B326p B326p",
+   "window": [
+    2348,
+    2509
+   ],
+   "live": false
+  }
+ ]
+}

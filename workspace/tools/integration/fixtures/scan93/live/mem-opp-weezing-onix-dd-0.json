@@ -1,0 +1,50 @@
+{
+ "schema": "scan93-live-adapter-fixture/v1",
+ "move": "MEMENTO",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/scan93/scenarios/mem-opp-weezing-onix-dd.json",
+ "denseWindow": {
+  "startFrame": 506,
+  "endFrame": 680
+ },
+ "attacker": {
+  "species": "WEEZING",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793700003,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 0,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 349,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 22
+  }
+ ]
+}

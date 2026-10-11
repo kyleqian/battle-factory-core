@@ -1,0 +1,297 @@
+diff --git a/src/engine/liveMoveAnimation.ts b/src/engine/liveMoveAnimation.ts
+index f353093b..27e28d31 100644
+--- a/src/engine/liveMoveAnimation.ts
++++ b/src/engine/liveMoveAnimation.ts
+@@ -112,6 +112,7 @@ import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts
+ import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
+ import { liveEruptionProfile, liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
+ import { KNOWN_ENTRY_NON_BATTLER_SPRITES, battlerSprite, liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
++import { liveScanlineEntry } from "./liveScanlineHistory.ts";
+ import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
+ import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
+ import { shockWaveSpriteOrderPlanText, shockWaveTimingFor } from "../animation/shockWave.ts";
+@@ -816,6 +817,7 @@ function liveHailSpriteOrderPlanText(species: LiveMoveBodySpecies): string | nul
+  */
+ export function liveMementoReducerConfig(
+   field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent", x2Input?: LiveMoveBattlerX2Input,
++  scanline0: Readonly<{ srcBuffer: number; buffers: readonly (readonly number[])[] }> = FIRST_BODY_SCANLINE,
+ ): MementoConfig {
+   const art = createBattleCommandFieldArtView(field);
+   const battler = (side: "player" | "opponent"): MementoBattlerConfig => {
+@@ -826,8 +828,8 @@ export function liveMementoReducerConfig(
+       bgPaletteId: opponent ? 8 : 9 };
+   };
+   return { attacker: battler(attackerSide), target: battler(attackerSide === "player" ? "opponent" : "player"),
+-    initialScanlineSourceBuffer: FIRST_BODY_SCANLINE.srcBuffer as 0 | 1,
+-    initialScanlineBuffers: FIRST_BODY_SCANLINE.buffers as unknown as readonly [readonly number[], readonly number[]],
++    initialScanlineSourceBuffer: scanline0.srcBuffer as 0 | 1,
++    initialScanlineBuffers: scanline0.buffers as unknown as readonly [readonly number[], readonly number[]],
+     initialWindow: { win0h: 240, win0v: 161 } };
+ }
+ 
+@@ -2764,11 +2766,15 @@ export function liveMoveAnimationPresentation(
+       // Memento (docs/next-adapters-prep34.md s2.5): the battle's first animation body only (the scanline entry is the intro residue; a later
+       // body after a scanline body differs), non-shiny (live battler art draws normal palettes). The attacker's self-KO / stat drops are
+       // gameplay-owned and never read inside the body; the HUD shows the displayed HP 0 (prep6 Self-Destruct path) under the live field.
+-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
++      // scan93: a later body reads the order host's scanline history (liveScanlineHistory.ts; absent = an unmodelled writer since: declines).
++      if (!spriteOrderInput?.known) return null;
++      const mementoHistory = spriteOrderInput.firstBody ? [] : spriteOrderInput.scanlineHistory;
++      if (mementoHistory === undefined || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
+       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
++      const mementoScanline = liveScanlineEntry(FIRST_BODY_SCANLINE, mementoHistory, (side) => art[side].speciesSymbol);
+       config = { move: "MEMENTO", attacker, target,
+         fieldProfile: { playerHp: field.player.hp, playerMaxHp: field.player.maxHP, opponentHp: field.opponent.hp, opponentMaxHp: field.opponent.maxHP },
+-        reducer: liveMementoReducerConfig(field, attacker.geometry.side, battlerX2Input) };
++        reducer: liveMementoReducerConfig(field, attacker.geometry.side, battlerX2Input, mementoScanline) };
+       break;
+     }
+     case 245: {
+@@ -4126,9 +4132,13 @@ export function liveMoveAnimationPresentation(
+       // Quick Attack / Growl / Splash / its own body (65 displayed scanline lines then differ from the residue, unread) and differs only on
+       // the documented lag rows 143..158; it needs both species rests {0,0}. A PLAYER attacker's later body (opponent target) declines: the
+       // scanout split moved by the history (18 px after a Quick Attack alone, 54..298k px after other predecessors) is not modelled.
++      // scan93: a later body reads the order host's scanline history when it is known (display-neutral in every measured window). A PLAYER
++      // attacker's later body still declines: its windows carry the scanout split (prep30 s1.4; scan93: 11 of 11 later windows split "event").
+       if (!spriteOrderInput?.known) return null;
++      const xsHistory = spriteOrderInput.firstBody ? [] : spriteOrderInput.scanlineHistory;
+       if (!spriteOrderInput.firstBody && (attacker.geometry.side !== "opponent" || !liveBattlersRestFree(art))) return null;
+       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
++      const xsScanline = xsHistory === undefined ? FIRST_BODY_SCANLINE : liveScanlineEntry(FIRST_BODY_SCANLINE, xsHistory, (side) => art[side].speciesSymbol);
+       const palettes = composeLiveArtPalettes(art);
+       const activationOrder = spriteOrderWithOccupiedPrefix(
+         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+@@ -4136,7 +4146,7 @@ export function liveMoveAnimationPresentation(
+       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+       const inputs = liveExtrasensoryInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors,
+-        attackerPictureHeight: pictureHeight(attacker.geometry.side), palettes, activationOrder, sort: sortGbaSpriteOrder,
++        attackerPictureHeight: pictureHeight(attacker.geometry.side), palettes, activationOrder, sort: sortGbaSpriteOrder, scanline0: xsScanline,
+         lateLag: liveMoveOptionalLagAge(326, attacker.geometry.side, liveMoveTimingBodyOf(spriteOrderInput)) !== null });
+       if (inputs === null) return null;
+       // The EXTRASENSORY seam centres are the battler sprite centres (gSprites x / y).
+diff --git a/src/engine/liveMoveSpriteAllocator.ts b/src/engine/liveMoveSpriteAllocator.ts
+index 12d33c81..3dfda517 100644
+--- a/src/engine/liveMoveSpriteAllocator.ts
++++ b/src/engine/liveMoveSpriteAllocator.ts
+@@ -220,6 +220,8 @@ export interface LiveMoveSpriteOrderInput {
+    * constant S0; the BG-snapshot adapters (Overheat, Silver Wind) require it.
+    */
+   readonly firstBody?: true;
++  /** scan93: the order host's scanline-buffer history (liveScanlineHistory.ts); absent = invalidated. */
++  readonly scanlineHistory?: readonly ("player" | "opponent")[];
+   /**
+    * prep18 s1.1: the previous unit was a Dig setup body and nothing (but its own attacker hide) has run since, so the Dig
+    * unleash's order and BG/scanline history are the measured post-setup state (liveSpriteOrderHost `digSetupUnits`).
+diff --git a/src/engine/liveOamMoves.ts b/src/engine/liveOamMoves.ts
+index cab2e51d..816ae86b 100644
+--- a/src/engine/liveOamMoves.ts
++++ b/src/engine/liveOamMoves.ts
+@@ -817,6 +817,8 @@ export function livePsywaveInputs(args: LivePsywaveInputArgs): { duration: numbe
+ }
+ 
+ export interface LiveExtrasensoryInputArgs {
++  /** scan93: the activation scanline entry from the order host's scanline history (default: the first-body intro residue). */
++  readonly scanline0?: Readonly<{ state: number; srcBuffer: number; dmaDest: number; buffers: readonly (readonly number[])[] }>;
+   readonly attackerSide: Side;
+   readonly attackerSpecies: string;
+   readonly targetSpecies: string;
+@@ -857,6 +859,7 @@ export function liveExtrasensoryInputs(args: LiveExtrasensoryInputArgs): { durat
+   // CloneBattlerSpriteWithBlend copies the whole attacker sprite struct, so the clone carries the attacker's idle x2 / y2 rest.
+   const attackerPosition = { x: attacker.spriteCenter.x + attacker.frontIdleRest.x2, y: attacker.spriteCenter.y + attacker.frontIdleRest.y2 };
+   const key = JSON.stringify([attackerSide, attackerPosition, args.attackerPictureHeight, attackerObject.attr, targetObject.attr, args.activationOrder, rows]);
++  const scanline0 = args.scanline0 ?? FIRST_BODY_SCANLINE;
+   let built = extrasensoryCache.get(key);
+   if (!built) {
+     built = liveExtrasensoryHardwareOamRows({ attacker: attackerObject, target: targetObject, attackerPosition,
+@@ -872,7 +875,7 @@ export function liveExtrasensoryInputs(args: LiveExtrasensoryInputArgs): { durat
+     target: { slot: targetObject.slot, x: target.spriteCenter.x, y: target.spriteCenter.y, x2: 0, y2: 0, objBank: targetObject.attr[2] >>> 12 & 0xf },
+     targetBattler: targetSide === "player" ? 0 : 1, cloneSlot, cloneMatrix,
+     cloneStep: (j) => liveExtrasensoryCloneStep(j, args.attackerPictureHeight, GBA_SINE_TABLE_256),
+-    targetYElevation, scanline0: FIRST_BODY_SCANLINE, lateLag: args.lateLag, sine: GBA_SINE_TABLE_256 });
++    targetYElevation, scanline0, lateLag: args.lateLag, sine: GBA_SINE_TABLE_256 });
+   const art = (species: string, object: ReturnType<typeof battlerObject>) =>
+     ({ displaySpecies: species, slot: object.slot, attr: object.attr, subpriority: object.subpriority });
+   return {
+diff --git a/src/engine/liveScanlineHistory.ts b/src/engine/liveScanlineHistory.ts
+new file mode 100644
+index 00000000..4049182b
+--- /dev/null
++++ b/src/engine/liveScanlineHistory.ts
+@@ -0,0 +1,61 @@
++/**
++ * scan93: the presentation-only scanline-buffer history (docs/next-adapters-scan93.md). gScanlineEffect + gScanlineEffectRegBuffers at an
++ * animation body's activation, folded over the battle's earlier bodies (ROM-proven on 22 scenarios x2 fresh, 67/67 known activations):
++ *   - the battle starts at the intro residue FIRST_BODY_SCANLINE (canonical: srcBuffer 1; the measured srcBuffer-0 form is the same
++ *     buffers relabelled, display-neutral: every HBlank DMA reads banks[srcBuffer] and flips);
++ *   - a body whose script never touches the scanline effect leaves it unchanged;
++ *   - Move_EXTRASENSORY is modelled (both banks over the target window; srcBuffer parity unchanged after 3 x 24 active VBlanks);
++ *   - every other writer (Memento, Dragon Dance, Rapid Spin, Acid Armor, Dig, Surf / Muddy Water, Spite, Sketch), a party menu, a skipped
++ *     resolution or a faint / switch after an Extrasensory body (its window geometry is the then-current target) invalidates it.
++ * The host carries the attacker sides of the Extrasensory bodies so far (null = invalidated); it never touches gameplay.
++ */
++import enemyElevations from "../data/gen/enemy-mon-elevations.json" with { type: "json" };
++import { GBA_SINE_TABLE_256 } from "./battleMenu.ts";
++
++export type LiveScanlineSide = "player" | "opponent";
++/** Attacker sides of the Extrasensory bodies since the battle began; null = invalidated (consumers of a history decline). */
++export type LiveScanlineHistory = readonly LiveScanlineSide[] | null;
++export type LiveScanlineEntry = Readonly<{ state: number; srcBuffer: number; dmaDest: number; buffers: readonly (readonly number[])[] }>;
++
++/** Move ids whose bodies write the scanline effect but are not modelled (pret source table, scan93). */
++export const LIVE_SCANLINE_UNMODELLED_WRITER_MOVE_IDS: ReadonlySet<number> = new Set([262, 349, 229, 151, 91, 57, 330, 180, 166]);
++const SCANLINE_INVALIDATING_EVENTS: ReadonlySet<string> = new Set(["faint", "switch-out", "forced-switch-out", "switch-in-start", "next-mon-send-out"]);
++
++export function applyLiveScanlineHistoryEvent(
++  history: LiveScanlineHistory, event: Readonly<{ kind: string; moveId?: number; attackerSide?: LiveScanlineSide }>,
++): LiveScanlineHistory {
++  if (history === null) return null;
++  if (event.kind === "move-animation" && event.moveId === 326 && event.attackerSide !== undefined) return Object.freeze([...history, event.attackerSide]);
++  if (event.kind === "move-animation" && event.moveId !== undefined && LIVE_SCANLINE_UNMODELLED_WRITER_MOVE_IDS.has(event.moveId)) return null;
++  if (history.length > 0 && SCANLINE_INVALIDATING_EVENTS.has(event.kind)) return null;
++  return history;
++}
++
++const sine = (i: number) => (i < 320 ? GBA_SINE_TABLE_256[i & 0xff]! : 0);
++const SPRITE_X: Record<LiveScanlineSide, number> = { player: 72, opponent: 176 };
++
++/** The scanline entry after the history's Extrasensory bodies (target species per side = the current, unchanged since). */
++export function liveScanlineEntry(
++  entry: LiveScanlineEntry, history: readonly LiveScanlineSide[], speciesOf: (side: LiveScanlineSide) => string,
++): LiveScanlineEntry {
++  let s = entry;
++  for (const attackerSide of history) {
++    const targetSide: LiveScanlineSide = attackerSide === "player" ? "opponent" : "player";
++    const y = targetSide === "opponent" ? 40 - ((enemyElevations as Readonly<Record<string, number>>)[speciesOf(targetSide)] ?? 0) : 80;
++    const lo = Math.max(0, y - 32), hi = y + 32, bgX0 = 32 - SPRITE_X[targetSide];
++    const banks = [[...s.buffers[0]!], [...s.buffers[1]!]];
++    for (const [step, shift, phase] of [[2, 5, 64], [2, 5, 192], [4, 4, 0]] as const) {
++      for (let i = lo; i <= lo + 64; i += 1) { banks[0]![i] = bgX0; banks[1]![i] = bgX0; }
++      for (let j = 0; j <= 23; j += 1) {
++        let k = phase;
++        for (let i = lo; i <= hi; i += 1) {
++          let v = sine(k) >> shift;
++          if (v > 0) v += j & 3; else if (v < 0) v -= j & 3;
++          banks[0]![i] = bgX0 + v; banks[1]![i] = bgX0 + v; k += step;
++        }
++      }
++    }
++    s = Object.freeze({ state: 0, srcBuffer: s.srcBuffer, dmaDest: targetSide === "opponent" ? 0x4000014 : 0x4000018, buffers: Object.freeze(banks) });
++  }
++  return s;
++}
+diff --git a/src/engine/liveSpriteOrderHost.ts b/src/engine/liveSpriteOrderHost.ts
+index 448f6b9b..4084beac 100644
+--- a/src/engine/liveSpriteOrderHost.ts
++++ b/src/engine/liveSpriteOrderHost.ts
+@@ -43,6 +43,7 @@ import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+ import { createKnownEntrySpriteAllocatorProvider, type KnownEntryRoute } from "./knownEntrySpriteAllocator.ts";
+ import type { LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+ import type { LiveSpriteAllocatorHost } from "./liveSpriteAllocator.ts";
++import { applyLiveScanlineHistoryEvent, type LiveScanlineHistory } from "./liveScanlineHistory.ts";
+ import { generalAnimationPresentationRngKey, isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION, WORDS_ORDER_UNIT_MOVE_IDS } from "./wordsOrderUnits.ts";
+ import {
+   KNOWN_ENTRY_BATTLER_SLOTS, KNOWN_ENTRY_OCCUPANT_ROLES, applySpriteOrderPresentationEvent, createSpriteOrderTracker,
+@@ -63,6 +64,8 @@ export interface LiveSpriteOrderHost {
+   readonly hidden: readonly [boolean, boolean];
+   /** Presentation units (animation bodies, faints, switches, party-menu resets) applied since the battle began (prep16 s0.3 first-body gate). */
+   readonly bodies?: number;
++  /** scan93: the scanline-buffer history (liveScanlineHistory.ts): Extrasensory attacker sides so far; null / absent = invalidated. */
++  readonly scanline?: LiveScanlineHistory;
+   /**
+    * prep18 s1.1: the battle's first unit was a Dig setup body (move-animation 91 at `bodies` 0). `units` = the body counter right
+    * after it; the unleash lend requires no other unit since (only the setup's own attacker-hide invalidate may follow).
+@@ -175,7 +178,7 @@ const INVALIDATING_EVENTS: ReadonlySet<string> = new Set(["trainer-slide-out", "
+ 
+ export function createLiveSpriteOrderHost(order: SpriteOrderState): LiveSpriteOrderHost {
+   const hidden: readonly [boolean, boolean] = Object.freeze([false, false] as const);
+-  return Object.freeze({ tracker: createSpriteOrderTracker(order), promptRequestId: null, cursor: null, hidden, bodies: 0 });
++  return Object.freeze({ tracker: createSpriteOrderTracker(order), promptRequestId: null, cursor: null, hidden, bodies: 0, scanline: Object.freeze([]) });
+ }
+ 
+ /**
+@@ -227,7 +230,7 @@ export function openLiveSpriteOrderHostPartyMenu(host: LiveSpriteOrderHost): Liv
+   return Object.freeze({
+     ...withoutDeferred(host),
+     tracker: applySpriteOrderPresentationEvent(host.tracker, { kind: "party-menu-reset" }),
+-    bodies: (host.bodies ?? 0) + 1,
++    bodies: (host.bodies ?? 0) + 1, scanline: null,
+     cursor: host.cursor === null || host.cursor.drained ? host.cursor : Object.freeze({ ...host.cursor, drained: true }),
+   });
+ }
+@@ -517,6 +520,7 @@ export function advanceLiveSpriteOrderHost(
+   let tracker = host.tracker;
+   let hidden = host.hidden;
+   let bodies = host.bodies ?? 0;
++  let scanline: LiveScanlineHistory = host.scanline ?? null;
+   let digSetup = host.digSetup;
+   let bonemerangHit1 = host.bonemerangHit1;
+   let deferredBody = host.deferredBody;
+@@ -529,6 +533,7 @@ export function advanceLiveSpriteOrderHost(
+   if (cursor?.requestId !== requestId) {
+     if (cursor !== null && !cursor.drained) {
+       tracker = invalidateSpriteOrderTracker(tracker, "previous resolution not fully applied");
++      scanline = null;
+       record({ kind: "invalidate", reason: "previous resolution not fully applied" });
+     }
+     if (host.promptRequestId !== requestId) {
+@@ -593,6 +598,8 @@ export function advanceLiveSpriteOrderHost(
+         record(mapped.then);
+       }
+       const wasFirstBody = bodies === 0;
++      if (mapped.event) scanline = applyLiveScanlineHistoryEvent(scanline, mapped.event as never);
++      if (mapped.then) scanline = applyLiveScanlineHistoryEvent(scanline, mapped.then as never);
+       if (mapped.event && BODY_UNIT_EVENTS.has(mapped.event.kind)) bodies += 1;
+       if (mapped.event?.kind === "move-animation" && mapped.event.moveId === 91 && wasFirstBody) digSetup = Object.freeze({ units: bodies });
+       if (mapped.event?.kind === "move-animation" && mapped.event.moveId === 155 && wasFirstBody) bonemerangHit1 = Object.freeze({ units: bodies });
+@@ -613,13 +620,13 @@ export function advanceLiveSpriteOrderHost(
+       drained: nextEventIndex >= events.length && cursor.segmentIndex === resolution.segments.length - 1,
+     };
+   }
+-  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && digSetup === host.digSetup && bonemerangHit1 === host.bonemerangHit1
++  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && scanline === (host.scanline ?? null) && digSetup === host.digSetup && bonemerangHit1 === host.bonemerangHit1
+     && deferred === host.deferred && deferredBody === host.deferredBody && deferredOccupancy === host.deferredOccupancy && hidden === host.hidden
+     && cursor.requestId === host.cursor?.requestId
+     && cursor.segmentIndex === host.cursor.segmentIndex && cursor.nextEventIndex === host.cursor.nextEventIndex
+     && cursor.drained === host.cursor.drained) return host;
+   const { deferred: _d, deferredBody: _b, deferredOccupancy: _o, ...rest } = host;
+-  return Object.freeze({ ...rest, tracker, hidden, bodies, ...(digSetup === undefined ? {} : { digSetup }), ...(bonemerangHit1 === undefined ? {} : { bonemerangHit1 }),
++  return Object.freeze({ ...rest, tracker, hidden, bodies, scanline, ...(digSetup === undefined ? {} : { digSetup }), ...(bonemerangHit1 === undefined ? {} : { bonemerangHit1 }),
+     ...(deferredBody === undefined ? {} : { deferredBody }), ...(deferred === undefined ? {} : { deferred }),
+     ...(deferred === undefined || deferredOccupancy === undefined ? {} : { deferredOccupancy }), cursor: Object.freeze(cursor) });
+ }
+@@ -685,6 +692,7 @@ export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number):
+   const hit2 = moveId === 155 && host.bonemerangHit1 !== undefined && (host.bodies ?? 0) >= host.bonemerangHit1.units && (host.bodies ?? 0) <= host.bonemerangHit1.units + 1;
+   return Object.freeze({
+     known: true as const, free: hit2 ? bonemerangHit2Free() : free, ...((host.bodies ?? 0) === 0 ? { firstBody: true as const } : {}),
++    ...((host.bodies ?? 0) === 0 || host.scanline === undefined || host.scanline === null ? {} : { scanlineHistory: host.scanline }),
+     ...(hit2 ? { afterBonemerangHit1: true as const } : {}),
+   });
+ }
+diff --git a/tools/integration/liveAdapterFramebuffer.ts b/tools/integration/liveAdapterFramebuffer.ts
+index 0585acd2..8ea51236 100644
+--- a/tools/integration/liveAdapterFramebuffer.ts
++++ b/tools/integration/liveAdapterFramebuffer.ts
+@@ -3,6 +3,7 @@
+  * The tool supplies a displayed field and typed request, never a captured
+  * per-frame host/config. Ordinary command selection is tested independently.
+  */
++import { applyLiveScanlineHistoryEvent, type LiveScanlineHistory } from "../../src/engine/liveScanlineHistory.ts";
+ import { spawnSync } from "node:child_process";
+ import { createHash } from "node:crypto";
+ import { cpSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+@@ -419,6 +420,14 @@ function withFirstBody(f: Fixture, input: ReturnType<typeof prepareLiveMoveSprit
+   const first = process.env.POKEBENCH_LIVE_ORDER_INPUT === "first-body"
+     || (!f.precedingBodies?.length && !f.precedingTurns && !f.precedingX2Events);
+   if (first) return { ...input, firstBody: true as const };
++  // scan93: the order host's scanline history over the declared preceding bodies (move bodies as move-animation events).
++  if (f.precedingBodies?.length && !f.precedingTurns && !f.precedingX2Events) {
++    let scanline: LiveScanlineHistory = Object.freeze([]);
++    for (const u of f.precedingBodies) {
++      if (u.statAnimation === undefined && u.statusAnimation === undefined) scanline = applyLiveScanlineHistoryEvent(scanline, { kind: "move-animation", moveId: u.moveId, attackerSide: u.side });
++    }
++    if (scanline !== null) input = { ...input, scanlineHistory: scanline };
++  }
+   // prep29: Bonemerang hit 2 directly after a first-body hit 1 (host `bonemerangHit1`).
+   const only = f.precedingBodies?.length === 1 && !f.precedingTurns && !f.precedingX2Events ? f.precedingBodies[0]! : undefined;
+   return only?.moveId === 155 && only.statAnimation === undefined && only.statusAnimation === undefined && f.move === "BONEMERANG"

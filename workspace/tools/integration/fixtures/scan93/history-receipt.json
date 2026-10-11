@@ -1,0 +1,3628 @@
+{
+ "schema": "scan93-compare/v1",
+ "bodies": 103,
+ "scenarios": 22,
+ "r1EqualsR2": true,
+ "knownBodies": 67,
+ "knownEqual": 67,
+ "knownEqualExact": 57,
+ "invalidatedBodies": 36,
+ "rows": [
+  {
+   "scenario": "mem-opp-weezing-onix-dd.json",
+   "body": 0,
+   "frame": 69,
+   "label": "Move_DRAGON_DANCE",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-dd.json",
+   "body": 1,
+   "frame": 214,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "DRAGON_DANCE:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..47:2 48..112:-40 113..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "fcfeb54c"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-dd.json",
+   "body": 2,
+   "frame": 506,
+   "label": "Move_MEMENTO",
+   "side": "opponent",
+   "preceding": "DRAGON_DANCE:p StatsChange:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..47:2 48..112:-40 113..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "fcfeb54c"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-dd.json",
+   "body": 3,
+   "frame": 685,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "DRAGON_DANCE:p StatsChange:p MEMENTO:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 113,
+    "bank1": 113
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "53 runs; lines differing from S0: 113",
+    "bank1": "53 runs; lines differing from S0: 113",
+    "banksEqualOn0to159": false,
+    "digest": "39d43344"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-dd.json",
+   "body": 4,
+   "frame": 2496,
+   "label": "Move_DRAGON_DANCE",
+   "side": "player",
+   "preceding": "DRAGON_DANCE:p StatsChange:p MEMENTO:o StatsChange:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 113,
+    "bank1": 113
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "53 runs; lines differing from S0: 113",
+    "bank1": "53 runs; lines differing from S0: 113",
+    "banksEqualOn0to159": false,
+    "digest": "39d43344"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-dd.json",
+   "body": 5,
+   "frame": 2641,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "DRAGON_DANCE:p StatsChange:p MEMENTO:o StatsChange:p DRAGON_DANCE:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 113,
+    "bank1": 113
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "51 runs; lines differing from S0: 113",
+    "bank1": "60 runs; lines differing from S0: 113",
+    "banksEqualOn0to159": false,
+    "digest": "153d18c1"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-psywave.json",
+   "body": 0,
+   "frame": 69,
+   "label": "Move_PSYWAVE",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-psywave.json",
+   "body": 1,
+   "frame": 423,
+   "label": "Move_MEMENTO",
+   "side": "opponent",
+   "preceding": "PSYWAVE:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-psywave.json",
+   "body": 2,
+   "frame": 602,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "PSYWAVE:p MEMENTO:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 112,
+    "bank1": 112
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "52 runs; lines differing from S0: 112",
+    "bank1": "52 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "9c71f0b5"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-psywave.json",
+   "body": 3,
+   "frame": 2496,
+   "label": "Move_PSYWAVE",
+   "side": "player",
+   "preceding": "PSYWAVE:p MEMENTO:o StatsChange:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 112,
+    "bank1": 112
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "52 runs; lines differing from S0: 112",
+    "bank1": "52 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "9c71f0b5"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-qa.json",
+   "body": 0,
+   "frame": 74,
+   "label": "Move_QUICK_ATTACK",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-qa.json",
+   "body": 1,
+   "frame": 205,
+   "label": "Move_MEMENTO",
+   "side": "opponent",
+   "preceding": "QUICK_ATTACK:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-qa.json",
+   "body": 2,
+   "frame": 384,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:p MEMENTO:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 112,
+    "bank1": 112
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "52 runs; lines differing from S0: 112",
+    "bank1": "52 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "9c71f0b5"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-qa.json",
+   "body": 3,
+   "frame": 2342,
+   "label": "Move_QUICK_ATTACK",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:p MEMENTO:o StatsChange:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 112,
+    "bank1": 112
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "52 runs; lines differing from S0: 112",
+    "bank1": "52 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "9c71f0b5"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-qa.json",
+   "body": 4,
+   "frame": 2473,
+   "label": "Move_RECOVER",
+   "side": "opponent",
+   "preceding": "QUICK_ATTACK:p MEMENTO:o StatsChange:p QUICK_ATTACK:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 112,
+    "bank1": 112
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "52 runs; lines differing from S0: 112",
+    "bank1": "52 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "9c71f0b5"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-xs.json",
+   "body": 0,
+   "frame": 77,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-xs.json",
+   "body": 1,
+   "frame": 452,
+   "label": "Move_MEMENTO",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "c5bcb527"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "c5bcb527"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-xs.json",
+   "body": 2,
+   "frame": 631,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p MEMENTO:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 112,
+    "bank1": 112
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "52 runs; lines differing from S0: 112",
+    "bank1": "52 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "9c71f0b5"
+   }
+  },
+  {
+   "scenario": "mem-opp-weezing-onix-xs.json",
+   "body": 3,
+   "frame": 2504,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p MEMENTO:o StatsChange:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 112,
+    "bank1": 112
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "52 runs; lines differing from S0: 112",
+    "bank1": "52 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "9c71f0b5"
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-dd.json",
+   "body": 0,
+   "frame": 73,
+   "label": "Move_DRAGON_DANCE",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..319:0",
+    "bank1": "0..79:2 80..159:-2 160..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "bd4be9f5"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-dd.json",
+   "body": 1,
+   "frame": 218,
+   "label": "General_StatsChange",
+   "side": "opponent",
+   "preceding": "DRAGON_DANCE:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "15 runs; lines differing from S0: 160",
+    "bank1": "0..7:2 8..72:-145 73..79:2 80..159:-2 160..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "8512a425"
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-dd.json",
+   "body": 2,
+   "frame": 514,
+   "label": "Move_MEMENTO",
+   "side": "player",
+   "preceding": "DRAGON_DANCE:o StatsChange:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "15 runs; lines differing from S0: 160",
+    "bank1": "0..7:2 8..72:-145 73..79:2 80..159:-2 160..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "8512a425"
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-dd.json",
+   "body": 3,
+   "frame": 696,
+   "label": "General_StatsChange",
+   "side": "opponent",
+   "preceding": "DRAGON_DANCE:o StatsChange:o MEMENTO:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 160,
+    "bank1": 160
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000016",
+    "dmaControl": "0xa2600001",
+    "bank0": "45 runs; lines differing from S0: 160",
+    "bank1": "47 runs; lines differing from S0: 160",
+    "banksEqualOn0to159": false,
+    "digest": "5cd67597"
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-psywave.json",
+   "body": 0,
+   "frame": 73,
+   "label": "Move_PSYWAVE",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..319:0",
+    "bank1": "0..79:2 80..159:-2 160..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "bd4be9f5"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-psywave.json",
+   "body": 1,
+   "frame": 388,
+   "label": "Move_MEMENTO",
+   "side": "player",
+   "preceding": "PSYWAVE:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..319:0",
+    "bank1": "0..79:2 80..159:-2 160..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "bd4be9f5"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-psywave.json",
+   "body": 2,
+   "frame": 570,
+   "label": "General_StatsChange",
+   "side": "opponent",
+   "preceding": "PSYWAVE:o MEMENTO:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 160,
+    "bank1": 160
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000016",
+    "dmaControl": "0xa2600001",
+    "bank0": "45 runs; lines differing from S0: 160",
+    "bank1": "47 runs; lines differing from S0: 160",
+    "banksEqualOn0to159": false,
+    "digest": "5cd67597"
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-qa.json",
+   "body": 0,
+   "frame": 78,
+   "label": "Move_QUICK_ATTACK",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..319:0",
+    "bank1": "0..79:2 80..159:-2 160..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "bd4be9f5"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-qa.json",
+   "body": 1,
+   "frame": 294,
+   "label": "Move_MEMENTO",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..319:0",
+    "bank1": "0..79:2 80..159:-2 160..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "bd4be9f5"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-qa.json",
+   "body": 2,
+   "frame": 476,
+   "label": "General_StatsChange",
+   "side": "opponent",
+   "preceding": "QUICK_ATTACK:o MEMENTO:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 160,
+    "bank1": 160
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000016",
+    "dmaControl": "0xa2600001",
+    "bank0": "45 runs; lines differing from S0: 160",
+    "bank1": "47 runs; lines differing from S0: 160",
+    "banksEqualOn0to159": false,
+    "digest": "5cd67597"
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-xs.json",
+   "body": 0,
+   "frame": 81,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..319:0",
+    "bank1": "0..79:2 80..159:-2 160..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "bd4be9f5"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-xs.json",
+   "body": 1,
+   "frame": 1215,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "53 runs; lines differing from S0: 160",
+    "bank1": "54 runs; lines differing from S0: 160",
+    "banksEqualOn0to159": false,
+    "digest": "4f654b2e"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-xs.json",
+   "body": 2,
+   "frame": 1647,
+   "label": "General_HeldItemEffect",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "53 runs; lines differing from S0: 160",
+    "bank1": "54 runs; lines differing from S0: 160",
+    "banksEqualOn0to159": false,
+    "digest": "4f654b2e"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-xs.json",
+   "body": 3,
+   "frame": 2349,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o EXTRASENSORY:o HeldItemEffect:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "53 runs; lines differing from S0: 160",
+    "bank1": "54 runs; lines differing from S0: 160",
+    "banksEqualOn0to159": false,
+    "digest": "4f654b2e"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-xs.json",
+   "body": 4,
+   "frame": 2718,
+   "label": "Move_MEMENTO",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o EXTRASENSORY:o HeldItemEffect:p EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": false,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "53 runs; lines differing from S0: 160",
+    "bank1": "54 runs; lines differing from S0: 160",
+    "banksEqualOn0to159": false,
+    "digest": "4f654b2e"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "mem-pla-weezing-onix-xs.json",
+   "body": 5,
+   "frame": 2900,
+   "label": "General_StatsChange",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o EXTRASENSORY:o HeldItemEffect:p EXTRASENSORY:o MEMENTO:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 160,
+    "bank1": 160
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000016",
+    "dmaControl": "0xa2600001",
+    "bank0": "46 runs; lines differing from S0: 160",
+    "bank1": "48 runs; lines differing from S0: 160",
+    "banksEqualOn0to159": false,
+    "digest": "07fa658a"
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "body": 0,
+   "frame": 84,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "body": 1,
+   "frame": 347,
+   "label": "Move_DRAGON_DANCE",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "body": 2,
+   "frame": 492,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o DRAGON_DANCE:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..47:2 48..112:-40 113..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "fcfeb54c"
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "body": 3,
+   "frame": 1218,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o DRAGON_DANCE:p StatsChange:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..47:2 48..112:-40 113..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "fcfeb54c"
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "body": 4,
+   "frame": 1483,
+   "label": "Move_DRAGON_DANCE",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o DRAGON_DANCE:p StatsChange:p EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "body": 5,
+   "frame": 1628,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o DRAGON_DANCE:p StatsChange:p EXTRASENSORY:o DRAGON_DANCE:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..47:2 48..112:-40 113..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "fcfeb54c"
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "body": 6,
+   "frame": 2352,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o DRAGON_DANCE:p StatsChange:p EXTRASENSORY:o DRAGON_DANCE:p StatsChange:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..47:2 48..112:-40 113..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "fcfeb54c"
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "body": 7,
+   "frame": 2616,
+   "label": "Move_DRAGON_DANCE",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o DRAGON_DANCE:p StatsChange:p EXTRASENSORY:o DRAGON_DANCE:p StatsChange:p EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-dd.json",
+   "body": 8,
+   "frame": 2761,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o DRAGON_DANCE:p StatsChange:p EXTRASENSORY:o DRAGON_DANCE:p StatsChange:p EXTRASENSORY:o DRAGON_DANCE:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..47:2 48..112:-40 113..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "fcfeb54c"
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-memento.json",
+   "body": 0,
+   "frame": 84,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-memento.json",
+   "body": 1,
+   "frame": 345,
+   "label": "Move_MEMENTO",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-memento.json",
+   "body": 2,
+   "frame": 531,
+   "label": "General_StatsChange",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o MEMENTO:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 160,
+    "bank1": 160
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x4000016",
+    "dmaControl": "0xa2600001",
+    "bank0": "62 runs; lines differing from S0: 113",
+    "bank1": "60 runs; lines differing from S0: 113",
+    "banksEqualOn0to159": false,
+    "digest": "76002bc7"
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-psywave.json",
+   "body": 0,
+   "frame": 84,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-psywave.json",
+   "body": 1,
+   "frame": 1218,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-psywave.json",
+   "body": 2,
+   "frame": 2352,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-qa.json",
+   "body": 0,
+   "frame": 77,
+   "label": "Move_QUICK_ATTACK",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-qa.json",
+   "body": 1,
+   "frame": 218,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "QUICK_ATTACK:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-qa.json",
+   "body": 2,
+   "frame": 1211,
+   "label": "Move_QUICK_ATTACK",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:p EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-qa.json",
+   "body": 3,
+   "frame": 1352,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "QUICK_ATTACK:p EXTRASENSORY:o QUICK_ATTACK:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-qa.json",
+   "body": 4,
+   "frame": 2345,
+   "label": "Move_QUICK_ATTACK",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:p EXTRASENSORY:o QUICK_ATTACK:p EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-qa.json",
+   "body": 5,
+   "frame": 2486,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "QUICK_ATTACK:p EXTRASENSORY:o QUICK_ATTACK:p EXTRASENSORY:o QUICK_ATTACK:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-splash.json",
+   "body": 0,
+   "frame": 84,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-splash.json",
+   "body": 1,
+   "frame": 340,
+   "label": "Move_SPLASH",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-splash.json",
+   "body": 2,
+   "frame": 1218,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o SPLASH:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-splash.json",
+   "body": 3,
+   "frame": 1476,
+   "label": "Move_SPLASH",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o SPLASH:p EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-splash.json",
+   "body": 4,
+   "frame": 2352,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o SPLASH:p EXTRASENSORY:o SPLASH:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-splash.json",
+   "body": 5,
+   "frame": 2609,
+   "label": "Move_SPLASH",
+   "side": "player",
+   "preceding": "EXTRASENSORY:o SPLASH:p EXTRASENSORY:o SPLASH:p EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-xs.json",
+   "body": 0,
+   "frame": 84,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-xs.json",
+   "body": 1,
+   "frame": 1218,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-opp-nuzleaf-shuckle-xs.json",
+   "body": 2,
+   "frame": 2352,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:o EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "54 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "46a04f42"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-espeon-crobat-qa.json",
+   "body": 0,
+   "frame": 80,
+   "label": "Move_QUICK_ATTACK",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-espeon-crobat-qa.json",
+   "body": 1,
+   "frame": 231,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-espeon-crobat-qa.json",
+   "body": 2,
+   "frame": 2347,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:o EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "c5bcb527"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "c5bcb527"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-espeon-crobat-xs.json",
+   "body": 0,
+   "frame": 79,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-espeon-crobat-xs.json",
+   "body": 1,
+   "frame": 594,
+   "label": "Move_EXTRASENSORY",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "c5bcb527"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "c5bcb527"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-espeon-crobat-xs.json",
+   "body": 2,
+   "frame": 1213,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p EXTRASENSORY:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 111,
+    "bank1": 111
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "93 runs; lines differing from S0: 111",
+    "bank1": "92 runs; lines differing from S0: 111",
+    "banksEqualOn0to159": false,
+    "digest": "c195ba9e"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000018",
+    "dmaControl": "0xa2600001",
+    "bank0": "93 runs; lines differing from S0: 111",
+    "bank1": "92 runs; lines differing from S0: 111",
+    "banksEqualOn0to159": false,
+    "digest": "c195ba9e"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "body": 0,
+   "frame": 80,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "body": 1,
+   "frame": 349,
+   "label": "Move_DRAGON_DANCE",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "body": 2,
+   "frame": 494,
+   "label": "General_StatsChange",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p DRAGON_DANCE:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..7:2 8..72:-144 73..79:2 80..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "155e269b"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "body": 3,
+   "frame": 1214,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p DRAGON_DANCE:o StatsChange:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..7:2 8..72:-144 73..79:2 80..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "155e269b"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "body": 4,
+   "frame": 1483,
+   "label": "Move_DRAGON_DANCE",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p DRAGON_DANCE:o StatsChange:o EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "body": 5,
+   "frame": 1628,
+   "label": "General_StatsChange",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p DRAGON_DANCE:o StatsChange:o EXTRASENSORY:p DRAGON_DANCE:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..7:2 8..72:-144 73..79:2 80..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "155e269b"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "body": 6,
+   "frame": 2348,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p DRAGON_DANCE:o StatsChange:o EXTRASENSORY:p DRAGON_DANCE:o StatsChange:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..7:2 8..72:-144 73..79:2 80..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "155e269b"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "body": 7,
+   "frame": 2615,
+   "label": "Move_DRAGON_DANCE",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p DRAGON_DANCE:o StatsChange:o EXTRASENSORY:p DRAGON_DANCE:o StatsChange:o EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-dd.json",
+   "body": 8,
+   "frame": 2760,
+   "label": "General_StatsChange",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p DRAGON_DANCE:o StatsChange:o EXTRASENSORY:p DRAGON_DANCE:o StatsChange:o EXTRASENSORY:p DRAGON_DANCE:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..7:2 8..72:-144 73..79:2 80..159:-2 160..319:0",
+    "bank1": "15 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "155e269b"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-memento.json",
+   "body": 0,
+   "frame": 80,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-memento.json",
+   "body": 1,
+   "frame": 347,
+   "label": "Move_MEMENTO",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-memento.json",
+   "body": 2,
+   "frame": 531,
+   "label": "General_StatsChange",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p MEMENTO:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 160,
+    "bank1": 160
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "71 runs; lines differing from S0: 112",
+    "bank1": "69 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "e718de5e"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-memento.json",
+   "body": 3,
+   "frame": 2338,
+   "label": "Move_SPLASH",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p MEMENTO:o StatsChange:p",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 160,
+    "bank1": 160
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "71 runs; lines differing from S0: 112",
+    "bank1": "69 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "e718de5e"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-memento.json",
+   "body": 4,
+   "frame": 2592,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p MEMENTO:o StatsChange:p SPLASH:o",
+   "r1EqualsR2": true,
+   "predicted": "invalidated",
+   "equalExact": null,
+   "equal": null,
+   "ramLinesNotS0": {
+    "bank0": 160,
+    "bank1": 160
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 0,
+    "dmaDest": "0x400001a",
+    "dmaControl": "0xa2600001",
+    "bank0": "71 runs; lines differing from S0: 112",
+    "bank1": "69 runs; lines differing from S0: 112",
+    "banksEqualOn0to159": false,
+    "digest": "e718de5e"
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-psywave.json",
+   "body": 0,
+   "frame": 80,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-psywave.json",
+   "body": 1,
+   "frame": 1214,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-psywave.json",
+   "body": 2,
+   "frame": 2348,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-qa.json",
+   "body": 0,
+   "frame": 81,
+   "label": "Move_QUICK_ATTACK",
+   "side": "opponent",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-qa.json",
+   "body": 1,
+   "frame": 218,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-qa.json",
+   "body": 2,
+   "frame": 1215,
+   "label": "Move_QUICK_ATTACK",
+   "side": "opponent",
+   "preceding": "QUICK_ATTACK:o EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-qa.json",
+   "body": 3,
+   "frame": 1352,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:o EXTRASENSORY:p QUICK_ATTACK:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-qa.json",
+   "body": 4,
+   "frame": 2349,
+   "label": "Move_QUICK_ATTACK",
+   "side": "opponent",
+   "preceding": "QUICK_ATTACK:o EXTRASENSORY:p QUICK_ATTACK:o EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-qa.json",
+   "body": 5,
+   "frame": 2486,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "QUICK_ATTACK:o EXTRASENSORY:p QUICK_ATTACK:o EXTRASENSORY:p QUICK_ATTACK:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-splash.json",
+   "body": 0,
+   "frame": 80,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-splash.json",
+   "body": 1,
+   "frame": 342,
+   "label": "Move_SPLASH",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-splash.json",
+   "body": 2,
+   "frame": 1214,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p SPLASH:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-splash.json",
+   "body": 3,
+   "frame": 1476,
+   "label": "Move_SPLASH",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p SPLASH:o EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-splash.json",
+   "body": 4,
+   "frame": 2348,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p SPLASH:o EXTRASENSORY:p SPLASH:o",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-splash.json",
+   "body": 5,
+   "frame": 2608,
+   "label": "Move_SPLASH",
+   "side": "opponent",
+   "preceding": "EXTRASENSORY:p SPLASH:o EXTRASENSORY:p SPLASH:o EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-xs.json",
+   "body": 0,
+   "frame": 80,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 0,
+    "bank1": 0
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x400001c",
+    "dmaControl": "0xa2600001",
+    "bank0": "0..79:2 80..159:-2 160..319:0",
+    "bank1": "0..319:0",
+    "banksEqualOn0to159": false,
+    "digest": "3719ab75"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-xs.json",
+   "body": 1,
+   "frame": 1214,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  },
+  {
+   "scenario": "xs-pla-nuzleaf-shuckle-xs.json",
+   "body": 2,
+   "frame": 2348,
+   "label": "Move_EXTRASENSORY",
+   "side": "player",
+   "preceding": "EXTRASENSORY:p EXTRASENSORY:p",
+   "r1EqualsR2": true,
+   "predicted": "known",
+   "equalExact": true,
+   "equal": true,
+   "ramLinesNotS0": {
+    "bank0": 65,
+    "bank1": 65
+   },
+   "ram": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "predictedSummary": {
+    "state": 0,
+    "srcBuffer": 1,
+    "dmaDest": "0x4000014",
+    "dmaControl": "0xa2600001",
+    "bank0": "55 runs; lines differing from S0: 65",
+    "bank1": "53 runs; lines differing from S0: 65",
+    "banksEqualOn0to159": false,
+    "digest": "6c766d87"
+   },
+   "mismatchLines": {
+    "bank0": 0,
+    "bank1": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,66 @@
+{
+ "schema": "scan93-live-adapter-fixture/v1",
+ "move": "EXTRASENSORY",
+ "bodyIndex": 2,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/scan93/scenarios/xs-pla-nuzleaf-shuckle-qa.json",
+ "denseWindow": {
+  "startFrame": 2486,
+  "endFrame": 2647
+ },
+ "attacker": {
+  "species": "NUZLEAF",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019075,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 150,
+  "playerMaxHp": 177,
+  "opponentHp": 96,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "timingPhase": "event",
+ "timingPhases": {
+  "optional-lag-age": "event",
+  "scanline-split-line": "no-event"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 98,
+   "side": "opponent"
+  },
+  {
+   "moveId": 326,
+   "side": "player"
+  },
+  {
+   "moveId": 98,
+   "side": "opponent"
+  },
+  {
+   "moveId": 326,
+   "side": "player"
+  },
+  {
+   "moveId": 98,
+   "side": "opponent"
+  }
+ ]
+}
