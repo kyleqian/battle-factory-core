@@ -119,8 +119,18 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
   [315, BOTH], // Overheat
   [69, BOTH], // Seismic Toss (request.damage = gAnimMoveDmg)
   [224, BOTH], // Megahorn (D4: the shipped phase; liveMoveTimingPolicy.ts)
+  // doll81 (docs/next-adapters-doll81.md): fresh direct-mGBA PERSIAN<->SLOWBRO + GENGAR -> GOLBAT / elevated GOLBAT -> LAPRAS windows,
+  // 0 px on every row of every window.
+  [138, Object.freeze(["opponent"] as const)], // Dream Eater (player: PERSIAN's ROM body is one row longer than GENGAR's)
+  [320, Object.freeze(["player"] as const)], // GrassWhistle (opponent: 13 whole-field rows near the body's end)
+  [76, BOTH], // SolarBeam, the charge turn only (the fire turn is the doll-free control's own residual)
+  [142, BOTH], // Lovely Kiss
+  [47, Object.freeze(["player"] as const)], // Sing (opponent: the ROM body length depends on the pair)
+  [241, BOTH], // Sunny Day (self-target: LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS)
 ]);
 export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_SUBSTITUTE_SWAP_BODY_CELLS.keys());
+/** Self-target bodies presented with the swaps (doll81: the ROM runs SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE around them too). */
+export const LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS: ReadonlySet<number> = new Set([241]);
 
 export type SubstituteSwapBodyFraming = Readonly<{ rows: number; shift: number }>;
 /**
@@ -139,6 +149,9 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: ReadonlyMap<number, SubstituteSw
   [44, { rows: 41, shift: -10 }], // Bite (adapter 26)
   [7, { rows: 102, shift: 0 }], // Fire Punch (adapter 101: one row short of the first inactive row)
   [153, { rows: 217, shift: -4 }], // Explosion (adapter 212)
+  [320, { rows: 221, shift: 0 }], // GrassWhistle (adapter 225; doll81)
+  [142, { rows: 153, shift: 0 }], // Lovely Kiss (adapter 152; doll81)
+  [47, { rows: 246, shift: 0 }], // Sing (player adapter 245; doll81)
 ].map(([id, framing]) => [id as number, Object.freeze(framing as SubstituteSwapBodyFraming)]));
 
 /** The composite's body framing for a request whose adapter duration is `adapterDuration`. */
@@ -171,10 +184,11 @@ export function liveSubstituteSwapApplies(
   request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
 ): boolean | null {
   if (battlerOf(field, request.attacker).substituteDoll !== true) return null;
-  return request.target !== request.attacker
-    && battlerOf(field, request.target).substituteDoll !== true
+  return (request.target === request.attacker ? LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS.has(request.moveId)
+    : battlerOf(field, request.target).substituteDoll !== true)
     && (LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(request.moveId) ?? []).includes(request.attacker === 0 ? "player" : "opponent")
     && request.multihit < 2
+    && !(request.moveId === 76 && request.turn !== 0)
     && !liveBattlerIsShiny(field.player.personality) && !liveBattlerIsShiny(field.opponent.personality);
 }
 

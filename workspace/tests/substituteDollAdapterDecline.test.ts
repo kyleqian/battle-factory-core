@@ -100,20 +100,22 @@ describe("live adapters decline while the Substitute doll is shown", () => {
     // breaks (fade message) the same turn.
     ["JYNX 11/35 defender", 11, 35, [3, 0, 0] as const, "188:1->0", "defender" as const],
     // Attacker (player): CRADILY subs on turn 1 (after the opponent's Rain Dance), then Solar Beam (live 76) from behind the doll.
-    ["CRADILY 144/35 player attacker", 144, 35, [0, 1, 1] as const, "76:0->1", "attacker" as const],
+    // land82: the route has charge turns (193 live frames, a presented swap body) and fire turns (32-frame fallback, declined).
+    // 76:0->1 is the CHARGE turn (t0), now a presented swap body (doll81), so it no longer declines.
+    ["CRADILY 144/35 player attacker", 144, 35, [0, 1, 1] as const, "76:0->1", "swapped" as const],
     // Attacker (opponent): the opponent JYNX subs too and uses Solar Beam (live 76) from behind its doll.
     ["JYNX 87/35 opponent attacker", 87, 35, [3, 0, 0] as const, "76:1->0", "attacker" as const],
   ])("route %s: the live body declines to the fallback unless it is a proven defender cell, the battle reaches the next prompt, Scene ON/OFF parity", (_n, seed, streak, slots, request, direction) => {
     const on = route(seed, streak, slots, "on");
     const off = route(seed, streak, slots, "off");
-    const hit = on.seen.find((s) => s.request === request && s.direction === direction)!;
+    const hit = on.seen.find((s) => s.request === request && s.direction === (direction === "swapped" ? "attacker" : direction))!;
     expect(hit).toBeDefined();
-    expect(hit.declined).toBe(!hit.provenCell);
+    expect(hit.declined).toBe(direction === "swapped" ? false : !hit.provenCell);
     expect(hit.provenCell).toBe(direction === "defender");
     // The same request with the doll removed would have been live: the decline is the doll's.
     expect(hit.liveWithoutDoll).toBe(true);
     // Every doll-involved body outside the proven defender cells declined; every other live body is unaffected by the gate.
-    for (const s of on.seen) expect(s.direction === null ? true : s.declined === !s.provenCell).toBe(true);
+    for (const s of on.seen) expect(s.direction === null ? true : direction === "swapped" ? s.declined === (s.ages === 32) : s.declined === !s.provenCell).toBe(true);
     expect(on.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(off.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expectParity(on.run, off.run);
