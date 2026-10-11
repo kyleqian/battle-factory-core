@@ -1,0 +1,155 @@
+{
+ "schema": "shadow105-route-check/v1",
+ "routes": {
+  "38:44:opponent": {
+   "framesBase": 10392,
+   "framesPatched": 10426,
+   "rowsBase": 26,
+   "rowsPatched": 36,
+   "leadBase": 0,
+   "leadPatched": 10,
+   "patchedRow0PreActivation": true,
+   "patchedRow0EqualsBaseRow0": false,
+   "patchedLeadRows1ToLEqualAge0Image": true,
+   "bodyRowsIdentical": true,
+   "afterRowEqual": true,
+   "patchedRow0VsRow1": {
+    "px": 200,
+    "bbox": [
+     160,
+     65,
+     191,
+     72
+    ]
+   },
+   "baseRow0VsRow1": {
+    "px": 477,
+    "bbox": [
+     41,
+     59,
+     102,
+     74
+    ]
+   },
+   "row0DiffInsideShadowBox": true,
+   "commandKeysIdentical": true
+  },
+  "4:188:opponent": {
+   "framesBase": 6358,
+   "framesPatched": 6366,
+   "rowsBase": 160,
+   "rowsPatched": 164,
+   "leadBase": 0,
+   "leadPatched": 4,
+   "patchedRow0PreActivation": true,
+   "patchedRow0EqualsBaseRow0": false,
+   "patchedLeadRows1ToLEqualAge0Image": true,
+   "bodyRowsIdentical": true,
+   "afterRowEqual": true,
+   "patchedRow0VsRow1": {
+    "px": 200,
+    "bbox": [
+     160,
+     65,
+     191,
+     72
+    ]
+   },
+   "baseRow0VsRow1": {
+    "px": 313,
+    "bbox": [
+     144,
+     22,
+     164,
+     42
+    ]
+   },
+   "row0DiffInsideShadowBox": true,
+   "commandKeysIdentical": true
+  },
+  "31:337:opponent": {
+   "framesBase": 11284,
+   "framesPatched": 11290,
+   "rowsBase": 137,
+   "rowsPatched": 143,
+   "leadBase": 0,
+   "leadPatched": 6,
+   "patchedRow0PreActivation": true,
+   "patchedRow0EqualsBaseRow0": false,
+   "patchedLeadRows1ToLEqualAge0Image": true,
+   "bodyRowsIdentical": true,
+   "afterRowEqual": true,
+   "patchedRow0VsRow1": {
+    "px": 200,
+    "bbox": [
+     160,
+     65,
+     191,
+     72
+    ]
+   },
+   "baseRow0VsRow1": {
+    "px": 0,
+    "bbox": null
+   },
+   "row0DiffInsideShadowBox": true,
+   "commandKeysIdentical": true
+  },
+  "38:188:player": {
+   "framesBase": 10392,
+   "framesPatched": 10426,
+   "rowsBase": 164,
+   "rowsPatched": 164,
+   "leadBase": 4,
+   "leadPatched": 4,
+   "patchedRow0PreActivation": true,
+   "patchedRow0EqualsBaseRow0": false,
+   "patchedLeadRows1ToLEqualAge0Image": true,
+   "bodyRowsIdentical": true,
+   "afterRowEqual": true,
+   "patchedRow0VsRow1": {
+    "px": 200,
+    "bbox": [
+     160,
+     65,
+     191,
+     72
+    ]
+   },
+   "baseRow0VsRow1": {
+    "px": 0,
+    "bbox": null
+   },
+   "row0DiffInsideShadowBox": true,
+   "commandKeysIdentical": true
+  },
+  "32:44:player": {
+   "framesBase": 18252,
+   "framesPatched": 18252,
+   "rowsBase": 36,
+   "rowsPatched": 36,
+   "leadBase": 10,
+   "leadPatched": 10,
+   "patchedRow0PreActivation": true,
+   "patchedRow0EqualsBaseRow0": false,
+   "patchedLeadRows1ToLEqualAge0Image": true,
+   "bodyRowsIdentical": true,
+   "afterRowEqual": true,
+   "patchedRow0VsRow1": {
+    "px": 200,
+    "bbox": [
+     160,
+     65,
+     191,
+     72
+    ]
+   },
+   "baseRow0VsRow1": {
+    "px": 0,
+    "bbox": null
+   },
+   "row0DiffInsideShadowBox": true,
+   "commandKeysIdentical": true
+  }
+ }
+}

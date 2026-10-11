@@ -1,0 +1,60 @@
+{
+ "schema": "shadow105-probe-sha256/v1",
+ "sha256": {
+  "shadow105-bite-opponent-crobat-golbat": {
+   "framesR1": "d587d5b913ba3d6b82c9c97ec608abd2ae663e47c703460be786c26537c14cc5",
+   "framesR2": "d587d5b913ba3d6b82c9c97ec608abd2ae663e47c703460be786c26537c14cc5",
+   "same": true
+  },
+  "shadow105-bite-opponent-crobat-lapras": {
+   "framesR1": "3f949b03195cff0fcb2f11c318266826969eaac0154aad798ce7815bfcbcc359",
+   "framesR2": "3f949b03195cff0fcb2f11c318266826969eaac0154aad798ce7815bfcbcc359",
+   "same": true
+  },
+  "shadow105-bite-player-raticate-crobat": {
+   "framesR1": "31cfbe28d28c9518b83cec3fc23b2a6638a3c700e24df78f751dedc5718b1fe6",
+   "framesR2": "31cfbe28d28c9518b83cec3fc23b2a6638a3c700e24df78f751dedc5718b1fe6",
+   "same": true
+  },
+  "shadow105-shadow-punch-opponent-haunter-golbat": {
+   "framesR1": "369e4bed88c9fa8eef8d3e54d9ff5df65e79448ddb97d8ec758f5179ff709017",
+   "framesR2": "369e4bed88c9fa8eef8d3e54d9ff5df65e79448ddb97d8ec758f5179ff709017",
+   "same": true
+  },
+  "shadow105-shadow-punch-opponent-haunter-lapras": {
+   "framesR1": "890e27d705d8b0abcfca234d0aa07821c9e04d03550a5997df4a93039a21f078",
+   "framesR2": "890e27d705d8b0abcfca234d0aa07821c9e04d03550a5997df4a93039a21f078",
+   "same": true
+  },
+  "shadow105-sludge-bomb-opponent-golbat-crobat": {
+   "framesR1": "0d691ef5d1c2553afabf366f8c1a05b51fc0b4a3a805221a646ac3498bc7532e",
+   "framesR2": "0d691ef5d1c2553afabf366f8c1a05b51fc0b4a3a805221a646ac3498bc7532e",
+   "same": true
+  },
+  "shadow105-sludge-bomb-opponent-golbat-snorlax": {
+   "framesR1": "2a55840728b057e5723d4fccf46859bdfe846ca98e95d03d061674926be097cf",
+   "framesR2": "2a55840728b057e5723d4fccf46859bdfe846ca98e95d03d061674926be097cf",
+   "same": true
+  },
+  "shadow105-sludge-bomb-player-muk-golbat": {
+   "framesR1": "1687291a636419c7d876d923395852971f65504fc0fb82601d5d1b543f3324b4",
+   "framesR2": "1687291a636419c7d876d923395852971f65504fc0fb82601d5d1b543f3324b4",
+   "same": true
+  },
+  "shadow105-twineedle-opponent-beedrill-golbat": {
+   "framesR1": "269d64f808575d76ea895575fb18177a7169c0260a2fdd287c11aeb6c91e9867",
+   "framesR2": "269d64f808575d76ea895575fb18177a7169c0260a2fdd287c11aeb6c91e9867",
+   "same": true
+  },
+  "shadow105-twineedle-opponent-beedrill-snorlax": {
+   "framesR1": "2f3fdc67ac5f3a967ad4d4cafd10bb907d48afa518ef9022f53d766a0c7cad5f",
+   "framesR2": "2f3fdc67ac5f3a967ad4d4cafd10bb907d48afa518ef9022f53d766a0c7cad5f",
+   "same": true
+  },
+  "shadow105-twineedle-player-beedrill-golbat": {
+   "framesR1": "17b679a53067a1e1a39d4cf9ad38c4b48d959fe6ae766b630c72fd5120f4b91f",
+   "framesR2": "17b679a53067a1e1a39d4cf9ad38c4b48d959fe6ae766b630c72fd5120f4b91f",
+   "same": true
+  }
+ }
+}

@@ -46,14 +46,15 @@ function rgbOf(dir: string, row: Row): Uint8Array {
   if (hash(rgb) !== row.sha256) throw new Error("RGB receipt drift");
   return rgb;
 }
-/** [total px, px inside BOX]; b is RGBA (production) when stride 4, RGB when 3. */
-function diff(a: Uint8Array, b: Uint8Array, stride: 3 | 4): [number, number] {
+/** [total px, px inside BOX]; b is RGBA (production) when stride 4, RGB when 3. `bb` (if given) grows to the differing pixels' bbox. */
+function diff(a: Uint8Array, b: Uint8Array, stride: 3 | 4, bb?: number[]): [number, number] {
   let px = 0, box = 0;
   for (let p = 0; p < 240 * 160; p++) {
     if (a[p * 3] !== b[p * stride] || a[p * 3 + 1] !== b[p * stride + 1] || a[p * 3 + 2] !== b[p * stride + 2]) {
       px++;
       const x = p % 240, y = Math.floor(p / 240);
       if (x >= BOX.x0 && x <= BOX.x1 && y >= BOX.y0 && y <= BOX.y1) box++;
+      if (bb) { bb[0] = Math.min(bb[0]!, x); bb[1] = Math.min(bb[1]!, y); bb[2] = Math.max(bb[2]!, x); bb[3] = Math.max(bb[3]!, y); }
     }
   }
   return [px, box];
@@ -123,8 +124,9 @@ for (const stem of stems) {
       }
       return cache.get(k)!;
     };
-    const per = runs.map((run) => Array.from({ length: L + D }, (_, j) =>
-      diff(rgbOf(run.rgb, rows[i + off + j]!), prodAt(Math.max(0, j - L), opt["pre-activation"] === "1" && L > 0 && j === 0), 4)[0]));
+    const bb = [240, 160, -1, -1]; // r1's bbox of every differing production pixel (lead + body)
+    const per = runs.map((run, ri) => Array.from({ length: L + D }, (_, j) =>
+      diff(rgbOf(run.rgb, rows[i + off + j]!), prodAt(Math.max(0, j - L), opt["pre-activation"] === "1" && L > 0 && j === 0), 4, ri === 0 ? bb : undefined)[0]));
     const leadPx = per.map((p) => p.slice(0, L));
     const bodyPx = per.map((p) => p.slice(L).reduce((s, x) => s + x, 0));
     const bad = per[0]!.map((x, j) => [j, x] as const).filter((x) => x[1] > 0);
@@ -134,9 +136,9 @@ for (const stem of stems) {
       romRowsEqualAge0: romLead[0]!.filter((x) => x.eqAge0).map((x) => x.j), romLeadR1EqR2: JSON.stringify(romLead[0]) === JSON.stringify(romLead[1]),
       romLead: romLead[0], prodLead: L, prodDuration: D, preActivation: opt["pre-activation"] === "1", rows: L + D,
       leadPx, bodyPx, identical: per[0]!.join() === per[1]!.join(), exactRows: per[0]!.filter((x) => x === 0).length,
-      badRows: ranges(bad.map((x) => x[0])), badPx: bad.slice(0, 24) };
+      badRows: ranges(bad.map((x) => x[0])), badBox: bb[2]! < 0 ? null : bb, badPx: bad.slice(0, 24) };
     results.push(entry);
-    console.log(`${stem} body${body} ${entry.attacker}->${entry.target} act ${r.frame} N ${N} romShadowRows [${shadowRows}] row0=A-1 ${entry.romPreEqualsRow0} rowsEqAge0 ${ranges(entry.romRowsEqualAge0).join(",")} | prod L ${L} D ${D} leadPx ${leadPx.map((p) => p.join("+")).join(" / ")} bodyPx ${bodyPx.join("/")} exact ${entry.exactRows}/${entry.rows} bad ${entry.badRows.slice(0, 8).join(",")}`);
+    console.log(`${stem} body${body} ${entry.attacker}->${entry.target} act ${r.frame} N ${N} romShadowRows [${shadowRows}] row0=A-1 ${entry.romPreEqualsRow0} rowsEqAge0 ${ranges(entry.romRowsEqualAge0).join(",")} | prod L ${L} D ${D} leadPx ${leadPx.map((p) => p.join("+")).join(" / ")} bodyPx ${bodyPx.join("/")} exact ${entry.exactRows}/${entry.rows} bad ${entry.badRows.slice(0, 8).join(",")}${entry.badBox ? ` box ${entry.badBox.join(",")}` : ""}`);
     i = bodyEnd - 1;
   }
 }

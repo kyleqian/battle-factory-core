@@ -1,0 +1,273 @@
+{
+ "schema": "shadow105-lead-check/v1",
+ "results": [
+  {
+   "stem": "shadow105-sludge-bomb-opponent-golbat-snorlax",
+   "move": "SLUDGE_BOMB",
+   "moveId": 188,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "GOLBAT",
+   "target": "SNORLAX",
+   "activation": 81,
+   "romBodyRows": 168,
+   "nRom": 4,
+   "romPreEqualsRow0": true,
+   "romShadowRows": [
+    0
+   ],
+   "romRowsEqualAge0": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "romLeadR1EqR2": true,
+   "romLead": [
+    {
+     "j": 0,
+     "eqPre": true,
+     "eqAge0": false,
+     "px": 200,
+     "box": 200,
+     "shadow": true
+    },
+    {
+     "j": 1,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 2,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 3,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 4,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    }
+   ],
+   "prodLead": 0,
+   "prodDuration": 160,
+   "preActivation": false,
+   "rows": 160,
+   "leadPx": [
+    [],
+    []
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 160,
+   "badRows": [],
+   "badBox": null,
+   "badPx": []
+  },
+  {
+   "stem": "shadow105-sludge-bomb-opponent-golbat-crobat",
+   "move": "SLUDGE_BOMB",
+   "moveId": 188,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "GOLBAT",
+   "target": "CROBAT",
+   "activation": 226,
+   "romBodyRows": 168,
+   "nRom": 4,
+   "romPreEqualsRow0": true,
+   "romShadowRows": [
+    0
+   ],
+   "romRowsEqualAge0": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "romLeadR1EqR2": true,
+   "romLead": [
+    {
+     "j": 0,
+     "eqPre": true,
+     "eqAge0": false,
+     "px": 200,
+     "box": 200,
+     "shadow": true
+    },
+    {
+     "j": 1,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 2,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 3,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 4,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    }
+   ],
+   "prodLead": 0,
+   "prodDuration": 160,
+   "preActivation": false,
+   "rows": 160,
+   "leadPx": [
+    [],
+    []
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 160,
+   "badRows": [],
+   "badBox": null,
+   "badPx": []
+  },
+  {
+   "stem": "shadow105-sludge-bomb-player-muk-golbat",
+   "move": "SLUDGE_BOMB",
+   "moveId": 188,
+   "side": "player",
+   "body": 0,
+   "attacker": "MUK",
+   "target": "GOLBAT",
+   "activation": 216,
+   "romBodyRows": 168,
+   "nRom": 4,
+   "romPreEqualsRow0": true,
+   "romShadowRows": [
+    0
+   ],
+   "romRowsEqualAge0": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "romLeadR1EqR2": true,
+   "romLead": [
+    {
+     "j": 0,
+     "eqPre": true,
+     "eqAge0": false,
+     "px": 200,
+     "box": 200,
+     "shadow": true
+    },
+    {
+     "j": 1,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 2,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 3,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 4,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    }
+   ],
+   "prodLead": 4,
+   "prodDuration": 160,
+   "preActivation": false,
+   "rows": 164,
+   "leadPx": [
+    [
+     200,
+     0,
+     0,
+     0
+    ],
+    [
+     200,
+     0,
+     0,
+     0
+    ]
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 163,
+   "badRows": [
+    "0"
+   ],
+   "badBox": [
+    160,
+    65,
+    191,
+    72
+   ],
+   "badPx": [
+    [
+     0,
+     200
+    ]
+   ]
+  }
+ ]
+}

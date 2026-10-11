@@ -1,0 +1,12 @@
+{
+ "overall": {
+  "commands": 27515,
+  "live": 26245,
+  "frames": 3985209,
+  "liveFrames": 3934140,
+  "liveSharePctByCount": 95.38,
+  "liveSharePctByFrames": 98.72
+ },
+ "commandKeyDigest": "b5c536d22cc0926c98774d55a937bc1b1ee3251df2afd9687c66b9552463f871",
+ "battleDigest": "b831bd5d66f38d1256e748a60035b27695afc9770dee2d65ffe4f2b83df90f17"
+}

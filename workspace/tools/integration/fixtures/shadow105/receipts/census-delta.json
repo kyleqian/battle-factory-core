@@ -1,0 +1,185 @@
+{
+ "leadMoves": 40,
+ "commands": [
+  27515,
+  27515
+ ],
+ "keySequenceIdentical": true,
+ "battleDigestExcludingFramesIdentical": true,
+ "statusChanges": {},
+ "commandsMovedByN": 239,
+ "liveMoved": 235,
+ "framesAdded": 1296,
+ "frames": [
+  3985209,
+  3986505
+ ],
+ "frameDeltaMismatches": 0,
+ "mismatches": [],
+ "perMoveAttacker": {
+  "41:BEEDRILL": {
+   "commands": 11,
+   "frames": 110
+  },
+  "44:CROBAT": {
+   "commands": 4,
+   "frames": 40
+  },
+  "52:CASTFORM": {
+   "commands": 5,
+   "frames": 20
+  },
+  "92:BUTTERFREE": {
+   "commands": 2,
+   "frames": 14
+  },
+  "92:CROBAT": {
+   "commands": 1,
+   "frames": 7
+  },
+  "92:DUSTOX": {
+   "commands": 1,
+   "frames": 7
+  },
+  "92:GOLBAT": {
+   "commands": 3,
+   "frames": 21
+  },
+  "93:LUNATONE": {
+   "commands": 7,
+   "frames": 35
+  },
+  "93:SKIPLOOM": {
+   "commands": 7,
+   "frames": 35
+  },
+  "93:SOLROCK": {
+   "commands": 9,
+   "frames": 45
+  },
+  "94:CHIMECHO": {
+   "commands": 16,
+   "frames": 80
+  },
+  "94:CLAYDOL": {
+   "commands": 15,
+   "frames": 75
+  },
+  "94:HAUNTER": {
+   "commands": 9,
+   "frames": 45
+  },
+  "94:MISDREAVUS": {
+   "commands": 10,
+   "frames": 50
+  },
+  "94:VENOMOTH": {
+   "commands": 1,
+   "frames": 5
+  },
+  "124:KOFFING": {
+   "commands": 13,
+   "frames": 52
+  },
+  "153:ELECTRODE": {
+   "commands": 1,
+   "frames": 4
+  },
+  "153:GLALIE": {
+   "commands": 2,
+   "frames": 8
+  },
+  "153:WEEZING": {
+   "commands": 3,
+   "frames": 12
+  },
+  "188:CROBAT": {
+   "commands": 5,
+   "frames": 20
+  },
+  "188:GOLBAT": {
+   "commands": 2,
+   "frames": 8
+  },
+  "188:VENOMOTH": {
+   "commands": 2,
+   "frames": 8
+  },
+  "188:WEEZING": {
+   "commands": 20,
+   "frames": 80
+  },
+  "207:CLAYDOL": {
+   "commands": 1,
+   "frames": 7
+  },
+  "207:ELECTRODE": {
+   "commands": 5,
+   "frames": 35
+  },
+  "207:JUMPLUFF": {
+   "commands": 3,
+   "frames": 21
+  },
+  "225:AERODACTYL": {
+   "commands": 2,
+   "frames": 12
+  },
+  "225:ALTARIA": {
+   "commands": 14,
+   "frames": 84
+  },
+  "232:GLIGAR": {
+   "commands": 7,
+   "frames": 28
+  },
+  "247:BANETTE": {
+   "commands": 1,
+   "frames": 5
+  },
+  "247:CLAYDOL": {
+   "commands": 3,
+   "frames": 15
+  },
+  "247:CROBAT": {
+   "commands": 3,
+   "frames": 15
+  },
+  "247:GLALIE": {
+   "commands": 3,
+   "frames": 15
+  },
+  "247:GOLBAT": {
+   "commands": 1,
+   "frames": 5
+  },
+  "247:MISDREAVUS": {
+   "commands": 6,
+   "frames": 30
+  },
+  "247:NINJASK": {
+   "commands": 6,
+   "frames": 30
+  },
+  "247:WEEZING": {
+   "commands": 8,
+   "frames": 40
+  },
+  "325:HAUNTER": {
+   "commands": 10,
+   "frames": 80
+  },
+  "337:ALTARIA": {
+   "commands": 5,
+   "frames": 30
+  },
+  "337:FLYGON": {
+   "commands": 9,
+   "frames": 54
+  },
+  "347:LUNATONE": {
+   "commands": 3,
+   "frames": 9
+  }
+ }
+}

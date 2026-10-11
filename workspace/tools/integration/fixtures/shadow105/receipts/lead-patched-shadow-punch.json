@@ -1,0 +1,431 @@
+{
+ "schema": "shadow105-lead-check/v1",
+ "results": [
+  {
+   "stem": "shadow105-shadow-punch-opponent-haunter-lapras",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "LAPRAS",
+   "activation": 81,
+   "romBodyRows": 109,
+   "nRom": 8,
+   "romPreEqualsRow0": true,
+   "romShadowRows": [
+    0
+   ],
+   "romRowsEqualAge0": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "romLeadR1EqR2": true,
+   "romLead": [
+    {
+     "j": 0,
+     "eqPre": true,
+     "eqAge0": false,
+     "px": 200,
+     "box": 200,
+     "shadow": true
+    },
+    {
+     "j": 1,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 2,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 3,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 4,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 5,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 6,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 7,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 8,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    }
+   ],
+   "prodLead": 8,
+   "prodDuration": 105,
+   "preActivation": true,
+   "rows": 113,
+   "leadPx": [
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   "bodyPx": [
+    286104,
+    286104
+   ],
+   "identical": true,
+   "exactRows": 96,
+   "badRows": [
+    "91..106",
+    "109"
+   ],
+   "badBox": [
+    0,
+    0,
+    239,
+    111
+   ],
+   "badPx": [
+    [
+     91,
+     17869
+    ],
+    [
+     92,
+     17869
+    ],
+    [
+     93,
+     17869
+    ],
+    [
+     94,
+     17869
+    ],
+    [
+     95,
+     17869
+    ],
+    [
+     96,
+     17869
+    ],
+    [
+     97,
+     17869
+    ],
+    [
+     98,
+     17869
+    ],
+    [
+     99,
+     17869
+    ],
+    [
+     100,
+     17869
+    ],
+    [
+     101,
+     17869
+    ],
+    [
+     102,
+     17869
+    ],
+    [
+     103,
+     17869
+    ],
+    [
+     104,
+     17869
+    ],
+    [
+     105,
+     17869
+    ],
+    [
+     106,
+     17869
+    ],
+    [
+     109,
+     200
+    ]
+   ]
+  },
+  {
+   "stem": "shadow105-shadow-punch-opponent-haunter-golbat",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "HAUNTER",
+   "target": "GOLBAT",
+   "activation": 81,
+   "romBodyRows": 109,
+   "nRom": 8,
+   "romPreEqualsRow0": true,
+   "romShadowRows": [
+    0
+   ],
+   "romRowsEqualAge0": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "romLeadR1EqR2": true,
+   "romLead": [
+    {
+     "j": 0,
+     "eqPre": true,
+     "eqAge0": false,
+     "px": 200,
+     "box": 200,
+     "shadow": true
+    },
+    {
+     "j": 1,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 2,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 3,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 4,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 5,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 6,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 7,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    },
+    {
+     "j": 8,
+     "eqPre": false,
+     "eqAge0": true,
+     "px": 0,
+     "box": 0,
+     "shadow": false
+    }
+   ],
+   "prodLead": 8,
+   "prodDuration": 105,
+   "preActivation": true,
+   "rows": 113,
+   "leadPx": [
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   "bodyPx": [
+    283256,
+    283256
+   ],
+   "identical": true,
+   "exactRows": 96,
+   "badRows": [
+    "91..106",
+    "109"
+   ],
+   "badBox": [
+    0,
+    0,
+    239,
+    111
+   ],
+   "badPx": [
+    [
+     91,
+     17691
+    ],
+    [
+     92,
+     17691
+    ],
+    [
+     93,
+     17691
+    ],
+    [
+     94,
+     17691
+    ],
+    [
+     95,
+     17691
+    ],
+    [
+     96,
+     17691
+    ],
+    [
+     97,
+     17691
+    ],
+    [
+     98,
+     17691
+    ],
+    [
+     99,
+     17691
+    ],
+    [
+     100,
+     17691
+    ],
+    [
+     101,
+     17691
+    ],
+    [
+     102,
+     17691
+    ],
+    [
+     103,
+     17691
+    ],
+    [
+     104,
+     17691
+    ],
+    [
+     105,
+     17691
+    ],
+    [
+     106,
+     17691
+    ],
+    [
+     109,
+     200
+    ]
+   ]
+  }
+ ]
+}
