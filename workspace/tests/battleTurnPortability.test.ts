@@ -221,6 +221,14 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
           power: 0, damage: 0, friendship: 0, multihit: 0 },
         timing: { minimumFrames: 32 },
       },
+      // sc106: General_StatsChange (B_ANIM_STATS_CHANGE, accuracy down 1 on ONIX) at its kernel event, 76 frames.
+      {
+        type: "stats-change",
+        eventSequence: 13,
+        battler: 0,
+        argument: 27,
+        timing: { minimumFrames: 76 },
+      },
       {
         type: "message",
         eventSequence: 14,

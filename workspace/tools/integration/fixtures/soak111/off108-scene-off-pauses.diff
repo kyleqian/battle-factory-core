@@ -1,0 +1,187 @@
+--- a/workspace/src/engine/battleResolutionPresentation.ts
++++ b/workspace/src/engine/battleResolutionPresentation.ts
+@@ -73,7 +73,10 @@
+   // ISSUES #81 4b route-scoped used-move hold: the failed/no-anim path's
+   // `pause`/controller span counts from print completion, so the typing term
+   // is the exact printable length (minimumFrames 0), not the 24-frame floor.
+-  | Readonly<{ minimumFrames: 0; holdFrames: number }>;
++  | Readonly<{ minimumFrames: 0; holdFrames: number }>
++  // off108 (ISSUES #167): the provenance-derived used-move hold over a source
++  // `pause B_WAIT_TIME_SHORT` (sourcePauseUsedMoveHoldFrames), after the floor.
++  | Readonly<{ minimumFrames: 24; holdFrames: number }>;
+ export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number }>;
+ export type BattleHitAnimationTiming = Readonly<{
+   minimumFrames: 35;
+@@ -635,6 +638,109 @@
+ } as const);
+ /** BattleScript_Pausex20's `pause B_WAIT_TIME_SHORT`. */
+ const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
++
++/**
++ * off108 (ISSUES #167, docs/off108-scene-off-pauses.md): Scene OFF runs
++ * BattleScript_Pausex20 for EVERY attackanimation, so a body without a hit
++ * receipt (a status move, Protect, a two-turn charge turn, a no-effect damaging
++ * move) still spends attackanimation .. waitanimation .. the next presented
++ * instruction. As on the hit path, one frame per interpreter execution from
++ * the opener print (STRINGID_USEDMOVE, or a charge turn's EMPTYSTRING3), whose
++ * command ends on the frame after its final glyph: the next presented
++ * receipt's command starts `instructionExecution - opener + lead` frames
++ * later. lead = 1 for a print (its first glyph lands one frame after the print
++ * executes) and for a status-data receipt (Cmd_statusanimation is the next
++ * instruction); 0 for STATS_CHANGE (the playanimation activation) and the HP
++ * bar. Frames already presented since the opener are subtracted. A held
++ * message or a body in between (Rest's waitmessage) breaks the
++ * one-frame-per-execution mapping, and an unlisted next receipt is unmeasured:
++ * no pause there.
++ */
++function sceneOffNoHitPauseFrames(
++  events: readonly BattleKernelSemanticEvent[],
++  attackIndex: number,
++  openerIndex: number | null,
++  presentedSinceOpener: readonly BattleResolutionPresentationCommand[],
++): number | null {
++  if (openerIndex === null) return null;
++  const opener = events[openerIndex]!.provenance?.instructionExecution;
++  if (opener === undefined) return null;
++  let execution = opener;
++  for (let index = openerIndex + 1; index <= attackIndex; index += 1) {
++    const next = events[index]!.provenance?.instructionExecution;
++    if (next === undefined || next < execution) return null;
++    execution = next;
++  }
++  let presented = 0;
++  for (const command of presentedSinceOpener) {
++    const timing = (command as { timing?: { minimumFrames: number; holdFrames?: number } }).timing;
++    if (
++      command.type === "message" || command.type === "move-animation" || command.type === "hit-animation"
++      || timing === undefined || (timing.holdFrames ?? 0) > 0
++    ) return null;
++    presented += timing.minimumFrames;
++  }
++  for (let index = attackIndex + 1; index < events.length; index += 1) {
++    const candidate = events[index]!;
++    const next = candidate.provenance?.instructionExecution;
++    if (next === undefined || next < execution) return null;
++    execution = next;
++    const payload = candidate.payload;
++    if (payload.kind === "set-battler-pp-data" || payload.kind === "play-se") continue;
++    const lead = payload.kind === "message" || payload.kind === "set-battler-status-data"
++      ? 1
++      : (payload.kind === "animation" && payload.animationId === "STATS_CHANGE") || payload.kind === "health-bar-update"
++        ? 0
++        : null;
++    if (lead === null) return null;
++    const frames = next - opener + lead - presented;
++    return frames > 0 ? frames : null;
++  }
++  return null;
++}
++
++/**
++ * off108 (ISSUES #167): a `pause B_WAIT_TIME_SHORT` between the attack string
++ * and the first print (BattleScript_MoveMissedPause, BattleScript_ButItFailed,
++ * the not-affected / "already ..." tails) runs in BOTH scenes with no
++ * controller command, so "X used Y!" stays on the box until that print. Hold
++ * it for one frame per interpreter execution from the attack string, + 1 for
++ * the printer. Only when the print is the first presented receipt after the
++ * attack string (the PP receipt is silent) and the source puts that pause
++ * within the three straight-line instructions before it.
++ */
++function sourcePauseUsedMoveHoldFrames(
++  events: readonly BattleKernelSemanticEvent[],
++  usedIndex: number,
++): number | null {
++  const used = events[usedIndex]!.provenance?.instructionExecution;
++  if (used === undefined) return null;
++  let execution = used;
++  for (let index = usedIndex + 1; index < events.length; index += 1) {
++    const candidate = events[index]!;
++    const next = candidate.provenance?.instructionExecution;
++    if (next === undefined || next < execution) return null;
++    execution = next;
++    if (candidate.payload.kind === "set-battler-pp-data") continue;
++    if (candidate.payload.kind !== "message") return null;
++    const programCounter = candidate.provenance!.programCounter;
++    for (let back = 1; back <= 3 && programCounter - back >= 0; back += 1) {
++      const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter - back];
++      if (
++        instruction === undefined
++        || instruction.opcodeName === "B_SCR_OP_GOTO"
++        || instruction.opcodeName === "B_SCR_OP_END"
++        || instruction.opcodeName === "B_SCR_OP_RETURN"
++      ) return null;
++      if (
++        instruction.opcodeName === "B_SCR_OP_PAUSE"
++        && instruction.operands[0]?.expression === "B_WAIT_TIME_SHORT"
++      ) return next - used + 1;
++    }
++    return null;
++  }
++  return null;
++}
+ const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
+ const STAT_TIMING = Object.freeze({ minimumFrames: 2 } as const);
+ const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
+@@ -3257,6 +3363,9 @@
+     beforeRules.battlers[1]!.item,
+   ] as [number, number];
+   let usedMoveInstructionExecution: number | null = null;
++  // off108: the opener print's event index and the command count after it.
++  let pauseOpenerIndex: number | null = null;
++  let pauseOpenerCommands = 0;
+   const zeroHpBattlers = new Set<0 | 1>();
+   const fieldArt = createBattleCommandFieldArtView(field);
+   // `gBattlerPartyIndexes[battler]` (battle_message.c's `BufferStringBattle`
+@@ -3360,7 +3469,12 @@
+             // printable length, not the 24-frame `MESSAGE_TIMING` floor --
+             // the 23-glyph "…used\nSPLASH!" must clear at +62, not +63.
+             ? Object.freeze({ minimumFrames: 0, holdFrames: usedMessageHoldFrames })
+-            : MESSAGE_TIMING
++            : (() => {
++              const hold = sourcePauseUsedMoveHoldFrames(events, index);
++              return hold === null
++                ? MESSAGE_TIMING
++                : Object.freeze({ minimumFrames: MESSAGE_TIMING.minimumFrames, holdFrames: hold });
++            })()
+           : payload.messageId === "STRINGID_RETURNMON"
+             ? RETURN_MON_TIMING
+             : payload.messageId === "STRINGID_SWITCHINMON"
+@@ -3370,6 +3484,10 @@
+                 ? WAITMESSAGE_LONG_TIMING
+                 : MESSAGE_TIMING),
+       }));
++      if (payload.messageId === "STRINGID_USEDMOVE" || payload.messageId === "STRINGID_EMPTYSTRING3") {
++        pauseOpenerIndex = index;
++        pauseOpenerCommands = commands.length;
++      }
+       pendingStatusMessageBattler = null;
+       pendingHeldItemEffectBattler = null;
+       continue;
+@@ -3423,12 +3541,25 @@
+         continue;
+       }
+       const hit = nextHitAnimation(events, index);
+-      if (usedMoveInstructionExecution === null || hit === null) {
++      if (hit === null) {
+         // An attack receipt without a hit receipt has no target hit/drain
+         // choreography. Existing typed effect/status commands own its
+-        // controller-specific presentation.
++        // controller-specific presentation; Scene OFF still runs
++        // BattleScript_Pausex20 for it (off108, ISSUES #167).
++        const pause = payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
++          ? sceneOffNoHitPauseFrames(events, index, pauseOpenerIndex, commands.slice(pauseOpenerCommands))
++          : null;
++        if (pause !== null) {
++          commands.push(Object.freeze({
++            type: "move-animation",
++            eventSequence: event.sequence,
++            battler,
++            timing: Object.freeze({ minimumFrames: pause }),
++          }));
++        }
+         continue;
+       }
++      if (usedMoveInstructionExecution === null) continue;
+       const hitExecution = instructionExecutionOf(hit);
+       // The interpreter provenance counts Cmd_pause's initial execution plus
+       // each of B_WAIT_TIME_SHORT's blocked retries. The visual command owns

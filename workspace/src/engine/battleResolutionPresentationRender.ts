@@ -844,11 +844,22 @@ function applyCompletedCommand(
     || command.type === "turn-end"
     || command.type === "trainer-slide"
     || command.type === "substitute-fade"
+    || command.type === "stats-change"
   ) return field;
   if (command.type === "switch-in") {
     return replaceFieldBattler(field, command.battler, command.incoming);
   }
   throw new Error("battle resolution renderer received an unknown command");
+}
+
+/** The displayed field at the start of `commands[index]`: `field` after the completed commands before it (currentCommandField's walk). */
+export function battleResolutionFieldBeforeCommand(
+  field: BattleResolutionDisplayedField,
+  commands: readonly BattleResolutionPresentationCommand[],
+  index: number,
+): BattleResolutionDisplayedField {
+  for (let completed = 0; completed < index; completed += 1) field = applyCompletedCommand(field, commands[completed]!);
+  return field;
 }
 
 /**
@@ -989,6 +1000,9 @@ export function battleResolutionCommandDuration(
       return command.timing.minimumFrames;
     case "trainer-slide":
     case "substitute-fade":
+      return command.timing.minimumFrames;
+    // sc106: General_StatsChange's added rows (76 / 90, statsChangeSpan); no pixels yet: the ordinary field / box (no effect).
+    case "stats-change":
       return command.timing.minimumFrames;
   }
 }

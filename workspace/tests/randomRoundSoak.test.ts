@@ -375,7 +375,15 @@ describe("random round soak driver (green milestone pin)", () => {
       // before `stopAtFirstRoundDecision` fires again (false -> true). ROM
       // receipt: tools/probe/receipts/issue140-getmovetarget-off.json. It still
       // earns all seven wins and both re-runs stay identical.
-      frames: 37_260,
+      //
+      // sc106 (the `stats-change` presentation command, 76 / 90 frames per
+      // played stat animation) then moved them to 37_499 / 2_679 (same seven
+      // wins, turn 3); soak111 (docs/soak111-decoupled-cooldown.md) moved
+      // them to 37_569 / 2_679: the driver's press cooldowns now come from
+      // their own seeded stream and the forced party selector waits out its
+      // input-dead entry fade instead of mashing into it, so only the frames
+      // between the same presses move. Same seven wins, turn 3.
+      frames: 37_569,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -387,7 +395,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_671,
+        renderCalls: 2_679,
       },
     });
     expect(second).toEqual(first);
@@ -470,30 +478,58 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 27's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
-    // Seed 27 (full policy) selects Baton Pass mid-turn and used to crash at
-    // round 1 battle 1 turn 10, frame 30798, on an unimplemented
+  it("ISSUES #89: seed 226's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+    // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
+    // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
     // (driveTrainerBoundary had no handling for a player-side mid-action
     // openpartyscreen halt). It's now a resumable player-choice halt that
     // hands off to the forced party selector instead of hard-failing, so the
-    // whole round plays out to a genuine finish. Pin the meaningful outcome
-    // shape (progressed past the old crash point, no throw, real endState),
-    // not the exact settling frame/turn — those drift with unrelated
-    // downstream RNG-consumption changes. `stopAtFirstRoundDecision` snapshots
-    // THIS round's own decided outcome regardless of what the terminal does
-    // afterward — this seed's terminal happens to dead-end on ISSUES #104
-    // (ISSUES #104 driver fix, PROGRESS ~1367), an unrelated open defect this
-    // pin has no stake in; without the flag the honest driver now reports
-    // that dead-end as HANG instead of this seed's own genuine roundLost.
-    const result = runSeed(27, {
+    // whole round plays out to a genuine finish.
+    //
+    // soak111 (docs/soak111-decoupled-cooldown.md) moved the pin to seed 226:
+    // seed 27's random game had already drifted off Baton Pass (on 52c181d54
+    // it commits Baton Pass zero times and is in postwin at frame 30798, so
+    // its frame bound alone no longer exercised the halt), sc106's
+    // stats-change frames re-rolled it again, and soak111's decoupled
+    // press-cooldown stream gives every exploring seed a new trajectory.
+    // tools/integration/soak111BatonPassSearch.ts scanned full-policy seeds
+    // for a run that commits Baton Pass and then opens the forced party
+    // selector on a still-living outgoing slot (Baton Pass's own switch);
+    // seed 226 is the first whose halt lands inside the first round itself
+    // (battle 4, LEDIAN, frame 54509) rather than in the chained round of the
+    // post-decision grace window. Unlike the old frame-only bound, this pin
+    // OBSERVES the halt through the observation-only coverage seam, so a
+    // future trajectory drift fails loudly instead of silently dropping the
+    // coverage. `stopAtFirstRoundDecision` snapshots THIS round's own decided
+    // outcome (see ISSUES #104's note in the history of this pin).
+    let frame = 0;
+    let batonPassCommitFrame: number | null = null;
+    let haltFrame: number | null = null;
+    const observer = {
+      beginSeed(): void {},
+      recordPlayerFightCommit(moveId: number): void {
+        if (moveId === 226 && batonPassCommitFrame === null) batonPassCommitFrame = frame;
+      },
+      observe(state: EngineState): void {
+        frame = state.frame;
+        const selector = state.factoryRoundBattleOrchestrator?.battleForcedPartySelect ?? null;
+        if (haltFrame !== null || selector === null || batonPassCommitFrame === null) return;
+        const outgoing = selector.party.find((m) => m.partyIndex === selector.request.faintedPartyIndex);
+        if (outgoing !== undefined && !outgoing.fainted) haltFrame = state.frame;
+      },
+    };
+    const result = runSeed(226, {
       maxFrames: 80_000,
       renderEvery: 0,
       stopAtFirstRoundDecision: true,
+      coverage: observer as never,
     });
     expect(result.errorMessage ?? "").not.toMatch(/openpartyscreen|machine-barrier/i);
-    expect(result.frames).toBeGreaterThan(30_798);
-    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost" });
+    expect(batonPassCommitFrame).not.toBeNull();
+    expect(haltFrame).not.toBeNull();
+    expect(result.frames).toBeGreaterThan(haltFrame!);
+    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost", battle: 4 });
   });
 
   // ISSUES #86's original concern (a forced replacement's terminal weather
@@ -724,22 +760,28 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       policy: "full" as const,
       stopAtFirstRoundDecision: true,
     };
-    // Recorded on the pre-change tree (this milestone's step 2 commit).
+    // Recorded on the pre-change tree (this milestone's step 2 commit);
+    // re-pinned by soak111 (docs/soak111-decoupled-cooldown.md): the soak
+    // driver's press cooldowns moved to their own seeded stream, so the
+    // decision stream -- and with it this exploring policy's whole random
+    // game -- is a new (now presentation-length-independent) trajectory.
+    // Before: seed 0 11955 / turn 20, seed 1 14345 / battle 1 turn 29 (sc106
+    // alone had already moved them to 14186 / 24 and 12272 / 23).
     expect(runSeed(0, options)).toMatchObject({
-      frames: 11955,
+      frames: 16321,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
       battle: 1,
-      turn: 20,
+      turn: 30,
     });
     expect(runSeed(1, options)).toMatchObject({
-      frames: 14345,
+      frames: 25321,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 0,
-      battle: 1,
-      turn: 29,
+      maxBattleDepth: 1,
+      battle: 2,
+      turn: 9,
     });
   });
 
@@ -751,8 +793,12 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       stopAtFirstRoundDecision: true,
     };
     // Recorded on the pre-change tree (this milestone's step 2 commit).
+    // soak111 (docs/soak111-decoupled-cooldown.md) re-pinned the frames
+    // only: vanilla's decisions are fixed, and the driver's press cooldowns
+    // now come from their own seeded stream (8499 -> 8683 here, 8550 -> 8670
+    // for seed 1; sc106 alone had moved them to 8625 / 8661). Same turn 16.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 8499,
+      frames: 8683,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -769,7 +815,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // the round genuinely re-chains right after the answer is given, so the
     // frozen last-pre-chain snapshot lands much earlier, at the real frame.
     expect(runSeed(1, options)).toMatchObject({
-      frames: 8550,
+      frames: 8670,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

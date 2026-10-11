@@ -19,6 +19,16 @@
 // Finding vs. cataloging: this tool NEVER fixes engine behavior. A throw
 // whose top frame is under tools/soak/ is a DRIVER bug; a throw from src/**
 // is an ENGINE bug and lands in docs/soak-crash-catalog.md.
+//
+// Two seeded streams (soak111, docs/soak111-decoupled-cooldown.md): every
+// DECISION draw (draft picks, menu/fight/switch/party intents, postwin and
+// swap answers, terminal buttons, ...) comes from `new Rng(seed)`; every
+// PRESS draw -- the idle cooldown gap after each press and the 6% B roll of
+// the message-advance mash -- comes from `new Rng(seed, SOAK_PRESS_RNG_SALT)`.
+// The count of press draws depends on how long each presentation runs, so
+// before the split a presentation-length change (e.g. a new stats-change
+// command or Scene OFF pause) shifted every later decision and replayed a
+// different random game; now it only moves frame numbers.
 
 import {
   createInitialState,
@@ -36,6 +46,7 @@ import {
   isMonPicInputReady,
 } from "../../src/engine/monPic.ts";
 import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
+import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import {
   applyTypeEffectiveness,
   MAX_STAT_STAGE,
@@ -1174,12 +1185,28 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+/**
+ * Salt for `RandomPlayer`'s press stream (soak111): the cooldown gap after
+ * every press and the message-advance mash's A/B roll are drawn from
+ * `new Rng(seed, SOAK_PRESS_RNG_SALT)`, never from the decision stream.
+ */
+export const SOAK_PRESS_RNG_SALT = 0x50ac_0111;
+
 export class Rng {
   private readonly next: () => number;
-  constructor(seed: number) {
-    // Spread nearby integer seeds apart.
-    this.next = mulberry32((seed ^ 0x9e3779b9) + seed * 0x85eb_ca6b);
+  readonly seed: number;
+  constructor(seed: number, salt = 0) {
+    this.seed = seed;
+    // Spread nearby integer seeds apart. `salt === 0` is the decision stream
+    // (bit-identical to the pre-soak111 single stream); a nonzero salt
+    // derives an independent stream from the same seed.
+    const spread = (seed ^ 0x9e3779b9) + seed * 0x85eb_ca6b;
+    this.next = mulberry32(salt === 0 ? spread : (spread ^ salt));
     for (let i = 0; i < 12; i += 1) this.next();
+  }
+  /** A fresh, independent stream seeded from this stream's seed and `salt` (does not draw from this stream). */
+  derive(salt: number): Rng {
+    return new Rng(this.seed, salt);
   }
   float(): number {
     return this.next();
@@ -1553,9 +1580,25 @@ export class RandomPlayer {
    * trajectory depends only on its own play.
    */
   private readonly fightUseCountByMoveId = new Map<number, number>();
+  /**
+   * soak111: the postwin menus' last roll, reused until the menu's cursor
+   * moves (or the menu changes). Those menus used to draw a fresh roll on
+   * every press attempt, including presses the menu dropped before it was
+   * input-ready, so the number of draws depended on press timing. Re-rolling
+   * only after a press visibly landed keeps the old per-landed-press policy.
+   */
+  private postwinRoll: { key: string; value: number } | null = null;
   public battle = 1;
   public turn = 0;
   private readonly rng: Rng;
+  /**
+   * soak111: the PRESS stream -- every `press()` cooldown gap and every
+   * `pressAdvance()` A/B mash roll. How many presses a presentation
+   * consumes depends on its length, so these draws live apart from `rng`
+   * (the DECISION stream); a presentation-length change then only shifts
+   * frames, never a later decision.
+   */
+  private readonly pressRng: Rng;
   private readonly log: ActionLog;
   private readonly policy: PlayerPolicy;
   /**
@@ -1591,8 +1634,10 @@ export class RandomPlayer {
     log: ActionLog,
     policy: PlayerPolicy,
     coverage: SoakCoverageCollector | null = null,
+    pressRng: Rng = rng.derive(SOAK_PRESS_RNG_SALT),
   ) {
     this.rng = rng;
+    this.pressRng = pressRng;
     this.log = log;
     this.policy = policy;
     this.coverage = coverage;
@@ -1611,8 +1656,16 @@ export class RandomPlayer {
     };
   }
 
+  /** soak111: one decision-stream float per (postwin menu, cursor position) -- see `postwinRoll`. */
+  private stickyPostwinRoll(state: EngineState, menu: string, cursor: number): number {
+    const roundId = state.factoryRoundBattleOrchestrator?.config.id ?? "";
+    const key = `${menu}:${roundId}:${this.battle}:${this.turn}:${cursor}`;
+    if (this.postwinRoll?.key !== key) this.postwinRoll = { key, value: this.rng.float() };
+    return this.postwinRoll.value;
+  }
+
   private press(button: GbaButton, gapMax = 10): ReadonlySet<GbaButton> {
-    this.cooldown = this.rng.gap(gapMax);
+    this.cooldown = this.pressRng.gap(gapMax);
     return new Set([button]);
   }
 
@@ -1706,7 +1759,7 @@ export class RandomPlayer {
   private pressAdvance(state: EngineState, label: string): ReadonlySet<GbaButton> {
     // Message-advance mash with jittered gaps; occasionally B (harmless
     // everywhere A-advance surfaces live, and it exercises B paths).
-    const useB = this.explores && this.rng.chance(0.06);
+    const useB = this.explores && this.pressRng.chance(0.06);
     this.note(state, `${label}${useB ? " (B)" : ""}`);
     return this.press(useB ? "B" : "A", 22);
   }
@@ -2177,6 +2230,13 @@ export class RandomPlayer {
     const orch = state.factoryRoundBattleOrchestrator!;
     const selector = orch.battleForcedPartySelect!;
     if (selector.sendOutElapsed !== null) return NO_BUTTONS;
+    // soak111: wait out the entry fade instead of mashing into it.
+    // advancePartySelect drops every key until `elapsed + 1` reaches
+    // PARTY_LIST_INPUT_ELAPSED, so those presses were always no-ops -- but
+    // each one re-rolled the decision stream's 0.3 "A on fainted slot" draw,
+    // and how many landed in the fade depended on press timing, i.e. on the
+    // preceding presentation's length.
+    if (selector.elapsed + 1 < PARTY_LIST_INPUT_ELAPSED) return NO_BUTTONS;
     if (selector.message !== null) {
       return this.pressAdvance(state, "forced-party message dismiss");
     }
@@ -2224,11 +2284,14 @@ export class RandomPlayer {
       && postwin.questionDismissElapsed === null
       && postwin.questionYesElapsed === null
     ) {
+      const questionRoll = this.explores
+        ? this.stickyPostwinRoll(state, `question-${postwin.question.kind}`, postwin.questionCursorPos)
+        : 1;
       const wantYes = !this.explores
         ? false
         : postwin.question.kind === "retire"
-          ? this.rng.chance(0.15)
-          : this.rng.chance(0.5);
+          ? questionRoll < 0.15
+          : questionRoll < 0.5;
       const targetPos = wantYes ? 0 : 1;
       if (postwin.questionCursorPos !== targetPos) {
         return this.press(targetPos === 0 ? "UP" : "DOWN", 8);
@@ -2260,7 +2323,8 @@ export class RandomPlayer {
       // still drawn (this.explores covers every exploring policy alike) so
       // "full"'s own draw here is untouched; only the decision it feeds is
       // overridden.
-      const rolledAccept = this.explores && this.rng.chance(0.5);
+      const rolledAccept = this.explores
+        && this.stickyPostwinRoll(state, "swap-offer", postwin.swapCursorPos) < 0.5;
       const accept = this.policy === "winning-swap"
         ? true
         : this.winningLike
@@ -2294,7 +2358,11 @@ export class RandomPlayer {
       && postwin.dialoguePage === 0
       && postwin.continuationCursorPos !== null
     ) {
-      const roll = this.rng.float();
+      const roll = this.stickyPostwinRoll(
+        state,
+        `continuation-${postwin.frontierBrain ? "brain" : "ordinary"}`,
+        postwin.continuationCursorPos,
+      );
       const target = !this.explores
         ? 0
         : roll < 0.85 ? 0 : roll < 0.92 ? 1 : roll < 0.96 ? 2 : 3;
@@ -2316,6 +2384,16 @@ export class RandomPlayer {
     // The swap controller enforces legality internally, so random legal-button
     // exploration (a real player's inputs) covers pickers, quit prompts, the
     // duplicate-species rejection, and the summary detour.
+    // soak111: press only when the press can land -- the controller drops
+    // every key while `!inputReady` (handleFactorySwapInput) and the summary
+    // detour drops keys during its transitions -- because each press below
+    // is a decision-stream draw, and how many presses fell into those dead
+    // windows depended on press timing (presentation length).
+    const summary = state.summaryScreen;
+    const ready = summary.isOpen || summary.transition
+      ? summary.isOpen && !summary.transition && !summary.pageTransition && !summary.monTransition
+      : state.factorySwap!.controller.inputReady;
+    if (!ready) return NO_BUTTONS;
     const roll = this.rng.float();
     const button: GbaButton = roll < 0.40
       ? "A"
@@ -2406,7 +2484,13 @@ export class RandomPlayer {
       this.note(state, "terminal: A");
       return this.press("A", 18);
     }
-    const roll = this.rng.float();
+    // soak111: terminal buttons come from the PRESS stream. The terminal
+    // presentation drops keys until each page/menu is input-ready, so how
+    // many rolls a terminal walk consumes depends on press timing; and every
+    // RECORD answer (YES / NO / cancel) enters the same EndRecordBattle
+    // farewell (stub-only record), so these rolls shape frames and the
+    // record message, never a later decision or gameplay.
+    const roll = this.pressRng.float();
     const button: GbaButton = roll < 0.6
       ? "A"
       : roll < 0.72

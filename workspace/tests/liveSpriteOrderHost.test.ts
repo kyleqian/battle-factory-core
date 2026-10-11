@@ -29,7 +29,9 @@ type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
 // of invalidating: hostKnown 646 -> 709, declines 63 -> 0 (every former decline now equals the pure transform; 0 mismatches).
 // plans48 plans (Attract, FRZ, NIGHTMARE, CURSED, ITEM_KNOCKOFF, Ice Punch, ...; Razor Wind key): hostKnown 709 -> 752, laterAfter
 // 65 -> 69; + Present (keyed by its branch) / Struggle opponent: 752 -> 772, 69 -> 72; declines and mismatches unchanged (0).
-const SWEEP_PIN = { compared: 863, hostKnown: 772, declines: 0, laterAfter: 72 };
+// sc106: + the sweep's 19 stats-change command edges (16 with a known host), each equal to the pure transform (0 mismatches); without
+// them compared / hostKnown stay 863 / 772, declines and laterAfter unchanged.
+const SWEEP_PIN = { compared: 882, hostKnown: 788, declines: 0, laterAfter: 72 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {

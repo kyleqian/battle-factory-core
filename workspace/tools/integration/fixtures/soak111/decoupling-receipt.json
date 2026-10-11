@@ -1,0 +1,1240 @@
+{
+  "step": "soak111: RandomPlayer press stream decoupled from the decision stream",
+  "identity": {
+    "testedRev": "HEAD",
+    "testedDriverTree": "a5a412ec0493d65e6900d5586bccd352ba8995d8",
+    "testedSrcTree": "94a7f48b379011e10a472ec617f4722a2cc645fb",
+    "coupledBaseRev": "cd84c00fe",
+    "coupledBaseDriverTree": "f74ada8e6f99cb439784d33a16040ca6c69792a9",
+    "off108DiffSha256": "6f9222fb531057ad953092d567525b7ce93fd05c6b0a5e94eac998f0eea31b38",
+    "off108DiffSource": "d31a93720:workspace/tools/integration/fixtures/off108/off108-scene-off-pauses.diff",
+    "patchedSrcFileSha256": "bce76a29ec034de99271635648f663719f8ea1cfb45fc2cf821346f0319c03c2",
+    "seeds": "0..15,27"
+  },
+  "policy": "full",
+  "verdict": {
+    "decoupledAllDecisionLogsIdentical": true,
+    "decoupledAllCanonicalLogsIdentical": true,
+    "decoupledAllGameplayIdentical": true,
+    "decoupledSeedsWithFramesMoved": 17,
+    "coupledControlSeedsWithDecisionLogDiverged": 17
+  },
+  "decoupled": {
+    "a": "dec",
+    "b": "dec+off108",
+    "summary": {
+      "seeds": 17,
+      "decisionLogIdentical": 17,
+      "exactDecisionLogIdentical": 14,
+      "canonicalLogIdentical": 17,
+      "gameplayIdentical": 17,
+      "framesDiffer": 17
+    },
+    "rows": [
+      {
+        "seed": 0,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          319,
+          319
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          282,
+          282
+        ],
+        "mashNotes": [
+          1086,
+          1202
+        ],
+        "frames": [
+          16321,
+          17577
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t30",
+          "b1 t30"
+        ],
+        "decisionsSha256": [
+          "5152b0d32e97d3e785925095091a243ff17dfe81c084fbfd20b7342865d5f43f",
+          "5152b0d32e97d3e785925095091a243ff17dfe81c084fbfd20b7342865d5f43f"
+        ]
+      },
+      {
+        "seed": 1,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          252,
+          252
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          249,
+          249
+        ],
+        "mashNotes": [
+          1816,
+          1954
+        ],
+        "frames": [
+          25321,
+          27061
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b2 t9",
+          "b2 t9"
+        ],
+        "decisionsSha256": [
+          "c72ff16240aa2963a12c3378c81c7008cba7114c441cd51ed092f35bb36d4dc9",
+          "c72ff16240aa2963a12c3378c81c7008cba7114c441cd51ed092f35bb36d4dc9"
+        ]
+      },
+      {
+        "seed": 2,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          916,
+          915
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          890,
+          890
+        ],
+        "mashNotes": [
+          6315,
+          6604
+        ],
+        "frames": [
+          86638,
+          90435
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b5 t42",
+          "b5 t42"
+        ],
+        "decisionsSha256": [
+          "78ec0f6b7b9a600868a2aaffbe6de3edb20046c74686455d539fb36f6af4beeb",
+          "78ec0f6b7b9a600868a2aaffbe6de3edb20046c74686455d539fb36f6af4beeb"
+        ]
+      },
+      {
+        "seed": 3,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          159,
+          159
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          156,
+          156
+        ],
+        "mashNotes": [
+          951,
+          1027
+        ],
+        "frames": [
+          13524,
+          14592
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t25",
+          "b1 t25"
+        ],
+        "decisionsSha256": [
+          "17e39b682cdb84b7118da56906da90fbdf7ed484b13716630ae61084d85813bc",
+          "17e39b682cdb84b7118da56906da90fbdf7ed484b13716630ae61084d85813bc"
+        ]
+      },
+      {
+        "seed": 4,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          100,
+          100
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          98,
+          98
+        ],
+        "mashNotes": [
+          888,
+          960
+        ],
+        "frames": [
+          12008,
+          12745
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t18",
+          "b1 t18"
+        ],
+        "decisionsSha256": [
+          "e9434ebfc5699b8ba8b2f2a66b6d162ff74ae1706ed28a604917b325728c766a",
+          "e9434ebfc5699b8ba8b2f2a66b6d162ff74ae1706ed28a604917b325728c766a"
+        ]
+      },
+      {
+        "seed": 5,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          451,
+          451
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          438,
+          438
+        ],
+        "mashNotes": [
+          2226,
+          2347
+        ],
+        "frames": [
+          32454,
+          34014
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b2 t25",
+          "b2 t25"
+        ],
+        "decisionsSha256": [
+          "3946b3a5134f32c40b2555f78a19094f0c2b366337259c0feed5240e5dd16e1f",
+          "3946b3a5134f32c40b2555f78a19094f0c2b366337259c0feed5240e5dd16e1f"
+        ]
+      },
+      {
+        "seed": 6,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          905,
+          904
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          887,
+          887
+        ],
+        "mashNotes": [
+          4441,
+          4807
+        ],
+        "frames": [
+          62422,
+          66563
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b3 t40",
+          "b3 t40"
+        ],
+        "decisionsSha256": [
+          "148af92ac00af19178ff028cda3c80cd50016b64291c04e7767c817d31a47008",
+          "148af92ac00af19178ff028cda3c80cd50016b64291c04e7767c817d31a47008"
+        ]
+      },
+      {
+        "seed": 7,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          920,
+          920
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          896,
+          896
+        ],
+        "mashNotes": [
+          4357,
+          4518
+        ],
+        "frames": [
+          63144,
+          65545
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b3 t37",
+          "b3 t37"
+        ],
+        "decisionsSha256": [
+          "b8fe2f19cb3c8edcd2610a7604e3fceebd845943efacb2a8f14898a2657572d4",
+          "b8fe2f19cb3c8edcd2610a7604e3fceebd845943efacb2a8f14898a2657572d4"
+        ]
+      },
+      {
+        "seed": 8,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          211,
+          211
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          200,
+          200
+        ],
+        "mashNotes": [
+          940,
+          1024
+        ],
+        "frames": [
+          13185,
+          13985
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t23",
+          "b1 t23"
+        ],
+        "decisionsSha256": [
+          "602807b80611812bc62f166f823d863389363c35d6cfdb02e4a6fd5aebe5fabd",
+          "602807b80611812bc62f166f823d863389363c35d6cfdb02e4a6fd5aebe5fabd"
+        ]
+      },
+      {
+        "seed": 9,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          178,
+          178
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          162,
+          162
+        ],
+        "mashNotes": [
+          901,
+          973
+        ],
+        "frames": [
+          12849,
+          13828
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t22",
+          "b1 t22"
+        ],
+        "decisionsSha256": [
+          "de4f7aeb13bbbd7858e3af0e43f64c8dde9af0566df44994010fb5936a91852a",
+          "de4f7aeb13bbbd7858e3af0e43f64c8dde9af0566df44994010fb5936a91852a"
+        ]
+      },
+      {
+        "seed": 10,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          658,
+          658
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          632,
+          632
+        ],
+        "mashNotes": [
+          3239,
+          3476
+        ],
+        "frames": [
+          45583,
+          48432
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b3 t12",
+          "b3 t12"
+        ],
+        "decisionsSha256": [
+          "1eaf91bb98954497539d22b3f3a15b35b91f61eec2feaf753fcbde8e604aa663",
+          "1eaf91bb98954497539d22b3f3a15b35b91f61eec2feaf753fcbde8e604aa663"
+        ]
+      },
+      {
+        "seed": 11,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          816,
+          815
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          805,
+          805
+        ],
+        "mashNotes": [
+          5856,
+          6175
+        ],
+        "frames": [
+          79236,
+          83153
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b5 t8",
+          "b5 t8"
+        ],
+        "decisionsSha256": [
+          "1af8fc2f296a45552d9e795ff79687097ca098a3da0e960a32ccc9e9452abda8",
+          "1af8fc2f296a45552d9e795ff79687097ca098a3da0e960a32ccc9e9452abda8"
+        ]
+      },
+      {
+        "seed": 12,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          346,
+          346
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          340,
+          340
+        ],
+        "mashNotes": [
+          1651,
+          1759
+        ],
+        "frames": [
+          23196,
+          24648
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t38",
+          "b1 t38"
+        ],
+        "decisionsSha256": [
+          "e123f3994492cb44244c496ea43d0dccca6813d9954a78a1e71dec849578dd5e",
+          "e123f3994492cb44244c496ea43d0dccca6813d9954a78a1e71dec849578dd5e"
+        ]
+      },
+      {
+        "seed": 13,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          771,
+          771
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          758,
+          758
+        ],
+        "mashNotes": [
+          4220,
+          4434
+        ],
+        "frames": [
+          59441,
+          61936
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b3 t24",
+          "b3 t24"
+        ],
+        "decisionsSha256": [
+          "b9ef3ffcc3e0e1af77d86c0d34f8862975d6d681e342dde37bea5ad189208ae6",
+          "b9ef3ffcc3e0e1af77d86c0d34f8862975d6d681e342dde37bea5ad189208ae6"
+        ]
+      },
+      {
+        "seed": 14,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          150,
+          150
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          141,
+          141
+        ],
+        "mashNotes": [
+          1044,
+          1129
+        ],
+        "frames": [
+          14288,
+          15225
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t24",
+          "b1 t24"
+        ],
+        "decisionsSha256": [
+          "c2b571bc89831da643e4d82216fa0bcd628f2d4d232fca9ffa0668664e449381",
+          "c2b571bc89831da643e4d82216fa0bcd628f2d4d232fca9ffa0668664e449381"
+        ]
+      },
+      {
+        "seed": 15,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          494,
+          494
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          486,
+          486
+        ],
+        "mashNotes": [
+          2018,
+          2123
+        ],
+        "frames": [
+          28827,
+          30386
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t46",
+          "b1 t46"
+        ],
+        "decisionsSha256": [
+          "aa77f85f1180bb8e606e9e1932c9727092e2eacbcae5361b7d6a48ce2f5c6fbf",
+          "aa77f85f1180bb8e606e9e1932c9727092e2eacbcae5361b7d6a48ce2f5c6fbf"
+        ]
+      },
+      {
+        "seed": 27,
+        "decisionLogIdentical": true,
+        "exactDecisionLogIdentical": true,
+        "exactDecisionNotes": [
+          368,
+          368
+        ],
+        "canonicalLogIdentical": true,
+        "gameplayIdentical": true,
+        "decisionNotes": [
+          363,
+          363
+        ],
+        "mashNotes": [
+          1713,
+          1794
+        ],
+        "frames": [
+          24408,
+          25464
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t34",
+          "b1 t34"
+        ],
+        "decisionsSha256": [
+          "90281ecd74e55ecc3101d2a0aae3a960b8fc7d8cc535084776336f138525137b",
+          "90281ecd74e55ecc3101d2a0aae3a960b8fc7d8cc535084776336f138525137b"
+        ]
+      }
+    ]
+  },
+  "coupledControl": {
+    "a": "cpl",
+    "b": "cpl+off108",
+    "summary": {
+      "seeds": 17,
+      "decisionLogIdentical": 0,
+      "exactDecisionLogIdentical": 0,
+      "canonicalLogIdentical": 0,
+      "gameplayIdentical": 0,
+      "framesDiffer": 17
+    },
+    "rows": [
+      {
+        "seed": 0,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          264,
+          153
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          246,
+          134
+        ],
+        "mashNotes": [
+          977,
+          701
+        ],
+        "frames": [
+          14186,
+          9885
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t24",
+          "b1 t15"
+        ],
+        "decisionsSha256": [
+          "9cf5ea15a048435f175f2e16f8705c61f85db9ecc8f6f42199042f7e010fa9d7",
+          "9b4e38e9f75f73b1d2fde078a7f27a45832cabd6766aacabc5fdfe0636baeb7b"
+        ]
+      },
+      {
+        "seed": 1,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          166,
+          224
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          148,
+          206
+        ],
+        "mashNotes": [
+          879,
+          830
+        ],
+        "frames": [
+          12272,
+          11814
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t23",
+          "b1 t18"
+        ],
+        "decisionsSha256": [
+          "3c00ad8e056d934d8fdf757eed40ccb6c60b389ba2edc9effcbf6133050ace48",
+          "397119ba07fff33a906ab565aef54ca7a2ea7a4c43b73d174bff7e95fc40cc9c"
+        ]
+      },
+      {
+        "seed": 2,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          247,
+          292
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          228,
+          273
+        ],
+        "mashNotes": [
+          1152,
+          1283
+        ],
+        "frames": [
+          16370,
+          18317
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t31",
+          "b1 t30"
+        ],
+        "decisionsSha256": [
+          "89a9551438394f97332032cb8885c225dd13da6205d5246994c7be98b005e3fb",
+          "b346f32285e61c851829c39378ec399ebc61e4f42486b0f8cf0348b123b2b6f3"
+        ]
+      },
+      {
+        "seed": 3,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          246,
+          307
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          225,
+          287
+        ],
+        "mashNotes": [
+          1013,
+          1452
+        ],
+        "frames": [
+          14273,
+          20011
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t27",
+          "b1 t30"
+        ],
+        "decisionsSha256": [
+          "934a51621407237b627b7325bee79d9056d4be50f64f21d2d1e4a1caa4277bbe",
+          "f425d26369aef275ce53b01bd3b8a8ad696a8b7ce248d2d46d31f7787504de03"
+        ]
+      },
+      {
+        "seed": 4,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          2095,
+          1936
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          1971,
+          1849
+        ],
+        "mashNotes": [
+          5626,
+          6647
+        ],
+        "frames": [
+          83293,
+          95751
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b3 t63",
+          "b4 t33"
+        ],
+        "decisionsSha256": [
+          "250fba4e88d28a3497ad181f30864d29cdf952877b3279c704dd256128b038e2",
+          "6589f241c3dde7ef6de7e45d913d3932173bf9ea37d3ba1a19c7f01aa82ce8b0"
+        ]
+      },
+      {
+        "seed": 5,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          953,
+          633
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          874,
+          577
+        ],
+        "mashNotes": [
+          3149,
+          3441
+        ],
+        "frames": [
+          45571,
+          47574
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b3 t41",
+          "b3 t12"
+        ],
+        "decisionsSha256": [
+          "80a282c02bb190217a9b55af0a3d90e19e591dbef551cf3f0bfbb9e2d12cb101",
+          "2882464a662b615429c49a01ef1dd70d7b0a77bbfd173d14479033739de446a5"
+        ]
+      },
+      {
+        "seed": 6,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          366,
+          336
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          331,
+          298
+        ],
+        "mashNotes": [
+          2124,
+          2125
+        ],
+        "frames": [
+          29160,
+          29418
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b2 t20",
+          "b2 t16"
+        ],
+        "decisionsSha256": [
+          "d256f116278d371b94bddfde41079e726a3a79ca8ae59ce480e159eb2d3e2854",
+          "db860e865cf71cbc4a7d42fcb46f4f7474acbd41492d4cc98c227bd7770258b4"
+        ]
+      },
+      {
+        "seed": 7,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          880,
+          349
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          798,
+          331
+        ],
+        "mashNotes": [
+          4154,
+          1133
+        ],
+        "frames": [
+          57985,
+          16857
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b4 t16",
+          "b1 t24"
+        ],
+        "decisionsSha256": [
+          "57bf01d7309ab742cff00ae39a4f954f45aa7c84ea96709df590109d80f21e7d",
+          "83e79faf851558a65405b25ab1349b394ae043d22f268147c2507b6f464cfdb0"
+        ]
+      },
+      {
+        "seed": 8,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          1284,
+          341
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          1175,
+          321
+        ],
+        "mashNotes": [
+          3879,
+          1901
+        ],
+        "frames": [
+          57503,
+          26871
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b4 t19",
+          "b2 t22"
+        ],
+        "decisionsSha256": [
+          "922a8267593e541048d4c3381ec764717f714348a300711872af7534f2328385",
+          "3634ffb99a0581b97fb065df7160b590ff49251bd552076c95ec1515ef8c6169"
+        ]
+      },
+      {
+        "seed": 9,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          230,
+          345
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          210,
+          326
+        ],
+        "mashNotes": [
+          1197,
+          1483
+        ],
+        "frames": [
+          16428,
+          21186
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t25",
+          "b1 t34"
+        ],
+        "decisionsSha256": [
+          "fc74ecd7d3e8616e67f33f131799babbfbab1edd3aef5ac5aa9c7fccd20ad168",
+          "c633f47777c123c3925a4c0bac327fa5e1547cb8b5b07d48cde493d053f04a70"
+        ]
+      },
+      {
+        "seed": 10,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          512,
+          820
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          495,
+          758
+        ],
+        "mashNotes": [
+          1880,
+          3620
+        ],
+        "frames": [
+          26525,
+          51606
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t43",
+          "b2 t31"
+        ],
+        "decisionsSha256": [
+          "43e276de9f9e4a57aac3e25f2e3ab675f74b9e0daa02a2906d0a1fb4ee9b7256",
+          "0e667db36ce34c45a93c212a99a499adda5bd64513b0a6bc633754181b6ef892"
+        ]
+      },
+      {
+        "seed": 11,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          351,
+          290
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          324,
+          273
+        ],
+        "mashNotes": [
+          2000,
+          1091
+        ],
+        "frames": [
+          28082,
+          15801
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b2 t17",
+          "b1 t24"
+        ],
+        "decisionsSha256": [
+          "6b75729695799a610e8d76cdbe625a31c3e3a3ca6cea9ee64f1db7c6f85bc127",
+          "90b09b6d0dfa4e6b2ee5514947ef014bc13b13b0c9819e51a2e057326e849d4a"
+        ]
+      },
+      {
+        "seed": 12,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          429,
+          967
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          411,
+          910
+        ],
+        "mashNotes": [
+          2037,
+          5554
+        ],
+        "frames": [
+          28981,
+          77051
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t50",
+          "b3 t62"
+        ],
+        "decisionsSha256": [
+          "0eed831cd4c6d7eae47a8949bdf058e817e61b5fbedbabd10617014890efb6ba",
+          "a2ae40a3776f9186206ca4d10e9ddaca8a935258a7a6827ff45655fff904e6d1"
+        ]
+      },
+      {
+        "seed": 13,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          176,
+          644
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          157,
+          587
+        ],
+        "mashNotes": [
+          1025,
+          3002
+        ],
+        "frames": [
+          14319,
+          42175
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t21",
+          "b3 t24"
+        ],
+        "decisionsSha256": [
+          "b72d897219bcc2d0f3b79a623ee2dc642b569b5c8d227668896f4ad25105c08b",
+          "5abc79e21f7f6042a093c4d7a809366289fbe6ef9b06669b7432df253df15720"
+        ]
+      },
+      {
+        "seed": 14,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          513,
+          803
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          483,
+          747
+        ],
+        "mashNotes": [
+          1508,
+          3159
+        ],
+        "frames": [
+          21797,
+          44251
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b1 t41",
+          "b2 t41"
+        ],
+        "decisionsSha256": [
+          "d9bd66119757f21457eb56bdbae66b76d27e5e68b252b17a9f9f177ce0e0e2bc",
+          "bd6806175885e028380683fcf226a7a168db0d6dbb51fee93d53e74b3a63fff0"
+        ]
+      },
+      {
+        "seed": 15,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          906,
+          249
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          768,
+          233
+        ],
+        "mashNotes": [
+          2627,
+          1075
+        ],
+        "frames": [
+          39115,
+          15187
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b2 t23",
+          "b1 t22"
+        ],
+        "decisionsSha256": [
+          "7f938a5927d0522d40c4d8179cac6b5936beb7fb1135f8a25d46d0086b24471b",
+          "c58bfe166f7f8657cd5ecc44b4c8f1e9639f5f18c4a39aef9340a8484d05bd98"
+        ]
+      },
+      {
+        "seed": 27,
+        "decisionLogIdentical": false,
+        "exactDecisionLogIdentical": false,
+        "exactDecisionNotes": [
+          394,
+          255
+        ],
+        "canonicalLogIdentical": false,
+        "gameplayIdentical": false,
+        "decisionNotes": [
+          342,
+          230
+        ],
+        "mashNotes": [
+          2067,
+          1531
+        ],
+        "frames": [
+          28774,
+          21012
+        ],
+        "endState": [
+          "roundLost",
+          "roundLost"
+        ],
+        "battleTurn": [
+          "b2 t24",
+          "b1 t30"
+        ],
+        "decisionsSha256": [
+          "244cc258d3ca9c32f8da4620daca4dcc571fd4e36d84aa79e184b2116a562dd8",
+          "33aeb17d8c544c45563719bb012f4c6c77510119aa1d00f111f2459a7f77c0ed"
+        ]
+      }
+    ]
+  }
+}

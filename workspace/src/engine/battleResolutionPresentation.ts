@@ -42,6 +42,9 @@ import {
 } from "../data/battleIntroStrings.ts";
 import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
 import { substituteFadeDuration } from "./liveSubstituteFade.ts";
+import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts";
+import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
+import { battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -269,6 +272,20 @@ export type BattleResolutionPresentationCommand =
       type: "substitute-fade";
       eventSequence: number;
       battler: 0 | 1;
+      timing: Readonly<{ minimumFrames: number }>;
+    }>
+  | Readonly<{
+      /**
+       * sc106 (S10A, ISSUES #166 slice c): General_StatsChange (B_ANIM_STATS_CHANGE / Cmd_playstatchangeanimation),
+       * presentation-only, Scene ON and OFF, at the kernel STATS_CHANGE `animation` event. `argument` is the animArg;
+       * minimumFrames = statsChangeSpan(statsChangeParams(argument)).addedRows (76 / 90: playanimation -> next instruction
+       * 77 / 91 rows vs 1 without the animation, docs/stat101-stats-change-design.md). None behind a Substitute (the ROM plays
+       * nothing) and none after a live Double Team body, whose window already owns the banner (docs/sc106-stats-change-command.md).
+       */
+      type: "stats-change";
+      eventSequence: number;
+      battler: 0 | 1;
+      argument: number;
       timing: Readonly<{ minimumFrames: number }>;
     }>
   | Readonly<{
@@ -3224,6 +3241,36 @@ function fieldAfter(
   return createBattleCommandDisplayedField(transition.state.rules.rulesContext);
 }
 
+/** sc106: Double Team (104), whose accepted live window (liveMoveAnimation.ts, 230 rows) already contains its stats change. */
+const STATS_CHANGE_OWNING_LIVE_MOVE_IDS: ReadonlySet<number> = new Set([104]);
+
+/**
+ * sc106: whether a STATS_CHANGE of `battler` presents a stats-change command after the commands `before` it.
+ * - Not behind a Substitute: the ROM's controller skips the animation while the battler is behind its Substitute
+ *   (battle_gfx_sfx_util.c TryHandleLaunchBattleTableAnimation, stat101 receipt harden-behind-sub: 1 row). The fact used is
+ *   the displayed Substitute doll at the command's start (BattleCommandFieldBattler.substituteDoll after the preceding
+ *   commands: the segment field's doll, set after a Substitute body, cleared at the fade / faint / switch-out, a switch-in's
+ *   incoming snapshot), the same fact the renderer draws the doll from.
+ * - Not right after a Double Team body of the same battler that has a live duration (Scene ON; Scene OFF has no such command):
+ *   its window already presents the stats change through the row before the next message (docs/sc106-stats-change-command.md).
+ */
+function statsChangePresented(
+  field: BattleResolutionDisplayedField,
+  before: readonly BattleResolutionPresentationCommand[],
+  battler: 0 | 1,
+): boolean {
+  const atStart = battleResolutionFieldBeforeCommand(field, before, before.length);
+  if ((battler === 0 ? atStart.player : atStart.opponent).substituteDoll === true) return false;
+  const previous = before[before.length - 1];
+  return !(
+    previous?.type === "move-animation"
+    && previous.battler === battler
+    && previous.animation !== undefined
+    && STATS_CHANGE_OWNING_LIVE_MOVE_IDS.has(previous.animation.moveId)
+    && liveMoveAnimationDuration(previous.animation, battleResolutionFieldBeforeCommand(field, before, before.length - 1)) !== null
+  );
+}
+
 export function projectBattleResolutionCommands(
   events: readonly BattleKernelSemanticEvent[],
   beforeRules: BattleScriptRulesContext,
@@ -3270,6 +3317,7 @@ export function projectBattleResolutionCommands(
   // (ISSUES #115).
   let currentField: BattleResolutionDisplayedField = field;
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
+  const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -3388,6 +3436,16 @@ export function projectBattleResolutionCommands(
       substituteFades.push({
         at: commands.length, battler: singlesBattler(payload.battler ?? -1, "substitute fade"), sequence: event.sequence,
       });
+      continue;
+    }
+    if (payload.kind === "animation" && payload.animationId === "STATS_CHANGE") {
+      const params = statsChangeParams(Number(payload.arguments[0]));
+      if (params !== null) {
+        statsChanges.push({
+          at: commands.length, battler: singlesBattler(payload.battler ?? -1, "stats change"), sequence: event.sequence,
+          argument: params.animArg, frames: statsChangeSpan(params).addedRows,
+        });
+      }
       continue;
     }
     if (
@@ -3737,12 +3795,32 @@ export function projectBattleResolutionCommands(
     }
   }
   // The fade command itself, after whatever the queue last showed (the dismissed STRINGID_SUBSTITUTEDMG) and before the
-  // "faded" message; inserted last-first so earlier insertion points stay valid.
-  for (const fade of [...substituteFades].reverse()) {
-    commands.splice(fade.at, 0, Object.freeze({
-      type: "substitute-fade" as const, eventSequence: fade.sequence, battler: fade.battler,
-      timing: Object.freeze({ minimumFrames: substituteFadeDuration(fade.battler === 0 ? "player" : "opponent") }),
-    }));
+  // "faded" message; and each stats-change command at its STATS_CHANGE event. Inserted in (position, event) order.
+  const inserts = [
+    ...substituteFades.map((fade) => ({ at: fade.at, sequence: fade.sequence, fade, statsChange: null })),
+    ...statsChanges.map((statsChange) => ({ at: statsChange.at, sequence: statsChange.sequence, fade: null, statsChange })),
+  ].sort((a, b) => a.at - b.at || a.sequence - b.sequence);
+  if (inserts.length !== 0) {
+    const ordered: BattleResolutionPresentationCommand[] = [];
+    let next = 0;
+    for (let index = 0; index <= commands.length; index += 1) {
+      for (; next < inserts.length && inserts[next]!.at === index; next += 1) {
+        const { fade, statsChange } = inserts[next]!;
+        if (fade !== null) {
+          ordered.push(Object.freeze({
+            type: "substitute-fade" as const, eventSequence: fade.sequence, battler: fade.battler,
+            timing: Object.freeze({ minimumFrames: substituteFadeDuration(fade.battler === 0 ? "player" : "opponent") }),
+          }));
+        } else if (statsChange !== null && statsChangePresented(field, ordered, statsChange.battler)) {
+          ordered.push(Object.freeze({
+            type: "stats-change" as const, eventSequence: statsChange.sequence, battler: statsChange.battler,
+            argument: statsChange.argument, timing: Object.freeze({ minimumFrames: statsChange.frames }),
+          }));
+        }
+      }
+      if (index < commands.length) ordered.push(commands[index]!);
+    }
+    commands.splice(0, commands.length, ...ordered);
   }
   if (!commands.some(
     (command) => command.type === "message" && command.advance === "button",

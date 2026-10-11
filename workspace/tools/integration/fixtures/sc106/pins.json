@@ -1,0 +1,58 @@
+{
+ "tree": "git archive 563eebd0a (production == final; new tests + boundary ratchet, pins NOT yet moved) in its own two-commit git repo, wasm artifact copied",
+ "command": "npm test -- --maxWorkers=4",
+ "totals": [
+  "Test Files  3 failed | 1625 passed | 44 skipped (1672)",
+  "Tests  6 failed | 13392 passed | 223 skipped (13621)"
+ ],
+ "pinCount": 6,
+ "files": {
+  "tests/battleTurnPortability.test.ts": 1,
+  "tests/liveSpriteOrderHost.test.ts": 1,
+  "tests/randomRoundSoak.test.ts": 4
+ },
+ "pins": [
+  {
+   "file": "tests/battleTurnPortability.test.ts",
+   "test": "Battle Scene OFF full-turn kernel portability > preserves kernel receipt identity, typed animation requests, field boundary, and next request",
+   "assertion": "AssertionError: expected [ { type: 'message', \u2026(5) }, \u2026(13) ] to deeply equal [ { type: 'message', \u2026(5) }, \u2026(12) ]",
+   "class": "command vector: + exactly one stats-change command {eventSequence 13, battler 0, argument 27, minimumFrames 76} at the Sand-Attack STATS_CHANGE event, between the move-animation (seq 12) and the accuracy message (seq 14); every other command identical",
+   "sc106": "moved"
+  },
+  {
+   "file": "tests/liveSpriteOrderHost.test.ts",
+   "test": "live sprite-order seam (presentation-only, tracked across modelled bodies) > host tracker == pure transform at every command edge of the 20-battle sweep; battle units keep later bodies' tracker known",
+   "assertion": "AssertionError: expected { compared: 882, hostKnown: 788, \u2026(2) } to deeply equal { compared: 863, hostKnown: 772, \u2026(2) }",
+   "class": "count: compared 863 -> 882 / hostKnown 772 -> 788 = + the 20-battle sweep's 19 stats-change command edges (16 host-known), each equal to the pure transform (0 mismatches); without them 863 / 772 (.integration sweep attribution)",
+   "sc106": "moved"
+  },
+  {
+   "file": "tests/randomRoundSoak.test.ts",
+   "test": "random round soak driver (green milestone pin) > earns all seven generated wins through the live tick/render and terminal seams",
+   "assertion": "AssertionError: expected { seed: 21, outcome: 'OK', \u2026(9) } to match object { outcome: 'OK', \u2026(5) }",
+   "class": "NOT a stats-change offset: the soak's RandomPlayer presses A with an rng.gap cooldown on every resolution frame, so the 76 / 90 added rows draw extra rng values and every later random choice shifts (action logs identical up to the first stats-change command, then a different random game; e.g. seed 27 no longer reaches its Baton Pass halt). Left unmoved: reported",
+   "sc106": "not moved"
+  },
+  {
+   "file": "tests/randomRoundSoak.test.ts",
+   "test": "random round soak driver (green milestone pin) > ISSUES #89: seed 27's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector",
+   "assertion": "AssertionError: expected 28774 to be greater than 30798",
+   "class": "NOT a stats-change offset: the soak's RandomPlayer presses A with an rng.gap cooldown on every resolution frame, so the 76 / 90 added rows draw extra rng values and every later random choice shifts (action logs identical up to the first stats-change command, then a different random game; e.g. seed 27 no longer reaches its Baton Pass halt). Left unmoved: reported",
+   "sc106": "not moved"
+  },
+  {
+   "file": "tests/randomRoundSoak.test.ts",
+   "test": "Milestone M-B step 2: effectiveness-aware winning policy > (c) leaves \"full\" byte-identical for two seeds (winning-only change)",
+   "assertion": "AssertionError: expected { seed: +0, outcome: 'OK', \u2026(9) } to match object { frames: 11955, outcome: 'OK', \u2026(4) }",
+   "class": "NOT a stats-change offset: the soak's RandomPlayer presses A with an rng.gap cooldown on every resolution frame, so the 76 / 90 added rows draw extra rng values and every later random choice shifts (action logs identical up to the first stats-change command, then a different random game; e.g. seed 27 no longer reaches its Baton Pass halt). Left unmoved: reported",
+   "sc106": "not moved"
+  },
+  {
+   "file": "tests/randomRoundSoak.test.ts",
+   "test": "Milestone M-B step 2: effectiveness-aware winning policy > (c) leaves \"vanilla\" byte-identical for two seeds (winning-only change)",
+   "assertion": "AssertionError: expected { seed: +0, outcome: 'OK', \u2026(9) } to match object { frames: 8499, outcome: 'OK', \u2026(4) }",
+   "class": "NOT a stats-change offset: the soak's RandomPlayer presses A with an rng.gap cooldown on every resolution frame, so the 76 / 90 added rows draw extra rng values and every later random choice shifts (action logs identical up to the first stats-change command, then a different random game; e.g. seed 27 no longer reaches its Baton Pass halt). Left unmoved: reported",
+   "sc106": "not moved"
+  }
+ ]
+}

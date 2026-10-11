@@ -298,6 +298,7 @@ export function createBattleKernelTurnPresentation(
       resolutionCommand?.type === "move-animation"
       || resolutionCommand?.type === "hit-animation"
       || resolutionCommand?.type === "sprite-visibility"
+      || resolutionCommand?.type === "stats-change"
     ) {
       // The legacy canonical adapter already includes these controller waits
       // in its immutable per-command durations. Typed animation commands are
@@ -305,6 +306,7 @@ export function createBattleKernelTurnPresentation(
       // visibility likewise belongs to that lifecycle's persistent battler
       // boundaries; ignoring ordinary visible pass-through receipts here
       // preserves the compatibility adapter's established command vector.
+      // sc106: so does the General_StatsChange command (stats-change).
     } else if (resolutionCommand !== undefined) {
       throw new Error(
         `Scene OFF compatibility projection does not yet render ${resolutionCommand.type} commands`,
