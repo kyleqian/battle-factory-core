@@ -92,7 +92,8 @@ have no ROM staging.
     305420351; every Return at friendship 0.
   - `audit22FlatterStage.py`: ff, same base.
   - `audit22ReseedProbe.py`: reseed85's words57 machinery. Lab seed 305419897; win A / B in one batch, 9 / 9 A == B.
-  - Ids are internal ids (all < 252, equal to national); EV totals <= 510.
+  - Ids are internal ids. Every species chosen here is < 252, where internal = national; EXPLOUD 372 and the benches come from ret88's base.
+    ret88's doc calls its Return user "Shelgon 372", but internal 372 is EXPLOUD (the fixtures' species). EV totals <= 510.
   - The two-KO routes use three DISTINCT opponent species. The fixture derivation detects a KO by a species change, and a first try with
     3 x PSYDUCK hid the second KO.
 - Probes and fixtures:
@@ -133,16 +134,24 @@ AUDIT22_DUMP=<dir> AUDIT22_DUMP_AGES=2,40 node --experimental-strip-types --no-w
 node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=936..936 --index-from=936 --out=r.json --commands=c.jsonl
 ```
 
-Run A' of the runner (run A + the Flatter reseed routes) is the committed receipt set; every exploratory receipt was byte-identical to it. Run B into fresh dirs:
+Run A'' of the runner (run A + the Flatter reseed routes + CROBAT -> RATTATA) is the committed receipt set; every exploratory receipt was byte-identical to it. Run B into fresh dirs:
 see section 5.
 
 ## 5. Gates
 
-- **Run B** (`audit22Run.sh` into fresh dirs, after run A' was committed): **280 same, 0 DIFF**. That covers every check JSON, summary,
+- **Run B** (`audit22Run.sh` into fresh dirs, after run A'' was committed): **291 same, 0 DIFF**. That covers every check JSON, summary,
   derive / rekey log, RAM / step-counter receipt, derived / aligned / levelled fixture and scenario.
-  - All 132 window checks (98 windows, raw and ablated renders) have r1 == r2.
-  - No ROM drift (ISSUES #154): run A, run A' (the Flatter routes added) and run B agree byte for byte on the 258 shared files.
+  - All 135 window checks (101 windows, raw and ablated renders) have r1 == r2.
+  - No ROM drift (ISSUES #154): five runner runs agree byte for byte on every file they share.
+    - run A and its run B (before the additions): 261 same, 0 DIFF;
+    - run A' (+ the Flatter reseed routes): the 258 shared files the same;
+    - run A'' (+ CROBAT -> RATTATA): the 276 shared files the same;
+    - run B'': 291 / 291.
   - Every exploratory pre-runner receipt also agrees.
+- `npm test` in a git-archive copy of HEAD `a46837da7` (master with this audit's files, inside the scratch dir; never the checkout):
+  **1,620 files / 13,297 tests passed** (44 / 223 skipped).
+  - `npm run build`: see the final commit message.
+  - Only new tools / receipts / this doc changed (no src).
 - `git diff --check` clean. `tools/integration/fixtures/audit-22/.gitattributes` (copied from plans69) keeps `*.diff -whitespace`; there
   is no `.diff` here.
 - `git status --short` listed only this audit's new files at every commit; paths were staged explicitly.

@@ -2,7 +2,7 @@
 """Live audit 22 (docs/live-audit-22.md): battle-lab scenarios for the ret88 families, on ret88ConsumerStage.py's base (audit 20 Part B
 pb-fly-wingull-opp-s2: 3 FIGHT -> first-move turns; lab seed pinned explicitly, ISSUES #154; the pb- prefix makes audit20Fixtures.py window
 EVERY body). EVERY party member that knows Return 216 is staged at friendship 0 (the kernel's value; ret80 / ret88 -> ReturnWeak).
-Species are INTERNAL ids (all < 252 here, = national). Leads:
+Species are INTERNAL ids (the ones chosen here are < 252, = national; EXPLOUD 372 / the benches are the base's). Leads:
   dt  pb-a22dt-<side>-<dt user>: Double Team 104 after a ReturnWeak, the census's newly live Double Team users (ret88 census flips: player
       PONYTA 77 seed 487, opponent BLISSEY 242 seed 978) on BOTH sides. <side> = the Double Team user's side. Return users PIDGEOT 18 /
       LAPRAS 131 (no entry-hook ability: an Intimidate entry runs inside BattleLab.prepare, outside the fixture history; dt60 section 4).
