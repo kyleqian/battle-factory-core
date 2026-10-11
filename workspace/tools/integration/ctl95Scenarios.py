@@ -11,8 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 BASE = json.loads((ROOT / "tools/integration/fixtures/doll90/scenarios/doll90-ctl-recover-opponent.json").read_text())
 out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
-SP = {"PERSIAN": 53, "SLOWBRO": 80, "GOLBAT": 42, "LAPRAS": 131, "GENGAR": 94, "BRELOOM": 307, "STARMIE": 121}
-MV = {"FOCUS_PUNCH": 264, "IRON_TAIL": 231, "RECOVER": 105, "LIGHT_SCREEN": 113, "TACKLE": 33}
+SP = {"PERSIAN": 53, "SLOWBRO": 80, "GOLBAT": 42, "LAPRAS": 131, "GENGAR": 94, "BRELOOM": 307, "STARMIE": 121, "CROBAT": 169, "WAILORD": 314}
+MV = {"FOCUS_PUNCH": 264, "IRON_TAIL": 231, "RECOVER": 105, "LIGHT_SCREEN": 113, "TACKLE": 33, "GRASS_WHISTLE": 320}
 FAST = {"hp": 252, "attack": 0, "defense": 0, "speed": 252, "spAttack": 0, "spDefense": 0}
 SLOW = {"hp": 252, "attack": 0, "defense": 128, "speed": 0, "spAttack": 0, "spDefense": 128}
 IV_FAST = {"hp": 31, "attack": 31, "defense": 31, "speed": 31, "spAttack": 0, "spDefense": 31}
@@ -30,6 +30,11 @@ CELLS = [
     ("ctl95-it-player-gengar", "IRON_TAIL", "player", "GENGAR", "SLOWBRO", "LIGHT_SCREEN", True),
     ("ctl95-recover-player-persian", "RECOVER", "player", "PERSIAN", "SLOWBRO", "TACKLE", False),
     ("ctl95-recover-player-golbat", "RECOVER", "player", "GOLBAT", "LAPRAS", "TACKLE", False),
+    # GrassWhistle restore-blend predictions (receipts/gw-predictions.txt, written before these probes ran)
+    ("ctl95-gw-opponent-gengar", "GRASS_WHISTLE", "opponent", "GENGAR", "SLOWBRO", "LIGHT_SCREEN", True),
+    ("ctl95-gw-opponent-crobat", "GRASS_WHISTLE", "opponent", "CROBAT", "WAILORD", "LIGHT_SCREEN", True),
+    ("ctl95-gw-player-persian", "GRASS_WHISTLE", "player", "PERSIAN", "SLOWBRO", "LIGHT_SCREEN", True),
+    ("ctl95-gw-player-gengar", "GRASS_WHISTLE", "player", "GENGAR", "SLOWBRO", "LIGHT_SCREEN", True),
 ]
 rows = []
 for name, move, side, user, foe, foe_move, user_fast in CELLS:
