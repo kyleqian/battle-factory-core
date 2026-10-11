@@ -17,19 +17,21 @@ backlog.
 
 # Open
 
-## #164 — Return 216's order plan is the weak branch; Factory plays ReturnStrongest (S10A, found 2026-10-10 by live audit 20; fix in flight: ret80)
+## #165 — GAMEPLAY: the ROM's Factory turns Return into Frustration (friendship 0); production keeps Return (found 2026-10-10 by ret80)
 
-docs/live-audit-20.md s1.3: `"216:*": 117` (`spriteOrderProductionPlans.ts`) is a 4-create weak-branch plan; Factory battlers send
-friendship 255 (ReturnStrongest: 31 creates in slots 3 / 4 / 5 / 7, post-body free order `[4, 3, 5, 7, 21, 20, ...]`), so the lend after
-every Return != ROM (0 / 15 windows; 0 px so far — an order-sensitive consumer would show it).
-
-## #162 — Castform weather forms drawn as the normal form in live bodies (S10A, found 2026-10-10 by live audit 19; live claim fixed by cf78, pixels open)
-
-docs/live-audit-19.md: fold71's CASTFORM_CHANGE order plan made bodies after a form change LIVE; while Castform is in its sun / rain form
-production draws the NORMAL-form Castform (44 live windows, 998..2,312 px per row in its sprite box; order 44 / 44 == ROM). Root cause is
-ISSUES #143's open remainder (no `gBattleMonForms` in the field view). FIXED as a live claim by cf78 (`c6f60846e`: every live body
-declines while a Castform is shown in a weather form; 54 commands / 9,587 frames on 0..999 now fall back). Open: the pixels themselves
-(the fallback draws the same normal-form art) — #143's per-form palette / coords / elevation; then the decline can lift.
+The ROM builds every Factory rental and opponent with `friendship = 0` and writes each move through `SetMonMoveAvoidReturn`
+(`reference/pokeemerald/src/battle_factory.c:459-462`, `:501`, `:820-823`, `:913-919`: `MOVE_RETURN` -> `MOVE_FRUSTRATION`), so a Factory
+battle never contains Return: the 11 Level-50 sets that list Return (`src/data/gen/battle-frontier-mons.json`: TOGEPI 26, MARILL 28,
+CLEFAIRY 107, TOGETIC 288, DRAGONAIR 306, PIDGEOT 355, GYARADOS 459 / 747, EXEGGUTOR 534, FEAROW 567, ...) fight with Frustration
+(power (255 - 0) * 10 / 25 = 102). Production has no such mapping (no `AvoidReturn` anywhere in `src/`): those sets keep Return at
+friendship 0 (power 1) — different damage, AI scores (Factory AI CheckBadMove treats the two effects differently) and animation. Production's live
+Return adapter drew the 282-frame Strongest body (it falls back since ret80). docs/next-adapters-prep18.md s4's "255 for every Return user" cites
+battle_tower.c, which the Factory does not use. Not fixed in S10A (presentation-only mandate: gameplay outcomes must not change).
+Resume (a gameplay-parity step): map Return -> Frustration where the Factory builds battle parties (player rentals and opponents, both
+the battle-start and swap paths), check what the draft / swap summary screens show for those sets in the ROM (the screens may read
+`gFacilityTrainerMons` directly), re-run the Factory battle / AI / soak gates, then retire or re-scope the live Return adapter and
+ret80's Return order keys (Frustration's animation is the one that plays). Census 0..999 today: RETURN 47 commands (all fall back
+after ret80) plus the 76 later bodies behind them.
 
 ## #161 — Dive attack: an extra lag frame at age 17 on poisoned player-diver routes (S10A, found 2026-10-10 by st76)
 
@@ -198,6 +200,9 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Fixed (`55d1ef1dd`):** the normal-form Y placement (player back delta 0 from
   `sCastformBackSpriteYCoords`, opponent elevation 13 from `sCastformElevations`;
   `docs/castform-art-diagnosis.md`); retained ROM runs now 237/237 exact both sides.
+- **Live claim (cf78, 2026-10-10; was ISSUES #162):** every live body declines while a CASTFORM is shown in a weather form
+  (presentation-only per-slot form from the CASTFORM_CHANGE argument; live audit 19 had found 44 live windows drawing the normal form);
+  the fallback draws the same normal-form pixels until the per-form art below lands, then the decline can lift.
 - **Open remainder:** Forecast/weather forms need `gBattleMonForms` in the field view:
   per-form palette (`battle_gfx_sfx_util.c:615-620`), front coords
   (`gCastformFrontSpriteCoords`), elevations 14/13/13 and back Y per form. Also the

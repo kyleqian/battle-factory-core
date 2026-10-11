@@ -5,18 +5,34 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-10 (day, IN PROGRESS) — S10A: #159 fixed, nine folds; census 0..299 98.53 % / 99.28 %
+## 2026-10-10 (day) — S10A: ISSUES #159 fixed, 12 production folds, 3 live audits; live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 
-- **State:** local master, production src `e6f98bf9` (`dc173666b`). Supervisor union gates on it: typecheck, 1,607 files / 13,225 tests,
-  build, differential 624 / 624, census seeds 0..299 98.53 % / 99.28 % (session start 96.98 / 97.99; 0 regressions at every fold, gameplay
-  command sequence identical). Mid-session census 0..999 on src `a96642c9`: 93.13 % / 97.34 % (start 91.89 / 95.82).
-- **Did:** hide66 (#159: live bodies no longer draw a hidden charger; 90 wrong live commands on 0..999 -> 0), fly63 re-landed, sw67
-  (Shock Wave plan), land68 (Dive words unit + SUBSTITUTE_FADE), plans69 + fold71 (Magnitude / CASTFORM_CHANGE / Conversion 2 / Needle
-  Arm plans; kernel Speed Boost animArg1), dive70 (Dive attack body live), ice72 (Ice Ball words unit for any consumer), audit 18 (442
-  windows, no defect) + fix74 (player Light Screen at a hidden opponent fails closed; Bulk Up proven for all Factory users), hist73
-  evidence (+154 / +17,256 banked). Details: ANIMATION_INTEGRATION_PROGRESS.md top entry.
-- **In flight / next:** land75 (hist73 landing), live audit 19, then final gates + census + preview.
-- **Notes:** no DEFERRED entries. ISSUES #159 closed; #160 new (Whirlpool at a hidden diver: lend residual, 0 px so far).
+- **State:** local master, production src `4c4fe4c7` (`bf082c6e1`). Census `239+13+24+0+0=276` (no adapter-count change: today widened
+  histories and fixed live claims). Supervisor FINAL gates on that code: typecheck, full suite 1,614 files / 13,258 tests, build,
+  differential 624 / 624 vs `b50c4dabd` (session start), census seeds 0..299 97.98 % / 98.40 % (start 96.98 / 97.99), seeds 0..999
+  **93.79 % of move-animation commands / 97.37 % of frames live** (start 91.89 / 95.82; two runs byte-identical), seeds 50000.. 95.20 / 97.18
+  (start 93.07 / 95.47); gameplay command key sequence + battle digest identical at every fold; soak gates: see the follow-up wind-down commit. Preview
+  <http://127.0.0.1:5191/> serves the final build (receipt in the follow-up wind-down commit).
+- **Did (production, each re-proved by the supervisor from fresh probes / reruns):** hide66 (ISSUES #159: live bodies drew a hidden
+  Fly / Bounce / Dig / Dive charger — 90 wrong live commands on 0..999 -> 0) + fly63 re-landed; sw67 (Shock Wave geometry-keyed order plan);
+  land68 (Dive words unit + SUBSTITUTE_FADE); fold71 (Magnitude / CASTFORM_CHANGE / Conversion 2 / Needle Arm plans + the kernel's Speed
+  Boost animArg1); dive70 (Dive attack body live); ice72 (Ice Ball words unit for any consumer); fix74 (player Light Screen at a hidden
+  opponent fails closed); land75 (37 audited net-zero allocator bodies; hidden faint / reshow keep the order host: +154 / +17,256);
+  st76 (Dive / Meteor Mash status gates lifted); cf78 (live bodies decline while a Castform is in a weather form — 54 commands honestly
+  back to fallback; Needle Arm tie); land79 (Flatter at later bodies); ret80 (Return's order keyed by power level — 123 commands honestly
+  back to fallback, see #165).
+- **Did (evidence / audits):** plans69, hist73, flat77, doll81 (banked, see Next); live audits 18 (442 windows), 19 (599), 20 (436) —
+  each found real issues (Light Screen hidden-phase, Castform weather form, Needle Arm tie, Return plan) that were fixed the same day.
+- **Decisions (reversible, in scope):** failing closed instead of shipping known-wrong pixels (Castform weather forms, Return at
+  friendship 0, Sky Uppercut / player Light Screen at a hidden battler); Bulk Up's "species defect" refuted by source + 22 ROM windows.
+- **Next:** ISSUES #165 FIRST if gameplay changes are in scope for the next run (the ROM Factory has no Return: friendship 0 + Return ->
+  Frustration; production keeps Return — a damage / AI / animation divergence, outside S10A's presentation-only mandate). S10A: land the
+  banked doll81 (Substitute doll cells) patch; Flatter after a Flatter (words unit) / after Tackle (audit 33); #143 per-form Castform art
+  (then lift cf78's decline); post-KO reseed blockers (words-unit order plans); Extrasensory / Memento later bodies; #161 (Dive attack
+  age-17 lag); live audit 21 after the next batch.
+- **Notes:** no DEFERRED entries. ISSUES: #159 / #160 / #162 / #163 / #164 closed; #161 and #165 new. All worker branches merged,
+  worktrees removed; briefs, launcher logs and pruned worker scratch under `.integration/validation/*-20261010/`, transcripts
+  `.codex-logs/workers/`.
 
 ---
 

@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-10 (day) — S10A: ISSUES #159 sprite fix, fly63 re-landed, Shock Wave order plan (in progress)
+## 2026-10-10 (day) — S10A: #159 fixed, 12 production folds + 7 audit / evidence steps; honest corrections (Castform, Return); ordinary-play live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 
 - Session start: master `b50c4dabd`, production src `06b791ff` == the 2026-10-09 final gates' tree (`final-supervisor-gates-20261009-day.json`)
   -> baseline receipt reused, no fresh baseline run. Oracle services predate the HEAD commit time but no oracle/harness file changed since
@@ -166,7 +166,34 @@
 - Supervisor union gates on `c6f60846e` (src `cdae97b8`): typecheck, full suite 1,612 files / 13,245 tests, build, differential 624 / 624
   vs `c68111480`, census seeds 0..299 98.62 % / 99.34 % (no change: the Castform routes are on seeds 600..999)
   (`tools/integration/fixtures/union-gates-c6f60846e.json`).
-- In flight: land79 (INTEGRATION, Sonnet: the flat77 patch), ret80 (SIDE, stacked on audit 20: Return 216 fail-closed / Strongest plan).
+- Folded Sonnet worker `133226f48` (INTEGRATION) as `79443c475` (src `a91aa685`): land79 — flat77's patch (Flatter 260 live at a later body
+  when the allocator history is known; the history-only allocator input for 260; the later-body register base). 9 new tests (revert: 9 / 9
+  fail); 6 later-body windows re-rendered fresh (219 rows, 0 px, r1 == r2, check JSONs == flat77's). Census 0..999 +17 / +3,723 == the
+  banked number; key sequence + digests identical. Worker gates 1,613 files, build, differential. Supervisor: 2 windows re-rendered fresh
+  == flat77's committed checks.
+- Folded Opus worker `b0f8b6d95` (SIDE, stacked on audit 20) with audit 20 as `bf082c6e1` (src `4c4fe4c7`): ret80 — Return 216's order key
+  follows its power level (`AnimTask_GetReturnPowerLevel`, battle_anim_effects_3.c:5060-5073: Weak < 61, Medium 61..91, Strong 92..200,
+  Strongest > 200): plan 117 is ReturnMedium (re-checked 2 / 2); Strongest gets its ROM plan (key 30216, 31 creates, 12 / 12 per frame,
+  588 windows); Weak / Strong invalidate. audit 20's post-Return lends 0 / 15 -> 15 / 15; Swift / Shock Wave / Water Pulse after a 255
+  Return 26 windows 0 px. **FINDING (gameplay, ISSUES #165):** the ROM's Factory builds every mon with friendship 0 and turns Return into
+  Frustration (`battle_factory.c:459-462`, `:820-823`, `SetMonMoveAvoidReturn :913-919`); production keeps Return at friendship 0, so the
+  census only reaches the Weak (invalidate) path: **123 commands live -> fallback on 0..999** (RETURN 47 + later bodies), 0 the other way,
+  key sequence + digests identical. Honest direction (the wrong-order lends and the Strongest-length Return body no longer claim live);
+  the gameplay fix is out of S10A's presentation-only mandate. Supervisor: fresh `ret80Probe.py` + extract + check == committed.
+- prep doll81 (MAIN lane, Opus, `a837bddea`, new files only; BANKED for the next session): Substitute-doll cells. 60 scenarios x2 fresh
+  (r1 == r2), two species pairs per cell incl. an elevated GOLBAT. Proven through the patched production renderer (0 px or = the doll-free
+  control): Dream Eater opponent, Leaf Blade both, ThunderPunch both, GrassWhistle player, SolarBeam charge turn both, Lovely Kiss both, Sing
+  player, Sunny Day both (the self-target class = any attacker-doll body: `PlayerDoMoveAnimation` swaps the doll first). Residuals named:
+  Dream Eater player / Sing opponent (ROM length by species pair), GrassWhistle / Focus Punch opponent, Double Team (banner after the
+  swap-back + clone phase), Recover (orbs), Iron Tail, Double-Edge player; Psych Up is a real decline (species palette in the doll box).
+  Temp patch `fixtures/doll81/doll81-cells.diff` (13 cells + framing + `LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS = {241}` + a SolarBeam turn
+  gate + 2 defender cells + one census-classifier string); census 0..999 on `1e2f48b8a`: +77 commands (doll declines 255 -> 178), 0 live
+  -> fallback; only stall-battle seed 881 is cut one turn earlier at the frame cap (proven harmless at a 20M-frame cap). Pins: 3 (listed
+  in the doc). The patch dry-runs on `bf082c6e1`; rerun its runner on the fold's base.
+- Supervisor FINAL gates on `bf082c6e1` (src `4c4fe4c7`): typecheck, full suite **1,614 files / 13,258 tests**, build, differential
+  **624 / 624 vs `b50c4dabd`** (session start), census seeds 0..299 **97.98 % / 98.40 %** (vs `c6f60846e`: 56 live -> fallback = ret80's
+  Return chains, 5 fallback -> live = land79's Flatter; key sequence + digests identical), seeds 0..999 **93.79 % / 97.37 %** (two runs
+  byte-identical; session start 91.89 / 95.82), seeds 50000..50999 **95.20 % / 97.18 %** (start 93.07 / 95.47); soak gates: see the follow-up wind-down commit.
 
 ## 2026-10-09 (day) — S10A: allocator / order / words-lend histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 

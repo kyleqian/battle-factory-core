@@ -1,0 +1,61 @@
+{
+ "schema": "final-supervisor-gates/v1",
+ "date": "2026-10-10 (day session)",
+ "commit": "bf082c6e1",
+ "srcTree": "4c4fe4c715bc405364fddc8c7ef511fa420590b4",
+ "typecheck": "pass",
+ "suite": {
+  "files": "1614 passed | 44 skipped",
+  "tests": "13258 passed | 223 skipped"
+ },
+ "build": "pass",
+ "differential": {
+  "base": "b50c4dabd (session start)",
+  "traces": [
+   "fight-submenu",
+   "battle1-postwin-next-prompt",
+   "presentation-rng-playable-live-bodies-seeded-on"
+  ],
+  "result": "624 captures byte-identical"
+ },
+ "census0to299": {
+  "reportSha256": "5f48502bf08a81dfa49b700849c4265887832315c98e74d1ec35e08aee38476f",
+  "commands": 7970,
+  "live": 7809,
+  "livePctCount": 97.98,
+  "livePctFrames": 98.4,
+  "renderThrows": 0,
+  "vsSessionStart": {
+   "base": "b50c4dabd (src 06b791ff)",
+   "livePctCountBefore": 96.98,
+   "livePctFramesBefore": 97.99
+  }
+ },
+ "census0to999": {
+  "reportSha256": "16e19fb8f59f1f0883a219454b2aaf82482cb0d16de6fe11cf859e072256d1f0",
+  "commands": 27518,
+  "live": 25809,
+  "livePctCount": 93.79,
+  "livePctFrames": 97.37,
+  "renderThrows": 0,
+  "twoRunsByteIdentical": true,
+  "vsSessionStart": {
+   "livePctCountBefore": 91.89,
+   "livePctFramesBefore": 95.82,
+   "dayPeak": "94.37 / 98.18 (src d73cf1af) before cf78 (-54 Castform weather-form commands) and ret80 (-123 Return-chain commands) honest corrections"
+  }
+ },
+ "census50000to50999": {
+  "reportSha256": "5bb26cf7157daf00238c7990434146dfd22e3c14d5db3657f476340750caec64",
+  "commands": 27041,
+  "live": 25742,
+  "livePctCount": 95.2,
+  "livePctFrames": 97.18,
+  "renderThrows": 0,
+  "vsSessionStart": {
+   "livePctCountBefore": 93.07,
+   "livePctFramesBefore": 95.47
+  }
+ },
+ "note": "per-fold proofs: gameplay command key sequence + battleDigestExcludingFrames identical at every fold (union-gates-*.json, worker receipts)"
+}

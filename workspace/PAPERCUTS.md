@@ -8,6 +8,34 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Tooling gaps hit on 2026-10-10 (S10A day)
+
+- **What / cost:** (1) one full `npm test` (~11 min) is longer than the Bash tool's 10-min foreground limit, so every production
+  worker sharded it (`--shard=1/2`, `--shard=2/2`, ~1-2 min each); `tests/battlesceneSplitEligibility`'s parser rejects an inline
+  generic constraint in a `battleScene.ts` top-level function and only the full suite shows it (~3 min). (2) `liveShareCensus.ts`
+  numbers battles / streaks per seed RANGE, so range-split runs are a different battle set from one 0..999 run (deltas do not compare
+  across splits: +43 vs +49 for the same fold); hist73 added `--index-from` only in a copy (`hist73LiveShareCensus.ts`), st76 / cf78
+  patched scratch copies (~3 min x 4 + supervisor confusion). Fix: upstream `--index-from`. (3) Banked temp patches
+  (`*-temp-src.diff`, `fold-test-pins.diff`) rot as soon as another landing touches their lines, are `workspace/`-prefixed (apply from
+  the repo root), and the prepNNRun.sh runners refuse a tree where the patch is already landed, so after a fold their steps run by hand
+  (~5-10 min, land68 / fold71). (4) A banked receipt without the plan / words texts a fold's vector test needs (prep65) -> an
+  extractor written at fold time (~8 min). (5) audit 18's checker: the missed-strike rule assumes complete turns and no priority
+  (Magic Coat +4; a consumer moving before the strike) and misfires (~4-5 min x 2); `audit18Fixtures.py` hard-codes its scenario dir
+  (~3 min); a Dive setup consumer lacked its splash context and looked like a production defect (~10 min). (6) Lab species are
+  INTERNAL ids (Glalie 347, Castform 385) and nothing flags a national-dex id; EV totals > 510 and a gender on a genderless species
+  fail with a bare "exit 1" (~4-6 min x 3). (7) `liveStatusImplementedCount` pins the inventory entry's field set, so one new field
+  costs a full shard rerun (~6 min). (8) zsh: an unquoted `--include=*.test.ts` glob errors, `$VAR` file lists do not word-split, a
+  no-match glob in `rm` aborts the chain (~1-3 min, several workers). (9) Raw probe JSON embeds the scenario path, so receipt hashes
+  depend on the output dir (~3 min). (10) `prep61EventProbe.py` drops every frame before the last sprite reset, incl. the party menu
+  (~3 min). (11) A `git archive` of `src` + `tools/integration` is not runnable without `tools/lib/` (~2 min). (12) The default 120-s
+  Bash timeout silently backgrounds `npm run typecheck` / a census and leaves an empty log (~2 min x 3). (13) `git apply` of a
+  `workspace/`-relative diff from inside `workspace/` silently skips every hunk (use `patch -p1`, ~3 min). (14) The audit 19 / 20 fixtures
+  hard-code friendship 70 (Factory sends 0), hiding Return's branch (~8 min); `liveShareCensusGates.ts` finds production lines by exact
+  text, so rewording a gate crashes the census at load (~3 min). (15) A census stall battle (seed 881) is cut at a fixed frame cap, so any
+  presentation-length change moves its digest; proving it harmless took ~10 min. (16) Supervisor: a zsh `$N` command variable in my own
+  final-gates script did not word-split, so all four censuses failed to launch (rerun by hand, ~3 min).
+- **Hits:** 16 (2026-10-10 day).
+
 ## Census / probe tooling gaps hit on 2026-10-09 (S10A day)
 
 - **What / cost:** (1) `liveShareCensusGates.ts` checks the RAW order-lend input, so a words-deferred lend that fails to resolve
