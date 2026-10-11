@@ -3119,6 +3119,8 @@ export interface SceneOnSwaggerConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
   /** Source `GetBattlerSpriteCoord(attacker, Y_PIC_OFFSET)` breath origin. */
   readonly breathOrigin: Readonly<{ x: number; y: number }>;
+  /** `MON_PIC_HEIGHT - 2 * y_offset` of the attacker (SetBattlerSpriteYOffsetFromYScale); the staged Rattata pair when unset. */
+  readonly battlerHeight?: number;
 }
 
 /** Friendship and branch selection remain battle-engine inputs; Factory uses 0. */
@@ -9756,6 +9758,7 @@ export function sceneOnSwaggerView(
       state.config.breathOrigin,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+      state.config.battlerHeight,
     ),
   };
 }

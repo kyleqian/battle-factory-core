@@ -40729,22 +40729,27 @@ export function renderSceneOnMovePresentation(
       (playerToOpponent ? view.target : view.attacker).geometry.spriteCorner.y
         + liveIdle(playerToOpponent ? view.target : view.attacker).y2,
     );
-    for (const mark of displayed.angerMarks) {
-      const matrix = Math.trunc(0x10000 / mark.xScale);
-      drawSpriteSheetAffineRotate(
-        fb,
-        swaggerArt.anger.tileset,
-        swaggerArt.anger.palette,
-        mark.x,
-        mark.y,
-        matrix,
-        0,
-        0,
-        matrix,
-        undefined,
-        false,
-      );
-    }
+    const drawAngerMarks = () => {
+      for (const mark of displayed.angerMarks) {
+        const matrix = Math.trunc(0x10000 / mark.xScale);
+        drawSpriteSheetAffineRotate(
+          fb,
+          swaggerArt.anger.tileset,
+          swaggerArt.anger.palette,
+          mark.x,
+          mark.y,
+          matrix,
+          0,
+          0,
+          matrix,
+          undefined,
+          false,
+        );
+      }
+    };
+    // ScriptCmd_createsprite: the mark is created at the TARGET's subpriority - 2, i.e. 38 (behind the player battler, 30) when the
+    // target is the opponent (40) but 28 (IN FRONT of it) when the target is the player.
+    if (!opponentToPlayer) drawAngerMarks();
     drawSpriteSheet(
       fb,
       player.tileset,
@@ -40764,6 +40769,7 @@ export function renderSceneOnMovePresentation(
         false,
       );
     }
+    if (opponentToPlayer) drawAngerMarks();
     if (displayed.finger) {
       const finger = displayed.finger;
       drawSpriteSheetFlipped(
@@ -42408,20 +42414,25 @@ export function renderSceneOnMovePresentation(
       view.target.geometry.spriteCorner.x + (targetIdle?.x2 ?? 0),
       view.target.geometry.spriteCorner.y + (targetIdle?.y2 ?? 0),
     );
+    // An OPPONENT attacker rests at its species' front idle offset too (ONIX x2 1: live drew it 1 px left of the ROM on every row).
+    const attackerIdle = view.attacker.geometry.side === "opponent"
+      ? sceneOnBattlerFrontIdleRest(view.attacker) : { x2: 0, y2: 0 };
+    const attackerCorner = { x: view.attacker.geometry.spriteCorner.x + attackerIdle.x2,
+      y: view.attacker.geometry.spriteCorner.y + attackerIdle.y2 };
     drawSpriteSheet(
       fb,
       attackerSprite.tileset,
       state.age >= 2 && displayed.attackerGrayscale
         ? grayscalePalette(attackerSprite.palette)
         : attackerSprite.palette,
-      view.attacker.geometry.spriteCorner.x,
-      view.attacker.geometry.spriteCorner.y,
+      attackerCorner.x,
+      attackerCorner.y,
     );
     if (state.age >= 2 && displayed.metalBgLoaded) {
       drawMetallicShineMasked(
         fb,
         attackerSprite,
-        view.attacker.geometry.spriteCorner,
+        attackerCorner,
         displayed.bg1X,
         displayed.bg1Y,
       );

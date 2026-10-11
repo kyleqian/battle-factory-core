@@ -157,9 +157,11 @@ export function swaggerAtAge(
   attackerCenter: SwaggerPoint,
   targetSide: SwaggerSide,
   targetCenter: SwaggerPoint,
+  // The attacker's species-specific picture height (Bulk Up's input); the Rattata 38 / 32 only when unset (the staged pair).
+  attackerPictureHeight?: number,
 ): SwaggerState {
   const attackerScale = swaggerGrowAndShrinkAtAge(age);
-  const battlerHeight = attackerSide === "player" ? 38 : 32;
+  const battlerHeight = attackerPictureHeight ?? (attackerSide === "player" ? 38 : 32);
   return {
     attackerScale,
     attackerY2: growAndShrinkY2AtAge(age, battlerHeight),

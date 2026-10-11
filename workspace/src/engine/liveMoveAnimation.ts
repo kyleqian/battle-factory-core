@@ -1953,7 +1953,7 @@ export function liveMoveAnimationPresentation(
       break;
     case 207:
       config = { move: "SWAGGER", attacker, target, fieldProfile,
-        breathOrigin: attackerAnchors.picOffsetPoint };
+        breathOrigin: attackerAnchors.picOffsetPoint, battlerHeight: attackerAnchors.pictureHeight };
       break;
     case 339:
       config = { move: "BULK_UP", attacker, target, fieldProfile,
