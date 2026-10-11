@@ -171,8 +171,8 @@ pause was not anchored here (it needs the message command's first-glyph frame). 
 - `sh tools/integration/idle98Run.sh <fresh>` (no census), in a fresh dir inside the repo after the pins commit: **ALL SAME**. That covers
   scenarios 18, scenario index, probes 36 / 36 r1 == r2, 72 / 72 outputs == the committed sha256, compare r1 == committed == r2, STATS_CHANGE,
   32 / 32 routes == committed sha256, class table json + tsv, and 14 / 14 render routes x2 x2 == the committed render check.
-- The census (`--census`) was run by hand on both trees with the runner's exact commands (section 1 numbers). The exposure run also used the
-  runner's commands (base copy, five shards).
+- `sh tools/integration/idle98Run.sh <fresh> --census` (01:32 -> 01:42, after the doc commits): **ALL SAME**. That covers everything above plus
+  both censuses -> census-delta.json and the exposure run -> exposure.json, byte-identical to the hand-run receipts.
 - `npm test` in a git-archive copy of `ca0add97f` (its own two-commit git repo; HEAD also carries the supervisor's interleaved ctl95 merge):
   **1,623 files / 13,335 tests passed** (44 / 223 skipped), 0 failed. `npm run build` in the same copy: **green** (exit 0). Later commits add only `pins.json`, `idle98Pins.py` and this doc (no TypeScript).
 - `git diff --check` is clean at every commit. `git status --short` listed only new idle98 files, staged by explicit path. The live checkout's git
