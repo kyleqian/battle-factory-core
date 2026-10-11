@@ -108,7 +108,10 @@ Focus Punch phase table: `receipts/fp-phase.tsv` (lag ages per body from the gRn
 ## 4. Gates
 
 - `git diff --check` clean, and no tracked file outside the `audit24` set modified at any commit.
-- Runner pass 1 / pass 2: section 5.
+- **Runner.** Pass 1 crashed (a missing scratch `route` dir, fixed).
+  - Pass 2 (fresh dirs): SAME on scenarios (24), fp.json, fp-phase.tsv, route-check.json, rowdiff, swap-attdoll.json and swap-lead.json; probes r1 == r2 24 / 24.
+  - Its two DIFFs are explained. (1) The probe JSON records the scenario path, and the frame rows are identical to the session probes 24 / 24; the receipt now hashes the frame rows. (2) scene-off-b38.json's tree label changed from HEAD to ae0eb8ed3 (same runs).
+  - Pass 2's output is the committed receipt set. **Pass 3 into fresh dirs: `audit24Run: ALL SAME`.** All 22 / 22 receipts are SAME, probes r1 == r2 byte for byte 24 / 24 (`fixtures/audit-24/runner-pass3.log`).
 - `npm test` / `npm run build`: final message.
 - **Patched-copy `npm test`** (`git archive 93d77a403` + the temp patch; `receipts/patched-npm-test.json`): 23 files / 49 tests failed, 1,599 files / 12,472 tests passed.
   - 7 files / 20 tests are environment-only: `factory-wasm artifact not found` (the archive has no `artifacts/wasm` build). These are the 6 `factoryAi*Parity` / `factoryTrainerScheduleParity` files, plus `livePrep9MoveAdapters` (classified by its message; recheck).
