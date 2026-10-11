@@ -1,0 +1,212 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "audit23-self-double-team-player-sneasel-magcargo",
+   "kind": "swap",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 1770,
+   "activation": 1813,
+   "window": [
+    1770,
+    2013
+   ],
+   "rows": 244,
+   "swapInRows": 42,
+   "romBodyRows": 158,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 2124329702,
+   "adapterDuration": 230,
+   "multihit": 0,
+   "productionDuration": 244,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 159,
+    "shift": -1
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 244,
+    "digests": [
+     "fe76d0a56309b46d",
+     "fe76d0a56309b46d"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    600,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      600,
+      600
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit23-self-double-team-player-sneasel-magcargo",
+   "kind": "swap",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 3468,
+   "activation": 3511,
+   "window": [
+    3468,
+    3711
+   ],
+   "rows": 244,
+   "swapInRows": 42,
+   "romBodyRows": 158,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3318098768,
+   "adapterDuration": 230,
+   "multihit": 0,
+   "productionDuration": 244,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 159,
+    "shift": -1
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 244,
+    "digests": [
+     "fe76d0a56309b46d",
+     "fe76d0a56309b46d"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    600,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      600,
+      600
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit23-self-double-team-player-sneasel-magcargo",
+   "kind": "swap",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 5166,
+   "activation": 5209,
+   "window": [
+    5166,
+    5409
+   ],
+   "rows": 244,
+   "swapInRows": 42,
+   "romBodyRows": 158,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 3330797252,
+   "adapterDuration": 230,
+   "multihit": 0,
+   "productionDuration": 244,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 159,
+    "shift": -1
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 244,
+    "digests": [
+     "fe76d0a56309b46d",
+     "fe76d0a56309b46d"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    600,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      600,
+      600
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  }
+ ]
+}

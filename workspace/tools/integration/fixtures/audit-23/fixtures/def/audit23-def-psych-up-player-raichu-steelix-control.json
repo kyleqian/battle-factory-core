@@ -1,0 +1,45 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "PSYCH_UP",
+ "moveId": 244,
+ "kind": "control",
+ "stem": "audit23-def-psych-up-player-raichu-steelix",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/prep38/scenarios/audit23-def-psych-up-player-raichu-steelix.json",
+ "denseWindow": {
+  "startFrame": 67,
+  "endFrame": 245
+ },
+ "attacker": {
+  "species": "RAICHU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "STEELIX",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "defenderDoll": false,
+ "fieldProfile": {
+  "playerHp": 167,
+  "playerMaxHp": 167,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": false,
+  "subHP": 0,
+  "tiles": "44bf89311274"
+ }
+}

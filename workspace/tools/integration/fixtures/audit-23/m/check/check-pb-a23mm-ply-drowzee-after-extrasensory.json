@@ -1,0 +1,110 @@
+{
+ "schema": "audit23-chain-check/v1",
+ "scenario": "pb-a23mm-ply-drowzee-after-extrasensory",
+ "rows": [
+  {
+   "fixture": "pb-a23mm-ply-drowzee-after-extrasensory-c1.json",
+   "move": "MEMENTO",
+   "side": "player",
+   "species": "DROWZEE/XATU",
+   "alloc": {
+    "input": null,
+    "rom": [],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "326@1 HIT_ANIMATION@0 262@0"
+   ],
+   "romPower": 80,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0,
+    "damage": 0,
+    "friendship": 70,
+    "multihit": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 433,
+    "endFrame": 613
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 181,
+    "exactRows": 181,
+    "px": 0,
+    "digests": [
+     "3f613b0631f6a0dd",
+     "3f613b0631f6a0dd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 181,
+    "exactRows": 181,
+    "px": 0,
+    "digests": [
+     "3f613b0631f6a0dd",
+     "3f613b0631f6a0dd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  }
+ ]
+}

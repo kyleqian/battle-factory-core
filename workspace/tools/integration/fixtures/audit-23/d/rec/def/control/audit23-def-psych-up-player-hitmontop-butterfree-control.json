@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "audit23-def-psych-up-player-hitmontop-butterfree-control.json",
+  "stem": "audit23-def-psych-up-player-hitmontop-butterfree",
+  "kind": "control",
+  "move": "PSYCH_UP",
+  "attackerSide": "player",
+  "defenderDoll": false,
+  "window": [
+   70,
+   248
+  ],
+  "rows": 179,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 179,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 179,
+    "digest": "4e3f6a9c7b5bdf95ec2d6072ae732a5b2b5eba744b1c719e671c0875c7569ed9"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 179,
+    "digest": "4e3f6a9c7b5bdf95ec2d6072ae732a5b2b5eba744b1c719e671c0875c7569ed9"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

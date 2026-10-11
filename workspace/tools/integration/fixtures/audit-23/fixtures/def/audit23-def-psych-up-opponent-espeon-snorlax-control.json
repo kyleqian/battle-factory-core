@@ -1,0 +1,45 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "PSYCH_UP",
+ "moveId": 244,
+ "kind": "control",
+ "stem": "audit23-def-psych-up-opponent-espeon-snorlax",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/prep38/scenarios/audit23-def-psych-up-opponent-espeon-snorlax.json",
+ "denseWindow": {
+  "startFrame": 71,
+  "endFrame": 249
+ },
+ "attacker": {
+  "species": "ESPEON",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "SNORLAX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": false,
+ "fieldProfile": {
+  "playerHp": 267,
+  "playerMaxHp": 267,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": false,
+  "subHP": 0,
+  "tiles": "64c3e759c1a0"
+ }
+}

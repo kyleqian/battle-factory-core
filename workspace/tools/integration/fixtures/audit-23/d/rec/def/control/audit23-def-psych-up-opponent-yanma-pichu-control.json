@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "audit23-def-psych-up-opponent-yanma-pichu-control.json",
+  "stem": "audit23-def-psych-up-opponent-yanma-pichu",
+  "kind": "control",
+  "move": "PSYCH_UP",
+  "attackerSide": "opponent",
+  "defenderDoll": false,
+  "window": [
+   70,
+   248
+  ],
+  "rows": 179,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 179,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 179,
+    "digest": "e4255fdcc136ce54451ea1b719011c5e04c75d102e1a44f714f41fb58f237563"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 179,
+    "digest": "e4255fdcc136ce54451ea1b719011c5e04c75d102e1a44f714f41fb58f237563"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

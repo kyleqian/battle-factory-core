@@ -1,0 +1,16 @@
+audit23-self-double-team-player-sneasel-magcargo	DOUBLE_TEAM	104	player	SNEASEL	MAGCARGO	self
+audit23-self-double-team-player-tauros-yanma	DOUBLE_TEAM	104	player	TAUROS	YANMA	self
+audit23-self-double-team-opponent-yanma-snorlax	DOUBLE_TEAM	104	opponent	YANMA	SNORLAX	self
+audit23-self-double-team-opponent-sneasel-magcargo	DOUBLE_TEAM	104	opponent	SNEASEL	MAGCARGO	self
+audit23-self-recover-player-miltank-aerodactyl	RECOVER	105	player	MILTANK	AERODACTYL	self
+audit23-self-recover-player-girafarig-magcargo	RECOVER	105	player	GIRAFARIG	MAGCARGO	self
+audit23-self-recover-opponent-aerodactyl-magcargo	RECOVER	105	opponent	AERODACTYL	MAGCARGO	self
+audit23-self-recover-opponent-raichu-snorlax	RECOVER	105	opponent	RAICHU	SNORLAX	self
+audit23-att-sing-opponent-jigglypuff-wobbuffet	SING	47	opponent	JIGGLYPUFF	WOBBUFFET	att
+audit23-att-sing-opponent-butterfree-pichu	SING	47	opponent	BUTTERFREE	PICHU	att
+audit23-def-psych-up-player-raichu-steelix	PSYCH_UP	244	player	RAICHU	STEELIX	def
+audit23-def-psych-up-player-hitmontop-butterfree	PSYCH_UP	244	player	HITMONTOP	BUTTERFREE	def
+audit23-def-psych-up-opponent-espeon-snorlax	PSYCH_UP	244	opponent	ESPEON	SNORLAX	def
+audit23-def-psych-up-opponent-yanma-pichu	PSYCH_UP	244	opponent	YANMA	PICHU	def
+audit23-self-recover-player-miltank-aerodactyl-sandstorm	RECOVER	105	player	MILTANK	AERODACTYL	self
+audit23-self-recover-opponent-raichu-steelix-sandstorm	RECOVER	105	opponent	RAICHU	STEELIX	self

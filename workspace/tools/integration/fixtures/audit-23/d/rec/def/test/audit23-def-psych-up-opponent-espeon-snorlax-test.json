@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "audit23-def-psych-up-opponent-espeon-snorlax-test.json",
+  "stem": "audit23-def-psych-up-opponent-espeon-snorlax",
+  "kind": "test",
+  "move": "PSYCH_UP",
+  "attackerSide": "opponent",
+  "defenderDoll": true,
+  "window": [
+   1737,
+   1915
+  ],
+  "rows": 179,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 179,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 179,
+    "digest": "3fefd049623e6362f3cc05d7f6eea8160df14484b049a3db90e67a3ddf15903e"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 179,
+    "digest": "3fefd049623e6362f3cc05d7f6eea8160df14484b049a3db90e67a3ddf15903e"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]

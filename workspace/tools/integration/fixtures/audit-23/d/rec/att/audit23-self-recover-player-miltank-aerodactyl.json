@@ -1,0 +1,74 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "audit23-self-recover-player-miltank-aerodactyl",
+   "kind": "swap",
+   "side": "player",
+   "move": "RECOVER",
+   "moveId": 105,
+   "turn": 0,
+   "frame": 1764,
+   "activation": 1807,
+   "window": [
+    1764,
+    2032
+   ],
+   "rows": 269,
+   "swapInRows": 42,
+   "romBodyRows": 183,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 2414291170,
+   "adapterDuration": 169,
+   "multihit": 0,
+   "productionDuration": 269,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 184,
+    "shift": -10
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 269,
+    "digests": [
+     "fd4dce6e97b72a80",
+     "fd4dce6e97b72a80"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    8
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  }
+ ]
+}

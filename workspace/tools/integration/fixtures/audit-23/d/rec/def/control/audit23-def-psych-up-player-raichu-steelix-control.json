@@ -1,0 +1,39 @@
+[
+ {
+  "fixture": "audit23-def-psych-up-player-raichu-steelix-control.json",
+  "stem": "audit23-def-psych-up-player-raichu-steelix",
+  "kind": "control",
+  "move": "PSYCH_UP",
+  "attackerSide": "player",
+  "defenderDoll": false,
+  "window": [
+   67,
+   245
+  ],
+  "rows": 179,
+  "orderInput": "fixture",
+  "shift": 0,
+  "liveDuration": 179,
+  "liveEngaged": true,
+  "identical": true,
+  "runs": [
+   {
+    "run": 1,
+    "residualPixels": 0,
+    "exactRows": 179,
+    "digest": "7b070e05172b5df710c5e118dfe4fc22502e534b1303cad627bae1aa3132670b"
+   },
+   {
+    "run": 2,
+    "residualPixels": 0,
+    "exactRows": 179,
+    "digest": "7b070e05172b5df710c5e118dfe4fc22502e534b1303cad627bae1aa3132670b"
+   }
+  ],
+  "affectedAges": "",
+  "maxPxRow": 0,
+  "fieldPx": 0,
+  "bbox": null,
+  "perRow": []
+ }
+]
