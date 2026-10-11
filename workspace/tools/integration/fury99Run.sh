@@ -2,7 +2,7 @@
 # fury99: reproduce every committed fury99 artifact from scratch into a FRESH out dir inside the repo (refused if non-empty / outside).
 #   sh tools/integration/fury99Run.sh <fresh-out-dir> [--census]
 # 1. scenarios (fury99Scenarios.py, written to the committed dir) must be byte-identical (git diff --quiet);
-# 2. probes: 8 scenarios x2 fresh direct mGBA (fury99Probes.sh); summary (r1 == r2, RAM counters, palette blend rows) == probe-summary.json;
+# 2. probes: 10 scenarios x2 fresh direct mGBA (fury99Probes.sh); summary (r1 == r2, RAM counters, palette blend rows) == probe-summary.json;
 # 3. fixtures (fury99Fixtures.py over r1) == fixtures/fury99/live;
 # 4. the production renderer check (later58Check.sh: liveAdapterFramebuffer.ts, two more fresh probes per scenario) == fixtures/fury99/check.json,
 #    and the receipt (fury99Receipt.py) == fixtures/fury99-live-receipt.json;
@@ -18,12 +18,12 @@ F=tools/integration/fixtures/fury99
 fail=0
 check() { if cmp -s "$1" "$2"; then echo "SAME $3"; else echo "DIFF $3"; fail=1; fi; }
 python3 tools/integration/fury99Scenarios.py > /dev/null
-git diff --quiet -- "$F/scenarios" && echo "SAME scenarios (8)" || { echo "DIFF scenarios"; fail=1; }
+git diff --quiet -- "$F/scenarios" && echo "SAME scenarios (10)" || { echo "DIFF scenarios"; fail=1; }
 OUT="$OUT/probes" JOBS=8 sh tools/integration/fury99Probes.sh
 python3 tools/integration/fury99Summary.py "$OUT/probes" "$OUT/probe-summary.json" > /dev/null
 check "$F/probe-summary.json" "$OUT/probe-summary.json" "probe-summary.json (r1 == r2, counters, blend rows)"
 python3 tools/integration/fury99Fixtures.py "$OUT/probes/r1" "$OUT/live" > /dev/null
-diff -r "$F/live" "$OUT/live" > /dev/null && echo "SAME fixtures (40)" || { echo "DIFF fixtures"; fail=1; }
+diff -r "$F/live" "$OUT/live" > /dev/null && echo "SAME fixtures (50)" || { echo "DIFF fixtures"; fail=1; }
 OUT="$OUT/check-scratch" JOBS=8 sh tools/integration/later58Check.sh "$OUT/live" "$OUT/check.json" > "$OUT/check.log" 2>&1
 # later58Check.sh writes compact JSON; the committed copy is the same rows (compare the parsed rows, not the bytes).
 python3 -c 'import json, sys; a, b = (json.load(open(p))["rows"] for p in sys.argv[1:3]); sys.exit(a != b)' "$F/check.json" "$OUT/check.json" \
