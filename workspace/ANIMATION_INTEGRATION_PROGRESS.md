@@ -94,6 +94,8 @@
   worker tree vs `302e39bdb` **+37 / +8,760**, 0 regressions; doll90Run.sh into a fresh dir: probes r1 == r2, `same summary.tsv`.
 - Census on `d46da5755` (src `081a0570`; every fold so far) vs the session baseline: **+372 commands / +57,024 live frames, 0 live ->
   fallback, 0 errors, keys identical except seed 881's budget-cut tail: 95.15 % / 98.63 %** (start 93.79 / 97.37).
+- Supervisor union gates on `d46da5755` (src `081a0570`): typecheck, full suite 1,621 files / 13,308 tests (2 shards, 0 failed), build,
+  differential 624 / 624 vs `b05d384ca` (`.integration/validation/union-d46da5755/`).
 - In flight: ctl95 (INTEGRATION: are the LIVE doll-free Recover / GrassWhistle / Focus Punch / Iron Tail bodies wrong, or the doll
   labs' controls mis-staged?), scan93 (SIDE: scanline-buffer history for Extrasensory player / Memento later bodies; census +16 / +2,657
   on its patch), idle94 (MAIN: the accepted-window-after-activation convention — bodies N frames shorter than the ROM).
