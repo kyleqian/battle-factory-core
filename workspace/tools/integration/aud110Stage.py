@@ -29,6 +29,8 @@ JOBS = [  # id, mover side, mover species, other species, mover move, other move
     ("substitute-opp-362-213", "opponent", 362, 213, G.SUBSTITUTE, G.HARDEN, 2),
     ("swagger-ply-65-143", "player", 65, 143, 207, G.HARDEN, 2),
     ("swagger-opp-169-99", "opponent", 169, 99, 207, G.HARDEN, 2),
+    ("swagger-ply-19-95", "player", 19, 95, 207, G.HARDEN, 2),         # RATTATA = the pair the hard-coded 38 / 32 came from (regression)
+    ("swagger-opp-19-95", "opponent", 19, 95, 207, G.HARDEN, 2),
 ]
 
 

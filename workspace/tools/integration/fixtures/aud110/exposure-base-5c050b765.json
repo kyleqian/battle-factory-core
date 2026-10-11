@@ -31,7 +31,10 @@
  },
  "swagger": {
   "total": 127,
-  "live": 127
+  "live": 127,
+  "heightDiffersFromHardCoded": 100,
+  "battles": 59,
+  "unknownSpecies": 5
  },
  "meanLook": {
   "total": 27,
