@@ -31,6 +31,24 @@
   + battle digest identical, 0 frame-length changes; cast83Run.sh into a fresh dir — staged / derived / both receipts == committed.
 - Supervisor reproduction of flat84: flat84Run.sh into a fresh dir under the repo (an out dir outside the repo cannot find ../oracle —
   flat77Probe.py's harness lookup) — 35 / 35 non-census receipts `same`.
+- Folded Sonnet worker `427709d2a` (INTEGRATION) as `c25af4253`: land86 — flat84's patch (Flatter 260 joins WORDS_ORDER_UNIT_MOVE_IDS,
+  liveFlatterWordsPostFree, the marker records the body species), tests/land86FlatterWordsUnit.test.ts (revert: 4 / 4 fail); 32 after-a-
+  Flatter windows re-rendered through the final code 0 px, == flat84's checks. Worker gates: full suite (2 shards, 0 failed), build,
+  differential 624. Supervisor: census on the worker tree vs land82's **+44 / +6,401**, 0 regressions, keys identical.
+- **Union defect caught by the supervisor's union census (fixed `302e39bdb`):** land86's patch (cut on the pre-cast83 tree) added a
+  `composeLivePalettes` call; cast83 had replaced that function's import with the form-aware `composeLiveArtPalettes`. Both branches were
+  green alone and the textual merge was clean, but the union threw ReferenceError on every Flatter words carry: census 17 battles
+  aborted (errors 0 -> 17), typecheck TS2552. Fix: `composeLiveArtPalettes(art)` (identical without a Castform form). Census on
+  `302e39bdb` (src `8150be72`) vs the session baseline: **+153 commands / +31,581 live frames = land82 + cast83 + land86 exactly**,
+  0 regressions, 0 errors, keys identical except seed 881's budget-cut tail: **94.35 % / 97.77 %** (start 93.79 / 97.37).
+- prep reseed85 (MAIN lane, Opus, `4f4828f3b` .. `d46cdfff1`, new files only): the post-KO send-out allocator reseed after a words-order
+  unit. The reseed reads slot OCCUPANCY only and every words unit is allocator-net-zero, so the order host can keep a word-free
+  occupancy shadow while the free order stays deferred. ROM: 13 routes x 2 probes x 2 runs A == B; 4 / 4 words-vs-control pairs SAME
+  occupancy, differing free order; 20 / 20 windows 0 px through the patched renderer; census +47 / +4,834 (allocator-unknown 52 -> 6),
+  keys + digests identical; no pin moves; runner 13 / 13 receipts byte-identical. BANKED -> land87 (in flight).
+- FINDING (supervisor, from the census + source): the live Return 216 body adapter renders ReturnStrongest for every request and never
+  reads `request.friendship`; the kernel sends friendship 0 (ret80 / #165), where Move_RETURN plays ReturnWeak (two dips + one hitsplat).
+  37 census Return bodies were therefore wrong live claims. ret88 (MAIN lane) fails them closed first, then builds the Weak body + plan.
 
 ## 2026-10-10 (day) — S10A: #159 fixed, 12 production folds + 7 audit / evidence steps; honest corrections (Castform, Return); ordinary-play live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 
