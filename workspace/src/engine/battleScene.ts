@@ -2,6 +2,8 @@ import {
   LIVE_MOVE_NO_HIDDEN_SIDES, liveMoveAnimationPresentation, liveMoveHiddenSides, liveMoveOpponentShadowRow, liveMoveOpponentShadowReturn,
   type LiveMoveHiddenSides,
 } from "./liveMoveAnimation.ts";
+import { liveBattlerAnchors } from "./liveMoveAnimation.ts";
+import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
@@ -821,6 +823,7 @@ import {
 } from "./battleCommandPresentationRender.ts";
 import type { BattleCommandFieldArtBattler, BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import { battleCommandFieldArtElevation } from "./battleCommandFieldArt.ts";
+import { battleCommandFieldSpriteOrigin } from "./battleCommandFieldArt.ts";
 import type {
   BattleResolutionRenderEffect,
   BattleResolutionPresentationRenderView,
@@ -7689,6 +7692,50 @@ function statAnimBannerPalette(stat: BattleStatName): RgbColor[] {
     case "accuracy": return statAnimBanner.palettes.accuracy;
     case "evasion": return statAnimBanner.palettes.evasion;
   }
+}
+
+/**
+ * scd112 (S10A, ISSUES #166 slice d, docs/scd112-stats-change-render.md): General_StatsChange's `stats-change` command over the
+ * field as it is, Scene ON and OFF alike. Command age a is the reducer's rel a + 1 (stat102 s4: the command's 76 / 90 frames are the
+ * added rows rel 1 .. E+1). The banner rows come only from the pure reducer (statsChangeParams: palette / direction;
+ * statsChangeRow: bannerVisible / eva / bg1YVisible) and are drawn by the exact helpers above; the mask is the battler's displayed
+ * pic (species / form / doll art of the field) at battleCommandFieldSpriteOrigin (elevation). In Scene ON the opponent stands at its
+ * tracked front idle rest (liveBattlerX2History via liveBattlerAnchors: the ROM's OBJ-window copy takes the battler's live x2 / y2);
+ * Scene OFF has no x2 input and no residual x2. SpriteCB_EnemyShadow hides an elevated opponent's shadow while enemyShadowHidden
+ * (rel 1 .. E+1: every command age). Null when the effect is not a playable stats change (statsChangeParams null).
+ */
+export function statsChangeRenderView(view: BattleResolutionPresentationRenderView): Readonly<{
+  view: BattleResolutionPresentationRenderView;
+  banner: Readonly<{
+    tileset: Tileset; corner: Readonly<{ x: number; y: number }>; direction: "up" | "down"; eva: number; bg1Y: number; palette: RgbColor[];
+  }> | null;
+}> | null {
+  const effect = view.effect;
+  if (effect?.type !== "stats-change") return null;
+  const params = statsChangeParams(effect.argument);
+  if (params === null) return null;
+  const row = statsChangeRow(params, effect.age + 1);
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const opponent = rest.x2 === 0 && rest.y2 === 0 ? view.fieldArt.opponent : Object.freeze({
+    ...view.fieldArt.opponent,
+    origin: Object.freeze({ x: view.fieldArt.opponent.origin.x + rest.x2, y: view.fieldArt.opponent.origin.y + rest.y2 }),
+  });
+  const fieldArt = opponent === view.fieldArt.opponent ? view.fieldArt : Object.freeze({ ...view.fieldArt, opponent });
+  const art = fieldArt[side];
+  const banner = row.bannerVisible && view.visibility[side].sprite && row.eva !== null && row.bg1YVisible !== null
+    ? Object.freeze({
+        tileset: art.pic.tileset as Tileset, corner: battleCommandFieldSpriteOrigin(art, side), direction: params.direction,
+        eva: row.eva, bg1Y: row.bg1YVisible,
+        palette: (statAnimBanner.palettes as unknown as Readonly<Record<string, RgbColor[]>>)[params.palette]!,
+      })
+    : null;
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || row.enemyShadowHidden }),
+    banner,
+  });
 }
 
 type SceneOffStatEffect = Extract<
@@ -54665,6 +54712,9 @@ export function renderBattleResolutionSceneOffView(
   // healthboxes and the message window. Scene ON and OFF alike.
   const fade = substituteFadeRenderView(view);
   if (fade) view = fade.view;
+  // scd112: the stats-change command's field (tracked rest, shadow hide) and its banner (drawn below, after the stat banner).
+  const statsChange = statsChangeRenderView(view);
+  if (statsChange) view = statsChange.view;
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const faint = view.effect?.type === "faint" ? view.effect : null;
   const hit = view.effect?.type === "hit" ? view.effect : null;
@@ -54881,6 +54931,15 @@ export function renderBattleResolutionSceneOffView(
           statAnimBannerPalette(banner.stat),
         );
       }
+    }
+  }
+  if (statsChange?.banner) {
+    // scd112: General_StatsChange's BG1 inside the OBJ window (statsChangeRenderView), over the composed field.
+    const banner = statsChange.banner;
+    if (banner.direction === "up") {
+      drawStatIncreaseBannerForBattler(fb, banner.tileset, banner.corner, banner.eva, banner.bg1Y, banner.palette);
+    } else {
+      drawStatDecreaseBannerForBattlerPalette(fb, banner.tileset, banner.corner, banner.eva, banner.bg1Y, banner.palette);
     }
   }
   // A status controller's lasting visible result is the healthbox icon. The

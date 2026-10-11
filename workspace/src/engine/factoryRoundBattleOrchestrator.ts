@@ -433,6 +433,9 @@ export type FactoryBattleMoveSelectionCursors = readonly [
   0 | 1 | 2 | 3,
 ];
 
+/** scd112: a tracked Scene ON x2 input with no side zeroed (statsChangeRenderView: the species rest). */
+const STATS_CHANGE_X2_NONE_ZEROED: LiveMoveBattlerX2Input = Object.freeze({ zeroed: Object.freeze([]) });
+
 const RESET_MOVE_SELECTION_CURSORS: FactoryBattleMoveSelectionCursors =
   Object.freeze([0, 0, 0, 0]);
 
@@ -2427,6 +2430,11 @@ function prepareResolutionPalette(
     // S10A fade (liveSubstituteFade.ts): the other battler's tracked rest at the fade's start.
     battlerX2Input = retainedX2?.commandKey === commandKey
       ? resolution.liveMoveBattlerX2Input : liveMoveBattlerX2Input(x2Host.history);
+  } else if (command?.type === "stats-change" && x2Host) {
+    // scd112 (S10A #166 slice d): the banner's OBJ-window copy stands at the battler's tracked rest. The x2 host exists only in
+    // Scene ON, so the input is always present here (none zeroed = the species rest); Scene OFF gets none (no residual x2).
+    battlerX2Input = retainedX2?.commandKey === commandKey
+      ? resolution.liveMoveBattlerX2Input : liveMoveBattlerX2Input(x2Host.history) ?? STATS_CHANGE_X2_NONE_ZEROED;
   }
   if (x2Host) {
     x2Host = advanceLiveBattlerX2Host(x2Host, resolution, isFinalCommand ? Number.POSITIVE_INFINITY : commandSequence);
