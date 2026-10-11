@@ -1,0 +1,125 @@
+{
+ "stat101-harden-ply-primeape-onix.json": {
+  "move": 106,
+  "userSide": "player",
+  "user": "PRIMEAPE",
+  "otherLead": "ONIX",
+  "bench": null,
+  "expectedAnimArg": 16,
+  "animatedSide": "player",
+  "variant": "up1 DEF single",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "stat101-agility-opp-golbat-snorlax.json": {
+  "move": 97,
+  "userSide": "opponent",
+  "user": "GOLBAT",
+  "otherLead": "SNORLAX",
+  "bench": null,
+  "expectedAnimArg": 41,
+  "animatedSide": "opponent",
+  "variant": "up2 SPEED single sharply, elevated opponent",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "stat101-growl-ply-primeape-onix.json": {
+  "move": 45,
+  "userSide": "player",
+  "user": "PRIMEAPE",
+  "otherLead": "ONIX",
+  "bench": null,
+  "expectedAnimArg": 22,
+  "animatedSide": "opponent",
+  "variant": "down1 ATK single, big opponent picture (ONIX)",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "stat101-screech-opp-golbat-onix.json": {
+  "move": 103,
+  "userSide": "opponent",
+  "user": "GOLBAT",
+  "otherLead": "ONIX",
+  "bench": null,
+  "expectedAnimArg": 47,
+  "animatedSide": "player",
+  "variant": "down2 DEF single sharply, player ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "stat101-cosmic-power-ply-snorlax-golbat.json": {
+  "move": 322,
+  "userSide": "player",
+  "user": "SNORLAX",
+  "otherLead": "GOLBAT",
+  "bench": null,
+  "expectedAnimArg": 55,
+  "animatedSide": "player",
+  "variant": "up multiple (DEF + SPDEF), player SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "stat101-tickle-opp-golbat-snorlax.json": {
+  "move": 321,
+  "userSide": "opponent",
+  "user": "GOLBAT",
+  "otherLead": "SNORLAX",
+  "bench": null,
+  "expectedAnimArg": 57,
+  "animatedSide": "player",
+  "variant": "down multiple (ATK + DEF), player SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "stat101-superpower-opp-machamp-snorlax.json": {
+  "move": 276,
+  "userSide": "opponent",
+  "user": "MACHAMP",
+  "otherLead": "SNORLAX",
+  "bench": null,
+  "expectedAnimArg": 57,
+  "animatedSide": "opponent",
+  "variant": "down multiple self (secondary, BattleScript_AtkDefDown)",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "stat101-memento-ply-primeape-onix.json": {
+  "move": 262,
+  "userSide": "player",
+  "user": "PRIMEAPE",
+  "otherLead": "ONIX",
+  "bench": null,
+  "expectedAnimArg": 58,
+  "animatedSide": "opponent",
+  "variant": "down multiple sharply (ATK + SPATK -2), opponent ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "stat101-icy-wind-ply-primeape-golbat.json": {
+  "move": 196,
+  "userSide": "player",
+  "user": "PRIMEAPE",
+  "otherLead": "GOLBAT",
+  "bench": null,
+  "expectedAnimArg": 24,
+  "animatedSide": "opponent",
+  "variant": "secondary-effect SPEED -1 on the elevated opponent",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "stat101-roar-intimidate-ply-primeape-onix.json": {
+  "move": 46,
+  "userSide": "player",
+  "user": "PRIMEAPE",
+  "otherLead": "ONIX",
+  "bench": [
+   "GYARADOS",
+   "GRANBULL"
+  ],
+  "expectedAnimArg": 22,
+  "animatedSide": "player",
+  "variant": "Intimidate on the Roar-forced switch-in (both bench mons Intimidate)",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ }
+}
