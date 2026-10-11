@@ -1,0 +1,212 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "audit23-self-double-team-player-tauros-yanma",
+   "kind": "swap",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 1769,
+   "activation": 1812,
+   "window": [
+    1769,
+    2012
+   ],
+   "rows": 244,
+   "swapInRows": 42,
+   "romBodyRows": 158,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 1709088657,
+   "adapterDuration": 230,
+   "multihit": 0,
+   "productionDuration": 244,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 159,
+    "shift": -1
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 244,
+    "digests": [
+     "fe76d0a56309b46d",
+     "fe76d0a56309b46d"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit23-self-double-team-player-tauros-yanma",
+   "kind": "swap",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 4380,
+   "activation": 4423,
+   "window": [
+    4380,
+    4623
+   ],
+   "rows": 244,
+   "swapInRows": 42,
+   "romBodyRows": 158,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 680082351,
+   "adapterDuration": 230,
+   "multihit": 0,
+   "productionDuration": 244,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 159,
+    "shift": -1
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 244,
+    "digests": [
+     "fe76d0a56309b46d",
+     "fe76d0a56309b46d"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit23-self-double-team-player-tauros-yanma",
+   "kind": "swap",
+   "side": "player",
+   "move": "DOUBLE_TEAM",
+   "moveId": 104,
+   "turn": 0,
+   "frame": 5325,
+   "activation": 5368,
+   "window": [
+    5325,
+    5568
+   ],
+   "rows": 244,
+   "swapInRows": 42,
+   "romBodyRows": 158,
+   "swapBackRows": 42,
+   "orderInput": "fixture",
+   "pinnedRng2": 4237998799,
+   "adapterDuration": 230,
+   "multihit": 0,
+   "productionDuration": 244,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 159,
+    "shift": -1
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 244,
+    "digests": [
+     "fe76d0a56309b46d",
+     "fe76d0a56309b46d"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    600,
+    800,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      200,
+      200
+     ],
+     "withoutLatch": [
+      800,
+      800
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  }
+ ]
+}

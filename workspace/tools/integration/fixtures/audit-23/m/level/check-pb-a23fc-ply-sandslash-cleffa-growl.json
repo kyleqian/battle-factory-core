@@ -1,0 +1,687 @@
+{
+ "schema": "audit23-chain-check/v1",
+ "scenario": "pb-a23fc-ply-sandslash-cleffa-growl",
+ "rows": [
+  {
+   "fixture": "pb-a23fc-ply-sandslash-cleffa-growl-c0.json",
+   "move": "FURY_CUTTER",
+   "side": "player",
+   "species": "SANDSLASH/CLEFFA",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "210@0"
+   ],
+   "romPower": 10,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 10,
+    "damage": 1,
+    "friendship": 70,
+    "multihit": 0,
+    "rolloutCounter": 1
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 80,
+    "endFrame": 122
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a23fc-ply-sandslash-cleffa-growl-c2.json",
+   "move": "FURY_CUTTER",
+   "side": "player",
+   "species": "SANDSLASH/CLEFFA",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 4,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "210@0 HIT_ANIMATION@1 45@1 STATS_CHANGE(22)@0",
+    "210@0"
+   ],
+   "romPower": 20,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 20,
+    "damage": 1,
+    "friendship": 70,
+    "multihit": 0,
+    "rolloutCounter": 2
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1414,
+    "endFrame": 1456
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a23fc-ply-sandslash-cleffa-growl-c3.json",
+   "move": "FURY_CUTTER",
+   "side": "player",
+   "species": "SANDSLASH/MILTANK",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4
+    ],
+    "preEqEntry": false,
+    "equal": null,
+    "preDiff": [
+     "inUse",
+     "matrixBitmap"
+    ]
+   },
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "210@0 HIT_ANIMATION@1 45@1 STATS_CHANGE(22)@0",
+    "210@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "210@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 40,
+    "damage": 1,
+    "friendship": 70,
+    "multihit": 0,
+    "rolloutCounter": 3
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4082,
+    "endFrame": 4124
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a23fc-ply-sandslash-cleffa-growl-c6.json",
+   "move": "FURY_CUTTER",
+   "side": "player",
+   "species": "SANDSLASH/MILTANK",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4
+    ],
+    "preEqEntry": false,
+    "equal": null,
+    "preDiff": [
+     "inUse",
+     "matrixBitmap"
+    ]
+   },
+   "units": 16,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "210@0 HIT_ANIMATION@1 45@1 STATS_CHANGE(22)@0",
+    "210@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "210@0 HIT_ANIMATION@1 45@1 STATS_CHANGE(22)@0",
+    "45@1 STATS_CHANGE(22)@0 210@0"
+   ],
+   "romPower": 80,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 80,
+    "damage": 1,
+    "friendship": 70,
+    "multihit": 0,
+    "rolloutCounter": 4
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5694,
+    "endFrame": 5736
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a23fc-ply-sandslash-cleffa-growl-c7.json",
+   "move": "FURY_CUTTER",
+   "side": "player",
+   "species": "SANDSLASH/MILTANK",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4
+    ],
+    "preEqEntry": false,
+    "equal": null,
+    "preDiff": [
+     "inUse",
+     "matrixBitmap"
+    ]
+   },
+   "units": 18,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "210@0 HIT_ANIMATION@1 45@1 STATS_CHANGE(22)@0",
+    "210@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "210@0 HIT_ANIMATION@1 45@1 STATS_CHANGE(22)@0",
+    "45@1 STATS_CHANGE(22)@0 210@0 HIT_ANIMATION@1",
+    "210@0"
+   ],
+   "romPower": 160,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 160,
+    "damage": 1,
+    "friendship": 70,
+    "multihit": 0,
+    "rolloutCounter": 5
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 6750,
+    "endFrame": 6792
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a23fc-ply-sandslash-cleffa-growl-c10.json",
+   "move": "FURY_CUTTER",
+   "side": "player",
+   "species": "SANDSLASH/MILTANK",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4
+    ],
+    "preEqEntry": false,
+    "equal": null,
+    "preDiff": [
+     "inUse",
+     "matrixBitmap"
+    ]
+   },
+   "units": 24,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "210@0 HIT_ANIMATION@1 45@1 STATS_CHANGE(22)@0",
+    "210@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "210@0 HIT_ANIMATION@1 45@1 STATS_CHANGE(22)@0",
+    "45@1 STATS_CHANGE(22)@0 210@0 HIT_ANIMATION@1",
+    "210@0 HIT_ANIMATION@1 45@1 STATS_CHANGE(22)@0",
+    "45@1 STATS_CHANGE(22)@0 210@0"
+   ],
+   "romPower": 160,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 160,
+    "damage": 0,
+    "friendship": 70,
+    "multihit": 0,
+    "rolloutCounter": 5
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 8362,
+    "endFrame": 8404
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  }
+ ]
+}

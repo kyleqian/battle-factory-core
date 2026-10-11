@@ -1,0 +1,2835 @@
+{
+ "schema": "audit23-chain-check/v1",
+ "scenario": "pb-a23fc-opp-pinsir-snorlax-extrasensory",
+ "rows": [
+  {
+   "fixture": "pb-a23fc-opp-pinsir-snorlax-extrasensory-c0.json",
+   "move": "FURY_CUTTER",
+   "side": "opponent",
+   "species": "PINSIR/SNORLAX",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "210@1"
+   ],
+   "romPower": 10,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 10
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 81,
+    "endFrame": 123
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 43,
+    "px": 0,
+    "digests": [
+     "5f88de2842929dcd",
+     "5f88de2842929dcd"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a23fc-opp-pinsir-snorlax-extrasensory-c2.json",
+   "move": "FURY_CUTTER",
+   "side": "opponent",
+   "species": "PINSIR/SNORLAX",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 4,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1"
+   ],
+   "romPower": 20,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 20
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1415,
+    "endFrame": 1457
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "unclassified (case-local gate)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 19,
+    "px": 68009,
+    "digests": [
+     "cbbdec711d9ce5d1",
+     "cbbdec711d9ce5d1"
+    ],
+    "residualRows": [
+     [
+      8,
+      20921
+     ],
+     [
+      9,
+      20921
+     ],
+     [
+      10,
+      20921
+     ],
+     [
+      11,
+      66
+     ],
+     [
+      12,
+      100
+     ],
+     [
+      13,
+      103
+     ],
+     [
+      14,
+      106
+     ],
+     [
+      15,
+      106
+     ],
+     [
+      16,
+      106
+     ],
+     [
+      17,
+      581
+     ],
+     [
+      18,
+      590
+     ],
+     [
+      19,
+      134
+     ],
+     [
+      20,
+      112
+     ],
+     [
+      21,
+      542
+     ],
+     [
+      22,
+      534
+     ],
+     [
+      23,
+      68
+     ],
+     [
+      24,
+      53
+     ],
+     [
+      25,
+      501
+     ],
+     [
+      26,
+      497
+     ],
+     [
+      27,
+      27
+     ],
+     [
+      28,
+      27
+     ],
+     [
+      29,
+      483
+     ],
+     [
+      30,
+      483
+     ],
+     [
+      31,
+      27
+     ]
+    ],
+    "rowBoxes": [
+     [
+      8,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      9,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      10,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      11,
+      80,
+      91,
+      75,
+      86
+     ],
+     [
+      12,
+      76,
+      93,
+      73,
+      90
+     ],
+     [
+      13,
+      73,
+      90,
+      76,
+      93
+     ],
+     [
+      14,
+      69,
+      86,
+      80,
+      97
+     ],
+     [
+      15,
+      66,
+      83,
+      83,
+      100
+     ],
+     [
+      16,
+      63,
+      80,
+      86,
+      103
+     ],
+     [
+      17,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      18,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      19,
+      54,
+      79,
+      87,
+      111
+     ],
+     [
+      20,
+      51,
+      76,
+      90,
+      111
+     ],
+     [
+      21,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      22,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      23,
+      53,
+      74,
+      92,
+      111
+     ],
+     [
+      24,
+      53,
+      71,
+      95,
+      111
+     ],
+     [
+      25,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      26,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      27,
+      53,
+      64,
+      102,
+      111
+     ],
+     [
+      28,
+      53,
+      64,
+      102,
+      111
+     ],
+     [
+      29,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      30,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      31,
+      53,
+      64,
+      102,
+      111
+     ]
+    ],
+    "detail": [
+     {
+      "age": 8,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 9,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 11,
+      "px": 66,
+      "bbox": [
+       80,
+       91,
+       75,
+       86
+      ],
+      "sample": "90,75 rom fff098 live f7f7ff"
+     },
+     {
+      "age": 12,
+      "px": 100,
+      "bbox": [
+       76,
+       93,
+       73,
+       90
+      ],
+      "sample": "92,73 rom fff098 live f7f7ff"
+     },
+     {
+      "age": 13,
+      "px": 103,
+      "bbox": [
+       73,
+       90,
+       76,
+       93
+      ],
+      "sample": "89,76 rom fff498 live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 19,
+    "px": 65758,
+    "digests": [
+     "a026f83d7cb9bc3b",
+     "a026f83d7cb9bc3b"
+    ],
+    "residualRows": [
+     [
+      8,
+      20921
+     ],
+     [
+      9,
+      20921
+     ],
+     [
+      10,
+      20921
+     ],
+     [
+      11,
+      139
+     ],
+     [
+      12,
+      202
+     ],
+     [
+      13,
+      208
+     ],
+     [
+      14,
+      172
+     ],
+     [
+      15,
+      136
+     ],
+     [
+      16,
+      184
+     ],
+     [
+      17,
+      250
+     ],
+     [
+      18,
+      252
+     ],
+     [
+      19,
+      266
+     ],
+     [
+      20,
+      202
+     ],
+     [
+      21,
+      158
+     ],
+     [
+      22,
+      154
+     ],
+     [
+      23,
+      126
+     ],
+     [
+      24,
+      104
+     ],
+     [
+      25,
+      90
+     ],
+     [
+      26,
+      82
+     ],
+     [
+      27,
+      54
+     ],
+     [
+      28,
+      54
+     ],
+     [
+      29,
+      54
+     ],
+     [
+      30,
+      54
+     ],
+     [
+      31,
+      54
+     ]
+    ],
+    "rowBoxes": [
+     [
+      8,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      9,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      10,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      11,
+      51,
+      91,
+      75,
+      86
+     ],
+     [
+      12,
+      49,
+      93,
+      73,
+      90
+     ],
+     [
+      13,
+      52,
+      90,
+      76,
+      93
+     ],
+     [
+      14,
+      56,
+      86,
+      80,
+      97
+     ],
+     [
+      15,
+      59,
+      83,
+      83,
+      100
+     ],
+     [
+      16,
+      62,
+      80,
+      86,
+      103
+     ],
+     [
+      17,
+      57,
+      85,
+      81,
+      106
+     ],
+     [
+      18,
+      57,
+      85,
+      84,
+      109
+     ],
+     [
+      19,
+      54,
+      88,
+      87,
+      111
+     ],
+     [
+      20,
+      51,
+      91,
+      90,
+      111
+     ],
+     [
+      21,
+      50,
+      92,
+      93,
+      111
+     ],
+     [
+      22,
+      53,
+      89,
+      90,
+      111
+     ],
+     [
+      23,
+      53,
+      89,
+      92,
+      111
+     ],
+     [
+      24,
+      53,
+      89,
+      95,
+      111
+     ],
+     [
+      25,
+      54,
+      88,
+      97,
+      111
+     ],
+     [
+      26,
+      54,
+      88,
+      99,
+      111
+     ],
+     [
+      27,
+      53,
+      89,
+      102,
+      111
+     ],
+     [
+      28,
+      53,
+      89,
+      102,
+      111
+     ],
+     [
+      29,
+      53,
+      89,
+      102,
+      111
+     ],
+     [
+      30,
+      53,
+      89,
+      102,
+      111
+     ],
+     [
+      31,
+      53,
+      89,
+      102,
+      111
+     ]
+    ],
+    "detail": [
+     {
+      "age": 8,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 9,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 11,
+      "px": 139,
+      "bbox": [
+       51,
+       91,
+       75,
+       86
+      ],
+      "sample": "52,75 rom f7f7ff live fff098"
+     },
+     {
+      "age": 12,
+      "px": 202,
+      "bbox": [
+       49,
+       93,
+       73,
+       90
+      ],
+      "sample": "50,73 rom f7f7ff live fff098"
+     },
+     {
+      "age": 13,
+      "px": 208,
+      "bbox": [
+       52,
+       90,
+       76,
+       93
+      ],
+      "sample": "53,76 rom ffffff live fff498"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "pb-a23fc-opp-pinsir-snorlax-extrasensory-c4.json",
+   "move": "FURY_CUTTER",
+   "side": "opponent",
+   "species": "PINSIR/SNORLAX",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2749,
+    "endFrame": 2791
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "unclassified (case-local gate)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 19,
+    "px": 150290,
+    "digests": [
+     "3ccf088c54646833",
+     "3ccf088c54646833"
+    ],
+    "residualRows": [
+     [
+      8,
+      20921
+     ],
+     [
+      9,
+      20921
+     ],
+     [
+      10,
+      20921
+     ],
+     [
+      11,
+      73
+     ],
+     [
+      12,
+      102
+     ],
+     [
+      13,
+      105
+     ],
+     [
+      14,
+      106
+     ],
+     [
+      15,
+      20921
+     ],
+     [
+      16,
+      20921
+     ],
+     [
+      17,
+      20921
+     ],
+     [
+      18,
+      20921
+     ],
+     [
+      19,
+      134
+     ],
+     [
+      20,
+      112
+     ],
+     [
+      21,
+      531
+     ],
+     [
+      22,
+      528
+     ],
+     [
+      23,
+      68
+     ],
+     [
+      24,
+      53
+     ],
+     [
+      25,
+      495
+     ],
+     [
+      26,
+      491
+     ],
+     [
+      27,
+      27
+     ],
+     [
+      28,
+      27
+     ],
+     [
+      29,
+      482
+     ],
+     [
+      30,
+      482
+     ],
+     [
+      31,
+      27
+     ]
+    ],
+    "rowBoxes": [
+     [
+      8,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      9,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      10,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      11,
+      51,
+      62,
+      75,
+      86
+     ],
+     [
+      12,
+      49,
+      66,
+      73,
+      90
+     ],
+     [
+      13,
+      52,
+      69,
+      76,
+      93
+     ],
+     [
+      14,
+      56,
+      73,
+      80,
+      97
+     ],
+     [
+      15,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      16,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      17,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      18,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      19,
+      63,
+      88,
+      87,
+      111
+     ],
+     [
+      20,
+      66,
+      91,
+      90,
+      111
+     ],
+     [
+      21,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      22,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      23,
+      68,
+      89,
+      92,
+      111
+     ],
+     [
+      24,
+      71,
+      89,
+      95,
+      111
+     ],
+     [
+      25,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      26,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      27,
+      78,
+      89,
+      102,
+      111
+     ],
+     [
+      28,
+      78,
+      89,
+      102,
+      111
+     ],
+     [
+      29,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      30,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      31,
+      78,
+      89,
+      102,
+      111
+     ]
+    ],
+    "detail": [
+     {
+      "age": 8,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 9,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 11,
+      "px": 73,
+      "bbox": [
+       51,
+       62,
+       75,
+       86
+      ],
+      "sample": "52,75 rom fff098 live f7f7ff"
+     },
+     {
+      "age": 12,
+      "px": 102,
+      "bbox": [
+       49,
+       66,
+       73,
+       90
+      ],
+      "sample": "50,73 rom fff098 live f7f7ff"
+     },
+     {
+      "age": 13,
+      "px": 105,
+      "bbox": [
+       52,
+       69,
+       76,
+       93
+      ],
+      "sample": "53,76 rom fff498 live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 36,
+    "px": 146447,
+    "digests": [
+     "3ffdbda02d23446a",
+     "3ffdbda02d23446a"
+    ],
+    "residualRows": [
+     [
+      8,
+      20921
+     ],
+     [
+      9,
+      20921
+     ],
+     [
+      10,
+      20921
+     ],
+     [
+      15,
+      20921
+     ],
+     [
+      16,
+      20921
+     ],
+     [
+      17,
+      20921
+     ],
+     [
+      18,
+      20921
+     ]
+    ],
+    "rowBoxes": [
+     [
+      8,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      9,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      10,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      15,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      16,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      17,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      18,
+      0,
+      239,
+      0,
+      111
+     ]
+    ],
+    "detail": [
+     {
+      "age": 8,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 9,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 15,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 16,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 17,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "pb-a23fc-opp-pinsir-snorlax-extrasensory-c6.json",
+   "move": "FURY_CUTTER",
+   "side": "opponent",
+   "species": "PINSIR/SNORLAX",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 12,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1"
+   ],
+   "romPower": 80,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 80
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4083,
+    "endFrame": 4125
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "unclassified (case-local gate)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 19,
+    "px": 150310,
+    "digests": [
+     "9569d75ca20be711",
+     "9569d75ca20be711"
+    ],
+    "residualRows": [
+     [
+      8,
+      20921
+     ],
+     [
+      9,
+      20921
+     ],
+     [
+      10,
+      20921
+     ],
+     [
+      11,
+      66
+     ],
+     [
+      12,
+      100
+     ],
+     [
+      13,
+      103
+     ],
+     [
+      14,
+      106
+     ],
+     [
+      15,
+      20921
+     ],
+     [
+      16,
+      20921
+     ],
+     [
+      17,
+      20921
+     ],
+     [
+      18,
+      20921
+     ],
+     [
+      19,
+      134
+     ],
+     [
+      20,
+      112
+     ],
+     [
+      21,
+      542
+     ],
+     [
+      22,
+      534
+     ],
+     [
+      23,
+      68
+     ],
+     [
+      24,
+      53
+     ],
+     [
+      25,
+      501
+     ],
+     [
+      26,
+      497
+     ],
+     [
+      27,
+      27
+     ],
+     [
+      28,
+      27
+     ],
+     [
+      29,
+      483
+     ],
+     [
+      30,
+      483
+     ],
+     [
+      31,
+      27
+     ]
+    ],
+    "rowBoxes": [
+     [
+      8,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      9,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      10,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      11,
+      80,
+      91,
+      75,
+      86
+     ],
+     [
+      12,
+      76,
+      93,
+      73,
+      90
+     ],
+     [
+      13,
+      73,
+      90,
+      76,
+      93
+     ],
+     [
+      14,
+      69,
+      86,
+      80,
+      97
+     ],
+     [
+      15,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      16,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      17,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      18,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      19,
+      54,
+      79,
+      87,
+      111
+     ],
+     [
+      20,
+      51,
+      76,
+      90,
+      111
+     ],
+     [
+      21,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      22,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      23,
+      53,
+      74,
+      92,
+      111
+     ],
+     [
+      24,
+      53,
+      71,
+      95,
+      111
+     ],
+     [
+      25,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      26,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      27,
+      53,
+      64,
+      102,
+      111
+     ],
+     [
+      28,
+      53,
+      64,
+      102,
+      111
+     ],
+     [
+      29,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      30,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      31,
+      53,
+      64,
+      102,
+      111
+     ]
+    ],
+    "detail": [
+     {
+      "age": 8,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 9,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 11,
+      "px": 66,
+      "bbox": [
+       80,
+       91,
+       75,
+       86
+      ],
+      "sample": "90,75 rom fff098 live f7f7ff"
+     },
+     {
+      "age": 12,
+      "px": 100,
+      "bbox": [
+       76,
+       93,
+       73,
+       90
+      ],
+      "sample": "92,73 rom fff098 live f7f7ff"
+     },
+     {
+      "age": 13,
+      "px": 103,
+      "bbox": [
+       73,
+       90,
+       76,
+       93
+      ],
+      "sample": "89,76 rom fff498 live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 19,
+    "px": 148620,
+    "digests": [
+     "87a230d0e1fd953a",
+     "87a230d0e1fd953a"
+    ],
+    "residualRows": [
+     [
+      8,
+      20921
+     ],
+     [
+      9,
+      20921
+     ],
+     [
+      10,
+      20921
+     ],
+     [
+      11,
+      139
+     ],
+     [
+      12,
+      202
+     ],
+     [
+      13,
+      208
+     ],
+     [
+      14,
+      172
+     ],
+     [
+      15,
+      20921
+     ],
+     [
+      16,
+      20921
+     ],
+     [
+      17,
+      20921
+     ],
+     [
+      18,
+      20921
+     ],
+     [
+      19,
+      266
+     ],
+     [
+      20,
+      202
+     ],
+     [
+      21,
+      158
+     ],
+     [
+      22,
+      154
+     ],
+     [
+      23,
+      126
+     ],
+     [
+      24,
+      104
+     ],
+     [
+      25,
+      90
+     ],
+     [
+      26,
+      82
+     ],
+     [
+      27,
+      54
+     ],
+     [
+      28,
+      54
+     ],
+     [
+      29,
+      54
+     ],
+     [
+      30,
+      54
+     ],
+     [
+      31,
+      54
+     ]
+    ],
+    "rowBoxes": [
+     [
+      8,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      9,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      10,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      11,
+      51,
+      91,
+      75,
+      86
+     ],
+     [
+      12,
+      49,
+      93,
+      73,
+      90
+     ],
+     [
+      13,
+      52,
+      90,
+      76,
+      93
+     ],
+     [
+      14,
+      56,
+      86,
+      80,
+      97
+     ],
+     [
+      15,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      16,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      17,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      18,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      19,
+      54,
+      88,
+      87,
+      111
+     ],
+     [
+      20,
+      51,
+      91,
+      90,
+      111
+     ],
+     [
+      21,
+      50,
+      92,
+      93,
+      111
+     ],
+     [
+      22,
+      53,
+      89,
+      90,
+      111
+     ],
+     [
+      23,
+      53,
+      89,
+      92,
+      111
+     ],
+     [
+      24,
+      53,
+      89,
+      95,
+      111
+     ],
+     [
+      25,
+      54,
+      88,
+      97,
+      111
+     ],
+     [
+      26,
+      54,
+      88,
+      99,
+      111
+     ],
+     [
+      27,
+      53,
+      89,
+      102,
+      111
+     ],
+     [
+      28,
+      53,
+      89,
+      102,
+      111
+     ],
+     [
+      29,
+      53,
+      89,
+      102,
+      111
+     ],
+     [
+      30,
+      53,
+      89,
+      102,
+      111
+     ],
+     [
+      31,
+      53,
+      89,
+      102,
+      111
+     ]
+    ],
+    "detail": [
+     {
+      "age": 8,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 9,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 11,
+      "px": 139,
+      "bbox": [
+       51,
+       91,
+       75,
+       86
+      ],
+      "sample": "52,75 rom f7f7ff live fff098"
+     },
+     {
+      "age": 12,
+      "px": 202,
+      "bbox": [
+       49,
+       93,
+       73,
+       90
+      ],
+      "sample": "50,73 rom f7f7ff live fff098"
+     },
+     {
+      "age": 13,
+      "px": 208,
+      "bbox": [
+       52,
+       90,
+       76,
+       93
+      ],
+      "sample": "53,76 rom ffffff live fff498"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "pb-a23fc-opp-pinsir-snorlax-extrasensory-c8.json",
+   "move": "FURY_CUTTER",
+   "side": "opponent",
+   "species": "PINSIR/SNORLAX",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 16,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1 HIT_ANIMATION@0 326@0 HIT_ANIMATION@1",
+    "210@1"
+   ],
+   "romPower": 160,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 160
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5417,
+    "endFrame": 5459
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player",
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": false,
+    "decline": "unclassified (case-local gate)",
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 19,
+    "px": 150290,
+    "digests": [
+     "3ccf088c54646833",
+     "3ccf088c54646833"
+    ],
+    "residualRows": [
+     [
+      8,
+      20921
+     ],
+     [
+      9,
+      20921
+     ],
+     [
+      10,
+      20921
+     ],
+     [
+      11,
+      73
+     ],
+     [
+      12,
+      102
+     ],
+     [
+      13,
+      105
+     ],
+     [
+      14,
+      106
+     ],
+     [
+      15,
+      20921
+     ],
+     [
+      16,
+      20921
+     ],
+     [
+      17,
+      20921
+     ],
+     [
+      18,
+      20921
+     ],
+     [
+      19,
+      134
+     ],
+     [
+      20,
+      112
+     ],
+     [
+      21,
+      531
+     ],
+     [
+      22,
+      528
+     ],
+     [
+      23,
+      68
+     ],
+     [
+      24,
+      53
+     ],
+     [
+      25,
+      495
+     ],
+     [
+      26,
+      491
+     ],
+     [
+      27,
+      27
+     ],
+     [
+      28,
+      27
+     ],
+     [
+      29,
+      482
+     ],
+     [
+      30,
+      482
+     ],
+     [
+      31,
+      27
+     ]
+    ],
+    "rowBoxes": [
+     [
+      8,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      9,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      10,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      11,
+      51,
+      62,
+      75,
+      86
+     ],
+     [
+      12,
+      49,
+      66,
+      73,
+      90
+     ],
+     [
+      13,
+      52,
+      69,
+      76,
+      93
+     ],
+     [
+      14,
+      56,
+      73,
+      80,
+      97
+     ],
+     [
+      15,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      16,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      17,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      18,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      19,
+      63,
+      88,
+      87,
+      111
+     ],
+     [
+      20,
+      66,
+      91,
+      90,
+      111
+     ],
+     [
+      21,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      22,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      23,
+      68,
+      89,
+      92,
+      111
+     ],
+     [
+      24,
+      71,
+      89,
+      95,
+      111
+     ],
+     [
+      25,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      26,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      27,
+      78,
+      89,
+      102,
+      111
+     ],
+     [
+      28,
+      78,
+      89,
+      102,
+      111
+     ],
+     [
+      29,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      30,
+      41,
+      102,
+      71,
+      111
+     ],
+     [
+      31,
+      78,
+      89,
+      102,
+      111
+     ]
+    ],
+    "detail": [
+     {
+      "age": 8,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 9,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 11,
+      "px": 73,
+      "bbox": [
+       51,
+       62,
+       75,
+       86
+      ],
+      "sample": "52,75 rom fff098 live f7f7ff"
+     },
+     {
+      "age": 12,
+      "px": 102,
+      "bbox": [
+       49,
+       66,
+       73,
+       90
+      ],
+      "sample": "50,73 rom fff098 live f7f7ff"
+     },
+     {
+      "age": 13,
+      "px": 105,
+      "bbox": [
+       52,
+       69,
+       76,
+       93
+      ],
+      "sample": "53,76 rom fff498 live ffffff"
+     }
+    ]
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 43,
+    "exactRows": 36,
+    "px": 146447,
+    "digests": [
+     "3ffdbda02d23446a",
+     "3ffdbda02d23446a"
+    ],
+    "residualRows": [
+     [
+      8,
+      20921
+     ],
+     [
+      9,
+      20921
+     ],
+     [
+      10,
+      20921
+     ],
+     [
+      15,
+      20921
+     ],
+     [
+      16,
+      20921
+     ],
+     [
+      17,
+      20921
+     ],
+     [
+      18,
+      20921
+     ]
+    ],
+    "rowBoxes": [
+     [
+      8,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      9,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      10,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      15,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      16,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      17,
+      0,
+      239,
+      0,
+      111
+     ],
+     [
+      18,
+      0,
+      239,
+      0,
+      111
+     ]
+    ],
+    "detail": [
+     {
+      "age": 8,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 9,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 10,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 15,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 16,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     },
+     {
+      "age": 17,
+      "px": 20921,
+      "bbox": [
+       0,
+       239,
+       0,
+       111
+      ],
+      "sample": "0,0 rom cecece live ffffff"
+     }
+    ]
+   }
+  }
+ ]
+}

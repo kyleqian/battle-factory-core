@@ -1,0 +1,220 @@
+{
+ "schema": "audit23-chain-check/v1",
+ "scenario": "pb-a23it-ply-steelix-pidgeot",
+ "rows": [
+  {
+   "fixture": "pb-a23it-ply-steelix-pidgeot-c1.json",
+   "move": "IRON_TAIL",
+   "side": "player",
+   "species": "STEELIX/PIDGEOT",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 1,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "150@1 231@0"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 100,
+    "damage": 1,
+    "friendship": 70,
+    "multihit": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 319,
+    "endFrame": 453
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 135,
+    "exactRows": 135,
+    "px": 0,
+    "digests": [
+     "db69ee7aa6c6eb7f",
+     "db69ee7aa6c6eb7f"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 135,
+    "exactRows": 135,
+    "px": 0,
+    "digests": [
+     "db69ee7aa6c6eb7f",
+     "db69ee7aa6c6eb7f"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a23it-ply-steelix-pidgeot-c3.json",
+   "move": "IRON_TAIL",
+   "side": "player",
+   "species": "STEELIX/PIDGEOT",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 5,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "150@1 231@0 HIT_ANIMATION@1 STATS_CHANGE(23)@1",
+    "150@1 231@0"
+   ],
+   "romPower": 100,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 100,
+    "damage": 1,
+    "friendship": 70,
+    "multihit": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1653,
+    "endFrame": 1787
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 135,
+    "exactRows": 135,
+    "px": 0,
+    "digests": [
+     "db69ee7aa6c6eb7f",
+     "db69ee7aa6c6eb7f"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 135,
+    "exactRows": 135,
+    "px": 0,
+    "digests": [
+     "db69ee7aa6c6eb7f",
+     "db69ee7aa6c6eb7f"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  }
+ ]
+}

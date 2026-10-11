@@ -1,0 +1,57 @@
+{
+ "schema": "ctl95-control-check/v1",
+ "results": [
+  {
+   "stem": "audit23-self-double-team-opponent-sneasel-magcargo",
+   "move": "DOUBLE_TEAM",
+   "side": "opponent",
+   "body": 0,
+   "attacker": "SNEASEL",
+   "target": "MAGCARGO",
+   "activation": 77,
+   "romBodyRows": 158,
+   "shift": 1,
+   "window": [
+    78,
+    307
+   ],
+   "rows": 230,
+   "duration": 230,
+   "personality": 1793700000,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 230,
+   "badAges": [],
+   "badPx": []
+  },
+  {
+   "stem": "audit23-self-double-team-opponent-yanma-snorlax",
+   "move": "DOUBLE_TEAM",
+   "side": "opponent",
+   "body": 0,
+   "attacker": "YANMA",
+   "target": "SNORLAX",
+   "activation": 75,
+   "romBodyRows": 158,
+   "shift": 1,
+   "window": [
+    76,
+    305
+   ],
+   "rows": 230,
+   "duration": 230,
+   "personality": 1793700000,
+   "px": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 230,
+   "badAges": [],
+   "badPx": []
+  }
+ ]
+}

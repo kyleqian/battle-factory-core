@@ -1,0 +1,115 @@
+{
+ "schema": "audit23-chain-check/v1",
+ "scenario": "pb-a23gw-ply-snorlax-aerodactyl",
+ "rows": [
+  {
+   "fixture": "pb-a23gw-ply-snorlax-aerodactyl-c2.json",
+   "move": "GRASS_WHISTLE",
+   "side": "player",
+   "species": "SNORLAX/AERODACTYL",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "150@1",
+    "150@1 320@0"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0,
+    "damage": 0,
+    "friendship": 70,
+    "multihit": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1657,
+    "endFrame": 1881,
+    "ageOffset": 0,
+    "bodyStartFrame": 1657,
+    "bodyEndFrame": 1877
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 225,
+    "exactRows": 225,
+    "px": 0,
+    "digests": [
+     "446a0c2183b9381d",
+     "446a0c2183b9381d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 225,
+    "exactRows": 225,
+    "px": 0,
+    "digests": [
+     "446a0c2183b9381d",
+     "446a0c2183b9381d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  }
+ ]
+}

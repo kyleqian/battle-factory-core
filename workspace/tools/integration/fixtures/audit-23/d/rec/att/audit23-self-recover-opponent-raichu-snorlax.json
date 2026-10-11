@@ -1,0 +1,74 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "audit23-self-recover-opponent-raichu-snorlax",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "RECOVER",
+   "moveId": 105,
+   "turn": 0,
+   "frame": 1735,
+   "activation": 1776,
+   "window": [
+    1735,
+    1999
+   ],
+   "rows": 265,
+   "swapInRows": 40,
+   "romBodyRows": 183,
+   "swapBackRows": 40,
+   "orderInput": "fixture",
+   "pinnedRng2": 2640403978,
+   "adapterDuration": 169,
+   "multihit": 0,
+   "productionDuration": 265,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 184,
+    "shift": -10
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 265,
+    "digests": [
+     "7441dd063b673c6d",
+     "7441dd063b673c6d"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  }
+ ]
+}

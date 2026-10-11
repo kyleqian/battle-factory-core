@@ -1,0 +1,37 @@
+att	audit23-att-sing-opponent-butterfree-pichu	SING	opponent	swap	1741	317	body 235	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-att-sing-opponent-butterfree-pichu	SING	opponent	swap	5073	317	body 235	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-att-sing-opponent-jigglypuff-wobbuffet	SING	opponent	swap	1741	326	body 244	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-att-sing-opponent-jigglypuff-wobbuffet	SING	opponent	swap	5073	326	body 244	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-double-team-opponent-sneasel-magcargo	DOUBLE_TEAM	opponent	plain	77	159	body 158	presented false	px 233602/233602	identical true	bad 2,6,12,14,16..24,26,28..42,45..54,57..130	k+1 -
+att	audit23-self-double-team-opponent-sneasel-magcargo	DOUBLE_TEAM	opponent	swap	3408	240	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-double-team-opponent-sneasel-magcargo	DOUBLE_TEAM	opponent	swap	5074	240	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-double-team-opponent-yanma-snorlax	DOUBLE_TEAM	opponent	plain	75	159	body 158	presented false	px 244928/244928	identical true	bad 0,2,6,12,14,16..24,26,28..42,45..54,57..130,158	k+1 -
+att	audit23-self-double-team-opponent-yanma-snorlax	DOUBLE_TEAM	opponent	swap	3406	240	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-double-team-player-sneasel-magcargo	DOUBLE_TEAM	player	swap	1770	244	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-double-team-player-sneasel-magcargo	DOUBLE_TEAM	player	swap	3468	244	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-double-team-player-sneasel-magcargo	DOUBLE_TEAM	player	swap	5166	244	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-double-team-player-tauros-yanma	DOUBLE_TEAM	player	swap	1769	244	body 158	presented true	px 0/0	identical true	bad -	k+1 200
+att	audit23-self-double-team-player-tauros-yanma	DOUBLE_TEAM	player	swap	4380	244	body 158	presented true	px 0/0	identical true	bad -	k+1 200
+att	audit23-self-double-team-player-tauros-yanma	DOUBLE_TEAM	player	swap	5325	244	body 158	presented true	px 0/0	identical true	bad -	k+1 200
+att	audit23-self-recover-opponent-aerodactyl-magcargo	RECOVER	opponent	swap	1739	265	body 183	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-recover-opponent-raichu-snorlax	RECOVER	opponent	swap	1735	265	body 183	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-recover-opponent-raichu-steelix-sandstorm	SANDSTORM	player	plain	341	168	body 167	presented false	px 259163/259163	identical true	bad 0..167	k+1 -
+att	audit23-self-recover-opponent-raichu-steelix-sandstorm	SANDSTORM	player	plain	700	167	body 166	presented false	px 428271/428271	identical true	bad 0..166	k+1 -
+att	audit23-self-recover-opponent-raichu-steelix-sandstorm	SANDSTORM	player	plain	2127	167	body 166	presented false	px 428271/428271	identical true	bad 0..166	k+1 -
+att	audit23-self-recover-opponent-raichu-steelix-sandstorm	RECOVER	opponent	swap	3401	265	body 183	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-recover-opponent-raichu-steelix-sandstorm	SANDSTORM	player	plain	4080	167	body 166	presented false	px 428271/428271	identical true	bad 0..166	k+1 -
+att	audit23-self-recover-opponent-raichu-steelix-sandstorm	SANDSTORM	player	plain	5459	167	body 166	presented false	px 428271/428271	identical true	bad 0..166	k+1 -
+att	audit23-self-recover-player-girafarig-magcargo	RECOVER	player	swap	1766	269	body 183	presented true	px 0/0	identical true	bad -	k+1 0
+att	audit23-self-recover-player-miltank-aerodactyl-sandstorm	SANDSTORM	opponent	plain	351	168	body 167	presented false	px 289313/289313	identical true	bad 0..167	k+1 -
+att	audit23-self-recover-player-miltank-aerodactyl-sandstorm	RECOVER	player	swap	1764	269	body 183	presented true	px 0/0	identical true	bad -	k+1 200
+att	audit23-self-recover-player-miltank-aerodactyl-sandstorm	RECOVER	player	swap	3462	269	body 183	presented true	px 0/0	identical true	bad -	k+1 200
+att	audit23-self-recover-player-miltank-aerodactyl-sandstorm	RECOVER	player	swap	5160	269	body 183	presented true	px 0/0	identical true	bad -	k+1 200
+att	audit23-self-recover-player-miltank-aerodactyl	RECOVER	player	swap	1764	269	body 183	presented true	px 0/0	identical true	bad -	k+1 200
+def	audit23-def-psych-up-opponent-espeon-snorlax	PSYCH_UP	opponent	control	71	179	shift 0	live true	px 0/0	identical true	bad -
+def	audit23-def-psych-up-opponent-yanma-pichu	PSYCH_UP	opponent	control	70	179	shift 0	live true	px 0/0	identical true	bad -
+def	audit23-def-psych-up-player-hitmontop-butterfree	PSYCH_UP	player	control	70	179	shift 0	live true	px 0/0	identical true	bad -
+def	audit23-def-psych-up-player-raichu-steelix	PSYCH_UP	player	control	67	179	shift 0	live true	px 0/0	identical true	bad -
+def	audit23-def-psych-up-opponent-espeon-snorlax	PSYCH_UP	opponent	test	1737	179	shift 0	live true	px 0/0	identical true	bad -
+def	audit23-def-psych-up-opponent-yanma-pichu	PSYCH_UP	opponent	test	1736	179	shift 0	live true	px 0/0	identical true	bad -
+def	audit23-def-psych-up-player-hitmontop-butterfree	PSYCH_UP	player	test	1736	179	shift 0	live true	px 0/0	identical true	bad -
+def	audit23-def-psych-up-player-raichu-steelix	PSYCH_UP	player	test	1733	179	shift 0	live true	px 0/0	identical true	bad -

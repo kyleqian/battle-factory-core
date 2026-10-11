@@ -1,0 +1,56 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "PSYCH_UP",
+ "moveId": 244,
+ "kind": "test",
+ "stem": "audit23-def-psych-up-opponent-yanma-pichu",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/prep38/scenarios/audit23-def-psych-up-opponent-yanma-pichu.json",
+ "denseWindow": {
+  "startFrame": 1736,
+  "endFrame": 1914
+ },
+ "attacker": {
+  "species": "YANMA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "PICHU",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 96,
+  "playerMaxHp": 127,
+  "opponentHp": 172,
+  "opponentMaxHp": 172,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 244,
+   "side": "opponent"
+  },
+  {
+   "moveId": 164,
+   "side": "player"
+  }
+ ],
+ "nonMoveBodiesBefore": [
+  "General_StatsChange"
+ ],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 31,
+  "tiles": "22a6f54c07e2"
+ }
+}

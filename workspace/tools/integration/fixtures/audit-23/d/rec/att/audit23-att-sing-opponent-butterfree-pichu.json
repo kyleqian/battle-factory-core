@@ -1,0 +1,143 @@
+{
+ "schema": "attdoll-check/v1",
+ "results": [
+  {
+   "stem": "audit23-att-sing-opponent-butterfree-pichu",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "SING",
+   "moveId": 47,
+   "turn": 0,
+   "frame": 1741,
+   "activation": 1782,
+   "window": [
+    1741,
+    2057
+   ],
+   "rows": 317,
+   "swapInRows": 40,
+   "romBodyRows": 235,
+   "swapBackRows": 40,
+   "orderInput": "fixture",
+   "pinnedRng2": 470713256,
+   "adapterDuration": 248,
+   "multihit": 0,
+   "productionDuration": 317,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 246,
+    "shift": 0
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 317,
+    "digests": [
+     "81d6a4d40039fd60",
+     "81d6a4d40039fd60"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  },
+  {
+   "stem": "audit23-att-sing-opponent-butterfree-pichu",
+   "kind": "swap",
+   "side": "opponent",
+   "move": "SING",
+   "moveId": 47,
+   "turn": 0,
+   "frame": 5073,
+   "activation": 5114,
+   "window": [
+    5073,
+    5389
+   ],
+   "rows": 317,
+   "swapInRows": 40,
+   "romBodyRows": 235,
+   "swapBackRows": 40,
+   "orderInput": "fixture",
+   "pinnedRng2": 2600268331,
+   "adapterDuration": 248,
+   "multihit": 0,
+   "productionDuration": 317,
+   "swapPresented": true,
+   "cell": true,
+   "framing": {
+    "rows": 246,
+    "shift": 0
+   },
+   "prod": {
+    "px": [
+     0,
+     0
+    ],
+    "exactRows": 317,
+    "digests": [
+     "81d6a4d40039fd60",
+     "81d6a4d40039fd60"
+    ],
+    "identical": true,
+    "badAges": [],
+    "maxPxRow": 0,
+    "firstBad": []
+   },
+   "romChangesAfter": [
+    679,
+    679,
+    0,
+    0,
+    0
+   ],
+   "tail": {
+    "rowK1": {
+     "production": [
+      0,
+      0
+     ],
+     "withoutLatch": [
+      679,
+      679
+     ]
+    },
+    "rowK2": {
+     "production": [
+      0,
+      0
+     ]
+    }
+   }
+  }
+ ]
+}

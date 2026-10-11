@@ -1,0 +1,4 @@
+audit23-def-psych-up-player-raichu-steelix control=67..245(179) test=1733..1911(179)
+audit23-def-psych-up-player-hitmontop-butterfree control=70..248(179) test=1736..1914(179)
+audit23-def-psych-up-opponent-espeon-snorlax control=71..249(179) test=1737..1915(179)
+audit23-def-psych-up-opponent-yanma-pichu control=70..248(179) test=1736..1914(179)

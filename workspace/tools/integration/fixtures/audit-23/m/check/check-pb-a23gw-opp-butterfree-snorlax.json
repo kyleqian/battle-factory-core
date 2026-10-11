@@ -1,0 +1,347 @@
+{
+ "schema": "audit23-chain-check/v1",
+ "scenario": "pb-a23gw-opp-butterfree-snorlax",
+ "rows": [
+  {
+   "fixture": "pb-a23gw-opp-butterfree-snorlax-c0.json",
+   "move": "GRASS_WHISTLE",
+   "side": "opponent",
+   "species": "BUTTERFREE/SNORLAX",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "320@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0,
+    "damage": 0,
+    "friendship": 70,
+    "multihit": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 84,
+    "endFrame": 308,
+    "ageOffset": 0,
+    "bodyStartFrame": 84,
+    "bodyEndFrame": 304
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 225,
+    "exactRows": 225,
+    "px": 0,
+    "digests": [
+     "446a0c2183b9381d",
+     "446a0c2183b9381d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 225,
+    "exactRows": 225,
+    "px": 0,
+    "digests": [
+     "446a0c2183b9381d",
+     "446a0c2183b9381d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a23gw-opp-butterfree-snorlax-c2.json",
+   "move": "GRASS_WHISTLE",
+   "side": "opponent",
+   "species": "BUTTERFREE/SNORLAX",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "320@1 status:SLP@0 status:SLP@0",
+    "status:SLP@0",
+    "status:SLP@0",
+    "150@0",
+    "320@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0,
+    "damage": 0,
+    "friendship": 70,
+    "multihit": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 5420,
+    "endFrame": 5644,
+    "ageOffset": 0,
+    "bodyStartFrame": 5420,
+    "bodyEndFrame": 5640
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 225,
+    "exactRows": 225,
+    "px": 0,
+    "digests": [
+     "446a0c2183b9381d",
+     "446a0c2183b9381d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 225,
+    "exactRows": 225,
+    "px": 0,
+    "digests": [
+     "446a0c2183b9381d",
+     "446a0c2183b9381d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a23gw-opp-butterfree-snorlax-c4.json",
+   "move": "GRASS_WHISTLE",
+   "side": "opponent",
+   "species": "BUTTERFREE/SNORLAX",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3,
+     3,
+     4
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "320@1 status:SLP@0 status:SLP@0",
+    "status:SLP@0",
+    "status:SLP@0",
+    "150@0",
+    "320@1 status:SLP@0 status:SLP@0",
+    "150@0",
+    "320@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0,
+    "damage": 0,
+    "friendship": 70,
+    "multihit": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 8088,
+    "endFrame": 8312,
+    "ageOffset": 0,
+    "bodyStartFrame": 8088,
+    "bodyEndFrame": 8308
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 225,
+    "exactRows": 225,
+    "px": 0,
+    "digests": [
+     "446a0c2183b9381d",
+     "446a0c2183b9381d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 225,
+    "exactRows": 225,
+    "px": 0,
+    "digests": [
+     "446a0c2183b9381d",
+     "446a0c2183b9381d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  }
+ ]
+}
