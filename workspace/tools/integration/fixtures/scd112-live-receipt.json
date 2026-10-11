@@ -4770,5 +4770,111 @@
    "ok": true
   }
  },
- "census": null
+ "census": {
+  "shards": {
+   "0": {
+    "commands": 2680,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "1": {
+    "commands": 2654,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "2": {
+    "commands": 2636,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "3": {
+    "commands": 2643,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "4": {
+    "commands": 3222,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "5": {
+    "commands": 2801,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "6": {
+    "commands": 2409,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "7": {
+    "commands": 2807,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "8": {
+    "commands": 2921,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "9": {
+    "commands": 2740,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   }
+  },
+  "commands": 27513,
+  "keyMismatches": 0,
+  "statusChanges": 0,
+  "frameChanges": 0,
+  "otherFieldChanges": 0,
+  "digestMismatches": 0,
+  "statsRows": 5552,
+  "statsRowMismatches": 0,
+  "framesBase": 14946997,
+  "framesFinal": 14946997,
+  "presentedStatsChange": 3667,
+  "presentedStatsChangeRows": 298348,
+  "identical": true
+ }
 }
