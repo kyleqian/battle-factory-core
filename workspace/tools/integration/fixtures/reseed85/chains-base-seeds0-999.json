@@ -1,0 +1,98 @@
+{
+ "schema": "hist73-allocator-chains/v1",
+ "declines": 52,
+ "fallbackFrames": 5145,
+ "chainLength": {
+  "1": 1,
+  "2": 48,
+  "4": 3
+ },
+ "units": [
+  {
+   "unit": "command party-summary",
+   "involvedCommands": 51,
+   "involvedFrames": 5066,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "command switch-in",
+   "involvedCommands": 51,
+   "involvedFrames": 5066,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "body GUST (no plan, not net-zero)",
+   "involvedCommands": 2,
+   "involvedFrames": 152,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "body TRANSFORM (no plan, not net-zero)",
+   "involvedCommands": 2,
+   "involvedFrames": 152,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "command sprite-visibility recall",
+   "involvedCommands": 1,
+   "involvedFrames": 123,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "command switch-out",
+   "involvedCommands": 1,
+   "involvedFrames": 123,
+   "soloCommands": 0,
+   "soloFrames": 0
+  },
+  {
+   "unit": "body STRUGGLE (no plan, not net-zero)",
+   "involvedCommands": 1,
+   "involvedFrames": 79,
+   "soloCommands": 1,
+   "soloFrames": 79
+  }
+ ],
+ "greedy": [
+  {
+   "add": "body STRUGGLE (no plan, not net-zero)",
+   "cumulativeCommands": 1,
+   "cumulativeFrames": 79
+  },
+  {
+   "add": "command switch-in",
+   "cumulativeCommands": 1,
+   "cumulativeFrames": 79
+  },
+  {
+   "add": "command party-summary",
+   "cumulativeCommands": 49,
+   "cumulativeFrames": 4870
+  },
+  {
+   "add": "body TRANSFORM (no plan, not net-zero)",
+   "cumulativeCommands": 49,
+   "cumulativeFrames": 4870
+  },
+  {
+   "add": "body GUST (no plan, not net-zero)",
+   "cumulativeCommands": 51,
+   "cumulativeFrames": 5022
+  },
+  {
+   "add": "command switch-out",
+   "cumulativeCommands": 51,
+   "cumulativeFrames": 5022
+  },
+  {
+   "add": "command sprite-visibility recall",
+   "cumulativeCommands": 52,
+   "cumulativeFrames": 5145
+  }
+ ]
+}
