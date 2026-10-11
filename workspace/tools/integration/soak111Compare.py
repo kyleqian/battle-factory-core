@@ -8,7 +8,8 @@
   dec+off108  this tree + off108-scene-off-pauses.diff
   cpl       the coupled base driver (cd84c00fe) -- control
   cpl+off108  the coupled base + the same patch -- control
-Per seed and pair: decision log identical (non-mash notes, frame dropped),
+Per seed and pair: decision log identical (non-mash notes, frame dropped,
+consecutive duplicates collapsed), exact decision log identical (uncollapsed),
 canonical log identical (all notes, frame dropped, mash runs collapsed),
 gameplay identical (outcome / endState / battle / turn / error), frames a / b.
 """
@@ -31,6 +32,8 @@ def pair(a_name, b_name):
         rows.append({
             "seed": seed,
             "decisionLogIdentical": ra["decisionsSha256"] == rb["decisionsSha256"],
+            "exactDecisionLogIdentical": ra["exactDecisionsSha256"] == rb["exactDecisionsSha256"],
+            "exactDecisionNotes": [ra["exactDecisionNotes"], rb["exactDecisionNotes"]],
             "canonicalLogIdentical": ra["canonicalSha256"] == rb["canonicalSha256"],
             "gameplayIdentical": all(ra[k] == rb[k] for k in ("outcome", "endState", "battle", "turn", "errorMessage")),
             "decisionNotes": [ra["decisionNotes"], rb["decisionNotes"]],
@@ -43,6 +46,7 @@ def pair(a_name, b_name):
     summary = {
         "seeds": len(rows),
         "decisionLogIdentical": sum(r["decisionLogIdentical"] for r in rows),
+        "exactDecisionLogIdentical": sum(r["exactDecisionLogIdentical"] for r in rows),
         "canonicalLogIdentical": sum(r["canonicalLogIdentical"] for r in rows),
         "gameplayIdentical": sum(r["gameplayIdentical"] for r in rows),
         "framesDiffer": sum(r["frames"][0] != r["frames"][1] for r in rows),

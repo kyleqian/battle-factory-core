@@ -5,7 +5,10 @@
 // note through the `onNote` seam, and writes per seed:
 // (the per-seed logs cover the first round only: notes at frame <= the
 // reported snapshot frame; the raw frames file keeps every note)
-//   <logs-dir>/seed-<n>.decisions.txt  every NON-mash note, "b<battle> t<turn> <what>" (frame dropped)
+//   <logs-dir>/seed-<n>.decisions.txt  every NON-mash note, "b<battle> t<turn> <what>" (frame dropped),
+//                                      consecutive identical notes collapsed (a re-press of an input
+//                                      already decided whose first press was dropped); the summary also
+//                                      carries the exact uncollapsed sequence's sha256
 //   <logs-dir>/seed-<n>.canonical.txt  every note, frame dropped, mash " (B)" dropped, consecutive
 //                                      identical mash notes collapsed to one
 //   <logs-dir>/seed-<n>.frames.txt     "<frame> <what>" for every note (raw, frame-bearing)
@@ -55,6 +58,7 @@ for (const seed of seeds) {
     stopAtFirstRoundDecision: true,
     onNote: (n) => notes.push({ ...n }),
   });
+  const exact: string[] = [];
   const decisions: string[] = [];
   const canonical: string[] = [];
   let lastMash: string | null = null;
@@ -74,8 +78,11 @@ for (const seed of seeds) {
     }
     lastMash = null;
     const line = `b${n.battle} t${n.turn} ${n.what}`;
-    decisions.push(line);
-    canonical.push(line);
+    exact.push(line);
+    // A repeated identical decision note is a re-press of an input already
+    // decided (the first press was dropped before the surface was ready).
+    if (decisions[decisions.length - 1] !== line) decisions.push(line);
+    if (canonical[canonical.length - 1] !== line) canonical.push(line);
   }
   const decisionsText = decisions.join("\n") + "\n";
   const canonicalText = canonical.join("\n") + "\n";
@@ -95,6 +102,8 @@ for (const seed of seeds) {
     mashNotes: mash,
     decisionNotes: decisions.length,
     canonicalLines: canonical.length,
+    exactDecisionNotes: exact.length,
+    exactDecisionsSha256: sha(exact.join("\n") + "\n"),
     decisionsSha256: sha(decisionsText),
     canonicalSha256: sha(canonicalText),
   };
