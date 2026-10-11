@@ -550,7 +550,12 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
  * re-shows it when the script ends (one display frame later), and these accepted windows extend 2 frames past the script
  * end (docs/live-species-audit-2.md 2.1). Any adapter whose window ends after the script end needs its own entry.
  */
-export const LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS: Readonly<Record<number, number>> = Object.freeze({ 113: 2, 248: 2 });
+export const LIVE_MOVE_OPPONENT_SHADOW_RETURN_ROWS: Readonly<Record<number, number>> = Object.freeze({
+  113: 2, 248: 2,
+  // ctl95: GrassWhistle's 225-row window runs 5 rows past its 220-row script (220 on every probe, geometry-independent), so the shadow is
+  // back on rows 221..224 (doll-free elevated GOLBAT opponent control: 200 px on each otherwise, both bodies).
+  320: GRASS_WHISTLE_WINDOW_FRAMES - 221,
+});
 
 /**
  * Interior rows [first, last] of a live window on which the elevated-opponent shadow is shown between the move script's end and
