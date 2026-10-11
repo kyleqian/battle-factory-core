@@ -1,0 +1,44 @@
+{
+ "commands": 27480,
+ "harden": {
+  "total": 38,
+  "live": 38,
+  "opponentSide": 16,
+  "opponentAttackers": {
+   "RELICANTH": 16
+  },
+  "opponentWithNonzeroIdleRest": 0
+ },
+ "taunt": {
+  "total": 28,
+  "live": 28,
+  "opponentAttackerCommands": 18,
+  "battles": 11,
+  "pairs": {
+   "MIGHTYENA>BELLOSSOM": 1,
+   "MIGHTYENA>KABUTOPS": 2,
+   "MIGHTYENA>ROSELIA": 1,
+   "MURKROW>LICKITUNG": 2,
+   "MURKROW>MACHOKE": 1,
+   "MURKROW>MANTINE": 1,
+   "MURKROW>MIGHTYENA": 2,
+   "MURKROW>PERSIAN": 1,
+   "MURKROW>PILOSWINE": 2,
+   "MURKROW>PRIMEAPE": 1,
+   "MURKROW>SPINDA": 1,
+   "MURKROW>STANTLER": 3
+  }
+ },
+ "swagger": {
+  "total": 127,
+  "live": 127
+ },
+ "meanLook": {
+  "total": 27,
+  "live": 27
+ },
+ "substitute": {
+  "total": 47,
+  "live": 47
+ }
+}

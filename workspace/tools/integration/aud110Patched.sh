@@ -23,5 +23,5 @@ NAMES=$(ls "$OUT"/$FX/*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 
 cd "$OUT/copy"
 echo "$NAMES" | OUT=$OUT CHECK=$CHECK FX=$FX xargs -n 1 -P 6 sh -c 'node --experimental-strip-types --no-warnings tools/integration/$CHECK.ts "$OUT/$FX" "$0" "$OUT/check/check-$0.json" > "$OUT/check/$0.log" 2>&1 || echo "FAILED $0"'
 cd "$ROOT"
-python3 tools/integration/audit20Summary.py "$OUT/check" > "$OUT/all-bodies-summary.txt"
-tail -3 "$OUT/all-bodies-summary.txt"
+python3 tools/integration/aud110Summary.py "$OUT/check" > "$OUT/summary.txt"
+tail -6 "$OUT/summary.txt"

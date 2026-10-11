@@ -1,0 +1,71 @@
+pb-aud110-harden-143-362-c0        HARDEN     player   SNORLAX/DUSCLOPS   live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-harden-143-362-c1        HARDEN     opponent DUSCLOPS/SNORLAX   live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-harden-143-362-c2        HARDEN     player   SNORLAX/DUSCLOPS   live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-harden-143-362-c3        HARDEN     opponent DUSCLOPS/SNORLAX   live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-harden-93-95-c0          HARDEN     player   HAUNTER/ONIX       live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-harden-93-95-c1          HARDEN     opponent ONIX/HAUNTER       live=1 rows=101 exact=0   px=109067  r1==r2=1 ages=0..39(40) entry=109067
+pb-aud110-harden-93-95-c2          HARDEN     player   HAUNTER/ONIX       live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-harden-93-95-c3          HARDEN     opponent ONIX/HAUNTER       live=1 rows=101 exact=0   px=109067  r1==r2=1 ages=0..39(40) entry=109067
+pb-aud110-harden-99-169-c0         HARDEN     player   KINGLER/CROBAT     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-harden-99-169-c1         HARDEN     opponent CROBAT/KINGLER     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-harden-99-169-c2         HARDEN     player   KINGLER/CROBAT     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-harden-99-169-c3         HARDEN     opponent CROBAT/KINGLER     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-meanlook-opp-169-99-c0   MEAN_LOOK  opponent CROBAT/KINGLER     live=1 rows=171 exact=171 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-meanlook-opp-169-99-c1   HARDEN     player   KINGLER/CROBAT     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-meanlook-opp-169-99-c2   HARDEN     player   KINGLER/CROBAT     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-meanlook-ply-65-143-c0   MEAN_LOOK  player   ALAKAZAM/SNORLAX   live=1 rows=171 exact=171 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-meanlook-ply-65-143-c1   HARDEN     opponent SNORLAX/ALAKAZAM   live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-meanlook-ply-65-143-c2   HARDEN     opponent SNORLAX/ALAKAZAM   live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-substitute-opp-362-213-c0 SUBSTITUTE opponent DUSCLOPS/SHUCKLE   live=1 rows=87  exact=87  px=0       r1==r2=1 ages=- entry=0
+pb-aud110-substitute-opp-362-213-c1 HARDEN     player   SHUCKLE/DUSCLOPS   live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=143218
+pb-aud110-substitute-opp-362-213-c2 HARDEN     player   SHUCKLE/DUSCLOPS   live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=143218
+pb-aud110-substitute-ply-99-169-c0 SUBSTITUTE player   KINGLER/CROBAT     live=1 rows=87  exact=87  px=0       r1==r2=1 ages=- entry=0
+pb-aud110-substitute-ply-99-169-c1 HARDEN     opponent CROBAT/KINGLER     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=196344
+pb-aud110-substitute-ply-99-169-c2 HARDEN     opponent CROBAT/KINGLER     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=196344
+pb-aud110-swagger-opp-169-99-c0    SWAGGER    opponent CROBAT/KINGLER     live=1 rows=161 exact=116 px=75383   r1==r2=1 ages=3..42(40) entry=75383
+pb-aud110-swagger-opp-169-99-c1    SWAGGER    opponent CROBAT/KINGLER     live=1 rows=161 exact=116 px=75383   r1==r2=1 ages=3..42(40) entry=75383
+pb-aud110-swagger-ply-65-143-c0    SWAGGER    player   ALAKAZAM/SNORLAX   live=1 rows=161 exact=120 px=65847   r1==r2=1 ages=3..45(40) entry=65847
+pb-aud110-swagger-ply-65-143-c1    SWAGGER    player   ALAKAZAM/SNORLAX   live=1 rows=161 exact=120 px=65847   r1==r2=1 ages=3..45(40) entry=65847
+pb-aud110-taunt-opp-169-99-c0      TAUNT      opponent CROBAT/KINGLER     live=1 rows=125 exact=99  px=568     r1==r2=1 ages=75..117(26) entry=568
+pb-aud110-taunt-opp-362-213-c0     TAUNT      opponent DUSCLOPS/SHUCKLE   live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-taunt-opp-95-42-c0       TAUNT      opponent ONIX/GOLBAT        live=1 rows=125 exact=108 px=304     r1==r2=1 ages=75..91(17) entry=304
+pb-aud110-taunt-ply-65-143-c0      TAUNT      player   ALAKAZAM/SNORLAX   live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-taunt-ply-93-95-c0       TAUNT      player   HAUNTER/ONIX       live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud110-taunt-ply-99-169-c0      TAUNT      player   KINGLER/CROBAT     live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-143-303-c0           TAUNT      player   SHEDINJA/SNORLAX   live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-143-42-sub-c0        TAUNT      player   GOLBAT/SNORLAX     live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-143-42-sub-c1        SUBSTITUTE player   GOLBAT/SNORLAX     live=1 rows=87  exact=87  px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-143-42-sub-c3        HARDEN     opponent SNORLAX/GOLBAT     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=176447
+pb-stg107-opp-143-42-sub-c4        HARDEN     opponent SNORLAX/GOLBAT     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=176447
+pb-stg107-opp-143-42-sub-c5        HARDEN     opponent SNORLAX/GOLBAT     live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=176447
+pb-stg107-opp-143-95-c0            TAUNT      player   ONIX/SNORLAX       live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-143-95-c2            TAUNT      player   ONIX/SNORLAX       live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-303-42-c0            TAUNT      player   GOLBAT/SHEDINJA    live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-42-135-c0            TAUNT      player   JOLTEON/GOLBAT     live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-42-135-c2            TAUNT      player   JOLTEON/GOLBAT     live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-pp-95-362-c0         MEAN_LOOK  opponent ONIX/DUSCLOPS      live=1 rows=171 exact=171 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-pp-95-362-c1         HARDEN     player   DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-pp-95-362-c2         HARDEN     player   DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-pp-95-362-c3         HARDEN     player   DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-pp-95-362-c5         HARDEN     player   DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-pp-95-362-c7         HARDEN     player   DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-opp-pp-95-362-c9         HARDEN     player   DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-143-303-c0           TAUNT      opponent SHEDINJA/SNORLAX   live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-213-143-c0           TAUNT      opponent SNORLAX/SHUCKLE    live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-213-143-c2           TAUNT      opponent SNORLAX/SHUCKLE    live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-303-42-c0            TAUNT      opponent GOLBAT/SHEDINJA    live=1 rows=125 exact=108 px=283     r1==r2=1 ages=107..123(17) entry=283
+pb-stg107-ply-95-42-c0             TAUNT      opponent GOLBAT/ONIX        live=1 rows=125 exact=94  px=216     r1==r2=1 ages=75..123(31) entry=216
+pb-stg107-ply-95-42-c2             TAUNT      opponent GOLBAT/ONIX        live=1 rows=125 exact=94  px=216     r1==r2=1 ages=75..123(31) entry=216
+pb-stg107-ply-pp-95-362-c0         MEAN_LOOK  player   ONIX/DUSCLOPS      live=1 rows=171 exact=171 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-pp-95-362-c1         HARDEN     opponent DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-pp-95-362-c2         HARDEN     opponent DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-pp-95-362-c3         HARDEN     opponent DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-pp-95-362-c5         HARDEN     opponent DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-pp-95-362-c7         HARDEN     opponent DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-stg107-ply-pp-95-362-c9         HARDEN     opponent DUSCLOPS/ONIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+TOTAL HARDEN     windows=35 chain-0px=33 r1==r2=35
+TOTAL MEAN_LOOK  windows=4 chain-0px=4 r1==r2=4
+TOTAL SUBSTITUTE windows=3 chain-0px=3 r1==r2=3
+TOTAL SWAGGER    windows=4 chain-0px=0 r1==r2=4
+TOTAL TAUNT      windows=19 chain-0px=14 r1==r2=19
+not listed: STRUGGLE=25
