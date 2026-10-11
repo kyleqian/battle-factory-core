@@ -1,0 +1,44 @@
+{
+ "schema": "scan93-live-adapter-fixture/v1",
+ "move": "EXTRASENSORY",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/scan93/scenarios/xs-pla-nuzleaf-shuckle-psywave.json",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 240
+ },
+ "attacker": {
+  "species": "NUZLEAF",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349019075,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 177,
+  "playerMaxHp": 177,
+  "opponentHp": 127,
+  "opponentMaxHp": 127,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "timingPhase": "no-event",
+ "timingPhases": {
+  "optional-lag-age": "no-event",
+  "scanline-split-line": "no-event"
+ }
+}

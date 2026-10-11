@@ -1,0 +1,45 @@
+{
+ "schema": "scan93-live-adapter-fixture/v1",
+ "move": "MEMENTO",
+ "bodyIndex": 0,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/scan93/scenarios/xs-opp-nuzleaf-shuckle-memento.json",
+ "denseWindow": {
+  "startFrame": 345,
+  "endFrame": 526
+ },
+ "attacker": {
+  "species": "SHUCKLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "NUZLEAF",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2654435850,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 0,
+  "playerMaxHp": 127,
+  "opponentHp": 177,
+  "opponentMaxHp": 177,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0
+ },
+ "precedingBodies": [
+  {
+   "moveId": 326,
+   "side": "opponent"
+  }
+ ]
+}
