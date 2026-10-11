@@ -1,5 +1,33 @@
 # Animation integration progress
 
+## 2026-10-11 (afternoon, in progress) — S10A: Struggle + stats-change first (supervisor ledger, updated per fold)
+
+- Session start: master `52c181d54`, production src `14d1be159` == the 2026-10-10 night final gates' tree -> baseline receipt reused.
+  Oracle services (2026-10-06) postdate the last `oracle/` commit (2026-08-15); the freshness script's FAIL compares against any HEAD
+  commit (docs-only) and is a false positive.
+- off108 (MAIN lane, Opus, new files only, `54eb4d9b8` .. `069225252`): ISSUES #167 anchors. Scene OFF no-hit pause rule
+  P = Δ(N) + lead(N) - D_between exact on 16 / 16 classes (Rest open); the MoveMissedPause is LOST in both scenes (ROM "missed" first
+  glyph G+37, production G+1). Banked `off108-scene-off-pauses.diff`; census OFF +9,717 pauses / +7,386 holds, ON 0 changes. New
+  finding: Scene OFF `status` command is 32 frames where the ROM takes 2. Supervisor: off108Run.sh into a fresh dir ALL SAME.
+- stg107 (SIDE, Opus, new files only; merged `5c050b765`): Struggle 165 source table, real forced-Struggle routes (Taunt on an
+  all-status set; PP exhaustion vs Pressure), 19 ROM windows r1 == r2, banked live adapter `stg107-struggle.diff` (new
+  src/animation/struggle.ts + the MOVEMENT_WAVES asset): 15 / 15 live windows 0 px on every row; census on the patched copy 95.38 / 98.72
+  -> 98.80 / 99.27 % (884 / 1,033 Struggle live; declines: lend unknown 106, attacker doll 24, defender doll 19). Supervisor:
+  STG107_PATCH=1 stg107Run.sh into a fresh dir — every receipt same, 15 live 0 px, 19 r1 == r2.
+- sc106 (INTEGRATION, Opus, `563eebd0a` .. `cd84c00fe`) + soak111 (INTEGRATION, Opus, stacked, .. `e2853fca2`), merged `1cfac3f7f`
+  (src `94a7f48b3`): ISSUES #166 slice (c) — a `stats-change` command per played STATS_CHANGE (76 / 90 frames, both scenes; none behind a
+  displayed doll; none right after a live Double Team body, whose window owns the banner — that window still ends 9 rows before the ROM's
+  next message, pre-existing). Census 0..999: 0 move status changes, +3,667 commands / +298,348 frames (= stat101's 4,529 played - 862
+  live-DT exemptions). sc106 broke 4 randomRoundSoak pins: the soak's RandomPlayer drew press cooldowns from its decision stream, so any
+  presentation-length change re-rolled its games. soak111 split the press stream (plus four input-dead-press fixes the proof exposed):
+  17 / 17 seeds identical decisions with the off108 patch applied (old driver 0 / 17); pins re-pinned; ISSUES #89 coverage moved from
+  seed 27 (lost before sc106) to natural seed 226. Gates on `2959af3d9` (== merge code + master's new tool files): full suite 0 failed,
+  typecheck, smoke 448, build, soak gates vanilla 0:20 20 / 20, full 0:20 20 / 20, winning vary-rng 0:30 30 / 30. Supervisor: sc106
+  production diff reviewed; soak111Run.sh into a fresh dir ALL SAME.
+- Live audit 25 (aud110, MAIN lane, Sonnet, new files only): stg107's Taunt / Harden flags are window-alignment ARTIFACTS; widening
+  found 3 live DEFECTS with banked patches (Taunt marks behind a player target, Harden ignores an opponent attacker's idle rest, Swagger
+  hard-codes RATTATA's picture height) -> fix114.
+
 ## 2026-10-11 — User-directed Struggle inclusion (docs only)
 
 The user explicitly included Struggle 165 in S10A after reviewing its roadmap exclusion. It is the first next-run animation task,
