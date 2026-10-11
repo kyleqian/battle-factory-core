@@ -106,7 +106,9 @@ for name, d in SOURCES:
                 fx = {
                     "schema": "flat84-chain-fixture/v1", "move": NAMES[move], "bodyIndex": k,
                     "probe": "tools/integration/flat77Probe.py", "scenario": str(SCEN / d["scenario"]),
-                    "denseWindow": {"startFrame": b["startFrame"], "endFrame": b["endFrame"]},
+                    # SPARK 209: the adapter's age 0 is activation + 9 for 115 rows (liveMoveAnimationDuration case 209; spark62)
+                    "denseWindow": {"startFrame": b["startFrame"] + 9, "endFrame": b["startFrame"] + 9 + 114} if move == 209
+                    else {"startFrame": b["startFrame"], "endFrame": b["endFrame"]},
                     "attacker": {"species": SPECIES[at[atk]["species"]], "geometry": {"side": side}},
                     "target": {"species": SPECIES[at[other]["species"]], "geometry": {"side": "opponent" if side == "player" else "player"}},
                     "attackerPersonality": at[atk]["personality"],

@@ -5,8 +5,8 @@
  "probe": "tools/integration/flat77Probe.py",
  "scenario": "tools/integration/fixtures/flat84/scenarios/c-spark-opp.json",
  "denseWindow": {
-  "startFrame": 905,
-  "endFrame": 1030
+  "startFrame": 914,
+  "endFrame": 1028
  },
  "attacker": {
   "species": "NIDORINA",
