@@ -86,9 +86,26 @@ seam and injects nothing.
 Totals: 237 seeds, 15 hits. No seed threw and every run ended OK. The pin uses seed 226 because its halt lies before the reported
 first-round snapshot, so `stopAtFirstRoundDecision`'s endState is the round that went through the halt.
 
-## 5. Gates
+## 5. Gates (code tested = `2959af3d9`; later commits are docs only)
 
-(Filled in by the gate commit, below.)
+- `npx vitest run` over the 7 soak test files (randomRoundSoak, randomRoundSoakParallel, CombinedDraft, Coverage, CoverageDraft,
+  CoverageFight, OracleStrength; 4 workers): **7 files / 109 tests passed**.
+- `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
+- Full suite, two nohup shards run one after the other (4 workers):
+  - shard 1: **814 files passed (22 skipped), 6,992 tests passed (119 skipped)**;
+  - shard 2: **814 files passed (22 skipped), 6,406 tests passed (104 skipped)**. On sc106 this shard had 813 passed and 1 failed,
+    with the 4 randomRoundSoak pins failing; it is now all green.
+- `npm run build`: green.
+- Soak gates:
+  - `npm run soak -- --policy vanilla --seeds 0:20 --parallel 5`: **OK 20 / 20** (CRASH 0, HANG 0, all 20 `budget`), 605 s. I
+    started the serial form and stopped it after seed 0 (OK, budget, 131.7 s), because 20 serial 600k-frame seeds (~44 min) would
+    not fit the session cap. Seeds are independent `runSeed` calls, and tests/randomRoundSoakParallel.test.ts pins serial ==
+    parallel.
+  - `npm run soak -- --seeds 0:20 --parallel 3`: **OK 20 / 20** (CRASH 0, HANG 0, all 20 `budget`), 1,027 s.
+  - `npm run soak -- --policy winning --vary-rng --first-round --start-carry 0 --seeds 0:30 --render-every 0 --parallel 2`:
+    **OK 30 / 30** (CRASH 0, HANG 0, budget 0; 21 roundLost, 9 roundComplete), 25 s.
+- `sh tools/integration/soak111Run.sh <fresh>` on the final tree: **ALL SAME**.
+- `git diff --check`: clean.
 
 ## 6. Reproduction (from workspace/)
 
