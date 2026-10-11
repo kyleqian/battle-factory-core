@@ -124,6 +124,10 @@ for (const stem of stems) {
       // BattleScriptFirstChargingTurn prints STRINGID_EMPTYSTRING3 (no "used X!") before a two-turn move's first-turn body
       ...(["DIG", "SOLAR_BEAM", "FLY"].includes(move) && turn === 0 ? { messageLines: ["", ""] } : {}),
       presentationRngActivation: { value: unstep(rows[a + 1]!.rng2), source: "prep40Probe.py gRng2Value at activation + 1, stepped back once" },
+      // doll90: --personalities=<dir> (doll90Personality.py RAM reads, <stem>-r1.json): the attacker's real party personality (Double
+      // Team's player clone phase derives from its nature; production's field always carries it). Absent = no personality (as before).
+      ...(opt.personalities && existsSync(`${opt.personalities}/${stem}-r1.json`)
+        ? { attackerPersonality: JSON.parse(readFileSync(`${opt.personalities}/${stem}-r1.json`, "utf8"))[side][0].personality } : {}),
     } as Fixture;
     let orderInput = "fixture";
     const withOrder = <T>(fn: () => T): T => {
@@ -188,6 +192,12 @@ for (const stem of stems) {
     const prodCache = new Map<number, Uint8Array>();
     const prodAt = (age: number) => prodCache.get(age) ?? (prodCache.set(age, renderAt(age)), prodCache.get(age)!);
     entry.prod = measure(prodAt);
+    // doll90: --emit=<dir> writes each presented swap window as a compact Tier-1 fixture (the fixture + attacker + the ROM RGB sha256
+    // of every window row, run 1; r1 == r2 is entry.prod.identical), re-rendered by tools/integration/doll90AttFixture.ts.
+    if (opt.emit && kind === "swap" && entry.swapPresented && entry.prod && (entry.prod as { identical: boolean }).identical) {
+      writeFileSync(`${opt.emit}/${stem}-${rows[i]!.frame}.json`, JSON.stringify({ schema: "doll90-attdoll-fixture/v1", stem,
+        window: entry.window, attacker, fixture, rows: window.map((row, age) => [age, row.frame, row.sha256]) }) + "\n");
+    }
     entry.romChangesAfter = [0, 1, 2, 3, 4].map((n) => {
       try { const x = diff(rgbOf(runs[0]!.rgb, rows[k + n]!), (() => { const b = rgbOf(runs[0]!.rgb, rows[k + n + 1]!); const o = new Uint8Array(240 * 160 * 4); for (let p = 0; p < 240 * 160; p++) { o[p * 4] = b[p * 3]!; o[p * 4 + 1] = b[p * 3 + 1]!; o[p * 4 + 2] = b[p * 3 + 2]!; } return o; })()); return x.px; } catch { return null; }
     });

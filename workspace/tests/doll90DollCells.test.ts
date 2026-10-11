@@ -5,6 +5,11 @@ import type { BattleResolutionDisplayedField } from "../src/engine/battleResolut
 import { createBattleCommandFieldArtView } from "../src/engine/battleCommandFieldArt.ts";
 import { renderBattleResolutionLiveView, renderBattleResolutionSceneOffView } from "../src/engine/battleScene.ts";
 import { LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveMoveAnimationDuration, liveMoveSubstituteDollDeclines } from "../src/engine/liveMoveAnimation.ts";
+import {
+  LIVE_SUBSTITUTE_SWAP_BODY_CELLS, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING, LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS, liveSubstituteSwapApplies,
+  liveSubstituteSwapView,
+} from "../src/engine/liveSubstituteSwap.ts";
+import { doll90AttRowSha, readDoll90AttFixture } from "../tools/integration/doll90AttFixture.ts";
 import { liveView, type Fixture } from "../tools/integration/liveAdapterFramebuffer.ts";
 
 // doll90 (docs/doll90-doll-cells.md): Substitute-doll residual cells, batch 2. Evidence: tools/integration/fixtures/doll90/ and
@@ -19,6 +24,8 @@ const field = (playerDoll: boolean, opponentDoll: boolean): BattleResolutionDisp
 const req = (moveId: number, attacker: 0 | 1): BattleMoveAnimationRequest =>
   ({ moveId, attacker, target: attacker === 0 ? 1 : 0, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0 }) as BattleMoveAnimationRequest;
 const defenderDoll = (attacker: 0 | 1) => (attacker === 0 ? field(false, true) : field(true, false));
+const attackerDoll = (attacker: 0 | 1) => (attacker === 0 ? field(true, false) : field(false, true));
+const self = (moveId: number, attacker: 0 | 1) => ({ ...req(moveId, attacker), target: attacker }) as BattleMoveAnimationRequest;
 const BOTH = ["player", "opponent"];
 
 // The doll81 `def` probes' TEST fixtures (prep38 schema): the DEFENDER is the displayed doll (as prep38Check.ts flags it).
@@ -66,4 +73,33 @@ describe("doll90: Substitute-doll residual cells", () => {
       expect(boxDiff(stem, 0)).toBe(0);
     }
   });
+  it("Double Team 104: self-target swap cell, both sides, framed {rows 159, shift -1}; Recover 105 still declines", () => {
+    expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(104)!]).toEqual(BOTH);
+    expect(LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS.has(104)).toBe(true);
+    // The ROM body: 158 script rows + the first inactive row (MON_TO_SUBSTITUTE starts there; no stats banner behind the doll).
+    // Shift -1: every doll-free control body of the doll81 labs is 0 px one row later than activation-aligned (docs/doll90-doll-cells.md).
+    expect(LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(104)).toEqual({ rows: 159, shift: -1 });
+    for (const a of [0, 1] as const) {
+      expect(liveSubstituteSwapApplies(self(104, a), attackerDoll(a))).toBe(true);
+      expect(liveMoveSubstituteDollDeclines(self(104, a), attackerDoll(a))).toBe(false);
+      expect(liveMoveAnimationDuration(self(104, a), attackerDoll(a))).toBe(a === 0 ? 244 : 240);
+      expect(liveMoveAnimationDuration(self(104, a), field(false, false))).toBe(230);
+      const bodyStart = a === 0 ? 43 : 41;
+      const view = (age: number) => liveSubstituteSwapView({ healthboxes: {}, message: null, visibility: {}, waitCursor: null,
+        field: attackerDoll(a), effect: { type: "move", request: self(104, a), age } } as never);
+      expect(view(bodyStart + 1)!.view.effect).toMatchObject({ age: 0 });
+      expect(view(bodyStart + 158)!.view.effect).toMatchObject({ age: 157 });
+      expect(view(bodyStart + 159)!.kind).toBe("swap");
+      expect(liveSubstituteSwapApplies(self(105, a), attackerDoll(a))).toBe(false);
+      expect(liveMoveSubstituteDollDeclines(self(105, a), attackerDoll(a))).toBe(true);
+    }
+  });
+  // Committed ROM RGB sha256 per row of four doll81 composite windows (fresh direct mGBA, r1 == r2; the attacker's RAM-read personality):
+  // swap-in, idle, body, swap-back and the first inactive row through the production live renderer.
+  it.each(["doll90-double-team-player-1770", "doll90-double-team-player-gengar-1769", "doll90-double-team-opponent-3408",
+    "doll90-double-team-opponent-golbat-3407"])("%s: every composite row equals the ROM frame", (stem) => {
+    const f = readDoll90AttFixture(`tools/integration/fixtures/doll90/att/${stem}.json`);
+    expect(f.rows.length).toBe(f.attacker === 0 ? 244 : 240);
+    expect(f.rows.filter(([age, , sha]) => doll90AttRowSha(f, age) !== sha).map(([age]) => age)).toEqual([]);
+  }, 120000);
 });

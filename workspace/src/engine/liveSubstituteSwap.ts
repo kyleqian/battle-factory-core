@@ -127,10 +127,16 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
   [142, BOTH], // Lovely Kiss
   [47, Object.freeze(["player"] as const)], // Sing (opponent: the ROM body length depends on the pair)
   [241, BOTH], // Sunny Day (self-target: LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS)
+  // doll90 (docs/doll90-doll-cells.md): PERSIAN / GENGAR player, PERSIAN / elevated GOLBAT opponent, 0 px on every row.
+  [104, BOTH], // Double Team (self-target; the attacker's personality-derived clone phase, dt60)
 ]);
 export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_SUBSTITUTE_SWAP_BODY_CELLS.keys());
-/** Self-target bodies presented with the swaps (doll81: the ROM runs SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE around them too). */
-export const LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS: ReadonlySet<number> = new Set([241]);
+/**
+ * Self-target bodies presented with the swaps (doll81: the ROM runs SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE around them too). Double Team
+ * (doll90): the stats banner the doll-free adapter ends with never runs behind the doll (TryHandleLaunchBattleTableAnimation skips
+ * B_ANIM_STATS_CHANGE while behindSubstitute), so the composite frames only the ROM body.
+ */
+export const LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS: ReadonlySet<number> = new Set([241, 104]);
 
 export type SubstituteSwapBodyFraming = Readonly<{ rows: number; shift: number }>;
 /**
@@ -152,6 +158,7 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: ReadonlyMap<number, SubstituteSw
   [320, { rows: 221, shift: 0 }], // GrassWhistle (adapter 225; doll81)
   [142, { rows: 153, shift: 0 }], // Lovely Kiss (adapter 152; doll81)
   [47, { rows: 246, shift: 0 }], // Sing (player adapter 245; doll81)
+  [104, { rows: 159, shift: -1 }], // Double Team (adapter 230 = body + stats banner; doll90: every doll-free control 0 px at -1)
 ].map(([id, framing]) => [id as number, Object.freeze(framing as SubstituteSwapBodyFraming)]));
 
 /** The composite's body framing for a request whose adapter duration is `adapterDuration`. */

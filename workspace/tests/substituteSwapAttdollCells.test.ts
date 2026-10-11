@@ -62,6 +62,8 @@ describe("attacker-doll swap cells (prep40)", () => {
       [7, 101, 102, 0, ["player", "opponent"]], [153, 212, 217, -4, ["player", "opponent"]],
       // land82 (doll81)
       [47, 245, 246, 0, ["player"]], [142, 152, 153, 0, ["player", "opponent"]], [320, 225, 221, 0, ["player"]],
+      // doll90: Double Team (self-target), the doll-free controls' calibrated shift -1
+      [104, 230, 159, -1, ["player", "opponent"]],
     ];
     expect([...LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.keys()].sort((a, b) => a - b)).toEqual(framed.map((f) => f[0]).sort((a, b) => a - b));
     for (const [moveId, adapter, rows, shift, sides] of framed) {
