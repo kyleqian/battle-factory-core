@@ -1,0 +1,42 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "bodyIndex": 0,
+ "furyCutterCounter": 1,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/fury99/scenarios/fury-cutter-pla-grovyle-blissey-growl.json",
+ "denseWindow": {
+  "startFrame": 78,
+  "endFrame": 120
+ },
+ "attacker": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "BLISSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2654435782,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 157,
+  "playerMaxHp": 157,
+  "opponentHp": 362,
+  "opponentMaxHp": 362,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 10,
+  "rolloutCounter": 1
+ }
+}

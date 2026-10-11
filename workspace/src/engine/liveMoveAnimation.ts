@@ -3913,15 +3913,29 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 210: {
-      // oam1 (prep20 s1.3): counter-1 body only. No counter reaches the request (MOVE_ANIMATION carries none for 210), but a
-      // first body implies it: furyCutterCounter starts at 0 for a sent-in battler, a successful Fury Cutter always plays its
-      // body (so none ran before) and a miss resets it; Cmd_furycuttercalc then sets 1. Counters 2..5 are never first bodies
-      // and also need the gComplexPaletteBlend palette provider: they decline. Non-shiny, zero idle rests. later58
+      // oam1 (prep20 s1.3): a first body implies counter 1: furyCutterCounter starts at 0 for a sent-in battler, a successful Fury
+      // Cutter always plays its body (so none ran before) and a miss resets it; Cmd_furycuttercalc then sets 1. Counters 2..5 are
+      // never first bodies. Non-shiny, zero idle rests. later58
       // (docs/next-adapters-later58.md): at a LATER body the counter is read from the request's power (gBattleMovePower after
       // damagecalc = 10 << (counter - 1), x 1.5 under SWARM): 10 / 15 is counter 1, whose body is exact after Quick Attack / Growl /
-      // Splash (the history it starts from is unread); both species rests must be {0,0}. After its own body the order lend is unknown.
+      // Splash (the history it starts from is unread); both species rests must be {0,0}.
+      // fury99 (docs/fury99-fury-cutter-counters.md): plans54's payload carries furyCutterCounter (request.rolloutCounter, moveId-gated)
+      // and keys the order host, so a later body after the user's own body has a known lend. Counters 2..5 render the left / right slice
+      // (counter & 1) and the complex palette blend (liveFuryCutterBlendRows); nothing else of the previous body is read (Step2 restores
+      // the palettes, the blend sprite is invisible). 40 / 40 ROM windows (counters 1..5, both sides, two pairs) 0 px. Without the payload
+      // a later body keeps the later58 power rule (10 / 15 = counter 1).
       if (!spriteOrderInput?.known) return null;
-      if (!spriteOrderInput.firstBody && (!liveBattlersRestFree(art) || (request.power !== 10 && request.power !== 15))) return null;
+      const furyCutterCounter = request.rolloutCounter
+        ?? (spriteOrderInput.firstBody || request.power === 10 || request.power === 15 ? 1 : undefined);
+      if (furyCutterCounter !== 1 && furyCutterCounter !== 2 && furyCutterCounter !== 3 && furyCutterCounter !== 4
+        && furyCutterCounter !== 5) return null;
+      // fury99: at counter 2+ the user's previous Fury Cutter body zeroed its target's x2 (ShakeMon; the x2 tracker's "zeroed" target role):
+      // a species rest counts only while the tracker does not have it zeroed (ROM opponent ONIX x2 1 at counter 1, 0 at counters 2..5;
+      // 4 / 4 windows 0 px). Counter 1 keeps the species rule.
+      const restFree = (side: "player" | "opponent") => { const rest = liveBattlerAnchors(side, art, battlerX2Input).frontIdleRest;
+        return rest.x2 === 0 && rest.y2 === 0; };
+      if (!spriteOrderInput.firstBody
+        && !(furyCutterCounter >= 2 ? restFree("player") && restFree("opponent") : liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
@@ -3930,7 +3944,7 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const inputs = liveFuryCutterInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
-        counter: 1, sort: sortGbaSpriteOrder });
+        counter: furyCutterCounter, sort: sortGbaSpriteOrder });
       if (inputs === null) return null;
       config = { move: "FURY_CUTTER", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;

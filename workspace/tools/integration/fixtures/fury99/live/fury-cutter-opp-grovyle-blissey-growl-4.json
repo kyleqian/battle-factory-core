@@ -1,0 +1,138 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "bodyIndex": 4,
+ "furyCutterCounter": 5,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/fury99/scenarios/fury-cutter-opp-grovyle-blissey-growl.json",
+ "denseWindow": {
+  "startFrame": 4618,
+  "endFrame": 4660
+ },
+ "attacker": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "BLISSEY",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808507,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 235,
+  "playerMaxHp": 362,
+  "opponentHp": 157,
+  "opponentMaxHp": 157,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 160,
+  "rolloutCounter": 5
+ },
+ "precedingBodies": [
+  {
+   "moveId": 210,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  },
+  {
+   "moveId": 10210,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  },
+  {
+   "moveId": 20210,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  },
+  {
+   "moveId": 30210,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  }
+ ],
+ "precedingX2Events": [
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "player"
+  }
+ ]
+}

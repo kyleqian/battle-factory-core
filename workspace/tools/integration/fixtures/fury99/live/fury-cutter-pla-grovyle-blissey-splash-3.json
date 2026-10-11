@@ -1,0 +1,100 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "bodyIndex": 3,
+ "furyCutterCounter": 4,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/fury99/scenarios/fury-cutter-pla-grovyle-blissey-splash.json",
+ "denseWindow": {
+  "startFrame": 3480,
+  "endFrame": 3522
+ },
+ "attacker": {
+  "species": "GROVYLE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "BLISSEY",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2654435782,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 157,
+  "playerMaxHp": 157,
+  "opponentHp": 227,
+  "opponentMaxHp": 362,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 80,
+  "rolloutCounter": 4
+ },
+ "precedingBodies": [
+  {
+   "moveId": 210,
+   "side": "player"
+  },
+  {
+   "moveId": 150,
+   "side": "opponent"
+  },
+  {
+   "moveId": 10210,
+   "side": "player"
+  },
+  {
+   "moveId": 150,
+   "side": "opponent"
+  },
+  {
+   "moveId": 20210,
+   "side": "player"
+  },
+  {
+   "moveId": 150,
+   "side": "opponent"
+  }
+ ],
+ "precedingX2Events": [
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 150,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 150,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 150,
+   "attackerSide": "opponent"
+  }
+ ]
+}

@@ -1,0 +1,138 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "bodyIndex": 4,
+ "furyCutterCounter": 5,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/fury99/scenarios/fury-cutter-opp-scyther-golem-growl.json",
+ "denseWindow": {
+  "startFrame": 4618,
+  "endFrame": 4660
+ },
+ "attacker": {
+  "species": "SCYTHER",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 2027808507,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 129,
+  "playerMaxHp": 187,
+  "opponentHp": 177,
+  "opponentMaxHp": 177,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 160,
+  "rolloutCounter": 5
+ },
+ "precedingBodies": [
+  {
+   "moveId": 210,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  },
+  {
+   "moveId": 10210,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  },
+  {
+   "moveId": 20210,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  },
+  {
+   "moveId": 30210,
+   "side": "opponent"
+  },
+  {
+   "moveId": 45,
+   "side": "player"
+  },
+  {
+   "moveId": 0,
+   "side": "opponent",
+   "statAnimation": 22
+  }
+ ],
+ "precedingX2Events": [
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "player"
+  }
+ ]
+}

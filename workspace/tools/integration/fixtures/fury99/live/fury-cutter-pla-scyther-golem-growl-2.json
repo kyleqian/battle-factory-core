@@ -1,0 +1,92 @@
+{
+ "schema": "later58-live-adapter-fixture/v1",
+ "move": "FURY_CUTTER",
+ "bodyIndex": 2,
+ "furyCutterCounter": 3,
+ "probe": "tools/integration/prep48Probe.py",
+ "scenario": "tools/integration/fixtures/fury99/scenarios/fury-cutter-pla-scyther-golem-growl.json",
+ "denseWindow": {
+  "startFrame": 2346,
+  "endFrame": 2388
+ },
+ "attacker": {
+  "species": "SCYTHER",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLEM",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2654435782,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 177,
+  "playerMaxHp": 177,
+  "opponentHp": 160,
+  "opponentMaxHp": 187,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "power": 40,
+  "rolloutCounter": 3
+ },
+ "precedingBodies": [
+  {
+   "moveId": 210,
+   "side": "player"
+  },
+  {
+   "moveId": 45,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 22
+  },
+  {
+   "moveId": 10210,
+   "side": "player"
+  },
+  {
+   "moveId": 45,
+   "side": "opponent"
+  },
+  {
+   "moveId": 0,
+   "side": "player",
+   "statAnimation": 22
+  }
+ ],
+ "precedingX2Events": [
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "opponent"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 210,
+   "attackerSide": "player"
+  },
+  {
+   "kind": "move-body",
+   "moveId": 45,
+   "attackerSide": "opponent"
+  }
+ ]
+}

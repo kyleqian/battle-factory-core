@@ -1,0 +1,47 @@
+{
+ "schema": "fury99-parity/v1",
+ "seed": 851,
+ "streak": 2,
+ "turnBoundariesCompared": 30,
+ "playerTurns": 30,
+ "framesOn": 22476,
+ "framesOff": 19040,
+ "logicalDigest": "56ee1df8e37aae5cc59a77ec4fd28513e17fe4f368d2dd8378ec6184bedf244a",
+ "rngEqual": true,
+ "rulesEqual": true,
+ "boundaryEqual": true,
+ "bodiesOn": 42,
+ "orderKnownBodiesOn": 28,
+ "allocatorKnownBodiesOn": 42,
+ "orderStopsOn": [
+  "no EXACT plan: body 291:player"
+ ],
+ "furyCutterBodiesOn": [
+  {
+   "turn": 10,
+   "moveId": 210,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  },
+  {
+   "turn": 14,
+   "moveId": 210,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": true,
+   "invalidReason": null,
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  }
+ ]
+}

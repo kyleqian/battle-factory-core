@@ -293,15 +293,39 @@ export interface LiveFuryCutterArgs {
   readonly target: LiveOamBattlerAnchors;
   readonly palettes: LivePaletteComposite;
   readonly activationOrder: readonly number[];
-  /** gDisableStructs[attacker].furyCutterCounter after Cmd_furycuttercalc (only 1 is provided: the first body). */
-  readonly counter: 1;
+  /** gDisableStructs[attacker].furyCutterCounter after Cmd_furycuttercalc (1..5; the request's furyCutterCounter payload). */
+  readonly counter: 1 | 2 | 3 | 4 | 5;
   readonly sort: LiveSpriteOrderSort;
 }
 const furyCache = new Map<string, readonly string[][]>();
 
 /**
- * MOVE_FURY_CUTTER (210) counter-1 body live inputs (prep20 s1.3): the right-hit slice (counter & 1), no complex palette
- * blend (counter 1 takes FuryCutterContinue2 directly). Palette = composite + ANIM_TAG_CUT (OBJ bank 23) from row 2 and the
+ * fury99 (docs/fury99-fury-cutter-counters.md): the hardware rows Move_FURY_CUTTER's complex_palette_blend shows blended. Medium
+ * (counter 2) has num_blends 1, Strong / Strongest (3 / 4+) num_blends 3, all delay 3. The blend sprite is created in the slice's
+ * script frame (state 7, the slice schedule's first state): AnimComplexPaletteBlend blends at once, then AnimComplexPaletteBlend_Step1
+ * runs in the same frame's AnimateSprites (timer 3 -> 2) and toggles Y2 / Y1 each time its timer reaches 0 (timer = delay & 0xFF,
+ * sDelay ^= 0x100); Step2 ends at coefficient 0. A state's palette shows on the next hardware row, like its OAM.
+ */
+export function liveFuryCutterBlendRows(counter: number): ReadonlySet<number> {
+  const rows = new Set<number>();
+  if (counter < 2) return rows;
+  let numBlends = counter === 2 ? 1 : 3, delay = 3, timer = 3, on = true;
+  for (let state = 7; ; state += 1) {
+    if (timer > 0) timer -= 1;
+    else if (numBlends === 0) return rows;
+    else { on = (delay & 0x100) !== 0; delay ^= 0x100; timer = delay & 0xff; numBlends -= 1; }
+    if (on) rows.add(state + 1);
+  }
+}
+/** BlendPalette (util.c) of one BGR555 word toward RGB(9, 8, 10) at coefficient 4 (FuryCutterMedium / Strong / Strongest color1 / blend_y1). */
+const furyCutterBlendWord = (word: number): number => {
+  const channel = (shift: number, target: number) => { const c = word >> shift & 31; return c + (((target - c) * 4) >> 4); };
+  return channel(0, 9) | channel(5, 8) << 5 | channel(10, 10) << 10;
+};
+
+/**
+ * MOVE_FURY_CUTTER (210) body live inputs (prep20 s1.3; fury99 counters 2..5): the slice direction from counter & 1 (right = h-flipped)
+ * and, from counter 2, the complex palette blend (liveFuryCutterBlendRows); counter 1 takes FuryCutterContinue2 directly. Palette = composite + ANIM_TAG_CUT (OBJ bank 23) from row 2 and the
  * monbg copy into BG bank 8 / 9 from row 4; registers = S0 + monbg (row 5: cnt, scroll 32 - centre; cleared on row 37),
  * setalpha 12, 8 (rows 7..32) and AnimTask_ShakeMon(ANIM_TARGET, 0, 3, 10, 1) on the monbg y (+3 on rows 17..30 in
  * 2-row phases, measured identical in both accepted orientations and the SCYTHER -> GOLEM alternates).
@@ -324,9 +348,13 @@ export function liveFuryCutterInputs(args: LiveFuryCutterArgs): { duration: numb
   const monbgBank = targetSide === "opponent" ? 8 : 9, targetObjBank = targetSide === "opponent" ? 17 : 16;
   const layer = targetSide === "opponent" ? "bg1" : "bg2";
   const cutPalette = resourceWords("ANIM_TAG_CUT");
+  const blendRows = liveFuryCutterBlendRows(args.counter);
   const paletteAt = (age: number): number[] => {
     const out = args.palettes.hardware.slice();
     if (age >= 2) cutPalette.forEach((word, i) => { out[23 * 16 + i] = word; });
+    // F_PAL_BG | F_PAL_BATTLERS (GetBattlePalettesMask, singles): BG palettes 1..3 and both battlers' OBJ palettes 16 / 17.
+    if (blendRows.has(age)) for (const bank of [1, 2, 3, 16, 17]) for (let i = 0; i < 16; i += 1) out[bank * 16 + i] = furyCutterBlendWord(out[bank * 16 + i]!);
+    // Task_UpdateMonBg copies the target's FADED OBJ palette into the monbg bank every frame (so it carries the blend).
     if (age >= 4) for (let i = 0; i < 16; i += 1) out[monbgBank * 16 + i] = out[targetObjBank * 16 + i]!;
     return out;
   };
