@@ -44,6 +44,28 @@
 - Supervisor union gates on `302e39bdb` (src `8150be72`; land82 + cast83 + land86 + the fix), in a detached worktree: typecheck, full
   suite 1,617 files / 13,276 tests (2 shards, 0 failed), build, differential 624 / 624 byte-identical vs `b05d384ca`
   (logs `.integration/validation/union-302e39bdb/`).
+- Live audit 21 (SIDE, Opus, `e14b6bc05` .. `27b43d26d`, new files only): **DEFECT — player Quick Attack 98**: `quickAttack.ts`'s fitted
+  `targetBaseX2 = -1` (prep7's PIDGEOTTO -> ONIX first body) drew every other target 1 px left: 16 / 18 windows 14.2k..18.7k px
+  (NIDORINO / SNORLAX / CROBAT; ONIX after its first body); flat84's "Quick Attack residual" is this. cast83's Ember / Flamethrower /
+  Scary Face "normal-form residuals" are an ARTIFACT (its checker started windows at the activation; production's accepted windows
+  start at activation + 4): aligned, all 0 px, and the 3 declined keys 52:by:1 / 53:by:1 / 184:at:3 lift live 0 px (14 / 14). Icy Wind
+  in rain = TIMING-PHASE (lag at age 241 / 242 vs 261; not rain, not the form). land82's doll cells hold for SNORLAX / AZURILL / CROBAT
+  / WAILORD incl. the doll-breaking hit; Castform form tracking exact through 4 mid-battle changes (17 / 17 ENTRY windows). -> qa91.
+- Main-lane Opus worker ret88 (`dc46d6d41` .. `f2ffb8b90`, src `662f378b`): rung 1 (honest correction) — Return 216 fails closed
+  unless returnPowerLevel(friendship) is a proven branch: the 37 live census Return bodies (ReturnStrongest drawn where the ROM plays
+  ReturnWeak) -> fallback. Rung 2 — ReturnWeak (friendship < 61, the kernel's 0): order key 40216 + ROM plan (production plan 223;
+  predicted `Cf;D0;Cf;Cf;D2;D1` exact per frame 24 / 24 bodies) and the 88-row body live (38 windows, 34 live 0 px, r1 == r2;
+  consumer lends after it == ROM 26 / 26). Census 0..999: **+123 commands**, 0 live -> fallback overall, all 84 Return commands live as
+  ReturnWeak. Flag: 5 live Double Team consumer windows in the lab show ~317k..364k px on rows 2..57 — the same on a pre-ret88
+  control (fixture personality suspected) -> audit 22 priority. Supervisor: census on master vs `302e39bdb` **+123 / 0 regressions**,
+  keys identical; ret88Run.sh into a fresh dir — every receipt `same`.
+- Folded Sonnet worker `a988d83ff` (INTEGRATION) as `9df9b234a` (src `615e6cb3`): land87 — reseed85's occupancy shadow
+  (liveSpriteOrderHost.ts), tests/land87WordsOccupancyReseed.test.ts (revert: the 4 reseed tests fail); 8 of reseed85's windows
+  re-rendered 0 px. Census vs the fixed union **+58 / +6,955** (more than +47: land86's Flatter unit lets 3 Magic Coat + 8 Flatter reach
+  the shadow); allocator-unknown 55 -> 6. The branch's own import fix for the union break was dropped in the merge (master fixed the
+  call site; an unused import fails noUnusedLocals). Supervisor: census on the worker tree vs `302e39bdb` +58 / +6,955, 0 regressions.
+- Census on `9df9b234a` (src `615e6cb3`; all folds so far) vs the session baseline: **+335 commands / +48,264 live frames, 0 live ->
+  fallback, keys identical except seed 881's budget-cut tail: 95.01 % / 98.60 %** (start 93.79 / 97.37); 0 errors.
 - prep reseed85 (MAIN lane, Opus, `4f4828f3b` .. `d46cdfff1`, new files only): the post-KO send-out allocator reseed after a words-order
   unit. The reseed reads slot OCCUPANCY only and every words unit is allocator-net-zero, so the order host can keep a word-free
   occupancy shadow while the free order stays deferred. ROM: 13 routes x 2 probes x 2 runs A == B; 4 / 4 words-vs-control pairs SAME
