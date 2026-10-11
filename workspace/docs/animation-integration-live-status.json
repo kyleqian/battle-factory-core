@@ -647,15 +647,6 @@
       ]
     },
     {
-      "move": "MOVE_FOCUS_PUNCH",
-      "id": 264,
-      "liveEvidence": [],
-      "remaining": [
-        "independent arbitrary-species framebuffer comparison",
-        "ordinary command-input replay"
-      ]
-    },
-    {
       "move": "MOVE_BRICK_BREAK",
       "id": 280,
       "liveEvidence": [
@@ -3652,7 +3643,7 @@
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 239,
+  "implementedCount": 238,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3829,7 +3820,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 24,
+  "faithfulTimingCount": 25,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -6202,6 +6193,101 @@
         "OUT=SCRATCH JOBS=14 sh tools/integration/d4laterCounters.sh SCRATCH/counters 14 SCRATCH/counters.json <later58 sheer-cold / extrasensory / sky-attack scenarios + the accepted extrasensory / sky-attack scenarios> (docs/next-adapters-d4later.md)",
         "POKEBENCH_LIVE_PROBE_SHARE=1 node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts SCRATCH/d4-sky.json tools/integration/fixtures/d4later/windows/*.json",
         "npx vitest run tests/animation/d4laterTiming.test.ts tests/animation/liveQ2Adapters.test.ts"
+      ]
+    },
+    {
+      "id": 264,
+      "move": "MOVE_FOCUS_PUNCH",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 131,
+          "fixedLagAges": [
+            30,
+            151,
+            152
+          ],
+          "iterations": 150,
+          "side": "opponent",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 154,
+              "measured": 14
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 153,
+              "measured": 3
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 131,
+          "fixedLagAges": [
+            30,
+            151,
+            152
+          ],
+          "iterations": 150,
+          "side": "player",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 154,
+              "measured": 9
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 153,
+              "measured": 5
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          132,
+          133,
+          134,
+          135,
+          136,
+          137,
+          138,
+          139,
+          140,
+          141,
+          142,
+          143,
+          144,
+          145,
+          146,
+          147,
+          154
+        ],
+        "rows": 17,
+        "maxPixelsPerRow": 18267,
+        "cause": "the restorebg Task_FadeToBg frame (LoadDefaultBg's battle-terrain decompress while the screen is black) does not overrun in the other phase: no lag at age 131 (gRng2Value advances between rows 130 and 131), so the return-to-field fade-in starts at 132 instead of 133 and every fade-in row 132..147 is one BLDY step brighter in the ROM (16 whole-field rows, 16,972..18,267 px/row: the accepted BRELOOM -> STARMIE opponent fixture 292,272 px, ctl95 PERSIAN / GOLBAT opponent, PERSIAN / GENGAR / MACHAMP player); an ELEVATED opponent attacker's shadow also returns one row earlier, on window row 154 (GOLBAT 200 px); every other row exact"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A fp100, lsbz precedent: the adapter gained a measured CPU-phase parameter, both sides; the live adapter renders the dominant phase, liveMoveAnimation.ts case 264 restoreLag = the policy phase, 154 active rows + the first inactive row = 155 rows both sides); the existing exact fixture proofs stay valid in their proved scope (the accepted player fixture is the policy phase; the accepted BRELOOM -> STARMIE opponent body (153) is now the documented other phase)",
+        "tools/integration/fixtures/fp100/receipts/phase.tsv (fp100Run.sh: fresh direct-mGBA ctl95Probe.py, explicit lab seeds 305419897 / 38177486, r1 == r2 13/13 scenarios; 29 doll-free bodies, 8 species pairs, first and later bodies): lag at 131 (gRng2Value repeat 130/131, ROM body 154 rows) in opponent 14 of 16, player 8 of 13; fixed lags 30, 151, 152 (no-event frame) in every body",
+        "tools/integration/fixtures/fp100-live-receipt.json: every policy-phase window 0 px on every row through the production live renderer (ctl95ControlCheck.ts, two fresh runs): opponent 14 / 14, player 8 / 8; the 7 other-phase windows only on rows 132..147 (+ row 154 for the elevated GOLBAT)",
+        "docs/ctl95-doll-free-controls.md s3 (the mechanism and the no-input ablation: side, species, body index, doll history, personality)",
+        "scoped-exact liveEvidence (kept, now in its proved scope): tools/compare/fixtures/focus-punch-{player,opponent}-breloom-*-starmie.json through liveAdapterFramebuffer (live-adapter-source-field-receipt.json)",
+        "scoped-exact remaining (kept): independent arbitrary-species framebuffer comparison",
+        "scoped-exact remaining (kept): ordinary command-input replay"
+      ],
+      "proofCommands": [
+        "sh tools/integration/fp100Run.sh .integration/validation/<fresh>",
+        "npx vitest run tests/animation/fp100FocusPunchTiming.test.ts tests/animation/focusPunch.test.ts"
       ]
     }
   ],

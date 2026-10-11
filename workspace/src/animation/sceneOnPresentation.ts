@@ -2303,6 +2303,8 @@ export interface SceneOnFocusPunchConfig {
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnFocusPunchFieldProfile>;
+  /** The age-131 restore lag phase (focusPunch.ts); absent = the accepted fixtures' per-side body. */
+  readonly restoreLag?: boolean;
 }
 
 /** Narrow Scene-ON seam for MOVE_MACH_PUNCH's live source-relative body. */
@@ -8151,6 +8153,7 @@ export function sceneOnFocusPunchView(
       state.age,
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
+      state.config.restoreLag,
     ),
   };
 }
