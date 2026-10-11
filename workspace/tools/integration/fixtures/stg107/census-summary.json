@@ -1,0 +1,47 @@
+{
+ "base": {
+  "commandKeyDigest": "b5c536d22cc0926c98774d55a937bc1b1ee3251df2afd9687c66b9552463f871",
+  "overall": {
+   "commands": 27515,
+   "frames": 3983929,
+   "live": 26245,
+   "liveFrames": 3932860,
+   "liveSharePctByCount": 95.38,
+   "liveSharePctByFrames": 98.72
+  },
+  "struggle": {
+   "byReason": {
+    "attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)": 24,
+    "defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)": 19,
+    "no adapter (no liveMoveAnimationDuration case)": 1046
+   },
+   "commands": 1089,
+   "frames": 34817,
+   "live": 0,
+   "liveFrames": 0
+  }
+ },
+ "nonStruggleStatusChanges": {},
+ "patched": {
+  "commandKeyDigest": "b2f90161f3cab426284c2b107dce6edbc08cc3b88d4a1f6d5aa84c420eb8d265",
+  "overall": {
+   "commands": 27459,
+   "frames": 4061368,
+   "live": 27129,
+   "liveFrames": 4031868,
+   "liveSharePctByCount": 98.8,
+   "liveSharePctByFrames": 99.27
+  },
+  "struggle": {
+   "byReason": {
+    "attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)": 24,
+    "defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)": 19,
+    "sprite-order lend unknown": 106
+   },
+   "commands": 1033,
+   "frames": 112256,
+   "live": 884,
+   "liveFrames": 99008
+  }
+ }
+}

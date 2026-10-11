@@ -1,0 +1,20 @@
+pb-stg107-opp-143-303-c1 opponent SNORLAX/SHEDINJA live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-opp-143-42-sub-c2 opponent SNORLAX/GOLBAT live=False decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS) rows=112 exact=0 px=281284 entryPx=195664 digests=same
+pb-stg107-opp-143-95-c1 opponent SNORLAX/ONIX live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-opp-143-95-c3 opponent SNORLAX/ONIX live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-opp-303-42-c1 opponent SHEDINJA/GOLBAT live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-opp-42-135-c1 opponent GOLBAT/JOLTEON live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-opp-42-135-c3 opponent GOLBAT/JOLTEON live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-opp-pp-95-362-c4 opponent ONIX/DUSCLOPS live=False decline=unclassified (case-local gate) rows=112 exact=0 px=174607 entryPx=0 digests=same
+pb-stg107-opp-pp-95-362-c6 opponent ONIX/DUSCLOPS live=False decline=unclassified (case-local gate) rows=112 exact=0 px=174607 entryPx=0 digests=same
+pb-stg107-opp-pp-95-362-c8 opponent ONIX/DUSCLOPS live=False decline=unclassified (case-local gate) rows=112 exact=0 px=174607 entryPx=0 digests=same
+pb-stg107-ply-143-303-c1 player SNORLAX/SHEDINJA live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-ply-213-143-c1 player SHUCKLE/SNORLAX live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-ply-213-143-c3 player SHUCKLE/SNORLAX live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-ply-303-42-c1 player SHEDINJA/GOLBAT live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-ply-95-42-c1 player ONIX/GOLBAT live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-ply-95-42-c3 player ONIX/GOLBAT live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-ply-pp-95-362-c4 player ONIX/DUSCLOPS live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-ply-pp-95-362-c6 player ONIX/DUSCLOPS live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+pb-stg107-ply-pp-95-362-c8 player ONIX/DUSCLOPS live=True decline=None rows=112 exact=112 px=0 entryPx=0 digests=same
+19 Struggle windows: 15 live, 15 live 0 px on every row, 19 r1 == r2
