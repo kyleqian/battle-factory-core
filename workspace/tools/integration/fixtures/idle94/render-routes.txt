@@ -1,0 +1,8 @@
+154 339 player
+398 339 opponent
+3 207 player
+6 207 opponent
+286 269 player
+165 269 opponent
+6 184 player
+24 184 opponent

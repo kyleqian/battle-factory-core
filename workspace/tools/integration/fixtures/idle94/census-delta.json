@@ -1,0 +1,420 @@
+{
+ "leadMoves": 40,
+ "commands": [
+  27516,
+  27516
+ ],
+ "keySequenceIdentical": true,
+ "battleDigestExcludingFramesIdentical": true,
+ "statusChanges": {},
+ "frameDeltaMismatches": 0,
+ "mismatchSamples": [],
+ "substituteSwapLeadCommandsKept0": 1,
+ "commandsMovedByN": 3842,
+ "liveMoved": 3835,
+ "framesAdded": 20853,
+ "totalFrames": [
+  3959685,
+  3980538
+ ],
+ "liveFrames": [
+  3905536,
+  3926361
+ ],
+ "live": [
+  26181,
+  26181
+ ],
+ "perMoveSide": {
+  "106 HARDEN opponent": {
+   "commands": 16,
+   "framesAdded": 16,
+   "N": 1
+  },
+  "106 HARDEN player": {
+   "commands": 22,
+   "framesAdded": 22,
+   "N": 1
+  },
+  "120 SELFDESTRUCT opponent": {
+   "commands": 1,
+   "framesAdded": 4,
+   "N": 4
+  },
+  "120 SELFDESTRUCT player": {
+   "commands": 1,
+   "framesAdded": 4,
+   "N": 4
+  },
+  "124 SLUDGE opponent": {
+   "commands": 37,
+   "framesAdded": 148,
+   "N": 4
+  },
+  "124 SLUDGE player": {
+   "commands": 19,
+   "framesAdded": 76,
+   "N": 4
+  },
+  "136 HI JUMP KICK opponent": {
+   "commands": 4,
+   "framesAdded": 4,
+   "N": 1
+  },
+  "136 HI JUMP KICK player": {
+   "commands": 4,
+   "framesAdded": 4,
+   "N": 1
+  },
+  "146 DIZZY PUNCH opponent": {
+   "commands": 6,
+   "framesAdded": 78,
+   "N": 13
+  },
+  "146 DIZZY PUNCH player": {
+   "commands": 8,
+   "framesAdded": 104,
+   "N": 13
+  },
+  "153 EXPLOSION opponent": {
+   "commands": 12,
+   "framesAdded": 48,
+   "N": 4
+  },
+  "153 EXPLOSION player": {
+   "commands": 38,
+   "framesAdded": 152,
+   "N": 4
+  },
+  "158 HYPER FANG opponent": {
+   "commands": 7,
+   "framesAdded": 28,
+   "N": 4
+  },
+  "184 SCARY FACE opponent": {
+   "commands": 91,
+   "framesAdded": 364,
+   "N": 4
+  },
+  "184 SCARY FACE player": {
+   "commands": 93,
+   "framesAdded": 372,
+   "N": 4
+  },
+  "188 SLUDGE BOMB opponent": {
+   "commands": 130,
+   "framesAdded": 520,
+   "N": 4
+  },
+  "188 SLUDGE BOMB player": {
+   "commands": 149,
+   "framesAdded": 596,
+   "N": 4
+  },
+  "204 CHARM opponent": {
+   "commands": 49,
+   "framesAdded": 196,
+   "N": 4
+  },
+  "204 CHARM player": {
+   "commands": 54,
+   "framesAdded": 216,
+   "N": 4
+  },
+  "207 SWAGGER opponent": {
+   "commands": 43,
+   "framesAdded": 301,
+   "N": 7
+  },
+  "207 SWAGGER player": {
+   "commands": 84,
+   "framesAdded": 588,
+   "N": 7
+  },
+  "225 DRAGONBREATH opponent": {
+   "commands": 105,
+   "framesAdded": 630,
+   "N": 6
+  },
+  "225 DRAGONBREATH player": {
+   "commands": 71,
+   "framesAdded": 426,
+   "N": 6
+  },
+  "232 METAL CLAW opponent": {
+   "commands": 61,
+   "framesAdded": 244,
+   "N": 4
+  },
+  "232 METAL CLAW player": {
+   "commands": 46,
+   "framesAdded": 184,
+   "N": 4
+  },
+  "247 SHADOW BALL opponent": {
+   "commands": 251,
+   "framesAdded": 1255,
+   "N": 5
+  },
+  "247 SHADOW BALL player": {
+   "commands": 231,
+   "framesAdded": 1155,
+   "N": 5
+  },
+  "248 FUTURE SIGHT opponent": {
+   "commands": 28,
+   "framesAdded": 140,
+   "N": 5
+  },
+  "248 FUTURE SIGHT player": {
+   "commands": 29,
+   "framesAdded": 145,
+   "N": 5
+  },
+  "269 TAUNT opponent": {
+   "commands": 18,
+   "framesAdded": 180,
+   "N": 10
+  },
+  "269 TAUNT player": {
+   "commands": 10,
+   "framesAdded": 100,
+   "N": 10
+  },
+  "282 KNOCK OFF opponent": {
+   "commands": 54,
+   "framesAdded": 324,
+   "N": 6
+  },
+  "282 KNOCK OFF player": {
+   "commands": 61,
+   "framesAdded": 366,
+   "N": 6
+  },
+  "294 TAIL GLOW opponent": {
+   "commands": 7,
+   "framesAdded": 7,
+   "N": 1
+  },
+  "294 TAIL GLOW player": {
+   "commands": 2,
+   "framesAdded": 2,
+   "N": 1
+  },
+  "299 BLAZE KICK opponent": {
+   "commands": 2,
+   "framesAdded": 20,
+   "N": 10
+  },
+  "299 BLAZE KICK player": {
+   "commands": 3,
+   "framesAdded": 30,
+   "N": 10
+  },
+  "305 POISON FANG opponent": {
+   "commands": 22,
+   "framesAdded": 154,
+   "N": 7
+  },
+  "305 POISON FANG player": {
+   "commands": 8,
+   "framesAdded": 56,
+   "N": 7
+  },
+  "313 FAKE TEARS opponent": {
+   "commands": 41,
+   "framesAdded": 41,
+   "N": 1
+  },
+  "313 FAKE TEARS player": {
+   "commands": 48,
+   "framesAdded": 48,
+   "N": 1
+  },
+  "325 SHADOW PUNCH opponent": {
+   "commands": 10,
+   "framesAdded": 80,
+   "N": 8
+  },
+  "325 SHADOW PUNCH player": {
+   "commands": 17,
+   "framesAdded": 136,
+   "N": 8
+  },
+  "334 IRON DEFENSE opponent": {
+   "commands": 31,
+   "framesAdded": 31,
+   "N": 1
+  },
+  "334 IRON DEFENSE player": {
+   "commands": 23,
+   "framesAdded": 23,
+   "N": 1
+  },
+  "337 DRAGON CLAW opponent": {
+   "commands": 36,
+   "framesAdded": 216,
+   "N": 6
+  },
+  "337 DRAGON CLAW player": {
+   "commands": 31,
+   "framesAdded": 186,
+   "N": 6
+  },
+  "339 BULK UP opponent": {
+   "commands": 25,
+   "framesAdded": 100,
+   "N": 4
+  },
+  "339 BULK UP player": {
+   "commands": 22,
+   "framesAdded": 88,
+   "N": 4
+  },
+  "342 POISON TAIL opponent": {
+   "commands": 7,
+   "framesAdded": 49,
+   "N": 7
+  },
+  "342 POISON TAIL player": {
+   "commands": 3,
+   "framesAdded": 21,
+   "N": 7
+  },
+  "343 COVET opponent": {
+   "commands": 9,
+   "framesAdded": 9,
+   "N": 1
+  },
+  "343 COVET player": {
+   "commands": 5,
+   "framesAdded": 5,
+   "N": 1
+  },
+  "347 CALM MIND opponent": {
+   "commands": 57,
+   "framesAdded": 171,
+   "N": 3
+  },
+  "347 CALM MIND player": {
+   "commands": 64,
+   "framesAdded": 192,
+   "N": 3
+  },
+  "41 TWINEEDLE opponent": {
+   "commands": 11,
+   "framesAdded": 110,
+   "N": 10
+  },
+  "41 TWINEEDLE player": {
+   "commands": 13,
+   "framesAdded": 130,
+   "N": 10
+  },
+  "44 BITE opponent": {
+   "commands": 176,
+   "framesAdded": 1760,
+   "N": 10
+  },
+  "44 BITE player": {
+   "commands": 147,
+   "framesAdded": 1470,
+   "N": 10
+  },
+  "51 ACID opponent": {
+   "commands": 35,
+   "framesAdded": 245,
+   "N": 7
+  },
+  "51 ACID player": {
+   "commands": 39,
+   "framesAdded": 273,
+   "N": 7
+  },
+  "52 EMBER opponent": {
+   "commands": 58,
+   "framesAdded": 232,
+   "N": 4
+  },
+  "52 EMBER player": {
+   "commands": 42,
+   "framesAdded": 168,
+   "N": 4
+  },
+  "55 WATER GUN opponent": {
+   "commands": 12,
+   "framesAdded": 120,
+   "N": 10
+  },
+  "55 WATER GUN player": {
+   "commands": 20,
+   "framesAdded": 200,
+   "N": 10
+  },
+  "71 ABSORB opponent": {
+   "commands": 2,
+   "framesAdded": 20,
+   "N": 10
+  },
+  "71 ABSORB player": {
+   "commands": 13,
+   "framesAdded": 130,
+   "N": 10
+  },
+  "74 GROWTH opponent": {
+   "commands": 29,
+   "framesAdded": 29,
+   "N": 1
+  },
+  "74 GROWTH player": {
+   "commands": 8,
+   "framesAdded": 8,
+   "N": 1
+  },
+  "75 RAZOR LEAF opponent": {
+   "commands": 16,
+   "framesAdded": 208,
+   "N": 13
+  },
+  "75 RAZOR LEAF player": {
+   "commands": 24,
+   "framesAdded": 312,
+   "N": 13
+  },
+  "82 DRAGON RAGE player": {
+   "commands": 2,
+   "framesAdded": 14,
+   "N": 7
+  },
+  "92 TOXIC opponent": {
+   "commands": 79,
+   "framesAdded": 553,
+   "N": 7
+  },
+  "92 TOXIC player": {
+   "commands": 83,
+   "framesAdded": 581,
+   "N": 7
+  },
+  "93 CONFUSION opponent": {
+   "commands": 43,
+   "framesAdded": 215,
+   "N": 5
+  },
+  "93 CONFUSION player": {
+   "commands": 64,
+   "framesAdded": 320,
+   "N": 5
+  },
+  "94 PSYCHIC opponent": {
+   "commands": 351,
+   "framesAdded": 1755,
+   "N": 5
+  },
+  "94 PSYCHIC player": {
+   "commands": 269,
+   "framesAdded": 1345,
+   "N": 5
+  }
+ }
+}
