@@ -1580,6 +1580,14 @@ export class RandomPlayer {
    * trajectory depends only on its own play.
    */
   private readonly fightUseCountByMoveId = new Map<number, number>();
+  /**
+   * soak111: the postwin menus' last roll, reused until the menu's cursor
+   * moves (or the menu changes). Those menus used to draw a fresh roll on
+   * every press attempt, including presses the menu dropped before it was
+   * input-ready, so the number of draws depended on press timing. Re-rolling
+   * only after a press visibly landed keeps the old per-landed-press policy.
+   */
+  private postwinRoll: { key: string; value: number } | null = null;
   public battle = 1;
   public turn = 0;
   private readonly rng: Rng;
@@ -1646,6 +1654,14 @@ export class RandomPlayer {
       rented: 0,
       peekedSummary: this.explores && rng.chance(0.25),
     };
+  }
+
+  /** soak111: one decision-stream float per (postwin menu, cursor position) -- see `postwinRoll`. */
+  private stickyPostwinRoll(state: EngineState, menu: string, cursor: number): number {
+    const roundId = state.factoryRoundBattleOrchestrator?.config.id ?? "";
+    const key = `${menu}:${roundId}:${this.battle}:${this.turn}:${cursor}`;
+    if (this.postwinRoll?.key !== key) this.postwinRoll = { key, value: this.rng.float() };
+    return this.postwinRoll.value;
   }
 
   private press(button: GbaButton, gapMax = 10): ReadonlySet<GbaButton> {
@@ -2268,11 +2284,14 @@ export class RandomPlayer {
       && postwin.questionDismissElapsed === null
       && postwin.questionYesElapsed === null
     ) {
+      const questionRoll = this.explores
+        ? this.stickyPostwinRoll(state, `question-${postwin.question.kind}`, postwin.questionCursorPos)
+        : 1;
       const wantYes = !this.explores
         ? false
         : postwin.question.kind === "retire"
-          ? this.rng.chance(0.15)
-          : this.rng.chance(0.5);
+          ? questionRoll < 0.15
+          : questionRoll < 0.5;
       const targetPos = wantYes ? 0 : 1;
       if (postwin.questionCursorPos !== targetPos) {
         return this.press(targetPos === 0 ? "UP" : "DOWN", 8);
@@ -2304,7 +2323,8 @@ export class RandomPlayer {
       // still drawn (this.explores covers every exploring policy alike) so
       // "full"'s own draw here is untouched; only the decision it feeds is
       // overridden.
-      const rolledAccept = this.explores && this.rng.chance(0.5);
+      const rolledAccept = this.explores
+        && this.stickyPostwinRoll(state, "swap-offer", postwin.swapCursorPos) < 0.5;
       const accept = this.policy === "winning-swap"
         ? true
         : this.winningLike
@@ -2338,7 +2358,11 @@ export class RandomPlayer {
       && postwin.dialoguePage === 0
       && postwin.continuationCursorPos !== null
     ) {
-      const roll = this.rng.float();
+      const roll = this.stickyPostwinRoll(
+        state,
+        `continuation-${postwin.frontierBrain ? "brain" : "ordinary"}`,
+        postwin.continuationCursorPos,
+      );
       const target = !this.explores
         ? 0
         : roll < 0.85 ? 0 : roll < 0.92 ? 1 : roll < 0.96 ? 2 : 3;
