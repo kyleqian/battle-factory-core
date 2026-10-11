@@ -1,0 +1,2373 @@
+{
+ "schema": "idle98-compare/v1",
+ "scenarios": {
+  "idle98-bite-opp-houndoom-snorlax": {
+   "move": 44,
+   "class": "hit",
+   "attackerSide": "opponent",
+   "attacker": "HOUNDOOM",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "bodies": [
+    {
+     "mv": 44,
+     "atk": 1,
+     "X": 137202228,
+     "G": 67,
+     "F_att": 73,
+     "A": 76,
+     "E": 116,
+     "F_after": 118,
+     "F_es": 119,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 40,
+     "spanOn": 45,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 121,
+     "off": {
+      "G": 67,
+      "F_att": 73,
+      "F_after": 108,
+      "F_es": 109,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 0,
+     "X": 137202228,
+     "G": 229,
+     "F_att": 235,
+     "A": 238,
+     "E": 279,
+     "F_after": 281,
+     "F_es": 282,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 284,
+     "off": {
+      "G": 219,
+      "F_att": 225,
+      "F_after": 260,
+      "F_es": 261,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-bite-ply-houndoom-snorlax": {
+   "move": 44,
+   "class": "hit",
+   "attackerSide": "player",
+   "attacker": "HOUNDOOM",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "bodies": [
+    {
+     "mv": 44,
+     "atk": 0,
+     "X": 137202228,
+     "G": 63,
+     "F_att": 69,
+     "A": 72,
+     "E": 112,
+     "F_after": 114,
+     "F_es": 115,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 40,
+     "spanOn": 45,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 117,
+     "off": {
+      "G": 63,
+      "F_att": 69,
+      "F_after": 104,
+      "F_es": 105,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 224,
+     "F_att": 230,
+     "A": 233,
+     "E": 274,
+     "F_after": 276,
+     "F_es": 277,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 279,
+     "off": {
+      "G": 214,
+      "F_att": 220,
+      "F_after": 255,
+      "F_es": 256,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-bulk-up-opp-primeape-onix": {
+   "move": 339,
+   "class": "status-control",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "bodies": [
+    {
+     "mv": 339,
+     "atk": 1,
+     "X": 137209450,
+     "G": 66,
+     "F_att": 69,
+     "A": 72,
+     "E": 179,
+     "F_after": 181,
+     "F_es": null,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 107,
+     "spanOn": 112,
+     "attMinusG_on": 3,
+     "esMinusAfter_on": null,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": false,
+     "rowEEqualsEminus1": false,
+     "firstChangeAfterE": 190,
+     "off": {
+      "G": 66,
+      "F_att": 69,
+      "F_after": 104,
+      "F_es": null,
+      "span": 35,
+      "attMinusG": 3,
+      "esMinusAfter": null,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 0,
+     "X": 137202228,
+     "G": 478,
+     "F_att": 484,
+     "A": 487,
+     "E": 528,
+     "F_after": 530,
+     "F_es": 531,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 533,
+     "off": {
+      "G": 401,
+      "F_att": 407,
+      "F_after": 442,
+      "F_es": 443,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [
+    {
+     "A": 183,
+     "E": 258,
+     "len": 75,
+     "mv": 339,
+     "atk": 1,
+     "ptr": 137209462,
+     "screenChanges": 59
+    }
+   ],
+   "risesOff": [
+    {
+     "A": 106,
+     "E": 181,
+     "len": 75,
+     "mv": 339,
+     "atk": 1,
+     "ptr": 137209462,
+     "screenChanges": 59
+    }
+   ]
+  },
+  "idle98-bulk-up-ply-primeape-onix": {
+   "move": 339,
+   "class": "status-control",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "bodies": [
+    {
+     "mv": 339,
+     "atk": 0,
+     "X": 137209450,
+     "G": 62,
+     "F_att": 65,
+     "A": 68,
+     "E": 175,
+     "F_after": 177,
+     "F_es": null,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 107,
+     "spanOn": 112,
+     "attMinusG_on": 3,
+     "esMinusAfter_on": null,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": false,
+     "rowEEqualsEminus1": false,
+     "firstChangeAfterE": 186,
+     "off": {
+      "G": 62,
+      "F_att": 65,
+      "F_after": 100,
+      "F_es": null,
+      "span": 35,
+      "attMinusG": 3,
+      "esMinusAfter": null,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 470,
+     "F_att": 476,
+     "A": 479,
+     "E": 520,
+     "F_after": 522,
+     "F_es": 523,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 525,
+     "off": {
+      "G": 393,
+      "F_att": 399,
+      "F_after": 434,
+      "F_es": 435,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [
+    {
+     "A": 179,
+     "E": 254,
+     "len": 75,
+     "mv": 339,
+     "atk": 0,
+     "ptr": 137209462,
+     "screenChanges": 59
+    }
+   ],
+   "risesOff": [
+    {
+     "A": 102,
+     "E": 177,
+     "len": 75,
+     "mv": 339,
+     "atk": 0,
+     "ptr": 137209462,
+     "screenChanges": 59
+    }
+   ]
+  },
+  "idle98-double-kick-opp-hitmonlee-snorlax": {
+   "move": 24,
+   "class": "multi-hit",
+   "attackerSide": "opponent",
+   "attacker": "HITMONLEE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "bodies": [
+    {
+     "mv": 24,
+     "atk": 1,
+     "X": 137203257,
+     "G": 72,
+     "F_att": 89,
+     "A": 92,
+     "E": 127,
+     "F_after": 129,
+     "F_es": 130,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 35,
+     "spanOn": 40,
+     "attMinusG_on": 17,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 132,
+     "off": {
+      "G": 72,
+      "F_att": 89,
+      "F_after": 124,
+      "F_es": 125,
+      "span": 35,
+      "attMinusG": 17,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 24,
+     "atk": 1,
+     "X": 137203257,
+     "G": 240,
+     "F_att": 259,
+     "A": 262,
+     "E": 297,
+     "F_after": 299,
+     "F_es": 300,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 35,
+     "spanOn": 40,
+     "attMinusG_on": 19,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 302,
+     "off": {
+      "G": 235,
+      "F_att": 254,
+      "F_after": 289,
+      "F_es": 290,
+      "span": 35,
+      "attMinusG": 19,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 0,
+     "X": 137202228,
+     "G": 770,
+     "F_att": 776,
+     "A": 779,
+     "E": 820,
+     "F_after": 822,
+     "F_es": 823,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 825,
+     "off": {
+      "G": 760,
+      "F_att": 766,
+      "F_after": 801,
+      "F_es": 802,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [
+    {
+     "A": 919,
+     "E": null,
+     "len": null,
+     "mv": 0,
+     "atk": 0,
+     "ptr": 137213899,
+     "screenChanges": 3
+    }
+   ],
+   "risesOff": []
+  },
+  "idle98-double-kick-ply-hitmonlee-snorlax": {
+   "move": 24,
+   "class": "multi-hit",
+   "attackerSide": "player",
+   "attacker": "HITMONLEE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "bodies": [
+    {
+     "mv": 24,
+     "atk": 0,
+     "X": 137203257,
+     "G": 68,
+     "F_att": 85,
+     "A": 88,
+     "E": 123,
+     "F_after": 125,
+     "F_es": 126,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 35,
+     "spanOn": 40,
+     "attMinusG_on": 17,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 128,
+     "off": {
+      "G": 68,
+      "F_att": 85,
+      "F_after": 120,
+      "F_es": 121,
+      "span": 35,
+      "attMinusG": 17,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 24,
+     "atk": 0,
+     "X": 137203257,
+     "G": 219,
+     "F_att": 238,
+     "A": 241,
+     "E": 276,
+     "F_after": 278,
+     "F_es": 279,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 35,
+     "spanOn": 40,
+     "attMinusG_on": 19,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 281,
+     "off": {
+      "G": 214,
+      "F_att": 233,
+      "F_after": 268,
+      "F_es": 269,
+      "span": 35,
+      "attMinusG": 19,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 593,
+     "F_att": 599,
+     "A": 602,
+     "E": 643,
+     "F_after": 645,
+     "F_es": 646,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 648,
+     "off": {
+      "G": 583,
+      "F_att": 589,
+      "F_after": 624,
+      "F_es": 625,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-dynamic-punch-opp-machamp-snorlax": {
+   "move": 223,
+   "class": "miss",
+   "attackerSide": "opponent",
+   "attacker": "MACHAMP",
+   "target": "SNORLAX",
+   "seed": 305419898,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "bodies": [
+    {
+     "mv": 33,
+     "atk": 0,
+     "X": 137202228,
+     "G": 234,
+     "F_att": 240,
+     "A": 243,
+     "E": 284,
+     "F_after": 286,
+     "F_es": 287,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 289,
+     "off": {
+      "G": 234,
+      "F_att": 240,
+      "F_after": 275,
+      "F_es": 276,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": [],
+   "noAttackerBody": {
+    "ptrRunsOn": [
+     [
+      137204710,
+      39,
+      1
+     ],
+     [
+      137204716,
+      40,
+      1
+     ],
+     [
+      137202176,
+      41,
+      1
+     ],
+     [
+      137202214,
+      42,
+      1
+     ],
+     [
+      137202215,
+      43,
+      1
+     ],
+     [
+      137202270,
+      44,
+      1
+     ],
+     [
+      137202271,
+      45,
+      31
+     ],
+     [
+      137202272,
+      76,
+      32
+     ],
+     [
+      137202275,
+      108,
+      1
+     ],
+     [
+      137202276,
+      109,
+      1
+     ],
+     [
+      137202277,
+      110,
+      92
+     ],
+     [
+      137202280,
+      202,
+      1
+     ],
+     [
+      137202254,
+      203,
+      1
+     ],
+     [
+      137202260,
+      204,
+      3
+     ],
+     [
+      137202263,
+      207,
+      4
+     ],
+     [
+      137202176,
+      211,
+      1
+     ],
+     [
+      137202214,
+      212,
+      1
+     ],
+     [
+      137202215,
+      213,
+      1
+     ],
+     [
+      137202222,
+      214,
+      1
+     ],
+     [
+      137202223,
+      215,
+      21
+     ],
+     [
+      137202224,
+      236,
+      1
+     ],
+     [
+      137202225,
+      237,
+      1
+     ],
+     [
+      137202226,
+      238,
+      1
+     ],
+     [
+      137202227,
+      239,
+      1
+     ],
+     [
+      137202228,
+      240,
+      1
+     ],
+     [
+      137202229,
+      241,
+      45
+     ],
+     [
+      137202230,
+      286,
+      1
+     ],
+     [
+      137202231,
+      287,
+      1
+     ],
+     [
+      137202233,
+      288,
+      34
+     ],
+     [
+      137202234,
+      322,
+      1
+     ],
+     [
+      137202236,
+      323,
+      34
+     ],
+     [
+      137202238,
+      357,
+      1
+     ],
+     [
+      137202239,
+      358,
+      1
+     ],
+     [
+      137202242,
+      359,
+      1
+     ],
+     [
+      137202243,
+      360,
+      1
+     ],
+     [
+      137202246,
+      361,
+      1
+     ],
+     [
+      137202247,
+      362,
+      1
+     ],
+     [
+      137202254,
+      363,
+      1
+     ],
+     [
+      137202260,
+      364,
+      3
+     ],
+     [
+      137202263,
+      367,
+      368
+     ]
+    ],
+    "ptrRunsOff": [
+     [
+      137204710,
+      39,
+      1
+     ],
+     [
+      137204716,
+      40,
+      1
+     ],
+     [
+      137202176,
+      41,
+      1
+     ],
+     [
+      137202214,
+      42,
+      1
+     ],
+     [
+      137202215,
+      43,
+      1
+     ],
+     [
+      137202270,
+      44,
+      1
+     ],
+     [
+      137202271,
+      45,
+      31
+     ],
+     [
+      137202272,
+      76,
+      32
+     ],
+     [
+      137202275,
+      108,
+      1
+     ],
+     [
+      137202276,
+      109,
+      1
+     ],
+     [
+      137202277,
+      110,
+      92
+     ],
+     [
+      137202280,
+      202,
+      1
+     ],
+     [
+      137202254,
+      203,
+      1
+     ],
+     [
+      137202260,
+      204,
+      3
+     ],
+     [
+      137202263,
+      207,
+      4
+     ],
+     [
+      137202176,
+      211,
+      1
+     ],
+     [
+      137202214,
+      212,
+      1
+     ],
+     [
+      137202215,
+      213,
+      1
+     ],
+     [
+      137202222,
+      214,
+      1
+     ],
+     [
+      137202223,
+      215,
+      21
+     ],
+     [
+      137202224,
+      236,
+      1
+     ],
+     [
+      137202225,
+      237,
+      1
+     ],
+     [
+      137202226,
+      238,
+      1
+     ],
+     [
+      137202227,
+      239,
+      1
+     ],
+     [
+      137202228,
+      240,
+      1
+     ],
+     [
+      137210809,
+      241,
+      32
+     ],
+     [
+      137210812,
+      273,
+      1
+     ],
+     [
+      137202229,
+      274,
+      1
+     ],
+     [
+      137202230,
+      275,
+      1
+     ],
+     [
+      137202231,
+      276,
+      1
+     ],
+     [
+      137202233,
+      277,
+      34
+     ],
+     [
+      137202234,
+      311,
+      1
+     ],
+     [
+      137202236,
+      312,
+      34
+     ],
+     [
+      137202238,
+      346,
+      1
+     ],
+     [
+      137202239,
+      347,
+      1
+     ],
+     [
+      137202242,
+      348,
+      1
+     ],
+     [
+      137202243,
+      349,
+      1
+     ],
+     [
+      137202246,
+      350,
+      1
+     ],
+     [
+      137202247,
+      351,
+      1
+     ],
+     [
+      137202254,
+      352,
+      1
+     ]
+    ],
+    "first11RunsEqualOnOff": true,
+    "on": {
+     "G": 74,
+     "pauseStart": 76,
+     "pauseFrames": 32,
+     "firstChangeAfterPause": 111,
+     "G1ToNextChange": 36
+    },
+    "off": {
+     "G": 74,
+     "pauseStart": 76,
+     "pauseFrames": 32,
+     "firstChangeAfterPause": 111,
+     "G1ToNextChange": 36
+    }
+   }
+  },
+  "idle98-dynamic-punch-ply-machamp-snorlax": {
+   "move": 223,
+   "class": "miss",
+   "attackerSide": "player",
+   "attacker": "MACHAMP",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "bodies": [
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 230,
+     "F_att": 236,
+     "A": 239,
+     "E": 280,
+     "F_after": 282,
+     "F_es": 283,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 285,
+     "off": {
+      "G": 230,
+      "F_att": 236,
+      "F_after": 271,
+      "F_es": 272,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": [],
+   "noAttackerBody": {
+    "ptrRunsOn": [
+     [
+      137204710,
+      39,
+      1
+     ],
+     [
+      137204716,
+      40,
+      1
+     ],
+     [
+      137202176,
+      41,
+      1
+     ],
+     [
+      137202214,
+      42,
+      1
+     ],
+     [
+      137202215,
+      43,
+      1
+     ],
+     [
+      137202270,
+      44,
+      1
+     ],
+     [
+      137202271,
+      45,
+      27
+     ],
+     [
+      137202272,
+      72,
+      32
+     ],
+     [
+      137202275,
+      104,
+      1
+     ],
+     [
+      137202276,
+      105,
+      1
+     ],
+     [
+      137202277,
+      106,
+      88
+     ],
+     [
+      137202280,
+      194,
+      1
+     ],
+     [
+      137202254,
+      195,
+      1
+     ],
+     [
+      137202260,
+      196,
+      3
+     ],
+     [
+      137202263,
+      199,
+      4
+     ],
+     [
+      137202176,
+      203,
+      1
+     ],
+     [
+      137202214,
+      204,
+      1
+     ],
+     [
+      137202215,
+      205,
+      1
+     ],
+     [
+      137202222,
+      206,
+      1
+     ],
+     [
+      137202223,
+      207,
+      25
+     ],
+     [
+      137202224,
+      232,
+      1
+     ],
+     [
+      137202225,
+      233,
+      1
+     ],
+     [
+      137202226,
+      234,
+      1
+     ],
+     [
+      137202227,
+      235,
+      1
+     ],
+     [
+      137202228,
+      236,
+      1
+     ],
+     [
+      137202229,
+      237,
+      45
+     ],
+     [
+      137202230,
+      282,
+      1
+     ],
+     [
+      137202231,
+      283,
+      1
+     ],
+     [
+      137202233,
+      284,
+      34
+     ],
+     [
+      137202234,
+      318,
+      1
+     ],
+     [
+      137202236,
+      319,
+      28
+     ],
+     [
+      137202238,
+      347,
+      1
+     ],
+     [
+      137202239,
+      348,
+      1
+     ],
+     [
+      137202242,
+      349,
+      1
+     ],
+     [
+      137202243,
+      350,
+      1
+     ],
+     [
+      137202246,
+      351,
+      1
+     ],
+     [
+      137202247,
+      352,
+      1
+     ],
+     [
+      137202254,
+      353,
+      1
+     ],
+     [
+      137202260,
+      354,
+      3
+     ],
+     [
+      137202263,
+      357,
+      378
+     ]
+    ],
+    "ptrRunsOff": [
+     [
+      137204710,
+      39,
+      1
+     ],
+     [
+      137204716,
+      40,
+      1
+     ],
+     [
+      137202176,
+      41,
+      1
+     ],
+     [
+      137202214,
+      42,
+      1
+     ],
+     [
+      137202215,
+      43,
+      1
+     ],
+     [
+      137202270,
+      44,
+      1
+     ],
+     [
+      137202271,
+      45,
+      27
+     ],
+     [
+      137202272,
+      72,
+      32
+     ],
+     [
+      137202275,
+      104,
+      1
+     ],
+     [
+      137202276,
+      105,
+      1
+     ],
+     [
+      137202277,
+      106,
+      88
+     ],
+     [
+      137202280,
+      194,
+      1
+     ],
+     [
+      137202254,
+      195,
+      1
+     ],
+     [
+      137202260,
+      196,
+      3
+     ],
+     [
+      137202263,
+      199,
+      4
+     ],
+     [
+      137202176,
+      203,
+      1
+     ],
+     [
+      137202214,
+      204,
+      1
+     ],
+     [
+      137202215,
+      205,
+      1
+     ],
+     [
+      137202222,
+      206,
+      1
+     ],
+     [
+      137202223,
+      207,
+      25
+     ],
+     [
+      137202224,
+      232,
+      1
+     ],
+     [
+      137202225,
+      233,
+      1
+     ],
+     [
+      137202226,
+      234,
+      1
+     ],
+     [
+      137202227,
+      235,
+      1
+     ],
+     [
+      137202228,
+      236,
+      1
+     ],
+     [
+      137210809,
+      237,
+      32
+     ],
+     [
+      137210812,
+      269,
+      1
+     ],
+     [
+      137202229,
+      270,
+      1
+     ],
+     [
+      137202230,
+      271,
+      1
+     ],
+     [
+      137202231,
+      272,
+      1
+     ],
+     [
+      137202233,
+      273,
+      34
+     ],
+     [
+      137202234,
+      307,
+      1
+     ],
+     [
+      137202236,
+      308,
+      28
+     ],
+     [
+      137202238,
+      336,
+      1
+     ],
+     [
+      137202239,
+      337,
+      1
+     ],
+     [
+      137202242,
+      338,
+      1
+     ],
+     [
+      137202243,
+      339,
+      1
+     ],
+     [
+      137202246,
+      340,
+      1
+     ],
+     [
+      137202247,
+      341,
+      1
+     ],
+     [
+      137202254,
+      342,
+      1
+     ]
+    ],
+    "first11RunsEqualOnOff": true,
+    "on": {
+     "G": 70,
+     "pauseStart": 72,
+     "pauseFrames": 32,
+     "firstChangeAfterPause": 107,
+     "G1ToNextChange": 36
+    },
+    "off": {
+     "G": 70,
+     "pauseStart": 72,
+     "pauseFrames": 32,
+     "firstChangeAfterPause": 107,
+     "G1ToNextChange": 36
+    }
+   }
+  },
+  "idle98-earthquake-opp-rhydon-snorlax": {
+   "move": 89,
+   "class": "hit",
+   "attackerSide": "opponent",
+   "attacker": "RHYDON",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "bodies": [
+    {
+     "mv": 89,
+     "atk": 1,
+     "X": 137206910,
+     "G": 67,
+     "F_att": 79,
+     "A": 82,
+     "E": 289,
+     "F_after": 291,
+     "F_es": 292,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 207,
+     "spanOn": 212,
+     "attMinusG_on": 12,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 294,
+     "off": {
+      "G": 67,
+      "F_att": 79,
+      "F_after": 114,
+      "F_es": 115,
+      "span": 35,
+      "attMinusG": 12,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 0,
+     "X": 137202228,
+     "G": 479,
+     "F_att": 485,
+     "A": 488,
+     "E": 529,
+     "F_after": 531,
+     "F_es": 532,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 534,
+     "off": {
+      "G": 302,
+      "F_att": 308,
+      "F_after": 343,
+      "F_es": 344,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-earthquake-ply-rhydon-snorlax": {
+   "move": 89,
+   "class": "hit",
+   "attackerSide": "player",
+   "attacker": "RHYDON",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "bodies": [
+    {
+     "mv": 89,
+     "atk": 0,
+     "X": 137206910,
+     "G": 63,
+     "F_att": 75,
+     "A": 78,
+     "E": 285,
+     "F_after": 287,
+     "F_es": 288,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 207,
+     "spanOn": 212,
+     "attMinusG_on": 12,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 290,
+     "off": {
+      "G": 63,
+      "F_att": 75,
+      "F_after": 110,
+      "F_es": 111,
+      "span": 35,
+      "attMinusG": 12,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 455,
+     "F_att": 461,
+     "A": 464,
+     "E": 505,
+     "F_after": 507,
+     "F_es": 508,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 510,
+     "off": {
+      "G": 278,
+      "F_att": 284,
+      "F_after": 319,
+      "F_es": 320,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-karate-chop-opp-machoke-snorlax": {
+   "move": 2,
+   "class": "hit",
+   "attackerSide": "opponent",
+   "attacker": "MACHOKE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "bodies": [
+    {
+     "mv": 2,
+     "atk": 1,
+     "X": 137202228,
+     "G": 71,
+     "F_att": 77,
+     "A": 80,
+     "E": 128,
+     "F_after": 130,
+     "F_es": 131,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 48,
+     "spanOn": 53,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 133,
+     "off": {
+      "G": 71,
+      "F_att": 77,
+      "F_after": 112,
+      "F_es": 113,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 0,
+     "X": 137202228,
+     "G": 385,
+     "F_att": 391,
+     "A": 394,
+     "E": 435,
+     "F_after": 437,
+     "F_es": 438,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 440,
+     "off": {
+      "G": 367,
+      "F_att": 373,
+      "F_after": 408,
+      "F_es": 409,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-karate-chop-ply-machoke-snorlax": {
+   "move": 2,
+   "class": "hit",
+   "attackerSide": "player",
+   "attacker": "MACHOKE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "bodies": [
+    {
+     "mv": 2,
+     "atk": 0,
+     "X": 137202228,
+     "G": 67,
+     "F_att": 73,
+     "A": 76,
+     "E": 124,
+     "F_after": 126,
+     "F_es": 127,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 48,
+     "spanOn": 53,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 129,
+     "off": {
+      "G": 67,
+      "F_att": 73,
+      "F_after": 108,
+      "F_es": 109,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 359,
+     "F_att": 365,
+     "A": 368,
+     "E": 409,
+     "F_after": 411,
+     "F_es": 412,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 414,
+     "off": {
+      "G": 341,
+      "F_att": 347,
+      "F_after": 382,
+      "F_es": 383,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-psychic-opp-alakazam-snorlax": {
+   "move": 94,
+   "class": "hit",
+   "attackerSide": "opponent",
+   "attacker": "ALAKAZAM",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "bodies": [
+    {
+     "mv": 94,
+     "atk": 1,
+     "X": 137202228,
+     "G": 70,
+     "F_att": 76,
+     "A": 79,
+     "E": 223,
+     "F_after": 225,
+     "F_es": 226,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 144,
+     "spanOn": 149,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 228,
+     "off": {
+      "G": 70,
+      "F_att": 76,
+      "F_after": 111,
+      "F_es": 112,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 0,
+     "X": 137202228,
+     "G": 364,
+     "F_att": 370,
+     "A": 373,
+     "E": 414,
+     "F_after": 416,
+     "F_es": 417,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 419,
+     "off": {
+      "G": 250,
+      "F_att": 256,
+      "F_after": 291,
+      "F_es": 292,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-psychic-ply-alakazam-snorlax": {
+   "move": 94,
+   "class": "hit",
+   "attackerSide": "player",
+   "attacker": "ALAKAZAM",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "bodies": [
+    {
+     "mv": 94,
+     "atk": 0,
+     "X": 137202228,
+     "G": 66,
+     "F_att": 72,
+     "A": 75,
+     "E": 219,
+     "F_after": 221,
+     "F_es": 222,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 144,
+     "spanOn": 149,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 224,
+     "off": {
+      "G": 66,
+      "F_att": 72,
+      "F_after": 107,
+      "F_es": 108,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 354,
+     "F_att": 360,
+     "A": 363,
+     "E": 404,
+     "F_after": 406,
+     "F_es": 407,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 409,
+     "off": {
+      "G": 240,
+      "F_att": 246,
+      "F_after": 281,
+      "F_es": 282,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-razor-wind-opp-scyther-snorlax": {
+   "move": 13,
+   "class": "two-turn",
+   "attackerSide": "opponent",
+   "attacker": "SCYTHER",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "bodies": [
+    {
+     "mv": 13,
+     "atk": 1,
+     "X": 137203828,
+     "G": 46,
+     "F_att": 47,
+     "A": 50,
+     "E": 95,
+     "F_after": 97,
+     "F_es": null,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 45,
+     "spanOn": 50,
+     "attMinusG_on": 1,
+     "esMinusAfter_on": null,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": false,
+     "rowEEqualsEminus1": false,
+     "firstChangeAfterE": 103,
+     "off": {
+      "G": 46,
+      "F_att": 47,
+      "F_after": 82,
+      "F_es": null,
+      "span": 35,
+      "attMinusG": 1,
+      "esMinusAfter": null,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 0,
+     "X": 137202228,
+     "G": 234,
+     "F_att": 240,
+     "A": 243,
+     "E": 284,
+     "F_after": 286,
+     "F_es": 287,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 289,
+     "off": {
+      "G": 219,
+      "F_att": 225,
+      "F_after": 260,
+      "F_es": 261,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-razor-wind-ply-scyther-snorlax": {
+   "move": 13,
+   "class": "two-turn",
+   "attackerSide": "player",
+   "attacker": "SCYTHER",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "bodies": [
+    {
+     "mv": 13,
+     "atk": 0,
+     "X": 137203828,
+     "G": 46,
+     "F_att": 47,
+     "A": 50,
+     "E": 95,
+     "F_after": 97,
+     "F_es": null,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 45,
+     "spanOn": 50,
+     "attMinusG_on": 1,
+     "esMinusAfter_on": null,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": false,
+     "rowEEqualsEminus1": false,
+     "firstChangeAfterE": 103,
+     "off": {
+      "G": 46,
+      "F_att": 47,
+      "F_after": 82,
+      "F_es": null,
+      "span": 35,
+      "attMinusG": 1,
+      "esMinusAfter": null,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 234,
+     "F_att": 240,
+     "A": 243,
+     "E": 284,
+     "F_after": 286,
+     "F_es": 287,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 289,
+     "off": {
+      "G": 219,
+      "F_att": 225,
+      "F_after": 260,
+      "F_es": 261,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 13,
+     "atk": 0,
+     "X": 137202228,
+     "G": 405,
+     "F_att": 411,
+     "A": 414,
+     "E": 486,
+     "F_after": 488,
+     "F_es": 489,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 72,
+     "spanOn": 77,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 491,
+     "off": {
+      "G": 379,
+      "F_att": 385,
+      "F_after": 420,
+      "F_es": 421,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 610,
+     "F_att": 616,
+     "A": 619,
+     "E": 660,
+     "F_after": 662,
+     "F_es": 663,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 665,
+     "off": {
+      "G": 542,
+      "F_att": 548,
+      "F_after": 583,
+      "F_es": 584,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-water-pulse-opp-blastoise-golem": {
+   "move": 352,
+   "class": "ko",
+   "attackerSide": "opponent",
+   "attacker": "BLASTOISE",
+   "target": "GOLEM",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "bodies": [
+    {
+     "mv": 352,
+     "atk": 1,
+     "X": 137202228,
+     "G": 75,
+     "F_att": 81,
+     "A": 84,
+     "E": 243,
+     "F_after": 245,
+     "F_es": 246,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 159,
+     "spanOn": 164,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 248,
+     "off": {
+      "G": 75,
+      "F_att": 81,
+      "F_after": 116,
+      "F_es": 117,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [],
+   "risesOff": []
+  },
+  "idle98-water-pulse-ply-blastoise-golem": {
+   "move": 352,
+   "class": "ko",
+   "attackerSide": "player",
+   "attacker": "BLASTOISE",
+   "target": "GOLEM",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "bodies": [
+    {
+     "mv": 352,
+     "atk": 0,
+     "X": 137202228,
+     "G": 71,
+     "F_att": 77,
+     "A": 80,
+     "E": 239,
+     "F_after": 241,
+     "F_es": 242,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 159,
+     "spanOn": 164,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 244,
+     "off": {
+      "G": 71,
+      "F_att": 77,
+      "F_after": 112,
+      "F_es": 113,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    },
+    {
+     "mv": 33,
+     "atk": 1,
+     "X": 137202228,
+     "G": 546,
+     "F_att": 552,
+     "A": 555,
+     "E": 596,
+     "F_after": 598,
+     "F_es": 599,
+     "pre": 3,
+     "post": 2,
+     "E_minus_A": 41,
+     "spanOn": 46,
+     "attMinusG_on": 6,
+     "esMinusAfter_on": 1,
+     "preRowsStatic": true,
+     "rowAEqualsPre": true,
+     "postRowsEqualE": true,
+     "postRowsEqualEminus1": true,
+     "rowEEqualsEminus1": true,
+     "firstChangeAfterE": 601,
+     "off": {
+      "G": 417,
+      "F_att": 423,
+      "F_after": 458,
+      "F_es": 459,
+      "span": 35,
+      "attMinusG": 6,
+      "esMinusAfter": 1,
+      "activeRises": 0
+     }
+    }
+   ],
+   "otherRisesOn": [
+    {
+     "A": 672,
+     "E": null,
+     "len": null,
+     "mv": 0,
+     "atk": 1,
+     "ptr": 137213899,
+     "screenChanges": 26
+    }
+   ],
+   "risesOff": []
+  }
+ },
+ "summary": {
+  "bodies": 37,
+  "pre3": 37,
+  "post2": 37,
+  "preStatic": 37,
+  "postEqualsE": 37,
+  "off35": 37,
+  "attMinusGSame": 37,
+  "esMinusAfterSame": 37,
+  "pairedOff": 37
+ }
+}

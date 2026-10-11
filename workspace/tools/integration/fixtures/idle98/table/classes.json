@@ -1,0 +1,976 @@
+{
+ "schema": "idle98-classes/v1",
+ "rows": [
+  {
+   "scenario": "idle98-bite-opp-houndoom-snorlax",
+   "move": 44,
+   "side": "opponent",
+   "class": "hit",
+   "battle": 19,
+   "attG": 6,
+   "pre": 3,
+   "E_minus_A": 40,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 45,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 26,
+   "prodNext": "hit-animation",
+   "prodOff": 42,
+   "live": true,
+   "romOffG1ToHit": 42,
+   "L_off": 0,
+   "L_on": 26,
+   "L_onDecomposed": {
+    "offCommandMinus36": 6,
+    "pre": 3,
+    "N+trail+1": 15,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 21
+  },
+  {
+   "scenario": "idle98-bite-ply-houndoom-snorlax",
+   "move": 44,
+   "side": "player",
+   "class": "hit",
+   "battle": 2,
+   "attG": 6,
+   "pre": 3,
+   "E_minus_A": 40,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 45,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 26,
+   "prodNext": "hit-animation",
+   "prodOff": 42,
+   "live": true,
+   "romOffG1ToHit": 42,
+   "L_off": 0,
+   "L_on": 26,
+   "L_onDecomposed": {
+    "offCommandMinus36": 6,
+    "pre": 3,
+    "N+trail+1": 15,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 21
+  },
+  {
+   "scenario": "idle98-bulk-up-opp-primeape-onix",
+   "move": 339,
+   "side": "opponent",
+   "class": "status (no hit)",
+   "battle": 398,
+   "attG": 3,
+   "pre": 3,
+   "E_minus_A": 107,
+   "post": 2,
+   "esMinusAfter": null,
+   "spanOn": 112,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 104,
+   "prodNext": "stat",
+   "prodOff": 0,
+   "live": true,
+   "L_onMinusL_off": -27
+  },
+  {
+   "scenario": "idle98-bulk-up-ply-primeape-onix",
+   "move": 339,
+   "side": "player",
+   "class": "status (no hit)",
+   "battle": 154,
+   "attG": 3,
+   "pre": 3,
+   "E_minus_A": 107,
+   "post": 2,
+   "esMinusAfter": null,
+   "spanOn": 112,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 104,
+   "prodNext": "stat",
+   "prodOff": 0,
+   "live": true,
+   "L_onMinusL_off": -27
+  },
+  {
+   "scenario": "idle98-double-kick-opp-hitmonlee-snorlax",
+   "move": 24,
+   "side": "opponent",
+   "class": "multi-hit body 1",
+   "battle": 201,
+   "attG": 17,
+   "pre": 3,
+   "E_minus_A": 35,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 40,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 36,
+   "prodNext": "hit-animation",
+   "prodOff": 53,
+   "live": true,
+   "romOffG1ToHit": 53,
+   "L_off": 0,
+   "L_on": 22,
+   "L_onDecomposed": {
+    "offCommandMinus36": 17,
+    "pre": 3,
+    "N+trail+1": 0,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 17
+  },
+  {
+   "scenario": "idle98-double-kick-opp-hitmonlee-snorlax",
+   "move": 24,
+   "side": "opponent",
+   "class": "multi-hit body 2",
+   "battle": 201,
+   "attG": 19,
+   "pre": 3,
+   "E_minus_A": 35,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 40,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 36,
+   "prodNext": "hit-animation",
+   "prodOff": 115,
+   "live": true,
+   "romOffG1ToHit": 55,
+   "L_off": null,
+   "L_on": 84,
+   "L_onDecomposed": {
+    "offCommandMinus36": 79,
+    "pre": 3,
+    "N+trail+1": 0,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 79
+  },
+  {
+   "scenario": "idle98-double-kick-ply-hitmonlee-snorlax",
+   "move": 24,
+   "side": "player",
+   "class": "multi-hit body 1",
+   "battle": 27,
+   "attG": 17,
+   "pre": 3,
+   "E_minus_A": 35,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 40,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 36,
+   "prodNext": "hit-animation",
+   "prodOff": 53,
+   "live": true,
+   "romOffG1ToHit": 53,
+   "L_off": 0,
+   "L_on": 22,
+   "L_onDecomposed": {
+    "offCommandMinus36": 17,
+    "pre": 3,
+    "N+trail+1": 0,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 17
+  },
+  {
+   "scenario": "idle98-double-kick-ply-hitmonlee-snorlax",
+   "move": 24,
+   "side": "player",
+   "class": "multi-hit body 2",
+   "battle": 27,
+   "attG": 19,
+   "pre": 3,
+   "E_minus_A": 35,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 40,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 36,
+   "prodNext": "hit-animation",
+   "prodOff": 115,
+   "live": true,
+   "romOffG1ToHit": 55,
+   "L_off": null,
+   "L_on": 84,
+   "L_onDecomposed": {
+    "offCommandMinus36": 79,
+    "pre": 3,
+    "N+trail+1": 0,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 79
+  },
+  {
+   "scenario": "idle98-earthquake-opp-rhydon-snorlax",
+   "move": 89,
+   "side": "opponent",
+   "class": "hit",
+   "battle": 4,
+   "attG": 12,
+   "pre": 3,
+   "E_minus_A": 207,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 212,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 198,
+   "prodNext": "hit-animation",
+   "prodOff": 48,
+   "live": true,
+   "romOffG1ToHit": 48,
+   "L_off": 0,
+   "L_on": 27,
+   "L_onDecomposed": {
+    "offCommandMinus36": 12,
+    "pre": 3,
+    "N+trail+1": 10,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 22
+  },
+  {
+   "scenario": "idle98-earthquake-ply-rhydon-snorlax",
+   "move": 89,
+   "side": "player",
+   "class": "hit",
+   "battle": 6,
+   "attG": 12,
+   "pre": 3,
+   "E_minus_A": 207,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 212,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 198,
+   "prodNext": "hit-animation",
+   "prodOff": 48,
+   "live": true,
+   "romOffG1ToHit": 48,
+   "L_off": 0,
+   "L_on": 27,
+   "L_onDecomposed": {
+    "offCommandMinus36": 12,
+    "pre": 3,
+    "N+trail+1": 10,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 22
+  },
+  {
+   "scenario": "idle98-karate-chop-opp-machoke-snorlax",
+   "move": 2,
+   "side": "opponent",
+   "class": "hit",
+   "battle": 718,
+   "attG": 6,
+   "pre": 3,
+   "E_minus_A": 48,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 53,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 49,
+   "prodNext": "hit-animation",
+   "prodOff": 42,
+   "live": true,
+   "romOffG1ToHit": 42,
+   "L_off": 0,
+   "L_on": 11,
+   "L_onDecomposed": {
+    "offCommandMinus36": 6,
+    "pre": 3,
+    "N+trail+1": 0,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 6
+  },
+  {
+   "scenario": "idle98-karate-chop-ply-machoke-snorlax",
+   "move": 2,
+   "side": "player",
+   "class": "hit",
+   "battle": 268,
+   "attG": 6,
+   "pre": 3,
+   "E_minus_A": 48,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 53,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 49,
+   "prodNext": "hit-animation",
+   "prodOff": 42,
+   "live": true,
+   "romOffG1ToHit": 42,
+   "L_off": 0,
+   "L_on": 11,
+   "L_onDecomposed": {
+    "offCommandMinus36": 6,
+    "pre": 3,
+    "N+trail+1": 0,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 6
+  },
+  {
+   "scenario": "idle98-psychic-opp-alakazam-snorlax",
+   "move": 94,
+   "side": "opponent",
+   "class": "hit",
+   "battle": 2,
+   "attG": 6,
+   "pre": 3,
+   "E_minus_A": 144,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 149,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 140,
+   "prodNext": "hit-animation",
+   "prodOff": 42,
+   "live": true,
+   "romOffG1ToHit": 42,
+   "L_off": 0,
+   "L_on": 16,
+   "L_onDecomposed": {
+    "offCommandMinus36": 6,
+    "pre": 3,
+    "N+trail+1": 5,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 11
+  },
+  {
+   "scenario": "idle98-psychic-ply-alakazam-snorlax",
+   "move": 94,
+   "side": "player",
+   "class": "hit",
+   "battle": 398,
+   "attG": 6,
+   "pre": 3,
+   "E_minus_A": 144,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 149,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 140,
+   "prodNext": "hit-animation",
+   "prodOff": 42,
+   "live": true,
+   "romOffG1ToHit": 42,
+   "L_off": 0,
+   "L_on": 16,
+   "L_onDecomposed": {
+    "offCommandMinus36": 6,
+    "pre": 3,
+    "N+trail+1": 5,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 11
+  },
+  {
+   "scenario": "idle98-razor-wind-opp-scyther-snorlax",
+   "move": 13,
+   "side": "opponent",
+   "class": "two-turn charge",
+   "battle": 250,
+   "attG": 1,
+   "pre": 3,
+   "E_minus_A": 45,
+   "post": 2,
+   "esMinusAfter": null,
+   "spanOn": 50,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 45,
+   "prodNext": "message",
+   "prodOff": 0,
+   "live": true,
+   "L_onMinusL_off": -30
+  },
+  {
+   "scenario": "idle98-razor-wind-ply-scyther-snorlax",
+   "move": 13,
+   "side": "player",
+   "class": "two-turn charge",
+   "battle": 201,
+   "attG": 1,
+   "pre": 3,
+   "E_minus_A": 45,
+   "post": 2,
+   "esMinusAfter": null,
+   "spanOn": 50,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 45,
+   "prodNext": "message",
+   "prodOff": 0,
+   "live": true,
+   "L_onMinusL_off": -30
+  },
+  {
+   "scenario": "idle98-razor-wind-ply-scyther-snorlax",
+   "move": 13,
+   "side": "player",
+   "class": "two-turn strike",
+   "battle": 201,
+   "attG": 6,
+   "pre": 3,
+   "E_minus_A": 72,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 77,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true
+  },
+  {
+   "scenario": "idle98-water-pulse-opp-blastoise-golem",
+   "move": 352,
+   "side": "opponent",
+   "class": "hit (KO)",
+   "battle": 19,
+   "attG": 6,
+   "pre": 3,
+   "E_minus_A": 159,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 164,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 160,
+   "prodNext": "hit-animation",
+   "prodOff": 42,
+   "live": true,
+   "romOffG1ToHit": 42,
+   "L_off": 0,
+   "L_on": 11,
+   "L_onDecomposed": {
+    "offCommandMinus36": 6,
+    "pre": 3,
+    "N+trail+1": 0,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 6
+  },
+  {
+   "scenario": "idle98-water-pulse-ply-blastoise-golem",
+   "move": 352,
+   "side": "player",
+   "class": "hit (KO)",
+   "battle": 0,
+   "attG": 6,
+   "pre": 3,
+   "E_minus_A": 159,
+   "post": 2,
+   "esMinusAfter": 1,
+   "spanOn": 164,
+   "spanOff": 35,
+   "preRowsStatic": true,
+   "rowAEqualsPre": true,
+   "postRowsEqualE": true,
+   "D": 160,
+   "prodNext": "hit-animation",
+   "prodOff": 42,
+   "live": true,
+   "romOffG1ToHit": 42,
+   "L_off": 0,
+   "L_on": 11,
+   "L_onDecomposed": {
+    "offCommandMinus36": 6,
+    "pre": 3,
+    "N+trail+1": 0,
+    "post": 2,
+    "effectivenesssound": 1
+   },
+   "residualAfterPre3Post2": 6
+  }
+ ],
+ "misses": [
+  {
+   "battle": 0,
+   "on": [
+    [
+     "[\"GRIMER used\",\"SLUDGE!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"GRIMER used\",\"ROCK TOMB!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"POLIWHIRL used\",\"DOUBLESLAP!\"]",
+     25,
+     89
+    ],
+    [
+     "[\"Foe TENTACOOL used\",\"WRAP!\"]",
+     24,
+     93
+    ]
+   ],
+   "off": [
+    [
+     "[\"GRIMER used\",\"SLUDGE!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"GRIMER used\",\"ROCK TOMB!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"POLIWHIRL used\",\"DOUBLESLAP!\"]",
+     25,
+     89
+    ],
+    [
+     "[\"Foe TENTACOOL used\",\"WRAP!\"]",
+     24,
+     93
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 2,
+   "on": [
+    [
+     "[\"BLASTOISE used\",\"SEISMIC TOSS!\"]",
+     27,
+     89
+    ],
+    [
+     "[\"Foe MEDICHAM used\",\"HI JUMP KICK!\"]",
+     30,
+     92
+    ]
+   ],
+   "off": [
+    [
+     "[\"BLASTOISE used\",\"SEISMIC TOSS!\"]",
+     27,
+     89
+    ],
+    [
+     "[\"Foe MEDICHAM used\",\"HI JUMP KICK!\"]",
+     30,
+     92
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 4,
+   "on": [],
+   "off": [],
+   "identical": true
+  },
+  {
+   "battle": 6,
+   "on": [
+    [
+     "[\"GRAVELER used\",\"ROCK SLIDE!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"GRAVELER used\",\"ROCK SLIDE!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"Foe PARASECT used\",\"SPORE!\"]",
+     24,
+     92
+    ],
+    [
+     "[\"CAMERUPT used\",\"BODY SLAM!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"QUILAVA used\",\"CRUSH CLAW!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"Foe MACHOKE used\",\"CROSS CHOP!\"]",
+     27,
+     91
+    ],
+    [
+     "[\"QUILAVA used\",\"BODY SLAM!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"Foe MACHOKE used\",\"CROSS CHOP!\"]",
+     27,
+     91
+    ],
+    [
+     "[\"Foe MACHOKE used\",\"CROSS CHOP!\"]",
+     27,
+     91
+    ]
+   ],
+   "off": [
+    [
+     "[\"GRAVELER used\",\"ROCK SLIDE!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"GRAVELER used\",\"ROCK SLIDE!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"Foe PARASECT used\",\"SPORE!\"]",
+     24,
+     92
+    ],
+    [
+     "[\"CAMERUPT used\",\"BODY SLAM!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"QUILAVA used\",\"CRUSH CLAW!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"Foe MACHOKE used\",\"CROSS CHOP!\"]",
+     27,
+     91
+    ],
+    [
+     "[\"QUILAVA used\",\"BODY SLAM!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"Foe MACHOKE used\",\"CROSS CHOP!\"]",
+     27,
+     91
+    ],
+    [
+     "[\"Foe MACHOKE used\",\"CROSS CHOP!\"]",
+     27,
+     91
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 7,
+   "on": [
+    [
+     "[\"Foe MUK used\",\"DYNAMICPUNCH!\"]",
+     25,
+     88
+    ]
+   ],
+   "off": [
+    [
+     "[\"Foe MUK used\",\"DYNAMICPUNCH!\"]",
+     25,
+     88
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 19,
+   "on": [
+    [
+     "[\"SEALEO used\",\"ICE BALL!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"SEALEO used\",\"ICE BALL!\"]",
+     24,
+     88
+    ]
+   ],
+   "off": [
+    [
+     "[\"SEALEO used\",\"ICE BALL!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"SEALEO used\",\"ICE BALL!\"]",
+     24,
+     88
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 27,
+   "on": [
+    [
+     "[\"Foe ONIX used\",\"ROCK SLIDE!\"]",
+     24,
+     88
+    ]
+   ],
+   "off": [
+    [
+     "[\"Foe ONIX used\",\"ROCK SLIDE!\"]",
+     24,
+     88
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 154,
+   "on": [
+    [
+     "[\"HERACROSS used\",\"EARTHQUAKE!\"]",
+     25,
+     89
+    ],
+    [
+     "[\"HERACROSS used\",\"ATTRACT!\"]",
+     24,
+     89
+    ]
+   ],
+   "off": [
+    [
+     "[\"HERACROSS used\",\"EARTHQUAKE!\"]",
+     25,
+     89
+    ],
+    [
+     "[\"HERACROSS used\",\"ATTRACT!\"]",
+     24,
+     89
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 201,
+   "on": [],
+   "off": [],
+   "identical": true
+  },
+  {
+   "battle": 250,
+   "on": [
+    [
+     "[\"VOLBEAT used\",\"CONFUSE RAY!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"VOLBEAT used\",\"CONFUSE RAY!\"]",
+     24,
+     88
+    ]
+   ],
+   "off": [
+    [
+     "[\"VOLBEAT used\",\"CONFUSE RAY!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"VOLBEAT used\",\"CONFUSE RAY!\"]",
+     24,
+     88
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 268,
+   "on": [
+    [
+     "[\"PRIMEAPE used\",\"SWAGGER!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"PRIMEAPE used\",\"SCREECH!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"PRIMEAPE used\",\"SCREECH!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"PRIMEAPE used\",\"KARATE CHOP!\"]",
+     25,
+     88
+    ]
+   ],
+   "off": [
+    [
+     "[\"PRIMEAPE used\",\"SWAGGER!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"PRIMEAPE used\",\"SCREECH!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"PRIMEAPE used\",\"SCREECH!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"PRIMEAPE used\",\"KARATE CHOP!\"]",
+     25,
+     88
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 398,
+   "on": [],
+   "off": [],
+   "identical": true
+  },
+  {
+   "battle": 527,
+   "on": [
+    [
+     "[\"Foe GRUMPIG used\",\"PSYCHIC!\"]",
+     24,
+     91
+    ],
+    [
+     "[\"Foe GRUMPIG used\",\"ICE PUNCH!\"]",
+     26,
+     91
+    ]
+   ],
+   "off": [
+    [
+     "[\"Foe GRUMPIG used\",\"PSYCHIC!\"]",
+     24,
+     91
+    ],
+    [
+     "[\"Foe GRUMPIG used\",\"ICE PUNCH!\"]",
+     26,
+     91
+    ]
+   ],
+   "identical": true
+  },
+  {
+   "battle": 718,
+   "on": [
+    [
+     "[\"HUNTAIL used\",\"WHIRLPOOL!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"Foe PRIMEAPE used\",\"SCREECH!\"]",
+     25,
+     92
+    ]
+   ],
+   "off": [
+    [
+     "[\"HUNTAIL used\",\"WHIRLPOOL!\"]",
+     24,
+     88
+    ],
+    [
+     "[\"Foe PRIMEAPE used\",\"SCREECH!\"]",
+     25,
+     92
+    ]
+   ],
+   "identical": true
+  }
+ ]
+}

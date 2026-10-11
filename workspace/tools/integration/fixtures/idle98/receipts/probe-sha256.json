@@ -1,0 +1,151 @@
+{
+ "schema": "idle98-probe-sha256/v1",
+ "r1EqualsR2": 36,
+ "outputs": 36,
+ "sha256": {
+  "idle98-bite-opp-houndoom-snorlax-off.json": {
+   "r1": "26b451201cc5f8eb17ba1f0e663263dca8d4195b159b6fe12b32358cd9e1f9bb",
+   "r2": "26b451201cc5f8eb17ba1f0e663263dca8d4195b159b6fe12b32358cd9e1f9bb"
+  },
+  "idle98-bite-opp-houndoom-snorlax-on.json": {
+   "r1": "67b45195679031a8d2edc0598c14d8820095530134e5006a9f4a290dd84f31d6",
+   "r2": "67b45195679031a8d2edc0598c14d8820095530134e5006a9f4a290dd84f31d6"
+  },
+  "idle98-bite-ply-houndoom-snorlax-off.json": {
+   "r1": "c40cda8eb65f4e803debd9733ea981ff83a1545f4b954fad0efe412794ada120",
+   "r2": "c40cda8eb65f4e803debd9733ea981ff83a1545f4b954fad0efe412794ada120"
+  },
+  "idle98-bite-ply-houndoom-snorlax-on.json": {
+   "r1": "b62f463b79cf5bec0159c72da8b7c958eebf2030e4e3e8e78c4f1e46e652e5fd",
+   "r2": "b62f463b79cf5bec0159c72da8b7c958eebf2030e4e3e8e78c4f1e46e652e5fd"
+  },
+  "idle98-bulk-up-opp-primeape-onix-off.json": {
+   "r1": "768594a34d0c69fd7efe6b5575511c94486caee990f36275ff7e1a820ffd1ce1",
+   "r2": "768594a34d0c69fd7efe6b5575511c94486caee990f36275ff7e1a820ffd1ce1"
+  },
+  "idle98-bulk-up-opp-primeape-onix-on.json": {
+   "r1": "5040ac39eea9837d4ff99d63b18d38d98d176a322ea7b6fcf5ec362aeabd9734",
+   "r2": "5040ac39eea9837d4ff99d63b18d38d98d176a322ea7b6fcf5ec362aeabd9734"
+  },
+  "idle98-bulk-up-ply-primeape-onix-off.json": {
+   "r1": "e9139b3dab3be4c420814c9e7d9bf15e620419767a4fceae693fb33bfc4f3baf",
+   "r2": "e9139b3dab3be4c420814c9e7d9bf15e620419767a4fceae693fb33bfc4f3baf"
+  },
+  "idle98-bulk-up-ply-primeape-onix-on.json": {
+   "r1": "5c70d8db4576ae4d4af68fffa14f3186e815b891d1e81ac4f04fa7fcd28dba9c",
+   "r2": "5c70d8db4576ae4d4af68fffa14f3186e815b891d1e81ac4f04fa7fcd28dba9c"
+  },
+  "idle98-double-kick-opp-hitmonlee-snorlax-off.json": {
+   "r1": "1513dcc945899075cdb9d08f5be5d74f50bb3f8ffa7812a993fda17a9896c5d4",
+   "r2": "1513dcc945899075cdb9d08f5be5d74f50bb3f8ffa7812a993fda17a9896c5d4"
+  },
+  "idle98-double-kick-opp-hitmonlee-snorlax-on.json": {
+   "r1": "30c03e054f5db388892a17f4ec680f53d3585111ceff23e4d7319b3b62672a09",
+   "r2": "30c03e054f5db388892a17f4ec680f53d3585111ceff23e4d7319b3b62672a09"
+  },
+  "idle98-double-kick-ply-hitmonlee-snorlax-off.json": {
+   "r1": "9e593b3422653004d17a17069994b21d3d1eb828378a17c7ee71524d85f39918",
+   "r2": "9e593b3422653004d17a17069994b21d3d1eb828378a17c7ee71524d85f39918"
+  },
+  "idle98-double-kick-ply-hitmonlee-snorlax-on.json": {
+   "r1": "41639887f80b1063ccd8599d624522471d01ffc290c9c28fdbcbce9f777f24aa",
+   "r2": "41639887f80b1063ccd8599d624522471d01ffc290c9c28fdbcbce9f777f24aa"
+  },
+  "idle98-dynamic-punch-opp-machamp-snorlax-off.json": {
+   "r1": "0ff0d683d854e6ebeb0bc1c1d79a301579078596f756e2c8a06b5a45d1e99dca",
+   "r2": "0ff0d683d854e6ebeb0bc1c1d79a301579078596f756e2c8a06b5a45d1e99dca"
+  },
+  "idle98-dynamic-punch-opp-machamp-snorlax-on.json": {
+   "r1": "e19001b1b91ab3821c4e69a986fe95ca66e5b011a728d82cda309336d1ef05e7",
+   "r2": "e19001b1b91ab3821c4e69a986fe95ca66e5b011a728d82cda309336d1ef05e7"
+  },
+  "idle98-dynamic-punch-ply-machamp-snorlax-off.json": {
+   "r1": "960e5539a6bfdc2498e77aa58ad8029cc17d3e75bf89211ee64e05ae31b5bc31",
+   "r2": "960e5539a6bfdc2498e77aa58ad8029cc17d3e75bf89211ee64e05ae31b5bc31"
+  },
+  "idle98-dynamic-punch-ply-machamp-snorlax-on.json": {
+   "r1": "4862fc313504cc788c73f01308255cc71d0a987ec38779ed2897ac07e33f5521",
+   "r2": "4862fc313504cc788c73f01308255cc71d0a987ec38779ed2897ac07e33f5521"
+  },
+  "idle98-earthquake-opp-rhydon-snorlax-off.json": {
+   "r1": "ae51322ab85dbde9e90b120ff491c76bc8e82df96b985526fac14d451f895fe0",
+   "r2": "ae51322ab85dbde9e90b120ff491c76bc8e82df96b985526fac14d451f895fe0"
+  },
+  "idle98-earthquake-opp-rhydon-snorlax-on.json": {
+   "r1": "20d4b16a4e2e0fe5cf8f953b4ec2c94d33cd647fdef3beacb605244f95cfcd96",
+   "r2": "20d4b16a4e2e0fe5cf8f953b4ec2c94d33cd647fdef3beacb605244f95cfcd96"
+  },
+  "idle98-earthquake-ply-rhydon-snorlax-off.json": {
+   "r1": "97b476719ebf719c7ec43a758aeadb273be41ff2c25776f1243e188e73c543dc",
+   "r2": "97b476719ebf719c7ec43a758aeadb273be41ff2c25776f1243e188e73c543dc"
+  },
+  "idle98-earthquake-ply-rhydon-snorlax-on.json": {
+   "r1": "223e9b706d5b57691fa3c0f9cb59d1d97d16c5794f6a17324cec87a52ae3a420",
+   "r2": "223e9b706d5b57691fa3c0f9cb59d1d97d16c5794f6a17324cec87a52ae3a420"
+  },
+  "idle98-karate-chop-opp-machoke-snorlax-off.json": {
+   "r1": "589e8d6b8042d1d778727684fabe58defbcf75da27a4d1d1bb8702130ac05431",
+   "r2": "589e8d6b8042d1d778727684fabe58defbcf75da27a4d1d1bb8702130ac05431"
+  },
+  "idle98-karate-chop-opp-machoke-snorlax-on.json": {
+   "r1": "0cec66dce0cb988e0040ab7298f0c76e4b9791fe766ea09492be85d772aeb20c",
+   "r2": "0cec66dce0cb988e0040ab7298f0c76e4b9791fe766ea09492be85d772aeb20c"
+  },
+  "idle98-karate-chop-ply-machoke-snorlax-off.json": {
+   "r1": "1d36e189067c6a1614b8ea56db291ced6cedb5e0ba2997a34039a42a579f2a82",
+   "r2": "1d36e189067c6a1614b8ea56db291ced6cedb5e0ba2997a34039a42a579f2a82"
+  },
+  "idle98-karate-chop-ply-machoke-snorlax-on.json": {
+   "r1": "68bc3e1b9eeb7866fe0fcb599e770a3dbc8df0c5e53d52634eb50bb234967d4a",
+   "r2": "68bc3e1b9eeb7866fe0fcb599e770a3dbc8df0c5e53d52634eb50bb234967d4a"
+  },
+  "idle98-psychic-opp-alakazam-snorlax-off.json": {
+   "r1": "c41802d9d787b8ecdd75dae989020f58d18819e74734a72701ae00580443a43a",
+   "r2": "c41802d9d787b8ecdd75dae989020f58d18819e74734a72701ae00580443a43a"
+  },
+  "idle98-psychic-opp-alakazam-snorlax-on.json": {
+   "r1": "8be9e49894b8823b4d365fe873fa75ded538e57d3113b7eca463f9ff2fa05fc8",
+   "r2": "8be9e49894b8823b4d365fe873fa75ded538e57d3113b7eca463f9ff2fa05fc8"
+  },
+  "idle98-psychic-ply-alakazam-snorlax-off.json": {
+   "r1": "62780e335f01e4b035d4c7a9eeba542696d416522f1530c07a0afe5cc474f06c",
+   "r2": "62780e335f01e4b035d4c7a9eeba542696d416522f1530c07a0afe5cc474f06c"
+  },
+  "idle98-psychic-ply-alakazam-snorlax-on.json": {
+   "r1": "397d89f6c4b2f6367686fdf14e9545421b3c0eab169770ca111c4994003df7cc",
+   "r2": "397d89f6c4b2f6367686fdf14e9545421b3c0eab169770ca111c4994003df7cc"
+  },
+  "idle98-razor-wind-opp-scyther-snorlax-off.json": {
+   "r1": "f5f74b4383dcb74945c9bc0e2077bbf906e9f8fc65c5485fcc2712d5e3017cd7",
+   "r2": "f5f74b4383dcb74945c9bc0e2077bbf906e9f8fc65c5485fcc2712d5e3017cd7"
+  },
+  "idle98-razor-wind-opp-scyther-snorlax-on.json": {
+   "r1": "cdef20948a07242d2acd49b546af2151b15f4a2ba144e23c112cf096711b49b0",
+   "r2": "cdef20948a07242d2acd49b546af2151b15f4a2ba144e23c112cf096711b49b0"
+  },
+  "idle98-razor-wind-ply-scyther-snorlax-off.json": {
+   "r1": "659bdd97f0cf6457463c9d2716bffdb498893be5f0a3f22fa20a10833ff948a7",
+   "r2": "659bdd97f0cf6457463c9d2716bffdb498893be5f0a3f22fa20a10833ff948a7"
+  },
+  "idle98-razor-wind-ply-scyther-snorlax-on.json": {
+   "r1": "8a6e2a37c8ee4b2ba1e53f3d910893b82ca35bb13d7a444cae4bccdce6970bfe",
+   "r2": "8a6e2a37c8ee4b2ba1e53f3d910893b82ca35bb13d7a444cae4bccdce6970bfe"
+  },
+  "idle98-water-pulse-opp-blastoise-golem-off.json": {
+   "r1": "f381b2abcd272df74675015d054d6bc593d7ec165331151de8344ce49a496960",
+   "r2": "f381b2abcd272df74675015d054d6bc593d7ec165331151de8344ce49a496960"
+  },
+  "idle98-water-pulse-opp-blastoise-golem-on.json": {
+   "r1": "46c0ef27a6f7eb1b8710929312d8dc4e2c745ddbc7e8bd4d06f66992007b9be8",
+   "r2": "46c0ef27a6f7eb1b8710929312d8dc4e2c745ddbc7e8bd4d06f66992007b9be8"
+  },
+  "idle98-water-pulse-ply-blastoise-golem-off.json": {
+   "r1": "91edfe1cbd339e2d71845616b949740dcab18c301bf3f2d3ab989d5617fe810c",
+   "r2": "91edfe1cbd339e2d71845616b949740dcab18c301bf3f2d3ab989d5617fe810c"
+  },
+  "idle98-water-pulse-ply-blastoise-golem-on.json": {
+   "r1": "1bf3fbf57722c7da6a9ad2facbc21e709d10005ee9e59ebf5c04a5d288153844",
+   "r2": "1bf3fbf57722c7da6a9ad2facbc21e709d10005ee9e59ebf5c04a5d288153844"
+  }
+ }
+}

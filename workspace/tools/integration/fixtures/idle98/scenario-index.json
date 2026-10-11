@@ -1,0 +1,164 @@
+{
+ "idle98-karate-chop-ply-machoke-snorlax.json": {
+  "move": 2,
+  "class": "hit",
+  "attackerSide": "player",
+  "attacker": "MACHOKE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle98-karate-chop-opp-machoke-snorlax.json": {
+  "move": 2,
+  "class": "hit",
+  "attackerSide": "opponent",
+  "attacker": "MACHOKE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle98-psychic-ply-alakazam-snorlax.json": {
+  "move": 94,
+  "class": "hit",
+  "attackerSide": "player",
+  "attacker": "ALAKAZAM",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle98-psychic-opp-alakazam-snorlax.json": {
+  "move": 94,
+  "class": "hit",
+  "attackerSide": "opponent",
+  "attacker": "ALAKAZAM",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle98-bite-ply-houndoom-snorlax.json": {
+  "move": 44,
+  "class": "hit",
+  "attackerSide": "player",
+  "attacker": "HOUNDOOM",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle98-bite-opp-houndoom-snorlax.json": {
+  "move": 44,
+  "class": "hit",
+  "attackerSide": "opponent",
+  "attacker": "HOUNDOOM",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle98-earthquake-ply-rhydon-snorlax.json": {
+  "move": 89,
+  "class": "hit",
+  "attackerSide": "player",
+  "attacker": "RHYDON",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle98-earthquake-opp-rhydon-snorlax.json": {
+  "move": 89,
+  "class": "hit",
+  "attackerSide": "opponent",
+  "attacker": "RHYDON",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle98-double-kick-ply-hitmonlee-snorlax.json": {
+  "move": 24,
+  "class": "multi-hit",
+  "attackerSide": "player",
+  "attacker": "HITMONLEE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle98-double-kick-opp-hitmonlee-snorlax.json": {
+  "move": 24,
+  "class": "multi-hit",
+  "attackerSide": "opponent",
+  "attacker": "HITMONLEE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle98-razor-wind-ply-scyther-snorlax.json": {
+  "move": 13,
+  "class": "two-turn",
+  "attackerSide": "player",
+  "attacker": "SCYTHER",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle98-razor-wind-opp-scyther-snorlax.json": {
+  "move": 13,
+  "class": "two-turn",
+  "attackerSide": "opponent",
+  "attacker": "SCYTHER",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle98-water-pulse-ply-blastoise-golem.json": {
+  "move": 352,
+  "class": "ko",
+  "attackerSide": "player",
+  "attacker": "BLASTOISE",
+  "target": "GOLEM",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle98-water-pulse-opp-blastoise-golem.json": {
+  "move": 352,
+  "class": "ko",
+  "attackerSide": "opponent",
+  "attacker": "BLASTOISE",
+  "target": "GOLEM",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle98-bulk-up-ply-primeape-onix.json": {
+  "move": 339,
+  "class": "status-control",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle98-bulk-up-opp-primeape-onix.json": {
+  "move": 339,
+  "class": "status-control",
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle98-dynamic-punch-ply-machamp-snorlax.json": {
+  "move": 223,
+  "class": "miss",
+  "attackerSide": "player",
+  "attacker": "MACHAMP",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle98-dynamic-punch-opp-machamp-snorlax.json": {
+  "move": 223,
+  "class": "miss",
+  "attackerSide": "opponent",
+  "attacker": "MACHAMP",
+  "target": "SNORLAX",
+  "seed": 305419898,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ }
+}

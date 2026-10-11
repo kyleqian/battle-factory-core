@@ -15,7 +15,7 @@ os.makedirs(out, exist_ok=True)
 TEMPLATE = {"player": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
             "opponent": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"}
 SP = {"PRIMEAPE": 57, "ONIX": 95, "SNORLAX": 143, "MACHOKE": 67, "ALAKAZAM": 65, "HOUNDOOM": 229, "RHYDON": 112, "HITMONLEE": 106,
-      "SCYTHER": 123, "MACHAMP": 68, "STARMIE": 121, "GOLEM": 76}
+      "SCYTHER": 123, "MACHAMP": 68, "BLASTOISE": 9, "GOLEM": 76}
 S0 = 305419897
 CASES = [  # (slug, move id, class, attacker, target, seed, final idle frames)
     ("karate-chop", 2, "hit", "MACHOKE", "SNORLAX", S0, 700),
@@ -24,7 +24,7 @@ CASES = [  # (slug, move id, class, attacker, target, seed, final idle frames)
     ("earthquake", 89, "hit", "RHYDON", "SNORLAX", S0, 700),
     ("double-kick", 24, "multi-hit", "HITMONLEE", "SNORLAX", S0, 900),
     ("razor-wind", 13, "two-turn", "SCYTHER", "SNORLAX", S0, 1500),
-    ("water-pulse", 352, "ko", "STARMIE", "GOLEM", S0, 700),
+    ("water-pulse", 352, "ko", "BLASTOISE", "GOLEM", S0, 700),
     ("bulk-up", 339, "status-control", "PRIMEAPE", "ONIX", S0, 700),
 ]
 # Dynamic Punch (50 % accuracy): the miss seeds found by the --miss-search probes (ON r1, Scene ON; see the doc), one per side.
