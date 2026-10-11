@@ -1,0 +1,41 @@
+{
+ "schema": "scan93-census-summary/v1",
+ "seeds": "0..999 (10 shards, --index-from)",
+ "commands": 27516,
+ "base": {
+  "live": 26144,
+  "liveFrames": 3896776,
+  "frames": 3952109
+ },
+ "patched": {
+  "live": 26160,
+  "liveFrames": 3899433,
+  "frames": 3952132
+ },
+ "gainsByMoveSide": {
+  "262:player": 4,
+  "326:player": 12
+ },
+ "regressionsLiveToNonLive": 0,
+ "commandKeyDigestEqual": true,
+ "battleDigestEqual": false,
+ "battleDigestExcludingFramesEqual": true,
+ "deltaPairingMismatches": 23,
+ "deltaKeys": [
+  "commands",
+  "liveCountAfter",
+  "liveCountBefore",
+  "liveCountPctAfter",
+  "liveCountPctBefore",
+  "liveFramePctAfter",
+  "liveFramePctBefore",
+  "liveFramesAfter",
+  "liveFramesBefore",
+  "pairingMismatches",
+  "presentedFrames",
+  "regressionCount",
+  "regressions",
+  "schema",
+  "units"
+ ]
+}

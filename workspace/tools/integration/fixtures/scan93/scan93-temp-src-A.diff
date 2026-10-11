@@ -181,7 +181,7 @@ index 00000000..4049182b
 +  return s;
 +}
 diff --git a/src/engine/liveSpriteOrderHost.ts b/src/engine/liveSpriteOrderHost.ts
-index 448f6b9b..cbf4b199 100644
+index 448f6b9b..4084beac 100644
 --- a/src/engine/liveSpriteOrderHost.ts
 +++ b/src/engine/liveSpriteOrderHost.ts
 @@ -43,6 +43,7 @@ import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -264,7 +264,7 @@ index 448f6b9b..cbf4b199 100644
    const hit2 = moveId === 155 && host.bonemerangHit1 !== undefined && (host.bodies ?? 0) >= host.bonemerangHit1.units && (host.bodies ?? 0) <= host.bonemerangHit1.units + 1;
    return Object.freeze({
      known: true as const, free: hit2 ? bonemerangHit2Free() : free, ...((host.bodies ?? 0) === 0 ? { firstBody: true as const } : {}),
-+    ...(host.scanline === undefined || host.scanline === null ? {} : { scanlineHistory: host.scanline }),
++    ...((host.bodies ?? 0) === 0 || host.scanline === undefined || host.scanline === null ? {} : { scanlineHistory: host.scanline }),
      ...(hit2 ? { afterBonemerangHit1: true as const } : {}),
    });
  }
