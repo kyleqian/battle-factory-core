@@ -1,0 +1,71 @@
+{
+ "schema": "audit24-lead-check/v1",
+ "results": [
+  {
+   "stem": "audit24-lead-harden-player-kingler-snorlax",
+   "move": "HARDEN",
+   "moveId": 106,
+   "side": "player",
+   "body": 0,
+   "attacker": "KINGLER",
+   "target": "SNORLAX",
+   "activation": 69,
+   "romBodyRows": 101,
+   "kind": "plain",
+   "lead": 1,
+   "duration": 101,
+   "rows": 102,
+   "window": [
+    69,
+    170
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 102,
+   "badRows": [],
+   "badPx": []
+  },
+  {
+   "stem": "audit24-lead-harden-opponent-kingler-snorlax",
+   "move": "HARDEN",
+   "moveId": 106,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "KINGLER",
+   "target": "SNORLAX",
+   "activation": 73,
+   "romBodyRows": 101,
+   "kind": "plain",
+   "lead": 1,
+   "duration": 101,
+   "rows": 102,
+   "window": [
+    73,
+    174
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 102,
+   "badRows": [],
+   "badPx": []
+  }
+ ]
+}

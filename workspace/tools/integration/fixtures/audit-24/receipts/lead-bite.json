@@ -1,0 +1,71 @@
+{
+ "schema": "audit24-lead-check/v1",
+ "results": [
+  {
+   "stem": "audit24-lead-bite-player-raticate-skarmory",
+   "move": "BITE",
+   "moveId": 44,
+   "side": "player",
+   "body": 0,
+   "attacker": "RATICATE",
+   "target": "SKARMORY",
+   "activation": 72,
+   "romBodyRows": 40,
+   "kind": "plain",
+   "lead": 10,
+   "duration": 26,
+   "rows": 36,
+   "window": [
+    72,
+    107
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 36,
+   "badRows": [],
+   "badPx": []
+  },
+  {
+   "stem": "audit24-lead-bite-opponent-raticate-skarmory",
+   "move": "BITE",
+   "moveId": 44,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "RATICATE",
+   "target": "SKARMORY",
+   "activation": 76,
+   "romBodyRows": 40,
+   "kind": "plain",
+   "lead": 10,
+   "duration": 26,
+   "rows": 36,
+   "window": [
+    76,
+    111
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 36,
+   "badRows": [],
+   "badPx": []
+  }
+ ]
+}

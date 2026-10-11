@@ -1,0 +1,95 @@
+{
+ "schema": "audit24-probe-sha256/v1",
+ "sha256": {
+  "audit24-fp-opponent-hitmonlee-skarmory": {
+   "r1": "3c0ed1fba18985b3d6480325e6a1e0350c9110b547fb02f0d824092636e5dd16",
+   "r2": "3c0ed1fba18985b3d6480325e6a1e0350c9110b547fb02f0d824092636e5dd16",
+   "same": true
+  },
+  "audit24-fp-opponent-poliwrath-quagsire": {
+   "r1": "33e0ee01e37dc937adec2d97c718eef78e410db1debdd07cb9be535b18480dbf",
+   "r2": "33e0ee01e37dc937adec2d97c718eef78e410db1debdd07cb9be535b18480dbf",
+   "same": true
+  },
+  "audit24-fp-player-hitmonlee-steelix": {
+   "r1": "cb6ffb600842980543530c724fa2f5caad00d3af26e2a7f5aad226c5922c28b9",
+   "r2": "cb6ffb600842980543530c724fa2f5caad00d3af26e2a7f5aad226c5922c28b9",
+   "same": true
+  },
+  "audit24-fp-player-poliwrath-lapras": {
+   "r1": "e5ed529bab8c9b0cefee7134a4350c9565641607dd3b72c0e7f74e3f5d31cab8",
+   "r2": "e5ed529bab8c9b0cefee7134a4350c9565641607dd3b72c0e7f74e3f5d31cab8",
+   "same": true
+  },
+  "audit24-lead-bite-opponent-raticate-skarmory": {
+   "r1": "ed3f6127a0f059314e427af05a675e57ee7b21fb908a1c25839857a685a748f4",
+   "r2": "ed3f6127a0f059314e427af05a675e57ee7b21fb908a1c25839857a685a748f4",
+   "same": true
+  },
+  "audit24-lead-bite-player-raticate-skarmory": {
+   "r1": "5743b7725add4892deac2d408884c4b3b72b0267069d72cefcc29018459bee93",
+   "r2": "5743b7725add4892deac2d408884c4b3b72b0267069d72cefcc29018459bee93",
+   "same": true
+  },
+  "audit24-lead-dizzy-punch-opponent-kangaskhan-steelix": {
+   "r1": "9cc95fa7001dc7fec7314236e50bc57a52bf3a4a6eda675f807f20d98ce071a1",
+   "r2": "9cc95fa7001dc7fec7314236e50bc57a52bf3a4a6eda675f807f20d98ce071a1",
+   "same": true
+  },
+  "audit24-lead-dizzy-punch-player-kangaskhan-steelix": {
+   "r1": "5fb2a9521533ae9a3e1e7f985ac26a5e4f4169f285bb66a4a845b805a5ea7a19",
+   "r2": "5fb2a9521533ae9a3e1e7f985ac26a5e4f4169f285bb66a4a845b805a5ea7a19",
+   "same": true
+  },
+  "audit24-lead-ember-opponent-ninetales-snorlax": {
+   "r1": "6be8487ad5a94ded9d4ee32e94d0196ae653272e3b6ab8de140f512947282c6f",
+   "r2": "6be8487ad5a94ded9d4ee32e94d0196ae653272e3b6ab8de140f512947282c6f",
+   "same": true
+  },
+  "audit24-lead-ember-player-ninetales-snorlax": {
+   "r1": "d8dc60b09281ad18f2481869e92582649138f116018ffae04ad02e3b03dd0113",
+   "r2": "d8dc60b09281ad18f2481869e92582649138f116018ffae04ad02e3b03dd0113",
+   "same": true
+  },
+  "audit24-lead-harden-opponent-kingler-snorlax": {
+   "r1": "b28c294c52e8b6c02c9d2ad35127f74859e9d21d5585b673139fa04867e1f527",
+   "r2": "b28c294c52e8b6c02c9d2ad35127f74859e9d21d5585b673139fa04867e1f527",
+   "same": true
+  },
+  "audit24-lead-harden-player-kingler-snorlax": {
+   "r1": "1bfbec3327ae1e472930a0f6db5499db5a298465cec209531e8de9fceea5929b",
+   "r2": "1bfbec3327ae1e472930a0f6db5499db5a298465cec209531e8de9fceea5929b",
+   "same": true
+  },
+  "audit24-lead-razor-leaf-opponent-venusaur-quagsire": {
+   "r1": "8b7a8d2a80faff08f789d85a7429d87572bbc7cfc49b325971059083e5442409",
+   "r2": "8b7a8d2a80faff08f789d85a7429d87572bbc7cfc49b325971059083e5442409",
+   "same": true
+  },
+  "audit24-lead-razor-leaf-player-venusaur-quagsire": {
+   "r1": "7f750487c49013812c2125b31ee5f4781a22270070446af6d8b46c515d85eb19",
+   "r2": "7f750487c49013812c2125b31ee5f4781a22270070446af6d8b46c515d85eb19",
+   "same": true
+  },
+  "audit24-lead-shadow-punch-opponent-gengar-lapras": {
+   "r1": "9b8213dfbcc0bb3bd80d3f39cc9a6480eda7318e6f9dd48c5cd2ec966ed64dd3",
+   "r2": "9b8213dfbcc0bb3bd80d3f39cc9a6480eda7318e6f9dd48c5cd2ec966ed64dd3",
+   "same": true
+  },
+  "audit24-lead-shadow-punch-player-gengar-lapras": {
+   "r1": "ad4fb8e7f913f6d3831452d587b5244614183ce5a11bdaf36b54c621bca2f0b0",
+   "r2": "ad4fb8e7f913f6d3831452d587b5244614183ce5a11bdaf36b54c621bca2f0b0",
+   "same": true
+  },
+  "audit24-swap-bite-opponent-raticate": {
+   "r1": "ec34d68189a0b0cfdf011974e537c29ed1b6aadeb8f30fe49db52d0355ed0071",
+   "r2": "ec34d68189a0b0cfdf011974e537c29ed1b6aadeb8f30fe49db52d0355ed0071",
+   "same": true
+  },
+  "audit24-swap-bite-player-raticate": {
+   "r1": "0b32c0d7615c0b943031a1a79250d840e61edbdca69089a39af5ac45243751f7",
+   "r2": "0b32c0d7615c0b943031a1a79250d840e61edbdca69089a39af5ac45243751f7",
+   "same": true
+  }
+ }
+}

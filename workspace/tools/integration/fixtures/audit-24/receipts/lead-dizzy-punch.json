@@ -1,0 +1,71 @@
+{
+ "schema": "audit24-lead-check/v1",
+ "results": [
+  {
+   "stem": "audit24-lead-dizzy-punch-player-kangaskhan-steelix",
+   "move": "DIZZY_PUNCH",
+   "moveId": 146,
+   "side": "player",
+   "body": 0,
+   "attacker": "KANGASKHAN",
+   "target": "STEELIX",
+   "activation": 81,
+   "romBodyRows": 86,
+   "kind": "plain",
+   "lead": 13,
+   "duration": 69,
+   "rows": 82,
+   "window": [
+    81,
+    162
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 82,
+   "badRows": [],
+   "badPx": []
+  },
+  {
+   "stem": "audit24-lead-dizzy-punch-opponent-kangaskhan-steelix",
+   "move": "DIZZY_PUNCH",
+   "moveId": 146,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "KANGASKHAN",
+   "target": "STEELIX",
+   "activation": 85,
+   "romBodyRows": 86,
+   "kind": "plain",
+   "lead": 13,
+   "duration": 69,
+   "rows": 82,
+   "window": [
+    85,
+    166
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    0,
+    0
+   ],
+   "identical": true,
+   "exactRows": 82,
+   "badRows": [],
+   "badPx": []
+  }
+ ]
+}

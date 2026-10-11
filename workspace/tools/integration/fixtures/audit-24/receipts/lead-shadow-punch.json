@@ -1,0 +1,157 @@
+{
+ "schema": "audit24-lead-check/v1",
+ "results": [
+  {
+   "stem": "audit24-lead-shadow-punch-player-gengar-lapras",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "player",
+   "body": 0,
+   "attacker": "GENGAR",
+   "target": "LAPRAS",
+   "activation": 76,
+   "romBodyRows": 109,
+   "kind": "plain",
+   "lead": 8,
+   "duration": 106,
+   "rows": 114,
+   "window": [
+    76,
+    189
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    280208,
+    280208
+   ],
+   "identical": true,
+   "exactRows": 98,
+   "badRows": [
+    "91..106"
+   ],
+   "badPx": [
+    [
+     91,
+     17513
+    ],
+    [
+     92,
+     17513
+    ],
+    [
+     93,
+     17513
+    ],
+    [
+     94,
+     17513
+    ],
+    [
+     95,
+     17513
+    ],
+    [
+     96,
+     17513
+    ],
+    [
+     97,
+     17513
+    ],
+    [
+     98,
+     17513
+    ],
+    [
+     99,
+     17513
+    ],
+    [
+     100,
+     17513
+    ],
+    [
+     101,
+     17513
+    ],
+    [
+     102,
+     17513
+    ],
+    [
+     103,
+     17513
+    ],
+    [
+     104,
+     17513
+    ],
+    [
+     105,
+     17513
+    ],
+    [
+     106,
+     17513
+    ]
+   ]
+  },
+  {
+   "stem": "audit24-lead-shadow-punch-opponent-gengar-lapras",
+   "move": "SHADOW_PUNCH",
+   "moveId": 325,
+   "side": "opponent",
+   "body": 0,
+   "attacker": "GENGAR",
+   "target": "LAPRAS",
+   "activation": 80,
+   "romBodyRows": 108,
+   "kind": "plain",
+   "lead": 8,
+   "duration": 105,
+   "rows": 113,
+   "window": [
+    80,
+    192
+   ],
+   "romLeadStatic": true,
+   "romPreRowEqual": true,
+   "leadPx": [
+    0,
+    0
+   ],
+   "bodyPx": [
+    296,
+    296
+   ],
+   "identical": true,
+   "exactRows": 109,
+   "badRows": [
+    "109..112"
+   ],
+   "badPx": [
+    [
+     109,
+     74
+    ],
+    [
+     110,
+     74
+    ],
+    [
+     111,
+     74
+    ],
+    [
+     112,
+     74
+    ]
+   ]
+  }
+ ]
+}
