@@ -77,15 +77,15 @@ for f in sorted(glob.glob(os.path.join(d1, "*.json"))):
         scr_changes = sum(full[i][0]["scr"] != full[i - 1][0]["scr"] for i in range(A + 1, E + 1))
         anim_rows = [i - A for i in range(A, E + 4) if full[i][0].get("d", [0])[0]]
         sp_a = next(full[i][3] for i in range(A, E) if full[i][3][1])
-        tsv = ["rel\tf\tact\tEVA\tEVB\tbg1x\tbg1y\tobjwin\twinout\tbldcnt\tbg1cnt\tow\tslots\tinUse\tdpx\tbbox\tscr"]
-        sig_t, sig_m, sig_d, sig_p = [], [], [], []
+        tsv = ["rel\tf\tact\tEVA\tEVB\tbg1x\tbg1y\tobjwin\twinout\tbldcnt\tbg1cnt\tow\tslots\tinUse\tdpx\tbbox\tscr\tmaskCrop"]
+        sig_t, sig_m, sig_d, sig_c, sig_p = [], [], [], [], []
         for i in range(A - 1, E + 4):
             r, io, o, s = full[i]
             ea, eb = blend(io)
             dd = r.get("d", [0])
             line = [i - A, r["f"], r["act"], ea, eb, r["bg1"][0], r["bg1"][1], int(bool(io["dispcnt"] & 0x8000)), f"{io['winout']:04x}",
                     f"{io['bldcnt']:04x}", f"{io['bg1cnt']:04x}", ",".join(f"{e[0]}:{e[1]:04x}:{e[2]:04x}:{e[3]:04x}" for e in o) or "-",
-                    ",".join(map(str, s[1])) or "-", s[0], dd[0], ",".join(map(str, dd[1:])) or "-", r["scr"]]
+                    ",".join(map(str, s[1])) or "-", s[0], dd[0], ",".join(map(str, dd[1:])) or "-", r["scr"], r.get("mc", "-")]
             tsv.append("\t".join(map(str, line)))
             if i >= A:  # row A-1 is the diff reference (its own `d` may belong to an earlier window's tail)
                 # timing: rel, act, EVA, EVB, BG1 X / Y, WINOUT, BLDCNT, slots, inUse; BG1CNT only from Step1 on (its prior value is the
@@ -95,6 +95,7 @@ for f in sorted(glob.glob(os.path.join(d1, "*.json"))):
                 sig_t.append([line[0], *line[2:5], line[5] if late else "-", line[6] if late else "-", *line[8:10], line[10] if i - A >= s1 else "-", *line[12:14]])
                 sig_m.append([line[0], line[11]])
                 sig_d.append([line[0], line[14], line[15]])
+                sig_c.append([line[0], r.get("mr"), r.get("mc0"), r.get("mc")])
                 sig_p.append([line[0], line[16], r.get("sl")])
         # the script instruction that launched it (last pointer change at or before A) and the first pointer change after E
         p0 = max(i for i in range(1, A + 1) if full[i][0]["ptr"] != full[i - 1][0]["ptr"])
@@ -114,6 +115,8 @@ for f in sorted(glob.glob(os.path.join(d1, "*.json"))):
                    "rowsTsv": f"rows/{tsv_name}", "timingSignatureSha": hashlib.sha256(json.dumps(sig_t).encode()).hexdigest()[:16],
                    "maskSignatureSha": hashlib.sha256(json.dumps(sig_m).encode()).hexdigest()[:16],
                    "deltaSignatureSha": hashlib.sha256(json.dumps(sig_d).encode()).hexdigest()[:16],
+                   "maskCropSignatureSha": hashlib.sha256(json.dumps(sig_c).encode()).hexdigest()[:16],
+                   "maskRect": next((full[i][0]["mr"] for i in range(A, E + 4) if "mr" in full[i][0]), None),
                    "screenSignatureSha": hashlib.sha256(json.dumps(sig_p).encode()).hexdigest()[:16]})
     summary.setdefault(scen, {"index": index.get(scen + ".json")})[scene] = {
         "sha256": hashlib.sha256(raw1).hexdigest(), "r1EqualsR2": raw1 == raw2, "windows": ws}
@@ -122,6 +125,7 @@ for scen, v in summary.items():
     v["timingOnEqualsOff"] = len(on) == len(off) and all(a["timingSignatureSha"] == b["timingSignatureSha"] for a, b in zip(on, off))
     v["maskOnEqualsOff"] = len(on) == len(off) and all(a["maskSignatureSha"] == b["maskSignatureSha"] for a, b in zip(on, off))
     v["deltaOnEqualsOff"] = len(on) == len(off) and all(a["deltaSignatureSha"] == b["deltaSignatureSha"] for a, b in zip(on, off))
+    v["maskCropOnEqualsOff"] = len(on) == len(off) and all(a["maskCropSignatureSha"] == b["maskCropSignatureSha"] for a, b in zip(on, off))
     v["screenOnEqualsOff"] = len(on) == len(off) and all(a["screenSignatureSha"] == b["screenSignatureSha"] for a, b in zip(on, off))
     v["expectedArgSeen"] = any(w["arg"] == v["index"]["expectedAnimArg"] for w in on) if v["index"] else None
 json.dump(summary, open(os.path.join(out, "stat-anim.json"), "w"), indent=1)
@@ -130,7 +134,7 @@ for scen, v in summary.items():
     for scene in ("on", "off"):
         for w in v[scene]["windows"]:
             t = w["timeline"]
-            print(scen, scene, v[scene]["r1EqualsR2"], v["timingOnEqualsOff"], v["maskOnEqualsOff"], v["deltaOnEqualsOff"], v["screenOnEqualsOff"], "arg", w["arg"], "A", w["A"], "len", w["activeFrames"], "chg", w["screenChanges"],
+            print(scen, scene, v[scene]["r1EqualsR2"], v["timingOnEqualsOff"], v["maskOnEqualsOff"], v["deltaOnEqualsOff"], v["maskCropOnEqualsOff"], v["screenOnEqualsOff"], "arg", w["arg"], "A", w["A"], "len", w["activeFrames"], "chg", w["screenChanges"],
                   "s1", t["step1Regs"], "eva", t["firstEva"], t["peakEva"], t["peakRows"], t["lastEva"], "rest", t["regsRestored"], "ow", t["owRows"],
                   "vis", t["visibleRows"], t["visibleRowCount"], "bg1", w["bg1Start"], "mask", w["mask"]["x"], w["mask"]["y"], w["mask"]["dims"], w["mask"]["affine"],
                   "bbox", w["changedBbox"], "script", w["script"], "slot", w["copySlot"], w["inUseDuring"], "bs", w["battlerSprites"])

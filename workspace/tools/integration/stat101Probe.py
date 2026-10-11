@@ -14,6 +14,11 @@ Per trace frame (frame 0 = after BattleLab.prepare, frame n = after n trace fram
   sp  (only when changed)    [inUse sprite count, [gSprites slots in OBJ-window mode], battler 0 / 1 sprite [id, x, y, x2, y2, invisible]]
   d   (only from a gAnimScriptActive rise to 4 rows after its fall)  [changed px, x0, y0, x1, y1] vs the screen of the row before the rise
   sl  (same window)          crc32 per scanline (160, hex8 joined) of the raw RGB888 screen
+  mc  (same window, once an OBJ-window entry exists)  sha256[:16] of the RGB888 crop of the window's first OBJ-window OAM rect
+                             (x, y, w, h clipped to the screen; `mr` on the window's first such row = [x, y, w, h]); the same rect
+                             is used until the window ends, `mc0` = the crop of the reference row (A-1)
+Optional env STAT101_DUMP=<dir>: also write <dir>/<output stem>-<A>.npz (the reference frame and every window row's full RGB) for
+local comparisons; never committed.
 The profile picks the oracle bootstrap exactly as oracle/server.py does; the scenario's own "profile" is overridden, its lab "seed" stays.
 """
 from __future__ import annotations
@@ -25,6 +30,7 @@ import zlib
 from pathlib import Path
 
 import numpy as np
+import os
 
 if len(sys.argv) != 4 or sys.argv[2] not in ("on", "off"):
     raise SystemExit("usage: stat101Probe.py <scenario> <on|off> <output.json>")
@@ -61,6 +67,8 @@ def main() -> None:
     blk = lambda a, n: hashlib.sha256(bytes(u8(a + i) for i in range(n))).hexdigest()[:12]
     rows, last = [], {}
     frame, prev_act, prev_scr, ref_img, tail = 0, 0, None, None, -1
+    rect, dump, dump_a = None, [], None
+    DUMP = os.environ.get("STAT101_DUMP")
 
     def anim_arg() -> int:
         p = u32(bsd_a)
@@ -70,7 +78,7 @@ def main() -> None:
         return u16(ad + 0) if ad else -1
 
     def sample() -> None:
-        nonlocal prev_act, prev_scr, ref_img, tail
+        nonlocal prev_act, prev_scr, ref_img, tail, rect, dump, dump_a
         rgb = oracle.screen_rgb()
         img = np.frombuffer(rgb, dtype=np.uint8).reshape(160, 240, 3)
         act = u8(act_a)
@@ -102,7 +110,9 @@ def main() -> None:
                 row[k] = v
                 last[k] = v
         if act and not prev_act:
-            ref_img, tail = prev_scr, 4
+            if DUMP and dump:
+                np.savez_compressed(os.path.join(DUMP, f"{OUTPUT.stem}-{dump_a}.npz"), *dump)
+            ref_img, tail, rect, dump, dump_a = prev_scr, 4, None, [prev_scr], frame
         if ref_img is not None and (act or tail >= 0):
             diff = np.any(img != ref_img, axis=2)
             n = int(diff.sum())
@@ -112,6 +122,21 @@ def main() -> None:
             else:
                 row["d"] = [0]
             row["sl"] = "".join(f"{zlib.crc32(img[y].tobytes()):08x}" for y in range(160))
+            if rect is None and ow:
+                a0, a1 = ow[0][1], ow[0][2]
+                side = {0: 8, 1: 16, 2: 32, 3: 64}[a1 >> 14] if a0 >> 14 == 0 else None
+                if side:
+                    side2 = side * 2 if a0 & 0x300 == 0x300 else side
+                    x, y = (a1 & 0x1FF) - (512 if a1 & 0x100 else 0), (a0 & 0xFF) - (256 if (a0 & 0xFF) >= 160 else 0)
+                    x0, y0, x1, y1 = max(0, x), max(0, y), min(240, x + side2), min(160, y + side2)
+                    rect = [x0, y0, x1 - x0, y1 - y0]
+                    row["mr"] = rect
+                    row["mc0"] = hashlib.sha256(ref_img[y0:y1, x0:x1].tobytes()).hexdigest()[:16]
+            if rect is not None:
+                x0, y0, w, h = rect
+                row["mc"] = hashlib.sha256(img[y0:y0 + h, x0:x0 + w].tobytes()).hexdigest()[:16]
+            if DUMP:
+                dump.append(img.copy())
             if not act:
                 tail -= 1
         prev_act, prev_scr = act, img.copy()
@@ -123,6 +148,8 @@ def main() -> None:
             oracle.advance(segment.get("buttons", []))
             frame += 1
             sample()
+    if DUMP and dump:
+        np.savez_compressed(os.path.join(DUMP, f"{OUTPUT.stem}-{dump_a}.npz"), *dump)
     OUTPUT.write_text(json.dumps({"schema": "stat101-probe/v1", "scenario": SCENARIO.name, "mode": MODE, "seed": request.get("seed"),
                                   "frameCount": frame, "rows": rows}, separators=(",", ":")))
 
