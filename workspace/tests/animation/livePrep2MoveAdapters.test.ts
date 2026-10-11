@@ -127,7 +127,7 @@ describe("live prep2 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.slot], r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.slot], r.streak);
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
-    expect(body?.ages).toEqual(land97Ages(c.id, c.duration));
+    expect(body?.ages).toEqual(land97Ages(c.id, c.duration, body?.opponent));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);
@@ -143,7 +143,7 @@ describe("live prep2 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.slot], r.streak, true);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.slot], r.streak, true);
     const body = on.animations.find(a => a.moveId === 153 && a.attacker === 0);
-    expect(body?.ages).toEqual(land97Ages(153, 212));
+    expect(body?.ages).toEqual(land97Ages(153, 212, body?.opponent));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     // setatkhptozero (battle_scripts_1.s:380) precedes attackanimation: the displayed field already shows HP 0.
     const hpZero = on.semanticEvents.some(e => JSON.stringify(e.event).includes("hp-change"));

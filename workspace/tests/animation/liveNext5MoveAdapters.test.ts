@@ -133,7 +133,7 @@ describe("live next5 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.slot], r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.slot], r.streak);
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
-    expect(body?.ages).toEqual(land97Ages(c.id, c.duration));
+    expect(body?.ages).toEqual(land97Ages(c.id, c.duration, body?.opponent));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);

@@ -923,14 +923,15 @@ const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
 
 /**
  * The idle lead rows a live move-animation command presents before its accepted body (0: declined, a Substitute swap, no lead).
- * Live audit 24 (docs/live-audit-24.md): with an ELEVATED opponent attacker the ROM's activation row (lead row 0) still shows the
- * enemy shadow that the body's age-0 frame hides (200 px on row 0; Shadow Punch HAUNTER, Bite CROBAT, Sludge Bomb GOLBAT), so those
- * commands keep no lead (the pre-land97 presentation, every row a ROM image) until the row-0 shadow is modelled.
+ * Live audit 24 / shadow105 (docs/live-audit-24.md, docs/next-adapters-shadow105.md): while an ELEVATED opponent is on the field the
+ * ROM's activation row (lead row 0) still shows its enemy shadow, which the body's age-0 frame hides (200 px on row 0) — whichever side
+ * attacks — so those commands keep no lead (the pre-land97 presentation, every row a ROM image) until the row-0 shadow is modelled
+ * (shadow105's banked patch).
  */
 export function liveMoveIdleLeadRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number {
   const lead = LIVE_MOVE_IDLE_LEAD_ROWS.get(request.moveId) ?? 0;
   if (lead === 0 || liveSubstituteSwapApplies(request, field) === true || liveMoveAnimationDuration(request, field) === null) return 0;
-  if (request.attacker === 1 && battleCommandFieldArtElevation(createBattleCommandFieldArtView(field).opponent, "opponent") > 0) return 0;
+  if (battleCommandFieldArtElevation(createBattleCommandFieldArtView(field).opponent, "opponent") > 0) return 0;
   return lead;
 }
 

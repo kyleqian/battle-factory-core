@@ -326,7 +326,7 @@ describe("live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal B
       const id = NEW[route.name];
       const body = on.animations.find(a => a.moveId === id && a.attacker === 0)!;
       expect(body.player).toBe(route.player);
-      expect(body.ages).toEqual(land97Ages(id, DURATION[id]!));
+      expect(body.ages).toEqual(land97Ages(id, DURATION[id]!, body.opponent));
       expect(body.adapterActive.every(Boolean)).toBe(true);
       // These provider-consumer routes are the battle's first body (later bodies: the cross-body routes below/in
       // tests/liveSpriteOrderHost.test.ts).
@@ -344,7 +344,7 @@ describe("live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal B
     const { on, off } = ordinary(43, 28, 0);
     expect(on.requests.map(q => [q.moveId, q.attacker])).toEqual([[241, 1], [299, 0]]);
     const body = on.animations.find(a => a.moveId === 299 && a.attacker === 0)!;
-    expect(body.ages).toEqual(land97Ages(299, 78));
+    expect(body.ages).toEqual(land97Ages(299, 78, body.opponent));
     expect(body.adapterActive.every(Boolean)).toBe(true);
     const moves = on.commands.filter(row => row.type === "move-animation");
     const predicted = predictLentOrders(on, true);
