@@ -1,5 +1,25 @@
 # Animation integration progress
 
+## 2026-10-10 (night) — S10A: in progress (supervisor Opus 5.5, 19:57 -> deadline 05:57)
+
+- Session start: master `b05d384ca`, production src `4c4fe4c7` == the 2026-10-10 day final gates' tree -> baseline receipt reused. Oracle
+  services (started 2026-10-06) postdate the last oracle / harness commit (2026-08-15). Supervisor baseline census seeds 0..999 (10
+  `--index-from` shards, merged with hist73Merge.py) == the day-final report: 93.79 % / 97.37 %, command-key digest `26489b387dcfa50e`.
+- prep flat84 (MAIN lane, Opus, `37e176b89` .. `ed9f5e394`, new files only): Flatter 260 as a words-order unit. Plan == ROM endOrder
+  47 / 47 bodies (predictions committed first); lends after a Flatter == ROM 61 / 63 fixtures (2 = fixture-history limit; words57 KO
+  chain EXACT 9 / 9 consumers, 207 windows); 37 / 37 after-a-Flatter windows 0 px r1 == r2 through the patched renderer; census 0..999
+  +44 / +6,401, 0 regressions, keys + digests identical; no pin moves. BANKED -> land86. Named: a first-body player Quick Attack residual
+  (NIDORINA -> NIDORINO, 14,223 px ages 14..32, target-shake rows) — to audit.
+- Folded Sonnet worker `905b457b9` (INTEGRATION) as `aeaa33dff` (src `9f3b877d`): land82 — doll81's 13 Substitute-doll cells (Dream Eater
+  opponent, GrassWhistle player, SolarBeam charge turn both, Lovely Kiss both, Sing player, Sunny Day both as the first self-target swap
+  body; Leaf Blade / ThunderPunch defender cells both), 3 pins moved, tests/land82DollCells.test.ts (5 revert experiments fail).
+  land82Run.sh (BASE=b05d384ca): 60 / 60 scenarios r1 == r2, summaries byte-identical to doll81; 6 windows re-rendered through the final
+  code 0 px (ThunderPunch GOLBAT row 0 = the control's own shadow). Worker gates: full suite 1,615 files (2 shards), build, differential
+  624 byte-identical. Supervisor: census 0..999 on the worker tree vs the baseline: **+77 commands / +18,659 live frames**, 0 live ->
+  fallback, keys identical except seed 881 (a Struggle stall cut 2 commands earlier by the 200,000-frame budget; prefix identical);
+  land82Run.sh into a fresh dir: probes 60 / 60 r1 == r2, summary / explore / pins `same`; clean merge (src == worker's tested tree) ->
+  smoke 448, touched tests 74 / 74.
+
 ## 2026-10-10 (day) — S10A: #159 fixed, 12 production folds + 7 audit / evidence steps; honest corrections (Castform, Return); ordinary-play live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 
 - Session start: master `b50c4dabd`, production src `06b791ff` == the 2026-10-09 final gates' tree (`final-supervisor-gates-20261009-day.json`)
