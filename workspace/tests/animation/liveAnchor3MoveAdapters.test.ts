@@ -14,6 +14,7 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { land97Ages } from "../helpers/land97LeadAges.ts";
 
 type Key = "attackerCoord" | "breathOrigin" | "targetEffectCenter" | "battlerHeight";
 /** `expected(side)` is each accepted source fixture's recorded/derived value for that orientation. */
@@ -174,7 +175,7 @@ describe("live anchor3 move adapters", () => {
     const on = generatedCommandAnimationReplay(row.route.seed, "on", [row.route.slot], row.route.streak);
     const off = generatedCommandAnimationReplay(row.route.seed, "off", [row.route.slot], row.route.streak);
     const body = on.animations.find(animation => animation.moveId === row.id && animation.attacker === 0);
-    expect(body?.ages).toEqual(Array.from({ length: row.duration }, (_, age) => age));
+    expect(body?.ages).toEqual(land97Ages(row.id, row.duration));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);

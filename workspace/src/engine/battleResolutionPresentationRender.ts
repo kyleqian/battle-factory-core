@@ -908,6 +908,25 @@ function currentSegment(state: BattleResolutionPresentationState) {
   return segment;
 }
 
+/**
+ * idle94 (S10A timing fidelity): the ROM's idle lead rows. The accepted window of these adapters starts N rows after the
+ * gAnimScriptActive rising edge; the ROM screen on those N rows is byte-identical to the frame before the activation and to
+ * window row 0 (live age 0) on both sides (tools/integration/fixtures/idle94/lead-scan, r1 == r2), so the command presents N more
+ * rows showing its age-0 frame before the accepted body. Presentation timing only.
+ */
+const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
+  [41, 10], [44, 10], [51, 7], [52, 4], [55, 10], [71, 10], [74, 1], [75, 13], [82, 7], [92, 7], [93, 5], [94, 5], [106, 1], [120, 4],
+  [124, 4], [136, 1], [146, 13], [153, 4], [158, 4], [184, 4], [188, 4], [204, 4], [207, 7], [225, 6], [232, 4], [247, 5], [248, 5],
+  [269, 10], [282, 6], [294, 1], [299, 10], [305, 7], [313, 1], [325, 8], [334, 1], [337, 6], [339, 4], [342, 7], [343, 1], [347, 3],
+]);
+
+/** The idle lead rows a live move-animation command presents before its accepted body (0: declined, a Substitute swap, no lead). */
+export function liveMoveIdleLeadRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number {
+  const lead = LIVE_MOVE_IDLE_LEAD_ROWS.get(request.moveId) ?? 0;
+  if (lead === 0 || liveSubstituteSwapApplies(request, field) === true || liveMoveAnimationDuration(request, field) === null) return 0;
+  return lead;
+}
+
 export function battleResolutionCommandDuration(
   command: BattleResolutionPresentationCommand,
   field: BattleResolutionDisplayedField,
@@ -923,10 +942,10 @@ export function battleResolutionCommandDuration(
         command.timing.minimumFrames,
         battleStringPrintableLength(command.lines),
       ) + command.timing.holdFrames;
-    case "move-animation":
-      return command.animation
-        ? liveMoveAnimationDuration(command.animation, field, bodyClass) ?? command.timing.minimumFrames
-        : command.timing.minimumFrames;
+    case "move-animation": {
+      const live = command.animation ? liveMoveAnimationDuration(command.animation, field, bodyClass) : null;
+      return live === null ? command.timing.minimumFrames : live + liveMoveIdleLeadRows(command.animation!, field);
+    }
     case "hit-animation":
       return command.timing.minimumFrames;
     case "hp": {
@@ -1430,7 +1449,8 @@ export function createBattleResolutionPresentationRenderView(
       hpTarget = Object.freeze({ battler: command.battler, to: command.to });
     } else if (command.type === "move-animation" && command.animation) {
       effect = Object.freeze({
-        type: "move", request: command.animation, age: state.lifecycle.phaseElapsed,
+        type: "move", request: command.animation,
+        age: Math.max(0, state.lifecycle.phaseElapsed - liveMoveIdleLeadRows(command.animation, field)),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
         spriteOrderInput: state.liveMoveSpriteOrderInput,

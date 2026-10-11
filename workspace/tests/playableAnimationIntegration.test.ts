@@ -4,6 +4,7 @@ import { createInitialState, tick, render } from "../src/engine/core.ts";
 import { playableAnimationReplay } from "../tools/integration/playableAnimationReplay.ts";
 import { battleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
+import { land97Ages } from "./helpers/land97LeadAges.ts";
 
 describe("ordinary playable animation queue", () => {
   it("plays damaging and no-hit moves from draft input, resumes commands, and preserves rules/RNG", () => {
@@ -55,7 +56,7 @@ describe("ordinary playable animation queue", () => {
       const expectedMove = slots.length === 4 ? 325 : 109;
       const animation = on.animations.find(a => a.moveId === expectedMove && a.attacker === 1)!;
       expect(animation).toMatchObject({ player: "WAILMER", opponent: "HAUNTER" });
-      expect(animation.ages).toEqual(Array.from({ length: expectedMove === 325 ? 105 : 270 }, (_, i) => i));
+      expect(animation.ages).toEqual(land97Ages(expectedMove, expectedMove === 325 ? 105 : 270));
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     }
   }, 60000);

@@ -22,6 +22,7 @@ import { healBellNotesInPainterOrder, HEAL_BELL_REUSED_ORDER_SLOTS } from "../..
 import { leafBladeDisplayedOamOrderAtAge, LEAF_BLADE_OAM_ORDER_SLOTS } from "../../src/animation/leafBlade.ts";
 import { perishSongNoteOrderFromFree } from "../../src/animation/perishSong.ts";
 import moveData from "../../src/data/gen/moves.json" with { type: "json" };
+import { land97Ages } from "../helpers/land97LeadAges.ts";
 
 // docs/order-consumer-prep.md §0/§1/§4/§5: Grudge (288) is READY-WITH-PROVIDER for the battle's first move body;
 // window 66..274 / 70..278 (209 rows, shadow row 0); seed = F before the six-flame window filtered to [3,4,5,7,9,10].
@@ -325,7 +326,7 @@ describe("live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal B
       const id = NEW[route.name];
       const body = on.animations.find(a => a.moveId === id && a.attacker === 0)!;
       expect(body.player).toBe(route.player);
-      expect(body.ages).toEqual(Array.from({ length: DURATION[id]! }, (_, age) => age));
+      expect(body.ages).toEqual(land97Ages(id, DURATION[id]!));
       expect(body.adapterActive.every(Boolean)).toBe(true);
       // These provider-consumer routes are the battle's first body (later bodies: the cross-body routes below/in
       // tests/liveSpriteOrderHost.test.ts).
@@ -343,7 +344,7 @@ describe("live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal B
     const { on, off } = ordinary(43, 28, 0);
     expect(on.requests.map(q => [q.moveId, q.attacker])).toEqual([[241, 1], [299, 0]]);
     const body = on.animations.find(a => a.moveId === 299 && a.attacker === 0)!;
-    expect(body.ages).toEqual(Array.from({ length: 78 }, (_, age) => age));
+    expect(body.ages).toEqual(land97Ages(299, 78));
     expect(body.adapterActive.every(Boolean)).toBe(true);
     const moves = on.commands.filter(row => row.type === "move-animation");
     const predicted = predictLentOrders(on, true);

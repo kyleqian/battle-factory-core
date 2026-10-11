@@ -12,6 +12,7 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState, spriteOrderForSlots } from "../../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { land97Ages } from "../helpers/land97LeadAges.ts";
 
 // docs/next-adapters-prep9.md (the five D-PAL moves: no palette snapshot is consumed) and docs/next-adapters-prep7.md +
 // docs/sprite-order-policy-gaps.md (Double Team / Feather Dance). Every adapter is gated on the lent tracked order.
@@ -147,7 +148,7 @@ describe("live prep9 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", r.moves, r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", r.moves, r.streak);
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
-    expect(body?.ages).toEqual(Array.from({ length: c.duration[0]! }, (_, age) => age));
+    expect(body?.ages).toEqual(land97Ages(c.id, c.duration[0]!));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     const bodyRow = on.commands.find(row => row.type === "move-animation"
       && (row.command as { animation: { moveId: number; attacker: number } }).animation.moveId === c.id

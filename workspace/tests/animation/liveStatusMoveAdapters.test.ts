@@ -16,6 +16,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { land97Ages } from "../helpers/land97LeadAges.ts";
 
 const field = {
   player: {
@@ -195,7 +196,7 @@ describe("live status, psychic, and ghost move adapters", () => {
     expect(effects).toHaveLength(2);
     for (const effect of effects) {
       expect(effect).toMatchObject({ player: "DROWZEE", opponent: "LUVDISC" });
-      expect(effect.ages).toEqual(Array.from({ length: 140 }, (_, age) => age));
+      expect(effect.ages).toEqual(land97Ages(93, 140));
     }
     expect(replay.requests.filter(request => request.moveId === 93 && request.attacker === 0)
       .map(request => [request.turn, request.damage]))
