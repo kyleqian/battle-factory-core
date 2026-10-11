@@ -28,15 +28,23 @@ CASES = [
     ("roar-intimidate", 46, "player", "PRIMEAPE", "ONIX", 22, "player", "Intimidate on the Roar-forced switch-in (both bench mons Intimidate)", 470,
      ["GYARADOS", "GRANBULL"]),
 ]
+# The no-animation baseline: the player's PRIMEAPE uses Substitute (slot 0) on turn 1 and Harden (slot 1) behind it on turn 2, so
+# TryHandleLaunchBattleTableAnimation skips B_ANIM_STATS_CHANGE (behindSubstitute) and playanimation -> next instruction is bare.
+CASES.append(("harden-behind-sub", [164, 106, 106, 106], "player", "PRIMEAPE", "ONIX", None, "player", "Harden behind a Substitute: NO animation (baseline)",
+              700, None))
 # STRINGID_PKMNWASDRAGGEDOUT (BattleScript_TrainerBattleForceOut) waits for A in the lab: idle 470, press A once, then idle 600.
-TAIL = {"roar-intimidate": [{"frames": 2, "buttons": ["A"]}, {"frames": 600, "buttons": []}]}
+TAIL = {"roar-intimidate": [{"frames": 2, "buttons": ["A"]}, {"frames": 600, "buttons": []}],
+        # dismiss "The SUBSTITUTE took damage!" (waits for A in the lab), then turn 2: FIGHT, cursor RIGHT to slot 1 (Harden), select
+        "harden-behind-sub": [{"frames": 2, "buttons": ["A"]}, {"frames": 120, "buttons": []},
+                              {"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["RIGHT"]},
+                              {"frames": 10, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 900, "buttons": []}]}
 index = {}
 for slug, move, side, user, other_sp, arg, anim_side, variant, idle, bench in CASES:
     d = copy.deepcopy(json.load(open(os.path.join(ROOT, TEMPLATE[side]))))
     other = "opponent" if side == "player" else "player"
     a, t = d["overrides"]["parties"][side][0], d["overrides"]["parties"][other][0]
     assert a["moves"] == [339] * 4 and t["moves"] == [33] * 4, (side, a["moves"], t["moves"])
-    a["species"], a["moves"], t["species"] = SP[user], [move] * 4, SP[other_sp]
+    a["species"], a["moves"], t["species"] = SP[user], (move if isinstance(move, list) else [move] * 4), SP[other_sp]
     if bench:
         for slot, sp in zip(d["overrides"]["parties"][other][1:], bench):
             slot["species"], slot["abilitySlot"] = SP[sp], 0

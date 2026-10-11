@@ -11,6 +11,7 @@ Per trace frame (frame 0 = after BattleLab.prepare, frame n = after n trace fram
   io  (only when changed)    DISPCNT, BG0..3CNT, WININ, WINOUT, BLDCNT, BLDALPHA, BLDY (hardware IO)
   pb / po                    sha256[:12] of BG / OBJ palette RAM
   ow  (only when changed)    OAM entries in OBJ-window mode (attr0 bits 10-11 == 2, not disabled): [index, attr0, attr1, attr2]
+  st  (only when changed)    gBattleMons[0 / 1].statStages[8] (struct BattlePokemon 0x58 bytes, statStages at 0x18)
   sp  (only when changed)    [inUse sprite count, [gSprites slots in OBJ-window mode], battler 0 / 1 sprite [id, x, y, x2, y2, invisible]]
   d   (only from a gAnimScriptActive rise to 4 rows after its fall)  [changed px, x0, y0, x1, y1] vs the screen of the row before the rise
   sl  (same window)          crc32 per scanline (160, hex8 joined) of the raw RGB888 screen
@@ -62,6 +63,7 @@ def main() -> None:
     lab.prepare(request)
     sy = oracle.symbols
     ptr_a, act_a, mv_a, atk_a = sy["gBattlescriptCurrInstr"], sy["gAnimScriptActive"], sy["gCurrentMove"], sy["gBattlerAttacker"]
+    mons_a = sy["gBattleMons"]
     bgx_a, bgy_a, spr_a, bsid_a, bsd_a = sy["gBattle_BG1_X"], sy["gBattle_BG1_Y"], sy["gSprites"], sy["gBattlerSpriteIds"], sy["gBattleSpritesDataPtr"]
     u8, u16, u32 = oracle.read_u8, oracle.read_u16, oracle.read_u32
     blk = lambda a, n: hashlib.sha256(bytes(u8(a + i) for i in range(n))).hexdigest()[:12]
@@ -105,6 +107,7 @@ def main() -> None:
             base = spr_a + sid * SPRITE_SIZE
             bs.append([sid, s16(u16(base + 0x20)), s16(u16(base + 0x22)), s16(u16(base + 0x24)), s16(u16(base + 0x26)), (u8(base + 0x3E) >> 2) & 1])
         cur["sp"] = [in_use, win_slots, bs]
+        cur["st"] = [[u8(mons_a + b * 0x58 + 0x18 + k) for k in range(8)] for b in (0, 1)]
         for k, v in cur.items():
             if last.get(k) != v:
                 row[k] = v

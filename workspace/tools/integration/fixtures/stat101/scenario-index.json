@@ -121,5 +121,22 @@
   "variant": "Intimidate on the Roar-forced switch-in (both bench mons Intimidate)",
   "seed": 305419897,
   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "stat101-harden-behind-sub-ply-primeape-onix.json": {
+  "move": [
+   164,
+   106,
+   106,
+   106
+  ],
+  "userSide": "player",
+  "user": "PRIMEAPE",
+  "otherLead": "ONIX",
+  "bench": null,
+  "expectedAnimArg": null,
+  "animatedSide": "player",
+  "variant": "Harden behind a Substitute: NO animation (baseline)",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
  }
 }

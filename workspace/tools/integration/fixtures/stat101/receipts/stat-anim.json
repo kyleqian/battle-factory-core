@@ -13,7 +13,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
   },
   "off": {
-   "sha256": "0666862585502a6e680fca923199a46e8ac07c4812e762d9d5ed36b69c2f4624",
+   "sha256": "be76d769432af2df97aec2a3288d4439bdb001a007e61736886eddb630b299be",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -47,7 +47,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatUpPrintString+5",
       "nextRel": 91,
-      "span": 91
+      "span": 91,
+      "statWrites": [
+       [
+        -38,
+        [
+         [
+          1,
+          3,
+          6,
+          8
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 91
      },
      "screenChanges": 82,
      "bg1Start": [
@@ -109,10 +123,18 @@
      ],
      "screenSignatureSha": "0820a5c47839b45a"
     }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 107,
+     "label": "BattleScript_StatUpPrintString+0",
+     "rowsToNextInstruction": 91,
+     "animActive": true
+    }
    ]
   },
   "on": {
-   "sha256": "d18fedbb90a9aafc7e9a958c1dba7d5522960706ee95f372aab957ac9971a475",
+   "sha256": "cd6cccef190d2f02db8cec305ab9c4687380b42753a5c7a806ba3beb4259a813",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -146,7 +168,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatUpPrintString+5",
       "nextRel": 91,
-      "span": 91
+      "span": 91,
+      "statWrites": [
+       [
+        -94,
+        [
+         [
+          1,
+          3,
+          6,
+          8
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 91
      },
      "screenChanges": 82,
      "bg1Start": [
@@ -208,6 +244,14 @@
      ],
      "screenSignatureSha": "0820a5c47839b45a"
     }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 163,
+     "label": "BattleScript_StatUpPrintString+0",
+     "rowsToNextInstruction": 91,
+     "animActive": true
+    }
    ]
   },
   "timingOnEqualsOff": true,
@@ -231,7 +275,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
   },
   "off": {
-   "sha256": "d4fa4b4a115f3046f9858061a54aa468b3899d8e772d8ef088043de96294028c",
+   "sha256": "43ea82d2b1376ae63d6f25b90f2e7796e9bfbf5a9a5d4c95f36107bee13735bd",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -265,7 +309,32 @@
       "launchRel": 0,
       "next": "BattleScript_CosmicPowerDoMoveAnim+18",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        78,
+        [
+         [
+          0,
+          2,
+          6,
+          7
+         ]
+        ]
+       ],
+       [
+        169,
+        [
+         [
+          0,
+          5,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
      },
      "screenChanges": 60,
      "bg1Start": [
@@ -327,10 +396,11 @@
      ],
      "screenSignatureSha": "e10a35b264c45b4e"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "on": {
-   "sha256": "a1ff5e59c52a2eb44fc16b69c2d44e242d76505e7148db6b3e7c42c294b96ac1",
+   "sha256": "51b7c9276a0ac391b2b2bd0ecc63b00f0005be98649b11864880b2704bac34a1",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -364,7 +434,32 @@
       "launchRel": 0,
       "next": "BattleScript_CosmicPowerDoMoveAnim+18",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        78,
+        [
+         [
+          0,
+          2,
+          6,
+          7
+         ]
+        ]
+       ],
+       [
+        169,
+        [
+         [
+          0,
+          5,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
      },
      "screenChanges": 60,
      "bg1Start": [
@@ -426,7 +521,8 @@
      ],
      "screenSignatureSha": "e10a35b264c45b4e"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "timingOnEqualsOff": true,
   "maskOnEqualsOff": true,
@@ -449,7 +545,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
   },
   "off": {
-   "sha256": "8c69a20e3b6b144828bad7c024bd21e598368738a1883238d9058bf39eb46a55",
+   "sha256": "4bb6e995047a2517f562f1c346167bb28131c1807febdf32b3ca4fdfe275bdd6",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -483,7 +579,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatDownPrintString+5",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        -38,
+        [
+         [
+          1,
+          1,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 78
      },
      "screenChanges": 59,
      "bg1Start": [
@@ -545,10 +655,18 @@
      ],
      "screenSignatureSha": "e53c9229061d254b"
     }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 105,
+     "label": "BattleScript_StatDownPrintString+0",
+     "rowsToNextInstruction": 77,
+     "animActive": true
+    }
    ]
   },
   "on": {
-   "sha256": "8a2e8ab770b8889ae39599dcebd074d0f02e6eb2b9d6b621d1a0eb16c941eedb",
+   "sha256": "1be1181b0391b26fd6721f553557dc35fb4bb7493dcf576d68a84fabe2110afb",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -582,7 +700,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatDownPrintString+5",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        -77,
+        [
+         [
+          1,
+          1,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 78
      },
      "screenChanges": 59,
      "bg1Start": [
@@ -644,6 +776,65 @@
      ],
      "screenSignatureSha": "e53c9229061d254b"
     }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 144,
+     "label": "BattleScript_StatDownPrintString+0",
+     "rowsToNextInstruction": 77,
+     "animActive": true
+    }
+   ]
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": true,
+  "deltaOnEqualsOff": true,
+  "maskCropOnEqualsOff": true,
+  "screenOnEqualsOff": true,
+  "expectedArgSeen": true
+ },
+ "stat101-harden-behind-sub-ply-primeape-onix": {
+  "index": {
+   "move": [
+    164,
+    106,
+    106,
+    106
+   ],
+   "userSide": "player",
+   "user": "PRIMEAPE",
+   "otherLead": "ONIX",
+   "bench": null,
+   "expectedAnimArg": null,
+   "animatedSide": "player",
+   "variant": "Harden behind a Substitute: NO animation (baseline)",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+  },
+  "off": {
+   "sha256": "3046b7ac1f532275cdd49b099dbbab967ae67ec5d3bd741275fb7c58061d2c4c",
+   "r1EqualsR2": true,
+   "windows": [],
+   "playanimationToPrint": [
+    {
+     "row": 972,
+     "label": "BattleScript_StatUpPrintString+0",
+     "rowsToNextInstruction": 1,
+     "animActive": false
+    }
+   ]
+  },
+  "on": {
+   "sha256": "b50db84e6686c6417e92769947f8c01e45c6aa54e68a1a0f622eb419d7d29670",
+   "r1EqualsR2": true,
+   "windows": [],
+   "playanimationToPrint": [
+    {
+     "row": 1127,
+     "label": "BattleScript_StatUpPrintString+0",
+     "rowsToNextInstruction": 1,
+     "animActive": false
+    }
    ]
   },
   "timingOnEqualsOff": true,
@@ -667,7 +858,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
   },
   "off": {
-   "sha256": "24ebdf8e55a9d6f19849c15b2d44a3512cc556c519a78d39965fb3f7dd01143b",
+   "sha256": "1a149d2fe8329bcb769d0a1b2c05a25cc04ae602974b5109b97517f61d73c10f",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -701,7 +892,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatUpPrintString+5",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        -38,
+        [
+         [
+          0,
+          2,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 78
      },
      "screenChanges": 59,
      "bg1Start": [
@@ -763,10 +968,18 @@
      ],
      "screenSignatureSha": "d252019f88a29223"
     }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 104,
+     "label": "BattleScript_StatUpPrintString+0",
+     "rowsToNextInstruction": 77,
+     "animActive": true
+    }
    ]
   },
   "on": {
-   "sha256": "301552e06928ce7de030ed2d4a959d0bc54c7bc9d1e7c9547746a569597e566e",
+   "sha256": "bb8b7b10799b532da29aeaf4ab5ea60d178f774307e56db1b59ad87dfc3068a8",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -800,7 +1013,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatUpPrintString+5",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        -109,
+        [
+         [
+          0,
+          2,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 78
      },
      "screenChanges": 59,
      "bg1Start": [
@@ -862,6 +1089,14 @@
      ],
      "screenSignatureSha": "59c2e704f6ed8de3"
     }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 175,
+     "label": "BattleScript_StatUpPrintString+0",
+     "rowsToNextInstruction": 77,
+     "animActive": true
+    }
    ]
   },
   "timingOnEqualsOff": true,
@@ -885,7 +1120,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
   },
   "off": {
-   "sha256": "4168d30ff2d99cd9b9ad5b7cf4d1d5e4254a2c1de3904bf1c86b32d8161233f3",
+   "sha256": "a7344335ca38270a47e4c82b9ec492027862eb79bfe8b00f0e91d5ab62544c7a",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -919,7 +1154,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatDown+12",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        -1,
+        [
+         [
+          1,
+          3,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
      },
      "screenChanges": 60,
      "bg1Start": [
@@ -981,10 +1230,11 @@
      ],
      "screenSignatureSha": "3ab9ee6cfb736b90"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "on": {
-   "sha256": "87def6bb5ab1d760acbd3af5d915018cf039b145cd0e8f7122961466fe0f0e98",
+   "sha256": "8df7b302f152097602237e9e00488cab69fd11654d3df0deb38944256e0dda15",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -1018,7 +1268,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatDown+12",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        -1,
+        [
+         [
+          1,
+          3,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
      },
      "screenChanges": 60,
      "bg1Start": [
@@ -1080,7 +1344,8 @@
      ],
      "screenSignatureSha": "3ab9ee6cfb736b90"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "timingOnEqualsOff": true,
   "maskOnEqualsOff": true,
@@ -1103,7 +1368,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
   },
   "off": {
-   "sha256": "b93e5c377f49acb98e5e9680e4c6e1520783dd10686dfc0122f118863de114b1",
+   "sha256": "ee2ba37edc057216d5bea2d1b2581ade615ec5902790aa80dfba004a3368045d",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -1137,7 +1402,32 @@
       "launchRel": 0,
       "next": "BattleScript_EffectMemento+46",
       "nextRel": 91,
-      "span": 91
+      "span": 91,
+      "statWrites": [
+       [
+        93,
+        [
+         [
+          1,
+          1,
+          6,
+          4
+         ]
+        ]
+       ],
+       [
+        193,
+        [
+         [
+          1,
+          4,
+          6,
+          4
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 96
      },
      "screenChanges": 81,
      "bg1Start": [
@@ -1199,10 +1489,11 @@
      ],
      "screenSignatureSha": "d52ab5773007330e"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "on": {
-   "sha256": "17135765cda12ee797696522ae26445996e96087e3ba6a1192536434777bd1ac",
+   "sha256": "c50383115c093c7977e50ed1939c992852554e10429c7214459bdcbee1a43c6e",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -1236,7 +1527,32 @@
       "launchRel": 0,
       "next": "BattleScript_EffectMemento+46",
       "nextRel": 91,
-      "span": 91
+      "span": 91,
+      "statWrites": [
+       [
+        93,
+        [
+         [
+          1,
+          1,
+          6,
+          4
+         ]
+        ]
+       ],
+       [
+        193,
+        [
+         [
+          1,
+          4,
+          6,
+          4
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 96
      },
      "screenChanges": 81,
      "bg1Start": [
@@ -1298,7 +1614,8 @@
      ],
      "screenSignatureSha": "5801396dc9a6a9e6"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "timingOnEqualsOff": true,
   "maskOnEqualsOff": false,
@@ -1324,7 +1641,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
   },
   "off": {
-   "sha256": "55c1614131a9bf2ecfc7f0bdb2966c58e82828504aece6bb7ec1f57aa208d981",
+   "sha256": "c4043b1307ac18a8df54ea33842cf94a88b0f24acbc19e2b1a1b848b4e64616b",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -1358,7 +1675,21 @@
       "launchRel": 0,
       "next": "BattleScript_IntimidateActivates+76",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        -3,
+        [
+         [
+          0,
+          1,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 78
      },
      "screenChanges": 59,
      "bg1Start": [
@@ -1420,10 +1751,11 @@
      ],
      "screenSignatureSha": "396f9dd9aba0a952"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "on": {
-   "sha256": "aa33cb4157d80b315b67f39008d94d2dd1c701470e5d2a0c1ab79640cae226d6",
+   "sha256": "3da2f1b5d60534f2aabb78d9aadc73ad15d6b8ceac6891a5b91448345e86588c",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -1457,7 +1789,21 @@
       "launchRel": 0,
       "next": "BattleScript_IntimidateActivates+76",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        -3,
+        [
+         [
+          0,
+          1,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 78
      },
      "screenChanges": 59,
      "bg1Start": [
@@ -1519,7 +1865,8 @@
      ],
      "screenSignatureSha": "184d1f82cdc6fa17"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "timingOnEqualsOff": true,
   "maskOnEqualsOff": true,
@@ -1542,7 +1889,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
   },
   "off": {
-   "sha256": "a040bca5b953aa6afb6e75d5ded8e6be831b82d9b69ab5a8a19d867004191583",
+   "sha256": "6e128bdb3dcd345fb9d200cb6120d187eaad28d95b5cfd8032033a9ee5d54767",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -1576,7 +1923,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatDownPrintString+5",
       "nextRel": 91,
-      "span": 91
+      "span": 91,
+      "statWrites": [
+       [
+        -38,
+        [
+         [
+          0,
+          2,
+          6,
+          4
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 91
      },
      "screenChanges": 82,
      "bg1Start": [
@@ -1638,10 +1999,18 @@
      ],
      "screenSignatureSha": "fcb0da664dd38200"
     }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 109,
+     "label": "BattleScript_StatDownPrintString+0",
+     "rowsToNextInstruction": 91,
+     "animActive": true
+    }
    ]
   },
   "on": {
-   "sha256": "d24f934b36b00909453e841b6654e588437e82078d5414e5f1fc8ff72a9ee119",
+   "sha256": "55dffdeeb8a947c826cd959f27158ccc9d9d3c97f909d82cc0c930884aff4c1b",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -1675,7 +2044,21 @@
       "launchRel": 0,
       "next": "BattleScript_StatDownPrintString+5",
       "nextRel": 91,
-      "span": 91
+      "span": 91,
+      "statWrites": [
+       [
+        -70,
+        [
+         [
+          0,
+          2,
+          6,
+          4
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 91
      },
      "screenChanges": 82,
      "bg1Start": [
@@ -1737,6 +2120,14 @@
      ],
      "screenSignatureSha": "fcb0da664dd38200"
     }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 141,
+     "label": "BattleScript_StatDownPrintString+0",
+     "rowsToNextInstruction": 91,
+     "animActive": true
+    }
    ]
   },
   "timingOnEqualsOff": true,
@@ -1760,7 +2151,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
   },
   "off": {
-   "sha256": "00d4090792f90ff75a0a53b79a00c9cfa9150ce35dc72fae9be5fe9c51a2a914",
+   "sha256": "aba38096e56231b5637e23ca65c4b3785392b096ed4e7ffb03aea34412b74658",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -1794,7 +2185,32 @@
       "launchRel": 0,
       "next": "BattleScript_AtkDefDown+14",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        79,
+        [
+         [
+          1,
+          1,
+          6,
+          5
+         ]
+        ]
+       ],
+       [
+        174,
+        [
+         [
+          1,
+          2,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 82
      },
      "screenChanges": 59,
      "bg1Start": [
@@ -1856,10 +2272,11 @@
      ],
      "screenSignatureSha": "4b78f5cca3442718"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "on": {
-   "sha256": "54772ec8c62e6ba0588146191e884e35051534b86b0c7f44ff126961c2dffec3",
+   "sha256": "cb947ecc5416ba3ea5d553ae5c152204ebb3906f0b80a3aaf357f0689e8bf00b",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -1893,7 +2310,32 @@
       "launchRel": 0,
       "next": "BattleScript_AtkDefDown+14",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        79,
+        [
+         [
+          1,
+          1,
+          6,
+          5
+         ]
+        ]
+       ],
+       [
+        174,
+        [
+         [
+          1,
+          2,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 82
      },
      "screenChanges": 59,
      "bg1Start": [
@@ -1955,7 +2397,8 @@
      ],
      "screenSignatureSha": "4b78f5cca3442718"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "timingOnEqualsOff": true,
   "maskOnEqualsOff": true,
@@ -1978,7 +2421,7 @@
    "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
   },
   "off": {
-   "sha256": "3ac4f0c02fff86bdb2c090a7b41cf304b2ed6cb32109f869d58dccafcd414774",
+   "sha256": "89c648ea67992f00fe30bdc42c9f253c6baf4865204d221595a067995de5fd66",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -2012,7 +2455,32 @@
       "launchRel": 0,
       "next": "BattleScript_TickleDoMoveAnim+23",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        79,
+        [
+         [
+          0,
+          1,
+          6,
+          5
+         ]
+        ]
+       ],
+       [
+        170,
+        [
+         [
+          0,
+          2,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
      },
      "screenChanges": 60,
      "bg1Start": [
@@ -2074,10 +2542,11 @@
      ],
      "screenSignatureSha": "5dab6479371fbc58"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "on": {
-   "sha256": "9905d89ab45ec5960a3be4f979815046bed8e2438bab19ce464513096720e637",
+   "sha256": "2a64a52045ea41e9ec037100c8d90dd47993c79a207838f9439f347d93ead0e1",
    "r1EqualsR2": true,
    "windows": [
     {
@@ -2111,7 +2580,32 @@
       "launchRel": 0,
       "next": "BattleScript_TickleDoMoveAnim+23",
       "nextRel": 77,
-      "span": 77
+      "span": 77,
+      "statWrites": [
+       [
+        79,
+        [
+         [
+          0,
+          1,
+          6,
+          5
+         ]
+        ]
+       ],
+       [
+        170,
+        [
+         [
+          0,
+          2,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
      },
      "screenChanges": 60,
      "bg1Start": [
@@ -2173,7 +2667,8 @@
      ],
      "screenSignatureSha": "5dab6479371fbc58"
     }
-   ]
+   ],
+   "playanimationToPrint": []
   },
   "timingOnEqualsOff": true,
   "maskOnEqualsOff": true,

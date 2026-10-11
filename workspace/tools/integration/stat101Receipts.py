@@ -24,11 +24,11 @@ def label(ptr):
 
 
 def windows(rows):
-    io, ow, sp, res = None, None, None, []
+    io, ow, sp, st, res = None, None, None, None, []
     full = []
     for r in rows:
-        io, ow, sp = r.get("io", io), r.get("ow", ow), r.get("sp", sp)
-        full.append((r, io, ow, sp))
+        io, ow, sp, st = r.get("io", io), r.get("ow", ow), r.get("sp", sp), r.get("st", st)
+        full.append((r, io, ow, sp, st))
     for A in range(1, len(full)):
         if not (full[A][0]["act"] and not full[A - 1][0]["act"]):
             continue
@@ -80,7 +80,7 @@ for f in sorted(glob.glob(os.path.join(d1, "*.json"))):
         tsv = ["rel\tf\tact\tEVA\tEVB\tbg1x\tbg1y\tobjwin\twinout\tbldcnt\tbg1cnt\tow\tslots\tinUse\tdpx\tbbox\tscr\tmaskCrop"]
         sig_t, sig_m, sig_d, sig_c, sig_p = [], [], [], [], []
         for i in range(A - 1, E + 4):
-            r, io, o, s = full[i]
+            r, io, o, s, _ = full[i]
             ea, eb = blend(io)
             dd = r.get("d", [0])
             line = [i - A, r["f"], r["act"], ea, eb, r["bg1"][0], r["bg1"][1], int(bool(io["dispcnt"] & 0x8000)), f"{io['winout']:04x}",
@@ -102,6 +102,12 @@ for f in sorted(glob.glob(os.path.join(d1, "*.json"))):
         p1 = next((i for i in range(E, len(full)) if full[i][0]["ptr"] != full[i - 1][0]["ptr"]), None)
         script = {"launch": label(full[p0][0]["ptr"]), "launchRel": p0 - A, "next": label(full[p1][0]["ptr"]) if p1 else None,
                   "nextRel": None if p1 is None else p1 - A, "span": None if p1 is None else p1 - p0}
+        # gBattleMons statStages writes (rows where any stage changes) within 120 rows of the window, relative to A
+        writes = [[i - A, [[b, j, full[i - 1][4][b][j], full[i][4][b][j]] for b in (0, 1) for j in range(8) if full[i][4][b][j] != full[i - 1][4][b][j]]]
+                  for i in range(max(1, A - 120), min(len(full), E + 120)) if full[i][4] != full[i - 1][4]]
+        # first screen change after the window's last visible row (the next instruction's first visible effect, e.g. the message box)
+        next_change = next((i - A for i in range(E + 1, len(full)) if full[i][0]["scr"] != full[i - 1][0]["scr"]), None)
+        script["statWrites"], script["firstScreenChangeAfterE"] = writes, next_change
         tsv_name = f"{scen}-{scene}-{k}.tsv"
         open(os.path.join(out, "rows", tsv_name), "w").write("\n".join(tsv) + "\n")
         ws.append({"A": A, "E": E, "activeFrames": E - A, "arg": full[A][0]["arg"], "mv": full[A][0]["mv"],
@@ -118,8 +124,16 @@ for f in sorted(glob.glob(os.path.join(d1, "*.json"))):
                    "maskCropSignatureSha": hashlib.sha256(json.dumps(sig_c).encode()).hexdigest()[:16],
                    "maskRect": next((full[i][0]["mr"] for i in range(A, E + 4) if "mr" in full[i][0]), None),
                    "screenSignatureSha": hashlib.sha256(json.dumps(sig_p).encode()).hexdigest()[:16]})
+    # every StatUp / StatDown print reached right after `playanimation BS_*, B_ANIM_STATS_CHANGE` (with or without an animation):
+    # rows from that playanimation's execution (the pointer lands on the print) to the print's execution (the next pointer change)
+    spans = []
+    for i in range(1, len(rows)):
+        if rows[i]["ptr"] != rows[i - 1]["ptr"] and label(rows[i]["ptr"]) in ("BattleScript_StatUpPrintString+0", "BattleScript_StatDownPrintString+0"):
+            j = next((j for j in range(i + 1, len(rows)) if rows[j]["ptr"] != rows[i]["ptr"]), None)
+            spans.append({"row": i, "label": label(rows[i]["ptr"]), "rowsToNextInstruction": None if j is None else j - i,
+                          "animActive": any(rows[g]["act"] for g in range(i, j or i + 1))})
     summary.setdefault(scen, {"index": index.get(scen + ".json")})[scene] = {
-        "sha256": hashlib.sha256(raw1).hexdigest(), "r1EqualsR2": raw1 == raw2, "windows": ws}
+        "sha256": hashlib.sha256(raw1).hexdigest(), "r1EqualsR2": raw1 == raw2, "windows": ws, "playanimationToPrint": spans}
 for scen, v in summary.items():
     on, off = v.get("on", {}).get("windows", []), v.get("off", {}).get("windows", [])
     v["timingOnEqualsOff"] = len(on) == len(off) and all(a["timingSignatureSha"] == b["timingSignatureSha"] for a, b in zip(on, off))
@@ -127,14 +141,16 @@ for scen, v in summary.items():
     v["deltaOnEqualsOff"] = len(on) == len(off) and all(a["deltaSignatureSha"] == b["deltaSignatureSha"] for a, b in zip(on, off))
     v["maskCropOnEqualsOff"] = len(on) == len(off) and all(a["maskCropSignatureSha"] == b["maskCropSignatureSha"] for a, b in zip(on, off))
     v["screenOnEqualsOff"] = len(on) == len(off) and all(a["screenSignatureSha"] == b["screenSignatureSha"] for a, b in zip(on, off))
-    v["expectedArgSeen"] = any(w["arg"] == v["index"]["expectedAnimArg"] for w in on) if v["index"] else None
+    v["expectedArgSeen"] = (any(w["arg"] == v["index"]["expectedAnimArg"] for w in on) if v["index"]["expectedAnimArg"] is not None
+                            else not on and not off) if v["index"] else None
 json.dump(summary, open(os.path.join(out, "stat-anim.json"), "w"), indent=1)
 open(os.path.join(out, "stat-anim.json"), "a").write("\n")
 for scen, v in summary.items():
     for scene in ("on", "off"):
+        print(scen, scene, "playanimationToPrint", [(x["label"], x["rowsToNextInstruction"], x["animActive"]) for x in v[scene]["playanimationToPrint"]])
         for w in v[scene]["windows"]:
             t = w["timeline"]
             print(scen, scene, v[scene]["r1EqualsR2"], v["timingOnEqualsOff"], v["maskOnEqualsOff"], v["deltaOnEqualsOff"], v["maskCropOnEqualsOff"], v["screenOnEqualsOff"], "arg", w["arg"], "A", w["A"], "len", w["activeFrames"], "chg", w["screenChanges"],
                   "s1", t["step1Regs"], "eva", t["firstEva"], t["peakEva"], t["peakRows"], t["lastEva"], "rest", t["regsRestored"], "ow", t["owRows"],
                   "vis", t["visibleRows"], t["visibleRowCount"], "bg1", w["bg1Start"], "mask", w["mask"]["x"], w["mask"]["y"], w["mask"]["dims"], w["mask"]["affine"],
-                  "bbox", w["changedBbox"], "script", w["script"], "slot", w["copySlot"], w["inUseDuring"], "bs", w["battlerSprites"])
+                  "script", w["script"], "slot", w["copySlot"], w["inUseDuring"], "bs", w["battlerSprites"])
