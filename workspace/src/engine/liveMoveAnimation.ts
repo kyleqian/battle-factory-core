@@ -20,7 +20,6 @@ import { SUBSTITUTE_FRAME_COUNT } from "../animation/substitute.ts";
 import { dragonRageFireSpitGeometryFor } from "../animation/dragonRage.ts";
 import { TAIL_WHIP_FRAME_COUNT } from "../animation/tailWhip.ts";
 import { CONFUSE_RAY_FRAME_COUNT } from "../animation/confuseRay.ts";
-import { FOCUS_PUNCH_FIRST_INACTIVE_AGE } from "../animation/focusPunch.ts";
 import { SCREECH_FIRST_INACTIVE_AGE } from "../animation/screech.ts";
 import {
   BRICK_BREAK_NORMAL_FRAME_COUNT,
@@ -231,7 +230,10 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Light Screen 113 reclassified to faithful timing (lsbz, liveMoveTimingPolicy.ts 113, the opponent's row-59 BLDALPHA write phase);
   // its exact fixtures stay valid in scope.
   114, 115, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 182, 186, 188, 201, 204,
-  208, 211, 213, 223, 227, 231, 232, 235, 243, 246, 247, 257, 264, 272, 277, 280, 281, 287, 290, 302,
+  208, 211, 213, 223, 227, 231, 232, 235, 243, 246, 247, 257,
+  // Focus Punch 264 reclassified to faithful timing (fp100, liveMoveTimingPolicy.ts 264, the age-131 restore lag); its exact fixtures
+  // stay valid in scope.
+  272, 277, 280, 281, 287, 290, 302,
   305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
   56, 61, 197, 238, 259, 294, 341,
   // prep11 (docs/next-adapters-prep11.md): Leech Seed main body.
@@ -1239,10 +1241,8 @@ export function liveMoveAnimationDuration(
     case 242: return liveMoveTimingBodyRows(242); // Crunch dark-background body through cleanup (faithful timing, a13fix: 142 rows, lag at 121).
     case 246: return 128; // ancientPowerAtAge: active through 126, cleanup at 127.
     case 247: return SHADOW_BALL_END_AGE + 1;
-    case 264:
-      return FOCUS_PUNCH_FIRST_INACTIVE_AGE[
-        request.target === 0 ? "player" : "opponent"
-      ] + 1;
+    // Faithful timing (fp100, D4): active rows in the policy phase of the age-131 restore lag (154 rows both sides) + the first inactive row.
+    case 264: return liveMoveTimingBodyRows(264, request.attacker === 0 ? "player" : "opponent")! + 1;
     case 272: return 147; // Role Play silhouette/blend body through cleanup.
     case 280:
       return request.turn === 0
@@ -2179,7 +2179,11 @@ export function liveMoveAnimationPresentation(
     case 242: config = { move: "CRUNCH", attacker, target, fieldProfile }; break;
     case 246: config = { move: "ANCIENT_POWER", attacker, target, fieldProfile }; break;
     case 247: config = { move: "SHADOW_BALL", attacker, target, fieldProfile }; break;
-    case 264: config = { move: "FOCUS_PUNCH", attacker, target, fieldProfile }; break;
+    case 264:
+      // fp100 (D4, liveMoveTimingPolicy.ts 264): the age-131 restore lag phase; the dominant phase lags on both sides.
+      config = { move: "FOCUS_PUNCH", attacker, target, fieldProfile,
+        restoreLag: liveMoveOptionalLagAge(264, attacker.geometry.side) !== null };
+      break;
     case 272: {
       // CreateAdditionalMonSpriteForMoveAnim places the target-species
       // silhouette at the attacker's coord plus that species' pic y offset in

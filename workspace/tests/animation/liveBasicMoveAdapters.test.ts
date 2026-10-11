@@ -74,9 +74,11 @@ function routeHash(
 
 describe("live BASIC move adapters", () => {
   it("routes Focus Punch and Screech with complete side-specific cleanup bodies", () => {
-    expect(LIVE_MOVE_ANIMATION_IDS).toEqual(expect.arrayContaining([103, 264]));
+    // fp100: Focus Punch is faithful timing (the age-131 restore lag, lag phase on both sides: 155 rows each).
+    expect(LIVE_MOVE_ANIMATION_IDS).toEqual(expect.arrayContaining([103]));
+    expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(264);
     expect(liveMoveAnimationDuration(request(264, 0))).toBe(155);
-    expect(liveMoveAnimationDuration(request(264, 1))).toBe(154);
+    expect(liveMoveAnimationDuration(request(264, 1))).toBe(155);
     expect(liveMoveAnimationDuration(request(103, 0))).toBe(63);
     expect(liveMoveAnimationDuration(request(103, 1))).toBe(63);
 

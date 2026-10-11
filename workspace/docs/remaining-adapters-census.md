@@ -8,19 +8,19 @@ node tools/integration/censusActivationSummary.mjs                    # fixtures
 tools/integration/censusActivation.sh; tools/integration/censusStagedActivation.sh   # direct-mGBA probes (optional, regenerates the receipts)
 ```
 
-Inputs: `docs/animation-integration-live-status.json` (239 live, 13 faithful random, 24 faithful timing), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + faithful-timing + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md; faithful-timing = the disjoint D4 bucket `faithfulTimingAdapters`, docs/faithful-timing.md, where a D3+D4 adapter is counted once with `d3: true`) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
+Inputs: `docs/animation-integration-live-status.json` (238 live, 13 faithful random, 25 faithful timing), `docs/animation-integration-readiness.json` + `-merged-readiness.json` (276 accepted, host classes), `tools/integration/fixtures/h-buffer-triage.json` (per-field classes/cites of the 78 H_BUFFER moves; stale config line numbers are re-resolved by symbol), `sprite-order-body-plans-ext.json`, the Level-50 set pools for the usage weight (the model of `tools/integration/spriteOrderPlanCoverageRank.py`: ranges 0..6, 4 moves per set, both sides; `weight` below is the share of all Factory move uses). The script asserts `live (scoped exact) + faithful-random + faithful-timing + in-flight + remaining = 276` (faithful-random = the disjoint D3 bucket `faithfulRandomAdapters`, docs/presentation-rng.md; faithful-timing = the disjoint D4 bucket `faithfulTimingAdapters`, docs/faithful-timing.md, where a D3+D4 adapter is counted once with `d3: true`) and that every cited `file:line` exists and is non-empty. In-flight = batches the supervisor has running (none; the lists in the script are empty). Helping Hand is the 277th Factory move and is not accepted (not counted).
 
 ## 1. Summary
 
 | Bucket | Moves | Weight |
 |---|---:|---:|
 | accepted Factory moves | 276 | 100% |
-| live adapters (scoped exact) | 239 | 85.92% |
+| live adapters (scoped exact) | 238 | 85.62% |
 | faithful-random adapters (ASTONISH, DOUBLE_KICK, FLAIL, FLATTER, HYPER_BEAM, LOVELY_KISS, LUSTER_PURGE, MUD_SLAP, RAIN_DANCE, SAND_ATTACK, THRASH, WATER_PULSE, WISH) | 13 | 3.84% |
-| faithful-timing adapters (BLIZZARD, CONFUSE_RAY, CRUNCH, DIVE, EXTRASENSORY, EXTREME_SPEED, FAINT_ATTACK, HIDDEN_POWER, HYPER_VOICE, ICE_BALL, ICY_WIND, LIGHT_SCREEN, MACH_PUNCH, MEGAHORN, METEOR_MASH, NIGHTMARE, PSYCHIC, PSYWAVE, PURSUIT, REVENGE, SHEER_COLD, SKILL_SWAP, SKY_ATTACK, SUPERPOWER) | 24 | 9.75% |
+| faithful-timing adapters (BLIZZARD, CONFUSE_RAY, CRUNCH, DIVE, EXTRASENSORY, EXTREME_SPEED, FAINT_ATTACK, FOCUS_PUNCH, HIDDEN_POWER, HYPER_VOICE, ICE_BALL, ICY_WIND, LIGHT_SCREEN, MACH_PUNCH, MEGAHORN, METEOR_MASH, NIGHTMARE, PSYCHIC, PSYWAVE, PURSUIT, REVENGE, SHEER_COLD, SKILL_SWAP, SKY_ATTACK, SUPERPOWER) | 25 | 10.05% |
 | in flight (0 order-consumer + 0 prep6) | 0 | 0.00% |
 | **remaining (this census)** | **0** | **0.00%** |
-| check | 239+13+24+0+0=276 | |
+| check | 238+13+25+0+0=276 | |
 
 Remaining moves by group:
 

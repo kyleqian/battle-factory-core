@@ -24,8 +24,9 @@ describe("animation-integration live status count", () => {
     // 245 - Pursuit / Hidden Power reclassified to faithful timing (d4w, prep41 D4 widening); 242 - Icy Wind / Blizzard / Confuse Ray
     // reclassified to faithful timing (d4tails); 241 - Faint Attack reclassified to faithful timing (fa185, per-side restore lag);
     // 240 - Light Screen reclassified to faithful timing (lsbz, the opponent's row-59 BLDALPHA write phase); 239 - Sky Attack reclassified to
-    // faithful timing (d4later, the strike's optional lag at 161).
-    expect(status.implementedCount).toBe(239);
+    // faithful timing (d4later, the strike's optional lag at 161); 238 - Focus Punch reclassified to faithful timing (fp100, the age-131
+    // restore lag).
+    expect(status.implementedCount).toBe(238);
     expect(status.playableExactCount).toBe(0);
     const faithful = status.faithfulRandomAdapters as { id: number; move: string; policy: string; provenance: string }[];
     expect(status.faithfulRandomCount).toBe(faithful.length);

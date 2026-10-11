@@ -58,11 +58,25 @@ export interface FocusPunchState {
 /**
  * The two side branches differ only in the final target-mon-BG cleanup
  * callback.  The values are source-window ages, not battle/turn timestamps.
+ * They are the accepted fixtures' bodies: the per-side split is the age-131
+ * restore lag (below), which the default `restoreLag` reproduces.
  */
 export const FOCUS_PUNCH_FIRST_INACTIVE_AGE: Readonly<Record<FocusPunchSide, number>> = {
   opponent: 154,
   player: 153,
 };
+
+/**
+ * S10A fp100 (D4, liveMoveTimingPolicy.ts 264): `restorebg`'s Task_FadeToBg
+ * reloads the battle background (LoadDefaultBg) while the screen is black and
+ * that frame may overrun VBlank, a lag at body age 131.  With it the
+ * return-to-field fade, the target-mon-BG cleanup and the first inactive row
+ * all come one row later (154 active rows, else 153).  No battle input
+ * decides it (docs/fp100-focus-punch-d4.md).
+ */
+export function focusPunchFirstInactiveAge(restoreLag: boolean): number {
+  return restoreLag ? 154 : 153;
+}
 
 function gbaSin(angle: number, amplitude: number): number {
   return (GBA_SINE_TABLE_256[angle & 0xff]! * amplitude) >> 8;
@@ -75,12 +89,12 @@ function fadeInBldy(age: number): number {
   return 47 - age;
 }
 
-function restoreBldy(age: number, targetSide: FocusPunchSide): number {
+function restoreBldy(age: number, restoreLag: boolean): number {
   if (age < 113) return 0;
   if (age <= 128) return age - 112;
-  const firstFieldFadeInAge = targetSide === "opponent" ? 133 : 132;
+  const firstFieldFadeInAge = restoreLag ? 133 : 132;
   if (age < firstFieldFadeInAge) return 16;
-  const finalFadeAge = targetSide === "opponent" ? 148 : 147;
+  const finalFadeAge = restoreLag ? 148 : 147;
   return Math.max(0, finalFadeAge - age);
 }
 
@@ -155,16 +169,19 @@ function soundAtAge(age: number): FocusPunchSound | null {
  * `age = 0` is the first pointer-owned `Move_FOCUS_PUNCH` source row.  The
  * reducer takes only the resolved target side and geometry; gameplay state,
  * fixtures, absolute battle time, and framebuffer recordings are never read.
+ * `restoreLag` is the age-131 lag phase (focusPunchFirstInactiveAge); the
+ * default is the accepted fixtures' per-side body.
  */
 export function focusPunchAtAge(
   age: number,
   targetSide: FocusPunchSide,
   targetCenter: FocusPunchPoint,
+  restoreLag: boolean = targetSide === "opponent",
 ): FocusPunchState {
-  const firstInactive = FOCUS_PUNCH_FIRST_INACTIVE_AGE[targetSide];
+  const firstInactive = focusPunchFirstInactiveAge(restoreLag);
   const active = age >= 0 && age < firstInactive;
-  const restore = restoreBldy(age, targetSide);
-  const firstFieldFadeInAge = targetSide === "opponent" ? 133 : 132;
+  const restore = restoreBldy(age, restoreLag);
+  const firstFieldFadeInAge = restoreLag ? 133 : 132;
   return {
     active,
     impactLoaded: age >= 1 && age < firstInactive,
@@ -176,7 +193,7 @@ export function focusPunchAtAge(
       impact: age >= 28 && age < firstFieldFadeInAge,
       bldy: Math.max(fadeInBldy(age), restore),
     },
-    targetOnMonBg: age >= 49 && age < (targetSide === "opponent" ? 150 : 149),
+    targetOnMonBg: age >= 49 && age < (restoreLag ? 150 : 149),
     alpha: age >= 52 && age < 112 ? { eva: 12, evb: 8 } : null,
     targetOffset: targetOffsetAtAge(age),
     fist: fistAtAge(age, targetCenter),

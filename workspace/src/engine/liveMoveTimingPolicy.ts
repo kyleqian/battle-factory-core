@@ -552,6 +552,32 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * S10A fp100 (docs/fp100-focus-punch-d4.md; ctl95 "Focus Punch needs your decision", docs/ctl95-doll-free-controls.md s3): the
+   * restorebg Task_FadeToBg frame (battle_anim.c: LoadDefaultBg's battle-terrain decompress while the screen is black) overruns VBlank
+   * in some bodies: gRng2Value repeats between body rows 130 and 131. The return-to-field fade-in (first changed row 132 -> 133), the
+   * target-mon-BG cleanup and the first inactive row move together: 154 active rows with it, 153 without (focusPunch.ts restoreLag).
+   * Fixed lags at 30, 151, 152 in the no-event frame (152, 153 after the age-131 lag). Neither side, species, body index nor doll
+   * history decides it (same pair, same lab: PERSIAN -> SLOWBRO opponent 154, 154, 154, 153). Measured (fresh direct mGBA, r1 == r2,
+   * tools/integration/fixtures/fp100/receipts/phase.tsv): opponent attacker lag in 14 of 16 bodies + the accepted BRELOOM -> STARMIE
+   * fixture (153) = 14 : 3; player attacker 8 : 5 + the accepted player fixture (154) = 9 : 5. Wrong phase: the fade-in rows 132..147.
+   */
+  264: {
+    move: "MOVE_FOCUS_PUNCH",
+    parameters: [{
+      kind: "optional-lag-age", age: 131, fixedLagAges: [30, 151, 152], iterations: 150, side: "opponent",
+      alternatives: [{ phase: "event", bodyRows: 154, measured: 14 }, { phase: "no-event", bodyRows: 153, measured: 3 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/fp100/receipts/phase.tsv (opponent: lag at 131 in 14 of 16 fresh bodies, 4 pairs, first and later)",
+        "accepted opponent fixture BRELOOM -> STARMIE (153 rows: no lag; production exact before fp100)", "tools/integration/fixtures/fp100-live-receipt.json"],
+    }, {
+      kind: "optional-lag-age", age: 131, fixedLagAges: [30, 151, 152], iterations: 150, side: "player",
+      alternatives: [{ phase: "event", bodyRows: 154, measured: 9 }, { phase: "no-event", bodyRows: 153, measured: 5 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/fp100/receipts/phase.tsv (player: lag at 131 in 8 of 13 fresh bodies, 4 pairs, first and later)",
+        "accepted player fixture (154 rows: lag; production exact before fp100)", "tools/integration/fixtures/fp100-live-receipt.json"],
+    }],
+  },
+  /**
    * S10A Ice Ball (docs/next-adapters-prep26.md s1.4 H / s4 item 6; tools/integration/fixtures/prep26/iceball-check.json lagRows): 0-step lag rows
    * (an animationRng stall: VBlank overrun), measured PER COUNTER BODY (request.rolloutCounter 1..5; 18 bodies): none in any counter 0..2 body
    * (accepted SPHEAL player / opponent + GLALIE -> GOLEM player / opponent: 4 each), counter 3 (body 4) row 38 in 1 of 3 (accepted player; not
@@ -698,6 +724,9 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // (18 : 18 tie -> no lag, 180 rows); exact fixtures tools/integration/fixtures/q2-live/sky-attack-*, other-phase strikes
   // tools/integration/fixtures/d4later/windows/sky-attack-strike-*.
   143,
+  // S10A fp100 (reclassified from scoped exact, lsbz precedent): Focus Punch, the age-131 restore lag (lag on both sides, 154 active rows;
+  // focusPunch.ts restoreLag); exact fixtures stay valid in scope; other-phase windows tools/integration/fixtures/fp100/windows/*.
+  264,
 ]);
 
 /**
