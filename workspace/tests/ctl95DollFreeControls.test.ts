@@ -10,7 +10,9 @@ import {
 } from "../src/engine/liveMoveAnimation.ts";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
-import { LIVE_SUBSTITUTE_SWAP_BODY_CELLS } from "../src/engine/liveSubstituteSwap.ts";
+import {
+  LIVE_SUBSTITUTE_SWAP_BODY_CELLS, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING, LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS,
+} from "../src/engine/liveSubstituteSwap.ts";
 import { ctl95ControlRowSha, readCtl95ControlFixture } from "../tools/integration/ctl95ControlFixture.ts";
 import { doll90AttRowSha, readDoll90AttFixture } from "../tools/integration/doll90AttFixture.ts";
 
@@ -80,14 +82,22 @@ describe("ctl95 doll-free control classification", () => {
 
   const attDir = "tools/integration/fixtures/ctl95/att";
   const attWindows = readdirSync(attDir).filter((n) => n.endsWith(".json")).sort();
-  it("GrassWhistle 320 attacker-doll swap cell: both sides (opponent widened by ctl95), three opponent composites", () => {
+  it("attacker-doll swap cells: GrassWhistle 320 both sides (opponent widened), Recover 105 both sides (self-target, {184, -10})", () => {
     expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(320)!]).toEqual(["player", "opponent"]);
-    expect(attWindows.map((n) => { const f = readDoll90AttFixture(`${attDir}/${n}`); return `${f.attacker}:${f.rows.length}`; }))
-      .toEqual(["1:302", "1:302", "1:302"]);
+    expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(105)!]).toEqual(["player", "opponent"]);
+    expect(LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS.has(105)).toBe(true);
+    expect(LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(105)).toEqual({ rows: 184, shift: -10 });
+    expect(attWindows.map((n) => { const f = readDoll90AttFixture(`${attDir}/${n}`); return `${f.fixture.move}:${f.attacker}:${f.rows.length}`; }))
+      .toEqual(["GRASS_WHISTLE:1:302", "GRASS_WHISTLE:1:302", "GRASS_WHISTLE:1:302", "RECOVER:1:265", "RECOVER:1:265", "RECOVER:0:269",
+        "RECOVER:0:269"]);
   });
   for (const name of attWindows) {
-    it(`${name}: the opponent GrassWhistle doll composite equals the ROM row on every row (sha256)`, () => {
-      const f = readDoll90AttFixture(`${attDir}/${name}`);
+    it(`${name}: the attacker-doll composite equals the ROM row on every row (sha256)`, () => {
+      const read = readDoll90AttFixture(`${attDir}/${name}`);
+      // Recover is self-target in production (request.target = attacker: LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS); the emitting checker
+      // (liveAdapterFramebuffer.ts SELF_TARGET_MOVES) targets the foe, so re-render with the production request.
+      const f = read.fixture.move !== "RECOVER" ? read
+        : { ...read, fixture: { ...read.fixture, requestFields: { ...read.fixture.requestFields, target: read.attacker } as never } };
       const bad = f.rows.filter(([age, , sha]) => doll90AttRowSha(f, age) !== sha).map(([age]) => age);
       expect(bad).toEqual([]);
     }, 120_000);

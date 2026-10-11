@@ -37,15 +37,16 @@ describe("land82: doll81 Substitute-doll cells", () => {
     expect(LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(142)).toEqual({ rows: 153, shift: 0 });
     expect(LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(47)).toEqual({ rows: 246, shift: 0 });
   });
-  it("self-target id set is {241} + doll90's Double Team 104: Sunny Day swaps, Recover still declines", () => {
-    // doll90 (docs/doll90-doll-cells.md) added Double Team 104 (pinned in tests/doll90DollCells.test.ts).
-    expect([...LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS]).toEqual([241, 104]);
+  it("self-target id set is {241} + doll90's Double Team 104 + ctl95's Recover 105: Sunny Day swaps", () => {
+    // doll90 (docs/doll90-doll-cells.md) added Double Team 104 (pinned in tests/doll90DollCells.test.ts); ctl95 added Recover 105
+    // (docs/ctl95-doll-free-controls.md, pinned in tests/ctl95DollFreeControls.test.ts).
+    expect([...LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS]).toEqual([241, 104, 105]);
     for (const a of [0, 1] as const) {
       expect(liveSubstituteSwapApplies(req(241, a, { target: a }), attackerDoll(a))).toBe(true);
       expect(liveMoveSubstituteDollDeclines(req(241, a, { target: a }), attackerDoll(a))).toBe(false);
       for (const id of [105]) {
-        expect(liveSubstituteSwapApplies(req(id, a, { target: a }), attackerDoll(a))).toBe(false);
-        expect(liveMoveSubstituteDollDeclines(req(id, a, { target: a }), attackerDoll(a))).toBe(true);
+        expect(liveSubstituteSwapApplies(req(id, a, { target: a }), attackerDoll(a))).toBe(true);
+        expect(liveMoveSubstituteDollDeclines(req(id, a, { target: a }), attackerDoll(a))).toBe(false);
       }
     }
   });
