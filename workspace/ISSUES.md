@@ -17,6 +17,31 @@ backlog.
 
 # Open
 
+## #166 — STATS_CHANGE: the stat-change animation is missing in ordinary play (Scene ON and OFF) (S10A, found 2026-10-11 by idle94 / idle98)
+
+`Cmd_playanimation` exempts B_ANIM_STATS_CHANGE from HITMARKER_NO_ANIMATIONS (`battle_script_commands.c:4011`), so `General_StatsChange`
+(`AnimTask_StatsChange`, `battle_anim_status_effects.c:482`; StatsChangeAnimation_Step3 in `battle_anim_utility_funcs.c`) plays in BOTH scenes:
+a scrolling stat-arrow BG faded in (blend 10, or 13 "sharply"), held 20 (30) frames and faded out, masked by an OBJ-window copy of the
+battler sprite. ROM: 75 active frames (STAT_ANIM_MULTIPLE_PLUS1, Bulk Up, PRIMEAPE both sides) and 89 sharply (Swords Dance up, Scary Face
+down), ON == OFF, r1 == r2 (`tools/integration/fixtures/idle98/receipts/stats-change.json`). Duration depends only on "sharply"; direction
+sets the scroll (+-3) and BG X, the stat the palette, species / side the mask. Production: a 2-frame `stat` command
+(`battleResolutionPresentation.ts` STAT_TIMING), no pixels. Exposure (seeds 0..999): 5,698 stat commands in 4,689 groups (one ROM animation
+per playstatchangeanimation), 897 / 1,000 battles, >= ~340k frames (~8.6 % of the census timeline). Fix shape (docs/next-adapters-idle98.md
+§5a): a stats-change presentation command per group with the source duration and a live adapter (BG arrows + OBJ-window mask) keyed by
+direction / stat / sharply / battler, proven dense against the ROM like any accepted body (Scene ON and OFF). Presentation only.
+
+## #167 — Scene OFF: move bodies without a hit receipt lose the BattleScript_Pausex20 span; misses may lose MoveMissedPause (S10A, found 2026-10-11 by idle94 / idle98)
+
+With Battle Scene OFF, Cmd_attackanimation pushes BattleScript_Pausex20 (`pause B_WAIT_TIME_SHORT`) for EVERY move: F_after - F_att = 35
+(37 / 37 + 20 / 20 bodies). Production's OFF route emits that pause only when a hit receipt follows (`battleResolutionPresentation.ts`
+SCENE_OFF_ATTACK_PAUSE: "An attack receipt without a hit receipt ... continue"): 9,975 / 27,481 census move bodies (36 %: Double Team, Protect,
+Confuse Ray, Rest, Dig, Curse, ...) show nothing for >= 35 frames (~349k OFF frames). Fix shape (docs/next-adapters-idle98.md §5b): emit the OFF
+pause for every SCENE_OFF_ATTACK_PAUSE receipt, (attG - 1) + 35 + k frames from the same instruction provenance as the hit path (measure k per
+follow-up). PLAUSIBLE, to anchor first (§5c): a miss plays `pause B_WAIT_TIME_SHORT` (BattleScript_MoveMissedPause) before "X's attack missed!"
+in both scenes (ROM: 36 frames from the "used" text's last glyph to the next change); production goes straight to the miss message — check
+the message command's first-glyph frame before fixing. Related, Scene ON (banked, not landed): every live body is 3 frames short before
+and 2 after (pre / post rows, idle98's `idle98-universal-rows.diff`: 23,814 commands +3 / +5 frames, 273 timing pins in 65 test files).
+
 ## #165 — GAMEPLAY: the ROM's Factory turns Return into Frustration (friendship 0); production keeps Return (found 2026-10-10 by ret80)
 
 The ROM builds every Factory rental and opponent with `friendship = 0` and writes each move through `SetMonMoveAvoidReturn`
@@ -24,14 +49,15 @@ The ROM builds every Factory rental and opponent with `friendship = 0` and write
 battle never contains Return: the 11 Level-50 sets that list Return (`src/data/gen/battle-frontier-mons.json`: TOGEPI 26, MARILL 28,
 CLEFAIRY 107, TOGETIC 288, DRAGONAIR 306, PIDGEOT 355, GYARADOS 459 / 747, EXEGGUTOR 534, FEAROW 567, ...) fight with Frustration
 (power (255 - 0) * 10 / 25 = 102). Production has no such mapping (no `AvoidReturn` anywhere in `src/`): those sets keep Return at
-friendship 0 (power 1) — different damage, AI scores (Factory AI CheckBadMove treats the two effects differently) and animation. Production's live
-Return adapter drew the 282-frame Strongest body (it falls back since ret80). docs/next-adapters-prep18.md s4's "255 for every Return user" cites
+friendship 0 (power 1) — different damage, AI scores (Factory AI CheckBadMove treats the two effects differently) and animation. Since ret88
+(2026-10-11) production's live Return renders the ROM's ReturnWeak branch (friendship < 61: 88 rows, order key 40216) — what the ROM plays for
+production's own friendship-0 Return; ReturnStrongest stays proven for friendship > 200. docs/next-adapters-prep18.md s4's "255 for every Return user" cites
 battle_tower.c, which the Factory does not use. Not fixed in S10A (presentation-only mandate: gameplay outcomes must not change).
 Resume (a gameplay-parity step): map Return -> Frustration where the Factory builds battle parties (player rentals and opponents, both
 the battle-start and swap paths), check what the draft / swap summary screens show for those sets in the ROM (the screens may read
 `gFacilityTrainerMons` directly), re-run the Factory battle / AI / soak gates, then retire or re-scope the live Return adapter and
-ret80's Return order keys (Frustration's animation is the one that plays). Census 0..999 today: RETURN 47 commands (all fall back
-after ret80) plus the 76 later bodies behind them.
+ret80's / ret88's Return order keys (Frustration's animation is the one that plays). Census 0..999 (2026-10-11): 84 Return commands, all live
+as ReturnWeak.
 
 ## #161 — Dive attack: an extra lag frame at age 17 on poisoned player-diver routes (S10A, found 2026-10-10 by st76)
 
@@ -203,11 +229,12 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Live claim (cf78, 2026-10-10; was ISSUES #162):** every live body declines while a CASTFORM is shown in a weather form
   (presentation-only per-slot form from the CASTFORM_CHANGE argument; live audit 19 had found 44 live windows drawing the normal form);
   the fallback draws the same normal-form pixels until the per-form art below lands, then the decline can lift.
-- **Open remainder:** Forecast/weather forms need `gBattleMonForms` in the field view:
-  per-form palette (`battle_gfx_sfx_util.c:615-620`), front coords
-  (`gCastformFrontSpriteCoords`), elevations 14/13/13 and back Y per form. Also the
-  latent front coords width (source 32 vs app 24, `battle_anim_mons.c:2253-2255`)
-  for width-dependent moves. Not exercised by any current proof.
+- **Per-form art LANDED (cast83, 2026-10-10 night; qa91 +3 keys):** form frame, castformPalette[form], front coords, elevation and
+  back Y per form in the field view and the live renderer; 32 (move, Castform role, form) keys ROM-proven live
+  (`LIVE_CASTFORM_FORM_PROVEN`). **Open remainder:** unmeasured keys keep declining (census 0..999: ~15 commands — Ember / Rain Dance /
+  Fly / Ice Ball / Scary Face / Rest in other forms); rain Icy Wind is a TIMING-PHASE (lag ages [241, 242] vs [261], also without Castform:
+  a D4 candidate); the Substitute-swap composite still declines with a form shown; the latent front coords width (source 32 vs app 24,
+  `battle_anim_mons.c:2253-2255`) for width-dependent moves is unexercised.
 
 ## #141 — Two `SetMoveEffect` exits must RE-RUN `seteffectwithchance` (which then wastes one `Random() % 100`): the THRASH lock-in `break`s without advancing the cursor, and Thief/Covet-vs-Sticky-Hold uses `BattleScriptPushCursor()` — the port `advance`s / `"call"`s instead (RNG-affecting)
 
