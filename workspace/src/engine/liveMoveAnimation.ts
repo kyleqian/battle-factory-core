@@ -113,6 +113,7 @@ import { SUPERPOWER_ROWS, liveSuperpowerInputs } from "./liveSuperpowerInputs.ts
 import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveOutrageInputs, liveRapidSpinInputs, liveHyperVoiceInputs, liveSkyAttackInputs, liveSandTombProfile, liveSmogInputs, liveSnoreInputs } from "./liveQ2Moves.ts";
 import { liveEruptionProfile, liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES, battlerSprite, liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
+import { liveScanlineEntry } from "./liveScanlineHistory.ts";
 import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveSpriteOrderPlanText, shockWaveTimingFor } from "../animation/shockWave.ts";
@@ -817,6 +818,7 @@ function liveHailSpriteOrderPlanText(species: LiveMoveBodySpecies): string | nul
  */
 export function liveMementoReducerConfig(
   field: BattleResolutionDisplayedField, attackerSide: "player" | "opponent", x2Input?: LiveMoveBattlerX2Input,
+  scanline0: Readonly<{ srcBuffer: number; buffers: readonly (readonly number[])[] }> = FIRST_BODY_SCANLINE,
 ): MementoConfig {
   const art = createBattleCommandFieldArtView(field);
   const battler = (side: "player" | "opponent"): MementoBattlerConfig => {
@@ -827,8 +829,8 @@ export function liveMementoReducerConfig(
       bgPaletteId: opponent ? 8 : 9 };
   };
   return { attacker: battler(attackerSide), target: battler(attackerSide === "player" ? "opponent" : "player"),
-    initialScanlineSourceBuffer: FIRST_BODY_SCANLINE.srcBuffer as 0 | 1,
-    initialScanlineBuffers: FIRST_BODY_SCANLINE.buffers as unknown as readonly [readonly number[], readonly number[]],
+    initialScanlineSourceBuffer: scanline0.srcBuffer as 0 | 1,
+    initialScanlineBuffers: scanline0.buffers as unknown as readonly [readonly number[], readonly number[]],
     initialWindow: { win0h: 240, win0v: 161 } };
 }
 
@@ -2794,11 +2796,15 @@ export function liveMoveAnimationPresentation(
       // Memento (docs/next-adapters-prep34.md s2.5): the battle's first animation body only (the scanline entry is the intro residue; a later
       // body after a scanline body differs), non-shiny (live battler art draws normal palettes). The attacker's self-KO / stat drops are
       // gameplay-owned and never read inside the body; the HUD shows the displayed HP 0 (prep6 Self-Destruct path) under the live field.
-      if (!spriteOrderInput?.known || !spriteOrderInput.firstBody) return null;
+      // scan93: a later body reads the order host's scanline history (liveScanlineHistory.ts; absent = an unmodelled writer since: declines).
+      if (!spriteOrderInput?.known) return null;
+      const mementoHistory = spriteOrderInput.firstBody ? [] : spriteOrderInput.scanlineHistory;
+      if (mementoHistory === undefined || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const mementoScanline = liveScanlineEntry(FIRST_BODY_SCANLINE, mementoHistory, (side) => art[side].speciesSymbol);
       config = { move: "MEMENTO", attacker, target,
         fieldProfile: { playerHp: field.player.hp, playerMaxHp: field.player.maxHP, opponentHp: field.opponent.hp, opponentMaxHp: field.opponent.maxHP },
-        reducer: liveMementoReducerConfig(field, attacker.geometry.side, battlerX2Input) };
+        reducer: liveMementoReducerConfig(field, attacker.geometry.side, battlerX2Input, mementoScanline) };
       break;
     }
     case 245: {
@@ -4158,9 +4164,13 @@ export function liveMoveAnimationPresentation(
       // Quick Attack / Growl / Splash / its own body (65 displayed scanline lines then differ from the residue, unread) and differs only on
       // the documented lag rows 143..158; it needs both species rests {0,0}. A PLAYER attacker's later body (opponent target) declines: the
       // scanout split moved by the history (18 px after a Quick Attack alone, 54..298k px after other predecessors) is not modelled.
+      // scan93: a later body reads the order host's scanline history when it is known (display-neutral in every measured window). A PLAYER
+      // attacker's later body still declines: its windows carry the scanout split (prep30 s1.4; scan93: 11 of 11 later windows split "event").
       if (!spriteOrderInput?.known) return null;
+      const xsHistory = spriteOrderInput.firstBody ? [] : spriteOrderInput.scanlineHistory;
       if (!spriteOrderInput.firstBody && (attacker.geometry.side !== "opponent" || !liveBattlersRestFree(art))) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const xsScanline = xsHistory === undefined ? FIRST_BODY_SCANLINE : liveScanlineEntry(FIRST_BODY_SCANLINE, xsHistory, (side) => art[side].speciesSymbol);
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4168,7 +4178,7 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const inputs = liveExtrasensoryInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors,
-        attackerPictureHeight: pictureHeight(attacker.geometry.side), palettes, activationOrder, sort: sortGbaSpriteOrder,
+        attackerPictureHeight: pictureHeight(attacker.geometry.side), palettes, activationOrder, sort: sortGbaSpriteOrder, scanline0: xsScanline,
         lateLag: liveMoveOptionalLagAge(326, attacker.geometry.side, liveMoveTimingBodyOf(spriteOrderInput)) !== null });
       if (inputs === null) return null;
       // The EXTRASENSORY seam centres are the battler sprite centres (gSprites x / y).

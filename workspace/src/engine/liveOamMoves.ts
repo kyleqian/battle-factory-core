@@ -817,6 +817,8 @@ export function livePsywaveInputs(args: LivePsywaveInputArgs): { duration: numbe
 }
 
 export interface LiveExtrasensoryInputArgs {
+  /** scan93: the activation scanline entry from the order host's scanline history (default: the first-body intro residue). */
+  readonly scanline0?: Readonly<{ state: number; srcBuffer: number; dmaDest: number; buffers: readonly (readonly number[])[] }>;
   readonly attackerSide: Side;
   readonly attackerSpecies: string;
   readonly targetSpecies: string;
@@ -857,6 +859,7 @@ export function liveExtrasensoryInputs(args: LiveExtrasensoryInputArgs): { durat
   // CloneBattlerSpriteWithBlend copies the whole attacker sprite struct, so the clone carries the attacker's idle x2 / y2 rest.
   const attackerPosition = { x: attacker.spriteCenter.x + attacker.frontIdleRest.x2, y: attacker.spriteCenter.y + attacker.frontIdleRest.y2 };
   const key = JSON.stringify([attackerSide, attackerPosition, args.attackerPictureHeight, attackerObject.attr, targetObject.attr, args.activationOrder, rows]);
+  const scanline0 = args.scanline0 ?? FIRST_BODY_SCANLINE;
   let built = extrasensoryCache.get(key);
   if (!built) {
     built = liveExtrasensoryHardwareOamRows({ attacker: attackerObject, target: targetObject, attackerPosition,
@@ -872,7 +875,7 @@ export function liveExtrasensoryInputs(args: LiveExtrasensoryInputArgs): { durat
     target: { slot: targetObject.slot, x: target.spriteCenter.x, y: target.spriteCenter.y, x2: 0, y2: 0, objBank: targetObject.attr[2] >>> 12 & 0xf },
     targetBattler: targetSide === "player" ? 0 : 1, cloneSlot, cloneMatrix,
     cloneStep: (j) => liveExtrasensoryCloneStep(j, args.attackerPictureHeight, GBA_SINE_TABLE_256),
-    targetYElevation, scanline0: FIRST_BODY_SCANLINE, lateLag: args.lateLag, sine: GBA_SINE_TABLE_256 });
+    targetYElevation, scanline0, lateLag: args.lateLag, sine: GBA_SINE_TABLE_256 });
   const art = (species: string, object: ReturnType<typeof battlerObject>) =>
     ({ displaySpecies: species, slot: object.slot, attr: object.attr, subpriority: object.subpriority });
   return {

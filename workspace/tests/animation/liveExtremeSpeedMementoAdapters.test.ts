@@ -167,10 +167,13 @@ describe("Memento (262) live adapter (scoped exact, first body)", () => {
     expect(Object.keys(receipt.stagedByteIdentity.base)).toEqual(expect.arrayContaining(["MEMENTO player", "MEMENTO opponent"]));
   });
 
-  it("gates: a later body (after Psywave) and an unknown order decline; a shiny battler declines", () => {
+  it("gates: a later body is live after Psywave (history known), declines after a Dragon Dance (history invalidated); an unknown order declines; a shiny battler declines", () => {
     const { view, effect } = effectOf(later);
     expect((effect.spriteOrderInput as { firstBody?: boolean }).firstBody).not.toBe(true);
-    expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput)).toBeNull();
+    expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, effect.spriteOrderInput)).not.toBeNull();
+    const afterDd = effectOf({ ...later, precedingBodies: [{ moveId: 349, side: "player" }] });
+    expect((afterDd.effect.spriteOrderInput as { scanlineHistory?: unknown }).scanlineHistory).toBeUndefined();
+    expect(liveMoveAnimationPresentation(afterDd.effect.request, afterDd.view.field, 0, undefined, undefined, afterDd.effect.spriteOrderInput)).toBeNull();
     const first = effectOf(fixtureAt("memento-player-weezing-opponent-onix"));
     const call = (order: unknown, field = first.view.field) => liveMoveAnimationPresentation(first.effect.request, field, 0, undefined, undefined, order as never);
     expect(call(first.effect.spriteOrderInput)).not.toBeNull();
@@ -203,11 +206,11 @@ describe("Memento (262) live adapter (scoped exact, first body)", () => {
     expect(on.state.round.rules.rngValue).toBe(off.state.round.rules.rngValue);
   }, 240000);
 
-  it("route 127/28 WEEZING (the opponent's body first): the later Memento body declines and the battle continues", () => {
+  it("route 127/28 WEEZING (the opponent's body first): the later Memento body is live (scan93 history) and the battle continues", () => {
     const on = generatedCommandAnimationReplay(127, "on", [0], 28, false, true);
     const bodies = on.animations.filter((a) => a.moveId === 262 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.adapterActive.some(Boolean)).toBe(false);
+    expect(bodies[0]!.adapterActive.some(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
   }, 240000);
 });

@@ -43,6 +43,7 @@ import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { createKnownEntrySpriteAllocatorProvider, type KnownEntryRoute } from "./knownEntrySpriteAllocator.ts";
 import type { LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveSpriteAllocatorHost } from "./liveSpriteAllocator.ts";
+import { applyLiveScanlineHistoryEvent, type LiveScanlineHistory } from "./liveScanlineHistory.ts";
 import { generalAnimationPresentationRngKey, isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION, WORDS_ORDER_UNIT_MOVE_IDS } from "./wordsOrderUnits.ts";
 import {
   KNOWN_ENTRY_BATTLER_SLOTS, KNOWN_ENTRY_OCCUPANT_ROLES, applySpriteOrderPresentationEvent, createSpriteOrderTracker,
@@ -63,6 +64,8 @@ export interface LiveSpriteOrderHost {
   readonly hidden: readonly [boolean, boolean];
   /** Presentation units (animation bodies, faints, switches, party-menu resets) applied since the battle began (prep16 s0.3 first-body gate). */
   readonly bodies?: number;
+  /** scan93: the scanline-buffer history (liveScanlineHistory.ts): Extrasensory attacker sides so far; null / absent = invalidated. */
+  readonly scanline?: LiveScanlineHistory;
   /**
    * prep18 s1.1: the battle's first unit was a Dig setup body (move-animation 91 at `bodies` 0). `units` = the body counter right
    * after it; the unleash lend requires no other unit since (only the setup's own attacker-hide invalidate may follow).
@@ -175,7 +178,7 @@ const INVALIDATING_EVENTS: ReadonlySet<string> = new Set(["trainer-slide-out", "
 
 export function createLiveSpriteOrderHost(order: SpriteOrderState): LiveSpriteOrderHost {
   const hidden: readonly [boolean, boolean] = Object.freeze([false, false] as const);
-  return Object.freeze({ tracker: createSpriteOrderTracker(order), promptRequestId: null, cursor: null, hidden, bodies: 0 });
+  return Object.freeze({ tracker: createSpriteOrderTracker(order), promptRequestId: null, cursor: null, hidden, bodies: 0, scanline: Object.freeze([]) });
 }
 
 /**
@@ -227,7 +230,7 @@ export function openLiveSpriteOrderHostPartyMenu(host: LiveSpriteOrderHost): Liv
   return Object.freeze({
     ...withoutDeferred(host),
     tracker: applySpriteOrderPresentationEvent(host.tracker, { kind: "party-menu-reset" }),
-    bodies: (host.bodies ?? 0) + 1,
+    bodies: (host.bodies ?? 0) + 1, scanline: null,
     cursor: host.cursor === null || host.cursor.drained ? host.cursor : Object.freeze({ ...host.cursor, drained: true }),
   });
 }
@@ -517,6 +520,7 @@ export function advanceLiveSpriteOrderHost(
   let tracker = host.tracker;
   let hidden = host.hidden;
   let bodies = host.bodies ?? 0;
+  let scanline: LiveScanlineHistory = host.scanline ?? null;
   let digSetup = host.digSetup;
   let bonemerangHit1 = host.bonemerangHit1;
   let deferredBody = host.deferredBody;
@@ -529,6 +533,7 @@ export function advanceLiveSpriteOrderHost(
   if (cursor?.requestId !== requestId) {
     if (cursor !== null && !cursor.drained) {
       tracker = invalidateSpriteOrderTracker(tracker, "previous resolution not fully applied");
+      scanline = null;
       record({ kind: "invalidate", reason: "previous resolution not fully applied" });
     }
     if (host.promptRequestId !== requestId) {
@@ -593,6 +598,8 @@ export function advanceLiveSpriteOrderHost(
         record(mapped.then);
       }
       const wasFirstBody = bodies === 0;
+      if (mapped.event) scanline = applyLiveScanlineHistoryEvent(scanline, mapped.event as never);
+      if (mapped.then) scanline = applyLiveScanlineHistoryEvent(scanline, mapped.then as never);
       if (mapped.event && BODY_UNIT_EVENTS.has(mapped.event.kind)) bodies += 1;
       if (mapped.event?.kind === "move-animation" && mapped.event.moveId === 91 && wasFirstBody) digSetup = Object.freeze({ units: bodies });
       if (mapped.event?.kind === "move-animation" && mapped.event.moveId === 155 && wasFirstBody) bonemerangHit1 = Object.freeze({ units: bodies });
@@ -613,13 +620,13 @@ export function advanceLiveSpriteOrderHost(
       drained: nextEventIndex >= events.length && cursor.segmentIndex === resolution.segments.length - 1,
     };
   }
-  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && digSetup === host.digSetup && bonemerangHit1 === host.bonemerangHit1
+  if (tracker === host.tracker && bodies === (host.bodies ?? 0) && scanline === (host.scanline ?? null) && digSetup === host.digSetup && bonemerangHit1 === host.bonemerangHit1
     && deferred === host.deferred && deferredBody === host.deferredBody && deferredOccupancy === host.deferredOccupancy && hidden === host.hidden
     && cursor.requestId === host.cursor?.requestId
     && cursor.segmentIndex === host.cursor.segmentIndex && cursor.nextEventIndex === host.cursor.nextEventIndex
     && cursor.drained === host.cursor.drained) return host;
   const { deferred: _d, deferredBody: _b, deferredOccupancy: _o, ...rest } = host;
-  return Object.freeze({ ...rest, tracker, hidden, bodies, ...(digSetup === undefined ? {} : { digSetup }), ...(bonemerangHit1 === undefined ? {} : { bonemerangHit1 }),
+  return Object.freeze({ ...rest, tracker, hidden, bodies, scanline, ...(digSetup === undefined ? {} : { digSetup }), ...(bonemerangHit1 === undefined ? {} : { bonemerangHit1 }),
     ...(deferredBody === undefined ? {} : { deferredBody }), ...(deferred === undefined ? {} : { deferred }),
     ...(deferred === undefined || deferredOccupancy === undefined ? {} : { deferredOccupancy }), cursor: Object.freeze(cursor) });
 }
@@ -685,6 +692,7 @@ export function lendLiveSpriteOrder(host: LiveSpriteOrderHost, moveId?: number):
   const hit2 = moveId === 155 && host.bonemerangHit1 !== undefined && (host.bodies ?? 0) >= host.bonemerangHit1.units && (host.bodies ?? 0) <= host.bonemerangHit1.units + 1;
   return Object.freeze({
     known: true as const, free: hit2 ? bonemerangHit2Free() : free, ...((host.bodies ?? 0) === 0 ? { firstBody: true as const } : {}),
+    ...((host.bodies ?? 0) === 0 || host.scanline === undefined || host.scanline === null ? {} : { scanlineHistory: host.scanline }),
     ...(hit2 ? { afterBonemerangHit1: true as const } : {}),
   });
 }
