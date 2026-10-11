@@ -51,7 +51,9 @@ Scene OFF: hit-path L_OFF = 0. A no-hit body has no OFF command: L_OFF = (attG -
    exactly the leads land97 does not cover (Thunder Punch, Bind, Supersonic, Flamethrower, Double Team, Recover, Rock Slide ply, Faint Attack,
    Milk Drink, Spark, Dynamic Punch, Encore, Synthesis).
 3. Move the pins listed in section 4. Each ordinary-route age sequence `[0..D-1]` becomes `[0 x (P+1), 1..D-1, (D-1) x T]`. Row counts move by P + T,
-   and battle frame totals move by the sum over the route's live bodies.
+   and battle frame totals move by the sum over the route's live bodies. The presentation-RNG host advances every frame. So a Random2 body after a
+   moved body draws different faithful-random (D3) words: its pixels change from its first draw age on, and it stays live. No test pinned those
+   words: all 273 moved pins are timing pins.
 4. Follow-ups, measured here but not banked:
    - **Full hit-path accounting** (exact alignment of the next command): pre = attG + 2 + N rows instead of 3. Production already has attG on the hit
      path: OFF `1 + I + 32` = attG + 36, so pre = (1 + I + 32) - 34 + N. The ON MOVE_ANIMATION branch needs the same
@@ -172,7 +174,7 @@ pause was not anchored here (it needs the message command's first-glyph frame). 
 - The census (`--census`) was run by hand on both trees with the runner's exact commands (section 1 numbers). The exposure run also used the
   runner's commands (base copy, five shards).
 - `npm test` in a git-archive copy of `ca0add97f` (its own two-commit git repo; HEAD also carries the supervisor's interleaved ctl95 merge):
-  HEAD_TEST. `npm run build` in the same copy: HEAD_BUILD. Later commits add only `pins.json`, `idle98Pins.py` and this doc (no TypeScript).
+  **1,623 files / 13,335 tests passed** (44 / 223 skipped), 0 failed. `npm run build` in the same copy: **green** (exit 0). Later commits add only `pins.json`, `idle98Pins.py` and this doc (no TypeScript).
 - `git diff --check` is clean at every commit. `git status --short` listed only new idle98 files, staged by explicit path. The live checkout's git
   still resolves to the repo top (no nested `.git` was created).
 
