@@ -96,6 +96,21 @@ Environment-only, NOT a pin: `tests/appDifferential.test.ts > app-differential C
 a worktree`. The patched copy carried a local one-commit `git init` (used to cut the diff), so `--base 'HEAD^'` does not name a commit.
 The plain HEAD archive copy passes it.
 
+## 4b. Gates (evidence only)
+
+- `npm test` in a git-archive copy of `804523481`: **1,621 files / 13,308 tests passed** (44 / 223 skipped), 0 failed. `npm run build` is
+  green in an archive copy of `a51f9a9c5`; later commits change only docs and fixtures. `git diff --check` is clean at every commit.
+  `git status --short` listed only the new idle94 files.
+- `sh tools/integration/idle94Run.sh <fresh>` (no census) in a fresh dir: **ALL SAME** (scenarios, scenario index, lead-scan scenarios,
+  table lead column, 40 / 40 + 98 / 98 probe jobs r1 == r2, 138 / 138 outputs == the committed sha256, compare, lead-scan check, 8 / 8
+  routes, render check). The census (`--census`) was run by hand on both trees with the runner's exact commands (section 1 numbers).
+- **Run `npm test` in an archive copy ONLY after giving the copy its own git repo** (`git init` at the copy's top, plus two commits so
+  `HEAD^` exists). Scratch copies live inside the main repo's tree, so without that, git discovery climbs to the LIVE repo.
+  `tests/codexLauncherProfiles.test.ts` (it drives the launchers with `cwd: process.cwd()`) then created a nested
+  `workspace/.git` in the live checkout at 00:31:48. That turned every git command in workspace/ into a one-commit `main` repo. idle94
+  removed it right away (it held only idle94's own pins commit, which was redone on master as `804523481`). The isolated rerun left the
+  checkout untouched.
+
 ## 5. Reproduction (from workspace/)
 
 ```
