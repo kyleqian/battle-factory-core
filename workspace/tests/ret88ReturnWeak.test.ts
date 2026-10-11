@@ -68,4 +68,33 @@ describe("ret88: ReturnWeak (friendship < 61) order plan, host key 40216", () =>
       }
     }
   });
+
+  // Dense windows through the production live renderer vs direct-mGBA RGB (audit20Check.ts: two fresh probes per scenario, r1 == r2;
+  // tools/integration/ret88Windows.sh / ret88Consumers.sh). The committed summaries are the receipts of the code that added them.
+  const summary = (name: string) => readFileSync(new URL(`../tools/integration/fixtures/ret88/${name}`, import.meta.url), "utf8").trim().split("\n");
+  const rows = (lines: string[]) => lines.filter(l => /^pb-/.test(l)).map(l => ({ name: l.split(/\s+/)[0]!, move: l.split(/\s+/)[1]!, side: l.split(/\s+/)[2]!,
+    live: / live=1 order/.test(l), rows: Number(/ rows=(\d+)/.exec(l)![1]), exact: Number(/ exact=(\d+)/.exec(l)![1]), px: Number(/ px=(\d+)/.exec(l)![1]),
+    r1r2: / r1==r2=1 ages/.test(l) }));
+  it("ReturnWeak body windows: every live window 88 / 88 rows at 0 px, both sides, first and later bodies, r1 == r2", () => {
+    const w = rows(summary("weak-windows-summary.txt"));
+    expect(w).toHaveLength(38);
+    expect(w.every(x => x.move === "RETURN" && x.r1r2)).toBe(true);
+    const live = w.filter(x => x.live);
+    expect(live).toHaveLength(34);
+    expect(live.every(x => x.rows === 88 && x.exact === 88 && x.px === 0)).toBe(true);
+    expect(new Set(live.map(x => x.side))).toEqual(new Set(["player", "opponent"]));
+    // the ret88Probe pairs: Dragonair / Onix (idle-rest target), Snorlax / Golbat (elevated target), Golbat / Snorlax (elevated attacker)
+    for (const pair of ["148-95", "143-42", "42-143"]) for (const side of ["ply", "opp"]) {
+      expect(live.some(x => x.name.startsWith(`pb-ret88w-${side}-${pair}-`)), `${side} ${pair}`).toBe(true);
+    }
+  });
+  it("consumers after a ReturnWeak (6 moves, both sides): every lent order == the ROM's; no lend = fallback", () => {
+    const lends = summary("consumer-lends-pi.txt").filter(l => /^pb-.*\.json\s+[A-Z_]+\s+live=/.test(l));
+    expect(lends).toHaveLength(29);
+    const moves = new Set(lends.map(l => l.split(/\s+/)[1]));
+    expect(moves).toEqual(new Set(["AIR_CUTTER", "CURSE", "DOUBLE_TEAM", "DRAGON_DANCE", "ICE_BEAM", "THUNDERBOLT"]));
+    for (const l of lends) expect(/ live=1 /.test(l) ? / pi-same=1 /.test(l) : / lend=None /.test(l), l).toBe(true);
+    expect(lends.filter(l => / live=1 /.test(l))).toHaveLength(26);
+  });
 });
+

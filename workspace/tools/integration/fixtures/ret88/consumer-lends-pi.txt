@@ -1,0 +1,59 @@
+pb-ret88-opp-air-cutter-c1.json          AIR_CUTTER  live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-ret88-opp-curse-c1.json               CURSE       live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-ret88-opp-curse-c2.json               CURSE       live=1 pre-KO  after=174    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-opp-double-team-c1.json         DOUBLE_TEAM live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-ret88-opp-double-team-c2.json         DOUBLE_TEAM live=1 pre-KO  after=104    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-opp-dragon-dance-c1.json        DRAGON_DANCE live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-ret88-opp-dragon-dance-c2.json        DRAGON_DANCE live=0 pre-KO  after=349    raw-same=0 pi-same=0 lend=None pi(rom)=[3, 4, 5, 10, 7, 9, 21, 20]
+pb-ret88-opp-ice-beam-c1.json            ICE_BEAM    live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-ret88-opp-ice-beam-c2.json            ICE_BEAM    live=1 pre-KO  after=58     raw-same=1 pi-same=1 lend=[3, 4, 11, 12, 10, 9, 7, 5] pi(rom)=[3, 4, 11, 12, 10, 9, 7, 5]
+pb-ret88-opp-thunderbolt-c1.json         THUNDERBOLT live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[4, 3, 21, 20, 5, 19, 18, 17] pi(rom)=[4, 3, 21, 20, 5, 19, 18, 17]
+pb-ret88-opp-thunderbolt-c2.json         THUNDERBOLT live=1 pre-KO  after=85     raw-same=1 pi-same=1 lend=[3, 4, 5, 7, 9, 11, 12, 10] pi(rom)=[3, 4, 5, 7, 9, 11, 12, 10]
+pb-ret88-ply-air-cutter-c1.json          AIR_CUTTER  live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-air-cutter-c3.json          AIR_CUTTER  live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 5, 21, 20, 19, 18, 17] pi(rom)=[3, 4, 5, 21, 20, 19, 18, 17]
+pb-ret88-ply-air-cutter-c5.json          AIR_CUTTER  live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 5, 21, 20, 19, 18, 17] pi(rom)=[3, 4, 5, 21, 20, 19, 18, 17]
+pb-ret88-ply-curse-c1.json               CURSE       live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-curse-c3.json               CURSE       live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-curse-c5.json               CURSE       live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-double-team-c1.json         DOUBLE_TEAM live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-double-team-c3.json         DOUBLE_TEAM live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-double-team-c5.json         DOUBLE_TEAM live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-dragon-dance-c1.json        DRAGON_DANCE live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-dragon-dance-c3.json        DRAGON_DANCE live=0 pre-KO  after=216    raw-same=0 pi-same=0 lend=None pi(rom)=[3, 4, 9, 5, 10, 7, 21, 20]
+pb-ret88-ply-dragon-dance-c4.json        DRAGON_DANCE live=0 pre-KO  after=349    raw-same=0 pi-same=0 lend=None pi(rom)=[3, 4, 9, 5, 10, 7, 21, 20]
+pb-ret88-ply-ice-beam-c1.json            ICE_BEAM    live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-ice-beam-c2.json            ICE_BEAM    live=1 pre-KO  after=58     raw-same=1 pi-same=1 lend=[3, 4, 11, 12, 10, 9, 7, 5] pi(rom)=[3, 4, 11, 12, 10, 9, 7, 5]
+pb-ret88-ply-ice-beam-c3.json            ICE_BEAM    live=1 pre-KO  after=58     raw-same=1 pi-same=1 lend=[3, 4, 11, 12, 10, 9, 7, 5] pi(rom)=[3, 4, 11, 12, 10, 9, 7, 5]
+pb-ret88-ply-thunderbolt-c1.json         THUNDERBOLT live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 21, 20, 5, 19, 18, 17] pi(rom)=[3, 4, 21, 20, 5, 19, 18, 17]
+pb-ret88-ply-thunderbolt-c2.json         THUNDERBOLT live=1 pre-KO  after=85     raw-same=1 pi-same=1 lend=[4, 3, 5, 7, 9, 11, 12, 10] pi(rom)=[4, 3, 5, 7, 9, 11, 12, 10]
+pb-ret88-ply-thunderbolt-c4.json         THUNDERBOLT live=1 pre-KO  after=216    raw-same=1 pi-same=1 lend=[3, 4, 5, 7, 9, 11, 12, 10] pi(rom)=[3, 4, 5, 7, 9, 11, 12, 10]
+
+pb-ret88-opp-air-cutter-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-opp-curse-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-opp-curse-c2.json pre-KO after 174 pi-same=True 1
+pb-ret88-opp-double-team-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-opp-double-team-c2.json pre-KO after 104 pi-same=True 1
+pb-ret88-opp-dragon-dance-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-opp-dragon-dance-c2.json pre-KO after 349 pi-same=False 1
+pb-ret88-opp-ice-beam-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-opp-ice-beam-c2.json pre-KO after 58 pi-same=True 1
+pb-ret88-opp-thunderbolt-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-opp-thunderbolt-c2.json pre-KO after 85 pi-same=True 1
+pb-ret88-ply-air-cutter-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-air-cutter-c3.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-air-cutter-c5.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-curse-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-curse-c3.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-curse-c5.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-double-team-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-double-team-c3.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-double-team-c5.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-dragon-dance-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-dragon-dance-c3.json pre-KO after 216 pi-same=False 1
+pb-ret88-ply-dragon-dance-c4.json pre-KO after 349 pi-same=False 1
+pb-ret88-ply-ice-beam-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-ice-beam-c2.json pre-KO after 58 pi-same=True 1
+pb-ret88-ply-ice-beam-c3.json pre-KO after 58 pi-same=True 1
+pb-ret88-ply-thunderbolt-c1.json pre-KO after 216 pi-same=True 1
+pb-ret88-ply-thunderbolt-c2.json pre-KO after 85 pi-same=True 1
+pb-ret88-ply-thunderbolt-c4.json pre-KO after 216 pi-same=True 1

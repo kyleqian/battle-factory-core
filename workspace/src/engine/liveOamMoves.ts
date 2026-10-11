@@ -12,10 +12,10 @@ import paletteData from "../data/gen/live-animation-palette-resources.json" with
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
 import type { LivePaletteComposite } from "./liveMovePaletteComposite.ts";
 import {
-  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, liveMegahornHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveRevengeHardwareOamRows, liveWillOWispHardwareOamRows, livePsywaveHardwareOamRows, livePsywaveRingAttr, liveExtrasensoryCloneStep, liveExtrasensoryHardwareOamRows,
+  FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, liveMegahornHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveReturnProgram, liveRevengeHardwareOamRows, liveWillOWispHardwareOamRows, livePsywaveHardwareOamRows, livePsywaveRingAttr, liveExtrasensoryCloneStep, liveExtrasensoryHardwareOamRows,
   SKILL_SWAP_ORB, SKILL_SWAP_ORB_PAIRS, liveSkillSwapHardwareOamRows, liveSkillSwapOrbLives, type LiveSkillSwapOrbPosition,
   FLATTER_ROWS, liveFlatterHardwareOamRows, type LiveFlatterBuildSprites,
-  type LiveOamScene, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
+  type LiveOamScene, type LiveReturnBranch, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
 } from "./liveMoveOamAssembler.ts";
 import { liveMegahornBodyRows, liveMegahornRows } from "./liveMegahornInputs.ts";
 import { LIVE_REVENGE_ROWS, liveRevengeRows } from "./liveRevengeInputs.ts";
@@ -480,6 +480,8 @@ export interface LiveReturnArgs {
   readonly palettes: LivePaletteComposite;
   readonly activationOrder: readonly number[];
   readonly sort: LiveSpriteOrderSort;
+  /** Move_RETURN branch (default ReturnStrongest; ret88: ReturnWeak at the kernel's friendship 0). */
+  readonly branch?: LiveReturnBranch;
 }
 const returnCache = new Map<string, ReturnType<typeof liveReturnHardwareOamRows>>();
 /** AnimTask_ShakeMon(target, x, 0, reps, 1) starts [row, reps, x] of ReturnStrongest (return.ts PROGRAMS.strongest). */
@@ -520,28 +522,31 @@ const blendToBlack = (c: number, y: number): number => {
  */
 export function liveReturnInputs(args: LiveReturnArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } | null {
   const { attackerSide, attacker, target } = args;
+  const branch = args.branch ?? "strongest", program = liveReturnProgram(branch);
   const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
   const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
-  const key = JSON.stringify([attackerSide, attacker.frontIdleRest, target.frontIdleRest, target.picOffsetPoint, attackerObject.attr, targetObject.attr, args.activationOrder]);
+  const key = JSON.stringify([branch, attackerSide, attacker.frontIdleRest, target.frontIdleRest, target.picOffsetPoint, attackerObject.attr, targetObject.attr, args.activationOrder]);
   let built = returnCache.get(key);
   if (!built) {
     built = liveReturnHardwareOamRows({ attackerSide, attacker: attackerObject, target: targetObject, attackerIdleY2: attacker.frontIdleRest.y2,
       targetIdle: target.frontIdleRest, scene: KNOWN_ENTRY_SCENE, impactCenter: target.picOffsetPoint, impactTileBase: 305, impactPaletteSlot: 7,
       freeMatrices: Array.from({ length: 32 }, (_, i) => i).filter((i) => i !== 1 && i !== 2), occupiedSlots: KNOWN_ENTRY_OCCUPIED_SLOTS,
-      activationOrder: args.activationOrder, sort: args.sort });
+      activationOrder: args.activationOrder, sort: args.sort, branch });
     if (returnCache.size > 16) returnCache.clear();
     returnCache.set(key, built);
   }
   const rows = built;
-  const lives = liveReturnLives(KNOWN_ENTRY_OCCUPIED_SLOTS, Array.from({ length: 32 }, (_, i) => i).filter((i) => i !== 1 && i !== 2));
+  const lives = liveReturnLives(KNOWN_ENTRY_OCCUPIED_SLOTS, Array.from({ length: 32 }, (_, i) => i).filter((i) => i !== 1 && i !== 2), branch);
   const monbgBank = targetSide === "opponent" ? 8 : 9, targetObjBank = targetSide === "opponent" ? 17 : 16;
   const layer = targetSide === "opponent" ? "bg1" : "bg2";
   const impactPalette = resourceWords("ANIM_TAG_IMPACT");
-  const x2s = returnTargetX2(RETURN_ROWS, target.frontIdleRest.x2);
+  // ReturnWeak has no AnimTask_ShakeMon (the target x2 stays its idle rest) and no gSimplePaletteBlend helpers (ret88).
+  const x2s = branch === "strongest" ? returnTargetX2(RETURN_ROWS, target.frontIdleRest.x2)
+    : Array.from({ length: program.rows }, () => target.frontIdleRest.x2);
   const paletteAt = (age: number): number[] => {
     const out = args.palettes.hardware.slice();
     if (age >= 2) impactPalette.forEach((word, i) => { out[23 * 16 + i] = word; });
-    const y = age >= 13 ? returnBlendY(age) : 0;
+    const y = branch === "strongest" && age >= 13 ? returnBlendY(age) : 0;
     if (y) for (const bank of [2, 3]) for (let i = 0; i < 16; i += 1) out[bank * 16 + i] = blendToBlack(args.palettes.hardware[bank * 16 + i]!, y);
     if (age >= 4) for (let i = 0; i < 16; i += 1) out[monbgBank * 16 + i] = out[targetObjBank * 16 + i]!;
     return out;
@@ -550,11 +555,12 @@ export function liveReturnInputs(args: LiveReturnArgs): { duration: number; anim
     const registers: Record<string, number> = { ...S0_REGISTERS };
     if (age >= 1) { registers.win0h = 0; registers.win0v = 0; }
     if (age >= 5) registers[`${layer}cnt`] = (S0_REGISTERS[`${layer}cnt`]! & ~0xc003 | 0x4000 | 2) & 0xffff;
-    if (age >= 1 && age - 1 >= 4 && age - 1 < 280) {
+    // Task_UpdateMonBg runs until CLEAR + 3 (280 / ret88 Weak 86); setalpha until blendoff at CLEAR (277 / 83).
+    if (age >= 1 && age - 1 >= 4 && age - 1 < program.clearMonbg + 3) {
       registers[`${layer}hofs`] = (32 - (target.spriteCenter.x + x2s[age - 1]!)) & 0x1ff;
       registers[`${layer}vofs`] = (32 - (target.spriteCenter.y + target.frontIdleRest.y2)) & 0x1ff;
     }
-    if (age >= 7 && age < 277) { registers.bldcnt = 16192; registers.bldalpha = 2060; }
+    if (age >= 7 && age < program.clearMonbg) { registers.bldcnt = 16192; registers.bldalpha = 2060; }
     return registers;
   };
   const art = (species: string, object: ReturnType<typeof battlerObject>) =>
@@ -563,11 +569,12 @@ export function liveReturnInputs(args: LiveReturnArgs): { duration: number; anim
   const splats = lives.filter((l) => l.kind === "splat");
   const traces = lives.filter((l) => l.kind === "trace");
   return {
-    duration: RETURN_ROWS,
+    duration: program.rows,
     animationInputsAt: (age: number) => {
       const row = Math.min(age, rows.oam.length - 1), palette = paletteAt(age);
       return {
-        friendship: 255,
+        // The reducer selects its branch (monbg window, palette blend) from gAnimFriendship: 255 = Strongest, 0 = Weak.
+        friendship: branch === "strongest" ? 255 : 0,
         attackerInitialOffset: attacker.frontIdleRest, targetInitialOffset: target.frontIdleRest,
         attackerArt: art(args.attackerSpecies, attackerObject), targetArt: art(args.targetSpecies, targetObject),
         // Task / sprite slots only label the reducer's records (the renderer draws the hardware OAM buffer).

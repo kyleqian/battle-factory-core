@@ -321,6 +321,8 @@ export interface LiveReturnOamInputs {
   readonly occupiedSlots: readonly number[];
   readonly activationOrder: readonly number[];
   readonly sort: LiveSpriteOrderSort;
+  /** Move_RETURN branch (default ReturnStrongest; ret88: ReturnWeak). */
+  readonly branch?: LiveReturnBranch;
 }
 
 /**
@@ -336,6 +338,25 @@ const RETURN_IMPACTS = [[34, 3, -5, 2], [67, -10, -8, 2], [101, -10, -8, 2], [12
 const RETURN_TRACES = [120, 120, 142, 157, 172, 187, 202] as const;
 const RETURN_BLEND = [11, 264] as const;
 const RETURN_SPLAT_LIFE = { 2: 10, 0: 9 } as const, RETURN_TRACE_LIFE = 6, RETURN_BLEND_LIFE = 12;
+/** ret88: ReturnWeak (gAnimFriendship < 61, the kernel's friendship 0; battle_anim_scripts.s:8939-8948 = return.ts PROGRAMS.weak): two
+ * gVerticalDipSpriteTemplate dips (16, 1) at 11 / 47, one basic hitsplat (x -10, y -8, animation 2) at 54, clearmonbg at 83, first
+ * inactive age 87 (88 rows). No trace clones, palette blends or target ShakeMon (the target keeps its idle rest). */
+export const RETURN_WEAK_ROWS = 88;
+export type LiveReturnBranch = "weak" | "strongest";
+interface LiveReturnProgram {
+  readonly rows: number; readonly clearMonbg: number;
+  readonly dips: readonly (readonly [number, number, number])[]; readonly impacts: readonly (readonly [number, number, number, 0 | 2])[];
+  readonly traces: readonly number[]; readonly blends: readonly number[];
+  /** ReturnStrongest's AnimTask_ShakeMon tasks end with the target x2 = 0: it is back at its art attr minus the idle rest. */
+  readonly targetRestZeroed: boolean;
+}
+const RETURN_PROGRAMS: Readonly<Record<LiveReturnBranch, LiveReturnProgram>> = Object.freeze({
+  strongest: { rows: RETURN_ROWS, clearMonbg: RETURN_CLEAR_MONBG, dips: RETURN_DIPS, impacts: RETURN_IMPACTS, traces: RETURN_TRACES,
+    blends: RETURN_BLEND, targetRestZeroed: true },
+  weak: { rows: RETURN_WEAK_ROWS, clearMonbg: 83, dips: [[11, 16, 1], [47, 16, 1]], impacts: [[54, -10, -8, 2]], traces: [], blends: [],
+    targetRestZeroed: false },
+});
+export const liveReturnProgram = (branch: LiveReturnBranch): Readonly<{ rows: number; clearMonbg: number }> => RETURN_PROGRAMS[branch];
 
 /** DoVerticalDip + TranslateSpriteLinearById: d steps of +dy, 2 hold rows, d steps of -dy. */
 function returnDipY2(state: number, start: number, steps: number, dy: number): number {
@@ -346,19 +367,20 @@ function returnDipY2(state: number, start: number, steps: number, dy: number): n
   if (k < 2 * steps + 2) return dy * (2 * steps + 2 - k - 1);
   return 0;
 }
-export function liveReturnAttackerY2(state: number): number {
+export function liveReturnAttackerY2(state: number, branch: LiveReturnBranch = "strongest"): number {
   let y = 0;
-  for (const [start, steps, dy] of RETURN_DIPS) y += returnDipY2(state, start, steps, dy);
+  for (const [start, steps, dy] of RETURN_PROGRAMS[branch].dips) y += returnDipY2(state, start, steps, dy);
   return y;
 }
 interface ReturnLife { kind: "dip" | "splat" | "trace" | "blend"; first: number; last: number; idx: number; slot: number; matrix: number }
 /** Lowest-free sprite slots / matrix ids over the helper lifetimes in script creation order. */
-function returnLives(occupied: readonly number[], freeMatrices: readonly number[]): ReturnLife[] {
+function returnLives(occupied: readonly number[], freeMatrices: readonly number[], branch: LiveReturnBranch): ReturnLife[] {
+  const program = RETURN_PROGRAMS[branch];
   const events: { f: number; phase: number; kind: ReturnLife["kind"]; life: number; idx: number }[] = [];
-  RETURN_DIPS.forEach(([f, d], idx) => events.push({ f, phase: 0, kind: "dip", life: 2 * d + 3, idx }));
-  RETURN_IMPACTS.forEach(([f, , , a], idx) => events.push({ f, phase: 1, kind: "splat", life: RETURN_SPLAT_LIFE[a], idx }));
-  RETURN_TRACES.forEach((f, idx) => events.push({ f, phase: 2, kind: "trace", life: RETURN_TRACE_LIFE, idx }));
-  RETURN_BLEND.forEach((f, idx) => events.push({ f, phase: -1, kind: "blend", life: RETURN_BLEND_LIFE, idx }));
+  program.dips.forEach(([f, d], idx) => events.push({ f, phase: 0, kind: "dip", life: 2 * d + 3, idx }));
+  program.impacts.forEach(([f, , , a], idx) => events.push({ f, phase: 1, kind: "splat", life: RETURN_SPLAT_LIFE[a], idx }));
+  program.traces.forEach((f, idx) => events.push({ f, phase: 2, kind: "trace", life: RETURN_TRACE_LIFE, idx }));
+  program.blends.forEach((f, idx) => events.push({ f, phase: -1, kind: "blend", life: RETURN_BLEND_LIFE, idx }));
   events.sort((a, b) => a.f - b.f || a.phase - b.phase || a.idx - b.idx);
   const held: ReturnLife[] = [];
   for (const e of events) {
@@ -375,7 +397,8 @@ function returnLives(occupied: readonly number[], freeMatrices: readonly number[
   }
   return held;
 }
-export const liveReturnLives = (occupied: readonly number[], freeMatrices: readonly number[]) => returnLives(occupied, freeMatrices);
+export const liveReturnLives = (occupied: readonly number[], freeMatrices: readonly number[], branch: LiveReturnBranch = "strongest") =>
+  returnLives(occupied, freeMatrices, branch);
 
 /**
  * Per-row hardware OAM + matrices of one Return (strongest) body (rows 0..281): `hardwareOam[row] = build(sprite state of
@@ -385,17 +408,18 @@ export const liveReturnLives = (occupied: readonly number[], freeMatrices: reado
  * into the carried sort (subpriority attacker - 2; the splats too; the trace clones keep the attacker's).
  */
 export function liveReturnHardwareOamRows(input: LiveReturnOamInputs): { oam: string[][]; matrices: (readonly [number, number, number, number])[][] } {
-  const lives = returnLives(input.occupiedSlots, input.freeMatrices);
+  const branch = input.branch ?? "strongest", program = RETURN_PROGRAMS[branch];
+  const lives = returnLives(input.occupiedSlots, input.freeMatrices, branch);
   const { attacker, target } = input;
   const helperAttr: OamAttr = [0x00a0, 0x0130, 0xffff];
   const stale = new Map<number, number>();
   const spritesAt = (state: number): LiveOamSprite[] => {
     const out: LiveOamSprite[] = input.scene.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
-    const y2 = liveReturnAttackerY2(state) - input.attackerIdleY2;
+    const y2 = liveReturnAttackerY2(state, branch) - input.attackerIdleY2;
     const attackerAttr: OamAttr = [attacker.attr[0] + y2 & 0xff | attacker.attr[0] & ~0xff, attacker.attr[1], attacker.attr[2]];
     out.push({ ...attacker, attr: attackerAttr, visible: true, oamY: attackerAttr[0] & 0xff });
-    const away = state >= RETURN_MONBG_BIRTH + 1 && state < RETURN_CLEAR_MONBG;
-    const back = state >= RETURN_CLEAR_MONBG;
+    const away = state >= RETURN_MONBG_BIRTH + 1 && state < program.clearMonbg;
+    const back = state >= program.clearMonbg && program.targetRestZeroed;
     const targetAttr: OamAttr = back
       ? [target.attr[0] & ~0xff | target.attr[0] - input.targetIdle.y2 & 0xff, target.attr[1] & ~0x1ff | target.attr[1] - input.targetIdle.x2 & 0x1ff, target.attr[2]]
       : target.attr;
@@ -407,13 +431,13 @@ export function liveReturnHardwareOamRows(input: LiveReturnOamInputs): { oam: st
       if (life.kind === "dip" || life.kind === "blend") {
         out.push({ slot: life.slot, attr: helperAttr, subpriority: helperSubpriority, visible: false, oamY: 0xa0 });
       } else if (life.kind === "splat") {
-        const [, x, y] = RETURN_IMPACTS[life.idx]!;
+        const [, x, y] = program.impacts[life.idx]!;
         const sign = input.attackerSide === "opponent" ? -1 : 1;
         const attr: OamAttr = [0x0100 | 0x0400 | input.impactCenter.y + y - 16 & 0xff,
           0x8000 | life.matrix << 9 | input.impactCenter.x + sign * x - 16 & 0x1ff, input.impactTileBase | 2 << 10 | input.impactPaletteSlot << 12];
         out.push({ slot: life.slot, attr, subpriority: helperSubpriority, visible: true, oamY: attr[0] & 0xff });
       } else {
-        const created = attacker.attr[0] + liveReturnAttackerY2(life.first) - input.attackerIdleY2 & 0xff | 0x0400 | attacker.attr[0] & ~0xff;
+        const created = attacker.attr[0] + liveReturnAttackerY2(life.first, branch) - input.attackerIdleY2 & 0xff | 0x0400 | attacker.attr[0] & ~0xff;
         const attr: OamAttr = [created, attacker.attr[1], attacker.attr[2] & ~0xc00 | 2 << 10];
         const visible = state > life.first;
         stale.set(life.slot, created & 0xff);
@@ -425,14 +449,14 @@ export function liveReturnHardwareOamRows(input: LiveReturnOamInputs): { oam: st
   const matricesAt = (state: number): (readonly [number, number, number, number])[] => {
     const m = Array.from({ length: 32 }, () => IDENTITY as readonly [number, number, number, number]);
     for (const life of lives) {
-      if (life.kind === "splat" && RETURN_IMPACTS[life.idx]![3] === 2 && state >= life.first && state <= life.last) m[life.matrix] = [372, 0, 0, 372];
+      if (life.kind === "splat" && program.impacts[life.idx]![3] === 2 && state >= life.first && state <= life.last) m[life.matrix] = [372, 0, 0, 372];
     }
     return m;
   };
   const oam: string[][] = [], matrices: (readonly [number, number, number, number])[][] = [];
   let order: readonly number[] = input.activationOrder;
   let previous = spritesAt(-1);
-  for (let row = 0; row < RETURN_ROWS; row += 1) {
+  for (let row = 0; row < program.rows; row += 1) {
     const m = matricesAt(row - 1);
     oam.push(buildLiveHardwareOam(order, previous, input.scene.healthbox, m));
     matrices.push(m);

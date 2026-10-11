@@ -121,7 +121,7 @@ import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with {
 import {
   CURSE_STATS_ROWS, curseStatsBattleBgAt, curseStatsPaletteAt, curseStatsRegistersAt, curseStatsSpritesAt, curseStatsTasksAt,
 } from "../animation/curseModel.ts";
-import { carryLiveSpriteOrder, FLATTER_ROWS, FURY_CUTTER_ROWS, RETURN_ROWS, type LiveOamSprite } from "./liveMoveOamAssembler.ts";
+import { carryLiveSpriteOrder, FLATTER_ROWS, FURY_CUTTER_ROWS, RETURN_ROWS, RETURN_WEAK_ROWS, type LiveOamSprite } from "./liveMoveOamAssembler.ts";
 import { returnPowerLevel } from "./liveSpriteOrderHost.ts";
 import { willOWispSpritesAtAge, willOWispTimeline } from "../animation/willOWisp.ts";
 import { skillSwapAtAge, type SkillSwapLiveInputs } from "../animation/skillSwap.ts";
@@ -264,7 +264,7 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Fury Cutter: the counter-1 body only (a first body implies furyCutterCounter 1). Pursuit reclassified to faithful timing (prep41,
   // liveMoveTimingPolicy.ts 228); its exact first-body fixtures stay valid in scope.
   261, 210,
-  // Return (strongest branch, friendship > 200 only: ret88), first body (docs/next-adapters-prep24.md s2).
+  // Return (strongest branch, friendship > 200; ret88: weak branch, < 61), first body (docs/next-adapters-prep24.md s2).
   216,
   // Spit Up, all three Stockpile counters (docs/next-adapters-prep31.md s2 / s3; liveSpitUpInputs.ts): any known lend.
   255,
@@ -1457,9 +1457,12 @@ export function liveMoveAnimationDuration(
     case 226: return 53;
     // Endeavor (prep27 s0.2): the script body, 67 active rows + the cleanup row (the HP set / drain are later queue commands).
     case 283: return 68;
-    // Return (strongest branch, friendship 255): 282 rows both sides. Move_RETURN branches on gAnimFriendship
-    // (AnimTask_GetReturnPowerLevel; ret88): every other power level declines (the kernel sends friendship 0 = ReturnWeak).
-    case 216: return returnPowerLevel(request.friendship) === 3 ? RETURN_ROWS : null;
+    // Return: Move_RETURN branches on gAnimFriendship (AnimTask_GetReturnPowerLevel). ReturnStrongest (> 200): 282 rows both sides;
+    // ret88: ReturnWeak (< 61, the kernel's friendship 0): 88 rows (first inactive age 87 + 1). Medium / Strong decline.
+    case 216: {
+      const level = returnPowerLevel(request.friendship);
+      return level === 3 ? RETURN_ROWS : level === 0 ? RETURN_WEAK_ROWS : null;
+    }
     // Spit Up (prep31 s2.2): 108 rows (counters 1, 2), 109 (counter 3); request.turn = the Stockpile counter (gameplay-owned, read only).
     case 255: return liveSpitUpDuration(request.turn);
     // Curse (curse-live): MOVE_CURSE's choosetwoturnanim picks CurseStats when gAnimMoveTurn & 1 (BattleScript_EffectCurse
@@ -3889,14 +3892,16 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 216: {
-      // Return (prep24 s2): the strongest branch only (request.friendship > 200; ret88: the kernel sends 0 = ReturnWeak). Any known lend
+      // Return (prep24 s2; ret88): the strongest (friendship > 200) and weak (< 61, the kernel's 0) branches. Any known lend
       // (prep48 / later48: the known-entry allocator IMPACT slot 3.. / matrices free from 0 is the ROM state at every probed activation,
       // after audited net-zero predecessors or not; the S0 register base stays, the renderer reads only the registers the body writes),
       // non-shiny; the oam1 idle-rest convention (the model handles the target's non-zero idle rest, proven on ONIX / GOLEM at a first
       // body; the attacker's rest is replaced by the dip y2). A later body declines unless both species rests are {0,0}: the ROM zeroes
       // ONIX / RATTATA after Quick Attack / Return, which the x2 tracker reads as keep / unknown = the rest.
-      // ret88: the body is ReturnStrongest's; any other power level (AnimTask_GetReturnPowerLevel on gAnimFriendship) declines.
-      if (returnPowerLevel(request.friendship) !== 3) return null;
+      // ret88: ReturnStrongest (level 3) or ReturnWeak (level 0, the kernel's friendship 0; same gates, the Weak event table); Medium /
+      // Strong (AnimTask_GetReturnPowerLevel on gAnimFriendship) decline.
+      const returnLevel = returnPowerLevel(request.friendship);
+      if (returnLevel !== 3 && returnLevel !== 0) return null;
       if (!spriteOrderInput?.known) return null;
       if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
@@ -3907,7 +3912,7 @@ export function liveMoveAnimationPresentation(
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const inputs = liveReturnInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
-        sort: sortGbaSpriteOrder });
+        sort: sortGbaSpriteOrder, branch: returnLevel === 3 ? "strongest" : "weak" });
       if (inputs === null) return null;
       config = { move: "RETURN", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
