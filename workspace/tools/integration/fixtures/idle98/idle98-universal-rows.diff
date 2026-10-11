@@ -1,0 +1,90 @@
+--- a/workspace/src/engine/battleResolutionPresentationRender.ts
++++ b/workspace/src/engine/battleResolutionPresentationRender.ts
+@@ -908,6 +908,61 @@
+   return segment;
+ }
+ 
++/**
++ * idle98 (S10A timing fidelity): the ROM's universal rows around every live move body (docs/next-adapters-idle98.md). The script
++ * reaches Cmd_attackanimation 3 frames before gAnimScriptActive rises (pre) and waitanimation releases 2 frames after the first
++ * inactive frame (post) on every body: damaging, multi-hit, two-turn, KO and status moves, both sides (idle98 37 / 37, idle94 20 / 20,
++ * r1 == r2). The pre rows show the image before the activation (production's age-0 frame); the post rows show the first inactive
++ * row, which is production's last row exactly when the adapter's trail is -1 (idle94 table). Presentation timing only.
++ * Masks: 1 = the player attacks, 2 = the opponent attacks.
++ */
++const LIVE_MOVE_PRE_ROWS = 3;
++const LIVE_MOVE_POST_ROWS = 2;
++// Sides whose pre rows are NOT proven to be the age-0 frame: idle lead N != 0 outside idle94's 40 static-lead moves, or N unknown.
++const LIVE_MOVE_NO_PRE_ROW_SIDES: ReadonlyMap<number, number> = new Map([
++  [9, 3], [20, 3], [48, 3], [53, 3], [104, 3], [105, 3], [157, 1], [185, 3], [208, 3], [209, 3], [223, 3], [227, 3], [235, 3],
++]);
++// Sides whose trail is -1 (production's last row is the ROM's first inactive row): the post rows repeat it.
++const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
++  [2, 3], [5, 3], [11, 3], [12, 3], [14, 3], [21, 3], [23, 3], [25, 3], [27, 3], [29, 3], [32, 3], [34, 3], [35, 3], [36, 3],
++  [38, 3], [39, 3], [42, 3], [43, 3], [49, 3], [50, 3], [56, 3], [60, 3], [61, 3], [62, 3], [65, 3], [66, 3], [67, 3], [68, 3],
++  [69, 3], [78, 3], [79, 3], [83, 3], [85, 3], [86, 3], [87, 3], [88, 3], [90, 3], [93, 3], [94, 3], [95, 3], [97, 3], [98, 3],
++  [101, 3], [103, 3], [106, 3], [107, 3], [108, 3], [109, 3], [111, 3], [112, 3], [114, 3], [115, 3], [116, 3], [118, 3], [122, 3], [126, 1],
++  [129, 3], [131, 3], [133, 3], [136, 3], [147, 3], [148, 3], [151, 3], [152, 3], [154, 3], [156, 3], [162, 3], [163, 3], [172, 3], [178, 3],
++  [180, 3], [182, 3], [186, 3], [187, 3], [192, 1], [195, 3], [197, 3], [201, 3], [203, 3], [211, 3], [212, 3], [213, 3], [214, 2], [215, 3],
++  [218, 3], [219, 3], [226, 3], [230, 3], [231, 3], [236, 3], [238, 3], [242, 3], [243, 3], [246, 3], [250, 3], [253, 3], [254, 3], [257, 3],
++  [259, 3], [263, 3], [264, 3], [265, 3], [266, 3], [269, 3], [271, 3], [272, 3], [275, 3], [277, 3], [280, 3], [281, 3], [283, 3], [287, 3],
++  [288, 3], [290, 3], [294, 3], [302, 3], [306, 3], [312, 3], [317, 3], [319, 3], [321, 3], [332, 3], [334, 3], [335, 3], [336, 3], [339, 3],
++  [341, 3], [345, 3], [348, 3], [349, 3],
++]);
++const NO_UNIVERSAL_ROWS = Object.freeze({ pre: 0, post: 0 });
++
++/** The universal rows a live move-animation command presents around its body (none: declined, a Substitute swap). */
++export function liveMoveUniversalRows(
++  request: BattleMoveAnimationRequest,
++  field: BattleResolutionDisplayedField,
++): { readonly pre: number; readonly post: number } {
++  if (liveSubstituteSwapApplies(request, field) === true || liveMoveAnimationDuration(request, field) === null) return NO_UNIVERSAL_ROWS;
++  const side = request.attacker === 0 ? 1 : 2;
++  return Object.freeze({
++    pre: ((LIVE_MOVE_NO_PRE_ROW_SIDES.get(request.moveId) ?? 0) & side) === 0 ? LIVE_MOVE_PRE_ROWS : 0,
++    post: ((LIVE_MOVE_POST_ROW_SIDES.get(request.moveId) ?? 0) & side) !== 0 ? LIVE_MOVE_POST_ROWS : 0,
++  });
++}
++
++/** The body age shown on this row: held at 0 over the pre rows and at the last body row over the post rows. */
++function liveMoveUniversalRowAge(
++  state: BattleResolutionPresentationState,
++  request: BattleMoveAnimationRequest,
++  field: BattleResolutionDisplayedField,
++): number {
++  const rows = liveMoveUniversalRows(request, field);
++  const age = Math.max(0, state.lifecycle.phaseElapsed - rows.pre);
++  if (rows.post === 0) return age;
++  const live = liveMoveAnimationDuration(request, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput));
++  return live === null ? age : Math.min(age, live - 1);
++}
++
+ export function battleResolutionCommandDuration(
+   command: BattleResolutionPresentationCommand,
+   field: BattleResolutionDisplayedField,
+@@ -923,10 +978,12 @@
+         command.timing.minimumFrames,
+         battleStringPrintableLength(command.lines),
+       ) + command.timing.holdFrames;
+-    case "move-animation":
+-      return command.animation
+-        ? liveMoveAnimationDuration(command.animation, field, bodyClass) ?? command.timing.minimumFrames
+-        : command.timing.minimumFrames;
++    case "move-animation": {
++      const live = command.animation ? liveMoveAnimationDuration(command.animation, field, bodyClass) : null;
++      if (live === null) return command.timing.minimumFrames;
++      const rows = liveMoveUniversalRows(command.animation!, field);
++      return rows.pre + live + rows.post;
++    }
+     case "hit-animation":
+       return command.timing.minimumFrames;
+     case "hp": {
+@@ -1430,7 +1487,7 @@
+       hpTarget = Object.freeze({ battler: command.battler, to: command.to });
+     } else if (command.type === "move-animation" && command.animation) {
+       effect = Object.freeze({
+-        type: "move", request: command.animation, age: state.lifecycle.phaseElapsed,
++        type: "move", request: command.animation, age: liveMoveUniversalRowAge(state, command.animation, field),
+         paletteInput: state.liveMovePaletteInput,
+         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
+         spriteOrderInput: state.liveMoveSpriteOrderInput,
