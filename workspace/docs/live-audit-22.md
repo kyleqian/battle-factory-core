@@ -4,7 +4,7 @@
 the clone phase and not the fixture's personality.
 - ret88's 5 windows measured 316,986 / 316,702 / 340,691 px (x 3).
 - `audit20Fixtures.py` writes no `ageOffset`. Production's accepted Double Team framing is **age 0 = ROM activation + 1**
-  (`dt60Fixtures.py` `AGE_OFFSET {104: -1}`; `liveMoveAnimation.ts:466-467`).
+  (`dt60Fixtures.py:40` `AGE_OFFSET {104: -1}`; `liveMoveAnimation.ts:451-452` at 9df9b234a).
 - Aligned, all 5 windows are **0 px**.
 - The census's newly live Double Team users (PONYTA player, BLISSEY opponent) were measured on both sides after a ReturnWeak. Raw: 12 / 12
   non-zero. Aligned: 12 / 12 0 px on the accepted rows.
@@ -23,7 +23,7 @@ Method:
   view (CHAIN lend = the claim; ENTRY = the no-history control) is rendered against two more fresh probe processes, with r1 == r2 per-row
   digests on **every** window.
 - No existing tracked file was edited.
-- The runner's second run (run B) into fresh dirs reproduced every receipt byte-identically (section 4).
+- The runner's second run (run B) into fresh dirs reproduced every receipt byte-identically (section 5).
 
 ## 1. Results
 
@@ -130,12 +130,16 @@ AUDIT22_DUMP=<dir> AUDIT22_DUMP_AGES=2,40 node --experimental-strip-types --no-w
 node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=936..936 --index-from=936 --out=r.json --commands=c.jsonl
 ```
 
-Run A of the runner is the committed receipt set (every exploratory receipt was byte-identical to it). Run B into fresh dirs:
+Run A' of the runner (run A + the Flatter reseed routes) is the committed receipt set; every exploratory receipt was byte-identical to it. Run B into fresh dirs:
 see section 5.
 
 ## 5. Gates
 
-- Run B (fresh dirs): RUNB_RESULT
+- **Run B** (`audit22Run.sh` into fresh dirs, after run A' was committed): **280 same, 0 DIFF**. That covers every check JSON, summary,
+  derive / rekey log, RAM / step-counter receipt, derived / aligned / levelled fixture and scenario.
+  - All 132 window checks (98 windows, raw and ablated renders) have r1 == r2.
+  - No ROM drift (ISSUES #154): run A, run A' (the Flatter routes added) and run B agree byte for byte on the 258 shared files.
+  - Every exploratory pre-runner receipt also agrees.
 - `git diff --check` clean. `tools/integration/fixtures/audit-22/.gitattributes` (copied from plans69) keeps `*.diff -whitespace`; there
   is no `.diff` here.
 - `git status --short` listed only this audit's new files at every commit; paths were staged explicitly.
