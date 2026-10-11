@@ -1,0 +1,68 @@
+{
+ "battles": 1000,
+ "budgetEnded": 3,
+ "statsChange": {
+  "statCommands": 5698,
+  "groups": 4689,
+  "battlesWithAny": 897,
+  "byDirection": {
+   "up": 3416,
+   "down": 2282
+  },
+  "byMagnitude": {
+   "2": 1395,
+   "1": 4303
+  },
+  "byStat": {
+   "speed": 1195,
+   "attack": 1064,
+   "evasion": 1025,
+   "defense": 911,
+   "special-defense": 609,
+   "accuracy": 486,
+   "special-attack": 408
+  }
+ },
+ "moveBodies": {
+  "onCommands": 27481,
+  "censusMoveCommands": 27481,
+  "hitPath": 17506,
+  "noHit": 9975,
+  "noHitNext": {
+   "message": 6973,
+   "hp": 1090,
+   "status": 807,
+   "stat": 771,
+   "sprite-visibility": 155,
+   "switch-out": 143,
+   "turn-end": 36
+  },
+  "noHitByMove": {
+   "104": 885,
+   "182": 558,
+   "109": 532,
+   "156": 467,
+   "91": 338,
+   "174": 250,
+   "86": 226,
+   "240": 210,
+   "266": 190,
+   "184": 184,
+   "105": 180,
+   "113": 176,
+   "201": 169,
+   "92": 163,
+   "273": 155,
+   "97": 145,
+   "28": 143,
+   "133": 142,
+   "203": 141,
+   "108": 138,
+   "207": 127,
+   "347": 121,
+   "349": 120,
+   "14": 116,
+   "219": 106
+  }
+ }
+}
