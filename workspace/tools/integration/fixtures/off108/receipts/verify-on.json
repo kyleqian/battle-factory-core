@@ -1,0 +1,278 @@
+{
+ "schema": "off108-verify/v1",
+ "scene": "on",
+ "classes": [
+  {
+   "class": "stat self (Bulk Up)",
+   "checked": true,
+   "romAnchor": 39,
+   "P": 39,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "stat self (Double Team)",
+   "checked": true,
+   "romAnchor": 40,
+   "P": 38,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "stat target (Sand-Attack)",
+   "checked": true,
+   "romAnchor": 40,
+   "P": 38,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "status msg (Confuse Ray)",
+   "checked": true,
+   "romAnchor": 46,
+   "P": 46,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "status (Toxic)",
+   "checked": true,
+   "romAnchor": 48,
+   "P": 48,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "status (Thunder Wave)",
+   "checked": true,
+   "romAnchor": 47,
+   "P": 47,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "protect (Protect)",
+   "checked": true,
+   "romAnchor": 39,
+   "P": 39,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "protect (Detect)",
+   "checked": true,
+   "romAnchor": 39,
+   "P": 39,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "rest (Rest)",
+   "checked": false
+  },
+  {
+   "class": "two-turn charge (Dig)",
+   "checked": true,
+   "romAnchor": 42,
+   "P": 42,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "two-turn charge (Razor Wind)",
+   "checked": true,
+   "romAnchor": 42,
+   "P": 42,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "two-turn charge (SolarBeam)",
+   "checked": true,
+   "romAnchor": 42,
+   "P": 42,
+   "base": {
+    "starts": [],
+    "residuals": []
+   },
+   "patched": {
+    "starts": [],
+    "residuals": []
+   }
+  },
+  {
+   "class": "failed (Snore awake: But it failed!)",
+   "checked": true,
+   "romAnchor": 37,
+   "P": 37,
+   "base": {
+    "starts": [
+     0
+    ],
+    "residuals": [
+     -37
+    ]
+   },
+   "patched": {
+    "starts": [
+     37
+    ],
+    "residuals": [
+     0
+    ]
+   }
+  },
+  {
+   "class": "miss (Dynamic Punch, player)",
+   "checked": true,
+   "romAnchor": 36,
+   "P": 36,
+   "base": {
+    "starts": [
+     0
+    ],
+    "residuals": [
+     -36
+    ]
+   },
+   "patched": {
+    "starts": [
+     36
+    ],
+    "residuals": [
+     0
+    ]
+   }
+  },
+  {
+   "class": "miss (Dynamic Punch, opponent)",
+   "checked": true,
+   "romAnchor": 36,
+   "P": 36,
+   "base": {
+    "starts": [
+     0
+    ],
+    "residuals": [
+     -36
+    ]
+   },
+   "patched": {
+    "starts": [
+     36
+    ],
+    "residuals": [
+     0
+    ]
+   }
+  },
+  {
+   "class": "protect-blocked (Tackle vs Protect)",
+   "checked": true,
+   "romAnchor": 36,
+   "P": 36,
+   "base": {
+    "starts": [
+     0
+    ],
+    "residuals": [
+     -36
+    ]
+   },
+   "patched": {
+    "starts": [
+     36
+    ],
+    "residuals": [
+     0
+    ]
+   }
+  },
+  {
+   "class": "protect-blocked (Tackle vs Detect)",
+   "checked": true,
+   "romAnchor": 36,
+   "P": 36,
+   "base": {
+    "starts": [
+     0
+    ],
+    "residuals": [
+     -36
+    ]
+   },
+   "patched": {
+    "starts": [
+     36
+    ],
+    "residuals": [
+     0
+    ]
+   }
+  }
+ ],
+ "summary": {
+  "checked": 16,
+  "patchedZeroResidual": 5
+ }
+}
