@@ -1,0 +1,191 @@
+{
+ "schema": "hist73-merged-census/v1",
+ "seeds": "0..999",
+ "shards": [
+  "0..99",
+  "100..199",
+  "200..299",
+  "300..399",
+  "400..499",
+  "500..599",
+  "600..699",
+  "700..799",
+  "800..899",
+  "900..999"
+ ],
+ "battles": {
+  "played": 1000,
+  "terminal": 997,
+  "stalled": 3,
+  "errors": 0,
+  "frames": 14650655,
+  "playerTurns": 20638
+ },
+ "overall": {
+  "commands": 27515,
+  "live": 26245,
+  "frames": 3985209,
+  "liveFrames": 3934140,
+  "liveSharePctByCount": 95.38,
+  "liveSharePctByFrames": 98.72
+ },
+ "perReason": [
+  {
+   "reason": "duration: no adapter (no liveMoveAnimationDuration case)",
+   "count": 1053,
+   "frames": 33665
+  },
+  {
+   "reason": "presentation: later-body (order lend not a first body)",
+   "count": 23,
+   "frames": 3703
+  },
+  {
+   "reason": "presentation: sprite-order lend unknown",
+   "count": 19,
+   "frames": 3554
+  },
+  {
+   "reason": "duration: defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "count": 52,
+   "frames": 1664
+  },
+  {
+   "reason": "duration: attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)",
+   "count": 50,
+   "frames": 1600
+  },
+  {
+   "reason": "presentation: unclassified (case-local gate)",
+   "count": 10,
+   "frames": 1567
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: measured residual 196:by:2: Icy Wind in rain: 335,691 / 332,548 px (TIMING-PHASE: lag ages [241, 242] vs [261], also without Castform; live audit 21) (cast83, ISSUES #143)",
+   "count": 3,
+   "frames": 861
+  },
+  {
+   "reason": "presentation: stale move power unknown",
+   "count": 12,
+   "frames": 816
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: measured residual 196:at:2: Icy Wind in rain: 335,022 / 337,522 px (TIMING-PHASE: lag ages [241, 242] vs [261], also without Castform; live audit 21) (cast83, ISSUES #143)",
+   "count": 2,
+   "frames": 574
+  },
+  {
+   "reason": "presentation: sprite allocator history unknown",
+   "count": 5,
+   "frames": 442
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 240:at:2 (cast83, ISSUES #143)",
+   "count": 2,
+   "frames": 374
+  },
+  {
+   "reason": "presentation: target hidden (semi-invulnerable): no D4 phase for its lag profile (hide66)",
+   "count": 2,
+   "frames": 276
+  },
+  {
+   "reason": "duration: attacker doll: both battlers shown as dolls",
+   "count": 8,
+   "frames": 256
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 52:by:2 (cast83, ISSUES #143)",
+   "count": 4,
+   "frames": 252
+  },
+  {
+   "reason": "duration: unsupported turn 0",
+   "count": 7,
+   "frames": 224
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 184:at:2 (cast83, ISSUES #143)",
+   "count": 1,
+   "frames": 194
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 258:at:3 (cast83, ISSUES #143)",
+   "count": 1,
+   "frames": 158
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 19:at:3 (cast83, ISSUES #143)",
+   "count": 3,
+   "frames": 154
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 301:at:3 (cast83, ISSUES #143)",
+   "count": 2,
+   "frames": 152
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 52:by:3 (cast83, ISSUES #143)",
+   "count": 2,
+   "frames": 134
+  },
+  {
+   "reason": "duration: defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "count": 4,
+   "frames": 128
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 53:by:2 (cast83, ISSUES #143)",
+   "count": 1,
+   "frames": 115
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 156:at:3 (cast83, ISSUES #143)",
+   "count": 1,
+   "frames": 110
+  },
+  {
+   "reason": "duration: attacker doll: self-target body",
+   "count": 3,
+   "frames": 96
+  }
+ ],
+ "perDetail": [
+  {
+   "detail": "order host: no EXACT plan: body 63:player",
+   "count": 7,
+   "frames": 1648
+  },
+  {
+   "detail": "order host: no EXACT plan: body 310:player",
+   "count": 5,
+   "frames": 897
+  },
+  {
+   "detail": "order host: next-mon summary while the opponent battler is tracked",
+   "count": 2,
+   "frames": 514
+  },
+  {
+   "detail": "order host: no EXACT plan: body 316:player",
+   "count": 5,
+   "frames": 495
+  }
+ ],
+ "shardBattleDigests": [
+  "60c8cc6d2bfa0a6a9a0967b8dd768a99e7876fff7375f3ce3996687f34ac4194",
+  "efebdd8091de69934e23670d8a022b5a9e30820eb9c612fa48ca29f50f2ecd11",
+  "ab2179223d4ba575bf263ccbab75a087ec396ce5a81483c16ac90fa7d509dee9",
+  "0646046565605ecbc29017c3ffc6c85a84fb7196b41ab5cd9cb900024cd175af",
+  "9708d9e0406ad976d7cd9a1fb55f969d8e91cfcd1705db19441d0a0fc4ce4310",
+  "65ce7cfb5502d433729c74578ffab77e32e6cc9974d394231ddbaf78ca0e7422",
+  "a8f0b7073001471cb681d7189b991f6d041df63a0ab485d909a7c4226477613c",
+  "d5afd5898825b685656b2402e2f8f96cad8a544ff5c350726701b0ca9b41fc2f",
+  "6695a0304394bd23b378e83e01a713535c3932b0afaaaafcaf082e297d536e6a",
+  "a4bf0afbe9364c71c8a3668c69e138611d130cfb80173f12c3517ab251a60816"
+ ],
+ "battleDigest": "b831bd5d66f38d1256e748a60035b27695afc9770dee2d65ffe4f2b83df90f17",
+ "commandKeyDigest": "b5c536d22cc0926c98774d55a937bc1b1ee3251df2afd9687c66b9552463f871",
+ "renderThrows": 0
+}

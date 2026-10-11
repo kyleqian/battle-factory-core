@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-10 (night) — S10A: in progress (supervisor Opus 5.5, 19:57 -> deadline 05:57)
+## 2026-10-10 (night) — S10A: 12 production folds + 4 live audits + 7 evidence steps; live share 0..999 93.79 -> 95.38 % of commands (97.37 -> 98.72 % of frames; 99.32 / 99.59 % excluding Struggle); 238 + 13 + 25
 
 - Session start: master `b05d384ca`, production src `4c4fe4c7` == the 2026-10-10 day final gates' tree -> baseline receipt reused. Oracle
   services (started 2026-10-06) postdate the last oracle / harness commit (2026-08-15). Supervisor baseline census seeds 0..999 (10
@@ -176,6 +176,16 @@
 - FINDING (supervisor, from the census + source): the live Return 216 body adapter renders ReturnStrongest for every request and never
   reads `request.friendship`; the kernel sends friendship 0 (ret80 / #165), where Move_RETURN plays ReturnWeak (two dips + one hitsplat).
   37 census Return bodies were therefore wrong live claims. ret88 (MAIN lane) fails them closed first, then builds the Weak body + plan.
+- Supervisor FINAL gates on `89d1cf258` (src `dc6c756a`; every fold + the audit-24 fix): typecheck, full suite **1,627 files / 13,387
+  tests** (2 shards, 0 failed), build; differential vs `b05d384ca` (session start): `fight-submenu` 235 / 235 and `battle1-postwin-next-prompt`
+  216 / 216 byte-identical; `presentation-rng-playable-live-bodies-seeded-on` 10 / 173 (163 differ = land97's 8 Shadow Punch lead rows by
+  the player HAUNTER shifting every later capture; intended). Census seeds 0..999 (10 `--index-from` shards, two runs byte-identical,
+  `report-seeds0-999-final-20261011-night.json`): **95.38 % of move-animation commands / 98.72 % of frames** (start 93.79 / 97.37);
+  excluding Struggle (1,089 commands, outside the 276) **99.32 % / 99.59 %**; +436 commands vs session start, 0 live -> fallback,
+  0 errors, keys identical except two Struggle stalls' budget-cut tails (seeds 796 / 881, prefixes identical); seeds 0..299 **99.12 % /
+  99.68 %** (start 97.98 / 98.40); seeds 50000..50999 96.67 / 98.84 % (start 95.20 / 97.18). Preview <http://127.0.0.1:5191/> serves `e9933518a` (src `dc6c756a`):
+  4 samples hash-equal (canvas == ABI == screenshot), session export + ON -> OFF restart passed, no browser errors
+  (`playable-preview-e9933518a-receipt.json`). Soak gates not run (S10A scoped policy; no kernel / rules / RNG file changed tonight).
 
 ## 2026-10-10 (day) — S10A: #159 fixed, 12 production folds + 7 audit / evidence steps; honest corrections (Castform, Return); ordinary-play live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 

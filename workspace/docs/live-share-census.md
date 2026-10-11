@@ -4,7 +4,21 @@ How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
 `tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
 
-## Latest (2026-10-10 day, production src `4c4fe4c7`, master `bf082c6e1`)
+## Latest (2026-10-11 night, production src `dc6c756a`, master `89d1cf258`)
+
+| seeds | commands | live | **live by count** | **live by frames** |
+|---|---:|---:|---:|---:|
+| 0..999 (`report-seeds0-999-final-20261011-night.json`: 10 `--index-from` shards merged with hist73Merge.py; two runs byte-identical) | 27515 | 26245 | **95.38 %** | **98.72 %** |
+| 0..999 excluding Struggle 165 (1,089 commands; not a Factory rental move) | 26426 | 26245 | 99.32 % | 99.59 % |
+| 0..299 (`report-seeds0-299-final-20261011-night.json`) | 7970 | 7900 | 99.12 % | 99.68 % |
+| 50000..50999 (`report-seeds50000-50999-final-20261011-night.json`) | 27041 | 26140 | 96.67 % | 98.84 % |
+
+Session start (2026-10-10 night, src `4c4fe4c7`): 93.79 / 97.37 (0..999), 97.98 / 98.40 (0..299), 95.20 / 97.18 (50000..). +436 commands
+on 0..999, 0 live -> fallback, gameplay command keys identical (two Struggle stalls' budget-cut tails aside). The frame totals grew because
+land97's lead rows lengthened about 3,600 live bodies to the ROM's timing; ISSUES #166 (the missing stat-change animation) is outside this census
+(it counts move-animation commands only).
+
+## Previous (2026-10-10 day, production src `4c4fe4c7`, master `bf082c6e1`)
 
 | seeds | commands | live | **live by count** | **live by frames** | faithful-random history (count / frames) |
 |---|---:|---:|---:|---:|---|
