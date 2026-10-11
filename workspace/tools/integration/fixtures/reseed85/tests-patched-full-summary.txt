@@ -1,0 +1,26 @@
+# reseed85 FULL suite on the PATCHED git-archive copy (aeaa33dff + reseed85-temp-src.diff), node_modules symlinked:
+#   POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4   (4 workers: a sibling worker's shards shared the machine)
+✓ tests/cryDurationsExtraction.test.ts (4 tests) 664ms
+Test Files  6 failed | 1604 passed | 49 skipped (1659)
+Tests  19 failed | 12379 passed | 1088 skipped (13486)
+Duration  966.31s (transform 69.86s, setup 1.65s, collect 757.89s, tests 3072.92s, environment 38ms, prepare 544ms)
+# the 19 failures (6 files) = the environmental WASM parity set: 'factory-wasm artifact not found at <copy>/artifacts/wasm/factory_wasm.wasm'
+FAIL  tests/factoryAiBattleHistoryParity.test.ts > Factory AI battle-history ABI-v1 parity > matches create, explicit records, sync ordering, invalidation, overlays, move dedup and cap
+FAIL  tests/factoryAiBattleHistoryParity.test.ts > Factory AI battle-history ABI-v1 parity > preserves arbitrary history Numbers, NaN SameValueZero, and canonical unknown-ability errors
+FAIL  tests/factoryAiBattleHistoryParity.test.ts > Factory AI battle-history ABI-v1 parity > selects the requested engine and rejects malformed wire packets without trapping
+FAIL  tests/factoryAiLiveDecisionParity.test.ts > Factory AI live decision ABI-v1 parity > covers all 12 M8g source-view/chooser corpus cases in both modes
+FAIL  tests/factoryAiLiveDecisionParity.test.ts > Factory AI live decision ABI-v1 parity > retains turn ownership and the authoritative target decisions
+FAIL  tests/factoryAiLiveDecisionParity.test.ts > Factory AI live decision ABI-v1 parity > preserves exact production errors while malformed packets stay checked
+FAIL  tests/factoryAiLivePlannerParity.test.ts > Factory AI live planner ABI-v1 parity > matches the M8i 12-case / 10-category surface in both modes
+FAIL  tests/factoryAiLivePlannerParity.test.ts > Factory AI live planner ABI-v1 parity > gives malformed structure status 2 before semantic evaluation
+FAIL  tests/factoryAiLivePlannerParity.test.ts > Factory AI live planner ABI-v1 parity > pins default selection and forced-WASM no-fallback behavior
+FAIL  tests/factoryAiLiveViewParity.test.ts > Factory AI live-view constructor ABI-v1 parity > deep-compares complete source-shaped views across semantic categories
+FAIL  tests/factoryAiLiveViewParity.test.ts > Factory AI live-view constructor ABI-v1 parity > covers weather precedence, numeric edges, and every attacker/target optional combination
+FAIL  tests/factoryAiLiveViewParity.test.ts > Factory AI live-view constructor ABI-v1 parity > preserves attacker-before-target unknown-ability ordering and exact errors
+FAIL  tests/factoryAiLiveViewParity.test.ts > Factory AI live-view constructor ABI-v1 parity > selects the requested adapter and rejects malformed packets without trapping
+FAIL  tests/factoryAiSwitchPolicyParity.test.ts > factory switch ABI-v1 parity > matches the selector's focused quirks and deterministic type/move sweep in both adapters
+FAIL  tests/factoryAiSwitchPolicyParity.test.ts > factory switch ABI-v1 parity > matches complete policy/precheck objects, typed errors, and the full retained census
+FAIL  tests/factoryAiSwitchPolicyParity.test.ts > factory switch ABI-v1 parity > selects the requested adapter mode and rejects malformed boundary lengths without trapping
+FAIL  tests/factoryTrainerScheduleParity.test.ts > Factory trainer schedule ABI-v1 parity > matches complete focused and deterministic-sweep objects and ratchets the ledger census
+FAIL  tests/factoryTrainerScheduleParity.test.ts > Factory trainer schedule ABI-v1 parity > matches every production-reachable validation error and its ordering
+FAIL  tests/factoryTrainerScheduleParity.test.ts > Factory trainer schedule ABI-v1 parity > selects the requested engine and rejects malformed input lengths without trapping

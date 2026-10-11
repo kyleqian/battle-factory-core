@@ -130,7 +130,9 @@ copies, as are the controls, so the patch changes neither.
 2. **Pins a fold must move:** none. The related set, run on the patched copy (95 files: every test naming the order host / allocator /
    reseed / words / deferred / post-KO / Light Screen / Protect / census, `related-tests-patched.txt`), gives **94 files passed, 1,202
    tests passed**. The only failing file is `factoryAiSwitchPolicyParity.test.ts` (3 tests), which is environmental: `artifacts/wasm` is
-   absent from git-archive copies, the known WASM parity set. **This worker did NOT run the full suite on the patched copy.**
+   absent from git-archive copies, the known WASM parity set. **Full suite on the patched copy** (`tests-patched-full-summary.txt`,
+   4 workers): **12,379 passed, 19 failed**. The 19 failures are exactly the environmental WASM parity set (6 files: `factoryAi*Parity`,
+   `factoryTrainerScheduleParity`, "factory-wasm artifact not found"). 1,088 tests are skipped, as on master.
 3. **New pins (Tier 1) a fold should add** (e.g. `tests/reseed85WordsOccupancyReseed.test.ts`; each must fail without the hunks):
    - KO after a pending words marker: host from the known entry, Sand-Attack 28 marker (`markLiveSpriteOrderDeferredBody` + its
      move-animation event), then `hit-animation`, `faint` (opponent), `party-summary-next`, `party-summary-hide`, `next-mon-send-out` (the
