@@ -1,0 +1,88 @@
+{
+ "schema": "audit24-patched-npm-test/v1",
+ "tree": "git archive 93d77a403 (production src 8706d10c) workspace + audit24-lead-row0.diff (node_modules, reference symlinked)",
+ "summary": {
+  "files": "23 failed | 1599 passed | 49 skipped (1671)",
+  "tests": "49 failed | 12472 passed | 1088 skipped (13609)"
+ },
+ "environmentOnly": {
+  "why": "factory-wasm artifact not found (artifacts/wasm is untracked; the archive copy has no wasm build)",
+  "files": [
+   "tests/animation/livePrep9MoveAdapters.test.ts",
+   "tests/factoryAiBattleHistoryParity.test.ts",
+   "tests/factoryAiLiveDecisionParity.test.ts",
+   "tests/factoryAiLivePlannerParity.test.ts",
+   "tests/factoryAiLiveViewParity.test.ts",
+   "tests/factoryAiSwitchPolicyParity.test.ts",
+   "tests/factoryTrainerScheduleParity.test.ts"
+  ],
+  "tests": 20
+ },
+ "movedByPatch": {
+  "files": 16,
+  "tests": 29,
+  "byFile": {
+   "tests/animation/liveAnchor2MoveAdapters.test.ts": [
+    "live anchor2 move adapters > completes ordinary 'TAIL_GLOW' and preserves ON/OFF rules and RNG"
+   ],
+   "tests/animation/liveAnchor3MoveAdapters.test.ts": [
+    "live anchor3 move adapters > completes ordinary 'SWAGGER' and preserves ON/OFF rules and RNG",
+    "live anchor3 move adapters > completes ordinary 'BULK_UP' and preserves ON/OFF rules and RNG"
+   ],
+   "tests/animation/liveAnchorMoveAdapters.test.ts": [
+    "live anchor move adapters > completes ordinary 'ACID' and preserves ON/OFF rules and RNG",
+    "live anchor move adapters > completes ordinary 'SLUDGE' and preserves ON/OFF rules and RNG",
+    "live anchor move adapters > completes ordinary 'SLUDGE_BOMB' and preserves ON/OFF rules and RNG",
+    "live anchor move adapters > completes ordinary 'WATER_GUN' and preserves ON/OFF rules and RNG",
+    "live anchor move adapters > completes ordinary 'HARDEN' and preserves ON/OFF rules and RNG",
+    "live anchor move adapters > completes ordinary 'IRON_DEFENSE' and preserves ON/OFF rules and RNG",
+    "live anchor move adapters > completes ordinary 'METAL_CLAW' and preserves ON/OFF rules and RNG"
+   ],
+   "tests/animation/liveHBufferS1MoveAdapters.test.ts": [
+    "live H_BUFFER S1 move adapters > completes ordinary 'DRAGON_BREATH' and preserves ON/OFF rules and RNG"
+   ],
+   "tests/animation/liveNext5MoveAdapters.test.ts": [
+    "live next5 move adapters > completes ordinary 'SCARY_FACE' and preserves ON/OFF rules and RNG",
+    "live next5 move adapters > completes ordinary 'DIZZY_PUNCH' and preserves ON/OFF rules and RNG"
+   ],
+   "tests/animation/liveOrderConsumerMoveAdapters.test.ts": [
+    "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary EMBER (seed 4, strea",
+    "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary DRAGON_RAGE (seed 37",
+    "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary BLAZE_KICK (seed 322",
+    "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > renders Blaze Kick as a LATER body "
+   ],
+   "tests/animation/livePrep2MoveAdapters.test.ts": [
+    "live prep2 move adapters > completes ordinary 'FUTURE_SIGHT' and preserves ON/OFF rules and RNG",
+    "live prep2 move adapters > Explosion: the body ages with the attacker at HP 0, then the replacement screen is the documented boundary"
+   ],
+   "tests/animation/livePrep5MoveAdapters.test.ts": [
+    "live prep5 move adapters > completes ordinary 'TAUNT' and preserves ON/OFF rules and RNG"
+   ],
+   "tests/animation/livePrep6MoveAdapters.test.ts": [
+    "live prep6 move adapters > completes ordinary 'SELF_DESTRUCT' and preserves ON/OFF rules and RNG",
+    "live prep6 move adapters > completes ordinary 'KNOCK_OFF' and preserves ON/OFF rules and RNG"
+   ],
+   "tests/animation/livePrep7MoveAdapters.test.ts": [
+    "live prep7 move adapters > completes ordinary 'FAKE_TEARS' and preserves ON/OFF rules and RNG"
+   ],
+   "tests/battleResolutionPresentation.test.ts": [
+    "battle resolution presentation receipt ownership > hides the elevated shadow for the post-body hide rows after a live body (ISSUES #147)"
+   ],
+   "tests/cf78CastformForm.test.ts": [
+    "cf78: census route 950 through the production orchestrator, Scene ON / OFF parity > battle 950 (seed 950, streak 13): the player's CASTFORM in hail; the ROM-pro"
+   ],
+   "tests/land97IdleLeadRows.test.ts": [
+    "land97 idle lead rows > Bulk Up (battle 154, player): rows 0..N-1 equal the age-0 frame, row N+k equals the unpatched row k"
+   ],
+   "tests/liveSpriteOrderHost.test.ts": [
+    "live sprite-order seam (presentation-only, tracked across modelled bodies) > lends after a voluntary switch or a cancelled party menu; adapters active every age"
+   ],
+   "tests/playerfaintLend.test.ts": [
+    "player-faint lends on ordinary-input generated routes (forced replacement answered: first healthy member) > seed 4: every body after the forced switch-in is len"
+   ],
+   "tests/spriteOrderPolicyGaps.test.ts": [
+    "sprite-order policy gaps (S10A) > engine HEAD keeps the order known through the leading `stat` command of a first-body Double Team / Fake Tears"
+   ]
+  }
+ }
+}

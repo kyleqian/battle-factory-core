@@ -26,7 +26,7 @@ echo "code $(git rev-parse HEAD) src $(git rev-parse HEAD:workspace/src) base $B
 # 1. staging
 python3 tools/integration/audit24Stage.py "$SCR/scenarios" > /dev/null
 diff -r "$SCR/scenarios" "$FX/scenarios" > /dev/null && echo "SAME scenarios ($(wc -l < "$FX/scenarios/list.tsv" | tr -d ' '))" || echo "DIFF scenarios"
-S=$SCR/scenarios; P=$SCR/probes; mkdir -p "$P" "$REC/route"
+S=$SCR/scenarios; P=$SCR/probes; mkdir -p "$P" "$REC/route" "$SCR/route"
 
 # 2. probes
 cut -f1 "$S/list.tsv" | while read -r n; do for r in 1 2; do echo "$S $n $r $P"; done; done | xargs -P 8 -n 4 tools/integration/audit24Job.sh > "$SCR/probes.log"

@@ -110,7 +110,10 @@ Focus Punch phase table: `receipts/fp-phase.tsv` (lag ages per body from the gRn
 - `git diff --check` clean, and no tracked file outside the `audit24` set modified at any commit.
 - Runner pass 1 / pass 2: section 5.
 - `npm test` / `npm run build`: final message.
-- Patched-copy `npm test` (the pins the fix shape moves): see below.
+- **Patched-copy `npm test`** (`git archive 93d77a403` + the temp patch; `receipts/patched-npm-test.json`): 23 files / 49 tests failed, 1,599 files / 12,472 tests passed.
+  - 7 files / 20 tests are environment-only: `factory-wasm artifact not found` (the archive has no `artifacts/wasm` build). These are the 6 `factoryAi*Parity` / `factoryTrainerScheduleParity` files, plus `livePrep9MoveAdapters` (classified by its message; recheck).
+  - **16 files / 29 tests moved by the patch**: the land97 ordinary-route age / row-sequence pins (`liveAnchor*`, `liveNext5`, `livePrep2/5/6/7`, `liveHBufferS1`, `liveOrderConsumer`, `land97IdleLeadRows`), and also `liveSpriteOrderHost`, `spriteOrderPolicyGaps`, `playerfaintLend`, `battleResolutionPresentation` ("hides the elevated shadow for the post-body hide rows") and `cf78CastformForm` (live count 9 -> 7).
+  - So an effect-less row 0 also reaches the sprite-order lend tracking and the census live counts. **The temp patch proves the mechanism and the pixels. It is not fold-ready.** The fold shape is option (b) above: keep the move effect on lead row 0 and draw the pre-activation shadow there.
 
 ## 5. Reproduce (from workspace/)
 
