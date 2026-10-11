@@ -280,13 +280,5 @@
    0,
    734
   ]
- },
- "idle94": {
-  "move": 339,
-  "attackerSide": "opponent",
-  "attacker": "PRIMEAPE",
-  "target": "ONIX",
-  "pair": "a",
-  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
  }
 }

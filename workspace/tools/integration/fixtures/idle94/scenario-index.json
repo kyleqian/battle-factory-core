@@ -1,0 +1,182 @@
+{
+ "idle94-bulk-up-ply-a-primeape-onix.json": {
+  "move": 339,
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "pair": "a",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-bulk-up-opp-a-primeape-onix.json": {
+  "move": 339,
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "pair": "a",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle94-bulk-up-ply-b-heracross-snorlax.json": {
+  "move": 339,
+  "attackerSide": "player",
+  "attacker": "HERACROSS",
+  "target": "SNORLAX",
+  "pair": "b",
+  "seed": 305420349,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-bulk-up-opp-b-heracross-snorlax.json": {
+  "move": 339,
+  "attackerSide": "opponent",
+  "attacker": "HERACROSS",
+  "target": "SNORLAX",
+  "pair": "b",
+  "seed": 305420349,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle94-swagger-ply-a-hypno-onix.json": {
+  "move": 207,
+  "attackerSide": "player",
+  "attacker": "HYPNO",
+  "target": "ONIX",
+  "pair": "a",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-swagger-opp-a-hypno-onix.json": {
+  "move": 207,
+  "attackerSide": "opponent",
+  "attacker": "HYPNO",
+  "target": "ONIX",
+  "pair": "a",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle94-swagger-ply-b-persian-snorlax.json": {
+  "move": 207,
+  "attackerSide": "player",
+  "attacker": "PERSIAN",
+  "target": "SNORLAX",
+  "pair": "b",
+  "seed": 305420349,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-swagger-opp-b-persian-snorlax.json": {
+  "move": 207,
+  "attackerSide": "opponent",
+  "attacker": "PERSIAN",
+  "target": "SNORLAX",
+  "pair": "b",
+  "seed": 305420349,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle94-taunt-ply-a-murkrow-shuckle.json": {
+  "move": 269,
+  "attackerSide": "player",
+  "attacker": "MURKROW",
+  "target": "SHUCKLE",
+  "pair": "a",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-taunt-opp-a-murkrow-shuckle.json": {
+  "move": 269,
+  "attackerSide": "opponent",
+  "attacker": "MURKROW",
+  "target": "SHUCKLE",
+  "pair": "a",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle94-taunt-ply-b-murkrow-snorlax.json": {
+  "move": 269,
+  "attackerSide": "player",
+  "attacker": "MURKROW",
+  "target": "SNORLAX",
+  "pair": "b",
+  "seed": 305420349,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-taunt-opp-b-murkrow-snorlax.json": {
+  "move": 269,
+  "attackerSide": "opponent",
+  "attacker": "MURKROW",
+  "target": "SNORLAX",
+  "pair": "b",
+  "seed": 305420349,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle94-scary-face-ply-a-rhyhorn-shuckle.json": {
+  "move": 184,
+  "attackerSide": "player",
+  "attacker": "RHYHORN",
+  "target": "SHUCKLE",
+  "pair": "a",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-scary-face-opp-a-rhyhorn-shuckle.json": {
+  "move": 184,
+  "attackerSide": "opponent",
+  "attacker": "RHYHORN",
+  "target": "SHUCKLE",
+  "pair": "a",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle94-scary-face-ply-b-pupitar-snorlax.json": {
+  "move": 184,
+  "attackerSide": "player",
+  "attacker": "PUPITAR",
+  "target": "SNORLAX",
+  "pair": "b",
+  "seed": 305420349,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-scary-face-opp-b-pupitar-snorlax.json": {
+  "move": 184,
+  "attackerSide": "opponent",
+  "attacker": "PUPITAR",
+  "target": "SNORLAX",
+  "pair": "b",
+  "seed": 305420349,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle94-swords-dance-ply-c-scyther-onix.json": {
+  "move": 14,
+  "attackerSide": "player",
+  "attacker": "SCYTHER",
+  "target": "ONIX",
+  "pair": "c",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-swords-dance-opp-c-scyther-onix.json": {
+  "move": 14,
+  "attackerSide": "opponent",
+  "attacker": "SCYTHER",
+  "target": "ONIX",
+  "pair": "c",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "idle94-agility-ply-c-dodrio-onix.json": {
+  "move": 97,
+  "attackerSide": "player",
+  "attacker": "DODRIO",
+  "target": "ONIX",
+  "pair": "c",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "idle94-agility-opp-c-dodrio-onix.json": {
+  "move": 97,
+  "attackerSide": "opponent",
+  "attacker": "DODRIO",
+  "target": "ONIX",
+  "pair": "c",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ }
+}

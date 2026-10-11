@@ -280,13 +280,5 @@
    0,
    734
   ]
- },
- "idle94": {
-  "move": 207,
-  "attackerSide": "player",
-  "attacker": "PERSIAN",
-  "target": "SNORLAX",
-  "pair": "b",
-  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
  }
 }

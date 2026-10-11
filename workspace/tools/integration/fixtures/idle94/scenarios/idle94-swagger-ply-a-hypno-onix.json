@@ -280,13 +280,5 @@
    0,
    734
   ]
- },
- "idle94": {
-  "move": 207,
-  "attackerSide": "player",
-  "attacker": "HYPNO",
-  "target": "ONIX",
-  "pair": "a",
-  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
  }
 }
