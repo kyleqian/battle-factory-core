@@ -2216,34 +2216,37 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-10 evening): 239 scoped-exact + 13 faithful-random + 24 faithful-timing live adapters (census `239+13+24+0+0=276`,
-unchanged: the 2026-10-10 day session widened histories and fixed live claims). Fixed / landed: ISSUES #159 (live bodies drew a hidden
-Fly / Bounce / Dig / Dive charger: 90 wrong live commands on seeds 0..999 -> 0; fly63 re-landed), Shock Wave geometry-keyed plan, Dive as
-a words unit + its attack body live, SUBSTITUTE_FADE, Magnitude / CASTFORM_CHANGE / Conversion 2 / Needle Arm plans (Needle Arm's
-SortSprites tie modelled), the kernel's Speed Boost animArg1, Ice Ball as a words unit for any consumer, 37 audited net-zero allocator
-bodies, hidden-battler faint / reshow, Dive / Meteor Mash with a displayed status, Flatter at later bodies. Honest corrections (live ->
-fallback): every body while a Castform is in a weather form (54 commands; #143's per-form art), Return's wrong order (123 commands; see
-ISSUES #165), Sky Uppercut / the player's Light Screen at a hidden battler (lag phase). Live audits 18 / 19 / 20 (1,477 windows) found and
-closed every defect above. Ordinary-play census (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261010-day.json`,
-src `4c4fe4c7`): **93.79 % of move-animation commands / 97.37 % of frames live** (session start 91.89 / 95.82). Resume points:
+Next (2026-10-11 night): 238 scoped-exact + 13 faithful-random + 25 faithful-timing live adapters (census `238+13+25+0+0=276`;
+Focus Punch moved scoped exact -> faithful timing under the standing D4 approval). The 2026-10-10 night session landed: 13 + 3 + 2
+Substitute-doll cells (land82 / doll90 / ctl95), #143 per-form Castform art (cast83 + qa91 keys), Flatter as a words-order unit (land86),
+the post-KO reseed through a words-unit occupancy shadow (land87), ReturnWeak for the kernel's friendship-0 Return (ret88; 37 wrong
+ReturnStrongest claims corrected first), a scanline-buffer history (land96: Memento later bodies), Fury Cutter counters 2..5 (fury99),
+source fixes for live DEFECTS found by audits / controls (Quick Attack's target offset, GrassWhistle's position-dependent fade-back, Iron
+Tail's band mask), Focus Punch D4 (fp100), and idle94's static lead rows for 40 adapters (land97: Scene ON bodies no longer N frames short).
+Live audits 21..24 (audit 24's land97 row-0 shadow defect fixed narrowly: an elevated opponent attacker keeps no lead rows). Ordinary-play census (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261011-night.json`,
+src `8706d10c`): **95.38 % of move-animation commands / 98.72 % of frames live** (session start 93.79 / 97.37); excluding Struggle (1,089 commands),
+99.32 % of commands / 99.59 % of frames. Resume points:
 0. ISSUES #165 (GAMEPLAY, outside S10A's presentation-only mandate — needs a run where gameplay changes are in scope): the ROM Factory
-   builds every mon with friendship 0 and turns Return into Frustration (`battle_factory.c` `SetMonMoveAvoidReturn`); production keeps
-   Return. Then retire / re-scope the live Return adapter and ret80's Return keys.
-1. Land the BANKED doll81 patch (`docs/next-adapters-doll81.md`: 13 Substitute-doll cells, +77 commands on 0..999, 3 pins; rerun its
-   runner on the fold's base). Then the named doll residuals (Double Team banner / clone phase, Recover orbs, Focus Punch, GrassWhistle
-   opponent, Iron Tail).
-2. Flatter remainder (`docs/next-adapters-flat77.md`): after a Flatter (make 260 a words-order unit from its 114 words), after Tackle
-   (audit 33 allocator net-zero).
-3. #143 per-form Castform art (palette, front coords, elevation, back Y), then lift cf78's decline (54 commands / 9.6k frames).
-4. Post-KO reseed blockers (hist73 residual 55 / 5.5k: words-unit order plans for Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES /
-   Astonish); plans69's negatives (Hyper Beam Random2 + geometry, Astonish words law, Odor Sleuth 2-class geometry); the player-locked
-   strike turn (no prompt -> the order host invalidates; audit 18 / 19 counted 174+ fallbacks there).
-5. Later bodies: Extrasensory player (3.7k), Memento; #161 (Dive attack age-17 lag on poisoned player divers); #152 remainder; #154 /
-   #157; the "4 idle frames shorter" accepted-window convention (fix74) as a timing-fidelity question.
-6. A live audit after the next batch (audits 18 / 19 / 20 tools: tools/integration/audit18*-audit20*).
+   builds every mon with friendship 0 and turns Return into Frustration; production keeps Return (now drawn as ReturnWeak, ret88).
+1. ISSUES #166 — the MISSING General_StatsChange presentation (both scenes; 897 / 1,000 battles, ~8.6 % of the timeline). The design pack
+   is ready: `docs/stat101-stats-change-design.md` slices (a)..(f); (a) the pure reducer `src/animation/statsChange.ts` (unwired) and (b) the
+   dense comparator (20 / 20 windows 0 px, ON and OFF) are DONE (`docs/stat102-stats-change-reducer.md`). Next: slice (c) the
+   `stats-change` presentation command (76 / 90 frames, both scenes, SUBSTITUTE_FADE pattern; moves timing pins), then (d) live
+   rendering, (e) order / allocator host binding, (f) census + audit.
+2. Timeline fidelity (presentation only): the BANKED `idle98-universal-rows.diff` (every live body is 3 frames short before and 2 after:
+   23,814 commands +3 / +5, 273 timing pins in 65 files; `docs/next-adapters-idle98.md`); ISSUES #167 (Scene OFF no-hit pause, the miss
+   pause to anchor first); idle94's unproven lead moves (Flamethrower, 8 more) and per-move tails (Swagger, Scary Face).
+3. Remaining fallbacks (non-Struggle 181 commands / 16,268 frames on 0..999): Extrasensory player later bodies (a per-row scanout split,
+   scan93 patch B not D4-eligible), Hyper Beam / Astonish / Odor Sleuth order plans (plans69 negatives), Endeavor stale power, the
+   remaining Castform keys (#143), doll cells Focus Punch / Dream Eater player / Dig / Double-Edge / Iron Tail, Memento after a Dragon Dance.
+4. Shadow Punch 325 has an optional lag at body age 90 (audit 24: 4 : 4 pooled; the Focus Punch class) — a D4 phase census first; the
+   elevated-opponent lead row 0 shadow (then lift the land97 elevated-attacker decline); #161, #152 remainder, #154 / #157; the app-only differential trace `presentation-rng-playable-live-bodies-seeded-on` samples Shadow
+   Punch whose lead rows moved its later captures (163 / 173 differ vs pre-land97 bases; regenerate its capture frames with
+   tools/integration/presentationRngTraces.ts if it should re-center on the bodies).
+5. A live audit after every batch (audits 21..24 tools; ALWAYS on production accepted windows: tools/integration/audit21Align.py).
 Struggle (1,056 commands / 33.8k frames in the census) is not a Factory rental move and stays outside the 276 accepted bodies.
-Validate new adapters with alternate-species dense proofs whose windows come from
-the source activation frame, not only the accepted fixture species.
+Validate new adapters with alternate-species dense proofs whose windows are the production accepted window aligned to the
+source activation frame (tools/integration/audit21Align.py), not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.
 
 Acceptance:

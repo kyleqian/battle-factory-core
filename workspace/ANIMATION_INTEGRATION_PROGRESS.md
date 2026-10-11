@@ -151,7 +151,23 @@
   attacker / target, big / small; the elevated BUTTERFREE's fade-back starts 13 rows before the old constant) 10 / 10, Iron Tail 6 / 6, Fury
   Cutter counters 1..5 with Extrasensory / Tackle / Growl in between and target switches 16 / 16 live (2 = a fixture-level ARTIFACT), Memento
   later 4 / 4, Psych Up doll 8 / 8, Double Team swap 9 / 9, Sing opponent 4 / 4, Recover swap 8 / 8; runs A / B 142 receipts byte-identical.
-- In flight: land97 (INTEGRATION: idle94 lead rows), audit 23 (SIDE), stat102 (MAIN: #166 slices (a) reducer + (b) comparator, unwired).
+- prep stat102 (MAIN lane, Opus, `1c6ce7836` .. `79b06f8e9`): ISSUES #166 slices (a) + (b): the pure reducer `src/animation/statsChange.ts`
+  (UNWIRED: statsChangeParams / statsChangeSpan / statsChangeRow — a literal replay of StatsChangeAnimation_Step3; only row anchors from the
+  ROM) pinned on every row of all 20 stat101 ROM tables (1,684 rows; 4 one-constant mutations each fail); the comparator on it through the
+  production corner: 20 / 20 windows 0 px, Scene ON and OFF (`docs/stat102-stats-change-reducer.md`). Next: slice (c).
+- Folded Sonnet worker `bd1260c01` (INTEGRATION) as `ae0eb8ed3` (src `8706d10c`): land97 — idle94's lead rows for 40 adapters
+  (`liveMoveIdleLeadRows` in battleResolutionPresentationRender.ts; Scene ON only; Substitute-swap composites keep 0), 30 pins in 16 files
+  +N, tests/land97IdleLeadRows.test.ts; idle94's runner on the new base SAME (8 / 8 routes); census: 3,842 commands +N frames, 0 status
+  changes, keys + battleDigestExcludingFrames identical; Scene OFF unchanged (battles 154 / 3). The app-only differential trace
+  `presentation-rng-playable-live-bodies-seeded-on` samples Shadow Punch (N = 8): 163 / 173 captures differ vs pre-land97 bases (intended;
+  canonical railroad traces byte-identical).
+- Live audit 24 (SIDE, Opus, `522740d22` .. `d9741487f`, new files only; merged `89d1cf258`): **DEFECT (land97)**: an ELEVATED opponent
+  attacker's lead row 0 misses the enemy shadow (200 px; the ROM's activation row still shows it): Shadow Punch HAUNTER, Bite CROBAT, Sludge
+  Bomb GOLBAT; everything else exact (18 land97 windows, 6 Substitute-swap bodies, Scene OFF battle 38 identical). **Fixed narrowly by the
+  supervisor (`df4afda75`)**: an elevated opponent attacker keeps NO lead rows (exactly the pre-land97 presentation) until the row-0
+  shadow is modelled; pins: the HAUNTER route back to 0..104, a new elevated-case test. fp100: 5 lag-phase bodies 0 px, 5 minority
+  bodies rows 132..147 only (pooled opponent 16 : 7, player 12 : 6 — lag still dominant). NEW D4 candidate: Shadow Punch's optional
+  lag at body age 90 (4 : 4 pooled; production renders the no-lag phase = the accepted fixtures).
 - prep reseed85 (MAIN lane, Opus, `4f4828f3b` .. `d46cdfff1`, new files only): the post-KO send-out allocator reseed after a words-order
   unit. The reseed reads slot OCCUPANCY only and every words unit is allocator-net-zero, so the order host can keep a word-free
   occupancy shadow while the free order stays deferred. ROM: 13 routes x 2 probes x 2 runs A == B; 4 / 4 words-vs-control pairs SAME
