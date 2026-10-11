@@ -3,6 +3,7 @@
  * The tool supplies a displayed field and typed request, never a captured
  * per-frame host/config. Ordinary command selection is tested independently.
  */
+import { applyLiveScanlineHistoryEvent, type LiveScanlineHistory } from "../../src/engine/liveScanlineHistory.ts";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { cpSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
@@ -419,6 +420,14 @@ function withFirstBody(f: Fixture, input: ReturnType<typeof prepareLiveMoveSprit
   const first = process.env.POKEBENCH_LIVE_ORDER_INPUT === "first-body"
     || (!f.precedingBodies?.length && !f.precedingTurns && !f.precedingX2Events);
   if (first) return { ...input, firstBody: true as const };
+  // scan93: the order host's scanline history over the declared preceding bodies (move bodies as move-animation events).
+  if (f.precedingBodies?.length && !f.precedingTurns && !f.precedingX2Events) {
+    let scanline: LiveScanlineHistory = Object.freeze([]);
+    for (const u of f.precedingBodies) {
+      if (u.statAnimation === undefined && u.statusAnimation === undefined) scanline = applyLiveScanlineHistoryEvent(scanline, { kind: "move-animation", moveId: u.moveId, attackerSide: u.side });
+    }
+    if (scanline !== null) input = { ...input, scanlineHistory: scanline };
+  }
   // prep29: Bonemerang hit 2 directly after a first-body hit 1 (host `bonemerangHit1`).
   const only = f.precedingBodies?.length === 1 && !f.precedingTurns && !f.precedingX2Events ? f.precedingBodies[0]! : undefined;
   return only?.moveId === 155 && only.statAnimation === undefined && only.statusAnimation === undefined && f.move === "BONEMERANG"
