@@ -15,7 +15,7 @@ history.
   generic constraint in a `battleScene.ts` top-level function and only the full suite shows it (~3 min). (2) `liveShareCensus.ts`
   numbers battles / streaks per seed RANGE, so range-split runs are a different battle set from one 0..999 run (deltas do not compare
   across splits: +43 vs +49 for the same fold); hist73 added `--index-from` only in a copy (`hist73LiveShareCensus.ts`), st76 / cf78
-  patched scratch copies (~3 min x 4 + supervisor confusion). Fix: upstream `--index-from`. (3) Banked temp patches
+  patched scratch copies (~3 min x 4 + supervisor confusion). FIXED 2026-10-10 wind-down: `liveShareCensus.ts --index-from=N` (default output unchanged). (3) Banked temp patches
   (`*-temp-src.diff`, `fold-test-pins.diff`) rot as soon as another landing touches their lines, are `workspace/`-prefixed (apply from
   the repo root), and the prepNNRun.sh runners refuse a tree where the patch is already landed, so after a fold their steps run by hand
   (~5-10 min, land68 / fold71). (4) A banked receipt without the plan / words texts a fold's vector test needs (prep65) -> an

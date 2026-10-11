@@ -6,8 +6,11 @@
 // renderBattleResolutionLiveView decides it (liveSubstituteSwapView, then liveMoveAnimationPresentation; substituteFadeRenderView),
 // and every fallback carries the production gate that fired (liveShareCensusGates.ts). No oracle.
 //   node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=<from>..<to> [--seed-step=N]
-//     [--streak-mul=N] [--out=report.json] [--commands=commands.jsonl]
+//     [--streak-mul=N] [--index-from=N] [--out=report.json] [--commands=commands.jsonl]
 // Battle i (0-based) uses seed = from + i * seedStep and streak = (i * streakMul) % 49 (streaks 0..48, challenges 0..6).
+// --index-from=N (default 0) starts i at N, so parallel shards (--seeds=100..199 --index-from=100, ...) reproduce exactly the battles
+// (ids, streaks) of one --seeds=0..999 run; without it every shard restarts i at 0 and plays a DIFFERENT battle set (hist73 / cf78 /
+// st76 used private copies with this flag, 2026-10-10).
 import { writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import {
@@ -31,7 +34,7 @@ import { classifyDurationDecline, classifyPresentationDecline, type Decline } fr
 
 const arg = (name: string, fallback?: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 const [fromSeed, toSeed] = arg("seeds", "0..9")!.split("..").map(Number) as [number, number];
-const seedStep = Number(arg("seed-step", "1")), streakMul = Number(arg("streak-mul", "11"));
+const seedStep = Number(arg("seed-step", "1")), streakMul = Number(arg("streak-mul", "11")), indexFrom = Number(arg("index-from", "0"));
 const FRAME_BUDGET = 200000, RENDER_SAMPLE_EVERY = 97;
 
 const moveRows = (movesJson as unknown as { moves: { move: string; id: number; name: string }[] }).moves;
@@ -214,7 +217,7 @@ function playBattle(battle: number, seed: number, streak: number): void {
 }
 
 const started = Date.now();
-for (let i = 0, seed = fromSeed; seed <= toSeed; i++, seed += seedStep) {
+for (let i = indexFrom, seed = fromSeed; seed <= toSeed; i++, seed += seedStep) {
   playBattle(i, seed, (i * streakMul) % 49);
   if (i % 10 === 9) process.stderr.write(`battle ${i + 1} seed ${seed}: ${commands.length} commands, ${((Date.now() - started) / 1000).toFixed(0)} s\n`);
 }

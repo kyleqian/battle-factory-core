@@ -17,8 +17,9 @@ ISSUES #143) and Return's order at Factory friendship 0 (ret80, 123 commands; IS
 commands that had drawn a hidden semi-invulnerable battler. Remaining fallback frames on seeds 0..999 by reason: no adapter (Struggle, not
 a rental move) 33,792 (1,056 commands), sprite-order lend unknown 26,027 (129), case-local gates 14,582 (109), Castform weather form 10,116
 (58), allocator history unknown 5,145 (52), later-body 4,416 (27), Substitute doll cells ~7.8k. Gameplay command key sequence identical
-at every fold. Per-range censuses (`liveShareCensus.ts --seeds=a..b`) number battles per range, so split runs are a DIFFERENT battle set
-from one 0..999 run — compare deltas within one split only.
+at every fold. Per-range censuses (`liveShareCensus.ts --seeds=a..b`) number battles per range unless `--index-from=a` is given (added 2026-10-10):
+with it, shards reproduce one 0..999 run exactly (verified: `--seeds=100..199 --index-from=100` == battles 100..199 of a 0..299 run,
+2,654 / 2,654 records; the default output is byte-identical to before).
 
 Previous (2026-10-09 day, src `06b791ff`): 91.89 % / 95.82 % on seeds 0..999 (`report-seeds0-999-final-20261009-day.json`).
 
