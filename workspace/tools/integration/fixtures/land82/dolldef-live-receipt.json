@@ -1,0 +1,1068 @@
+{
+ "schema": "land82-dolldef-live-receipt/v1",
+ "base": "b05d384ca",
+ "productionSrcTree": "4c4fe4c715bc405364fddc8c7ef511fa420590b4",
+ "patchSha256_16": "973c77fd4ff4852a",
+ "method": "tools/integration/land82Run.sh: fresh direct-mGBA, 60 scenarios twice (r1 == r2 byte-identical), patched copy of base; summary.tsv/summary-explore.tsv identical to doll81 receipts",
+ "results": [
+  {
+   "file": "doll81-def-dig-opponent-golbat-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-dig-opponent-golbat-test.json",
+     "stem": "doll81-def-dig-opponent-golbat",
+     "kind": "test",
+     "move": "DIG",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1744,
+      1811
+     ],
+     "rows": 68,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 78144,
+       "exactRows": 0,
+       "digest": "d4f6f7a5976d04052e25107dac982df5d345848d55857c60afebf06d44cbd7de"
+      },
+      {
+       "run": 2,
+       "residualPixels": 78144,
+       "exactRows": 0,
+       "digest": "d4f6f7a5976d04052e25107dac982df5d345848d55857c60afebf06d44cbd7de"
+      }
+     ],
+     "affectedAges": "0..67",
+     "maxPxRow": 2428,
+     "fieldPx": 78144,
+     "bbox": [
+      56,
+      6,
+      207,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-dig-opponent-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-dig-opponent-test.json",
+     "stem": "doll81-def-dig-opponent",
+     "kind": "test",
+     "move": "DIG",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1745,
+      1812
+     ],
+     "rows": 68,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 58470,
+       "exactRows": 5,
+       "digest": "9b1bfdf59cdd139d0821d8e5876867e1fddaa9d66b4b6e6d521e1cbfced2d3b2"
+      },
+      {
+       "run": 2,
+       "residualPixels": 58470,
+       "exactRows": 5,
+       "digest": "9b1bfdf59cdd139d0821d8e5876867e1fddaa9d66b4b6e6d521e1cbfced2d3b2"
+      }
+     ],
+     "affectedAges": "0..62",
+     "maxPxRow": 2080,
+     "fieldPx": 58470,
+     "bbox": [
+      56,
+      25,
+      206,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-dig-player-gengar-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-dig-player-gengar-test.json",
+     "stem": "doll81-def-dig-player-gengar",
+     "kind": "test",
+     "move": "DIG",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1720,
+      1914
+     ],
+     "rows": 195,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 427583,
+       "exactRows": 0,
+       "digest": "d9bad7498113a62d688afa00deb5f990b4f24955bc874365aa2b4540613c5e36"
+      },
+      {
+       "run": 2,
+       "residualPixels": 427583,
+       "exactRows": 0,
+       "digest": "d9bad7498113a62d688afa00deb5f990b4f24955bc874365aa2b4540613c5e36"
+      }
+     ],
+     "affectedAges": "0..194",
+     "maxPxRow": 2471,
+     "fieldPx": 320138,
+     "bbox": [
+      16,
+      67,
+      113,
+      149
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-dig-player-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-dig-player-test.json",
+     "stem": "doll81-def-dig-player",
+     "kind": "test",
+     "move": "DIG",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      680,
+      747
+     ],
+     "rows": 68,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 66274,
+       "exactRows": 5,
+       "digest": "19535293e0dcde476454f17a4a887c06d0b9774829787f5dd9fc280026a1b123"
+      },
+      {
+       "run": 2,
+       "residualPixels": 66274,
+       "exactRows": 5,
+       "digest": "19535293e0dcde476454f17a4a887c06d0b9774829787f5dd9fc280026a1b123"
+      }
+     ],
+     "affectedAges": "0..62",
+     "maxPxRow": 2086,
+     "fieldPx": 66274,
+     "bbox": [
+      42,
+      37,
+      195,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-double-edge-opponent-golbat-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-double-edge-opponent-golbat-test.json",
+     "stem": "doll81-def-double-edge-opponent-golbat",
+     "kind": "test",
+     "move": "DOUBLE_EDGE",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1747,
+      1887
+     ],
+     "rows": 141,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": 141,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 0,
+       "exactRows": 141,
+       "digest": "8dd4d729b4f0742303f281b33af857199625ce45f98fcbb4debde6171726753d"
+      },
+      {
+       "run": 2,
+       "residualPixels": 0,
+       "exactRows": 141,
+       "digest": "8dd4d729b4f0742303f281b33af857199625ce45f98fcbb4debde6171726753d"
+      }
+     ],
+     "affectedAges": "",
+     "maxPxRow": 0,
+     "fieldPx": 0,
+     "bbox": null
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-double-edge-opponent-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-double-edge-opponent-test.json",
+     "stem": "doll81-def-double-edge-opponent",
+     "kind": "test",
+     "move": "DOUBLE_EDGE",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1748,
+      1888
+     ],
+     "rows": 141,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": 141,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 0,
+       "exactRows": 141,
+       "digest": "0751419636b8ca717f9bb858887dadaad1e69d14fc48929bbf1679a4f25111a3"
+      },
+      {
+       "run": 2,
+       "residualPixels": 0,
+       "exactRows": 141,
+       "digest": "0751419636b8ca717f9bb858887dadaad1e69d14fc48929bbf1679a4f25111a3"
+      }
+     ],
+     "affectedAges": "",
+     "maxPxRow": 0,
+     "fieldPx": 0,
+     "bbox": null
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-double-edge-player-gengar-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-double-edge-player-gengar-test.json",
+     "stem": "doll81-def-double-edge-player-gengar",
+     "kind": "test",
+     "move": "DOUBLE_EDGE",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1743,
+      1883
+     ],
+     "rows": 141,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 691564,
+       "exactRows": 27,
+       "digest": "1489124cb5e22fa79f485f790f33ee411cc88b991efc64c87b5498b80046767f"
+      },
+      {
+       "run": 2,
+       "residualPixels": 691564,
+       "exactRows": 27,
+       "digest": "1489124cb5e22fa79f485f790f33ee411cc88b991efc64c87b5498b80046767f"
+      }
+     ],
+     "affectedAges": "5..8,14..19,34..48,50..138",
+     "maxPxRow": 16817,
+     "fieldPx": 691564,
+     "bbox": [
+      0,
+      1,
+      239,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-double-edge-player-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-double-edge-player-test.json",
+     "stem": "doll81-def-double-edge-player",
+     "kind": "test",
+     "move": "DOUBLE_EDGE",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1744,
+      1884
+     ],
+     "rows": 141,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 737262,
+       "exactRows": 27,
+       "digest": "b3a6662f3f650a863d27d395721e9a363cc3967ac5ae901119d9641a6b444fd0"
+      },
+      {
+       "run": 2,
+       "residualPixels": 737262,
+       "exactRows": 27,
+       "digest": "b3a6662f3f650a863d27d395721e9a363cc3967ac5ae901119d9641a6b444fd0"
+      }
+     ],
+     "affectedAges": "5..8,14..19,34..48,50..138",
+     "maxPxRow": 17057,
+     "fieldPx": 737262,
+     "bbox": [
+      0,
+      1,
+      239,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-iron-tail-opponent-golbat-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-iron-tail-opponent-golbat-test.json",
+     "stem": "doll81-def-iron-tail-opponent-golbat",
+     "kind": "test",
+     "move": "IRON_TAIL",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1745,
+      1879
+     ],
+     "rows": 135,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 157396,
+       "exactRows": 1,
+       "digest": "cb85c66bd3bf9e89eb9fd6d91211b575fe965ecd50969b59603bb88c0fe9df87"
+      },
+      {
+       "run": 2,
+       "residualPixels": 157396,
+       "exactRows": 1,
+       "digest": "cb85c66bd3bf9e89eb9fd6d91211b575fe965ecd50969b59603bb88c0fe9df87"
+      }
+     ],
+     "affectedAges": "1..134",
+     "maxPxRow": 2447,
+     "fieldPx": 157396,
+     "bbox": [
+      56,
+      6,
+      204,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-iron-tail-opponent-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-iron-tail-opponent-test.json",
+     "stem": "doll81-def-iron-tail-opponent",
+     "kind": "test",
+     "move": "IRON_TAIL",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1746,
+      1880
+     ],
+     "rows": 135,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 140553,
+       "exactRows": 15,
+       "digest": "e5b0604e97d43ef4051974e837035fd0e6dad6be781358b3bee7bdfbe622013c"
+      },
+      {
+       "run": 2,
+       "residualPixels": 140553,
+       "exactRows": 15,
+       "digest": "e5b0604e97d43ef4051974e837035fd0e6dad6be781358b3bee7bdfbe622013c"
+      }
+     ],
+     "affectedAges": "7..126",
+     "maxPxRow": 1938,
+     "fieldPx": 140553,
+     "bbox": [
+      56,
+      25,
+      202,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-iron-tail-player-gengar-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-iron-tail-player-gengar-test.json",
+     "stem": "doll81-def-iron-tail-player-gengar",
+     "kind": "test",
+     "move": "IRON_TAIL",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1741,
+      1875
+     ],
+     "rows": 135,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 217889,
+       "exactRows": 15,
+       "digest": "a4082f759f39256d21127362a89f526e3b9c0a23e0ad376f578458f3834a2e10"
+      },
+      {
+       "run": 2,
+       "residualPixels": 217889,
+       "exactRows": 15,
+       "digest": "a4082f759f39256d21127362a89f526e3b9c0a23e0ad376f578458f3834a2e10"
+      }
+     ],
+     "affectedAges": "7..126",
+     "maxPxRow": 2512,
+     "fieldPx": 217889,
+     "bbox": [
+      46,
+      24,
+      193,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-iron-tail-player-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-iron-tail-player-test.json",
+     "stem": "doll81-def-iron-tail-player",
+     "kind": "test",
+     "move": "IRON_TAIL",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1742,
+      1876
+     ],
+     "rows": 135,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 210053,
+       "exactRows": 15,
+       "digest": "8f4f1c0189d67ad54eb41a4f8d690ccf75c93dad17d788e7eb808f485fda9e67"
+      },
+      {
+       "run": 2,
+       "residualPixels": 210053,
+       "exactRows": 15,
+       "digest": "8f4f1c0189d67ad54eb41a4f8d690ccf75c93dad17d788e7eb808f485fda9e67"
+      }
+     ],
+     "affectedAges": "7..126",
+     "maxPxRow": 2785,
+     "fieldPx": 210053,
+     "bbox": [
+      42,
+      37,
+      193,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-leaf-blade-opponent-golbat-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-leaf-blade-opponent-golbat-test.json",
+     "stem": "doll81-def-leaf-blade-opponent-golbat",
+     "kind": "test",
+     "move": "LEAF_BLADE",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1744,
+      1967
+     ],
+     "rows": 224,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": 224,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 0,
+       "exactRows": 224,
+       "digest": "fb7eefac7872b5abeddedd9a9375eba145d5493b56d2409e67c2f4c476213833"
+      },
+      {
+       "run": 2,
+       "residualPixels": 0,
+       "exactRows": 224,
+       "digest": "fb7eefac7872b5abeddedd9a9375eba145d5493b56d2409e67c2f4c476213833"
+      }
+     ],
+     "affectedAges": "",
+     "maxPxRow": 0,
+     "fieldPx": 0,
+     "bbox": null
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-leaf-blade-opponent-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-leaf-blade-opponent-test.json",
+     "stem": "doll81-def-leaf-blade-opponent",
+     "kind": "test",
+     "move": "LEAF_BLADE",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1745,
+      1968
+     ],
+     "rows": 224,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": 224,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 0,
+       "exactRows": 224,
+       "digest": "9561da5abb632566c6e9d8c3c194b646e2fadb3174934130fd8b54fd6f8861c9"
+      },
+      {
+       "run": 2,
+       "residualPixels": 0,
+       "exactRows": 224,
+       "digest": "9561da5abb632566c6e9d8c3c194b646e2fadb3174934130fd8b54fd6f8861c9"
+      }
+     ],
+     "affectedAges": "",
+     "maxPxRow": 0,
+     "fieldPx": 0,
+     "bbox": null
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-leaf-blade-player-gengar-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-leaf-blade-player-gengar-test.json",
+     "stem": "doll81-def-leaf-blade-player-gengar",
+     "kind": "test",
+     "move": "LEAF_BLADE",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1740,
+      1963
+     ],
+     "rows": 224,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": 224,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 0,
+       "exactRows": 224,
+       "digest": "c68366ecced4b8fc0cda5832be4c392b0e824c8a5498d17d0fea14e4abc08564"
+      },
+      {
+       "run": 2,
+       "residualPixels": 0,
+       "exactRows": 224,
+       "digest": "c68366ecced4b8fc0cda5832be4c392b0e824c8a5498d17d0fea14e4abc08564"
+      }
+     ],
+     "affectedAges": "",
+     "maxPxRow": 0,
+     "fieldPx": 0,
+     "bbox": null
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-leaf-blade-player-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-leaf-blade-player-test.json",
+     "stem": "doll81-def-leaf-blade-player",
+     "kind": "test",
+     "move": "LEAF_BLADE",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1741,
+      1964
+     ],
+     "rows": 224,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": 224,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 0,
+       "exactRows": 224,
+       "digest": "0d1554a8f56bc41c89581c82156d73e2a96d879196106d392b9fb694cf2bd4bb"
+      },
+      {
+       "run": 2,
+       "residualPixels": 0,
+       "exactRows": 224,
+       "digest": "0d1554a8f56bc41c89581c82156d73e2a96d879196106d392b9fb694cf2bd4bb"
+      }
+     ],
+     "affectedAges": "",
+     "maxPxRow": 0,
+     "fieldPx": 0,
+     "bbox": null
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-psych-up-opponent-golbat-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-psych-up-opponent-golbat-test.json",
+     "stem": "doll81-def-psych-up-opponent-golbat",
+     "kind": "test",
+     "move": "PSYCH_UP",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1737,
+      1915
+     ],
+     "rows": 179,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 3073936,
+       "exactRows": 1,
+       "digest": "4dee1471f512a5ffefb11d11ff2b918d1c212a7bb687329cdc7c5857e78c739b"
+      },
+      {
+       "run": 2,
+       "residualPixels": 3073936,
+       "exactRows": 1,
+       "digest": "4dee1471f512a5ffefb11d11ff2b918d1c212a7bb687329cdc7c5857e78c739b"
+      }
+     ],
+     "affectedAges": "1..178",
+     "maxPxRow": 20302,
+     "fieldPx": 3073936,
+     "bbox": [
+      0,
+      0,
+      239,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-psych-up-opponent-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-psych-up-opponent-test.json",
+     "stem": "doll81-def-psych-up-opponent",
+     "kind": "test",
+     "move": "PSYCH_UP",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1738,
+      1916
+     ],
+     "rows": 179,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 3076059,
+       "exactRows": 13,
+       "digest": "4ebb1e4286e2894b27d2a17e525ccd303362cbae980e44c4dc6fb3961fcabb9b"
+      },
+      {
+       "run": 2,
+       "residualPixels": 3076059,
+       "exactRows": 13,
+       "digest": "4ebb1e4286e2894b27d2a17e525ccd303362cbae980e44c4dc6fb3961fcabb9b"
+      }
+     ],
+     "affectedAges": "8..173",
+     "maxPxRow": 20302,
+     "fieldPx": 3076059,
+     "bbox": [
+      0,
+      0,
+      239,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-psych-up-player-gengar-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-psych-up-player-gengar-test.json",
+     "stem": "doll81-def-psych-up-player-gengar",
+     "kind": "test",
+     "move": "PSYCH_UP",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1733,
+      1911
+     ],
+     "rows": 179,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 3019511,
+       "exactRows": 13,
+       "digest": "1737ff433a77e9be5edd0243b001cb592e6b6693bc81d615e02747ca823aa040"
+      },
+      {
+       "run": 2,
+       "residualPixels": 3019511,
+       "exactRows": 13,
+       "digest": "1737ff433a77e9be5edd0243b001cb592e6b6693bc81d615e02747ca823aa040"
+      }
+     ],
+     "affectedAges": "8..173",
+     "maxPxRow": 20317,
+     "fieldPx": 3019511,
+     "bbox": [
+      0,
+      0,
+      239,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-psych-up-player-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-psych-up-player-test.json",
+     "stem": "doll81-def-psych-up-player",
+     "kind": "test",
+     "move": "PSYCH_UP",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1734,
+      1912
+     ],
+     "rows": 179,
+     "orderInput": "fixture",
+     "shift": 0,
+     "liveDuration": null,
+     "liveEngaged": false,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 3020373,
+       "exactRows": 13,
+       "digest": "76b5f36407a979a9ec371f33ac2d5dd6b6ab8afc969656885575499072f67d94"
+      },
+      {
+       "run": 2,
+       "residualPixels": 3020373,
+       "exactRows": 13,
+       "digest": "76b5f36407a979a9ec371f33ac2d5dd6b6ab8afc969656885575499072f67d94"
+      }
+     ],
+     "affectedAges": "8..173",
+     "maxPxRow": 20317,
+     "fieldPx": 3020373,
+     "bbox": [
+      0,
+      0,
+      239,
+      111
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-thunder-punch-opponent-golbat-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-thunder-punch-opponent-golbat-test.json",
+     "stem": "doll81-def-thunder-punch-opponent-golbat",
+     "kind": "test",
+     "move": "THUNDER_PUNCH",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1748,
+      1883
+     ],
+     "rows": 136,
+     "orderInput": "fixture",
+     "shift": -10,
+     "liveDuration": 104,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 200,
+       "exactRows": 135,
+       "digest": "6b6662025e74faa9975556403419263e5b4c0cffc4de42b5276842783ddb4844"
+      },
+      {
+       "run": 2,
+       "residualPixels": 200,
+       "exactRows": 135,
+       "digest": "6b6662025e74faa9975556403419263e5b4c0cffc4de42b5276842783ddb4844"
+      }
+     ],
+     "affectedAges": "0",
+     "maxPxRow": 200,
+     "fieldPx": 200,
+     "bbox": [
+      160,
+      65,
+      191,
+      72
+     ]
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-thunder-punch-opponent-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-thunder-punch-opponent-test.json",
+     "stem": "doll81-def-thunder-punch-opponent",
+     "kind": "test",
+     "move": "THUNDER_PUNCH",
+     "attackerSide": "opponent",
+     "defenderDoll": true,
+     "window": [
+      1749,
+      1884
+     ],
+     "rows": 136,
+     "orderInput": "fixture",
+     "shift": -10,
+     "liveDuration": 104,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 0,
+       "exactRows": 136,
+       "digest": "bd600c8e8326bcc2707305e5bea0a9379ee6ed77f9d75edff26ae6bf22f5fd45"
+      },
+      {
+       "run": 2,
+       "residualPixels": 0,
+       "exactRows": 136,
+       "digest": "bd600c8e8326bcc2707305e5bea0a9379ee6ed77f9d75edff26ae6bf22f5fd45"
+      }
+     ],
+     "affectedAges": "",
+     "maxPxRow": 0,
+     "fieldPx": 0,
+     "bbox": null
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-thunder-punch-player-gengar-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-thunder-punch-player-gengar-test.json",
+     "stem": "doll81-def-thunder-punch-player-gengar",
+     "kind": "test",
+     "move": "THUNDER_PUNCH",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1744,
+      1879
+     ],
+     "rows": 136,
+     "orderInput": "fixture",
+     "shift": -10,
+     "liveDuration": 104,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 0,
+       "exactRows": 136,
+       "digest": "de027ff521389cf324d7fd51c712d748e9451b1e39b239c5e878d05347181a23"
+      },
+      {
+       "run": 2,
+       "residualPixels": 0,
+       "exactRows": 136,
+       "digest": "de027ff521389cf324d7fd51c712d748e9451b1e39b239c5e878d05347181a23"
+      }
+     ],
+     "affectedAges": "",
+     "maxPxRow": 0,
+     "fieldPx": 0,
+     "bbox": null
+    }
+   ]
+  },
+  {
+   "file": "doll81-def-thunder-punch-player-test.json",
+   "data": [
+    {
+     "fixture": "doll81-def-thunder-punch-player-test.json",
+     "stem": "doll81-def-thunder-punch-player",
+     "kind": "test",
+     "move": "THUNDER_PUNCH",
+     "attackerSide": "player",
+     "defenderDoll": true,
+     "window": [
+      1745,
+      1880
+     ],
+     "rows": 136,
+     "orderInput": "fixture",
+     "shift": -10,
+     "liveDuration": 104,
+     "liveEngaged": true,
+     "identical": true,
+     "runs": [
+      {
+       "run": 1,
+       "residualPixels": 0,
+       "exactRows": 136,
+       "digest": "a16c5dc27fc6d12d48e90339916b74e8eca01f8b54b28eee334805da77622fc8"
+      },
+      {
+       "run": 2,
+       "residualPixels": 0,
+       "exactRows": 136,
+       "digest": "a16c5dc27fc6d12d48e90339916b74e8eca01f8b54b28eee334805da77622fc8"
+      }
+     ],
+     "affectedAges": "",
+     "maxPxRow": 0,
+     "fieldPx": 0,
+     "bbox": null
+    }
+   ]
+  }
+ ]
+}
