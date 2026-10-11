@@ -1,0 +1,1936 @@
+{
+ "schema": "flat77-chain-check/v1",
+ "scenario": "c-quick-attack-ply",
+ "rows": [
+  {
+   "fixture": "c-quick-attack-ply-c0.json",
+   "move": "QUICK_ATTACK",
+   "side": "player",
+   "species": "NIDORINA/NIDORINO",
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "98@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 78,
+    "endFrame": 110
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 33,
+    "exactRows": 14,
+    "px": 14223,
+    "digests": [
+     "0a2befc2c44adb1b",
+     "0a2befc2c44adb1b"
+    ],
+    "residualRows": [
+     [
+      14,
+      639
+     ],
+     [
+      15,
+      636
+     ],
+     [
+      16,
+      636
+     ],
+     [
+      17,
+      639
+     ],
+     [
+      18,
+      639
+     ],
+     [
+      19,
+      636
+     ],
+     [
+      20,
+      636
+     ],
+     [
+      21,
+      639
+     ],
+     [
+      22,
+      639
+     ],
+     [
+      23,
+      636
+     ],
+     [
+      24,
+      872
+     ],
+     [
+      25,
+      872
+     ],
+     [
+      26,
+      872
+     ],
+     [
+      27,
+      872
+     ],
+     [
+      28,
+      872
+     ],
+     [
+      29,
+      872
+     ],
+     [
+      30,
+      872
+     ],
+     [
+      31,
+      872
+     ],
+     [
+      32,
+      872
+     ]
+    ],
+    "detail": [
+     {
+      "age": 14,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 15,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 16,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 17,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 18,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 19,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     }
+    ],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 33,
+    "exactRows": 14,
+    "px": 14223,
+    "digests": [
+     "0a2befc2c44adb1b",
+     "0a2befc2c44adb1b"
+    ],
+    "residualRows": [
+     [
+      14,
+      639
+     ],
+     [
+      15,
+      636
+     ],
+     [
+      16,
+      636
+     ],
+     [
+      17,
+      639
+     ],
+     [
+      18,
+      639
+     ],
+     [
+      19,
+      636
+     ],
+     [
+      20,
+      636
+     ],
+     [
+      21,
+      639
+     ],
+     [
+      22,
+      639
+     ],
+     [
+      23,
+      636
+     ],
+     [
+      24,
+      872
+     ],
+     [
+      25,
+      872
+     ],
+     [
+      26,
+      872
+     ],
+     [
+      27,
+      872
+     ],
+     [
+      28,
+      872
+     ],
+     [
+      29,
+      872
+     ],
+     [
+      30,
+      872
+     ],
+     [
+      31,
+      872
+     ],
+     [
+      32,
+      872
+     ]
+    ],
+    "detail": [
+     {
+      "age": 14,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 15,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 16,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 17,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 18,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 19,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "c-quick-attack-ply-c1.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/NIDORINA",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "98@0 HIT_ANIMATION@1 260@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 219,
+    "endFrame": 437
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 218,
+      "mismatch": [
+       {
+        "age": 0,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 1,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 2,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 3,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 4,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 5,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 6,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 7,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 8,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 9,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 10,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       },
+       {
+        "age": 11,
+        "diff": {
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         }
+        }
+       }
+      ]
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "c-quick-attack-ply-c2.json",
+   "move": "QUICK_ATTACK",
+   "side": "player",
+   "species": "NIDORINA/NIDORINO",
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "98@0 HIT_ANIMATION@1 260@1 STATS_CHANGE(18)@0 status:CONFUSION@0",
+    "status:CONFUSION@0 98@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 40
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1602,
+    "endFrame": 1634
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 33,
+    "exactRows": 14,
+    "px": 14223,
+    "digests": [
+     "0a2befc2c44adb1b",
+     "0a2befc2c44adb1b"
+    ],
+    "residualRows": [
+     [
+      14,
+      639
+     ],
+     [
+      15,
+      636
+     ],
+     [
+      16,
+      636
+     ],
+     [
+      17,
+      639
+     ],
+     [
+      18,
+      639
+     ],
+     [
+      19,
+      636
+     ],
+     [
+      20,
+      636
+     ],
+     [
+      21,
+      639
+     ],
+     [
+      22,
+      639
+     ],
+     [
+      23,
+      636
+     ],
+     [
+      24,
+      872
+     ],
+     [
+      25,
+      872
+     ],
+     [
+      26,
+      872
+     ],
+     [
+      27,
+      872
+     ],
+     [
+      28,
+      872
+     ],
+     [
+      29,
+      872
+     ],
+     [
+      30,
+      872
+     ],
+     [
+      31,
+      872
+     ],
+     [
+      32,
+      872
+     ]
+    ],
+    "detail": [
+     {
+      "age": 14,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 15,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 16,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 17,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 18,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 19,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     }
+    ],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 33,
+    "exactRows": 14,
+    "px": 14223,
+    "digests": [
+     "0a2befc2c44adb1b",
+     "0a2befc2c44adb1b"
+    ],
+    "residualRows": [
+     [
+      14,
+      639
+     ],
+     [
+      15,
+      636
+     ],
+     [
+      16,
+      636
+     ],
+     [
+      17,
+      639
+     ],
+     [
+      18,
+      639
+     ],
+     [
+      19,
+      636
+     ],
+     [
+      20,
+      636
+     ],
+     [
+      21,
+      639
+     ],
+     [
+      22,
+      639
+     ],
+     [
+      23,
+      636
+     ],
+     [
+      24,
+      872
+     ],
+     [
+      25,
+      872
+     ],
+     [
+      26,
+      872
+     ],
+     [
+      27,
+      872
+     ],
+     [
+      28,
+      872
+     ],
+     [
+      29,
+      872
+     ],
+     [
+      30,
+      872
+     ],
+     [
+      31,
+      872
+     ],
+     [
+      32,
+      872
+     ]
+    ],
+    "detail": [
+     {
+      "age": 14,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 15,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 16,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 17,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 18,
+      "px": 639,
+      "bbox": [
+       157,
+       204,
+       26,
+       71
+      ],
+      "sample": "159,26 rom f7f7ff live bd63bd"
+     },
+     {
+      "age": 19,
+      "px": 636,
+      "bbox": [
+       152,
+       199,
+       26,
+       71
+      ],
+      "sample": "154,26 rom f7f7ff live bd63bd"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "c-quick-attack-ply-c3.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/NIDORINA",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "98@0 HIT_ANIMATION@1 260@1 STATS_CHANGE(18)@0 status:CONFUSION@0",
+    "status:CONFUSION@0 98@0 HIT_ANIMATION@1 260@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1741,
+    "endFrame": 1959
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 218,
+      "mismatch": [
+       {
+        "age": 0,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 1,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 2,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 3,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 4,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 5,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 6,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 7,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 8,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 9,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 10,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 11,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       }
+      ]
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 210,
+    "px": 41,
+    "digests": [
+     "d67470efe76111d9",
+     "d67470efe76111d9"
+    ],
+    "residualRows": [
+     [
+      69,
+      3
+     ],
+     [
+      70,
+      13
+     ],
+     [
+      71,
+      12
+     ],
+     [
+      72,
+      5
+     ],
+     [
+      73,
+      2
+     ],
+     [
+      75,
+      1
+     ],
+     [
+      77,
+      2
+     ],
+     [
+      78,
+      2
+     ],
+     [
+      97,
+      1
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 3,
+      "bbox": [
+       0,
+       239,
+       98,
+       99
+      ],
+      "sample": "239,98 rom 164343 live 603146"
+     },
+     {
+      "age": 70,
+      "px": 13,
+      "bbox": [
+       1,
+       237,
+       93,
+       97
+      ],
+      "sample": "4,93 rom 600f00 live 603146"
+     },
+     {
+      "age": 71,
+      "px": 12,
+      "bbox": [
+       7,
+       235,
+       89,
+       94
+      ],
+      "sample": "228,89 rom 605f4a live 603146"
+     },
+     {
+      "age": 72,
+      "px": 5,
+      "bbox": [
+       13,
+       232,
+       87,
+       89
+      ],
+      "sample": "18,87 rom 164343 live 603146"
+     },
+     {
+      "age": 73,
+      "px": 2,
+      "bbox": [
+       25,
+       25,
+       84,
+       85
+      ],
+      "sample": "25,84 rom 164343 live 603146"
+     },
+     {
+      "age": 75,
+      "px": 1,
+      "bbox": [
+       210,
+       210,
+       73,
+       73
+      ],
+      "sample": "210,73 rom 605f4a live 605f12"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "c-quick-attack-ply-c4.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/NIDORINA",
+   "units": 12,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "98@0 HIT_ANIMATION@1 260@1 STATS_CHANGE(18)@0 status:CONFUSION@0",
+    "status:CONFUSION@0 98@0 HIT_ANIMATION@1 260@1 STATS_CHANGE(18)@0",
+    "status:CONFUSION@0 HIT_ANIMATION@0 260@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3094,
+    "endFrame": 3312
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 218,
+      "mismatch": [
+       {
+        "age": 0,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 1,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 2,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 3,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 4,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 5,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 6,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 7,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 8,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 9,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 10,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 11,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg2cnt": {
+          "rom": 24066,
+          "live": 24064
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       }
+      ]
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 212,
+    "px": 25,
+    "digests": [
+     "b42f171a6b623068",
+     "b42f171a6b623068"
+    ],
+    "residualRows": [
+     [
+      70,
+      11
+     ],
+     [
+      71,
+      4
+     ],
+     [
+      72,
+      3
+     ],
+     [
+      73,
+      2
+     ],
+     [
+      74,
+      1
+     ],
+     [
+      96,
+      2
+     ],
+     [
+      97,
+      2
+     ]
+    ],
+    "detail": [
+     {
+      "age": 70,
+      "px": 11,
+      "bbox": [
+       0,
+       239,
+       91,
+       96
+      ],
+      "sample": "238,91 rom 164343 live 5d2500"
+     },
+     {
+      "age": 71,
+      "px": 4,
+      "bbox": [
+       12,
+       233,
+       86,
+       92
+      ],
+      "sample": "12,86 rom 164343 live 381500"
+     },
+     {
+      "age": 72,
+      "px": 3,
+      "bbox": [
+       18,
+       19,
+       82,
+       83
+      ],
+      "sample": "18,82 rom 164343 live 5d2500"
+     },
+     {
+      "age": 73,
+      "px": 2,
+      "bbox": [
+       24,
+       25,
+       78,
+       78
+      ],
+      "sample": "24,78 rom 164343 live 5d2500"
+     },
+     {
+      "age": 74,
+      "px": 1,
+      "bbox": [
+       31,
+       31,
+       74,
+       74
+      ],
+      "sample": "31,74 rom 164343 live 5d2500"
+     },
+     {
+      "age": 96,
+      "px": 2,
+      "bbox": [
+       147,
+       149,
+       68,
+       70
+      ],
+      "sample": "147,68 rom 605f4a live 511b40"
+     }
+    ]
+   }
+  }
+ ]
+}

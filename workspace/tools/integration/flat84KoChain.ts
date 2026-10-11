@@ -347,7 +347,11 @@ function checkJob(name: string, job: Job): ChainRow[] {
     }
     if (unit.kind === "body") {
       const shape = unit.windows.length;
-      const event: [SpriteOrderPresentationEvent, SpriteOrderPlan | null, string] = shape === 2
+      // flat84: Flatter's confusion (Status_Confusion: 5 sprites created and freed in one pair of windows) is the production
+      // status-animation CONFUSION unit; a 2-window Cf;D0 body is the stat animation (Flatter's Sp. Atk +1 = argument 18 shares the class-1 plan)
+      const event: [SpriteOrderPresentationEvent, SpriteOrderPlan | null, string] = unit.plan === "Cfffff;D1,2,0,3,4"
+        ? [{ kind: "status-animation", status: "CONFUSION" }, decodeSpriteOrderPlan(SPRITE_ORDER_PRODUCTION_PLANS[SPRITE_ORDER_PRODUCTION_ANIMS.STATUS_CONFUSION!]!), "status-animation CONFUSION"]
+        : shape === 2
         ? [{ kind: "stat-animation", argument: 20 }, spriteOrderStatAnimationPlan(20), "stat-animation 20"]
         : [{ kind: "general-animation", animation: "SUN_CONTINUES" }, SUN, "general SUN_CONTINUES"];
       if (apply(event[0], event[1], unit.windows, event[2]) < 0) { close(); tracker = null; prod = null; }

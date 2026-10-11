@@ -1,0 +1,1091 @@
+{
+ "schema": "flat77-chain-check/v1",
+ "scenario": "c-spark-ply",
+ "rows": [
+  {
+   "fixture": "c-spark-ply-c0.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/NIDORINA",
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "260@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 74,
+    "endFrame": 292
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 218,
+      "rows": 218,
+      "mismatch": []
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "c-spark-ply-c1.json",
+   "move": "SPARK",
+   "side": "player",
+   "species": "NIDORINA/NIDORINO",
+   "units": 4,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "260@1 STATS_CHANGE(18)@0 status:CONFUSION@0 status:CONFUSION@0 209@0"
+   ],
+   "romPower": 65,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 65
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 902,
+    "endFrame": 1016,
+    "bodyStartFrame": 893
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 115,
+    "exactRows": 115,
+    "px": 0,
+    "digests": [
+     "5130e4ad78b247bb",
+     "5130e4ad78b247bb"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 115,
+    "exactRows": 115,
+    "px": 0,
+    "digests": [
+     "5130e4ad78b247bb",
+     "5130e4ad78b247bb"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "c-spark-ply-c2.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/NIDORINA",
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "260@1 STATS_CHANGE(18)@0 status:CONFUSION@0 status:CONFUSION@0 209@0 HIT_ANIMATION@1",
+    "260@1"
+   ],
+   "romPower": 65,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1408,
+    "endFrame": 1626
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 218,
+      "mismatch": [
+       {
+        "age": 0,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 1,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 2,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 3,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 4,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 5,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 6,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 7,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 8,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 9,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 10,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 11,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       }
+      ]
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 208,
+    "px": 51,
+    "digests": [
+     "b894fef927cc2956",
+     "b894fef927cc2956"
+    ],
+    "residualRows": [
+     [
+      69,
+      2
+     ],
+     [
+      70,
+      13
+     ],
+     [
+      71,
+      7
+     ],
+     [
+      72,
+      1
+     ],
+     [
+      89,
+      5
+     ],
+     [
+      90,
+      7
+     ],
+     [
+      92,
+      6
+     ],
+     [
+      93,
+      2
+     ],
+     [
+      95,
+      3
+     ],
+     [
+      96,
+      4
+     ],
+     [
+      97,
+      1
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 2,
+      "bbox": [
+       0,
+       0,
+       100,
+       101
+      ],
+      "sample": "0,100 rom 605f12 live 164343"
+     },
+     {
+      "age": 70,
+      "px": 13,
+      "bbox": [
+       1,
+       236,
+       91,
+       99
+      ],
+      "sample": "1,91 rom 603146 live 5d2500"
+     },
+     {
+      "age": 71,
+      "px": 7,
+      "bbox": [
+       10,
+       232,
+       89,
+       93
+      ],
+      "sample": "229,89 rom 600f00 live 381500"
+     },
+     {
+      "age": 72,
+      "px": 1,
+      "bbox": [
+       17,
+       17,
+       90,
+       90
+      ],
+      "sample": "17,90 rom 605f4a live 5d2500"
+     },
+     {
+      "age": 89,
+      "px": 5,
+      "bbox": [
+       113,
+       114,
+       64,
+       66
+      ],
+      "sample": "113,64 rom 5d2500 live 164343"
+     },
+     {
+      "age": 90,
+      "px": 7,
+      "bbox": [
+       107,
+       109,
+       68,
+       70
+      ],
+      "sample": "107,68 rom 605f12 live 5d2500"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "c-spark-ply-c3.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/NIDORINA",
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "260@1 STATS_CHANGE(18)@0 status:CONFUSION@0 status:CONFUSION@0 209@0 HIT_ANIMATION@1",
+    "260@1 STATS_CHANGE(18)@0 status:CONFUSION@0 HIT_ANIMATION@0",
+    "260@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2742,
+    "endFrame": 2960
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 218,
+      "mismatch": [
+       {
+        "age": 0,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 1,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 2,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 3,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 4,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 5,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 6,
+        "diff": {
+         "dispcnt": {
+          "rom": 16192,
+          "live": 48960
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 7,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 8,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 9,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 10,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       },
+       {
+        "age": 11,
+        "diff": {
+         "dispcnt": {
+          "rom": 32576,
+          "live": 65344
+         },
+         "bg1cnt": {
+          "rom": 7168,
+          "live": 39936
+         },
+         "bg1vofs": {
+          "rom": 3,
+          "live": 0
+         }
+        }
+       }
+      ]
+     },
+     "activationOrder": true,
+     "allocator": {
+      "exact": 431,
+      "rows": 431,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 202,
+    "px": 59,
+    "digests": [
+     "1eee6e631c8ca273",
+     "1eee6e631c8ca273"
+    ],
+    "residualRows": [
+     [
+      69,
+      1
+     ],
+     [
+      70,
+      13
+     ],
+     [
+      71,
+      7
+     ],
+     [
+      72,
+      4
+     ],
+     [
+      73,
+      6
+     ],
+     [
+      74,
+      4
+     ],
+     [
+      75,
+      3
+     ],
+     [
+      76,
+      2
+     ],
+     [
+      77,
+      1
+     ],
+     [
+      78,
+      1
+     ],
+     [
+      79,
+      1
+     ],
+     [
+      80,
+      1
+     ],
+     [
+      81,
+      1
+     ],
+     [
+      82,
+      1
+     ],
+     [
+      90,
+      8
+     ],
+     [
+      91,
+      3
+     ],
+     [
+      94,
+      2
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 1,
+      "bbox": [
+       0,
+       0,
+       99,
+       99
+      ],
+      "sample": "0,99 rom 600f00 live 16251e"
+     },
+     {
+      "age": 70,
+      "px": 13,
+      "bbox": [
+       2,
+       239,
+       95,
+       99
+      ],
+      "sample": "6,95 rom 600f00 live 16251e"
+     },
+     {
+      "age": 71,
+      "px": 7,
+      "bbox": [
+       7,
+       236,
+       88,
+       96
+      ],
+      "sample": "12,88 rom 600f00 live 5d2500"
+     },
+     {
+      "age": 72,
+      "px": 4,
+      "bbox": [
+       8,
+       19,
+       84,
+       93
+      ],
+      "sample": "19,84 rom 600f00 live 5d2500"
+     },
+     {
+      "age": 73,
+      "px": 6,
+      "bbox": [
+       12,
+       25,
+       80,
+       90
+      ],
+      "sample": "25,80 rom 600f00 live 5d2500"
+     },
+     {
+      "age": 74,
+      "px": 4,
+      "bbox": [
+       16,
+       31,
+       76,
+       84
+      ],
+      "sample": "31,76 rom 600f00 live 5d2500"
+     }
+    ]
+   }
+  }
+ ]
+}

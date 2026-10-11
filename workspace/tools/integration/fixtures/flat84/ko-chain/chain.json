@@ -1,0 +1,142 @@
+{
+ "schema": "ice72-chain/v1",
+ "summary": {
+  "chains": 1,
+  "exact": 1,
+  "chainsThroughBattleUnits": 1,
+  "exactThroughBattleUnits": 1,
+  "framesChecked": 14841,
+  "windowsChecked": 207,
+  "consumersAfterBattleUnit": 8,
+  "consumersAfterBattleUnitExact": 8,
+  "jobsIdenticalAB": 1,
+  "jobs": 1
+ },
+ "chains": [
+  {
+   "job": "ko-flatter-opp-slowbro-wp",
+   "words": "260 f2080",
+   "activation": "rom-entry",
+   "identityMap": true,
+   "steps": [
+    "carry 260",
+    "stat-animation 20",
+    "status-animation CONFUSION",
+    "status-animation CONFUSION",
+    "body 352:player",
+    "hit-animation",
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "status-animation CONFUSION",
+    "body 352:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "status-animation CONFUSION",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "status-animation CONFUSION",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 352:player",
+    "hit-animation",
+    "action-prompt",
+    "actions-committed",
+    "body 33:player",
+    "hit-animation",
+    "body 352:player",
+    "hit-animation",
+    "faint opponent"
+   ],
+   "windows": 207,
+   "windowMismatch": [],
+   "frames": 14841,
+   "frameMismatch": 0,
+   "consumers": [
+    {
+     "body": "352",
+     "frame": 2901,
+     "exact": true,
+     "afterBattleUnit": false
+    },
+    {
+     "body": "33",
+     "frame": 6951,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "352",
+     "frame": 7288,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 9385,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 11819,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 14253,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "352",
+     "frame": 14500,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "33",
+     "frame": 16687,
+     "exact": true,
+     "afterBattleUnit": true
+    },
+    {
+     "body": "352",
+     "frame": 16837,
+     "exact": true,
+     "afterBattleUnit": true
+    }
+   ],
+   "battleUnits": [
+    "faint opponent",
+    "party-summary-next",
+    "party-summary-hide",
+    "next-mon-send-out",
+    "faint opponent"
+   ],
+   "carry": {
+    "frames": 0,
+    "frameMismatch": 0,
+    "windows": 0,
+    "windowMismatch": 0,
+    "postExact": true
+   },
+   "verdict": "EXACT"
+  }
+ ]
+}

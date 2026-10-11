@@ -11,6 +11,7 @@
 # 5. lends: flat77Check.ts FLAT77_LENDS_ONLY=1 in base and patched (== lends-base.txt / lends-patched.txt; predict-lends.txt = the
 #    production columns of the patched pass);
 # 6. windows: flat84Check.ts per scenario in patched (two more fresh probe processes each; == check/*.json, summary.txt);
+# 6b. the KO chain: flat84KoProbe.py (A / B in one batch) + flat84KoExtract.py + flat84KoChain.ts in patched (== ko-chain/);
 # 7. (FLAT84_CENSUS=1) flat84Census.sh (== census/census-check.txt, census-delta.json);
 # 8. (FLAT84_TESTS=1) the related test files in patched (== tests-patched-summary.txt).
 set -e
@@ -55,6 +56,14 @@ mkdir -p "$OUT/check"
   "$N tools/integration/flat84Check.ts $W/fixtures \"\$0\" \"$OUT/check/check-\$0.json\" > \"$OUT/check/\$0.log\" 2>&1 || echo FAILED \$0")
 for f in $W/check/*.json; do same "$OUT/check/$(basename "$f")" "$f"; done
 python3 tools/integration/flat77Summary.py "$OUT/check" > "$OUT/summary.txt"; same "$OUT/summary.txt" $W/summary.txt
+# 6b. KO chain (words57 / ice72 method): fresh A / B probe batch, extract, predictions, chain check in patched (== ko-chain/)
+PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py} ${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python} \
+  tools/integration/flat84KoProbe.py "$OUT/ko" > "$OUT/ko-probes.txt"
+python3 tools/integration/flat84KoExtract.py "$OUT/ko" "$OUT/ko/units.json" > "$OUT/ko/units-summary.txt"
+(cd "$OUT/patched" && ICE72_OUT="$OUT/ko" ICE72_PREDICT="$OUT/ko/predictions.json" $N tools/integration/flat84KoChain.ts "$OUT/ko/units.json" "$OUT/ko/chain.json" > /dev/null \
+  && ICE72_OUT="$OUT/ko" $N tools/integration/flat84KoChain.ts "$OUT/ko/units.json" "$OUT/ko/chain.json" "$OUT/ko/lend-vectors.json" | sed 's/[[:space:]]*$//' > "$OUT/ko/chain.txt")
+(cd "$OUT/ko" && shasum -a 256 raw/*.json) > "$OUT/ko/raw.sha256"
+for f in units-summary.txt predictions.json chain.json chain.txt lend-vectors.json raw.sha256; do same "$OUT/ko/$f" $W/ko-chain/$f; done
 # 7. census 0..999 base vs patched
 if [ -n "$FLAT84_CENSUS" ]; then
   sh tools/integration/flat84Census.sh "$OUT/base" "$OUT/patched" "$OUT/census" > /dev/null

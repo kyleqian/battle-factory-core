@@ -1,0 +1,2 @@
+EXACT ko-flatter-opp-slowbro-wp 260 f2080 rom-entry id carry 0/0fr post true windows 207/207 frames 14841 (0 mism) consumers 352:ok,33*:ok,352*:ok,33*:ok,33*:ok,33*:ok,352*:ok,33*:ok,352*:ok | faint opponent,party-summary-next,party-summary-hide,next-mon-send-out,faint opponent
+{"chains":1,"exact":1,"chainsThroughBattleUnits":1,"exactThroughBattleUnits":1,"framesChecked":14841,"windowsChecked":207,"consumersAfterBattleUnit":8,"consumersAfterBattleUnitExact":8,"jobsIdenticalAB":1,"jobs":1}
