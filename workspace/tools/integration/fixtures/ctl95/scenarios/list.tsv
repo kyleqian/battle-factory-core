@@ -1,0 +1,11 @@
+ctl95-fp-opponent-persian	FOCUS_PUNCH	264	opponent	PERSIAN	SLOWBRO
+ctl95-fp-opponent-golbat	FOCUS_PUNCH	264	opponent	GOLBAT	LAPRAS
+ctl95-fp-opponent-breloom	FOCUS_PUNCH	264	opponent	BRELOOM	STARMIE
+ctl95-fp-player-persian	FOCUS_PUNCH	264	player	PERSIAN	SLOWBRO
+ctl95-fp-player-gengar	FOCUS_PUNCH	264	player	GENGAR	SLOWBRO
+ctl95-it-opponent-persian	IRON_TAIL	231	opponent	PERSIAN	SLOWBRO
+ctl95-it-opponent-golbat	IRON_TAIL	231	opponent	GOLBAT	LAPRAS
+ctl95-it-player-persian	IRON_TAIL	231	player	PERSIAN	SLOWBRO
+ctl95-it-player-gengar	IRON_TAIL	231	player	GENGAR	SLOWBRO
+ctl95-recover-player-persian	RECOVER	105	player	PERSIAN	SLOWBRO
+ctl95-recover-player-golbat	RECOVER	105	player	GOLBAT	LAPRAS
