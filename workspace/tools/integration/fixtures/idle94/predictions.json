@@ -1,0 +1,25 @@
+{
+ "schema": "idle94-predictions/v1",
+ "committedBefore": "any probe of the 16 idle94 scenarios (calibration seen before: ONE Scene ON + ONE Scene OFF run of tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json, which is the template of idle94-bulk-up-ply-a; production route b154 ON / OFF via idle94Route.ts)",
+ "anchors": {
+  "F_att": "first frame gBattlescriptCurrInstr == X, the move script's attackanimation byte (X = the pointer one frame before the waitanimation byte X+1 that is current on the activation frame)",
+  "A": "activation: first frame gAnimScriptActive == 1 after F_att",
+  "E": "first inactive frame after A",
+  "F_after": "first frame gBattlescriptCurrInstr == X+2 (waitanimation released; Scene OFF reaches it after BattleScript_Pausex20)",
+  "production": "the move-animation command starts when the 'used X!' message command ends (route log: message start + its duration), i.e. production age 0 is displayed on the frame equivalent to ROM F_att; the next command starts at age D"
+ },
+ "formula": "frames lost per body L = (F_after - F_att) - D = pre + N + trail + post, pre = A - F_att, post = F_after - E, trail = E - (A + N + D) (table.tsv)",
+ "general": {
+  "pre": 3, "post": 2,
+  "leadRows": "the ROM screen on A .. A+N-1 is byte-identical to the screen of A-1 (the idle field with the fully printed 'used X!' text; no glyph / sprite / palette / blend change is visible); register / OAM writes may happen without a visible change",
+  "leadReproducible": "yes: the lead rows equal production's own age-0 frame only if window row 0 is still static; otherwise equal the idle field production already renders on the message command's last frame",
+  "speciesIndependent": true, "sideIndependent": true,
+  "OFF": "Scene OFF F_after - F_att = 35 (attackanimation 1 + Pausex20 32 + return 1 + waitanimation 1) for every scenario"
+ },
+ "perMove": {
+  "339 BULK_UP": {"N": 4, "D": 104, "trail": -1, "E_minus_A": 107, "L": 8},
+  "207 SWAGGER": {"N": 7, "D": 161, "trail": 0, "E_minus_A": 168, "L": 12},
+  "269 TAUNT": {"N": 10, "D": 125, "trail": -1, "E_minus_A": 134, "L": 14},
+  "184 SCARY_FACE": {"N": 4, "D": 190, "trail": -1, "E_minus_A": 193, "L": 8, "note": "trail not in the ledger: predicted -1 (the dominant convention, window end 268 = production's last row)"}
+ }
+}
