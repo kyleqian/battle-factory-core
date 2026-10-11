@@ -4,12 +4,13 @@ party members per side, no transient-state injection; the stock ROM decides ever
 Species are INTERNAL ids (Shedinja 303, Dusclops 362; Kanto / Johto ids equal the national dex).
 
 Routes (no RNG in the forcing condition):
-  TAUNT  the Taunt user is FASTER than the struggler, whose four slots are all Splash 150 (power 0: CheckMoveLimitations' taunt bit).
-         T1 Taunt lands first (tauntTimer 2) -> the struggler's Splash fails; ENDTURN_TAUNT -> 1; T2 the struggler has no usable move ->
+  TAUNT  the Taunt user is FASTER than the struggler, whose four slots are all Harden 106 (power 0: CheckMoveLimitations' taunt bit;
+         Harden, not Splash: every body of the battle then has a production live adapter for the audit-20 render check).
+         T1 Taunt lands first (tauntTimer 2) -> the struggler's Harden fails; ENDTURN_TAUNT -> 1; T2 the struggler has no usable move ->
          the selection script BattleScript_NoMovesLeft -> MOVE_STRUGGLE; ENDTURN_TAUNT -> 0; T3 Taunt again; T4 Struggle again, ...
          Player struggler: FIGHT (A) prints "<mon> has no moves left!" and the turn runs (no move menu). Opponent struggler: the same
          selection state (HandleTurnActionSelectionState is battler-agnostic; the opponent controller skips the selection string).
-  PP     PP exhaustion: the struggler knows ONE 5-PP move (Mean Look 212) against a Pressure target (Dusclops 362, ability slot 0): two
+  PP     PP exhaustion: the struggler knows ONE 5-PP move (Mean Look 212) against a Pressure target (Dusclops 362, ability slot 0; it knows Harden x4): two
          PP per use (5 -> 3 -> 1 -> 0), Struggle from T4 on, every later turn too.
 Jobs: (id, struggler side, struggler, target, route, extra player inputs, turns). Turn input = FIGHT -> first move (plans48Probe.TURN with 1500 idle frames: a
 Taunt turn runs ~1360 frames);
@@ -26,7 +27,7 @@ import sw67Probe as S67  # GENDER only
 
 SEED = 305420349
 BASE = Path("tools/battle-lab/mechanic-taunt-player-murkrow-opponent-shuckle.json")
-SPLASH, TAUNT, SUBSTITUTE, MEAN_LOOK, TACKLE = 150, 269, 164, 212, 33
+HARDEN, TAUNT, SUBSTITUTE, MEAN_LOOK, TACKLE = 106, 269, 164, 212, 33
 FAST = dict(nature=13, ivs=dict(hp=31, attack=31, defense=31, speed=31, spAttack=31, spDefense=31),
             evs=dict(hp=252, attack=0, defense=0, speed=252, spAttack=0, spDefense=0))
 SLOW = dict(nature=2, ivs=dict(hp=31, attack=31, defense=31, speed=0, spAttack=31, spDefense=31),
@@ -66,11 +67,11 @@ def scenario(job, profile: str) -> dict:
     data["profile"] = profile
     data["seed"] = SEED
     if route == "taunt":
-        s_moves = [SPLASH] * 4
+        s_moves = [HARDEN] * 4
         t_moves = [TAUNT, SUBSTITUTE, TAUNT, TAUNT] if other == "player" else [TAUNT] * 4
         s_speed, t_speed = SLOW, FAST
-    else:  # pp: one 5-PP move vs Pressure; the Pressure target only Splashes (its four slots constrain the AI)
-        s_moves, t_moves = [MEAN_LOOK, 0, 0, 0], [SPLASH] * 4
+    else:  # pp: one 5-PP move vs Pressure; the Pressure target only uses Harden (its four slots constrain the AI)
+        s_moves, t_moves = [MEAN_LOOK, 0, 0, 0], [HARDEN] * 4
         s_speed, t_speed = FAST, SLOW
     bench = [member(113, [TACKLE] * 4, SLOW), member(95, [TACKLE] * 4, SLOW)]
     data["overrides"] = {"parties": {side: [member(struggler, s_moves, s_speed)] + bench,

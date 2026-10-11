@@ -12,6 +12,7 @@ animCmdIndex, attr0..2, invisible, subpriority), and those slots' positions in s
 from __future__ import annotations
 
 import hashlib
+import os
 import json
 import subprocess
 import sys
@@ -88,7 +89,7 @@ def main() -> None:
             bodies.append({"startFrame": frame, "label": label_of(ptr), "attacker": u8(names["gBattleAnimAttacker"]),
                            "target": u8(names["gBattleAnimTarget"]), "hp": h, "turnCounter": t,
                            "species": [u16(mons + b * 0x58) for b in range(2)]})
-            state["entry"] = [i for i in range(64) if state["prevUse"][i]] if bodies[-1]["label"] == "Move_STRUGGLE" else None
+            state["entry"] = [i for i in range(64) if state["prevUse"][i]] if bodies[-1]["label"] == os.environ.get("STG107_LABEL", "Move_STRUGGLE") else None
             state["tasks"] = None
             if state["entry"] is not None:
                 bodies[-1]["entryInUse"] = state["entry"]
