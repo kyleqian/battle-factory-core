@@ -46,6 +46,7 @@ import {
   isMonPicInputReady,
 } from "../../src/engine/monPic.ts";
 import { factoryTerminalRecordMenuInputReady } from "../../src/engine/factoryTerminalPresentation.ts";
+import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import {
   applyTypeEffectiveness,
   MAX_STAT_STAGE,
@@ -2213,6 +2214,13 @@ export class RandomPlayer {
     const orch = state.factoryRoundBattleOrchestrator!;
     const selector = orch.battleForcedPartySelect!;
     if (selector.sendOutElapsed !== null) return NO_BUTTONS;
+    // soak111: wait out the entry fade instead of mashing into it.
+    // advancePartySelect drops every key until `elapsed + 1` reaches
+    // PARTY_LIST_INPUT_ELAPSED, so those presses were always no-ops -- but
+    // each one re-rolled the decision stream's 0.3 "A on fainted slot" draw,
+    // and how many landed in the fade depended on press timing, i.e. on the
+    // preceding presentation's length.
+    if (selector.elapsed + 1 < PARTY_LIST_INPUT_ELAPSED) return NO_BUTTONS;
     if (selector.message !== null) {
       return this.pressAdvance(state, "forced-party message dismiss");
     }
