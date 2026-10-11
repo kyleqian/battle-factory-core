@@ -9,7 +9,8 @@
 #     GrassWhistle / Iron Tail / Focus Punch at 0) -> <out>/rec/ctl; attdollLiveCheck.ts (speciesAudit14SwapCheck.ts --personalities) on
 #     the doll labs -> <out>/rec/att; ctl95Summary.py -> <out>/summary.tsv, cmp'd with tools/integration/fixtures/ctl95/receipts/summary.tsv;
 #  4. --census: liveShareCensus.ts seeds 0..999 as 10 --index-from shards on git-archive copies of BASE and HEAD, hist73Merge.py,
-#     land82CensusCheck.py + prep43CensusDelta.py -> <out>/census-check.txt, <out>/census-delta.json, <out>/census-prep43.json.
+#     land82CensusCheck.py + prep43CensusDelta.py (ctl95CensusPair.py: stalled-battle tails paired) -> <out>/census-check.txt,
+#     <out>/census-delta.json, <out>/census-prep43.json.
 # The out dir must be INSIDE the repo (the probe tools find ../oracle from there).
 # usage: sh tools/integration/ctl95Run.sh <fresh-out-dir> [--census]
 set -e
@@ -61,7 +62,7 @@ if [ "$2" = --census ]; then
   for t in base final; do python3 tools/integration/hist73Merge.py "$OUT/census/$t" "$OUT/census/$t.json" "$OUT/census/$t.jsonl" > /dev/null; done
   python3 tools/integration/land82CensusCheck.py "$OUT/census/base" "$OUT/census/base.json" "$OUT/census/base.jsonl" "$OUT/census/final" \
     "$OUT/census/final.json" "$OUT/census/final.jsonl" "$OUT/census-delta.json" > "$OUT/census-check.txt"
-  python3 tools/integration/prep43CensusDelta.py "$OUT/census/base.json" "$OUT/census/base.jsonl" "$OUT/census/final.json" "$OUT/census/final.jsonl" \
-    "$OUT/census-prep43.json" > /dev/null
+  python3 tools/integration/ctl95CensusPair.py "$OUT/census/base.json" "$OUT/census/base.jsonl" "$OUT/census/final.json" "$OUT/census/final.jsonl" \
+    "$OUT/census-prep43.json" > "$OUT/census-prep43.txt"
   for f in census-delta.json census-check.txt census-prep43.json; do cmp -s "$OUT/$f" "$FX/receipts/$f" && echo "same $f" || echo "DIFF $f"; done
 fi
