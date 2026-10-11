@@ -11,7 +11,10 @@ first, SLOW lead = the consumer whose MOVE bodies are the windows; 3 A-A cycles)
   qa   flat84's named Quick Attack 98 residual (player NIDORINA -> opponent NIDORINO, a FIRST body): the same pair in this recipe plus other
        pairs (NIDORINA -> SNORLAX, PERSIAN -> NIDORINO, AZURILL -> CROBAT); the fast lead
        uses SHOCK_WAVE (Quick Attack's +1 priority makes the slow lead's body the battle's first); prep7's accepted pair PIDGEOTTO -> ONIX
-       and NIDORINA -> ONIX are the staging controls.
+       and NIDORINA -> ONIX are the staging controls;
+  cf   CASTFORM form CHANGES mid-battle: an opponent CASTFORM whose AI picks among [SUNNY_DAY, RAIN_DANCE, SUNNY_DAY, RAIN_DANCE] (FAST; the
+       windows are the player's SHOCK_WAVE 351 at it, proven in every form) or [SUNNY_DAY, RAIN_DANCE, SHOCK_WAVE, RAIN_DANCE] (SLOW; the
+       windows are its own bodies), 6 cycles.
 Speeds: lead() gives the FAST lead IV 31 + a neutral nature, the SLOW lead IV 0 + Relaxed (cast83Stage.py's lead()).
 usage: audit21Stage.py <out-dir>   (the committed set is tools/integration/fixtures/audit-21/scenarios/)
 """
@@ -41,12 +44,15 @@ def trace(cycles: int) -> dict:
     return {"segments": seg}
 
 
-def stage(name: str, fast_species: str, fast_move: str, slow_species: str, slow_move: str, slow_side: str, cycles: int = 3) -> None:
+def stage(name: str, fast_species: str, fast_move, slow_species: str, slow_move, slow_side: str, cycles: int = 3) -> None:
     s = json.loads(json.dumps(BASE))
     fast_side = "opponent" if slow_side == "player" else "player"
     parties = s["overrides"]["parties"]
-    parties[fast_side][0] = lead(parties[fast_side][0], SP[fast_species], M[fast_move], True)
-    parties[slow_side][0] = lead(parties[slow_side][0], SP[slow_species], M[slow_move], False)
+    parties[fast_side][0] = lead(parties[fast_side][0], SP[fast_species], M[fast_move] if isinstance(fast_move, str) else 0, True)
+    parties[slow_side][0] = lead(parties[slow_side][0], SP[slow_species], M[slow_move] if isinstance(slow_move, str) else 0, False)
+    for side, mv in ((fast_side, fast_move), (slow_side, slow_move)):
+        if not isinstance(mv, str):  # a move list (the opponent AI picks)
+            parties[side][0]["moves"] = [M[x] for x in mv]
     for p in ("player", "opponent"):
         for m in parties[p][1:]:
             m["item"] = 0
@@ -88,3 +94,8 @@ stage("a21-qa-ply-azurill-crobat", "CROBAT", "SHOCK_WAVE", "AZURILL", "QUICK_ATT
 # (an opponent-side control a21-qa-opp-nidorino-nidorina crashed the probe process (exit 139, no output) twice: dropped)
 stage("a21-qa-ply-pidgeotto-onix", "ONIX", "SHOCK_WAVE", "PIDGEOTTO", "QUICK_ATTACK", "player")
 stage("a21-qa-ply-nidorina-onix", "ONIX", "SHOCK_WAVE", "NIDORINA", "QUICK_ATTACK", "player")
+# cf: form changes mid-battle (opponent CASTFORM's AI alternates the weather)
+WX = ("SUNNY_DAY", "RAIN_DANCE", "SUNNY_DAY", "RAIN_DANCE")
+stage("a21-cf-change-at-cfopp-lapras", "CASTFORM", WX, "LAPRAS", "SHOCK_WAVE", "player", 6)
+stage("a21-cf-change-at-cfopp-snorlax", "CASTFORM", WX, "SNORLAX", "SHOCK_WAVE", "player", 6)
+stage("a21-cf-change-by-cfopp-lapras", "LAPRAS", "SHOCK_WAVE", "CASTFORM", ("SUNNY_DAY", "RAIN_DANCE", "SHOCK_WAVE", "RAIN_DANCE"), "opponent", 6)
