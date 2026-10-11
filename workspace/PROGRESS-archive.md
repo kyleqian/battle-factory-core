@@ -1,3 +1,28 @@
+## 2026-10-09 (overnight) — S10A: host histories widened; ordinary-play live share 77.7 -> 87.2 % of commands (91.1 % of frames); 241 + 13 + 22
+
+- **State:** local master, production src tree `dde58985` (`c99a40a0a`). Census `241+13+22+0+0=276` (Icy Wind, Blizzard, Confuse
+  Ray, Faint Attack moved scoped exact -> faithful timing with counter evidence). Supervisor final gates on that code: typecheck, full suite 1,583 files / 13,039 tests, build, differential 624/624 vs `3fbe30cf7`, census seeds 0..299 92.66 % / 94.12 % (`final-supervisor-gates-20261009.json`).
+  Ordinary-play census seeds 0..999 (src `f7cf9a74`, before the last two folds: Faint Attack timing, prep49 +52 / +8,685 on seeds 0..299): **87.23 % of move animations
+  live by count, 91.13 % by frames** (session start 77.68 / 78.76), faithful-random history 1.54 % / 1.81 %; seeds 50000..: 88.38
+  / 90.47; gameplay command sequence and battle digest identical at every fold. Preview <http://127.0.0.1:5191/> serves `96aaaebbe` (4 samples hash-equal, session export + ON->OFF restart, no errors; `playable-preview-96aaaebbe-receipt.json`).
+- **Did (11 production folds, each re-proved by the supervisor from fresh probes / census reruns):** allocator NET-ZERO ids
+  (prep44); order plans (prep45: BRN, TURN_TRAP by wrapped move, heals, Hydro Pump, Solar Beam by turn, ...; plans48: FRZ,
+  NIGHTMARE, Knock Off item, Ice Punch, Attract, Present, Razor Wind, ...); GEOMETRY-KEYED order from the renderers' timelines
+  (Giga / Mega Drain, Dream Eater); Icy Wind / Blizzard at any species geometry; retained locked-action prompt cycle + battle-start
+  seeds + opponent recall (prep47); deferred lend after Random2-words units + RAIN_CONTINUES sub-stream with per-command
+  faithful-random-history accounting (prep46); Dig / Return later bodies (prep48); Baton Pass / AI switch summary / double-KO reshow (prep49); D4 accounting (d4tails, fa185).
+- **Did (evidence):** prep45 / prep46 / prep47 / prep48 / prep49 (landed the same session) / prep50 (status-animation allocator net-zero, banked); live audit 15 (142 chain windows: no species / history defect;
+  Light Screen opponent row-59 CPU phase filed in ISSUES #152).
+- **Decisions (reversible, in D3 / D4 scope):** RAIN_CONTINUES words are a non-consuming per-event read (no policy bump; the
+  80-draw step shortfall is documented in docs/presentation-rng.md); a consumer whose order comes through a words marker counts as
+  faithful random per command; Faint Attack renders the dominant phase per attacker side.
+- **Next:** ROADMAP S10A "Next (2026-10-09 morning)" — land prep50 first (banked: status-animation allocator net-zero, +55 / +6,302), then the remaining order-host stops,
+  FRZ / status2 allocator units, case-local gates (Blizzard impact age), x2-tracker rows, ISSUES #152 remainder.
+- **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches
+  merged, worktrees removed; briefs + logs under `.integration/validation/*-20261009/`, worker transcripts `.codex-logs/workers/`.
+
+---
+
 ## 2026-10-08 (overnight) — S10A: Substitute presentation, deferred order lend, live-share census, order plans; 245 + 13 + 18
 
 - **State:** local master, production src tree `e3fc2240` (`65dec33c2`): 245 scoped-exact + 13 faithful-random +

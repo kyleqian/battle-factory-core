@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-10 (night) — S10A: 8 production folds + 2 audits so far; live share 0..999 93.79 -> 95.15 % of commands (97.37 -> 98.63 % of frames); 239 + 13 + 24 (CHECKPOINT, session in progress)
+
+- **State:** local master, production src `081a0570` (`d46da5755`). Adapter census unchanged (`239+13+24+0+0=276`): tonight widened
+  histories and fixed live claims. Supervisor union gates on `9df9b234a` (13,291 tests, build, differential 624 vs `b05d384ca`) and on
+  `302e39bdb`; gates on `d46da5755` running. Census seeds 0..999 on `d46da5755` vs session start: +372 commands / +57,024 live frames,
+  0 live -> fallback, 0 errors, keys identical (except the seed-881 Struggle stall's budget-cut tail).
+- **Did (production, each supervisor-reproduced):** land82 (13 Substitute-doll cells, +77), cast83 (ISSUES #143 per-form Castform art,
+  29 + 3 proven keys, +32), land86 (Flatter as a words-order unit, +44), union fix `302e39bdb` (land86 x cast83 semantic merge break
+  caught by the union census), ret88 (Return 216 at the kernel's friendship 0: 37 wrong ReturnStrongest live claims failed closed,
+  then ReturnWeak body + plan: +123), land87 (post-KO reseed through a words-unit occupancy shadow, +58), qa91 (Quick Attack target
+  offset = -(tracked rest), not a fitted -1: 144 live player bodies per 1,000 battles were 1 px off), doll90 (Psych Up / Double Team /
+  Sing opponent doll cells, +37).
+- **Did (evidence / audits):** flat84, reseed85 (banked + landed); live audit 21 (Quick Attack DEFECT -> qa91; Castform residuals =
+  checker alignment), live audit 22 (no defect).
+- **Next:** see ANIMATION_INTEGRATION_PROGRESS.md top entry (in-flight ctl95 / scan93 / idle94).
+- **Notes:** no DEFERRED entries. ISSUES #165 (Return -> Frustration, gameplay) still needs a run where gameplay changes are in scope.
+
+---
+
 ## 2026-10-10 (day) — S10A: ISSUES #159 fixed, 12 production folds, 3 live audits; live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 
 - **State:** local master, production src `4c4fe4c7` (`bf082c6e1`). Census `239+13+24+0+0=276` (no adapter-count change: today widened
@@ -70,26 +89,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   worktrees removed; briefs + logs + preserved worker scratch under `.integration/validation/*-20261009b/`, transcripts `.codex-logs/workers/`.
 
 ---
-
-## 2026-10-09 (overnight) — S10A: host histories widened; ordinary-play live share 77.7 -> 87.2 % of commands (91.1 % of frames); 241 + 13 + 22
-
-- **State:** local master, production src tree `dde58985` (`c99a40a0a`). Census `241+13+22+0+0=276` (Icy Wind, Blizzard, Confuse
-  Ray, Faint Attack moved scoped exact -> faithful timing with counter evidence). Supervisor final gates on that code: typecheck, full suite 1,583 files / 13,039 tests, build, differential 624/624 vs `3fbe30cf7`, census seeds 0..299 92.66 % / 94.12 % (`final-supervisor-gates-20261009.json`).
-  Ordinary-play census seeds 0..999 (src `f7cf9a74`, before the last two folds: Faint Attack timing, prep49 +52 / +8,685 on seeds 0..299): **87.23 % of move animations
-  live by count, 91.13 % by frames** (session start 77.68 / 78.76), faithful-random history 1.54 % / 1.81 %; seeds 50000..: 88.38
-  / 90.47; gameplay command sequence and battle digest identical at every fold. Preview <http://127.0.0.1:5191/> serves `96aaaebbe` (4 samples hash-equal, session export + ON->OFF restart, no errors; `playable-preview-96aaaebbe-receipt.json`).
-- **Did (11 production folds, each re-proved by the supervisor from fresh probes / census reruns):** allocator NET-ZERO ids
-  (prep44); order plans (prep45: BRN, TURN_TRAP by wrapped move, heals, Hydro Pump, Solar Beam by turn, ...; plans48: FRZ,
-  NIGHTMARE, Knock Off item, Ice Punch, Attract, Present, Razor Wind, ...); GEOMETRY-KEYED order from the renderers' timelines
-  (Giga / Mega Drain, Dream Eater); Icy Wind / Blizzard at any species geometry; retained locked-action prompt cycle + battle-start
-  seeds + opponent recall (prep47); deferred lend after Random2-words units + RAIN_CONTINUES sub-stream with per-command
-  faithful-random-history accounting (prep46); Dig / Return later bodies (prep48); Baton Pass / AI switch summary / double-KO reshow (prep49); D4 accounting (d4tails, fa185).
-- **Did (evidence):** prep45 / prep46 / prep47 / prep48 / prep49 (landed the same session) / prep50 (status-animation allocator net-zero, banked); live audit 15 (142 chain windows: no species / history defect;
-  Light Screen opponent row-59 CPU phase filed in ISSUES #152).
-- **Decisions (reversible, in D3 / D4 scope):** RAIN_CONTINUES words are a non-consuming per-event read (no policy bump; the
-  80-draw step shortfall is documented in docs/presentation-rng.md); a consumer whose order comes through a words marker counts as
-  faithful random per command; Faint Attack renders the dominant phase per attacker side.
-- **Next:** ROADMAP S10A "Next (2026-10-09 morning)" — land prep50 first (banked: status-animation allocator net-zero, +55 / +6,302), then the remaining order-host stops,
-  FRZ / status2 allocator units, case-local gates (Blizzard impact age), x2-tracker rows, ISSUES #152 remainder.
-- **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches
-  merged, worktrees removed; briefs + logs under `.integration/validation/*-20261009/`, worker transcripts `.codex-logs/workers/`.
