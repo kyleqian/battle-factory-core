@@ -3,6 +3,8 @@
 // as the soak pins do (`stopAtFirstRoundDecision`, the CLI's `--first-round`;
 // `renderEvery: 0`; the policy's default frame budget), captures every driver
 // note through the `onNote` seam, and writes per seed:
+// (the per-seed logs cover the first round only: notes at frame <= the
+// reported snapshot frame; the raw frames file keeps every note)
 //   <logs-dir>/seed-<n>.decisions.txt  every NON-mash note, "b<battle> t<turn> <what>" (frame dropped)
 //   <logs-dir>/seed-<n>.canonical.txt  every note, frame dropped, mash " (B)" dropped, consecutive
 //                                      identical mash notes collapsed to one
@@ -54,7 +56,11 @@ for (const seed of seeds) {
   const canonical: string[] = [];
   let lastMash: string | null = null;
   let mash = 0;
-  for (const n of notes) {
+  // Compare the FIRST round only: notes up to the run's reported snapshot
+  // frame (the last pre-chaining frame). Later notes belong to the fixed
+  // 9,000-frame post-decision grace window, whose extent is frame-defined.
+  const firstRound = notes.filter((n) => n.frame <= result.frames);
+  for (const n of firstRound) {
     const isMash = MASH.test(n.what);
     if (isMash) {
       mash += 1;
@@ -82,6 +88,7 @@ for (const seed of seeds) {
     frames: result.frames,
     errorMessage: result.errorMessage ?? null,
     notes: notes.length,
+    firstRoundNotes: firstRound.length,
     mashNotes: mash,
     decisionNotes: decisions.length,
     canonicalLines: canonical.length,
