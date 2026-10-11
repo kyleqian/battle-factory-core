@@ -1,0 +1,129 @@
+{
+ "schema": "land87-live-receipt/v1",
+ "base": "c25af4253",
+ "productionSrcBase": "d87bed5f",
+ "patch": "tools/integration/fixtures/reseed85/reseed85-temp-src.diff (patch -p1; one file, all hunks landed)",
+ "flatterPolicy": "260 is in LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS (hist73 audit group); WORDS_ORDER_UNIT_MOVE_IDS subset pinned by the test",
+ "windows": [
+  {
+   "window": "ms-opp-diglett-protect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 123,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "ms-ply-snorlax-lightscreen-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 86,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "rd-opp-poliwag-reflect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 79,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "rd-opp-poliwag-reflect-c1.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 78,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "rd-ply-snorlax-reflect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 79,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "sa-opp-pidgeotto-protect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 123,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "sa-ply-snorlax-protect-c0.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 123,
+   "px": 0,
+   "same": true
+  },
+  {
+   "window": "sa-ply-snorlax-protect-c1.json",
+   "live": true,
+   "decline": null,
+   "reseeds": [
+    true
+   ],
+   "rows": 123,
+   "px": 0,
+   "same": true
+  }
+ ],
+ "windowsSummary": {
+  "count": 8,
+  "allLive": true,
+  "allZeroPx": true,
+  "allRunsEqual": true,
+  "rows": 814,
+  "probePairsAeqB": "12 of 12",
+  "byteIdenticalToReseed85CheckPatched": true
+ },
+ "census": {
+  "seeds": "0..999",
+  "shards": 10,
+  "commands": 27137,
+  "commandsGained": 47,
+  "framesGained": 4975,
+  "liveBase": 25578,
+  "liveFinal": 25625,
+  "liveFramesBase": 3836389,
+  "liveFramesFinal": 3841364,
+  "allocatorUnknownBase": "52 / 5286",
+  "allocatorUnknownFinal": "6 / 530",
+  "flatterGained": "1 / 219",
+  "regressions": 0,
+  "keySequenceIdentical": true,
+  "battleDigest": "76a447ec70fa",
+  "frameNote": "reseed85 reported +4,834 on aeaa33dff: the same 46 allocator commands + 1 Flatter / 219 frames; master base now presents 141 more frames in those 52 allocator-unknown commands (5,286 vs 5,145)"
+ },
+ "parity": {
+  "11": "identical to reseed85 parity-11.json",
+  "98": "identical to reseed85 parity-98.json",
+  "420": "identical to reseed85 parity-420.json"
+ }
+}

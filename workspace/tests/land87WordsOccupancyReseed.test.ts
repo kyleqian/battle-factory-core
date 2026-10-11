@@ -105,4 +105,11 @@ describe("land87: allocator reseed through a pending words marker's occupancy sh
     const windows = JSON.parse(readFileSync("tools/integration/fixtures/reseed85/windows.json", "utf8")) as { summary: { pass: boolean } };
     expect(windows.summary.pass).toBe(true);
   });
+
+  it("land87 live receipt: 8 re-rendered windows live 0 px, census +47 commands, 0 regressions", () => {
+    const receipt = JSON.parse(readFileSync("tools/integration/fixtures/land87-live-receipt.json", "utf8")) as
+      { windowsSummary: { count: number; allLive: boolean; allZeroPx: boolean; allRunsEqual: boolean }; census: { commandsGained: number; regressions: number; keySequenceIdentical: boolean } };
+    expect(receipt.windowsSummary).toMatchObject({ count: 8, allLive: true, allZeroPx: true, allRunsEqual: true });
+    expect(receipt.census).toMatchObject({ commandsGained: 47, regressions: 0, keySequenceIdentical: true });
+  });
 });
