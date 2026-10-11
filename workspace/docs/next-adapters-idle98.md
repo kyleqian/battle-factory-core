@@ -158,8 +158,8 @@ it only when a hit receipt follows (`battleResolutionPresentation.ts` SCENE_OFF_
 route b154 OFF goes "HERACROSS used BULK UP!" (24) -> `stat`. 16 census routes: ON hit-path bodies 310 == OFF move-animation commands 310, while
 165 no-hit bodies have none. Exposure: 9,975 / 27,481 census move bodies (Double Team 885, Protect 558, Confuse Ray 532, Rest 467, Dig 338,
 Curse 250, ...). At least 35 frames each (~349k OFF frames) plus attG - 1 instruction frames (2 for Bulk Up). Fix shape: emit the OFF move-animation
-pause command for every SCENE_OFF_ATTACK_PAUSE receipt. Without a hit receipt it lasts 1 + (instructions through waitanimation) + 32 (attG - 1 + 35
-+ the waitanimation frame), using the same provenance as the hit path.
+pause command for every SCENE_OFF_ATTACK_PAUSE receipt. Without a hit receipt it lasts (attG - 1) + 35 frames plus k, the frames from F_after to the
+next instruction production presents. Derive it from the same instruction provenance as the hit path, and measure k per follow-up (stat / message / status).
 
 **(c) (new, PLAUSIBLE) Misses: the 32-frame BattleScript_MoveMissedPause in both scenes.** ROM: attackstring -> ppreduce -> `pause B_WAIT_TIME_SHORT` (32)
 -> effectivenesssound -> resultmessage. G+1 -> the next screen change = 36 frames, ON == OFF (Dynamic Punch misses, both sides). Production goes
