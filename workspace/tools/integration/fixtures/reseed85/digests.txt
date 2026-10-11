@@ -1,0 +1,11 @@
+shard 0: battleDigestExcludingFrames 56ca562c236b0378 same | battleDigest fdd5f71d3efd267d same | commandDigest differs (live status)
+shard 1: battleDigestExcludingFrames 9ec91d41527f5cd4 same | battleDigest 2beb32be2db8fe59 same | commandDigest differs (live status)
+shard 2: battleDigestExcludingFrames 46d231d61bf762b1 same | battleDigest 24910a27c78f0d25 same | commandDigest differs (live status)
+shard 3: battleDigestExcludingFrames 90b4db212f657a79 same | battleDigest a397575138b3df5b same | commandDigest differs (live status)
+shard 4: battleDigestExcludingFrames 01cc7cdc1e287688 same | battleDigest 2f807adf8d2de693 same | commandDigest differs (live status)
+shard 5: battleDigestExcludingFrames 5935feb01d971df3 same | battleDigest d238030454a87684 same | commandDigest same
+shard 6: battleDigestExcludingFrames 367131fc5c556e84 same | battleDigest d430d4b6c4f039db same | commandDigest differs (live status)
+shard 7: battleDigestExcludingFrames e6045d8f2f4a441f same | battleDigest 3743e4a8e75c4655 same | commandDigest differs (live status)
+shard 8: battleDigestExcludingFrames add79432df1a31d7 same | battleDigest b2a0ce69cfad0607 same | commandDigest differs (live status)
+shard 9: battleDigestExcludingFrames 113744b4393cedc6 same | battleDigest 3af7749704bdc9ca same | commandDigest same
+PASS battle digests (with and excluding frames) identical in all 10 shards

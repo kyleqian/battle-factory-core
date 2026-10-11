@@ -1,0 +1,34 @@
+{
+ "schema": "flat77-parity/v1",
+ "seed": 98,
+ "streak": 0,
+ "turnBoundariesCompared": 20,
+ "playerTurns": 20,
+ "framesOn": 12354,
+ "framesOff": 10158,
+ "logicalDigest": "a41ebb880046a8bdb3730732c2dec624da8da404e8229a1cdf0430c867ad8542",
+ "rngEqual": true,
+ "rulesEqual": true,
+ "boundaryEqual": true,
+ "bodiesOn": 33,
+ "orderKnownBodiesOn": 15,
+ "allocatorKnownBodiesOn": 33,
+ "orderStopsOn": [
+  "no EXACT plan: body 189:player"
+ ],
+ "flatterBodiesOn": [
+  {
+   "turn": 12,
+   "moveId": 260,
+   "moveTurn": 0,
+   "side": 0,
+   "orderKnown": false,
+   "invalidReason": "no EXACT plan: body 189:player",
+   "hidden": [
+    false,
+    false
+   ],
+   "allocatorKnown": true
+  }
+ ]
+}
