@@ -6,7 +6,7 @@
 # 2. fresh probes: 11 labs x {r1, r2} (shadow105Job.sh: ctl95Probe.py, 40-row RGB tail, a crashed run rerun once; 8 parallel), r1 == r2
 #    byte for byte (frame rows) -> <out>/receipts/probe-sha256.json;
 # 3. git-archive copies of the FIXED base 3cc8381ce (production src dc6c756a) and base + fixtures/shadow105/shadow105-lead-row0-shadow.diff
-#    (patch -p1, no .orig / .rej), node_modules + artifacts symlinked;
+#    (patch -p1, no .orig / .rej), node_modules + artifacts + reference symlinked;
 # 4. shadow105LeadCheck.ts per move in both copies (base as committed; patched with --pre-activation, the patch's row-0 flag)
 #    -> <out>/receipts/lead-{base,patched}-<move>.json (the ROM lead table rows + production rows); 4b. shadow105RouteRender.ts on 5
 #    census routes in both copies + shadow105RouteCheck.py -> <out>/receipts/route/route-check.json;
@@ -47,7 +47,7 @@ PY
 for t in base patched; do
   mkdir -p "$OUT/tree/$t"
   git -C .. archive $BASE workspace | tar -x -C "$OUT/tree/$t"
-  ln -s "$W/node_modules" "$OUT/tree/$t/workspace/node_modules"; ln -s "$W/artifacts" "$OUT/tree/$t/workspace/artifacts"
+  for g in node_modules artifacts reference; do ln -s "$W/$g" "$OUT/tree/$t/workspace/$g"; done  # the gitignored on-disk prerequisites
   cp tools/integration/shadow105LeadCheck.ts tools/integration/shadow105RouteRender.ts "$OUT/tree/$t/workspace/tools/integration/"
 done
 patch -s -p1 -d "$OUT/tree/patched" < "$FX/shadow105-lead-row0-shadow.diff"
