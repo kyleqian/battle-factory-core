@@ -1,0 +1,42 @@
+att	doll81-att-sing-opponent-golbat	SING	opponent	swap	3403	325	body 243	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-att-sing-opponent	SING	opponent	swap	3404	323	body 241	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-att-sing-player-gengar	SING	player	swap	1765	331	body 245	presented true	px 0/0	identical true	bad -	k+1 200
+att	doll81-att-sing-player-gengar	SING	player	swap	5161	331	body 245	presented true	px 0/0	identical true	bad -	k+1 200
+att	doll81-att-sing-player	SING	player	swap	1766	331	body 245	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-att-sing-player	SING	player	swap	5162	331	body 245	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-self-double-team-opponent-golbat	DOUBLE_TEAM	opponent	plain	76	159	body 158	presented false	px 306106/306106	identical true	bad 0,2,6,12,14,16..24,26,28..42,45..54,57..130,158	k+1 -
+att	doll81-self-double-team-opponent-golbat	DOUBLE_TEAM	opponent	swap	3407	240	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-self-double-team-opponent-golbat	DOUBLE_TEAM	opponent	swap	5073	240	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-self-double-team-opponent	DOUBLE_TEAM	opponent	plain	77	159	body 158	presented false	px 275287/275287	identical true	bad 2,6,12,14,16..24,26,28..42,45..54,57..130	k+1 -
+att	doll81-self-double-team-opponent	DOUBLE_TEAM	opponent	swap	3408	240	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-self-double-team-opponent	DOUBLE_TEAM	opponent	swap	5074	240	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-self-double-team-player-gengar	DOUBLE_TEAM	player	swap	1769	244	body 158	presented true	px 0/0	identical true	bad -	k+1 200
+att	doll81-self-double-team-player-gengar	DOUBLE_TEAM	player	swap	3467	244	body 158	presented true	px 0/0	identical true	bad -	k+1 200
+att	doll81-self-double-team-player-gengar	DOUBLE_TEAM	player	swap	5165	244	body 158	presented true	px 0/0	identical true	bad -	k+1 200
+att	doll81-self-double-team-player	DOUBLE_TEAM	player	swap	1770	244	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-self-double-team-player	DOUBLE_TEAM	player	swap	3468	244	body 158	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll81-self-double-team-player	DOUBLE_TEAM	player	plain	5167	159	body 158	presented false	px 298560/298560	identical true	bad 2,5,11,13,15..23,25,27..41,44..53,56..129	k+1 -
+att	doll90-att-sing-opponent-crobat-wailord	SING	opponent	swap	3403	312	body 230	presented true	px 0/0	identical true	bad -	k+1 0
+att	doll90-att-sing-opponent-wailord-crobat	SING	opponent	swap	2651	330	body 248	presented true	px 0/0	identical true	bad -	k+1 0
+ctl	doll90-ctl-grass-whistle-opponent-golbat	GRASS_WHISTLE	opponent	plain	80	221	body 220	presented false	px 181050/181050	identical true	bad 167..171,173..177	k+1 -
+ctl	doll90-ctl-grass-whistle-opponent-golbat	GRASS_WHISTLE	opponent	plain	3412	221	body 220	presented false	px 181050/181050	identical true	bad 167..171,173..177	k+1 -
+ctl	doll90-ctl-grass-whistle-opponent	GRASS_WHISTLE	opponent	plain	81	221	body 220	presented false	px 228007/228007	identical true	bad 165..177	k+1 -
+ctl	doll90-ctl-grass-whistle-opponent	GRASS_WHISTLE	opponent	plain	3413	221	body 220	presented false	px 228007/228007	identical true	bad 165..177	k+1 -
+ctl	doll90-ctl-recover-opponent-golbat	RECOVER	opponent	plain	1736	184	body 183	presented false	px 186901/186901	identical true	bad 0..178	k+1 -
+ctl	doll90-ctl-recover-opponent-golbat	RECOVER	opponent	plain	3402	184	body 183	presented false	px 186901/186901	identical true	bad 0..178	k+1 -
+ctl	doll90-ctl-recover-opponent-golbat	RECOVER	opponent	plain	5068	184	body 183	presented false	px 186901/186901	identical true	bad 0..178	k+1 -
+ctl	doll90-ctl-recover-opponent	RECOVER	opponent	plain	1737	184	body 183	presented false	px 179771/179771	identical true	bad 1..178	k+1 -
+ctl	doll90-ctl-recover-opponent	RECOVER	opponent	plain	3403	184	body 183	presented false	px 179771/179771	identical true	bad 1..178	k+1 -
+ctl	doll90-ctl-recover-opponent	RECOVER	opponent	plain	5069	184	body 183	presented false	px 179771/179771	identical true	bad 1..178	k+1 -
+ctl	doll90-ctl-sing-opponent-golbat	SING	opponent	plain	72	244	body 243	presented false	px 0/0	identical true	bad -	k+1 -
+ctl	doll90-ctl-sing-opponent-golbat	SING	opponent	plain	3404	244	body 243	presented false	px 0/0	identical true	bad -	k+1 -
+ctl	doll90-ctl-sing-opponent	SING	opponent	plain	73	242	body 241	presented false	px 0/0	identical true	bad -	k+1 -
+ctl	doll90-ctl-sing-opponent	SING	opponent	plain	3405	242	body 241	presented false	px 0/0	identical true	bad -	k+1 -
+def	doll81-def-psych-up-opponent	PSYCH_UP	opponent	control	72	179	shift 0	live true	px 0/0	identical true	bad -
+def	doll81-def-psych-up-opponent-golbat	PSYCH_UP	opponent	control	71	179	shift 0	live true	px 0/0	identical true	bad -
+def	doll81-def-psych-up-player	PSYCH_UP	player	control	68	179	shift 0	live true	px 0/0	identical true	bad -
+def	doll81-def-psych-up-player-gengar	PSYCH_UP	player	control	67	179	shift 0	live true	px 0/0	identical true	bad -
+def	doll81-def-psych-up-opponent-golbat	PSYCH_UP	opponent	test	1737	179	shift 0	live true	px 0/0	identical true	bad -
+def	doll81-def-psych-up-opponent	PSYCH_UP	opponent	test	1738	179	shift 0	live true	px 0/0	identical true	bad -
+def	doll81-def-psych-up-player-gengar	PSYCH_UP	player	test	1733	179	shift 0	live true	px 0/0	identical true	bad -
+def	doll81-def-psych-up-player	PSYCH_UP	player	test	1734	179	shift 0	live true	px 0/0	identical true	bad -

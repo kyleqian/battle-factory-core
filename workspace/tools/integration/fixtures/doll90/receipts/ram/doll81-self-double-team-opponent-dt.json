@@ -1,0 +1,128 @@
+{
+ "schema": "doll90-dt-ram-summary/v1",
+ "source": "dt60Probe.py (direct mGBA), doll90Run.sh",
+ "battlerData3Changes": [
+  {
+   "frame": 1,
+   "battlers": [
+    {
+     "slot": 6,
+     "callback": "SpriteCallbackDummy",
+     "data": [
+      0,
+      0,
+      80,
+      2,
+      -32,
+      8,
+      0,
+      30
+     ]
+    },
+    {
+     "slot": 8,
+     "callback": "SpriteCallbackDummy",
+     "data": [
+      1,
+      0,
+      53,
+      0,
+      256,
+      256,
+      0,
+      1020
+     ]
+    }
+   ]
+  }
+ ],
+ "bodies": [
+  {
+   "activation": 77,
+   "attacker": 1,
+   "species": [
+    80,
+    53
+   ],
+   "attackerData3": 0,
+   "row1Clones": [
+    {
+     "slot": 3,
+     "data0": 0,
+     "data1": 0,
+     "data3": 1
+    },
+    {
+     "slot": 4,
+     "data0": 0,
+     "data1": 128,
+     "data3": 1
+    }
+   ],
+   "row1SpriteOrder": [
+    6,
+    8,
+    4,
+    3
+   ]
+  },
+  {
+   "activation": 3449,
+   "attacker": 1,
+   "species": [
+    80,
+    53
+   ],
+   "attackerData3": 0,
+   "row1Clones": [
+    {
+     "slot": 3,
+     "data0": 0,
+     "data1": 0,
+     "data3": 1
+    },
+    {
+     "slot": 4,
+     "data0": 0,
+     "data1": 128,
+     "data3": 1
+    }
+   ],
+   "row1SpriteOrder": [
+    6,
+    8,
+    3,
+    4
+   ]
+  },
+  {
+   "activation": 5115,
+   "attacker": 1,
+   "species": [
+    80,
+    53
+   ],
+   "attackerData3": 0,
+   "row1Clones": [
+    {
+     "slot": 3,
+     "data0": 0,
+     "data1": 0,
+     "data3": 1
+    },
+    {
+     "slot": 4,
+     "data0": 0,
+     "data1": 128,
+     "data3": 1
+    }
+   ],
+   "row1SpriteOrder": [
+    6,
+    8,
+    3,
+    4
+   ]
+  }
+ ]
+}

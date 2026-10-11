@@ -11,6 +11,7 @@ import type {
   SceneOnMovePresentationState, SceneOnMoveConfig, SceneOnPresentationBattler,
 } from "../animation/sceneOnPresentation.ts";
 import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresentation.ts";
+import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { reduceMemento, type MementoBattlerConfig, type MementoConfig } from "../animation/memento.ts";
@@ -999,6 +1000,32 @@ function liveEruptionProfileFor(field: BattleResolutionDisplayedField, attackerS
 }
 
 /**
+ * doll90: Sing (47)'s ROM body (activation .. first inactive row) follows its geometry. Each wavy note is destroyed once it leaves
+ * x -16..256 / y -16..128 (AnimWavyMusicNotes_Step), the script's first waitforvisualfinish waits for the last one, and the rest
+ * (clearmonbg, AnimTask_MusicNotesClearRainbowBlend, end) is geometry-independent: first inactive row = the last note's last
+ * on-screen body age (sceneOnSingView: note age = body age - 7) + 97. Fresh direct-mGBA ROM bodies: player PERSIAN / GENGAR 246,
+ * opponent PERSIAN 242, GOLBAT 244, and the predicted-then-probed CROBAT -> WAILORD 231 / WAILORD -> CROBAT 249 (docs/doll90-doll-cells.md).
+ */
+const SING_BODY_TAIL_ROWS = 97;
+const singBodyRowsCache = new Map<string, number | null>();
+export function liveSingBodyRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number | null {
+  const key = `${request.attacker}/${field.player.species}/${field.opponent.species}`;
+  if (singBodyRowsCache.has(key)) return singBodyRowsCache.get(key)!;
+  const state = liveMoveAnimationPresentation(request, field, 0);
+  let rows: number | null = null;
+  if (state !== null && state.config.move === "SING") {
+    const { attacker, target } = state.config as unknown as Record<"attacker" | "target", { geometry: { animationCenter: { x: number; y: number } } }>;
+    let last = -1;
+    for (let noteAge = 0; noteAge < 512; noteAge++) {
+      if (wavyMusicNotesGeometryAtAge(noteAge, attacker.geometry.animationCenter, target.geometry.animationCenter).length > 0) last = noteAge;
+    }
+    if (last >= 0) rows = last + 7 + SING_BODY_TAIL_ROWS;
+  }
+  singBodyRowsCache.set(key, rows);
+  return rows;
+}
+
+/**
  * S10A Substitute, DEFENDER shown as the doll (docs/next-adapters-prep38.md s1 / s3 v1): the (move id, attacker side) cells
  * proven 0 px on dense direct-mGBA windows with the doll as the defender's live art (liveSceneOnBattlerArt), the effect / hit
  * anchors on the species corner, the doll corner without elevation, idle rest 0 and no opponent shadow
@@ -1033,6 +1060,8 @@ export const LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS: ReadonlyMap<number, readonly (
   // (ThunderPunch GOLBAT -> LAPRAS: row 0 = the doll-free control's own elevated-attacker shadow, 200 px).
   [348, ["player", "opponent"]], // Leaf Blade
   [9, ["player", "opponent"]], // ThunderPunch
+  // doll90 (docs/doll90-doll-cells.md): the doll's palette bank composed (composeLiveFieldPalettes), 0 px on every row.
+  [244, ["player", "opponent"]], // Psych Up
 ].map(([id, sides]) => [id as number, Object.freeze(sides as ("player" | "opponent")[])]));
 
 /**
@@ -1061,9 +1090,10 @@ export function liveMoveAnimationDuration(
   request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField, bodyClass: LiveMoveTimingBody = "first",
 ): number | null {
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
-    const body = liveMoveAnimationDuration(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1), bodyClass);
+    const bodyField = substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1);
+    const body = liveMoveAnimationDuration(request, bodyField, bodyClass);
     return body === null ? null
-      : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body).rows);
+      : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body, request, bodyField).rows);
   }
   if (field !== undefined && liveMoveSubstituteDollDeclines(request, field)) return null;
   switch (request.moveId) {
@@ -3763,7 +3793,9 @@ export function liveMoveAnimationPresentation(
       // Everything else is the measured first-body constant set (liveBgSnapshotMoves.ts) + anchors + the assets-only composite.
       if (!spriteOrderInput?.known) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLiveArtPalettes(art);
+      // doll90: a Psych Up target shown as the Substitute doll has gSubstituteDollPal in its OBJ bank (as Megahorn's monbg reads it);
+      // identical to composeLiveArtPalettes when neither battler is the doll.
+      const palettes = request.moveId === 244 ? composeLiveFieldPalettes(art) : composeLiveArtPalettes(art);
       if (palettes === null) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const args = { attackerSide: attacker.geometry.side, attacker: attackerAnchors, target: targetAnchors, palettes };

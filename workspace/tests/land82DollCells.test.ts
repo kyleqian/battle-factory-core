@@ -23,7 +23,8 @@ const BOTH = ["player", "opponent"];
 
 describe("land82: doll81 Substitute-doll cells", () => {
   it("attacker-doll swap cells: sides per move", () => {
-    const cells: [number, string[]][] = [[138, ["opponent"]], [320, ["player"]], [76, BOTH], [142, BOTH], [47, ["player"]], [241, BOTH]];
+    // doll90 widened Sing 47 to both sides (tests/doll90DollCells.test.ts).
+    const cells: [number, string[]][] = [[138, ["opponent"]], [320, ["player"]], [76, BOTH], [142, BOTH], [47, BOTH], [241, BOTH]];
     for (const [id, sides] of cells) expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(id)!]).toEqual(sides);
     for (const [id, sides] of cells) for (const side of ["player", "opponent"] as const) {
       const a = side === "player" ? 0 : 1;
@@ -36,12 +37,13 @@ describe("land82: doll81 Substitute-doll cells", () => {
     expect(LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(142)).toEqual({ rows: 153, shift: 0 });
     expect(LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(47)).toEqual({ rows: 246, shift: 0 });
   });
-  it("self-target id set is exactly {241}: Sunny Day swaps, Double Team / Recover still decline", () => {
-    expect([...LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS]).toEqual([241]);
+  it("self-target id set is {241} + doll90's Double Team 104: Sunny Day swaps, Recover still declines", () => {
+    // doll90 (docs/doll90-doll-cells.md) added Double Team 104 (pinned in tests/doll90DollCells.test.ts).
+    expect([...LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS]).toEqual([241, 104]);
     for (const a of [0, 1] as const) {
       expect(liveSubstituteSwapApplies(req(241, a, { target: a }), attackerDoll(a))).toBe(true);
       expect(liveMoveSubstituteDollDeclines(req(241, a, { target: a }), attackerDoll(a))).toBe(false);
-      for (const id of [104, 105]) {
+      for (const id of [105]) {
         expect(liveSubstituteSwapApplies(req(id, a, { target: a }), attackerDoll(a))).toBe(false);
         expect(liveMoveSubstituteDollDeclines(req(id, a, { target: a }), attackerDoll(a))).toBe(true);
       }

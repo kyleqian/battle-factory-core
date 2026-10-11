@@ -1,0 +1,54 @@
+{
+ "schema": "prep38-subbed-defender-fixture/v1",
+ "move": "PSYCH_UP",
+ "moveId": 244,
+ "kind": "test",
+ "stem": "doll81-def-psych-up-opponent-golbat",
+ "probe": "tools/integration/prep38Probe.py",
+ "scenario": "tools/integration/fixtures/prep38/scenarios/doll81-def-psych-up-opponent-golbat.json",
+ "denseWindow": {
+  "startFrame": 1737,
+  "endFrame": 1915
+ },
+ "attacker": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "LAPRAS",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "defenderDoll": true,
+ "fieldProfile": {
+  "playerHp": 178,
+  "playerMaxHp": 237,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "male",
+  "opponentGender": "male"
+ },
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "precedingBodies": [
+  {
+   "moveId": 244,
+   "side": "opponent"
+  },
+  {
+   "moveId": 164,
+   "side": "player"
+  }
+ ],
+ "nonMoveBodiesBefore": [],
+ "doll": {
+  "behindSubstitute": true,
+  "subHP": 59,
+  "tiles": "22a6f54c07e2"
+ }
+}

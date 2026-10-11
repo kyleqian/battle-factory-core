@@ -21,7 +21,7 @@ import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 import { applyLiveBattlerX2Event, liveMoveBattlerX2Input, type LiveBattlerX2History, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
-import { liveBattlerAnchors, liveCastformFormDeclines, liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
+import { liveBattlerAnchors, liveCastformFormDeclines, liveMoveAnimationDuration, liveSingBodyRows } from "./liveMoveAnimation.ts";
 import { liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
 
 type Side = "player" | "opponent";
@@ -125,12 +125,18 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
   [320, Object.freeze(["player"] as const)], // GrassWhistle (opponent: 13 whole-field rows near the body's end)
   [76, BOTH], // SolarBeam, the charge turn only (the fire turn is the doll-free control's own residual)
   [142, BOTH], // Lovely Kiss
-  [47, Object.freeze(["player"] as const)], // Sing (opponent: the ROM body length depends on the pair)
+  [47, BOTH], // Sing (doll90: the ROM body length follows the note geometry, substituteSwapBodyFraming)
   [241, BOTH], // Sunny Day (self-target: LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS)
+  // doll90 (docs/doll90-doll-cells.md): PERSIAN / GENGAR player, PERSIAN / elevated GOLBAT opponent, 0 px on every row.
+  [104, BOTH], // Double Team (self-target; the attacker's personality-derived clone phase, dt60)
 ]);
 export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_SUBSTITUTE_SWAP_BODY_CELLS.keys());
-/** Self-target bodies presented with the swaps (doll81: the ROM runs SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE around them too). */
-export const LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS: ReadonlySet<number> = new Set([241]);
+/**
+ * Self-target bodies presented with the swaps (doll81: the ROM runs SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE around them too). Double Team
+ * (doll90): the stats banner the doll-free adapter ends with never runs behind the doll (TryHandleLaunchBattleTableAnimation skips
+ * B_ANIM_STATS_CHANGE while behindSubstitute), so the composite frames only the ROM body.
+ */
+export const LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS: ReadonlySet<number> = new Set([241, 104]);
 
 export type SubstituteSwapBodyFraming = Readonly<{ rows: number; shift: number }>;
 /**
@@ -151,11 +157,18 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_FRAMING: ReadonlyMap<number, SubstituteSw
   [153, { rows: 217, shift: -4 }], // Explosion (adapter 212)
   [320, { rows: 221, shift: 0 }], // GrassWhistle (adapter 225; doll81)
   [142, { rows: 153, shift: 0 }], // Lovely Kiss (adapter 152; doll81)
-  [47, { rows: 246, shift: 0 }], // Sing (player adapter 245; doll81)
+  [47, { rows: 246, shift: 0 }], // Sing (player adapter 245; doll81; doll90: geometry-derived, liveSingBodyRows)
+  [104, { rows: 159, shift: -1 }], // Double Team (adapter 230 = body + stats banner; doll90: every doll-free control 0 px at -1)
 ].map(([id, framing]) => [id as number, Object.freeze(framing as SubstituteSwapBodyFraming)]));
 
-/** The composite's body framing for a request whose adapter duration is `adapterDuration`. */
-export function substituteSwapBodyFraming(moveId: number, adapterDuration: number): SubstituteSwapBodyFraming {
+/** The composite's body framing for a request whose adapter duration is `adapterDuration` (`field`: the body field, Sing's geometry). */
+export function substituteSwapBodyFraming(
+  moveId: number, adapterDuration: number, request?: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField,
+): SubstituteSwapBodyFraming {
+  if (moveId === 47 && request !== undefined && field !== undefined) {
+    const rows = liveSingBodyRows(request, field);
+    if (rows !== null) return Object.freeze({ rows, shift: 0 });
+  }
   return LIVE_SUBSTITUTE_SWAP_BODY_FRAMING.get(moveId) ?? Object.freeze({ rows: adapterDuration, shift: 0 });
 }
 
@@ -258,7 +271,7 @@ export function liveSubstituteSwapView(view: BattleResolutionPresentationRenderV
   const bodyField = substituteSwapBodyField(view.field, attacker);
   const adapterDuration = liveMoveAnimationDuration(effect.request, bodyField);
   if (adapterDuration === null) return null;
-  const framing = substituteSwapBodyFraming(effect.request.moveId, adapterDuration);
+  const framing = substituteSwapBodyFraming(effect.request.moveId, adapterDuration, effect.request, bodyField);
   const swapFrame = substituteSwapFrameAt(side, framing.rows, effect.age);
   const frame = swapFrame.kind === "body" ? Object.freeze({ kind: "body" as const, age: swapFrame.age + framing.shift }) : swapFrame;
   if (frame.kind === "body") {

@@ -24203,6 +24203,9 @@ export function renderSceneOnMovePresentation(
 
     type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
     const artFor = (battler: typeof view.attacker): BattlerArt => {
+      // doll90: a target shown as the Substitute doll draws the doll sheet (as Megahorn's artFor; liveSubstituteDollArt).
+      const doll = liveSubstituteDollArt(battler.geometry.side);
+      if (doll) return doll as unknown as BattlerArt;
       const art = battler.geometry.side === "player"
         ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[battler.species]
         : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[battler.species];
