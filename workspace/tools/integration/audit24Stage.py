@@ -14,13 +14,15 @@ ROOT = Path(__file__).resolve().parents[2]
 out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
 load = lambda p: json.loads((ROOT / p).read_text())
 SP = {"GENGAR": 94, "LAPRAS": 131, "RATICATE": 20, "SKARMORY": 227, "VENUSAUR": 3, "QUAGSIRE": 195, "KANGASKHAN": 115,
-      "STEELIX": 208, "KINGLER": 99, "SNORLAX": 143, "NINETALES": 38, "HITMONLEE": 106, "POLIWRATH": 62, "PERSIAN": 53}
+      "STEELIX": 208, "KINGLER": 99, "SNORLAX": 143, "NINETALES": 38, "HITMONLEE": 106, "POLIWRATH": 62, "PERSIAN": 53, "HAUNTER": 93}
 FEMALE_ONLY = {"KANGASKHAN"}
 LEAD_TEMPLATE = {"player": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
                  "opponent": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"}
 # move id, move, attacker, foe (land97 LIVE_MOVE_IDLE_LEAD_ROWS ids not in idle94's 4 routes)
 LEAD = [(325, "SHADOW_PUNCH", "GENGAR", "LAPRAS"), (44, "BITE", "RATICATE", "SKARMORY"), (75, "RAZOR_LEAF", "VENUSAUR", "QUAGSIRE"),
-        (146, "DIZZY_PUNCH", "KANGASKHAN", "STEELIX"), (106, "HARDEN", "KINGLER", "SNORLAX"), (52, "EMBER", "NINETALES", "SNORLAX")]
+        (146, "DIZZY_PUNCH", "KANGASKHAN", "STEELIX"), (106, "HARDEN", "KINGLER", "SNORLAX"), (52, "EMBER", "NINETALES", "SNORLAX"),
+        # HAUNTER is the only Factory frontier mon with Shadow Punch (GENGAR above is an off-Factory pair)
+        (325, "SHADOW_PUNCH", "HAUNTER", "LAPRAS"), (325, "SHADOW_PUNCH", "HAUNTER", "SKARMORY")]
 SEED_A, SEED_B = 305419897, 38177486
 rows = []
 

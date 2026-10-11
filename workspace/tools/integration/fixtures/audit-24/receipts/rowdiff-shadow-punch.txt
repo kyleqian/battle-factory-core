@@ -1,0 +1,19 @@
+audit24-lead-shadow-punch-opponent-haunter-skarmory row 0 (frame 81, age 0, lag-row false) px 200 bbox 160,65..191,72 (169,65) rom 82,107,99 prod 189,189,156 | (189,68) rom 82,107,99 prod 189,189,156 | (177,72) rom 82,107,99 prod 189,189,156
+audit24-lead-shadow-punch-opponent-haunter-skarmory row 1 (frame 82, age 0, lag-row false) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-opponent-haunter-skarmory row 108 (frame 189, age 100, lag-row false) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-opponent-haunter-skarmory row 109 (frame 190, age 101, lag-row false) px 200 bbox 160,65..191,72 (169,65) rom 189,189,156 prod 82,107,99 | (189,68) rom 189,189,156 prod 82,107,99 | (177,72) rom 189,189,156 prod 82,107,99
+audit24-lead-shadow-punch-opponent-haunter-skarmory row 110 (frame 191, age 102, lag-row false) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-opponent-haunter-lapras row 0 (frame 81, age 0, lag-row false) px 200 bbox 160,65..191,72 (169,65) rom 82,107,99 prod 189,189,156 | (189,68) rom 82,107,99 prod 189,189,156 | (177,72) rom 82,107,99 prod 189,189,156
+audit24-lead-shadow-punch-opponent-haunter-lapras row 1 (frame 82, age 0, lag-row false) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-opponent-haunter-lapras row 108 (frame 189, age 100, lag-row false) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-opponent-haunter-lapras row 109 (frame 190, age 101, lag-row false) px 200 bbox 160,65..191,72 (169,65) rom 189,189,156 prod 82,107,99 | (189,68) rom 189,189,156 prod 82,107,99 | (177,72) rom 189,189,156 prod 82,107,99
+audit24-lead-shadow-punch-opponent-haunter-lapras row 110 (frame 191, age 102, lag-row false) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-player-haunter-lapras row 90 (frame 167, age 82, lag-row true) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-player-haunter-lapras row 91 (frame 168, age 83, lag-row false) px 17817 bbox 0,0..239,111 (0,0) rom 0,0,0 prod 16,15,15 | (97,0) rom 0,0,0 prod 16,15,15 | (194,0) rom 0,0,0 prod 16,15,15 | (51,1) rom 0,0,0 prod 14,14,14 | (148,1) rom 0,0,0 prod 14,14,14 | (5,2) rom 0,0,0 prod 14,14,14
+audit24-lead-shadow-punch-player-haunter-lapras row 106 (frame 183, age 98, lag-row false) px 17817 bbox 0,0..239,111 (0,0) rom 240,239,239 prod 255,255,255 | (97,0) rom 240,239,239 prod 255,255,255 | (194,0) rom 240,239,239 prod 255,255,255 | (51,1) rom 209,216,216 prod 222,231,231 | (148,1) rom 209,216,216 prod 222,231,231 | (5,2) rom 209,216,216 prod 222,231,231
+audit24-lead-shadow-punch-player-haunter-lapras row 107 (frame 184, age 99, lag-row false) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-player-haunter-skarmory row 112 (frame 189, age 104, lag-row false) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-player-haunter-skarmory row 113 (frame 190, age 105, lag-row false) px 1451 bbox 13,16..112,44 (17,16) rom 255,255,255 prod 123,148,132 | (25,17) rom 82,107,99 prod 33,57,0 | (32,18) rom 33,57,0 prod 222,214,181 | (39,19) rom 222,214,181 prod 255,255,222 | (53,21) rom 255,255,222 prod 222,214,181 | (88,24) rom 255,255,222 prod 222,214,181
+audit24-lead-shadow-punch-opponent-gengar-lapras row 108 (frame 188, age 100, lag-row false) px 0 bbox 240,160..-1,-1 
+audit24-lead-shadow-punch-opponent-gengar-lapras row 109 (frame 189, age 101, lag-row false) px 74 bbox 163,68..186,72 (167,68) rom 189,189,156 prod 82,107,99
+audit24-lead-shadow-punch-opponent-gengar-lapras row 112 (frame 192, age 104, lag-row false) px 74 bbox 163,68..186,72 (167,68) rom 189,189,156 prod 82,107,99

@@ -76,9 +76,29 @@
    "r2": "9b8213dfbcc0bb3bd80d3f39cc9a6480eda7318e6f9dd48c5cd2ec966ed64dd3",
    "same": true
   },
+  "audit24-lead-shadow-punch-opponent-haunter-lapras": {
+   "r1": "059b258e557cf418ea29d879d6c1f1ad68df551e0d2384f7498634edba3e6a2b",
+   "r2": "059b258e557cf418ea29d879d6c1f1ad68df551e0d2384f7498634edba3e6a2b",
+   "same": true
+  },
+  "audit24-lead-shadow-punch-opponent-haunter-skarmory": {
+   "r1": "46a991ed0b627ebb6a75923f5eddfdd5cf981087dc6cb7315b44a5b310661e3f",
+   "r2": "46a991ed0b627ebb6a75923f5eddfdd5cf981087dc6cb7315b44a5b310661e3f",
+   "same": true
+  },
   "audit24-lead-shadow-punch-player-gengar-lapras": {
    "r1": "ad4fb8e7f913f6d3831452d587b5244614183ce5a11bdaf36b54c621bca2f0b0",
    "r2": "ad4fb8e7f913f6d3831452d587b5244614183ce5a11bdaf36b54c621bca2f0b0",
+   "same": true
+  },
+  "audit24-lead-shadow-punch-player-haunter-lapras": {
+   "r1": "373d379b060194b7789a3cf5ab0eb2a49f6e877bb0a0f34d72834739f6634f77",
+   "r2": "373d379b060194b7789a3cf5ab0eb2a49f6e877bb0a0f34d72834739f6634f77",
+   "same": true
+  },
+  "audit24-lead-shadow-punch-player-haunter-skarmory": {
+   "r1": "8b7afeed66a1bd6d79f4751196f9c60551e176515483066e8f89da52cebf5e54",
+   "r2": "8b7afeed66a1bd6d79f4751196f9c60551e176515483066e8f89da52cebf5e54",
    "same": true
   },
   "audit24-swap-bite-opponent-raticate": {

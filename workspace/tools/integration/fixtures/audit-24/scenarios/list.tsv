@@ -10,6 +10,10 @@ audit24-lead-harden-player-kingler-snorlax	lead	106	player	KINGLER	SNORLAX	30541
 audit24-lead-harden-opponent-kingler-snorlax	lead	106	opponent	KINGLER	SNORLAX	305419897
 audit24-lead-ember-player-ninetales-snorlax	lead	52	player	NINETALES	SNORLAX	305419897
 audit24-lead-ember-opponent-ninetales-snorlax	lead	52	opponent	NINETALES	SNORLAX	305419897
+audit24-lead-shadow-punch-player-haunter-lapras	lead	325	player	HAUNTER	LAPRAS	305419897
+audit24-lead-shadow-punch-opponent-haunter-lapras	lead	325	opponent	HAUNTER	LAPRAS	305419897
+audit24-lead-shadow-punch-player-haunter-skarmory	lead	325	player	HAUNTER	SKARMORY	305419897
+audit24-lead-shadow-punch-opponent-haunter-skarmory	lead	325	opponent	HAUNTER	SKARMORY	305419897
 audit24-swap-bite-player-raticate	swap	44	player	RATICATE	SLOWBRO	305419897
 audit24-swap-bite-opponent-raticate	swap	44	opponent	RATICATE	SLOWBRO	305419897
 audit24-fp-opponent-hitmonlee-skarmory	fp	264	opponent	HITMONLEE	SKARMORY	305419897
