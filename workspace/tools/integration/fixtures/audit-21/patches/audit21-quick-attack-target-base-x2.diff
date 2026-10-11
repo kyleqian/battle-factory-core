@@ -1,0 +1,14 @@
+--- a/src/animation/quickAttack.ts
++++ b/src/animation/quickAttack.ts
+@@ -142,10 +142,7 @@
+     attackerOffset: quickAttackTravelAtAge(age, attackerSide),
+     afterimages: quickAttackAfterimagesAtAge(age, attackerSide),
+     targetShakeX2: quickAttackTargetShakeX2(age),
+-    targetBaseX2:
+-      attackerSide === "player" && age >= QUICK_ATTACK_IMPACT_FIRST_AGE
+-        ? -1
+-        : 0,
++    targetBaseX2: 0,
+     impactVisible:
+       age >= QUICK_ATTACK_IMPACT_FIRST_AGE
+       && age <= QUICK_ATTACK_IMPACT_LAST_AGE,

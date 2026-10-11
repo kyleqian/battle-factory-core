@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Live audit 21: cast83Fixtures.py (below, unchanged) for the audit-21 scenarios (tools/integration/fixtures/audit-21/scenarios/).
+Added: QUICK_ATTACK 98 (power 40).
 usage: audit21Fixtures.py <probe-dir> <fixture-dir>
 """
 """cast83 (ISSUES #143, docs/cast83-castform-forms.md): audit19Fixtures.py for the cast83 scenarios (tools/integration/fixtures/cast83/
@@ -37,8 +38,8 @@ probe_dir, out_dir = Path(sys.argv[1]), Path(sys.argv[2])
 out_dir.mkdir(parents=True, exist_ok=True)
 SCEN = Path("tools/integration/fixtures/audit-21/scenarios")
 SPECIES = {s["id"]: s["name"].removeprefix("SPECIES_") for s in json.loads(Path("src/data/gen/species-stats.json").read_text())["species"]}
-POWER = {38: 120, 196: 55, 58: 95, 52: 40, 258: 0, 53: 95, 61: 65, 332: 60, 182: 0, 57: 95, 184: 0, 86: 0, 162: 1, 222: 0, 241: 0, 240: 0, 176: 0, 302: 60, 173: 40, 301: 30, 291: 60, 351: 60, 352: 60, 129: 60, 85: 95, 189: 20, 250: 15}
-NAMES = {38: "DOUBLE_EDGE", 196: "ICY_WIND", 58: "ICE_BEAM", 52: "EMBER", 258: "HAIL", 53: "FLAMETHROWER", 61: "BUBBLE_BEAM", 332: "AERIAL_ACE", 182: "PROTECT", 57: "SURF", 184: "SCARY_FACE", 86: "THUNDER_WAVE", 162: "SUPER_FANG", 222: "MAGNITUDE", 241: "SUNNY_DAY", 240: "RAIN_DANCE", 176: "CONVERSION_2", 302: "NEEDLE_ARM", 173: "SNORE", 301: "ICE_BALL",
+POWER = {98: 40, 38: 120, 196: 55, 58: 95, 52: 40, 258: 0, 53: 95, 61: 65, 332: 60, 182: 0, 57: 95, 184: 0, 86: 0, 162: 1, 222: 0, 241: 0, 240: 0, 176: 0, 302: 60, 173: 40, 301: 30, 291: 60, 351: 60, 352: 60, 129: 60, 85: 95, 189: 20, 250: 15}
+NAMES = {98: "QUICK_ATTACK", 38: "DOUBLE_EDGE", 196: "ICY_WIND", 58: "ICE_BEAM", 52: "EMBER", 258: "HAIL", 53: "FLAMETHROWER", 61: "BUBBLE_BEAM", 332: "AERIAL_ACE", 182: "PROTECT", 57: "SURF", 184: "SCARY_FACE", 86: "THUNDER_WAVE", 162: "SUPER_FANG", 222: "MAGNITUDE", 241: "SUNNY_DAY", 240: "RAIN_DANCE", 176: "CONVERSION_2", 302: "NEEDLE_ARM", 173: "SNORE", 301: "ICE_BALL",
          291: "DIVE", 351: "SHOCK_WAVE", 352: "WATER_PULSE", 129: "SWIFT", 85: "THUNDERBOLT", 189: "MUD_SLAP", 250: "WHIRLPOOL"}
 MOVES = {f"Move_{v}": k for k, v in NAMES.items()}
 RAM_POWER = {222, 301}

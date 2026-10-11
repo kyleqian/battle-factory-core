@@ -7,7 +7,11 @@ first, SLOW lead = the consumer whose MOVE bodies are the windows; 3 A-A cycles)
   cx   the non-Castform controls of similar geometry: HOPPIP 187 (small, elevated on the opponent side, like CASTFORM) in CASTFORM's place
        with cast83's own opposing species (CROBAT / MANTINE for Ember, GOLBAT / MANTINE for Flamethrower, GOLBAT / LAPRAS for Scary Face);
   iw   Icy Wind 196: the normal-form control (CASTFORM normal, fast lead SHOCK_WAVE) by / at CASTFORM, and the rain control with NO
-       CASTFORM (HOPPIP in its place; the fast lead sets RAIN_DANCE 240).
+       CASTFORM (HOPPIP in its place; the fast lead sets RAIN_DANCE 240);
+  qa   flat84's named Quick Attack 98 residual (player NIDORINA -> opponent NIDORINO, a FIRST body): the same pair in this recipe plus other
+       pairs (NIDORINA -> SNORLAX, PERSIAN -> NIDORINO, AZURILL -> CROBAT); the fast lead
+       uses SHOCK_WAVE (Quick Attack's +1 priority makes the slow lead's body the battle's first); prep7's accepted pair PIDGEOTTO -> ONIX
+       and NIDORINA -> ONIX are the staging controls.
 Speeds: lead() gives the FAST lead IV 31 + a neutral nature, the SLOW lead IV 0 + Relaxed (cast83Stage.py's lead()).
 usage: audit21Stage.py <out-dir>   (the committed set is tools/integration/fixtures/audit-21/scenarios/)
 """
@@ -16,8 +20,8 @@ from pathlib import Path
 
 OUT = Path(sys.argv[1]); OUT.mkdir(parents=True, exist_ok=True)
 BASE = json.loads(Path("tools/battle-lab/prep18-return-altopp-snorlax-golem.json").read_text())
-M = {"SUNNY_DAY": 241, "RAIN_DANCE": 240, "HAIL": 258, "EMBER": 52, "ICY_WIND": 196, "SHOCK_WAVE": 351, "FLAMETHROWER": 53, "SCARY_FACE": 184}
-SP = {"CASTFORM": 385, "CROBAT": 169, "GOLBAT": 42, "LAPRAS": 131, "MANTINE": 226, "SNORLAX": 143, "AZURILL": 350, "HOPPIP": 187}
+M = {"SUNNY_DAY": 241, "RAIN_DANCE": 240, "HAIL": 258, "EMBER": 52, "ICY_WIND": 196, "SHOCK_WAVE": 351, "FLAMETHROWER": 53, "SCARY_FACE": 184, "QUICK_ATTACK": 98}
+SP = {"CASTFORM": 385, "CROBAT": 169, "GOLBAT": 42, "LAPRAS": 131, "MANTINE": 226, "SNORLAX": 143, "AZURILL": 350, "HOPPIP": 187, "NIDORINA": 30, "NIDORINO": 33, "PERSIAN": 53, "PIDGEOTTO": 17, "ONIX": 95}
 tag = lambda s: s.lower().replace("_", "-")
 
 
@@ -76,3 +80,11 @@ stage("a21-iw-rain-by-hpply-golbat", "GOLBAT", "RAIN_DANCE", "HOPPIP", "ICY_WIND
 stage("a21-iw-rain-by-hpopp-mantine", "MANTINE", "RAIN_DANCE", "HOPPIP", "ICY_WIND", "opponent")
 stage("a21-iw-rain-at-hpply-golbat", "HOPPIP", "RAIN_DANCE", "GOLBAT", "ICY_WIND", "opponent")
 stage("a21-iw-rain-at-hpopp-lapras", "HOPPIP", "RAIN_DANCE", "LAPRAS", "ICY_WIND", "player")
+# qa: Quick Attack (slow lead) vs the fast lead's SHOCK_WAVE
+stage("a21-qa-ply-nidorina-nidorino", "NIDORINO", "SHOCK_WAVE", "NIDORINA", "QUICK_ATTACK", "player")
+stage("a21-qa-ply-nidorina-snorlax", "SNORLAX", "SHOCK_WAVE", "NIDORINA", "QUICK_ATTACK", "player")
+stage("a21-qa-ply-persian-nidorino", "NIDORINO", "SHOCK_WAVE", "PERSIAN", "QUICK_ATTACK", "player")
+stage("a21-qa-ply-azurill-crobat", "CROBAT", "SHOCK_WAVE", "AZURILL", "QUICK_ATTACK", "player")
+# (an opponent-side control a21-qa-opp-nidorino-nidorina crashed the probe process (exit 139, no output) twice: dropped)
+stage("a21-qa-ply-pidgeotto-onix", "ONIX", "SHOCK_WAVE", "PIDGEOTTO", "QUICK_ATTACK", "player")
+stage("a21-qa-ply-nidorina-onix", "ONIX", "SHOCK_WAVE", "NIDORINA", "QUICK_ATTACK", "player")

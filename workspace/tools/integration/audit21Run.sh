@@ -8,7 +8,8 @@
 # 2. audit21Check.ts (two more fresh probe processes per scenario, r1 == r2) with THIS tree's production code on fixtures/ -> check/,
 #    aligned/ -> aligned/, c83-aligned/ -> c83-aligned/ (before);
 # 3. the same check from a git-archive copy of HEAD with patches/audit21-castform-residual-keys-lift.diff applied on c83-aligned/ ->
-#    c83-aligned-lifted/ (after);
+#    c83-aligned-lifted/ (after), and from a copy with patches/audit21-quick-attack-target-base-x2.diff on the a21-qa-* windows ->
+#    qa-patched/ (after; before = check/);
 # 4. summaries (audit21Summary.py), lag.txt (issue151Counters.sh), and a byte comparison with the committed receipts/.
 set -e
 [ $# -ge 2 ] || { echo "usage: audit21Run.sh <receipt-dir> <scratch-dir>"; exit 2; }
@@ -35,15 +36,21 @@ mkdir -p "$T/tree"
 git archive HEAD | tar -x -C "$T/tree"
 ln -s "$PWD/node_modules" "$T/tree/node_modules"
 patch -s -p1 -d "$T/tree" < $W/patches/audit21-castform-residual-keys-lift.diff
+mkdir -p "$T/tree-qa"
+git archive HEAD | tar -x -C "$T/tree-qa"
+ln -s "$PWD/node_modules" "$T/tree-qa/node_modules"
+patch -s -p1 -d "$T/tree-qa" < $W/patches/audit21-quick-attack-target-base-x2.diff
 jobs() {
   for n in $(ls $W/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 basename); do
     echo "tools/integration/audit21Check.ts $W/fixtures $n check"; echo "tools/integration/audit21Check.ts $W/aligned $n aligned"; done
   for n in $C83; do
     echo "tools/integration/audit21Check.ts $W/c83-aligned $n c83-aligned"; echo "$T/tree/tools/integration/audit21Check.ts $W/c83-aligned $n c83-aligned-lifted"; done
+  for n in $(ls $W/fixtures/a21-qa-*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 basename); do
+    echo "$T/tree-qa/tools/integration/audit21Check.ts $W/fixtures $n qa-patched"; done
 }
 jobs | xargs -n 4 -P "$J" sh -c 'mkdir -p "'"$REC"'/$3"; node --experimental-strip-types --no-warnings "$0" "$1" "$2" "'"$REC"'/$3/check-$2.json" \
   > "'"$T"'/$3-$2.log" 2>&1 || echo "FAILED $3 $2"'
-for d in check aligned c83-aligned c83-aligned-lifted; do python3 tools/integration/audit21Summary.py "$REC/$d" > "$REC/summary-$d.txt"; done
+for d in check aligned c83-aligned c83-aligned-lifted qa-patched; do python3 tools/integration/audit21Summary.py "$REC/$d" > "$REC/summary-$d.txt"; done
 sh tools/integration/issue151Counters.sh "$T/lag" "$J" $W/aligned/a21-cn-scary-face-at-cfply-azurill-c2.json \
   $W/aligned/a21-cn-scary-face-at-cfply-azurill-c1.json $W/aligned/a21-cn-scary-face-at-cfply-snorlax-c2.json \
   $W/fixtures/a21-iw-normal-at-cfply-golbat-c2.json $W/fixtures/a21-iw-normal-at-cfply-golbat-c1.json \
