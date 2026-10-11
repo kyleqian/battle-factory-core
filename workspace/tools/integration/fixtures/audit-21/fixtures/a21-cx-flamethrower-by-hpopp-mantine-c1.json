@@ -1,0 +1,225 @@
+{
+ "schema": "audit19-chain-fixture/v1",
+ "move": "FLAMETHROWER",
+ "bodyIndex": 1,
+ "probe": "tools/integration/audit19Probe.py",
+ "scenario": "tools/integration/fixtures/audit-21/scenarios/a21-cx-flamethrower-by-hpopp-mantine.json",
+ "denseWindow": {
+  "startFrame": 1896,
+  "endFrame": 2105
+ },
+ "attacker": {
+  "species": "HOPPIP",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "MANTINE",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703682,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 165,
+  "playerMaxHp": 172,
+  "opponentHp": 77,
+  "opponentMaxHp": 142,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 0,
+  "power": 95
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 1,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   3,
+   5,
+   4,
+   13,
+   12,
+   11,
+   10,
+   9,
+   7,
+   19,
+   17,
+   16,
+   15,
+   14,
+   25,
+   24,
+   23,
+   22,
+   21,
+   20,
+   18,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ],
+  "power": 95
+ },
+ "presentationRngActivation": {
+  "value": 1475739498,
+  "source": "audit19Probe.py at.rng2 (RAM gRng2Value, activation frame 1896)"
+ },
+ "pinnedRng2": [
+  [
+   0,
+   2440601759
+  ],
+  [
+   2,
+   2612356828
+  ],
+  [
+   4,
+   4098214719
+  ]
+ ],
+ "pinnedGeneral": [],
+ "promptShown": [
+  true,
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "351",
+      "0",
+      "60",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "53",
+      "0",
+      "95",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 0,
+     "target": 0,
+     "arguments": []
+    }
+   ]
+  },
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "351",
+      "0",
+      "60",
+      "1",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "HIT_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": []
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "53",
+      "0",
+      "95",
+      "1",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}

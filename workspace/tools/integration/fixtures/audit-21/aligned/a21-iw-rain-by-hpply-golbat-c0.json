@@ -1,0 +1,163 @@
+{
+ "schema": "audit19-chain-fixture/v1",
+ "move": "ICY_WIND",
+ "bodyIndex": 0,
+ "probe": "tools/integration/audit19Probe.py",
+ "scenario": "tools/integration/fixtures/audit-21/scenarios/a21-iw-rain-by-hpply-golbat.json",
+ "denseWindow": {
+  "startFrame": 398,
+  "endFrame": 684
+ },
+ "attacker": {
+  "species": "HOPPIP",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "attackerPersonality": 2349015557,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 142,
+  "playerMaxHp": 142,
+  "opponentHp": 182,
+  "opponentMaxHp": 182,
+  "playerGender": "female",
+  "opponentGender": "male"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 1,
+  "power": 55
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 0,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   13,
+   14,
+   11,
+   12,
+   9,
+   10,
+   5,
+   7,
+   3,
+   4,
+   17,
+   18,
+   16,
+   15,
+   21,
+   20,
+   19,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   23,
+   22,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37,
+   38,
+   39,
+   40,
+   41,
+   42,
+   43,
+   44,
+   45,
+   46,
+   47
+  ],
+  "power": 55
+ },
+ "presentationRngActivation": {
+  "value": 3271321420,
+  "source": "audit19Probe.py at.rng2 (RAM gRng2Value, activation frame 398)"
+ },
+ "pinnedRng2": [
+  [
+   0,
+   370756553
+  ]
+ ],
+ "pinnedGeneral": [],
+ "promptShown": [
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "240",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "196",
+      "0",
+      "55",
+      "1",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}
