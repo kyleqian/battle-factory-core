@@ -26,7 +26,9 @@ const nameOf = Object.fromEntries(moveRows.map((m) => [m.move, m.name]));
 // In-flight batches named by the supervisor (ANIMATION_INTEGRATION_PROGRESS.md "Running: order-consumer batch" + prep6 READY list).
 const ORDER_BATCH = []; // all landed (live = 198); kept for the in-flight bucket, which is now empty
 const PREP6_READY = []; // all landed
-const liveSet = new Set(live.implementedAdapters.map((x) => x.move));
+// stl109: additionalRequiredBodies (Struggle 165) are live adapters outside the 276; they never enter the identity below.
+const additionalBodies = new Set(Object.keys(live.additionalRequiredBodies ?? {}));
+const liveSet = new Set(live.implementedAdapters.map((x) => x.move).filter((m) => !additionalBodies.has(m)));
 // Faithful-random adapters (D3, docs/presentation-rng.md): a disjoint bucket, neither scoped-exact live nor remaining.
 const faithfulSet = new Set((live.faithfulRandomAdapters ?? []).map((x) => x.move));
 // Faithful-timing adapters (D4, docs/faithful-timing.md): a third disjoint bucket. A D3+D4 adapter (d3: true) is counted here only.
@@ -46,7 +48,7 @@ const inflightIn = [...accepted].filter((m) => !liveSet.has(m) && !faithfulSet.h
 const remaining = [...accepted].filter((m) => !liveSet.has(m) && !faithfulSet.has(m) && !timingSet.has(m) && !inflight.has(m)).sort();
 if (accepted.size !== live.currentAcceptedFactoryMoves) throw new Error(`accepted ${accepted.size} != live-status currentAcceptedFactoryMoves ${live.currentAcceptedFactoryMoves}`);
 for (const m of liveSet) if (!accepted.has(m)) throw new Error(`live adapter ${m} is not an accepted Factory move`);
-if (liveIn.length !== live.implementedCount) throw new Error(`live ${liveIn.length} != implementedCount ${live.implementedCount}`);
+if (liveIn.length !== live.implementedCount - additionalBodies.size) throw new Error(`live ${liveIn.length} != implementedCount ${live.implementedCount} - ${additionalBodies.size} additional required bodies`);
 for (const m of faithfulSet) {
   if (!accepted.has(m)) throw new Error(`faithful-random adapter ${m} is not an accepted Factory move`);
   if (liveSet.has(m)) throw new Error(`faithful-random adapter ${m} is also scoped-exact live`);

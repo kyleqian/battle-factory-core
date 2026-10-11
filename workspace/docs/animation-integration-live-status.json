@@ -3620,6 +3620,20 @@
         "Headbutt by a GOLEM player attacker carries the adapter's own pre-existing 92 px (body ages 15..38, rows 110..111), identical per row with and without the doll (subswap-ctrl-player-golem-onix-headbutt)",
         "production Scene OFF does not play the body (ISSUES #153, kernel-owned); doubles not covered"
       ]
+    },
+    {
+      "move": "MOVE_STRUGGLE",
+      "id": 165,
+      "sourceFieldEvidence": "../tools/integration/fixtures/stg107/struggle-windows-on.jsonl",
+      "liveEvidence": [
+        "scope: the forced move (additionalRequiredBodies, outside the historical 276; docs/struggle-integration-scope.md): src/animation/struggle.ts program (monbg 7, setalpha / waves 10, waves destroyed 75, splat 76..85, clearmonbg 87, first inactive 111 -> 112 rows), liveOamMoves.ts liveStruggleInputs, battleScene.ts STRUGGLE branch (docs/stl109-struggle-live.md); no Random / Random2 (no D3), no CPU-phase variation in 19 ROM windows (no D4); gates: known lend, a later body only with zero idle rests, non-shiny, no Substitute doll on either side; #142 row 0",
+        "ROM: 19 Struggle windows on 11 forced-Struggle routes (Taunt, PP exhaustion), both orientations, 7 species pairs incl. elevated Golbat and big-picture Snorlax, first and repeated bodies, KO target, recoil faint; r1 == r2 (docs/stg107-struggle.md, tools/integration/fixtures/stg107/struggle-windows-on.jsonl)",
+        "production live renderer: 15 / 15 live windows 0 px on all 112 rows, chain and entry lends, r1 == r2, reproduced from the landed production by tools/integration/stl109Run.sh (receipt tools/integration/fixtures/stl109-live-receipt.json); 4 windows fail closed with named gates",
+        "ordinary routes: seed 60 / streak 23 (opponent Struggle at turn 45; then the player's at turn 58) present live bodies every age (112), prompt reached, Scene ON / OFF logical events / RNG / damage identical (tests/stl109Struggle.test.ts)"
+      ],
+      "remaining": [
+        "Substitute-doll defender / attacker cells, a later body with a non-zero idle rest (an opponent ONIX attacker after other bodies), shiny battlers and a lend the order host does not know (e.g. after a Struggle body: no plan entry) decline with named gates (docs/stg107-struggle.md s3.3)"
+      ]
     }
   ],
   "fallback": "Unadapted MOVE_ANIMATION requests retain a bounded presentation pause, with no generic visual substitution and no playable-exact credit.",
@@ -3636,15 +3650,33 @@
     "#147 ordinary resolution field (both Scene profiles): elevated opponents at origin - enemyMonElevation with the generated shadow while visible, faint sink from the elevated origin, shadow hidden on blink-invisible rows, at HP 0 and on the post-body hide rows; ROM receipts elevated-renderer-receipt.json (Scene OFF 919/935 was 0/935; 203 committed traces byte-identical)"
   ],
   "pending": [
-    "MOVE_STRUGGLE (165): additional required S10A live body, user-approved 2026-10-11; first next-run task alongside stat-change animations; docs/struggle-integration-scope.md",
     "production adapters/providers for the remaining 154 accepted Factory moves",
     "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
     "source palette resource plans for 54 implemented adapters without audited ownership"
   ],
   "foldedVerifiedSnapshot": "8fb2afbc1",
   "currentAcceptedFactoryMoves": 276,
+  "additionalRequiredBodies": {
+    "MOVE_STRUGGLE": {
+      "id": 165,
+      "required": true,
+      "requiredBy": "user decision 2026-10-11 (docs/struggle-integration-scope.md)",
+      "accepted": "stg107: 19 ROM windows, 15 / 15 live production windows 0 px (docs/stg107-struggle.md)",
+      "live": "stl109 (docs/stl109-struggle-live.md): in LIVE_MOVE_ANIMATION_IDS and implementedAdapters; census 0..999: 884 of 1,033 Struggle commands live",
+      "state": "live",
+      "outsideCatalogue": true,
+      "evidence": [
+        "docs/stg107-struggle.md",
+        "docs/stl109-struggle-live.md",
+        "tools/integration/fixtures/stg107/struggle-windows-on.jsonl",
+        "tools/integration/fixtures/stl109-live-receipt.json",
+        "tests/stl109Struggle.test.ts"
+      ],
+      "note": "The ONE required body outside the historical 276 accepted catalogue moves: never counted in currentAcceptedFactoryMoves, the exact / faithful-random / faithful-timing / remaining identity, or the rental list (weight 0). Reported separately as required / accepted / live."
+    }
+  },
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 238,
+  "implementedCount": 239,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -6309,9 +6341,7 @@
     },
     "claimBoundary": "Faithful timing means the live body renders the source animation program exactly (geometry, allocation, order, lifecycle, cleanup, palettes) with ONE deterministic CPU-phase per documented timing parameter: the dominant measured phase (most frequent across all banked measurements; a tie selects the phase without the optional event). Windows measured in the selected phase are pixel-exact; windows measured in the other phase differ only on the documented rows. Faithful-timing adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG, damage, turn order or facility state."
   },
-  "unadaptedNotes": {
-    "MOVE_STRUGGLE": "Required by the 2026-10-11 user decision; no live adapter yet. Track separately from the historical 276 accepted catalogue bodies until dense acceptance and live promotion. Headline ordinary-play coverage includes Struggle; rental-list weight 0 does not exclude it. See docs/struggle-integration-scope.md."
-  },
+  "unadaptedNotes": {},
   "verifiedPreview": {
     "commit": "96aaaebbe8eddb238e2dc5de781b19d921c20d5f",
     "build": "96aaaebbe 2026-10-09",

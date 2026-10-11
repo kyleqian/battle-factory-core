@@ -13,6 +13,10 @@ describe("animation-integration live status count", () => {
     const status = JSON.parse(readFileSync(join(import.meta.dirname, "../docs/animation-integration-live-status.json"), "utf8"));
     const ids = (status.implementedAdapters as { id: number }[]).map(entry => entry.id);
     expect(new Set(ids).size).toBe(ids.length);
+    // stl109: Struggle 165 is the one additional required body outside the historical 276 (additionalRequiredBodies); it is a live
+    // scoped-exact adapter, so it is in implementedAdapters / LIVE_MOVE_ANIMATION_IDS and in implementedCount, but never in the 276.
+    expect(Object.values(status.additionalRequiredBodies as Record<string, { id: number }>).map(entry => entry.id)).toEqual([165]);
+    expect(ids).toContain(165);
     expect(status.implementedCount).toBe(ids.length);
     expect([...ids].sort((a, b) => a - b)).toEqual([...LIVE_MOVE_ANIMATION_IDS].sort((a, b) => a - b));
   });
@@ -26,7 +30,7 @@ describe("animation-integration live status count", () => {
     // 240 - Light Screen reclassified to faithful timing (lsbz, the opponent's row-59 BLDALPHA write phase); 239 - Sky Attack reclassified to
     // faithful timing (d4later, the strike's optional lag at 161); 238 - Focus Punch reclassified to faithful timing (fp100, the age-131
     // restore lag).
-    expect(status.implementedCount).toBe(238);
+    expect(status.implementedCount - Object.keys(status.additionalRequiredBodies).length).toBe(238); // + Struggle 165 (stl109) = 239 live adapters
     expect(status.playableExactCount).toBe(0);
     const faithful = status.faithfulRandomAdapters as { id: number; move: string; policy: string; provenance: string }[];
     expect(status.faithfulRandomCount).toBe(faithful.length);
@@ -55,8 +59,11 @@ describe("animation-integration live status count", () => {
     const timing = status.faithfulTimingAdapters as { id: number; move: string; policyVersion: string; d3: boolean; timingParameters: unknown[] }[];
     expect(status.faithfulTimingCount).toBe(timing.length);
     expect(timing.map((entry) => entry.id).sort((a, b) => a - b)).toEqual([...LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS].sort((a, b) => a - b));
+    const additional = new Set(Object.keys(status.additionalRequiredBodies));
+    expect(additional.size).toBe(1);
+    expect(accepted.has("MOVE_STRUGGLE")).toBe(false); // outside the catalogue: never one of the 276
     const buckets = {
-      exact: (status.implementedAdapters as { move: string }[]).map((entry) => entry.move),
+      exact: (status.implementedAdapters as { move: string }[]).map((entry) => entry.move).filter((move) => !additional.has(move)),
       faithfulRandom: (status.faithfulRandomAdapters as { move: string }[]).map((entry) => entry.move),
       faithfulTiming: timing.map((entry) => entry.move),
     };

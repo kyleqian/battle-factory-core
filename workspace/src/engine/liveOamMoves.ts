@@ -7,6 +7,7 @@
 import darkBgAsset from "../assets/gen/battle-anim-bg-dark.json" with { type: "json" };
 import psychicBgAsset from "../assets/gen/battle-anim-psychic-bg.json" with { type: "json" };
 import ghostBgAsset from "../assets/gen/battle-anim-ghost-bg.json" with { type: "json" };
+import movementWavesAsset from "../assets/gen/battle-anim-movement-waves.json" with { type: "json" };
 import enemyElevations from "../data/gen/enemy-mon-elevations.json" with { type: "json" };
 import paletteData from "../data/gen/live-animation-palette-resources.json" with { type: "json" };
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES } from "./liveBgSnapshotMoves.ts";
@@ -15,7 +16,7 @@ import {
   FURY_CUTTER_ROWS, KNOWN_ENTRY_HEALTHBOX_OAM, buildLiveHardwareOam, carryLiveSpriteOrder, KNOWN_ENTRY_HEALTHBOX_SLOTS, PURSUIT_ROWS, RETURN_ROWS, liveFuryCutterHardwareOamRows, liveMegahornHardwareOamRows, livePursuitHardwareOamRows, liveReturnHardwareOamRows, liveReturnLives, liveReturnProgram, liveRevengeHardwareOamRows, liveWillOWispHardwareOamRows, livePsywaveHardwareOamRows, livePsywaveRingAttr, liveExtrasensoryCloneStep, liveExtrasensoryHardwareOamRows,
   SKILL_SWAP_ORB, SKILL_SWAP_ORB_PAIRS, liveSkillSwapHardwareOamRows, liveSkillSwapOrbLives, type LiveSkillSwapOrbPosition,
   FLATTER_ROWS, liveFlatterHardwareOamRows, type LiveFlatterBuildSprites,
-  type LiveOamScene, type LiveReturnBranch, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
+  type LiveOamScene, type LiveOamSprite, type LiveReturnBranch, type LiveSpriteOrderSort, type OamAttr, type WispProgram,
 } from "./liveMoveOamAssembler.ts";
 import { liveMegahornBodyRows, liveMegahornRows } from "./liveMegahornInputs.ts";
 import { LIVE_REVENGE_ROWS, liveRevengeRows } from "./liveRevengeInputs.ts";
@@ -1293,6 +1294,133 @@ export function liveFlatterInputs(args: LiveFlatterInputArgs): { duration: numbe
         palette: { unfaded: loaded(row, args.palettes.unfaded), faded: loaded(row, args.palettes.faded),
           hardware: row === 0 ? [...args.palettes.hardware] : loaded(row - 1, args.palettes.faded) },
         registers: liveFlatterRegisters(row, args.firstBody),
+      };
+    },
+  };
+}
+
+/** stg107: MOVE_STRUGGLE's source program, passed in by liveMoveAnimation.ts (src/animation/struggle.ts). */
+export interface LiveStruggleProgram {
+  readonly rows: number; readonly monbg: number; readonly blend: number; readonly clearMonbg: number;
+  readonly splat: number; readonly splatLife: number;
+  readonly attackerX2: (state: number) => number;
+  readonly targetX2: (state: number) => number;
+  readonly waveFrame: (state: number) => number | null;
+  readonly waveAnims: readonly (readonly Readonly<{ tileOffset: number; hFlip: boolean }>[])[];
+}
+export interface LiveStruggleArgs {
+  readonly attackerSide: Side;
+  readonly attackerSpecies: string;
+  readonly targetSpecies: string;
+  readonly attacker: LiveOamBattlerAnchors;
+  readonly target: LiveOamBattlerAnchors;
+  readonly palettes: LivePaletteComposite;
+  readonly activationOrder: readonly number[];
+  readonly sort: LiveSpriteOrderSort;
+  readonly program: LiveStruggleProgram;
+}
+/** Known-entry allocator (docs/stg107-struggle.md s1; every probed activation): IMPACT loads first (tile 305, OBJ palette slot 7 = bank
+ * 23), MOVEMENT_WAVES second (0x600 bytes: tiles 321..368, slot 8 = bank 24); matrices 1 / 2 are held at the known entry (matrix 0). */
+const STRUGGLE_IMPACT_TILES = [305, 16] as const, STRUGGLE_WAVES_TILES = [321, 48] as const;
+const STRUGGLE_IMPACT_SLOT = 7, STRUGGLE_WAVES_SLOT = 8;
+const struggleCache = new Map<string, { oam: string[][]; matrices: (readonly [number, number, number, number])[][] }>();
+
+/**
+ * MOVE_STRUGGLE (165) live inputs (stg107): hardware OAM + matrices over the lent order (`hardwareOam[row] = build(sprite state of
+ * row - 1)`): the attacker (AnimTask_ShakeMonInPlace x2 on its OBJ), the target (monbg: absent from the monbg row to clearmonbg; its
+ * ShakeMonInPlace x2 drives the BG scroll), the two gMovementWavesSpriteTemplate sprites (lowest free slots, attacker X_2 +32 / -32,
+ * Y_PIC_OFFSET, subpriority attacker - 2, 32x32 ObjNormal, gMovementWavesAnimTable frames) and the basic hitsplat (the freed lowest
+ * slot, target X_2 / Y_PIC_OFFSET, subpriority attacker - 3, affine anim 2 = matrix 372, ObjBlend). Palette = composite + IMPACT
+ * (bank 23, row 2) + MOVEMENT_WAVES (bank 24, row 3) + the monbg copy of the target's OBJ bank (BG bank 8 opponent / 9 player).
+ * Registers = S0 + MoveBattlerSpriteToBG / Task_UpdateMonBg (scroll 32 - (centre + x2) one row later, until clearmonbg + 3),
+ * setalpha 12, 8 until clearmonbg. Every value is source-derived; no capture row.
+ */
+export function liveStruggleInputs(args: LiveStruggleArgs): { duration: number; animationInputsAt: (age: number) => Record<string, unknown> } {
+  const { attackerSide, attacker, target, program: p } = args;
+  const targetSide: Side = attackerSide === "player" ? "opponent" : "player";
+  const attackerObject = battlerObject(attackerSide, attacker), targetObject = battlerObject(targetSide, target);
+  const free = Array.from({ length: 64 }, (_, i) => i).filter((i) => !KNOWN_ENTRY_OCCUPIED_SLOTS.includes(i));
+  const waveSlots = [free[0]!, free[1]!], splatSlot = free[0]!;
+  const withX2 = (attr: OamAttr, dx: number): OamAttr => [attr[0], attr[1] & ~0x1ff | (attr[1] + dx) & 0x1ff, attr[2]];
+  const spritesAt = (state: number): LiveOamSprite[] => {
+    const out: LiveOamSprite[] = KNOWN_ENTRY_SCENE.occupants.map((o) => ({ ...o, oamY: o.attr[0] & 0xff }));
+    const attackerAttr = withX2(attackerObject.attr, p.attackerX2(state));
+    out.push({ slot: attackerObject.slot, attr: attackerAttr, subpriority: attackerObject.subpriority, visible: true, oamY: attackerAttr[0] & 0xff });
+    const targetAttr = withX2(targetObject.attr, p.targetX2(state));
+    out.push({ slot: targetObject.slot, attr: targetAttr, subpriority: targetObject.subpriority,
+      visible: !(state >= p.monbg && state < p.clearMonbg), oamY: targetAttr[0] & 0xff });
+    const frame = p.waveFrame(state);
+    if (frame !== null) {
+      waveSlots.forEach((slot, i) => {
+        const anim = p.waveAnims[i]![frame]!;
+        const x = attacker.picOffsetPoint.x + (i === 0 ? 32 : -32), y = attacker.picOffsetPoint.y;
+        const attr: OamAttr = [y - 16 & 0xff, 0x8000 | (anim.hFlip ? 0x1000 : 0) | x - 16 & 0x1ff,
+          STRUGGLE_WAVES_TILES[0] + anim.tileOffset | 2 << 10 | STRUGGLE_WAVES_SLOT << 12];
+        out.push({ slot, attr, subpriority: attackerObject.subpriority - 2, visible: true, oamY: attr[0] & 0xff });
+      });
+    }
+    if (state >= p.splat && state < p.splat + p.splatLife) {
+      const { x, y } = target.picOffsetPoint;
+      const attr: OamAttr = [0x0100 | 0x0400 | y - 16 & 0xff, 0x8000 | x - 16 & 0x1ff, STRUGGLE_IMPACT_TILES[0] | 2 << 10 | STRUGGLE_IMPACT_SLOT << 12];
+      out.push({ slot: splatSlot, attr, subpriority: attackerObject.subpriority - 3, visible: true, oamY: attr[0] & 0xff });
+    }
+    return out;
+  };
+  const matricesAt = (state: number): (readonly [number, number, number, number])[] => {
+    const m = IDENTITY_MATRICES.slice() as (readonly [number, number, number, number])[];
+    if (state >= p.splat && state < p.splat + p.splatLife) m[0] = [372, 0, 0, 372];
+    return m;
+  };
+  const key = JSON.stringify([attackerSide, attacker, target, attackerObject.attr, targetObject.attr, args.activationOrder]);
+  let built = struggleCache.get(key);
+  if (!built) {
+    const oam: string[][] = [], matrices: (readonly [number, number, number, number])[][] = [];
+    let order: readonly number[] = args.activationOrder;
+    let previous = spritesAt(-1);
+    for (let row = 0; row < p.rows; row += 1) {
+      const m = matricesAt(row - 1);
+      oam.push(buildLiveHardwareOam(order, previous, KNOWN_ENTRY_SCENE.healthbox, m));
+      matrices.push(m);
+      previous = spritesAt(row);
+      order = carryLiveSpriteOrder(order, previous, args.sort);
+    }
+    built = { oam, matrices };
+    if (struggleCache.size > 16) struggleCache.clear();
+    struggleCache.set(key, built);
+  }
+  const rows = built;
+  const monbgBank = targetSide === "opponent" ? 8 : 9, targetObjBank = targetSide === "opponent" ? 17 : 16;
+  const layer = targetSide === "opponent" ? "bg1" : "bg2";
+  const impactPalette = resourceWords("ANIM_TAG_IMPACT");
+  const wavesPalette = movementWavesAsset.palette.map(bgr555);
+  const paletteAt = (age: number): number[] => {
+    const out = args.palettes.hardware.slice();
+    if (age >= 2) impactPalette.forEach((word, i) => { out[23 * 16 + i] = word; });
+    if (age >= 3) wavesPalette.forEach((word, i) => { out[24 * 16 + i] = word; });
+    if (age >= p.monbg) for (let i = 0; i < 16; i += 1) out[monbgBank * 16 + i] = out[targetObjBank * 16 + i]!;
+    return out;
+  };
+  const registersAt = (age: number): Record<string, number> => {
+    const registers: Record<string, number> = { ...S0_REGISTERS };
+    if (age >= 1) { registers.win0h = 0; registers.win0v = 0; }
+    if (age >= p.monbg + 1) registers[`${layer}cnt`] = (S0_REGISTERS[`${layer}cnt`]! & ~0xc003 | 0x4000 | 2) & 0xffff;
+    if (age >= 1 && age - 1 >= p.monbg && age - 1 < p.clearMonbg + 3) {
+      registers[`${layer}hofs`] = (32 - (target.spriteCenter.x + target.frontIdleRest.x2 + p.targetX2(age - 1))) & 0x1ff;
+      registers[`${layer}vofs`] = (32 - (target.spriteCenter.y + target.frontIdleRest.y2)) & 0x1ff;
+    }
+    if (age >= p.blend && age < p.clearMonbg) { registers.bldcnt = 16192; registers.bldalpha = 2060; }
+    return registers;
+  };
+  const art = (species: string, object: ReturnType<typeof battlerObject>) => ({ displaySpecies: species, attr: object.attr });
+  return {
+    duration: p.rows,
+    animationInputsAt: (age: number) => {
+      const row = Math.min(age, rows.oam.length - 1);
+      return {
+        attackerArt: art(args.attackerSpecies, attackerObject), targetArt: art(args.targetSpecies, targetObject),
+        buffers: { hardwareOam: rows.oam[row]!, hardwareMatrices: rows.matrices[row]! },
+        hardwarePalette: paletteAt(age), registers: registersAt(age), monbgLayer: layer,
+        impactTiles: STRUGGLE_IMPACT_TILES, wavesTiles: STRUGGLE_WAVES_TILES, impactBank: 16 + STRUGGLE_IMPACT_SLOT, wavesBank: 16 + STRUGGLE_WAVES_SLOT,
       };
     },
   };

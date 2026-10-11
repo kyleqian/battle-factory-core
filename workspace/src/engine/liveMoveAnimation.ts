@@ -40,6 +40,10 @@ import { SPORE_FRAME_COUNT } from "../animation/spore.ts";
 import { STOMP_FRAME_COUNT } from "../animation/stomp.ts";
 import { STUN_SPORE_FRAME_COUNT } from "../animation/stunSpore.ts";
 import { GRASS_WHISTLE_WINDOW_FRAMES } from "../animation/grassWhistle.ts";
+import {
+  STRUGGLE_BLEND, STRUGGLE_CLEAR_MONBG, STRUGGLE_MONBG, STRUGGLE_ROWS, STRUGGLE_SPLAT, STRUGGLE_SPLAT_LIFE, STRUGGLE_WAVE_ANIMS,
+  struggleAttackerOamX2, struggleTargetX2, struggleWaveFrame,
+} from "../animation/struggle.ts";
 import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
 import { liveTrackedFrontIdleRest, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
@@ -113,7 +117,7 @@ import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveO
 import { liveEruptionProfile, liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES, battlerSprite, liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveScanlineEntry } from "./liveScanlineHistory.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveStruggleInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveSpriteOrderPlanText, shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
@@ -382,6 +386,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, drawn on the doll), and present the swaps around a proven body while only the attacker is
   // (liveMoveSubstituteDollDeclines, liveSubstituteSwap.ts).
   164,
+  // stl109 (docs/stl109-struggle-live.md): Struggle, the forced move (the ONE required body outside the historical 276; scoped exact, no
+  // D3 / D4 parameter). Tracked in docs/animation-integration-live-status.json additionalRequiredBodies.
+  165,
 ] as const);
 
 /** In-use OBJ slots at a first-body activation (prep14 s1: equal in all 24 probed scenarios). */
@@ -420,6 +427,8 @@ export const LIVE_MOVE_OPPONENT_SHADOW_ROW: Readonly<Record<number, number>> = O
     76, 217, 236, 250,
     // multihit batch (multihit-shadow-rows.json): every hit window starts at its own activation.
     3, 4, 167,
+    // stg107 (docs/stg107-struggle.md): Struggle's window starts at activation (elevated GOLBAT target: 200 px at age 0 otherwise).
+    165,
     // anchor4 batch (issue142-shadow-rows-extra.json): every window starts at activation (Earthquake: age 0 is the activation frame).
     89, 90, 152, 345, 60, 133,
     // next5 (issue142-shadow-rows-extra.json): Glare/Teeter Dance/Soft-Boiled windows start at activation;
@@ -1119,6 +1128,8 @@ export function liveMoveAnimationDuration(
       const inputs = field === undefined ? null : waterSpoutLiveInputs(field, request.attacker === 0 ? "player" : "opponent");
       return inputs === null ? null : waterSpoutTimeline(inputs).length;
     }
+    // stg107: Struggle (src/animation/struggle.ts): activation .. first inactive age 111.
+    case 165: return STRUGGLE_ROWS;
     case 2: return KARATE_CHOP_FRAME_COUNT;
     // Extreme Speed: activation .. first inactive row (prep34 s1.1); faithful timing (a13fix): the policy's dominant 321-row phase (lag at 292).
     case 245: return liveMoveTimingBodyRows(245);
@@ -3951,6 +3962,26 @@ export function liveMoveAnimationPresentation(
         counter: furyCutterCounter, sort: sortGbaSpriteOrder });
       if (inputs === null) return null;
       config = { move: "FURY_CUTTER", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
+      break;
+    }
+    case 165: {
+      // stg107 (docs/stg107-struggle.md): Struggle, the forced move. Return's gates: any known lend (the known-entry allocator IMPACT /
+      // MOVEMENT_WAVES tiles 305 / 321, palette slots 7 / 8, matrix 0 at every probed activation), non-shiny, a later body only with
+      // zero idle rests (both ShakeMonInPlace tasks are relative to the battler's x2).
+      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      const palettes = composeLiveArtPalettes(art);
+      const activationOrder = spriteOrderWithOccupiedPrefix(
+        { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+      if (palettes === null || activationOrder === null) return null;
+      const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      const inputs = liveStruggleInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        sort: sortGbaSpriteOrder, program: { rows: STRUGGLE_ROWS, monbg: STRUGGLE_MONBG, blend: STRUGGLE_BLEND, clearMonbg: STRUGGLE_CLEAR_MONBG,
+          splat: STRUGGLE_SPLAT, splatLife: STRUGGLE_SPLAT_LIFE, attackerX2: struggleAttackerOamX2, targetX2: struggleTargetX2,
+          waveFrame: struggleWaveFrame, waveAnims: STRUGGLE_WAVE_ANIMS } });
+      config = { move: "STRUGGLE", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
     case 216: {

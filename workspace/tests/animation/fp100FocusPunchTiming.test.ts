@@ -73,7 +73,8 @@ describe("fp100: Focus Punch age-131 restore lag (D4)", () => {
     expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(264);
     expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(264);
     const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
-    expect([status.implementedCount, status.faithfulRandomCount, status.faithfulTimingCount]).toEqual([238, 13, 25]);
+    // stl109: implementedCount also counts Struggle 165, the one additional required body outside the 276 (additionalRequiredBodies)
+    expect([status.implementedCount - Object.keys(status.additionalRequiredBodies).length, status.faithfulRandomCount, status.faithfulTimingCount]).toEqual([238, 13, 25]);
     expect(status.implementedAdapters.some((e: { id: number }) => e.id === 264)).toBe(false);
     const entry = status.faithfulTimingAdapters.find((e: { id: number }) => e.id === 264);
     expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[264]!.parameters.map(({ evidence: _evidence, ...p }) => p));

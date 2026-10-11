@@ -8284,6 +8284,17 @@
    ]
   }
  ],
+ "additionalRequiredBodies": [
+  {
+   "move": "MOVE_STRUGGLE",
+   "id": 165,
+   "required": true,
+   "accepted": true,
+   "live": true,
+   "rentalListEntry": false,
+   "note": "The ONE required body outside the 276 catalogue moves (user decision 2026-10-11, docs/struggle-integration-scope.md): not a rental move, so it has no entry in the tiers above and is in none of their counts. Accepted by stg107 (19 ROM windows, 15 / 15 live production windows 0 px, docs/stg107-struggle.md), live by stl109 (docs/stl109-struggle-live.md)."
+  }
+ ],
  "queue": [],
  "blockers": [
   {

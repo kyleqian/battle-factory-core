@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import inventory from "../../src/data/gen/factory-animation-inventory.json" with { type: "json" };
 import frontierMons from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
+import { LIVE_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveAnimation.ts";
 import { LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS } from "../../src/engine/liveMovePresentationRng.ts";
 import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import {
@@ -68,7 +69,10 @@ describe("live inventory claim buckets", () => {
   it("counts faithful-random adapters apart from scoped-exact live adapters and Factory acceptance", () => {
     const status = JSON.parse(readFileSync(join(import.meta.dirname, "../../docs/animation-integration-live-status.json"), "utf8"));
     // implementedCount keeps meaning the scoped-exact live adapters; faithful random is a disjoint bucket.
-    expect(status.implementedCount).toBe(238); // d4later: Sky Attack -> faithful timing; fp100: Focus Punch -> faithful timing
+    // d4later: Sky Attack -> faithful timing; fp100: Focus Punch -> faithful timing; stl109: + Struggle 165, the one required body outside the 276
+    const additional = Object.keys(status.additionalRequiredBodies);
+    expect(additional).toEqual(["MOVE_STRUGGLE"]);
+    expect(status.implementedCount).toBe(238 + additional.length);
     // Faithful-random adapters (liveMovePresentationRng.ts): the production list, nothing more.
     expect(status.faithfulRandomCount).toBe(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS.length);
     expect(status.faithfulRandomAdapters).toHaveLength(status.faithfulRandomCount);
@@ -98,11 +102,35 @@ describe("live inventory claim buckets", () => {
     expect(bulkUp.sourceFieldEvidence).toContain("../tools/integration/fixtures/fix74-live-receipt.json");
     // every accepted move is in exactly one of exact / faithful random / faithful timing / remaining (276)
     const census = JSON.parse(readFileSync(join(import.meta.dirname, "../../tools/integration/fixtures/remaining-adapters-census.json"), "utf8")).summary;
-    expect(status.implementedCount + status.faithfulRandomCount + status.faithfulTimingCount + census.remaining).toBe(276);
+    expect(status.implementedCount - additional.length + status.faithfulRandomCount + status.faithfulTimingCount + census.remaining).toBe(276);
     expect(census.faithfulTiming).toBe(status.faithfulTimingCount);
     // Faithful random / timing add no exact coverage or Factory acceptance.
     expect(status.currentAcceptedFactoryMoves).toBe(276);
     expect(animationCoverageSummary().find((row) => row.tier === "level50")?.exact).toBe(275);
+  });
+
+  it("tracks Struggle 165 as the one required body outside the catalogue: required / accepted / live reported separately, in no rental tier", () => {
+    const status = JSON.parse(readFileSync(join(import.meta.dirname, "../../docs/animation-integration-live-status.json"), "utf8"));
+    const coverage = JSON.parse(readFileSync(join(import.meta.dirname, "../../ANIMATION_COVERAGE.json"), "utf8"));
+    const record = status.additionalRequiredBodies.MOVE_STRUGGLE;
+    expect(record).toMatchObject({ id: 165, required: true, state: "live", outsideCatalogue: true });
+    expect(coverage.additionalRequiredBodies).toEqual([
+      expect.objectContaining({ move: "MOVE_STRUGGLE", id: 165, required: true, accepted: true, live: true, rentalListEntry: false }),
+    ]);
+    expect((LIVE_MOVE_ANIMATION_IDS as readonly number[]).includes(165)).toBe(true);
+    // not a rental move: in neither the level-50 (276) nor the open-only tier; it sits in the outside-Factory tier (its 77 unsupported
+    // ledger rows are the catalogue's own), so the partitions and exact counts stay as they were
+    for (const tier of [inventory.tiers.level50, inventory.tiers.openOnly]) expect(tier.moves.map((move) => move.move)).not.toContain("MOVE_STRUGGLE");
+    expect(inventory.tiers.outsideFactory.moves.map((move) => move.move)).toContain("MOVE_STRUGGLE");
+    expect(status.pending.some((line: string) => line.includes("MOVE_STRUGGLE"))).toBe(false);
+    expect(Object.keys(status.unadaptedNotes)).not.toContain("MOVE_STRUGGLE");
+    const report = {
+      required: 1,
+      accepted: Object.values(coverage.additionalRequiredBodies as { accepted: boolean }[]).filter((entry) => entry.accepted).length,
+      live: (status.implementedAdapters as { id: number }[]).filter((entry) => entry.id === 165).length,
+    };
+    expect(report).toEqual({ required: 1, accepted: 1, live: 1 });
+    expect(status.implementedCount).toBe(239);
   });
 });
 
