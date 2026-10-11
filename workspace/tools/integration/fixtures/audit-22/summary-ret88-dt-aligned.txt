@@ -1,0 +1,6 @@
+pb-ret88-opp-double-team-c1.json                     DOUBLE_TEAM  player   AMPHAROS/EXPLOUD     live=1 rows=159 exact=159 px=0 ages=- r1==r2=1 | entry live=1 px=0
+pb-ret88-opp-double-team-c2.json                     DOUBLE_TEAM  player   AMPHAROS/EXPLOUD     live=1 rows=159 exact=159 px=0 ages=- r1==r2=1 | entry live=1 px=32462
+pb-ret88-ply-double-team-c1.json                     DOUBLE_TEAM  opponent SNORLAX/EXPLOUD      live=1 rows=159 exact=159 px=0 ages=- r1==r2=1 | entry live=1 px=79107
+pb-ret88-ply-double-team-c3.json                     DOUBLE_TEAM  opponent SNORLAX/EXPLOUD      live=1 rows=159 exact=159 px=0 ages=- r1==r2=1 | entry live=1 px=79107
+pb-ret88-ply-double-team-c5.json                     DOUBLE_TEAM  opponent SNORLAX/EXPLOUD      live=1 rows=159 exact=159 px=0 ages=- r1==r2=1 | entry live=1 px=79107
+windows=5 live=5 0px=5 r1==r2=5 declined=0

@@ -1,0 +1,10 @@
+pb-ret88-opp-double-team-c0.json RETURN units 0 power 1 otherInvisible 0
+pb-ret88-opp-double-team-c1.json DOUBLE_TEAM units 3 power 1 otherInvisible 0
+pb-ret88-opp-double-team-c2.json DOUBLE_TEAM units 5 power 1 otherInvisible 0
+pb-ret88-opp-double-team-c3.json RETURN units 7 power 1 otherInvisible 0
+pb-ret88-ply-double-team-c0.json RETURN units 0 power 1 otherInvisible 0
+pb-ret88-ply-double-team-c1.json DOUBLE_TEAM units 2 power 1 otherInvisible 0
+pb-ret88-ply-double-team-c2.json RETURN units 4 power 1 otherInvisible 0
+pb-ret88-ply-double-team-c3.json DOUBLE_TEAM units 6 power 1 otherInvisible 0
+pb-ret88-ply-double-team-c4.json RETURN units 8 power 1 otherInvisible 0
+pb-ret88-ply-double-team-c5.json DOUBLE_TEAM units 10 power 1 otherInvisible 0

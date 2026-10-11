@@ -1,0 +1,270 @@
+{
+ "battleNum": 0,
+ "challengeNum": 0,
+ "level": 50,
+ "mode": "mechanicLab",
+ "opponentSetIds": [
+  135,
+  188,
+  184
+ ],
+ "overrides": {
+  "parties": {
+   "opponent": [
+    {
+     "ivs": {
+      "attack": 31,
+      "defense": 31,
+      "hp": 31,
+      "spAttack": 31,
+      "spDefense": 31,
+      "speed": 31
+     },
+     "level": 15,
+     "moves": [
+      240,
+      240,
+      240,
+      240
+     ],
+     "species": 54
+    },
+    {
+     "ivs": {
+      "attack": 31,
+      "defense": 31,
+      "hp": 31,
+      "spAttack": 31,
+      "spDefense": 31,
+      "speed": 31
+     },
+     "level": 15,
+     "moves": [
+      240,
+      240,
+      240,
+      240
+     ],
+     "species": 16
+    },
+    {
+     "ivs": {
+      "attack": 31,
+      "defense": 31,
+      "hp": 31,
+      "spAttack": 31,
+      "spDefense": 31,
+      "speed": 31
+     },
+     "level": 18,
+     "moves": [
+      240,
+      240,
+      240,
+      240
+     ],
+     "species": 21
+    }
+   ],
+   "player": [
+    {
+     "ivs": {
+      "attack": 31,
+      "defense": 31,
+      "hp": 31,
+      "spAttack": 31,
+      "spDefense": 31,
+      "speed": 0
+     },
+     "level": 50,
+     "moves": [
+      129,
+      115,
+      115,
+      115
+     ],
+     "species": 79
+    },
+    {
+     "ivs": {
+      "attack": 31,
+      "defense": 31,
+      "hp": 31,
+      "spAttack": 31,
+      "spDefense": 31,
+      "speed": 31
+     },
+     "level": 50,
+     "moves": [
+      33,
+      33,
+      33,
+      33
+     ],
+     "species": 67
+    },
+    {
+     "ivs": {
+      "attack": 31,
+      "defense": 31,
+      "hp": 31,
+      "spAttack": 31,
+      "spDefense": 31,
+      "speed": 31
+     },
+     "level": 50,
+     "moves": [
+      33,
+      33,
+      33,
+      33
+     ],
+     "species": 75
+    }
+   ]
+  }
+ },
+ "playerSetIds": [
+  156,
+  149,
+  180
+ ],
+ "profile": "battle-scene-on",
+ "schemaVersion": 1,
+ "seed": 305419897,
+ "trace": {
+  "segments": [
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 30
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 2400
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 30
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 2400
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 30
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 2400
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 30
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 2400
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 30
+   },
+   {
+    "buttons": [
+     "RIGHT"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 20
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 2400
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 30
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 2
+   },
+   {
+    "buttons": [],
+    "frames": 2400
+   }
+  ]
+ },
+ "trainerId": 50
+}

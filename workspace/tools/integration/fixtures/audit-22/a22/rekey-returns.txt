@@ -1,0 +1,1 @@
+38 fixtures kept; 43 dropped (non-Return bodies); 68 Return events rekeyed; friendship {'0': 68}

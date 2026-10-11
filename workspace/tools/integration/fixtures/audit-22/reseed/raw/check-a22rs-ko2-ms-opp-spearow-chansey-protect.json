@@ -1,0 +1,348 @@
+{
+ "schema": "reseed85-chain-check/v1",
+ "scenario": "a22rs-ko2-ms-opp-spearow-chansey-protect",
+ "rows": [
+  {
+   "fixture": "a22rs-ko2-ms-opp-spearow-chansey-protect-c0.json",
+   "move": "PROTECT",
+   "side": "opponent",
+   "species": "CHANSEY/SLOWPOKE",
+   "units": 9,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "189@1 HIT_ANIMATION@0 STATS_CHANGE(27)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "182@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4939,
+    "endFrame": 5061
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 189:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "reseeds": [
+     true
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a22rs-ko2-ms-opp-spearow-chansey-protect-c1.json",
+   "move": "PROTECT",
+   "side": "opponent",
+   "species": "CHANSEY/SLOWPOKE",
+   "units": 10,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "189@1 HIT_ANIMATION@0 STATS_CHANGE(27)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "182@1",
+    "182@1"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 7373,
+    "endFrame": 7495
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 189:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "reseeds": [
+     true
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 123,
+    "exactRows": 123,
+    "px": 0,
+    "digests": [
+     "b536151869dadf6c",
+     "b536151869dadf6c"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "a22rs-ko2-ms-opp-spearow-chansey-protect-c2.json",
+   "move": "SWIFT",
+   "side": "player",
+   "species": "SLOWPOKE/CHANSEY",
+   "units": 11,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "189@1 HIT_ANIMATION@0 STATS_CHANGE(27)@0 129@0 HIT_ANIMATION@1 undefined@1 undefined@1 undefined@1 undefined@1",
+    "182@1",
+    "182@1",
+    "129@0"
+   ],
+   "romPower": 60,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 60
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 9959,
+    "endFrame": 10036
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "player"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 189:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "residualRows": [],
+    "detail": [],
+    "allocatorKnown": true,
+    "reseeds": [
+     true
+    ],
+    "d3": {
+     "registers": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     },
+     "activationOrder": null,
+     "allocator": {
+      "exact": 0,
+      "rows": 0,
+      "mismatch": []
+     }
+    },
+    "d3Same": true
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 78,
+    "exactRows": 78,
+    "px": 0,
+    "digests": [
+     "5b54014456a1d44f",
+     "5b54014456a1d44f"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

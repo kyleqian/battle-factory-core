@@ -1,0 +1,1 @@
+5 fixtures kept; 5 dropped (Return bodies); 8 Return events rekeyed; friendship {'0': 8}

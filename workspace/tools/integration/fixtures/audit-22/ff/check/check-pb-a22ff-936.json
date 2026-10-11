@@ -1,0 +1,1426 @@
+{
+ "schema": "audit22-chain-check/v1",
+ "scenario": "pb-a22ff-936",
+ "rows": [
+  {
+   "fixture": "pb-a22ff-936-c0.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/TOGETIC",
+   "alloc": {
+    "input": [
+     -1
+    ],
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": false,
+    "preDiff": []
+   },
+   "units": 0,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "260@1"
+   ],
+   "romPower": 0,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 74,
+    "endFrame": 292
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a22ff-936-c1.json",
+   "move": "FOLLOW_ME",
+   "side": "player",
+   "species": "TOGETIC/NIDORINO",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 6,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "260@1 STATS_CHANGE(18)@0 status:CONFUSION@0 status:CONFUSION@0 HIT_ANIMATION@0",
+    "status:CONFUSION@0 266@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1614,
+    "endFrame": 1798
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 185,
+    "exactRows": 185,
+    "px": 0,
+    "digests": [
+     "c1cb2b501f4f586d",
+     "c1cb2b501f4f586d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 185,
+    "exactRows": 185,
+    "px": 0,
+    "digests": [
+     "c1cb2b501f4f586d",
+     "c1cb2b501f4f586d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a22ff-936-c2.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/TOGETIC",
+   "alloc": {
+    "input": [
+     -1
+    ],
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": false,
+    "preDiff": []
+   },
+   "units": 7,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "260@1 STATS_CHANGE(18)@0 status:CONFUSION@0 status:CONFUSION@0 HIT_ANIMATION@0",
+    "status:CONFUSION@0 266@0 260@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1947,
+    "endFrame": 2165
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 212,
+    "px": 68,
+    "digests": [
+     "46384e54d1609055",
+     "46384e54d1609055"
+    ],
+    "residualRows": [
+     [
+      69,
+      3
+     ],
+     [
+      70,
+      29
+     ],
+     [
+      71,
+      21
+     ],
+     [
+      72,
+      6
+     ],
+     [
+      73,
+      4
+     ],
+     [
+      90,
+      1
+     ],
+     [
+      91,
+      4
+     ]
+    ],
+    "rowBoxes": [
+     [
+      69,
+      0,
+      239,
+      99,
+      102
+     ],
+     [
+      70,
+      0,
+      239,
+      93,
+      99
+     ],
+     [
+      71,
+      3,
+      238,
+      89,
+      96
+     ],
+     [
+      72,
+      7,
+      231,
+      85,
+      93
+     ],
+     [
+      73,
+      227,
+      228,
+      82,
+      83
+     ],
+     [
+      90,
+      128,
+      128,
+      74,
+      74
+     ],
+     [
+      91,
+      133,
+      135,
+      74,
+      77
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 3,
+      "bbox": [
+       0,
+       239,
+       99,
+       102
+      ],
+      "sample": "239,99 rom 605f4a live 164343"
+     },
+     {
+      "age": 70,
+      "px": 29,
+      "bbox": [
+       0,
+       239,
+       93,
+       99
+      ],
+      "sample": "239,93 rom 600f00 live 381500"
+     },
+     {
+      "age": 71,
+      "px": 21,
+      "bbox": [
+       3,
+       238,
+       89,
+       96
+      ],
+      "sample": "235,89 rom 600f00 live 381500"
+     },
+     {
+      "age": 72,
+      "px": 6,
+      "bbox": [
+       7,
+       231,
+       85,
+       93
+      ],
+      "sample": "231,85 rom 600f00 live 381500"
+     },
+     {
+      "age": 73,
+      "px": 4,
+      "bbox": [
+       227,
+       228,
+       82,
+       83
+      ],
+      "sample": "227,82 rom 600f00 live 5d2500"
+     },
+     {
+      "age": 90,
+      "px": 1,
+      "bbox": [
+       128,
+       128,
+       74,
+       74
+      ],
+      "sample": "128,74 rom 3b0f00 live 4e3a12"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "pb-a22ff-936-c3.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/TOGETIC",
+   "alloc": {
+    "input": [
+     -1
+    ],
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": false,
+    "preDiff": []
+   },
+   "units": 11,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "260@1 STATS_CHANGE(18)@0 status:CONFUSION@0 status:CONFUSION@0 HIT_ANIMATION@0",
+    "status:CONFUSION@0 266@0 260@1 STATS_CHANGE(18)@0",
+    "status:CONFUSION@0 HIT_ANIMATION@0 260@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 3116,
+    "endFrame": 3334
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 202,
+    "px": 65,
+    "digests": [
+     "d51e8f882fd02ef7",
+     "d51e8f882fd02ef7"
+    ],
+    "residualRows": [
+     [
+      69,
+      2
+     ],
+     [
+      70,
+      14
+     ],
+     [
+      71,
+      13
+     ],
+     [
+      72,
+      14
+     ],
+     [
+      73,
+      2
+     ],
+     [
+      74,
+      2
+     ],
+     [
+      75,
+      1
+     ],
+     [
+      76,
+      2
+     ],
+     [
+      77,
+      3
+     ],
+     [
+      78,
+      3
+     ],
+     [
+      79,
+      3
+     ],
+     [
+      80,
+      1
+     ],
+     [
+      81,
+      1
+     ],
+     [
+      82,
+      1
+     ],
+     [
+      83,
+      1
+     ],
+     [
+      84,
+      1
+     ],
+     [
+      85,
+      1
+     ]
+    ],
+    "rowBoxes": [
+     [
+      69,
+      0,
+      0,
+      101,
+      102
+     ],
+     [
+      70,
+      0,
+      239,
+      93,
+      99
+     ],
+     [
+      71,
+      3,
+      233,
+      88,
+      96
+     ],
+     [
+      72,
+      7,
+      229,
+      84,
+      93
+     ],
+     [
+      73,
+      11,
+      12,
+      80,
+      80
+     ],
+     [
+      74,
+      15,
+      16,
+      76,
+      76
+     ],
+     [
+      75,
+      19,
+      19,
+      72,
+      72
+     ],
+     [
+      76,
+      209,
+      209,
+      72,
+      73
+     ],
+     [
+      77,
+      26,
+      205,
+      66,
+      70
+     ],
+     [
+      78,
+      29,
+      201,
+      63,
+      67
+     ],
+     [
+      79,
+      32,
+      197,
+      60,
+      64
+     ],
+     [
+      80,
+      35,
+      35,
+      57,
+      57
+     ],
+     [
+      81,
+      38,
+      38,
+      54,
+      54
+     ],
+     [
+      82,
+      41,
+      41,
+      51,
+      51
+     ],
+     [
+      83,
+      44,
+      44,
+      49,
+      49
+     ],
+     [
+      84,
+      47,
+      47,
+      47,
+      47
+     ],
+     [
+      85,
+      50,
+      50,
+      45,
+      45
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 2,
+      "bbox": [
+       0,
+       0,
+       101,
+       102
+      ],
+      "sample": "0,101 rom 605f12 live 600f00"
+     },
+     {
+      "age": 70,
+      "px": 14,
+      "bbox": [
+       0,
+       239,
+       93,
+       99
+      ],
+      "sample": "0,93 rom 605f12 live 5d2500"
+     },
+     {
+      "age": 71,
+      "px": 13,
+      "bbox": [
+       3,
+       233,
+       88,
+       96
+      ],
+      "sample": "3,88 rom 605f12 live 164343"
+     },
+     {
+      "age": 72,
+      "px": 14,
+      "bbox": [
+       7,
+       229,
+       84,
+       93
+      ],
+      "sample": "7,84 rom 605f12 live 164343"
+     },
+     {
+      "age": 73,
+      "px": 2,
+      "bbox": [
+       11,
+       12,
+       80,
+       80
+      ],
+      "sample": "11,80 rom 605f12 live 164343"
+     },
+     {
+      "age": 74,
+      "px": 2,
+      "bbox": [
+       15,
+       16,
+       76,
+       76
+      ],
+      "sample": "15,76 rom 605f12 live 164343"
+     }
+    ]
+   }
+  },
+  {
+   "fixture": "pb-a22ff-936-c4.json",
+   "move": "FOLLOW_ME",
+   "side": "player",
+   "species": "TOGETIC/NIDORINO",
+   "alloc": {
+    "input": null,
+    "rom": [
+     3
+    ],
+    "preEqEntry": true,
+    "equal": null,
+    "preDiff": []
+   },
+   "units": 13,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "260@1 STATS_CHANGE(18)@0 status:CONFUSION@0 status:CONFUSION@0 HIT_ANIMATION@0",
+    "status:CONFUSION@0 266@0 260@1 STATS_CHANGE(18)@0",
+    "status:CONFUSION@0 HIT_ANIMATION@0 260@1 STATS_CHANGE(18)@0",
+    "266@0"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4193,
+    "endFrame": 4377
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 185,
+    "exactRows": 185,
+    "px": 0,
+    "digests": [
+     "c1cb2b501f4f586d",
+     "c1cb2b501f4f586d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 185,
+    "exactRows": 185,
+    "px": 0,
+    "digests": [
+     "c1cb2b501f4f586d",
+     "c1cb2b501f4f586d"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "pb-a22ff-936-c5.json",
+   "move": "FLATTER",
+   "side": "opponent",
+   "species": "NIDORINO/TOGETIC",
+   "alloc": {
+    "input": [
+     -1
+    ],
+    "rom": [
+     3,
+     4,
+     5
+    ],
+    "preEqEntry": true,
+    "equal": false,
+    "preDiff": []
+   },
+   "units": 14,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "260@1 STATS_CHANGE(18)@0 status:CONFUSION@0 status:CONFUSION@0 HIT_ANIMATION@0",
+    "status:CONFUSION@0 266@0 260@1 STATS_CHANGE(18)@0",
+    "status:CONFUSION@0 HIT_ANIMATION@0 260@1 STATS_CHANGE(18)@0",
+    "266@0 260@1"
+   ],
+   "romPower": 40,
+   "request": {
+    "turn": 0,
+    "target": 0,
+    "power": 0
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 4526,
+    "endFrame": 4744
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": true,
+    "orderInvalid": "no EXACT plan: body 260:opponent",
+    "allocatorInput": true,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 219,
+    "px": 0,
+    "digests": [
+     "3a18c77f509e4e8e",
+     "3a18c77f509e4e8e"
+    ],
+    "residualRows": [],
+    "rowBoxes": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": true,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 219,
+    "exactRows": 190,
+    "px": 88,
+    "digests": [
+     "ebc4aacfa44c5ae6",
+     "ebc4aacfa44c5ae6"
+    ],
+    "residualRows": [
+     [
+      69,
+      1
+     ],
+     [
+      70,
+      8
+     ],
+     [
+      71,
+      13
+     ],
+     [
+      72,
+      9
+     ],
+     [
+      73,
+      1
+     ],
+     [
+      75,
+      2
+     ],
+     [
+      76,
+      2
+     ],
+     [
+      77,
+      4
+     ],
+     [
+      78,
+      4
+     ],
+     [
+      79,
+      4
+     ],
+     [
+      80,
+      4
+     ],
+     [
+      81,
+      4
+     ],
+     [
+      82,
+      4
+     ],
+     [
+      83,
+      1
+     ],
+     [
+      84,
+      1
+     ],
+     [
+      85,
+      1
+     ],
+     [
+      86,
+      1
+     ],
+     [
+      87,
+      1
+     ],
+     [
+      88,
+      1
+     ],
+     [
+      89,
+      1
+     ],
+     [
+      90,
+      1
+     ],
+     [
+      91,
+      2
+     ],
+     [
+      92,
+      2
+     ],
+     [
+      93,
+      2
+     ],
+     [
+      94,
+      2
+     ],
+     [
+      95,
+      2
+     ],
+     [
+      96,
+      6
+     ],
+     [
+      97,
+      2
+     ],
+     [
+      98,
+      2
+     ]
+    ],
+    "rowBoxes": [
+     [
+      69,
+      1,
+      1,
+      97,
+      97
+     ],
+     [
+      70,
+      0,
+      239,
+      92,
+      98
+     ],
+     [
+      71,
+      3,
+      237,
+      90,
+      96
+     ],
+     [
+      72,
+      7,
+      231,
+      87,
+      92
+     ],
+     [
+      73,
+      227,
+      227,
+      85,
+      85
+     ],
+     [
+      75,
+      19,
+      19,
+      84,
+      85
+     ],
+     [
+      76,
+      23,
+      23,
+      82,
+      83
+     ],
+     [
+      77,
+      27,
+      204,
+      72,
+      81
+     ],
+     [
+      78,
+      31,
+      199,
+      70,
+      79
+     ],
+     [
+      79,
+      35,
+      194,
+      68,
+      78
+     ],
+     [
+      80,
+      40,
+      190,
+      66,
+      76
+     ],
+     [
+      81,
+      43,
+      186,
+      64,
+      75
+     ],
+     [
+      82,
+      46,
+      182,
+      62,
+      74
+     ],
+     [
+      83,
+      49,
+      49,
+      73,
+      73
+     ],
+     [
+      84,
+      52,
+      52,
+      72,
+      72
+     ],
+     [
+      85,
+      55,
+      55,
+      72,
+      72
+     ],
+     [
+      86,
+      58,
+      58,
+      72,
+      72
+     ],
+     [
+      87,
+      61,
+      61,
+      72,
+      72
+     ],
+     [
+      88,
+      64,
+      64,
+      72,
+      72
+     ],
+     [
+      89,
+      67,
+      67,
+      72,
+      72
+     ],
+     [
+      90,
+      70,
+      70,
+      73,
+      73
+     ],
+     [
+      91,
+      72,
+      73,
+      74,
+      74
+     ],
+     [
+      92,
+      74,
+      75,
+      75,
+      75
+     ],
+     [
+      93,
+      76,
+      77,
+      76,
+      76
+     ],
+     [
+      94,
+      78,
+      79,
+      77,
+      77
+     ],
+     [
+      95,
+      80,
+      81,
+      79,
+      79
+     ],
+     [
+      96,
+      82,
+      143,
+      45,
+      81
+     ],
+     [
+      97,
+      84,
+      85,
+      83,
+      83
+     ],
+     [
+      98,
+      86,
+      87,
+      85,
+      85
+     ]
+    ],
+    "detail": [
+     {
+      "age": 69,
+      "px": 1,
+      "bbox": [
+       1,
+       1,
+       97,
+       97
+      ],
+      "sample": "1,97 rom 16251e live 164343"
+     },
+     {
+      "age": 70,
+      "px": 8,
+      "bbox": [
+       0,
+       239,
+       92,
+       98
+      ],
+      "sample": "7,92 rom 16251e live 164343"
+     },
+     {
+      "age": 71,
+      "px": 13,
+      "bbox": [
+       3,
+       237,
+       90,
+       96
+      ],
+      "sample": "235,90 rom 16251e live 5d2500"
+     },
+     {
+      "age": 72,
+      "px": 9,
+      "bbox": [
+       7,
+       231,
+       87,
+       92
+      ],
+      "sample": "228,87 rom 603146 live 605f12"
+     },
+     {
+      "age": 73,
+      "px": 1,
+      "bbox": [
+       227,
+       227,
+       85,
+       85
+      ],
+      "sample": "227,85 rom 600f00 live 3b0f00"
+     },
+     {
+      "age": 75,
+      "px": 2,
+      "bbox": [
+       19,
+       19,
+       84,
+       85
+      ],
+      "sample": "19,84 rom 605f12 live 16251e"
+     }
+    ]
+   }
+  }
+ ]
+}
