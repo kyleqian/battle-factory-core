@@ -10,16 +10,19 @@
 //                                      identical mash notes collapsed to one
 //   <logs-dir>/seed-<n>.frames.txt     "<frame> <what>" for every note (raw, frame-bearing)
 // and a JSON summary (outcome, endState, battle, turn, frames, note counts, sha256s).
-// Mash notes are exactly the labels RandomPlayer.pressAdvance() emits: their
-// count and A/B choice depend on presentation length (press stream), so they
-// are the only notes allowed to differ between two presentation variants.
+// Mash notes are exactly the press-stream notes -- the labels
+// RandomPlayer.pressAdvance() emits and onTerminal()'s "terminal: <button>":
+// their count and button depend on presentation length, so they are the only
+// notes allowed to differ between two presentation variants (canonical log:
+// a mash run collapses to one line, terminal buttons to "terminal").
 //   node --experimental-strip-types --no-warnings tools/integration/soak111Decoupling.ts \
 //     --policy=full --seeds=0..11,27 --logs-dir=<dir> --out=<summary.json>
 import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { runSeed, type SoakPolicy } from "../soak/randomRoundSoakDriver.ts";
 
-const MASH = /^(battleScene A|battleRoom A|prebattleRoom A|intro A|rejection dismiss|party message dismiss|resolution advance|forced-party message dismiss|postwin room advance|postwin brain call-scene box \d+|postwin brain one-liner \(AskSwapBeforeHead\)|postwin advance)( \(B\))?$/;
+// Press-stream notes: pressAdvance()'s mash labels and onTerminal()'s buttons.
+const MASH = /^(terminal: (A|B|UP|DOWN)|battleScene A|battleRoom A|prebattleRoom A|intro A|rejection dismiss|party message dismiss|resolution advance|forced-party message dismiss|postwin room advance|postwin brain call-scene box \d+|postwin brain one-liner \(AskSwapBeforeHead\)|postwin advance)( \(B\))?$/;
 
 function flag(name: string): string | undefined {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
@@ -64,7 +67,7 @@ for (const seed of seeds) {
     const isMash = MASH.test(n.what);
     if (isMash) {
       mash += 1;
-      const label = `b${n.battle} t${n.turn} ${n.what.replace(/ \(B\)$/, "")}`;
+      const label = `b${n.battle} t${n.turn} ${n.what.replace(/ \(B\)$/, "").replace(/^terminal: .*/, "terminal")}`;
       if (label !== lastMash) canonical.push(label);
       lastMash = label;
       continue;

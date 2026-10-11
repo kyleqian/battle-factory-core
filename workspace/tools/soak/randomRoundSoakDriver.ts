@@ -2360,6 +2360,16 @@ export class RandomPlayer {
     // The swap controller enforces legality internally, so random legal-button
     // exploration (a real player's inputs) covers pickers, quit prompts, the
     // duplicate-species rejection, and the summary detour.
+    // soak111: press only when the press can land -- the controller drops
+    // every key while `!inputReady` (handleFactorySwapInput) and the summary
+    // detour drops keys during its transitions -- because each press below
+    // is a decision-stream draw, and how many presses fell into those dead
+    // windows depended on press timing (presentation length).
+    const summary = state.summaryScreen;
+    const ready = summary.isOpen || summary.transition
+      ? summary.isOpen && !summary.transition && !summary.pageTransition && !summary.monTransition
+      : state.factorySwap!.controller.inputReady;
+    if (!ready) return NO_BUTTONS;
     const roll = this.rng.float();
     const button: GbaButton = roll < 0.40
       ? "A"
@@ -2450,7 +2460,13 @@ export class RandomPlayer {
       this.note(state, "terminal: A");
       return this.press("A", 18);
     }
-    const roll = this.rng.float();
+    // soak111: terminal buttons come from the PRESS stream. The terminal
+    // presentation drops keys until each page/menu is input-ready, so how
+    // many rolls a terminal walk consumes depends on press timing; and every
+    // RECORD answer (YES / NO / cancel) enters the same EndRecordBattle
+    // farewell (stub-only record), so these rolls shape frames and the
+    // record message, never a later decision or gameplay.
+    const roll = this.pressRng.float();
     const button: GbaButton = roll < 0.6
       ? "A"
       : roll < 0.72
