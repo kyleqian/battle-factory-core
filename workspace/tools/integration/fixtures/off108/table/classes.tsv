@@ -1,0 +1,18 @@
+class	G	att	pause rows	afterAtt	next	k	next kind	prod N (kernel delta)	lead	D_between	P (rule)	check	base residual	samples
+stat self (Bulk Up)	62	3	BattleScript_Pausex20+0@4	38	40	2	STATS_CHANGE activation (act rise)	STATS_CHANGE@39	0	0	39	True	-39	7
+stat self (Double Team)	67	4	BattleScript_Pausex20+0@5	39	41	2	STATS_CHANGE activation (act rise)	STATS_CHANGE@40	0	2	38	True	-38	292
+stat target (Sand-Attack)	70	4	BattleScript_Pausex20+0@5	39	41	2	STATS_CHANGE activation (act rise)	STATS_CHANGE@40	0	2	38	True	-38	81
+status msg (Confuse Ray)	66	7	BattleScript_Pausex20+0@8	42	47	5	first change in BattleScript_MoveEffectConfusion+10 (exec 1)	STRINGID_PKMNWASCONFUSED@45	1	0	46	True	-46	209
+status (Toxic)	60	11	BattleScript_Pausex20+0@12	46	51	5	first change in BattleScript_MoveEffectToxic+5 (exec 1)	set-battler-status-data@47	1	0	48	True	-48	53
+status (Thunder Wave)	67	10	BattleScript_Pausex20+0@11	45	50	5	first change in BattleScript_MoveEffectParalysis+7 (exec 1)	set-battler-status-data@46	1	0	47	True	-47	80
+protect (Protect)	62	3	BattleScript_Pausex20+0@4	38	40	2	first change in BattleScript_EffectProtect+11 (exec 1)	STRINGID_PKMNPROTECTEDITSELF2@38	1	0	39	True	-39	237
+protect (Detect)	61	3	BattleScript_Pausex20+0@4	38	40	2	first change in BattleScript_EffectProtect+11 (exec 1)	STRINGID_PKMNPROTECTEDITSELF2@38	1	0	39	True	-39	31
+rest (Rest)	184	128	BattleScript_Pausex20+0@129	163	166	3	first change in BattleScript_PresentHealTarget+13 (exec 1)	None	None	None	None	None	None	None
+two-turn charge (Dig)	49	2	BattleScript_Pausex20+0@3	37	43	6	first change in BattleScript_TwoTurnMovesSecondTurn+85 (exec 1)	STRINGID_PKMNDUGHOLE@41	1	0	42	True	-42	131
+two-turn charge (Razor Wind)	45	2	BattleScript_Pausex20+0@3	37	43	6	first change in BattleScript_TwoTurnMovesSecondTurn+85 (exec 1)	STRINGID_PKMNWHIPPEDWHIRLWIND@41	1	0	42	True	-42	7
+two-turn charge (SolarBeam)	48	2	BattleScript_Pausex20+0@3	37	43	6	first change in BattleScript_TwoTurnMovesSecondTurn+85 (exec 1)	STRINGID_PKMNTOOKSUNLIGHT@41	1	0	42	True	-42	31
+failed (Snore awake: But it failed!)	61	None	BattleScript_ButItFailed+0@3	None	38	None	first change in BattleScript_ButItFailed+10 (exec 1)	STRINGID_BUTITFAILED@36	1	0	37	True	-37	33
+miss (Dynamic Punch, player)	70	None	BattleScript_MoveMissedPause+0@2	None	37	None	first change in BattleScript_MoveMissed+2 (exec 1)	STRINGID_ATTACKMISSED@35	1	0	36	True	-36	6
+miss (Dynamic Punch, opponent)	74	None	BattleScript_MoveMissedPause+0@2	None	37	None	first change in BattleScript_MoveMissed+2 (exec 2)	STRINGID_ATTACKMISSED@35	1	0	36	True	-36	6
+protect-blocked (Tackle vs Protect)	223	None	BattleScript_MoveMissedPause+0@2	None	37	None	first change in BattleScript_MoveMissed+2 (exec 2)	STRINGID_PKMNPROTECTEDITSELF@35	1	0	36	True	-36	149
+protect-blocked (Tackle vs Detect)	222	None	BattleScript_MoveMissedPause+0@2	None	37	None	first change in BattleScript_MoveMissed+2 (exec 2)	STRINGID_PKMNPROTECTEDITSELF@35	1	0	36	True	-36	149

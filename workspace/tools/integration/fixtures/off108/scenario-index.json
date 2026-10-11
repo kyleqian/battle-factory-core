@@ -1,0 +1,137 @@
+{
+ "off108-bulk-up-ply-primeape-onix.json": {
+  "move": 339,
+  "class": "stat",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-double-team-ply-primeape-onix.json": {
+  "move": 104,
+  "class": "stat",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-sand-attack-ply-primeape-snorlax.json": {
+  "move": 28,
+  "class": "stat",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-confuse-ray-ply-primeape-snorlax.json": {
+  "move": 109,
+  "class": "status",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-toxic-ply-primeape-onix.json": {
+  "move": 92,
+  "class": "status",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-thunder-wave-ply-primeape-snorlax.json": {
+  "move": 86,
+  "class": "status",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-protect-ply-primeape-onix.json": {
+  "move": 182,
+  "class": "protect",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-detect-ply-primeape-onix.json": {
+  "move": 197,
+  "class": "protect",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-rest-ply-snorlax-onix.json": {
+  "move": 156,
+  "class": "rest",
+  "attackerSide": "player",
+  "attacker": "SNORLAX",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-dig-ply-primeape-snorlax.json": {
+  "move": 91,
+  "class": "two-turn",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-razor-wind-ply-primeape-snorlax.json": {
+  "move": 13,
+  "class": "two-turn",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-solar-beam-ply-primeape-snorlax.json": {
+  "move": 76,
+  "class": "two-turn",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-snore-ply-primeape-snorlax.json": {
+  "move": 173,
+  "class": "failed",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-dynamic-punch-ply-machamp-snorlax.json": {
+  "move": 223,
+  "class": "miss",
+  "attackerSide": "player",
+  "attacker": "MACHAMP",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off108-dynamic-punch-opp-machamp-snorlax.json": {
+  "move": 223,
+  "class": "miss",
+  "attackerSide": "opponent",
+  "attacker": "MACHAMP",
+  "target": "SNORLAX",
+  "seed": 305419898,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ }
+}

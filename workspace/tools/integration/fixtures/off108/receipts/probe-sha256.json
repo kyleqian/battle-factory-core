@@ -1,0 +1,126 @@
+{
+ "schema": "off108-probe-sha256/v1",
+ "how": "idle94Probe.py, direct mGBA, fresh process per job, r1 == r2 byte for byte",
+ "sha256": {
+  "off108-bulk-up-ply-primeape-onix-off.json": {
+   "r1": "12017cc45cbbc42d88d4f5ea16fdd18798882e2e44f62b6f8928e47fb7e2566c",
+   "r2": "12017cc45cbbc42d88d4f5ea16fdd18798882e2e44f62b6f8928e47fb7e2566c"
+  },
+  "off108-bulk-up-ply-primeape-onix-on.json": {
+   "r1": "691a083bc0244cc5f550b5a83c1ddad3177bd776ea73733d76bc029444af5387",
+   "r2": "691a083bc0244cc5f550b5a83c1ddad3177bd776ea73733d76bc029444af5387"
+  },
+  "off108-confuse-ray-ply-primeape-snorlax-off.json": {
+   "r1": "1afde1ff5d73f534f2ce6eebdae16d6837712aae665f8c2d112feb418cc3d793",
+   "r2": "1afde1ff5d73f534f2ce6eebdae16d6837712aae665f8c2d112feb418cc3d793"
+  },
+  "off108-confuse-ray-ply-primeape-snorlax-on.json": {
+   "r1": "418761cdf70ed15d1a38d35edf1e31c9d9c672b711ef33340b0e56801c12abcc",
+   "r2": "418761cdf70ed15d1a38d35edf1e31c9d9c672b711ef33340b0e56801c12abcc"
+  },
+  "off108-detect-ply-primeape-onix-off.json": {
+   "r1": "668b0ff4298a459412b84c177b7a3f9688cd842bb78ef9964b13c5b8dfaf9cdd",
+   "r2": "668b0ff4298a459412b84c177b7a3f9688cd842bb78ef9964b13c5b8dfaf9cdd"
+  },
+  "off108-detect-ply-primeape-onix-on.json": {
+   "r1": "74218bce64c3baf730d0682e1da0d8473b3cf520197f041e27bdb89afa379198",
+   "r2": "74218bce64c3baf730d0682e1da0d8473b3cf520197f041e27bdb89afa379198"
+  },
+  "off108-dig-ply-primeape-snorlax-off.json": {
+   "r1": "b85a7e08135e70829168d237b9a0bd3e726e1ebeaa8a1628c96c0e7c261ac575",
+   "r2": "b85a7e08135e70829168d237b9a0bd3e726e1ebeaa8a1628c96c0e7c261ac575"
+  },
+  "off108-dig-ply-primeape-snorlax-on.json": {
+   "r1": "36ba34870fa07a1148767d908fc9c42545ffbb830617533b45223d2b6b76ec08",
+   "r2": "36ba34870fa07a1148767d908fc9c42545ffbb830617533b45223d2b6b76ec08"
+  },
+  "off108-double-team-ply-primeape-onix-off.json": {
+   "r1": "d53ce6bf9d3224c5423c74655ef8a9797483f3fff17174af3906b2aff52b40cc",
+   "r2": "d53ce6bf9d3224c5423c74655ef8a9797483f3fff17174af3906b2aff52b40cc"
+  },
+  "off108-double-team-ply-primeape-onix-on.json": {
+   "r1": "592429c4c99bd8ccf29ee0d574501c9307c64977e9647a2957fc6ee597864af2",
+   "r2": "592429c4c99bd8ccf29ee0d574501c9307c64977e9647a2957fc6ee597864af2"
+  },
+  "off108-dynamic-punch-opp-machamp-snorlax-off.json": {
+   "r1": "d9d334814f6553931e148aa226b0b958dbbd991bdaf168f83352264eec1fe67b",
+   "r2": "d9d334814f6553931e148aa226b0b958dbbd991bdaf168f83352264eec1fe67b"
+  },
+  "off108-dynamic-punch-opp-machamp-snorlax-on.json": {
+   "r1": "1736b89733c3605ee26ee0d98283e45fd6b872249adef10b96f6324cd0597984",
+   "r2": "1736b89733c3605ee26ee0d98283e45fd6b872249adef10b96f6324cd0597984"
+  },
+  "off108-dynamic-punch-ply-machamp-snorlax-off.json": {
+   "r1": "a20ac38d374e469ef8edb619500391fba6ce1709d72a4c0910180267f1738c46",
+   "r2": "a20ac38d374e469ef8edb619500391fba6ce1709d72a4c0910180267f1738c46"
+  },
+  "off108-dynamic-punch-ply-machamp-snorlax-on.json": {
+   "r1": "1c06df3a786f2d0c81a108d2e32197fb439f585ea6dedfcb57ed2c3ae342604e",
+   "r2": "1c06df3a786f2d0c81a108d2e32197fb439f585ea6dedfcb57ed2c3ae342604e"
+  },
+  "off108-protect-ply-primeape-onix-off.json": {
+   "r1": "c3630048bf3152ad316f73bd5b9f3d44ee9e239628d05a2452dcd48d9fe03a30",
+   "r2": "c3630048bf3152ad316f73bd5b9f3d44ee9e239628d05a2452dcd48d9fe03a30"
+  },
+  "off108-protect-ply-primeape-onix-on.json": {
+   "r1": "06d59fdc3ab0812159c81d4eb87f1cbc68d05dc14cb54ddce3dc11da54f84dbc",
+   "r2": "06d59fdc3ab0812159c81d4eb87f1cbc68d05dc14cb54ddce3dc11da54f84dbc"
+  },
+  "off108-razor-wind-ply-primeape-snorlax-off.json": {
+   "r1": "ed590def2acf171c1b0bc711792b25458c771e936ad07fc58d0ec932b1796fd7",
+   "r2": "ed590def2acf171c1b0bc711792b25458c771e936ad07fc58d0ec932b1796fd7"
+  },
+  "off108-razor-wind-ply-primeape-snorlax-on.json": {
+   "r1": "e8172c1d29b30e47e263f8f891d18b9f0e47dbf402440fba331159fa74bb47b1",
+   "r2": "e8172c1d29b30e47e263f8f891d18b9f0e47dbf402440fba331159fa74bb47b1"
+  },
+  "off108-rest-ply-snorlax-onix-off.json": {
+   "r1": "21d018e43ea69d66ce250ba1f9b59b9e3dcbad53ef86f43d39d19612b98f08d8",
+   "r2": "21d018e43ea69d66ce250ba1f9b59b9e3dcbad53ef86f43d39d19612b98f08d8"
+  },
+  "off108-rest-ply-snorlax-onix-on.json": {
+   "r1": "a45d0c2121113aff8c13a7a6db386242341b262a99bad3fc1ae49ca554a1c277",
+   "r2": "a45d0c2121113aff8c13a7a6db386242341b262a99bad3fc1ae49ca554a1c277"
+  },
+  "off108-sand-attack-ply-primeape-snorlax-off.json": {
+   "r1": "7ab60b1df23e9af2df615a49baef95c52bcdd164a21a325c7e92a7f13b0ac14d",
+   "r2": "7ab60b1df23e9af2df615a49baef95c52bcdd164a21a325c7e92a7f13b0ac14d"
+  },
+  "off108-sand-attack-ply-primeape-snorlax-on.json": {
+   "r1": "cd57ad0f79282f3df2f80965fa8064733bc21ae1204dab9308467c392bd5a915",
+   "r2": "cd57ad0f79282f3df2f80965fa8064733bc21ae1204dab9308467c392bd5a915"
+  },
+  "off108-snore-ply-primeape-snorlax-off.json": {
+   "r1": "8d61598921d411a5acd6a4bb3f63e8618bab94c867ad20d6d88ccd32766540df",
+   "r2": "8d61598921d411a5acd6a4bb3f63e8618bab94c867ad20d6d88ccd32766540df"
+  },
+  "off108-snore-ply-primeape-snorlax-on.json": {
+   "r1": "868731575bd293bdd6dfd2483e585da0a567d17f692d0e4f9a100ce23dcc3c74",
+   "r2": "868731575bd293bdd6dfd2483e585da0a567d17f692d0e4f9a100ce23dcc3c74"
+  },
+  "off108-solar-beam-ply-primeape-snorlax-off.json": {
+   "r1": "d99681092ba4a097c66bb5094fac8a33d3a9cb5380c985257f1573af72680690",
+   "r2": "d99681092ba4a097c66bb5094fac8a33d3a9cb5380c985257f1573af72680690"
+  },
+  "off108-solar-beam-ply-primeape-snorlax-on.json": {
+   "r1": "d8b70b5446871db9ae5e41c2e3f3b9c023936473f960fcf4eb3c084cca96abdc",
+   "r2": "d8b70b5446871db9ae5e41c2e3f3b9c023936473f960fcf4eb3c084cca96abdc"
+  },
+  "off108-thunder-wave-ply-primeape-snorlax-off.json": {
+   "r1": "5ce7998f885b2d109c9116271590c5d368b44a96d31a4a7a986063ed208aabbe",
+   "r2": "5ce7998f885b2d109c9116271590c5d368b44a96d31a4a7a986063ed208aabbe"
+  },
+  "off108-thunder-wave-ply-primeape-snorlax-on.json": {
+   "r1": "b1805acf22585484043df9a50287e4a675864a674b57c5a95efe2b6685946492",
+   "r2": "b1805acf22585484043df9a50287e4a675864a674b57c5a95efe2b6685946492"
+  },
+  "off108-toxic-ply-primeape-onix-off.json": {
+   "r1": "57d8ead88a63cc3bb45d513f9b355cb4a84a293a7d0b29fb28c15be61fd3a304",
+   "r2": "57d8ead88a63cc3bb45d513f9b355cb4a84a293a7d0b29fb28c15be61fd3a304"
+  },
+  "off108-toxic-ply-primeape-onix-on.json": {
+   "r1": "21aeaca7c4f5b6f9acb783f07ffcedcf675accf165c38326477769ee53f2570a",
+   "r2": "21aeaca7c4f5b6f9acb783f07ffcedcf675accf165c38326477769ee53f2570a"
+  }
+ }
+}

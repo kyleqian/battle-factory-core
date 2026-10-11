@@ -1,0 +1,3075 @@
+{
+ "schema": "off108-classes/v1",
+ "rows": [
+  {
+   "class": "stat self (Bulk Up)",
+   "scenario": "off108-bulk-up-ply-primeape-onix",
+   "attacker": 0,
+   "move": 339,
+   "rom_off": {
+    "G": 62,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      4
+     ]
+    ],
+    "att": 3,
+    "afterAtt": 38,
+    "next": 40,
+    "nextKind": "STATS_CHANGE activation (act rise)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectBulkUp+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+0",
+      3,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      4,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      36,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+1",
+      37,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+2",
+      38,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+8",
+      39,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+12",
+      40,
+      77
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+18",
+      117,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+24",
+      118,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+35",
+      119,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+40",
+      120,
+      87
+     ],
+     [
+      "BattleScript_BulkUpTryDef+0",
+      207,
+      1
+     ],
+     [
+      "BattleScript_BulkUpTryDef+6",
+      208,
+      1
+     ],
+     [
+      "BattleScript_BulkUpTryDef+12",
+      209,
+      1
+     ],
+     [
+      "BattleScript_BulkUpTryDef+23",
+      210,
+      1
+     ],
+     [
+      "BattleScript_BulkUpTryDef+28",
+      211,
+      88
+     ],
+     [
+      "BattleScript_BulkUpEnd+0",
+      299,
+      1
+     ]
+    ],
+    "k": 2
+   },
+   "rom_on": {
+    "G": 62,
+    "opener": "attackstring",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectBulkUp+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+0",
+      3,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+1",
+      4,
+      111
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+2",
+      115,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+8",
+      116,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+12",
+      117,
+      77
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+18",
+      194,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+24",
+      195,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+35",
+      196,
+      1
+     ],
+     [
+      "BattleScript_BulkUpDoMoveAnim+40",
+      197,
+      87
+     ],
+     [
+      "BattleScript_BulkUpTryDef+0",
+      284,
+      1
+     ],
+     [
+      "BattleScript_BulkUpTryDef+6",
+      285,
+      1
+     ],
+     [
+      "BattleScript_BulkUpTryDef+12",
+      286,
+      1
+     ],
+     [
+      "BattleScript_BulkUpTryDef+23",
+      287,
+      1
+     ],
+     [
+      "BattleScript_BulkUpTryDef+28",
+      288,
+      88
+     ],
+     [
+      "BattleScript_BulkUpEnd+0",
+      376,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 7,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "animation",
+     "STATS_CHANGE",
+     "BattleScript_BulkUpDoMoveAnim:2726",
+     39
+    ],
+    "Nkind": "STATS_CHANGE",
+    "att": 3,
+    "attLabel": "BattleScript_BulkUpDoMoveAnim:2723",
+    "between": [],
+    "lead": 0,
+    "path": [
+     "STATS_CHANGE",
+     "attack",
+     "STRINGID_DEFENDERSSTATROSE"
+    ],
+    "samples": 7,
+    "exampleSeed": 154
+   },
+   "rule": {
+    "P": 39,
+    "romAnchor": 39,
+    "deltaNplusLead": 39,
+    "check": true,
+    "baseResidual": -39
+   }
+  },
+  {
+   "class": "stat self (Double Team)",
+   "scenario": "off108-double-team-ply-primeape-onix",
+   "attacker": 0,
+   "move": 104,
+   "rom_off": {
+    "G": 67,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      5
+     ]
+    ],
+    "att": 4,
+    "afterAtt": 39,
+    "next": 41,
+    "nextKind": "STATS_CHANGE activation (act rise)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectStatUpAfterAtkCanceler+2",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectStatUpAfterAtkCanceler+8",
+      3,
+      1
+     ],
+     [
+      "BattleScript_StatUpAttackAnim+0",
+      4,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      5,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      37,
+      1
+     ],
+     [
+      "BattleScript_StatUpAttackAnim+1",
+      38,
+      1
+     ],
+     [
+      "BattleScript_StatUpDoAnim+0",
+      39,
+      1
+     ],
+     [
+      "BattleScript_StatUpDoAnim+1",
+      40,
+      1
+     ],
+     [
+      "BattleScript_StatUpPrintString+0",
+      41,
+      77
+     ],
+     [
+      "BattleScript_StatUpPrintString+5",
+      118,
+      92
+     ],
+     [
+      "BattleScript_StatUpEnd+0",
+      210,
+      1
+     ]
+    ],
+    "k": 2
+   },
+   "rom_on": {
+    "G": 67,
+    "opener": "attackstring",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectStatUpAfterAtkCanceler+2",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectStatUpAfterAtkCanceler+8",
+      3,
+      1
+     ],
+     [
+      "BattleScript_StatUpAttackAnim+0",
+      4,
+      1
+     ],
+     [
+      "BattleScript_StatUpAttackAnim+1",
+      5,
+      162
+     ],
+     [
+      "BattleScript_StatUpDoAnim+0",
+      167,
+      1
+     ],
+     [
+      "BattleScript_StatUpDoAnim+1",
+      168,
+      1
+     ],
+     [
+      "BattleScript_StatUpPrintString+0",
+      169,
+      77
+     ],
+     [
+      "BattleScript_StatUpPrintString+5",
+      246,
+      92
+     ],
+     [
+      "BattleScript_StatUpEnd+0",
+      338,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 345,
+   "prod": {
+    "D_between": 2,
+    "N": [
+     "animation",
+     "STATS_CHANGE",
+     "BattleScript_StatUpDoAnim:503",
+     40
+    ],
+    "Nkind": "STATS_CHANGE",
+    "att": 4,
+    "attLabel": "BattleScript_StatUpAttackAnim:499",
+    "between": [
+     "stat"
+    ],
+    "lead": 0,
+    "path": [
+     "STATS_CHANGE",
+     "STRINGID_DEFENDERSSTATROSE",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 292,
+    "exampleSeed": 2
+   },
+   "rule": {
+    "P": 38,
+    "romAnchor": 40,
+    "deltaNplusLead": 40,
+    "check": true,
+    "baseResidual": -38
+   }
+  },
+  {
+   "class": "stat target (Sand-Attack)",
+   "scenario": "off108-sand-attack-ply-primeape-snorlax",
+   "attacker": 0,
+   "move": 28,
+   "rom_off": {
+    "G": 70,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      5
+     ]
+    ],
+    "att": 4,
+    "afterAtt": 39,
+    "next": 41,
+    "nextKind": "STATS_CHANGE activation (act rise)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectStatDown+20",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectStatDown+26",
+      3,
+      1
+     ],
+     [
+      "BattleScript_StatDownDoAnim+0",
+      4,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      5,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      37,
+      1
+     ],
+     [
+      "BattleScript_StatDownDoAnim+1",
+      38,
+      1
+     ],
+     [
+      "BattleScript_StatDownDoAnim+2",
+      39,
+      1
+     ],
+     [
+      "BattleScript_StatDownDoAnim+3",
+      40,
+      1
+     ],
+     [
+      "BattleScript_StatDownPrintString+0",
+      41,
+      77
+     ],
+     [
+      "BattleScript_StatDownPrintString+5",
+      118,
+      92
+     ],
+     [
+      "BattleScript_StatDownEnd+0",
+      210,
+      1
+     ]
+    ],
+    "k": 2
+   },
+   "rom_on": {
+    "G": 70,
+    "opener": "attackstring",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectStatDown+20",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectStatDown+26",
+      3,
+      1
+     ],
+     [
+      "BattleScript_StatDownDoAnim+0",
+      4,
+      1
+     ],
+     [
+      "BattleScript_StatDownDoAnim+1",
+      5,
+      62
+     ],
+     [
+      "BattleScript_StatDownDoAnim+2",
+      67,
+      1
+     ],
+     [
+      "BattleScript_StatDownDoAnim+3",
+      68,
+      1
+     ],
+     [
+      "BattleScript_StatDownPrintString+0",
+      69,
+      77
+     ],
+     [
+      "BattleScript_StatDownPrintString+5",
+      146,
+      92
+     ],
+     [
+      "BattleScript_StatDownEnd+0",
+      238,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 89,
+   "prod": {
+    "D_between": 2,
+    "N": [
+     "animation",
+     "STATS_CHANGE",
+     "BattleScript_StatDownDoAnim:549",
+     40
+    ],
+    "Nkind": "STATS_CHANGE",
+    "att": 4,
+    "attLabel": "BattleScript_StatDownDoAnim:546",
+    "between": [
+     "stat"
+    ],
+    "lead": 0,
+    "path": [
+     "STATS_CHANGE",
+     "STRINGID_DEFENDERSSTATFELL",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 81,
+    "exampleSeed": 2
+   },
+   "rule": {
+    "P": 38,
+    "romAnchor": 40,
+    "deltaNplusLead": 40,
+    "check": true,
+    "baseResidual": -38
+   }
+  },
+  {
+   "class": "status msg (Confuse Ray)",
+   "scenario": "off108-confuse-ray-ply-primeape-snorlax",
+   "attacker": 0,
+   "move": 109,
+   "rom_off": {
+    "G": 66,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      8
+     ]
+    ],
+    "att": 7,
+    "afterAtt": 42,
+    "next": 47,
+    "nextKind": "first change in BattleScript_MoveEffectConfusion+10 (exec 1)",
+    "statusAnim": 44,
+    "path": [
+     [
+      "BattleScript_EffectConfuse+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+10",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+20",
+      4,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+30",
+      5,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+37",
+      6,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+45",
+      7,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      8,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      40,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+46",
+      41,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+47",
+      42,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+53",
+      43,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectConfusion+0",
+      44,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectConfusion+7",
+      45,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectConfusion+10",
+      46,
+      92
+     ],
+     [
+      "BattleScript_MoveEffectConfusion+13",
+      138,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+54",
+      139,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+55",
+      140,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+58",
+      141,
+      1
+     ]
+    ],
+    "k": 5
+   },
+   "rom_on": {
+    "G": 66,
+    "opener": "attackstring",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectConfuse+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+10",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+20",
+      4,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+30",
+      5,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+37",
+      6,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+45",
+      7,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+46",
+      8,
+      273
+     ],
+     [
+      "BattleScript_EffectConfuse+47",
+      281,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+53",
+      282,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectConfusion+0",
+      283,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectConfusion+7",
+      284,
+      101
+     ],
+     [
+      "BattleScript_MoveEffectConfusion+10",
+      385,
+      92
+     ],
+     [
+      "BattleScript_MoveEffectConfusion+13",
+      477,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+54",
+      478,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+55",
+      479,
+      1
+     ],
+     [
+      "BattleScript_EffectConfuse+58",
+      480,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 270,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_PKMNWASCONFUSED",
+     "BattleScript_MoveEffectConfusion:3934",
+     45
+    ],
+    "Nkind": "message",
+    "att": 7,
+    "attLabel": "BattleScript_EffectConfuse:912",
+    "between": [],
+    "lead": 1,
+    "path": [
+     "STRINGID_PKMNWASCONFUSED",
+     "set-battler-sprite-visibility",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 209,
+    "exampleSeed": 0
+   },
+   "rule": {
+    "P": 46,
+    "romAnchor": 46,
+    "deltaNplusLead": 46,
+    "check": true,
+    "baseResidual": -46
+   }
+  },
+  {
+   "class": "status (Toxic)",
+   "scenario": "off108-toxic-ply-primeape-onix",
+   "attacker": 0,
+   "move": 92,
+   "rom_off": {
+    "G": 60,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      12
+     ]
+    ],
+    "att": 11,
+    "afterAtt": 46,
+    "next": 51,
+    "nextKind": "first change in BattleScript_MoveEffectToxic+5 (exec 1)",
+    "statusAnim": 48,
+    "path": [
+     [
+      "BattleScript_EffectToxic+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+10",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+20",
+      4,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+30",
+      5,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+40",
+      6,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+50",
+      7,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+57",
+      8,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+64",
+      9,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+71",
+      10,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+79",
+      11,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      12,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      44,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+80",
+      45,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+81",
+      46,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+87",
+      47,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectToxic+0",
+      48,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectToxic+2",
+      49,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectToxic+5",
+      50,
+      91
+     ],
+     [
+      "BattleScript_MoveEffectToxic+8",
+      141,
+      1
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+0",
+      142,
+      1
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+2",
+      143,
+      2
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+3",
+      145,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+88",
+      146,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+89",
+      147,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+92",
+      148,
+      1
+     ]
+    ],
+    "k": 5
+   },
+   "rom_on": {
+    "G": 60,
+    "opener": "attackstring",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectToxic+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+10",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+20",
+      4,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+30",
+      5,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+40",
+      6,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+50",
+      7,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+57",
+      8,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+64",
+      9,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+71",
+      10,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+79",
+      11,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+80",
+      12,
+      234
+     ],
+     [
+      "BattleScript_EffectToxic+81",
+      246,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+87",
+      247,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectToxic+0",
+      248,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectToxic+2",
+      249,
+      72
+     ],
+     [
+      "BattleScript_MoveEffectToxic+5",
+      321,
+      91
+     ],
+     [
+      "BattleScript_MoveEffectToxic+8",
+      412,
+      1
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+0",
+      413,
+      1
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+2",
+      414,
+      2
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+3",
+      416,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+88",
+      417,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+89",
+      418,
+      1
+     ],
+     [
+      "BattleScript_EffectToxic+92",
+      419,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 139,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "set-battler-status-data",
+     "",
+     "BattleScript_EffectToxic:702",
+     47
+    ],
+    "Nkind": "set-battler-status-data",
+    "att": 11,
+    "attLabel": "BattleScript_EffectToxic:699",
+    "between": [],
+    "lead": 1,
+    "path": [
+     "set-battler-status-data",
+     "STRINGID_PKMNBADLYPOISONED",
+     "status-icon-update"
+    ],
+    "samples": 53,
+    "exampleSeed": 12
+   },
+   "rule": {
+    "P": 48,
+    "romAnchor": 48,
+    "deltaNplusLead": 48,
+    "check": true,
+    "baseResidual": -48
+   }
+  },
+  {
+   "class": "status (Thunder Wave)",
+   "scenario": "off108-thunder-wave-ply-primeape-snorlax",
+   "attacker": 0,
+   "move": 86,
+   "rom_off": {
+    "G": 67,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      11
+     ]
+    ],
+    "att": 10,
+    "afterAtt": 45,
+    "next": 50,
+    "nextKind": "first change in BattleScript_MoveEffectParalysis+7 (exec 1)",
+    "statusAnim": 47,
+    "path": [
+     [
+      "BattleScript_EffectParalyze+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+10",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+20",
+      4,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+21",
+      5,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+32",
+      6,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+42",
+      7,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+52",
+      8,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+59",
+      9,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+67",
+      10,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      11,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      43,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+68",
+      44,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+69",
+      45,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+75",
+      46,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectParalysis+0",
+      47,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectParalysis+2",
+      48,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectParalysis+7",
+      49,
+      115
+     ],
+     [
+      "BattleScript_MoveEffectParalysis+10",
+      164,
+      1
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+0",
+      165,
+      1
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+2",
+      166,
+      2
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+3",
+      168,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+76",
+      169,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+77",
+      170,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+80",
+      171,
+      1
+     ]
+    ],
+    "k": 5
+   },
+   "rom_on": {
+    "G": 67,
+    "opener": "attackstring",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectParalyze+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+10",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+20",
+      4,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+21",
+      5,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+32",
+      6,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+42",
+      7,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+52",
+      8,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+59",
+      9,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+67",
+      10,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+68",
+      11,
+      123
+     ],
+     [
+      "BattleScript_EffectParalyze+69",
+      134,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+75",
+      135,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectParalysis+0",
+      136,
+      1
+     ],
+     [
+      "BattleScript_MoveEffectParalysis+2",
+      137,
+      40
+     ],
+     [
+      "BattleScript_MoveEffectParalysis+7",
+      177,
+      115
+     ],
+     [
+      "BattleScript_MoveEffectParalysis+10",
+      292,
+      1
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+0",
+      293,
+      1
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+2",
+      294,
+      2
+     ],
+     [
+      "BattleScript_UpdateEffectStatusIconRet+3",
+      296,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+76",
+      297,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+77",
+      298,
+      1
+     ],
+     [
+      "BattleScript_EffectParalyze+80",
+      299,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 125,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "set-battler-status-data",
+     "",
+     "BattleScript_EffectParalyze:1022",
+     46
+    ],
+    "Nkind": "set-battler-status-data",
+    "att": 10,
+    "attLabel": "BattleScript_EffectParalyze:1019",
+    "between": [],
+    "lead": 1,
+    "path": [
+     "set-battler-status-data",
+     "STRINGID_PKMNWASPARALYZED",
+     "status-icon-update"
+    ],
+    "samples": 80,
+    "exampleSeed": 11
+   },
+   "rule": {
+    "P": 47,
+    "romAnchor": 47,
+    "deltaNplusLead": 47,
+    "check": true,
+    "baseResidual": -47
+   }
+  },
+  {
+   "class": "protect (Protect)",
+   "scenario": "off108-protect-ply-primeape-onix",
+   "attacker": 0,
+   "move": 182,
+   "rom_off": {
+    "G": 62,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      4
+     ]
+    ],
+    "att": 3,
+    "afterAtt": 38,
+    "next": 40,
+    "nextKind": "first change in BattleScript_EffectProtect+11 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectProtect+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+4",
+      3,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      4,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      36,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+5",
+      37,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+6",
+      38,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+11",
+      39,
+      90
+     ],
+     [
+      "BattleScript_EffectProtect+14",
+      129,
+      1
+     ]
+    ],
+    "k": 2
+   },
+   "rom_on": {
+    "G": 62,
+    "opener": "attackstring",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectProtect+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+4",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+5",
+      4,
+      126
+     ],
+     [
+      "BattleScript_EffectProtect+6",
+      130,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+11",
+      131,
+      90
+     ],
+     [
+      "BattleScript_EffectProtect+14",
+      221,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 257,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_PKMNPROTECTEDITSELF2",
+     "BattleScript_EffectEndure:1540",
+     38
+    ],
+    "Nkind": "message",
+    "att": 3,
+    "attLabel": "BattleScript_EffectEndure:1538",
+    "between": [],
+    "lead": 1,
+    "path": [
+     "STRINGID_PKMNPROTECTEDITSELF2",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 237,
+    "exampleSeed": 7
+   },
+   "rule": {
+    "P": 39,
+    "romAnchor": 39,
+    "deltaNplusLead": 39,
+    "check": true,
+    "baseResidual": -39
+   }
+  },
+  {
+   "class": "protect (Detect)",
+   "scenario": "off108-detect-ply-primeape-onix",
+   "attacker": 0,
+   "move": 197,
+   "rom_off": {
+    "G": 61,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      4
+     ]
+    ],
+    "att": 3,
+    "afterAtt": 38,
+    "next": 40,
+    "nextKind": "first change in BattleScript_EffectProtect+11 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectProtect+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+4",
+      3,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      4,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      36,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+5",
+      37,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+6",
+      38,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+11",
+      39,
+      90
+     ],
+     [
+      "BattleScript_EffectProtect+14",
+      129,
+      1
+     ]
+    ],
+    "k": 2
+   },
+   "rom_on": {
+    "G": 61,
+    "opener": "attackstring",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectProtect+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+4",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+5",
+      4,
+      113
+     ],
+     [
+      "BattleScript_EffectProtect+6",
+      117,
+      1
+     ],
+     [
+      "BattleScript_EffectProtect+11",
+      118,
+      90
+     ],
+     [
+      "BattleScript_EffectProtect+14",
+      208,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 32,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_PKMNPROTECTEDITSELF2",
+     "BattleScript_EffectEndure:1540",
+     38
+    ],
+    "Nkind": "message",
+    "att": 3,
+    "attLabel": "BattleScript_EffectEndure:1538",
+    "between": [],
+    "lead": 1,
+    "path": [
+     "STRINGID_PKMNPROTECTEDITSELF2",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 31,
+    "exampleSeed": 5
+   },
+   "rule": {
+    "P": 39,
+    "romAnchor": 39,
+    "deltaNplusLead": 39,
+    "check": true,
+    "baseResidual": -39
+   }
+  },
+  {
+   "class": "rest (Rest)",
+   "scenario": "off108-rest-ply-snorlax-onix",
+   "attacker": 0,
+   "move": 156,
+   "rom_off": {
+    "G": 184,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      129
+     ]
+    ],
+    "att": 128,
+    "afterAtt": 163,
+    "next": 166,
+    "nextKind": "first change in BattleScript_PresentHealTarget+13 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectRest+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+13",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+18",
+      4,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+23",
+      5,
+      32
+     ],
+     [
+      "BattleScript_EffectRest+26",
+      37,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+31",
+      38,
+      86
+     ],
+     [
+      "BattleScript_EffectRest+34",
+      124,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+36",
+      125,
+      2
+     ],
+     [
+      "BattleScript_EffectRest+37",
+      127,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+0",
+      128,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      129,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      161,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+1",
+      162,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+2",
+      163,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+11",
+      164,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+13",
+      165,
+      10
+     ],
+     [
+      "BattleScript_PresentHealTarget+15",
+      175,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+18",
+      176,
+      88
+     ],
+     [
+      "BattleScript_PresentHealTarget+21",
+      264,
+      1
+     ]
+    ],
+    "k": 3
+   },
+   "rom_on": {
+    "G": 195,
+    "opener": "attackstring",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectRest+3",
+      2,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+13",
+      3,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+18",
+      4,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+23",
+      5,
+      32
+     ],
+     [
+      "BattleScript_EffectRest+26",
+      37,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+31",
+      38,
+      86
+     ],
+     [
+      "BattleScript_EffectRest+34",
+      124,
+      1
+     ],
+     [
+      "BattleScript_EffectRest+36",
+      125,
+      2
+     ],
+     [
+      "BattleScript_EffectRest+37",
+      127,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+0",
+      128,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+1",
+      129,
+      113
+     ],
+     [
+      "BattleScript_PresentHealTarget+2",
+      242,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+11",
+      243,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+13",
+      244,
+      10
+     ],
+     [
+      "BattleScript_PresentHealTarget+15",
+      254,
+      1
+     ],
+     [
+      "BattleScript_PresentHealTarget+18",
+      255,
+      88
+     ],
+     [
+      "BattleScript_PresentHealTarget+21",
+      343,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 222
+  },
+  {
+   "class": "two-turn charge (Dig)",
+   "scenario": "off108-dig-ply-primeape-snorlax",
+   "attacker": 0,
+   "move": 91,
+   "rom_off": {
+    "G": 49,
+    "opener": "EMPTYSTRING3",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      3
+     ]
+    ],
+    "att": 2,
+    "afterAtt": 37,
+    "next": 43,
+    "nextKind": "first change in BattleScript_TwoTurnMovesSecondTurn+85 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+52",
+      2,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      3,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      35,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+53",
+      36,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+54",
+      37,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+63",
+      38,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+69",
+      39,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+70",
+      40,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+80",
+      41,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+85",
+      42,
+      85
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+88",
+      127,
+      1
+     ],
+     [
+      "BattleScript_FirstTurnSemiInvulnerable+5",
+      128,
+      1
+     ],
+     [
+      "BattleScript_FirstTurnSemiInvulnerable+6",
+      129,
+      1
+     ]
+    ],
+    "k": 6
+   },
+   "rom_on": {
+    "G": 49,
+    "opener": "EMPTYSTRING3",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+52",
+      2,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+53",
+      3,
+      198
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+54",
+      201,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+63",
+      202,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+69",
+      203,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+70",
+      204,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+80",
+      205,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+85",
+      206,
+      85
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+88",
+      291,
+      1
+     ],
+     [
+      "BattleScript_FirstTurnSemiInvulnerable+5",
+      292,
+      1
+     ],
+     [
+      "BattleScript_FirstTurnSemiInvulnerable+6",
+      293,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 264,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_PKMNDUGHOLE",
+     "BattleScriptFirstChargingTurn:805",
+     41
+    ],
+    "Nkind": "message",
+    "att": 2,
+    "attLabel": "BattleScriptFirstChargingTurn:799",
+    "between": [],
+    "lead": 1,
+    "path": [
+     "STRINGID_PKMNDUGHOLE",
+     "set-battler-sprite-visibility",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 131,
+    "exampleSeed": 0
+   },
+   "rule": {
+    "P": 42,
+    "romAnchor": 42,
+    "deltaNplusLead": 42,
+    "check": true,
+    "baseResidual": -42
+   }
+  },
+  {
+   "class": "two-turn charge (Razor Wind)",
+   "scenario": "off108-razor-wind-ply-primeape-snorlax",
+   "attacker": 0,
+   "move": 13,
+   "rom_off": {
+    "G": 45,
+    "opener": "EMPTYSTRING3",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      3
+     ]
+    ],
+    "att": 2,
+    "afterAtt": 37,
+    "next": 43,
+    "nextKind": "first change in BattleScript_TwoTurnMovesSecondTurn+85 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+52",
+      2,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      3,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      35,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+53",
+      36,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+54",
+      37,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+63",
+      38,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+69",
+      39,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+70",
+      40,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+80",
+      41,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+85",
+      42,
+      96
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+88",
+      138,
+      1
+     ],
+     [
+      "BattleScript_EffectRazorWind+35",
+      139,
+      1
+     ]
+    ],
+    "k": 6
+   },
+   "rom_on": {
+    "G": 45,
+    "opener": "EMPTYSTRING3",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+52",
+      2,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+53",
+      3,
+      49
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+54",
+      52,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+63",
+      53,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+69",
+      54,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+70",
+      55,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+80",
+      56,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+85",
+      57,
+      96
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+88",
+      153,
+      1
+     ],
+     [
+      "BattleScript_EffectRazorWind+35",
+      154,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 12,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_PKMNWHIPPEDWHIRLWIND",
+     "BattleScriptFirstChargingTurn:805",
+     41
+    ],
+    "Nkind": "message",
+    "att": 2,
+    "attLabel": "BattleScriptFirstChargingTurn:799",
+    "between": [],
+    "lead": 1,
+    "path": [
+     "STRINGID_PKMNWHIPPEDWHIRLWIND",
+     "set-battler-sprite-visibility",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 7,
+    "exampleSeed": 201
+   },
+   "rule": {
+    "P": 42,
+    "romAnchor": 42,
+    "deltaNplusLead": 42,
+    "check": true,
+    "baseResidual": -42
+   }
+  },
+  {
+   "class": "two-turn charge (SolarBeam)",
+   "scenario": "off108-solar-beam-ply-primeape-snorlax",
+   "attacker": 0,
+   "move": 76,
+   "rom_off": {
+    "G": 48,
+    "opener": "EMPTYSTRING3",
+    "pauses": [
+     [
+      "BattleScript_Pausex20+0",
+      3
+     ]
+    ],
+    "att": 2,
+    "afterAtt": 37,
+    "next": 43,
+    "nextKind": "first change in BattleScript_TwoTurnMovesSecondTurn+85 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+52",
+      2,
+      1
+     ],
+     [
+      "BattleScript_Pausex20+0",
+      3,
+      32
+     ],
+     [
+      "BattleScript_Pausex20+3",
+      35,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+53",
+      36,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+54",
+      37,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+63",
+      38,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+69",
+      39,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+70",
+      40,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+80",
+      41,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+85",
+      42,
+      90
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+88",
+      132,
+      1
+     ],
+     [
+      "BattleScript_SolarBeamDecideTurn+35",
+      133,
+      1
+     ]
+    ],
+    "k": 6
+   },
+   "rom_on": {
+    "G": 48,
+    "opener": "EMPTYSTRING3",
+    "pauses": [],
+    "att": null,
+    "afterAtt": null,
+    "next": null,
+    "nextKind": null,
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+52",
+      2,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+53",
+      3,
+      111
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+54",
+      114,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+63",
+      115,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+69",
+      116,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+70",
+      117,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+80",
+      118,
+      1
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+85",
+      119,
+      90
+     ],
+     [
+      "BattleScript_TwoTurnMovesSecondTurn+88",
+      209,
+      1
+     ],
+     [
+      "BattleScript_SolarBeamDecideTurn+35",
+      210,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": false
+   },
+   "prodSamples": 65,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_PKMNTOOKSUNLIGHT",
+     "BattleScriptFirstChargingTurn:805",
+     41
+    ],
+    "Nkind": "message",
+    "att": 2,
+    "attLabel": "BattleScriptFirstChargingTurn:799",
+    "between": [],
+    "lead": 1,
+    "path": [
+     "STRINGID_PKMNTOOKSUNLIGHT",
+     "set-battler-sprite-visibility",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 31,
+    "exampleSeed": 21
+   },
+   "rule": {
+    "P": 42,
+    "romAnchor": 42,
+    "deltaNplusLead": 42,
+    "check": true,
+    "baseResidual": -42
+   }
+  },
+  {
+   "class": "failed (Snore awake: But it failed!)",
+   "scenario": "off108-snore-ply-primeape-snorlax",
+   "attacker": 0,
+   "move": 173,
+   "rom_off": {
+    "G": 61,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_ButItFailed+0",
+      3
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 38,
+    "nextKind": "first change in BattleScript_ButItFailed+10 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectSnore+13",
+      2,
+      1
+     ],
+     [
+      "BattleScript_ButItFailed+0",
+      3,
+      32
+     ],
+     [
+      "BattleScript_ButItFailed+3",
+      35,
+      1
+     ],
+     [
+      "BattleScript_ButItFailed+9",
+      36,
+      1
+     ],
+     [
+      "BattleScript_ButItFailed+10",
+      37,
+      79
+     ],
+     [
+      "BattleScript_ButItFailed+13",
+      116,
+      1
+     ]
+    ]
+   },
+   "rom_on": {
+    "G": 61,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_ButItFailed+0",
+      3
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 38,
+    "nextKind": "first change in BattleScript_ButItFailed+10 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_EffectSnore+13",
+      2,
+      1
+     ],
+     [
+      "BattleScript_ButItFailed+0",
+      3,
+      32
+     ],
+     [
+      "BattleScript_ButItFailed+3",
+      35,
+      1
+     ],
+     [
+      "BattleScript_ButItFailed+9",
+      36,
+      1
+     ],
+     [
+      "BattleScript_ButItFailed+10",
+      37,
+      79
+     ],
+     [
+      "BattleScript_ButItFailed+13",
+      116,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": true
+   },
+   "prodSamples": 36,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_BUTITFAILED",
+     "BattleScript_ButItFailed:2061",
+     36
+    ],
+    "att": null,
+    "lead": 1,
+    "path": [
+     "set-battler-pp-data",
+     "STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 33,
+    "exampleSeed": 19
+   },
+   "rule": {
+    "P": 37,
+    "romAnchor": 37,
+    "deltaNplusLead": 37,
+    "check": true,
+    "baseResidual": -37
+   }
+  },
+  {
+   "class": "miss (Dynamic Punch, player)",
+   "scenario": "off108-dynamic-punch-ply-machamp-snorlax",
+   "attacker": 0,
+   "move": 223,
+   "rom_off": {
+    "G": 70,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 37,
+    "nextKind": "first change in BattleScript_MoveMissed+2 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2,
+      32
+     ],
+     [
+      "BattleScript_MoveMissed+0",
+      34,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+1",
+      35,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+2",
+      36,
+      88
+     ],
+     [
+      "BattleScript_MoveMissed+5",
+      124,
+      1
+     ]
+    ]
+   },
+   "rom_on": {
+    "G": 70,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 37,
+    "nextKind": "first change in BattleScript_MoveMissed+2 (exec 1)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2,
+      32
+     ],
+     [
+      "BattleScript_MoveMissed+0",
+      34,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+1",
+      35,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+2",
+      36,
+      88
+     ],
+     [
+      "BattleScript_MoveMissed+5",
+      124,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": true
+   },
+   "prodSamples": 9,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_ATTACKMISSED",
+     "BattleScript_MoveMissed:280",
+     35
+    ],
+    "att": null,
+    "lead": 1,
+    "path": [
+     "set-battler-pp-data",
+     "STRINGID_ATTACKMISSED",
+     "set-battler-sprite-visibility",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 6,
+    "exampleSeed": 7
+   },
+   "rule": {
+    "P": 36,
+    "romAnchor": 36,
+    "deltaNplusLead": 36,
+    "check": true,
+    "baseResidual": -36
+   }
+  },
+  {
+   "class": "miss (Dynamic Punch, opponent)",
+   "scenario": "off108-dynamic-punch-opp-machamp-snorlax",
+   "attacker": 1,
+   "move": 223,
+   "rom_off": {
+    "G": 74,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 37,
+    "nextKind": "first change in BattleScript_MoveMissed+2 (exec 2)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2,
+      32
+     ],
+     [
+      "BattleScript_MoveMissed+0",
+      34,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+1",
+      35,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+2",
+      36,
+      92
+     ],
+     [
+      "BattleScript_MoveMissed+5",
+      128,
+      1
+     ]
+    ]
+   },
+   "rom_on": {
+    "G": 74,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 37,
+    "nextKind": "first change in BattleScript_MoveMissed+2 (exec 2)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2,
+      32
+     ],
+     [
+      "BattleScript_MoveMissed+0",
+      34,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+1",
+      35,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+2",
+      36,
+      92
+     ],
+     [
+      "BattleScript_MoveMissed+5",
+      128,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": true
+   },
+   "prodSamples": 9,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_ATTACKMISSED",
+     "BattleScript_MoveMissed:280",
+     35
+    ],
+    "att": null,
+    "lead": 1,
+    "path": [
+     "set-battler-pp-data",
+     "STRINGID_ATTACKMISSED",
+     "set-battler-sprite-visibility",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 6,
+    "exampleSeed": 7
+   },
+   "rule": {
+    "P": 36,
+    "romAnchor": 36,
+    "deltaNplusLead": 36,
+    "check": true,
+    "baseResidual": -36
+   }
+  },
+  {
+   "class": "protect-blocked (Tackle vs Protect)",
+   "scenario": "off108-protect-ply-primeape-onix",
+   "attacker": 1,
+   "move": 33,
+   "rom_off": {
+    "G": 223,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 37,
+    "nextKind": "first change in BattleScript_MoveMissed+2 (exec 2)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2,
+      32
+     ],
+     [
+      "BattleScript_MoveMissed+0",
+      34,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+1",
+      35,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+2",
+      36,
+      90
+     ],
+     [
+      "BattleScript_MoveMissed+5",
+      126,
+      1
+     ]
+    ]
+   },
+   "rom_on": {
+    "G": 315,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 37,
+    "nextKind": "first change in BattleScript_MoveMissed+2 (exec 2)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2,
+      32
+     ],
+     [
+      "BattleScript_MoveMissed+0",
+      34,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+1",
+      35,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+2",
+      36,
+      90
+     ],
+     [
+      "BattleScript_MoveMissed+5",
+      126,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": true
+   },
+   "prodSamples": 195,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_PKMNPROTECTEDITSELF",
+     "BattleScript_MoveMissed:280",
+     35
+    ],
+    "att": null,
+    "lead": 1,
+    "path": [
+     "set-battler-pp-data",
+     "STRINGID_PKMNPROTECTEDITSELF",
+     "set-battler-sprite-visibility",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 149,
+    "exampleSeed": 185
+   },
+   "rule": {
+    "P": 36,
+    "romAnchor": 36,
+    "deltaNplusLead": 36,
+    "check": true,
+    "baseResidual": -36
+   }
+  },
+  {
+   "class": "protect-blocked (Tackle vs Detect)",
+   "scenario": "off108-detect-ply-primeape-onix",
+   "attacker": 1,
+   "move": 33,
+   "rom_off": {
+    "G": 222,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 37,
+    "nextKind": "first change in BattleScript_MoveMissed+2 (exec 2)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2,
+      32
+     ],
+     [
+      "BattleScript_MoveMissed+0",
+      34,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+1",
+      35,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+2",
+      36,
+      90
+     ],
+     [
+      "BattleScript_MoveMissed+5",
+      126,
+      1
+     ]
+    ]
+   },
+   "rom_on": {
+    "G": 301,
+    "opener": "attackstring",
+    "pauses": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2
+     ]
+    ],
+    "att": null,
+    "afterAtt": null,
+    "next": 37,
+    "nextKind": "first change in BattleScript_MoveMissed+2 (exec 2)",
+    "statusAnim": null,
+    "path": [
+     [
+      "BattleScript_MoveMissedPause+0",
+      2,
+      32
+     ],
+     [
+      "BattleScript_MoveMissed+0",
+      34,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+1",
+      35,
+      1
+     ],
+     [
+      "BattleScript_MoveMissed+2",
+      36,
+      90
+     ],
+     [
+      "BattleScript_MoveMissed+5",
+      126,
+      1
+     ]
+    ]
+   },
+   "onVsOff": {
+    "pausePathSame": true
+   },
+   "prodSamples": 195,
+   "prod": {
+    "D_between": 0,
+    "N": [
+     "message",
+     "STRINGID_PKMNPROTECTEDITSELF",
+     "BattleScript_MoveMissed:280",
+     35
+    ],
+    "att": null,
+    "lead": 1,
+    "path": [
+     "set-battler-pp-data",
+     "STRINGID_PKMNPROTECTEDITSELF",
+     "set-battler-sprite-visibility",
+     "set-battler-sprite-visibility"
+    ],
+    "samples": 149,
+    "exampleSeed": 185
+   },
+   "rule": {
+    "P": 36,
+    "romAnchor": 36,
+    "deltaNplusLead": 36,
+    "check": true,
+    "baseResidual": -36
+   }
+  }
+ ]
+}

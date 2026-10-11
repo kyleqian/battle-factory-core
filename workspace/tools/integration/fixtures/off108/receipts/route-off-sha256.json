@@ -1,0 +1,10 @@
+{
+ "schema": "off108-route-sha256/v1",
+ "how": "off108Route.ts --scene=off --seeds=100k..100k+99 (k = 0..3) on the base copy 52c181d54",
+ "sha256": {
+  "off-0.jsonl": "0cea57f6d771cd0c15ad41334a666e74377cc799e7f0c644858303660ac98621",
+  "off-1.jsonl": "d7ead55e7e4009f806b5244e88a65bb0d9797fed877056ed142e44347aabf271",
+  "off-2.jsonl": "236e4dce4150edf35ef6ed3335003b015856ecac3966970f4279895130435784",
+  "off-3.jsonl": "bdcf7ce1a4c89a690fb123ceaea63b2f957538827ee4c8eab43e3e8ed02ca667"
+ }
+}
