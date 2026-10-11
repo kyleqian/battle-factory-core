@@ -1,1 +1,3 @@
 *.diff -whitespace
+# ctl95ControlCheck.ts prints "bad " (trailing space) when no row is bad; the receipt is kept byte-for-byte (the runner cmp gate)
+d/dt-plain-shift*.txt -whitespace
