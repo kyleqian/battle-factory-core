@@ -79,7 +79,14 @@ inventory's outside-Factory tier only (never the 276 or the rental list); the le
 
 ## Gates and reruns
 
-(Filled in at the end of the session; see the final message.)
+Final code (serialized, four Vitest workers): new + moved-pin + named files (stl109Struggle, liveShadowRows, liveStatusImplementedCount,
+factoryAnimationInventory, fp100FocusPunchTiming, playableAnimationIntegration, factoryBattleScriptNoPpStruggleFullTurn,
+animationBoundaryRatchet) 8 files / 139 tests green; `npm run typecheck` clean; `npm run test:smoke` 8 files / 448 tests; full suite as two
+shards: shard 1 813 files passed + 1 failed (`fp100FocusPunchTiming` accounting pin, `implementedCount` 238 -> 239: the pin now subtracts
+`additionalRequiredBodies`; fixed and rerun green), shard 2 814 files / 6,412 tests passed; `npm run build` green;
+`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 5c050b765`:
+PASS, 624 captures byte-identical across the 3 traces (the app-only trace 173 / 173).
+Non-timing failures: only the fp100 accounting pin above (an expected count pin, not a defect). No timing pin moved.
 
 ```
 sh tools/integration/stl109Run.sh .integration/validation/<fresh>                  # ROM receipts only
