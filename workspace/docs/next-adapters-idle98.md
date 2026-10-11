@@ -14,11 +14,12 @@ processes, r1 == r2 byte for byte (36 / 36 scenario outputs + 8 / 8 STATS_CHANGE
 | Scene OFF | **F_after - F_att = 35 on 37 / 37** (Cmd_attackanimation -> BattleScript_Pausex20). F_att - G and F_es - F_after are identical ON vs OFF on 37 / 37: only attackanimation..waitanimation depends on the scene | same |
 | Production's OFF hit path | **Exact (L_OFF = 0) on all 12 paired first bodies**: its `1 + interveningInstructions + 32` equals the ROM's G+1 -> Cmd_hitanimation span, attG + 36 (42 for BattleScript_EffectHit moves, 48 Earthquake, 53 Double Kick hit 1). G = the final glyph of "X used Y!", so production's move-animation command starts on the ROM frame G+1 in both scenes (same 24-frame message command) | `table/classes.json` (`romOffG1ToHit` == `prodOff`) |
 | Frames production loses per body (Scene ON) | **hit / KO: L_ON = prodOff - 30 + N + trail**: Karate Chop 11, Water Pulse 11, Psychic 16, Bite 26, Earthquake 27, Double Kick hit 1 22. **Later multi-hit body: 84** (Double Kick hit 2: ON command 36 vs OFF 115). **No-hit (status, two-turn charge): L_ON = L_OFF - 27 (Bulk Up) / - 30 (Razor Wind charge)**, where L_OFF = (attG - 1) + 35 + k (no OFF command at all). Miss: no body, production ON == OFF on 31 / 31 misses (14 routes) | `table/classes.tsv`, routes `receipts/route-sha256.json` |
+| Predictions (`predictions.json`, committed before the probes) | **ROM: all held** (pre 3, post 2, static pre rows, post rows == E, OFF 35, scene-independent outside the span, miss = no body with the same pause in both scenes). **Production: L_OFF = 0 held, and the no-hit class held.** The ON hit-path formula 12 + N + trail held for the attG = 6 moves (Karate Chop 11, Psychic 16, Bite 26) but missed Earthquake (predicted 21, measured 27) and Double Kick hit 1 (predicted 11, measured 22): their attack string is further from attackanimation (attG 12 / 17). prodOff - 30 + N + trail covers all of them. Double Kick hit 2 (84) was badly mispredicted ("same as a single hit") | `table/classes.tsv` |
 | Are the lost rows reproducible from production's own frames? | **Yes for pre and post.** Pre: rows G+1..A+N-1 are all the age-0 image (production's own age-0 frame for lead-0 bodies and idle94's 40 static-lead moves). Post: on trail -1 sides, rows E+1..E+3 equal production's last row (E). Not reproducible from frames alone: the multi-hit later-body gap (its 84 frames include screen changes before G) | same |
 | **BANKED temp patch** | `liveMoveUniversalRows` + `liveMoveUniversalRowAge` (1 file, +59 / -5). A live move-animation command lasts P + D + T. Its effect age is clamp(elapsed - P, 0, D - 1). P = 3 except 13 masked moves (their lead is unproven: `LIVE_MOVE_NO_PRE_ROW_SIDES`). T = 2 on the 257 trail -1 sides (130 moves, `LIVE_MOVE_POST_ROW_SIDES`), else 0. A Substitute swap and a declined body keep 0 / 0 | `idle98-universal-rows.diff` |
 | Patch proof | **Routes 14 / 14** (Karate Chop, Psychic, Water Pulse, Bulk Up, Bite, Earthquake on both sides; Double Kick; Dynamic Punch = masked control, P 0). Patched pre rows == base row 0 (age 0, live). Body rows unchanged (sha, age, live). Exception: the two Random2 adapters on routes whose earlier bodies gained rows (Water Pulse x2, Double Kick) keep age / live everywhere and differ only from their first draw age (91 / 97 >= 86, 11 >= 10). Their presentation-RNG words moved with the timeline (the host advances every frame). Post rows == base last row. Next command's first row equal. r1 == r2 in both trees | `receipts/render-check.json` |
 | Census delta (seeds 0..999, ten shards per tree) | **0 status changes (live 26,185 both). 0 per-command mismatches. 23,814 commands moved by exactly P + T**: 11,716 by +5 (255 move-sides), 12,098 by +3 (253 move-sides). 23,687 of them are live; 127 are presentation-stage fallbacks. 111 Substitute swaps kept +0. **+94,874 frames** (3,959,685 -> 4,054,801 incl. seed 434). Key sequence + battleDigestExcludingFrames identical on 9 / 10 shards. Shard 4: seed 434 is a frame-budget stall (the census's FRAME_BUDGET): it ends one turn earlier (338 vs 339 turns) and drops its final Struggle fallback command. Its 265 patched commands are a key prefix of the base's 266. The other 99 battles are identical | `census-delta.json`, `census-summary.json` |
-| Test pins the patch moves | PINS_LINE | `pins.json` |
+| Test pins the patch moves | **273 tests in 65 files, every one a timing pin**: 267 ordinary-route row / age sequences, 4 row counts, and 2 durations (MOVE_ANIMATION 48 -> 53, Earthquake 198 -> 201). Patched copy: 65 files / 273 tests failed, 1,557 files / 13,042 tests passed (44 / 223 skipped). It ran in its own two-commit git repo, so the appDifferential environment failure idle94 hit does not appear | `pins.json` |
 | STATS_CHANGE (issue a) | **A missing presentation, not only timing.** The ROM plays General_StatsChange (AnimTask_StatsChange: an OBJ-window sprite copy of the battler with a scrolling, blended stat-arrow BG) for **75 active frames** (STAT_ANIM_MULTIPLE_PLUS1, Bulk Up: 59 screen changes). It plays **89 frames** in the sharply variant (Swords Dance +2 and Scary Face -2: 81 changes). Scene ON and OFF are identical (r1 == r2). Production presents a 2-frame `stat` command. **Census: 5,698 stat commands in 4,689 groups, 897 / 1,000 battles** (up 3,416 / down 2,282; sharply 1,395) | `receipts/stats-change.json`, `exposure.json` |
 | Scene OFF pause (issue b) | **9,975 of the 27,481 census move bodies (36 %) have no hit receipt.** Production's OFF route presents nothing for their 35-frame attackanimation -> Pausex20 -> waitanimation span (plus attG - 1 instruction frames). Spot check (16 battles): ON hit-path bodies 310 == OFF move-animation commands 310 | `exposure.json` |
 
@@ -62,7 +63,76 @@ Scene OFF: hit-path L_OFF = 0. A no-hit body has no OFF command: L_OFF = (attG -
 
 ## 4. Pins the patch moves
 
-PINS_SECTION
+Patched copy (`git archive 3dd2b74b9` + the diff, its own two-commit git repo), `npm test`: **65 files / 273 tests failed, 1,557 files /
+13,042 tests passed** (44 / 223 skipped). 0 non-timing failures. Each pin asserts a live body's ordinary-route row count, age sequence or command
+duration. Each moves by P + T (+3 or +5) per live body on its route. `tools/integration/fixtures/idle98/pins.json` lists all 273 with each assertion's first
+line. Per file:
+
+- `tests/animation/liveWallMoveAdapters.test.ts`: 15
+- `tests/animation/livePrep8MoveAdapters.test.ts`: 12
+- `tests/animation/liveFaithfulTimingAdapters.test.ts`: 11
+- `tests/animation/liveOrderConsumerMoveAdapters.test.ts`: 11
+- `tests/animation/livePrep11MoveAdapters.test.ts`: 9
+- `tests/animation/liveAnchor3MoveAdapters.test.ts`: 8
+- `tests/animation/livePrep2MoveAdapters.test.ts`: 8
+- `tests/animation/livePrep6MoveAdapters.test.ts`: 8
+- `tests/animation/livePrep7MoveAdapters.test.ts`: 8
+- `tests/animation/liveProfileMoveAdapters.test.ts`: 8
+- `tests/animation/liveQ2Adapters.test.ts`: 8
+- `tests/animation/liveAnchor2MoveAdapters.test.ts`: 7
+- `tests/animation/liveAnchorMoveAdapters.test.ts`: 7
+- `tests/animation/livePrep16MoveAdapters.test.ts`: 7
+- `tests/animation/liveAnchor4MoveAdapters.test.ts`: 6
+- `tests/animation/liveFieldfxMoveAdapters.test.ts`: 6
+- `tests/animation/liveHBufferS1MoveAdapters.test.ts`: 6
+- `tests/animation/livePrep10MoveAdapters.test.ts`: 6
+- `tests/animation/livePrep5MoveAdapters.test.ts`: 6
+- `tests/animation/livePrep9MoveAdapters.test.ts`: 6
+- `tests/animation/liveR2GatesRoutes.test.ts`: 6
+- `tests/animation/liveFirePunchBody.test.ts`: 5
+- `tests/animation/liveOam1MoveAdapters.test.ts`: 5
+- `tests/animation/livePhysical2cMoveAdapters.test.ts`: 5
+- `tests/animation/liveRandom2R1MoveAdapters.test.ts`: 5
+- `tests/playableContactAnimationLifecycle.test.ts`: 4
+- `tests/animation/liveNext5MoveAdapters.test.ts`: 4
+- `tests/animation/livePhysical2aMoveAdapters.test.ts`: 4
+- `tests/animation/livePhysical2bMoveAdapters.test.ts`: 4
+- `tests/animation/livePrep13MoveAdapters.test.ts`: 4
+- `tests/animation/liveRoarWhirlwindMoveAdapters.test.ts`: 4
+- `tests/animation/liveSelectorsMoveAdapters.test.ts`: 4
+- `tests/animation/liveEndeavorAdapter.test.ts`: 3
+- `tests/animation/liveGlowMoveAdapters.test.ts`: 3
+- `tests/animation/liveLaterBodiesBg.test.ts`: 3
+- `tests/animation/liveMultihitMoveAdapters.test.ts`: 3
+- `tests/animation/liveRandom2R4MoveAdapters.test.ts`: 3
+- `tests/animation/liveSkillSwapFlatterAdapters.test.ts`: 3
+- `tests/playableAnimationIntegration.test.ts`: 2
+- `tests/animation/liveBatonPassAdapter.test.ts`: 2
+- `tests/animation/liveCurseStatsAdapter.test.ts`: 2
+- `tests/animation/liveDigAdapter.test.ts`: 2
+- `tests/animation/liveExtremeSpeedMementoAdapters.test.ts`: 2
+- `tests/animation/liveFlyBounce.test.ts`: 2
+- `tests/animation/liveIceBallAdapter.test.ts`: 2
+- `tests/animation/liveLsbzTiming.test.ts`: 2
+- `tests/animation/livePrep29Adapters.test.ts`: 2
+- `tests/animation/liveRandom2R5MoveAdapters.test.ts`: 2
+- `tests/animation/liveReturnAdapter.test.ts`: 2
+- `tests/battleResolutionPresentation.test.ts`: 1
+- `tests/playableAnimationLifecycle.test.ts`: 1
+- `tests/substituteDollDefenderLive.test.ts`: 1
+- `tests/wordsOrderDeferredLend.test.ts`: 1
+- `tests/animation/liveDiveAttackAdapter.test.ts`: 1
+- `tests/animation/liveDiveSetupAdapter.test.ts`: 1
+- `tests/animation/liveDrillPeckAdapter.test.ts`: 1
+- `tests/animation/liveHowlAdapter.test.ts`: 1
+- `tests/animation/livePhysicalMoveAdapters.test.ts`: 1
+- `tests/animation/liveSheerColdAndFix150.test.ts`: 1
+- `tests/animation/liveShockWaveAdapter.test.ts`: 1
+- `tests/animation/liveSpitUpAdapter.test.ts`: 1
+- `tests/animation/liveStatusMoveAdapters.test.ts`: 1
+- `tests/animation/liveSubstituteBodyAdapter.test.ts`: 1
+- `tests/animation/liveSuperpowerAdapter.test.ts`: 1
+- `tests/animation/liveSupportMoveAdapters.test.ts`: 1
 
 ## 5. ISSUES drafts (ready to file)
 
