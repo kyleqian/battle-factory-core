@@ -7,7 +7,8 @@
 #    fixtures from this checkout are copied into both;
 # 2. re-stage the 18 scenarios (must equal the committed ones and scenario-index.json);
 # 3. probes: 18 scenarios x {ON, OFF} x {r1, r2} (idle94Probe.py, 7 parallel; a crashed job reruns once), r1 == r2 byte for byte and
-#    == receipts/probe-sha256.json; idle98Compare.py (r1 == committed receipts/compare-r1.json, r2 == r1);
+#    == receipts/probe-sha256.json; idle98Compare.py (r1 == committed receipts/compare-r1.json, r2 == r1); 3b. the STATS_CHANGE
+#    windows of idle94's Swords Dance / Scary Face scenarios (idle98StatsChange.py == receipts/stats-change.json);
 # 4. production routes: idle94Route.ts ON / OFF for the 16 census battles of the class table (base copy) == receipts/route-sha256.json;
 #    idle98Classes.py == table/classes.{json,tsv};
 # 5. render routes: idle94RouteRender.ts in both copies x {r1, r2}; idle98RenderCheck.py == receipts/render-check.json;
@@ -72,6 +73,12 @@ python3 tools/integration/idle98Compare.py "$OUT/probes/r1" "$F/scenario-index.j
 python3 tools/integration/idle98Compare.py "$OUT/probes/r2" "$F/scenario-index.json" "$OUT/compare-r2.json" > /dev/null
 check "$F/receipts/compare-r1.json" "$OUT/compare-r1.json" "compare-r1.json"
 check "$OUT/compare-r1.json" "$OUT/compare-r2.json" "compare r2 == r1"
+# 3b. STATS_CHANGE windows: idle94's Swords Dance (+2) / Scary Face (-2) scenarios x {ON, OFF} x {r1, r2}
+mkdir -p "$OUT/stats/r1" "$OUT/stats/r2"
+(cd "$OUT/base/workspace" && for r in r1 r2; do for m in on off; do for s in idle94-swords-dance-ply-c-scyther-onix idle94-scary-face-opp-a-rhyhorn-shuckle; do
+  echo "$OUT/stats/$r $m $W/tools/integration/fixtures/idle94/scenarios/$s.json"; done; done; done | xargs -P 8 -n 3 "$OUT/job.sh")
+python3 tools/integration/idle98StatsChange.py "$OUT/stats/r1" "$OUT/stats/r2" "$F/receipts/compare-r1.json" "$OUT/stats-change.json" > /dev/null
+check "$F/receipts/stats-change.json" "$OUT/stats-change.json" "stats-change.json (r1 == r2 inside)"
 
 # 4. production routes (class table)
 mkdir -p "$OUT/routes"
