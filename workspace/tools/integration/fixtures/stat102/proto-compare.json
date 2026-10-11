@@ -1,0 +1,1166 @@
+{
+ "stat101-agility-opp-golbat-snorlax-on": {
+  "arg": 41,
+  "side": "opponent",
+  "species": "GOLBAT",
+  "reducer": {
+   "direction": "up",
+   "palette": "speed",
+   "sharply": true,
+   "state3Rel": 89,
+   "endRel": 89,
+   "nextInstructionRel": 91,
+   "addedRows": 90,
+   "bannerRows": 80,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "romMaskRect": [
+   144,
+   3,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 93,
+   "firstRel": -1,
+   "lastRel": 91,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 92,
+    "rectPx": 0,
+    "fullPx": 713
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-agility-opp-golbat-snorlax-off": {
+  "arg": 41,
+  "side": "opponent",
+  "species": "GOLBAT",
+  "reducer": {
+   "direction": "up",
+   "palette": "speed",
+   "sharply": true,
+   "state3Rel": 89,
+   "endRel": 89,
+   "nextInstructionRel": 91,
+   "addedRows": 90,
+   "bannerRows": 80,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "romMaskRect": [
+   144,
+   3,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 93,
+   "firstRel": -1,
+   "lastRel": 91,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 92,
+    "rectPx": 0,
+    "fullPx": 713
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-cosmic-power-ply-snorlax-golbat-on": {
+  "arg": 55,
+  "side": "player",
+  "species": "SNORLAX",
+  "reducer": {
+   "direction": "up",
+   "palette": "multiple",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "romMaskRect": [
+   40,
+   59,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 0
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-cosmic-power-ply-snorlax-golbat-off": {
+  "arg": 55,
+  "side": "player",
+  "species": "SNORLAX",
+  "reducer": {
+   "direction": "up",
+   "palette": "multiple",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "romMaskRect": [
+   40,
+   59,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 0
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-growl-ply-primeape-onix-on": {
+  "arg": 22,
+  "side": "opponent",
+  "species": "ONIX",
+  "reducer": {
+   "direction": "down",
+   "palette": "attack",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "romMaskRect": [
+   144,
+   10,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 689
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-growl-ply-primeape-onix-off": {
+  "arg": 22,
+  "side": "opponent",
+  "species": "ONIX",
+  "reducer": {
+   "direction": "down",
+   "palette": "attack",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "romMaskRect": [
+   144,
+   10,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 689
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-harden-ply-primeape-onix-on": {
+  "arg": 16,
+  "side": "player",
+  "species": "PRIMEAPE",
+  "reducer": {
+   "direction": "up",
+   "palette": "defense",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "romMaskRect": [
+   40,
+   55,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 735
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-harden-ply-primeape-onix-off": {
+  "arg": 16,
+  "side": "player",
+  "species": "PRIMEAPE",
+  "reducer": {
+   "direction": "up",
+   "palette": "defense",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "romMaskRect": [
+   40,
+   55,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 735
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-icy-wind-ply-primeape-golbat-on": {
+  "arg": 24,
+  "side": "opponent",
+  "species": "GOLBAT",
+  "reducer": {
+   "direction": "down",
+   "palette": "speed",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "romMaskRect": [
+   144,
+   3,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 559
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-icy-wind-ply-primeape-golbat-off": {
+  "arg": 24,
+  "side": "opponent",
+  "species": "GOLBAT",
+  "reducer": {
+   "direction": "down",
+   "palette": "speed",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 144,
+   "y": 3
+  },
+  "romMaskRect": [
+   144,
+   3,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 559
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-memento-ply-primeape-onix-on": {
+  "arg": 58,
+  "side": "opponent",
+  "species": "ONIX",
+  "reducer": {
+   "direction": "down",
+   "palette": "multiple",
+   "sharply": true,
+   "state3Rel": 89,
+   "endRel": 89,
+   "nextInstructionRel": 91,
+   "addedRows": 90,
+   "bannerRows": 80,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "liveX2Y2": [
+   1,
+   0
+  ],
+  "maskCorner": {
+   "x": 145,
+   "y": 10
+  },
+  "romMaskRect": [
+   145,
+   10,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 93,
+   "firstRel": -1,
+   "lastRel": 91,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 92,
+    "rectPx": 0,
+    "fullPx": 0
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-memento-ply-primeape-onix-off": {
+  "arg": 58,
+  "side": "opponent",
+  "species": "ONIX",
+  "reducer": {
+   "direction": "down",
+   "palette": "multiple",
+   "sharply": true,
+   "state3Rel": 89,
+   "endRel": 89,
+   "nextInstructionRel": 91,
+   "addedRows": 90,
+   "bannerRows": 80,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 144,
+   "y": 10
+  },
+  "romMaskRect": [
+   144,
+   10,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 93,
+   "firstRel": -1,
+   "lastRel": 91,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 92,
+    "rectPx": 0,
+    "fullPx": 0
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-roar-intimidate-ply-primeape-onix-on": {
+  "arg": 22,
+  "side": "player",
+  "species": "PRIMEAPE",
+  "reducer": {
+   "direction": "down",
+   "palette": "attack",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "romMaskRect": [
+   40,
+   55,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 922
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-roar-intimidate-ply-primeape-onix-off": {
+  "arg": 22,
+  "side": "player",
+  "species": "PRIMEAPE",
+  "reducer": {
+   "direction": "down",
+   "palette": "attack",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 55
+  },
+  "romMaskRect": [
+   40,
+   55,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 922
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-screech-opp-golbat-onix-on": {
+  "arg": 47,
+  "side": "player",
+  "species": "ONIX",
+  "reducer": {
+   "direction": "down",
+   "palette": "defense",
+   "sharply": true,
+   "state3Rel": 89,
+   "endRel": 89,
+   "nextInstructionRel": 91,
+   "addedRows": 90,
+   "bannerRows": 80,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 48
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 48
+  },
+  "romMaskRect": [
+   40,
+   48,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 93,
+   "firstRel": -1,
+   "lastRel": 91,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 92,
+    "rectPx": 0,
+    "fullPx": 782
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-screech-opp-golbat-onix-off": {
+  "arg": 47,
+  "side": "player",
+  "species": "ONIX",
+  "reducer": {
+   "direction": "down",
+   "palette": "defense",
+   "sharply": true,
+   "state3Rel": 89,
+   "endRel": 89,
+   "nextInstructionRel": 91,
+   "addedRows": 90,
+   "bannerRows": 80,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 48
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 48
+  },
+  "romMaskRect": [
+   40,
+   48,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 93,
+   "firstRel": -1,
+   "lastRel": 91,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 92,
+    "rectPx": 0,
+    "fullPx": 782
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-superpower-opp-machamp-snorlax-on": {
+  "arg": 57,
+  "side": "opponent",
+  "species": "MACHAMP",
+  "reducer": {
+   "direction": "down",
+   "palette": "multiple",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 9
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 144,
+   "y": 9
+  },
+  "romMaskRect": [
+   144,
+   9,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 0
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-superpower-opp-machamp-snorlax-off": {
+  "arg": 57,
+  "side": "opponent",
+  "species": "MACHAMP",
+  "reducer": {
+   "direction": "down",
+   "palette": "multiple",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 0
+  },
+  "productionCorner": {
+   "x": 144,
+   "y": 9
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 144,
+   "y": 9
+  },
+  "romMaskRect": [
+   144,
+   9,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": false,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 0
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-tickle-opp-golbat-snorlax-on": {
+  "arg": 57,
+  "side": "player",
+  "species": "SNORLAX",
+  "reducer": {
+   "direction": "down",
+   "palette": "multiple",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "romMaskRect": [
+   40,
+   59,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 0
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "stat101-tickle-opp-golbat-snorlax-off": {
+  "arg": 57,
+  "side": "player",
+  "species": "SNORLAX",
+  "reducer": {
+   "direction": "down",
+   "palette": "multiple",
+   "sharply": false,
+   "state3Rel": 67,
+   "endRel": 75,
+   "nextInstructionRel": 77,
+   "addedRows": 76,
+   "bannerRows": 58,
+   "shadowRows": 4
+  },
+  "productionCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "liveX2Y2": [
+   0,
+   0
+  ],
+  "maskCorner": {
+   "x": 40,
+   "y": 59
+  },
+  "romMaskRect": [
+   40,
+   59,
+   64,
+   64
+  ],
+  "cornerEqualsRomRect": true,
+  "elevatedOpponentShadow": true,
+  "compared": {
+   "rows": 79,
+   "firstRel": -1,
+   "lastRel": 77,
+   "firstBad": null
+  },
+  "rect": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "fullScreen": {
+   "mismatchedRows": 0,
+   "px": 0
+  },
+  "afterWindow": [
+   {
+    "rel": 78,
+    "rectPx": 0,
+    "fullPx": 0
+   }
+  ],
+  "perRowMismatches": []
+ },
+ "summary": {
+  "windows": 20,
+  "zeroPxWindows": 20
+ }
+}
