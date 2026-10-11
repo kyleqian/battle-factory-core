@@ -6,7 +6,7 @@ usage: off108Classes.py <rom.json> <route-dir> <out-dir>
 ROM side, per lab use (G = the final glyph of the opener print; every number below is a ROM row - G, i.e. the kernel's
 instructionExecution - u for the receipt that instruction emits): att = the attackanimation row (Scene OFF pushes BattleScript_Pausex20 on
 the next row), the 32-row pause run (Pausex20 / MoveMissedPause / ButItFailed / a script `pause B_WAIT_TIME_SHORT`), afterAtt = the row
-after waitanimation (att + 35 for an attack pause), next = the first presented anchor after the pause: a message's first glyph (its print
+after waitanimation (span = afterAtt - att, 35 on every attack pause), next = the first presented anchor after the pause: a message's first glyph (its print
 row + 2), a STATS_CHANGE activation (gAnimScriptActive rise), the HP bar's first change, k = next - afterAtt.
 Production side, per class: the census uses of the move with the lab's receipt path (same follow labels), their kernel deltas
 (attack receipt, the next presented receipt N), the frames production already presents between the opener and the attack receipt
@@ -60,7 +60,10 @@ def rom_anchors(u):
             out["pauses"].append([lab, d])
             if lab == "BattleScript_Pausex20+0" and out["att"] is None:
                 out["att"] = runs[i - 1][1]
-                out["afterAtt"] = out["att"] + 35
+                # F_after: the row after waitanimation's (the run after BattleScript_Pausex20's return)
+                ret = next(j for j in range(i + 1, len(runs)) if runs[j][0] == "BattleScript_Pausex20+3")
+                out["afterAtt"] = runs[ret + 1][1] + runs[ret + 1][2]
+                out["span"] = out["afterAtt"] - out["att"]
         if out["next"] is None and nch and d >= (out["afterAtt"] or 0) and (out["pauses"] or out["att"] is not None):
             if act:
                 out["next"], out["nextKind"] = d, "STATS_CHANGE activation (act rise)"
@@ -71,19 +74,14 @@ def rom_anchors(u):
     return out
 
 
-def prod_samples(scene, move, labels_hint):
-    res = []
-    for f in sorted(glob.glob(os.path.join(rdir, f"{scene}-*.jsonl"))):
-        for line in open(f):
-            if not line.strip():
-                continue
+USES = collections.defaultdict(list)  # census uses by move, loaded once
+for f in sorted(glob.glob(os.path.join(rdir, "off-*.jsonl"))):
+    for line in open(f):
+        if line.strip():
             u = json.loads(line)
-            if u["move"] == move:
-                res.append(u)
-    return res
+            USES[u["move"]].append(u)
 
 
-MOVES_ANY = sorted({json.loads(l)["move"] for f in glob.glob(os.path.join(rdir, "off-*.jsonl")) for l in open(f) if l.strip()} - {None})
 PRESENTED = ("message", "stat-stage-change", "set-battler-status-data", "health-bar-update", "status-icon-update")
 LEAD = {"message": 1, "set-battler-status-data": 1, "STATS_CHANGE": 0, "health-bar-update": 0}
 
@@ -112,7 +110,7 @@ for cls, stem, atk, ordinal, move in CASES:
     for mode in ("off", "on"):
         u = rom_use(stem, mode, atk, ordinal)
         row[f"rom_{mode}"] = None if u is None else rom_anchors(u)
-    samples = prod_samples("off", move, None) if move != 33 else [x for m in MOVES_ANY for x in prod_samples("off", m, None)]
+    samples = USES[move] if move != 33 else [x for m in sorted(USES, key=lambda m: (m is None, m)) for x in USES[m]]
     sigs = collections.Counter()
     ex = {}
     for s in samples:
@@ -153,11 +151,11 @@ for cls, stem, atk, ordinal, move in CASES:
 
 json.dump({"schema": "off108-classes/v1", "rows": table}, open(os.path.join(out, "classes.json"), "w"), indent=1)
 with open(os.path.join(out, "classes.tsv"), "w") as t:
-    t.write("class\tG\tatt\tpause rows\tafterAtt\tnext\tk\tnext kind\tprod N (kernel delta)\tlead\tD_between\tP (rule)\tcheck\tbase residual\tsamples\n")
+    t.write("class\tG\tatt\tpause rows\tafterAtt\tspan\tnext\tk\tnext kind\tprod N (kernel delta)\tlead\tD_between\tP (rule)\tcheck\tbase residual\tsamples\n")
     for r in table:
         ro, p, ru = r["rom_off"] or {}, r.get("prod") or {}, r.get("rule") or {}
         t.write("\t".join(str(x) for x in [r["class"], ro.get("G"), ro.get("att"), ";".join(f"{a}@{b}" for a, b in ro.get("pauses", [])), ro.get("afterAtt"),
-                ro.get("next"), ro.get("k"), ro.get("nextKind"), None if not p.get("N") else f"{p['N'][1] or p['N'][0]}@{p['N'][3]}", p.get("lead"),
+                ro.get("span"), ro.get("next"), ro.get("k"), ro.get("nextKind"), None if not p.get("N") else f"{p['N'][1] or p['N'][0]}@{p['N'][3]}", p.get("lead"),
                 p.get("D_between"), ru.get("P"), ru.get("check"), ru.get("baseResidual"), p.get("samples")]) + "\n")
 ok = sum(1 for r in table if (r.get("rule") or {}).get("check"))
 pp = [r for r in table if r["rom_off"] and r["rom_off"]["att"] is None]
