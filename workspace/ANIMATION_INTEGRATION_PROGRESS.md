@@ -77,8 +77,26 @@
   the target where the ROM does — they were 1 px left). Castform proven keys += 52:by:1 / 53:by:1 / 184:at:3 (audit 21 ARTIFACT;
   14 / 14 windows 0 px); rain Icy Wind stays declined as TIMING-PHASE. Worker gates: full suite 1,617 files / 13,278 tests, build,
   differential 624; qa91Run.sh run B == committed.
-- Live audit 22 (MAIN lane, Opus, in progress): ret88's Double Team "residual" = ARTIFACT (audit20Fixtures.py writes no ageOffset;
-  production's accepted DT framing starts at the ROM activation) — no defect.
+- Live audit 22 (MAIN lane, Opus, `c3101175c` .. `3a76cb3e6`, new files only, on a `9df9b234a` copy): **no production DEFECT**. ret88's
+  Double Team flag is an ARTIFACT (audit20Fixtures.py writes no ageOffset; production's accepted DT framing is age 0 = activation + 1):
+  aligned, ret88's 5 windows and the census's newly live PONYTA / BLISSEY Double Teams 12 / 12 are 0 px. ReturnWeak bodies with other
+  species 35 / 35 (incl. the idle-rest RATTATA's first body); Swift / Shock Wave / Water Pulse after a ReturnWeak 15 / 15; land87 reseed
+  routes incl. two KOs in one pending chain 17 / 17 (after a fixture-level ablation); land86 Flatter-after-Flatter 11 / 11. Runs A / B
+  byte-identical. PAPERCUT (2 false alarms tonight): checkers built on audit20Fixtures.py / cast83Check.ts start windows at the ROM
+  activation, not the production accepted window — use audit21Align.py.
+- Folded Opus worker `8ee81968c` (INTEGRATION) as `d46da5755` (src `081a0570`): doll90 — Psych Up 244 defender-doll cell both sides (the
+  renderer drew the doll box with the species sheet / bank; now the doll sheet + composeLiveFieldPalettes), Double Team 104 self-target
+  swap cell both sides (the ROM skips the stats banner behind a doll; framing {rows 159, shift -1}; the swaps never touch data[3]),
+  Sing 47 opponent swap cell (body ends 97 rows after the last on-screen note: predicted 230 / 248 rows for two new pairs before
+  probing, measured exactly). Still declining with named residuals: Recover (the doll-FREE controls are off 180k px), GrassWhistle /
+  Focus Punch opponent (doll-free controls miss whole-field BG rows), Focus Punch player (one 153-row body, D4 class), Iron Tail,
+  Dream Eater player, Dig, Double-Edge. Worker gates: full suite 2 shards 0 failed, build, differential 624. Supervisor: census on the
+  worker tree vs `302e39bdb` **+37 / +8,760**, 0 regressions; doll90Run.sh into a fresh dir: probes r1 == r2, `same summary.tsv`.
+- Census on `d46da5755` (src `081a0570`; every fold so far) vs the session baseline: **+372 commands / +57,024 live frames, 0 live ->
+  fallback, 0 errors, keys identical except seed 881's budget-cut tail: 95.15 % / 98.63 %** (start 93.79 / 97.37).
+- In flight: ctl95 (INTEGRATION: are the LIVE doll-free Recover / GrassWhistle / Focus Punch / Iron Tail bodies wrong, or the doll
+  labs' controls mis-staged?), scan93 (SIDE: scanline-buffer history for Extrasensory player / Memento later bodies; census +16 / +2,657
+  on its patch), idle94 (MAIN: the accepted-window-after-activation convention — bodies N frames shorter than the ROM).
 - prep reseed85 (MAIN lane, Opus, `4f4828f3b` .. `d46cdfff1`, new files only): the post-KO send-out allocator reseed after a words-order
   unit. The reseed reads slot OCCUPANCY only and every words unit is allocator-net-zero, so the order host can keep a word-free
   occupancy shadow while the free order stays deferred. ROM: 13 routes x 2 probes x 2 runs A == B; 4 / 4 words-vs-control pairs SAME
