@@ -1,1 +1,1 @@
-38 fixtures kept; 43 dropped (non-Return bodies); 68 Return events rekeyed; friendship {'0': 68}
+41 fixtures kept; 46 dropped (non-Return bodies); 74 Return events rekeyed; friendship {'0': 74}

@@ -10,7 +10,7 @@ Species are INTERNAL ids (all < 252 here, = national). Leads:
   rw  pb-a22rw-<side>-<attacker>-<target>: ReturnWeak BODIES (3 Return turns: a first and two later bodies) with other species: a big
       attacker (SNORLAX 143, STEELIX 208), a small picture (PICHU 172), an elevated opponent (CROBAT 169) as target and as attacker, and the
       only non-ONIX idle-rest species (RATTATA 19, front idle rest x2 1) as the opponent target and as the opponent attacker. The other lead
-      knows only Splash 150.
+      knows only Splash 150. ply-crobat-rattata: the faster CROBAT's first Return reaches RATTATA before RATTATA's own first body.
   dc  pb-a22dc-<opp|ply>-<consumer>: ret88ConsumerStage.py's two shapes (opp-: the opponent's EXPLOUD 372 leads with Return, the player's
       AMPHAROS 181 has 4x the consumer; ply-: the player's EXPLOUD leads with Return, the opponent's SNORLAX 143 has 4x the consumer) with
       deep-free-list consumers beyond ret88's set: Swift 129, Shock Wave 351, Water Pulse 352.
@@ -57,7 +57,8 @@ for name, species, nature, ret in (("ponyta", 77, 3, 18), ("blissey", 242, 5, 13
     n += 2
 # rw: (attacker side, attacker, target)
 NAMES = {143: "snorlax", 172: "pichu", 208: "steelix", 169: "crobat", 19: "rattata"}
-for side, atk, tgt in (("ply", 143, 172), ("opp", 172, 143), ("ply", 208, 169), ("opp", 169, 208), ("ply", 172, 19), ("opp", 19, 172)):
+for side, atk, tgt in (("ply", 143, 172), ("opp", 172, 143), ("ply", 208, 169), ("opp", 169, 208), ("ply", 172, 19), ("opp", 19, 172),
+                       ("ply", 169, 19)):
     s = copy.deepcopy(base); P = s["overrides"]["parties"]
     a, t = (P["player"][0], P["opponent"][0]) if side == "ply" else (P["opponent"][0], P["player"][0])
     lead(a, atk, 216); lead(t, tgt, 150)

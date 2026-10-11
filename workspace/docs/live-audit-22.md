@@ -10,7 +10,7 @@ the clone phase and not the fixture's personality.
   non-zero. Aligned: 12 / 12 0 px on the accepted rows.
 
 Every other live claim audited is 0 px on its accepted rows:
-- ReturnWeak bodies with other species: 34 / 34 live windows.
+- ReturnWeak bodies with other species: 35 / 35 live windows, including the idle-rest RATTATA as the target at its first body.
 - Swift / Shock Wave / Water Pulse after a ReturnWeak: 15 / 15.
 - land87 reseed routes with other species, including the Flatter route and **two KOs in one pending chain** (the host reseeds twice):
   17 / 17 after a fixture-level ablation.
@@ -36,7 +36,7 @@ Method:
 | PONYTA (player) -> PIDGEOT (elevated opponent) Double Team: the activation frame (aligned age -1) | **ARTIFACT** (window edge, ISSUES #142 convention) | 200 px on 1 row, 3 windows | Rows 0..157 are 0 px. The ROM still shows the elevated opponent's shadow on its activation frame (`SpriteCB_EnemyShadow` hides it one frame after `gAnimScriptActive`). Production gives that frame to the preceding message command: `LIVE_MOVE_OPPONENT_SHADOW_ROW` "Double Team (104): the first window row is one frame after the activation (row -1): no row" |
 | land87 reseed, TWO KOs in one pending chain (Sand-Attack / Rain Dance / Flatter; Swift after the first send-out; Protect / Reflect after the second) | **ARTIFACT** (fixture: no level) | 2,528 / 2,964 / 5,412 -> **0** (8 / 8) | `summary-reseed-raw.txt` -> `summary-reseed-level.txt` (`audit22Level.py`). Every residual row is the opponent healthbox's level digits (x 89..98, y 21..28). `reseed85Fixtures.py` writes no `opponentLevel`, so a L12..18 send-out renders "Lv50" |
 | land86 Flatter windows: audit20Check's allocator comparison `alloc=1!` | not a pixel claim: the comparator does not apply | px 0 | audit 20's comparator assumes `[wall, ...sparkles]`; Flatter's input has no wall (-1). The ROM pre-activation allocator state equals the entry state; 0 px |
-| ReturnWeak with RATTATA (the only non-ONIX idle-rest species): 3 bodies at it, 1 later body by it | DECLINE (fail-closed fallback; not a live claim) | n/a | `unclassified (case-local gate)`. RATTATA's own Splash body precedes each Return at it: ret88's later-body rest gate class (ONIX). ENTRY control: 0 px at RATTATA, 30,720 px on the attacker's later body, so the gate is right to decline there |
+| ReturnWeak with RATTATA (the only non-ONIX idle-rest species): 5 bodies at it after its own Splash body, 1 later body by it | DECLINE (fail-closed fallback; not a live claim) | n/a | `unclassified (case-local gate)`: ret88's later-body rest gate class (ONIX). ENTRY control: 0 px at RATTATA, 30,720 px on the attacker's later body, so the gate is right to decline there. RATTATA's true FIRST body as the target (`ply-crobat-rattata-c0`: the faster CROBAT's Return comes before RATTATA acts) and as the attacker (`opp-rattata-pichu-c0`) are **live, 0 px** |
 
 ### 1.2 The Double Team flag (target 1)
 
@@ -71,11 +71,11 @@ Method:
 |---|---|---|---|---|---|
 | ret88 DT (ret88's own `pb-ret88-{opp,ply}-double-team`) | 2 | 5 | 5 | raw 0 / **aligned 5** | ARTIFACT 5 (alignment) |
 | dt: Double Team after a ReturnWeak: PONYTA (player n3 / opponent), BLISSEY (player n5 / opponent); Return users PIDGEOT / LAPRAS | 4 | 12 | 12 | raw 0 / **aligned 9** + 3 with only the age -1 row | ARTIFACT 12 (alignment); 3 window-edge rows (ISSUES #142) |
-| ReturnWeak BODIES (every Return body of the 16 audit-22 lab scenarios, i.e. the dt / dc ones too): attackers EXPLOUD, LAPRAS, PIDGEOT, SNORLAX (big), STEELIX (big), PICHU (small), CROBAT (elevated attacker), RATTATA (idle rest); targets incl. PICHU (small), CROBAT (elevated opponent), STEELIX / SNORLAX (big), RATTATA (idle rest); first + later bodies, both sides | (16) | 38 | 34 | **34** | EXACT 34; DECLINE 4 (RATTATA, 1.1) |
+| ReturnWeak BODIES (every Return body of the 16 audit-22 lab scenarios, i.e. the dt / dc ones too): attackers EXPLOUD, LAPRAS, PIDGEOT, SNORLAX (big), STEELIX (big), PICHU (small), CROBAT (elevated attacker), RATTATA (idle rest); targets incl. RATTATA (idle rest, first body via CROBAT), PICHU (small), CROBAT (elevated opponent), STEELIX / SNORLAX (big), RATTATA (idle rest); first + later bodies, both sides | (17) | 41 | 35 | **35** | EXACT 35; DECLINE 6 (RATTATA, 1.1) |
 | dc: Swift 129 / Shock Wave 351 / Water Pulse 352 after a ReturnWeak (ret88's two shapes) | 6 | 15 | 15 | **15** | EXACT 15 (first + later bodies, both sides) |
 | reseed: land87 routes with other species: Sand-Attack / Mud-Slap / Rain Dance (+ RAIN_CONTINUES) / **Flatter** by SPEAROW / PSYDUCK / PIDGEY, KO by SLOWPOKE's Swift (Own Tempo on the Flatter routes), send-out CHANSEY / MR_MIME / PIDGEY / PSYDUCK / SPEAROW; consumers Protect / Reflect / Light Screen / Swift, both sides | 9 | 17 | 17 | raw 9 / **level 17** | EXACT 9; ARTIFACT 8 (level) -> 0. **5 windows reseed TWICE** (`reseeds [true, true]`: two KOs in one pending Sand-Attack / Rain Dance / Flatter chain) |
 | ff: Flatter after a Flatter, census shapes (735: player NIDORINO vs WOBBUFFET, Mud-Slap / Safeguard between; 936: opponent NIDORINO vs TOGETIC, Wish / Follow Me between) | 2 | 11 | 11 | **11** | EXACT 11. Flatter later bodies c3 / c4 (735) and c2 / c3 / c5 (936) take deferred lends (`order=1d`), Mud-Slap / Safeguard / Follow Me consumers included |
-| **total** | 29 | **98** | **94** | **94 on the accepted rows** (91 every row) | DEFECT 0; ARTIFACT 25 (alignment 17, level 8); window-edge 3 rows; DECLINE 4 |
+| **total** | 30 | **101** | **95** | **95 on the accepted rows** (92 every row) | DEFECT 0; ARTIFACT 25 (alignment 17, level 8); window-edge 3 rows; DECLINE 6 |
 
 Census replay (target 4): `liveShareCensus.ts --seeds=735..735 --index-from=735` (streak 0) and `936` (streak 6) on the base. Every
 command is live:
@@ -111,13 +111,16 @@ have no ROM staging.
 
 - No ROM staging of the census battles themselves: target 4 replays 735 / 936 through the production orchestrator (status per command)
   and checks pixels on lab routes of the same shape.
-- The ReturnWeak idle-rest coverage beyond the first body is a fail-closed decline (RATTATA; ret88's ONIX gate class). No later-body
-  RATTATA claim exists to audit.
+- Beyond its first body, a ReturnWeak at the idle-rest RATTATA is a fail-closed decline (ret88's ONIX gate class), so there is no
+  later-body RATTATA claim to audit.
 - In `a22rs-ko2-ms-opp-spearow-chansey-protect`, the Factory AI sent CHANSEY after the first KO, so it is a single-KO route (still 0 px).
   The two-KO routes are the `ko2-sa` / `ko2-rd` player-consumer routes.
 - Only ReturnWeak (power level 0, the kernel's friendship) is reachable. ret88's Strong / Medium remainder is unchanged.
 
 ## 4. Reproduction (from workspace/; direct mGBA only, ~4 min)
+
+The runner leaves ~4-6 GB in `<fresh-scratch-dir>`: the base copy plus the probes' RGB frames (`tree/workspace/a22/rs/rgb-*`). Delete
+that dir once the comparison is read; the runner never deletes anything itself.
 
 ```
 sh tools/integration/audit22Run.sh <fresh-receipt-dir> <fresh-scratch-dir>
@@ -150,7 +153,7 @@ see section 5.
   `audit22ReseedFixtures.py`, `audit22Align.py`, `audit22Level.py`, `audit22Check.ts`, `audit22StepCounter.ts`, `audit22Data3.py`,
   `audit22Summary.py`.
 - Receipts (`tools/integration/fixtures/audit-22/`):
-  - `scenarios/` (29);
+  - `scenarios/` (30);
   - `fixtures/{dt,a,ff,rs}/` (raw, aligned, rekeyed, levelled);
   - `ret88-dt/`, `a22/`, `ff/`, `reseed/`: check JSONs, derive / rekey logs, `rom-data3.jsonl`, `production-step-counter.jsonl`;
   - `summary-*.txt`.

@@ -64,6 +64,12 @@ pb-a22rw-opp-rattata-pichu-c0.json RETURN units 0 power 1 otherInvisible 0
 pb-a22rw-opp-rattata-pichu-c1.json SPLASH units 3 power 1 otherInvisible 0
 pb-a22rw-opp-rattata-pichu-c2.json SPLASH units 4 power 1 otherInvisible 0
 pb-a22rw-opp-rattata-pichu-c3.json RETURN units 5 power 1 otherInvisible 0
+pb-a22rw-ply-crobat-rattata-c0.json RETURN units 0 power 1 otherInvisible 0
+pb-a22rw-ply-crobat-rattata-c1.json SPLASH units 2 power 1 otherInvisible 0
+pb-a22rw-ply-crobat-rattata-c2.json RETURN units 3 power 1 otherInvisible 0
+pb-a22rw-ply-crobat-rattata-c3.json SPLASH units 5 power 1 otherInvisible 0
+pb-a22rw-ply-crobat-rattata-c4.json RETURN units 6 power 1 otherInvisible 0
+pb-a22rw-ply-crobat-rattata-c5.json SPLASH units 8 power 1 otherInvisible 0
 pb-a22rw-ply-pichu-rattata-c0.json SPLASH units 0 power 0 otherInvisible 0
 pb-a22rw-ply-pichu-rattata-c1.json RETURN units 1 power 1 otherInvisible 0
 pb-a22rw-ply-pichu-rattata-c2.json SPLASH units 3 power 1 otherInvisible 0
