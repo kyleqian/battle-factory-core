@@ -1,0 +1,146 @@
+{
+ "schema": "hist73-merged-census/v1",
+ "seeds": "0..999",
+ "shards": [
+  "0..99",
+  "100..199",
+  "200..299",
+  "300..399",
+  "400..499",
+  "500..599",
+  "600..699",
+  "700..799",
+  "800..899",
+  "900..999"
+ ],
+ "battles": {
+  "played": 1000,
+  "terminal": 997,
+  "stalled": 3,
+  "errors": 0,
+  "frames": 14619879,
+  "playerTurns": 20641
+ },
+ "overall": {
+  "commands": 27518,
+  "live": 25853,
+  "frames": 3952274,
+  "liveFrames": 3854913,
+  "liveSharePctByCount": 93.95,
+  "liveSharePctByFrames": 97.54
+ },
+ "perReason": [
+  {
+   "reason": "duration: no adapter (no liveMoveAnimationDuration case)",
+   "count": 1056,
+   "frames": 33792
+  },
+  {
+   "reason": "presentation: sprite-order lend unknown",
+   "count": 116,
+   "frames": 23901
+  },
+  {
+   "reason": "presentation: unclassified (case-local gate)",
+   "count": 80,
+   "frames": 10515
+  },
+  {
+   "reason": "presentation: CASTFORM shown in a weather form: the field art has no form input (cf78, ISSUES #143)",
+   "count": 58,
+   "frames": 10116
+  },
+  {
+   "reason": "presentation: sprite allocator history unknown",
+   "count": 52,
+   "frames": 5145
+  },
+  {
+   "reason": "presentation: later-body (order lend not a first body)",
+   "count": 27,
+   "frames": 4416
+  },
+  {
+   "reason": "duration: attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)",
+   "count": 106,
+   "frames": 3392
+  },
+  {
+   "reason": "duration: defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "count": 89,
+   "frames": 2848
+  },
+  {
+   "reason": "duration: attacker doll: self-target body",
+   "count": 48,
+   "frames": 1536
+  },
+  {
+   "reason": "presentation: stale move power unknown",
+   "count": 12,
+   "frames": 816
+  },
+  {
+   "reason": "presentation: target hidden (semi-invulnerable): no D4 phase for its lag profile (hide66)",
+   "count": 2,
+   "frames": 276
+  },
+  {
+   "reason": "duration: attacker doll: both battlers shown as dolls",
+   "count": 8,
+   "frames": 256
+  },
+  {
+   "reason": "duration: unsupported turn 0",
+   "count": 7,
+   "frames": 224
+  },
+  {
+   "reason": "duration: defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "count": 4,
+   "frames": 128
+  }
+ ],
+ "perDetail": [
+  {
+   "detail": "order host: Return power level 0 body",
+   "count": 97,
+   "frames": 20347
+  },
+  {
+   "detail": "order host: no EXACT plan: body 63:player",
+   "count": 7,
+   "frames": 1648
+  },
+  {
+   "detail": "order host: no EXACT plan: body 310:player",
+   "count": 5,
+   "frames": 897
+  },
+  {
+   "detail": "order host: next-mon summary while the opponent battler is tracked",
+   "count": 2,
+   "frames": 514
+  },
+  {
+   "detail": "order host: no EXACT plan: body 316:player",
+   "count": 5,
+   "frames": 495
+  }
+ ],
+ "shardBattleDigests": [
+  "fdd5f71d3efd267d8eb538c06dfcb6b19a83d82a1004b90533c1e7812ac8a0f3",
+  "e30618fcce52e07831a8f6bf43f7122ecb6e356eaf36bf2188aba670ff16b172",
+  "d076ca63c855ae7ea5f408b173a826f841754e1397f64157146aece95a481227",
+  "4a1dee96a6e14e1fd58806b81c331e99e0ad23a0fd3cfaaa0e9b43042f993b52",
+  "112a435bd62876706510de326ffcfcad1b0e908a93a549b52e4774a6b904244e",
+  "f1d99b4d1f095de8457cab919096dcb7efe757592d23087135611fabb56b8e6a",
+  "d430d4b6c4f039dbffdb2d4a2f0a880349a0e69e85d9fa3f3f64b31f6bc949fe",
+  "e8abdf968511554302a526e308d651d43fae020c78bee11a04f2832c0717da47",
+  "c115314a3cc4b4baec04d48ea782ef83e49060ac6e5ee56d2ccf86612b883566",
+  "37e11095d5904b57b4a0dc944e025f6950278300e08537b2bd11cc8e6de1bde5"
+ ],
+ "battleDigest": "11b30db7a3445ee6f2754ed7433c1a6e8d51030ed21fd1dc542c69ebb76795b4",
+ "commandKeyDigest": "26489b387dcfa50e08c3551b7f6fb5ad7e1be3b5a2f38827eebf4e61d94d6e39",
+ "renderThrows": 0
+}

@@ -42,7 +42,7 @@ for b, a in gained:
 for k in sorted(gd, key=lambda k: (-gf[k], k)):
     print(f"  gained from BEFORE decline {k!r}: {gd[k]} / {gf[k]}")
 for name, rows in (("before", before), ("after", after)):
-    fl = [c for c in rows if c.get("moveId") == 260 and c["kind"] == "move-animation"]
+    fl = [c for c in rows if c.get("moveId") == 260 and c["kind"] == "move"]
     st = Counter(c["status"] for c in fl)
     print(f'Flatter 260 {name}: {len(fl)} commands, status {dict(st)}, live frames {sum(c["liveFrames"] for c in fl)} of {sum(c["frames"] for c in fl)}')
     d = Counter(); f = Counter()
@@ -50,7 +50,7 @@ for name, rows in (("before", before), ("after", after)):
         if c["status"] != "live":
             d[dec(c)] += 1; f[dec(c)] += c["frames"] - c["liveFrames"]
     for k in sorted(d, key=lambda k: (-f[k], k)):
-        print(f"  Flatter {name} decline {k!r}: {d[k]} / {f[k]}")
+        print(f"  Flatter {name} decline {k!r}: {d[k]} / {f[k]}; battles {sorted({c['battle'] for c in fl if c['status'] != 'live' and dec(c) == k})}")
     s = Counter(); sf = Counter()
     for c in rows:
         if c["status"] != "live" and "260" in dec(c):
