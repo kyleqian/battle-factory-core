@@ -133,8 +133,11 @@ describe("cast83: the weather-form gate lifts only ROM-proven (move, Castform ro
   };
   const lifted = JSON.parse(readFileSync("tools/integration/fixtures/cast83/receipt-lifted.json", "utf8")) as typeof receipt;
   it("every proven key: live in the final-code receipt, every live window 0 px, r1 == r2, both Castform sides", () => {
-    expect(LIVE_CASTFORM_FORM_PROVEN.size).toBe(29);
+    // qa91: three keys lifted on live audit 21's aligned windows (their receipt: tests/qa91QuickAttackCastformKeys.test.ts).
+    const qa91Lifted = new Set(["52:by:1", "53:by:1", "184:at:3"]);
+    expect(LIVE_CASTFORM_FORM_PROVEN.size).toBe(29 + qa91Lifted.size);
     for (const key of LIVE_CASTFORM_FORM_PROVEN) {
+      if (qa91Lifted.has(key)) continue;
       const k = receipt.keys[key];
       expect(k, key).toBeDefined();
       expect([k!.live > 0, k!.liveExact === k!.live, k!.allSame, k!.sides], key).toEqual([true, true, true, ["opponent", "player"]]);
@@ -151,7 +154,9 @@ describe("cast83: the weather-form gate lifts only ROM-proven (move, Castform ro
     expect(liveCastformFormDeclines(fieldOf(SPECIES.CASTFORM, SPECIES.GOLBAT), { moveId: 52, attacker: 0 })).toBe(false);
     expect(liveCastformFormDeclines(field, { moveId: 196, attacker: 0 })).toBe(false); // 196:by:3
     expect(liveCastformFormDeclines(field, { moveId: 196, attacker: 1 })).toBe(false); // 196:at:3
-    expect(liveCastformFormDeclineReason(field, { moveId: 184, attacker: 1 })).toMatch(/^measured residual 184:at:3/);
+    expect(liveCastformFormDeclines(field, { moveId: 184, attacker: 1 })).toBe(false); // 184:at:3 (qa91)
+    expect(liveCastformFormDeclineReason(fieldOf(SPECIES.CASTFORM, SPECIES.GOLBAT, [2]), { moveId: 196, attacker: 1 }))
+      .toMatch(/^measured residual 196:at:2/);
     expect(liveCastformFormDeclineReason(field, { moveId: 19, attacker: 1 })).toBe("body not ROM-proven for 19:at:3");
     expect(liveCastformFormDeclineReason(field)).toBe("Substitute swap composite not measured");
     expect(liveCastformFormDeclineReason(fieldOf(SPECIES.CASTFORM, SPECIES.GOLBAT, [255]), { moveId: 196, attacker: 0 }))

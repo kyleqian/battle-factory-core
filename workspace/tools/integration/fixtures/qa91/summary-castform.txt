@@ -1,0 +1,39 @@
+c83-ctl-ember-by-cfopp-c0.json EMBER opponent CASTFORM/MANTINE units=2 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfopp-c1.json EMBER opponent CASTFORM/MANTINE units=6 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfopp-c2.json EMBER opponent CASTFORM/MANTINE units=10 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfply-c0.json EMBER player CASTFORM/CROBAT units=2 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfply-c1.json EMBER player CASTFORM/CROBAT units=6 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-ember-by-cfply-c2.json EMBER player CASTFORM/CROBAT units=10 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfopp-c0.json FLAMETHROWER opponent CASTFORM/MANTINE units=2 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfopp-c1.json FLAMETHROWER opponent CASTFORM/MANTINE units=6 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfopp-c2.json FLAMETHROWER opponent CASTFORM/MANTINE units=10 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfply-c0.json FLAMETHROWER player CASTFORM/GOLBAT units=2 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfply-c1.json FLAMETHROWER player CASTFORM/GOLBAT units=6 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-flamethrower-by-cfply-c2.json FLAMETHROWER player CASTFORM/GOLBAT units=10 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfopp-c0.json SCARY_FACE player LAPRAS/CASTFORM units=2 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfopp-c1.json SCARY_FACE player LAPRAS/CASTFORM units=6 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfply-c0.json SCARY_FACE opponent GOLBAT/CASTFORM units=2 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfply-c1.json SCARY_FACE opponent GOLBAT/CASTFORM units=4 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-ctl-scary-face-at-cfply-c2.json SCARY_FACE opponent GOLBAT/CASTFORM units=8 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-hail-scary-face-at-cfopp-c0.json SCARY_FACE player LAPRAS/CASTFORM units=2 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-hail-scary-face-at-cfply-c0.json SCARY_FACE opponent GOLBAT/CASTFORM units=2 live=True rows=190 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-rain-icy-wind-at-cfopp-c0.json ICY_WIND player LAPRAS/CASTFORM units=2 live=False decline='CASTFORM_shown_in_a_weather_form:_measured_residual_196:at:2:_Icy_Wind_in_rain:_335,022_/_337,522_px_(TIMING-PHASE:_lag_ages_[241,_242]_vs_[261],_also_without_Castform;_live_audit_21)_(cast83,_ISSUES_#143)' rows=287 px=5456848 same=True entryLive=False entryPx=5456848 ages=1..40(40+) first=1:[160, 191, 65, 72]:169,65 rom bdbd9c live 526b63
+c83-rain-icy-wind-at-cfopp-c1.json ICY_WIND player LAPRAS/CASTFORM units=6 live=False decline='CASTFORM_shown_in_a_weather_form:_measured_residual_196:at:2:_Icy_Wind_in_rain:_335,022_/_337,522_px_(TIMING-PHASE:_lag_ages_[241,_242]_vs_[261],_also_without_Castform;_live_audit_21)_(cast83,_ISSUES_#143)' rows=286 px=5436925 same=True entryLive=False entryPx=5436925 ages=1..40(40+) first=1:[160, 191, 65, 72]:169,65 rom bdbd9c live 526b63
+c83-rain-icy-wind-at-cfply-c0.json ICY_WIND opponent GOLBAT/CASTFORM units=2 live=False decline='CASTFORM_shown_in_a_weather_form:_measured_residual_196:at:2:_Icy_Wind_in_rain:_335,022_/_337,522_px_(TIMING-PHASE:_lag_ages_[241,_242]_vs_[261],_also_without_Castform;_live_audit_21)_(cast83,_ISSUES_#143)' rows=286 px=5308922 same=True entryLive=False entryPx=5308922 ages=1..40(40+) first=1:[160, 191, 65, 72]:169,65 rom bdbd9c live 526b63
+c83-rain-icy-wind-at-cfply-c1.json ICY_WIND opponent GOLBAT/CASTFORM units=6 live=False decline='CASTFORM_shown_in_a_weather_form:_measured_residual_196:at:2:_Icy_Wind_in_rain:_335,022_/_337,522_px_(TIMING-PHASE:_lag_ages_[241,_242]_vs_[261],_also_without_Castform;_live_audit_21)_(cast83,_ISSUES_#143)' rows=286 px=5308922 same=True entryLive=False entryPx=5308922 ages=1..40(40+) first=1:[160, 191, 65, 72]:169,65 rom bdbd9c live 526b63
+c83-rain-icy-wind-by-cfopp-c0.json ICY_WIND opponent CASTFORM/MANTINE units=2 live=False decline='CASTFORM_shown_in_a_weather_form:_measured_residual_196:by:2:_Icy_Wind_in_rain:_335,691_/_332,548_px_(TIMING-PHASE:_lag_ages_[241,_242]_vs_[261],_also_without_Castform;_live_audit_21)_(cast83,_ISSUES_#143)' rows=287 px=5299453 same=True entryLive=False entryPx=5299453 ages=1..40(40+) first=1:[160, 191, 65, 72]:169,65 rom bdbd9c live 526b63
+c83-rain-icy-wind-by-cfopp-c1.json ICY_WIND opponent CASTFORM/MANTINE units=6 live=False decline='CASTFORM_shown_in_a_weather_form:_measured_residual_196:by:2:_Icy_Wind_in_rain:_335,691_/_332,548_px_(TIMING-PHASE:_lag_ages_[241,_242]_vs_[261],_also_without_Castform;_live_audit_21)_(cast83,_ISSUES_#143)' rows=286 px=5280187 same=True entryLive=False entryPx=5280187 ages=1..40(40+) first=1:[160, 191, 65, 72]:169,65 rom bdbd9c live 526b63
+c83-rain-icy-wind-by-cfply-c0.json ICY_WIND player CASTFORM/GOLBAT units=2 live=False decline='CASTFORM_shown_in_a_weather_form:_measured_residual_196:by:2:_Icy_Wind_in_rain:_335,691_/_332,548_px_(TIMING-PHASE:_lag_ages_[241,_242]_vs_[261],_also_without_Castform;_live_audit_21)_(cast83,_ISSUES_#143)' rows=286 px=5352311 same=True entryLive=False entryPx=5352311 ages=1..40(40+) first=1:[160, 191, 65, 72]:169,65 rom bdbd9c live 526b63
+c83-rain-icy-wind-by-cfply-c1.json ICY_WIND player CASTFORM/GOLBAT units=6 live=False decline='CASTFORM_shown_in_a_weather_form:_measured_residual_196:by:2:_Icy_Wind_in_rain:_335,691_/_332,548_px_(TIMING-PHASE:_lag_ages_[241,_242]_vs_[261],_also_without_Castform;_live_audit_21)_(cast83,_ISSUES_#143)' rows=286 px=5352311 same=True entryLive=False entryPx=5352311 ages=1..40(40+) first=1:[160, 191, 65, 72]:169,65 rom bdbd9c live 526b63
+c83-sun-ember-by-cfopp-c0.json EMBER opponent CASTFORM/MANTINE units=2 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfopp-c1.json EMBER opponent CASTFORM/MANTINE units=5 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfopp-c2.json EMBER opponent CASTFORM/MANTINE units=8 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfply-c0.json EMBER player CASTFORM/CROBAT units=2 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfply-c1.json EMBER player CASTFORM/CROBAT units=5 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-ember-by-cfply-c2.json EMBER player CASTFORM/CROBAT units=8 live=True rows=63 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfopp-c0.json FLAMETHROWER opponent CASTFORM/MANTINE units=2 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfopp-c1.json FLAMETHROWER opponent CASTFORM/MANTINE units=5 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfopp-c2.json FLAMETHROWER opponent CASTFORM/MANTINE units=8 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfply-c0.json FLAMETHROWER player CASTFORM/GOLBAT units=2 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfply-c1.json FLAMETHROWER player CASTFORM/GOLBAT units=5 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-
+c83-sun-flamethrower-by-cfply-c2.json FLAMETHROWER player CASTFORM/GOLBAT units=8 live=True rows=126 px=0 same=True entryLive=True entryPx=0 ages=-

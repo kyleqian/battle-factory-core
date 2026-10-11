@@ -1,0 +1,293 @@
+{
+ "schema": "audit19-chain-check/v1",
+ "scenario": "c83-sun-flamethrower-by-cfply",
+ "rows": [
+  {
+   "fixture": "c83-sun-flamethrower-by-cfply-c0.json",
+   "move": "FLAMETHROWER",
+   "side": "player",
+   "species": "CASTFORM/GOLBAT",
+   "units": 2,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@0 53@0"
+   ],
+   "romPower": 95,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 95
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 585,
+    "endFrame": 710,
+    "ageOffset": -11,
+    "bodyStartFrame": 581,
+    "bodyEndFrame": 790
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": null,
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 126,
+    "px": 0,
+    "digests": [
+     "9b551a35c30f7319",
+     "9b551a35c30f7319"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 126,
+    "px": 0,
+    "digests": [
+     "9b551a35c30f7319",
+     "9b551a35c30f7319"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "c83-sun-flamethrower-by-cfply-c1.json",
+   "move": "FLAMETHROWER",
+   "side": "player",
+   "species": "CASTFORM/GOLBAT",
+   "units": 5,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@0 53@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "53@0"
+   ],
+   "romPower": 95,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 95
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 1581,
+    "endFrame": 1706,
+    "ageOffset": -11,
+    "bodyStartFrame": 1577,
+    "bodyEndFrame": 1786
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 126,
+    "px": 0,
+    "digests": [
+     "9b551a35c30f7319",
+     "9b551a35c30f7319"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 126,
+    "px": 0,
+    "digests": [
+     "9b551a35c30f7319",
+     "9b551a35c30f7319"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  },
+  {
+   "fixture": "c83-sun-flamethrower-by-cfply-c2.json",
+   "move": "FLAMETHROWER",
+   "side": "player",
+   "species": "CASTFORM/GOLBAT",
+   "units": 8,
+   "romInvisible": [
+    false,
+    false
+   ],
+   "hideAgree": true,
+   "promptShown": [
+    true,
+    true,
+    true
+   ],
+   "history": [
+    "241@1 CASTFORM_CHANGE(1)@0 53@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "53@0 HIT_ANIMATION@1 SUN_CONTINUES@0",
+    "53@0"
+   ],
+   "romPower": 95,
+   "request": {
+    "turn": 0,
+    "target": 1,
+    "power": 95
+   },
+   "unitPowers": [],
+   "window": {
+    "startFrame": 2915,
+    "endFrame": 3040,
+    "ageOffset": -11,
+    "bodyStartFrame": 2911,
+    "bodyEndFrame": 3120
+   },
+   "sameWindow": [
+    true,
+    true
+   ],
+   "x2": {
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "chain": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": false,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 126,
+    "px": 0,
+    "digests": [
+     "9b551a35c30f7319",
+     "9b551a35c30f7319"
+    ],
+    "residualRows": [],
+    "detail": []
+   },
+   "entry": {
+    "live": true,
+    "decline": null,
+    "orderKnown": true,
+    "orderDeferred": false,
+    "orderInvalid": null,
+    "allocatorInput": false,
+    "firstBody": true,
+    "hidden": [
+     false,
+     false
+    ],
+    "doll": [
+     false,
+     false
+    ],
+    "invalidatedBy": [],
+    "rows": 126,
+    "exactRows": 126,
+    "px": 0,
+    "digests": [
+     "9b551a35c30f7319",
+     "9b551a35c30f7319"
+    ],
+    "residualRows": [],
+    "detail": []
+   }
+  }
+ ]
+}

@@ -12949,6 +12949,8 @@ export function sceneOnQuickAttackView(
     ...quickAttackAnimationAtAge(
       state.age + (state.config.animationAgeOffset ?? 0),
       state.config.attacker.geometry.side,
+      // The target's drawn rest (the renderer's opponent idle; the staged ONIX corner carries its species rest 1).
+      state.config.target.geometry.side === "opponent" ? sceneOnBattlerFrontIdleRest(state.config.target).x2 : 0,
     ),
     ...hitReaction,
     displayedTargetHp: displayedHpAfterDamage(state.age, {

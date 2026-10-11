@@ -22,7 +22,7 @@ for (const side of ["player", "opponent"]) {
 const first = (f, from = 0) => { const b = JSON.stringify(f(0)); for (let a = 1; a < 120; a++) if (JSON.stringify(f(a)) !== b) return a; return null; };
 out.firstActiveAge = {
   AERIAL_ACE: first((a) => aerialAceAnimationAtAge(a, "opponent")), AERIAL_ACE_player: first((a) => aerialAceAnimationAtAge(a, "player")),
-  QUICK_ATTACK: first((a) => quickAttackAnimationAtAge(a, "opponent")), QUICK_ATTACK_player: first((a) => quickAttackAnimationAtAge(a, "player")),
+  QUICK_ATTACK: first((a) => quickAttackAnimationAtAge(a, "opponent", 0)), QUICK_ATTACK_player: first((a) => quickAttackAnimationAtAge(a, "player", 1)),
   FEATHER_DANCE: first((a) => featherDanceSpritesAtAge(a, { x: 72, y: 80 }, "player", 0)),
   note: "first animationAge whose body output differs from age 0 (idle). Reducer age at the script activation (accepted timeline) is 42/42 (AA), 44/44 (QA), 44/44 (FD): the body is idle for animationAge 0..41/43 and for the first 8-10 script frames",
 };
@@ -30,6 +30,6 @@ const same = (f, g, n) => { for (let a = 0; a < n; a++) if (JSON.stringify(f(a))
 out.offsetEquivalence = {
   AERIAL_ACE_player_off4_vs_basis42: same((a) => aerialAceAnimationAtAge(a + 38 + 4 - 38 + 0, "player"), (a) => aerialAceAnimationAtAge(a + 4, "player"), 200),
   FEATHER_DANCE_player_off4: same((a) => featherDanceSpritesAtAge(a + 40, { x: 176, y: 40 }, "opponent", 4), (a) => featherDanceSpritesAtAge(a + 44, { x: 176, y: 40 }, "opponent", 0), 300),
-  QUICK_ATTACK_player_off4: same((a) => quickAttackAnimationAtAge(a + 40 + 4, "player"), (a) => quickAttackAnimationAtAge(a + 44, "player"), 120),
+  QUICK_ATTACK_player_off4: same((a) => quickAttackAnimationAtAge(a + 40 + 4, "player", 1), (a) => quickAttackAnimationAtAge(a + 44, "player", 1), 120),
 };
 console.log(JSON.stringify(out, null, 1));
