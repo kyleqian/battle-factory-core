@@ -21,6 +21,11 @@ separately counted "faithful timing". Follow `docs/faithful-timing.md` and
 ANIMATION_VERIFICATION.md; further evidenced cases of the same lag-frame /
 VBlank-phase class need no renewed approval. Batch shared mechanisms and reuse
 valid receipts while prioritizing the remaining adapters and ordinary play.
+On 2026-10-11 the user explicitly included Struggle 165 in S10A. Implement it
+first in the next run, alongside #166, under `docs/struggle-integration-scope.md`.
+This overrides the outside-Factory restriction for this forced move. Include
+Struggle in headline ordinary-play coverage and keep its required/pending state
+separate from the historical 276 accepted catalogue bodies until proved.
 Historical remote-only instructions and isolated cloud branches are superseded.
 
 Canonical checkout: `/Users/kyle/Developer/pokebench/pokeemerald-factory-core`,
@@ -75,7 +80,8 @@ plans, net-zero allocator history, sprite order).
 1. Extend live adapters and reusable source-derived providers in bounded batches.
    Inventory each accepted move's identities, host state, production provider,
    completion and blocker. Preserve independent per-move dense acceptance and
-   report gaps honestly. Stay within Factory scope; no 77 non-Factory expansion.
+   report gaps honestly. Include the user-approved forced Struggle body; no
+   general 77 non-Factory expansion is authorized.
 2. Preserve ordinary real-input presentation through text, HP, hits, faint,
    switching and menus. Verify both attacking orientations with current Pokémon
    and reach subsequent valid command prompts. Injected presentation stages

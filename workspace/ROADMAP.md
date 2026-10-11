@@ -44,6 +44,16 @@ authorized unblocking and finishing S10A; prioritize remaining adapters and
 ordinary-play continuation, batch shared mechanisms and reuse valid evidence.
 Implemented 2026-10-07: `src/engine/liveMoveTimingPolicy.ts` + `docs/faithful-timing-policy.md`; 18 faithful-timing adapters live (2026-10-08).
 
+**User scope decision, 2026-10-11:** include Struggle (`MOVE_STRUGGLE`, 165)
+in S10A and work it first in the next run, alongside the missing stat-change
+animation (#166). Forced moves reachable in Factory play are part of playable
+completion even when absent from rental move lists. This supersedes Struggle's
+previous exclusion and the generic outside-Factory restriction for this move.
+See `docs/struggle-integration-scope.md` for the work and acceptance contract.
+Headline ordinary-play coverage must include Struggle; excluding it is only a
+diagnostic. The 276 already accepted catalogue bodies retain their historical
+counts; Struggle is one additional required, currently unimplemented body.
+
 ## Operational notes
 
 - **Log backup (2026-08-10):** Codex/DeepSeek session logs (`.codex-logs/`,
@@ -2224,35 +2234,41 @@ ReturnStrongest claims corrected first), a scanline-buffer history (land96: Meme
 source fixes for live DEFECTS found by audits / controls (Quick Attack's target offset, GrassWhistle's position-dependent fade-back, Iron
 Tail's band mask), Focus Punch D4 (fp100), and idle94's static lead rows for 40 adapters (land97: Scene ON bodies no longer N frames short).
 Live audits 21..24 (audit 24 / shadow105's land97 row-0 shadow defect fixed narrowly: no lead rows while an elevated opponent is on the field). Ordinary-play census (`tools/integration/fixtures/live-share-census/report-seeds0-999-final-20261011-night.json`,
-src `8706d10c`): **95.38 % of move-animation commands / 98.72 % of frames live** (session start 93.79 / 97.37); excluding Struggle (1,089 commands),
-99.32 % of commands / 99.59 % of frames. Resume points:
+src `14d1be15`): **95.38 % of move-animation commands / 98.72 % of frames live** (session start 93.79 / 97.37), including Struggle.
+The 99.32 % / 99.59 % diagnostic excludes its 1,089 commands and does not establish S10A completion. Resume points:
 0. ISSUES #165 (GAMEPLAY, outside S10A's presentation-only mandate — needs a run where gameplay changes are in scope): the ROM Factory
    builds every mon with friendship 0 and turns Return into Frustration; production keeps Return (now drawn as ReturnWeak, ret88).
-1. ISSUES #166 — the MISSING General_StatsChange presentation (both scenes; 897 / 1,000 battles, ~8.6 % of the timeline). The design pack
+1. FIRST: implement Struggle 165 as an additional required Factory-reachable live body. Follow `docs/struggle-integration-scope.md`:
+   source-derived renderer and duration, dense both-side / alternate-species proofs, real forced-Struggle routes through cleanup and
+   recoil / HP / faint / next prompt, and unchanged Scene ON/OFF gameplay/RNG. Track it separately from the historical 276 until
+   accepted; extend the census/accounting before live promotion. Rental frequency 0 is not a reason to skip it.
+2. ISSUES #166 — the MISSING General_StatsChange presentation (both scenes; 897 / 1,000 battles, ~8.6 % of the timeline). The design pack
    is ready: `docs/stat101-stats-change-design.md` slices (a)..(f); (a) the pure reducer `src/animation/statsChange.ts` (unwired) and (b) the
    dense comparator (20 / 20 windows 0 px, ON and OFF) are DONE (`docs/stat102-stats-change-reducer.md`). Next: slice (c) the
    `stats-change` presentation command (76 / 90 frames, both scenes, SUBSTITUTE_FADE pattern; moves timing pins), then (d) live
    rendering, (e) order / allocator host binding, (f) census + audit.
-2. Timeline fidelity (presentation only): the BANKED `idle98-universal-rows.diff` (every live body is 3 frames short before and 2 after:
+3. Timeline fidelity (presentation only): the BANKED `idle98-universal-rows.diff` (every live body is 3 frames short before and 2 after:
    23,814 commands +3 / +5, 273 timing pins in 65 files; `docs/next-adapters-idle98.md`); ISSUES #167 (Scene OFF no-hit pause, the miss
    pause to anchor first); idle94's unproven lead moves (Flamethrower, 8 more) and per-move tails (Swagger, Scary Face).
-3. Remaining fallbacks (non-Struggle 181 commands / 16,268 frames on 0..999): Extrasensory player later bodies (a per-row scanout split,
+4. Remaining fallbacks beyond Struggle (181 commands / 16,268 frames on 0..999): Extrasensory player later bodies (a per-row scanout split,
    scan93 patch B not D4-eligible), Hyper Beam / Astonish / Odor Sleuth order plans (plans69 negatives), Endeavor stale power, the
    remaining Castform keys (#143), doll cells Focus Punch / Dream Eater player / Dig / Double-Edge / Iron Tail, Memento after a Dragon Dance.
-4. Two BANKED patches ready to land: `tools/integration/fixtures/shadow105/shadow105-lead-row0-shadow.diff` (draw the elevated opponent's
+5. Two BANKED patches ready to land: `tools/integration/fixtures/shadow105/shadow105-lead-row0-shadow.diff` (draw the elevated opponent's
    shadow on lead row 0, lift the elevated decline: 458 commands regain their lead rows; docs/next-adapters-shadow105.md) and
    `tools/integration/fixtures/sp103/sp103-shadow-punch-d4.diff` (Shadow Punch age-90 lag as D4 faithful timing, dominant 13 : 3 / 12 : 4;
    docs/next-adapters-sp103.md); #161, #152 remainder, #154 / #157; the app-only differential trace `presentation-rng-playable-live-bodies-seeded-on` samples Shadow
    Punch whose lead rows moved its later captures (163 / 173 differ vs pre-land97 bases; regenerate its capture frames with
    tools/integration/presentationRngTraces.ts if it should re-center on the bodies).
-5. A live audit after every batch (audits 21..24 tools; ALWAYS on production accepted windows: tools/integration/audit21Align.py).
-Struggle (1,056 commands / 33.8k frames in the census) is not a Factory rental move and stays outside the 276 accepted bodies.
+6. A live audit after every batch (audits 21..24 tools; ALWAYS on production accepted windows: tools/integration/audit21Align.py).
+Struggle is required by the 2026-10-11 user decision. S10A cannot be marked complete while its live adapter remains missing.
 Validate new adapters with alternate-species dense proofs whose windows are the production accepted window aligned to the
 source activation frame (tools/integration/audit21Align.py), not only the accepted fixture species.
 Latest progress supersedes this starting checkpoint as verified work lands.
 
 Acceptance:
 
+- Include Struggle as an additional required body and in headline ordinary-play coverage. Historical 276-body catalogue completion
+  alone does not satisfy S10A; report Struggle's pending / accepted / live state separately without granting unproved credit.
 - Each newly integrated body has complete dense source/framebuffer proof through
   the production live renderer, both orientations, twice fresh, and every
   evidence-required variant. Use the existing per-move integration verifiers;

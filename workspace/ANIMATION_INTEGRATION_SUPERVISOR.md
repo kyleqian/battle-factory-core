@@ -18,13 +18,17 @@ S10A's mission and scoped acceptance policy control this stage's work queue.
   with scoped checks for subsequent tooling changes.
 - Resume the latest ledger and ROADMAP S10A's ordered steps. D3 option (a) was
   approved and implemented on 2026-10-06 (presentation RNG host, seed export,
-  separate faithful-random accounting). Production (src tree `8706d10c`, 2026-10-11) has 238 scoped-exact
+  separate faithful-random accounting). Production (src tree `14d1be15`, 2026-10-11) has 238 scoped-exact
   + 13 faithful-random + 25 faithful-timing live adapters; reuse its recorded green baseline when code
   and environment match. Pick bounded batches.
 - Continue accepted-move adapters and source-derived host providers. Preserve
   gameplay outcomes, RNG ownership, damage, turn order and facility state.
   Helping Hand's doubles blocker does not block accepted moves. No new Factory
-  acceptance campaign, Rust port, or outside-Factory expansion.
+  acceptance campaign, Rust port, or general outside-Factory expansion. The
+  2026-10-11 user decision explicitly includes forced Struggle 165; it is the
+  first next-run animation task, alongside #166. Follow
+  `docs/struggle-integration-scope.md`. Rental-list absence or weight 0 must
+  not exclude it from S10A completion or headline ordinary-play coverage.
 - Whole-playable arbitrary-history framebuffer exactness remains unclaimed.
   Preserve explicit palette/switch/party-return limitations until proven fixed.
 

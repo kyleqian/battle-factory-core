@@ -3636,6 +3636,7 @@
     "#147 ordinary resolution field (both Scene profiles): elevated opponents at origin - enemyMonElevation with the generated shadow while visible, faint sink from the elevated origin, shadow hidden on blink-invisible rows, at HP 0 and on the post-body hide rows; ROM receipts elevated-renderer-receipt.json (Scene OFF 919/935 was 0/935; 203 committed traces byte-identical)"
   ],
   "pending": [
+    "MOVE_STRUGGLE (165): additional required S10A live body, user-approved 2026-10-11; first next-run task alongside stat-change animations; docs/struggle-integration-scope.md",
     "production adapters/providers for the remaining 154 accepted Factory moves",
     "complete graphics ownership across actual switches, forced replacement, summaries, substitute/transform and unmodeled histories",
     "source palette resource plans for 54 implemented adapters without audited ownership"
@@ -6308,7 +6309,9 @@
     },
     "claimBoundary": "Faithful timing means the live body renders the source animation program exactly (geometry, allocation, order, lifecycle, cleanup, palettes) with ONE deterministic CPU-phase per documented timing parameter: the dominant measured phase (most frequent across all banked measurements; a tie selects the phase without the optional event). Windows measured in the selected phase are pixel-exact; windows measured in the other phase differ only on the documented rows. Faithful-timing adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG, damage, turn order or facility state."
   },
-  "unadaptedNotes": {},
+  "unadaptedNotes": {
+    "MOVE_STRUGGLE": "Required by the 2026-10-11 user decision; no live adapter yet. Track separately from the historical 276 accepted catalogue bodies until dense acceptance and live promotion. Headline ordinary-play coverage includes Struggle; rental-list weight 0 does not exclude it. See docs/struggle-integration-scope.md."
+  },
   "verifiedPreview": {
     "commit": "96aaaebbe8eddb238e2dc5de781b19d921c20d5f",
     "build": "96aaaebbe 2026-10-09",

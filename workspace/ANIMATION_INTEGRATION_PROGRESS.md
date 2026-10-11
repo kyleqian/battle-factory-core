@@ -1,5 +1,17 @@
 # Animation integration progress
 
+## 2026-10-11 — User-directed Struggle inclusion (docs only)
+
+The user explicitly included Struggle 165 in S10A after reviewing its roadmap exclusion. It is the first next-run animation task,
+alongside #166, under `docs/struggle-integration-scope.md`. ROADMAP, supervisor/worker instructions, verification scope, local setup,
+live-status pending work and census guidance now record this requirement. The historical 276 accepted bodies retain their counts;
+Struggle is one additional required body, currently missing and unaccepted. Extend accounting before live promotion and include it
+in headline ordinary-play coverage. S10A cannot be completed while this adapter remains missing.
+
+No production change or run launch: src `14d1be15`, tests/build receipt on `4bf782115`, preview `66dbf4973`, and measured coverage
+95.38% / 98.72% remain unchanged. JSON/queue ledger checks, the historical catalogue census (`238+13+25+0+0=276`) and
+`git diff --check` passed; no full-suite/build rerun is needed for this docs-only checkpoint under ANIMATION_VERIFICATION.md.
+
 ## 2026-10-10 (night) — S10A: 12 production folds + 4 live audits + 7 evidence steps; live share 0..999 93.79 -> 95.38 % of commands (97.37 -> 98.72 % of frames; 99.32 / 99.59 % excluding Struggle); 238 + 13 + 25
 
 - Session start: master `b05d384ca`, production src `4c4fe4c7` == the 2026-10-10 day final gates' tree -> baseline receipt reused. Oracle

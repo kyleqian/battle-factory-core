@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-11 — User scope update: include Struggle in S10A
+
+- **State:** docs-only checkpoint on local master; production src `14d1be15` and the green 2026-10-10 night receipt are unchanged.
+  Coverage remains 95.38% of move-animation commands / 98.72% of frames, including Struggle. Its live adapter is still missing.
+- **Did:** recorded the user's explicit inclusion of Struggle 165, removed the roadmap exclusion, and updated supervisor instructions,
+  live-status pending work and census reporting. The historical 276 accepted bodies stay separate from this additional required body;
+  no acceptance or live credit was added. See `docs/struggle-integration-scope.md`.
+- **Next:** FIRST implement and prove Struggle through real forced-use routes, both sides and source-required variants, alongside
+  #166's missing stat-change presentation; extend accounting before live promotion. Then resume the existing timing / history queue.
+- **Notes:** this is presentation scope only; #165's gameplay change remains a separate scope decision. No run started. Diff,
+  JSON/queue ledger checks and the historical catalogue census (`238+13+25+0+0=276`) passed; the unchanged green production receipt
+  is reused under `ANIMATION_VERIFICATION.md`.
+
+---
+
 ## 2026-10-10 (night) — S10A: 12 production folds + 4 live audits; live share 0..999 93.79 -> 95.38 % of commands (97.37 -> 98.72 % of frames; 99.32 / 99.59 % excluding Struggle); 238 + 13 + 25
 
 - **State:** local master, production src `14d1be15` (gated on `4bf782115`; later commits are docs / receipts / evidence). Adapter census
@@ -64,38 +79,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no DEFERRED entries. ISSUES: #159 / #160 / #162 / #163 / #164 closed; #161 and #165 new. All worker branches merged,
   worktrees removed; briefs, launcher logs and pruned worker scratch under `.integration/validation/*-20261010/`, transcripts
   `.codex-logs/workers/`.
-
----
-
-## 2026-10-09 (day) — S10A: histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
-
-- **State:** local master, production src tree `06b791ff` (fly63 REVERTED in `1a0f6e214` after live audit 17 found live bodies drawing the
-  hidden Fly / Bounce charger — ISSUES #159). Census `239+13+24+0+0=276` (Light Screen and Sky Attack moved scoped exact -> faithful
-  timing by counter-evidenced D4 accounting). Supervisor FINAL gates on the reverted tree: typecheck, full suite 1,597 files / 13,153 tests,
-  build, differential 624/624 vs `ccc4774c4`, census seeds 0..299 96.98 % / 97.99 % (start 92.66 / 94.12, 0 regressions). Census seeds 0..999 **91.89 % of move
-  animations live by count / 95.82 % by frames** (start 87.95 / 92.09), seeds 50000.. 93.07 / 95.47
-  (`final-supervisor-gates-20261009-day.json`). Gameplay command key sequence identical at every fold. Preview <http://127.0.0.1:5191/> serves `897a18dd6` (src `06b791ff`; 4
-  samples hash-equal, session export + ON->OFF restart passed, no errors; `playable-preview-897a18dd6-receipt.json`).
-- **Did (12 production folds, 11 kept + fly63 reverted; each re-proved by the supervisor from fresh probes / check reruns / census reruns):**
-  allocator carries across audited status animations (alloc50, alloc52: SLP / CONFUSION / PSN / PRZ / BRN / FRZ / INFATUATION / CURSED /
-  NIGHTMARE + 40 bodies); general / hit / stat animations audited net-zero or fail closed (aud56, #156); order plans Outrage / FOCUS_BAND
-  (plans51), Fury Cutter by counter, hail / HAIL_CONTINUES / Blizzard / Water Spout geometry-keyed, Eruption fail-closed (plans54, #155),
-  [fly63 Fly / Bounce two-turn plans: REVERTED, #159]; the words-deferred lend replays past faint / send-out / switch units (words57,
-  words59: dirt-body species in the marker, trailing RAIN_CONTINUES words); eight moves live at later bodies (later58); D4: Light Screen
-  opponent + Blizzard geometry window (lsbz), later-body phase keys + Sky Attack (d4later); Double Team clone phase from the send-out
-  animation's data[3] (dt60, #158 — 86 / 214 live Double Teams had been one frame off); Spark opponent side live (spark62).
-- **Did (evidence):** prep52 (allocator tail), gates53 (exact case-local census: 77 % was the words lend), live audit 16 (239 windows, no
-  species / history defect), prep61 (Dive / Fly / Bounce; the hide toggle never fires with Scene ON), prep64 (SUBSTITUTE_FADE staged:
-  the old stagings stalled at a button-wait message) and prep65 (Dive words unit) — both BANKED with supervisor-reproduced receipts; live audit 17 (dt60 prediction == RAM 16 / 16;
-  the fly63 DEFECT).
-- **Decisions (reversible, in D3 / D4 scope):** kept later58's Sheer Cold / Extrasensory opponent later bodies live while the D4 key was
-  added (d4later did it the same session); Sky Attack strike 18 : 18 tie -> tie rule (180 rows); dt60's data[3] table is generated by
-  EXECUTING the pret source on the host (source-derived data, not a captured table); Eruption fails closed instead of a geometry model;
-  fly63 reverted late (no time for the #159 fix + gates) rather than shipping a known wrong-pixel live claim.
-- **Next:** ROADMAP S10A "Next (2026-10-09 evening)": FIRST fix #159 (hide the semi-invulnerable battler in the live view; audit 17's
-  patch shape), then re-land fly63 and the banked prep65 (Dive as a words unit, +35 / +5,361) and prep64 (SUBSTITUTE_FADE, +16 / +3,730); then the Dive attack body adapter, Shock Wave reducer timeline, the post-KO reseed, Flatter
-  later bodies, #152 / #154 / #157, live audit 18.
-- **Notes:** no DEFERRED entries. Soak gates superseded for S10A (ANIMATION_VERIFICATION scoped policy). All worker branches merged,
-  worktrees removed; briefs + logs + preserved worker scratch under `.integration/validation/*-20261009b/`, transcripts `.codex-logs/workers/`.
 
 ---

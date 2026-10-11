@@ -18,8 +18,9 @@ bash tools/integration/start-local-preview.sh
 For hot reload use `npm run dev` (port 5173). The browser app needs neither the
 server nor the ROM/oracle at runtime. The current live adapter count is
 in `ANIMATION_INTEGRATION_PROGRESS.md` (238 scoped-exact + 13 faithful-random + 25 faithful-timing of 276
-accepted Factory bodies on 2026-10-11; about 98.7 % of move-animation frames (95.4 % of commands; 99.3 % of commands
-excluding Struggle) play live in ordinary play, `docs/live-share-census.md`). The stat-change animation is still missing
+accepted Factory bodies on 2026-10-11; about 98.7 % of move-animation frames (95.4 % of commands,
+including Struggle) play live in ordinary play, `docs/live-share-census.md`). Struggle is one additional required body
+under the 2026-10-11 user decision and has no live adapter yet (`docs/struggle-integration-scope.md`). The stat-change animation is still missing
 (ISSUES #166).
 Helping Hand is the sole unaccepted Factory move, pending legal doubles staging.
 Whole-playable arbitrary-history framebuffer exactness remains unclaimed.

@@ -125,4 +125,10 @@ resume condition. `ANIMATION_COVERAGE.json.queue` only sets priority; an empty
 manual list never means the remaining moves are unauthorized or exhausted.
 `state: blocked` differs from `state: complete`. Component reuse and dormant
 contest-only track obligations never waive move acceptance or hide ready moves.
-The 77 moves outside the Factory are outside this campaign scope.
+The 77 moves outside the Factory rental catalogue remain outside the general
+campaign scope, with one explicit S10A exception: the user approved forced
+Struggle 165 on 2026-10-11 (`docs/struggle-integration-scope.md`). Track it as
+required/pending work even before its dense body acceptance. The 276 accepted
+catalogue-body total does not prove S10A exhaustion or completion. Struggle
+must pass the same source/framebuffer, ordinary-route and gameplay/RNG gates;
+headline ordinary-play coverage includes it.

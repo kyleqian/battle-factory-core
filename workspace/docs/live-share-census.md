@@ -6,10 +6,15 @@ which production gate made each fallback. Tooling + evidence only: `tools/integr
 
 ## Latest (2026-10-11 night, production src `14d1be15`, master `4bf782115`; 0..299 and 50000.. on `dc6c756a`)
 
+**Scope update, user-approved 2026-10-11:** Struggle is required S10A work even
+though it is not listed in rental moves. Use the all-command coverage as the
+headline and completion measure. The excluding-Struggle row is diagnostic
+only; see `struggle-integration-scope.md`. These measured results are unchanged.
+
 | seeds | commands | live | **live by count** | **live by frames** |
 |---|---:|---:|---:|---:|
 | 0..999 (`report-seeds0-999-final-20261011-night.json`: 10 `--index-from` shards merged with hist73Merge.py; two runs byte-identical) | 27515 | 26245 | **95.38 %** | **98.72 %** |
-| 0..999 excluding Struggle 165 (1,089 commands; not a Factory rental move) | 26426 | 26245 | 99.32 % | 99.59 % |
+| diagnostic only: 0..999 excluding required Struggle 165 (1,089 commands) | 26426 | 26245 | 99.32 % | 99.59 % |
 | 0..299 (`report-seeds0-299-final-20261011-night.json`) | 7970 | 7900 | 99.12 % | 99.68 % |
 | 50000..50999 (`report-seeds50000-50999-final-20261011-night.json`) | 27041 | 26140 | 96.67 % | 98.84 % |
 
@@ -169,6 +174,8 @@ RAIN_CONTINUES rows together cover ~319k frames (≈ 8.5 % of all presented fram
 Factory weight = fraction of Level-50 Factory move slots (ranges 0..6, 4 moves per set; the
 `tools/integration/remainingAdaptersCensus.mjs` model). STRUGGLE has weight 0 (never a rental move) but is common here
 because the policy cycles all four slots until PP runs out in long battles.
+Weight 0 describes the rental list, not playable reachability or work priority:
+the 2026-10-11 user decision requires the Struggle adapter.
 
 ## What the top buckets would need (gate -> lever -> evidence)
 
