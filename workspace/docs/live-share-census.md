@@ -4,7 +4,25 @@ How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
 `tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
 
-## Latest (2026-10-11 night, production src `14d1be15`, master `4bf782115`; 0..299 and 50000.. on `dc6c756a`)
+## Latest (2026-10-11, stl109 — Struggle 165 live; production src `5007ac57`, base master `5c050b765`)
+
+Struggle (the user-required forced move, `docs/struggle-integration-scope.md`) is part of the headline: it is ordinary play, so the
+all-command share below includes it. Seeds 0..999 as 10 `--index-from` shards merged with hist73Merge.py, both arms by
+`ret88Census.sh shards` (base `5c050b765`, final = the stl109 tree); receipt `tools/integration/fixtures/stl109-census-summary.json`
+(+ `-check.txt`); identical to stg107's patched arm (`docs/stg107-struggle.md` §3.5).
+
+| arm | commands | live | **live by count** | **live by frames** | Struggle commands / live / live frames |
+|---|---:|---:|---:|---:|---|
+| base `5c050b765` (== the night report below) | 27515 | 26245 | **95.38 %** | **98.72 %** (3,932,860 of 3,983,929) | 1,089 / 0 / 0 of 34,817 |
+| **stl109** | 27459 | 27129 | **98.80 %** | **99.27 %** (4,031,868 of 4,061,368) | 1,033 / **884** / 99,008 of 112,256 |
+
+0 non-Struggle status changes; land82CensusCheck: command keys identical outside the stalled tails, `battleDigestExcludingFrames`
+identical, played / terminal / stalled 1000 / 997 / 3 in both arms, live -> non-live 0. The 56 fewer commands are the budget-cut
+tails of the three Struggle-only stalemates (seeds 434, 796, 881): a live Struggle body is 112 rows instead of the fallback's ~32,
+so the 200,000-frame budget ends them 17 / 14 / 25 Struggle commands earlier. Struggle's 149 declines, each named: `sprite-order lend
+unknown` 106 (after a Struggle body: no plan entry), `attacker doll: swap body cell unproven` 24, `defender doll: unproven body cell` 19.
+
+## Previous (2026-10-11 night, production src `14d1be15`, master `4bf782115`; 0..299 and 50000.. on `dc6c756a`)
 
 **Scope update, user-approved 2026-10-11:** Struggle is required S10A work even
 though it is not listed in rental moves. Use the all-command coverage as the
@@ -186,7 +204,7 @@ the 2026-10-11 user decision requires the Struggle adapter.
 | Protect, Light Screen, Reflect, Barrier, Magic Coat, Mirror Coat | `liveMoveAnimation.ts:1498 / 1488` `if (!spriteAllocatorInput?.historyKnown) return null` | a move body without an allocator PLAN (and not net-zero) invalidates the allocator host (`liveMoveSpriteAllocator.ts:84-88`); plans for the bodies that drop it | `docs/allocator-plan-v2-evidence.md`, `docs/allocator-net-zero-audit.md`, `docs/allocator-net-zero-audit-ext.md` |
 | Icy Wind, Blizzard (unclassified) | `liveMoveAnimation.ts:1785-1786` `!provableEffectOrder(...)` (module-private, so the classifier cannot evaluate it and leaves it unclassified) | per its comment (`liveMoveAnimation.ts:645-651`): the OAM slot table is proven only at the accepted geometry; other species pairs need the CreateSprite/SortSprites order proven (`icyWind.ts:257`, `blizzard.ts:562`) | accepted Icy Wind / Blizzard windows (duration comments `liveMoveAnimation.ts` case 196 / 59) |
 | Double Team (opponent), Faint Attack (opponent), Rock Slide (player) | `liveMoveAnimation.ts:1080 / 1045 / 1059` (side-only duration cases) | the missing attacker side's accepted window | `docs/double-team-portable-staging-probe.md`, `docs/faint-attack-portable-staging-probe.md`, `docs/rock-slide-portable-staging-probe.md` |
-| Struggle | no `liveMoveAnimationDuration` case (`default: return null` at `liveMoveAnimation.ts:1190`; the receipt cites the switch's closing line :1191) | a Struggle adapter (1051 commands / 33.6k frames here; weight 0 in rentals) | none found |
+| Struggle | **landed by stl109** (was: no `liveMoveAnimationDuration` case). Remaining: the order-host plan entry after a Struggle body (106 lend-unknown), doll cells | 884 of 1,033 commands live | `docs/stl109-struggle-live.md`, `docs/stg107-struggle.md` |
 | Return, Pursuit, Extrasensory, Mach Punch, Signal Beam, Sheer Cold, Fury Cutter, Memento, Sky Attack, Bonemerang | `firstBody` gates (`liveMoveAnimation.ts:3335 / 3296 / 3555 / 2965 / 2871 / 2885 / 3317 / 2232 / 2901 / 2916`) | later-body BG / scanline history (192 commands, 33.6k frames) | `docs/s10a-random2-order-lend-blocker.md`, `ANIMATION_INTEGRATION_PROGRESS.md` prep notes |
 | Dive turn 1, Curse (Ghost) turn 0 | duration cases 291 / 174 (`unsupported turn`) | the Dive attack body / Curse Ghost branch (71 commands) | comments at the duration cases |
 | Substitute | `liveSubstituteSwap.ts:170-173`, `liveMoveAnimation.ts:780-788` | more swap body cells (Dream Eater, Solar Beam, Lovely Kiss, Focus Punch, Grass Whistle, Sing) and defender-doll cells (18 moves, 89 commands) | `docs/next-adapters-prep37.md`, `prep38.md`, `tools/integration/fixtures/dolldef-live-receipt.json` |
