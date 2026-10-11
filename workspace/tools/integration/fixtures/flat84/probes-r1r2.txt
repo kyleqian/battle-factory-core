@@ -1,0 +1,14 @@
+same c-mega-drain-opp
+same c-mega-drain-ply
+same c-quick-attack-opp
+same c-quick-attack-ply
+same c-spark-opp
+same c-spark-ply
+same c-tackle-opp
+same c-tackle-ply
+same c-water-pulse-opp
+same c-water-pulse-ply
+same ff-nidorina-nidorino-opp
+same ff-nidorina-nidorino-ply
+same ff-nidorino-nidorina-opp
+same ff-nidorino-nidorina-ply

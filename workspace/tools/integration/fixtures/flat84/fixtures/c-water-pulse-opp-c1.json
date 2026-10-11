@@ -1,0 +1,243 @@
+{
+ "schema": "flat84-chain-fixture/v1",
+ "move": "WATER_PULSE",
+ "bodyIndex": 1,
+ "probe": "tools/integration/flat77Probe.py",
+ "scenario": "tools/integration/fixtures/flat84/scenarios/c-water-pulse-opp.json",
+ "denseWindow": {
+  "startFrame": 911,
+  "endFrame": 1070
+ },
+ "attacker": {
+  "species": "NIDORINA",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "NIDORINO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "attackerPersonality": 1793703657,
+ "displayedStatus": {
+  "player": "none",
+  "opponent": "none"
+ },
+ "fieldProfile": {
+  "playerHp": 168,
+  "playerMaxHp": 168,
+  "opponentHp": 177,
+  "opponentMaxHp": 177,
+  "playerGender": "male",
+  "opponentGender": "female"
+ },
+ "requestFields": {
+  "turn": 0,
+  "target": 0,
+  "power": 60
+ },
+ "rom": {
+  "invisible": [
+   false,
+   false
+  ],
+  "turn": 0,
+  "spriteOrder": [
+   62,
+   60,
+   0,
+   63,
+   1,
+   61,
+   6,
+   8,
+   2,
+   4,
+   5,
+   3,
+   7,
+   9,
+   39,
+   29,
+   32,
+   30,
+   40,
+   12,
+   28,
+   44,
+   25,
+   36,
+   35,
+   34,
+   18,
+   17,
+   31,
+   13,
+   37,
+   19,
+   16,
+   27,
+   15,
+   24,
+   43,
+   20,
+   33,
+   14,
+   10,
+   22,
+   26,
+   21,
+   23,
+   11,
+   38,
+   41,
+   42,
+   54,
+   55,
+   56,
+   57,
+   58,
+   59,
+   48,
+   49,
+   50,
+   51,
+   52,
+   53,
+   45,
+   46,
+   47
+  ],
+  "power": 60,
+  "at": {
+   "registers": {
+    "dispcnt": 16192,
+    "bg0cnt": 38912,
+    "bg1cnt": 7168,
+    "bg2cnt": 24064,
+    "bg3cnt": 23051,
+    "bg1hofs": 0,
+    "bg1vofs": 3,
+    "bg2hofs": 0,
+    "bg2vofs": 0,
+    "win0h": 0,
+    "win0v": 0,
+    "winin": 16191,
+    "winout": 16191,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   },
+   "paletteTags": [
+    65535,
+    65535,
+    65535,
+    65535,
+    54322,
+    55039,
+    55044,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535,
+    65535
+   ],
+   "tileBitmapSha": "e7e5d2118d9322f0",
+   "tileTagsSha": "db2d361386c28422",
+   "matrixBitmap": 6,
+   "pre": {
+    "dispcnt": 16192,
+    "bg0cnt": 38912,
+    "bg1cnt": 7168,
+    "bg2cnt": 24064,
+    "bg3cnt": 23051,
+    "bg1hofs": 0,
+    "bg1vofs": 3,
+    "bg2hofs": 0,
+    "bg2vofs": 0,
+    "win0h": 0,
+    "win0v": 0,
+    "winin": 16191,
+    "winout": 16191,
+    "bldcnt": 0,
+    "bldalpha": 0,
+    "bldy": 0
+   }
+  }
+ },
+ "presentationRngActivation": {
+  "value": 951185750,
+  "source": "flat77Probe.py at.rng2 (RAM gRng2Value, activation frame 911)"
+ },
+ "pinnedRng2": [
+  [
+   0,
+   2844915746
+  ]
+ ],
+ "pinnedGeneral": [],
+ "promptShown": [
+  true
+ ],
+ "precedingTurns": [
+  {
+   "events": [
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 0,
+     "target": 1,
+     "arguments": [
+      "260",
+      "0",
+      "0",
+      "0",
+      "70",
+      "0"
+     ]
+    },
+    {
+     "kind": "animation",
+     "animationId": "STATS_CHANGE",
+     "battler": 1,
+     "target": 1,
+     "arguments": [
+      "18"
+     ]
+    },
+    {
+     "kind": "status-animation",
+     "battler": 1,
+     "isStatus2": 1,
+     "status": 1
+    },
+    {
+     "kind": "status-animation",
+     "battler": 1,
+     "isStatus2": 1,
+     "status": 1
+    },
+    {
+     "kind": "animation",
+     "animationId": "MOVE_ANIMATION",
+     "battler": 1,
+     "target": 0,
+     "arguments": [
+      "352",
+      "0",
+      "60",
+      "1",
+      "70",
+      "0"
+     ]
+    }
+   ]
+  }
+ ]
+}
