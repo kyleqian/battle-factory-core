@@ -13,7 +13,8 @@
   NIGHTMARE 75 rows; Scene OFF skips all), census 8,080 occurrences, none drawn; slices SA1..SA10. Supervisor: sta123Run.sh ALL SAME.
 - Soak (S10A's scoped policy does not require it; run because soak111 changed the driver): vanilla 0:20 20 / 20 OK; full 0:60 59 / 60 —
   the HANG (seed 25 @ postwin:page0) was soak111's sticky post-win roll choosing the unselectable REST forever -> fixed `7d04d2686`
-  (re-draw after every A on REST; seed 25 OK; soak tests 70 / 70).
+  (re-draw after every A on REST; seed 25 OK; soak tests 70 / 70). Fifth gate on the fixed driver (src `b4befa039`): winning --vary-rng
+  --first-round carry 0 / 14 / 28 **100 / 100 each**, winning-swap carry 0 **100 / 100** (0 CRASH / 0 HANG).
 
 - Session start: master `52c181d54`, production src `14d1be159` == the 2026-10-10 night final gates' tree -> baseline receipt reused.
   Oracle services (2026-10-06) postdate the last `oracle/` commit (2026-08-15); the freshness script's FAIL compares against any HEAD

@@ -26,7 +26,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `7d04d2686` (seed 25 OK; soak tests 70 / 70).
 - **Soak gates (S10A scoped policy does not require them; run because the soak driver changed):** vanilla 0:20 **20 / 20 OK**; full 0:60
   **59 / 60** on the pre-fix driver (the one HANG = seed 25, the driver bug above; rerun on the fix: OK); winning 0:60 / winning-swap 0:60
-  and the varied-RNG fifth gate: see the ledger (ANIMATION_INTEGRATION_PROGRESS.md top entry) for the final counts.
+  see the ledger (ANIMATION_INTEGRATION_PROGRESS.md top entry); varied-RNG fifth gate on the fixed driver: winning carry 0 / 14 / 28
+  **100 / 100 each**, winning-swap carry 0 **100 / 100**.
 - **Next:** ROADMAP S10A resume points — ISSUES #168 Scene ON status animations (prep pack DONE: docs/sta123-status-animations-design.md,
   slices SA1..SA10), remaining fallbacks (Odor Sleuth / Hyper Beam order plans), #166 / #167 remainders, regenerate the app-only trace.
 - **Notes:** no DEFERRED entries. ISSUES: #166 / #167 trimmed, #168 new, #153 quantified. All worker branches merged; worktrees removed
