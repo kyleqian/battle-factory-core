@@ -1,0 +1,7 @@
+stf115-opp-tsub-143-95     STRUGGLE  opponent activation=1655  rows=193 romBody=111 adapter=112 production=193 presented=1 px=[0, 0] exact=193 k1=[0, 0] k2=[0, 0]
+stf115-opp-tsub-143-95     STRUGGLE  opponent activation=4723  rows=193 romBody=111 adapter=112 production=193 presented=1 px=[0, 0] exact=193 k1=[0, 0] k2=[0, 0]
+stf115-opp-tsub-143-95     STRUGGLE  opponent activation=7791  rows=193 romBody=111 adapter=112 production=193 presented=1 px=[0, 0] exact=193 k1=[0, 0] k2=[0, 0]
+stf115-ply-tsub-95-135     STRUGGLE  player   activation=1653  rows=197 romBody=111 adapter=112 production=197 presented=1 px=[0, 0] exact=197 k1=[0, 0] k2=[0, 0]
+stf115-ply-tsub-95-135     STRUGGLE  player   activation=4721  rows=197 romBody=111 adapter=112 production=197 presented=1 px=[0, 0] exact=197 k1=[0, 0] k2=[0, 0]
+stf115-ply-tsub-95-135     STRUGGLE  player   activation=7789  rows=197 romBody=111 adapter=112 production=197 presented=1 px=[0, 0] exact=197 k1=[0, 0] k2=[0, 0]
+TOTAL attacker-doll swap windows=6 presented-0px-every-row(+k1,k2)=6

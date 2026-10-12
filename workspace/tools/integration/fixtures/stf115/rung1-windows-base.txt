@@ -1,15 +1,13 @@
+pb-stf115-opp-psub-143-362-c0      MEAN_LOOK  opponent -              live=1 rows=171 exact=171 px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-psub-143-362-c1      SUBSTITUTE player   -              live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-psub-143-362-c2      STRUGGLE   opponent -              live=0 rows=112 exact=37  px=91439   r1==r2=1 entry=166432 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+pb-stf115-opp-psub-143-362-c3      STRUGGLE   opponent after-struggle live=0 rows=112 exact=37  px=91439   r1==r2=1 entry=166432 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
 pb-stf115-opp-psub-95-362-c0       MEAN_LOOK  opponent -              live=1 rows=171 exact=171 px=0       r1==r2=1 entry=0 lend=1
 pb-stf115-opp-psub-95-362-c1       SUBSTITUTE player   -              live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
 pb-stf115-opp-psub-95-362-c2       STRUGGLE   opponent -              live=0 rows=112 exact=0   px=170304  r1==r2=1 entry=166432 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
 pb-stf115-opp-psub-95-362-c3       STRUGGLE   opponent after-struggle live=0 rows=112 exact=0   px=170304  r1==r2=1 entry=166432 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
-pb-stf115-opp-tsub-143-95-c0       HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
-pb-stf115-opp-tsub-143-95-c1       TAUNT      player   -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
-pb-stf115-opp-tsub-143-95-c2       STRUGGLE   opponent -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
-pb-stf115-opp-tsub-143-95-c3       HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
-pb-stf115-opp-tsub-143-95-c4       TAUNT      player   after-struggle live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
-pb-stf115-opp-tsub-143-95-c5       STRUGGLE   opponent after-struggle live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
-pb-stf115-opp-tsub-143-95-c6       SUBSTITUTE opponent after-struggle live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
-pb-stf115-opp-tsub-143-95-c7       TAUNT      player   after-struggle live=0 rows=125 exact=28  px=35070   r1==r2=1 entry=292256 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+pb-stf115-opp-tsub-143-95-c0       SUBSTITUTE opponent -              live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-tsub-143-95-c1       TAUNT      player   -              live=0 rows=125 exact=28  px=35070   r1==r2=1 entry=292256 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
 pb-stf115-ply-psub-95-362-c0       MEAN_LOOK  player   -              live=1 rows=171 exact=171 px=0       r1==r2=1 entry=0 lend=1
 pb-stf115-ply-psub-95-362-c1       SUBSTITUTE opponent -              live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
 pb-stf115-ply-psub-95-362-c2       STRUGGLE   player   -              live=0 rows=112 exact=37  px=83684   r1==r2=1 entry=158743 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
@@ -66,5 +64,5 @@ pb-stg107-ply-pp-95-362-c6         STRUGGLE   player   after-struggle live=1 row
 pb-stg107-ply-pp-95-362-c7         HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
 pb-stg107-ply-pp-95-362-c8         STRUGGLE   player   after-struggle live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
 pb-stg107-ply-pp-95-362-c9         HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
-TOTAL all            windows=68 live=58 live-0px=58 r1==r2=68 lend==ROM=68
-TOTAL after-struggle windows=28 live=23 live-0px=23 r1==r2=28 lend==ROM=28
+TOTAL all            windows=66 live=54 live-0px=54 r1==r2=66 lend==ROM=66
+TOTAL after-struggle windows=24 live=19 live-0px=19 r1==r2=24 lend==ROM=24

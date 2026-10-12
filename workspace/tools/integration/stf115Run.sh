@@ -55,8 +55,8 @@ for n in stf115-ply-tsub-95-135 stf115-opp-tsub-143-95; do
   if cmp -s "$OUT/att/$n-r1.json" "$OUT/att/$n-r2.json"; then echo "r1 == r2 $n"; else echo "R1 != R2 $n"; fi
   (cd "$OUT/patched" && node --experimental-strip-types --no-warnings $T/attdollLiveCheck.ts --out="$OUT/att-rec/$n.json" "$OUT/att" $n > "$OUT/att-rec/$n.out" 2>&1)
 done
-python3 $T/attdollReceipt.py "$OUT/att-rec/receipt.json" "$OUT/att-rec" > "$REC/rung2-attdoll.txt"
-tail -3 "$REC/rung2-attdoll.txt"
+python3 $T/stf115Summary.py --attdoll "$OUT/att-rec" > "$REC/rung2-attdoll.txt"
+tail -1 "$REC/rung2-attdoll.txt"
 for f in rung2-windows-patched.txt rung2-attdoll.txt; do same "$F/$f" "$REC/$f"; done
 # 5. census 0..999 (optional): base copy, and the patched copy when it exists
 if [ -n "$STF115_CENSUS" ]; then

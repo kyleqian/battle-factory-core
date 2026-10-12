@@ -4,11 +4,28 @@ in a given tree): fixture, move, side, after (`after-struggle` = an earlier Stru
 r1 == r2 (both fresh probes' per-row digests, chain + entry, and the same ROM window), the ENTRY lend's px, the decline; then totals, and the
 after-a-Struggle totals. With <lends.jsonl> (AUDIT20_LENDS_ONLY output) each line also carries `lend=` (the CHAIN lend's free order == the ROM
 sSpriteOrder free order at the activation: 1 / 0).
-usage: stf115Summary.py <check-dir> [<lends.jsonl>]"""
+usage: stf115Summary.py <check-dir> [<lends.jsonl>]
+       stf115Summary.py --attdoll <attdollLiveCheck receipt dir>   (one line per subbed-ATTACKER swap composite window: rows, ROM body rows,
+       production duration, presented, px vs run 1 / run 2, exact rows, tail rows k+1 / k+2; then totals)"""
 import json, re, sys
 from collections import Counter
 from pathlib import Path
 
+if sys.argv[1] == "--attdoll":
+    n = ok = 0
+    for p in sorted(Path(sys.argv[2]).glob("stf115-*.json")):
+        for w in json.loads(p.read_text())["results"]:
+            if w.get("kind") != "swap" or "prod" not in w:
+                continue
+            px, tail = w["prod"]["px"], w.get("tail") or {}
+            k1, k2 = (tail.get("rowK1") or {}).get("production"), (tail.get("rowK2") or {}).get("production")
+            good = w["swapPresented"] and px == [0, 0] and w["prod"]["exactRows"] == w["rows"] and k1 == [0, 0] and k2 == [0, 0]
+            n += 1; ok += int(good)
+            print(f"{p.stem:<26} {w['move']:<9} {w['side']:<8} activation={w['activation']:<5} rows={w['rows']} romBody={w['romBodyRows']} "
+                  f"adapter={w['adapterDuration']} production={w['productionDuration']} presented={int(w['swapPresented'])} px={px} "
+                  f"exact={w['prod']['exactRows']} k1={k1} k2={k2}")
+    print(f"TOTAL attacker-doll swap windows={n} presented-0px-every-row(+k1,k2)={ok}")
+    sys.exit(0)
 lends = {}
 if len(sys.argv) > 2:
     for line in Path(sys.argv[2]).read_text().splitlines():

@@ -1,16 +1,14 @@
+pb-stf115-opp-psub-143-362-c0.json MEAN_LOOK units 0 power 0 otherInvisible 0
+pb-stf115-opp-psub-143-362-c1.json SUBSTITUTE units 1 power 0 otherInvisible 0
+pb-stf115-opp-psub-143-362-c2.json STRUGGLE units 2 power 50 otherInvisible 0
+pb-stf115-opp-psub-143-362-c3.json STRUGGLE units 3 power 50 otherInvisible 0
 pb-stf115-opp-psub-95-362-c0.json MEAN_LOOK units 0 power 0 otherInvisible 0
 pb-stf115-opp-psub-95-362-c1.json SUBSTITUTE units 1 power 0 otherInvisible 0
 pb-stf115-opp-psub-95-362-c2.json STRUGGLE units 2 power 50 otherInvisible 0
 pb-stf115-opp-psub-95-362-c3.json STRUGGLE units 3 power 50 otherInvisible 0
-pb-stf115-opp-tsub-143-95-c0.json HARDEN units 0 power 0 otherInvisible 0
-pb-stf115-opp-tsub-143-95-c1.json TAUNT units 2 power 0 otherInvisible 0
-pb-stf115-opp-tsub-143-95-c2.json STRUGGLE units 3 power 50 otherInvisible 0
-pb-stf115-opp-tsub-143-95-c3.json HARDEN units 5 power 50 otherInvisible 0
-pb-stf115-opp-tsub-143-95-c4.json TAUNT units 7 power 50 otherInvisible 0
-pb-stf115-opp-tsub-143-95-c5.json STRUGGLE units 8 power 50 otherInvisible 0
-pb-stf115-opp-tsub-143-95-c6.json SUBSTITUTE units 10 power 50 otherInvisible 0
-pb-stf115-opp-tsub-143-95-c7.json TAUNT units 11 power 50 otherInvisible 0
-pb-stf115-opp-tsub-143-95 UNMODELLED Special_SubstituteToMon at 7750
+pb-stf115-opp-tsub-143-95-c0.json SUBSTITUTE units 0 power 0 otherInvisible 0
+pb-stf115-opp-tsub-143-95-c1.json TAUNT units 1 power 0 otherInvisible 0
+pb-stf115-opp-tsub-143-95 UNMODELLED Special_SubstituteToMon at 1614
 pb-stf115-ply-psub-95-362-c0.json MEAN_LOOK units 0 power 0 otherInvisible 0
 pb-stf115-ply-psub-95-362-c1.json SUBSTITUTE units 1 power 0 otherInvisible 0
 pb-stf115-ply-psub-95-362-c2.json STRUGGLE units 2 power 50 otherInvisible 0
