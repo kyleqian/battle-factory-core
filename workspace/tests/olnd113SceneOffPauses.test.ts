@@ -176,11 +176,12 @@ describe("olnd113: Scene OFF no-hit pause, per class on production routes", () =
     }
   });
 
-  it("joint target: pause + stats-change command put the first stat message's first glyph on the ROM row (measured, see doc)", () => {
+  it("joint target: pause + stats-change command put the first stat message's first glyph on the ROM row (scf117: 0 residual)", () => {
     // ROM (off108 receipts/rom-r1.json, Scene OFF): first stat message's first glyph G+121 (Bulk Up) / G+119 (Double Team, Sand-Attack).
-    // Landed production starts that message on G+119 / G+118 / G+118: -2 / -1 / -1, all of it AFTER the stats-change command (the
-    // print executes on rel 77 and its glyph lands on rel 78; Bulk Up also runs setstatchanger before its stat write). The stats-change
-    // command itself starts on rel 1 (A + 1) on every route: the pause is exact.
+    // olnd113 measured -2 / -1 / -1, all of it AFTER the stats-change command (the print executes on rel 77 and its glyph lands on
+    // rel 78; Bulk Up also runs setstatchanger before its stat write). scf117 (docs/scf117-stats-change-finish.md) holds the
+    // stats-change command for delta(next) - delta(STATS_CHANGE) - 1 + lead(next) more rows: 0 / 0 / 0. The stats-change command
+    // itself starts on rel 1 (A + 1) on every route: the pause is exact.
     const firstMessage = (use: Use) => {
       const at = use.commands.findIndex((c, i) => i > 0 && c[1] === "message");
       return 1 + (use.commands[0]![3] ?? 0) + use.commands.slice(1, at).reduce((s, c) => s + (c[2] ?? 0) + (c[3] ?? 0), 0);
@@ -190,9 +191,9 @@ describe("olnd113: Scene OFF no-hit pause, per class on production routes", () =
       return 1 + (use.commands[0]![3] ?? 0) + use.commands.slice(1, at).reduce((s, c) => s + (c[2] ?? 0) + (c[3] ?? 0), 0);
     };
     const cases = [
-      { move: 339, seed: 154, romGlyph: 121, romA: 40, message: 119 },
-      { move: 104, seed: 2, romGlyph: 119, romA: 41, message: 118 },
-      { move: 28, seed: 2, romGlyph: 119, romA: 41, message: 118 },
+      { move: 339, seed: 154, romGlyph: 121, romA: 40, message: 121 },
+      { move: 104, seed: 2, romGlyph: 119, romA: 41, message: 119 },
+      { move: 28, seed: 2, romGlyph: 119, romA: 41, message: 119 },
     ];
     for (const c of cases) {
       const uses = battleUses(c.seed, "off").filter((u) => u.move === c.move && u.attack !== null && !u.hit
@@ -201,7 +202,7 @@ describe("olnd113: Scene OFF no-hit pause, per class on production routes", () =
       for (const use of uses) {
         expect(statsChangeStart(use)).toBe(c.romA + 1);
         expect(firstMessage(use)).toBe(c.message);
-        expect(firstMessage(use) - c.romGlyph).toBe(c.move === 339 ? -2 : -1);
+        expect(firstMessage(use) - c.romGlyph).toBe(0);
       }
     }
   });

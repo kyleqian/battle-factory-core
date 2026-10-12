@@ -289,7 +289,11 @@ export type BattleResolutionPresentationCommand =
       eventSequence: number;
       battler: 0 | 1;
       argument: number;
-      timing: Readonly<{ minimumFrames: number }>;
+      /**
+       * scf117 (ISSUES #166): holdFrames (present only when > 0) = the rows from the animation's next instruction
+       * (rel 77 / 91) to the following print's first glyph, less the `stat` frames between (statsChangeNextReceiptHoldFrames).
+       */
+      timing: Readonly<{ minimumFrames: number; holdFrames?: number }>;
     }>
   | Readonly<{
       /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
@@ -3380,6 +3384,36 @@ function statsChangePresented(
   );
 }
 
+/**
+ * scf117 (ISSUES #166, docs/scf117-stats-change-finish.md; olnd113's joint-target fix shape): the stats-change command
+ * covers rel 1 .. 76 / 90, so the next command starts on rel 77 / 91, the row of the animation's next script instruction.
+ * The ROM shows the first glyph of the following print one row after the print executes, `delta(print) - delta(STATS_CHANGE)
+ * - 1` interpreter executions (one row each) after rel 77 / 91: Bulk Up's setstatchanger + statbuffchange + jumpifbyte, or
+ * AllStatsUp's two (issue69: write 283, box clear 285). The `stat` commands in between draw nothing; their frames are
+ * subtracted (the off108 pause convention). Anything else in between, or no provenance: 0.
+ */
+function statsChangeNextReceiptHoldFrames(
+  events: readonly BattleKernelSemanticEvent[],
+  statsChangeSequence: number,
+  following: readonly BattleResolutionPresentationCommand[],
+): number {
+  const statsChange = events.find((event) => event.sequence === statsChangeSequence)?.provenance?.instructionExecution;
+  if (statsChange === undefined) return 0;
+  let presented = 0;
+  for (const command of following) {
+    if (command.type === "stat") {
+      presented += command.timing.minimumFrames;
+      continue;
+    }
+    if (command.type !== "message") return 0;
+    const print = events.find((event) => event.sequence === command.eventSequence)?.provenance?.instructionExecution;
+    if (print === undefined || print <= statsChange) return 0;
+    const lead = 1;
+    return Math.max(0, print - statsChange - 1 + lead - presented);
+  }
+  return 0;
+}
+
 export function projectBattleResolutionCommands(
   events: readonly BattleKernelSemanticEvent[],
   beforeRules: BattleScriptRulesContext,
@@ -3953,6 +3987,16 @@ export function projectBattleResolutionCommands(
         }
       }
       if (index < commands.length) ordered.push(commands[index]!);
+    }
+    for (let index = 0; index < ordered.length; index += 1) {
+      const command = ordered[index]!;
+      if (command.type !== "stats-change") continue;
+      const holdFrames = statsChangeNextReceiptHoldFrames(events, command.eventSequence, ordered.slice(index + 1));
+      if (holdFrames > 0) {
+        ordered[index] = Object.freeze({
+          ...command, timing: Object.freeze({ minimumFrames: command.timing.minimumFrames, holdFrames }),
+        });
+      }
     }
     commands.splice(0, commands.length, ...ordered);
   }
