@@ -12,7 +12,7 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState, spriteOrderForSlots } from "../../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { land97Ages } from "../helpers/land97LeadAges.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep7.md: live durations are counted from the activation frame to the first inactive script row
 // (the later hit/HP/text rows belong to the queue's own commands). Shadow row 0 = live age 0 = activation.
@@ -160,7 +160,7 @@ describe("live prep7 move adapters", () => {
     const off = generatedCommandAnimationReplay(r.seed, "off", slots, r.streak, r.stall ?? false);
     const side = r.attacker ?? 0;
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === side);
-    expect(body?.ages).toEqual(land97Ages(c.id, c.duration[side]!));
+    expect(body?.ages).toEqual(iu120Ages(c.id, c.duration[side]!, side === 0 ? "player" : "opponent"));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     if (c.order) {
       // The move is the battle's first body: the production host lent the known-entry order.

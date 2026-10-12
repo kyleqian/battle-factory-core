@@ -20,6 +20,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
+import { iu120Ages, iu120EffectAges } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep22.md s0.1-0.3 / B.1-B.5 (authoritative): Lovely Kiss (142, faithful-random: 4 Random2 words, one frame at age
 // +120), Spikes (191) and Octazooka (190) (exact, no Random2) through the shared profile builder (src/engine/liveProfileMoves.ts).
@@ -263,7 +264,7 @@ describe("live r3 profile ordinary routes", () => {
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
     const bodies = on.animations.filter((a) => a.moveId === id && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: ages }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(id, ages));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     parityOf(on, off);
   }, 240000);
@@ -278,7 +279,7 @@ describe("live r3 profile ordinary routes", () => {
       const again = random2Route(seed, "on", [slot], streak, SEED_A);
       const bodies = A.bodies.filter((b) => b.moveId === 142 && b.attacker === 0);
       expect(bodies).toHaveLength(1);
-      expect(bodies[0]!.ages).toEqual(Array.from({ length: 152 }, (_, age) => age));
+      expect(bodies[0]!.ages).toEqual(iu120EffectAges(142, 152));
       expect(bodies[0]!.active.every(Boolean)).toBe(true);
       expect(bodies[0]!.provenance).toBe("surrogate");
       expect(bodies[0]!.words).toHaveLength(4);
@@ -363,7 +364,7 @@ describe("live r3 Signal Beam (exact, first body)", () => {
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
     const bodies = on.animations.filter((a) => a.moveId === 324 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 145 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(324, 145));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(off.boundaries).toHaveLength(on.boundaries.length);

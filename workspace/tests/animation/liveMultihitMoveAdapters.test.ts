@@ -15,6 +15,7 @@ import {
 import { LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 const field = {
   player: { species: 340, speciesSymbol: "CAMERUPT", name: "CAMERUPT", level: 50,
@@ -119,7 +120,7 @@ describe("live multi-hit ordinary routes", () => {
     expect(bodies).toHaveLength(row.hits);
     expect(requests.map(r => r.turn)).toEqual(Array.from({ length: row.hits }, (_, i) => i));
     for (const body of bodies) {
-      expect(body.ages).toEqual(Array.from({ length: row.ages }, (_, age) => age));
+      expect(body.ages).toEqual(iu120Ages(row.id, row.ages));
       expect(body.adapterActive.every(Boolean)).toBe(true);
     }
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

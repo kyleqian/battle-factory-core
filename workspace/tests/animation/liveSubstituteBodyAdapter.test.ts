@@ -8,6 +8,7 @@ import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMo
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // S10A Substitute part 3 (docs/next-adapters-prep37.md s1 / s3a.4): the 87-row BODY through the generalised live renderer
 // branch; the doll lifecycle and the adapter declines are parts 1-2 (tests/substituteDoll*.test.ts).
@@ -92,7 +93,7 @@ describe("S10A Substitute body (164) scoped exact", () => {
     const off = generatedCommandAnimationReplay(11, "off", [3], 35, true, true);
     const bodies = on.animations.filter((a) => a.moveId === 164 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 87 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(164, 87));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     // Hand-off: the first frame of the next command shows the doll (applySubstituteDollCommand), not the mon.
     expect(after[0]?.doll).toBe(true);

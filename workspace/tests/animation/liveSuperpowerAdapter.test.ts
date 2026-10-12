@@ -11,6 +11,7 @@ import { liveSuperpowerInputs } from "../../src/engine/liveSuperpowerInputs.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // D4 faithful timing: Superpower (276) (docs/next-adapters-prep31.md s1 / s3; src/engine/liveSuperpowerInputs.ts) with the per-side monbg write row
 // from src/engine/liveMoveTimingPolicy.ts. Dense windows tools/integration/fixtures/s10a-live/superpower-*.json (receipt r5-live-receipt.json; D4 check
@@ -109,7 +110,7 @@ describe("D4 Superpower (276) faithful timing", () => {
     const off = generatedCommandAnimationReplay(179, "off", [0], 42);
     const bodies = on.animations.filter((a) => a.moveId === 276 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 248 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(276, 248));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);

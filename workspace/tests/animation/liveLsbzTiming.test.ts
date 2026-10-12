@@ -7,6 +7,7 @@ import {
 } from "../../src/engine/liveMoveTimingPolicy.ts";
 import { lightScreenAtAge, mirrorCoatAtAge } from "../../src/animation/lightScreen.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // S10A lsbz (ISSUES #152 "Light Screen (113) opponent attacker, row 59"; docs/live-audit-15-chains.md s1 TIMING-PHASE): the opponent's
 // row-59 BLDALPHA write lands at once (dominant, 9 windows) or one frame late under the row-60 write (the SNORLAX / CHANSEY first body and
@@ -87,7 +88,7 @@ describe("lsbz ordinary routes", () => {
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
     const bodies = on.animations.filter((a) => a.moveId === id && a.attacker === 1);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: ages }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(id, ages, "opponent"));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);

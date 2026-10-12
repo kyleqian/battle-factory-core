@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
 import { liveMoveIdleLeadRows } from "../src/engine/battleResolutionPresentationRender.ts";
+import { iu120Pre } from "./helpers/iu120Rows.ts";
 
 // shp116 (shadow105, docs/next-adapters-shadow105.md + docs/shp116-shadow-lead-and-shadow-punch-d4.md): the ROM's activation row (lead
 // row 0) still shows an ELEVATED opponent's enemy shadow, whichever side attacks; rows 1..N-1 are the body's age-0 image (shadow
@@ -47,15 +48,18 @@ describe("shp116: the elevated opponent's enemy shadow on lead row 0", () => {
     const r = route(38, 44, "opponent");
     expect(r.end).toBe("terminal");
     const target = r.render.filter((row) => row.after !== true);
-    // 10 lead rows + the 26-row Bite body; the lead rows are all age 0 and live.
-    expect(target).toHaveLength(36);
-    expect(target.slice(0, 11).map((row) => row.age)).toEqual(Array(11).fill(0));
+    // iu120: P 3 pre rows + 10 lead rows + the 26-row Bite body; the pre and lead rows are all age 0 and live.
+    const P = iu120Pre(44, "opponent");
+    expect(target).toHaveLength(P + 36);
+    expect(target.slice(0, P + 11).map((row) => row.age)).toEqual(Array(P + 11).fill(0));
     expect(target.every((row) => row.live)).toBe(true);
-    expect(target.map((row) => row.pre === true)).toEqual([true, ...Array(35).fill(false)]);
+    // The pre rows show the activation row's image (idle98: F_att..A-1 == row A), shadow included.
+    expect(target.map((row) => row.pre === true)).toEqual([...Array(P + 1).fill(true), ...Array(35).fill(false)]);
     expect(r.row0VsRow1).toEqual({ px: 200, bbox: [160, 65, 191, 72] });
-    // rows 1..9 are the body's age-0 image (the same frame); only row 0 differs from them.
-    expect(new Set(target.slice(1, 11).map((row) => row.sha)).size).toBe(1);
-    expect(target[0]!.sha).not.toBe(target[1]!.sha);
+    // rows P+1..P+9 are the body's age-0 image (the same frame); only rows 0..P (one image) differ from them.
+    expect(new Set(target.slice(P + 1, P + 11).map((row) => row.sha)).size).toBe(1);
+    expect(new Set(target.slice(0, P + 1).map((row) => row.sha)).size).toBe(1);
+    expect(target[P]!.sha).not.toBe(target[P + 1]!.sha);
   }, 120000);
 
   it("census route b38 (player WEEZING Sludge Bomb -> elevated CROBAT): the same row-0 shadow", () => {
@@ -63,7 +67,8 @@ describe("shp116: the elevated opponent's enemy shadow on lead row 0", () => {
     const target = r.render.filter((row) => row.after !== true);
     expect(target.slice(0, 4).map((row) => row.age)).toEqual([0, 0, 0, 0]);
     expect(target.map((row) => row.pre === true).indexOf(true)).toBe(0);
-    expect(target.filter((row) => row.pre === true)).toHaveLength(1);
+    // iu120: the activation row + the P pre rows before it.
+    expect(target.filter((row) => row.pre === true)).toHaveLength(1 + iu120Pre(188));
     expect(r.row0VsRow1).toEqual({ px: 200, bbox: [160, 65, 191, 72] });
   }, 120000);
 });

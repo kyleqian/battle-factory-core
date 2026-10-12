@@ -15,6 +15,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 const field = {
   player: {
@@ -239,8 +240,8 @@ describe("live support move adapters", () => {
       && body.player === "GRIMER" && body.opponent === "VIBRAVA"))
       .toBe(true);
     expect(bodies.map((body) => body.ages)).toEqual([
-      Array.from({ length: 119 }, (_, age) => age),
-      Array.from({ length: 119 }, (_, age) => age),
+      iu120Ages(151, 119),
+      iu120Ages(151, 119),
     ]);
     expect(on.requests.filter((entry) => entry.moveId === 151)
       .map((entry) => entry.target)).toEqual([0, 0]);

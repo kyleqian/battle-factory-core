@@ -16,6 +16,7 @@ import { smogInputsFor } from "../../tools/compare/verifySmogReducer.ts";
 import { sandTombProfileFor } from "../../tools/compare/sandTombReducer.ts";
 import { skyAttackInputsFor } from "../../tools/compare/verifySkyAttackReducer.ts";
 import { snoreInputsFor } from "../../tools/compare/verifySnoreReducer.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep25.md s0.2 / B.4 / B.5 / C (authoritative): the zero-Random2 Q2 bodies through src/engine/liveQ2Moves.ts.
 // Dense framebuffer proofs: tools/integration/fixtures/q2-live/*.json (receipt q2-live-adapter-receipt.json).
@@ -214,10 +215,10 @@ describe("live Q2 ordinary routes", () => {
     const bodies = on.animations.filter((a) => a.moveId === id && a.attacker === 0);
     // Sky Attack: the charge body and the strike body of the same route (the strike is keyed 10143 in the order host).
     expect(bodies).toHaveLength(id === 143 ? 2 : 1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: ages }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(id, ages));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     if (id === 143) {
-      expect(bodies[1]!.ages).toEqual(Array.from({ length: 180 }, (_, age) => age));
+      expect(bodies[1]!.ages).toEqual(iu120Ages(143, 180));
       // 376: Thunder Wave in between (planned) -> known lend -> adapter active every age. 244: Ice Beam after the opponent's Dragon Dance;
       // 349:opponent was NEEDS-KEYS (strike declined every age) and is planned since prep45 (side-keyed), so the strike lends too.
       expect(bodies[1]!.adapterActive.every(Boolean)).toBe(true);

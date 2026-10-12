@@ -61,7 +61,9 @@ const observe = () => {
         sha: createHash("sha256").update(fb).digest("hex").slice(0, 16), ...(k === afterKey ? { after: true } : {}),
         ...(e?.type === "move" && e.preActivationRow === true ? { pre: true } : {}) } as RenderRow);
       if (k === targetKey && firstRows.length < 2) {
-        firstRows.push(fb.slice());
+        // iu120: the universal pre rows show the activation row's image too, so compare the LAST preActivationRow row with the row after it.
+        if (firstRows.length === 1 && e?.type === "move" && e.preActivationRow === true) firstRows[0] = fb.slice();
+        else firstRows.push(fb.slice());
         if (firstRows.length === 2) {
           let px = 0; const bb = [240, 160, -1, -1];
           for (let p = 0; p < 240 * 160; p++) {

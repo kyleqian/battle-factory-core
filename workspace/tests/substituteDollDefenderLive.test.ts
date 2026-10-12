@@ -12,6 +12,7 @@ import { applySpriteOrderPresentationEvent, createSpriteOrderTracker, spriteOrde
 import { knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
 import { dolldefRowSha, dolldefView, type DolldefFixture } from "../tools/integration/dolldefLiveCheck.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Extra } from "./helpers/iu120Rows.ts";
 
 // S10A Substitute, DEFENDER shown as the doll (docs/next-adapters-prep38.md; tools/integration/fixtures/dolldef-live-receipt.json):
 // proven (move, attacker side) cells run live on the doll; every other defender-doll body declines.
@@ -159,8 +160,9 @@ describe("ordinary route: a live move hits the subbed defender", () => {
     const off = generatedCommandAnimationReplay(103, "off", [1, 1], 28, true, true);
     expect(on.requests.map((q) => `${q.moveId}:${q.attacker}->${q.target}`)).toEqual(["164:0->0", "248:1->0", "89:1->0"]);
     expect(seen.duration).toBe(198);
-    expect(seen.ages).toBe(198);
-    expect(seen.live).toBe(198);
+    // iu120: + the opponent Earthquake's P pre rows (age 0, live); the body duration is unchanged.
+    expect(seen.ages).toBe(198 + iu120Extra(89, "opponent"));
+    expect(seen.live).toBe(198 + iu120Extra(89, "opponent"));
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.state.battleCommandPresentation?.field.player.substituteDoll).toBe(true);
     expect(off.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

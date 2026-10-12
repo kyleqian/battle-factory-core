@@ -12,6 +12,7 @@ import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
+import { iu120Ages, iu120Extra } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep24.md s2 + return-live: MOVE_RETURN (216), the strongest branch (friendship > 200; every committed
 // fixture was staged at 255). Dense framebuffer proofs: tools/integration/fixtures/return-live/*.json (return-live-adapter-receipt.json).
@@ -131,8 +132,8 @@ describe("return-live: MOVE_RETURN strongest branch", () => {
       expect(returns.length).toBeGreaterThan(0);
       expect(returns.every(r => r.friendship === 0)).toBe(true);
       const bodies = on.animations.filter(a => a.moveId === 216 && a.attacker === 0);
-      expect(bodies.map(b => b.ages.length)).toEqual([88]);
-      expect(bodies[0]!.ages).toEqual(Array.from({ length: 88 }, (_, age) => age));
+      expect(bodies.map(b => b.ages.length)).toEqual([88 + iu120Extra(216)]);
+      expect(bodies[0]!.ages).toEqual(iu120Ages(216, 88));
       expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
       expect(on.stalled).toBe(off.stalled);

@@ -13,6 +13,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 const cases = [
   { id: 34, move: "BODY_SLAM", duration: 107, effectAge: 45 },
@@ -103,7 +104,7 @@ describe("live physical2a move adapters", () => {
     expect(on.requests.some(request => request.moveId === row.id), JSON.stringify(route)).toBe(true);
     const bodies = on.animations.filter(animation => animation.moveId === row.id && animation.attacker === 0);
     expect(bodies, JSON.stringify(route)).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: row.duration }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(row.id, row.duration));
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);
     expect(off.boundaries).toHaveLength(2);

@@ -6,6 +6,7 @@ import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages, iu120Extra } from "../helpers/iu120Rows.ts";
 
 // Roar (46) / Whirlwind (18) live bodies (docs/next-adapters-prep11.md s0.2; dense fixtures tools/integration/fixtures/prep11-live/
 // roar-* / whirlwind-*, receipt tools/integration/fixtures/roar-live-receipt.json) and the Scene ON forced switch-out continuation
@@ -40,7 +41,7 @@ describe("live Roar / Whirlwind adapters + Scene ON forced switch-out", () => {
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
     expect(bodies).toHaveLength(1);
     const duration = liveMoveAnimationDuration(request(r.id, 0))!;
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: duration }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(r.id, duration));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     // The forced continuation directly follows the body: hold (no recall animation), recall receipt, send-in.
     const index = on.commands.findIndex(c => c.type === "move-animation" && (c.command as any).animation?.moveId === r.id);
@@ -49,7 +50,7 @@ describe("live Roar / Whirlwind adapters + Scene ON forced switch-out", () => {
     expect(hold!.command).toMatchObject({ battler: 1, skipAnimation: true });
     expect(recall!.command).toMatchObject({ battler: 1, visible: false, recall: true });
     expect([hold!.frame - body!.frame, recall!.frame - hold!.frame, sendIn!.frame - recall!.frame])
-      .toEqual([duration, FORCED_RETURN_TO_BALL_HOLD_FRAMES, FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES]);
+      .toEqual([duration + iu120Extra(r.id), FORCED_RETURN_TO_BALL_HOLD_FRAMES, FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES]);
     // Scene OFF keeps the voluntary-style 32-frame span (no MOVE_ANIMATION receipt).
     const offHold = off.commands.find(c => c.type === "switch-out");
     expect(offHold?.command).toMatchObject({ battler: 1, timing: { minimumFrames: 32 } });

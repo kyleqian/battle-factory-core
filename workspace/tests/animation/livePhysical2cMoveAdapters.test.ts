@@ -16,7 +16,7 @@ import {
   liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { land97Ages } from "../helpers/land97LeadAges.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 const cases = [
   { id: 12, move: "GUILLOTINE", duration: GUILLOTINE_PLAYER_FRAME_COUNT, effectAge: 90,
@@ -90,7 +90,7 @@ describe("live physical2c move adapters", () => {
     const on = generatedCommandAnimationReplay(row.route.seed, "on", [row.route.slot], row.route.streak);
     const off = generatedCommandAnimationReplay(row.route.seed, "off", [row.route.slot], row.route.streak);
     const body = on.animations.find(animation => animation.moveId === row.id && animation.attacker === 0);
-    expect(body?.ages).toEqual(land97Ages(row.id, row.duration));
+    expect(body?.ages).toEqual(iu120Ages(row.id, row.duration));
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);
     expect(off.boundaries).toHaveLength(2);
@@ -127,7 +127,7 @@ describe("live physical2c move adapters", () => {
       const bodies = replay.animations.filter(animation => animation.moveId === row.id);
       expect(bodies).toHaveLength(2);
       for (const body of bodies) {
-        expect(body.ages).toEqual(land97Ages(row.id, row.duration));
+        expect(body.ages).toEqual(iu120Ages(row.id, row.duration));
       }
       expect(replay.boundaries).toHaveLength(3);
       expect(replay.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

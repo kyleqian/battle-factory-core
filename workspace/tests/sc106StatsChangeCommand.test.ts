@@ -10,6 +10,7 @@ import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
 import { statsChangeParams, statsChangeSpan } from "../src/animation/statsChange.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { scanRoute } from "../tools/integration/sc106RouteScan.ts";
+import { iu120Extra } from "./helpers/iu120Rows.ts";
 
 // sc106 (S10A, ISSUES #166 slice c; docs/sc106-stats-change-command.md): the `stats-change` presentation command at each kernel
 // STATS_CHANGE `animation` event, 76 / 90 frames (stat101 receipts: playanimation -> next instruction 77 / 91 rows vs 1 without
@@ -37,6 +38,10 @@ describe("the stats-change command's duration", () => {
 
 type Route = ReturnType<typeof scanRoute>;
 const anchor = (route: Route, index: number) => route.anchors[index]!;
+// iu120 (docs/iu120-universal-rows.md): every live move body before an anchor adds its P + T universal rows (tests/helpers/iu120Rows.ts).
+const P = "player" as const, O = "opponent" as const;
+const iu = (...bodies: (readonly [number, "player" | "opponent", number?])[]) =>
+  bodies.reduce((n, [id, side, times]) => n + iu120Extra(id, side) * (times ?? 1), 0);
 
 describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54)", () => {
   it("status stat move, sharply (seed 0, slot 2: GRIMER Acid Armor, arg 40): command after the body, message +90", () => {
@@ -45,13 +50,17 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a).toMatchObject({ path: "status-move", argument: 40, battler: 0, prevEvent: "animation:MOVE_ANIMATION:151,0,0,0,0,0" });
     expect(a.before?.type).toBe("move-animation");
     // Base: the "GRIMER's DEFENSE sharply rose!" message (and its first glyph) started on frame 976.
-    expect(a.statsChange).toEqual({ frame: 976, frames: 90 });
+    // iu120: + the opponent's Dig setup (91) and the Acid Armor (151) bodies before it.
+    const shift = iu([91, O], [151, P]);
+    expect(a.statsChange).toEqual({ frame: 976 + shift, frames: 90 });
     // scf117: + 1 hold frame (the print executes on rel 91 and shows its first glyph on rel 92).
-    expect(a.following).toMatchObject({ type: "message", frame: 976 + 90 + 1, glyph: 976 + 90 + 1 });
+    expect(a.following).toMatchObject({ type: "message", frame: 976 + shift + 90 + 1, glyph: 976 + shift + 90 + 1 });
     // Base 6045 frames; 7 played stats changes (4 x 90 + 3 x 76) = +588; olnd113 (ISSUES #167): + the one source-pause used-move
     // hold this route crosses (STRINGID_BUTITFAILED, 36 at frame 4752; tools/integration/olnd113RouteHolds.ts). scf117: + 7 x 1 hold
     // frame + 1 frame of dismissal parity (the replay presses A on even frames in awaiting-message-dismiss; 7 is odd).
-    expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1);
+    // iu120: + every live body's universal rows (player 151 x3, 196 x4; opponent Dig 91 x4, 219, 204), - 2 frames of dismissal parity
+    // (two later dismissals land one frame earlier relative to the timeline shifted by an odd 27 / 29 frames).
+    expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1 + iu([91, O, 4], [151, P, 3], [196, P, 4], [219, O], [204, O]) - 2);
   });
 
   it("status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76", () => {
@@ -59,13 +68,16 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     const a = anchor(route, 0);
     expect(a).toMatchObject({ path: "status-move", argument: 27, battler: 1, prevEvent: "animation:MOVE_ANIMATION:28,0,0,0,0,0" });
     expect(a.before?.type).toBe("move-animation");
-    expect(a.statsChange).toEqual({ frame: 641, frames: 76 });
-    expect(a.following).toMatchObject({ type: "message", frame: 641 + 76 + 1, glyph: 641 + 76 + 1 });
+    // iu120: + the Sand-Attack (28) body before it.
+    expect(a.statsChange).toEqual({ frame: 641 + iu([28, P]), frames: 76 });
+    expect(a.following).toMatchObject({ type: "message", frame: 641 + iu([28, P]) + 76 + 1, glyph: 641 + iu([28, P]) + 76 + 1 });
     // olnd113 (ISSUES #167): + the source-pause used-move holds crossed before each anchor (36 each: ITDOESNTAFFECT at 812, ATTACKMISSED
     // at 1257, ITDOESNTAFFECT at 1705, ATTACKMISSED at 2150; the next one, 3116, is after the last anchor).
     expect(route.anchors.map((x) => x.following!.frame)).toEqual(
       // scf117: + 1 hold frame per crossed stats-change command (i + 1).
-      [641, 974, 1310, 1643, 1979, 2421].map((f, i) => f + 76 * (i + 1) + [0, 36, 72, 108, 144, 144][i]! + (i + 1)),
+      // iu120: + the i + 1 Sand-Attack bodies (and, before the sixth, the opponent's Water Gun 55) crossed.
+      [641, 974, 1310, 1643, 1979, 2421].map((f, i) => f + 76 * (i + 1) + [0, 36, 72, 108, 144, 144][i]! + (i + 1)
+        + iu([28, P, i + 1]) + (i === 5 ? iu([55, O]) : 0)),
     );
   });
 
@@ -74,8 +86,10 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     const a = anchor(route, 0);
     expect(a).toMatchObject({ path: "secondary", argument: 24, battler: 0, prevEvent: "stat-stage-change:speed" });
     expect(a.before?.type).toBe("stat");
-    expect(a.statsChange).toEqual({ frame: 1379, frames: 76 });
-    expect(a.following).toMatchObject({ type: "message", frame: 1379 + 76 + 1, glyph: 1379 + 76 + 1 });
+    // iu120: + the three live bodies before it (player 98 x2, opponent 317).
+    const shift = iu([98, P, 2], [317, O]);
+    expect(a.statsChange).toEqual({ frame: 1379 + shift, frames: 76 });
+    expect(a.following).toMatchObject({ type: "message", frame: 1379 + shift + 76 + 1, glyph: 1379 + shift + 76 + 1 });
   });
 
   it("Intimidate (seed 6, slot 0: Foe GROWLITHE's Intimidate on DROWZE, arg 22): message +76", () => {
@@ -84,8 +98,10 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a).toMatchObject({ path: "intimidate", argument: 22, battler: 0, prevEvent: "stat-stage-change:attack" });
     // shp116 (shadow105): + 10, the two DROWZEE Confusion (93, N 5) bodies into the elevated Foe DUSTOX before it regain their idle lead
     // rows (lead row 0 now draws the enemy shadow instead of declining the lead); scf117: + 1 hold before the following print.
-    expect(a.statsChange).toEqual({ frame: 2694 + 10, frames: 76 });
-    expect(a.following).toMatchObject({ type: "message", frame: 2694 + 10 + 76 + 1, glyph: 2694 + 10 + 76 + 1 });
+    // iu120: + the six live bodies before it (player 23, 93 x2; opponent 18, 60, 318).
+    const shift = iu([23, P], [18, O], [60, O], [93, P, 2], [318, O]);
+    expect(a.statsChange).toEqual({ frame: 2694 + 10 + shift, frames: 76 });
+    expect(a.following).toMatchObject({ type: "message", frame: 2694 + 10 + shift + 76 + 1, glyph: 2694 + 10 + shift + 76 + 1 });
     expect(a.following!.text).toContain("INTIMIDATE");
   });
 
@@ -95,15 +111,19 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a).toMatchObject({ path: "playstatchangeanimation", argument: 57, battler: 0, prevEvent: "animation:MOVE_ANIMATION:321,0,0,0,0,0" });
     expect(a.before?.type).toBe("move-animation");
     // olnd113 (ISSUES #167): + the two ATTACKMISSED used-move holds before it (39 at 1140, 40 at 1625) = +79.
-    expect(a.statsChange).toEqual({ frame: 1929 + 79, frames: 76 });
+    // iu120: + the four live bodies before it (player 205; opponent 55 x2, the Tickle 321).
+    const shift = iu([205, P], [55, O, 2], [321, O]);
+    expect(a.statsChange).toEqual({ frame: 1929 + 79 + shift, frames: 76 });
     // One animation for the group: the stat write that follows (ATK) starts 76 frames later; DEF's write has no second command.
     // scf117: + 3 hold frames (setstatchanger + statbuffchange + jumpifbyte + printfromtable after rel 77: the ATK write's `stat`
     // starts on rel 80 and its message's first glyph on rel 82, the print + 1).
-    expect(a.following).toMatchObject({ type: "stat", frame: 1929 + 79 + 76 + 3 });
+    expect(a.following).toMatchObject({ type: "stat", frame: 1929 + 79 + shift + 76 + 3 });
     // The route total: + the same 79, - 1 frame of dismissal parity (the replay presses A on even frames in awaiting-message-dismiss,
     // so after the odd 39-frame hold a later dismissal lands one frame earlier relative to the shifted timeline). scf117: + the
     // route's 6 holds (3 + 3 + 1 + 1 + 1 + 1 = 10) + 1 frame of dismissal parity.
-    expect(route.frames).toBe(8557 + 456 + 79 - 1 + 10 + 1);
+    // iu120: + every live body's universal rows on the route.
+    expect(route.frames).toBe(8557 + 456 + 79 - 1 + 10 + 1
+      + iu([205, P, 6], [55, O, 3], [321, O, 2], [246, O], [341, O], [44, O], [260, O], [148, P, 2], [24, O, 4]));
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 230-row window owns the banner; the message is unmoved", () => {
@@ -116,7 +136,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // The opponent's Acid Armor (arg 40) in the same route does present: 3 x 90.
     expect(route.anchors.filter((x) => x.statsChange !== null).map((x) => x.statsChange!.frames)).toEqual([90, 90, 90]);
     // scf117: + 3 x 1 hold frame after the three Acid Armor commands.
-    expect(route.frames).toBe(4600 + 270 + 3);
+    // iu120: + the opponent's live bodies (Barrier 112 x3, Headbutt 29 x2, Confusion 93 x2); Double Team 104 is masked (P 0, T 0).
+    expect(route.frames).toBe(4600 + 270 + 3 + iu([112, O, 3], [29, O, 2], [93, O, 2], [104, P, 6]));
   });
 });
 

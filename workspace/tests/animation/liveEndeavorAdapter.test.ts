@@ -13,6 +13,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { w3Register } from "../../tools/integration/prep27W3Predicate.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // Endeavor (283) live script-body adapter (docs/next-adapters-prep27.md s0.2 / s5). Dense proofs: tools/integration/fixtures/baton-endeavor-live-receipt.json.
 const DIR = "tools/integration/fixtures/baton-endeavor-live";
@@ -111,7 +112,7 @@ describe("live Endeavor (283) script-body adapter", () => {
       const bodies = on.animations.filter((a) => a.moveId === 283 && a.attacker === 0);
       expect(bodies).toHaveLength(1);
       expect(bodies[0]!.player).toBe(route.species);
-      expect(bodies[0]!.ages).toEqual(Array.from({ length: 68 }, (_, age) => age));
+      expect(bodies[0]!.ages).toEqual(iu120Ages(283, 68));
       expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
       expect(powers).toEqual([route.power]);
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

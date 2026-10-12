@@ -17,6 +17,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { machPunchInputsFor } from "../../tools/compare/verifyMachPunchReducer.ts";
+import { iu120Ages, iu120EffectAges } from "../helpers/iu120Rows.ts";
 
 // D4a faithful timing (docs/faithful-timing.md, docs/faithful-timing-policy.md): Mach Punch through the Q2 builder family with the optional late lag
 // from src/engine/liveMoveTimingPolicy.ts. Dense windows: tools/integration/fixtures/d4a-live/*.json (receipt d4a-live-receipt.json, checked by
@@ -191,7 +192,7 @@ describe("faithful-timing ordinary routes", () => {
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
     const bodies = on.animations.filter((a) => a.moveId === id && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: ages }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(id, ages));
     if (active) expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     else expect(bodies[0]!.adapterActive.some(Boolean)).toBe(false);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
@@ -430,7 +431,7 @@ describe("D4b Meteor Mash (309) faithful timing with D3", () => {
     const b = random2Route(15, "on", [0], 21, SEED_B), off = random2Route(15, "off", [0], 21, SEED_A);
     const bodies = a.bodies.filter((body) => body.moveId === 309 && body.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 215 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120EffectAges(309, 215));
     expect(bodies[0]!.active.every(Boolean)).toBe(true);
     expect(bodies[0]!.provenance).toBe("surrogate");
     expect(bodies[0]!.words).toHaveLength(96);
@@ -701,7 +702,7 @@ describe("Nightmare (171) faithful timing", () => {
       const off = generatedCommandAnimationReplay(seed, "off", [...slots], streak);
       const bodies = on.animations.filter((a) => a.moveId === 171 && a.attacker === 0);
       expect(bodies).toHaveLength(1);
-      expect(bodies[0]!.ages).toEqual(Array.from({ length: 168 }, (_, age) => age));
+      expect(bodies[0]!.ages).toEqual(iu120Ages(171, 168));
       expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
       expect(on.animations.some((a) => a.moveId === 95 && a.attacker === 0)).toBe(true);
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

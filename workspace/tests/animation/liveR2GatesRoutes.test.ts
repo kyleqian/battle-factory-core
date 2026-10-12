@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { LIVE_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveAnimation.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // r2-gates: ordinary generated routes for the widened gates (tools/integration/fixtures/r2-gates/routes.json): a later Overheat body (known
 // order lend) and an opponent Psych Up first body are live every age, the next prompt is reached, and Scene ON/OFF gameplay is equal.
@@ -24,7 +25,7 @@ describe("r2-gates ordinary routes (later Overheat, opponent Psych Up)", () => {
     const body = on.animations[r.index]!;
     expect([body.moveId, body.attacker]).toEqual([r.moveId, r.attacker === "player" ? 0 : 1]);
     expect(on.animations.slice(0, r.index).map(a => `${a.moveId}${a.attacker === 0 ? "p" : "o"}`).join(",")).toBe(r.prior);
-    expect(body.ages).toEqual(Array.from({ length: r.duration }, (_, age) => age));
+    expect(body.ages).toEqual(iu120Ages(r.moveId, r.duration, r.attacker));
     expect(body.adapterActive.every(Boolean)).toBe(r.active);
     expect(body.adapterActive.some(Boolean)).toBe(r.active);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

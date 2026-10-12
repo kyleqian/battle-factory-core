@@ -4,7 +4,7 @@ import { createInitialState, tick, render } from "../src/engine/core.ts";
 import { playableAnimationReplay } from "../tools/integration/playableAnimationReplay.ts";
 import { battleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
-import { land97Ages } from "./helpers/land97LeadAges.ts";
+import { iu120Ages, iu120Extra } from "./helpers/iu120Rows.ts";
 
 describe("ordinary playable animation queue", () => {
   it("plays damaging and no-hit moves from draft input, resumes commands, and preserves rules/RNG", () => {
@@ -58,7 +58,7 @@ describe("ordinary playable animation queue", () => {
       expect(animation).toMatchObject({ player: "WAILMER", opponent: "HAUNTER" });
       // shp116 (shadow105): HAUNTER is an ELEVATED opponent attacker; its Shadow Punch keeps its 8 idle lead rows, row 0 drawing the
       // enemy shadow the ROM's activation row still shows; shp116 (sp103 D4): the body is 105 + the age-90 restore lag row = 106.
-      expect(animation.ages).toEqual(expectedMove === 325 ? land97Ages(325, 106) : land97Ages(expectedMove, 270));
+      expect(animation.ages).toEqual(expectedMove === 325 ? iu120Ages(325, 106, "opponent") : iu120Ages(expectedMove, 270, "opponent"));
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     }
   }, 60000);
@@ -93,8 +93,8 @@ describe("ordinary playable animation queue", () => {
       const off = generatedCommandAnimationReplay(seed, "off", slots);
       const body = on.animations.filter(animation => animation.moveId === 113);
       expect(body).toHaveLength(1);
-      expect(body[0]!.ages).toEqual(Array.from({ length: 88 }, (_, age) => age));
-      expect(body[0]!.adapterActive).toEqual(Array(88).fill(exact));
+      expect(body[0]!.ages).toEqual(iu120Ages(113, 88));
+      expect(body[0]!.adapterActive).toEqual(Array(88 + iu120Extra(113)).fill(exact));
       const lsCommand = on.commands.find(row => row.type === "move-animation"
         && (row.command as { animation?: { moveId: number } }).animation?.moveId === 113)!;
       expect(lsCommand.spriteInputHistoryKnown === true).toBe(exact);

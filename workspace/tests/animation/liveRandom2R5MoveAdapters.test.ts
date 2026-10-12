@@ -15,6 +15,7 @@ import { presentationRngBodyWords } from "../../src/engine/presentationRngHost.t
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
+import { iu120EffectAges } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep17.md part B (authoritative): Mud-Slap (189) and Sand-Attack (28) faithful-random. Dense framebuffer
 // proofs: tools/integration/fixtures/prep17-live/*.json (receipt random2-r5-live-receipt.json).
@@ -199,7 +200,7 @@ describe("live prep17 ordinary routes", () => {
       const again = random2Route(seed, "on", [slot], streak, SEED_A);
       const bodies = A.bodies.filter((b) => b.moveId === id && b.attacker === 0);
       expect(bodies).toHaveLength(1);
-      expect(bodies[0]!.ages).toEqual(Array.from({ length: ages }, (_, age) => age));
+      expect(bodies[0]!.ages).toEqual(iu120EffectAges(id, ages));
       expect(bodies[0]!.active.every(Boolean)).toBe(true);
       expect(bodies[0]!.provenance).toBe("surrogate");
       expect(B.bodies.filter((b) => b.moveId === id)[0]!.words).not.toEqual(bodies[0]!.words);

@@ -48,6 +48,7 @@ import {
   createFactoryFullTurnBattleState,
   type FactoryFullTurnDecisionRules,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import { iu120Extra } from "./helpers/iu120Rows.ts";
 
 function initialBattle() {
   return createFactoryFullTurnBattleState({
@@ -741,7 +742,8 @@ describe("battle resolution presentation receipt ownership", () => {
       { type: "hit-animation", eventSequence: 3 },
       { type: "hp", eventSequence: 4 },
     ]);
-    expect(battleResolutionCommandDuration(resolution.segments[0]!.commands[1]!, resolution.field)).toBe(48);
+    // iu120: + the universal rows (Headbutt 29 by the player: P 3, T 2).
+    expect(battleResolutionCommandDuration(resolution.segments[0]!.commands[1]!, resolution.field)).toBe(48 + iu120Extra(29));
   });
 
   it("hides the elevated shadow for the post-body hide rows after a live body (ISSUES #147)", () => {

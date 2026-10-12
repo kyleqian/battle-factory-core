@@ -15,6 +15,7 @@ import {
 import { liveBattlerIsShiny } from "../../src/engine/liveMovePaletteComposite.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
+import { iu120EffectAges } from "../helpers/iu120Rows.ts";
 
 // S10A Ice Ball (301), every counter body (docs/next-adapters-prep26.md s1 / s4). Faithful timing (D4: the lag rows are a CPU phase, per-counter
 // dominant phase) with D3 (Random2 shards from the presentation host). Counters 1..4 take the seam-resolved deferred lend
@@ -210,7 +211,7 @@ describe("S10A Ice Ball (301): faithful timing with D3", () => {
     const chain = a.bodies.filter((body) => body.moveId === 301 && body.attacker === 0);
     expect(chain.length).toBeGreaterThanOrEqual(3);
     chain.forEach((body, k) => {
-      expect(body.ages, `body ${k + 1}`).toEqual(Array.from({ length: k === 4 ? 133 : 76 }, (_, age) => age));
+      expect(body.ages, `body ${k + 1}`).toEqual(iu120EffectAges(301, k === 4 ? 133 : 76));
       expect(body.active.every(Boolean), `body ${k + 1}`).toBe(true);
       expect(body.provenance).toBe("surrogate");
       expect(body.words).toHaveLength(2 * [5, 7, 9, 10, 10][k]!);
@@ -243,7 +244,7 @@ describe("S10A Ice Ball (301): faithful timing with D3", () => {
     const b = random2Route(1, "on", [1, 1, 1], 0, SEED_B), off = random2Route(1, "off", [1, 1, 1], 0, SEED_A);
     const chain = a.bodies.filter((body) => body.moveId === 301 && body.attacker === 0);
     expect(chain.length).toBeGreaterThanOrEqual(4);
-    expect(chain[0]!.ages).toEqual(Array.from({ length: 76 }, (_, age) => age));
+    expect(chain[0]!.ages).toEqual(iu120EffectAges(301, 76));
     expect(chain[0]!.provenance).toBe("surrogate");
     expect(chain[0]!.words).toHaveLength(10);
     expect(chain.slice(0, 4).map((body) => body.active.every(Boolean))).toEqual([true, true, true, true]);

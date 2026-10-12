@@ -11,7 +11,7 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { land97Ages } from "../helpers/land97LeadAges.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep5.md: accepted dense windows (rows); shadow row 0 iff the window starts at activation (Taunt -10: none).
 // Aromatherapy is 400 rows player-attacker / 396 opponent-attacker (both windows end on script-end frame 474).
@@ -103,7 +103,7 @@ describe("live prep5 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.move], r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.move], r.streak);
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
-    expect(body?.ages).toEqual(land97Ages(c.id, c.duration[0]!));
+    expect(body?.ages).toEqual(iu120Ages(c.id, c.duration[0]!));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     if (c.id === 118) {
       // Body only: the called move is an ordinary second request (prep5 s2.5) handled by its own adapter or the fallback.
