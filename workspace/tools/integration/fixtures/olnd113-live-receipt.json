@@ -1,0 +1,892 @@
+{
+ "schema": "olnd113-live-receipt/v1",
+ "base": "bce86a4b0",
+ "baseSrc": "94a7f48b3",
+ "finalSrc": "b46ad30e2e7ed96c150219ff5e01bb56fe923092",
+ "leadStatsChange": 1,
+ "romR1Sha256": "a2bbbf5e7871f8d7844648d738823b885e9b8467e29d6ecf6104bb3e8be37649",
+ "ruleCheck": {
+  "off": [
+   16,
+   16
+  ],
+  "on": [
+   5,
+   5
+  ],
+  "classes": {
+   "off": {
+    "stat self (Bulk Up)": {
+     "anchor": 40,
+     "base": [
+      -39
+     ],
+     "final": [
+      0
+     ]
+    },
+    "stat self (Double Team)": {
+     "anchor": 41,
+     "base": [
+      -38
+     ],
+     "final": [
+      0
+     ]
+    },
+    "stat target (Sand-Attack)": {
+     "anchor": 41,
+     "base": [
+      -38
+     ],
+     "final": [
+      0
+     ]
+    },
+    "status msg (Confuse Ray)": {
+     "anchor": 46,
+     "base": [
+      -46
+     ],
+     "final": [
+      0
+     ]
+    },
+    "status (Toxic)": {
+     "anchor": 48,
+     "base": [
+      -48
+     ],
+     "final": [
+      0
+     ]
+    },
+    "status (Thunder Wave)": {
+     "anchor": 47,
+     "base": [
+      -47
+     ],
+     "final": [
+      0
+     ]
+    },
+    "protect (Protect)": {
+     "anchor": 39,
+     "base": [
+      -39
+     ],
+     "final": [
+      0
+     ]
+    },
+    "protect (Detect)": {
+     "anchor": 39,
+     "base": [
+      -39
+     ],
+     "final": [
+      0
+     ]
+    },
+    "two-turn charge (Dig)": {
+     "anchor": 42,
+     "base": [
+      -42
+     ],
+     "final": [
+      0
+     ]
+    },
+    "two-turn charge (Razor Wind)": {
+     "anchor": 42,
+     "base": [
+      -42
+     ],
+     "final": [
+      0
+     ]
+    },
+    "two-turn charge (SolarBeam)": {
+     "anchor": 42,
+     "base": [
+      -42
+     ],
+     "final": [
+      0
+     ]
+    },
+    "failed (Snore awake: But it failed!)": {
+     "anchor": 37,
+     "base": [
+      -37
+     ],
+     "final": [
+      0
+     ]
+    },
+    "miss (Dynamic Punch, player)": {
+     "anchor": 36,
+     "base": [
+      -36
+     ],
+     "final": [
+      0
+     ]
+    },
+    "miss (Dynamic Punch, opponent)": {
+     "anchor": 36,
+     "base": [
+      -36
+     ],
+     "final": [
+      0
+     ]
+    },
+    "protect-blocked (Tackle vs Protect)": {
+     "anchor": 36,
+     "base": [
+      -36
+     ],
+     "final": [
+      0
+     ]
+    },
+    "protect-blocked (Tackle vs Detect)": {
+     "anchor": 36,
+     "base": [
+      -36
+     ],
+     "final": [
+      0
+     ]
+    }
+   },
+   "on": {
+    "stat self (Bulk Up)": {
+     "anchor": 40,
+     "base": [],
+     "final": []
+    },
+    "stat self (Double Team)": {
+     "anchor": 41,
+     "base": [],
+     "final": []
+    },
+    "stat target (Sand-Attack)": {
+     "anchor": 41,
+     "base": [],
+     "final": []
+    },
+    "status msg (Confuse Ray)": {
+     "anchor": 46,
+     "base": [],
+     "final": []
+    },
+    "status (Toxic)": {
+     "anchor": 48,
+     "base": [],
+     "final": []
+    },
+    "status (Thunder Wave)": {
+     "anchor": 47,
+     "base": [],
+     "final": []
+    },
+    "protect (Protect)": {
+     "anchor": 39,
+     "base": [],
+     "final": []
+    },
+    "protect (Detect)": {
+     "anchor": 39,
+     "base": [],
+     "final": []
+    },
+    "two-turn charge (Dig)": {
+     "anchor": 42,
+     "base": [],
+     "final": []
+    },
+    "two-turn charge (Razor Wind)": {
+     "anchor": 42,
+     "base": [],
+     "final": []
+    },
+    "two-turn charge (SolarBeam)": {
+     "anchor": 42,
+     "base": [],
+     "final": []
+    },
+    "failed (Snore awake: But it failed!)": {
+     "anchor": 37,
+     "base": [
+      -37
+     ],
+     "final": [
+      0
+     ]
+    },
+    "miss (Dynamic Punch, player)": {
+     "anchor": 36,
+     "base": [
+      -36
+     ],
+     "final": [
+      0
+     ]
+    },
+    "miss (Dynamic Punch, opponent)": {
+     "anchor": 36,
+     "base": [
+      -36
+     ],
+     "final": [
+      0
+     ]
+    },
+    "protect-blocked (Tackle vs Protect)": {
+     "anchor": 36,
+     "base": [
+      -36
+     ],
+     "final": [
+      0
+     ]
+    },
+    "protect-blocked (Tackle vs Detect)": {
+     "anchor": 36,
+     "base": [
+      -36
+     ],
+     "final": [
+      0
+     ]
+    }
+   }
+  }
+ },
+ "jointTarget": [
+  {
+   "move": 339,
+   "scenario": "off108-bulk-up-ply-primeape-onix",
+   "romFirstGlyph": 121,
+   "romStatsChangeRow": 40,
+   "finalMessageStarts": [
+    119
+   ],
+   "residuals": [
+    -2
+   ]
+  },
+  {
+   "move": 104,
+   "scenario": "off108-double-team-ply-primeape-onix",
+   "romFirstGlyph": 119,
+   "romStatsChangeRow": 41,
+   "finalMessageStarts": [
+    118
+   ],
+   "residuals": [
+    -1
+   ]
+  },
+  {
+   "move": 28,
+   "scenario": "off108-sand-attack-ply-primeape-snorlax",
+   "romFirstGlyph": 119,
+   "romStatsChangeRow": 41,
+   "finalMessageStarts": [
+    118
+   ],
+   "residuals": [
+    -1
+   ]
+  }
+ ],
+ "censusOn": {
+  "statusChanges": 0,
+  "frameChanges": 0,
+  "commands": 27513,
+  "battlesKeyMismatch": [
+   {
+    "battle": 434,
+    "commands": [
+     265,
+     250
+    ],
+    "commonPrefix": 250
+   },
+   {
+    "battle": 796,
+    "commands": [
+     214,
+     195
+    ],
+    "commonPrefix": 195
+   },
+   {
+    "battle": 881,
+    "commands": [
+     292,
+     286
+    ],
+    "commonPrefix": 286
+   }
+  ],
+  "battleDigestExcludingFramesSame": 7,
+  "framesBase": 14946997,
+  "framesFinal": 15187831,
+  "framesDelta": 240834,
+  "stalls": [
+   {
+    "shard": 4,
+    "base": [
+     {
+      "seed": 434,
+      "streak": 21,
+      "turns": 338,
+      "at": "resolution presenting"
+     }
+    ],
+    "patched": [
+     {
+      "seed": 434,
+      "streak": 21,
+      "turns": 316,
+      "at": "resolution presenting"
+     }
+    ]
+   },
+   {
+    "shard": 7,
+    "base": [
+     {
+      "seed": 796,
+      "streak": 34,
+      "turns": 365,
+      "at": "resolution presenting"
+     }
+    ],
+    "patched": [
+     {
+      "seed": 796,
+      "streak": 34,
+      "turns": 336,
+      "at": "resolution presenting"
+     }
+    ]
+   },
+   {
+    "shard": 8,
+    "base": [
+     {
+      "seed": 881,
+      "streak": 38,
+      "turns": 267,
+      "at": "resolution presenting"
+     }
+    ],
+    "patched": [
+     {
+      "seed": 881,
+      "streak": 38,
+      "turns": 261,
+      "at": "resolution presenting"
+     }
+    ]
+   }
+  ],
+  "liveShare": {
+   "base": {
+    "commands": 27513,
+    "live": 26245,
+    "frames": 3983896,
+    "liveFrames": 3932860
+   },
+   "final": {
+    "commands": 27473,
+    "live": 26245,
+    "frames": 3982616,
+    "liveFrames": 3932860
+   }
+  }
+ },
+ "censusOff": {
+  "uses": [
+   38067,
+   37939
+  ],
+  "useKeyMismatch": 3,
+  "seedsDiffering": [
+   {
+    "seed": 434,
+    "uses": [
+     710,
+     656
+    ],
+    "commonPrefix": 656
+   },
+   {
+    "seed": 796,
+    "uses": [
+     740,
+     678
+    ],
+    "commonPrefix": 678
+   },
+   {
+    "seed": 881,
+    "uses": [
+     432,
+     420
+    ],
+    "commonPrefix": 420
+   }
+  ],
+  "commandMismatch": 0,
+  "mismatchExamples": [],
+  "inserted": [
+   9717,
+   407249
+  ],
+  "holds": [
+   7382,
+   274874
+  ],
+  "off108": {
+   "inserted": [
+    9717,
+    404165
+   ],
+   "holds": [
+    7386,
+    275018
+   ]
+  },
+  "insertedByN": {
+   "STATS_CHANGE": {
+    "off108": [
+     3084,
+     117695
+    ],
+    "off108AdjustedLead1": [
+     3084,
+     120779
+    ],
+    "final": [
+     3084,
+     120779
+    ]
+   },
+   "beyond the route's 14-receipt window": {
+    "off108": [
+     54,
+     3836
+    ],
+    "off108AdjustedLead1": [
+     54,
+     3836
+    ],
+    "final": [
+     54,
+     3836
+    ]
+   },
+   "health-bar-update": {
+    "off108": [
+     621,
+     24821
+    ],
+    "off108AdjustedLead1": [
+     621,
+     24821
+    ],
+    "final": [
+     621,
+     24821
+    ]
+   },
+   "message": {
+    "off108": [
+     5153,
+     220475
+    ],
+    "off108AdjustedLead1": [
+     5153,
+     220475
+    ],
+    "final": [
+     5153,
+     220475
+    ]
+   },
+   "set-battler-status-data": {
+    "off108": [
+     805,
+     37338
+    ],
+    "off108AdjustedLead1": [
+     805,
+     37338
+    ],
+    "final": [
+     805,
+     37338
+    ]
+   }
+  },
+  "holdsByLabel": {
+   "BattleScript_AbilityNoSpecificStatLoss": {
+    "off108": [
+     6,
+     216
+    ],
+    "final": [
+     6,
+     216
+    ]
+   },
+   "BattleScript_AbilityNoStatLoss": {
+    "off108": [
+     14,
+     504
+    ],
+    "final": [
+     14,
+     504
+    ]
+   },
+   "BattleScript_AbilityPreventsPhasingOut": {
+    "off108": [
+     3,
+     108
+    ],
+    "final": [
+     3,
+     108
+    ]
+   },
+   "BattleScript_AlreadyAsleep": {
+    "off108": [
+     92,
+     3496
+    ],
+    "final": [
+     92,
+     3496
+    ]
+   },
+   "BattleScript_AlreadyAtFullHp": {
+    "off108": [
+     396,
+     14587
+    ],
+    "final": [
+     396,
+     14587
+    ]
+   },
+   "BattleScript_AlreadyBurned": {
+    "off108": [
+     7,
+     266
+    ],
+    "final": [
+     7,
+     266
+    ]
+   },
+   "BattleScript_AlreadyConfused": {
+    "off108": [
+     95,
+     3705
+    ],
+    "final": [
+     95,
+     3705
+    ]
+   },
+   "BattleScript_AlreadyHasSubstitute": {
+    "off108": [
+     97,
+     3589
+    ],
+    "final": [
+     97,
+     3589
+    ]
+   },
+   "BattleScript_AlreadyParalyzed": {
+    "off108": [
+     128,
+     5248
+    ],
+    "final": [
+     128,
+     5248
+    ]
+   },
+   "BattleScript_ButItFailed": {
+    "off108": [
+     2488,
+     95387
+    ],
+    "final": [
+     2488,
+     95387
+    ]
+   },
+   "BattleScript_CantMakeAsleep": {
+    "off108": [
+     5,
+     190
+    ],
+    "final": [
+     5,
+     190
+    ]
+   },
+   "BattleScript_CantRaiseMultipleStats": {
+    "off108": [
+     85,
+     3230
+    ],
+    "final": [
+     85,
+     3230
+    ]
+   },
+   "BattleScript_EffectMagnitude": {
+    "off108": [
+     26,
+     962
+    ],
+    "final": [
+     26,
+     962
+    ]
+   },
+   "BattleScript_FlashFireBoost": {
+    "off108": [
+     17,
+     586
+    ],
+    "final": [
+     17,
+     586
+    ]
+   },
+   "BattleScript_HitAllWithUndergroundBonusMissed": {
+    "off108": [
+     102,
+     4388
+    ],
+    "final": [
+     102,
+     4388
+    ]
+   },
+   "BattleScript_MagicCoatBounce": {
+    "off108": [
+     4,
+     140
+    ],
+    "final": [
+     4,
+     140
+    ]
+   },
+   "BattleScript_MonMadeMoveUseless": {
+    "off108": [
+     19,
+     646
+    ],
+    "final": [
+     19,
+     646
+    ]
+   },
+   "BattleScript_MoveMissed": {
+    "off108": [
+     3577,
+     129045
+    ],
+    "final": [
+     3573,
+     128901
+    ]
+   },
+   "BattleScript_MultiHitPrintStrings": {
+    "off108": [
+     5,
+     245
+    ],
+    "final": [
+     5,
+     245
+    ]
+   },
+   "BattleScript_NotAffected": {
+    "off108": [
+     58,
+     2446
+    ],
+    "final": [
+     58,
+     2446
+    ]
+   },
+   "BattleScript_ObliviousPreventsAttraction": {
+    "off108": [
+     11,
+     407
+    ],
+    "final": [
+     11,
+     407
+    ]
+   },
+   "BattleScript_OwnTempoPrevents": {
+    "off108": [
+     14,
+     504
+    ],
+    "final": [
+     14,
+     504
+    ]
+   },
+   "BattleScript_PRLZPrevention": {
+    "off108": [
+     3,
+     117
+    ],
+    "final": [
+     3,
+     117
+    ]
+   },
+   "BattleScript_PSNPrevention": {
+    "off108": [
+     1,
+     39
+    ],
+    "final": [
+     1,
+     39
+    ]
+   },
+   "BattleScript_PrintAbilityMadeIneffective": {
+    "off108": [
+     1,
+     37
+    ],
+    "final": [
+     1,
+     37
+    ]
+   },
+   "BattleScript_RestIsAlreadyAsleep": {
+    "off108": [
+     2,
+     74
+    ],
+    "final": [
+     2,
+     74
+    ]
+   },
+   "BattleScript_SafeguardProtected": {
+    "off108": [
+     4,
+     166
+    ],
+    "final": [
+     4,
+     166
+    ]
+   },
+   "BattleScript_SoundproofProtected": {
+    "off108": [
+     9,
+     315
+    ],
+    "final": [
+     9,
+     315
+    ]
+   },
+   "BattleScript_SpitUpFail": {
+    "off108": [
+     11,
+     407
+    ],
+    "final": [
+     11,
+     407
+    ]
+   },
+   "BattleScript_SturdyPreventsOHKO": {
+    "off108": [
+     5,
+     195
+    ],
+    "final": [
+     5,
+     195
+    ]
+   },
+   "BattleScript_SwallowFail": {
+    "off108": [
+     19,
+     684
+    ],
+    "final": [
+     19,
+     684
+    ]
+   },
+   "BattleScript_TeeterDanceAlreadyConfused": {
+    "off108": [
+     4,
+     177
+    ],
+    "final": [
+     4,
+     177
+    ]
+   },
+   "BattleScript_TripleKickPrintStrings": {
+    "off108": [
+     2,
+     100
+    ],
+    "final": [
+     2,
+     100
+    ]
+   },
+   "BattleScript_WasntAffected": {
+    "off108": [
+     76,
+     2812
+    ],
+    "final": [
+     76,
+     2812
+    ]
+   }
+  },
+  "noHitWithoutPause": {
+   "health-bar-update": 466,
+   "set-battler-sprite-visibility": 298,
+   "speed": 243,
+   "attack": 129,
+   "(none)": 36,
+   "special-attack": 34,
+   "STRINGID_ITDOESNTAFFECT": 3,
+   "STATS_CHANGE": 2,
+   "set-battler-status-data": 2
+  }
+ }
+}
