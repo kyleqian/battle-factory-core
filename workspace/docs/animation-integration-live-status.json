@@ -3675,6 +3675,46 @@
       "note": "The ONE required body outside the historical 276 accepted catalogue moves: never counted in currentAcceptedFactoryMoves, the exact / faithful-random / faithful-timing / remaining identity, or the rental list (weight 0). Reported separately as required / accepted / live."
     }
   },
+  "generalAnimations": {
+    "STATS_CHANGE": {
+      "animation": "General_StatsChange (B_ANIM_STATS_CHANGE / Cmd_playstatchangeanimation: AnimTask_StatsChange)",
+      "kind": "general animation (not a move body)",
+      "state": "live",
+      "scenes": [
+        "on",
+        "off"
+      ],
+      "command": "stats-change presentation command at the kernel STATS_CHANGE event: 76 / 90 frames (+ holdFrames to the following print's first glyph, scf117); none behind a Substitute; none after a live Double Team body (its window owns the banner, Scene ON)",
+      "censusSeeds0to999": {
+        "kernelEvents": 4552,
+        "playedByRom": 4529,
+        "behindSubstitute": 23,
+        "sceneOn": {
+          "commands": 3667,
+          "frames": 302540,
+          "liveDoubleTeamExemptions": 862
+        },
+        "sceneOff": {
+          "commands": 4529,
+          "frames": 368914
+        }
+      },
+      "accounting": "Reported on its own line: NOT folded into the move-animation live share (liveShareCensus counts move-animation / substitute-fade commands only)",
+      "evidence": [
+        "docs/stat101-stats-change-design.md",
+        "docs/stat102-stats-change-reducer.md",
+        "docs/sc106-stats-change-command.md",
+        "docs/scd112-stats-change-render.md",
+        "docs/olnd113-scene-off-pauses-live.md",
+        "docs/scf117-stats-change-finish.md",
+        "tools/integration/fixtures/scf117-live-receipt.json"
+      ],
+      "proofs": "stat101 ROM receipts (20 windows, r1 == r2, ON == OFF); stat102 reducer rows; scd112 comparator through production 20 / 20 windows 0 px (scf117: with the Growl tracker row); scf117 post-command alignment 0 residual on every path, both scenes",
+      "remaining": [
+        "the live Double Team window ends 9 rows before the ROM's following glyph (Scene ON; docs/sc106-stats-change-command.md section 2)"
+      ]
+    }
+  },
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
   "implementedCount": 239,
   "playableExactCount": 0,
