@@ -2243,8 +2243,9 @@ decoupled press stream (soak111). Ordinary-play census (`.integration/validation
 1. ISSUES #168 — the Scene ON status-condition animations (B_ANIM_STATUS_PSN 71 / PRZ 39 / BRN 39 / SLP 97 rows) are not presented
    (thousands of census occurrences). Prep pack: docs/sta123-status-animations-design.md (if landed; else start with that evidence step),
    then the stats-change pattern: a presented command + durations, renderers by shared component, host effects, census + audit.
-2. Remaining fallbacks (287 commands / 28,457 frames on 0..999): order plans for Odor Sleuth 316 and Hyper Beam 63 (106 Struggle + other
-   lend-unknown declines are host invalidations by those bodies: docs/stf115-struggle-declines.md), later-body lends, doll cells (33 / 26),
+2. FIRST (cheap): land the BANKED ord124 patch (docs/ord124-order-plans.md §4: computed Odor Sleuth 316 + False Swipe 206 order plans;
+   +106 commands -> 99.34 % / 99.60 % on its patched copy). Then audit the Golbat Mega Punch first-window flag it raised (287,402 px).
+   Remaining fallbacks after it: Hyper Beam 63 (Random2 orb words, 12), Astonish 5, Extrasensory player later bodies 23, doll cells (33 / 26),
    Castform weather keys (#143), stale move power (Endeavor), Extrasensory player later bodies, Memento after a Dragon Dance.
 3. Timeline remainders: #166 (the live Double Team window ends 9 rows before the ROM's next message), #167 (Rest's OFF attack pause,
    sprite-visibility / stat-stage-change next receipts, the charge-turn EMPTYSTRING3 print), #153 (Scene OFF skips the Substitute body:

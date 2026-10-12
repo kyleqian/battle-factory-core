@@ -28,8 +28,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   pre-fix driver full 0:60 59 / 60, winning 57 / 60, winning-swap 59 / 60 (all HANGs = the driver bug above; each rerun OK on the fix);
   confirmation reruns of the 0:60 gates on the fixed driver: see the ledger (ANIMATION_INTEGRATION_PROGRESS.md top entry); varied-RNG fifth gate on the fixed driver: winning carry 0 / 14 / 28
   **100 / 100 each**, winning-swap carry 0 **100 / 100**.
-- **Next:** ROADMAP S10A resume points — ISSUES #168 Scene ON status animations (prep pack DONE: docs/sta123-status-animations-design.md,
-  slices SA1..SA10), remaining fallbacks (Odor Sleuth / Hyper Beam order plans), #166 / #167 remainders, regenerate the app-only trace.
+- **Next:** ROADMAP S10A resume points — land the BANKED ord124 order plans (+106 commands -> 99.34 / 99.60 %; then audit its Mega Punch
+  flag), ISSUES #168 Scene ON status animations (prep pack DONE: docs/sta123-status-animations-design.md, slices SA1..SA10), #166 / #167
+  remainders, regenerate the app-only presentation-rng trace.
 - **Notes:** no DEFERRED entries. ISSUES: #166 / #167 trimmed, #168 new, #153 quantified. All worker branches merged; worktrees removed
   (scratch preserved under `.integration/validation/*-20261011/`, transcripts `.codex-logs/workers/`).
 

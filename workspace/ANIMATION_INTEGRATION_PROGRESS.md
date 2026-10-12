@@ -15,7 +15,14 @@
   vanilla 0:20 **20 / 20 OK**; full 0:60 59 / 60, winning 0:60 57 / 60, winning-swap 0:60 59 / 60 — every HANG `@ postwin:page0`: soak111's
   sticky post-win roll (keyed by menu + cursor) chose a deliberate no-op (REST: full 25, winning 4 / 27 / 48; RECORD: winning-swap 17) and
   pressed A forever. Fixed `7d04d2686` + `bd7780162` (re-draw after every A on RECORD / REST); all five seeds rerun OK (winning 4 / 27 / 48
-  and winning-swap 17 reach carry 14 at the 1,000,000-frame budget); soak tests 70 / 70, no pin moved. Fifth gate on the fixed driver (src `b4befa039`): winning --vary-rng
+  and winning-swap 17 reach carry 14 at the 1,000,000-frame budget); soak tests 70 / 70, no pin moved.
+  Confirmation on the fixed driver (`bd7780162`): full 0:60 **60 / 60 OK**; winning / winning-swap 0:60 reruns: see PROGRESS.
+- ord124 (SIDE, Opus, new files only, branch `worker/side-20261011-204243`): the lend-unknown bucket is 106 / 125 commands from ONE
+  battle (705: a Metronome-called Odor Sleuth, then a False Swipe); computed plans exact on ROM RAM (Odor Sleuth 51 / 51 bodies — equal
+  sort keys keep the lend's slot order, so plans69's "target species" classes were lend classes; False Swipe 18 / 18); banked patch
+  (generator line + rows fixture + fold-pin diff): census 98.95 / 99.32 -> **99.34 / 99.60 %** on its patched copy, 0 other changes.
+  Hyper Beam stays negative (Random2 orb words). FLAG: Golbat Mega Punch first window on the `wos-*-143-42-5` routes 287,402 /
+  17,984 px (lend == ROM; base == patched) — a live defect or an alignment artefact: audit it next. Fifth gate on the fixed driver (src `b4befa039`): winning --vary-rng
   --first-round carry 0 / 14 / 28 **100 / 100 each**, winning-swap carry 0 **100 / 100** (0 CRASH / 0 HANG).
 
 - Session start: master `52c181d54`, production src `14d1be159` == the 2026-10-10 night final gates' tree -> baseline receipt reused.
