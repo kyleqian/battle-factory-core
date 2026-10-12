@@ -45,6 +45,8 @@ describe("defender shown as the Substitute doll: proven cells live, everything e
       "348:opponent", "348:player", "9:opponent", "9:player",
       // doll90: Psych Up, both sides (the doll sheet + the doll palette bank).
       "244:opponent", "244:player",
+      // stf115 / sdl119: Struggle, both sides (the doll-aware art lookup + the doll palette bank).
+      "165:opponent", "165:player",
     ].sort());
   });
   it("a proven cell keeps its doll-free duration; unproven orientations / moves and both-doll bodies decline", () => {

@@ -42,6 +42,8 @@ for n in stf115-ply-tsub-95-135 stf115-opp-tsub-143-95; do
 done
 python3 $T/stf115Summary.py --attdoll "$OUT/att-rec" > "$REC/rung2-attdoll.txt"
 tail -1 "$REC/rung2-attdoll.txt"
-for f in rung1-lends.jsonl derive.txt rung2-windows-patched.txt rung2-attdoll.txt; do same "$F/$f" "$REC/$f"; done
+for f in derive.txt rung2-windows-patched.txt rung2-attdoll.txt; do same "$F/$f" "$REC/$f"; done
+# the lends differ from stf115's only in the 5 defender-doll lines (live now); sdl119's own copy is the reference
+same tools/integration/fixtures/sdl119/lends.jsonl "$REC/rung1-lends.jsonl"
 # rung 1: the 54 doll-free live windows (live=59 minus the 5 defender-doll) are 0 px
 grep -c "live=1 .*px=0 " "$REC/rung2-windows-patched.txt" | sed 's/^/live 0px lines: /'

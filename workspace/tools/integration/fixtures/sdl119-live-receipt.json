@@ -1,0 +1,27 @@
+{
+ "base": "76c33f4bc",
+ "runner": "tools/integration/sdl119Run.sh",
+ "r1EqualsR2": "66/66 windows; 2/2 attacker-doll routes (6 windows)",
+ "rung1": {
+  "dollFreeLiveWindows": {
+   "live": 54,
+   "zeroPx": 54
+  },
+  "lendEqualsRom": "66/66"
+ },
+ "rung2": {
+  "defenderDollWindows": {
+   "live": 5,
+   "zeroPx": 5
+  },
+  "attackerDollWindows": {
+   "live": 6,
+   "zeroPx": 6,
+   "compositeRows": {
+    "player": 197,
+    "opponent": 193
+   }
+  }
+ },
+ "allLive": "TOTAL all            windows=66 live=59 live-0px=59 r1==r2=66 lend==ROM=66"
+}

@@ -9,6 +9,7 @@ import {
 import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveSubstituteDollDeclines,
 } from "../src/engine/liveMoveAnimation.ts";
+import { liveSubstituteSwapApplies, substituteSwapCompositeDuration } from "../src/engine/liveSubstituteSwap.ts";
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
 import speciesStats from "../src/data/gen/species-stats.json" with { type: "json" };
@@ -142,15 +143,19 @@ describe("stl109: Struggle gates", () => {
     expect(present(request(0), displayed("SNORLAX", "PIDGEOT", { personality: shiny }), firstBodyOrder())).toBeNull();
   });
 
-  it("a Substitute doll declines on either side: the defender doll (cell unproven) and the attacker doll (swap body cell unproven)", () => {
+  it("a Substitute doll is live on either side (sdl119): the defender doll presents, the attacker doll swaps (197 player / 193 opponent); both dolls decline", () => {
     for (const attacker of [0, 1] as const) {
       const defenderDoll = displayed("SNORLAX", "GOLBAT", attacker === 0 ? { opponentDoll: true } : { playerDoll: true });
       const attackerDoll = displayed("SNORLAX", "GOLBAT", attacker === 0 ? { playerDoll: true } : { opponentDoll: true });
-      for (const field of [defenderDoll, attackerDoll]) {
-        expect(liveMoveSubstituteDollDeclines(request(attacker), field)).toBe(true);
-        expect(liveMoveAnimationDuration(request(attacker), field)).toBeNull();
-        expect(present(request(attacker), field, firstBodyOrder())).toBeNull();
-      }
+      expect(liveMoveSubstituteDollDeclines(request(attacker), defenderDoll)).toBe(false);
+      expect(present(request(attacker), defenderDoll, firstBodyOrder())).not.toBeNull();
+      expect(liveSubstituteSwapApplies(request(attacker), attackerDoll)).toBe(true);
+      expect(liveMoveAnimationDuration(request(attacker), attackerDoll))
+        .toBe(substituteSwapCompositeDuration(attacker === 0 ? "player" : "opponent", 112));
+      const both = displayed("SNORLAX", "GOLBAT", { playerDoll: true, opponentDoll: true });
+      expect(liveMoveSubstituteDollDeclines(request(attacker), both)).toBe(true);
+      expect(liveMoveAnimationDuration(request(attacker), both)).toBeNull();
+      expect(present(request(attacker), both, firstBodyOrder())).toBeNull();
     }
   });
 });
