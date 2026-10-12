@@ -60,6 +60,21 @@
   6 / 6 at 0 px, composites 197 / 193 rows); census 0..999 **98.80 / 99.27 -> 98.95 / 99.44 %** (+43 Struggle live; 895 / 1,001 Struggle
   commands live; 0 other status changes). Worker gates: full suite 1,633 files 0 failed, build, differential 624 / 624. Supervisor:
   sdl119Run.sh on `396308f86` — 59 / 59 live 0 px, 6 / 6 composites, every receipt same.
+- scf117 (INTEGRATION, Opus, merged `2d987e2e5`, src `d4988e08` on `681da5c10`): **ISSUES #166 finished** — (1) the print after a
+  stats-change shows its first glyph on the ROM row (a `holdFrames` on the command; residual 0 on 22 census paths in both scenes; olnd113's
+  joint target -2 / -1 / -1 -> 0 / 0 / 0; AllStatsUp anchored on issue69's frames); (2) source-derived x2 tracker rows (Growl / Will-O-Wisp /
+  Trick target; Screech / Soft-Boiled / Belly Drum / Trick attacker): Growl ON 20 / 20, live bodies after a Growl 43 / 43 rows 0 px (base
+  ONIX body 70,910 px off); (3) args 56 / 58 take class 2 (host binding needed no change); (4) `generalAnimations.STATS_CHANGE` in the
+  live status (ON 3,667 commands / 302,540 frames, OFF 4,529 / 368,914; a separate line, not move coverage). Census: 0 status changes.
+  Supervisor: scf117Run.sh into a fresh dir ALL SAME (19 paths 0 residual on 0..199, 20 / 20). Census-doc conflict with sdl119 resolved
+  (both sections kept).
+- shp116 (SIDE, Opus, `289c97608` .. `e9491198c`, folded via union `9d23a17c4`): shadow105 (the elevated opponent's shadow on lead row 0;
+  the audit-24 decline removed) + sp103 (Shadow Punch 325's age-90 lag as D4 faithful timing; catalogue `237+13+26+0+0=276` + Struggle)
+  + sp103's DEFECT (an elevated opponent TARGET's shadow return in Shadow Punch: ages 102..105 200 -> 0 px). Census: 0 status changes,
+  458 lead commands regain +N (+2,576 frames), 27 Shadow Punch +1 frame; differential: the app-only presentation-rng trace moves 21 / 173
+  captures (Shadow Punch fade rows, the menu one frame later), canonical traces identical. Supervisor: shp116Run.sh ALL SAME; the sc106
+  Intimidate anchor conflict resolved as +10 (lead rows) +1 (hold) — the test passes on the union.
+- **Union `9d23a17c4` (src `530600bb1`)**: typecheck, smoke 448; full suite + build running (union-b).
 
 ## 2026-10-11 — User-directed Struggle inclusion (docs only)
 
