@@ -154,5 +154,37 @@
   "turns": 2,
   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
   "targetGender": "female"
+ },
+ "sta123-ice-beam-ply-delcatty-shuckle.json": {
+  "animation": "FRZ",
+  "paths": "move-inflicted (MoveEffectFreeze, 10% Ice Beam) + frozen turns",
+  "attackerSide": "player",
+  "seed": 305419958,
+  "template": "tools/battle-lab/mechanic-ice-beam-player-delcatty-opponent-shuckle.json",
+  "extraTurns": 2
+ },
+ "sta123-ice-beam-opp-delcatty-shuckle.json": {
+  "animation": "FRZ",
+  "paths": "move-inflicted (MoveEffectFreeze, 10% Ice Beam) + frozen turns",
+  "attackerSide": "opponent",
+  "seed": 305419955,
+  "template": "tools/battle-lab/mechanic-ice-beam-opponent-delcatty-player-shuckle.json",
+  "extraTurns": 2
+ },
+ "sta123-nightmare-ply-haunter-shuckle.json": {
+  "animation": "NIGHTMARE",
+  "paths": "Hypnosis + Nightmare (no status2 anim at infliction) + end-turn nightmare tick (status2animation) + sleep turns",
+  "attackerSide": "player",
+  "seed": 1,
+  "template": "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json",
+  "extraTurns": 2
+ },
+ "sta123-nightmare-opp-haunter-shuckle.json": {
+  "animation": "NIGHTMARE",
+  "paths": "Hypnosis + Nightmare (no status2 anim at infliction) + end-turn nightmare tick (status2animation) + sleep turns",
+  "attackerSide": "opponent",
+  "seed": 1,
+  "template": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+  "extraTurns": 2
  }
 }

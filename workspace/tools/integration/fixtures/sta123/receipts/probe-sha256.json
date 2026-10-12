@@ -47,6 +47,38 @@
   "r1": "f35b73b4ff9833f5719a0ab3a240ec9808b262c5dddff35198430767d01d610d",
   "r2": "f35b73b4ff9833f5719a0ab3a240ec9808b262c5dddff35198430767d01d610d"
  },
+ "sta123-ice-beam-opp-delcatty-shuckle-off.json": {
+  "r1": "5bb0cbd75f8b6198f2a881f6b84c1f6767856835262f31ee970bdc2b9417817f",
+  "r2": "5bb0cbd75f8b6198f2a881f6b84c1f6767856835262f31ee970bdc2b9417817f"
+ },
+ "sta123-ice-beam-opp-delcatty-shuckle-on.json": {
+  "r1": "ea717159f2a8d1890810efd70956263436cc2026879ee18b75ca50e4708c85b2",
+  "r2": "ea717159f2a8d1890810efd70956263436cc2026879ee18b75ca50e4708c85b2"
+ },
+ "sta123-ice-beam-ply-delcatty-shuckle-off.json": {
+  "r1": "0700d9fe424d269cab8bf37d47a14e2f9daa78c05b71856780907f0e67749d19",
+  "r2": "0700d9fe424d269cab8bf37d47a14e2f9daa78c05b71856780907f0e67749d19"
+ },
+ "sta123-ice-beam-ply-delcatty-shuckle-on.json": {
+  "r1": "0e23f6a665c565a6decdfda4cf08f1042534d087ac062be49fea7c3eb15bc4c6",
+  "r2": "0e23f6a665c565a6decdfda4cf08f1042534d087ac062be49fea7c3eb15bc4c6"
+ },
+ "sta123-nightmare-opp-haunter-shuckle-off.json": {
+  "r1": "9ff96948b07442aca3765ba0711364d3a9f7c2cb58b82d4574fbecf8544e0752",
+  "r2": "9ff96948b07442aca3765ba0711364d3a9f7c2cb58b82d4574fbecf8544e0752"
+ },
+ "sta123-nightmare-opp-haunter-shuckle-on.json": {
+  "r1": "dc3c2f7016bd27e6d797e4c385f1e8bc7d3f691eafd97abdb9f9995a6fe6f066",
+  "r2": "dc3c2f7016bd27e6d797e4c385f1e8bc7d3f691eafd97abdb9f9995a6fe6f066"
+ },
+ "sta123-nightmare-ply-haunter-shuckle-off.json": {
+  "r1": "4358abed0dfd6bb7fc352df32f437c4847cc8b7e7217f09fd3dde1dc2f1d9d70",
+  "r2": "4358abed0dfd6bb7fc352df32f437c4847cc8b7e7217f09fd3dde1dc2f1d9d70"
+ },
+ "sta123-nightmare-ply-haunter-shuckle-on.json": {
+  "r1": "0da8815919f06d493372ef105c076358638276922d55bf6b1cbe49131dbc31f1",
+  "r2": "0da8815919f06d493372ef105c076358638276922d55bf6b1cbe49131dbc31f1"
+ },
  "sta123-spore-opp-primeape-onix-off.json": {
   "r1": "ca90ccbde678207408df9b1b6fc6f1718f35d3133974d681ecd6e8a13c1cbab8",
   "r2": "ca90ccbde678207408df9b1b6fc6f1718f35d3133974d681ecd6e8a13c1cbab8"

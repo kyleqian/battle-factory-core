@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """sta123: summarise sta123Exposure.ts shards (census seeds, Scene ON production kernel) into per B_ANIM_STATUS_* x kernel-path counts.
-The path is read from the message right before the status-animation receipt (turn-start / end-turn scripts print first, then animate:
-BattleScript_MoveUsedIsAsleep / IsParalyzed / IsFrozen / IsConfused / IsInLove, PoisonTurnDmg / BurnTurnDmg / CurseTurnDmg /
-NightmareTurnDmg), otherwise from the message right after it (MoveEffect* / ThrashConfuses / CuteCharmActivates animate first, then print).
+Scripts that animate first and then print (MoveEffect* / YawnMakesAsleep / ThrashConfuses / CuteCharmActivates) are recognised by the
+message right after the status-animation receipt (an infliction message of that animation's status, INFLICT); every other receipt by the message right before it
+(turn-start / end-turn scripts print first, then animate: BattleScript_MoveUsedIsAsleep / IsParalyzed / IsFrozen / IsConfused /
+IsInLove, PoisonTurnDmg / BurnTurnDmg / CurseTurnDmg / NightmareTurnDmg).
 usage: sta123ExposureSummary.py <shard-dir> <out.json>        (<shard-dir>/e*.jsonl)
 """
 import glob, json, os, sys
@@ -13,6 +14,10 @@ PREV = {"STRINGID_PKMNHURTBYPOISON": "end-turn poison tick", "STRINGID_PKMNHURTB
         "STRINGID_PKMNISCONFUSED": "confusion self-check", "STRINGID_PKMNINLOVE": "in-love check",
         "STRINGID_PKMNAFFLICTEDBYCURSE": "end-turn curse tick", "STRINGID_PKMNLOCKEDINNIGHTMARE": "end-turn nightmare tick"}
 NEXT = {"STRINGID_PKMNFATIGUECONFUSION": "thrash fatigue", "STRINGID_PKMNSXINFATUATEDY": "cute charm"}
+INFLICT = {"PSN": {"STRINGID_PKMNBADLYPOISONED", "STRINGID_PKMNWASPOISONED", "STRINGID_PKMNPOISONEDBY"},
+           "BRN": {"STRINGID_PKMNWASBURNED", "STRINGID_PKMNBURNEDBY"}, "PRZ": {"STRINGID_PKMNWASPARALYZED", "STRINGID_PKMNWASPARALYZEDBY"},
+           "SLP": {"STRINGID_PKMNFELLASLEEP", "STRINGID_PKMNMADESLEEP"}, "FRZ": {"STRINGID_PKMNWASFROZEN"},
+           "CONFUSION": {"STRINGID_PKMNWASCONFUSED", "STRINGID_PKMNFATIGUECONFUSION"}, "INFATUATION": {"STRINGID_PKMNSXINFATUATEDY"}}
 battles, ends, per, sides, withAny = 0, Counter(), Counter(), Counter(), Counter()
 for f in sorted(glob.glob(os.path.join(sys.argv[1], "e*.jsonl"))):
     for line in open(f):
@@ -21,7 +26,9 @@ for f in sorted(glob.glob(os.path.join(sys.argv[1], "e*.jsonl"))):
         ends["terminal" if b["end"] == "terminal" else "other"] += 1
         seen = set()
         for a in b["anims"]:
-            path = PREV.get(a["prevMessage"]) or NEXT.get(a["nextMessage"]) or f"inflicted (next {a['nextMessage']})"
+            nm = a["nextMessage"] or ""
+            inflicted = nm in INFLICT.get(a["anim"], ())
+            path = (NEXT.get(nm) or f"inflicted (next {nm})") if inflicted else (PREV.get(a["prevMessage"]) or f"? (prev {a['prevMessage']})")
             k = f"{a['anim']}|{path}"
             per[k] += 1
             sides[f"{a['anim']}|{'player' if a['battler'] == 0 else 'opponent'}"] += 1

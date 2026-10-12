@@ -745,6 +745,782 @@
     ]
    }
   },
+  "sta123-ice-beam-opp-delcatty-shuckle": {
+   "animation": "FRZ",
+   "paths": "move-inflicted (MoveEffectFreeze, 10% Ice Beam) + frozen turns",
+   "attackerSide": "opponent",
+   "seed": 305419955,
+   "template": "tools/battle-lab/mechanic-ice-beam-opponent-delcatty-player-shuckle.json",
+   "extraTurns": 2,
+   "on": {
+    "rows": 2503,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectFreeze+0",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 973,
+      "instrRows": 1,
+      "controllerRows": 133,
+      "activeRows": 115,
+      "firstActive": 17,
+      "lastActive": 131,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveEffectFreeze+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . x x x x x x x x x x x x x x x x x ax oax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 0,
+      "row": 1302,
+      "instrRows": 1,
+      "controllerRows": 117,
+      "activeRows": 116,
+      "firstActive": 0,
+      "lastActive": 115,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . ax oax ax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 0,
+      "row": 2008,
+      "instrRows": 1,
+      "controllerRows": 117,
+      "activeRows": 116,
+      "firstActive": 0,
+      "lastActive": 115,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . ax oax ax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 2503,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectFreeze+0",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 801,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectFreeze+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 0,
+      "row": 997,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 0,
+      "row": 1836,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-ice-beam-ply-delcatty-shuckle": {
+   "animation": "FRZ",
+   "paths": "move-inflicted (MoveEffectFreeze, 10% Ice Beam) + frozen turns",
+   "attackerSide": "player",
+   "seed": 305419958,
+   "template": "tools/battle-lab/mechanic-ice-beam-player-delcatty-opponent-shuckle.json",
+   "extraTurns": 2,
+   "on": {
+    "rows": 2503,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectFreeze+0",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 334,
+      "instrRows": 1,
+      "controllerRows": 134,
+      "activeRows": 115,
+      "firstActive": 18,
+      "lastActive": 132,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveEffectFreeze+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . x x x x x x x x x x x x x x x x x x ax oax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 1,
+      "row": 672,
+      "instrRows": 1,
+      "controllerRows": 117,
+      "activeRows": 116,
+      "firstActive": 0,
+      "lastActive": 115,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . ax oax ax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 2503,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectFreeze+0",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 162,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectFreeze+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 1,
+      "row": 366,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-nightmare-opp-haunter-shuckle": {
+   "animation": "NIGHTMARE",
+   "paths": "Hypnosis + Nightmare (no status2 anim at infliction) + end-turn nightmare tick (status2animation) + sleep turns",
+   "attackerSide": "opponent",
+   "seed": 1,
+   "template": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+   "extraTurns": 2,
+   "on": {
+    "rows": 3737,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 490,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 91,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax sopax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so sox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 1015,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 91,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax soax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so so ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 0,
+      "row": 1538,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 41,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . ax sopax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . so ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 3737,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 268,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 1015,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 0,
+      "row": 1303,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-nightmare-ply-haunter-shuckle": {
+   "animation": "NIGHTMARE",
+   "paths": "Hypnosis + Nightmare (no status2 anim at infliction) + end-turn nightmare tick (status2animation) + sleep turns",
+   "attackerSide": "player",
+   "seed": 1,
+   "template": "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json",
+   "extraTurns": 2,
+   "on": {
+    "rows": 3769,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 245,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 538,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 1360,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 1569,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . ax opax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 2182,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 2391,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . ax opax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 3116,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 3325,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . ax opax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 3769,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 107,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 303,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 1222,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 1334,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 2182,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 2294,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 3116,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 3228,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
   "sta123-spore-opp-primeape-onix": {
    "move": 147,
    "animation": "SLP",
@@ -2271,6 +3047,126 @@
     "BattleScript_CurseTurnDmg"
    ]
   },
+  "FRZ|frozen turn|opponent|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsFrozen"
+   ]
+  },
+  "FRZ|frozen turn|opponent|on": {
+   "n": 1,
+   "controllerRows": [
+    117
+   ],
+   "activeRows": [
+    116
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsFrozen"
+   ]
+  },
+  "FRZ|frozen turn|player|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsFrozen"
+   ]
+  },
+  "FRZ|frozen turn|player|on": {
+   "n": 2,
+   "controllerRows": [
+    117
+   ],
+   "activeRows": [
+    116
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsFrozen"
+   ]
+  },
+  "FRZ|move-inflicted|opponent|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectFreeze"
+   ]
+  },
+  "FRZ|move-inflicted|opponent|on": {
+   "n": 1,
+   "controllerRows": [
+    134
+   ],
+   "activeRows": [
+    115
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectFreeze"
+   ]
+  },
+  "FRZ|move-inflicted|player|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectFreeze"
+   ]
+  },
+  "FRZ|move-inflicted|player|on": {
+   "n": 1,
+   "controllerRows": [
+    133
+   ],
+   "activeRows": [
+    115
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectFreeze"
+   ]
+  },
   "INFATUATION|in-love check|opponent|off": {
    "n": 2,
    "controllerRows": [
@@ -2329,6 +3225,66 @@
    ],
    "next": [
     "BattleScript_MoveUsedIsInLove"
+   ]
+  },
+  "NIGHTMARE|end-turn nightmare tick|opponent|off": {
+   "n": 3,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_NightmareTurnDmg"
+   ]
+  },
+  "NIGHTMARE|end-turn nightmare tick|opponent|on": {
+   "n": 3,
+   "controllerRows": [
+    75
+   ],
+   "activeRows": [
+    74
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_NightmareTurnDmg"
+   ]
+  },
+  "NIGHTMARE|end-turn nightmare tick|player|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_NightmareTurnDmg"
+   ]
+  },
+  "NIGHTMARE|end-turn nightmare tick|player|on": {
+   "n": 1,
+   "controllerRows": [
+    75
+   ],
+   "activeRows": [
+    74
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_NightmareTurnDmg"
    ]
   },
   "PRZ|can't move|opponent|off": {
@@ -2572,7 +3528,7 @@
    ]
   },
   "SLP|move-inflicted|opponent|off": {
-   "n": 1,
+   "n": 2,
    "controllerRows": [
     0
    ],
@@ -2587,7 +3543,7 @@
    ]
   },
   "SLP|move-inflicted|opponent|on": {
-   "n": 1,
+   "n": 2,
    "controllerRows": [
     97
    ],
@@ -2602,7 +3558,7 @@
    ]
   },
   "SLP|move-inflicted|player|off": {
-   "n": 1,
+   "n": 2,
    "controllerRows": [
     0
    ],
@@ -2617,7 +3573,7 @@
    ]
   },
   "SLP|move-inflicted|player|on": {
-   "n": 1,
+   "n": 2,
    "controllerRows": [
     97
    ],
@@ -2632,7 +3588,7 @@
    ]
   },
   "SLP|sleep turn|opponent|off": {
-   "n": 3,
+   "n": 7,
    "controllerRows": [
     0
    ],
@@ -2647,7 +3603,7 @@
    ]
   },
   "SLP|sleep turn|opponent|on": {
-   "n": 3,
+   "n": 7,
    "controllerRows": [
     97
    ],
@@ -2662,7 +3618,7 @@
    ]
   },
   "SLP|sleep turn|player|off": {
-   "n": 3,
+   "n": 4,
    "controllerRows": [
     0
    ],
@@ -2677,7 +3633,7 @@
    ]
   },
   "SLP|sleep turn|player|on": {
-   "n": 3,
+   "n": 4,
    "controllerRows": [
     97
    ],

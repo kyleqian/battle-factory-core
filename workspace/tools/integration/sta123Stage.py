@@ -5,6 +5,9 @@ same parties of three, EV totals <= 510). Only the attacker lead's species / mov
 the explicit lab seed and the turn count change: every turn is the template's fight-menu press (A, 30 idle, A on slot 1) plus a fixed
 idle, so later turns repeat the same move (the target lead keeps the template's Tackle x4). Species are INTERNAL ids (Kanto ids equal
 their national numbers). Same shape as off121Stage.py (base 2d70bafd9 does not carry it).
+FRZ and NIGHTMARE (chance / two-move setups) reuse the accepted legal mechanic templates and pins of the status-animation sprite audit
+(tools/integration/statusAnimationSpriteBatch.py: two extra A,A turns of 934 frames; the Ice Beam player-carrier seed 305419958 from its
+freeze sweep, every other seed the template's own).
 usage: sta123Stage.py <out-dir>   (also writes <out-dir>/../scenario-index.json)
 """
 import copy, json, os, sys
@@ -53,4 +56,28 @@ for slug, move, anim, paths, atk, tgt, turns, *gender in CASES:
                        "seed": S0, "turns": turns, "template": TEMPLATE[side], **({"targetGender": gender[0]} if gender else {})}
         open(os.path.join(out, name), "w").write(json.dumps(d, indent=1) + "\n")
         print(name)
+AUDIT_TURN = [{"frames": 2, "buttons": ["A"]}, {"frames": 30, "buttons": []}, {"frames": 2, "buttons": ["A"]}, {"frames": 900, "buttons": []}]
+LEGAL = [  # (slug, template, seed or None = the template's, B_ANIM_STATUS_*, paths, attacker side)
+    ("ice-beam-ply-delcatty-shuckle", "tools/battle-lab/mechanic-ice-beam-player-delcatty-opponent-shuckle.json", 305419958, "FRZ",
+     "move-inflicted (MoveEffectFreeze, 10% Ice Beam) + frozen turns", "player"),
+    ("ice-beam-opp-delcatty-shuckle", "tools/battle-lab/mechanic-ice-beam-opponent-delcatty-player-shuckle.json", None, "FRZ",
+     "move-inflicted (MoveEffectFreeze, 10% Ice Beam) + frozen turns", "opponent"),
+    ("nightmare-ply-haunter-shuckle", "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json", None, "NIGHTMARE",
+     "Hypnosis + Nightmare (no status2 anim at infliction) + end-turn nightmare tick (status2animation) + sleep turns", "player"),
+    ("nightmare-opp-haunter-shuckle", "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json", None, "NIGHTMARE",
+     "Hypnosis + Nightmare (no status2 anim at infliction) + end-turn nightmare tick (status2animation) + sleep turns", "opponent"),
+]
+for slug, template, seed, anim, paths, side in LEGAL:
+    d = copy.deepcopy(json.load(open(os.path.join(ROOT, template))))
+    for s in ("player", "opponent"):
+        for p in d["overrides"]["parties"][s]:
+            assert sum(p["evs"].values()) <= 510
+    segs = d["trace"]["segments"] + copy.deepcopy(AUDIT_TURN) * 2
+    d["trace"] = {"segments": segs, "captureFrames": [0, sum(x["frames"] for x in segs)]}
+    if seed is not None:
+        d["seed"] = seed
+    name = f"sta123-{slug}.json"
+    index[name] = {"animation": anim, "paths": paths, "attackerSide": side, "seed": d["seed"], "template": template, "extraTurns": 2}
+    open(os.path.join(out, name), "w").write(json.dumps(d, indent=1) + "\n")
+    print(name)
 open(os.path.join(out, "..", "scenario-index.json"), "w").write(json.dumps(index, indent=1) + "\n")

@@ -32,10 +32,8 @@
   "BRN|inflicted (next STRINGID_PKMNBURNEDBY)": 18,
   "BRN|inflicted (next STRINGID_PKMNWASBURNED)": 79,
   "CONFUSION|confusion self-check": 1564,
-  "CONFUSION|end-turn burn tick": 2,
-  "CONFUSION|end-turn poison tick": 1,
   "CONFUSION|inflicted (next STRINGID_PKMNWASCONFUSED)": 789,
-  "CONFUSION|thrash fatigue": 48,
+  "CONFUSION|thrash fatigue": 51,
   "CURSED|end-turn curse tick": 21,
   "FRZ|frozen turn": 104,
   "FRZ|inflicted (next STRINGID_PKMNWASFROZEN)": 43,
@@ -49,11 +47,9 @@
   "PSN|inflicted (next STRINGID_PKMNBADLYPOISONED)": 167,
   "PSN|inflicted (next STRINGID_PKMNPOISONEDBY)": 47,
   "PSN|inflicted (next STRINGID_PKMNWASPOISONED)": 47,
-  "SLP|can't move": 3,
-  "SLP|end-turn burn tick": 1,
-  "SLP|inflicted (next STRINGID_PKMNFELLASLEEP)": 393,
+  "SLP|inflicted (next STRINGID_PKMNFELLASLEEP)": 399,
   "SLP|inflicted (next STRINGID_PKMNMADESLEEP)": 3,
-  "SLP|sleep turn": 1503
+  "SLP|sleep turn": 1501
  },
  "byAnimationAndSide": {
   "BRN|opponent": 255,
