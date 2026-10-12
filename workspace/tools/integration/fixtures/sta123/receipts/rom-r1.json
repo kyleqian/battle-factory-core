@@ -1,0 +1,3651 @@
+{
+ "schema": "sta123-rom/v1",
+ "scenarios": {
+  "sta123-attract-opp-primeape-onix": {
+   "move": 213,
+   "animation": "INFATUATION",
+   "paths": "Attract (no status anim at infliction) + in-love check (status2animation)",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "targetGender": "female",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveUsedIsInLove+6",
+      "op": "status2animation",
+      "animation": "INFATUATION",
+      "path": "in-love check",
+      "battler": 0,
+      "row": 702,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 85,
+      "oamChanges": 86,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsInLove+12",
+       "return"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsInLove+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax ax soax ax soax ax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax ax soax ax soax soax soax soax soax soax soax soax soax sox so o x"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsInLove+6",
+      "op": "status2animation",
+      "animation": "INFATUATION",
+      "path": "in-love check",
+      "battler": 0,
+      "row": 1727,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 85,
+      "oamChanges": 86,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsInLove+12",
+       "return"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsInLove+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax ax soax ax soax ax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax ax soax ax soax soax soax soax soax soax soax soax soax sox so o x"
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveUsedIsInLove+6",
+      "op": "status2animation",
+      "animation": "INFATUATION",
+      "path": "in-love check",
+      "battler": 0,
+      "row": 298,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsInLove+12",
+       "return"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsInLove+0",
+      "window": ". . . . . x"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsInLove+6",
+      "op": "status2animation",
+      "animation": "INFATUATION",
+      "path": "in-love check",
+      "battler": 0,
+      "row": 1727,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsInLove+12",
+       "return"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsInLove+0",
+      "window": ". . . . . x"
+     }
+    ]
+   }
+  },
+  "sta123-attract-ply-primeape-onix": {
+   "move": 213,
+   "animation": "INFATUATION",
+   "paths": "Attract (no status anim at infliction) + in-love check (status2animation)",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "targetGender": "female",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveUsedIsInLove+6",
+      "op": "status2animation",
+      "animation": "INFATUATION",
+      "path": "in-love check",
+      "battler": 1,
+      "row": 702,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 85,
+      "oamChanges": 86,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsInLove+12",
+       "return"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsInLove+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax ax soax ax soax ax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax ax soax ax soax soax soax soax soax soax soax soax soax sox so o x"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsInLove+6",
+      "op": "status2animation",
+      "animation": "INFATUATION",
+      "path": "in-love check",
+      "battler": 1,
+      "row": 1723,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 85,
+      "oamChanges": 86,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsInLove+12",
+       "return"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsInLove+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax ax soax ax soax ax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax ax soax ax soax soax soax soax soax soax soax soax soax sox so o x"
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveUsedIsInLove+6",
+      "op": "status2animation",
+      "animation": "INFATUATION",
+      "path": "in-love check",
+      "battler": 1,
+      "row": 298,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsInLove+12",
+       "return"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsInLove+0",
+      "window": ". . . . . x"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsInLove+6",
+      "op": "status2animation",
+      "animation": "INFATUATION",
+      "path": "in-love check",
+      "battler": 1,
+      "row": 1723,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsInLove+12",
+       "return"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsInLove+0",
+      "window": ". . . . . x"
+     }
+    ]
+   }
+  },
+  "sta123-confuse-ray-opp-primeape-onix": {
+   "move": 109,
+   "animation": "CONFUSION",
+   "paths": "move-inflicted (MoveEffectConfusion, chosenstatus2animation) + confusion self-check",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectConfusion+0",
+      "op": "chosenstatusanimation",
+      "animation": "CONFUSION",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 353,
+      "instrRows": 1,
+      "controllerRows": 100,
+      "activeRows": 99,
+      "firstActive": 0,
+      "lastActive": 98,
+      "screenChanges": 89,
+      "oamChanges": 90,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectConfusion+7",
+       "printstring"
+      ],
+      "printBefore": null,
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax ax ax ax ax x . ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsConfused+6",
+      "op": "status2animation",
+      "animation": "CONFUSION",
+      "path": "confusion self-check",
+      "battler": 0,
+      "row": 636,
+      "instrRows": 1,
+      "controllerRows": 100,
+      "activeRows": 99,
+      "firstActive": 0,
+      "lastActive": 98,
+      "screenChanges": 89,
+      "oamChanges": 90,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsConfused+12",
+       "jumpifbyte"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsConfused+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax ax ax ax ax x . o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsConfused+6",
+      "op": "status2animation",
+      "animation": "CONFUSION",
+      "path": "confusion self-check",
+      "battler": 0,
+      "row": 1725,
+      "instrRows": 1,
+      "controllerRows": 100,
+      "activeRows": 99,
+      "firstActive": 0,
+      "lastActive": 98,
+      "screenChanges": 89,
+      "oamChanges": 90,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsConfused+12",
+       "jumpifbyte"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsConfused+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax ax ax ax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectConfusion+0",
+      "op": "chosenstatusanimation",
+      "animation": "CONFUSION",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 114,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectConfusion+7",
+       "printstring"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsConfused+6",
+      "op": "status2animation",
+      "animation": "CONFUSION",
+      "path": "confusion self-check",
+      "battler": 0,
+      "row": 297,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsConfused+12",
+       "jumpifbyte"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsConfused+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsConfused+6",
+      "op": "status2animation",
+      "animation": "CONFUSION",
+      "path": "confusion self-check",
+      "battler": 0,
+      "row": 1725,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsConfused+12",
+       "jumpifbyte"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsConfused+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-confuse-ray-ply-primeape-onix": {
+   "move": 109,
+   "animation": "CONFUSION",
+   "paths": "move-inflicted (MoveEffectConfusion, chosenstatus2animation) + confusion self-check",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectConfusion+0",
+      "op": "chosenstatusanimation",
+      "animation": "CONFUSION",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 349,
+      "instrRows": 1,
+      "controllerRows": 100,
+      "activeRows": 99,
+      "firstActive": 0,
+      "lastActive": 98,
+      "screenChanges": 89,
+      "oamChanges": 90,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectConfusion+7",
+       "printstring"
+      ],
+      "printBefore": null,
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax ax ax ax ax x . ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsConfused+6",
+      "op": "status2animation",
+      "animation": "CONFUSION",
+      "path": "confusion self-check",
+      "battler": 1,
+      "row": 640,
+      "instrRows": 1,
+      "controllerRows": 100,
+      "activeRows": 99,
+      "firstActive": 0,
+      "lastActive": 98,
+      "screenChanges": 89,
+      "oamChanges": 90,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsConfused+12",
+       "jumpifbyte"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsConfused+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax ax ax ax ax x . o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsConfused+6",
+      "op": "status2animation",
+      "animation": "CONFUSION",
+      "path": "confusion self-check",
+      "battler": 1,
+      "row": 1729,
+      "instrRows": 1,
+      "controllerRows": 100,
+      "activeRows": 99,
+      "firstActive": 0,
+      "lastActive": 98,
+      "screenChanges": 89,
+      "oamChanges": 90,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsConfused+12",
+       "jumpifbyte"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsConfused+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax ax ax ax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectConfusion+0",
+      "op": "chosenstatusanimation",
+      "animation": "CONFUSION",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 110,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectConfusion+7",
+       "printstring"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsConfused+6",
+      "op": "status2animation",
+      "animation": "CONFUSION",
+      "path": "confusion self-check",
+      "battler": 1,
+      "row": 301,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsConfused+12",
+       "jumpifbyte"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsConfused+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsConfused+6",
+      "op": "status2animation",
+      "animation": "CONFUSION",
+      "path": "confusion self-check",
+      "battler": 1,
+      "row": 1729,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsConfused+12",
+       "jumpifbyte"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsConfused+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-curse-opp-gengar-onix": {
+   "move": 174,
+   "animation": "CURSED",
+   "paths": "Ghost Curse (no status anim at infliction) + end-turn curse tick (status2animation)",
+   "attackerSide": "opponent",
+   "attacker": "GENGAR",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_CurseTurnDmg+6",
+      "op": "status2animation",
+      "animation": "CURSED",
+      "path": "end-turn curse tick",
+      "battler": 0,
+      "row": 922,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_CurseTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_CurseTurnDmg+0",
+      "window": ". . . ax opax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     },
+     {
+      "label": "BattleScript_CurseTurnDmg+6",
+      "op": "status2animation",
+      "animation": "CURSED",
+      "path": "end-turn curse tick",
+      "battler": 0,
+      "row": 1894,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_CurseTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_CurseTurnDmg+0",
+      "window": ". . . ax oax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_CurseTurnDmg+6",
+      "op": "status2animation",
+      "animation": "CURSED",
+      "path": "end-turn curse tick",
+      "battler": 0,
+      "row": 580,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_CurseTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_CurseTurnDmg+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_CurseTurnDmg+6",
+      "op": "status2animation",
+      "animation": "CURSED",
+      "path": "end-turn curse tick",
+      "battler": 0,
+      "row": 1894,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_CurseTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_CurseTurnDmg+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-curse-ply-gengar-onix": {
+   "move": 174,
+   "animation": "CURSED",
+   "paths": "Ghost Curse (no status anim at infliction) + end-turn curse tick (status2animation)",
+   "attackerSide": "player",
+   "attacker": "GENGAR",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_CurseTurnDmg+6",
+      "op": "status2animation",
+      "animation": "CURSED",
+      "path": "end-turn curse tick",
+      "battler": 1,
+      "row": 922,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_CurseTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_CurseTurnDmg+0",
+      "window": ". . . ax opax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     },
+     {
+      "label": "BattleScript_CurseTurnDmg+6",
+      "op": "status2animation",
+      "animation": "CURSED",
+      "path": "end-turn curse tick",
+      "battler": 1,
+      "row": 1894,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_CurseTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_CurseTurnDmg+0",
+      "window": ". . . ax oax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_CurseTurnDmg+6",
+      "op": "status2animation",
+      "animation": "CURSED",
+      "path": "end-turn curse tick",
+      "battler": 1,
+      "row": 580,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_CurseTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_CurseTurnDmg+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_CurseTurnDmg+6",
+      "op": "status2animation",
+      "animation": "CURSED",
+      "path": "end-turn curse tick",
+      "battler": 1,
+      "row": 1894,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_CurseTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_CurseTurnDmg+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-ice-beam-opp-delcatty-shuckle": {
+   "animation": "FRZ",
+   "paths": "move-inflicted (MoveEffectFreeze, 10% Ice Beam) + frozen turns",
+   "attackerSide": "opponent",
+   "seed": 305419955,
+   "template": "tools/battle-lab/mechanic-ice-beam-opponent-delcatty-player-shuckle.json",
+   "extraTurns": 2,
+   "on": {
+    "rows": 2503,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectFreeze+0",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 973,
+      "instrRows": 1,
+      "controllerRows": 133,
+      "activeRows": 115,
+      "firstActive": 17,
+      "lastActive": 131,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveEffectFreeze+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . x x x x x x x x x x x x x x x x x ax oax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 0,
+      "row": 1302,
+      "instrRows": 1,
+      "controllerRows": 117,
+      "activeRows": 116,
+      "firstActive": 0,
+      "lastActive": 115,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . ax oax ax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 0,
+      "row": 2008,
+      "instrRows": 1,
+      "controllerRows": 117,
+      "activeRows": 116,
+      "firstActive": 0,
+      "lastActive": 115,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . ax oax ax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 2503,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectFreeze+0",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 801,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectFreeze+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 0,
+      "row": 997,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 0,
+      "row": 1836,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-ice-beam-ply-delcatty-shuckle": {
+   "animation": "FRZ",
+   "paths": "move-inflicted (MoveEffectFreeze, 10% Ice Beam) + frozen turns",
+   "attackerSide": "player",
+   "seed": 305419958,
+   "template": "tools/battle-lab/mechanic-ice-beam-player-delcatty-opponent-shuckle.json",
+   "extraTurns": 2,
+   "on": {
+    "rows": 2503,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectFreeze+0",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 334,
+      "instrRows": 1,
+      "controllerRows": 134,
+      "activeRows": 115,
+      "firstActive": 18,
+      "lastActive": 132,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveEffectFreeze+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . x x x x x x x x x x x x x x x x x x ax oax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 1,
+      "row": 672,
+      "instrRows": 1,
+      "controllerRows": 117,
+      "activeRows": 116,
+      "firstActive": 0,
+      "lastActive": 115,
+      "screenChanges": 24,
+      "oamChanges": 5,
+      "palChanges": 6,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . ax oax ax ax ax ax oax ax ax soax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax spax ax ax spax ax ax spax sax sax sax sax sax sax sax sax sax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax oax ax oax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 2503,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectFreeze+0",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 162,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectFreeze+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsFrozen+6",
+      "op": "statusanimation",
+      "animation": "FRZ",
+      "path": "frozen turn",
+      "battler": 1,
+      "row": 366,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsFrozen+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsFrozen+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-nightmare-opp-haunter-shuckle": {
+   "animation": "NIGHTMARE",
+   "paths": "Hypnosis + Nightmare (no status2 anim at infliction) + end-turn nightmare tick (status2animation) + sleep turns",
+   "attackerSide": "opponent",
+   "seed": 1,
+   "template": "tools/battle-lab/mechanic-nightmare-opponent-haunter-player-shuckle.json",
+   "extraTurns": 2,
+   "on": {
+    "rows": 3737,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 490,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 91,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax sopax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so sox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 1015,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 91,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax soax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so so ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 0,
+      "row": 1538,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 41,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . ax sopax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . so ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 3737,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 268,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 1015,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 0,
+      "row": 1303,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-nightmare-ply-haunter-shuckle": {
+   "animation": "NIGHTMARE",
+   "paths": "Hypnosis + Nightmare (no status2 anim at infliction) + end-turn nightmare tick (status2animation) + sleep turns",
+   "attackerSide": "player",
+   "seed": 1,
+   "template": "tools/battle-lab/mechanic-nightmare-player-haunter-opponent-shuckle.json",
+   "extraTurns": 2,
+   "on": {
+    "rows": 3769,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 245,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 538,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 1360,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 1569,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . ax opax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 2182,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 2391,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . ax opax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 3116,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 3325,
+      "instrRows": 1,
+      "controllerRows": 75,
+      "activeRows": 74,
+      "firstActive": 0,
+      "lastActive": 73,
+      "screenChanges": 40,
+      "oamChanges": 43,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . ax opax ax ax ax oax ax sax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax oax ax oax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 3769,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 107,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 303,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 1222,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 1334,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 2182,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 2294,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 3116,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_NightmareTurnDmg+6",
+      "op": "status2animation",
+      "animation": "NIGHTMARE",
+      "path": "end-turn nightmare tick",
+      "battler": 1,
+      "row": 3228,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_NightmareTurnDmg+12",
+       "goto"
+      ],
+      "printBefore": "BattleScript_NightmareTurnDmg+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-spore-opp-primeape-onix": {
+   "move": 147,
+   "animation": "SLP",
+   "paths": "move-inflicted (MoveEffectSleep) + sleep turns",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 3,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "on": {
+    "rows": 4303,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 285,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 565,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 1719,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 3153,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 4303,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 109,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 292,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 1719,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 0,
+      "row": 3153,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-spore-ply-primeape-onix": {
+   "move": 147,
+   "animation": "SLP",
+   "paths": "move-inflicted (MoveEffectSleep) + sleep turns",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 3,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "rows": 4303,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 281,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 569,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 1723,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 3157,
+      "instrRows": 1,
+      "controllerRows": 97,
+      "activeRows": 96,
+      "firstActive": 0,
+      "lastActive": 95,
+      "screenChanges": 90,
+      "oamChanges": 91,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . ax oax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax sox so o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 4303,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 105,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectSleep+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 296,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 1723,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "op": "statusanimation",
+      "animation": "SLP",
+      "path": "sleep turn",
+      "battler": 1,
+      "row": 3157,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsAsleep+8",
+       "goto"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-thunder-wave-opp-primeape-snorlax": {
+   "move": 86,
+   "animation": "PRZ",
+   "paths": "move-inflicted (MoveEffectParalysis) + can't move",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "turns": 4,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "on": {
+    "rows": 5737,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectParalysis+0",
+      "op": "statusanimation",
+      "animation": "PRZ",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 207,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 25,
+      "oamChanges": 26,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectParalysis+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax oax ax ax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax ax soax ax soax ax soax ax soax ax ax x so ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsParalyzed+6",
+      "op": "statusanimation",
+      "animation": "PRZ",
+      "path": "can't move",
+      "battler": 0,
+      "row": 1751,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 25,
+      "oamChanges": 26,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsParalyzed+8",
+       "various"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsParalyzed+0",
+      "window": ". . . ax opax ax ax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax ax soax ax soax ax soax ax soax ax ax x so o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 5737,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectParalysis+0",
+      "op": "statusanimation",
+      "animation": "PRZ",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 118,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectParalysis+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsParalyzed+6",
+      "op": "statusanimation",
+      "animation": "PRZ",
+      "path": "can't move",
+      "battler": 0,
+      "row": 1751,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsParalyzed+8",
+       "various"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsParalyzed+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-thunder-wave-ply-primeape-snorlax": {
+   "move": 86,
+   "animation": "PRZ",
+   "paths": "move-inflicted (MoveEffectParalysis) + can't move",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "turns": 4,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "rows": 5737,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectParalysis+0",
+      "op": "statusanimation",
+      "animation": "PRZ",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 203,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 25,
+      "oamChanges": 26,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectParalysis+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax oax ax ax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax ax soax ax soax ax soax ax soax ax ax x so ox sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsParalyzed+6",
+      "op": "statusanimation",
+      "animation": "PRZ",
+      "path": "can't move",
+      "battler": 1,
+      "row": 1755,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 25,
+      "oamChanges": 26,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveUsedIsParalyzed+8",
+       "various"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsParalyzed+0",
+      "window": ". . . ax opax ax ax ax soax soax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax ax soax ax soax ax soax ax soax ax soax ax ax x so o ."
+     }
+    ]
+   },
+   "off": {
+    "rows": 5737,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectParalysis+0",
+      "op": "statusanimation",
+      "animation": "PRZ",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 114,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectParalysis+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_MoveUsedIsParalyzed+6",
+      "op": "statusanimation",
+      "animation": "PRZ",
+      "path": "can't move",
+      "battler": 1,
+      "row": 1755,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveUsedIsParalyzed+8",
+       "various"
+      ],
+      "printBefore": "BattleScript_MoveUsedIsParalyzed+0",
+      "window": ". . . . . ."
+     }
+    ]
+   }
+  },
+  "sta123-toxic-opp-primeape-onix": {
+   "move": 92,
+   "animation": "PSN",
+   "paths": "move-inflicted (MoveEffectToxic) + end-turn toxic tick",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectToxic+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 312,
+      "instrRows": 1,
+      "controllerRows": 71,
+      "activeRows": 70,
+      "firstActive": 0,
+      "lastActive": 69,
+      "screenChanges": 27,
+      "oamChanges": 20,
+      "palChanges": 12,
+      "next": [
+       "BattleScript_MoveEffectToxic+2",
+       "printstring"
+      ],
+      "printBefore": null,
+      "window": ". . . ax oax soax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax ax soax ax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax ax ax ax ax ax ax ax ax ax ax ax ax x . ox sx"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "end-turn poison tick",
+      "battler": 0,
+      "row": 717,
+      "instrRows": 1,
+      "controllerRows": 71,
+      "activeRows": 70,
+      "firstActive": 0,
+      "lastActive": 69,
+      "screenChanges": 27,
+      "oamChanges": 20,
+      "palChanges": 12,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "window": ". . . ax oax soax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax ax soax ax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o x"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "end-turn poison tick",
+      "battler": 0,
+      "row": 1896,
+      "instrRows": 1,
+      "controllerRows": 71,
+      "activeRows": 70,
+      "firstActive": 0,
+      "lastActive": 69,
+      "screenChanges": 27,
+      "oamChanges": 20,
+      "palChanges": 12,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "window": ". . . ax oax soax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax ax soax ax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o x"
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectToxic+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 112,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectToxic+2",
+       "printstring"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "end-turn poison tick",
+      "battler": 0,
+      "row": 435,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "window": ". . . . . x"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "end-turn poison tick",
+      "battler": 0,
+      "row": 1885,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "window": ". . . . . x"
+     }
+    ]
+   }
+  },
+  "sta123-toxic-ply-primeape-onix": {
+   "move": 92,
+   "animation": "PSN",
+   "paths": "move-inflicted (MoveEffectToxic) + end-turn toxic tick",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectToxic+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 308,
+      "instrRows": 1,
+      "controllerRows": 71,
+      "activeRows": 70,
+      "firstActive": 0,
+      "lastActive": 69,
+      "screenChanges": 26,
+      "oamChanges": 19,
+      "palChanges": 12,
+      "next": [
+       "BattleScript_MoveEffectToxic+2",
+       "printstring"
+      ],
+      "printBefore": null,
+      "window": ". . . ax oax ax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax ax soax ax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax ax ax ax ax ax ax ax ax ax ax ax ax x . ox sx"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "end-turn poison tick",
+      "battler": 1,
+      "row": 720,
+      "instrRows": 1,
+      "controllerRows": 71,
+      "activeRows": 70,
+      "firstActive": 0,
+      "lastActive": 69,
+      "screenChanges": 27,
+      "oamChanges": 20,
+      "palChanges": 12,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "window": ". . . ax oax soax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax ax soax ax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o x"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "end-turn poison tick",
+      "battler": 1,
+      "row": 1900,
+      "instrRows": 1,
+      "controllerRows": 71,
+      "activeRows": 70,
+      "firstActive": 0,
+      "lastActive": 69,
+      "screenChanges": 27,
+      "oamChanges": 20,
+      "palChanges": 12,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "window": ". . . ax oax soax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax ax soax ax ax soax ax spax soax ax ax sopax ax ax soax spax ax soax ax spax soax ax ax sopax ax ax soax spax ax ax ax ax ax ax ax ax ax ax ax ax ax x . o x"
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectToxic+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 108,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectToxic+2",
+       "printstring"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "end-turn poison tick",
+      "battler": 1,
+      "row": 438,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "window": ". . . . . x"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "PSN",
+      "path": "end-turn poison tick",
+      "battler": 1,
+      "row": 1889,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "window": ". . . . . x"
+     }
+    ]
+   }
+  },
+  "sta123-will-o-wisp-opp-primeape-onix": {
+   "move": 261,
+   "animation": "BRN",
+   "paths": "move-inflicted (MoveEffectBurn) + end-turn burn tick",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectBurn+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 298,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 33,
+      "oamChanges": 34,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectBurn+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax x so ox sx"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "end-turn burn tick",
+      "battler": 0,
+      "row": 659,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 33,
+      "oamChanges": 34,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax x so o x"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "end-turn burn tick",
+      "battler": 0,
+      "row": 1864,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 33,
+      "oamChanges": 34,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax x so o x"
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectBurn+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "move-inflicted",
+      "battler": 0,
+      "row": 116,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectBurn+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "end-turn burn tick",
+      "battler": 0,
+      "row": 427,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "window": ". . . . . x"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "end-turn burn tick",
+      "battler": 0,
+      "row": 1853,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "window": ". . . . . x"
+     }
+    ]
+   }
+  },
+  "sta123-will-o-wisp-ply-primeape-onix": {
+   "move": 261,
+   "animation": "BRN",
+   "paths": "move-inflicted (MoveEffectBurn) + end-turn burn tick",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectBurn+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 295,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 33,
+      "oamChanges": 34,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_MoveEffectBurn+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax x so ox sx"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "end-turn burn tick",
+      "battler": 1,
+      "row": 665,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 33,
+      "oamChanges": 34,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax x so o x"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "end-turn burn tick",
+      "battler": 1,
+      "row": 1869,
+      "instrRows": 1,
+      "controllerRows": 39,
+      "activeRows": 38,
+      "firstActive": 0,
+      "lastActive": 37,
+      "screenChanges": 33,
+      "oamChanges": 34,
+      "palChanges": 1,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "window": ". . . ax opax ax ax ax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax soax x so o x"
+     }
+    ]
+   },
+   "off": {
+    "rows": 2869,
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectBurn+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "move-inflicted",
+      "battler": 1,
+      "row": 112,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_MoveEffectBurn+2",
+       "printfromtable"
+      ],
+      "printBefore": null,
+      "window": ". . . . x sx"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "end-turn burn tick",
+      "battler": 1,
+      "row": 432,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "window": ". . . . . x"
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "op": "statusanimation",
+      "animation": "BRN",
+      "path": "end-turn burn tick",
+      "battler": 1,
+      "row": 1858,
+      "instrRows": 1,
+      "controllerRows": 0,
+      "activeRows": 0,
+      "firstActive": null,
+      "lastActive": null,
+      "screenChanges": 0,
+      "oamChanges": 0,
+      "palChanges": 0,
+      "next": [
+       "BattleScript_DoTurnDmg+0",
+       "orword"
+      ],
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "window": ". . . . . x"
+     }
+    ]
+   }
+  }
+ },
+ "summary": {
+  "BRN|end-turn burn tick|opponent|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_DoTurnDmg"
+   ]
+  },
+  "BRN|end-turn burn tick|opponent|on": {
+   "n": 2,
+   "controllerRows": [
+    39
+   ],
+   "activeRows": [
+    38
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_DoTurnDmg"
+   ]
+  },
+  "BRN|end-turn burn tick|player|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_DoTurnDmg"
+   ]
+  },
+  "BRN|end-turn burn tick|player|on": {
+   "n": 2,
+   "controllerRows": [
+    39
+   ],
+   "activeRows": [
+    38
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_DoTurnDmg"
+   ]
+  },
+  "BRN|move-inflicted|opponent|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectBurn"
+   ]
+  },
+  "BRN|move-inflicted|opponent|on": {
+   "n": 1,
+   "controllerRows": [
+    39
+   ],
+   "activeRows": [
+    38
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectBurn"
+   ]
+  },
+  "BRN|move-inflicted|player|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectBurn"
+   ]
+  },
+  "BRN|move-inflicted|player|on": {
+   "n": 1,
+   "controllerRows": [
+    39
+   ],
+   "activeRows": [
+    38
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectBurn"
+   ]
+  },
+  "CONFUSION|confusion self-check|opponent|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsConfused"
+   ]
+  },
+  "CONFUSION|confusion self-check|opponent|on": {
+   "n": 2,
+   "controllerRows": [
+    100
+   ],
+   "activeRows": [
+    99
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsConfused"
+   ]
+  },
+  "CONFUSION|confusion self-check|player|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsConfused"
+   ]
+  },
+  "CONFUSION|confusion self-check|player|on": {
+   "n": 2,
+   "controllerRows": [
+    100
+   ],
+   "activeRows": [
+    99
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsConfused"
+   ]
+  },
+  "CONFUSION|move-inflicted|opponent|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectConfusion"
+   ]
+  },
+  "CONFUSION|move-inflicted|opponent|on": {
+   "n": 1,
+   "controllerRows": [
+    100
+   ],
+   "activeRows": [
+    99
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectConfusion"
+   ]
+  },
+  "CONFUSION|move-inflicted|player|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectConfusion"
+   ]
+  },
+  "CONFUSION|move-inflicted|player|on": {
+   "n": 1,
+   "controllerRows": [
+    100
+   ],
+   "activeRows": [
+    99
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectConfusion"
+   ]
+  },
+  "CURSED|end-turn curse tick|opponent|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_CurseTurnDmg"
+   ]
+  },
+  "CURSED|end-turn curse tick|opponent|on": {
+   "n": 2,
+   "controllerRows": [
+    75
+   ],
+   "activeRows": [
+    74
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_CurseTurnDmg"
+   ]
+  },
+  "CURSED|end-turn curse tick|player|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_CurseTurnDmg"
+   ]
+  },
+  "CURSED|end-turn curse tick|player|on": {
+   "n": 2,
+   "controllerRows": [
+    75
+   ],
+   "activeRows": [
+    74
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_CurseTurnDmg"
+   ]
+  },
+  "FRZ|frozen turn|opponent|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsFrozen"
+   ]
+  },
+  "FRZ|frozen turn|opponent|on": {
+   "n": 1,
+   "controllerRows": [
+    117
+   ],
+   "activeRows": [
+    116
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsFrozen"
+   ]
+  },
+  "FRZ|frozen turn|player|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsFrozen"
+   ]
+  },
+  "FRZ|frozen turn|player|on": {
+   "n": 2,
+   "controllerRows": [
+    117
+   ],
+   "activeRows": [
+    116
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsFrozen"
+   ]
+  },
+  "FRZ|move-inflicted|opponent|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectFreeze"
+   ]
+  },
+  "FRZ|move-inflicted|opponent|on": {
+   "n": 1,
+   "controllerRows": [
+    134
+   ],
+   "activeRows": [
+    115
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectFreeze"
+   ]
+  },
+  "FRZ|move-inflicted|player|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectFreeze"
+   ]
+  },
+  "FRZ|move-inflicted|player|on": {
+   "n": 1,
+   "controllerRows": [
+    133
+   ],
+   "activeRows": [
+    115
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectFreeze"
+   ]
+  },
+  "INFATUATION|in-love check|opponent|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsInLove"
+   ]
+  },
+  "INFATUATION|in-love check|opponent|on": {
+   "n": 2,
+   "controllerRows": [
+    97
+   ],
+   "activeRows": [
+    96
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsInLove"
+   ]
+  },
+  "INFATUATION|in-love check|player|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsInLove"
+   ]
+  },
+  "INFATUATION|in-love check|player|on": {
+   "n": 2,
+   "controllerRows": [
+    97
+   ],
+   "activeRows": [
+    96
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsInLove"
+   ]
+  },
+  "NIGHTMARE|end-turn nightmare tick|opponent|off": {
+   "n": 3,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_NightmareTurnDmg"
+   ]
+  },
+  "NIGHTMARE|end-turn nightmare tick|opponent|on": {
+   "n": 3,
+   "controllerRows": [
+    75
+   ],
+   "activeRows": [
+    74
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_NightmareTurnDmg"
+   ]
+  },
+  "NIGHTMARE|end-turn nightmare tick|player|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_NightmareTurnDmg"
+   ]
+  },
+  "NIGHTMARE|end-turn nightmare tick|player|on": {
+   "n": 1,
+   "controllerRows": [
+    75
+   ],
+   "activeRows": [
+    74
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_NightmareTurnDmg"
+   ]
+  },
+  "PRZ|can't move|opponent|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsParalyzed"
+   ]
+  },
+  "PRZ|can't move|opponent|on": {
+   "n": 1,
+   "controllerRows": [
+    39
+   ],
+   "activeRows": [
+    38
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsParalyzed"
+   ]
+  },
+  "PRZ|can't move|player|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsParalyzed"
+   ]
+  },
+  "PRZ|can't move|player|on": {
+   "n": 1,
+   "controllerRows": [
+    39
+   ],
+   "activeRows": [
+    38
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsParalyzed"
+   ]
+  },
+  "PRZ|move-inflicted|opponent|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectParalysis"
+   ]
+  },
+  "PRZ|move-inflicted|opponent|on": {
+   "n": 1,
+   "controllerRows": [
+    39
+   ],
+   "activeRows": [
+    38
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectParalysis"
+   ]
+  },
+  "PRZ|move-inflicted|player|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectParalysis"
+   ]
+  },
+  "PRZ|move-inflicted|player|on": {
+   "n": 1,
+   "controllerRows": [
+    39
+   ],
+   "activeRows": [
+    38
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectParalysis"
+   ]
+  },
+  "PSN|end-turn poison tick|opponent|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_DoTurnDmg"
+   ]
+  },
+  "PSN|end-turn poison tick|opponent|on": {
+   "n": 2,
+   "controllerRows": [
+    71
+   ],
+   "activeRows": [
+    70
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_DoTurnDmg"
+   ]
+  },
+  "PSN|end-turn poison tick|player|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_DoTurnDmg"
+   ]
+  },
+  "PSN|end-turn poison tick|player|on": {
+   "n": 2,
+   "controllerRows": [
+    71
+   ],
+   "activeRows": [
+    70
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_DoTurnDmg"
+   ]
+  },
+  "PSN|move-inflicted|opponent|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectToxic"
+   ]
+  },
+  "PSN|move-inflicted|opponent|on": {
+   "n": 1,
+   "controllerRows": [
+    71
+   ],
+   "activeRows": [
+    70
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectToxic"
+   ]
+  },
+  "PSN|move-inflicted|player|off": {
+   "n": 1,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectToxic"
+   ]
+  },
+  "PSN|move-inflicted|player|on": {
+   "n": 1,
+   "controllerRows": [
+    71
+   ],
+   "activeRows": [
+    70
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectToxic"
+   ]
+  },
+  "SLP|move-inflicted|opponent|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectSleep"
+   ]
+  },
+  "SLP|move-inflicted|opponent|on": {
+   "n": 2,
+   "controllerRows": [
+    97
+   ],
+   "activeRows": [
+    96
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectSleep"
+   ]
+  },
+  "SLP|move-inflicted|player|off": {
+   "n": 2,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectSleep"
+   ]
+  },
+  "SLP|move-inflicted|player|on": {
+   "n": 2,
+   "controllerRows": [
+    97
+   ],
+   "activeRows": [
+    96
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveEffectSleep"
+   ]
+  },
+  "SLP|sleep turn|opponent|off": {
+   "n": 7,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsAsleep"
+   ]
+  },
+  "SLP|sleep turn|opponent|on": {
+   "n": 7,
+   "controllerRows": [
+    97
+   ],
+   "activeRows": [
+    96
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsAsleep"
+   ]
+  },
+  "SLP|sleep turn|player|off": {
+   "n": 4,
+   "controllerRows": [
+    0
+   ],
+   "activeRows": [
+    0
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsAsleep"
+   ]
+  },
+  "SLP|sleep turn|player|on": {
+   "n": 4,
+   "controllerRows": [
+    97
+   ],
+   "activeRows": [
+    96
+   ],
+   "instrRows": [
+    1
+   ],
+   "next": [
+    "BattleScript_MoveUsedIsAsleep"
+   ]
+  }
+ }
+}
