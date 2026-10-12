@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """olnd113: the live receipt (tools/integration/fixtures/olnd113-live-receipt.json) from an olnd113Run.sh --census out-dir.
 
-usage: olnd113Receipt.py <out-dir> <final-sha> <out.json>
+usage: olnd113Receipt.py <out-dir> <final-src-tree> <out.json>   (the final rev's `git rev-parse <rev>:workspace/src`)
 Collects: the lead-adjusted rule check + joint target (olnd113-verify.json); the ROM receipt digests (rom-r1.json sha256, == off108's);
 Scene ON census (liveShareCensus 0..999, base bce86a4b0 vs final; hist73Merge overall live share per tree; off108CensusDelta.py
 sceneOn: status / frame changes, KEY mismatches, digests); Scene OFF census (off108Route 0..999: inserted pauses / holds per class)
@@ -10,7 +10,7 @@ landed lead(STATS_CHANGE) = 1: + 1 frame per STATS_CHANGE-next pause, counts unc
 """
 import hashlib, json, os, sys
 
-out_dir, final_sha, out_path = sys.argv[1:4]
+out_dir, final_src, out_path = sys.argv[1:4]
 J = lambda *p: json.load(open(os.path.join(out_dir, *p)))
 v, cd = J("olnd113-verify.json"), J("census-delta.json")
 off108 = json.load(open("tools/integration/fixtures/off108/census-delta.json"))
@@ -37,7 +37,7 @@ for k in sorted(set(o108["holdsByLabel"]) | set(off["holdsByLabel"])):
                 "final": [off["holdsByLabel"].get(k, 0), off["holdFramesByLabel"].get(k, 0)]}
 res = {
     "schema": "olnd113-live-receipt/v1",
-    "base": "bce86a4b0", "final": final_sha,
+    "base": "bce86a4b0", "baseSrc": "94a7f48b3", "finalSrc": final_src,
     "leadStatsChange": 1,
     "romR1Sha256": hashlib.sha256(open(os.path.join(out_dir, "rom-r1.json"), "rb").read()).hexdigest(),
     "ruleCheck": {"off": [v["off"]["finalZeroResidual"], v["off"]["checked"]], "on": [v["on"]["finalZeroResidual"], v["on"]["checked"]],

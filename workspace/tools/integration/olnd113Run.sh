@@ -108,7 +108,7 @@ if [ "$CENSUS" = "--census" ]; then
   done
   python3 tools/integration/off108CensusDelta.py "$OUT/census-base" "$OUT/census-final" "$OUT/offcensus-base" "$OUT/offcensus-final" \
     "$OUT/census-delta.json" | head -1
-  python3 tools/integration/olnd113Receipt.py "$OUT" "$FINAL_SHA" "$OUT/olnd113-live-receipt.json"
+  python3 tools/integration/olnd113Receipt.py "$OUT" "$(git rev-parse "$FINAL_SHA:workspace/src")" "$OUT/olnd113-live-receipt.json"
   if [ -f tools/integration/fixtures/olnd113-live-receipt.json ]; then
     check tools/integration/fixtures/olnd113-live-receipt.json "$OUT/olnd113-live-receipt.json" "olnd113-live-receipt.json"
   fi
