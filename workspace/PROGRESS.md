@@ -22,11 +22,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   commands +3 / +5); shp116 (shadow105 lead-row shadow, Shadow Punch D4, its shadow-return defect); fix114 / fix122 (live defects from
   audits 25 / 26: Taunt marks, Harden idle rest, Swagger picture height, Struggle target x2, Scene ON "But it failed!" hold — 12 classes).
 - **Did (tooling):** soak111 decoupled the soak player's press stream from its decisions (presentation length no longer re-rolls soak
-  games; ISSUES #89 pin -> seed 226). Its sticky post-win roll hung full seed 25 on the unselectable REST (wind-down gate) -> fixed
-  `7d04d2686` (seed 25 OK; soak tests 70 / 70).
-- **Soak gates (S10A scoped policy does not require them; run because the soak driver changed):** vanilla 0:20 **20 / 20 OK**; full 0:60
-  **59 / 60** on the pre-fix driver (the one HANG = seed 25, the driver bug above; rerun on the fix: OK); winning 0:60 / winning-swap 0:60
-  see the ledger (ANIMATION_INTEGRATION_PROGRESS.md top entry); varied-RNG fifth gate on the fixed driver: winning carry 0 / 14 / 28
+  games; ISSUES #89 pin -> seed 226). Its sticky post-win roll hung 5 wind-down soak seeds on the no-op RECORD / REST choices -> fixed
+  `7d04d2686` + `bd7780162` (all 5 seeds OK; soak tests 70 / 70).
+- **Soak gates (S10A scoped policy does not require them; run because the soak driver changed):** vanilla 0:20 **20 / 20 OK**; on the
+  pre-fix driver full 0:60 59 / 60, winning 57 / 60, winning-swap 59 / 60 (all HANGs = the driver bug above; each rerun OK on the fix);
+  confirmation reruns of the 0:60 gates on the fixed driver: see the ledger (ANIMATION_INTEGRATION_PROGRESS.md top entry); varied-RNG fifth gate on the fixed driver: winning carry 0 / 14 / 28
   **100 / 100 each**, winning-swap carry 0 **100 / 100**.
 - **Next:** ROADMAP S10A resume points — ISSUES #168 Scene ON status animations (prep pack DONE: docs/sta123-status-animations-design.md,
   slices SA1..SA10), remaining fallbacks (Odor Sleuth / Hyper Beam order plans), #166 / #167 remainders, regenerate the app-only trace.

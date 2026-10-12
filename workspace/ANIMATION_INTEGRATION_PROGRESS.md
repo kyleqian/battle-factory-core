@@ -11,9 +11,11 @@
 - sta123 (SIDE, Opus, new files only, merged `553af4343`): ISSUES #168 prep pack — 9 / 9 B_ANIM_STATUS_* on the ROM both sides (PSN 71,
   CONFUSION 100, BRN 39, INFATUATION 97, SLP 97, PRZ 39, FRZ 117 (133-134 after Ice Beam: the controller waits for battle SEs), CURSE 75,
   NIGHTMARE 75 rows; Scene OFF skips all), census 8,080 occurrences, none drawn; slices SA1..SA10. Supervisor: sta123Run.sh ALL SAME.
-- Soak (S10A's scoped policy does not require it; run because soak111 changed the driver): vanilla 0:20 20 / 20 OK; full 0:60 59 / 60 —
-  the HANG (seed 25 @ postwin:page0) was soak111's sticky post-win roll choosing the unselectable REST forever -> fixed `7d04d2686`
-  (re-draw after every A on REST; seed 25 OK; soak tests 70 / 70). Fifth gate on the fixed driver (src `b4befa039`): winning --vary-rng
+- Soak (S10A's scoped policy does not require it; run because soak111 changed the driver), first pass on `d6444bd53` (pre-fix driver):
+  vanilla 0:20 **20 / 20 OK**; full 0:60 59 / 60, winning 0:60 57 / 60, winning-swap 0:60 59 / 60 — every HANG `@ postwin:page0`: soak111's
+  sticky post-win roll (keyed by menu + cursor) chose a deliberate no-op (REST: full 25, winning 4 / 27 / 48; RECORD: winning-swap 17) and
+  pressed A forever. Fixed `7d04d2686` + `bd7780162` (re-draw after every A on RECORD / REST); all five seeds rerun OK (winning 4 / 27 / 48
+  and winning-swap 17 reach carry 14 at the 1,000,000-frame budget); soak tests 70 / 70, no pin moved. Fifth gate on the fixed driver (src `b4befa039`): winning --vary-rng
   --first-round carry 0 / 14 / 28 **100 / 100 each**, winning-swap carry 0 **100 / 100** (0 CRASH / 0 HANG).
 
 - Session start: master `52c181d54`, production src `14d1be159` == the 2026-10-10 night final gates' tree -> baseline receipt reused.
