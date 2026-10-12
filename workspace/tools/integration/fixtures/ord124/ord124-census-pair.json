@@ -1,0 +1,47 @@
+{
+ "battleDigest": "7fe744ffe7d7b6eca225fdc6682814f3f8cb96f87ed5790aa77380a1cbf39bbd",
+ "battleDigestIdentical": true,
+ "commandKeyDigest": "69c8f19a17ce63d991d015e26aeaa2c6b14c5e67c4ae398e398cefa950e4c8fe",
+ "commandKeyDigestIdentical": true,
+ "commands": [
+  27426,
+  27426
+ ],
+ "frames": [
+  4160787,
+  4160787
+ ],
+ "framesIdenticalPerCommand": true,
+ "keysIdentical": true,
+ "lifted": {
+  "beforeDetail": {
+   "order host: no EXACT plan: body 316:player": 106
+  },
+  "byBattleMoveSide": {
+   "705 165:opponent": 18,
+   "705 165:player": 83,
+   "705 254:opponent": 5
+  },
+  "commands": 106,
+  "frames": 11832
+ },
+ "live": [
+  27139,
+  27245
+ ],
+ "liveFramePct": [
+  99.32,
+  99.6
+ ],
+ "liveFrames": [
+  4132330,
+  4144162
+ ],
+ "livePct": [
+  98.95,
+  99.34
+ ],
+ "otherStatusChanges": [],
+ "schema": "ord124-census-pair/v1",
+ "shardBattleDigestsIdentical": true
+}

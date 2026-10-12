@@ -1,4 +1,4 @@
-// ord124 (docs/ord124-order-plans.md): per-window ROM check of the computed Odor Sleuth 316 plan rows (fixtures/ord124/ord124-plan-rows.json,
+// ord124 (docs/ord124-order-plans.md): per-window ROM check of the ord124 plan rows (computed Odor Sleuth 316, observed False Swipe 206) (fixtures/ord124/ord124-plan-rows.json,
 // rendered to text exactly as spriteOrderProductionTable.ts does) against direct-mGBA unit receipts (plans69Extract.py / ord124Extract.py):
 // the production cursor (applySpriteOrderUnitPlan over decodeSpriteOrderPlan) runs from the ROM F at the unit start, and the created /
 // destroyed slots and the free order F must equal the ROM after every allocation window (plans69Check.ts checkUnit, per frame, no merging).
@@ -61,8 +61,8 @@ for (const file of process.argv.slice(3)) {
     let seen = 0;
     job.units.forEach((unit, index) => {
       if (unit.kind !== "body" || unit.truncated) return;
-      const m = /^body (316|63):(player|opponent)$/.exec(unit.label);
-      if (!m) return;
+      const m = /^body (\d+):(player|opponent)$/.exec(unit.label);
+      if (!m || (m[1] !== "63" && texts[`${m[1]}:${m[2]}`] === undefined)) return;
       const key = `${m[1]}:${m[2]}`;
       if (m[1] === "63") {
         (hyperBeam[key] ??= []).push(`${name}@${unit.frame}`);
@@ -74,8 +74,8 @@ for (const file of process.argv.slice(3)) {
       const problems = checkUnit(unit, texts[key]!);
       entry.instances += 1;
       if (seen++ === 0) entry.firstBodies += 1; else entry.laterBodies += 1;
-      const lend = unit.F0.slice(0, 2).join(",");
-      entry.byLend[`F0 [${lend},..] -> ${unit.plan.split(";")[5]}`] = (entry.byLend[`F0 [${lend},..] -> ${unit.plan.split(";")[5]}`] ?? 0) + 1;
+      const lend = `F0 [${unit.F0.slice(0, 2).join(",")},..]${m[1] === "316" ? ` -> ${unit.plan.split(";")[5]}` : ""}`;
+      entry.byLend[lend] = (entry.byLend[lend] ?? 0) + 1;
       entry.observed[unit.plan] = (entry.observed[unit.plan] ?? 0) + 1;
       if (problems.length === 0) entry.exact += 1; else entry.mismatches.push(`${file.split("/").pop()} ${name}@${unit.frame}: ${problems.join(" | ")}`);
     });

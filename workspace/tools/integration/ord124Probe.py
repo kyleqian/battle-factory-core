@@ -24,6 +24,12 @@ for side, other, tag in SIDES:
     for a, d, seed in ((345, 95, 7), (143, 42, 11), (345, 6, 0), (345, 25, 7), (143, 94, 11), (345, 248, 0)):
         JOBS.append(("ODOR_SLEUTH", f"ord124-os-{tag}-{a}-{d}-s{seed}", 316, P69.base("mega-punch", side, "cacturne"),
                      (("species", side, a), ("species", other, d), ("moves", side, 316), ("seed", seed), ("turns", 2))))
+# False Swipe 206 (rung 3: census battle 705's next host invalidation after the Odor Sleuth body, also Metronome-called): attacker knows
+# only False Swipe (it never KOs), first + later bodies, both sides, three targets, seeds pinned
+for side, other, tag in SIDES:
+    for a, d, seed in ((345, 95, 7), (143, 42, 11), (345, 202, 0)):
+        JOBS.append(("FALSE_SWIPE", f"ord124-fs-{tag}-{a}-{d}-s{seed}", 206, P69.base("mega-punch", side, "cacturne"),
+                     (("species", side, a), ("species", other, d), ("moves", side, 206), ("seed", seed), ("turns", 2))))
 # Hyper Beam 63 + its recharge turn (no body): the Aerodactyl scenarios, one more turn, pinned seed 5
 for side, other, tag in SIDES:
     JOBS.append(("HYPER_BEAM", f"ord124-hb-{tag}-142-95-s5", 63, P69.base("hyper-beam", side, "aerodactyl"), (("seed", 5), ("turns", 1))))

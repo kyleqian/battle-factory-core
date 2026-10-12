@@ -1,6 +1,8 @@
 {
  "schema": "ord124-check/v1",
  "planTexts": {
+  "206:opponent": "Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;D3;D4;D5;D6;D0;Cf;D7",
+  "206:player": "Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;D3;D4;D5;D6;D0;Cf;D7",
   "316:opponent": "Cff;Cf;Cf;D2;D3;D0,1/P542,542;Cf;D4",
   "316:player": "Cff;Cf;Cf;D2;D3;D0,1/P552,552;Cf;D4"
  },
@@ -33,6 +35,34 @@
    "observed": {
     "Cff;Cf;Cf;D2;D3;D0,1;Cf;D4": 16,
     "Cff;Cf;Cf;D2;D3;D1,0;Cf;D4": 13
+   },
+   "mismatches": []
+  },
+  "206:opponent": {
+   "instances": 9,
+   "exact": 9,
+   "firstBodies": 3,
+   "laterBodies": 6,
+   "byLend": {
+    "F0 [3,4,..]": 7,
+    "F0 [4,3,..]": 2
+   },
+   "observed": {
+    "Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;D3;D4;D5;D6;D0;Cf;D7": 9
+   },
+   "mismatches": []
+  },
+  "206:player": {
+   "instances": 9,
+   "exact": 9,
+   "firstBodies": 3,
+   "laterBodies": 6,
+   "byLend": {
+    "F0 [3,4,..]": 7,
+    "F0 [4,3,..]": 2
+   },
+   "observed": {
+    "Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;D3;D4;D5;D6;D0;Cf;D7": 9
    },
    "mismatches": []
   }
