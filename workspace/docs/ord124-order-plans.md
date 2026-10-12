@@ -150,7 +150,8 @@ rows), identically in base and patched. That is either a live Mega Punch defect 
 artefact of the routes' first window. It was not investigated: it is outside this step.
 
 **Fold pins.** In the patched copy, the 9 sprite-order test files pass **70 / 70** with `ord124-fold-test-pins.diff` applied. Without
-it, exactly 1 test fails: the table length pin. The full `npm test` result for the patched copy is in the final message.
+it, exactly 1 test fails: the table length pin. **Full `npm test` in the patched copy (diff + fold pins): 1,639 files passed / 44 skipped,
+13,532 tests passed / 223 skipped.**
 
 ## 4. FOLD INSTRUCTIONS (land step)
 
