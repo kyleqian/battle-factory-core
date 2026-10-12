@@ -132,3 +132,8 @@ Gates (archive copy of `f43e580a5`, the tools-only tip before the receipts / doc
 directory-scanning tests (`gate6CoverageManifest`, `aud56GeneralAnimationAllocator`, `land75WallRoutes`) 3 files / 32 passed.
 `npm run build` green. The full `npm test` was not run, because the brief forbids the full suite on the live checkout. No `src/` or `tests/`
 file changed, so the suite's inputs are 396308f86's. `git diff --check` clean.
+
+**Master moved during the audit** (scf117 + shp116 merged; scf117 adds source-derived x2 tracker rows and the post-stats-change message
+alignment, which targets the known TIMING-PHASE rows 8 / 12). On the tip `3c4fdd598`, neither DEFECT is fixed by source: the x2 tracker
+has no 165 row, and `sourcePauseUsedMoveHoldFrames` has no attackanimation case. Both banked patches pass `git apply --check` on that tip's
+`src/`. All measurements above are on the fixed base 396308f86. The tip was not re-probed.
