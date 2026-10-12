@@ -86,7 +86,7 @@ describe("sdl119: Struggle 165 Substitute-doll cells", () => {
     expect(rows.map((l) => /rows=(\d+)/.exec(l)![1])).toEqual(rows.map((l) => (l.includes(" player ") ? "197" : "193")));
     const receipt = JSON.parse(readFileSync("tools/integration/fixtures/sdl119-live-receipt.json", "utf8"));
     expect(receipt.rung2.defenderDollWindows).toEqual({ live: 5, zeroPx: 5 });
-    expect(receipt.rung2.attackerDollWindows).toEqual({ live: 6, zeroPx: 6 });
+    expect(receipt.rung2.attackerDollWindows).toMatchObject({ live: 6, zeroPx: 6, compositeRows: { player: 197, opponent: 193 } });
     expect(receipt.rung1.dollFreeLiveWindows).toEqual({ live: 54, zeroPx: 54 });
   });
 });
