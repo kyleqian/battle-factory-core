@@ -1,0 +1,53 @@
+{
+ "schema": "aud118-substitute/v1",
+ "issue": "#153",
+ "rom_off": {
+  "G": 66,
+  "waitanimation": [
+   6,
+   90
+  ],
+  "waitanimationChanges": 40,
+  "hpFirstChange": 98,
+  "messageFirstGlyph": 140
+ },
+ "rom_on": {
+  "G": 66,
+  "waitanimation": [
+   6,
+   90
+  ],
+  "waitanimationChanges": 40,
+  "hpFirstChange": 98,
+  "messageFirstGlyph": 140
+ },
+ "production": [
+  {
+   "commands": [
+    [
+     "move-animation",
+     40,
+     null
+    ],
+    [
+     "hp",
+     28,
+     null
+    ],
+    [
+     "message",
+     24,
+     64
+    ]
+   ],
+   "uses": 16,
+   "starts": {
+    "move-animation": 0,
+    "hp": 40,
+    "message": 68
+   },
+   "residualHpBar": -57,
+   "residualMessage": -71
+  }
+ ]
+}

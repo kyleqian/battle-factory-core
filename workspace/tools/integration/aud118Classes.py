@@ -16,6 +16,8 @@ AUD118_CASES = '''CASES = [
     ("field (Mist)", "aud118-mist-ply-primeape-onix", 0, 0, 54),
     ("status (Spore)", "aud118-spore-ply-primeape-snorlax", 0, 0, 147),
     ("doll (Substitute)", "aud118-substitute-ply-primeape-onix", 0, 0, 164),
+    ("failed (Light Screen again: But it failed!)", "aud118-light-screen-twice-ply-primeape-onix", 0, 1, 113),
+    ("failed (Reflect again: But it failed!)", "aud118-reflect-twice-ply-primeape-onix", 0, 1, 115),
 ]
 '''
 src = Path(__file__).with_name("off108Classes.py").read_text()

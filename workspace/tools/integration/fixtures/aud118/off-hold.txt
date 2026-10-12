@@ -1,0 +1,2 @@
+{"off": {"113": {"residuals": {"0": 33}, "romGlyph": 41}, "115": {"residuals": {"0": 2}, "romGlyph": 40}}, "on": {"113": {"residuals": {"-40": 33}, "romGlyph": 41}, "115": {"residuals": {"-39": 2}, "romGlyph": 40}}, "routes": "routes"}
+{"off": {"113": {"residuals": {"0": 33}, "romGlyph": 41}, "115": {"residuals": {"0": 2}, "romGlyph": 40}}, "on": {"113": {"residuals": {"0": 33}, "romGlyph": 41}, "115": {"residuals": {"0": 2}, "romGlyph": 40}}, "routes": "routes-patched"}

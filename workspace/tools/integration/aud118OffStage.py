@@ -5,6 +5,8 @@ lead's species (Tackle x4), the explicit lab seed 305419897 and the final idle c
   stat self:   Swords Dance 14 (up2 ATK), Agility 97 (up2 SPEED)        stat target: Leer 43 (down1 DEF), Screech 103 (down2 DEF)
   screens:     Light Screen 113, Reflect 115                            field:       Haze 114, Mist 54
   sleep:       Spore 147 (100 % accurate)                               doll:        Substitute 164
+  hold:        Light Screen / Reflect used on TWO turns: the second use runs BattleScript_ButItFailed (the MoveMissedPause-class hold,
+               both scenes); turn 2 repeats the template's FIGHT -> A input
 usage: aud118OffStage.py <out-dir>   (also writes <out-dir>/../scenario-index.json)
 """
 import copy, json, os, sys
@@ -27,6 +29,8 @@ CASES = [  # (slug, move id, class, attacker side, attacker, target, seed, final
     ("mist", 54, "field", "player", "PRIMEAPE", "ONIX", S0, 700),
     ("spore", 147, "status", "player", "PRIMEAPE", "SNORLAX", S0, 700),
     ("substitute", 164, "doll", "player", "PRIMEAPE", "ONIX", S0, 700),
+    ("light-screen-twice", 113, "failed", "player", "PRIMEAPE", "ONIX", S0, 700),
+    ("reflect-twice", 115, "failed", "player", "PRIMEAPE", "ONIX", S0, 700),
 ]
 index = {}
 for slug, move, cls, side, atk, tgt, seed, idle in CASES:
@@ -40,6 +44,8 @@ for slug, move, cls, side, atk, tgt, seed, idle in CASES:
     segs = d["trace"]["segments"]
     assert segs[-1] == {"frames": 700, "buttons": []}, segs[-1]
     segs[-1]["frames"] = idle
+    if slug.endswith("-twice"):
+        segs.extend(copy.deepcopy(segs))
     d["trace"]["captureFrames"] = [0, sum(s["frames"] for s in segs)]
     d["seed"] = seed
     name = f"aud118-{slug}-{'ply' if side == 'player' else 'opp'}-{atk.lower()}-{tgt.lower()}.json"
