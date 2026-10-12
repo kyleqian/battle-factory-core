@@ -7,12 +7,15 @@ Pointer runs (gBattlescriptCurrInstr constant) are labelled with the battle-scri
 name (include/constants/battle_script_commands.h enum order; the ROM byte at the pointer). An instruction that emits
 BtlController_EmitSetMonData(REQUEST_STATUS_BATTLE) -- seteffectprimary / seteffectsecondary / seteffectwithchance (SetMoveEffect),
 attackcanceler (effect 2: sleep / freeze turns), cleareffectsonfaint, trysetrest, moveend (MOVEEND item cures) -- starts an "event" when the next print
-(printstring / printfromtable) follows it with no other print in between. Per event: S = the status instruction's first row, P = the
+(printstring / printfromtable) follows it with no other print in between. Per event: S = the status instruction's first row,
+Sexec = its last row (the row it executes on: cleareffectsonfaint / moveend first wait on the controller), G = the last "X used Y!"
+final glyph before S (off108Rom.py's anchor), P = the
 print's first row, F = the first screen change after P (the print's first glyph; a faint's last healthbox / sprite change lands on P
 itself), the runs from S to P (label, opcode, start - S,
 length), and the status animation run between S and the print or after its waitmessage (statusanimation's length, gAnimScriptActive rows
 and screen changes: Scene ON plays B_ANIM_STATUS_*, Scene OFF skips it). Also every statusanimation run in the probe (ticks, sleep
-turns, paralysis): its rows, active rows, screen changes, and the label of the print before it.
+turns, paralysis): its rows, active rows, screen changes, the label of the print before it, and the controller rows after it
+(gBattleControllerExecFlags set: the B_ANIM_STATUS_* playback in Scene ON) with their gAnimScriptActive rows and screen changes.
 """
 import bisect, json, os, re, sys
 
@@ -71,8 +74,15 @@ def analyse(rows):
         o = op(rows[f]["ptr"])
         if o == "statusanimation":
             prev = next((lab(rows[rr[k][0]]["ptr"]) for k in range(i - 1, max(-1, i - 12), -1) if op(rows[rr[k][0]]["ptr"]) in PRINT_OPS), None)
+            # The controller plays the animation after the instruction advances: count the rows from the next one while
+            # gBattleControllerExecFlags stays set (Scene ON: B_ANIM_STATUS_*; Scene OFF: nothing was emitted).
+            h = g + 1
+            while h < len(rows) and rows[h]["exec"]:
+                h += 1
             anims.append({"label": lab(rows[f]["ptr"]), "row": f, "rows": g - f + 1, "activeRows": sum(1 for x in range(f, g + 1) if rows[x]["act"]),
-                          "screenChanges": sum(1 for x in changes if f <= x <= g), "printBefore": prev})
+                          "screenChanges": sum(1 for x in changes if f <= x <= g), "printBefore": prev,
+                          "controllerRows": h - g - 1, "controllerActiveRows": sum(1 for x in range(g + 1, h) if rows[x]["act"]),
+                          "controllerScreenChanges": sum(1 for x in changes if g + 1 <= x < h)})
         if o not in STATUS_OPS:
             continue
         for k in range(i + 1, min(len(rr), i + 60)):

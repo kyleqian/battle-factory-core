@@ -308,7 +308,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
      }
     ]
    },
@@ -434,7 +437,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      }
     ]
    }
@@ -942,7 +948,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -950,7 +959,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -958,7 +970,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -966,7 +981,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
      }
     ]
    },
@@ -1464,7 +1482,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -1472,7 +1493,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -1480,7 +1504,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -1488,7 +1515,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      }
     ]
    }
@@ -1996,7 +2026,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -2004,7 +2037,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -2012,7 +2048,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -2020,7 +2059,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
      }
     ]
    },
@@ -2518,7 +2560,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -2526,7 +2571,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -2534,7 +2582,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_MoveUsedIsAsleep+6",
@@ -2542,7 +2593,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsAsleep+0"
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      }
     ]
    }
@@ -3004,7 +3058,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 25
      },
      {
       "label": "BattleScript_MoveUsedIsParalyzed+6",
@@ -3012,7 +3069,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsParalyzed+0"
+      "printBefore": "BattleScript_MoveUsedIsParalyzed+0",
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 25
      }
     ]
    },
@@ -3464,7 +3524,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_MoveUsedIsParalyzed+6",
@@ -3472,7 +3535,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_MoveUsedIsParalyzed+0"
+      "printBefore": "BattleScript_MoveUsedIsParalyzed+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      }
     ]
    }
@@ -3755,7 +3821,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -3763,7 +3832,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_PoisonTurnDmg+0"
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -3771,7 +3843,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_PoisonTurnDmg+0"
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
      }
     ]
    },
@@ -4044,7 +4119,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -4052,7 +4130,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_PoisonTurnDmg+0"
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -4060,7 +4141,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_PoisonTurnDmg+0"
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      }
     ]
    }
@@ -4343,7 +4427,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 26
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -4351,7 +4438,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_PoisonTurnDmg+0"
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -4359,7 +4449,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_PoisonTurnDmg+0"
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
      }
     ]
    },
@@ -4632,7 +4725,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -4640,7 +4736,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_PoisonTurnDmg+0"
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -4648,7 +4747,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_PoisonTurnDmg+0"
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      }
     ]
    }
@@ -4913,7 +5015,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 33
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -4921,7 +5026,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_BurnTurnDmg+0"
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 33
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -4929,7 +5037,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_BurnTurnDmg+0"
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 33
      }
     ]
    },
@@ -5184,7 +5295,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": null
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -5192,7 +5306,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_BurnTurnDmg+0"
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      },
      {
       "label": "BattleScript_DoStatusTurnDmg+0",
@@ -5200,7 +5317,10 @@
       "rows": 1,
       "activeRows": 0,
       "screenChanges": 0,
-      "printBefore": "BattleScript_BurnTurnDmg+0"
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
      }
     ]
    }
