@@ -27,6 +27,20 @@
 - Live audit 25 (aud110, MAIN lane, Sonnet, new files only): stg107's Taunt / Harden flags are window-alignment ARTIFACTS; widening
   found 3 live DEFECTS with banked patches (Taunt marks behind a player target, Harden ignores an opponent attacker's idle rest, Swagger
   hard-codes RATTATA's picture height) -> fix114.
+- fix114 (MAIN lane, Opus, on master `6a6978eb6` .. `0a0d5000f`, src `876dfd41`): the three audit-25 patches landed + 22 widened windows
+  (Taunt 23 / 23, Harden 45 / 45, Swagger 16 / 16, Mean Look 4 / 4, Substitute 3 / 3 at 0 px, r1 == r2; base Taunt 17 / 23, Harden 39 / 45,
+  Swagger 4 / 16); tests/fix114LiveAuditDefects.test.ts (revert experiments fail each rule); census: pixels only (0 status / frame / key
+  changes). Worker gates: full suite, build, differential 624 / 624. Supervisor: fix114Run.sh on `0a0d5000f` into a fresh dir — every
+  receipt same, the five totals above reproduced.
+- stl109 (SIDE, Sonnet, `3df88a19d` .. `fd195c877`, merged `7390bf8ca`): **Struggle 165 LIVE** — stg107's adapter + 165 in
+  LIVE_MOVE_ANIMATION_IDS, tests/stl109Struggle.test.ts (ROM rows, gates, two real kernel routes with Scene ON / OFF parity; 11 revert
+  experiments), accounting: catalogue `238+13+25+0+0=276` kept, Struggle tracked as `additionalRequiredBodies.MOVE_STRUGGLE` (required ->
+  accepted -> live) => **239 live adapters**. Supervisor: STL109_PATCH=1 stl109Run.sh from the landed tree — every receipt same,
+  15 live 0 px, 19 r1 == r2.
+- **Supervisor union gates on `7390bf8ca` (src `2ed518f1f` = sc106 + soak111 + fix114 + stl109)**, detached worktree: typecheck, full suite
+  1,630 files / 13,431 tests 0 failed, build (`.integration/validation/union-7390bf8ca/`). Census 0..999 (ret88Census.sh shards):
+  **98.80 % of move-animation commands / 99.27 % of frames live** (27,128 / 27,458; session start 95.38 / 98.72), 0 render throws.
+  Struggle declines left: lend unknown, doll cells (-> stf115).
 
 ## 2026-10-11 — User-directed Struggle inclusion (docs only)
 

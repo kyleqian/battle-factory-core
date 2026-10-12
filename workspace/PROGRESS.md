@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-11 (afternoon, checkpoint) — S10A: Struggle LIVE, stats-change command, 3 live defects fixed; live share 0..999 95.38 -> 98.80 % of commands (98.72 -> 99.27 % of frames)
+
+- **State:** local master `7390bf8ca` (production src `2ed518f1f`); supervisor union gates green (typecheck, full suite 1,630 files /
+  13,431 tests, build). Adapter census `238+13+25+0+0=276` + Struggle (the one additional required body) = 239 live. Workers still
+  running: stats-change renderer (scd112), Scene OFF pauses (olnd113), Struggle declines evidence (stf115).
+- **Did:** Struggle 165 live (stg107 evidence -> stl109: 15 / 15 ROM windows 0 px, 884 / 1,033 census Struggle commands live);
+  ISSUES #166 slice (c) (sc106: `stats-change` command, 76 / 90 frames, both scenes); soak driver press stream decoupled from its
+  decisions (soak111: presentation length no longer re-rolls soak games; #89 coverage on seed 226); live audit 25 (aud110) + fix114
+  (Taunt marks / Harden idle rest / Swagger picture height: wrong live pixels on ~118 census commands, now 0 px); #167 anchors banked (off108).
+- **Next:** fold scd112 / olnd113 / stf115; then #166 slices (e) + (f), shp116 (shadow105 + sp103 banked patches), idle98 universal rows.
+- **Notes:** details in ANIMATION_INTEGRATION_PROGRESS.md. No DEFERRED entries.
+
+---
+
 ## 2026-10-11 — User scope update: include Struggle in S10A
 
 - **State:** docs-only checkpoint on local master; production src `14d1be15` and the green 2026-10-10 night receipt are unchanged.
