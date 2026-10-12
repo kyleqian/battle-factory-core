@@ -74,7 +74,26 @@
   458 lead commands regain +N (+2,576 frames), 27 Shadow Punch +1 frame; differential: the app-only presentation-rng trace moves 21 / 173
   captures (Shadow Punch fade rows, the menu one frame later), canonical traces identical. Supervisor: shp116Run.sh ALL SAME; the sc106
   Intimidate anchor conflict resolved as +10 (lead rows) +1 (hold) — the test passes on the union.
-- **Union `9d23a17c4` (src `530600bb1`)**: typecheck, smoke 448; full suite + build running (union-b).
+- **Union `9d23a17c4` (src `530600bb1`)**: typecheck, smoke 448, full suite 1,636 files / 13,493 tests 0 failed, build. Census 0..999:
+  **98.95 % / 99.31 %** (27,140 / 27,427 commands; 4,037,631 / 4,065,771 frames), 0 render throws.
+- Live audit 26 (aud118, MAIN lane, Opus, new files only, `487caa205` .. `d6444bd53`, base `396308f86`): Struggle 6 new pairs + KO switch-in
+  OK (16 / 16 0 px); banner 9 new scenarios x ON / OFF 18 / 18 0 px; OFF pauses 8 new classes 0 residual; **2 DEFECTS** with banked
+  patches: (A) Struggle's target keeps its idle rest (x2 tracker had no 165 row: next live body 1 px off, 136,375 / 50,661 px; census 0
+  but reachable), (B) Scene ON "But it failed!" after a no-effect attackanimation starts ~40 frames early (519 uses / 234 battles). #153
+  quantified. Supervisor: aud118Run.sh on `d6444bd53` — 15 receipts same.
+- fix122 (MAIN lane, Opus, on master `052615adc` .. `181d0674e`, src `649b374d9`): both audit-26 fixes landed; (B) restricted to ROM-proven
+  sites and every measured class matched: Reflect / Rain Dance / Protect / Detect / Endure / Stockpile (glyph 40), Light Screen / Safeguard
+  / Sunny Day / Sandstorm / Hail (41), Leech Seed (74) — 12 / 12 classes -> 0 residual, Scene OFF byte-identical; census 0 status changes.
+- iu120 (INTEGRATION, Opus, `008c485a4` .. `ba9d06d6c`, merged `2d70bafd9`): idle98's universal pre / post rows folded into land97's lead
+  hold (P + N + D + T; Struggle and other unmeasured bodies 0 / 0): 14 / 14 render routes; census: 0 status changes, 23,870 commands +P+T
+  (+95,148 frames), Scene OFF unchanged; 283 timing pins / 68 files via tests/helpers/iu120Rows.ts. The app-only
+  `presentation-rng-playable-live-bodies-seeded-on` trace now moves 120 / 173 captures (fixed capture frames vs a longer timeline):
+  regenerate its capture frames with tools/integration/presentationRngTraces.ts (not done). Supervisor: iu120Run.sh ALL SAME.
+- off121 (SIDE, Opus, `e34c93caa` .. `57f65199f` + supervisor runner fix `60b68c281`, merged `2131feda7`): Scene OFF `status` command ends
+  at the next print (move-inflicted 32 -> 2, sleep turn / faint -> 1, wake-up 2, item cure 35, Rest 38; Toxic G+51 / Thunder Wave G+50
+  exact); OFF 8,479 status commands 0 mismatches (-235,502 frames); Scene ON byte-identical. Evidence: Scene ON status animations are
+  missing (PSN 71 / PRZ 39 / BRN 39 / SLP 97 rows) -> ISSUES #168. Supervisor: off121Run.sh failed on setup (no reference/ link in its
+  archive copies) -> fixed -> ALL SAME, 18 / 18 probes r1 == r2.
 
 ## 2026-10-11 — User-directed Struggle inclusion (docs only)
 

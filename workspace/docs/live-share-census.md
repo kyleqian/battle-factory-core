@@ -4,7 +4,15 @@ How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
 `tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
 
-## Latest (2026-10-11, sdl119 — Struggle on a Substitute doll live; base master `76c33f4bc`, production src `377ed0c48`)
+## Final 2026-10-11 afternoon session (master `2131feda7`, production src `b4befa039`)
+
+Seeds 0..999, 10 `--index-from` shards (`ret88Census.sh shards`, supervisor): **27,139 / 27,426 move-animation commands live (98.95 %),
+4,132,330 / 4,160,787 frames (99.32 %)**, 0 render throws (session start `52c181d54`: 95.38 % / 98.72 %). Struggle is included (live
+except 106 order-lend declines after Odor Sleuth / Hyper Beam hosts). The total frame count grew with today's timeline fixes (universal
+pre / post rows, shadow lead rows, Shadow Punch D4), not with fallback. General_StatsChange stays a separate line (below).
+`.integration/validation/final-2131feda7/census/merged.json`.
+
+## Previous (2026-10-11, sdl119 — Struggle on a Substitute doll live; base master `76c33f4bc`, production src `377ed0c48`)
 
 The stf115 doll cells landed (`docs/sdl119-struggle-doll-live.md`). Seeds 0..999, both arms by `ret88Census.sh shards`: live by count
 98.80 % -> **98.95 %** (27,097 -> 27,140 of 27,429 -> 27,427 commands), by frames 99.27 % -> **99.31 %** (supervisor correction: 99.44 % was land82CensusCheck.py's `liveFramePctAfter`, which divides the final live frames by the BASE arm's frame total; live Struggle bodies are longer than the fallback, so the final total grew — 4,035,044 / 4,063,168 = 99.31 %, == the merged report). Struggle: 1,003 / 854 live

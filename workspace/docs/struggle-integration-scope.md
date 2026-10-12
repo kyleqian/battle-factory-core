@@ -12,6 +12,12 @@ issue #166; do not ask for this scope approval again.
 
 ## Current state and accounting
 
+**Status 2026-10-11 (afternoon session): LIVE.** stg107 (evidence, 19 ROM windows) -> stl109 (landed: 15 / 15 live windows 0 px, two
+real kernel routes with Scene ON / OFF parity) -> sdl119 (Substitute-doll cells). Census 0..999: 895 / 1,001 Struggle commands live; the
+106 declines are order-host invalidations by Odor Sleuth / Hyper Beam bodies earlier in those battles (docs/stf115-struggle-declines.md).
+Accounting: `additionalRequiredBodies.MOVE_STRUGGLE` (required -> accepted -> live) outside the historical 276. Audit 26 found and fix122
+fixed one Struggle defect (its target keeps its idle rest). The text below is the original scope contract.
+
 - The historical catalogue has 276 accepted bodies, all with scoped live
   adapters. Struggle adds one required body; it is not yet accepted or live.
 - Keep historical catalogue counts and evidence intact. Extend the inventory
