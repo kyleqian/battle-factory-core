@@ -1,0 +1,19 @@
+aud118-bulk-up-opp-rattata-diglett on 55 psca corner 144,24 rom 144,24 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":0,"boxPx":0,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-bulk-up-opp-rattata-diglett off 55 psca corner 144,24 rom 144,24 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":0,"boxPx":0,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-calm-mind-opp-crobat-steelix on 55 psca corner 144,2 rom 144,2 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":0,"boxPx":0,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-calm-mind-opp-crobat-steelix off 55 psca corner 144,2 rom 144,2 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":0,"boxPx":0,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-dragon-dance-ply-dragonite-rattata on 55 psca corner 40,54 rom 40,54 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":0,"boxPx":0,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-dragon-dance-ply-dragonite-rattata off 55 psca corner 40,54 rom 40,54 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":0,"boxPx":0,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-leer-ply-steelix-castform on 23 print corner 144,12 rom 144,12 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":321,"boxPx":321,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-leer-ply-steelix-castform off 23 print corner 144,12 rom 144,12 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":321,"boxPx":321,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-roar-intimidate-masq-ply-dragonite-onix on 22 print corner 40,54 rom 40,54 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":386,"boxPx":386,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-roar-intimidate-masq-ply-dragonite-onix off 22 print corner 40,54 rom 40,54 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":386,"boxPx":386,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-roar-intimidate-onto-crobat-opp-crobat-steelix on 22 print corner 144,2 rom 144,2 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":388,"boxPx":388,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-roar-intimidate-onto-crobat-opp-crobat-steelix off 22 print corner 144,2 rom 144,2 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":388,"boxPx":388,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-screech-ply-diglett-rattata on 47 print corner 144,24 rom 144,24 rows 93: rect 0 px, full 0 px; next rows [{"rel":91,"fullPx":400,"boxPx":400,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-screech-ply-diglett-rattata off 47 print corner 144,24 rom 144,24 rows 93: rect 0 px, full 0 px; next rows [{"rel":91,"fullPx":400,"boxPx":400,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-superpower-opp-onix-wailord on 57 psca corner 145,10 rom 145,10 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":0,"boxPx":0,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-superpower-opp-onix-wailord off 57 psca corner 144,10 rom 144,10 rows 79: rect 0 px, full 0 px; next rows [{"rel":77,"fullPx":0,"boxPx":0,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-swords-dance-opp-onix-diglett on 39 print corner 144,10 rom 144,10 rows 93: rect 0 px, full 0 px; next rows [{"rel":91,"fullPx":430,"boxPx":430,"outsideBoxPx":0}]; raw rect (banner rows) 0
+aud118-swords-dance-opp-onix-diglett off 39 print corner 144,10 rom 144,10 rows 93: rect 0 px, full 0 px; next rows [{"rel":91,"fullPx":430,"boxPx":430,"outsideBoxPx":0}]; raw rect (banner rows) 0
+production path, rect + full screen 0 px windows (rows A-1 .. E+2): 18 / 18

@@ -1,0 +1,2391 @@
+{
+ "aud118-bulk-up-opp-rattata-diglett": {
+  "index": {
+   "move": 339,
+   "userSide": "opponent",
+   "user": "RATTATA",
+   "otherLead": "DIGLETT",
+   "bench": null,
+   "stagedBench": null,
+   "stagedBenchSide": null,
+   "expectedAnimArg": 55,
+   "animatedSide": "opponent",
+   "variant": "up multiple, opponent RATTATA (front idle rest x2 1)",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+  },
+  "off": {
+   "sha256": "7c4c074d8dd668477ba93edc4ba0d64f2784e0072b7814787201b00adef8ecf4",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 243,
+     "E": 318,
+     "activeFrames": 75,
+     "arg": 55,
+     "mv": 339,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       7,
+       64
+      ],
+      "visibleRowCount": 58
+     },
+     "script": {
+      "launch": "BattleScript_BulkUpDoMoveAnim+12",
+      "launchRel": 0,
+      "next": "BattleScript_BulkUpDoMoveAnim+18",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        78,
+        [
+         [
+          1,
+          1,
+          6,
+          7
+         ]
+        ]
+       ],
+       [
+        172,
+        [
+         [
+          1,
+          2,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 81
+     },
+     "screenChanges": 59,
+     "bg1Start": [
+      0,
+      9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0918",
+       "c490",
+       "11d9"
+      ],
+      "y": 24,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      163,
+      41,
+      189,
+      71
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       96,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       56,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-bulk-up-opp-rattata-diglett-off-0.tsv",
+     "timingSignatureSha": "c6675abae1697fd3",
+     "maskSignatureSha": "c39fac115637b9fd",
+     "deltaSignatureSha": "a93e27a8a838ea76",
+     "maskCropSignatureSha": "8a0688ed33afee7c",
+     "maskRect": [
+      144,
+      24,
+      64,
+      64
+     ],
+     "screenSignatureSha": "87190326bd69b73b"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "on": {
+   "sha256": "35e2c5c6e9c7bce917d3dc2b4eaf215e0182c98dd922342f951566fb0256acc1",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 331,
+     "E": 406,
+     "activeFrames": 75,
+     "arg": 55,
+     "mv": 339,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       7,
+       64
+      ],
+      "visibleRowCount": 58
+     },
+     "script": {
+      "launch": "BattleScript_BulkUpDoMoveAnim+12",
+      "launchRel": 0,
+      "next": "BattleScript_BulkUpDoMoveAnim+18",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        78,
+        [
+         [
+          1,
+          1,
+          6,
+          7
+         ]
+        ]
+       ],
+       [
+        172,
+        [
+         [
+          1,
+          2,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 81
+     },
+     "screenChanges": 59,
+     "bg1Start": [
+      0,
+      9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0918",
+       "c490",
+       "11d9"
+      ],
+      "y": 24,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      163,
+      41,
+      189,
+      71
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       96,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       56,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-bulk-up-opp-rattata-diglett-on-0.tsv",
+     "timingSignatureSha": "c6675abae1697fd3",
+     "maskSignatureSha": "c39fac115637b9fd",
+     "deltaSignatureSha": "a93e27a8a838ea76",
+     "maskCropSignatureSha": "8a0688ed33afee7c",
+     "maskRect": [
+      144,
+      24,
+      64,
+      64
+     ],
+     "screenSignatureSha": "87190326bd69b73b"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": true,
+  "deltaOnEqualsOff": true,
+  "maskCropOnEqualsOff": true,
+  "screenOnEqualsOff": true,
+  "expectedArgSeen": true
+ },
+ "aud118-calm-mind-opp-crobat-steelix": {
+  "index": {
+   "move": 347,
+   "userSide": "opponent",
+   "user": "CROBAT",
+   "otherLead": "STEELIX",
+   "bench": null,
+   "stagedBench": null,
+   "stagedBenchSide": null,
+   "expectedAnimArg": 55,
+   "animatedSide": "opponent",
+   "variant": "up multiple (SPATK + SPDEF), ELEVATED opponent user",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+  },
+  "off": {
+   "sha256": "f5b7585b924b72c98b8a5252c7dfb398f31a3491eb7ff73776f6de7b1142869a",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 106,
+     "E": 181,
+     "activeFrames": 75,
+     "arg": 55,
+     "mv": 347,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       1,
+       76
+      ],
+      "visibleRowCount": 76
+     },
+     "script": {
+      "launch": "BattleScript_CalmMindDoMoveAnim+12",
+      "launchRel": 0,
+      "next": "BattleScript_CalmMindDoMoveAnim+18",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        78,
+        [
+         [
+          1,
+          4,
+          6,
+          7
+         ]
+        ]
+       ],
+       [
+        172,
+        [
+         [
+          1,
+          5,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
+     },
+     "screenChanges": 60,
+     "bg1Start": [
+      0,
+      9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0902",
+       "c490",
+       "11d9"
+      ],
+      "y": 2,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      144,
+      3,
+      206,
+      72
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       80,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       34,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-calm-mind-opp-crobat-steelix-off-0.tsv",
+     "timingSignatureSha": "c6675abae1697fd3",
+     "maskSignatureSha": "3282ac9dc444d968",
+     "deltaSignatureSha": "3ff27532050d2cac",
+     "maskCropSignatureSha": "3174a989df5b20e1",
+     "maskRect": [
+      144,
+      2,
+      64,
+      64
+     ],
+     "screenSignatureSha": "17d38eb33b4196ae"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "on": {
+   "sha256": "3faf88a832d1731f6fb289359337ae36da773d4635fc6fafecc8b28ea0c7d8a4",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 183,
+     "E": 258,
+     "activeFrames": 75,
+     "arg": 55,
+     "mv": 347,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       1,
+       76
+      ],
+      "visibleRowCount": 76
+     },
+     "script": {
+      "launch": "BattleScript_CalmMindDoMoveAnim+12",
+      "launchRel": 0,
+      "next": "BattleScript_CalmMindDoMoveAnim+18",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        78,
+        [
+         [
+          1,
+          4,
+          6,
+          7
+         ]
+        ]
+       ],
+       [
+        172,
+        [
+         [
+          1,
+          5,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
+     },
+     "screenChanges": 60,
+     "bg1Start": [
+      0,
+      9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0902",
+       "c490",
+       "11d9"
+      ],
+      "y": 2,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      144,
+      3,
+      206,
+      72
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       80,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       34,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-calm-mind-opp-crobat-steelix-on-0.tsv",
+     "timingSignatureSha": "c6675abae1697fd3",
+     "maskSignatureSha": "3282ac9dc444d968",
+     "deltaSignatureSha": "3ff27532050d2cac",
+     "maskCropSignatureSha": "3174a989df5b20e1",
+     "maskRect": [
+      144,
+      2,
+      64,
+      64
+     ],
+     "screenSignatureSha": "17d38eb33b4196ae"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": true,
+  "deltaOnEqualsOff": true,
+  "maskCropOnEqualsOff": true,
+  "screenOnEqualsOff": true,
+  "expectedArgSeen": true
+ },
+ "aud118-dragon-dance-ply-dragonite-rattata": {
+  "index": {
+   "move": 349,
+   "userSide": "player",
+   "user": "DRAGONITE",
+   "otherLead": "RATTATA",
+   "bench": null,
+   "stagedBench": null,
+   "stagedBenchSide": null,
+   "expectedAnimArg": 55,
+   "animatedSide": "player",
+   "variant": "up multiple (ATK + SPEED), new species",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+  },
+  "off": {
+   "sha256": "a53e2762a7f4fe8a1507df85164fdc5d5190aae140b5e6822a9e80d7bf38faa1",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 108,
+     "E": 183,
+     "activeFrames": 75,
+     "arg": 55,
+     "mv": 349,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       7,
+       64
+      ],
+      "visibleRowCount": 58
+     },
+     "script": {
+      "launch": "BattleScript_DragonDanceDoMoveAnim+12",
+      "launchRel": 0,
+      "next": "BattleScript_DragonDanceDoMoveAnim+18",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        78,
+        [
+         [
+          0,
+          1,
+          6,
+          7
+         ]
+        ]
+       ],
+       [
+        170,
+        [
+         [
+          0,
+          3,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 81
+     },
+     "screenChanges": 59,
+     "bg1Start": [
+      0,
+      9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0936",
+       "c228",
+       "0171"
+      ],
+      "y": 54,
+      "x": 40,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 369
+     },
+     "changedBbox": [
+      40,
+      60,
+      102,
+      111
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       86,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       56,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-dragon-dance-ply-dragonite-rattata-off-0.tsv",
+     "timingSignatureSha": "c6675abae1697fd3",
+     "maskSignatureSha": "c45045bb642cb267",
+     "deltaSignatureSha": "f31e68cce0790e07",
+     "maskCropSignatureSha": "1838b29057e32794",
+     "maskRect": [
+      40,
+      54,
+      64,
+      64
+     ],
+     "screenSignatureSha": "2a4dfe11ffbbe337"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "on": {
+   "sha256": "8bbb5ddb21b24594eafeb05af05e974b9f10f64e92e6cfcf014786de1e624617",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 219,
+     "E": 294,
+     "activeFrames": 75,
+     "arg": 55,
+     "mv": 349,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       7,
+       64
+      ],
+      "visibleRowCount": 58
+     },
+     "script": {
+      "launch": "BattleScript_DragonDanceDoMoveAnim+12",
+      "launchRel": 0,
+      "next": "BattleScript_DragonDanceDoMoveAnim+18",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        78,
+        [
+         [
+          0,
+          1,
+          6,
+          7
+         ]
+        ]
+       ],
+       [
+        170,
+        [
+         [
+          0,
+          3,
+          6,
+          7
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 81
+     },
+     "screenChanges": 59,
+     "bg1Start": [
+      0,
+      9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0936",
+       "c228",
+       "0171"
+      ],
+      "y": 54,
+      "x": 40,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 369
+     },
+     "changedBbox": [
+      40,
+      60,
+      102,
+      111
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       86,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       56,
+       1,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-dragon-dance-ply-dragonite-rattata-on-0.tsv",
+     "timingSignatureSha": "c6675abae1697fd3",
+     "maskSignatureSha": "c45045bb642cb267",
+     "deltaSignatureSha": "f31e68cce0790e07",
+     "maskCropSignatureSha": "1838b29057e32794",
+     "maskRect": [
+      40,
+      54,
+      64,
+      64
+     ],
+     "screenSignatureSha": "7bea672070a96c16"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": true,
+  "deltaOnEqualsOff": true,
+  "maskCropOnEqualsOff": true,
+  "screenOnEqualsOff": false,
+  "expectedArgSeen": true
+ },
+ "aud118-leer-ply-steelix-castform": {
+  "index": {
+   "move": 43,
+   "userSide": "player",
+   "user": "STEELIX",
+   "otherLead": "CASTFORM",
+   "bench": null,
+   "stagedBench": null,
+   "stagedBenchSide": null,
+   "expectedAnimArg": 23,
+   "animatedSide": "opponent",
+   "variant": "down1 DEF onto an opponent CASTFORM (normal form)",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+  },
+  "off": {
+   "sha256": "652105c832ca8a6388e89752d0a2eb50f1e4d013407070760cab3bbb1f7ac059",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 317,
+     "E": 392,
+     "activeFrames": 75,
+     "arg": 23,
+     "mv": 43,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       1,
+       78
+      ],
+      "visibleRowCount": 77
+     },
+     "script": {
+      "launch": "BattleScript_StatDownPrintString+0",
+      "launchRel": 0,
+      "next": "BattleScript_StatDownPrintString+5",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        -38,
+        [
+         [
+          1,
+          2,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
+     },
+     "screenChanges": 60,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "090c",
+       "c490",
+       "11d9"
+      ],
+      "y": 12,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      16,
+      28,
+      191,
+      149
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       80,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       44,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-leer-ply-steelix-castform-off-0.tsv",
+     "timingSignatureSha": "fe6cdd184f40ae6b",
+     "maskSignatureSha": "fc757544d6afa5ac",
+     "deltaSignatureSha": "3e6dabe9c7a8cb6f",
+     "maskCropSignatureSha": "06c1190987b4d4e1",
+     "maskRect": [
+      144,
+      12,
+      64,
+      64
+     ],
+     "screenSignatureSha": "6b48ce31244ac5e9"
+    }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 317,
+     "label": "BattleScript_StatDownPrintString+0",
+     "rowsToNextInstruction": 77,
+     "animActive": true
+    }
+   ]
+  },
+  "on": {
+   "sha256": "92c01f455e3aa2e379a7f91fef04ccaf0738f3c43e41cdbd263a97fefb891edd",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 367,
+     "E": 442,
+     "activeFrames": 75,
+     "arg": 23,
+     "mv": 43,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       1,
+       78
+      ],
+      "visibleRowCount": 77
+     },
+     "script": {
+      "launch": "BattleScript_StatDownPrintString+0",
+      "launchRel": 0,
+      "next": "BattleScript_StatDownPrintString+5",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        -77,
+        [
+         [
+          1,
+          2,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
+     },
+     "screenChanges": 60,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "090c",
+       "c490",
+       "11d9"
+      ],
+      "y": 12,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      16,
+      28,
+      191,
+      149
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       80,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       44,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-leer-ply-steelix-castform-on-0.tsv",
+     "timingSignatureSha": "fe6cdd184f40ae6b",
+     "maskSignatureSha": "fc757544d6afa5ac",
+     "deltaSignatureSha": "3e6dabe9c7a8cb6f",
+     "maskCropSignatureSha": "06c1190987b4d4e1",
+     "maskRect": [
+      144,
+      12,
+      64,
+      64
+     ],
+     "screenSignatureSha": "6b48ce31244ac5e9"
+    }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 367,
+     "label": "BattleScript_StatDownPrintString+0",
+     "rowsToNextInstruction": 77,
+     "animActive": true
+    }
+   ]
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": true,
+  "deltaOnEqualsOff": true,
+  "maskCropOnEqualsOff": true,
+  "screenOnEqualsOff": true,
+  "expectedArgSeen": true
+ },
+ "aud118-roar-intimidate-masq-ply-dragonite-onix": {
+  "index": {
+   "move": 46,
+   "userSide": "player",
+   "user": "DRAGONITE",
+   "otherLead": "ONIX",
+   "bench": [
+    "MASQUERAIN",
+    "MASQUERAIN"
+   ],
+   "stagedBench": [
+    "MASQUERAIN",
+    "MASQUERAIN"
+   ],
+   "stagedBenchSide": "opponent",
+   "expectedAnimArg": 22,
+   "animatedSide": "player",
+   "variant": "Intimidate FROM the elevated MASQUERAIN switch-in",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+  },
+  "off": {
+   "sha256": "050b1abc90ab7ad43ecf415e226f97a01b3ad500bc7a113e23a8815d20aa68fa",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 559,
+     "E": 634,
+     "activeFrames": 75,
+     "arg": 22,
+     "mv": 0,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       1,
+       78
+      ],
+      "visibleRowCount": 77
+     },
+     "script": {
+      "launch": "BattleScript_IntimidateActivates+73",
+      "launchRel": 0,
+      "next": "BattleScript_IntimidateActivates+76",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        -3,
+        [
+         [
+          0,
+          1,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
+     },
+     "screenChanges": 60,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0936",
+       "c228",
+       "0171"
+      ],
+      "y": 54,
+      "x": 40,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 369
+     },
+     "changedBbox": [
+      16,
+      60,
+      191,
+      151
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       86,
+       0,
+       0,
+       0
+      ],
+      [
+       4,
+       176,
+       31,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-roar-intimidate-masq-ply-dragonite-onix-off-0.tsv",
+     "timingSignatureSha": "fe6cdd184f40ae6b",
+     "maskSignatureSha": "c45045bb642cb267",
+     "deltaSignatureSha": "18940231cd66fde6",
+     "maskCropSignatureSha": "44e71198423dcbd3",
+     "maskRect": [
+      40,
+      54,
+      64,
+      64
+     ],
+     "screenSignatureSha": "fc92ba4cd4dc251b"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "on": {
+   "sha256": "77e3aafc515b0d8e8de4f8d9bbb878536ef11ffe6839f99859d5c6cafdacecd3",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 559,
+     "E": 634,
+     "activeFrames": 75,
+     "arg": 22,
+     "mv": 0,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       1,
+       78
+      ],
+      "visibleRowCount": 77
+     },
+     "script": {
+      "launch": "BattleScript_IntimidateActivates+73",
+      "launchRel": 0,
+      "next": "BattleScript_IntimidateActivates+76",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        -3,
+        [
+         [
+          0,
+          1,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
+     },
+     "screenChanges": 60,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0936",
+       "c228",
+       "0171"
+      ],
+      "y": 54,
+      "x": 40,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 369
+     },
+     "changedBbox": [
+      16,
+      60,
+      191,
+      151
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       86,
+       0,
+       0,
+       0
+      ],
+      [
+       4,
+       176,
+       31,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-roar-intimidate-masq-ply-dragonite-onix-on-0.tsv",
+     "timingSignatureSha": "fe6cdd184f40ae6b",
+     "maskSignatureSha": "c45045bb642cb267",
+     "deltaSignatureSha": "18940231cd66fde6",
+     "maskCropSignatureSha": "44e71198423dcbd3",
+     "maskRect": [
+      40,
+      54,
+      64,
+      64
+     ],
+     "screenSignatureSha": "36af1613f0fe4774"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": true,
+  "deltaOnEqualsOff": true,
+  "maskCropOnEqualsOff": true,
+  "screenOnEqualsOff": false,
+  "expectedArgSeen": true
+ },
+ "aud118-roar-intimidate-onto-crobat-opp-crobat-steelix": {
+  "index": {
+   "move": 46,
+   "userSide": "opponent",
+   "user": "CROBAT",
+   "otherLead": "STEELIX",
+   "bench": null,
+   "stagedBench": [
+    "MIGHTYENA",
+    "SALAMENCE"
+   ],
+   "stagedBenchSide": "player",
+   "expectedAnimArg": 22,
+   "animatedSide": "opponent",
+   "variant": "Intimidate ONTO the elevated opponent CROBAT",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+  },
+  "off": {
+   "sha256": "09e6d15fbfcf22fbe17d54b70e2ca7a579a34744b77a395075d76e877e3052c2",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 559,
+     "E": 634,
+     "activeFrames": 75,
+     "arg": 22,
+     "mv": 0,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       1,
+       78
+      ],
+      "visibleRowCount": 77
+     },
+     "script": {
+      "launch": "BattleScript_IntimidateActivates+73",
+      "launchRel": 0,
+      "next": "BattleScript_IntimidateActivates+76",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        -3,
+        [
+         [
+          1,
+          1,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
+     },
+     "screenChanges": 60,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0902",
+       "c490",
+       "11d9"
+      ],
+      "y": 2,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      16,
+      3,
+      206,
+      151
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       4,
+       72,
+       84,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       34,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-roar-intimidate-onto-crobat-opp-crobat-steelix-off-0.tsv",
+     "timingSignatureSha": "fe6cdd184f40ae6b",
+     "maskSignatureSha": "3282ac9dc444d968",
+     "deltaSignatureSha": "66cfc21f029f7b9d",
+     "maskCropSignatureSha": "209c0bd5e33303e6",
+     "maskRect": [
+      144,
+      2,
+      64,
+      64
+     ],
+     "screenSignatureSha": "1f16fa33567dbb1f"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "on": {
+   "sha256": "e0fa273660e0adb3a96274090d984cd49fadfa28b06aaa2b19c57ed32abce1ac",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 559,
+     "E": 634,
+     "activeFrames": 75,
+     "arg": 22,
+     "mv": 0,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       1,
+       78
+      ],
+      "visibleRowCount": 77
+     },
+     "script": {
+      "launch": "BattleScript_IntimidateActivates+73",
+      "launchRel": 0,
+      "next": "BattleScript_IntimidateActivates+76",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        -3,
+        [
+         [
+          1,
+          1,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 77
+     },
+     "screenChanges": 60,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0902",
+       "c490",
+       "11d9"
+      ],
+      "y": 2,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      16,
+      3,
+      206,
+      151
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       4,
+       72,
+       84,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       34,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-roar-intimidate-onto-crobat-opp-crobat-steelix-on-0.tsv",
+     "timingSignatureSha": "fe6cdd184f40ae6b",
+     "maskSignatureSha": "3282ac9dc444d968",
+     "deltaSignatureSha": "66cfc21f029f7b9d",
+     "maskCropSignatureSha": "209c0bd5e33303e6",
+     "maskRect": [
+      144,
+      2,
+      64,
+      64
+     ],
+     "screenSignatureSha": "1277025f3ad0cd2c"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": true,
+  "deltaOnEqualsOff": true,
+  "maskCropOnEqualsOff": true,
+  "screenOnEqualsOff": false,
+  "expectedArgSeen": true
+ },
+ "aud118-screech-ply-diglett-rattata": {
+  "index": {
+   "move": 103,
+   "userSide": "player",
+   "user": "DIGLETT",
+   "otherLead": "RATTATA",
+   "bench": null,
+   "stagedBench": null,
+   "stagedBenchSide": null,
+   "expectedAnimArg": 47,
+   "animatedSide": "opponent",
+   "variant": "down2 DEF sharply onto opponent RATTATA (rest x2 1)",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+  },
+  "off": {
+   "sha256": "6155460dc01ee70fd531cde5744ae7b0bab131892a0aec5223a78c1df4fb7ec5",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 106,
+     "E": 195,
+     "activeFrames": 89,
+     "arg": 47,
+     "mv": 103,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 13,
+      "peakRows": [
+       31,
+       62
+      ],
+      "lastEva": 86,
+      "regsRestored": 90,
+      "owRows": [
+       6,
+       91
+      ],
+      "visibleRows": [
+       7,
+       92
+      ],
+      "visibleRowCount": 81
+     },
+     "script": {
+      "launch": "BattleScript_StatDownPrintString+0",
+      "launchRel": 0,
+      "next": "BattleScript_StatDownPrintString+5",
+      "nextRel": 91,
+      "span": 91,
+      "statWrites": [
+       [
+        -38,
+        [
+         [
+          1,
+          2,
+          6,
+          4
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 92
+     },
+     "screenChanges": 81,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0918",
+       "c490",
+       "11d9"
+      ],
+      "y": 24,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      16,
+      41,
+      189,
+      149
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       96,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       56,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-screech-ply-diglett-rattata-off-0.tsv",
+     "timingSignatureSha": "e2fdf1a4fb281227",
+     "maskSignatureSha": "6386046a020fdbd5",
+     "deltaSignatureSha": "a7ccf9deddd93d0f",
+     "maskCropSignatureSha": "83b06dc111d92b06",
+     "maskRect": [
+      144,
+      24,
+      64,
+      64
+     ],
+     "screenSignatureSha": "2f41b1b4b69914cf"
+    }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 106,
+     "label": "BattleScript_StatDownPrintString+0",
+     "rowsToNextInstruction": 91,
+     "animActive": true
+    }
+   ]
+  },
+  "on": {
+   "sha256": "03ec207b922c9975893aae3553e286cb2fcc8b5c1178a0b94524e8e7bf3264ce",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 138,
+     "E": 227,
+     "activeFrames": 89,
+     "arg": 47,
+     "mv": 103,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 13,
+      "peakRows": [
+       31,
+       62
+      ],
+      "lastEva": 86,
+      "regsRestored": 90,
+      "owRows": [
+       6,
+       91
+      ],
+      "visibleRows": [
+       7,
+       92
+      ],
+      "visibleRowCount": 81
+     },
+     "script": {
+      "launch": "BattleScript_StatDownPrintString+0",
+      "launchRel": 0,
+      "next": "BattleScript_StatDownPrintString+5",
+      "nextRel": 91,
+      "span": 91,
+      "statWrites": [
+       [
+        -70,
+        [
+         [
+          1,
+          2,
+          6,
+          4
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 92
+     },
+     "screenChanges": 81,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "0918",
+       "c490",
+       "11d9"
+      ],
+      "y": 24,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      16,
+      41,
+      189,
+      149
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       96,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       56,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-screech-ply-diglett-rattata-on-0.tsv",
+     "timingSignatureSha": "e2fdf1a4fb281227",
+     "maskSignatureSha": "6386046a020fdbd5",
+     "deltaSignatureSha": "a7ccf9deddd93d0f",
+     "maskCropSignatureSha": "83b06dc111d92b06",
+     "maskRect": [
+      144,
+      24,
+      64,
+      64
+     ],
+     "screenSignatureSha": "2f41b1b4b69914cf"
+    }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 138,
+     "label": "BattleScript_StatDownPrintString+0",
+     "rowsToNextInstruction": 91,
+     "animActive": true
+    }
+   ]
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": true,
+  "deltaOnEqualsOff": true,
+  "maskCropOnEqualsOff": true,
+  "screenOnEqualsOff": true,
+  "expectedArgSeen": true
+ },
+ "aud118-superpower-opp-onix-wailord": {
+  "index": {
+   "move": 276,
+   "userSide": "opponent",
+   "user": "ONIX",
+   "otherLead": "WAILORD",
+   "bench": null,
+   "stagedBench": null,
+   "stagedBenchSide": null,
+   "expectedAnimArg": 57,
+   "animatedSide": "opponent",
+   "variant": "self down multiple right after its own x2 body, ONIX rest 1",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+  },
+  "off": {
+   "sha256": "2403ff9c7725a9c8cb54f9e7794475fc74e1fd169c76057e1cc970873e5ea21c",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 201,
+     "E": 276,
+     "activeFrames": 75,
+     "arg": 57,
+     "mv": 276,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       7,
+       64
+      ],
+      "visibleRowCount": 58
+     },
+     "script": {
+      "launch": "BattleScript_AtkDefDown+10",
+      "launchRel": 0,
+      "next": "BattleScript_AtkDefDown+14",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        79,
+        [
+         [
+          1,
+          1,
+          6,
+          5
+         ]
+        ]
+       ],
+       [
+        171,
+        [
+         [
+          1,
+          2,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 82
+     },
+     "screenChanges": 59,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "090a",
+       "c490",
+       "11d9"
+      ],
+      "y": 10,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      149,
+      12,
+      203,
+      71
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       102,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       42,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-superpower-opp-onix-wailord-off-0.tsv",
+     "timingSignatureSha": "fe6cdd184f40ae6b",
+     "maskSignatureSha": "c344a186a758baa7",
+     "deltaSignatureSha": "caaf8c280c857d66",
+     "maskCropSignatureSha": "a7431902c33b118e",
+     "maskRect": [
+      144,
+      10,
+      64,
+      64
+     ],
+     "screenSignatureSha": "f70802cfcc505d62"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "on": {
+   "sha256": "9c9f6d9f12f2f5102ce82eeda07c733caf44b5451e847d78b19f254fcfa0246f",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 418,
+     "E": 493,
+     "activeFrames": 75,
+     "arg": 57,
+     "mv": 276,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 10,
+      "peakRows": [
+       25,
+       46
+      ],
+      "lastEva": 64,
+      "regsRestored": 68,
+      "owRows": [
+       6,
+       69
+      ],
+      "visibleRows": [
+       7,
+       64
+      ],
+      "visibleRowCount": 58
+     },
+     "script": {
+      "launch": "BattleScript_AtkDefDown+10",
+      "launchRel": 0,
+      "next": "BattleScript_AtkDefDown+14",
+      "nextRel": 77,
+      "span": 77,
+      "statWrites": [
+       [
+        79,
+        [
+         [
+          1,
+          1,
+          6,
+          5
+         ]
+        ]
+       ],
+       [
+        171,
+        [
+         [
+          1,
+          2,
+          6,
+          5
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 82
+     },
+     "screenChanges": 59,
+     "bg1Start": [
+      64,
+      -9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "090a",
+       "c491",
+       "11d9"
+      ],
+      "y": 10,
+      "x": 145,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      150,
+      12,
+      204,
+      71
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       102,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       42,
+       1,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-superpower-opp-onix-wailord-on-0.tsv",
+     "timingSignatureSha": "fe6cdd184f40ae6b",
+     "maskSignatureSha": "7d6566744603e433",
+     "deltaSignatureSha": "2ca5933b9b124d4e",
+     "maskCropSignatureSha": "f9e4faa8b769ea85",
+     "maskRect": [
+      145,
+      10,
+      64,
+      64
+     ],
+     "screenSignatureSha": "33236fd44f3cabc1"
+    }
+   ],
+   "playanimationToPrint": []
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": false,
+  "deltaOnEqualsOff": false,
+  "maskCropOnEqualsOff": false,
+  "screenOnEqualsOff": false,
+  "expectedArgSeen": true
+ },
+ "aud118-swords-dance-opp-onix-diglett": {
+  "index": {
+   "move": 14,
+   "userSide": "opponent",
+   "user": "ONIX",
+   "otherLead": "DIGLETT",
+   "bench": null,
+   "stagedBench": null,
+   "stagedBenchSide": null,
+   "expectedAnimArg": 39,
+   "animatedSide": "opponent",
+   "variant": "up2 ATK sharply, opponent ONIX (rest x2 1)",
+   "seed": 305419897,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+  },
+  "off": {
+   "sha256": "82d0b5880a1656cb85055179e60b928fc088d3ef2dd5578a491f8d187bb925bc",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 318,
+     "E": 407,
+     "activeFrames": 89,
+     "arg": 39,
+     "mv": 14,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 13,
+      "peakRows": [
+       31,
+       62
+      ],
+      "lastEva": 86,
+      "regsRestored": 90,
+      "owRows": [
+       6,
+       91
+      ],
+      "visibleRows": [
+       7,
+       92
+      ],
+      "visibleRowCount": 81
+     },
+     "script": {
+      "launch": "BattleScript_StatUpPrintString+0",
+      "launchRel": 0,
+      "next": "BattleScript_StatUpPrintString+5",
+      "nextRel": 91,
+      "span": 91,
+      "statWrites": [
+       [
+        -38,
+        [
+         [
+          1,
+          1,
+          6,
+          8
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 92
+     },
+     "screenChanges": 81,
+     "bg1Start": [
+      0,
+      9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "090a",
+       "c490",
+       "11d9"
+      ],
+      "y": 10,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      16,
+      12,
+      203,
+      149
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       96,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       42,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-swords-dance-opp-onix-diglett-off-0.tsv",
+     "timingSignatureSha": "f758801265801dfc",
+     "maskSignatureSha": "6e21df8b166a3f2a",
+     "deltaSignatureSha": "31d1ef8a4ad58e4f",
+     "maskCropSignatureSha": "d1032c43dab4aece",
+     "maskRect": [
+      144,
+      10,
+      64,
+      64
+     ],
+     "screenSignatureSha": "c54c461f195dccc3"
+    }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 318,
+     "label": "BattleScript_StatUpPrintString+0",
+     "rowsToNextInstruction": 91,
+     "animActive": true
+    }
+   ]
+  },
+  "on": {
+   "sha256": "27cfd765f5bb5fa728ecba38565b20075ba86e62871ae50de5bf49ee3807e37c",
+   "r1EqualsR2": true,
+   "windows": [
+    {
+     "A": 368,
+     "E": 457,
+     "activeFrames": 89,
+     "arg": 39,
+     "mv": 14,
+     "timeline": {
+      "step1Regs": 2,
+      "firstEva": 7,
+      "peakEva": 13,
+      "peakRows": [
+       31,
+       62
+      ],
+      "lastEva": 86,
+      "regsRestored": 90,
+      "owRows": [
+       6,
+       91
+      ],
+      "visibleRows": [
+       7,
+       92
+      ],
+      "visibleRowCount": 81
+     },
+     "script": {
+      "launch": "BattleScript_StatUpPrintString+0",
+      "launchRel": 0,
+      "next": "BattleScript_StatUpPrintString+5",
+      "nextRel": 91,
+      "span": 91,
+      "statWrites": [
+       [
+        -77,
+        [
+         [
+          1,
+          1,
+          6,
+          8
+         ]
+        ]
+       ]
+      ],
+      "firstScreenChangeAfterE": 92
+     },
+     "screenChanges": 81,
+     "bg1Start": [
+      0,
+      9
+     ],
+     "mask": {
+      "oam": 9,
+      "attr": [
+       "090a",
+       "c490",
+       "11d9"
+      ],
+      "y": 10,
+      "x": 144,
+      "affine": true,
+      "doubleSize": false,
+      "dims": 64,
+      "tile": 473
+     },
+     "changedBbox": [
+      16,
+      12,
+      203,
+      149
+     ],
+     "copySlot": [
+      3
+     ],
+     "inUseDuring": 10,
+     "battlerSprites": [
+      [
+       6,
+       72,
+       96,
+       0,
+       0,
+       0
+      ],
+      [
+       8,
+       176,
+       42,
+       0,
+       0,
+       0
+      ]
+     ],
+     "rowsTsv": "rows/aud118-swords-dance-opp-onix-diglett-on-0.tsv",
+     "timingSignatureSha": "f758801265801dfc",
+     "maskSignatureSha": "6e21df8b166a3f2a",
+     "deltaSignatureSha": "31d1ef8a4ad58e4f",
+     "maskCropSignatureSha": "d1032c43dab4aece",
+     "maskRect": [
+      144,
+      10,
+      64,
+      64
+     ],
+     "screenSignatureSha": "c54c461f195dccc3"
+    }
+   ],
+   "playanimationToPrint": [
+    {
+     "row": 368,
+     "label": "BattleScript_StatUpPrintString+0",
+     "rowsToNextInstruction": 91,
+     "animActive": true
+    }
+   ]
+  },
+  "timingOnEqualsOff": true,
+  "maskOnEqualsOff": true,
+  "deltaOnEqualsOff": true,
+  "maskCropOnEqualsOff": true,
+  "screenOnEqualsOff": true,
+  "expectedArgSeen": true
+ }
+}

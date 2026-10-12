@@ -1,0 +1,40 @@
+pb-aud118-opp-12-50-c0             TAUNT      player   DIGLETT/BUTTERFREE   live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-12-50-c1             STRUGGLE   opponent BUTTERFREE/DIGLETT   live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-12-50-c2             TAUNT      player   DIGLETT/BUTTERFREE   live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-12-50-c3             STRUGGLE   opponent BUTTERFREE/DIGLETT   live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-166-65-c0            TAUNT      player   ALAKAZAM/LEDIAN      live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-166-65-c1            STRUGGLE   opponent LEDIAN/ALAKAZAM      live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-166-65-c2            TAUNT      player   ALAKAZAM/LEDIAN      live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-166-65-c3            STRUGGLE   opponent LEDIAN/ALAKAZAM      live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-208-314-c0           TAUNT      player   WAILORD/STEELIX      live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-208-314-c1           STRUGGLE   opponent STEELIX/WAILORD      live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-208-314-c2           TAUNT      player   WAILORD/STEELIX      live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-208-314-c3           STRUGGLE   opponent STEELIX/WAILORD      live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-385-55-rain-c0       RAIN_DANCE player   GOLDUCK/CASTFORM     live=1 rows=187 exact=187 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-opp-385-55-rain-c1       HARDEN     opponent CASTFORM/GOLDUCK     live=0 rows=101 exact=0   px=71674   r1==r2=1 ages=0..39(40) entry=71674 decline=CASTFORM shown in a weather form: body not ROM-proven for 106:by:2 (cast83, ISSUES #143)
+pb-aud118-opp-385-55-rain-c2       TAUNT      player   GOLDUCK/CASTFORM     live=0 rows=125 exact=0   px=59572   r1==r2=1 ages=0..39(40) entry=59572 decline=CASTFORM shown in a weather form: body not ROM-proven for 269:at:2 (cast83, ISSUES #143)
+pb-aud118-opp-385-55-rain-c3       STRUGGLE   opponent CASTFORM/GOLDUCK     live=0 rows=112 exact=1   px=88063   r1==r2=1 ages=1..40(40) entry=88063 decline=CASTFORM shown in a weather form: body not ROM-proven for 165:by:2 (cast83, ISSUES #143)
+pb-aud118-opp-385-55-rain-c4       TAUNT      player   GOLDUCK/CASTFORM     live=0 rows=125 exact=0   px=59572   r1==r2=1 ages=0..39(40) entry=59572 decline=CASTFORM shown in a weather form: body not ROM-proven for 269:at:2 (cast83, ISSUES #143)
+pb-aud118-ply-208-12-c0            TAUNT      opponent BUTTERFREE/STEELIX   live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-208-12-c1            STRUGGLE   player   STEELIX/BUTTERFREE   live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-208-12-c2            TAUNT      opponent BUTTERFREE/STEELIX   live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-208-12-c3            STRUGGLE   player   STEELIX/BUTTERFREE   live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-208-303-c0           TAUNT      opponent SHEDINJA/STEELIX     live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-208-303-c1           STRUGGLE   player   STEELIX/SHEDINJA     live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-208-303-c2           HARDEN     opponent CHANSEY/STEELIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-208-303-c3           HARDEN     player   STEELIX/CHANSEY      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-208-303-c4           HARDEN     opponent CHANSEY/STEELIX      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-208-303-c5           HARDEN     player   STEELIX/CHANSEY      live=1 rows=101 exact=101 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-50-208-c0            TAUNT      opponent STEELIX/DIGLETT      live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-50-208-c1            STRUGGLE   player   DIGLETT/STEELIX      live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-50-208-c2            TAUNT      opponent STEELIX/DIGLETT      live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-50-208-c3            STRUGGLE   player   DIGLETT/STEELIX      live=1 rows=112 exact=112 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-50-95-c0             TAUNT      opponent ONIX/DIGLETT         live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-50-95-c1             STRUGGLE   player   DIGLETT/ONIX         live=0 rows=112 exact=0   px=163751  r1==r2=1 ages=0..39(40) entry=0 decline=unclassified (case-local gate)
+pb-aud118-ply-50-95-c2             TAUNT      opponent ONIX/DIGLETT         live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-50-95-c3             STRUGGLE   player   DIGLETT/ONIX         live=0 rows=112 exact=0   px=163751  r1==r2=1 ages=0..39(40) entry=0 decline=unclassified (case-local gate)
+pb-aud118-ply-65-19-c0             TAUNT      opponent RATTATA/ALAKAZAM     live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-65-19-c1             STRUGGLE   player   ALAKAZAM/RATTATA     live=0 rows=112 exact=0   px=137701  r1==r2=1 ages=0..39(40) entry=0 decline=unclassified (case-local gate)
+pb-aud118-ply-65-19-c2             TAUNT      opponent RATTATA/ALAKAZAM     live=1 rows=125 exact=125 px=0       r1==r2=1 ages=- entry=0
+pb-aud118-ply-65-19-c3             STRUGGLE   player   ALAKAZAM/RATTATA     live=0 rows=112 exact=0   px=137701  r1==r2=1 ages=0..39(40) entry=0 decline=unclassified (case-local gate)
+TOTAL HARDEN 4/5 (r1==r2 5)  RAIN_DANCE 1/1 (r1==r2 1)  STRUGGLE 11/16 (r1==r2 16)  TAUNT 15/17 (r1==r2 17)
