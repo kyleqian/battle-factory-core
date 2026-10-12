@@ -21,14 +21,14 @@ existing tracked file was edited.
 | 7 | stats-change banner, 9 new scenarios x Scene ON / OFF: Dragon Dance (player Dragonite), Calm Mind (ELEVATED opp Crobat), Bulk Up (opp RATTATA), Leer onto opp CASTFORM, Superpower self drop right after its own x2 body (opp ONIX, rest kept: corner 145 ON / 144 OFF == ROM), Swords Dance (opp ONIX), Screech onto opp RATTATA, Intimidate FROM elevated Masquerain, Intimidate ONTO elevated opp Crobat (the opponent Roars the player's Intimidate bench in) | 18 (rows A-1 .. E+2, 79 / 93 each) | **OK**: 18 / 18 at 0 px, rect and full screen. Production corner == ROM mask rect on all 18. r1 == r2 for the probes (18 / 18) and the comparator | `banner-compare.txt`, `banner-stat-anim.json` |
 | 8 | Banner: the next message's first glyph (print path) | 10 print-path windows | **TIMING-PHASE (known)**: the glyph lands **1 row early** (E+2, 321..430 px, message box band only). This is sc106 / olnd113's documented post-stats-change δ. The 8 playstatchangeanimation windows are 0 px at E+2 | `banner-compare.txt` `next rows` |
 | 9 | Scene OFF pause, 8 new classes: Swords Dance, Agility (stat self), Leer, Screech (stat target), Light Screen, Reflect, Haze, Spore (sleep) | 8 classes vs production census uses (seeds 0..399; 6..106 uses each) | **OK**: 8 / 8 at 0 residual against the landed anchor. The 4 stat classes are +1 against off108's raw anchor, which is exactly olnd113's lead(STATS_CHANGE) = 1: an anchor-convention ARTIFACT, not a residual | `off-verify.txt`, `off-classes.tsv` |
-| 10 | Scene OFF hold: "But it failed!" after a repeated Light Screen / Reflect | 2 classes (33 + 2 production uses) | **OK** in Scene OFF: 0 / 0 | `off-hold.txt`, `off-verify.txt` |
-| 11 | **Scene ON: the same "But it failed!" hold** | Light Screen 33 uses, Reflect 2 (seeds 0..399) | **DEFECT B** (timing, mechanism from source): production starts the message **40 / 39 frames early** -> banked patch: **0 / 0**. The OFF routes are byte-identical with the patch | `off-hold.txt` |
+| 10 | Scene OFF hold: "But it failed!" after a repeated Light Screen / Reflect / Rain Dance | 3 classes (33 + 2 + 39 production uses) | **OK** in Scene OFF: 0 / 0 / 0 | `off-hold.txt`, `off-verify.txt` |
+| 11 | **Scene ON: the same "But it failed!" hold** | Light Screen 33 uses, Reflect 2, Rain Dance 39 (seeds 0..399) | **DEFECT B** (timing, mechanism from source): production starts the message **40 / 39 / 39 frames early** -> banked patch: **0 / 0 / 0**. The OFF routes are byte-identical with the patch | `off-hold.txt` |
 | 12 | Scene OFF: the stat message's first glyph after pause + stats-change command (joint target) | 4 new stat classes | **TIMING-PHASE (known)**: **−1** on all 4. This is olnd113's documented print-path δ | `off-verify.txt` `joint` |
 | 13 | Scene OFF Substitute | 16 production uses (seeds 0..399) | **KNOWN DEFECT (ISSUES #153)**, quantified here. The ROM plays the Substitute body in Scene OFF: a 90-row waitanimation with 40 screen changes, HP bar G+98, message glyph G+140. Production gives a 40-frame plain pause: HP bar **−57**, message **−71** frames, and no doll body | `off-substitute.json` |
 | 14 | Scene OFF Mist | ROM only | **NOT MEASURABLE**: 0 production uses in seeds 0..999 (the 400..999 shards are empty). ROM: Pausex20 at G+4, glyph G+40 | `off-rom-r1.json`, runner |
 
 **Totals.** Struggle-battle windows: 41. 30 are live at 0 px on the base. The 2 DEFECT A windows go to 0 with the patch, which makes **32 / 32 live windows 0 px** (the other 9 decline by design). Banner: 18 / 18 OK. Scene OFF:
-10 / 10 classes OK. One new presentation timing defect in Scene ON (B). No alignment ARTIFACT among the rendered windows, because every
+11 / 11 classes OK. One new presentation timing defect in Scene ON (B). No alignment ARTIFACT among the rendered windows, because every
 window is aligned (`aud110Align.py`). The only anchor ARTIFACT is the stats-change lead convention in row 9.
 
 ## 2. DEFECT A: Struggle's target x2 (the x2 tracker's fallback)
@@ -49,22 +49,28 @@ window is aligned (`aud110Align.py`). The only anchor ARTIFACT is the stats-chan
 ## 3. DEFECT B: Scene ON "But it failed!" after a no-effect attackanimation
 
 - **Mechanism (source).** A repeated Light Screen / Reflect fails in `setlightscreen` / `setreflect` (MOVE_RESULT_MISSED). It then runs
-  `BattleScript_PrintReflectLightScreenSafeguardString`: `attackanimation`, `waitanimation`, `printfromtable`. `Cmd_attackanimation`
+  `BattleScript_PrintReflectLightScreenSafeguardString`: `attackanimation`, `waitanimation`, `printfromtable`. A repeated Rain Dance fails
+  in `setrain` and runs the same three instructions in `BattleScript_MoveWeatherChange`. `Cmd_attackanimation`
   (`battle_script_commands.c:1793-1797`) takes its MOVE_RESULT_NO_EFFECT branch and pushes `BattleScript_Pausex20` **in Scene ON too**,
   with no controller command. So the ROM shows "X used LIGHT SCREEN!" until the "But it failed!" glyph at **G+41** (Reflect G+40), the same
-  in both scenes (`off-rom-r1.json`, the -twice scenarios' second use). Scene OFF is exact, because its kernel emits SCENE_OFF_ATTACK_PAUSE and
+  in both scenes; Rain Dance G+40 (`off-rom-r1.json`, the -twice scenarios' second use). Scene OFF is exact, because its kernel emits SCENE_OFF_ATTACK_PAUSE and
   olnd113's pause fires. In Scene ON there is no receipt. olnd113's used-move hold (`sourcePauseUsedMoveHoldFrames`) only recognises a
   literal `pause B_WAIT_TIME_SHORT` within the three instructions before the print. So production starts the message at G+1:
-  **−40 (Light Screen, 33 / 33 uses), −39 (Reflect, 2 / 2)**.
+  **−40 (Light Screen, 33 / 33 uses), −39 (Reflect, 2 / 2), −39 (Rain Dance, 39 / 39)**.
 - **Patch** `tools/integration/fixtures/aud118/aud118-on-noeffect-attackanimation-hold.diff`: the same back-scan also accepts
   `B_SCR_OP_ATTACKANIMATION`. Reaching it with no attack receipt in between means the NO_EFFECT branch ran, and the hold is
-  Δ(print) + 1, as for a source pause. Scene ON goes to **0 / 0**. Scene OFF routes are **byte-identical** with the patch (4 / 4 shards), because the
+  Δ(print) + 1, as for a source pause. Scene ON goes to **0 / 0 / 0**. Scene OFF routes are **byte-identical** with the patch (4 / 4 shards), because the
   OFF attack receipt stops the scan first.
-- **Siblings, unmeasured.** A damaging move with no effect (immune target) takes the same branch, but its first message is several
-  instructions later (resultmessage), so the patch does not touch it. Safeguard / Mist failures share the Light Screen tail; Mist has no
-  production use.
-- **Census exposure** (Scene ON `off108Route.ts` seeds 0..999, base vs patched, `aud118HoldExposure.py`): see `hold-exposure.json`
-  (section 5).
+- **Census exposure** (Scene ON `off108Route.ts` seeds 0..999 in the base / patched copies, `aud118HoldExposure.py`,
+  `hold-exposure.json`): the patch changes **519 of 37,777 compared uses in 234 battles** (+23,894 frames). Only the used-move
+  message's holdFrames change: **0 other command changes**. By move and first message: Light Screen 70, Reflect 20, Rain Dance 72,
+  Sunny Day 16, Sandstorm 83, Hail 22, Safeguard 62, Protect 50, Detect 7, Endure 16 ("But it failed!"), Stockpile 1 (can't stockpile),
+  Leech Seed 82 (evaded) + 18 (doesn't affect). Light Screen / Reflect / Rain Dance are ROM-proven to 0 here. The others take the same
+  source branch (a failed set* followed within three instructions by attackanimation / waitanimation / print) but are **not ROM-proven
+  per class**. Leech Seed also has an earlier `pause B_WAIT_TIME_SHORT`, so it deserves its own probe before a landing. Two
+  FRAME_BUDGET-stalled battles (seeds 434 / 796, the olnd113 set) end 2 uses earlier with the patch (590 -> 588, 626 -> 624).
+- **Siblings, unmeasured.** A damaging move with no effect on an immune target takes the same branch, but its first message comes several
+  instructions later (resultmessage, after a play-se receipt), so the patch does not touch it.
 
 ## 4. Method
 
@@ -79,7 +85,8 @@ window is aligned (`aud110Align.py`). The only anchor ARTIFACT is the stats-chan
 - **Scene OFF** (`aud118OffStage.py`, `aud118OffRun.sh`): off108's staging, `idle94Probe.py` ON / OFF x r1 / r2 (24 / 24 r1 == r2),
   `off108Rom.py`, and `off108Route.ts` OFF seeds 0..399 (Mist 400..999), ON 0..399 (Light Screen / Reflect). Then `aud118Classes.py`
   (off108Classes.py's rule table with a new CASES list), `off108Verify.py`, `aud118Verify.py` (olnd113Verify.py with the new stat SCEN +
-  the #153 row) and `aud118OnHold.py`.
+  the #153 row) and `aud118OnHold.py`. The Scene ON hold is measured on ON routes of the same moves, because the off108 class matcher
+  keys on the OFF attack receipt, which Scene ON does not emit there (`off-verify.txt`'s "on" rows are empty by construction).
 
 ## 5. Reproduce (from workspace/)
 
@@ -88,4 +95,40 @@ sh tools/integration/aud118Run.sh .integration/validation/<fresh>               
 AUD118_CENSUS=1 sh tools/integration/aud118Run.sh .integration/validation/<fresh>   # + census 0..999 (base) -> Struggle exposure, ON hold exposure
 ```
 
-Every receipt prints `same` / `DIFF` against `tools/integration/fixtures/aud118/`.
+Every receipt prints `same` / `DIFF` against `tools/integration/fixtures/aud118/`. Reproduction status: one fresh end-to-end run
+(`worker-scratch/R1`) printed `same` for the Struggle (base + patched), banner and Scene OFF / ON hold receipts (section 6). The census
+receipts (`exposure-base-396308f86.json`, `hold-exposure.json`) were produced by the census arm's exact tools and copies
+(`ret88Census.sh shards` -> `aud118Exposure.ts`; `off108Route.ts --scene=on` 0..999 in the base / patched copies ->
+`aud118HoldExposure.py`), but the census arm was not rerun end to end inside the 60-minute cap.
+
+Files: `aud118Stage.py`, `aud118Patched.sh`, `aud118Summary.py` (Struggle); `aud118StatStage.py`, `aud118StatRun.sh` (banner);
+`aud118OffStage.py`, `aud118OffRun.sh`, `aud118Classes.py`, `aud118Verify.py`, `aud118OnHold.py` (Scene OFF / ON hold);
+`aud118Exposure.ts`, `aud118HoldExposure.py` (census); `aud118Run.sh` (all). Patches and receipts are in `tools/integration/fixtures/aud118/`.
+
+## 6. Reproduction run (fresh, 19:00 -> 19:10, `sh tools/integration/aud118Run.sh .integration/validation/aud118-20261011/worker-scratch/R1`)
+
+```
+same struggle-base.txt
+same struggle-patched.txt
+TOTAL HARDEN 4/5 (r1==r2 5)  RAIN_DANCE 1/1 (r1==r2 1)  STRUGGLE 11/16 (r1==r2 16)  TAUNT 15/17 (r1==r2 17)
+stat probes r1 == r2: 18 / 18
+SAME comparator r1 == r2
+production path, rect + full screen 0 px windows (rows A-1 .. E+2): 18 / 18
+same banner-compare.txt
+same banner-stat-anim.json
+off probes: 26 / 26 r1 == r2
+SAME rom r2 == r1
+same OFF routes off-0 (patched)  ... off-3 (patched)
+same off-rom-r1.json
+same off-classes.tsv
+same off-verify.txt
+same off-substitute.json
+same off-hold.txt
+```
+
+(The TOTAL line is the patched arm. Its non-0 counts are the 9 designed declines of rows 5 / 6. The base arm has TAUNT 13 / 17: DEFECT A.)
+
+Gates (archive copy of `f43e580a5`, the tools-only tip before the receipts / doc): `npm run test:smoke` 8 files / 448 tests passed. The
+directory-scanning tests (`gate6CoverageManifest`, `aud56GeneralAnimationAllocator`, `land75WallRoutes`) 3 files / 32 passed.
+`npm run build` green. The full `npm test` was not run, because the brief forbids the full suite on the live checkout. No `src/` or `tests/`
+file changed, so the suite's inputs are 396308f86's. `git diff --check` clean.
