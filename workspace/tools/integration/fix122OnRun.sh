@@ -46,4 +46,5 @@ for c in copy copy-final; do
   done; wait)
 done
 for k in 0 1 2 3 4 5 6 7 8 9; do cmp -s "$OUT/routes/off-$k.jsonl" "$OUT/routes-final/off-$k.jsonl" && echo "same OFF routes off-$k" || echo "DIFF OFF routes off-$k"; done
-[ -f "$OUT/rom-r1.json" ] && python3 tools/integration/fix122OnHold.py "$OUT/rom-r1.json" "$OUT/routes" "$OUT/routes-final" > "$OUT/hold.txt" && cat "$OUT/hold.txt"
+python3 tools/integration/fix122OnHold.py "$OUT/rom-r1.json" "$OUT/routes" "$OUT/routes-final" > "$OUT/hold.txt"
+tail -2 "$OUT/hold.txt"
