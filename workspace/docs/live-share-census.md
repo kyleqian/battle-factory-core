@@ -4,6 +4,15 @@ How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
 `tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
 
+## General_StatsChange (2026-10-11, scf117; production src `d4988e08`, base master `681da5c10`) — a separate line
+
+The stat-arrow banner (B_ANIM_STATS_CHANGE / Cmd_playstatchangeanimation) is a GENERAL animation presented by its own `stats-change`
+command (sc106 / scd112 / olnd113 / scf117), live in both scenes. It is NOT part of the move-animation share below (that census counts
+move-animation / substitute-fade commands only). Seeds 0..999: **Scene ON 3,667 commands / 302,540 frames** (4,529 played by the ROM
+− 862 live-Double-Team exemptions), **Scene OFF 4,529 / 368,914**; kernel events 4,552 (23 behind a Substitute: no animation).
+scf117's census delta: move-animation share unchanged (98.80 % / 99.27 %), 0 status changes, `battleDigestExcludingFrames` identical
+(`docs/scf117-stats-change-finish.md` §4, `tools/integration/fixtures/scf117-live-receipt.json`).
+
 ## Latest (2026-10-11, stl109 — Struggle 165 live; production src `5007ac57`, base master `5c050b765`)
 
 Struggle (the user-required forced move, `docs/struggle-integration-scope.md`) is part of the headline: it is ordinary play, so the

@@ -1,0 +1,3768 @@
+{
+ "schema": "scf117-live-receipt/v1",
+ "issue": "ISSUES #166 slices (e) + (f), General_StatsChange finished",
+ "base": "681da5c10",
+ "testedCodeCommit": "39d2bde2a646b3eb8db0ca77eb198c819d2d564b",
+ "srcTree": "d4988e08916e76a02b9587f7c88028c23fdb19ef",
+ "rung1Alignment": {
+  "perScene": {
+   "on": {
+    "commands": 746,
+    "frames": 61560,
+    "holdFrames": 832,
+    "sharply": 288
+   },
+   "off": {
+    "commands": 917,
+    "frames": 74727,
+    "holdFrames": 1003,
+    "sharply": 288
+   }
+  },
+  "nonZeroResidual": 0,
+  "paths": {
+   "BattleScript_AllStatsUpAtk|76|message|hold 3|glyph rel 80|residual 0": {
+    "on": 1,
+    "off": 1
+   },
+   "BattleScript_AllStatsUpAtk|76|stat|hold 1|glyph rel 80|residual 0": {
+    "on": 7,
+    "off": 7
+   },
+   "BattleScript_BulkUpDoMoveAnim|76|stat|hold 2|glyph rel 81|residual 0": {
+    "on": 3,
+    "off": 3
+   },
+   "BattleScript_CalmMindDoMoveAnim|76|stat|hold 2|glyph rel 81|residual 0": {
+    "on": 15,
+    "off": 15
+   },
+   "BattleScript_CosmicPowerDoMoveAnim|76|stat|hold 2|glyph rel 81|residual 0": {
+    "on": 15,
+    "off": 15
+   },
+   "BattleScript_DragonDanceDoMoveAnim|76|stat|hold 2|glyph rel 81|residual 0": {
+    "on": 11,
+    "off": 11
+   },
+   "BattleScript_EffectFlatter|76|message|hold 1|glyph rel 78|residual 0": {
+    "on": 4,
+    "off": 4
+   },
+   "BattleScript_EffectMemento|90|stat|hold 3|glyph rel 96|residual 0": {
+    "on": 2,
+    "off": 2
+   },
+   "BattleScript_EffectSwagger|90|message|hold 1|glyph rel 92|residual 0": {
+    "on": 23,
+    "off": 23
+   },
+   "BattleScript_IntimidateActivatesLoop|76|message|hold 1|glyph rel 78|residual 0": {
+    "on": 24,
+    "off": 24
+   },
+   "BattleScript_SAtkDown2|90|stat|hold 2|glyph rel 95|residual 0": {
+    "on": 26,
+    "off": 26
+   },
+   "BattleScript_SpeedBoostActivates|76|message|hold 1|glyph rel 78|residual 0": {
+    "on": 14,
+    "off": 14
+   },
+   "BattleScript_StatDownDoAnim|76|message|hold 1|glyph rel 78|residual 0": {
+    "on": 114,
+    "off": 114
+   },
+   "BattleScript_StatDownDoAnim|90|message|hold 1|glyph rel 92|residual 0": {
+    "on": 114,
+    "off": 114
+   },
+   "BattleScript_StatDown|76|message|hold 1|glyph rel 78|residual 0": {
+    "on": 172,
+    "off": 172
+   },
+   "BattleScript_StatUpDoAnim|76|message|hold 1|glyph rel 78|residual 0": {
+    "on": 38,
+    "off": 209
+   },
+   "BattleScript_StatUpDoAnim|90|message|hold 1|glyph rel 92|residual 0": {
+    "on": 123,
+    "off": 123
+   },
+   "BattleScript_StatUp|76|message|hold 1|glyph rel 78|residual 0": {
+    "on": 35,
+    "off": 35
+   },
+   "BattleScript_TickleDoMoveAnim|76|stat|hold 3|glyph rel 82|residual 0": {
+    "on": 5,
+    "off": 5
+   }
+  }
+ },
+ "rung2ProductionCompare": {
+  "windows": 20,
+  "zeroPxWindows": 20,
+  "perRowDigest": "ff0f08d6cb32c076",
+  "growlOn": {
+   "x2History": {
+    "bodies": [
+     {
+      "f": 71,
+      "mv": 45,
+      "atk": 0
+     }
+    ],
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 10
+   },
+   "romMaskRect": [
+    144,
+    10,
+    64,
+    64
+   ],
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   }
+  }
+ },
+ "rung2DenseLiveAfterGrowl": {
+  "base-scf117-fury-cutter-opp-onix-golem-growl-0": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "r1EqualsR2": true
+  },
+  "base-scf117-fury-cutter-opp-onix-golem-growl-1": {
+   "rows": 43,
+   "exactRows": [
+    19,
+    19
+   ],
+   "residualPixels": [
+    70910,
+    70910
+   ],
+   "r1EqualsR2": true
+  },
+  "live-fury-cutter-opp-grovyle-blissey-growl-2": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "r1EqualsR2": true
+  },
+  "live-fury-cutter-pla-scyther-golem-growl-2": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "r1EqualsR2": true
+  },
+  "live-scf117-fury-cutter-opp-onix-golem-growl-0": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "r1EqualsR2": true
+  },
+  "live-scf117-fury-cutter-opp-onix-golem-growl-1": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "r1EqualsR2": true
+  },
+  "live-scf117-fury-cutter-opp-onix-golem-growl-3": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "r1EqualsR2": true
+  }
+ },
+ "censusDelta": {
+  "commandsBase": 27429,
+  "commandsFinal": 27429,
+  "liveBase": 27099,
+  "liveFinal": 27099,
+  "liveFramesBase": 4028456,
+  "liveFramesFinal": 4028454,
+  "framesBase": 15222471,
+  "framesFinal": 15226717,
+  "liveToFallback": 0,
+  "frameChangesWithoutStatusChange": 1,
+  "stalledBattles": [
+   {
+    "battle": 434,
+    "commandsBase": 238,
+    "commandsFinal": 238,
+    "prefix": true,
+    "framesBase": 200001,
+    "framesFinal": 200001
+   },
+   {
+    "battle": 796,
+    "commandsBase": 185,
+    "commandsFinal": 185,
+    "prefix": true,
+    "framesBase": 200001,
+    "framesFinal": 200001
+   },
+   {
+    "battle": 881,
+    "commandsBase": 264,
+    "commandsFinal": 264,
+    "prefix": true,
+    "framesBase": 200001,
+    "framesFinal": 200001
+   }
+  ],
+  "keyMismatchBattles": [],
+  "statsEventsBase": 4552,
+  "statsEventsFinal": 4552,
+  "statsEventMismatches": 0,
+  "presentedBase": 3667,
+  "presentedFinal": 3667,
+  "presentedRowsBase": 298348,
+  "presentedRowsFinal": 302540,
+  "holdHistogram": {
+   "1": 3174,
+   "2": 463,
+   "3": 29,
+   "5": 1
+  },
+  "frameBalanceMismatches": [
+   {
+    "battle": 0,
+    "delta": 10,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 1,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 3,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 6,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 7,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 8,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 9,
+    "delta": 16,
+    "stats": 14,
+    "moves": 0
+   },
+   {
+    "battle": 10,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 13,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 14,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 17,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 19,
+    "delta": 10,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 20,
+    "delta": 4,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 22,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 23,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 24,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 28,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 33,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 35,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 36,
+    "delta": 2,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 37,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 38,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 40,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 42,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 45,
+    "delta": 12,
+    "stats": 10,
+    "moves": 0
+   },
+   {
+    "battle": 46,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 47,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 50,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 51,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 52,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 54,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 55,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 57,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 58,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 59,
+    "delta": 8,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 60,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 63,
+    "delta": 16,
+    "stats": 15,
+    "moves": 0
+   },
+   {
+    "battle": 64,
+    "delta": 14,
+    "stats": 12,
+    "moves": 0
+   },
+   {
+    "battle": 66,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 69,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 70,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 71,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 74,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 76,
+    "delta": 10,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 78,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 80,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 82,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 83,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 85,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 86,
+    "delta": 12,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 87,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 88,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 92,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 94,
+    "delta": 12,
+    "stats": 10,
+    "moves": 0
+   },
+   {
+    "battle": 95,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 97,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 98,
+    "delta": 8,
+    "stats": 10,
+    "moves": 0
+   },
+   {
+    "battle": 106,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 107,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 108,
+    "delta": 4,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 109,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 110,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 112,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 113,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 116,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 118,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 121,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 124,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 125,
+    "delta": 18,
+    "stats": 19,
+    "moves": 0
+   },
+   {
+    "battle": 134,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 138,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 139,
+    "delta": 16,
+    "stats": 14,
+    "moves": 0
+   },
+   {
+    "battle": 140,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 143,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 145,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 146,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 148,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 149,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 151,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 153,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 156,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 157,
+    "delta": 10,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 158,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 162,
+    "delta": 10,
+    "stats": 12,
+    "moves": 0
+   },
+   {
+    "battle": 165,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 166,
+    "delta": 16,
+    "stats": 14,
+    "moves": 0
+   },
+   {
+    "battle": 167,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 168,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 174,
+    "delta": 12,
+    "stats": 14,
+    "moves": 0
+   },
+   {
+    "battle": 176,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 178,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 179,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 181,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 183,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 184,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 185,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 186,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 188,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 189,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 190,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 191,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 193,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 194,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 196,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 197,
+    "delta": 20,
+    "stats": 18,
+    "moves": 0
+   },
+   {
+    "battle": 199,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 201,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 202,
+    "delta": 8,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 204,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 206,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 207,
+    "delta": 8,
+    "stats": 10,
+    "moves": 0
+   },
+   {
+    "battle": 208,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 211,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 214,
+    "delta": 20,
+    "stats": 21,
+    "moves": 0
+   },
+   {
+    "battle": 215,
+    "delta": 10,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 217,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 221,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 223,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 224,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 225,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 226,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 228,
+    "delta": 12,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 230,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 232,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 233,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 234,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 235,
+    "delta": 12,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 236,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 237,
+    "delta": 10,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 239,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 241,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 242,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 243,
+    "delta": 28,
+    "stats": 27,
+    "moves": 0
+   },
+   {
+    "battle": 246,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 247,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 248,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 250,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 253,
+    "delta": 4,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 255,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 257,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 259,
+    "delta": 14,
+    "stats": 13,
+    "moves": 0
+   },
+   {
+    "battle": 260,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 261,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 263,
+    "delta": 8,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 264,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 266,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 268,
+    "delta": 22,
+    "stats": 23,
+    "moves": 0
+   },
+   {
+    "battle": 269,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 270,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 272,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 273,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 274,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 275,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 277,
+    "delta": 16,
+    "stats": 14,
+    "moves": 0
+   },
+   {
+    "battle": 280,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 281,
+    "delta": 14,
+    "stats": 13,
+    "moves": 0
+   },
+   {
+    "battle": 282,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 285,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 286,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 288,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 289,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 290,
+    "delta": 12,
+    "stats": 13,
+    "moves": 0
+   },
+   {
+    "battle": 293,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 294,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 295,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 296,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 299,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 300,
+    "delta": 6,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 301,
+    "delta": 20,
+    "stats": 19,
+    "moves": 0
+   },
+   {
+    "battle": 303,
+    "delta": 14,
+    "stats": 13,
+    "moves": 0
+   },
+   {
+    "battle": 304,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 306,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 307,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 308,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 309,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 310,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 313,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 315,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 316,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 318,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 320,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 321,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 322,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 323,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 326,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 329,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 330,
+    "delta": 6,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 331,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 332,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 335,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 336,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 338,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 339,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 340,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 341,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 345,
+    "delta": 12,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 346,
+    "delta": 14,
+    "stats": 13,
+    "moves": 0
+   },
+   {
+    "battle": 347,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 348,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 350,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 351,
+    "delta": 12,
+    "stats": 13,
+    "moves": 0
+   },
+   {
+    "battle": 353,
+    "delta": 4,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 358,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 360,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 361,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 363,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 365,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 366,
+    "delta": 16,
+    "stats": 14,
+    "moves": 0
+   },
+   {
+    "battle": 374,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 375,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 376,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 377,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 379,
+    "delta": 12,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 380,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 383,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 384,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 386,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 387,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 388,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 389,
+    "delta": 10,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 393,
+    "delta": 18,
+    "stats": 19,
+    "moves": 0
+   },
+   {
+    "battle": 394,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 398,
+    "delta": 12,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 399,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 400,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 402,
+    "delta": 8,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 403,
+    "delta": 14,
+    "stats": 12,
+    "moves": 0
+   },
+   {
+    "battle": 405,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 406,
+    "delta": 14,
+    "stats": 16,
+    "moves": 0
+   },
+   {
+    "battle": 408,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 409,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 410,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 411,
+    "delta": 10,
+    "stats": 12,
+    "moves": 0
+   },
+   {
+    "battle": 412,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 415,
+    "delta": 18,
+    "stats": 20,
+    "moves": 0
+   },
+   {
+    "battle": 420,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 422,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 423,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 424,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 428,
+    "delta": 4,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 433,
+    "delta": 12,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 436,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 438,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 439,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 440,
+    "delta": 16,
+    "stats": 17,
+    "moves": 0
+   },
+   {
+    "battle": 441,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 442,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 446,
+    "delta": 10,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 447,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 450,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 451,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 452,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 453,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 455,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 459,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 460,
+    "delta": 14,
+    "stats": 12,
+    "moves": 0
+   },
+   {
+    "battle": 464,
+    "delta": 10,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 467,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 468,
+    "delta": 16,
+    "stats": 15,
+    "moves": 0
+   },
+   {
+    "battle": 470,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 471,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 475,
+    "delta": 12,
+    "stats": 10,
+    "moves": 0
+   },
+   {
+    "battle": 477,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 478,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 480,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 482,
+    "delta": 0,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 483,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 487,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 488,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 489,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 490,
+    "delta": 20,
+    "stats": 18,
+    "moves": 0
+   },
+   {
+    "battle": 491,
+    "delta": 20,
+    "stats": 21,
+    "moves": 0
+   },
+   {
+    "battle": 495,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 496,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 497,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 499,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 500,
+    "delta": 2,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 502,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 504,
+    "delta": 8,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 505,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 507,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 508,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 509,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 510,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 514,
+    "delta": 16,
+    "stats": 14,
+    "moves": 0
+   },
+   {
+    "battle": 515,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 519,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 521,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 523,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 524,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 528,
+    "delta": 10,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 529,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 532,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 535,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 536,
+    "delta": 14,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 540,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 541,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 542,
+    "delta": 24,
+    "stats": 25,
+    "moves": 0
+   },
+   {
+    "battle": 544,
+    "delta": 10,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 551,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 552,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 553,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 554,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 555,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 557,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 558,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 559,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 560,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 562,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 565,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 567,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 568,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 569,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 570,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 571,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 572,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 573,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 575,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 576,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 577,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 578,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 580,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 582,
+    "delta": 14,
+    "stats": 12,
+    "moves": 0
+   },
+   {
+    "battle": 584,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 587,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 588,
+    "delta": 10,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 589,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 593,
+    "delta": 4,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 594,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 596,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 598,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 600,
+    "delta": 10,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 601,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 602,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 603,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 604,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 606,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 607,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 609,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 611,
+    "delta": 8,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 612,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 614,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 615,
+    "delta": 4,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 616,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 619,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 620,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 621,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 623,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 624,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 625,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 626,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 629,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 630,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 631,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 632,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 633,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 634,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 635,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 637,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 638,
+    "delta": 10,
+    "stats": 12,
+    "moves": 0
+   },
+   {
+    "battle": 642,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 643,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 646,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 647,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 648,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 651,
+    "delta": 12,
+    "stats": 10,
+    "moves": 0
+   },
+   {
+    "battle": 654,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 656,
+    "delta": 10,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 657,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 658,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 659,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 660,
+    "delta": 10,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 661,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 663,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 665,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 666,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 667,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 668,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 670,
+    "delta": 10,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 673,
+    "delta": 8,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 678,
+    "delta": 16,
+    "stats": 14,
+    "moves": 0
+   },
+   {
+    "battle": 682,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 683,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 684,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 687,
+    "delta": 8,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 688,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 690,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 691,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 694,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 695,
+    "delta": 18,
+    "stats": 16,
+    "moves": 0
+   },
+   {
+    "battle": 696,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 697,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 698,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 699,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 701,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 704,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 705,
+    "delta": 16,
+    "stats": 15,
+    "moves": 0
+   },
+   {
+    "battle": 709,
+    "delta": 12,
+    "stats": 10,
+    "moves": 0
+   },
+   {
+    "battle": 710,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 712,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 713,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 715,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 719,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 720,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 731,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 732,
+    "delta": 4,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 733,
+    "delta": 10,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 735,
+    "delta": 20,
+    "stats": 18,
+    "moves": 0
+   },
+   {
+    "battle": 736,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 737,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 739,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 743,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 744,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 746,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 749,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 750,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 751,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 752,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 754,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 755,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 756,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 758,
+    "delta": 24,
+    "stats": 21,
+    "moves": 0
+   },
+   {
+    "battle": 761,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 762,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 763,
+    "delta": 6,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 764,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 765,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 767,
+    "delta": 4,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 772,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 773,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 774,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 775,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 776,
+    "delta": 2,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 777,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 780,
+    "delta": 4,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 781,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 784,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 787,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 789,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 790,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 793,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 795,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 798,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 799,
+    "delta": 16,
+    "stats": 14,
+    "moves": 0
+   },
+   {
+    "battle": 800,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 802,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 806,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 807,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 809,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 813,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 817,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 819,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 820,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 821,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 822,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 823,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 825,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 826,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 827,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 831,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 832,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 833,
+    "delta": 26,
+    "stats": 25,
+    "moves": 0
+   },
+   {
+    "battle": 834,
+    "delta": 10,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 838,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 839,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 840,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 841,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 842,
+    "delta": 2,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 843,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 844,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 845,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 847,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 852,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 856,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 860,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 861,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 862,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 863,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 865,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 866,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 868,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 869,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 870,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 871,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 875,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 880,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 882,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 883,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 885,
+    "delta": 6,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 887,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 891,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 892,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 893,
+    "delta": 12,
+    "stats": 13,
+    "moves": 0
+   },
+   {
+    "battle": 895,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 896,
+    "delta": 14,
+    "stats": 15,
+    "moves": 0
+   },
+   {
+    "battle": 897,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 900,
+    "delta": 10,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 901,
+    "delta": 10,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 902,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 903,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 905,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 908,
+    "delta": 6,
+    "stats": 4,
+    "moves": 0
+   },
+   {
+    "battle": 910,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 912,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 913,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 915,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 917,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 918,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 919,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 920,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 921,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 922,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 924,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 925,
+    "delta": 0,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 926,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 927,
+    "delta": 14,
+    "stats": 15,
+    "moves": 0
+   },
+   {
+    "battle": 928,
+    "delta": 4,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 930,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 932,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 933,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 936,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 937,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 938,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 940,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 942,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 943,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 944,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 945,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 946,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 947,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 949,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 953,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 954,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 956,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 958,
+    "delta": 12,
+    "stats": 11,
+    "moves": 0
+   },
+   {
+    "battle": 959,
+    "delta": 6,
+    "stats": 8,
+    "moves": 0
+   },
+   {
+    "battle": 960,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 961,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 962,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 964,
+    "delta": 4,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 965,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 966,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 969,
+    "delta": 8,
+    "stats": 6,
+    "moves": 0
+   },
+   {
+    "battle": 970,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 972,
+    "delta": 4,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 973,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 976,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 978,
+    "delta": 16,
+    "stats": 19,
+    "moves": 0
+   },
+   {
+    "battle": 979,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 980,
+    "delta": 6,
+    "stats": 5,
+    "moves": 0
+   },
+   {
+    "battle": 981,
+    "delta": 2,
+    "stats": 1,
+    "moves": 0
+   },
+   {
+    "battle": 983,
+    "delta": 8,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 985,
+    "delta": 10,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 986,
+    "delta": 14,
+    "stats": 13,
+    "moves": 0
+   },
+   {
+    "battle": 989,
+    "delta": 2,
+    "stats": 3,
+    "moves": 0
+   },
+   {
+    "battle": 992,
+    "delta": 16,
+    "stats": 15,
+    "moves": 0
+   },
+   {
+    "battle": 994,
+    "delta": 28,
+    "stats": 29,
+    "moves": 0
+   },
+   {
+    "battle": 995,
+    "delta": 6,
+    "stats": 7,
+    "moves": 0
+   },
+   {
+    "battle": 997,
+    "delta": 4,
+    "stats": 2,
+    "moves": 0
+   },
+   {
+    "battle": 998,
+    "delta": 8,
+    "stats": 9,
+    "moves": 0
+   },
+   {
+    "battle": 999,
+    "delta": 0,
+    "stats": 1,
+    "moves": 0
+   }
+  ],
+  "digestExcludingFramesEqualShards": 10,
+  "statusChangeCount": 0,
+  "statusChangesByMove": {},
+  "liveShareCountBase": 98.8,
+  "liveShareCountFinal": 98.8
+ },
+ "censusStatusChanges": [],
+ "censusMerged_base": {
+  "battles": {
+   "played": 1000,
+   "terminal": 997,
+   "stalled": 3,
+   "errors": 0,
+   "frames": 15222471,
+   "playerTurns": 20513
+  },
+  "overall": {
+   "commands": 27429,
+   "live": 27099,
+   "frames": 4057956,
+   "liveFrames": 4028456,
+   "liveSharePctByCount": 98.8,
+   "liveSharePctByFrames": 99.27
+  },
+  "battleDigest": "13709646dd71b18649fc957ce870aa147c7c61eef8c672352ed5a61216554a4b",
+  "commandKeyDigest": "7e0864d0cbb20a16fd7226176d6939d02a6cb2894cbe1daee138ef90da819e02"
+ },
+ "censusMerged_final": {
+  "battles": {
+   "played": 1000,
+   "terminal": 997,
+   "stalled": 3,
+   "errors": 0,
+   "frames": 15226717,
+   "playerTurns": 20513
+  },
+  "overall": {
+   "commands": 27429,
+   "live": 27099,
+   "frames": 4057954,
+   "liveFrames": 4028454,
+   "liveSharePctByCount": 98.8,
+   "liveSharePctByFrames": 99.27
+  },
+  "battleDigest": "59349ffaab12c40bd1a0202d11fd6c047d9ac04e3595a427bd0716137b6d5f00",
+  "commandKeyDigest": "7e0864d0cbb20a16fd7226176d6939d02a6cb2894cbe1daee138ef90da819e02"
+ },
+ "censusStatsChangePerScene": {
+  "on": {
+   "commands": 3667,
+   "frames": 302540,
+   "holdFrames": 4192,
+   "sharply": 1404
+  },
+  "off": {
+   "commands": 4529,
+   "frames": 368914,
+   "holdFrames": 5054,
+   "sharply": 1404
+  }
+ },
+ "censusAlignmentNonZeroResidual": 0,
+ "censusExposure": {
+  "battles": 1000,
+  "budgetEnded": 3,
+  "totalFrames": 15226717,
+  "statCommands": 5698,
+  "battlesWithStatCommands": 897,
+  "statsChangeEvents": 4552,
+  "battlesWithStatsChange": 878,
+  "byClass": {
+   "up1": 1439,
+   "down1": 1299,
+   "up2": 715,
+   "down2": 685,
+   "multiple-up1": 386,
+   "multiple-down1": 24,
+   "multiple-down2": 4
+  },
+  "byArg": {
+   "15": 75,
+   "16": 121,
+   "17": 170,
+   "18": 124,
+   "19": 1,
+   "21": 948,
+   "22": 144,
+   "23": 103,
+   "24": 342,
+   "26": 147,
+   "27": 486,
+   "28": 77,
+   "39": 237,
+   "40": 182,
+   "41": 145,
+   "42": 9,
+   "43": 142,
+   "46": 134,
+   "47": 94,
+   "48": 241,
+   "49": 113,
+   "50": 103,
+   "55": 386,
+   "57": 24,
+   "58": 4
+  },
+  "bySide": {
+   "player": 2186,
+   "opponent": 2366
+  },
+  "substitute": {
+   "visible": 4529,
+   "behindSubstitute": 23
+  },
+  "castformForms": {}
+ },
+ "gates": {
+  "finalCodeCommit": "5f09fc1b5",
+  "targeted": "15 files / 227 tests passed (4 workers)",
+  "typecheck": "green",
+  "smoke": "448 / 448",
+  "fullSuite": "shard 1 817 files / 7,030 tests passed (22 / 119 skipped); shard 2 816 files / 6,442 tests passed (22 / 104 skipped); 0 failed",
+  "build": "green",
+  "differential": "PASS, 624 / 624 captures byte-identical (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on, base 681da5c10)",
+  "soakLogs": "soak111Decoupling full / vanilla seeds 0..1: decision + canonical logs SAME vs 681da5c10"
+ }
+}
