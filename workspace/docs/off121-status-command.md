@@ -109,7 +109,21 @@ tests); the 10 ROM-receipt tests and the Scene ON guard pass.
 
 ## 5. Gates
 
-(filled in at the end of the step)
+Final code = production src `4642cfcba` (commit e34c93caa; later commits add tools / receipt / doc only).
+
+- Targeted (4 workers, before the soak re-pin): olnd113SceneOffPauses, sc106StatsChangeCommand, battleResolutionPresentation,
+  randomRoundSoak, playableAnimationIntegration, factoryRoundBattleOrchestrator: 6 files, 199 passed / 3 failed = exactly the three soak
+  pins of §3, re-pinned after (both shards below include every one of these files). `tests/off121StatusCommand.test.ts`: 13 / 13.
+- `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
+- Full suite, two shards, 4 workers, one after the other (nohup, polled): shard 1 **819 files / 7,046 tests passed** (22 / 119 skipped),
+  0 failed. Shard 2 **818 files / 6,460 tests passed** (22 / 104 skipped), 0 failed.
+- `npm run build`: green.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base
+  9d23a17c4`: **PASS, 624 / 624 captures byte-identical** (the canonical traces are Scene ON).
+- `npm run soak -- --policy vanilla --seeds 0:20 --parallel 5`: **OK 20, CRASH 0, HANG 0** (budget 20).
+- `git diff --check`: clean.
+- Not serialized (the 80-minute cap left no room): build and differential ran during full-suite shard 1, smoke and the soak during
+  shard 2; sibling lanes were also running soaks on the same machine.
 
 ## 6. Reproduction (from workspace/)
 
