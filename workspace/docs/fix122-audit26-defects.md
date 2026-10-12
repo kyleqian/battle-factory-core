@@ -87,7 +87,15 @@ aud118's `hold-exposure.json` for the generic patch.
 
 `tests/fix122AuditDefects.test.ts`: DEFECT A pins the table and the event fold, with a revert experiment (the aud118 patch reversed):
 2 / 2 fail. DEFECT B covers one census battle per class (Scene ON start == ROM glyph − 1) plus a Scene OFF Rain Dance row. Revert
-experiment (the hold line removed): **12 / 12 class tests fail** (start 0), and the OFF row still passes. MOVED_PINS
+experiment (the hold line removed): **12 / 12 class tests fail** (start 0), and the OFF row still passes. **No existing pin moved**: no other test pins a Scene ON failure-message
+start of the covered classes.
+
+Gates (final code 20ce9ee3f + docs / tools): the targeted files (fix122, olnd113, x2-history x5, stl109, sdl119) passed before the commit.
+`npm run typecheck` green. `npm run test:smoke` 8 files / 448 passed. Full suite (4 workers, shards one after the other): 1/2 819 files
+passed / 22 skipped (7,035 tests), 2/2 818 / 22 (6,474 tests). `npm run build` green. `npm run compare:differential -- fight-submenu
+battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base d6444bd53`: PASS, 624 / 624 captures byte-identical.
+`git diff --check` clean. Because of the cap, build and differential ran during the shards (not serialized). Reproduction: the receipts
+come from the pieces of `fix122Run.sh` (the same tools / copies). The runner itself was not rerun end to end inside the cap.
 
 ## 5. Reproduce (from workspace/)
 
