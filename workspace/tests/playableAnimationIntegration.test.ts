@@ -57,8 +57,8 @@ describe("ordinary playable animation queue", () => {
       const animation = on.animations.find(a => a.moveId === expectedMove && a.attacker === 1)!;
       expect(animation).toMatchObject({ player: "WAILMER", opponent: "HAUNTER" });
       // shp116 (shadow105): HAUNTER is an ELEVATED opponent attacker; its Shadow Punch keeps its 8 idle lead rows, row 0 drawing the
-      // enemy shadow the ROM's activation row still shows.
-      expect(animation.ages).toEqual(expectedMove === 325 ? land97Ages(325, 105) : land97Ages(expectedMove, 270));
+      // enemy shadow the ROM's activation row still shows; shp116 (sp103 D4): the body is 105 + the age-90 restore lag row = 106.
+      expect(animation.ages).toEqual(expectedMove === 325 ? land97Ages(325, 106) : land97Ages(expectedMove, 270));
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     }
   }, 60000);

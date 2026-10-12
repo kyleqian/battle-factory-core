@@ -753,21 +753,6 @@
       ]
     },
     {
-      "move": "MOVE_SHADOW_PUNCH",
-      "id": 325,
-      "liveEvidence": [
-        "opening-draft input: HAUNTER -> GROVYLE",
-        "generated seed 54 command input: HAUNTER -> WAILMER"
-      ],
-      "remaining": [
-        "source BG restore / VBlank timing and final cleanup under changed battle history",
-        "persistent palette/resource allocation through switch and unknown graphics",
-        "whole-playable arbitrary-history source comparison"
-      ],
-      "paletteHistoryEvidence": "../tools/integration/fixtures/live-palette-history-receipt.json",
-      "framebufferDiagnosis": "../tools/integration/fixtures/live-palette-framebuffer-diagnosis.json"
-    },
-    {
       "move": "MOVE_HOWL",
       "id": 336,
       "sourceFieldEvidence": "../tools/integration/fixtures/howl-live-adapter-receipt.json",
@@ -3676,7 +3661,7 @@
     }
   },
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 239,
+  "implementedCount": 238,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3853,7 +3838,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 25,
+  "faithfulTimingCount": 26,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -6321,6 +6306,99 @@
       "proofCommands": [
         "sh tools/integration/fp100Run.sh .integration/validation/<fresh>",
         "npx vitest run tests/animation/fp100FocusPunchTiming.test.ts tests/animation/focusPunch.test.ts"
+      ]
+    },
+    {
+      "id": 325,
+      "move": "MOVE_SHADOW_PUNCH",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 90,
+          "fixedLagAges": [
+            27,
+            70,
+            71
+          ],
+          "iterations": 105,
+          "side": "opponent",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 109,
+              "measured": 12
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 108,
+              "measured": 4
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 90,
+          "fixedLagAges": [
+            27,
+            70,
+            71
+          ],
+          "iterations": 105,
+          "side": "player",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 109,
+              "measured": 13
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 108,
+              "measured": 3
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [
+          83,
+          84,
+          85,
+          86,
+          87,
+          88,
+          89,
+          90,
+          91,
+          92,
+          93,
+          94,
+          95,
+          96,
+          97,
+          98,
+          101
+        ],
+        "rows": 17,
+        "maxPixelsPerRow": 18176,
+        "cause": "the restorebg Task_FadeToBg frame (LoadDefaultBg's battle-terrain decompress) does not overrun in the other phase: no lag at body row 90 (production age 82), so the return-to-field fade-in starts at age 83 instead of 84 and every fade-in age 83..98 is one BLDY step brighter in the ROM (16 whole-field rows, 17,096..18,176 px/row: the accepted HAUNTER -> ONIX fixtures, sp103 HAUNTER -> STEELIX opponent, HAUNTER -> CROBAT player); the elevated opponent HAUNTER's shadow also returns one row earlier, age 101 (200 px); every other row as the policy phase"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A sp103, fp100 precedent: the adapter gained a measured CPU-phase parameter, both sides; the live adapter renders the dominant phase, liveMoveAnimation.ts case 325 liveFadeHost restoreTaskStartCallbackDeferrals 1 = the policy phase, duration 107 player / 106 opponent); the existing exact fixture proofs stay valid in their proved scope (the accepted HAUNTER -> ONIX fixtures (108 active rows) are now the documented other phase)",
+        "tools/integration/fixtures/sp103/receipts/phase.tsv (sp103Run.sh: fresh direct-mGBA ctl95Probe.py, explicit lab seeds 305419897 / 38177486, r1 == r2 6/6 scenarios; 24 HAUNTER bodies, 5 foes, first and later bodies, after Light Screen / Shadow Punch / Harden): lag at 90 (gRng2Value repeat 89/90, ROM body 109 rows) in player 11 of 12, opponent 10 of 12; fixed lags 27, 70, 71 in every body; + docs/live-audit-24.md TIMING-PHASE (6 fresh bodies) + the 2 accepted fixtures",
+        "tools/integration/fixtures/sp103/receipts/body-patch.json: every policy-phase opponent window 0 px on every row through the patched production live renderer (ctl95ControlCheck.ts --shift=8, two fresh runs): 10 / 10; player policy-phase windows exact except the pre-existing E+5 trail row 106 (live audit 24 ARTIFACT) and the elevated-target shadow rows 102..105 (CROBAT)",
+        "scoped-exact liveEvidence (kept, now in its proved scope): opening-draft input HAUNTER -> GROVYLE; generated seed 54 command input HAUNTER -> WAILMER",
+        "scoped-exact remaining (kept): persistent palette/resource allocation through switch and unknown graphics",
+        "scoped-exact remaining (kept): whole-playable arbitrary-history source comparison"
+      ],
+      "proofCommands": [
+        "sh tools/integration/sp103Run.sh .integration/validation/<fresh>"
       ]
     }
   ],

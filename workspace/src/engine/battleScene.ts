@@ -51648,7 +51648,8 @@ export function renderSceneOnMovePresentation(
         ).x2;
     // `SpriteCB_EnemyShadow` unhides elevated opponent shadows only after
     // the animation script clears; hardware OAM exposes it one frame later.
-    if (opponentToPlayer && view.animationAge >= 101) {
+    if (opponentToPlayer && view.animationAge >= 101
+      + (liveField ? state.config.liveFadeHost?.restoreTaskStartCallbackDeferrals ?? 0 : 0)) {
       drawSpriteSheet(
         fb,
         battleAnimGhostBg.opponentShadow.tileset,

@@ -29,8 +29,8 @@ describe("animation-integration live status count", () => {
     // reclassified to faithful timing (d4tails); 241 - Faint Attack reclassified to faithful timing (fa185, per-side restore lag);
     // 240 - Light Screen reclassified to faithful timing (lsbz, the opponent's row-59 BLDALPHA write phase); 239 - Sky Attack reclassified to
     // faithful timing (d4later, the strike's optional lag at 161); 238 - Focus Punch reclassified to faithful timing (fp100, the age-131
-    // restore lag).
-    expect(status.implementedCount - Object.keys(status.additionalRequiredBodies).length).toBe(238); // + Struggle 165 (stl109) = 239 live adapters
+    // restore lag); 237 - Shadow Punch reclassified to faithful timing (shp116 / sp103, the age-90 restore lag).
+    expect(status.implementedCount - Object.keys(status.additionalRequiredBodies).length).toBe(237); // + Struggle 165 (stl109) = 238
     expect(status.playableExactCount).toBe(0);
     const faithful = status.faithfulRandomAdapters as { id: number; move: string; policy: string; provenance: string }[];
     expect(status.faithfulRandomCount).toBe(faithful.length);

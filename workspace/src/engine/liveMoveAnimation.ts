@@ -238,7 +238,9 @@ export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   // Focus Punch 264 reclassified to faithful timing (fp100, liveMoveTimingPolicy.ts 264, the age-131 restore lag); its exact fixtures
   // stay valid in scope.
   272, 277, 280, 281, 287, 290, 302,
-  305, 306, 319, 320, 321, 325, 334, 335, 336, 337, 342, 343, 347,
+  // Shadow Punch 325 reclassified to faithful timing (sp103, liveMoveTimingPolicy.ts 325, the age-90 restore lag); its exact fixtures
+  // stay valid in scope.
+  305, 306, 319, 320, 321, 334, 335, 336, 337, 342, 343, 347,
   56, 61, 197, 238, 259, 294, 341,
   // prep11 (docs/next-adapters-prep11.md): Leech Seed main body.
   73, 80, 161, 169, 193, 194, 278, 314, 327,
@@ -1270,8 +1272,9 @@ export function liveMoveAnimationDuration(
     // The opponent-front script drops its final wave one source row earlier.
     case 319: return request.attacker === 0 ? 86 : 85;
     case 321: return TICKLE_FRAME_COUNT;
-    // Source restorebg fade, then inactive display. Both orientations restore.
-    case 325: return request.attacker === 0 ? 106 : 105;
+    // Source restorebg fade, then inactive display. Both orientations restore; sp103 (D4): + the age-90 restore lag row.
+    case 325: return (request.attacker === 0 ? 106 : 105)
+      + (liveMoveOptionalLagAge(325, request.attacker === 0 ? "player" : "opponent") !== null ? 1 : 0);
     // The source Block script is two rows longer on the opponent-front side.
     case 335: return request.attacker === 0 ? 141 : 146;
     case 334: return 101; // Iron Defense source body through its final blend row.
@@ -2278,6 +2281,8 @@ export function liveMoveAnimationPresentation(
       config = {
         move: "SHADOW_PUNCH", attacker, target,
         traceScratchUnfadedPalette: paletteInput?.traceScratchUnfadedPalette,
+        // sp103 (D4, liveMoveTimingPolicy.ts 325): the age-90 restore lag defers the restore fade (and the shadow return) one row.
+        liveFadeHost: { restoreTaskStartCallbackDeferrals: liveMoveOptionalLagAge(325, attacker.geometry.side) !== null ? 1 : 0 },
         fieldProfile: { ...fieldProfile, playerStatus: "none" },
         attackerSpriteId: request.attacker === 0 ? 6 : 8,
         attackerMoveSpeed: request.attacker === 0 ? 8 : -8,
