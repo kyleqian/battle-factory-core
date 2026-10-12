@@ -71,7 +71,22 @@ trajectory check is the log identity.
 
 ## 5. Gates
 
-GATES_PLACEHOLDER
+Final code = production src `b46ad30e2` (unchanged since 8aed73113); tests / tools as of 5a3cecce5, docs / receipt after.
+
+- Targeted (4 workers): olnd113SceneOffPauses, factoryRoundBattleOrchestrator, sc106StatsChangeCommand, randomRoundSoak,
+  battleResolutionPresentation, animation/factoryAnimationInventory, playableAnimationIntegration: **7 files / 209 tests passed**.
+- `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
+- Full suite, two shards, 4 workers (after the census): shard 1 **815 files / 6,995 tests passed** (22 / 119 skipped). Shard 2 **814 files /
+  6,430 tests passed** (22 / 104 skipped). 0 failed.
+- `npm run build`: green.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base bce86a4b0`:
+  **PASS, 624 / 624 captures byte-identical** (235 + 216 + 173). Both canonical railroad traces are byte-identical, and no capture moved
+  (these Scene ON windows contain no miss / fail print).
+- `npm run soak -- --policy vanilla --seeds 0:20 --parallel 5`: **OK 20, CRASH 0, HANG 0** (budget 20).
+- `git diff --check`: clean.
+- `sh tools/integration/olnd113Run.sh <fresh> --census`: ALL SAME (section 3).
+- Revert experiments (git-archive copy of HEAD, its own git repo): production file = bce86a4b0's → olnd113SceneOffPauses 25 / 27 fail;
+  lead(STATS_CHANGE) = 0 → exactly 4 fail (Bulk Up, Double Team, Sand-Attack, joint target).
 
 ## 6. Reproduction (from workspace/)
 
