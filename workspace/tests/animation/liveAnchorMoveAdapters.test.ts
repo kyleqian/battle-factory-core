@@ -131,7 +131,7 @@ describe("live anchor move adapters", () => {
     const on = generatedCommandAnimationReplay(row.route.seed, "on", [row.route.slot], row.route.streak);
     const off = generatedCommandAnimationReplay(row.route.seed, "off", [row.route.slot], row.route.streak);
     const body = on.animations.find(animation => animation.moveId === row.id && animation.attacker === 0);
-    expect(body?.ages).toEqual(land97Ages(row.id, row.duration, body?.opponent));
+    expect(body?.ages).toEqual(land97Ages(row.id, row.duration));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);

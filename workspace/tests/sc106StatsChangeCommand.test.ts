@@ -82,8 +82,10 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     const route = scanRoute(6, Array(8).fill(0), "on");
     const a = anchor(route, 0);
     expect(a).toMatchObject({ path: "intimidate", argument: 22, battler: 0, prevEvent: "stat-stage-change:attack" });
-    expect(a.statsChange).toEqual({ frame: 2694, frames: 76 });
-    expect(a.following).toMatchObject({ type: "message", frame: 2694 + 76 + 1, glyph: 2694 + 76 + 1 });
+    // shp116 (shadow105): + 10, the two DROWZEE Confusion (93, N 5) bodies into the elevated Foe DUSTOX before it regain their idle lead
+    // rows (lead row 0 now draws the enemy shadow instead of declining the lead); scf117: + 1 hold before the following print.
+    expect(a.statsChange).toEqual({ frame: 2694 + 10, frames: 76 });
+    expect(a.following).toMatchObject({ type: "message", frame: 2694 + 10 + 76 + 1, glyph: 2694 + 10 + 76 + 1 });
     expect(a.following!.text).toContain("INTIMIDATE");
   });
 

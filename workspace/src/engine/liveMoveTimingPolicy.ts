@@ -578,6 +578,35 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
     }],
   },
   /**
+   * S10A sp103 (docs/next-adapters-sp103.md; live audit 24 "TIMING-PHASE"): Move_SHADOW_PUNCH ends `clearmonbg; blendoff; restorebg;
+   * waitbgfadein`, Focus Punch's tail: the Task_FadeToBg frame (LoadDefaultBg's battle-terrain decompress) overruns VBlank in some
+   * bodies, gRng2Value repeats between body rows 89 and 90 (ROM rows from the activation; production age 82, after the 8 idle lead
+   * rows). The restore fade-in (production ages 83..98) and the elevated opponent HAUNTER's shadow return (101) come one row later:
+   * 109 active rows with it, 108 without (shadowPunchFadeHost.ts restoreTaskStartCallbackDeferrals 1). Fixed lags at 27, 70, 71.
+   * HAUNTER is the only Factory user. Measured (fresh direct mGBA, r1 == r2, tools/integration/fixtures/sp103/receipts/phase.tsv +
+   * live audit 24's 6 fresh bodies and the 2 accepted HAUNTER -> ONIX fixtures): player 13 : 3, opponent 12 : 4. Neither side, foe,
+   * body index nor predecessor decides it (same lab, same pair: opponent HAUNTER -> STEELIX 108, 108, 109, 109). Wrong phase: the
+   * fade-in ages 83..98 (+ 101 for the opponent attacker).
+   */
+  325: {
+    move: "MOVE_SHADOW_PUNCH",
+    parameters: [{
+      kind: "optional-lag-age", age: 90, fixedLagAges: [27, 70, 71], iterations: 105, side: "opponent",
+      alternatives: [{ phase: "event", bodyRows: 109, measured: 12 }, { phase: "no-event", bodyRows: 108, measured: 4 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/sp103/receipts/phase.tsv (opponent: lag at 90 in 10 of 12 fresh HAUNTER bodies, 3 foes, first and later)",
+        "docs/live-audit-24.md TIMING-PHASE (opponent: HAUNTER -> LAPRAS, SKARMORY lag; GENGAR -> LAPRAS no lag)",
+        "accepted opponent fixture HAUNTER -> ONIX (108 rows: no lag; production exact before sp103)"],
+    }, {
+      kind: "optional-lag-age", age: 90, fixedLagAges: [27, 70, 71], iterations: 105, side: "player",
+      alternatives: [{ phase: "event", bodyRows: 109, measured: 13 }, { phase: "no-event", bodyRows: 108, measured: 3 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/sp103/receipts/phase.tsv (player: lag at 90 in 11 of 12 fresh HAUNTER bodies, 2 foes, first and later)",
+        "docs/live-audit-24.md TIMING-PHASE (player: HAUNTER -> LAPRAS, GENGAR -> LAPRAS lag; HAUNTER -> SKARMORY no lag)",
+        "accepted player fixture HAUNTER -> ONIX (108 rows: no lag; production exact before sp103)"],
+    }],
+  },
+  /**
    * S10A Ice Ball (docs/next-adapters-prep26.md s1.4 H / s4 item 6; tools/integration/fixtures/prep26/iceball-check.json lagRows): 0-step lag rows
    * (an animationRng stall: VBlank overrun), measured PER COUNTER BODY (request.rolloutCounter 1..5; 18 bodies): none in any counter 0..2 body
    * (accepted SPHEAL player / opponent + GLALIE -> GOLEM player / opponent: 4 each), counter 3 (body 4) row 38 in 1 of 3 (accepted player; not
@@ -727,6 +756,10 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // S10A fp100 (reclassified from scoped exact, lsbz precedent): Focus Punch, the age-131 restore lag (lag on both sides, 154 active rows;
   // focusPunch.ts restoreLag); exact fixtures stay valid in scope; other-phase windows tools/integration/fixtures/fp100/windows/*.
   264,
+  // S10A sp103 (reclassified from scoped exact, fp100 precedent): Shadow Punch, the age-90 restore lag (lag on both sides, 109 active rows;
+  // shadowPunchFadeHost.ts restoreTaskStartCallbackDeferrals 1); exact fixtures stay valid in scope; other-phase windows
+  // tools/integration/fixtures/sp103/windows/*.
+  325,
 ]);
 
 /**

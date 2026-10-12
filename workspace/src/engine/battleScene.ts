@@ -51644,13 +51644,17 @@ export function renderSceneOnMovePresentation(
         ).x2;
     // `SpriteCB_EnemyShadow` unhides elevated opponent shadows only after
     // the animation script clears; hardware OAM exposes it one frame later.
-    if (opponentToPlayer && view.animationAge >= 101) {
+    // shp116 (sp103 DEFECT): on the live field the opponent battler's shadow
+    // returns whenever its species is elevated, attacker or target.
+    const shadowBattler = opponentToPlayer ? view.attacker : view.target;
+    if ((liveField ? enemyMonElevation(shadowBattler.species) > 0 : opponentToPlayer) && view.animationAge >= 101
+      + (liveField ? state.config.liveFadeHost?.restoreTaskStartCallbackDeferrals ?? 0 : 0)) {
       drawSpriteSheet(
         fb,
         battleAnimGhostBg.opponentShadow.tileset,
         battleAnimGhostBg.opponentShadow.palette,
-        view.attacker.geometry.animationCenter.x - 16,
-        view.attacker.geometry.battlePositionCenter.y + 25,
+        shadowBattler.geometry.animationCenter.x - 16,
+        shadowBattler.geometry.battlePositionCenter.y + 25,
       );
     }
     drawSpriteSheet(
@@ -55425,9 +55429,10 @@ export function renderBattleResolutionLiveView(
   liveCastformFormSides.player = view.fieldArt.player.castformForm;
   liveCastformFormSides.opponent = view.fieldArt.opponent.castformForm;
   // SpriteCB_EnemyShadow (battle_gfx_sfx_util.c:1214) also hides the shadow of an `invisible` battler sprite (hide66).
+  // shadow105: a lead > 0 command's row 0 is the ROM's activation row, whose OAM still shows the shadow (the hide shows from row 1).
   liveOpponentShadow.species = effect?.type === "move" && view.field.opponent.hp !== 0 && !subbedOpponentAttacker
     && !liveSubstituteDollSides.opponent && !hiddenSides.opponent
-    && (effect.age === shadowRow || liveMoveOpponentShadowReturn(effect.request, effect.age))
+    && (effect.age === shadowRow || effect.preActivationRow === true || liveMoveOpponentShadowReturn(effect.request, effect.age))
     ? view.fieldArt.opponent.speciesSymbol : null;
   liveOpponentShadow.suppressAdHoc = effect?.type === "move" && effect.age === 0;
   try {

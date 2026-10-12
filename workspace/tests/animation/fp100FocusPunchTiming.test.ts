@@ -69,18 +69,18 @@ describe("fp100: Focus Punch age-131 restore lag (D4)", () => {
     }
   });
 
-  it("accounting: Focus Punch moved from scoped exact to faithful timing (238 + 13 + 25 = 276)", () => {
+  it("accounting: Focus Punch moved from scoped exact to faithful timing (237 + 13 + 26 = 276 after shp116's Shadow Punch)", () => {
     expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(264);
     expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(264);
     const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
     // stl109: implementedCount also counts Struggle 165, the one additional required body outside the 276 (additionalRequiredBodies)
-    expect([status.implementedCount - Object.keys(status.additionalRequiredBodies).length, status.faithfulRandomCount, status.faithfulTimingCount]).toEqual([238, 13, 25]);
+    expect([status.implementedCount - Object.keys(status.additionalRequiredBodies).length, status.faithfulRandomCount, status.faithfulTimingCount]).toEqual([237, 13, 26]);
     expect(status.implementedAdapters.some((e: { id: number }) => e.id === 264)).toBe(false);
     const entry = status.faithfulTimingAdapters.find((e: { id: number }) => e.id === 264);
     expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[264]!.parameters.map(({ evidence: _evidence, ...p }) => p));
     expect(entry.alternatePhaseResidual).toMatchObject({ ages: [...Array.from({ length: 16 }, (_, i) => 132 + i), 154], maxPixelsPerRow: 18267 });
     const census = JSON.parse(readFileSync("tools/integration/fixtures/remaining-adapters-census.json", "utf8"));
-    expect(census.summary?.sumsTo ?? census.sumsTo).toBe("238+13+25+0+0=276");
+    expect(census.summary?.sumsTo ?? census.sumsTo).toBe("237+13+26+0+0=276");
   });
 
   describe("committed ROM windows (fresh direct mGBA, r1 == r2) re-rendered through the production live renderer", () => {
