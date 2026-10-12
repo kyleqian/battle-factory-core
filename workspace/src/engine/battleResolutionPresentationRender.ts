@@ -565,6 +565,11 @@ export type BattleResolutionRenderEffect =
   | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput; presentationRng?: LiveMovePresentationRngInput; battlerX2Input?: LiveMoveBattlerX2Input }>
   /** S10A Substitute fade (liveSubstituteFade.ts): command age; the other battler's rest from the tracked x2 history. */
   | Readonly<{ type: "substitute-fade"; battler: 0 | 1; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
+  /**
+   * scd112 (S10A, ISSUES #166 slice d): General_StatsChange of the battler (animArg `argument`) at command age; `battlerX2Input` is
+   * the tracked x2 history (present only in Scene ON, where the orchestrator's x2 host exists; absent = no residual x2).
+   */
+  | Readonly<{ type: "stats-change"; battler: 0 | 1; argument: number; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -1001,7 +1006,7 @@ export function battleResolutionCommandDuration(
     case "trainer-slide":
     case "substitute-fade":
       return command.timing.minimumFrames;
-    // sc106: General_StatsChange's added rows (76 / 90, statsChangeSpan); no pixels yet: the ordinary field / box (no effect).
+    // sc106: General_StatsChange's added rows (76 / 90, statsChangeSpan); scd112 draws the banner over the field (stats-change effect).
     case "stats-change":
       return command.timing.minimumFrames;
   }
@@ -1486,6 +1491,12 @@ export function createBattleResolutionPresentationRenderView(
     } else if (command.type === "substitute-fade" && fadePresented) {
       effect = Object.freeze({
         type: "substitute-fade", battler: command.battler, age: state.lifecycle.phaseElapsed,
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      });
+    } else if (command.type === "stats-change" && fieldBattler(field, command.battler).substituteDoll !== true) {
+      // scd112: the banner over the field as it is (battleScene.ts statsChangeRenderView); never over the doll (the ROM plays nothing).
+      effect = Object.freeze({
+        type: "stats-change", battler: command.battler, argument: command.argument, age: state.lifecycle.phaseElapsed,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "hit-animation") {

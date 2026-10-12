@@ -1,0 +1,4880 @@
+{
+ "schema": "scd112-live-receipt/v1",
+ "base": "1cfac3f7f",
+ "frameMapping": "stats-change command age a == statsChangeRow rel a + 1",
+ "deltaCheck": {
+  "spans": {
+   "stat101-agility-opp-golbat-snorlax-on": {
+    "span": 91,
+    "E": 89,
+    "firstScreenChangeAfterE": 91
+   },
+   "stat101-agility-opp-golbat-snorlax-off": {
+    "span": 91,
+    "E": 89,
+    "firstScreenChangeAfterE": 91
+   },
+   "stat101-cosmic-power-ply-snorlax-golbat-on": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 77
+   },
+   "stat101-cosmic-power-ply-snorlax-golbat-off": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 77
+   },
+   "stat101-growl-ply-primeape-onix-on": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 78
+   },
+   "stat101-growl-ply-primeape-onix-off": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 78
+   },
+   "stat101-harden-ply-primeape-onix-on": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 78
+   },
+   "stat101-harden-ply-primeape-onix-off": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 78
+   },
+   "stat101-icy-wind-ply-primeape-golbat-on": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 77
+   },
+   "stat101-icy-wind-ply-primeape-golbat-off": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 77
+   },
+   "stat101-memento-ply-primeape-onix-on": {
+    "span": 91,
+    "E": 89,
+    "firstScreenChangeAfterE": 96
+   },
+   "stat101-memento-ply-primeape-onix-off": {
+    "span": 91,
+    "E": 89,
+    "firstScreenChangeAfterE": 96
+   },
+   "stat101-roar-intimidate-ply-primeape-onix-on": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 78
+   },
+   "stat101-roar-intimidate-ply-primeape-onix-off": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 78
+   },
+   "stat101-screech-opp-golbat-onix-on": {
+    "span": 91,
+    "E": 89,
+    "firstScreenChangeAfterE": 91
+   },
+   "stat101-screech-opp-golbat-onix-off": {
+    "span": 91,
+    "E": 89,
+    "firstScreenChangeAfterE": 91
+   },
+   "stat101-superpower-opp-machamp-snorlax-on": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 82
+   },
+   "stat101-superpower-opp-machamp-snorlax-off": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 82
+   },
+   "stat101-tickle-opp-golbat-snorlax-on": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 77
+   },
+   "stat101-tickle-opp-golbat-snorlax-off": {
+    "span": 77,
+    "E": 75,
+    "firstScreenChangeAfterE": 77
+   }
+  },
+  "boundary": {
+   "stat101-agility-opp-golbat-snorlax-on": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 378
+   },
+   "stat101-agility-opp-golbat-snorlax-off": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 378
+   },
+   "stat101-cosmic-power-ply-snorlax-golbat-on": {
+    "path": "playstatchangeanimation",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 0
+   },
+   "stat101-cosmic-power-ply-snorlax-golbat-off": {
+    "path": "playstatchangeanimation",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 0
+   },
+   "stat101-growl-ply-primeape-onix-on": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 445
+   },
+   "stat101-growl-ply-primeape-onix-off": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 445
+   },
+   "stat101-harden-ply-primeape-onix-on": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 498
+   },
+   "stat101-harden-ply-primeape-onix-off": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 498
+   },
+   "stat101-icy-wind-ply-primeape-golbat-on": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 162
+   },
+   "stat101-icy-wind-ply-primeape-golbat-off": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 162
+   },
+   "stat101-memento-ply-primeape-onix-on": {
+    "path": "playstatchangeanimation",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 0
+   },
+   "stat101-memento-ply-primeape-onix-off": {
+    "path": "playstatchangeanimation",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 0
+   },
+   "stat101-roar-intimidate-ply-primeape-onix-on": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 377
+   },
+   "stat101-roar-intimidate-ply-primeape-onix-off": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 377
+   },
+   "stat101-screech-opp-golbat-onix-on": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 434
+   },
+   "stat101-screech-opp-golbat-onix-off": {
+    "path": "print",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 434
+   },
+   "stat101-superpower-opp-machamp-snorlax-on": {
+    "path": "playstatchangeanimation",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 0
+   },
+   "stat101-superpower-opp-machamp-snorlax-off": {
+    "path": "playstatchangeanimation",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 0
+   },
+   "stat101-tickle-opp-golbat-snorlax-on": {
+    "path": "playstatchangeanimation",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 0
+   },
+   "stat101-tickle-opp-golbat-snorlax-off": {
+    "path": "playstatchangeanimation",
+    "rel-1": 0,
+    "rel0": 0,
+    "nextFirstRowOutsideBox": 0,
+    "nextFirstRowBoxBand": 0
+   }
+  },
+  "spansEqualAddedRowsPlusOne": true,
+  "boundaryOutsideBoxZero": true,
+  "printPathNextGlyphOneRowEarly": [
+   "stat101-agility-opp-golbat-snorlax-off",
+   "stat101-agility-opp-golbat-snorlax-on",
+   "stat101-growl-ply-primeape-onix-off",
+   "stat101-growl-ply-primeape-onix-on",
+   "stat101-harden-ply-primeape-onix-off",
+   "stat101-harden-ply-primeape-onix-on",
+   "stat101-icy-wind-ply-primeape-golbat-off",
+   "stat101-icy-wind-ply-primeape-golbat-on",
+   "stat101-roar-intimidate-ply-primeape-onix-off",
+   "stat101-roar-intimidate-ply-primeape-onix-on",
+   "stat101-screech-opp-golbat-onix-off",
+   "stat101-screech-opp-golbat-onix-on"
+  ]
+ },
+ "productionCompare": {
+  "stat101-agility-opp-golbat-snorlax-on": {
+   "arg": 41,
+   "side": "opponent",
+   "path": "print",
+   "reducer": {
+    "direction": "up",
+    "palette": "speed",
+    "sharply": true,
+    "state3Rel": 89,
+    "endRel": 89,
+    "nextInstructionRel": 91,
+    "addedRows": 90
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 73,
+      "mv": 97,
+      "atk": 1
+     }
+    ],
+    "zeroed": []
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 3
+   },
+   "romMaskRect": [
+    144,
+    3,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 93,
+    "firstRel": -1,
+    "lastRel": 91,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 91,
+     "fullPx": 378,
+     "boxPx": 378,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 92,
+     "fullPx": 400,
+     "boxPx": 400
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "558a4b2294680727",
+    "558a4b2294680727",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "52128e41fea5e4a3",
+    "ed335d7c16ff0fbc",
+    "2ed373284782617a",
+    "5f21be885baea1f7",
+    "0681bdf29d381b76",
+    "8aeaa31f44cb8d6e",
+    "cb4c3a3d23e5c57a",
+    "c52ed0e3edde1f92",
+    "21faba114cc20531",
+    "fde2644de42a06e1",
+    "beddea993fddaba3",
+    "81985e9f8fe6e7ee",
+    "09d08216e3e6f7a8",
+    "1c5ad247021f3f1c",
+    "01b3aacdae893fe1",
+    "aa09157b57e7050e",
+    "9a265ef770e152b3",
+    "c01a3ab91abdb1f4",
+    "474df581a93c25f0",
+    "ef0a954210bc0c4b",
+    "1da4c0693c60af8b",
+    "8365fbd2b03dfcf3",
+    "644b7982b513abfe",
+    "2fdc065a96fe77e9",
+    "9803d1c9a7678d73",
+    "d8d6bea92b90f7b4",
+    "e12005254101466b",
+    "4bd298551f15c0fe",
+    "b27edb24196d0778",
+    "4c57d23cb3b429b2",
+    "44427af70be79aad",
+    "b5e118ad6323736a",
+    "7d1881cdd61be4a0",
+    "b2faea456e31214a",
+    "971cc46ea0855ac3",
+    "d282e940899efb30",
+    "b376460fea2221f9",
+    "07c55721ace57d89",
+    "26edf83b1ecb8e91",
+    "0534750394c0f39a",
+    "6f2ce9bd8851870d",
+    "d4284db86213cdc0",
+    "87016508a019b4ac",
+    "477eccfece3f1f0c",
+    "15a08231a40cae14",
+    "7b65c5aa1302a637",
+    "8fb7aa8568fe639d",
+    "3924e4d509517311",
+    "634e89202e3893be",
+    "a7cba177119948a4",
+    "565dd57c6f2f1969",
+    "4121ecec98c9904c",
+    "557765477d225d86",
+    "b8f6222a36f8f212",
+    "fe108aad6c29b006",
+    "92bf63ee373cc3b3",
+    "1b593a94c5be49c4",
+    "1baeb4c83885581a",
+    "30d2829de8cfdab5",
+    "f0124ad9bda35134",
+    "581237b54ec05b2c",
+    "f4fc427c1b66ec99",
+    "1ff8fd94f74d2d23",
+    "b923b1d46c60b62a",
+    "b1600745cb6f0e87",
+    "c588f302c908ee5d",
+    "6d2a40b64c51ad21",
+    "a36ea3f891f98093",
+    "8e5f12de7c45be0f",
+    "773897b193bed5bd",
+    "37d5782faf485d82",
+    "01ff140717b96733",
+    "f9c1b46aad9a055b",
+    "e61d1ab6d211e6cf",
+    "aeb460d2d27ce572",
+    "cf65953396e256ca",
+    "02aaf4869c917c87",
+    "5168092dbd4a3fcd",
+    "6420b5a71a06b0d4",
+    "bc0e892e769e037e",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "c465765eca7f2835",
+    "ce5800637a97d727"
+   ],
+   "perRowMismatches": [
+    [
+     91,
+     0,
+     378,
+     378,
+     0
+    ],
+    [
+     92,
+     0,
+     400,
+     400,
+     0
+    ]
+   ]
+  },
+  "stat101-agility-opp-golbat-snorlax-off": {
+   "arg": 41,
+   "side": "opponent",
+   "path": "print",
+   "reducer": {
+    "direction": "up",
+    "palette": "speed",
+    "sharply": true,
+    "state3Rel": 89,
+    "endRel": 89,
+    "nextInstructionRel": 91,
+    "addedRows": 90
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 144,
+    "y": 3
+   },
+   "romMaskRect": [
+    144,
+    3,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 93,
+    "firstRel": -1,
+    "lastRel": 91,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 91,
+     "fullPx": 378,
+     "boxPx": 378,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 92,
+     "fullPx": 400,
+     "boxPx": 400
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "558a4b2294680727",
+    "558a4b2294680727",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "52128e41fea5e4a3",
+    "ed335d7c16ff0fbc",
+    "2ed373284782617a",
+    "5f21be885baea1f7",
+    "0681bdf29d381b76",
+    "8aeaa31f44cb8d6e",
+    "cb4c3a3d23e5c57a",
+    "c52ed0e3edde1f92",
+    "21faba114cc20531",
+    "fde2644de42a06e1",
+    "beddea993fddaba3",
+    "81985e9f8fe6e7ee",
+    "09d08216e3e6f7a8",
+    "1c5ad247021f3f1c",
+    "01b3aacdae893fe1",
+    "aa09157b57e7050e",
+    "9a265ef770e152b3",
+    "c01a3ab91abdb1f4",
+    "474df581a93c25f0",
+    "ef0a954210bc0c4b",
+    "1da4c0693c60af8b",
+    "8365fbd2b03dfcf3",
+    "644b7982b513abfe",
+    "2fdc065a96fe77e9",
+    "9803d1c9a7678d73",
+    "d8d6bea92b90f7b4",
+    "e12005254101466b",
+    "4bd298551f15c0fe",
+    "b27edb24196d0778",
+    "4c57d23cb3b429b2",
+    "44427af70be79aad",
+    "b5e118ad6323736a",
+    "7d1881cdd61be4a0",
+    "b2faea456e31214a",
+    "971cc46ea0855ac3",
+    "d282e940899efb30",
+    "b376460fea2221f9",
+    "07c55721ace57d89",
+    "26edf83b1ecb8e91",
+    "0534750394c0f39a",
+    "6f2ce9bd8851870d",
+    "d4284db86213cdc0",
+    "87016508a019b4ac",
+    "477eccfece3f1f0c",
+    "15a08231a40cae14",
+    "7b65c5aa1302a637",
+    "8fb7aa8568fe639d",
+    "3924e4d509517311",
+    "634e89202e3893be",
+    "a7cba177119948a4",
+    "565dd57c6f2f1969",
+    "4121ecec98c9904c",
+    "557765477d225d86",
+    "b8f6222a36f8f212",
+    "fe108aad6c29b006",
+    "92bf63ee373cc3b3",
+    "1b593a94c5be49c4",
+    "1baeb4c83885581a",
+    "30d2829de8cfdab5",
+    "f0124ad9bda35134",
+    "581237b54ec05b2c",
+    "f4fc427c1b66ec99",
+    "1ff8fd94f74d2d23",
+    "b923b1d46c60b62a",
+    "b1600745cb6f0e87",
+    "c588f302c908ee5d",
+    "6d2a40b64c51ad21",
+    "a36ea3f891f98093",
+    "8e5f12de7c45be0f",
+    "773897b193bed5bd",
+    "37d5782faf485d82",
+    "01ff140717b96733",
+    "f9c1b46aad9a055b",
+    "e61d1ab6d211e6cf",
+    "aeb460d2d27ce572",
+    "cf65953396e256ca",
+    "02aaf4869c917c87",
+    "5168092dbd4a3fcd",
+    "6420b5a71a06b0d4",
+    "bc0e892e769e037e",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "c465765eca7f2835",
+    "ce5800637a97d727"
+   ],
+   "perRowMismatches": [
+    [
+     91,
+     0,
+     378,
+     378,
+     0
+    ],
+    [
+     92,
+     0,
+     400,
+     400,
+     0
+    ]
+   ]
+  },
+  "stat101-cosmic-power-ply-snorlax-golbat-on": {
+   "arg": 55,
+   "side": "player",
+   "path": "playstatchangeanimation",
+   "reducer": {
+    "direction": "up",
+    "palette": "multiple",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 74,
+      "mv": 33,
+      "atk": 1
+     },
+     {
+      "f": 216,
+      "mv": 322,
+      "atk": 0
+     }
+    ],
+    "zeroed": [
+     "player"
+    ]
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 59
+   },
+   "romMaskRect": [
+    40,
+    59,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 0,
+     "boxPx": 0,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 0,
+     "boxPx": 0
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "558a4b2294680727",
+    "558a4b2294680727",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "3077e372d4738e18",
+    "f20a885ee1102495",
+    "dd485f44266ac06f",
+    "1a97e3adaba1ec54",
+    "ac8d18371d4dbcb8",
+    "e4162c840d1bf0a0",
+    "466e0b12f2693606",
+    "c6fd5fdd27e3c9e2",
+    "85d6740e638f62b6",
+    "2e198e327fb1077d",
+    "c06170f9520a57c1",
+    "32cbab82641284b4",
+    "9b3e369c53b73167",
+    "ede80e6b35a14b1a",
+    "4aff560531994b02",
+    "699c1584b3832860",
+    "12189e9eb6336ee5",
+    "29488c504c0f30eb",
+    "c487aaa448eb0cb2",
+    "d4d8b0f91ca7e482",
+    "98347bead4e6f451",
+    "59718d5aec7fc858",
+    "1730ec7bd3030212",
+    "5b61e380097ef316",
+    "355824cf0d0a89c2",
+    "0270cc241f3716b2",
+    "ae13471031178020",
+    "183c1f92f74dba38",
+    "bd0ce70a3e0c6d55",
+    "dad179e90b070c22",
+    "302766ea630d3ce1",
+    "ae5e447ca5ecf79a",
+    "9769944787cfb24d",
+    "adce447b18282015",
+    "b14da6a146da1c78",
+    "946713bfee46b6fb",
+    "d6412f16449bddae",
+    "d09990684ab7b367",
+    "1519cb71704414d8",
+    "071ac674a8f06422",
+    "9b752919f6d3d041",
+    "3cea866f3d29dc84",
+    "d8d840677f739604",
+    "c56e5539640c54e2",
+    "9b3e369c53b73167",
+    "ede80e6b35a14b1a",
+    "c6b1863449346546",
+    "3d5f21dc7995dd13",
+    "160a98f5a8aaab03",
+    "2b308b653cb7cb53",
+    "31598556104521fb",
+    "06f29f59d1e2c66b",
+    "abe51511d3acc304",
+    "5979028d3c64fb73",
+    "0f0243e68ad04fb8",
+    "9ea914ea28e7e1bc",
+    "c7b6a6715fdaf646",
+    "fbe8d0cdded02149",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "558a4b2294680727",
+    "558a4b2294680727"
+   ],
+   "perRowMismatches": []
+  },
+  "stat101-cosmic-power-ply-snorlax-golbat-off": {
+   "arg": 55,
+   "side": "player",
+   "path": "playstatchangeanimation",
+   "reducer": {
+    "direction": "up",
+    "palette": "multiple",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 40,
+    "y": 59
+   },
+   "romMaskRect": [
+    40,
+    59,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 0,
+     "boxPx": 0,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 0,
+     "boxPx": 0
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "558a4b2294680727",
+    "558a4b2294680727",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "3077e372d4738e18",
+    "f20a885ee1102495",
+    "dd485f44266ac06f",
+    "1a97e3adaba1ec54",
+    "ac8d18371d4dbcb8",
+    "e4162c840d1bf0a0",
+    "466e0b12f2693606",
+    "c6fd5fdd27e3c9e2",
+    "85d6740e638f62b6",
+    "2e198e327fb1077d",
+    "c06170f9520a57c1",
+    "32cbab82641284b4",
+    "9b3e369c53b73167",
+    "ede80e6b35a14b1a",
+    "4aff560531994b02",
+    "699c1584b3832860",
+    "12189e9eb6336ee5",
+    "29488c504c0f30eb",
+    "c487aaa448eb0cb2",
+    "d4d8b0f91ca7e482",
+    "98347bead4e6f451",
+    "59718d5aec7fc858",
+    "1730ec7bd3030212",
+    "5b61e380097ef316",
+    "355824cf0d0a89c2",
+    "0270cc241f3716b2",
+    "ae13471031178020",
+    "183c1f92f74dba38",
+    "bd0ce70a3e0c6d55",
+    "dad179e90b070c22",
+    "302766ea630d3ce1",
+    "ae5e447ca5ecf79a",
+    "9769944787cfb24d",
+    "adce447b18282015",
+    "b14da6a146da1c78",
+    "946713bfee46b6fb",
+    "d6412f16449bddae",
+    "d09990684ab7b367",
+    "1519cb71704414d8",
+    "071ac674a8f06422",
+    "9b752919f6d3d041",
+    "3cea866f3d29dc84",
+    "d8d840677f739604",
+    "c56e5539640c54e2",
+    "9b3e369c53b73167",
+    "ede80e6b35a14b1a",
+    "c6b1863449346546",
+    "3d5f21dc7995dd13",
+    "160a98f5a8aaab03",
+    "2b308b653cb7cb53",
+    "31598556104521fb",
+    "06f29f59d1e2c66b",
+    "abe51511d3acc304",
+    "5979028d3c64fb73",
+    "0f0243e68ad04fb8",
+    "9ea914ea28e7e1bc",
+    "c7b6a6715fdaf646",
+    "fbe8d0cdded02149",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "558a4b2294680727",
+    "558a4b2294680727"
+   ],
+   "perRowMismatches": []
+  },
+  "stat101-growl-ply-primeape-onix-on": {
+   "arg": 22,
+   "side": "opponent",
+   "path": "print",
+   "reducer": {
+    "direction": "down",
+    "palette": "attack",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 71,
+      "mv": 45,
+      "atk": 0
+     }
+    ],
+    "zeroed": []
+   },
+   "productionCorner": {
+    "x": 145,
+    "y": 10
+   },
+   "romMaskRect": [
+    144,
+    10,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": false,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": 1
+   },
+   "rect": {
+    "px": 82916
+   },
+   "fullScreen": {
+    "px": 82916
+   },
+   "zeroPx": false,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 445,
+     "boxPx": 445,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 325,
+     "boxPx": 325
+    }
+   ],
+   "rawRectBannerRowsPx": 63278,
+   "productionFrameSha": [
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "0125b92121932603",
+    "e430f8a51657dad7",
+    "778e21997fa0c9c0",
+    "aa407203f92d22ba",
+    "28c26f957c46993f",
+    "36b86c6d83015e70",
+    "2c4cab80cb09b132",
+    "c9f25273dec57db6",
+    "88bb85dd2021c8aa",
+    "6cfae8c22304404b",
+    "5439f635d492577d",
+    "1a970e70d1cc5c8e",
+    "77d515b04ad0ff52",
+    "4f309703a9a2f04f",
+    "48151a13e0203c5d",
+    "c74cd714ca0fab6f",
+    "9c7721ef97467afb",
+    "559aa5de41178e56",
+    "92faf48751f77d94",
+    "67b038123be6300e",
+    "9978d44078d4c86e",
+    "035b0d5223a73f98",
+    "e0a48f3e7b3b472e",
+    "2ccbdd85bf9f3a61",
+    "6dc791aa30e28151",
+    "1a1a6dc592f3f95a",
+    "8ee9a8d7d4ae0671",
+    "8508eca0278b526f",
+    "4dc25b83e992ec8d",
+    "09abde8b81289d0e",
+    "9cfdc326ae8e034a",
+    "3d617e5dbecadb6a",
+    "cb8436a10e42b100",
+    "e1abfb3ded69f9ac",
+    "ec62d3961df430b9",
+    "8528de715a54431a",
+    "e8be2ef2e5369029",
+    "6459f76139ef7ad3",
+    "f7ea3528051e07c2",
+    "d857509a5f1cd900",
+    "49e5f9c3bc9c0aa9",
+    "58dbf1fa207722ee",
+    "ef0b36adbb6de1ef",
+    "22b59bf940c69f5f",
+    "77d515b04ad0ff52",
+    "4f309703a9a2f04f",
+    "1ed66cb3f2358553",
+    "dee589b3dc8013de",
+    "3155dd1f7a884b02",
+    "4d965529d6e366ee",
+    "a61e88e8b02f3180",
+    "57f5967d83a0c6fb",
+    "2888241f8ef8ab84",
+    "aa88c04c063d27ae",
+    "867372c4ad0bc7cf",
+    "eb8a1e7d719126b7",
+    "0a26750b419bb764",
+    "989b6e203d94e3af",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "48f4b5b3b53e17aa",
+    "9465a6e3561ff151"
+   ],
+   "perRowMismatches": [
+    [
+     1,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     2,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     3,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     4,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     5,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     6,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     7,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     8,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     9,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     10,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     11,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     12,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     13,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     14,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     15,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     16,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     17,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     18,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     19,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     20,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     21,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     22,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     23,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     24,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     25,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     26,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     27,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     28,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     29,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     30,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     31,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     32,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     33,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     34,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     35,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     36,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     37,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     38,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     39,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     40,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     41,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     42,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     43,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     44,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     45,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     46,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     47,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     48,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     49,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     50,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     51,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     52,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     53,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     54,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     55,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     56,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     57,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     58,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     59,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     60,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     61,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     62,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     63,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     64,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     65,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     66,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     67,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     68,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     69,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     70,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     71,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     72,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     73,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     74,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     75,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     76,
+     1091,
+     1091,
+     0,
+     1091
+    ],
+    [
+     77,
+     0,
+     445,
+     445,
+     0
+    ],
+    [
+     78,
+     0,
+     325,
+     325,
+     0
+    ]
+   ]
+  },
+  "stat101-growl-ply-primeape-onix-off": {
+   "arg": 22,
+   "side": "opponent",
+   "path": "print",
+   "reducer": {
+    "direction": "down",
+    "palette": "attack",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 144,
+    "y": 10
+   },
+   "romMaskRect": [
+    144,
+    10,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 445,
+     "boxPx": 445,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 325,
+     "boxPx": 325
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "ebdba8e58ffa8ce7",
+    "9db0bd0b6673d434",
+    "624e762a71020e50",
+    "fda83b2df9658039",
+    "b5be346cc8c8eb4e",
+    "1164f64418d5d10e",
+    "769fe82c75daeba2",
+    "979371adcba2a155",
+    "03b4df2ee5e6a723",
+    "fe7ae5aae911ad3d",
+    "68a790a7e3dd7396",
+    "a4dce98d45fdc064",
+    "5f9d2c5eaea059ef",
+    "96c55c092977bb7c",
+    "9226eff00dc496cd",
+    "d68ad60dec677917",
+    "b46be19d6dfac326",
+    "c3801668c3e718ac",
+    "bd824a6d820fc006",
+    "6909436c17331c89",
+    "898bd757f1647a83",
+    "afc9ea365dea3a95",
+    "1f553030db932bcd",
+    "fc9cab2061832f5b",
+    "e37fd12e542551ab",
+    "15449a750bd2d5a2",
+    "8bdf508db9ea34ad",
+    "ba6761dfd14010bc",
+    "256091ece591e4aa",
+    "c6094fe67ba1d55e",
+    "16ade533e2e0c504",
+    "53bdcc97b3f8fa2a",
+    "2cccde7598bc6821",
+    "41d960c883608ada",
+    "cfcb87ebafc7294c",
+    "56409aade77ddd03",
+    "a861d83970bce54d",
+    "02934aec0295b294",
+    "3fcc07817b40e9d8",
+    "f3921d7235be7724",
+    "2f1cac06d10a16c6",
+    "3b763f3746310100",
+    "325d31fbb4f5a26a",
+    "e78f9eec66323099",
+    "5f9d2c5eaea059ef",
+    "96c55c092977bb7c",
+    "b3b3188826a09c65",
+    "64a7fb0ea8058d3b",
+    "3cfc8f366ee54678",
+    "cf4164211c6cc329",
+    "87e568831130cf22",
+    "a858dde6d231c9c2",
+    "2c6dff623be00ab1",
+    "0342b5ed33b80f18",
+    "7e7a3c4a0cdfdd27",
+    "268eb5c94cdd1fe4",
+    "4d05eae3e7b6633a",
+    "0c837edb955a89aa",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "48f4b5b3b53e17aa",
+    "9465a6e3561ff151"
+   ],
+   "perRowMismatches": [
+    [
+     77,
+     0,
+     445,
+     445,
+     0
+    ],
+    [
+     78,
+     0,
+     325,
+     325,
+     0
+    ]
+   ]
+  },
+  "stat101-harden-ply-primeape-onix-on": {
+   "arg": 16,
+   "side": "player",
+   "path": "print",
+   "reducer": {
+    "direction": "up",
+    "palette": "defense",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 70,
+      "mv": 106,
+      "atk": 0
+     }
+    ],
+    "zeroed": []
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 55
+   },
+   "romMaskRect": [
+    40,
+    55,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 498,
+     "boxPx": 498,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 333,
+     "boxPx": 333
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "3d573794d6f3bf5e",
+    "aff1d82cd4745ad4",
+    "e4ae4034c3554d6a",
+    "5ca03de4cd0dbfb8",
+    "4c2997b3b5643f25",
+    "b62050d2cbb5067c",
+    "e1a8294bfc42639b",
+    "888bb1e52a8bd5f0",
+    "6544dd94ad0bc061",
+    "acb57e8fbb9f11a4",
+    "1f037f16c7215a9f",
+    "dc166e2c236d854e",
+    "c5ffd6a31a49f725",
+    "f2ae3554b8af21a8",
+    "8b78d9af02b15a89",
+    "10c0a2faf70622da",
+    "6e9d67a2a8955f16",
+    "605e1b840b6a4e6e",
+    "3bd69ce383009a40",
+    "11b1ef0f441d4546",
+    "3d9a6a8bf72ca430",
+    "448c3f446e5ca1dc",
+    "2ddb77cfc2bfc4fc",
+    "9ce3c1dee5351401",
+    "8b82c6e1ea2024c6",
+    "3d7f43525b8b8be3",
+    "371b36b5c5664883",
+    "2f9a0f0929eac82a",
+    "95d0d85df540dfd7",
+    "36a22f9fab20cbd3",
+    "19319bf833dabd22",
+    "921b20540d26939c",
+    "5676bdccddd9b852",
+    "617a56a7eba0c7b2",
+    "d0281dbf36a97ddf",
+    "25745217c70b7e06",
+    "24e5458cc91959a9",
+    "e3c02a4f964f5927",
+    "685f3855e69efd0a",
+    "f1653b7e90daf9c8",
+    "b27fc917697a9c44",
+    "5746bb0239e1847c",
+    "acb02688b5994d01",
+    "e095c187f2aab916",
+    "c5ffd6a31a49f725",
+    "f2ae3554b8af21a8",
+    "ba9456d64efce1ee",
+    "0fe92ea2db182907",
+    "d3afaace45ce5923",
+    "afaf107952e21854",
+    "5ffbede867361ac8",
+    "4da9af92ca83f89a",
+    "f3d674101adc06ba",
+    "0d25bc028785fb0d",
+    "24d80b242d33c808",
+    "6fd2621e2e6554a1",
+    "f9f5f6d13e346bde",
+    "a291c2f82289138d",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "48f4b5b3b53e17aa",
+    "9465a6e3561ff151"
+   ],
+   "perRowMismatches": [
+    [
+     77,
+     0,
+     498,
+     498,
+     0
+    ],
+    [
+     78,
+     0,
+     333,
+     333,
+     0
+    ]
+   ]
+  },
+  "stat101-harden-ply-primeape-onix-off": {
+   "arg": 16,
+   "side": "player",
+   "path": "print",
+   "reducer": {
+    "direction": "up",
+    "palette": "defense",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 40,
+    "y": 55
+   },
+   "romMaskRect": [
+    40,
+    55,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 498,
+     "boxPx": 498,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 333,
+     "boxPx": 333
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "2118bcbb55fb2f27",
+    "01acbed1f0ab3a2c",
+    "0aaa6ffdcdafc0c5",
+    "54ef360191268618",
+    "f2d2a0fe6fc3eb9a",
+    "14f2a1fc29e4117b",
+    "0122bebb4b327182",
+    "84b2ecca88deed38",
+    "1f2d0e6f0bce995d",
+    "7442abf27123edde",
+    "a20fec9c275e55c0",
+    "5dfe84df433dbc57",
+    "4292fbd32aebf109",
+    "0268e3885b6d99b0",
+    "54b97e3e4210c7c1",
+    "f30685016bd184da",
+    "5c07dbc8f4a245df",
+    "4f1f7c38ddcdbe21",
+    "0c8b9c092266bd2c",
+    "ed1db4db392d633d",
+    "4fdfdc9028353be4",
+    "90af3c29150cd14b",
+    "96f485f5219a1edd",
+    "85128dedc172fc9b",
+    "7e56efbd45f40fd9",
+    "3225ddb531917f51",
+    "80f5143ec8ea836e",
+    "7959245d92c4d5c8",
+    "114cf17e93abc6d2",
+    "e814af54c86c1b58",
+    "4182c4e77c92290d",
+    "0d4f0e5b282abd88",
+    "2daf29fff1bf0531",
+    "ee37f2efb5c6940d",
+    "689d156bafa56929",
+    "faefbb03f04eba57",
+    "c509f0f460edba96",
+    "6be7c750631e361f",
+    "6ad589b1efdd24ba",
+    "104df2253e34745c",
+    "3f344a3323b38805",
+    "65f4048c5f6b9c6d",
+    "74b30a4c0c3d407f",
+    "ef9883e52753ace9",
+    "4292fbd32aebf109",
+    "0268e3885b6d99b0",
+    "8dadac93bef7b629",
+    "bd9e9f0bf9845db6",
+    "32b84883baea0c56",
+    "9ed6d7ecc3104588",
+    "92c367e8a008dc32",
+    "9c889b8e70aff2a6",
+    "290e43331a0b5fb6",
+    "a6a6d97ef42ad0d1",
+    "e825fd22638abe6d",
+    "455def1f0afe7696",
+    "01e0c3702428e116",
+    "9b014a3049e15e48",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "48f4b5b3b53e17aa",
+    "9465a6e3561ff151"
+   ],
+   "perRowMismatches": [
+    [
+     77,
+     0,
+     498,
+     498,
+     0
+    ],
+    [
+     78,
+     0,
+     333,
+     333,
+     0
+    ]
+   ]
+  },
+  "stat101-icy-wind-ply-primeape-golbat-on": {
+   "arg": 24,
+   "side": "opponent",
+   "path": "print",
+   "reducer": {
+    "direction": "down",
+    "palette": "speed",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 76,
+      "mv": 196,
+      "atk": 0
+     }
+    ],
+    "zeroed": []
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 3
+   },
+   "romMaskRect": [
+    144,
+    3,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 162,
+     "boxPx": 162,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 439,
+     "boxPx": 439
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "fdb21275a4be71dc",
+    "fdb21275a4be71dc",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "2c09c6deb6165ed7",
+    "4cbba8f8bf833634",
+    "6f3825eb176729c4",
+    "0588ac5e4434d2c4",
+    "48c98f5c7ee185a9",
+    "c94fb92db2434325",
+    "7d3cb7cb61384854",
+    "3c2bfc37c306c262",
+    "48d04434f5cb4490",
+    "2be146a5d9089392",
+    "4dfcae6400005f8b",
+    "8209753cb9053869",
+    "3b219415d534d248",
+    "951c10ccde54e0b0",
+    "45510cf1940a6a3a",
+    "f0cc4f3a6c632848",
+    "264cdeee497b5194",
+    "74d74c91095f8ddf",
+    "ffd92e6404b5d694",
+    "140e95e80314de03",
+    "b10400fc2bb6d3b7",
+    "2980b5acff28d798",
+    "d8065541d8a07290",
+    "2c101045bf16cf29",
+    "b64852fc436400d5",
+    "bd9d3844bd9c564d",
+    "aa602c66a1ad9d1d",
+    "96a4d9ad15eacd5e",
+    "5952d6488d0b95d3",
+    "ab5c4c1791caa262",
+    "6a37aa2f8f7f90dd",
+    "6a063496a34b8be1",
+    "8e12398db248b43b",
+    "4571604ccf31f173",
+    "2862c74baf8d60d0",
+    "1445064800e4a61e",
+    "0f9eed893ec744a0",
+    "5a62fbcf46c216ae",
+    "1e96b4bcf54f927c",
+    "d1abbbae39eb63ca",
+    "ebfce9432de797f1",
+    "0e4c49241b844fa2",
+    "43523c1547b626ac",
+    "ca4ac4ac30986862",
+    "3b219415d534d248",
+    "951c10ccde54e0b0",
+    "a8a4d3c66af0429c",
+    "c1aec1363e24f4d6",
+    "21c96e24abc3eb1b",
+    "64a91932bb974ae6",
+    "e3930cf24d1c03d5",
+    "d1865cbc37ebf119",
+    "2eb36b5f83bd6d7b",
+    "81e8c891a64d1eb9",
+    "25c8e6583b3606c4",
+    "3dc0afe7128d06f0",
+    "8f8786a244be5a98",
+    "2cdd627f065b76de",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "41de369234f7a50d",
+    "32013144d4c9a948"
+   ],
+   "perRowMismatches": [
+    [
+     77,
+     0,
+     162,
+     162,
+     0
+    ],
+    [
+     78,
+     0,
+     439,
+     439,
+     0
+    ]
+   ]
+  },
+  "stat101-icy-wind-ply-primeape-golbat-off": {
+   "arg": 24,
+   "side": "opponent",
+   "path": "print",
+   "reducer": {
+    "direction": "down",
+    "palette": "speed",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 144,
+    "y": 3
+   },
+   "romMaskRect": [
+    144,
+    3,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 162,
+     "boxPx": 162,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 439,
+     "boxPx": 439
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "fdb21275a4be71dc",
+    "fdb21275a4be71dc",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "2c09c6deb6165ed7",
+    "4cbba8f8bf833634",
+    "6f3825eb176729c4",
+    "0588ac5e4434d2c4",
+    "48c98f5c7ee185a9",
+    "c94fb92db2434325",
+    "7d3cb7cb61384854",
+    "3c2bfc37c306c262",
+    "48d04434f5cb4490",
+    "2be146a5d9089392",
+    "4dfcae6400005f8b",
+    "8209753cb9053869",
+    "3b219415d534d248",
+    "951c10ccde54e0b0",
+    "45510cf1940a6a3a",
+    "f0cc4f3a6c632848",
+    "264cdeee497b5194",
+    "74d74c91095f8ddf",
+    "ffd92e6404b5d694",
+    "140e95e80314de03",
+    "b10400fc2bb6d3b7",
+    "2980b5acff28d798",
+    "d8065541d8a07290",
+    "2c101045bf16cf29",
+    "b64852fc436400d5",
+    "bd9d3844bd9c564d",
+    "aa602c66a1ad9d1d",
+    "96a4d9ad15eacd5e",
+    "5952d6488d0b95d3",
+    "ab5c4c1791caa262",
+    "6a37aa2f8f7f90dd",
+    "6a063496a34b8be1",
+    "8e12398db248b43b",
+    "4571604ccf31f173",
+    "2862c74baf8d60d0",
+    "1445064800e4a61e",
+    "0f9eed893ec744a0",
+    "5a62fbcf46c216ae",
+    "1e96b4bcf54f927c",
+    "d1abbbae39eb63ca",
+    "ebfce9432de797f1",
+    "0e4c49241b844fa2",
+    "43523c1547b626ac",
+    "ca4ac4ac30986862",
+    "3b219415d534d248",
+    "951c10ccde54e0b0",
+    "a8a4d3c66af0429c",
+    "c1aec1363e24f4d6",
+    "21c96e24abc3eb1b",
+    "64a91932bb974ae6",
+    "e3930cf24d1c03d5",
+    "d1865cbc37ebf119",
+    "2eb36b5f83bd6d7b",
+    "81e8c891a64d1eb9",
+    "25c8e6583b3606c4",
+    "3dc0afe7128d06f0",
+    "8f8786a244be5a98",
+    "2cdd627f065b76de",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "d7c470c7bd2aa106",
+    "41de369234f7a50d",
+    "32013144d4c9a948"
+   ],
+   "perRowMismatches": [
+    [
+     77,
+     0,
+     162,
+     162,
+     0
+    ],
+    [
+     78,
+     0,
+     439,
+     439,
+     0
+    ]
+   ]
+  },
+  "stat101-memento-ply-primeape-onix-on": {
+   "arg": 58,
+   "side": "opponent",
+   "path": "playstatchangeanimation",
+   "reducer": {
+    "direction": "down",
+    "palette": "multiple",
+    "sharply": true,
+    "state3Rel": 89,
+    "endRel": 89,
+    "nextInstructionRel": 91,
+    "addedRows": 90
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 71,
+      "mv": 262,
+      "atk": 0
+     }
+    ],
+    "zeroed": []
+   },
+   "productionCorner": {
+    "x": 145,
+    "y": 10
+   },
+   "romMaskRect": [
+    145,
+    10,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 93,
+    "firstRel": -1,
+    "lastRel": 91,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 91,
+     "fullPx": 0,
+     "boxPx": 0,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 92,
+     "fullPx": 0,
+     "boxPx": 0
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "1d0a302037e5eb73",
+    "af10db5acf5f79e4",
+    "3e57a7571824ff60",
+    "e891f839e296ef41",
+    "f1d7c6a1c3e0f354",
+    "08f8b24e002447ad",
+    "c4c7e3b0f591482c",
+    "792c3a400fe181fe",
+    "fb799e1c05d7604d",
+    "0aa182bf8b3eae40",
+    "95ab6e74e1bfc151",
+    "f067bd3884f3c95d",
+    "2fadab2c4a5ef0d2",
+    "f96e3b007e519f11",
+    "5b00485af22297fd",
+    "e9cf4760f95a2ccb",
+    "46004566a699edfa",
+    "e8b84e5ff89a7717",
+    "cf25e4f72d489864",
+    "1fe933730aab5f91",
+    "a1e61502e2c2abe1",
+    "9e5d6da4e2cfe644",
+    "5bd3baf7859837c4",
+    "2a45889cd0151f4c",
+    "28e0a125cf4cc6de",
+    "ff327af565de2549",
+    "0d6525081f722600",
+    "1fece72c931e800b",
+    "067a1972bbf23cdc",
+    "6d09ae3c156d3719",
+    "14cff00625a82cf3",
+    "da036301bf337016",
+    "764cf12e8cea6aaa",
+    "5bcac8cd5a706522",
+    "6dba7f2a0fe4e3ea",
+    "b5efbebd9da76336",
+    "7c1f90da762a0181",
+    "7f9b4c3e5c75088c",
+    "21cd4c78c9bb70b6",
+    "7e6148d8485433f6",
+    "e62700bebbf420a0",
+    "73d7814dacb54ca8",
+    "c84a71b667e8da31",
+    "fc6c5c0c5f88902e",
+    "25a1f2ad1c4b2d7f",
+    "007edf6f34e4aa0a",
+    "4355d6cd574f891f",
+    "c77628f133939cf6",
+    "f04c590a71fa4a72",
+    "1155ebc93917da91",
+    "bba84975caf25197",
+    "2570f6026364ed4e",
+    "f97b119e68efe31f",
+    "3a0a5a0305915ae5",
+    "466cb5237fc0390c",
+    "b981bc876fd068a1",
+    "726ca219b18bbfe9",
+    "ae58ee3d5b9c194b",
+    "3973f8e530c15df8",
+    "19e854bc7dd43556",
+    "a2f7592f9904ed9b",
+    "749dfb0163f71306",
+    "ee12d3b68cb625cc",
+    "46aa768fb86099ed",
+    "ac1adc8c3b59bcc3",
+    "80c6c3e75c602486",
+    "4b037e1d5432e4a7",
+    "ac6aa5a7ed780ade",
+    "611263bc7b5b2ce6",
+    "24fd7571c4ce89d0",
+    "7ae8ee834d25c087",
+    "000b87287778043b",
+    "a3165928860bc03b",
+    "490f30c71f00869c",
+    "7482b655a5c31c05",
+    "ab372040e2a7490f",
+    "eb956edcbd148639",
+    "5a7947c241898d5a",
+    "89e2e09bc686e752",
+    "8093247426f0bd9a",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "d3ec09fb04cceedf",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5"
+   ],
+   "perRowMismatches": []
+  },
+  "stat101-memento-ply-primeape-onix-off": {
+   "arg": 58,
+   "side": "opponent",
+   "path": "playstatchangeanimation",
+   "reducer": {
+    "direction": "down",
+    "palette": "multiple",
+    "sharply": true,
+    "state3Rel": 89,
+    "endRel": 89,
+    "nextInstructionRel": 91,
+    "addedRows": 90
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 144,
+    "y": 10
+   },
+   "romMaskRect": [
+    144,
+    10,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 93,
+    "firstRel": -1,
+    "lastRel": 91,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 91,
+     "fullPx": 0,
+     "boxPx": 0,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 92,
+     "fullPx": 0,
+     "boxPx": 0
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "aa3640edfc185539",
+    "4fa6fcf509ec35f4",
+    "c3b2cb673507af75",
+    "1235d3bf70ce07ed",
+    "03e6739f96d9d2c1",
+    "57c18fc46a874c8e",
+    "b04046a219881698",
+    "73181bd0959ef403",
+    "2dc61301d709b0d0",
+    "df88b96499595667",
+    "f5291d937be094e5",
+    "773a887aa0624329",
+    "d7c80e32b784ea37",
+    "ed4e1915798d2f8b",
+    "06b58ecc3db0c0b3",
+    "1570e702f2df1bb7",
+    "bd3cb7fd5afdca23",
+    "789c02417dae5826",
+    "0713bdeb3ffb34f2",
+    "cb9163075a65a4d8",
+    "694c25265cdd1e8a",
+    "490b2ab05a796729",
+    "77920787a4202868",
+    "d32f3920c6ed6de8",
+    "0c40691a8db56fbf",
+    "9cf761479c02387a",
+    "aee51e4a0d71c71b",
+    "0aeb8b8d760f6571",
+    "844d86d893ced1ca",
+    "0c464c931d92c7fe",
+    "9d228e82768a35ab",
+    "b53ecbac49d2ef7a",
+    "7e53e33562793925",
+    "fb10a399bd44f82d",
+    "6bdba26495c5fc94",
+    "0146ddef28e89df6",
+    "d7c45b0e72e3179c",
+    "8541e99325e1366a",
+    "49bc6d250c84af26",
+    "b215955d7faedbb3",
+    "26944d8030ebb122",
+    "ef4d6e5e7a579967",
+    "9d726315e6b1a90e",
+    "5eab2cf49f41d702",
+    "5b24341b32310de4",
+    "6d7f4df1ea63ab00",
+    "95d37b35f44a7815",
+    "c3170b0320637f63",
+    "43a4e06ba0269109",
+    "c46cbcf4e7f7b93c",
+    "5d6531fe9c7292da",
+    "8b60d57bcc71cb7f",
+    "ec9f9ef77f26b947",
+    "e452058dba19d96d",
+    "a8dbf36457ea44f4",
+    "a4f2069e12ec2373",
+    "571953a323f3bbc9",
+    "c0504836a1b24d44",
+    "ed940a42284d8c00",
+    "33d10786bebc247a",
+    "eb74affc445013d1",
+    "ce606c3a3ff42341",
+    "1a087bd6215d4f8b",
+    "5d1fbae0f9aec259",
+    "38b319ff9afd8029",
+    "d730617d17741817",
+    "f90c7cd75e2211ff",
+    "a90b3d7f22013d41",
+    "c2631c72403321db",
+    "fb1f2f994a6652e9",
+    "a386de35326ea132",
+    "15f58ed4f8812990",
+    "88279da7e74de725",
+    "0483afff905fb604",
+    "8bc298c654deb0c2",
+    "bde9f6b057a38299",
+    "efab2fecdfaabaa2",
+    "3ddb49c675e7946f",
+    "d91b8a972c5d1ea5",
+    "a635c9cb0d26d148",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5",
+    "00c9136da9e0bef5"
+   ],
+   "perRowMismatches": []
+  },
+  "stat101-roar-intimidate-ply-primeape-onix-on": {
+   "arg": 22,
+   "side": "player",
+   "path": "print",
+   "reducer": {
+    "direction": "down",
+    "palette": "attack",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 72,
+      "mv": 33,
+      "atk": 1
+     },
+     {
+      "f": 208,
+      "mv": 46,
+      "atk": 0
+     }
+    ],
+    "zeroed": [
+     "player"
+    ]
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 55
+   },
+   "romMaskRect": [
+    40,
+    55,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 377,
+     "boxPx": 377,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 610,
+     "boxPx": 610
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "0fe6a930a4d1050f",
+    "2e31f45852a8ad36",
+    "9a2f8b3e3c2d8bc4",
+    "d8e2b05fe00fb080",
+    "0ddba06551f1034b",
+    "4b8b65ebc65853d7",
+    "ca754b6b4de8743f",
+    "cc5f29903b27639b",
+    "2ee050cb99c9daa6",
+    "90aadbd0919c232e",
+    "f980161197be85aa",
+    "c29e66ec1eda6b99",
+    "fcb1020712ef743f",
+    "d520f6d5304eaec0",
+    "01f0cc40296a322a",
+    "2e20983bc093efc6",
+    "03aed585fd1c018c",
+    "9f4e31363969dbda",
+    "684fae04ff5739d7",
+    "cda6632dac98a15d",
+    "80d100ebc1cb0790",
+    "1e77c0c208115c1e",
+    "ec06616a3ead49ac",
+    "7398bf814a27ec76",
+    "7c2934eaf911a841",
+    "20443e7cdf3e21d8",
+    "90ba7dacfd90e911",
+    "3a2c449bdb166293",
+    "b49472f99228b3c5",
+    "2c94faf895e73ccd",
+    "d9cacd2aff62bf9f",
+    "b49f2da096fd2b6c",
+    "a7131c44edd84ccf",
+    "ce98b5a6f23a0d84",
+    "865bb5e4cea2c67b",
+    "f373f62dd27d55d6",
+    "9c8a2d8cd5d46909",
+    "6ca43ed44294e682",
+    "aed8ae51d40baa4c",
+    "9ac616aa96f99b0b",
+    "f6026f204b6fdfbe",
+    "418a14a41ed44fca",
+    "40312203edad5997",
+    "7709aa4a90b95bdb",
+    "fcb1020712ef743f",
+    "d520f6d5304eaec0",
+    "513ed3519f3ef0b4",
+    "ddecdfee73e9cad0",
+    "9c05ff76f4c12d25",
+    "133862ac27f4f86c",
+    "e62c311a3b13b1f6",
+    "26adfc105652edfd",
+    "1bc77e5603991d1c",
+    "a2a425d66ba61c66",
+    "0d4d1cff9f5bc4e7",
+    "3cc6310e1afb33e0",
+    "45e247d96694f501",
+    "9e626335b810ccc1",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "bfa2e2a0ab4866b5",
+    "06ff81ad1cc58ab2"
+   ],
+   "perRowMismatches": [
+    [
+     77,
+     0,
+     377,
+     377,
+     0
+    ],
+    [
+     78,
+     0,
+     610,
+     610,
+     0
+    ]
+   ]
+  },
+  "stat101-roar-intimidate-ply-primeape-onix-off": {
+   "arg": 22,
+   "side": "player",
+   "path": "print",
+   "reducer": {
+    "direction": "down",
+    "palette": "attack",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 40,
+    "y": 55
+   },
+   "romMaskRect": [
+    40,
+    55,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 377,
+     "boxPx": 377,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 610,
+     "boxPx": 610
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "0fe6a930a4d1050f",
+    "2e31f45852a8ad36",
+    "9a2f8b3e3c2d8bc4",
+    "d8e2b05fe00fb080",
+    "0ddba06551f1034b",
+    "4b8b65ebc65853d7",
+    "ca754b6b4de8743f",
+    "cc5f29903b27639b",
+    "2ee050cb99c9daa6",
+    "90aadbd0919c232e",
+    "f980161197be85aa",
+    "c29e66ec1eda6b99",
+    "fcb1020712ef743f",
+    "d520f6d5304eaec0",
+    "01f0cc40296a322a",
+    "2e20983bc093efc6",
+    "03aed585fd1c018c",
+    "9f4e31363969dbda",
+    "684fae04ff5739d7",
+    "cda6632dac98a15d",
+    "80d100ebc1cb0790",
+    "1e77c0c208115c1e",
+    "ec06616a3ead49ac",
+    "7398bf814a27ec76",
+    "7c2934eaf911a841",
+    "20443e7cdf3e21d8",
+    "90ba7dacfd90e911",
+    "3a2c449bdb166293",
+    "b49472f99228b3c5",
+    "2c94faf895e73ccd",
+    "d9cacd2aff62bf9f",
+    "b49f2da096fd2b6c",
+    "a7131c44edd84ccf",
+    "ce98b5a6f23a0d84",
+    "865bb5e4cea2c67b",
+    "f373f62dd27d55d6",
+    "9c8a2d8cd5d46909",
+    "6ca43ed44294e682",
+    "aed8ae51d40baa4c",
+    "9ac616aa96f99b0b",
+    "f6026f204b6fdfbe",
+    "418a14a41ed44fca",
+    "40312203edad5997",
+    "7709aa4a90b95bdb",
+    "fcb1020712ef743f",
+    "d520f6d5304eaec0",
+    "513ed3519f3ef0b4",
+    "ddecdfee73e9cad0",
+    "9c05ff76f4c12d25",
+    "133862ac27f4f86c",
+    "e62c311a3b13b1f6",
+    "26adfc105652edfd",
+    "1bc77e5603991d1c",
+    "a2a425d66ba61c66",
+    "0d4d1cff9f5bc4e7",
+    "3cc6310e1afb33e0",
+    "45e247d96694f501",
+    "9e626335b810ccc1",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "cc17d57482f32d49",
+    "bfa2e2a0ab4866b5",
+    "06ff81ad1cc58ab2"
+   ],
+   "perRowMismatches": [
+    [
+     77,
+     0,
+     377,
+     377,
+     0
+    ],
+    [
+     78,
+     0,
+     610,
+     610,
+     0
+    ]
+   ]
+  },
+  "stat101-screech-opp-golbat-onix-on": {
+   "arg": 47,
+   "side": "player",
+   "path": "print",
+   "reducer": {
+    "direction": "down",
+    "palette": "defense",
+    "sharply": true,
+    "state3Rel": 89,
+    "endRel": 89,
+    "nextInstructionRel": 91,
+    "addedRows": 90
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 75,
+      "mv": 103,
+      "atk": 1
+     }
+    ],
+    "zeroed": [
+     "player"
+    ]
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 48
+   },
+   "romMaskRect": [
+    40,
+    48,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 93,
+    "firstRel": -1,
+    "lastRel": 91,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 91,
+     "fullPx": 434,
+     "boxPx": 434,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 92,
+     "fullPx": 397,
+     "boxPx": 397
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "d79b6c001dc8b1d9",
+    "d79b6c001dc8b1d9",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "dfb0c402cd33499f",
+    "44cd06e0c1903be8",
+    "a8a44369d30afb8d",
+    "803b03db3184a7a5",
+    "7a883b985d179e6f",
+    "17cccc46b286796c",
+    "28b5bd30a0b6ff4a",
+    "7a47964d442d4979",
+    "457f7f17d4cc8412",
+    "44da7b9af6564ca9",
+    "91c0cfbe6d48983d",
+    "cfa534a66dfd07a1",
+    "ce54467a91936a0b",
+    "49bcb29ac7eb771f",
+    "6a7f13d9bddcd8ce",
+    "85dc917d103208f3",
+    "0db6147d47fe2b92",
+    "1d2fd00118cc08d7",
+    "cbd3e31f51b38e9d",
+    "d42d0f51281e1ed8",
+    "d6114899433c1826",
+    "aaf48c7286528343",
+    "c09b895b87ba3f1a",
+    "5879db84eb56289d",
+    "5220dfb943914386",
+    "15e3c3b05b55d260",
+    "e1fc0ec3004b95ba",
+    "0f5bafe75e4e08f6",
+    "8b22ec0e4d32feec",
+    "8229b42862fc9bf3",
+    "8caa8bd9f7f28346",
+    "e0b0f6066abb8071",
+    "6296c12cf88a89da",
+    "cb0466e2a0949388",
+    "29bf7a35f9ec349c",
+    "b32b011a17e2862c",
+    "48a6cc5c9d228b3c",
+    "eb79ce683841464d",
+    "7943002219537acc",
+    "d848346b033371f6",
+    "b9de9d7c16f58b61",
+    "364c6b01afc3a358",
+    "d74b1c3e37a8f0c0",
+    "102892230bce3bab",
+    "cc01be6760543c12",
+    "c95e6f8ca6baf432",
+    "761ba7d63e0dbeac",
+    "38d1dbe51542c0b5",
+    "a1c042888d3d59f9",
+    "b8867de1c7d7927e",
+    "0802eff1f9d2dd6e",
+    "38818727164374f1",
+    "1dfc47b41d416c5a",
+    "e57afd6d3782a083",
+    "daa6803ff4cc751f",
+    "d61873dccf9617da",
+    "8b0f997aab8f706b",
+    "3f796c9b1975e581",
+    "01fb82ffa1306330",
+    "d154079494251742",
+    "0e6fb571b6ee921e",
+    "31c3a196c5cd8652",
+    "d1079b9c1cd15aba",
+    "50d6a9d1e3201c5a",
+    "e3c458ee25bf6451",
+    "723e09b16aea50d5",
+    "c02631897cfa6cbc",
+    "bd833c3c68a3e9a2",
+    "ffc7261f73879e3f",
+    "31063ca8d2db429f",
+    "cf114234a60179aa",
+    "ff5346212c2a35af",
+    "6d7900412731bf40",
+    "b20a6a3674efa6aa",
+    "bc7db457dbf5d3e0",
+    "9ca2d91436ea5c3b",
+    "3384310363a26412",
+    "c67ad0ce9f666403",
+    "a2200e822147ad80",
+    "56b5e4420c20cf7e",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "e87fbca12d34951b",
+    "24ecb28a7d4bd554"
+   ],
+   "perRowMismatches": [
+    [
+     91,
+     0,
+     434,
+     434,
+     0
+    ],
+    [
+     92,
+     0,
+     397,
+     397,
+     0
+    ]
+   ]
+  },
+  "stat101-screech-opp-golbat-onix-off": {
+   "arg": 47,
+   "side": "player",
+   "path": "print",
+   "reducer": {
+    "direction": "down",
+    "palette": "defense",
+    "sharply": true,
+    "state3Rel": 89,
+    "endRel": 89,
+    "nextInstructionRel": 91,
+    "addedRows": 90
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 40,
+    "y": 48
+   },
+   "romMaskRect": [
+    40,
+    48,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 93,
+    "firstRel": -1,
+    "lastRel": 91,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 91,
+     "fullPx": 434,
+     "boxPx": 434,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 92,
+     "fullPx": 397,
+     "boxPx": 397
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "d79b6c001dc8b1d9",
+    "d79b6c001dc8b1d9",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "dfb0c402cd33499f",
+    "44cd06e0c1903be8",
+    "a8a44369d30afb8d",
+    "803b03db3184a7a5",
+    "7a883b985d179e6f",
+    "17cccc46b286796c",
+    "28b5bd30a0b6ff4a",
+    "7a47964d442d4979",
+    "457f7f17d4cc8412",
+    "44da7b9af6564ca9",
+    "91c0cfbe6d48983d",
+    "cfa534a66dfd07a1",
+    "ce54467a91936a0b",
+    "49bcb29ac7eb771f",
+    "6a7f13d9bddcd8ce",
+    "85dc917d103208f3",
+    "0db6147d47fe2b92",
+    "1d2fd00118cc08d7",
+    "cbd3e31f51b38e9d",
+    "d42d0f51281e1ed8",
+    "d6114899433c1826",
+    "aaf48c7286528343",
+    "c09b895b87ba3f1a",
+    "5879db84eb56289d",
+    "5220dfb943914386",
+    "15e3c3b05b55d260",
+    "e1fc0ec3004b95ba",
+    "0f5bafe75e4e08f6",
+    "8b22ec0e4d32feec",
+    "8229b42862fc9bf3",
+    "8caa8bd9f7f28346",
+    "e0b0f6066abb8071",
+    "6296c12cf88a89da",
+    "cb0466e2a0949388",
+    "29bf7a35f9ec349c",
+    "b32b011a17e2862c",
+    "48a6cc5c9d228b3c",
+    "eb79ce683841464d",
+    "7943002219537acc",
+    "d848346b033371f6",
+    "b9de9d7c16f58b61",
+    "364c6b01afc3a358",
+    "d74b1c3e37a8f0c0",
+    "102892230bce3bab",
+    "cc01be6760543c12",
+    "c95e6f8ca6baf432",
+    "761ba7d63e0dbeac",
+    "38d1dbe51542c0b5",
+    "a1c042888d3d59f9",
+    "b8867de1c7d7927e",
+    "0802eff1f9d2dd6e",
+    "38818727164374f1",
+    "1dfc47b41d416c5a",
+    "e57afd6d3782a083",
+    "daa6803ff4cc751f",
+    "d61873dccf9617da",
+    "8b0f997aab8f706b",
+    "3f796c9b1975e581",
+    "01fb82ffa1306330",
+    "d154079494251742",
+    "0e6fb571b6ee921e",
+    "31c3a196c5cd8652",
+    "d1079b9c1cd15aba",
+    "50d6a9d1e3201c5a",
+    "e3c458ee25bf6451",
+    "723e09b16aea50d5",
+    "c02631897cfa6cbc",
+    "bd833c3c68a3e9a2",
+    "ffc7261f73879e3f",
+    "31063ca8d2db429f",
+    "cf114234a60179aa",
+    "ff5346212c2a35af",
+    "6d7900412731bf40",
+    "b20a6a3674efa6aa",
+    "bc7db457dbf5d3e0",
+    "9ca2d91436ea5c3b",
+    "3384310363a26412",
+    "c67ad0ce9f666403",
+    "a2200e822147ad80",
+    "56b5e4420c20cf7e",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "c5a4b862c8a8969f",
+    "e87fbca12d34951b",
+    "24ecb28a7d4bd554"
+   ],
+   "perRowMismatches": [
+    [
+     91,
+     0,
+     434,
+     434,
+     0
+    ],
+    [
+     92,
+     0,
+     397,
+     397,
+     0
+    ]
+   ]
+  },
+  "stat101-superpower-opp-machamp-snorlax-on": {
+   "arg": 57,
+   "side": "opponent",
+   "path": "playstatchangeanimation",
+   "reducer": {
+    "direction": "down",
+    "palette": "multiple",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 81,
+      "mv": 276,
+      "atk": 1
+     }
+    ],
+    "zeroed": [
+     "player"
+    ]
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 9
+   },
+   "romMaskRect": [
+    144,
+    9,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 0,
+     "boxPx": 0,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 0,
+     "boxPx": 0
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "dbe569b6fa31bc49",
+    "24bfdf05c01fa9c4",
+    "471556b6acaa398f",
+    "4bfa1345dd1fa4cd",
+    "e7f80875e90989d6",
+    "52586b2d5521f804",
+    "4be2df2e1cdf049d",
+    "fad9ea17980ed102",
+    "e59ee4a8e94ee842",
+    "6a264e3cb22f83c7",
+    "ef9f6cc5a5dc50cb",
+    "b203012abf04f8ee",
+    "600e8f20c67020e3",
+    "68ca0b1fe3331eac",
+    "cc0df70e0a7a594e",
+    "64e90219798b163d",
+    "a805d14e3ccb1441",
+    "1a4d797cc6edd20b",
+    "0193bfd4e1372e59",
+    "84425bf0e0567775",
+    "7d705a51faa61405",
+    "defe841bc7b2a9b5",
+    "f2a2a29c7bd068d3",
+    "513285da76344cf3",
+    "6c5309b10e47d841",
+    "26805765214b6bb4",
+    "bcfba4b33aef791a",
+    "fbf605794b62710b",
+    "bc924afd8a0bf18a",
+    "5f55dafa236ad454",
+    "07e8579f275df705",
+    "ee225407ad90f975",
+    "3488bda23bfca88f",
+    "674f2018d8f7b5b4",
+    "35277650ec406926",
+    "c674c6ddc5f7271f",
+    "3fd7e21759fb153a",
+    "d6892778b178b134",
+    "8354a979df000cb6",
+    "53f11fb2bf55f352",
+    "eb3089516aefe942",
+    "d6936e7a239d8e41",
+    "5c59ca7e5ffabf41",
+    "aa5243c3d75f848c",
+    "600e8f20c67020e3",
+    "68ca0b1fe3331eac",
+    "ac57e384146255b2",
+    "211342be205b1fa6",
+    "478d86ed7b649dec",
+    "79ab8b04e295293b",
+    "7e2e5cbf03dd5caa",
+    "d2a2283e2b819078",
+    "ad5f82a01099faea",
+    "9859f10bea8ff912",
+    "9f018bf3e0be9812",
+    "4fe862967759e9d7",
+    "4a711ea3df17f9a0",
+    "de32ef85def807f6",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0"
+   ],
+   "perRowMismatches": []
+  },
+  "stat101-superpower-opp-machamp-snorlax-off": {
+   "arg": 57,
+   "side": "opponent",
+   "path": "playstatchangeanimation",
+   "reducer": {
+    "direction": "down",
+    "palette": "multiple",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 144,
+    "y": 9
+   },
+   "romMaskRect": [
+    144,
+    9,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 0,
+     "boxPx": 0,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 0,
+     "boxPx": 0
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "dbe569b6fa31bc49",
+    "24bfdf05c01fa9c4",
+    "471556b6acaa398f",
+    "4bfa1345dd1fa4cd",
+    "e7f80875e90989d6",
+    "52586b2d5521f804",
+    "4be2df2e1cdf049d",
+    "fad9ea17980ed102",
+    "e59ee4a8e94ee842",
+    "6a264e3cb22f83c7",
+    "ef9f6cc5a5dc50cb",
+    "b203012abf04f8ee",
+    "600e8f20c67020e3",
+    "68ca0b1fe3331eac",
+    "cc0df70e0a7a594e",
+    "64e90219798b163d",
+    "a805d14e3ccb1441",
+    "1a4d797cc6edd20b",
+    "0193bfd4e1372e59",
+    "84425bf0e0567775",
+    "7d705a51faa61405",
+    "defe841bc7b2a9b5",
+    "f2a2a29c7bd068d3",
+    "513285da76344cf3",
+    "6c5309b10e47d841",
+    "26805765214b6bb4",
+    "bcfba4b33aef791a",
+    "fbf605794b62710b",
+    "bc924afd8a0bf18a",
+    "5f55dafa236ad454",
+    "07e8579f275df705",
+    "ee225407ad90f975",
+    "3488bda23bfca88f",
+    "674f2018d8f7b5b4",
+    "35277650ec406926",
+    "c674c6ddc5f7271f",
+    "3fd7e21759fb153a",
+    "d6892778b178b134",
+    "8354a979df000cb6",
+    "53f11fb2bf55f352",
+    "eb3089516aefe942",
+    "d6936e7a239d8e41",
+    "5c59ca7e5ffabf41",
+    "aa5243c3d75f848c",
+    "600e8f20c67020e3",
+    "68ca0b1fe3331eac",
+    "ac57e384146255b2",
+    "211342be205b1fa6",
+    "478d86ed7b649dec",
+    "79ab8b04e295293b",
+    "7e2e5cbf03dd5caa",
+    "d2a2283e2b819078",
+    "ad5f82a01099faea",
+    "9859f10bea8ff912",
+    "9f018bf3e0be9812",
+    "4fe862967759e9d7",
+    "4a711ea3df17f9a0",
+    "de32ef85def807f6",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0",
+    "437bb1f41e8cdbe0"
+   ],
+   "perRowMismatches": []
+  },
+  "stat101-tickle-opp-golbat-snorlax-on": {
+   "arg": 57,
+   "side": "player",
+   "path": "playstatchangeanimation",
+   "reducer": {
+    "direction": "down",
+    "palette": "multiple",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": {
+    "bodies": [
+     {
+      "f": 70,
+      "mv": 321,
+      "atk": 1
+     }
+    ],
+    "zeroed": [
+     "opponent"
+    ]
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 59
+   },
+   "romMaskRect": [
+    40,
+    59,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 0,
+     "boxPx": 0,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 0,
+     "boxPx": 0
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "558a4b2294680727",
+    "558a4b2294680727",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "ac93bc24d465d4ea",
+    "f199dfdb6a258e50",
+    "edad2c82fcade281",
+    "efa820677b3597e7",
+    "0e60d316f545e4e6",
+    "98ef3080a569b857",
+    "25c0edd8a9bc75c2",
+    "61a341fb1cff971f",
+    "f8dc06d9cd03057d",
+    "d7efdb1149fdbfba",
+    "5ea31308c6d2bd68",
+    "82e3aec24248b3f0",
+    "af3b002b066a2258",
+    "4fea504ae3e225a2",
+    "18551a6ee9bc87af",
+    "b24aec885a26ab4d",
+    "26e7d8db1051302d",
+    "269dd938cb53d96d",
+    "b41a0455b67a071d",
+    "69ee7510afe3a37b",
+    "7328f04972d75c10",
+    "1a42a62b10629a3d",
+    "e766e3155d09447a",
+    "93b9d2b1ea662c17",
+    "9525b4d219f541cd",
+    "d9aeada7ad73c7e8",
+    "48724386da193d17",
+    "980e1d7ca19ed994",
+    "433a6aa14f4800b5",
+    "b74cb69bcb4ad0c9",
+    "935ba759a8a4a13e",
+    "4cbd97dc85b1ecf2",
+    "b0d39e20d72cfe7b",
+    "ed4b79a6d10b1bd8",
+    "b88bb6146d46412d",
+    "21aa083388542525",
+    "c54cc04d9d5be412",
+    "499b3424fceed28a",
+    "e90d9066c95607b0",
+    "e0a878aa3dd5537b",
+    "0ef326a587e7a881",
+    "a96b4c15e506d94b",
+    "7d145889af9956e4",
+    "0fa7d4df7bf7a603",
+    "af3b002b066a2258",
+    "4fea504ae3e225a2",
+    "5829d262e46488f4",
+    "504cc4af9d2aa172",
+    "28e4b4548a56394c",
+    "fe1b901655df9b3b",
+    "2069fb7586eb50bc",
+    "9692c8ee8489c45c",
+    "bc622b284c49f06c",
+    "8d3593e834850d71",
+    "6fdf2bbb323e5a9e",
+    "97b317d2952d8a57",
+    "c218026ca4669e4f",
+    "7a48541adbf477a2",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "558a4b2294680727",
+    "558a4b2294680727"
+   ],
+   "perRowMismatches": []
+  },
+  "stat101-tickle-opp-golbat-snorlax-off": {
+   "arg": 57,
+   "side": "player",
+   "path": "playstatchangeanimation",
+   "reducer": {
+    "direction": "down",
+    "palette": "multiple",
+    "sharply": false,
+    "state3Rel": 67,
+    "endRel": 75,
+    "nextInstructionRel": 77,
+    "addedRows": 76
+   },
+   "x2History": null,
+   "productionCorner": {
+    "x": 40,
+    "y": 59
+   },
+   "romMaskRect": [
+    40,
+    59,
+    64,
+    64
+   ],
+   "cornerEqualsRomRect": true,
+   "compared": {
+    "rows": 79,
+    "firstRel": -1,
+    "lastRel": 77,
+    "firstBad": null
+   },
+   "rect": {
+    "px": 0
+   },
+   "fullScreen": {
+    "px": 0
+   },
+   "zeroPx": true,
+   "nextCommandRows": [
+    {
+     "rel": 77,
+     "fullPx": 0,
+     "boxPx": 0,
+     "outsideBoxPx": 0
+    }
+   ],
+   "afterWindow": [
+    {
+     "rel": 78,
+     "fullPx": 0,
+     "boxPx": 0
+    }
+   ],
+   "rawRectBannerRowsPx": 0,
+   "productionFrameSha": [
+    "558a4b2294680727",
+    "558a4b2294680727",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "ac93bc24d465d4ea",
+    "f199dfdb6a258e50",
+    "edad2c82fcade281",
+    "efa820677b3597e7",
+    "0e60d316f545e4e6",
+    "98ef3080a569b857",
+    "25c0edd8a9bc75c2",
+    "61a341fb1cff971f",
+    "f8dc06d9cd03057d",
+    "d7efdb1149fdbfba",
+    "5ea31308c6d2bd68",
+    "82e3aec24248b3f0",
+    "af3b002b066a2258",
+    "4fea504ae3e225a2",
+    "18551a6ee9bc87af",
+    "b24aec885a26ab4d",
+    "26e7d8db1051302d",
+    "269dd938cb53d96d",
+    "b41a0455b67a071d",
+    "69ee7510afe3a37b",
+    "7328f04972d75c10",
+    "1a42a62b10629a3d",
+    "e766e3155d09447a",
+    "93b9d2b1ea662c17",
+    "9525b4d219f541cd",
+    "d9aeada7ad73c7e8",
+    "48724386da193d17",
+    "980e1d7ca19ed994",
+    "433a6aa14f4800b5",
+    "b74cb69bcb4ad0c9",
+    "935ba759a8a4a13e",
+    "4cbd97dc85b1ecf2",
+    "b0d39e20d72cfe7b",
+    "ed4b79a6d10b1bd8",
+    "b88bb6146d46412d",
+    "21aa083388542525",
+    "c54cc04d9d5be412",
+    "499b3424fceed28a",
+    "e90d9066c95607b0",
+    "e0a878aa3dd5537b",
+    "0ef326a587e7a881",
+    "a96b4c15e506d94b",
+    "7d145889af9956e4",
+    "0fa7d4df7bf7a603",
+    "af3b002b066a2258",
+    "4fea504ae3e225a2",
+    "5829d262e46488f4",
+    "504cc4af9d2aa172",
+    "28e4b4548a56394c",
+    "fe1b901655df9b3b",
+    "2069fb7586eb50bc",
+    "9692c8ee8489c45c",
+    "bc622b284c49f06c",
+    "8d3593e834850d71",
+    "6fdf2bbb323e5a9e",
+    "97b317d2952d8a57",
+    "c218026ca4669e4f",
+    "7a48541adbf477a2",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "1dfbbd939f7f34a0",
+    "558a4b2294680727",
+    "558a4b2294680727"
+   ],
+   "perRowMismatches": []
+  },
+  "summary": {
+   "neg": null,
+   "trackerGrowlZeroedExperiment": false,
+   "windows": 20,
+   "zeroPxWindows": 19,
+   "perRowDigest": "0e059736f7313c88"
+  }
+ },
+ "experiments": {
+  "neg-age+1": {
+   "summary": {
+    "neg": "age+1",
+    "trackerGrowlZeroedExperiment": false,
+    "windows": 20,
+    "zeroPxWindows": 0,
+    "perRowDigest": "ca89a173f2c31e32"
+   },
+   "nonZeroWindows": {
+    "stat101-agility-opp-golbat-snorlax-on": {
+     "rect": 69058,
+     "fullScreen": 69420
+    },
+    "stat101-agility-opp-golbat-snorlax-off": {
+     "rect": 69058,
+     "fullScreen": 69420
+    },
+    "stat101-cosmic-power-ply-snorlax-golbat-on": {
+     "rect": 61642,
+     "fullScreen": 62042
+    },
+    "stat101-cosmic-power-ply-snorlax-golbat-off": {
+     "rect": 61642,
+     "fullScreen": 62042
+    },
+    "stat101-growl-ply-primeape-onix-on": {
+     "rect": 115984,
+     "fullScreen": 115984
+    },
+    "stat101-growl-ply-primeape-onix-off": {
+     "rect": 70943,
+     "fullScreen": 70943
+    },
+    "stat101-harden-ply-primeape-onix-on": {
+     "rect": 72586,
+     "fullScreen": 72586
+    },
+    "stat101-harden-ply-primeape-onix-off": {
+     "rect": 72586,
+     "fullScreen": 72586
+    },
+    "stat101-icy-wind-ply-primeape-golbat-on": {
+     "rect": 51096,
+     "fullScreen": 51458
+    },
+    "stat101-icy-wind-ply-primeape-golbat-off": {
+     "rect": 51096,
+     "fullScreen": 51458
+    },
+    "stat101-memento-ply-primeape-onix-on": {
+     "rect": 95917,
+     "fullScreen": 95917
+    },
+    "stat101-memento-ply-primeape-onix-off": {
+     "rect": 95749,
+     "fullScreen": 95749
+    },
+    "stat101-roar-intimidate-ply-primeape-onix-on": {
+     "rect": 72196,
+     "fullScreen": 72196
+    },
+    "stat101-roar-intimidate-ply-primeape-onix-off": {
+     "rect": 72196,
+     "fullScreen": 72196
+    },
+    "stat101-screech-opp-golbat-onix-on": {
+     "rect": 86514,
+     "fullScreen": 86914
+    },
+    "stat101-screech-opp-golbat-onix-off": {
+     "rect": 86514,
+     "fullScreen": 86914
+    },
+    "stat101-superpower-opp-machamp-snorlax-on": {
+     "rect": 90569,
+     "fullScreen": 90569
+    },
+    "stat101-superpower-opp-machamp-snorlax-off": {
+     "rect": 90569,
+     "fullScreen": 90569
+    },
+    "stat101-tickle-opp-golbat-snorlax-on": {
+     "rect": 61426,
+     "fullScreen": 61826
+    },
+    "stat101-tickle-opp-golbat-snorlax-off": {
+     "rect": 61426,
+     "fullScreen": 61826
+    }
+   }
+  },
+  "neg-no-rest": {
+   "summary": {
+    "neg": "no-rest",
+    "trackerGrowlZeroedExperiment": false,
+    "windows": 20,
+    "zeroPxWindows": 19,
+    "perRowDigest": "f9fd0e1ce3b3bd1e"
+   },
+   "nonZeroWindows": {
+    "stat101-memento-ply-primeape-onix-on": {
+     "rect": 87280,
+     "fullScreen": 87280
+    }
+   }
+  },
+  "neg-no-shadow": {
+   "summary": {
+    "neg": "no-shadow",
+    "trackerGrowlZeroedExperiment": false,
+    "windows": 20,
+    "zeroPxWindows": 9,
+    "perRowDigest": "3afe46478230877d"
+   },
+   "nonZeroWindows": {
+    "stat101-agility-opp-golbat-snorlax-on": {
+     "rect": 380,
+     "fullScreen": 2000
+    },
+    "stat101-agility-opp-golbat-snorlax-off": {
+     "rect": 380,
+     "fullScreen": 2000
+    },
+    "stat101-cosmic-power-ply-snorlax-golbat-on": {
+     "rect": 0,
+     "fullScreen": 3600
+    },
+    "stat101-cosmic-power-ply-snorlax-golbat-off": {
+     "rect": 0,
+     "fullScreen": 3600
+    },
+    "stat101-growl-ply-primeape-onix-on": {
+     "rect": 82916,
+     "fullScreen": 82916
+    },
+    "stat101-icy-wind-ply-primeape-golbat-on": {
+     "rect": 684,
+     "fullScreen": 3600
+    },
+    "stat101-icy-wind-ply-primeape-golbat-off": {
+     "rect": 684,
+     "fullScreen": 3600
+    },
+    "stat101-screech-opp-golbat-onix-on": {
+     "rect": 0,
+     "fullScreen": 2000
+    },
+    "stat101-screech-opp-golbat-onix-off": {
+     "rect": 0,
+     "fullScreen": 2000
+    },
+    "stat101-tickle-opp-golbat-snorlax-on": {
+     "rect": 0,
+     "fullScreen": 3600
+    },
+    "stat101-tickle-opp-golbat-snorlax-off": {
+     "rect": 0,
+     "fullScreen": 3600
+    }
+   }
+  },
+  "tracker-growl-zeroed": {
+   "summary": {
+    "neg": null,
+    "trackerGrowlZeroedExperiment": true,
+    "windows": 20,
+    "zeroPxWindows": 20,
+    "perRowDigest": "ff0f08d6cb32c076"
+   },
+   "nonZeroWindows": {}
+  }
+ },
+ "routes": {
+  "0:2:on": {
+   "sameTimeline": true,
+   "lastFrame": 6647,
+   "presentedFrames": 6067,
+   "framesDiffer": 494,
+   "framesDifferOutsideStatsChange": [],
+   "statsChangeCommands": [
+    {
+     "frame": 976,
+     "battler": 0,
+     "argument": 40,
+     "species": "GRIMER",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1603,
+     "battler": 0,
+     "argument": 40,
+     "species": "GRIMER",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 2272,
+     "battler": 0,
+     "argument": 40,
+     "species": "GRIMER",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 4584,
+     "battler": 1,
+     "argument": 24,
+     "species": "WOBBUFFET",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 5383,
+     "battler": 1,
+     "argument": 24,
+     "species": "WOBBUFFET",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 6155,
+     "battler": 1,
+     "argument": 24,
+     "species": "WOBBUFFET",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 6446,
+     "battler": 0,
+     "argument": 46,
+     "species": "POLIWHIRL",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "3:3:on": {
+   "sameTimeline": true,
+   "lastFrame": 3787,
+   "presentedFrames": 3178,
+   "framesDiffer": 348,
+   "framesDifferOutsideStatsChange": [],
+   "statsChangeCommands": [
+    {
+     "frame": 641,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1050,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1462,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1871,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 2283,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 2801,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "3:1:on": {
+   "sameTimeline": true,
+   "lastFrame": 6449,
+   "presentedFrames": 5840,
+   "framesDiffer": 232,
+   "framesDifferOutsideStatsChange": [],
+   "statsChangeCommands": [
+    {
+     "frame": 1379,
+     "battler": 0,
+     "argument": 24,
+     "species": "PIDGEOTTO",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 3455,
+     "battler": 0,
+     "argument": 24,
+     "species": "ONIX",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 3996,
+     "battler": 0,
+     "argument": 24,
+     "species": "ONIX",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 4793,
+     "battler": 0,
+     "argument": 24,
+     "species": "ONIX",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "6:0:on": {
+   "sameTimeline": true,
+   "lastFrame": 6149,
+   "presentedFrames": 5568,
+   "framesDiffer": 298,
+   "framesDifferOutsideStatsChange": [],
+   "statsChangeCommands": [
+    {
+     "frame": 2694,
+     "battler": 0,
+     "argument": 22,
+     "species": "DROWZEE",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 3154,
+     "battler": 1,
+     "argument": 41,
+     "species": "GROWLITHE",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 4284,
+     "battler": 1,
+     "argument": 41,
+     "species": "GROWLITHE",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 5497,
+     "battler": 1,
+     "argument": 41,
+     "species": "GROWLITHE",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "13:3:on": {
+   "sameTimeline": true,
+   "lastFrame": 9027,
+   "presentedFrames": 8397,
+   "framesDiffer": 348,
+   "framesDifferOutsideStatsChange": [],
+   "statsChangeCommands": [
+    {
+     "frame": 1929,
+     "battler": 0,
+     "argument": 57,
+     "species": "WAILMER",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 2704,
+     "battler": 0,
+     "argument": 57,
+     "species": "WAILMER",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 4577,
+     "battler": 0,
+     "argument": 24,
+     "species": "WAILMER",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 6276,
+     "battler": 0,
+     "argument": 18,
+     "species": "PARASECT",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 6708,
+     "battler": 1,
+     "argument": 27,
+     "species": "NIDORINA",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 8737,
+     "battler": 1,
+     "argument": 27,
+     "species": "NIDORINA",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "14:0:on": {
+   "sameTimeline": true,
+   "lastFrame": 5654,
+   "presentedFrames": 5086,
+   "framesDiffer": 360,
+   "framesDifferOutsideStatsChange": [],
+   "statsChangeCommands": [
+    {
+     "frame": 614,
+     "battler": 1,
+     "argument": 39,
+     "species": "LEDIAN",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 10,
+     "nonBannerClass": "shadow",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1156,
+     "battler": 1,
+     "argument": 41,
+     "species": "LEDIAN",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 10,
+     "nonBannerClass": "shadow",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1697,
+     "battler": 1,
+     "argument": 41,
+     "species": "LEDIAN",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 10,
+     "nonBannerClass": "shadow",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 4049,
+     "battler": 1,
+     "argument": 39,
+     "species": "LEDIAN",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 10,
+     "nonBannerClass": "shadow",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "3:3:off": {
+   "sameTimeline": true,
+   "lastFrame": 3281,
+   "presentedFrames": 2672,
+   "framesDiffer": 348,
+   "framesDifferOutsideStatsChange": [],
+   "statsChangeCommands": [
+    {
+     "frame": 583,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 934,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1288,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1639,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1993,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 2374,
+     "battler": 1,
+     "argument": 27,
+     "species": "MARSHTOMP",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "0:2:off": {
+   "sameTimeline": true,
+   "lastFrame": 4702,
+   "presentedFrames": 4122,
+   "framesDiffer": 494,
+   "framesDifferOutsideStatsChange": [],
+   "statsChangeCommands": [
+    {
+     "frame": 663,
+     "battler": 0,
+     "argument": 40,
+     "species": "GRIMER",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1145,
+     "battler": 0,
+     "argument": 40,
+     "species": "GRIMER",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 1501,
+     "battler": 0,
+     "argument": 40,
+     "species": "GRIMER",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 3297,
+     "battler": 1,
+     "argument": 24,
+     "species": "WOBBUFFET",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 3851,
+     "battler": 1,
+     "argument": 24,
+     "species": "WOBBUFFET",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 4307,
+     "battler": 1,
+     "argument": 24,
+     "species": "WOBBUFFET",
+     "frames": 76,
+     "bannerFramesDiffer": 58,
+     "bannerFrames": 58,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    },
+    {
+     "frame": 4501,
+     "battler": 0,
+     "argument": 46,
+     "species": "POLIWHIRL",
+     "frames": 90,
+     "bannerFramesDiffer": 80,
+     "bannerFrames": 80,
+     "nonBannerFramesDiffer": 0,
+     "nonBannerClass": "none",
+     "followingFirstFrameIdentical": true,
+     "ok": true
+    }
+   ],
+   "ok": true
+  },
+  "summary": {
+   "routes": 8,
+   "ok": true
+  }
+ },
+ "census": {
+  "shards": {
+   "0": {
+    "commands": 2680,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "1": {
+    "commands": 2654,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "2": {
+    "commands": 2636,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "3": {
+    "commands": 2643,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "4": {
+    "commands": 3222,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "5": {
+    "commands": 2801,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "6": {
+    "commands": 2409,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "7": {
+    "commands": 2807,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "8": {
+    "commands": 2921,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   },
+   "9": {
+    "commands": 2740,
+    "lengthEqual": true,
+    "battleDigest": true,
+    "battleDigestExcludingFrames": true,
+    "commandDigest": true,
+    "battleFrames": true,
+    "statsRowsEqual": true
+   }
+  },
+  "commands": 27513,
+  "keyMismatches": 0,
+  "statusChanges": 0,
+  "frameChanges": 0,
+  "otherFieldChanges": 0,
+  "digestMismatches": 0,
+  "statsRows": 5552,
+  "statsRowMismatches": 0,
+  "framesBase": 14946997,
+  "framesFinal": 14946997,
+  "presentedStatsChange": 3667,
+  "presentedStatsChangeRows": 298348,
+  "identical": true
+ }
+}
