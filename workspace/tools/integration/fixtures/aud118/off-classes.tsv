@@ -11,3 +11,4 @@ status (Spore)	60	8	BattleScript_Pausex20+0@9	43	35	48	5	first change in BattleS
 doll (Substitute)	66	None		None	None	None	None	None	None	None	None	None	None	None	None
 failed (Light Screen again: But it failed!)	801	4	BattleScript_Pausex20+0@5	39	35	41	2	first change in BattleScript_PrintReflectLightScreenSafeguardString+7 (exec 1)	STRINGID_PKMNRAISEDSPDEF@39	1	0	40	True	-40	73
 failed (Reflect again: But it failed!)	796	3	BattleScript_Pausex20+0@4	38	35	40	2	first change in BattleScript_PrintReflectLightScreenSafeguardString+7 (exec 1)	STRINGID_PKMNRAISEDDEF@38	1	0	39	True	-39	25
+failed (Rain Dance again: But it failed!)	799	3	BattleScript_Pausex20+0@4	38	35	40	2	first change in BattleScript_MoveWeatherChange+7 (exec 1)	STRINGID_STARTEDTORAIN@38	1	0	39	True	-39	99
