@@ -41,6 +41,16 @@
   1,630 files / 13,431 tests 0 failed, build (`.integration/validation/union-7390bf8ca/`). Census 0..999 (ret88Census.sh shards):
   **98.80 % of move-animation commands / 99.27 % of frames live** (27,128 / 27,458; session start 95.38 / 98.72), 0 render throws.
   Struggle declines left: lend unknown, doll cells (-> stf115).
+- scd112 (INTEGRATION, Opus, merged `41d24e6cc`, src `c477ee81` on `1cfac3f7f`): ISSUES #166 slice (d) — the General_StatsChange banner
+  drawn in BOTH scenes through the production path (reducer rows, existing exact helpers, mask at the displayed picture + tracked x2 rest,
+  elevated shadow hidden): 19 / 20 ROM windows 0 px both scenes (Growl ON 82,916 px: liveBattlerX2History has no Growl row; with it
+  zeroed 20 / 20 -> scf117); 8 production routes: pixels only on stats-change frames; census identical. Supervisor: scd112Run.sh ALL SAME.
+- olnd113 (SIDE, Opus, merged `681da5c10`, src `b46ad30e` on `bce86a4b0`): ISSUES #167 — off108's patch landed (Scene OFF no-hit pause per
+  class; the MoveMissedPause / failed / Protect-blocked hold in BOTH scenes); lead(STATS_CHANGE) = 1 (stat102's age 0 = rel 1). OFF rule
+  16 / 16, ON pause-path 5 / 5 at 0 residual; post-stats-change first glyph still -2 / -1 / -1 (-> scf117). Census ON 0 status changes;
+  OFF +9,717 pauses / +407,249 frames, 0 command mismatches; soak pins moved by frames only (decision logs identical). Supervisor:
+  olnd113Run.sh ALL SAME.
+- **Supervisor union gates on `681da5c10` (src `e00a22788`)**: typecheck, smoke 448, full suite 1,632 files / 13,467 tests 0 failed, build.
 
 ## 2026-10-11 — User-directed Struggle inclusion (docs only)
 
