@@ -19,7 +19,10 @@ land97's `liveMoveIdleLeadRows`. Presentation only: gameplay, RNG, damage, turn 
 | Revert experiments (archive copy) | rows stubbed to 0 / 0: **6 / 10 fail** (the 4 passing are the test-side mask constants and the three 0 / 0 cases). Struggle exclusion removed + `preActivationRow` back to elapsed 0 only: **3 / 10 fail** (mask equality, Struggle, shp116 composition) |
 | Differential (`--base 9d23a17c4`) | `fight-submenu` 235 / 235 and `battle1-postwin-next-prompt` 216 / 216 byte-identical. `presentation-rng-playable-live-bodies-seeded-on` 53 / 173 identical: its capture frames are each body's activation and last frame on the base timeline; every body after the first now starts P + T (+ the earlier bodies' rows) later and lasts P + T longer, so the fixed frames land on other rows (and Random2 words move with the host). **Regenerate its capture frames with `tools/integration/presentationRngTraces.ts`** (not done here) |
 
-Census, gates: see the receipt `tools/integration/fixtures/iu120-live-receipt.json` and the final report.
+| Census 0..999 (10 `--index-from` shards per tree, `hist73Merge.py`, `iu120CensusDelta.py`) | **0 status changes, 0 per-command mismatches.** 27,427 commands both trees (live 27,140 both). **23,870 commands moved by exactly P + T of their side** (23,779 live + 91 presentation-stage fallbacks); 135 Substitute swaps and every Struggle command kept +0. **+95,148 frames** (4,065,771 -> 4,160,919). Command KEY sequence identical on 10 / 10 shards; `battleDigestExcludingFrames` identical on 9 / 10: shard 4's seed 434 (streak 21) is the census FRAME_BUDGET stall idle98 also hit; it stalls in both trees and the final tree is cut one turn earlier (289 vs 290 turns), with the same command keys. `fixtures/iu120/census-delta.json` |
+| Gates (final code) | typecheck green; smoke 8 files / 448 tests; the 70 gate files green (60 + the 10 Random2-route files rerun after the effect-age fix); **full suite on `03bb26521`: shard 1 819 files / 7,035 tests passed (22 / 119 skipped), shard 2 818 / 6,468 (22 / 104), 0 failed**; `npm run build` green; `git diff --check` clean |
+
+Receipt: `tools/integration/fixtures/iu120-live-receipt.json`.
 
 ## Reproduce (from workspace/)
 
