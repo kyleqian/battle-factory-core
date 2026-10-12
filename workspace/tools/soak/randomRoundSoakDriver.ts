@@ -2374,6 +2374,12 @@ export class RandomPlayer {
         `postwin ${postwin.frontierBrain ? "brain " : ""}continuation: `
           + `${["GO ON", "RECORD", "REST", "RETIRE"][target]}`,
       );
+      // REST is deliberately unselectable (user decision 2026-08-05): its A press changes nothing, so the
+      // sticky roll above (keyed by menu + cursor) would never be re-drawn and the driver pressed A on REST
+      // forever (full seed 25 HANG @ postwin:page0, 2026-10-11 wind-down). Re-draw after every A on REST:
+      // exactly one decision draw per such press, independent of press timing (the pre-soak111 per-press
+      // policy for this no-op choice).
+      if (target === 2) this.postwinRoll = null;
       return this.press("A", 12);
     }
     return this.pressAdvance(state, "postwin advance");
