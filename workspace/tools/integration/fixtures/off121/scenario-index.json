@@ -1,0 +1,92 @@
+{
+ "off121-toxic-ply-primeape-onix.json": {
+  "move": 92,
+  "classes": "move-status psn + end-turn toxic tick",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off121-toxic-opp-primeape-onix.json": {
+  "move": 92,
+  "classes": "move-status psn + end-turn toxic tick",
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "off121-will-o-wisp-ply-primeape-onix.json": {
+  "move": 261,
+  "classes": "move-status brn + end-turn burn tick",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off121-spore-ply-primeape-onix.json": {
+  "move": 147,
+  "classes": "move-status slp + sleep turns / wake",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 4,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off121-spore-opp-primeape-onix.json": {
+  "move": 147,
+  "classes": "move-status slp + sleep turns / wake",
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 4,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "off121-thunder-wave-ply-primeape-snorlax.json": {
+  "move": 86,
+  "classes": "move-status prz + paralysis turns",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 4,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off121-self-destruct-ply-primeape-onix.json": {
+  "move": 120,
+  "classes": "faint (cleareffectsonfaint)",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 1,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off121-rest-ply-snorlax-onix.json": {
+  "move": 156,
+  "classes": "rest (trysetrest)",
+  "attackerSide": "player",
+  "attacker": "SNORLAX",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 1,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off121-spore-chesto-ply-primeape-onix.json": {
+  "move": 147,
+  "classes": "item cure (MOVEEND Chesto Berry)",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 1,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ }
+}

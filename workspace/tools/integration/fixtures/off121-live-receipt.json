@@ -1,0 +1,85 @@
+{
+ "schema": "off121-live-receipt/v1",
+ "finalSrcTree": "4642cfcba7e0d344e8cc867b815e6430d8865e6c",
+ "on": {
+  "files": 22,
+  "identical": 22,
+  "different": [],
+  "mergedSummary": {
+   "schema": "hist73-merged-census/v1",
+   "seeds": "0..999",
+   "battleDigest": "5326e861968a78a69b3f0e34266921607d7e3dbcf5e9788ef50608fc46e626ca",
+   "commandKeyDigest": "f1f8b6eb61f157287c471a1c206d69e1a15fb14b067ffa3a29a34d8a755218e1",
+   "renderThrows": 0
+  }
+ },
+ "offRouteWindows": {
+  "usesCompared": 37939,
+  "commandMismatches": 0,
+  "usesWithChangedStatus": 5550,
+  "stalledSeeds": {
+   "796": {
+    "base": 678,
+    "final": 680
+   }
+  },
+  "statusChangedByFrames": [
+   [
+    32,
+    1,
+    3877
+   ],
+   [
+    32,
+    2,
+    1223
+   ],
+   [
+    32,
+    38,
+    466
+   ],
+   [
+    32,
+    35,
+    236
+   ]
+  ],
+  "statusChangedFramesTotal": -153373
+ },
+ "offStatusCommands": {
+  "compared": 8479,
+  "mismatches": 0,
+  "stalledSeeds": {},
+  "framesDelta": -235502,
+  "byClass": {
+   "faint (cleareffectsonfaint)": {
+    "32->1 (delta 1)": 4327
+   },
+   "sleep turn (attackcanceler)": {
+    "32->1 (delta 1)": 1497
+   },
+   "move-inflicted (SetMoveEffect)": {
+    "32->1 (delta 1)": 4,
+    "32->2 (delta 2)": 1224
+   },
+   "wake up (attackcanceler)": {
+    "32->2 (delta 2)": 587
+   },
+   "rest (trysetrest)": {
+    "32->33 (delta 33)": 1,
+    "32->38 (delta 33)": 466
+   },
+   "item cure (moveend)": {
+    "32->1 (delta 1)": 1,
+    "32->35 (delta 35)": 243
+   },
+   "frozen turn (attackcanceler)": {
+    "32->1 (delta 1)": 104
+   },
+   "thaw (attackcanceler)": {
+    "32->1 (delta 1)": 25
+   }
+  }
+ }
+}

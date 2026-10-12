@@ -1,0 +1,5329 @@
+{
+ "schema": "off121-rom/v1",
+ "scenarios": {
+  "off121-rest-ply-snorlax-onix": {
+   "move": 156,
+   "classes": "rest (trysetrest)",
+   "attackerSide": "player",
+   "attacker": "SNORLAX",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 1,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectRest+18",
+      "statusOp": "trysetrest",
+      "S": 199,
+      "Sexec": 199,
+      "G": 195,
+      "printLabel": "BattleScript_EffectRest+26",
+      "P": 232,
+      "F": 234,
+      "printMinusStatus": 33,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 34,
+      "runs": [
+       [
+        "BattleScript_EffectRest+18",
+        "trysetrest",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectRest+23",
+        "pause",
+        1,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectRest+26",
+        "printfromtable",
+        33,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": []
+   },
+   "off": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectRest+18",
+      "statusOp": "trysetrest",
+      "S": 188,
+      "Sexec": 188,
+      "G": 184,
+      "printLabel": "BattleScript_EffectRest+26",
+      "P": 221,
+      "F": 223,
+      "printMinusStatus": 33,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 34,
+      "runs": [
+       [
+        "BattleScript_EffectRest+18",
+        "trysetrest",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectRest+23",
+        "pause",
+        1,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectRest+26",
+        "printfromtable",
+        33,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": []
+   }
+  },
+  "off121-self-destruct-ply-primeape-onix": {
+   "move": 120,
+   "classes": "faint (cleareffectsonfaint)",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 1,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_FaintAttacker+7",
+      "statusOp": "cleareffectsonfaint",
+      "S": 464,
+      "Sexec": 480,
+      "G": 67,
+      "printLabel": "BattleScript_FaintAttacker+9",
+      "P": 481,
+      "F": 483,
+      "printMinusStatus": 17,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 18,
+      "runs": [
+       [
+        "BattleScript_FaintAttacker+7",
+        "cleareffectsonfaint",
+        0,
+        17,
+        1,
+        0,
+        10
+       ],
+       [
+        "BattleScript_FaintAttacker+9",
+        "printstring",
+        17,
+        1,
+        0,
+        0,
+        1
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": []
+   },
+   "off": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_FaintAttacker+7",
+      "statusOp": "cleareffectsonfaint",
+      "S": 368,
+      "Sexec": 384,
+      "G": 67,
+      "printLabel": "BattleScript_FaintAttacker+9",
+      "P": 385,
+      "F": 387,
+      "printMinusStatus": 17,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 18,
+      "runs": [
+       [
+        "BattleScript_FaintAttacker+7",
+        "cleareffectsonfaint",
+        0,
+        17,
+        1,
+        0,
+        10
+       ],
+       [
+        "BattleScript_FaintAttacker+9",
+        "printstring",
+        17,
+        1,
+        0,
+        0,
+        1
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": []
+   }
+  },
+  "off121-spore-chesto-ply-primeape-onix": {
+   "move": 147,
+   "classes": "item cure (MOVEEND Chesto Berry)",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 1,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectSleep+61",
+      "statusOp": "seteffectprimary",
+      "S": 280,
+      "Sexec": 280,
+      "G": 60,
+      "printLabel": "BattleScript_MoveEffectSleep+2",
+      "P": 282,
+      "F": 287,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 5,
+      "romOffSpan": 6,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+61",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+2",
+        "printfromtable",
+        2,
+        98,
+        2,
+        96,
+        91
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectSleep+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 471,
+      "Sexec": 473,
+      "G": 60,
+      "printLabel": "BattleScript_BerryCureSlpRet+7",
+      "P": 475,
+      "F": 487,
+      "printMinusStatus": 4,
+      "glyphMinusPrint": 12,
+      "romOffSpan": 15,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_BerryCureSlpRet+0",
+        "playanimation",
+        3,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_BerryCureSlpRet+7",
+        "printstring",
+        4,
+        213,
+        2,
+        211,
+        109
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "row": 281,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
+     }
+    ]
+   },
+   "off": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectSleep+61",
+      "statusOp": "seteffectprimary",
+      "S": 104,
+      "Sexec": 104,
+      "G": 60,
+      "printLabel": "BattleScript_MoveEffectSleep+2",
+      "P": 106,
+      "F": 108,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+61",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+2",
+        "printfromtable",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectSleep+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 198,
+      "Sexec": 200,
+      "G": 60,
+      "printLabel": "BattleScript_BerryCureSlpRet+7",
+      "P": 235,
+      "F": 237,
+      "printMinusStatus": 37,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 38,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_BerryCureSlpRet+0",
+        "playanimation",
+        3,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_Pausex20+0",
+        "pause",
+        4,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_Pausex20+3",
+        "return",
+        36,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_BerryCureSlpRet+7",
+        "printstring",
+        37,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "row": 105,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     }
+    ]
+   }
+  },
+  "off121-spore-opp-primeape-onix": {
+   "move": 147,
+   "classes": "move-status slp + sleep turns / wake",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 4,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "on": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectSleep+61",
+      "statusOp": "seteffectprimary",
+      "S": 284,
+      "Sexec": 284,
+      "G": 64,
+      "printLabel": "BattleScript_MoveEffectSleep+2",
+      "P": 286,
+      "F": 291,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 5,
+      "romOffSpan": 6,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+61",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+2",
+        "printfromtable",
+        2,
+        98,
+        1,
+        96,
+        91
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectSleep+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 479,
+      "Sexec": 479,
+      "G": 64,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 480,
+      "F": 482,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       86,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 64,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 1535,
+      "F": 1537,
+      "printMinusStatus": 62,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 63,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        25,
+        2,
+        0,
+        21
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        28,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        30,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        62,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 1633,
+      "Sexec": 1633,
+      "G": 1498,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 1634,
+      "F": 1636,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       86,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 2907,
+      "Sexec": 2907,
+      "G": 1498,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 2969,
+      "F": 2971,
+      "printMinusStatus": 62,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 63,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        25,
+        2,
+        0,
+        21
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        28,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        30,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        62,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 3067,
+      "Sexec": 3067,
+      "G": 2932,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 3068,
+      "F": 3070,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       86,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 4341,
+      "Sexec": 4341,
+      "G": 2932,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 4403,
+      "F": 4405,
+      "printMinusStatus": 62,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 63,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        25,
+        2,
+        0,
+        21
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        28,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        30,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        62,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 4501,
+      "Sexec": 4501,
+      "G": 4366,
+      "printLabel": "BattleScript_MoveUsedWokeUp+9",
+      "P": 4503,
+      "F": 4505,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedWokeUp+0",
+        "bicword",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedWokeUp+9",
+        "printfromtable",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "row": 285,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 565,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 1719,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 3153,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
+     }
+    ]
+   },
+   "off": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectSleep+61",
+      "statusOp": "seteffectprimary",
+      "S": 108,
+      "Sexec": 108,
+      "G": 64,
+      "printLabel": "BattleScript_MoveEffectSleep+2",
+      "P": 110,
+      "F": 112,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+61",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+2",
+        "printfromtable",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectSleep+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 206,
+      "Sexec": 206,
+      "G": 64,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 207,
+      "F": 209,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       86,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 64,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 1535,
+      "F": 1537,
+      "printMinusStatus": 62,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 63,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        25,
+        2,
+        0,
+        21
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        28,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        30,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        62,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 1633,
+      "Sexec": 1633,
+      "G": 1498,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 1634,
+      "F": 1636,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       86,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 2907,
+      "Sexec": 2907,
+      "G": 1498,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 2969,
+      "F": 2971,
+      "printMinusStatus": 62,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 63,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        25,
+        2,
+        0,
+        21
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        28,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        30,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        62,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 3067,
+      "Sexec": 3067,
+      "G": 2932,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 3068,
+      "F": 3070,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       86,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 4341,
+      "Sexec": 4341,
+      "G": 2932,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 4403,
+      "F": 4405,
+      "printMinusStatus": 62,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 63,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        25,
+        2,
+        0,
+        21
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        28,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        30,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        62,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 4501,
+      "Sexec": 4501,
+      "G": 4366,
+      "printLabel": "BattleScript_MoveUsedWokeUp+9",
+      "P": 4503,
+      "F": 4505,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedWokeUp+0",
+        "bicword",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedWokeUp+9",
+        "printfromtable",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "row": 109,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 292,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 1719,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 3153,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     }
+    ]
+   }
+  },
+  "off121-spore-ply-primeape-onix": {
+   "move": 147,
+   "classes": "move-status slp + sleep turns / wake",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 4,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectSleep+61",
+      "statusOp": "seteffectprimary",
+      "S": 280,
+      "Sexec": 280,
+      "G": 60,
+      "printLabel": "BattleScript_MoveEffectSleep+2",
+      "P": 282,
+      "F": 287,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 5,
+      "romOffSpan": 6,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+61",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+2",
+        "printfromtable",
+        2,
+        98,
+        2,
+        96,
+        91
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectSleep+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 479,
+      "Sexec": 479,
+      "G": 60,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 480,
+      "F": 482,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       90,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 60,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 1531,
+      "F": 1533,
+      "printMinusStatus": 58,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 59,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        21,
+        1,
+        0,
+        18
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        23,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        24,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        25,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        26,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        58,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 1633,
+      "Sexec": 1633,
+      "G": 1494,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 1634,
+      "F": 1636,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       90,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 2907,
+      "Sexec": 2907,
+      "G": 1494,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 2965,
+      "F": 2967,
+      "printMinusStatus": 58,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 59,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        21,
+        1,
+        0,
+        18
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        23,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        24,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        25,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        26,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        58,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 3067,
+      "Sexec": 3067,
+      "G": 2928,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 3068,
+      "F": 3070,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       90,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 4341,
+      "Sexec": 4341,
+      "G": 2928,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 4399,
+      "F": 4401,
+      "printMinusStatus": 58,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 59,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        21,
+        1,
+        0,
+        18
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        23,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        24,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        25,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        26,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        58,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 4501,
+      "Sexec": 4501,
+      "G": 4362,
+      "printLabel": "BattleScript_MoveUsedWokeUp+9",
+      "P": 4503,
+      "F": 4505,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedWokeUp+0",
+        "bicword",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedWokeUp+9",
+        "printfromtable",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "row": 281,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 569,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 1723,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 3157,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 97,
+      "controllerActiveRows": 96,
+      "controllerScreenChanges": 90
+     }
+    ]
+   },
+   "off": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectSleep+61",
+      "statusOp": "seteffectprimary",
+      "S": 104,
+      "Sexec": 104,
+      "G": 60,
+      "printLabel": "BattleScript_MoveEffectSleep+2",
+      "P": 106,
+      "F": 108,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+61",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectSleep+2",
+        "printfromtable",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectSleep+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 206,
+      "Sexec": 206,
+      "G": 60,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 207,
+      "F": 209,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       90,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 60,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 1531,
+      "F": 1533,
+      "printMinusStatus": 58,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 59,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        21,
+        1,
+        0,
+        18
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        23,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        24,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        25,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        26,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        58,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 1633,
+      "Sexec": 1633,
+      "G": 1494,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 1634,
+      "F": 1636,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       90,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 2907,
+      "Sexec": 2907,
+      "G": 1494,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 2965,
+      "F": 2967,
+      "printMinusStatus": 58,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 59,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        21,
+        1,
+        0,
+        18
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        23,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        24,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        25,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        26,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        58,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 3067,
+      "Sexec": 3067,
+      "G": 2928,
+      "printLabel": "BattleScript_MoveUsedIsAsleep+0",
+      "P": 3068,
+      "F": 3070,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsAsleep+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsAsleep+6",
+       "statusanimation",
+       90,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectSleep+0",
+      "statusOp": "attackcanceler",
+      "S": 4341,
+      "Sexec": 4341,
+      "G": 2928,
+      "printLabel": "BattleScript_AlreadyAsleep+6",
+      "P": 4399,
+      "F": 4401,
+      "printMinusStatus": 58,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 59,
+      "runs": [
+       [
+        "BattleScript_EffectSleep+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+2",
+        "ppreduce",
+        2,
+        21,
+        1,
+        0,
+        18
+       ],
+       [
+        "BattleScript_EffectSleep+3",
+        "jumpifstatus2",
+        23,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectSleep+13",
+        "jumpifstatus",
+        24,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+0",
+        "various",
+        25,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+3",
+        "pause",
+        26,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyAsleep+6",
+        "printstring",
+        58,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 4501,
+      "Sexec": 4501,
+      "G": 4362,
+      "printLabel": "BattleScript_MoveUsedWokeUp+9",
+      "P": 4503,
+      "F": 4505,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedWokeUp+0",
+        "bicword",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedWokeUp+9",
+        "printfromtable",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectSleep+0",
+      "row": 105,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 296,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 1723,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_MoveUsedIsAsleep+6",
+      "row": 3157,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsAsleep+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     }
+    ]
+   }
+  },
+  "off121-thunder-wave-ply-primeape-snorlax": {
+   "move": 86,
+   "classes": "move-status prz + paralysis turns",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "turns": 4,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectParalyze+75",
+      "statusOp": "seteffectprimary",
+      "S": 202,
+      "Sexec": 202,
+      "G": 67,
+      "printLabel": "BattleScript_MoveEffectParalysis+2",
+      "P": 204,
+      "F": 209,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 5,
+      "romOffSpan": 6,
+      "runs": [
+       [
+        "BattleScript_EffectParalyze+75",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectParalysis+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectParalysis+2",
+        "printfromtable",
+        2,
+        40,
+        2,
+        38,
+        26
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectParalysis+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectParalyze+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 402,
+      "printLabel": "BattleScript_AlreadyParalyzed+6",
+      "P": 1541,
+      "F": 1543,
+      "printMinusStatus": 68,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 69,
+      "runs": [
+       [
+        "BattleScript_EffectParalyze+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+2",
+        "ppreduce",
+        2,
+        28,
+        1,
+        0,
+        24
+       ],
+       [
+        "BattleScript_EffectParalyze+3",
+        "jumpifability",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+10",
+        "jumpifstatus2",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+20",
+        "typecalc",
+        32,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+21",
+        "jumpifbyte",
+        33,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+32",
+        "jumpifstatus",
+        34,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+0",
+        "various",
+        35,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+3",
+        "pause",
+        36,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+6",
+        "printstring",
+        68,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 1649,
+      "Sexec": 1649,
+      "G": 1501,
+      "printLabel": "BattleScript_MoveUsedIsParalyzed+0",
+      "P": 1650,
+      "F": 1652,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsParalyzed+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsParalyzed+6",
+       "statusanimation",
+       106,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectParalyze+0",
+      "statusOp": "attackcanceler",
+      "S": 2907,
+      "Sexec": 2907,
+      "G": 1501,
+      "printLabel": "BattleScript_AlreadyParalyzed+6",
+      "P": 2975,
+      "F": 2977,
+      "printMinusStatus": 68,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 69,
+      "runs": [
+       [
+        "BattleScript_EffectParalyze+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+2",
+        "ppreduce",
+        2,
+        28,
+        1,
+        0,
+        24
+       ],
+       [
+        "BattleScript_EffectParalyze+3",
+        "jumpifability",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+10",
+        "jumpifstatus2",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+20",
+        "typecalc",
+        32,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+21",
+        "jumpifbyte",
+        33,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+32",
+        "jumpifstatus",
+        34,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+0",
+        "various",
+        35,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+3",
+        "pause",
+        36,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+6",
+        "printstring",
+        68,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_EffectParalyze+0",
+      "statusOp": "attackcanceler",
+      "S": 4341,
+      "Sexec": 4341,
+      "G": 3109,
+      "printLabel": "BattleScript_AlreadyParalyzed+6",
+      "P": 4409,
+      "F": 4411,
+      "printMinusStatus": 68,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 69,
+      "runs": [
+       [
+        "BattleScript_EffectParalyze+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+2",
+        "ppreduce",
+        2,
+        28,
+        1,
+        0,
+        24
+       ],
+       [
+        "BattleScript_EffectParalyze+3",
+        "jumpifability",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+10",
+        "jumpifstatus2",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+20",
+        "typecalc",
+        32,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+21",
+        "jumpifbyte",
+        33,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+32",
+        "jumpifstatus",
+        34,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+0",
+        "various",
+        35,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+3",
+        "pause",
+        36,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+6",
+        "printstring",
+        68,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectParalysis+0",
+      "row": 203,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 25
+     },
+     {
+      "label": "BattleScript_MoveUsedIsParalyzed+6",
+      "row": 1755,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsParalyzed+0",
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 25
+     }
+    ]
+   },
+   "off": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectParalyze+75",
+      "statusOp": "seteffectprimary",
+      "S": 113,
+      "Sexec": 113,
+      "G": 67,
+      "printLabel": "BattleScript_MoveEffectParalysis+2",
+      "P": 115,
+      "F": 117,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_EffectParalyze+75",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectParalysis+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectParalysis+2",
+        "printfromtable",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectParalysis+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectParalyze+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 274,
+      "printLabel": "BattleScript_AlreadyParalyzed+6",
+      "P": 1541,
+      "F": 1543,
+      "printMinusStatus": 68,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 69,
+      "runs": [
+       [
+        "BattleScript_EffectParalyze+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+2",
+        "ppreduce",
+        2,
+        28,
+        1,
+        0,
+        24
+       ],
+       [
+        "BattleScript_EffectParalyze+3",
+        "jumpifability",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+10",
+        "jumpifstatus2",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+20",
+        "typecalc",
+        32,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+21",
+        "jumpifbyte",
+        33,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+32",
+        "jumpifstatus",
+        34,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+0",
+        "various",
+        35,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+3",
+        "pause",
+        36,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+6",
+        "printstring",
+        68,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_HitFromAtkCanceler+0",
+      "statusOp": "attackcanceler",
+      "S": 1649,
+      "Sexec": 1649,
+      "G": 1501,
+      "printLabel": "BattleScript_MoveUsedIsParalyzed+0",
+      "P": 1650,
+      "F": 1652,
+      "printMinusStatus": 1,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 2,
+      "runs": [
+       [
+        "BattleScript_HitFromAtkCanceler+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveUsedIsParalyzed+0",
+        "printstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveUsedIsParalyzed+6",
+       "statusanimation",
+       106,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectParalyze+0",
+      "statusOp": "attackcanceler",
+      "S": 2907,
+      "Sexec": 2907,
+      "G": 1501,
+      "printLabel": "BattleScript_AlreadyParalyzed+6",
+      "P": 2975,
+      "F": 2977,
+      "printMinusStatus": 68,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 69,
+      "runs": [
+       [
+        "BattleScript_EffectParalyze+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+2",
+        "ppreduce",
+        2,
+        28,
+        1,
+        0,
+        24
+       ],
+       [
+        "BattleScript_EffectParalyze+3",
+        "jumpifability",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+10",
+        "jumpifstatus2",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+20",
+        "typecalc",
+        32,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+21",
+        "jumpifbyte",
+        33,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+32",
+        "jumpifstatus",
+        34,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+0",
+        "various",
+        35,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+3",
+        "pause",
+        36,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+6",
+        "printstring",
+        68,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_EffectParalyze+0",
+      "statusOp": "attackcanceler",
+      "S": 4341,
+      "Sexec": 4341,
+      "G": 3109,
+      "printLabel": "BattleScript_AlreadyParalyzed+6",
+      "P": 4409,
+      "F": 4411,
+      "printMinusStatus": 68,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 69,
+      "runs": [
+       [
+        "BattleScript_EffectParalyze+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+2",
+        "ppreduce",
+        2,
+        28,
+        1,
+        0,
+        24
+       ],
+       [
+        "BattleScript_EffectParalyze+3",
+        "jumpifability",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+10",
+        "jumpifstatus2",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+20",
+        "typecalc",
+        32,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+21",
+        "jumpifbyte",
+        33,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectParalyze+32",
+        "jumpifstatus",
+        34,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+0",
+        "various",
+        35,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+3",
+        "pause",
+        36,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyParalyzed+6",
+        "printstring",
+        68,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectParalysis+0",
+      "row": 114,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_MoveUsedIsParalyzed+6",
+      "row": 1755,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_MoveUsedIsParalyzed+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     }
+    ]
+   }
+  },
+  "off121-toxic-opp-primeape-onix": {
+   "move": 92,
+   "classes": "move-status psn + end-turn toxic tick",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "on": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectToxic+87",
+      "statusOp": "seteffectprimary",
+      "S": 311,
+      "Sexec": 311,
+      "G": 64,
+      "printLabel": "BattleScript_MoveEffectToxic+2",
+      "P": 313,
+      "F": 315,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_EffectToxic+87",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectToxic+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectToxic+2",
+        "printstring",
+        2,
+        72,
+        1,
+        70,
+        27
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectToxic+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 621,
+      "Sexec": 623,
+      "G": 508,
+      "printLabel": "BattleScript_PoisonTurnDmg+0",
+      "P": 629,
+      "F": 631,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_PoisonTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       96,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectToxic+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 508,
+      "printLabel": "BattleScript_AlreadyPoisoned+6",
+      "P": 1569,
+      "F": 1571,
+      "printMinusStatus": 96,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 97,
+      "runs": [
+       [
+        "BattleScript_EffectToxic+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+2",
+        "ppreduce",
+        2,
+        25,
+        2,
+        0,
+        21
+       ],
+       [
+        "BattleScript_EffectToxic+3",
+        "jumpifability",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+10",
+        "jumpifstatus2",
+        28,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+20",
+        "jumpifstatus",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+30",
+        "jumpifstatus",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+0",
+        "various",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+3",
+        "pause",
+        32,
+        64,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+6",
+        "printstring",
+        96,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 1800,
+      "Sexec": 1802,
+      "G": 1688,
+      "printLabel": "BattleScript_PoisonTurnDmg+0",
+      "P": 1808,
+      "F": 1810,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_PoisonTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       96,
+       1,
+       0,
+       0,
+       0
+      ]
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectToxic+0",
+      "row": 312,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 717,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 1896,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
+     }
+    ]
+   },
+   "off": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectToxic+87",
+      "statusOp": "seteffectprimary",
+      "S": 111,
+      "Sexec": 111,
+      "G": 64,
+      "printLabel": "BattleScript_MoveEffectToxic+2",
+      "P": 113,
+      "F": 115,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_EffectToxic+87",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectToxic+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectToxic+2",
+        "printstring",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectToxic+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 339,
+      "Sexec": 341,
+      "G": 237,
+      "printLabel": "BattleScript_PoisonTurnDmg+0",
+      "P": 347,
+      "F": 349,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_PoisonTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       96,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectToxic+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 237,
+      "printLabel": "BattleScript_AlreadyPoisoned+6",
+      "P": 1569,
+      "F": 1571,
+      "printMinusStatus": 96,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 97,
+      "runs": [
+       [
+        "BattleScript_EffectToxic+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+2",
+        "ppreduce",
+        2,
+        25,
+        2,
+        0,
+        21
+       ],
+       [
+        "BattleScript_EffectToxic+3",
+        "jumpifability",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+10",
+        "jumpifstatus2",
+        28,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+20",
+        "jumpifstatus",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+30",
+        "jumpifstatus",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+0",
+        "various",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+3",
+        "pause",
+        32,
+        64,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+6",
+        "printstring",
+        96,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 1789,
+      "Sexec": 1791,
+      "G": 1688,
+      "printLabel": "BattleScript_PoisonTurnDmg+0",
+      "P": 1797,
+      "F": 1799,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_PoisonTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       96,
+       1,
+       0,
+       0,
+       0
+      ]
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectToxic+0",
+      "row": 112,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 435,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 1885,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     }
+    ]
+   }
+  },
+  "off121-toxic-ply-primeape-onix": {
+   "move": 92,
+   "classes": "move-status psn + end-turn toxic tick",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectToxic+87",
+      "statusOp": "seteffectprimary",
+      "S": 307,
+      "Sexec": 307,
+      "G": 60,
+      "printLabel": "BattleScript_MoveEffectToxic+2",
+      "P": 309,
+      "F": 313,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 4,
+      "romOffSpan": 5,
+      "runs": [
+       [
+        "BattleScript_EffectToxic+87",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectToxic+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectToxic+2",
+        "printstring",
+        2,
+        72,
+        2,
+        70,
+        26
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectToxic+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 620,
+      "Sexec": 622,
+      "G": 512,
+      "printLabel": "BattleScript_PoisonTurnDmg+0",
+      "P": 628,
+      "F": 630,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_PoisonTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       100,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectToxic+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 512,
+      "printLabel": "BattleScript_AlreadyPoisoned+6",
+      "P": 1565,
+      "F": 1567,
+      "printMinusStatus": 92,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 93,
+      "runs": [
+       [
+        "BattleScript_EffectToxic+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+2",
+        "ppreduce",
+        2,
+        21,
+        1,
+        0,
+        18
+       ],
+       [
+        "BattleScript_EffectToxic+3",
+        "jumpifability",
+        23,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+10",
+        "jumpifstatus2",
+        24,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+20",
+        "jumpifstatus",
+        25,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+30",
+        "jumpifstatus",
+        26,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+0",
+        "various",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+3",
+        "pause",
+        28,
+        64,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+6",
+        "printstring",
+        92,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 1800,
+      "Sexec": 1802,
+      "G": 1692,
+      "printLabel": "BattleScript_PoisonTurnDmg+0",
+      "P": 1808,
+      "F": 1810,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_PoisonTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       100,
+       1,
+       0,
+       0,
+       0
+      ]
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectToxic+0",
+      "row": 308,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 26
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 720,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 1900,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 71,
+      "controllerActiveRows": 70,
+      "controllerScreenChanges": 27
+     }
+    ]
+   },
+   "off": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectToxic+87",
+      "statusOp": "seteffectprimary",
+      "S": 107,
+      "Sexec": 107,
+      "G": 60,
+      "printLabel": "BattleScript_MoveEffectToxic+2",
+      "P": 109,
+      "F": 111,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_EffectToxic+87",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectToxic+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectToxic+2",
+        "printstring",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectToxic+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 338,
+      "Sexec": 340,
+      "G": 241,
+      "printLabel": "BattleScript_PoisonTurnDmg+0",
+      "P": 346,
+      "F": 348,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_PoisonTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       100,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectToxic+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 241,
+      "printLabel": "BattleScript_AlreadyPoisoned+6",
+      "P": 1565,
+      "F": 1567,
+      "printMinusStatus": 92,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 93,
+      "runs": [
+       [
+        "BattleScript_EffectToxic+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+2",
+        "ppreduce",
+        2,
+        21,
+        1,
+        0,
+        18
+       ],
+       [
+        "BattleScript_EffectToxic+3",
+        "jumpifability",
+        23,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+10",
+        "jumpifstatus2",
+        24,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+20",
+        "jumpifstatus",
+        25,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectToxic+30",
+        "jumpifstatus",
+        26,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+0",
+        "various",
+        27,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+3",
+        "pause",
+        28,
+        64,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyPoisoned+6",
+        "printstring",
+        92,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 1789,
+      "Sexec": 1791,
+      "G": 1692,
+      "printLabel": "BattleScript_PoisonTurnDmg+0",
+      "P": 1797,
+      "F": 1799,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_PoisonTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       100,
+       1,
+       0,
+       0,
+       0
+      ]
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectToxic+0",
+      "row": 108,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 438,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 1889,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_PoisonTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     }
+    ]
+   }
+  },
+  "off121-will-o-wisp-ply-primeape-onix": {
+   "move": 261,
+   "classes": "move-status brn + end-turn burn tick",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "on": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectWillOWisp+70",
+      "statusOp": "seteffectprimary",
+      "S": 294,
+      "Sexec": 294,
+      "G": 66,
+      "printLabel": "BattleScript_MoveEffectBurn+2",
+      "P": 296,
+      "F": 301,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 5,
+      "romOffSpan": 6,
+      "runs": [
+       [
+        "BattleScript_EffectWillOWisp+70",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectBurn+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectBurn+2",
+        "printfromtable",
+        2,
+        40,
+        2,
+        38,
+        34
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectBurn+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 562,
+      "Sexec": 564,
+      "G": 459,
+      "printLabel": "BattleScript_BurnTurnDmg+0",
+      "P": 570,
+      "F": 572,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_BurnTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       103,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectWillOWisp+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 459,
+      "printLabel": "BattleScript_AlreadyBurned+6",
+      "P": 1537,
+      "F": 1539,
+      "printMinusStatus": 64,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 65,
+      "runs": [
+       [
+        "BattleScript_EffectWillOWisp+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectWillOWisp+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectWillOWisp+2",
+        "ppreduce",
+        2,
+        27,
+        1,
+        0,
+        24
+       ],
+       [
+        "BattleScript_EffectWillOWisp+3",
+        "jumpifstatus2",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectWillOWisp+13",
+        "jumpifstatus",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyBurned+0",
+        "various",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyBurned+3",
+        "pause",
+        32,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyBurned+6",
+        "printstring",
+        64,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 1766,
+      "Sexec": 1768,
+      "G": 1663,
+      "printLabel": "BattleScript_BurnTurnDmg+0",
+      "P": 1774,
+      "F": 1776,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_BurnTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       103,
+       1,
+       0,
+       0,
+       0
+      ]
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectBurn+0",
+      "row": 295,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 33
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 665,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 33
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 1869,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "controllerRows": 39,
+      "controllerActiveRows": 38,
+      "controllerScreenChanges": 33
+     }
+    ]
+   },
+   "off": {
+    "events": [
+     {
+      "statusLabel": "BattleScript_EffectWillOWisp+70",
+      "statusOp": "seteffectprimary",
+      "S": 111,
+      "Sexec": 111,
+      "G": 66,
+      "printLabel": "BattleScript_MoveEffectBurn+2",
+      "P": 113,
+      "F": 115,
+      "printMinusStatus": 2,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 3,
+      "runs": [
+       [
+        "BattleScript_EffectWillOWisp+70",
+        "seteffectprimary",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectBurn+0",
+        "statusanimation",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEffectBurn+2",
+        "printfromtable",
+        2,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_MoveEffectBurn+0",
+       "statusanimation",
+       1,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 329,
+      "Sexec": 331,
+      "G": 237,
+      "printLabel": "BattleScript_BurnTurnDmg+0",
+      "P": 337,
+      "F": 339,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_BurnTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       103,
+       1,
+       0,
+       0,
+       0
+      ]
+     },
+     {
+      "statusLabel": "BattleScript_EffectWillOWisp+0",
+      "statusOp": "attackcanceler",
+      "S": 1473,
+      "Sexec": 1473,
+      "G": 237,
+      "printLabel": "BattleScript_AlreadyBurned+6",
+      "P": 1537,
+      "F": 1539,
+      "printMinusStatus": 64,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 65,
+      "runs": [
+       [
+        "BattleScript_EffectWillOWisp+0",
+        "attackcanceler",
+        0,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectWillOWisp+1",
+        "attackstring",
+        1,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectWillOWisp+2",
+        "ppreduce",
+        2,
+        27,
+        1,
+        0,
+        24
+       ],
+       [
+        "BattleScript_EffectWillOWisp+3",
+        "jumpifstatus2",
+        29,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_EffectWillOWisp+13",
+        "jumpifstatus",
+        30,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyBurned+0",
+        "various",
+        31,
+        1,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyBurned+3",
+        "pause",
+        32,
+        32,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_AlreadyBurned+6",
+        "printstring",
+        64,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": null
+     },
+     {
+      "statusLabel": "BattleScript_MoveEnd+6",
+      "statusOp": "moveend",
+      "S": 1755,
+      "Sexec": 1757,
+      "G": 1663,
+      "printLabel": "BattleScript_BurnTurnDmg+0",
+      "P": 1763,
+      "F": 1765,
+      "printMinusStatus": 8,
+      "glyphMinusPrint": 2,
+      "romOffSpan": 9,
+      "runs": [
+       [
+        "BattleScript_MoveEnd+6",
+        "moveend",
+        0,
+        3,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_MoveEnd+9",
+        "end",
+        3,
+        5,
+        0,
+        0,
+        0
+       ],
+       [
+        "BattleScript_BurnTurnDmg+0",
+        "printstring",
+        8,
+        1,
+        0,
+        0,
+        0
+       ]
+      ],
+      "statusAnimation": [
+       "BattleScript_DoStatusTurnDmg+0",
+       "statusanimation",
+       103,
+       1,
+       0,
+       0,
+       0
+      ]
+     }
+    ],
+    "statusAnimations": [
+     {
+      "label": "BattleScript_MoveEffectBurn+0",
+      "row": 112,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": null,
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 432,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     },
+     {
+      "label": "BattleScript_DoStatusTurnDmg+0",
+      "row": 1858,
+      "rows": 1,
+      "activeRows": 0,
+      "screenChanges": 0,
+      "printBefore": "BattleScript_BurnTurnDmg+0",
+      "controllerRows": 0,
+      "controllerActiveRows": 0,
+      "controllerScreenChanges": 0
+     }
+    ]
+   }
+  }
+ }
+}

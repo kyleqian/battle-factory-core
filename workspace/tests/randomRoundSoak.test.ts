@@ -390,7 +390,10 @@ describe("random round soak driver (green milestone pin)", () => {
       // battle 7, turn 3, seven wins and diagnostics. scf117 (ISSUES #166, the
       // post-stats-change hold, docs/scf117-stats-change-finish.md): frames
       // unchanged, renderCalls 2_727 -> 2_728; everything else identical.
-      frames: 38_358,
+      // off121 (the Scene OFF `status` command ends at the next print,
+      // docs/off121-status-command.md): frames 38_358 -> 37_645, renderCalls
+      // 2_728 -> 2_697; same battle 7, turn 3, seven wins and diagnostics.
+      frames: 37_645,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -402,7 +405,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_728,
+        renderCalls: 2_697,
       },
     });
     expect(second).toEqual(first);
@@ -778,9 +781,12 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // 16321 -> 17591, 25321 -> 27061; decision and canonical logs identical
     // to bce86a4b0's (soak111Decoupling.ts), same battle / turn. scf117 (the
     // post-stats-change hold): frames only, seed 1 27061 -> 27052; decision and
-    // canonical logs identical to 681da5c10's for both seeds.
+    // canonical logs identical to 681da5c10's for both seeds. off121 (the
+    // Scene OFF `status` command ends at the next print): frames only,
+    // 17591 -> 17557 and 27052 -> 26869; decision and canonical logs
+    // identical to 9d23a17c4's for both seeds.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 17591,
+      frames: 17557,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -788,7 +794,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       turn: 30,
     });
     expect(runSeed(1, options)).toMatchObject({
-      frames: 27052,
+      frames: 26869,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -813,8 +819,10 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // 8683 -> 9143 and 8670 -> 9205; decision logs identical to bce86a4b0's.
     // scf117 (the post-stats-change hold): frames only, seed 0 9143 -> 9145;
     // decision and canonical logs identical to 681da5c10's for both seeds.
+    // off121 (the Scene OFF `status` command): frames only, 9145 -> 9130 and
+    // 9205 -> 9033; decision and canonical logs identical to 9d23a17c4's.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 9145,
+      frames: 9130,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -831,7 +839,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // the round genuinely re-chains right after the answer is given, so the
     // frozen last-pre-chain snapshot lands much earlier, at the real frame.
     expect(runSeed(1, options)).toMatchObject({
-      frames: 9205,
+      frames: 9033,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
