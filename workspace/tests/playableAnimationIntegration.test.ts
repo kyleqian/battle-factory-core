@@ -56,9 +56,9 @@ describe("ordinary playable animation queue", () => {
       const expectedMove = slots.length === 4 ? 325 : 109;
       const animation = on.animations.find(a => a.moveId === expectedMove && a.attacker === 1)!;
       expect(animation).toMatchObject({ player: "WAILMER", opponent: "HAUNTER" });
-      // Live audit 24: HAUNTER is an ELEVATED opponent attacker, so its Shadow Punch keeps no idle lead rows (the ROM's lead row 0
-      // still shows the enemy shadow); every other land97 lead body keeps its N rows.
-      expect(animation.ages).toEqual(expectedMove === 325 ? land97Ages(0, 105) : land97Ages(expectedMove, 270));
+      // shp116 (shadow105): HAUNTER is an ELEVATED opponent attacker; its Shadow Punch keeps its 8 idle lead rows, row 0 drawing the
+      // enemy shadow the ROM's activation row still shows.
+      expect(animation.ages).toEqual(expectedMove === 325 ? land97Ages(325, 105) : land97Ages(expectedMove, 270));
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     }
   }, 60000);

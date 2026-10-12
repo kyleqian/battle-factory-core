@@ -17,7 +17,6 @@ import {
   type BattleCommandUiStatus,
 } from "./battleCommandPresentation.ts";
 import {
-  battleCommandFieldArtElevation,
   createBattleCommandFieldArtView,
   type BattleCommandFieldArtView,
 } from "./battleCommandFieldArt.ts";
@@ -562,7 +561,9 @@ function sendInWhiteCoefficientAtFrame(frame: number): number {
 }
 
 export type BattleResolutionRenderEffect =
-  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput; presentationRng?: LiveMovePresentationRngInput; battlerX2Input?: LiveMoveBattlerX2Input }>
+  | Readonly<{ type: "move"; request: BattleMoveAnimationRequest; age: number; paletteInput?: LiveMovePaletteInput; spriteAllocatorInput?: LiveMoveSpriteAllocatorInput; spriteOrderInput?: LiveMoveSpriteOrderInput; presentationRng?: LiveMovePresentationRngInput; battlerX2Input?: LiveMoveBattlerX2Input;
+      /** shadow105: lead row 0 of a lead > 0 command, the ROM's activation row (its OAM still shows the elevated-opponent shadow). */
+      preActivationRow?: true }>
   /** S10A Substitute fade (liveSubstituteFade.ts): command age; the other battler's rest from the tracked x2 history. */
   | Readonly<{ type: "substitute-fade"; battler: 0 | 1; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
   /**
@@ -939,15 +940,13 @@ const LIVE_MOVE_IDLE_LEAD_ROWS: ReadonlyMap<number, number> = new Map([
 
 /**
  * The idle lead rows a live move-animation command presents before its accepted body (0: declined, a Substitute swap, no lead).
- * Live audit 24 / shadow105 (docs/live-audit-24.md, docs/next-adapters-shadow105.md): while an ELEVATED opponent is on the field the
- * ROM's activation row (lead row 0) still shows its enemy shadow, which the body's age-0 frame hides (200 px on row 0) — whichever side
- * attacks — so those commands keep no lead (the pre-land97 presentation, every row a ROM image) until the row-0 shadow is modelled
- * (shadow105's banked patch).
+ * Live audit 24 / shadow105 / shp116 (docs/next-adapters-shadow105.md): while an ELEVATED opponent is on the field the ROM's
+ * activation row (lead row 0) still shows its enemy shadow, which the body's age-0 frame hides — whichever side attacks; the render
+ * presents that row with `preActivationRow` (the shadow drawn).
  */
 export function liveMoveIdleLeadRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number {
   const lead = LIVE_MOVE_IDLE_LEAD_ROWS.get(request.moveId) ?? 0;
   if (lead === 0 || liveSubstituteSwapApplies(request, field) === true || liveMoveAnimationDuration(request, field) === null) return 0;
-  if (battleCommandFieldArtElevation(createBattleCommandFieldArtView(field).opponent, "opponent") > 0) return 0;
   return lead;
 }
 
@@ -1475,9 +1474,11 @@ export function createBattleResolutionPresentationRenderView(
       );
       hpTarget = Object.freeze({ battler: command.battler, to: command.to });
     } else if (command.type === "move-animation" && command.animation) {
+      const lead = liveMoveIdleLeadRows(command.animation, field);
       effect = Object.freeze({
         type: "move", request: command.animation,
-        age: Math.max(0, state.lifecycle.phaseElapsed - liveMoveIdleLeadRows(command.animation, field)),
+        age: Math.max(0, state.lifecycle.phaseElapsed - lead),
+        ...(lead > 0 && state.lifecycle.phaseElapsed === 0 ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
         spriteOrderInput: state.liveMoveSpriteOrderInput,

@@ -55429,9 +55429,10 @@ export function renderBattleResolutionLiveView(
   liveCastformFormSides.player = view.fieldArt.player.castformForm;
   liveCastformFormSides.opponent = view.fieldArt.opponent.castformForm;
   // SpriteCB_EnemyShadow (battle_gfx_sfx_util.c:1214) also hides the shadow of an `invisible` battler sprite (hide66).
+  // shadow105: a lead > 0 command's row 0 is the ROM's activation row, whose OAM still shows the shadow (the hide shows from row 1).
   liveOpponentShadow.species = effect?.type === "move" && view.field.opponent.hp !== 0 && !subbedOpponentAttacker
     && !liveSubstituteDollSides.opponent && !hiddenSides.opponent
-    && (effect.age === shadowRow || liveMoveOpponentShadowReturn(effect.request, effect.age))
+    && (effect.age === shadowRow || effect.preActivationRow === true || liveMoveOpponentShadowReturn(effect.request, effect.age))
     ? view.fieldArt.opponent.speciesSymbol : null;
   liveOpponentShadow.suppressAdHoc = effect?.type === "move" && effect.age === 0;
   try {
