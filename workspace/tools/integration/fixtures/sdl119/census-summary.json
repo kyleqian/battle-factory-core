@@ -1,0 +1,45 @@
+{
+ "base": {
+  "commandKeyDigest": "7e0864d0cbb20a16fd7226176d6939d02a6cb2894cbe1daee138ef90da819e02",
+  "overall": {
+   "commands": 27429,
+   "frames": 4057956,
+   "live": 27099,
+   "liveFrames": 4028456,
+   "liveSharePctByCount": 98.8,
+   "liveSharePctByFrames": 99.27
+  },
+  "struggle": {
+   "byReason": {
+    "attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)": 24,
+    "defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)": 19,
+    "sprite-order lend unknown": 106
+   },
+   "commands": 1003,
+   "frames": 108844,
+   "live": 854,
+   "liveFrames": 95596
+  }
+ },
+ "nonStruggleStatusChanges": {},
+ "patched": {
+  "commandKeyDigest": "f1f8b6eb61f157287c471a1c206d69e1a15fb14b067ffa3a29a34d8a755218e1",
+  "overall": {
+   "commands": 27427,
+   "frames": 4063168,
+   "live": 27140,
+   "liveFrames": 4035044,
+   "liveSharePctByCount": 98.95,
+   "liveSharePctByFrames": 99.31
+  },
+  "struggle": {
+   "byReason": {
+    "sprite-order lend unknown": 106
+   },
+   "commands": 1001,
+   "frames": 114056,
+   "live": 895,
+   "liveFrames": 102184
+  }
+ }
+}

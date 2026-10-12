@@ -4,7 +4,15 @@ How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
 `tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
 
-## Latest (2026-10-11, stl109 — Struggle 165 live; production src `5007ac57`, base master `5c050b765`)
+## Latest (2026-10-11, sdl119 — Struggle on a Substitute doll live; base master `76c33f4bc`, production src `377ed0c48`)
+
+The stf115 doll cells landed (`docs/sdl119-struggle-doll-live.md`). Seeds 0..999, both arms by `ret88Census.sh shards`: live by count
+98.80 % -> **98.95 %** (27,097 -> 27,140 of 27,429 -> 27,427 commands), by frames 99.27 % -> **99.44 %**. Struggle: 1,003 / 854 live
+-> 1,001 / **895** live (declines 149 -> **106**, all `sprite-order lend unknown`: Odor Sleuth 316 / Hyper Beam 63 hosts); +43 newly
+live (36 opponent / 7 player). 0 non-Struggle status changes, `battleDigestExcludingFrames` identical, stalled 3 in both arms.
+Receipts `tools/integration/fixtures/sdl119/census-{summary,check}.json`. Previous headline below.
+
+## Previous (2026-10-11, stl109 — Struggle 165 live; production src `5007ac57`, base master `5c050b765`)
 
 Struggle (the user-required forced move, `docs/struggle-integration-scope.md`) is part of the headline: it is ordinary play, so the
 all-command share below includes it. Seeds 0..999 as 10 `--index-from` shards merged with hist73Merge.py, both arms by
