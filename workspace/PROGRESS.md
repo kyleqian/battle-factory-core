@@ -5,17 +5,32 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-11 (afternoon, checkpoint) — S10A: Struggle LIVE, stats-change command, 3 live defects fixed; live share 0..999 95.38 -> 98.80 % of commands (98.72 -> 99.27 % of frames)
+## 2026-10-11 (afternoon / evening) — S10A: Struggle LIVE, General_StatsChange LIVE (both scenes), timeline fixes, 2 audits -> 4 live defects fixed; live share 0..999 95.38 -> 98.95 % of commands (98.72 -> 99.32 % of frames)
 
-- **State:** local master `7390bf8ca` (production src `2ed518f1f`); supervisor union gates green (typecheck, full suite 1,630 files /
-  13,431 tests, build). Adapter census `238+13+25+0+0=276` + Struggle (the one additional required body) = 239 live. Workers still
-  running: stats-change renderer (scd112), Scene OFF pauses (olnd113), Struggle declines evidence (stf115).
-- **Did:** Struggle 165 live (stg107 evidence -> stl109: 15 / 15 ROM windows 0 px, 884 / 1,033 census Struggle commands live);
-  ISSUES #166 slice (c) (sc106: `stats-change` command, 76 / 90 frames, both scenes); soak driver press stream decoupled from its
-  decisions (soak111: presentation length no longer re-rolls soak games; #89 coverage on seed 226); live audit 25 (aud110) + fix114
-  (Taunt marks / Harden idle rest / Swagger picture height: wrong live pixels on ~118 census commands, now 0 px); #167 anchors banked (off108).
-- **Next:** fold scd112 / olnd113 / stf115; then #166 slices (e) + (f), shp116 (shadow105 + sp103 banked patches), idle98 universal rows.
-- **Notes:** details in ANIMATION_INTEGRATION_PROGRESS.md. No DEFERRED entries.
+- **State:** local master; production src `b4befa039` (code `2131feda7`; later commits are docs, receipts, new evidence tools and one soak
+  driver fix). Adapter census `237+13+26+0+0=276` (Shadow Punch -> faithful timing) **+ Struggle 165 live** (the one additional required
+  body; `additionalRequiredBodies.MOVE_STRUGGLE`). Supervisor FINAL gates on `2131feda7`: typecheck, full suite 1,639 files / 13,532 tests
+  0 failed, build; differential vs session start `52c181d54`: the two canonical railroad traces byte-identical (235 + 216), the app-only
+  `presentation-rng-playable-live-bodies-seeded-on` 131 / 173 captures moved by today's intended timing (shp116 / iu120: regenerate its
+  capture frames). Census 0..999: **98.95 % / 99.32 %** live (27,139 / 27,426 commands, 0 render throws; session start 95.38 / 98.72).
+  General_StatsChange (separate line): Scene ON 3,667 / OFF 4,529 commands. Preview <http://127.0.0.1:5191/> serves `8d815e080` (src
+  `b4befa039`; 4 samples hash-equal, export + ON -> OFF restart passed, no browser errors; `playable-preview-8d815e080-receipt.json`).
+- **Did (production, each supervisor-reproduced from the worker's runner into a fresh dir; union gates after every fold):** Struggle
+  (stg107 -> stl109 -> stf115 -> sdl119: 15 / 15 + 11 doll windows 0 px; 895 / 1,001 census Struggle commands live); ISSUES #166
+  General_StatsChange (sc106 command, scd112 renderer, scf117 alignment / Growl x2 rows / order plan / accounting); #167 (olnd113 OFF
+  no-hit pauses + MoveMissedPause hold); off121 (Scene OFF `status` command); iu120 (idle98 universal pre / post rows: 23,870 live
+  commands +3 / +5); shp116 (shadow105 lead-row shadow, Shadow Punch D4, its shadow-return defect); fix114 / fix122 (live defects from
+  audits 25 / 26: Taunt marks, Harden idle rest, Swagger picture height, Struggle target x2, Scene ON "But it failed!" hold — 12 classes).
+- **Did (tooling):** soak111 decoupled the soak player's press stream from its decisions (presentation length no longer re-rolls soak
+  games; ISSUES #89 pin -> seed 226). Its sticky post-win roll hung full seed 25 on the unselectable REST (wind-down gate) -> fixed
+  `7d04d2686` (seed 25 OK; soak tests 70 / 70).
+- **Soak gates (S10A scoped policy does not require them; run because the soak driver changed):** vanilla 0:20 **20 / 20 OK**; full 0:60
+  **59 / 60** on the pre-fix driver (the one HANG = seed 25, the driver bug above; rerun on the fix: OK); winning 0:60 / winning-swap 0:60
+  and the varied-RNG fifth gate: see the ledger (ANIMATION_INTEGRATION_PROGRESS.md top entry) for the final counts.
+- **Next:** ROADMAP S10A resume points — ISSUES #168 Scene ON status animations (prep pack DONE: docs/sta123-status-animations-design.md,
+  slices SA1..SA10), remaining fallbacks (Odor Sleuth / Hyper Beam order plans), #166 / #167 remainders, regenerate the app-only trace.
+- **Notes:** no DEFERRED entries. ISSUES: #166 / #167 trimmed, #168 new, #153 quantified. All worker branches merged; worktrees removed
+  (scratch preserved under `.integration/validation/*-20261011/`, transcripts `.codex-logs/workers/`).
 
 ---
 
@@ -60,38 +75,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** no DEFERRED entries; ISSUES #166 / #167 new, #143 / #165 updated. #165 (Return -> Frustration) still needs a run where gameplay
   changes are in scope. Soak gates not run (S10A scoped policy; no kernel / rules / RNG file changed). All worker branches merged, worktrees
   removed; briefs + launcher logs under `.integration/validation/*-2026101[01]/`, transcripts `.codex-logs/workers/`.
-
----
-
-## 2026-10-10 (day) — S10A: ISSUES #159 fixed, 12 production folds, 3 live audits; live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
-
-- **State:** local master, production src `4c4fe4c7` (`bf082c6e1`). Census `239+13+24+0+0=276` (no adapter-count change: today widened
-  histories and fixed live claims). Supervisor FINAL gates on that code: typecheck, full suite 1,614 files / 13,258 tests, build,
-  differential 624 / 624 vs `b50c4dabd` (session start), census seeds 0..299 97.98 % / 98.40 % (start 96.98 / 97.99), seeds 0..999
-  **93.79 % of move-animation commands / 97.37 % of frames live** (start 91.89 / 95.82; two runs byte-identical), seeds 50000.. 95.20 / 97.18
-  (start 93.07 / 95.47); gameplay command key sequence + battle digest identical at every fold; soak gates on `bf082c6e1` (a kernel file changed: Speed Boost animArg1): vanilla 0:20 20 / 20 OK, full 0:60 60 / 60, winning
-  0:60 60 / 60, winning-swap 0:60 60 / 60 (all budget-ended = OK; the varied-RNG fifth gate was not run). Preview
-  <http://127.0.0.1:5191/> serves `20023b861` (src `4c4fe4c7`; 4 samples
-  hash-equal, session export + ON -> OFF restart passed, no browser errors; `playable-preview-20023b861-receipt.json`).
-- **Did (production, each re-proved by the supervisor from fresh probes / reruns):** hide66 (ISSUES #159: live bodies drew a hidden
-  Fly / Bounce / Dig / Dive charger — 90 wrong live commands on 0..999 -> 0) + fly63 re-landed; sw67 (Shock Wave geometry-keyed order plan);
-  land68 (Dive words unit + SUBSTITUTE_FADE); fold71 (Magnitude / CASTFORM_CHANGE / Conversion 2 / Needle Arm plans + the kernel's Speed
-  Boost animArg1); dive70 (Dive attack body live); ice72 (Ice Ball words unit for any consumer); fix74 (player Light Screen at a hidden
-  opponent fails closed); land75 (37 audited net-zero allocator bodies; hidden faint / reshow keep the order host: +154 / +17,256);
-  st76 (Dive / Meteor Mash status gates lifted); cf78 (live bodies decline while a Castform is in a weather form — 54 commands honestly
-  back to fallback; Needle Arm tie); land79 (Flatter at later bodies); ret80 (Return's order keyed by power level — 123 commands honestly
-  back to fallback, see #165).
-- **Did (evidence / audits):** plans69, hist73, flat77, doll81 (banked, see Next); live audits 18 (442 windows), 19 (599), 20 (436) —
-  each found real issues (Light Screen hidden-phase, Castform weather form, Needle Arm tie, Return plan) that were fixed the same day.
-- **Decisions (reversible, in scope):** failing closed instead of shipping known-wrong pixels (Castform weather forms, Return at
-  friendship 0, Sky Uppercut / player Light Screen at a hidden battler); Bulk Up's "species defect" refuted by source + 22 ROM windows.
-- **Next:** ISSUES #165 FIRST if gameplay changes are in scope for the next run (the ROM Factory has no Return: friendship 0 + Return ->
-  Frustration; production keeps Return — a damage / AI / animation divergence, outside S10A's presentation-only mandate). S10A: land the
-  banked doll81 (Substitute doll cells) patch; Flatter after a Flatter (words unit) / after Tackle (audit 33); #143 per-form Castform art
-  (then lift cf78's decline); post-KO reseed blockers (words-unit order plans); Extrasensory / Memento later bodies; #161 (Dive attack
-  age-17 lag); live audit 21 after the next batch.
-- **Notes:** no DEFERRED entries. ISSUES: #159 / #160 / #162 / #163 / #164 closed; #161 and #165 new. All worker branches merged,
-  worktrees removed; briefs, launcher logs and pruned worker scratch under `.integration/validation/*-20261010/`, transcripts
-  `.codex-logs/workers/`.
 
 ---

@@ -1,6 +1,19 @@
 # Animation integration progress
 
-## 2026-10-11 (afternoon, in progress) — S10A: Struggle + stats-change first (supervisor ledger, updated per fold)
+## 2026-10-11 (afternoon / evening) — S10A: Struggle LIVE, General_StatsChange LIVE, timeline fixes; 95.38 / 98.72 -> 98.95 / 99.32 % live
+
+- **Final (supervisor):** code `2131feda7`, production src `b4befa039`. Gates in a detached worktree: typecheck, full suite 1,639 files /
+  13,532 tests 0 failed, build; differential vs `52c181d54`: fight-submenu 235 / 235 + battle1-postwin-next-prompt 216 / 216 byte-identical,
+  presentation-rng-playable-live-bodies-seeded-on 42 / 173 (moved by shp116 / iu120's intended timing; regenerate its capture frames).
+  Census 0..999 (`.integration/validation/final-2131feda7/census/`): 27,139 / 27,426 commands (98.95 %), 4,132,330 / 4,160,787 frames
+  (99.32 %), 0 render throws. Adapters `237+13+26+0+0=276` + Struggle. Preview `8d815e080` (src `b4befa039`): 4 samples hash-equal,
+  session export + ON -> OFF restart passed, no browser errors (`tools/integration/fixtures/playable-preview-8d815e080-receipt.json`).
+- sta123 (SIDE, Opus, new files only, merged `553af4343`): ISSUES #168 prep pack — 9 / 9 B_ANIM_STATUS_* on the ROM both sides (PSN 71,
+  CONFUSION 100, BRN 39, INFATUATION 97, SLP 97, PRZ 39, FRZ 117 (133-134 after Ice Beam: the controller waits for battle SEs), CURSE 75,
+  NIGHTMARE 75 rows; Scene OFF skips all), census 8,080 occurrences, none drawn; slices SA1..SA10. Supervisor: sta123Run.sh ALL SAME.
+- Soak (S10A's scoped policy does not require it; run because soak111 changed the driver): vanilla 0:20 20 / 20 OK; full 0:60 59 / 60 —
+  the HANG (seed 25 @ postwin:page0) was soak111's sticky post-win roll choosing the unselectable REST forever -> fixed `7d04d2686`
+  (re-draw after every A on REST; seed 25 OK; soak tests 70 / 70).
 
 - Session start: master `52c181d54`, production src `14d1be159` == the 2026-10-10 night final gates' tree -> baseline receipt reused.
   Oracle services (2026-10-06) postdate the last `oracle/` commit (2026-08-15); the freshness script's FAIL compares against any HEAD
