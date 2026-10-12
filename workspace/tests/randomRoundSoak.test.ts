@@ -387,7 +387,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // 38_358 / 2_727: Scene OFF no-hit bodies now present their
       // BattleScript_Pausex20 span and misses / failed moves hold "X used Y!"
       // over the source `pause B_WAIT_TIME_SHORT` (presentation only). Same
-      // battle 7, turn 3, seven wins and diagnostics.
+      // battle 7, turn 3, seven wins and diagnostics. scf117 (ISSUES #166, the
+      // post-stats-change hold, docs/scf117-stats-change-finish.md): frames
+      // unchanged, renderCalls 2_727 -> 2_728; everything else identical.
       frames: 38_358,
       battle: 7,
       turn: 3,
@@ -400,7 +402,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_727,
+        renderCalls: 2_728,
       },
     });
     expect(second).toEqual(first);
@@ -774,7 +776,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // alone had already moved them to 14186 / 24 and 12272 / 23). olnd113
     // (ISSUES #167, the Scene OFF pause / miss hold) moved the frames only:
     // 16321 -> 17591, 25321 -> 27061; decision and canonical logs identical
-    // to bce86a4b0's (soak111Decoupling.ts), same battle / turn.
+    // to bce86a4b0's (soak111Decoupling.ts), same battle / turn. scf117 (the
+    // post-stats-change hold): frames only, seed 1 27061 -> 27052; decision and
+    // canonical logs identical to 681da5c10's for both seeds.
     expect(runSeed(0, options)).toMatchObject({
       frames: 17591,
       outcome: "OK",
@@ -784,7 +788,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       turn: 30,
     });
     expect(runSeed(1, options)).toMatchObject({
-      frames: 27061,
+      frames: 27052,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -807,8 +811,10 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // for seed 1; sc106 alone had moved them to 8625 / 8661). Same turn 16.
     // olnd113 (ISSUES #167, the Scene OFF pause / miss hold): frames only,
     // 8683 -> 9143 and 8670 -> 9205; decision logs identical to bce86a4b0's.
+    // scf117 (the post-stats-change hold): frames only, seed 0 9143 -> 9145;
+    // decision and canonical logs identical to 681da5c10's for both seeds.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 9143,
+      frames: 9145,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
