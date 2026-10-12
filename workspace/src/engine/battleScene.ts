@@ -7694,6 +7694,14 @@ function statAnimBannerPalette(stat: BattleStatName): RgbColor[] {
   }
 }
 
+/** scd112: the stats-change command's field view (statsChangeRenderView) and its banner, or no banner on a row without one. */
+export type StatsChangeRenderView = Readonly<{
+  view: BattleResolutionPresentationRenderView;
+  banner: Readonly<{
+    tileset: Tileset; corner: Readonly<{ x: number; y: number }>; direction: "up" | "down"; eva: number; bg1Y: number; palette: RgbColor[];
+  }> | null;
+}>;
+
 /**
  * scd112 (S10A, ISSUES #166 slice d, docs/scd112-stats-change-render.md): General_StatsChange's `stats-change` command over the
  * field as it is, Scene ON and OFF alike. Command age a is the reducer's rel a + 1 (stat102 s4: the command's 76 / 90 frames are the
@@ -7704,12 +7712,7 @@ function statAnimBannerPalette(stat: BattleStatName): RgbColor[] {
  * Scene OFF has no x2 input and no residual x2. SpriteCB_EnemyShadow hides an elevated opponent's shadow while enemyShadowHidden
  * (rel 1 .. E+1: every command age). Null when the effect is not a playable stats change (statsChangeParams null).
  */
-export function statsChangeRenderView(view: BattleResolutionPresentationRenderView): Readonly<{
-  view: BattleResolutionPresentationRenderView;
-  banner: Readonly<{
-    tileset: Tileset; corner: Readonly<{ x: number; y: number }>; direction: "up" | "down"; eva: number; bg1Y: number; palette: RgbColor[];
-  }> | null;
-}> | null {
+export function statsChangeRenderView(view: BattleResolutionPresentationRenderView): StatsChangeRenderView | null {
   const effect = view.effect;
   if (effect?.type !== "stats-change") return null;
   const params = statsChangeParams(effect.argument);
