@@ -6,9 +6,12 @@
 // Intimidate windows); on the playstatchangeanimation path the first stat write is on `statWrites[0]` and the glyph on the write + 3
 // (setstatchanger .. statbuffchange, jumpifbyte, printfromtable; firstScreenChangeAfterE 96 / 82 on Memento / Superpower).
 // AllStatsUp (no jumpifbyte) shows it on the write + 2 (docs/issue69-omniboost-off-ground-truth.md: write 283, box clear 285).
+// Rung 2: the source-derived x2 tracker rows (liveBattlerX2History.ts LIVE_BATTLER_X2_SOURCE_ZEROED) and their dense live receipt.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { scf117AlignBattle, type Scf117AlignRow } from "../tools/integration/scf117Align.ts";
+import { liveBattlerX2MoveRoleClass, LIVE_BATTLER_X2_MOVE_TABLE, LIVE_BATTLER_X2_SOURCE_ZEROED } from "../src/engine/liveBattlerX2History.ts";
+import movesJson from "../src/data/gen/moves.json" with { type: "json" };
 
 type Window = { arg: number; script: { nextRel: number; statWrites: [number, unknown][]; firstScreenChangeAfterE: number } };
 const STAT101 = JSON.parse(readFileSync("tools/integration/fixtures/stat101/receipts/stat-anim.json", "utf8")) as
@@ -76,4 +79,37 @@ describe("scf117 rung 1: the print after a stats-change command shows its first 
       }
     }, 120000);
   }
+});
+
+
+describe("scf117 rung 2: source-derived x2 tracker rows (status moves ending in an absolute reset)", () => {
+  it("Growl 45 / Will-O-Wisp 261 / Trick 271 zero the target; Screech 103 / Soft-Boiled 135 / Belly Drum 187 / Trick 271 the attacker", () => {
+    for (const id of [45, 261, 271]) expect(liveBattlerX2MoveRoleClass(id, "target")).toBe("zeroed");
+    for (const id of [103, 135, 187, 271]) expect(liveBattlerX2MoveRoleClass(id, "attacker")).toBe("zeroed");
+    // every source row is an unmeasured status move (no measured row overridden, no damaging-move fallback changed)
+    for (const role of ["attacker", "target"] as const) {
+      for (const id of LIVE_BATTLER_X2_SOURCE_ZEROED[role]) {
+        const t = LIVE_BATTLER_X2_MOVE_TABLE[role];
+        expect([...t.zeroed, ...t.keep, ...t.mixed]).not.toContain(id);
+        expect(movesJson.moves.find((m) => m.id === id)!.power).toBe(0);
+      }
+    }
+    // the other roles keep their classes (Growl's attacker, Screech's measured target)
+    expect(liveBattlerX2MoveRoleClass(45, "attacker")).toBe("keep");
+    expect(liveBattlerX2MoveRoleClass(103, "target")).toBe("zeroed");
+  });
+
+  it("dense live bodies after a Growl: opponent ONIX (rest +1) Fury Cutter 0 px on the final tree and 70,910 px on the base", () => {
+    const r = JSON.parse(readFileSync("tools/integration/fixtures/scf117/x2-live.json", "utf8")) as {
+      final: Record<string, { rows: number; exactRows: number[]; residualPixels: number[] }>;
+      base681da5c10: Record<string, { rows: number; exactRows: number[]; residualPixels: number[] }>;
+    };
+    expect(Object.keys(r.final)).toHaveLength(5);
+    for (const v of Object.values(r.final)) {
+      expect(v.exactRows).toEqual([v.rows, v.rows]);
+      expect(v.residualPixels).toEqual([0, 0]);
+    }
+    expect(r.base681da5c10["scf117-fury-cutter-opp-onix-golem-growl-0"]!.residualPixels).toEqual([0, 0]);
+    expect(r.base681da5c10["scf117-fury-cutter-opp-onix-golem-growl-1"]).toMatchObject({ exactRows: [19, 19], residualPixels: [70910, 70910] });
+  });
 });
