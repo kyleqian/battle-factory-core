@@ -1,0 +1,14 @@
+268 2 player
+718 2 opponent
+398 94 player
+2 94 opponent
+0 352 player
+19 352 opponent
+154 339 player
+398 339 opponent
+2 44 player
+19 44 opponent
+6 89 player
+4 89 opponent
+27 24 player
+527 223 player
