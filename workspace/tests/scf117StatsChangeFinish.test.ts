@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 import { scf117AlignBattle, type Scf117AlignRow } from "../tools/integration/scf117Align.ts";
 import { liveBattlerX2MoveRoleClass, LIVE_BATTLER_X2_MOVE_TABLE, LIVE_BATTLER_X2_SOURCE_ZEROED } from "../src/engine/liveBattlerX2History.ts";
 import movesJson from "../src/data/gen/moves.json" with { type: "json" };
+import { spriteOrderStatAnimationPlan } from "../src/engine/spriteOrderEventTransform.ts";
 
 type Window = { arg: number; script: { nextRel: number; statWrites: [number, unknown][]; firstScreenChangeAfterE: number } };
 const STAT101 = JSON.parse(readFileSync("tools/integration/fixtures/stat101/receipts/stat-anim.json", "utf8")) as
@@ -111,5 +112,19 @@ describe("scf117 rung 2: source-derived x2 tracker rows (status moves ending in 
     }
     expect(r.base681da5c10["scf117-fury-cutter-opp-onix-golem-growl-0"]!.residualPixels).toEqual([0, 0]);
     expect(r.base681da5c10["scf117-fury-cutter-opp-onix-golem-growl-1"]).toMatchObject({ exactRows: [19, 19], residualPixels: [70910, 70910] });
+  });
+});
+
+
+describe("scf117 rung 3: the order host's STATS_CHANGE unit", () => {
+  it("multiple +-2 (56 / 58) take class 2's plan (Memento receipt == Screech's slot rows); the other classes are unchanged", () => {
+    expect(spriteOrderStatAnimationPlan(58)).toBe(spriteOrderStatAnimationPlan(47));
+    expect(spriteOrderStatAnimationPlan(56)).toBe(spriteOrderStatAnimationPlan(47));
+    expect(spriteOrderStatAnimationPlan(57)).toBe(spriteOrderStatAnimationPlan(22));
+    expect(spriteOrderStatAnimationPlan(58)).not.toBe(spriteOrderStatAnimationPlan(22));
+    for (const unplayable of [14, 29, 38, 53, 54, 59, 70]) expect(spriteOrderStatAnimationPlan(unplayable)).toBeNull();
+    const slots = (scenario: string) => readFileSync(`tools/integration/fixtures/stat101/receipts/rows/stat101-${scenario}-on-0.tsv`, "utf8")
+      .trim().split("\n").slice(1).map((line) => line.split("\t")).map((c) => `${c[12]}/${c[13]}`);
+    expect(slots("memento-ply-primeape-onix")).toEqual(slots("screech-opp-golbat-onix"));
   });
 });

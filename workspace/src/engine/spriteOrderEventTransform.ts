@@ -214,10 +214,11 @@ export function spriteOrderProductionBodyPlan(moveId: number, side: "player" | "
 }
 
 /** `B_ANIM_STATS_CHANGE` argument (STAT_ANIM_PLUS1/MINUS1 + stat 15..28, PLUS2/MINUS2 + stat 39..52, multiple
- * +1/-1 55/57). Multiple +-2 (56/58) is unobserved: null. */
+ * +1/-1 55/57, multiple +-2 56/58). scf117: multiple +-2 is class 2 (stat101 Memento 58 receipt, both scenes: the copy in
+ * gSprites slot 3 from rel 2, freed on the fall row 89, the Screech 47 rows exactly; 56 takes the same sharply Step path). */
 export function spriteOrderStatAnimationPlan(argument: number): SpriteOrderPlan | null {
   const klass = (argument >= 15 && argument <= 28) || argument === 55 || argument === 57 ? 1
-    : argument >= 39 && argument <= 52 ? 2 : null;
+    : (argument >= 39 && argument <= 52) || argument === 56 || argument === 58 ? 2 : null;
   return klass === null ? null : planAt(SPRITE_ORDER_PRODUCTION_ANIMS[`STATS_CHANGE_CLASS_${klass}`]);
 }
 
