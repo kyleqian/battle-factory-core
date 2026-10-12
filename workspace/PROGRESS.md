@@ -27,7 +27,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Soak gates (S10A scoped policy does not require them; run because the soak driver changed):** vanilla 0:20 **20 / 20 OK**; on the
   pre-fix driver full 0:60 59 / 60, winning 57 / 60, winning-swap 59 / 60 (all HANGs = the driver bug above; each rerun OK on the fix);
   confirmation on the fixed driver `bd7780162`: full 0:60 **60 / 60**, winning 0:60 **60 / 60**, winning-swap 0:60 **60 / 60** OK (all
-  budget-ended); (ANIMATION_INTEGRATION_PROGRESS.md top entry); varied-RNG fifth gate on the fixed driver: winning carry 0 / 14 / 28
+  budget-ended); varied-RNG fifth gate on the fixed driver: winning carry 0 / 14 / 28
   **100 / 100 each**, winning-swap carry 0 **100 / 100**.
 - **Next:** ROADMAP S10A resume points — land the BANKED ord124 order plans (+106 commands -> 99.34 / 99.60 %; then audit its Mega Punch
   flag), ISSUES #168 Scene ON status animations (prep pack DONE: docs/sta123-status-animations-design.md, slices SA1..SA10), #166 / #167
