@@ -1,0 +1,58 @@
+{
+ "schema": "ord124-check/v1",
+ "planTexts": {
+  "316:opponent": "Cff;Cf;Cf;D2;D3;D0,1/P542,542;Cf;D4",
+  "316:player": "Cff;Cf;Cf;D2;D3;D0,1/P552,552;Cf;D4"
+ },
+ "notIdenticalAB": 0,
+ "bodies": {
+  "316:opponent": {
+   "instances": 22,
+   "exact": 22,
+   "firstBodies": 12,
+   "laterBodies": 10,
+   "byLend": {
+    "F0 [3,4,..] -> D0,1": 14,
+    "F0 [4,3,..] -> D1,0": 8
+   },
+   "observed": {
+    "Cff;Cf;Cf;D2;D3;D0,1;Cf;D4": 14,
+    "Cff;Cf;Cf;D2;D3;D1,0;Cf;D4": 8
+   },
+   "mismatches": []
+  },
+  "316:player": {
+   "instances": 29,
+   "exact": 29,
+   "firstBodies": 18,
+   "laterBodies": 11,
+   "byLend": {
+    "F0 [3,4,..] -> D0,1": 16,
+    "F0 [4,3,..] -> D1,0": 13
+   },
+   "observed": {
+    "Cff;Cf;Cf;D2;D3;D0,1;Cf;D4": 16,
+    "Cff;Cf;Cf;D2;D3;D1,0;Cf;D4": 13
+   },
+   "mismatches": []
+  }
+ },
+ "hyperBeamPlanClasses": {
+  "63:opponent": 6,
+  "63:player": 6
+ },
+ "hyperBeamNextUnits": [
+  "hyper-beam-opp-142-95@2089 -> gap gap Cf;D0;Cff",
+  "hyper-beam-opp-142-95-s1@2089 -> gap gap Cf;D0 | body body 33:player Cf;Cf;D0;D1 | gap gap Cf;D0;Cff",
+  "hyper-beam-opp-142-95-s2@2089 -> gap gap Cf;D0 | body body 33:player Cf;Cf;D0;D1 | gap gap Cf;D0;Cff",
+  "hyper-beam-opp-142-95-s3@2089 -> gap gap Cf;D0 | body body 33:player Cf;Cf;D0;D1 | gap gap Cf;D0;Cff",
+  "hyper-beam-opp-143-42@2234 -> gap gap Cf;D0;Do6",
+  "hyper-beam-ply-142-95@2085 -> gap gap Cf;D0 | body body 33:opponent Cf;Cf;D0;D1 | gap gap Cf;D0",
+  "hyper-beam-ply-142-95-s1@2085 -> gap gap Cf;D0 | body body 33:opponent Cf;Cf;D0;D1 | gap gap Cf;D0",
+  "hyper-beam-ply-142-95-s2@2085 -> gap gap Cf;D0 | body body 33:opponent Cf;Cf;D0;D1 | gap gap Cf;D0",
+  "hyper-beam-ply-142-95-s3@2085 -> gap gap Cf;D0 | body body 33:opponent Cf;Cf;D0;D1 | gap gap Cf;D0",
+  "hyper-beam-ply-143-42@2235 -> gap gap Cf;D0;Do8",
+  "ord124-hb-opp-142-95-s5@2089 -> gap gap Cf;D0 | body body 33:player Cf;Cf;D0;D1 | gap gap Cf;D0;Cff;D1,2",
+  "ord124-hb-ply-142-95-s5@2085 -> gap gap Cf;D0 | body body 33:opponent Cf;Cf;D0;D1 | gap gap Cf;D0"
+ ]
+}
