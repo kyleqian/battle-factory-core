@@ -1,0 +1,74 @@
+{
+ "off121-rest-ply-snorlax-onix-off.json": {
+  "r1": "cb7b7762c3e7c3ce8ef56c2b20dd2c6d480f5b917c655c0dcfdc04aeb0e9e013",
+  "r2": "cb7b7762c3e7c3ce8ef56c2b20dd2c6d480f5b917c655c0dcfdc04aeb0e9e013"
+ },
+ "off121-rest-ply-snorlax-onix-on.json": {
+  "r1": "04b0df0b8972e47f7e8c70fb2566c32dc8408f60776e7b176c343534e13f9709",
+  "r2": "04b0df0b8972e47f7e8c70fb2566c32dc8408f60776e7b176c343534e13f9709"
+ },
+ "off121-self-destruct-ply-primeape-onix-off.json": {
+  "r1": "8519b7a88a7426fc32b0a3b08a25a9a0331c33fec3a8a043539f30bed6d2f246",
+  "r2": "8519b7a88a7426fc32b0a3b08a25a9a0331c33fec3a8a043539f30bed6d2f246"
+ },
+ "off121-self-destruct-ply-primeape-onix-on.json": {
+  "r1": "71947f3c1260204cb515944ea1020dc2a7bbd982b65aca4c840a7fd7dc11603e",
+  "r2": "71947f3c1260204cb515944ea1020dc2a7bbd982b65aca4c840a7fd7dc11603e"
+ },
+ "off121-spore-chesto-ply-primeape-onix-off.json": {
+  "r1": "abdb2cfec4eebd8bb88cb72ef2f477c953a95d82ac4867d64d4c4e1503b56a97",
+  "r2": "abdb2cfec4eebd8bb88cb72ef2f477c953a95d82ac4867d64d4c4e1503b56a97"
+ },
+ "off121-spore-chesto-ply-primeape-onix-on.json": {
+  "r1": "29baa9a2f8e756deb2697ea5c1ea04494785ccdddc213a476aab876725e44cf7",
+  "r2": "29baa9a2f8e756deb2697ea5c1ea04494785ccdddc213a476aab876725e44cf7"
+ },
+ "off121-spore-opp-primeape-onix-off.json": {
+  "r1": "b215b485715686a9a1b798183ae9a4aadbc962e8564d09ee8463ed600e9803ae",
+  "r2": "b215b485715686a9a1b798183ae9a4aadbc962e8564d09ee8463ed600e9803ae"
+ },
+ "off121-spore-opp-primeape-onix-on.json": {
+  "r1": "38f60e455a678fe7c20531723ea3cbe3ed26ec0e1e4a66dc4fb5d051e2fb6bcf",
+  "r2": "38f60e455a678fe7c20531723ea3cbe3ed26ec0e1e4a66dc4fb5d051e2fb6bcf"
+ },
+ "off121-spore-ply-primeape-onix-off.json": {
+  "r1": "9ede69190f637d3e65d11a2bf672f0ef0373e27f7283c0e66a3c5f7e79576fe6",
+  "r2": "9ede69190f637d3e65d11a2bf672f0ef0373e27f7283c0e66a3c5f7e79576fe6"
+ },
+ "off121-spore-ply-primeape-onix-on.json": {
+  "r1": "f39df599bc632b47862069b9d7e2bada9e53ca4f42cd1c213fb20ef062db422f",
+  "r2": "f39df599bc632b47862069b9d7e2bada9e53ca4f42cd1c213fb20ef062db422f"
+ },
+ "off121-thunder-wave-ply-primeape-snorlax-off.json": {
+  "r1": "734e1c481a74ee025b271cbdb9aa7e3c9ae7f94bed4ab5eb349e8d22b3895e25",
+  "r2": "734e1c481a74ee025b271cbdb9aa7e3c9ae7f94bed4ab5eb349e8d22b3895e25"
+ },
+ "off121-thunder-wave-ply-primeape-snorlax-on.json": {
+  "r1": "83443880bcde48482e09769908d8a2dad425a1b8fecedabde4156430f188aadd",
+  "r2": "83443880bcde48482e09769908d8a2dad425a1b8fecedabde4156430f188aadd"
+ },
+ "off121-toxic-opp-primeape-onix-off.json": {
+  "r1": "275d133fa3adac954c94d953968afe4e5f19b4231299fe9eefee24283fc2a105",
+  "r2": "275d133fa3adac954c94d953968afe4e5f19b4231299fe9eefee24283fc2a105"
+ },
+ "off121-toxic-opp-primeape-onix-on.json": {
+  "r1": "372730b91315272726e52338b032ad4d9ed163f81b9d5d3f41b99b3d648ef702",
+  "r2": "372730b91315272726e52338b032ad4d9ed163f81b9d5d3f41b99b3d648ef702"
+ },
+ "off121-toxic-ply-primeape-onix-off.json": {
+  "r1": "158dc8a353de196ded3379f73576cb0b16beeb94072eeb349dcad8c85d55174c",
+  "r2": "158dc8a353de196ded3379f73576cb0b16beeb94072eeb349dcad8c85d55174c"
+ },
+ "off121-toxic-ply-primeape-onix-on.json": {
+  "r1": "9a5541e1467d07c4f6a8f4790e9d343057773bf9509221784915829ed9b5a5d0",
+  "r2": "9a5541e1467d07c4f6a8f4790e9d343057773bf9509221784915829ed9b5a5d0"
+ },
+ "off121-will-o-wisp-ply-primeape-onix-off.json": {
+  "r1": "fc9a49fe83417751200e4846d7206800e1023169fb79322807ac08aaa2ec1c03",
+  "r2": "fc9a49fe83417751200e4846d7206800e1023169fb79322807ac08aaa2ec1c03"
+ },
+ "off121-will-o-wisp-ply-primeape-onix-on.json": {
+  "r1": "215c1dd79abf1e6b5761ee4e2e6284932001d7bec42167df60182bc9a9b802f6",
+  "r2": "215c1dd79abf1e6b5761ee4e2e6284932001d7bec42167df60182bc9a9b802f6"
+ }
+}

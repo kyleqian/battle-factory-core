@@ -45,6 +45,7 @@ import { substituteFadeDuration } from "./liveSubstituteFade.ts";
 import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import { battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -96,7 +97,8 @@ export type BattleHpTiming = Readonly<{ minimumFrames: 28 }>;
  * `BattleMessageTiming`.
  */
 export type BattleStatTiming = Readonly<{ minimumFrames: 2 }>;
-export type BattleStatusTiming = Readonly<{ minimumFrames: 32 }>;
+/** 32 frames; Scene OFF: the frames to the next print (off121, `sceneOffStatusFrames`). */
+export type BattleStatusTiming = Readonly<{ minimumFrames: number }>;
 export type BattleStatusIconTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleFaintTiming =
   | Readonly<{
@@ -764,6 +766,52 @@ function sourcePauseUsedMoveHoldFrames(
     return null;
   }
   return null;
+}
+/**
+ * off121 (docs/off121-status-command.md): in Scene OFF `Cmd_statusanimation` is skipped (HITMARKER_NO_ANIMATIONS,
+ * battle_script_commands.c:5753), so nothing is drawn between a status-data receipt (BtlController_EmitSetMonData
+ * REQUEST_STATUS_BATTLE: SetMoveEffect, the attack canceler's sleep / freeze turns, trysetrest, cleareffectsonfaint) and the
+ * print after it: every instruction in between runs once per frame (Rest's `pause B_WAIT_TIME_SHORT` once per blocked
+ * retry). The status command ends where the print's command starts. Commands start `instructionExecution + lead` after
+ * the anchor with lead 1 for both receipts (off108), so the command lasts delta(print) - delta(status). When the status
+ * command is the first command after "X used Y!" in the same execution (Rest's trysetrest), it starts on the frame after
+ * that print's final glyph (idle98's G + 1), before the ROM's status row, so it lasts delta(print) - delta(used) + 1.
+ * Anything else between the two receipts, or no provenance: null (the 32-frame command stays).
+ */
+function sceneOffStatusFrames(
+  events: readonly BattleKernelSemanticEvent[],
+  statusIndex: number,
+  usedIndex: number | null,
+  presentedSinceUsed: number,
+): number | null {
+  const status = events[statusIndex]!.provenance?.instructionExecution;
+  if (status === undefined) return null;
+  let print: number | null = null;
+  let execution = status;
+  for (let index = statusIndex + 1; index < events.length; index += 1) {
+    const candidate = events[index]!;
+    const next = candidate.provenance?.instructionExecution;
+    if (next === undefined || next < execution) return null;
+    execution = next;
+    if (candidate.payload.kind === "set-battler-pp-data" || candidate.payload.kind === "play-se") continue;
+    if (candidate.payload.kind !== "message") return null;
+    print = next;
+    break;
+  }
+  if (print === null || print <= status) return null;
+  const usedEvent = usedIndex === null ? undefined : events[usedIndex];
+  const used = usedEvent?.provenance?.instructionExecution;
+  if (
+    usedIndex === null || usedEvent === undefined || used === undefined || presentedSinceUsed !== 0
+    || usedEvent.payload.kind !== "message" || usedEvent.payload.messageId !== "STRINGID_USEDMOVE"
+  ) return print - status;
+  execution = used;
+  for (let index = usedIndex + 1; index <= statusIndex; index += 1) {
+    const next = events[index]!.provenance?.instructionExecution;
+    if (next === undefined || next < execution) return print - status;
+    execution = next;
+  }
+  return print - used + 1;
 }
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 2 } as const);
@@ -3755,13 +3803,16 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "set-battler-status-data") {
       const battler = singlesBattler(payload.battler, "status change");
       pendingStatusMessageBattler = battler;
+      const sceneOffStatus = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+        ? sceneOffStatusFrames(events, index, pauseOpenerIndex, commands.length - pauseOpenerCommands)
+        : null;
       commands.push(Object.freeze({
         type: "status",
         eventSequence: event.sequence,
         battler,
         before: beforeRules.battlers[battler]!.status1,
         after: payload.status1,
-        timing: STATUS_TIMING,
+        timing: sceneOffStatus === null ? STATUS_TIMING : Object.freeze({ minimumFrames: sceneOffStatus }),
       }));
       continue;
     }
