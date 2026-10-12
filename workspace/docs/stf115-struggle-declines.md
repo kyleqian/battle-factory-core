@@ -42,7 +42,7 @@ the lab seed is pinned (stg107Stage.SEED 305420349). Runner: `sh tools/integrati
   `LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS` and `LIVE_SUBSTITUTE_SWAP_BODY_CELLS`. The art change alone (stg107's suggestion) left 604..610 px
   on every row: the doll box had the species palette (ROM 7b8c5a, live 94847b). With the palette composed, every window is exact.
   - Census 0..999 on the patched copy: **+43 Struggle commands live, 0 non-Struggle status changes.** Live share 98.80 % / 99.27 % ->
-    **98.95 % / 99.44 %**; Struggle 883 / 1,032 -> **923 / 1,029** live.
+    **98.95 % / 99.31 %** (supervisor correction: 99.44 % divided by the base arm's frame total); Struggle 883 / 1,032 -> **923 / 1,029** live.
   - land82CensusCheck: command keys identical outside the stalled tails, `battleDigestExcludingFrames` identical, played / terminal /
     stalled 1000 / 997 / 3 in both arms, live -> non-live 0.
   - The 3 fewer commands (27,458 -> 27,455) are the stalled Struggle-only battles' budget-cut tails: 796 (200 -> 198) and 881 (268 -> 267).
@@ -127,7 +127,7 @@ plus the tail rows k+1 / k+2 (`fixtures/stf115/rung2-attdoll.txt`):
    - `artFor` back to the species maps. That needs a renderer-level check: a defender-doll Struggle frame whose doll box differs from the
      species sheet. Alternatively, pin `stf115Run.sh`'s receipt.
 4. **Accounting:** none. Struggle is already the one additional required body (stl109); this widens its live share only.
-   `docs/live-share-census.md` gets the new headline: 98.95 % / 99.44 %, Struggle 923 / 1,029.
+   `docs/live-share-census.md` gets the new headline: 98.95 % / 99.31 %, Struggle 923 / 1,029.
 5. **Residual (named, not Struggle work):**
    - the 106 lend declines need an order plan for **Odor Sleuth 316** (both sides absent: two `CloneBattlerSpriteWithBlend` clones copy
      the target's whole sprite, priority word AND y, so their sSpriteOrder place is decided by SortSprites' tie rule; then two

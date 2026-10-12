@@ -7,7 +7,7 @@ which production gate made each fallback. Tooling + evidence only: `tools/integr
 ## Latest (2026-10-11, sdl119 — Struggle on a Substitute doll live; base master `76c33f4bc`, production src `377ed0c48`)
 
 The stf115 doll cells landed (`docs/sdl119-struggle-doll-live.md`). Seeds 0..999, both arms by `ret88Census.sh shards`: live by count
-98.80 % -> **98.95 %** (27,097 -> 27,140 of 27,429 -> 27,427 commands), by frames 99.27 % -> **99.44 %**. Struggle: 1,003 / 854 live
+98.80 % -> **98.95 %** (27,097 -> 27,140 of 27,429 -> 27,427 commands), by frames 99.27 % -> **99.31 %** (supervisor correction: 99.44 % was land82CensusCheck.py's `liveFramePctAfter`, which divides the final live frames by the BASE arm's frame total; live Struggle bodies are longer than the fallback, so the final total grew — 4,035,044 / 4,063,168 = 99.31 %, == the merged report). Struggle: 1,003 / 854 live
 -> 1,001 / **895** live (declines 149 -> **106**, all `sprite-order lend unknown`: Odor Sleuth 316 / Hyper Beam 63 hosts); +43 newly
 live (36 opponent / 7 player). 0 non-Struggle status changes, `battleDigestExcludingFrames` identical, stalled 3 in both arms.
 Receipts `tools/integration/fixtures/sdl119/census-{summary,check}.json`. Previous headline below.

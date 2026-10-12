@@ -12,7 +12,7 @@
   receipt `tools/integration/fixtures/sdl119-live-receipt.json`. The lends file differs from stf115's only in the 5 defender-doll
   lines (now `live:true`); reference `fixtures/sdl119/lends.jsonl`.
 - **Census 0..999**, base `76c33f4bc` vs final (src `377ed0c48`), `ret88Census.sh shards` x 2 + `land82CensusCheck.py` +
-  `stg107CensusSummary.py`: live by count 98.80 % -> **98.95 %** (27,097 -> 27,140), by frames 99.27 % -> **99.44 %**; Struggle
+  `stg107CensusSummary.py`: live by count 98.80 % -> **98.95 %** (27,097 -> 27,140), by frames 99.27 % -> **99.31 %** (supervisor correction: 99.44 % divided by the base arm's frame total; see docs/live-share-census.md); Struggle
   declines 149 -> **106** (+43: 36 opponent / 7 player; `attacker doll` 24 and `defender doll` 19 -> 0), 0 non-Struggle status changes,
   command keys identical outside the stalled tails, `battleDigestExcludingFrames` identical, played / terminal / stalled 1000 / 997 /
   3 both arms, live -> non-live 0. The two fewer commands (27,429 -> 27,427) are the budget-cut tail of stalemate seed 881 (live Struggle

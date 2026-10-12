@@ -57,7 +57,7 @@
   Sleuth 316 (no plan either side), 5 after Hyper Beam 63 (plan keys missing). Rung 2: banked doll-cell patch (doll-aware art + doll
   palette). Supervisor: stf115Run.sh on `76c33f4bc` — every receipt same.
 - sdl119 (MAIN lane, Sonnet, on master `250fad76e` .. `396308f86`, src `377ed0c48`): the doll cells landed (defender 5 / 5, attacker-doll swap
-  6 / 6 at 0 px, composites 197 / 193 rows); census 0..999 **98.80 / 99.27 -> 98.95 / 99.44 %** (+43 Struggle live; 895 / 1,001 Struggle
+  6 / 6 at 0 px, composites 197 / 193 rows); census 0..999 **98.80 / 99.27 -> 98.95 / 99.31 %** (the worker reported 99.44 %: a fixed base-arm denominator; corrected) (+43 Struggle live; 895 / 1,001 Struggle
   commands live; 0 other status changes). Worker gates: full suite 1,633 files 0 failed, build, differential 624 / 624. Supervisor:
   sdl119Run.sh on `396308f86` — 59 / 59 live 0 px, 6 / 6 composites, every receipt same.
 - scf117 (INTEGRATION, Opus, merged `2d987e2e5`, src `d4988e08` on `681da5c10`): **ISSUES #166 finished** — (1) the print after a
