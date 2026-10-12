@@ -16,7 +16,7 @@
   sticky post-win roll (keyed by menu + cursor) chose a deliberate no-op (REST: full 25, winning 4 / 27 / 48; RECORD: winning-swap 17) and
   pressed A forever. Fixed `7d04d2686` + `bd7780162` (re-draw after every A on RECORD / REST); all five seeds rerun OK (winning 4 / 27 / 48
   and winning-swap 17 reach carry 14 at the 1,000,000-frame budget); soak tests 70 / 70, no pin moved.
-  Confirmation on the fixed driver (`bd7780162`): full 0:60 **60 / 60 OK**; winning / winning-swap 0:60 reruns: see PROGRESS.
+  Confirmation on the fixed driver (`bd7780162`): full 0:60 **60 / 60**, winning 0:60 **60 / 60**, winning-swap 0:60 **60 / 60** OK.
 - ord124 (SIDE, Opus, new files only, branch `worker/side-20261011-204243`): the lend-unknown bucket is 106 / 125 commands from ONE
   battle (705: a Metronome-called Odor Sleuth, then a False Swipe); computed plans exact on ROM RAM (Odor Sleuth 51 / 51 bodies — equal
   sort keys keep the lend's slot order, so plans69's "target species" classes were lend classes; False Swipe 18 / 18); banked patch
