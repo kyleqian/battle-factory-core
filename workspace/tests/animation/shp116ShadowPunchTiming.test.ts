@@ -74,19 +74,21 @@ describe("shp116: Shadow Punch age-90 restore lag (D4)", () => {
   describe("committed ROM windows (fresh direct mGBA, r1 == r2) re-rendered through the production live renderer", () => {
     const dir = "tools/integration/fixtures/sp103/windows";
     const windows = readdirSync(dir).filter((n) => n.endsWith(".json")).sort();
-    // The policy-phase residual rows outside the D4 entry: the player window's last row (106) is the pre-existing E+5 trail row
-    // (live audit 24 ARTIFACT, both phases), and an elevated opponent TARGET (CROBAT) misses its shadow return.
+    // The policy-phase residual row outside the D4 entry: the player window's last row (106) is the pre-existing E+5 trail row
+    // (live audit 24 ARTIFACT, both phases). The elevated opponent TARGET's (CROBAT) shadow return at 101 + deferrals is drawn
+    // (shp116, the sp103 DEFECT): without it ages 102..105 are 200 px each (the revert experiment in the shp116 doc).
     const EXPECTED: Record<string, number[]> = {
       "sp103-opponent-haunter-aerodactyl-slow-b0.json": [],
       "sp103-opponent-haunter-quagsire-b0.json": [],
       "sp103-opponent-haunter-steelix-b2.json": [],
       "sp103-player-haunter-steelix-b0.json": [106],
-      "sp103-player-haunter-crobat-b0.json": [...range(102, 105), 106],
-      "sp103-player-haunter-crobat-slow-b0.json": [...range(102, 105), 106],
-      // Other phase (no lag at 90): the fade-in 83..98 one BLDY step off, the opponent HAUNTER's own shadow return (101), and the
-      // documented last row (the ROM's next output inside the one-row-longer window / the trail row).
+      "sp103-player-haunter-crobat-b0.json": [106],
+      "sp103-player-haunter-crobat-slow-b0.json": [106],
+      // Other phase (no lag at 90): the fade-in 83..98 one BLDY step off, the opponent shadow return one row earlier in the ROM (101:
+      // the HAUNTER attacker's / the CROBAT target's), and the documented last rows (the ROM's next output inside the one-row-longer
+      // window; the player's trail row).
       "sp103-opponent-haunter-steelix-b0.json": [...range(83, 98), 101, 105],
-      "sp103-player-haunter-crobat-slow-b3.json": [...range(83, 98), ...range(101, 105), 106],
+      "sp103-player-haunter-crobat-slow-b3.json": [...range(83, 98), 101, 105, 106],
     };
     it("eight windows: 6 policy phase (opponent 3, player 3) + 2 other phase (opponent STEELIX b0, player CROBAT-slow b3)", () => {
       expect(windows).toEqual(Object.keys(EXPECTED).sort());
