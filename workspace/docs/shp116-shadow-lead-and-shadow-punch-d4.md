@@ -34,6 +34,8 @@ Factory acceptance and the 276 total are unchanged.
 - `tests/animation/factoryAnimationInventory.test.ts`: `238 + additional` -> `237 + additional`; `implementedCount` 239 -> 238.
 - `tests/liveStatusImplementedCount.test.ts`: 238 -> 237 (+ Struggle = 238).
 - `tests/animation/fp100FocusPunchTiming.test.ts` accounting: `[238, 13, 25]` -> `[237, 13, 26]`, census string -> `237+13+26+0+0=276`.
+- `tests/sc106StatsChangeCommand.test.ts` Intimidate route (seed 6): the stats-change anchor 2694 -> 2694 + 10 (the two player DROWZEE
+  Confusion bodies (93, N 5) into the elevated Foe DUSTOX before it regain their lead rows: 140 -> 145 rows each).
 - New: `tests/shp116ShadowLeadRow0.test.ts` (3), `tests/animation/shp116ShadowPunchTiming.test.ts` (13).
 
 ## Census 0..999 (10 `--index-from` shards per tree, `hist73Merge.py`, `shp116CensusDelta.py`)
@@ -54,6 +56,14 @@ Factory acceptance and the 276 total are unchanged.
 `tools/integration/shp116Parity.ts` on the seed-54 HAUNTER route (opponent HAUNTER Shadow Punch into WAILMER), 23 boundaries: **ON == OFF**
 (rng, rules context minus hitMarker's scene bit, boundary) and the boundary digest `8318623d3cbd…` is the same in the base and the final
 tree. The Shadow Punch body presents 114 rows (base 105).
+
+## App differential (`--base 681da5c10`)
+
+`fight-submenu` 235 / 235 and `battle1-postwin-next-prompt` 216 / 216 captures byte-identical. `presentation-rng-playable-live-bodies-seeded-on`
+(app-only) 152 / 173: the 21 moved captures are (1) 10 player Shadow Punch rows (frames 1904..1916 and 3049..3061: phaseElapsed 93..105 =
+ages 85..97 of two grounded-target bodies, same elapsed in both trees), 17,716 px each = one BLDY step of the restore fade-in, the sp103
+policy phase's one-row deferral; (2) 11 action-menu captures (2284..2503, 673 / 1,673 px): the action menu's phaseElapsed is one lower
+in the final tree (the + 1 Shadow Punch row), so its idle animation phase shifts on those captures (2275 / 2512 / 3622 coincide).
 
 ## Out of scope / still open
 
