@@ -1,0 +1,58 @@
+diff --git a/src/engine/battleScene.ts b/src/engine/battleScene.ts
+index 7a1f3c4e..4a1d66a1 100644
+--- a/src/engine/battleScene.ts
++++ b/src/engine/battleScene.ts
+@@ -25955,13 +25955,9 @@ export function renderSceneOnMovePresentation(
+     const plan = sceneOnStruggleDisplayPlan(moveState);
+     if (attacker.geometry.side === target.geometry.side) throw new Error("STRUGGLE presentation requires battlers on opposite sides");
+     type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
+-    const artFor = (side: "player" | "opponent", species: string): BattlerArt => {
+-      const art = side === "player"
+-        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[species]
+-        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[species];
+-      if (!art) throw new Error(`STRUGGLE missing live battler art ${species}`);
+-      return art;
+-    };
++    // stf115: the doll-aware lookup (a side shown as the Substitute doll draws the doll sheet, as the proven doll branches do).
++    const artFor = (side: "player" | "opponent", species: string): BattlerArt =>
++      liveSceneOnBattlerArt({ species, geometry: { side } }) as BattlerArt;
+     const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset => side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
+     const rgb555 = (word: number): RgbColor => {
+       const packed = mgbaColorFromBgr555(word);
+diff --git a/src/engine/liveMoveAnimation.ts b/src/engine/liveMoveAnimation.ts
+index ac677da4..7ebf97c7 100644
+--- a/src/engine/liveMoveAnimation.ts
++++ b/src/engine/liveMoveAnimation.ts
+@@ -1080,6 +1080,8 @@ export const LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS: ReadonlyMap<number, readonly (
+   [9, ["player", "opponent"]], // ThunderPunch
+   // doll90 (docs/doll90-doll-cells.md): the doll's palette bank composed (composeLiveFieldPalettes), 0 px on every row.
+   [244, ["player", "opponent"]], // Psych Up
++  // stf115 (docs/stf115-struggle-declines.md s2): Struggle drawn through liveSceneOnBattlerArt, 0 px on every row.
++  [165, ["player", "opponent"]], // Struggle
+ ].map(([id, sides]) => [id as number, Object.freeze(sides as ("player" | "opponent")[])]));
+ 
+ /**
+@@ -3971,7 +3973,9 @@ export function liveMoveAnimationPresentation(
+       if (!spriteOrderInput?.known) return null;
+       if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
+       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+-      const palettes = composeLiveArtPalettes(art);
++      // stf115: a battler shown as the Substitute doll has gSubstituteDollPal in its OBJ bank (doll90's Psych Up rule); identical to
++      // composeLiveArtPalettes when neither battler is the doll.
++      const palettes = composeLiveFieldPalettes(art);
+       const activationOrder = spriteOrderWithOccupiedPrefix(
+         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
+       if (palettes === null || activationOrder === null) return null;
+diff --git a/src/engine/liveSubstituteSwap.ts b/src/engine/liveSubstituteSwap.ts
+index 2db5ec08..a388d33f 100644
+--- a/src/engine/liveSubstituteSwap.ts
++++ b/src/engine/liveSubstituteSwap.ts
+@@ -132,6 +132,8 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
+   [105, BOTH], // Recover (self-target; ctl95: the doll-free controls' accepted window is activation + 10)
+   // doll90 (docs/doll90-doll-cells.md): PERSIAN / GENGAR player, PERSIAN / elevated GOLBAT opponent, 0 px on every row.
+   [104, BOTH], // Double Team (self-target; the attacker's personality-derived clone phase, dt60)
++  // stf115 (docs/stf115-struggle-declines.md s2): Struggle by a doll attacker (Taunt route), 0 px on every row.
++  [165, BOTH], // Struggle
+ ]);
+ export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_SUBSTITUTE_SWAP_BODY_CELLS.keys());
+ /**
