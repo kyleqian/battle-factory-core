@@ -15,6 +15,7 @@ import {
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { speciesFrontIdleRestOffsetOrZero } from "../../src/animation/speciesIdleAnim.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 type Key = "initialBattlerX2" | "initialTargetX2" | "targetIdleX2" | "attackerPictureSize";
 type Side = "player" | "opponent";
@@ -161,7 +162,7 @@ describe("live anchor4 move adapters", () => {
     const on = generatedCommandAnimationReplay(row.route.seed, "on", [row.route.slot], row.route.streak);
     const off = generatedCommandAnimationReplay(row.route.seed, "off", [row.route.slot], row.route.streak);
     const body = on.animations.find(animation => animation.moveId === row.id && animation.attacker === 0);
-    expect(body?.ages).toEqual(Array.from({ length: row.duration }, (_, age) => age));
+    expect(body?.ages).toEqual(iu120Ages(row.id, row.duration));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);

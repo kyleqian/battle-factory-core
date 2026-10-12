@@ -14,6 +14,7 @@ import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts"
 import { flatterConfetti } from "../../tools/integration/prep32FlatterModel.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { orbLives35, orbScale35 } from "../../tools/integration/prep35SkillSwapModel.ts";
+import { iu120Ages, iu120EffectAges } from "../helpers/iu120Rows.ts";
 
 // S10A Skill Swap (285, faithful timing) from the prep35 source model (docs/next-adapters-prep35.md s3 item 1). Dense windows:
 // tools/integration/fixtures/s10a-live/skill-swap-*.json, receipt tools/integration/fixtures/sf-live-receipt.json (tools/integration/d4aTimingCheck.ts:
@@ -132,7 +133,7 @@ describe("S10A Skill Swap (285) faithful timing", () => {
     const off = generatedCommandAnimationReplay(8, "off", [3], 7);
     const bodies = on.animations.filter((a) => a.moveId === 285 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 196 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(285, 196));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expectOnOffParity(on, off);
@@ -244,7 +245,7 @@ describe("S10A Flatter (260) faithful random", () => {
     const b = random2Route(51, "on", [3], 0, SEED_B), off = random2Route(51, "off", [3], 0, SEED_A);
     const bodies = a.bodies.filter((body) => body.moveId === 260 && body.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 219 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120EffectAges(260, 219));
     expect(bodies[0]!.active.every(Boolean)).toBe(true);
     expect(bodies[0]!.provenance).toBe("surrogate");
     expect(bodies[0]!.words).toHaveLength(114);
@@ -340,7 +341,7 @@ describe("S10A Eruption (284) scoped exact", () => {
     const off = generatedCommandAnimationReplay(88, "off", [1], 14);
     const bodies = on.animations.filter((a) => a.moveId === 284 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 476 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(284, 476));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expectOnOffParity(on, off);

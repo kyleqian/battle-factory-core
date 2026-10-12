@@ -12,7 +12,7 @@ import {
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import monPicCoords from "../../src/data/gen/mon-pic-coords.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { land97Ages } from "../helpers/land97LeadAges.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 type Side = "player" | "opponent";
 // docs/next-adapters-prep.md s1: accepted reducer durations; shadow row 0 iff the window starts at activation.
@@ -133,7 +133,7 @@ describe("live next5 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.slot], r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.slot], r.streak);
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === 0);
-    expect(body?.ages).toEqual(land97Ages(c.id, c.duration));
+    expect(body?.ages).toEqual(iu120Ages(c.id, c.duration));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.boundaries).toHaveLength(2);

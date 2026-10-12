@@ -8,6 +8,7 @@ import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts"
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // Sheer Cold (329, docs/next-adapters-prep22.md s B.5, first body) + the #150 audit-6 fixes (Signal Beam shake owns x2, Fire Punch shiny
 // decline, verifier display names, Curse target idle lift). Dense proofs: tools/integration/fixtures/fix150-live-receipt.json.
@@ -86,7 +87,7 @@ describe("live Sheer Cold (329) first-body adapter", () => {
     const off = generatedCommandAnimationReplay(267, "off", [1], 35);
     const bodies = on.animations.filter((a) => a.moveId === 329 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 191 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(329, 191));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(off.boundaries).toHaveLength(on.boundaries.length);

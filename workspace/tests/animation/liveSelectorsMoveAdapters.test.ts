@@ -14,6 +14,7 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 const field = {
   player: { species: 340, speciesSymbol: "CAMERUPT", name: "CAMERUPT", level: 50,
@@ -174,7 +175,7 @@ describe("live selectors ordinary routes", () => {
     const requests = on.requests.filter(r => r.moveId === row.id && r.attacker === 0);
     expect(bodies).toHaveLength(row.bodies.length);
     row.bodies.forEach((expected, i) => {
-      expect(bodies[i]?.ages).toEqual(Array.from({ length: expected.ages }, (_, age) => age));
+      expect(bodies[i]?.ages).toEqual(iu120Ages(row.id, expected.ages));
       expect(bodies[i]?.adapterActive.every(Boolean)).toBe(true);
       if (expected.turn !== undefined) expect(requests[i]?.turn).toBe(expected.turn);
       if (expected.damageSign) expect(requests[i]!.damage > 0).toBe(expected.damageSign === "positive");

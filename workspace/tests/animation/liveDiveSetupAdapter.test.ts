@@ -17,6 +17,7 @@ import {
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120EffectAges } from "../helpers/iu120Rows.ts";
 
 // S10A Dive (291) SETUP body (docs/next-adapters-prep25.md s0.2 / B.1 / B.1a / C; scope cut: docs/s10a-random2-order-lend-blocker.md): D3
 // droplets from the presentation host + the D4 player row-68 OAM transfer phase (liveMoveTimingPolicy.ts 291). Dense windows:
@@ -172,12 +173,12 @@ describe("S10A Dive (291) setup body: faithful timing with D3", () => {
     expect(dives.length).toBeGreaterThanOrEqual(2);
     const setup = dives.find((d) => (d.turn & 1) === 0)!, attack = dives.find((d) => (d.turn & 1) === 1)!;
     // The route's attacker is CLAMPERL (Y_PIC_OFFSET y 101): the ball rule gives 119 rows, as measured (species audit 11 clamperlA, 0 px).
-    expect(setup.ages).toEqual(Array.from({ length: 119 }, (_, age) => age));
+    expect(setup.ages).toEqual(iu120EffectAges(291, 119));
     expect(setup.active.every(Boolean)).toBe(true);
     expect(setup.provenance).toBe("surrogate");
     expect(setup.words).toHaveLength(20);
     // dive70: the attack body plays live at every age (93 rows) on 56 surrogate words (tests/animation/liveDiveAttackAdapter.test.ts)
-    expect(attack.ages).toEqual(Array.from({ length: 93 }, (_, age) => age));
+    expect(attack.ages).toEqual(iu120EffectAges(291, 93));
     expect(attack.active.every(Boolean)).toBe(true);
     expect(attack.words).toHaveLength(56);
     expect(a.run.stalled).toBe(false);

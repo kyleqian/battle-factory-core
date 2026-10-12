@@ -16,6 +16,7 @@ import {
 import { createPresentationRngState } from "../../src/engine/presentationRng.ts";
 import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
+import { iu120EffectAges } from "../helpers/iu120Rows.ts";
 
 type PlanEntry = { key: string; acceptedActivationValue: number; draws: { ageOffset: number; count: number }[];
   pinnedWords: unknown; predictedFromPlan: unknown; alternate?: { activationValue: number; firstWords: number[] } };
@@ -194,7 +195,7 @@ describe("faithful-random live adapters: surrogate ordinary routes", () => {
     expect(bodies).toHaveLength(move.route.bodies);
     expect(new Set(bodies.map((body) => body.key)).size).toBe(bodies.length);
     for (const body of bodies) {
-      expect(body.ages).toEqual(Array.from({ length: duration }, (_, age) => age));
+      expect(body.ages).toEqual(iu120EffectAges(move.id, duration));
       expect(body.active.every(Boolean)).toBe(true);
       expect(body.provenance).toBe("surrogate");
       expect(body.words).toHaveLength(LIVE_MOVE_RANDOM2_PLANS[move.id]!.reduce((n, step) => n + step.count, 0));

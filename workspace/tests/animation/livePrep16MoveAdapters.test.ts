@@ -16,6 +16,7 @@ import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { composePalettes as toolComposePalettes } from "../../tools/integration/prep16PaletteComposite.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Extra } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep16.md: Overheat (315) and Silver Wind (318), FIRST BODY only. The dense framebuffer proofs are
 // tools/integration/fixtures/prep16-live/*.json (receipt prep16-live-adapter-receipt.json).
@@ -205,7 +206,7 @@ describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: fir
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.slot], r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.slot], r.streak);
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
-    expect(bodies.map(b => b.ages.length)).toEqual([r.ages]);
+    expect(bodies.map(b => b.ages.length)).toEqual([r.ages + iu120Extra(r.id)]);
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(r.active);

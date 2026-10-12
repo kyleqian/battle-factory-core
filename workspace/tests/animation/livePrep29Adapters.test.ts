@@ -10,6 +10,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { outrageInputsFor } from "../../tools/compare/verifyOutrageReducer.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep29.md s0 / B.1 / B.3 / B.5 / B.6 (authoritative): Bonemerang (both hits), Rapid Spin, Outrage (exact) and Luster Purge
 // (faithful-random). Dense framebuffer proofs: tools/integration/fixtures/prep29-live/*.json (receipt r29-live-receipt.json).
@@ -132,7 +133,7 @@ describe("live prep29 ordinary routes", () => {
     const bodies = on.animations.filter((a) => a.moveId === id && a.attacker === 0);
     expect(bodies).toHaveLength(hits);
     for (const body of bodies) {
-      expect(body.ages).toEqual(Array.from({ length: ages }, (_, age) => age));
+      expect(body.ages).toEqual(iu120Ages(id, ages));
       expect(body.adapterActive.every(Boolean)).toBe(true);
     }
     parityOf(on, off);

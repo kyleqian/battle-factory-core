@@ -10,6 +10,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { shockWaveInputsFor } from "../../tools/compare/verifyShockWaveReducer.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // S10A scoped exact: Shock Wave (351) through the prep33 input builder (liveOamMoves.ts liveShockWaveInputs) and the reducer's geometry-derived
 // timing (docs/next-adapters-prep33.md s0.2 / s3 item 1). Dense windows tools/integration/fixtures/d4a-live/shock-wave-*.json, receipt
@@ -107,7 +108,7 @@ describe("Shock Wave (351) live adapter (scoped exact)", () => {
     const off = generatedCommandAnimationReplay(7, "off", [2], 7);
     const bodies = on.animations.filter((a) => a.moveId === 351 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 266 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(351, 266));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);

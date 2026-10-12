@@ -4,6 +4,7 @@ import { sceneOnHowlView, type SceneOnHowlPresentationState } from "../../src/an
 import { liveMoveAnimationPresentation, liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 const field = {
   player: { species: 287, name: "MIGHTYENA", level: 50, hp: 145, maxHP: 145, gender: "male", status: "none" },
@@ -37,7 +38,7 @@ describe("live Howl battler input", () => {
     expect(bodies).toHaveLength(2);
     for (const body of bodies) {
       expect(body).toMatchObject({ player: "LOUDRED", opponent: "VOLTORB" });
-      expect(body.ages).toEqual(Array.from({ length: 102 }, (_, age) => age));
+      expect(body.ages).toEqual(iu120Ages(336, 102));
     }
     expect(on.boundaries).toHaveLength(3);
     expect(on.boundaries.map(b => b.rules.rulesContext.battlers[0]!.statStages[1]))

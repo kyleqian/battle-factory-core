@@ -28,6 +28,7 @@ import {
 import { generalAnimationPresentationRngKey, isWordsOrderDeferredUnit } from "../src/engine/wordsOrderUnits.ts";
 import { PRESENTATION_RNG_POLICY_V1, presentationRngFromTrace, presentationRngTraceMetadata } from "../src/engine/presentationRngHost.ts";
 import { words46Route } from "../tools/integration/words46RouteScan.ts";
+import { iu120EffectAges } from "./helpers/iu120Rows.ts";
 
 // S10A words46 (docs/next-adapters-prep46.md): the generalized seam-resolved deferred lend after Random2-words order units, against the prep46
 // probe units (tools/integration/fixtures/words46/prep46-units.json: ROM sSpriteOrder free order F0 at every unit edge, RAM-read words; 12 jobs
@@ -423,8 +424,8 @@ describe("words46: ordinary rain route (generated rentals, production seams)", (
     expect(rainFrames.length).toBeGreaterThan(100);
     expect(new Set(rainFrames.map((f) => `${f.moveId}/${f.attacker}`))).toEqual(new Set(["291/1"]));
     // dive70: the opponent's Dive setup (115 rows) and, since the attack body adapter, its attack body (93 rows), both through the marker
-    const ages = (n: number) => Array.from({ length: n }, (_, age) => age);
-    expect(rainFrames.map((f) => f.age)).toEqual([...ages(115), ...ages(93)]);
+    // iu120: each body holds age 0 over its P pre rows (tests/helpers/iu120Rows.ts).
+    expect(rainFrames.map((f) => f.age)).toEqual([...iu120EffectAges(291, 115, "opponent"), ...iu120EffectAges(291, 93, "opponent")]);
     // a different presentation seed: different words, the same logic
     expect(B.run.boundaries).toEqual(A.run.boundaries);
     expect(B.run.state.facilityState).toEqual(A.run.state.facilityState);

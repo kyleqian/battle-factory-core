@@ -10,6 +10,7 @@ import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../..
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // Later bodies of Silver Wind (318, both sides) and Psych Up (244, player): the gate is a known order lend (Overheat 315 keeps
 // `firstBody`). Dense proof: tools/integration/fixtures/later-bodies-bg/*.json (receipt later-bodies-bg-receipt.json).
@@ -131,7 +132,7 @@ describe("live later-body Silver Wind / Psych Up (BG-register history not consum
     const off = generatedCommandAnimationReplay(r.seed, "off", r.slots, 0);
     const body = on.animations[r.index]!;
     expect([body.moveId, body.attacker]).toEqual([318, r.attacker]);
-    expect(body.ages).toEqual(Array.from({ length: r.attacker === 0 ? 193 : 196 }, (_, age) => age));
+    expect(body.ages).toEqual(iu120Ages(318, r.attacker === 0 ? 193 : 196, r.attacker === 0 ? "player" : "opponent"));
     expect(body.adapterActive.every(Boolean)).toBe(r.active);
     expect(body.adapterActive.some(Boolean)).toBe(r.active);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

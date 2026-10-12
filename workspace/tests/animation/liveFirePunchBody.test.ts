@@ -11,6 +11,7 @@ import {
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // r2-gates (docs/next-adapters-prep22.md s0/A): MOVE_FIRE_PUNCH (7) BODY only. The dense framebuffer proofs are
 // tools/integration/fixtures/r2-gates/fp-*.json (receipt r2-gates-firepunch-receipt.json); the burn flames belong to the separate
@@ -120,7 +121,7 @@ describe("live Fire Punch body-only adapter (7)", () => {
     const off = generatedCommandAnimationReplay(r.seed, "off", P(r.seed, r.turns), 0, true, true);
     const body = on.animations[r.index]!;
     expect([body.moveId, body.attacker]).toEqual([7, r.attacker]);
-    expect(body.ages).toEqual(Array.from({ length: 101 }, (_, age) => age));
+    expect(body.ages).toEqual(iu120Ages(7, 101, r.attacker === 0 ? "player" : "opponent"));
     expect(body.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     if (r.burn) expect(on.semanticEvents.some(e => /burn/i.test(JSON.stringify(e.event)))).toBe(true);

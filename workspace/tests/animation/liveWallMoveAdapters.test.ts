@@ -8,6 +8,7 @@ import {
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
 import { prepareLiveMoveSpriteAllocator } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages, iu120Extra } from "../helpers/iu120Rows.ts";
 
 /** Live age offsets are asserted through the dense proof; durations pin windows. */
 const moves = [
@@ -67,8 +68,9 @@ describe("wall-family live adapters", () => {
     const duration = moves.find(row => row.id === moveId)!.duration;
     const body = on.animations.filter(animation => animation.moveId === moveId);
     expect(body).toHaveLength(1);
-    expect(body[0]!.ages).toEqual(Array.from({ length: duration }, (_, age) => age));
-    expect(body[0]!.adapterActive).toEqual(Array(duration).fill(exact));
+    const side = body[0]!.attacker === 0 ? "player" : "opponent";
+    expect(body[0]!.ages).toEqual(iu120Ages(moveId, duration, side));
+    expect(body[0]!.adapterActive).toEqual(Array(duration + iu120Extra(moveId, side)).fill(exact));
     const command = on.commands.find(row => row.type === "move-animation"
       && (row.command as { animation?: { moveId: number } }).animation?.moveId === moveId)!;
     expect(command.spriteInputHistoryKnown === true).toBe(exact);

@@ -15,6 +15,7 @@ import {
 import { calculateHpStat } from "../../src/engine/stats.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import dodrioScenario from "../../tools/battle-lab/mechanic-drill-peck-player-dodrio-opponent-onix.json" with { type: "json" };
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 function field(attacker: "FEAROW" | "DODRIO", maxHP: number): BattleResolutionDisplayedField {
   return {
@@ -131,7 +132,7 @@ describe("live Drill Peck adapter", () => {
       ["FEAROW", "SLAKING"],
     ]);
     for (const body of bodies) {
-      expect(body.ages).toEqual(Array.from({ length: 91 }, (_, age) => age));
+      expect(body.ages).toEqual(iu120Ages(65, 91));
     }
     expect(on.requests.filter(moveRequest => moveRequest.moveId === 65)).toHaveLength(2);
     expect(on.boundaries).toHaveLength(4);

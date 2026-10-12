@@ -12,6 +12,7 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "../../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep8.md: the ten allocator-plan-v2 moves. Live durations run from the activation frame to the first
 // inactive script row (window start = activation, row 0 for all ten); every adapter is gated on the lent tracked order.
@@ -172,7 +173,7 @@ describe("live prep8 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.move], r.streak, r.stall ?? false);
     const off = generatedCommandAnimationReplay(r.seed, "off", [r.move], r.streak, r.stall ?? false);
     const body = on.animations.find(a => a.moveId === c.id && a.attacker === c.side);
-    expect(body?.ages).toEqual(Array.from({ length: c.expected }, (_, age) => age));
+    expect(body?.ages).toEqual(iu120Ages(c.id, c.expected, c.side === 0 ? "player" : "opponent"));
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     // The body is the battle's first (or, after Tackle/Peck, a known-order later) body: the production host lent the order.
     const bodyRow = on.commands.find(row => row.type === "move-animation"

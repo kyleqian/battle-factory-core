@@ -13,6 +13,7 @@ import { batonPassAtAge } from "../../src/animation/batonPass.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // Baton Pass (226) live body adapter (docs/next-adapters-prep27.md s0.1 / s4). Dense proofs: tools/integration/fixtures/baton-endeavor-live-receipt.json.
 const DIR = "tools/integration/fixtures/baton-endeavor-live";
@@ -113,7 +114,7 @@ describe("live Baton Pass (226) body adapter", () => {
       const bodies = on.animations.filter((a) => a.moveId === 226 && a.attacker === 0);
       expect(bodies).toHaveLength(1);
       expect(bodies[0]!.player).toBe(route.species);
-      expect(bodies[0]!.ages).toEqual(Array.from({ length: 53 }, (_, age) => age));
+      expect(bodies[0]!.ages).toEqual(iu120Ages(226, 53));
       expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
       expect(sprite.length).toBeGreaterThan(0);
       expect(sprite.every((v) => v === false)).toBe(true);

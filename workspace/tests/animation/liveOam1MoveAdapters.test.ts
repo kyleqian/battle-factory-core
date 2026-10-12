@@ -15,6 +15,7 @@ import { sortGbaSpriteOrder } from "../../src/animation/gbaObjCompositor.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
+import { iu120Ages, iu120Extra } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep20.md + oam1: the production hardware-OAM provider (src/engine/liveMoveOamAssembler.ts). Dense
 // framebuffer proofs: tools/integration/fixtures/oam1-live/*.json (receipt oam1-live-adapter-receipt.json).
@@ -105,8 +106,8 @@ describe("oam1 production hardware-OAM provider: MOVE_WILL_O_WISP", () => {
     const on = generatedCommandAnimationReplay(82, "on", [1], 7);
     const off = generatedCommandAnimationReplay(82, "off", [1], 7);
     const bodies = on.animations.filter(a => a.moveId === 261 && a.attacker === 0);
-    expect(bodies.map(b => b.ages.length)).toEqual([214]);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 214 }, (_, age) => age));
+    expect(bodies.map(b => b.ages.length)).toEqual([214 + iu120Extra(261)]);
+    expect(bodies[0]!.ages).toEqual(iu120Ages(261, 214));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);
@@ -155,7 +156,7 @@ describe("oam1 production hardware-OAM provider: MOVE_PURSUIT", () => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
     const bodies = on.animations.filter(a => a.moveId === 228 && a.attacker === 0);
-    expect(bodies.map(b => b.ages.length)).toEqual([103]);
+    expect(bodies.map(b => b.ages.length)).toEqual([103 + iu120Extra(228)]);
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(off.boundaries).toHaveLength(on.boundaries.length);
@@ -197,7 +198,7 @@ describe("oam1 production hardware-OAM provider: MOVE_FURY_CUTTER (counter-1 bod
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);
     const bodies = on.animations.filter(a => a.moveId === 210 && a.attacker === 0);
-    expect(bodies.map(b => b.ages.length)).toEqual([43]);
+    expect(bodies.map(b => b.ages.length)).toEqual([43 + iu120Extra(210)]);
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(off.boundaries).toHaveLength(on.boundaries.length);

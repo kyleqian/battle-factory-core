@@ -1,0 +1,1794 @@
+{
+ "tree": "the iu120 fold 008c485a4 (production; tests at 3cad94b88, before any pin moved)",
+ "command": "npm test -- --maxWorkers=4 --shard=1/2 and --shard=2/2",
+ "totals": [
+  "Test Files  40 failed | 778 passed | 22 skipped (840)",
+  "Tests  169 failed | 6864 passed | 119 skipped (7152)",
+  "Test Files  28 failed | 790 passed | 22 skipped (840)",
+  "Tests  114 failed | 6354 passed | 104 skipped (6572)"
+ ],
+ "pinCount": 283,
+ "files": 68,
+ "byKind": {
+  "count": 4,
+  "row / age sequence": 267,
+  "row count (a generated Scene ON queue's presented rows: +5)": 1,
+  "row count (Twineedle hits: `hits.every(a => a.ages.length === 37 && ...)`)": 1,
+  "row count (Fury Swipes bodies: `ages.length` per body)": 1,
+  "row count (`digs.filter((b) => b.ages.length === 195)` finds no later Dig body: its rows moved to 195 + P + T)": 1,
+  "row count (land97's Bulk Up route b154: 104 + N 4 rows, + P 3 + T 2)": 1,
+  "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)": 5,
+  "row count (shp116's Bite route b38: 26 + N 10 rows, + P 3)": 1,
+  "row count (shp116's preActivationRow rows: the activation row + the P 3 pre rows showing it)": 1
+ },
+ "byFile": {
+  "tests/animation/liveWallMoveAdapters.test.ts": 15,
+  "tests/animation/livePrep8MoveAdapters.test.ts": 12,
+  "tests/animation/liveFaithfulTimingAdapters.test.ts": 11,
+  "tests/animation/liveOrderConsumerMoveAdapters.test.ts": 11,
+  "tests/animation/livePrep11MoveAdapters.test.ts": 9,
+  "tests/animation/livePrep6MoveAdapters.test.ts": 8,
+  "tests/animation/livePrep7MoveAdapters.test.ts": 8,
+  "tests/animation/liveProfileMoveAdapters.test.ts": 8,
+  "tests/animation/liveAnchor3MoveAdapters.test.ts": 8,
+  "tests/animation/livePrep2MoveAdapters.test.ts": 8,
+  "tests/animation/liveQ2Adapters.test.ts": 8,
+  "tests/animation/liveAnchor2MoveAdapters.test.ts": 7,
+  "tests/animation/liveAnchorMoveAdapters.test.ts": 7,
+  "tests/animation/livePrep16MoveAdapters.test.ts": 7,
+  "tests/animation/liveAnchor4MoveAdapters.test.ts": 6,
+  "tests/animation/liveFieldfxMoveAdapters.test.ts": 6,
+  "tests/animation/liveHBufferS1MoveAdapters.test.ts": 6,
+  "tests/animation/livePrep10MoveAdapters.test.ts": 6,
+  "tests/animation/livePrep5MoveAdapters.test.ts": 6,
+  "tests/animation/livePrep9MoveAdapters.test.ts": 6,
+  "tests/animation/liveR2GatesRoutes.test.ts": 6,
+  "tests/sc106StatsChangeCommand.test.ts": 6,
+  "tests/animation/liveFirePunchBody.test.ts": 5,
+  "tests/animation/liveOam1MoveAdapters.test.ts": 5,
+  "tests/animation/livePhysical2cMoveAdapters.test.ts": 5,
+  "tests/animation/liveRandom2R1MoveAdapters.test.ts": 5,
+  "tests/playableContactAnimationLifecycle.test.ts": 4,
+  "tests/animation/liveNext5MoveAdapters.test.ts": 4,
+  "tests/animation/livePhysical2bMoveAdapters.test.ts": 4,
+  "tests/animation/livePrep13MoveAdapters.test.ts": 4,
+  "tests/animation/liveSelectorsMoveAdapters.test.ts": 4,
+  "tests/animation/livePhysical2aMoveAdapters.test.ts": 4,
+  "tests/animation/liveRoarWhirlwindMoveAdapters.test.ts": 4,
+  "tests/animation/liveGlowMoveAdapters.test.ts": 3,
+  "tests/animation/liveLaterBodiesBg.test.ts": 3,
+  "tests/animation/liveRandom2R4MoveAdapters.test.ts": 3,
+  "tests/animation/liveEndeavorAdapter.test.ts": 3,
+  "tests/animation/liveMultihitMoveAdapters.test.ts": 3,
+  "tests/animation/liveSkillSwapFlatterAdapters.test.ts": 3,
+  "tests/playableAnimationIntegration.test.ts": 2,
+  "tests/animation/liveBatonPassAdapter.test.ts": 2,
+  "tests/animation/liveDigAdapter.test.ts": 2,
+  "tests/animation/liveLsbzTiming.test.ts": 2,
+  "tests/animation/liveRandom2R5MoveAdapters.test.ts": 2,
+  "tests/land97IdleLeadRows.test.ts": 2,
+  "tests/shp116ShadowLeadRow0.test.ts": 2,
+  "tests/animation/liveCurseStatsAdapter.test.ts": 2,
+  "tests/animation/liveExtremeSpeedMementoAdapters.test.ts": 2,
+  "tests/animation/liveFlyBounce.test.ts": 2,
+  "tests/animation/liveIceBallAdapter.test.ts": 2,
+  "tests/animation/livePrep29Adapters.test.ts": 2,
+  "tests/animation/liveReturnAdapter.test.ts": 2,
+  "tests/battleResolutionPresentation.test.ts": 1,
+  "tests/playableAnimationLifecycle.test.ts": 1,
+  "tests/wordsOrderDeferredLend.test.ts": 1,
+  "tests/animation/liveDiveAttackAdapter.test.ts": 1,
+  "tests/animation/liveDiveSetupAdapter.test.ts": 1,
+  "tests/animation/liveDrillPeckAdapter.test.ts": 1,
+  "tests/animation/livePhysicalMoveAdapters.test.ts": 1,
+  "tests/animation/liveShockWaveAdapter.test.ts": 1,
+  "tests/animation/liveSpitUpAdapter.test.ts": 1,
+  "tests/animation/liveSupportMoveAdapters.test.ts": 1,
+  "tests/substituteDollDefenderLive.test.ts": 1,
+  "tests/animation/liveHowlAdapter.test.ts": 1,
+  "tests/animation/liveSheerColdAndFix150.test.ts": 1,
+  "tests/animation/liveStatusMoveAdapters.test.ts": 1,
+  "tests/animation/liveSubstituteBodyAdapter.test.ts": 1,
+  "tests/animation/liveSuperpowerAdapter.test.ts": 1
+ },
+ "pins": [
+  {
+   "file": "tests/battleResolutionPresentation.test.ts",
+   "test": "battle resolution presentation receipt ownership > preserves controller MOVE_ANIMATION parameters and delegates its duration",
+   "assertion": "AssertionError: expected 53 to be 48 // Object.is equality",
+   "kind": "count"
+  },
+  {
+   "file": "tests/playableAnimationIntegration.test.ts",
+   "test": "ordinary playable animation queue > renders both opponent damaging and no-hit moves from generated command input through cleanup",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(108) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(105) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/playableAnimationIntegration.test.ts",
+   "test": "ordinary playable animation queue > plays Light Screen from six generated rentals, preserves text/self-target, and resumes after repeat failure",
+   "assertion": "AssertionError: expected [ Array(91) ] to deeply equal [ Array(88) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/playableAnimationLifecycle.test.ts",
+   "test": "generated Scene ON queue lifecycle and rule isolation > uses the incoming displayed species for the next live effect after an ordinary party-menu switch",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(266) ] to have a length of 270 but got 275",
+   "kind": "row count (a generated Scene ON queue's presented rows: +5)"
+  },
+  {
+   "file": "tests/playableContactAnimationLifecycle.test.ts",
+   "test": "ordinary contact animation command lifecycle > renders each Twineedle hit, then KO/replacement before the next target's hits",
+   "assertion": "AssertionError: expected false to be true // Object.is equality",
+   "kind": "row count (Twineedle hits: `hits.every(a => a.ages.length === 37 && ...)`)"
+  },
+  {
+   "file": "tests/playableContactAnimationLifecycle.test.ts",
+   "test": "ordinary contact animation command lifecycle > completes all three Fury Swipes bodies and preserves the remaining-hit counters",
+   "assertion": "AssertionError: expected false to be true // Object.is equality",
+   "kind": "row count (Fury Swipes bodies: `ages.length` per body)"
+  },
+  {
+   "file": "tests/playableContactAnimationLifecycle.test.ts",
+   "test": "ordinary contact animation command lifecycle > restarts 242 on a subsequent ordinary command with current field art",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(138) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(133) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/playableContactAnimationLifecycle.test.ts",
+   "test": "ordinary contact animation command lifecycle > restarts 163 on a subsequent ordinary command with current field art",
+   "assertion": "AssertionError: expected [ Array(51) ] to deeply equal [ Array(46) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/wordsOrderDeferredLend.test.ts",
+   "test": "words46: ordinary rain route (generated rentals, production seams) > live through the rain marker; logic / RNG identical across presentation seeds and Scene ON/OFF; replay and export round trip reproduce the frames",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(206) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(199) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor2MoveAdapters.test.ts",
+   "test": "live anchor2 move adapters > completes ordinary 'BUBBLE_BEAM' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(235) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(230) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor2MoveAdapters.test.ts",
+   "test": "live anchor2 move adapters > completes ordinary 'HYDRO_PUMP' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(137) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(132) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor2MoveAdapters.test.ts",
+   "test": "live anchor2 move adapters > completes ordinary 'MUD_SHOT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(141) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(136) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor2MoveAdapters.test.ts",
+   "test": "live anchor2 move adapters > completes ordinary 'CROSS_CHOP' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(93) ] to deeply equal [ Array(88) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor2MoveAdapters.test.ts",
+   "test": "live anchor2 move adapters > completes ordinary 'DETECT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(106) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor2MoveAdapters.test.ts",
+   "test": "live anchor2 move adapters > completes ordinary 'TAIL_GLOW' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(200) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(195) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor2MoveAdapters.test.ts",
+   "test": "live anchor2 move adapters > completes ordinary 'TORMENT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(173) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(168) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor4MoveAdapters.test.ts",
+   "test": "live anchor4 move adapters > completes ordinary 'EARTHQUAKE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(192) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(189) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor4MoveAdapters.test.ts",
+   "test": "live anchor4 move adapters > completes ordinary 'FISSURE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(250) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(245) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor4MoveAdapters.test.ts",
+   "test": "live anchor4 move adapters > completes ordinary 'CRABHAMMER' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(101) ] to deeply equal [ Array(105) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor4MoveAdapters.test.ts",
+   "test": "live anchor4 move adapters > completes ordinary 'MAGICAL_LEAF' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(178) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(173) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor4MoveAdapters.test.ts",
+   "test": "live anchor4 move adapters > completes ordinary 'PSYBEAM' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(156) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(151) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor4MoveAdapters.test.ts",
+   "test": "live anchor4 move adapters > completes ordinary 'AMNESIA' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(212) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(207) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveBatonPassAdapter.test.ts",
+   "test": "live Baton Pass (226) body adapter > route seed 71 / streak 0 (AIPOM): adapter active every age, party screen answered, next prompt, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(58) ] to deeply equal [ Array(53) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveBatonPassAdapter.test.ts",
+   "test": "live Baton Pass (226) body adapter > route seed 2 / streak 7 (NINJASK): adapter active every age, party screen answered, next prompt, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(58) ] to deeply equal [ Array(53) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveDigAdapter.test.ts",
+   "test": "live Dig ordinary route > seed 13 / streak 7 / slot 2 AZUMARILL: both bodies active every age, attacker hidden between turns, prompt reached, ON/OFF parity",
+   "assertion": "AssertionError: expected [ 198, 71 ] to deeply equal [ 195, 68 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveDigAdapter.test.ts",
+   "test": "live Dig ordinary route > seed 9 / streak 7 / slot 1 POLITOED: a later Dig setup (not the battle's first body) is live every age (later48); ON/OFF parity",
+   "assertion": "AssertionError: expected 0 to be greater than 0",
+   "kind": "row count (`digs.filter((b) => b.ages.length === 195)` finds no later Dig body: its rows moved to 195 + P + T)"
+  },
+  {
+   "file": "tests/animation/liveDiveAttackAdapter.test.ts",
+   "test": "dive70: Dive 291 attack body live adapter > ordinary route seed 111 slot 0: both player Dive attacks live at every age on 56 surrogate words; seeds change words not logic; export replay reproduces the frames",
+   "assertion": "AssertionError: expected [ Array(96) ] to deeply equal [ Array(93) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveDiveSetupAdapter.test.ts",
+   "test": "S10A Dive (291) setup body: faithful timing with D3 > ordinary route seed 111 slot 0: setup live every age, attacker hidden across the gap, attack live (dive70); seeds / Scene OFF keep gameplay",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(114) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(110) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveDrillPeckAdapter.test.ts",
+   "test": "live Drill Peck adapter > repeats complete bodies after ordinary switching and preserves ON/OFF state and RNG",
+   "assertion": "AssertionError: expected [ Array(96) ] to deeply equal [ Array(91) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFieldfxMoveAdapters.test.ts",
+   "test": "live fieldfx move adapters > completes ordinary 'FLAME_WHEEL' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(166) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(161) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFieldfxMoveAdapters.test.ts",
+   "test": "live fieldfx move adapters > completes ordinary 'FIRE_SPIN' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(100) ] to deeply equal [ Array(104) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFieldfxMoveAdapters.test.ts",
+   "test": "live fieldfx move adapters > completes ordinary 'HEAT_WAVE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(164) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(159) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFieldfxMoveAdapters.test.ts",
+   "test": "live fieldfx move adapters > completes ordinary 'SANDSTORM' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(164) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(159) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFieldfxMoveAdapters.test.ts",
+   "test": "live fieldfx move adapters > completes ordinary 'SONIC_BOOM' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(57) ] to deeply equal [ Array(52) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFieldfxMoveAdapters.test.ts",
+   "test": "live fieldfx move adapters > completes ordinary 'BLOCK' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(137) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(132) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFirePunchBody.test.ts",
+   "test": "live Fire Punch body-only adapter (7) > ordinary route '70 player Magby first body': active every age, prompt reached, ON/OFF rules/RNG equal",
+   "assertion": "AssertionError: expected [ Array(104) ] to deeply equal [ Array(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFirePunchBody.test.ts",
+   "test": "live Fire Punch body-only adapter (7) > ordinary route '180 player Magby first body': active every age, prompt reached, ON/OFF rules/RNG equal",
+   "assertion": "AssertionError: expected [ Array(104) ] to deeply equal [ Array(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFirePunchBody.test.ts",
+   "test": "live Fire Punch body-only adapter (7) > ordinary route '65 foe Magby after Confuse Ray': active every age, prompt reached, ON/OFF rules/RNG equal",
+   "assertion": "AssertionError: expected [ Array(104) ] to deeply equal [ Array(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFirePunchBody.test.ts",
+   "test": "live Fire Punch body-only adapter (7) > ordinary route '389 foe Magby after Confuse Ray + Kno\u2026': active every age, prompt reached, ON/OFF rules/RNG equal",
+   "assertion": "AssertionError: expected [ Array(104) ] to deeply equal [ Array(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFirePunchBody.test.ts",
+   "test": "live Fire Punch body-only adapter (7) > ordinary route '780 player Magby burn route': active every age, prompt reached, ON/OFF rules/RNG equal",
+   "assertion": "AssertionError: expected [ Array(104) ] to deeply equal [ Array(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveGlowMoveAdapters.test.ts",
+   "test": "live glow move adapters > completes ordinary 'FLASH' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(69) ] to deeply equal [ Array(64) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveGlowMoveAdapters.test.ts",
+   "test": "live glow move adapters > completes ordinary 'ROLE_PLAY' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(143) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(138) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveGlowMoveAdapters.test.ts",
+   "test": "live glow move adapters > completes ordinary 'SPITE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(217) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(212) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveHBufferS1MoveAdapters.test.ts",
+   "test": "live H_BUFFER S1 move adapters > completes ordinary 'MEAN_LOOK' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(167) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(162) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveHBufferS1MoveAdapters.test.ts",
+   "test": "live H_BUFFER S1 move adapters > completes ordinary 'SMELLING_SALT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(117) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(112) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveHBufferS1MoveAdapters.test.ts",
+   "test": "live H_BUFFER S1 move adapters > completes ordinary 'DEFENSE_CURL' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(105) ] to deeply equal [ Array(100) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveHBufferS1MoveAdapters.test.ts",
+   "test": "live H_BUFFER S1 move adapters > completes ordinary 'INGRAIN' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(160) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(155) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveHBufferS1MoveAdapters.test.ts",
+   "test": "live H_BUFFER S1 move adapters > completes ordinary 'WRAP' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(43) ] to deeply equal [ Array(38) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveHBufferS1MoveAdapters.test.ts",
+   "test": "live H_BUFFER S1 move adapters > completes ordinary 'DRAGON_BREATH' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(92) ] to deeply equal [ Array(89) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveLaterBodiesBg.test.ts",
+   "test": "live later-body Silver Wind / Psych Up (BG-register history not consumed) > ordinary route '106/0 player SILVER_WIND after foe Fu\u2026': ON/OFF rules and RNG unchanged",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(187) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(184) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveLaterBodiesBg.test.ts",
+   "test": "live later-body Silver Wind / Psych Up (BG-register history not consumed) > ordinary route '9/0 player SILVER_WIND after foe Sand\u2026': ON/OFF rules and RNG unchanged",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(187) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(184) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveLaterBodiesBg.test.ts",
+   "test": "live later-body Silver Wind / Psych Up (BG-register history not consumed) > ordinary route '160/0 foe SILVER_WIND after the playe\u2026': ON/OFF rules and RNG unchanged",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(190) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(187) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveLsbzTiming.test.ts",
+   "test": "lsbz ordinary routes > route LIGHT_SCREEN 81/9 PILOSWINE (opponent): body live on every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(91) ] to deeply equal [ Array(88) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveLsbzTiming.test.ts",
+   "test": "lsbz ordinary routes > route BLIZZARD 87/26 WALREIN -> JYNX (opponent, impact 198): body live on every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(356) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(353) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveNext5MoveAdapters.test.ts",
+   "test": "live next5 move adapters > completes ordinary 'SCARY_FACE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(188) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(185) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveNext5MoveAdapters.test.ts",
+   "test": "live next5 move adapters > completes ordinary 'GLARE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(207) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(204) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveNext5MoveAdapters.test.ts",
+   "test": "live next5 move adapters > completes ordinary 'TEETER_DANCE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(163) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(160) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveNext5MoveAdapters.test.ts",
+   "test": "live next5 move adapters > completes ordinary 'DIZZY_PUNCH' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(85) ] to deeply equal [ Array(82) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOam1MoveAdapters.test.ts",
+   "test": "oam1 production hardware-OAM provider: MOVE_WILL_O_WISP > route 82/7 BANETTE: adapter active every age, prompt reached; Scene ON/OFF boundaries, RNG and rules identical",
+   "assertion": "AssertionError: expected [ 217 ] to deeply equal [ 214 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOam1MoveAdapters.test.ts",
+   "test": "oam1 production hardware-OAM provider: MOVE_PURSUIT > route 52/0 slot 1: active every age, prompt reached, ON/OFF parity",
+   "assertion": "AssertionError: expected [ 106 ] to deeply equal [ 103 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOam1MoveAdapters.test.ts",
+   "test": "oam1 production hardware-OAM provider: MOVE_PURSUIT > route 38/14 slot 2: active every age, prompt reached, ON/OFF parity",
+   "assertion": "AssertionError: expected [ 106 ] to deeply equal [ 103 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOam1MoveAdapters.test.ts",
+   "test": "oam1 production hardware-OAM provider: MOVE_FURY_CUTTER (counter-1 body) > route 58/0 slot 0: active every age, prompt reached, ON/OFF parity",
+   "assertion": "AssertionError: expected [ 46 ] to deeply equal [ 43 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOam1MoveAdapters.test.ts",
+   "test": "oam1 production hardware-OAM provider: MOVE_FURY_CUTTER (counter-1 body) > route 60/0 slot 0: active every age, prompt reached, ON/OFF parity",
+   "assertion": "AssertionError: expected [ 46 ] to deeply equal [ 43 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2bMoveAdapters.test.ts",
+   "test": "live physical2b move adapters > reaches and completes ordinary 'PIN_MISSILE' requests with ON/OFF state and RNG parity",
+   "assertion": "AssertionError: expected [ Array(98) ] to deeply equal [ Array(93) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2bMoveAdapters.test.ts",
+   "test": "live physical2b move adapters > reaches and completes ordinary 'RAZOR_LEAF' requests with ON/OFF state and RNG parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(146) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(143) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2bMoveAdapters.test.ts",
+   "test": "live physical2b move adapters > reaches and completes ordinary 'SECRET_POWER' requests with ON/OFF state and RNG parity",
+   "assertion": "AssertionError: expected [ Array(107) ] to deeply equal [ Array(102) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2bMoveAdapters.test.ts",
+   "test": "live physical2b move adapters > reaches and completes ordinary 'NEEDLE_ARM' requests with ON/OFF state and RNG parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(104) ] to deeply equal [ Array(108) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2cMoveAdapters.test.ts",
+   "test": "live physical2c move adapters > completes ordinary 'GUILLOTINE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(161) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(156) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2cMoveAdapters.test.ts",
+   "test": "live physical2c move adapters > completes ordinary 'COUNTER' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(93) ] to deeply equal [ Array(88) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2cMoveAdapters.test.ts",
+   "test": "live physical2c move adapters > completes ordinary 'SUPER_FANG' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(196) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(191) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2cMoveAdapters.test.ts",
+   "test": "live physical2c move adapters > completes ordinary 'COVET' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(109) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(106) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2cMoveAdapters.test.ts",
+   "test": "live physical2c move adapters > restarts Super Fang and Covet through complete fresh bodies on consecutive commands",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(196) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(191) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysicalMoveAdapters.test.ts",
+   "test": "live physical move adapters > repeats LOW_KICK from ordinary generated command input through cleanup",
+   "assertion": "AssertionError: expected [ Array(38) ] to deeply equal [ Array(33) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep10MoveAdapters.test.ts",
+   "test": "live prep10 move adapters > completes ordinary 'MAGNITUDE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 177 ] to deeply equal [ 174 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep10MoveAdapters.test.ts",
+   "test": "live prep10 move adapters > completes ordinary 'REVERSAL' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 176 ] to deeply equal [ 173 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep10MoveAdapters.test.ts",
+   "test": "live prep10 move adapters > completes ordinary 'REVERSAL (second body, 40)' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 176 ] to deeply equal [ 173 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep10MoveAdapters.test.ts",
+   "test": "live prep10 move adapters > completes ordinary 'PAIN_SPLIT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 84 ] to deeply equal [ 81 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep10MoveAdapters.test.ts",
+   "test": "live prep10 move adapters > completes ordinary 'ROCK_BLAST' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 92, 92, 92 ] to deeply equal [ 89, 89, 89 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep10MoveAdapters.test.ts",
+   "test": "live prep10 move adapters > completes ordinary 'RAZOR_WIND' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 48, 75 ] to deeply equal [ 45, 72 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep13MoveAdapters.test.ts",
+   "test": "live prep13 move adapters > completes ordinary 'ICE_BEAM 0/14 DELCATTY' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 206 ] to deeply equal [ 203 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep13MoveAdapters.test.ts",
+   "test": "live prep13 move adapters > completes ordinary 'ICE_BEAM 1/14 DUNSPARCE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 206 ] to deeply equal [ 203 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep13MoveAdapters.test.ts",
+   "test": "live prep13 move adapters > completes ordinary 'WATER_SPOUT 83/14 WAILMER' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 266 ] to deeply equal [ 263 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep13MoveAdapters.test.ts",
+   "test": "live prep13 Hyper Beam (faithful random) > route 10/28 AERODACTYL: adapter active every age; logical state identical across presentation seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(275) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(271) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep5MoveAdapters.test.ts",
+   "test": "live prep5 move adapters > completes ordinary 'MIST_BALL' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(207) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(204) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep5MoveAdapters.test.ts",
+   "test": "live prep5 move adapters > completes ordinary 'AROMATHERAPY' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(396) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(391) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep5MoveAdapters.test.ts",
+   "test": "live prep5 move adapters > completes ordinary 'FOLLOW_ME' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(181) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(176) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep5MoveAdapters.test.ts",
+   "test": "live prep5 move adapters > completes ordinary 'METRONOME' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(123) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(118) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep5MoveAdapters.test.ts",
+   "test": "live prep5 move adapters > completes ordinary 'TAUNT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(131) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(126) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep5MoveAdapters.test.ts",
+   "test": "live prep5 move adapters > completes ordinary 'BELLY_DRUM' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(106) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep6MoveAdapters.test.ts",
+   "test": "live prep6 move adapters > completes ordinary 'ROCK_TOMB' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(170) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(165) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep6MoveAdapters.test.ts",
+   "test": "live prep6 move adapters > completes ordinary 'SAFEGUARD' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(76) ] to deeply equal [ Array(71) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep6MoveAdapters.test.ts",
+   "test": "live prep6 move adapters > completes ordinary 'SWEET_SCENT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(171) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(166) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep6MoveAdapters.test.ts",
+   "test": "live prep6 move adapters > completes ordinary 'SELF_DESTRUCT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(111) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(108) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep6MoveAdapters.test.ts",
+   "test": "live prep6 move adapters > completes ordinary 'KNOCK_OFF' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(57) ] to deeply equal [ Array(54) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep6MoveAdapters.test.ts",
+   "test": "live prep6 move adapters > completes ordinary Swallow after 1 Stockpile and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(157) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(154) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep6MoveAdapters.test.ts",
+   "test": "live prep6 move adapters > completes ordinary Swallow after 2 Stockpile and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(172) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(169) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep6MoveAdapters.test.ts",
+   "test": "live prep6 move adapters > completes ordinary Swallow after 3 Stockpile and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(187) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(184) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep7MoveAdapters.test.ts",
+   "test": "live prep7 move adapters > completes ordinary 'AERIAL_ACE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(55) ] to deeply equal [ Array(50) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep7MoveAdapters.test.ts",
+   "test": "live prep7 move adapters > completes ordinary 'QUICK_ATTACK' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(38) ] to deeply equal [ Array(33) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep7MoveAdapters.test.ts",
+   "test": "live prep7 move adapters > completes ordinary 'FAKE_TEARS' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(91) ] to deeply equal [ Array(88) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep7MoveAdapters.test.ts",
+   "test": "live prep7 move adapters > completes ordinary 'SLEEP_TALK' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(180) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(177) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep7MoveAdapters.test.ts",
+   "test": "live prep7 move adapters > completes ordinary 'ROCK_SLIDE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(132) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(129) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep7MoveAdapters.test.ts",
+   "test": "live prep7 move adapters > completes ordinary 'FIRE_BLAST' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(193) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(188) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep7MoveAdapters.test.ts",
+   "test": "live prep7 move adapters > completes ordinary 'DRAGON_DANCE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(138) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(133) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep7MoveAdapters.test.ts",
+   "test": "live prep7 move adapters > completes ordinary 'ICE_PUNCH' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(178) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(175) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'SWIFT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(83) ] to deeply equal [ Array(78) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'TRICK' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(221) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(216) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'FRUSTRATION' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(225) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(220) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'FRUSTRATION (opponent)' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(225) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(220) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'SEISMIC_TOSS' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(224) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(219) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'HORN_DRILL' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(189) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(184) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'AURORA_BEAM' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(212) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(207) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'UPROAR' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(78) ] to deeply equal [ Array(73) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'THUNDERBOLT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(233) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(228) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'STOCKPILE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(104) ] to deeply equal [ Array(99) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'ZAP_CANNON' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(108) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(103) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep8MoveAdapters.test.ts",
+   "test": "live prep8 move adapters > completes ordinary 'SWIFT (opponent)' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(85) ] to deeply equal [ Array(80) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep9MoveAdapters.test.ts",
+   "test": "live prep9 move adapters > completes ordinary 'GIGA_DRAIN' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(224) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(221) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep9MoveAdapters.test.ts",
+   "test": "live prep9 move adapters > completes ordinary 'SUNNY_DAY' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(152) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(149) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep9MoveAdapters.test.ts",
+   "test": "live prep9 move adapters > completes ordinary 'MEGA_DRAIN' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(212) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(209) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep9MoveAdapters.test.ts",
+   "test": "live prep9 move adapters > completes ordinary 'ABSORB' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(198) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(195) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep9MoveAdapters.test.ts",
+   "test": "live prep9 move adapters > completes ordinary 'DREAM_EATER' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(260) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(257) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep9MoveAdapters.test.ts",
+   "test": "live prep9 move adapters > completes ordinary 'FEATHER_DANCE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(162) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(159) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveProfileMoveAdapters.test.ts",
+   "test": "live r3 profile ordinary routes > route SPIKES 17/21 FORRETRESS: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(107) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(104) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveProfileMoveAdapters.test.ts",
+   "test": "live r3 profile ordinary routes > route SPIKES 75/7 QWILFISH: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(107) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(104) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveProfileMoveAdapters.test.ts",
+   "test": "live r3 profile ordinary routes > route OCTAZOOKA 116/7 OCTILLERY: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(82) ] to deeply equal [ Array(79) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveProfileMoveAdapters.test.ts",
+   "test": "live r3 profile ordinary routes > route OCTAZOOKA 239/7 OCTILLERY: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(82) ] to deeply equal [ Array(79) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveProfileMoveAdapters.test.ts",
+   "test": "live r3 profile ordinary routes > route LOVELY_KISS 11/21 JYNX (faithful-random): active every age with surrogate words; two presentation seeds give different words and identical boundaries / RNG / facility state; Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(147) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(143) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveProfileMoveAdapters.test.ts",
+   "test": "live r3 profile ordinary routes > route LOVELY_KISS 11/35 JYNX (faithful-random): active every age with surrogate words; two presentation seeds give different words and identical boundaries / RNG / facility state; Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(147) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(143) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveProfileMoveAdapters.test.ts",
+   "test": "live r3 Signal Beam (exact, first body) > route SIGNAL_BEAM 8/14 VENOMOTH: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(139) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(136) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveProfileMoveAdapters.test.ts",
+   "test": "live r3 Signal Beam (exact, first body) > route SIGNAL_BEAM 10/0 YANMA: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(139) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(136) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveR2GatesRoutes.test.ts",
+   "test": "r2-gates ordinary routes (later Overheat, opponent Psych Up) > route 315 seed 43 streak 35 index 1 ('BLAZIKEN vs SNORLAX'): ON/OFF rules and RNG unchanged",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(224) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(221) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveR2GatesRoutes.test.ts",
+   "test": "r2-gates ordinary routes (later Overheat, opponent Psych Up) > route 315 seed 162 streak 14 index 1 ('TORKOAL vs PERSIAN'): ON/OFF rules and RNG unchanged",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(224) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(221) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveR2GatesRoutes.test.ts",
+   "test": "r2-gates ordinary routes (later Overheat, opponent Psych Up) > route 315 seed 175 streak 35 index 1 ('RAPIDASH vs ESPEON'): ON/OFF rules and RNG unchanged",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(224) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(221) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveR2GatesRoutes.test.ts",
+   "test": "r2-gates ordinary routes (later Overheat, opponent Psych Up) > route 315 seed 143 streak 28 index 1 ('GRANBULL vs JOLTEON'): ON/OFF rules and RNG unchanged",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(224) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(221) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveR2GatesRoutes.test.ts",
+   "test": "r2-gates ordinary routes (later Overheat, opponent Psych Up) > route 244 seed 336 streak 7 index +0 ('SNEASEL vs JUMPLUFF'): ON/OFF rules and RNG unchanged",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(173) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(170) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveR2GatesRoutes.test.ts",
+   "test": "r2-gates ordinary routes (later Overheat, opponent Psych Up) > route 244 seed 713 streak 7 index +0 ('PLUSLE vs JUMPLUFF'): ON/OFF rules and RNG unchanged",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(173) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(170) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R1MoveAdapters.test.ts",
+   "test": "faithful-random live adapters: surrogate ordinary routes > 'double-kick': route reaches every body, live at every age, surrogate words; logic/RNG unchanged across seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ Array(39) ] to deeply equal [ Array(36) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R1MoveAdapters.test.ts",
+   "test": "faithful-random live adapters: surrogate ordinary routes > 'astonish': route reaches every body, live at every age, surrogate words; logic/RNG unchanged across seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ Array(66) ] to deeply equal [ Array(63) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R1MoveAdapters.test.ts",
+   "test": "faithful-random live adapters: surrogate ordinary routes > 'thrash': route reaches every body, live at every age, surrogate words; logic/RNG unchanged across seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ Array(106) ] to deeply equal [ Array(103) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R1MoveAdapters.test.ts",
+   "test": "faithful-random live adapters: surrogate ordinary routes > 'flail': route reaches every body, live at every age, surrogate words; logic/RNG unchanged across seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(109) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(105) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R1MoveAdapters.test.ts",
+   "test": "faithful-random live adapters: surrogate ordinary routes > 'wish': route reaches every body, live at every age, surrogate words; logic/RNG unchanged across seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(266) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(262) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R4MoveAdapters.test.ts",
+   "test": "live prep14 ordinary routes > route RAIN_DANCE 2/21 BLASTOISE: adapter active every age, surrogate provenance; logical state identical across presentation seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(182) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(178) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R4MoveAdapters.test.ts",
+   "test": "live prep14 ordinary routes > route WATER_PULSE 7/7 CASTFORM: adapter active every age, surrogate provenance; logical state identical across presentation seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(155) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(151) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R4MoveAdapters.test.ts",
+   "test": "live prep14 ordinary routes > route HAIL 1/0 DELIBIRD: body reached, adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal",
+   "assertion": "AssertionError: expected [ 161 ] to deeply equal [ 158 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R5MoveAdapters.test.ts",
+   "test": "live prep17 ordinary routes > route MUD_SLAP 9/14 POLITOED: adapter active every age, surrogate provenance; logical state identical across presentation seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ Array(54) ] to deeply equal [ Array(51) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRandom2R5MoveAdapters.test.ts",
+   "test": "live prep17 ordinary routes > route SAND_ATTACK 3/0 PIDGEOTTO: adapter active every age, surrogate provenance; logical state identical across presentation seeds and Scene ON/OFF",
+   "assertion": "AssertionError: expected [ Array(61) ] to deeply equal [ Array(58) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSelectorsMoveAdapters.test.ts",
+   "test": "live selectors ordinary routes > completes ordinary 'SOLAR_BEAM' (every variant) and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(102) ] to deeply equal [ Array(108) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSelectorsMoveAdapters.test.ts",
+   "test": "live selectors ordinary routes > completes ordinary 'PRESENT' (every variant) and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(195) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(192) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSelectorsMoveAdapters.test.ts",
+   "test": "live selectors ordinary routes > completes ordinary 'MOONLIGHT' (every variant) and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(348) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(343) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSelectorsMoveAdapters.test.ts",
+   "test": "live selectors ordinary routes > completes ordinary 'WHIRLPOOL' (every variant) and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(129) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(124) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveShockWaveAdapter.test.ts",
+   "test": "Shock Wave (351) live adapter (scoped exact) > route 7/7 CASTFORM: live every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(260) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(257) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSpitUpAdapter.test.ts",
+   "test": "Spit Up ordinary route > route 33/7 SWALOT (Stockpile, Spit Up): body live every age at counter 1, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(102) ] to deeply equal [ Array(108) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSupportMoveAdapters.test.ts",
+   "test": "live support move adapters > replays a real Factory Acid Armor command twice through cleanup",
+   "assertion": "AssertionError: expected [ \u2026(2) ] to deeply equal [ \u2026(2) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 21 slot 3 streak 0 move 112 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(81) ] to deeply equal [ Array(76) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 82 slot 0 streak 0 move 112 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(81) ] to deeply equal [ Array(76) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 10 slot 0 streak 0 move 112 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(81) ] to deeply equal [ Array(76) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 67 slot 2 streak 0 move 112 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(81) ] to deeply equal [ Array(76) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 87 slot 2 streak 0 move 277 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(81) ] to deeply equal [ Array(76) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 447 slot 0 streak 0 move 277 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(81) ] to deeply equal [ Array(76) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 260 slot 0 streak 0 move 277 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(81) ] to deeply equal [ Array(76) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 38 slot 3 streak 0 move 182 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(119) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(114) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 118 slot 0 streak 0 move 182 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(119) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(114) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 20 slot 0 streak 0 move 182 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(119) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(114) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 64 slot 2 streak 0 move 182 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(119) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(114) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 17 slot 3 streak 14 move 115 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(84) ] to deeply equal [ Array(79) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 58 slot 3 streak 14 move 115 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(84) ] to deeply equal [ Array(79) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 231 slot 1 streak 0 move 243 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(91) ] to deeply equal [ Array(86) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveWallMoveAdapters.test.ts",
+   "test": "wall-family live adapters > seed 345 slot 0 streak 0 move 243 adapter=true through the ordinary route",
+   "assertion": "AssertionError: expected [ Array(91) ] to deeply equal [ Array(86) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/land97IdleLeadRows.test.ts",
+   "test": "land97 idle lead rows > a live command lasts D + N (Bulk Up 104 + 4, Swagger 161 + 7, Taunt 125 + 10, Scary Face 190 + 4)",
+   "assertion": "AssertionError: expected 113 to be 108 // Object.is equality",
+   "kind": "count"
+  },
+  {
+   "file": "tests/land97IdleLeadRows.test.ts",
+   "test": "land97 idle lead rows > Bulk Up (battle 154, player): rows 0..N-1 equal the age-0 frame, row N+k equals the unpatched row k",
+   "assertion": "AssertionError: expected [ \u2026(113) ] to have a length of 108 but got 113",
+   "kind": "row count (land97's Bulk Up route b154: 104 + N 4 rows, + P 3 + T 2)"
+  },
+  {
+   "file": "tests/sc106StatsChangeCommand.test.ts",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > status stat move, sharply (seed 0, slot 2: GRIMER Acid Armor, arg 40): command after the body, message +90",
+   "assertion": "AssertionError: expected { frame: 984, frames: 90 } to deeply equal { frame: 976, frames: 90 }",
+   "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
+  },
+  {
+   "file": "tests/sc106StatsChangeCommand.test.ts",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76",
+   "assertion": "AssertionError: expected { frame: 644, frames: 76 } to deeply equal { frame: 641, frames: 76 }",
+   "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
+  },
+  {
+   "file": "tests/sc106StatsChangeCommand.test.ts",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > secondary effect (seed 3, slot 1: Icy Wind's SPEED -1 on the player, arg 24): after the stat write, message +76",
+   "assertion": "AssertionError: expected { frame: 1394, frames: 76 } to deeply equal { frame: 1379, frames: 76 }",
+   "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
+  },
+  {
+   "file": "tests/sc106StatsChangeCommand.test.ts",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > Intimidate (seed 6, slot 0: Foe GROWLITHE's Intimidate on DROWZE, arg 22): message +76",
+   "assertion": "AssertionError: expected { frame: 2730, frames: 76 } to deeply equal { frame: 2704, frames: 76 }",
+   "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
+  },
+  {
+   "file": "tests/sc106StatsChangeCommand.test.ts",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > playstatchangeanimation (seed 13, slot 3: Tickle, multiple down1 on the player, arg 57): before the first stat write +76",
+   "assertion": "AssertionError: expected { frame: 2022, frames: 76 } to deeply equal { frame: 2008, frames: 76 }",
+   "kind": "anchor frame (a stats-change command's first frame: + P + T per earlier live body on the route; its own frames unchanged)"
+  },
+  {
+   "file": "tests/sc106StatsChangeCommand.test.ts",
+   "test": "ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54) > live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 230-row window owns the banner; the message is unmoved",
+   "assertion": "AssertionError: expected 4908 to be 4873 // Object.is equality",
+   "kind": "count"
+  },
+  {
+   "file": "tests/shp116ShadowLeadRow0.test.ts",
+   "test": "shp116: the elevated opponent's enemy shadow on lead row 0 > census route b38 (CROBAT Bite, streak 26): row 0 is preActivationRow and row 1 + exactly the 200 px shadow box",
+   "assertion": "AssertionError: expected [ \u2026(39) ] to have a length of 36 but got 39",
+   "kind": "row count (shp116's Bite route b38: 26 + N 10 rows, + P 3)"
+  },
+  {
+   "file": "tests/shp116ShadowLeadRow0.test.ts",
+   "test": "shp116: the elevated opponent's enemy shadow on lead row 0 > census route b38 (player WEEZING Sludge Bomb -> elevated CROBAT): the same row-0 shadow",
+   "assertion": "AssertionError: expected [ \u2026(4) ] to have a length of 1 but got 4",
+   "kind": "row count (shp116's preActivationRow rows: the activation row + the P 3 pre rows showing it)"
+  },
+  {
+   "file": "tests/substituteDollDefenderLive.test.ts",
+   "test": "ordinary route: a live move hits the subbed defender > MEGANIUM 103/28 [Substitute, Substitute]: the opponent's Earthquake live on the player's doll every age, next prompt with the doll, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected 201 to be 198 // Object.is equality",
+   "kind": "count"
+  },
+  {
+   "file": "tests/animation/liveAnchor3MoveAdapters.test.ts",
+   "test": "live anchor3 move adapters > completes ordinary 'ENDURE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(118) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(113) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor3MoveAdapters.test.ts",
+   "test": "live anchor3 move adapters > completes ordinary 'FOCUS_ENERGY' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(118) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(113) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor3MoveAdapters.test.ts",
+   "test": "live anchor3 move adapters > completes ordinary 'FACADE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(86) ] to deeply equal [ Array(81) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor3MoveAdapters.test.ts",
+   "test": "live anchor3 move adapters > completes ordinary 'MINIMIZE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(149) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(144) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor3MoveAdapters.test.ts",
+   "test": "live anchor3 move adapters > completes ordinary 'THUNDER' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(258) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(253) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor3MoveAdapters.test.ts",
+   "test": "live anchor3 move adapters > completes ordinary 'THUNDER_WAVE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(116) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(111) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor3MoveAdapters.test.ts",
+   "test": "live anchor3 move adapters > completes ordinary 'SWAGGER' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(162) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(159) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchor3MoveAdapters.test.ts",
+   "test": "live anchor3 move adapters > completes ordinary 'BULK_UP' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(104) ] to deeply equal [ Array(108) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchorMoveAdapters.test.ts",
+   "test": "live anchor move adapters > completes ordinary 'ACID' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(132) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(129) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchorMoveAdapters.test.ts",
+   "test": "live anchor move adapters > completes ordinary 'SLUDGE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(100) ] to deeply equal [ Array(106) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchorMoveAdapters.test.ts",
+   "test": "live anchor move adapters > completes ordinary 'SLUDGE_BOMB' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(158) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(155) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchorMoveAdapters.test.ts",
+   "test": "live anchor move adapters > completes ordinary 'WATER_GUN' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(115) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(112) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchorMoveAdapters.test.ts",
+   "test": "live anchor move adapters > completes ordinary 'HARDEN' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(107) ] to deeply equal [ Array(102) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchorMoveAdapters.test.ts",
+   "test": "live anchor move adapters > completes ordinary 'IRON_DEFENSE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(107) ] to deeply equal [ Array(102) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveAnchorMoveAdapters.test.ts",
+   "test": "live anchor move adapters > completes ordinary 'METAL_CLAW' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(138) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(135) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveCurseStatsAdapter.test.ts",
+   "test": "curse-live: MOVE_CURSE live adapter (174) > route 28/28 slot 0: first-body stats Curse active every age, prompt reached, ON/OFF parity",
+   "assertion": "AssertionError: expected [ 179 ] to deeply equal [ 176 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveCurseStatsAdapter.test.ts",
+   "test": "curse-live: MOVE_CURSE live adapter (174) > route 47/28 slot 0: first-body stats Curse active every age, prompt reached, ON/OFF parity",
+   "assertion": "AssertionError: expected [ 179 ] to deeply equal [ 176 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveEndeavorAdapter.test.ts",
+   "test": "live Endeavor (283) script-body adapter > route seed 58 / streak 0 (GROVYLE, register 20): active every age, prompt, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(73) ] to deeply equal [ Array(68) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveEndeavorAdapter.test.ts",
+   "test": "live Endeavor (283) script-body adapter > route seed 38 / streak 7 (SWELLOW, register 65): active every age, prompt, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(73) ] to deeply equal [ Array(68) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveEndeavorAdapter.test.ts",
+   "test": "live Endeavor (283) script-body adapter > route seed 52 / streak 0 (BEEDRILL, register 0): active every age, prompt, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(73) ] to deeply equal [ Array(68) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveExtremeSpeedMementoAdapters.test.ts",
+   "test": "Extreme Speed (245) live adapter (scoped exact) > route 182/21 ARCANINE: live every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(315) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(312) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveExtremeSpeedMementoAdapters.test.ts",
+   "test": "Memento (262) live adapter (scoped exact, first body) > route 259/28 WEEZING: live every age, the user faints, forced replacement, next action prompt, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(173) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(170) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "faithful-timing ordinary routes > route MACH_PUNCH 48/7 HITMONCHAN: body reached, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(104) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "faithful-timing ordinary routes > route MACH_PUNCH 48/14 HITMONCHAN: body reached, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(104) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "faithful-timing ordinary routes > route MACH_PUNCH 11/7 HITMONTOP (later body after Intimidate: later58): body reached, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(104) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(101) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "faithful-timing ordinary routes > route MEGAHORN 5/35 RHYDON: body reached, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(171) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(168) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "faithful-timing ordinary routes > route REVENGE 75/14 QWILFISH: body reached, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(139) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(136) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "faithful-timing ordinary routes > route PSYWAVE 84/7 CHIMECHO: body reached, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(199) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(196) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "faithful-timing ordinary routes > route EXTRASENSORY 9/35 EXPLOUD: body reached, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(155) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(152) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "faithful-timing ordinary routes > route EXTRASENSORY 42/7 STANTLER (later body: scanline gate): body reached, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(155) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(152) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "D4b Meteor Mash (309) faithful timing with D3 > D3 route 15/21 METAGROSS: live every age with surrogate words; two presentation seeds and Scene OFF keep gameplay / RNG / facility; same seed -> same frames",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(210) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(206) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "Nightmare (171) faithful timing > route 30/28 HYPNO: Hypnosis then Nightmare live on every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(162) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(159) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFaithfulTimingAdapters.test.ts",
+   "test": "Nightmare (171) faithful timing > route 166/14 HAUNTER: Hypnosis then Nightmare live on every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(162) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(159) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFlyBounce.test.ts",
+   "test": "live Fly / Bounce adapters > completes ordinary 'FLY 38/7 SWELLOW': both bodies live, attacker hidden across the gap, ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 46, 71 ] to deeply equal [ 43, 68 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveFlyBounce.test.ts",
+   "test": "live Fly / Bounce adapters > completes ordinary 'BOUNCE 65/7 PONYTA': both bodies live, attacker hidden across the gap, ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 67, 58 ] to deeply equal [ 64, 55 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveHowlAdapter.test.ts",
+   "test": "live Howl battler input > replays two real stat-changing commands through cleanup without changing outcomes or RNG",
+   "assertion": "AssertionError: expected [ Array(107) ] to deeply equal [ Array(102) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveIceBallAdapter.test.ts",
+   "test": "S10A Ice Ball (301): faithful timing with D3 > ordinary route seed 152 slot 1: an Ice Ball chain of 4 bodies, every body live every age (deferred lends), next prompt; replay equal; two presentation seeds and Scene OFF keep gameplay / RNG / facility",
+   "assertion": "AssertionError: body 1: expected [ Array(79) ] to deeply equal [ Array(76) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveIceBallAdapter.test.ts",
+   "test": "S10A Ice Ball (301): faithful timing with D3 > ordinary route seed 1 DELIBIRD slot 1: chain bodies 1..4 live every age (ice72: body 3 follows the opponent's KO + send-in and body 4 nests it, the Ice Ball words unit replays the battle units); two presentation seeds and Scene OFF keep gameplay / RNG / facility",
+   "assertion": "AssertionError: expected [ Array(79) ] to deeply equal [ Array(76) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveMultihitMoveAdapters.test.ts",
+   "test": "live multi-hit ordinary routes > completes ordinary 'DOUBLE_SLAP' (seed 95, 4 hits) and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(37) ] to deeply equal [ Array(34) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveMultihitMoveAdapters.test.ts",
+   "test": "live multi-hit ordinary routes > completes ordinary 'DOUBLE_SLAP' (seed 246, 3 hits) and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(37) ] to deeply equal [ Array(34) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveMultihitMoveAdapters.test.ts",
+   "test": "live multi-hit ordinary routes > completes ordinary 'COMET_PUNCH' (seed 226, 3 hits) and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(40) ] to deeply equal [ Array(37) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Grudge (while the tracked order is known) > plays ordinary Grudge as the battle's first body (seed 57, slot 3, Haunter) with the adapter active every age",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(205) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(200) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Grudge (while the tracked order is known) > renders Grudge as a LATER body after a modelled opponent Light Screen with the tracked order (seed 16, slot 3)",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(205) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(200) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Grudge (while the tracked order is known) > renders live once the earlier confusion unit is planned (seed 16, slots [1, 3]; declined before prep43)",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(205) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(200) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary EMBER (seed 4, streak 7, slot 1, MAGCARGO) with the adapter active every age",
+   "assertion": "AssertionError: expected [ Array(70) ] to deeply equal [ Array(67) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary DRAGON_RAGE (seed 37, streak 14, slot 3, CHARMELEON) with the adapter active every age",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(151) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(148) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary HEAL_BELL (seed 0, streak 7, slot 3, DELCATTY) with the adapter active every age",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(257) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(252) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary LEAF_BLADE (seed 89, streak 21, slot 0, SCEPTILE) with the adapter active every age",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(220) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(215) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary PERISH_SONG (seed 25, streak 14, slot 0, MURKROW) with the adapter active every age",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(255) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(250) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary ROCK_THROW (seed 33, streak 0, slot 1, GRAVELER) with the adapter active every age",
+   "assertion": "AssertionError: expected [ Array(92) ] to deeply equal [ Array(87) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > plays ordinary BLAZE_KICK (seed 322, streak 28, slot 0, BLAZIKEN) with the adapter active every age",
+   "assertion": "AssertionError: expected [ Array(91) ] to deeply equal [ Array(88) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveOrderConsumerMoveAdapters.test.ts",
+   "test": "live order-consumer adapters: Ember, Dragon Rage, Flamethrower, Heal Bell, Leaf Blade, Perish Song, Rock Throw, Blaze Kick > renders Blaze Kick as a LATER body after a modelled opponent Sunny Day (seed 43, streak 28, slot 0)",
+   "assertion": "AssertionError: expected [ Array(91) ] to deeply equal [ Array(88) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2aMoveAdapters.test.ts",
+   "test": "live physical2a move adapters > reaches and completes ordinary 'BODY_SLAM' requests with ON/OFF state and RNG parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(103) ] to deeply equal [ Array(107) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2aMoveAdapters.test.ts",
+   "test": "live physical2a move adapters > reaches and completes ordinary 'TAKE_DOWN' requests with ON/OFF state and RNG parity",
+   "assertion": "AssertionError: expected [ Array(103) ] to deeply equal [ Array(98) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2aMoveAdapters.test.ts",
+   "test": "live physical2a move adapters > reaches and completes ordinary 'DOUBLE_EDGE' requests with ON/OFF state and RNG parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(137) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(132) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePhysical2aMoveAdapters.test.ts",
+   "test": "live physical2a move adapters > reaches and completes ordinary 'SUBMISSION' requests with ON/OFF state and RNG parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(120) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(115) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep11MoveAdapters.test.ts",
+   "test": "live prep11 move adapters > completes ordinary 'LEECH_SEED 16/28 VENUSAUR' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 144 ] to deeply equal [ 141 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep11MoveAdapters.test.ts",
+   "test": "live prep11 move adapters > completes ordinary 'TRI_ATTACK 0/21 DUGTRIO' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 287 ] to deeply equal [ 284 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep11MoveAdapters.test.ts",
+   "test": "live prep11 move adapters > completes ordinary 'PETAL_DANCE 49/7 GLOOM' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 247, 247 ] to deeply equal [ 244, 244 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep11MoveAdapters.test.ts",
+   "test": "live prep11 move adapters > completes ordinary 'DESTINY_BOND 18/42 GENGAR' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 191 ] to deeply equal [ 188 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep11MoveAdapters.test.ts",
+   "test": "live prep11 move adapters > completes ordinary 'SKY_UPPERCUT 48/7 HITMONCHAN' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 191 ] to deeply equal [ 188 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep11MoveAdapters.test.ts",
+   "test": "live prep11 move adapters > completes ordinary 'AIR_CUTTER 57/7 GOLBAT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 115 ] to deeply equal [ 112 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep11MoveAdapters.test.ts",
+   "test": "live prep11 move adapters > completes ordinary 'FORESIGHT 100/14 HITMONLEE' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 170 ] to deeply equal [ 167 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep11MoveAdapters.test.ts",
+   "test": "live prep11 move adapters > completes ordinary 'SPIDER_WEB 567/0 ARIADOS' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 210 ] to deeply equal [ 207 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep11MoveAdapters.test.ts",
+   "test": "live prep11 move adapters > completes ordinary 'RECYCLE 378/0 PORYGON (two turns)' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 206 ] to deeply equal [ 203 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep16MoveAdapters.test.ts",
+   "test": "live prep16 move adapters (Overheat, Silver Wind, Psych Up player: first body) > completes ordinary 'OVERHEAT 4/14 MAGCARGO' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 233 ] to deeply equal [ 230 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep16MoveAdapters.test.ts",
+   "test": "live prep16 move adapters (Overheat, Silver Wind, Psych Up player: first body) > completes ordinary 'OVERHEAT 69/14 SOLROCK' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 233 ] to deeply equal [ 230 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep16MoveAdapters.test.ts",
+   "test": "live prep16 move adapters (Overheat, Silver Wind, Psych Up player: first body) > completes ordinary 'SILVER_WIND 3/7 VOLBEAT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 196 ] to deeply equal [ 193 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep16MoveAdapters.test.ts",
+   "test": "live prep16 move adapters (Overheat, Silver Wind, Psych Up player: first body) > completes ordinary 'SILVER_WIND 8/7 VENOMOTH' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 196 ] to deeply equal [ 193 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep16MoveAdapters.test.ts",
+   "test": "live prep16 move adapters (Overheat, Silver Wind, Psych Up player: first body) > completes ordinary 'SILVER_WIND 9/0 BUTTERFREE (not first)' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 196 ] to deeply equal [ 193 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep16MoveAdapters.test.ts",
+   "test": "live prep16 move adapters (Overheat, Silver Wind, Psych Up player: first body) > completes ordinary 'PSYCH_UP 66/7 JUMPLUFF' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 182 ] to deeply equal [ 179 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep16MoveAdapters.test.ts",
+   "test": "live prep16 move adapters (Overheat, Silver Wind, Psych Up player: first body) > completes ordinary 'PSYCH_UP 15/28 METAGROSS' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ 182 ] to deeply equal [ 179 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep29Adapters.test.ts",
+   "test": "live prep29 ordinary routes > route BONEMERANG 246/21 MAROWAK (both hits): bodies reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(74) ] to deeply equal [ Array(71) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep29Adapters.test.ts",
+   "test": "live prep29 ordinary routes > route RAPID_SPIN 80/14 WARTORTLE: bodies reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(124) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(121) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep2MoveAdapters.test.ts",
+   "test": "live prep2 move adapters > completes ordinary 'SURF' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(138) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(135) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep2MoveAdapters.test.ts",
+   "test": "live prep2 move adapters > completes ordinary 'MUDDY_WATER' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(138) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(135) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep2MoveAdapters.test.ts",
+   "test": "live prep2 move adapters > completes ordinary 'ICY_WIND' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(281) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(278) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep2MoveAdapters.test.ts",
+   "test": "live prep2 move adapters > completes ordinary 'BLIZZARD' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(366) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(363) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep2MoveAdapters.test.ts",
+   "test": "live prep2 move adapters > completes ordinary 'FAKE_OUT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ Array(89) ] to deeply equal [ Array(86) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep2MoveAdapters.test.ts",
+   "test": "live prep2 move adapters > completes ordinary 'COSMIC_POWER' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(235) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(232) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep2MoveAdapters.test.ts",
+   "test": "live prep2 move adapters > completes ordinary 'FUTURE_SIGHT' and preserves ON/OFF rules and RNG",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(113) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(110) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/livePrep2MoveAdapters.test.ts",
+   "test": "live prep2 move adapters > Explosion: the body ages with the attacker at HP 0, then the replacement screen is the documented boundary",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(210) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(207) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveQ2Adapters.test.ts",
+   "test": "live Q2 ordinary routes > route HYPER_VOICE 75/21 EXPLOUD: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(107) ] to deeply equal [ Array(104) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveQ2Adapters.test.ts",
+   "test": "live Q2 ordinary routes > route HYPER_VOICE 141/21 EXPLOUD: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(107) ] to deeply equal [ Array(104) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveQ2Adapters.test.ts",
+   "test": "live Q2 ordinary routes > route SMOG 29/0 MAGBY: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(299) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(296) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveQ2Adapters.test.ts",
+   "test": "live Q2 ordinary routes > route SMOG 70/0 MAGBY: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(299) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(296) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveQ2Adapters.test.ts",
+   "test": "live Q2 ordinary routes > route SAND_TOMB 345/21 DUGTRIO: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(117) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(114) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveQ2Adapters.test.ts",
+   "test": "live Q2 ordinary routes > route SAND_TOMB 543/21 DUGTRIO: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(117) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(114) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveQ2Adapters.test.ts",
+   "test": "live Q2 ordinary routes > route SKY_ATTACK 244/42 FEAROW charge + strike: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(142) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(139) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveQ2Adapters.test.ts",
+   "test": "live Q2 ordinary routes > route SKY_ATTACK 376/42 FEAROW charge + strike: body reached, adapter active every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(142) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(139) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveReturnAdapter.test.ts",
+   "test": "return-live: MOVE_RETURN strongest branch > route 24/14 PIDGEOT: the friendship-0 Return is a live ReturnWeak body every age, prompt reached; Scene ON/OFF boundaries, RNG and rules identical",
+   "assertion": "AssertionError: expected [ 91 ] to deeply equal [ 88 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveReturnAdapter.test.ts",
+   "test": "return-live: MOVE_RETURN strongest branch > route 51/28 EXEGGUTOR: the friendship-0 Return is a live ReturnWeak body every age, prompt reached; Scene ON/OFF boundaries, RNG and rules identical",
+   "assertion": "AssertionError: expected [ 91 ] to deeply equal [ 88 ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRoarWhirlwindMoveAdapters.test.ts",
+   "test": "live Roar / Whirlwind adapters + Scene ON forced switch-out > completes ordinary 'ROAR 42/0 HOUNDOUR': live body every age, instant removal + send-in at E+11, ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(102) ] to deeply equal [ Array(99) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRoarWhirlwindMoveAdapters.test.ts",
+   "test": "live Roar / Whirlwind adapters + Scene ON forced switch-out > completes ordinary 'ROAR 6/21 VAPOREON': live body every age, instant removal + send-in at E+11, ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(102) ] to deeply equal [ Array(99) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRoarWhirlwindMoveAdapters.test.ts",
+   "test": "live Roar / Whirlwind adapters + Scene ON forced switch-out > completes ordinary 'WHIRLWIND 9/0 BUTTERFREE': live body every age, instant removal + send-in at E+11, ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(86) ] to deeply equal [ Array(83) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveRoarWhirlwindMoveAdapters.test.ts",
+   "test": "live Roar / Whirlwind adapters + Scene ON forced switch-out > completes ordinary 'WHIRLWIND 30/0 BEAUTIFLY': live body every age, instant removal + send-in at E+11, ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(86) ] to deeply equal [ Array(83) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSheerColdAndFix150.test.ts",
+   "test": "live Sheer Cold (329) first-body adapter > route seed 267 / streak 35 (DEWGONG): body reached, adapter active every age, prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(185) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(182) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSkillSwapFlatterAdapters.test.ts",
+   "test": "S10A Skill Swap (285) faithful timing > route 8/7 VENOMOTH: Skill Swap live on every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(190) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(187) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSkillSwapFlatterAdapters.test.ts",
+   "test": "S10A Flatter (260) faithful random > D3 route 51/0 NIDORINA: live every age with surrogate words; two presentation seeds and Scene OFF keep gameplay / RNG / facility; same seed -> same frames",
+   "assertion": "AssertionError: expected [ +0, +0, +0, +0, 1, 2, 3, 4, \u2026(214) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(210) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSkillSwapFlatterAdapters.test.ts",
+   "test": "S10A Eruption (284) scoped exact > route 88/14 CAMERUPT: Eruption live on every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(470) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(467) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveStatusMoveAdapters.test.ts",
+   "test": "live status, psychic, and ghost move adapters > restarts a legal generated Confusion command with the current displayed field",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(141) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(136) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSubstituteBodyAdapter.test.ts",
+   "test": "S10A Substitute body (164) scoped exact > route 11/35 JYNX: the body is live on every age, the doll is shown from the next command on, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ Array(90) ] to deeply equal [ Array(87) ]",
+   "kind": "row / age sequence"
+  },
+  {
+   "file": "tests/animation/liveSuperpowerAdapter.test.ts",
+   "test": "D4 Superpower (276) faithful timing > route 179/42 NIDOQUEEN: body live every age, following prompt reached, Scene ON/OFF parity",
+   "assertion": "AssertionError: expected [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(242) ] to deeply equal [ +0, 1, 2, 3, 4, 5, 6, 7, 8, \u2026(239) ]",
+   "kind": "row / age sequence"
+  }
+ ]
+}

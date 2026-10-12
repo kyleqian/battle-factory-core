@@ -1,0 +1,2649 @@
+{
+ "shards": {
+  "0": {
+   "commands": [
+    2680,
+    2680
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": true
+  },
+  "1": {
+   "commands": [
+    2654,
+    2654
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": true
+  },
+  "2": {
+   "commands": [
+    2636,
+    2636
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": true
+  },
+  "3": {
+   "commands": [
+    2643,
+    2643
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": true
+  },
+  "4": {
+   "commands": [
+    3195,
+    3195
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": false
+  },
+  "5": {
+   "commands": [
+    2801,
+    2801
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": true
+  },
+  "6": {
+   "commands": [
+    2409,
+    2409
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": true
+  },
+  "7": {
+   "commands": [
+    2778,
+    2778
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": true
+  },
+  "8": {
+   "commands": [
+    2891,
+    2891
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": true
+  },
+  "9": {
+   "commands": [
+    2740,
+    2740
+   ],
+   "keySequenceIdentical": true,
+   "battleDigestExcludingFramesIdentical": true
+  }
+ },
+ "statusChanges": {},
+ "frameDeltaMismatches": 0,
+ "mismatchSamples": [],
+ "perMoveSide": {
+  "101 NIGHT SHADE opponent": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "101 NIGHT SHADE player": {
+   "commands": 10,
+   "framesAdded": 50,
+   "rows": 5
+  },
+  "103 SCREECH opponent": {
+   "commands": 47,
+   "framesAdded": 235,
+   "rows": 5
+  },
+  "103 SCREECH player": {
+   "commands": 47,
+   "framesAdded": 235,
+   "rows": 5
+  },
+  "106 HARDEN opponent": {
+   "commands": 16,
+   "framesAdded": 80,
+   "rows": 5
+  },
+  "106 HARDEN player": {
+   "commands": 22,
+   "framesAdded": 110,
+   "rows": 5
+  },
+  "107 MINIMIZE opponent": {
+   "commands": 25,
+   "framesAdded": 125,
+   "rows": 5
+  },
+  "107 MINIMIZE player": {
+   "commands": 38,
+   "framesAdded": 190,
+   "rows": 5
+  },
+  "108 SMOKESCREEN opponent": {
+   "commands": 67,
+   "framesAdded": 335,
+   "rows": 5
+  },
+  "108 SMOKESCREEN player": {
+   "commands": 71,
+   "framesAdded": 355,
+   "rows": 5
+  },
+  "109 CONFUSE RAY opponent": {
+   "commands": 228,
+   "framesAdded": 1140,
+   "rows": 5
+  },
+  "109 CONFUSE RAY player": {
+   "commands": 304,
+   "framesAdded": 1520,
+   "rows": 5
+  },
+  "11 VICEGRIP opponent": {
+   "commands": 3,
+   "framesAdded": 15,
+   "rows": 5
+  },
+  "11 VICEGRIP player": {
+   "commands": 9,
+   "framesAdded": 45,
+   "rows": 5
+  },
+  "111 DEFENSE CURL opponent": {
+   "commands": 35,
+   "framesAdded": 175,
+   "rows": 5
+  },
+  "111 DEFENSE CURL player": {
+   "commands": 37,
+   "framesAdded": 185,
+   "rows": 5
+  },
+  "112 BARRIER opponent": {
+   "commands": 30,
+   "framesAdded": 150,
+   "rows": 5
+  },
+  "112 BARRIER player": {
+   "commands": 38,
+   "framesAdded": 190,
+   "rows": 5
+  },
+  "113 LIGHT SCREEN opponent": {
+   "commands": 88,
+   "framesAdded": 264,
+   "rows": 3
+  },
+  "113 LIGHT SCREEN player": {
+   "commands": 88,
+   "framesAdded": 264,
+   "rows": 3
+  },
+  "114 HAZE opponent": {
+   "commands": 13,
+   "framesAdded": 65,
+   "rows": 5
+  },
+  "114 HAZE player": {
+   "commands": 7,
+   "framesAdded": 35,
+   "rows": 5
+  },
+  "115 REFLECT opponent": {
+   "commands": 36,
+   "framesAdded": 180,
+   "rows": 5
+  },
+  "115 REFLECT player": {
+   "commands": 32,
+   "framesAdded": 160,
+   "rows": 5
+  },
+  "116 FOCUS ENERGY opponent": {
+   "commands": 2,
+   "framesAdded": 10,
+   "rows": 5
+  },
+  "116 FOCUS ENERGY player": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "118 METRONOME opponent": {
+   "commands": 20,
+   "framesAdded": 100,
+   "rows": 5
+  },
+  "118 METRONOME player": {
+   "commands": 27,
+   "framesAdded": 135,
+   "rows": 5
+  },
+  "12 GUILLOTINE opponent": {
+   "commands": 6,
+   "framesAdded": 30,
+   "rows": 5
+  },
+  "12 GUILLOTINE player": {
+   "commands": 6,
+   "framesAdded": 30,
+   "rows": 5
+  },
+  "120 SELFDESTRUCT opponent": {
+   "commands": 1,
+   "framesAdded": 3,
+   "rows": 3
+  },
+  "120 SELFDESTRUCT player": {
+   "commands": 1,
+   "framesAdded": 3,
+   "rows": 3
+  },
+  "122 LICK opponent": {
+   "commands": 8,
+   "framesAdded": 40,
+   "rows": 5
+  },
+  "122 LICK player": {
+   "commands": 10,
+   "framesAdded": 50,
+   "rows": 5
+  },
+  "123 SMOG opponent": {
+   "commands": 1,
+   "framesAdded": 3,
+   "rows": 3
+  },
+  "123 SMOG player": {
+   "commands": 5,
+   "framesAdded": 15,
+   "rows": 3
+  },
+  "124 SLUDGE opponent": {
+   "commands": 37,
+   "framesAdded": 111,
+   "rows": 3
+  },
+  "124 SLUDGE player": {
+   "commands": 19,
+   "framesAdded": 57,
+   "rows": 3
+  },
+  "126 FIRE BLAST opponent": {
+   "commands": 52,
+   "framesAdded": 156,
+   "rows": 3
+  },
+  "126 FIRE BLAST player": {
+   "commands": 41,
+   "framesAdded": 205,
+   "rows": 5
+  },
+  "129 SWIFT opponent": {
+   "commands": 53,
+   "framesAdded": 265,
+   "rows": 5
+  },
+  "129 SWIFT player": {
+   "commands": 39,
+   "framesAdded": 195,
+   "rows": 5
+  },
+  "13 RAZOR WIND opponent": {
+   "commands": 15,
+   "framesAdded": 45,
+   "rows": 3
+  },
+  "13 RAZOR WIND player": {
+   "commands": 17,
+   "framesAdded": 51,
+   "rows": 3
+  },
+  "131 SPIKE CANNON opponent": {
+   "commands": 44,
+   "framesAdded": 220,
+   "rows": 5
+  },
+  "131 SPIKE CANNON player": {
+   "commands": 19,
+   "framesAdded": 95,
+   "rows": 5
+  },
+  "133 AMNESIA opponent": {
+   "commands": 73,
+   "framesAdded": 365,
+   "rows": 5
+  },
+  "133 AMNESIA player": {
+   "commands": 69,
+   "framesAdded": 345,
+   "rows": 5
+  },
+  "135 SOFTBOILED opponent": {
+   "commands": 63,
+   "framesAdded": 189,
+   "rows": 3
+  },
+  "135 SOFTBOILED player": {
+   "commands": 42,
+   "framesAdded": 126,
+   "rows": 3
+  },
+  "136 HI JUMP KICK opponent": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "136 HI JUMP KICK player": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "137 GLARE opponent": {
+   "commands": 11,
+   "framesAdded": 33,
+   "rows": 3
+  },
+  "137 GLARE player": {
+   "commands": 9,
+   "framesAdded": 27,
+   "rows": 3
+  },
+  "138 DREAM EATER opponent": {
+   "commands": 36,
+   "framesAdded": 108,
+   "rows": 3
+  },
+  "138 DREAM EATER player": {
+   "commands": 13,
+   "framesAdded": 39,
+   "rows": 3
+  },
+  "14 SWORDS DANCE opponent": {
+   "commands": 76,
+   "framesAdded": 380,
+   "rows": 5
+  },
+  "14 SWORDS DANCE player": {
+   "commands": 40,
+   "framesAdded": 200,
+   "rows": 5
+  },
+  "142 LOVELY KISS opponent": {
+   "commands": 12,
+   "framesAdded": 36,
+   "rows": 3
+  },
+  "142 LOVELY KISS player": {
+   "commands": 21,
+   "framesAdded": 63,
+   "rows": 3
+  },
+  "143 SKY ATTACK opponent": {
+   "commands": 5,
+   "framesAdded": 15,
+   "rows": 3
+  },
+  "143 SKY ATTACK player": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "146 DIZZY PUNCH opponent": {
+   "commands": 6,
+   "framesAdded": 18,
+   "rows": 3
+  },
+  "146 DIZZY PUNCH player": {
+   "commands": 8,
+   "framesAdded": 24,
+   "rows": 3
+  },
+  "147 SPORE opponent": {
+   "commands": 5,
+   "framesAdded": 25,
+   "rows": 5
+  },
+  "147 SPORE player": {
+   "commands": 12,
+   "framesAdded": 60,
+   "rows": 5
+  },
+  "148 FLASH opponent": {
+   "commands": 22,
+   "framesAdded": 110,
+   "rows": 5
+  },
+  "148 FLASH player": {
+   "commands": 14,
+   "framesAdded": 70,
+   "rows": 5
+  },
+  "149 PSYWAVE opponent": {
+   "commands": 24,
+   "framesAdded": 72,
+   "rows": 3
+  },
+  "149 PSYWAVE player": {
+   "commands": 13,
+   "framesAdded": 39,
+   "rows": 3
+  },
+  "151 ACID ARMOR opponent": {
+   "commands": 32,
+   "framesAdded": 160,
+   "rows": 5
+  },
+  "151 ACID ARMOR player": {
+   "commands": 28,
+   "framesAdded": 140,
+   "rows": 5
+  },
+  "152 CRABHAMMER opponent": {
+   "commands": 15,
+   "framesAdded": 75,
+   "rows": 5
+  },
+  "152 CRABHAMMER player": {
+   "commands": 10,
+   "framesAdded": 50,
+   "rows": 5
+  },
+  "153 EXPLOSION opponent": {
+   "commands": 12,
+   "framesAdded": 36,
+   "rows": 3
+  },
+  "153 EXPLOSION player": {
+   "commands": 38,
+   "framesAdded": 114,
+   "rows": 3
+  },
+  "154 FURY SWIPES opponent": {
+   "commands": 60,
+   "framesAdded": 300,
+   "rows": 5
+  },
+  "154 FURY SWIPES player": {
+   "commands": 55,
+   "framesAdded": 275,
+   "rows": 5
+  },
+  "155 BONEMERANG opponent": {
+   "commands": 9,
+   "framesAdded": 27,
+   "rows": 3
+  },
+  "155 BONEMERANG player": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "156 REST opponent": {
+   "commands": 144,
+   "framesAdded": 720,
+   "rows": 5
+  },
+  "156 REST player": {
+   "commands": 320,
+   "framesAdded": 1600,
+   "rows": 5
+  },
+  "157 ROCK SLIDE opponent": {
+   "commands": 239,
+   "framesAdded": 717,
+   "rows": 3
+  },
+  "158 HYPER FANG opponent": {
+   "commands": 7,
+   "framesAdded": 21,
+   "rows": 3
+  },
+  "161 TRI ATTACK opponent": {
+   "commands": 35,
+   "framesAdded": 105,
+   "rows": 3
+  },
+  "161 TRI ATTACK player": {
+   "commands": 32,
+   "framesAdded": 96,
+   "rows": 3
+  },
+  "162 SUPER FANG opponent": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "162 SUPER FANG player": {
+   "commands": 1,
+   "framesAdded": 5,
+   "rows": 5
+  },
+  "163 SLASH opponent": {
+   "commands": 86,
+   "framesAdded": 430,
+   "rows": 5
+  },
+  "163 SLASH player": {
+   "commands": 94,
+   "framesAdded": 470,
+   "rows": 5
+  },
+  "164 SUBSTITUTE opponent": {
+   "commands": 30,
+   "framesAdded": 90,
+   "rows": 3
+  },
+  "164 SUBSTITUTE player": {
+   "commands": 17,
+   "framesAdded": 51,
+   "rows": 3
+  },
+  "167 TRIPLE KICK opponent": {
+   "commands": 11,
+   "framesAdded": 33,
+   "rows": 3
+  },
+  "167 TRIPLE KICK player": {
+   "commands": 13,
+   "framesAdded": 39,
+   "rows": 3
+  },
+  "169 SPIDER WEB opponent": {
+   "commands": 3,
+   "framesAdded": 9,
+   "rows": 3
+  },
+  "169 SPIDER WEB player": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "171 NIGHTMARE opponent": {
+   "commands": 20,
+   "framesAdded": 60,
+   "rows": 3
+  },
+  "171 NIGHTMARE player": {
+   "commands": 11,
+   "framesAdded": 33,
+   "rows": 3
+  },
+  "172 FLAME WHEEL opponent": {
+   "commands": 30,
+   "framesAdded": 150,
+   "rows": 5
+  },
+  "172 FLAME WHEEL player": {
+   "commands": 21,
+   "framesAdded": 105,
+   "rows": 5
+  },
+  "173 SNORE opponent": {
+   "commands": 3,
+   "framesAdded": 9,
+   "rows": 3
+  },
+  "173 SNORE player": {
+   "commands": 1,
+   "framesAdded": 3,
+   "rows": 3
+  },
+  "174 CURSE opponent": {
+   "commands": 146,
+   "framesAdded": 438,
+   "rows": 3
+  },
+  "174 CURSE player": {
+   "commands": 97,
+   "framesAdded": 291,
+   "rows": 3
+  },
+  "175 FLAIL opponent": {
+   "commands": 35,
+   "framesAdded": 105,
+   "rows": 3
+  },
+  "175 FLAIL player": {
+   "commands": 43,
+   "framesAdded": 129,
+   "rows": 3
+  },
+  "178 COTTON SPORE opponent": {
+   "commands": 26,
+   "framesAdded": 130,
+   "rows": 5
+  },
+  "178 COTTON SPORE player": {
+   "commands": 31,
+   "framesAdded": 155,
+   "rows": 5
+  },
+  "179 REVERSAL opponent": {
+   "commands": 14,
+   "framesAdded": 42,
+   "rows": 3
+  },
+  "179 REVERSAL player": {
+   "commands": 38,
+   "framesAdded": 114,
+   "rows": 3
+  },
+  "18 WHIRLWIND opponent": {
+   "commands": 8,
+   "framesAdded": 24,
+   "rows": 3
+  },
+  "18 WHIRLWIND player": {
+   "commands": 15,
+   "framesAdded": 45,
+   "rows": 3
+  },
+  "180 SPITE opponent": {
+   "commands": 5,
+   "framesAdded": 25,
+   "rows": 5
+  },
+  "180 SPITE player": {
+   "commands": 15,
+   "framesAdded": 75,
+   "rows": 5
+  },
+  "182 PROTECT opponent": {
+   "commands": 310,
+   "framesAdded": 1550,
+   "rows": 5
+  },
+  "182 PROTECT player": {
+   "commands": 248,
+   "framesAdded": 1240,
+   "rows": 5
+  },
+  "183 MACH PUNCH opponent": {
+   "commands": 24,
+   "framesAdded": 72,
+   "rows": 3
+  },
+  "183 MACH PUNCH player": {
+   "commands": 27,
+   "framesAdded": 81,
+   "rows": 3
+  },
+  "184 SCARY FACE opponent": {
+   "commands": 91,
+   "framesAdded": 273,
+   "rows": 3
+  },
+  "184 SCARY FACE player": {
+   "commands": 93,
+   "framesAdded": 279,
+   "rows": 3
+  },
+  "186 SWEET KISS opponent": {
+   "commands": 7,
+   "framesAdded": 35,
+   "rows": 5
+  },
+  "186 SWEET KISS player": {
+   "commands": 7,
+   "framesAdded": 35,
+   "rows": 5
+  },
+  "187 BELLY DRUM opponent": {
+   "commands": 1,
+   "framesAdded": 5,
+   "rows": 5
+  },
+  "187 BELLY DRUM player": {
+   "commands": 2,
+   "framesAdded": 10,
+   "rows": 5
+  },
+  "188 SLUDGE BOMB opponent": {
+   "commands": 130,
+   "framesAdded": 390,
+   "rows": 3
+  },
+  "188 SLUDGE BOMB player": {
+   "commands": 149,
+   "framesAdded": 447,
+   "rows": 3
+  },
+  "189 MUD-SLAP opponent": {
+   "commands": 105,
+   "framesAdded": 315,
+   "rows": 3
+  },
+  "189 MUD-SLAP player": {
+   "commands": 87,
+   "framesAdded": 261,
+   "rows": 3
+  },
+  "19 FLY opponent": {
+   "commands": 79,
+   "framesAdded": 237,
+   "rows": 3
+  },
+  "19 FLY player": {
+   "commands": 43,
+   "framesAdded": 129,
+   "rows": 3
+  },
+  "190 OCTAZOOKA opponent": {
+   "commands": 12,
+   "framesAdded": 36,
+   "rows": 3
+  },
+  "190 OCTAZOOKA player": {
+   "commands": 8,
+   "framesAdded": 24,
+   "rows": 3
+  },
+  "191 SPIKES opponent": {
+   "commands": 11,
+   "framesAdded": 33,
+   "rows": 3
+  },
+  "191 SPIKES player": {
+   "commands": 3,
+   "framesAdded": 9,
+   "rows": 3
+  },
+  "192 ZAP CANNON player": {
+   "commands": 1,
+   "framesAdded": 5,
+   "rows": 5
+  },
+  "193 FORESIGHT opponent": {
+   "commands": 15,
+   "framesAdded": 45,
+   "rows": 3
+  },
+  "193 FORESIGHT player": {
+   "commands": 7,
+   "framesAdded": 21,
+   "rows": 3
+  },
+  "194 DESTINY BOND opponent": {
+   "commands": 16,
+   "framesAdded": 48,
+   "rows": 3
+  },
+  "194 DESTINY BOND player": {
+   "commands": 19,
+   "framesAdded": 57,
+   "rows": 3
+  },
+  "195 PERISH SONG opponent": {
+   "commands": 17,
+   "framesAdded": 85,
+   "rows": 5
+  },
+  "195 PERISH SONG player": {
+   "commands": 19,
+   "framesAdded": 95,
+   "rows": 5
+  },
+  "196 ICY WIND opponent": {
+   "commands": 116,
+   "framesAdded": 348,
+   "rows": 3
+  },
+  "196 ICY WIND player": {
+   "commands": 125,
+   "framesAdded": 375,
+   "rows": 3
+  },
+  "197 DETECT opponent": {
+   "commands": 30,
+   "framesAdded": 150,
+   "rows": 5
+  },
+  "197 DETECT player": {
+   "commands": 26,
+   "framesAdded": 130,
+   "rows": 5
+  },
+  "2 KARATE CHOP opponent": {
+   "commands": 3,
+   "framesAdded": 15,
+   "rows": 5
+  },
+  "2 KARATE CHOP player": {
+   "commands": 12,
+   "framesAdded": 60,
+   "rows": 5
+  },
+  "200 OUTRAGE opponent": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "201 SANDSTORM opponent": {
+   "commands": 70,
+   "framesAdded": 350,
+   "rows": 5
+  },
+  "201 SANDSTORM player": {
+   "commands": 99,
+   "framesAdded": 495,
+   "rows": 5
+  },
+  "202 GIGA DRAIN opponent": {
+   "commands": 223,
+   "framesAdded": 669,
+   "rows": 3
+  },
+  "202 GIGA DRAIN player": {
+   "commands": 165,
+   "framesAdded": 495,
+   "rows": 3
+  },
+  "203 ENDURE opponent": {
+   "commands": 54,
+   "framesAdded": 270,
+   "rows": 5
+  },
+  "203 ENDURE player": {
+   "commands": 87,
+   "framesAdded": 435,
+   "rows": 5
+  },
+  "204 CHARM opponent": {
+   "commands": 49,
+   "framesAdded": 147,
+   "rows": 3
+  },
+  "204 CHARM player": {
+   "commands": 54,
+   "framesAdded": 162,
+   "rows": 3
+  },
+  "205 ROLLOUT opponent": {
+   "commands": 95,
+   "framesAdded": 285,
+   "rows": 3
+  },
+  "205 ROLLOUT player": {
+   "commands": 94,
+   "framesAdded": 282,
+   "rows": 3
+  },
+  "207 SWAGGER opponent": {
+   "commands": 43,
+   "framesAdded": 129,
+   "rows": 3
+  },
+  "207 SWAGGER player": {
+   "commands": 84,
+   "framesAdded": 252,
+   "rows": 3
+  },
+  "21 SLAM opponent": {
+   "commands": 47,
+   "framesAdded": 235,
+   "rows": 5
+  },
+  "21 SLAM player": {
+   "commands": 26,
+   "framesAdded": 130,
+   "rows": 5
+  },
+  "210 FURY CUTTER opponent": {
+   "commands": 47,
+   "framesAdded": 141,
+   "rows": 3
+  },
+  "210 FURY CUTTER player": {
+   "commands": 37,
+   "framesAdded": 111,
+   "rows": 3
+  },
+  "211 STEEL WING opponent": {
+   "commands": 49,
+   "framesAdded": 245,
+   "rows": 5
+  },
+  "211 STEEL WING player": {
+   "commands": 30,
+   "framesAdded": 150,
+   "rows": 5
+  },
+  "212 MEAN LOOK opponent": {
+   "commands": 14,
+   "framesAdded": 70,
+   "rows": 5
+  },
+  "212 MEAN LOOK player": {
+   "commands": 13,
+   "framesAdded": 65,
+   "rows": 5
+  },
+  "213 ATTRACT opponent": {
+   "commands": 9,
+   "framesAdded": 45,
+   "rows": 5
+  },
+  "213 ATTRACT player": {
+   "commands": 65,
+   "framesAdded": 325,
+   "rows": 5
+  },
+  "214 SLEEP TALK opponent": {
+   "commands": 7,
+   "framesAdded": 35,
+   "rows": 5
+  },
+  "215 HEAL BELL opponent": {
+   "commands": 49,
+   "framesAdded": 245,
+   "rows": 5
+  },
+  "215 HEAL BELL player": {
+   "commands": 22,
+   "framesAdded": 110,
+   "rows": 5
+  },
+  "216 RETURN opponent": {
+   "commands": 27,
+   "framesAdded": 81,
+   "rows": 3
+  },
+  "216 RETURN player": {
+   "commands": 57,
+   "framesAdded": 171,
+   "rows": 3
+  },
+  "217 PRESENT opponent": {
+   "commands": 1,
+   "framesAdded": 3,
+   "rows": 3
+  },
+  "217 PRESENT player": {
+   "commands": 3,
+   "framesAdded": 9,
+   "rows": 3
+  },
+  "218 FRUSTRATION opponent": {
+   "commands": 40,
+   "framesAdded": 200,
+   "rows": 5
+  },
+  "218 FRUSTRATION player": {
+   "commands": 50,
+   "framesAdded": 250,
+   "rows": 5
+  },
+  "219 SAFEGUARD opponent": {
+   "commands": 54,
+   "framesAdded": 270,
+   "rows": 5
+  },
+  "219 SAFEGUARD player": {
+   "commands": 52,
+   "framesAdded": 260,
+   "rows": 5
+  },
+  "220 PAIN SPLIT opponent": {
+   "commands": 9,
+   "framesAdded": 27,
+   "rows": 3
+  },
+  "220 PAIN SPLIT player": {
+   "commands": 16,
+   "framesAdded": 48,
+   "rows": 3
+  },
+  "222 MAGNITUDE opponent": {
+   "commands": 9,
+   "framesAdded": 27,
+   "rows": 3
+  },
+  "222 MAGNITUDE player": {
+   "commands": 13,
+   "framesAdded": 39,
+   "rows": 3
+  },
+  "224 MEGAHORN opponent": {
+   "commands": 49,
+   "framesAdded": 147,
+   "rows": 3
+  },
+  "224 MEGAHORN player": {
+   "commands": 33,
+   "framesAdded": 99,
+   "rows": 3
+  },
+  "225 DRAGONBREATH opponent": {
+   "commands": 105,
+   "framesAdded": 315,
+   "rows": 3
+  },
+  "225 DRAGONBREATH player": {
+   "commands": 71,
+   "framesAdded": 213,
+   "rows": 3
+  },
+  "226 BATON PASS opponent": {
+   "commands": 14,
+   "framesAdded": 70,
+   "rows": 5
+  },
+  "226 BATON PASS player": {
+   "commands": 36,
+   "framesAdded": 180,
+   "rows": 5
+  },
+  "228 PURSUIT opponent": {
+   "commands": 34,
+   "framesAdded": 102,
+   "rows": 3
+  },
+  "228 PURSUIT player": {
+   "commands": 20,
+   "framesAdded": 60,
+   "rows": 3
+  },
+  "229 RAPID SPIN opponent": {
+   "commands": 5,
+   "framesAdded": 15,
+   "rows": 3
+  },
+  "229 RAPID SPIN player": {
+   "commands": 3,
+   "framesAdded": 9,
+   "rows": 3
+  },
+  "23 STOMP opponent": {
+   "commands": 18,
+   "framesAdded": 90,
+   "rows": 5
+  },
+  "23 STOMP player": {
+   "commands": 29,
+   "framesAdded": 145,
+   "rows": 5
+  },
+  "230 SWEET SCENT opponent": {
+   "commands": 50,
+   "framesAdded": 250,
+   "rows": 5
+  },
+  "230 SWEET SCENT player": {
+   "commands": 27,
+   "framesAdded": 135,
+   "rows": 5
+  },
+  "231 IRON TAIL opponent": {
+   "commands": 21,
+   "framesAdded": 105,
+   "rows": 5
+  },
+  "231 IRON TAIL player": {
+   "commands": 40,
+   "framesAdded": 200,
+   "rows": 5
+  },
+  "232 METAL CLAW opponent": {
+   "commands": 61,
+   "framesAdded": 183,
+   "rows": 3
+  },
+  "232 METAL CLAW player": {
+   "commands": 46,
+   "framesAdded": 138,
+   "rows": 3
+  },
+  "236 MOONLIGHT opponent": {
+   "commands": 19,
+   "framesAdded": 95,
+   "rows": 5
+  },
+  "236 MOONLIGHT player": {
+   "commands": 8,
+   "framesAdded": 40,
+   "rows": 5
+  },
+  "238 CROSS CHOP opponent": {
+   "commands": 50,
+   "framesAdded": 250,
+   "rows": 5
+  },
+  "238 CROSS CHOP player": {
+   "commands": 46,
+   "framesAdded": 230,
+   "rows": 5
+  },
+  "24 DOUBLE KICK opponent": {
+   "commands": 107,
+   "framesAdded": 321,
+   "rows": 3
+  },
+  "24 DOUBLE KICK player": {
+   "commands": 127,
+   "framesAdded": 381,
+   "rows": 3
+  },
+  "240 RAIN DANCE opponent": {
+   "commands": 95,
+   "framesAdded": 285,
+   "rows": 3
+  },
+  "240 RAIN DANCE player": {
+   "commands": 115,
+   "framesAdded": 345,
+   "rows": 3
+  },
+  "241 SUNNY DAY opponent": {
+   "commands": 48,
+   "framesAdded": 144,
+   "rows": 3
+  },
+  "241 SUNNY DAY player": {
+   "commands": 49,
+   "framesAdded": 147,
+   "rows": 3
+  },
+  "242 CRUNCH opponent": {
+   "commands": 78,
+   "framesAdded": 390,
+   "rows": 5
+  },
+  "242 CRUNCH player": {
+   "commands": 107,
+   "framesAdded": 535,
+   "rows": 5
+  },
+  "243 MIRROR COAT opponent": {
+   "commands": 28,
+   "framesAdded": 140,
+   "rows": 5
+  },
+  "243 MIRROR COAT player": {
+   "commands": 27,
+   "framesAdded": 135,
+   "rows": 5
+  },
+  "244 PSYCH UP opponent": {
+   "commands": 33,
+   "framesAdded": 99,
+   "rows": 3
+  },
+  "244 PSYCH UP player": {
+   "commands": 58,
+   "framesAdded": 174,
+   "rows": 3
+  },
+  "245 EXTREMESPEED opponent": {
+   "commands": 21,
+   "framesAdded": 63,
+   "rows": 3
+  },
+  "245 EXTREMESPEED player": {
+   "commands": 11,
+   "framesAdded": 33,
+   "rows": 3
+  },
+  "246 ANCIENTPOWER opponent": {
+   "commands": 119,
+   "framesAdded": 595,
+   "rows": 5
+  },
+  "246 ANCIENTPOWER player": {
+   "commands": 120,
+   "framesAdded": 600,
+   "rows": 5
+  },
+  "247 SHADOW BALL opponent": {
+   "commands": 251,
+   "framesAdded": 753,
+   "rows": 3
+  },
+  "247 SHADOW BALL player": {
+   "commands": 231,
+   "framesAdded": 693,
+   "rows": 3
+  },
+  "248 FUTURE SIGHT opponent": {
+   "commands": 28,
+   "framesAdded": 84,
+   "rows": 3
+  },
+  "248 FUTURE SIGHT player": {
+   "commands": 29,
+   "framesAdded": 87,
+   "rows": 3
+  },
+  "25 MEGA KICK opponent": {
+   "commands": 80,
+   "framesAdded": 400,
+   "rows": 5
+  },
+  "25 MEGA KICK player": {
+   "commands": 54,
+   "framesAdded": 270,
+   "rows": 5
+  },
+  "250 WHIRLPOOL opponent": {
+   "commands": 28,
+   "framesAdded": 140,
+   "rows": 5
+  },
+  "250 WHIRLPOOL player": {
+   "commands": 16,
+   "framesAdded": 80,
+   "rows": 5
+  },
+  "252 FAKE OUT opponent": {
+   "commands": 29,
+   "framesAdded": 87,
+   "rows": 3
+  },
+  "252 FAKE OUT player": {
+   "commands": 15,
+   "framesAdded": 45,
+   "rows": 3
+  },
+  "253 UPROAR opponent": {
+   "commands": 1,
+   "framesAdded": 5,
+   "rows": 5
+  },
+  "253 UPROAR player": {
+   "commands": 12,
+   "framesAdded": 60,
+   "rows": 5
+  },
+  "254 STOCKPILE opponent": {
+   "commands": 26,
+   "framesAdded": 130,
+   "rows": 5
+  },
+  "254 STOCKPILE player": {
+   "commands": 23,
+   "framesAdded": 115,
+   "rows": 5
+  },
+  "255 SPIT UP opponent": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "256 SWALLOW opponent": {
+   "commands": 11,
+   "framesAdded": 33,
+   "rows": 3
+  },
+  "256 SWALLOW player": {
+   "commands": 19,
+   "framesAdded": 57,
+   "rows": 3
+  },
+  "257 HEAT WAVE opponent": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "257 HEAT WAVE player": {
+   "commands": 3,
+   "framesAdded": 15,
+   "rows": 5
+  },
+  "258 HAIL opponent": {
+   "commands": 40,
+   "framesAdded": 120,
+   "rows": 3
+  },
+  "258 HAIL player": {
+   "commands": 32,
+   "framesAdded": 96,
+   "rows": 3
+  },
+  "259 TORMENT opponent": {
+   "commands": 13,
+   "framesAdded": 65,
+   "rows": 5
+  },
+  "259 TORMENT player": {
+   "commands": 20,
+   "framesAdded": 100,
+   "rows": 5
+  },
+  "260 FLATTER opponent": {
+   "commands": 12,
+   "framesAdded": 36,
+   "rows": 3
+  },
+  "260 FLATTER player": {
+   "commands": 22,
+   "framesAdded": 66,
+   "rows": 3
+  },
+  "261 WILL-O-WISP opponent": {
+   "commands": 8,
+   "framesAdded": 24,
+   "rows": 3
+  },
+  "261 WILL-O-WISP player": {
+   "commands": 23,
+   "framesAdded": 69,
+   "rows": 3
+  },
+  "262 MEMENTO player": {
+   "commands": 4,
+   "framesAdded": 12,
+   "rows": 3
+  },
+  "263 FACADE opponent": {
+   "commands": 94,
+   "framesAdded": 470,
+   "rows": 5
+  },
+  "263 FACADE player": {
+   "commands": 99,
+   "framesAdded": 495,
+   "rows": 5
+  },
+  "264 FOCUS PUNCH opponent": {
+   "commands": 19,
+   "framesAdded": 95,
+   "rows": 5
+  },
+  "264 FOCUS PUNCH player": {
+   "commands": 8,
+   "framesAdded": 40,
+   "rows": 5
+  },
+  "265 SMELLINGSALT opponent": {
+   "commands": 8,
+   "framesAdded": 40,
+   "rows": 5
+  },
+  "265 SMELLINGSALT player": {
+   "commands": 3,
+   "framesAdded": 15,
+   "rows": 5
+  },
+  "266 FOLLOW ME opponent": {
+   "commands": 89,
+   "framesAdded": 445,
+   "rows": 5
+  },
+  "266 FOLLOW ME player": {
+   "commands": 101,
+   "framesAdded": 505,
+   "rows": 5
+  },
+  "269 TAUNT opponent": {
+   "commands": 18,
+   "framesAdded": 90,
+   "rows": 5
+  },
+  "269 TAUNT player": {
+   "commands": 10,
+   "framesAdded": 50,
+   "rows": 5
+  },
+  "27 ROLLING KICK opponent": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "27 ROLLING KICK player": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "271 TRICK opponent": {
+   "commands": 3,
+   "framesAdded": 15,
+   "rows": 5
+  },
+  "271 TRICK player": {
+   "commands": 17,
+   "framesAdded": 85,
+   "rows": 5
+  },
+  "272 ROLE PLAY opponent": {
+   "commands": 2,
+   "framesAdded": 10,
+   "rows": 5
+  },
+  "272 ROLE PLAY player": {
+   "commands": 8,
+   "framesAdded": 40,
+   "rows": 5
+  },
+  "273 WISH opponent": {
+   "commands": 67,
+   "framesAdded": 201,
+   "rows": 3
+  },
+  "273 WISH player": {
+   "commands": 88,
+   "framesAdded": 264,
+   "rows": 3
+  },
+  "275 INGRAIN opponent": {
+   "commands": 11,
+   "framesAdded": 55,
+   "rows": 5
+  },
+  "275 INGRAIN player": {
+   "commands": 16,
+   "framesAdded": 80,
+   "rows": 5
+  },
+  "276 SUPERPOWER opponent": {
+   "commands": 3,
+   "framesAdded": 9,
+   "rows": 3
+  },
+  "276 SUPERPOWER player": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "277 MAGIC COAT opponent": {
+   "commands": 39,
+   "framesAdded": 195,
+   "rows": 5
+  },
+  "277 MAGIC COAT player": {
+   "commands": 27,
+   "framesAdded": 135,
+   "rows": 5
+  },
+  "278 RECYCLE opponent": {
+   "commands": 7,
+   "framesAdded": 21,
+   "rows": 3
+  },
+  "278 RECYCLE player": {
+   "commands": 11,
+   "framesAdded": 33,
+   "rows": 3
+  },
+  "279 REVENGE opponent": {
+   "commands": 5,
+   "framesAdded": 15,
+   "rows": 3
+  },
+  "279 REVENGE player": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "28 SAND-ATTACK opponent": {
+   "commands": 78,
+   "framesAdded": 234,
+   "rows": 3
+  },
+  "28 SAND-ATTACK player": {
+   "commands": 65,
+   "framesAdded": 195,
+   "rows": 3
+  },
+  "280 BRICK BREAK opponent": {
+   "commands": 183,
+   "framesAdded": 915,
+   "rows": 5
+  },
+  "280 BRICK BREAK player": {
+   "commands": 147,
+   "framesAdded": 735,
+   "rows": 5
+  },
+  "281 YAWN opponent": {
+   "commands": 51,
+   "framesAdded": 255,
+   "rows": 5
+  },
+  "281 YAWN player": {
+   "commands": 52,
+   "framesAdded": 260,
+   "rows": 5
+  },
+  "282 KNOCK OFF opponent": {
+   "commands": 54,
+   "framesAdded": 162,
+   "rows": 3
+  },
+  "282 KNOCK OFF player": {
+   "commands": 61,
+   "framesAdded": 183,
+   "rows": 3
+  },
+  "283 ENDEAVOR opponent": {
+   "commands": 15,
+   "framesAdded": 75,
+   "rows": 5
+  },
+  "283 ENDEAVOR player": {
+   "commands": 9,
+   "framesAdded": 45,
+   "rows": 5
+  },
+  "284 ERUPTION opponent": {
+   "commands": 6,
+   "framesAdded": 18,
+   "rows": 3
+  },
+  "284 ERUPTION player": {
+   "commands": 3,
+   "framesAdded": 9,
+   "rows": 3
+  },
+  "285 SKILL SWAP opponent": {
+   "commands": 6,
+   "framesAdded": 18,
+   "rows": 3
+  },
+  "285 SKILL SWAP player": {
+   "commands": 32,
+   "framesAdded": 96,
+   "rows": 3
+  },
+  "288 GRUDGE opponent": {
+   "commands": 20,
+   "framesAdded": 100,
+   "rows": 5
+  },
+  "288 GRUDGE player": {
+   "commands": 18,
+   "framesAdded": 90,
+   "rows": 5
+  },
+  "29 HEADBUTT opponent": {
+   "commands": 26,
+   "framesAdded": 130,
+   "rows": 5
+  },
+  "29 HEADBUTT player": {
+   "commands": 63,
+   "framesAdded": 315,
+   "rows": 5
+  },
+  "290 SECRET POWER opponent": {
+   "commands": 51,
+   "framesAdded": 255,
+   "rows": 5
+  },
+  "290 SECRET POWER player": {
+   "commands": 37,
+   "framesAdded": 185,
+   "rows": 5
+  },
+  "291 DIVE opponent": {
+   "commands": 81,
+   "framesAdded": 243,
+   "rows": 3
+  },
+  "291 DIVE player": {
+   "commands": 53,
+   "framesAdded": 159,
+   "rows": 3
+  },
+  "294 TAIL GLOW opponent": {
+   "commands": 7,
+   "framesAdded": 35,
+   "rows": 5
+  },
+  "294 TAIL GLOW player": {
+   "commands": 2,
+   "framesAdded": 10,
+   "rows": 5
+  },
+  "297 FEATHERDANCE opponent": {
+   "commands": 11,
+   "framesAdded": 33,
+   "rows": 3
+  },
+  "297 FEATHERDANCE player": {
+   "commands": 20,
+   "framesAdded": 60,
+   "rows": 3
+  },
+  "298 TEETER DANCE opponent": {
+   "commands": 4,
+   "framesAdded": 12,
+   "rows": 3
+  },
+  "298 TEETER DANCE player": {
+   "commands": 13,
+   "framesAdded": 39,
+   "rows": 3
+  },
+  "299 BLAZE KICK opponent": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "299 BLAZE KICK player": {
+   "commands": 3,
+   "framesAdded": 9,
+   "rows": 3
+  },
+  "3 DOUBLESLAP opponent": {
+   "commands": 7,
+   "framesAdded": 21,
+   "rows": 3
+  },
+  "3 DOUBLESLAP player": {
+   "commands": 64,
+   "framesAdded": 192,
+   "rows": 3
+  },
+  "301 ICE BALL opponent": {
+   "commands": 28,
+   "framesAdded": 84,
+   "rows": 3
+  },
+  "301 ICE BALL player": {
+   "commands": 43,
+   "framesAdded": 129,
+   "rows": 3
+  },
+  "302 NEEDLE ARM opponent": {
+   "commands": 9,
+   "framesAdded": 45,
+   "rows": 5
+  },
+  "302 NEEDLE ARM player": {
+   "commands": 3,
+   "framesAdded": 15,
+   "rows": 5
+  },
+  "304 HYPER VOICE player": {
+   "commands": 8,
+   "framesAdded": 24,
+   "rows": 3
+  },
+  "305 POISON FANG opponent": {
+   "commands": 22,
+   "framesAdded": 66,
+   "rows": 3
+  },
+  "305 POISON FANG player": {
+   "commands": 8,
+   "framesAdded": 24,
+   "rows": 3
+  },
+  "306 CRUSH CLAW opponent": {
+   "commands": 45,
+   "framesAdded": 225,
+   "rows": 5
+  },
+  "306 CRUSH CLAW player": {
+   "commands": 36,
+   "framesAdded": 180,
+   "rows": 5
+  },
+  "309 METEOR MASH opponent": {
+   "commands": 25,
+   "framesAdded": 75,
+   "rows": 3
+  },
+  "309 METEOR MASH player": {
+   "commands": 30,
+   "framesAdded": 90,
+   "rows": 3
+  },
+  "310 ASTONISH opponent": {
+   "commands": 12,
+   "framesAdded": 36,
+   "rows": 3
+  },
+  "310 ASTONISH player": {
+   "commands": 16,
+   "framesAdded": 48,
+   "rows": 3
+  },
+  "312 AROMATHERAPY opponent": {
+   "commands": 1,
+   "framesAdded": 5,
+   "rows": 5
+  },
+  "312 AROMATHERAPY player": {
+   "commands": 1,
+   "framesAdded": 5,
+   "rows": 5
+  },
+  "313 FAKE TEARS opponent": {
+   "commands": 41,
+   "framesAdded": 123,
+   "rows": 3
+  },
+  "313 FAKE TEARS player": {
+   "commands": 48,
+   "framesAdded": 144,
+   "rows": 3
+  },
+  "314 AIR CUTTER opponent": {
+   "commands": 27,
+   "framesAdded": 81,
+   "rows": 3
+  },
+  "314 AIR CUTTER player": {
+   "commands": 13,
+   "framesAdded": 39,
+   "rows": 3
+  },
+  "315 OVERHEAT opponent": {
+   "commands": 52,
+   "framesAdded": 156,
+   "rows": 3
+  },
+  "315 OVERHEAT player": {
+   "commands": 60,
+   "framesAdded": 180,
+   "rows": 3
+  },
+  "317 ROCK TOMB opponent": {
+   "commands": 105,
+   "framesAdded": 525,
+   "rows": 5
+  },
+  "317 ROCK TOMB player": {
+   "commands": 54,
+   "framesAdded": 270,
+   "rows": 5
+  },
+  "318 SILVER WIND opponent": {
+   "commands": 80,
+   "framesAdded": 240,
+   "rows": 3
+  },
+  "318 SILVER WIND player": {
+   "commands": 81,
+   "framesAdded": 243,
+   "rows": 3
+  },
+  "319 METAL SOUND opponent": {
+   "commands": 8,
+   "framesAdded": 40,
+   "rows": 5
+  },
+  "319 METAL SOUND player": {
+   "commands": 6,
+   "framesAdded": 30,
+   "rows": 5
+  },
+  "32 HORN DRILL opponent": {
+   "commands": 11,
+   "framesAdded": 55,
+   "rows": 5
+  },
+  "32 HORN DRILL player": {
+   "commands": 5,
+   "framesAdded": 25,
+   "rows": 5
+  },
+  "320 GRASSWHISTLE opponent": {
+   "commands": 20,
+   "framesAdded": 60,
+   "rows": 3
+  },
+  "320 GRASSWHISTLE player": {
+   "commands": 9,
+   "framesAdded": 27,
+   "rows": 3
+  },
+  "321 TICKLE opponent": {
+   "commands": 16,
+   "framesAdded": 80,
+   "rows": 5
+  },
+  "321 TICKLE player": {
+   "commands": 7,
+   "framesAdded": 35,
+   "rows": 5
+  },
+  "322 COSMIC POWER opponent": {
+   "commands": 18,
+   "framesAdded": 54,
+   "rows": 3
+  },
+  "322 COSMIC POWER player": {
+   "commands": 43,
+   "framesAdded": 129,
+   "rows": 3
+  },
+  "323 WATER SPOUT opponent": {
+   "commands": 9,
+   "framesAdded": 27,
+   "rows": 3
+  },
+  "324 SIGNAL BEAM opponent": {
+   "commands": 22,
+   "framesAdded": 66,
+   "rows": 3
+  },
+  "324 SIGNAL BEAM player": {
+   "commands": 22,
+   "framesAdded": 66,
+   "rows": 3
+  },
+  "325 SHADOW PUNCH opponent": {
+   "commands": 10,
+   "framesAdded": 30,
+   "rows": 3
+  },
+  "325 SHADOW PUNCH player": {
+   "commands": 17,
+   "framesAdded": 51,
+   "rows": 3
+  },
+  "326 EXTRASENSORY opponent": {
+   "commands": 22,
+   "framesAdded": 66,
+   "rows": 3
+  },
+  "326 EXTRASENSORY player": {
+   "commands": 24,
+   "framesAdded": 72,
+   "rows": 3
+  },
+  "327 SKY UPPERCUT opponent": {
+   "commands": 10,
+   "framesAdded": 30,
+   "rows": 3
+  },
+  "327 SKY UPPERCUT player": {
+   "commands": 23,
+   "framesAdded": 69,
+   "rows": 3
+  },
+  "328 SAND TOMB player": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "329 SHEER COLD opponent": {
+   "commands": 4,
+   "framesAdded": 12,
+   "rows": 3
+  },
+  "329 SHEER COLD player": {
+   "commands": 4,
+   "framesAdded": 12,
+   "rows": 3
+  },
+  "330 MUDDY WATER opponent": {
+   "commands": 9,
+   "framesAdded": 27,
+   "rows": 3
+  },
+  "330 MUDDY WATER player": {
+   "commands": 7,
+   "framesAdded": 21,
+   "rows": 3
+  },
+  "332 AERIAL ACE opponent": {
+   "commands": 350,
+   "framesAdded": 1750,
+   "rows": 5
+  },
+  "332 AERIAL ACE player": {
+   "commands": 346,
+   "framesAdded": 1730,
+   "rows": 5
+  },
+  "334 IRON DEFENSE opponent": {
+   "commands": 31,
+   "framesAdded": 155,
+   "rows": 5
+  },
+  "334 IRON DEFENSE player": {
+   "commands": 23,
+   "framesAdded": 115,
+   "rows": 5
+  },
+  "335 BLOCK opponent": {
+   "commands": 13,
+   "framesAdded": 65,
+   "rows": 5
+  },
+  "335 BLOCK player": {
+   "commands": 13,
+   "framesAdded": 65,
+   "rows": 5
+  },
+  "336 HOWL opponent": {
+   "commands": 3,
+   "framesAdded": 15,
+   "rows": 5
+  },
+  "336 HOWL player": {
+   "commands": 8,
+   "framesAdded": 40,
+   "rows": 5
+  },
+  "337 DRAGON CLAW opponent": {
+   "commands": 36,
+   "framesAdded": 108,
+   "rows": 3
+  },
+  "337 DRAGON CLAW player": {
+   "commands": 31,
+   "framesAdded": 93,
+   "rows": 3
+  },
+  "339 BULK UP opponent": {
+   "commands": 25,
+   "framesAdded": 125,
+   "rows": 5
+  },
+  "339 BULK UP player": {
+   "commands": 22,
+   "framesAdded": 110,
+   "rows": 5
+  },
+  "34 BODY SLAM opponent": {
+   "commands": 137,
+   "framesAdded": 685,
+   "rows": 5
+  },
+  "34 BODY SLAM player": {
+   "commands": 115,
+   "framesAdded": 575,
+   "rows": 5
+  },
+  "340 BOUNCE opponent": {
+   "commands": 54,
+   "framesAdded": 162,
+   "rows": 3
+  },
+  "340 BOUNCE player": {
+   "commands": 45,
+   "framesAdded": 135,
+   "rows": 3
+  },
+  "341 MUD SHOT opponent": {
+   "commands": 7,
+   "framesAdded": 35,
+   "rows": 5
+  },
+  "341 MUD SHOT player": {
+   "commands": 18,
+   "framesAdded": 90,
+   "rows": 5
+  },
+  "342 POISON TAIL opponent": {
+   "commands": 7,
+   "framesAdded": 21,
+   "rows": 3
+  },
+  "342 POISON TAIL player": {
+   "commands": 3,
+   "framesAdded": 9,
+   "rows": 3
+  },
+  "343 COVET opponent": {
+   "commands": 9,
+   "framesAdded": 27,
+   "rows": 3
+  },
+  "343 COVET player": {
+   "commands": 5,
+   "framesAdded": 15,
+   "rows": 3
+  },
+  "345 MAGICAL LEAF opponent": {
+   "commands": 76,
+   "framesAdded": 380,
+   "rows": 5
+  },
+  "345 MAGICAL LEAF player": {
+   "commands": 85,
+   "framesAdded": 425,
+   "rows": 5
+  },
+  "347 CALM MIND opponent": {
+   "commands": 57,
+   "framesAdded": 171,
+   "rows": 3
+  },
+  "347 CALM MIND player": {
+   "commands": 64,
+   "framesAdded": 192,
+   "rows": 3
+  },
+  "348 LEAF BLADE opponent": {
+   "commands": 37,
+   "framesAdded": 185,
+   "rows": 5
+  },
+  "348 LEAF BLADE player": {
+   "commands": 24,
+   "framesAdded": 120,
+   "rows": 5
+  },
+  "349 DRAGON DANCE opponent": {
+   "commands": 63,
+   "framesAdded": 315,
+   "rows": 5
+  },
+  "349 DRAGON DANCE player": {
+   "commands": 57,
+   "framesAdded": 285,
+   "rows": 5
+  },
+  "35 WRAP opponent": {
+   "commands": 31,
+   "framesAdded": 155,
+   "rows": 5
+  },
+  "35 WRAP player": {
+   "commands": 34,
+   "framesAdded": 170,
+   "rows": 5
+  },
+  "350 ROCK BLAST opponent": {
+   "commands": 28,
+   "framesAdded": 84,
+   "rows": 3
+  },
+  "350 ROCK BLAST player": {
+   "commands": 24,
+   "framesAdded": 72,
+   "rows": 3
+  },
+  "351 SHOCK WAVE opponent": {
+   "commands": 23,
+   "framesAdded": 69,
+   "rows": 3
+  },
+  "351 SHOCK WAVE player": {
+   "commands": 35,
+   "framesAdded": 105,
+   "rows": 3
+  },
+  "352 WATER PULSE opponent": {
+   "commands": 81,
+   "framesAdded": 243,
+   "rows": 3
+  },
+  "352 WATER PULSE player": {
+   "commands": 151,
+   "framesAdded": 453,
+   "rows": 3
+  },
+  "36 TAKE DOWN opponent": {
+   "commands": 22,
+   "framesAdded": 110,
+   "rows": 5
+  },
+  "36 TAKE DOWN player": {
+   "commands": 9,
+   "framesAdded": 45,
+   "rows": 5
+  },
+  "37 THRASH opponent": {
+   "commands": 9,
+   "framesAdded": 27,
+   "rows": 3
+  },
+  "37 THRASH player": {
+   "commands": 19,
+   "framesAdded": 57,
+   "rows": 3
+  },
+  "38 DOUBLE-EDGE opponent": {
+   "commands": 173,
+   "framesAdded": 865,
+   "rows": 5
+  },
+  "38 DOUBLE-EDGE player": {
+   "commands": 140,
+   "framesAdded": 700,
+   "rows": 5
+  },
+  "39 TAIL WHIP opponent": {
+   "commands": 17,
+   "framesAdded": 85,
+   "rows": 5
+  },
+  "39 TAIL WHIP player": {
+   "commands": 12,
+   "framesAdded": 60,
+   "rows": 5
+  },
+  "4 COMET PUNCH opponent": {
+   "commands": 14,
+   "framesAdded": 42,
+   "rows": 3
+  },
+  "4 COMET PUNCH player": {
+   "commands": 20,
+   "framesAdded": 60,
+   "rows": 3
+  },
+  "41 TWINEEDLE opponent": {
+   "commands": 11,
+   "framesAdded": 33,
+   "rows": 3
+  },
+  "41 TWINEEDLE player": {
+   "commands": 13,
+   "framesAdded": 39,
+   "rows": 3
+  },
+  "42 PIN MISSILE opponent": {
+   "commands": 13,
+   "framesAdded": 65,
+   "rows": 5
+  },
+  "42 PIN MISSILE player": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "43 LEER opponent": {
+   "commands": 13,
+   "framesAdded": 65,
+   "rows": 5
+  },
+  "43 LEER player": {
+   "commands": 7,
+   "framesAdded": 35,
+   "rows": 5
+  },
+  "44 BITE opponent": {
+   "commands": 176,
+   "framesAdded": 528,
+   "rows": 3
+  },
+  "44 BITE player": {
+   "commands": 147,
+   "framesAdded": 441,
+   "rows": 3
+  },
+  "46 ROAR opponent": {
+   "commands": 20,
+   "framesAdded": 60,
+   "rows": 3
+  },
+  "46 ROAR player": {
+   "commands": 86,
+   "framesAdded": 258,
+   "rows": 3
+  },
+  "47 SING opponent": {
+   "commands": 25,
+   "framesAdded": 75,
+   "rows": 3
+  },
+  "47 SING player": {
+   "commands": 20,
+   "framesAdded": 60,
+   "rows": 3
+  },
+  "49 SONICBOOM opponent": {
+   "commands": 1,
+   "framesAdded": 5,
+   "rows": 5
+  },
+  "49 SONICBOOM player": {
+   "commands": 5,
+   "framesAdded": 25,
+   "rows": 5
+  },
+  "5 MEGA PUNCH opponent": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "5 MEGA PUNCH player": {
+   "commands": 4,
+   "framesAdded": 20,
+   "rows": 5
+  },
+  "50 DISABLE opponent": {
+   "commands": 5,
+   "framesAdded": 25,
+   "rows": 5
+  },
+  "50 DISABLE player": {
+   "commands": 12,
+   "framesAdded": 60,
+   "rows": 5
+  },
+  "51 ACID opponent": {
+   "commands": 35,
+   "framesAdded": 105,
+   "rows": 3
+  },
+  "51 ACID player": {
+   "commands": 39,
+   "framesAdded": 117,
+   "rows": 3
+  },
+  "52 EMBER opponent": {
+   "commands": 58,
+   "framesAdded": 174,
+   "rows": 3
+  },
+  "52 EMBER player": {
+   "commands": 42,
+   "framesAdded": 126,
+   "rows": 3
+  },
+  "55 WATER GUN opponent": {
+   "commands": 12,
+   "framesAdded": 36,
+   "rows": 3
+  },
+  "55 WATER GUN player": {
+   "commands": 20,
+   "framesAdded": 60,
+   "rows": 3
+  },
+  "56 HYDRO PUMP opponent": {
+   "commands": 64,
+   "framesAdded": 320,
+   "rows": 5
+  },
+  "56 HYDRO PUMP player": {
+   "commands": 62,
+   "framesAdded": 310,
+   "rows": 5
+  },
+  "57 SURF opponent": {
+   "commands": 376,
+   "framesAdded": 1128,
+   "rows": 3
+  },
+  "57 SURF player": {
+   "commands": 260,
+   "framesAdded": 780,
+   "rows": 3
+  },
+  "58 ICE BEAM opponent": {
+   "commands": 198,
+   "framesAdded": 594,
+   "rows": 3
+  },
+  "58 ICE BEAM player": {
+   "commands": 196,
+   "framesAdded": 588,
+   "rows": 3
+  },
+  "59 BLIZZARD opponent": {
+   "commands": 36,
+   "framesAdded": 108,
+   "rows": 3
+  },
+  "59 BLIZZARD player": {
+   "commands": 43,
+   "framesAdded": 129,
+   "rows": 3
+  },
+  "60 PSYBEAM opponent": {
+   "commands": 64,
+   "framesAdded": 320,
+   "rows": 5
+  },
+  "60 PSYBEAM player": {
+   "commands": 92,
+   "framesAdded": 460,
+   "rows": 5
+  },
+  "61 BUBBLEBEAM opponent": {
+   "commands": 65,
+   "framesAdded": 325,
+   "rows": 5
+  },
+  "61 BUBBLEBEAM player": {
+   "commands": 97,
+   "framesAdded": 485,
+   "rows": 5
+  },
+  "62 AURORA BEAM opponent": {
+   "commands": 29,
+   "framesAdded": 145,
+   "rows": 5
+  },
+  "62 AURORA BEAM player": {
+   "commands": 18,
+   "framesAdded": 90,
+   "rows": 5
+  },
+  "63 HYPER BEAM player": {
+   "commands": 7,
+   "framesAdded": 21,
+   "rows": 3
+  },
+  "65 DRILL PECK opponent": {
+   "commands": 75,
+   "framesAdded": 375,
+   "rows": 5
+  },
+  "65 DRILL PECK player": {
+   "commands": 30,
+   "framesAdded": 150,
+   "rows": 5
+  },
+  "66 SUBMISSION opponent": {
+   "commands": 3,
+   "framesAdded": 15,
+   "rows": 5
+  },
+  "66 SUBMISSION player": {
+   "commands": 7,
+   "framesAdded": 35,
+   "rows": 5
+  },
+  "67 LOW KICK opponent": {
+   "commands": 23,
+   "framesAdded": 115,
+   "rows": 5
+  },
+  "67 LOW KICK player": {
+   "commands": 11,
+   "framesAdded": 55,
+   "rows": 5
+  },
+  "68 COUNTER opponent": {
+   "commands": 47,
+   "framesAdded": 235,
+   "rows": 5
+  },
+  "68 COUNTER player": {
+   "commands": 56,
+   "framesAdded": 280,
+   "rows": 5
+  },
+  "69 SEISMIC TOSS opponent": {
+   "commands": 61,
+   "framesAdded": 305,
+   "rows": 5
+  },
+  "69 SEISMIC TOSS player": {
+   "commands": 42,
+   "framesAdded": 210,
+   "rows": 5
+  },
+  "7 FIRE PUNCH opponent": {
+   "commands": 72,
+   "framesAdded": 216,
+   "rows": 3
+  },
+  "7 FIRE PUNCH player": {
+   "commands": 75,
+   "framesAdded": 225,
+   "rows": 3
+  },
+  "71 ABSORB opponent": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "71 ABSORB player": {
+   "commands": 13,
+   "framesAdded": 39,
+   "rows": 3
+  },
+  "72 MEGA DRAIN opponent": {
+   "commands": 21,
+   "framesAdded": 63,
+   "rows": 3
+  },
+  "72 MEGA DRAIN player": {
+   "commands": 28,
+   "framesAdded": 84,
+   "rows": 3
+  },
+  "73 LEECH SEED opponent": {
+   "commands": 46,
+   "framesAdded": 138,
+   "rows": 3
+  },
+  "73 LEECH SEED player": {
+   "commands": 31,
+   "framesAdded": 93,
+   "rows": 3
+  },
+  "74 GROWTH opponent": {
+   "commands": 29,
+   "framesAdded": 87,
+   "rows": 3
+  },
+  "74 GROWTH player": {
+   "commands": 8,
+   "framesAdded": 24,
+   "rows": 3
+  },
+  "75 RAZOR LEAF opponent": {
+   "commands": 16,
+   "framesAdded": 48,
+   "rows": 3
+  },
+  "75 RAZOR LEAF player": {
+   "commands": 24,
+   "framesAdded": 72,
+   "rows": 3
+  },
+  "76 SOLARBEAM opponent": {
+   "commands": 91,
+   "framesAdded": 273,
+   "rows": 3
+  },
+  "76 SOLARBEAM player": {
+   "commands": 83,
+   "framesAdded": 249,
+   "rows": 3
+  },
+  "78 STUN SPORE opponent": {
+   "commands": 30,
+   "framesAdded": 150,
+   "rows": 5
+  },
+  "78 STUN SPORE player": {
+   "commands": 23,
+   "framesAdded": 115,
+   "rows": 5
+  },
+  "79 SLEEP POWDER opponent": {
+   "commands": 68,
+   "framesAdded": 340,
+   "rows": 5
+  },
+  "79 SLEEP POWDER player": {
+   "commands": 34,
+   "framesAdded": 170,
+   "rows": 5
+  },
+  "8 ICE PUNCH opponent": {
+   "commands": 55,
+   "framesAdded": 165,
+   "rows": 3
+  },
+  "8 ICE PUNCH player": {
+   "commands": 55,
+   "framesAdded": 165,
+   "rows": 3
+  },
+  "80 PETAL DANCE opponent": {
+   "commands": 53,
+   "framesAdded": 159,
+   "rows": 3
+  },
+  "80 PETAL DANCE player": {
+   "commands": 76,
+   "framesAdded": 228,
+   "rows": 3
+  },
+  "82 DRAGON RAGE player": {
+   "commands": 2,
+   "framesAdded": 6,
+   "rows": 3
+  },
+  "83 FIRE SPIN opponent": {
+   "commands": 37,
+   "framesAdded": 185,
+   "rows": 5
+  },
+  "83 FIRE SPIN player": {
+   "commands": 15,
+   "framesAdded": 75,
+   "rows": 5
+  },
+  "85 THUNDERBOLT opponent": {
+   "commands": 181,
+   "framesAdded": 905,
+   "rows": 5
+  },
+  "85 THUNDERBOLT player": {
+   "commands": 148,
+   "framesAdded": 740,
+   "rows": 5
+  },
+  "86 THUNDER WAVE opponent": {
+   "commands": 112,
+   "framesAdded": 560,
+   "rows": 5
+  },
+  "86 THUNDER WAVE player": {
+   "commands": 114,
+   "framesAdded": 570,
+   "rows": 5
+  },
+  "87 THUNDER opponent": {
+   "commands": 37,
+   "framesAdded": 185,
+   "rows": 5
+  },
+  "87 THUNDER player": {
+   "commands": 32,
+   "framesAdded": 160,
+   "rows": 5
+  },
+  "88 ROCK THROW opponent": {
+   "commands": 5,
+   "framesAdded": 25,
+   "rows": 5
+  },
+  "88 ROCK THROW player": {
+   "commands": 8,
+   "framesAdded": 40,
+   "rows": 5
+  },
+  "89 EARTHQUAKE opponent": {
+   "commands": 514,
+   "framesAdded": 1542,
+   "rows": 3
+  },
+  "89 EARTHQUAKE player": {
+   "commands": 403,
+   "framesAdded": 1209,
+   "rows": 3
+  },
+  "90 FISSURE opponent": {
+   "commands": 2,
+   "framesAdded": 10,
+   "rows": 5
+  },
+  "90 FISSURE player": {
+   "commands": 6,
+   "framesAdded": 30,
+   "rows": 5
+  },
+  "91 DIG opponent": {
+   "commands": 327,
+   "framesAdded": 981,
+   "rows": 3
+  },
+  "91 DIG player": {
+   "commands": 258,
+   "framesAdded": 774,
+   "rows": 3
+  },
+  "92 TOXIC opponent": {
+   "commands": 79,
+   "framesAdded": 237,
+   "rows": 3
+  },
+  "92 TOXIC player": {
+   "commands": 83,
+   "framesAdded": 249,
+   "rows": 3
+  },
+  "93 CONFUSION opponent": {
+   "commands": 43,
+   "framesAdded": 215,
+   "rows": 5
+  },
+  "93 CONFUSION player": {
+   "commands": 64,
+   "framesAdded": 320,
+   "rows": 5
+  },
+  "94 PSYCHIC opponent": {
+   "commands": 351,
+   "framesAdded": 1755,
+   "rows": 5
+  },
+  "94 PSYCHIC player": {
+   "commands": 269,
+   "framesAdded": 1345,
+   "rows": 5
+  },
+  "95 HYPNOSIS opponent": {
+   "commands": 19,
+   "framesAdded": 95,
+   "rows": 5
+  },
+  "95 HYPNOSIS player": {
+   "commands": 35,
+   "framesAdded": 175,
+   "rows": 5
+  },
+  "97 AGILITY opponent": {
+   "commands": 69,
+   "framesAdded": 345,
+   "rows": 5
+  },
+  "97 AGILITY player": {
+   "commands": 76,
+   "framesAdded": 380,
+   "rows": 5
+  },
+  "98 QUICK ATTACK opponent": {
+   "commands": 143,
+   "framesAdded": 715,
+   "rows": 5
+  },
+  "98 QUICK ATTACK player": {
+   "commands": 144,
+   "framesAdded": 720,
+   "rows": 5
+  }
+ },
+ "commands": [
+  27427,
+  27427
+ ],
+ "frames": [
+  4065771,
+  4160919
+ ],
+ "liveFrames": [
+  4037631,
+  4132462
+ ],
+ "live": [
+  27140,
+  27140
+ ],
+ "moved": 23870,
+ "liveMoved": 23779,
+ "framesAdded": 95148,
+ "swapsKept0": 135
+}

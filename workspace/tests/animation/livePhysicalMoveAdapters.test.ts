@@ -15,6 +15,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 const field = {
   player: {
@@ -163,7 +164,7 @@ describe("live physical move adapters", () => {
     expect(effects).toHaveLength(2);
     for (const effect of effects) {
       expect(effect).toMatchObject({ attacker: 0, player: "MACHOKE", opponent: "LEDIAN" });
-      expect(effect.ages).toEqual(Array.from({ length: 33 }, (_, age) => age));
+      expect(effect.ages).toEqual(iu120Ages(67, 33));
     }
     expect(on.requests.filter((request) => request.moveId === 67)
       .map(({ turn, multihit }) => [turn, multihit]))

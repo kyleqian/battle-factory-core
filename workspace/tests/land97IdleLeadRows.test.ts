@@ -8,6 +8,7 @@ import type { BattleResolutionDisplayedField } from "../src/engine/battleResolut
 import { battleResolutionCommandDuration, liveMoveIdleLeadRows } from "../src/engine/battleResolutionPresentationRender.ts";
 import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
 import { LIVE_SUBSTITUTE_SWAP_BODY_IDS, liveSubstituteSwapApplies } from "../src/engine/liveSubstituteSwap.ts";
+import { iu120Extra, iu120Post, iu120Pre } from "./helpers/iu120Rows.ts";
 
 // land97: the banked idle94 lead rows (tools/integration/fixtures/idle94/idle94-lead-rows.diff, docs/next-adapters-idle94.md): 40 live
 // adapters whose accepted window starts N rows after the ROM activation present N extra rows showing their own age-0 frame.
@@ -51,7 +52,8 @@ describe("land97 idle lead rows", () => {
       for (const side of [0, 1] as const) {
         expect(liveMoveAnimationDuration(req(id, side), plain)).toBe(d);
         expect(liveMoveIdleLeadRows(req(id, side), plain)).toBe(n);
-        expect(battleResolutionCommandDuration(command(req(id, side)), plain)).toBe(d + n);
+        // iu120: + the universal pre / post rows around the lead + body (tests/iu120UniversalRows.test.ts).
+        expect(battleResolutionCommandDuration(command(req(id, side)), plain)).toBe(d + n + iu120Extra(id, side === 0 ? "player" : "opponent"));
       }
     }
   });
@@ -84,18 +86,20 @@ describe("land97 idle lead rows", () => {
         "--seed=154", "--streak=" + ((154 * 11) % 49), "--move=339", "--side=player", `--out=${out}`], { stdio: "ignore" });
       const now = JSON.parse(readFileSync(out, "utf8")) as typeof base;
       const body = base.render.filter((r) => !r.after), nowBody = now.render.filter((r) => !r.after);
-      const N = 4;
+      // iu120: the P pre rows come before the N lead rows (both the age-0 frame); the T post rows repeat the last body row.
+      const N = 4, P = iu120Pre(339), T = iu120Post(339);
       expect(body).toHaveLength(104);
-      expect(nowBody).toHaveLength(104 + N);
-      for (let i = 0; i < N; i += 1) {
+      expect(nowBody).toHaveLength(P + N + 104 + T);
+      for (let i = 0; i < P + N; i += 1) {
         expect(nowBody[i]!.sha).toBe(body[0]!.sha);
         expect(nowBody[i]!.age).toBe(0);
         expect(nowBody[i]!.live).toBe(true);
       }
       for (let k = 0; k < body.length; k += 1) {
-        expect(nowBody[N + k]!.sha, `row ${k}`).toBe(body[k]!.sha);
-        expect(nowBody[N + k]!.age).toBe(body[k]!.age);
+        expect(nowBody[P + N + k]!.sha, `row ${k}`).toBe(body[k]!.sha);
+        expect(nowBody[P + N + k]!.age).toBe(body[k]!.age);
       }
+      for (let j = 0; j < T; j += 1) expect(nowBody[P + N + body.length + j]!.sha).toBe(body.at(-1)!.sha);
       expect(now.render.find((r) => r.after)!.sha).toBe(base.render.find((r) => r.after)!.sha);
     } finally {
       rmSync(dir, { recursive: true, force: true });

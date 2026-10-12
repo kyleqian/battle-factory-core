@@ -24,6 +24,7 @@ import { createPresentationRngHostAt, presentationRngBodyWords } from "../../src
 import { createPresentationRngState } from "../../src/engine/presentationRng.ts";
 import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
+import { iu120Extra, iu120EffectAges } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep13.md: Ice Beam (58), Water Spout (323), Hidden Power (237). The dense framebuffer proofs are
 // tools/integration/fixtures/prep13-live/*.json (receipt prep13-live-adapter-receipt.json).
@@ -166,7 +167,7 @@ describe("live prep13 move adapters", () => {
     const on = generatedCommandAnimationReplay(r.seed, "on", r.moves, r.streak);
     const off = generatedCommandAnimationReplay(r.seed, "off", r.moves, r.streak);
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
-    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies);
+    expect(bodies.map(b => b.ages.length)).toEqual(r.bodies.map(n => n + iu120Extra(r.id)));
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);
@@ -265,7 +266,7 @@ describe("live prep13 Hyper Beam (faithful random)", () => {
     const off = random2Route(10, "off", [0], 28, 0x1234abcd);
     const bodies = A.bodies.filter(b => b.moveId === 63 && b.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 280 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120EffectAges(63, 280));
     expect(bodies[0]!.active.every(Boolean)).toBe(true);
     expect(bodies[0]!.provenance).toBe("surrogate");
     expect(bodies[0]!.words).toHaveLength(156);

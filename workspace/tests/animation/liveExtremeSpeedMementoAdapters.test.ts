@@ -8,6 +8,7 @@ import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS, LIVE_MOVE_TIMING_POLICY } from
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // S10A scoped exact (docs/next-adapters-prep34.md): Extreme Speed (245) and Memento (262). Dense windows tools/integration/fixtures/s10a-live/
 // {extreme-speed,memento}-*.json (tools/integration/s10aEsMementoFixtures.py from 2 fresh prep22Probe runs per scenario), receipt
@@ -34,7 +35,7 @@ const routeParity = (seed: number, choices: Choices, streak: number, id: number,
   const off = generatedCommandAnimationReplay(seed, "off", choices, streak);
   const bodies = on.animations.filter((a) => a.moveId === id && a.attacker === 0);
   expect(bodies).toHaveLength(1);
-  expect(bodies[0]!.ages).toEqual(Array.from({ length: ages }, (_, age) => age));
+  expect(bodies[0]!.ages).toEqual(iu120Ages(id, ages));
   expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
   expect(on.stalled).toBe(off.stalled);
   expect(off.boundaries).toHaveLength(on.boundaries.length);
@@ -191,7 +192,7 @@ describe("Memento (262) live adapter (scoped exact, first body)", () => {
     const off = generatedCommandAnimationReplay(259, "off", [0], 28, false, true);
     const bodies = on.animations.filter((a) => a.moveId === 262 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 179 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(262, 179));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(false);

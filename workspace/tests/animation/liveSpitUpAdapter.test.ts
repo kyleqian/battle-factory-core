@@ -9,6 +9,7 @@ import { liveSpitUpInputs, liveSpitUpRows } from "../../src/engine/liveSpitUpInp
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
+import { iu120Ages } from "../helpers/iu120Rows.ts";
 
 // Spit Up (255) live adapter, all three Stockpile counters (docs/next-adapters-prep31.md s3; src/engine/liveSpitUpInputs.ts). Dense proofs:
 // tools/integration/fixtures/s10a-live/spit-up-*.json (2 fresh prep22Probe runs per scenario), receipt tools/integration/fixtures/r5-live-receipt.json.
@@ -127,7 +128,7 @@ describe("Spit Up ordinary route", () => {
     const off = generatedCommandAnimationReplay(33, "off", [0, 2], 7);
     const bodies = on.animations.filter((a) => a.moveId === 255 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(Array.from({ length: 108 }, (_, age) => age));
+    expect(bodies[0]!.ages).toEqual(iu120Ages(255, 108));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);

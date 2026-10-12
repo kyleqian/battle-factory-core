@@ -11,6 +11,7 @@ import { LIVE_DIVE_RANDOM2_PLANS, liveMoveRandom2Plan } from "../../src/engine/l
 import { presentationRngFromTrace, presentationRngTraceMetadata } from "../../src/engine/presentationRngHost.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
+import { iu120EffectAges } from "../helpers/iu120Rows.ts";
 
 // dive70 (docs/dive70-dive-attack.md): the Dive 291 ATTACK body (turn 1, DiveAttack + RisingWaterHitEffect) plays live. Receipt:
 // tools/integration/fixtures/dive70-live-receipt.json (dive70Receipt.py over liveAdapterFramebuffer.ts: 15 dense windows x 2 fresh direct-mGBA
@@ -122,7 +123,7 @@ describe("dive70: Dive 291 attack body live adapter", () => {
     const attacks = (route: typeof a) => route.bodies.filter((body) => body.moveId === 291 && (body.turn & 1) === 1);
     expect(attacks(a)).toHaveLength(2);
     for (const attack of attacks(a)) {
-      expect(attack.ages).toEqual(Array.from({ length: 93 }, (_, age) => age));
+      expect(attack.ages).toEqual(iu120EffectAges(291, 93));
       expect(attack.active.every(Boolean)).toBe(true);
       expect(attack.provenance).toBe("surrogate");
       expect(attack.words).toHaveLength(56);
