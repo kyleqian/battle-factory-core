@@ -1,0 +1,12 @@
+{"fixture":"pb-ord124-wfs-opp-345-95-106-s7-c1.json","move":"HARDEN","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,10,9,7,5,21,20,19,18,17,16,15,14,13,12]}
+{"fixture":"pb-ord124-wfs-opp-345-95-106-s7-c3.json","move":"HARDEN","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,10,9,7,5,21,20,19,18,17,16,15,14,13,12]}
+{"fixture":"pb-ord124-wfs-ply-345-95-106-s7-c1.json","move":"HARDEN","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,10,9,7,5,21,20,19,18,17,16,15,14,13,12]}
+{"fixture":"pb-ord124-wfs-ply-345-95-106-s7-c3.json","move":"HARDEN","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,10,9,7,5,21,20,19,18,17,16,15,14,13,12]}
+{"fixture":"pb-ord124-wos-opp-143-42-5-s11-c0.json","move":"MEGA_PUNCH","live":true,"decline":null,"deferred":false,"same":true,"lend":[4,3,21,20,5,19,18,17,16,15,14,13,12,11,10,9],"rom":[4,3,21,20,5,19,18,17,16,15,14,13,12,11,10,9]}
+{"fixture":"pb-ord124-wos-opp-143-42-5-s11-c2.json","move":"MEGA_PUNCH","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,7,5,21,20,19,18,17,16,15,14,13,12,11,10]}
+{"fixture":"pb-ord124-wos-opp-345-95-106-s7-c1.json","move":"HARDEN","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,7,5,21,20,19,18,17,16,15,14,13,12,11,10]}
+{"fixture":"pb-ord124-wos-opp-345-95-106-s7-c3.json","move":"HARDEN","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,7,5,21,20,19,18,17,16,15,14,13,12,11,10]}
+{"fixture":"pb-ord124-wos-ply-143-42-5-s11-c0.json","move":"MEGA_PUNCH","live":true,"decline":null,"deferred":false,"same":true,"lend":[4,3,21,20,5,19,18,17,16,15,14,13,12,11,10,9],"rom":[4,3,21,20,5,19,18,17,16,15,14,13,12,11,10,9]}
+{"fixture":"pb-ord124-wos-ply-143-42-5-s11-c2.json","move":"MEGA_PUNCH","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,7,5,21,20,19,18,17,16,15,14,13,12,11,10]}
+{"fixture":"pb-ord124-wos-ply-345-95-106-s7-c1.json","move":"HARDEN","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,7,5,21,20,19,18,17,16,15,14,13,12,11,10]}
+{"fixture":"pb-ord124-wos-ply-345-95-106-s7-c3.json","move":"HARDEN","live":true,"decline":null,"deferred":false,"same":false,"lend":null,"rom":[3,4,7,5,21,20,19,18,17,16,15,14,13,12,11,10]}

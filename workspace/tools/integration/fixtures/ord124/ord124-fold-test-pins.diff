@@ -1,0 +1,17 @@
+diff --git a/tests/spriteOrderEventTransform.test.ts b/tests/spriteOrderEventTransform.test.ts
+index 5158a924..165da486 100644
+--- a/tests/spriteOrderEventTransform.test.ts
++++ b/tests/spriteOrderEventTransform.test.ts
+@@ -34,8 +34,10 @@ describe("production sprite-order plan table (generated, pinned)", () => {
+     //   (docs/ret80-return-order.md).
+     // + ret88 (fixtures/ret88/plan-rows.json, appended): Return's ReturnWeak key 40216 both sides, 2 bodies, 1 plan
+     //   (docs/ret88-return-weak.md).
+-    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(554);
+-    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(224);
++    // + ord124 (fixtures/ord124/ord124-plan-rows.json, appended): Odor Sleuth 316 + False Swipe 206 both sides, 4 bodies, 3 plans
++    //   (316: the clone pair's tied-word FDERIVED group leaves in its lend order; docs/ord124-order-plans.md).
++    expect(Object.keys(SPRITE_ORDER_PRODUCTION_BODIES)).toHaveLength(558);
++    expect(SPRITE_ORDER_PRODUCTION_PLANS).toHaveLength(227);
+   });
+ 
+   it("decodes every EXACT-PLAN (move, side) body of the ext table to the fixture plan", () => {
