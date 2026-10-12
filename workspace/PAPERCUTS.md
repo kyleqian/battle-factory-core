@@ -8,6 +8,28 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Tooling gaps hit on 2026-10-11 (S10A afternoon)
+
+- **What / cost:** (1) Evidence runners hard-code their base revision and patch-apply their own banked diff (off108Run.sh,
+  aud110Patched.sh, stg107Run.sh, stf115Run.sh), so every land step writes a near-copy wrapper to re-prove from its own checkout, and a
+  runner fails outright on a tree where the patch is already landed (fix114 on the Struggle union) (~3-10 min x 6). (2)
+  `land82CensusCheck.py`'s `liveFramePctAfter` divides the final arm's live frames by the BASE arm's frame total; when live bodies grow
+  the timeline (Struggle 112 rows vs ~32 fallback) it over-reports (sdl119 / stf115 published 99.44 % for a true 99.31 %; supervisor
+  correction `33306f735`) — use the merged report's own percentages. (3) `prep43CensusDelta.py` / `ret88Census.sh compare` assert equal
+  command counts and abort on any budget-stalled tail (seeds 434 / 796 / 881) (~2-5 min x 3). (4) The serial wind-down vanilla soak
+  gate runs ~44 min (every seed to the 600k budget); workers and the supervisor use `--parallel 5` (~10 min). (5) `liveShareCensus.ts`
+  is Scene ON only; Scene OFF timing changes need off108Route.ts / olnd113 tools (~5 min). (6) `audit20Check.ts` aborts a whole
+  scenario when any body lacks a live adapter; `audit20Summary.py` crashes on audit21Check output (KeyError 'alloc') (~4-5 min x 2).
+  (7) `scd112ProductionCompare.ts` / `off108Classes.py` / `olnd113Verify.py` hard-code their fixture dirs / case lists (~3-4 min x 3);
+  the off108 class matcher keys on the Scene OFF attack receipt, so Scene ON holds without one show as unchecked (~3 min).
+  (8) `stat101ExposureSummary.py` reads only `shard-*.jsonl` and divides by zero otherwise (~2 min); `spriteOrderProductionPlans.ts`
+  is generated and byte-pinned, so even a comment edit fails a test (~2 min). (9) `npx vitest` on targeted files OOMs without the npm
+  script's NODE_OPTIONS=--max-old-space-size=8192 (~1 min); `npm run typecheck | tail` hides the exit code (~2 min). (10) The soak's
+  RandomPlayer drew press cooldowns from its decision stream, so every presentation-length change re-rolled soak games and broke pins
+  (FIXED 2026-10-11 by soak111: separate press stream). (11) The stat102 doc puts the message box on a message command's second frame
+  while sc106 / off108 put the first glyph on its first frame — the one-frame disagreement hid a residual (~10 min, olnd113).
+- **Hits:** 11 (2026-10-11 afternoon).
+
 ## Tooling gaps hit on 2026-10-10 (S10A day)
 
 - **What / cost:** (1) one full `npm test` (~11 min) is longer than the Bash tool's 10-min foreground limit, so every production
