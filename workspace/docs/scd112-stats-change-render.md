@@ -18,12 +18,23 @@ Base: master `1cfac3f7f` (production src `94a7f48b3`). Final production src: **`
 | Census 0..999 (10 `--index-from` shards per tree, base `1cfac3f7f` vs final `e54f95518` archives) | **Identical.** 27,513 commands: 0 key, 0 status, 0 frame and 0 other-field changes. `battleDigest`, `battleDigestExcludingFrames`, `commandDigest` and `battleFrames` are identical on 10 / 10 shards. Frames 14,946,997 == 14,946,997. 5,552 stats rows identical; 3,667 presented stats-change commands (298,348 rows, == sc106) | receipt `census`, `scd112CensusDelta.py` |
 | Scene ON / OFF gameplay parity | `tests/sc106StatsChangeCommand.test.ts` "Scene ON / OFF gameplay parity": seed 0 slot 2 (7 / 7 commands) and seed 13 slot 3 (6 / 6). Identical boundaries / RNG on the final tree | targeted gate |
 
-## 2. Gates (final code: production src `128c05c18`)
+## 2. Gates (final code: production src `c477ee818` = `128c05c18` + a type alias)
 
-See the final report of the session for the full-suite / build / differential numbers (recorded after this doc's commit).
+The comparator, routes and census above ran on `128c05c18`. `55214f7da` only names `statsChangeRenderView`'s return type: the
+battleScene split-eligibility scanner flagged the inline multi-line return type as unrecognized top-level content. The emitted JS is
+identical. `scd112Run.sh --census` reran everything on the final tree (section 5).
 - Targeted (4 workers): scd112StatsChangeRender, sc106StatsChangeCommand, statsChangeReducer, battleResolutionPresentation,
   factoryAnimationInventory, playableAnimationIntegration, animationBoundaryRatchet: **7 files / 98 tests passed**.
-- `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
+- `npm run typecheck`: green (before and after the type alias). `npm run test:smoke`: **448 / 448**.
+- Full suite, two shards (4 workers). Shard 2: **814 files / 6,412 tests passed**. Shard 1 on `128c05c18`: 1 failure,
+  `battlesceneSplitEligibility` (the scanner, fixed by `55214f7da`). Shard 1 rerun on the final code: **815 files / 6,995 tests
+  passed**. Total **1,629 files / 13,407 tests passed** (44 files / 223 tests skipped), 0 failed. **No pixel-hash pin moved** in any
+  existing test.
+- `npm run build`: green.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 1cfac3f7f`:
+  **PASS, 624 / 624 captures byte-identical** (235 + 216 + 173). The canonical railroad traces are unchanged, and no capture of the app-only
+  trace moved (none of its captures falls on a stats-change frame).
+- `git diff --check`: clean.
 
 ## 3. Tier-1 (`tests/scd112StatsChangeRender.test.ts`, 9 tests)
 
@@ -47,6 +58,10 @@ See the final report of the session for the full-suite / build / differential nu
   9-row gap, Scene OFF pauses (#167).
 
 ## 5. Reproduction (from workspace/)
+
+`sh tools/integration/scd112Run.sh <fresh> --census` on the final tree (`55214f7da`, production src `c477ee818`): **ALL SAME** (17:13 -> 17:19).
+That covers stat102's ROM frames (22 / 22 probes r1 == r2, ALL SAME); the comparator 19 / 20 with r1 == r2; the controls 0 / 19 / 9; the
+experiment 20 / 20; routes 8 / 8 OK; the census identical; and the receipt == committed.
 
 ```
 sh tools/integration/scd112Run.sh <fresh-out-dir-inside-the-repo> [--census]   # stat102 ROM frames (ALL SAME), comparator x2 (r1 == r2),
