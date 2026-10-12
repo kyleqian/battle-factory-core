@@ -26005,13 +26005,9 @@ export function renderSceneOnMovePresentation(
     const plan = sceneOnStruggleDisplayPlan(moveState);
     if (attacker.geometry.side === target.geometry.side) throw new Error("STRUGGLE presentation requires battlers on opposite sides");
     type BattlerArt = BattleBackSpriteAsset | OpponentFrontSpriteAsset;
-    const artFor = (side: "player" | "opponent", species: string): BattlerArt => {
-      const art = side === "player"
-        ? (battleBackSpritesAsset as Record<string, BattleBackSpriteAsset>)[species]
-        : (opponentFrontSpritesAsset as Record<string, OpponentFrontSpriteAsset>)[species];
-      if (!art) throw new Error(`STRUGGLE missing live battler art ${species}`);
-      return art;
-    };
+    // stf115: the doll-aware lookup (a side shown as the Substitute doll draws the doll sheet, as the proven doll branches do).
+    const artFor = (side: "player" | "opponent", species: string): BattlerArt =>
+      liveSceneOnBattlerArt({ species, geometry: { side } }) as BattlerArt;
     const tilesFor = (art: BattlerArt, side: "player" | "opponent"): Tileset => side === "player" ? art.tileset : subTileset(art.tileset, 0, 8);
     const rgb555 = (word: number): RgbColor => {
       const packed = mgbaColorFromBgr555(word);

@@ -132,6 +132,8 @@ export const LIVE_SUBSTITUTE_SWAP_BODY_CELLS: ReadonlyMap<number, readonly Side[
   [105, BOTH], // Recover (self-target; ctl95: the doll-free controls' accepted window is activation + 10)
   // doll90 (docs/doll90-doll-cells.md): PERSIAN / GENGAR player, PERSIAN / elevated GOLBAT opponent, 0 px on every row.
   [104, BOTH], // Double Team (self-target; the attacker's personality-derived clone phase, dt60)
+  // stf115 (docs/stf115-struggle-declines.md s2): Struggle by a doll attacker (Taunt route), 0 px on every row.
+  [165, BOTH], // Struggle
 ]);
 export const LIVE_SUBSTITUTE_SWAP_BODY_IDS: ReadonlySet<number> = new Set(LIVE_SUBSTITUTE_SWAP_BODY_CELLS.keys());
 /**

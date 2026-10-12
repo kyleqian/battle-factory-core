@@ -1080,6 +1080,8 @@ export const LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS: ReadonlyMap<number, readonly (
   [9, ["player", "opponent"]], // ThunderPunch
   // doll90 (docs/doll90-doll-cells.md): the doll's palette bank composed (composeLiveFieldPalettes), 0 px on every row.
   [244, ["player", "opponent"]], // Psych Up
+  // stf115 (docs/stf115-struggle-declines.md s2): Struggle drawn through liveSceneOnBattlerArt, 0 px on every row.
+  [165, ["player", "opponent"]], // Struggle
 ].map(([id, sides]) => [id as number, Object.freeze(sides as ("player" | "opponent")[])]));
 
 /**
@@ -3971,7 +3973,9 @@ export function liveMoveAnimationPresentation(
       if (!spriteOrderInput?.known) return null;
       if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
-      const palettes = composeLiveArtPalettes(art);
+      // stf115: a battler shown as the Substitute doll has gSubstituteDollPal in its OBJ bank (doll90's Psych Up rule); identical to
+      // composeLiveArtPalettes when neither battler is the doll.
+      const palettes = composeLiveFieldPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (palettes === null || activationOrder === null) return null;
