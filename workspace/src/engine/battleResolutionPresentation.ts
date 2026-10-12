@@ -724,6 +724,26 @@ function sceneOffNoHitPauseFrames(
 }
 
 /**
+ * fix122 (docs/fix122-audit26-defects.md): the attackanimation sites whose
+ * Scene ON "But it failed!" hold is ROM-proven to 0 frames (the first
+ * attackanimation at or after each label; BattleScript_EffectProtect is also
+ * BattleScript_EffectEndure). Other sites keep the pause-only rule.
+ */
+export const NO_EFFECT_ATTACKANIMATION_HOLD_LABELS = Object.freeze([
+  "BattleScript_PrintReflectLightScreenSafeguardString",
+  "BattleScript_MoveWeatherChange",
+  "BattleScript_EffectProtect",
+  "BattleScript_EffectStockpile",
+  "BattleScript_DoLeechSeed",
+] as const);
+const NO_EFFECT_ATTACKANIMATION_HOLD_PCS: ReadonlySet<number> = new Set(
+  NO_EFFECT_ATTACKANIMATION_HOLD_LABELS.map((label) => {
+    let programCounter = BATTLE_SCRIPT_PROGRAM.labelEntries[label]!.programCounter;
+    while (BATTLE_SCRIPT_PROGRAM.instructions[programCounter]!.opcodeName !== "B_SCR_OP_ATTACKANIMATION") programCounter += 1;
+    return programCounter;
+  }),
+);
+/**
  * off108 (ISSUES #167): a `pause B_WAIT_TIME_SHORT` between the attack string
  * and the first print (BattleScript_MoveMissedPause, BattleScript_ButItFailed,
  * the not-affected / "already ..." tails) runs in BOTH scenes with no
@@ -760,6 +780,11 @@ function sourcePauseUsedMoveHoldFrames(
         instruction.opcodeName === "B_SCR_OP_PAUSE"
         && instruction.operands[0]?.expression === "B_WAIT_TIME_SHORT"
       ) return next - used + 1;
+      // fix122 (aud118 DEFECT B): a ROM-proven attackanimation reached with no
+      // receipt took Cmd_attackanimation's MOVE_RESULT_NO_EFFECT branch, which
+      // pushes BattleScript_Pausex20 in BOTH scenes (battle_script_commands.c:
+      // 1793-1797): the failed set* / protect-like / stockpile / setseeded print.
+      if (NO_EFFECT_ATTACKANIMATION_HOLD_PCS.has(programCounter - back)) return next - used + 1;
     }
     return null;
   }
