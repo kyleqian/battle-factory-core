@@ -1,0 +1,70 @@
+pb-stf115-opp-psub-95-362-c0       MEAN_LOOK  opponent -              live=1 rows=171 exact=171 px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-psub-95-362-c1       SUBSTITUTE player   -              live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-psub-95-362-c2       STRUGGLE   opponent -              live=0 rows=112 exact=0   px=170304  r1==r2=1 entry=166432 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+pb-stf115-opp-psub-95-362-c3       STRUGGLE   opponent after-struggle live=0 rows=112 exact=0   px=170304  r1==r2=1 entry=166432 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+pb-stf115-opp-tsub-143-95-c0       HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-tsub-143-95-c1       TAUNT      player   -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-tsub-143-95-c2       STRUGGLE   opponent -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-tsub-143-95-c3       HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-tsub-143-95-c4       TAUNT      player   after-struggle live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-tsub-143-95-c5       STRUGGLE   opponent after-struggle live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-tsub-143-95-c6       SUBSTITUTE opponent after-struggle live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-opp-tsub-143-95-c7       TAUNT      player   after-struggle live=0 rows=125 exact=28  px=35070   r1==r2=1 entry=292256 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+pb-stf115-ply-psub-95-362-c0       MEAN_LOOK  player   -              live=1 rows=171 exact=171 px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-ply-psub-95-362-c1       SUBSTITUTE opponent -              live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-ply-psub-95-362-c2       STRUGGLE   player   -              live=0 rows=112 exact=37  px=83684   r1==r2=1 entry=158743 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+pb-stf115-ply-psub-95-362-c3       STRUGGLE   player   after-struggle live=0 rows=112 exact=37  px=83684   r1==r2=1 entry=158743 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+pb-stf115-ply-tsub-95-135-c0       SUBSTITUTE player   -              live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
+pb-stf115-ply-tsub-95-135-c1       TAUNT      opponent -              live=0 rows=125 exact=28  px=34571   r1==r2=1 entry=236784 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+pb-stg107-opp-143-303-c0           TAUNT      player   -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-143-303-c1           STRUGGLE   opponent -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-143-42-sub-c0        TAUNT      player   -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-143-42-sub-c1        SUBSTITUTE player   -              live=1 rows=87  exact=87  px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-143-42-sub-c2        STRUGGLE   opponent -              live=0 rows=112 exact=37  px=91455   r1==r2=1 entry=195664 lend=1 decline=defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+pb-stg107-opp-143-42-sub-c3        HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=176447 lend=1
+pb-stg107-opp-143-42-sub-c4        HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=176447 lend=1
+pb-stg107-opp-143-42-sub-c5        HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=176447 lend=1
+pb-stg107-opp-143-95-c0            TAUNT      player   -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-143-95-c1            STRUGGLE   opponent -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-143-95-c2            TAUNT      player   after-struggle live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-143-95-c3            STRUGGLE   opponent after-struggle live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-303-42-c0            TAUNT      player   -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-303-42-c1            STRUGGLE   opponent -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-42-135-c0            TAUNT      player   -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-42-135-c1            STRUGGLE   opponent -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-42-135-c2            TAUNT      player   after-struggle live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-42-135-c3            STRUGGLE   opponent after-struggle live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-pp-95-362-c0         MEAN_LOOK  opponent -              live=1 rows=171 exact=171 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-pp-95-362-c1         HARDEN     player   -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-pp-95-362-c2         HARDEN     player   -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-pp-95-362-c3         HARDEN     player   -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-pp-95-362-c4         STRUGGLE   opponent -              live=0 rows=112 exact=0   px=174607  r1==r2=1 entry=0 lend=1 decline=unclassified (case-local gate)
+pb-stg107-opp-pp-95-362-c5         HARDEN     player   after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-pp-95-362-c6         STRUGGLE   opponent after-struggle live=0 rows=112 exact=0   px=174607  r1==r2=1 entry=0 lend=1 decline=unclassified (case-local gate)
+pb-stg107-opp-pp-95-362-c7         HARDEN     player   after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-opp-pp-95-362-c8         STRUGGLE   opponent after-struggle live=0 rows=112 exact=0   px=174607  r1==r2=1 entry=0 lend=1 decline=unclassified (case-local gate)
+pb-stg107-opp-pp-95-362-c9         HARDEN     player   after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-143-303-c0           TAUNT      opponent -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-143-303-c1           STRUGGLE   player   -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-213-143-c0           TAUNT      opponent -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-213-143-c1           STRUGGLE   player   -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-213-143-c2           TAUNT      opponent after-struggle live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-213-143-c3           STRUGGLE   player   after-struggle live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-303-42-c0            TAUNT      opponent -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-303-42-c1            STRUGGLE   player   -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-95-42-c0             TAUNT      opponent -              live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-95-42-c1             STRUGGLE   player   -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-95-42-c2             TAUNT      opponent after-struggle live=1 rows=125 exact=125 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-95-42-c3             STRUGGLE   player   after-struggle live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c0         MEAN_LOOK  player   -              live=1 rows=171 exact=171 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c1         HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c2         HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c3         HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c4         STRUGGLE   player   -              live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c5         HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c6         STRUGGLE   player   after-struggle live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c7         HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c8         STRUGGLE   player   after-struggle live=1 rows=112 exact=112 px=0       r1==r2=1 entry=0 lend=1
+pb-stg107-ply-pp-95-362-c9         HARDEN     opponent after-struggle live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+TOTAL all            windows=68 live=58 live-0px=58 r1==r2=68 lend==ROM=68
+TOTAL after-struggle windows=28 live=23 live-0px=23 r1==r2=28 lend==ROM=28
