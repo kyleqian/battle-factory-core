@@ -17,30 +17,35 @@ backlog.
 
 # Open
 
-## #166 — STATS_CHANGE: the stat-change animation is missing in ordinary play (Scene ON and OFF) (S10A, found 2026-10-11 by idle94 / idle98)
+## #168 — Scene ON: the status-condition animations (B_ANIM_STATUS_*) are not presented (S10A, found 2026-10-11 by off121)
 
-`Cmd_playanimation` exempts B_ANIM_STATS_CHANGE from HITMARKER_NO_ANIMATIONS (`battle_script_commands.c:4011`), so `General_StatsChange`
-(`AnimTask_StatsChange`, `battle_anim_status_effects.c:482`; StatsChangeAnimation_Step3 in `battle_anim_utility_funcs.c`) plays in BOTH scenes:
-a scrolling stat-arrow BG faded in (blend 10, or 13 "sharply"), held 20 (30) frames and faded out, masked by an OBJ-window copy of the
-battler sprite. ROM: 75 active frames (STAT_ANIM_MULTIPLE_PLUS1, Bulk Up, PRIMEAPE both sides) and 89 sharply (Swords Dance up, Scary Face
-down), ON == OFF, r1 == r2 (`tools/integration/fixtures/idle98/receipts/stats-change.json`). Duration depends only on "sharply"; direction
-sets the scroll (+-3) and BG X, the stat the palette, species / side the mask. Production: a 2-frame `stat` command
-(`battleResolutionPresentation.ts` STAT_TIMING), no pixels. Exposure (seeds 0..999): 5,698 stat commands in 4,689 groups (one ROM animation
-per playstatchangeanimation), 897 / 1,000 battles, >= ~340k frames (~8.6 % of the census timeline). Fix shape (docs/next-adapters-idle98.md
-§5a): a stats-change presentation command per group with the source duration and a live adapter (BG arrows + OBJ-window mask) keyed by
-direction / stat / sharply / battler, proven dense against the ROM like any accepted body (Scene ON and OFF). Presentation only.
+In Scene ON, Cmd_statusanimation emits BtlController_EmitStatusAnimation and the controller plays B_ANIM_STATUS_* while the next script
+instruction waits: PSN 71 rows, PRZ 39, BRN 39, SLP 97 (ROM, both sides, r1 == r2: `tools/integration/fixtures/off121/receipts/rom-r1.json`
+`statusAnimations[].controllerRows`). Production projects NO command from the kernel's `status-animation` receipt; the 32-frame `status`
+command (set-battler-status-data) is the only stand-in, so move-inflicted PSN is -40 frames, PRZ / BRN -8, SLP -66, and end-turn PSN / BRN
+ticks, sleep turns and paralysis "can't move" get no animation and no time (-71 / -39 / -97 / -39 per occurrence); faint / Rest / cure
+`status` commands hold 32 frames where the ROM draws nothing. Exposure (census 0..999): 1,228 move-inflicted, 1,497 sleep turns, 102 frozen
+turns, plus every tick / can't-move / confusion / nightmare / curse occurrence. Fix shape (docs/off121-status-command.md §1b): project the
+receipt to a presented command of the measured controller length with a live renderer per animation (src/animation/statusAnimation.ts
+already renders Status_Burn for the canonical Fire Punch turn); the status-data write itself draws nothing (Scene OFF's rule: off121).
+Measure CONFUSION / CURSED / NIGHTMARE / FRZ first. Prep pack: docs/sta123-status-animations-design.md (if landed). Scene OFF is DONE
+(off121: the OFF `status` command ends at the next print).
 
-## #167 — Scene OFF: move bodies without a hit receipt lose the BattleScript_Pausex20 span; misses may lose MoveMissedPause (S10A, found 2026-10-11 by idle94 / idle98)
+## #166 — remainder: the live Double Team window ends 9 rows before the ROM's next message (Scene ON) (S10A, 2026-10-11)
 
-With Battle Scene OFF, Cmd_attackanimation pushes BattleScript_Pausex20 (`pause B_WAIT_TIME_SHORT`) for EVERY move: F_after - F_att = 35
-(37 / 37 + 20 / 20 bodies). Production's OFF route emits that pause only when a hit receipt follows (`battleResolutionPresentation.ts`
-SCENE_OFF_ATTACK_PAUSE: "An attack receipt without a hit receipt ... continue"): 9,975 / 27,481 census move bodies (36 %: Double Team, Protect,
-Confuse Ray, Rest, Dig, Curse, ...) show nothing for >= 35 frames (~349k OFF frames). Fix shape (docs/next-adapters-idle98.md §5b): emit the OFF
-pause for every SCENE_OFF_ATTACK_PAUSE receipt, (attG - 1) + 35 + k frames from the same instruction provenance as the hit path (measure k per
-follow-up). PLAUSIBLE, to anchor first (§5c): a miss plays `pause B_WAIT_TIME_SHORT` (BattleScript_MoveMissedPause) before "X's attack missed!"
-in both scenes (ROM: 36 frames from the "used" text's last glyph to the next change); production goes straight to the miss message — check
-the message command's first-glyph frame before fixing. Related, Scene ON (banked, not landed): every live body is 3 frames short before
-and 2 after (pre / post rows, idle98's `idle98-universal-rows.diff`: 23,814 commands +3 / +5 frames, 273 timing pins in 65 test files).
+General_StatsChange is DONE in both scenes (sc106 command, scd112 renderer, scf117 alignment / x2 rows / order plan / accounting:
+`generalAnimations.STATS_CHANGE`). Remaining: after a LIVE Double Team body (which owns its stats change, so no `stats-change` command
+follows), the window ends at stats-change rel 68 while the ROM's next instruction is at rel 77: the next message starts 8 rows early (9 to
+the visible box) — pre-existing, docs/sc106-stats-change-command.md (DT evidence) and docs/scf117-stats-change-finish.md §6. Fix options:
+extend the DT window by the measured rows, or trim it to its body and let the generic command own the banner (moves the DT pins).
+
+## #167 — remainder: Scene OFF Rest attack pause and unmeasured next receipts (S10A, 2026-10-11)
+
+Landed: olnd113 (OFF no-hit pause per class + the MoveMissedPause / failed / Protect-blocked hold in both scenes), scf117 (post-stats-change
+alignment), off121 (OFF `status` command), fix122 (Scene ON no-effect attackanimation hold, 12 classes). Open: Rest's attack receipt after
+"went to sleep!" + waitmessage + the status icon gets no OFF pause (ROM att G+128, F_after G+163, HP bar G+166; off108 §1 "Open", off121 §1c);
+no-hit bodies whose next receipt is a sprite-visibility (298 census bodies) or a stat-stage-change without STATS_CHANGE (Curse-like paths)
+get no OFF pause (unmeasured); the charge-turn EMPTYSTRING3 print is a 24-frame message in production vs 2 ROM rows (off108 notes).
 
 ## #165 — GAMEPLAY: the ROM's Factory turns Return into Frustration (friendship 0); production keeps Return (found 2026-10-10 by ret80)
 
@@ -96,7 +101,8 @@ Source plays Substitute (and Transform) through `Cmd_attackanimation` even when 
 Scene OFF). The kernel's attackanimation port (`battleScriptHitChainOpcode.ts` ~:2224) takes the no-animation pause
 for Substitute instead, so under Scene OFF the doll only appears from the next prompt (presentation timing only; no
 logical outcome measured to change). Gameplay-kernel owned: needs a main-lane fix with Scene OFF frame-timing proof.
-Evidence: `docs/next-adapters-prep37.md`, `tools/integration/fixtures/subst-live-receipt.json`.
+Evidence: `docs/next-adapters-prep37.md`, `tools/integration/fixtures/subst-live-receipt.json`. Quantified by live audit 26 (2026-10-11,
+docs/aud118-live-audit-26.md): 16 census uses; ROM OFF waitanimation 90 rows, HP bar G+98, glyph G+140; production HP bar -57, message -71.
 
 ## #152 — Species audits 9-14 remainder: idle-rest attacker class, Extrasensory split rows, Confuse Ray CPU phase, TYRANITAR rows (S10A, 2026-10-07)
 
