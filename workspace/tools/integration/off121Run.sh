@@ -21,6 +21,7 @@ for t in base final; do
   mkdir -p "$OUT/$t/workspace"
   git archive "$rev" . | tar -x -C "$OUT/$t/workspace"
   ln -s "$W/node_modules" "$OUT/$t/workspace/node_modules"
+  ln -s "$W/reference" "$OUT/$t/workspace/reference"
   (cd "$OUT/$t/workspace" && git init -q && git add -A > /dev/null && git -c user.email=off121@local -c user.name=off121 commit -qm "$t" \
     && git -c user.email=off121@local -c user.name=off121 commit -q --allow-empty -m extra)
 done
