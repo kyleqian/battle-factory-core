@@ -14,6 +14,7 @@
  *   MOVE_ANIMATION (moveId, attacker side, turn): attacker role and target role (the opposing battler) by
  *     LIVE_BATTLER_X2_MOVE_TABLE (measured): zeroed -> zeroed; unchanged/transient -> keep;
  *     mixed (target: Razor Wind 13, Return 216, Dive 291; move 0 = non-move bodies) -> unknown;
+ *     source-derived (LIVE_BATTLER_X2_SOURCE_ZEROED, scf117: status moves ending in an absolute reset) -> zeroed;
  *     not measured (rest0 / absent): attacker keep; target zeroed when the move deals damage (power > 0: every hit
  *     shakes its target) except a two-turn move's charge turn (keep), otherwise keep            (§0.6 fallback)
  *   HIT_ANIMATION, STATS_CHANGE, weather-continues animations                                  keep (blink / measured)
@@ -75,11 +76,26 @@ export const LIVE_BATTLER_X2_MOVE_TABLE = Object.freeze({
   }),
 });
 
+/**
+ * scf117 (ISSUES #166, docs/scf117-stats-change-finish.md): source-derived rows for unmeasured status moves (power 0, where the
+ * fallback keeps both roles) whose script's last write to that battler's x2 / y2 is an absolute reset (battle_anim_scripts.s;
+ * every task below ends `x2 = 0; y2 = 0`). Target: Growl 45 (AnimTask_ShakeMon2 ANIM_TARGET last; ROM: the stat101 Growl receipt
+ * has the opponent ONIX, rest +1, at x2 0 by the stats change), Will-O-Wisp 261 (ShakeMon2, then fire sprites only), Trick 271
+ * (StretchTargetUp, then ShakeMon). Attacker: Screech 103 (ShakeMon2, then rings and SwayMon on the target), Soft-Boiled 135
+ * (ShakeMon, then egg / ring / star sprites), Belly Drum 187 (BellyDrumLeft's ShakeMon, then a note sprite and the blend clear),
+ * Trick 271 (StretchAttackerUp, then ShakeMon).
+ */
+export const LIVE_BATTLER_X2_SOURCE_ZEROED = Object.freeze({
+  attacker: Object.freeze([103, 135, 187, 271]),
+  target: Object.freeze([45, 261, 271]),
+});
+
 export type LiveBattlerX2RoleClass = "zeroed" | "keep" | "unknown";
 const roleSets = (role: "attacker" | "target") => ({
   zeroed: new Set<number>(LIVE_BATTLER_X2_MOVE_TABLE[role].zeroed),
   keep: new Set<number>(LIVE_BATTLER_X2_MOVE_TABLE[role].keep),
   mixed: new Set<number>(LIVE_BATTLER_X2_MOVE_TABLE[role].mixed),
+  sourceZeroed: new Set<number>(LIVE_BATTLER_X2_SOURCE_ZEROED[role]),
 });
 const ROLE_SETS = { attacker: roleSets("attacker"), target: roleSets("target") };
 const MOVE_ROWS = new Map(movesData.moves.map((row) => [row.id, row] as const));
@@ -97,6 +113,7 @@ export function liveBattlerX2MoveRoleClass(moveId: number, role: "attacker" | "t
   if (sets.zeroed.has(moveId)) return "zeroed";
   if (sets.keep.has(moveId)) return "keep";
   if (sets.mixed.has(moveId)) return "unknown";
+  if (sets.sourceZeroed.has(moveId)) return "zeroed";
   if (role === "attacker") return "keep";
   const row = MOVE_ROWS.get(moveId);
   if (row === undefined) return "unknown";

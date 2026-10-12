@@ -1007,8 +1007,9 @@ export function battleResolutionCommandDuration(
     case "substitute-fade":
       return command.timing.minimumFrames;
     // sc106: General_StatsChange's added rows (76 / 90, statsChangeSpan); scd112 draws the banner over the field (stats-change effect).
+    // scf117: + the rows to the following print's first glyph (holdFrames, statsChangeNextReceiptHoldFrames).
     case "stats-change":
-      return command.timing.minimumFrames;
+      return command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
   }
 }
 

@@ -1,0 +1,92 @@
+{
+ "schema": "scf117-x2-live/v1",
+ "tool": "tools/integration/liveAdapterFramebuffer.ts (fresh direct-mGBA source probe twice per fixture, r1 == r2 digests)",
+ "final": {
+  "fury-cutter-opp-grovyle-blissey-growl-2": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "digest": "91c8d0223a4c7a1f3db2e94036dbe5a0183ae31bb2ad3a3394a1c77c5cbe1601"
+  },
+  "fury-cutter-pla-scyther-golem-growl-2": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "digest": "4edcadf862e69672b0e4ebe95b5af3e096fe45b05a718babe45be4aeac3f0555"
+  },
+  "scf117-fury-cutter-opp-onix-golem-growl-0": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "digest": "6f420c1c00136b657d2b05a597f5ad2648ef128dcc8e8d413aad9083e081c910"
+  },
+  "scf117-fury-cutter-opp-onix-golem-growl-1": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "digest": "700a4feb7838b144683b8a24182f584f95d1b5068f66ea2688b39f51af12c41c"
+  },
+  "scf117-fury-cutter-opp-onix-golem-growl-3": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "digest": "66ed7e59e297ddf2d13078e21bc9cf5d2dbbdc9452a2b359b45d18007b993f44"
+  }
+ },
+ "base681da5c10": {
+  "scf117-fury-cutter-opp-onix-golem-growl-0": {
+   "rows": 43,
+   "exactRows": [
+    43,
+    43
+   ],
+   "residualPixels": [
+    0,
+    0
+   ],
+   "digest": "6f420c1c00136b657d2b05a597f5ad2648ef128dcc8e8d413aad9083e081c910"
+  },
+  "scf117-fury-cutter-opp-onix-golem-growl-1": {
+   "rows": 43,
+   "exactRows": [
+    19,
+    19
+   ],
+   "residualPixels": [
+    70910,
+    70910
+   ],
+   "digest": "32abaee03cb85c7f6b7f5a939f29e18719b72a960edfd2bd4ceab41af1ef3099"
+  }
+ }
+}

@@ -82,14 +82,15 @@ describe("production sprite-order plan table (generated, pinned)", () => {
     expect(spriteOrderProductionBodyPlan(164, "opponent")).toEqual([]);
   });
 
-  it("stat classes equal every observed per-argument plan; unobserved multiple +-2 refuses", () => {
+  it("stat classes equal every observed per-argument plan; multiple +-2 is class 2 (scf117)", () => {
     const anims = fixture("sprite-order-gap-causes.json").midBattleAnimations.anims as Record<string, { verdict: string; plan: unknown; args: string[] }>;
     for (const [key, row] of Object.entries(anims)) {
       if (!key.startsWith("General:B_ANIM_STATS_CHANGE[")) continue;
       for (const arg of row.args) expect(spriteOrderStatAnimationPlan(Number(arg)), key).toEqual(row.plan);
     }
-    expect(spriteOrderStatAnimationPlan(56)).toBeNull();
-    expect(spriteOrderStatAnimationPlan(58)).toBeNull();
+    // scf117: multiple +-2 (56 / 58) is class 2 (stat101 Memento 58 receipt: Screech's slot rows exactly).
+    expect(spriteOrderStatAnimationPlan(56)).toEqual(spriteOrderStatAnimationPlan(47));
+    expect(spriteOrderStatAnimationPlan(58)).toEqual(spriteOrderStatAnimationPlan(47));
     expect(spriteOrderStatAnimationPlan(0)).toBeNull();
   });
 });

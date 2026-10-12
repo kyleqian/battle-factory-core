@@ -221,13 +221,14 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
           power: 0, damage: 0, friendship: 0, multihit: 0 },
         timing: { minimumFrames: 32 },
       },
-      // sc106: General_StatsChange (B_ANIM_STATS_CHANGE, accuracy down 1 on ONIX) at its kernel event, 76 frames.
+      // sc106: General_StatsChange (B_ANIM_STATS_CHANGE, accuracy down 1 on ONIX) at its kernel event, 76 frames; scf117: + 1 hold
+      // frame, the print (the next instruction, rel 77) shows its first glyph on rel 78.
       {
         type: "stats-change",
         eventSequence: 13,
         battler: 0,
         argument: 27,
-        timing: { minimumFrames: 76 },
+        timing: { minimumFrames: 76, holdFrames: 1 },
       },
       {
         type: "message",
