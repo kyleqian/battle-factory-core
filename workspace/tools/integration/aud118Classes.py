@@ -18,6 +18,7 @@ AUD118_CASES = '''CASES = [
     ("doll (Substitute)", "aud118-substitute-ply-primeape-onix", 0, 0, 164),
     ("failed (Light Screen again: But it failed!)", "aud118-light-screen-twice-ply-primeape-onix", 0, 1, 113),
     ("failed (Reflect again: But it failed!)", "aud118-reflect-twice-ply-primeape-onix", 0, 1, 115),
+    ("failed (Rain Dance again: But it failed!)", "aud118-rain-dance-twice-ply-primeape-onix", 0, 1, 240),
 ]
 '''
 src = Path(__file__).with_name("off108Classes.py").read_text()

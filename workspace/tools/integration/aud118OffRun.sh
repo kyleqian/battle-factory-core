@@ -37,16 +37,16 @@ python3 tools/integration/off108Rom.py "$OUT/probes/r1" "$OUT/stage/scenario-ind
 python3 tools/integration/off108Rom.py "$OUT/probes/r2" "$OUT/stage/scenario-index.json" "$OUT/rom-r2.json" > /dev/null
 cmp -s "$OUT/rom-r1.json" "$OUT/rom-r2.json" && echo "SAME rom r2 == r1" || echo "DIFF rom r2 != r1"
 (cd "$OUT/copy" && for k in 0 1 2 3; do
-  $NODE tools/integration/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=off --moves=14,97,43,103,113,115,114,54,147,164 \
+  $NODE tools/integration/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=off --moves=14,97,43,103,113,115,114,54,147,164,240 \
     --out="$OUT/routes/off-$k.jsonl" > /dev/null &
 done; wait)
 # Mist 54 has no use in seeds 0..399; seeds 400..999 (six shards, Mist only) show it has none at all
 (cd "$OUT/copy" && for k in 4 5 6 7 8 9; do
   $NODE tools/integration/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=off --moves=54 --out="$OUT/routes/off-$k.jsonl" > /dev/null &
 done; wait)
-# Scene ON routes for the hold classes (the hold applies in both scenes): seeds 0..399, Light Screen / Reflect only
+# Scene ON routes for the hold classes (the hold applies in both scenes): seeds 0..399, Light Screen / Reflect / Rain Dance only
 (cd "$OUT/copy" && for k in 0 1 2 3; do
-  $NODE tools/integration/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=on --moves=113,115 --out="$OUT/routes/on-$k.jsonl" > /dev/null &
+  $NODE tools/integration/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=on --moves=113,115,240 --out="$OUT/routes/on-$k.jsonl" > /dev/null &
 done; wait)
 python3 tools/integration/aud118Classes.py "$OUT/rom-r1.json" "$OUT/routes" "$OUT/table"
 python3 tools/integration/off108Verify.py "$OUT/table/classes.json" "$OUT/routes" "$OUT/routes" "$OUT/verify-off.json" | tail -1
@@ -55,9 +55,9 @@ python3 tools/integration/aud118Verify.py "$OUT/rom-r1.json" "$OUT/verify-off.js
   "$OUT/substitute.json" > "$OUT/verify.txt"
 cat "$OUT/verify.txt"
 (cd "$OUT/copy-patched" && for k in 0 1 2 3; do
-  $NODE tools/integration/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=off --moves=14,97,43,103,113,115,114,54,147,164 \
+  $NODE tools/integration/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=off --moves=14,97,43,103,113,115,114,54,147,164,240 \
     --out="$OUT/routes-patched/off-$k.jsonl" > /dev/null &
-  $NODE tools/integration/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=on --moves=113,115 --out="$OUT/routes-patched/on-$k.jsonl" > /dev/null &
+  $NODE tools/integration/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=on --moves=113,115,240 --out="$OUT/routes-patched/on-$k.jsonl" > /dev/null &
 done; wait)
 for k in 0 1 2 3; do cmp -s "$OUT/routes/off-$k.jsonl" "$OUT/routes-patched/off-$k.jsonl" && echo "same OFF routes off-$k (patched)" || echo "DIFF OFF routes off-$k (patched)"; done
 python3 tools/integration/aud118OnHold.py "$OUT/rom-r1.json" "$OUT/routes" "$OUT/routes-patched" > "$OUT/hold.txt"
