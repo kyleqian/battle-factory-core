@@ -33,4 +33,14 @@ if [ -n "$AUD118_CENSUS" ]; then
   sh $T/ret88Census.sh shards "$OUT/census" 396308f86
   node --experimental-strip-types --no-warnings $T/aud118Exposure.ts "$OUT/census/merged.jsonl" > "$REC/exposure-base-396308f86.json"
   same "$F/exposure-base-396308f86.json" "$REC/exposure-base-396308f86.json"
+  # the Scene ON hold patch: off108Route.ts --scene=on seeds 0..999 in the OFF run's base / patched copies -> exposed uses
+  for t in base patched; do
+    d="$OUT/off/copy"; [ "$t" = patched ] && d="$OUT/off/copy-patched"
+    mkdir -p "$OUT/hx/$t"
+    (cd "$d" && for k in 0 1 2 3 4 5 6 7 8 9; do
+      node --experimental-strip-types --no-warnings $T/off108Route.ts --seeds=$((k * 100))..$((k * 100 + 99)) --scene=on --out="$OUT/hx/$t/on-$k.jsonl" > /dev/null &
+    done; wait)
+  done
+  python3 $T/aud118HoldExposure.py "$OUT/hx/base" "$OUT/hx/patched" > "$REC/hold-exposure.json"
+  same "$F/hold-exposure.json" "$REC/hold-exposure.json"
 fi
