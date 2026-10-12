@@ -51,6 +51,15 @@
   OFF +9,717 pauses / +407,249 frames, 0 command mismatches; soak pins moved by frames only (decision logs identical). Supervisor:
   olnd113Run.sh ALL SAME.
 - **Supervisor union gates on `681da5c10` (src `e00a22788`)**: typecheck, smoke 448, full suite 1,632 files / 13,467 tests 0 failed, build.
+- stf115 (MAIN lane, Opus, new files only, `dd5d489d9` .. `76c33f4bc`): rung 1 refuted its brief's premise — Struggle already has an
+  exact order plan (SPRITE_ORDER_PRODUCTION_BODIES 165 -> 94; production lend == ROM on 66 / 66 activations, 24 after a Struggle; 54 / 54
+  live windows 0 px). The 106 "lend unknown" Struggle declines are host invalidations by OTHER bodies: 101 after a Metronome-called Odor
+  Sleuth 316 (no plan either side), 5 after Hyper Beam 63 (plan keys missing). Rung 2: banked doll-cell patch (doll-aware art + doll
+  palette). Supervisor: stf115Run.sh on `76c33f4bc` — every receipt same.
+- sdl119 (MAIN lane, Sonnet, on master `250fad76e` .. `396308f86`, src `377ed0c48`): the doll cells landed (defender 5 / 5, attacker-doll swap
+  6 / 6 at 0 px, composites 197 / 193 rows); census 0..999 **98.80 / 99.27 -> 98.95 / 99.44 %** (+43 Struggle live; 895 / 1,001 Struggle
+  commands live; 0 other status changes). Worker gates: full suite 1,633 files 0 failed, build, differential 624 / 624. Supervisor:
+  sdl119Run.sh on `396308f86` — 59 / 59 live 0 px, 6 / 6 composites, every receipt same.
 
 ## 2026-10-11 — User-directed Struggle inclusion (docs only)
 
