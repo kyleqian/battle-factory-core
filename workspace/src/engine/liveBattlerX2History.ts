@@ -48,6 +48,7 @@ export type LiveBattlerX2Event =
  * Measured end-state classes by move id and role (tools/integration/fixtures/x2-history/move-end-state-x2-onix-pairs.json;
  * rows the pair run left rest0/absent filled from the target census move-end-state-x2.json). `keep` = unchanged or
  * transient (back at the start value at end+1).
+ * aud118: Struggle 165's target is `keep` from source (Move_STRUGGLE shakes it only with the relative AnimTask_ShakeMonInPlace).
  */
 export const LIVE_BATTLER_X2_MOVE_TABLE = Object.freeze({
   attacker: Object.freeze({
@@ -69,7 +70,7 @@ export const LIVE_BATTLER_X2_MOVE_TABLE = Object.freeze({
       250, 257, 265, 276, 284, 290, 295, 302, 305, 306, 309, 310, 317, 327, 328, 332, 341, 342, 345, 348, 352]),
     keep: Object.freeze([
       32, 35, 37, 39, 47, 48, 50, 59, 67, 73, 74, 78, 79, 92, 95, 107, 108, 109, 111, 113, 114, 115, 118, 133, 142,
-      147, 148, 149, 150, 151, 169, 178, 180, 182, 186, 190, 191, 193, 194, 195, 196, 197, 201, 211, 212, 213, 219,
+      147, 148, 149, 150, 151, 165, 169, 178, 180, 182, 186, 190, 191, 193, 194, 195, 196, 197, 201, 211, 212, 213, 219,
       230, 232, 237, 253, 258, 259, 260, 262, 263, 266, 272, 273, 277, 280, 288, 312, 318, 319, 320, 321, 330, 335,
       337, 349]),
     mixed: Object.freeze([0, 13, 216, 291]),
