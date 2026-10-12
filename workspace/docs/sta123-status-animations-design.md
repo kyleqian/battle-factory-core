@@ -188,3 +188,10 @@ python3 tools/integration/sta123ExposureSummary.py <dir> <exposure.json>
 Scenarios (18, explicit seeds): Bulk Up templates (Primeape / Gengar vs Onix / Snorlax, seed 305419897, both sides): Toxic, Will-O-Wisp,
 Thunder Wave, Spore, Confuse Ray, Ghost Curse, Attract (female Onix); legal mechanic templates (both sides): Ice Beam Delcatty / Shuckle
 (seeds 305419958 / 305419955, the sprite audit's freeze sweep), Nightmare Haunter / Shuckle (seed 1).
+
+## 8. Gates (this pack: new files only, production untouched)
+
+- `sh tools/integration/sta123Run.sh .integration/validation/sta123-run1 --census` (archive copy of 42f68b371): **ALL SAME** — scenarios 18 /
+  index SAME, probes 36 / 36 r1 == r2, 72 / 72 == committed sha256, rom-r1 SAME, rom r2 == r1, exposure.json SAME.
+- `npm test` (full, one run): **1,638 files / 13,519 tests passed** (44 / 223 skipped), 0 failed (785 s). `npm run build`: green.
+- `git diff --check`: clean.
