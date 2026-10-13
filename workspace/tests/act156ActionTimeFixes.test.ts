@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import c1 from "../tools/probe/receipts/rcp154-c1-dragged-in-before-acting-off.json" with { type: "json" };
 import c1f from "../tools/probe/receipts/rcp154-c1f-census811-shape-foe-dragged-off.json" with { type: "json" };
+import c2 from "../tools/probe/receipts/rcp154-c2-encored-mid-turn-selected-off.json" with { type: "json" };
+import c2u from "../tools/probe/receipts/rcp154-c2u-encored-mid-turn-user-target-off.json" with { type: "json" };
 import movesData from "../src/data/gen/moves.json" with { type: "json" };
 import speciesTypes from "../src/data/gen/species-types.json" with { type: "json" };
 import type { BattleScriptPartyMemberInput } from "../src/engine/battleScriptRulesContext.ts";
@@ -15,6 +17,7 @@ import { verifyReceipt } from "../tools/probe/verify-rcp154.ts";
  */
 type Receipt = Parameters<typeof verifyReceipt>[0];
 type PartyMon = (typeof c1f)["parties"]["player"][number];
+type Moves = readonly [number, number, number, number];
 
 const MOVE_PP = new Map(movesData.moves.map((move) => [move.id, move.pp]));
 const ppOf = (moves: readonly number[]) =>
@@ -23,12 +26,12 @@ const ppOf = (moves: readonly number[]) =>
 function active(mon: PartyMon): FactoryFullTurnBattlerConfig {
   const entry = speciesTypes.species[mon.species - 1]!;
   return {
-    species: mon.species, moveId: mon.moves[0]!, moves: mon.moves, pp: ppOf(mon.moves),
+    species: mon.species, moveId: mon.moves[0]!, moves: mon.moves as unknown as Moves, pp: ppOf(mon.moves),
     ability: mon.ability, abilityNum: mon.abilitySlot, item: mon.item, personality: mon.personality,
     attack: mon.stats.attack, defense: mon.stats.defense, spAttack: mon.stats.spAttack,
     spDefense: mon.stats.spDefense, speed: mon.stats.speed, hp: mon.hp, maxHp: mon.maxHp,
     types: [entry.types[0]!, entry.types[1]!],
-  } as FactoryFullTurnBattlerConfig;
+  };
 }
 
 function bench(mon: PartyMon): BattleScriptPartyMemberInput {
@@ -38,7 +41,7 @@ function bench(mon: PartyMon): BattleScriptPartyMemberInput {
     personality: mon.personality, level: mon.level, maxHP: mon.maxHp, hp: mon.hp,
     attack: mon.stats.attack, defense: mon.stats.defense, speed: mon.stats.speed,
     spAttack: mon.stats.spAttack, spDefense: mon.stats.spDefense, item: mon.item,
-    moves: mon.moves, pp: ppOf(mon.moves),
+    moves: mon.moves as unknown as Moves, pp: ppOf(mon.moves),
   };
 }
 
@@ -99,5 +102,27 @@ describe("act156 F1 (ISSUES #169) -- a battler dragged in before acting takes no
     expect(ids(1)).not.toContain("STRINGID_PKMNHPFULL");
     // The cancel does not leak: turn 2 dispatches both actions.
     expect(ids(2).filter((id) => id === "STRINGID_USEDMOVE")).toHaveLength(2);
+  });
+});
+
+describe("act156 F2 (ISSUES #170) -- a battler Encored mid-turn before acting uses the encored move", () => {
+  it.each([
+    ["C2: SNORLAX banked DEFENSE CURL, Encored into TACKLE (MOVE_TARGET_SELECTED: one GetMoveTarget draw)", c2],
+    ["C2u: SNORLAX banked TACKLE, Encored into DEFENSE CURL (MOVE_TARGET_USER: no draw of its own)", c2u],
+  ] as const)("%s replays the stock-ROM receipt draw for draw", (_name, receipt) => {
+    const result = verifyReceipt(receipt as unknown as Receipt);
+    expect(result.port.stoppedEarly).toBeNull();
+    expect(result.comparison.firstDivergence).toBeNull();
+    expect(result.comparison.portActiveHp).toEqual(result.comparison.romActiveHp);
+    expect(result.comparison.portUsedMoveMessages).toEqual(result.comparison.romMoveDispatches);
+    expect(result.pass).toBe(true);
+  });
+
+  it("C2 turn 2 pays the Encore arm's GetMoveTarget right after the Encore timer draw", () => {
+    const result = verifyReceipt(c2 as unknown as Receipt);
+    expect(result.port.turns[1]!.draws.slice(0, 3).map((draw) => draw.reason)).toEqual([
+      "accuracycheck", "Encore duration ((Random() & 3) + 3)", "GetMoveTarget(MOVE_TARGET_SELECTED)",
+    ]);
+    expect(result.port.turns[1]!.events).not.toContain("message:STRINGID_DEFENDERSSTATROSE");
   });
 });

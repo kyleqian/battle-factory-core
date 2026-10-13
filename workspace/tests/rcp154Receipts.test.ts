@@ -194,17 +194,20 @@ describe("rcp154 C2 -- a battler Encored mid-turn before acting uses the encored
     expect(targets.at(-1)!.value % 2).toBe(1);
   });
 
-  it("port at HEAD FAILs at turn 2 index 2: it runs the turn-start DEFENSE CURL (no GetMoveTarget, no TACKLE)", () => {
-    expect(c2.comparison.verdictToday).toBe("FAIL");
-    expect(c2.comparison.firstDivergence).toMatchObject({
-      turn: 2, index: 2,
-      rom: { reason: "GetMoveTarget(MOVE_TARGET_SELECTED)" },
-      port: { reason: "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)" },
-    });
-    expect(c2.port.turns[1].events).toContain("message:STRINGID_DEFENDERSSTATROSE");
-    expect(c2.comparison.portActiveHp[1]).toEqual(c2.comparison.portActiveHp[0]);
-    // Turn 1 matches draw for draw.
-    expect(c2.port.turns[0].draws.map((draw) => draw.rngBefore)).toEqual(c2.rom.turns[0].draws.map((draw) => draw.rngBefore));
+  it("port PASSes after act156 F2 (ISSUES #170): SNORLAX runs the encored TACKLE with its GetMoveTarget draw", () => {
+    // Before act156 the port FAILed at turn 2 index 2: it ran the turn-start DEFENSE CURL
+    // (STRINGID_DEFENDERSSTATROSE; no GetMoveTarget, no TACKLE chain).
+    expect(c2.comparison.verdictToday).toBe("PASS");
+    expect(c2.comparison.firstDivergence).toBeNull();
+    expect(c2.comparison.portActiveHp).toEqual(c2.comparison.romActiveHp);
+    expect(c2.port.turns[1].events).not.toContain("message:STRINGID_DEFENDERSSTATROSE");
+    expect(c2.port.turns[1].draws.map((draw) => draw.reason)).toEqual([
+      "accuracycheck", "Encore duration ((Random() & 3) + 3)", "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "accuracycheck", "critcalc", "adjustnormaldamage", "seteffectwithchance",
+      "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+    ]);
+    expect(c2.port.turns.map((turn) => turn.draws.map((draw) => draw.rngBefore)))
+      .toEqual(c2.rom.turns.map((turn) => turn.draws.map((draw) => draw.rngBefore)));
   });
 
   it("predicts the ROM sequence post-fix", () => {
@@ -233,15 +236,15 @@ describe("rcp154 C2u -- control: the encored move is user-targeted (DEFENSE CURL
     expect(turn2.draws.map((draw) => draw.callerFunction)).toEqual(["Cmd_accuracycheck", "Cmd_trysetencore", "BattleTurnPassed"]);
   });
 
-  it("port at HEAD FAILs at turn 2 index 2: it runs the turn-start TACKLE's hit chain", () => {
-    expect(c2u.comparison.verdictToday).toBe("FAIL");
-    expect(c2u.comparison.firstDivergence).toMatchObject({
-      turn: 2, index: 2,
-      rom: { reason: "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)" },
-      port: { reason: "accuracycheck" },
-    });
-    expect(c2u.comparison.romActiveHp[1]).toEqual(c2u.comparison.romActiveHp[0]);
-    expect(c2u.comparison.portActiveHp[1][1]).toBeLessThan(c2u.comparison.portActiveHp[0][1]);
+  it("port PASSes after act156 F2 (ISSUES #170): SNORLAX runs the encored DEFENSE CURL and draws nothing itself", () => {
+    // Before act156 the port FAILed at turn 2 index 2: it ran the turn-start TACKLE's hit chain.
+    expect(c2u.comparison.verdictToday).toBe("PASS");
+    expect(c2u.comparison.firstDivergence).toBeNull();
+    expect(c2u.comparison.portActiveHp).toEqual(c2u.comparison.romActiveHp);
+    expect(c2u.comparison.portActiveHp[1]).toEqual(c2u.comparison.portActiveHp[0]);
+    expect(c2u.port.turns[1].draws.map((draw) => draw.reason)).toEqual([
+      "accuracycheck", "Encore duration ((Random() & 3) + 3)", "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+    ]);
   });
 
   it("predicts the ROM sequence post-fix", () => {

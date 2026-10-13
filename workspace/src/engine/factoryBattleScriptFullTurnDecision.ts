@@ -1501,6 +1501,7 @@ function buildActionContext(
   moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
   forcedStruggle: boolean,
+  currentMovePosition: BattleMoveSlot = moveSlot,
 ): BattleScriptRulesContext {
   const chosenMovePositions = Object.freeze(
     priorRulesContext.chosenMovePositions.map((position, battler) =>
@@ -1512,7 +1513,7 @@ function buildActionContext(
     selectorRoles: { attacker: mover, target, effectBattler: target, fainted: null },
     scriptingBattler: mover,
     currentMove: moveId,
-    currentMovePosition: moveSlot,
+    currentMovePosition,
     chosenMove: moveId,
     chosenMovePositions,
     // HandleAction_UseMove resets these globals for every acting battler
@@ -1675,6 +1676,44 @@ function actionTakesChosenMoveChangedArm(
     !== actionRulesContext.chosenMoveByBattler[battler];
 }
 
+/**
+ * `HandleAction_UseMove`'s two Encore arms (`battle_util.c:111-117` and
+ * `:119-128`), evaluated on the rules context at this battler's OWN action
+ * (ISSUES #170, receipts rcp154-c2 / rcp154-c2u): an Encore a faster foe set
+ * earlier in the same turn (`Cmd_trysetencore`, `battle_script_commands.c:
+ * 8017`) applies. Source order: the noValidMoves arm (the caller's
+ * `forcedStruggle`) and the STATUS2_MULTIPLETURNS / RECHARGE lock arm come
+ * first, so neither yields here. Both arms set only the globals
+ * gCurrMovePos / gChosenMovePos to `encoredMovePos` --
+ * `gBattleStruct->chosenMovePositions[attacker]` keeps the selected slot
+ * (Grudge reads it) -- and both call `GetMoveTarget`. The overwritten arm
+ * also clears the Encore. For a turn-start Encore this is the same move,
+ * slot and retarget the selection already chose (`lockedMoveDecision`); the
+ * turn-start `clearOverwrittenEncoreAtAction` hoist means the `:119-128` arm
+ * is normally consumed there and reported via `retargetsAtExecution`.
+ */
+function actionEncoreArm(
+  actionRulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): Readonly<{ moveId: number; movePosition: BattleMoveSlot; rulesContext: BattleScriptRulesContext }> | null {
+  if (battlerStatusMoveLock(actionRulesContext, battler) !== 0) return null;
+  const source = actionRulesContext.battlers[battler]!;
+  if (source.encoredMove === 0) return null;
+  const movePosition = source.encoredMovePos as BattleMoveSlot;
+  if (source.moves[movePosition] === source.encoredMove) {
+    return Object.freeze({ moveId: source.encoredMove, movePosition, rulesContext: actionRulesContext });
+  }
+  return Object.freeze({
+    moveId: source.moves[movePosition]!,
+    movePosition,
+    rulesContext: withBattler(actionRulesContext, battler, {
+      encoredMove: 0,
+      encoredMovePos: 0,
+      encoreTimer: 0,
+    }),
+  });
+}
+
 /** Runs one battler's chosen move from its LITERAL topology entry (census precedent, `factoryBattleScriptDecision.ts`'s own mechanism). */
 function runMoveAction(
   program: BattleScriptProgram,
@@ -1687,27 +1726,36 @@ function runMoveAction(
   forcedStruggle = false,
   retargetsAtExecution = false,
 ): ActionResult {
-  const chosenMoveChanged = !forcedStruggle
+  const encore = forcedStruggle ? null : actionEncoreArm(priorState.rulesContext, mover as BattleSinglesBattler);
+  const actionRules = encore?.rulesContext ?? priorState.rulesContext;
+  const chosenMoveChanged = encore === null
+    && !forcedStruggle
     && !retargetsAtExecution
-    && actionTakesChosenMoveChangedArm(priorState.rulesContext, mover as BattleSinglesBattler, moveSlot);
-  const executedMoveId = chosenMoveChanged
-    ? priorState.rulesContext.battlers[mover]!.moves[moveSlot]!
+    && actionTakesChosenMoveChangedArm(actionRules, mover as BattleSinglesBattler, moveSlot);
+  const executedMoveId = encore !== null
+    ? encore.moveId
+    : chosenMoveChanged
+    ? actionRules.battlers[mover]!.moves[moveSlot]!
     : moveId;
   const topology = TOPOLOGY_BY_MOVE.get(executedMoveId);
   if (!topology) throw new Error(`move ${executedMoveId} has no source Battle Script entry`);
-  const retarget = retargetsAtExecution || chosenMoveChanged
-    ? drawActionMoveTarget(program, priorState, mover, executedMoveId, topology.entryScript)
+  const actionState: MachineState = encore === null
+    ? priorState
+    : Object.freeze({ ...priorState, rulesContext: actionRules });
+  const retarget = retargetsAtExecution || chosenMoveChanged || encore !== null
+    ? drawActionMoveTarget(program, actionState, mover, executedMoveId, topology.entryScript)
     : null;
   const actionContext = buildActionContext(
-    priorState.rulesContext,
+    actionRules,
     mover,
     executedMoveId,
     moveSlot,
     retarget?.target ?? target,
     forcedStruggle,
+    encore?.movePosition ?? moveSlot,
   );
   const started = startBattleScriptExecute(program, topology.entryScript, {
-    ...priorState,
+    ...actionState,
     rulesContext: actionContext,
     rng: retarget?.rng ?? priorState.rng,
   });

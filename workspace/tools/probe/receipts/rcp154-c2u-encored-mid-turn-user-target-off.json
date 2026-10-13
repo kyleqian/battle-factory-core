@@ -1611,29 +1611,9 @@
       "value": 45250
      },
      {
-      "reason": "accuracycheck",
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
       "rngBefore": 2965519688,
       "value": 7952
-     },
-     {
-      "reason": "critcalc",
-      "rngBefore": 521168923,
-      "value": 39318
-     },
-     {
-      "reason": "adjustnormaldamage",
-      "rngBefore": 2576805362,
-      "value": 56559
-     },
-     {
-      "reason": "seteffectwithchance",
-      "rngBefore": 3706678397,
-      "value": 43693
-     },
-     {
-      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
-      "rngBefore": 2863507372,
-      "value": 61455
      }
     ],
     "usedMoveMessages": 2,
@@ -1646,17 +1626,15 @@
      "set-battler-sprite-visibility:null",
      "message:STRINGID_USEDMOVE",
      "set-battler-pp-data:null",
+     "stat-stage-change:null",
      "animation:MOVE_ANIMATION",
-     "play-se:null",
-     "animation:HIT_ANIMATION",
-     "health-bar-update:null",
-     "hp-change:null",
-     "set-battler-sprite-visibility:null",
+     "animation:STATS_CHANGE",
+     "message:STRINGID_DEFENDERSSTATROSE",
      "set-battler-sprite-visibility:null"
     ],
     "activeHpAtTurnEnd": [
      235,
-     141
+     167
     ]
    },
    {
@@ -1664,13 +1642,13 @@
     "draws": [
      {
       "reason": "accuracycheck",
-      "rngBefore": 4101822398,
-      "value": 15832
+      "rngBefore": 3313512506,
+      "value": 11554
      },
      {
       "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
-      "rngBefore": 1037574233,
-      "value": 52407
+      "rngBefore": 757241125,
+      "value": 32969
      }
     ],
     "usedMoveMessages": 2,
@@ -1690,7 +1668,7 @@
     ],
     "activeHpAtTurnEnd": [
      235,
-     141
+     167
     ]
    },
    {
@@ -1698,13 +1676,13 @@
     "draws": [
      {
       "reason": "accuracycheck",
-      "rngBefore": 74642003,
-      "value": 27128
+      "rngBefore": 2759744383,
+      "value": 36072
      },
      {
       "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
-      "rngBefore": 1777915850,
-      "value": 8431
+      "rngBefore": 2364016518,
+      "value": 35002
      }
     ],
     "usedMoveMessages": 2,
@@ -1724,7 +1702,7 @@
     ],
     "activeHpAtTurnEnd": [
      235,
-     141
+     167
     ]
    },
    {
@@ -1732,13 +1710,13 @@
     "draws": [
      {
       "reason": "accuracycheck",
-      "rngBefore": 883727308,
-      "value": 20670
+      "rngBefore": 1992568680,
+      "value": 27242
      },
      {
       "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
-      "rngBefore": 1354686031,
-      "value": 35099
+      "rngBefore": 1785348027,
+      "value": 29770
      }
     ],
     "usedMoveMessages": 2,
@@ -1758,13 +1736,13 @@
     ],
     "activeHpAtTurnEnd": [
      235,
-     141
+     167
     ]
    }
   ]
  },
  "comparison": {
-  "verdictToday": "FAIL",
+  "verdictToday": "PASS",
   "romDrawCounts": [
    2,
    3,
@@ -1774,7 +1752,7 @@
   ],
   "portDrawCounts": [
    2,
-   7,
+   3,
    2,
    2,
    2
@@ -1822,35 +1800,22 @@
    ],
    [
     235,
-    141
+    167
    ],
    [
     235,
-    141
+    167
    ],
    [
     235,
-    141
+    167
    ],
    [
     235,
-    141
+    167
    ]
   ],
-  "firstDivergence": {
-   "turn": 2,
-   "index": 2,
-   "rom": {
-    "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
-    "rngBefore": 2965519688,
-    "value": 7952
-   },
-   "port": {
-    "reason": "accuracycheck",
-    "rngBefore": 2965519688,
-    "value": 7952
-   }
-  }
+  "firstDivergence": null
  },
  "predictedPostFix": {
   "note": "The ROM's own turn-execution draws in the port's reason vocabulary plus its per-turn move-dispatch count: after a fix the kernel must emit exactly this (reason, rngBefore) sequence, this many USEDMOVE announcements and these HPs.",
