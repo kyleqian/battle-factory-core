@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-13 — rng146: #141b Sticky Hold + #140 `:133` RNG draws FIXED; #141a THRASH fix built but deferred (main/ts gameplay)
+
+- **State:** local master; production src `e8843465a` (F2 `8726675ec` + F3) with F1 `0f9b5301e` reverted in `52340a10e`.
+  verify-rcp143 R2 / R3 / R3-control PASS, R1 FAIL (deferred). Census 0..999 27,271 / 27,090 live (99.34 % / 99.60 %).
+- **Did:** F2: STEAL_ITEM Sticky Hold arm `"call-current"` (BattleScriptPushCursor). F3: the rules-context cell
+  `chosenMoveByBattler` (gChosenMoveByBattler, threaded with chosenActionByBattler), banked at selection and reset at
+  BattleTurnPassed; `runMoveAction` takes `battle_util.c:130-134` at the battler's own action (GetMoveTarget draws).
+  F1 (THRASH re-runs seteffectwithchance) is correct (R1 PASS) but moves 8 pins, all via Petal Dance / Thrash lock-ins
+  (per-fix toggles), and 5 of them need new-seed scans, so it was reverted. Docs: docs/rng146-rng-draw-fixes.md.
+- **Ripple (landed tree):** tests moved: none beyond the receipt pins. Census vs ret165: 2 battles changed, both F3
+  (269 Solar Beam slept by GrassWhistle; 811 a Whirlwind-dragged GLOOM now runs its own slot move instead of ROAR;
+  this route was not anticipated and has no ROM receipt yet). Soak vanilla 0:20 20 / 20 OK, per-seed lines identical.
+- **Next:** re-land #141a: cherry-pick `0f9b5301e` + the 8 re-pins listed in ISSUES #141 (expect census 45 battles,
+  vanilla soak b2 t16 -> b4 t0). Optional ROM card for the 811 phazing route. Then #139 (reuses the F3 bank).
+- **Notes:** see the doc for gates. ISSUES #140 removed; #141 trimmed to #141a.
+
+---
+
 ## 2026-10-13 — ret165: Factory parties turn Return into Frustration (ISSUES #165 FIXED; main/ts gameplay correction)
 
 - **State:** local master; production src changed by `cd99c8073` (helper + tests + attributed re-pins); ROM receipt `98f4f8a05`.
@@ -38,32 +56,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Use the engine gates in ANIMATION_VERIFICATION.md, including all five gameplay gates; attribute intentional trajectory changes.
 - **Notes:** audio remains deferred, settled exceptions stay settled, and no run is launched by this checkpoint. Reuse the unchanged
   production receipt. Scope/ledger checks, `git diff --check`, shell syntax / `--print-config`, and all 62 launcher-profile tests passed.
-
----
-
-## 2026-10-12 (evening) .. 2026-10-13 — S10A: Scene ON status-condition animations DONE (#168: timed + all nine drawn), sound-effect waits, Double Team / Smokescreen timing, ordinary-row idle rest; live share 0..999 98.95 -> 99.34 % of commands (99.32 -> 99.60 % of frames)
-
-- **State:** local master `63f6850b2` (production src == union `c4d38e1f3`). Supervisor FINAL gates on that union: typecheck, smoke 448,
-  full suite 1,653 files / 13,710 tests 0 failed, build; differential vs session start `cfe4e26ca`: both canonical railroad traces
-  byte-identical (235 + 216), the app-only presentation-rng trace 172 / 173 (Double Team's intended +9 tail). Census 0..999: **99.34 % /
-  99.60 %** live (27,221 / 27,402 commands), 0 render throws. Catalogue `236+13+27+0+0=276` + Struggle (Smokescreen -> faithful timing).
-  Preview <http://127.0.0.1:5191/> serves `63f6850b2` (4 samples hash-equal, export + ON -> OFF restart passed, no browser errors).
-  Soak on `74cbec2b8` (last Scene OFF change): vanilla 0:20 20 / 20, full 0:60 60 / 60, winning 0:60 60 / 60, winning-swap 0:60 60 / 60;
-  fifth gate 100 / 100 x 4.
-- **Did (production; every worker runner re-run by the supervisor into a fresh dir, ALL SAME; unions gated in detached worktrees):**
-  ordl126 (ord124 order plans: +106 commands live), sa125 (#168 SA1 + SA3: the status-animation command with ROM controller rows, the
-  32-frame stand-in removed), sag130 (the IsBattleSEPlaying gate before status animations: 72 commands / 729 frames), sar131 + sad133 +
-  sae135 (**all nine status animations drawn**: 88 dense ROM windows 0 px on every command row; source-derived x2 rows), gaf140 (the
-  drawn animation waits out the gate: a union defect sae135 found), sgl138 (the same gate on stats-change in both scenes and multi-hit
-  2nd+ hits: 366 / 240 commands), tmr136 (#166 Double Team tail +9 rows; Smokescreen first-use D4 phase), rsl141 (ordinary Scene ON rows
-  draw ONIX's idle rest: 22,746 / 22,746 ROM rows 0 px).
-- **Did (evidence):** seg127, stp128, stq132, sgs134, rst139 (prep for the above); live audits 27 (aud129: Golbat Mega Punch flag = a D4
-  phase, 0 defects) and 28 (aud137: 121 / 121 status-animation command rows 0 px, 0 new defects); inv142 (a status animation over a hidden
-  Dig battler: the ROM draws its sprites; banked patch, 5 census cases, not landed).
-- **Supervisor union fixes:** sad133 x stq132 typecheck break (TS2366); sad133 x sae135 diverged `liveStatusAnimationRow` signatures (5-file
-  resolution); tmr136 x sgl138 render conflict + one route-total re-pin (seed 9: 3 live Double Teams).
-- **Next:** ROADMAP S10A "Next (2026-10-13)": land inv142 (banked); FRZ 115 / 116 frozen-turn phase (aud137, D4); #167 remainders; Hyper
-  Beam / Astonish / Extrasensory / doll-cell fallbacks; a live audit after every batch. (The app-only differential traces were
-  regenerated on the final timeline, `bba4d9dc6`: 173 -> 190 captures; differential 831 / 831 byte-identical, smoke 448.)
-- **Notes:** no DEFERRED entries. ISSUES: #168 trimmed to inv142's remainder, #166 removed (fixed). Worker branches merged, worktrees
-  removed (scratch under `.integration/validation/*-2026101[23]/`, transcripts `.codex-logs/workers/`).
