@@ -214,12 +214,13 @@ export interface LiveStatusAnimationSprite extends StatusAnimationSprite {
 
 /**
  * sad133: what a live row needs beyond (animation, age, side) for the stp128 reducers (statusConditionAnimations.ts). `sprite` =
- * gSprites[battler].x / y = battleCommandFieldSpriteOrigin (elevation included) + 32; `freezeLoadLagRows` = Status_Freeze's
- * ice-cube load lag (1 on the frozen turn, 0 when inflicted after a damaging move).
+ * gSprites[battler].x / y = battleCommandFieldSpriteOrigin (elevation included) + 32; `inflicted` = the animation right after the
+ * battler's status command (a status the script just set, behind the damaging move's IsBattleSEPlaying gate): FRZ's ice-cube load
+ * lag is 0 there and 1 otherwise (the frozen turn, MoveUsedIsFrozen; stp128 freezeLoadLagRows).
  */
 export interface LiveStatusAnimationContext {
   readonly sprite: Readonly<{ x: number; y: number }>;
-  readonly freezeLoadLagRows?: 0 | 1;
+  readonly inflicted?: boolean;
 }
 
 /** Status_Poison / Status_Paralysis: `AnimTask_ShakeMon2 ANIM_ATTACKER` (attacker = target = the battler, LaunchStatusAnimation). */
@@ -330,7 +331,7 @@ function statusConditionSprites(sprite: StatusConditionDisplaySprite, paletteRot
 function statusConditionRow(
   animation: StatusConditionAnimation, age: number, side: "player" | "opponent", context: LiveStatusAnimationContext,
 ): LiveStatusAnimationRow {
-  const options = { freezeLoadLagRows: context.freezeLoadLagRows ?? 1 };
+  const options = { freezeLoadLagRows: context.inflicted === true ? 0 as const : 1 as const };
   const at = (idleX2: number) =>
     statusConditionDisplayRow(animation, age, statusConditionTarget(side, context.sprite.x, context.sprite.y, idleX2), options);
   const row = at(0);
@@ -364,6 +365,10 @@ export function liveStatusAnimationRow(
       return context === undefined ? null : statusConditionRow("CURSED", age, side, context);
     case "NIGHTMARE":
       return context === undefined ? null : statusConditionRow("NIGHTMARE", age, side, context);
+    case "CONFUSION":
+      return context === undefined ? null : statusConditionRow("CONFUSION", age, side, context);
+    case "FRZ":
+      return context === undefined ? null : statusConditionRow("FRZ", age, side, context);
     default:
       return null;
   }

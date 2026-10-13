@@ -7767,7 +7767,9 @@ export function statusAnimationRenderView(view: BattleResolutionPresentationRend
   const side = effect.battler === 0 ? "player" as const : "opponent" as const;
   // sad133: the stp128 cases' createsprite origin is the battler sprite's x / y (corner + 32, elevation included).
   const corner = battleCommandFieldSpriteOrigin(view.fieldArt[side], side);
-  const row = liveStatusAnimationRow(effect.animation, effect.age, side, { sprite: { x: corner.x + 32, y: corner.y + 32 } });
+  const row = liveStatusAnimationRow(effect.animation, effect.age, side, {
+    sprite: { x: corner.x + 32, y: corner.y + 32 }, inflicted: effect.inflicted === true,
+  });
   if (row === null || !view.visibility[side].sprite || view.field[side].substituteDoll === true) return null;
   const rest = effect.battlerX2Input === undefined
     ? { x2: 0, y2: 0 }

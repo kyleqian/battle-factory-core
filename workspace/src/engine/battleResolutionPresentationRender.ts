@@ -574,8 +574,11 @@ export type BattleResolutionRenderEffect =
   /**
    * sar131 (S10A, ISSUES #168 slice SA4): B_ANIM_STATUS_* `animation` of the battler at command age (drawn: statusAnimation.ts
    * liveStatusAnimationRow; others leave the field as it is); `battlerX2Input` = the tracked x2 history (Scene ON only).
+   * sad133: `inflicted` = the command right after the battler's `status` command (sa125 SA3: a status the script just set).
    */
-  | Readonly<{ type: "status-animation"; battler: 0 | 1; animation: string; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
+  | Readonly<{
+      type: "status-animation"; battler: 0 | 1; animation: string; age: number; battlerX2Input?: LiveMoveBattlerX2Input; inflicted?: true;
+    }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -1136,6 +1139,8 @@ export const STATUS_ANIMATIONS_DRAWN: ReadonlySet<string> = new Set([
   // sad133 (SA6 / SA7 / SA8)
   "CURSED",
   "NIGHTMARE",
+  "CONFUSION",
+  "FRZ",
 ]);
 
 /**
@@ -1594,9 +1599,11 @@ export function createBattleResolutionPresentationRenderView(
       });
     } else if (command.type === "status-animation") {
       // sar131: the status animation over the field as it is (battleScene.ts statusAnimationRenderView).
+      const previous = state.commandIndex > 0 ? segment.commands[state.commandIndex - 1] : undefined;
       effect = Object.freeze({
         type: "status-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+        ...(previous?.type === "status" && previous.battler === command.battler ? { inflicted: true as const } : {}),
       });
     } else if (command.type === "hit-animation") {
       effect = Object.freeze({
