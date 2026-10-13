@@ -12,16 +12,20 @@ export const SEND_IN_TAIL_MESSAGE_AFTER_SLIDE = 26;
 export const SEND_IN_TAIL_CASTFORM = 385;
 /** sMonAnimFunctions callback length per front animation id (fitted, 46 ids; absent = never dominates a swept species: 0). */
 export const SEND_IN_TAIL_FRONT_ANIM_DURATION: Readonly<Record<string, number>> = Object.freeze({
+  ANIM_BACK_AND_LUNGE: 33,
   ANIM_BOUNCE_ROTATE_TO_SIDES: 88,
   ANIM_BOUNCE_ROTATE_TO_SIDES_SLOW: 168,
   ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL: 88,
   ANIM_BOUNCE_ROTATE_TO_SIDES_SMALL_SLOW: 168,
+  ANIM_CIRCLE_C_CLOCKWISE_SLOW: 44,
   ANIM_CIRCLE_INTO_BG: 66,
   ANIM_CIRCULAR_STRETCH_TWICE: 42,
   ANIM_CIRCULAR_VIBRATE: 58,
   ANIM_DEEP_V_SQUISH_AND_BOUNCE: 65,
   ANIM_FIGURE_8: 65,
+  ANIM_FLASH_YELLOW: 57,
   ANIM_FLICKER_INCREASING: 66,
+  ANIM_FOUR_PETAL: 64,
   ANIM_FRONT_FLIP: 50,
   ANIM_GLOW_BLACK: 130,
   ANIM_GLOW_BLUE: 66,
@@ -33,6 +37,8 @@ export const SEND_IN_TAIL_FRONT_ANIM_DURATION: Readonly<Record<string, number>> 
   ANIM_H_JUMPS_V_STRETCH_TWICE: 157,
   ANIM_H_PIVOT: 102,
   ANIM_H_SHAKE: 40,
+  ANIM_H_SHAKE_SLOW: 78,
+  ANIM_H_SLIDE: 42,
   ANIM_H_SLIDE_SLOW: 82,
   ANIM_H_SLIDE_WOBBLE: 102,
   ANIM_H_STRETCH: 42,
@@ -40,11 +46,20 @@ export const SEND_IN_TAIL_FRONT_ANIM_DURATION: Readonly<Record<string, number>> 
   ANIM_LUNGE_GROW: 66,
   ANIM_RAPID_H_HOPS: 87,
   ANIM_RISING_WOBBLE: 102,
+  ANIM_ROTATE_TO_SIDES_TWICE: 130,
   ANIM_ROTATE_UP_SLAM_DOWN: 74,
+  ANIM_ROTATE_UP_TO_SIDES: 33,
   ANIM_SHRINK_GROW: 50,
+  ANIM_SPIN: 62,
   ANIM_SWING_CONCAVE: 102,
   ANIM_SWING_CONCAVE_FAST: 103,
   ANIM_SWING_CONCAVE_FAST_SHORT: 52,
+  ANIM_SWING_CONVEX: 102,
+  ANIM_SWING_CONVEX_FAST: 103,
+  ANIM_TIP_MOVE_FORWARD: 37,
+  ANIM_TUMBLING_FRONT_FLIP_TWICE: 138,
+  ANIM_TWIST: 34,
+  ANIM_TWIST_TWICE: 141,
   ANIM_V_JUMPS_BIG: 34,
   ANIM_V_JUMPS_H_JUMPS: 66,
   ANIM_V_JUMPS_SMALL: 34,
@@ -57,6 +72,7 @@ export const SEND_IN_TAIL_FRONT_ANIM_DURATION: Readonly<Record<string, number>> 
   ANIM_V_SQUISH_AND_BOUNCE: 50,
   ANIM_V_SQUISH_AND_BOUNCE_SLOW: 98,
   ANIM_V_STRETCH: 42,
+  ANIM_ZIGZAG_FAST: 55,
   ANIM_ZIGZAG_SLOW: 109,
 });
 /** Front animation ids used by the Factory species (index into the per-species rows). */
@@ -192,7 +208,7 @@ export const SEND_IN_TAIL_SPECIES: Readonly<Record<number, readonly [number, num
 });
 /** Swept cry-bound opponent species: message start - slide start (measured; every other species: 26). */
 export const SEND_IN_TAIL_MESSAGE_EXCEPTIONS: Readonly<Record<number, number>> = Object.freeze({
-  115: 27, 125: 27, 157: 50, 205: 27, 279: 29, 282: 43, 343: 41,
+  115: 27, 125: 27, 157: 50, 205: 27, 279: 29, 282: 43, 343: 41, 400: 33, 401: 41,
 });
 
 export type SendInTail = Readonly<{ slideStart: number; messageStart: number | null }>;

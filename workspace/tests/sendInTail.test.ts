@@ -23,8 +23,11 @@ const FX = "tools/integration/fixtures";
 const json = (path: string) => JSON.parse(readFileSync(`${FX}/${path}`, "utf8"));
 type Row = { species: number; slide: number | null; txt: number | null };
 function sweep(name: string): Row[] {
+  return sweepAt(`forced-switch/${name}`);
+}
+function sweepAt(path: string): Row[] {
   const rows: Row[] = [];
-  for (const line of readFileSync(`${FX}/forced-switch/${name}`, "utf8").split("\n")) {
+  for (const line of readFileSync(`${FX}/${path}`, "utf8").split("\n")) {
     const parts = line.split(/\s+/);
     if (parts.length < 2 || parts[1] === "FAILED") continue;
     const field = (key: string) => {
@@ -46,7 +49,22 @@ describe("snd145 send-in tail table", () => {
       const [s, anim, delay] = SEND_IN_TAIL_SPECIES[species]!;
       expect([s, SEND_IN_TAIL_ANIM_IDS[anim], delay]).toEqual([frames[String(species)] ?? 0, ...tables[String(species)]!]);
     }
-    expect({ ...SEND_IN_TAIL_FRONT_ANIM_DURATION }).toEqual(json("send-in-tail/anim-duration.json"));
+    // offs152 R5: ids no swept species dominated take the ported reducer's terminal tick + 1 (fixtures/offs152/anim-duration-terminal.json).
+    expect({ ...SEND_IN_TAIL_FRONT_ANIM_DURATION })
+      .toEqual({ ...json("offs152/anim-duration-terminal.json"), ...json("send-in-tail/anim-duration.json") });
+  });
+
+  it("offs152 R5: the 37 species the first sweep could not stage (27 genderless, 10 male-only; Scene ON, r1 == r2): 36 / 37", () => {
+    const rows = [
+      ...sweepAt("offs152/species-sweep-opponent-target-genderless-on.txt"),
+      ...sweepAt("offs152/species-sweep-opponent-target-male-only-on.txt"),
+    ];
+    expect(rows.length).toBe(37);
+    const wrong = rows.filter((r) => sendInTail(r.species, "opponent").slideStart !== r.slide! - 10
+      || sendInTail(r.species, "opponent").messageStart !== r.txt! - 10);
+    // UNOWN (201): the ROM is 6 frames earlier (slide 55 = the ZIGZAG_FAST callback; the staged letter form's frame animation is
+    // shorter than sAnim_Unown_1's 61): form-dependent, not modelled.
+    expect(wrong.map((r) => r.species)).toEqual([201]);
   });
 
   it("reproduces the opponent healthbox slide of all 338 swept species and the message start (slide + 26 or the measured cry-bound offset)", () => {

@@ -12,6 +12,7 @@ tmp = Path(f"/tmp/fs/sweep-{tag}"); tmp.mkdir(parents=True, exist_ok=True)
 base = json.load(open(f"tools/battle-lab/{name}.json"))
 def run(sp):
     d = json.loads(json.dumps(base)); d["overrides"]["parties"][side][slot]["species"] = sp
+    if os.environ.get("FS_GENDER"): d["overrides"]["parties"][side][slot]["gender"] = os.environ["FS_GENDER"]  # offs152: e.g. genderless
     s = tmp / f"{name}-{side}-{sp}.json"; s.write_text(json.dumps(d)); o = tmp / f"out-{name}-{side}-{sp}.json"
     subprocess.run([os.environ["PY"], "tools/integration/forcedSwitchRomProbe.py", str(s), str(o)], capture_output=True)
     return sp, o

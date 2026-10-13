@@ -7,6 +7,8 @@ import { describe, expect, it } from "vitest";
 import speciesStats from "../src/data/gen/species-stats.json" with { type: "json" };
 import { SEND_IN_TAIL_OFF_CRY_FRAMES } from "../src/data/sendInTailOff.ts";
 import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation.ts";
+import { frontSendOutAffineAtTick } from "../src/animation/sendOutDispatcher.ts";
+import { rotateToSidesTwiceFrameAtTick } from "../src/animation/speciesIdleAnim.ts";
 import {
   opponentSwitchInDuration,
   sceneOffOpponentSwitchInDuration,
@@ -85,5 +87,18 @@ describe("offs152: Scene OFF opponent send-in tail", () => {
     expect(switchInTiming(1, 157, false, "TYPHLOSION").minimumFrames).toBe(145 - SWITCH_IN_WAITSTATE_HOLD_FRAMES);
     expect(switchInTiming(1, 304, true, "TAILLOW").minimumFrames).toBe(opponentSwitchInDuration(304) - SWITCH_IN_WAITSTATE_HOLD_FRAMES);
     expect(switchInTiming(0, 304, false, "TAILLOW").minimumFrames).toBe(91);
+  });
+});
+
+describe("offs152 R6: SOLROCK (ROTATE_TO_SIDES_TWICE) front send-in matrix", () => {
+  it("falls back to the reducer's affineWrites[] rotation (fra151 remainder 2)", () => {
+    for (const tick of [1, 10, 40, 128]) {
+      const write = rotateToSidesTwiceFrameAtTick(tick)!.affineWrites.at(-1)!;
+      const theta = ((write.rotationU16 >> 8) / 128) * Math.PI;
+      const c = Math.trunc(Math.cos(theta) * 256) + 0;
+      const s = Math.trunc(Math.sin(theta) * 256) + 0;
+      expect(frontSendOutAffineAtTick("SOLROCK", tick)).toEqual([c, -s + 0, s, c]);
+    }
+    expect(frontSendOutAffineAtTick("SOLROCK", 10)).not.toEqual([256, 0, 0, 256]);
   });
 });
