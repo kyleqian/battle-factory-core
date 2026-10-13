@@ -6,7 +6,8 @@
  *   node --experimental-strip-types tools/probe/verify-rcp154.ts <receipt.json> [--write]
  *
  * Same method as tools/probe/verify-rcp143.ts: the receipt's scenario is rerun
- * through the TS full-turn kernel at HEAD (`tools/probe/rcp143PortDriver.ts`),
+ * through the TS full-turn kernel at HEAD (`tools/probe/rcp154PortDriver.ts`, rcp143's
+ * driver taking each decision from the request's legal list),
  * seeded with the ROM's own `gRngValue` just before its first turn-execution
  * draw, with the ROM's per-turn AI-selection draws injected between turns.
  * Differences from rcp143: the player's bench (party slots 1/2) and the
@@ -25,7 +26,7 @@ import speciesTypes from "../../src/data/gen/species-types.json" with { type: "j
 import movesData from "../../src/data/gen/moves.json" with { type: "json" };
 import type { FactoryFullTurnBattlerConfig } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import type { BattleScriptPartyMemberInput } from "../../src/engine/battleScriptRulesContext.ts";
-import { runPortTurns, type PortDraw } from "./rcp143PortDriver.ts";
+import { runPortTurns, type PortDraw } from "./rcp154PortDriver.ts";
 import { romReason as rcp143RomReason } from "./verify-rcp143.ts";
 
 /** ROM callers this step adds to rcp143's map (function name -> port draw reason). */
@@ -164,7 +165,7 @@ export function verifyReceipt(receipt: Receipt) {
   return {
     pass,
     port: {
-      kernel: "src/engine/factoryBattleScriptFullTurnDecision.ts reduceFactoryFullTurnDecision via tools/probe/rcp143PortDriver.ts (benches staged by tools/probe/verify-rcp154.ts)",
+      kernel: "src/engine/factoryBattleScriptFullTurnDecision.ts reduceFactoryFullTurnDecision via tools/probe/rcp154PortDriver.ts (benches staged by tools/probe/verify-rcp154.ts)",
       seededFromRomRngBefore: turns[0].draws[0].rngBefore,
       injectedAiSelectionDraws: turns.map((turn) => (turn.turn === 1 ? 0 : turn.aiSelectionDrawCount)),
       playerSlots: receipt.portPlayerSlots,

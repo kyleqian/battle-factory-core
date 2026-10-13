@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import c1 from "../tools/probe/receipts/rcp154-c1-dragged-in-before-acting-off.json" with { type: "json" };
+import c1f from "../tools/probe/receipts/rcp154-c1f-census811-shape-foe-dragged-off.json" with { type: "json" };
 import c2 from "../tools/probe/receipts/rcp154-c2-encored-mid-turn-selected-off.json" with { type: "json" };
 import c2u from "../tools/probe/receipts/rcp154-c2u-encored-mid-turn-user-target-off.json" with { type: "json" };
 
@@ -15,11 +16,13 @@ type Action = Readonly<{
   attacker: number; activeSpecies: number; currentMove: number; currMovePos: number;
   chosenMoveByBattler: number; slotMoveAtCurrMovePos: number;
 }>;
-type Receipt = typeof c1 | typeof c2 | typeof c2u;
+type Receipt = typeof c1 | typeof c1f | typeof c2 | typeof c2u;
 
 const LCG = (value: number) => (Math.imul(value, 0x41c64e6d) + 0x6073) >>> 0;
-const SPECIES = { RHYHORN: 111, ZIGZAGOON: 288, POOCHYENA: 286, PIDGEOT: 18, SNORLAX: 143, PLUSLE: 353 } as const;
-const MOVE = { WHIRLWIND: 18, TACKLE: 33, ROAR: 46, DEFENSE_CURL: 111, AMNESIA: 133, HEADBUTT: 29, ENCORE: 227 } as const;
+const SPECIES = {
+  RHYHORN: 111, ZIGZAGOON: 288, POOCHYENA: 286, PIDGEOT: 18, SNORLAX: 143, PLUSLE: 353, BEAUTIFLY: 292, GLOOM: 44, VOLBEAT: 386,
+} as const;
+const MOVE = { WHIRLWIND: 18, TACKLE: 33, ROAR: 46, MOONLIGHT: 236, DEFENSE_CURL: 111, AMNESIA: 133, HEADBUTT: 29, ENCORE: 227 } as const;
 
 function expectProvenance(receipt: Receipt) {
   expect(receipt.schema).toBe("rcp154-action-time-receipt/v1");
@@ -111,6 +114,42 @@ describe("rcp154 C1 -- a battler dragged in by Whirlwind before acting does not 
     expect(c1.predictedPostFix.turns[0].draws.map((draw) => draw.reason)).toEqual([
       "accuracycheck", "forcerandomswitch:pick", "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
     ]);
+  });
+});
+
+describe("rcp154 C1f -- census-811 side: the foe dragged in by the player's Whirlwind does not act either", () => {
+  const draggedTurns = [0, 2, 4, 6].map((index) => c1f.rom.turns[index]);
+
+  it("is a reproducible, cross-checked stock-ROM receipt on census 811's species", () => {
+    expectProvenance(c1f);
+    expect(c1f.parties.player[0]).toMatchObject({ species: SPECIES.BEAUTIFLY, moves: [MOVE.WHIRLWIND, 318, 72, 213] });
+    expect(c1f.parties.opponent.map((mon) => [mon.species, mon.moves[0]])).toEqual([
+      [SPECIES.RHYHORN, MOVE.ROAR], [SPECIES.GLOOM, MOVE.MOONLIGHT], [SPECIES.VOLBEAT, MOVE.MOONLIGHT],
+    ]);
+  });
+
+  it("turns 1/3/5/7: only BEAUTIFLY dispatches; the dragged-in VOLBEAT / GLOOM neither ROARs nor uses MOONLIGHT", () => {
+    for (const [index, turn] of draggedTurns.entries()) {
+      const name = index === 3 ? "GLOOM" : "VOLBEAT";
+      expect(turn.actions.map((action) => [action.attacker, action.currentMove])).toEqual([[0, MOVE.WHIRLWIND]]);
+      expect(messageTexts(turn)).toEqual(expect.arrayContaining([`Foe ${name} was\ndragged out!\n`]));
+      expect(messageTexts(turn).filter((text) => text.startsWith("Foe ") && text.includes(" used"))).toEqual([]);
+    }
+    // The next turn it runs its own selection.
+    expect(c1f.rom.turns[1].actions[0]).toMatchObject({ attacker: 1, activeSpecies: SPECIES.VOLBEAT, currentMove: MOVE.MOONLIGHT });
+  });
+
+  it("port at HEAD matches every draw and HP but announces a MOONLIGHT the ROM never runs (FAIL by dispatch count)", () => {
+    expect(c1f.comparison.verdictToday).toBe("FAIL");
+    expect(c1f.comparison.firstDivergence).toBeNull();
+    expect(c1f.comparison.portActiveHp).toEqual(c1f.comparison.romActiveHp);
+    expect(c1f.comparison.romMoveDispatches).toEqual([1, 2, 1, 2, 1, 2, 1]);
+    expect(c1f.comparison.portUsedMoveMessages).toEqual([2, 2, 2, 2, 2, 2, 2]);
+    expect(c1f.port.turns[0].events).toContain("message:STRINGID_PKMNHPFULL");
+  });
+
+  it("predicts the ROM sequence post-fix", () => {
+    expectPredictionIsRom(c1f);
   });
 });
 

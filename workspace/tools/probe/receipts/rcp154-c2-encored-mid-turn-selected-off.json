@@ -1853,7 +1853,7 @@
   }
  },
  "port": {
-  "kernel": "src/engine/factoryBattleScriptFullTurnDecision.ts reduceFactoryFullTurnDecision via tools/probe/rcp143PortDriver.ts (benches staged by tools/probe/verify-rcp154.ts)",
+  "kernel": "src/engine/factoryBattleScriptFullTurnDecision.ts reduceFactoryFullTurnDecision via tools/probe/rcp154PortDriver.ts (benches staged by tools/probe/verify-rcp154.ts)",
   "seededFromRomRngBefore": 449897005,
   "injectedAiSelectionDraws": [
    0,
