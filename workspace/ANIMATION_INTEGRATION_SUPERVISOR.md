@@ -21,16 +21,32 @@ S10A's mission and scoped acceptance policy control this stage's work queue.
   separate faithful-random accounting). Production (src tree `65a45fcc`, 2026-10-13) has 236 scoped-exact
   + 13 faithful-random + 27 faithful-timing live adapters (+ Struggle) and all nine Scene ON status
   animations; reuse its recorded green baseline when code and environment match. Pick bounded batches.
-- Continue accepted-move adapters and source-derived host providers. Preserve
-  gameplay outcomes, RNG ownership, damage, turn order and facility state.
+- Continue accepted-move adapters and source-derived host providers. For
+  presentation-only work preserve gameplay outcomes, RNG ownership, damage,
+  turn order and facility state. The 2026-10-13 finish-up scope also authorizes
+  main-lane source-proven engine corrections under `docs/factory-finish-scope.md`.
   Helping Hand's doubles blocker does not block accepted moves. No new Factory
   acceptance campaign, Rust port, or general outside-Factory expansion. The
-  2026-10-11 user decision explicitly includes forced Struggle 165; it is the
-  first next-run animation task, alongside #166. Follow
+  2026-10-11 user decision explicitly includes forced Struggle 165; it and
+  #166 are live. Continue their remaining variants under
   `docs/struggle-integration-scope.md`. Rental-list absence or weight 0 must
   not exclude it from S10A completion or headline ordinary-play coverage.
 - Whole-playable arbitrary-history framebuffer exactness remains unclaimed.
   Preserve explicit palette/switch/party-return limitations until proven fixed.
+
+## Factory accuracy finish-up — approved 2026-10-13
+
+The user included the remaining animation, presentation and battle-engine
+fixes in the current mission. Follow `docs/factory-finish-scope.md`: start with
+#165, then #141 / #140 and #139, while dispatching independent presentation
+work where useful. Use main/ts workers for gameplay/RNG changes with explicit
+permission in their briefs; integration workers remain presentation-only.
+Source-correct damage, AI, RNG and event-order changes are intended fixes,
+even when old traces or soak trajectories change. Attribute those changes,
+prove the source behavior, and run the required gameplay gates. Presentation
+code must not change the corrected logical rules across Scene ON/OFF or visual
+seeds. Do not defer these engine fixes for a new scope approval. Audio stays
+deferred; the historical catalogue and standing D3/D4 contracts are unchanged.
 
 ## Approved Random2 implementation — D3, 2026-10-06
 

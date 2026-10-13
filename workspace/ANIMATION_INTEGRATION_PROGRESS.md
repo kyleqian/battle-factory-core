@@ -1,5 +1,19 @@
 # Animation integration progress
 
+## 2026-10-13 — User-authorized Factory finish-up scope (instructions only)
+
+All remaining animation variants, presentation corrections and discussed battle-engine accuracy defects are now in the current
+mission (`docs/factory-finish-scope.md`). The former presentation-only scope block is superseded for source-proven main-lane fixes.
+Queue #165 first, then #141 / #140 and #139; continue independent #168 / timing / fallback work. Scene ON/OFF must agree on the
+corrected rules, while intentional source-correct damage / AI / RNG / event-order changes may move old trajectories. Use the full
+engine verification contract and gameplay gates. Audio and prior settled exceptions remain deferred/settled.
+
+The roadmap, main/worker guides, verification policy and actual main-supervisor launch prompt now carry this authorization.
+Production src `65a45fcc`, its full-test/build receipt on `c4d38e1f3`, the served preview `63f6850b2` and measured coverage 99.34% /
+99.60% remain unchanged. This checkpoint changes scope/instructions only and starts no run; no implementation credit is added.
+Validation: scope/ledger checks, `git diff --check`, `bash -n run-supervisor.sh`, launcher `--print-config`, and
+`npm test -- tests/codexLauncherProfiles.test.ts` (62 / 62 passed). No production full-suite/build rerun is needed for this checkpoint.
+
 ## 2026-10-12 (evening) .. 2026-10-13 — S10A: ISSUES #168 DONE (all nine Scene ON status animations timed + drawn), SE gates, #166 DT tail, Smokescreen D4, ordinary-row idle rest; 98.95 / 99.32 -> 99.34 / 99.60 % live
 
 - **Final (supervisor):** master `63f6850b2` (production src == union `c4d38e1f3`). Gates on that union: typecheck, smoke 448, full suite

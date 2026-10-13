@@ -1,3 +1,17 @@
+## 2026-10-11 — User scope update: include Struggle in S10A
+
+- **State:** docs-only checkpoint on local master; production src `14d1be15` and the green 2026-10-10 night receipt are unchanged.
+  Coverage remains 95.38% of move-animation commands / 98.72% of frames, including Struggle. Its live adapter is still missing.
+- **Did:** recorded the user's explicit inclusion of Struggle 165, removed the roadmap exclusion, and updated supervisor instructions,
+  live-status pending work and census reporting. The historical 276 accepted bodies stay separate from this additional required body;
+  no acceptance or live credit was added. See `docs/struggle-integration-scope.md`.
+- **Next:** FIRST implement and prove Struggle through real forced-use routes, both sides and source-required variants, alongside
+  #166's missing stat-change presentation; extend accounting before live promotion. Then resume the existing timing / history queue.
+- **Notes:** this is presentation scope only; #165's gameplay change remains a separate scope decision. No run started. Diff,
+  JSON/queue ledger checks and the historical catalogue census (`238+13+25+0+0=276`) passed; the unchanged green production receipt
+  is reused under `ANIMATION_VERIFICATION.md`.
+
+---
 ## 2026-10-10 (night) — S10A: 12 production folds + 4 live audits; live share 0..999 93.79 -> 95.38 % of commands (97.37 -> 98.72 % of frames; 99.32 / 99.59 % excluding Struggle); 238 + 13 + 25
 
 - **State:** local master, production src `14d1be15` (gated on `4bf782115`; later commits are docs / receipts / evidence). Adapter census

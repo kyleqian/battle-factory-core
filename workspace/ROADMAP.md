@@ -14,15 +14,21 @@ battles, and the open-level rule set (until the single-battle loop is solid).
 later milestone — stage S11 below (user decision, 2026-07-28). No earlier
 stage's acceptance includes audio.
 
-## Current execution priority — 2026-10-07
+## Current execution priority — 2026-10-13
 
-The next main stage is **S10A: playable animation integration**, described below.
+The current main mission is **S10A plus the Factory accuracy finish-up**:
+remaining animation variants, presentation corrections and battle-engine
+defects are all authorized by the user's 2026-10-13 direction. See
+`docs/factory-finish-scope.md`; the presentation-only restriction is superseded
+for source-proven engine fixes in that scope. Start with Return -> Frustration
+(#165), then the RNG fixes (#141 / #140) and Focus Punch preparation (#139).
 Run the normal `./run-supervisor.sh`; the roadmap determines its mission.
 Integration is local master work, with bounded temporary worker checkouts and
 the existing model routing. There is no separate integration supervisor program.
 This user-directed priority supersedes historical optional-animation and
-Scene-ON-selector deferrals below. Keep unresolved mechanics debt recorded;
-do not rerun earlier campaigns or schedule audio ahead of this stage.
+Scene-ON-selector deferrals below. Fix the in-scope mechanics debt instead of
+parking it behind the animation stage. Reuse earlier proofs where valid;
+do not restart unrelated campaigns or schedule audio ahead of this work.
 
 Read `ANIMATION_INTEGRATION_PROGRESS.md` for the exact latest production receipt
 and next step, and `ANIMATION_INTEGRATION_SUPERVISOR.md` for detailed execution
@@ -55,6 +61,14 @@ diagnostic. The 276 already accepted catalogue bodies retain their historical
 counts; Struggle is one additional required body.
 Implemented 2026-10-11: Struggle live (`docs/stl109-struggle-live.md`, doll cells `docs/sdl119-struggle-doll-live.md`; 895 / 1,001 census
 Struggle commands live, the rest declining on other moves' order-host gaps) and #166's stat-change animation live in both scenes.
+
+**User scope decision, 2026-10-13:** all remaining animation variants,
+presentation corrections and the discussed battle-engine accuracy bugs are in
+the current finish-up scope. Main-lane fixes to gameplay, damage, AI, RNG and
+event ordering are authorized when proved against the original source;
+presentation-only work must preserve the same corrected rules across scene
+modes. See `docs/factory-finish-scope.md` for ownership and gates. Audio stays
+deferred; previously settled exceptions and unrelated expansion remain parked.
 
 ## Operational notes
 
@@ -2237,9 +2251,11 @@ the same SE wait now precedes stats-change banners (both scenes) and multi-hit 2
 Smokescreen's first-use phase (tmr136); ordinary Scene ON rows draw ONIX's tracked idle rest (rst139 / rsl141); ord124's order plans
 landed (ordl126). Ordinary-play census (`.integration/validation/final-63f6850b2/census/merged.json`): **99.34 % of move-animation
 commands / 99.60 % of frames live** (session start 98.95 / 99.32). Live audits 27 / 28: 0 defects. Resume points:
-0. ISSUES #165 (GAMEPLAY, outside S10A's presentation-only mandate — needs a run where gameplay changes are in scope): the ROM Factory
-   builds every mon with friendship 0 and turns Return into Frustration; production keeps Return (drawn as ReturnWeak, ret88).
-1. FIRST (cheap): land the BANKED inv142 patch (docs/inv142-status-animation-invisible-battler.md: a status animation over a hidden Dig
+0. FIRST, AUTHORIZED 2026-10-13: fix the battle-engine accuracy backlog through main-lane steps under `docs/factory-finish-scope.md`.
+   #165: Factory friendship 0 + Return -> Frustration (player/opponent builds and swaps; verify summaries); then #141's missing
+   rampage / Sticky Hold RNG draws, #140's Mimic/Transform overwritten chosen-move targeting draw, and #139's Focus Punch pre-pass.
+   Intentional source-correct damage / AI / RNG / event-order changes are permitted; prove them and run the gameplay gates.
+1. Presentation (cheap, can proceed independently): land the BANKED inv142 patch (docs/inv142-status-animation-invisible-battler.md: a status animation over a hidden Dig
    battler draws its sprites; 5 census commands). Then FRZ's frozen-turn 115 / 116 phase (aud137 §; D4 class, 1 frame).
 2. Remaining move-animation fallbacks (census 181 commands): Hyper Beam 63 (Random2 orb words), Astonish 310 (small words law),
    Extrasensory 326 player later bodies (scanout split), doll cells, Castform weather keys (#143), stale move power (Endeavor), Memento after
@@ -2257,6 +2273,9 @@ Latest progress supersedes this starting checkpoint as verified work lands.
 
 Acceptance:
 
+- The current Factory finish-up includes the battle-engine defects in `docs/factory-finish-scope.md`; no presentation-only
+  scope exclusion may leave them unworked. Prove intentional gameplay/RNG corrections against the source and run the applicable
+  gameplay gates. Scene ON/OFF and presentation seeds must still agree on corrected logical outcomes.
 - Include Struggle as an additional required body and in headline ordinary-play coverage. Historical 276-body catalogue completion
   alone does not satisfy S10A; report Struggle's pending / accepted / live state separately without granting unproved credit.
 - Each newly integrated body has complete dense source/framebuffer proof through

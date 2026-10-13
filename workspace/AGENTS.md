@@ -69,6 +69,15 @@ This is the stable ownership contract; current state remains in `PROGRESS.md`.
 | **Animation** | Battle Scene ON | Move timelines, particles, sprites, presentation assets and traces | Damage, RNG, turn order, round advancement, or facility state |
 | **Integration** | Battle Scene ON | Assigned live adapters, host providers, presentation seam and real-route tests | Gameplay/RNG changes, Factory acceptance or supervisor ledgers |
 
+**User scope update, 2026-10-13:** the current main mission includes all
+remaining Factory animation, presentation and battle-engine accuracy fixes.
+The main/ts lane may intentionally correct source-proven gameplay/RNG bugs
+(#165 / #141 / #140 / #139) under `docs/factory-finish-scope.md`. The supervisor
+must assign those changes explicitly; integration/animation lane ownership
+stays presentation-only. Scene modes must share the same corrected rules.
+This supersedes the old S10A-wide prohibition on mechanics changes; no renewed
+user permission is needed for the covered fixes. Audio remains deferred.
+
 - Main defines shared interfaces before another lane depends on them.
 - Scene mode may change presentation timing, never logical outcomes or RNG.
 - Animation's handoff is `ANIMATION_PROGRESS.md`; coverage and non-exclusive

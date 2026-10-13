@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-13 — User scope update: all remaining Factory correctness work is authorized
+
+- **State:** scope/instructions checkpoint on local master; production src `65a45fcc` and the green final receipt on `c4d38e1f3`
+  are unchanged. Move-animation coverage remains 99.34% of commands / 99.60% of frames; no fix is credited by this scope change.
+- **Did:** recorded `docs/factory-finish-scope.md` and updated the roadmap, lane/supervisor instructions and launch prompt. All
+  remaining animation variants, presentation corrections and source-proven battle-engine bugs are authorized. Main-lane changes
+  to damage / AI / RNG / event ordering are allowed with source proof; presentation workers retain their narrow ownership.
+- **Next:** FIRST #165 Return -> Frustration; then #141's rampage / Sticky Hold RNG draws, #140's Mimic/Transform targeting branch,
+  and #139's Focus Punch pre-pass. Continue independent banked #168 fixes, fallback variants and presentation/timing remainders.
+  Use the engine gates in ANIMATION_VERIFICATION.md, including all five gameplay gates; attribute intentional trajectory changes.
+- **Notes:** audio remains deferred, settled exceptions stay settled, and no run is launched by this checkpoint. Reuse the unchanged
+  production receipt. Scope/ledger checks, `git diff --check`, shell syntax / `--print-config`, and all 62 launcher-profile tests passed.
+
+---
+
 ## 2026-10-12 (evening) .. 2026-10-13 — S10A: Scene ON status-condition animations DONE (#168: timed + all nine drawn), sound-effect waits, Double Team / Smokescreen timing, ordinary-row idle rest; live share 0..999 98.95 -> 99.34 % of commands (99.32 -> 99.60 % of frames)
 
 - **State:** local master `63f6850b2` (production src == union `c4d38e1f3`). Supervisor FINAL gates on that union: typecheck, smoke 448,
@@ -63,20 +78,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   remainders, regenerate the app-only presentation-rng trace.
 - **Notes:** no DEFERRED entries. ISSUES: #166 / #167 trimmed, #168 new, #153 quantified. All worker branches merged; worktrees removed
   (scratch preserved under `.integration/validation/*-20261011/`, transcripts `.codex-logs/workers/`).
-
----
-
-## 2026-10-11 — User scope update: include Struggle in S10A
-
-- **State:** docs-only checkpoint on local master; production src `14d1be15` and the green 2026-10-10 night receipt are unchanged.
-  Coverage remains 95.38% of move-animation commands / 98.72% of frames, including Struggle. Its live adapter is still missing.
-- **Did:** recorded the user's explicit inclusion of Struggle 165, removed the roadmap exclusion, and updated supervisor instructions,
-  live-status pending work and census reporting. The historical 276 accepted bodies stay separate from this additional required body;
-  no acceptance or live credit was added. See `docs/struggle-integration-scope.md`.
-- **Next:** FIRST implement and prove Struggle through real forced-use routes, both sides and source-required variants, alongside
-  #166's missing stat-change presentation; extend accounting before live promotion. Then resume the existing timing / history queue.
-- **Notes:** this is presentation scope only; #165's gameplay change remains a separate scope decision. No run started. Diff,
-  JSON/queue ledger checks and the historical catalogue census (`238+13+25+0+0=276`) passed; the unchanged green production receipt
-  is reused under `ANIMATION_VERIFICATION.md`.
 
 ---

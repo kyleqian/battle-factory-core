@@ -27,6 +27,12 @@ At wind-down, summarize every question added or still blocking work in the top
 
 No unresolved user-level decisions.
 
+The 2026-10-13 user direction includes all remaining Factory animation,
+presentation and discussed battle-engine accuracy fixes in the current
+finish-up mission (`docs/factory-finish-scope.md`). #165 / #141 / #140 / #139
+are authorized main-lane work and must not be deferred for gameplay/RNG scope
+approval. Audio and existing settled exceptions retain their prior decisions.
+
 (D4, the CPU-load animation timing decision, was ANSWERED by the user on
 2026-10-07: option (b) — ship the dominant measured timing in a separately
 counted "faithful timing" category. The user authorized unblocking and finishing

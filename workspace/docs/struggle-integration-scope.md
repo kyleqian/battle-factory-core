@@ -47,7 +47,10 @@ fixed one Struggle defect (its target keeps its idle rest). The text below is th
    boundary. Include repeated uses and relevant Substitute/history cases.
 4. Preserve existing gameplay outcomes, damage, turn order and gameplay RNG;
    compare Scene ON/OFF. This decision authorizes presentation integration,
-   not gameplay changes such as issue #165's Return -> Frustration mapping.
+   not gameplay changes. Subsequent user authorization on 2026-10-13 permits
+   source-proven engine fixes, including #165, through separate main-lane steps
+   under `factory-finish-scope.md`; it does not give a Struggle renderer gameplay
+   RNG ownership or waive Scene ON/OFF logical parity.
 5. Run the scoped production gates in `ANIMATION_VERIFICATION.md`, independently
    reproduce the central proof, and report the census including Struggle.
    Record any remaining variant/history gates honestly and refresh the preview

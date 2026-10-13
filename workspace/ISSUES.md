@@ -17,6 +17,13 @@ backlog.
 
 # Open
 
+**Current scope, user-approved 2026-10-13:** the remaining Factory animation,
+presentation and battle-engine accuracy defects are all authorized in the
+finish-up mission (`docs/factory-finish-scope.md`). #165 / #141 / #140 / #139
+may change gameplay/RNG when proved against source; use main-lane ownership
+and gameplay gates. Historical presentation-only exclusions are superseded.
+Settled/parked records and unrelated expansions retain their existing status.
+
 ## #168 — remainder: a Scene ON status animation over an INVISIBLE battler draws nothing (S10A; #168 otherwise DONE 2026-10-13)
 
 All nine B_ANIM_STATUS_* animations are timed (sa125 + the IsBattleSEPlaying gate, sag130) and drawn (sar131 / sad133 / sae135 / gaf140;
@@ -44,7 +51,8 @@ CLEFAIRY 107, TOGETIC 288, DRAGONAIR 306, PIDGEOT 355, GYARADOS 459 / 747, EXEGG
 friendship 0 (power 1) — different damage, AI scores (Factory AI CheckBadMove treats the two effects differently) and animation. Since ret88
 (2026-10-11) production's live Return renders the ROM's ReturnWeak branch (friendship < 61: 88 rows, order key 40216) — what the ROM plays for
 production's own friendship-0 Return; ReturnStrongest stays proven for friendship > 200. docs/next-adapters-prep18.md s4's "255 for every Return user" cites
-battle_tower.c, which the Factory does not use. Not fixed in S10A (presentation-only mandate: gameplay outcomes must not change).
+battle_tower.c, which the Factory does not use. Still unfixed; the user authorized this gameplay correction on 2026-10-13
+under `docs/factory-finish-scope.md`. The former presentation-only scope blocker is resolved.
 Resume (a gameplay-parity step): map Return -> Frustration where the Factory builds battle parties (player rentals and opponents, both
 the battle-start and swap paths), check what the draft / swap summary screens show for those sets in the ROM (the screens may read
 `gFacilityTrainerMons` directly), re-run the Factory battle / AI / soak gates, then retire or re-scope the live Return adapter and

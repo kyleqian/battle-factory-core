@@ -26,6 +26,11 @@ first in the next run, alongside #166, under `docs/struggle-integration-scope.md
 This overrides the outside-Factory restriction for this forced move. Include
 Struggle in headline ordinary-play coverage and keep its required/pending state
 separate from the historical 276 accepted catalogue bodies until proved.
+On 2026-10-13 the user included all remaining animation variants, presentation
+corrections and battle-engine accuracy defects in the current finish-up mission.
+See `docs/factory-finish-scope.md`. The main/ts lane is authorized to fix #165,
+#141, #140 and #139 with source-proven gameplay/RNG changes; integration workers
+still own presentation only. This supersedes the S10A-wide mechanics exclusion.
 Historical remote-only instructions and isolated cloud branches are superseded.
 
 Canonical checkout: `/Users/kyle/Developer/pokebench/pokeemerald-factory-core`,
@@ -45,7 +50,10 @@ evidence and unfinished refs locally before cleaning up worker worktrees.
 This mandate authorizes the necessary engine/presentation seam, browser option,
 live renderer adaptation, tests and preview. It supersedes old roadmap deferrals
 of playable Scene ON and the Factory worker's animation-only file restriction.
-Preserve gameplay outcomes, RNG, damage, turn order and facility progression.
+Presentation-only steps preserve gameplay outcomes, RNG, damage, turn order
+and facility progression. Source-proven main-lane engine corrections are
+authorized by the 2026-10-13 scope update, with `docs/factory-finish-scope.md`'s
+verification and intentional-change accounting.
 Document deliberate module-boundary changes; never silently widen ratchets.
 
 ## Established baseline and remaining work

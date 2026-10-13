@@ -44,6 +44,33 @@ scoped gates before dispatch; production/dependency/configuration deltas or a
 missing production receipt need a full baseline. Documentation alone does not
 invalidate a code receipt. Never invent or assume a green result.
 
+## Factory engine corrections — user-approved 2026-10-13
+
+`docs/factory-finish-scope.md` authorizes the remaining Factory animation,
+presentation and battle-engine fixes in the current mission, including #165,
+#141, #140 and #139. The old stage-wide presentation-only restriction no
+longer blocks those corrections. Assign them to main/ts workers with explicit
+files, intended source behavior and acceptance gates.
+
+- Prove corrected engine behavior with original-source analysis, staged ROM
+  routes and meaningful Tier-1 controls. Attribute exact RNG draw changes,
+  damage / AI changes and event ordering where applicable. Rebaseline old
+  trajectories only after establishing the intended source-correct change.
+- Engine changes need affected checks, smoke, typecheck, the full suite/build,
+  applicable Factory battle/AI checks and all five gameplay gates defined in
+  `SUPERVISOR.md`, including its varied-RNG winning/swap profiles. The scoped
+  presentation-only soak waiver does not apply to mechanics changes.
+- Scene ON/OFF and different visual seeds must share the same corrected
+  gameplay rules and RNG stream. Presentation rendering still cannot consume
+  gameplay RNG; D3/D4 remain presentation-owned exceptions only.
+- Re-run ordinary live coverage and affected presentation proofs on the
+  corrected rules. Report intentional changes rather than treating unchanged
+  command digests against a buggy baseline as a requirement. Preserve controls
+  for unaffected cases, valid historical body proofs and truthful claim counts.
+- Same-source baseline reuse and the supervisor clean-fold policy above still
+  apply. Documented source-correct changes need no renewed scope permission;
+  audio and settled out-of-scope exceptions remain under their prior decisions.
+
 ## Random2 live integration — user-approved D3, 2026-10-06
 
 The user authorized a separate deterministic presentation RNG for the next

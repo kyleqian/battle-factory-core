@@ -24,6 +24,11 @@ is live in both scenes and all nine status-condition animations are live in Scen
 Helping Hand is the sole unaccepted Factory move, pending legal doubles staging.
 Whole-playable arbitrary-history framebuffer exactness remains unclaimed.
 
+The 2026-10-13 user direction includes all remaining Factory animation,
+presentation and battle-engine accuracy fixes, including #165 Return ->
+Frustration and #141 / #140 / #139. See `docs/factory-finish-scope.md` for the
+main-lane authority and gameplay gates. Audio remains deferred.
+
 Resume the current main roadmap stage from this workspace with:
 
 ```sh

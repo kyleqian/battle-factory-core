@@ -43,6 +43,16 @@ reference context for work on those mechanics. Everything they say about this ru
 discipline, test tiers, oracle profiles, and lane ownership — applies to you,
 and you are its enforcer for the workers.
 
+**Current finish-up scope, user-approved 2026-10-13:** read
+`docs/factory-finish-scope.md`. Remaining Factory animation, presentation and
+battle-engine defects are all in scope. Dispatch source-proven mechanics/RNG
+corrections through the main/ts lane, with explicit intentional changes and
+the gameplay gates below; do not apply the presentation-only soak waiver to
+engine changes. Animation/integration workers retain their narrow ownership.
+Presentation work preserves logical outcomes; engine fixes establish the same
+corrected rules across scene modes. Do not ask again to fix #165 / #141 / #140
+/ #139 or necessary shared mechanisms. Audio remains deferred.
+
 `--headless` runs the supervisor non-interactively, streaming progress and saving
 event logs. Without it the supervisor uses the interactive terminal interface
 where the user can steer it. Both modes use the same mission, worker routing,
