@@ -14,7 +14,7 @@ same() { if cmp -s "$1" "$2"; then echo "same $(basename "$2")"; else echo "DIFF
 copy() {  # copy <dir> [reverse-diff]: git-archive copy of HEAD, node_modules / reference / artifacts linked, its own git repo
   d=$1
   git archive --format=tar HEAD . | (mkdir -p "$d" && tar -x -C "$d")
-  for l in node_modules reference artifacts; do ln -s "$ROOT/$l" "$d/$l"; done
+  for l in node_modules reference artifacts; do ln -sfn "$ROOT/$l" "$d/$l"; done
   if [ -n "$2" ]; then (cd "$d" && patch -s -R -p1 < "$ROOT/$2"); fi
   (cd "$d" && git init -q && git add -A > /dev/null && git -c user.email=w@x -c user.name=w commit -qm copy \
     && git -c user.email=w@x -c user.name=w commit -q --allow-empty -m extra)
