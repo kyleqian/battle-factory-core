@@ -89,7 +89,7 @@ describe("ISSUES #165: Factory parties turn Return into Frustration", () => {
   it("swap path: a swapped-in Return set re-enters the next battle's party as Frustration", () => {
     const playerRecords: FactoryRentalParty = [record(15), record(291), record(1)];
     const opponentRecords: FactoryRentalParty = [record(459), record(2), record(3)];
-    const toBattleMon = (r: ReturnType<typeof record>) => {
+    const toBattleMon = (r: FactoryRentalParty[number]) => {
       const member = createFactoryCorpusPartyMember(r);
       return {
         id: `rental-${r.setId}`, species: member.speciesName, hp: member.hp, maxHp: member.maxHP,

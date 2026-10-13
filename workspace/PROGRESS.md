@@ -20,7 +20,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Soak vanilla 0:20 20 / 20 OK, per-seed lines identical to soak-gates-20261012.
 - **Next:** #141 (rampage / Sticky Hold RNG draws), #140, #139 per ROADMAP S10A item 0; the other gameplay gates (full / winning /
   winning-swap 0:60, fifth gate) were not run by this step. The live Return adapter stays (Metronome can call Return).
-- **Notes:** typecheck + smoke 448 + 383 Factory/Return-related test files green on `cd99c8073`; full `npm test` + build run next (result in the following commit).
+- **Notes:** gates on the tested tree (`e0b518d9a` + the test-only type fix in the next commit): typecheck 0 errors, smoke 448,
+  full `npm test` (2 vitest shards) 1,655 files / 13,725 tests passed, 0 failed (44 files / 223 tests skipped), build OK. Draft SUMMARY
+  ROM capture not done (no cheap staged draft with a Return set); source-cited + Tier-1. Scratch: `.integration/validation/ret165-20261013/`.
 
 ---
 

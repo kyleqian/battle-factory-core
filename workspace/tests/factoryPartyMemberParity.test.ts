@@ -126,7 +126,7 @@ describe.skipIf(!wasmAvailable)("Full corpus sweep — ts vs wasm across all 882
     }
     expect(compared).toBe(FRONTIER_MONS.length);
     expect(avoidReturnDivergent).toEqual(
-      FRONTIER_MONS.map((row, setId) => setId).filter((setId) => factoryFacilitySetMoveIds(setId).includes(216)),
+      FRONTIER_MONS.map((_row, setId) => setId).filter((setId) => factoryFacilitySetMoveIds(setId).includes(216)),
     );
   });
 });
