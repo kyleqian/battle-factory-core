@@ -57,6 +57,14 @@ ROM: opponent slide el 36 constant (front animation skipped), message slide + 26
 (the cry starts at release and `SwitchIn_HandleSoundAndEnd` waits for it). Production OFF: slide 33, span 91 + 11 (unchanged by snd145).
 Measured OFF residual on the two windows: 68 hb + msg rows each. A fix needs the per-species cry end (m4a lengths) for the message.
 
+## Gates (tested commit `1bc2ae511`, tree `b71c6340`, src `364e0849`)
+
+Full `npm test` **1,655 files / 13,724 tests passed, 0 failed** (44 files / 223 tests skipped); `npm run build` OK; `npm run typecheck` OK;
+`npm run test:smoke` OK; `git diff --check` clean. A first full run (tree of `96a258766`) failed 7 tests in 2 files that pin absolute
+Scene ON route frames (`tests/sc106StatsChangeCommand.test.ts` 3, `tests/sgl138SeGateLive.test.ts` 4); all 7 moves were attributed to
+opponent send-ins (sgl138 totals == the census per-battle deltas; sc106 WOBBUFFET / GROWLITHE / NIDORINA send-ins) and re-pinned in
+`1bc2ae511`. `snd145Run.sh` twice into fresh dirs: run2 ALL SAME.
+
 ## Files
 
 `src/data/sendInTail.ts` (generated), `src/engine/switchInTail.ts`, `src/engine/battleResolutionPresentation.ts` (switch-in timing,
