@@ -70,8 +70,8 @@ describe("ord149 A: Astonish 310 words law", () => {
     expect(diff).toContain("+export const WORDS_ORDER_UNIT_MOVE_IDS: readonly number[] = Object.freeze([28, 189, 240, 260, 291, 301, 310]);");
     expect(diff).toContain("`Cf;D0;Cff;D1,2/P${liveAstonishDropletRise(words.words[1]! & 0x7f)},${liveAstonishDropletRise(words.words[3]! & 0x7f)}`");
     expect(createHash("sha256").update(diff).digest("hex")).toBe("20e4b3425c4d7dfa72eff750f47d9fc306a32f642ba840913962e34e61c22180");
-    // base unchanged: the patch is banked, not landed
-    expect(WORDS_ORDER_UNIT_MOVE_IDS).not.toContain(310);
+    // asl155: the banked patch is landed (tests/ordl149AstonishWordsUnit.test.ts)
+    expect(WORDS_ORDER_UNIT_MOVE_IDS).toContain(310);
     const delta = json("ord149-census-delta.json");
     expect(delta.commands).toBe(27256);
     expect(delta.lifted).toEqual({ commands: 6, frames: 983 });

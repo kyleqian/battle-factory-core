@@ -1619,6 +1619,8 @@ export function liveWordsOrderDeferredCarry(
     if (unit.generalAnimation === undefined && unit.moveId === 260) {
       return unit.bodySpecies === undefined ? null : liveFlatterWordsPostFree(unit, activationFree, wordsOf(unit.key), unit.bodySpecies);
     }
+    // ord149: Astonish carries through its droplets' rises (liveAstonishWordsPostFree; species-free: both droplets start at the target's point).
+    if (unit.generalAnimation === undefined && unit.moveId === 310) return liveAstonishWordsPostFree(activationFree, wordsOf(unit.key));
     const dirt = unit.generalAnimation === undefined && unit.moveId !== 240;
     if (dirt && unit.bodySpecies !== undefined) {
       const bodyAnchors = liveWordsBodyAnchors(unit.bodySpecies);
@@ -4696,6 +4698,35 @@ function liveDiveWordsPlan(
     return `${births.length > 0 ? `C${"f".repeat(births.length)}` : ""}${births.length > 0 && group.length > 0 ? "/" : ""}${group.length > 0 ? `D${group.join(",")}` : ""}`;
   }).join(";");
   return { text, profile: real };
+}
+
+/**
+ * ord149: an Astonish 310 droplet's rise on the last SortSprites before its destroy (AnimSprayWaterDroplet_Step, battle_anim_flying.c:1139:
+ * data[1] = 896 + v2 (v2 odd) / 896 - v2 (even), `y2 -= data[1] >> 8; data[1] -= 32` per step; the 31st step destroys, so 30 steps are sorted).
+ */
+export function liveAstonishDropletRise(v2: number): number {
+  let data1 = v2 % 2 ? 896 + v2 : 896 - v2, rise = 0;
+  for (let step = 0; step < 30; step++, data1 -= 32) rise += data1 >> 8;
+  return rise;
+}
+
+/**
+ * ord149 (docs/ord149-astonish-extrasensory.md): the Astonish body's order plan from its 4 words. Move_ASTONISH creates its two droplets in one
+ * frame at the target's point; they die in the same frame, and SortSprites (equal priority words) puts the lower one (the smaller rise)
+ * first and never swaps equal keys, so the pair leaves by rise, ties in the lend order: the P words are the rises (the cursor sorts the pair
+ * by them, ties by F index at creation). Null without the body's 4 words. ROM: 36 / 36 bodies exact per window (fixtures/ord149).
+ */
+export function liveAstonishWordsPlanText(words: PresentationRngWords | null): string | null {
+  if (words === null || words.words.length !== 4) return null;
+  return `Cf;D0;Cff;D1,2/P${liveAstonishDropletRise(words.words[1]! & 0x7f)},${liveAstonishDropletRise(words.words[3]! & 0x7f)}`;
+}
+
+/** ord149: the free order after an Astonish body (liveAstonishWordsPlanText applied with the production plan cursor), or null. */
+export function liveAstonishWordsPostFree(activationFree: readonly number[], words: PresentationRngWords | null): readonly number[] | null {
+  const text = liveAstonishWordsPlanText(words);
+  if (text === null) return null;
+  const cursor = applySpriteOrderUnitPlan(createSpriteOrderPlanCursor({ known: true, free: activationFree, pendingDestroyed: [] }), decodeSpriteOrderPlan(text));
+  return cursor.order.known ? Object.freeze([...cursor.order.free]) : null;
 }
 
 /** land68 (prep65): the free order after a Dive body (liveDiveWordsPlanText applied with the production plan cursor), or null. */
