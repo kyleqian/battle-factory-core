@@ -29,11 +29,11 @@
   "exception": "Not exercised here: when the dragged-in mon's switch-in ability fires (e.g. Drizzle), AbilityBattleEffects pushes the cursor without advancing it (the :5296 advance is inside the cancel arm), so switchineffects re-runs after the ability script and the cancel lands on that second pass. Intimidate / Trace return 0 from AbilityBattleEffects and take the cancel arm directly (port note battleScriptSwitchinOpcode.ts:1284-1290)."
  },
  "portSitesAtHead": {
-  "cancelWriteMissing": "src/engine/battleScriptSwitchinOpcode.ts:1324-1329 ports the `if (!Ability && !Item)` body (clears SIDE_STATUS_SPIKES_DAMAGED, advances) but never writes actionsByTurnOrder[i] = B_ACTION_CANCEL_PARTNER for the switched-in battler's turn-order slot (source :5270-5274)",
+  "cancelWriteMissing": "src/engine/battleScriptSwitchinOpcode.ts:1325-1338 ports the `if (!Ability && !Item)` body (clears SIDE_STATUS_SPIKES_DAMAGED, advances) but never writes actionsByTurnOrder[i] = B_ACTION_CANCEL_PARTNER for the switched-in battler's turn-order slot (source :5270-5274)",
   "secondActionGate": "src/engine/factoryBattleScriptFullTurnDecision.ts:2986 skips action 2 only when actionsByTurnOrder[1] === B_ACTION_TRY_FINISH (Pursuit); 12 (B_ACTION_FINISHED / CANCEL_PARTNER) is not checked, so the dragged-in battler runs its own action",
   "whatThePortRuns": "after rng146 F3 the port runs the dragged-in foe's own slot move (MOONLIGHT) through the :130-134 arm -- exactly rng146's census-811 description; the ROM runs no action"
  },
- "fixShape": "(1) battleScriptSwitchinOpcode.ts, in the :1324-1329 cancel body: for every turn-order slot i with battlerByTurnOrder[i] === battler write actionsByTurnOrder[i] = 12 (B_ACTION_CANCEL_PARTNER; source :5270-5274). (2) factoryBattleScriptFullTurnDecision.ts:2986: skip action 2 when actionsByTurnOrder[1] is B_ACTION_TRY_FINISH (11) OR B_ACTION_FINISHED (12) -- source HandleAction_ActionFinished (battle_util.c:658-663) dispatches the slot's value, and 12 is HandleAction_ActionFinished again, which ends the turn. No new draw sites; the post-fix sequence is the ROM's.",
+ "fixShape": "(1) battleScriptSwitchinOpcode.ts, in the :1325-1338 cancel body: for every turn-order slot i with battlerByTurnOrder[i] === battler write actionsByTurnOrder[i] = 12 (B_ACTION_CANCEL_PARTNER; source :5270-5274). (2) factoryBattleScriptFullTurnDecision.ts:2986: skip action 2 when actionsByTurnOrder[1] is B_ACTION_TRY_FINISH (11) OR B_ACTION_FINISHED (12) -- source HandleAction_ActionFinished (battle_util.c:658-663) dispatches the slot's value, and 12 is HandleAction_ActionFinished again, which ends the turn. No new draw sites; the post-fix sequence is the ROM's.",
  "oracleProfile": "battle-scene-off",
  "seed": 305419897,
  "runs": 2,
