@@ -1,0 +1,83 @@
+{
+ "off148-curse-ply.json": {
+  "move": 174,
+  "class": "stat-stage",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off148-curse-opp.json": {
+  "move": 174,
+  "class": "stat-stage",
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "off148-swagger-ply.json": {
+  "move": 207,
+  "class": "stat-stage",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off148-flatter-ply.json": {
+  "move": 260,
+  "class": "stat-stage",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off148-agility-ply.json": {
+  "move": 97,
+  "class": "control-stats-change",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off148-wish-ply.json": {
+  "move": 273,
+  "class": "sprite-visibility",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off148-wish-opp.json": {
+  "move": 273,
+  "class": "sprite-visibility",
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "off148-roar-ply.json": {
+  "move": 46,
+  "class": "sprite-visibility",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "off148-baton-pass-opp.json": {
+  "move": 226,
+  "class": "sprite-visibility",
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ }
+}
