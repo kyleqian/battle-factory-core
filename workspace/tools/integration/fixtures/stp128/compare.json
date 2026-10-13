@@ -1,0 +1,934 @@
+{
+ "schema": "stp128-compare-receipt/v1",
+ "blend": "helper",
+ "windows": 29,
+ "cleanWindows": 29,
+ "summary": {
+  "CONFUSION/player": {
+   "windows": 6,
+   "rows": 618,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "CONFUSION/opponent": {
+   "windows": 6,
+   "rows": 618,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "CURSED/player": {
+   "windows": 4,
+   "rows": 312,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "CURSED/opponent": {
+   "windows": 4,
+   "rows": 312,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "NIGHTMARE/player": {
+   "windows": 3,
+   "rows": 234,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "NIGHTMARE/opponent": {
+   "windows": 6,
+   "rows": 468,
+   "fullPx": 0,
+   "rectPx": 0
+  }
+ },
+ "controls": {
+  "age+1": {
+   "windows": 29,
+   "cleanWindows": 0,
+   "failedWindows": [
+    "stp128-confuse-ray-opp-primeape-golbat#0",
+    "stp128-confuse-ray-opp-primeape-golbat#1",
+    "stp128-confuse-ray-opp-primeape-golbat#2",
+    "stp128-confuse-ray-opp-primeape-onix#0",
+    "stp128-confuse-ray-opp-primeape-onix#1",
+    "stp128-confuse-ray-opp-primeape-onix#2",
+    "stp128-confuse-ray-ply-primeape-golbat#0",
+    "stp128-confuse-ray-ply-primeape-golbat#1",
+    "stp128-confuse-ray-ply-primeape-golbat#2",
+    "stp128-confuse-ray-ply-primeape-onix#0",
+    "stp128-confuse-ray-ply-primeape-onix#1",
+    "stp128-confuse-ray-ply-primeape-onix#2",
+    "stp128-curse-opp-gengar-golbat#0",
+    "stp128-curse-opp-gengar-golbat#1",
+    "stp128-curse-opp-gengar-onix#0",
+    "stp128-curse-opp-gengar-onix#1",
+    "stp128-curse-ply-gengar-golbat#0",
+    "stp128-curse-ply-gengar-golbat#1",
+    "stp128-curse-ply-gengar-onix#0",
+    "stp128-curse-ply-gengar-onix#1",
+    "stp128-nightmare-opp-gengar-golbat#0",
+    "stp128-nightmare-opp-gengar-golbat#1",
+    "stp128-nightmare-opp-haunter-shuckle#0",
+    "stp128-nightmare-ply-gengar-golbat#0",
+    "stp128-nightmare-ply-gengar-golbat#1",
+    "stp128-nightmare-ply-gengar-golbat#2",
+    "stp128-nightmare-ply-haunter-shuckle#0",
+    "stp128-nightmare-ply-haunter-shuckle#1",
+    "stp128-nightmare-ply-haunter-shuckle#2"
+   ],
+   "fullPx": 988903
+  },
+  "no-shake": {
+   "windows": 29,
+   "cleanWindows": 12,
+   "failedWindows": [
+    "stp128-curse-opp-gengar-golbat#0",
+    "stp128-curse-opp-gengar-golbat#1",
+    "stp128-curse-opp-gengar-onix#0",
+    "stp128-curse-opp-gengar-onix#1",
+    "stp128-curse-ply-gengar-golbat#0",
+    "stp128-curse-ply-gengar-golbat#1",
+    "stp128-curse-ply-gengar-onix#0",
+    "stp128-curse-ply-gengar-onix#1",
+    "stp128-nightmare-opp-gengar-golbat#0",
+    "stp128-nightmare-opp-gengar-golbat#1",
+    "stp128-nightmare-opp-haunter-shuckle#0",
+    "stp128-nightmare-ply-gengar-golbat#0",
+    "stp128-nightmare-ply-gengar-golbat#1",
+    "stp128-nightmare-ply-gengar-golbat#2",
+    "stp128-nightmare-ply-haunter-shuckle#0",
+    "stp128-nightmare-ply-haunter-shuckle#1",
+    "stp128-nightmare-ply-haunter-shuckle#2"
+   ],
+   "fullPx": 458055
+  },
+  "wrong-side": {
+   "windows": 29,
+   "cleanWindows": 0,
+   "failedWindows": [
+    "stp128-confuse-ray-opp-primeape-golbat#0",
+    "stp128-confuse-ray-opp-primeape-golbat#1",
+    "stp128-confuse-ray-opp-primeape-golbat#2",
+    "stp128-confuse-ray-opp-primeape-onix#0",
+    "stp128-confuse-ray-opp-primeape-onix#1",
+    "stp128-confuse-ray-opp-primeape-onix#2",
+    "stp128-confuse-ray-ply-primeape-golbat#0",
+    "stp128-confuse-ray-ply-primeape-golbat#1",
+    "stp128-confuse-ray-ply-primeape-golbat#2",
+    "stp128-confuse-ray-ply-primeape-onix#0",
+    "stp128-confuse-ray-ply-primeape-onix#1",
+    "stp128-confuse-ray-ply-primeape-onix#2",
+    "stp128-curse-opp-gengar-golbat#0",
+    "stp128-curse-opp-gengar-golbat#1",
+    "stp128-curse-opp-gengar-onix#0",
+    "stp128-curse-opp-gengar-onix#1",
+    "stp128-curse-ply-gengar-golbat#0",
+    "stp128-curse-ply-gengar-golbat#1",
+    "stp128-curse-ply-gengar-onix#0",
+    "stp128-curse-ply-gengar-onix#1",
+    "stp128-nightmare-opp-gengar-golbat#0",
+    "stp128-nightmare-opp-gengar-golbat#1",
+    "stp128-nightmare-opp-haunter-shuckle#0",
+    "stp128-nightmare-ply-gengar-golbat#0",
+    "stp128-nightmare-ply-gengar-golbat#1",
+    "stp128-nightmare-ply-gengar-golbat#2",
+    "stp128-nightmare-ply-haunter-shuckle#0",
+    "stp128-nightmare-ply-haunter-shuckle#1",
+    "stp128-nightmare-ply-haunter-shuckle#2"
+   ],
+   "fullPx": 1177465
+  },
+  "blend-gba5": {
+   "windows": 29,
+   "cleanWindows": 12,
+   "failedWindows": [
+    "stp128-curse-opp-gengar-golbat#0",
+    "stp128-curse-opp-gengar-golbat#1",
+    "stp128-curse-opp-gengar-onix#0",
+    "stp128-curse-opp-gengar-onix#1",
+    "stp128-curse-ply-gengar-golbat#0",
+    "stp128-curse-ply-gengar-golbat#1",
+    "stp128-curse-ply-gengar-onix#0",
+    "stp128-curse-ply-gengar-onix#1",
+    "stp128-nightmare-opp-gengar-golbat#0",
+    "stp128-nightmare-opp-gengar-golbat#1",
+    "stp128-nightmare-opp-haunter-shuckle#0",
+    "stp128-nightmare-ply-gengar-golbat#0",
+    "stp128-nightmare-ply-gengar-golbat#1",
+    "stp128-nightmare-ply-gengar-golbat#2",
+    "stp128-nightmare-ply-haunter-shuckle#0",
+    "stp128-nightmare-ply-haunter-shuckle#1",
+    "stp128-nightmare-ply-haunter-shuckle#2"
+   ],
+   "fullPx": 250728
+  },
+  "no-healthbox": {
+   "windows": 29,
+   "cleanWindows": 24,
+   "failedWindows": [
+    "stp128-curse-opp-gengar-golbat#0",
+    "stp128-curse-opp-gengar-golbat#1",
+    "stp128-curse-opp-gengar-onix#0",
+    "stp128-curse-opp-gengar-onix#1",
+    "stp128-nightmare-opp-haunter-shuckle#0"
+   ],
+   "fullPx": 2006
+  }
+ },
+ "perWindow": {
+  "stp128-confuse-ray-opp-primeape-golbat#0": {
+   "animation": "CONFUSION",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    63,
+    96,
+    87
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 1013,
+    "rectPx": 1013
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-opp-primeape-golbat#1": {
+   "animation": "CONFUSION",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    34,
+    63,
+    75,
+    32
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-opp-primeape-golbat#2": {
+   "animation": "CONFUSION",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    34,
+    63,
+    75,
+    32
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-opp-primeape-onix#0": {
+   "animation": "CONFUSION",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    57,
+    96,
+    93
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 1015,
+    "rectPx": 1015
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-opp-primeape-onix#1": {
+   "animation": "CONFUSION",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    34,
+    57,
+    75,
+    32
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-opp-primeape-onix#2": {
+   "animation": "CONFUSION",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    34,
+    57,
+    75,
+    32
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-ply-primeape-golbat#0": {
+   "animation": "CONFUSION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    16,
+    4,
+    198,
+    146
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 896,
+    "rectPx": 896
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-ply-primeape-golbat#1": {
+   "animation": "CONFUSION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    138,
+    4,
+    76,
+    69
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-ply-primeape-golbat#2": {
+   "animation": "CONFUSION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    138,
+    4,
+    76,
+    69
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-ply-primeape-onix#0": {
+   "animation": "CONFUSION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    11,
+    198,
+    139
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 896,
+    "rectPx": 896
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-ply-primeape-onix#1": {
+   "animation": "CONFUSION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    138,
+    11,
+    76,
+    33
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-confuse-ray-ply-primeape-onix#2": {
+   "animation": "CONFUSION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    138,
+    11,
+    76,
+    33
+   ],
+   "rows": 103,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 102,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-curse-opp-gengar-golbat#0": {
+   "animation": "CURSED",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 94
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    42,
+    44,
+    61,
+    68
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-curse-opp-gengar-golbat#1": {
+   "animation": "CURSED",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 94
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    42,
+    44,
+    61,
+    68
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-curse-opp-gengar-onix#0": {
+   "animation": "CURSED",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 94
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    42,
+    44,
+    60,
+    68
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-curse-opp-gengar-onix#1": {
+   "animation": "CURSED",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 94
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    42,
+    44,
+    60,
+    68
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-curse-ply-gengar-golbat#0": {
+   "animation": "CURSED",
+   "side": "opponent",
+   "species": {
+    "player": 94,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    145,
+    0,
+    62,
+    73
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-curse-ply-gengar-golbat#1": {
+   "animation": "CURSED",
+   "side": "opponent",
+   "species": {
+    "player": 94,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    145,
+    0,
+    62,
+    73
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-curse-ply-gengar-onix#0": {
+   "animation": "CURSED",
+   "side": "opponent",
+   "species": {
+    "player": 94,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    147,
+    0,
+    59,
+    72
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-curse-ply-gengar-onix#1": {
+   "animation": "CURSED",
+   "side": "opponent",
+   "species": {
+    "player": 94,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    147,
+    0,
+    59,
+    72
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-nightmare-opp-gengar-golbat#0": {
+   "animation": "NIGHTMARE",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 94
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    42,
+    44,
+    61,
+    68
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-nightmare-opp-gengar-golbat#1": {
+   "animation": "NIGHTMARE",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 94
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    42,
+    44,
+    61,
+    68
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-nightmare-opp-haunter-shuckle#0": {
+   "animation": "NIGHTMARE",
+   "side": "player",
+   "species": {
+    "player": 115,
+    "opponent": 93
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    43,
+    44,
+    149,
+    68
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-nightmare-ply-gengar-golbat#0": {
+   "animation": "NIGHTMARE",
+   "side": "opponent",
+   "species": {
+    "player": 94,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    145,
+    0,
+    62,
+    73
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-nightmare-ply-gengar-golbat#1": {
+   "animation": "NIGHTMARE",
+   "side": "opponent",
+   "species": {
+    "player": 94,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    145,
+    0,
+    62,
+    73
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-nightmare-ply-gengar-golbat#2": {
+   "animation": "NIGHTMARE",
+   "side": "opponent",
+   "species": {
+    "player": 94,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    145,
+    0,
+    62,
+    73
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-nightmare-ply-haunter-shuckle#0": {
+   "animation": "NIGHTMARE",
+   "side": "opponent",
+   "species": {
+    "player": 93,
+    "opponent": 213
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    150,
+    0,
+    53,
+    72
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-nightmare-ply-haunter-shuckle#1": {
+   "animation": "NIGHTMARE",
+   "side": "opponent",
+   "species": {
+    "player": 93,
+    "opponent": 213
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    150,
+    0,
+    53,
+    72
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stp128-nightmare-ply-haunter-shuckle#2": {
+   "animation": "NIGHTMARE",
+   "side": "opponent",
+   "species": {
+    "player": 93,
+    "opponent": 213
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    150,
+    0,
+    53,
+    72
+   ],
+   "rows": 78,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 77,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  }
+ }
+}
