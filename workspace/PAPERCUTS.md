@@ -131,7 +131,9 @@ history.
   worker cleaning up its own dense probes with `pkill -f mgba` (2026-10-06 R3) took down 8012 AND
   8014; the next side launch refused ("required battle-scene-off oracle is unavailable") and the
   supervisor restarted both with `pokebench_ensure_oracle_profile` (~10 min).
-- **Hits:** 1 (plus the 2026-08-25 `randomRoundSoak` entry below — same pattern-kill class).
+- **Hits:** 2 (plus the 2026-08-25 `randomRoundSoak` entry below — same pattern-kill class). 2026-10-13: the rcp143 side worker
+  ran `pkill -f "vitest"` to stop its own suite and killed the ts-lane ret165 worker's shard-2 run (~6 min lost); every brief
+  since carries a "never kill by pattern" HOUSE RULES line.
 - **Fix:** briefs say "never pattern-kill; kill only PIDs you started"; a probe wrapper that
   records its own PIDs would make cleanup safe.
 
