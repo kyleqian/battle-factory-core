@@ -1,0 +1,146 @@
+{
+ "schema": "off148-verify/v1",
+ "classes": [
+  {
+   "class": "Curse (player)",
+   "move": 174,
+   "N": "message",
+   "romAttRow": 5,
+   "romNExecRow": 42,
+   "romAnchor": 44,
+   "romFirstChange": 44,
+   "base": {
+    "bodies": 94,
+    "residual": {
+     "-41": 94
+    },
+    "pause": {
+     "0": 94
+    }
+   },
+   "final": {
+    "bodies": 94,
+    "residual": {
+     "0": 94
+    },
+    "pause": {
+     "41": 94
+    }
+   },
+   "exact": true
+  },
+  {
+   "class": "Curse (opponent)",
+   "move": 174,
+   "N": "message",
+   "romAttRow": 5,
+   "romNExecRow": 42,
+   "romAnchor": 44,
+   "romFirstChange": 44,
+   "base": {
+    "bodies": 143,
+    "residual": {
+     "-41": 143
+    },
+    "pause": {
+     "0": 143
+    }
+   },
+   "final": {
+    "bodies": 143,
+    "residual": {
+     "0": 143
+    },
+    "pause": {
+     "41": 143
+    }
+   },
+   "exact": true
+  },
+  {
+   "class": "Swagger",
+   "move": 207,
+   "N": "STATS_CHANGE",
+   "romAttRow": 3,
+   "romNExecRow": 42,
+   "romAnchor": 44,
+   "romFirstChange": 50,
+   "base": {
+    "bodies": 81,
+    "residual": {
+     "-41": 81
+    },
+    "pause": {
+     "0": 81
+    }
+   },
+   "final": {
+    "bodies": 81,
+    "residual": {
+     "0": 81
+    },
+    "pause": {
+     "41": 81
+    }
+   },
+   "exact": true
+  },
+  {
+   "class": "Flatter",
+   "move": 260,
+   "N": "STATS_CHANGE",
+   "romAttRow": 3,
+   "romNExecRow": 42,
+   "romAnchor": 44,
+   "romFirstChange": 50,
+   "base": {
+    "bodies": 22,
+    "residual": {
+     "-41": 22
+    },
+    "pause": {
+     "0": 22
+    }
+   },
+   "final": {
+    "bodies": 22,
+    "residual": {
+     "0": 22
+    },
+    "pause": {
+     "41": 22
+    }
+   },
+   "exact": true
+  },
+  {
+   "class": "Rest",
+   "move": 156,
+   "N": "health-bar-update",
+   "romAttRow": 128,
+   "romNExecRow": 164,
+   "romAnchor": 165,
+   "romFirstChange": 166,
+   "base": {
+    "bodies": 314,
+    "residual": {
+     "-37": 314
+    },
+    "pause": {
+     "0": 314
+    }
+   },
+   "final": {
+    "bodies": 314,
+    "residual": {
+     "0": 314
+    },
+    "pause": {
+     "37": 314
+    }
+   },
+   "exact": true
+  }
+ ],
+ "exactClasses": 5
+}

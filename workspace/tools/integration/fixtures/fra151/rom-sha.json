@@ -1,0 +1,347 @@
+{
+ "faint-157": {
+  "frames": 340,
+  "sha": "83233d1cbaa8a882",
+  "r1EqualsR2": true
+ },
+ "faint-304": {
+  "frames": 340,
+  "sha": "a12ee7139fa9f9d8",
+  "r1EqualsR2": true
+ },
+ "faint-341": {
+  "frames": 340,
+  "sha": "0213cc7681d4ed8b",
+  "r1EqualsR2": true
+ },
+ "faint-385": {
+  "frames": 340,
+  "sha": "c034cc7e5895819b",
+  "r1EqualsR2": true
+ },
+ "faint-397": {
+  "frames": 340,
+  "sha": "4c0fb9eb63f7a1c9",
+  "r1EqualsR2": true
+ },
+ "faint-95": {
+  "frames": 340,
+  "sha": "09f0d075e866547c",
+  "r1EqualsR2": true
+ },
+ "roar-10": {
+  "frames": 340,
+  "sha": "e2ab9f3a38f3426c",
+  "r1EqualsR2": true
+ },
+ "roar-109": {
+  "frames": 340,
+  "sha": "08aecaae228f5cb6",
+  "r1EqualsR2": true
+ },
+ "roar-116": {
+  "frames": 340,
+  "sha": "ee0b6d78a3aade70",
+  "r1EqualsR2": true
+ },
+ "roar-123": {
+  "frames": 340,
+  "sha": "a41431bf25dce983",
+  "r1EqualsR2": true
+ },
+ "roar-129": {
+  "frames": 340,
+  "sha": "bbe35fd1b6ece1fa",
+  "r1EqualsR2": true
+ },
+ "roar-130": {
+  "frames": 340,
+  "sha": "20d14b7396f47a70",
+  "r1EqualsR2": true
+ },
+ "roar-149": {
+  "frames": 340,
+  "sha": "172ab8cbb309b694",
+  "r1EqualsR2": true
+ },
+ "roar-15": {
+  "frames": 340,
+  "sha": "ddb50a3df5ee91a8",
+  "r1EqualsR2": true
+ },
+ "roar-157": {
+  "frames": 340,
+  "sha": "b834aa7ad8ffcb28",
+  "r1EqualsR2": true
+ },
+ "roar-171": {
+  "frames": 340,
+  "sha": "59cfde983d389799",
+  "r1EqualsR2": true
+ },
+ "roar-174": {
+  "frames": 340,
+  "sha": "21ed82b162e06ed5",
+  "r1EqualsR2": true
+ },
+ "roar-177": {
+  "frames": 340,
+  "sha": "e0ec4580ccd1cea1",
+  "r1EqualsR2": true
+ },
+ "roar-18": {
+  "frames": 340,
+  "sha": "cc2a6e6de442e410",
+  "r1EqualsR2": true
+ },
+ "roar-181": {
+  "frames": 340,
+  "sha": "056a2f630cdd30cc",
+  "r1EqualsR2": true
+ },
+ "roar-184": {
+  "frames": 340,
+  "sha": "8b632d5366e737f7",
+  "r1EqualsR2": true
+ },
+ "roar-20": {
+  "frames": 340,
+  "sha": "fb8c06d1134ff86c",
+  "r1EqualsR2": true
+ },
+ "roar-202": {
+  "frames": 340,
+  "sha": "d217eb0106d14001",
+  "r1EqualsR2": true
+ },
+ "roar-21": {
+  "frames": 340,
+  "sha": "f2ba1f8b02148b5c",
+  "r1EqualsR2": true
+ },
+ "roar-211": {
+  "frames": 340,
+  "sha": "ceb7533826b6809d",
+  "r1EqualsR2": true
+ },
+ "roar-214": {
+  "frames": 340,
+  "sha": "44a3479ded2209e8",
+  "r1EqualsR2": true
+ },
+ "roar-225": {
+  "frames": 340,
+  "sha": "4ec6010f6c2353e7",
+  "r1EqualsR2": true
+ },
+ "roar-230": {
+  "frames": 340,
+  "sha": "3081f78a38287d20",
+  "r1EqualsR2": true
+ },
+ "roar-24": {
+  "frames": 340,
+  "sha": "f291eb264b8a9a32",
+  "r1EqualsR2": true
+ },
+ "roar-25": {
+  "frames": 340,
+  "sha": "0ca646d658a5ca77",
+  "r1EqualsR2": true
+ },
+ "roar-27": {
+  "frames": 340,
+  "sha": "b4657b682d53ced2",
+  "r1EqualsR2": true
+ },
+ "roar-288": {
+  "frames": 340,
+  "sha": "a642a0a1027123cc",
+  "r1EqualsR2": true
+ },
+ "roar-297": {
+  "frames": 340,
+  "sha": "f6eb7d71ef321aab",
+  "r1EqualsR2": true
+ },
+ "roar-302": {
+  "frames": 340,
+  "sha": "4a5e53c4eb1fc869",
+  "r1EqualsR2": true
+ },
+ "roar-304": {
+  "frames": 340,
+  "sha": "36dd0f2d86743048",
+  "r1EqualsR2": true
+ },
+ "roar-305": {
+  "frames": 340,
+  "sha": "3ec9576d5422acba",
+  "r1EqualsR2": true
+ },
+ "roar-307": {
+  "frames": 340,
+  "sha": "29df8e79596e52bd",
+  "r1EqualsR2": true
+ },
+ "roar-309": {
+  "frames": 340,
+  "sha": "8333d5fcf71256e2",
+  "r1EqualsR2": true
+ },
+ "roar-310": {
+  "frames": 340,
+  "sha": "702260034c22f3c3",
+  "r1EqualsR2": true
+ },
+ "roar-327": {
+  "frames": 340,
+  "sha": "a87be3f558e90559",
+  "r1EqualsR2": true
+ },
+ "roar-329": {
+  "frames": 340,
+  "sha": "05035c11ea44521c",
+  "r1EqualsR2": true
+ },
+ "roar-331": {
+  "frames": 340,
+  "sha": "8a5bd96d85d2486c",
+  "r1EqualsR2": true
+ },
+ "roar-336": {
+  "frames": 340,
+  "sha": "fa912ab5ce0e5c49",
+  "r1EqualsR2": true
+ },
+ "roar-341": {
+  "frames": 340,
+  "sha": "be2777d347731367",
+  "r1EqualsR2": true
+ },
+ "roar-345": {
+  "frames": 340,
+  "sha": "7574bb8e16f00ecd",
+  "r1EqualsR2": true
+ },
+ "roar-352": {
+  "frames": 340,
+  "sha": "efabe957a4f4e2e3",
+  "r1EqualsR2": true
+ },
+ "roar-361": {
+  "frames": 340,
+  "sha": "c467707f7601ed99",
+  "r1EqualsR2": true
+ },
+ "roar-376": {
+  "frames": 340,
+  "sha": "0b179f614a3e910a",
+  "r1EqualsR2": true
+ },
+ "roar-378": {
+  "frames": 340,
+  "sha": "122013610d208f10",
+  "r1EqualsR2": true
+ },
+ "roar-381": {
+  "frames": 340,
+  "sha": "08186f194d07e963",
+  "r1EqualsR2": true
+ },
+ "roar-384": {
+  "frames": 340,
+  "sha": "bd4a7abdf2247547",
+  "r1EqualsR2": true
+ },
+ "roar-385": {
+  "frames": 340,
+  "sha": "1914f3a391abe2e0",
+  "r1EqualsR2": true
+ },
+ "roar-397": {
+  "frames": 340,
+  "sha": "e3b9e71ca3d93e24",
+  "r1EqualsR2": true
+ },
+ "roar-46": {
+  "frames": 340,
+  "sha": "ead1d7efa11aa4ed",
+  "r1EqualsR2": true
+ },
+ "roar-48": {
+  "frames": 340,
+  "sha": "1056ab275ca870e6",
+  "r1EqualsR2": true
+ },
+ "roar-5": {
+  "frames": 340,
+  "sha": "f6366f50a99ccbe1",
+  "r1EqualsR2": true
+ },
+ "roar-51": {
+  "frames": 340,
+  "sha": "62cdc1bfa98bb5df",
+  "r1EqualsR2": true
+ },
+ "roar-58": {
+  "frames": 340,
+  "sha": "df58ea1ae52a702a",
+  "r1EqualsR2": true
+ },
+ "roar-76": {
+  "frames": 340,
+  "sha": "a3edfb08160cf09e",
+  "r1EqualsR2": true
+ },
+ "roar-77": {
+  "frames": 340,
+  "sha": "a1285021fbadb1ea",
+  "r1EqualsR2": true
+ },
+ "roar-87": {
+  "frames": 340,
+  "sha": "b7ac4d682eafaf5e",
+  "r1EqualsR2": true
+ },
+ "roar-89": {
+  "frames": 340,
+  "sha": "25843d4686c8a112",
+  "r1EqualsR2": true
+ },
+ "roar-90": {
+  "frames": 340,
+  "sha": "6af9faa7cb2a1a5c",
+  "r1EqualsR2": true
+ },
+ "roar-92": {
+  "frames": 340,
+  "sha": "ec776c8aa1f6e344",
+  "r1EqualsR2": true
+ },
+ "roar-93": {
+  "frames": 340,
+  "sha": "06f05123a9861a1c",
+  "r1EqualsR2": true
+ },
+ "roar-94": {
+  "frames": 340,
+  "sha": "2c27454a1e93fbe6",
+  "r1EqualsR2": true
+ },
+ "roar-95": {
+  "frames": 340,
+  "sha": "b5908f17fbd49746",
+  "r1EqualsR2": true
+ },
+ "roar-96": {
+  "frames": 340,
+  "sha": "6334392a9a61bf71",
+  "r1EqualsR2": true
+ },
+ "roar-99": {
+  "frames": 340,
+  "sha": "7d9450c35b5d9e3c",
+  "r1EqualsR2": true
+ }
+}

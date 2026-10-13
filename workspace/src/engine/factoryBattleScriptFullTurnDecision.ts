@@ -219,6 +219,8 @@ const B_ACTION_USE_MOVE = 0;
 /** include/constants/battle.h B_ACTION_SWITCH. */
 const B_ACTION_SWITCH = 2;
 const B_ACTION_TRY_FINISH = 11;
+/** include/battle.h:39-40 -- B_ACTION_CANCEL_PARTNER == B_ACTION_FINISHED. */
+const B_ACTION_CANCEL_PARTNER = 12;
 
 /**
  * Run Away is an honest Factory no-op at this adapter's decision boundary.
@@ -1500,6 +1502,7 @@ function buildActionContext(
   moveSlot: BattleMoveSlot,
   target: BattleScriptBattlerId,
   forcedStruggle: boolean,
+  currentMovePosition: BattleMoveSlot = moveSlot,
 ): BattleScriptRulesContext {
   const chosenMovePositions = Object.freeze(
     priorRulesContext.chosenMovePositions.map((position, battler) =>
@@ -1511,7 +1514,7 @@ function buildActionContext(
     selectorRoles: { attacker: mover, target, effectBattler: target, fainted: null },
     scriptingBattler: mover,
     currentMove: moveId,
-    currentMovePosition: moveSlot,
+    currentMovePosition,
     chosenMove: moveId,
     chosenMovePositions,
     // HandleAction_UseMove resets these globals for every acting battler
@@ -1707,6 +1710,44 @@ function runFocusPunchSetUpPrePass(handlers: Handlers, priorState: MachineState)
   return Object.freeze({ kind: "terminal", state });
 }
 
+/**
+ * `HandleAction_UseMove`'s two Encore arms (`battle_util.c:111-117` and
+ * `:119-128`), evaluated on the rules context at this battler's OWN action
+ * (ISSUES #170, receipts rcp154-c2 / rcp154-c2u): an Encore a faster foe set
+ * earlier in the same turn (`Cmd_trysetencore`, `battle_script_commands.c:
+ * 8017`) applies. Source order: the noValidMoves arm (the caller's
+ * `forcedStruggle`) and the STATUS2_MULTIPLETURNS / RECHARGE lock arm come
+ * first, so neither yields here. Both arms set only the globals
+ * gCurrMovePos / gChosenMovePos to `encoredMovePos` --
+ * `gBattleStruct->chosenMovePositions[attacker]` keeps the selected slot
+ * (Grudge reads it) -- and both call `GetMoveTarget`. The overwritten arm
+ * also clears the Encore. For a turn-start Encore this is the same move,
+ * slot and retarget the selection already chose (`lockedMoveDecision`); the
+ * turn-start `clearOverwrittenEncoreAtAction` hoist means the `:119-128` arm
+ * is normally consumed there and reported via `retargetsAtExecution`.
+ */
+function actionEncoreArm(
+  actionRulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): Readonly<{ moveId: number; movePosition: BattleMoveSlot; rulesContext: BattleScriptRulesContext }> | null {
+  if (battlerStatusMoveLock(actionRulesContext, battler) !== 0) return null;
+  const source = actionRulesContext.battlers[battler]!;
+  if (source.encoredMove === 0) return null;
+  const movePosition = source.encoredMovePos as BattleMoveSlot;
+  if (source.moves[movePosition] === source.encoredMove) {
+    return Object.freeze({ moveId: source.encoredMove, movePosition, rulesContext: actionRulesContext });
+  }
+  return Object.freeze({
+    moveId: source.moves[movePosition]!,
+    movePosition,
+    rulesContext: withBattler(actionRulesContext, battler, {
+      encoredMove: 0,
+      encoredMovePos: 0,
+      encoreTimer: 0,
+    }),
+  });
+}
+
 /** Runs one battler's chosen move from its LITERAL topology entry (census precedent, `factoryBattleScriptDecision.ts`'s own mechanism). */
 function runMoveAction(
   program: BattleScriptProgram,
@@ -1719,27 +1760,36 @@ function runMoveAction(
   forcedStruggle = false,
   retargetsAtExecution = false,
 ): ActionResult {
-  const chosenMoveChanged = !forcedStruggle
+  const encore = forcedStruggle ? null : actionEncoreArm(priorState.rulesContext, mover as BattleSinglesBattler);
+  const actionRules = encore?.rulesContext ?? priorState.rulesContext;
+  const chosenMoveChanged = encore === null
+    && !forcedStruggle
     && !retargetsAtExecution
-    && actionTakesChosenMoveChangedArm(priorState.rulesContext, mover as BattleSinglesBattler, moveSlot);
-  const executedMoveId = chosenMoveChanged
-    ? priorState.rulesContext.battlers[mover]!.moves[moveSlot]!
+    && actionTakesChosenMoveChangedArm(actionRules, mover as BattleSinglesBattler, moveSlot);
+  const executedMoveId = encore !== null
+    ? encore.moveId
+    : chosenMoveChanged
+    ? actionRules.battlers[mover]!.moves[moveSlot]!
     : moveId;
   const topology = TOPOLOGY_BY_MOVE.get(executedMoveId);
   if (!topology) throw new Error(`move ${executedMoveId} has no source Battle Script entry`);
-  const retarget = retargetsAtExecution || chosenMoveChanged
-    ? drawActionMoveTarget(program, priorState, mover, executedMoveId, topology.entryScript)
+  const actionState: MachineState = encore === null
+    ? priorState
+    : Object.freeze({ ...priorState, rulesContext: actionRules });
+  const retarget = retargetsAtExecution || chosenMoveChanged || encore !== null
+    ? drawActionMoveTarget(program, actionState, mover, executedMoveId, topology.entryScript)
     : null;
   const actionContext = buildActionContext(
-    priorState.rulesContext,
+    actionRules,
     mover,
     executedMoveId,
     moveSlot,
     retarget?.target ?? target,
     forcedStruggle,
+    encore?.movePosition ?? moveSlot,
   );
   const started = startBattleScriptExecute(program, topology.entryScript, {
-    ...priorState,
+    ...actionState,
     rulesContext: actionContext,
     rng: retarget?.rng ?? priorState.rng,
   });
@@ -2091,6 +2141,22 @@ export function runStagedVoluntarySwitch(
  * `chosenMoveByBattler` (gChosenMoveByBattler) is banked the same way; see
  * `selectionChosenMove`.
  */
+/**
+ * SetActionsAndBattlersTurnOrder (battle_main.c:4816-4850) rewrites
+ * gActionsByTurnOrder[0..gBattlersCount) from gChosenActionByBattler every
+ * turn, so a previous turn's TRY_FINISH / CANCEL_PARTNER (ISSUES #169) never
+ * leaks into this one. Singles: slots 2-3 are untouched, as in source.
+ */
+function withTurnStartActions(
+  rulesContext: BattleScriptRulesContext,
+  actionsInTurnOrder: readonly [number, number],
+): BattleScriptRulesContext {
+  const actionsByTurnOrder = rulesContext.actionsByTurnOrder.map((action, slot) =>
+    slot < 2 ? actionsInTurnOrder[slot]! : action
+  ) as unknown as BattleScriptRulesContext["actionsByTurnOrder"];
+  return Object.freeze({ ...rulesContext, actionsByTurnOrder: Object.freeze(actionsByTurnOrder) });
+}
+
 function withTurnOrderPositions(
   rulesContext: BattleScriptRulesContext,
   currentTurnActionNumber: number,
@@ -3017,12 +3083,19 @@ function continueFullTurnAfterAction(
         & ~BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
       ) >>> 0,
     });
-    if (betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_TRY_FINISH) {
+    if (
+      betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_TRY_FINISH
+      || betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_CANCEL_PARTNER
+    ) {
       // Pursuit interception during action 1 rewrote mover2's turn-order slot
       // to B_ACTION_TRY_FINISH (Cmd_jumpifnopursuitswitchdmg,
       // battle_script_commands.c:8751-8753), so RunTurnActionsFunctions never
       // dispatches mover2's own move -- the switch script already landed the
       // double-power Pursuit hit. Skip straight to end-turn.
+      // ISSUES #169: a battler dragged in by action 1's Roar/Whirlwind had its
+      // slot set to B_ACTION_CANCEL_PARTNER by Cmd_switchineffects
+      // (battle_script_commands.c:5270-5274); HandleAction_ActionFinished
+      // dispatches nothing for it (receipts rcp154-c1 / rcp154-c1f).
       preEndTurnState = Object.freeze({ ...preEndTurnState, rulesContext: betweenActionsRules });
     } else {
       const preAction2State: MachineState = Object.freeze({
@@ -3268,7 +3341,10 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     instructionsExecuted: 0,
     haltReason: null,
     scheduler: createBattleScriptSchedulerState(),
-    rulesContext: withTurnOrderPositions(rc0, 0, mover1, mover2, [
+    rulesContext: withTurnOrderPositions(withTurnStartActions(rc0, [
+      mover1SwitchPartyIndex !== null ? B_ACTION_SWITCH : B_ACTION_USE_MOVE,
+      mover2SwitchPartyIndex !== null ? B_ACTION_SWITCH : B_ACTION_USE_MOVE,
+    ]), 0, mover1, mover2, [
       // HandleTurnActionSelectionState's banked gChosenActionByBattler
       // (battle_main.c:159): B_ACTION_SWITCH for a party swap, otherwise
       // B_ACTION_USE_MOVE. Read back by ENDTURN_ORDER's re-sort.

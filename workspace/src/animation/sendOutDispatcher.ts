@@ -426,3 +426,134 @@ export function backSendOutFrameAtTick(
   if (offset === null) return null;
   return Object.freeze({ x2: offset.x2, y2: offset.y2 });
 }
+
+const generatedAnimationDelays = selectorTables.animationDelay.species as Readonly<Record<string, number>>;
+
+/** `sMonAnimationDelayTable[species - 1]` (0 = the `Anim_*` callback launches with the sprite animation). */
+export function frontSendOutAnimationDelay(species: string): number {
+  return generatedAnimationDelays[species] ?? 0;
+}
+
+type FrontAffineFields = Readonly<{
+  affineMode?: string;
+  xScale?: number | null;
+  yScale?: number | null;
+  affineXScaleSigned?: number | null;
+  affineYScaleSigned?: number | null;
+  affineWriteRotationU16?: number | null;
+  affineRotationU16?: number | null;
+  rotationU16?: number | null;
+  affineRotation?: number | null;
+  startedAffine?: boolean;
+  invisible?: boolean;
+  paletteWrite?: boolean;
+  blendCoefficient?: number;
+  blendColor?: number;
+}>;
+
+/**
+ * fra151: families whose `Anim_*` initializer only installs the motion callback (no call on the install tick) while the reducer's
+ * tick 0 is already the callback's first call, so reducer tick N runs one frame later on the send-in clock. Source scan of the
+ * front `sMonAnimFunctions` initializers (pokemon_animation.c): `Anim_BackAndLunge`, `Anim_FrontFlip`, `Anim_Figure8`,
+ * `Anim_RotateUpSlamDown` install without calling; the FRONT_FLIP reducer already models that tick (tick 0 = no motion), the other
+ * three move on tick 0. ROM: RATICATE (FIGURE_8) and GOLEM (ROTATE_UP_SLAM_DOWN) windows one tick behind the bare reducer.
+ */
+export const FRONT_SEND_OUT_INITIALIZER_ONLY_TICKS: Readonly<Partial<Record<SpeciesFrontAnimFamily, number>>> = Object.freeze({
+  BACK_AND_LUNGE: 1,
+  FIGURE_8: 1,
+  ROTATE_UP_SLAM_DOWN: 1,
+});
+
+function frontSendOutFamily(species: string): SpeciesFrontAnimFamily | null {
+  const raw = generatedFrontAnimIds[species];
+  if (!raw?.startsWith(FRONT_ANIM_PREFIX)) return null;
+  const family = raw.slice(FRONT_ANIM_PREFIX.length);
+  return family in FRONT_SEND_OUT_REDUCERS ? family as SpeciesFrontAnimFamily : null;
+}
+
+/** fra151: frames before the reducer's tick 0 on the send-in clock (`FRONT_SEND_OUT_INITIALIZER_ONLY_TICKS`, else 0). */
+export function frontSendOutInitializerTicks(species: string): number {
+  const family = frontSendOutFamily(species);
+  return family === null ? 0 : FRONT_SEND_OUT_INITIALIZER_ONLY_TICKS[family] ?? 0;
+}
+
+/**
+ * The full reducer frame (not the `{ x2, y2 }` projection) at the clamped tick. `Anim_VerticalStretch` is reduced with
+ * `dontFlip` TRUE: `Task_HandleMonAnimation` sets `sDontFlip` for the opponent front sprite, so `HandleSetAffineData` keeps the
+ * positive xScale (the reducer's default models the flipped call).
+ */
+function frontSendOutRawFrame(family: SpeciesFrontAnimFamily, tick: number): (SpeciesIdleOffset & FrontAffineFields) | null {
+  const t = Math.min(tick, FRONT_SEND_OUT_TERMINAL_TICKS[family]);
+  if (family === "V_STRETCH") return verticalStretchFrameAtTick(t, true) as SpeciesIdleOffset & FrontAffineFields | null;
+  return FRONT_SEND_OUT_REDUCERS[family](t) as (SpeciesIdleOffset & FrontAffineFields) | null;
+}
+
+/** The latest non-null value of `read` at or before `tick` (an OAM matrix / palette keeps its last write). */
+function lastWritten<T>(family: SpeciesFrontAnimFamily, tick: number, read: (f: SpeciesIdleOffset & FrontAffineFields) => T | null | undefined): T | null {
+  for (let t = Math.min(tick, FRONT_SEND_OUT_TERMINAL_TICKS[family]); t >= 0; t -= 1) {
+    const frame = frontSendOutRawFrame(family, t);
+    if (frame === null) return null;
+    const value = read(frame);
+    if (value !== null && value !== undefined) return value;
+  }
+  return null;
+}
+
+/**
+ * fra151: the OAM matrix the species' front `Anim_*` callback leaves at `ticksSinceStart` (same tick clamp as
+ * `frontSendOutFrameAtTick`), or null when the sprite is not in double-size affine mode (no transform on screen).
+ * `HandleSetAffineData` keeps xScale / rotation as given for the opponent front sprite (`sDontFlip` TRUE), and `SetAffineData`
+ * routes them through BIOS `ObjAffineSet` (pokemon_animation.c): theta = (rotation >> 8) / 128 * pi, pa = cos * xScale,
+ * pb = -sin * xScale, pc = sin * yScale, pd = cos * yScale, each truncated (mGBA, as `psychUp.ts`'s spiral matrix). A tick
+ * without a write keeps the last written value (gOamMatrices persists).
+ */
+export function frontSendOutAffineAtTick(
+  species: string,
+  ticksSinceStart: number,
+): readonly [number, number, number, number] | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  const family = frontSendOutFamily(species);
+  if (family === null) return null;
+  const frame = frontSendOutRawFrame(family, ticksSinceStart);
+  if (frame === null || frame.affineMode !== "double") return null;
+  // `HandleStartAffineAnim`'s `StartSpriteAffineAnim(sprite, 0)` arms affineAnimBeginning, so on that tick AnimateSprite's
+  // BeginAffineAnim (after the callback) overwrites the callback's matrix with sMonAffineAnims[0]'s identity frame (sprite.c);
+  // ROM: KINGDRA (CIRCLE_INTO_BG) / HERACROSS (LUNGE_GROW) show the identity on their first motion tick. An install-only family
+  // started affine on its install frame (before reducer tick 0), so its tick-0 write shows (ROM: GOLEM el 36).
+  if (frame.startedAffine === true && FRONT_SEND_OUT_INITIALIZER_ONLY_TICKS[family] === undefined) {
+    return Object.freeze([256, 0, 0, 256] as const);
+  }
+  const xScale = lastWritten(family, ticksSinceStart, (f) => f.xScale ?? f.affineXScaleSigned) ?? 256;
+  const yScale = lastWritten(family, ticksSinceStart, (f) => f.yScale ?? f.affineYScaleSigned) ?? 256;
+  const rotation = (lastWritten(family, ticksSinceStart,
+    (f) => f.affineWriteRotationU16 ?? f.affineRotationU16 ?? f.rotationU16 ?? f.affineRotation) ?? 0) & 0xffff;
+  const theta = ((rotation >> 8) / 128) * Math.PI;
+  const sx = xScale / 256;
+  const sy = yScale / 256;
+  // `+ 0`: C's s16 has no negative zero.
+  return Object.freeze([
+    Math.trunc(Math.cos(theta) * sx * 256) + 0,
+    Math.trunc(-Math.sin(theta) * sx * 256) + 0,
+    Math.trunc(Math.sin(theta) * sy * 256) + 0,
+    Math.trunc(Math.cos(theta) * sy * 256) + 0,
+  ] as const);
+}
+
+/**
+ * fra151: the non-geometric front-animation state at `ticksSinceStart`: `invisible` (Anim_FlickerIncreasing) and the last
+ * `BlendPalette` write of a glow / flash family (coefficient 0..16 toward a BGR555 color, 0 = the sprite's own palette; null = no write).
+ */
+export function frontSendOutPaletteAtTick(
+  species: string,
+  ticksSinceStart: number,
+): Readonly<{ invisible: boolean; blend: Readonly<{ coefficient: number; color: number }> | null }> {
+  const family = frontSendOutFamily(species);
+  if (family === null || !Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return { invisible: false, blend: null };
+  const frame = frontSendOutRawFrame(family, ticksSinceStart);
+  const blend = lastWritten(family, ticksSinceStart, (f) => f.paletteWrite === true && f.blendCoefficient !== undefined
+    ? { coefficient: f.blendCoefficient, color: f.blendColor ?? 0 } : null);
+  return Object.freeze({
+    invisible: frame?.invisible === true,
+    blend: blend === null ? null : Object.freeze(blend),
+  });
+}

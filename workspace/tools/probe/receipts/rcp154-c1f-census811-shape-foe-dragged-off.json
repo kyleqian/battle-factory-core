@@ -1971,7 +1971,7 @@
       "value": 52148
      }
     ],
-    "usedMoveMessages": 2,
+    "usedMoveMessages": 1,
     "events": [
      "message:STRINGID_USEDMOVE",
      "set-battler-pp-data:null",
@@ -1981,10 +1981,6 @@
      "switch-in-animation:null",
      "message:STRINGID_PKMNWASDRAGGEDOUT",
      "set-battler-sprite-visibility:null",
-     "set-battler-sprite-visibility:null",
-     "message:STRINGID_USEDMOVE",
-     "set-battler-pp-data:null",
-     "message:STRINGID_PKMNHPFULL",
      "set-battler-sprite-visibility:null"
     ],
     "activeHpAtTurnEnd": [
@@ -2101,7 +2097,7 @@
       "value": 15832
      }
     ],
-    "usedMoveMessages": 2,
+    "usedMoveMessages": 1,
     "events": [
      "message:STRINGID_USEDMOVE",
      "set-battler-pp-data:null",
@@ -2111,10 +2107,6 @@
      "switch-in-animation:null",
      "message:STRINGID_PKMNWASDRAGGEDOUT",
      "set-battler-sprite-visibility:null",
-     "set-battler-sprite-visibility:null",
-     "message:STRINGID_USEDMOVE",
-     "set-battler-pp-data:null",
-     "message:STRINGID_PKMNHPFULL",
      "set-battler-sprite-visibility:null"
     ],
     "activeHpAtTurnEnd": [
@@ -2181,7 +2173,7 @@
       "value": 61256
      }
     ],
-    "usedMoveMessages": 2,
+    "usedMoveMessages": 1,
     "events": [
      "message:STRINGID_USEDMOVE",
      "set-battler-pp-data:null",
@@ -2191,10 +2183,6 @@
      "switch-in-animation:null",
      "message:STRINGID_PKMNWASDRAGGEDOUT",
      "set-battler-sprite-visibility:null",
-     "set-battler-sprite-visibility:null",
-     "message:STRINGID_USEDMOVE",
-     "set-battler-pp-data:null",
-     "message:STRINGID_PKMNHPFULL",
      "set-battler-sprite-visibility:null"
     ],
     "activeHpAtTurnEnd": [
@@ -2296,7 +2284,7 @@
       "value": 23231
      }
     ],
-    "usedMoveMessages": 2,
+    "usedMoveMessages": 1,
     "events": [
      "message:STRINGID_USEDMOVE",
      "set-battler-pp-data:null",
@@ -2306,10 +2294,6 @@
      "switch-in-animation:null",
      "message:STRINGID_PKMNWASDRAGGEDOUT",
      "set-battler-sprite-visibility:null",
-     "set-battler-sprite-visibility:null",
-     "message:STRINGID_USEDMOVE",
-     "set-battler-pp-data:null",
-     "message:STRINGID_PKMNHPFULL",
      "set-battler-sprite-visibility:null"
     ],
     "activeHpAtTurnEnd": [
@@ -2320,7 +2304,7 @@
   ]
  },
  "comparison": {
-  "verdictToday": "FAIL",
+  "verdictToday": "PASS",
   "romDrawCounts": [
    6,
    9,
@@ -2349,13 +2333,13 @@
    1
   ],
   "portUsedMoveMessages": [
+   1,
    2,
+   1,
    2,
+   1,
    2,
-   2,
-   2,
-   2,
-   2
+   1
   ],
   "romActiveHp": [
    [

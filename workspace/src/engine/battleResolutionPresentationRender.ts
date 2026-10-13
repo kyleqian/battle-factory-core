@@ -53,6 +53,10 @@ import {
   partySendOutPhase,
 } from "./partySelect.ts";
 import { genericHitReactionAtAge } from "./battleMenu.ts";
+import {
+  frontSendOutAffineAtTick, frontSendOutAnimationDelay, frontSendOutFrameAtTick, frontSendOutInitializerTicks, frontSendOutPaletteAtTick,
+} from "../animation/sendOutDispatcher.ts";
+import { frontSendOutSpriteFrameAtTick } from "../animation/sendOutSpriteFrame.ts";
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
   BATTLE_COMMAND_ACTION_ENTER_DELAY;
@@ -291,7 +295,72 @@ export type MidBattleSwitchInView = Readonly<{
   monTintCoefficient: number;
   /** Player-healthbox x2 slide offset (110 -> 0 at 5 px/frame), or null before the slide. */
   healthboxDx: number | null;
+  /**
+   * fra151: a Scene ON opponent send-in's species front animation once the emerge has settled (null before it starts, for the
+   * player side and in Scene OFF, whose SKIP_FRONT_ANIM path never launches it).
+   */
+  frontAnim: MidBattleSwitchInFrontAnim | null;
 }>;
+
+/** fra151: the settled send-in sprite's front animation state on one rendered frame. */
+export type MidBattleSwitchInFrontAnim = Readonly<{
+  /** `sAnim_<Name>_1` frame on screen (0 = the front pic, 1 = its second frame). */
+  frame: 0 | 1;
+  x2: number;
+  y2: number;
+  /** OAM matrix (pa, pb, pc, pd) of an affine `Anim_*` write; null = no affine transform. */
+  matrix: readonly [number, number, number, number] | null;
+  /** Anim_FlickerIncreasing's hidden frames. */
+  invisible: boolean;
+  /** A glow / flash family's last `BlendPalette` write (coefficient toward a BGR555 color); null = the sprite's own palette. */
+  blend: Readonly<{ coefficient: number; color: number }> | null;
+}>;
+
+/**
+ * fra151 (ISSUES #146 / #71 remainder, docs/fra151-front-send-in-animation.md): Scene ON opponent send-in elapsed on which the
+ * `sAnim_<Name>_1` program's tick 0 renders. `SpriteCB_ReleasedMonFlyOut` (pokeball.c:1088-1131) sees the emerge's affineAnimEnded and
+ * calls `DoMonFrontSpriteAnimation` (pokemon.c:6811-6856): `StartSpriteAnim(sprite, 1)` plus the `sMonAnimFunctions` callback, at once or
+ * after `sMonAnimationDelayTable[species - 1]` frames (Task_AnimateAfterDelay's pre-decrement launches it one frame early). Fitted on the
+ * snd145 dense windows (ROM rows of TAILLOW / ONIX / TYPHLOSION / SALAMENCE / SPHEAL / CASTFORM).
+ */
+export const MID_BATTLE_SWITCH_FRONT_ANIM_FRAME_START_ELAPSED = 34;
+/** The `sMonAnimFunctions` callback's x2 / y2 / matrix for reducer tick N renders on `MOTION_START + N` (+ delay - 1). */
+export const MID_BATTLE_SWITCH_FRONT_ANIM_MOTION_START_ELAPSED = 35;
+
+/**
+ * fra151: the release fade task (`Task_FadeMon_ToNormal`, run after the sprite callbacks and rewriting the same palette from the
+ * unfaded buffer) writes only while it ramps (Scene ON el 40..56: coefficient 16 -> 0), not during its hold; a glow / flash
+ * family's `BlendPalette` (every frame from its first tick) shows on every other frame. ROM (fra151 GASTLY GLOW_BLACK window):
+ * the plain palette (glow coefficient 0) at el 35..39 over the held tint, the tint ramp at 40..56, the glow's 8, 8, 8, 9, ... from 57.
+ */
+function midBattleSwitchInPalette(
+  frontAnim: MidBattleSwitchInFrontAnim | null,
+  monTintCoefficient: number,
+  tintTaskWrites: boolean,
+): Readonly<{ monTintCoefficient: number; frontAnim: MidBattleSwitchInFrontAnim | null }> {
+  if (frontAnim === null || frontAnim.blend === null) return { monTintCoefficient, frontAnim };
+  return tintTaskWrites
+    ? { monTintCoefficient, frontAnim: Object.freeze({ ...frontAnim, blend: null }) }
+    : { monTintCoefficient: 0, frontAnim };
+}
+
+export function midBattleSwitchInFrontAnimAt(species: string, elapsed: number): MidBattleSwitchInFrontAnim | null {
+  const frameTick = elapsed - MID_BATTLE_SWITCH_FRONT_ANIM_FRAME_START_ELAPSED;
+  if (frameTick < 0) return null;
+  const delay = frontSendOutAnimationDelay(species);
+  const motionTick = elapsed - MID_BATTLE_SWITCH_FRONT_ANIM_MOTION_START_ELAPSED - (delay > 0 ? delay - 1 : 0)
+    - frontSendOutInitializerTicks(species);
+  const offset = motionTick < 0 ? null : frontSendOutFrameAtTick(species, motionTick);
+  const palette = motionTick < 0 ? null : frontSendOutPaletteAtTick(species, motionTick);
+  return Object.freeze({
+    frame: frontSendOutSpriteFrameAtTick(species, frameTick) ?? 0,
+    x2: offset?.x2 ?? 0,
+    y2: offset?.y2 ?? 0,
+    matrix: motionTick < 0 ? null : frontSendOutAffineAtTick(species, motionTick),
+    invisible: palette?.invisible ?? false,
+    blend: palette?.blend ?? null,
+  });
+}
 
 /**
  * Projects the mid-battle switch-in's visible state from the `switch-in`
@@ -309,6 +378,8 @@ export function midBattleSwitchInAt(
    * calibrated constants (player 66; opponent 33: Scene OFF, whose skipped front animation does not gate the slide).
    */
   healthboxSlideStart?: number,
+  /** fra151: the Scene ON opponent send-in species whose front animation plays (omitted = none: player side, Scene OFF). */
+  frontAnimSpecies?: string,
 ): MidBattleSwitchInView {
   const side = battler === 0 ? "player" : "opponent";
   // DoPokeballSendOutAnimation routes by GetBattlerSide. Player send-outs
@@ -356,10 +427,13 @@ export function midBattleSwitchInAt(
   // The shared release task holds the ball-open tint at 16 for 23 rendered
   // callbacks, then fades 15 -> 0. This is the handoff-relative form of the
   // source-derived generated-opponent release cadence in battleScene.ts.
+  // fra151: on a Scene ON opponent send-in (front animation launched) the ROM's ramp starts one frame earlier (dense snd145 windows,
+  // 6 species: coefficient 15 at local 22); the Scene OFF windows show the same 16 rows but stay with the OFF owner.
+  const tintHold = frontAnimSpecies !== undefined ? 22 : 23;
   const monTintCoefficient = side === "opponent"
-    ? opponentMaterializeLocal < 23
+    ? opponentMaterializeLocal < tintHold
       ? 16
-      : Math.max(0, 15 - (opponentMaterializeLocal - 23))
+      : Math.max(0, 15 - (opponentMaterializeLocal - tintHold))
     : 0;
   const healthboxSlideElapsed = healthboxSlideStart ?? (side === "player"
     ? MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED
@@ -398,8 +472,12 @@ export function midBattleSwitchInAt(
       : Object.freeze({ pa: 256, pb: 0, pc: 0, pd: 256 }),
     monVisible,
     emergeAccumulator,
-    monTintCoefficient,
     healthboxDx,
+    ...midBattleSwitchInPalette(
+      frontAnimSpecies === undefined || side !== "opponent" ? null : midBattleSwitchInFrontAnimAt(frontAnimSpecies, elapsed),
+      monTintCoefficient,
+      opponentMaterializeLocal >= tintHold - 1 && opponentMaterializeLocal <= tintHold + 15,
+    ),
   });
 }
 
@@ -1788,6 +1866,9 @@ export function createBattleResolutionPresentationRenderView(
         sendInElapsed,
         command.battler,
         command.healthboxSlideElapsed === undefined ? undefined : command.healthboxSlideElapsed - visualDelay,
+        // fra151: only the Scene ON opponent send-in (the species-keyed tail) launches the front animation.
+        command.healthboxSlideElapsed === undefined || command.battler !== 1
+          ? undefined : createBattleCommandFieldArtView(field).opponent.speciesSymbol,
       );
       midBattleSwitchFade = midBattleSwitchSendInFadeAt(sendInElapsed, command.battler) ?? midBattleSwitchFade;
       midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(sendInElapsed, command.battler) ?? midBattleSwitchParticles;

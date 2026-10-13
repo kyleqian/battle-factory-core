@@ -1,0 +1,68 @@
+{
+ "schema": "off148-census-delta/v1",
+ "uses": [
+  37716,
+  37716
+ ],
+ "useKeyMismatch": 0,
+ "commandMismatch": 0,
+ "mismatchExamples": [],
+ "inserted": 867,
+ "insertedFrames": 33734,
+ "insertedByClass": {
+  "health-bar-update": 466,
+  "speed": 238,
+  "attack": 129,
+  "special-attack": 34
+ },
+ "insertedFramesByClass": {
+  "health-bar-update": 17242,
+  "speed": 9761,
+  "attack": 5337,
+  "special-attack": 1394
+ },
+ "insertedByMoveClassP": {
+  "156 health-bar-update P=37": 466,
+  "174 speed P=41": 237,
+  "207 attack P=41": 121,
+  "260 special-attack P=41": 34,
+  "207 attack P=47": 6,
+  "321 attack P=47": 2,
+  "174 speed P=44": 1
+ },
+ "noHitWithoutPauseBase": {
+  "health-bar-update": 466,
+  "set-battler-sprite-visibility": 296,
+  "speed": 238,
+  "attack": 129,
+  "(none)": 35,
+  "special-attack": 34,
+  "STRINGID_ITDOESNTAFFECT": 3,
+  "STATS_CHANGE": 2,
+  "set-battler-status-data": 2
+ },
+ "noHitWithoutPauseFinal": {
+  "set-battler-sprite-visibility": 296,
+  "(none)": 35,
+  "STRINGID_ITDOESNTAFFECT": 3,
+  "STATS_CHANGE": 2,
+  "set-battler-status-data": 2
+ },
+ "noHitWithoutPauseFinalByMove": {
+  "273 set-battler-sprite-visibility": 155,
+  "46 set-battler-sprite-visibility": 104,
+  "226 (none)": 35,
+  "18 set-battler-sprite-visibility": 23,
+  "226 set-battler-sprite-visibility": 14,
+  "222 STRINGID_ITDOESNTAFFECT": 3,
+  "184 STATS_CHANGE": 2,
+  "78 set-battler-status-data": 1,
+  "92 set-battler-status-data": 1
+ },
+ "pausesChanged": 0,
+ "sceneOn": {
+  "shards": 10,
+  "byteIdentical": 10,
+  "uses": 37522
+ }
+}
