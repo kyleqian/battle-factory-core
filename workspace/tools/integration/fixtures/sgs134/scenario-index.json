@@ -1,0 +1,112 @@
+{
+ "sgs134-mud-slap-primeape-ply.json": {
+  "class": "stat-drop target ACC-1 (Mud-Slap 100 %)",
+  "move": 189,
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "attackerAbilitySlot": 0,
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 3,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "sgs134-mud-slap-primeape-opp.json": {
+  "class": "stat-drop target ACC-1 (Mud-Slap 100 %)",
+  "move": 189,
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "attackerAbilitySlot": 0,
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 3,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "sgs134-icy-wind-primeape-ply.json": {
+  "class": "stat-drop target SPD-1 (Icy Wind 100 %)",
+  "move": 196,
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "attackerAbilitySlot": 0,
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 3,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "sgs134-icy-wind-primeape-opp.json": {
+  "class": "stat-drop target SPD-1 (Icy Wind 100 %)",
+  "move": 196,
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "attackerAbilitySlot": 0,
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 3,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "sgs134-meteor-mash-chansey-ply.json": {
+  "class": "stat-raise attacker ATK+1 (Meteor Mash 20 %, Serene Grace)",
+  "move": 309,
+  "attackerSide": "player",
+  "attacker": "CHANSEY",
+  "attackerAbilitySlot": 1,
+  "target": "SNORLAX",
+  "seed": 305419899,
+  "turns": 4,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "sgs134-meteor-mash-chansey-opp.json": {
+  "class": "stat-raise attacker ATK+1 (Meteor Mash 20 %, Serene Grace)",
+  "move": 309,
+  "attackerSide": "opponent",
+  "attacker": "CHANSEY",
+  "attackerAbilitySlot": 1,
+  "target": "SNORLAX",
+  "seed": 305419899,
+  "turns": 4,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "sgs134-bonemerang-chansey-ply.json": {
+  "class": "multi-hit 2 (Bonemerang)",
+  "move": 155,
+  "attackerSide": "player",
+  "attacker": "CHANSEY",
+  "attackerAbilitySlot": 0,
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 3,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "sgs134-bonemerang-chansey-opp.json": {
+  "class": "multi-hit 2 (Bonemerang)",
+  "move": 155,
+  "attackerSide": "opponent",
+  "attacker": "CHANSEY",
+  "attackerAbilitySlot": 0,
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 3,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "sgs134-pin-missile-primeape-ply.json": {
+  "class": "multi-hit 2..5 (Pin Missile)",
+  "move": 42,
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "attackerAbilitySlot": 0,
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 3,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "sgs134-pin-missile-primeape-opp.json": {
+  "class": "multi-hit 2..5 (Pin Missile)",
+  "move": 42,
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "attackerAbilitySlot": 0,
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 3,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ }
+}

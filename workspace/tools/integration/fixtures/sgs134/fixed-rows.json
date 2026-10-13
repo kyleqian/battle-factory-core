@@ -1,0 +1,7 @@
+{
+ "schema": "sgs134-fixed-rows/v1",
+ "note": "seg127's rule (seRows / cap from fixtures/seg127/rule.json); fixedRows measured on rom-r1.json (seAge - hpDrain of every gated receipt): stats-change 44 = seg127's hit-secondary path (seteffectwithchance -> BattleScript_StatUp / StatDown playanimation), multi-hit 62 (BattleScript_DoMultiHit: hitanimation .. printstring EMPTYSTRING3 + waitmessage 1 .. decrementmultihit -> attackanimation); null = no ROM receipt (projection reports the receipt as unmeasured)",
+ "seRows": {"12": 18, "13": 73, "14": 88},
+ "cap": 29,
+ "fixedRows": {"stats-change-target": 44, "stats-change-attacker": 44, "multi-hit": 62}
+}
