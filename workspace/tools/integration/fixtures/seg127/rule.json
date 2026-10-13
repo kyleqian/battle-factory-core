@@ -1,0 +1,7 @@
+{
+ "schema": "seg127-rule/v1",
+ "doc": "docs/seg127-status-se-gate.md; gate = clamp(seRows[songId] - seAge, 0, 29); seAge = fixedRows[class] + hpDrainRows when no message is printed between the effectivenesssound SE and the status animation (else the gate is 0); mirrors src/engine/seg127StatusSeGate.ts",
+ "seRows": {"12": 18, "13": 73, "14": 88},
+ "cap": 29,
+ "fixedRows": {"hit-secondary": 44, "contact-ability": 49, "cute-charm": 47, "thrash-fatigue": 54, "yawn": 53}
+}

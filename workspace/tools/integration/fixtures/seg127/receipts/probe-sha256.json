@@ -1,0 +1,130 @@
+{
+ "seg127-body-slam-onix-opp-on.json": {
+  "r1": "e942b9666c2ef5aee503801766e848effaa372a754251c7d32ed42c880de1828",
+  "r2": "e942b9666c2ef5aee503801766e848effaa372a754251c7d32ed42c880de1828"
+ },
+ "seg127-body-slam-onix-ply-on.json": {
+  "r1": "787608c8128b96b19ab4b0fef162f46829b704e1ac736735d628c032d5df4a95",
+  "r2": "787608c8128b96b19ab4b0fef162f46829b704e1ac736735d628c032d5df4a95"
+ },
+ "seg127-body-slam-snorlax-opp-on.json": {
+  "r1": "f7fc6f9ffd4efe82b136b355a9b3c041bfaed9e3d8c2cd051736361eb925b887",
+  "r2": "f7fc6f9ffd4efe82b136b355a9b3c041bfaed9e3d8c2cd051736361eb925b887"
+ },
+ "seg127-body-slam-snorlax-ply-on.json": {
+  "r1": "fe90c58d92b4be87354b3f62839a7666c9977fceef6eafd2a07eed872d9f2b96",
+  "r2": "fe90c58d92b4be87354b3f62839a7666c9977fceef6eafd2a07eed872d9f2b96"
+ },
+ "seg127-flamethrower-onix-opp-on.json": {
+  "r1": "a796c208cdcd68755c2ad7efd0b344f766bb8d90dfd9fcbc59014ebd2098dec7",
+  "r2": "a796c208cdcd68755c2ad7efd0b344f766bb8d90dfd9fcbc59014ebd2098dec7"
+ },
+ "seg127-flamethrower-onix-ply-on.json": {
+  "r1": "5ffdb0c7dde30148655163e2dedc3474f7d697771932ea48a1ebb2deb5228d41",
+  "r2": "5ffdb0c7dde30148655163e2dedc3474f7d697771932ea48a1ebb2deb5228d41"
+ },
+ "seg127-flamethrower-snorlax-opp-on.json": {
+  "r1": "bf2316aab116efc40c05a6c0b8b5a0f713e3a2a9e60b8af0bf4436d18651c5cd",
+  "r2": "bf2316aab116efc40c05a6c0b8b5a0f713e3a2a9e60b8af0bf4436d18651c5cd"
+ },
+ "seg127-flamethrower-snorlax-ply-on.json": {
+  "r1": "1a6a5310b30316fe44f6d7c026d9120a6962793ae753a400dede48dc43b92d97",
+  "r2": "1a6a5310b30316fe44f6d7c026d9120a6962793ae753a400dede48dc43b92d97"
+ },
+ "seg127-ice-beam-opp-delcatty-shuckle-on.json": {
+  "r1": "21e7ef4923ebab3cd07a43ae3772198e8842b9217676c4d8951db32809bddd11",
+  "r2": "21e7ef4923ebab3cd07a43ae3772198e8842b9217676c4d8951db32809bddd11"
+ },
+ "seg127-ice-beam-ply-delcatty-shuckle-on.json": {
+  "r1": "0f8ffd703ecb61554ce50db26c37aa32d53d16c88371695cdd02d0f8f69d1d96",
+  "r2": "0f8ffd703ecb61554ce50db26c37aa32d53d16c88371695cdd02d0f8f69d1d96"
+ },
+ "seg127-psybeam-snorlax-opp-on.json": {
+  "r1": "35e4ba79bf47e02d8e4dbdb1e60dd43fca6e42cf892dce042b05d3e447924659",
+  "r2": "35e4ba79bf47e02d8e4dbdb1e60dd43fca6e42cf892dce042b05d3e447924659"
+ },
+ "seg127-psybeam-snorlax-ply-on.json": {
+  "r1": "dcaa0d884c2a308dd09b10126e16e4ca36c7b3282effa9622494aa31a5ebe845",
+  "r2": "dcaa0d884c2a308dd09b10126e16e4ca36c7b3282effa9622494aa31a5ebe845"
+ },
+ "seg127-sludge-bomb-gyarados-opp-on.json": {
+  "r1": "af791602df8505e6b8f22747165aab00629b45d63bd59385ea4cd5b9a06c02f1",
+  "r2": "af791602df8505e6b8f22747165aab00629b45d63bd59385ea4cd5b9a06c02f1"
+ },
+ "seg127-sludge-bomb-gyarados-ply-on.json": {
+  "r1": "4a2b231a3299422078a8af267c990c81f4a0ab1369a52bd20ec6c0e55bc9bd9f",
+  "r2": "4a2b231a3299422078a8af267c990c81f4a0ab1369a52bd20ec6c0e55bc9bd9f"
+ },
+ "seg127-tackle-clefable-cute-charm-opp-on.json": {
+  "r1": "6dd6df98e47ab39c64424e375fa73f8d68eed4c2331b5207dc09c50fd6c7ea77",
+  "r2": "6dd6df98e47ab39c64424e375fa73f8d68eed4c2331b5207dc09c50fd6c7ea77"
+ },
+ "seg127-tackle-clefable-cute-charm-ply-on.json": {
+  "r1": "307bc6f7eeefd52d78d6f0a6ed6f06e19f0072a324e70fdfed4268a6e1e554d4",
+  "r2": "307bc6f7eeefd52d78d6f0a6ed6f06e19f0072a324e70fdfed4268a6e1e554d4"
+ },
+ "seg127-tackle-magmar-flame-body-opp-on.json": {
+  "r1": "e3d06db6c4423354328c34d860730378414107aab9a0c7841739102a023fba22",
+  "r2": "e3d06db6c4423354328c34d860730378414107aab9a0c7841739102a023fba22"
+ },
+ "seg127-tackle-magmar-flame-body-ply-on.json": {
+  "r1": "d9f06d4aebdc21e59580322f2a24cba573c2817304e2591478a299e293022b41",
+  "r2": "d9f06d4aebdc21e59580322f2a24cba573c2817304e2591478a299e293022b41"
+ },
+ "seg127-tackle-nidoking-poison-point-opp-on.json": {
+  "r1": "1d72b102f37b47b9542b6aa1632e58ac92755bd6fdcdf5a48f14a86a6712c523",
+  "r2": "1d72b102f37b47b9542b6aa1632e58ac92755bd6fdcdf5a48f14a86a6712c523"
+ },
+ "seg127-tackle-nidoking-poison-point-ply-on.json": {
+  "r1": "f751c5030c4309d9a4c7521850c9cc7ff38d51c3707f7dacac52fac287ea7758",
+  "r2": "f751c5030c4309d9a4c7521850c9cc7ff38d51c3707f7dacac52fac287ea7758"
+ },
+ "seg127-tackle-parasect-effect-spore-opp-on.json": {
+  "r1": "52e0f8e5c16af3030eaa71583a44efc57b56eb765621eaed20eb9d5725de8c42",
+  "r2": "52e0f8e5c16af3030eaa71583a44efc57b56eb765621eaed20eb9d5725de8c42"
+ },
+ "seg127-tackle-parasect-effect-spore-ply-on.json": {
+  "r1": "0a8636912db7dfea4513843fcd37579f48aef8e5bc8c6f08610e4a3212227e59",
+  "r2": "0a8636912db7dfea4513843fcd37579f48aef8e5bc8c6f08610e4a3212227e59"
+ },
+ "seg127-tackle-pikachu-static-opp-on.json": {
+  "r1": "72c029a074e797e183fa7b31ae748953449b899fa76798919b1cfebc3d1c10c8",
+  "r2": "72c029a074e797e183fa7b31ae748953449b899fa76798919b1cfebc3d1c10c8"
+ },
+ "seg127-tackle-pikachu-static-ply-on.json": {
+  "r1": "e784a51b7a2495ad969198d68d510a158d3623938ed279e74fef927d0ef01104",
+  "r2": "e784a51b7a2495ad969198d68d510a158d3623938ed279e74fef927d0ef01104"
+ },
+ "seg127-thrash-snorlax-opp-on.json": {
+  "r1": "4df4019488044bfa9245e5dba7bda60d6a8d255f70e0201fe95e3a6aecafd9c0",
+  "r2": "4df4019488044bfa9245e5dba7bda60d6a8d255f70e0201fe95e3a6aecafd9c0"
+ },
+ "seg127-thrash-snorlax-ply-on.json": {
+  "r1": "3b1c4c462af5ff22f574dd09f12b2f6405e8838eb52e0ce18b380b6753e97b0a",
+  "r2": "3b1c4c462af5ff22f574dd09f12b2f6405e8838eb52e0ce18b380b6753e97b0a"
+ },
+ "seg127-thunder-wave-alakazam-synchronize-opp-on.json": {
+  "r1": "df6b99f08993029e6761e20649af070e2eccf6807ba38aff160fabc579fcddf7",
+  "r2": "df6b99f08993029e6761e20649af070e2eccf6807ba38aff160fabc579fcddf7"
+ },
+ "seg127-thunder-wave-alakazam-synchronize-ply-on.json": {
+  "r1": "1ec80a6d5746026d0de15ac37fd34107460604d7517b47d60d7498bc06cfe7c6",
+  "r2": "1ec80a6d5746026d0de15ac37fd34107460604d7517b47d60d7498bc06cfe7c6"
+ },
+ "seg127-thunderbolt-gyarados-opp-on.json": {
+  "r1": "9ba926b95f58f02bdd58319a6aa097b9c7c24b9ab64c390db9d7ed3c2d765181",
+  "r2": "9ba926b95f58f02bdd58319a6aa097b9c7c24b9ab64c390db9d7ed3c2d765181"
+ },
+ "seg127-thunderbolt-gyarados-ply-on.json": {
+  "r1": "a274c740c8ef2053ccc5bf5261c8decd026795ac4e4f7df85ec57821394e5824",
+  "r2": "a274c740c8ef2053ccc5bf5261c8decd026795ac4e4f7df85ec57821394e5824"
+ },
+ "seg127-yawn-tyranitar-sand-stream-opp-on.json": {
+  "r1": "1b09fe7a10d01bc6f9be935cfa625330ee78ce50066333b7a6194ced35ac7d77",
+  "r2": "1b09fe7a10d01bc6f9be935cfa625330ee78ce50066333b7a6194ced35ac7d77"
+ },
+ "seg127-yawn-tyranitar-sand-stream-ply-on.json": {
+  "r1": "b7f24047aff0c81e69dd08ca6b8945dd1e1afa567d6d2407953f169787c4a6fb",
+  "r2": "b7f24047aff0c81e69dd08ca6b8945dd1e1afa567d6d2407953f169787c4a6fb"
+ }
+}

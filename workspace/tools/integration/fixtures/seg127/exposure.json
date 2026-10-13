@@ -1,0 +1,447 @@
+{
+ "schema": "seg127-exposure/v1",
+ "receipts": 8080,
+ "unclassified": 0,
+ "byClass": {
+  "contact-ability": 96,
+  "end-turn": 1298,
+  "hit-secondary": 384,
+  "status-move": 1529,
+  "synchronize": 20,
+  "thrash-fatigue": 51,
+  "turn-start": 4629,
+  "yawn": 73
+ },
+ "byClassAnimationSide": {
+  "contact-ability|BRN|opponent": 7,
+  "contact-ability|BRN|player": 10,
+  "contact-ability|INFATUATION|opponent": 4,
+  "contact-ability|INFATUATION|player": 1,
+  "contact-ability|PRZ|opponent": 16,
+  "contact-ability|PRZ|player": 14,
+  "contact-ability|PSN|opponent": 22,
+  "contact-ability|PSN|player": 19,
+  "contact-ability|SLP|opponent": 1,
+  "contact-ability|SLP|player": 2,
+  "end-turn|BRN|opponent": 193,
+  "end-turn|BRN|player": 164,
+  "end-turn|CURSED|opponent": 1,
+  "end-turn|CURSED|player": 20,
+  "end-turn|NIGHTMARE|opponent": 16,
+  "end-turn|NIGHTMARE|player": 39,
+  "end-turn|PSN|opponent": 415,
+  "end-turn|PSN|player": 450,
+  "hit-secondary|BRN|opponent": 31,
+  "hit-secondary|BRN|player": 17,
+  "hit-secondary|CONFUSION|opponent": 36,
+  "hit-secondary|CONFUSION|player": 31,
+  "hit-secondary|FRZ|opponent": 24,
+  "hit-secondary|FRZ|player": 19,
+  "hit-secondary|PRZ|opponent": 89,
+  "hit-secondary|PRZ|player": 75,
+  "hit-secondary|PSN|opponent": 27,
+  "hit-secondary|PSN|player": 24,
+  "hit-secondary|SLP|opponent": 6,
+  "hit-secondary|SLP|player": 5,
+  "status-move|BRN|opponent": 23,
+  "status-move|BRN|player": 8,
+  "status-move|CONFUSION|opponent": 429,
+  "status-move|CONFUSION|player": 293,
+  "status-move|PRZ|opponent": 146,
+  "status-move|PRZ|player": 153,
+  "status-move|PSN|opponent": 83,
+  "status-move|PSN|player": 80,
+  "status-move|SLP|opponent": 140,
+  "status-move|SLP|player": 174,
+  "synchronize|BRN|opponent": 1,
+  "synchronize|PRZ|opponent": 6,
+  "synchronize|PRZ|player": 7,
+  "synchronize|PSN|opponent": 2,
+  "synchronize|PSN|player": 4,
+  "thrash-fatigue|CONFUSION|opponent": 24,
+  "thrash-fatigue|CONFUSION|player": 27,
+  "turn-start|CONFUSION|opponent": 919,
+  "turn-start|CONFUSION|player": 645,
+  "turn-start|FRZ|opponent": 53,
+  "turn-start|FRZ|player": 51,
+  "turn-start|INFATUATION|opponent": 520,
+  "turn-start|INFATUATION|player": 276,
+  "turn-start|PRZ|opponent": 356,
+  "turn-start|PRZ|player": 307,
+  "turn-start|SLP|opponent": 544,
+  "turn-start|SLP|player": 958,
+  "yawn|SLP|opponent": 31,
+  "yawn|SLP|player": 42
+ },
+ "seOpenByClassSongAnimationSide": {
+  "contact-ability|13|BRN|opponent": 5,
+  "contact-ability|13|BRN|player": 2,
+  "contact-ability|13|INFATUATION|opponent": 3,
+  "contact-ability|13|PRZ|opponent": 7,
+  "contact-ability|13|PRZ|player": 4,
+  "contact-ability|13|PSN|opponent": 11,
+  "contact-ability|13|PSN|player": 6,
+  "contact-ability|13|SLP|player": 1,
+  "hit-secondary|13|BRN|opponent": 10,
+  "hit-secondary|13|BRN|player": 10,
+  "hit-secondary|13|CONFUSION|opponent": 18,
+  "hit-secondary|13|CONFUSION|player": 19,
+  "hit-secondary|13|FRZ|opponent": 15,
+  "hit-secondary|13|FRZ|player": 13,
+  "hit-secondary|13|PRZ|opponent": 64,
+  "hit-secondary|13|PRZ|player": 54,
+  "hit-secondary|13|PSN|opponent": 20,
+  "hit-secondary|13|PSN|player": 14,
+  "hit-secondary|13|SLP|opponent": 6,
+  "hit-secondary|13|SLP|player": 5,
+  "thrash-fatigue|13|CONFUSION|opponent": 4,
+  "thrash-fatigue|13|CONFUSION|player": 5,
+  "yawn|13|SLP|opponent": 1,
+  "yawn|13|SLP|player": 4
+ },
+ "seOpenByClass": {
+  "contact-ability": 39,
+  "hit-secondary": 248,
+  "thrash-fatigue": 9,
+  "yawn": 5
+ },
+ "projection": {
+  "contact-ability|BRN|opponent": {
+   "open": 5,
+   "gated": 4,
+   "frames": 49,
+   "unmeasured": 0,
+   "gates": {
+    "0": 1,
+    "6": 1,
+    "9": 1,
+    "17": 2
+   }
+  },
+  "contact-ability|BRN|player": {
+   "open": 2,
+   "gated": 0,
+   "frames": 0,
+   "unmeasured": 0,
+   "gates": {
+    "0": 2
+   }
+  },
+  "contact-ability|INFATUATION|opponent": {
+   "open": 3,
+   "gated": 0,
+   "frames": 0,
+   "unmeasured": 0,
+   "gates": {
+    "0": 3
+   }
+  },
+  "contact-ability|PRZ|opponent": {
+   "open": 7,
+   "gated": 1,
+   "frames": 7,
+   "unmeasured": 0,
+   "gates": {
+    "0": 6,
+    "7": 1
+   }
+  },
+  "contact-ability|PRZ|player": {
+   "open": 4,
+   "gated": 0,
+   "frames": 0,
+   "unmeasured": 0,
+   "gates": {
+    "0": 4
+   }
+  },
+  "contact-ability|PSN|opponent": {
+   "open": 11,
+   "gated": 2,
+   "frames": 6,
+   "unmeasured": 0,
+   "gates": {
+    "0": 9,
+    "1": 1,
+    "5": 1
+   }
+  },
+  "contact-ability|PSN|player": {
+   "open": 6,
+   "gated": 0,
+   "frames": 0,
+   "unmeasured": 0,
+   "gates": {
+    "0": 6
+   }
+  },
+  "contact-ability|SLP|player": {
+   "open": 1,
+   "gated": 0,
+   "frames": 0,
+   "unmeasured": 0,
+   "gates": {
+    "0": 1
+   }
+  },
+  "hit-secondary|BRN|opponent": {
+   "open": 10,
+   "gated": 0,
+   "frames": 0,
+   "unmeasured": 0,
+   "gates": {
+    "0": 10
+   }
+  },
+  "hit-secondary|BRN|player": {
+   "open": 10,
+   "gated": 2,
+   "frames": 11,
+   "unmeasured": 0,
+   "gates": {
+    "0": 8,
+    "4": 1,
+    "7": 1
+   }
+  },
+  "hit-secondary|CONFUSION|opponent": {
+   "open": 18,
+   "gated": 7,
+   "frames": 63,
+   "unmeasured": 0,
+   "gates": {
+    "0": 11,
+    "5": 2,
+    "6": 1,
+    "7": 1,
+    "9": 1,
+    "11": 1,
+    "20": 1
+   }
+  },
+  "hit-secondary|CONFUSION|player": {
+   "open": 19,
+   "gated": 5,
+   "frames": 68,
+   "unmeasured": 0,
+   "gates": {
+    "0": 14,
+    "4": 1,
+    "8": 1,
+    "10": 1,
+    "22": 1,
+    "24": 1
+   }
+  },
+  "hit-secondary|FRZ|opponent": {
+   "open": 15,
+   "gated": 3,
+   "frames": 47,
+   "unmeasured": 0,
+   "gates": {
+    "0": 12,
+    "14": 1,
+    "15": 1,
+    "18": 1
+   }
+  },
+  "hit-secondary|FRZ|player": {
+   "open": 13,
+   "gated": 2,
+   "frames": 11,
+   "unmeasured": 0,
+   "gates": {
+    "0": 11,
+    "2": 1,
+    "9": 1
+   }
+  },
+  "hit-secondary|PRZ|opponent": {
+   "open": 64,
+   "gated": 22,
+   "frames": 221,
+   "unmeasured": 0,
+   "gates": {
+    "0": 42,
+    "1": 2,
+    "3": 3,
+    "4": 1,
+    "6": 1,
+    "7": 1,
+    "8": 2,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 3,
+    "15": 1,
+    "16": 1,
+    "17": 1,
+    "18": 2,
+    "21": 1
+   }
+  },
+  "hit-secondary|PRZ|player": {
+   "open": 54,
+   "gated": 15,
+   "frames": 129,
+   "unmeasured": 0,
+   "gates": {
+    "0": 39,
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "6": 3,
+    "7": 3,
+    "9": 1,
+    "10": 1,
+    "12": 1,
+    "14": 1,
+    "17": 1,
+    "22": 1
+   }
+  },
+  "hit-secondary|PSN|opponent": {
+   "open": 20,
+   "gated": 1,
+   "frames": 24,
+   "unmeasured": 0,
+   "gates": {
+    "0": 19,
+    "24": 1
+   }
+  },
+  "hit-secondary|PSN|player": {
+   "open": 14,
+   "gated": 2,
+   "frames": 38,
+   "unmeasured": 0,
+   "gates": {
+    "0": 12,
+    "12": 1,
+    "26": 1
+   }
+  },
+  "hit-secondary|SLP|opponent": {
+   "open": 6,
+   "gated": 1,
+   "frames": 8,
+   "unmeasured": 0,
+   "gates": {
+    "0": 5,
+    "8": 1
+   }
+  },
+  "hit-secondary|SLP|player": {
+   "open": 5,
+   "gated": 0,
+   "frames": 0,
+   "unmeasured": 0,
+   "gates": {
+    "0": 5
+   }
+  },
+  "thrash-fatigue|CONFUSION|opponent": {
+   "open": 4,
+   "gated": 1,
+   "frames": 10,
+   "unmeasured": 0,
+   "gates": {
+    "0": 3,
+    "10": 1
+   }
+  },
+  "thrash-fatigue|CONFUSION|player": {
+   "open": 5,
+   "gated": 0,
+   "frames": 0,
+   "unmeasured": 0,
+   "gates": {
+    "0": 5
+   }
+  },
+  "yawn|SLP|opponent": {
+   "open": 1,
+   "gated": 1,
+   "frames": 11,
+   "unmeasured": 0,
+   "gates": {
+    "11": 1
+   }
+  },
+  "yawn|SLP|player": {
+   "open": 4,
+   "gated": 4,
+   "frames": 34,
+   "unmeasured": 0,
+   "gates": {
+    "5": 1,
+    "6": 1,
+    "11": 1,
+    "12": 1
+   }
+  }
+ },
+ "projectionByClass": {
+  "contact-ability": {
+   "receipts": 96,
+   "open": 39,
+   "gated": 7,
+   "frames": 62,
+   "unmeasuredOpen": 0
+  },
+  "end-turn": {
+   "receipts": 1298,
+   "open": 0,
+   "gated": 0,
+   "frames": 0,
+   "unmeasuredOpen": 0
+  },
+  "hit-secondary": {
+   "receipts": 384,
+   "open": 248,
+   "gated": 60,
+   "frames": 620,
+   "unmeasuredOpen": 0
+  },
+  "status-move": {
+   "receipts": 1529,
+   "open": 0,
+   "gated": 0,
+   "frames": 0,
+   "unmeasuredOpen": 0
+  },
+  "synchronize": {
+   "receipts": 20,
+   "open": 0,
+   "gated": 0,
+   "frames": 0,
+   "unmeasuredOpen": 0
+  },
+  "thrash-fatigue": {
+   "receipts": 51,
+   "open": 9,
+   "gated": 1,
+   "frames": 10,
+   "unmeasuredOpen": 0
+  },
+  "turn-start": {
+   "receipts": 4629,
+   "open": 0,
+   "gated": 0,
+   "frames": 0,
+   "unmeasuredOpen": 0
+  },
+  "yawn": {
+   "receipts": 73,
+   "open": 5,
+   "gated": 5,
+   "frames": 45,
+   "unmeasuredOpen": 0
+  }
+ },
+ "projectionTotal": {
+  "gated": 73,
+  "frames": 737,
+  "unmeasuredOpen": 0
+ }
+}
