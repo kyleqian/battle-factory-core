@@ -1,0 +1,111 @@
+{
+ "41:0:on": {
+  "sameTimeline": true,
+  "lastFrame": 8162,
+  "presentedFrames": 7557,
+  "stalled": false,
+  "statusAnimationCommands": 11,
+  "gatedCommands": {
+   "9:0:5:presenting": {
+    "animation": "PRZ",
+    "battler": 0,
+    "species": "GRIMER",
+    "frames": 55,
+    "gate": 16,
+    "previousMessage": "Foe ONIX used DRAGONBREATH!",
+    "differingAges": {
+     "count": 50,
+     "min": 5,
+     "max": 54
+    }
+   }
+  },
+  "ungatedStatusAnimationDiffering": 0,
+  "firstFrameAfterGated": 0,
+  "unexplained": 0,
+  "unexplainedFirst": [],
+  "verdict": "OK"
+ },
+ "92:0:on": {
+  "sameTimeline": true,
+  "lastFrame": 7376,
+  "presentedFrames": 6777,
+  "stalled": false,
+  "statusAnimationCommands": 2,
+  "gatedCommands": {
+   "9:0:5:presenting": {
+    "animation": "PSN",
+    "battler": 1,
+    "species": "RATICATE",
+    "frames": 79,
+    "gate": 8,
+    "previousMessage": "Foe RATICATE used PURSUIT!",
+    "differingAges": {
+     "count": 62,
+     "min": 2,
+     "max": 63
+    }
+   }
+  },
+  "ungatedStatusAnimationDiffering": 0,
+  "firstFrameAfterGated": 0,
+  "unexplained": 0,
+  "unexplainedFirst": [],
+  "verdict": "OK"
+ },
+ "2:1:on": {
+  "sameTimeline": true,
+  "lastFrame": 4451,
+  "presentedFrames": 3852,
+  "stalled": false,
+  "statusAnimationCommands": 4,
+  "gatedCommands": {
+   "13:0:5:presenting": {
+    "animation": "PRZ",
+    "battler": 1,
+    "species": "PLUSLE",
+    "frames": 45,
+    "gate": 6,
+    "previousMessage": "Foe PLUSLE used QUICK ATTACK!",
+    "differingAges": {
+     "count": 40,
+     "min": 5,
+     "max": 44
+    }
+   }
+  },
+  "ungatedStatusAnimationDiffering": 0,
+  "firstFrameAfterGated": 0,
+  "unexplained": 0,
+  "unexplainedFirst": [],
+  "verdict": "OK"
+ },
+ "22:1:on": {
+  "sameTimeline": true,
+  "lastFrame": 6109,
+  "presentedFrames": 5541,
+  "stalled": false,
+  "statusAnimationCommands": 5,
+  "gatedCommands": {
+   "12:0:5:presenting": {
+    "animation": "PSN",
+    "battler": 0,
+    "species": "RATICATE",
+    "frames": 78,
+    "gate": 7,
+    "previousMessage": "RATICATE used PURSUIT!",
+    "differingAges": {
+     "count": 59,
+     "min": 2,
+     "max": 62
+    }
+   }
+  },
+  "ungatedStatusAnimationDiffering": 0,
+  "firstFrameAfterGated": 0,
+  "unexplained": 0,
+  "unexplainedFirst": [],
+  "verdict": "OK"
+ },
+ "verdict": "OK"
+}
