@@ -1,0 +1,478 @@
+{
+ "census": {
+  "allShardDigestsSame": {
+   "battleDigest": true,
+   "battleDigestExcludingFrames": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "battleMismatches": 0,
+  "declineChanges": 0,
+  "frameChanges": 0,
+  "keyMismatches": 0,
+  "liveFrameChanges": 0,
+  "moveRecords": 27403,
+  "segmentMismatches": 0,
+  "statusChanges": 0,
+  "totals": {
+   "base.battleFrames": 15915101,
+   "base.commands": 27368,
+   "base.frames": 4154509,
+   "base.live": 27081,
+   "base.liveFrames": 4126052,
+   "base.statusAnimationCommands": 8063,
+   "final.battleFrames": 15915101,
+   "final.commands": 27368,
+   "final.frames": 4154509,
+   "final.live": 27081,
+   "final.liveFrames": 4126052,
+   "final.statusAnimationCommands": 8063
+  }
+ },
+ "controls": {
+  "age+1": {
+   "windows": 34,
+   "zeroPxCommandRowWindows": 0,
+   "zeroPxWindows": 0
+  },
+  "lag-swap": {
+   "windows": 34,
+   "zeroPxCommandRowWindows": 29,
+   "zeroPxWindows": 26
+  },
+  "no-cube": {
+   "windows": 34,
+   "zeroPxCommandRowWindows": 29,
+   "zeroPxWindows": 26
+  },
+  "no-ducks": {
+   "windows": 34,
+   "zeroPxCommandRowWindows": 22,
+   "zeroPxWindows": 22
+  },
+  "no-ghost": {
+   "windows": 34,
+   "zeroPxCommandRowWindows": 17,
+   "zeroPxWindows": 14
+  },
+  "no-shake": {
+   "windows": 34,
+   "zeroPxCommandRowWindows": 17,
+   "zeroPxWindows": 14
+  },
+  "wrong-side": {
+   "windows": 34,
+   "zeroPxCommandRowWindows": 0,
+   "zeroPxWindows": 0
+  }
+ },
+ "productionCompare": {
+  "ageOffset": "status-animation command age a == stp128 reducer rel a == ROM row rel a (rel 0 = the gAnimScriptActive rise)",
+  "r1EqualsR2": true,
+  "residualWindows": {
+   "stp128-confuse-ray-ply-primeape-onix#0": [
+    [
+     100,
+     1091,
+     0
+    ],
+    [
+     101,
+     1091,
+     0
+    ]
+   ],
+   "stp128-confuse-ray-ply-primeape-onix#1": [
+    [
+     100,
+     1091,
+     0
+    ],
+    [
+     101,
+     1091,
+     0
+    ]
+   ],
+   "stp128-confuse-ray-ply-primeape-onix#2": [
+    [
+     100,
+     1091,
+     0
+    ],
+    [
+     101,
+     1091,
+     0
+    ]
+   ]
+  },
+  "summary": {
+   "neg": null,
+   "perAnimationSide": {
+    "CONFUSION opponent": {
+     "commandPx": 0,
+     "commandRows": 606,
+     "commandRowsZeroPx": 6,
+     "px": 6546,
+     "rows": 618,
+     "windows": 6,
+     "zeroPx": 3
+    },
+    "CONFUSION player": {
+     "commandPx": 0,
+     "commandRows": 606,
+     "commandRowsZeroPx": 6,
+     "px": 0,
+     "rows": 618,
+     "windows": 6,
+     "zeroPx": 6
+    },
+    "CURSED opponent": {
+     "commandPx": 0,
+     "commandRows": 304,
+     "commandRowsZeroPx": 4,
+     "px": 0,
+     "rows": 312,
+     "windows": 4,
+     "zeroPx": 4
+    },
+    "CURSED player": {
+     "commandPx": 0,
+     "commandRows": 304,
+     "commandRowsZeroPx": 4,
+     "px": 0,
+     "rows": 312,
+     "windows": 4,
+     "zeroPx": 4
+    },
+    "FRZ opponent": {
+     "commandPx": 0,
+     "commandRows": 236,
+     "commandRowsZeroPx": 2,
+     "px": 0,
+     "rows": 240,
+     "windows": 2,
+     "zeroPx": 2
+    },
+    "FRZ player": {
+     "commandPx": 0,
+     "commandRows": 354,
+     "commandRowsZeroPx": 3,
+     "px": 0,
+     "rows": 360,
+     "windows": 3,
+     "zeroPx": 3
+    },
+    "NIGHTMARE opponent": {
+     "commandPx": 0,
+     "commandRows": 456,
+     "commandRowsZeroPx": 6,
+     "px": 0,
+     "rows": 468,
+     "windows": 6,
+     "zeroPx": 6
+    },
+    "NIGHTMARE player": {
+     "commandPx": 0,
+     "commandRows": 228,
+     "commandRowsZeroPx": 3,
+     "px": 0,
+     "rows": 234,
+     "windows": 3,
+     "zeroPx": 3
+    }
+   },
+   "perRowDigest": "fc82afec7fe47499",
+   "windows": 34,
+   "zeroPxCommandRowWindows": 34,
+   "zeroPxWindows": 31
+  }
+ },
+ "rom": {
+  "probes": "stp128 probes r1 == r2: 14 / 14",
+  "romWindowsEqualsStp128Committed": true,
+  "windows": 34
+ },
+ "routes": {
+  "19:0:on": {
+   "differing": {
+    "afterStatusAnimationFirstFrame": 0,
+    "statusAnimation": 616,
+    "unexplained": 0,
+    "x2RowsBody": 0
+   },
+   "frames": 6650,
+   "ok": true,
+   "presented": 6051,
+   "sameTimeline": true,
+   "statusAnimationCommands": [
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ]
+   ]
+  },
+  "22:0:on": {
+   "differing": {
+    "afterStatusAnimationFirstFrame": 0,
+    "statusAnimation": 528,
+    "unexplained": 0,
+    "x2RowsBody": 0
+   },
+   "frames": 7076,
+   "ok": true,
+   "presented": 6517,
+   "sameTimeline": true,
+   "statusAnimationCommands": [
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     0
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     0
+    ]
+   ]
+  },
+  "24:0:on": {
+   "differing": {
+    "afterStatusAnimationFirstFrame": 7,
+    "statusAnimation": 693,
+    "unexplained": 0,
+    "x2RowsBody": 0
+   },
+   "frames": 5545,
+   "ok": true,
+   "presented": 5003,
+   "sameTimeline": true,
+   "statusAnimationCommands": [
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     99
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     99
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     99
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     99
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     99
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     99
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     99
+    ]
+   ]
+  },
+  "5:0:on": {
+   "differing": {
+    "afterStatusAnimationFirstFrame": 0,
+    "statusAnimation": 528,
+    "unexplained": 0,
+    "x2RowsBody": 0
+   },
+   "frames": 7057,
+   "ok": true,
+   "presented": 6466,
+   "sameTimeline": true,
+   "statusAnimationCommands": [
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ]
+   ]
+  },
+  "9:0:on": {
+   "differing": {
+    "afterStatusAnimationFirstFrame": 0,
+    "statusAnimation": 176,
+    "unexplained": 0,
+    "x2RowsBody": 0
+   },
+   "frames": 6432,
+   "ok": true,
+   "presented": 5854,
+   "sameTimeline": true,
+   "statusAnimationCommands": [
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     88
+    ]
+   ]
+  }
+ },
+ "sar131PsnPrz": {
+  "neg": null,
+  "perRowDigest": "0f1a90d870e9b290",
+  "windows": 17,
+  "zeroPxWindows": 17
+ },
+ "schema": "sad133-live-receipt/v1",
+ "verdicts": {
+  "censusZeroChanges": true,
+  "comparatorR1EqualsR2": true,
+  "controlsFailWhereDrawn": true,
+  "everyCommandRowZeroPx": true,
+  "residualOnlyOnixConfusionNextMessageRows": true,
+  "routesOk": true,
+  "sar131PsnPrzStillZeroPx": true,
+  "x2TrackerMatchesRom": true
+ },
+ "x2": {
+  "byAnimationAndTrackedState": {
+   "CONFUSION:idle": 9,
+   "CONFUSION:zeroed": 3,
+   "CURSED:zeroed": 8,
+   "FRZ:idle": 3,
+   "FRZ:zeroed": 2,
+   "NIGHTMARE:zeroed": 9
+  },
+  "matches": 34,
+  "windows": 34
+ }
+}
