@@ -105,6 +105,15 @@ export interface StatusConditionSpan {
   readonly createRow: number;
 }
 
+/**
+ * The target geometry from the battler sprite alone: GetBattlerSpriteCoord(X_2) == sprite x and (Y_PIC_OFFSET) == sprite y + 8 on the
+ * player side, the sprite y on the opponent side (every stp128 ROM window: Onix / Golbat / Shuckle, elevated or not). The sprite x / y
+ * are production's battleCommandFieldSpriteOrigin (elevation included) + 32.
+ */
+export function statusConditionTarget(side: StatusConditionSide, spriteX: number, spriteY: number, idleX2 = 0): StatusConditionTarget {
+  return { side, spriteX, spriteY, animX: spriteX, animY: spriteY + (side === "player" ? 8 : 0), idleX2 };
+}
+
 // ---- frame-order anchors (each identical in every ROM window; see the doc) --------------------------------------------------------
 /** monbg ANIM_DEF_PARTNER: the battler sprite turns invisible and the BG copy is placed on rel 3; clearmonbg restores it. */
 const MONBG_ROW = 3;

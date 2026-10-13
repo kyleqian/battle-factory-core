@@ -8,6 +8,7 @@ import {
   STATUS_CONDITION_SPANS,
   statusConditionDisplayRow,
   statusConditionSourceRow,
+  statusConditionTarget,
   type StatusConditionAnimation,
   type StatusConditionTarget,
 } from "../src/animation/statusConditionAnimations.ts";
@@ -54,6 +55,7 @@ describe("stp128 status-condition reducers vs every ROM row", () => {
   for (const [key, w] of windows) {
     it(`${key} (${w.animation}, ${w.side} target): ${w.rows.length} rows rel ${w.rows[0]!.rel} .. ${w.rows.at(-1)!.rel}`, () => {
       const target = stp128Target(w);
+      expect(statusConditionTarget(w.side, target.spriteX, target.spriteY, target.idleX2)).toEqual(target);
       expect(w.E).toBe(STATUS_CONDITION_SPANS[w.animation].activeRows);
       const bad: string[] = [];
       for (const r of w.rows) {
