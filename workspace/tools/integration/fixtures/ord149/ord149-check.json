@@ -1,0 +1,71 @@
+{
+ "schema": "ord149-check/v1",
+ "riseClasses30": [
+  22,
+  26,
+  30,
+  34,
+  38,
+  42,
+  45,
+  48
+ ],
+ "notIdenticalAB": 0,
+ "bodies": {
+  "opponent": {
+   "instances": 18,
+   "exact": 18,
+   "firstBodies": 6,
+   "laterBodies": 12,
+   "ties": 1,
+   "byLend": {
+    "F0 [3,4,..] rise1>rise2 -> D2,1": 10,
+    "F0 [3,4,..] rise1<rise2 -> D1,2": 7,
+    "F0 [3,4,..] tie -> D1,2": 1
+   },
+   "riseClassesObserved": [
+    22,
+    26,
+    30,
+    34,
+    38,
+    42,
+    45,
+    48
+   ],
+   "controlsExact": {
+    "static D1,2": 8,
+    "static D2,1": 10,
+    "row 310:opponent (tied P537)": 8
+   },
+   "mismatches": []
+  },
+  "player": {
+   "instances": 18,
+   "exact": 18,
+   "firstBodies": 6,
+   "laterBodies": 12,
+   "ties": 0,
+   "byLend": {
+    "F0 [3,4,..] rise1>rise2 -> D2,1": 11,
+    "F0 [3,4,..] rise1<rise2 -> D1,2": 7
+   },
+   "riseClassesObserved": [
+    22,
+    26,
+    30,
+    34,
+    38,
+    42,
+    45,
+    48
+   ],
+   "controlsExact": {
+    "static D1,2": 7,
+    "static D2,1": 11,
+    "row 310:opponent (tied P537)": 7
+   },
+   "mismatches": []
+  }
+ }
+}

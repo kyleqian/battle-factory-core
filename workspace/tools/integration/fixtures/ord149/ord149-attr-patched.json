@@ -1,0 +1,162 @@
+{
+ "all": {
+  "commands": 37,
+  "frames": 6527
+ },
+ "groups": {
+  "(no detail)": {
+   "battles": {
+    "19": {
+     "commands": 2,
+     "frames": 328,
+     "moves": {
+      "326:player": 2
+     }
+    },
+    "201": {
+     "commands": 1,
+     "frames": 164,
+     "moves": {
+      "326:player": 1
+     }
+    },
+    "21": {
+     "commands": 1,
+     "frames": 164,
+     "moves": {
+      "326:player": 1
+     }
+    },
+    "244": {
+     "commands": 1,
+     "frames": 164,
+     "moves": {
+      "326:player": 1
+     }
+    },
+    "304": {
+     "commands": 2,
+     "frames": 328,
+     "moves": {
+      "326:player": 2
+     }
+    },
+    "611": {
+     "commands": 3,
+     "frames": 492,
+     "moves": {
+      "326:player": 3
+     }
+    },
+    "731": {
+     "commands": 2,
+     "frames": 328,
+     "moves": {
+      "326:player": 2
+     }
+    },
+    "767": {
+     "commands": 4,
+     "frames": 656,
+     "moves": {
+      "326:player": 4
+     }
+    },
+    "785": {
+     "commands": 1,
+     "frames": 164,
+     "moves": {
+      "326:player": 1
+     }
+    },
+    "882": {
+     "commands": 5,
+     "frames": 820,
+     "moves": {
+      "326:player": 5
+     }
+    },
+    "957": {
+     "commands": 1,
+     "frames": 164,
+     "moves": {
+      "326:player": 1
+     }
+    }
+   },
+   "byReason": {
+    "later-body (order lend not a first body)": 23
+   },
+   "commands": 23,
+   "frames": 3772
+  },
+  "body 63:player": {
+   "battles": {
+    "644": {
+     "commands": 1,
+     "frames": 283,
+     "invalidatedBy": {
+      "attacker": "AERODACTYL",
+      "index": 5,
+      "move": "HYPER BEAM",
+      "previousCommand": "COUNTER:opponent",
+      "status": "live",
+      "target": "URSARING"
+     },
+     "moves": {
+      "63:player": 1
+     }
+    },
+    "729": {
+     "commands": 11,
+     "frames": 1946,
+     "invalidatedBy": {
+      "attacker": "AERODACTYL",
+      "index": 12,
+      "move": "HYPER BEAM",
+      "previousCommand": "DRAGONBREATH:opponent",
+      "status": "live",
+      "target": "MUK"
+     },
+     "moves": {
+      "165:player": 5,
+      "174:opponent": 3,
+      "63:player": 3
+     }
+    }
+   },
+   "byReason": {
+    "sprite-order lend unknown": 12
+   },
+   "commands": 12,
+   "frames": 2229
+  },
+  "order host: next-mon summary while the opponent battler is tracked": {
+   "battles": {
+    "355": {
+     "commands": 2,
+     "frames": 526,
+     "moves": {
+      "104:player": 1,
+      "161:opponent": 1
+     }
+    }
+   },
+   "byReason": {
+    "sprite-order lend unknown": 2
+   },
+   "commands": 2,
+   "frames": 526
+  }
+ },
+ "totals": {
+  "later-body (order lend not a first body)": {
+   "commands": 23,
+   "frames": 3772
+  },
+  "sprite-order lend unknown": {
+   "commands": 14,
+   "frames": 2755
+  }
+ }
+}

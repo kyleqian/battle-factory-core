@@ -1,0 +1,15 @@
+diff --git a/tests/land87WordsOccupancyReseed.test.ts b/tests/land87WordsOccupancyReseed.test.ts
+index 7e31dcae..8821f083 100644
+--- a/tests/land87WordsOccupancyReseed.test.ts
++++ b/tests/land87WordsOccupancyReseed.test.ts
+@@ -89,8 +89,8 @@ describe("land87: allocator reseed through a pending words marker's occupancy sh
+     expect(liveSpriteAllocatorReseedable(Object.freeze(withoutMarker) as LiveSpriteOrderHost)).toBe(false);
+   });
+ 
+-  it("policy pin: every words unit is allocator-net-zero (the shadow's license), Flatter 260 included", () => {
+-    expect(WORDS_ORDER_UNIT_MOVE_IDS).toEqual([28, 189, 240, 260, 291, 301]);
++  it("policy pin: every words unit is allocator-net-zero (the shadow's license), Flatter 260 and Astonish 310 (ord149) included", () => {
++    expect(WORDS_ORDER_UNIT_MOVE_IDS).toEqual([28, 189, 240, 260, 291, 301, 310]);
+     for (const id of WORDS_ORDER_UNIT_MOVE_IDS) expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS, `move ${id}`).toContain(id);
+     expect(LIVE_SPRITE_ALLOCATOR_NET_ZERO_GENERAL_ANIMATIONS.has("RAIN_CONTINUES")).toBe(true);
+     expect(WORDS_ORDER_GENERAL_ANIMATION).toBe("RAIN_CONTINUES");
