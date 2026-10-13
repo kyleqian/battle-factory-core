@@ -1,0 +1,56 @@
+{
+ "schema": "sgs134-census-delta/v1",
+ "on": {
+  "battles": 1000,
+  "sameEndDigestCommandTypes": 1000,
+  "commands": 302634,
+  "ungatedIdentical": 302162,
+  "gatedExact": 366,
+  "messageParity": 106,
+  "framesBase": 15915831,
+  "framesPatched": 15919489,
+  "gatedCommands": {
+   "move-animation": 126,
+   "stats-change": 240
+  },
+  "gateFrames": {
+   "move-animation": 540,
+   "stats-change": 3114
+  },
+  "problems": [],
+  "problemCount": 0,
+  "projection": {
+   "seedClassCells": 172,
+   "cellsEqual": 172,
+   "cellsDiffer": [],
+   "patchedOnlyCells": [],
+   "projectedFrames": 3654
+  }
+ },
+ "off": {
+  "battles": 1000,
+  "sameEndDigestCommandTypes": 1000,
+  "commands": 297278,
+  "ungatedIdentical": 296960,
+  "gatedExact": 240,
+  "messageParity": 78,
+  "framesBase": 12256349,
+  "framesPatched": 12259481,
+  "gatedCommands": {
+   "stats-change": 240
+  },
+  "gateFrames": {
+   "stats-change": 3114
+  },
+  "problems": [],
+  "problemCount": 0,
+  "projection": {
+   "seedClassCells": 126,
+   "cellsEqual": 126,
+   "cellsDiffer": [],
+   "patchedOnlyCells": [],
+   "projectedFrames": 3114
+  }
+ },
+ "ok": true
+}

@@ -10,14 +10,14 @@
   },
   "2/4": {
    "files": "1 failed | 411 passed | 12 skipped (424)",
-   "tests": "1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+   "tests": "1 failed | 4168 passed | 62 skipped (4231)",
    "failed": [
     "tests/appDifferential.test.ts"
    ]
   },
   "3/4": {
    "files": "1 failed | 410 passed | 13 skipped (424)",
-   "tests": "1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+   "tests": "1 failed | 3262 passed | 60 skipped (3323)",
    "failed": [
     "tests/animation/liveMultihitMoveAdapters.test.ts"
    ]
