@@ -30,7 +30,7 @@ for (let seed = s0; seed < s1; seed += 1) {
     open = null;
   };
   try {
-    generatedCommandAnimationReplay(seed, scene, Array(8).fill(0), 0, true, true, (state, frame) => {
+    generatedCommandAnimationReplay(seed, scene, Array(8).fill(Number(arg("slot") ?? 0) as 0 | 1 | 2 | 3), 0, true, true, (state, frame) => {
       const r = state.battleResolutionPresentation;
       if (bands && bandStart !== null && frame - bandStart <= 300) {
         fb.fill(0);
