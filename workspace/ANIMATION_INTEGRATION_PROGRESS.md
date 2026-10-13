@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-12 (evening, in progress) — S10A: #168 status animations — timing + SE gate live, 6 / 9 drawn; ord124 plans landed; 99.34 / 99.60 % live
+## 2026-10-12 (evening, in progress) — S10A: #168 status animations — timing + SE gate live, all 9 drawn; SE gate on stats-change / multi-hit; #166 DT tail; Smokescreen D4; 99.34 / 99.60 % live
 
 - Session start: master `cfe4e26ca`, production src `b4befa039` == the 2026-10-11 final gates' tree -> baseline receipt reused. Oracle
   freshness FAIL = the known false positive (services 2026-10-06; last `oracle/` commit 2026-08-15).
@@ -57,6 +57,34 @@
   the reducer's sprite-template union; sad133's switch lost exhaustiveness) — fixed with explicit unreachable cases (`b6884121b`); smoke
   448, full suite 1,648 files / 13,674 tests 0 failed (pre-fix, runtime-identical), typecheck + build + 7 status test files 123 / 123
   post-fix. Master `86298bae3`.
+- sae135 (SIDE, Opus, base `7511dc63d`): **ISSUES #168 SA5 — SLP / BRN / INFATUATION DRAWN** (stq132's reducer; letter Z affine, flames,
+  hearts): 37 / 37 ROM windows 0 px on every command row (6 ONIX-opponent windows carry the ordinary-row idle-rest residual on the next
+  command -> rst139), controls fail, x2 kept 13 / 13, routes 6 / 6, census identical. Found the union DEFECT: on the 72 SE-GATED
+  status-animation commands the drawn animation starts gate rows early (the effect age does not skip the gate) -> gaf140. Supervisor:
+  sae135Run.sh --census ALL SAME.
+- **Union `16e05edfc` (master + sae135; supervisor resolution)**: sad133 and sae135 diverged on `liveStatusAnimationRow`'s 4th argument
+  ({ sprite, inflicted } vs { x, y }) — unified on the context form for all nine; one sprite type (behindBattlers / blend / affine); the
+  draw helper routes affine sprites; sae135's tests call the context form. Typecheck, smoke, full suite 1,649 files / 13,686 tests 0
+  failed, build; sar131 / sad133 / sae135 window comparators byte-identical on the union (their route checks flag only the OTHER slices'
+  newly drawn commands — expected).
+- sgl138 (MAIN lane, Opus, on master `368e5b41c` .. `f3d46e8a4`): sgs134's gate LANDED — `seGateFrames` lead before the stats-change
+  banner (both scenes) and multi-hit 2nd+ hits (Scene ON); census 0..999 == sgs134's patched copy (ON 366 commands / 3,654 frames, OFF
+  240 / 3,114; gameplay identical); pins: sc106 route +8 +9, COMET_PUNCH hit 2 +1; soak vanilla / default 0:20 20 / 20; differential
+  624 / 624.
+- tmr136 (INTEGRATION, Opus, `506abb5e1` .. `82eaac512`, base `439575012`): (A) **ISSUES #166 remainder FIXED** — the live Double Team
+  window holds the General_StatsChange's rel 69..77 (`LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS` 9: 230 -> 239 rows; every existing body row
+  byte-identical; the tail rows 0 px and the next glyph on ROM age 239 on 12 / 12 dt60 windows); (B) Smokescreen 108 -> D4 faithful timing
+  keyed by its use in the battle (first use 124 rows / no lag, later 125; the x2 history host counts the battle's own MOVE_ANIMATION bodies;
+  in-phase windows 22 / 24 0 px, 2 the minority phase): catalogue **236 + 13 + 27 + 0 + 0 = 276** + Struggle. Supervisor: tmr136Run.sh
+  ALL same; census 0..999 base vs final (the worker did not run it): **859 live Double Team +9 frames, 66 first-use Smokescreens -1, 0
+  status / decline-reason changes** (decline `gate` line refs shift only); shard 7's digest / key differences = battle 796, a census
+  frame-budget-truncated battle that loses one record (pairing shifts for 796..799).
+- **Union `74cbec2b8` = master** (U3 + sgl138 + tmr136; supervisor: one render conflict (moveUse x seGate) resolved keeping both; sgl138's
+  seed-9 Scene ON route total re-pinned 15,260 -> 15,288 = tmr136's 3 live Double Teams +9 each + 1 even-frame press parity, anchors
+  identical): typecheck, 12 cross-branch test files green; full gates below.
+- rst139 (SIDE, Opus, new files only): ordinary Scene ON rows never drew the opponent's idle rest: ROM holds x2 outside scripts (8
+  scenarios r1 == r2); exposure = ONIX only (Factory pool): 4,349 tracked-idle frames / 9 battles (12,477 `unknown` not claimable); banked
+  patch -> 22,746 / 22,746 ROM rows 0 px, census identical, differential identical -> rsl141 landing.
 - Live audit 27 (aud129, MAIN lane, Opus, new files only): 105 windows, lend == ROM 105 / 105, **85 OK, 20 TIMING-PHASE (D4 class; each
   residual row is 0 px one age off), 0 DEFECT**. ord124's Golbat Mega Punch flag = Mega Punch's own BG-write row 71 + restore-fade phase
   (no party dependency); Spark = alignment artefact; Smokescreen use-1 phase quantified (66 live / 8,580 frames on 0..999).
