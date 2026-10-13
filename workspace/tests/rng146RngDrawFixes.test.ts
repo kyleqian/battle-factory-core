@@ -6,7 +6,7 @@ import r3Control from "../tools/probe/receipts/rcp143-r3-control-transform-off.j
 import { verifyReceipt } from "../tools/probe/verify-rcp143.ts";
 
 /**
- * STEP rng146 -- ISSUES #141b and the #140 remainder (#141a deferred). Each banked
+ * STEP rng146 -- ISSUES #141b and the #140 remainder; #141a re-landed by thr153. Each banked
  * stock-ROM receipt (docs/rcp143-engine-fix-receipts.md) is replayed through
  * the live full-turn kernel here, so a regression in any of the three fixes
  * fails hermetically (committed JSON + pure kernel; no oracle).
@@ -26,17 +26,19 @@ describe("rng146 -- source-exact RNG draws against the rcp143 receipts", () => {
     expect(result.pass).toBe(true);
   });
 
-  it("R1 (F1, #141a) stays the known FAIL until its re-pins land: one draw short at the first lock-in", () => {
-    // F1 (0f9b5301e) was reverted in 86888ac9b: it is correct (R1 PASS) but moves 8 pinned
-    // trajectories through Petal Dance / Thrash lock-ins; see docs/rng146-rng-draw-fixes.md.
+  it("R1 (F1, #141a, re-landed thr153): the THRASH lock-in re-runs seteffectwithchance and wastes one roll", () => {
     const result = verifyReceipt(r1 as unknown as Receipt);
-    expect(result.pass).toBe(false);
-    expect(result.comparison.firstDivergence).toMatchObject({
-      turn: 1,
-      index: 5,
-      rom: { reason: "seteffectwithchance" },
-      port: { reason: "accuracycheck" },
-    });
+    expect(result.comparison.firstDivergence).toBeNull();
+    expect(result.port.stoppedEarly).toBeNull();
+    expect(result.comparison.portActiveHp).toEqual(result.comparison.romActiveHp);
+    expect(result.pass).toBe(true);
+    // Turn 1: duration draw, then the wasted re-run roll before Steelix's accuracy check.
+    expect(result.port.turns[0]!.draws.slice(3, 7).map((draw) => draw.reason)).toEqual([
+      "seteffectwithchance",
+      "SetMoveEffect Thrash-family lock-in duration ((Random() & 1) + 2)",
+      "seteffectwithchance",
+      "accuracycheck",
+    ]);
   });
 
   it("R3: the :133 loop draws once on turn 4 and twice on turn 8, on the Solar Beam user's own action", () => {
