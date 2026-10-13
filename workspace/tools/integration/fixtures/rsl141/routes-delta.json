@@ -1,0 +1,152 @@
+{
+ "ok": true,
+ "battles": {
+  "134": {
+   "frames": 12739,
+   "end": "terminal",
+   "sameRowSequence": true,
+   "atStake": 256,
+   "changed": 256,
+   "unexpectedChanges": 0,
+   "atStakeUnchanged": 0,
+   "changedBy": {
+    "menu-action-menu|idle|ONIX": 4,
+    "menu-fight-menu|idle|ONIX": 7,
+    "menu-fight-opening|idle|ONIX": 10,
+    "ordinary|idle|ONIX": 211,
+    "resolution-confirm-handoff|idle|ONIX": 18,
+    "resolution-next-command-handoff|idle|ONIX": 6
+   }
+  },
+  "196": {
+   "frames": 18604,
+   "end": "terminal",
+   "sameRowSequence": true,
+   "atStake": 24,
+   "changed": 24,
+   "unexpectedChanges": 0,
+   "atStakeUnchanged": 0,
+   "changedBy": {
+    "ordinary|idle|ONIX": 24
+   }
+  },
+  "205": {
+   "frames": 29004,
+   "end": "terminal",
+   "sameRowSequence": true,
+   "atStake": 358,
+   "changed": 358,
+   "unexpectedChanges": 0,
+   "atStakeUnchanged": 0,
+   "changedBy": {
+    "menu-action-menu|idle|ONIX": 4,
+    "menu-fight-menu|idle|ONIX": 7,
+    "menu-fight-opening|idle|ONIX": 10,
+    "ordinary|idle|ONIX": 313,
+    "resolution-confirm-handoff|idle|ONIX": 18,
+    "resolution-next-command-handoff|idle|ONIX": 6
+   }
+  },
+  "27": {
+   "frames": 17771,
+   "end": "terminal",
+   "sameRowSequence": true,
+   "atStake": 1467,
+   "changed": 1467,
+   "unexpectedChanges": 0,
+   "atStakeUnchanged": 0,
+   "changedBy": {
+    "menu-action-menu|idle|ONIX": 6,
+    "menu-fight-menu|idle|ONIX": 18,
+    "menu-fight-opening|idle|ONIX": 15,
+    "ordinary|idle|ONIX": 1383,
+    "resolution-confirm-handoff|idle|ONIX": 27,
+    "resolution-next-command-handoff|idle|ONIX": 18
+   }
+  },
+  "312": {
+   "frames": 17124,
+   "end": "terminal",
+   "sameRowSequence": true,
+   "atStake": 598,
+   "changed": 598,
+   "unexpectedChanges": 0,
+   "atStakeUnchanged": 0,
+   "changedBy": {
+    "menu-action-menu|idle|ONIX": 6,
+    "menu-fight-menu|idle|ONIX": 21,
+    "menu-fight-opening|idle|ONIX": 15,
+    "ordinary|idle|ONIX": 511,
+    "resolution-confirm-handoff|idle|ONIX": 27,
+    "resolution-next-command-handoff|idle|ONIX": 18
+   }
+  },
+  "428": {
+   "frames": 28834,
+   "end": "terminal",
+   "sameRowSequence": true,
+   "atStake": 1192,
+   "changed": 1192,
+   "unexpectedChanges": 0,
+   "atStakeUnchanged": 0,
+   "changedBy": {
+    "menu-action-menu|idle|ONIX": 4,
+    "menu-fight-menu|idle|ONIX": 7,
+    "menu-fight-opening|idle|ONIX": 10,
+    "ordinary|idle|ONIX": 1141,
+    "resolution-confirm-handoff|idle|ONIX": 18,
+    "resolution-next-command-handoff|idle|ONIX": 12
+   }
+  },
+  "731": {
+   "frames": 16974,
+   "end": "terminal",
+   "sameRowSequence": true,
+   "atStake": 182,
+   "changed": 182,
+   "unexpectedChanges": 0,
+   "atStakeUnchanged": 0,
+   "changedBy": {
+    "menu-action-menu|idle|ONIX": 4,
+    "menu-fight-menu|idle|ONIX": 7,
+    "menu-fight-opening|idle|ONIX": 10,
+    "ordinary|idle|ONIX": 137,
+    "resolution-confirm-handoff|idle|ONIX": 18,
+    "resolution-next-command-handoff|idle|ONIX": 6
+   }
+  },
+  "780": {
+   "frames": 16944,
+   "end": "terminal",
+   "sameRowSequence": true,
+   "atStake": 42,
+   "changed": 42,
+   "unexpectedChanges": 0,
+   "atStakeUnchanged": 0,
+   "changedBy": {
+    "menu-action-menu|idle|ONIX": 2,
+    "menu-fight-menu|idle|ONIX": 2,
+    "menu-fight-opening|idle|ONIX": 5,
+    "ordinary|idle|ONIX": 24,
+    "resolution-confirm-handoff|idle|ONIX": 9
+   }
+  },
+  "851": {
+   "frames": 24608,
+   "end": "terminal",
+   "sameRowSequence": true,
+   "atStake": 230,
+   "changed": 230,
+   "unexpectedChanges": 0,
+   "atStakeUnchanged": 0,
+   "changedBy": {
+    "menu-action-menu|idle|ONIX": 2,
+    "menu-fight-menu|idle|ONIX": 5,
+    "menu-fight-opening|idle|ONIX": 5,
+    "ordinary|idle|ONIX": 203,
+    "resolution-confirm-handoff|idle|ONIX": 9,
+    "resolution-next-command-handoff|idle|ONIX": 6
+   }
+  }
+ }
+}
