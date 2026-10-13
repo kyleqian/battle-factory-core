@@ -1,0 +1,178 @@
+{
+ "aud137-brn-opp-crobat.json": {
+  "r1": "122f633277f0cf376746d82f872e7cde38c1bb60edff5cc8d7d9a5f412d1bedc",
+  "r2": "122f633277f0cf376746d82f872e7cde38c1bb60edff5cc8d7d9a5f412d1bedc"
+ },
+ "aud137-brn-opp-ninjask.json": {
+  "r1": "9538a882a215dbbaf12b822783da99d0052ddb6093051a6b241ce143e80e0f1c",
+  "r2": "9538a882a215dbbaf12b822783da99d0052ddb6093051a6b241ce143e80e0f1c"
+ },
+ "aud137-brn-ply-crobat.json": {
+  "r1": "743d6e91f294f159900f077a0ab778191ea633f8feac026a15db45919cd9abb4",
+  "r2": "743d6e91f294f159900f077a0ab778191ea633f8feac026a15db45919cd9abb4"
+ },
+ "aud137-brn-ply-haunter-onix.json": {
+  "r1": "b5441c6250448077829e0a41d46720815341ade7c4a179c2cdef8ad86581a84b",
+  "r2": "b5441c6250448077829e0a41d46720815341ade7c4a179c2cdef8ad86581a84b"
+ },
+ "aud137-brn-ply-ninjask.json": {
+  "r1": "c99b70d0160c1be4b2648ded44dc6a7d02a89a9c8dd08613cae3d05a5fd8a31a",
+  "r2": "c99b70d0160c1be4b2648ded44dc6a7d02a89a9c8dd08613cae3d05a5fd8a31a"
+ },
+ "aud137-conf-opp-flygon.json": {
+  "r1": "6e043deececd9725e1f35bd876ad19081ab9a6a4e2a36b0a8b4ac85309d8982c",
+  "r2": "6e043deececd9725e1f35bd876ad19081ab9a6a4e2a36b0a8b4ac85309d8982c"
+ },
+ "aud137-conf-opp-ninjask.json": {
+  "r1": "5021dd8bb75ff1464aed4d5a1a394e96f2e47efda101b093d101814a0e07655e",
+  "r2": "5021dd8bb75ff1464aed4d5a1a394e96f2e47efda101b093d101814a0e07655e"
+ },
+ "aud137-conf-ply-flygon.json": {
+  "r1": "52b28c0e9f6da07c638390bca43222eb47321b719a41ff20d94551ed4ef58655",
+  "r2": "52b28c0e9f6da07c638390bca43222eb47321b719a41ff20d94551ed4ef58655"
+ },
+ "aud137-conf-ply-haunter-onix.json": {
+  "r1": "465e51ce8d467c52dbc945030fe9857ec882af0982c3fb139b38afce976ddc3c",
+  "r2": "465e51ce8d467c52dbc945030fe9857ec882af0982c3fb139b38afce976ddc3c"
+ },
+ "aud137-conf-ply-ninjask.json": {
+  "r1": "e58e1345070cef2692c8a0bbff8d0dffec79efa52fb8dc90b102c0c2164a146a",
+  "r2": "e58e1345070cef2692c8a0bbff8d0dffec79efa52fb8dc90b102c0c2164a146a"
+ },
+ "aud137-curse-opp-crobat.json": {
+  "r1": "e371c50f58e6cbd5c0d57433e00264f28819bd069fe1e4d17a0b36624a98fdbd",
+  "r2": "e371c50f58e6cbd5c0d57433e00264f28819bd069fe1e4d17a0b36624a98fdbd"
+ },
+ "aud137-curse-opp-ninjask.json": {
+  "r1": "1d3404474ba37812a2c835eaf8203f56b57b16dc52acd91125d68f384711b087",
+  "r2": "1d3404474ba37812a2c835eaf8203f56b57b16dc52acd91125d68f384711b087"
+ },
+ "aud137-curse-ply-crobat.json": {
+  "r1": "6018f3e20436b8b5577f512f13d9a1c537fc4fc317f0db2b371ed3dd1c1050a5",
+  "r2": "6018f3e20436b8b5577f512f13d9a1c537fc4fc317f0db2b371ed3dd1c1050a5"
+ },
+ "aud137-curse-ply-ninjask.json": {
+  "r1": "aebe55918d34eba24e4dd04eb199f876a9e209ef3fdd53a62c83f049d468741a",
+  "r2": "aebe55918d34eba24e4dd04eb199f876a9e209ef3fdd53a62c83f049d468741a"
+ },
+ "aud137-frz-opp-skarmory.json": {
+  "r1": "52ac773f7750c8c1789b8bebc529301ed53e055ed8965dc252693c500e504c8c",
+  "r2": "52ac773f7750c8c1789b8bebc529301ed53e055ed8965dc252693c500e504c8c"
+ },
+ "aud137-frz-opp-snorlax.json": {
+  "r1": "7bd9b0c9818769f37208fe7ec88d99c61bf2c917a00d50e9ee19bed6c358096e",
+  "r2": "7bd9b0c9818769f37208fe7ec88d99c61bf2c917a00d50e9ee19bed6c358096e"
+ },
+ "aud137-frz-ply-skarmory.json": {
+  "r1": "b4be30c50e3dbfe919fcd5ce80722992d075aeafdad2e679d98439545da43909",
+  "r2": "b4be30c50e3dbfe919fcd5ce80722992d075aeafdad2e679d98439545da43909"
+ },
+ "aud137-frz-ply-snorlax.json": {
+  "r1": "0fa824ef4b42d1fdb8638fa10d1f282a5f6305322999a3b8e14e33936dd294a9",
+  "r2": "0fa824ef4b42d1fdb8638fa10d1f282a5f6305322999a3b8e14e33936dd294a9"
+ },
+ "aud137-inf-opp-crobat.json": {
+  "r1": "5c1108dbd8525aa883e59385bba010ce49284cd1487144a1aa2daf568d089247",
+  "r2": "5c1108dbd8525aa883e59385bba010ce49284cd1487144a1aa2daf568d089247"
+ },
+ "aud137-inf-opp-flygon.json": {
+  "r1": "518b50785e9f7ef3cf722239c30b3fc1de53a98aad414c1659de3951268b0556",
+  "r2": "518b50785e9f7ef3cf722239c30b3fc1de53a98aad414c1659de3951268b0556"
+ },
+ "aud137-inf-ply-crobat.json": {
+  "r1": "fad84c0a0ea9165f8a2eff6561bc2bbdfcb531ce4d4ae86761b6089f62ebe735",
+  "r2": "fad84c0a0ea9165f8a2eff6561bc2bbdfcb531ce4d4ae86761b6089f62ebe735"
+ },
+ "aud137-inf-ply-flygon.json": {
+  "r1": "532f4555cda69fd0fbef316941082e6c908259325e84b1d5d4b1aa949d0b84e3",
+  "r2": "532f4555cda69fd0fbef316941082e6c908259325e84b1d5d4b1aa949d0b84e3"
+ },
+ "aud137-nightmare-opp-flygon.json": {
+  "r1": "ae3de23eca89333185fc0791073c1b1884a0a02ecca2f13a293dc1759a0e27a8",
+  "r2": "ae3de23eca89333185fc0791073c1b1884a0a02ecca2f13a293dc1759a0e27a8"
+ },
+ "aud137-nightmare-opp-ninjask.json": {
+  "r1": "d36f51d40c76ab204527200e621e37b44f6f66d8a14fae7af51c6c0adc409b3e",
+  "r2": "d36f51d40c76ab204527200e621e37b44f6f66d8a14fae7af51c6c0adc409b3e"
+ },
+ "aud137-nightmare-ply-flygon.json": {
+  "r1": "eb714c9b17edfce3552fec5c3c862ba053179b14ace6bb41c2d86a70bc7ca8c5",
+  "r2": "eb714c9b17edfce3552fec5c3c862ba053179b14ace6bb41c2d86a70bc7ca8c5"
+ },
+ "aud137-nightmare-ply-ninjask.json": {
+  "r1": "c5ad106dad8aefa28d811e4585afeecdc0e328ccdb51c342d542d35dd8315ca9",
+  "r2": "c5ad106dad8aefa28d811e4585afeecdc0e328ccdb51c342d542d35dd8315ca9"
+ },
+ "aud137-prz-conf-ply-primeape-tauros.json": {
+  "r1": "b9b21148e58f0e7477c6a75aa90ee3f600b082dd862fdd3e24380191c4ed8ec9",
+  "r2": "b9b21148e58f0e7477c6a75aa90ee3f600b082dd862fdd3e24380191c4ed8ec9"
+ },
+ "aud137-prz-opp-crobat.json": {
+  "r1": "f3c5164bf8bae7120db0a76716554e55877950e96e365e0f49479484d089b6ba",
+  "r2": "f3c5164bf8bae7120db0a76716554e55877950e96e365e0f49479484d089b6ba"
+ },
+ "aud137-prz-opp-ninjask.json": {
+  "r1": "60859f629c32c6528a507c26bf9e86394c1179bf9ae78fa2c90ea5a58faf9c80",
+  "r2": "60859f629c32c6528a507c26bf9e86394c1179bf9ae78fa2c90ea5a58faf9c80"
+ },
+ "aud137-prz-ply-crobat.json": {
+  "r1": "ad8982294ed9b1a91804b60e3d97d32bd5eb3b9bae446c9670e9aa0ccf657d03",
+  "r2": "ad8982294ed9b1a91804b60e3d97d32bd5eb3b9bae446c9670e9aa0ccf657d03"
+ },
+ "aud137-prz-ply-ninjask.json": {
+  "r1": "42b2707ad8a537dd92c299e6094d61cfbd3010747bce435f3b105154469d4f0c",
+  "r2": "42b2707ad8a537dd92c299e6094d61cfbd3010747bce435f3b105154469d4f0c"
+ },
+ "aud137-psn-opp-castform-rain.json": {
+  "r1": "04e43ddd56c510afbedd8b30b26ad3227add055316478a3ee4463b57b3b9a582",
+  "r2": "04e43ddd56c510afbedd8b30b26ad3227add055316478a3ee4463b57b3b9a582"
+ },
+ "aud137-psn-opp-flygon.json": {
+  "r1": "863bf7f7ecfa4f509d41a1ece63dcf343f00c61d1b503c9ce808d3d3b6c1952d",
+  "r2": "863bf7f7ecfa4f509d41a1ece63dcf343f00c61d1b503c9ce808d3d3b6c1952d"
+ },
+ "aud137-psn-opp-ninjask.json": {
+  "r1": "737e505a36e348281fd1d38f094a1bc1330c67a3f34edba9a63f2df6f6da4fff",
+  "r2": "737e505a36e348281fd1d38f094a1bc1330c67a3f34edba9a63f2df6f6da4fff"
+ },
+ "aud137-psn-ply-castform-rain.json": {
+  "r1": "8cb437b51085317c9c3f48be0ca55242632c9aa10ed76a6ca869bcb3475ef4a9",
+  "r2": "8cb437b51085317c9c3f48be0ca55242632c9aa10ed76a6ca869bcb3475ef4a9"
+ },
+ "aud137-psn-ply-crobat-onix.json": {
+  "r1": "7a87ccd154778e211f6a9fab20c307aa2b5c66f7e3f8019695f5c2f2325b5b94",
+  "r2": "7a87ccd154778e211f6a9fab20c307aa2b5c66f7e3f8019695f5c2f2325b5b94"
+ },
+ "aud137-psn-ply-flygon.json": {
+  "r1": "9b856427f3889be8b8dc2ca7e3d60a4e868e80189750ca4ce792d951e379b384",
+  "r2": "9b856427f3889be8b8dc2ca7e3d60a4e868e80189750ca4ce792d951e379b384"
+ },
+ "aud137-psn-ply-ninjask.json": {
+  "r1": "128a81102bacab7726b597c41dfeb945aa0a1c77cab06c1a1ade4cae3a5761c4",
+  "r2": "128a81102bacab7726b597c41dfeb945aa0a1c77cab06c1a1ade4cae3a5761c4"
+ },
+ "aud137-slp-opp-crobat.json": {
+  "r1": "2fba49cac817353029a71b9640507cfb82e36677ec438f27039f42e062e8be83",
+  "r2": "2fba49cac817353029a71b9640507cfb82e36677ec438f27039f42e062e8be83"
+ },
+ "aud137-slp-opp-flygon.json": {
+  "r1": "c988382d66a8c3fdd74ab9c26824bf9fddd3b8dfb04c7473a14a8b1daab7b97d",
+  "r2": "c988382d66a8c3fdd74ab9c26824bf9fddd3b8dfb04c7473a14a8b1daab7b97d"
+ },
+ "aud137-slp-ply-crobat.json": {
+  "r1": "1dee2f3e36d96ef42db82a0d264543a88e1279891189327802c99f456c42e3f2",
+  "r2": "1dee2f3e36d96ef42db82a0d264543a88e1279891189327802c99f456c42e3f2"
+ },
+ "aud137-slp-ply-flygon.json": {
+  "r1": "d5cdc21477d92a12286e19c0d9bac368b37cc783398ef4f817e9ca7bd9679966",
+  "r2": "d5cdc21477d92a12286e19c0d9bac368b37cc783398ef4f817e9ca7bd9679966"
+ },
+ "aud137-slp-ply-parasect-onix.json": {
+  "r1": "d68a472edac49ccd2256b1e3ea7d13c0a7d789c54eeca0b7369400960edfa727",
+  "r2": "d68a472edac49ccd2256b1e3ea7d13c0a7d789c54eeca0b7369400960edfa727"
+ },
+ "aud137-slp-psn-ply-primeape-crobat.json": {
+  "r1": "9ba71ba4d4fc12ab361e595f4a85ce39ff6201765f5d65dea46f290d617dc9dd",
+  "r2": "9ba71ba4d4fc12ab361e595f4a85ce39ff6201765f5d65dea46f290d617dc9dd"
+ }
+}

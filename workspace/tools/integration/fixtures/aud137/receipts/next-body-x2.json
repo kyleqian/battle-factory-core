@@ -1,0 +1,221 @@
+{
+ "aud137-psn-ply-crobat-onix-307": {
+  "animation": "PSN",
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectToxic+0",
+  "X": 306,
+  "F": 377,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 0,
+  "kept": false,
+  "romClass": "zeroed",
+  "tableClass": "zeroed",
+  "classAgrees": true,
+  "nextBody": {
+   "R": 519,
+   "move": 33,
+   "attacker": "opponent",
+   "romX2": 0,
+   "romY2": 0,
+   "predicted": {
+    "history": {
+     "player": "idle",
+     "opponent": "zeroed"
+    },
+    "x2": 0,
+    "rectPx": 0
+   },
+   "base": {
+    "history": {
+     "player": "idle",
+     "opponent": "unknown"
+    },
+    "x2": 1,
+    "rectPx": 1091
+   }
+  }
+ },
+ "aud137-psn-ply-crobat-onix-717": {
+  "animation": "PSN",
+  "side": "opponent",
+  "path": "BattleScript_DoStatusTurnDmg+0",
+  "X": 716,
+  "F": 787,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "romClass": "uninformative (x2 0 before)",
+  "tableClass": "zeroed",
+  "classAgrees": null,
+  "nextBody": {
+   "R": 1699,
+   "move": 33,
+   "attacker": "opponent",
+   "romX2": 0,
+   "romY2": 0,
+   "predicted": {
+    "history": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    },
+    "x2": 0,
+    "rectPx": 0
+   },
+   "base": {
+    "history": {
+     "player": "zeroed",
+     "opponent": "unknown"
+    },
+    "x2": 1,
+    "rectPx": 1091
+   }
+  }
+ },
+ "aud137-psn-ply-crobat-onix-1897": {
+  "animation": "PSN",
+  "side": "opponent",
+  "path": "BattleScript_DoStatusTurnDmg+0",
+  "X": 1896,
+  "F": 1967,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "romClass": "uninformative (x2 0 before)",
+  "tableClass": "zeroed",
+  "classAgrees": null,
+  "nextBody": null
+ },
+ "aud137-conf-ply-haunter-onix-349": {
+  "animation": "CONFUSION",
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectConfusion+0",
+  "X": 348,
+  "F": 448,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "romClass": "keep",
+  "tableClass": "keep",
+  "classAgrees": true,
+  "nextBody": null
+ },
+ "aud137-conf-ply-haunter-onix-640": {
+  "animation": "CONFUSION",
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsConfused+6",
+  "X": 639,
+  "F": 739,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "romClass": "keep",
+  "tableClass": "keep",
+  "classAgrees": true,
+  "nextBody": null
+ },
+ "aud137-conf-ply-haunter-onix-1729": {
+  "animation": "CONFUSION",
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsConfused+6",
+  "X": 1728,
+  "F": 1828,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "romClass": "keep",
+  "tableClass": "keep",
+  "classAgrees": true,
+  "nextBody": null
+ },
+ "aud137-slp-ply-parasect-onix-418": {
+  "animation": "SLP",
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectSleep+0",
+  "X": 417,
+  "F": 514,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "romClass": "keep",
+  "tableClass": "keep",
+  "classAgrees": true,
+  "nextBody": null
+ },
+ "aud137-slp-ply-parasect-onix-1565": {
+  "animation": "SLP",
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsAsleep+6",
+  "X": 1564,
+  "F": 1661,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "romClass": "keep",
+  "tableClass": "keep",
+  "classAgrees": true,
+  "nextBody": null
+ },
+ "aud137-slp-ply-parasect-onix-2999": {
+  "animation": "SLP",
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsAsleep+6",
+  "X": 2998,
+  "F": 3095,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "romClass": "keep",
+  "tableClass": "keep",
+  "classAgrees": true,
+  "nextBody": null
+ },
+ "aud137-brn-ply-haunter-onix-295": {
+  "animation": "BRN",
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectBurn+0",
+  "X": 294,
+  "F": 333,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "romClass": "uninformative (x2 0 before)",
+  "tableClass": "keep",
+  "classAgrees": null,
+  "nextBody": null
+ },
+ "aud137-brn-ply-haunter-onix-704": {
+  "animation": "BRN",
+  "side": "opponent",
+  "path": "BattleScript_DoStatusTurnDmg+0",
+  "X": 703,
+  "F": 742,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "romClass": "uninformative (x2 0 before)",
+  "tableClass": "keep",
+  "classAgrees": null,
+  "nextBody": null
+ },
+ "aud137-brn-ply-haunter-onix-1908": {
+  "animation": "BRN",
+  "side": "opponent",
+  "path": "BattleScript_DoStatusTurnDmg+0",
+  "X": 1907,
+  "F": 1946,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "romClass": "uninformative (x2 0 before)",
+  "tableClass": "keep",
+  "classAgrees": null,
+  "nextBody": null
+ },
+ "summary": {
+  "windows": 12,
+  "keptAfterWindow": 11,
+  "windowsWithNextBody": 2,
+  "predictedExact": 2,
+  "baseRectDiffers": 2
+ }
+}

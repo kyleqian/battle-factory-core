@@ -1,0 +1,511 @@
+{
+ "aud137-psn-ply-ninjask.json": {
+  "animation": "PSN",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-psn-opp-ninjask.json": {
+  "animation": "PSN",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-psn-ply-flygon.json": {
+  "animation": "PSN",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 305419897
+ },
+ "aud137-psn-opp-flygon.json": {
+  "animation": "PSN",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 305419897
+ },
+ "aud137-prz-ply-crobat.json": {
+  "animation": "PRZ",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-ply-primeape-snorlax.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-prz-opp-crobat.json": {
+  "animation": "PRZ",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-opp-primeape-snorlax.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-prz-ply-ninjask.json": {
+  "animation": "PRZ",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-ply-primeape-snorlax.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-prz-opp-ninjask.json": {
+  "animation": "PRZ",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-opp-primeape-snorlax.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-slp-ply-crobat.json": {
+  "animation": "SLP",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-spore-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-slp-opp-crobat.json": {
+  "animation": "SLP",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-spore-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-slp-ply-flygon.json": {
+  "animation": "SLP",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-spore-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 305419897
+ },
+ "aud137-slp-opp-flygon.json": {
+  "animation": "SLP",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-spore-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 305419897
+ },
+ "aud137-brn-ply-ninjask.json": {
+  "animation": "BRN",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-will-o-wisp-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-brn-opp-ninjask.json": {
+  "animation": "BRN",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-will-o-wisp-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-brn-ply-crobat.json": {
+  "animation": "BRN",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-will-o-wisp-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-brn-opp-crobat.json": {
+  "animation": "BRN",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-will-o-wisp-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-inf-ply-flygon.json": {
+  "animation": "INFATUATION",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-attract-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 305419897
+ },
+ "aud137-inf-opp-flygon.json": {
+  "animation": "INFATUATION",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-attract-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 305419897
+ },
+ "aud137-inf-ply-crobat.json": {
+  "animation": "INFATUATION",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-attract-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-inf-opp-crobat.json": {
+  "animation": "INFATUATION",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-attract-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-conf-ply-flygon.json": {
+  "animation": "CONFUSION",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-confuse-ray-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 305419897
+ },
+ "aud137-conf-opp-flygon.json": {
+  "animation": "CONFUSION",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-confuse-ray-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 305419897
+ },
+ "aud137-conf-ply-ninjask.json": {
+  "animation": "CONFUSION",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-confuse-ray-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-conf-opp-ninjask.json": {
+  "animation": "CONFUSION",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-confuse-ray-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-curse-ply-crobat.json": {
+  "animation": "CURSED",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-curse-ply-gengar-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-curse-opp-crobat.json": {
+  "animation": "CURSED",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-curse-opp-gengar-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-curse-ply-ninjask.json": {
+  "animation": "CURSED",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-curse-ply-gengar-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-curse-opp-ninjask.json": {
+  "animation": "CURSED",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-curse-opp-gengar-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 305419897
+ },
+ "aud137-nightmare-ply-flygon.json": {
+  "animation": "NIGHTMARE",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-nightmare-ply-gengar-golbat.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 1
+ },
+ "aud137-nightmare-opp-flygon.json": {
+  "animation": "NIGHTMARE",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-nightmare-opp-gengar-golbat.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "FLYGON"
+  },
+  "seed": 1
+ },
+ "aud137-nightmare-ply-ninjask.json": {
+  "animation": "NIGHTMARE",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-nightmare-ply-gengar-golbat.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 1
+ },
+ "aud137-nightmare-opp-ninjask.json": {
+  "animation": "NIGHTMARE",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-nightmare-opp-gengar-golbat.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "NINJASK"
+  },
+  "seed": 1
+ },
+ "aud137-frz-ply-skarmory.json": {
+  "animation": "FRZ",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-ice-beam-ply-delcatty-shuckle.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "SKARMORY"
+  },
+  "seed": 305419958
+ },
+ "aud137-frz-opp-skarmory.json": {
+  "animation": "FRZ",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-ice-beam-opp-delcatty-shuckle.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "SKARMORY"
+  },
+  "seed": 1
+ },
+ "aud137-frz-ply-snorlax.json": {
+  "animation": "FRZ",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-ice-beam-ply-delcatty-shuckle.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "SNORLAX"
+  },
+  "seed": 305419958
+ },
+ "aud137-frz-opp-snorlax.json": {
+  "animation": "FRZ",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-ice-beam-opp-delcatty-shuckle.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "SNORLAX"
+  },
+  "seed": 1
+ },
+ "aud137-psn-ply-crobat-onix.json": {
+  "animation": "PSN",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-ply-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "attacker",
+   "species": "CROBAT"
+  },
+  "seed": 305419897
+ },
+ "aud137-slp-ply-parasect-onix.json": {
+  "animation": "SLP",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-spore-ply-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "attacker",
+   "species": "PARASECT"
+  },
+  "seed": 305419897
+ },
+ "aud137-conf-ply-haunter-onix.json": {
+  "animation": "CONFUSION",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stp128/scenarios/stp128-confuse-ray-ply-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "attacker",
+   "species": "HAUNTER"
+  },
+  "seed": 305419897
+ },
+ "aud137-brn-ply-haunter-onix.json": {
+  "animation": "BRN",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-will-o-wisp-ply-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "attacker",
+   "species": "HAUNTER"
+  },
+  "seed": 305419897
+ },
+ "aud137-psn-opp-castform-rain.json": {
+  "animation": "PSN",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-opp-primeape-onix.json",
+  "changed": {
+   "side": "player",
+   "role": "target",
+   "species": "CASTFORM",
+   "moves": [
+    240,
+    240,
+    240,
+    240
+   ]
+  },
+  "seed": 305419897
+ },
+ "aud137-psn-ply-castform-rain.json": {
+  "animation": "PSN",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "CASTFORM",
+   "moves": [
+    240,
+    240,
+    240,
+    240
+   ]
+  },
+  "seed": 305419897
+ },
+ "aud137-slp-psn-ply-primeape-crobat.json": {
+  "animation": "SLP",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/stq132/scenarios/stq132-spore-ply-primeape-onix.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "CROBAT",
+   "moves": [
+    92,
+    92,
+    92,
+    92
+   ]
+  },
+  "seed": 305419897
+ },
+ "aud137-prz-conf-ply-primeape-tauros.json": {
+  "animation": "PRZ",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-ply-primeape-snorlax.json",
+  "changed": {
+   "side": "opponent",
+   "role": "target",
+   "species": "TAUROS",
+   "moves": [
+    37,
+    37,
+    37,
+    37
+   ],
+   "gender": "male"
+  },
+  "seed": 305419897
+ }
+}
