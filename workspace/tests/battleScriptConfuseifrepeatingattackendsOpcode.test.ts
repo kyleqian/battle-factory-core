@@ -203,7 +203,7 @@ describe("SetMoveEffect MOVE_EFFECT_THRASH case (Cmd_seteffectwithchance's dispa
     return { execution, result: stepBattleScriptMachine(program, patched, execution.handlers) };
   }
 
-  it("not yet locked: draws the duration and sets STATUS2_MULTIPLETURNS|STATUS2_LOCK_CONFUSE + gLockedMoves on the ATTACKER, plain advance", () => {
+  it("not yet locked: draws the duration and sets STATUS2_MULTIPLETURNS|STATUS2_LOCK_CONFUSE + gLockedMoves on the ATTACKER, then re-runs seteffectwithchance (rcp143 R1)", () => {
     const rc = context(
       { status2: 0 },
       {
@@ -227,8 +227,19 @@ describe("SetMoveEffect MOVE_EFFECT_THRASH case (Cmd_seteffectwithchance's dispa
     expect(result.state.rulesContext.lockedMoves).toEqual([MOVE_THRASH, 8, 9, 10]);
     // target (the OTHER battler) is untouched -- MOVE_EFFECT_AFFECTS_USER routes gEffectBattler to the attacker, not the target.
     expect(result.state.rulesContext.battlers[1]!.status2).toBe(0);
-    // no script call: SetMoveEffect's own switch just `break`s for this case -- the transition is the opcode after seteffectwithchance, not a call/jump.
-    expect(result.state.programCounter).toBe(setEffectWithChancePc + 1);
+    // no script call: SetMoveEffect's own switch just `break`s for this case without moving
+    // gBattlescriptCurrInstr (:2851-2862), so the cursor stays on seteffectwithchance and
+    // Cmd_seteffectwithchance's tail has already cleared MOVE_EFFECT_BYTE.
+    expect(result.state.programCounter).toBe(setEffectWithChancePc);
+    expect(result.state.callStack).toEqual(execution.state.callStack);
+    expect(result.state.rulesContext.moveEffectByte).toBe(0);
+    // The re-run spends exactly one wasted `Random() % 100` (byte 0 -> instr++) and changes nothing else.
+    const rerun = stepBattleScriptMachine(program, result.state, execution.handlers);
+    if (rerun.kind !== "advanced") throw new Error("expected advance");
+    expect(rerun.state.rng.calls).toBe(result.state.rng.calls + 1);
+    expect(rerun.state.programCounter).toBe(setEffectWithChancePc + 1);
+    expect(rerun.state.rulesContext.battlers).toEqual(result.state.rulesContext.battlers);
+    expect(rerun.state.rulesContext.lockedMoves).toEqual([MOVE_THRASH, 8, 9, 10]);
   });
 
   it("already locked: SetMoveEffect's family-B early-out (status2 & sStatusFlagsForMoveEffects[MOVE_EFFECT_THRASH] == STATUS2_LOCK_CONFUSE) passes through untouched -- exactly the outer seteffectwithchance roll, no nested duration draw", () => {
