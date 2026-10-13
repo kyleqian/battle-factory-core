@@ -715,10 +715,19 @@ const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
  * instruction) and for STATS_CHANGE (the sc106 stats-change command's age 0
  * is stat101's rel 1, the row after the gAnimScriptActive rise = the
  * playanimation row: stat102 frame mapping, olnd113); 0 for the HP bar.
- * Frames already presented since the opener are subtracted. A held
- * message or a body in between (Rest's waitmessage) breaks the
- * one-frame-per-execution mapping, and an unlisted next receipt is unmeasured:
- * no pause there.
+ * Frames already presented since the opener are subtracted. An unlisted next
+ * receipt is unmeasured: no pause there (off148: a sprite-visibility receipt
+ * next, Wish / Roar / Baton Pass, whose next drawn change is a switch-out or
+ * the next action's print; nothing next).
+ *
+ * off148 (docs/off148-scene-off-pauses-remainder.md): a stat-stage-change
+ * receipt between the attack receipt and N (Curse's statbuffchange before its
+ * print, Swagger / Flatter's before STATS_CHANGE) draws nothing in Scene OFF;
+ * it is skipped and its `stat` command's frames are subtracted. A held message
+ * since the opener (Rest: "went to sleep!" + waitmessage + the status icon)
+ * breaks the one-frame-per-execution mapping before the attack receipt, but
+ * production's commands since the opener then end on the ROM's attackanimation
+ * row, and the mapping holds again from there: P = Δ(N) − Δ(attack) + 1 + lead.
  */
 function sceneOffNoHitPauseFrames(
   events: readonly BattleKernelSemanticEvent[],
@@ -735,15 +744,21 @@ function sceneOffNoHitPauseFrames(
     if (next === undefined || next < execution) return null;
     execution = next;
   }
+  const attack = execution;
   let presented = 0;
+  let held = false;
   for (const command of presentedSinceOpener) {
     const timing = (command as { timing?: { minimumFrames: number; holdFrames?: number } }).timing;
-    if (
-      command.type === "message" || command.type === "move-animation" || command.type === "hit-animation"
-      || timing === undefined || (timing.holdFrames ?? 0) > 0
-    ) return null;
+    if (command.type === "move-animation" || command.type === "hit-animation" || timing === undefined) return null;
+    if (command.type === "message" || (timing.holdFrames ?? 0) > 0) held = true;
     presented += timing.minimumFrames;
   }
+  // The held-message path is ROM-anchored only for Rest's shape: trysetrest's
+  // status, the held print, the status icon (off108 §1 / off148 R3). Other
+  // held prints before the attack receipt (Magnitude, a Magic Coat bounce)
+  // are unmeasured.
+  if (held && presentedSinceOpener.map((command) => command.type).join() !== "status,message,status-icon") return null;
+  let skipped = 0;
   for (let index = attackIndex + 1; index < events.length; index += 1) {
     const candidate = events[index]!;
     const next = candidate.provenance?.instructionExecution;
@@ -751,6 +766,10 @@ function sceneOffNoHitPauseFrames(
     execution = next;
     const payload = candidate.payload;
     if (payload.kind === "set-battler-pp-data" || payload.kind === "play-se") continue;
+    if (payload.kind === "stat-stage-change") {
+      if (payload.from !== payload.to) skipped += STAT_TIMING.minimumFrames;
+      continue;
+    }
     const lead = payload.kind === "message" || payload.kind === "set-battler-status-data"
       || (payload.kind === "animation" && payload.animationId === "STATS_CHANGE")
       ? 1
@@ -758,7 +777,9 @@ function sceneOffNoHitPauseFrames(
         ? 0
         : null;
     if (lead === null) return null;
-    const frames = next - opener + lead - presented;
+    const frames = held
+      ? next - attack + 1 + lead - skipped
+      : next - opener + lead - presented - skipped;
     return frames > 0 ? frames : null;
   }
   return null;
