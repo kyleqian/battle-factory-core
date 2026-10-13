@@ -71,7 +71,6 @@ export function seg127StatusSeGateRowsForPath(
 /** The kernel event fields the event-level form reads (structurally a BattleScriptSemanticEventPayload subset). */
 export type Seg127GateEvent = Readonly<{
   kind: string;
-  battler?: number | null;
   messageId?: string;
   songId?: number;
   animationId?: string;
@@ -92,7 +91,7 @@ const INFLICTED_BY_STRINGS: ReadonlySet<string> = new Set([
 export function seg127StatusSeGateFromEvents(
   events: readonly Seg127GateEvent[],
   index: number,
-  hpBarRows: (from: number, to: number, battler: number) => number = (from, to) => Math.abs(from - to),
+  hpBarRows: (from: number, to: number) => number = (from, to) => Math.abs(from - to),
 ): Readonly<{ gate: number; songId: number | null; path: Seg127SeGatePath | null; hpDrainRows: number; messageSinceSe: boolean }> | null {
   if (events[index]?.kind !== "status-animation") {
     throw new Error(`seg127StatusSeGate: events[${index}] is not a status-animation event`);
@@ -105,7 +104,7 @@ export function seg127StatusSeGateFromEvents(
   const songId = events[se]!.songId ?? null;
   const between = events.slice(se + 1, index);
   const messageSinceSe = between.some((e) => e.kind === "message");
-  const hpDrainRows = between.reduce((n, e) => (e.kind === "hp-change" ? n + hpBarRows(e.from as number, e.to as number, e.battler as number) : n), 0);
+  const hpDrainRows = between.reduce((n, e) => (e.kind === "hp-change" ? n + hpBarRows(e.from as number, e.to as number) : n), 0);
   if (messageSinceSe) return { gate: 0, songId, path: null, hpDrainRows, messageSinceSe };
   const next = events.slice(index + 1).find((e) => e.kind === "message")?.messageId ?? null;
   const moveBeforeSe = events.slice(0, se).some((e) => e.kind === "animation" && e.animationId === "MOVE_ANIMATION");
