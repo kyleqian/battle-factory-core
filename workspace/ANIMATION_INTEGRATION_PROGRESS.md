@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-12 (evening, in progress) — S10A: #168 status-animation TIMING live (Scene ON), ord124 plans landed; 99.34 / 99.60 % live
+## 2026-10-12 (evening, in progress) — S10A: #168 status animations — timing + SE gate live, PSN / PRZ drawn; ord124 plans landed; 99.34 / 99.60 % live
 
 - Session start: master `cfe4e26ca`, production src `b4befa039` == the 2026-10-11 final gates' tree -> baseline receipt reused. Oracle
   freshness FAIL = the known false positive (services 2026-10-06; last `oracle/` commit 2026-08-15).
@@ -28,6 +28,21 @@
   NIGHTMARE / CONFUSION / FRZ (AnimGhostStatusSprite, AnimConfusionDuck ported literally; FRZ through frozenIceCube.ts + monbg; FRZ 115 vs
   116 isolated): dense ROM windows 14 scenarios r1 == r2, **34 / 34 windows 0 px on every row** through existing production helpers
   (incl. elevated GOLBAT / HAUNTER shadows); controls fail as designed. Supervisor: stp128Run.sh ALL SAME.
+- sag130 (MAIN lane, Opus, on master `c67bf421a` .. `4f790c9d3`): **ISSUES #168 SA2** — seg127's gate wired into the status-animation
+  command (`minimumFrames = gate + controllerRows`; HP-bar rows = |from - to|). Production ON - OFF == gate + rows on 222 anchored
+  commands (19 gated / 167 gate frames, 15 classes both sides where the census has them); census 0..999: exactly 72 commands +729 frames ==
+  seg127's projection receipt by receipt, 0 status changes, OFF 10 / 10 identical; 0 pins moved; worker gates full suite 1,644 files, build,
+  soak vanilla 20 / 20, differential 624 / 624. Supervisor: sag130Run.sh ALL OK (census 99.34 / 99.60 %).
+- sar131 (INTEGRATION, Opus, `28ef901b9` .. `7ae8aff49`, base = sa125 tip): **ISSUES #168 SA4 — PSN / PRZ DRAWN** in Scene ON: the
+  `status-animation` render effect + `battleScene.ts statusAnimationRenderView` + `statusAnimation.ts liveStatusAnimationRow` (ShakeMon2 +
+  BlendColorCycle / ElectricityEffect; command age a == ROM row X + 1 + a); **17 / 17 dense ROM windows 0 px** every row (elevated LEDIAN /
+  GOLBAT incl.), controls fail (age+1 0 / 17, no-shake 0 / 17, wrong-side 0 / 17); source-derived x2 rows for all nine B_ANIM_STATUS_*
+  (`LIVE_BATTLER_X2_STATUS_ANIMATION`: ShakeMon2 ones zeroed, sprite-only ones keep; the next live body at the predicted x2 14 / 14);
+  routes 5 / 5; census 0..999 identical (pixels only). The canonical Thunder Wave fixture untouched. Supervisor: sar131Run.sh --census ALL SAME.
+- stq132 (SIDE, Opus, base `a5e585119`): stp128's reducer extended (unwired) with SLP / BRN / INFATUATION through rest.ts / firePunch.ts /
+  charm.ts: 13 scenarios, **37 / 37 windows 0 px**, 24 / 24 perturbations fail the pins. Supervisor: stq132Run.sh ALL SAME.
+- **Union `7511dc63d` (master `4f790c9d3` + stq132 + sar131; = master `61de9fb98` src)**: typecheck, smoke 448, full suite 1,646 files /
+  13,649 tests 0 failed, build.
 - Live audit 27 (aud129, MAIN lane, Opus, new files only): 105 windows, lend == ROM 105 / 105, **85 OK, 20 TIMING-PHASE (D4 class; each
   residual row is 0 px one age off), 0 DEFECT**. ord124's Golbat Mega Punch flag = Mega Punch's own BG-write row 71 + restore-fade phase
   (no party dependency); Spark = alignment artefact; Smokescreen use-1 phase quantified (66 live / 8,580 frames on 0..999).

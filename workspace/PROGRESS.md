@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-12 (evening, in progress) — S10A: status-condition animation TIMING live in Scene ON (#168 SA1 + SA3), ord124 order plans landed (99.34 / 99.60 %)
+## 2026-10-12 (evening, in progress) — S10A: status-condition animations in Scene ON — timing + SE gate live, PSN / PRZ drawn (#168); ord124 order plans landed (99.34 / 99.60 %)
 
 - **State:** local master `53419e533`; production src = union `a1730a1f9` (sa125 + ordl126) + stp128's unwired reducer module. Supervisor
   union gates on `a1730a1f9`: typecheck, smoke 448, full suite 1,642 files / 13,555 tests 0 failed, build. Session start `cfe4e26ca` (src
@@ -19,7 +19,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Did (evidence, new files):** seg127 (the IsBattleSEPlaying gate: `clamp(seRows - seAge, 0, 29)`, 56 / 56 ROM receipts, 72 gated / 729
   frames on 0..999; banked unwired rule), stp128 (CURSED / NIGHTMARE / CONFUSION / FRZ unwired reducer, 34 / 34 dense ROM windows 0 px),
   aud129 live audit 27 (105 windows: 85 OK, 20 D4 timing phases incl. ord124's Golbat Mega Punch flag, 0 defects).
-- **In flight:** sar131 (draw PSN / PRZ + x2 rows), stq132 (BRN / SLP / INFATUATION reducer), next sag130 (wire the SE gate).
+- **Also folded (union `7511dc63d`, full suite 1,646 files / 13,649 tests, build):** sag130 (#168 SA2: the IsBattleSEPlaying gate in the
+  status-animation command, 72 commands +729 frames == the ROM rule), sar131 (#168 SA4: **PSN / PRZ drawn**, 17 / 17 ROM windows 0 px;
+  source-derived x2 rows for all nine), stq132 (SLP / BRN / INFATUATION reducer, unwired, 37 / 37 windows 0 px).
+- **In flight:** sad133 (draw CURSED / NIGHTMARE / CONFUSION / FRZ), sae135 (draw SLP / BRN / INFATUATION), sgs134 (the same SE gate on
+  stats-change / multi-hit requests, evidence).
 - **Notes:** no DEFERRED entries. Oracle freshness FAIL = known false positive (services 2026-10-06 postdate the last oracle/ commit).
 
 ---
