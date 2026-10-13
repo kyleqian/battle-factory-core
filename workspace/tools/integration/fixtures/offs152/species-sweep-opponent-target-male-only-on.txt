@@ -1,0 +1,10 @@
+32 30 pidx [0, 1] species [228, 32] ball 10 y2start 29 hbslide 88 ctrlIdle None txtStart 114
+33 34 pidx [0, 1] species [228, 33] ball 10 y2start 29 hbslide 96 ctrlIdle None txtStart 122
+34 69 pidx [0, 1] species [228, 34] ball 10 y2start 29 hbslide 121 ctrlIdle None txtStart 147
+106 53 pidx [0, 1] species [228, 106] ball 10 y2start 29 hbslide 88 ctrlIdle None txtStart 114
+107 51 pidx [0, 1] species [228, 107] ball 10 y2start 29 hbslide 121 ctrlIdle None txtStart 147
+128 52 pidx [0, 1] species [228, 128] ball 10 y2start 29 hbslide 134 ctrlIdle None txtStart 160
+236 46 pidx [0, 1] species [228, 236] ball 10 y2start 29 hbslide 106 ctrlIdle None txtStart 132
+237 39 pidx [0, 1] species [228, 237] ball 10 y2start 29 hbslide 90 ctrlIdle None txtStart 116
+386 33 pidx [0, 1] species [228, 386] ball 10 y2start 29 hbslide 117 ctrlIdle None txtStart 143
+408 62 pidx [0, 1] species [228, 408] ball 10 y2start 29 hbslide 96 ctrlIdle None txtStart 122

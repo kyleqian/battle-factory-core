@@ -1,0 +1,44 @@
+{
+ "r1": {
+  "slideStart": 166,
+  "duration": 192,
+  "romNextText": 192,
+  "rows": 195,
+  "zeroRows": 195,
+  "px": {
+   "total": 0,
+   "hb": 0,
+   "opp": 0,
+   "msg": 0,
+   "bg": 0
+  }
+ },
+ "r2": {
+  "slideStart": 166,
+  "duration": 192,
+  "romNextText": 192,
+  "rows": 195,
+  "zeroRows": 195,
+  "px": {
+   "total": 0,
+   "hb": 0,
+   "opp": 0,
+   "msg": 0,
+   "bg": 0
+  }
+ },
+ "controlNoFallback": {
+  "slideStart": 166,
+  "duration": 192,
+  "romNextText": 192,
+  "rows": 195,
+  "zeroRows": 71,
+  "px": {
+   "total": 191380,
+   "hb": 0,
+   "opp": 191380,
+   "msg": 0,
+   "bg": 0
+  }
+ }
+}

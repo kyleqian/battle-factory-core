@@ -1,0 +1,376 @@
+1 47 pidx [1, 0] species [1, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+2 47 pidx [1, 0] species [2, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+3 55 pidx [1, 0] species [3, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+4 41 pidx [1, 0] species [4, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 115 txtStart 117
+5 41 pidx [1, 0] species [5, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 115 txtStart 117
+6 55 pidx [1, 0] species [6, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+7 41 pidx [1, 0] species [7, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 115 txtStart 117
+8 49 pidx [1, 0] species [8, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 123 txtStart 125
+9 55 pidx [1, 0] species [9, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+10 24 pidx [1, 0] species [10, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+11 66 pidx [1, 0] species [11, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 140 txtStart 142
+12 29 pidx [1, 0] species [12, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 103 txtStart 105
+13 46 pidx [1, 0] species [13, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+14 52 pidx [1, 0] species [14, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 126 txtStart 128
+15 55 pidx [1, 0] species [15, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+16 11 pidx [1, 0] species [16, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+17 43 pidx [1, 0] species [17, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 117 txtStart 119
+18 49 pidx [1, 0] species [18, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 123 txtStart 125
+19 23 pidx [1, 0] species [19, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+20 27 pidx [1, 0] species [20, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 101 txtStart 103
+21 50 pidx [1, 0] species [21, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 124 txtStart 126
+22 49 pidx [1, 0] species [22, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 123 txtStart 125
+23 55 pidx [1, 0] species [23, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+24 55 pidx [1, 0] species [24, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+25 47 pidx [1, 0] species [25, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+26 67 pidx [1, 0] species [26, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 141 txtStart 143
+27 27 pidx [1, 0] species [27, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 101 txtStart 103
+28 39 pidx [1, 0] species [28, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 113 txtStart 115
+29 28 pidx [1, 0] species [29, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 102 txtStart 104
+30 36 pidx [1, 0] species [30, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+31 48 pidx [1, 0] species [31, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 122 txtStart 124
+32 FAILED
+33 FAILED
+34 FAILED
+35 24 pidx [1, 0] species [35, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+36 30 pidx [1, 0] species [36, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+37 67 pidx [1, 0] species [37, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 141 txtStart 143
+38 69 pidx [1, 0] species [38, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 143 txtStart 145
+39 15 pidx [1, 0] species [39, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+40 19 pidx [1, 0] species [40, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+41 55 pidx [1, 0] species [41, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+42 55 pidx [1, 0] species [42, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+43 42 pidx [1, 0] species [43, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 115 txtStart 117
+44 36 pidx [1, 0] species [44, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+45 73 pidx [1, 0] species [45, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 147 txtStart 149
+46 79 pidx [1, 0] species [46, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 153 txtStart 155
+47 86 pidx [1, 0] species [47, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 160 txtStart 162
+48 44 pidx [1, 0] species [48, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 118 txtStart 120
+49 46 pidx [1, 0] species [49, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+50 55 pidx [1, 0] species [50, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+51 55 pidx [1, 0] species [51, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+52 27 pidx [1, 0] species [52, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 101 txtStart 103
+53 54 pidx [1, 0] species [53, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 128 txtStart 130
+54 37 pidx [1, 0] species [54, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 111 txtStart 113
+55 32 pidx [1, 0] species [55, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 106 txtStart 108
+56 47 pidx [1, 0] species [56, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+57 46 pidx [1, 0] species [57, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+58 38 pidx [1, 0] species [58, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+59 49 pidx [1, 0] species [59, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 123 txtStart 125
+60 32 pidx [1, 0] species [60, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 106 txtStart 108
+61 19 pidx [1, 0] species [61, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+62 32 pidx [1, 0] species [62, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 106 txtStart 108
+63 66 pidx [1, 0] species [63, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 140 txtStart 142
+64 76 pidx [1, 0] species [64, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 150 txtStart 152
+65 89 pidx [1, 0] species [65, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 163 txtStart 165
+66 38 pidx [1, 0] species [66, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+67 39 pidx [1, 0] species [67, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 113 txtStart 115
+68 47 pidx [1, 0] species [68, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+69 22 pidx [1, 0] species [69, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+70 42 pidx [1, 0] species [70, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 116 txtStart 118
+71 55 pidx [1, 0] species [71, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+72 45 pidx [1, 0] species [72, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 119 txtStart 121
+73 65 pidx [1, 0] species [73, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 139 txtStart 141
+74 67 pidx [1, 0] species [74, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 141 txtStart 143
+75 79 pidx [1, 0] species [75, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 153 txtStart 155
+76 40 pidx [1, 0] species [76, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 114 txtStart 116
+77 43 pidx [1, 0] species [77, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 117 txtStart 119
+78 53 pidx [1, 0] species [78, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 127 txtStart 129
+79 21 pidx [1, 0] species [79, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+80 38 pidx [1, 0] species [80, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+81 FAILED
+82 FAILED
+83 21 pidx [1, 0] species [83, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+84 55 pidx [1, 0] species [84, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+85 55 pidx [1, 0] species [85, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+86 51 pidx [1, 0] species [86, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 125 txtStart 127
+87 60 pidx [1, 0] species [87, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 134 txtStart 136
+88 30 pidx [1, 0] species [88, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+89 42 pidx [1, 0] species [89, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 116 txtStart 118
+90 44 pidx [1, 0] species [90, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 118 txtStart 120
+91 59 pidx [1, 0] species [91, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 133 txtStart 135
+92 66 pidx [1, 0] species [92, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 140 txtStart 142
+93 67 pidx [1, 0] species [93, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 141 txtStart 143
+94 42 pidx [1, 0] species [94, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 116 txtStart 118
+95 70 pidx [1, 0] species [95, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 144 txtStart 146
+96 82 pidx [1, 0] species [96, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 156 txtStart 158
+97 82 pidx [1, 0] species [97, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 156 txtStart 158
+98 69 pidx [1, 0] species [98, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 143 txtStart 145
+99 69 pidx [1, 0] species [99, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 143 txtStart 145
+100 FAILED
+101 FAILED
+102 54 pidx [1, 0] species [102, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 128 txtStart 130
+103 90 pidx [1, 0] species [103, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 164 txtStart 166
+104 43 pidx [1, 0] species [104, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 117 txtStart 119
+105 41 pidx [1, 0] species [105, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 115 txtStart 117
+106 FAILED
+107 FAILED
+108 43 pidx [1, 0] species [108, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 117 txtStart 119
+109 58 pidx [1, 0] species [109, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 132 txtStart 134
+110 61 pidx [1, 0] species [110, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 135 txtStart 137
+111 55 pidx [1, 0] species [111, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+112 58 pidx [1, 0] species [112, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 132 txtStart 134
+113 42 pidx [1, 0] species [113, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 116 txtStart 118
+114 43 pidx [1, 0] species [114, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 117 txtStart 119
+115 53 pidx [1, 0] species [115, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 127 txtStart 129
+116 27 pidx [1, 0] species [116, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 101 txtStart 103
+117 24 pidx [1, 0] species [117, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+118 28 pidx [1, 0] species [118, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 102 txtStart 104
+119 55 pidx [1, 0] species [119, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+120 FAILED
+121 FAILED
+122 54 pidx [1, 0] species [122, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 128 txtStart 130
+123 38 pidx [1, 0] species [123, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+124 134 pidx [1, 0] species [124, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 208 txtStart 210
+125 87 pidx [1, 0] species [125, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 161 txtStart 163
+126 44 pidx [1, 0] species [126, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 118 txtStart 120
+127 35 pidx [1, 0] species [127, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+128 FAILED
+129 54 pidx [1, 0] species [129, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 128 txtStart 130
+130 57 pidx [1, 0] species [130, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 131 txtStart 133
+131 42 pidx [1, 0] species [131, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 116 txtStart 118
+132 FAILED
+133 40 pidx [1, 0] species [133, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 114 txtStart 116
+134 63 pidx [1, 0] species [134, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 137 txtStart 139
+135 45 pidx [1, 0] species [135, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 119 txtStart 121
+136 44 pidx [1, 0] species [136, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 118 txtStart 120
+137 FAILED
+138 38 pidx [1, 0] species [138, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+139 38 pidx [1, 0] species [139, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+140 35 pidx [1, 0] species [140, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+141 39 pidx [1, 0] species [141, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 113 txtStart 115
+142 69 pidx [1, 0] species [142, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 143 txtStart 145
+143 15 pidx [1, 0] species [143, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+144 FAILED
+145 FAILED
+146 FAILED
+147 33 pidx [1, 0] species [147, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+148 47 pidx [1, 0] species [148, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+149 54 pidx [1, 0] species [149, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 128 txtStart 130
+152 15 pidx [1, 0] species [152, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+153 25 pidx [1, 0] species [153, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+154 46 pidx [1, 0] species [154, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+155 20 pidx [1, 0] species [155, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+156 34 pidx [1, 0] species [156, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 108 txtStart 110
+157 108 pidx [1, 0] species [157, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 182 txtStart 184
+158 52 pidx [1, 0] species [158, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 126 txtStart 128
+159 57 pidx [1, 0] species [159, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 131 txtStart 133
+160 72 pidx [1, 0] species [160, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 146 txtStart 148
+161 12 pidx [1, 0] species [161, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+162 18 pidx [1, 0] species [162, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+163 31 pidx [1, 0] species [163, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 105 txtStart 107
+164 60 pidx [1, 0] species [164, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 134 txtStart 136
+165 20 pidx [1, 0] species [165, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+166 24 pidx [1, 0] species [166, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+167 38 pidx [1, 0] species [167, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+168 35 pidx [1, 0] species [168, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+169 66 pidx [1, 0] species [169, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 140 txtStart 142
+170 36 pidx [1, 0] species [170, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+171 30 pidx [1, 0] species [171, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+172 21 pidx [1, 0] species [172, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+173 17 pidx [1, 0] species [173, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+174 20 pidx [1, 0] species [174, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+175 31 pidx [1, 0] species [175, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 105 txtStart 107
+176 20 pidx [1, 0] species [176, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+177 30 pidx [1, 0] species [177, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+178 42 pidx [1, 0] species [178, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 116 txtStart 118
+179 21 pidx [1, 0] species [179, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+180 39 pidx [1, 0] species [180, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 113 txtStart 115
+181 47 pidx [1, 0] species [181, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+182 40 pidx [1, 0] species [182, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 114 txtStart 116
+183 37 pidx [1, 0] species [183, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 111 txtStart 113
+184 48 pidx [1, 0] species [184, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 122 txtStart 124
+185 46 pidx [1, 0] species [185, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+186 52 pidx [1, 0] species [186, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 126 txtStart 128
+187 24 pidx [1, 0] species [187, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+188 37 pidx [1, 0] species [188, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 111 txtStart 113
+189 46 pidx [1, 0] species [189, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+190 40 pidx [1, 0] species [190, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 114 txtStart 116
+191 23 pidx [1, 0] species [191, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+192 45 pidx [1, 0] species [192, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 119 txtStart 121
+193 48 pidx [1, 0] species [193, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 122 txtStart 124
+194 21 pidx [1, 0] species [194, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+195 38 pidx [1, 0] species [195, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+196 56 pidx [1, 0] species [196, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 130 txtStart 132
+197 44 pidx [1, 0] species [197, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 118 txtStart 120
+198 48 pidx [1, 0] species [198, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 122 txtStart 124
+199 68 pidx [1, 0] species [199, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 142 txtStart 144
+200 33 pidx [1, 0] species [200, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+201 FAILED
+202 58 pidx [1, 0] species [202, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 132 txtStart 134
+203 42 pidx [1, 0] species [203, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 116 txtStart 118
+204 38 pidx [1, 0] species [204, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+205 57 pidx [1, 0] species [205, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 131 txtStart 133
+206 45 pidx [1, 0] species [206, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 119 txtStart 121
+207 35 pidx [1, 0] species [207, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+208 108 pidx [1, 0] species [208, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 182 txtStart 184
+209 41 pidx [1, 0] species [209, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 115 txtStart 117
+210 67 pidx [1, 0] species [210, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 141 txtStart 143
+211 33 pidx [1, 0] species [211, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+212 65 pidx [1, 0] species [212, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 139 txtStart 141
+213 29 pidx [1, 0] species [213, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 103 txtStart 105
+214 52 pidx [1, 0] species [214, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 126 txtStart 128
+215 26 pidx [1, 0] species [215, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 100 txtStart 102
+216 47 pidx [1, 0] species [216, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+217 84 pidx [1, 0] species [217, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 158 txtStart 160
+218 49 pidx [1, 0] species [218, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 123 txtStart 125
+219 60 pidx [1, 0] species [219, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 134 txtStart 136
+220 36 pidx [1, 0] species [220, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+221 37 pidx [1, 0] species [221, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 111 txtStart 113
+222 37 pidx [1, 0] species [222, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 111 txtStart 113
+223 30 pidx [1, 0] species [223, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+224 74 pidx [1, 0] species [224, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 148 txtStart 150
+225 46 pidx [1, 0] species [225, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+226 45 pidx [1, 0] species [226, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 119 txtStart 121
+227 68 pidx [1, 0] species [227, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 142 txtStart 144
+228 36 pidx [1, 0] species [228, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+229 56 pidx [1, 0] species [229, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 130 txtStart 132
+230 39 pidx [1, 0] species [230, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 113 txtStart 115
+231 32 pidx [1, 0] species [231, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 106 txtStart 108
+232 49 pidx [1, 0] species [232, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 123 txtStart 125
+233 FAILED
+234 64 pidx [1, 0] species [234, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 138 txtStart 140
+235 29 pidx [1, 0] species [235, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 103 txtStart 105
+236 FAILED
+237 FAILED
+238 33 pidx [1, 0] species [238, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+239 30 pidx [1, 0] species [239, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+240 41 pidx [1, 0] species [240, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 115 txtStart 117
+241 42 pidx [1, 0] species [241, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 116 txtStart 118
+242 47 pidx [1, 0] species [242, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+243 FAILED
+244 FAILED
+245 FAILED
+246 36 pidx [1, 0] species [246, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+247 24 pidx [1, 0] species [247, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+248 66 pidx [1, 0] species [248, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 140 txtStart 142
+277 33 pidx [1, 0] species [277, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+278 58 pidx [1, 0] species [278, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 132 txtStart 134
+279 74 pidx [1, 0] species [279, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 148 txtStart 150
+280 28 pidx [1, 0] species [280, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 102 txtStart 104
+281 82 pidx [1, 0] species [281, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 156 txtStart 158
+282 89 pidx [1, 0] species [282, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 163 txtStart 165
+283 21 pidx [1, 0] species [283, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+284 48 pidx [1, 0] species [284, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 122 txtStart 124
+285 64 pidx [1, 0] species [285, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 138 txtStart 140
+286 26 pidx [1, 0] species [286, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 100 txtStart 102
+287 55 pidx [1, 0] species [287, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 129 txtStart 131
+288 33 pidx [1, 0] species [288, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+289 87 pidx [1, 0] species [289, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 161 txtStart 163
+290 25 pidx [1, 0] species [290, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+291 46 pidx [1, 0] species [291, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+292 23 pidx [1, 0] species [292, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+293 46 pidx [1, 0] species [293, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+294 36 pidx [1, 0] species [294, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+295 13 pidx [1, 0] species [295, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+296 41 pidx [1, 0] species [296, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 115 txtStart 117
+297 48 pidx [1, 0] species [297, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 122 txtStart 124
+298 23 pidx [1, 0] species [298, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+299 32 pidx [1, 0] species [299, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 106 txtStart 108
+300 56 pidx [1, 0] species [300, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 130 txtStart 132
+301 18 pidx [1, 0] species [301, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+302 35 pidx [1, 0] species [302, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+303 FAILED
+304 17 pidx [1, 0] species [304, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+305 26 pidx [1, 0] species [305, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 100 txtStart 102
+306 25 pidx [1, 0] species [306, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+307 36 pidx [1, 0] species [307, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+308 35 pidx [1, 0] species [308, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+309 35 pidx [1, 0] species [309, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+310 34 pidx [1, 0] species [310, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 108 txtStart 110
+311 30 pidx [1, 0] species [311, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+312 56 pidx [1, 0] species [312, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 130 txtStart 132
+313 80 pidx [1, 0] species [313, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 154 txtStart 156
+314 119 pidx [1, 0] species [314, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 193 txtStart 195
+315 20 pidx [1, 0] species [315, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+316 60 pidx [1, 0] species [316, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 134 txtStart 136
+317 24 pidx [1, 0] species [317, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+318 FAILED
+319 FAILED
+320 38 pidx [1, 0] species [320, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 112 txtStart 114
+321 27 pidx [1, 0] species [321, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 101 txtStart 103
+322 33 pidx [1, 0] species [322, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+323 26 pidx [1, 0] species [323, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 100 txtStart 102
+324 48 pidx [1, 0] species [324, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 122 txtStart 124
+325 14 pidx [1, 0] species [325, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+326 34 pidx [1, 0] species [326, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 108 txtStart 110
+327 70 pidx [1, 0] species [327, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 144 txtStart 146
+328 22 pidx [1, 0] species [328, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+329 111 pidx [1, 0] species [329, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 185 txtStart 187
+330 29 pidx [1, 0] species [330, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 103 txtStart 105
+331 65 pidx [1, 0] species [331, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 139 txtStart 141
+332 29 pidx [1, 0] species [332, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 103 txtStart 105
+333 40 pidx [1, 0] species [333, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 114 txtStart 116
+334 74 pidx [1, 0] species [334, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 148 txtStart 150
+335 21 pidx [1, 0] species [335, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+336 47 pidx [1, 0] species [336, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+337 35 pidx [1, 0] species [337, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+338 60 pidx [1, 0] species [338, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 134 txtStart 136
+339 27 pidx [1, 0] species [339, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 101 txtStart 103
+340 66 pidx [1, 0] species [340, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 140 txtStart 142
+341 16 pidx [1, 0] species [341, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+342 34 pidx [1, 0] species [342, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 108 txtStart 110
+343 103 pidx [1, 0] species [343, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 177 txtStart 179
+344 26 pidx [1, 0] species [344, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 100 txtStart 102
+345 64 pidx [1, 0] species [345, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 138 txtStart 140
+346 48 pidx [1, 0] species [346, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 122 txtStart 124
+347 59 pidx [1, 0] species [347, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 133 txtStart 135
+348 FAILED
+349 FAILED
+350 30 pidx [1, 0] species [350, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+351 21 pidx [1, 0] species [351, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+352 36 pidx [1, 0] species [352, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+353 26 pidx [1, 0] species [353, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 100 txtStart 102
+354 46 pidx [1, 0] species [354, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 120 txtStart 122
+355 33 pidx [1, 0] species [355, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+356 23 pidx [1, 0] species [356, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+357 47 pidx [1, 0] species [357, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 121 txtStart 123
+358 16 pidx [1, 0] species [358, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+359 32 pidx [1, 0] species [359, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 106 txtStart 108
+360 39 pidx [1, 0] species [360, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 113 txtStart 115
+361 30 pidx [1, 0] species [361, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+362 39 pidx [1, 0] species [362, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 113 txtStart 115
+363 31 pidx [1, 0] species [363, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 105 txtStart 107
+364 24 pidx [1, 0] species [364, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+365 41 pidx [1, 0] species [365, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 115 txtStart 117
+366 28 pidx [1, 0] species [366, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 102 txtStart 104
+367 23 pidx [1, 0] species [367, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+368 49 pidx [1, 0] species [368, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 123 txtStart 125
+369 93 pidx [1, 0] species [369, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 167 txtStart 169
+370 23 pidx [1, 0] species [370, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+371 37 pidx [1, 0] species [371, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 111 txtStart 113
+372 80 pidx [1, 0] species [372, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 154 txtStart 156
+373 52 pidx [1, 0] species [373, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 126 txtStart 128
+374 45 pidx [1, 0] species [374, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 119 txtStart 121
+375 64 pidx [1, 0] species [375, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 138 txtStart 140
+376 30 pidx [1, 0] species [376, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 104 txtStart 106
+377 24 pidx [1, 0] species [377, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+378 36 pidx [1, 0] species [378, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 110 txtStart 112
+379 33 pidx [1, 0] species [379, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+380 27 pidx [1, 0] species [380, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 101 txtStart 103
+381 57 pidx [1, 0] species [381, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 131 txtStart 133
+382 26 pidx [1, 0] species [382, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 100 txtStart 102
+383 59 pidx [1, 0] species [383, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 133 txtStart 135
+384 73 pidx [1, 0] species [384, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 147 txtStart 149
+385 36 pidx [1, 0] species [385, 228] ball 10 y2start 59 hbslide 76 ctrlIdle 111 txtStart 113
+386 FAILED
+387 49 pidx [1, 0] species [387, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 123 txtStart 125
+388 28 pidx [1, 0] species [388, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 102 txtStart 104
+389 83 pidx [1, 0] species [389, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 157 txtStart 159
+390 33 pidx [1, 0] species [390, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 107 txtStart 109
+391 65 pidx [1, 0] species [391, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 139 txtStart 141
+392 29 pidx [1, 0] species [392, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 103 txtStart 105
+393 35 pidx [1, 0] species [393, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+394 69 pidx [1, 0] species [394, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 143 txtStart 145
+395 22 pidx [1, 0] species [395, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 99 txtStart 101
+396 57 pidx [1, 0] species [396, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 131 txtStart 133
+397 71 pidx [1, 0] species [397, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 145 txtStart 147
+398 FAILED
+399 FAILED
+400 FAILED
+401 FAILED
+402 FAILED
+403 FAILED
+407 35 pidx [1, 0] species [407, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 109 txtStart 111
+408 FAILED
+411 29 pidx [1, 0] species [411, 228] ball 10 y2start 58 hbslide 75 ctrlIdle 103 txtStart 105

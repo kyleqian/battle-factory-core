@@ -50,6 +50,8 @@ import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
 import {
   opponentSwitchInDuration, opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay,
+  sceneOffOpponentSwitchInDuration, sceneOffOpponentSwitchInHealthboxSlideElapsed, sceneOffOpponentSwitchInLagElapsed,
+  sceneOffOpponentSwitchInVisualDelay,
 } from "./switchInTail.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
@@ -199,7 +201,7 @@ export type BattleFaintTiming =
     }>;
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: number }>;
 export type BattleSpriteVisibilityTiming = Readonly<{
-  minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES;
+  minimumFrames: 1 | typeof FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES | typeof SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES;
 }>;
 export type BattleTurnEndTiming = Readonly<{ minimumFrames: 8 }>;
 export type BattleTrainerSlideTiming = Readonly<{ minimumFrames: 38 }>;
@@ -321,6 +323,13 @@ export type BattleResolutionPresentationCommand =
        */
       healthboxSlideElapsed?: number;
       sendInVisualDelay?: number;
+      /**
+       * offs152: Scene OFF opponent send-in (src/engine/switchInTail.ts `sceneOffOpponentSwitchIn*`): the slide / visual delay above
+       * are the Scene OFF constants and NO front animation runs (SKIP_FRONT_ANIM); Scene ON's faint-replacement hold does not apply.
+       */
+      skipFrontAnimation?: true;
+      /** offs152: Scene OFF long-nickname lag frame -- from this elapsed on the send-in visuals run one frame late. */
+      sendInLagElapsed?: number;
     }>
   | Readonly<{
       type: "switch-out";
@@ -334,6 +343,11 @@ export type BattleResolutionPresentationCommand =
        * the recall receipt removes it and its healthbox.
        */
       skipAnimation?: true;
+      /**
+       * offs152: Scene OFF forced removal (no body ran): the target stays drawn at rest through the hold until the recall
+       * receipt removes it in one row (docs/offs152-scene-off-send-in-tail.md §R0).
+       */
+      targetAtRest?: true;
     }>
   | Readonly<{
       type: "sprite-visibility";
@@ -809,7 +823,8 @@ const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
  * Frames already presented since the opener are subtracted. An unlisted next
  * receipt is unmeasured: no pause there (off148: a sprite-visibility receipt
  * next, Wish / Roar / Baton Pass, whose next drawn change is a switch-out or
- * the next action's print; nothing next).
+ * the next action's print; nothing next). offs152: a `returntoball` receipt (Roar / Whirlwind / Baton Pass) is N
+ * with lead -3 (SCENE_OFF_RETURN_TO_BALL_LEAD).
  *
  * off148 (docs/off148-scene-off-pauses-remainder.md): a stat-stage-change
  * receipt between the attack receipt and N (Curse's statbuffchange before its
@@ -820,6 +835,21 @@ const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
  * production's commands since the opener then end on the ROM's attackanimation
  * row, and the mapping holds again from there: P = Δ(N) − Δ(attack) + 1 + lead.
  */
+/** The battler operand (`BS_TARGET` / `BS_ATTACKER`) of a `returntoball` receipt's source instruction, if known. */
+function returnToBallOperand(event: BattleKernelSemanticEvent): string | null {
+  const programCounter = event.provenance?.programCounter;
+  if (programCounter === undefined || programCounter < 0) return null;
+  const instruction = BATTLE_SCRIPT_PROGRAM.instructions[programCounter];
+  return instruction?.opcodeName === "B_SCR_OP_RETURNTOBALL" ? instruction.operands[0]?.expression ?? null : null;
+}
+
+/**
+ * offs152 (docs/offs152-scene-off-send-in-tail.md §R0): the forced switch-out after a Scene OFF Roar / Whirlwind / Baton Pass body.
+ * `returntoball` executes on row R and removes the target on R + 2 (off148 OFF probes), the forced hold's 4 frames end there, so the
+ * switch-out command starts on R - 2 = the print convention's R + 2 (lead 1) minus 4.
+ */
+const SCENE_OFF_RETURN_TO_BALL_LEAD = -3; // 1 - FORCED_RETURN_TO_BALL_HOLD_FRAMES (declared below; pinned in tests/offs152SceneOffForcedSwitch.test.ts)
+
 function sceneOffNoHitPauseFrames(
   events: readonly BattleKernelSemanticEvent[],
   attackIndex: number,
@@ -866,7 +896,10 @@ function sceneOffNoHitPauseFrames(
       ? 1
       : payload.kind === "health-bar-update"
         ? 0
-        : null;
+        : payload.kind === "set-battler-sprite-visibility" && payload.invisible
+            && candidate.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL"
+          ? SCENE_OFF_RETURN_TO_BALL_LEAD
+          : null;
     if (lead === null) return null;
     const frames = held
       ? next - attack + 1 + lead - skipped
@@ -1155,12 +1188,13 @@ export const OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES = 11;
  * snd145 (ISSUES #146 remainder): in Scene ON the opponent's send-in tail is species-keyed (the healthbox slide waits for the front
  * animation, the next printstring for the controller end; src/engine/switchInTail.ts), so its controller span is the species' whole
  * duration minus the shared waitstate hold. The player side keeps the calibrated 91-frame span (its message is cry-bound, not
- * modelled); Scene OFF skips the front animation (HITMARKER_NO_ANIMATIONS -> SKIP_FRONT_ANIM), so it keeps the calibrated span too.
+ * modelled). offs152: Scene OFF skips the front animation (HITMARKER_NO_ANIMATIONS -> SKIP_FRONT_ANIM): the opponent's span is the
+ * slide- or cry-bound Scene OFF tail (`sceneOffOpponentSwitchInDuration`, keyed by species and the incoming nickname's length).
  */
-export function switchInTiming(battler: 0 | 1, species: number, sceneOn = true): BattleSwitchInTiming {
-  return battler === 0 || !sceneOn
-    ? SWITCH_IN_TIMING
-    : Object.freeze({ minimumFrames: opponentSwitchInDuration(species) - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
+export function switchInTiming(battler: 0 | 1, species: number, sceneOn = true, nickname = ""): BattleSwitchInTiming {
+  if (battler === 0) return SWITCH_IN_TIMING;
+  const duration = sceneOn ? opponentSwitchInDuration(species) : sceneOffOpponentSwitchInDuration(species, nickname);
+  return Object.freeze({ minimumFrames: duration - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
 }
 /**
  * ISSUES #78 slice 4: the real `CONTROLLER_RETURNMONTOBALL` receipt's
@@ -1183,6 +1217,18 @@ const SWITCH_OUT_TIMING = Object.freeze({ minimumFrames: RETURN_TO_BALL_SPAN_FRA
 export const FORCED_RETURN_TO_BALL_HOLD_FRAMES = 4;
 export const FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES = 6;
 const FORCED_SWITCH_OUT_TIMING = Object.freeze({ minimumFrames: FORCED_RETURN_TO_BALL_HOLD_FRAMES } as const);
+/**
+ * offs152 (ISSUES #146 items 4/5, docs/offs152-scene-off-send-in-tail.md §R0): Scene OFF reaches the same `Cmd_returntoball`
+ * (skipAnim = TRUE, `battle_script_commands.c:5346-5353`) with no body: Roar / Whirlwind (`returntoball BS_TARGET`) and Baton Pass
+ * (`returntoball BS_ATTACKER`, `battle_scripts_1.s:1706`) remove the sprite + healthbox in ONE row, returntoball row + 2 (off148 OFF
+ * probes: Roar G+44 -> G+46, opponent Baton Pass G+43 -> G+45), so Scene OFF uses the forced hold (4) with the target at rest.
+ * Roar's `switchinanim` follows 6 rows later (the Scene ON gap: send-in ball at removal + 8, G+54); Baton Pass prints
+ * STRINGID_SWITCHINMON first (getswitchedmondata, switchindataupdate's 2-row wait, hpthresholds): first glyph G+50 = removal + 5.
+ */
+export const SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES = 5;
+const SCENE_OFF_FORCED_SWITCH_OUT = Object.freeze({
+  timing: FORCED_SWITCH_OUT_TIMING, skipAnimation: true as const, targetAtRest: true as const,
+});
 const TURN_END_TIMING = Object.freeze({ minimumFrames: 8 } as const);
 /**
  * ISSUES #73 rung B correction (2026-08-04): the prior port (53, from
@@ -4187,11 +4233,16 @@ export function projectBattleResolutionCommands(
       // command (the outgoing mon's scale-up + teardown, rendered from the
       // switch-out view) ahead of the recall receipt that commits the hidden
       // sprite/healthbox after the span.
-      // Scene ON only: Roar/Whirlwind's `returntoball BS_TARGET` after a MOVE_ANIMATION receipt on that target (Baton
-      // Pass's `returntoball BS_ATTACKER` and every Scene OFF receipt keep the voluntary-style span below).
-      const forcedRemoval = event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL"
-        && payload.invisible && sceneOnMoveTarget === battler;
+      // Scene ON: Roar/Whirlwind's `returntoball BS_TARGET` after a MOVE_ANIMATION receipt on that target (Baton Pass's
+      // `returntoball BS_ATTACKER` keeps the voluntary-style span below); Scene OFF: every `returntoball` (offs152).
+      // offs152: in Scene OFF every `returntoball` receipt is the forced removal (no body; the target is drawn at rest).
+      const returnToBall = event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL" && payload.invisible;
+      const sceneOffRemoval = returnToBall && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
+      const forcedRemoval = returnToBall && (sceneOffRemoval || sceneOnMoveTarget === battler);
       if (forcedRemoval) sceneOnMoveTarget = null;
+      const removalGap = sceneOffRemoval && returnToBallOperand(event) === "BS_ATTACKER"
+        ? SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES
+        : FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES;
       if (
         event.provenance?.opcodeName === "B_SCR_OP_RETURNATKTOBALL"
         || event.provenance?.opcodeName === "B_SCR_OP_RETURNTOBALL"
@@ -4200,9 +4251,11 @@ export function projectBattleResolutionCommands(
           type: "switch-out",
           eventSequence: event.sequence,
           battler,
-          ...(forcedRemoval
-            ? { timing: FORCED_SWITCH_OUT_TIMING, skipAnimation: true as const }
-            : { timing: SWITCH_OUT_TIMING }),
+          ...(sceneOffRemoval
+            ? SCENE_OFF_FORCED_SWITCH_OUT
+            : forcedRemoval
+              ? { timing: FORCED_SWITCH_OUT_TIMING, skipAnimation: true as const }
+              : { timing: SWITCH_OUT_TIMING }),
         }));
       }
       commands.push(Object.freeze({
@@ -4214,7 +4267,7 @@ export function projectBattleResolutionCommands(
         // one controller callback; the receipt itself owns the relative
         // display edge. The forced removal holds until `switchinanim`.
         timing: Object.freeze({
-          minimumFrames: forcedRemoval ? FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES : 1 as const,
+          minimumFrames: forcedRemoval ? removalGap : 1 as const,
         }),
         // See the "sprite-visibility" command type's own doc comment: the
         // real CONTROLLER_RETURNMONTOBALL receipts are Cmd_various's
@@ -4331,7 +4384,8 @@ export function projectBattleResolutionCommands(
       currentField = battler === 0
         ? Object.freeze({ ...currentField, player: incoming.field })
         : Object.freeze({ ...currentField, opponent: incoming.field });
-      const speciesTail = battler === 1 && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
+      const sceneOn = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
+      const speciesTail = battler === 1 && sceneOn;
       commands.push(Object.freeze({
         type: "switch-in",
         eventSequence: event.sequence,
@@ -4340,11 +4394,20 @@ export function projectBattleResolutionCommands(
         toPartyIndex: switched.toPartyIndex,
         incoming: incoming.field,
         incomingStatus1: incoming.status1,
-        timing: switchInTiming(battler, incoming.field.species, speciesTail),
+        timing: switchInTiming(battler, incoming.field.species, sceneOn, incoming.field.name),
         settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
         ...(speciesTail ? {
           healthboxSlideElapsed: opponentSwitchInHealthboxSlideElapsed(incoming.field.species),
           sendInVisualDelay: opponentSwitchInVisualDelay(incoming.field.species),
+        } : battler === 1 ? {
+          // offs152: the Scene OFF opponent tail (no front animation).
+          healthboxSlideElapsed: sceneOffOpponentSwitchInHealthboxSlideElapsed(incoming.field.species),
+          sendInVisualDelay: sceneOffOpponentSwitchInVisualDelay(incoming.field.species),
+          skipFrontAnimation: true as const,
+          ...(() => {
+            const lag = sceneOffOpponentSwitchInLagElapsed(incoming.field.species, incoming.field.name);
+            return lag === null ? {} : { sendInLagElapsed: lag };
+          })(),
         } : {}),
       }));
     }
@@ -4407,7 +4470,7 @@ export function projectBattleResolutionCommands(
   // snd145: an opponent FAINT REPLACEMENT that ends the turn holds its settled send-in through the source's post-`switchinanim`
   // turn-end work (`switchineffects`, the rest of `BattleScript_HandleFaintedMon`, `BattleTurnPassed`) before the action prompt.
   const last = commands[commands.length - 1];
-  if (last?.type === "switch-in" && last.battler === 1 && last.healthboxSlideElapsed !== undefined
+  if (last?.type === "switch-in" && last.battler === 1 && last.healthboxSlideElapsed !== undefined && last.skipFrontAnimation !== true
     && commands.some((command) => command.type === "faint" && command.battler === 1)) {
     commands[commands.length - 1] = Object.freeze({
       ...last,

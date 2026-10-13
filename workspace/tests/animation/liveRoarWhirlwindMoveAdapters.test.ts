@@ -51,10 +51,12 @@ describe("live Roar / Whirlwind adapters + Scene ON forced switch-out", () => {
     expect(recall!.command).toMatchObject({ battler: 1, visible: false, recall: true });
     expect([hold!.frame - body!.frame, recall!.frame - hold!.frame, sendIn!.frame - recall!.frame])
       .toEqual([duration + iu120Extra(r.id), FORCED_RETURN_TO_BALL_HOLD_FRAMES, FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES]);
-    // Scene OFF keeps the voluntary-style 32-frame span (no MOVE_ANIMATION receipt).
+    // offs152: Scene OFF takes the same forced hold (Cmd_returntoball skips the return animation in both scenes) with the target
+    // drawn at rest (no body ran); tests/offs152SceneOffForcedSwitch.test.ts pins its ROM rows.
     const offHold = off.commands.find(c => c.type === "switch-out");
-    expect(offHold?.command).toMatchObject({ battler: 1, timing: { minimumFrames: 32 } });
-    expect(offHold?.command).not.toHaveProperty("skipAnimation");
+    expect(offHold?.command).toMatchObject({
+      battler: 1, timing: { minimumFrames: FORCED_RETURN_TO_BALL_HOLD_FRAMES }, skipAnimation: true, targetAtRest: true,
+    });
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);
     expect(off.boundaries).toHaveLength(on.boundaries.length);

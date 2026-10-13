@@ -444,6 +444,8 @@ type FrontAffineFields = Readonly<{
   affineRotationU16?: number | null;
   rotationU16?: number | null;
   affineRotation?: number | null;
+  /** A reducer that reports its matrix only per write (ROTATE_TO_SIDES_TWICE: `RotateToSidesTwiceAffineWrite`). */
+  affineWrites?: readonly Readonly<{ xScale?: number; yScale?: number; rotationU16?: number }>[];
   startedAffine?: boolean;
   invisible?: boolean;
   paletteWrite?: boolean;
@@ -523,10 +525,12 @@ export function frontSendOutAffineAtTick(
   if (frame.startedAffine === true && FRONT_SEND_OUT_INITIALIZER_ONLY_TICKS[family] === undefined) {
     return Object.freeze([256, 0, 0, 256] as const);
   }
-  const xScale = lastWritten(family, ticksSinceStart, (f) => f.xScale ?? f.affineXScaleSigned) ?? 256;
-  const yScale = lastWritten(family, ticksSinceStart, (f) => f.yScale ?? f.affineYScaleSigned) ?? 256;
+  // offs152 (fra151 remainder 2): a reducer without top-level fields reports the tick's matrix in its last `affineWrites` entry.
+  const lastWrite = (f: FrontAffineFields) => f.affineWrites?.[f.affineWrites.length - 1];
+  const xScale = lastWritten(family, ticksSinceStart, (f) => f.xScale ?? f.affineXScaleSigned ?? lastWrite(f)?.xScale) ?? 256;
+  const yScale = lastWritten(family, ticksSinceStart, (f) => f.yScale ?? f.affineYScaleSigned ?? lastWrite(f)?.yScale) ?? 256;
   const rotation = (lastWritten(family, ticksSinceStart,
-    (f) => f.affineWriteRotationU16 ?? f.affineRotationU16 ?? f.rotationU16 ?? f.affineRotation) ?? 0) & 0xffff;
+    (f) => f.affineWriteRotationU16 ?? f.affineRotationU16 ?? f.rotationU16 ?? f.affineRotation ?? lastWrite(f)?.rotationU16) ?? 0) & 0xffff;
   const theta = ((rotation >> 8) / 128) * Math.PI;
   const sx = xScale / 256;
   const sy = yScale / 256;

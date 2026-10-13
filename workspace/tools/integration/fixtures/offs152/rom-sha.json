@@ -1,0 +1,77 @@
+{
+ "roar-10": {
+  "frames": 340,
+  "sha": "f064678d6e8d3877",
+  "r1EqualsR2": true
+ },
+ "roar-12": {
+  "frames": 340,
+  "sha": "1e4a0e5193e699a5",
+  "r1EqualsR2": true
+ },
+ "roar-19": {
+  "frames": 340,
+  "sha": "8b76a9d72b9ccde3",
+  "r1EqualsR2": true
+ },
+ "roar-20": {
+  "frames": 340,
+  "sha": "786f4d5ba7a0dfec",
+  "r1EqualsR2": true
+ },
+ "roar-54": {
+  "frames": 340,
+  "sha": "00d5abeaff2a60ea",
+  "r1EqualsR2": true
+ },
+ "roar-95": {
+  "frames": 340,
+  "sha": "08fb3e47e0c07ab2",
+  "r1EqualsR2": true
+ },
+ "roar-153": {
+  "frames": 340,
+  "sha": "bf7dd94f7c86358c",
+  "r1EqualsR2": true
+ },
+ "roar-157": {
+  "frames": 340,
+  "sha": "fbbc0122f08b053f",
+  "r1EqualsR2": true
+ },
+ "roar-161": {
+  "frames": 340,
+  "sha": "2aa533223083c288",
+  "r1EqualsR2": true
+ },
+ "roar-215": {
+  "frames": 340,
+  "sha": "d221e39dd0ec74ab",
+  "r1EqualsR2": true
+ },
+ "roar-290": {
+  "frames": 340,
+  "sha": "a7a280827b9c5a74",
+  "r1EqualsR2": true
+ },
+ "roar-304": {
+  "frames": 340,
+  "sha": "35eaf2b4388c7449",
+  "r1EqualsR2": true
+ },
+ "roar-308": {
+  "frames": 340,
+  "sha": "e894c7c8b28514e9",
+  "r1EqualsR2": true
+ },
+ "roar-341": {
+  "frames": 340,
+  "sha": "1c8baf04c718fdc9",
+  "r1EqualsR2": true
+ },
+ "roar-385": {
+  "frames": 340,
+  "sha": "983eb549443f5a04",
+  "r1EqualsR2": true
+ }
+}

@@ -15,9 +15,15 @@ fx = root / "tools/integration/fixtures"
 T = json.load(open(fx / "send-in-tail/front-anim-tables.json"))
 S = json.load(open(fx / "send-in-tail/front-sprite-frames.json"))
 A = json.load(open(fx / "send-in-tail/anim-duration.json"))
+# offs152 R5: ids no swept species dominated take the ported reducer's terminal tick + 1 (offs152AnimTerminal.ts; 44 / 46 fitted ids agree).
+A_TERMINAL = json.load(open(fx / "offs152/anim-duration-terminal.json"))
+A = {**A_TERMINAL, **A}
 ids = sorted(json.load(open(fx / "forced-switch/factory-species-ids.json")))
 exc = {}
-for l in open(fx / "forced-switch/species-sweep-opponent-target.txt"):
+# offs152 R5: + the 37 species the first sweep could not stage (27 genderless, 10 male-only; FS_GENDER, Scene ON, r1 == r2).
+for l in [*open(fx / "forced-switch/species-sweep-opponent-target.txt"),
+          *open(fx / "offs152/species-sweep-opponent-target-genderless-on.txt"),
+          *open(fx / "offs152/species-sweep-opponent-target-male-only-on.txt")]:
     m, t = re.search(r"hbslide (\d+)", l), re.search(r"txtStart (\d+)", l)
     if m and t and int(t.group(1)) - int(m.group(1)) != 26:
         exc[int(l.split()[0])] = int(t.group(1)) - int(m.group(1))
