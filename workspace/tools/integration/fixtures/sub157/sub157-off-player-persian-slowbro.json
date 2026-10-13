@@ -1,0 +1,31 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "SUBSTITUTE",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/prep37-off-player-persian-slowbro.json",
+ "denseWindow": {
+  "startFrame": 73,
+  "endFrame": 159
+ },
+ "windowSource": "window = [activation, first inactive row] of this scenario's first Move_SUBSTITUTE body (87 rows) from 2 fresh prep37Probes.sh runs (bodies agree); profile battle-scene-off",
+ "attacker": {
+  "species": "PERSIAN",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 172,
+  "playerMaxHp": 172,
+  "opponentHp": 202,
+  "opponentMaxHp": 202,
+  "playerGender": "male",
+  "opponentGender": "male"
+ }
+}

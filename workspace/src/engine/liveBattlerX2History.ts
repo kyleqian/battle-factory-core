@@ -197,6 +197,13 @@ export function applyLiveBattlerX2Event(history: LiveBattlerX2History, event: Li
 }
 
 /** The tracked input a move body reads at its activation edge (sides left at 0 by an earlier body; none = undefined). */
+/**
+ * sub157 (ISSUES #153): Battle Scene OFF has no x2 history host. BattleAnimateFrontSprite (pokemon.c:6805) skips every front
+ * animation under HITMARKER_NO_ANIMATIONS, so no battler ever stands at a species front idle rest: the bodies source still plays
+ * in Scene OFF (Cmd_attackanimation's Transform / Substitute exemption, General_SubstituteFade) read both sides at {0,0}.
+ */
+export const LIVE_BATTLER_X2_SCENE_OFF_INPUT: LiveMoveBattlerX2Input = Object.freeze({ zeroed: Object.freeze(["player", "opponent"] as const) });
+
 export function liveMoveBattlerX2Input(history: LiveBattlerX2History): LiveMoveBattlerX2Input | undefined {
   const zeroed = (["player", "opponent"] as const).filter((side) => history[side] === "zeroed");
   return zeroed.length === 0 ? undefined : Object.freeze({ zeroed: Object.freeze(zeroed) });

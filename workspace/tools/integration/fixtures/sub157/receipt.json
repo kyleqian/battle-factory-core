@@ -1,0 +1,183 @@
+{
+ "schema": "sub157-scene-off-substitute-receipt/v1",
+ "issue": "#153",
+ "probes": {
+  "runner": "OUT=<fresh> sh tools/integration/prep37Probes.sh sub157-off-opponent-persian-slowbro sub157-off-player-golem-opponent-onix sub157-off-opponent-golem-player-onix prep37-off-player-persian-slowbro (direct mGBA, Battle Scene OFF bootstrap, each scenario twice from fresh processes; r1 == r2 byte-identical, 4 / 4)",
+  "files": [
+   {
+    "file": "prep37-off-player-persian-slowbro-r1.json",
+    "sha256": "bd00836fe65257d5"
+   },
+   {
+    "file": "prep37-off-player-persian-slowbro-r2.json",
+    "sha256": "bd00836fe65257d5"
+   },
+   {
+    "file": "sub157-off-opponent-golem-player-onix-r1.json",
+    "sha256": "c93749f4bfe72573"
+   },
+   {
+    "file": "sub157-off-opponent-golem-player-onix-r2.json",
+    "sha256": "c93749f4bfe72573"
+   },
+   {
+    "file": "sub157-off-opponent-persian-slowbro-r1.json",
+    "sha256": "a40a82ab30a7bb88"
+   },
+   {
+    "file": "sub157-off-opponent-persian-slowbro-r2.json",
+    "sha256": "a40a82ab30a7bb88"
+   },
+   {
+    "file": "sub157-off-player-golem-opponent-onix-r1.json",
+    "sha256": "5a361df6e27a5e4b"
+   },
+   {
+    "file": "sub157-off-player-golem-opponent-onix-r2.json",
+    "sha256": "5a361df6e27a5e4b"
+   }
+  ]
+ },
+ "fixtures": "python3 tools/integration/sub157Fixtures.py <probe dir> (substBodyFixtures.py with the OFF cases): window = [first Move_SUBSTITUTE row, first inactive row], 87 rows",
+ "checker": "POKEBENCH_LIVE_PROBE_SHARE=1 node --experimental-strip-types --no-warnings tools/integration/liveFixtureDriver.ts <summary> tools/integration/fixtures/sub157/sub157-off-*.json (liveAdapterFramebuffer.ts: two more fresh run-battle-lab-rgb.py probe processes; production renderBattleResolutionLiveView, full 240x160 frame; a battle-scene-off scenario reads LIVE_BATTLER_X2_SCENE_OFF_INPUT as production does)",
+ "windows": [
+  {
+   "fixture": "tools/integration/fixtures/s10a-live/substitute-alt-off-player-persian-slowbro.json",
+   "scenario": "tools/battle-lab/prep37-off-player-persian-slowbro.json",
+   "window": {
+    "startFrame": 73,
+    "endFrame": 159
+   },
+   "attacker": "PERSIAN (player)",
+   "target": "SLOWBRO",
+   "beforeX2Fix": null,
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    87,
+    87
+   ],
+   "rows": 87,
+   "digests": [
+    "a806817deb4b129542707f74bd78e9fe8a4489176345b781f3612ee35f805141",
+    "a806817deb4b129542707f74bd78e9fe8a4489176345b781f3612ee35f805141"
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/sub157/sub157-off-opponent-golem-player-onix.json",
+   "scenario": "tools/battle-lab/sub157-off-opponent-golem-player-onix.json",
+   "window": {
+    "startFrame": 226,
+    "endFrame": 312
+   },
+   "attacker": "GOLEM (opponent)",
+   "target": "ONIX",
+   "beforeX2Fix": [
+    0,
+    0
+   ],
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    87,
+    87
+   ],
+   "rows": 87,
+   "digests": [
+    "2c5cca3dc7fac308f033e63dfa3fd4edaf295b9d9152987d798192710c30b0bd",
+    "2c5cca3dc7fac308f033e63dfa3fd4edaf295b9d9152987d798192710c30b0bd"
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/sub157/sub157-off-opponent-persian-slowbro.json",
+   "scenario": "tools/battle-lab/sub157-off-opponent-persian-slowbro.json",
+   "window": {
+    "startFrame": 77,
+    "endFrame": 163
+   },
+   "attacker": "PERSIAN (opponent)",
+   "target": "SLOWBRO",
+   "beforeX2Fix": [
+    0,
+    0
+   ],
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    87,
+    87
+   ],
+   "rows": 87,
+   "digests": [
+    "9e11082a31e0d29be231043e3344e6916858e565d157b5b6a78bfb32a17311be",
+    "9e11082a31e0d29be231043e3344e6916858e565d157b5b6a78bfb32a17311be"
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/sub157/sub157-off-player-golem-opponent-onix.json",
+   "scenario": "tools/battle-lab/sub157-off-player-golem-opponent-onix.json",
+   "window": {
+    "startFrame": 280,
+    "endFrame": 366
+   },
+   "attacker": "GOLEM (player)",
+   "target": "ONIX",
+   "beforeX2Fix": [
+    94917,
+    94917
+   ],
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    87,
+    87
+   ],
+   "rows": 87,
+   "digests": [
+    "e859e8f28827f5add9e29c409c97fa3e154493f5e467d468d1b306f1219c3d8a",
+    "e859e8f28827f5add9e29c409c97fa3e154493f5e467d468d1b306f1219c3d8a"
+   ]
+  },
+  {
+   "fixture": "tools/integration/fixtures/sub157/sub157-off-player-persian-slowbro.json",
+   "scenario": "tools/battle-lab/prep37-off-player-persian-slowbro.json",
+   "window": {
+    "startFrame": 73,
+    "endFrame": 159
+   },
+   "attacker": "PERSIAN (player)",
+   "target": "SLOWBRO",
+   "beforeX2Fix": [
+    0,
+    0
+   ],
+   "residual": [
+    0,
+    0
+   ],
+   "exactRows": [
+    87,
+    87
+   ],
+   "rows": 87,
+   "digests": [
+    "a806817deb4b129542707f74bd78e9fe8a4489176345b781f3612ee35f805141",
+    "a806817deb4b129542707f74bd78e9fe8a4489176345b781f3612ee35f805141"
+   ]
+  }
+ ],
+ "totals": {
+  "windows": 5,
+  "rowsPerRun": 435,
+  "residualPixels": 0
+ },
+ "x2Note": "before the OFF x2 input the GOLEM -> ONIX player window drew ONIX at its Scene ON front idle rest (x2 +1): 94,917 px = 1,091 px/row x 87; the ROM skips the front animation in Scene OFF (pokemon.c:6805)"
+}

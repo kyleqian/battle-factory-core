@@ -40,7 +40,8 @@ import {
 import { createPresentationRngHostAt, recordPresentationRngSubStream } from "../../src/engine/presentationRngHost.ts";
 import { generalAnimationPresentationRngKey } from "../../src/engine/wordsOrderUnits.ts";
 import {
-  LIVE_BATTLER_X2_IDLE, applyLiveBattlerX2Event, liveBattlerX2EventsOf, liveMoveBattlerX2Input, type LiveBattlerX2Event,
+  LIVE_BATTLER_X2_IDLE, LIVE_BATTLER_X2_SCENE_OFF_INPUT, applyLiveBattlerX2Event, liveBattlerX2EventsOf, liveMoveBattlerX2Input,
+  type LiveBattlerX2Event,
   type LiveMoveBattlerX2Input,
 } from "../../src/engine/liveBattlerX2History.ts";
 import type { BattleKernelSemanticEvent } from "../../src/engine/battleDecisionBoundary.ts";
@@ -388,6 +389,10 @@ export function fixturePresentationRng(f: Fixture, request: BattleMoveAnimationR
  */
 export function fixtureBattlerX2Input(f: Fixture): LiveMoveBattlerX2Input | undefined {
   if (process.env.POKEBENCH_LIVE_X2_INPUT === "species-rest") return undefined;
+  // sub157: a Battle Scene OFF scenario has no x2 host; production's OFF bodies read both sides zeroed (no front animation ran).
+  if ((JSON.parse(readFileSync(resolve(root, f.scenario), "utf8")) as { profile?: string }).profile === "battle-scene-off") {
+    return LIVE_BATTLER_X2_SCENE_OFF_INPUT;
+  }
   let history = LIVE_BATTLER_X2_IDLE;
   if (f.precedingX2Events) {
     // POKEBENCH_LIVE_X2_INPUT=no-send-in: control that drops the send-in resets (the pre-send-in battler's history).

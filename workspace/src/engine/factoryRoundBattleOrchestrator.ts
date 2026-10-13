@@ -37,7 +37,8 @@ import { liveMoveGeometrySpriteOrderPlanText } from "./liveMoveAnimation.ts";
 import { liveMovePresentationRngBodyKey } from "./liveMovePresentationRng.ts";
 import {
   advanceLiveBattlerX2Host, applyLiveBattlerX2Event, createLiveBattlerX2Host, invalidateLiveBattlerX2Host,
-  liveBattlerX2EventsOf, liveMoveBattlerX2Input, liveMoveBattlerX2InputForBody, liveStaleMovePowerTaintedBy, LIVE_BATTLER_X2_IDLE, type LiveBattlerX2Host,
+  liveBattlerX2EventsOf, liveMoveBattlerX2Input, liveMoveBattlerX2InputForBody, liveStaleMovePowerTaintedBy, LIVE_BATTLER_X2_IDLE,
+  LIVE_BATTLER_X2_SCENE_OFF_INPUT, type LiveBattlerX2Host,
   type LiveBattlerX2History, type LiveMoveBattlerX2Input,
 } from "./liveBattlerX2History.ts";
 import {
@@ -2268,6 +2269,24 @@ function retainedLockedActionOwnerAtCommandBoundary(
 }
 
 /**
+ * sub157 (ISSUES #153): the Scene OFF resolution's x2 input -- both sides at {0,0} (LIVE_BATTLER_X2_SCENE_OFF_INPUT) while the
+ * current command is a live move body (only Transform / Substitute carry a request in Scene OFF) or the Substitute fade; every
+ * other command keeps none, as before.
+ */
+function withSceneOffBattlerX2Input(state: FactoryRoundBattleOrchestratorState): FactoryRoundBattleOrchestratorState {
+  const resolution = state.battleResolutionPresentation;
+  if (!resolution) return state;
+  const command = resolution.segments[resolution.segmentIndex]?.commands[resolution.commandIndex];
+  const input = (command?.type === "move-animation" && command.animation) || command?.type === "substitute-fade"
+    ? LIVE_BATTLER_X2_SCENE_OFF_INPUT : undefined;
+  if (resolution.liveMoveBattlerX2Input === input) return state;
+  return Object.freeze({
+    ...state,
+    battleResolutionPresentation: Object.freeze({ ...resolution, liveMoveBattlerX2Input: input }),
+  });
+}
+
+/**
  * Advances only the controller-owned Scene-OFF resolution clock. The pending
  * kernel boundary remains immutable, and the next command UI does not exist
  * until the six displayed blank handoff frames have completed.
@@ -2275,7 +2294,7 @@ function retainedLockedActionOwnerAtCommandBoundary(
 function prepareResolutionPalette(
   state: FactoryRoundBattleOrchestratorState,
 ): FactoryRoundBattleOrchestratorState {
-  if (state.config.battleScene !== "on") return state;
+  if (state.config.battleScene !== "on") return withSceneOffBattlerX2Input(state);
   const resolution = state.battleResolutionPresentation;
   if (resolution?.lifecycle.phase === "presenting-switch-in") {
     const retained = state.liveMovePaletteHost;

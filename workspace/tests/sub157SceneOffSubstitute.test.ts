@@ -2,7 +2,9 @@
 // HITMARKER_NO_ANIMATIONS (battle_script_commands.c:1748), so under Battle Scene OFF both still emit the controller move animation
 // (prep37 / aud118: the ROM's Substitute body is identical in the two scenes). On ordinary census battles (off108Route.ts's loop:
 // battle i = seed i, streak i * 11 % 49) the Scene OFF command stream of every Substitute / Transform body equals Scene ON's; every
-// other move keeps the OFF BattleScript_Pausex20 receipt (control).
+// other move keeps the OFF BattleScript_Pausex20 receipt (control). The OFF body reads both battlers at x2 {0,0}: BattleAnimateFrontSprite
+// (pokemon.c:6805) skips the front animation under HITMARKER_NO_ANIMATIONS, so no species idle rest exists in Scene OFF (the ONIX
+// rest +1 drew 94,917 px on the GOLEM -> ONIX OFF window; 0 px with the OFF input, tools/integration/fixtures/sub157/receipt.json).
 import { describe, expect, it } from "vitest";
 import {
   advanceFactoryRoundBattleCommand,
@@ -15,6 +17,7 @@ import { liveMoveRandom2PlanContextAt } from "../src/engine/battleResolutionPres
 import { createPresentationRngSession } from "../src/engine/presentationRngHost";
 import { tickLiveMovePresentationRngSession } from "../src/engine/liveMovePresentationRng";
 import { PARTY_LIST_INPUT_ELAPSED } from "../src/engine/partySelect";
+import { LIVE_BATTLER_X2_SCENE_OFF_INPUT, liveTrackedFrontIdleRest } from "../src/engine/liveBattlerX2History";
 import type { GbaButton } from "../src/input";
 
 type Use = { move: number; attacker: number; attack: string | null; label: string | null; commands: unknown[] };
@@ -50,12 +53,16 @@ function usesOf(segment: any, out: Use[]) {
   }
 }
 
+/** Per presented frame: the current command's type / request move and the resolution's x2 input. */
+type Frame = { type: string; moveId: number | null; x2: unknown };
 const cache = new Map<string, Use[]>();
+const framesCache = new Map<string, Frame[]>();
 function battleUses(seed: number, scene: "on" | "off"): Use[] {
   const key = `${seed}-${scene}`;
   const cached = cache.get(key);
   if (cached) return cached;
   const out: Use[] = [];
+  const frames: Frame[] = [];
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
@@ -75,6 +82,8 @@ function battleUses(seed: number, scene: "on" | "off"): Use[] {
     rng = tickLiveMovePresentationRngSession(rng, state, liveMoveRandom2PlanContextAt);
     const r = state.battleResolutionPresentation as any;
     if (r) for (const s of r.segments) if (!seen.has(s)) { seen.add(s); usesOf(s, out); }
+    const command = r?.segments[r.segmentIndex]?.commands[r.commandIndex];
+    if (command) frames.push({ type: command.type, moveId: command.animation?.moveId ?? null, x2: r.liveMoveBattlerX2Input });
     if (!owned()) ended = true;
   };
   const phase = () => state.battleCommandPresentation?.lifecycle.phase;
@@ -113,6 +122,7 @@ function battleUses(seed: number, scene: "on" | "off"): Use[] {
     until(() => phase() === "action-menu");
   }
   cache.set(key, out);
+  framesCache.set(key, frames);
   return out;
 }
 
@@ -151,6 +161,18 @@ describe("sub157: Scene OFF Substitute / Transform keep the controller move anim
         expect(use.commands.some((x: any) => x.type === "move-animation" && x.animation !== undefined)).toBe(false);
       }
       for (const use of battleUses(seed, "on").filter((u) => u.attack !== null)) expect(use.attack).toBe("MOVE_ANIMATION");
+    }
+  });
+
+  it("Scene OFF bodies read both battlers at x2 {0,0} (no front animation); every other OFF command keeps no x2 input", () => {
+    expect(liveTrackedFrontIdleRest("opponent", { x2: 1, y2: 0 }, LIVE_BATTLER_X2_SCENE_OFF_INPUT)).toEqual({ x2: 0, y2: 0 });
+    for (const seed of [17, 74, 197]) {
+      battleUses(seed, "off");
+      const frames = framesCache.get(`${seed}-off`)!;
+      const bodies = frames.filter((f) => f.type === "move-animation" && f.moveId !== null);
+      expect(bodies.length).toBeGreaterThan(0);
+      for (const f of bodies) expect(f.x2).toBe(LIVE_BATTLER_X2_SCENE_OFF_INPUT);
+      for (const f of frames) if (f.moveId === null && f.type !== "substitute-fade") expect(f.x2).toBeUndefined();
     }
   });
 });
