@@ -6,7 +6,9 @@
 // renderBattleResolutionLiveView decides it (liveSubstituteSwapView, then liveMoveAnimationPresentation; substituteFadeRenderView),
 // and every fallback carries the production gate that fired (liveShareCensusGates.ts). No oracle.
 //   node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=<from>..<to> [--seed-step=N]
-//     [--streak-mul=N] [--index-from=N] [--out=report.json] [--commands=commands.jsonl]
+//     [--streak-mul=N] [--index-from=N] [--out=report.json] [--commands=commands.jsonl] [--scene=on|off]
+// --scene=off (sub157, default on) plays the same battles under Battle Scene OFF (the main-lane ripple census); the report's
+// config.battleScene says which.
 // Battle i (0-based) uses seed = from + i * seedStep and streak = (i * streakMul) % 49 (streaks 0..48, challenges 0..6).
 // --index-from=N (default 0) starts i at N, so parallel shards (--seeds=100..199 --index-from=100, ...) reproduce exactly the battles
 // (ids, streaks) of one --seeds=0..999 run; without it every shard restarts i at 0 and plays a DIFFERENT battle set (hist73 / cf78 /
@@ -33,6 +35,8 @@ import policyJson from "../../src/data/gen/factory-round-policy.json" with { typ
 import { classifyDurationDecline, classifyPresentationDecline, type Decline } from "./liveShareCensusGates.ts";
 
 const arg = (name: string, fallback?: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
+const battleScene = arg("scene", "on") as "on" | "off";
+if (battleScene !== "on" && battleScene !== "off") throw new Error(`--scene must be on or off, got ${battleScene}`);
 const [fromSeed, toSeed] = arg("seeds", "0..9")!.split("..").map(Number) as [number, number];
 const seedStep = Number(arg("seed-step", "1")), streakMul = Number(arg("streak-mul", "11")), indexFrom = Number(arg("index-from", "0"));
 const FRAME_BUDGET = 200000, RENDER_SAMPLE_EVERY = 97;
@@ -76,7 +80,7 @@ let liveFrameCounter = 0;
 
 function playBattle(battle: number, seed: number, streak: number): void {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: "on",
+    id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene,
     factoryWinStreak: streak, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
     rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
@@ -278,7 +282,7 @@ const kinds = (k: CommandRecord["kind"]) => {
 };
 const report = {
   schema: "live-share-census/v1",
-  config: { seeds: `${fromSeed}..${toSeed}`, seedStep, streakMul, streaks: "(i * streakMul) % 49", battleScene: "on", rentals: "generateInitial [0,1,2]",
+  config: { seeds: `${fromSeed}..${toSeed}`, seedStep, streakMul, streaks: "(i * streakMul) % 49", battleScene, rentals: "generateInitial [0,1,2]",
     policy: "FIGHT + least-used legal slot (ties: lowest); forced replacement: first healthy member", renderSampleEvery: RENDER_SAMPLE_EVERY,
     presentationRng: "core.ts tick seam replicated: createPresentationRngSession() default seed, fresh per battle" },
   battles: { played: battles.length, terminal: battles.filter((b) => b.end === "terminal").length, stalled: battles.filter((b) => b.end === "stalled").length,
