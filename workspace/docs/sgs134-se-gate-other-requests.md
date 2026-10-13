@@ -143,3 +143,6 @@ base-vs-patched census (~8 minutes on 16 cores).
 - `npm test -- tests/sgs134SeGateOtherRequests.test.ts`: 1 file / 9 tests passed; `npm run typecheck`: green; `npm run test:smoke`:
   448 / 448; `git diff --check`: clean; `git status`: no modified tracked file.
 - Patched copy (`4f790c9d3` + the diff): `npm run typecheck` green; 205 targeted test files 2,829 / 2,830 (the one sc106 route pin, §1).
+- Full suite on the main checkout at `6c3f68fa6` (not required for new files only; run anyway): `npm test -- --shard=1/2` 824 files /
+  7,145 tests passed, `--shard=2/2` 823 files / 6,513 tests passed = **1,647 files / 13,658 tests, 0 failed** (44 / 223 skipped);
+  `npm run build`: green.
