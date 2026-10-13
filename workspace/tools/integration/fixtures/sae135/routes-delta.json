@@ -1,0 +1,477 @@
+{
+ "34:0:on": {
+  "sameTimeline": true,
+  "frames": 6349,
+  "presented": 5753,
+  "differing": {
+   "statusAnimation": 276,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "IVYSAUR",
+    "opponentElevated": false,
+    "path": "It\u2019s super effective!",
+    "frames": 100,
+    "differingAges": 0
+   },
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "GRIMER",
+    "opponentElevated": false,
+    "path": "GRIMER\u2019s attack missed!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "GRIMER",
+    "opponentElevated": false,
+    "path": "GRIMER is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "GRIMER",
+    "opponentElevated": false,
+    "path": "GRIMER is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   }
+  ],
+  "ok": true
+ },
+ "296:0:on": {
+  "sameTimeline": true,
+  "frames": 5349,
+  "presented": 4793,
+  "differing": {
+   "statusAnimation": 644,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "TOGETIC",
+    "opponentElevated": false,
+    "path": "Foe ROSELIA used GRASSWHISTLE!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "TOGETIC",
+    "opponentElevated": false,
+    "path": "TOGETIC is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "TOGETIC",
+    "opponentElevated": false,
+    "path": "TOGETIC is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "TOGETIC",
+    "opponentElevated": false,
+    "path": "Foe ROSELIA used GRASSWHISTLE!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "TOGETIC",
+    "opponentElevated": false,
+    "path": "TOGETIC is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "TOGETIC",
+    "opponentElevated": false,
+    "path": "TOGETIC is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "player",
+    "species": "TOGETIC",
+    "opponentElevated": false,
+    "path": "TOGETIC is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   }
+  ],
+  "ok": true
+ },
+ "277:0:on": {
+  "sameTimeline": true,
+  "frames": 10819,
+  "presented": 10257,
+  "differing": {
+   "statusAnimation": 736,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "SLP",
+    "side": "opponent",
+    "species": "SEALEO",
+    "opponentElevated": false,
+    "path": "Foe SEALEO is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "opponent",
+    "species": "SEALEO",
+    "opponentElevated": false,
+    "path": "Foe SEALEO is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "opponent",
+    "species": "SEALEO",
+    "opponentElevated": false,
+    "path": "Foe SEALEO is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "opponent",
+    "species": "SEALEO",
+    "opponentElevated": false,
+    "path": "Foe SEALEO is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "opponent",
+    "species": "SEALEO",
+    "opponentElevated": false,
+    "path": "Foe SEALEO is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "opponent",
+    "species": "SEALEO",
+    "opponentElevated": false,
+    "path": "Foe SEALEO is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "opponent",
+    "species": "SEALEO",
+    "opponentElevated": false,
+    "path": "Foe SEALEO is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "SLP",
+    "side": "opponent",
+    "species": "SEALEO",
+    "opponentElevated": false,
+    "path": "Foe SEALEO is fast asleep.",
+    "frames": 97,
+    "differingAges": 92
+   }
+  ],
+  "ok": true
+ },
+ "124:0:on": {
+  "sameTimeline": true,
+  "frames": 6194,
+  "presented": 5580,
+  "differing": {
+   "statusAnimation": 212,
+   "afterStatusAnimationFirstFrame": 2,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "YANMA",
+    "opponentElevated": true,
+    "path": "It\u2019s not very effective\u2026",
+    "frames": 39,
+    "differingAges": 38
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "YANMA",
+    "opponentElevated": true,
+    "path": "Foe YANMA is hurt by its burn!",
+    "frames": 39,
+    "differingAges": 38
+   },
+   {
+    "animation": "PRZ",
+    "side": "player",
+    "species": "MAGCARGO",
+    "opponentElevated": false,
+    "path": "Foe PLUSLE used SPARK!",
+    "frames": 39,
+    "differingAges": 0
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "PLUSLE",
+    "opponentElevated": false,
+    "path": "MAGCARGO is paralyzed! It may be unable to move!",
+    "frames": 39,
+    "differingAges": 34
+   },
+   {
+    "animation": "PRZ",
+    "side": "player",
+    "species": "MAGCARGO",
+    "opponentElevated": false,
+    "path": "MAGCARGO is paralyzed! It can\u2019t move!",
+    "frames": 39,
+    "differingAges": 0
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "PLUSLE",
+    "opponentElevated": false,
+    "path": "Foe PLUSLE is hurt by its burn!",
+    "frames": 39,
+    "differingAges": 34
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "PLUSLE",
+    "opponentElevated": false,
+    "path": "Foe PLUSLE is hurt by its burn!",
+    "frames": 39,
+    "differingAges": 34
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "PLUSLE",
+    "opponentElevated": false,
+    "path": "Foe PLUSLE is hurt by its burn!",
+    "frames": 39,
+    "differingAges": 34
+   }
+  ],
+  "ok": true
+ },
+ "126:0:on": {
+  "sameTimeline": true,
+  "frames": 30001,
+  "presented": 5975,
+  "differing": {
+   "statusAnimation": 204,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "MACHOKE",
+    "opponentElevated": false,
+    "path": "It\u2019s super effective!",
+    "frames": 39,
+    "differingAges": 34
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "MACHOKE",
+    "opponentElevated": false,
+    "path": "Foe MACHOKE is hurt by its burn!",
+    "frames": 39,
+    "differingAges": 34
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "MACHOKE",
+    "opponentElevated": false,
+    "path": "Foe MACHOKE is hurt by its burn!",
+    "frames": 39,
+    "differingAges": 34
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "MACHOKE",
+    "opponentElevated": false,
+    "path": "Foe MACHOKE is hurt by its burn!",
+    "frames": 39,
+    "differingAges": 34
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "MACHOKE",
+    "opponentElevated": false,
+    "path": "Foe MACHOKE is hurt by its burn!",
+    "frames": 39,
+    "differingAges": 34
+   },
+   {
+    "animation": "BRN",
+    "side": "opponent",
+    "species": "MACHOKE",
+    "opponentElevated": false,
+    "path": "Foe MACHOKE is hurt by its burn!",
+    "frames": 39,
+    "differingAges": 34
+   }
+  ],
+  "ok": true
+ },
+ "18:0:on": {
+  "sameTimeline": true,
+  "frames": 7223,
+  "presented": 6660,
+  "differing": {
+   "statusAnimation": 736,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "INFATUATION",
+    "side": "player",
+    "species": "PUPITAR",
+    "opponentElevated": false,
+    "path": "PUPITAR is in love with Foe EEVEE!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "INFATUATION",
+    "side": "player",
+    "species": "PUPITAR",
+    "opponentElevated": false,
+    "path": "PUPITAR is in love with Foe EEVEE!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "INFATUATION",
+    "side": "player",
+    "species": "PUPITAR",
+    "opponentElevated": false,
+    "path": "PUPITAR is in love with Foe EEVEE!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "INFATUATION",
+    "side": "player",
+    "species": "PUPITAR",
+    "opponentElevated": false,
+    "path": "PUPITAR is in love with Foe EEVEE!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "INFATUATION",
+    "side": "player",
+    "species": "PUPITAR",
+    "opponentElevated": false,
+    "path": "PUPITAR is in love with Foe EEVEE!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "INFATUATION",
+    "side": "player",
+    "species": "PUPITAR",
+    "opponentElevated": false,
+    "path": "PUPITAR is in love with Foe EEVEE!",
+    "frames": 97,
+    "differingAges": 0
+   },
+   {
+    "animation": "INFATUATION",
+    "side": "player",
+    "species": "PUPITAR",
+    "opponentElevated": false,
+    "path": "PUPITAR is in love with Foe EEVEE!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "INFATUATION",
+    "side": "player",
+    "species": "PUPITAR",
+    "opponentElevated": false,
+    "path": "PUPITAR is in love with Foe EEVEE!",
+    "frames": 97,
+    "differingAges": 92
+   },
+   {
+    "animation": "INFATUATION",
+    "side": "player",
+    "species": "PUPITAR",
+    "opponentElevated": false,
+    "path": "PUPITAR is in love with Foe EEVEE!",
+    "frames": 97,
+    "differingAges": 92
+   }
+  ],
+  "ok": true
+ },
+ "allOk": true
+}

@@ -1,0 +1,196 @@
+{
+ "stq132-spore-ply-primeape-onix-282": {
+  "animation": "SLP",
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectSleep+0",
+  "X": 281,
+  "F": 378,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-spore-ply-primeape-onix-570": {
+  "animation": "SLP",
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsAsleep+6",
+  "X": 569,
+  "F": 666,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-spore-ply-primeape-onix-1724": {
+  "animation": "SLP",
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsAsleep+6",
+  "X": 1723,
+  "F": 1820,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-spore-ply-primeape-onix-3158": {
+  "animation": "SLP",
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsAsleep+6",
+  "X": 3157,
+  "F": 3254,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-attract-ply-primeape-onix-703": {
+  "animation": "INFATUATION",
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsInLove+6",
+  "X": 702,
+  "F": 799,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-attract-ply-primeape-onix-1724": {
+  "animation": "INFATUATION",
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsInLove+6",
+  "X": 1723,
+  "F": 1820,
+  "battlerX2BeforeX": 1,
+  "battlerX2AfterF": 1,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-will-o-wisp-ply-primeape-onix-296": {
+  "animation": "BRN",
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectBurn+0",
+  "X": 295,
+  "F": 334,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "nextBody": {
+   "R": 468,
+   "move": 33,
+   "attacker": "opponent",
+   "romX2": 0,
+   "romY2": 0,
+   "predicted": {
+    "history": {
+     "player": "idle",
+     "opponent": "zeroed"
+    },
+    "x2": 0,
+    "rectPx": 0
+   },
+   "base": {
+    "history": {
+     "player": "idle",
+     "opponent": "unknown"
+    },
+    "x2": 1,
+    "rectPx": 1091
+   }
+  }
+ },
+ "stq132-will-o-wisp-ply-primeape-onix-666": {
+  "animation": "BRN",
+  "side": "opponent",
+  "path": "BattleScript_DoStatusTurnDmg+0",
+  "X": 665,
+  "F": 704,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "nextBody": {
+   "R": 1672,
+   "move": 33,
+   "attacker": "opponent",
+   "romX2": 0,
+   "romY2": 0,
+   "predicted": {
+    "history": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    },
+    "x2": 0,
+    "rectPx": 0
+   },
+   "base": {
+    "history": {
+     "player": "zeroed",
+     "opponent": "unknown"
+    },
+    "x2": 1,
+    "rectPx": 1091
+   }
+  }
+ },
+ "stq132-will-o-wisp-ply-primeape-onix-1870": {
+  "animation": "BRN",
+  "side": "opponent",
+  "path": "BattleScript_DoStatusTurnDmg+0",
+  "X": 1869,
+  "F": 1908,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-spore-opp-primeape-onix-286": {
+  "animation": "SLP",
+  "side": "player",
+  "path": "BattleScript_MoveEffectSleep+0",
+  "X": 285,
+  "F": 382,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-spore-opp-primeape-onix-566": {
+  "animation": "SLP",
+  "side": "player",
+  "path": "BattleScript_MoveUsedIsAsleep+6",
+  "X": 565,
+  "F": 662,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-spore-opp-primeape-onix-1720": {
+  "animation": "SLP",
+  "side": "player",
+  "path": "BattleScript_MoveUsedIsAsleep+6",
+  "X": 1719,
+  "F": 1816,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "nextBody": null
+ },
+ "stq132-spore-opp-primeape-onix-3154": {
+  "animation": "SLP",
+  "side": "player",
+  "path": "BattleScript_MoveUsedIsAsleep+6",
+  "X": 3153,
+  "F": 3250,
+  "battlerX2BeforeX": 0,
+  "battlerX2AfterF": 0,
+  "kept": true,
+  "nextBody": null
+ },
+ "summary": {
+  "windows": 13,
+  "keptAfterWindow": 13,
+  "windowsWithNextBody": 2,
+  "predictedExact": 2,
+  "baseRectDiffers": 2
+ }
+}

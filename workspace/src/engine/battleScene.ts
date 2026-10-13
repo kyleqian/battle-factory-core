@@ -7765,7 +7765,7 @@ export function statusAnimationRenderView(view: BattleResolutionPresentationRend
   const effect = view.effect;
   if (effect?.type !== "status-animation") return null;
   const side = effect.battler === 0 ? "player" as const : "opponent" as const;
-  // sad133: the stp128 cases' createsprite origin is the battler sprite's x / y (corner + 32, elevation included).
+  // sad133 / sae135: the reducers' createsprite origin is the battler sprite's x / y (corner + 32, elevation included).
   const corner = battleCommandFieldSpriteOrigin(view.fieldArt[side], side);
   const row = liveStatusAnimationRow(effect.animation, effect.age, side, {
     sprite: { x: corner.x + 32, y: corner.y + 32 }, inflicted: effect.inflicted === true,
@@ -7794,6 +7794,17 @@ export function statusAnimationRenderView(view: BattleResolutionPresentationRend
   // command's first row: battleResolutionPresentationRender.ts postBodyShadowHiddenAt).
   const shadowHidden = view.postBodyShadowHidden || effect.age >= 1;
   return Object.freeze({ view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: shadowHidden }), sprites: row.sprites });
+}
+
+/** sae135: one status-animation OBJ; an affine-normal one (Status_Sleep's letter Z) around its box centre, no double-size box. */
+function drawLiveStatusAnimationSprite(fb: Uint8Array, sprite: LiveStatusAnimationSprite): void {
+  const tileset = sprite.tileset as Tileset;
+  if (sprite.affine === undefined) {
+    drawSpriteSheet(fb, tileset, sprite.palette, sprite.x, sprite.y);
+    return;
+  }
+  const { a, b, c, d } = sprite.affine;
+  drawSpriteSheetAffineRotate(fb, tileset, sprite.palette, sprite.x + tileset.columns * 4, sprite.y + tileset.rows * 4, a, b, c, d, undefined, false);
 }
 
 type SceneOffStatEffect = Extract<
@@ -54831,7 +54842,8 @@ function drawSubstituteFadeBgCopy(fb: Uint8Array, copy: SubstituteFadeBgCopy): v
 
 /** sad133: one status-animation OBJ, blended (BLDALPHA, 8-bit as mGBA) over the field drawn so far when it is semi-transparent. */
 function drawStatusAnimationSprite(fb: Uint8Array, sprite: LiveStatusAnimationSprite): void {
-  if (sprite.blend === undefined) drawSpriteSheet(fb, sprite.tileset as Tileset, sprite.palette, sprite.x, sprite.y);
+  if (sprite.affine !== undefined) drawLiveStatusAnimationSprite(fb, sprite);
+  else if (sprite.blend === undefined) drawSpriteSheet(fb, sprite.tileset as Tileset, sprite.palette, sprite.x, sprite.y);
   else drawSpriteSheetBlendedOverFb(fb, sprite.tileset as Tileset, sprite.palette, sprite.x, sprite.y, sprite.blend.eva, sprite.blend.evb);
 }
 

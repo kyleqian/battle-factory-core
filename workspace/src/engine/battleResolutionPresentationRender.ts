@@ -1141,6 +1141,10 @@ export const STATUS_ANIMATIONS_DRAWN: ReadonlySet<string> = new Set([
   "NIGHTMARE",
   "CONFUSION",
   "FRZ",
+  // sae135 (SA5)
+  "SLP",
+  "BRN",
+  "INFATUATION",
 ]);
 
 /**

@@ -3,10 +3,14 @@ import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" wit
 import curseAsset from "./assets/curse.json" with { type: "json" };
 import dizzyPunchAsset from "./assets/dizzyPunch.json" with { type: "json" };
 import lovelyKissAsset from "./assets/lovely-kiss.json" with { type: "json" };
+import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import type { RgbColor } from "../engine/bg.ts";
+import charmAsset from "./assets/charm.json" with { type: "json" };
+import restAsset from "./assets/rest.json" with { type: "json" };
 import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
 import {
-  statusConditionDisplayRow, statusConditionTarget, type StatusConditionAnimation, type StatusConditionDisplaySprite,
+  statusConditionDisplayRow, statusConditionTarget, statusParticleDisplayRow, type StatusConditionAnimation,
+  type StatusConditionDisplaySprite, type StatusParticleAnimation,
 } from "./statusConditionAnimations.ts";
 
 export type StatusAnimationKind = "paralysis";
@@ -193,7 +197,7 @@ export function statusAnimationAtSourceAge(
  * statusanimation row + 1). Every task / sprite row below is the source script's own schedule (battle_anim_scripts.s), shown
  * through the measured display lag of the live field (OAM: a ShakeMon2 tick written at script row r shows on row r + 2).
  */
-export type LiveStatusAnimationName = "PSN" | "PRZ" | "CURSED" | "NIGHTMARE" | "CONFUSION" | "FRZ";
+export type LiveStatusAnimationName = "PSN" | "PRZ" | "CURSED" | "NIGHTMARE" | "CONFUSION" | "FRZ" | "SLP" | "BRN" | "INFATUATION";
 
 export interface LiveStatusAnimationRow {
   /** The animated battler's x2 / y2: "rest" before its ShakeMon2 shows (the tracked idle rest), else the task's absolute value. */
@@ -210,6 +214,8 @@ export interface LiveStatusAnimationSprite extends StatusAnimationSprite {
   readonly behindBattlers?: true;
   /** A semi-transparent OBJ under BLDCNT's blend: BLDALPHA eva / evb over what is drawn below it (8-bit, as mGBA). */
   readonly blend?: Readonly<{ eva: number; evb: number }>;
+  /** sae135: an affine-normal OBJ (the letter Z) drawn around its box centre with that matrix. */
+  readonly affine?: Readonly<{ a: number; b: number; c: number; d: number }>;
 }
 
 /**
@@ -319,11 +325,34 @@ function statusConditionSprites(sprite: StatusConditionDisplaySprite, paletteRot
       for (let i = 0; i < 3; i += 1) palette[13 + i] = ICE_CUBE.palette[13 + ((i + paletteRotation) % 3)]!;
       return ICE_CUBE.pieces.map((piece) => ({ x: sprite.left + piece.x, y: sprite.top + piece.y, tileset: piece.tileset, palette, ...blend }));
     }
-    // stq132's SLP / BRN / INFATUATION templates: not in STATUS_ANIMATIONS_DRAWN on this tree (sae135 draws them), so unreachable here.
+    // stq132's SLP / BRN / INFATUATION templates come only from statusParticleDisplayRow (statusParticles / particleSprite below).
     case "gSleepLetterZSpriteTemplate":
     case "gBurnFlameSpriteTemplate":
     case "gMagentaHeartSpriteTemplate":
       return [];
+  }
+}
+
+type ParticleArt = Readonly<{ tileset: StatusAnimationSprite["tileset"]; palette: RgbColor[] }>;
+const sleepLetterZ = (restAsset as unknown as { letterZ: ParticleArt }).letterZ;
+const magentaHeart = (charmAsset as unknown as { magentaHeart: ParticleArt }).magentaHeart;
+const smallEmber = battleAnimSmallEmberAsset as unknown as ParticleArt;
+
+/** A 32x32 frame of battle-anim-small-ember.json (gAnims_BasicFire: frame = tileOffset / 16, 4x4 tiles). */
+function smallEmberFrame(tileOffset: number): StatusAnimationSprite["tileset"] {
+  return { columns: 4, rows: 4, tiles: smallEmber.tileset.tiles.slice(tileOffset, tileOffset + 16) };
+}
+
+function particleSprite(sprite: StatusConditionDisplaySprite): LiveStatusAnimationSprite {
+  switch (sprite.template) {
+    case "gSleepLetterZSpriteTemplate":
+      return { x: sprite.left, y: sprite.top, tileset: sleepLetterZ.tileset, palette: sleepLetterZ.palette, affine: sprite.affine! };
+    case "gBurnFlameSpriteTemplate":
+      return { x: sprite.left, y: sprite.top, tileset: smallEmberFrame(sprite.tileOffset), palette: smallEmber.palette };
+    case "gMagentaHeartSpriteTemplate":
+      return { x: sprite.left, y: sprite.top, tileset: magentaHeart.tileset, palette: magentaHeart.palette };
+    default:
+      throw new Error(`liveStatusAnimationRow: unexpected status particle template ${sprite.template}`);
   }
 }
 
@@ -346,6 +375,20 @@ function statusConditionRow(
     paletteBlend: null,
     sprites: row.sprites.flatMap((sprite) => statusConditionSprites(sprite, row.objPaletteRotation)),
   };
+}
+
+/**
+ * sae135 (S10A, ISSUES #168 slice SA5, docs/sae135-status-animation-render-3.md): Status_Sleep / Status_Burn / Status_Infatuation,
+ * sprite-only scripts (the battler stays at its rest): statusConditionAnimations.ts statusParticleDisplayRow (stq132's reducer) at
+ * rel = command age (rel 0 = the first gAnimScriptActive row = command age 0), back-to-front by SortSprites. `battler` = the battler
+ * sprite's gSprites x / y (production's corner, elevation included, + 32): the letter Z starts from it; the flames / hearts start from
+ * BATTLER_COORD_X / Y.
+ */
+function statusParticles(
+  animation: StatusParticleAnimation, age: number, side: "player" | "opponent", battler: Readonly<{ x: number; y: number }>,
+): LiveStatusAnimationRow {
+  const row = statusParticleDisplayRow(animation, age, statusConditionTarget(side, battler.x, battler.y));
+  return { battlerOffset: "rest", paletteBlend: null, sprites: row.sprites.map(particleSprite) };
 }
 
 /**
@@ -374,6 +417,12 @@ export function liveStatusAnimationRow(
       return context === undefined ? null : statusConditionRow("CONFUSION", age, side, context);
     case "FRZ":
       return context === undefined ? null : statusConditionRow("FRZ", age, side, context);
+    case "SLP":
+      return context === undefined ? null : statusParticles("SLP", age, side, context.sprite);
+    case "BRN":
+      return context === undefined ? null : statusParticles("BRN", age, side, context.sprite);
+    case "INFATUATION":
+      return context === undefined ? null : statusParticles("INFATUATION", age, side, context.sprite);
     default:
       return null;
   }
