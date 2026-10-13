@@ -1,0 +1,41 @@
+{
+ "schema": "off148-probe-sha256/v1",
+ "probes": {
+  "off148-agility-ply-off.json": {
+   "r1": "6c534955f77ad891cb8d71a5d93b4611aab75236fb21a10189ab12fcbb8961c0",
+   "r2": "6c534955f77ad891cb8d71a5d93b4611aab75236fb21a10189ab12fcbb8961c0"
+  },
+  "off148-baton-pass-opp-off.json": {
+   "r1": "e325837fbb9cb509b3feea27b343eaaa2cfd7b4904dee8c4e41972c28ff82b92",
+   "r2": "e325837fbb9cb509b3feea27b343eaaa2cfd7b4904dee8c4e41972c28ff82b92"
+  },
+  "off148-curse-opp-off.json": {
+   "r1": "0485cca47b76c4cbff554a5b88eb4c4b6ccd56298506b8af5393f42d9c75ea46",
+   "r2": "0485cca47b76c4cbff554a5b88eb4c4b6ccd56298506b8af5393f42d9c75ea46"
+  },
+  "off148-curse-ply-off.json": {
+   "r1": "c04f76f653e2d6f3ef542640feb7926e536db904e704ff3030ce89e922ee4853",
+   "r2": "c04f76f653e2d6f3ef542640feb7926e536db904e704ff3030ce89e922ee4853"
+  },
+  "off148-flatter-ply-off.json": {
+   "r1": "8563b38a00f8f8124f754a1b042265245c32aa94dee04cfda1907a5c98daa8ff",
+   "r2": "8563b38a00f8f8124f754a1b042265245c32aa94dee04cfda1907a5c98daa8ff"
+  },
+  "off148-roar-ply-off.json": {
+   "r1": "021cef44cf48dd0502670525034249b6630822c8e0c81b75bbe6ccd3a265861e",
+   "r2": "021cef44cf48dd0502670525034249b6630822c8e0c81b75bbe6ccd3a265861e"
+  },
+  "off148-swagger-ply-off.json": {
+   "r1": "3e7e3061f2289dd08c8db9ee4f4f9b9c028a115634ab6c970dc6edac80869578",
+   "r2": "3e7e3061f2289dd08c8db9ee4f4f9b9c028a115634ab6c970dc6edac80869578"
+  },
+  "off148-wish-opp-off.json": {
+   "r1": "e6c792d64a8f3d29ee6b2430bf98b377456818fdbec57d04fcfab6b810d25ffb",
+   "r2": "e6c792d64a8f3d29ee6b2430bf98b377456818fdbec57d04fcfab6b810d25ffb"
+  },
+  "off148-wish-ply-off.json": {
+   "r1": "85d317fd15bd1efead02c26559dbd734d6be2ff95b9af4ed1c17fcdc36592825",
+   "r2": "85d317fd15bd1efead02c26559dbd734d6be2ff95b9af4ed1c17fcdc36592825"
+  }
+ }
+}
