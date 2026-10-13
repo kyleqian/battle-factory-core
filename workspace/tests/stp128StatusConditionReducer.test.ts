@@ -84,6 +84,13 @@ describe("stp128 status-condition reducers vs every ROM row", () => {
     });
   }
 
+  it("spans equal sta123's controller rows (CURSED / NIGHTMARE 75, CONFUSION 100, FRZ 117 frozen turn / 116 + the SE gate after Ice Beam)", () => {
+    expect(Object.fromEntries(Object.entries(STATUS_CONDITION_SPANS).map(([k, v]) => [k, v.controllerRows])))
+      .toEqual({ CURSED: 75, NIGHTMARE: 75, CONFUSION: 100, FRZ: 117 });
+    expect(statusConditionSpan("FRZ")).toEqual(STATUS_CONDITION_SPANS.FRZ);
+    expect(statusConditionSpan("FRZ", { freezeLoadLagRows: 0 }).controllerRows).toBe(116);
+  });
+
   it("display rows: the shake shows one row late, created sprites two rows after their create row, the shadow hides on rel 1 .. E + 1", () => {
     const target: StatusConditionTarget = { side: "opponent", spriteX: 176, spriteY: 42, animX: 176, animY: 42 };
     expect(statusConditionDisplayRow("CURSED", 7, target).battlerOffset).toEqual({ x: 2, y: 0 });
