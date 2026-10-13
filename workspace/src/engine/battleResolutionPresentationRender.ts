@@ -651,6 +651,11 @@ export type BattleResolutionRenderEffect =
   | Readonly<{
       type: "status-animation"; battler: 0 | 1; animation: string; age: number; battlerX2Input?: LiveMoveBattlerX2Input; inflicted?: true;
     }>
+  /**
+   * fpp150 (ISSUES #139): a general animation (B_ANIM_FOCUS_PUNCH_SETUP) at the reducer's rel (= command age - 1; fps147 §4d);
+   * drawn by battleScene.ts generalAnimationRenderView (src/animation/focusPunchSetUp.ts). `battlerX2Input` as status-animation.
+   */
+  | Readonly<{ type: "general-animation"; battler: 0 | 1; animation: string; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -934,6 +939,8 @@ function applyCompletedCommand(
     || command.type === "stats-change"
     // sa125 / sar131: the field stays as it is; the status-animation effect draws over it (battleScene.ts statusAnimationRenderView).
     || command.type === "status-animation"
+    // fpp150: likewise the general animation (battleScene.ts generalAnimationRenderView).
+    || command.type === "general-animation"
   ) return field;
   if (command.type === "switch-in") {
     return replaceFieldBattler(field, command.battler, command.incoming);
@@ -1163,6 +1170,9 @@ export function battleResolutionCommandDuration(
       return command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
     // sa125 (ISSUES #168 SA1): B_ANIM_STATUS_*'s controller rows (STATUS_ANIMATION_ADDED_ROWS); sar131 draws PSN / PRZ.
     case "status-animation":
+      return command.timing.minimumFrames;
+    // fpp150: X + 1 .. X + 124 (FOCUS_PUNCH_SETUP_COMMAND_FRAMES; 3 behind a Substitute).
+    case "general-animation":
       return command.timing.minimumFrames;
   }
 }
@@ -1693,6 +1703,13 @@ export function createBattleResolutionPresentationRenderView(
         age: state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0),
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
         ...(previous?.type === "status" && previous.battler === command.battler ? { inflicted: true as const } : {}),
+      });
+    } else if (command.type === "general-animation" && fieldBattler(field, command.battler).substituteDoll !== true) {
+      // fpp150 (fps147 §4d): command age a is ROM row X + 1 + a, so the reducer's rel is a - 1. Behind the doll the ROM plays
+      // nothing (TryHandleLaunchBattleTableAnimation), the field stays as it is.
+      effect = Object.freeze({
+        type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "hit-animation") {
       effect = Object.freeze({

@@ -85,7 +85,10 @@ export type BattleMessageTiming =
   | Readonly<{ minimumFrames: 0; holdFrames: number }>
   // off108 (ISSUES #167): the provenance-derived used-move hold over a source
   // `pause B_WAIT_TIME_SHORT` (sourcePauseUsedMoveHoldFrames), after the floor.
-  | Readonly<{ minimumFrames: 24; holdFrames: number }>;
+  | Readonly<{ minimumFrames: 24; holdFrames: number }>
+  // fpp150 (ISSUES #139): a Focus Punch pre-pass print -- the empty box's interpreter rows, or the focus print's
+  // waitmessage B_WAIT_TIME_LONG + the end2 -> next action lead (focusPunchPrePassMessageTiming).
+  | Readonly<{ minimumFrames: number; holdFrames: number }>;
 /**
  * sgs134 (docs/sgs134-se-gate-other-requests.md): seGateFrames (present only when > 0) = HandleMoveAnimation's IsBattleSEPlaying rows
  * before a multi-hit move's 2nd+ hit (sgs134RequestSeGate); the live command presents them before its pre rows (the field as it is).
@@ -121,6 +124,64 @@ export const STATUS_ANIMATION_ADDED_ROWS = Object.freeze({
   PSN: 71, CONFUSION: 100, BRN: 39, INFATUATION: 97, SLP: 97, PRZ: 39, FRZ: 117, CURSED: 75, NIGHTMARE: 75,
 } as const);
 export type BattleStatusAnimationName = keyof typeof STATUS_ANIMATION_ADDED_ROWS;
+/**
+ * fpp150 (ISSUES #139; fps147 §1 / §4b, 7 / 7 dense Scene ON windows): the general-animation command for
+ * B_ANIM_FOCUS_PUNCH_SETUP spans ROM rows X + 1 .. X + 124 (X = the playanimation row; gAnimScriptActive X + 2 .. X + 121),
+ * so the next message command's first frame is the first glyph of "…is tightening its focus!" at X + 125. Behind a Substitute
+ * TryHandleLaunchBattleTableAnimation returns at once (battle_gfx_sfx_util.c:468-472): first glyph at X + 4, no animation.
+ */
+export const FOCUS_PUNCH_SETUP_COMMAND_FRAMES = 124;
+export const FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES = 3;
+/**
+ * fpp150 (rcp143 R4, both scenes): the rows from the end of the "…is tightening its focus!" print + `waitmessage
+ * B_WAIT_TIME_LONG` (L + 64) to the next action's first glyph: end2, RunTurnActionsFunctions and action 1's prologue
+ * (ROM: print 108 / 198, next action's print 214 / 304, first glyph + 1; L = 31). Before a second Focus Punch user's
+ * pre-pass (unprobed, fps147 §4h) the action prologue is replaced by CheckFocusPunch's re-entry: 4 rows fewer.
+ */
+export const FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_FRAMES = 11;
+export const FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES = 7;
+export const FOCUS_PUNCH_SETUP_SCRIPT = "BattleScript_FocusPunchSetUp";
+/** STATUS2_SUBSTITUTE (include/constants/battle.h:216). */
+const FOCUS_PUNCH_STATUS2_SUBSTITUTE = 1 << 24;
+
+/**
+ * fpp150: a pre-pass print's timing. The empty box (printstring STRINGID_EMPTYSTRING3 + waitmessage 1) lasts one frame per
+ * kernel interpreter execution to the script's next presented receipt plus waitmessage 1's controller row (the kernel does not
+ * count the printer's busy row): Scene ON the playanimation (2 + 1: rows X - 3 .. X - 1, the general-animation command then
+ * starts X + 1), Scene OFF the focus print (36 + 1: BattleScript_Pausex20's call / pause 32 / return, the focus print's first
+ * glyph then lands on its command's first frame). rcp143 R4: empty box shown 72, Scene OFF focus print 108 (glyph 109),
+ * Scene ON X 74; fps147 §4b. The focus print adds the end2 -> next action / pre-pass lead.
+ */
+function focusPunchPrePassMessageTiming(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+  base: BattleMessageTiming,
+): BattleMessageTiming | null {
+  const event = events[index]!;
+  if (event.provenance?.sourceLabel !== FOCUS_PUNCH_SETUP_SCRIPT || event.payload.kind !== "message") return null;
+  if (event.payload.messageId === "STRINGID_EMPTYSTRING3") {
+    const next = events[index + 1];
+    const from = event.provenance.instructionExecution;
+    const to = next?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT ? next.provenance.instructionExecution : undefined;
+    if (from === undefined || to === undefined || to <= from) return null;
+    return Object.freeze({ minimumFrames: to - from + 1, holdFrames: 0 });
+  }
+  if (event.payload.messageId === "STRINGID_PKMNTIGHTENINGFOCUS") {
+    const next = events[index + 1];
+    const nextPrePass = next?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT;
+    return Object.freeze({
+      minimumFrames: base.minimumFrames,
+      holdFrames: base.holdFrames
+        + (nextPrePass ? FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES : FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_FRAMES),
+    });
+  }
+  return null;
+}
+
+/** fpp150: the turn opens with BattleScript_FocusPunchSetUp (CheckFocusPunch_ClearVarsBeforeTurnStarts runs before action 1). */
+export function battleResolutionOpensWithFocusPunchPrePass(events: readonly BattleKernelSemanticEvent[]): boolean {
+  return events.find((event) => event.sequence >= 0)?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT;
+}
 export type BattleStatusIconTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleFaintTiming =
   | Readonly<{
@@ -342,6 +403,19 @@ export type BattleResolutionPresentationCommand =
       timing: Readonly<{ minimumFrames: number; seGateFrames?: number }>;
     }>
   | Readonly<{
+      /**
+       * fpp150 (ISSUES #139, docs/fpp150-focus-punch-prepass.md): BattleScript_FocusPunchSetUp's B_ANIM_FOCUS_PUNCH_SETUP
+       * (Scene ON only: the kernel's playanimation takes BattleScript_Pausex20 in Scene OFF). Command age a = ROM row X + 1 + a
+       * (X = the playanimation row); General_FocusPunchSetUp is drawn at rel = age - 1 (fps147's rows). minimumFrames =
+       * FOCUS_PUNCH_SETUP_COMMAND_FRAMES (the next print's first glyph at X + 125), or the substitute rows (no animation).
+       */
+      type: "general-animation";
+      eventSequence: number;
+      battler: 0 | 1;
+      animation: "FOCUS_PUNCH_SETUP";
+      timing: Readonly<{ minimumFrames: number }>;
+    }>
+  | Readonly<{
       /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
       type: "trainer-slide";
       eventSequence: number;
@@ -447,6 +521,13 @@ export type BattleResolutionConfirmHandoff = Readonly<{
   fightDisplayCursor: 0 | 1 | 2 | 3;
   idleBounceElapsed: number;
   bounceReset: boolean;
+  /**
+   * fpp150: the turn opens with the Focus Punch pre-pass, whose empty box the ROM prints 3 rows after turn order (R4: 68 -> 71,
+   * shown 72) where an action's first print lands 9 rows after it (36 -> 45, glyph 46). The handoff ends after
+   * stop-bounce-request (the first command's frame is then the empty box's first display row on R4, both scenes); the remaining
+   * stages' rows (the action prologue) are carried by the pre-pass's last print (FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_FRAMES).
+   */
+  focusPunchPrePass?: true;
 }>;
 
 /**
@@ -3821,10 +3902,13 @@ export function projectBattleResolutionCommands(
             ? RETURN_MON_TIMING
             : payload.messageId === "STRINGID_SWITCHINMON"
               ? SWITCH_IN_MESSAGE_TIMING
-              : messageTimingFromSourceProvenance(event)
-                ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
-                ? WAITMESSAGE_LONG_TIMING
-                : MESSAGE_TIMING),
+              : (() => {
+                const base = messageTimingFromSourceProvenance(event)
+                  ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
+                  ? WAITMESSAGE_LONG_TIMING
+                  : MESSAGE_TIMING);
+                return focusPunchPrePassMessageTiming(events, index, base) ?? base;
+              })(),
       }));
       if (payload.messageId === "STRINGID_USEDMOVE" || payload.messageId === "STRINGID_EMPTYSTRING3") {
         pauseOpenerIndex = index;
@@ -3841,6 +3925,21 @@ export function projectBattleResolutionCommands(
         battler: singlesBattler(payload.battler, "trainer slide"),
         direction: payload.kind === "trainer-slide-in" ? "in" as const : "out" as const,
         timing: TRAINER_SLIDE_TIMING,
+      }));
+      continue;
+    }
+    if (payload.kind === "animation" && payload.animationId === "FOCUS_PUNCH_SETUP") {
+      const battler = singlesBattler(payload.battler ?? -1, "focus punch setup");
+      // gBattleSpritesDataPtr->battlerData[].behindSubstitute at the turn's start = the battler's STATUS2_SUBSTITUTE.
+      const behindSubstitute = (beforeRules.battlers[battler]!.status2 & FOCUS_PUNCH_STATUS2_SUBSTITUTE) !== 0;
+      commands.push(Object.freeze({
+        type: "general-animation",
+        eventSequence: event.sequence,
+        battler,
+        animation: "FOCUS_PUNCH_SETUP",
+        timing: Object.freeze({
+          minimumFrames: behindSubstitute ? FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES : FOCUS_PUNCH_SETUP_COMMAND_FRAMES,
+        }),
       }));
       continue;
     }
@@ -4394,6 +4493,7 @@ export function createBattleResolutionPresentation(
           bounceReset: false,
           fightDisplayCursor: input.confirmHandoff!.fightDisplayCursor,
           idleBounceElapsed: input.confirmHandoff!.idleBounceElapsed,
+          ...(battleResolutionOpensWithFocusPunchPrePass(events) ? { focusPunchPrePass: true as const } : {}),
         }),
     field,
     pendingBoundary: boundary,
@@ -4523,7 +4623,9 @@ export function advanceBattleResolutionConfirmHandoff(
       fadeTick: state.fadeTick + 1,
     });
   }
-  const nextStage = CONFIRM_HANDOFF_NEXT[handoff.stage];
+  const nextStage = handoff.focusPunchPrePass === true && handoff.stage === "stop-bounce-request"
+    ? null
+    : CONFIRM_HANDOFF_NEXT[handoff.stage];
   if (nextStage === null) {
     return Object.freeze({
       ...state,

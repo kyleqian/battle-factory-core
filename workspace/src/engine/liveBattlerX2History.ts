@@ -53,6 +53,11 @@ export type LiveBattlerX2Event =
   | Readonly<{ kind: "substitute-fade"; side: LiveBattlerX2Side }>
   /** sar131: a B_ANIM_STATUS_* script on the battler of `side` (LaunchStatusAnimation: attacker = target = the battler). */
   | Readonly<{ kind: "status-animation"; side: LiveBattlerX2Side; animation: string | null }>
+  /**
+   * fpp150: General_FocusPunchSetUp (B_ANIM_FOCUS_PUNCH_SETUP): AnimTask_ShakeMon2 writes the attacker's x2 absolutely and
+   * ends at 0 (fps147 §1c, 7 / 7 windows); the other battler is untouched.
+   */
+  | Readonly<{ kind: "general-animation"; side: LiveBattlerX2Side }>
   | Readonly<{ kind: "unknown"; side: LiveBattlerX2Side | "both"; reason: string }>;
 
 /**
@@ -176,6 +181,7 @@ export function applyLiveBattlerX2Event(history: LiveBattlerX2History, event: Li
       break;
     }
     case "substitute-fade":
+    case "general-animation":
       next = { ...history, [event.side]: "zeroed" };
       break;
     case "status-animation": {
@@ -226,6 +232,7 @@ export function liveBattlerX2EventsOf(event: BattleKernelSemanticEvent): readonl
     }
     if (KEEP_ANIMATIONS.has(payload.animationId)) return [];
     if (payload.animationId === "SUBSTITUTE_FADE") return [{ kind: "substitute-fade", side }];
+    if (payload.animationId === "FOCUS_PUNCH_SETUP") return [{ kind: "general-animation", side }];
     const target = sideOf(payload.target);
     const unknown = (at: LiveBattlerX2Side): LiveBattlerX2Event => ({ kind: "unknown", side: at, reason: payload.animationId });
     return target === null || target === side ? [unknown(side)] : [unknown(side), unknown(target)];

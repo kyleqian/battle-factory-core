@@ -5,6 +5,7 @@ import {
 import { liveBattlerAnchors } from "./liveMoveAnimation.ts";
 import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
+import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
@@ -7745,6 +7746,61 @@ export function statsChangeRenderView(view: BattleResolutionPresentationRenderVi
   return Object.freeze({
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || row.enemyShadowHidden }),
     banner,
+  });
+}
+
+/** fpp150: the general-animation command's field view (generalAnimationRenderView) and its Endure particles (over the battlers). */
+export type GeneralAnimationRenderView = Readonly<{
+  view: BattleResolutionPresentationRenderView;
+  sprites: readonly Readonly<{ x: number; y: number; frame: number; oamSlot: number }>[];
+}>;
+
+/** fps147 §4e: production draws the Endure particles in this gSprites slot order. */
+const FOCUS_PUNCH_SETUP_PARTICLE_DRAW_SLOTS = Object.freeze([9, 7, 5, 4, 3]);
+
+/**
+ * fpp150 (ISSUES #139, docs/fpp150-focus-punch-prepass.md; fps147 §4e path 2): B_ANIM_FOCUS_PUNCH_SETUP's
+ * General_FocusPunchSetUp over the field as it is (Scene ON; the kernel emits none in Scene OFF, and the presentation draws
+ * nothing over the doll). One display row of focusPunchSetUp.ts focusPunchSetUpDisplayRow at the effect's rel: the attacker's
+ * OBJ palette blended toward RGB_RED by the row's palette Y, its corner + ShakeMon2 x2, the opponent at its tracked front idle
+ * rest (as statusAnimationRenderView), the Endure particles (focus-energy art, frame x 4 tile rows, corner (x - 8, y - 16)) and
+ * SpriteCB_EnemyShadow's hide (display rows 1 .. 121). attackerCoord = liveBattlerAnchors(side).battlePositionCenter, the ROM's
+ * GetBattlerSpriteCoord on 7 / 7 windows. Null for another animation (the field stays as it is).
+ */
+export function generalAnimationRenderView(view: BattleResolutionPresentationRenderView): GeneralAnimationRenderView | null {
+  const effect = view.effect;
+  if (effect?.type !== "general-animation" || effect.animation !== "FOCUS_PUNCH_SETUP") return null;
+  if (effect.age < 0) return null;
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const row = focusPunchSetUpDisplayRow(effect.age, side, liveBattlerAnchors(side, view.fieldArt).battlePositionCenter);
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const place = (at: "player" | "opponent") => {
+    const art = view.fieldArt[at];
+    const base = at === "opponent" ? rest : { x2: 0, y2: 0 };
+    const x2 = base.x2 + (at === side ? row.attackerX2 : 0);
+    const blend = at === side && row.attackerPaletteY > 0;
+    if (x2 === 0 && base.y2 === 0 && !blend) return art;
+    return Object.freeze({
+      ...art,
+      origin: Object.freeze({ x: art.origin.x + x2, y: art.origin.y + base.y2 }),
+      ...(blend ? {
+        pic: Object.freeze({
+          ...art.pic, palette: blendPaletteToward(art.pic.palette as RgbColor[], { r: 255, g: 0, b: 0 }, row.attackerPaletteY),
+        }),
+      } : {}),
+    });
+  };
+  const player = place("player"), opponent = place("opponent");
+  const fieldArt = player === view.fieldArt.player && opponent === view.fieldArt.opponent
+    ? view.fieldArt : Object.freeze({ ...view.fieldArt, player, opponent });
+  const sprites = FOCUS_PUNCH_SETUP_PARTICLE_DRAW_SLOTS
+    .map((slot) => row.sprites.find((sprite) => sprite.oamSlot === slot))
+    .filter((sprite): sprite is NonNullable<typeof sprite> => sprite !== undefined);
+  return Object.freeze({
+    view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || row.enemyShadowHidden }),
+    sprites,
   });
 }
 
@@ -54905,6 +54961,9 @@ export function renderBattleResolutionSceneOffView(
   // sar131: the status animation's battler (shake, palette blend, tracked rest) and its sprites (drawn over the battlers below).
   const statusAnimation = statusAnimationRenderView(view);
   if (statusAnimation) view = statusAnimation.view;
+  // fpp150: the general animation's attacker (shake, red blend, tracked rest) and its particles (drawn over the battlers below).
+  const generalAnimation = generalAnimationRenderView(view);
+  if (generalAnimation) view = generalAnimation.view;
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const faint = view.effect?.type === "faint" ? view.effect : null;
   const hit = view.effect?.type === "hit" ? view.effect : null;
@@ -55031,6 +55090,10 @@ export function renderBattleResolutionSceneOffView(
   }
   // sar131: the status animation's OAM (priority 2 in front of its battler, under the priority-1 healthboxes).
   for (const sprite of statusAnimation?.sprites ?? []) if (!sprite.behindBattlers) drawStatusAnimationSprite(fb, sprite);
+  for (const sprite of generalAnimation?.sprites ?? []) {
+    drawSpriteSheet(fb, subTileset(focusEnergyArt.focusEnergy.tileset, sprite.frame * 4, 4), focusEnergyArt.focusEnergy.palette,
+      sprite.x - 8, sprite.y - 16);
+  }
   if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);
   if (view.visibility.opponent.healthbox) {
     drawSendOutHealthbox(
