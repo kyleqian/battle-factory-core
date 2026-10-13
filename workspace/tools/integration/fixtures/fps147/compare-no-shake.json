@@ -1,0 +1,719 @@
+{
+ "schema": "fps147-compare/v1",
+ "summary": {
+  "neg": "no-shake",
+  "windows": 7,
+  "reducerZeroPxWindows": 0,
+  "productionEndureZeroPxWindows": null,
+  "perRowDigest": "645660a3dfcdd282"
+ },
+ "result": {
+  "o-aggron": {
+   "side": "opponent",
+   "species": {
+    "player": "JOLTEON",
+    "opponent": "AGGRON"
+   },
+   "R": 44,
+   "elevatedOpponentShadow": false,
+   "attackerCoord": {
+    "x": 176,
+    "y": 40
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 8
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 76112,
+   "animationRowsPx": 76112,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 638,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     39,
+     1239,
+     0
+    ],
+    [
+     40,
+     1251,
+     0
+    ],
+    [
+     41,
+     1259,
+     0
+    ],
+    [
+     42,
+     1246,
+     0
+    ],
+    [
+     43,
+     1239,
+     0
+    ],
+    [
+     44,
+     1264,
+     0
+    ],
+    [
+     45,
+     1261,
+     0
+    ],
+    [
+     46,
+     1270,
+     0
+    ],
+    [
+     47,
+     1270,
+     0
+    ],
+    [
+     48,
+     1223,
+     0
+    ],
+    [
+     49,
+     1218,
+     0
+    ],
+    [
+     50,
+     1226,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "e7eafc8493640c72"
+  },
+  "o-golem": {
+   "side": "opponent",
+   "species": {
+    "player": "JOLTEON",
+    "opponent": "GOLEM"
+   },
+   "R": 44,
+   "elevatedOpponentShadow": false,
+   "attackerCoord": {
+    "x": 176,
+    "y": 40
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 13
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 57202,
+   "animationRowsPx": 57202,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 632,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     39,
+     920,
+     0
+    ],
+    [
+     40,
+     930,
+     0
+    ],
+    [
+     41,
+     936,
+     0
+    ],
+    [
+     42,
+     949,
+     0
+    ],
+    [
+     43,
+     953,
+     0
+    ],
+    [
+     44,
+     970,
+     0
+    ],
+    [
+     45,
+     971,
+     0
+    ],
+    [
+     46,
+     968,
+     0
+    ],
+    [
+     47,
+     964,
+     0
+    ],
+    [
+     48,
+     929,
+     0
+    ],
+    [
+     49,
+     917,
+     0
+    ],
+    [
+     50,
+     910,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "0baef3da783003b7"
+  },
+  "o-registeel": {
+   "side": "opponent",
+   "species": {
+    "player": "JOLTEON",
+    "opponent": "REGISTEEL"
+   },
+   "R": 44,
+   "elevatedOpponentShadow": false,
+   "attackerCoord": {
+    "x": 176,
+    "y": 40
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 11
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 57661,
+   "animationRowsPx": 57661,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 638,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     39,
+     932,
+     0
+    ],
+    [
+     40,
+     932,
+     0
+    ],
+    [
+     41,
+     939,
+     0
+    ],
+    [
+     42,
+     939,
+     0
+    ],
+    [
+     43,
+     939,
+     0
+    ],
+    [
+     44,
+     970,
+     0
+    ],
+    [
+     45,
+     970,
+     0
+    ],
+    [
+     46,
+     967,
+     0
+    ],
+    [
+     47,
+     967,
+     0
+    ],
+    [
+     48,
+     954,
+     0
+    ],
+    [
+     49,
+     941,
+     0
+    ],
+    [
+     50,
+     931,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "1750af968837c2f2"
+  },
+  "p-breloom-golbat": {
+   "side": "player",
+   "species": {
+    "player": "BRELOOM",
+    "opponent": "GOLBAT"
+   },
+   "R": 76,
+   "elevatedOpponentShadow": true,
+   "attackerCoord": {
+    "x": 72,
+    "y": 80
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 52
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 45643,
+   "animationRowsPx": 45643,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 908,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     39,
+     773,
+     0
+    ],
+    [
+     40,
+     763,
+     0
+    ],
+    [
+     41,
+     765,
+     0
+    ],
+    [
+     42,
+     744,
+     0
+    ],
+    [
+     43,
+     737,
+     0
+    ],
+    [
+     44,
+     734,
+     0
+    ],
+    [
+     45,
+     733,
+     0
+    ],
+    [
+     46,
+     741,
+     0
+    ],
+    [
+     47,
+     740,
+     0
+    ],
+    [
+     48,
+     692,
+     0
+    ],
+    [
+     49,
+     692,
+     0
+    ],
+    [
+     50,
+     703,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "d9bbda652e02f530"
+  },
+  "p-breloom": {
+   "side": "player",
+   "species": {
+    "player": "BRELOOM",
+    "opponent": "JOLTEON"
+   },
+   "R": 76,
+   "elevatedOpponentShadow": false,
+   "attackerCoord": {
+    "x": 72,
+    "y": 80
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 52
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 45643,
+   "animationRowsPx": 45643,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 908,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     39,
+     773,
+     0
+    ],
+    [
+     40,
+     763,
+     0
+    ],
+    [
+     41,
+     765,
+     0
+    ],
+    [
+     42,
+     744,
+     0
+    ],
+    [
+     43,
+     737,
+     0
+    ],
+    [
+     44,
+     734,
+     0
+    ],
+    [
+     45,
+     733,
+     0
+    ],
+    [
+     46,
+     741,
+     0
+    ],
+    [
+     47,
+     740,
+     0
+    ],
+    [
+     48,
+     692,
+     0
+    ],
+    [
+     49,
+     692,
+     0
+    ],
+    [
+     50,
+     703,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "718ac9c93963b5c8"
+  },
+  "p-electabuzz": {
+   "side": "player",
+   "species": {
+    "player": "ELECTABUZZ",
+    "opponent": "JOLTEON"
+   },
+   "R": 108,
+   "elevatedOpponentShadow": false,
+   "attackerCoord": {
+    "x": 72,
+    "y": 80
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 56
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 32576,
+   "animationRowsPx": 32576,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 770,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     39,
+     524,
+     0
+    ],
+    [
+     40,
+     511,
+     0
+    ],
+    [
+     41,
+     512,
+     0
+    ],
+    [
+     42,
+     511,
+     0
+    ],
+    [
+     43,
+     515,
+     0
+    ],
+    [
+     44,
+     524,
+     0
+    ],
+    [
+     45,
+     522,
+     0
+    ],
+    [
+     46,
+     532,
+     0
+    ],
+    [
+     47,
+     534,
+     0
+    ],
+    [
+     48,
+     500,
+     0
+    ],
+    [
+     49,
+     507,
+     0
+    ],
+    [
+     50,
+     517,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "dd18a1a82ae1e286"
+  },
+  "p-machamp": {
+   "side": "player",
+   "species": {
+    "player": "MACHAMP",
+    "opponent": "JOLTEON"
+   },
+   "R": 44,
+   "elevatedOpponentShadow": false,
+   "attackerCoord": {
+    "x": 72,
+    "y": 80
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 52
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 56862,
+   "animationRowsPx": 56862,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 948,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     39,
+     915,
+     0
+    ],
+    [
+     40,
+     914,
+     0
+    ],
+    [
+     41,
+     912,
+     0
+    ],
+    [
+     42,
+     895,
+     0
+    ],
+    [
+     43,
+     898,
+     0
+    ],
+    [
+     44,
+     935,
+     0
+    ],
+    [
+     45,
+     940,
+     0
+    ],
+    [
+     46,
+     951,
+     0
+    ],
+    [
+     47,
+     954,
+     0
+    ],
+    [
+     48,
+     926,
+     0
+    ],
+    [
+     49,
+     924,
+     0
+    ],
+    [
+     50,
+     922,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "14676bafb87bceca"
+  }
+ }
+}

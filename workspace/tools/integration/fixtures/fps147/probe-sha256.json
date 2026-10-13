@@ -1,0 +1,53 @@
+{
+ "schema": "fps147-probe-sha256/v1",
+ "jobs": {
+  "o-aggron": {
+   "r1": "4d42f354855d4e12f5e1c32521b756e363efef905e1b0f6309a12f371ed23251",
+   "r2": "4d42f354855d4e12f5e1c32521b756e363efef905e1b0f6309a12f371ed23251",
+   "equal": true,
+   "dumpRgb": "81aed7c0511c0dcac0ae222e9243cc9231b3edaf7f49025e85330559f67e14d4"
+  },
+  "o-golem": {
+   "r1": "4da8ba1bf0a0f287ef18c4f40845de27292e244260050c57981eacef74b1f896",
+   "r2": "4da8ba1bf0a0f287ef18c4f40845de27292e244260050c57981eacef74b1f896",
+   "equal": true,
+   "dumpRgb": "239600904ea2298229780acff640ff9412dfd227c41f44e89ddff7295a41fc01"
+  },
+  "o-registeel": {
+   "r1": "4ca021ab776927a1423bfe2770845dc8dfd2fb083473caccf8ae1984a4de5480",
+   "r2": "4ca021ab776927a1423bfe2770845dc8dfd2fb083473caccf8ae1984a4de5480",
+   "equal": true,
+   "dumpRgb": "f0b15233ee1abc9a4b59ee491ce6a40de29f7f8707312346fbad4aad0e2f22d1"
+  },
+  "p-breloom-golbat": {
+   "r1": "7aa2b6642369c94c6f10a005c7227480eb60a7971eaca6e5132ca96549df5ba2",
+   "r2": "7aa2b6642369c94c6f10a005c7227480eb60a7971eaca6e5132ca96549df5ba2",
+   "equal": true,
+   "dumpRgb": "a5bbbbd046fa41b2641c77bb8ee57183e699c7e9c7543c4be076ea0743ef9a49"
+  },
+  "p-breloom": {
+   "r1": "e61bca8bbebbee806a0d383f473415704c4f08cf4575a594b315b3e7f54c361e",
+   "r2": "e61bca8bbebbee806a0d383f473415704c4f08cf4575a594b315b3e7f54c361e",
+   "equal": true,
+   "dumpRgb": "c5fddec9dcde020ca6b1f45e78e3a6e2408879b69b0d798e3c8534ba2905937c"
+  },
+  "p-electabuzz": {
+   "r1": "2cd12d5f6075126ea9567302f42dfabcd15ae4b60094b950346d6f2abfb3e488",
+   "r2": "2cd12d5f6075126ea9567302f42dfabcd15ae4b60094b950346d6f2abfb3e488",
+   "equal": true,
+   "dumpRgb": "0d319ed7b07b1197e931d215e3812b7f748e58e6a5dd893f8368f5b4fb92fd1f"
+  },
+  "p-machamp-sub": {
+   "r1": "f067711f15dee4ec8bf0f731b02cb494262c090bcb08e72166a537cfcccd4ce2",
+   "r2": "f067711f15dee4ec8bf0f731b02cb494262c090bcb08e72166a537cfcccd4ce2",
+   "equal": true,
+   "dumpRgb": "7683d611f6777e62d8b782536027ebed4c0b327ca76aba342a557660f702d139"
+  },
+  "p-machamp": {
+   "r1": "9317ebfce17828cefa4ec35ba842ca3f0a22966c0b54a25a0f9abf2ec603763a",
+   "r2": "9317ebfce17828cefa4ec35ba842ca3f0a22966c0b54a25a0f9abf2ec603763a",
+   "equal": true,
+   "dumpRgb": "a8044b9f4491ad2177c6cf346a68a58f51316203c49cf62103b8cb315e97d159"
+  }
+ }
+}
