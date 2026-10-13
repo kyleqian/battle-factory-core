@@ -11,6 +11,7 @@
 //   msg = message box (y >= 112)                       bg  = the rest of the field (the white fade's BG outside the regions above)
 //   node --experimental-strip-types --no-warnings tools/integration/snd145Compare.ts <scenario.json> <rom-png-dir> <faint|roar> <out.json>
 //     [--slide=N] [--duration=N]   (controls: override the opponent slide start / switch-in duration; default = production's)
+//     [--scene=off]                (build the command as production does in Scene OFF: the calibrated slide 33 / 91 + 11 span)
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { inflateSync } from "node:zlib";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
@@ -20,7 +21,6 @@ import {
   OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES, SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming,
 } from "../../src/engine/battleResolutionPresentation.ts";
 import { opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay } from "../../src/engine/switchInTail.ts";
-import * as renderModule from "../../src/engine/battleResolutionPresentationRender.ts";
 
 const [scenarioPath, romDir, kind, outPath] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const opt = (name: string) => {
@@ -73,16 +73,21 @@ const after = kind === "faint" ? ["What will", `${name(playerMon.species)} do?`]
 const message = (seq: number, lines: string[]) => Object.freeze({ type: "message", eventSequence: seq, lines, advance: "automatic",
   noCursor: false, timing: { minimumFrames: 24, holdFrames: 0 } });
 const slide = opt("slide");
-const timing = opt("duration") === null ? switchInTiming(1, species) : { minimumFrames: opt("duration")! - SWITCH_IN_WAITSTATE_HOLD_FRAMES };
+// --scene=off builds the command as production does in Scene OFF (calibrated constants, no species tail, no faint hold).
+const sceneOn = !process.argv.includes("--scene=off");
+const timing = opt("duration") === null ? switchInTiming(1, species, sceneOn) : { minimumFrames: opt("duration")! - SWITCH_IN_WAITSTATE_HOLD_FRAMES };
+const tailFields = sceneOn
+  ? { healthboxSlideElapsed: slide ?? opponentSwitchInHealthboxSlideElapsed(species), sendInVisualDelay: opponentSwitchInVisualDelay(species) }
+  : slide === null ? {} : { healthboxSlideElapsed: slide };
 // A faint replacement that ends the turn carries production's extra turn-end hold (the action prompt follows outside this segment:
 // rows are compared through the hold's last row; snd145RouteProbe.ts measures the prompt itself).
-const settleHoldFrames = SWITCH_IN_WAITSTATE_HOLD_FRAMES + (kind === "faint" ? OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES : 0);
+const settleHoldFrames = SWITCH_IN_WAITSTATE_HOLD_FRAMES + (kind === "faint" && sceneOn ? OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES : 0);
 const duration = timing.minimumFrames + settleHoldFrames;
 const commands = [
   message(1, before),
   Object.freeze({ type: "sprite-visibility", eventSequence: 2, battler: 1, visible: false, recall: true, timing: { minimumFrames: 1 } }),
   Object.freeze({ type: "switch-in", eventSequence: 3, battler: 1, fromPartyIndex: 0, toPartyIndex: 1, incoming, incomingStatus1: 0,
-    timing, settleHoldFrames }),
+    timing, settleHoldFrames, ...tailFields }),
   message(4, after),
 ];
 const viewAt = (e: number) => createBattleResolutionPresentationRenderView({
@@ -91,10 +96,7 @@ const viewAt = (e: number) => createBattleResolutionPresentationRenderView({
   confirmHandoff: null, opponentTrainer: null, sourceDecision: { kind: "use-move" }, fadeTick: 0,
 } as never);
 const draw = (e: number) => {
-  let view = viewAt(e);
-  if (slide !== null && view.midBattleSwitchIn !== null) {
-    view = { ...view, midBattleSwitchIn: renderModule.midBattleSwitchInAt(e, 1, slide) };
-  }
+  const view = viewAt(e);
   const fb = new Uint8Array(240 * 160 * 4);
   renderBattleResolutionLiveView(fb, view);
   return fb;
@@ -102,7 +104,7 @@ const draw = (e: number) => {
 const frames = readdirSync(romDir!).filter((f) => /^frame-\d+\.png$/.test(f)).map((f) => Number(f.slice(6, -4))).sort((a, b) => a - b);
 const rom = new Map(frames.map((f) => [f, readPng(`${romDir}/frame-${String(f).padStart(5, "0")}.png`)]));
 // Anchor: production elapsed 2 (+ CASTFORM's whole-send-in delay) shows the closed ball at (168,56) 16x16.
-const anchorElapsed = 2 + opponentSwitchInVisualDelay(species);
+const anchorElapsed = 2 + (sceneOn ? opponentSwitchInVisualDelay(species) : 0);
 const ball = draw(anchorElapsed);
 const boxEqual = (r: Uint8Array) => {
   for (let y = 56; y < 72; y += 1) for (let x = 168; x < 184; x += 1) for (let k = 0; k < 3; k += 1) {
@@ -131,7 +133,7 @@ for (let e = 0; e <= until; e += 1) {
   }
   rows.push(row);
 }
-const tail = { slideStart: slide ?? opponentSwitchInHealthboxSlideElapsed(species), duration };
+const tail = { sceneOn, slideStart: slide ?? (sceneOn ? opponentSwitchInHealthboxSlideElapsed(species) : 33), duration };
 // The ROM's next text (forced: "Foe X was dragged out!"; faint: the "What will X do?" prompt): the first row after the slide whose
 // message box differs from the slide-start row's.
 const msgBand = (f: Uint8Array) => Buffer.from(f.subarray(112 * 240 * 3)).toString("base64");

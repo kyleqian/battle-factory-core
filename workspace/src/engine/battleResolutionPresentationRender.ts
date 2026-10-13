@@ -26,7 +26,6 @@ import type {
   BattleResolutionPresentationCommand,
   BattleResolutionPresentationState,
 } from "./battleResolutionPresentation.ts";
-import { opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay } from "./switchInTail.ts";
 import {
   BATTLE_SCRIPT_STATUS1_BURN,
   BATTLE_SCRIPT_STATUS1_FREEZE,
@@ -306,8 +305,8 @@ export function midBattleSwitchInAt(
   elapsed: number,
   battler: 0 | 1,
   /**
-   * snd145: the opponent's species-keyed slide start (`opponentSwitchInHealthboxSlideElapsed(incoming species)`, what the
-   * production render passes); omitted = the player constant / the pre-snd145 opponent 33 for direct callers.
+   * snd145: a Scene ON opponent switch-in's species-keyed slide start (the command's `healthboxSlideElapsed`); omitted = the
+   * calibrated constants (player 66; opponent 33: Scene OFF, whose skipped front animation does not gate the slide).
    */
   healthboxSlideStart?: number,
 ): MidBattleSwitchInView {
@@ -1765,13 +1764,13 @@ export function createBattleResolutionPresentationRenderView(
       // The incoming mon is already the field battler; the mid-battle
       // switch-in view holds its visible onset until the ball-release emerge.
       field = withSubstituteDoll(replaceFieldBattler(field, command.battler, command.incoming), command.battler, false);
-      // snd145: the opponent's species-keyed slide start; CASTFORM's whole send-in runs one frame late (opponentSwitchInVisualDelay).
-      const visualDelay = command.battler === 1 ? opponentSwitchInVisualDelay(command.incoming.species) : 0;
+      // snd145: a Scene ON opponent send-in carries its species-keyed slide start; CASTFORM's whole send-in runs one frame late.
+      const visualDelay = command.sendInVisualDelay ?? 0;
       const sendInElapsed = state.lifecycle.phaseElapsed - visualDelay;
       midBattleSwitchIn = midBattleSwitchInAt(
         sendInElapsed,
         command.battler,
-        command.battler === 1 ? opponentSwitchInHealthboxSlideElapsed(command.incoming.species) - visualDelay : undefined,
+        command.healthboxSlideElapsed === undefined ? undefined : command.healthboxSlideElapsed - visualDelay,
       );
       midBattleSwitchFade = midBattleSwitchSendInFadeAt(sendInElapsed, command.battler) ?? midBattleSwitchFade;
       midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(sendInElapsed, command.battler) ?? midBattleSwitchParticles;

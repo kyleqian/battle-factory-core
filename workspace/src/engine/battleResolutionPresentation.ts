@@ -48,7 +48,9 @@ import { battleResolutionFieldBeforeCommand } from "./battleResolutionPresentati
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
-import { opponentSwitchInDuration } from "./switchInTail.ts";
+import {
+  opponentSwitchInDuration, opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay,
+} from "./switchInTail.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -251,6 +253,13 @@ export type BattleResolutionPresentationCommand =
        * 91-frame controller span.
        */
       settleHoldFrames?: number;
+      /**
+       * snd145: Scene ON opponent send-in only (src/engine/switchInTail.ts): the species-keyed healthbox slide start (switch-in
+       * elapsed) and the frames the whole send-in starts late (CASTFORM 1). Absent = the calibrated constants (player; Scene OFF,
+       * where HITMARKER_NO_ANIMATIONS skips the front animation that gates the slide: BattleAnimateFrontSprite, pokemon.c:6803).
+       */
+      healthboxSlideElapsed?: number;
+      sendInVisualDelay?: number;
     }>
   | Readonly<{
       type: "switch-out";
@@ -1034,19 +1043,20 @@ const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: SWITCH_IN_SPAN_FRAMES } 
  */
 export const SWITCH_IN_WAITSTATE_HOLD_FRAMES = 11;
 /**
- * snd145 (ISSUES #146 remainder): an opponent faint replacement that ends the turn. The ROM blanks the message box 10 frames after
+ * snd145 (ISSUES #146 remainder): a Scene ON opponent faint replacement that ends the turn. The ROM blanks the message box 10 frames after
  * the species' send-in tail (where a forced switch prints "dragged out!") and draws the action menu at +17 (dense Scene ON windows,
  * 5 / 5 species without a switch-in effect; docs/snd145-send-in-tail-live.md); production's next-command handoff shows 6 blank
  * frames, so the switch-in holds 11 more frames: menu exact, the blank one frame late.
  */
 export const OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES = 11;
 /**
- * snd145 (ISSUES #146 remainder): the opponent's send-in tail is species-keyed (the healthbox slide waits for the front animation,
- * the next printstring for the controller end; src/engine/switchInTail.ts), so its controller span is the species' whole duration
- * minus the shared waitstate hold. The player side keeps the calibrated 91-frame span (its message is cry-bound, not modelled).
+ * snd145 (ISSUES #146 remainder): in Scene ON the opponent's send-in tail is species-keyed (the healthbox slide waits for the front
+ * animation, the next printstring for the controller end; src/engine/switchInTail.ts), so its controller span is the species' whole
+ * duration minus the shared waitstate hold. The player side keeps the calibrated 91-frame span (its message is cry-bound, not
+ * modelled); Scene OFF skips the front animation (HITMARKER_NO_ANIMATIONS -> SKIP_FRONT_ANIM), so it keeps the calibrated span too.
  */
-export function switchInTiming(battler: 0 | 1, species: number): BattleSwitchInTiming {
-  return battler === 0
+export function switchInTiming(battler: 0 | 1, species: number, sceneOn = true): BattleSwitchInTiming {
+  return battler === 0 || !sceneOn
     ? SWITCH_IN_TIMING
     : Object.freeze({ minimumFrames: opponentSwitchInDuration(species) - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
 }
@@ -4201,6 +4211,7 @@ export function projectBattleResolutionCommands(
       currentField = battler === 0
         ? Object.freeze({ ...currentField, player: incoming.field })
         : Object.freeze({ ...currentField, opponent: incoming.field });
+      const speciesTail = battler === 1 && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
       commands.push(Object.freeze({
         type: "switch-in",
         eventSequence: event.sequence,
@@ -4209,8 +4220,12 @@ export function projectBattleResolutionCommands(
         toPartyIndex: switched.toPartyIndex,
         incoming: incoming.field,
         incomingStatus1: incoming.status1,
-        timing: switchInTiming(battler, incoming.field.species),
+        timing: switchInTiming(battler, incoming.field.species, speciesTail),
         settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
+        ...(speciesTail ? {
+          healthboxSlideElapsed: opponentSwitchInHealthboxSlideElapsed(incoming.field.species),
+          sendInVisualDelay: opponentSwitchInVisualDelay(incoming.field.species),
+        } : {}),
       }));
     }
   }
@@ -4272,7 +4287,7 @@ export function projectBattleResolutionCommands(
   // snd145: an opponent FAINT REPLACEMENT that ends the turn holds its settled send-in through the source's post-`switchinanim`
   // turn-end work (`switchineffects`, the rest of `BattleScript_HandleFaintedMon`, `BattleTurnPassed`) before the action prompt.
   const last = commands[commands.length - 1];
-  if (last?.type === "switch-in" && last.battler === 1
+  if (last?.type === "switch-in" && last.battler === 1 && last.healthboxSlideElapsed !== undefined
     && commands.some((command) => command.type === "faint" && command.battler === 1)) {
     commands[commands.length - 1] = Object.freeze({
       ...last,

@@ -86,6 +86,9 @@ describe("snd145 live switch-in tail (R2 timing, R3 send-in fade / particles)", 
       expect(midBattleSwitchInAt(slide + 22, 1, slide).healthboxDx).toBe(0);
       expect(switchInTiming(0, species)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
     }
+    // Scene OFF skips the front animation (HITMARKER_NO_ANIMATIONS -> SKIP_FRONT_ANIM): the calibrated span stays.
+    expect(switchInTiming(1, 341, false)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
+    expect(midBattleSwitchInAt(33, 1).healthboxDx).toBe(-110);
     expect(midBattleSwitchInAt(65, 0).healthboxDx).toBeNull();
     expect(midBattleSwitchInAt(66, 0).healthboxDx).toBe(110);
   });
