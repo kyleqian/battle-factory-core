@@ -87,6 +87,10 @@ its R1 table check (R5 regenerated the table) and its OFF control windows (the O
 
 ## Reproduce
 
+Run on `fe9e4759c`: `sh tools/integration/offs152Run.sh <fresh> --no-sweeps` -> **ALL SAME** (tables, tests, 16 windows twice fresh ==
+the committed digests, production compares r1 == r2 == the summary, SOLROCK 0 px). The 8 sweeps were each run twice fresh during the
+step (r1 == r2 byte-identical, committed); the full runner (with sweeps, ~20 min) and `--census --soak` were not rerun end to end.
+
 ```sh
 sh tools/integration/offs152Run.sh <fresh-dir>                    # R0-R3, R5, R6 (sweeps x8, 16 windows x2, tests): ALL SAME
 sh tools/integration/offs152Run.sh <fresh-dir> --census --soak    # + R4 Scene ON census both trees + vanilla soak 0:20 both trees
