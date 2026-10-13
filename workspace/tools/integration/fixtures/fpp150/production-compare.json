@@ -1,0 +1,131 @@
+{
+ "schema": "fpp150-production-compare/v1",
+ "summary": {
+  "neg": null,
+  "x2": "species",
+  "windows": 7,
+  "zeroPxWindows": 7,
+  "perRowDigest": "8f9e52c40d650af8"
+ },
+ "result": {
+  "o-aggron": {
+   "side": "opponent",
+   "battler": 1,
+   "species": {
+    "player": "JOLTEON",
+    "opponent": "AGGRON"
+   },
+   "R": 44,
+   "scoredRows": 124,
+   "px": 0,
+   "rowsWithProductionPixels": 116,
+   "after": {
+    "px": 0,
+    "messageBandPx": 638
+   },
+   "badRows": []
+  },
+  "o-golem": {
+   "side": "opponent",
+   "battler": 1,
+   "species": {
+    "player": "JOLTEON",
+    "opponent": "GOLEM"
+   },
+   "R": 44,
+   "scoredRows": 124,
+   "px": 0,
+   "rowsWithProductionPixels": 116,
+   "after": {
+    "px": 0,
+    "messageBandPx": 632
+   },
+   "badRows": []
+  },
+  "o-registeel": {
+   "side": "opponent",
+   "battler": 1,
+   "species": {
+    "player": "JOLTEON",
+    "opponent": "REGISTEEL"
+   },
+   "R": 44,
+   "scoredRows": 124,
+   "px": 0,
+   "rowsWithProductionPixels": 116,
+   "after": {
+    "px": 0,
+    "messageBandPx": 638
+   },
+   "badRows": []
+  },
+  "p-breloom-golbat": {
+   "side": "player",
+   "battler": 0,
+   "species": {
+    "player": "BRELOOM",
+    "opponent": "GOLBAT"
+   },
+   "R": 76,
+   "scoredRows": 124,
+   "px": 0,
+   "rowsWithProductionPixels": 121,
+   "after": {
+    "px": 0,
+    "messageBandPx": 908
+   },
+   "badRows": []
+  },
+  "p-breloom": {
+   "side": "player",
+   "battler": 0,
+   "species": {
+    "player": "BRELOOM",
+    "opponent": "JOLTEON"
+   },
+   "R": 76,
+   "scoredRows": 124,
+   "px": 0,
+   "rowsWithProductionPixels": 116,
+   "after": {
+    "px": 0,
+    "messageBandPx": 908
+   },
+   "badRows": []
+  },
+  "p-electabuzz": {
+   "side": "player",
+   "battler": 0,
+   "species": {
+    "player": "ELECTABUZZ",
+    "opponent": "JOLTEON"
+   },
+   "R": 108,
+   "scoredRows": 124,
+   "px": 0,
+   "rowsWithProductionPixels": 116,
+   "after": {
+    "px": 0,
+    "messageBandPx": 770
+   },
+   "badRows": []
+  },
+  "p-machamp": {
+   "side": "player",
+   "battler": 0,
+   "species": {
+    "player": "MACHAMP",
+    "opponent": "JOLTEON"
+   },
+   "R": 44,
+   "scoredRows": 124,
+   "px": 0,
+   "rowsWithProductionPixels": 116,
+   "after": {
+    "px": 0,
+    "messageBandPx": 948
+   },
+   "badRows": []
+  }
+ }
+}
