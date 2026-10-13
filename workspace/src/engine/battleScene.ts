@@ -7758,8 +7758,10 @@ export type StatusAnimationRenderView = Readonly<{
  * (absolute; before the task shows, the tracked rest) with its OBJ palette blended (blend_color_cycle F_PAL_ATTACKER), and the
  * script's sprites. The opponent stands at its tracked front idle rest (liveBattlerAnchors, from the x2 history) whenever it is not
  * shaken; without an x2 input there is no residual x2. SpriteCB_EnemyShadow hides an elevated opponent's shadow while
- * gAnimScriptActive (shown from age 1). Null for an animation without a case (the field stays as it is), over the doll or for an
- * invisible battler sprite.
+ * gAnimScriptActive (shown from age 1). Null for an animation without a case (the field stays as it is) or over the doll. inv142
+ * (docs/inv142-status-animation-invisible-battler.md): over an INVISIBLE battler sprite (a Dig / Fly charge body hid it, then
+ * CANCELER_IN_LOVE / ENDTURN_YAWN's CancelMultiTurnMoves cleared STATUS3 so Cmd_status(2)animation still sends the receipt) the ROM
+ * runs the script anyway: its sprites are drawn at the battler's coordinates and the battler stays hidden (view.visibility unchanged).
  */
 export function statusAnimationRenderView(view: BattleResolutionPresentationRenderView): StatusAnimationRenderView | null {
   const effect = view.effect;
@@ -7770,7 +7772,7 @@ export function statusAnimationRenderView(view: BattleResolutionPresentationRend
   const row = liveStatusAnimationRow(effect.animation, effect.age, side, {
     sprite: { x: corner.x + 32, y: corner.y + 32 }, inflicted: effect.inflicted === true,
   });
-  if (row === null || !view.visibility[side].sprite || view.field[side].substituteDoll === true) return null;
+  if (row === null || view.field[side].substituteDoll === true) return null;
   const rest = effect.battlerX2Input === undefined
     ? { x2: 0, y2: 0 }
     : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
