@@ -1,0 +1,87 @@
+{
+ "stq132-spore-ply-primeape-onix.json": {
+  "animation": "SLP",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-spore-ply-primeape-onix.json",
+  "seed": 305419897
+ },
+ "stq132-spore-ply-primeape-golbat.json": {
+  "animation": "SLP",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-spore-ply-primeape-onix.json",
+  "target": "GOLBAT",
+  "seed": 305419897
+ },
+ "stq132-spore-opp-primeape-onix.json": {
+  "animation": "SLP",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-spore-opp-primeape-onix.json",
+  "seed": 305419897
+ },
+ "stq132-spore-opp-primeape-golbat.json": {
+  "animation": "SLP",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-spore-opp-primeape-onix.json",
+  "target": "GOLBAT",
+  "seed": 305419897
+ },
+ "stq132-will-o-wisp-ply-primeape-onix.json": {
+  "animation": "BRN",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-will-o-wisp-ply-primeape-onix.json",
+  "seed": 305419897
+ },
+ "stq132-will-o-wisp-ply-primeape-golbat.json": {
+  "animation": "BRN",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-will-o-wisp-ply-primeape-onix.json",
+  "target": "GOLBAT",
+  "seed": 305419897
+ },
+ "stq132-will-o-wisp-opp-primeape-onix.json": {
+  "animation": "BRN",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-will-o-wisp-opp-primeape-onix.json",
+  "seed": 305419897
+ },
+ "stq132-will-o-wisp-opp-primeape-golbat.json": {
+  "animation": "BRN",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-will-o-wisp-opp-primeape-onix.json",
+  "target": "GOLBAT",
+  "seed": 305419897
+ },
+ "stq132-attract-ply-primeape-onix.json": {
+  "animation": "INFATUATION",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-attract-ply-primeape-onix.json",
+  "seed": 305419897
+ },
+ "stq132-attract-ply-primeape-golbat.json": {
+  "animation": "INFATUATION",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-attract-ply-primeape-onix.json",
+  "target": "GOLBAT",
+  "seed": 305419897
+ },
+ "stq132-attract-opp-primeape-onix.json": {
+  "animation": "INFATUATION",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-attract-opp-primeape-onix.json",
+  "seed": 305419897
+ },
+ "stq132-attract-opp-primeape-golbat.json": {
+  "animation": "INFATUATION",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-attract-opp-primeape-onix.json",
+  "target": "GOLBAT",
+  "seed": 305419897
+ },
+ "stq132-fire-punch-ply-magby-wailmer.json": {
+  "animation": "BRN",
+  "attackerSide": "player",
+  "source": "tools/battle-lab/mechanic-fire-punch-burn-lifecycle-off.json",
+  "seed": 8,
+  "path": "fire-secondary"
+ }
+}

@@ -1,0 +1,54 @@
+{
+ "stq132-attract-opp-primeape-golbat.json": {
+  "r1": "3fad9f22095ab2246e0074d6fd014fdc834eb5fff3e312f8b6cf8c7f45f3e843",
+  "r2": "3fad9f22095ab2246e0074d6fd014fdc834eb5fff3e312f8b6cf8c7f45f3e843"
+ },
+ "stq132-attract-opp-primeape-onix.json": {
+  "r1": "32a79c1687347f4a70dc14f5fa691e5d9d1dd74516272cf26d6e83fb06269af8",
+  "r2": "32a79c1687347f4a70dc14f5fa691e5d9d1dd74516272cf26d6e83fb06269af8"
+ },
+ "stq132-attract-ply-primeape-golbat.json": {
+  "r1": "c835d22d666ce7af1a63c8cbef97a0eaa2ff3b14a4be3a431cbced5f5b653864",
+  "r2": "c835d22d666ce7af1a63c8cbef97a0eaa2ff3b14a4be3a431cbced5f5b653864"
+ },
+ "stq132-attract-ply-primeape-onix.json": {
+  "r1": "43182d2ea74137e430ab19dfdf2a34f6471950e751149da61a3aa7090e18d973",
+  "r2": "43182d2ea74137e430ab19dfdf2a34f6471950e751149da61a3aa7090e18d973"
+ },
+ "stq132-fire-punch-ply-magby-wailmer.json": {
+  "r1": "6c49683bb71725c07c9951327130f316ea0a585a4526d8a6eed3888f089c9827",
+  "r2": "6c49683bb71725c07c9951327130f316ea0a585a4526d8a6eed3888f089c9827"
+ },
+ "stq132-spore-opp-primeape-golbat.json": {
+  "r1": "bd9f952674bc0685cdd23e926bfd6f99f2971ebc6c7f36cad15123b10a6483e7",
+  "r2": "bd9f952674bc0685cdd23e926bfd6f99f2971ebc6c7f36cad15123b10a6483e7"
+ },
+ "stq132-spore-opp-primeape-onix.json": {
+  "r1": "1777ef0c02e205d16d63e72e667bf2ee1a8287918b23a33cc99db80f73dbc028",
+  "r2": "1777ef0c02e205d16d63e72e667bf2ee1a8287918b23a33cc99db80f73dbc028"
+ },
+ "stq132-spore-ply-primeape-golbat.json": {
+  "r1": "23c6b3641b5d2b7883e74f8e344d9df189b448d21e511a439169ee1d863f44ae",
+  "r2": "23c6b3641b5d2b7883e74f8e344d9df189b448d21e511a439169ee1d863f44ae"
+ },
+ "stq132-spore-ply-primeape-onix.json": {
+  "r1": "5375203a776dcab7965b705e807a97bd5a16c7c8cc6488c7b2d38600b59a3356",
+  "r2": "5375203a776dcab7965b705e807a97bd5a16c7c8cc6488c7b2d38600b59a3356"
+ },
+ "stq132-will-o-wisp-opp-primeape-golbat.json": {
+  "r1": "bd8b8b2c87e877fbf8450fe521362881d8986f02dc3a0f8cd5b9d6d491b305b2",
+  "r2": "bd8b8b2c87e877fbf8450fe521362881d8986f02dc3a0f8cd5b9d6d491b305b2"
+ },
+ "stq132-will-o-wisp-opp-primeape-onix.json": {
+  "r1": "c19b1e55a849e7e9934fd1793e8b3dbbe66e62d1370df6179a3bc6788b26f022",
+  "r2": "c19b1e55a849e7e9934fd1793e8b3dbbe66e62d1370df6179a3bc6788b26f022"
+ },
+ "stq132-will-o-wisp-ply-primeape-golbat.json": {
+  "r1": "9e46b2565eb4ce9b23a40a6cd6bdca9142cd965e2816c87429b8b9d1287e89fd",
+  "r2": "9e46b2565eb4ce9b23a40a6cd6bdca9142cd965e2816c87429b8b9d1287e89fd"
+ },
+ "stq132-will-o-wisp-ply-primeape-onix.json": {
+  "r1": "6821f47478e7469b8f1120362436f05e9d26de0016e9a3c00c0b83a284626932",
+  "r2": "6821f47478e7469b8f1120362436f05e9d26de0016e9a3c00c0b83a284626932"
+ }
+}
