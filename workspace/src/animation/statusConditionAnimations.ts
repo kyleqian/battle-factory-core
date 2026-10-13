@@ -8,12 +8,13 @@
  *  - `statusConditionSourceRow`: RAM / register state at the end of the row (what tools/integration/stp128Probe.py samples);
  *  - `statusConditionDisplayRow`: what the screen of that row shows (the frame-order lags below applied).
  * Callbacks are literal ports of battle_anim_ghost.c:1127-1174 (AnimGhostStatusSprite / _Step) and battle_anim_normal.c:258-296
- * (AnimConfusionDuck / _Step); ShakeMon2 reuses ./shakeMon2.ts.
+ * (AnimConfusionDuck / _Step); ShakeMon2 reuses ./shakeMon2.ts, AnimTask_FrozenIceCube reuses ./frozenIceCube.ts (Move_SHEER_COLD's task).
  */
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import { frozenIceCubeState } from "./frozenIceCube.ts";
 import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
 
-export type StatusConditionAnimation = "CURSED" | "NIGHTMARE" | "CONFUSION";
+export type StatusConditionAnimation = "CURSED" | "NIGHTMARE" | "CONFUSION" | "FRZ";
 export type StatusConditionSide = "player" | "opponent";
 
 /** The animated battler (gBattleAnimAttacker == gBattleAnimTarget == the status battler). */
@@ -29,8 +30,18 @@ export interface StatusConditionTarget {
   readonly idleX2?: number;
 }
 
+/**
+ * FRZ only: rows the frame loses inside Status_Freeze's `loadspritegfx ANIM_TAG_ICE_CUBE` (the LZ decompression straddles the VBlank).
+ * 1 on the frozen-turn path (MoveUsedIsFrozen: the launch row also ran the battle script / controller work), 0 after a damaging move's
+ * IsBattleSEPlaying gate (Ice Beam's MoveEffectFreeze). Measured, dominant phase (D4 faithful timing); default 1.
+ */
+export interface StatusConditionOptions {
+  readonly freezeLoadLagRows?: 0 | 1;
+}
+
 export interface StatusConditionSprite {
-  readonly template: "gCurseGhostSpriteTemplate" | "gNightmareDevilSpriteTemplate" | "gConfusionDuckSpriteTemplate";
+  readonly template: "gCurseGhostSpriteTemplate" | "gNightmareDevilSpriteTemplate" | "gConfusionDuckSpriteTemplate"
+    | "sFrozenIceCubeSpriteTemplate";
   /** Creation order inside the script (the lowest-free slot rule assigns the real slot). */
   readonly index: number;
   readonly x: number;
@@ -47,7 +58,8 @@ export interface StatusConditionSprite {
   readonly hFlip: boolean;
   /** OAM objMode blend (semi-transparent OBJ: BLDCNT's blend applies with this sprite as the first target). */
   readonly blend: boolean;
-  readonly size: 16 | 32;
+  /** 64 = the ice cube: a 64x64 OBJ with sFrozenIceCubeSubspriteTable (four pieces around x + x2 / y + y2). */
+  readonly size: 16 | 32 | 64;
   readonly data: readonly number[];
 }
 
@@ -72,10 +84,10 @@ export interface StatusConditionSourceRow {
 export interface StatusConditionDisplaySprite {
   readonly template: StatusConditionSprite["template"];
   readonly index: number;
-  /** OAM top-left on screen (x + x2 + centerToCornerVec). */
+  /** OAM top-left on screen (x + x2 + centerToCornerVec); for the ice cube (size 64) the subsprite base x + x2 / y + y2. */
   readonly left: number;
   readonly top: number;
-  readonly size: 16 | 32;
+  readonly size: 16 | 32 | 64;
   readonly tileOffset: number;
   readonly hFlip: boolean;
   readonly priority: number;
@@ -94,6 +106,8 @@ export interface StatusConditionDisplayRow {
   readonly sprites: readonly StatusConditionDisplaySprite[];
   /** An elevated opponent's shadow is hidden while any battle animation runs (stat102: rel 1 .. E + 1). */
   readonly enemyShadowHidden: boolean;
+  /** FRZ: left rotations of the ice cube palette entries 13..15 shown on this row (OBJ palette bank of ANIM_TAG_ICE_CUBE), else 0. */
+  readonly objPaletteRotation: number;
 }
 
 export interface StatusConditionSpan {
@@ -127,11 +141,34 @@ const DUCK_CREATE_ROW = 3;
 /** Sprites created by the script (a task, after BuildOamBuffer) reach OAM one row later and the screen one more row later. */
 const SPRITE_DISPLAY_LAG = 1;
 
+/** Status_Freeze (lag 0; every row from monbg on shifts by the load lag): monbg on 3, AnimTask_FrozenIceCube creates the cube on 6. */
+const FREEZE_CREATE_ROW = 6;
+/** The task's callback k runs on create row + k; its buffered BLDALPHA / palette writes are shown one row later. */
+const FREEZE_REGISTER_LAG = 1;
+/** clearmonbg after the task's DestroyAnimVisualTask (task age 105): battler sprite visible on 111, BG shadows 0 on 115 (= E). */
+const FREEZE_BATTLER_VISIBLE_ROW = 111;
+const FREEZE_BG_RESET_ROW = 115;
+const FREEZE_ACTIVE_ROWS = 115;
+
 export const STATUS_CONDITION_SPANS: Readonly<Record<StatusConditionAnimation, StatusConditionSpan>> = {
   CURSED: { activeRows: 74, controllerRows: 75, createRow: GHOST_CREATE_ROW },
   NIGHTMARE: { activeRows: 74, controllerRows: 75, createRow: GHOST_CREATE_ROW },
   CONFUSION: { activeRows: 99, controllerRows: 100, createRow: DUCK_CREATE_ROW },
+  /** the frozen-turn path (freezeLoadLagRows 1); after Ice Beam: 115 / 116 / 6 (statusConditionSpan) */
+  FRZ: { activeRows: FREEZE_ACTIVE_ROWS + 1, controllerRows: FREEZE_ACTIVE_ROWS + 2, createRow: FREEZE_CREATE_ROW + 1 },
 };
+
+export function statusConditionSpan(animation: StatusConditionAnimation, options: StatusConditionOptions = {}): StatusConditionSpan {
+  if (animation !== "FRZ") return STATUS_CONDITION_SPANS[animation];
+  const lag = freezeLag(options);
+  return { activeRows: FREEZE_ACTIVE_ROWS + lag, controllerRows: FREEZE_ACTIVE_ROWS + lag + 1, createRow: FREEZE_CREATE_ROW + lag };
+}
+
+function freezeLag(options: StatusConditionOptions): number {
+  const lag = options.freezeLoadLagRows ?? 1;
+  if (lag !== 0 && lag !== 1) throw new Error(`invalid freezeLoadLagRows ${lag}`);
+  return lag;
+}
 
 const sin = (angle: number, amplitude: number): number => (GBA_SINE_TABLE_256[angle & 0xff]! * amplitude) >> 8;
 const cos = (angle: number, amplitude: number): number => (GBA_SINE_TABLE_256[(angle + 64) & 0xff]! * amplitude) >> 8;
@@ -228,10 +265,18 @@ function assertRel(rel: number): void {
   if (!Number.isInteger(rel)) throw new Error(`invalid status-condition row ${rel}`);
 }
 
+function monBg(rel: number, from: number, to: number, target: StatusConditionTarget, x2: number, y2: number): [number, number, number, number] {
+  if (rel < from || rel >= to) return [0, 0, 0, 0];
+  // Task_UpdateMonBg: BG X = spriteX0 - (x + x2) + bgX, bgX = 32 - spriteX0 (MoveBattlerSpriteToBG); opponent BG1, player BG2
+  const x = 32 - target.spriteX - x2, y = 32 - target.spriteY - y2;
+  return target.side === "opponent" ? [x, y, 0, 0] : [0, 0, x, y];
+}
+
 /** RAM / register state at the end of row `rel` (rel < 0: before the animation). */
-export function statusConditionSourceRow(animation: StatusConditionAnimation, rel: number, target: StatusConditionTarget): StatusConditionSourceRow {
+export function statusConditionSourceRow(animation: StatusConditionAnimation, rel: number, target: StatusConditionTarget,
+  options: StatusConditionOptions = {}): StatusConditionSourceRow {
   assertRel(rel);
-  const span = STATUS_CONDITION_SPANS[animation];
+  const span = statusConditionSpan(animation, options);
   const active = rel >= 0 && rel < span.activeRows;
   const controllerBusy = rel >= 0 && rel < span.controllerRows;
   const base = { rel, active, controllerBusy };
@@ -253,16 +298,26 @@ export function statusConditionSourceRow(animation: StatusConditionAnimation, re
     }
     return { ...base, battlerX2: target.idleX2 ?? 0, battlerY2: 0, battlerInvisible: false, bg: [0, 0, 0, 0], sprites, bldcnt: 0, bldalpha: 0 };
   }
+  if (animation === "FRZ") {
+    const lag = freezeLag(options);
+    const idle = target.idleX2 ?? 0;
+    const cube = rel >= FREEZE_CREATE_ROW + lag && frozenIceCubeState(rel - FREEZE_CREATE_ROW - lag).spriteAlive;
+    const shown = frozenIceCubeState(rel - FREEZE_CREATE_ROW - lag - FREEZE_REGISTER_LAG);
+    const registers = rel - FREEZE_CREATE_ROW - lag - FREEZE_REGISTER_LAG >= 0 && shown.blendEnabled;
+    return { ...base, battlerX2: idle, battlerY2: 0,
+      battlerInvisible: rel >= MONBG_ROW + lag && rel < FREEZE_BATTLER_VISIBLE_ROW + lag,
+      bg: monBg(rel, MONBG_ROW + lag, FREEZE_BG_RESET_ROW + lag, target, idle, 0),
+      sprites: cube ? [{ template: "sFrozenIceCubeSpriteTemplate", index: 0, x: target.animX - 32, y: target.animY - 36, x2: 0, y2: 0,
+        invisible: false, priority: 2, subpriority: 4, animNum: 0, animCmdIndex: 0, tileOffset: 0, hFlip: false, blend: true, size: 64,
+        data: [0, 0, 0, 0, 0, 0, 0, 0] }] : [],
+      bldcnt: registers ? BLDCNT_EFFECT_BLEND | BLDCNT_TGT2_ALL : 0,
+      bldalpha: registers ? shown.eva | (shown.evb << 8) : 0 };
+  }
   // CURSED / NIGHTMARE
   const shake = shakeMon2OffsetAtTick(2, 0, 14, 1, rel - GHOST_CREATE_ROW);
   const battlerInvisible = rel >= MONBG_ROW && rel < GHOST_BATTLER_VISIBLE_ROW;
-  let bg: [number, number, number, number] = [0, 0, 0, 0];
-  if (rel >= MONBG_ROW && rel < GHOST_BG_RESET_ROW) {
-    // Task_UpdateMonBg: BG X = spriteX0 - (x + x2) + bgX, bgX = 32 - spriteX0 (MoveBattlerSpriteToBG); opponent BG1, player BG2
-    const x = 32 - target.spriteX - (rel < GHOST_CREATE_ROW ? target.idleX2 ?? 0 : rel < GHOST_BATTLER_VISIBLE_ROW ? shake.x2 : 0);
-    const y = 32 - target.spriteY - (rel < GHOST_BATTLER_VISIBLE_ROW ? shake.y2 : 0);
-    bg = target.side === "opponent" ? [x, y, 0, 0] : [0, 0, x, y];
-  }
+  const bg = monBg(rel, MONBG_ROW, GHOST_BG_RESET_ROW, target,
+    rel < GHOST_CREATE_ROW ? target.idleX2 ?? 0 : rel < GHOST_BATTLER_VISIBLE_ROW ? shake.x2 : 0, rel < GHOST_BATTLER_VISIBLE_ROW ? shake.y2 : 0);
   const k = rel - GHOST_CREATE_ROW + 1;
   const sprites: StatusConditionSprite[] = [];
   let bldcnt = 0, bldalpha = 0;
@@ -286,22 +341,25 @@ export function statusConditionSourceRow(animation: StatusConditionAnimation, re
 }
 
 /** What the screen of row `rel` shows. */
-export function statusConditionDisplayRow(animation: StatusConditionAnimation, rel: number, target: StatusConditionTarget): StatusConditionDisplayRow {
+export function statusConditionDisplayRow(animation: StatusConditionAnimation, rel: number, target: StatusConditionTarget,
+  options: StatusConditionOptions = {}): StatusConditionDisplayRow {
   assertRel(rel);
-  const span = STATUS_CONDITION_SPANS[animation];
-  // BG scroll shadows and OAM are copied in the next VBlank; BLDCNT / BLDALPHA written by a sprite callback land in the same row.
-  const prev = statusConditionSourceRow(animation, rel - 1, target);
-  const now = statusConditionSourceRow(animation, rel, target);
-  const oam = statusConditionSourceRow(animation, rel - SPRITE_DISPLAY_LAG, target);
+  const span = statusConditionSpan(animation, options);
+  // BG scroll shadows and OAM are copied in the next VBlank; the sampled BLDCNT / BLDALPHA of a row are the ones its scanout uses.
+  const prev = statusConditionSourceRow(animation, rel - 1, target, options);
+  const now = statusConditionSourceRow(animation, rel, target, options);
+  const oam = statusConditionSourceRow(animation, rel - SPRITE_DISPLAY_LAG, target, options);
   const created = rel - SPRITE_DISPLAY_LAG - span.createRow;
   const blendOn = (now.bldcnt & BLDCNT_EFFECT_BLEND) !== 0;
   const sprites = created >= 1
     ? oam.sprites.filter((s) => !s.invisible).map((s) => ({ template: s.template, index: s.index,
-      left: s.x + s.x2 - s.size / 2, top: s.y + s.y2 - s.size / 2, size: s.size, tileOffset: s.tileOffset, hFlip: s.hFlip,
+      left: s.x + s.x2 - (s.size === 64 ? 0 : s.size / 2), top: s.y + s.y2 - (s.size === 64 ? 0 : s.size / 2), size: s.size, tileOffset: s.tileOffset, hFlip: s.hFlip,
       priority: s.priority, subpriority: s.subpriority,
       blend: s.blend && blendOn ? { eva: now.bldalpha & 0x1f, evb: (now.bldalpha >> 8) & 0x1f } : null }))
     : [];
   sprites.sort((a, b) => b.priority - a.priority || b.subpriority - a.subpriority || b.index - a.index);
+  const rotationAge = rel - span.createRow - FREEZE_REGISTER_LAG;
   return { rel, battlerOffset: { x: prev.battlerX2, y: prev.battlerY2 }, battlerOnBg: prev.battlerInvisible, sprites,
-    enemyShadowHidden: rel >= 1 && rel <= span.activeRows + 1 };
+    enemyShadowHidden: rel >= 1 && rel <= span.activeRows + 1,
+    objPaletteRotation: animation === "FRZ" && rotationAge >= 0 ? frozenIceCubeState(rotationAge).paletteRotation : 0 };
 }

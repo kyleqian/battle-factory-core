@@ -11,12 +11,16 @@
 // shadow shown, no sprites), where it is P(rel). C == ROM(rel) needs every pixel the animation changes to be right. Rows rel -1 .. E + 2
 // (release + 1) are scored; E + 3 (release + 2) is reported apart (the next instruction may print there). Full screen and the affected
 // rect (the union of the production change mask and the ROM's own change bbox over the window).
-//   node --experimental-strip-types --no-warnings tools/integration/stp128Compare.ts <raw-dir> <out.json> [--neg=age+1|no-shake|wrong-side] [--blend=helper|gba] [--no-healthbox] [--only=<key substring>]
+//   node --experimental-strip-types --no-warnings tools/integration/stp128Compare.ts <raw-dir> <out.json> [--neg=age+1|no-shake|wrong-side|no-rotation|lag-swap] [--blend=helper|gba] [--no-healthbox] [--only=<key substring>]   (--no-healthbox drops all three occluders)
 import { readFileSync, writeFileSync } from "node:fs";
-import { battleBg, drawOpponentHealthboxWobble, drawSpriteSheet, drawSpriteSheetBlendedOverFb, drawTileBg, setPixel } from "../../src/engine/battleScene.ts";
+import {
+  battleBg, battleWindow, drawComposedPlayerHealthbox, drawOpponentHealthboxWobble, drawSpriteSheet, drawSpriteSheetBlendedOverFb, drawTileBg,
+  onixPlayerHealthboxContent, setPixel,
+} from "../../src/engine/battleScene.ts";
 import { battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import {
-  STATUS_CONDITION_SPANS, statusConditionDisplayRow, type StatusConditionAnimation, type StatusConditionDisplaySprite, type StatusConditionTarget,
+  statusConditionDisplayRow, statusConditionSpan, type StatusConditionAnimation, type StatusConditionDisplaySprite, type StatusConditionOptions,
+  type StatusConditionTarget,
 } from "../../src/animation/statusConditionAnimations.ts";
 
 const args = process.argv.slice(2);
@@ -33,6 +37,10 @@ const shadow = JSON.parse(readFileSync("src/assets/gen/battle-enemy-shadow.json"
 const curse = JSON.parse(readFileSync("src/animation/assets/curse.json", "utf8"));
 const lovelyKiss = JSON.parse(readFileSync("src/animation/assets/lovely-kiss.json", "utf8"));
 const dizzy = JSON.parse(readFileSync("src/animation/assets/dizzyPunch.json", "utf8"));
+// production's ice cube (battleScene.ts battleAnimIceCube, Move_SHEER_COLD): the four sFrozenIceCubeSubsprites pieces + palette
+const iceCube = JSON.parse(readFileSync("src/assets/gen/battle-anim-ice-cube.json", "utf8")) as {
+  palette: { r: number; g: number; b: number }[]; pieces: { x: number; y: number; tileset: any }[];
+};
 type Tileset = { columns: number; rows: number; tiles: number[][] };
 type Rgb = { r: number; g: number; b: number };
 const FRAME = 240 * 160 * 3;
@@ -46,13 +54,23 @@ const hflip = (ts: Tileset): Tileset => {
   }
   return { columns: ts.columns, rows: ts.rows, tiles };
 };
-const ART: Record<StatusConditionDisplaySprite["template"], { tileset: Tileset; palette: Rgb[] }> = {
+const ART: Record<Exclude<StatusConditionDisplaySprite["template"], "sFrozenIceCubeSpriteTemplate">, { tileset: Tileset; palette: Rgb[] }> = {
   gCurseGhostSpriteTemplate: { tileset: curse.ghost.tileset, palette: curse.ghost.palette },
   gNightmareDevilSpriteTemplate: { tileset: sub(lovelyKiss.devil.tileset, 0, 4, 4), palette: lovelyKiss.devil.palette },
   gConfusionDuckSpriteTemplate: { tileset: dizzy.duck.tileset, palette: dizzy.duck.palette },
 };
 
-function drawSprite(fb: Uint8Array, s: StatusConditionDisplaySprite): void {
+function drawSprite(fb: Uint8Array, s: StatusConditionDisplaySprite, paletteRotation: number): void {
+  if (s.template === "sFrozenIceCubeSpriteTemplate") {
+    // as battleScene.ts's SHEER_COLD body: entries 13..15 rotated left `paletteRotation` times, each piece blended (helper)
+    if (!s.blend || s.blend.eva === 0) return;
+    const palette = iceCube.palette.slice();
+    for (let i = 0; i < 3; i++) palette[13 + i] = iceCube.palette[13 + ((i + paletteRotation) % 3)]!;
+    for (const piece of iceCube.pieces) {
+      drawSpriteSheetBlendedOverFb(fb, piece.tileset, palette as any, s.left + piece.x, s.top + piece.y, s.blend.eva, s.blend.evb);
+    }
+    return;
+  }
   const art = ART[s.template];
   let ts = s.size === 16 ? sub(art.tileset, s.tileOffset, 2, 2) : art.tileset;
   if (s.hFlip) ts = hflip(ts);
@@ -76,8 +94,11 @@ function drawSprite(fb: Uint8Array, s: StatusConditionDisplaySprite): void {
 const result: Record<string, unknown> = {};
 let total = 0, clean = 0;
 for (const [key, w] of Object.entries(rom.windows)) {
-  if (w.animation === "FRZ" || (only && !key.includes(only))) continue;
+  if (only && !key.includes(only)) continue;
   const animation = w.animation as StatusConditionAnimation;
+  // FRZ: the frozen-turn windows lose one row in loadspritegfx (E 116); after Ice Beam they do not (E 115)
+  const romLag = w.E === 116 ? 1 : 0;
+  const options: StatusConditionOptions = animation === "FRZ" ? { freezeLoadLagRows: (neg === "lag-swap" ? 1 - romLag : romLag) as 0 | 1 } : {};
   const scenario = JSON.parse(readFileSync(`${F}/scenarios/${w.scenario}`, "utf8"));
   const species = { player: scenario.overrides.parties.player[0].species, opponent: scenario.overrides.parties.opponent[0].species };
   const view = createBattleCommandFieldArtView({ player: { species: species.player }, opponent: { species: species.opponent } } as any) as any;
@@ -85,29 +106,33 @@ for (const [key, w] of Object.entries(rom.windows)) {
   const other = side === "player" ? "opponent" : "player";
   const first = w.rows.find((r: any) => r.sprites.length).sprites[0];
   const before = w.rows[0];
-  const target: StatusConditionTarget = { side, spriteX: before.bat[0], spriteY: before.bat[1], animX: first[0],
-    animY: first[1] + (animation === "CONFUSION" ? 15 : 0), idleX2: before.bat[2] };
+  const target: StatusConditionTarget = { side, spriteX: before.bat[0], spriteY: before.bat[1], animX: first[0] + (animation === "FRZ" ? 32 : 0),
+    animY: first[1] + (animation === "CONFUSION" ? 15 : animation === "FRZ" ? 36 : 0), idleX2: before.bat[2] };
   const motionTarget: StatusConditionTarget = neg === "wrong-side" ? { ...target, side: other } : target;
   const originT = battleCommandFieldSpriteOrigin(view[side], side), originO = battleCommandFieldSpriteOrigin(view[other], other);
   const elevated = shadow.elevatedSpecies.includes(`SPECIES_${view.opponent.speciesSymbol}`);
   const raw = readFileSync(`${rawDir}/${key}.rgb`);
   const frameAt = (rel: number) => raw.subarray((rel + 2) * FRAME, (rel + 3) * FRAME);
   const base = frameAt(-1);
-  const E = STATUS_CONDITION_SPANS[animation].activeRows;
-  const paint = (offset: { x: number; y: number }, sprites: readonly StatusConditionDisplaySprite[], shadowShown: boolean) => {
+  const E = statusConditionSpan(animation, options).activeRows;
+  const paint = (offset: { x: number; y: number }, sprites: readonly StatusConditionDisplaySprite[], shadowShown: boolean, rotation = 0) => {
     const fb = new Uint8Array(240 * 160 * 4);
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
     if (shadowShown) {
       const sx = 176 - shadow.width / 2, sy = 40 + 29 - shadow.height / 2;
       for (const p of shadow.mask) setPixel(fb, sx + (p % shadow.width), sy + Math.floor(p / shadow.width), shadow.color);
     }
-    for (const s of sprites) if (s.priority === 3) drawSprite(fb, s);
+    for (const s of sprites) if (s.priority === 3) drawSprite(fb, s, rotation);
     drawSpriteSheet(fb, view[other].pic.tileset, view[other].pic.palette, originO.x + w.rows[0].other[2], originO.y + w.rows[0].other[3]);
     drawSpriteSheet(fb, view[side].pic.tileset, view[side].pic.palette, originT.x + offset.x, originT.y + offset.y);
-    for (const s of sprites) if (s.priority !== 3) drawSprite(fb, s);
-    // the opponent healthbox OBJs (priority 1) are in front of every status sprite: drawn in P and P_ord alike, only its opaque
-    // footprint matters (C keeps the ROM's own healthbox pixels there)
-    if (!noHealthbox) drawOpponentHealthboxWobble(fb, 0);
+    for (const s of sprites) if (s.priority !== 3) drawSprite(fb, s, rotation);
+    // occluders in front of every status sprite, drawn in P and P_ord alike (only their opaque footprint matters: C keeps the ROM's
+    // own pixels there): the healthbox OBJs (priority 1) and the battle message window (BG0, priority 0, y 112..159)
+    if (!noHealthbox) {
+      drawOpponentHealthboxWobble(fb, 0);
+      drawComposedPlayerHealthbox(fb, onixPlayerHealthboxContent);
+      drawTileBg(fb, battleWindow.tileset, battleWindow.tilemap, battleWindow.palette);
+    }
     return fb;
   };
   const ord = paint({ x: target.idleX2 ?? 0, y: 0 }, [], elevated);
@@ -116,9 +141,9 @@ for (const [key, w] of Object.entries(rom.windows)) {
   const mask = new Uint8Array(240 * 160);
   for (const r of w.rows) {
     if (r.rel < -1) continue;
-    const d = statusConditionDisplayRow(animation, neg === "age+1" ? r.rel + 1 : r.rel, motionTarget);
+    const d = statusConditionDisplayRow(animation, neg === "age+1" ? r.rel + 1 : r.rel, motionTarget, options);
     const offset = neg === "no-shake" ? { x: target.idleX2 ?? 0, y: 0 } : d.battlerOffset;
-    const p = paint(offset, d.sprites, elevated && !d.enemyShadowHidden);
+    const p = paint(offset, d.sprites, elevated && !d.enemyShadowHidden, neg === "no-rotation" ? 0 : d.objPaletteRotation);
     const c = new Uint8Array(base);
     for (let i = 0; i < 240 * 160; i++) {
       if (p[i * 4] !== ord[i * 4] || p[i * 4 + 1] !== ord[i * 4 + 1] || p[i * 4 + 2] !== ord[i * 4 + 2]) {
