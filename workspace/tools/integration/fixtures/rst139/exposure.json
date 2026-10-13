@@ -1,0 +1,244 @@
+{
+ "battles": 1000,
+ "ended": [
+  "Error: frame budget",
+  "terminal"
+ ],
+ "frames": 15915831,
+ "speciesWithNonzeroRestSeen": {
+  "ONIX": 1
+ },
+ "speciesSeen": 252,
+ "totalsByGroup": {
+  "body": {
+   "frames": 5128619,
+   "battles": 1000
+  },
+  "faint": {
+   "frames": 86896,
+   "battles": 999
+  },
+  "handoff": {
+   "frames": 300204,
+   "battles": 1000
+  },
+  "menu": {
+   "frames": 263052,
+   "battles": 1000
+  },
+  "ordinary": {
+   "frames": 8678044,
+   "battles": 1000
+  },
+  "other:resolution-forced-party-handoff": {
+   "frames": 151624,
+   "battles": 929
+  },
+  "other:resolution-presenting-switch-in": {
+   "frames": 535853,
+   "battles": 929
+  },
+  "other:resolution-terminal-handoff": {
+   "frames": 997,
+   "battles": 997
+  },
+  "switch": {
+   "frames": 228572,
+   "battles": 999
+  }
+ },
+ "atStake": {
+  "idle": {
+   "frames": 4349,
+   "battles": 9
+  },
+  "zeroed": {
+   "frames": 34141,
+   "battles": 9
+  },
+  "unknown": {
+   "frames": 12477,
+   "battles": 8
+  }
+ },
+ "seedsAtStake": {
+  "idle": [
+   27,
+   134,
+   196,
+   205,
+   312,
+   428,
+   731,
+   780,
+   851
+  ],
+  "zeroed": [
+   27,
+   134,
+   196,
+   205,
+   312,
+   428,
+   731,
+   780,
+   851
+  ],
+  "unknown": [
+   27,
+   134,
+   196,
+   312,
+   428,
+   731,
+   780,
+   851
+  ]
+ },
+ "rows": [
+  {
+   "group": "handoff",
+   "opponent": "(rest 0)",
+   "oppState": "-",
+   "sprite": "hidden/doll",
+   "frames": 6732,
+   "battles": 113
+  },
+  {
+   "group": "handoff",
+   "opponent": "(rest 0)",
+   "oppState": "-",
+   "sprite": "visible",
+   "frames": 291978,
+   "battles": 1000
+  },
+  {
+   "group": "handoff",
+   "opponent": "ONIX",
+   "oppState": "idle",
+   "sprite": "visible",
+   "frames": 216,
+   "battles": 8
+  },
+  {
+   "group": "handoff",
+   "opponent": "ONIX",
+   "oppState": "unknown",
+   "sprite": "visible",
+   "frames": 477,
+   "battles": 8
+  },
+  {
+   "group": "handoff",
+   "opponent": "ONIX",
+   "oppState": "zeroed",
+   "sprite": "visible",
+   "frames": 801,
+   "battles": 9
+  },
+  {
+   "group": "menu",
+   "opponent": "(rest 0)",
+   "oppState": "-",
+   "sprite": "hidden/doll",
+   "frames": 8025,
+   "battles": 113
+  },
+  {
+   "group": "menu",
+   "opponent": "(rest 0)",
+   "oppState": "-",
+   "sprite": "visible",
+   "frames": 253719,
+   "battles": 1000
+  },
+  {
+   "group": "menu",
+   "opponent": "ONIX",
+   "oppState": "idle",
+   "sprite": "visible",
+   "frames": 186,
+   "battles": 8
+  },
+  {
+   "group": "menu",
+   "opponent": "ONIX",
+   "oppState": "unknown",
+   "sprite": "visible",
+   "frames": 414,
+   "battles": 8
+  },
+  {
+   "group": "menu",
+   "opponent": "ONIX",
+   "oppState": "zeroed",
+   "sprite": "visible",
+   "frames": 708,
+   "battles": 9
+  },
+  {
+   "group": "ordinary",
+   "opponent": "(rest 0)",
+   "oppState": "-",
+   "sprite": "hidden/doll",
+   "frames": 647021,
+   "battles": 1000
+  },
+  {
+   "group": "ordinary",
+   "opponent": "(rest 0)",
+   "oppState": "-",
+   "sprite": "visible",
+   "frames": 7981102,
+   "battles": 1000
+  },
+  {
+   "group": "ordinary",
+   "opponent": "ONIX",
+   "oppState": "idle",
+   "sprite": "hidden/doll",
+   "frames": 16,
+   "battles": 1
+  },
+  {
+   "group": "ordinary",
+   "opponent": "ONIX",
+   "oppState": "idle",
+   "sprite": "visible",
+   "frames": 3947,
+   "battles": 9
+  },
+  {
+   "group": "ordinary",
+   "opponent": "ONIX",
+   "oppState": "unknown",
+   "sprite": "hidden/doll",
+   "frames": 214,
+   "battles": 5
+  },
+  {
+   "group": "ordinary",
+   "opponent": "ONIX",
+   "oppState": "unknown",
+   "sprite": "visible",
+   "frames": 11586,
+   "battles": 8
+  },
+  {
+   "group": "ordinary",
+   "opponent": "ONIX",
+   "oppState": "zeroed",
+   "sprite": "hidden/doll",
+   "frames": 1526,
+   "battles": 9
+  },
+  {
+   "group": "ordinary",
+   "opponent": "ONIX",
+   "oppState": "zeroed",
+   "sprite": "visible",
+   "frames": 32632,
+   "battles": 9
+  }
+ ]
+}
