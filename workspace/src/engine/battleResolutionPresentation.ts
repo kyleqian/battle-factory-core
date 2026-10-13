@@ -50,6 +50,8 @@ import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
 import {
   opponentSwitchInDuration, opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay,
+  sceneOffOpponentSwitchInDuration, sceneOffOpponentSwitchInHealthboxSlideElapsed, sceneOffOpponentSwitchInLagElapsed,
+  sceneOffOpponentSwitchInVisualDelay,
 } from "./switchInTail.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
@@ -260,6 +262,13 @@ export type BattleResolutionPresentationCommand =
        */
       healthboxSlideElapsed?: number;
       sendInVisualDelay?: number;
+      /**
+       * offs152: Scene OFF opponent send-in (src/engine/switchInTail.ts `sceneOffOpponentSwitchIn*`): the slide / visual delay above
+       * are the Scene OFF constants and NO front animation runs (SKIP_FRONT_ANIM); Scene ON's faint-replacement hold does not apply.
+       */
+      skipFrontAnimation?: true;
+      /** offs152: Scene OFF long-nickname lag frame -- from this elapsed on the send-in visuals run one frame late. */
+      sendInLagElapsed?: number;
     }>
   | Readonly<{
       type: "switch-out";
@@ -1098,12 +1107,13 @@ export const OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES = 11;
  * snd145 (ISSUES #146 remainder): in Scene ON the opponent's send-in tail is species-keyed (the healthbox slide waits for the front
  * animation, the next printstring for the controller end; src/engine/switchInTail.ts), so its controller span is the species' whole
  * duration minus the shared waitstate hold. The player side keeps the calibrated 91-frame span (its message is cry-bound, not
- * modelled); Scene OFF skips the front animation (HITMARKER_NO_ANIMATIONS -> SKIP_FRONT_ANIM), so it keeps the calibrated span too.
+ * modelled). offs152: Scene OFF skips the front animation (HITMARKER_NO_ANIMATIONS -> SKIP_FRONT_ANIM): the opponent's span is the
+ * slide- or cry-bound Scene OFF tail (`sceneOffOpponentSwitchInDuration`, keyed by species and the incoming nickname's length).
  */
-export function switchInTiming(battler: 0 | 1, species: number, sceneOn = true): BattleSwitchInTiming {
-  return battler === 0 || !sceneOn
-    ? SWITCH_IN_TIMING
-    : Object.freeze({ minimumFrames: opponentSwitchInDuration(species) - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
+export function switchInTiming(battler: 0 | 1, species: number, sceneOn = true, nickname = ""): BattleSwitchInTiming {
+  if (battler === 0) return SWITCH_IN_TIMING;
+  const duration = sceneOn ? opponentSwitchInDuration(species) : sceneOffOpponentSwitchInDuration(species, nickname);
+  return Object.freeze({ minimumFrames: duration - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
 }
 /**
  * ISSUES #78 slice 4: the real `CONTROLLER_RETURNMONTOBALL` receipt's
@@ -4275,7 +4285,8 @@ export function projectBattleResolutionCommands(
       currentField = battler === 0
         ? Object.freeze({ ...currentField, player: incoming.field })
         : Object.freeze({ ...currentField, opponent: incoming.field });
-      const speciesTail = battler === 1 && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
+      const sceneOn = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
+      const speciesTail = battler === 1 && sceneOn;
       commands.push(Object.freeze({
         type: "switch-in",
         eventSequence: event.sequence,
@@ -4284,11 +4295,20 @@ export function projectBattleResolutionCommands(
         toPartyIndex: switched.toPartyIndex,
         incoming: incoming.field,
         incomingStatus1: incoming.status1,
-        timing: switchInTiming(battler, incoming.field.species, speciesTail),
+        timing: switchInTiming(battler, incoming.field.species, sceneOn, incoming.field.name),
         settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
         ...(speciesTail ? {
           healthboxSlideElapsed: opponentSwitchInHealthboxSlideElapsed(incoming.field.species),
           sendInVisualDelay: opponentSwitchInVisualDelay(incoming.field.species),
+        } : battler === 1 ? {
+          // offs152: the Scene OFF opponent tail (no front animation).
+          healthboxSlideElapsed: sceneOffOpponentSwitchInHealthboxSlideElapsed(incoming.field.species),
+          sendInVisualDelay: sceneOffOpponentSwitchInVisualDelay(incoming.field.species),
+          skipFrontAnimation: true as const,
+          ...(() => {
+            const lag = sceneOffOpponentSwitchInLagElapsed(incoming.field.species, incoming.field.name);
+            return lag === null ? {} : { sendInLagElapsed: lag };
+          })(),
         } : {}),
       }));
     }
@@ -4351,7 +4371,7 @@ export function projectBattleResolutionCommands(
   // snd145: an opponent FAINT REPLACEMENT that ends the turn holds its settled send-in through the source's post-`switchinanim`
   // turn-end work (`switchineffects`, the rest of `BattleScript_HandleFaintedMon`, `BattleTurnPassed`) before the action prompt.
   const last = commands[commands.length - 1];
-  if (last?.type === "switch-in" && last.battler === 1 && last.healthboxSlideElapsed !== undefined
+  if (last?.type === "switch-in" && last.battler === 1 && last.healthboxSlideElapsed !== undefined && last.skipFrontAnimation !== true
     && commands.some((command) => command.type === "faint" && command.battler === 1)) {
     commands[commands.length - 1] = Object.freeze({
       ...last,

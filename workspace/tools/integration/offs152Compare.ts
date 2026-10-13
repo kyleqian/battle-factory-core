@@ -70,11 +70,11 @@ const field = Object.freeze({ player: mon(0, playerMon, 0), opponent: mon(1, par
 const incoming = mon(1, incomingMon, 1);
 const message = (seq: number, lines: string[]) => Object.freeze({ type: "message", eventSequence: seq, lines, advance: "automatic",
   noCursor: false, timing: { minimumFrames: 24, holdFrames: 0 } });
-// Scene OFF tail as production builds it (offs152 R3: sceneOffOpponentSwitchIn*; before it: slide 33 default, 91 + 11).
-const offTail = (tail as any).sceneOffOpponentSwitchInHealthboxSlideElapsed;
-const slide = opt("slide") ?? (base || offTail === undefined ? null : offTail(species));
+// Scene OFF tail as production builds it (offs152 R3: sceneOffOpponentSwitchIn*, keyed by species + nickname; --base: slide 33, 91 + 11).
+const slide = opt("slide") ?? (base ? null : tail.sceneOffOpponentSwitchInHealthboxSlideElapsed(species));
+const visualDelay = base ? 0 : tail.sceneOffOpponentSwitchInVisualDelay(species);
 const timing = opt("duration") !== null ? { minimumFrames: opt("duration")! - SWITCH_IN_WAITSTATE_HOLD_FRAMES }
-  : base ? { minimumFrames: 91 } : switchInTiming(1, species, false);
+  : base ? { minimumFrames: 91 } : switchInTiming(1, species, false, incoming.name);
 const pause = base ? 0 : 41;
 const switchOut = base
   ? Object.freeze({ type: "switch-out", eventSequence: 3, battler: 1, timing: { minimumFrames: RETURN_TO_BALL_SPAN_FRAMES } })
@@ -89,7 +89,10 @@ const commands = [
   switchOut,
   Object.freeze({ type: "sprite-visibility", eventSequence: 4, battler: 1, visible: false, recall: true, timing: { minimumFrames: gap } }),
   Object.freeze({ type: "switch-in", eventSequence: 5, battler: 1, fromPartyIndex: 0, toPartyIndex: 1, incoming, incomingStatus1: 0,
-    timing, settleHoldFrames, ...(slide === null ? {} : { healthboxSlideElapsed: slide }) }),
+    timing, settleHoldFrames, ...(slide === null ? {} : { healthboxSlideElapsed: slide }),
+    ...(base ? {} : { sendInVisualDelay: visualDelay, skipFrontAnimation: true }),
+    ...(base || opt("slide") !== null || tail.sceneOffOpponentSwitchInLagElapsed(species, incoming.name) === null ? {}
+      : { sendInLagElapsed: tail.sceneOffOpponentSwitchInLagElapsed(species, incoming.name) }) }),
   message(6, [`Foe ${name(species)} was`, "dragged out!"]),
 ];
 const spans = commands.map((c: any) => c.type === "switch-in" ? duration : c.timing.minimumFrames);
@@ -110,7 +113,7 @@ const draw = (t: number) => {
 };
 const frames = readdirSync(romDir!).filter((f) => /^frame-\d+\.png$/.test(f)).map((f) => Number(f.slice(6, -4))).sort((a, b) => a - b);
 const rom = new Map(frames.map((f) => [f, readPng(`${romDir}/frame-${String(f).padStart(5, "0")}.png`)]));
-const ball = draw(sendInT + 2);
+const ball = draw(sendInT + 2 + visualDelay);
 const boxEqual = (r: Uint8Array) => {
   for (let y = 56; y < 72; y += 1) for (let x = 168; x < 184; x += 1) for (let k = 0; k < 3; k += 1) {
     if (r[(y * 240 + x) * 3 + k] !== ball[(y * 240 + x) * 4 + k]) return false;
@@ -120,7 +123,7 @@ const boxEqual = (r: Uint8Array) => {
 const anchorFrame = frames.find((f) => boxEqual(rom.get(f)!) && !boxEqual(rom.get(f - 1) ?? new Uint8Array(240 * 160 * 3)));
 if (anchorFrame === undefined) throw new Error("no ROM frame shows production's elapsed-2 ball");
 // ROM frame of t = 0: the ROM's send-in elapsed 0 is G + 52 (ball G + 54, off148 probe rows), so the pause starts at ball - 53.
-const t0 = anchorFrame - 53;
+const t0 = anchorFrame - 53 - (base ? tail.sceneOffOpponentSwitchInVisualDelay(species) : visualDelay);
 const playerHalf = (x: number, y: number) => (x < 120 && y >= 48 && y < 112) || (x >= 120 && y >= 64 && y < 112);
 const region = (x: number, y: number) => y >= 112 ? "msg" : x < 120 && y < 48 ? "hb" : x >= 120 && y < 64 ? "opp" : "bg";
 const last = opt("until") ?? (sendInT + duration + 2);

@@ -87,7 +87,8 @@ describe("snd145 live switch-in tail (R2 timing, R3 send-in fade / particles)", 
       expect(switchInTiming(0, species)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
     }
     // Scene OFF skips the front animation (HITMARKER_NO_ANIMATIONS -> SKIP_FRONT_ANIM): the calibrated span stays.
-    expect(switchInTiming(1, 341, false)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
+    // offs152: Scene OFF opponent send-ins use the OFF tail (tests/offs152SendInTailOff.test.ts), not the calibrated 91-frame span.
+    expect(switchInTiming(1, 341, false, "SPHEAL")).toEqual({ minimumFrames: 62 - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
     expect(midBattleSwitchInAt(33, 1).healthboxDx).toBe(-110);
     expect(midBattleSwitchInAt(65, 0).healthboxDx).toBeNull();
     expect(midBattleSwitchInAt(66, 0).healthboxDx).toBe(110);

@@ -1844,13 +1844,15 @@ export function createBattleResolutionPresentationRenderView(
       field = withSubstituteDoll(replaceFieldBattler(field, command.battler, command.incoming), command.battler, false);
       // snd145: a Scene ON opponent send-in carries its species-keyed slide start; CASTFORM's whole send-in runs one frame late.
       const visualDelay = command.sendInVisualDelay ?? 0;
-      const sendInElapsed = state.lifecycle.phaseElapsed - visualDelay;
+      // offs152: a Scene OFF long-nickname send-in repeats the slide's first frame (lag frame): later visuals run one frame late.
+      const lagged = command.sendInLagElapsed !== undefined && state.lifecycle.phaseElapsed >= command.sendInLagElapsed ? 1 : 0;
+      const sendInElapsed = state.lifecycle.phaseElapsed - visualDelay - lagged;
       midBattleSwitchIn = midBattleSwitchInAt(
         sendInElapsed,
         command.battler,
         command.healthboxSlideElapsed === undefined ? undefined : command.healthboxSlideElapsed - visualDelay,
-        // fra151: only the Scene ON opponent send-in (the species-keyed tail) launches the front animation.
-        command.healthboxSlideElapsed === undefined || command.battler !== 1
+        // fra151: only the Scene ON opponent send-in (the species-keyed tail) launches the front animation (offs152: Scene OFF skips it).
+        command.healthboxSlideElapsed === undefined || command.battler !== 1 || command.skipFrontAnimation === true
           ? undefined : createBattleCommandFieldArtView(field).opponent.speciesSymbol,
       );
       midBattleSwitchFade = midBattleSwitchSendInFadeAt(sendInElapsed, command.battler) ?? midBattleSwitchFade;
