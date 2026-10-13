@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-12 (evening, in progress) — S10A: #168 status animations — timing + SE gate live, PSN / PRZ drawn; ord124 plans landed; 99.34 / 99.60 % live
+## 2026-10-12 (evening, in progress) — S10A: #168 status animations — timing + SE gate live, 6 / 9 drawn; ord124 plans landed; 99.34 / 99.60 % live
 
 - Session start: master `cfe4e26ca`, production src `b4befa039` == the 2026-10-11 final gates' tree -> baseline receipt reused. Oracle
   freshness FAIL = the known false positive (services 2026-10-06; last `oracle/` commit 2026-08-15).
@@ -43,6 +43,20 @@
   charm.ts: 13 scenarios, **37 / 37 windows 0 px**, 24 / 24 perturbations fail the pins. Supervisor: stq132Run.sh ALL SAME.
 - **Union `7511dc63d` (master `4f790c9d3` + stq132 + sar131; = master `61de9fb98` src)**: typecheck, smoke 448, full suite 1,646 files /
   13,649 tests 0 failed, build.
+- sad133 (INTEGRATION, Opus, `58d8ffa74` .. `3401c9e6a`, base = sar131 tip + stp128 cherry-picked unchanged): **ISSUES #168 SA6 / SA7 /
+  SA8 — CURSED / NIGHTMARE / CONFUSION / FRZ DRAWN** through `liveStatusAnimationRow` (stp128's reducer at rel = age; FRZ's 115 / 116 load
+  lag from a presentation-only `inflicted` input = the command follows its battler's `status` command): **34 / 34 ROM windows 0 px on every
+  command row** (31 / 34 full screen: 3 ONIX-opponent CONFUSION windows show 1,091 px on the NEXT message's rows a = 100 / 101 — the
+  pre-existing "ordinary rows never draw the opponent's idle rest" gap, not fitted -> rst139); controls fail each its own class; x2 34 / 34;
+  sar131's PSN / PRZ still 17 / 17; routes 5 / 5; census 0..999 identical. Supervisor: sad133Run.sh --census ALL SAME.
+- sgs134 (MAIN lane, Opus, new files only): the same IsBattleSEPlaying gate on OTHER controller requests — General_StatsChange after a
+  neutral non-crit hit (target drops, attacker raises; fixed rows 44, BOTH scenes) and multi-hit 2nd+ hits (fixed rows 62, Scene ON):
+  production SHORT by exactly the gate on every receipt; banked `sgs134-gate.diff`: census ON 366 commands / 3,654 frames, OFF 240 / 3,114,
+  gameplay identical (±1 message-parity allowance from the census driver's even-frame presses). Supervisor: sgs134Run.sh --delta (below).
+- **Union `b6884121b` (master `439575012` + sad133 + a supervisor fix)**: the sad133 x stq132 union broke typecheck (TS2366: stq132 widened
+  the reducer's sprite-template union; sad133's switch lost exhaustiveness) — fixed with explicit unreachable cases (`b6884121b`); smoke
+  448, full suite 1,648 files / 13,674 tests 0 failed (pre-fix, runtime-identical), typecheck + build + 7 status test files 123 / 123
+  post-fix. Master `86298bae3`.
 - Live audit 27 (aud129, MAIN lane, Opus, new files only): 105 windows, lend == ROM 105 / 105, **85 OK, 20 TIMING-PHASE (D4 class; each
   residual row is 0 px one age off), 0 DEFECT**. ord124's Golbat Mega Punch flag = Mega Punch's own BG-write row 71 + restore-fade phase
   (no party dependency); Spark = alignment artefact; Smokescreen use-1 phase quantified (66 live / 8,580 frames on 0..999).

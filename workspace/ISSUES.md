@@ -19,9 +19,9 @@ backlog.
 
 ## #168 — Scene ON: the status-condition animations (B_ANIM_STATUS_*) are not drawn (S10A, found 2026-10-11 by off121; TIMING fixed 2026-10-12)
 
-Remainder after sa125 / sag130 / sar131 (timing exact incl. the IsBattleSEPlaying gate; PSN / PRZ drawn at 0 px; source-derived x2 rows
-for all nine): CURSED / NIGHTMARE / CONFUSION / FRZ (sad133, stp128's reducer) and SLP / BRN / INFATUATION (sae135, stq132's reducer) are
-not drawn yet. Design: docs/sta123-status-animations-design.md §5.
+Remainder after sa125 / sag130 / sar131 / sad133 (timing exact incl. the IsBattleSEPlaying gate; PSN / PRZ / CURSED / NIGHTMARE /
+CONFUSION / FRZ drawn at 0 px on every command row; source-derived x2 rows for all nine): SLP / BRN / INFATUATION (sae135, stq132's
+reducer) are not drawn yet. Design: docs/sta123-status-animations-design.md §5.
 
 ## #166 — remainder: the live Double Team window ends 9 rows before the ROM's next message (Scene ON) (S10A, 2026-10-11)
 

@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-12 (evening, in progress) — S10A: status-condition animations in Scene ON — timing + SE gate live, PSN / PRZ drawn (#168); ord124 order plans landed (99.34 / 99.60 %)
+## 2026-10-12 (evening, in progress) — S10A: status-condition animations in Scene ON — timing + SE gate live, 6 / 9 drawn (#168); ord124 order plans landed (99.34 / 99.60 %)
 
 - **State:** local master `53419e533`; production src = union `a1730a1f9` (sa125 + ordl126) + stp128's unwired reducer module. Supervisor
   union gates on `a1730a1f9`: typecheck, smoke 448, full suite 1,642 files / 13,555 tests 0 failed, build. Session start `cfe4e26ca` (src
@@ -22,8 +22,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Also folded (union `7511dc63d`, full suite 1,646 files / 13,649 tests, build):** sag130 (#168 SA2: the IsBattleSEPlaying gate in the
   status-animation command, 72 commands +729 frames == the ROM rule), sar131 (#168 SA4: **PSN / PRZ drawn**, 17 / 17 ROM windows 0 px;
   source-derived x2 rows for all nine), stq132 (SLP / BRN / INFATUATION reducer, unwired, 37 / 37 windows 0 px).
-- **In flight:** sad133 (draw CURSED / NIGHTMARE / CONFUSION / FRZ), sae135 (draw SLP / BRN / INFATUATION), sgs134 (the same SE gate on
-  stats-change / multi-hit requests, evidence).
+- **Also folded (union `b6884121b`):** sad133 (#168: **CURSED / NIGHTMARE / CONFUSION / FRZ drawn**, 34 / 34 ROM windows 0 px on every
+  command row) + a supervisor union fix (stq132 x sad133 typecheck break, TS2366). sgs134 evidence: the SE gate also applies to stats-change
+  (both scenes) and multi-hit 2nd+ hits (ON) — production short by exactly the gate; banked patch.
+- **In flight:** sae135 (draw SLP / BRN / INFATUATION), tmr136 (Double Team window + Smokescreen first-use timing), sgl138 (land sgs134).
 - **Notes:** no DEFERRED entries. Oracle freshness FAIL = known false positive (services 2026-10-06 postdate the last oracle/ commit).
 
 ---
