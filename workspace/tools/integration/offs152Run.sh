@@ -3,7 +3,7 @@
 # tail, Scene ON genderless / male-only tail, SOLROCK's matrix). Run from workspace/ (this checkout or a fresh copy with node_modules,
 # reference and bin/oracle); direct mGBA (the vendor venv; PYTHONPATH -> vendor/libmgba-py) and the shared HTTP oracles read-only
 # (battle-scene-off 8014, battle-scene-on 8012: bin/oracle lab). Nothing outside <out-dir> is written.
-#   sh tools/integration/offs152Run.sh <fresh-out-dir> [--census] [--soak]
+#   sh tools/integration/offs152Run.sh <fresh-out-dir> [--no-sweeps] [--census] [--soak]     (--no-sweeps: skip R1's 8 sweeps, ~20 min)
 # R1  forcedSwitchSweep.py (forcedSwitchRomProbe.py) x {Scene OFF opponent target, Scene OFF player target, Scene ON genderless
 #     (FS_GENDER=genderless), Scene ON male-only (FS_GENDER=male)}, each twice fresh: r1 == r2 == fixtures/offs152/species-sweep-*.txt.
 # R2  offs152GenTable.py == src/data/sendInTailOff.ts; offs152AnimTerminal.ts == fixtures/offs152/anim-duration-terminal.json;
@@ -16,8 +16,8 @@
 #     actions equal, all OK.
 set -u
 OUT="$1"; shift
-CENSUS=0; SOAK=0
-for a in "$@"; do [ "$a" = "--census" ] && CENSUS=1; [ "$a" = "--soak" ] && SOAK=1; done
+CENSUS=0; SOAK=0; SWEEPS=1
+for a in "$@"; do [ "$a" = "--census" ] && CENSUS=1; [ "$a" = "--soak" ] && SOAK=1; [ "$a" = "--no-sweeps" ] && SWEEPS=0; done
 [ -e "$OUT" ] && { echo "refusing: $OUT exists"; exit 2; }
 mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd)
 W=$(pwd); F=tools/integration/fixtures/offs152; BASE=16ae4522e; fail=0
@@ -32,6 +32,7 @@ sweep() { # sweep <tag> <profile> <scenario> <side> <species.json> [gender]
       "$PY" tools/integration/forcedSwitchSweep.py "$3" "$4" "offs152-$1-$r" 1 > "$OUT/sweep-$1-$r.txt" 2> /dev/null) &
   done
 }
+if [ $SWEEPS = 1 ]; then
 sweep opp-off battle-scene-off mechanic-roar-player-houndour-opponent-onix opponent tools/integration/fixtures/forced-switch/factory-species-ids.json
 sweep ply-off battle-scene-off mechanic-roar-opponent-houndour-player-onix player tools/integration/fixtures/forced-switch/factory-species-ids.json
 wait
@@ -46,6 +47,7 @@ for p in "opp-off species-sweep-opponent-target-off" "ply-off species-sweep-play
   check "$F/$2.txt" "$OUT/sweep-$1-r1.txt" "R1 sweep $1 == fixtures/offs152/$2.txt"
 done
 rm -rf "$OUT/fs"
+fi
 # R2 tables + tests
 python3 tools/integration/offs152GenTable.py "$OUT/sendInTailOff.ts" > /dev/null
 check src/data/sendInTailOff.ts "$OUT/sendInTailOff.ts" "R2 generated cry table == src/data/sendInTailOff.ts"

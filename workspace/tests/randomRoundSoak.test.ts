@@ -393,7 +393,10 @@ describe("random round soak driver (green milestone pin)", () => {
       // off121 (the Scene OFF `status` command ends at the next print,
       // docs/off121-status-command.md): frames 38_358 -> 37_645, renderCalls
       // 2_728 -> 2_697; same battle 7, turn 3, seven wins and diagnostics.
-      frames: 37_645,
+      // offs152 (the Scene OFF opponent send-in tail + forced switch-out,
+      // docs/offs152-scene-off-send-in-tail.md): frames 37_645 -> 37_332,
+      // renderCalls 2_697 -> 2_667; same battle 7, turn 3, seven wins and diagnostics.
+      frames: 37_332,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -405,7 +408,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_697,
+        renderCalls: 2_667,
       },
     });
     expect(second).toEqual(first);
@@ -784,9 +787,12 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // canonical logs identical to 681da5c10's for both seeds. off121 (the
     // Scene OFF `status` command ends at the next print): frames only,
     // 17591 -> 17557 and 27052 -> 26869; decision and canonical logs
-    // identical to 9d23a17c4's for both seeds.
+    // identical to 9d23a17c4's for both seeds. offs152 (the Scene OFF opponent
+    // send-in tail + forced switch-out): frames only, 17557 -> 17423 and
+    // 26869 -> 26878 (a cry-bound send-in outlasts the old 102); same battle /
+    // turn / end state.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 17557,
+      frames: 17423,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -794,7 +800,7 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       turn: 30,
     });
     expect(runSeed(1, options)).toMatchObject({
-      frames: 26869,
+      frames: 26878,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
