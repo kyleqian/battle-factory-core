@@ -7183,13 +7183,16 @@ function drawParticleTile(fb: Uint8Array, tileIndex: number, hFlip: boolean, ox:
  */
 function drawMidBattleSwitchBallOpenParticles(
   fb: Uint8Array,
-  window: "recall" | "send-in",
+  window: "recall" | "send-in" | "opponent-send-in",
   schedules: readonly MidBattleSwitchParticle[],
 ): void {
   if (schedules.length === 0) return;
+  // snd145: an opponent send-in bursts at the opponent ball (176,64) - 5, the battle-start opponent's PARTICLE_ORIGIN; no terrain clip.
   const origin = window === "recall"
     ? { x: 68, y: 108 }
-    : { x: 68, y: 119 };
+    : window === "opponent-send-in"
+      ? PARTICLE_ORIGIN
+      : { x: 68, y: 119 };
   const anim = battleAnimParticles.regularBallAnim;
   const alive: AliveParticle[] = schedules.map((p) => ({
     i: p.i,
@@ -7228,7 +7231,7 @@ function drawMidBattleSwitchBallOpenParticles(
       frame.hFlip,
       origin.x + p.dx,
       origin.y + p.dy,
-      112,
+      window === "opponent-send-in" ? undefined : 112,
     );
   }
 }

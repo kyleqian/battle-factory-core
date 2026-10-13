@@ -1301,9 +1301,12 @@ describe("battle resolution presentation receipt ownership", () => {
     });
     const overlapFrame = createFramebuffer();
     const ballOnlyFrame = createFramebuffer();
-    renderBattleResolutionSceneOffView(overlapFrame, overlapView);
+    // snd145: every send-in now bursts its ball-open particles from elapsed 17; at elapsed 20 the two radius-0 particles sit
+    // over the ball centre and hide the tiny emerging mon (as in the ROM), so this ball/mon overlap check strips them.
+    renderBattleResolutionSceneOffView(overlapFrame, Object.freeze({ ...overlapView, midBattleSwitchParticles: null }));
     renderBattleResolutionSceneOffView(ballOnlyFrame, Object.freeze({
       ...overlapView,
+      midBattleSwitchParticles: null,
       midBattleSwitchIn: Object.freeze({
         ...overlapView.midBattleSwitchIn!,
         monVisible: false,
