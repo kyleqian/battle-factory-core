@@ -1,3 +1,4 @@
+import { liveStatusAnimationRow } from "../animation/statusAnimation.ts";
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import {
   liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput, type LiveMoveRandom2PlanContext,
@@ -571,6 +572,11 @@ export type BattleResolutionRenderEffect =
    * the tracked x2 history (present only in Scene ON, where the orchestrator's x2 host exists; absent = no residual x2).
    */
   | Readonly<{ type: "stats-change"; battler: 0 | 1; argument: number; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
+  /**
+   * sar131 (S10A, ISSUES #168 slice SA4): B_ANIM_STATUS_* `animation` of the battler at command age (drawn: statusAnimation.ts
+   * liveStatusAnimationRow; others leave the field as it is); `battlerX2Input` = the tracked x2 history (Scene ON only).
+   */
+  | Readonly<{ type: "status-animation"; battler: 0 | 1; animation: string; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -851,7 +857,7 @@ function applyCompletedCommand(
     || command.type === "trainer-slide"
     || command.type === "substitute-fade"
     || command.type === "stats-change"
-    // sa125: timing only (the B_ANIM_STATUS_* renderers are SA4..SA8); the field stays as it is.
+    // sa125 / sar131: the field stays as it is; the status-animation effect draws over it (battleScene.ts statusAnimationRenderView).
     || command.type === "status-animation"
   ) return field;
   if (command.type === "switch-in") {
@@ -1073,7 +1079,7 @@ export function battleResolutionCommandDuration(
     // scf117: + the rows to the following print's first glyph (holdFrames, statsChangeNextReceiptHoldFrames).
     case "stats-change":
       return command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
-    // sa125 (ISSUES #168 SA1): B_ANIM_STATUS_*'s controller rows (STATUS_ANIMATION_ADDED_ROWS); nothing drawn yet.
+    // sa125 (ISSUES #168 SA1): B_ANIM_STATUS_*'s controller rows (STATUS_ANIMATION_ADDED_ROWS); sar131 draws PSN / PRZ.
     case "status-animation":
       return command.timing.minimumFrames;
   }
@@ -1145,6 +1151,11 @@ function postBodyShadowHiddenAt(
     const completed = segment.commands[index]!;
     // A presented Substitute fade owns the shadow through its own tail (liveSubstituteFade.ts): visible after it.
     if (completed.type === "substitute-fade") return false;
+    // sar131: SpriteCB_EnemyShadow hides the shadow while gAnimScriptActive, shown one row late: a drawn status animation's hide
+    // (statusAnimationRenderView: ages 1 .. end) holds through the next command's first row.
+    if (completed.type === "status-animation" && rows <= 1 && liveStatusAnimationRow(completed.animation, 0, "opponent") !== null) {
+      return true;
+    }
     if (completed.type === "move-animation") {
       if (!completed.animation || liveMoveAnimationDuration(completed.animation, fields[index]!) === null) return false;
       return rows <= liveMoveOpponentShadowPostBodyHideRows(completed.animation);
@@ -1568,6 +1579,12 @@ export function createBattleResolutionPresentationRenderView(
       // scd112: the banner over the field as it is (battleScene.ts statsChangeRenderView); never over the doll (the ROM plays nothing).
       effect = Object.freeze({
         type: "stats-change", battler: command.battler, argument: command.argument, age: state.lifecycle.phaseElapsed,
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      });
+    } else if (command.type === "status-animation") {
+      // sar131: the status animation over the field as it is (battleScene.ts statusAnimationRenderView).
+      effect = Object.freeze({
+        type: "status-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "hit-animation") {

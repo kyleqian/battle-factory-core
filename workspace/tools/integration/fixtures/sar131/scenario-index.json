@@ -1,0 +1,83 @@
+{
+ "sta123-toxic-ply-primeape-onix.json": {
+  "move": 92,
+  "animation": "PSN",
+  "paths": "move-inflicted (MoveEffectToxic) + end-turn toxic tick",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+  "source": "tools/integration/fixtures/sta123/scenarios"
+ },
+ "sta123-toxic-opp-primeape-onix.json": {
+  "move": 92,
+  "animation": "PSN",
+  "paths": "move-inflicted (MoveEffectToxic) + end-turn toxic tick",
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "ONIX",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+  "source": "tools/integration/fixtures/sta123/scenarios"
+ },
+ "sta123-thunder-wave-ply-primeape-snorlax.json": {
+  "move": 86,
+  "animation": "PRZ",
+  "paths": "move-inflicted (MoveEffectParalysis) + can't move",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 4,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+  "source": "tools/integration/fixtures/sta123/scenarios"
+ },
+ "sta123-thunder-wave-opp-primeape-snorlax.json": {
+  "move": 86,
+  "animation": "PRZ",
+  "paths": "move-inflicted (MoveEffectParalysis) + can't move",
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "SNORLAX",
+  "seed": 305419897,
+  "turns": 4,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+  "source": "tools/integration/fixtures/sta123/scenarios"
+ },
+ "sar131-toxic-ply-primeape-ledian.json": {
+  "move": 92,
+  "animation": "PSN",
+  "paths": "move-inflicted (MoveEffectToxic) + end-turn toxic tick; elevated opponent",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "LEDIAN",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "sar131-thunder-wave-ply-primeape-golbat.json": {
+  "move": 86,
+  "animation": "PRZ",
+  "paths": "move-inflicted (MoveEffectParalysis) + can't move; elevated opponent",
+  "attackerSide": "player",
+  "attacker": "PRIMEAPE",
+  "target": "GOLBAT",
+  "seed": 305419897,
+  "turns": 4,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "sar131-thunder-wave-opp-primeape-golbat.json": {
+  "move": 86,
+  "animation": "PRZ",
+  "paths": "move-inflicted (MoveEffectParalysis) + can't move",
+  "attackerSide": "opponent",
+  "attacker": "PRIMEAPE",
+  "target": "GOLBAT",
+  "seed": 305419897,
+  "turns": 4,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ }
+}

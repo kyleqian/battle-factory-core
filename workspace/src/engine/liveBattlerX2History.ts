@@ -18,7 +18,8 @@
  *     not measured (rest0 / absent): attacker keep; target zeroed when the move deals damage (power > 0: every hit
  *     shakes its target) except a two-turn move's charge turn (keep), otherwise keep            (§0.6 fallback)
  *   HIT_ANIMATION, STATS_CHANGE, weather-continues animations                                  keep (blink / measured)
- *   any other general or status animation on a battler                                         that side := unknown
+ *   B_ANIM_STATUS_* on a battler (sar131, LIVE_BATTLER_X2_STATUS_ANIMATION, source-derived)    zeroed / keep
+ *   any other general animation on a battler                                                   that side := unknown
  *   SUBSTITUTE_FADE (General_SubstituteFade's trailing swap task ends at x2 0)                 that side := zeroed
  *   faint-animation                                                                            keep (send-in resets)
  *   party-menu return, unapplied events, battle advanced without a presented resolution        both := unknown
@@ -26,6 +27,7 @@
 import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
+import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 
 export type LiveBattlerX2State = "idle" | "zeroed" | "unknown";
 export type LiveBattlerX2Side = "player" | "opponent";
@@ -42,6 +44,8 @@ export type LiveBattlerX2Event =
   | Readonly<{ kind: "move-body"; moveId: number; attackerSide: LiveBattlerX2Side; turn?: number }>
   /** General_SubstituteFade: its trailing AnimTask_SwapMonSpriteToFromSubstitute ends at x2 0 (measured RATTATA, rest +1). */
   | Readonly<{ kind: "substitute-fade"; side: LiveBattlerX2Side }>
+  /** sar131: a B_ANIM_STATUS_* script on the battler of `side` (LaunchStatusAnimation: attacker = target = the battler). */
+  | Readonly<{ kind: "status-animation"; side: LiveBattlerX2Side; animation: string | null }>
   | Readonly<{ kind: "unknown"; side: LiveBattlerX2Side | "both"; reason: string }>;
 
 /**
@@ -89,6 +93,24 @@ export const LIVE_BATTLER_X2_MOVE_TABLE = Object.freeze({
 export const LIVE_BATTLER_X2_SOURCE_ZEROED = Object.freeze({
   attacker: Object.freeze([103, 135, 187, 271]),
   target: Object.freeze([45, 261, 271]),
+});
+
+/**
+ * sar131 (S10A, ISSUES #168 slice SA4, docs/sar131-status-animation-render.md): the battler's x2 / y2 after each B_ANIM_STATUS_*
+ * script (battle_anim_scripts.s; LaunchStatusAnimation, battle_anim_status_effects.c:543, sets attacker = target = the battler):
+ *   zeroed  Status_Poison (10224) / Status_Paralysis (10268): AnimTask_ShakeMon2 ANIM_ATTACKER; Status_Curse (10285) /
+ *           Status_Nightmare: AnimTask_ShakeMon2 ANIM_TARGET. AnimTask_ShakeMon2_Step's last toggle writes `x2 = 0; y2 = 0`
+ *           (battle_anim_mon_movement.c:231-232), an absolute reset.
+ *   keep    Status_Burn (10235: gBurnFlameSpriteTemplate only), Status_Sleep (gSleepLetterZSpriteTemplate only), Status_Infatuation
+ *           (gMagentaHeartSpriteTemplate only), Status_Confusion (ConfusionEffect: create_confusion_duck_sprite only): sprite-only
+ *           scripts never write the battler sprite's x2 / y2. Status_Freeze (10274): monbg / clearmonbg read x2 (MoveBattlerSpriteToBG,
+ *           battle_anim.c:698 / 702) and toggle visibility (Task_ClearMonBg), AnimTask_FrozenIceCube (battle_anim_status_effects.c:381)
+ *           and its steps write no battler x2 / y2.
+ * Anything else (WRAPPED has no table entry; an unknown name) makes that side unknown.
+ */
+export const LIVE_BATTLER_X2_STATUS_ANIMATION: Readonly<Record<string, "zeroed" | "keep">> = Object.freeze({
+  PSN: "zeroed", PRZ: "zeroed", CURSED: "zeroed", NIGHTMARE: "zeroed",
+  BRN: "keep", SLP: "keep", INFATUATION: "keep", CONFUSION: "keep", FRZ: "keep",
 });
 
 export type LiveBattlerX2RoleClass = "zeroed" | "keep" | "unknown";
@@ -149,6 +171,11 @@ export function applyLiveBattlerX2Event(history: LiveBattlerX2History, event: Li
     case "substitute-fade":
       next = { ...history, [event.side]: "zeroed" };
       break;
+    case "status-animation": {
+      const cls = event.animation === null ? undefined : LIVE_BATTLER_X2_STATUS_ANIMATION[event.animation];
+      next = { ...history, [event.side]: cls === "zeroed" ? "zeroed" : cls === "keep" ? history[event.side] : "unknown" };
+      break;
+    }
     case "unknown":
       next = event.side === "both" ? { player: "unknown", opponent: "unknown" } : { ...history, [event.side]: "unknown" };
       break;
@@ -197,7 +224,9 @@ export function liveBattlerX2EventsOf(event: BattleKernelSemanticEvent): readonl
     return target === null || target === side ? [unknown(side)] : [unknown(side), unknown(target)];
   }
   if (payload.kind === "status-animation") {
-    return [{ kind: "unknown", side: sideOf(payload.battler) ?? "both", reason: "status animation" }];
+    const side = sideOf(payload.battler);
+    if (side === null) return [{ kind: "unknown", side: "both", reason: "status animation" }];
+    return [{ kind: "status-animation", side, animation: spriteOrderStatusAnimationName(payload.isStatus2 !== 0, payload.status) }];
   }
   return [];
 }

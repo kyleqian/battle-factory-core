@@ -98,8 +98,9 @@ describe("live battler x2 history (ISSUES #148, presentation-only)", () => {
     }
     expect(liveBattlerX2EventsOf(event(4, { kind: "animation", animationId: "TURN_TRAP", battler: 1, target: 0, arguments: [] }))
       .map((e) => e.kind === "unknown" && e.side)).toEqual(["opponent", "player"]);
+    // sar131: B_ANIM_STATUS_* rows are source-derived (LIVE_BATTLER_X2_STATUS_ANIMATION): PSN (status 8) zeroes its battler.
     expect(liveBattlerX2EventsOf(event(5, { kind: "status-animation", battler: 1, isStatus2: 0, status: 8 })))
-      .toEqual([{ kind: "unknown", side: "opponent", reason: "status animation" }]);
+      .toEqual([{ kind: "status-animation", side: "opponent", animation: "PSN" }]);
     expect(liveBattlerX2EventsOf(event(6, { kind: "faint-animation", battler: 1 }))).toEqual([]);
     expect(liveBattlerX2EventsOf(event(7, { kind: "message", text: "x" }))).toEqual([]);
   });
@@ -186,7 +187,9 @@ describe("x2 history over ordinary generated routes with ONIX opponents (docs/x2
   it.each([
     // sa125: "1:0:17" -> "1:0:18" (the key is requestId:segment:commandIndex): one Scene ON status-animation command now precedes
     // that body in segment 1:0 (sa125 adds no other command); bodies, inputs and ON / OFF parity unchanged.
-    [110, 14, 10, 3, ["1:0:18", "3:0:1", "5:0:7"]],
+    // sar131: + 5 bodies ("5:0:1", "7:0:1", "11:0:1", "13:0:1", "15:0:1") whose ONIX an earlier status animation left unknown and
+    // the source-derived status-animation rows (LIVE_BATTLER_X2_STATUS_ANIMATION) now know zeroed (bodies / parity unchanged).
+    [110, 14, 10, 8, ["1:0:18", "3:0:1", "5:0:1", "5:0:7", "7:0:1", "11:0:1", "13:0:1", "15:0:1"]],
     [134, 15, 13, 9, ["3:0:9", "5:0:6", "7:0:1", "7:0:5", "9:0:8", "13:0:1", "13:0:8", "15:0:1", "17:0:5"]],
   ] as const)("seed %i: %i bodies, %i with an ONIX opponent, %i inputs changed; Scene ON/OFF logic, RNG, boundaries equal",
     (seed, bodies, rest, changed, keys) => {
