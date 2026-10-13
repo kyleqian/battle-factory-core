@@ -12,7 +12,26 @@ text = re.sub(r"\x1b\[[0-9;]*m", "", open(log, errors="replace").read())
 lines = text.splitlines()
 # Reviewed by hand (sa125). Keyed by (file, test prefix).
 REVIEWED = [
-__REVIEWED__
+    ("tests/off121StatusCommand.test.ts", "Scene ON is untouched",
+     "SA3 itself: the Scene ON guard 'every status command stays 32' now reads 'stays 32 unless its battler's status animation runs in "
+     "the same execution (then off121's delta(print) - delta(status))' on the same seeds 11 / 12; every OFF assertion unchanged", "moved"),
+    ("tests/stl109Struggle.test.ts", "opponent first, then the player (turn 58)",
+     "frame budget: the turn-58 route (seed 60 / streak 23) crosses 34 Scene ON status animations (+3,298 frames) and 34 SA3 status "
+     "commands (-1,044): 27,992 -> 30,246 frames (base / final measured), past generatedCommandAnimationReplay's 30,000-frame budget; "
+     "the route now passes 40,000 explicitly (new optional frameBudget parameter, default 30,000); Scene OFF 22,806 both trees", "moved"),
+    ("tests/appDifferential.test.ts", "",
+     "ENVIRONMENT, not a pin: the archive copy is a one-commit git repo (the CLI guard tests need history); passes in the worktree", "env"),
+    ("tests/liveBattlerX2History.test.ts", "seed 110",
+     "command index: body key '1:0:17' -> '1:0:18' (requestId:segment:commandIndex): one Scene ON status-animation command now precedes "
+     "the body in segment 1:0 (the only command sa125 inserts); 14 bodies / 10 ONIX / 3 inputs changed and ON / OFF parity unchanged "
+     "(base and final replays measured); seed 134 unchanged", "moved"),
+    ("tests/sc106StatsChangeCommand.test.ts", "playstatchangeanimation (seed 13",
+     "frames: the route total 9177 -> 9625 = + 4 CONFUSION (100) + 2 PRZ (39) status-animation commands - 30 (one SA3 status 32 -> 2), "
+     "all after the Tickle anchor (base / final replays measured; the anchor frames and every other sc106 assertion unchanged)", "moved"),
+    ("tests/liveSpriteOrderHost.test.ts", "host tracker == pure transform",
+     "count: compared 882 -> 895 / hostKnown 788 -> 798 = + the 20-battle sweep's 13 status-animation command edges (10 host-known), "
+     "each equal to the pure transform (0 mismatches; measured on the final tree); declines 0 and laterAfter 72 unchanged", "moved"),
+
 ]
 pins, seen = [], set()
 for i, line in enumerate(lines):

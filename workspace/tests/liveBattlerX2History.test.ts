@@ -184,7 +184,9 @@ describe("live battler x2 history (ISSUES #148, presentation-only)", () => {
 describe("x2 history over ordinary generated routes with ONIX opponents (docs/x2-history-148.md §0.5 seeds 110 / 134)", () => {
   // tools/integration/fixtures/x2-history-tracker/route-replay-110-134.json: later bodies whose input changes (ONIX zeroed).
   it.each([
-    [110, 14, 10, 3, ["1:0:17", "3:0:1", "5:0:7"]],
+    // sa125: "1:0:17" -> "1:0:18" (the key is requestId:segment:commandIndex): one Scene ON status-animation command now precedes
+    // that body in segment 1:0 (sa125 adds no other command); bodies, inputs and ON / OFF parity unchanged.
+    [110, 14, 10, 3, ["1:0:18", "3:0:1", "5:0:7"]],
     [134, 15, 13, 9, ["3:0:9", "5:0:6", "7:0:1", "7:0:5", "9:0:8", "13:0:1", "13:0:8", "15:0:1", "17:0:5"]],
   ] as const)("seed %i: %i bodies, %i with an ONIX opponent, %i inputs changed; Scene ON/OFF logic, RNG, boundaries equal",
     (seed, bodies, rest, changed, keys) => {
