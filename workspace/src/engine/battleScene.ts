@@ -54646,6 +54646,12 @@ export const SCENE_OFF_TURN_DEFAULT_IDENTITY: SceneOffTurnIdentity = {
  * the shared `MATERIALIZE_Y2_TABLE` (the same descent the battle-START
  * player materialize uses).
  */
+/** fra151: a BGR555 color as the 8-bit RGB the renderer's 5-bit blends expand ((c5 << 3) | (c5 >> 2)). */
+function bgr555ToRgb8(color: number): RgbColor {
+  const expand = (c5: number) => (c5 << 3) | (c5 >> 2);
+  return { r: expand(color & 0x1f), g: expand((color >> 5) & 0x1f), b: expand((color >> 10) & 0x1f) };
+}
+
 function drawMidBattleSwitchInSprite(
   fb: Uint8Array,
   art: BattleCommandFieldArtBattler,
@@ -54694,13 +54700,19 @@ function drawMidBattleSwitchInSprite(
       if (state.side === "opponent" && front !== null) {
         // fra151: once the emerge has settled, a Scene ON opponent send-in plays the species front animation (sAnim_<Name>_1
         // frame, the Anim_* callback's x2 / y2 and, for an affine family, its double-size OAM matrix) under the release tint.
+        // A glow / flash family's BlendPalette shows whenever the release fade task does not rewrite the palette that frame
+        // (midBattleSwitchInPalette); Anim_FlickerIncreasing hides the sprite on its odd frames.
+        if (front.invisible) return;
         const tileset = (front.frame === 1 ? (art.pic as { frame2?: Tileset }).frame2 ?? art.pic.tileset : art.pic.tileset) as Tileset;
+        const palette = front.blend !== null
+          ? blendPaletteToward(art.pic.palette as RgbColor[], bgr555ToRgb8(front.blend.color), front.blend.coefficient)
+          : art.pic.palette as RgbColor[];
         if (front.matrix !== null) {
-          drawSpriteSheetAffineRotate(fb, tileset, art.pic.palette as RgbColor[], art.origin.x + 32 + front.x2,
+          drawSpriteSheetAffineRotate(fb, tileset, palette, art.origin.x + 32 + front.x2,
             originY + 32 + emergeY2 + front.y2, front.matrix[0], front.matrix[1], front.matrix[2], front.matrix[3], undefined, true,
             MATERIALIZE_TINT_COLOR, state.monTintCoefficient);
         } else {
-          drawSpriteSheetAffineTintedBlend(fb, tileset, art.pic.palette as RgbColor[], art.origin.x, originY, state.emergeAccumulator,
+          drawSpriteSheetAffineTintedBlend(fb, tileset, palette, art.origin.x, originY, state.emergeAccumulator,
             MATERIALIZE_TINT_COLOR, state.monTintCoefficient, emergeY2 + front.y2, front.x2);
         }
       } else if (state.side === "opponent") {

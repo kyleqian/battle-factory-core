@@ -7,7 +7,10 @@ import {
   midBattleSwitchInAt,
   midBattleSwitchInFrontAnimAt,
 } from "../src/engine/battleResolutionPresentationRender.ts";
-import { frontSendOutAffineAtTick, frontSendOutAnimationDelay, frontSendOutFrameAtTick } from "../src/animation/sendOutDispatcher.ts";
+import {
+  FRONT_SEND_OUT_INITIALIZER_ONLY_TICKS, frontSendOutAffineAtTick, frontSendOutAnimationDelay, frontSendOutFrameAtTick,
+  frontSendOutInitializerTicks, frontSendOutPaletteAtTick,
+} from "../src/animation/sendOutDispatcher.ts";
 import { frontSendOutSpriteFrameAtTick } from "../src/animation/sendOutSpriteFrame.ts";
 
 describe("fra151 Scene ON opponent send-in front animation", () => {
@@ -56,5 +59,37 @@ describe("fra151 Scene ON opponent send-in front animation", () => {
     expect(midBattleSwitchInAt(56, 1, 70, "TAILLOW").monTintCoefficient).toBe(0);
     expect(midBattleSwitchInAt(41, 1).monTintCoefficient).toBe(16);
     expect(midBattleSwitchInAt(42, 1).monTintCoefficient).toBe(15);
+  });
+
+  it("delays the install-only initializers (Anim_BackAndLunge / Figure8 / RotateUpSlamDown) by one frame", () => {
+    expect(FRONT_SEND_OUT_INITIALIZER_ONLY_TICKS).toEqual({ BACK_AND_LUNGE: 1, FIGURE_8: 1, ROTATE_UP_SLAM_DOWN: 1 });
+    expect(frontSendOutInitializerTicks("RATICATE")).toBe(1);
+    expect(frontSendOutInitializerTicks("PIDGEOT")).toBe(0);
+    expect(midBattleSwitchInFrontAnimAt("RATICATE", 35)).toMatchObject({ x2: 0, y2: 0 });
+    const tick0 = frontSendOutFrameAtTick("RATICATE", 0)!;
+    expect(midBattleSwitchInFrontAnimAt("RATICATE", 36)).toMatchObject({ x2: tick0.x2, y2: tick0.y2 });
+    // GOLEM: the first RotateUpSlamDown_0 write (rotation 0xff00) shows at el 36 (ROM 0 px).
+    expect(midBattleSwitchInFrontAnimAt("GOLEM", 36)!.matrix).toEqual([255, 6, -6, 255]);
+  });
+
+  it("shows sMonAffineAnims' identity on the HandleStartAffineAnim tick and keeps the last matrix write", () => {
+    expect(frontSendOutAffineAtTick("KINGDRA", 0)).toEqual([256, 0, 0, 256]);
+    expect(frontSendOutAffineAtTick("HERACROSS", 0)).toEqual([256, 0, 0, 256]);
+    expect(frontSendOutAffineAtTick("HERACROSS", 1)).toEqual([244, 0, 0, 244]);
+    // RotateUpSlamDown_1 writes no rotation: the last written one persists.
+    expect(frontSendOutAffineAtTick("GOLEM", 20)).toEqual(frontSendOutAffineAtTick("GOLEM", 19));
+    // V_STRETCH is reduced with sDontFlip TRUE (positive xScale).
+    expect(frontSendOutAffineAtTick("ARBOK", 20)![0]).toBeGreaterThan(0);
+  });
+
+  it("models the glow palette under the release fade task and the flicker visibility", () => {
+    // GASTLY (GLOW_BLACK): the plain palette over the held tint at el 35..39, the tint ramp at 40..56, the glow from 57.
+    expect(midBattleSwitchInAt(35, 1, 166, "GASTLY")).toMatchObject({ monTintCoefficient: 0, frontAnim: { blend: { coefficient: 0 } } });
+    expect(midBattleSwitchInAt(40, 1, 166, "GASTLY")).toMatchObject({ monTintCoefficient: 16, frontAnim: { blend: null } });
+    expect(midBattleSwitchInAt(56, 1, 166, "GASTLY")).toMatchObject({ monTintCoefficient: 0, frontAnim: { blend: null } });
+    expect(midBattleSwitchInAt(57, 1, 166, "GASTLY")).toMatchObject({ monTintCoefficient: 0, frontAnim: { blend: { coefficient: 8, color: 0 } } });
+    expect(frontSendOutPaletteAtTick("HAUNTER", 1).invisible).toBe(true);
+    expect(frontSendOutPaletteAtTick("HAUNTER", 2).invisible).toBe(false);
+    expect(frontSendOutPaletteAtTick("TAILLOW", 10)).toEqual({ invisible: false, blend: null });
   });
 });
