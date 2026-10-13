@@ -51,9 +51,24 @@ player PSN tick, elevated LEDIAN PSN, elevated GOLBAT PRZ, player PRZ can't move
 undrawn kinds; the nine x2 rows, the receipt mapping, and the next-body receipt. **Revert experiment** (statusAnimationRenderView returning
 null): **7 / 15 fail** (the 6 window pins + the shadow test); restored from a scratch copy.
 
-## 5. Gates
+## 5. Gates (final code: production src `4c1c48c97`)
 
-See the final report of the session (filled in at landing; the supervisor's ledgers carry them).
+- `sh tools/integration/sar131Run.sh .integration/validation/run1/out --census` (archive copies of `2ada2a415` and HEAD `2d47a0d0d`,
+  production src `4c1c48c97`): **ALL SAME** — scenarios 7 / index SAME, probes r1 == r2 7 / 7, probe sha256 SAME, rom-r1 SAME, r2 == r1,
+  comparator 17 / 17 (r1 == r2, == committed), controls 0 / 0 / 8 / 9 / 0 / 15 of 17, next body 14 / 14 SAME, routes 5 / 5 OK SAME,
+  census delta SAME (0 changes), receipt SAME.
+- Targeted (4 workers): tests/sar131StatusAnimationRender, sa125StatusAnimationCommand, every test touching statusAnimation /
+  liveBattlerX2History (14 files), battleResolutionPresentation, factoryAnimationInventory, animationBoundaryRatchet,
+  playableAnimationIntegration: **18 files / 240 tests passed**. (The first run failed the boundary ratchet on a render-file import of
+  src/animation; fixed by `STATUS_ANIMATIONS_DRAWN`, the two files rerun alone, then the whole set.)
+- `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
+- Full suite, two shards, 4 workers: shard 1 **821 files / 7,059 tests passed** (22 / 119 skipped), shard 2 **820 files / 6,499 tests
+  passed** (22 / 104 skipped); total **1,641 files / 13,558 tests passed**, 0 failed.
+- `npm run build`: green.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 2ada2a415`:
+  **PASS, 624 / 624 captures byte-identical** (235 + 216 + 173): the two canonical railroad traces unchanged, no capture of the app-only
+  trace moved (none falls on a drawn PSN / PRZ frame).
+- `git diff --check`: clean.
 
 ## 6. Open (not in scope)
 
