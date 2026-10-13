@@ -1,0 +1,129 @@
+{
+ "schema": "inv142-receipt/v1",
+ "exposure": {
+  "seeds": "0..999",
+  "battles": 1000,
+  "statusAnimationCommands": 8063,
+  "invisibleCommands": 5,
+  "dollCommands": 0,
+  "table": {
+   "INFATUATION | opponent | CANCELLER_IN_LOVE (own move cancelled: BattleScript_MoveUsedIsInLove) | semi-invulnerable live-body hide (hidden by the battler's DIG charge body)": 2,
+   "INFATUATION | player | CANCELLER_IN_LOVE (own move cancelled: BattleScript_MoveUsedIsInLove) | semi-invulnerable live-body hide (hidden by the battler's DIG charge body)": 1,
+   "SLP | player | ENDTURN_YAWN (BattleScript_YawnMakesAsleep) | semi-invulnerable live-body hide (hidden by the battler's DIG charge body)": 2
+  }
+ },
+ "rom": {
+  "scenarios": 4,
+  "probes": 4,
+  "invisibleWindowsPlayed": 5,
+  "invisibleReceiptsSkipped": 0,
+  "everyPlayedWindow": {
+   "battlerInvisibleOnEveryActiveRow": true,
+   "battlerX2": [
+    [
+     0,
+     0
+    ]
+   ],
+   "spritesCreated": [
+    2,
+    3
+   ],
+   "visibleAgainAfterF": [
+    [
+     "makevisible",
+     92
+    ],
+    [
+     "makevisible",
+     96
+    ],
+    [
+     "moveend",
+     103
+    ],
+    [
+     "moveend",
+     107
+    ]
+   ]
+  }
+ },
+ "productionToday": {
+  "zeroPxWindows": 0,
+  "windows": 5,
+  "px": {
+   "inv142-love-opp@1733": 28627,
+   "inv142-love-opp@6035": 28627,
+   "inv142-love-ply@1401": 47807,
+   "inv142-yawn-opp@3371": 13098,
+   "inv142-yawn-ply@1937": 13614
+  }
+ },
+ "patched": {
+  "zeroPxWindows": 5,
+  "windows": 5,
+  "perRowDigest": "737964e634fb4d98",
+  "battlerHiddenEveryCommandRow": true
+ },
+ "controls": {
+  "age+1": {
+   "zeroPxWindows": 0,
+   "windows": 5
+  },
+  "wrong-side": {
+   "zeroPxWindows": 0,
+   "windows": 5
+  }
+ },
+ "routes": {
+  "18:0:on": {
+   "verdict": "OK",
+   "frames": 6660,
+   "differingFrames": 92,
+   "outsideStatusAnimation": 0,
+   "changedCommands": {
+    "10:1:5": {
+     "battler": 0,
+     "animation": "INFATUATION",
+     "species": "PUPITAR",
+     "previousMessage": "PUPITAR is in love with Foe EEVEE!",
+     "differingAges": [
+      5,
+      96
+     ],
+     "count": 92
+    }
+   }
+  }
+ },
+ "census": {
+  "moveRecords": 27402,
+  "keyMismatches": 0,
+  "frameChanges": 0,
+  "liveFrameChanges": 0,
+  "declineChanges": 0,
+  "battleMismatches": 0,
+  "segmentMismatches": 0,
+  "allShardDigestsSame": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "totals": {
+   "base.live": 27186,
+   "base.commands": 27367,
+   "base.liveFrames": 4146057,
+   "base.frames": 4162691,
+   "final.live": 27186,
+   "final.commands": 27367,
+   "final.liveFrames": 4146057,
+   "final.frames": 4162691,
+   "base.statusAnimationCommands": 8063,
+   "base.battleFrames": 15926929,
+   "final.statusAnimationCommands": 8063,
+   "final.battleFrames": 15926929
+  }
+ }
+}
