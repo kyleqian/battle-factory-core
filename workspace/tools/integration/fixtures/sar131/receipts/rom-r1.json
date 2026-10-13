@@ -1,0 +1,921 @@
+{
+ "sta123-toxic-ply-primeape-onix": {
+  "index": {
+   "move": 92,
+   "animation": "PSN",
+   "paths": "move-inflicted (MoveEffectToxic) + end-turn toxic tick",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "source": "tools/integration/fixtures/sta123/scenarios"
+  },
+  "windows": [
+   {
+    "X": 308,
+    "R": 309,
+    "F": 379,
+    "activeRows": 70,
+    "label": "BattleScript_MoveEffectToxic+0",
+    "op": "statusanimation",
+    "animation": "PSN",
+    "battler": 1,
+    "dump": "sta123-toxic-ply-primeape-onix-on-309.npz",
+    "battlerX2BeforeX": [
+     0,
+     1
+    ],
+    "nextBody": {
+     "R": 521,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sta123-toxic-ply-primeape-onix-on-521.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 720,
+    "R": 721,
+    "F": 791,
+    "activeRows": 70,
+    "label": "BattleScript_DoStatusTurnDmg+0",
+    "op": "statusanimation",
+    "animation": "PSN",
+    "battler": 1,
+    "dump": "sta123-toxic-ply-primeape-onix-on-721.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 1701,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sta123-toxic-ply-primeape-onix-on-1701.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 1900,
+    "R": 1901,
+    "F": 1971,
+    "activeRows": 70,
+    "label": "BattleScript_DoStatusTurnDmg+0",
+    "op": "statusanimation",
+    "animation": "PSN",
+    "battler": 1,
+    "dump": "sta123-toxic-ply-primeape-onix-on-1901.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 0
+   }
+  ],
+  "bodies": [
+   {
+    "R": 74,
+    "mv": 92,
+    "atk": 0,
+    "x2": [
+     0,
+     1
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 521,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 1701,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "sta123-toxic-opp-primeape-onix": {
+  "index": {
+   "move": 92,
+   "animation": "PSN",
+   "paths": "move-inflicted (MoveEffectToxic) + end-turn toxic tick",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "ONIX",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "source": "tools/integration/fixtures/sta123/scenarios"
+  },
+  "windows": [
+   {
+    "X": 312,
+    "R": 313,
+    "F": 383,
+    "activeRows": 70,
+    "label": "BattleScript_MoveEffectToxic+0",
+    "op": "statusanimation",
+    "animation": "PSN",
+    "battler": 0,
+    "dump": "sta123-toxic-opp-primeape-onix-on-313.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 517,
+     "mv": 33,
+     "atk": 0,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sta123-toxic-opp-primeape-onix-on-517.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 717,
+    "R": 718,
+    "F": 788,
+    "activeRows": 70,
+    "label": "BattleScript_DoStatusTurnDmg+0",
+    "op": "statusanimation",
+    "animation": "PSN",
+    "battler": 0,
+    "dump": "sta123-toxic-opp-primeape-onix-on-718.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 1697,
+     "mv": 33,
+     "atk": 0,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sta123-toxic-opp-primeape-onix-on-1697.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 1896,
+    "R": 1897,
+    "F": 1967,
+    "activeRows": 70,
+    "label": "BattleScript_DoStatusTurnDmg+0",
+    "op": "statusanimation",
+    "animation": "PSN",
+    "battler": 0,
+    "dump": "sta123-toxic-opp-primeape-onix-on-1897.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 0
+   }
+  ],
+  "bodies": [
+   {
+    "R": 78,
+    "mv": 92,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 517,
+    "mv": 33,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 1697,
+    "mv": 33,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "sta123-thunder-wave-ply-primeape-snorlax": {
+  "index": {
+   "move": 86,
+   "animation": "PRZ",
+   "paths": "move-inflicted (MoveEffectParalysis) + can't move",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "turns": 4,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json",
+   "source": "tools/integration/fixtures/sta123/scenarios"
+  },
+  "windows": [
+   {
+    "X": 203,
+    "R": 204,
+    "F": 242,
+    "activeRows": 38,
+    "label": "BattleScript_MoveEffectParalysis+0",
+    "op": "statusanimation",
+    "animation": "PRZ",
+    "battler": 1,
+    "dump": "sta123-thunder-wave-ply-primeape-snorlax-on-204.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 411,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sta123-thunder-wave-ply-primeape-snorlax-on-411.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 1755,
+    "R": 1756,
+    "F": 1794,
+    "activeRows": 38,
+    "label": "BattleScript_MoveUsedIsParalyzed+6",
+    "op": "statusanimation",
+    "animation": "PRZ",
+    "battler": 1,
+    "dump": "sta123-thunder-wave-ply-primeape-snorlax-on-1756.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 3118,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sta123-thunder-wave-ply-primeape-snorlax-on-3118.npz"
+    },
+    "battlerX2AfterF": 0
+   }
+  ],
+  "bodies": [
+   {
+    "R": 80,
+    "mv": 86,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 411,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 3118,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 4552,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "sta123-thunder-wave-opp-primeape-snorlax": {
+  "index": {
+   "move": 86,
+   "animation": "PRZ",
+   "paths": "move-inflicted (MoveEffectParalysis) + can't move",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "turns": 4,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json",
+   "source": "tools/integration/fixtures/sta123/scenarios"
+  },
+  "windows": [
+   {
+    "X": 207,
+    "R": 208,
+    "F": 246,
+    "activeRows": 38,
+    "label": "BattleScript_MoveEffectParalysis+0",
+    "op": "statusanimation",
+    "animation": "PRZ",
+    "battler": 0,
+    "dump": "sta123-thunder-wave-opp-primeape-snorlax-on-208.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 407,
+     "mv": 33,
+     "atk": 0,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sta123-thunder-wave-opp-primeape-snorlax-on-407.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 1751,
+    "R": 1752,
+    "F": 1790,
+    "activeRows": 38,
+    "label": "BattleScript_MoveUsedIsParalyzed+6",
+    "op": "statusanimation",
+    "animation": "PRZ",
+    "battler": 0,
+    "dump": "sta123-thunder-wave-opp-primeape-snorlax-on-1752.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 3114,
+     "mv": 33,
+     "atk": 0,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sta123-thunder-wave-opp-primeape-snorlax-on-3114.npz"
+    },
+    "battlerX2AfterF": 0
+   }
+  ],
+  "bodies": [
+   {
+    "R": 84,
+    "mv": 86,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 407,
+    "mv": 33,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 3114,
+    "mv": 33,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 4548,
+    "mv": 33,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "sar131-toxic-ply-primeape-ledian": {
+  "index": {
+   "move": 92,
+   "animation": "PSN",
+   "paths": "move-inflicted (MoveEffectToxic) + end-turn toxic tick; elevated opponent",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "LEDIAN",
+   "seed": 305419897,
+   "turns": 2,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+  },
+  "windows": [
+   {
+    "X": 308,
+    "R": 309,
+    "F": 379,
+    "activeRows": 70,
+    "label": "BattleScript_MoveEffectToxic+0",
+    "op": "statusanimation",
+    "animation": "PSN",
+    "battler": 1,
+    "dump": "sar131-toxic-ply-primeape-ledian-on-309.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 525,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sar131-toxic-ply-primeape-ledian-on-525.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 724,
+    "R": 725,
+    "F": 795,
+    "activeRows": 70,
+    "label": "BattleScript_DoStatusTurnDmg+0",
+    "op": "statusanimation",
+    "animation": "PSN",
+    "battler": 1,
+    "dump": "sar131-toxic-ply-primeape-ledian-on-725.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 1705,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sar131-toxic-ply-primeape-ledian-on-1705.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 1904,
+    "R": 1905,
+    "F": 1975,
+    "activeRows": 70,
+    "label": "BattleScript_DoStatusTurnDmg+0",
+    "op": "statusanimation",
+    "animation": "PSN",
+    "battler": 1,
+    "dump": "sar131-toxic-ply-primeape-ledian-on-1905.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 0
+   }
+  ],
+  "bodies": [
+   {
+    "R": 74,
+    "mv": 92,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 525,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 1705,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "sar131-thunder-wave-ply-primeape-golbat": {
+  "index": {
+   "move": 86,
+   "animation": "PRZ",
+   "paths": "move-inflicted (MoveEffectParalysis) + can't move; elevated opponent",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "GOLBAT",
+   "seed": 305419897,
+   "turns": 4,
+   "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+  },
+  "windows": [
+   {
+    "X": 203,
+    "R": 204,
+    "F": 242,
+    "activeRows": 38,
+    "label": "BattleScript_MoveEffectParalysis+0",
+    "op": "statusanimation",
+    "animation": "PRZ",
+    "battler": 1,
+    "dump": "sar131-thunder-wave-ply-primeape-golbat-on-204.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 409,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sar131-thunder-wave-ply-primeape-golbat-on-409.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 1753,
+    "R": 1754,
+    "F": 1792,
+    "activeRows": 38,
+    "label": "BattleScript_MoveUsedIsParalyzed+6",
+    "op": "statusanimation",
+    "animation": "PRZ",
+    "battler": 1,
+    "dump": "sar131-thunder-wave-ply-primeape-golbat-on-1754.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 3116,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sar131-thunder-wave-ply-primeape-golbat-on-3116.npz"
+    },
+    "battlerX2AfterF": 0
+   }
+  ],
+  "bodies": [
+   {
+    "R": 80,
+    "mv": 86,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 409,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 3116,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 4550,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "sar131-thunder-wave-opp-primeape-golbat": {
+  "index": {
+   "move": 86,
+   "animation": "PRZ",
+   "paths": "move-inflicted (MoveEffectParalysis) + can't move",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "GOLBAT",
+   "seed": 305419897,
+   "turns": 4,
+   "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+  },
+  "windows": [
+   {
+    "X": 207,
+    "R": 208,
+    "F": 246,
+    "activeRows": 38,
+    "label": "BattleScript_MoveEffectParalysis+0",
+    "op": "statusanimation",
+    "animation": "PRZ",
+    "battler": 0,
+    "dump": "sar131-thunder-wave-opp-primeape-golbat-on-208.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 405,
+     "mv": 33,
+     "atk": 0,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sar131-thunder-wave-opp-primeape-golbat-on-405.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 1749,
+    "R": 1750,
+    "F": 1788,
+    "activeRows": 38,
+    "label": "BattleScript_MoveUsedIsParalyzed+6",
+    "op": "statusanimation",
+    "animation": "PRZ",
+    "battler": 0,
+    "dump": "sar131-thunder-wave-opp-primeape-golbat-on-1750.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 3112,
+     "mv": 33,
+     "atk": 0,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "sar131-thunder-wave-opp-primeape-golbat-on-3112.npz"
+    },
+    "battlerX2AfterF": 0
+   }
+  ],
+  "bodies": [
+   {
+    "R": 84,
+    "mv": 86,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 405,
+    "mv": 33,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 3112,
+    "mv": 33,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 4546,
+    "mv": 33,
+    "atk": 0,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ }
+}

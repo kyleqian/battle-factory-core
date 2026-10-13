@@ -1,0 +1,345 @@
+{
+ "87:0:on": {
+  "sameTimeline": true,
+  "frames": 8238,
+  "presented": 7677,
+  "differing": {
+   "statusAnimation": 550,
+   "afterStatusAnimationFirstFrame": 4,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [
+   "11:0:1:presenting",
+   "13:0:1:presenting",
+   "16:0:12:presenting",
+   "16:0:1:presenting",
+   "1:0:9:presenting",
+   "3:0:1:presenting",
+   "5:0:1:presenting",
+   "5:0:7:presenting",
+   "7:0:9:presenting",
+   "9:0:1:presenting"
+  ],
+  "statusAnimationCommands": [
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "SPOINK",
+    "opponentElevated": true,
+    "path": "Foe BUTTERFREE used TOXIC!",
+    "frames": 71,
+    "differingAges": 70
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "SPOINK",
+    "opponentElevated": true,
+    "path": "SPOINK is hurt by poison!",
+    "frames": 71,
+    "differingAges": 70
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "SPOINK",
+    "opponentElevated": true,
+    "path": "SPOINK is hurt by poison!",
+    "frames": 71,
+    "differingAges": 70
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "GROWLITHE",
+    "opponentElevated": true,
+    "path": "Foe BUTTERFREE used TOXIC!",
+    "frames": 71,
+    "differingAges": 70
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "GROWLITHE",
+    "opponentElevated": false,
+    "path": "GROWLITHE is hurt by poison!",
+    "frames": 71,
+    "differingAges": 54
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "GROWLITHE",
+    "opponentElevated": false,
+    "path": "GROWLITHE is hurt by poison!",
+    "frames": 71,
+    "differingAges": 54
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "GROWLITHE",
+    "opponentElevated": false,
+    "path": "GROWLITHE is hurt by poison!",
+    "frames": 71,
+    "differingAges": 54
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "SPOINK",
+    "opponentElevated": false,
+    "path": "SPOINK is hurt by poison!",
+    "frames": 71,
+    "differingAges": 54
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "SPOINK",
+    "opponentElevated": false,
+    "path": "SPOINK\u2019s SP. ATK rose!",
+    "frames": 100,
+    "differingAges": 0
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "SPOINK",
+    "opponentElevated": false,
+    "path": "SPOINK is confused!",
+    "frames": 100,
+    "differingAges": 0
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "SPOINK",
+    "opponentElevated": false,
+    "path": "SPOINK is hurt by poison!",
+    "frames": 71,
+    "differingAges": 54
+   }
+  ],
+  "ok": true
+ },
+ "0:0:on": {
+  "sameTimeline": true,
+  "frames": 5728,
+  "presented": 5154,
+  "differing": {
+   "statusAnimation": 216,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [
+   "4:0:1:presenting",
+   "4:0:7:presenting",
+   "6:0:1:presenting",
+   "9:0:1:presenting"
+  ],
+  "statusAnimationCommands": [
+   {
+    "animation": "PSN",
+    "side": "opponent",
+    "species": "VIBRAVA",
+    "opponentElevated": false,
+    "path": "It\u2019s not very effective\u2026",
+    "frames": 71,
+    "differingAges": 54
+   },
+   {
+    "animation": "PSN",
+    "side": "opponent",
+    "species": "VIBRAVA",
+    "opponentElevated": false,
+    "path": "Foe VIBRAVA is hurt by poison!",
+    "frames": 71,
+    "differingAges": 54
+   },
+   {
+    "animation": "PSN",
+    "side": "opponent",
+    "species": "VIBRAVA",
+    "opponentElevated": false,
+    "path": "Foe VIBRAVA is hurt by poison!",
+    "frames": 71,
+    "differingAges": 54
+   },
+   {
+    "animation": "PSN",
+    "side": "opponent",
+    "species": "VIBRAVA",
+    "opponentElevated": false,
+    "path": "Foe VIBRAVA is hurt by poison!",
+    "frames": 71,
+    "differingAges": 54
+   }
+  ],
+  "ok": true
+ },
+ "12:0:on": {
+  "sameTimeline": true,
+  "frames": 4471,
+  "presented": 3815,
+  "differing": {
+   "statusAnimation": 34,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [
+   "13:0:12:presenting",
+   "15:0:1:presenting"
+  ],
+  "statusAnimationCommands": [
+   {
+    "animation": "PRZ",
+    "side": "opponent",
+    "species": "IVYSAUR",
+    "opponentElevated": false,
+    "path": "DELCATTY used SECRET POWER!",
+    "frames": 39,
+    "differingAges": 34
+   }
+  ],
+  "ok": true
+ },
+ "2:0:on": {
+  "sameTimeline": true,
+  "frames": 5916,
+  "presented": 5320,
+  "differing": {
+   "statusAnimation": 34,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [
+   "3:0:13:presenting",
+   "5:0:1:presenting"
+  ],
+  "statusAnimationCommands": [
+   {
+    "animation": "PRZ",
+    "side": "opponent",
+    "species": "PLUSLE",
+    "opponentElevated": false,
+    "path": "It\u2019s not very effective\u2026",
+    "frames": 39,
+    "differingAges": 34
+   }
+  ],
+  "ok": true
+ },
+ "76:0:on": {
+  "sameTimeline": true,
+  "frames": 8866,
+  "presented": 8282,
+  "differing": {
+   "statusAnimation": 280,
+   "afterStatusAnimationFirstFrame": 4,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [
+   "12:0:7:presenting",
+   "14:0:9:presenting",
+   "16:0:1:presenting",
+   "16:0:7:presenting",
+   "18:0:5:presenting"
+  ],
+  "statusAnimationCommands": [
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "GLOOM",
+    "opponentElevated": false,
+    "path": "Foe MAGBY used CONFUSE RAY!",
+    "frames": 100,
+    "differingAges": 0
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "GLOOM",
+    "opponentElevated": false,
+    "path": "It\u2019s not very effective\u2026",
+    "frames": 100,
+    "differingAges": 0
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "MAGBY",
+    "opponentElevated": false,
+    "path": "PORYGON used PSYBEAM!",
+    "frames": 100,
+    "differingAges": 0
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "MAGBY",
+    "opponentElevated": false,
+    "path": "Foe MAGBY is confused!",
+    "frames": 100,
+    "differingAges": 0
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "MAGBY",
+    "opponentElevated": false,
+    "path": "Foe MAGBY is confused!",
+    "frames": 100,
+    "differingAges": 0
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "PORYGON",
+    "opponentElevated": true,
+    "path": "Foe BUTTERFREE used TOXIC!",
+    "frames": 71,
+    "differingAges": 70
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "PORYGON",
+    "opponentElevated": true,
+    "path": "PORYGON is hurt by poison!",
+    "frames": 71,
+    "differingAges": 70
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "PORYGON",
+    "opponentElevated": true,
+    "path": "PORYGON is hurt by poison!",
+    "frames": 71,
+    "differingAges": 70
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "PORYGON",
+    "opponentElevated": true,
+    "path": "PORYGON is hurt by poison!",
+    "frames": 71,
+    "differingAges": 70
+   }
+  ],
+  "ok": true
+ },
+ "allOk": true
+}

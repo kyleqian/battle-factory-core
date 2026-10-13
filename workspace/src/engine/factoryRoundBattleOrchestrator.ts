@@ -2430,9 +2430,10 @@ function prepareResolutionPalette(
     // S10A fade (liveSubstituteFade.ts): the other battler's tracked rest at the fade's start.
     battlerX2Input = retainedX2?.commandKey === commandKey
       ? resolution.liveMoveBattlerX2Input : liveMoveBattlerX2Input(x2Host.history);
-  } else if (command?.type === "stats-change" && x2Host) {
+  } else if ((command?.type === "stats-change" || command?.type === "status-animation") && x2Host) {
     // scd112 (S10A #166 slice d): the banner's OBJ-window copy stands at the battler's tracked rest. The x2 host exists only in
     // Scene ON, so the input is always present here (none zeroed = the species rest); Scene OFF gets none (no residual x2).
+    // sar131 (#168 SA4): a status animation's battler stands at its tracked rest until its ShakeMon2 shows (and the other at its).
     battlerX2Input = retainedX2?.commandKey === commandKey
       ? resolution.liveMoveBattlerX2Input : liveMoveBattlerX2Input(x2Host.history) ?? STATS_CHANGE_X2_NONE_ZEROED;
   }

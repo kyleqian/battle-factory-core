@@ -1,0 +1,666 @@
+{
+ "schema": "sar131-live-receipt/v1",
+ "rom": {
+  "probes": "probes r1 == r2: 7 / 7",
+  "romR1EqualsR2": true,
+  "windowsByAnimationSideAndPath": {
+   "PRZ|opponent|MoveEffectParalysis": 2,
+   "PRZ|opponent|MoveUsedIsParalyzed": 2,
+   "PRZ|player|MoveEffectParalysis": 2,
+   "PRZ|player|MoveUsedIsParalyzed": 2,
+   "PSN|opponent|DoStatusTurnDmg": 4,
+   "PSN|opponent|MoveEffectToxic": 2,
+   "PSN|player|DoStatusTurnDmg": 2,
+   "PSN|player|MoveEffectToxic": 1
+  },
+  "windows": 17
+ },
+ "productionCompare": {
+  "summary": {
+   "neg": null,
+   "windows": 17,
+   "zeroPxWindows": 17,
+   "perRowDigest": "0f1a90d870e9b290"
+  },
+  "r1EqualsR2": true,
+  "perWindow": {
+   "sta123-toxic-ply-primeape-onix-309": {
+    "animation": "PSN",
+    "side": "opponent",
+    "path": "BattleScript_MoveEffectToxic+0",
+    "rows": 74,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "idle",
+     "opponent": "idle"
+    }
+   },
+   "sta123-toxic-ply-primeape-onix-721": {
+    "animation": "PSN",
+    "side": "opponent",
+    "path": "BattleScript_DoStatusTurnDmg+0",
+    "rows": 74,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   },
+   "sta123-toxic-ply-primeape-onix-1901": {
+    "animation": "PSN",
+    "side": "opponent",
+    "path": "BattleScript_DoStatusTurnDmg+0",
+    "rows": 74,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   },
+   "sta123-toxic-opp-primeape-onix-313": {
+    "animation": "PSN",
+    "side": "player",
+    "path": "BattleScript_MoveEffectToxic+0",
+    "rows": 74,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "idle",
+     "opponent": "idle"
+    }
+   },
+   "sta123-toxic-opp-primeape-onix-718": {
+    "animation": "PSN",
+    "side": "player",
+    "path": "BattleScript_DoStatusTurnDmg+0",
+    "rows": 74,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   },
+   "sta123-toxic-opp-primeape-onix-1897": {
+    "animation": "PSN",
+    "side": "player",
+    "path": "BattleScript_DoStatusTurnDmg+0",
+    "rows": 74,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   },
+   "sta123-thunder-wave-ply-primeape-snorlax-204": {
+    "animation": "PRZ",
+    "side": "opponent",
+    "path": "BattleScript_MoveEffectParalysis+0",
+    "rows": 42,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "idle",
+     "opponent": "idle"
+    }
+   },
+   "sta123-thunder-wave-ply-primeape-snorlax-1756": {
+    "animation": "PRZ",
+    "side": "opponent",
+    "path": "BattleScript_MoveUsedIsParalyzed+6",
+    "rows": 42,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   },
+   "sta123-thunder-wave-opp-primeape-snorlax-208": {
+    "animation": "PRZ",
+    "side": "player",
+    "path": "BattleScript_MoveEffectParalysis+0",
+    "rows": 42,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "idle",
+     "opponent": "idle"
+    }
+   },
+   "sta123-thunder-wave-opp-primeape-snorlax-1752": {
+    "animation": "PRZ",
+    "side": "player",
+    "path": "BattleScript_MoveUsedIsParalyzed+6",
+    "rows": 42,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   },
+   "sar131-toxic-ply-primeape-ledian-309": {
+    "animation": "PSN",
+    "side": "opponent",
+    "path": "BattleScript_MoveEffectToxic+0",
+    "rows": 74,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "idle",
+     "opponent": "idle"
+    }
+   },
+   "sar131-toxic-ply-primeape-ledian-725": {
+    "animation": "PSN",
+    "side": "opponent",
+    "path": "BattleScript_DoStatusTurnDmg+0",
+    "rows": 74,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   },
+   "sar131-toxic-ply-primeape-ledian-1905": {
+    "animation": "PSN",
+    "side": "opponent",
+    "path": "BattleScript_DoStatusTurnDmg+0",
+    "rows": 74,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   },
+   "sar131-thunder-wave-ply-primeape-golbat-204": {
+    "animation": "PRZ",
+    "side": "opponent",
+    "path": "BattleScript_MoveEffectParalysis+0",
+    "rows": 42,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "idle",
+     "opponent": "idle"
+    }
+   },
+   "sar131-thunder-wave-ply-primeape-golbat-1754": {
+    "animation": "PRZ",
+    "side": "opponent",
+    "path": "BattleScript_MoveUsedIsParalyzed+6",
+    "rows": 42,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   },
+   "sar131-thunder-wave-opp-primeape-golbat-208": {
+    "animation": "PRZ",
+    "side": "player",
+    "path": "BattleScript_MoveEffectParalysis+0",
+    "rows": 42,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "idle",
+     "opponent": "idle"
+    }
+   },
+   "sar131-thunder-wave-opp-primeape-golbat-1750": {
+    "animation": "PRZ",
+    "side": "player",
+    "path": "BattleScript_MoveUsedIsParalyzed+6",
+    "rows": 42,
+    "px": 0,
+    "nextRowsBoxPx": [
+     0,
+     0
+    ],
+    "x2History": {
+     "player": "zeroed",
+     "opponent": "zeroed"
+    }
+   }
+  },
+  "ageOffset": "command age a == ROM row X + 1 + a (X = the statusanimation instruction row; a = 0 = the first gAnimScriptActive row)"
+ },
+ "controls": {
+  "age+1": {
+   "zeroPxWindows": 0,
+   "windows": 17,
+   "failingWindows": [
+    "sar131-thunder-wave-opp-primeape-golbat-1750",
+    "sar131-thunder-wave-opp-primeape-golbat-208",
+    "sar131-thunder-wave-ply-primeape-golbat-1754",
+    "sar131-thunder-wave-ply-primeape-golbat-204",
+    "sar131-toxic-ply-primeape-ledian-1905",
+    "sar131-toxic-ply-primeape-ledian-309",
+    "sar131-toxic-ply-primeape-ledian-725",
+    "sta123-thunder-wave-opp-primeape-snorlax-1752",
+    "sta123-thunder-wave-opp-primeape-snorlax-208",
+    "sta123-thunder-wave-ply-primeape-snorlax-1756",
+    "sta123-thunder-wave-ply-primeape-snorlax-204",
+    "sta123-toxic-opp-primeape-onix-1897",
+    "sta123-toxic-opp-primeape-onix-313",
+    "sta123-toxic-opp-primeape-onix-718",
+    "sta123-toxic-ply-primeape-onix-1901",
+    "sta123-toxic-ply-primeape-onix-309",
+    "sta123-toxic-ply-primeape-onix-721"
+   ]
+  },
+  "no-shake": {
+   "zeroPxWindows": 0,
+   "windows": 17,
+   "failingWindows": [
+    "sar131-thunder-wave-opp-primeape-golbat-1750",
+    "sar131-thunder-wave-opp-primeape-golbat-208",
+    "sar131-thunder-wave-ply-primeape-golbat-1754",
+    "sar131-thunder-wave-ply-primeape-golbat-204",
+    "sar131-toxic-ply-primeape-ledian-1905",
+    "sar131-toxic-ply-primeape-ledian-309",
+    "sar131-toxic-ply-primeape-ledian-725",
+    "sta123-thunder-wave-opp-primeape-snorlax-1752",
+    "sta123-thunder-wave-opp-primeape-snorlax-208",
+    "sta123-thunder-wave-ply-primeape-snorlax-1756",
+    "sta123-thunder-wave-ply-primeape-snorlax-204",
+    "sta123-toxic-opp-primeape-onix-1897",
+    "sta123-toxic-opp-primeape-onix-313",
+    "sta123-toxic-opp-primeape-onix-718",
+    "sta123-toxic-ply-primeape-onix-1901",
+    "sta123-toxic-ply-primeape-onix-309",
+    "sta123-toxic-ply-primeape-onix-721"
+   ]
+  },
+  "no-blend": {
+   "zeroPxWindows": 8,
+   "windows": 17,
+   "failingWindows": [
+    "sar131-toxic-ply-primeape-ledian-1905",
+    "sar131-toxic-ply-primeape-ledian-309",
+    "sar131-toxic-ply-primeape-ledian-725",
+    "sta123-toxic-opp-primeape-onix-1897",
+    "sta123-toxic-opp-primeape-onix-313",
+    "sta123-toxic-opp-primeape-onix-718",
+    "sta123-toxic-ply-primeape-onix-1901",
+    "sta123-toxic-ply-primeape-onix-309",
+    "sta123-toxic-ply-primeape-onix-721"
+   ]
+  },
+  "no-sparks": {
+   "zeroPxWindows": 9,
+   "windows": 17,
+   "failingWindows": [
+    "sar131-thunder-wave-opp-primeape-golbat-1750",
+    "sar131-thunder-wave-opp-primeape-golbat-208",
+    "sar131-thunder-wave-ply-primeape-golbat-1754",
+    "sar131-thunder-wave-ply-primeape-golbat-204",
+    "sta123-thunder-wave-opp-primeape-snorlax-1752",
+    "sta123-thunder-wave-opp-primeape-snorlax-208",
+    "sta123-thunder-wave-ply-primeape-snorlax-1756",
+    "sta123-thunder-wave-ply-primeape-snorlax-204"
+   ]
+  },
+  "wrong-side": {
+   "zeroPxWindows": 0,
+   "windows": 17,
+   "failingWindows": [
+    "sar131-thunder-wave-opp-primeape-golbat-1750",
+    "sar131-thunder-wave-opp-primeape-golbat-208",
+    "sar131-thunder-wave-ply-primeape-golbat-1754",
+    "sar131-thunder-wave-ply-primeape-golbat-204",
+    "sar131-toxic-ply-primeape-ledian-1905",
+    "sar131-toxic-ply-primeape-ledian-309",
+    "sar131-toxic-ply-primeape-ledian-725",
+    "sta123-thunder-wave-opp-primeape-snorlax-1752",
+    "sta123-thunder-wave-opp-primeape-snorlax-208",
+    "sta123-thunder-wave-ply-primeape-snorlax-1756",
+    "sta123-thunder-wave-ply-primeape-snorlax-204",
+    "sta123-toxic-opp-primeape-onix-1897",
+    "sta123-toxic-opp-primeape-onix-313",
+    "sta123-toxic-opp-primeape-onix-718",
+    "sta123-toxic-ply-primeape-onix-1901",
+    "sta123-toxic-ply-primeape-onix-309",
+    "sta123-toxic-ply-primeape-onix-721"
+   ]
+  },
+  "base-x2": {
+   "zeroPxWindows": 15,
+   "windows": 17,
+   "failingWindows": [
+    "sta123-toxic-ply-primeape-onix-1901",
+    "sta123-toxic-ply-primeape-onix-721"
+   ]
+  }
+ },
+ "nextBodyX2": {
+  "windowsWithNextBody": 14,
+  "predictedExact": 14,
+  "baseRectDiffers": 2
+ },
+ "routes": {
+  "87:0:on": {
+   "sameTimeline": true,
+   "frames": 8238,
+   "presented": 7677,
+   "differing": {
+    "statusAnimation": 550,
+    "afterStatusAnimationFirstFrame": 4,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "ok": true,
+   "statusAnimationCommands": [
+    [
+     "PSN",
+     "player",
+     71,
+     70
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     70
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     70
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     70
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     54
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     54
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     54
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     54
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     0
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     0
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     54
+    ]
+   ]
+  },
+  "0:0:on": {
+   "sameTimeline": true,
+   "frames": 5728,
+   "presented": 5154,
+   "differing": {
+    "statusAnimation": 216,
+    "afterStatusAnimationFirstFrame": 0,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "ok": true,
+   "statusAnimationCommands": [
+    [
+     "PSN",
+     "opponent",
+     71,
+     54
+    ],
+    [
+     "PSN",
+     "opponent",
+     71,
+     54
+    ],
+    [
+     "PSN",
+     "opponent",
+     71,
+     54
+    ],
+    [
+     "PSN",
+     "opponent",
+     71,
+     54
+    ]
+   ]
+  },
+  "12:0:on": {
+   "sameTimeline": true,
+   "frames": 4471,
+   "presented": 3815,
+   "differing": {
+    "statusAnimation": 34,
+    "afterStatusAnimationFirstFrame": 0,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "ok": true,
+   "statusAnimationCommands": [
+    [
+     "PRZ",
+     "opponent",
+     39,
+     34
+    ]
+   ]
+  },
+  "2:0:on": {
+   "sameTimeline": true,
+   "frames": 5916,
+   "presented": 5320,
+   "differing": {
+    "statusAnimation": 34,
+    "afterStatusAnimationFirstFrame": 0,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "ok": true,
+   "statusAnimationCommands": [
+    [
+     "PRZ",
+     "opponent",
+     39,
+     34
+    ]
+   ]
+  },
+  "76:0:on": {
+   "sameTimeline": true,
+   "frames": 8866,
+   "presented": 8282,
+   "differing": {
+    "statusAnimation": 280,
+    "afterStatusAnimationFirstFrame": 4,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "ok": true,
+   "statusAnimationCommands": [
+    [
+     "CONFUSION",
+     "player",
+     100,
+     0
+    ],
+    [
+     "CONFUSION",
+     "player",
+     100,
+     0
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     0
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     0
+    ],
+    [
+     "CONFUSION",
+     "opponent",
+     100,
+     0
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     70
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     70
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     70
+    ],
+    [
+     "PSN",
+     "player",
+     71,
+     70
+    ]
+   ]
+  }
+ },
+ "census": {
+  "moveRecords": 27403,
+  "keyMismatches": 0,
+  "frameChanges": 0,
+  "liveFrameChanges": 0,
+  "declineChanges": 0,
+  "battleMismatches": 0,
+  "segmentMismatches": 0,
+  "allShardDigestsSame": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "totals": {
+   "base.live": 27081,
+   "base.commands": 27368,
+   "base.liveFrames": 4126052,
+   "base.frames": 4154509,
+   "final.live": 27081,
+   "final.commands": 27368,
+   "final.liveFrames": 4126052,
+   "final.frames": 4154509,
+   "base.statusAnimationCommands": 8063,
+   "base.battleFrames": 15915101,
+   "final.statusAnimationCommands": 8063,
+   "final.battleFrames": 15915101
+  },
+  "statusChanges": 0
+ },
+ "verdicts": {
+  "probesR1EqualsR2": true,
+  "romR1EqualsR2": true,
+  "productionZeroPxEveryWindow": true,
+  "comparatorR1EqualsR2": true,
+  "controlsFail": true,
+  "nextBodyAtPredictedX2": true,
+  "routesOk": true,
+  "censusZeroFrameChanges": true
+ }
+}
