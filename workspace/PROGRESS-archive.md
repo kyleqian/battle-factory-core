@@ -1,3 +1,32 @@
+## 2026-10-10 (night) — S10A: 12 production folds + 4 live audits; live share 0..999 93.79 -> 95.38 % of commands (97.37 -> 98.72 % of frames; 99.32 / 99.59 % excluding Struggle); 238 + 13 + 25
+
+- **State:** local master, production src `14d1be15` (gated on `4bf782115`; later commits are docs / receipts / evidence). Adapter census
+  `238+13+25+0+0=276` (Focus Punch scoped exact -> faithful timing under the standing D4 approval). Supervisor FINAL gates: typecheck,
+  full suite 1,627 files / 13,387 tests, build; differential vs session start `b05d384ca`: the two canonical railroad traces byte-identical,
+  the app-only `presentation-rng-playable-live-bodies-seeded-on` 163 / 173 captures shifted by land97's intended Shadow Punch lead rows.
+  Census seeds 0..999 (two runs byte-identical): **95.38 % of move-animation commands / 98.72 % of frames** (start 93.79 / 97.37; +436
+  commands, 0 live -> fallback, 0 errors, gameplay keys identical); seeds 0..299 99.12 / 99.68 %; seeds 50000..50999 96.67 / 98.84 % (start 95.20 / 97.18).
+  Preview <http://127.0.0.1:5191/> serves `66dbf4973` (src `14d1be15`; 4 samples hash-equal, export + ON -> OFF restart passed, no errors).
+- **Did (production, each supervisor-reproduced by census on the worker tree + an evidence rerun):** land82 (13 Substitute-doll cells,
+  +77), cast83 (#143 per-form Castform art, +32), land86 (Flatter words unit, +44), union fix `302e39bdb` (land86 x cast83 semantic break,
+  caught by the union census), ret88 (Return at the kernel's friendship 0: 37 wrong ReturnStrongest claims corrected, then ReturnWeak live,
+  +123), land87 (post-KO reseed through a words-unit occupancy shadow, +58), qa91 (Quick Attack target offset from the tracked rest: 144
+  live bodies per 1,000 battles were 1 px off; 3 Castform keys), doll90 (Psych Up / Double Team / Sing doll cells, +37), land96 (scanline
+  history: Memento later bodies, +4), ctl95 (live DEFECTS fixed: GrassWhistle's position-dependent fade-back, Iron Tail's band mask;
+  Recover / GrassWhistle doll cells, +24), fury99 (Fury Cutter counters 2..5, +36), fp100 (Focus Punch D4), land97 (40 adapters present
+  their static lead rows: Scene ON timeline +N frames) + the supervisor's narrow audit-24 / shadow105 fix (no lead rows while an
+  elevated opponent is on the field; shadow105's banked patch restores them properly).
+- **Did (evidence / audits):** flat84, reseed85, scan93, idle94, idle98 (universal pre / post rows banked), stat101 + stat102 (#166 design
+  pack; the stat-change reducer + comparator DONE, unwired), shadow105 + sp103 (banked patches: lead row-0 shadow; Shadow Punch D4);
+  live audits 21 (Quick Attack DEFECT), 22 (none), 23 (none), 24 (land97 row 0).
+- **Next:** ROADMAP S10A "Next (2026-10-11 night)": #166 slice (c) (the missing stat-change animation, both scenes, ~8.6 % of the
+  timeline) is the headline; then the banked universal pre / post rows, #167, the remaining 181 non-Struggle fallbacks.
+- **Notes:** no DEFERRED entries; ISSUES #166 / #167 new, #143 / #165 updated. #165 (Return -> Frustration) still needs a run where gameplay
+  changes are in scope. Soak gates not run (S10A scoped policy; no kernel / rules / RNG file changed). All worker branches merged, worktrees
+  removed; briefs + launcher logs under `.integration/validation/*-2026101[01]/`, transcripts `.codex-logs/workers/`.
+
+---
+
 ## 2026-10-10 (day) — S10A: ISSUES #159 fixed, 12 production folds, 3 live audits; live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 
 - **State:** local master, production src `4c4fe4c7` (`bf082c6e1`). Census `239+13+24+0+0=276` (no adapter-count change: today widened

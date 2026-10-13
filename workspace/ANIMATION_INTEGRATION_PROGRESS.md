@@ -1,5 +1,37 @@
 # Animation integration progress
 
+## 2026-10-12 (evening, in progress) — S10A: #168 status-animation TIMING live (Scene ON), ord124 plans landed; 99.34 / 99.60 % live
+
+- Session start: master `cfe4e26ca`, production src `b4befa039` == the 2026-10-11 final gates' tree -> baseline receipt reused. Oracle
+  freshness FAIL = the known false positive (services 2026-10-06; last `oracle/` commit 2026-08-15).
+- ordl126 (SIDE, Sonnet, merged `1352d2130`): ord124's banked plans landed through the table generator (src hunk == the banked hunk,
+  checked); tests/ordl126OrderPlans.test.ts (revert experiment: static `D0,1` fails the 21 [4, 3] instances). Census 0..999 **98.95 /
+  99.32 -> 99.34 / 99.60 %** (+106 commands / +11,832 frames, battle 705; 0 other changes; lend unknown 125 -> 19). Worker gates: full
+  suite, build, differential 624 / 624. Supervisor: ordl126Run.sh into a fresh dir ALL SAME (12 / 12 windows live, 10 / 10 0 px — the other
+  2 are the Golbat Mega Punch flag, see aud129). Union `1352d2130` (+ seg127): typecheck, smoke, targeted 38 / 38.
+- seg127 (MAIN lane, Opus, new files only): the controller's IsBattleSEPlaying gate before a status animation. Source rule
+  `gate = clamp(seRows[songId] - seAge, 0, 29)` (effectivenesssound SE: not very 18 / neutral 73 / super 88 rows; any print in between ->
+  0), **56 / 56 ROM receipts residual 0** both sides (sta123's Ice Beam 17 / 18 explained by HP drain, not side); census 0..999 72 gated /
+  729 frames. Banked unwired `src/engine/seg127StatusSeGate.ts`. Also: the same gate sits in the battle-animation controller -> a
+  General_StatsChange right after a neutral hit's secondary probably waits too (unmeasured; #166 timing candidate). Supervisor:
+  seg127Run.sh --census ALL SAME.
+- sa125 (INTEGRATION, Opus, `a67a38741` .. `2ada2a415`): **ISSUES #168 SA1 + SA3** — a Scene ON `status-animation` command per kernel
+  receipt (animation = InitAndLaunchChosenStatusAnimation's pick; `STATUS_ANIMATION_ADDED_ROWS` PSN 71, CONFUSION 100, BRN 39, INFATUATION
+  97, SLP 97, PRZ 39, FRZ 117, CURSED 75, NIGHTMARE 75); the ON `status` command followed by its battler's status animation lasts off121's
+  delta(print) - delta(status) (32 -> 2 / 1). Production ON - OFF from each anchor = the ROM controller rows on **212 / 212** anchored
+  census commands (only the SE-gated class differs -> sag130). Census 0..999: 7,894 commands / +650,788 frames, SA3 -85,797; 0 move status
+  changes; Scene OFF 10 / 10 shards byte-identical; 5 pins moved (pins.json); no soak pin (the soak plays Scene OFF); differential 624 /
+  624 identical. Timing only — nothing drawn. Supervisor: sa125Run.sh into a fresh dir ALL OK; production diff reviewed (92 lines).
+  **Union `a1730a1f9` (master + sa125; src then + stp128's unwired module on master `53419e533`)**: typecheck, smoke 448, full suite
+  1,642 files / 13,555 tests 0 failed, build.
+- stp128 (SIDE, Opus, new files only, merged `a5e585119`): unwired reducer `src/animation/statusConditionAnimations.ts` for CURSED /
+  NIGHTMARE / CONFUSION / FRZ (AnimGhostStatusSprite, AnimConfusionDuck ported literally; FRZ through frozenIceCube.ts + monbg; FRZ 115 vs
+  116 isolated): dense ROM windows 14 scenarios r1 == r2, **34 / 34 windows 0 px on every row** through existing production helpers
+  (incl. elevated GOLBAT / HAUNTER shadows); controls fail as designed. Supervisor: stp128Run.sh ALL SAME.
+- Live audit 27 (aud129, MAIN lane, Opus, new files only): 105 windows, lend == ROM 105 / 105, **85 OK, 20 TIMING-PHASE (D4 class; each
+  residual row is 0 px one age off), 0 DEFECT**. ord124's Golbat Mega Punch flag = Mega Punch's own BG-write row 71 + restore-fade phase
+  (no party dependency); Spark = alignment artefact; Smokescreen use-1 phase quantified (66 live / 8,580 frames on 0..999).
+
 ## 2026-10-11 (afternoon / evening) — S10A: Struggle LIVE, General_StatsChange LIVE, timeline fixes; 95.38 / 98.72 -> 98.95 / 99.32 % live
 
 - **Final (supervisor):** code `2131feda7`, production src `b4befa039`. Gates in a detached worktree: typecheck, full suite 1,639 files /

@@ -17,19 +17,14 @@ backlog.
 
 # Open
 
-## #168 — Scene ON: the status-condition animations (B_ANIM_STATUS_*) are not presented (S10A, found 2026-10-11 by off121)
+## #168 — Scene ON: the status-condition animations (B_ANIM_STATUS_*) are not drawn (S10A, found 2026-10-11 by off121; TIMING fixed 2026-10-12)
 
-In Scene ON, Cmd_statusanimation emits BtlController_EmitStatusAnimation and the controller plays B_ANIM_STATUS_* while the next script
-instruction waits: PSN 71 rows, PRZ 39, BRN 39, SLP 97 (ROM, both sides, r1 == r2: `tools/integration/fixtures/off121/receipts/rom-r1.json`
-`statusAnimations[].controllerRows`). Production projects NO command from the kernel's `status-animation` receipt; the 32-frame `status`
-command (set-battler-status-data) is the only stand-in, so move-inflicted PSN is -40 frames, PRZ / BRN -8, SLP -66, and end-turn PSN / BRN
-ticks, sleep turns and paralysis "can't move" get no animation and no time (-71 / -39 / -97 / -39 per occurrence); faint / Rest / cure
-`status` commands hold 32 frames where the ROM draws nothing. Exposure (census 0..999): 1,228 move-inflicted, 1,497 sleep turns, 102 frozen
-turns, plus every tick / can't-move / confusion / nightmare / curse occurrence. Fix shape (docs/off121-status-command.md §1b): project the
-receipt to a presented command of the measured controller length with a live renderer per animation (src/animation/statusAnimation.ts
-already renders Status_Burn for the canonical Fire Punch turn); the status-data write itself draws nothing (Scene OFF's rule: off121).
-Measure CONFUSION / CURSED / NIGHTMARE / FRZ first. Prep pack: docs/sta123-status-animations-design.md (if landed). Scene OFF is DONE
-(off121: the OFF `status` command ends at the next print).
+Remainder after sa125 (docs/sa125-status-animation-command.md: the `status-animation` command holds the ROM controller rows, and the
+32-frame `status` stand-in ends at it; 212 / 212 anchored census commands on the ROM row): (1) the IsBattleSEPlaying gate before a status
+animation that follows a neutral non-crit hit with no print in between (docs/seg127-status-se-gate.md: banked rule, 72 commands / 729
+frames on 0..999) -> sag130; (2) NOTHING is drawn yet: PSN / PRZ (sar131, existing components), CURSED / NIGHTMARE / CONFUSION / FRZ
+(stp128's unwired reducer, 34 / 34 ROM windows 0 px), BRN / SLP / INFATUATION (stq132); (3) the x2 history marks a side `unknown` after any
+status animation (liveBattlerX2History.ts) — source rows pending (sar131). Design: docs/sta123-status-animations-design.md §5.
 
 ## #166 — remainder: the live Double Team window ends 9 rows before the ROM's next message (Scene ON) (S10A, 2026-10-11)
 

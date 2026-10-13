@@ -5,6 +5,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-12 (evening, in progress) — S10A: status-condition animation TIMING live in Scene ON (#168 SA1 + SA3), ord124 order plans landed (99.34 / 99.60 %)
+
+- **State:** local master `53419e533`; production src = union `a1730a1f9` (sa125 + ordl126) + stp128's unwired reducer module. Supervisor
+  union gates on `a1730a1f9`: typecheck, smoke 448, full suite 1,642 files / 13,555 tests 0 failed, build. Session start `cfe4e26ca` (src
+  `b4befa039`, the 2026-10-11 final-gated tree: receipt reused).
+- **Did (production, each supervisor-reproduced from the worker's runner into a fresh dir):** ordl126 (ord124's banked Odor Sleuth 316 +
+  False Swipe 206 order plans: census 0..999 98.95 / 99.32 -> **99.34 / 99.60 %**, +106 commands, 0 other changes); sa125 (ISSUES #168
+  SA1 + SA3: a Scene ON `status-animation` command per kernel receipt with the ROM controller rows PSN 71 / CONFUSION 100 / BRN 39 /
+  INFATUATION 97 / SLP 97 / PRZ 39 / FRZ 117 / CURSED 75 / NIGHTMARE 75; the 32-frame `status` stand-in ends at it (off121's rule in ON);
+  212 / 212 anchored census commands land on the ROM row; +650,788 / -85,797 frames on 0..999; Scene OFF 10 / 10 shards byte-identical;
+  canonical + app-only differential 624 / 624 identical; timing only, nothing drawn yet).
+- **Did (evidence, new files):** seg127 (the IsBattleSEPlaying gate: `clamp(seRows - seAge, 0, 29)`, 56 / 56 ROM receipts, 72 gated / 729
+  frames on 0..999; banked unwired rule), stp128 (CURSED / NIGHTMARE / CONFUSION / FRZ unwired reducer, 34 / 34 dense ROM windows 0 px),
+  aud129 live audit 27 (105 windows: 85 OK, 20 D4 timing phases incl. ord124's Golbat Mega Punch flag, 0 defects).
+- **In flight:** sar131 (draw PSN / PRZ + x2 rows), stq132 (BRN / SLP / INFATUATION reducer), next sag130 (wire the SE gate).
+- **Notes:** no DEFERRED entries. Oracle freshness FAIL = known false positive (services 2026-10-06 postdate the last oracle/ commit).
+
+---
+
 ## 2026-10-11 (afternoon / evening) — S10A: Struggle LIVE, General_StatsChange LIVE (both scenes), timeline fixes, 2 audits -> 4 live defects fixed; live share 0..999 95.38 -> 98.95 % of commands (98.72 -> 99.32 % of frames)
 
 - **State:** local master; production src `b4befa039` (code `2131feda7`; later commits are docs, receipts, new evidence tools and one soak
@@ -49,34 +68,5 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** this is presentation scope only; #165's gameplay change remains a separate scope decision. No run started. Diff,
   JSON/queue ledger checks and the historical catalogue census (`238+13+25+0+0=276`) passed; the unchanged green production receipt
   is reused under `ANIMATION_VERIFICATION.md`.
-
----
-
-## 2026-10-10 (night) — S10A: 12 production folds + 4 live audits; live share 0..999 93.79 -> 95.38 % of commands (97.37 -> 98.72 % of frames; 99.32 / 99.59 % excluding Struggle); 238 + 13 + 25
-
-- **State:** local master, production src `14d1be15` (gated on `4bf782115`; later commits are docs / receipts / evidence). Adapter census
-  `238+13+25+0+0=276` (Focus Punch scoped exact -> faithful timing under the standing D4 approval). Supervisor FINAL gates: typecheck,
-  full suite 1,627 files / 13,387 tests, build; differential vs session start `b05d384ca`: the two canonical railroad traces byte-identical,
-  the app-only `presentation-rng-playable-live-bodies-seeded-on` 163 / 173 captures shifted by land97's intended Shadow Punch lead rows.
-  Census seeds 0..999 (two runs byte-identical): **95.38 % of move-animation commands / 98.72 % of frames** (start 93.79 / 97.37; +436
-  commands, 0 live -> fallback, 0 errors, gameplay keys identical); seeds 0..299 99.12 / 99.68 %; seeds 50000..50999 96.67 / 98.84 % (start 95.20 / 97.18).
-  Preview <http://127.0.0.1:5191/> serves `66dbf4973` (src `14d1be15`; 4 samples hash-equal, export + ON -> OFF restart passed, no errors).
-- **Did (production, each supervisor-reproduced by census on the worker tree + an evidence rerun):** land82 (13 Substitute-doll cells,
-  +77), cast83 (#143 per-form Castform art, +32), land86 (Flatter words unit, +44), union fix `302e39bdb` (land86 x cast83 semantic break,
-  caught by the union census), ret88 (Return at the kernel's friendship 0: 37 wrong ReturnStrongest claims corrected, then ReturnWeak live,
-  +123), land87 (post-KO reseed through a words-unit occupancy shadow, +58), qa91 (Quick Attack target offset from the tracked rest: 144
-  live bodies per 1,000 battles were 1 px off; 3 Castform keys), doll90 (Psych Up / Double Team / Sing doll cells, +37), land96 (scanline
-  history: Memento later bodies, +4), ctl95 (live DEFECTS fixed: GrassWhistle's position-dependent fade-back, Iron Tail's band mask;
-  Recover / GrassWhistle doll cells, +24), fury99 (Fury Cutter counters 2..5, +36), fp100 (Focus Punch D4), land97 (40 adapters present
-  their static lead rows: Scene ON timeline +N frames) + the supervisor's narrow audit-24 / shadow105 fix (no lead rows while an
-  elevated opponent is on the field; shadow105's banked patch restores them properly).
-- **Did (evidence / audits):** flat84, reseed85, scan93, idle94, idle98 (universal pre / post rows banked), stat101 + stat102 (#166 design
-  pack; the stat-change reducer + comparator DONE, unwired), shadow105 + sp103 (banked patches: lead row-0 shadow; Shadow Punch D4);
-  live audits 21 (Quick Attack DEFECT), 22 (none), 23 (none), 24 (land97 row 0).
-- **Next:** ROADMAP S10A "Next (2026-10-11 night)": #166 slice (c) (the missing stat-change animation, both scenes, ~8.6 % of the
-  timeline) is the headline; then the banked universal pre / post rows, #167, the remaining 181 non-Struggle fallbacks.
-- **Notes:** no DEFERRED entries; ISSUES #166 / #167 new, #143 / #165 updated. #165 (Return -> Frustration) still needs a run where gameplay
-  changes are in scope. Soak gates not run (S10A scoped policy; no kernel / rules / RNG file changed). All worker branches merged, worktrees
-  removed; briefs + launcher logs under `.integration/validation/*-2026101[01]/`, transcripts `.codex-logs/workers/`.
 
 ---
