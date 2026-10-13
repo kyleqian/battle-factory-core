@@ -18,7 +18,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   100 general animations (opp 65 / player 35). Differential 641 / 641 byte-identical. Tests moved: rcp143 R4 pin, fps147 "unwired" pin.
 - **Next:** #139 remainder (voluntary-switch recall order; two-user / other-prologue leads unprobed). Charge-turn EMPTYSTRING3
   (#167 sentence kept): needs a dense charge-turn card per scene + an anchor run like `fpp150Anchors.ts` (doc §4).
-- **Notes:** gates: see the docs commit (typecheck 0, smoke 448, full suite / build / soak there). core-rs has no pre-pass port (not edited).
+- **Notes:** gates on the final tree: typecheck 0, smoke 448, full `npm test` (4 shards) 1,663 files / 13,822 tests passed, 0 failed
+  (44 / 223 skipped), build OK; soak vanilla 0:20 20 / 20 OK, per-seed lines identical to thr153 (`b4 t0`). core-rs: no port (not edited).
   Docs `docs/fpp150-focus-punch-prepass.md`; scratch `.integration/validation/fpp150/`.
 
 ---

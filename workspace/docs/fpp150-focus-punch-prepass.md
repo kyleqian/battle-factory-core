@@ -11,9 +11,9 @@ User-authorized gameplay-order fix (`docs/factory-finish-scope.md`): a new end2 
 | Pre-pass anchors through production (`tools/integration/fpp150Anchors.ts`, `tests/fpp150FocusPunchPrePassPresentation.test.ts`, 5) | R4 Scene OFF: empty box **72**, focus glyph **109**, foe's glyph **215** == ROM. Scene ON: empty box **72**, general animation **75 .. 198** (X + 1 .. X + 124), focus glyph **199**, foe's glyph **305** == ROM. Control arms calibrate the map (first glyph 46 == ROM) |
 | fps147's 7 dense Scene ON windows **through the production render** (`tools/integration/fpp150ProductionCompare.ts`) | **0 px on 7 / 7** (rel -1 .. 122 full screen, 124 rows each, incl. the elevated GOLBAT shadow window); rel 123 .. 128 0 px outside the message band. Controls age+1 / wrong-side / no-effect: 0 / 7 clean. `fixtures/fpp150/production-compare*.json` |
 | Census 0..999 (Scene ON, `ret88Census.sh`) | command keys + `battleDigestExcludingFrames` **identical**, live 27,016 / 27,196 unchanged; **36 battles** changed frames only (+20,848), **36 / 36 attributed** (§3) |
-| Soak vanilla 0:20 `--parallel 5` | see PROGRESS.md (fpp150 entry) |
+| Soak vanilla 0:20 `--parallel 5` | **20 / 20 OK**; every per-seed line (`b4 t0`, budget, carry <= 7, depth <= 9) identical to thr153's: no seed changed |
 | `compare:differential` fight-submenu / battle1-postwin-next-prompt / presentation-rng-playable-live-bodies-seeded-on vs `c94a282bd` | **PASS, 641 / 641 captures byte-identical** (no Focus Punch in those traces) |
-| Full `npm test` (2 shards) mid-step | 1 failure, the deliberate fps147 "is unwired" pin (flipped: only `battleScene.ts` imports the reducer) |
+| Full `npm test` | mid-step: 1 failure, the deliberate fps147 "is unwired" pin (flipped: only `battleScene.ts` imports the reducer). Final tree (4 shards): **1,663 files / 13,822 tests passed, 0 failed** (44 / 223 skipped); typecheck 0; smoke 448; build OK |
 
 ## 2. What changed
 
