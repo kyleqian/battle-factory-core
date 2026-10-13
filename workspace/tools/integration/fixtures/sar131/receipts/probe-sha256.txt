@@ -1,0 +1,7 @@
+97dee974bb1dd8e2ca186fab64793aaf707686659ad03d8b9b8ad8b63f54d319  sar131-thunder-wave-opp-primeape-golbat-on.json
+f246e058919bb99842ddc570e6e8927a6a040ab8d79c6717df2e72b510360da4  sar131-thunder-wave-ply-primeape-golbat-on.json
+b99076115606830d60002ff51aecf9573463c50f17acc3c7c8f5ac95588c2fee  sar131-toxic-ply-primeape-ledian-on.json
+d895eedaf99ce6db808c61fd7e823c772dc2eca195902eb795110ed5629862e3  sta123-thunder-wave-opp-primeape-snorlax-on.json
+03f2aeffa4c1373dc5bb85fc2654791b02a482428cf14192d62cbd6bdbc81bbc  sta123-thunder-wave-ply-primeape-snorlax-on.json
+4746ffe5945ebba8909ae60fda0d4f8b2b5de7a0645bc87ab71f8ca45bdd31a1  sta123-toxic-opp-primeape-onix-on.json
+b3df5065b082bd541f475e5d79aa1821dda6e93ae3e5d51b5427b4984215a4b7  sta123-toxic-ply-primeape-onix-on.json

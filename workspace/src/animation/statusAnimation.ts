@@ -1,5 +1,6 @@
 import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
 import type { RgbColor } from "../engine/bg.ts";
+import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
 
 export type StatusAnimationKind = "paralysis";
 
@@ -175,5 +176,96 @@ export function statusAnimationAtSourceAge(
         ),
       };
     }
+  }
+}
+
+/**
+ * sar131 (S10A, ISSUES #168 slice SA4, docs/sar131-status-animation-render.md): the B_ANIM_STATUS_* scripts drawn on the live
+ * field, one case per animation (`liveStatusAnimationRow`; an animation without a case is not drawn: the field stays as it is).
+ * Age a = the `status-animation` command's age; a = 0 is the ROM's first gAnimScriptActive row (sta123 firstActive 0 = the
+ * statusanimation row + 1). Every task / sprite row below is the source script's own schedule (battle_anim_scripts.s), shown
+ * through the measured display lag of the live field (OAM: a ShakeMon2 tick written at script row r shows on row r + 2).
+ */
+export type LiveStatusAnimationName = "PSN" | "PRZ";
+
+export interface LiveStatusAnimationRow {
+  /** The animated battler's x2 / y2: "rest" before its ShakeMon2 shows (the tracked idle rest), else the task's absolute value. */
+  readonly battlerOffset: Readonly<{ x2: number; y2: number }> | "rest";
+  /** blend_color_cycle F_PAL_ATTACKER: the battler's OBJ palette blended toward `color` by coeff / 16 (null = none). */
+  readonly paletteBlend: Readonly<{ color: RgbColor; coeff: number }> | null;
+  readonly sprites: readonly StatusAnimationSprite[];
+}
+
+/** Status_Poison / Status_Paralysis: `AnimTask_ShakeMon2 ANIM_ATTACKER` (attacker = target = the battler, LaunchStatusAnimation). */
+const PSN_SHAKE = [1, 0, 18, 2] as const;
+const PRZ_SHAKE = [1, 0, 10, 1] as const;
+/** RGB(30, 0, 31) as an 8-bit RgbColor (blendPaletteToward reads the 5-bit component back). */
+const PSN_BLEND_COLOR: RgbColor = Object.freeze({ r: 30 << 3, g: 0, b: 31 << 3 });
+/** sBattlerCoords[0] (battle_anim_mons.c): BATTLER_COORD_X / Y of the singles player / opponent. */
+const STATUS_BATTLER_COORDS = Object.freeze({ player: { x: 72, y: 80 }, opponent: { x: 176, y: 40 } });
+
+/**
+ * The script row the ShakeMon2 task is created on, as command age: Status_Poison runs `loopsewithpan`, `createvisualtask`,
+ * `blend_color_cycle` on the first script row (0); Status_Paralysis's `loadspritegfx` waits 1 (WaitAnimFrameCount: decrement, then
+ * hand back, then run), so its `createvisualtask` and ElectricityEffect's first `createsprite` run on row 3. The task's tick k
+ * (shakeMon2Sequence) is written on row creation + k and shows on row creation + k + 2 (OAM lag); before tick 0 shows, the
+ * battler stands at its rest.
+ */
+function shakeMon2Row(
+  age: number, creation: number, [x, y, n, delay]: readonly [number, number, number, number],
+): LiveStatusAnimationRow["battlerOffset"] {
+  const tick = age - creation - 2;
+  if (tick < 0) return "rest";
+  return shakeMon2OffsetAtTick(x, y, n, delay, tick);
+}
+
+/**
+ * `blend_color_cycle` with delay 2, 2 blends, 0 -> 12 (Status_Poison; the same arguments as Move_SMOG's target blend, smog.ts
+ * targetBlendAtAge, here from the task's creation row): BeginNormalPaletteFade's deltaY 2 steps every 4 rows (delay 2 plus the
+ * BG / OBJ half alternation), 12 holds through the finishing sequence, then the second leg 12 -> 0. `t` = rows since the shown
+ * palette's creation row (the palette RAM change shows on its own row; t = age - 2 for Status_Poison).
+ */
+function blendColorCycleDelay2To12(t: number): number {
+  if (t < 4 || t > 54) return 0;
+  if (t <= 24) return 2 * Math.floor(t / 4);
+  if (t < 34) return 12;
+  return Math.max(0, 12 - 2 * Math.floor((t - 30) / 4));
+}
+
+/** ElectricityEffect's i-th createsprite row (`delay 2` = 4 rows: decrement twice, hand back, run). */
+const PRZ_ELECTRICITY_FIRST_ROW = 3;
+/** AnimElectricity -> WaitAnimForDuration(5): the sprite's first shown row after its createsprite row, then 6 shown rows. */
+const ELECTRICITY_SHOW_LAG = 2;
+const ELECTRICITY_SHOWN_ROWS = 6;
+
+function statusElectricity(age: number, side: "player" | "opponent"): StatusAnimationSprite[] {
+  const center = STATUS_BATTLER_COORDS[side];
+  return ELECTRICITY_SPAWNS.flatMap((spawn, index) => {
+    const local = age - (PRZ_ELECTRICITY_FIRST_ROW + index * 4 + ELECTRICITY_SHOW_LAG);
+    if (local < 0 || local >= ELECTRICITY_SHOWN_ROWS) return [];
+    // InitSpritePosToAnimTarget(FALSE) + SetAnimSpriteInitialXOffset: attacker == target, so the opponent side subtracts the x
+    // offset and the player side adds it; a 16x16 OAM centred on (x, y).
+    const x = side === "player" ? center.x + spawn.x : center.x - spawn.x;
+    return [{ x: x - 8, y: center.y + spawn.y - 8, tileset: flippedSparkTiles(spawn.frame), palette: spark2.palette }];
+  });
+}
+
+/** One row of a live B_ANIM_STATUS_* animation of a battler on `side`, or null when the animation is not drawn (yet). */
+export function liveStatusAnimationRow(
+  animation: string, age: number, side: "player" | "opponent",
+): LiveStatusAnimationRow | null {
+  switch (animation) {
+    case "PSN": {
+      const coeff = blendColorCycleDelay2To12(age - 2);
+      return {
+        battlerOffset: shakeMon2Row(age, 0, PSN_SHAKE),
+        paletteBlend: coeff === 0 ? null : { color: PSN_BLEND_COLOR, coeff },
+        sprites: [],
+      };
+    }
+    case "PRZ":
+      return { battlerOffset: shakeMon2Row(age, PRZ_ELECTRICITY_FIRST_ROW, PRZ_SHAKE), paletteBlend: null, sprites: statusElectricity(age, side) };
+    default:
+      return null;
   }
 }

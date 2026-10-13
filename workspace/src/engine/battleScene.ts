@@ -4,6 +4,7 @@ import {
 } from "./liveMoveAnimation.ts";
 import { liveBattlerAnchors } from "./liveMoveAnimation.ts";
 import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
+import { liveStatusAnimationRow, type StatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
@@ -7742,6 +7743,53 @@ export function statsChangeRenderView(view: BattleResolutionPresentationRenderVi
     view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: view.postBodyShadowHidden || row.enemyShadowHidden }),
     banner,
   });
+}
+
+/** sar131: the status-animation command's field view (statusAnimationRenderView) and its sprites (drawn over the battlers). */
+export type StatusAnimationRenderView = Readonly<{
+  view: BattleResolutionPresentationRenderView;
+  sprites: readonly StatusAnimationSprite[];
+}>;
+
+/**
+ * sar131 (S10A, ISSUES #168 slice SA4, docs/sar131-status-animation-render.md): a B_ANIM_STATUS_* `status-animation` command over
+ * the field as it is (Scene ON; the kernel emits none in Scene OFF). One row of statusAnimation.ts liveStatusAnimationRow: the
+ * battler's displayed picture (species / Castform form art of the field, elevation applied by the draw) at its ShakeMon2 x2 / y2
+ * (absolute; before the task shows, the tracked rest) with its OBJ palette blended (blend_color_cycle F_PAL_ATTACKER), and the
+ * script's sprites. The opponent stands at its tracked front idle rest (liveBattlerAnchors, from the x2 history) whenever it is not
+ * shaken; without an x2 input there is no residual x2. SpriteCB_EnemyShadow hides an elevated opponent's shadow while
+ * gAnimScriptActive (shown from age 1). Null for an animation without a case (the field stays as it is), over the doll or for an
+ * invisible battler sprite.
+ */
+export function statusAnimationRenderView(view: BattleResolutionPresentationRenderView): StatusAnimationRenderView | null {
+  const effect = view.effect;
+  if (effect?.type !== "status-animation") return null;
+  const side = effect.battler === 0 ? "player" as const : "opponent" as const;
+  const row = liveStatusAnimationRow(effect.animation, effect.age, side);
+  if (row === null || !view.visibility[side].sprite || view.field[side].substituteDoll === true) return null;
+  const rest = effect.battlerX2Input === undefined
+    ? { x2: 0, y2: 0 }
+    : liveBattlerAnchors("opponent", view.fieldArt, effect.battlerX2Input).frontIdleRest;
+  const place = (at: "player" | "opponent") => {
+    const art = view.fieldArt[at];
+    const offset = at === side && row.battlerOffset !== "rest" ? row.battlerOffset : at === "opponent" ? rest : { x2: 0, y2: 0 };
+    const blend = at === side ? row.paletteBlend : null;
+    if (offset.x2 === 0 && offset.y2 === 0 && blend === null) return art;
+    return Object.freeze({
+      ...art,
+      origin: Object.freeze({ x: art.origin.x + offset.x2, y: art.origin.y + offset.y2 }),
+      ...(blend === null ? {} : {
+        pic: Object.freeze({ ...art.pic, palette: blendPaletteToward(art.pic.palette as RgbColor[], blend.color, blend.coeff) }),
+      }),
+    });
+  };
+  const player = place("player"), opponent = place("opponent");
+  const fieldArt = player === view.fieldArt.player && opponent === view.fieldArt.opponent
+    ? view.fieldArt : Object.freeze({ ...view.fieldArt, player, opponent });
+  // The shadow callback sees gAnimScriptActive from the first row and is shown one row late (ages 1 .. end, and the next
+  // command's first row: battleResolutionPresentationRender.ts postBodyShadowHiddenAt).
+  const shadowHidden = view.postBodyShadowHidden || effect.age >= 1;
+  return Object.freeze({ view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: shadowHidden }), sprites: row.sprites });
 }
 
 type SceneOffStatEffect = Extract<
@@ -54817,6 +54865,9 @@ export function renderBattleResolutionSceneOffView(
   // scd112: the stats-change command's field (tracked rest, shadow hide) and its banner (drawn below, after the stat banner).
   const statsChange = statsChangeRenderView(view);
   if (statsChange) view = statsChange.view;
+  // sar131: the status animation's battler (shake, palette blend, tracked rest) and its sprites (drawn over the battlers below).
+  const statusAnimation = statusAnimationRenderView(view);
+  if (statusAnimation) view = statusAnimation.view;
   drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
   const faint = view.effect?.type === "faint" ? view.effect : null;
   const hit = view.effect?.type === "hit" ? view.effect : null;
@@ -54939,6 +54990,8 @@ export function renderBattleResolutionSceneOffView(
       );
     }
   }
+  // sar131: the status animation's OAM (priority 2 in front of its battler, under the priority-1 healthboxes).
+  for (const sprite of statusAnimation?.sprites ?? []) drawSpriteSheet(fb, sprite.tileset as Tileset, sprite.palette, sprite.x, sprite.y);
   if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);
   if (view.visibility.opponent.healthbox) {
     drawSendOutHealthbox(
