@@ -1,3 +1,18 @@
+## 2026-10-13 — User scope update: all remaining Factory correctness work is authorized
+
+- **State:** scope/instructions checkpoint on local master; production src `65a45fcc` and the green final receipt on `c4d38e1f3`
+  are unchanged. Move-animation coverage remains 99.34% of commands / 99.60% of frames; no fix is credited by this scope change.
+- **Did:** recorded `docs/factory-finish-scope.md` and updated the roadmap, lane/supervisor instructions and launch prompt. All
+  remaining animation variants, presentation corrections and source-proven battle-engine bugs are authorized. Main-lane changes
+  to damage / AI / RNG / event ordering are allowed with source proof; presentation workers retain their narrow ownership.
+- **Next:** FIRST #165 Return -> Frustration; then #141's rampage / Sticky Hold RNG draws, #140's Mimic/Transform targeting branch,
+  and #139's Focus Punch pre-pass. Continue independent banked #168 fixes, fallback variants and presentation/timing remainders.
+  Use the engine gates in ANIMATION_VERIFICATION.md, including all five gameplay gates; attribute intentional trajectory changes.
+- **Notes:** audio remains deferred, settled exceptions stay settled, and no run is launched by this checkpoint. Reuse the unchanged
+  production receipt. Scope/ledger checks, `git diff --check`, shell syntax / `--print-config`, and all 62 launcher-profile tests passed.
+
+---
+
 ## 2026-10-12 (evening) .. 2026-10-13 — S10A: Scene ON status-condition animations DONE (#168: timed + all nine drawn), sound-effect waits, Double Team / Smokescreen timing, ordinary-row idle rest; live share 0..999 98.95 -> 99.34 % of commands (99.32 -> 99.60 % of frames)
 
 - **State:** local master `63f6850b2` (production src == union `c4d38e1f3`). Supervisor FINAL gates on that union: typecheck, smoke 448,

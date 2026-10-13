@@ -2252,8 +2252,8 @@ Smokescreen's first-use phase (tmr136); ordinary Scene ON rows draw ONIX's track
 landed (ordl126). Ordinary-play census (`.integration/validation/final-63f6850b2/census/merged.json`): **99.34 % of move-animation
 commands / 99.60 % of frames live** (session start 98.95 / 99.32). Live audits 27 / 28: 0 defects. Resume points:
 0. FIRST, AUTHORIZED 2026-10-13: fix the battle-engine accuracy backlog through main-lane steps under `docs/factory-finish-scope.md`.
-   [x] #165 Return -> Frustration DONE (ret165, docs/ret165-return-to-frustration.md: ROM receipt, census Return 84 -> 0); then #141's missing
-   rampage / Sticky Hold RNG draws, #140's Mimic/Transform overwritten chosen-move targeting draw, and #139's Focus Punch pre-pass.
+   [x] #165 Return -> Frustration DONE (ret165, docs/ret165-return-to-frustration.md: ROM receipt, census Return 84 -> 0); [x] #141's missing
+   rampage / Sticky Hold RNG draws and #140's chosen-move targeting draw DONE (rng146 + thr153, docs/rng146-rng-draw-fixes.md); next #139's Focus Punch pre-pass.
    Intentional source-correct damage / AI / RNG / event-order changes are permitted; prove them and run the gameplay gates.
 1. Presentation (cheap, can proceed independently): land the BANKED inv142 patch (docs/inv142-status-animation-invisible-battler.md: a status animation over a hidden Dig
    battler draws its sprites; 5 census commands). Then FRZ's frozen-turn 115 / 116 phase (aud137 §; D4 class, 1 frame).
