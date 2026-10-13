@@ -177,8 +177,10 @@ describe("stl109: forced Struggle through the kernel (generated rental routes)",
   for (const route of ROUTES) {
     it(`${route.name}: every Struggle body is live for all 112 rows, the turn reaches the next prompt, Scene ON / OFF logic, damage and RNG are identical`, async () => {
       const { generatedCommandAnimationReplay } = await import("../tools/integration/generatedCommandAnimationReplay.ts");
-      const on = generatedCommandAnimationReplay(route.seed, "on", route.slots as never, route.streak, true, true);
-      const off = generatedCommandAnimationReplay(route.seed, "off", route.slots as never, route.streak, true, true);
+      // sa125: the turn-58 route crosses 34 Scene ON status animations (+3,298 frames, SA3 -1,044): 27,992 -> 30,246 frames, past
+      // the replay's default 30,000-frame budget, so both routes pass 40,000 explicitly.
+      const on = generatedCommandAnimationReplay(route.seed, "on", route.slots as never, route.streak, true, true, undefined, 40000);
+      const off = generatedCommandAnimationReplay(route.seed, "off", route.slots as never, route.streak, true, true, undefined, 40000);
       expect(on.stalled).toBe(false);
       expect(off.stalled).toBe(false);
       const bodies = on.animations.filter((a) => a.moveId === 165);

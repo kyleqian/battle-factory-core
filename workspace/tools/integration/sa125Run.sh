@@ -20,6 +20,7 @@ for t in base final; do
   mkdir -p "$OUT/$t"
   git -C "$ROOT" archive "$rev" | tar -x -C "$OUT/$t"
   ln -s "$W/node_modules" "$OUT/$t/workspace/node_modules"
+  [ -e "$W/reference" ] && ln -s "$W/reference" "$OUT/$t/workspace/reference"
   (cd "$OUT/$t" && git init -q && git -c user.email=sa125@local -c user.name=sa125 commit -q --allow-empty -m "$t")
   echo "$(git rev-parse "$rev") $(git rev-parse "$rev:workspace/src")" > "$OUT/$t.rev"
 done
@@ -71,6 +72,6 @@ except FileNotFoundError:
     print("receipt: no committed copy")
 sys.exit(0 if ok else 1)
 PYEOF
-rm -f "$OUT/base/workspace/node_modules" "$OUT/final/workspace/node_modules"
+rm -f "$OUT/base/workspace/node_modules" "$OUT/final/workspace/node_modules" "$OUT/base/workspace/reference" "$OUT/final/workspace/reference"
 [ "$fail" -eq 0 ] && echo "sa125Run: ALL OK" || echo "sa125Run: FAILED"
 exit "$fail"

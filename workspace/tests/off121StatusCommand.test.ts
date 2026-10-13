@@ -27,6 +27,8 @@ const ROM = (JSON.parse(readFileSync("tools/integration/fixtures/off121/receipts
 type Status = {
   label: string; print: string; deltaPrint: number; deltaUsed: number | null; firstAfterUsed: boolean;
   frames: number; framesFromUsed: number | null;
+  /** sa125 SA3: the battler's status animation runs in the same execution (right before the print, or right after it). */
+  animated: boolean;
 };
 const FRAME_BUDGET = 200000;
 
@@ -46,6 +48,10 @@ function statusesOf(segment: any, out: Status[]) {
     const sameExecution = used !== null && ev.slice(used + 1, i + 1).every((e: any, k: number, a: any[]) =>
       e.provenance.instructionExecution >= (k === 0 ? ev[used!].provenance.instructionExecution : a[k - 1].provenance.instructionExecution));
     const printAt = cmds.findIndex((c) => c.eventSequence === ev[j].sequence);
+    const following = ev.slice(i + 1).filter((e: any) => e.payload.kind !== "set-battler-pp-data" && e.payload.kind !== "play-se");
+    const animated = (following[0]?.payload.kind === "status-animation" && following[0].payload.battler === ev[i].payload.battler)
+      || (following[0]?.payload.kind === "message" && following[1]?.payload.kind === "status-animation"
+        && following[1].payload.battler === ev[i].payload.battler);
     out.push({
       label: `${ev[i].provenance.sourceLabel}`, print: ev[j].payload.messageId,
       deltaPrint: ev[j].provenance.instructionExecution - s,
@@ -55,6 +61,7 @@ function statusesOf(segment: any, out: Status[]) {
       framesFromUsed: sameExecution && usedAt >= 0
         ? cmds.slice(usedAt + 1, printAt).reduce((sum: number, c: any) => sum + c.timing.minimumFrames + (c.timing.holdFrames ?? 0), 0)
         : null,
+      animated,
     });
   }
 }
@@ -205,9 +212,13 @@ describe("off121: the Scene OFF status command on production census routes", () 
     expect([toxic.frames, wave.frames, rest.frames]).toEqual([2, 2, 38]);
   });
 
-  it("Scene ON is untouched: every status command stays 32 frames", () => {
+  // sa125 SA3 (docs/sa125-status-animation-command.md): a Scene ON status command whose battler's status animation runs in the same
+  // execution now lasts the Scene OFF delta (the status-animation command after it holds the controller rows); every other stays 32.
+  it("Scene ON: every status command stays 32 frames unless its status animation follows (sa125 SA3: delta(print) - delta(status))", () => {
     const on = [11, 12].flatMap((seed) => battleStatuses(seed, "on"));
     expect(on.length).toBeGreaterThan(5);
-    for (const s of on) expect(s.frames).toBe(32);
+    for (const s of on) expect(s.frames).toBe(s.animated ? s.deltaPrint : 32);
+    expect(on.filter((s) => s.animated).length).toBeGreaterThan(0);
+    expect(on.filter((s) => !s.animated).length).toBeGreaterThan(0);
   });
 });
