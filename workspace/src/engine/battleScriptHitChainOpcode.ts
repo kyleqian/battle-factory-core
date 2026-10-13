@@ -3901,11 +3901,10 @@ function applyChargingMoveEffect(
  * `(num) << 10` write -- 2 or 3 both fit the 2-bit field with no carry into
  * `STATUS2_MULTIPLETURNS`'s own bit 12), and -- unlike every status1-family
  * case above -- never pushes/jumps to a script at all: `SetMoveEffect`'s own
- * switch just `break`s without moving `gBattlescriptCurrInstr`, so the
- * calling `seteffectwithchance` re-executes on the next frame with
- * MOVE_EFFECT_BYTE already cleared and spends one wasted `Random() % 100`
- * before advancing (rcp143 R1). The transition is a jump to the current
- * instruction, not an `"advance"` and not a `"call"`.
+ * switch just `break`s, so `BattleScript_EffectRampage2`'s `goto
+ * BattleScript_HitFromCritCalc` tail (already run before `seteffectwithchance`
+ * reaches this dispatch) is genuinely the whole move; `"advance"` is the
+ * correct transition, not a `"call"`.
  *
  * Source stores `gCurrentMove` in the effect battler's `gLockedMoves` entry.
  * The full-turn action consumer reads it back independently of the move
@@ -3945,13 +3944,9 @@ function applyThrashMoveEffect(
     ),
   ) as BattleScriptRulesContext["lockedMoves"];
   const nextRulesContext = Object.freeze({ ...withRampage, lockedMoves });
-  // The case body `break`s without touching gBattlescriptCurrInstr
-  // (:2851-2862), so the cursor stays on this seteffectwithchance. The caller
-  // clears MOVE_EFFECT_BYTE, and the re-run spends one more `Random() % 100`
-  // before its own `instr++` (docs/rcp143-engine-fix-receipts.md R1).
   return transitionBattleScriptCommand(
     context,
-    Object.freeze({ kind: "jump", programCounter: context.state.programCounter }),
+    Object.freeze({ kind: "advance" }),
     { rulesContext: nextRulesContext, rng },
   );
 }

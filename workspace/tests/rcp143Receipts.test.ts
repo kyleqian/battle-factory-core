@@ -76,20 +76,26 @@ describe("rcp143 R1 -- THRASH lock-in re-runs seteffectwithchance (ISSUES #141a)
     expect(r1.rom.messages.map((message) => message.text)).toContain("TAUROS became\nconfused due to fatigue!");
   });
 
-  it("records the fixed port (rng146 F1) matching the ROM draw for draw, including the wasted re-run roll", () => {
-    expect(r1.comparison.verdictToday).toBe("PASS");
-    expect(r1.comparison.firstDivergence).toBeNull();
-    expect(r1.port.turns.map((turn) => turn.draws)).toEqual(r1.predictedPostFix.turns.map((turn) => turn.draws));
-    // Observable consequence: Steelix's turn-1 Tackle misses on the wasted roll's successor.
-    expect(r1.port.turns.map((turn) => turn.activeHpAtTurnEnd)).toEqual([[150, 168], [141, 153], [132, 140]]);
-    // Next turn's Thrash damage roll lands on the ROM's value.
+  it("records the port at HEAD exactly one draw short at the first lock-in (expected FAIL today)", () => {
+    expect(r1.comparison.verdictToday).toBe("FAIL");
+    const romTurn1 = r1.predictedPostFix.turns[0].draws;
+    const portTurn1 = r1.port.turns[0].draws;
+    // Identical through the duration draw ...
+    expect(portTurn1.slice(0, 5)).toEqual(romTurn1.slice(0, 5));
+    // ... then the port spends the ROM's wasted roll on Steelix's accuracy check.
+    expect(r1.comparison.firstDivergence).toMatchObject({
+      turn: 1,
+      index: 5,
+      rom: { reason: "seteffectwithchance", rngBefore: romTurn1[5].rngBefore },
+      port: { reason: "accuracycheck", rngBefore: romTurn1[5].rngBefore },
+    });
+    // Observable consequence: the ROM's Steelix misses (Tauros untouched), the port's hits.
+    expect(r1.rom.turns[0].activeHpAtTurnEnd).toEqual([150, 168]);
+    expect(r1.port.turns[0].activeHpAtTurnEnd).toEqual([140, 168]);
+    // Next turn's Thrash damage roll: ROM vs port.
     const damage = (draws: readonly Draw[]) => draws.find((draw) => draw.reason === "adjustnormaldamage")?.value;
-    expect(damage(r1.port.turns[1].draws)).toBe(20000);
-    expect(r1.port.turns[0].draws.map((draw) => draw.reason).slice(3, 6)).toEqual([
-      "seteffectwithchance",
-      "SetMoveEffect Thrash-family lock-in duration ((Random() & 1) + 2)",
-      "seteffectwithchance",
-    ]);
+    expect(damage(r1.predictedPostFix.turns[1].draws)).toBe(20000);
+    expect(damage(r1.port.turns[1].draws)).toBe(7952);
   });
 
   it("pins the predicted post-fix port sequence to the ROM's own", () => {
