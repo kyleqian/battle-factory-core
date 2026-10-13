@@ -29,7 +29,7 @@ const ROM = (JSON.parse(readFileSync("tools/integration/fixtures/sta123/receipts
 const ROWS = STATUS_ANIMATION_ADDED_ROWS as Readonly<Record<string, number>>;
 const FRAME_BUDGET = 200000;
 
-type Seg = { events: any[]; commands: any[] };
+type Seg = { events: any[]; commands: any[]; rules: string };
 const cache = new Map<string, Seg[]>();
 /** One ordinary census battle (liveShareCensus.ts playBattle: battle i = seed i, streak i * 11 % 49): its segments in order. */
 function battleSegments(seed: number, scene: "on" | "off"): Seg[] {
@@ -55,7 +55,8 @@ function battleSegments(seed: number, scene: "on" | "off"): Seg[] {
     else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons));
     rng = tickLiveMovePresentationRngSession(rng, state, liveMoveRandom2PlanContextAt);
     const r = state.battleResolutionPresentation as any;
-    if (r) for (const s of r.segments) if (!seen.has(s)) { seen.add(s); out.push({ events: s.events, commands: s.commands }); }
+    if (r) for (const s of r.segments) if (!seen.has(s)) { seen.add(s); out.push({ events: s.events, commands: s.commands,
+      rules: JSON.stringify(s.afterRules, (k, v) => (k === "hitMarker" ? v & ~0x80 : v)) }); }
     if (!owned()) ended = true;
   };
   const phase = () => state.battleCommandPresentation?.lifecycle.phase;
@@ -97,6 +98,9 @@ function battleSegments(seed: number, scene: "on" | "off"): Seg[] {
   return out;
 }
 
+// Receipts the kernel emits by scene (HITMARKER_NO_ANIMATIONS): status animations and playanimation / attackanimation receipts
+// (Scene ON) vs the Scene OFF attack pause.
+const SCENE_ONLY_KINDS = new Set(["status-animation", "animation"]);
 const frames = (c: any) => (c.timing?.minimumFrames ?? 0) + (c.timing?.holdFrames ?? 0);
 const shape = (c: any) => `${c.type}:${c.type === "message" ? c.messageId ?? "" : ""}:${c.type === "move-animation" || c.type === "status" ? "" : frames(c)}`;
 const ANCHOR_TYPES = new Set(["status", "message", "hp", "stat", "status-icon"]);
@@ -278,3 +282,17 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
     for (const k of ["STRINGID_TARGETFAINTED|false", "STRINGID_PKMNWOKEUP|false", "STRINGID_PKMNWENTTOSLEEP|false"]) expect(t[k], k).toEqual(["32->32"]);
   });
 });
+
+describe("sa125: Scene ON / OFF gameplay parity on two real routes (presentation only)", () => {
+  it.each([12, 60])("seed %i: identical logical events and after-rules (RNG, battlers, field; HITMARKER_NO_ANIMATIONS masked) in both scenes", (seed) => {
+    const logical = (scene: "on" | "off") => battleSegments(seed, scene).map((s) => ({
+      rules: s.rules,
+      events: s.events.map((e: any) => e.payload).filter((p: any) => !SCENE_ONLY_KINDS.has(p.kind)).map((p: any) => JSON.stringify(p)),
+    }));
+    const on = logical("on"), off = logical("off");
+    expect(on.length).toBeGreaterThan(5);
+    expect(on).toEqual(off);
+    expect(battleSegments(seed, "on").flatMap((s) => s.commands).filter((c: any) => c.type === "status-animation").length).toBeGreaterThan(0);
+  });
+});
+
