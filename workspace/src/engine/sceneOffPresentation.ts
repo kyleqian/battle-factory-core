@@ -299,6 +299,7 @@ export function createBattleKernelTurnPresentation(
       || resolutionCommand?.type === "hit-animation"
       || resolutionCommand?.type === "sprite-visibility"
       || resolutionCommand?.type === "stats-change"
+      || resolutionCommand?.type === "status-animation"
     ) {
       // The legacy canonical adapter already includes these controller waits
       // in its immutable per-command durations. Typed animation commands are

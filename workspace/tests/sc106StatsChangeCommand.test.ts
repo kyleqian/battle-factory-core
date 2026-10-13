@@ -11,6 +11,7 @@ import { statsChangeParams, statsChangeSpan } from "../src/animation/statsChange
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { scanRoute } from "../tools/integration/sc106RouteScan.ts";
 import { iu120Extra } from "./helpers/iu120Rows.ts";
+import { SA125_BASE_STATUS_FRAMES, SA125_STATUS_ANIMATION_ROWS } from "./helpers/sa125Rows.ts";
 
 // sc106 (S10A, ISSUES #166 slice c; docs/sc106-stats-change-command.md): the `stats-change` presentation command at each kernel
 // STATS_CHANGE `animation` event, 76 / 90 frames (stat101 receipts: playanimation -> next instruction 77 / 91 rows vs 1 without
@@ -122,8 +123,11 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // so after the odd 39-frame hold a later dismissal lands one frame earlier relative to the shifted timeline). scf117: + the
     // route's 6 holds (3 + 3 + 1 + 1 + 1 + 1 = 10) + 1 frame of dismissal parity.
     // iu120: + every live body's universal rows on the route.
+    // sa125 (docs/sa125-status-animation-command.md): + the route's Scene ON status animations (CONFUSION x4, PRZ x2) and its one SA3
+    // status command (Thunder Wave's PRZ write 32 -> 2), all after this anchor: 9177 -> 9625 (base / final measured).
     expect(route.frames).toBe(8557 + 456 + 79 - 1 + 10 + 1
-      + iu([205, P, 6], [55, O, 3], [321, O, 2], [246, O], [341, O], [44, O], [260, O], [148, P, 2], [24, O, 4]));
+      + iu([205, P, 6], [55, O, 3], [321, O, 2], [246, O], [341, O], [44, O], [260, O], [148, P, 2], [24, O, 4])
+      + 4 * SA125_STATUS_ANIMATION_ROWS.CONFUSION! + 2 * SA125_STATUS_ANIMATION_ROWS.PRZ! - (SA125_BASE_STATUS_FRAMES - 2));
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 230-row window owns the banner; the message is unmoved", () => {
