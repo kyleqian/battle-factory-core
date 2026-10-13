@@ -136,4 +136,10 @@ base-vs-patched census (~8 minutes on 16 cores).
 
 ## 5. Gates (this step: new files only, production untouched)
 
-See the final commit message / handoff for the exact numbers (runner, targeted tests, typecheck, smoke, `git diff --check`, `git status`).
+- `sh tools/integration/sgs134Run.sh .integration/validation/sgs134-20261012/worker-scratch/run1 --delta` (archive of `4f790c9d3` + the
+  sgs134 files of `439575012`): **ALL SAME** — scenarios 10 / index SAME; probes ON 10 / 10 and OFF 10 / 10 r1 == r2, 40 / 40 ==
+  committed sha256 per scene; rom-r1 / rom-off-r1 SAME, r2 == r1; exposure.json SAME; production-on / -off SAME; patch applies;
+  census-delta.json SAME (ALL TRUE).
+- `npm test -- tests/sgs134SeGateOtherRequests.test.ts`: 1 file / 9 tests passed; `npm run typecheck`: green; `npm run test:smoke`:
+  448 / 448; `git diff --check`: clean; `git status`: no modified tracked file.
+- Patched copy (`4f790c9d3` + the diff): `npm run typecheck` green; 205 targeted test files 2,829 / 2,830 (the one sc106 route pin, §1).
