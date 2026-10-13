@@ -9,6 +9,15 @@ import {
   SEND_IN_TAIL_SPECIES,
   sendInTail,
 } from "../src/data/sendInTail.ts";
+import { SWITCH_IN_SPAN_FRAMES, SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation.ts";
+import {
+  midBattleSwitchFadeAt,
+  midBattleSwitchInAt,
+  midBattleSwitchParticleSchedulesAt,
+  midBattleSwitchSendInFadeAt,
+  midBattleSwitchSendInParticlesAt,
+} from "../src/engine/battleResolutionPresentationRender.ts";
+import { opponentSwitchInDuration, opponentSwitchInHealthboxSlideElapsed } from "../src/engine/switchInTail.ts";
 
 const FX = "tools/integration/fixtures";
 const json = (path: string) => JSON.parse(readFileSync(`${FX}/${path}`, "utf8"));
@@ -61,5 +70,46 @@ describe("snd145 send-in tail table", () => {
     expect(rows.length).toBe(339);
     expect(rows.filter((r) => sendInTail(r.species, "player").slideStart !== r.slide! - 10)).toEqual([]);
     expect(sendInTail(1, "player").messageStart).toBeNull();
+  });
+});
+
+describe("snd145 live switch-in tail (R2 timing, R3 send-in fade / particles)", () => {
+  // TAILLOW (function-dominated, 70 / 96: dense Scene ON 0 px), SPHEAL (frame-dominated, 234), SALAMENCE (delayed), TYPHLOSION
+  // (delayed + cry-bound message +50), CASTFORM (+1).
+  const cases: [number, number, number][] = [[304, 70, 96], [341, 234, 260], [397, 145, 171], [157, 95, 145], [385, 139, 165]];
+  it("gives every opponent switch-in the species' slide start and duration; the player keeps 91 + 11 and slide 66", () => {
+    for (const [species, slide, total] of cases) {
+      expect([opponentSwitchInHealthboxSlideElapsed(species), opponentSwitchInDuration(species)]).toEqual([slide, total]);
+      expect(switchInTiming(1, species).minimumFrames + SWITCH_IN_WAITSTATE_HOLD_FRAMES).toBe(total);
+      expect(midBattleSwitchInAt(slide - 1, 1, slide).healthboxDx).toBeNull();
+      expect(midBattleSwitchInAt(slide, 1, slide).healthboxDx).toBe(-110);
+      expect(midBattleSwitchInAt(slide + 22, 1, slide).healthboxDx).toBe(0);
+      expect(switchInTiming(0, species)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
+    }
+    expect(midBattleSwitchInAt(65, 0).healthboxDx).toBeNull();
+    expect(midBattleSwitchInAt(66, 0).healthboxDx).toBe(110);
+  });
+
+  it("keys the opponent send-in fade / particles to the switch-in elapsed (ROM: white in from 19, 8-frame plateau, no stolen tick)", () => {
+    const bg = Array.from({ length: 60 }, (_, e) => midBattleSwitchSendInFadeAt(e, 1)?.bg ?? null);
+    expect(bg.slice(16, 58)).toEqual([
+      null, 0, 0, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16, 16, 16, 16, 16, 16, 16, 16,
+      14, 14, 12, 12, 10, 10, 8, 8, 6, 6, 4, 4, 2, 2, 0, 0, 0,
+    ]);
+    expect(midBattleSwitchSendInFadeAt(30, 1)!.obj).toBe(0);
+    expect(midBattleSwitchSendInParticlesAt(16, 1)).toBeNull();
+    expect(midBattleSwitchSendInParticlesAt(19, 1)!.schedules.map((p) => [p.i, p.age])).toEqual([[0, 0]]);
+    expect(midBattleSwitchSendInParticlesAt(43, 1)!.schedules.map((p) => p.i)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+    expect(midBattleSwitchSendInParticlesAt(44, 1)!.schedules.map((p) => p.i)).not.toContain(0);
+    expect(midBattleSwitchSendInParticlesAt(59, 1)).toBeNull();
+  });
+
+  it("keeps the player send-in windows identical to the voluntary fixture's trace windows (switch-in starts at 1140)", () => {
+    for (let e = 0; e < 102; e += 1) {
+      const trace = 1140 + e;
+      expect(midBattleSwitchSendInFadeAt(e, 0)).toEqual(trace >= 1187 ? midBattleSwitchFadeAt(trace) : null);
+      const particles = midBattleSwitchSendInParticlesAt(e, 0);
+      expect(particles?.schedules ?? null).toEqual(trace >= 1187 ? midBattleSwitchParticleSchedulesAt(trace, "send-in") : null);
+    }
   });
 });

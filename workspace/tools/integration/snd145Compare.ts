@@ -148,3 +148,24 @@ if (dumpArg !== undefined) {
     writeFileSync(`${outPath}.e${e}.ppm`, Buffer.concat([Buffer.from(`P6 480 160 255\n`), img]));
   }
 }
+// --fit-fade: per row, the white-fade BG coefficient (0..16) whose production field matches the ROM's opponent healthbox band
+// (x < 120, y < 48; before the healthbox slides in) -- the ROM's send-in fade curve.
+if (process.argv.includes("--fit-fade")) {
+  const fits: [number, number[]][] = [];
+  for (let e = 0; e < Math.min(rows.length, 70); e += 1) {
+    const r = rom.get(base + e)!; const view = viewAt(e); const ok: number[] = [];
+    for (let y = 0; y <= 16; y += 1) {
+      const fb = new Uint8Array(240 * 160 * 4);
+      renderBattleResolutionLiveView(fb, { ...view, midBattleSwitchFade: { bg: y, obj: 0 } });
+      let same = true;
+      for (let py = 0; py < 112 && same; py += 1) for (let px = 0; px < 240; px += 1) {
+        if ((px >= 136 && py < 76) || (px >= 120 && py >= 64) || (px < 120 && py < 48 && e >= 66) || (px < 110 && py >= 48)) continue;
+        const i = py * 240 + px;
+        if (fb[i * 4] !== r[i * 3] || fb[i * 4 + 1] !== r[i * 3 + 1] || fb[i * 4 + 2] !== r[i * 3 + 2]) { same = false; break; }
+      }
+      if (same) ok.push(y);
+    }
+    fits.push([e, ok]);
+  }
+  console.log(JSON.stringify(fits.filter(([, ok]) => ok.length !== 1 || ok[0] !== 0)));
+}

@@ -559,12 +559,78 @@ function recallWhiteCoefficientAtFrame(frame: number): number {
 }
 
 function sendInWhiteCoefficientAtFrame(frame: number): number {
-  const k = frame - 1187;
+  return sendInWhiteCoefficient(frame - 1187, true);
+}
+
+/**
+ * The send-in white fade's `y` k ticks after its launch (`LaunchBallFadeMonTask(TRUE, ...)`: white in 0 -> 16 at 2 per second tick,
+ * plateau, white out). `slideStolenTick`: the player send-in's healthbox-slide start steals one update inside the plateau (1203-1208
+ * runs one tick longer); an opponent send-in's species-keyed slide starts long after the fade (send-in +70 or later), so its plateau
+ * is the unstolen one (snd145: dense Scene ON windows, docs/snd145-send-in-tail-live.md).
+ */
+function sendInWhiteCoefficient(k: number, slideStolenTick: boolean): number {
   if (k < 0) return 0;
   if (k <= 15) return 2 * Math.floor((k + 2) / 2); // white in 1187-1202 (launch already stepped)
-  if (k <= 21) return 16; // plateau 1203-1208 (healthbox-slide stolen tick extends it)
-  if (k <= 38) return 16 - 2 * Math.ceil((k - 22) / 2); // white out 1209-1224
+  const plateauEnd = slideStolenTick ? 22 : 21;
+  if (k <= plateauEnd) return 16; // plateau 1203-1208 (healthbox-slide stolen tick extends it)
+  if (k <= 38) return Math.max(0, 16 - 2 * Math.ceil((k - plateauEnd) / 2)); // white out 1209-1224
   return 0; // finishing 1226-1230 clears, then idle
+}
+
+/**
+ * snd145 (ISSUES #146 remainder): the trace frame of the staged voluntary fixture at a PLAYER switch-in's elapsed (its `switch-in`
+ * starts at 1140, docs/mid-battle-switch-presentation-ground-truth.md §2) -- the send-in fade / particle windows (1187-1231) are this
+ * command's elapsed 47-91 on every player send-in.
+ */
+export const MID_BATTLE_SWITCH_PLAYER_SEND_IN_TRACE = 1140;
+/**
+ * snd145: an OPPONENT switch-in's ball opens at elapsed 18 (`SpriteCB_ReleaseMonFromBall`: StartSpriteAnim(sprite, 1),
+ * AnimateBallOpenParticles and LaunchBallFadeMonTask in one tick); the rendered fade / particle clock is the player's 30 elapsed
+ * earlier (the player ball opens at its elapsed 48 on the same convention), measured on dense Scene ON windows.
+ */
+export const MID_BATTLE_SWITCH_OPPONENT_SEND_IN_PARTICLE_START = 17;
+
+/**
+ * snd145 (ISSUES #146 remainder): the send-in half of the ball-open white fade, keyed to the `switch-in` command's own elapsed for
+ * EVERY send-in (voluntary, forced Roar / Whirlwind, faint replacement; `SpriteCB_ReleaseMonFromBall` -> `LaunchBallFadeMonTask(TRUE,
+ * battler, 14, ...)`, pokeball.c:750-758, fades BG palettes 1-3 white whichever side sends). The player keeps the voluntary
+ * fixture's windows (its `obj` ramp blends the player mon); the opponent's `obj` is 0 (its release tint is the switch-in sprite's own
+ * `monTintCoefficient`). Null outside the window.
+ */
+export function midBattleSwitchSendInFadeAt(elapsed: number, battler: 0 | 1): MidBattleSwitchFadeAt | null {
+  if (battler === 0) {
+    const traceFrame = MID_BATTLE_SWITCH_PLAYER_SEND_IN_TRACE + elapsed;
+    return traceFrame >= 1187 ? midBattleSwitchFadeAt(traceFrame) : null;
+  }
+  const k = elapsed - MID_BATTLE_SWITCH_OPPONENT_SEND_IN_PARTICLE_START - 2;
+  if (k < -2 || k > 38) return null;
+  return Object.freeze({ bg: sendInWhiteCoefficient(k, false), obj: 0 });
+}
+
+/**
+ * snd145: the send-in half of the ball-open particle burst at the `switch-in` command's elapsed, for every send-in. Player: the
+ * voluntary fixture's send-in schedule (base (72,123), the slide-start stolen tick); opponent: the same 16-particle program spawned
+ * from elapsed 17 (one per tick, rendered from spawn + 2, destroyed at spawn + 26: no stolen tick inside the window). Null outside.
+ */
+export function midBattleSwitchSendInParticlesAt(
+  elapsed: number,
+  battler: 0 | 1,
+): Readonly<{ window: "send-in" | "opponent-send-in"; schedules: readonly MidBattleSwitchParticle[] }> | null {
+  if (battler === 0) {
+    const traceFrame = MID_BATTLE_SWITCH_PLAYER_SEND_IN_TRACE + elapsed;
+    return traceFrame >= MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE
+      ? Object.freeze({ window: "send-in", schedules: midBattleSwitchParticleSchedulesAt(traceFrame, "send-in") })
+      : null;
+  }
+  const start = MID_BATTLE_SWITCH_OPPONENT_SEND_IN_PARTICLE_START;
+  const out: MidBattleSwitchParticle[] = [];
+  for (let i = 0; i < 16; i += 1) {
+    if (elapsed > start + 26 + i) continue;
+    const age = elapsed - start - 2 - i;
+    if (age < 0) continue;
+    out.push(Object.freeze({ i, age, frozen: false, dx: 0, dy: 0 }));
+  }
+  return elapsed >= start && elapsed <= start + 26 + 15 ? Object.freeze({ window: "opponent-send-in", schedules: out }) : null;
 }
 
 export type BattleResolutionRenderEffect =
@@ -707,7 +773,8 @@ export type BattleResolutionPresentationRenderView = Readonly<{
    * scene renderer applies the Sin/Cos radial offsets and the tile cycle.
    */
   midBattleSwitchParticles: Readonly<{
-    window: "recall" | "send-in";
+    /** snd145: "opponent-send-in" = an opponent switch-in's burst at the opponent ball (base (176,59), prio 1, no terrain clip). */
+    window: "recall" | "send-in" | "opponent-send-in";
     schedules: readonly MidBattleSwitchParticle[];
   }> | null;
   /**
@@ -1425,24 +1492,22 @@ export function createBattleResolutionPresentationRenderView(
   // voluntary-switch fixture; a non-switch resolution (e.g. a plain move like
   // this trace's GUST) can still advance `fadeTick` into that numeric range
   // and must not render a phantom ball-fade on its field/sprite.
-  const midBattleSwitchFade = state.sourceDecision.kind === "switch"
-    ? midBattleSwitchFadeAt(MID_BATTLE_SWITCH_FADE_BASE_TRACE + state.fadeTick)
+  // snd145: only the RECALL half stays on this voluntary-switch clock; the send-in half belongs to the current `switch-in`
+  // command (`midBattleSwitchSendInFadeAt`, below), for every send-in.
+  const recallTraceFrame = MID_BATTLE_SWITCH_FADE_BASE_TRACE + state.fadeTick;
+  let midBattleSwitchFade = state.sourceDecision.kind === "switch" && recallTraceFrame < 1187
+    ? midBattleSwitchFadeAt(recallTraceFrame)
     : null;
   // §10.2 residual 1b: the ball-open particle burst, keyed to the same
   // switch-only fade windows (recall 1089-1130, send-in 1187-1228) so a
   // non-switch resolution never leaks particles.
-  const midBattleSwitchParticles = state.sourceDecision.kind !== "switch"
-    ? null
-    : (() => {
-        const traceFrame = MID_BATTLE_SWITCH_FADE_BASE_TRACE + state.fadeTick;
-        const window = traceFrame >= MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE
-          ? "send-in"
-          : "recall";
-        return Object.freeze({
-          window,
-          schedules: midBattleSwitchParticleSchedulesAt(traceFrame, window),
+  let midBattleSwitchParticles: BattleResolutionPresentationRenderView["midBattleSwitchParticles"] =
+    state.sourceDecision.kind !== "switch" || recallTraceFrame >= MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE
+      ? null
+      : Object.freeze({
+          window: "recall" as const,
+          schedules: midBattleSwitchParticleSchedulesAt(recallTraceFrame, "recall"),
         });
-      })();
   if (state.lifecycle.phase === "presenting-switch-in") {
     const switchCommand = segment.commands.find(
       (candidate): candidate is Extract<
@@ -1705,6 +1770,9 @@ export function createBattleResolutionPresentationRenderView(
         command.battler,
         command.battler === 1 ? opponentSwitchInHealthboxSlideElapsed(command.incoming.species) : undefined,
       );
+      midBattleSwitchFade = midBattleSwitchSendInFadeAt(state.lifecycle.phaseElapsed, command.battler) ?? midBattleSwitchFade;
+      midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(state.lifecycle.phaseElapsed, command.battler)
+        ?? midBattleSwitchParticles;
       fainted.delete(command.battler);
     } else if (command.type === "switch-out") {
       // ISSUES #78 slice 4: the outgoing mon's return-to-ball scale-up owns
