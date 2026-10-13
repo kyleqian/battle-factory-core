@@ -7,7 +7,7 @@ data[15] - data[14] + 1 times in the call); for iteration k (line L = data[14] +
 that moment. Line L's word is HBlank-DMA'd in the HBlank of line L - 1, so a write at VCOUNT v < 160 shows on this frame only when
 v < L - 1 or (v == L - 1 and not yet in HBlank); otherwise line L still shows the previous row's word (the scanout split, prep30 s1.4).
 Per stepped row: [traceFrame, task data[0], data[1], data[14], data[15], entry VCOUNT, exit VCOUNT, old lines (still the previous word)]."""
-import json, subprocess, sys
+import json, os, subprocess, sys
 from collections import Counter
 from pathlib import Path
 
@@ -83,3 +83,5 @@ for seg in req["trace"]["segments"]:
 OUT.parent.mkdir(parents=True, exist_ok=True)
 OUT.write_text(json.dumps({"schema": "ord149-xs-lines/v1", "scenario": SCEN.name, "rows": rows}, separators=(",", ":")) + "\n")
 print(f"wrote {OUT} rows={len(rows)}")
+sys.stdout.flush()
+os._exit(0)  # as spriteOrderEventProbe.py: skip the mGBA teardown (it segfaults after the receipt is written)
