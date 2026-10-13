@@ -1,0 +1,205 @@
+{
+ "aud137t-zap-cannon-crit-ply-primeape-snorlax.json": {
+  "class": "hit-secondary PRZ with a critical hit",
+  "expect": "gate 0 (critmessage closes the SE)",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-ply-primeape-snorlax.json",
+  "changes": {
+   "player": {
+    "moves": [
+     192,
+     192,
+     192,
+     192
+    ]
+   }
+  },
+  "seed": 12
+ },
+ "aud137t-zap-cannon-se-ply-primeape-crobat.json": {
+  "class": "super-effective hit-secondary PRZ",
+  "expect": "gate 0 (resultmessage closes the SE)",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-ply-primeape-snorlax.json",
+  "changes": {
+   "player": {
+    "moves": [
+     192,
+     192,
+     192,
+     192
+    ]
+   },
+   "opponent": {
+    "species": 169
+   }
+  },
+  "seed": 305419897
+ },
+ "aud137t-zap-cannon-se-opp-primeape-crobat.json": {
+  "class": "super-effective hit-secondary PRZ",
+  "expect": "gate 0",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-opp-primeape-snorlax.json",
+  "changes": {
+   "opponent": {
+    "moves": [
+     192,
+     192,
+     192,
+     192
+    ]
+   },
+   "player": {
+    "species": 169
+   }
+  },
+  "seed": 305419897
+ },
+ "aud137t-faint-tick-ply-golem-crobat.json": {
+  "class": "end-turn PSN tick right after the opponent's faint",
+  "expect": "the rule",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-opp-primeape-onix.json",
+  "changes": {
+   "opponent": {
+    "species": 169,
+    "moves": [
+     92,
+     92,
+     92,
+     92
+    ],
+    "evs": {
+     "hp": 0,
+     "attack": 0,
+     "defense": 0,
+     "speed": 255,
+     "spAttack": 0,
+     "spDefense": 0
+    }
+   },
+   "player": {
+    "species": 76,
+    "moves": [
+     157,
+     157,
+     157,
+     157
+    ]
+   }
+  },
+  "seed": 305419897
+ },
+ "aud137t-yawn-after-hit-opp-snorlax.json": {
+  "class": "Yawn SLP after a hit",
+  "expect": "the rule",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-ply-primeape-snorlax.json",
+  "changes": {
+   "player": {
+    "species": 169,
+    "moves": [
+     33,
+     33,
+     33,
+     33
+    ]
+   },
+   "opponent": {
+    "moves": [
+     281,
+     281,
+     281,
+     281
+    ]
+   }
+  },
+  "seed": 305419897
+ },
+ "aud137t-yawn-after-hit-ply-snorlax.json": {
+  "class": "Yawn SLP after a hit",
+  "expect": "the rule",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-thunder-wave-opp-primeape-snorlax.json",
+  "changes": {
+   "opponent": {
+    "species": 169,
+    "moves": [
+     33,
+     33,
+     33,
+     33
+    ]
+   },
+   "player": {
+    "moves": [
+     281,
+     281,
+     281,
+     281
+    ]
+   }
+  },
+  "seed": 305419897
+ },
+ "aud137t-substitute-ply-onix.json": {
+  "class": "PSN tick behind a Substitute",
+  "expect": "no status animation (substituteHP != 0)",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-opp-primeape-onix.json",
+  "changes": {
+   "player": {
+    "moves": [
+     164,
+     164,
+     164,
+     164
+    ]
+   }
+  },
+  "seed": 305419897
+ },
+ "aud137t-substitute-opp-onix.json": {
+  "class": "PSN tick behind a Substitute",
+  "expect": "no status animation",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-ply-primeape-onix.json",
+  "changes": {
+   "opponent": {
+    "moves": [
+     164,
+     164,
+     164,
+     164
+    ]
+   }
+  },
+  "seed": 305419897
+ },
+ "aud137t-dig-ply-onix.json": {
+  "class": "PSN tick while underground (Dig)",
+  "expect": "no status animation (STATUS3_SEMI_INVULNERABLE)",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-opp-primeape-onix.json",
+  "changes": {
+   "player": {
+    "moves": [
+     91,
+     91,
+     91,
+     91
+    ]
+   }
+  },
+  "seed": 305419897
+ },
+ "aud137t-fly-ply-pelipper.json": {
+  "class": "PSN tick while airborne (Fly)",
+  "expect": "no status animation",
+  "template": "tools/integration/fixtures/sar131/scenarios/sta123-toxic-opp-primeape-onix.json",
+  "changes": {
+   "player": {
+    "species": 310,
+    "moves": [
+     19,
+     19,
+     19,
+     19
+    ]
+   }
+  },
+  "seed": 305419897
+ }
+}
