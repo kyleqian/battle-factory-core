@@ -1,0 +1,375 @@
+{
+ "stq132-spore-ply-primeape-onix": {
+  "index": {
+   "animation": "SLP",
+   "attackerSide": "player",
+   "source": "tools/integration/fixtures/sta123/scenarios/sta123-spore-ply-primeape-onix.json",
+   "seed": 305419897
+  },
+  "windows": [
+   {
+    "X": 281,
+    "R": 282,
+    "F": 378,
+    "activeRows": 96,
+    "label": "BattleScript_MoveEffectSleep+0",
+    "op": "statusanimation",
+    "animation": "SLP",
+    "battler": 1,
+    "dump": "stq132-spore-ply-primeape-onix-on-282.npz",
+    "battlerX2BeforeX": [
+     0,
+     1
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 1
+   },
+   {
+    "X": 569,
+    "R": 570,
+    "F": 666,
+    "activeRows": 96,
+    "label": "BattleScript_MoveUsedIsAsleep+6",
+    "op": "statusanimation",
+    "animation": "SLP",
+    "battler": 1,
+    "dump": "stq132-spore-ply-primeape-onix-on-570.npz",
+    "battlerX2BeforeX": [
+     0,
+     1
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 1
+   },
+   {
+    "X": 1723,
+    "R": 1724,
+    "F": 1820,
+    "activeRows": 96,
+    "label": "BattleScript_MoveUsedIsAsleep+6",
+    "op": "statusanimation",
+    "animation": "SLP",
+    "battler": 1,
+    "dump": "stq132-spore-ply-primeape-onix-on-1724.npz",
+    "battlerX2BeforeX": [
+     0,
+     1
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 1
+   },
+   {
+    "X": 3157,
+    "R": 3158,
+    "F": 3254,
+    "activeRows": 96,
+    "label": "BattleScript_MoveUsedIsAsleep+6",
+    "op": "statusanimation",
+    "animation": "SLP",
+    "battler": 1,
+    "dump": "stq132-spore-ply-primeape-onix-on-3158.npz",
+    "battlerX2BeforeX": [
+     0,
+     1
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 1
+   }
+  ],
+  "bodies": [
+   {
+    "R": 71,
+    "mv": 147,
+    "atk": 0,
+    "x2": [
+     0,
+     1
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "stq132-attract-ply-primeape-onix": {
+  "index": {
+   "animation": "INFATUATION",
+   "attackerSide": "player",
+   "source": "tools/integration/fixtures/sta123/scenarios/sta123-attract-ply-primeape-onix.json",
+   "seed": 305419897
+  },
+  "windows": [
+   {
+    "X": 702,
+    "R": 703,
+    "F": 799,
+    "activeRows": 96,
+    "label": "BattleScript_MoveUsedIsInLove+6",
+    "op": "status2animation",
+    "animation": "INFATUATION",
+    "battler": 1,
+    "dump": "stq132-attract-ply-primeape-onix-on-703.npz",
+    "battlerX2BeforeX": [
+     0,
+     1
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 1
+   },
+   {
+    "X": 1723,
+    "R": 1724,
+    "F": 1820,
+    "activeRows": 96,
+    "label": "BattleScript_MoveUsedIsInLove+6",
+    "op": "status2animation",
+    "animation": "INFATUATION",
+    "battler": 1,
+    "dump": "stq132-attract-ply-primeape-onix-on-1724.npz",
+    "battlerX2BeforeX": [
+     0,
+     1
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 1
+   }
+  ],
+  "bodies": [
+   {
+    "R": 69,
+    "mv": 213,
+    "atk": 0,
+    "x2": [
+     0,
+     1
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "stq132-will-o-wisp-ply-primeape-onix": {
+  "index": {
+   "animation": "BRN",
+   "attackerSide": "player",
+   "source": "tools/integration/fixtures/sta123/scenarios/sta123-will-o-wisp-ply-primeape-onix.json",
+   "seed": 305419897
+  },
+  "windows": [
+   {
+    "X": 295,
+    "R": 296,
+    "F": 334,
+    "activeRows": 38,
+    "label": "BattleScript_MoveEffectBurn+0",
+    "op": "statusanimation",
+    "animation": "BRN",
+    "battler": 1,
+    "dump": "stq132-will-o-wisp-ply-primeape-onix-on-296.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 468,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "stq132-will-o-wisp-ply-primeape-onix-on-468.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 665,
+    "R": 666,
+    "F": 704,
+    "activeRows": 38,
+    "label": "BattleScript_DoStatusTurnDmg+0",
+    "op": "statusanimation",
+    "animation": "BRN",
+    "battler": 1,
+    "dump": "stq132-will-o-wisp-ply-primeape-onix-on-666.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": {
+     "R": 1672,
+     "mv": 33,
+     "atk": 1,
+     "x2": [
+      0,
+      0
+     ],
+     "y2": [
+      0,
+      0
+     ],
+     "dump": "stq132-will-o-wisp-ply-primeape-onix-on-1672.npz"
+    },
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 1869,
+    "R": 1870,
+    "F": 1908,
+    "activeRows": 38,
+    "label": "BattleScript_DoStatusTurnDmg+0",
+    "op": "statusanimation",
+    "animation": "BRN",
+    "battler": 1,
+    "dump": "stq132-will-o-wisp-ply-primeape-onix-on-1870.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 0
+   }
+  ],
+  "bodies": [
+   {
+    "R": 78,
+    "mv": 261,
+    "atk": 0,
+    "x2": [
+     0,
+     1
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 468,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   },
+   {
+    "R": 1672,
+    "mv": 33,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ },
+ "stq132-spore-opp-primeape-onix": {
+  "index": {
+   "animation": "SLP",
+   "attackerSide": "opponent",
+   "source": "tools/integration/fixtures/sta123/scenarios/sta123-spore-opp-primeape-onix.json",
+   "seed": 305419897
+  },
+  "windows": [
+   {
+    "X": 285,
+    "R": 286,
+    "F": 382,
+    "activeRows": 96,
+    "label": "BattleScript_MoveEffectSleep+0",
+    "op": "statusanimation",
+    "animation": "SLP",
+    "battler": 0,
+    "dump": "stq132-spore-opp-primeape-onix-on-286.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 565,
+    "R": 566,
+    "F": 662,
+    "activeRows": 96,
+    "label": "BattleScript_MoveUsedIsAsleep+6",
+    "op": "statusanimation",
+    "animation": "SLP",
+    "battler": 0,
+    "dump": "stq132-spore-opp-primeape-onix-on-566.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 1719,
+    "R": 1720,
+    "F": 1816,
+    "activeRows": 96,
+    "label": "BattleScript_MoveUsedIsAsleep+6",
+    "op": "statusanimation",
+    "animation": "SLP",
+    "battler": 0,
+    "dump": "stq132-spore-opp-primeape-onix-on-1720.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 0
+   },
+   {
+    "X": 3153,
+    "R": 3154,
+    "F": 3250,
+    "activeRows": 96,
+    "label": "BattleScript_MoveUsedIsAsleep+6",
+    "op": "statusanimation",
+    "animation": "SLP",
+    "battler": 0,
+    "dump": "stq132-spore-opp-primeape-onix-on-3154.npz",
+    "battlerX2BeforeX": [
+     0,
+     0
+    ],
+    "nextBody": null,
+    "battlerX2AfterF": 0
+   }
+  ],
+  "bodies": [
+   {
+    "R": 75,
+    "mv": 147,
+    "atk": 1,
+    "x2": [
+     0,
+     0
+    ],
+    "y2": [
+     0,
+     0
+    ]
+   }
+  ]
+ }
+}

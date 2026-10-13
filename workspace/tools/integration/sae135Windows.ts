@@ -28,7 +28,10 @@ export function sae135RomWindows(): Record<string, Sae135RomWindow> {
   return JSON.parse(readFileSync(`${STQ132}/rom-windows.json`, "utf8")).windows;
 }
 
-export function sae135Window(win: Sae135RomWindow, opts: { ageShift?: number; battlerOverride?: 0 | 1 } = {}) {
+/** `zeroed`: an explicit x2 input (sae135NextBodyX2.ts: the production tracker's prediction) instead of the ROM's row rel -1. */
+export function sae135Window(
+  win: Sae135RomWindow, opts: { ageShift?: number; battlerOverride?: 0 | 1; zeroed?: readonly ("player" | "opponent")[] } = {},
+) {
   const scenario = JSON.parse(readFileSync(`${STQ132}/scenarios/${win.scenario}`, "utf8"));
   const parties = scenario.overrides.parties;
   const make = (b: 0 | 1, mon: any) => Object.freeze({
@@ -50,12 +53,14 @@ export function sae135Window(win: Sae135RomWindow, opts: { ageShift?: number; ba
     confirmHandoff: null, opponentTrainer: null, sourceDecision: { kind: "use-move" }, fadeTick: 0, liveMoveBattlerX2Input: x2Input,
   });
   // The ROM's opponent x2 on row rel -1 -> the tracked x2 input that reproduces it.
-  const before = win.rows.find((r) => r.rel === -1)!;
-  const romOpponentX2 = win.side === "opponent" ? before.bat[2]! : before.other[2]!;
+  const before = win.rows.find((r) => r.rel === -1);
+  const romOpponentX2 = before === undefined ? null : win.side === "opponent" ? before.bat[2]! : before.other[2]!;
   const probe = createBattleResolutionPresentationRenderView(stateFor({ zeroed: [] })(1, 0) as never);
   const idle = liveBattlerAnchors("opponent", probe.fieldArt, { zeroed: [] }).frontIdleRest.x2;
-  if (romOpponentX2 !== idle && romOpponentX2 !== 0) throw new Error(`sae135Window: ROM opponent x2 ${romOpponentX2} is neither the rest ${idle} nor 0`);
-  const x2Input = Object.freeze({ zeroed: Object.freeze(romOpponentX2 === idle ? [] : ["opponent" as const]) });
+  if (opts.zeroed === undefined && romOpponentX2 !== idle && romOpponentX2 !== 0) {
+    throw new Error(`sae135Window: ROM opponent x2 ${romOpponentX2} is neither the rest ${idle} nor 0`);
+  }
+  const x2Input = Object.freeze({ zeroed: Object.freeze(opts.zeroed ?? (romOpponentX2 === idle ? [] : ["opponent" as const])) });
   const stateAt = stateFor(x2Input);
   const viewOf = (commandIndex: number, age: number): BattleResolutionPresentationRenderView =>
     createBattleResolutionPresentationRenderView(stateAt(commandIndex, age) as never);
