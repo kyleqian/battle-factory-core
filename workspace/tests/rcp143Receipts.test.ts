@@ -1,0 +1,142 @@
+import { describe, expect, it } from "vitest";
+import r1 from "../tools/probe/receipts/rcp143-r1-thrash-lockin-off.json" with { type: "json" };
+import r2 from "../tools/probe/receipts/rcp143-r2-covet-stickyhold-off.json" with { type: "json" };
+
+/**
+ * STEP rcp143 -- stock-ROM receipts for the next engine fixes (ISSUES #141 /
+ * #140 / #139), banked BEFORE the fixes land. Hermetic: these assertions read
+ * only the committed JSON; `tools/probe/verify-rcp143.ts` is the live
+ * port-vs-ROM comparison (it FAILs until #141 is fixed, then must PASS).
+ * See docs/rcp143-engine-fix-receipts.md.
+ */
+type Draw = Readonly<{ reason: string; rngBefore: number; value: number }>;
+type RomDraw = Readonly<{ frame: number; caller: string; callerFunction: string; rngBefore: number; value: number; script: string }>;
+
+const LCG = (value: number) => (Math.imul(value, 0x41c64e6d) + 0x6073) >>> 0;
+
+function expectProvenance(receipt: typeof r1 | typeof r2) {
+  expect(receipt.schema).toBe("rcp143-engine-fix-receipt/v1");
+  expect(receipt.oracleProfile).toBe("battle-scene-off");
+  expect(receipt.byteIdenticalAcrossRuns).toBe(true);
+  expect(receipt.probeOutputSha256).toBe(receipt.probeOutputSha256Rerun);
+  expect(receipt.drawCountCrossChecked).toBe(true);
+  expect(receipt.attributionReconciled).toBe(true);
+  for (const turn of receipt.rom.turns) {
+    expect(turn.drawCount).toBe(turn.draws.length);
+    expect(turn.aiSelectionDrawCount).toBe(turn.aiSelectionDraws.length);
+    // Every turn ends on BattleTurnPassed's gRandomTurnNumber draw.
+    expect(turn.draws.at(-1)?.callerFunction).toBe("BattleTurnPassed");
+    for (const draw of turn.draws as readonly RomDraw[]) {
+      // The recorded u16 is the LCG step of the recorded pre-draw state.
+      expect(draw.value).toBe(LCG(draw.rngBefore) >>> 16);
+    }
+  }
+}
+
+/** The ROM's turn-execution draws in the port's vocabulary must be what the fixed kernel emits. */
+function expectPredictionIsRom(receipt: typeof r1 | typeof r2) {
+  expect(receipt.predictedPostFix.turns.map((turn) => turn.draws.map((draw: Draw) => draw.rngBefore)))
+    .toEqual(receipt.rom.turns.map((turn) => turn.draws.map((draw) => draw.rngBefore)));
+  expect(receipt.predictedPostFix.turns.map((turn) => turn.activeHpAtTurnEnd))
+    .toEqual(receipt.rom.turns.map((turn) => turn.activeHpAtTurnEnd));
+  expect(receipt.predictedPostFix.turns.flatMap((turn) => turn.draws.map((draw: Draw) => draw.reason)))
+    .not.toContain(expect.stringMatching(/^UNMAPPED/));
+}
+
+describe("rcp143 R1 -- THRASH lock-in re-runs seteffectwithchance (ISSUES #141a)", () => {
+  const lockInTurns = r1.rom.turns.filter((turn) =>
+    turn.draws.some((draw) => draw.caller === "SetMoveEffect+0x113c"));
+
+  it("is a reproducible, cross-checked stock-ROM receipt", () => {
+    expectProvenance(r1);
+    expect(r1.parties.player[0]).toMatchObject({ species: 128, ability: 22, moves: [37, 33, 30, 39] });
+    expect(r1.parties.opponent[0]).toMatchObject({ species: 208, moves: [33, 33, 33, 33] });
+  });
+
+  it("spends chance roll, (Random() & 1) + 2 duration, then a SECOND chance roll on every lock-in", () => {
+    // Turn 1 (first selection) and turn 3 (re-selected after the fatigue confusion) both lock in.
+    expect(lockInTurns.map((turn) => turn.turn)).toEqual([1, 3]);
+    for (const turn of lockInTurns) {
+      const at = turn.draws.findIndex((draw) => draw.caller === "SetMoveEffect+0x113c");
+      const [roll, duration, wasted] = turn.draws.slice(at - 1, at + 2);
+      expect([roll.callerFunction, duration.callerFunction, wasted.callerFunction])
+        .toEqual(["Cmd_seteffectwithchance", "SetMoveEffect", "Cmd_seteffectwithchance"]);
+      // Same opcode, re-executed on the very next frame (one opcode per frame).
+      expect(roll.frame).toBe(duration.frame);
+      expect(wasted.frame).toBe(duration.frame + 1);
+      expect(wasted.script).toBe(roll.script);
+    }
+    // Lock duration (value & 1) + 2 = 2 on turn 1: the fatigue confusion lands at the end of turn 2.
+    const turn1Duration = lockInTurns[0].draws.find((draw) => draw.caller === "SetMoveEffect+0x113c");
+    expect(((turn1Duration?.value ?? 1) & 1) + 2).toBe(2);
+    expect(r1.rom.turns[1].draws.map((draw) => draw.caller)).toContain("SetMoveEffect+0x92e");
+    expect(r1.rom.messages.map((message) => message.text)).toContain("TAUROS became\nconfused due to fatigue!");
+  });
+
+  it("records the port at HEAD exactly one draw short at the first lock-in (expected FAIL today)", () => {
+    expect(r1.comparison.verdictToday).toBe("FAIL");
+    const romTurn1 = r1.predictedPostFix.turns[0].draws;
+    const portTurn1 = r1.port.turns[0].draws;
+    // Identical through the duration draw ...
+    expect(portTurn1.slice(0, 5)).toEqual(romTurn1.slice(0, 5));
+    // ... then the port spends the ROM's wasted roll on Steelix's accuracy check.
+    expect(r1.comparison.firstDivergence).toMatchObject({
+      turn: 1,
+      index: 5,
+      rom: { reason: "seteffectwithchance", rngBefore: romTurn1[5].rngBefore },
+      port: { reason: "accuracycheck", rngBefore: romTurn1[5].rngBefore },
+    });
+    // Observable consequence: the ROM's Steelix misses (Tauros untouched), the port's hits.
+    expect(r1.rom.turns[0].activeHpAtTurnEnd).toEqual([150, 168]);
+    expect(r1.port.turns[0].activeHpAtTurnEnd).toEqual([140, 168]);
+    // Next turn's Thrash damage roll: ROM vs port.
+    const damage = (draws: readonly Draw[]) => draws.find((draw) => draw.reason === "adjustnormaldamage")?.value;
+    expect(damage(r1.predictedPostFix.turns[1].draws)).toBe(20000);
+    expect(damage(r1.port.turns[1].draws)).toBe(7952);
+  });
+
+  it("pins the predicted post-fix port sequence to the ROM's own", () => {
+    expectPredictionIsRom(r1);
+    expect(r1.predictedPostFix.turns.map((turn) => turn.draws.length)).toEqual([8, 10, 12]);
+  });
+});
+
+describe("rcp143 R2 -- Covet into Sticky Hold returns onto seteffectwithchance (ISSUES #141b)", () => {
+  it("is a reproducible, cross-checked stock-ROM receipt with Sticky Hold active", () => {
+    expectProvenance(r2);
+    expect(r2.parties.player[0]).toMatchObject({ species: 289, item: 0, moves: [343, 29, 28, 33] });
+    // GULPIN abilitySlot 1 == ABILITY_STICKY_HOLD (60), holding SOOTHE_BELL (184).
+    expect(r2.parties.opponent[0]).toMatchObject({ species: 367, abilitySlot: 1, ability: 60, item: 184 });
+    expect(r2.rom.messages.filter((message) => message.text === "Foe GULPIN’s STICKY HOLD\nmade COVET ineffective!"))
+      .toHaveLength(3);
+  });
+
+  it("re-runs seteffectwithchance after BattleScript_NoItemSteal returns, every Covet turn", () => {
+    for (const turn of r2.rom.turns) {
+      const rolls = turn.draws.filter((draw) => draw.callerFunction === "Cmd_seteffectwithchance" && draw.currentMove === 343);
+      expect(rolls).toHaveLength(2);
+      const [chance, wasted] = rolls;
+      expect(turn.draws.indexOf(wasted)).toBe(turn.draws.indexOf(chance) + 1);
+      expect(wasted.frame).toBeGreaterThan(chance.frame);
+    }
+  });
+
+  it("records the port at HEAD one draw short per Covet turn (expected FAIL today)", () => {
+    expect(r2.comparison.verdictToday).toBe("FAIL");
+    expect(r2.comparison.romDrawCounts).toEqual([10, 10, 10]);
+    expect(r2.comparison.portDrawCounts).toEqual([9, 9, 9]);
+    expect(r2.comparison.firstDivergence).toMatchObject({
+      turn: 1,
+      index: 4,
+      rom: { reason: "seteffectwithchance" },
+      port: { reason: "accuracycheck" },
+    });
+    // Turn-2 consequence: the port's Covet crits off the offset stream, the ROM's does not.
+    expect(r2.rom.turns[1].activeHpAtTurnEnd).toEqual([126, 104]);
+    expect(r2.port.turns[1].activeHpAtTurnEnd).toEqual([126, 68]);
+  });
+
+  it("pins the predicted post-fix port sequence to the ROM's own", () => {
+    expectPredictionIsRom(r2);
+  });
+});

@@ -1,0 +1,25 @@
+{
+ "schema": "rcp143-engine-fix-receipt/v1",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp143-random-callers.py",
+ "builder": "tools/probe/build-rcp143-receipt.py",
+ "verify": "tools/probe/verify-rcp143.ts",
+ "attribution": "Pass 1: sRandCount (0x020249C0) per-frame deltas cross-checked against a gRngValue LCG replay. Pass 2: a fresh emulator single-steps only the flagged frames and records every entry into Random() (0x0806F5CC) with its caller (LR bisected against arm-none-eabi-nm text symbols), the pre-draw gRngValue and gBattlescriptCurrInstr. Pass-2 hit count == pass-1 window total (attributionReconciled).",
+ "receipt": "R1",
+ "issue": 141,
+ "part": "a",
+ "card": "tools/probe/rcp143/r1-thrash-tauros-steelix-off.json",
+ "title": "THRASH-family lock-in re-runs seteffectwithchance (one wasted Random() % 100)",
+ "scenario": "Player TAUROS (Thrash/Tackle/Horn Attack/Tail Whip, Adamant, Intimidate) vs bulky STEELIX (Tackle x4, Impish, 255 HP/Def EVs, Speed IV 0). Turn 1 select Thrash (slot 0); A pulses afterwards (turn 3 re-selects Thrash, a second lock-in).",
+ "sourceUnderTest": {
+  "seteffectwithchance": "reference/pokeemerald/src/battle_script_commands.c:2908-2937 (Random() % 100 is the FIRST conjunct of :2922; the else arm :2931-2934 is the only cursor advance)",
+  "thrashCase": "reference/pokeemerald/src/battle_script_commands.c:2851-2862 (not-yet-locked arm draws (Random() & 1) + 2 and `break`s without touching gBattlescriptCurrInstr)",
+  "moveEffectTail": "reference/pokeemerald/src/battle_script_commands.c:2905 (gBattleCommunication[MOVE_EFFECT_BYTE] = 0)",
+  "entryScript": "reference/pokeemerald/data/battle_scripts_1.s:583-591 BattleScript_EffectRampage -> confuseifrepeatingattackends -> BattleScript_HitFromCritCalc ... seteffectwithchance"
+ },
+ "portSitesAtHead": {
+  "thrashAdvance": "src/engine/battleScriptHitChainOpcode.ts:3909-3946 applyThrashMoveEffect -- the not-yet-locked arm draws the duration then returns { kind: \"advance\" } at :3945 (the already-locked arm's advance at :3919 is correct)",
+  "seteffectwithchanceHandler": "src/engine/battleScriptHitChainOpcode.ts:4060-4084 (draw-before-byte-test already source-exact)"
+ },
+ "fixShape": "In applyThrashMoveEffect's not-yet-locked arm, return a control directive that re-executes the current seteffectwithchance instruction (jump to the instruction's own programCounter) instead of { kind: \"advance\" }; the re-run finds moveEffectByte 0, draws seteffectwithchance once more and advances."
+}
