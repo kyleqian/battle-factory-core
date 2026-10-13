@@ -23,17 +23,19 @@ index 325f6440..0d509a7b 100644
      requestId: number;
      side: "player";
 diff --git a/src/engine/battleResolutionPresentationRender.ts b/src/engine/battleResolutionPresentationRender.ts
-index b29b0997..ff8ee8ee 100644
+index b29b0997..8eb2cb8d 100644
 --- a/src/engine/battleResolutionPresentationRender.ts
 +++ b/src/engine/battleResolutionPresentationRender.ts
-@@ -5,6 +5,7 @@ import {
- import type { PresentationRngHost } from "./presentationRngHost.ts";
- import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+@@ -7,7 +7,8 @@ import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./l
  import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
-+import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
  import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSubstituteSwap.ts";
  import {
-   liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
+-  liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
++  liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows,
++  liveSemiInvulnerableHideBattler,
+ } from "./liveMoveAnimation.ts";
+ import { liveMoveTimingBodyOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
+ import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 @@ -1741,9 +1742,28 @@ export function createBattleResolutionPresentationRenderView(
    // cf78: a displayed CASTFORM in a weather form (its slot's gBattleMonForms at this command) declines every live body.
    field = withLiveCastformForms(field, liveCastformFormsAt(state, command));
@@ -53,7 +55,7 @@ index b29b0997..ff8ee8ee 100644
 +          || command.type === "trainer-slide" || command.type === "move-animation"))
 +      && switchIn === null && midBattleSwitchIn === null && switchOut === null && partySummary === null
 +      && field.opponent.substituteDoll !== true
-+    ? speciesFrontIdleRestOffsetOrZero(baseFieldArt.opponent.speciesSymbol) : null;
++    ? liveBattlerAnchors("opponent", baseFieldArt).frontIdleRest : null;
 +  const fieldArt = ordinaryRest === null || (ordinaryRest.x2 === 0 && ordinaryRest.y2 === 0) ? baseFieldArt : Object.freeze({
 +    ...baseFieldArt,
 +    opponent: Object.freeze({
