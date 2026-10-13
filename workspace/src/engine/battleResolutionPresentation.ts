@@ -46,6 +46,7 @@ import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts"
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import { battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
+import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -97,8 +98,20 @@ export type BattleHpTiming = Readonly<{ minimumFrames: 28 }>;
  * `BattleMessageTiming`.
  */
 export type BattleStatTiming = Readonly<{ minimumFrames: 2 }>;
-/** 32 frames; Scene OFF: the frames to the next print (off121, `sceneOffStatusFrames`). */
+/**
+ * 32 frames; Scene OFF: the frames to the next print (off121, `sceneOffStatusFrames`); Scene ON, when a status animation of
+ * the same execution follows: the same frames (sa125 SA3, `sceneOnStatusFrames`).
+ */
 export type BattleStatusTiming = Readonly<{ minimumFrames: number }>;
+/**
+ * sa125 (docs/sta123-status-animations-design.md §1 / §4, tools/integration/fixtures/sta123/receipts/rom-r1.json): the rows
+ * the next script instruction waits on the controller after a Scene ON statusanimation = gAnimScriptActive rows + 1 (the
+ * IsBattleSEPlaying gate, SA2, is 0 here). WRAPPED has no table entry in source (never played).
+ */
+export const STATUS_ANIMATION_ADDED_ROWS = Object.freeze({
+  PSN: 71, CONFUSION: 100, BRN: 39, INFATUATION: 97, SLP: 97, PRZ: 39, FRZ: 117, CURSED: 75, NIGHTMARE: 75,
+} as const);
+export type BattleStatusAnimationName = keyof typeof STATUS_ANIMATION_ADDED_ROWS;
 export type BattleStatusIconTiming = Readonly<{ minimumFrames: 1 }>;
 export type BattleFaintTiming =
   | Readonly<{
@@ -296,6 +309,20 @@ export type BattleResolutionPresentationCommand =
        * (rel 77 / 91) to the following print's first glyph, less the `stat` frames between (statsChangeNextReceiptHoldFrames).
        */
       timing: Readonly<{ minimumFrames: number; holdFrames?: number }>;
+    }>
+  | Readonly<{
+      /**
+       * sa125 (S10A, ISSUES #168 slice SA1): B_ANIM_STATUS_* (Cmd_statusanimation / status2animation / chosenstatusanimation),
+       * Scene ON only, at the kernel `status-animation` receipt (the kernel already skips Scene OFF, a Substitute and a
+       * semi-invulnerable battler). `animation` is InitAndLaunchChosenStatusAnimation's pick (spriteOrderStatusAnimationName);
+       * minimumFrames = STATUS_ANIMATION_ADDED_ROWS[animation], the controller rows the next instruction waits
+       * (docs/sta123-status-animations-design.md §4). Timing only: nothing is drawn yet (renderers are SA4..SA8).
+       */
+      type: "status-animation";
+      eventSequence: number;
+      battler: 0 | 1;
+      animation: BattleStatusAnimationName;
+      timing: Readonly<{ minimumFrames: number }>;
     }>
   | Readonly<{
       /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
@@ -837,6 +864,50 @@ function sceneOffStatusFrames(
     execution = next;
   }
   return print - used + 1;
+}
+/**
+ * sa125 SA3 (docs/sa125-status-animation-command.md): in Scene ON a status-data receipt whose battler's statusanimation runs
+ * in the same execution -- right before the print (move / ability infliction: status, statusanimation, print) or right
+ * after it (sleep / frozen turns: status, print, waitmessage, statusanimation) -- draws nothing itself either: the ROM
+ * status write -> animation -> print timeline is the Scene OFF one plus the animation's controller rows, which the
+ * `status-animation` command owns. So the status command lasts delta(print) - delta(status) (off121's rule) and the
+ * status-animation command follows it. Anything else between the receipts, or no status animation: null (32 stays).
+ */
+function sceneOnStatusFrames(events: readonly BattleKernelSemanticEvent[], statusIndex: number): number | null {
+  const statusEvent = events[statusIndex]!;
+  const status = statusEvent.provenance?.instructionExecution;
+  if (status === undefined || statusEvent.payload.kind !== "set-battler-status-data") return null;
+  const battler = statusEvent.payload.battler;
+  let print: number | null = null;
+  let animated = false;
+  let execution = status;
+  for (let index = statusIndex + 1; index < events.length; index += 1) {
+    const candidate = events[index]!;
+    const next = candidate.provenance?.instructionExecution;
+    if (next === undefined || next < execution) return null;
+    execution = next;
+    const payload = candidate.payload;
+    if (payload.kind === "set-battler-pp-data" || payload.kind === "play-se") continue;
+    if (payload.kind === "status-animation" && print === null) {
+      if (payload.battler !== battler) return null;
+      animated = true;
+      continue;
+    }
+    if (print === null) {
+      if (payload.kind !== "message") return null;
+      print = next;
+      if (animated) break;
+      continue;
+    }
+    animated = payload.kind === "status-animation" && payload.battler === battler;
+    break;
+  }
+  return animated && print !== null && print > status ? print - status : null;
+}
+/** sa125 SA1: the presented B_ANIM_STATUS_* of a kernel `status-animation` receipt, or null (WRAPPED / none: no table entry). */
+function statusAnimationPresented(isStatus2: number, status: number): BattleStatusAnimationName | null {
+  const name = spriteOrderStatusAnimationName(isStatus2 !== 0, status);
+  return name !== null && Object.hasOwn(STATUS_ANIMATION_ADDED_ROWS, name) ? name as BattleStatusAnimationName : null;
 }
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 2 } as const);
@@ -3830,7 +3901,7 @@ export function projectBattleResolutionCommands(
       pendingStatusMessageBattler = battler;
       const sceneOffStatus = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
         ? sceneOffStatusFrames(events, index, pauseOpenerIndex, commands.length - pauseOpenerCommands)
-        : null;
+        : sceneOnStatusFrames(events, index);
       commands.push(Object.freeze({
         type: "status",
         eventSequence: event.sequence,
@@ -3839,6 +3910,19 @@ export function projectBattleResolutionCommands(
         after: payload.status1,
         timing: sceneOffStatus === null ? STATUS_TIMING : Object.freeze({ minimumFrames: sceneOffStatus }),
       }));
+      continue;
+    }
+    if (payload.kind === "status-animation") {
+      const animation = statusAnimationPresented(payload.isStatus2, payload.status);
+      if (animation !== null) {
+        commands.push(Object.freeze({
+          type: "status-animation",
+          eventSequence: event.sequence,
+          battler: singlesBattler(payload.battler, "status animation"),
+          animation,
+          timing: Object.freeze({ minimumFrames: STATUS_ANIMATION_ADDED_ROWS[animation] }),
+        }));
+      }
       continue;
     }
     if (payload.kind === "set-battler-item") {

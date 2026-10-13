@@ -1,0 +1,280 @@
+// sa125 (S10A, ISSUES #168 slices SA1 + SA3; docs/sa125-status-animation-command.md). SA1: Scene ON projects the kernel's
+// `status-animation` receipt (Cmd_statusanimation / status2animation / chosenstatusanimation; the kernel already skips Scene OFF, a
+// Substitute and a semi-invulnerable battler) into a `status-animation` command of STATUS_ANIMATION_ADDED_ROWS[animation] frames =
+// the ROM controller rows the next instruction waits (sta123 rom-r1.json; the IsBattleSEPlaying gate is SA2: 0 here, flagged).
+// SA3: a Scene ON `status` command whose battler's status animation runs in the same execution lasts off121's Scene OFF
+// delta(print) - delta(status); every other status command keeps 32. ROM receipts: tools/integration/fixtures/sta123/receipts/rom-r1.json.
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+import {
+  advanceFactoryRoundBattleCommand,
+  advanceFactoryRoundBattleResolution,
+  advanceFactoryRoundBattleStartIntro,
+  beginFactoryRoundBattleStartIntro,
+  createFactoryRoundBattleOrchestrator,
+} from "../src/engine/factoryRoundBattleOrchestrator";
+import { liveMoveRandom2PlanContextAt } from "../src/engine/battleResolutionPresentationRender";
+import { STATUS_ANIMATION_ADDED_ROWS } from "../src/engine/battleResolutionPresentation";
+import { prepareRulesStatusAnimation } from "../src/engine/battleScriptRulesContext";
+import { createPresentationRngSession } from "../src/engine/presentationRngHost";
+import { tickLiveMovePresentationRngSession } from "../src/engine/liveMovePresentationRng";
+import { PARTY_LIST_INPUT_ELAPSED } from "../src/engine/partySelect";
+import type { GbaButton } from "../src/input";
+
+type RomAnim = { animation: string; path: string; battler: number; row: number; controllerRows: number; activeRows: number;
+  firstActive: number | null; next: string[] };
+type RomScenario = { animation: string; attackerSide: string; on: { statusAnimations: RomAnim[] }; off: { statusAnimations: RomAnim[] } };
+const ROM = (JSON.parse(readFileSync("tools/integration/fixtures/sta123/receipts/rom-r1.json", "utf8")) as
+  { scenarios: Record<string, RomScenario> }).scenarios;
+const ROWS = STATUS_ANIMATION_ADDED_ROWS as Readonly<Record<string, number>>;
+const FRAME_BUDGET = 200000;
+
+type Seg = { events: any[]; commands: any[] };
+const cache = new Map<string, Seg[]>();
+/** One ordinary census battle (liveShareCensus.ts playBattle: battle i = seed i, streak i * 11 % 49): its segments in order. */
+function battleSegments(seed: number, scene: "on" | "off"): Seg[] {
+  const key = `${seed}-${scene}`;
+  const hit = cache.get(key);
+  if (hit) return hit;
+  const out: Seg[] = [];
+  let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
+    factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
+    battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
+    rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
+  }));
+  let rng = createPresentationRngSession();
+  let frame = 0, ended = false;
+  const seen = new Set<unknown>();
+  const slotUses = [0, 0, 0, 0];
+  const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
+  const step = (buttons: readonly GbaButton[] = []) => {
+    if (++frame > FRAME_BUDGET) throw new Error("frame budget");
+    if (state.battleStartIntro) state = advanceFactoryRoundBattleStartIntro(state, new Set(buttons));
+    else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons));
+    else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons));
+    rng = tickLiveMovePresentationRngSession(rng, state, liveMoveRandom2PlanContextAt);
+    const r = state.battleResolutionPresentation as any;
+    if (r) for (const s of r.segments) if (!seen.has(s)) { seen.add(s); out.push({ events: s.events, commands: s.commands }); }
+    if (!owned()) ended = true;
+  };
+  const phase = () => state.battleCommandPresentation?.lifecycle.phase;
+  const pulse = (button: GbaButton) => { step(); if (!ended) step([button]); if (!ended) step(); };
+  const forcedSelector = () => {
+    const selector = state.battleForcedPartySelect;
+    return selector && selector.sendOutElapsed === null && selector.elapsed >= PARTY_LIST_INPUT_ELAPSED ? selector : null;
+  };
+  const until = (predicate: () => boolean) => {
+    while (!ended && !predicate()) {
+      const selector = forcedSelector();
+      if (selector) {
+        pulse(selector.message !== null ? "A" : selector.cursor === "onix" && !selector.submenuOpen ? "DOWN" : "A");
+        continue;
+      }
+      step((state.battleStartIntro && frame % 16 === 0)
+        || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0) ? ["A"] : []);
+    }
+  };
+  until(() => phase() === "action-menu");
+  while (!ended) {
+    pulse("A");
+    until(() => phase() === "fight-menu");
+    if (ended) break;
+    const menu = state.battleCommandPresentation!;
+    const legal = ([0, 1, 2, 3] as const).filter((s) => menu.legalMoveBySlot[s] !== null);
+    const slot = legal.length === 0 ? 0 : legal.reduce((best, s) => (slotUses[s]! < slotUses[best]! ? s : best), legal[0]!);
+    slotUses[slot]!++;
+    for (let i = 0; i < 4; i++) {
+      const cursor = state.battleCommandPresentation!.fightCursor;
+      if (cursor === slot) break;
+      pulse((cursor & 1) !== (slot & 1) ? ((slot & 1) ? "RIGHT" : "LEFT") : ((slot & 2) ? "DOWN" : "UP"));
+    }
+    pulse("A");
+    until(() => !state.battleCommandPresentation);
+    until(() => phase() === "action-menu");
+  }
+  cache.set(key, out);
+  return out;
+}
+
+const frames = (c: any) => (c.timing?.minimumFrames ?? 0) + (c.timing?.holdFrames ?? 0);
+const shape = (c: any) => `${c.type}:${c.type === "message" ? c.messageId ?? "" : ""}:${c.type === "move-animation" || c.type === "status" ? "" : frames(c)}`;
+const ANCHOR_TYPES = new Set(["status", "message", "hp", "stat", "status-icon"]);
+type Anchor = { animation: string; side: "player" | "opponent"; path: string; gateFlag: boolean; length: number; on: number; off: number;
+  orderOk: boolean };
+
+/**
+ * Per Scene ON status-animation command of a battle: the path (the print right before it on the after-print paths, else
+ * "inflicted"), its order, and the frames from the nearest preceding anchor command (status / message / hp / stat / status-icon,
+ * matched across the scenes by its type ordinal) to the command right after it (the print on the inflicted paths, the HP bar on
+ * the end-turn ticks, ...), ON and OFF. Kept only where the commands between
+ * the two (without the status-animation ones) are identical in both scenes, so ON - OFF is the status-animation frames alone.
+ */
+function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnimations: number } {
+  const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any) => ({ c, events: s.events })));
+  const off = battleSegments(seed, "off").flatMap((s) => s.commands.map((c: any) => ({ c, events: s.events })));
+  const messages = (l: typeof on) => l.filter((x) => x.c.type === "message").map((x) => x.c.messageId);
+  expect(messages(on), `seed ${seed}: identical prints in both scenes`).toEqual(messages(off));
+  const ordinal = (l: typeof on, i: number) => l.slice(0, i).filter((x) => x.c.type === l[i]!.c.type).length;
+  const nth = (l: typeof on, type: string, n: number) => { let k = -1; return l.findIndex((x) => x.c.type === type && ++k === n); };
+  const out: Anchor[] = [];
+  let unanchored = 0;
+  on.forEach(({ c, events }, i) => {
+    if (c.type !== "status-animation") return;
+    const at = events.findIndex((e: any) => e.sequence === c.eventSequence);
+    let prev = at - 1;
+    while (prev >= 0 && (events[prev].payload.kind === "set-battler-pp-data" || events[prev].payload.kind === "play-se")) prev -= 1;
+    const before = prev >= 0 ? events[prev].payload : null;
+    const path = before?.kind === "message" ? before.messageId : "inflicted";
+    let used = at - 1;
+    while (used >= 0 && !(events[used].payload.kind === "message" && events[used].payload.messageId === "STRINGID_USEDMOVE")) used -= 1;
+    const damaged = used >= 0 && events.slice(used, at).some((e: any) => e.payload.kind === "hp-change" && e.payload.to < e.payload.from);
+    const neighbours = [on[i - 1]?.c, on[i + 1]?.c].filter((x) => x?.eventSequence !== undefined).map((x) => x.eventSequence);
+    const orderOk = (on[i - 1]?.c.eventSequence ?? -Infinity) < c.eventSequence && c.eventSequence < (on[i + 1]?.c.eventSequence ?? Infinity)
+      && neighbours.length >= 1;
+    // The span starts on the latest print before it, or right after the latest body (any non-anchor command) if that is later.
+    let left = i;
+    while (left - 1 >= 0 && (ANCHOR_TYPES.has(on[left - 1]!.c.type) || on[left - 1]!.c.type === "status-animation")) {
+      left -= 1;
+      if (on[left]!.c.type === "message") break;
+    }
+    let right = i + 1;
+    while (right < on.length && on[right]!.c.type === "status-animation") right += 1;
+    const onSpan = on.slice(left, right).filter((x) => x.c.type !== "status-animation");
+    const offRight = right >= on.length ? -1 : nth(off, on[right]!.c.type, ordinal(on, right));
+    const offLeft = offRight - onSpan.length;
+    const offSpan = offLeft < 0 ? [] : off.slice(offLeft, offRight);
+    const bodyBefore = (l: typeof on, k: number) => (k > 0 ? shape(l[k - 1]!.c).replace(/:\d*$/, "") : "");
+    if (offRight < 0 || offLeft < 0 || onSpan.map((x) => shape(x.c)).join() !== offSpan.map((x) => shape(x.c)).join()
+      || bodyBefore(on, left) !== bodyBefore(off, offLeft)) {
+      unanchored += 1;
+      return;
+    }
+    out.push({
+      animation: c.animation, side: c.battler === 0 ? "player" : "opponent", path, gateFlag: path === "inflicted" && damaged,
+      length: c.timing.minimumFrames, orderOk,
+      on: on.slice(left, right).reduce((sum, x) => sum + frames(x.c), 0), off: offSpan.reduce((sum, x) => sum + frames(x.c), 0),
+    });
+  });
+  const offAnimations = off.filter((x) => x.c.type === "status-animation").length;
+  return { anchors: out, unanchored, offAnimations };
+}
+
+// Census seeds (0..99, sa125LiveShareCensus.ts) carrying every animation x path the sta123 scenarios stage except CURSED / NIGHTMARE /
+// the frozen turn (none in 0..99; their constants are checked against the ROM receipts below and by the census delta).
+const SEEDS = [7, 11, 12, 18, 19, 20, 60, 76, 87];
+
+describe("sa125: the ROM receipts (sta123 rom-r1.json, 18 scenarios both sides)", () => {
+  const all = Object.entries(ROM).flatMap(([stem, s]) => s.on.statusAnimations.map((a) => ({ stem, side: s.attackerSide, ...a })));
+
+  it("every non-gated Scene ON statusanimation holds the next instruction for STATUS_ANIMATION_ADDED_ROWS (= active rows + 1)", () => {
+    expect(all.length).toBe(54);
+    const seen = new Set<string>();
+    for (const a of all) {
+      seen.add(a.animation);
+      if ((a.firstActive ?? 0) !== 0) continue;
+      expect(a.controllerRows, `${a.stem} ${a.animation} ${a.path} @${a.row}`).toBe(ROWS[a.animation]);
+      expect(a.activeRows + 1).toBe(a.controllerRows);
+    }
+    expect([...seen].sort()).toEqual(Object.keys(ROWS).sort());
+    // The only gated receipts: FRZ inflicted right after Ice Beam's hit (gate 17 opponent target / 18 player target, then 115 active
+    // rows + 1: 133 / 134 vs production's 117, i.e. 16 / 17 rows short), SA2's class; flagged, not modelled here.
+    expect(all.filter((a) => (a.firstActive ?? 0) !== 0).map((a) => [a.stem, a.path, a.firstActive, a.controllerRows])).toEqual([
+      ["sta123-ice-beam-opp-delcatty-shuckle", "move-inflicted", 17, 133],
+      ["sta123-ice-beam-ply-delcatty-shuckle", "move-inflicted", 18, 134],
+    ]);
+  });
+
+  it("Scene OFF runs the same instructions with 0 controller rows (the next instruction is the same label)", () => {
+    for (const [stem, s] of Object.entries(ROM)) {
+      expect(s.off.statusAnimations.length, stem).toBe(s.on.statusAnimations.length);
+      s.off.statusAnimations.forEach((a, k) => {
+        expect([a.controllerRows, a.next[0]], `${stem} ${k}`).toEqual([0, s.on.statusAnimations[k]!.next[0]]);
+      });
+    }
+  });
+
+  it("the table equals every non-gated ROM controllerRows exactly (a wrong constant fails here)", () => {
+    const byAnim = new Map<string, Set<number>>();
+    for (const a of all) if ((a.firstActive ?? 0) === 0) byAnim.set(a.animation, (byAnim.get(a.animation) ?? new Set()).add(a.controllerRows));
+    expect(Object.fromEntries([...byAnim].map(([k, v]) => [k, [...v]]))).toEqual(
+      Object.fromEntries(Object.entries(ROWS).map(([k, v]) => [k, [v]])));
+  });
+});
+
+describe("sa125: the kernel suppresses the receipt (no command) behind a Substitute / semi-invulnerable / in Scene OFF", () => {
+  const context = (status3: number, substituteHP: number, hitMarker: number) => ({
+    state: { rulesContext: { hitMarker, battlers: [{ status1: 0x40, status2: 0, status3, substituteHP }, { status1: 0, status2: 0, status3: 0, substituteHP: 0 }] } },
+  }) as any;
+  it.each([
+    ["plain", 0, 0, 0, "emit"],
+    ["behind a Substitute", 0, 25, 0, "suppress"],
+    ["semi-invulnerable (STATUS3_ON_AIR)", 0x40, 0, 0, "suppress"],
+    ["Scene OFF (HITMARKER_NO_ANIMATIONS)", 0, 0, 0x80, "suppress"],
+  ])("%s", (_, status3, sub, hitMarker, kind) => {
+    expect(prepareRulesStatusAnimation(context(status3 as number, sub as number, hitMarker as number), 0 as any, { kind: "live-status1" } as any).kind).toBe(kind);
+  });
+});
+
+describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay)", () => {
+  it("each status-animation command sits at its receipt, lasts the ROM controller rows, and moves the following print by exactly them", () => {
+    const covered = new Set<string>();
+    let total = 0, flagged = 0, unanchoredTotal = 0;
+    for (const seed of SEEDS) {
+      const { anchors: list, unanchored, offAnimations } = anchors(seed);
+      expect(offAnimations, `seed ${seed}: Scene OFF has no status-animation command`).toBe(0);
+      unanchoredTotal += unanchored;
+      for (const a of list) {
+        total += 1;
+        expect(a.orderOk, `${seed} ${a.animation} ${a.path}`).toBe(true);
+        expect(a.length, `${seed} ${a.animation}`).toBe(ROWS[a.animation]);
+        // ROM: ON next instruction - OFF next instruction (from the statusanimation row) = controllerRows (gate 0 on these paths).
+        expect(a.on - a.off, `${seed} ${a.animation} ${a.side} ${a.path}`).toBe(ROWS[a.animation]);
+        if (a.gateFlag) flagged += 1;
+        const path = a.path === "inflicted" ? "inflicted" : a.path;
+        covered.add(`${a.animation}|${path}|${a.side}`);
+      }
+    }
+    console.log(`sa125 anchors: ${total} anchored (${flagged} gate-flagged), ${unanchoredTotal} unanchored; ${[...covered].sort().join(" ")}`);
+    expect(total).toBeGreaterThan(100);
+    expect(unanchoredTotal).toBeLessThan(total / 5);
+    expect(flagged).toBeGreaterThan(0);
+    for (const k of [
+      "PSN|inflicted|player", "PSN|inflicted|opponent", "PSN|STRINGID_PKMNHURTBYPOISON|player", "PSN|STRINGID_PKMNHURTBYPOISON|opponent",
+      "PRZ|inflicted|player", "PRZ|inflicted|opponent", "PRZ|STRINGID_PKMNISPARALYZED|player", "PRZ|STRINGID_PKMNISPARALYZED|opponent",
+      "SLP|inflicted|player", "SLP|inflicted|opponent", "SLP|STRINGID_PKMNFASTASLEEP|player", "SLP|STRINGID_PKMNFASTASLEEP|opponent",
+      "CONFUSION|inflicted|player", "CONFUSION|inflicted|opponent", "CONFUSION|STRINGID_PKMNISCONFUSED|player",
+      "CONFUSION|STRINGID_PKMNISCONFUSED|opponent", "INFATUATION|STRINGID_PKMNINLOVE|player", "INFATUATION|STRINGID_PKMNINLOVE|opponent",
+      "BRN|inflicted|player", "BRN|inflicted|opponent", "BRN|STRINGID_PKMNHURTBYBURN|player", "BRN|STRINGID_PKMNHURTBYBURN|opponent",
+      "FRZ|inflicted|opponent",
+    ]) expect(covered.has(k), k).toBe(true);
+  });
+
+  it("SA3: a Scene ON status command followed by its battler's status animation lasts the Scene OFF frames; the rest keep 32", () => {
+    const table = new Map<string, Set<string>>();
+    for (const seed of SEEDS) {
+      const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any, i: number) => ({ c, next: s.commands[i + 1], events: s.events })));
+      const off = battleSegments(seed, "off").flatMap((s) => s.commands);
+      const offStatus = off.filter((c: any) => c.type === "status");
+      const onStatus = on.filter((x) => x.c.type === "status");
+      expect(onStatus.length, `seed ${seed}`).toBe(offStatus.length);
+      onStatus.forEach((x, k) => {
+        const at = x.events.findIndex((e: any) => e.sequence === x.c.eventSequence);
+        const print = x.events.slice(at + 1).find((e: any) => e.payload.kind === "message")?.payload.messageId ?? null;
+        const following = x.events.slice(at + 1).filter((e: any) => e.payload.kind !== "set-battler-pp-data" && e.payload.kind !== "play-se");
+        const animated = (following[0]?.payload.kind === "status-animation" && following[0].payload.battler === x.c.battler)
+          || (following[0]?.payload.kind === "message" && following[1]?.payload.kind === "status-animation" && following[1].payload.battler === x.c.battler);
+        const want = animated ? offStatus[k].timing.minimumFrames : 32;
+        expect(x.c.timing.minimumFrames, `seed ${seed} status ${k} ${print}`).toBe(want);
+        const key = `${print}|${animated}`;
+        table.set(key, (table.get(key) ?? new Set()).add(`32->${x.c.timing.minimumFrames}`));
+      });
+    }
+    const t = Object.fromEntries([...table].map(([k, v]) => [k, [...v].sort()]));
+    expect(t["STRINGID_PKMNWASPARALYZED|true"]).toEqual(["32->2"]);
+    expect(t["STRINGID_PKMNFELLASLEEP|true"]).toEqual(["32->2"]);
+    expect(t["STRINGID_PKMNBADLYPOISONED|true"]).toEqual(["32->2"]);
+    expect(t["STRINGID_PKMNFASTASLEEP|true"]).toEqual(["32->1"]);
+    for (const k of ["STRINGID_TARGETFAINTED|false", "STRINGID_PKMNWOKEUP|false", "STRINGID_PKMNWENTTOSLEEP|false"]) expect(t[k], k).toEqual(["32->32"]);
+  });
+});
