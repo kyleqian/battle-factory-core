@@ -42,8 +42,16 @@ export type PortTurnPlan = Readonly<{
   playerTargetBattler: 0 | 1;
 }>;
 
+export type PortEvent = Readonly<{
+  turn: number;
+  kind: string;
+  /** `messageId` for messages, the animation id for animation events, else null. */
+  id: string | null;
+}>;
+
 export type PortRun = Readonly<{
   draws: readonly PortDraw[];
+  events: readonly PortEvent[];
   hpAfterTurn: readonly (readonly [number, number])[];
   stoppedEarly: string | null;
 }>;
@@ -60,6 +68,7 @@ function inject(state: BattleState<FactoryFullTurnDecisionRules>, count: number,
 
 export function runPortTurns(config: FactoryFullTurnConfig, plan: readonly PortTurnPlan[]): PortRun {
   const draws: PortDraw[] = [];
+  const events: PortEvent[] = [];
   const hpAfterTurn: (readonly [number, number])[] = [];
   let turn = 0;
   const recording: BattleDecisionReducer<FactoryFullTurnDecisionRules> = (context) =>
@@ -84,7 +93,7 @@ export function runPortTurns(config: FactoryFullTurnConfig, plan: readonly PortT
     for (;;) {
       const boundary = state.boundary;
       if (boundary.kind !== "decision-required") {
-        return { draws, hpAfterTurn, stoppedEarly: `turn ${turn}: boundary ${boundary.kind}` };
+        return { draws, events, hpAfterTurn, stoppedEarly: `turn ${turn}: boundary ${boundary.kind}` };
       }
       const side = boundary.request.side;
       const result = submitBattleDecision(state, {
@@ -96,16 +105,21 @@ export function runPortTurns(config: FactoryFullTurnConfig, plan: readonly PortT
       }, recording);
       requestId += 1;
       state = result.state;
+      for (const event of result.events) {
+        const payload = event.payload as Readonly<Record<string, unknown>>;
+        const id = payload.messageId ?? payload.animationId ?? payload.animation ?? null;
+        events.push({ turn, kind: String(payload.kind), id: id === null ? null : String(id) });
+      }
       if (side === "trainer") break;
       if (result.kind !== "decision-required") {
-        return { draws, hpAfterTurn, stoppedEarly: `turn ${turn}: ${result.kind} after player submission` };
+        return { draws, events, hpAfterTurn, stoppedEarly: `turn ${turn}: ${result.kind} after player submission` };
       }
     }
     const battlers = state.rules.rulesContext.battlers;
     hpAfterTurn.push([battlers[0].hp, battlers[1].hp]);
     if (state.boundary.kind !== "decision-required") {
-      return { draws, hpAfterTurn, stoppedEarly: `after turn ${turn}: boundary ${state.boundary.kind}` };
+      return { draws, events, hpAfterTurn, stoppedEarly: `after turn ${turn}: boundary ${state.boundary.kind}` };
     }
   }
-  return { draws, hpAfterTurn, stoppedEarly: null };
+  return { draws, events, hpAfterTurn, stoppedEarly: null };
 }

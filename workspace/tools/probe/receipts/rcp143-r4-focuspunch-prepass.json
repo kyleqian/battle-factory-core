@@ -1,0 +1,1374 @@
+{
+ "schema": "rcp143-engine-fix-receipt/v1",
+ "receipt": "R4",
+ "issue": 139,
+ "title": "CheckFocusPunch_ClearVarsBeforeTurnStarts pre-pass: '<mon> is tightening its focus!' before ANY action, no Random()",
+ "oracleUrls": {
+  "battle-scene-off": "http://127.0.0.1:8014",
+  "battle-scene-on": "http://127.0.0.1:8012"
+ },
+ "probe": "tools/probe/probe-rcp143-random-callers.py",
+ "builder": "tools/probe/build-rcp143-r4-receipt.py",
+ "verify": "tools/probe/verify-rcp143-r4.ts",
+ "scenario": "Player BRELOOM (Giga Drain/Leech Seed/Focus Punch/Headbutt, Speed 90) vs faster JOLTEON (Sand-Attack x4, Speed 150; MOVE_TARGET_SELECTED, no damage, so Focus Punch is not interrupted). Focus Punch arm: A, DOWN, A (slot 2). Control arm: A, A (Giga Drain, slot 0). Same seed, both scene modes, each run twice fresh with a dense PNG per frame 0..766.",
+ "sourceUnderTest": {
+  "prePass": "reference/pokeemerald/src/battle_main.c:4906-4935 CheckFocusPunch_ClearVarsBeforeTurnStarts (battler-index walk of gBattleStruct->focusPunchBattlerId; gChosenMoveByBattler == MOVE_FOCUS_PUNCH && !SLEEP && !truantCounter && !noValidMoves -> BattleScriptExecute(BattleScript_FocusPunchSetUp))",
+  "entry": "reference/pokeemerald/src/battle_main.c:4811-4812 and :4853-4854 (SetActionsAndBattlersTurnOrder hands off to the pre-pass with focusPunchBattlerId = 0)",
+  "script": "reference/pokeemerald/data/battle_scripts_1.s:3709-3715 BattleScript_FocusPunchSetUp (printstring STRINGID_EMPTYSTRING3 / waitmessage 1 / playanimation BS_ATTACKER, B_ANIM_FOCUS_PUNCH_SETUP / printstring STRINGID_PKMNTIGHTENINGFOCUS / waitmessage B_WAIT_TIME_LONG / end2)",
+  "sceneOffAnimation": "Cmd_playanimation under HITMARKER_NO_ANIMATIONS substitutes BattleScript_Pausex20 (battle_scripts_1.s:3151-3153, pause B_WAIT_TIME_SHORT) for B_ANIM_FOCUS_PUNCH_SETUP",
+  "sceneOnAnimation": "reference/pokeemerald/data/battle_anim_scripts.s:10635-10646 General_FocusPunchSetUp (3x call EndureEffect, blend_color_cycle red, AnimTask_ShakeMon2)"
+ },
+ "portSitesAtHead": {
+  "turnOrderToAction1": "src/engine/factoryBattleScriptFullTurnDecision.ts:3159-3213 -- reduceFactoryFullTurnDecision fixes mover1/mover2 (:3161-3168), builds initialState (:3181-3197) and runs action1 (:3199) with nothing in between",
+  "animationRegistration": "src/engine/battleScriptStatbuffchangeOpcode.ts:257-268 (B_ANIM_FOCUS_PUNCH_SETUP registered only as a playanimation id)",
+  "focusPunchBattlerId": "grep -rn focusPunchBattlerId src/ is empty at HEAD"
+ },
+ "fixShape": "Between turn-order fixing and action 1 (factoryBattleScriptFullTurnDecision.ts, after :3197 / before :3199), walk battlers 0..1 in index order and, for each whose chosen move this turn is MOVE_FOCUS_PUNCH and who is not asleep, not Truant-loafing and not noValidMoves, run BattleScript_FocusPunchSetUp as its own end2 script (gBattlerAttacker = that battler) so its two message events and the FOCUS_PUNCH_SETUP playanimation precede action 1. No RNG: the ROM spends 0 Random() in the pre-pass.",
+ "arms": [
+  {
+   "arm": "off-focus-punch",
+   "card": "tools/probe/rcp143/r4-focuspunch-breloom-jolteon-off.json",
+   "oracleProfile": "battle-scene-off",
+   "seed": 305419897,
+   "runs": 2,
+   "probeOutputSha256": [
+    "b0edc3564a421aaf24f23f2eca01e29760e73ca1ea77f7570b08dee458869344",
+    "b0edc3564a421aaf24f23f2eca01e29760e73ca1ea77f7570b08dee458869344"
+   ],
+   "byteIdenticalAcrossRuns": true,
+   "densePngFrames": [
+    1,
+    766
+   ],
+   "densePngRgbSha256Digest": "0132529a7a0a6f2df0da98c709584a92969ea87af45c17a59d9797d3274d1b30",
+   "turnOrderFrame": 68,
+   "checkFocusPunchFrame": 69,
+   "runTurnActionsFrame": 207,
+   "prePass": {
+    "script": "BattleScript_FocusPunchSetUp",
+    "scriptStartFrame": 70,
+    "scriptEndFrame": 206,
+    "frames": 136,
+    "randomDraws": 0
+   },
+   "drawsBetweenTurnOrderAndFirstAction": 0,
+   "messages": [
+    {
+     "frame": 71,
+     "text": ""
+    },
+    {
+     "frame": 108,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "frame": 214,
+     "text": "Foe JOLTEON used\nSAND-ATTACK!"
+    },
+    {
+     "frame": 360,
+     "text": "BRELOOM’s accuracy\nfell!"
+    },
+    {
+     "frame": 461,
+     "text": "BRELOOM used\nFOCUS PUNCH!"
+    }
+   ],
+   "animSpans": [
+    {
+     "script": "General_StatsChange",
+     "firstActiveFrame": 283,
+     "labelsVisited": [
+      "General_StatsChange"
+     ],
+     "lastActiveFrame": 357,
+     "frames": 75
+    }
+   ],
+   "draws": [
+    {
+     "frame": 213,
+     "caller": "Cmd_accuracycheck+0x304",
+     "rngBefore": 960307641,
+     "value": 3428,
+     "script": "BattleScript_EffectStatDown+0xb",
+     "attacker": 1,
+     "currentMove": 28
+    },
+    {
+     "frame": 460,
+     "caller": "Cmd_accuracycheck+0x304",
+     "rngBefore": 224664120,
+     "value": 45804,
+     "script": "BattleScript_HitFromAccCheck",
+     "attacker": 0,
+     "currentMove": 264
+    },
+    {
+     "frame": 488,
+     "caller": "Cmd_critcalc+0x126",
+     "rngBefore": 3001850443,
+     "value": 42690,
+     "script": "BattleScript_HitFromCritCalc",
+     "attacker": 0,
+     "currentMove": 264
+    },
+    {
+     "frame": 491,
+     "caller": "Cmd_adjustnormaldamage+0x6",
+     "rngBefore": 2797792354,
+     "value": 6864,
+     "script": "BattleScript_HitFromCritCalc+0x3",
+     "attacker": 0,
+     "currentMove": 264
+    },
+    {
+     "frame": 710,
+     "caller": "Cmd_seteffectwithchance+0x80",
+     "rngBefore": 449897005,
+     "value": 27560,
+     "script": "BattleScript_HitFromAtkAnimation+0x12",
+     "attacker": 0,
+     "currentMove": 264
+    }
+   ],
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       28,
+       28,
+       28,
+       28
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "drawCountCrossChecked": true,
+   "attributionReconciled": true
+  },
+  {
+   "arm": "off-control",
+   "card": "tools/probe/rcp143/r4-focuspunch-control-gigadrain-off.json",
+   "oracleProfile": "battle-scene-off",
+   "seed": 305419897,
+   "runs": 2,
+   "probeOutputSha256": [
+    "ce8d8d7d46ecb95c05e38ff1fa294a887ea1202c2d193be18231d027955fc54a",
+    "ce8d8d7d46ecb95c05e38ff1fa294a887ea1202c2d193be18231d027955fc54a"
+   ],
+   "byteIdenticalAcrossRuns": true,
+   "densePngFrames": [
+    1,
+    766
+   ],
+   "densePngRgbSha256Digest": "585439a0e61d1e89f43edfa2827a4f085353b9b511b789da8e048bbdd39f7377",
+   "turnOrderFrame": 36,
+   "checkFocusPunchFrame": 37,
+   "runTurnActionsFrame": 38,
+   "prePass": null,
+   "drawsBetweenTurnOrderAndFirstAction": 0,
+   "messages": [
+    {
+     "frame": 45,
+     "text": "Foe JOLTEON used\nSAND-ATTACK!"
+    },
+    {
+     "frame": 191,
+     "text": "BRELOOM’s accuracy\nfell!"
+    },
+    {
+     "frame": 291,
+     "text": "BRELOOM used\nGIGA DRAIN!"
+    },
+    {
+     "frame": 438,
+     "text": "Foe JOLTEON had its\nenergy drained!"
+    },
+    {
+     "frame": 553,
+     "text": "What will\nBRELOOM do?"
+    }
+   ],
+   "animSpans": [
+    {
+     "script": "General_StatsChange",
+     "firstActiveFrame": 114,
+     "labelsVisited": [
+      "General_StatsChange"
+     ],
+     "lastActiveFrame": 188,
+     "frames": 75
+    }
+   ],
+   "draws": [
+    {
+     "frame": 44,
+     "caller": "Cmd_accuracycheck+0x304",
+     "rngBefore": 960307641,
+     "value": 3428,
+     "script": "BattleScript_EffectStatDown+0xb",
+     "attacker": 1,
+     "currentMove": 28
+    },
+    {
+     "frame": 290,
+     "caller": "Cmd_accuracycheck+0x304",
+     "rngBefore": 224664120,
+     "value": 45804,
+     "script": "BattleScript_EffectAbsorb+0x1",
+     "attacker": 0,
+     "currentMove": 202
+    },
+    {
+     "frame": 317,
+     "caller": "Cmd_critcalc+0x126",
+     "rngBefore": 3001850443,
+     "value": 42690,
+     "script": "BattleScript_EffectAbsorb+0xa",
+     "attacker": 0,
+     "currentMove": 202
+    },
+    {
+     "frame": 320,
+     "caller": "Cmd_adjustnormaldamage+0x6",
+     "rngBefore": 2797792354,
+     "value": 6864,
+     "script": "BattleScript_EffectAbsorb+0xd",
+     "attacker": 0,
+     "currentMove": 202
+    },
+    {
+     "frame": 549,
+     "caller": "BattleTurnPassed+0x156",
+     "rngBefore": 449897005,
+     "value": 27560,
+     "script": "BattleScript_MoveEnd+0x9",
+     "attacker": 0,
+     "currentMove": 0
+    },
+    {
+     "frame": 557,
+     "caller": "BattleAI_SetupAIData+0x82",
+     "rngBefore": 1806197660,
+     "value": 52148,
+     "script": "BattleScript_MoveEnd+0x9",
+     "attacker": 0,
+     "currentMove": 0
+    },
+    {
+     "frame": 557,
+     "caller": "BattleAI_SetupAIData+0x82",
+     "rngBefore": 3417592287,
+     "value": 40499,
+     "script": "BattleScript_MoveEnd+0x9",
+     "attacker": 0,
+     "currentMove": 0
+    },
+    {
+     "frame": 557,
+     "caller": "BattleAI_SetupAIData+0x82",
+     "rngBefore": 2654154342,
+     "value": 48338,
+     "script": "BattleScript_MoveEnd+0x9",
+     "attacker": 0,
+     "currentMove": 0
+    },
+    {
+     "frame": 557,
+     "caller": "BattleAI_SetupAIData+0x82",
+     "rngBefore": 3167892961,
+     "value": 16113,
+     "script": "BattleScript_MoveEnd+0x9",
+     "attacker": 0,
+     "currentMove": 0
+    },
+    {
+     "frame": 557,
+     "caller": "ChooseMoveOrAction_Singles+0xf6",
+     "rngBefore": 1056038720,
+     "value": 27265,
+     "script": "BattleScript_MoveEnd+0x9",
+     "attacker": 0,
+     "currentMove": 28
+    }
+   ],
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       28,
+       28,
+       28,
+       28
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "drawCountCrossChecked": true,
+   "attributionReconciled": true
+  },
+  {
+   "arm": "on-focus-punch",
+   "card": "tools/probe/rcp143/r4-focuspunch-breloom-jolteon-on.json",
+   "oracleProfile": "battle-scene-on",
+   "seed": 305419897,
+   "runs": 2,
+   "probeOutputSha256": [
+    "21021ec889f3c54eb01b5f0c19f430d04998f3c0d712b0c7d765cb7d301c4944",
+    "21021ec889f3c54eb01b5f0c19f430d04998f3c0d712b0c7d765cb7d301c4944"
+   ],
+   "byteIdenticalAcrossRuns": true,
+   "densePngFrames": [
+    1,
+    766
+   ],
+   "densePngRgbSha256Digest": "7b76a31625e1c07bc1db0515b53dd22da40c599b3d0953924d57ad841772f8ed",
+   "turnOrderFrame": 68,
+   "checkFocusPunchFrame": 69,
+   "runTurnActionsFrame": 297,
+   "prePass": {
+    "script": "BattleScript_FocusPunchSetUp",
+    "scriptStartFrame": 70,
+    "scriptEndFrame": 296,
+    "frames": 226,
+    "randomDraws": 0
+   },
+   "drawsBetweenTurnOrderAndFirstAction": 0,
+   "messages": [
+    {
+     "frame": 71,
+     "text": ""
+    },
+    {
+     "frame": 198,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "frame": 304,
+     "text": "Foe JOLTEON used\nSAND-ATTACK!"
+    },
+    {
+     "frame": 478,
+     "text": "BRELOOM’s accuracy\nfell!"
+    },
+    {
+     "frame": 579,
+     "text": "BRELOOM used\nFOCUS PUNCH!"
+    }
+   ],
+   "animSpans": [
+    {
+     "script": "General_FocusPunchSetUp",
+     "firstActiveFrame": 76,
+     "labelsVisited": [
+      "General_FocusPunchSetUp",
+      "Move_ENDURE"
+     ],
+     "lastActiveFrame": 195,
+     "frames": 120
+    },
+    {
+     "script": "Move_SAND_ATTACK",
+     "firstActiveFrame": 339,
+     "labelsVisited": [
+      "Move_SAND_ATTACK"
+     ],
+     "lastActiveFrame": 396,
+     "frames": 58
+    },
+    {
+     "script": "General_StatsChange",
+     "firstActiveFrame": 401,
+     "labelsVisited": [
+      "General_StatsChange"
+     ],
+     "lastActiveFrame": 475,
+     "frames": 75
+    },
+    {
+     "script": "Move_FOCUS_PUNCH",
+     "firstActiveFrame": 612,
+     "labelsVisited": [
+      "Move_FOCUS_PUNCH"
+     ],
+     "lastActiveFrame": 765,
+     "frames": 154
+    }
+   ],
+   "draws": [
+    {
+     "frame": 303,
+     "caller": "Cmd_accuracycheck+0x304",
+     "rngBefore": 960307641,
+     "value": 3428,
+     "script": "BattleScript_EffectStatDown+0xb",
+     "attacker": 1,
+     "currentMove": 28
+    },
+    {
+     "frame": 578,
+     "caller": "Cmd_accuracycheck+0x304",
+     "rngBefore": 224664120,
+     "value": 45804,
+     "script": "BattleScript_HitFromAccCheck",
+     "attacker": 0,
+     "currentMove": 264
+    },
+    {
+     "frame": 606,
+     "caller": "Cmd_critcalc+0x126",
+     "rngBefore": 3001850443,
+     "value": 42690,
+     "script": "BattleScript_HitFromCritCalc",
+     "attacker": 0,
+     "currentMove": 264
+    },
+    {
+     "frame": 609,
+     "caller": "Cmd_adjustnormaldamage+0x6",
+     "rngBefore": 2797792354,
+     "value": 6864,
+     "script": "BattleScript_HitFromCritCalc+0x3",
+     "attacker": 0,
+     "currentMove": 264
+    }
+   ],
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       28,
+       28,
+       28,
+       28
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "drawCountCrossChecked": true,
+   "attributionReconciled": true
+  },
+  {
+   "arm": "on-control",
+   "card": "tools/probe/rcp143/r4-focuspunch-control-gigadrain-on.json",
+   "oracleProfile": "battle-scene-on",
+   "seed": 305419897,
+   "runs": 2,
+   "probeOutputSha256": [
+    "e2829a04a2e59100a87560acc3f88f4c7b98ee7f268242a985ab3ed37467cbde",
+    "e2829a04a2e59100a87560acc3f88f4c7b98ee7f268242a985ab3ed37467cbde"
+   ],
+   "byteIdenticalAcrossRuns": true,
+   "densePngFrames": [
+    1,
+    766
+   ],
+   "densePngRgbSha256Digest": "b7d6f2c3ce70aa6171118ac1f0bf9f6db3d346542469c725e2b07c5783fac62b",
+   "turnOrderFrame": 36,
+   "checkFocusPunchFrame": 37,
+   "runTurnActionsFrame": 38,
+   "prePass": null,
+   "drawsBetweenTurnOrderAndFirstAction": 0,
+   "messages": [
+    {
+     "frame": 45,
+     "text": "Foe JOLTEON used\nSAND-ATTACK!"
+    },
+    {
+     "frame": 219,
+     "text": "BRELOOM’s accuracy\nfell!"
+    },
+    {
+     "frame": 319,
+     "text": "BRELOOM used\nGIGA DRAIN!"
+    },
+    {
+     "frame": 665,
+     "text": "Foe JOLTEON had its\nenergy drained!"
+    }
+   ],
+   "animSpans": [
+    {
+     "script": "Move_SAND_ATTACK",
+     "firstActiveFrame": 80,
+     "labelsVisited": [
+      "Move_SAND_ATTACK"
+     ],
+     "lastActiveFrame": 137,
+     "frames": 58
+    },
+    {
+     "script": "General_StatsChange",
+     "firstActiveFrame": 142,
+     "labelsVisited": [
+      "General_StatsChange"
+     ],
+     "lastActiveFrame": 216,
+     "frames": 75
+    },
+    {
+     "script": "Move_GIGA_DRAIN",
+     "firstActiveFrame": 351,
+     "labelsVisited": [
+      "Move_GIGA_DRAIN",
+      "Move_COUNT"
+     ],
+     "lastActiveFrame": 579,
+     "frames": 229
+    }
+   ],
+   "draws": [
+    {
+     "frame": 44,
+     "caller": "Cmd_accuracycheck+0x304",
+     "rngBefore": 960307641,
+     "value": 3428,
+     "script": "BattleScript_EffectStatDown+0xb",
+     "attacker": 1,
+     "currentMove": 28
+    },
+    {
+     "frame": 318,
+     "caller": "Cmd_accuracycheck+0x304",
+     "rngBefore": 224664120,
+     "value": 45804,
+     "script": "BattleScript_EffectAbsorb+0x1",
+     "attacker": 0,
+     "currentMove": 202
+    },
+    {
+     "frame": 345,
+     "caller": "Cmd_critcalc+0x126",
+     "rngBefore": 3001850443,
+     "value": 42690,
+     "script": "BattleScript_EffectAbsorb+0xa",
+     "attacker": 0,
+     "currentMove": 202
+    },
+    {
+     "frame": 348,
+     "caller": "Cmd_adjustnormaldamage+0x6",
+     "rngBefore": 2797792354,
+     "value": 6864,
+     "script": "BattleScript_EffectAbsorb+0xd",
+     "attacker": 0,
+     "currentMove": 202
+    }
+   ],
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       28,
+       28,
+       28,
+       28
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "drawCountCrossChecked": true,
+   "attributionReconciled": true
+  }
+ ],
+ "port": {
+  "kernel": "src/engine/factoryBattleScriptFullTurnDecision.ts reduceFactoryFullTurnDecision via tools/probe/rcp143PortDriver.ts",
+  "arms": [
+   {
+    "arm": "off-focus-punch",
+    "portMessageIds": [
+     "STRINGID_USEDMOVE",
+     "STRINGID_DEFENDERSSTATFELL",
+     "STRINGID_USEDMOVE",
+     "STRINGID_TARGETFAINTED",
+     "STRINGID_PLAYERDEFEATEDTRAINER1"
+    ],
+    "portDraws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 960307641
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 224664120
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 3001850443
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2797792354
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 449897005
+     }
+    ],
+    "portEventsToday": [
+     {
+      "kind": "message",
+      "id": "STRINGID_USEDMOVE"
+     },
+     {
+      "kind": "animation",
+      "id": "MOVE_ANIMATION"
+     },
+     {
+      "kind": "animation",
+      "id": "STATS_CHANGE"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_DEFENDERSSTATFELL"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_USEDMOVE"
+     },
+     {
+      "kind": "animation",
+      "id": "MOVE_ANIMATION"
+     },
+     {
+      "kind": "animation",
+      "id": "HIT_ANIMATION"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_TARGETFAINTED"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_PLAYERDEFEATEDTRAINER1"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_TRAINER1LOSETEXT"
+     }
+    ]
+   },
+   {
+    "arm": "off-control",
+    "portMessageIds": [
+     "STRINGID_USEDMOVE",
+     "STRINGID_DEFENDERSSTATFELL",
+     "STRINGID_USEDMOVE"
+    ],
+    "portDraws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 960307641
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 224664120
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 3001850443
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2797792354
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 449897005
+     }
+    ],
+    "portEventsToday": [
+     {
+      "kind": "message",
+      "id": "STRINGID_USEDMOVE"
+     },
+     {
+      "kind": "animation",
+      "id": "MOVE_ANIMATION"
+     },
+     {
+      "kind": "animation",
+      "id": "STATS_CHANGE"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_DEFENDERSSTATFELL"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_USEDMOVE"
+     },
+     {
+      "kind": "animation",
+      "id": "MOVE_ANIMATION"
+     },
+     {
+      "kind": "animation",
+      "id": "HIT_ANIMATION"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_PKMNENERGYDRAINED"
+     }
+    ]
+   }
+  ]
+ },
+ "comparison": {
+  "verdictToday": "FAIL",
+  "arms": [
+   {
+    "arm": "off-focus-punch",
+    "verdictToday": "FAIL",
+    "messagesMatch": false,
+    "drawsMatch": true,
+    "romMessageIds": [
+     "STRINGID_EMPTYSTRING3",
+     "STRINGID_PKMNTIGHTENINGFOCUS",
+     "STRINGID_USEDMOVE",
+     "STRINGID_DEFENDERSSTATFELL",
+     "STRINGID_USEDMOVE"
+    ]
+   },
+   {
+    "arm": "off-control",
+    "verdictToday": "PASS",
+    "messagesMatch": true,
+    "drawsMatch": true,
+    "romMessageIds": [
+     "STRINGID_USEDMOVE",
+     "STRINGID_DEFENDERSSTATFELL",
+     "STRINGID_USEDMOVE"
+    ]
+   }
+  ]
+ },
+ "predictedPostFix": {
+  "note": "Focus Punch arm: today's port events with BattleScript_FocusPunchSetUp's three events in front of action 1 (no RNG moves). Control arm: unchanged.",
+  "arms": [
+   {
+    "arm": "off-focus-punch",
+    "events": [
+     {
+      "kind": "message",
+      "id": "STRINGID_EMPTYSTRING3"
+     },
+     {
+      "kind": "animation",
+      "id": "FOCUS_PUNCH_SETUP"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_PKMNTIGHTENINGFOCUS"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_USEDMOVE"
+     },
+     {
+      "kind": "animation",
+      "id": "MOVE_ANIMATION"
+     },
+     {
+      "kind": "animation",
+      "id": "STATS_CHANGE"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_DEFENDERSSTATFELL"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_USEDMOVE"
+     },
+     {
+      "kind": "animation",
+      "id": "MOVE_ANIMATION"
+     },
+     {
+      "kind": "animation",
+      "id": "HIT_ANIMATION"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_TARGETFAINTED"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_PLAYERDEFEATEDTRAINER1"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_TRAINER1LOSETEXT"
+     }
+    ]
+   },
+   {
+    "arm": "off-control",
+    "events": [
+     {
+      "kind": "message",
+      "id": "STRINGID_USEDMOVE"
+     },
+     {
+      "kind": "animation",
+      "id": "MOVE_ANIMATION"
+     },
+     {
+      "kind": "animation",
+      "id": "STATS_CHANGE"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_DEFENDERSSTATFELL"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_USEDMOVE"
+     },
+     {
+      "kind": "animation",
+      "id": "MOVE_ANIMATION"
+     },
+     {
+      "kind": "animation",
+      "id": "HIT_ANIMATION"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_PKMNENERGYDRAINED"
+     }
+    ]
+   }
+  ]
+ }
+}

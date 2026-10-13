@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import r1 from "../tools/probe/receipts/rcp143-r1-thrash-lockin-off.json" with { type: "json" };
 import r2 from "../tools/probe/receipts/rcp143-r2-covet-stickyhold-off.json" with { type: "json" };
+import r4 from "../tools/probe/receipts/rcp143-r4-focuspunch-prepass.json" with { type: "json" };
 
 /**
  * STEP rcp143 -- stock-ROM receipts for the next engine fixes (ISSUES #141 /
@@ -138,5 +139,87 @@ describe("rcp143 R2 -- Covet into Sticky Hold returns onto seteffectwithchance (
 
   it("pins the predicted post-fix port sequence to the ROM's own", () => {
     expectPredictionIsRom(r2);
+  });
+});
+
+describe("rcp143 R4 -- Focus Punch pre-pass before ANY action, no RNG (ISSUES #139)", () => {
+  const arm = (name: string) => {
+    const found = r4.arms.find((candidate) => candidate.arm === name);
+    if (!found) throw new Error(`receipt has no arm ${name}`);
+    return found;
+  };
+
+  it("banks four byte-identical arms (Scene OFF and ON, Focus Punch and control), each run twice fresh", () => {
+    expect(r4.arms.map((candidate) => [candidate.arm, candidate.oracleProfile])).toEqual([
+      ["off-focus-punch", "battle-scene-off"],
+      ["off-control", "battle-scene-off"],
+      ["on-focus-punch", "battle-scene-on"],
+      ["on-control", "battle-scene-on"],
+    ]);
+    for (const candidate of r4.arms) {
+      expect(candidate.runs).toBe(2);
+      expect(candidate.byteIdenticalAcrossRuns).toBe(true);
+      expect(candidate.attributionReconciled).toBe(true);
+      expect(candidate.densePngFrames).toEqual([1, 766]);
+      // BRELOOM (Speed 90) is slower than JOLTEON (Speed 150).
+      expect(candidate.parties.player[0].stats.speed).toBeLessThan(candidate.parties.opponent[0].stats.speed);
+    }
+  });
+
+  it("prints the empty box then 'tightening its focus' before the faster foe's move, spending no Random()", () => {
+    for (const name of ["off-focus-punch", "on-focus-punch"]) {
+      const focus = arm(name);
+      expect(focus.prePass).toMatchObject({ script: "BattleScript_FocusPunchSetUp", randomDraws: 0 });
+      expect(focus.drawsBetweenTurnOrderAndFirstAction).toBe(0);
+      expect(focus.messages.slice(0, 3).map((message) => message.text)).toEqual([
+        "",
+        "BRELOOM is tightening\nits focus!",
+        "Foe JOLTEON used\nSAND-ATTACK!",
+      ]);
+      // Both pre-pass boxes are written inside the pre-pass script, before action 1 starts.
+      expect(focus.messages[1].frame).toBeLessThan(focus.prePass?.scriptEndFrame ?? 0);
+      expect(focus.messages[2].frame).toBeGreaterThan(focus.runTurnActionsFrame);
+    }
+    for (const name of ["off-control", "on-control"]) {
+      const control = arm(name);
+      expect(control.prePass).toBeNull();
+      // Turn order -> pre-pass check -> actions on consecutive frames.
+      expect([control.checkFocusPunchFrame, control.runTurnActionsFrame])
+        .toEqual([control.turnOrderFrame + 1, control.turnOrderFrame + 2]);
+      expect(control.messages[0].text).toBe("Foe JOLTEON used\nSAND-ATTACK!");
+    }
+  });
+
+  it("pins the frame timings the Scene ON presentation step will need", () => {
+    const off = arm("off-focus-punch");
+    const on = arm("on-focus-punch");
+    expect([off.turnOrderFrame, off.checkFocusPunchFrame, off.prePass?.scriptStartFrame, off.prePass?.scriptEndFrame, off.runTurnActionsFrame])
+      .toEqual([68, 69, 70, 206, 207]);
+    expect(off.messages.slice(0, 3).map((message) => message.frame)).toEqual([71, 108, 214]);
+    // Scene OFF has no FOCUS_PUNCH_SETUP animation (BattleScript_Pausex20 stands in).
+    expect(off.animSpans.map((span) => span.script)).not.toContain("General_FocusPunchSetUp");
+    expect([on.prePass?.scriptStartFrame, on.prePass?.scriptEndFrame, on.runTurnActionsFrame]).toEqual([70, 296, 297]);
+    expect(on.messages.slice(0, 3).map((message) => message.frame)).toEqual([71, 198, 304]);
+    expect(on.animSpans[0]).toMatchObject({
+      script: "General_FocusPunchSetUp",
+      firstActiveFrame: 76,
+      lastActiveFrame: 195,
+      frames: 120,
+    });
+  });
+
+  it("records the port at HEAD skipping the pre-pass (expected FAIL today) with the RNG already in step", () => {
+    expect(r4.comparison.verdictToday).toBe("FAIL");
+    const [focus, control] = r4.comparison.arms;
+    expect(focus).toMatchObject({ arm: "off-focus-punch", messagesMatch: false, drawsMatch: true });
+    expect(control).toMatchObject({ arm: "off-control", messagesMatch: true, drawsMatch: true });
+    expect(r4.port.arms[0].portMessageIds[0]).toBe("STRINGID_USEDMOVE");
+    expect(r4.predictedPostFix.arms[0].events.slice(0, 4)).toEqual([
+      { kind: "message", id: "STRINGID_EMPTYSTRING3" },
+      { kind: "animation", id: "FOCUS_PUNCH_SETUP" },
+      { kind: "message", id: "STRINGID_PKMNTIGHTENINGFOCUS" },
+      { kind: "message", id: "STRINGID_USEDMOVE" },
+    ]);
+    expect(r4.predictedPostFix.arms[1].events).toEqual(r4.port.arms[1].portEventsToday);
   });
 });
