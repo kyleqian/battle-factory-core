@@ -1,0 +1,23 @@
+{
+ "18:0:on": {
+  "frames": 6660,
+  "sameTimeline": true,
+  "differingFrames": 92,
+  "outsideStatusAnimation": 0,
+  "statusAnimationCommands": 9,
+  "changedCommands": {
+   "10:1:5": {
+    "battler": 0,
+    "animation": "INFATUATION",
+    "species": "PUPITAR",
+    "previousMessage": "PUPITAR is in love with Foe EEVEE!",
+    "differingAges": [
+     5,
+     96
+    ],
+    "count": 92
+   }
+  },
+  "verdict": "OK"
+ }
+}
