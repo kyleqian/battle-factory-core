@@ -217,4 +217,15 @@ Fixtures (`tools/integration/fixtures/stq132/`): `scenarios/` (13), `scenario-in
 
 ## 5. Gates
 
-See the final report of the session (filled in below when run).
+| gate | result |
+|---|---|
+| `sh tools/integration/stq132Run.sh .integration/validation/stq132-run1` (on `965ece3bd`; rerun on the final commit, see the session report) | **ALL SAME** (13 / 13 r1 == r2, 26 / 26 sha256, rom-windows SAME, tests 77 / 77, 37 / 37 windows 0 px, compare.json SAME), ~2 min |
+| `python3 tools/integration/stq132Perturb.py tools/integration/fixtures/stq132/perturbation.json <raw>` | 24 / 24 mutations fail the pin test; file restored byte-for-byte |
+| `npm test -- tests/stq132StatusConditionReducer.test.ts tests/stp128StatusConditionReducer.test.ts tests/animation/factoryAnimationInventory.test.ts tests/animation/animationBoundaryRatchet.test.ts` | 4 files / 88 tests passed |
+| `npm run typecheck` | green |
+| `npm run test:smoke` | 448 / 448 |
+| full `npm test`, four shards (`npm test -- --shard=k/4`) | **1,643 files / 13,621 tests passed** (44 / 223 skipped), 0 failed |
+| `npm run build` | green |
+| `git diff --check a5e585119 HEAD` | clean |
+
+One tracked file is modified (`src/animation/statusConditionAnimations.ts`, additions + the widened template union); everything else is new.
