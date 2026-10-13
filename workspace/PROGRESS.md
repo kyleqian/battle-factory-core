@@ -27,7 +27,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Supervisor union fixes:** sad133 x stq132 typecheck break (TS2366); sad133 x sae135 diverged `liveStatusAnimationRow` signatures (5-file
   resolution); tmr136 x sgl138 render conflict + one route-total re-pin (seed 9: 3 live Double Teams).
 - **Next:** ROADMAP S10A "Next (2026-10-13)": land inv142 (banked); FRZ 115 / 116 frozen-turn phase (aud137, D4); #167 remainders; Hyper
-  Beam / Astonish / Extrasensory / doll-cell fallbacks; the app-only differential trace's capture frames; a live audit after every batch.
+  Beam / Astonish / Extrasensory / doll-cell fallbacks; a live audit after every batch. (The app-only differential traces were
+  regenerated on the final timeline, `bba4d9dc6`: 173 -> 190 captures; differential 831 / 831 byte-identical, smoke 448.)
 - **Notes:** no DEFERRED entries. ISSUES: #168 trimmed to inv142's remainder, #166 removed (fixed). Worker branches merged, worktrees
   removed (scratch under `.integration/validation/*-2026101[23]/`, transcripts `.codex-logs/workers/`).
 

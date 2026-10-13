@@ -12,6 +12,8 @@
   Scene OFF timing) on `74cbec2b8` (the last Scene OFF change; later folds are Scene ON only): vanilla 0:20 **20 / 20**, full 0:60 **60 / 60**,
   winning 0:60 **60 / 60**, winning-swap 0:60 **60 / 60** OK (all budget-ended; the script's own repeat of the fifth gate also 100 / 100 x 4); fifth gate winning --vary-rng carry 0 / 14 / 28 **100 / 100 each**, winning-swap carry
   0 **100 / 100**.
+- Supervisor, after the final gates (`bba4d9dc6`, tools only): the app-only presentation-rng differential traces regenerated on the
+  current timeline (presentationRngTraces.ts: 173 -> 190 captures); differential vs `e8dd1f310` 831 / 831 byte-identical; smoke 448.
 - gaf140 (MAIN lane, Opus, on master `dd3c20914` .. `26000aa80`): the union DEFECT fixed — the status-animation command carries
   `seGateFrames`; the render effect age = command age - gate (the ordinary field during the gate): **16 / 16 gated ROM windows 0 px on every
   row incl. the 139 gate rows**; controls (pre-fix, gate +- 1) 0 / 16; census identical; 4 gated routes OK. Supervisor: gaf140Run.sh

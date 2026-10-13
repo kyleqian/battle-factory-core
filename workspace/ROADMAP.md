@@ -2247,8 +2247,8 @@ commands / 99.60 % of frames live** (session start 98.95 / 99.32). Live audits 2
 3. Timeline remainders: #167 (Rest's OFF attack pause, sprite-visibility / stat-stage-change next receipts, the charge-turn EMPTYSTRING3
    print), #153 (Scene OFF skips the Substitute body), idle94's unproven lead moves / per-move tails; the SE gate's unmeasured paths
    (Overheat / Superpower / AncientPower self-drops, Yawn after a hit, Thrash after sandstorm: sgs134 / sag130 docs).
-4. The app-only differential trace `presentation-rng-playable-live-bodies-seeded-on` samples fixed capture frames (1 / 173 moved tonight
-   by the Double Team tail): regenerate its capture frames with tools/integration/presentationRngTraces.ts.
+4. DONE 2026-10-13 (`bba4d9dc6`): the app-only presentation-rng differential traces were regenerated on the current timeline
+   (173 -> 190 captures); regenerate again with tools/integration/presentationRngTraces.ts after timeline-moving folds.
 5. A live audit after every batch (audits 21..28 tools; ALWAYS on production accepted windows: tools/integration/audit21Align.py).
 Struggle is required by the 2026-10-11 user decision; its adapter is live since 2026-10-11 (stl109), with the remaining declines above.
 Validate new adapters with alternate-species dense proofs whose windows are the production accepted window aligned to the
