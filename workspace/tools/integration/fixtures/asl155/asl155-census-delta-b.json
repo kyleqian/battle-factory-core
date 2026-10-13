@@ -1,0 +1,564 @@
+{
+ "schema": "asl155-census-delta/v1",
+ "commands": 27196,
+ "live": {
+  "base": [
+   27022,
+   4136118,
+   4151788
+  ],
+  "landed": [
+   27029,
+   4137273,
+   4151813
+  ]
+ },
+ "lifted": {
+  "commands": 7,
+  "frames": 1155,
+  "targets": {
+   "NIDORINA": 1,
+   "GLOOM": 1,
+   "IVYSAUR": 1,
+   "SEALEO": 4
+  }
+ },
+ "regressed": 0,
+ "changedOutsidePlayerExtrasensory": 0,
+ "frameChanges": {
+  "commands": 25,
+  "delta": 25,
+  "outsidePlayerExtrasensory": 0
+ },
+ "playerExtrasensory": {
+  "commands": 26,
+  "base": {
+   "fallback: later-body (order lend not a first body)": 25,
+   "live: None": 1
+  },
+  "landed": {
+   "fallback: unclassified (case-local gate)": 18,
+   "live: None": 8
+  },
+  "declinedTargetsLanded": {
+   "QWILFISH": 1,
+   "GIRAFARIG": 1,
+   "SCEPTILE": 1,
+   "CROBAT": 1,
+   "KINGLER": 2,
+   "CHIMECHO": 1,
+   "PLUSLE": 1,
+   "FURRET": 1,
+   "ONIX": 1,
+   "LILEEP": 1,
+   "SCYTHER": 1,
+   "MANTINE": 1,
+   "DRAGONAIR": 2,
+   "METANG": 1,
+   "GROWLITHE": 1,
+   "MISDREAVUS": 1
+  }
+ },
+ "changed": [
+  {
+   "battle": 19,
+   "command": 74,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "QWILFISH",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 19,
+   "command": 81,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "GIRAFARIG",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 21,
+   "command": 11,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "SCEPTILE",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 201,
+   "command": 13,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "NIDORINA",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "live",
+    null
+   ]
+  },
+  {
+   "battle": 244,
+   "command": 11,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "CROBAT",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 304,
+   "command": 22,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "KINGLER",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 304,
+   "command": 28,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "KINGLER",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 607,
+   "command": 28,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "GLOOM",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "live",
+    null
+   ]
+  },
+  {
+   "battle": 607,
+   "command": 33,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "CHIMECHO",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 611,
+   "command": 12,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "IVYSAUR",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "live",
+    null
+   ]
+  },
+  {
+   "battle": 611,
+   "command": 18,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "PLUSLE",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 611,
+   "command": 23,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "FURRET",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 731,
+   "command": 1,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "ONIX",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 731,
+   "command": 8,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "LILEEP",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 767,
+   "command": 1,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "SCYTHER",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 767,
+   "command": 10,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "MANTINE",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 767,
+   "command": 17,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "DRAGONAIR",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 767,
+   "command": 22,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "DRAGONAIR",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 785,
+   "command": 39,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "METANG",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 882,
+   "command": 6,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "SEALEO",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "live",
+    null
+   ]
+  },
+  {
+   "battle": 882,
+   "command": 11,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "SEALEO",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "live",
+    null
+   ]
+  },
+  {
+   "battle": 882,
+   "command": 17,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "SEALEO",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "live",
+    null
+   ]
+  },
+  {
+   "battle": 882,
+   "command": 23,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "SEALEO",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "live",
+    null
+   ]
+  },
+  {
+   "battle": 882,
+   "command": 27,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "GROWLITHE",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  },
+  {
+   "battle": 957,
+   "command": 11,
+   "move": "EXTRASENSORY",
+   "side": "player",
+   "target": "MISDREAVUS",
+   "xsPlayer": true,
+   "frames": [
+    164,
+    165
+   ],
+   "before": [
+    "fallback",
+    "later-body (order lend not a first body)"
+   ],
+   "after": [
+    "fallback",
+    "unclassified (case-local gate)"
+   ]
+  }
+ ]
+}

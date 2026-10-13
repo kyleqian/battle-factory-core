@@ -1,0 +1,343 @@
+{
+ "schema": "prep43-census-delta/v1",
+ "commands": 27196,
+ "presentedFrames": 4151788,
+ "pairingMismatches": 25,
+ "liveFramesBefore": 4136118,
+ "liveFramesAfter": 4137273,
+ "liveCountBefore": 27022,
+ "liveCountAfter": 27029,
+ "regressions": [],
+ "regressionCount": 0,
+ "units": [
+  {
+   "beforeDetail": "presentation: later-body (order lend not a first body)",
+   "commands": 25,
+   "frames": 4100,
+   "liveAfterCommands": 7,
+   "liveAfterFrames": 1155,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: unclassified (case-local gate)",
+     18
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "commands": 33,
+   "frames": 1056,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+     33
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: target hidden (semi-invulnerable): no D4 phase for its lag profile (hide66)",
+   "commands": 3,
+   "frames": 373,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: target hidden (semi-invulnerable): no D4 phase for its lag profile (hide66)",
+     3
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: no adapter (no liveMoveAnimationDuration case)",
+   "commands": 7,
+   "frames": 224,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: no adapter (no liveMoveAnimationDuration case)",
+     7
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: unsupported turn 0",
+   "commands": 7,
+   "frames": 224,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: unsupported turn 0",
+     7
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)",
+   "commands": 26,
+   "frames": 832,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)",
+     26
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: sprite allocator history unknown",
+   "commands": 3,
+   "frames": 246,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: sprite allocator history unknown",
+     3
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: unclassified (case-local gate)",
+   "commands": 11,
+   "frames": 1745,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: unclassified (case-local gate)",
+     11
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+   "commands": 4,
+   "frames": 128,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)",
+     4
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: next-mon summary while the opponent battler is tracked",
+   "commands": 2,
+   "frames": 526,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "order host: next-mon summary while the opponent battler is tracked",
+     2
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: stale move power unknown",
+   "commands": 12,
+   "frames": 876,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: stale move power unknown",
+     12
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: attacker doll: self-target body",
+   "commands": 3,
+   "frames": 96,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: attacker doll: self-target body",
+     3
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 240:at:2 (cast83, ISSUES #143)",
+   "commands": 1,
+   "frames": 190,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: body not ROM-proven for 240:at:2 (cast83, ISSUES #143)",
+     1
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 53:by:2 (cast83, ISSUES #143)",
+   "commands": 1,
+   "frames": 115,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: body not ROM-proven for 53:by:2 (cast83, ISSUES #143)",
+     1
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 184:at:2 (cast83, ISSUES #143)",
+   "commands": 1,
+   "frames": 197,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: body not ROM-proven for 184:at:2 (cast83, ISSUES #143)",
+     1
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "order host: no EXACT plan: body 63:player",
+   "commands": 12,
+   "frames": 2229,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "order host: no EXACT plan: body 63:player",
+     12
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: measured residual 196:at:2: Icy Wind in rain: 335,022 / 337,522 px (TIMING-PHASE: lag ages [241, 242] vs [261], also without Castform; live audit 21) (cast83, ISSUES #143)",
+   "commands": 2,
+   "frames": 580,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: measured residual 196:at:2: Icy Wind in rain: 335,022 / 337,522 px (TIMING-PHASE: lag ages [241, 242] vs [261], also without Castform; live audit 21) (cast83, ISSUES #143)",
+     2
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: measured residual 196:by:2: Icy Wind in rain: 335,691 / 332,548 px (TIMING-PHASE: lag ages [241, 242] vs [261], also without Castform; live audit 21) (cast83, ISSUES #143)",
+   "commands": 3,
+   "frames": 870,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: measured residual 196:by:2: Icy Wind in rain: 335,691 / 332,548 px (TIMING-PHASE: lag ages [241, 242] vs [261], also without Castform; live audit 21) (cast83, ISSUES #143)",
+     3
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 52:by:2 (cast83, ISSUES #143)",
+   "commands": 1,
+   "frames": 70,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: body not ROM-proven for 52:by:2 (cast83, ISSUES #143)",
+     1
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "duration: attacker doll: both battlers shown as dolls",
+   "commands": 8,
+   "frames": 256,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "duration: attacker doll: both battlers shown as dolls",
+     8
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 52:by:3 (cast83, ISSUES #143)",
+   "commands": 2,
+   "frames": 140,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: body not ROM-proven for 52:by:3 (cast83, ISSUES #143)",
+     2
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 156:at:3 (cast83, ISSUES #143)",
+   "commands": 1,
+   "frames": 115,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: body not ROM-proven for 156:at:3 (cast83, ISSUES #143)",
+     1
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 258:at:3 (cast83, ISSUES #143)",
+   "commands": 1,
+   "frames": 161,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: body not ROM-proven for 258:at:3 (cast83, ISSUES #143)",
+     1
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 301:at:3 (cast83, ISSUES #143)",
+   "commands": 2,
+   "frames": 158,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: body not ROM-proven for 301:at:3 (cast83, ISSUES #143)",
+     2
+    ]
+   ]
+  },
+  {
+   "beforeDetail": "presentation: CASTFORM shown in a weather form: body not ROM-proven for 19:at:3 (cast83, ISSUES #143)",
+   "commands": 3,
+   "frames": 163,
+   "liveAfterCommands": 0,
+   "liveAfterFrames": 0,
+   "stillFallbackAfterTop": [
+    [
+     "presentation: CASTFORM shown in a weather form: body not ROM-proven for 19:at:3 (cast83, ISSUES #143)",
+     3
+    ]
+   ]
+  }
+ ],
+ "liveFramePctBefore": 99.62,
+ "liveFramePctAfter": 99.65,
+ "liveCountPctBefore": 99.36,
+ "liveCountPctAfter": 99.39
+}
