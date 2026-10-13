@@ -3698,6 +3698,52 @@
       "remaining": [
         "the live Double Team window ends 9 rows before the ROM's following glyph (Scene ON; docs/sc106-stats-change-command.md section 2)"
       ]
+    },
+    "STATUS_ANIMATION": {
+      "animation": "B_ANIM_STATUS_* (Cmd_statusanimation / status2animation / chosenstatusanimation -> InitAndLaunchChosenStatusAnimation)",
+      "kind": "general animation (not a move body)",
+      "state": "timing only, not drawn",
+      "scenes": [
+        "on"
+      ],
+      "command": "status-animation presentation command at the kernel status-animation receipt (Scene ON only; the kernel skips Scene OFF, a Substitute and a semi-invulnerable battler): STATUS_ANIMATION_ADDED_ROWS = PSN 71, CONFUSION 100, BRN 39, INFATUATION 97, SLP 97, PRZ 39, FRZ 117, CURSED 75, NIGHTMARE 75 frames (the ROM controller rows); SA3: a Scene ON status command followed by its battler's status animation lasts the Scene OFF delta(print) - delta(status). Nothing is drawn (renderers SA4..SA8)",
+      "censusSeeds0to999": {
+        "kernelReceipts": 8080,
+        "sceneOn": {
+          "commands": 7894,
+          "frames": 650788,
+          "byAnimation": {
+            "BRN": 454,
+            "CONFUSION": 2404,
+            "CURSED": 21,
+            "FRZ": 147,
+            "INFATUATION": 627,
+            "NIGHTMARE": 55,
+            "PRZ": 1169,
+            "PSN": 1126,
+            "SLP": 1891
+          },
+          "gateFlagged": 511
+        },
+        "statusFramesDeltaSA3": -85797,
+        "sceneOff": {
+          "commands": 0,
+          "frames": 0
+        }
+      },
+      "accounting": "Reported on its own line: NOT folded into the move-animation live share (liveShareCensus counts move-animation / substitute-fade commands only)",
+      "evidence": [
+        "docs/sta123-status-animations-design.md",
+        "docs/off121-status-command.md",
+        "docs/sa125-status-animation-command.md",
+        "tools/integration/fixtures/sa125-live-receipt.json"
+      ],
+      "proofs": "sta123 ROM receipts (18 scenarios both sides, r1 == r2): controllerRows per animation; sa125 production routes ON - OFF == controllerRows on every anchored path (both sides); census delta: one command per kernel receipt, 0 move status changes",
+      "remaining": [
+        "SA2: the IsBattleSEPlaying gate after a damaging hit (FRZ after Ice Beam 133 / 134 vs 117; all inflicted-after-damage receipts flagged, not modelled)",
+        "SA4..SA8: the renderers (nothing drawn)",
+        "SA9: host / order / allocator checks"
+      ]
     }
   },
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",

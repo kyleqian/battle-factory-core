@@ -38,6 +38,8 @@ export function generatedCommandAnimationReplay(
   answerForcedSwitch = false,
   /** Observer called with the orchestrator state after every stepped frame (read-only; e.g. production frame renders). */
   onFrame?: (state: ReturnType<typeof createFactoryRoundBattleOrchestrator>, frame: number) => void,
+  /** The frame budget (sa125: a long route that crosses Scene ON status animations may pass it explicitly). */
+  frameBudget = 30000,
 ) {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
     id: `live-animation-generated-${seed}`, rngValue: seed, battleScene,
@@ -77,7 +79,7 @@ export function generatedCommandAnimationReplay(
   let frame = 0;
   let key = "";
   const step = (buttons: readonly GbaButton[] = []) => {
-    if (++frame > 30000) throw new StallError(`generated command replay exceeded budget at seed ${seed}`);
+    if (++frame > frameBudget) throw new StallError(`generated command replay exceeded budget at seed ${seed}`);
     if (state.battleStartIntro) state = advanceFactoryRoundBattleStartIntro(state, new Set(buttons));
     else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons));
     else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons));

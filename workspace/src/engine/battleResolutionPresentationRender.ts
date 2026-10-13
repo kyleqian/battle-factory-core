@@ -851,6 +851,8 @@ function applyCompletedCommand(
     || command.type === "trainer-slide"
     || command.type === "substitute-fade"
     || command.type === "stats-change"
+    // sa125: timing only (the B_ANIM_STATUS_* renderers are SA4..SA8); the field stays as it is.
+    || command.type === "status-animation"
   ) return field;
   if (command.type === "switch-in") {
     return replaceFieldBattler(field, command.battler, command.incoming);
@@ -1071,6 +1073,9 @@ export function battleResolutionCommandDuration(
     // scf117: + the rows to the following print's first glyph (holdFrames, statsChangeNextReceiptHoldFrames).
     case "stats-change":
       return command.timing.minimumFrames + (command.timing.holdFrames ?? 0);
+    // sa125 (ISSUES #168 SA1): B_ANIM_STATUS_*'s controller rows (STATUS_ANIMATION_ADDED_ROWS); nothing drawn yet.
+    case "status-animation":
+      return command.timing.minimumFrames;
   }
 }
 
