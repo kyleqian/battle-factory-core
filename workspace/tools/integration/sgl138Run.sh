@@ -30,7 +30,7 @@ BW="$OUT/base/workspace"; FW="$OUT/final/workspace"
 # 2. the final tree: src == base + the banked diff; anchor receipt; tests
 mkdir -p "$OUT/applied"
 git archive "$(git rev-parse "$BASE")" src | tar -x -C "$OUT/applied"
-(cd "$OUT/applied" && patch -s -p1 < "$FW/tools/integration/fixtures/sgs134/sgs134-gate.diff") \
+(cd "$OUT/applied" && patch -s -p1 < "$FW/tools/integration/fixtures/sgs134/sgs134-gate.diff" && find . -name '*.orig' -delete) \
   && diff -r "$OUT/applied/src" "$FW/src" > /dev/null && echo "SAME final src == base src + sgs134-gate.diff" \
   || { echo "DIFF final src vs base src + sgs134-gate.diff"; fail=1; }
 (cd "$FW" && node --experimental-strip-types --no-warnings tools/integration/sgl138Live.ts --out="$OUT/sgl138-live-receipt.json") || fail=1
