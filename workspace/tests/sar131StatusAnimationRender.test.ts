@@ -8,6 +8,7 @@ import {
   applyLiveBattlerX2Event, liveBattlerX2EventsOf, LIVE_BATTLER_X2_IDLE, LIVE_BATTLER_X2_STATUS_ANIMATION,
 } from "../src/engine/liveBattlerX2History.ts";
 import { STATUS_ANIMATION_ADDED_ROWS } from "../src/engine/battleResolutionPresentation.ts";
+import { STATUS_ANIMATIONS_DRAWN } from "../src/engine/battleResolutionPresentationRender.ts";
 import { statusAnimationRenderView } from "../src/engine/battleScene.ts";
 import { sar131Window, SAR131 } from "../tools/integration/sar131Windows.ts";
 import { sar131HistoryBefore } from "../tools/integration/sar131History.ts";
@@ -21,6 +22,7 @@ describe("sar131: PSN / PRZ rows (statusAnimation.ts liveStatusAnimationRow)", (
     for (const name of Object.keys(STATUS_ANIMATION_ADDED_ROWS)) {
       const drawn = liveStatusAnimationRow(name, 10, "opponent") !== null;
       expect(drawn, name).toBe(name === "PSN" || name === "PRZ");
+      expect(STATUS_ANIMATIONS_DRAWN.has(name), name).toBe(drawn);
     }
   });
   it("PSN: ShakeMon2 (1, 0, 18, 2) shown from age 2, ends x2 0 at age 55; blend 0 -> 12 -> 0 in steps of 2 every 4 rows", () => {

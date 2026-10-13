@@ -1,4 +1,3 @@
-import { liveStatusAnimationRow } from "../animation/statusAnimation.ts";
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import {
   liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput, type LiveMoveRandom2PlanContext,
@@ -1128,6 +1127,12 @@ export function isBattleResolutionNextCommandHandoffComplete(
 }
 
 /**
+ * sar131: the B_ANIM_STATUS_* the live field draws (statusAnimation.ts liveStatusAnimationRow's cases; src/engine reads src/animation
+ * only through battleScene.ts, so the set is pinned equal by tests/sar131StatusAnimationRender.test.ts).
+ */
+export const STATUS_ANIMATIONS_DRAWN: ReadonlySet<string> = new Set(["PSN", "PRZ"]);
+
+/**
  * ISSUES #147: whether the current presenting row is one of the first
  * `liveMoveOpponentShadowPostBodyHideRows` ordinary rows after the segment's
  * latest live move body (row 1 = the first frame after the body's last row).
@@ -1153,7 +1158,7 @@ function postBodyShadowHiddenAt(
     if (completed.type === "substitute-fade") return false;
     // sar131: SpriteCB_EnemyShadow hides the shadow while gAnimScriptActive, shown one row late: a drawn status animation's hide
     // (statusAnimationRenderView: ages 1 .. end) holds through the next command's first row.
-    if (completed.type === "status-animation" && rows <= 1 && liveStatusAnimationRow(completed.animation, 0, "opponent") !== null) {
+    if (completed.type === "status-animation" && rows <= 1 && STATUS_ANIMATIONS_DRAWN.has(completed.animation)) {
       return true;
     }
     if (completed.type === "move-animation") {
