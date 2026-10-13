@@ -1,0 +1,37 @@
+{
+ "schema": "rcp154-action-time-receipt/v1",
+ "receipt": "C1",
+ "followUpTo": "ISSUES #140 (rng146 F3, census battle 811)",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp154-action-time.py",
+ "builder": "tools/probe/build-rcp154-receipt.py",
+ "verify": "tools/probe/verify-rcp154.ts",
+ "card": "tools/probe/rcp154/c1-whirlwind-drags-roar-user-off.json",
+ "title": "A battler dragged in by Roar/Whirlwind before it acts does NOT act that turn: Cmd_switchineffects writes B_ACTION_CANCEL_PARTNER (== B_ACTION_FINISHED, 12) into its gActionsByTurnOrder slot, so neither the banked move nor its own slot move runs and no GetMoveTarget draw happens",
+ "scenario": "Player RHYHORN (Roar [TM05] / Horn Attack / Stomp / Tail Whip, speed 45) picks slot 0 ROAR every turn it is out; bench ZIGZAGOON (Tackle/Growl/Tail Whip/Headbutt) and POOCHYENA (Tackle/Howl/Sand-Attack/Bite) pick slot 0 TACKLE. Opponent PIDGEOT (Whirlwind x4, Jolly, 255 Speed EVs) is faster, so both -6 moves resolve Pidgeot first: Whirlwind drags the player's active battler out before it acts. Turn 1 is the census-811 shape (banked ROAR 46, dragged-in ZIGZAGOON slot 0 = TACKLE 33); later turns repeat it with every bench mon, including RHYHORN dragged back in after a TACKLE was banked.",
+ "portPlayerSlots": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "sourceUnderTest": {
+  "cancelWrite": "reference/pokeemerald/src/battle_script_commands.c:5219 Cmd_switchineffects; no-Spikes arm :5256-5281 -- when neither AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN) nor ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN) fires, :5270-5274 set gActionsByTurnOrder[i] = B_ACTION_CANCEL_PARTNER for the turn-order slot of the switched-in battler",
+  "sameValue": "reference/pokeemerald/include/battle.h:39-40 B_ACTION_FINISHED 12 == B_ACTION_CANCEL_PARTNER 12",
+  "consumer": "reference/pokeemerald/src/battle_util.c:658-663 HandleAction_ActionFinished: gCurrentActionFuncId = gActionsByTurnOrder[++gCurrentTurnActionNumber] -> 12 -> HandleAction_ActionFinished again; battle_main.c:4937 RunTurnActionsFunctions then ends the turn (gCurrentTurnActionNumber >= gBattlersCount)",
+  "forceOutScript": "reference/pokeemerald/data/battle_scripts_1.s:3324-3341 BattleScript_SuccessForceOut -> BattleScript_TrainerBattleForceOut: getswitchedmondata / switchindataupdate / switchinanim / printstring STRINGID_PKMNWASDRAGGEDOUT / switchineffects BS_TARGET (:3340)",
+  "pickLoop": "reference/pokeemerald/src/battle_script_commands.c:7185 Cmd_forcerandomswitch; do { i = Random() % monsCount; } while (...) at :7346 (monsCount = PARTY_SIZE in singles, so empty slots 3-5 are rejected draws)",
+  "neverReached": "reference/pokeemerald/src/battle_util.c:78-146 HandleAction_UseMove (absentBattlerFlags :85, Encore arms :111-128, :130-134 GetMoveTarget arm) is never entered for the dragged-in battler that turn",
+  "exception": "Not exercised here: when the dragged-in mon's switch-in ability fires (e.g. Drizzle), AbilityBattleEffects pushes the cursor without advancing it (the :5296 advance is inside the cancel arm), so switchineffects re-runs after the ability script and the cancel lands on that second pass. Intimidate / Trace return 0 from AbilityBattleEffects and take the cancel arm directly (port note battleScriptSwitchinOpcode.ts:1284-1290)."
+ },
+ "portSitesAtHead": {
+  "cancelWriteMissing": "src/engine/battleScriptSwitchinOpcode.ts:1324-1329 ports the `if (!Ability && !Item)` body (clears SIDE_STATUS_SPIKES_DAMAGED, advances) but never writes actionsByTurnOrder[i] = B_ACTION_CANCEL_PARTNER for the switched-in battler's turn-order slot (source :5270-5274)",
+  "secondActionGate": "src/engine/factoryBattleScriptFullTurnDecision.ts:2986 skips action 2 only when actionsByTurnOrder[1] === B_ACTION_TRY_FINISH (Pursuit); 12 (B_ACTION_FINISHED / CANCEL_PARTNER) is not checked, so the dragged-in battler runs its own action",
+  "whatThePortRuns": "after rng146 F3 the port's action 2 takes the :130-134 arm for the dragged-in mon (slot move != banked move): GetMoveTarget + the slot move's full hit chain -- the census-811 'GLOOM used MOONLIGHT' route. Before F3 it ran the banked ROAR. The ROM runs neither."
+ },
+ "fixShape": "(1) battleScriptSwitchinOpcode.ts, in the :1324-1329 cancel body: for every turn-order slot i with battlerByTurnOrder[i] === battler write actionsByTurnOrder[i] = 12 (B_ACTION_CANCEL_PARTNER; source :5270-5274). (2) factoryBattleScriptFullTurnDecision.ts:2986: skip action 2 when actionsByTurnOrder[1] is B_ACTION_TRY_FINISH (11) OR B_ACTION_FINISHED (12) -- source HandleAction_ActionFinished (battle_util.c:658-663) dispatches the slot's value, and 12 is HandleAction_ActionFinished again, which ends the turn. No new draw sites; the post-fix sequence is the ROM's."
+}
