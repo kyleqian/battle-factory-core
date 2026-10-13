@@ -95,6 +95,9 @@ describe("stq132 SLP / BRN / INFATUATION reducers vs every ROM row", () => {
     expect(statusParticleDisplayRow("SLP", 37, t).sprites).toHaveLength(2);
     expect(statusParticleDisplayRow("BRN", 5, t).sprites.map((s) => [s.left, s.top, s.tileOffset])).toEqual([[136, 48, 0]]);
     expect(statusParticleDisplayRow("INFATUATION", 5, t).sprites.map((s) => [s.left, s.top])).toEqual([[169, 51]]);
+    // SortSprites: equal OAM y (the flames) -> the earlier slot wins (drawn last); a larger y (the lower heart) wins over creation order
+    expect(statusParticleDisplayRow("BRN", 12, t).sprites.map((s) => s.index)).toEqual([1, 0]);
+    expect(statusParticleDisplayRow("INFATUATION", 40, t).sprites.map((s) => [s.index, s.top])).toEqual([[0, 34], [1, 42], [2, 51]]);
     expect(statusParticleDisplayRow("BRN", 20, t).battlerOffset).toEqual({ x: 1, y: 0 });
     expect(statusParticleDisplayRow("BRN", 39, t).enemyShadowHidden).toBe(true);
     expect(statusParticleDisplayRow("BRN", 40, t).enemyShadowHidden).toBe(false);
