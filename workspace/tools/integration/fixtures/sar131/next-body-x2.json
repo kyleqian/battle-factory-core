@@ -1,0 +1,385 @@
+{
+ "sta123-toxic-ply-primeape-onix-309": {
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectToxic+0",
+  "nextBody": {
+   "R": 521,
+   "move": 33,
+   "attacker": "opponent"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "idle",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "idle",
+    "opponent": "unknown"
+   },
+   "x2": 1,
+   "rectPx": 1091
+  }
+ },
+ "sta123-toxic-ply-primeape-onix-721": {
+  "side": "opponent",
+  "path": "BattleScript_DoStatusTurnDmg+0",
+  "nextBody": {
+   "R": 1701,
+   "move": 33,
+   "attacker": "opponent"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "unknown"
+   },
+   "x2": 1,
+   "rectPx": 1091
+  }
+ },
+ "sta123-toxic-opp-primeape-onix-313": {
+  "side": "player",
+  "path": "BattleScript_MoveEffectToxic+0",
+  "nextBody": {
+   "R": 517,
+   "move": 33,
+   "attacker": "player"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "idle"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "unknown",
+    "opponent": "idle"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sta123-toxic-opp-primeape-onix-718": {
+  "side": "player",
+  "path": "BattleScript_DoStatusTurnDmg+0",
+  "nextBody": {
+   "R": 1697,
+   "move": 33,
+   "attacker": "player"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "unknown",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sta123-thunder-wave-ply-primeape-snorlax-204": {
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectParalysis+0",
+  "nextBody": {
+   "R": 411,
+   "move": 33,
+   "attacker": "opponent"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "idle",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "idle",
+    "opponent": "unknown"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sta123-thunder-wave-ply-primeape-snorlax-1756": {
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsParalyzed+6",
+  "nextBody": {
+   "R": 3118,
+   "move": 33,
+   "attacker": "opponent"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "unknown"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sta123-thunder-wave-opp-primeape-snorlax-208": {
+  "side": "player",
+  "path": "BattleScript_MoveEffectParalysis+0",
+  "nextBody": {
+   "R": 407,
+   "move": 33,
+   "attacker": "player"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "idle"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "unknown",
+    "opponent": "idle"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sta123-thunder-wave-opp-primeape-snorlax-1752": {
+  "side": "player",
+  "path": "BattleScript_MoveUsedIsParalyzed+6",
+  "nextBody": {
+   "R": 3114,
+   "move": 33,
+   "attacker": "player"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "unknown",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sar131-toxic-ply-primeape-ledian-309": {
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectToxic+0",
+  "nextBody": {
+   "R": 525,
+   "move": 33,
+   "attacker": "opponent"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "idle",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "idle",
+    "opponent": "unknown"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sar131-toxic-ply-primeape-ledian-725": {
+  "side": "opponent",
+  "path": "BattleScript_DoStatusTurnDmg+0",
+  "nextBody": {
+   "R": 1705,
+   "move": 33,
+   "attacker": "opponent"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "unknown"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sar131-thunder-wave-ply-primeape-golbat-204": {
+  "side": "opponent",
+  "path": "BattleScript_MoveEffectParalysis+0",
+  "nextBody": {
+   "R": 409,
+   "move": 33,
+   "attacker": "opponent"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "idle",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "idle",
+    "opponent": "unknown"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sar131-thunder-wave-ply-primeape-golbat-1754": {
+  "side": "opponent",
+  "path": "BattleScript_MoveUsedIsParalyzed+6",
+  "nextBody": {
+   "R": 3116,
+   "move": 33,
+   "attacker": "opponent"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "unknown"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sar131-thunder-wave-opp-primeape-golbat-208": {
+  "side": "player",
+  "path": "BattleScript_MoveEffectParalysis+0",
+  "nextBody": {
+   "R": 405,
+   "move": 33,
+   "attacker": "player"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "idle"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "unknown",
+    "opponent": "idle"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "sar131-thunder-wave-opp-primeape-golbat-1750": {
+  "side": "player",
+  "path": "BattleScript_MoveUsedIsParalyzed+6",
+  "nextBody": {
+   "R": 3112,
+   "move": 33,
+   "attacker": "player"
+  },
+  "romX2": 0,
+  "romY2": 0,
+  "predicted": {
+   "history": {
+    "player": "zeroed",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  },
+  "base": {
+   "history": {
+    "player": "unknown",
+    "opponent": "zeroed"
+   },
+   "x2": 0,
+   "rectPx": 0
+  }
+ },
+ "summary": {
+  "windowsWithNextBody": 14,
+  "predictedExact": 14,
+  "baseRectDiffers": 2
+ }
+}
