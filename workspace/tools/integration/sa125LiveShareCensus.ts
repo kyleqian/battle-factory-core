@@ -108,7 +108,6 @@ function playBattle(battle: number, seed: number, streak: number): void {
       const evs = seg.events as any[];
       const cmds = seg.commands as any[];
       const nextIndex = (i: number) => { for (let j = i + 1; j < evs.length; j += 1) { const q = evs[j].payload; if (q.kind !== "set-battler-pp-data" && q.kind !== "play-se") return j; } return -1; };
-      const nextReceipt = (i: number) => { const j = nextIndex(i); return j < 0 ? null : evs[j].payload; };
       const msg = (i: number, d: number) => { for (let j = i + d; j >= 0 && j < evs.length; j += d) { const q = evs[j].payload; if (q.kind === "message") return String(q.messageId); } return null; };
       evs.forEach((e: any, i: number) => {
         const p = e.payload;
@@ -116,8 +115,9 @@ function playBattle(battle: number, seed: number, streak: number): void {
           const at = cmds.findIndex((c) => c.type === "status" && c.eventSequence === e.sequence);
           statsRows.push({ kind: "status", battle, seg: segKey, sequence: e.sequence, battler: p.battler, label: e.provenance?.sourceLabel ?? null,
             nextMessage: msg(i, 1), frames: at >= 0 ? cmds[at].timing.minimumFrames : null,
-            animAfter: (() => { const n = nextIndex(i); if (n < 0) return false; if (evs[n].payload.kind === "status-animation") return true;
-              if (evs[n].payload.kind !== "message") return false; const m = nextIndex(n); return m >= 0 && evs[m].payload.kind === "status-animation"; })() });
+            animAfter: (() => { const own = (j: number) => evs[j].payload.kind === "status-animation" && evs[j].payload.battler === p.battler;
+              const n = nextIndex(i); if (n < 0) return false; if (own(n)) return true;
+              if (evs[n].payload.kind !== "message") return false; const m = nextIndex(n); return m >= 0 && own(m); })() });
           return;
         }
         if (p.kind !== "status-animation") return;
@@ -126,7 +126,11 @@ function playBattle(battle: number, seed: number, streak: number): void {
         let usedAt = -1;
         for (let j = i - 1; j >= 0; j -= 1) if (evs[j].payload.kind === "message" && evs[j].payload.messageId === "STRINGID_USEDMOVE") { usedAt = j; break; }
         const damaged = usedAt >= 0 && evs.slice(usedAt, i).some((x: any) => x.payload.kind === "hp-change" && x.payload.to < x.payload.from);
-        const inflicted = nextReceipt(i)?.kind === "message";
+        // The path: the after-print paths (print, waitmessage, statusanimation) have the print right before the receipt; the
+        // infliction paths (statusanimation, then the print) do not. The SA2 gate flag: an infliction after a damaging hit.
+        let prev = i - 1;
+        while (prev >= 0 && (evs[prev].payload.kind === "set-battler-pp-data" || evs[prev].payload.kind === "play-se")) prev -= 1;
+        const inflicted = !(prev >= 0 && evs[prev].payload.kind === "message");
         statsRows.push({ kind: "anim", battle, seg: segKey, sequence: e.sequence, battler: p.battler, isStatus2: p.isStatus2, status: p.status, anim,
           prevMessage: msg(i, -1), nextMessage: msg(i, 1), inflicted, gateFlag: inflicted && damaged,
           presented: at >= 0, minimumFrames: at >= 0 ? cmds[at].timing.minimumFrames : 0, rows: 0, animKey: at >= 0 ? `${segKey}:${at}` : null });

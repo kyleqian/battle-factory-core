@@ -8,7 +8,16 @@ is SA2 (flagged here, not modelled). No kernel, RNG, damage, turn order or facil
 
 ## 1. Results first
 
-__RESULTS__
+| Question | Answer |
+|---|---|
+| The rule (SA1) | Scene ON: each kernel `status-animation` receipt -> a `status-animation` command (battler, animation = InitAndLaunchChosenStatusAnimation's pick, `minimumFrames` = **PSN 71, CONFUSION 100, BRN 39, INFATUATION 97, SLP 97, PRZ 39, FRZ 117, CURSED 75, NIGHTMARE 75**, `STATUS_ANIMATION_ADDED_ROWS`). Timing only; Scene OFF has none (the kernel emits no receipt). |
+| ROM receipts | sta123 `rom-r1.json`: all 52 non-gated Scene ON receipts hold the next instruction exactly the table's rows (= active rows + 1), both sides, every path; OFF 0 rows on all 54. The 2 gated receipts (FRZ right after Ice Beam's hit) hold 133 / 134. |
+| Per-path anchors | Production ON − OFF (same census battles, identical prints) from the anchor to the command after the status animation = the ROM rows, **212 / 212 anchored commands exact** (9 seeds; PSN / PRZ / SLP / CONFUSION / INFATUATION / BRN / FRZ, infliction and after-print paths, both sides; §3). Fails only on the gated class (FRZ after a damaging hit: 16 / 17 rows short; SA2). |
+| The rule (SA3) | Scene ON `status` command followed by its battler's status animation in the same execution lasts **delta(print) − delta(status)** (off121's OFF value): infliction 32 -> 2, sleep / frozen turns 32 -> 1. Others keep 32 (§4). Scene OFF byte-identical. |
+| Gate (SA2) flags | __GATE__ |
+| Pins moved | 5 pins in 5 files (`tools/integration/fixtures/sa125/pins.json`; + 1 environmental failure of the archive copy): off121's Scene ON guard (SA3 itself), stl109's turn-58 route budget (+3,298 − 1,044 frames: 27,992 -> 30,246 > the replay's 30,000 budget), liveBattlerX2History's body key (+1 command index), liveSpriteOrderHost's sweep (+13 status-animation edges, 0 mismatches), sc106's Tickle route total (+478 − 30 = 9,177 -> 9,625). **No soak pin moved** (the soak plays Scene OFF). |
+| Census 0..999 | __CENSUSROW__ |
+| Differential | `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base cfe4e26ca`: **PASS, 624 / 624 captures byte-identical** (no capture moved). |
 
 ## 2. The rule
 
@@ -61,4 +70,34 @@ Toxic / Thunder Wave / Rest), Scene ON's following print lands on the ROM row on
 
 No measured path fails the anchor except the gated FRZ-after-Ice-Beam class (SA2's).
 
-__CENSUS__
+## 4. SA3 table (Scene ON `status` command, base -> final; census 0..999, untruncated battles)
+
+Re-derived for ON from off121's ON probes (`tools/integration/fixtures/off121/receipts/rom-r1.json` `on.events`: status row S_exec -> the
+print instruction P, the same P − S_exec as OFF: Toxic / Thunder Wave / Will-O-Wisp / Spore 2, sleep turns 1) and sta123's `rom-r1.json`
+(the statusanimation between them is 1 row + controllerRows, the latter owned by the status-animation command). Residual = production
+status frames − kernel delta(print) − delta(status) = 0 per class.
+
+__SA3TABLE__
+
+## 5. Pins moved (`tools/integration/fixtures/sa125/pins.json`, `tools/integration/sa125Pins.py`)
+
+Patched copy (git archive `a67a38741` = final production src `9e124ee2f`, pins not yet moved; reference/ linked, artifacts/ copied), full
+suite two shards, 4 workers: shard 1 **3 failed / 817 passed files** (7,052 tests passed, 3 failed), shard 2 **3 failed / 817 passed**
+(6,483 passed, 3 failed). The 6 failures:
+
+| file | test | moved by | new value |
+|---|---|---|---|
+| tests/off121StatusCommand.test.ts | Scene ON guard | SA3 itself | "stays 32 unless its status animation follows (then delta(print) − delta(status))" |
+| tests/stl109Struggle.test.ts | turn-58 route | +34 status animations (3,298) − 34 SA3 statuses (1,044) = +2,254 frames: 27,992 -> 30,246 (base / final measured) > the replay's 30,000 budget | the route passes 40,000 (new optional `frameBudget` parameter of `generatedCommandAnimationReplay`, default 30,000) |
+| tests/liveBattlerX2History.test.ts | seed 110 keys | one status-animation command before the body in segment 1:0 (command index +1) | `1:0:17` -> `1:0:18` (bodies / inputs / parity unchanged) |
+| tests/liveSpriteOrderHost.test.ts | 20-battle sweep | + 13 status-animation command edges (10 host-known), 0 mismatches | compared 882 -> 895, hostKnown 788 -> 798 |
+| tests/sc106StatsChangeCommand.test.ts | Tickle route total | + 4 CONFUSION + 2 PRZ (478) − 30 (one SA3 status 32 -> 2), all after the anchor | 9,177 -> 9,625 (`tests/helpers/sa125Rows.ts`) |
+| tests/appDifferential.test.ts | CLI guard | ENVIRONMENT: the copy is a one-commit repo (`HEAD^`); passes in the worktree | not a pin |
+
+No soak pin moved: `randomRoundSoak` plays Scene OFF (`battleSceneMode` default "off"), where sa125 changes nothing; its decision logs
+are therefore identical by construction (and the Scene OFF census is byte-identical).
+
+## 6. Census 0..999 (base `cfe4e26ca` vs final, sa125LiveShareCensus.ts ten shards per tree + hist73Merge; off108Route.ts --scene=off)
+
+__CENSUSBODY__
+

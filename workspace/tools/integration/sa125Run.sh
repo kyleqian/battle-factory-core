@@ -54,24 +54,7 @@ same=0
 for k in 0 1 2 3 4 5 6 7 8 9; do cmp -s "$OUT/off-base/off-$k.jsonl" "$OUT/off-final/off-$k.jsonl" && same=$((same + 1)); done
 echo "Scene OFF census: $same / 10 shards byte-identical"; [ "$same" -eq 10 ] || fail=1
 # 5. receipt
-python3 - "$OUT" "$FW/tools/integration/fixtures/sa125-live-receipt.json" "$same" <<'PYEOF' || fail=1
-import json, sys
-out, committed, same = sys.argv[1], sys.argv[2], int(sys.argv[3])
-d = json.load(open(f"{out}/delta.json"))
-rev = lambda t: dict(zip(("commit", "src"), open(f"{out}/{t}.rev").read().split()))
-rec = {"schema": "sa125-live-receipt/v1", "base": rev("base"), "final": {"src": rev("final")["src"]},
-       "verdict": d["verdict"], "statusAnimation": d["statusAnimation"], "kernelReceipts": d["kernelReceipts"],
-       "statusCommandClasses": d["statusCommandClasses"], "statusFramesDelta": d["statusFramesDelta"], "liveShare": d["liveShare"],
-       "truncatedBattles": d["truncatedBattles"], "moveCommands": d["moveCommands"], "sceneOffShardsByteIdentical": same}
-open(f"{out}/sa125-live-receipt.json", "w").write(json.dumps(rec, indent=1) + "\n")
-ok = all(v is True for v in d["verdict"].values()) and same == 10
-print("verdict:", "ALL TRUE" if ok else json.dumps(d["verdict"]))
-try:
-    print("receipt == committed:", "SAME" if open(committed).read() == open(f"{out}/sa125-live-receipt.json").read() else "DIFF")
-except FileNotFoundError:
-    print("receipt: no committed copy")
-sys.exit(0 if ok else 1)
-PYEOF
+python3 "$FW/tools/integration/sa125Receipt.py" "$OUT" "$FW/tools/integration/fixtures/sa125-live-receipt.json" "$same" || fail=1
 rm -f "$OUT/base/workspace/node_modules" "$OUT/final/workspace/node_modules" "$OUT/base/workspace/reference" "$OUT/final/workspace/reference"
 [ "$fail" -eq 0 ] && echo "sa125Run: ALL OK" || echo "sa125Run: FAILED"
 exit "$fail"
