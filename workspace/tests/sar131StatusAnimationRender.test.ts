@@ -18,10 +18,11 @@ const compare = JSON.parse(readFileSync(`${SAR131}/production-compare.json`, "ut
 const sha = (b: Uint8Array) => createHash("sha256").update(b).digest("hex").slice(0, 16);
 
 describe("sar131: PSN / PRZ rows (statusAnimation.ts liveStatusAnimationRow)", () => {
-  it("draws PSN and PRZ only; every other B_ANIM_STATUS_* leaves the field as it is", () => {
+  it("draws PSN and PRZ (and exactly STATUS_ANIMATIONS_DRAWN); every other B_ANIM_STATUS_* leaves the field as it is", () => {
     for (const name of Object.keys(STATUS_ANIMATION_ADDED_ROWS)) {
-      const drawn = liveStatusAnimationRow(name, 10, "opponent") !== null;
-      expect(drawn, name).toBe(name === "PSN" || name === "PRZ");
+      // sad133: the stp128 cases need the battler sprite's x / y (statusAnimationRenderView passes it)
+      const drawn = liveStatusAnimationRow(name, 10, "opponent", { sprite: { x: 176, y: 40 } }) !== null;
+      if (name === "PSN" || name === "PRZ") expect(drawn, name).toBe(true);
       expect(STATUS_ANIMATIONS_DRAWN.has(name), name).toBe(drawn);
     }
   });

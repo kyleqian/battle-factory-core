@@ -1,0 +1,1624 @@
+{
+ "age+1": {
+  "failingCommandRowWindows": [
+   "stp128-confuse-ray-opp-primeape-golbat#0",
+   "stp128-confuse-ray-opp-primeape-golbat#1",
+   "stp128-confuse-ray-opp-primeape-golbat#2",
+   "stp128-confuse-ray-opp-primeape-onix#0",
+   "stp128-confuse-ray-opp-primeape-onix#1",
+   "stp128-confuse-ray-opp-primeape-onix#2",
+   "stp128-confuse-ray-ply-primeape-golbat#0",
+   "stp128-confuse-ray-ply-primeape-golbat#1",
+   "stp128-confuse-ray-ply-primeape-golbat#2",
+   "stp128-confuse-ray-ply-primeape-onix#0",
+   "stp128-confuse-ray-ply-primeape-onix#1",
+   "stp128-confuse-ray-ply-primeape-onix#2",
+   "stp128-curse-opp-gengar-golbat#0",
+   "stp128-curse-opp-gengar-golbat#1",
+   "stp128-curse-opp-gengar-onix#0",
+   "stp128-curse-opp-gengar-onix#1",
+   "stp128-curse-ply-gengar-golbat#0",
+   "stp128-curse-ply-gengar-golbat#1",
+   "stp128-curse-ply-gengar-onix#0",
+   "stp128-curse-ply-gengar-onix#1",
+   "stp128-ice-beam-opp-delcatty-shuckle#0",
+   "stp128-ice-beam-opp-delcatty-shuckle#1",
+   "stp128-ice-beam-opp-delcatty-shuckle#2",
+   "stp128-ice-beam-ply-delcatty-shuckle#0",
+   "stp128-ice-beam-ply-delcatty-shuckle#1",
+   "stp128-nightmare-opp-gengar-golbat#0",
+   "stp128-nightmare-opp-gengar-golbat#1",
+   "stp128-nightmare-opp-haunter-shuckle#0",
+   "stp128-nightmare-ply-gengar-golbat#0",
+   "stp128-nightmare-ply-gengar-golbat#1",
+   "stp128-nightmare-ply-gengar-golbat#2",
+   "stp128-nightmare-ply-haunter-shuckle#0",
+   "stp128-nightmare-ply-haunter-shuckle#1",
+   "stp128-nightmare-ply-haunter-shuckle#2"
+  ],
+  "perRowDigest": "acf256684362b9f3",
+  "perWindow": {
+   "stp128-confuse-ray-opp-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 38660,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 38660,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 38660,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 36202,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 36202,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 36202,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 39938,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 39938,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 39938,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 37556,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 37556,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 37556,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 29005,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 29005,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 30717,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 30717,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 31153,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 31153,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 38494,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 38494,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 102138,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 102138,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#2": {
+    "animation": "FRZ",
+    "commandPx": 102138,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 123422,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 123422,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 29700,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 29700,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 36181,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 31848,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 31848,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 31848,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 27815,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 27815,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 27815,
+    "side": "opponent",
+    "zeroPx": false
+   }
+  },
+  "windows": 34,
+  "zeroPxCommandRowWindows": 0,
+  "zeroPxWindows": 0
+ },
+ "lag-swap": {
+  "failingCommandRowWindows": [
+   "stp128-ice-beam-opp-delcatty-shuckle#0",
+   "stp128-ice-beam-opp-delcatty-shuckle#1",
+   "stp128-ice-beam-opp-delcatty-shuckle#2",
+   "stp128-ice-beam-ply-delcatty-shuckle#0",
+   "stp128-ice-beam-ply-delcatty-shuckle#1"
+  ],
+  "perRowDigest": "75abd852c9004910",
+  "perWindow": {
+   "stp128-confuse-ray-opp-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-opp-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-opp-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-opp-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 102138,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 102138,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#2": {
+    "animation": "FRZ",
+    "commandPx": 102138,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 123422,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 123422,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-nightmare-opp-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-nightmare-opp-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-gengar-golbat#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-haunter-shuckle#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-haunter-shuckle#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   }
+  },
+  "windows": 34,
+  "zeroPxCommandRowWindows": 29,
+  "zeroPxWindows": 26
+ },
+ "no-cube": {
+  "failingCommandRowWindows": [
+   "stp128-ice-beam-opp-delcatty-shuckle#0",
+   "stp128-ice-beam-opp-delcatty-shuckle#1",
+   "stp128-ice-beam-opp-delcatty-shuckle#2",
+   "stp128-ice-beam-ply-delcatty-shuckle#0",
+   "stp128-ice-beam-ply-delcatty-shuckle#1"
+  ],
+  "perRowDigest": "159a2895bd6bfda4",
+  "perWindow": {
+   "stp128-confuse-ray-opp-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-opp-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-opp-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-opp-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 282256,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 282256,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#2": {
+    "animation": "FRZ",
+    "commandPx": 282256,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 339334,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 339334,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-nightmare-opp-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-nightmare-opp-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-gengar-golbat#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-haunter-shuckle#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-haunter-shuckle#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   }
+  },
+  "windows": 34,
+  "zeroPxCommandRowWindows": 29,
+  "zeroPxWindows": 26
+ },
+ "no-ducks": {
+  "failingCommandRowWindows": [
+   "stp128-confuse-ray-opp-primeape-golbat#0",
+   "stp128-confuse-ray-opp-primeape-golbat#1",
+   "stp128-confuse-ray-opp-primeape-golbat#2",
+   "stp128-confuse-ray-opp-primeape-onix#0",
+   "stp128-confuse-ray-opp-primeape-onix#1",
+   "stp128-confuse-ray-opp-primeape-onix#2",
+   "stp128-confuse-ray-ply-primeape-golbat#0",
+   "stp128-confuse-ray-ply-primeape-golbat#1",
+   "stp128-confuse-ray-ply-primeape-golbat#2",
+   "stp128-confuse-ray-ply-primeape-onix#0",
+   "stp128-confuse-ray-ply-primeape-onix#1",
+   "stp128-confuse-ray-ply-primeape-onix#2"
+  ],
+  "perRowDigest": "54456d20371f230a",
+  "perWindow": {
+   "stp128-confuse-ray-opp-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 45726,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 45726,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 45726,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 42512,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 42512,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 42512,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 45808,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 45808,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 45808,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 42697,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 42697,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 42697,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-opp-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-opp-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-opp-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-curse-ply-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#2": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-opp-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-nightmare-opp-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-nightmare-opp-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-gengar-golbat#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-haunter-shuckle#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-ply-haunter-shuckle#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   }
+  },
+  "windows": 34,
+  "zeroPxCommandRowWindows": 22,
+  "zeroPxWindows": 22
+ },
+ "no-ghost": {
+  "failingCommandRowWindows": [
+   "stp128-curse-opp-gengar-golbat#0",
+   "stp128-curse-opp-gengar-golbat#1",
+   "stp128-curse-opp-gengar-onix#0",
+   "stp128-curse-opp-gengar-onix#1",
+   "stp128-curse-ply-gengar-golbat#0",
+   "stp128-curse-ply-gengar-golbat#1",
+   "stp128-curse-ply-gengar-onix#0",
+   "stp128-curse-ply-gengar-onix#1",
+   "stp128-nightmare-opp-gengar-golbat#0",
+   "stp128-nightmare-opp-gengar-golbat#1",
+   "stp128-nightmare-opp-haunter-shuckle#0",
+   "stp128-nightmare-ply-gengar-golbat#0",
+   "stp128-nightmare-ply-gengar-golbat#1",
+   "stp128-nightmare-ply-gengar-golbat#2",
+   "stp128-nightmare-ply-haunter-shuckle#0",
+   "stp128-nightmare-ply-haunter-shuckle#1",
+   "stp128-nightmare-ply-haunter-shuckle#2"
+  ],
+  "perRowDigest": "338934411117c1c7",
+  "perWindow": {
+   "stp128-confuse-ray-opp-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 14571,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 14571,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 13843,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 13843,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 11673,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 11673,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 13471,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 13471,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#2": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-opp-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 16948,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 16948,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 16968,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 14324,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 14324,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 14324,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 16912,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 16912,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 16912,
+    "side": "opponent",
+    "zeroPx": false
+   }
+  },
+  "windows": 34,
+  "zeroPxCommandRowWindows": 17,
+  "zeroPxWindows": 14
+ },
+ "no-shake": {
+  "failingCommandRowWindows": [
+   "stp128-curse-opp-gengar-golbat#0",
+   "stp128-curse-opp-gengar-golbat#1",
+   "stp128-curse-opp-gengar-onix#0",
+   "stp128-curse-opp-gengar-onix#1",
+   "stp128-curse-ply-gengar-golbat#0",
+   "stp128-curse-ply-gengar-golbat#1",
+   "stp128-curse-ply-gengar-onix#0",
+   "stp128-curse-ply-gengar-onix#1",
+   "stp128-nightmare-opp-gengar-golbat#0",
+   "stp128-nightmare-opp-gengar-golbat#1",
+   "stp128-nightmare-opp-haunter-shuckle#0",
+   "stp128-nightmare-ply-gengar-golbat#0",
+   "stp128-nightmare-ply-gengar-golbat#1",
+   "stp128-nightmare-ply-gengar-golbat#2",
+   "stp128-nightmare-ply-haunter-shuckle#0",
+   "stp128-nightmare-ply-haunter-shuckle#1",
+   "stp128-nightmare-ply-haunter-shuckle#2"
+  ],
+  "perRowDigest": "3550bc7a41f812d6",
+  "perWindow": {
+   "stp128-confuse-ray-opp-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-opp-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-confuse-ray-ply-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 18939,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 18939,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 22235,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 22235,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 27506,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 27506,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 35961,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 35961,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#2": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "player",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 0,
+    "side": "opponent",
+    "zeroPx": true
+   },
+   "stp128-nightmare-opp-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 18446,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 18446,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 28418,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 26899,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 26899,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 26899,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 17461,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 17461,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 17461,
+    "side": "opponent",
+    "zeroPx": false
+   }
+  },
+  "windows": 34,
+  "zeroPxCommandRowWindows": 17,
+  "zeroPxWindows": 14
+ },
+ "wrong-side": {
+  "failingCommandRowWindows": [
+   "stp128-confuse-ray-opp-primeape-golbat#0",
+   "stp128-confuse-ray-opp-primeape-golbat#1",
+   "stp128-confuse-ray-opp-primeape-golbat#2",
+   "stp128-confuse-ray-opp-primeape-onix#0",
+   "stp128-confuse-ray-opp-primeape-onix#1",
+   "stp128-confuse-ray-opp-primeape-onix#2",
+   "stp128-confuse-ray-ply-primeape-golbat#0",
+   "stp128-confuse-ray-ply-primeape-golbat#1",
+   "stp128-confuse-ray-ply-primeape-golbat#2",
+   "stp128-confuse-ray-ply-primeape-onix#0",
+   "stp128-confuse-ray-ply-primeape-onix#1",
+   "stp128-confuse-ray-ply-primeape-onix#2",
+   "stp128-curse-opp-gengar-golbat#0",
+   "stp128-curse-opp-gengar-golbat#1",
+   "stp128-curse-opp-gengar-onix#0",
+   "stp128-curse-opp-gengar-onix#1",
+   "stp128-curse-ply-gengar-golbat#0",
+   "stp128-curse-ply-gengar-golbat#1",
+   "stp128-curse-ply-gengar-onix#0",
+   "stp128-curse-ply-gengar-onix#1",
+   "stp128-ice-beam-opp-delcatty-shuckle#0",
+   "stp128-ice-beam-opp-delcatty-shuckle#1",
+   "stp128-ice-beam-opp-delcatty-shuckle#2",
+   "stp128-ice-beam-ply-delcatty-shuckle#0",
+   "stp128-ice-beam-ply-delcatty-shuckle#1",
+   "stp128-nightmare-opp-gengar-golbat#0",
+   "stp128-nightmare-opp-gengar-golbat#1",
+   "stp128-nightmare-opp-haunter-shuckle#0",
+   "stp128-nightmare-ply-gengar-golbat#0",
+   "stp128-nightmare-ply-gengar-golbat#1",
+   "stp128-nightmare-ply-gengar-golbat#2",
+   "stp128-nightmare-ply-haunter-shuckle#0",
+   "stp128-nightmare-ply-haunter-shuckle#1",
+   "stp128-nightmare-ply-haunter-shuckle#2"
+  ],
+  "perRowDigest": "623fcfbc2489d4c3",
+  "perWindow": {
+   "stp128-confuse-ray-opp-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 92393,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 92393,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 92393,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 89179,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 89179,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-opp-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 89179,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#0": {
+    "animation": "CONFUSION",
+    "commandPx": 88526,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#1": {
+    "animation": "CONFUSION",
+    "commandPx": 88526,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-golbat#2": {
+    "animation": "CONFUSION",
+    "commandPx": 88526,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#0": {
+    "animation": "CONFUSION",
+    "commandPx": 85415,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#1": {
+    "animation": "CONFUSION",
+    "commandPx": 85415,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-confuse-ray-ply-primeape-onix#2": {
+    "animation": "CONFUSION",
+    "commandPx": 85415,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 73145,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 73145,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 75713,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-opp-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 75713,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-golbat#0": {
+    "animation": "CURSED",
+    "commandPx": 73643,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-golbat#1": {
+    "animation": "CURSED",
+    "commandPx": 73643,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-onix#0": {
+    "animation": "CURSED",
+    "commandPx": 83896,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-curse-ply-gengar-onix#1": {
+    "animation": "CURSED",
+    "commandPx": 83896,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 580792,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 580792,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-opp-delcatty-shuckle#2": {
+    "animation": "FRZ",
+    "commandPx": 580792,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#0": {
+    "animation": "FRZ",
+    "commandPx": 575444,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-ice-beam-ply-delcatty-shuckle#1": {
+    "animation": "FRZ",
+    "commandPx": 575444,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 76850,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 76850,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-opp-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 88576,
+    "side": "player",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 77107,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 77107,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-gengar-golbat#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 77107,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#0": {
+    "animation": "NIGHTMARE",
+    "commandPx": 70158,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#1": {
+    "animation": "NIGHTMARE",
+    "commandPx": 70158,
+    "side": "opponent",
+    "zeroPx": false
+   },
+   "stp128-nightmare-ply-haunter-shuckle#2": {
+    "animation": "NIGHTMARE",
+    "commandPx": 70158,
+    "side": "opponent",
+    "zeroPx": false
+   }
+  },
+  "windows": 34,
+  "zeroPxCommandRowWindows": 0,
+  "zeroPxWindows": 0
+ }
+}
