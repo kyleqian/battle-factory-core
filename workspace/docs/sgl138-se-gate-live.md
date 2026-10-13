@@ -72,7 +72,8 @@ Code tested: production src of `170802d15` (== 368e5b41c's src; later commits ar
 - `npm run build` green.
 - `sgl138Run.sh` (run1, before the runner's `.orig` fix): receipt SAME, tests 15 / 15, census ok and == sgs134's patched copy; the src
   check (patch's `.orig` backup) re-run by hand after the fix: SAME.
-- Soak (vanilla + default, seeds 0:20) and the app differential: running at the time of this commit — see the handoff.
+- `npm run soak -- --policy vanilla --seeds 0:20 --parallel 5` **20 / 20 OK**; `npm run soak -- --seeds 0:20 --parallel 5` **20 / 20 OK**.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 86298bae3`: **PASS, 624 / 624 captures byte-identical** (235 + 216 + 173; the app-only trace did not move).
 
 ## 5. Reproduction (from workspace/)
 
