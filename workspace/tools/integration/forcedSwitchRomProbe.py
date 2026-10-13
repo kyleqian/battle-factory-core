@@ -17,7 +17,10 @@ ref = ROOT / "reference" / "pokeemerald"
 PROFILE = os.environ.get("FS_PROFILE", "battle-scene-on")  # battle-scene-off: no body exists; E is anchored on the gBattlerPartyIndexes change (= ON-profile E+7)
 _d = json.loads(SCEN.read_text()); _d["profile"] = PROFILE
 req = validate_request(_d, PROFILE)
-o = EmeraldOracle(ref / "pokeemerald.gba", ref / "pokeemerald.map", HARNESS / "oracle" / "bootstrap" / "factory.json")
+# offs152: boot the profile's own snapshot as oracle/server.py does (idle94Probe.py's BOOT); before offs152 the OFF profile booted the
+# Scene ON factory.json, so every earlier "FS_PROFILE=battle-scene-off" probe ran with the battle scene ON.
+BOOT = {"battle-scene-on": "factory.json", "battle-scene-off": "factory-battle-scene-off.json"}[PROFILE]
+o = EmeraldOracle(ref / "pokeemerald.gba", ref / "pokeemerald.map", HARNESS / "oracle" / "bootstrap" / BOOT)
 lab = BattleLab(o, PROFILE); lab.prepare(req)
 nm = subprocess.run(["arm-none-eabi-nm", "-n", str(ref / "pokeemerald.elf")], check=True, capture_output=True, text=True).stdout
 sym = {p[2]: int(p[0], 16) for p in (l.split() for l in nm.splitlines()) if len(p) == 3}
