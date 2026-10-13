@@ -1,5 +1,29 @@
 # Animation integration progress
 
+## 2026-10-13 (day, in progress) — finish-up session: engine fixes #165 / #141b / #140 + presentation landings
+
+- **Engine (main/ts lane, see PROGRESS.md):** ret165 (#165 Return -> Frustration; census Return 84 -> 0, Frustration 90 -> 154 all live;
+  supervisor reproduced the ROM receipt byte-identically), rng146 (#141b Sticky Hold + #140 `:130-134` arm; verify-rcp143 R2 / R3 /
+  R3-control PASS on master, R1 THRASH deferred -> thr153 re-land).
+- **inl144 (INTEGRATION, Sonnet, merged `d019cd6b4`): inv142 LANDED** (#168 hidden-battler remainder): the status animation draws over an
+  invisible battler, the battler stays hidden. Supervisor: inv142Run.sh --census into a fresh dir ALL SAME (5 / 5 windows 0 px, controls,
+  route delta 92 frames in the one INFATUATION command, census identical). Differential 641 / 641 (235 + 216 + 190).
+- **snd145 (INTEGRATION, Opus, merged `877580fde`): species-keyed OPPONENT send-in tail, Scene ON** (#146): generated
+  `src/data/sendInTail.ts` (376 species; 338 / 338 vs the sweep), `src/engine/switchInTail.ts`; every Scene ON opponent switch-in (voluntary,
+  forced, faint replacement) uses its species' healthbox slide + duration; send-in white fade + particles keyed to every switch-in command;
+  faint-replacement turn-end hold. 12 Scene ON dense windows (6 species x Roar / faint): healthbox + message rows 0 px (faint path: 1 blank
+  row one frame late; TYPHLOSION faint D4 lag frame). The sweep was Scene ON; **Scene OFF skips the front animation** (SKIP_FRONT_ANIM):
+  OFF unchanged here — ROM OFF slide el 36 / next message ~62 vs production 33 / 102 (68 rows per window) -> offs152. Census: only
+  switch-in commands move (1,783 / 3,550, +75,870 frames), 0 move-animation changes. Supervisor: snd145Run.sh --census ALL SAME.
+  Named residual: the species front animation is not drawn (16k-232k px per window) -> fra151.
+- **fps147 (SIDE, Opus, new files, merged `d095544e7`):** unwired `src/animation/focusPunchSetUp.ts` (General_FocusPunchSetUp == Move_ENDURE
+  body on a general-animation host): 7 dense Scene ON windows 0 px (incl. elevated other battler), controls fail, no D4 phase; behind a
+  Substitute no animation. Landing recipe docs/fps147-focus-punch-setup.md §4 (consumed by the #139 step). Supervisor: fps147Run.sh ALL SAME.
+- **rcp143 (SIDE, Opus, new files, merged `a76b8a61f`):** ROM receipts R1-R4 for #141 / #140 / #139 (docs/rcp143-engine-fix-receipts.md);
+  #140's real singles route is a lock cancelled mid-turn by a faster foe's sleep / freeze / Spite (Mimic / Transform cannot reach :133).
+- **Union gates:** `d019cd6b4` (ret165 + inl144 + rcp143): typecheck, smoke 448, full suite 1,656 files / 13,741 tests 0 failed, build.
+  `877580fde` (+ rng146 + fps147 + snd145): typecheck, smoke 448, affected 88 / 88; full suite + gameplay gates running.
+
 ## 2026-10-13 — User-authorized Factory finish-up scope (instructions only)
 
 All remaining animation variants, presentation corrections and discussed battle-engine accuracy defects are now in the current
