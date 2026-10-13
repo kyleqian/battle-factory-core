@@ -8,29 +8,33 @@ import {
   STATUS_CONDITION_SPANS,
   statusConditionDisplayRow,
   statusConditionSourceRow,
+  statusConditionSpan,
   statusConditionTarget,
+  type StatusConditionOptions,
   type StatusConditionAnimation,
   type StatusConditionTarget,
 } from "../src/animation/statusConditionAnimations.ts";
 
 interface RomRow {
-  rel: number; act: number; x: number; io: Record<string, number>; bg: number[]; bat: number[]; sprites: number[][];
+  rel: number; act: number; x: number; io: Record<string, number>; bg: number[]; bat: number[]; sprites: number[][]; p7?: number[];
 }
-interface RomWindow { scenario: string; animation: StatusConditionAnimation | "FRZ"; side: "player" | "opponent"; E: number; rows: RomRow[] }
+interface RomWindow { scenario: string; animation: StatusConditionAnimation; side: "player" | "opponent"; E: number; rows: RomRow[] }
 
 const rom = JSON.parse(readFileSync("tools/integration/fixtures/stp128/rom-windows.json", "utf8")) as { windows: Record<string, RomWindow> };
-const windows = Object.entries(rom.windows).filter(([, w]) => w.animation !== "FRZ") as [string, RomWindow & { animation: StatusConditionAnimation }][];
+const windows = Object.entries(rom.windows);
+/** FRZ: the frozen-turn windows lose one row in loadspritegfx (E 116), the windows after Ice Beam do not (E 115). */
+const optionsOf = (w: RomWindow): StatusConditionOptions => (w.animation === "FRZ" ? { freezeLoadLagRows: w.E === 116 ? 1 : 0 } : {});
 
 /** The window's target geometry, from the ROM row before the rise (battler sprite) and the first created sprite (createsprite origin). */
 export function stp128Target(w: RomWindow): StatusConditionTarget {
   const before = w.rows[0]!;
   const first = w.rows.find((r) => r.sprites.length)!.sprites[0]!;
-  const dy = w.animation === "CONFUSION" ? 15 : 0;
-  return { side: w.side, spriteX: before.bat[0]!, spriteY: before.bat[1]!, animX: first[0]!, animY: first[1]! + dy, idleX2: before.bat[2]! };
+  const dx = w.animation === "FRZ" ? 32 : 0, dy = w.animation === "CONFUSION" ? 15 : w.animation === "FRZ" ? 36 : 0;
+  return { side: w.side, spriteX: before.bat[0]!, spriteY: before.bat[1]!, animX: first[0]! + dx, animY: first[1]! + dy, idleX2: before.bat[2]! };
 }
 
-function sourceAsRom(animation: StatusConditionAnimation, rel: number, target: StatusConditionTarget) {
-  const s = statusConditionSourceRow(animation, rel, target);
+function sourceAsRom(animation: StatusConditionAnimation, rel: number, target: StatusConditionTarget, options: StatusConditionOptions) {
+  const s = statusConditionSourceRow(animation, rel, target, options);
   return {
     act: s.active ? 1 : 0, x: s.controllerBusy ? 1 : 0, bg: [...s.bg], bat: [s.battlerX2, s.battlerY2, s.battlerInvisible ? 1 : 0],
     bldcnt: s.bldcnt, bldalpha: s.bldalpha,
@@ -39,7 +43,7 @@ function sourceAsRom(animation: StatusConditionAnimation, rel: number, target: S
 }
 
 describe("stp128 status-condition reducers vs every ROM row", () => {
-  it("covers CURSED / NIGHTMARE / CONFUSION on both sides with at least two species pairs each", () => {
+  it("covers CURSED / NIGHTMARE / CONFUSION on both sides with at least two species pairs each, FRZ on both sides and both paths", () => {
     const pairs = new Map<string, Set<string>>();
     for (const [, w] of windows) {
       const key = `${w.animation}/${w.side}`;
@@ -49,22 +53,34 @@ describe("stp128 status-condition reducers vs every ROM row", () => {
     for (const animation of ["CURSED", "NIGHTMARE", "CONFUSION"]) {
       for (const side of ["player", "opponent"]) expect(pairs.get(`${animation}/${side}`)?.size ?? 0).toBeGreaterThanOrEqual(2);
     }
-    expect(windows.length).toBe(29);
+    expect(windows.length).toBe(34);
+    for (const side of ["player", "opponent"]) {
+      expect(windows.filter(([, w]) => w.animation === "FRZ" && w.side === side).map(([, w]) => w.E).sort()).toEqual(side === "player" ? [115, 116, 116] : [115, 116]);
+    }
   });
 
   for (const [key, w] of windows) {
     it(`${key} (${w.animation}, ${w.side} target): ${w.rows.length} rows rel ${w.rows[0]!.rel} .. ${w.rows.at(-1)!.rel}`, () => {
       const target = stp128Target(w);
+      const options = optionsOf(w);
+      const span = statusConditionSpan(w.animation, options);
       expect(statusConditionTarget(w.side, target.spriteX, target.spriteY, target.idleX2)).toEqual(target);
-      expect(w.E).toBe(STATUS_CONDITION_SPANS[w.animation].activeRows);
+      expect(w.E).toBe(span.activeRows);
       const bad: string[] = [];
       for (const r of w.rows) {
-        const got = sourceAsRom(w.animation, r.rel, target);
-        // after the release row (rel controllerRows) the controller flag belongs to the next battle-script instruction (a print)
-        const want = { act: r.act, x: r.rel <= STATUS_CONDITION_SPANS[w.animation].controllerRows ? r.x : got.x, bg: r.bg, bat: r.bat.slice(2, 5), bldcnt: r.io.bldcnt, bldalpha: r.io.bldalpha, sprites: r.sprites };
+        const got = sourceAsRom(w.animation, r.rel, target, options);
+        // before rel 0 (an IsBattleSEPlaying gate) and after the release row the controller flag belongs to other instructions
+        const want = { act: r.act, x: r.rel >= 0 && r.rel <= span.controllerRows ? r.x : got.x, bg: r.bg, bat: r.bat.slice(2, 5), bldcnt: r.io.bldcnt, bldalpha: r.io.bldalpha, sprites: r.sprites };
         if (JSON.stringify(got) !== JSON.stringify(want)) bad.push(`rel ${r.rel}: got ${JSON.stringify(got)} want ${JSON.stringify(want)}`);
       }
       expect(bad.slice(0, 3)).toEqual([]);
+      if (w.animation === "FRZ") {
+        // the ice cube palette rotation (entries 13..15) reaches OBJ palette RAM exactly on the rows the display reducer advances it
+        const romChanges = w.rows.filter((r) => r.rel > w.rows[0]!.rel && r.p7).map((r) => r.rel);
+        const rot = (rel: number) => statusConditionDisplayRow("FRZ", rel, target, options).objPaletteRotation;
+        const changes = w.rows.filter((r) => r.rel > w.rows[0]!.rel && rot(r.rel) !== rot(r.rel - 1)).map((r) => r.rel);
+        expect(changes).toEqual(romChanges);
+      }
     });
   }
 

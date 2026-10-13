@@ -19,6 +19,7 @@ since the window's previous row; rel -2 carries everything):
   bat                       battler 0 / 1 sprites: [spriteId, x, y, x2, y2, invisible]
   p7                        OBJ palette bank 7 of palette RAM (16 BGR555 words)
   pob / pbg                 sha256[:12] of OBJ / BG palette RAM
+  sc                        [sBattleAnimScriptPtr - the window label's address, sAnimFramesToWait, gMain.vblankCounter2 & 0xFF]
 Window header: label, rise frame, battler (gBattleAnimAttacker), E, the pre-window sprite set.
 Optional env STP128_DUMP=<dir>: also write <dir>/<output stem>-<rise>.npz (every window row's full RGB, rel -2 first); scratch only.
 """
@@ -79,6 +80,7 @@ def main() -> None:
     u8, u16, u32 = oracle.read_u8, oracle.read_u16, oracle.read_u32
     act_a, mv_a, ptr_a, atk_a = sy["gAnimScriptActive"], sy["sAnimMoveIndex"], sy["sBattleAnimScriptPtr"], sy["gBattleAnimAttacker"]
     exec_a, spr_a, bsid_a = sy["gBattleControllerExecFlags"], sy["gSprites"], sy["gBattlerSpriteIds"]
+    wait_a, vbc_a = sy["sAnimFramesToWait"], sy["gMain"] + 0x24  # struct Main: vblankCounter2 at 0x24
     bg_a = [sy["gBattle_BG1_X"], sy["gBattle_BG1_Y"], sy["gBattle_BG2_X"], sy["gBattle_BG2_Y"]]
     dump_dir = os.environ.get("STP128_DUMP")
     windows: list[dict] = []
@@ -116,6 +118,7 @@ def main() -> None:
         row["p7"] = [u16(0x05000200 + 7 * 32 + 2 * k) for k in range(16)]
         row["pob"] = hashlib.sha256(bytes(u8(0x05000200 + k) for k in range(512))).hexdigest()[:12]
         row["pbg"] = hashlib.sha256(bytes(u8(0x05000000 + k) for k in range(512))).hexdigest()[:12]
+        row["sc"] = [u32(ptr_a) - (cur["base"] if cur is not None else u32(ptr_a)), u8(wait_a), u32(vbc_a) & 0xFF]
         return row
 
     def sample() -> None:
@@ -129,7 +132,7 @@ def main() -> None:
             base = max((a for a in labels if a <= ptr), default=None)
             if base is not None and ptr - base < 0x40:
                 pre = [i for i in range(64) if in_use(i)]
-                cur = {"label": labels[base], "rise": frame, "ptr": ptr - base, "battler": u8(atk_a), "pre": pre, "E": None,
+                cur = {"base": base, "label": labels[base], "rise": frame, "ptr": ptr - base, "battler": u8(atk_a), "pre": pre, "E": None,
                        "rows": [], "frames": [], "ref": hist[-1][1]}
                 for k, (r, im) in enumerate(hist[-2:]):
                     cur["rows"].append(dict(r, rel=k - len(hist[-2:])))
@@ -164,7 +167,7 @@ def main() -> None:
         compact, last = [], {}
         for r in cur["rows"]:
             out = {"rel": r["rel"], "f": r["f"]}
-            for k in ("act", "x", "scr", "d", "io", "bg", "oam", "spr", "bat", "p7", "pob", "pbg"):
+            for k in ("act", "x", "scr", "d", "io", "bg", "oam", "spr", "bat", "p7", "pob", "pbg", "sc"):
                 if k in r and (r["rel"] == cur["rows"][0]["rel"] or last.get(k) != r[k] or k in ("act", "scr")):
                     out[k] = r[k]
                 if k in r:
