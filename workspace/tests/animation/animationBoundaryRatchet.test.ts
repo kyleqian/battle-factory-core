@@ -88,6 +88,12 @@ describe("animation/engine boundary ratchet", () => {
       // stats-change command reads only the pure General_StatsChange reducer's statsChangeParams / statsChangeSpan
       // (src/animation/statsChange.ts, no imports); presentation timing only, never battle rules, RNG or AI.
       join("src", "engine", "battleResolutionPresentation.ts"),
+      // fra151 (S10A ISSUES #146 / #71 remainder, step brief: wire the front send-out dispatcher into the Scene ON opponent switch-in
+      // renderer; docs/fra151-front-send-in-animation.md): midBattleSwitchInAt reads only the pure front send-out reducers
+      // (src/animation/sendOutDispatcher.ts frontSendOut{Frame,Affine,Palette}AtTick / frontSendOutAnimationDelay /
+      // frontSendOutInitializerTicks, src/animation/sendOutSpriteFrame.ts frontSendOutSpriteFrameAtTick); presentation pixels only,
+      // never battle rules, RNG, timing or AI.
+      join("src", "engine", "battleResolutionPresentationRender.ts"),
     ]);
     const violations: string[] = [];
     for (const file of collectTsFiles("src")) {
