@@ -1,0 +1,220 @@
+diff --git a/src/engine/battleResolutionPresentation.ts b/src/engine/battleResolutionPresentation.ts
+index 325f6440..0d509a7b 100644
+--- a/src/engine/battleResolutionPresentation.ts
++++ b/src/engine/battleResolutionPresentation.ts
+@@ -1,6 +1,6 @@
+ import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
+ import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+-import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
++import type { LiveBattlerX2History, LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
+ import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+ import {
+   battleCommandFieldBattlerFromPartyMember,
+@@ -478,6 +478,11 @@ export type BattleResolutionPresentationState = Readonly<{
+   liveMoveSpriteOrderInput?: LiveMoveSpriteOrderInput;
+   /** Presentation-only battler x2 history at the current move body's activation edge (liveBattlerX2History.ts, #148). */
+   liveMoveBattlerX2Input?: LiveMoveBattlerX2Input;
++  /**
++   * rst139 (docs/rst139-ordinary-row-rest.md): the tracked x2 history before the current command (Scene ON only; absent = no x2
++   * host). Ordinary rows draw an `idle` opponent at its species front idle rest (battleResolutionPresentationRender.ts).
++   */
++  liveOrdinaryBattlerX2History?: LiveBattlerX2History;
+   resolutionId: Readonly<{
+     requestId: number;
+     side: "player";
+diff --git a/src/engine/battleResolutionPresentationRender.ts b/src/engine/battleResolutionPresentationRender.ts
+index b29b0997..ff8ee8ee 100644
+--- a/src/engine/battleResolutionPresentationRender.ts
++++ b/src/engine/battleResolutionPresentationRender.ts
+@@ -5,6 +5,7 @@ import {
+ import type { PresentationRngHost } from "./presentationRngHost.ts";
+ import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+ import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
++import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
+ import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSubstituteSwap.ts";
+ import {
+   liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
+@@ -1741,9 +1742,28 @@ export function createBattleResolutionPresentationRenderView(
+   // cf78: a displayed CASTFORM in a weather form (its slot's gBattleMonForms at this command) declines every live body.
+   field = withLiveCastformForms(field, liveCastformFormsAt(state, command));
+   const tailSide = substituteSwapTailSideAt(state, segment, field);
+-  const fieldArt = tailSide === null
++  const baseFieldArt = tailSide === null
+     ? createBattleCommandFieldArtView(field)
+     : substituteSwapTailFieldArt(createBattleCommandFieldArtView(field), tailSide);
++  // rst139 (docs/rst139-ordinary-row-rest.md): outside a battle animation script the ROM keeps the battler sprite's x2 / y2 where the
++  // last script or send-in left it, so an ordinary Scene ON row (message / HP / blink / stat / status / handoff; no body, fade, banner,
++  // status animation, faint, switch or party summary) draws a tracked-`idle` opponent at its species front idle rest. `zeroed` and
++  // `unknown` keep x2 0; the doll has no rest; Scene OFF carries no history.
++  const ordinaryRest = state.liveOrdinaryBattlerX2History?.opponent === "idle"
++      && (effect === null || effect.type === "hit" || effect.type === "stat" || effect.type === "status")
++      && !(command !== null && state.lifecycle.phase !== "next-command-handoff" && state.lifecycle.phase !== "confirm-handoff"
++        && (command.type === "switch-in" || command.type === "switch-out" || command.type === "party-summary"
++          || command.type === "trainer-slide" || command.type === "move-animation"))
++      && switchIn === null && midBattleSwitchIn === null && switchOut === null && partySummary === null
++      && field.opponent.substituteDoll !== true
++    ? speciesFrontIdleRestOffsetOrZero(baseFieldArt.opponent.speciesSymbol) : null;
++  const fieldArt = ordinaryRest === null || (ordinaryRest.x2 === 0 && ordinaryRest.y2 === 0) ? baseFieldArt : Object.freeze({
++    ...baseFieldArt,
++    opponent: Object.freeze({
++      ...baseFieldArt.opponent,
++      origin: Object.freeze({ x: baseFieldArt.opponent.origin.x + ordinaryRest.x2, y: baseFieldArt.opponent.origin.y + ordinaryRest.y2 }),
++    }),
++  });
+   const playerHit = effect?.type === "hit" && effect.battler === 0
+     ? effect
+     : null;
+diff --git a/src/engine/battleScene.ts b/src/engine/battleScene.ts
+index 86df5c4b..187e3bc6 100644
+--- a/src/engine/battleScene.ts
++++ b/src/engine/battleScene.ts
+@@ -1438,7 +1438,7 @@ import {
+ } from "../animation/shadowPunch.ts";
+ import { shadowPunchLiveBackgroundBldy } from "../animation/shadowPunchFadeHost.ts";
+ import {
+-  speciesFrontIdleRestOffset,
++  speciesFrontIdleRestOffset, speciesFrontIdleRestOffsetOrZero,
+ } from "../animation/speciesIdleAnim.ts";
+ import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
+ import { rockBlastDisplayedTargetOffsetAtAge } from "../animation/rockBlast.ts";
+@@ -14901,7 +14901,17 @@ export function renderGeneratedBattleCommandPresentation(
+   presentation: BattleCommandPresentationState,
+   layer: "all" | "obj-only" = "all",
+   openElapsed?: number,
++  /** rst139: the orchestrator's tracked x2 history says the opponent is at its species front idle rest (Scene ON). */
++  opponentIdleRest = false,
+ ): void {
++  // rst139 (docs/rst139-ordinary-row-rest.md): the command menu's opponent stands at its tracked front idle rest.
++  const restArt = (art: BattleCommandFieldArtView): BattleCommandFieldArtView => {
++    if (!opponentIdleRest || art.opponent.substituteDoll === true) return art;
++    const rest = speciesFrontIdleRestOffsetOrZero(art.opponent.speciesSymbol);
++    if (rest.x2 === 0 && rest.y2 === 0) return art;
++    return Object.freeze({ ...art, opponent: Object.freeze({
++      ...art.opponent, origin: Object.freeze({ x: art.opponent.origin.x + rest.x2, y: art.opponent.origin.y + rest.y2 }) }) });
++  };
+   const bounceTick = presentation.idleBounceElapsed
+     + battleCommandBounceAgeOffset(presentation);
+   const idleBounce = commandMenuBounceY2(bounceTick);
+@@ -14919,7 +14929,7 @@ export function renderGeneratedBattleCommandPresentation(
+         bounce,
+         revealed,
+         view.healthboxes,
+-        view.fieldArt,
++        restArt(view.fieldArt),
+         view.spriteVisibility,
+         layer,
+         openElapsed,
+@@ -14937,7 +14947,7 @@ export function renderGeneratedBattleCommandPresentation(
+         bounce,
+         true,
+         view.healthboxes,
+-        view.fieldArt,
++        restArt(view.fieldArt),
+         view.spriteVisibility,
+         layer,
+         openElapsed,
+@@ -14959,7 +14969,7 @@ export function renderGeneratedBattleCommandPresentation(
+         bounce,
+         true,
+         view.healthboxes,
+-        view.fieldArt,
++        restArt(view.fieldArt),
+         view.spriteVisibility,
+         layer,
+         openElapsed,
+diff --git a/src/engine/core.ts b/src/engine/core.ts
+index f410619d..479b09e3 100644
+--- a/src/engine/core.ts
++++ b/src/engine/core.ts
+@@ -677,6 +677,8 @@ import {
+   completeFactoryRoundPresentation,
+   createFactoryRoundBattleOrchestrator,
+   factoryHeardBrainSpeech,
++  factoryRoundBattleOpponentIdleRest,
++  factoryRoundBattleResolutionForRender,
+   markFactoryBrainSpeechHeard,
+   preGenerateFactoryRoundNextOpponent,
+   type FactoryRoundBattleOrchestratorState,
+@@ -3511,7 +3513,8 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
+     } else {
+       renderBattleResolutionPresentation(
+         fb,
+-        resolution,
++        // rst139: the handoff rows read the battle's current tracked x2 history.
++        factoryRoundBattleResolutionForRender(state.factoryRoundBattleOrchestrator) ?? resolution,
+         { drawScene: renderBattleResolutionLiveView },
+         state.presentationRng?.host ?? null,
+       );
+@@ -3525,7 +3528,9 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
+     if (selector) {
+       renderBattlePartySelect(fb, selector, partySelectCloseRenderAssets(presentation));
+     } else {
+-      renderGeneratedBattleCommandPresentation(fb, presentation);
++      // rst139: the tracked x2 history of this battle (Scene ON only) puts an idle opponent at its front idle rest.
++      renderGeneratedBattleCommandPresentation(fb, presentation, "all", undefined,
++        factoryRoundBattleOpponentIdleRest(state.factoryRoundBattleOrchestrator));
+     }
+     return fb;
+   }
+diff --git a/src/engine/factoryRoundBattleOrchestrator.ts b/src/engine/factoryRoundBattleOrchestrator.ts
+index 029193fc..0a18acee 100644
+--- a/src/engine/factoryRoundBattleOrchestrator.ts
++++ b/src/engine/factoryRoundBattleOrchestrator.ts
+@@ -38,7 +38,7 @@ import { liveMovePresentationRngBodyKey } from "./liveMovePresentationRng.ts";
+ import {
+   advanceLiveBattlerX2Host, applyLiveBattlerX2Event, createLiveBattlerX2Host, invalidateLiveBattlerX2Host,
+   liveBattlerX2EventsOf, liveMoveBattlerX2Input, liveMoveBattlerX2InputForBody, liveStaleMovePowerTaintedBy, LIVE_BATTLER_X2_IDLE, type LiveBattlerX2Host,
+-  type LiveMoveBattlerX2Input,
++  type LiveBattlerX2History, type LiveMoveBattlerX2Input,
+ } from "./liveBattlerX2History.ts";
+ import {
+   invalidateLiveSpriteAllocatorHost,
+@@ -2422,6 +2422,8 @@ function prepareResolutionPalette(
+   const retainedX2 = state.liveBattlerX2Host?.battleCallStart === state.activeBattleCallStart
+     ? state.liveBattlerX2Host : undefined;
+   let x2Host = retainedX2 ? advanceLiveBattlerX2Host(retainedX2.host, resolution, commandSequence, true) : undefined;
++  // rst139: the history before this command (every event strictly before it) for its ordinary rows.
++  const ordinaryX2History = x2Host?.history;
+   let battlerX2Input: LiveMoveBattlerX2Input | undefined;
+   if (command?.type === "move-animation" && command.animation && x2Host) {
+     battlerX2Input = retainedX2?.commandKey === commandKey
+@@ -2508,6 +2510,7 @@ function prepareResolutionPalette(
+       liveMoveSpriteAllocatorInput: spriteInput,
+       liveMoveSpriteOrderInput: spriteOrderInput,
+       liveMoveBattlerX2Input: battlerX2Input,
++      liveOrdinaryBattlerX2History: ordinaryX2History,
+     }),
+     ...(x2Host === undefined ? {} : {
+       liveBattlerX2Host: Object.freeze({ battleCallStart: state.activeBattleCallStart, commandKey, host: x2Host }),
+@@ -2515,6 +2518,31 @@ function prepareResolutionPalette(
+   });
+ }
+ 
++/** rst139 (docs/rst139-ordinary-row-rest.md): this battle's tracked x2 history (Scene ON only), else undefined. */
++function currentLiveBattlerX2History(state: FactoryRoundBattleOrchestratorState): LiveBattlerX2History | undefined {
++  const x2 = state.liveBattlerX2Host;
++  return x2 !== undefined && x2.battleCallStart === state.activeBattleCallStart ? x2.host.history : undefined;
++}
++
++/**
++ * rst139: the resolution as drawn. A presented command's rows read the history before that command (prepareResolutionPalette); the
++ * handoff / dismiss rows (and the confirm-handoff row the command step returns before any palette pass) read the battle's current one.
++ */
++export function factoryRoundBattleResolutionForRender(
++  state: FactoryRoundBattleOrchestratorState,
++): BattleResolutionPresentationState | null {
++  const resolution = state.battleResolutionPresentation;
++  const history = currentLiveBattlerX2History(state);
++  if (!resolution || history === undefined
++    || (resolution.lifecycle.phase === "presenting" && resolution.liveOrdinaryBattlerX2History !== undefined)) return resolution ?? null;
++  return Object.freeze({ ...resolution, liveOrdinaryBattlerX2History: history });
++}
++
++/** rst139: the command UI's opponent stands at its species front idle rest (tracked `idle`, Scene ON). */
++export function factoryRoundBattleOpponentIdleRest(state: FactoryRoundBattleOrchestratorState): boolean {
++  return currentLiveBattlerX2History(state)?.opponent === "idle";
++}
++
+ export function advanceFactoryRoundBattleResolution(
+   state: FactoryRoundBattleOrchestratorState,
+   newKeys: ReadonlySet<GbaButton> = new Set(),
