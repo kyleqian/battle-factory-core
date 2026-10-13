@@ -2,10 +2,10 @@
  "schema": "fps147-compare/v1",
  "summary": {
   "neg": "no-shake",
-  "windows": 6,
+  "windows": 7,
   "reducerZeroPxWindows": 0,
   "productionEndureZeroPxWindows": null,
-  "perRowDigest": "212e3e09ee8db610"
+  "perRowDigest": "645660a3dfcdd282"
  },
  "result": {
   "o-aggron": {
@@ -15,6 +15,7 @@
     "opponent": "AGGRON"
    },
    "R": 44,
+   "elevatedOpponentShadow": false,
    "attackerCoord": {
     "x": 176,
     "y": 40
@@ -115,6 +116,7 @@
     "opponent": "GOLEM"
    },
    "R": 44,
+   "elevatedOpponentShadow": false,
    "attackerCoord": {
     "x": 176,
     "y": 40
@@ -215,6 +217,7 @@
     "opponent": "REGISTEEL"
    },
    "R": 44,
+   "elevatedOpponentShadow": false,
    "attackerCoord": {
     "x": 176,
     "y": 40
@@ -308,6 +311,107 @@
    ],
    "reducerFrameDigest": "1750af968837c2f2"
   },
+  "p-breloom-golbat": {
+   "side": "player",
+   "species": {
+    "player": "BRELOOM",
+    "opponent": "GOLBAT"
+   },
+   "R": 76,
+   "elevatedOpponentShadow": true,
+   "attackerCoord": {
+    "x": 72,
+    "y": 80
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 52
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 45643,
+   "animationRowsPx": 45643,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 908,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     39,
+     773,
+     0
+    ],
+    [
+     40,
+     763,
+     0
+    ],
+    [
+     41,
+     765,
+     0
+    ],
+    [
+     42,
+     744,
+     0
+    ],
+    [
+     43,
+     737,
+     0
+    ],
+    [
+     44,
+     734,
+     0
+    ],
+    [
+     45,
+     733,
+     0
+    ],
+    [
+     46,
+     741,
+     0
+    ],
+    [
+     47,
+     740,
+     0
+    ],
+    [
+     48,
+     692,
+     0
+    ],
+    [
+     49,
+     692,
+     0
+    ],
+    [
+     50,
+     703,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "d9bbda652e02f530"
+  },
   "p-breloom": {
    "side": "player",
    "species": {
@@ -315,6 +419,7 @@
     "opponent": "JOLTEON"
    },
    "R": 76,
+   "elevatedOpponentShadow": false,
    "attackerCoord": {
     "x": 72,
     "y": 80
@@ -415,6 +520,7 @@
     "opponent": "JOLTEON"
    },
    "R": 108,
+   "elevatedOpponentShadow": false,
    "attackerCoord": {
     "x": 72,
     "y": 80
@@ -515,6 +621,7 @@
     "opponent": "JOLTEON"
    },
    "R": 44,
+   "elevatedOpponentShadow": false,
    "attackerCoord": {
     "x": 72,
     "y": 80

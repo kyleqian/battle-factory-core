@@ -7,18 +7,20 @@
 //                  corner x - 8 / y - 16, drawn 9, 7, 5, 4, 3 in front of both battlers: the production Endure branch's order).
 //   production arm the production Endure live body itself: liveMoveAnimationPresentation({ moveId ENDURE, attacker }, field, age = rel)
 //                  + renderSceneOnMovePresentation(fb, state, liveField = true), i.e. what the landing gets by reusing that branch.
+// The reducer arm draws an elevated opponent's shadow (src/assets/gen/battle-enemy-shadow.json at the source singles placement
+// (176, 40 + 29), as stp128) unless the display row hides it; the production arm keeps the Endure body's own shadow rule (age 0 only).
 // Both draw the occluders the live view draws after the field (healthbox OBJs, the message window). Transplant (stp128 / scd112):
 // C(rel) = ROM(rel -1) except where P(rel) != P_ord (the same arm with no effect: reducer = idle battler, Y 0, no sprites; production
 // arm = its age 0), where it is P(rel). C == ROM(rel) needs every pixel the animation changes to be right. Scored rows: rel -4 (the
 // empty box) .. 122 (the row before the focus message's first glyph), full screen; rows 123 .. 128 are scored with the message band
 // (y >= 112, the print) reported apart.
-//   node --experimental-strip-types --no-warnings tools/integration/fps147Compare.ts <raw-dir> <out.json> [--neg=age+1|wrong-side|no-shake|no-blend]
-//     [--fixtures=<dir>]   (controls apply to the reducer arm; each must fail. --fixtures: a rebuilt fixture dir, fps147Run.sh)
+//   node --experimental-strip-types --no-warnings tools/integration/fps147Compare.ts <raw-dir> <out.json> [--neg=age+1|wrong-side|no-shake|no-blend|shadow-shown]
+//     [--fixtures=<dir>]   (controls apply to the reducer arm; each must fail; shadow-shown only where the opponent is elevated. --fixtures: a rebuilt fixture dir, fps147Run.sh)
 import { readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import {
   battleBg, battleWindow, drawComposedPlayerHealthbox, drawOpponentHealthboxWobble, drawSpriteSheet, drawTileBg, onixPlayerHealthboxContent,
-  renderSceneOnMovePresentation,
+  renderSceneOnMovePresentation, setPixel,
 } from "../../src/engine/battleScene.ts";
 import { battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import { blendComponentToward } from "../../src/engine/paletteFade.ts";
@@ -37,6 +39,9 @@ const MOVE_ENDURE = 203;
 const rom = JSON.parse(readFileSync(`${F}/rom-windows.json`, "utf8")) as { windows: Record<string, any> };
 const focusEnergy = (JSON.parse(readFileSync("src/animation/assets/focus-energy.json", "utf8")) as any).focusEnergy as {
   tileset: { columns: number; rows: number; tiles: number[][] }; palette: { r: number; g: number; b: number }[];
+};
+const shadow = JSON.parse(readFileSync("src/assets/gen/battle-enemy-shadow.json", "utf8")) as {
+  width: number; height: number; mask: number[]; color: { r: number; g: number; b: number }; elevatedSpecies: string[];
 };
 type Side = "player" | "opponent";
 const RED = { r: 255, g: 0, b: 0 };
@@ -70,6 +75,7 @@ for (const [key, w] of Object.entries(rom.windows)) {
   const corner = { player: battleCommandFieldSpriteOrigin(art.player, "player"), opponent: battleCommandFieldSpriteOrigin(art.opponent, "opponent") };
   const rest = { player: liveBattlerAnchors("player", art).frontIdleRest.x2, opponent: liveBattlerAnchors("opponent", art).frontIdleRest.x2 };
   const coordOf = (s: Side) => liveBattlerAnchors(s, art).battlePositionCenter;
+  const elevated = shadow.elevatedSpecies.includes(`SPECIES_${speciesName(species.opponent)}`);
   const raw = readFileSync(`${rawDir}/${key}.rgb`);
   const firstRel = w.rows[0].rel as number;
   const frameAt = (rel: number) => raw.subarray((rel - firstRel) * FRAME, (rel - firstRel + 1) * FRAME);
@@ -79,6 +85,10 @@ for (const [key, w] of Object.entries(rom.windows)) {
   const paint = (d: FocusPunchSetUpDisplayRow | null, animated: Side) => {
     const fb = new Uint8Array(240 * 160 * 4);
     drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    if (elevated && !(d?.enemyShadowHidden ?? false)) {
+      const sx = 176 - shadow.width / 2, sy = 40 + 29 - shadow.height / 2;
+      for (const p of shadow.mask) setPixel(fb, sx + (p % shadow.width), sy + Math.floor(p / shadow.width), shadow.color);
+    }
     const drawBattler = (s: Side) => {
       const pic = art[s].pic;
       const on = d !== null && s === animated;
@@ -103,7 +113,8 @@ for (const [key, w] of Object.entries(rom.windows)) {
   const motionSide: Side = neg === "wrong-side" ? other : side;
   const displayAt = (rel: number) => {
     const d = focusPunchSetUpDisplayRow(neg === "age+1" ? rel + 1 : rel, motionSide, coordOf(motionSide));
-    return neg === "no-shake" ? { ...d, attackerX2: 0 } : neg === "no-blend" ? { ...d, attackerPaletteY: 0 } : d;
+    return neg === "no-shake" ? { ...d, attackerX2: 0 } : neg === "no-blend" ? { ...d, attackerPaletteY: 0 }
+      : neg === "shadow-shown" ? { ...d, enemyShadowHidden: false } : d;
   };
   const ord = paint(null, side);
 
@@ -162,7 +173,7 @@ for (const [key, w] of Object.entries(rom.windows)) {
   digest.update(`${key}:${JSON.stringify(perRow)}\n`);
   result[key] = {
     side, species: { player: speciesName(species.player), opponent: speciesName(species.opponent) }, R: w.R,
-    attackerCoord: coordOf(side), productionCorner: corner[side], idleRest: rest,
+    elevatedOpponentShadow: elevated, attackerCoord: coordOf(side), productionCorner: corner[side], idleRest: rest,
     scoredRows: { first: FIRST_SCORED, last: LAST_SCORED, count: rows }, reducerPx: px, animationRowsPx: animPx,
     productionEndurePx: neg ? null : prodPx, afterRows: { rels: [LAST_SCORED + 1, w.rows.at(-1).rel], px: tailPx, messageBandPx: tailBand,
       productionPx: neg ? null : prodTailPx },

@@ -81,6 +81,11 @@ export interface FocusPunchSetUpDisplayRow {
   readonly attackerPaletteY: number;
   /** Added to the attacker's corner (production adds the opponent's tracked front idle rest on top). */
   readonly attackerX2: number;
+  /**
+   * An elevated opponent's shadow is hidden (SpriteCB_EnemyShadow: gAnimScriptActive, whoever animates), shown one row late:
+   * display rows 1 .. activeRows + 1.
+   */
+  readonly enemyShadowHidden: boolean;
 }
 
 /** Move_ENDURE's offsets past its 64 bytes are inside EndureEffect, which follows it directly in the ROM. */
@@ -141,5 +146,6 @@ export function focusPunchSetUpDisplayRow(
     attackerPaletteTarget: "red",
     attackerPaletteY: shown.attackerPaletteY,
     attackerX2: at.attackerDisplayX2,
+    enemyShadowHidden: rel >= 1 && rel <= FOCUS_PUNCH_SETUP_ROWS.activeRows + 1,
   };
 }

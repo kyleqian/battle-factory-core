@@ -19,6 +19,12 @@
    "equal": true,
    "dumpRgb": "f0b15233ee1abc9a4b59ee491ce6a40de29f7f8707312346fbad4aad0e2f22d1"
   },
+  "p-breloom-golbat": {
+   "r1": "7aa2b6642369c94c6f10a005c7227480eb60a7971eaca6e5132ca96549df5ba2",
+   "r2": "7aa2b6642369c94c6f10a005c7227480eb60a7971eaca6e5132ca96549df5ba2",
+   "equal": true,
+   "dumpRgb": "a5bbbbd046fa41b2641c77bb8ee57183e699c7e9c7543c4be076ea0743ef9a49"
+  },
   "p-breloom": {
    "r1": "e61bca8bbebbee806a0d383f473415704c4f08cf4575a594b315b3e7f54c361e",
    "r2": "e61bca8bbebbee806a0d383f473415704c4f08cf4575a594b315b3e7f54c361e",

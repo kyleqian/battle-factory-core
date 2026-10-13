@@ -93,21 +93,38 @@ describe("fps147 General_FocusPunchSetUp reducer vs dense ROM windows", () => {
     }
   });
 
-  it("comparator receipts: 0 px on every scored row of every window (both arms); every control fails every window", () => {
+  it("comparator receipts: reducer arm 0 px on every scored row of every window; every control fails", () => {
     const read = (name: string) => JSON.parse(readFileSync(`${FIX}/${name}`, "utf8"));
+    const shadowMask = JSON.parse(readFileSync("src/assets/gen/battle-enemy-shadow.json", "utf8")).mask.length as number;
     const main = read("compare.json");
+    const elevated = windows.filter(([key]) => main.result[key].elevatedOpponentShadow).map(([key]) => key);
+    expect(elevated).toEqual(["p-breloom-golbat"]);
     expect(main.summary).toMatchObject({ neg: null, windows: windows.length, reducerZeroPxWindows: windows.length,
-      productionEndureZeroPxWindows: windows.length });
+      productionEndureZeroPxWindows: windows.length - elevated.length });
     for (const [key, w] of windows) {
-      expect(main.result[key]).toMatchObject({ side: w.side, reducerPx: 0, animationRowsPx: 0, productionEndurePx: 0,
+      expect(main.result[key]).toMatchObject({ side: w.side, reducerPx: 0, animationRowsPx: 0,
         scoredRows: { first: FOCUS_PUNCH_SETUP_ROWS.emptyBoxDisplay, last: FOCUS_PUNCH_SETUP_ROWS.focusFirstGlyphDisplay - 1, count: 127 },
-        afterRows: { px: 0, productionPx: 0 } });
+        afterRows: { px: 0 } });
+      if (elevated.includes(key)) {
+        // production's Endure body shows the elevated shadow on its age 0 only: exactly the shadow is missing on the shown rows
+        expect(main.result[key].badRows).toEqual([-4, -3, -2, -1, 122].map((rel) => [rel, 0, shadowMask]));
+        expect(main.result[key].afterRows.productionPx).toBe(6 * shadowMask);
+      } else {
+        expect(main.result[key]).toMatchObject({ productionEndurePx: 0, afterRows: { productionPx: 0 } });
+      }
     }
     for (const neg of ["age+1", "wrong-side", "no-shake", "no-blend"]) {
       const control = read(`compare-${neg}.json`);
       expect(control.summary).toMatchObject({ neg, windows: windows.length, reducerZeroPxWindows: 0 });
       for (const [key] of windows) expect(control.result[key].animationRowsPx).toBeGreaterThan(0);
     }
+    const shown = read("compare-shadow-shown.json");
+    for (const [key] of windows) expect([key, shown.result[key].reducerPx > 0]).toEqual([key, elevated.includes(key)]);
+  });
+
+  it("the elevated-opponent shadow is hidden on display rows 1 .. E + 1", () => {
+    const hidden = Array.from({ length: 140 }, (_, i) => i - 8).filter((rel) => focusPunchSetUpDisplayRow(rel, "player", { x: 72, y: 80 }).enemyShadowHidden);
+    expect([hidden[0], hidden.at(-1), hidden.length]).toEqual([1, FOCUS_PUNCH_SETUP_ROWS.activeRows + 1, FOCUS_PUNCH_SETUP_ROWS.activeRows + 1]);
   });
 
   it("behind a substitute: no animation, the focus message 121 rows earlier", () => {

@@ -4,7 +4,7 @@
 #   1. fps147Stage.py           -> <out>/fixtures/scenarios/*.json           vs tools/integration/fixtures/fps147/scenarios
 #   2. fps147Probes.sh          -> <out>/probes/r{1,2} + <out>/dump (direct mGBA, Scene ON, each job twice fresh; r1 == r2 required)
 #   3. fps147Receipt.py         -> <out>/fixtures/{rom-windows,probe-sha256}.json
-#   4. fps147Compare.ts (+ the 4 controls) on the rebuilt fixtures -> <out>/fixtures/compare*.json
+#   4. fps147Compare.ts (+ the 5 controls) on the rebuilt fixtures -> <out>/fixtures/compare*.json
 # Prints "ALL SAME" when every rebuilt file is byte-identical to the committed one (exit 1 otherwise).
 set -eu
 OUT=$1
@@ -16,7 +16,7 @@ sh tools/integration/fps147Probes.sh "$OUT" "$OUT/fixtures/scenarios"
 python3 tools/integration/fps147Receipt.py "$OUT" "$OUT/fixtures"
 node --experimental-strip-types --no-warnings tools/integration/fps147Compare.ts "$OUT/dump" "$OUT/fixtures/compare.json" \
   --fixtures="$OUT/fixtures" | tail -1
-for n in age+1 wrong-side no-shake no-blend; do
+for n in age+1 wrong-side no-shake no-blend shadow-shown; do
   node --experimental-strip-types --no-warnings tools/integration/fps147Compare.ts "$OUT/dump" "$OUT/fixtures/compare-$n.json" \
     --fixtures="$OUT/fixtures" --neg=$n | tail -1
 done

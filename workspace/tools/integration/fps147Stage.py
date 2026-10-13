@@ -6,6 +6,8 @@ The Focus Punch user is a legal carrier (src/data/gen/battle-frontier-mons.json 
 selects Focus Punch from its slot; the opponent is JOLTEON with Sand-Attack x4 (MOVE_TARGET_SELECTED, no damage). Opponent-side windows:
 the carrier species with Focus Punch in all four slots (the documented way to constrain the Factory AI to one legal choice); the player is
 JOLTEON with Sand-Attack x4 and selects slot 0. No legal Focus Punch carrier is an elevated species (battle-enemy-shadow.json).
+`p-breloom-golbat`: the player's BRELOOM against an ELEVATED opponent (GOLBAT, Supersonic x4): SpriteCB_EnemyShadow hides the
+opponent's shadow whenever gAnimScriptActive is set, whoever animates.
 `p-machamp-sub`: turn 1 the player's MACHAMP uses Substitute (Sand-Attack is blocked by it), turn 2 Focus Punch from behind the
 substitute (TryHandleLaunchBattleTableAnimation skips B_ANIM_FOCUS_PUNCH_SETUP for a battler behind a substitute).
 
@@ -38,6 +40,7 @@ CASES = [
     ("o-aggron", "opponent", 546),
     ("o-registeel", "opponent", 840),
     ("p-machamp-sub", "player-substitute", 810),
+    ("p-breloom-golbat", "player-vs-elevated", 480),
 ]
 
 
@@ -82,6 +85,9 @@ def main() -> None:
             (OUT / f"{stem}.json").write_text(json.dumps(scen, indent=1) + "\n")
             print(stem, side, entry["species"], sub, keys)
             continue
+        if side == "player-vs-elevated":
+            parties["opponent"][0] = mon(jolteon, "SPECIES_GOLBAT", [MOVES["MOVE_SUPERSONIC"]] * 4)
+            side = "player"
         if side == "player":
             moves = [MOVES[m] for m in entry["moves"]]
             parties["player"][0] = mon(breloom, entry["species"], moves)
