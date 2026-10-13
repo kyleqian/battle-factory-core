@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "mode": "factoryLegal",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 7,
+  "battleNum": 1,
+  "trainerId": 222,
+  "playerSetIds": [
+    534,
+    567,
+    402
+  ],
+  "opponentSetIds": [
+    747,
+    648,
+    540
+  ],
+  "seed": 2150966716,
+  "trace": {
+    "segments": [],
+    "captureFrames": [
+      0
+    ]
+  }
+}

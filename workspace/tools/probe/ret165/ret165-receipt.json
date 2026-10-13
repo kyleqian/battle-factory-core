@@ -1,0 +1,573 @@
+{
+  "schema": "ret165-return-to-frustration/v1",
+  "issue": "#165",
+  "oracleProfile": "battle-scene-off",
+  "source": "battle_factory.c:913-919 SetMonMoveAvoidReturn; callers battle_factory.c:461 / :822, battle_tower.c:1880, battle_factory_screen.c:1774",
+  "ramSource": "../oracle/battle_lab.py reads gBattleMons (0x2024084 + battler * BATTLE_MON_SIZE; friendship +0x2B) and the decrypted party records",
+  "verdict": {
+    "returnCarriers": 6,
+    "allRomRecordsMatchAvoidReturn": true,
+    "allFriendshipZero": true,
+    "tsBuilderMatchesRomEveryMember": true,
+    "romMoveMenuText": "frame 41 of ret165-return-carriers-off: FRUSTRATION / BITE / THUNDER WAVE / DRAGON DANCE, PP 20/20 (PNG read)"
+  },
+  "labs": [
+    {
+      "label": "ret165-return-carriers-off (player GYARADOS 459 / EXEGGUTOR 534 / FEAROW 567)",
+      "activeGBattleMons": {
+        "player": {
+          "species": 130,
+          "moves": [
+            218,
+            44,
+            86,
+            349
+          ],
+          "pp": [
+            20,
+            25,
+            20,
+            20
+          ],
+          "friendship": 0
+        },
+        "opponent": {
+          "species": 143,
+          "moves": [
+            263,
+            247,
+            213,
+            104
+          ],
+          "pp": [
+            20,
+            15,
+            15,
+            15
+          ],
+          "friendship": 0
+        }
+      },
+      "player": [
+        {
+          "setId": 459,
+          "rawTableMoves": [
+            216,
+            44,
+            86,
+            349
+          ],
+          "romPartyMoves": [
+            218,
+            44,
+            86,
+            349
+          ],
+          "romPartyPp": [
+            20,
+            25,
+            20,
+            20
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            218,
+            44,
+            86,
+            349
+          ],
+          "tsPp": [
+            20,
+            25,
+            20,
+            20
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": true,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        },
+        {
+          "setId": 534,
+          "rawTableMoves": [
+            216,
+            174,
+            79,
+            156
+          ],
+          "romPartyMoves": [
+            218,
+            174,
+            79,
+            156
+          ],
+          "romPartyPp": [
+            20,
+            10,
+            15,
+            10
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            218,
+            174,
+            79,
+            156
+          ],
+          "tsPp": [
+            20,
+            10,
+            15,
+            10
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": true,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        },
+        {
+          "setId": 567,
+          "rawTableMoves": [
+            65,
+            216,
+            211,
+            185
+          ],
+          "romPartyMoves": [
+            65,
+            218,
+            211,
+            185
+          ],
+          "romPartyPp": [
+            20,
+            20,
+            25,
+            20
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            65,
+            218,
+            211,
+            185
+          ],
+          "tsPp": [
+            20,
+            20,
+            25,
+            20
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": true,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        }
+      ],
+      "opponent": [
+        {
+          "setId": 460,
+          "rawTableMoves": [
+            263,
+            247,
+            213,
+            104
+          ],
+          "romPartyMoves": [
+            263,
+            247,
+            213,
+            104
+          ],
+          "romPartyPp": [
+            20,
+            15,
+            15,
+            15
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            263,
+            247,
+            213,
+            104
+          ],
+          "tsPp": [
+            20,
+            15,
+            15,
+            15
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": false,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        },
+        {
+          "setId": 648,
+          "rawTableMoves": [
+            38,
+            94,
+            109,
+            349
+          ],
+          "romPartyMoves": [
+            38,
+            94,
+            109,
+            349
+          ],
+          "romPartyPp": [
+            15,
+            10,
+            10,
+            20
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            38,
+            94,
+            109,
+            349
+          ],
+          "tsPp": [
+            15,
+            10,
+            10,
+            20
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": false,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        },
+        {
+          "setId": 540,
+          "rawTableMoves": [
+            174,
+            213,
+            38,
+            247
+          ],
+          "romPartyMoves": [
+            174,
+            213,
+            38,
+            247
+          ],
+          "romPartyPp": [
+            10,
+            15,
+            15,
+            15
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            174,
+            213,
+            38,
+            247
+          ],
+          "tsPp": [
+            10,
+            15,
+            15,
+            15
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": false,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        }
+      ],
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "aac6a96aa8d91b066bd79f1b384c6330e75c67e50687977bb966a8dc867d21e1",
+          "file": "frame-00000.png"
+        },
+        {
+          "frame": 41,
+          "sha256": "0ac83819d5f091bc37ad417bc1d38a71eb7976ca6ce80f00b4901f7f26ca9e66",
+          "file": "frame-00041.png"
+        }
+      ]
+    },
+    {
+      "label": "ret165-opponent-return-carrier-off (opponent GYARADOS 747 lead; player EXEGGUTOR 534 / FEAROW 567)",
+      "activeGBattleMons": {
+        "player": {
+          "species": 103,
+          "moves": [
+            218,
+            174,
+            79,
+            156
+          ],
+          "pp": [
+            20,
+            10,
+            15,
+            10
+          ],
+          "friendship": 0
+        },
+        "opponent": {
+          "species": 130,
+          "moves": [
+            218,
+            89,
+            349,
+            156
+          ],
+          "pp": [
+            20,
+            10,
+            20,
+            10
+          ],
+          "friendship": 0
+        }
+      },
+      "player": [
+        {
+          "setId": 534,
+          "rawTableMoves": [
+            216,
+            174,
+            79,
+            156
+          ],
+          "romPartyMoves": [
+            218,
+            174,
+            79,
+            156
+          ],
+          "romPartyPp": [
+            20,
+            10,
+            15,
+            10
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            218,
+            174,
+            79,
+            156
+          ],
+          "tsPp": [
+            20,
+            10,
+            15,
+            10
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": true,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        },
+        {
+          "setId": 567,
+          "rawTableMoves": [
+            65,
+            216,
+            211,
+            185
+          ],
+          "romPartyMoves": [
+            65,
+            218,
+            211,
+            185
+          ],
+          "romPartyPp": [
+            20,
+            20,
+            25,
+            20
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            65,
+            218,
+            211,
+            185
+          ],
+          "tsPp": [
+            20,
+            20,
+            25,
+            20
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": true,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        },
+        {
+          "setId": 402,
+          "rawTableMoves": [
+            89,
+            34,
+            68,
+            317
+          ],
+          "romPartyMoves": [
+            89,
+            34,
+            68,
+            317
+          ],
+          "romPartyPp": [
+            10,
+            15,
+            20,
+            10
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            89,
+            34,
+            68,
+            317
+          ],
+          "tsPp": [
+            10,
+            15,
+            20,
+            10
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": false,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        }
+      ],
+      "opponent": [
+        {
+          "setId": 747,
+          "rawTableMoves": [
+            216,
+            89,
+            349,
+            156
+          ],
+          "romPartyMoves": [
+            218,
+            89,
+            349,
+            156
+          ],
+          "romPartyPp": [
+            20,
+            10,
+            20,
+            10
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            218,
+            89,
+            349,
+            156
+          ],
+          "tsPp": [
+            20,
+            10,
+            20,
+            10
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": true,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        },
+        {
+          "setId": 648,
+          "rawTableMoves": [
+            38,
+            94,
+            109,
+            349
+          ],
+          "romPartyMoves": [
+            38,
+            94,
+            109,
+            349
+          ],
+          "romPartyPp": [
+            15,
+            10,
+            10,
+            20
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            38,
+            94,
+            109,
+            349
+          ],
+          "tsPp": [
+            15,
+            10,
+            10,
+            20
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": false,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        },
+        {
+          "setId": 540,
+          "rawTableMoves": [
+            174,
+            213,
+            38,
+            247
+          ],
+          "romPartyMoves": [
+            174,
+            213,
+            38,
+            247
+          ],
+          "romPartyPp": [
+            10,
+            15,
+            15,
+            15
+          ],
+          "romPartyFriendship": 0,
+          "tsMoves": [
+            174,
+            213,
+            38,
+            247
+          ],
+          "tsPp": [
+            10,
+            15,
+            15,
+            15
+          ],
+          "tsFriendship": 0,
+          "carriesReturn": false,
+          "romMatchesAvoidReturn": true,
+          "tsMatchesRom": true
+        }
+      ],
+      "captures": [
+        {
+          "frame": 0,
+          "sha256": "f5ca0cd34fa8f5d627dd79a8ec2a5526c6abc338c67111f034a5d5bee0948a27",
+          "file": "frame-00000.png"
+        }
+      ]
+    }
+  ]
+}
