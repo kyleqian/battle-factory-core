@@ -1,6 +1,6 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
-import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
+import type { LiveBattlerX2History, LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import {
   battleCommandFieldBattlerFromPartyMember,
@@ -482,6 +482,11 @@ export type BattleResolutionPresentationState = Readonly<{
   liveMoveSpriteOrderInput?: LiveMoveSpriteOrderInput;
   /** Presentation-only battler x2 history at the current move body's activation edge (liveBattlerX2History.ts, #148). */
   liveMoveBattlerX2Input?: LiveMoveBattlerX2Input;
+  /**
+   * rst139 (docs/rst139-ordinary-row-rest.md): the tracked x2 history before the current command (Scene ON only; absent = no x2
+   * host). Ordinary rows draw an `idle` opponent at its species front idle rest (battleResolutionPresentationRender.ts).
+   */
+  liveOrdinaryBattlerX2History?: LiveBattlerX2History;
   resolutionId: Readonly<{
     requestId: number;
     side: "player";
