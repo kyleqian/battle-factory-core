@@ -1,0 +1,34 @@
+{
+ "rst139-confuse-ray-opp-onix.json": {
+  "r1": "c35436d7c40fa78f34eeb0f793becbb236c79433f2332d0eb22fc67c7c437717",
+  "r2": "c35436d7c40fa78f34eeb0f793becbb236c79433f2332d0eb22fc67c7c437717"
+ },
+ "rst139-confuse-ray-ply-golbat.json": {
+  "r1": "b4544bad29e25bd69beaa264c0048bef05ecdfa75556f915daa2aae70b17b69a",
+  "r2": "b4544bad29e25bd69beaa264c0048bef05ecdfa75556f915daa2aae70b17b69a"
+ },
+ "rst139-confuse-ray-ply-onix.json": {
+  "r1": "5ce25347dc1844f91f742a21d7429c750d1c2d380f428eae2c2976b3e9afae31",
+  "r2": "5ce25347dc1844f91f742a21d7429c750d1c2d380f428eae2c2976b3e9afae31"
+ },
+ "rst139-confuse-ray-ply-rattata.json": {
+  "r1": "83744a21308b6d2caa95587305ba4863b14b610a447100c1ae0b7881b79b480f",
+  "r2": "83744a21308b6d2caa95587305ba4863b14b610a447100c1ae0b7881b79b480f"
+ },
+ "rst139-harden-opp-onix.json": {
+  "r1": "d8d4f973e954455fe56ee4d567f4c88e00c9466328cfe20b0fb755b83786ff59",
+  "r2": "d8d4f973e954455fe56ee4d567f4c88e00c9466328cfe20b0fb755b83786ff59"
+ },
+ "rst139-karate-chop-ply-onix.json": {
+  "r1": "f47359a518921cbb587f0415a88e9ca2f0580de35f2c58167771e4200eac0ff0",
+  "r2": "f47359a518921cbb587f0415a88e9ca2f0580de35f2c58167771e4200eac0ff0"
+ },
+ "rst139-roar-ply-snorlax.json": {
+  "r1": "9193a030a7695f623ab1a0644801dc2a10cc162e7fe643a7344c45a2dbdfa50c",
+  "r2": "9193a030a7695f623ab1a0644801dc2a10cc162e7fe643a7344c45a2dbdfa50c"
+ },
+ "rst139-tail-whip-ply-onix.json": {
+  "r1": "d1c5954e59710d31385bba80bd5aa92c6218f3b279bdc92fa10122b9ffb02571",
+  "r2": "d1c5954e59710d31385bba80bd5aa92c6218f3b279bdc92fa10122b9ffb02571"
+ }
+}
