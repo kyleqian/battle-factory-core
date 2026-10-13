@@ -33,16 +33,20 @@ check() { if cmp -s "$1" "$2"; then echo "SAME $3"; else echo "DIFF $3"; fail=1;
 
 # 1. copies: final = this workspace's files; base = the sar131 tip from the first enclosing git repo that has it
 mkdir -p "$OUT/final/workspace"
-tar -cf - --exclude ./node_modules --exclude ./reference --exclude ./artifacts --exclude ./.integration --exclude ./dist --exclude ./.git . \
-  | tar -x -C "$OUT/final/workspace"
+# (species-audit-6 holds one ~250-byte file name that macOS tar cannot restore under a deep <out-dir>; nothing here reads it)
+XL=./tools/integration/fixtures/species-audit-6
+tar -cf - --exclude ./node_modules --exclude ./reference --exclude ./artifacts --exclude ./.integration --exclude ./dist --exclude ./.git \
+  --exclude $XL . | tar -x -C "$OUT/final/workspace"
 d=$W; REPO=""
 while [ "$d" != "/" ]; do
   if git -C "$d" cat-file -e "$BASE^{commit}" 2> /dev/null; then REPO=$d; break; fi
   d=$(dirname "$d")
 done
 [ -n "$REPO" ] || { echo "base $BASE not found in any enclosing git repo"; exit 2; }
-mkdir -p "$OUT/base"
-git -C "$REPO" archive "$BASE" workspace | tar -x -C "$OUT/base"
+mkdir -p "$OUT/base/workspace"
+# (from the repo's top level: run in a subdirectory, git archive would apply that prefix inside the tree)
+git -C "$(git -C "$REPO" rev-parse --show-toplevel)" archive "$BASE:workspace" | tar -x -C "$OUT/base/workspace" --exclude ${XL#./}
+[ -f "$OUT/base/workspace/src/engine/battleScene.ts" ] || { echo "base copy failed"; exit 2; }
 for t in base final; do
   ln -s "$W/node_modules" "$OUT/$t/workspace/node_modules"
   ln -s "$W/reference" "$OUT/$t/workspace/reference"

@@ -55,9 +55,25 @@ NIGHTMARE, both FRZ paths); the effect's `inflicted`; the elevated GOLBAT shadow
 passes the battler geometry (`liveStatusAnimationRow(name, 10, "opponent", { sprite })`) and asserts PSN / PRZ drawn and drawn ==
 `STATUS_ANIMATIONS_DRAWN`.
 
-## 5. Gates (final code: production src `72bf269e0`)
+## 5. Gates (final code: production src `72bf269e0`; tested at `f7018ff64`, later commits are runner / doc only)
 
-(filled in below)
+- `sh tools/integration/sad133Run.sh .integration/validation/sad133/run3/out --census` (final = this workspace, base = `7ae8aff49`):
+  **ALL SAME** (~12 min): stp128 probes r1 == r2 14 / 14, 28 / 28 == committed sha256, rom-windows SAME; comparator 34 / 34 command
+  rows 0 px (31 / 34 all rows), r1 == r2 == committed; controls SAME (command-row-clean 0 / 0 / 17 / 17 / 22 / 29 / 29 of 34); x2 34 / 34;
+  sar131 PSN / PRZ: probes 7 / 7, rom-r1 SAME, 17 / 17 0 px, production-compare.json SAME; routes 5 / 5 OK, SAME; census delta SAME
+  (0 changes); sad133 test 16 / 16 in the copy; receipt SAME (all verdicts true).
+- Targeted (4 workers): tests/sad133StatusAnimationRender, sar131StatusAnimationRender, sa125StatusAnimationCommand,
+  stp128StatusConditionReducer, animation/statusAnimation, animation/factoryAnimationInventory, animation/animationBoundaryRatchet,
+  playableAnimationIntegration: **8 files / 99 tests passed**.
+- `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
+- Full suite, two shards, 4 workers: shard 1 **822 files / 7,110 tests passed** (22 / 119 skipped), shard 2 **821 files / 6,501 tests
+  passed** (22 / 104 skipped); total **1,643 files / 13,611 tests passed**, 0 failed (sar131's 1,641 / 13,558 + stp128's 37 + sad133's 16).
+- `npm run build`: green.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 7ae8aff49`:
+  **PASS, 624 / 624 captures byte-identical** (235 + 216 + 173): the two canonical railroad traces unchanged, no capture of the app-only
+  trace moved (none falls on a drawn CURSED / NIGHTMARE / CONFUSION / FRZ frame). The canonical Thunder Wave path
+  (`statusAnimationAtSourceAge`) is untouched.
+- `git diff --check 7ae8aff49 HEAD`: clean.
 
 ## 6. Open (not in scope) and integration notes
 
