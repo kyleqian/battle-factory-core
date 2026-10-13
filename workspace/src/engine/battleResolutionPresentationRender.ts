@@ -1130,7 +1130,13 @@ export function isBattleResolutionNextCommandHandoffComplete(
  * sar131: the B_ANIM_STATUS_* the live field draws (statusAnimation.ts liveStatusAnimationRow's cases; src/engine reads src/animation
  * only through battleScene.ts, so the set is pinned equal by tests/sar131StatusAnimationRender.test.ts).
  */
-export const STATUS_ANIMATIONS_DRAWN: ReadonlySet<string> = new Set(["PSN", "PRZ"]);
+export const STATUS_ANIMATIONS_DRAWN: ReadonlySet<string> = new Set([
+  "PSN",
+  "PRZ",
+  // sad133 (SA6 / SA7 / SA8)
+  "CURSED",
+  "NIGHTMARE",
+]);
 
 /**
  * ISSUES #147: whether the current presenting row is one of the first

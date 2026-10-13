@@ -1,6 +1,13 @@
 import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
+import battleAnimIceCubeAsset from "../assets/gen/battle-anim-ice-cube.json" with { type: "json" };
+import curseAsset from "./assets/curse.json" with { type: "json" };
+import dizzyPunchAsset from "./assets/dizzyPunch.json" with { type: "json" };
+import lovelyKissAsset from "./assets/lovely-kiss.json" with { type: "json" };
 import type { RgbColor } from "../engine/bg.ts";
 import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
+import {
+  statusConditionDisplayRow, statusConditionTarget, type StatusConditionAnimation, type StatusConditionDisplaySprite,
+} from "./statusConditionAnimations.ts";
 
 export type StatusAnimationKind = "paralysis";
 
@@ -186,14 +193,33 @@ export function statusAnimationAtSourceAge(
  * statusanimation row + 1). Every task / sprite row below is the source script's own schedule (battle_anim_scripts.s), shown
  * through the measured display lag of the live field (OAM: a ShakeMon2 tick written at script row r shows on row r + 2).
  */
-export type LiveStatusAnimationName = "PSN" | "PRZ";
+export type LiveStatusAnimationName = "PSN" | "PRZ" | "CURSED" | "NIGHTMARE" | "CONFUSION" | "FRZ";
 
 export interface LiveStatusAnimationRow {
   /** The animated battler's x2 / y2: "rest" before its ShakeMon2 shows (the tracked idle rest), else the task's absolute value. */
   readonly battlerOffset: Readonly<{ x2: number; y2: number }> | "rest";
   /** blend_color_cycle F_PAL_ATTACKER: the battler's OBJ palette blended toward `color` by coeff / 16 (null = none). */
   readonly paletteBlend: Readonly<{ color: RgbColor; coeff: number }> | null;
-  readonly sprites: readonly StatusAnimationSprite[];
+  /** Back-to-front. */
+  readonly sprites: readonly LiveStatusAnimationSprite[];
+}
+
+/** sad133: a script sprite of the live row (PSN / PRZ: opaque, in front of the battlers). */
+export interface LiveStatusAnimationSprite extends StatusAnimationSprite {
+  /** OBJ priority 3 (AnimConfusionDuck's far half of the orbit): drawn behind the battlers, else in front of them. */
+  readonly behindBattlers?: true;
+  /** A semi-transparent OBJ under BLDCNT's blend: BLDALPHA eva / evb over what is drawn below it (8-bit, as mGBA). */
+  readonly blend?: Readonly<{ eva: number; evb: number }>;
+}
+
+/**
+ * sad133: what a live row needs beyond (animation, age, side) for the stp128 reducers (statusConditionAnimations.ts). `sprite` =
+ * gSprites[battler].x / y = battleCommandFieldSpriteOrigin (elevation included) + 32; `freezeLoadLagRows` = Status_Freeze's
+ * ice-cube load lag (1 on the frozen turn, 0 when inflicted after a damaging move).
+ */
+export interface LiveStatusAnimationContext {
+  readonly sprite: Readonly<{ x: number; y: number }>;
+  readonly freezeLoadLagRows?: 0 | 1;
 }
 
 /** Status_Poison / Status_Paralysis: `AnimTask_ShakeMon2 ANIM_ATTACKER` (attacker = target = the battler, LaunchStatusAnimation). */
@@ -250,9 +276,78 @@ function statusElectricity(age: number, side: "player" | "opponent"): StatusAnim
   });
 }
 
-/** One row of a live B_ANIM_STATUS_* animation of a battler on `side`, or null when the animation is not drawn (yet). */
+type Sheet = StatusAnimationSprite["tileset"];
+const sheet = (tileset: Sheet, first: number, columns: number, rows: number): Sheet =>
+  ({ columns, rows, tiles: tileset.tiles.slice(first, first + columns * rows) });
+const hFlipSheet = (tileset: Sheet): Sheet => ({
+  columns: tileset.columns, rows: tileset.rows,
+  tiles: Array.from({ length: tileset.columns * tileset.rows }, (_, i) => {
+    const tile = tileset.tiles[Math.floor(i / tileset.columns) * tileset.columns + tileset.columns - 1 - (i % tileset.columns)]!;
+    return Array.from({ length: 64 }, (_, p) => tile[(p >> 3) * 8 + 7 - (p & 7)]!);
+  }),
+});
+/** gCurseGhostSpriteTemplate (32x32), gNightmareDevilSpriteTemplate (frame 0: the sheet's first 4x4 tiles). */
+const GHOST = Object.freeze({ tileset: curseAsset.ghost.tileset as Sheet, palette: curseAsset.ghost.palette as RgbColor[] });
+const DEVIL = Object.freeze({ tileset: sheet(lovelyKissAsset.devil.tileset as Sheet, 0, 4, 4), palette: lovelyKissAsset.devil.palette as RgbColor[] });
+/** gConfusionDuckSpriteTemplate: a 16x16 frame = tiles tileOffset .. + 3 (0 / 4 / 8), hFlip per sAnims_ConfusionDuck. */
+const DUCK_FRAMES = new Map<string, Sheet>(([0, 4, 8] as const).flatMap((offset) => {
+  const frame = sheet(dizzyPunchAsset.duck.tileset as Sheet, offset, 2, 2);
+  return [[`${offset}`, frame], [`${offset}h`, hFlipSheet(frame)]] as const;
+}));
+const DUCK_PALETTE = dizzyPunchAsset.duck.palette as RgbColor[];
+/** sFrozenIceCubeSpriteTemplate: the four sFrozenIceCubeSubspriteTable pieces (Move_SHEER_COLD's asset); palette 13..15 rotate. */
+const ICE_CUBE = battleAnimIceCubeAsset as unknown as { palette: RgbColor[]; pieces: { x: number; y: number; tileset: Sheet }[] };
+
+function statusConditionSprites(sprite: StatusConditionDisplaySprite, paletteRotation: number): LiveStatusAnimationSprite[] {
+  const blend = sprite.blend === null ? {} : { blend: Object.freeze({ eva: sprite.blend.eva, evb: sprite.blend.evb }) };
+  switch (sprite.template) {
+    case "gCurseGhostSpriteTemplate":
+    case "gNightmareDevilSpriteTemplate": {
+      const art = sprite.template === "gCurseGhostSpriteTemplate" ? GHOST : DEVIL;
+      return [{ x: sprite.left, y: sprite.top, tileset: art.tileset, palette: art.palette, ...blend }];
+    }
+    case "gConfusionDuckSpriteTemplate":
+      return [{
+        x: sprite.left, y: sprite.top, tileset: DUCK_FRAMES.get(`${sprite.tileOffset}${sprite.hFlip ? "h" : ""}`)!, palette: DUCK_PALETTE,
+        ...(sprite.priority === 3 ? { behindBattlers: true as const } : {}), ...blend,
+      }];
+    case "sFrozenIceCubeSpriteTemplate": {
+      // the cube is a blended OBJ: nothing shows before the task's BLDCNT write or at eva 0
+      if (sprite.blend === null || sprite.blend.eva === 0) return [];
+      const palette = ICE_CUBE.palette.slice();
+      for (let i = 0; i < 3; i += 1) palette[13 + i] = ICE_CUBE.palette[13 + ((i + paletteRotation) % 3)]!;
+      return ICE_CUBE.pieces.map((piece) => ({ x: sprite.left + piece.x, y: sprite.top + piece.y, tileset: piece.tileset, palette, ...blend }));
+    }
+  }
+}
+
+/**
+ * sad133 (S10A, ISSUES #168 slices SA6 / SA7 / SA8, docs/sad133-status-animation-render-2.md): Status_Curse / Status_Nightmare /
+ * Status_Confusion / Status_Freeze from stp128's reducer (statusConditionDisplayRow at rel = age: a = 0 is its gAnimScriptActive rise
+ * row rel 0). The battler stands at its rest while the reducer's offset follows the idle x2 (before ShakeMon2 shows; CONFUSION / FRZ
+ * throughout); the monbg copy is pixel-identical to the sprite, so the battler is drawn as its sprite at that offset.
+ */
+function statusConditionRow(
+  animation: StatusConditionAnimation, age: number, side: "player" | "opponent", context: LiveStatusAnimationContext,
+): LiveStatusAnimationRow {
+  const options = { freezeLoadLagRows: context.freezeLoadLagRows ?? 1 };
+  const at = (idleX2: number) =>
+    statusConditionDisplayRow(animation, age, statusConditionTarget(side, context.sprite.x, context.sprite.y, idleX2), options);
+  const row = at(0);
+  const atRest = at(1).battlerOffset.x !== row.battlerOffset.x;
+  return {
+    battlerOffset: atRest ? "rest" : { x2: row.battlerOffset.x, y2: row.battlerOffset.y },
+    paletteBlend: null,
+    sprites: row.sprites.flatMap((sprite) => statusConditionSprites(sprite, row.objPaletteRotation)),
+  };
+}
+
+/**
+ * One row of a live B_ANIM_STATUS_* animation of a battler on `side`, or null when the animation is not drawn (yet). `context`:
+ * the stp128 cases' battler geometry (null without it).
+ */
 export function liveStatusAnimationRow(
-  animation: string, age: number, side: "player" | "opponent",
+  animation: string, age: number, side: "player" | "opponent", context?: LiveStatusAnimationContext,
 ): LiveStatusAnimationRow | null {
   switch (animation) {
     case "PSN": {
@@ -265,6 +360,10 @@ export function liveStatusAnimationRow(
     }
     case "PRZ":
       return { battlerOffset: shakeMon2Row(age, PRZ_ELECTRICITY_FIRST_ROW, PRZ_SHAKE), paletteBlend: null, sprites: statusElectricity(age, side) };
+    case "CURSED":
+      return context === undefined ? null : statusConditionRow("CURSED", age, side, context);
+    case "NIGHTMARE":
+      return context === undefined ? null : statusConditionRow("NIGHTMARE", age, side, context);
     default:
       return null;
   }

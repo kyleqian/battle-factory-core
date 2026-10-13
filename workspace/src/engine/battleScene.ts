@@ -4,7 +4,7 @@ import {
 } from "./liveMoveAnimation.ts";
 import { liveBattlerAnchors } from "./liveMoveAnimation.ts";
 import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
-import { liveStatusAnimationRow, type StatusAnimationSprite } from "../animation/statusAnimation.ts";
+import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
@@ -7748,7 +7748,7 @@ export function statsChangeRenderView(view: BattleResolutionPresentationRenderVi
 /** sar131: the status-animation command's field view (statusAnimationRenderView) and its sprites (drawn over the battlers). */
 export type StatusAnimationRenderView = Readonly<{
   view: BattleResolutionPresentationRenderView;
-  sprites: readonly StatusAnimationSprite[];
+  sprites: readonly LiveStatusAnimationSprite[];
 }>;
 
 /**
@@ -7765,7 +7765,9 @@ export function statusAnimationRenderView(view: BattleResolutionPresentationRend
   const effect = view.effect;
   if (effect?.type !== "status-animation") return null;
   const side = effect.battler === 0 ? "player" as const : "opponent" as const;
-  const row = liveStatusAnimationRow(effect.animation, effect.age, side);
+  // sad133: the stp128 cases' createsprite origin is the battler sprite's x / y (corner + 32, elevation included).
+  const corner = battleCommandFieldSpriteOrigin(view.fieldArt[side], side);
+  const row = liveStatusAnimationRow(effect.animation, effect.age, side, { sprite: { x: corner.x + 32, y: corner.y + 32 } });
   if (row === null || !view.visibility[side].sprite || view.field[side].substituteDoll === true) return null;
   const rest = effect.battlerX2Input === undefined
     ? { x2: 0, y2: 0 }
@@ -54825,6 +54827,12 @@ function drawSubstituteFadeBgCopy(fb: Uint8Array, copy: SubstituteFadeBgCopy): v
   }
 }
 
+/** sad133: one status-animation OBJ, blended (BLDALPHA, 8-bit as mGBA) over the field drawn so far when it is semi-transparent. */
+function drawStatusAnimationSprite(fb: Uint8Array, sprite: LiveStatusAnimationSprite): void {
+  if (sprite.blend === undefined) drawSpriteSheet(fb, sprite.tileset as Tileset, sprite.palette, sprite.x, sprite.y);
+  else drawSpriteSheetBlendedOverFb(fb, sprite.tileset as Tileset, sprite.palette, sprite.x, sprite.y, sprite.blend.eva, sprite.blend.evb);
+}
+
 export function renderBattleResolutionSceneOffView(
   fb: Uint8Array,
   view: BattleResolutionPresentationRenderView,
@@ -54930,6 +54938,8 @@ export function renderBattleResolutionSceneOffView(
       view.midBattleSwitchParticles.schedules,
     );
   }
+  // sad133: the status animation's priority-3 OAM (the confusion ducks' far half) behind the battlers.
+  for (const sprite of statusAnimation?.sprites ?? []) if (sprite.behindBattlers) drawStatusAnimationSprite(fb, sprite);
   if (view.visibility.opponent.sprite) {
     // ISSUES #147: the ordinary field draws an elevated opponent at the same
     // elevated origin and with the same generated shadow as the command menu
@@ -54991,7 +55001,7 @@ export function renderBattleResolutionSceneOffView(
     }
   }
   // sar131: the status animation's OAM (priority 2 in front of its battler, under the priority-1 healthboxes).
-  for (const sprite of statusAnimation?.sprites ?? []) drawSpriteSheet(fb, sprite.tileset as Tileset, sprite.palette, sprite.x, sprite.y);
+  for (const sprite of statusAnimation?.sprites ?? []) if (!sprite.behindBattlers) drawStatusAnimationSprite(fb, sprite);
   if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);
   if (view.visibility.opponent.healthbox) {
     drawSendOutHealthbox(
