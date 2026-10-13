@@ -122,18 +122,21 @@ describe("return-live: MOVE_RETURN strongest branch", () => {
     expect(lives.map(l => [l.kind, l.first, l.last])).toEqual([["dip", 11, 45], ["dip", 47, 81], ["splat", 54, 63]]);
   });
 
-  // Ordinary generated-rental routes (orderConsumerRouteScan.ts RETURN 216). The kernel sends friendship 0 (ret80 / ISSUES #165), so
-  // the ROM draws ReturnWeak; ret88: the Weak body (88 rows) is live every age, gameplay unchanged.
+  // Former ordinary generated-rental Return routes (orderConsumerRouteScan.ts RETURN 216: PIDGEOT set 355, EXEGGUTOR set 534). ret165
+  // (ISSUES #165): the Factory writes every set move through SetMonMoveAvoidReturn (battle_factory.c:913-919), so these Return
+  // carriers fight with Frustration at friendship 0 and play its proven 229-row body live every age. Ordinary Factory parties no
+  // longer reach Return (Metronome still can); the Weak / Strongest programs above stay proven for that path.
   it.each([[24, 14, "PIDGEOT"], [51, 28, "EXEGGUTOR"]] as const)(
-    "route %i/%i %s: the friendship-0 Return is a live ReturnWeak body every age, prompt reached; Scene ON/OFF boundaries, RNG and rules identical", (seed, streak, _species) => {
+    "route %i/%i %s: the set's Return is Frustration at friendship 0, a live body every age, prompt reached; Scene ON/OFF boundaries, RNG and rules identical", (seed, streak, _species) => {
       const on = generatedCommandAnimationReplay(seed, "on", [0], streak);
       const off = generatedCommandAnimationReplay(seed, "off", [0], streak);
-      const returns = on.requests.filter(r => r.moveId === 216 && r.attacker === 0);
-      expect(returns.length).toBeGreaterThan(0);
-      expect(returns.every(r => r.friendship === 0)).toBe(true);
-      const bodies = on.animations.filter(a => a.moveId === 216 && a.attacker === 0);
-      expect(bodies.map(b => b.ages.length)).toEqual([88 + iu120Extra(216)]);
-      expect(bodies[0]!.ages).toEqual(iu120Ages(216, 88));
+      expect(on.requests.filter(r => r.moveId === 216)).toEqual([]);
+      const frustrations = on.requests.filter(r => r.moveId === 218 && r.attacker === 0);
+      expect(frustrations.length).toBeGreaterThan(0);
+      expect(frustrations.every(r => r.friendship === 0)).toBe(true);
+      const bodies = on.animations.filter(a => a.moveId === 218 && a.attacker === 0);
+      expect(bodies.map(b => b.ages.length)).toEqual([229 + iu120Extra(218)]);
+      expect(bodies[0]!.ages).toEqual(iu120Ages(218, 229));
       expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
       expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
       expect(on.stalled).toBe(off.stalled);

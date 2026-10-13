@@ -16,10 +16,13 @@
 
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
+import { factoryFacilitySetMoveIds } from "./factoryCorpusParty.ts";
 
 export type FactoryCommentaryPartyMember = Readonly<{
   speciesName: string;
   moves: readonly [number, number, number, number];
+  /** When present, the style tally reads the raw facility set (see getFactoryOpponentBattleStyle). */
+  setId?: number;
 }>;
 
 export type FactoryCommentaryParty = readonly [
@@ -230,7 +233,10 @@ export function getFactoryOpponentBattleStyle(
 ): FactoryStyleTally {
   const points = Array<number>(FACTORY_STYLE.FLEXIBLE).fill(0);
   for (const mon of party) {
-    for (const move of mon.moves) points[getFactoryMoveBattleStyle(move)]! += 1;
+    // battle_factory.c:672 reads gFacilityTrainerMons[monId].moves directly,
+    // not the SetMonMoveAvoidReturn party copy (ISSUES #165).
+    const moves = mon.setId === undefined ? mon.moves : factoryFacilitySetMoveIds(mon.setId);
+    for (const move of moves) points[getFactoryMoveBattleStyle(move)]! += 1;
   }
 
   const qualifyingStyles: FactoryBattleStyle[] = [];

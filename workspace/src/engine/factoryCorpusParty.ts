@@ -6,7 +6,9 @@
  *   flagged stats and accepts only personalities whose `% NUM_NATURES`
  *   matches the set (`pokemon.c:2562-2593`, `:5498-5501`).
  * - Factory parties replace friendship/moves/item after creation
- *   (`battle_tower.c:1870-1883`, `battle_factory.c:440-464`).
+ *   (`battle_tower.c:1870-1883`, `battle_factory.c:440-464`); every move is
+ *   written through `SetMonMoveAvoidReturn` (`battle_factory.c:913-919`), so
+ *   a set's MOVE_RETURN becomes MOVE_FRUSTRATION (ISSUES #165).
  * - fixed IVs are copied to all six stats (`pokemon.c:2265-2273`).
  *
  * Selection/retry/RNG policy deliberately does not live here. Callers supply
@@ -78,6 +80,8 @@ type HeldItemRow = Readonly<{
 type SymbolIdRow = Readonly<{ name: string; id: number }>;
 
 const FRONTIER_MONS = (frontierMonsData as unknown as { entries: FrontierMonRow[] }).entries;
+const MOVE_RETURN = 216;
+const MOVE_FRUSTRATION = 218;
 const SPECIES_BY_NAME = new Map(
   (speciesStatsData as unknown as { species: SpeciesRow[] }).species.map((row) => [row.name, row]),
 );
@@ -85,6 +89,9 @@ const NATURES = (naturesData as { natures: NatureRow[] }).natures;
 const NATURE_BY_NAME = new Map(NATURES.map((row) => [row.name, row]));
 const MOVES_BY_NAME = new Map(
   (movesData as { moves: MoveRow[] }).moves.map((row) => [row.move, row]),
+);
+const MOVES_BY_ID = new Map(
+  (movesData as { moves: MoveRow[] }).moves.map((row) => [row.id, row]),
 );
 const ITEMS_BY_TABLE_ID = new Map(
   (frontierHeldItemsData as { entries: HeldItemRow[] }).entries.map((row) => [row.itemTableId, row]),
@@ -193,6 +200,32 @@ function isShiny(otId: number, personality: number): boolean {
   return value < SHINY_ODDS;
 }
 
+/**
+ * SetMonMoveAvoidReturn (`battle_factory.c:913-919`): MOVE_RETURN is written
+ * as MOVE_FRUSTRATION; every other move is unchanged. The source applies it
+ * wherever a Factory mon is created from `gFacilityTrainerMons` (player and
+ * opponent battle parties, `battle_factory.c:461` / `:501` / `:822`,
+ * `battle_tower.c:1880`; the draft screen's mons, `battle_factory_screen.c:1774`).
+ */
+export function setMonMoveAvoidReturn(move: number): number {
+  return move === MOVE_RETURN ? MOVE_FRUSTRATION : move;
+}
+
+/**
+ * The raw `gFacilityTrainerMons[setId].moves` ids, WITHOUT SetMonMoveAvoidReturn:
+ * what the source's direct table readers see (e.g. the opponent battle-style
+ * hint, `battle_factory.c:672`).
+ */
+export function factoryFacilitySetMoveIds(setId: number): readonly [number, number, number, number] {
+  const set = FRONTIER_MONS[setId];
+  if (set === undefined) throw new Error(`Frontier set id must be in 0..${FRONTIER_MONS.length - 1}, got ${setId}`);
+  return Object.freeze(set.moves.map((name) => {
+    const row = MOVES_BY_NAME.get(name);
+    if (row === undefined) throw new Error(`Frontier set ${set.index} has unknown move ${name}`);
+    return row.id;
+  })) as unknown as readonly [number, number, number, number];
+}
+
 /** Builds one legal Level-50 Factory member without touching engine state. */
 export function createFactoryCorpusPartyMember(
   instance: FactoryCorpusPartyInstance,
@@ -227,15 +260,12 @@ export function createFactoryCorpusPartyMember(
   }
   const ivs = instance.ivs ?? uniformBattleScriptIvs(instance.fixedIv);
   const evs = deriveEvs(set);
-  const moves = set.moves.map((name) => {
-    const row = MOVES_BY_NAME.get(name);
-    if (row === undefined) throw new Error(`Frontier set ${set.index} has unknown move ${name}`);
-    return row.id;
-  }) as unknown as readonly [number, number, number, number];
+  const moves = factoryFacilitySetMoveIds(instance.setId).map(setMonMoveAvoidReturn) as unknown as
+    readonly [number, number, number, number];
   // Facility sets carry no PP Ups. SetMonMoveSlot writes base PP and leaves
   // the freshly zeroed packed bonus byte untouched (pokemon.c:2974-2978).
   const ppUps = Object.freeze([0, 0, 0, 0] as const);
-  const pp = set.moves.map((name) => MOVES_BY_NAME.get(name)!.pp) as unknown as readonly [
+  const pp = moves.map((id) => MOVES_BY_ID.get(id)!.pp) as unknown as readonly [
     number, number, number, number,
   ];
   const item = ITEMS_BY_TABLE_ID.get(set.itemTableId);

@@ -24,6 +24,8 @@ import { wasmFactoryEngine, type FactoryEngine } from "../core-rs/adapter/factor
 import {
   createFactoryCorpusParty,
   createFactoryCorpusPartyMember,
+  factoryFacilitySetMoveIds,
+  setMonMoveAvoidReturn,
   type FactoryCorpusPartyInstance,
 } from "../src/engine/factoryCorpusParty.ts";
 import { natureFromPersonality } from "../src/engine/opponentGen.ts";
@@ -99,6 +101,7 @@ describe.skipIf(!wasmAvailable)("Full corpus sweep — ts vs wasm across all 882
   it(`[0..${FRONTIER_MONS.length - 1}] every Frontier set constructs identically on both engines`, async () => {
     const engine = await getWasmEngine();
     let compared = 0;
+    const avoidReturnDivergent: number[] = [];
     for (let setId = 0; setId < FRONTIER_MONS.length; setId++) {
       const personality = personalityForSet(setId);
       const instance: FactoryCorpusPartyInstance = {
@@ -110,10 +113,21 @@ describe.skipIf(!wasmAvailable)("Full corpus sweep — ts vs wasm across all 882
       };
       const ts = createFactoryCorpusPartyMember(instance);
       const wasm = engine.createFactoryCorpusPartyMember(instance);
-      expect(wasm, `setId=${setId} personality=${personality}: full-member-state parity`).toEqual(ts);
+      // ISSUES #165 (ret165): the TS builder applies SetMonMoveAvoidReturn
+      // (battle_factory.c:913-919); core-rs's port does not yet. Return and
+      // Frustration share PP 20, so the moves list is the only divergence.
+      if (wasm.moves.some((move, slot) => move !== ts.moves[slot])) avoidReturnDivergent.push(setId);
+      expect(wasm.moves, `setId=${setId}: wasm keeps the raw table moves`).toEqual(factoryFacilitySetMoveIds(setId));
+      expect(
+        { ...wasm, moves: wasm.moves.map(setMonMoveAvoidReturn) },
+        `setId=${setId} personality=${personality}: full-member-state parity`,
+      ).toEqual(ts);
       compared++;
     }
     expect(compared).toBe(FRONTIER_MONS.length);
+    expect(avoidReturnDivergent).toEqual(
+      FRONTIER_MONS.map((row, setId) => setId).filter((setId) => factoryFacilitySetMoveIds(setId).includes(216)),
+    );
   });
 });
 
