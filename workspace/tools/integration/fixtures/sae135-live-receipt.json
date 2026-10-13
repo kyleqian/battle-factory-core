@@ -1,0 +1,255 @@
+{
+ "schema": "sae135-live-receipt/v1",
+ "productionCompare": {
+  "windows": 37,
+  "zeroPxWindowsAllRows": 31,
+  "commandRowsZeroPxWindows": 37,
+  "perRowDigest": "0cf2d276f9d36fed",
+  "perAnimationSide": {
+   "INFATUATION/player": {
+    "windows": 4,
+    "rows": 400,
+    "commandRowsPx": 0,
+    "nextRowsPx": 0,
+    "zeroPxWindows": 4
+   },
+   "INFATUATION/opponent": {
+    "windows": 4,
+    "rows": 400,
+    "commandRowsPx": 0,
+    "nextRowsPx": 4364,
+    "zeroPxWindows": 2
+   },
+   "BRN/opponent": {
+    "windows": 7,
+    "rows": 294,
+    "commandRowsPx": 0,
+    "nextRowsPx": 0,
+    "zeroPxWindows": 7
+   },
+   "SLP/player": {
+    "windows": 8,
+    "rows": 800,
+    "commandRowsPx": 0,
+    "nextRowsPx": 0,
+    "zeroPxWindows": 8
+   },
+   "SLP/opponent": {
+    "windows": 8,
+    "rows": 800,
+    "commandRowsPx": 0,
+    "nextRowsPx": 8728,
+    "zeroPxWindows": 4
+   },
+   "BRN/player": {
+    "windows": 6,
+    "rows": 252,
+    "commandRowsPx": 0,
+    "nextRowsPx": 0,
+    "zeroPxWindows": 6
+   }
+  },
+  "nextCommandRowResidual": {
+   "stq132-attract-ply-primeape-onix#0": {
+    "rows": [
+     97,
+     98
+    ],
+    "px": [
+     1091,
+     1091
+    ],
+    "romOpponentX2": 1
+   },
+   "stq132-attract-ply-primeape-onix#1": {
+    "rows": [
+     97,
+     98
+    ],
+    "px": [
+     1091,
+     1091
+    ],
+    "romOpponentX2": 1
+   },
+   "stq132-spore-ply-primeape-onix#0": {
+    "rows": [
+     97,
+     98
+    ],
+    "px": [
+     1091,
+     1091
+    ],
+    "romOpponentX2": 1
+   },
+   "stq132-spore-ply-primeape-onix#1": {
+    "rows": [
+     97,
+     98
+    ],
+    "px": [
+     1091,
+     1091
+    ],
+    "romOpponentX2": 1
+   },
+   "stq132-spore-ply-primeape-onix#2": {
+    "rows": [
+     97,
+     98
+    ],
+    "px": [
+     1091,
+     1091
+    ],
+    "romOpponentX2": 1
+   },
+   "stq132-spore-ply-primeape-onix#3": {
+    "rows": [
+     97,
+     98
+    ],
+    "px": [
+     1091,
+     1091
+    ],
+    "romOpponentX2": 1
+   }
+  }
+ },
+ "diagOrdinaryRest": {
+  "neg": null,
+  "diag": "ordinary-rest",
+  "windows": 37,
+  "zeroPxWindows": 37,
+  "perRowDigest": "53a4e05ed864c82b"
+ },
+ "redrawHarness": {
+  "neg": "redraw",
+  "diag": null,
+  "windows": 37,
+  "zeroPxWindows": 31,
+  "perRowDigest": "0cf2d276f9d36fed",
+  "redrawExact": 2946,
+  "redrawRows": 2946
+ },
+ "controls": {
+  "age+1": {
+   "zeroPxWindows": 0,
+   "windows": 37
+  },
+  "wrong-side": {
+   "zeroPxWindows": 0,
+   "windows": 37
+  },
+  "drop-one": {
+   "zeroPxWindows": 0,
+   "windows": 37
+  },
+  "rest-y": {
+   "zeroPxWindows": 23,
+   "windows": 37
+  }
+ },
+ "nextBodyX2": {
+  "windows": 13,
+  "keptAfterWindow": 13,
+  "windowsWithNextBody": 2,
+  "predictedExact": 2,
+  "baseRectDiffers": 2
+ },
+ "routes": {
+  "34:0:on": {
+   "ok": true,
+   "differing": {
+    "statusAnimation": 276,
+    "afterStatusAnimationFirstFrame": 0,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "frames": 6349
+  },
+  "296:0:on": {
+   "ok": true,
+   "differing": {
+    "statusAnimation": 644,
+    "afterStatusAnimationFirstFrame": 0,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "frames": 5349
+  },
+  "277:0:on": {
+   "ok": true,
+   "differing": {
+    "statusAnimation": 736,
+    "afterStatusAnimationFirstFrame": 0,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "frames": 10819
+  },
+  "124:0:on": {
+   "ok": true,
+   "differing": {
+    "statusAnimation": 212,
+    "afterStatusAnimationFirstFrame": 2,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "frames": 6194
+  },
+  "126:0:on": {
+   "ok": true,
+   "differing": {
+    "statusAnimation": 204,
+    "afterStatusAnimationFirstFrame": 0,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "frames": 30001
+  },
+  "18:0:on": {
+   "ok": true,
+   "differing": {
+    "statusAnimation": 736,
+    "afterStatusAnimationFirstFrame": 0,
+    "x2RowsBody": 0,
+    "unexplained": 0
+   },
+   "frames": 7223
+  },
+  "allOk": true
+ },
+ "census": {
+  "moveRecords": 27403,
+  "keyMismatches": 0,
+  "frameChanges": 0,
+  "statusChanges": [],
+  "liveFrameChanges": 0,
+  "declineChanges": 0,
+  "battleMismatches": 0,
+  "segmentMismatches": 0,
+  "allShardDigestsSame": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "totals": {
+   "base.live": 27187,
+   "base.commands": 27368,
+   "base.liveFrames": 4137884,
+   "base.frames": 4154509,
+   "final.live": 27187,
+   "final.commands": 27368,
+   "final.liveFrames": 4137884,
+   "final.frames": 4154509,
+   "base.statusAnimationCommands": 8063,
+   "base.battleFrames": 15915831,
+   "final.statusAnimationCommands": 8063,
+   "final.battleFrames": 15915831
+  }
+ }
+}
