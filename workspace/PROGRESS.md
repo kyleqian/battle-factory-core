@@ -19,7 +19,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   this route was not anticipated and has no ROM receipt yet). Soak vanilla 0:20 20 / 20 OK, per-seed lines identical.
 - **Next:** re-land #141a: cherry-pick `0f9b5301e` + the 8 re-pins listed in ISSUES #141 (expect census 45 battles,
   vanilla soak b2 t16 -> b4 t0). Optional ROM card for the 811 phazing route. Then #139 (reuses the F3 bank).
-- **Notes:** see the doc for gates. ISSUES #140 removed; #141 trimmed to #141a.
+- **Notes:** gates on `299f35e0e`: typecheck 0, full `npm test` (2 shards) 1,657 files / 13,747 tests passed, 0 failed
+  (44 / 223 skipped), build OK; smoke 448 earlier. ISSUES #140 removed; #141 trimmed to #141a. Scratch: `.integration/validation/rng146/`.
 
 ---
 
