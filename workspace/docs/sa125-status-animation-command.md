@@ -77,7 +77,18 @@ print instruction P, the same P − S_exec as OFF: Toxic / Thunder Wave / Will-O
 (the statusanimation between them is 1 row + controllerRows, the latter owned by the status-animation command). Residual = production
 status frames − kernel delta(print) − delta(status) = 0 per class.
 
-__SA3TABLE__
+| class (the print after the status write) | status animation follows (same battler, same execution) | ROM P − S_exec (off121 ON probes) | ON frames base -> final | residual | census 0..999 |
+|---|---|---|---|---|---|
+| infliction: PKMNWASPARALYZED / WASPARALYZEDBY / FELLASLEEP / MADESLEEP / BADLYPOISONED / WASPOISONED / POISONEDBY / WASBURNED / BURNEDBY / WASFROZEN | yes, before the print | 2 (Toxic, Thunder Wave, Will-O-Wisp, Spore; both sides) | 32 -> **2** | 0 | 463 + 43 + 310 + 3 + 167 + 47 + 47 + 79 + 18 + 43 = **1,220** |
+| sleep turn: PKMNFASTASLEEP | yes, after the print | 1 (Spore scenarios, x3 each side) | 32 -> **1** | 0 | **1,483** |
+| frozen turn: PKMNISFROZEN | yes, after the print | not staged by off121 (kernel delta 1, as OFF) | 32 -> **1** | 0 (kernel) | **104** |
+| sleep turn behind a Substitute (kernel suppresses the animation) | no | — | 32 (kept) | — | 6 |
+| faint: TARGETFAINTED / ATTACKERFAINTED | no (1 ATTACKERFAINTED is followed by the OTHER battler's animation) | — | 32 (kept) | — | 3,856 / 466 |
+| wake-up PKMNWOKEUP, Rest PKMNWENTTOSLEEP / SLEPTHEALTHY, thaw PKMNWASDEFROSTED(2) | no | — | 32 (kept) | — | 583 / 443 + 24 / 26 |
+| item / ability cures: SITEMWOKEIT / SITEMCUREDPROBLEM / SITEMCUREDPARALYSIS / SITEMCUREDPOISON / HEALEDPARALYSIS | no | — | 32 (kept) | — | 133 / 96 / 13 / 1 / 4 |
+
+SA3 frames: 1,220 x −30 + (1,483 + 104) x −31 = **−85,797** (census `statusFramesDelta`). Classes kept at 32: 5,651 status commands (the
+stand-in stays wherever the ROM plays no status animation; those classes are a separate fidelity item, not this slice's).
 
 ## 5. Pins moved (`tools/integration/fixtures/sa125/pins.json`, `tools/integration/sa125Pins.py`)
 
@@ -101,3 +112,26 @@ are therefore identical by construction (and the Scene OFF census is byte-identi
 
 __CENSUSBODY__
 
+
+## 7. Tests (`tests/sa125StatusAnimationCommand.test.ts`, 11 tests)
+
+- ROM receipts: every non-gated ON receipt == the table (and == active rows + 1); the gated set is exactly the two Ice Beam FRZ
+  receipts (17 / 133, 18 / 134); OFF 0 rows with the same next label; the table equals the ROM rows per animation.
+- Kernel suppression (no receipt, so no command): behind a Substitute, semi-invulnerable, Scene OFF (`prepareRulesStatusAnimation`).
+- Production routes (§3): order (between its neighbours' event sequences), length == table, ON − OFF == the ROM rows on every anchored
+  command, the coverage set (animation x path x side), OFF has no command; SA3 per class; Scene ON / OFF parity on seeds 12 / 60
+  (identical logical events and after-rules incl. RNG, HITMARKER_NO_ANIMATIONS masked).
+- **Revert experiments** (recorded): PSN 71 -> 72 in production: **2 / 9 fail** (the two ROM-table tests); SA3 dropped
+  (`sceneOnStatusFrames` -> null): **2 / 9 fail** (the route anchor test: seed 7 FRZ inflicted ON − OFF 147 vs 117; the SA3 test:
+  seed 7 status 32 vs 2).
+
+## 8. Reproduction (from workspace/)
+
+```
+sh tools/integration/sa125Run.sh <fresh-out-dir-inside-the-repo>   # archives cfe4e26ca + HEAD, the test, ON census x2 + delta,
+                                                                    # OFF census x2 (byte-identical), receipt == committed
+npx vitest run tests/sa125StatusAnimationCommand.test.ts
+node --experimental-strip-types --no-warnings tools/integration/sa125LiveShareCensus.ts --seeds=0..99 --index-from=0 --out=r0.json --commands=r0.jsonl --stats=s0.jsonl
+python3 tools/integration/sa125CensusDelta.py <base-dir> <final-dir> tools/integration/fixtures/sta123/exposure.json <out.json>
+python3 tools/integration/sa125Pins.py <patched-npm-test.log> "<tree>" tools/integration/fixtures/sa125/pins.json
+```
