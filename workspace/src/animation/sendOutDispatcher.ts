@@ -426,3 +426,56 @@ export function backSendOutFrameAtTick(
   if (offset === null) return null;
   return Object.freeze({ x2: offset.x2, y2: offset.y2 });
 }
+
+const generatedAnimationDelays = selectorTables.animationDelay.species as Readonly<Record<string, number>>;
+
+/** `sMonAnimationDelayTable[species - 1]` (0 = the `Anim_*` callback launches with the sprite animation). */
+export function frontSendOutAnimationDelay(species: string): number {
+  return generatedAnimationDelays[species] ?? 0;
+}
+
+type FrontAffineFields = Readonly<{
+  affineMode?: string;
+  xScale?: number;
+  yScale?: number;
+  affineXScaleSigned?: number;
+  affineYScaleSigned?: number;
+  affineWriteRotationU16?: number;
+  affineRotationU16?: number;
+  rotationU16?: number;
+  affineRotation?: number;
+}>;
+
+/**
+ * fra151: the OAM matrix the species' front `Anim_*` callback leaves at `ticksSinceStart` (same tick clamp as
+ * `frontSendOutFrameAtTick`), or null when the sprite is not in double-size affine mode (no transform on screen).
+ * `HandleSetAffineData` keeps xScale / rotation as given for the opponent front sprite (`sDontFlip` TRUE), and `SetAffineData`
+ * routes them through BIOS `ObjAffineSet` (pokemon_animation.c): theta = (rotation >> 8) / 128 * pi, pa = cos * xScale,
+ * pb = -sin * xScale, pc = sin * yScale, pd = cos * yScale, each truncated (mGBA, as `psychUp.ts`'s spiral matrix).
+ */
+export function frontSendOutAffineAtTick(
+  species: string,
+  ticksSinceStart: number,
+): readonly [number, number, number, number] | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  const raw = generatedFrontAnimIds[species];
+  if (!raw?.startsWith(FRONT_ANIM_PREFIX)) return null;
+  const family = raw.slice(FRONT_ANIM_PREFIX.length);
+  if (!(family in FRONT_SEND_OUT_REDUCERS)) return null;
+  const resolvedFamily = family as SpeciesFrontAnimFamily;
+  const t = Math.min(ticksSinceStart, FRONT_SEND_OUT_TERMINAL_TICKS[resolvedFamily]);
+  const frame = FRONT_SEND_OUT_REDUCERS[resolvedFamily](t) as (SpeciesIdleOffset & FrontAffineFields) | null;
+  if (frame === null || frame.affineMode !== "double") return null;
+  const xScale = frame.xScale ?? frame.affineXScaleSigned ?? 256;
+  const yScale = frame.yScale ?? frame.affineYScaleSigned ?? 256;
+  const rotation = (frame.affineWriteRotationU16 ?? frame.affineRotationU16 ?? frame.rotationU16 ?? frame.affineRotation ?? 0) & 0xffff;
+  const theta = ((rotation >> 8) / 128) * Math.PI;
+  const sx = xScale / 256;
+  const sy = yScale / 256;
+  return Object.freeze([
+    Math.trunc(Math.cos(theta) * sx * 256),
+    Math.trunc(-Math.sin(theta) * sx * 256),
+    Math.trunc(Math.sin(theta) * sy * 256),
+    Math.trunc(Math.cos(theta) * sy * 256),
+  ] as const);
+}

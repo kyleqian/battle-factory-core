@@ -54690,7 +54690,20 @@ function drawMidBattleSwitchInSprite(
       const originY = state.side === "opponent"
         ? art.origin.y - battleCommandFieldArtElevation(art, "opponent")
         : art.origin.y;
-      if (state.side === "opponent") {
+      const front = state.frontAnim;
+      if (state.side === "opponent" && front !== null) {
+        // fra151: once the emerge has settled, a Scene ON opponent send-in plays the species front animation (sAnim_<Name>_1
+        // frame, the Anim_* callback's x2 / y2 and, for an affine family, its double-size OAM matrix) under the release tint.
+        const tileset = (front.frame === 1 ? (art.pic as { frame2?: Tileset }).frame2 ?? art.pic.tileset : art.pic.tileset) as Tileset;
+        if (front.matrix !== null) {
+          drawSpriteSheetAffineRotate(fb, tileset, art.pic.palette as RgbColor[], art.origin.x + 32 + front.x2,
+            originY + 32 + emergeY2 + front.y2, front.matrix[0], front.matrix[1], front.matrix[2], front.matrix[3], undefined, true,
+            MATERIALIZE_TINT_COLOR, state.monTintCoefficient);
+        } else {
+          drawSpriteSheetAffineTintedBlend(fb, tileset, art.pic.palette as RgbColor[], art.origin.x, originY, state.emergeAccumulator,
+            MATERIALIZE_TINT_COLOR, state.monTintCoefficient, emergeY2 + front.y2, front.x2);
+        }
+      } else if (state.side === "opponent") {
         // Same source release reducer as the generated battle-start opponent:
         // accumulator -> inverse affine matrix, species elevation, y2 descent,
         // and the ball-open palette ramp.
