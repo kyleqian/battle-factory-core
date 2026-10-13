@@ -17,7 +17,7 @@ shared oracle), explicit lab seed 305419897 in every scenario, every probe job t
 | Of the supervisor's counts | stat-stage-change next (speed 238 / attack 129 / special-attack 34 on this base = 401): **401 / 401 now paused**. Rest: **466 / 466**. Sprite-visibility next: **0 / 296** (Wish 155, Roar 104, Whirlwind 23, opponent Baton Pass 14). Nothing next: **0 / 35** (a player Baton Pass: the party menu opens). Still without a pause, outside this step's classes: Magnitude no-effect 3, Scary Face 2 (STATS_CHANGE after a held print), 2 Magic-Coat-bounced status moves | same |
 | Census 0..999 Scene ON | off108Route `--scene=on`: **10 / 10 shards byte-identical** (37,522 uses); liveShareCensus: runner section 5 | runner |
 | Test | `tests/off148SceneOffPauses.test.ts`, 10 tests: the ROM receipts (Curse both sides, Swagger / Flatter A, Rest's att / HP rows), the rule on 6 census bodies (Curse both sides, Swagger, Flatter, Rest both sides: P and N's start == the ROM anchor), Rest's pre-attack commands end on the ROM att row, unmeasured classes keep no pause (Wish, Roar, Magnitude, Magic Coat bounce), Scene ON keeps its move-animation command. **Revert** (production file = d019cd6b4's): **6 / 10 fail** (exactly the 6 per-class rule tests) | section 4 |
-| Pins moved | **none** (affected files, smoke and the full suite pass unchanged) | section 4 |
+| Pins moved | **1 field in 1 receipt**: `fixtures/sgl138-live-receipt.json` battle `19-off` frames 33,378 → 33,748 (+370 = that route's 10 Rest bodies × the new 37-frame pause); its 11 anchors and every other key are unchanged, Scene ON unchanged, and `sgl138Live.ts` regenerates the edited file byte-identically. No other pin moved (soak pins included) | section 4 |
 
 ## 2. Anchor table (Scene OFF; rows relative to G = the opener's final glyph; production's command after the opener starts on G + 1)
 
@@ -80,7 +80,14 @@ first (production print 88 + stat 2 = 90 frames vs the ROM's 89 rows from glyph 
   first-round soak battle reaches these bodies).
 - `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base
   d019cd6b4`: **PASS, 641 / 641 captures byte-identical** (235 + 216 + 190); nothing moved (Scene ON traces).
-- Full `npm test` and `npm run build`: see the worker report (run after this doc's first commit on the same production src).
+- Full `npm test` (4 workers, nohup, waited on the PID) on `580d3607c` (src `9f1646ef3`): 1,656 files passed, **1 failed** = the
+  sgl138 `19-off` frames pin above. Re-pinned in `a9dc71feb`; `tests/sgl138SeGateLive.test.ts` 6 / 6. Full `npm test` again on
+  `a9dc71feb` (src `9f1646ef3`): **1,657 files / 13,751 tests passed, 0 failed** (44 / 223 skipped), 12:46 → 13:01.
+- `npm run build` on `a9dc71feb`: **green** (exit 0).
+- `sh tools/integration/off148Run.sh .integration/validation/off148/run1` (final = `41e62166e`, src `9f1646ef3`), 12:16 → 12:28:
+  SAME scenarios (9) / scenario-index; probes 9 / 9 r1 == r2, 18 / 18 == committed sha256; SAME rom-r1, r2 == r1; Scene ON
+  liveShareCensus **20 / 20 files byte-identical**; census OFF 37,716 / 37,716 uses, 0 command mismatches, 867 inserted, ON 10 / 10
+  off108Route shards byte-identical; SAME census-delta.json; off148Verify 5 / 5 at residual 0; SAME verify.json; **ALL SAME**.
 - `git diff --check`: clean.
 
 ## 5. Reproduction (from workspace/)
