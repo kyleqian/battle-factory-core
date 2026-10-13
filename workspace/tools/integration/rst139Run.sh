@@ -48,7 +48,9 @@ tar -cf - --exclude ./node_modules --exclude ./reference --exclude ./artifacts -
   --exclude $XL . | tar -x -C "$OUT/patched/workspace"
 P="$OUT/patched/workspace"
 ln -s "$W/node_modules" "$P/node_modules"; ln -s "$W/reference" "$P/reference"
-(cd "$P" && git apply "$W/$FX/rst139-rest.diff") || { echo "patch does not apply"; exit 1; }
+# (patch, not git apply: inside an enclosing git repo git apply silently skips paths outside the repo's view)
+patch -s -p1 -d "$P" < "$W/$FX/rst139-rest.diff" || { echo "patch does not apply"; exit 1; }
+grep -q rst139 "$P/src/engine/core.ts" || { echo "patch not applied"; exit 1; }
 python3 tools/integration/rst139NpzToRaw.py "$OUT/rom/probes/r1" "$OUT/rom/dump" "$OUT/raw" > /dev/null
 $NODE tools/integration/rst139ProductionCompare.ts "$OUT/raw" "$OUT/cmp-base.json" | tail -1 | sed "s/^/today:   /"
 check "$FX/production-compare-base.json" "$OUT/cmp-base.json" "production-compare-base.json"
