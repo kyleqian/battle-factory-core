@@ -47,6 +47,7 @@ import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import { battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
+import { seg127StatusSeGateFromEvents } from "./seg127StatusSeGate.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -106,7 +107,8 @@ export type BattleStatusTiming = Readonly<{ minimumFrames: number }>;
 /**
  * sa125 (docs/sta123-status-animations-design.md §1 / §4, tools/integration/fixtures/sta123/receipts/rom-r1.json): the rows
  * the next script instruction waits on the controller after a Scene ON statusanimation = gAnimScriptActive rows + 1 (the
- * IsBattleSEPlaying gate, SA2, is 0 here). WRAPPED has no table entry in source (never played).
+ * IsBattleSEPlaying gate before it, SA2, is added per receipt: sag130, seg127StatusSeGate.ts). WRAPPED has no table entry in
+ * source (never played).
  */
 export const STATUS_ANIMATION_ADDED_ROWS = Object.freeze({
   PSN: 71, CONFUSION: 100, BRN: 39, INFATUATION: 97, SLP: 97, PRZ: 39, FRZ: 117, CURSED: 75, NIGHTMARE: 75,
@@ -315,8 +317,8 @@ export type BattleResolutionPresentationCommand =
        * sa125 (S10A, ISSUES #168 slice SA1): B_ANIM_STATUS_* (Cmd_statusanimation / status2animation / chosenstatusanimation),
        * Scene ON only, at the kernel `status-animation` receipt (the kernel already skips Scene OFF, a Substitute and a
        * semi-invulnerable battler). `animation` is InitAndLaunchChosenStatusAnimation's pick (spriteOrderStatusAnimationName);
-       * minimumFrames = STATUS_ANIMATION_ADDED_ROWS[animation], the controller rows the next instruction waits
-       * (docs/sta123-status-animations-design.md §4). Timing only: nothing is drawn yet (renderers are SA4..SA8).
+       * minimumFrames = the IsBattleSEPlaying gate (sag130 SA2, docs/seg127-status-se-gate.md) + STATUS_ANIMATION_ADDED_ROWS[animation],
+       * the controller rows the next instruction waits (docs/sta123-status-animations-design.md §4).
        */
       type: "status-animation";
       eventSequence: number;
@@ -904,6 +906,16 @@ function sceneOnStatusFrames(events: readonly BattleKernelSemanticEvent[], statu
   }
   return animated && print !== null && print > status ? print - status : null;
 }
+/**
+ * sag130 SA2 (docs/sag130-status-se-gate-live.md): the controller's IsBattleSEPlaying rows before the status animation of
+ * `events[index]` (seg127's rule over the segment's kernel events). HP-bar rows = |from - to| (MoveBattleBar's 1 HP per row: every
+ * Factory mon has max HP >= 48 but Shedinja, whose hit faints it, and the faint print closes the gate). A path with no measured
+ * fixed rows (null; none on census seeds 0..999) presents gate 0 (counted by sag130CensusDelta.py).
+ */
+function statusAnimationSeGate(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  return seg127StatusSeGateFromEvents(events.map((e) => e.payload), index)?.gate ?? 0;
+}
+
 /** sa125 SA1: the presented B_ANIM_STATUS_* of a kernel `status-animation` receipt, or null (WRAPPED / none: no table entry). */
 function statusAnimationPresented(isStatus2: number, status: number): BattleStatusAnimationName | null {
   const name = spriteOrderStatusAnimationName(isStatus2 !== 0, status);
@@ -3920,7 +3932,7 @@ export function projectBattleResolutionCommands(
           eventSequence: event.sequence,
           battler: singlesBattler(payload.battler, "status animation"),
           animation,
-          timing: Object.freeze({ minimumFrames: STATUS_ANIMATION_ADDED_ROWS[animation] }),
+          timing: Object.freeze({ minimumFrames: statusAnimationSeGate(events, index) + STATUS_ANIMATION_ADDED_ROWS[animation] }),
         }));
       }
       continue;
