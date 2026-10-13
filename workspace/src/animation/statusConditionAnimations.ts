@@ -11,7 +11,11 @@
  * (AnimConfusionDuck / _Step); ShakeMon2 reuses ./shakeMon2.ts, AnimTask_FrozenIceCube reuses ./frozenIceCube.ts (Move_SHEER_COLD's task).
  */
 import { GBA_SINE_TABLE_256 } from "../engine/battleMenu.ts";
+import { linearTranslationDeltaQ8 } from "./animLinearTranslation.ts";
+import { CHARM_HEART_CREATION_AGES, magentaHeartAtAge } from "./charm.ts";
+import { FIRE_PUNCH_BURN_FLAME_FIRST_AGE, firePunchBurnFlames } from "./firePunch.ts";
 import { frozenIceCubeState } from "./frozenIceCube.ts";
+import { REST_LETTER_SPAWN_AGES, restAtAge } from "./rest.ts";
 import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
 
 export type StatusConditionAnimation = "CURSED" | "NIGHTMARE" | "CONFUSION" | "FRZ";
@@ -41,7 +45,7 @@ export interface StatusConditionOptions {
 
 export interface StatusConditionSprite {
   readonly template: "gCurseGhostSpriteTemplate" | "gNightmareDevilSpriteTemplate" | "gConfusionDuckSpriteTemplate"
-    | "sFrozenIceCubeSpriteTemplate";
+    | "sFrozenIceCubeSpriteTemplate" | "gSleepLetterZSpriteTemplate" | "gBurnFlameSpriteTemplate" | "gMagentaHeartSpriteTemplate";
   /** Creation order inside the script (the lowest-free slot rule assigns the real slot). */
   readonly index: number;
   readonly x: number;
@@ -61,6 +65,16 @@ export interface StatusConditionSprite {
   /** 64 = the ice cube: a 64x64 OBJ with sFrozenIceCubeSubspriteTable (four pieces around x + x2 / y + y2). */
   readonly size: 16 | 32 | 64;
   readonly data: readonly number[];
+  /** stq132: affine-normal OBJ (the letter Z): gOamMatrices[matrixNum] (Q8.8 inverse a, b, c, d). Absent on non-affine sprites. */
+  readonly affine?: StatusConditionMatrix;
+}
+
+/** An OBJ affine matrix (pa, pb, pc, pd). */
+export interface StatusConditionMatrix {
+  readonly a: number;
+  readonly b: number;
+  readonly c: number;
+  readonly d: number;
 }
 
 export interface StatusConditionSourceRow {
@@ -94,6 +108,8 @@ export interface StatusConditionDisplaySprite {
   readonly subpriority: number;
   /** BLDALPHA coefficients when the sprite is a blended OBJ, else null (opaque). */
   readonly blend: Readonly<{ eva: number; evb: number }> | null;
+  /** stq132: the affine matrix shown on this row (affine-normal 32x32: `left / top` is still the 32x32 box). Absent when not affine. */
+  readonly affine?: StatusConditionMatrix;
 }
 
 export interface StatusConditionDisplayRow {
@@ -362,4 +378,157 @@ export function statusConditionDisplayRow(animation: StatusConditionAnimation, r
   return { rel, battlerOffset: { x: prev.battlerX2, y: prev.battlerY2 }, battlerOnBg: prev.battlerInvisible, sprites,
     enemyShadowHidden: rel >= 1 && rel <= span.activeRows + 1,
     objPaletteRotation: animation === "FRZ" && rotationAge >= 0 ? frozenIceCubeState(rotationAge).paletteRotation : 0 };
+}
+
+// ==== stq132: Status_Sleep / Status_Burn / Status_Infatuation (docs/stq132-status-condition-render-prep.md) ===========================
+// Single-template particle groups; the battler is not touched (no monbg, no shake, no blend: x2 / y2 / BG / BLDCNT stay as they were).
+// Each sprite's motion reuses the production port of the same template + args:
+//  - SLP: Move_REST's gSleepLetterZSpriteTemplate (4, -10) -> rest.ts restAtAge (AnimSleepLetterZ_Step x2 / y2, the affine matrices);
+//  - BRN: Fire Punch's burn flames -> firePunch.ts firePunchBurnFlames (AnimBurnFlame -> AnimTravelDiagonally, gAnims_BasicFire);
+//  - INFATUATION: Move_CHARM's hearts -> charm.ts magentaHeartAtAge (AnimMagentaHeart; Charm's 17-row spacing is the same).
+// Literal ports here (no production function covers them): each sprite's create-row state (the CreateSpriteAndAnimate call) and the
+// data[] words of the burn flame's linear translation.
+export type StatusParticleAnimation = "SLP" | "BRN" | "INFATUATION";
+/** All seven Scene ON status-condition animations with a reducer in this module. */
+export type StatusAnimation = StatusConditionAnimation | StatusParticleAnimation;
+
+/** The script's createsprite rows (rel), one per sprite in creation order (the audit's create frames +3 / +35, +3 / +9 / +15, +3 / +20 / +37). */
+const PARTICLE_CREATE_ROWS: Readonly<Record<StatusParticleAnimation, readonly number[]>> = {
+  SLP: [3, 35],
+  BRN: [3, 9, 15],
+  INFATUATION: [3, 20, 37],
+};
+
+export const STATUS_PARTICLE_SPANS: Readonly<Record<StatusParticleAnimation, StatusConditionSpan>> = {
+  SLP: { activeRows: 96, controllerRows: 97, createRow: PARTICLE_CREATE_ROWS.SLP[0]! },
+  BRN: { activeRows: 38, controllerRows: 39, createRow: PARTICLE_CREATE_ROWS.BRN[0]! },
+  INFATUATION: { activeRows: 96, controllerRows: 97, createRow: PARTICLE_CREATE_ROWS.INFATUATION[0]! },
+};
+
+export function isStatusParticleAnimation(animation: StatusAnimation): animation is StatusParticleAnimation {
+  return animation === "SLP" || animation === "BRN" || animation === "INFATUATION";
+}
+
+/** sBattlerCoords (singles): GetBattlerSpriteCoord(BATTLER_COORD_X / BATTLER_COORD_Y), the base the burn flame / heart start from. */
+const SINGLES_BATTLER_COORDS: Readonly<Record<StatusConditionSide, Readonly<{ x: number; y: number }>>> = {
+  player: { x: 72, y: 80 },
+  opponent: { x: 176, y: 40 },
+};
+/** BIOS ObjAffineSet for the letter Z's first affine frame AFFINEANIMCMD_FRAME(0x14, 0x14, ∓30, 0): the create row's gOamMatrices entry. */
+const SLEEP_LETTER_CREATE_MATRIX = { a: 2427, b: 2200 } as const;
+/** AnimSleepLetterZ_Step destroys the sprite on its 61st call (`++data[1] > 60`). */
+const SLEEP_LETTER_LAST_CALL = 60;
+/** Status_Burn's BurnFlame: AnimTravelDiagonally (-24, 24) -> (24, 24) over 20 callbacks; BATTLER_COORD_X / Y based (args 5 / 6 = 1). */
+const BURN_FLAME = { x: 24, y: 24, duration: 20, lastCall: 22 } as const;
+/** StoreSpriteCallbackInData6(sprite, DestroyAnimSprite): data[6] / data[7] = the low / high half of 0x080A3BFD (pokeemerald.map). */
+const DESTROY_ANIM_SPRITE_DATA = [0x3bfd, 0x080a] as const;
+/** gAnims_BasicFire: five 32x32 frames of four ticks (16 tiles apart), then ANIMCMD_JUMP(0). */
+const BURN_FLAME_FRAME_TICKS = 4;
+/** Status_Infatuation: createsprite gMagentaHeartSpriteTemplate, ANIM_ATTACKER, 3, (0 | -20 | 20), 20; AnimMagentaHeart lives 59 calls. */
+const HEART = { y: 20, lastCall: 59, subpriorityOffset: 3 } as const;
+const HEART_SCRIPT_X = [0, -20, 20] as const;
+
+interface ParticleState { readonly sprite: StatusConditionSprite; /** callbacks after the create row (0 = the create row) */ readonly k: number }
+
+function particles(animation: StatusParticleAnimation, rel: number, target: StatusConditionTarget): ParticleState[] {
+  const out: ParticleState[] = [];
+  const dir = target.side === "player" ? 1 : -1;
+  const base = SINGLES_BATTLER_COORDS[target.side];
+  PARTICLE_CREATE_ROWS[animation].forEach((createRow, index) => {
+    const k = rel - createRow;
+    if (k < 0) return;
+    const common = { index, invisible: false, priority: 2, animNum: 0, hFlip: false, blend: false };
+    if (animation === "SLP") {
+      if (k > SLEEP_LETTER_LAST_CALL) return;
+      // AnimSleepLetterZ (create row): SetSpriteCoordsToAnimAttackerCoords + (±4, -10), data[3] = ±1, the opponent's affine anim 1
+      const center = { x: target.animX, y: target.animY };
+      const letter = k >= 1 ? restAtAge(REST_LETTER_SPAWN_AGES[0] + k - 1, target.side, center).letters.find((l) => l.index === 0)! : null;
+      const affine = letter ? { ...letter.matrix }
+        : { a: SLEEP_LETTER_CREATE_MATRIX.a, b: dir * SLEEP_LETTER_CREATE_MATRIX.b, c: -dir * SLEEP_LETTER_CREATE_MATRIX.b, d: SLEEP_LETTER_CREATE_MATRIX.a };
+      out.push({ k, sprite: { template: "gSleepLetterZSpriteTemplate", ...common, x: center.x + dir * 4, y: center.y - 10,
+        x2: letter?.x2 ?? 0, y2: letter?.y2 ?? 0, subpriority: battlerSubpriority(target.side) - 2, animCmdIndex: 0, tileOffset: 0, size: 32,
+        data: [s16((k * (k - 1)) / 2), k, 0, dir, s16(2 * k * dir), 0, 0, 0], affine } });
+      return;
+    }
+    if (animation === "BRN") {
+      if (k > BURN_FLAME.lastCall) return;
+      const flameDir = -dir; // +1 opponent-front, -1 player-back (production's horizontalDirection)
+      const animCmdIndex = Math.floor(k / BURN_FLAME_FRAME_TICKS) % 5;
+      const sprite = { template: "gBurnFlameSpriteTemplate" as const, ...common, subpriority: battlerSubpriority(target.side) - 2, animCmdIndex,
+        tileOffset: animCmdIndex * 16, size: 32 as const };
+      if (k === 0) {
+        // createsprite at GetBattlerSpriteCoord(X_2 / Y_PIC_OFFSET); AnimBurnFlame only swaps the callback
+        out.push({ k, sprite: { ...sprite, x: target.animX, y: target.animY, x2: 0, y2: 0, data: [0, 0, 0, 0, 0, 0, 0, 0] } });
+        return;
+      }
+      const x = base.x - flameDir * BURN_FLAME.x, y = base.y + BURN_FLAME.y;
+      if (k === 1) {
+        // AnimTravelDiagonally: data[0] duration, data[2] / data[4] the end point, data[6..7] the follow-up callback
+        out.push({ k, sprite: { ...sprite, x, y, x2: 0, y2: 0, data: [BURN_FLAME.duration, 0, target.animX + flameDir * BURN_FLAME.x, 0, y, 0,
+          ...DESTROY_ANIM_SPRITE_DATA] } });
+        return;
+      }
+      const flame = firePunchBurnFlames(FIRE_PUNCH_BURN_FLAME_FIRST_AGE + k - 1, { center: { x: target.animX, y: target.animY },
+        statusBaseCenter: base, horizontalDirection: flameDir as 1 | -1 }).at(-1)!;
+      // InitAnimLinearTranslation / AnimTranslateLinear words: remaining ticks, the raw Q8 delta (bit 0 = leftward), the accumulator
+      const delta = Math.abs(linearTranslationDeltaQ8(flameDir * 2 * BURN_FLAME.x, BURN_FLAME.duration));
+      const calls = Math.min(k - 1, BURN_FLAME.duration);
+      out.push({ k, sprite: { ...sprite, x, y, x2: flame.x - x, y2: flame.y - y,
+        data: [BURN_FLAME.duration - calls, delta, 0, s16(delta * calls), 0, 0, ...DESTROY_ANIM_SPRITE_DATA] } });
+      return;
+    }
+    // INFATUATION
+    if (k >= HEART.lastCall) return;
+    const heart = k >= 1 ? magentaHeartAtAge(CHARM_HEART_CREATION_AGES[index]! + k - 1, index, target.side, base)! : null;
+    // AnimMagentaHeart's first call (create row): InitSpritePosToAnimAttacker(FALSE) + (±x, 20), x2 = Sin(0, 8), y2 = 0
+    out.push({ k, sprite: { template: "gMagentaHeartSpriteTemplate", ...common, x: base.x + dir * HEART_SCRIPT_X[index]!,
+      y: base.y + HEART.y, x2: heart?.x2 ?? 0, y2: heart?.y2 ?? 0, subpriority: battlerSubpriority(target.side) - HEART.subpriorityOffset,
+      animCmdIndex: 0, tileOffset: 0, size: 16, data: heart ? [heart.data0, heart.data1, s16(heart.data2), 0, 0, 0, 0, 0] : [1, 7, -0x80, 0, 0, 0, 0, 0] } });
+  });
+  return out;
+}
+
+export function statusParticleSpan(animation: StatusParticleAnimation): StatusConditionSpan {
+  return STATUS_PARTICLE_SPANS[animation];
+}
+
+/** RAM / register state at the end of row `rel` (statusConditionSourceRow's shape; the battler keeps its idle x2). */
+export function statusParticleSourceRow(animation: StatusParticleAnimation, rel: number, target: StatusConditionTarget): StatusConditionSourceRow {
+  assertRel(rel);
+  const span = STATUS_PARTICLE_SPANS[animation];
+  return { rel, active: rel >= 0 && rel < span.activeRows, controllerBusy: rel >= 0 && rel < span.controllerRows, battlerX2: target.idleX2 ?? 0,
+    battlerY2: 0, battlerInvisible: false, bg: [0, 0, 0, 0], sprites: particles(animation, rel, target).map((p) => p.sprite), bldcnt: 0, bldalpha: 0 };
+}
+
+/** OAM attr0 y as SortSprites compares it (>= 160 wraps negative). */
+const wrappedOamY = (top: number): number => {
+  const byte = top & 0xff;
+  return byte >= 160 ? byte - 256 : byte;
+};
+
+/**
+ * What the screen of row `rel` shows: the OAM built at the end of row rel - 1, holding every sprite created on or before rel - 2
+ * (a script-created sprite first shows 2 rows after its create row). Back-to-front: priority, subpriority, then SortSprites' wrapped OAM
+ * y (a larger y gets the lower OAM index and wins), exact ties to the lower (earlier) slot.
+ */
+export function statusParticleDisplayRow(animation: StatusParticleAnimation, rel: number, target: StatusConditionTarget): StatusConditionDisplayRow {
+  assertRel(rel);
+  const span = STATUS_PARTICLE_SPANS[animation];
+  const sprites = particles(animation, rel - SPRITE_DISPLAY_LAG, target).filter((p) => p.k >= 1).map(({ sprite: s }) => ({
+    template: s.template, index: s.index, left: s.x + s.x2 - s.size / 2, top: s.y + s.y2 - s.size / 2, size: s.size, tileOffset: s.tileOffset,
+    hFlip: s.hFlip, priority: s.priority, subpriority: s.subpriority, blend: null, ...(s.affine ? { affine: s.affine } : {}) }));
+  sprites.sort((a, b) => b.priority - a.priority || b.subpriority - a.subpriority || wrappedOamY(a.top) - wrappedOamY(b.top) || b.index - a.index);
+  return { rel, battlerOffset: { x: target.idleX2 ?? 0, y: 0 }, battlerOnBg: false, sprites, enemyShadowHidden: rel >= 1 && rel <= span.activeRows + 1,
+    objPaletteRotation: 0 };
+}
+
+/** All seven: the span / display row of any status animation with a reducer here (FRZ takes `options`). */
+export function statusAnimationSpan(animation: StatusAnimation, options: StatusConditionOptions = {}): StatusConditionSpan {
+  return isStatusParticleAnimation(animation) ? statusParticleSpan(animation) : statusConditionSpan(animation, options);
+}
+
+export function statusAnimationDisplayRow(animation: StatusAnimation, rel: number, target: StatusConditionTarget,
+  options: StatusConditionOptions = {}): StatusConditionDisplayRow {
+  return isStatusParticleAnimation(animation) ? statusParticleDisplayRow(animation, rel, target)
+    : statusConditionDisplayRow(animation, rel, target, options);
 }

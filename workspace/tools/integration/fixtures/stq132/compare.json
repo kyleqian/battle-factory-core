@@ -1,0 +1,1227 @@
+{
+ "schema": "stq132-compare-receipt/v1",
+ "windows": 37,
+ "cleanWindows": 37,
+ "summary": {
+  "INFATUATION/player": {
+   "windows": 4,
+   "rows": 400,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "INFATUATION/opponent": {
+   "windows": 4,
+   "rows": 400,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "BRN/opponent": {
+   "windows": 7,
+   "rows": 294,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "SLP/player": {
+   "windows": 8,
+   "rows": 800,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "SLP/opponent": {
+   "windows": 8,
+   "rows": 800,
+   "fullPx": 0,
+   "rectPx": 0
+  },
+  "BRN/player": {
+   "windows": 6,
+   "rows": 252,
+   "fullPx": 0,
+   "rectPx": 0
+  }
+ },
+ "controls": {
+  "age+1": {
+   "windows": 37,
+   "cleanWindows": 0,
+   "failedWindows": [
+    "stq132-attract-opp-primeape-golbat#0",
+    "stq132-attract-opp-primeape-golbat#1",
+    "stq132-attract-opp-primeape-onix#0",
+    "stq132-attract-opp-primeape-onix#1",
+    "stq132-attract-ply-primeape-golbat#0",
+    "stq132-attract-ply-primeape-golbat#1",
+    "stq132-attract-ply-primeape-onix#0",
+    "stq132-attract-ply-primeape-onix#1",
+    "stq132-fire-punch-ply-magby-wailmer#0",
+    "stq132-spore-opp-primeape-golbat#0",
+    "stq132-spore-opp-primeape-golbat#1",
+    "stq132-spore-opp-primeape-golbat#2",
+    "stq132-spore-opp-primeape-golbat#3",
+    "stq132-spore-opp-primeape-onix#0",
+    "stq132-spore-opp-primeape-onix#1",
+    "stq132-spore-opp-primeape-onix#2",
+    "stq132-spore-opp-primeape-onix#3",
+    "stq132-spore-ply-primeape-golbat#0",
+    "stq132-spore-ply-primeape-golbat#1",
+    "stq132-spore-ply-primeape-golbat#2",
+    "stq132-spore-ply-primeape-golbat#3",
+    "stq132-spore-ply-primeape-onix#0",
+    "stq132-spore-ply-primeape-onix#1",
+    "stq132-spore-ply-primeape-onix#2",
+    "stq132-spore-ply-primeape-onix#3",
+    "stq132-will-o-wisp-opp-primeape-golbat#0",
+    "stq132-will-o-wisp-opp-primeape-golbat#1",
+    "stq132-will-o-wisp-opp-primeape-golbat#2",
+    "stq132-will-o-wisp-opp-primeape-onix#0",
+    "stq132-will-o-wisp-opp-primeape-onix#1",
+    "stq132-will-o-wisp-opp-primeape-onix#2",
+    "stq132-will-o-wisp-ply-primeape-golbat#0",
+    "stq132-will-o-wisp-ply-primeape-golbat#1",
+    "stq132-will-o-wisp-ply-primeape-golbat#2",
+    "stq132-will-o-wisp-ply-primeape-onix#0",
+    "stq132-will-o-wisp-ply-primeape-onix#1",
+    "stq132-will-o-wisp-ply-primeape-onix#2"
+   ],
+   "fullPx": 377184
+  },
+  "wrong-side": {
+   "windows": 37,
+   "cleanWindows": 0,
+   "failedWindows": [
+    "stq132-attract-opp-primeape-golbat#0",
+    "stq132-attract-opp-primeape-golbat#1",
+    "stq132-attract-opp-primeape-onix#0",
+    "stq132-attract-opp-primeape-onix#1",
+    "stq132-attract-ply-primeape-golbat#0",
+    "stq132-attract-ply-primeape-golbat#1",
+    "stq132-attract-ply-primeape-onix#0",
+    "stq132-attract-ply-primeape-onix#1",
+    "stq132-fire-punch-ply-magby-wailmer#0",
+    "stq132-spore-opp-primeape-golbat#0",
+    "stq132-spore-opp-primeape-golbat#1",
+    "stq132-spore-opp-primeape-golbat#2",
+    "stq132-spore-opp-primeape-golbat#3",
+    "stq132-spore-opp-primeape-onix#0",
+    "stq132-spore-opp-primeape-onix#1",
+    "stq132-spore-opp-primeape-onix#2",
+    "stq132-spore-opp-primeape-onix#3",
+    "stq132-spore-ply-primeape-golbat#0",
+    "stq132-spore-ply-primeape-golbat#1",
+    "stq132-spore-ply-primeape-golbat#2",
+    "stq132-spore-ply-primeape-golbat#3",
+    "stq132-spore-ply-primeape-onix#0",
+    "stq132-spore-ply-primeape-onix#1",
+    "stq132-spore-ply-primeape-onix#2",
+    "stq132-spore-ply-primeape-onix#3",
+    "stq132-will-o-wisp-opp-primeape-golbat#0",
+    "stq132-will-o-wisp-opp-primeape-golbat#1",
+    "stq132-will-o-wisp-opp-primeape-golbat#2",
+    "stq132-will-o-wisp-opp-primeape-onix#0",
+    "stq132-will-o-wisp-opp-primeape-onix#1",
+    "stq132-will-o-wisp-opp-primeape-onix#2",
+    "stq132-will-o-wisp-ply-primeape-golbat#0",
+    "stq132-will-o-wisp-ply-primeape-golbat#1",
+    "stq132-will-o-wisp-ply-primeape-golbat#2",
+    "stq132-will-o-wisp-ply-primeape-onix#0",
+    "stq132-will-o-wisp-ply-primeape-onix#1",
+    "stq132-will-o-wisp-ply-primeape-onix#2"
+   ],
+   "fullPx": 1002260
+  },
+  "drop-one": {
+   "windows": 37,
+   "cleanWindows": 0,
+   "failedWindows": [
+    "stq132-attract-opp-primeape-golbat#0",
+    "stq132-attract-opp-primeape-golbat#1",
+    "stq132-attract-opp-primeape-onix#0",
+    "stq132-attract-opp-primeape-onix#1",
+    "stq132-attract-ply-primeape-golbat#0",
+    "stq132-attract-ply-primeape-golbat#1",
+    "stq132-attract-ply-primeape-onix#0",
+    "stq132-attract-ply-primeape-onix#1",
+    "stq132-fire-punch-ply-magby-wailmer#0",
+    "stq132-spore-opp-primeape-golbat#0",
+    "stq132-spore-opp-primeape-golbat#1",
+    "stq132-spore-opp-primeape-golbat#2",
+    "stq132-spore-opp-primeape-golbat#3",
+    "stq132-spore-opp-primeape-onix#0",
+    "stq132-spore-opp-primeape-onix#1",
+    "stq132-spore-opp-primeape-onix#2",
+    "stq132-spore-opp-primeape-onix#3",
+    "stq132-spore-ply-primeape-golbat#0",
+    "stq132-spore-ply-primeape-golbat#1",
+    "stq132-spore-ply-primeape-golbat#2",
+    "stq132-spore-ply-primeape-golbat#3",
+    "stq132-spore-ply-primeape-onix#0",
+    "stq132-spore-ply-primeape-onix#1",
+    "stq132-spore-ply-primeape-onix#2",
+    "stq132-spore-ply-primeape-onix#3",
+    "stq132-will-o-wisp-opp-primeape-golbat#0",
+    "stq132-will-o-wisp-opp-primeape-golbat#1",
+    "stq132-will-o-wisp-opp-primeape-golbat#2",
+    "stq132-will-o-wisp-opp-primeape-onix#0",
+    "stq132-will-o-wisp-opp-primeape-onix#1",
+    "stq132-will-o-wisp-opp-primeape-onix#2",
+    "stq132-will-o-wisp-ply-primeape-golbat#0",
+    "stq132-will-o-wisp-ply-primeape-golbat#1",
+    "stq132-will-o-wisp-ply-primeape-golbat#2",
+    "stq132-will-o-wisp-ply-primeape-onix#0",
+    "stq132-will-o-wisp-ply-primeape-onix#1",
+    "stq132-will-o-wisp-ply-primeape-onix#2"
+   ],
+   "fullPx": 198484
+  },
+  "no-affine": {
+   "windows": 37,
+   "cleanWindows": 21,
+   "failedWindows": [
+    "stq132-spore-opp-primeape-golbat#0",
+    "stq132-spore-opp-primeape-golbat#1",
+    "stq132-spore-opp-primeape-golbat#2",
+    "stq132-spore-opp-primeape-golbat#3",
+    "stq132-spore-opp-primeape-onix#0",
+    "stq132-spore-opp-primeape-onix#1",
+    "stq132-spore-opp-primeape-onix#2",
+    "stq132-spore-opp-primeape-onix#3",
+    "stq132-spore-ply-primeape-golbat#0",
+    "stq132-spore-ply-primeape-golbat#1",
+    "stq132-spore-ply-primeape-golbat#2",
+    "stq132-spore-ply-primeape-golbat#3",
+    "stq132-spore-ply-primeape-onix#0",
+    "stq132-spore-ply-primeape-onix#1",
+    "stq132-spore-ply-primeape-onix#2",
+    "stq132-spore-ply-primeape-onix#3"
+   ],
+   "fullPx": 363688
+  },
+  "tie-swap": {
+   "windows": 37,
+   "cleanWindows": 16,
+   "failedWindows": [
+    "stq132-attract-opp-primeape-golbat#0",
+    "stq132-attract-opp-primeape-golbat#1",
+    "stq132-attract-opp-primeape-onix#0",
+    "stq132-attract-opp-primeape-onix#1",
+    "stq132-attract-ply-primeape-golbat#0",
+    "stq132-attract-ply-primeape-golbat#1",
+    "stq132-attract-ply-primeape-onix#0",
+    "stq132-attract-ply-primeape-onix#1",
+    "stq132-fire-punch-ply-magby-wailmer#0",
+    "stq132-will-o-wisp-opp-primeape-golbat#0",
+    "stq132-will-o-wisp-opp-primeape-golbat#1",
+    "stq132-will-o-wisp-opp-primeape-golbat#2",
+    "stq132-will-o-wisp-opp-primeape-onix#0",
+    "stq132-will-o-wisp-opp-primeape-onix#1",
+    "stq132-will-o-wisp-opp-primeape-onix#2",
+    "stq132-will-o-wisp-ply-primeape-golbat#0",
+    "stq132-will-o-wisp-ply-primeape-golbat#1",
+    "stq132-will-o-wisp-ply-primeape-golbat#2",
+    "stq132-will-o-wisp-ply-primeape-onix#0",
+    "stq132-will-o-wisp-ply-primeape-onix#1",
+    "stq132-will-o-wisp-ply-primeape-onix#2"
+   ],
+   "fullPx": 2380
+  },
+  "index-order": {
+   "windows": 37,
+   "cleanWindows": 24,
+   "failedWindows": [
+    "stq132-fire-punch-ply-magby-wailmer#0",
+    "stq132-will-o-wisp-opp-primeape-golbat#0",
+    "stq132-will-o-wisp-opp-primeape-golbat#1",
+    "stq132-will-o-wisp-opp-primeape-golbat#2",
+    "stq132-will-o-wisp-opp-primeape-onix#0",
+    "stq132-will-o-wisp-opp-primeape-onix#1",
+    "stq132-will-o-wisp-opp-primeape-onix#2",
+    "stq132-will-o-wisp-ply-primeape-golbat#0",
+    "stq132-will-o-wisp-ply-primeape-golbat#1",
+    "stq132-will-o-wisp-ply-primeape-golbat#2",
+    "stq132-will-o-wisp-ply-primeape-onix#0",
+    "stq132-will-o-wisp-ply-primeape-onix#1",
+    "stq132-will-o-wisp-ply-primeape-onix#2"
+   ],
+   "fullPx": 620
+  },
+  "no-occluders": {
+   "windows": 37,
+   "cleanWindows": 29,
+   "failedWindows": [
+    "stq132-spore-opp-primeape-golbat#0",
+    "stq132-spore-opp-primeape-golbat#1",
+    "stq132-spore-opp-primeape-golbat#2",
+    "stq132-spore-opp-primeape-golbat#3",
+    "stq132-spore-opp-primeape-onix#0",
+    "stq132-spore-opp-primeape-onix#1",
+    "stq132-spore-opp-primeape-onix#2",
+    "stq132-spore-opp-primeape-onix#3"
+   ],
+   "fullPx": 11904
+  }
+ },
+ "perWindow": {
+  "stq132-attract-opp-primeape-golbat#0": {
+   "animation": "INFATUATION",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    36,
+    64,
+    71,
+    42
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-attract-opp-primeape-golbat#1": {
+   "animation": "INFATUATION",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    36,
+    64,
+    71,
+    42
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-attract-opp-primeape-onix#0": {
+   "animation": "INFATUATION",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    36,
+    64,
+    71,
+    42
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-attract-opp-primeape-onix#1": {
+   "animation": "INFATUATION",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    36,
+    64,
+    71,
+    42
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-attract-ply-primeape-golbat#0": {
+   "animation": "INFATUATION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    140,
+    24,
+    71,
+    49
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-attract-ply-primeape-golbat#1": {
+   "animation": "INFATUATION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    140,
+    24,
+    71,
+    49
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-attract-ply-primeape-onix#0": {
+   "animation": "INFATUATION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    140,
+    24,
+    71,
+    42
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-attract-ply-primeape-onix#1": {
+   "animation": "INFATUATION",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    140,
+    24,
+    71,
+    42
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-fire-punch-ply-magby-wailmer#0": {
+   "animation": "BRN",
+   "side": "opponent",
+   "species": {
+    "player": 240,
+    "opponent": 313
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    48,
+    187,
+    88
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 611,
+    "rectPx": 611
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-opp-primeape-golbat#0": {
+   "animation": "SLP",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    44,
+    96,
+    106
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 811,
+    "rectPx": 811
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-opp-primeape-golbat#1": {
+   "animation": "SLP",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    71,
+    44,
+    25,
+    46
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-opp-primeape-golbat#2": {
+   "animation": "SLP",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    71,
+    44,
+    25,
+    46
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-opp-primeape-golbat#3": {
+   "animation": "SLP",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    71,
+    44,
+    25,
+    46
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-opp-primeape-onix#0": {
+   "animation": "SLP",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    44,
+    96,
+    106
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 813,
+    "rectPx": 813
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-opp-primeape-onix#1": {
+   "animation": "SLP",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    71,
+    44,
+    24,
+    40
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-opp-primeape-onix#2": {
+   "animation": "SLP",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    71,
+    44,
+    24,
+    40
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-opp-primeape-onix#3": {
+   "animation": "SLP",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    71,
+    44,
+    24,
+    40
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-ply-primeape-golbat#0": {
+   "animation": "SLP",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    16,
+    0,
+    176,
+    150
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 694,
+    "rectPx": 694
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-ply-primeape-golbat#1": {
+   "animation": "SLP",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    155,
+    0,
+    37,
+    73
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-ply-primeape-golbat#2": {
+   "animation": "SLP",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    155,
+    0,
+    37,
+    73
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-ply-primeape-golbat#3": {
+   "animation": "SLP",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    155,
+    0,
+    37,
+    73
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-ply-primeape-onix#0": {
+   "animation": "SLP",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    0,
+    162,
+    150
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 694,
+    "rectPx": 694
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-ply-primeape-onix#1": {
+   "animation": "SLP",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    154,
+    0,
+    24,
+    38
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-ply-primeape-onix#2": {
+   "animation": "SLP",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    154,
+    0,
+    24,
+    38
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-spore-ply-primeape-onix#3": {
+   "animation": "SLP",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    154,
+    0,
+    24,
+    38
+   ],
+   "rows": 100,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 99,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-opp-primeape-golbat#0": {
+   "animation": "BRN",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    88,
+    96,
+    62
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 973,
+    "rectPx": 973
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-opp-primeape-golbat#1": {
+   "animation": "BRN",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    46,
+    88,
+    52,
+    24
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-opp-primeape-golbat#2": {
+   "animation": "BRN",
+   "side": "player",
+   "species": {
+    "player": 42,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    46,
+    88,
+    52,
+    24
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-opp-primeape-onix#0": {
+   "animation": "BRN",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    88,
+    96,
+    62
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 975,
+    "rectPx": 975
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-opp-primeape-onix#1": {
+   "animation": "BRN",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    46,
+    88,
+    52,
+    24
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-opp-primeape-onix#2": {
+   "animation": "BRN",
+   "side": "player",
+   "species": {
+    "player": 95,
+    "opponent": 57
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    46,
+    88,
+    52,
+    24
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-ply-primeape-golbat#0": {
+   "animation": "BRN",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    16,
+    48,
+    187,
+    102
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 856,
+    "rectPx": 856
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-ply-primeape-golbat#1": {
+   "animation": "BRN",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    150,
+    48,
+    53,
+    25
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-ply-primeape-golbat#2": {
+   "animation": "BRN",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 42
+   },
+   "elevatedOpponentShadow": true,
+   "rect": [
+    150,
+    48,
+    53,
+    25
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-ply-primeape-onix#0": {
+   "animation": "BRN",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    16,
+    48,
+    187,
+    102
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 856,
+    "rectPx": 856
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-ply-primeape-onix#1": {
+   "animation": "BRN",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    150,
+    48,
+    53,
+    24
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  },
+  "stq132-will-o-wisp-ply-primeape-onix#2": {
+   "animation": "BRN",
+   "side": "opponent",
+   "species": {
+    "player": 57,
+    "opponent": 95
+   },
+   "elevatedOpponentShadow": false,
+   "rect": [
+    150,
+    48,
+    53,
+    24
+   ],
+   "rows": 42,
+   "fullPx": 0,
+   "rectPx": 0,
+   "badRows": 0,
+   "residual": null,
+   "afterWindow": {
+    "rel": 41,
+    "fullPx": 0,
+    "rectPx": 0
+   },
+   "productionCornerEqualsRom": true
+  }
+ }
+}
