@@ -316,6 +316,8 @@ export function liveStatusAnimationRow(
       return { battlerOffset: shakeMon2Row(age, PRZ_ELECTRICITY_FIRST_ROW, PRZ_SHAKE), paletteBlend: null, sprites: statusElectricity(age, side) };
     case "SLP":
       return statusParticles("SLP", age, side, battler);
+    case "BRN":
+      return statusParticles("BRN", age, side, battler);
     default:
       return null;
   }

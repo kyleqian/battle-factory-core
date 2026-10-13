@@ -1133,6 +1133,7 @@ export function isBattleResolutionNextCommandHandoffComplete(
 export const STATUS_ANIMATIONS_DRAWN: ReadonlySet<string> = new Set([
   "PSN", "PRZ",
   "SLP", // sae135 (SA5)
+  "BRN", // sae135 (SA5)
 ]);
 
 /**

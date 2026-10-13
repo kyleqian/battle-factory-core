@@ -21,8 +21,8 @@ describe("sar131: PSN / PRZ rows (statusAnimation.ts liveStatusAnimationRow)", (
   it("draws PSN and PRZ only; every other B_ANIM_STATUS_* leaves the field as it is", () => {
     for (const name of Object.keys(STATUS_ANIMATION_ADDED_ROWS)) {
       const drawn = liveStatusAnimationRow(name, 10, "opponent") !== null;
-      // sae135 (SA5): + SLP (tests/sae135StatusAnimationRender.test.ts).
-      expect(drawn, name).toBe(name === "PSN" || name === "PRZ" || name === "SLP");
+      // sae135 (SA5): + SLP / BRN (tests/sae135StatusAnimationRender.test.ts).
+      expect(drawn, name).toBe(name === "PSN" || name === "PRZ" || name === "SLP" || name === "BRN");
       expect(STATUS_ANIMATIONS_DRAWN.has(name), name).toBe(drawn);
     }
   });
