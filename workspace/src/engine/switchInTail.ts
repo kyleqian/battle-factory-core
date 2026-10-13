@@ -7,7 +7,7 @@
  * the ball shows from elapsed 2, opens at 18), so the model's frames are the command's elapsed directly (ROM-verified on dense Scene ON
  * windows, docs/snd145-send-in-tail-live.md). The player side keeps its calibrated constants (slide 66, span 91 + 11).
  */
-import { sendInTail } from "../data/sendInTail.ts";
+import { SEND_IN_TAIL_CASTFORM, sendInTail } from "../data/sendInTail.ts";
 
 /** Opponent send-in: the `switch-in` elapsed of the healthbox slide's first frame (x2 -110). */
 export function opponentSwitchInHealthboxSlideElapsed(species: number): number {
@@ -17,4 +17,13 @@ export function opponentSwitchInHealthboxSlideElapsed(species: number): number {
 /** Opponent send-in: the `switch-in` command's whole duration (controller span + waitstate hold) = the next command's first frame. */
 export function opponentSwitchInDuration(species: number): number {
   return sendInTail(species, "opponent").messageStart!;
+}
+
+/**
+ * Opponent send-in: frames the whole send-in (ball, emerge, fade, particles) starts late. CASTFORM's ball shows one frame later
+ * than every other species' on the same timeline (dense Scene ON windows; the sweep's +1 on y2 start, slide and message alike), so
+ * its +1 is a whole-send-in shift (its slide / message frames above already include it).
+ */
+export function opponentSwitchInVisualDelay(species: number): number {
+  return species === SEND_IN_TAIL_CASTFORM ? 1 : 0;
 }

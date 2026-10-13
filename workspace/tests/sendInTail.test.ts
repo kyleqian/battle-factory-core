@@ -113,3 +113,11 @@ describe("snd145 live switch-in tail (R2 timing, R3 send-in fade / particles)", 
     }
   });
 });
+
+describe("snd145 CASTFORM whole-send-in delay", () => {
+  it("shifts CASTFORM's ball / fade / particles one frame (its slide / duration already carry the +1); other species 0", async () => {
+    const { opponentSwitchInVisualDelay } = await import("../src/engine/switchInTail.ts");
+    expect(opponentSwitchInVisualDelay(385)).toBe(1);
+    expect([304, 341, 95, 397, 157].map(opponentSwitchInVisualDelay)).toEqual([0, 0, 0, 0, 0]);
+  });
+});

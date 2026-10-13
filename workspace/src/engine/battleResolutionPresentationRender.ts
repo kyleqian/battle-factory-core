@@ -26,7 +26,7 @@ import type {
   BattleResolutionPresentationCommand,
   BattleResolutionPresentationState,
 } from "./battleResolutionPresentation.ts";
-import { opponentSwitchInHealthboxSlideElapsed } from "./switchInTail.ts";
+import { opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay } from "./switchInTail.ts";
 import {
   BATTLE_SCRIPT_STATUS1_BURN,
   BATTLE_SCRIPT_STATUS1_FREEZE,
@@ -1765,14 +1765,16 @@ export function createBattleResolutionPresentationRenderView(
       // The incoming mon is already the field battler; the mid-battle
       // switch-in view holds its visible onset until the ball-release emerge.
       field = withSubstituteDoll(replaceFieldBattler(field, command.battler, command.incoming), command.battler, false);
+      // snd145: the opponent's species-keyed slide start; CASTFORM's whole send-in runs one frame late (opponentSwitchInVisualDelay).
+      const visualDelay = command.battler === 1 ? opponentSwitchInVisualDelay(command.incoming.species) : 0;
+      const sendInElapsed = state.lifecycle.phaseElapsed - visualDelay;
       midBattleSwitchIn = midBattleSwitchInAt(
-        state.lifecycle.phaseElapsed,
+        sendInElapsed,
         command.battler,
-        command.battler === 1 ? opponentSwitchInHealthboxSlideElapsed(command.incoming.species) : undefined,
+        command.battler === 1 ? opponentSwitchInHealthboxSlideElapsed(command.incoming.species) - visualDelay : undefined,
       );
-      midBattleSwitchFade = midBattleSwitchSendInFadeAt(state.lifecycle.phaseElapsed, command.battler) ?? midBattleSwitchFade;
-      midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(state.lifecycle.phaseElapsed, command.battler)
-        ?? midBattleSwitchParticles;
+      midBattleSwitchFade = midBattleSwitchSendInFadeAt(sendInElapsed, command.battler) ?? midBattleSwitchFade;
+      midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(sendInElapsed, command.battler) ?? midBattleSwitchParticles;
       fainted.delete(command.battler);
     } else if (command.type === "switch-out") {
       // ISSUES #78 slice 4: the outgoing mon's return-to-ball scale-up owns

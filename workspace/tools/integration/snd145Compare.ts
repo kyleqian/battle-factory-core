@@ -3,8 +3,8 @@
 // method) and compared per row with a dense Scene ON oracle window (bin/oracle lab PNGs). Constructed segment: [previous message,
 // sprite-visibility(opponent hidden, recall), switch-in {battler 1, incoming = the staged species, timing as production builds it},
 // next message]; the incoming healthbox is the staged mon at full HP.
-// Alignment: production switch-in elapsed 2 (the closed ball's first frame) == the first ROM frame whose ball box equals production's;
-// then elapsed e == ROM frame anchor - 2 + e. Rows compared: e = 0 .. (next message first glyph or `--until`) + 2.
+// Alignment: production switch-in elapsed 2 (the closed ball's first frame; CASTFORM 3) == the first ROM frame whose ball box equals
+// production's; then elapsed e == ROM frame anchor - 2 + e (CASTFORM - 3). Rows compared: e = 0 .. (next message first glyph or `--until`) + 2.
 // The player half (back sprite + healthbox: x < 120, 48 <= y < 112 and x >= 120, 64 <= y < 112) is transplanted from the ROM (the
 // constructed player HP is not the ROM's); every other pixel is compared and split into regions:
 //   hb  = opponent healthbox band (x < 120, y < 48)    opp = opponent sprite / platform (x >= 120, y < 64)
@@ -17,7 +17,7 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../../src/engine/battleResolutionPresentation.ts";
-import { opponentSwitchInHealthboxSlideElapsed } from "../../src/engine/switchInTail.ts";
+import { opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay } from "../../src/engine/switchInTail.ts";
 import * as renderModule from "../../src/engine/battleResolutionPresentationRender.ts";
 
 const [scenarioPath, romDir, kind, outPath] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
@@ -96,8 +96,9 @@ const draw = (e: number) => {
 };
 const frames = readdirSync(romDir!).filter((f) => /^frame-\d+\.png$/.test(f)).map((f) => Number(f.slice(6, -4))).sort((a, b) => a - b);
 const rom = new Map(frames.map((f) => [f, readPng(`${romDir}/frame-${String(f).padStart(5, "0")}.png`)]));
-// Anchor: production elapsed 2 shows the closed ball at (168,56) 16x16.
-const ball = draw(2);
+// Anchor: production elapsed 2 (+ CASTFORM's whole-send-in delay) shows the closed ball at (168,56) 16x16.
+const anchorElapsed = 2 + opponentSwitchInVisualDelay(species);
+const ball = draw(anchorElapsed);
 const boxEqual = (r: Uint8Array) => {
   for (let y = 56; y < 72; y += 1) for (let x = 168; x < 184; x += 1) for (let k = 0; k < 3; k += 1) {
     if (r[(y * 240 + x) * 3 + k] !== ball[(y * 240 + x) * 4 + k]) return false;
@@ -106,7 +107,7 @@ const boxEqual = (r: Uint8Array) => {
 };
 const anchorFrame = frames.find((f) => boxEqual(rom.get(f)!) && !boxEqual(rom.get(f - 1) ?? new Uint8Array(240 * 160 * 3)));
 if (anchorFrame === undefined) throw new Error("no ROM frame shows production's elapsed-2 ball");
-const base = anchorFrame - 2;
+const base = anchorFrame - anchorElapsed;
 const playerHalf = (x: number, y: number) => (x < 120 && y >= 48 && y < 112) || (x >= 120 && y >= 64 && y < 112);
 const region = (x: number, y: number) => y >= 112 ? "msg" : x < 120 && y < 48 ? "hb" : x >= 120 && y < 64 ? "opp" : "bg";
 const until = opt("until") ?? duration + 2;
@@ -126,15 +127,23 @@ for (let e = 0; e <= until; e += 1) {
   rows.push(row);
 }
 const tail = { slideStart: slide ?? opponentSwitchInHealthboxSlideElapsed(species), duration };
+// The ROM's next text (forced: "Foe X was dragged out!"; faint: the "What will X do?" prompt): the first row after the slide whose
+// message box differs from the slide-start row's.
+const msgBand = (f: Uint8Array) => Buffer.from(f.subarray(112 * 240 * 3)).toString("base64");
+const slideRow = rom.get(base + tail.slideStart);
+let romNextText: number | null = null;
+for (let e = tail.slideStart + 1; slideRow !== undefined && rom.has(base + e); e += 1) {
+  if (msgBand(rom.get(base + e)!) !== msgBand(slideRow)) { romNextText = e; break; }
+}
 const sum = (k: "total" | "hb" | "opp" | "msg" | "bg") => rows.reduce((s, r) => s + r[k], 0);
-const result = { scenario: scenarioPath, kind, species, name: name(species), anchorFrame, base, ...tail, rows: rows.length,
+const result = { scenario: scenarioPath, kind, species, name: name(species), anchorFrame, base, ...tail, romNextText, rows: rows.length,
   zeroRows: rows.filter((r) => r.total === 0).length, px: { total: sum("total"), hb: sum("hb"), opp: sum("opp"), msg: sum("msg"), bg: sum("bg") },
   hbMsgNonZero: rows.filter((r) => r.hb + r.msg > 0).map((r) => [r.e, r.hb, r.msg]),
   bgNonZero: rows.filter((r) => r.bg > 0).map((r) => [r.e, r.bg]),
   oppNonZero: rows.filter((r) => r.opp > 0).map((r) => [r.e, r.opp]),
   perRow: rows };
 writeFileSync(outPath!, JSON.stringify(result, null, 1) + "\n");
-console.log(`${kind} ${name(species)} anchor ${anchorFrame} slide ${tail.slideStart} duration ${duration}: rows ${rows.length}, zero ${result.zeroRows}, px`,
+console.log(`${kind} ${name(species)} anchor ${anchorFrame} slide ${tail.slideStart} duration ${duration} romNextText ${romNextText}: rows ${rows.length}, zero ${result.zeroRows}, px`,
   JSON.stringify(result.px), "hb/msg rows", JSON.stringify(result.hbMsgNonZero.slice(0, 12)));
 // --dump=e1,e2,...: write production|ROM side-by-side PPMs (<out>.e<N>.ppm) for inspection.
 const dumpArg = process.argv.find((x) => x.startsWith("--dump="));
@@ -168,4 +177,33 @@ if (process.argv.includes("--fit-fade")) {
     fits.push([e, ok]);
   }
   console.log(JSON.stringify(fits.filter(([, ok]) => ok.length !== 1 || ok[0] !== 0)));
+}
+// --bbox=e: the bounding box of the differing (compared) pixels at elapsed e.
+const bboxArg = process.argv.find((x) => x.startsWith("--bbox="));
+if (bboxArg !== undefined) {
+  const e = Number(bboxArg.slice(7)); const p = draw(e); const r = rom.get(base + e)!;
+  let x0 = 240; let y0 = 160; let x1 = -1; let y1 = -1;
+  for (let y = 0; y < 160; y += 1) for (let x = 0; x < 240; x += 1) {
+    if (playerHalf(x, y)) continue;
+    const i = y * 240 + x;
+    if (p[i * 4] !== r[i * 3] || p[i * 4 + 1] !== r[i * 3 + 1] || p[i * 4 + 2] !== r[i * 3 + 2]) {
+      x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+    }
+  }
+  console.log(`bbox e${e}: x ${x0}..${x1} y ${y0}..${y1}`);
+}
+// --shift=e: the (dx, dy) translation of the opponent sprite box (x >= 120, y < 64) minimising the differing pixels at elapsed e.
+const shiftArg = process.argv.find((x) => x.startsWith("--shift="));
+if (shiftArg !== undefined) {
+  const e = Number(shiftArg.slice(8)); const p = draw(e); const r = rom.get(base + e)!;
+  let best: [number, number, number] = [0, 0, 1e9];
+  for (let dy = -4; dy <= 4; dy += 1) for (let dx = -4; dx <= 4; dx += 1) {
+    let n = 0;
+    for (let y = 4; y < 60; y += 1) for (let x = 124; x < 236; x += 1) {
+      const i = y * 240 + x; const j = (y - dy) * 240 + (x - dx);
+      if (p[j * 4] !== r[i * 3] || p[j * 4 + 1] !== r[i * 3 + 1] || p[j * 4 + 2] !== r[i * 3 + 2]) n += 1;
+    }
+    if (n < best[2]) best = [dx, dy, n];
+  }
+  console.log(`shift e${e}: ROM = production moved by dx ${best[0]} dy ${best[1]} -> ${best[2]} px`);
 }
