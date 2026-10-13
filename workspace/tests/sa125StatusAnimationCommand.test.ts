@@ -1,7 +1,8 @@
 // sa125 (S10A, ISSUES #168 slices SA1 + SA3; docs/sa125-status-animation-command.md). SA1: Scene ON projects the kernel's
 // `status-animation` receipt (Cmd_statusanimation / status2animation / chosenstatusanimation; the kernel already skips Scene OFF, a
 // Substitute and a semi-invulnerable battler) into a `status-animation` command of STATUS_ANIMATION_ADDED_ROWS[animation] frames =
-// the ROM controller rows the next instruction waits (sta123 rom-r1.json; the IsBattleSEPlaying gate is SA2: 0 here, flagged).
+// the ROM controller rows the next instruction waits (sta123 rom-r1.json), plus the IsBattleSEPlaying gate before it (SA2, wired by
+// sag130: seg127StatusSeGateFromEvents over the segment's events; 0 on every path but a neutral non-crit hit's open SE).
 // SA3: a Scene ON `status` command whose battler's status animation runs in the same execution lasts off121's Scene OFF
 // delta(print) - delta(status); every other status command keeps 32. ROM receipts: tools/integration/fixtures/sta123/receipts/rom-r1.json.
 import { readFileSync } from "node:fs";
@@ -15,6 +16,7 @@ import {
 } from "../src/engine/factoryRoundBattleOrchestrator";
 import { liveMoveRandom2PlanContextAt } from "../src/engine/battleResolutionPresentationRender";
 import { STATUS_ANIMATION_ADDED_ROWS } from "../src/engine/battleResolutionPresentation";
+import { seg127StatusSeGateFromEvents } from "../src/engine/seg127StatusSeGate";
 import { prepareRulesStatusAnimation } from "../src/engine/battleScriptRulesContext";
 import { createPresentationRngSession } from "../src/engine/presentationRngHost";
 import { tickLiveMovePresentationRngSession } from "../src/engine/liveMovePresentationRng";
@@ -104,8 +106,8 @@ const SCENE_ONLY_KINDS = new Set(["status-animation", "animation"]);
 const frames = (c: any) => (c.timing?.minimumFrames ?? 0) + (c.timing?.holdFrames ?? 0);
 const shape = (c: any) => `${c.type}:${c.type === "message" ? c.messageId ?? "" : ""}:${c.type === "move-animation" || c.type === "status" ? "" : frames(c)}`;
 const ANCHOR_TYPES = new Set(["status", "message", "hp", "stat", "status-icon"]);
-type Anchor = { animation: string; side: "player" | "opponent"; path: string; gateFlag: boolean; length: number; on: number; off: number;
-  orderOk: boolean };
+type Anchor = { animation: string; side: "player" | "opponent"; path: string; gateFlag: boolean; gate: number; length: number; on: number;
+  off: number; orderOk: boolean };
 
 /**
  * Per Scene ON status-animation command of a battle: the path (the print right before it on the after-print paths, else
@@ -156,7 +158,7 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
     }
     out.push({
       animation: c.animation, side: c.battler === 0 ? "player" : "opponent", path, gateFlag: path === "inflicted" && damaged,
-      length: c.timing.minimumFrames, orderOk,
+      gate: seg127StatusSeGateFromEvents(events.map((e: any) => e.payload), at)?.gate ?? 0, length: c.timing.minimumFrames, orderOk,
       on: on.slice(left, right).reduce((sum, x) => sum + frames(x.c), 0), off: offSpan.reduce((sum, x) => sum + frames(x.c), 0),
     });
   });
@@ -223,7 +225,7 @@ describe("sa125: the kernel suppresses the receipt (no command) behind a Substit
 describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay)", () => {
   it("each status-animation command sits at its receipt, lasts the ROM controller rows, and moves the following print by exactly them", () => {
     const covered = new Set<string>();
-    let total = 0, flagged = 0, unanchoredTotal = 0;
+    let total = 0, flagged = 0, gated = 0, unanchoredTotal = 0;
     for (const seed of SEEDS) {
       const { anchors: list, unanchored, offAnimations } = anchors(seed);
       expect(offAnimations, `seed ${seed}: Scene OFF has no status-animation command`).toBe(0);
@@ -231,15 +233,17 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
       for (const a of list) {
         total += 1;
         expect(a.orderOk, `${seed} ${a.animation} ${a.path}`).toBe(true);
-        expect(a.length, `${seed} ${a.animation}`).toBe(ROWS[a.animation]);
-        // ROM: ON next instruction - OFF next instruction (from the statusanimation row) = controllerRows (gate 0 on these paths).
-        expect(a.on - a.off, `${seed} ${a.animation} ${a.side} ${a.path}`).toBe(ROWS[a.animation]);
+        expect(a.length, `${seed} ${a.animation}`).toBe(a.gate + ROWS[a.animation]!);
+        // ROM: ON next instruction - OFF next instruction (from the statusanimation row) = controllerRows = gate + active rows + 1.
+        expect(a.on - a.off, `${seed} ${a.animation} ${a.side} ${a.path}`).toBe(a.gate + ROWS[a.animation]!);
+        if (a.gate > 0) expect(a.gateFlag, `${seed} ${a.animation}: a gate only after a damaging hit`).toBe(true);
         if (a.gateFlag) flagged += 1;
+        if (a.gate > 0) gated += 1;
         const path = a.path === "inflicted" ? "inflicted" : a.path;
         covered.add(`${a.animation}|${path}|${a.side}`);
       }
     }
-    console.log(`sa125 anchors: ${total} anchored (${flagged} gate-flagged), ${unanchoredTotal} unanchored; ${[...covered].sort().join(" ")}`);
+    console.log(`sa125 anchors: ${total} anchored (${flagged} after a damaging hit, ${gated} gated), ${unanchoredTotal} unanchored; ${[...covered].sort().join(" ")}`);
     expect(total).toBeGreaterThan(100);
     expect(unanchoredTotal).toBeLessThan(total / 5);
     expect(flagged).toBeGreaterThan(0);

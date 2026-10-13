@@ -1,6 +1,6 @@
 // seg127 (S10A / ISSUES #168 slice SA2, docs/seg127-status-se-gate.md): the Scene ON controller's IsBattleSEPlaying gate before a
-// B_ANIM_STATUS_* animation. BANKED and UNWIRED: no production module imports this file yet; SA2 calls it from the status-animation
-// command projection in battleResolutionPresentation.ts (docs/seg127-status-se-gate.md §5).
+// B_ANIM_STATUS_* animation. Wired by sag130 (docs/sag130-status-se-gate-live.md): the status-animation command projection in
+// battleResolutionPresentation.ts adds seg127StatusSeGateFromEvents' gate to the controller rows.
 //
 // Source: Player / OpponentHandleStatusAnimation (battle_controller_player.c:2768, battle_controller_opponent.c:1727) poll
 // IsBattleSEPlaying (battle_gfx_sfx_util.c:554-571) once per row before LaunchStatusAnimation: while SE1 or SE2 still has a live track
@@ -71,11 +71,13 @@ export function seg127StatusSeGateRowsForPath(
 /** The kernel event fields the event-level form reads (structurally a BattleScriptSemanticEventPayload subset). */
 export type Seg127GateEvent = Readonly<{
   kind: string;
+  battler?: number;
   messageId?: string;
   songId?: number;
   animationId?: string;
-  from?: number;
-  to?: number;
+  /** hp-change's HP (status-change's are strings: never read). */
+  from?: number | string;
+  to?: number | string;
 }>;
 
 const INFLICTED_BY_STRINGS: ReadonlySet<string> = new Set([
@@ -90,7 +92,7 @@ const INFLICTED_BY_STRINGS: ReadonlySet<string> = new Set([
 export function seg127StatusSeGateFromEvents(
   events: readonly Seg127GateEvent[],
   index: number,
-  hpBarRows: (from: number, to: number) => number = (from, to) => Math.abs(from - to),
+  hpBarRows: (from: number, to: number, battler: number) => number = (from, to) => Math.abs(from - to),
 ): Readonly<{ gate: number; songId: number | null; path: Seg127SeGatePath | null; hpDrainRows: number; messageSinceSe: boolean }> | null {
   if (events[index]?.kind !== "status-animation") {
     throw new Error(`seg127StatusSeGate: events[${index}] is not a status-animation event`);
@@ -103,7 +105,7 @@ export function seg127StatusSeGateFromEvents(
   const songId = events[se]!.songId ?? null;
   const between = events.slice(se + 1, index);
   const messageSinceSe = between.some((e) => e.kind === "message");
-  const hpDrainRows = between.reduce((n, e) => (e.kind === "hp-change" ? n + hpBarRows(e.from!, e.to!) : n), 0);
+  const hpDrainRows = between.reduce((n, e) => (e.kind === "hp-change" ? n + hpBarRows(e.from as number, e.to as number, e.battler!) : n), 0);
   if (messageSinceSe) return { gate: 0, songId, path: null, hpDrainRows, messageSinceSe };
   const next = events.slice(index + 1).find((e) => e.kind === "message")?.messageId ?? null;
   const moveBeforeSe = events.slice(0, se).some((e) => e.kind === "animation" && e.animationId === "MOVE_ANIMATION");
