@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import r1 from "../tools/probe/receipts/rcp143-r1-thrash-lockin-off.json" with { type: "json" };
 import r2 from "../tools/probe/receipts/rcp143-r2-covet-stickyhold-off.json" with { type: "json" };
 import r3 from "../tools/probe/receipts/rcp143-r3-getmovetarget-133-off.json" with { type: "json" };
+import r3Control from "../tools/probe/receipts/rcp143-r3-control-transform-off.json" with { type: "json" };
 import r4 from "../tools/probe/receipts/rcp143-r4-focuspunch-prepass.json" with { type: "json" };
 
 /**
@@ -16,7 +17,7 @@ type RomDraw = Readonly<{ frame: number; caller: string; callerFunction: string;
 
 const LCG = (value: number) => (Math.imul(value, 0x41c64e6d) + 0x6073) >>> 0;
 
-function expectProvenance(receipt: typeof r1 | typeof r2 | typeof r3) {
+function expectProvenance(receipt: typeof r1 | typeof r2 | typeof r3 | typeof r3Control) {
   expect(receipt.schema).toBe("rcp143-engine-fix-receipt/v1");
   expect(receipt.oracleProfile).toBe("battle-scene-off");
   expect(receipt.byteIdenticalAcrossRuns).toBe(true);
@@ -36,7 +37,7 @@ function expectProvenance(receipt: typeof r1 | typeof r2 | typeof r3) {
 }
 
 /** The ROM's turn-execution draws in the port's vocabulary must be what the fixed kernel emits. */
-function expectPredictionIsRom(receipt: typeof r1 | typeof r2 | typeof r3) {
+function expectPredictionIsRom(receipt: typeof r1 | typeof r2 | typeof r3 | typeof r3Control) {
   expect(receipt.predictedPostFix.turns.map((turn) => turn.draws.map((draw: Draw) => draw.rngBefore)))
     .toEqual(receipt.rom.turns.map((turn) => turn.draws.map((draw) => draw.rngBefore)));
   expect(receipt.predictedPostFix.turns.map((turn) => turn.activeHpAtTurnEnd))
@@ -191,6 +192,21 @@ describe("rcp143 R3 -- HandleAction_UseMove:133 reached in singles without Mimic
 
   it("pins the predicted post-fix port sequence to the ROM's own", () => {
     expectPredictionIsRom(r3);
+  });
+});
+
+describe("rcp143 R3 control -- Transform's overwritten slot used on a LATER turn does not take :133", () => {
+  it("draws no GetMoveTarget on any Ditto action after Transform, and the port already agrees", () => {
+    expectProvenance(r3Control);
+    expect(r3Control.parties.player[0]).toMatchObject({ species: 132, moves: [144, 0, 0, 0] });
+    const texts = r3Control.rom.messages.map((message) => message.text);
+    expect(texts).toContain("DITTO transformed\ninto SNORLAX!");
+    expect(texts.filter((text) => text === "DITTO used\nTACKLE!").length).toBeGreaterThanOrEqual(3);
+    const callers = r3Control.rom.turns.flatMap((turn) => turn.draws.map((draw) => draw.callerFunction));
+    expect(callers).not.toContain("GetMoveTarget");
+    expect(r3Control.comparison.verdictToday).toBe("PASS");
+    expect(r3Control.comparison.firstDivergence).toBeNull();
+    expectPredictionIsRom(r3Control);
   });
 });
 

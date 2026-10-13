@@ -46,7 +46,7 @@ const INTIMIDATE_BLOCKERS = new Set([29, 52, 73]); // CLEAR_BODY, HYPER_CUTTER, 
 
 type RomDraw = Readonly<{
   frame: number; caller: string; callerFunction: string; rngBefore: number; value: number;
-  script: string; attacker: number; currentMove: number;
+  script: string; battleMainFunc?: string; attacker: number; currentMove: number;
 }>;
 type RomTurn = Readonly<{
   turn: number; aiSelectionDrawCount: number; drawCount: number;
@@ -63,7 +63,15 @@ type Receipt = Record<string, unknown> & Readonly<{
   rom: Readonly<{ turns: readonly RomTurn[] }>;
 }>;
 
-export function romReason(draw: Pick<RomDraw, "caller" | "callerFunction">): string {
+export function romReason(draw: Pick<RomDraw, "caller" | "callerFunction" | "battleMainFunc">): string {
+  // GetWhoStrikesFirst's speed-tie Random() & 1 serves two callers: turn order
+  // (SetActionsAndBattlersTurnOrder, battle_main.c:4728/4745) and the
+  // ENDTURN_ORDER re-sort run from BattleTurnPassed's end-turn pass.
+  if (draw.callerFunction === "GetWhoStrikesFirst") {
+    return draw.battleMainFunc === "SetActionsAndBattlersTurnOrder"
+      ? "turn order speed tie (Random() & 1)"
+      : "ENDTURN_ORDER GetWhoStrikesFirst speed tie (Random() & 1)";
+  }
   return ROM_CALLER_TO_PORT_REASON[draw.caller]
     ?? ROM_CALLER_TO_PORT_REASON[draw.callerFunction]
     ?? `UNMAPPED ${draw.caller}`;

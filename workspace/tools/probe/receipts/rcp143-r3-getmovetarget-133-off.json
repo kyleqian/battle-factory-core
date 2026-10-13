@@ -201,6 +201,7 @@
       "rngBefore": 3167892961,
       "value": 16113,
       "script": "BattleScript_EffectSleep+0x26",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 147
      },
@@ -211,6 +212,7 @@
       "rngBefore": 1056038720,
       "value": 27265,
       "script": "BattleScript_EffectSleep+0x3d",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 147
      },
@@ -221,6 +223,7 @@
       "rngBefore": 1786900147,
       "value": 383,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -237,6 +240,7 @@
       "rngBefore": 25136298,
       "value": 30119,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -247,6 +251,7 @@
       "rngBefore": 1973883093,
       "value": 6401,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -257,6 +262,7 @@
       "rngBefore": 419524900,
       "value": 48110,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -267,6 +273,7 @@
       "rngBefore": 3152970951,
       "value": 59885,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -277,6 +284,7 @@
       "rngBefore": 3924658990,
       "value": 20000,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -287,6 +295,7 @@
       "rngBefore": 1310762761,
       "value": 45250,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -297,6 +306,7 @@
       "rngBefore": 2965519688,
       "value": 7952,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -307,6 +317,7 @@
       "rngBefore": 521168923,
       "value": 39318,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -317,6 +328,7 @@
       "rngBefore": 2576805362,
       "value": 56559,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -327,6 +339,7 @@
       "rngBefore": 3706678397,
       "value": 43693,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -337,6 +350,7 @@
       "rngBefore": 2863507372,
       "value": 61455,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -347,6 +361,7 @@
       "rngBefore": 4027526319,
       "value": 54381,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -357,6 +372,7 @@
       "rngBefore": 3563960566,
       "value": 25943,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 147
      }
@@ -374,6 +390,7 @@
       "rngBefore": 1700205873,
       "value": 33647,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -390,6 +407,7 @@
       "rngBefore": 2205111376,
       "value": 26615,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -400,6 +418,7 @@
       "rngBefore": 1744283267,
       "value": 50560,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -410,6 +429,7 @@
       "rngBefore": 3313512506,
       "value": 11554,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -420,6 +440,7 @@
       "rngBefore": 757241125,
       "value": 32969,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -430,6 +451,7 @@
       "rngBefore": 2160666420,
       "value": 42447,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -440,6 +462,7 @@
       "rngBefore": 2781866391,
       "value": 62588,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -450,6 +473,7 @@
       "rngBefore": 4101822398,
       "value": 15832,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -460,6 +484,7 @@
       "rngBefore": 1037574233,
       "value": 52407,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -470,6 +495,7 @@
       "rngBefore": 3434562648,
       "value": 13547,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -480,6 +506,7 @@
       "rngBefore": 887835115,
       "value": 3958,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -490,6 +517,7 @@
       "rngBefore": 259421058,
       "value": 1325,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -500,6 +528,7 @@
       "rngBefore": 86846157,
       "value": 7892,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -510,6 +539,7 @@
       "rngBefore": 517214140,
       "value": 42110,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 147
      }
@@ -527,6 +557,7 @@
       "rngBefore": 2759744383,
       "value": 36072,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -543,6 +574,7 @@
       "rngBefore": 2364016518,
       "value": 35002,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -553,6 +585,7 @@
       "rngBefore": 2293917825,
       "value": 38908,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -563,6 +596,7 @@
       "rngBefore": 2549886304,
       "value": 1138,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -573,6 +607,7 @@
       "rngBefore": 74642003,
       "value": 27128,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -583,6 +618,7 @@
       "rngBefore": 1777915850,
       "value": 8431,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -593,6 +629,7 @@
       "rngBefore": 552586613,
       "value": 46130,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -603,6 +640,7 @@
       "rngBefore": 3023208772,
       "value": 23420,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -613,6 +651,7 @@
       "rngBefore": 1534861927,
       "value": 35072,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -623,6 +662,7 @@
       "rngBefore": 2298505294,
       "value": 61256,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -633,6 +673,7 @@
       "rngBefore": 4014509481,
       "value": 30404,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -643,6 +684,7 @@
       "rngBefore": 1992568680,
       "value": 27242,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -653,6 +695,7 @@
       "rngBefore": 1785348027,
       "value": 29770,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -663,6 +706,7 @@
       "rngBefore": 1951038738,
       "value": 33727,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 147
      }
@@ -680,6 +724,7 @@
       "rngBefore": 2210340125,
       "value": 13484,
       "script": "BattleScript_EffectSleep+0x26",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 147
      },
@@ -690,6 +735,7 @@
       "rngBefore": 883727308,
       "value": 20670,
       "script": "BattleScript_EffectSleep+0x3d",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 147
      },
@@ -700,6 +746,7 @@
       "rngBefore": 1354686031,
       "value": 35099,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 76
      },
@@ -710,6 +757,7 @@
       "rngBefore": 2300254742,
       "value": 25985,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -726,6 +774,7 @@
       "rngBefore": 1702965201,
       "value": 41273,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -736,6 +785,7 @@
       "rngBefore": 2704894576,
       "value": 59008,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -746,6 +796,7 @@
       "rngBefore": 3867202083,
       "value": 52978,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -756,6 +807,7 @@
       "rngBefore": 3471999834,
       "value": 29411,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -766,6 +818,7 @@
       "rngBefore": 1927526853,
       "value": 238,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -776,6 +829,7 @@
       "rngBefore": 15630164,
       "value": 57168,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -786,6 +840,7 @@
       "rngBefore": 3746574135,
       "value": 65297,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -796,6 +851,7 @@
       "rngBefore": 4279319774,
       "value": 19606,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -806,6 +862,7 @@
       "rngBefore": 1284959993,
       "value": 42665,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -816,6 +873,7 @@
       "rngBefore": 2796158584,
       "value": 2746,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -826,6 +884,7 @@
       "rngBefore": 179980683,
       "value": 32828,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -836,6 +895,7 @@
       "rngBefore": 2151418530,
       "value": 16410,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -846,6 +906,7 @@
       "rngBefore": 1075463021,
       "value": 7944,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 147
      }
@@ -863,6 +924,7 @@
       "rngBefore": 520637404,
       "value": 17869,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -879,6 +941,7 @@
       "rngBefore": 1171109151,
       "value": 23231,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -889,6 +952,7 @@
       "rngBefore": 1522528422,
       "value": 25968,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -899,6 +963,7 @@
       "rngBefore": 1701866273,
       "value": 44552,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -909,6 +974,7 @@
       "rngBefore": 2919762816,
       "value": 61934,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -919,6 +985,7 @@
       "rngBefore": 4058924531,
       "value": 26806,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -929,6 +996,7 @@
       "rngBefore": 1756771050,
       "value": 58387,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -939,6 +1007,7 @@
       "rngBefore": 3826473493,
       "value": 750,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -949,6 +1018,7 @@
       "rngBefore": 49160548,
       "value": 1257,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -959,6 +1029,7 @@
       "rngBefore": 82382855,
       "value": 18056,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -969,6 +1040,7 @@
       "rngBefore": 1183339886,
       "value": 37672,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -979,6 +1051,7 @@
       "rngBefore": 2468889673,
       "value": 18025,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -989,6 +1062,7 @@
       "rngBefore": 1181331848,
       "value": 1608,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -999,6 +1073,7 @@
       "rngBefore": 105408347,
       "value": 51124,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 147
      }
@@ -1016,6 +1091,7 @@
       "rngBefore": 3350469682,
       "value": 26867,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -1032,6 +1108,7 @@
       "rngBefore": 1760796093,
       "value": 59128,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1042,6 +1119,7 @@
       "rngBefore": 3875020780,
       "value": 36327,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1052,6 +1130,7 @@
       "rngBefore": 2380783599,
       "value": 62415,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1062,6 +1141,7 @@
       "rngBefore": 4090465078,
       "value": 28045,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1072,6 +1152,7 @@
       "rngBefore": 1837963889,
       "value": 51081,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1082,6 +1163,7 @@
       "rngBefore": 3347648656,
       "value": 6088,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1092,6 +1174,7 @@
       "rngBefore": 399003075,
       "value": 53196,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1102,6 +1185,7 @@
       "rngBefore": 3486312058,
       "value": 9427,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1112,6 +1196,7 @@
       "rngBefore": 617852517,
       "value": 46178,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1122,6 +1207,7 @@
       "rngBefore": 3026347892,
       "value": 16675,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1132,6 +1218,7 @@
       "rngBefore": 1092863191,
       "value": 30590,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1142,6 +1229,7 @@
       "rngBefore": 2004791806,
       "value": 41889,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1152,6 +1240,7 @@
       "rngBefore": 2745273753,
       "value": 16964,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 147
      }
@@ -1169,6 +1258,7 @@
       "rngBefore": 1111771288,
       "value": 49857,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -1185,6 +1275,7 @@
       "rngBefore": 3267467563,
       "value": 19291,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1195,6 +1286,7 @@
       "rngBefore": 1264300482,
       "value": 50240,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1205,6 +1297,7 @@
       "rngBefore": 3292539917,
       "value": 31693,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1215,6 +1308,7 @@
       "rngBefore": 2077038588,
       "value": 48266,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1225,6 +1319,7 @@
       "rngBefore": 3163184831,
       "value": 13954,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1235,6 +1330,7 @@
       "rngBefore": 914549190,
       "value": 11804,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1245,6 +1341,7 @@
       "rngBefore": 773602753,
       "value": 285,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1255,6 +1352,7 @@
       "rngBefore": 18708896,
       "value": 9819,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1265,6 +1363,7 @@
       "rngBefore": 643557779,
       "value": 20735,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1275,6 +1374,7 @@
       "rngBefore": 1358929418,
       "value": 9401,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1285,6 +1385,7 @@
       "rngBefore": 616150709,
       "value": 32188,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1295,6 +1396,7 @@
       "rngBefore": 2109493636,
       "value": 31261,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1305,6 +1407,7 @@
       "rngBefore": 2048740775,
       "value": 25165,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 147
      }
@@ -1322,6 +1425,7 @@
       "rngBefore": 1649234574,
       "value": 20967,
       "script": "BattleScript_EffectSleep+0x26",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 147
      },
@@ -1332,6 +1436,7 @@
       "rngBefore": 1374145257,
       "value": 39098,
       "script": "BattleScript_EffectSleep+0x3d",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 147
      },
@@ -1342,6 +1447,7 @@
       "rngBefore": 2562376616,
       "value": 60178,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 76
      },
@@ -1352,6 +1458,7 @@
       "rngBefore": 3943882491,
       "value": 2075,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 76
      },
@@ -1362,6 +1469,7 @@
       "rngBefore": 136039250,
       "value": 65332,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -1378,6 +1486,7 @@
       "rngBefore": 4281658973,
       "value": 49944,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1388,6 +1497,7 @@
       "rngBefore": 3273143308,
       "value": 48754,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1398,6 +1508,7 @@
       "rngBefore": 3195154831,
       "value": 34131,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1408,6 +1519,7 @@
       "rngBefore": 2236812374,
       "value": 29346,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1418,6 +1530,7 @@
       "rngBefore": 1923274001,
       "value": 34918,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1428,6 +1541,7 @@
       "rngBefore": 2288404144,
       "value": 39222,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1438,6 +1552,7 @@
       "rngBefore": 2570459491,
       "value": 32087,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1448,6 +1563,7 @@
       "rngBefore": 2102876570,
       "value": 25242,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1458,6 +1574,7 @@
       "rngBefore": 1654289157,
       "value": 17836,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1468,6 +1585,7 @@
       "rngBefore": 1168957332,
       "value": 55090,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1478,6 +1596,7 @@
       "rngBefore": 3610421879,
       "value": 8077,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1488,6 +1607,7 @@
       "rngBefore": 529348382,
       "value": 46367,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1498,6 +1618,7 @@
       "rngBefore": 3038772281,
       "value": 27278,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 147
      }
@@ -1515,6 +1636,7 @@
       "rngBefore": 1787699896,
       "value": 16233,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -1531,6 +1653,7 @@
       "rngBefore": 1063860427,
       "value": 34589,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1541,6 +1664,7 @@
       "rngBefore": 2266851554,
       "value": 65094,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1551,6 +1675,7 @@
       "rngBefore": 4266058925,
       "value": 43178,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1561,6 +1686,7 @@
       "rngBefore": 2829743132,
       "value": 43420,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1571,6 +1697,7 @@
       "rngBefore": 2845595743,
       "value": 21240,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1581,6 +1708,7 @@
       "rngBefore": 1392046822,
       "value": 29157,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1591,6 +1719,7 @@
       "rngBefore": 1910890593,
       "value": 46404,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1601,6 +1730,7 @@
       "rngBefore": 3041163200,
       "value": 26915,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1611,6 +1741,7 @@
       "rngBefore": 1763958067,
       "value": 47645,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1621,6 +1752,7 @@
       "rngBefore": 3122469162,
       "value": 15498,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1631,6 +1763,7 @@
       "rngBefore": 1015735125,
       "value": 33061,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1641,6 +1774,7 @@
       "rngBefore": 2166690212,
       "value": 37120,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      },
@@ -1651,6 +1785,7 @@
       "rngBefore": 2432752455,
       "value": 40983,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 147
      }
@@ -1668,6 +1803,7 @@
       "rngBefore": 2685886382,
       "value": 30639,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 0,
       "currentMove": 0
      }
@@ -1684,6 +1820,7 @@
      "rngBefore": 2007966089,
      "value": 2751,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1694,6 +1831,7 @@
      "rngBefore": 180315592,
      "value": 25905,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1704,6 +1842,7 @@
      "rngBefore": 1697752731,
      "value": 28105,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1714,6 +1853,7 @@
      "rngBefore": 1841924722,
      "value": 11563,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1724,6 +1864,7 @@
      "rngBefore": 757796605,
      "value": 11924,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1734,6 +1875,7 @@
      "rngBefore": 781506604,
      "value": 36165,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1744,6 +1886,7 @@
      "rngBefore": 2370163503,
      "value": 45677,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1754,6 +1897,7 @@
      "rngBefore": 2993528182,
      "value": 7658,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1764,6 +1908,7 @@
      "rngBefore": 501899185,
      "value": 6617,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1774,6 +1919,7 @@
      "rngBefore": 433654992,
      "value": 56370,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1784,6 +1930,7 @@
      "rngBefore": 3694277891,
      "value": 53465,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1794,6 +1941,7 @@
      "rngBefore": 3503938746,
      "value": 16352,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 0
     },
@@ -1804,6 +1952,7 @@
      "rngBefore": 1071646629,
      "value": 17237,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 0,
      "currentMove": 147
     }

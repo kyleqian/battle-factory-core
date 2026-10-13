@@ -48,6 +48,7 @@ def main() -> None:
             "rngBefore": hit["rngBefore"],
             "value": hit["value"],
             "script": hit["script"],
+            "battleMainFunc": hit["battleMainFunc"],
             "attacker": hit["attacker"],
             "currentMove": hit["currentMove"],
         }

@@ -200,6 +200,7 @@
       "rngBefore": 960307641,
       "value": 3428,
       "script": "BattleScript_HitFromAccCheck",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -210,6 +211,7 @@
       "rngBefore": 224664120,
       "value": 45804,
       "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -220,6 +222,7 @@
       "rngBefore": 3001850443,
       "value": 42690,
       "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -230,6 +233,7 @@
       "rngBefore": 2797792354,
       "value": 6864,
       "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -240,6 +244,7 @@
       "rngBefore": 449897005,
       "value": 27560,
       "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -250,6 +255,7 @@
       "rngBefore": 1806197660,
       "value": 52148,
       "script": "BattleScript_HitFromAccCheck",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -260,6 +266,7 @@
       "rngBefore": 3417592287,
       "value": 40499,
       "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -270,6 +277,7 @@
       "rngBefore": 2654154342,
       "value": 48338,
       "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -280,6 +288,7 @@
       "rngBefore": 3167892961,
       "value": 16113,
       "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -290,6 +299,7 @@
       "rngBefore": 1056038720,
       "value": 27265,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      }
@@ -306,6 +316,7 @@
       "rngBefore": 1786900147,
       "value": 383,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      },
@@ -316,6 +327,7 @@
       "rngBefore": 25136298,
       "value": 30119,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      },
@@ -326,6 +338,7 @@
       "rngBefore": 1973883093,
       "value": 6401,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      },
@@ -336,6 +349,7 @@
       "rngBefore": 419524900,
       "value": 48110,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      },
@@ -346,6 +360,7 @@
       "rngBefore": 3152970951,
       "value": 59885,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 1
      }
@@ -363,6 +378,7 @@
       "rngBefore": 3924658990,
       "value": 20000,
       "script": "BattleScript_HitFromAccCheck",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -373,6 +389,7 @@
       "rngBefore": 1310762761,
       "value": 45250,
       "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -383,6 +400,7 @@
       "rngBefore": 2965519688,
       "value": 7952,
       "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -393,6 +411,7 @@
       "rngBefore": 521168923,
       "value": 39318,
       "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -403,6 +422,7 @@
       "rngBefore": 2576805362,
       "value": 56559,
       "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -413,6 +433,7 @@
       "rngBefore": 3706678397,
       "value": 43693,
       "script": "BattleScript_HitFromAccCheck",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -423,6 +444,7 @@
       "rngBefore": 2863507372,
       "value": 61455,
       "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -433,6 +455,7 @@
       "rngBefore": 4027526319,
       "value": 54381,
       "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -443,6 +466,7 @@
       "rngBefore": 3563960566,
       "value": 25943,
       "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -453,6 +477,7 @@
       "rngBefore": 1700205873,
       "value": 33647,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      }
@@ -469,6 +494,7 @@
       "rngBefore": 2205111376,
       "value": 26615,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      },
@@ -479,6 +505,7 @@
       "rngBefore": 1744283267,
       "value": 50560,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      },
@@ -489,6 +516,7 @@
       "rngBefore": 3313512506,
       "value": 11554,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      },
@@ -499,6 +527,7 @@
       "rngBefore": 757241125,
       "value": 32969,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      },
@@ -509,6 +538,7 @@
       "rngBefore": 2160666420,
       "value": 42447,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 1
      }
@@ -526,6 +556,7 @@
       "rngBefore": 2781866391,
       "value": 62588,
       "script": "BattleScript_HitFromAccCheck",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -536,6 +567,7 @@
       "rngBefore": 4101822398,
       "value": 15832,
       "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -546,6 +578,7 @@
       "rngBefore": 1037574233,
       "value": 52407,
       "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -556,6 +589,7 @@
       "rngBefore": 3434562648,
       "value": 13547,
       "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -566,6 +600,7 @@
       "rngBefore": 887835115,
       "value": 3958,
       "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 0,
       "currentMove": 343
      },
@@ -576,6 +611,7 @@
       "rngBefore": 259421058,
       "value": 1325,
       "script": "BattleScript_HitFromAccCheck",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -586,6 +622,7 @@
       "rngBefore": 86846157,
       "value": 7892,
       "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -596,6 +633,7 @@
       "rngBefore": 517214140,
       "value": 42110,
       "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -606,6 +644,7 @@
       "rngBefore": 2759744383,
       "value": 36072,
       "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
       "attacker": 1,
       "currentMove": 1
      },
@@ -616,6 +655,7 @@
       "rngBefore": 2364016518,
       "value": 35002,
       "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
       "attacker": 1,
       "currentMove": 0
      }
@@ -632,6 +672,7 @@
      "rngBefore": 2293917825,
      "value": 38908,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 1,
      "currentMove": 0
     },
@@ -642,6 +683,7 @@
      "rngBefore": 2549886304,
      "value": 1138,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 1,
      "currentMove": 0
     },
@@ -652,6 +694,7 @@
      "rngBefore": 74642003,
      "value": 27128,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 1,
      "currentMove": 0
     },
@@ -662,6 +705,7 @@
      "rngBefore": 1777915850,
      "value": 8431,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 1,
      "currentMove": 0
     },
@@ -672,6 +716,7 @@
      "rngBefore": 552586613,
      "value": 46130,
      "script": "BattleScript_MoveEnd+0x9",
+     "battleMainFunc": "HandleTurnActionSelectionState",
      "attacker": 1,
      "currentMove": 1
     }
