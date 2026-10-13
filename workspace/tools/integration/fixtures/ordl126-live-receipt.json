@@ -1,0 +1,219 @@
+{
+ "census": {
+  "battleDigestIdentical": true,
+  "commandKeyDigestIdentical": true,
+  "commands": [
+   27426,
+   27426
+  ],
+  "frames": [
+   4160787,
+   4160787
+  ],
+  "framesIdenticalPerCommand": true,
+  "keysIdentical": true,
+  "lifted": {
+   "beforeDetail": {
+    "order host: no EXACT plan: body 316:player": 106
+   },
+   "byBattleMoveSide": {
+    "705 165:opponent": 18,
+    "705 165:player": 83,
+    "705 254:opponent": 5
+   },
+   "commands": 106,
+   "frames": 11832
+  },
+  "live": [
+   27139,
+   27245
+  ],
+  "liveFramePct": [
+   99.32,
+   99.6
+  ],
+  "liveFrames": [
+   4132330,
+   4144162
+  ],
+  "livePct": [
+   98.95,
+   99.34
+  ],
+  "otherStatusChanges": [],
+  "shardBattleDigestsIdentical": true
+ },
+ "censusCheck": {
+  "liveCountAfter": 27245,
+  "liveCountBefore": 27139,
+  "liveFramesAfter": 4144162,
+  "liveFramesBefore": 4132330,
+  "pairingMismatches": 0,
+  "regressionCount": 0
+ },
+ "romBodies": {
+  "206:opponent": {
+   "byLend": {
+    "F0 [3,4,..]": 7,
+    "F0 [4,3,..]": 2
+   },
+   "exact": 9,
+   "instances": 9
+  },
+  "206:player": {
+   "byLend": {
+    "F0 [3,4,..]": 7,
+    "F0 [4,3,..]": 2
+   },
+   "exact": 9,
+   "instances": 9
+  },
+  "316:opponent": {
+   "byLend": {
+    "F0 [3,4,..] -> D0,1": 14,
+    "F0 [4,3,..] -> D1,0": 8
+   },
+   "exact": 22,
+   "instances": 22
+  },
+  "316:player": {
+   "byLend": {
+    "F0 [3,4,..] -> D0,1": 16,
+    "F0 [4,3,..] -> D1,0": 13
+   },
+   "exact": 29,
+   "instances": 29
+  }
+ },
+ "schema": "ordl126-live-receipt/v1",
+ "windowLendJobs": 12,
+ "windowRows": [
+  {
+   "exact": 101,
+   "live": 1,
+   "move": "HARDEN",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 101,
+   "side": "player",
+   "window": "pb-ord124-wfs-opp-345-95-106-s7-c1"
+  },
+  {
+   "exact": 101,
+   "live": 1,
+   "move": "HARDEN",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 101,
+   "side": "player",
+   "window": "pb-ord124-wfs-opp-345-95-106-s7-c3"
+  },
+  {
+   "exact": 101,
+   "live": 1,
+   "move": "HARDEN",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 101,
+   "side": "opponent",
+   "window": "pb-ord124-wfs-ply-345-95-106-s7-c1"
+  },
+  {
+   "exact": 101,
+   "live": 1,
+   "move": "HARDEN",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 101,
+   "side": "opponent",
+   "window": "pb-ord124-wfs-ply-345-95-106-s7-c3"
+  },
+  {
+   "exact": 142,
+   "live": 1,
+   "move": "MEGA_PUNCH",
+   "px": 287402,
+   "r1eqr2": 1,
+   "rows": 159,
+   "side": "player",
+   "window": "pb-ord124-wos-opp-143-42-5-s11-c0"
+  },
+  {
+   "exact": 160,
+   "live": 1,
+   "move": "MEGA_PUNCH",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 160,
+   "side": "player",
+   "window": "pb-ord124-wos-opp-143-42-5-s11-c2"
+  },
+  {
+   "exact": 101,
+   "live": 1,
+   "move": "HARDEN",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 101,
+   "side": "player",
+   "window": "pb-ord124-wos-opp-345-95-106-s7-c1"
+  },
+  {
+   "exact": 101,
+   "live": 1,
+   "move": "HARDEN",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 101,
+   "side": "player",
+   "window": "pb-ord124-wos-opp-345-95-106-s7-c3"
+  },
+  {
+   "exact": 159,
+   "live": 1,
+   "move": "MEGA_PUNCH",
+   "px": 17984,
+   "r1eqr2": 1,
+   "rows": 160,
+   "side": "opponent",
+   "window": "pb-ord124-wos-ply-143-42-5-s11-c0"
+  },
+  {
+   "exact": 160,
+   "live": 1,
+   "move": "MEGA_PUNCH",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 160,
+   "side": "opponent",
+   "window": "pb-ord124-wos-ply-143-42-5-s11-c2"
+  },
+  {
+   "exact": 101,
+   "live": 1,
+   "move": "HARDEN",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 101,
+   "side": "opponent",
+   "window": "pb-ord124-wos-ply-345-95-106-s7-c1"
+  },
+  {
+   "exact": 101,
+   "live": 1,
+   "move": "HARDEN",
+   "px": 0,
+   "r1eqr2": 1,
+   "rows": 101,
+   "side": "opponent",
+   "window": "pb-ord124-wos-ply-345-95-106-s7-c3"
+  }
+ ],
+ "windowTotals": {
+  "lend==ROM": 12,
+  "live": 12,
+  "live-0px": 10,
+  "r1==r2": 12,
+  "windows": 12
+ }
+}
