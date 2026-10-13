@@ -228,6 +228,9 @@ export const SPRITE_ORDER_PRODUCTION_PLANS: readonly string[] = Object.freeze([
   "Cfffffffffffff;Cfff;D0;D1;D2;D3;D4;D5;D6;D7;D8;D9;D10;D11;D12;D13;D14;D15",
   "Cf;D0;Cf;Cf;D2;D1;Cf;Cf;D4;D3;Cf;Cf;D6;D5;Cffff;D9,10;D8;D7;Cf;Cff;D11;D13;D12;Cfff;D16;D15;D14;Cfff;D19;D18;D17;Cfff;D22;D21;D20;Cfff;D25;D24;D23;Cf;Cf;D26;Cf;D27;Cf;D28;D29;Cf;D30",
   "Cf;D0;Cf;Cf;D2;D1",
+  "Cf;Cf;Cf;Cf;Cf;Cf;D1;Cf;D2;D3;D4;D5;D6;D0;Cf;D7",
+  "Cff;Cf;Cf;D2;D3;D0,1/P542,542;Cf;D4",
+  "Cff;Cf;Cf;D2;D3;D0,1/P552,552;Cf;D4",
 ]);
 
 /** `<moveId>:<attacker side>` -> plan index; EXACT-PLAN bodies only (NEEDS-KEYS / NOT-OBSERVED are absent = invalidate). */
@@ -301,7 +304,8 @@ export const SPRITE_ORDER_PRODUCTION_BODIES: Readonly<Record<string, number>> = 
   "200:opponent": 219, "200:player": 219, "210:opponent": 1, "210:player": 1, "10210:opponent": 2, "10210:player": 2, "20210:opponent": 2, "20210:player": 2,
   "30210:opponent": 2, "30210:player": 2, "19:opponent": 1, "19:player": 1, "340:opponent": 1, "340:player": 1, "10019:opponent": 16, "10019:player": 16,
   "10340:opponent": 11, "10340:player": 16, "176:opponent": 221, "176:player": 221, "222:opponent": 9, "222:player": 9, "302:opponent": 162, "20222:opponent": 0,
-  "20222:player": 0, "30216:opponent": 222, "30216:player": 222, "40216:opponent": 223, "40216:player": 223,
+  "20222:player": 0, "30216:opponent": 222, "30216:player": 222, "40216:opponent": 223, "40216:player": 223, "206:opponent": 224, "206:player": 224, "316:opponent": 225,
+  "316:player": 226,
 });
 
 /** Mid-battle (non-move) animations -> plan index. STATS_CHANGE_CLASS_1 = args 15..28 (+-1) and 55/57 (multiple +1/-1),
