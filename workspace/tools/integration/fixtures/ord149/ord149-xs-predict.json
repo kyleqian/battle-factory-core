@@ -1,0 +1,162 @@
+{
+ "schema": "ord149-xs-predict/v1",
+ "visibleLine": 27,
+ "windows": [
+  {
+   "probe": "xs-pla-xs-A",
+   "firstWriteFrame": 121,
+   "fixture": null,
+   "predictedSplitRows": 0,
+   "lagRows": 0,
+   "scan93AffectedRows": null,
+   "same": true,
+   "rows": []
+  },
+  {
+   "probe": "xs-pla-xs-A",
+   "firstWriteFrame": 1255,
+   "fixture": "xs-pla-nuzleaf-shuckle-xs-1.json",
+   "predictedSplitRows": 3,
+   "lagRows": 0,
+   "scan93AffectedRows": 3,
+   "same": true,
+   "rows": [
+    {
+     "traceFrame": 1308,
+     "stage": 2,
+     "data1": 1,
+     "romSplit": 28,
+     "rendererSplit": 7
+    },
+    {
+     "traceFrame": 1311,
+     "stage": 2,
+     "data1": 4,
+     "romSplit": 25,
+     "rendererSplit": 28
+    },
+    {
+     "traceFrame": 1314,
+     "stage": 2,
+     "data1": 7,
+     "romSplit": 31,
+     "rendererSplit": 7
+    }
+   ]
+  },
+  {
+   "probe": "xs-pla-xs-A",
+   "firstWriteFrame": 2389,
+   "fixture": "xs-pla-nuzleaf-shuckle-xs-2.json",
+   "predictedSplitRows": 1,
+   "lagRows": 0,
+   "scan93AffectedRows": 1,
+   "same": true,
+   "rows": [
+    {
+     "traceFrame": 2445,
+     "stage": 2,
+     "data1": 4,
+     "romSplit": 23,
+     "rendererSplit": 28
+    }
+   ]
+  },
+  {
+   "probe": "xs-pla-qa-A",
+   "firstWriteFrame": 259,
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-0.json",
+   "predictedSplitRows": 2,
+   "lagRows": 16,
+   "scan93AffectedRows": 18,
+   "same": true,
+   "rows": [
+    {
+     "traceFrame": 312,
+     "stage": 2,
+     "data1": 1,
+     "romSplit": 27,
+     "rendererSplit": 7
+    },
+    {
+     "traceFrame": 315,
+     "stage": 2,
+     "data1": 4,
+     "romSplit": 22,
+     "rendererSplit": 28
+    }
+   ]
+  },
+  {
+   "probe": "xs-pla-qa-A",
+   "firstWriteFrame": 1393,
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-1.json",
+   "predictedSplitRows": 5,
+   "lagRows": 16,
+   "scan93AffectedRows": 21,
+   "same": true,
+   "rows": [
+    {
+     "traceFrame": 1449,
+     "stage": 2,
+     "data1": 4,
+     "romSplit": 18,
+     "rendererSplit": 28
+    },
+    {
+     "traceFrame": 1450,
+     "stage": 2,
+     "data1": 5,
+     "romSplit": 27,
+     "rendererSplit": 7
+    },
+    {
+     "traceFrame": 1453,
+     "stage": 2,
+     "data1": 8,
+     "romSplit": 27,
+     "rendererSplit": 7
+    },
+    {
+     "traceFrame": 1459,
+     "stage": 2,
+     "data1": 14,
+     "romSplit": 31,
+     "rendererSplit": 7
+    },
+    {
+     "traceFrame": 1468,
+     "stage": 2,
+     "data1": 23,
+     "romSplit": 28,
+     "rendererSplit": 7
+    }
+   ]
+  },
+  {
+   "probe": "xs-pla-qa-A",
+   "firstWriteFrame": 2527,
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-2.json",
+   "predictedSplitRows": 2,
+   "lagRows": 0,
+   "scan93AffectedRows": 2,
+   "same": true,
+   "rows": [
+    {
+     "traceFrame": 2580,
+     "stage": 2,
+     "data1": 1,
+     "romSplit": 27,
+     "rendererSplit": 7
+    },
+    {
+     "traceFrame": 2583,
+     "stage": 2,
+     "data1": 4,
+     "romSplit": 24,
+     "rendererSplit": 28
+    }
+   ]
+  }
+ ]
+}
