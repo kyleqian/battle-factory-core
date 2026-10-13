@@ -1,6 +1,10 @@
 import battleAnimSpark2Asset from "../assets/gen/battle-anim-spark-2.json" with { type: "json" };
+import battleAnimSmallEmberAsset from "../assets/gen/battle-anim-small-ember.json" with { type: "json" };
 import type { RgbColor } from "../engine/bg.ts";
+import charmAsset from "./assets/charm.json" with { type: "json" };
+import restAsset from "./assets/rest.json" with { type: "json" };
 import { shakeMon2OffsetAtTick } from "./shakeMon2.ts";
+import { statusConditionTarget, statusParticleDisplayRow, type StatusConditionDisplaySprite, type StatusParticleAnimation } from "./statusConditionAnimations.ts";
 
 export type StatusAnimationKind = "paralysis";
 
@@ -186,14 +190,19 @@ export function statusAnimationAtSourceAge(
  * statusanimation row + 1). Every task / sprite row below is the source script's own schedule (battle_anim_scripts.s), shown
  * through the measured display lag of the live field (OAM: a ShakeMon2 tick written at script row r shows on row r + 2).
  */
-export type LiveStatusAnimationName = "PSN" | "PRZ";
+export type LiveStatusAnimationName = "PSN" | "PRZ" | "SLP" | "BRN" | "INFATUATION";
+
+/** sae135: a live status-animation OBJ; `affine` = an affine-normal OBJ (the letter Z) drawn around its box centre with that matrix. */
+export interface LiveStatusAnimationSprite extends StatusAnimationSprite {
+  readonly affine?: Readonly<{ a: number; b: number; c: number; d: number }>;
+}
 
 export interface LiveStatusAnimationRow {
   /** The animated battler's x2 / y2: "rest" before its ShakeMon2 shows (the tracked idle rest), else the task's absolute value. */
   readonly battlerOffset: Readonly<{ x2: number; y2: number }> | "rest";
   /** blend_color_cycle F_PAL_ATTACKER: the battler's OBJ palette blended toward `color` by coeff / 16 (null = none). */
   readonly paletteBlend: Readonly<{ color: RgbColor; coeff: number }> | null;
-  readonly sprites: readonly StatusAnimationSprite[];
+  readonly sprites: readonly LiveStatusAnimationSprite[];
 }
 
 /** Status_Poison / Status_Paralysis: `AnimTask_ShakeMon2 ANIM_ATTACKER` (attacker = target = the battler, LaunchStatusAnimation). */
@@ -250,9 +259,49 @@ function statusElectricity(age: number, side: "player" | "opponent"): StatusAnim
   });
 }
 
-/** One row of a live B_ANIM_STATUS_* animation of a battler on `side`, or null when the animation is not drawn (yet). */
+type ParticleArt = Readonly<{ tileset: StatusAnimationSprite["tileset"]; palette: RgbColor[] }>;
+const sleepLetterZ = (restAsset as unknown as { letterZ: ParticleArt }).letterZ;
+const magentaHeart = (charmAsset as unknown as { magentaHeart: ParticleArt }).magentaHeart;
+const smallEmber = battleAnimSmallEmberAsset as unknown as ParticleArt;
+
+/** A 32x32 frame of battle-anim-small-ember.json (gAnims_BasicFire: frame = tileOffset / 16, 4x4 tiles). */
+function smallEmberFrame(tileOffset: number): StatusAnimationSprite["tileset"] {
+  return { columns: 4, rows: 4, tiles: smallEmber.tileset.tiles.slice(tileOffset, tileOffset + 16) };
+}
+
+function particleSprite(sprite: StatusConditionDisplaySprite): LiveStatusAnimationSprite {
+  switch (sprite.template) {
+    case "gSleepLetterZSpriteTemplate":
+      return { x: sprite.left, y: sprite.top, tileset: sleepLetterZ.tileset, palette: sleepLetterZ.palette, affine: sprite.affine! };
+    case "gBurnFlameSpriteTemplate":
+      return { x: sprite.left, y: sprite.top, tileset: smallEmberFrame(sprite.tileOffset), palette: smallEmber.palette };
+    case "gMagentaHeartSpriteTemplate":
+      return { x: sprite.left, y: sprite.top, tileset: magentaHeart.tileset, palette: magentaHeart.palette };
+    default:
+      throw new Error(`liveStatusAnimationRow: unexpected status particle template ${sprite.template}`);
+  }
+}
+
+/**
+ * sae135 (S10A, ISSUES #168 slice SA5, docs/sae135-status-animation-render-3.md): Status_Sleep / Status_Burn / Status_Infatuation,
+ * sprite-only scripts (the battler stays at its rest): statusConditionAnimations.ts statusParticleDisplayRow (stq132's reducer) at
+ * rel = command age (rel 0 = the first gAnimScriptActive row = command age 0), back-to-front by SortSprites. `battler` = the battler
+ * sprite's gSprites x / y (production's corner, elevation included, + 32): the letter Z starts from it; the flames / hearts start from
+ * BATTLER_COORD_X / Y.
+ */
+function statusParticles(
+  animation: StatusParticleAnimation, age: number, side: "player" | "opponent", battler: Readonly<{ x: number; y: number }>,
+): LiveStatusAnimationRow {
+  const row = statusParticleDisplayRow(animation, age, statusConditionTarget(side, battler.x, battler.y));
+  return { battlerOffset: "rest", paletteBlend: null, sprites: row.sprites.map(particleSprite) };
+}
+
+/**
+ * One row of a live B_ANIM_STATUS_* animation of a battler on `side`, or null when the animation is not drawn (yet). `battler` = the
+ * battler sprite's gSprites x / y (sae135's particle animations need it; PSN / PRZ do not).
+ */
 export function liveStatusAnimationRow(
-  animation: string, age: number, side: "player" | "opponent",
+  animation: string, age: number, side: "player" | "opponent", battler: Readonly<{ x: number; y: number }> = { x: 0, y: 0 },
 ): LiveStatusAnimationRow | null {
   switch (animation) {
     case "PSN": {
@@ -265,6 +314,8 @@ export function liveStatusAnimationRow(
     }
     case "PRZ":
       return { battlerOffset: shakeMon2Row(age, PRZ_ELECTRICITY_FIRST_ROW, PRZ_SHAKE), paletteBlend: null, sprites: statusElectricity(age, side) };
+    case "SLP":
+      return statusParticles("SLP", age, side, battler);
     default:
       return null;
   }

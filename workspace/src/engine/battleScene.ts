@@ -4,7 +4,7 @@ import {
 } from "./liveMoveAnimation.ts";
 import { liveBattlerAnchors } from "./liveMoveAnimation.ts";
 import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
-import { liveStatusAnimationRow, type StatusAnimationSprite } from "../animation/statusAnimation.ts";
+import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { liveSubstituteSwapView } from "./liveSubstituteSwap.ts";
 import { substituteFadeRenderView, substituteFadeWhiteBgr555, type SubstituteFadeBgCopy } from "./liveSubstituteFade.ts";
 // S6 scene-assembly + send-out engine slices: the BATTLE-SCENE ASSEMBLY
@@ -7748,7 +7748,7 @@ export function statsChangeRenderView(view: BattleResolutionPresentationRenderVi
 /** sar131: the status-animation command's field view (statusAnimationRenderView) and its sprites (drawn over the battlers). */
 export type StatusAnimationRenderView = Readonly<{
   view: BattleResolutionPresentationRenderView;
-  sprites: readonly StatusAnimationSprite[];
+  sprites: readonly LiveStatusAnimationSprite[];
 }>;
 
 /**
@@ -7765,7 +7765,9 @@ export function statusAnimationRenderView(view: BattleResolutionPresentationRend
   const effect = view.effect;
   if (effect?.type !== "status-animation") return null;
   const side = effect.battler === 0 ? "player" as const : "opponent" as const;
-  const row = liveStatusAnimationRow(effect.animation, effect.age, side);
+  // sae135: the battler sprite's gSprites x / y (corner, elevation included, + 32): Status_Sleep's letter Z starts from it.
+  const corner = battleCommandFieldSpriteOrigin(view.fieldArt[side], side);
+  const row = liveStatusAnimationRow(effect.animation, effect.age, side, { x: corner.x + 32, y: corner.y + 32 });
   if (row === null || !view.visibility[side].sprite || view.field[side].substituteDoll === true) return null;
   const rest = effect.battlerX2Input === undefined
     ? { x2: 0, y2: 0 }
@@ -7790,6 +7792,17 @@ export function statusAnimationRenderView(view: BattleResolutionPresentationRend
   // command's first row: battleResolutionPresentationRender.ts postBodyShadowHiddenAt).
   const shadowHidden = view.postBodyShadowHidden || effect.age >= 1;
   return Object.freeze({ view: Object.freeze({ ...view, fieldArt, postBodyShadowHidden: shadowHidden }), sprites: row.sprites });
+}
+
+/** sae135: one status-animation OBJ; an affine-normal one (Status_Sleep's letter Z) around its box centre, no double-size box. */
+function drawLiveStatusAnimationSprite(fb: Uint8Array, sprite: LiveStatusAnimationSprite): void {
+  const tileset = sprite.tileset as Tileset;
+  if (sprite.affine === undefined) {
+    drawSpriteSheet(fb, tileset, sprite.palette, sprite.x, sprite.y);
+    return;
+  }
+  const { a, b, c, d } = sprite.affine;
+  drawSpriteSheetAffineRotate(fb, tileset, sprite.palette, sprite.x + tileset.columns * 4, sprite.y + tileset.rows * 4, a, b, c, d, undefined, false);
 }
 
 type SceneOffStatEffect = Extract<
@@ -54991,7 +55004,7 @@ export function renderBattleResolutionSceneOffView(
     }
   }
   // sar131: the status animation's OAM (priority 2 in front of its battler, under the priority-1 healthboxes).
-  for (const sprite of statusAnimation?.sprites ?? []) drawSpriteSheet(fb, sprite.tileset as Tileset, sprite.palette, sprite.x, sprite.y);
+  for (const sprite of statusAnimation?.sprites ?? []) drawLiveStatusAnimationSprite(fb, sprite);
   if (fade?.bgCopy) drawSubstituteFadeBgCopy(fb, fade.bgCopy);
   if (view.visibility.opponent.healthbox) {
     drawSendOutHealthbox(
