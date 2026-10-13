@@ -1,0 +1,1110 @@
+{
+ "seg127-flamethrower-snorlax-opp": {
+  "window": {
+   "class": "hit-secondary neutral BRN",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "label": "BattleScript_MoveEffectBurn+0",
+   "animation": "BRN",
+   "battler": 0,
+   "X": 3231,
+   "poll": 3232,
+   "gate": 5,
+   "R": 3237,
+   "activeRows": 38,
+   "nextRow": 3276,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-flamethrower-snorlax-opp.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3231,
+    "R": 3237,
+    "F": 3275,
+    "gate": 5,
+    "activeRows": 38,
+    "animation": "BRN",
+    "battler": 0,
+    "gated": true,
+    "dump": "seg127-flamethrower-snorlax-opp-on-3237.npz"
+   },
+   {
+    "X": 3619,
+    "R": 3620,
+    "F": 3658,
+    "gate": 0,
+    "activeRows": 38,
+    "animation": "BRN",
+    "battler": 0,
+    "gated": false,
+    "dump": "seg127-flamethrower-snorlax-opp-on-3620.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 84,
+    "mv": 53,
+    "atk": 1
+   },
+   {
+    "R": 401,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 1518,
+    "mv": 53,
+    "atk": 1
+   },
+   {
+    "R": 1941,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 2952,
+    "mv": 53,
+    "atk": 1
+   },
+   {
+    "R": 3407,
+    "mv": 33,
+    "atk": 0
+   }
+  ]
+ },
+ "seg127-flamethrower-snorlax-ply": {
+  "window": {
+   "class": "hit-secondary neutral BRN",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "label": "BattleScript_MoveEffectBurn+0",
+   "animation": "BRN",
+   "battler": 1,
+   "X": 3224,
+   "poll": 3225,
+   "gate": 8,
+   "R": 3233,
+   "activeRows": 38,
+   "nextRow": 3272,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-flamethrower-snorlax-ply.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3224,
+    "R": 3233,
+    "F": 3271,
+    "gate": 8,
+    "activeRows": 38,
+    "animation": "BRN",
+    "battler": 1,
+    "gated": true,
+    "dump": "seg127-flamethrower-snorlax-ply-on-3233.npz"
+   },
+   {
+    "X": 3623,
+    "R": 3624,
+    "F": 3662,
+    "gate": 0,
+    "activeRows": 38,
+    "animation": "BRN",
+    "battler": 1,
+    "gated": false,
+    "dump": "seg127-flamethrower-snorlax-ply-on-3624.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 80,
+    "mv": 53,
+    "atk": 0
+   },
+   {
+    "R": 398,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1514,
+    "mv": 53,
+    "atk": 0
+   },
+   {
+    "R": 1935,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 2948,
+    "mv": 53,
+    "atk": 0
+   },
+   {
+    "R": 3411,
+    "mv": 33,
+    "atk": 1
+   }
+  ]
+ },
+ "seg127-ice-beam-opp-delcatty-shuckle": {
+  "window": {
+   "class": "hit-secondary neutral FRZ (sta123 legal scenario)",
+   "attackerSide": "opponent",
+   "attacker": "DELCATTY",
+   "target": "SHUCKLE",
+   "seed": 305419955,
+   "label": "BattleScript_MoveEffectFreeze+0",
+   "animation": "FRZ",
+   "battler": 0,
+   "X": 973,
+   "poll": 974,
+   "gate": 17,
+   "R": 991,
+   "activeRows": 115,
+   "nextRow": 1107,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-ice-beam-opp-delcatty-shuckle.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 973,
+    "R": 991,
+    "F": 1106,
+    "gate": 17,
+    "activeRows": 115,
+    "animation": "FRZ",
+    "battler": 0,
+    "gated": true,
+    "dump": "seg127-ice-beam-opp-delcatty-shuckle-on-991.npz"
+   },
+   {
+    "X": 1302,
+    "R": 1303,
+    "F": 1419,
+    "gate": 0,
+    "activeRows": 116,
+    "animation": "FRZ",
+    "battler": 0,
+    "gated": false,
+    "dump": "seg127-ice-beam-opp-delcatty-shuckle-on-1303.npz"
+   },
+   {
+    "X": 2008,
+    "R": 2009,
+    "F": 2125,
+    "gate": 0,
+    "activeRows": 116,
+    "animation": "FRZ",
+    "battler": 0,
+    "gated": false,
+    "dump": "seg127-ice-beam-opp-delcatty-shuckle-on-2009.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 79,
+    "mv": 58,
+    "atk": 1
+   },
+   {
+    "R": 381,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 713,
+    "mv": 58,
+    "atk": 1
+   },
+   {
+    "R": 1647,
+    "mv": 58,
+    "atk": 1
+   }
+  ]
+ },
+ "seg127-ice-beam-ply-delcatty-shuckle": {
+  "window": {
+   "class": "hit-secondary neutral FRZ (sta123 legal scenario)",
+   "attackerSide": "player",
+   "attacker": "DELCATTY",
+   "target": "SHUCKLE",
+   "seed": 305419958,
+   "label": "BattleScript_MoveEffectFreeze+0",
+   "animation": "FRZ",
+   "battler": 1,
+   "X": 334,
+   "poll": 335,
+   "gate": 18,
+   "R": 353,
+   "activeRows": 115,
+   "nextRow": 469,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-ice-beam-ply-delcatty-shuckle.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 334,
+    "R": 353,
+    "F": 468,
+    "gate": 18,
+    "activeRows": 115,
+    "animation": "FRZ",
+    "battler": 1,
+    "gated": true,
+    "dump": "seg127-ice-beam-ply-delcatty-shuckle-on-353.npz"
+   },
+   {
+    "X": 672,
+    "R": 673,
+    "F": 789,
+    "gate": 0,
+    "activeRows": 116,
+    "animation": "FRZ",
+    "battler": 1,
+    "gated": false,
+    "dump": "seg127-ice-beam-ply-delcatty-shuckle-on-673.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 75,
+    "mv": 58,
+    "atk": 0
+   },
+   {
+    "R": 1643,
+    "mv": 58,
+    "atk": 0
+   },
+   {
+    "R": 2042,
+    "mv": 33,
+    "atk": 1
+   }
+  ]
+ },
+ "seg127-psybeam-snorlax-opp": {
+  "window": {
+   "class": "hit-secondary neutral CONFUSION",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "label": "BattleScript_MoveEffectConfusion+0",
+   "animation": "CONFUSION",
+   "battler": 0,
+   "X": 3169,
+   "poll": 3170,
+   "gate": 12,
+   "R": 3182,
+   "activeRows": 99,
+   "nextRow": 3282,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-psybeam-snorlax-opp.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3169,
+    "R": 3182,
+    "F": 3281,
+    "gate": 12,
+    "activeRows": 99,
+    "animation": "CONFUSION",
+    "battler": 0,
+    "gated": true,
+    "dump": "seg127-psybeam-snorlax-opp-on-3182.npz"
+   },
+   {
+    "X": 3468,
+    "R": 3469,
+    "F": 3568,
+    "gate": 0,
+    "activeRows": 99,
+    "animation": "CONFUSION",
+    "battler": 0,
+    "gated": false,
+    "dump": "seg127-psybeam-snorlax-opp-on-3469.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 79,
+    "mv": 60,
+    "atk": 1
+   },
+   {
+    "R": 340,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 1513,
+    "mv": 60,
+    "atk": 1
+   },
+   {
+    "R": 1873,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 2947,
+    "mv": 60,
+    "atk": 1
+   },
+   {
+    "R": 3602,
+    "mv": 33,
+    "atk": 0
+   }
+  ]
+ },
+ "seg127-psybeam-snorlax-ply": {
+  "window": {
+   "class": "hit-secondary neutral CONFUSION",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "SNORLAX",
+   "seed": 305419897,
+   "label": "BattleScript_MoveEffectConfusion+0",
+   "animation": "CONFUSION",
+   "battler": 1,
+   "X": 3163,
+   "poll": 3164,
+   "gate": 15,
+   "R": 3179,
+   "activeRows": 99,
+   "nextRow": 3279,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-psybeam-snorlax-ply.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3163,
+    "R": 3179,
+    "F": 3278,
+    "gate": 15,
+    "activeRows": 99,
+    "animation": "CONFUSION",
+    "battler": 1,
+    "gated": true,
+    "dump": "seg127-psybeam-snorlax-ply-on-3179.npz"
+   },
+   {
+    "X": 3473,
+    "R": 3474,
+    "F": 3573,
+    "gate": 0,
+    "activeRows": 99,
+    "animation": "CONFUSION",
+    "battler": 1,
+    "gated": false,
+    "dump": "seg127-psybeam-snorlax-ply-on-3474.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 75,
+    "mv": 60,
+    "atk": 0
+   },
+   {
+    "R": 337,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1509,
+    "mv": 60,
+    "atk": 0
+   },
+   {
+    "R": 1867,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 2943,
+    "mv": 60,
+    "atk": 0
+   },
+   {
+    "R": 3611,
+    "mv": 33,
+    "atk": 1
+   }
+  ]
+ },
+ "seg127-sludge-bomb-gyarados-ply": {
+  "window": {
+   "class": "hit-secondary neutral PSN (Snorlax has Immunity)",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "GYARADOS",
+   "seed": 305419897,
+   "label": "BattleScript_MoveEffectPoison+0",
+   "animation": "PSN",
+   "battler": 1,
+   "X": 3189,
+   "poll": 3190,
+   "gate": 1,
+   "R": 3191,
+   "activeRows": 70,
+   "nextRow": 3262,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-sludge-bomb-gyarados-ply.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3189,
+    "R": 3191,
+    "F": 3261,
+    "gate": 1,
+    "activeRows": 70,
+    "animation": "PSN",
+    "battler": 1,
+    "gated": true,
+    "dump": "seg127-sludge-bomb-gyarados-ply-on-3191.npz"
+   },
+   {
+    "X": 3621,
+    "R": 3622,
+    "F": 3692,
+    "gate": 0,
+    "activeRows": 70,
+    "animation": "PSN",
+    "battler": 1,
+    "gated": false,
+    "dump": "seg127-sludge-bomb-gyarados-ply-on-3622.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 79,
+    "mv": 188,
+    "atk": 0
+   },
+   {
+    "R": 363,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1513,
+    "mv": 188,
+    "atk": 0
+   },
+   {
+    "R": 1935,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 2947,
+    "mv": 188,
+    "atk": 0
+   },
+   {
+    "R": 3404,
+    "mv": 33,
+    "atk": 1
+   }
+  ]
+ },
+ "seg127-tackle-clefable-cute-charm-opp": {
+  "window": {
+   "class": "contact-ability Cute Charm INFATUATION",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "CLEFABLE",
+   "seed": 305419897,
+   "label": "BattleScript_CuteCharmActivates+0",
+   "animation": "INFATUATION",
+   "battler": 1,
+   "X": 3056,
+   "poll": 3057,
+   "gate": 4,
+   "R": 3061,
+   "activeRows": 96,
+   "nextRow": 3158,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-tackle-clefable-cute-charm-opp.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3056,
+    "R": 3061,
+    "F": 3157,
+    "gate": 4,
+    "activeRows": 96,
+    "animation": "INFATUATION",
+    "battler": 1,
+    "gated": true,
+    "dump": "seg127-tackle-clefable-cute-charm-opp-on-3061.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 76,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 224,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 1510,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1659,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 2944,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 3310,
+    "mv": 33,
+    "atk": 0
+   }
+  ]
+ },
+ "seg127-tackle-clefable-cute-charm-ply": {
+  "window": {
+   "class": "contact-ability Cute Charm INFATUATION",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "CLEFABLE",
+   "seed": 305419897,
+   "label": "BattleScript_CuteCharmActivates+0",
+   "animation": "INFATUATION",
+   "battler": 0,
+   "X": 3048,
+   "poll": 3049,
+   "gate": 8,
+   "R": 3057,
+   "activeRows": 96,
+   "nextRow": 3154,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-tackle-clefable-cute-charm-ply.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3048,
+    "R": 3057,
+    "F": 3153,
+    "gate": 8,
+    "activeRows": 96,
+    "animation": "INFATUATION",
+    "battler": 0,
+    "gated": true,
+    "dump": "seg127-tackle-clefable-cute-charm-ply-on-3057.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 72,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 221,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1506,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 1655,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 2940,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 3310,
+    "mv": 33,
+    "atk": 1
+   }
+  ]
+ },
+ "seg127-tackle-magmar-flame-body-ply": {
+  "window": {
+   "class": "contact-ability Flame Body BRN",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "MAGMAR",
+   "seed": 305419897,
+   "label": "BattleScript_MoveEffectBurn+0",
+   "animation": "BRN",
+   "battler": 0,
+   "X": 3053,
+   "poll": 3054,
+   "gate": 3,
+   "R": 3057,
+   "activeRows": 38,
+   "nextRow": 3096,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-tackle-magmar-flame-body-ply.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3053,
+    "R": 3057,
+    "F": 3095,
+    "gate": 3,
+    "activeRows": 38,
+    "animation": "BRN",
+    "battler": 0,
+    "gated": true,
+    "dump": "seg127-tackle-magmar-flame-body-ply-on-3057.npz"
+   },
+   {
+    "X": 3458,
+    "R": 3459,
+    "F": 3497,
+    "gate": 0,
+    "activeRows": 38,
+    "animation": "BRN",
+    "battler": 0,
+    "gated": false,
+    "dump": "seg127-tackle-magmar-flame-body-ply-on-3459.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 72,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 221,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1506,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 1656,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 2940,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 3249,
+    "mv": 33,
+    "atk": 1
+   }
+  ]
+ },
+ "seg127-tackle-nidoking-poison-point-opp": {
+  "window": {
+   "class": "contact-ability Poison Point PSN",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "NIDOKING",
+   "seed": 305419897,
+   "label": "BattleScript_MoveEffectPoison+0",
+   "animation": "PSN",
+   "battler": 1,
+   "X": 3057,
+   "poll": 3058,
+   "gate": 3,
+   "R": 3061,
+   "activeRows": 70,
+   "nextRow": 3132,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-tackle-nidoking-poison-point-opp.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3057,
+    "R": 3061,
+    "F": 3131,
+    "gate": 3,
+    "activeRows": 70,
+    "animation": "PSN",
+    "battler": 1,
+    "gated": true,
+    "dump": "seg127-tackle-nidoking-poison-point-opp-on-3061.npz"
+   },
+   {
+    "X": 3505,
+    "R": 3506,
+    "F": 3576,
+    "gate": 0,
+    "activeRows": 70,
+    "animation": "PSN",
+    "battler": 1,
+    "gated": false,
+    "dump": "seg127-tackle-nidoking-poison-point-opp-on-3506.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 76,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 223,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 1510,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1658,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 2944,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 3289,
+    "mv": 33,
+    "atk": 0
+   }
+  ]
+ },
+ "seg127-tackle-nidoking-poison-point-ply": {
+  "window": {
+   "class": "contact-ability Poison Point PSN",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "NIDOKING",
+   "seed": 305419897,
+   "label": "BattleScript_MoveEffectPoison+0",
+   "animation": "PSN",
+   "battler": 0,
+   "X": 3049,
+   "poll": 3050,
+   "gate": 7,
+   "R": 3057,
+   "activeRows": 70,
+   "nextRow": 3128,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-tackle-nidoking-poison-point-ply.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 3049,
+    "R": 3057,
+    "F": 3127,
+    "gate": 7,
+    "activeRows": 70,
+    "animation": "PSN",
+    "battler": 0,
+    "gated": true,
+    "dump": "seg127-tackle-nidoking-poison-point-ply-on-3057.npz"
+   },
+   {
+    "X": 3495,
+    "R": 3496,
+    "F": 3566,
+    "gate": 0,
+    "activeRows": 70,
+    "animation": "PSN",
+    "battler": 0,
+    "gated": false,
+    "dump": "seg127-tackle-nidoking-poison-point-ply-on-3496.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 72,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 220,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1506,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 1654,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 2940,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 3289,
+    "mv": 33,
+    "atk": 1
+   }
+  ]
+ },
+ "seg127-tackle-parasect-effect-spore-opp": {
+  "window": {
+   "class": "contact-ability Effect Spore PSN/PRZ/SLP",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "PARASECT",
+   "seed": 305419901,
+   "label": "BattleScript_MoveEffectParalysis+0",
+   "animation": "PRZ",
+   "battler": 1,
+   "X": 1620,
+   "poll": 1621,
+   "gate": 6,
+   "R": 1627,
+   "activeRows": 38,
+   "nextRow": 1666,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-tackle-parasect-effect-spore-opp.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 1620,
+    "R": 1627,
+    "F": 1665,
+    "gate": 6,
+    "activeRows": 38,
+    "animation": "PRZ",
+    "battler": 1,
+    "gated": true,
+    "dump": "seg127-tackle-parasect-effect-spore-opp-on-1627.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 76,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 224,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 1510,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 3011,
+    "mv": 33,
+    "atk": 0
+   }
+  ]
+ },
+ "seg127-tackle-parasect-effect-spore-ply": {
+  "window": {
+   "class": "contact-ability Effect Spore PSN/PRZ/SLP",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "PARASECT",
+   "seed": 305419901,
+   "label": "BattleScript_MoveEffectParalysis+0",
+   "animation": "PRZ",
+   "battler": 0,
+   "X": 1612,
+   "poll": 1613,
+   "gate": 10,
+   "R": 1623,
+   "activeRows": 38,
+   "nextRow": 1662,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-tackle-parasect-effect-spore-ply.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 1612,
+    "R": 1623,
+    "F": 1661,
+    "gate": 10,
+    "activeRows": 38,
+    "animation": "PRZ",
+    "battler": 0,
+    "gated": true,
+    "dump": "seg127-tackle-parasect-effect-spore-ply-on-1623.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 72,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 221,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1506,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 3015,
+    "mv": 33,
+    "atk": 1
+   }
+  ]
+ },
+ "seg127-yawn-tyranitar-sand-stream-opp": {
+  "window": {
+   "class": "yawn after end-turn sandstorm damage (Sand Stream target, Primeape takes sand)",
+   "attackerSide": "opponent",
+   "attacker": "PRIMEAPE",
+   "target": "TYRANITAR",
+   "seed": 305419897,
+   "label": "BattleScript_YawnMakesAsleep+0",
+   "animation": "SLP",
+   "battler": 0,
+   "X": 2216,
+   "poll": 2217,
+   "gate": 11,
+   "R": 2228,
+   "activeRows": 96,
+   "nextRow": 2325,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-yawn-tyranitar-sand-stream-opp.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 2216,
+    "R": 2228,
+    "F": 2324,
+    "gate": 11,
+    "activeRows": 96,
+    "animation": "SLP",
+    "battler": 0,
+    "gated": true,
+    "dump": "seg127-yawn-tyranitar-sand-stream-opp-on-2228.npz"
+   },
+   {
+    "X": 3154,
+    "R": 3155,
+    "F": 3251,
+    "gate": 0,
+    "activeRows": 96,
+    "animation": "SLP",
+    "battler": 0,
+    "gated": false,
+    "dump": "seg127-yawn-tyranitar-sand-stream-opp-on-3155.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 75,
+    "mv": 281,
+    "atk": 1
+   },
+   {
+    "R": 432,
+    "mv": 33,
+    "atk": 0
+   },
+   {
+    "R": 1662,
+    "mv": 33,
+    "atk": 0
+   }
+  ]
+ },
+ "seg127-yawn-tyranitar-sand-stream-ply": {
+  "window": {
+   "class": "yawn after end-turn sandstorm damage (Sand Stream target, Primeape takes sand)",
+   "attackerSide": "player",
+   "attacker": "PRIMEAPE",
+   "target": "TYRANITAR",
+   "seed": 305419897,
+   "label": "BattleScript_YawnMakesAsleep+0",
+   "animation": "SLP",
+   "battler": 1,
+   "X": 2206,
+   "poll": 2207,
+   "gate": 11,
+   "R": 2218,
+   "activeRows": 96,
+   "nextRow": 2315,
+   "scenario": "tools/integration/fixtures/seg127/scenarios/seg127-yawn-tyranitar-sand-stream-ply.json"
+  },
+  "seg127Match": true,
+  "windows": [
+   {
+    "X": 2206,
+    "R": 2218,
+    "F": 2314,
+    "gate": 11,
+    "activeRows": 96,
+    "animation": "SLP",
+    "battler": 1,
+    "gated": true,
+    "dump": "seg127-yawn-tyranitar-sand-stream-ply-on-2218.npz"
+   },
+   {
+    "X": 3154,
+    "R": 3155,
+    "F": 3251,
+    "gate": 0,
+    "activeRows": 96,
+    "animation": "SLP",
+    "battler": 1,
+    "gated": false,
+    "dump": "seg127-yawn-tyranitar-sand-stream-ply-on-3155.npz"
+   }
+  ],
+  "bodies": [
+   {
+    "R": 71,
+    "mv": 281,
+    "atk": 0
+   },
+   {
+    "R": 432,
+    "mv": 33,
+    "atk": 1
+   },
+   {
+    "R": 1662,
+    "mv": 33,
+    "atk": 1
+   }
+  ]
+ }
+}

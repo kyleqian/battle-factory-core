@@ -1,0 +1,275 @@
+{
+ "prefix": {
+  "summary": {
+   "neg": "prefix",
+   "windows": 16,
+   "zeroPxWindows": 0,
+   "gateRowsZeroPxWindows": 4,
+   "perRowDigest": "048a1b83e59f8c47"
+  },
+  "windows": {
+   "seg127-flamethrower-snorlax-opp": {
+    "px": 9526,
+    "gateRowsPx": 0,
+    "firstBad": 5
+   },
+   "seg127-flamethrower-snorlax-ply": {
+    "px": 10508,
+    "gateRowsPx": 54,
+    "firstBad": 5
+   },
+   "seg127-ice-beam-opp-delcatty-shuckle": {
+    "px": 294362,
+    "gateRowsPx": 39537,
+    "firstBad": 8
+   },
+   "seg127-ice-beam-ply-delcatty-shuckle": {
+    "px": 358823,
+    "gateRowsPx": 52913,
+    "firstBad": 8
+   },
+   "seg127-psybeam-snorlax-opp": {
+    "px": 78927,
+    "gateRowsPx": 4183,
+    "firstBad": 5
+   },
+   "seg127-psybeam-snorlax-ply": {
+    "px": 60207,
+    "gateRowsPx": 5101,
+    "firstBad": 5
+   },
+   "seg127-sludge-bomb-gyarados-ply": {
+    "px": 53818,
+    "gateRowsPx": 0,
+    "firstBad": 2
+   },
+   "seg127-tackle-clefable-cute-charm-opp": {
+    "px": 29884,
+    "gateRowsPx": 0,
+    "firstBad": 5
+   },
+   "seg127-tackle-clefable-cute-charm-ply": {
+    "px": 43134,
+    "gateRowsPx": 498,
+    "firstBad": 5
+   },
+   "seg127-tackle-magmar-flame-body-ply": {
+    "px": 9908,
+    "gateRowsPx": 0,
+    "firstBad": 5
+   },
+   "seg127-tackle-nidoking-poison-point-opp": {
+    "px": 75999,
+    "gateRowsPx": 783,
+    "firstBad": 2
+   },
+   "seg127-tackle-nidoking-poison-point-ply": {
+    "px": 107748,
+    "gateRowsPx": 4849,
+    "firstBad": 2
+   },
+   "seg127-tackle-parasect-effect-spore-opp": {
+    "px": 26936,
+    "gateRowsPx": 813,
+    "firstBad": 5
+   },
+   "seg127-tackle-parasect-effect-spore-ply": {
+    "px": 26205,
+    "gateRowsPx": 3858,
+    "firstBad": 5
+   },
+   "seg127-yawn-tyranitar-sand-stream-opp": {
+    "px": 20995,
+    "gateRowsPx": 56,
+    "firstBad": 5
+   },
+   "seg127-yawn-tyranitar-sand-stream-ply": {
+    "px": 19461,
+    "gateRowsPx": 54,
+    "firstBad": 5
+   }
+  }
+ },
+ "gate-1": {
+  "summary": {
+   "neg": "gate-1",
+   "windows": 16,
+   "zeroPxWindows": 0,
+   "gateRowsZeroPxWindows": 16,
+   "perRowDigest": "858976e775a2a7f8"
+  },
+  "windows": {
+   "seg127-flamethrower-snorlax-opp": {
+    "px": 8113,
+    "gateRowsPx": 0,
+    "firstBad": 9
+   },
+   "seg127-flamethrower-snorlax-ply": {
+    "px": 7886,
+    "gateRowsPx": 0,
+    "firstBad": 12
+   },
+   "seg127-ice-beam-opp-delcatty-shuckle": {
+    "px": 102138,
+    "gateRowsPx": 0,
+    "firstBad": 24
+   },
+   "seg127-ice-beam-ply-delcatty-shuckle": {
+    "px": 123422,
+    "gateRowsPx": 0,
+    "firstBad": 25
+   },
+   "seg127-psybeam-snorlax-opp": {
+    "px": 39527,
+    "gateRowsPx": 0,
+    "firstBad": 16
+   },
+   "seg127-psybeam-snorlax-ply": {
+    "px": 38306,
+    "gateRowsPx": 0,
+    "firstBad": 19
+   },
+   "seg127-sludge-bomb-gyarados-ply": {
+    "px": 53818,
+    "gateRowsPx": 0,
+    "firstBad": 2
+   },
+   "seg127-tackle-clefable-cute-charm-opp": {
+    "px": 13393,
+    "gateRowsPx": 0,
+    "firstBad": 8
+   },
+   "seg127-tackle-clefable-cute-charm-ply": {
+    "px": 13373,
+    "gateRowsPx": 0,
+    "firstBad": 12
+   },
+   "seg127-tackle-magmar-flame-body-ply": {
+    "px": 8113,
+    "gateRowsPx": 0,
+    "firstBad": 7
+   },
+   "seg127-tackle-nidoking-poison-point-opp": {
+    "px": 32606,
+    "gateRowsPx": 0,
+    "firstBad": 4
+   },
+   "seg127-tackle-nidoking-poison-point-ply": {
+    "px": 36446,
+    "gateRowsPx": 0,
+    "firstBad": 8
+   },
+   "seg127-tackle-parasect-effect-spore-opp": {
+    "px": 11714,
+    "gateRowsPx": 0,
+    "firstBad": 10
+   },
+   "seg127-tackle-parasect-effect-spore-ply": {
+    "px": 10224,
+    "gateRowsPx": 0,
+    "firstBad": 14
+   },
+   "seg127-yawn-tyranitar-sand-stream-opp": {
+    "px": 10646,
+    "gateRowsPx": 0,
+    "firstBad": 15
+   },
+   "seg127-yawn-tyranitar-sand-stream-ply": {
+    "px": 9534,
+    "gateRowsPx": 0,
+    "firstBad": 15
+   }
+  }
+ },
+ "gate+1": {
+  "summary": {
+   "neg": "gate+1",
+   "windows": 16,
+   "zeroPxWindows": 0,
+   "gateRowsZeroPxWindows": 16,
+   "perRowDigest": "04e78e31ae6f16c7"
+  },
+  "windows": {
+   "seg127-flamethrower-snorlax-opp": {
+    "px": 8095,
+    "gateRowsPx": 0,
+    "firstBad": 10
+   },
+   "seg127-flamethrower-snorlax-ply": {
+    "px": 7868,
+    "gateRowsPx": 0,
+    "firstBad": 13
+   },
+   "seg127-ice-beam-opp-delcatty-shuckle": {
+    "px": 102138,
+    "gateRowsPx": 0,
+    "firstBad": 25
+   },
+   "seg127-ice-beam-ply-delcatty-shuckle": {
+    "px": 123422,
+    "gateRowsPx": 0,
+    "firstBad": 26
+   },
+   "seg127-psybeam-snorlax-opp": {
+    "px": 39527,
+    "gateRowsPx": 0,
+    "firstBad": 17
+   },
+   "seg127-psybeam-snorlax-ply": {
+    "px": 38306,
+    "gateRowsPx": 0,
+    "firstBad": 20
+   },
+   "seg127-sludge-bomb-gyarados-ply": {
+    "px": 53818,
+    "gateRowsPx": 0,
+    "firstBad": 3
+   },
+   "seg127-tackle-clefable-cute-charm-opp": {
+    "px": 13227,
+    "gateRowsPx": 0,
+    "firstBad": 9
+   },
+   "seg127-tackle-clefable-cute-charm-ply": {
+    "px": 13207,
+    "gateRowsPx": 0,
+    "firstBad": 13
+   },
+   "seg127-tackle-magmar-flame-body-ply": {
+    "px": 8095,
+    "gateRowsPx": 0,
+    "firstBad": 8
+   },
+   "seg127-tackle-nidoking-poison-point-opp": {
+    "px": 32606,
+    "gateRowsPx": 0,
+    "firstBad": 5
+   },
+   "seg127-tackle-nidoking-poison-point-ply": {
+    "px": 36446,
+    "gateRowsPx": 0,
+    "firstBad": 9
+   },
+   "seg127-tackle-parasect-effect-spore-opp": {
+    "px": 11668,
+    "gateRowsPx": 0,
+    "firstBad": 11
+   },
+   "seg127-tackle-parasect-effect-spore-ply": {
+    "px": 10178,
+    "gateRowsPx": 0,
+    "firstBad": 15
+   },
+   "seg127-yawn-tyranitar-sand-stream-opp": {
+    "px": 10620,
+    "gateRowsPx": 0,
+    "firstBad": 16
+   },
+   "seg127-yawn-tyranitar-sand-stream-ply": {
+    "px": 9534,
+    "gateRowsPx": 0,
+    "firstBad": 16
+   }
+  }
+ }
+}
