@@ -1,0 +1,104 @@
+{
+ "stp128-curse-ply-gengar-onix.json": {
+  "animation": "CURSED",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-curse-ply-gengar-onix.json",
+  "seed": 305419897
+ },
+ "stp128-curse-opp-gengar-onix.json": {
+  "animation": "CURSED",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-curse-opp-gengar-onix.json",
+  "seed": 305419897
+ },
+ "stp128-nightmare-ply-haunter-shuckle.json": {
+  "animation": "NIGHTMARE",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-nightmare-ply-haunter-shuckle.json",
+  "seed": 1
+ },
+ "stp128-nightmare-opp-haunter-shuckle.json": {
+  "animation": "NIGHTMARE",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-nightmare-opp-haunter-shuckle.json",
+  "seed": 1
+ },
+ "stp128-confuse-ray-ply-primeape-onix.json": {
+  "animation": "CONFUSION",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-confuse-ray-ply-primeape-onix.json",
+  "seed": 305419897
+ },
+ "stp128-confuse-ray-opp-primeape-onix.json": {
+  "animation": "CONFUSION",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-confuse-ray-opp-primeape-onix.json",
+  "seed": 305419897
+ },
+ "stp128-ice-beam-ply-delcatty-shuckle.json": {
+  "animation": "FRZ",
+  "attackerSide": "player",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-ice-beam-ply-delcatty-shuckle.json",
+  "seed": 305419958
+ },
+ "stp128-ice-beam-opp-delcatty-shuckle.json": {
+  "animation": "FRZ",
+  "attackerSide": "opponent",
+  "source": "tools/integration/fixtures/sta123/scenarios/sta123-ice-beam-opp-delcatty-shuckle.json",
+  "seed": 305419955
+ },
+ "stp128-curse-ply-gengar-golbat.json": {
+  "animation": "CURSED",
+  "attackerSide": "player",
+  "move": 174,
+  "attacker": "GENGAR",
+  "target": "GOLBAT",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "stp128-curse-opp-gengar-golbat.json": {
+  "animation": "CURSED",
+  "attackerSide": "opponent",
+  "move": 174,
+  "attacker": "GENGAR",
+  "target": "GOLBAT",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "stp128-confuse-ray-ply-primeape-golbat.json": {
+  "animation": "CONFUSION",
+  "attackerSide": "player",
+  "move": 109,
+  "attacker": "PRIMEAPE",
+  "target": "GOLBAT",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-player-primeape-opponent-onix.json"
+ },
+ "stp128-confuse-ray-opp-primeape-golbat.json": {
+  "animation": "CONFUSION",
+  "attackerSide": "opponent",
+  "move": 109,
+  "attacker": "PRIMEAPE",
+  "target": "GOLBAT",
+  "seed": 305419897,
+  "turns": 2,
+  "template": "tools/battle-lab/mechanic-bulk-up-opponent-primeape-player-onix.json"
+ },
+ "stp128-nightmare-ply-gengar-golbat.json": {
+  "animation": "NIGHTMARE",
+  "attackerSide": "player",
+  "seed": 1,
+  "template": "tools/battle-lab/d4a-nightmare-extra-player-gengar-golbat.json",
+  "extraTurns": 2
+ },
+ "stp128-nightmare-opp-gengar-golbat.json": {
+  "animation": "NIGHTMARE",
+  "attackerSide": "opponent",
+  "seed": 1,
+  "template": "tools/battle-lab/d4a-nightmare-extra-opponent-gengar-golbat.json",
+  "extraTurns": 2
+ }
+}
