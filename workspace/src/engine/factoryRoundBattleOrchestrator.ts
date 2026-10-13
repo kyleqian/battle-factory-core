@@ -38,7 +38,7 @@ import { liveMovePresentationRngBodyKey } from "./liveMovePresentationRng.ts";
 import {
   advanceLiveBattlerX2Host, applyLiveBattlerX2Event, createLiveBattlerX2Host, invalidateLiveBattlerX2Host,
   liveBattlerX2EventsOf, liveMoveBattlerX2Input, liveMoveBattlerX2InputForBody, liveStaleMovePowerTaintedBy, LIVE_BATTLER_X2_IDLE, type LiveBattlerX2Host,
-  type LiveMoveBattlerX2Input,
+  type LiveBattlerX2History, type LiveMoveBattlerX2Input,
 } from "./liveBattlerX2History.ts";
 import {
   invalidateLiveSpriteAllocatorHost,
@@ -2422,6 +2422,8 @@ function prepareResolutionPalette(
   const retainedX2 = state.liveBattlerX2Host?.battleCallStart === state.activeBattleCallStart
     ? state.liveBattlerX2Host : undefined;
   let x2Host = retainedX2 ? advanceLiveBattlerX2Host(retainedX2.host, resolution, commandSequence, true) : undefined;
+  // rst139: the history before this command (every event strictly before it) for its ordinary rows.
+  const ordinaryX2History = x2Host?.history;
   let battlerX2Input: LiveMoveBattlerX2Input | undefined;
   if (command?.type === "move-animation" && command.animation && x2Host) {
     battlerX2Input = retainedX2?.commandKey === commandKey
@@ -2508,11 +2510,37 @@ function prepareResolutionPalette(
       liveMoveSpriteAllocatorInput: spriteInput,
       liveMoveSpriteOrderInput: spriteOrderInput,
       liveMoveBattlerX2Input: battlerX2Input,
+      liveOrdinaryBattlerX2History: ordinaryX2History,
     }),
     ...(x2Host === undefined ? {} : {
       liveBattlerX2Host: Object.freeze({ battleCallStart: state.activeBattleCallStart, commandKey, host: x2Host }),
     }),
   });
+}
+
+/** rst139 (docs/rst139-ordinary-row-rest.md): this battle's tracked x2 history (Scene ON only), else undefined. */
+function currentLiveBattlerX2History(state: FactoryRoundBattleOrchestratorState): LiveBattlerX2History | undefined {
+  const x2 = state.liveBattlerX2Host;
+  return x2 !== undefined && x2.battleCallStart === state.activeBattleCallStart ? x2.host.history : undefined;
+}
+
+/**
+ * rst139: the resolution as drawn. A presented command's rows read the history before that command (prepareResolutionPalette); the
+ * handoff / dismiss rows (and the confirm-handoff row the command step returns before any palette pass) read the battle's current one.
+ */
+export function factoryRoundBattleResolutionForRender(
+  state: FactoryRoundBattleOrchestratorState,
+): BattleResolutionPresentationState | null {
+  const resolution = state.battleResolutionPresentation;
+  const history = currentLiveBattlerX2History(state);
+  if (!resolution || history === undefined
+    || (resolution.lifecycle.phase === "presenting" && resolution.liveOrdinaryBattlerX2History !== undefined)) return resolution ?? null;
+  return Object.freeze({ ...resolution, liveOrdinaryBattlerX2History: history });
+}
+
+/** rst139: the command UI's opponent stands at its species front idle rest (tracked `idle`, Scene ON). */
+export function factoryRoundBattleOpponentIdleRest(state: FactoryRoundBattleOrchestratorState): boolean {
+  return currentLiveBattlerX2History(state)?.opponent === "idle";
 }
 
 export function advanceFactoryRoundBattleResolution(

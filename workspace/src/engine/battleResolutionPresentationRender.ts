@@ -7,7 +7,8 @@ import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./l
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSubstituteSwap.ts";
 import {
-  liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows, liveSemiInvulnerableHideBattler,
+  liveBattlerAnchors, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveOpponentShadowPostBodyHideRows,
+  liveSemiInvulnerableHideBattler,
 } from "./liveMoveAnimation.ts";
 import { liveMoveTimingBodyOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -1759,9 +1760,28 @@ export function createBattleResolutionPresentationRenderView(
   // cf78: a displayed CASTFORM in a weather form (its slot's gBattleMonForms at this command) declines every live body.
   field = withLiveCastformForms(field, liveCastformFormsAt(state, command));
   const tailSide = substituteSwapTailSideAt(state, segment, field);
-  const fieldArt = tailSide === null
+  const baseFieldArt = tailSide === null
     ? createBattleCommandFieldArtView(field)
     : substituteSwapTailFieldArt(createBattleCommandFieldArtView(field), tailSide);
+  // rst139 (docs/rst139-ordinary-row-rest.md): outside a battle animation script the ROM keeps the battler sprite's x2 / y2 where the
+  // last script or send-in left it, so an ordinary Scene ON row (message / HP / blink / stat / status / handoff; no body, fade, banner,
+  // status animation, faint, switch or party summary) draws a tracked-`idle` opponent at its species front idle rest. `zeroed` and
+  // `unknown` keep x2 0; the doll has no rest; Scene OFF carries no history.
+  const ordinaryRest = state.liveOrdinaryBattlerX2History?.opponent === "idle"
+      && (effect === null || effect.type === "hit" || effect.type === "stat" || effect.type === "status")
+      && !(command !== null && state.lifecycle.phase !== "next-command-handoff" && state.lifecycle.phase !== "confirm-handoff"
+        && (command.type === "switch-in" || command.type === "switch-out" || command.type === "party-summary"
+          || command.type === "trainer-slide" || command.type === "move-animation"))
+      && switchIn === null && midBattleSwitchIn === null && switchOut === null && partySummary === null
+      && field.opponent.substituteDoll !== true
+    ? liveBattlerAnchors("opponent", baseFieldArt).frontIdleRest : null;
+  const fieldArt = ordinaryRest === null || (ordinaryRest.x2 === 0 && ordinaryRest.y2 === 0) ? baseFieldArt : Object.freeze({
+    ...baseFieldArt,
+    opponent: Object.freeze({
+      ...baseFieldArt.opponent,
+      origin: Object.freeze({ x: baseFieldArt.opponent.origin.x + ordinaryRest.x2, y: baseFieldArt.opponent.origin.y + ordinaryRest.y2 }),
+    }),
+  });
   const playerHit = effect?.type === "hit" && effect.battler === 0
     ? effect
     : null;
