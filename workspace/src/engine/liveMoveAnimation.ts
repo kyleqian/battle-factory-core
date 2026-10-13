@@ -1105,6 +1105,13 @@ export function liveMoveSubstituteDollDeclines(
 }
 
 /**
+ * tmr136 (ISSUES #166): the rows a live Double Team window holds after its stats banner (rel 69..77 of the General_StatsChange it owns;
+ * the banner's registers are restored on rel 68 = age 229, the ROM's next script instruction runs on rel 77 and the next print's first
+ * glyph shows on rel 78 = age 239). Dense direct-mGBA windows: tools/integration/fixtures/tmr136-live-receipt.json.
+ */
+export const LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS = 9;
+
+/**
  * The presented body rows of a live move body (null: no live duration). `bodyClass` is the order host lend's body class
  * (liveMoveTimingBodyOf; default "first"): d4later's body-keyed D4 parameters (Sheer Cold 329 / Extrasensory 326 opponent later bodies).
  */
@@ -1406,8 +1413,11 @@ export function liveMoveAnimationDuration(
     case 254: return 99; // Stockpile 205..303 / 207..305 (after a Peck body).
     case 192: return 112; // Zap Cannon 84..195 / 80..191.
     // Double Team 71..300 (first-body lab run, activation 70): row -1. Opponent attacker 78..307 (S10A sides: activation 77, same
-    // 230 rows; tools/integration/fixtures/s10a-live/double-team-opponent-*.json).
-    case 104: return 230;
+    // 230 rows; tools/integration/fixtures/s10a-live/double-team-opponent-*.json). tmr136 (ISSUES #166): + 9 rows (ages 230..238 = the
+    // General_StatsChange's rel 69..77: the field after the banner, until the ROM's next instruction on rel 77), so the following
+    // message's first glyph lands on rel 78 as on the ROM (docs/tmr136-timing-remainders.md). The swap composite frames the ROM body
+    // (LIVE_SUBSTITUTE_SWAP_BODY_FRAMING 159 rows) and is unchanged.
+    case 104: return 230 + LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS;
     // Feather Dance: activation..script end (79..246 / 83..250); the controller's stat banner and messages that follow are
     // queue commands (prep7 s2.2). The reducer is relative to the printer, +44 at the activation frame.
     case 297: return 168;

@@ -6,7 +6,7 @@ import {
 import {
   battleResolutionCommandDuration, battleResolutionFieldBeforeCommand,
 } from "../src/engine/battleResolutionPresentationRender.ts";
-import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
+import { LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS, liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
 import { statsChangeParams, statsChangeSpan } from "../src/animation/statsChange.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 import { scanRoute } from "../tools/integration/sc106RouteScan.ts";
@@ -130,18 +130,21 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + 4 * SA125_STATUS_ANIMATION_ROWS.CONFUSION! + 2 * SA125_STATUS_ANIMATION_ROWS.PRZ! - (SA125_BASE_STATUS_FRAMES - 2));
   });
 
-  it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 230-row window owns the banner; the message is unmoved", () => {
+  it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 239-row window (tmr136) owns the banner; the message moves + 9", () => {
     const route = scanRoute(10, Array(8).fill(2), "on");
     const dt = route.anchors.filter((x) => x.prevEvent === "animation:MOVE_ANIMATION:104,0,0,0,0,0");
     expect(dt).toHaveLength(6);
     expect(dt.every((x) => x.statsChange === null && x.before?.type === "move-animation")).toBe(true);
-    expect(dt[0]!.following).toMatchObject({ type: "message", frame: 837, text: "YANMA’s evasiveness / rose!" });
-    expect(dt[0]!.following!.frame - dt[0]!.before!.frame).toBe(230);
+    // tmr136 (ISSUES #166): the window holds 9 more rows (rel 69..77), so the message's first glyph lands on rel 78 as on the ROM
+    // (the box changes on window age 239 in 12 / 12 dense direct-mGBA windows, tools/integration/fixtures/tmr136-live-receipt.json): + 9.
+    expect(dt[0]!.following).toMatchObject({ type: "message", frame: 846, text: "YANMA’s evasiveness / rose!" });
+    expect(dt[0]!.following!.frame - dt[0]!.before!.frame).toBe(239);
     // The opponent's Acid Armor (arg 40) in the same route does present: 3 x 90.
     expect(route.anchors.filter((x) => x.statsChange !== null).map((x) => x.statsChange!.frames)).toEqual([90, 90, 90]);
     // scf117: + 3 x 1 hold frame after the three Acid Armor commands.
     // iu120: + the opponent's live bodies (Barrier 112 x3, Headbutt 29 x2, Confusion 93 x2); Double Team 104 is masked (P 0, T 0).
-    expect(route.frames).toBe(4600 + 270 + 3 + iu([112, O, 3], [29, O, 2], [93, O, 2], [104, P, 6]));
+    // tmr136: + 9 tail rows per live Double Team body (6 bodies).
+    expect(route.frames).toBe(4600 + 270 + 3 + iu([112, O, 3], [29, O, 2], [93, O, 2], [104, P, 6]) + 6 * LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS);
   });
 });
 
@@ -188,7 +191,8 @@ describe("the Substitute and Double Team rules on production segments", () => {
     const fields = [segment.field, withDoll(segment.field, "opponent"), withDoll(segment.field, "player"),
       withDoll(withDoll(segment.field, "player"), "opponent")];
     // The user shown as the doll: the Substitute swap composite (liveSubstituteSwap.ts) around the same body; never null.
-    expect(fields.map((f) => liveMoveAnimationDuration(body.animation!, f))).toEqual([230, 230, 244, 244]);
+    // tmr136: the doll-free window is 230 + 9 tail rows (rel 69..77); the swap composite frames the ROM body and is unchanged.
+    expect(fields.map((f) => liveMoveAnimationDuration(body.animation!, f))).toEqual([239, 239, 244, 244]);
     for (const f of fields) {
       const commands = project(segment, f);
       expect(commands.some(evasion)).toBe(false);

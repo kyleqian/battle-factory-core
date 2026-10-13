@@ -85,7 +85,7 @@ describe("doll90: Substitute-doll residual cells", () => {
       expect(liveSubstituteSwapApplies(self(104, a), attackerDoll(a))).toBe(true);
       expect(liveMoveSubstituteDollDeclines(self(104, a), attackerDoll(a))).toBe(false);
       expect(liveMoveAnimationDuration(self(104, a), attackerDoll(a))).toBe(a === 0 ? 244 : 240);
-      expect(liveMoveAnimationDuration(self(104, a), field(false, false))).toBe(230);
+      expect(liveMoveAnimationDuration(self(104, a), field(false, false))).toBe(239); // tmr136: 230 + 9 tail rows (the composite is unchanged)
       const bodyStart = a === 0 ? 43 : 41;
       const view = (age: number) => liveSubstituteSwapView({ healthboxes: {}, message: null, visibility: {}, waitCursor: null,
         field: attackerDoll(a), effect: { type: "move", request: self(104, a), age } } as never);
