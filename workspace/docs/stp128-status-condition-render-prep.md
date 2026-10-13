@@ -29,11 +29,11 @@ sprite audit's swept seeds are staged. Its second "pair" is the two paths, after
   `probe-sha256.json`). Per row the probe records: the screen sha and changed bbox; every enabled OAM entry; the created sprites (x / y /
   x2 / y2 / invisible / priority / subpriority / animNum / animCmdIndex / tile / data[0..7]); the battler's x / y / x2 / y2 / invisible;
   gBattle_BG1/2_X/Y; DISPCNT / BG1CNT / BG2CNT / BLDCNT / BLDALPHA; OBJ palette bank 7; the anim-script pointer / sAnimFramesToWait.
-- **Reducer** pins every source row of all 34 windows (`tests/stp128StatusConditionReducer.test.ts`, 36 / 36). The pinned fields are
+- **Reducer** pins every source row of all 34 windows (`tests/stp128StatusConditionReducer.test.ts`, 37 / 37; the extra test pins the spans to sta123's controller rows). The pinned fields are
   gAnimScriptActive, the controller hold up to the release row, the battler's x2 / y2 / invisible, the monbg BG shadows,
   BLDCNT / BLDALPHA, and every sprite field above. FRZ's ice-cube palette rotation is pinned on exactly the rows where OBJ palette RAM
   changes. The test also pins `statusConditionTarget` (geometry from the battler sprite) on every window.
-- **Perturbation experiments.** Each single-constant mutation fails the pin test; the restored file passes 36 / 36:
+- **Perturbation experiments.** Each single-constant mutation fails the pin test (run on 36 tests, before the span test existed); the restored file passes:
 
   | mutation | failing tests |
   |---|---|
@@ -172,7 +172,7 @@ Per animation:
 
 ```
 sh tools/integration/stp128Run.sh <fresh-out-dir-inside-the-repo>     # archive copy of HEAD, ~2 min, ends "stp128Run: ALL SAME"
-npx vitest run tests/stp128StatusConditionReducer.test.ts              # 36 / 36
+npx vitest run tests/stp128StatusConditionReducer.test.ts              # 37 / 37
 python3 tools/integration/stp128Stage.py <dir>/scenarios               # 14 scenarios (8 sta123 reused + 6 Golbat pairs)
 sh tools/integration/stp128Job.sh <out-dir> <scenario.json> [<dump-dir>]   # one direct-mGBA probe job (stp128Probe.py)
 python3 tools/integration/stp128Receipt.py <probe-dir> tools/integration/fixtures/stp128/scenario-index.json <rom-windows.json>
@@ -188,9 +188,24 @@ The runner does the following:
 4. Runs the reducer test in the copy.
 5. Runs the comparator and the 7 controls. Their `compare.json` must equal the committed one.
 
-It deletes the ~1 GB frame dumps at the end (`STP128_KEEP_RAW=1` keeps them).
+It deletes the ~1 GB frame dumps at the end (`STP128_KEEP_RAW=1` keeps them). The out dir still holds ~1.6 GB (the archive copy and its
+git repo); delete it after the run.
 
 Fixtures (`tools/integration/fixtures/stp128/`): `scenarios/` (14), `scenario-index.json`, `probe-sha256.json`, `rom-windows.json`
 (34 windows, every row expanded, ~1 MB), `compare.json`.
 
 Perturbation recipe: copy the module aside, change one constant (section 1 table), run the test (it fails), restore the copy.
+
+## 5. Gates (on `203cc868b`)
+
+| gate | result |
+|---|---|
+| `sh tools/integration/stp128Run.sh .integration/validation/stp128-run2` | **ALL SAME** (14 / 14 r1 == r2, 28 / 28 sha256, rom-windows SAME, test 37 / 37, 34 / 34 windows 0 px, compare.json SAME) |
+| `npm test -- tests/stp128StatusConditionReducer.test.ts tests/animation/factoryAnimationInventory.test.ts tests/animation/animationBoundaryRatchet.test.ts` | 3 files / 47 tests passed (run before the span test was added) |
+| `npm run typecheck` | green |
+| `npm run test:smoke` | 448 / 448 |
+| full `npm test`, two shards (`npm test -- --shard=1/2`, then `--shard=2/2`) | **1,640 files / 13,569 tests passed** (44 / 223 skipped), 0 failed |
+| `npm run build` | green |
+| `git diff --check cfe4e26ca HEAD` | clean |
+
+29 files changed, all added; no tracked file is modified.
