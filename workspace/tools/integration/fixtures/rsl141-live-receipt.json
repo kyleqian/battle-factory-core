@@ -1,0 +1,65 @@
+{
+ "step": "rsl141 (docs/rsl141-ordinary-row-rest-live.md): rst139's ordinary-row idle rest landed on 74cbec2b8 (src 11e979d67)",
+ "base": "the landed tree with tools/integration/fixtures/rst139/rst139-rest.diff reversed (== 74cbec2b8's src, 5 / 5 files byte-identical)",
+ "rom": {
+  "probes": "probes r1 == r2: 8 / 8",
+  "probeSha256": "16 / 16 == fixtures/rst139/probe-sha256.json",
+  "romReceipt": "== fixtures/rst139/rom-receipt.json",
+  "productionBase": {
+   "rows": 22746,
+   "zeroPxRows": 7063,
+   "x2Prediction": "22746 / 22746"
+  },
+  "productionFinal": {
+   "rows": 22746,
+   "zeroPxRows": 22746,
+   "x2Prediction": "22746 / 22746"
+  },
+  "receipts": "cmp-base == fixtures/rst139/production-compare-base.json, cmp-final == fixtures/rst139/production-compare-patched.json (byte-identical)"
+ },
+ "routes": {
+  "ok": true,
+  "battles": 9,
+  "frames": 182602,
+  "atStake": 4349,
+  "changed": 4349,
+  "unexpectedChanges": 0,
+  "atStakeUnchanged": 0,
+  "sameRowSequence": true,
+  "receipt": "fixtures/rsl141/routes-delta.json"
+ },
+ "census": {
+  "seeds": "0..999",
+  "moveRecords": 27402,
+  "keyMismatches": 0,
+  "frameChanges": 0,
+  "liveFrameChanges": 0,
+  "declineChanges": 0,
+  "battleMismatches": 0,
+  "segmentMismatches": 0,
+  "statusChanges": 0,
+  "allShardDigestsSame": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "jsonlByteIdentical": "20 / 20",
+  "totals": {
+   "base.live": 27186,
+   "base.commands": 27367,
+   "base.liveFrames": 4146057,
+   "base.frames": 4162691,
+   "final.live": 27186,
+   "final.commands": 27367,
+   "final.liveFrames": 4146057,
+   "final.frames": 4162691,
+   "base.statusAnimationCommands": 8063,
+   "base.battleFrames": 15926929,
+   "final.statusAnimationCommands": 8063,
+   "final.battleFrames": 15926929
+  },
+  "receipt": "fixtures/rsl141/census-delta.json"
+ },
+ "rerun": "sh tools/integration/rsl141Run.sh <fresh-out-dir-inside-the-repo> [all|rom|routes|census]"
+}

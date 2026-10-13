@@ -67,8 +67,12 @@ if want routes; then
 fi
 
 if want census; then
+  # sad133Census.sh tars <tree>/tools, and species-audit-6 holds a file name tar cannot restore: census a filtered copy of this tree too
+  mkdir -p "$OUT/final/workspace"
+  tar -cf - --exclude ./node_modules --exclude ./reference --exclude ./artifacts --exclude ./.integration --exclude ./dist --exclude ./.git \
+    --exclude $XL . | tar -x -C "$OUT/final/workspace"
   sh tools/integration/sad133Census.sh "$B" "$OUT/census-base" > /dev/null 2>&1 &
-  sh tools/integration/sad133Census.sh "$W" "$OUT/census-final" > /dev/null 2>&1 &
+  sh tools/integration/sad133Census.sh "$OUT/final/workspace" "$OUT/census-final" > /dev/null 2>&1 &
   wait
   python3 tools/integration/sar131CensusDelta.py "$OUT/census-base" "$OUT/census-final" "$OUT/census-delta.json" | head -2
   check "$RX/census-delta.json" "$OUT/census-delta.json" "census-delta.json"
