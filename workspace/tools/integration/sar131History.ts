@@ -14,4 +14,3 @@ export function sar131HistoryBefore(scen: any, before: number, baseRule = false)
   for (const [r, f] of events.sort((x, y) => x[0] - y[0])) if (r < before) h = f(h);
   return h;
 }
-
