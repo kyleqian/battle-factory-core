@@ -2209,21 +2209,29 @@ export const adjustsetdamageOpcodeHandler: BattleScriptOpcodeHandler<BattleScrip
 };
 
 /**
- * Cmd_attackanimation (battle_script_commands.c:1743-1799). MOVE_TRANSFORM/
- * MOVE_SUBSTITUTE never reach BattleScript_EffectHit's own hit chain (each
- * has its own dedicated effect script), so the HITMARKER_NO_ANIMATIONS
- * branch's move-id exclusion is structurally always true here -- only the
- * hitMarker bit itself gates it. animTurn/animTargetsHit are the already
+ * Cmd_attackanimation (battle_script_commands.c:1743-1799). The
+ * HITMARKER_NO_ANIMATIONS (Scene OFF) branch exempts MOVE_TRANSFORM and
+ * MOVE_SUBSTITUTE (:1748): their own effect scripts (BattleScript_EffectTransform,
+ * BattleScript_SubstituteAnim) emit the controller move animation in both scenes
+ * (ISSUES #153, sub157). animTurn/animTargetsHit are the already
  * source-shaped gBattleScripting counters (battleScriptSetByte.ts).
  */
+/** include/constants/moves.h: the two moves Cmd_attackanimation animates even under HITMARKER_NO_ANIMATIONS (:1748). */
+const ATTACKANIMATION_MOVE_TRANSFORM = 144;
+const ATTACKANIMATION_MOVE_SUBSTITUTE = 164;
+
 function createAttackanimationOpcodeHandler(
   isControllerIdle: BattleScriptControllerIdlePort<BattleScriptRulesContext>,
 ): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
     if (!isControllerIdle(context)) return controllerBusyBlock(context);
     const rulesContext = context.state.rulesContext;
+    const move = rulesContext.currentMove;
 
-    if ((rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0) {
+    if (
+      (rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+      && move !== ATTACKANIMATION_MOVE_TRANSFORM && move !== ATTACKANIMATION_MOVE_SUBSTITUTE
+    ) {
       const pausex20 = resolveBattleScriptLabel(context.program, "BattleScript_Pausex20");
       if (!pausex20) throw new Error("attackanimation: committed program has no label BattleScript_Pausex20");
       const attacker = requireBattlerRole(rulesContext, "attacker");
@@ -2248,7 +2256,6 @@ function createAttackanimationOpcodeHandler(
       );
     }
 
-    const move = rulesContext.currentMove;
     const moveTarget = resolveBattleScriptMoveTarget(move);
     const isSpreadMove =
       (moveTarget & (BATTLE_SCRIPT_MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY | MOVE_TARGET_DEPENDS)) !== 0;
