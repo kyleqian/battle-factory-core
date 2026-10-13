@@ -1,0 +1,23 @@
+{
+ "tree": "git archive 043ae6dfe (production == final src; sag130 test + the gate-generalised sa125 anchor test; the unmodified 0befc345b sa125 test also passes on it: 11 / 11) in its own one-commit git repo, reference/ linked, artifacts/ copied; two shards, 4 workers",
+ "command": "npm test -- --maxWorkers=4",
+ "totals": [
+  "Test Files  1 failed | 821 passed | 22 skipped (844)",
+  "Tests  1 failed | 7095 passed | 119 skipped (7215)",
+  "Test Files  822 passed | 22 skipped (844)",
+  "Tests  6498 passed | 104 skipped (6602)"
+ ],
+ "pinCount": 1,
+ "files": {
+  "tests/appDifferential.test.ts": 1
+ },
+ "pins": [
+  {
+   "file": "tests/appDifferential.test.ts",
+   "test": "app-differential CLI guards > reports a missing trace before creating a worktree",
+   "assertion": "AssertionError: expected 'fatal: Needed a single revision\\napp-\u2026' to contain 'trace not found'",
+   "class": "ENVIRONMENT, not a pin: the archive copy is a one-commit git repo (the CLI guard tests need history); passes in the worktree",
+   "sag130": "env"
+  }
+ ]
+}
