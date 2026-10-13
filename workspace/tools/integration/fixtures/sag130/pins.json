@@ -1,5 +1,5 @@
 {
- "tree": "git archive 043ae6dfe (production == final src; sag130 test + the gate-generalised sa125 anchor test; the unmodified 0befc345b sa125 test also passes on it: 11 / 11) in its own one-commit git repo, reference/ linked, artifacts/ copied; two shards, 4 workers",
+ "tree": "git archive 043ae6dfe (production src 37034456c: the wiring with the first HP-bar callback, later replaced by |from - to| in ce6fb1d5c; sag130 test + the gate-generalised sa125 anchor test; the unmodified 0befc345b sa125 test also passes on it: 11 / 11) in its own one-commit git repo, reference/ linked, artifacts/ copied; two shards in parallel, 4 workers each. The final-code full suite (docs/sag130-status-se-gate-live.md \u00a76) re-confirms 0 moved pins",
  "command": "npm test -- --maxWorkers=4",
  "totals": [
   "Test Files  1 failed | 821 passed | 22 skipped (844)",
