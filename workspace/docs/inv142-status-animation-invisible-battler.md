@@ -36,6 +36,8 @@ still hidden by the charge turn.
    the pre-fix receipt), and the patched copy's `patch -p1` fails because the change is already applied. Retarget the runner's "today"
    leg to `production-patched.json` and drop the patch step in the landing commit.
 
+**Landed (inl144, branch worker/integration-20261013-094050):** the diff is applied in `src/engine/battleScene.ts` (the diff paths are workspace-relative: `git apply --directory=workspace`). `tests/inv142StatusAnimationInvisible.test.ts` now has 5 tests (the two "today" tests flipped to the patched truth; the diff-applies test dropped; revert experiment: the 2 flipped tests fail, the 3 receipt tests pass). `inv142Run.sh` now compares this tree to `production-patched.json` and reverse-applies the diff into a pre-fix `base` copy (for `production-today.json`, the route delta and the census base). `sh tools/integration/inv142Run.sh <out> --census`: ALL SAME, including census-delta (pixels only).
+
 ## 3. Files (all new)
 
 - `tools/integration/inv142Exposure.ts`, `inv142ExposureSummary.py`: the exposure census and its table.

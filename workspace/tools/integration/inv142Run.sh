@@ -7,13 +7,13 @@
 # 2. inv142Exposure.ts seeds 0..999 (10 shards) + inv142ExposureSummary.py == exposure.json;
 # 3. inv142Probes.sh: 4 scenarios x Scene ON x {r1 (window dump), r2}: r1 == r2, == probe-sha256.json; inv142Rom.py r1 == rom-r1.json,
 #    r2 == r1;
-# 4. inv142NpzToRaw.py + inv142Compare.ts in this tree == production-today.json; a patched copy (<out>/patched: src, tools, configs copied,
-#    node_modules / reference symlinked, fixtures/inv142/inv142-invisible.diff applied with patch -p1): == production-patched.json, the
-#    controls age+1 / wrong-side == controls.json;
-# 5. sar131RouteRender.ts 18:0:on in this tree and the patched copy, inv142RouteDelta.py == routes-delta.json;
-# 6. (--census) sa125LiveShareCensus.ts 0..999, 10 shards per tree (this tree / patched copy), sar131CensusDelta.py == census-delta.json;
+# 4. inv142NpzToRaw.py + inv142Compare.ts in this tree (the change is LANDED) == production-patched.json, the controls age+1 / wrong-side
+#    == controls.json; a pre-fix base copy (<out>/base: src, tools, configs copied, node_modules / reference symlinked,
+#    fixtures/inv142/inv142-invisible.diff reverse-applied with patch -R -p1): == production-today.json (the pre-fix receipt);
+# 5. sar131RouteRender.ts 18:0:on in the pre-fix base copy and this tree, inv142RouteDelta.py == routes-delta.json;
+# 6. (--census) sa125LiveShareCensus.ts 0..999, 10 shards per tree (pre-fix base copy / this tree), sar131CensusDelta.py == census-delta.json;
 # 7. inv142Receipt.py == fixtures/inv142/receipt.json (the census section only with --census).
-# Raw frame dumps and the patched copy are deleted at the end (INV142_KEEP=1 keeps them).
+# Raw frame dumps and the base copy are deleted at the end (INV142_KEEP=1 keeps them).
 set -u
 OUT="$1"; CENSUS="${2:-}"
 [ -e "$OUT" ] && { echo "refusing: $OUT exists"; exit 2; }
@@ -45,22 +45,22 @@ python3 tools/integration/inv142Rom.py "$OUT/rom/probes/r1" "$OUT/ev/rom-r1.json
 python3 tools/integration/inv142Rom.py "$OUT/rom/probes/r2" "$OUT/rom-r2.json" > /dev/null
 check "$F/rom-r1.json" "$OUT/ev/rom-r1.json" "rom-r1.json"
 check "$OUT/ev/rom-r1.json" "$OUT/rom-r2.json" "rom r2 == r1"
-# 4. production today + the patched copy
+# 4. production (landed) + the pre-fix base copy
 "$PY" tools/integration/inv142NpzToRaw.py "$OUT/rom/dump" "$OUT/ev/rom-r1.json" "$OUT/raw" > /dev/null
-P="$OUT/patched"; mkdir -p "$P"
+P="$OUT/base"; mkdir -p "$P"
 cp -R src tools package.json tsconfig.json "$P/"
 ln -s "$W/node_modules" "$P/node_modules"
 [ -e "$W/reference" ] && ln -s "$W/reference" "$P/reference"
-(cd "$P" && patch -p1 --quiet < "$W/$F/inv142-invisible.diff") || { echo "patch failed"; exit 1; }
-$NODE tools/integration/inv142Compare.ts "$OUT/ev/rom-r1.json" "$OUT/raw" "$OUT/ev/production-today.json" | tail -1 &
-(cd "$P" && $NODE tools/integration/inv142Compare.ts "$OUT/ev/rom-r1.json" "$OUT/raw" "$OUT/ev/production-patched.json" | tail -1) &
+(cd "$P" && patch -R -p1 --quiet < "$W/$F/inv142-invisible.diff") || { echo "reverse patch failed"; exit 1; }
+(cd "$P" && $NODE tools/integration/inv142Compare.ts "$OUT/ev/rom-r1.json" "$OUT/raw" "$OUT/ev/production-today.json" | tail -1) &
+$NODE tools/integration/inv142Compare.ts "$OUT/ev/rom-r1.json" "$OUT/raw" "$OUT/ev/production-patched.json" | tail -1 &
 for n in age+1 wrong-side; do
-  (cd "$P" && $NODE tools/integration/inv142Compare.ts --neg=$n "$OUT/ev/rom-r1.json" "$OUT/raw" "$OUT/neg-$n.json" > "$OUT/neg-$n.log" 2>&1) &
+  ($NODE tools/integration/inv142Compare.ts --neg=$n "$OUT/ev/rom-r1.json" "$OUT/raw" "$OUT/neg-$n.json" > "$OUT/neg-$n.log" 2>&1) &
 done
 # 5. routes
 mkdir -p "$OUT/routes"
-$NODE tools/integration/sar131RouteRender.ts --routes=18:0:on --out="$OUT/routes/base-18-0-on.json" > "$OUT/routes/base.log" 2>&1 &
-(cd "$P" && $NODE tools/integration/sar131RouteRender.ts --routes=18:0:on --out="$OUT/routes/patched-18-0-on.json" > "$OUT/routes/patched.log" 2>&1) &
+(cd "$P" && $NODE tools/integration/sar131RouteRender.ts --routes=18:0:on --out="$OUT/routes/base-18-0-on.json" > "$OUT/routes/base.log" 2>&1) &
+$NODE tools/integration/sar131RouteRender.ts --routes=18:0:on --out="$OUT/routes/patched-18-0-on.json" > "$OUT/routes/patched.log" 2>&1 &
 wait
 check "$F/production-today.json" "$OUT/ev/production-today.json" "production-today.json"
 check "$F/production-patched.json" "$OUT/ev/production-patched.json" "production-patched.json"
@@ -78,7 +78,7 @@ check "$F/routes-delta.json" "$OUT/ev/routes-delta.json" "routes-delta.json"
 if [ "$CENSUS" = "--census" ]; then
   mkdir -p "$OUT/census-base" "$OUT/census-patched"
   for t in base patched; do
-    if [ "$t" = base ]; then TREE="$W"; else TREE="$P"; fi
+    if [ "$t" = base ]; then TREE="$P"; else TREE="$W"; fi
     for i in 0 1 2 3 4 5 6 7 8 9; do a=$((i * 100)); b=$((a + 99)); C="$OUT/census-$t"
       (cd "$TREE" && $NODE tools/integration/sa125LiveShareCensus.ts \
         --seeds=$a..$b --index-from=$a --out="$C/r$i.json" --commands="$C/r$i.jsonl" --stats="$C/s$i.jsonl" > "$C/r$i.log" 2>&1) &
