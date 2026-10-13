@@ -138,7 +138,7 @@ describe("Substitute doll on ordinary routes", () => {
     expect(run.state.battleCommandPresentation?.field.player.substituteDoll).toBeUndefined();
   }, 240000);
 
-  it("BLISSEY 60/28: the doll stays up to the next prompts (Scene ON from the body, Scene OFF from the prompt = STATUS2_SUBSTITUTE)", () => {
+  it("BLISSEY 60/28: the doll stays up to the next prompts (both scenes from the body = STATUS2_SUBSTITUTE)", () => {
     for (const scene of ["on", "off"] as const) {
       const { run, seen } = trace(60, 28, [3, 0], scene);
       const prompt = run.state.battleCommandPresentation!;
@@ -148,8 +148,9 @@ describe("Substitute doll on ordinary routes", () => {
       const status2 = run.state.battle!.rules.rulesContext.battlers[0]!.status2;
       expect(status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE).not.toBe(0);
       expect(seen[0]).toBe("00@prompt");
-      // Scene ON: set inside the first resolution (after the body); Scene OFF has no body request, so from the next prompt.
-      expect(seen[1]).toMatch(scene === "on" ? /^10@1:\d+$/ : /^10@prompt$/);
+      // Both scenes: set inside the first resolution (after the body). sub157 (#153): Scene OFF plays the Substitute body too
+      // (Cmd_attackanimation's exemption); before, it had no body request and showed the doll only from the next prompt.
+      expect(seen[1]).toMatch(/^10@1:\d+$/);
     }
   }, 240000);
 });
