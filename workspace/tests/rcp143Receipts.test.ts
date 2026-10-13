@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import r1 from "../tools/probe/receipts/rcp143-r1-thrash-lockin-off.json" with { type: "json" };
 import r2 from "../tools/probe/receipts/rcp143-r2-covet-stickyhold-off.json" with { type: "json" };
+import r3 from "../tools/probe/receipts/rcp143-r3-getmovetarget-133-off.json" with { type: "json" };
 import r4 from "../tools/probe/receipts/rcp143-r4-focuspunch-prepass.json" with { type: "json" };
 
 /**
@@ -15,7 +16,7 @@ type RomDraw = Readonly<{ frame: number; caller: string; callerFunction: string;
 
 const LCG = (value: number) => (Math.imul(value, 0x41c64e6d) + 0x6073) >>> 0;
 
-function expectProvenance(receipt: typeof r1 | typeof r2) {
+function expectProvenance(receipt: typeof r1 | typeof r2 | typeof r3) {
   expect(receipt.schema).toBe("rcp143-engine-fix-receipt/v1");
   expect(receipt.oracleProfile).toBe("battle-scene-off");
   expect(receipt.byteIdenticalAcrossRuns).toBe(true);
@@ -35,7 +36,7 @@ function expectProvenance(receipt: typeof r1 | typeof r2) {
 }
 
 /** The ROM's turn-execution draws in the port's vocabulary must be what the fixed kernel emits. */
-function expectPredictionIsRom(receipt: typeof r1 | typeof r2) {
+function expectPredictionIsRom(receipt: typeof r1 | typeof r2 | typeof r3) {
   expect(receipt.predictedPostFix.turns.map((turn) => turn.draws.map((draw: Draw) => draw.rngBefore)))
     .toEqual(receipt.rom.turns.map((turn) => turn.draws.map((draw) => draw.rngBefore)));
   expect(receipt.predictedPostFix.turns.map((turn) => turn.activeHpAtTurnEnd))
@@ -139,6 +140,57 @@ describe("rcp143 R2 -- Covet into Sticky Hold returns onto seteffectwithchance (
 
   it("pins the predicted post-fix port sequence to the ROM's own", () => {
     expectPredictionIsRom(r2);
+  });
+});
+
+describe("rcp143 R3 -- HandleAction_UseMove:133 reached in singles without Mimic/Transform (ISSUES #140 remainder)", () => {
+  const getMoveTargetTurns = r3.rom.turns.filter((turn) => turn.draws.some((draw) => draw.callerFunction === "GetMoveTarget"));
+
+  it("is a reproducible, cross-checked stock-ROM receipt with legal sets", () => {
+    expectProvenance(r3);
+    // SNORLAX (Solar Beam by TM22) slower than PARASECT (Spore, level 27 level-up).
+    expect(r3.parties.player[0]).toMatchObject({ species: 143, moves: [76, 34, 156, 173] });
+    expect(r3.parties.opponent[0]).toMatchObject({ species: 47, moves: [147, 147, 147, 147] });
+    expect(r3.parties.player[0].stats.speed).toBeLessThan(r3.parties.opponent[0].stats.speed);
+  });
+
+  it("spends GetMoveTarget draws when the foe's Spore cancels the charging Solar Beam before Snorlax acts", () => {
+    expect(getMoveTargetTurns.map((turn) => turn.turn)).toEqual([4, 8]);
+    for (const turn of getMoveTargetTurns) {
+      const callers = turn.draws.map((draw) => draw.callerFunction);
+      // Parasect's Spore (accuracy, sleep duration) lands first, then Snorlax's prologue loop.
+      expect(callers.slice(0, 2)).toEqual(["Cmd_accuracycheck", "SetMoveEffect"]);
+      const loop = turn.draws.filter((draw) => draw.callerFunction === "GetMoveTarget");
+      for (const draw of loop) {
+        expect(draw).toMatchObject({ attacker: 0, currentMove: 76 });
+      }
+    }
+    // Geometric(1/2) with two battlers: 1 draw, then 2.
+    expect(getMoveTargetTurns.map((turn) => turn.draws.filter((draw) => draw.callerFunction === "GetMoveTarget").length))
+      .toEqual([1, 2]);
+    const texts = r3.rom.messages.map((message) => message.text);
+    expect(texts).toContain("SNORLAX took\nin sunlight!");
+    expect(texts.filter((text) => text === "SNORLAX\nfell asleep!")).toHaveLength(3);
+  });
+
+  it("records the port at HEAD skipping the :133 draw loop (expected FAIL today)", () => {
+    expect(r3.comparison.verdictToday).toBe("FAIL");
+    expect(r3.comparison.firstDivergence).toMatchObject({
+      turn: 4,
+      index: 2,
+      rom: { reason: "GetMoveTarget(MOVE_TARGET_SELECTED)" },
+      port: { reason: "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)" },
+    });
+    // Identical through turn 3 and the first two draws of turn 4.
+    expect(r3.port.turns.slice(0, 3)).toEqual(r3.predictedPostFix.turns.slice(0, 3).map((turn) => ({
+      turn: turn.turn,
+      draws: turn.draws,
+      activeHpAtTurnEnd: turn.activeHpAtTurnEnd,
+    })));
+  });
+
+  it("pins the predicted post-fix port sequence to the ROM's own", () => {
+    expectPredictionIsRom(r3);
   });
 });
 

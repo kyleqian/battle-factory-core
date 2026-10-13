@@ -31,10 +31,14 @@ export const ROM_CALLER_TO_PORT_REASON: Readonly<Record<string, string>> = Objec
   Cmd_seteffectwithchance: "seteffectwithchance",
   AtkCanceler_UnableToUseMove: "attackcanceler:unable-to-use-move",
   BattleTurnPassed: "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
-  // SetMoveEffect owns two draw sites here: MOVE_EFFECT_THRASH's (Random() & 1) + 2
-  // (battle_script_commands.c:2859) and MOVE_EFFECT_CONFUSION's (Random() % 4) + 2.
+  // GetMoveTarget's MOVE_TARGET_SELECTED do/while (battle_util.c:119-122), the issue140 reason.
+  GetMoveTarget: "GetMoveTarget(MOVE_TARGET_SELECTED)",
+  // SetMoveEffect owns three draw sites here: MOVE_EFFECT_THRASH's (Random() & 1) + 2
+  // (battle_script_commands.c:2859), MOVE_EFFECT_CONFUSION's (Random() % 4) + 2 and
+  // the sleep arm's (Random() & 3) + 2.
   "SetMoveEffect+0x113c": "SetMoveEffect Thrash-family lock-in duration ((Random() & 1) + 2)",
   "SetMoveEffect+0x92e": "SetMoveEffect confusion duration ((Random() % 4) + 2)",
+  "SetMoveEffect+0x6ba": "SetMoveEffect sleep duration ((Random() & 3) + 2)",
 });
 
 const ABILITY_INTIMIDATE = 22;

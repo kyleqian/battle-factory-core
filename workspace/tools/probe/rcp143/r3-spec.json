@@ -1,0 +1,27 @@
+{
+ "schema": "rcp143-engine-fix-receipt/v1",
+ "receipt": "R3",
+ "issue": 140,
+ "part": "battle_util.c:133 remainder",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp143-random-callers.py",
+ "builder": "tools/probe/build-rcp143-receipt.py",
+ "verify": "tools/probe/verify-rcp143.ts",
+ "card": "tools/probe/rcp143/r3-solarbeam-snorlax-parasect-spore-off.json",
+ "title": "HandleAction_UseMove:133 is reachable in singles WITHOUT Mimic/Transform: a locked battler (no selection -> gChosenMoveByBattler == MOVE_NONE) whose lock a faster foe cancels mid-turn runs GetMoveTarget's MOVE_TARGET_SELECTED draw loop",
+ "scenario": "Player SNORLAX (Solar Beam/Body Slam/Rest/Snore, Brave, Speed IV 0 -> 31) vs faster PARASECT (Spore x4, Jolly, 255 Speed EVs -> 90). Spore sleeps Snorlax; on the turn it wakes it charges Solar Beam (STATUS2_MULTIPLETURNS, no selection next turn); next turn Parasect's Spore lands first and SetMoveEffect's sleep arm calls CancelMultiTurnMoves(Snorlax); Snorlax's HandleAction_UseMove then misses the :106 locked arm and the Encore arms and takes :133 because moves[gCurrMovePos] (SOLAR_BEAM) != gChosenMoveByBattler (MOVE_NONE).",
+ "attribution": "As R1: sRandCount per-frame pass + single-step LR attribution; the GetMoveTarget draws are attributed to caller GetMoveTarget (+0x18e) with gBattleMainFunc RunTurnActionsFunctions, attacker 0, gCurrentMove MOVE_SOLAR_BEAM.",
+ "sourceUnderTest": {
+  "branch133": "reference/pokeemerald/src/battle_util.c:131-135 (else if moves[gCurrMovePos] != gChosenMoveByBattler -> GetMoveTarget(gCurrentMove, NO_TARGET_OVERRIDE))",
+  "lockedArm": "reference/pokeemerald/src/battle_util.c:106-109 (STATUS2_MULTIPLETURNS | STATUS2_RECHARGE -> gLockedMoves, no GetMoveTarget) -- precedes :133",
+  "chosenMoveReset": "reference/pokeemerald/src/battle_main.c:4001-4005 BattleTurnPassed resets gChosenMoveByBattler[i] = MOVE_NONE every turn; written again only by selection (:4194 Encore, :4399 chosen slot) -- a battler locked at selection time keeps MOVE_NONE",
+  "lockCancelBySleep": "reference/pokeemerald/src/battle_script_commands.c:2296 (SetMoveEffect sleep arm: CancelMultiTurnMoves(gEffectBattler)); same shape for freeze :2392 and Spite-to-0-PP :8357",
+  "getMoveTarget": "reference/pokeemerald/src/battle_util.c:6052+ GetMoveTarget MOVE_TARGET_SELECTED do/while Random() % gBattlersCount (see issue140 receipt)"
+ },
+ "portSitesAtHead": {
+  "actionMoveId": "src/engine/factoryBattleScriptFullTurnDecision.ts:2367 actionMoveId reads the live slot; no selection-time gChosenMoveByBattler bank exists, so :133 cannot be detected",
+  "drawActionMoveTarget": "src/engine/factoryBattleScriptFullTurnDecision.ts:1574-1603 drawActionMoveTarget (the modeled :105/:117/:128 draw loop via drawBattleScriptSelectedMoveTarget) and its caller at :1654",
+  "mimicTransformPremise": "ISSUES #140 says the branch needs Mimic/Transform; in singles neither can reach it (see doc)"
+ },
+ "fixShape": "Bank gChosenMoveByBattler per battler at selection (the chosen slot's move, or the Encore move per battle_main.c:4194), reset it to MOVE_NONE at BattleTurnPassed, leave it MOVE_NONE for battlers that skip selection (locked/recharging), and at action time after the noValidMoves / locked / Encore arms compare moves[chosenMovePosition] with the bank: on mismatch run drawActionMoveTarget (same do/while) before the move script."
+}
