@@ -88,6 +88,23 @@ describe("fps147 General_FocusPunchSetUp reducer vs dense ROM windows", () => {
     }
   });
 
+  it("comparator receipts: 0 px on every scored row of every window (both arms); every control fails every window", () => {
+    const read = (name: string) => JSON.parse(readFileSync(`${FIX}/${name}`, "utf8"));
+    const main = read("compare.json");
+    expect(main.summary).toMatchObject({ neg: null, windows: windows.length, reducerZeroPxWindows: windows.length,
+      productionEndureZeroPxWindows: windows.length });
+    for (const [key, w] of windows) {
+      expect(main.result[key]).toMatchObject({ side: w.side, reducerPx: 0, animationRowsPx: 0, productionEndurePx: 0,
+        scoredRows: { first: FOCUS_PUNCH_SETUP_ROWS.emptyBoxDisplay, last: FOCUS_PUNCH_SETUP_ROWS.focusFirstGlyphDisplay - 1, count: 127 },
+        afterRows: { px: 0, productionPx: 0 } });
+    }
+    for (const neg of ["age+1", "wrong-side", "no-shake", "no-blend"]) {
+      const control = read(`compare-${neg}.json`);
+      expect(control.summary).toMatchObject({ neg, windows: windows.length, reducerZeroPxWindows: 0 });
+      for (const [key] of windows) expect(control.result[key].animationRowsPx).toBeGreaterThan(0);
+    }
+  });
+
   it("is unwired: no production module imports it", () => {
     const hits: string[] = [];
     const walk = (dir: string) => {

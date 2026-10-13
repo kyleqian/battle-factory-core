@@ -1,0 +1,612 @@
+{
+ "schema": "fps147-compare/v1",
+ "summary": {
+  "neg": "age+1",
+  "windows": 6,
+  "reducerZeroPxWindows": 0,
+  "productionEndureZeroPxWindows": null,
+  "perRowDigest": "ec6fdee0221ff1ab"
+ },
+ "result": {
+  "o-aggron": {
+   "side": "opponent",
+   "species": {
+    "player": "JOLTEON",
+    "opponent": "AGGRON"
+   },
+   "R": 44,
+   "attackerCoord": {
+    "x": 176,
+    "y": 40
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 8
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 101853,
+   "animationRowsPx": 101819,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 638,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     4,
+     16,
+     0
+    ],
+    [
+     5,
+     22,
+     0
+    ],
+    [
+     6,
+     18,
+     0
+    ],
+    [
+     7,
+     120,
+     0
+    ],
+    [
+     8,
+     109,
+     0
+    ],
+    [
+     9,
+     69,
+     0
+    ],
+    [
+     10,
+     77,
+     0
+    ],
+    [
+     11,
+     121,
+     0
+    ],
+    [
+     12,
+     82,
+     0
+    ],
+    [
+     13,
+     181,
+     0
+    ],
+    [
+     14,
+     176,
+     0
+    ],
+    [
+     15,
+     136,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "a3e2f374f86b1697"
+  },
+  "o-golem": {
+   "side": "opponent",
+   "species": {
+    "player": "JOLTEON",
+    "opponent": "GOLEM"
+   },
+   "R": 44,
+   "attackerCoord": {
+    "x": 176,
+    "y": 40
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 13
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 84046,
+   "animationRowsPx": 84012,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 632,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     4,
+     16,
+     0
+    ],
+    [
+     5,
+     22,
+     0
+    ],
+    [
+     6,
+     18,
+     0
+    ],
+    [
+     7,
+     120,
+     0
+    ],
+    [
+     8,
+     109,
+     0
+    ],
+    [
+     9,
+     69,
+     0
+    ],
+    [
+     10,
+     77,
+     0
+    ],
+    [
+     11,
+     121,
+     0
+    ],
+    [
+     12,
+     82,
+     0
+    ],
+    [
+     13,
+     181,
+     0
+    ],
+    [
+     14,
+     176,
+     0
+    ],
+    [
+     15,
+     136,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "06b3980f46325a00"
+  },
+  "o-registeel": {
+   "side": "opponent",
+   "species": {
+    "player": "JOLTEON",
+    "opponent": "REGISTEEL"
+   },
+   "R": 44,
+   "attackerCoord": {
+    "x": 176,
+    "y": 40
+   },
+   "productionCorner": {
+    "x": 144,
+    "y": 11
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 87474,
+   "animationRowsPx": 87440,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 638,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     4,
+     16,
+     0
+    ],
+    [
+     5,
+     22,
+     0
+    ],
+    [
+     6,
+     18,
+     0
+    ],
+    [
+     7,
+     120,
+     0
+    ],
+    [
+     8,
+     109,
+     0
+    ],
+    [
+     9,
+     69,
+     0
+    ],
+    [
+     10,
+     77,
+     0
+    ],
+    [
+     11,
+     121,
+     0
+    ],
+    [
+     12,
+     82,
+     0
+    ],
+    [
+     13,
+     181,
+     0
+    ],
+    [
+     14,
+     176,
+     0
+    ],
+    [
+     15,
+     136,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "f556ffc19738f2c9"
+  },
+  "p-breloom": {
+   "side": "player",
+   "species": {
+    "player": "BRELOOM",
+    "opponent": "JOLTEON"
+   },
+   "R": 76,
+   "attackerCoord": {
+    "x": 72,
+    "y": 80
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 52
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 73883,
+   "animationRowsPx": 73857,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 908,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     4,
+     7,
+     0
+    ],
+    [
+     5,
+     15,
+     0
+    ],
+    [
+     6,
+     13,
+     0
+    ],
+    [
+     7,
+     114,
+     0
+    ],
+    [
+     8,
+     107,
+     0
+    ],
+    [
+     9,
+     67,
+     0
+    ],
+    [
+     10,
+     69,
+     0
+    ],
+    [
+     11,
+     114,
+     0
+    ],
+    [
+     12,
+     76,
+     0
+    ],
+    [
+     13,
+     171,
+     0
+    ],
+    [
+     14,
+     171,
+     0
+    ],
+    [
+     15,
+     132,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "659e4504642aa074"
+  },
+  "p-electabuzz": {
+   "side": "player",
+   "species": {
+    "player": "ELECTABUZZ",
+    "opponent": "JOLTEON"
+   },
+   "R": 108,
+   "attackerCoord": {
+    "x": 72,
+    "y": 80
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 56
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 60545,
+   "animationRowsPx": 60519,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 770,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     4,
+     7,
+     0
+    ],
+    [
+     5,
+     15,
+     0
+    ],
+    [
+     6,
+     13,
+     0
+    ],
+    [
+     7,
+     114,
+     0
+    ],
+    [
+     8,
+     107,
+     0
+    ],
+    [
+     9,
+     67,
+     0
+    ],
+    [
+     10,
+     69,
+     0
+    ],
+    [
+     11,
+     114,
+     0
+    ],
+    [
+     12,
+     76,
+     0
+    ],
+    [
+     13,
+     171,
+     0
+    ],
+    [
+     14,
+     171,
+     0
+    ],
+    [
+     15,
+     132,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "ce0d1408089c2e88"
+  },
+  "p-machamp": {
+   "side": "player",
+   "species": {
+    "player": "MACHAMP",
+    "opponent": "JOLTEON"
+   },
+   "R": 44,
+   "attackerCoord": {
+    "x": 72,
+    "y": 80
+   },
+   "productionCorner": {
+    "x": 40,
+    "y": 52
+   },
+   "idleRest": {
+    "player": 0,
+    "opponent": 0
+   },
+   "scoredRows": {
+    "first": -4,
+    "last": 122,
+    "count": 127
+   },
+   "reducerPx": 79855,
+   "animationRowsPx": 79829,
+   "productionEndurePx": null,
+   "afterRows": {
+    "rels": [
+     123,
+     128
+    ],
+    "px": 0,
+    "messageBandPx": 948,
+    "productionPx": null
+   },
+   "badRows": [
+    [
+     4,
+     7,
+     0
+    ],
+    [
+     5,
+     15,
+     0
+    ],
+    [
+     6,
+     13,
+     0
+    ],
+    [
+     7,
+     114,
+     0
+    ],
+    [
+     8,
+     107,
+     0
+    ],
+    [
+     9,
+     67,
+     0
+    ],
+    [
+     10,
+     69,
+     0
+    ],
+    [
+     11,
+     114,
+     0
+    ],
+    [
+     12,
+     76,
+     0
+    ],
+    [
+     13,
+     171,
+     0
+    ],
+    [
+     14,
+     171,
+     0
+    ],
+    [
+     15,
+     132,
+     0
+    ]
+   ],
+   "reducerFrameDigest": "71dc144e5c640453"
+  }
+ }
+}
