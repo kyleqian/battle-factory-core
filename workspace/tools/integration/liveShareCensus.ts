@@ -21,7 +21,7 @@ import {
 import { createBattleResolutionPresentationRenderView, liveMoveRandom2PlanContextAt } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { createPresentationRngSession } from "../../src/engine/presentationRngHost.ts";
 import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePresentationRng.ts";
-import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
+import { generalAnimationRenderView, renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveHiddenSides } from "../../src/engine/liveMoveAnimation.ts";
 import { liveSubstituteSwapView } from "../../src/engine/liveSubstituteSwap.ts";
 import { substituteFadeRenderView } from "../../src/engine/liveSubstituteFade.ts";
@@ -69,6 +69,7 @@ interface BattleRecord { battle: number; seed: number; streak: number; frames: n
   stalledAt?: string }
 
 const commands: CommandRecord[] = [];
+const generalAnimations: { battle: number; animation: string; side: "player" | "opponent"; frames: number; drawnFrames: number }[] = [];
 const battles: BattleRecord[] = [];
 const sanity = { sampledLiveFrames: 0, renderedOk: 0, renderThrows: [] as string[] };
 let liveFrameCounter = 0;
@@ -84,13 +85,26 @@ function playBattle(battle: number, seed: number, streak: number): void {
   // core.ts tick's presentation seam (after the logical frame): the default-seed Random2 session, a fresh one per battle (each
   // battle is the session's first), feeding the faithful-random adapters exactly as createInitialState / render do.
   let rng = createPresentationRngSession();
-  let frame = 0, ended = false, turns = 0, commandKey = "", current: CommandRecord | null = null;
+  let frame = 0, ended = false, turns = 0, commandKey = "", current: CommandRecord | null = null, generalKey = "";
   const slotUses = [0, 0, 0, 0];
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const observe = () => {
     const r = state.battleResolutionPresentation;
     if (r?.lifecycle.phase !== "presenting") return;
     const command = r.segments[r.segmentIndex]!.commands[r.commandIndex];
+    // fpp150: general animations (B_ANIM_FOCUS_PUNCH_SETUP) are counted apart, outside `commands` (digests unchanged).
+    if (command?.type === "general-animation") {
+      const key = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
+      const view = createBattleResolutionPresentationRenderView(r, rng.host);
+      if (key !== generalKey) {
+        generalKey = key;
+        generalAnimations.push({ battle, animation: command.animation, side: command.battler === 0 ? "player" : "opponent", frames: 0, drawnFrames: 0 });
+      }
+      const rec = generalAnimations.at(-1)!;
+      rec.frames++;
+      if (generalAnimationRenderView(view) !== null) rec.drawnFrames++;
+      return;
+    }
     if (command?.type !== "move-animation" && command?.type !== "substitute-fade") return;
     const key = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
     const view = createBattleResolutionPresentationRenderView(r, rng.host);
@@ -301,6 +315,11 @@ const report = {
   // dive70: the battle records without the presented-frame count (end, turns, seed, streak): equal whenever only body LENGTHS change
   battleDigestExcludingFrames: createHash("sha256").update(JSON.stringify(battles.map(({ frames: _frames, ...rest }) => rest))).digest("hex"),
   battleFrames: battles.map((b) => b.frames),
+  // fpp150: general-animation commands (counted apart from `commands`): per battle, presented / drawn frames.
+  generalAnimations: {
+    commands: generalAnimations.length, frames: sum(generalAnimations, (g) => g.frames), drawnFrames: sum(generalAnimations, (g) => g.drawnFrames),
+    records: generalAnimations,
+  },
   commandDigest: createHash("sha256").update(JSON.stringify(commands)).digest("hex"),
 };
 const text = JSON.stringify(report, null, 1) + "\n";
