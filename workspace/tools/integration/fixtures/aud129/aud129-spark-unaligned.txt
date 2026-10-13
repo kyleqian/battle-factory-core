@@ -1,0 +1,9 @@
+pb-aud129-iso2-opp-100-209-101-c0  SPARK      opponent -              live=1 rows=126 exact=6   px=1241608 r1==r2=1 entry=1241608 lend=1
+pb-aud129-iso2-opp-100-209-143-c0  SPARK      opponent -              live=1 rows=126 exact=6   px=1235783 r1==r2=1 entry=1235783 lend=1
+pb-aud129-iso2-opp-100-209-213-c0  SPARK      opponent -              live=1 rows=126 exact=6   px=1255722 r1==r2=1 entry=1255722 lend=1
+pb-aud129-iso2-ply-100-209-101-c0  SPARK      player   -              live=1 rows=126 exact=8   px=1254086 r1==r2=1 entry=1254086 lend=1
+pb-aud129-iso2-ply-100-209-143-c0  SPARK      player   -              live=1 rows=126 exact=9   px=1219150 r1==r2=1 entry=1219150 lend=1
+pb-aud129-iso2-ply-100-209-213-c0  SPARK      player   -              live=1 rows=126 exact=9   px=1259014 r1==r2=1 entry=1259014 lend=1
+pb-aud129-wide-100-209-101-129-c0  SPARK      player   -              live=1 rows=126 exact=8   px=1254086 r1==r2=1 entry=1254086 lend=1
+pb-aud129-wide-101-129-100-209-c1  SPARK      opponent -              live=1 rows=126 exact=6   px=1241608 r1==r2=1 entry=1241608 lend=1
+TOTAL all            windows=16 live=16 live-0px=8 r1==r2=16 lend==ROM=16

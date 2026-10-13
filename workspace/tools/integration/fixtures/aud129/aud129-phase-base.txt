@@ -1,0 +1,129 @@
+pb-aud129-flag-opp-143-42-5-s11-c0       MEGA_PUNCH  player   first use1  romBody=159 rows=159 px=287402  residual=71,141..156 PHASE
+pb-aud129-flag-opp-143-42-5-s11-c2       MEGA_PUNCH  player   later use2+ romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-flag-ply-143-42-5-s11-c0       MEGA_PUNCH  opponent first use1  romBody=160 rows=160 px=17984   residual=71 PHASE
+pb-aud129-flag-ply-143-42-5-s11-c2       MEGA_PUNCH  opponent later use2+ romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-iso-opp-143-42-5-c0            HARDEN      player   first use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-opp-143-42-5-c1            MEGA_PUNCH  opponent later use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-iso-opp-143-42-5-c2            HARDEN      player   later use2+ romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-opp-345-143-5-c0           MEGA_PUNCH  opponent first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-iso-opp-345-143-5-c1           HARDEN      player   later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-opp-345-143-5-c2           HARDEN      player   later use2+ romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-opp-42-143-5-c0            MEGA_PUNCH  opponent first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-iso-opp-42-143-5-c1            HARDEN      player   later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-opp-42-143-5-c2            HARDEN      player   later use2+ romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-opp-42-95-5-c0             MEGA_PUNCH  opponent first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-iso-opp-42-95-5-c1             HARDEN      player   later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-opp-42-95-5-c2             HARDEN      player   later use2+ romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-ply-143-42-5-c0            HARDEN      opponent first use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-ply-143-42-5-c1            MEGA_PUNCH  player   later use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-iso-ply-143-42-5-c2            HARDEN      opponent later use2+ romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-ply-345-143-5-c0           MEGA_PUNCH  player   first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-iso-ply-345-143-5-c1           HARDEN      opponent later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-ply-345-143-5-c2           HARDEN      opponent later use2+ romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-ply-42-143-5-c0            MEGA_PUNCH  player   first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-iso-ply-42-143-5-c1            HARDEN      opponent later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-ply-42-143-5-c2            HARDEN      opponent later use2+ romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-ply-42-95-5-c0             MEGA_PUNCH  player   first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-iso-ply-42-95-5-c1             HARDEN      opponent later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso-ply-42-95-5-c2             HARDEN      opponent later use2+ romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-opp-100-209-101-c0        SPARK       opponent first use1  romBody=126 rows=115 px=0       residual=- OK
+pb-aud129-iso2-opp-100-209-101-c1        HARDEN      player   later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-opp-100-209-143-c0        SPARK       opponent first use1  romBody=126 rows=115 px=0       residual=- OK
+pb-aud129-iso2-opp-100-209-143-c1        HARDEN      player   later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-opp-100-209-213-c0        SPARK       opponent first use1  romBody=126 rows=115 px=0       residual=- OK
+pb-aud129-iso2-opp-100-209-213-c1        HARDEN      player   later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-opp-109-108-143-c0        SMOKESCREEN opponent first use1  romBody=124 rows=124 px=61004   residual=49..88 PHASE
+pb-aud129-iso2-opp-109-108-143-c1        HARDEN      player   later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-opp-109-108-95-c0         SMOKESCREEN opponent first use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-iso2-opp-109-108-95-c1         HARDEN      player   later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-opp-110-108-169-c0        HARDEN      player   first use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-opp-110-108-169-c1        SMOKESCREEN opponent later use1  romBody=124 rows=124 px=74436   residual=49..88 PHASE
+pb-aud129-iso2-ply-100-209-101-c0        SPARK       player   first use1  romBody=126 rows=115 px=0       residual=- OK
+pb-aud129-iso2-ply-100-209-101-c1        HARDEN      opponent later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-ply-100-209-143-c0        SPARK       player   first use1  romBody=126 rows=115 px=0       residual=- OK
+pb-aud129-iso2-ply-100-209-143-c1        HARDEN      opponent later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-ply-100-209-213-c0        SPARK       player   first use1  romBody=126 rows=115 px=0       residual=- OK
+pb-aud129-iso2-ply-100-209-213-c1        HARDEN      opponent later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-ply-109-108-143-c0        SMOKESCREEN player   first use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-iso2-ply-109-108-143-c1        HARDEN      opponent later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-ply-109-108-95-c0         SMOKESCREEN player   first use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-iso2-ply-109-108-95-c1         HARDEN      opponent later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-ply-110-108-169-c0        HARDEN      opponent first use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-iso2-ply-110-108-169-c1        SMOKESCREEN player   later use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-ordl-opp-42-135-fs-c1          HARDEN      opponent later use1  romBody=102 rows=101 px=0       residual=- OK
+pb-aud129-ordl-opp-42-135-fs-c2          TAUNT       player   later use1  romBody=135 rows=125 px=0       residual=- OK
+pb-aud129-ordl-opp-42-135-fs-c3          STRUGGLE    opponent later use1  romBody=112 rows=112 px=0       residual=- OK
+pb-aud129-ordl-opp-42-135-fs-c4          TAUNT       player   later use2+ romBody=135 rows=125 px=0       residual=- OK
+pb-aud129-ordl-ply-345-310-254-c1        STOCKPILE   opponent later use1  romBody=99  rows=99  px=0       residual=- OK
+pb-aud129-ordl-ply-345-310-254-c3        STOCKPILE   opponent later use2+ romBody=99  rows=99  px=0       residual=- OK
+pb-aud129-phase-crunch-opp-s0-c0         CRUNCH      opponent first use1  romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-opp-s0-c2         CRUNCH      opponent later use2+ romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-opp-s1-c0         CRUNCH      opponent first use1  romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-opp-s1-c2         CRUNCH      opponent later use2+ romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-opp-s2-c0         CRUNCH      opponent first use1  romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-opp-s2-c2         CRUNCH      opponent later use2+ romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-opp-s3-c0         CRUNCH      opponent first use1  romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-ply-s0-c0         CRUNCH      player   first use1  romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-ply-s1-c0         CRUNCH      player   first use1  romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-ply-s2-c0         CRUNCH      player   first use1  romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-crunch-ply-s2-c2         CRUNCH      player   later use2+ romBody=141 rows=141 px=290096  residual=123..138 PHASE
+pb-aud129-phase-crunch-ply-s3-c0         CRUNCH      player   first use1  romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-phase-mega-punch-opp-s1-c0     MEGA_PUNCH  opponent first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-phase-mega-punch-opp-s2-c0     MEGA_PUNCH  opponent first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-phase-mega-punch-opp-s3-c0     MEGA_PUNCH  opponent first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-phase-mega-punch-ply-s0-c0     MEGA_PUNCH  player   first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-phase-mega-punch-ply-s1-c0     MEGA_PUNCH  player   first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-phase-mega-punch-ply-s2-c0     MEGA_PUNCH  player   first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-phase-mega-punch-ply-s3-c0     MEGA_PUNCH  player   first use1  romBody=160 rows=160 px=0       residual=- OK
+pb-aud129-phase-smokescreen-opp-s0-c1    SMOKESCREEN opponent later use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-phase-smokescreen-opp-s0-c3    SMOKESCREEN opponent later use2+ romBody=125 rows=125 px=0       residual=- OK
+pb-aud129-phase-smokescreen-opp-s1-c1    SMOKESCREEN opponent later use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-phase-smokescreen-opp-s1-c3    SMOKESCREEN opponent later use2+ romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-phase-smokescreen-opp-s2-c1    SMOKESCREEN opponent later use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-phase-smokescreen-opp-s2-c3    SMOKESCREEN opponent later use2+ romBody=125 rows=125 px=0       residual=- OK
+pb-aud129-phase-smokescreen-opp-s3-c1    SMOKESCREEN opponent later use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-phase-smokescreen-opp-s3-c3    SMOKESCREEN opponent later use2+ romBody=125 rows=125 px=0       residual=- OK
+pb-aud129-phase-smokescreen-ply-s0-c1    SMOKESCREEN player   later use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-phase-smokescreen-ply-s0-c3    SMOKESCREEN player   later use2+ romBody=125 rows=125 px=0       residual=- OK
+pb-aud129-phase-smokescreen-ply-s1-c1    SMOKESCREEN player   later use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-phase-smokescreen-ply-s1-c3    SMOKESCREEN player   later use2+ romBody=125 rows=125 px=0       residual=- OK
+pb-aud129-phase-smokescreen-ply-s2-c1    SMOKESCREEN player   later use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-phase-smokescreen-ply-s2-c3    SMOKESCREEN player   later use2+ romBody=125 rows=125 px=0       residual=- OK
+pb-aud129-phase-smokescreen-ply-s3-c1    SMOKESCREEN player   later use1  romBody=124 rows=124 px=83292   residual=49..88 PHASE
+pb-aud129-phase-smokescreen-ply-s3-c3    SMOKESCREEN player   later use2+ romBody=125 rows=125 px=0       residual=- OK
+pb-aud129-wide-100-209-101-129-c0        SPARK       player   first use1  romBody=126 rows=115 px=0       residual=- OK
+pb-aud129-wide-100-209-101-129-c1        SWIFT       opponent later use1  romBody=80  rows=80  px=0       residual=- OK
+pb-aud129-wide-101-129-100-209-c0        SWIFT       player   first use1  romBody=78  rows=78  px=0       residual=- OK
+pb-aud129-wide-101-129-100-209-c1        SPARK       opponent later use1  romBody=126 rows=115 px=0       residual=- OK
+pb-aud129-wide-109-108-169-103-c0        SCREECH     opponent first use1  romBody=63  rows=63  px=0       residual=- OK
+pb-aud129-wide-109-108-169-103-c1        SMOKESCREEN player   later use1  romBody=125 rows=125 px=0       residual=- OK
+pb-aud129-wide-169-103-109-108-c0        SCREECH     player   first use1  romBody=63  rows=63  px=0       residual=- OK
+pb-aud129-wide-169-103-109-108-c1        SMOKESCREEN opponent later use1  romBody=124 rows=124 px=74436   residual=49..88 PHASE
+pb-aud129-wide-302-163-334-242-c0        SLASH       player   first use1  romBody=46  rows=46  px=0       residual=- OK
+pb-aud129-wide-302-163-334-242-c1        CRUNCH      opponent later use1  romBody=142 rows=142 px=0       residual=- OK
+pb-aud129-wide-334-242-302-163-c0        CRUNCH      player   first use1  romBody=141 rows=141 px=284048  residual=123..138 PHASE
+pb-aud129-wide-334-242-302-163-c1        SLASH       opponent later use1  romBody=46  rows=46  px=0       residual=- OK
+TALLY CRUNCH      use1  romBody=141 windows=1
+TALLY CRUNCH      use1  romBody=142 windows=9
+TALLY CRUNCH      use2+ romBody=141 windows=1
+TALLY CRUNCH      use2+ romBody=142 windows=3
+TALLY HARDEN      use1  romBody=102 windows=21
+TALLY HARDEN      use2+ romBody=102 windows=8
+TALLY MEGA_PUNCH  use1  romBody=159 windows=1
+TALLY MEGA_PUNCH  use1  romBody=160 windows=16
+TALLY MEGA_PUNCH  use2+ romBody=160 windows=2
+TALLY SCREECH     use1  romBody=63  windows=2
+TALLY SLASH       use1  romBody=46  windows=2
+TALLY SMOKESCREEN use1  romBody=124 windows=15
+TALLY SMOKESCREEN use1  romBody=125 windows=1
+TALLY SMOKESCREEN use2+ romBody=124 windows=1
+TALLY SMOKESCREEN use2+ romBody=125 windows=7
+TALLY SPARK       use1  romBody=126 windows=8
+TALLY STOCKPILE   use1  romBody=99  windows=1
+TALLY STOCKPILE   use2+ romBody=99  windows=1
+TALLY STRUGGLE    use1  romBody=112 windows=1
+TALLY SWIFT       use1  romBody=78  windows=1
+TALLY SWIFT       use1  romBody=80  windows=1
+TALLY TAUNT       use1  romBody=135 windows=1
+TALLY TAUNT       use2+ romBody=135 windows=1
+VERDICTS OK=85 PHASE=20 OTHER=0
