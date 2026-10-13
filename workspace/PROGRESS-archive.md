@@ -1,3 +1,24 @@
+## 2026-10-13 — ret165: Factory parties turn Return into Frustration (ISSUES #165 FIXED; main/ts gameplay correction)
+
+- **State:** local master; production src changed by `cd99c8073` (helper + tests + attributed re-pins); ROM receipt `98f4f8a05`.
+  Full suite / build: see Notes. Census 0..999 99.34 % / 99.60 % live (27,075 / 27,256 commands), Return 84 -> **0**, Frustration 90 -> 154.
+- **Did:** `setMonMoveAvoidReturn` (battle_factory.c:913-919) in `createFactoryCorpusPartyMember`, the shared builder behind every
+  source call site (kernel parties both sides, generated / Brain opponents, swap rebuild, draft SUMMARY data); the opponent battle-style
+  hint (battle_factory.c:672) reads the raw set (`factoryFacilitySetMoveIds`). ROM (OFF labs, `tools/probe/ret165/`): 6 / 6 Return
+  carriers hold 218 in gBattleMons / both parties, friendship 0; TS == ROM for 12 / 12 members; FIGHT menu reads FRUSTRATION (PNG).
+  `tests/factoryReturnToFrustration.test.ts` (9). docs/ret165-return-to-frustration.md has the ripple table.
+- **Ripple (all attributed):** core-rs parity sweep (exactly the 11 Return sets; core-rs NOT edited — its `mon_construction.rs` lacks
+  the mapping), liveReturnAdapter routes 24/14 PIDGEOT 355 and 51/28 EXEGGUTOR 534 (now a live 229-row Frustration body). Census: 34
+  battles changed, each first diverging at its first Return command (player 20 / opponent 14 carriers), 0 unattributed.
+  Soak vanilla 0:20 20 / 20 OK, per-seed lines identical to soak-gates-20261012.
+- **Next:** #141 (rampage / Sticky Hold RNG draws), #140, #139 per ROADMAP S10A item 0; the other gameplay gates (full / winning /
+  winning-swap 0:60, fifth gate) were not run by this step. The live Return adapter stays (Metronome can call Return).
+- **Notes:** gates on the tested tree (`e0b518d9a` + the test-only type fix in the next commit): typecheck 0 errors, smoke 448,
+  full `npm test` (2 vitest shards) 1,655 files / 13,725 tests passed, 0 failed (44 files / 223 tests skipped), build OK. Draft SUMMARY
+  ROM capture not done (no cheap staged draft with a Return set); source-cited + Tier-1. Scratch: `.integration/validation/ret165-20261013/`.
+
+---
+
 ## 2026-10-13 — User scope update: all remaining Factory correctness work is authorized
 
 - **State:** scope/instructions checkpoint on local master; production src `65a45fcc` and the green final receipt on `c4d38e1f3`

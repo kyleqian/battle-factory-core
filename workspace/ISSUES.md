@@ -40,6 +40,8 @@ alignment), off121 (OFF `status` command), fix122 (Scene ON no-effect attackanim
 "went to sleep!" + waitmessage + the status icon gets no OFF pause (ROM att G+128, F_after G+163, HP bar G+166; off108 §1 "Open", off121 §1c);
 no-hit bodies whose next receipt is a sprite-visibility (298 census bodies) or a stat-stage-change without STATS_CHANGE (Curse-like paths)
 get no OFF pause (unmeasured); the charge-turn EMPTYSTRING3 print is a 24-frame message in production vs 2 ROM rows (off108 notes).
+(fpp150 fixed the Focus Punch pre-pass's EMPTYSTRING3 only; the charge-turn one needs a dense charge-turn card per scene and an anchor
+run like `tools/integration/fpp150Anchors.ts` -- docs/fpp150-focus-punch-prepass.md §4.)
 
 ## #161 — Dive attack: an extra lag frame at age 17 on poisoned player-diver routes (S10A, found 2026-10-10 by st76)
 
@@ -219,29 +221,14 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   a D4 candidate); the Substitute-swap composite still declines with a form shown; the latent front coords width (source 32 vs app 24,
   `battle_anim_mons.c:2253-2255`) for width-dependent moves is unexercised.
 
-## #139 — The `CheckFocusPunch_ClearVarsBeforeTurnStarts` pre-pass ("…is tightening its focus!" before ANY action) has no port site
+## #139 — remainder: Focus Punch pre-pass presentation edge routes (kernel + both scenes FIXED 2026-10-13, fpp150)
 
-**Found 2026-08-26** (turn-machinery audit §3 row 3.20 / Finding 2; supervisor-verified that
-`grep -rn focusPunchBattlerId src/` is empty). Source `battle_main.c:4906-4923`: after turn order
-is fixed and before `RunTurnActionsFunctions`, the engine walks `gBattleStruct->focusPunchBattlerId`
-in battler-index order and, for each battler with `gChosenMoveByBattler == MOVE_FOCUS_PUNCH` that
-is not asleep, not Truant-loafing and not `noValidMoves`, runs
-`BattleScriptExecute(BattleScript_FocusPunchSetUp)` (`printstring STRINGID_EMPTYSTRING3` /
-`waitmessage 1` / `playanimation B_ANIM_FOCUS_PUNCH_SETUP` / `printstring
-STRINGID_PKMNTIGHTENINGFOCUS` / `waitmessage B_WAIT_TIME_LONG` / `end2`). The same function's
-`TryClearRageAndFuryCutter` half is separately verdicted (Rage: 0 carriers). Port:
-`factoryBattleScriptFullTurnDecision.ts:3013-3030` goes straight from turn order to action 1;
-`battleScriptStatbuffchangeOpcode.ts:257-268` only registers the animation id.
-
-**Consequence:** message/event ORDER only (no RNG): the ROM shows the extra message box before
-either battler's action, even when the Focus Punch user is slower; every later message in the
-turn shifts by one box in the Scene-OFF captures. 11 of 882 rental entries carry Focus Punch.
-
-**Receipt recipe:** player slot 0 = a Focus Punch carrier (Speed 0), opponent = max-Speed mon with
-one harmless `MOVE_TARGET_SELECTED` attack ×4; turn 1 select Focus Punch and capture from the action
-menu through the first message box (ROM: "tightening its focus" first, then the opponent's faster
-move); control = the same fixture with another move selected. Fix shape: emit the pre-pass as its
-own end2 script event between turn-order fixing and action 1, in battler-index order.
+Landed (docs/fpp150-focus-punch-prepass.md): the kernel pre-pass (verify-rcp143-r4 PASS), the Scene OFF / ON timing (R4 anchors ==
+ROM) and the drawn general animation (fps147's 7 windows 0 px through production). Open: (a) a player VOLUNTARY SWITCH against an
+opponent Focus Punch presents `withSynthesizedSwitchRecallEvents`' recall receipts (sequences -2 / -1) BEFORE the pre-pass (kernel
+order is right; the null-handoff timing there is unmeasured); (b) unprobed rows: two Focus Punch users in one turn
+(`FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES` 7) and the 11-frame end2 -> action lead after action-1 prologues other than R4's
+StatDown (production's fixed confirm handoff shares that assumption). A dense card per case would settle both.
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 

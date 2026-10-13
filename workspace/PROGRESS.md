@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-13 — fpp150: #139 Focus Punch pre-pass — kernel + Scene OFF / ON timing + drawn general animation (main/ts)
+
+- **State:** local master, production src `d44b83144` (kernel) + `49c6c7c7b` (presentation / render). verify-rcp143-r4 **PASS**
+  (pin flipped). R4 anchors == ROM in both scenes (empty box 72; focus glyph 109 / 199; foe's glyph 215 / 305). fps147's 7 Scene ON
+  windows **0 px through the production render** (controls 0 / 7). Census 0..999 27,196 / 27,016 live (unchanged).
+- **Did:** the kernel runs BattleScript_FocusPunchSetUp before action 1 (index order; sleep / Truant guards; no RNG). The presentation
+  adds a `general-animation` command (124 frames; 3 behind a Substitute). Pre-pass prints: empty box = interpreter rows + 1
+  (ON 3 / OFF 37); focus print + 11-frame action lead. The handoff ends at stop-bounce-request. The render draws the fps147 reducer
+  (`generalAnimationRenderView`). x2 history zeroes the attacker. The census reports general animations apart.
+- **Ripple:** census: 36 battles frames-only (+20,848). All 36 attributed: alone == after, and == base with the pre-pass off.
+  100 general animations (opp 65 / player 35). Differential 641 / 641 byte-identical. Tests moved: rcp143 R4 pin, fps147 "unwired" pin.
+- **Next:** #139 remainder (voluntary-switch recall order; two-user / other-prologue leads unprobed). Charge-turn EMPTYSTRING3
+  (#167 sentence kept): needs a dense charge-turn card per scene + an anchor run like `fpp150Anchors.ts` (doc §4).
+- **Notes:** gates: see the docs commit (typecheck 0, smoke 448, full suite / build / soak there). core-rs has no pre-pass port (not edited).
+  Docs `docs/fpp150-focus-punch-prepass.md`; scratch `.integration/validation/fpp150/`.
+
+---
+
 ## 2026-10-13 — thr153: #141a THRASH / OUTRAGE / PETAL DANCE lock-in re-run RE-LANDED (ISSUES #141 FIXED; main/ts gameplay)
 
 - **State:** local master; F1 `0f9b5301e` re-applied (cherry-pick) + 8 attributed re-pins. verify-rcp143 R1 / R2 / R3 /
@@ -39,24 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   vanilla soak b2 t16 -> b4 t0). Optional ROM card for the 811 phazing route. Then #139 (reuses the F3 bank).
 - **Notes:** gates on `299f35e0e`: typecheck 0, full `npm test` (2 shards) 1,657 files / 13,747 tests passed, 0 failed
   (44 / 223 skipped), build OK; smoke 448 earlier. ISSUES #140 removed; #141 trimmed to #141a. Scratch: `.integration/validation/rng146/`.
-
----
-
-## 2026-10-13 — ret165: Factory parties turn Return into Frustration (ISSUES #165 FIXED; main/ts gameplay correction)
-
-- **State:** local master; production src changed by `cd99c8073` (helper + tests + attributed re-pins); ROM receipt `98f4f8a05`.
-  Full suite / build: see Notes. Census 0..999 99.34 % / 99.60 % live (27,075 / 27,256 commands), Return 84 -> **0**, Frustration 90 -> 154.
-- **Did:** `setMonMoveAvoidReturn` (battle_factory.c:913-919) in `createFactoryCorpusPartyMember`, the shared builder behind every
-  source call site (kernel parties both sides, generated / Brain opponents, swap rebuild, draft SUMMARY data); the opponent battle-style
-  hint (battle_factory.c:672) reads the raw set (`factoryFacilitySetMoveIds`). ROM (OFF labs, `tools/probe/ret165/`): 6 / 6 Return
-  carriers hold 218 in gBattleMons / both parties, friendship 0; TS == ROM for 12 / 12 members; FIGHT menu reads FRUSTRATION (PNG).
-  `tests/factoryReturnToFrustration.test.ts` (9). docs/ret165-return-to-frustration.md has the ripple table.
-- **Ripple (all attributed):** core-rs parity sweep (exactly the 11 Return sets; core-rs NOT edited — its `mon_construction.rs` lacks
-  the mapping), liveReturnAdapter routes 24/14 PIDGEOT 355 and 51/28 EXEGGUTOR 534 (now a live 229-row Frustration body). Census: 34
-  battles changed, each first diverging at its first Return command (player 20 / opponent 14 carriers), 0 unattributed.
-  Soak vanilla 0:20 20 / 20 OK, per-seed lines identical to soak-gates-20261012.
-- **Next:** #141 (rampage / Sticky Hold RNG draws), #140, #139 per ROADMAP S10A item 0; the other gameplay gates (full / winning /
-  winning-swap 0:60, fifth gate) were not run by this step. The live Return adapter stays (Metronome can call Return).
-- **Notes:** gates on the tested tree (`e0b518d9a` + the test-only type fix in the next commit): typecheck 0 errors, smoke 448,
-  full `npm test` (2 vitest shards) 1,655 files / 13,725 tests passed, 0 failed (44 files / 223 tests skipped), build OK. Draft SUMMARY
-  ROM capture not done (no cheap staged draft with a Return set); source-cited + Tier-1. Scratch: `.integration/validation/ret165-20261013/`.
