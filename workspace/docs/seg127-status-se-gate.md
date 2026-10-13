@@ -142,6 +142,9 @@ npm test -- tests/seg127StatusSeGate.test.ts
 - `npm test -- tests/seg127StatusSeGate.test.ts tests/animation/factoryAnimationInventory.test.ts`: 2 files / 16 tests passed;
   `npm run typecheck`: green; `npm run test:smoke`: 448 / 448 (first run caught the parity census flagging an `ABILITY_*`-spelled local
   constant in the new module: renamed `INFLICTED_BY_STRINGS`); `git diff --check`: clean; `git status`: no modified tracked file.
+- Full suite on `01e3749a3` (not required for new files only; run anyway): `npm test -- --shard=1/2` 820 files / 7,048 tests passed,
+  `--shard=2/2` 820 files / 6,492 tests passed = **1,640 files / 13,540 tests, 0 failed** (44 / 223 skipped; prior 1,639 / 13,532 + this
+  test's 8); `npm run build`: green.
 
 ## 0. Source prediction (written before probing)
 
