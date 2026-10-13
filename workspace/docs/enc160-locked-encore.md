@@ -10,7 +10,7 @@
 | rcp154 C1 / C1f / C2 / C2u; rcp143 R1 / R2 / R3 / R3-control; R4 (`verify-rcp143-r4.ts`) | all PASS |
 | ROM receipts | rebuilt from fresh Scene OFF runs, twice per card, byte-identical. Every ROM / evidence field equals audit aud159's receipt; only the card path, and so the probe-output sha, differ |
 | Census 0..999 (Scene ON, `ret88Census.sh`), base `sub157/census-base-on` @ `bbd9c6748` | **1 battle changed: 771**. Commands 27,261 → 27,207, all from 771 (99 → 45). Played / terminal / stalled / errors / renderThrows identical (1000 / 997 / 3 / 0 / 0); only shard 7's digest moved |
-| Soak vanilla 0:20 `--parallel 10` | see §3 |
+| Soak vanilla 0:20 `--parallel 10` | **20 / 20 OK** (0 crash / 0 hang, all budget). Every seed's endpoint (`b3 t16` / `b4 t0`, carry ≤ 7, depth ≤ 9) equals the base soak (`sub157/soak-base-lines.txt`) |
 | Tests | `tests/enc160Receipts.test.ts`, 11 tests. Without the guard, 3 fail (the hbenc / c2ice replays and the staged lock test) |
 
 ## 2. The fix
@@ -46,7 +46,7 @@ Tooling changes this needed (no gameplay effect):
   head, so the first hit is the first RNG divergence: pre-fix, the port paid an extra `GetMoveTarget` draw. The shift first
   shows at idx 10 (QUILAVA's AI choice, SWIFT → FURY SWIPES).
 - **0 unattributed battles.**
-- Soak vanilla 0:20 `--parallel 10`: SOAK_RESULT_PLACEHOLDER
+- Soak vanilla 0:20 `--parallel 10`: 20 / 20 OK, 0 seeds moved against the base soak.
 
 ## 4. Receipts and cards
 
