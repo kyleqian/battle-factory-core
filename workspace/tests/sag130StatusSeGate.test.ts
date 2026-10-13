@@ -103,9 +103,6 @@ function battleSegments(seed: number, scene: "on" | "off"): Seg[] {
   return out;
 }
 
-// Receipts the kernel emits by scene (HITMARKER_NO_ANIMATIONS): status animations and playanimation / attackanimation receipts
-// (Scene ON) vs the Scene OFF attack pause.
-const SCENE_ONLY_KINDS = new Set(["status-animation", "animation"]);
 const frames = (c: any) => (c.timing?.minimumFrames ?? 0) + (c.timing?.holdFrames ?? 0);
 const shape = (c: any) => `${c.type}:${c.type === "message" ? c.messageId ?? "" : ""}:${c.type === "move-animation" || c.type === "status" ? "" : frames(c)}`;
 const ANCHOR_TYPES = new Set(["status", "message", "hp", "stat", "status-icon"]);

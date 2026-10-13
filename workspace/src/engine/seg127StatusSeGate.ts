@@ -71,7 +71,7 @@ export function seg127StatusSeGateRowsForPath(
 /** The kernel event fields the event-level form reads (structurally a BattleScriptSemanticEventPayload subset). */
 export type Seg127GateEvent = Readonly<{
   kind: string;
-  battler?: number;
+  battler?: number | null;
   messageId?: string;
   songId?: number;
   animationId?: string;
@@ -105,7 +105,7 @@ export function seg127StatusSeGateFromEvents(
   const songId = events[se]!.songId ?? null;
   const between = events.slice(se + 1, index);
   const messageSinceSe = between.some((e) => e.kind === "message");
-  const hpDrainRows = between.reduce((n, e) => (e.kind === "hp-change" ? n + hpBarRows(e.from as number, e.to as number, e.battler!) : n), 0);
+  const hpDrainRows = between.reduce((n, e) => (e.kind === "hp-change" ? n + hpBarRows(e.from as number, e.to as number, e.battler as number) : n), 0);
   if (messageSinceSe) return { gate: 0, songId, path: null, hpDrainRows, messageSinceSe };
   const next = events.slice(index + 1).find((e) => e.kind === "message")?.messageId ?? null;
   const moveBeforeSe = events.slice(0, se).some((e) => e.kind === "animation" && e.animationId === "MOVE_ANIMATION");
