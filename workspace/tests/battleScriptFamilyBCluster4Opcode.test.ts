@@ -208,6 +208,19 @@ describe("Family-B Cluster 4 Thief/Covet and Knock Off", () => {
     // State-4's later quiet immunity pass writes battler 0's NONE ability.
     expect(result.rulesContext.lastUsedAbility).toBe(0);
     expect(messages(result)).toContain("STRINGID_PKMNSXMADEYINEFFECTIVE");
+    // BattleScriptPushCursor pushes seteffectwithchance itself (battle_util.c:966-969), so
+    // BattleScript_NoItemSteal's `return` re-runs it with the effect byte cleared: one wasted
+    // chance roll directly after the first (rcp143 R2).
+    const reasons = result.rng.ledger.map((entry) => entry.reason);
+    const chance = reasons.indexOf("seteffectwithchance");
+    expect(chance).toBeGreaterThan(-1);
+    expect(reasons.slice(chance)).toEqual(["seteffectwithchance", "seteffectwithchance"]);
+  });
+
+  it("Covet into Sticky Hold with no item to protect takes the ordinary single chance roll", () => {
+    const result = run("BattleScript_EffectThief", rules(MOVE_COVET, { ability: ABILITY_STICKY_HOLD, item: ITEM_NONE }));
+    expect(result.rng.ledger.filter((entry) => entry.reason === "seteffectwithchance")).toHaveLength(1);
+    expect(messages(result)).not.toContain("STRINGID_PKMNSXMADEYINEFFECTIVE");
   });
 
   it.each([

@@ -118,19 +118,17 @@ describe("rcp143 R2 -- Covet into Sticky Hold returns onto seteffectwithchance (
     }
   });
 
-  it("records the port at HEAD one draw short per Covet turn (expected FAIL today)", () => {
-    expect(r2.comparison.verdictToday).toBe("FAIL");
+  it("records the fixed port (rng146 F2) matching the ROM: two chance rolls per Covet turn", () => {
+    expect(r2.comparison.verdictToday).toBe("PASS");
     expect(r2.comparison.romDrawCounts).toEqual([10, 10, 10]);
-    expect(r2.comparison.portDrawCounts).toEqual([9, 9, 9]);
-    expect(r2.comparison.firstDivergence).toMatchObject({
-      turn: 1,
-      index: 4,
-      rom: { reason: "seteffectwithchance" },
-      port: { reason: "accuracycheck" },
-    });
-    // Turn-2 consequence: the port's Covet crits off the offset stream, the ROM's does not.
-    expect(r2.rom.turns[1].activeHpAtTurnEnd).toEqual([126, 104]);
-    expect(r2.port.turns[1].activeHpAtTurnEnd).toEqual([126, 68]);
+    expect(r2.comparison.portDrawCounts).toEqual([10, 10, 10]);
+    expect(r2.comparison.firstDivergence).toBeNull();
+    expect(r2.port.turns.map((turn) => turn.draws)).toEqual(r2.predictedPostFix.turns.map((turn) => turn.draws));
+    // Turn-2 consequence: the port's Covet no longer crits off an offset stream.
+    expect(r2.port.turns.map((turn) => turn.activeHpAtTurnEnd)).toEqual([[139, 141], [126, 104], [114, 70]]);
+    for (const turn of r2.port.turns) {
+      expect(turn.draws.map((draw) => draw.reason).slice(3, 5)).toEqual(["seteffectwithchance", "seteffectwithchance"]);
+    }
   });
 
   it("pins the predicted post-fix port sequence to the ROM's own", () => {

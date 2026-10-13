@@ -889,29 +889,34 @@
       "value": 6864
      },
      {
-      "reason": "accuracycheck",
+      "reason": "seteffectwithchance",
       "rngBefore": 449897005,
       "value": 27560
      },
      {
-      "reason": "critcalc",
+      "reason": "accuracycheck",
       "rngBefore": 1806197660,
       "value": 52148
      },
      {
-      "reason": "adjustnormaldamage",
+      "reason": "critcalc",
       "rngBefore": 3417592287,
       "value": 40499
      },
      {
-      "reason": "seteffectwithchance",
+      "reason": "adjustnormaldamage",
       "rngBefore": 2654154342,
       "value": 48338
      },
      {
-      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "reason": "seteffectwithchance",
       "rngBefore": 3167892961,
       "value": 16113
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1056038720,
+      "value": 27265
      }
     ],
     "activeHpAtTurnEnd": [
@@ -924,53 +929,58 @@
     "draws": [
      {
       "reason": "accuracycheck",
-      "rngBefore": 3152970951,
-      "value": 59885
-     },
-     {
-      "reason": "critcalc",
       "rngBefore": 3924658990,
       "value": 20000
      },
      {
-      "reason": "adjustnormaldamage",
+      "reason": "critcalc",
       "rngBefore": 1310762761,
       "value": 45250
      },
      {
-      "reason": "seteffectwithchance",
+      "reason": "adjustnormaldamage",
       "rngBefore": 2965519688,
       "value": 7952
      },
      {
-      "reason": "accuracycheck",
+      "reason": "seteffectwithchance",
       "rngBefore": 521168923,
       "value": 39318
      },
      {
-      "reason": "critcalc",
+      "reason": "seteffectwithchance",
       "rngBefore": 2576805362,
       "value": 56559
      },
      {
-      "reason": "adjustnormaldamage",
+      "reason": "accuracycheck",
       "rngBefore": 3706678397,
       "value": 43693
      },
      {
-      "reason": "seteffectwithchance",
+      "reason": "critcalc",
       "rngBefore": 2863507372,
       "value": 61455
      },
      {
-      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "reason": "adjustnormaldamage",
       "rngBefore": 4027526319,
       "value": 54381
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3563960566,
+      "value": 25943
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1700205873,
+      "value": 33647
      }
     ],
     "activeHpAtTurnEnd": [
      126,
-     68
+     104
     ]
    },
    {
@@ -978,68 +988,73 @@
     "draws": [
      {
       "reason": "accuracycheck",
-      "rngBefore": 757241125,
-      "value": 32969
-     },
-     {
-      "reason": "critcalc",
-      "rngBefore": 2160666420,
-      "value": 42447
-     },
-     {
-      "reason": "adjustnormaldamage",
       "rngBefore": 2781866391,
       "value": 62588
      },
      {
-      "reason": "seteffectwithchance",
+      "reason": "critcalc",
       "rngBefore": 4101822398,
       "value": 15832
      },
      {
-      "reason": "accuracycheck",
+      "reason": "adjustnormaldamage",
       "rngBefore": 1037574233,
       "value": 52407
      },
      {
-      "reason": "critcalc",
+      "reason": "seteffectwithchance",
       "rngBefore": 3434562648,
       "value": 13547
      },
      {
-      "reason": "adjustnormaldamage",
+      "reason": "seteffectwithchance",
       "rngBefore": 887835115,
       "value": 3958
      },
      {
-      "reason": "seteffectwithchance",
+      "reason": "accuracycheck",
       "rngBefore": 259421058,
       "value": 1325
      },
      {
-      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "reason": "critcalc",
       "rngBefore": 86846157,
       "value": 7892
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 517214140,
+      "value": 42110
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2759744383,
+      "value": 36072
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2364016518,
+      "value": 35002
      }
     ],
     "activeHpAtTurnEnd": [
-     112,
-     36
+     114,
+     70
     ]
    }
   ]
  },
  "comparison": {
-  "verdictToday": "FAIL",
+  "verdictToday": "PASS",
   "romDrawCounts": [
    10,
    10,
    10
   ],
   "portDrawCounts": [
-   9,
-   9,
-   9
+   10,
+   10,
+   10
   ],
   "romActiveHp": [
    [
@@ -1062,27 +1077,14 @@
    ],
    [
     126,
-    68
+    104
    ],
    [
-    112,
-    36
+    114,
+    70
    ]
   ],
-  "firstDivergence": {
-   "turn": 1,
-   "index": 4,
-   "rom": {
-    "reason": "seteffectwithchance",
-    "rngBefore": 449897005,
-    "value": 27560
-   },
-   "port": {
-    "reason": "accuracycheck",
-    "rngBefore": 449897005,
-    "value": 27560
-   }
-  }
+  "firstDivergence": null
  },
  "predictedPostFix": {
   "note": "The ROM's own turn-execution draws in the port's reason vocabulary: after the fix the kernel must emit exactly this (reason, rngBefore) sequence and these HPs.",

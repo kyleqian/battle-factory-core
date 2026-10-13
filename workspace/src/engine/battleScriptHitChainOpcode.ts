@@ -3155,9 +3155,13 @@ function applySetMoveEffect(
           target,
           targetState.ability,
         );
+        // BattleScriptPushCursor (battle_util.c:966-969) pushes the CURRENT
+        // instruction: BattleScript_NoItemSteal's `return` lands back on this
+        // seteffectwithchance, which re-runs with MOVE_EFFECT_BYTE already 0
+        // and spends one wasted `Random() % 100` (rcp143 R2).
         return transitionBattleScriptCommand(
           context,
-          Object.freeze({ kind: "call", programCounter }),
+          Object.freeze({ kind: "call-current", programCounter }),
           {
             rulesContext: revealedRules,
           },
