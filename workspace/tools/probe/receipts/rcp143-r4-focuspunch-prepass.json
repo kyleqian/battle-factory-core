@@ -24,6 +24,18 @@
   "focusPunchBattlerId": "grep -rn focusPunchBattlerId src/ is empty at HEAD"
  },
  "fixShape": "Between turn-order fixing and action 1 (factoryBattleScriptFullTurnDecision.ts, after :3197 / before :3199), walk battlers 0..1 in index order and, for each whose chosen move this turn is MOVE_FOCUS_PUNCH and who is not asleep, not Truant-loafing and not noValidMoves, run BattleScript_FocusPunchSetUp as its own end2 script (gBattlerAttacker = that battler) so its two message events and the FOCUS_PUNCH_SETUP playanimation precede action 1. No RNG: the ROM spends 0 Random() in the pre-pass.",
+ "serviceCrossCheck": {
+  "note": "The probe runs the stock ROM in-process with each profile's own bootstrap (oracle/bootstrap/factory.json for battle-scene-on, factory-battle-scene-off.json for battle-scene-off -- the same mapping oracle/server.py uses). The Focus Punch arm was also run through the live services (bin/oracle --profile <p> lab, captureFrames below); every service framebuffer sha256 equals the probe's rgbSha256 for that frame.",
+  "frames": [
+   76,
+   140,
+   198,
+   304,
+   766
+  ],
+  "battle-scene-on (:8012)": "all equal",
+  "battle-scene-off (:8014)": "all equal"
+ },
  "arms": [
   {
    "arm": "off-focus-punch",

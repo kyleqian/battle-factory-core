@@ -111,6 +111,9 @@ JOLTEON (Sand-Attack ×4, Speed 150; `MOVE_TARGET_SELECTED`, no damage). The con
 Drain. All four arms (OFF/ON × Focus Punch/control) were run twice fresh with a dense PNG every frame
 (1–766) and are byte-identical, including the per-frame RGB hashes. The OFF PNGs at frames 150 and 230
 and the ON PNG at frame 140 were read to confirm the text and the animation.
+The probe runs the ROM in-process with each profile's bootstrap. As a cross-check, the Focus Punch
+arm was rerun through the live `:8012` (ON) and `:8014` (OFF) services at frames 76, 140, 198, 304
+and 766, and every service framebuffer sha256 matched the probe's.
 
 | frame | Scene OFF (`:8014`) | Scene ON (`:8012` profile) |
 |---|---|---|
