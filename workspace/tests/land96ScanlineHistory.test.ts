@@ -144,13 +144,19 @@ describe("land96 Memento (262) / Extrasensory (326) later-body gates", () => {
     }
   });
 
-  it("Extrasensory: opponent later bodies are live; player later bodies still decline whatever the (known) history", () => {
+  it("Extrasensory: opponent later bodies are live; player later bodies (asl155) live on SHUCKLE, declining on the elevated CROBAT", () => {
     for (const n of ["xs-opp-nuzleaf-shuckle-xs-1", "xs-opp-nuzleaf-shuckle-xs-2", "xs-opp-nuzleaf-shuckle-psywave-1", "xs-opp-nuzleaf-shuckle-qa-1", "xs-pla-espeon-crobat-xs-0"]) {
       const r = call(live(n));
       expect(r.input.firstBody, n).toBeUndefined();
       expect(r.out, n).not.toBeNull();
     }
-    for (const n of ["xs-pla-nuzleaf-shuckle-xs-1", "xs-pla-nuzleaf-shuckle-xs-2", "xs-pla-nuzleaf-shuckle-psywave-1", "xs-pla-nuzleaf-shuckle-qa-0", "xs-pla-espeon-crobat-xs-1", "xs-pla-espeon-crobat-qa-0"]) {
+    // asl155 (D4 faithful timing, docs/asl155-astonish-extrasensory-live.md): a known history + a target whose first visible monbg line is >= 27
+    for (const n of ["xs-pla-nuzleaf-shuckle-xs-1", "xs-pla-nuzleaf-shuckle-xs-2", "xs-pla-nuzleaf-shuckle-psywave-1", "xs-pla-nuzleaf-shuckle-qa-0"]) {
+      const r = call(live(n));
+      expect(r.input.scanlineHistory, n).toBeDefined();
+      expect(r.out, n).not.toBeNull();
+    }
+    for (const n of ["xs-pla-espeon-crobat-xs-1", "xs-pla-espeon-crobat-qa-0"]) {
       const r = call(live(n));
       expect(r.input.scanlineHistory, n).toBeDefined();
       expect(r.out, n).toBeNull();

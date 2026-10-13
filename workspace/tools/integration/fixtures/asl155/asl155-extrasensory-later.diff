@@ -1,0 +1,179 @@
+diff --git a/src/animation/extrasensory.ts b/src/animation/extrasensory.ts
+index a884c6a5d..4b593b2b7 100644
+--- a/src/animation/extrasensory.ts
++++ b/src/animation/extrasensory.ts
+@@ -80,6 +80,11 @@ export interface ExtrasensoryLiveInputs {
+    * unelevated windows (opponent target 40 -> 8..72, player target 80 -> 48..112); the live provider passes the species elevation.
+    */
+   readonly targetYElevation?: number;
++  /**
++   * asl155 (D4 faithful timing): the source-fitted stage-2 data[1] 5 split row (lines <= 28 show the preceding row). Absent / true = the
++   * first-body phase; false = a player attacker's later body, whose dominant measured phase is S = 0 on that row (liveMoveTimingPolicy.ts 326).
++   */
++  readonly scanoutSplitRow?: boolean;
+ }
+ 
+ export interface ExtrasensoryTask {
+@@ -272,7 +277,9 @@ export function extrasensoryAtAge(age: number, input: Readonly<ExtrasensoryLiveI
+   // preceding bank while 29 onward consume the current bank.  This is keyed
+   // to live component state, not a battle tick; the opponent slice begins at
+   // 48 and is wholly after the boundary.
+-  const splitScanout = input.targetSide === "opponent"
++  // asl155 (D4 faithful timing, liveMoveTimingPolicy.ts 326 player later): a player attacker's LATER body renders the dominant measured
++  // later phase, S = 0 on this row too (5 of 5 measured later bodies; docs/asl155-astonish-extrasensory-live.md): scanoutSplitRow false.
++  const splitScanout = input.targetSide === "opponent" && input.scanoutSplitRow !== false
+     && stage?.stage === 2 && distortionData(age, input)?.[1] === 5;
+   const displayedScanline = splitScanout
+     ? currentScanline.map((value, y) => y <= 28 ? precedingScanline[y]! : value)
+diff --git a/src/engine/liveMoveAnimation.ts b/src/engine/liveMoveAnimation.ts
+index 7447a2025..4751adce5 100644
+--- a/src/engine/liveMoveAnimation.ts
++++ b/src/engine/liveMoveAnimation.ts
+@@ -104,7 +104,7 @@ import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "j
+ import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
+ import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
+ import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
+-import { LIVE_MOVE_TIMING_POLICY, liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, liveMoveTimingUseOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
++import { LIVE_MOVE_TIMING_POLICY, liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveScanoutSplitRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, liveMoveTimingUseOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
+ import { decodeSpriteOrderPlan, resolveSpriteOrderDeferredLend, type SpriteOrderDeferredCarry, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
+ import type { PresentationRngHost, PresentationRngWords } from "./presentationRngHost.ts";
+ import { isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
+@@ -117,7 +117,7 @@ import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveO
+ import { liveEruptionProfile, liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
+ import { KNOWN_ENTRY_NON_BATTLER_SPRITES, battlerSprite, liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
+ import { liveScanlineEntry } from "./liveScanlineHistory.ts";
+-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveStruggleInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
++import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveStruggleInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, liveOpponentElevation, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
+ import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
+ import { shockWaveSpriteOrderPlanText, shockWaveTimingFor } from "../animation/shockWave.ts";
+ import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
+@@ -4255,11 +4255,19 @@ export function liveMoveAnimationPresentation(
+       // Quick Attack / Growl / Splash / its own body (65 displayed scanline lines then differ from the residue, unread) and differs only on
+       // the documented lag rows 143..158; it needs both species rests {0,0}. A PLAYER attacker's later body (opponent target) declines: the
+       // scanout split moved by the history (18 px after a Quick Attack alone, 54..298k px after other predecessors) is not modelled.
+-      // scan93: a later body reads the order host's scanline history when it is known (display-neutral in every measured window). A PLAYER
+-      // attacker's later body still declines: its windows carry the scanout split (prep30 s1.4; scan93: 11 of 11 later windows split "event").
++      // scan93: a later body reads the order host's scanline history when it is known (display-neutral in every measured window).
++      // asl155 (D4 faithful timing; docs/asl155-astonish-extrasensory-live.md): a PLAYER attacker's later body is live with a known history and
++      // renders the dominant measured later phase (liveMoveTimingPolicy.ts 326 player later: the task-row-142 lag, 9 of 11; the scanout split
++      // S = 0 on every row, the fitted row included, 5 of 5). Its alternate phases (ord149 B1: S is a CPU phase) stay documented residual rows.
++      // That phase is dominant only for a target whose first visible monbg line is >= 27 (SHUCKLE class): a higher-reaching target (GOLEM 18,
++      // NUZLEAF / ESPEON 24, STANTLER / CROBAT 9) shows the split on rows where no S dominates, and declines. An ELEVATED opponent target
++      // (CROBAT class) declines too: its residual is not the split alone (prep30's generated distortion window for elevation 6).
+       if (!spriteOrderInput?.known) return null;
+       const xsHistory = spriteOrderInput.firstBody ? [] : spriteOrderInput.scanlineHistory;
+-      if (!spriteOrderInput.firstBody && (attacker.geometry.side !== "opponent" || !liveBattlersRestFree(art))) return null;
++      const xsPlayerLater = !spriteOrderInput.firstBody && attacker.geometry.side === "player";
++      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
++      if (xsPlayerLater && (xsHistory === undefined || liveOpponentElevation(art.opponent.speciesSymbol) !== 0
++        || liveFieldArtTopLine(art.opponent) < EXTRASENSORY_PLAYER_LATER_MIN_TOP_LINE)) return null;
+       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+       const xsScanline = xsHistory === undefined ? FIRST_BODY_SCANLINE : liveScanlineEntry(FIRST_BODY_SCANLINE, xsHistory, (side) => art[side].speciesSymbol);
+       const palettes = composeLiveArtPalettes(art);
+@@ -4270,7 +4278,8 @@ export function liveMoveAnimationPresentation(
+       const inputs = liveExtrasensoryInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
+         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors,
+         attackerPictureHeight: pictureHeight(attacker.geometry.side), palettes, activationOrder, sort: sortGbaSpriteOrder, scanline0: xsScanline,
+-        lateLag: liveMoveOptionalLagAge(326, attacker.geometry.side, liveMoveTimingBodyOf(spriteOrderInput)) !== null });
++        lateLag: liveMoveOptionalLagAge(326, attacker.geometry.side, liveMoveTimingBodyOf(spriteOrderInput)) !== null,
++        ...(xsPlayerLater ? { scanoutSplitRow: liveMoveScanoutSplitRow(326, "player", "later") } : {}) });
+       if (inputs === null) return null;
+       // The EXTRASENSORY seam centres are the battler sprite centres (gSprites x / y).
+       const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
+@@ -4700,6 +4709,24 @@ function liveDiveWordsPlan(
+   return { text, profile: real };
+ }
+ 
++/**
++ * asl155 (docs/asl155-astonish-extrasensory-live.md): the first screen line with an opaque pixel of a field battler's pic at its unelevated
++ * origin (the target's first visible monbg line in Extrasensory's distortion window; SHUCKLE 27 and GOLEM 18 as measured, prep30 s1.4).
++ */
++export function liveFieldArtTopLine(battler: Readonly<{ pic: { tileset: { columns: number; rows: number; tiles: readonly (readonly number[])[] } };
++  origin: Readonly<{ y: number }> }>): number {
++  const { columns, rows, tiles } = battler.pic.tileset;
++  for (let y = 0; y < rows * 8; y++) {
++    for (let x = 0; x < columns * 8; x++) if (tiles[(y >> 3) * columns + (x >> 3)]![(y & 7) * 8 + (x & 7)] !== 0) return battler.origin.y + y;
++  }
++  return Number.POSITIVE_INFINITY;
++}
++/**
++ * asl155: a player attacker's later Extrasensory body is live only for a target whose first visible monbg line is at least this line: there
++ * the dominant per-row display class over the measured later bodies is S = 0 on all 69 rows (ord149 xs; line 26: 68 / 69, GOLEM's 18: 50 / 69).
++ */
++export const EXTRASENSORY_PLAYER_LATER_MIN_TOP_LINE = 27;
++
+ /**
+  * ord149: an Astonish 310 droplet's rise on the last SortSprites before its destroy (AnimSprayWaterDroplet_Step, battle_anim_flying.c:1139:
+  * data[1] = 896 + v2 (v2 odd) / 896 - v2 (even), `y2 -= data[1] >> 8; data[1] -= 32` per step; the 31st step destroys, so 30 steps are sorted).
+diff --git a/src/engine/liveMoveTimingPolicy.ts b/src/engine/liveMoveTimingPolicy.ts
+index 6fc8b1827..d27dfa47a 100644
+--- a/src/engine/liveMoveTimingPolicy.ts
++++ b/src/engine/liveMoveTimingPolicy.ts
+@@ -289,6 +289,25 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
+       chosen: "event", tieRuleUsed: false,
+       evidence: ["tools/integration/fixtures/d4later/counters.json (opponent later bodies: counter lag age 141 = task row 142, 11 of 11)",
+         "tools/integration/fixtures/later58/check-extrasensory.json (11 of 11 opponent later windows in the lag phase)", "docs/next-adapters-d4later.md"],
++    }, {
++      // asl155 (scan93 patch B; docs/asl155-astonish-extrasensory-live.md): a PLAYER attacker's LATER body (opponent target) lags at task row 142
++      // in 9 of 11 measured later windows (scan93 scenarios, twice fresh); first bodies keep the parameter above.
++      kind: "optional-lag-age", age: 142, fixedLagAges: [122, 123], iterations: 161, side: "player", body: "later",
++      alternatives: [{ phase: "event", bodyRows: 162, measured: 9 }, { phase: "no-event", bodyRows: 161, measured: 2 }],
++      chosen: "event", tieRuleUsed: false,
++      evidence: ["tools/integration/fixtures/scan93/check-B.json (player later windows: timing.measured optional-lag-age event in 9 of 11)",
++        "docs/next-adapters-scan93.md"],
++    }, {
++      // asl155 (ord149 B1, docs/ord149-astonish-extrasensory.md s2): a PLAYER attacker's LATER body's per-row split line S is a CPU phase
++      // (instruction-stepped: not keyed by stage / row across bodies). Per (stage, row) over the 5 measured SHUCKLE-class later bodies the
++      // dominant display class is S <= 26 (== S = 0: the target's first monbg line is 27) on 68 of 69 rows, and on 1 row (stage 3 data[1] 1:
++      // S <= 26 2, S 27 2, S 28 1) by the tie rule. `age` 98 is the one row whose chosen phase differs from the first bodies: the first-body
++      // source-fitted split (stage 3 data[1] 5, lines <= 28 show the preceding row; "event") measured 0 of 5, S <= 26 ("no-event") 5 of 5.
++      kind: "scanline-split-line", age: 98, fixedLagAges: [], iterations: 161, side: "player", body: "later",
++      alternatives: [{ phase: "event", bodyRows: 162, measured: 0 }, { phase: "no-event", bodyRows: 162, measured: 5 }],
++      chosen: "no-event", tieRuleUsed: false,
++      evidence: ["tools/integration/fixtures/ord149/ord149-xs-split.json (per write row S, 3 routes x 3 bodies, A == B)",
++        "tools/integration/fixtures/asl155/asl155-xs-policy.json (per-row classes, policy vs alternates)", "docs/asl155-astonish-extrasensory-live.md"],
+     }],
+   },
+   /**
+@@ -711,6 +730,16 @@ export function liveMoveTimingSidePhase(moveId: number, kind: LiveMoveTimingPara
+   return liveMoveTimingParameterFor(moveId, kind, side, body)?.chosen ?? null;
+ }
+ 
++/**
++ * asl155: whether the reducer's source-fitted scanout split row stays (Extrasensory's stage-3 data[1] 5 row): true under the first-body
++ * scanline-split-line parameter (its S = 0 phase keeps the source-fitted row), else the body-keyed parameter's chosen phase ("event" = the
++ * fitted split, "no-event" = S = 0 on that row too).
++ */
++export function liveMoveScanoutSplitRow(moveId: number, side: "player" | "opponent", body: LiveMoveTimingBody): boolean {
++  const p = liveMoveTimingParameterFor(moveId, "scanline-split-line", side, body);
++  return p === null || p.body === undefined || p.chosen === "event";
++}
++
+ /** The policy parameter of a move, or null when the move has no D4 timing parameter of that kind. */
+ export function liveMoveTimingParameter(moveId: number, kind: LiveMoveTimingParameterKind): LiveMoveTimingParameter | null {
+   return liveMoveTimingParameterFor(moveId, kind);
+diff --git a/src/engine/liveOamMoves.ts b/src/engine/liveOamMoves.ts
+index 828c55cdb..031565ff2 100644
+--- a/src/engine/liveOamMoves.ts
++++ b/src/engine/liveOamMoves.ts
+@@ -860,7 +860,11 @@ export interface LiveExtrasensoryInputArgs {
+   readonly sort: LiveSpriteOrderSort;
+   /** D4 policy (liveMoveTimingPolicy.ts MOVE_EXTRASENSORY optional-lag-age): the optional lag at task row 142. */
+   readonly lateLag: boolean;
++  /** asl155 D4 policy (MOVE_EXTRASENSORY scanline-split-line, player later): false = S = 0 on the fitted split row (the reducer's scanoutSplitRow). */
++  readonly scanoutSplitRow?: boolean;
+ }
++/** The enemy elevation of an opponent species (enemy-mon-elevations.json; 0 = not elevated). */
++export const liveOpponentElevation = (species: string): number => (enemyElevations as Readonly<Record<string, number>>)[species] ?? 0;
+ /**
+  * First-body scanline entry S0 (the battle intro's residue; prep18 s1.1 / prep30 s0.2 H: bank 0 = 80 x +2, 80 x -2, then zeros; bank 1 zero;
+  * srcBuffer 1, state 0; equal in every measured scenario; the same constant as the Dig / Rapid Spin first bodies).
+@@ -923,7 +927,7 @@ export function liveExtrasensoryInputs(args: LiveExtrasensoryInputArgs): { durat
+         registers: m.registers,
+         background: { currentVram: `vram-${m.vram}`, battleVram: "vram-0", psychicVram: "vram-1", monbgPaletteBank: targetSide === "opponent" ? 8 : 9 },
+         scanline: m.scanline,
+-        targetYElevation,
++        targetYElevation, ...(args.scanoutSplitRow === false ? { scanoutSplitRow: false } : {}),
+         allocator: null, audio: null, liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
+       };
+     },

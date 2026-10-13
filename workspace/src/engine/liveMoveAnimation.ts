@@ -104,7 +104,7 @@ import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "j
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
-import { LIVE_MOVE_TIMING_POLICY, liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, liveMoveTimingUseOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
+import { LIVE_MOVE_TIMING_POLICY, liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveScanoutSplitRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, liveMoveTimingUseOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import { decodeSpriteOrderPlan, resolveSpriteOrderDeferredLend, type SpriteOrderDeferredCarry, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 import type { PresentationRngHost, PresentationRngWords } from "./presentationRngHost.ts";
 import { isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
@@ -117,7 +117,7 @@ import { liveBonemerangInputs, liveLusterPurgeFields, liveMachPunchInputs, liveO
 import { liveEruptionProfile, liveLovelyKissProfile, liveOctazookaProfile, liveSheerColdInputs, liveSheerColdRestoreFadeEndAge, liveSignalBeamInputs, liveSpikesProfile } from "./liveProfileMoves.ts";
 import { KNOWN_ENTRY_NON_BATTLER_SPRITES, battlerSprite, liveOverheatInputs, livePsychUpInputs, liveSilverWindInputs } from "./liveBgSnapshotMoves.ts";
 import { liveScanlineEntry } from "./liveScanlineHistory.ts";
-import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveStruggleInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
+import { liveCurseStatsInputs, liveFuryCutterInputs, liveMegahornInputs, livePursuitInputs, liveStruggleInputs, liveReturnInputs, liveRevengeInputs, liveWillOWispInputs, livePsywaveInputs, liveExtrasensoryInputs, liveNightmareInputs, liveShockWaveInputs, liveSkillSwapInputs, liveFlatterInputs, liveOpponentElevation, FIRST_BODY_SCANLINE } from "./liveOamMoves.ts";
 import shockWaveAsset from "../animation/assets/shock-wave.json" with { type: "json" };
 import { shockWaveSpriteOrderPlanText, shockWaveTimingFor } from "../animation/shockWave.ts";
 import revengeScratchAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
@@ -1619,6 +1619,8 @@ export function liveWordsOrderDeferredCarry(
     if (unit.generalAnimation === undefined && unit.moveId === 260) {
       return unit.bodySpecies === undefined ? null : liveFlatterWordsPostFree(unit, activationFree, wordsOf(unit.key), unit.bodySpecies);
     }
+    // ord149: Astonish carries through its droplets' rises (liveAstonishWordsPostFree; species-free: both droplets start at the target's point).
+    if (unit.generalAnimation === undefined && unit.moveId === 310) return liveAstonishWordsPostFree(activationFree, wordsOf(unit.key));
     const dirt = unit.generalAnimation === undefined && unit.moveId !== 240;
     if (dirt && unit.bodySpecies !== undefined) {
       const bodyAnchors = liveWordsBodyAnchors(unit.bodySpecies);
@@ -4253,11 +4255,19 @@ export function liveMoveAnimationPresentation(
       // Quick Attack / Growl / Splash / its own body (65 displayed scanline lines then differ from the residue, unread) and differs only on
       // the documented lag rows 143..158; it needs both species rests {0,0}. A PLAYER attacker's later body (opponent target) declines: the
       // scanout split moved by the history (18 px after a Quick Attack alone, 54..298k px after other predecessors) is not modelled.
-      // scan93: a later body reads the order host's scanline history when it is known (display-neutral in every measured window). A PLAYER
-      // attacker's later body still declines: its windows carry the scanout split (prep30 s1.4; scan93: 11 of 11 later windows split "event").
+      // scan93: a later body reads the order host's scanline history when it is known (display-neutral in every measured window).
+      // asl155 (D4 faithful timing; docs/asl155-astonish-extrasensory-live.md): a PLAYER attacker's later body is live with a known history and
+      // renders the dominant measured later phase (liveMoveTimingPolicy.ts 326 player later: the task-row-142 lag, 9 of 11; the scanout split
+      // S = 0 on every row, the fitted row included, 5 of 5). Its alternate phases (ord149 B1: S is a CPU phase) stay documented residual rows.
+      // That phase is dominant only for a target whose first visible monbg line is >= 27 (SHUCKLE class): a higher-reaching target (GOLEM 18,
+      // NUZLEAF / ESPEON 24, STANTLER / CROBAT 9) shows the split on rows where no S dominates, and declines. An ELEVATED opponent target
+      // (CROBAT class) declines too: its residual is not the split alone (prep30's generated distortion window for elevation 6).
       if (!spriteOrderInput?.known) return null;
       const xsHistory = spriteOrderInput.firstBody ? [] : spriteOrderInput.scanlineHistory;
-      if (!spriteOrderInput.firstBody && (attacker.geometry.side !== "opponent" || !liveBattlersRestFree(art))) return null;
+      const xsPlayerLater = !spriteOrderInput.firstBody && attacker.geometry.side === "player";
+      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
+      if (xsPlayerLater && (xsHistory === undefined || liveOpponentElevation(art.opponent.speciesSymbol) !== 0
+        || liveFieldArtTopLine(art.opponent) < EXTRASENSORY_PLAYER_LATER_MIN_TOP_LINE)) return null;
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
       const xsScanline = xsHistory === undefined ? FIRST_BODY_SCANLINE : liveScanlineEntry(FIRST_BODY_SCANLINE, xsHistory, (side) => art[side].speciesSymbol);
       const palettes = composeLiveArtPalettes(art);
@@ -4268,7 +4278,8 @@ export function liveMoveAnimationPresentation(
       const inputs = liveExtrasensoryInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors,
         attackerPictureHeight: pictureHeight(attacker.geometry.side), palettes, activationOrder, sort: sortGbaSpriteOrder, scanline0: xsScanline,
-        lateLag: liveMoveOptionalLagAge(326, attacker.geometry.side, liveMoveTimingBodyOf(spriteOrderInput)) !== null });
+        lateLag: liveMoveOptionalLagAge(326, attacker.geometry.side, liveMoveTimingBodyOf(spriteOrderInput)) !== null,
+        ...(xsPlayerLater ? { scanoutSplitRow: liveMoveScanoutSplitRow(326, "player", "later") } : {}) });
       if (inputs === null) return null;
       // The EXTRASENSORY seam centres are the battler sprite centres (gSprites x / y).
       const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
@@ -4696,6 +4707,53 @@ function liveDiveWordsPlan(
     return `${births.length > 0 ? `C${"f".repeat(births.length)}` : ""}${births.length > 0 && group.length > 0 ? "/" : ""}${group.length > 0 ? `D${group.join(",")}` : ""}`;
   }).join(";");
   return { text, profile: real };
+}
+
+/**
+ * asl155 (docs/asl155-astonish-extrasensory-live.md): the first screen line with an opaque pixel of a field battler's pic at its unelevated
+ * origin (the target's first visible monbg line in Extrasensory's distortion window; SHUCKLE 27 and GOLEM 18 as measured, prep30 s1.4).
+ */
+export function liveFieldArtTopLine(battler: Readonly<{ pic: { tileset: { columns: number; rows: number; tiles: readonly (readonly number[])[] } };
+  origin: Readonly<{ y: number }> }>): number {
+  const { columns, rows, tiles } = battler.pic.tileset;
+  for (let y = 0; y < rows * 8; y++) {
+    for (let x = 0; x < columns * 8; x++) if (tiles[(y >> 3) * columns + (x >> 3)]![(y & 7) * 8 + (x & 7)] !== 0) return battler.origin.y + y;
+  }
+  return Number.POSITIVE_INFINITY;
+}
+/**
+ * asl155: a player attacker's later Extrasensory body is live only for a target whose first visible monbg line is at least this line: there
+ * the dominant per-row display class over the measured later bodies is S = 0 on all 69 rows (ord149 xs; line 26: 68 / 69, GOLEM's 18: 50 / 69).
+ */
+export const EXTRASENSORY_PLAYER_LATER_MIN_TOP_LINE = 27;
+
+/**
+ * ord149: an Astonish 310 droplet's rise on the last SortSprites before its destroy (AnimSprayWaterDroplet_Step, battle_anim_flying.c:1139:
+ * data[1] = 896 + v2 (v2 odd) / 896 - v2 (even), `y2 -= data[1] >> 8; data[1] -= 32` per step; the 31st step destroys, so 30 steps are sorted).
+ */
+export function liveAstonishDropletRise(v2: number): number {
+  let data1 = v2 % 2 ? 896 + v2 : 896 - v2, rise = 0;
+  for (let step = 0; step < 30; step++, data1 -= 32) rise += data1 >> 8;
+  return rise;
+}
+
+/**
+ * ord149 (docs/ord149-astonish-extrasensory.md): the Astonish body's order plan from its 4 words. Move_ASTONISH creates its two droplets in one
+ * frame at the target's point; they die in the same frame, and SortSprites (equal priority words) puts the lower one (the smaller rise)
+ * first and never swaps equal keys, so the pair leaves by rise, ties in the lend order: the P words are the rises (the cursor sorts the pair
+ * by them, ties by F index at creation). Null without the body's 4 words. ROM: 36 / 36 bodies exact per window (fixtures/ord149).
+ */
+export function liveAstonishWordsPlanText(words: PresentationRngWords | null): string | null {
+  if (words === null || words.words.length !== 4) return null;
+  return `Cf;D0;Cff;D1,2/P${liveAstonishDropletRise(words.words[1]! & 0x7f)},${liveAstonishDropletRise(words.words[3]! & 0x7f)}`;
+}
+
+/** ord149: the free order after an Astonish body (liveAstonishWordsPlanText applied with the production plan cursor), or null. */
+export function liveAstonishWordsPostFree(activationFree: readonly number[], words: PresentationRngWords | null): readonly number[] | null {
+  const text = liveAstonishWordsPlanText(words);
+  if (text === null) return null;
+  const cursor = applySpriteOrderUnitPlan(createSpriteOrderPlanCursor({ known: true, free: activationFree, pendingDestroyed: [] }), decodeSpriteOrderPlan(text));
+  return cursor.order.known ? Object.freeze([...cursor.order.free]) : null;
 }
 
 /** land68 (prep65): the free order after a Dive body (liveDiveWordsPlanText applied with the production plan cursor), or null. */

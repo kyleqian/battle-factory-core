@@ -12,8 +12,10 @@ import type { SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
  * liveIceBallInputs(...).postBodyFree at the body's words, rollout counter and displayed species; docs/ice72-ice-ball-words-unit.md).
  * flat84: Flatter 260 (its 38 confetti die together, FLATTER_K burst 65 .. end 97; their slots keep the SortSprites y-order of their last frame, which
  * follows their own words: liveFlatterInputs' carried order at the last row, liveFlatterWordsPostFree; docs/next-adapters-flat84.md).
+ * ord149: Astonish 310 (its two droplets die together in the SortSprites order of their rises, which follow their own v2 words:
+ * liveAstonishWordsPostFree; docs/ord149-astonish-extrasensory.md). The 310:opponent table row keeps that side known (the marker drops).
  */
-export const WORDS_ORDER_UNIT_MOVE_IDS: readonly number[] = Object.freeze([28, 189, 240, 260, 291, 301]);
+export const WORDS_ORDER_UNIT_MOVE_IDS: readonly number[] = Object.freeze([28, 189, 240, 260, 291, 301, 310]);
 /** The general animation whose order unit is words-dependent (General_Rain); its marker is keyed per event. */
 export const WORDS_ORDER_GENERAL_ANIMATION = "RAIN_CONTINUES";
 

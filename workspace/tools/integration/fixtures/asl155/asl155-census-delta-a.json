@@ -1,0 +1,184 @@
+{
+ "changed": [
+  {
+   "after": [
+    "live",
+    null
+   ],
+   "battle": 394,
+   "before": [
+    "fallback",
+    {
+     "detail": "order host: no EXACT plan: body 310:player",
+     "gate": "liveMoveAnimation.ts:2535",
+     "reason": "sprite-order lend unknown",
+     "stage": "presentation"
+    }
+   ],
+   "command": 5,
+   "earlierAstonish": [
+    "player@3"
+   ],
+   "frames": 287,
+   "kind": "move",
+   "move": "TRI ATTACK",
+   "side": "opponent"
+  },
+  {
+   "after": [
+    "live",
+    null
+   ],
+   "battle": 428,
+   "before": [
+    "fallback",
+    {
+     "detail": "order host: no EXACT plan: body 310:player",
+     "gate": "liveMoveAnimation.ts:3853",
+     "reason": "sprite-order lend unknown",
+     "stage": "presentation"
+    }
+   ],
+   "command": 23,
+   "earlierAstonish": [
+    "player@20"
+   ],
+   "frames": 199,
+   "kind": "move",
+   "move": "SILVER WIND",
+   "side": "opponent"
+  },
+  {
+   "after": [
+    "live",
+    null
+   ],
+   "battle": 615,
+   "before": [
+    "fallback",
+    {
+     "detail": "order host: no EXACT plan: body 310:player",
+     "gate": "liveMoveAnimation.ts:3761",
+     "reason": "sprite-order lend unknown",
+     "stage": "presentation"
+    }
+   ],
+   "command": 20,
+   "earlierAstonish": [
+    "player@15",
+    "player@19"
+   ],
+   "frames": 61,
+   "kind": "move",
+   "move": "SAND-ATTACK",
+   "side": "opponent"
+  },
+  {
+   "after": [
+    "live",
+    null
+   ],
+   "battle": 615,
+   "before": [
+    "fallback",
+    {
+     "gate": "liveMoveAnimation.ts:2100",
+     "reason": "sprite allocator history unknown",
+     "stage": "presentation"
+    }
+   ],
+   "command": 24,
+   "earlierAstonish": [
+    "player@15",
+    "player@19"
+   ],
+   "frames": 91,
+   "kind": "move",
+   "move": "LIGHT SCREEN",
+   "side": "opponent"
+  },
+  {
+   "after": [
+    "live",
+    null
+   ],
+   "battle": 871,
+   "before": [
+    "fallback",
+    {
+     "gate": "liveMoveAnimation.ts:2112",
+     "reason": "sprite allocator history unknown",
+     "stage": "presentation"
+    }
+   ],
+   "command": 8,
+   "earlierAstonish": [
+    "player@3"
+   ],
+   "frames": 128,
+   "kind": "move",
+   "move": "PROTECT",
+   "side": "opponent"
+  },
+  {
+   "after": [
+    "live",
+    null
+   ],
+   "battle": 923,
+   "before": [
+    "fallback",
+    {
+     "detail": "order host: no EXACT plan: body 310:player",
+     "gate": "liveMoveAnimation.ts:3896",
+     "reason": "sprite-order lend unknown",
+     "stage": "presentation"
+    }
+   ],
+   "command": 16,
+   "earlierAstonish": [
+    "player@9"
+   ],
+   "frames": 217,
+   "kind": "move",
+   "move": "WILL-O-WISP",
+   "side": "player"
+  },
+  {
+   "after": [
+    "fallback",
+    {
+     "gate": "liveMoveAnimation.ts:4290",
+     "reason": "unclassified (case-local gate)",
+     "stage": "presentation"
+    }
+   ],
+   "battle": 923,
+   "before": [
+    "fallback",
+    {
+     "detail": "order host: no EXACT plan: body 310:player",
+     "gate": "liveMoveAnimation.ts:4283",
+     "reason": "sprite-order lend unknown",
+     "stage": "presentation"
+    }
+   ],
+   "command": 29,
+   "earlierAstonish": [
+    "player@9"
+   ],
+   "frames": 148,
+   "kind": "move",
+   "move": "REVENGE",
+   "side": "opponent"
+  }
+ ],
+ "changedWithoutEarlierPlayerAstonish": 0,
+ "commands": 27196,
+ "lifted": {
+  "commands": 6,
+  "frames": 983
+ },
+ "regressed": 0,
+ "schema": "ord149-census-delta/v1"
+}

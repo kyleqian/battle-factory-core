@@ -186,7 +186,8 @@ describe("faithful-timing ordinary routes", () => {
     // D4c: r3ProfileRouteSearch.ts 326 4 1 4000 (first candidates: 9/35 EXPLOUD slot 3 active; 42/7 STANTLER declined: Intimidate's switch-in stat
     // animation is an earlier unit, so the first-body scanline gate declines the whole body (scene-off view, logic unchanged); 75/35 EXPLOUD active).
     ["EXTRASENSORY 9/35 EXPLOUD", 326, 9, 35, 3 as const, 161, true],
-    ["EXTRASENSORY 42/7 STANTLER (later body: scanline gate)", 326, 42, 7, 0 as const, 161, false],
+    // asl155: a player later body follows the player later lag policy (162 rows, 9 of 11) also when its adapter declines
+    ["EXTRASENSORY 42/7 STANTLER (later body: scanline gate)", 326, 42, 7, 0 as const, 162, false],
   ])("route %s: body reached, following prompt reached, Scene ON/OFF parity", (_name, id, seed, streak, slot, ages, active) => {
     const on = generatedCommandAnimationReplay(seed, "on", [slot], streak);
     const off = generatedCommandAnimationReplay(seed, "off", [slot], streak);

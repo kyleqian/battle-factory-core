@@ -84,15 +84,18 @@ describe("later58 Sheer Cold 329 at a later body (D4: the per-side age-171 polic
 describe("later58 Extrasensory 326 at a later body (D4c: opponent attacker only)", () => {
   it.each(pinnedOf("EXTRASENSORY"))("%s: live, every pinned row equals the ROM frame", expectPinnedRows, 180000);
 
-  it("an opponent attacker's later bodies are live on rest-free battlers; a player attacker's later body declines (scanout split)", () => {
+  it("an opponent attacker's later bodies are live on rest-free battlers; a player attacker's later body is live only on a SHUCKLE-class target (asl155)", () => {
     for (const name of ["extrasensory-opp-nuzleaf-shuckle-qa-0", "extrasensory-opp-nuzleaf-shuckle-growl-2", "extrasensory-opp-alakazam-golem-splash-1"]) {
       expect(presentation(fixture(name))?.config.move).toBe("EXTRASENSORY");
     }
     const opp = fixture("extrasensory-opp-nuzleaf-shuckle-qa-0");
     expect(presentation({ ...opp, attacker: { ...opp.attacker, species: "ONIX" } })).toBeNull();
-    for (const name of ["extrasensory-pla-nuzleaf-shuckle-qa-0", "extrasensory-pla-nuzleaf-shuckle-splash-1", "extrasensory-pla-alakazam-golem-growl-1"]) {
-      expect(presentation(fixture(name))).toBeNull();
+    // asl155 (D4 faithful timing): the dominant later phase (S = 0 on every row) on a target whose first visible monbg line is >= 27 (SHUCKLE);
+    // GOLEM's line 18 shows the split on rows where no S dominates: declines
+    for (const name of ["extrasensory-pla-nuzleaf-shuckle-qa-0", "extrasensory-pla-nuzleaf-shuckle-splash-1"]) {
+      expect(presentation(fixture(name))?.config.move).toBe("EXTRASENSORY");
     }
+    expect(presentation(fixture("extrasensory-pla-alakazam-golem-growl-1"))).toBeNull();
     expect(presentation(fixture("extrasensory-pla-nuzleaf-shuckle-splash-0"))?.config.move).toBe("EXTRASENSORY");
   });
 });

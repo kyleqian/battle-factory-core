@@ -80,6 +80,11 @@ export interface ExtrasensoryLiveInputs {
    * unelevated windows (opponent target 40 -> 8..72, player target 80 -> 48..112); the live provider passes the species elevation.
    */
   readonly targetYElevation?: number;
+  /**
+   * asl155 (D4 faithful timing): the source-fitted stage-2 data[1] 5 split row (lines <= 28 show the preceding row). Absent / true = the
+   * first-body phase; false = a player attacker's later body, whose dominant measured phase is S = 0 on that row (liveMoveTimingPolicy.ts 326).
+   */
+  readonly scanoutSplitRow?: boolean;
 }
 
 export interface ExtrasensoryTask {
@@ -272,7 +277,9 @@ export function extrasensoryAtAge(age: number, input: Readonly<ExtrasensoryLiveI
   // preceding bank while 29 onward consume the current bank.  This is keyed
   // to live component state, not a battle tick; the opponent slice begins at
   // 48 and is wholly after the boundary.
-  const splitScanout = input.targetSide === "opponent"
+  // asl155 (D4 faithful timing, liveMoveTimingPolicy.ts 326 player later): a player attacker's LATER body renders the dominant measured
+  // later phase, S = 0 on this row too (5 of 5 measured later bodies; docs/asl155-astonish-extrasensory-live.md): scanoutSplitRow false.
+  const splitScanout = input.targetSide === "opponent" && input.scanoutSplitRow !== false
     && stage?.stage === 2 && distortionData(age, input)?.[1] === 5;
   const displayedScanline = splitScanout
     ? currentScanline.map((value, y) => y <= 28 ? precedingScanline[y]! : value)

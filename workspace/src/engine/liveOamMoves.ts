@@ -860,7 +860,11 @@ export interface LiveExtrasensoryInputArgs {
   readonly sort: LiveSpriteOrderSort;
   /** D4 policy (liveMoveTimingPolicy.ts MOVE_EXTRASENSORY optional-lag-age): the optional lag at task row 142. */
   readonly lateLag: boolean;
+  /** asl155 D4 policy (MOVE_EXTRASENSORY scanline-split-line, player later): false = S = 0 on the fitted split row (the reducer's scanoutSplitRow). */
+  readonly scanoutSplitRow?: boolean;
 }
+/** The enemy elevation of an opponent species (enemy-mon-elevations.json; 0 = not elevated). */
+export const liveOpponentElevation = (species: string): number => (enemyElevations as Readonly<Record<string, number>>)[species] ?? 0;
 /**
  * First-body scanline entry S0 (the battle intro's residue; prep18 s1.1 / prep30 s0.2 H: bank 0 = 80 x +2, 80 x -2, then zeros; bank 1 zero;
  * srcBuffer 1, state 0; equal in every measured scenario; the same constant as the Dig / Rapid Spin first bodies).
@@ -923,7 +927,7 @@ export function liveExtrasensoryInputs(args: LiveExtrasensoryInputArgs): { durat
         registers: m.registers,
         background: { currentVram: `vram-${m.vram}`, battleVram: "vram-0", psychicVram: "vram-1", monbgPaletteBank: targetSide === "opponent" ? 8 : 9 },
         scanline: m.scanline,
-        targetYElevation,
+        targetYElevation, ...(args.scanoutSplitRow === false ? { scanoutSplitRow: false } : {}),
         allocator: null, audio: null, liveCounts: { visualTasks: 0, soundTasks: 0, matrixBitmap: 0 }, animationRng: 0, gameplayRng: null, gameplayState: null,
       };
     },

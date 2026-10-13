@@ -44,7 +44,8 @@ describe("d4later: first vs later body D4 phase (Sheer Cold 329, Extrasensory 32
 
   it("the later-body parameters are body-keyed with the counted phases; the first-body parameters are unchanged", () => {
     for (const [id, age, rows] of [[329, 171, 191], [326, 142, 162]] as const) {
-      const later = LIVE_MOVE_TIMING_POLICY[id]!.parameters.filter((p) => p.body === "later");
+      // asl155 adds the PLAYER later-body Extrasensory parameters (tests/asl155ExtrasensoryPlayerLater.test.ts); d4later's are the opponent ones
+      const later = LIVE_MOVE_TIMING_POLICY[id]!.parameters.filter((p) => p.body === "later" && (id === 329 || p.side === "opponent"));
       expect(later.map((p) => [p.kind, p.age, p.side, p.chosen, p.tieRuleUsed])).toEqual([["optional-lag-age", age, "opponent", "event", false]]);
       expect(later[0]!.alternatives).toEqual([{ phase: "event", bodyRows: rows, measured: id === 329 ? 5 : 11 }, { phase: "no-event", bodyRows: rows - 1, measured: 0 }]);
       expect(dominantLiveMoveTimingPhase(later[0]!.alternatives)).toEqual({ phase: "event", tie: false });
@@ -56,7 +57,7 @@ describe("d4later: first vs later body D4 phase (Sheer Cold 329, Extrasensory 32
     expect(liveMoveTimingSidePhase(329, "optional-lag-age", "player", "later")).toBe("event");
     expect(liveMoveOptionalLagAge(326)).toBeNull();
     expect(liveMoveOptionalLagAge(326, "opponent", "later")).toBe(142);
-    expect(liveMoveOptionalLagAge(326, "player", "later")).toBeNull();
+    expect(liveMoveOptionalLagAge(326, "player", "later")).toBe(142); // asl155 (scan93 patch B: 9 of 11 player later windows lag)
     expect(liveMoveTimingParameter(326, "optional-lag-age")!.body).toBeUndefined();
   });
 
@@ -67,7 +68,7 @@ describe("d4later: first vs later body D4 phase (Sheer Cold 329, Extrasensory 32
     expect([0, 1].map((a) => liveMoveAnimationDuration(request(329, a as 0 | 1)))).toEqual([191, 190]);
     expect([0, 1].map((a) => liveMoveAnimationDuration(request(329, a as 0 | 1), undefined, "later"))).toEqual([191, 191]);
     expect([0, 1].map((a) => liveMoveAnimationDuration(request(326, a as 0 | 1)))).toEqual([161, 161]);
-    expect([0, 1].map((a) => liveMoveAnimationDuration(request(326, a as 0 | 1), undefined, "later"))).toEqual([161, 162]);
+    expect([0, 1].map((a) => liveMoveAnimationDuration(request(326, a as 0 | 1), undefined, "later"))).toEqual([162, 162]);
     expect([liveSheerColdRestoreFadeEndAge("opponent"), liveSheerColdRestoreFadeEndAge("opponent", "later")]).toEqual([188, 189]);
   });
 
