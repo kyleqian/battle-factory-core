@@ -61,7 +61,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // frame + 1 frame of dismissal parity (the replay presses A on even frames in awaiting-message-dismiss; 7 is odd).
     // iu120: + every live body's universal rows (player 151 x3, 196 x4; opponent Dig 91 x4, 219, 204), - 2 frames of dismissal parity
     // (two later dismissals land one frame earlier relative to the timeline shifted by an odd 27 / 29 frames).
-    expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1 + iu([91, O, 4], [151, P, 3], [196, P, 4], [219, O], [204, O]) - 2);
+    // sgl138: + 8 + 9 = sgs134: the route's two gated Icy Wind secondaries (IsBattleSEPlaying, docs/sgs134-se-gate-other-requests.md).
+    expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1 + iu([91, O, 4], [151, P, 3], [196, P, 4], [219, O], [204, O]) - 2 + 8 + 9);
   });
 
   it("status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76", () => {

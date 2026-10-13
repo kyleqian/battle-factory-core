@@ -105,10 +105,14 @@ describe("multi-hit live adapters: one MOVE_ANIMATION per hit", () => {
   });
 });
 
-const routes: ReadonlyArray<{ move: string; id: number; seed: number; slot: 0 | 1 | 2 | 3; hits: number; ages: number }> = [
-  { move: "DOUBLE_SLAP", id: 3, seed: 95, slot: 1, hits: 4, ages: 34 },
-  { move: "DOUBLE_SLAP", id: 3, seed: 246, slot: 1, hits: 3, ages: 34 },
-  { move: "COMET_PUNCH", id: 4, seed: 226, slot: 0, hits: 3, ages: 37 },
+// sgl138 (docs/sgl138-se-gate-live.md): seGates = each hit's IsBattleSEPlaying rows (sgs134's multi-hit gate, Scene ON): Comet Punch's
+// 2nd hit on seed 226 waits 1 row, so its command presents one more row before the body.
+const routes: ReadonlyArray<{
+  move: string; id: number; seed: number; slot: 0 | 1 | 2 | 3; hits: number; ages: number; seGates: readonly number[];
+}> = [
+  { move: "DOUBLE_SLAP", id: 3, seed: 95, slot: 1, hits: 4, ages: 34, seGates: [0, 0, 0, 0] },
+  { move: "DOUBLE_SLAP", id: 3, seed: 246, slot: 1, hits: 3, ages: 34, seGates: [0, 0, 0] },
+  { move: "COMET_PUNCH", id: 4, seed: 226, slot: 0, hits: 3, ages: 37, seGates: [0, 1, 0] },
 ];
 
 describe("live multi-hit ordinary routes", () => {
@@ -119,8 +123,8 @@ describe("live multi-hit ordinary routes", () => {
     const requests = on.requests.filter(r => r.moveId === row.id && r.attacker === 0);
     expect(bodies).toHaveLength(row.hits);
     expect(requests.map(r => r.turn)).toEqual(Array.from({ length: row.hits }, (_, i) => i));
-    for (const body of bodies) {
-      expect(body.ages).toEqual(iu120Ages(row.id, row.ages));
+    for (const [hit, body] of bodies.entries()) {
+      expect(body.ages).toEqual(iu120Ages(row.id, row.ages + row.seGates[hit]!));
       expect(body.adapterActive.every(Boolean)).toBe(true);
     }
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

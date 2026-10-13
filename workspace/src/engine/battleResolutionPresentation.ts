@@ -47,7 +47,7 @@ import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import { battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
-import { seg127StatusSeGateFromEvents } from "./seg127StatusSeGate.ts";
+import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -83,7 +83,11 @@ export type BattleMessageTiming =
   // off108 (ISSUES #167): the provenance-derived used-move hold over a source
   // `pause B_WAIT_TIME_SHORT` (sourcePauseUsedMoveHoldFrames), after the floor.
   | Readonly<{ minimumFrames: 24; holdFrames: number }>;
-export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number }>;
+/**
+ * sgs134 (docs/sgs134-se-gate-other-requests.md): seGateFrames (present only when > 0) = HandleMoveAnimation's IsBattleSEPlaying rows
+ * before a multi-hit move's 2nd+ hit (sgs134RequestSeGate); the live command presents them before its pre rows (the field as it is).
+ */
+export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number; seGateFrames?: number }>;
 export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35;
   firstDisplayedAge: 1;
@@ -310,7 +314,7 @@ export type BattleResolutionPresentationCommand =
        * scf117 (ISSUES #166): holdFrames (present only when > 0) = the rows from the animation's next instruction
        * (rel 77 / 91) to the following print's first glyph, less the `stat` frames between (statsChangeNextReceiptHoldFrames).
        */
-      timing: Readonly<{ minimumFrames: number; holdFrames?: number }>;
+      timing: Readonly<{ minimumFrames: number; holdFrames?: number; seGateFrames?: number }>;
     }>
   | Readonly<{
       /**
@@ -914,6 +918,69 @@ function sceneOnStatusFrames(events: readonly BattleKernelSemanticEvent[], statu
  */
 function statusAnimationSeGate(events: readonly BattleKernelSemanticEvent[], index: number): number {
   return seg127StatusSeGateFromEvents(events.map((e) => e.payload), index)?.gate ?? 0;
+}
+
+/**
+ * sgs134 (docs/sgs134-se-gate-other-requests.md): the controller's IsBattleSEPlaying rows before the OTHER gated requests, seg127's rule
+ * clamp(seRows[songId] - (fixedRows + HP-bar rows), 0, 29) over the segment's kernel events with the ROM-measured fixed rows
+ * (fixtures/sgs134/receipts/rom-r1.json / rom-off-r1.json, both sides): 44 for B_ANIM_STATS_CHANGE from a hit's secondary, both scenes
+ * (HandleBattleAnimation; SetMoveEffect's ChangeStatBuffs = the `stat-stage-change` right before the request, then BattleScript_StatDown
+ * -> DEFENDERSSTATFELL / BattleScript_StatUp -> ATTACKERSSTATROSE; the playstatchangeanimation paths — Overheat / Superpower /
+ * AncientPower — animate before their stat change and are unmeasured: 0) and 62 for a multi-hit move's 2nd+ MOVE_ANIMATION, Scene ON
+ * (BattleScript_DoMultiHit: HandleMoveAnimation; Scene OFF skips the attackanimation request). The SE is
+ * closed (0) by any print but the multi-hit loop's EMPTYSTRING3 (waitmessage 1) and by any animation script in between (its Cmd_end
+ * drains the SE); HIT_ANIMATION is a sprite blink. Every other request (Speed Boost, held items, Knock Off, ...) presents 0.
+ */
+function sgs134RequestSeGate(events: readonly BattleKernelSemanticEvent[], index: number): number {
+  const payloads = events.map((e) => e.payload);
+  const request = payloads[index]!;
+  if (request.kind !== "animation") return 0;
+  let se = -1;
+  for (let i = index - 1; i >= 0; i -= 1) {
+    if (payloads[i]!.kind === "play-se") { se = i; break; }
+  }
+  if (se < 0) return 0;
+  let drain = 0;
+  let emptyBetween = false;
+  for (const q of payloads.slice(se + 1, index)) {
+    if (q.kind === "message") {
+      if (q.messageId !== "STRINGID_EMPTYSTRING3") return 0;
+      emptyBetween = true;
+    } else if (q.kind === "status-animation" || (q.kind === "animation" && q.animationId !== "HIT_ANIMATION")) {
+      return 0;
+    } else if (q.kind === "hp-change") {
+      drain += Math.abs(q.from - q.to);
+    }
+  }
+  // The hit that played the SE: its MOVE_ANIMATION (Scene ON) / SCENE_OFF_ATTACK_PAUSE (Scene OFF).
+  let move: (typeof payloads)[number] | null = null;
+  for (let i = se - 1; i >= 0; i -= 1) {
+    const q = payloads[i]!;
+    if (q.kind === "animation" && (q.animationId === "MOVE_ANIMATION" || q.animationId === "SCENE_OFF_ATTACK_PAUSE")) { move = q; break; }
+  }
+  if (move === null || move.kind !== "animation") return 0;
+  const moveId = move.animationId === "MOVE_ANIMATION" ? String(move.arguments[0]) : null;
+  const next = payloads.slice(index + 1).find((q) => q.kind === "message");
+  const nextId = next?.kind === "message" ? next.messageId : null;
+  const songId = (payloads[se] as Extract<(typeof payloads)[number], { kind: "play-se" }>).songId;
+  let fixedRows: number | null = null;
+  if (request.animationId === "STATS_CHANGE") {
+    let previous: (typeof payloads)[number] | undefined;
+    for (let i = index - 1; i > se && previous === undefined; i -= 1) {
+      if (payloads[i]!.kind !== "set-battler-pp-data" && payloads[i]!.kind !== "game-stat-increment") previous = payloads[i];
+    }
+    if (previous?.kind === "stat-stage-change"
+      && (nextId === "STRINGID_DEFENDERSSTATFELL" || nextId === "STRINGID_ATTACKERSSTATROSE")) fixedRows = 44;
+  } else if (request.animationId === "MOVE_ANIMATION") {
+    if (emptyBetween && moveId !== null && String(request.arguments[0]) === moveId && !(nextId ?? "").startsWith("STRINGID_PKMN")) {
+      fixedRows = 62;
+    }
+  }
+  return fixedRows === null ? 0 : seg127StatusSeGateRows({ songId, seAgeRows: fixedRows + drain });
+}
+function moveAnimationSeGateTiming(events: readonly BattleKernelSemanticEvent[], index: number): { seGateFrames?: number } {
+  const seGate = sgs134RequestSeGate(events, index);
+  return seGate > 0 ? { seGateFrames: seGate } : {};
 }
 
 /** sa125 SA1: the presented B_ANIM_STATUS_* of a kernel `status-animation` receipt, or null (WRAPPED / none: no table entry). */
@@ -3619,7 +3686,7 @@ export function projectBattleResolutionCommands(
   // (ISSUES #115).
   let currentField: BattleResolutionDisplayedField = field;
   const substituteFades: { at: number; battler: 0 | 1; sequence: number }[] = [];
-  const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number }[] = [];
+  const statsChanges: { at: number; battler: 0 | 1; sequence: number; argument: number; frames: number; seGate: number }[] = [];
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
@@ -3752,9 +3819,10 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "animation" && payload.animationId === "STATS_CHANGE") {
       const params = statsChangeParams(Number(payload.arguments[0]));
       if (params !== null) {
+        const seGate = sgs134RequestSeGate(events, index);
         statsChanges.push({
           at: commands.length, battler: singlesBattler(payload.battler ?? -1, "stats change"), sequence: event.sequence,
-          argument: params.animArg, frames: statsChangeSpan(params).addedRows,
+          argument: params.animArg, frames: seGate + statsChangeSpan(params).addedRows, seGate,
         });
       }
       continue;
@@ -3787,7 +3855,7 @@ export function projectBattleResolutionCommands(
           animation,
           // An unadapted move retains a bounded pause, explicitly reported by
           // the readiness registry. No substitute effect receives exact credit.
-          timing: Object.freeze({ minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES }),
+          timing: Object.freeze({ minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index) }),
         }));
         continue;
       }
@@ -4154,7 +4222,9 @@ export function projectBattleResolutionCommands(
         } else if (statsChange !== null && statsChangePresented(field, ordered, statsChange.battler)) {
           ordered.push(Object.freeze({
             type: "stats-change" as const, eventSequence: statsChange.sequence, battler: statsChange.battler,
-            argument: statsChange.argument, timing: Object.freeze({ minimumFrames: statsChange.frames }),
+            argument: statsChange.argument, timing: Object.freeze({
+              minimumFrames: statsChange.frames, ...(statsChange.seGate > 0 ? { seGateFrames: statsChange.seGate } : {}),
+            }),
           }));
         }
       }
@@ -4166,7 +4236,7 @@ export function projectBattleResolutionCommands(
       const holdFrames = statsChangeNextReceiptHoldFrames(events, command.eventSequence, ordered.slice(index + 1));
       if (holdFrames > 0) {
         ordered[index] = Object.freeze({
-          ...command, timing: Object.freeze({ minimumFrames: command.timing.minimumFrames, holdFrames }),
+          ...command, timing: Object.freeze({ ...command.timing, holdFrames }),
         });
       }
     }
