@@ -83,11 +83,12 @@ helpers / assets (`tools/integration/fixtures/stq132/compare.json`):
   | SLP controllerRows 97 -> 98 | 17 | 0 |
   | BRN activeRows 38 -> 37 | 15 | 3 (the elevated Golbat shadow returns a row early) |
   | display: show a sprite on the row after its create row | 1 | 37 |
-  | display: SortSprites y rule reversed | 1 | see `perturbation.json` |
+  | display: SortSprites y rule reversed | 1 | 8 (every INFATUATION window) |
   | display: equal-y tie to the later slot | 1 | 13 (every BRN window) |
 
-  The two display-order rows were added after the first run; on that run the equal-y tie failed 0 tests (13 windows), so the test now
-  pins the order. `tools/integration/fixtures/stq132/perturbation.json` is the receipt of the final run (§5).
+  `tools/integration/fixtures/stq132/perturbation.json` is the receipt of the final run (24 mutations, all restored). On a first run
+  (before the display-order pin) the equal-y tie failed 0 tests and only the comparator (13 windows) caught it, so the test now pins
+  the SortSprites order.
 - **Comparator negative controls** (each must fail; `compare.json` `controls`):
 
   | control | clean windows | meaning |
@@ -208,7 +209,8 @@ The runner does the following:
 4. Runs the stq132 + stp128 reducer tests in the copy.
 5. Runs the comparator and the 7 controls. Their `compare.json` must equal the committed one.
 
-It deletes the frame dumps at the end (`STQ132_KEEP_RAW=1` keeps them); delete the out dir after the run.
+It deletes the frame dumps (`STQ132_KEEP_RAW=1` keeps them) and its archive copy (`STQ132_KEEP_COPY=1` keeps it) at the end; the out
+dir keeps only the probe outputs and receipts (~10 MB).
 
 Fixtures (`tools/integration/fixtures/stq132/`): `scenarios/` (13), `scenario-index.json`, `probe-sha256.json`, `rom-windows.json`
 (37 windows, every row expanded), `compare.json`, `perturbation.json`.

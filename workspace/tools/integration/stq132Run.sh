@@ -7,7 +7,8 @@
 #    frames; a crashed job reruns once); r1 == r2 and == probe-sha256.json; stq132Receipt.py r1 == committed rom-windows.json, r2 == r1;
 # 4. tests/stq132StatusConditionReducer.test.ts + stp128's (unchanged) in the copy;
 # 5. stq132NpzToRaw.py + stq132Compare.ts (main + 7 negative controls) -> stq132CompareReceipt.py == committed compare.json.
-# Raw frame dumps (<out>/dump, <out>/raw: ~0.4 GB) are deleted at the end unless STQ132_KEEP_RAW=1.
+# Raw frame dumps (<out>/dump, <out>/raw: ~0.4 GB) are deleted at the end unless STQ132_KEEP_RAW=1, the archive copy (<out>/copy)
+# unless STQ132_KEEP_COPY=1.
 set -u
 OUT="$1"; REV="${2:-HEAD}"
 [ -e "$OUT" ] && { echo "refusing: $OUT exists"; exit 2; }
@@ -61,4 +62,6 @@ C="$OUT/cmp"
   "no-occluders=$C/no-occluders.json")
 check "$CW/$F/compare.json" "$OUT/compare.json" "compare.json"
 [ "${STQ132_KEEP_RAW:-0}" = 1 ] || rm -rf "$OUT/dump" "$OUT/raw"
+# the archive copy (and its git repo) is deleted too; the receipts stay in <out>
+[ "${STQ132_KEEP_COPY:-0}" = 1 ] || rm -rf "$OUT/copy"
 [ "$fail" -eq 0 ] && echo "stq132Run: ALL SAME" || { echo "stq132Run: FAILED"; exit 1; }
