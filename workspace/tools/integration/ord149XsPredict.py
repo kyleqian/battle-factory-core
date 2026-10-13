@@ -43,10 +43,15 @@ for name in PROBE.values():
         rows = predicted(b)
         lag = 16 if win is not None and win["timing"]["measured"]["optional-lag-age"] == "no-event" else 0
         observed = None if win is None else int(win["affectedAges"].split("(")[1].rstrip(")"))
+        # a write row displays one row later (extrasensory.ts displayedAge = age - 1): its displayed age is traceFrame - window[0] + 1
+        ages = [] if win is None else [r["traceFrame"] - win["window"][0] + 1 for r in rows]
+        span = None if win is None else list(map(int, win["affectedAges"].split(" ")[0].split("..")))
         out["windows"].append({"probe": name, "firstWriteFrame": b[0][0], "fixture": None if win is None else win["fixture"],
+                               "displayedAges": ages, "scan93Span": span,
+                               "agesInSpan": span is None or (all(span[0] <= a <= span[1] for a in ages) and (lag > 0 or ages[0] == span[0] and ages[-1] == span[1])),
                                "predictedSplitRows": len(rows), "lagRows": lag, "scan93AffectedRows": observed,
                                "same": observed is None and len(rows) == 0 or observed == len(rows) + lag, "rows": rows})
 for w in out["windows"]:
     print(f"{w['probe']} @{w['firstWriteFrame']} {w['fixture'] or '(first body: accepted 0 px)'}: predicted {w['predictedSplitRows']} split + {w['lagRows']} lag"
-          f" vs scan93 {w['scan93AffectedRows']} -> {'same' if w['same'] else 'DIFF'}")
+          f" vs scan93 {w['scan93AffectedRows']} -> {'same' if w['same'] else 'DIFF'}; displayed ages {w['displayedAges']} in span {w['scan93Span']}: {w['agesInSpan']}")
 Path(sys.argv[1]).write_text(json.dumps(out, indent=1) + "\n")

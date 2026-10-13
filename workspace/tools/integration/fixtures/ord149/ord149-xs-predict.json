@@ -6,6 +6,9 @@
    "probe": "xs-pla-xs-A",
    "firstWriteFrame": 121,
    "fixture": null,
+   "displayedAges": [],
+   "scan93Span": null,
+   "agesInSpan": true,
    "predictedSplitRows": 0,
    "lagRows": 0,
    "scan93AffectedRows": null,
@@ -16,6 +19,16 @@
    "probe": "xs-pla-xs-A",
    "firstWriteFrame": 1255,
    "fixture": "xs-pla-nuzleaf-shuckle-xs-1.json",
+   "displayedAges": [
+    95,
+    98,
+    101
+   ],
+   "scan93Span": [
+    95,
+    101
+   ],
+   "agesInSpan": true,
    "predictedSplitRows": 3,
    "lagRows": 0,
    "scan93AffectedRows": 3,
@@ -48,6 +61,14 @@
    "probe": "xs-pla-xs-A",
    "firstWriteFrame": 2389,
    "fixture": "xs-pla-nuzleaf-shuckle-xs-2.json",
+   "displayedAges": [
+    98
+   ],
+   "scan93Span": [
+    98,
+    98
+   ],
+   "agesInSpan": true,
    "predictedSplitRows": 1,
    "lagRows": 0,
    "scan93AffectedRows": 1,
@@ -66,6 +87,15 @@
    "probe": "xs-pla-qa-A",
    "firstWriteFrame": 259,
    "fixture": "xs-pla-nuzleaf-shuckle-qa-0.json",
+   "displayedAges": [
+    95,
+    98
+   ],
+   "scan93Span": [
+    95,
+    158
+   ],
+   "agesInSpan": true,
    "predictedSplitRows": 2,
    "lagRows": 16,
    "scan93AffectedRows": 18,
@@ -91,6 +121,18 @@
    "probe": "xs-pla-qa-A",
    "firstWriteFrame": 1393,
    "fixture": "xs-pla-nuzleaf-shuckle-qa-1.json",
+   "displayedAges": [
+    98,
+    99,
+    102,
+    108,
+    117
+   ],
+   "scan93Span": [
+    98,
+    158
+   ],
+   "agesInSpan": true,
    "predictedSplitRows": 5,
    "lagRows": 16,
    "scan93AffectedRows": 21,
@@ -137,6 +179,15 @@
    "probe": "xs-pla-qa-A",
    "firstWriteFrame": 2527,
    "fixture": "xs-pla-nuzleaf-shuckle-qa-2.json",
+   "displayedAges": [
+    95,
+    98
+   ],
+   "scan93Span": [
+    95,
+    98
+   ],
+   "agesInSpan": true,
    "predictedSplitRows": 2,
    "lagRows": 0,
    "scan93AffectedRows": 2,
