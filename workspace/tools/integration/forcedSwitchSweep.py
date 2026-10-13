@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 name, side, tag, slot = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])
 SPECIES = json.load(open(os.environ["FS_SPECIES"])) if os.environ.get("FS_SPECIES") else [19, 292, 304, 12, 2, 198, 111, 95, 134, 130, 150, 249]  # FS_SPECIES=<json list of species ids>
 cry = {r["id"]: r["durationTicks"] for r in json.load(open("src/data/gen/cry-durations.json"))["species"]}
-tmp = Path(f"/tmp/fs/sweep-{tag}"); tmp.mkdir(parents=True, exist_ok=True)
+tmp = Path(os.environ.get("FS_TMP", "/tmp/fs")) / f"sweep-{tag}"; tmp.mkdir(parents=True, exist_ok=True)  # offs152: FS_TMP
 base = json.load(open(f"tools/battle-lab/{name}.json"))
 def run(sp):
     d = json.loads(json.dumps(base)); d["overrides"]["parties"][side][slot]["species"] = sp
