@@ -1,0 +1,353 @@
+{
+ "5:0:on": {
+  "sameTimeline": true,
+  "frames": 7057,
+  "presented": 6466,
+  "differing": {
+   "statusAnimation": 528,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "SABLEYE",
+    "opponentElevated": false,
+    "path": "Foe CHINCHOU used CONFUSE RAY!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "SABLEYE",
+    "opponentElevated": false,
+    "path": "SABLEYE is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "SABLEYE",
+    "opponentElevated": false,
+    "path": "SABLEYE is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "SABLEYE",
+    "opponentElevated": false,
+    "path": "SABLEYE is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "MARSHTOMP",
+    "opponentElevated": false,
+    "path": "YANMA used SIGNAL BEAM!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "MARSHTOMP",
+    "opponentElevated": false,
+    "path": "Foe MARSHTOMP is confused!",
+    "frames": 100,
+    "differingAges": 88
+   }
+  ],
+  "ok": true
+ },
+ "24:0:on": {
+  "sameTimeline": true,
+  "frames": 5545,
+  "presented": 5003,
+  "differing": {
+   "statusAnimation": 693,
+   "afterStatusAnimationFirstFrame": 7,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "VOLTORB",
+    "opponentElevated": true,
+    "path": "LUVDISC used SWEET KISS!",
+    "frames": 100,
+    "differingAges": 99
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "VOLTORB",
+    "opponentElevated": true,
+    "path": "Foe VOLTORB is confused!",
+    "frames": 100,
+    "differingAges": 99
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "VOLTORB",
+    "opponentElevated": true,
+    "path": "LUVDISC used SWEET KISS!",
+    "frames": 100,
+    "differingAges": 99
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "VOLTORB",
+    "opponentElevated": true,
+    "path": "Foe VOLTORB is confused!",
+    "frames": 100,
+    "differingAges": 99
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "VOLTORB",
+    "opponentElevated": true,
+    "path": "Foe VOLTORB is confused!",
+    "frames": 100,
+    "differingAges": 99
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "VOLTORB",
+    "opponentElevated": true,
+    "path": "Foe VOLTORB is confused!",
+    "frames": 100,
+    "differingAges": 99
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "VOLTORB",
+    "opponentElevated": true,
+    "path": "LUVDISC used SWEET KISS!",
+    "frames": 100,
+    "differingAges": 99
+   }
+  ],
+  "ok": true
+ },
+ "19:0:on": {
+  "sameTimeline": true,
+  "frames": 6650,
+  "presented": 6051,
+  "differing": {
+   "statusAnimation": 616,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "DROWZEE",
+    "opponentElevated": false,
+    "path": "Foe LUVDISC used SWEET KISS!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "DROWZEE",
+    "opponentElevated": false,
+    "path": "DROWZEE is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "DROWZEE",
+    "opponentElevated": false,
+    "path": "DROWZEE is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "DROWZEE",
+    "opponentElevated": false,
+    "path": "DROWZEE is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "LUVDISC",
+    "opponentElevated": false,
+    "path": "DROWZEE used CONFUSION!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "LUVDISC",
+    "opponentElevated": false,
+    "path": "Foe LUVDISC is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "LUVDISC",
+    "opponentElevated": false,
+    "path": "Foe LUVDISC is confused!",
+    "frames": 100,
+    "differingAges": 88
+   }
+  ],
+  "ok": true
+ },
+ "22:0:on": {
+  "sameTimeline": true,
+  "frames": 7076,
+  "presented": 6517,
+  "differing": {
+   "statusAnimation": 528,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "NIDORINA",
+    "opponentElevated": false,
+    "path": "LUVDISC used SWEET KISS!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "NIDORINA",
+    "opponentElevated": false,
+    "path": "Foe NIDORINA is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "NIDORINA",
+    "opponentElevated": false,
+    "path": "Foe NIDORINA is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "LUVDISC",
+    "opponentElevated": false,
+    "path": "LUVDISC\u2019s SP. ATK rose!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "player",
+    "species": "LUVDISC",
+    "opponentElevated": false,
+    "path": "LUVDISC is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "NIDORINA",
+    "opponentElevated": false,
+    "path": "Foe NIDORINA is confused!",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "RATICATE",
+    "opponentElevated": false,
+    "path": "RATICATE used ENDEAVOR!",
+    "frames": 71,
+    "differingAges": 0
+   },
+   {
+    "animation": "PSN",
+    "side": "player",
+    "species": "RATICATE",
+    "opponentElevated": false,
+    "path": "RATICATE is hurt by poison!",
+    "frames": 71,
+    "differingAges": 0
+   }
+  ],
+  "ok": true
+ },
+ "9:0:on": {
+  "sameTimeline": true,
+  "frames": 6432,
+  "presented": 5854,
+  "differing": {
+   "statusAnimation": 176,
+   "afterStatusAnimationFirstFrame": 0,
+   "x2RowsBody": 0,
+   "unexplained": 0
+  },
+  "unexplainedSamples": [],
+  "bodiesWithChangedX2Input": [],
+  "statusAnimationCommands": [
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "PIDGEOTTO",
+    "opponentElevated": false,
+    "path": "It\u2019s not very effective\u2026",
+    "frames": 100,
+    "differingAges": 88
+   },
+   {
+    "animation": "CONFUSION",
+    "side": "opponent",
+    "species": "PIDGEOTTO",
+    "opponentElevated": false,
+    "path": "Foe PIDGEOTTO is confused!",
+    "frames": 100,
+    "differingAges": 88
+   }
+  ],
+  "ok": true
+ },
+ "allOk": true
+}
