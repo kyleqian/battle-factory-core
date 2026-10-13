@@ -416,17 +416,6 @@
       ]
     },
     {
-      "move": "MOVE_SMOKESCREEN",
-      "id": 108,
-      "liveEvidence": [
-        "generated command input seeds 143/283/287, opponent-side",
-        "seed 4 player KOFFING -> BUTTERFREE twice"
-      ],
-      "remaining": [
-        "independent arbitrary-species framebuffer comparison"
-      ]
-    },
-    {
       "move": "MOVE_HAZE",
       "id": 114,
       "sourceFieldEvidence": "../tools/integration/fixtures/support-batch-live-adapter-receipt.json",
@@ -3749,7 +3738,7 @@
     }
   },
   "newSnapshotReadiness": "animation-integration-merged-readiness.json",
-  "implementedCount": 238,
+  "implementedCount": 237,
   "playableExactCount": 0,
   "claimBoundary": "Implemented means the ordinary queue renders a current-field body and resumes. It does not grant whole-battle timing or arbitrary-history framebuffer exactness.",
   "faithfulRandomCount": 13,
@@ -3926,7 +3915,7 @@
     },
     "claimBoundary": "Faithful random means the live body renders the source animation with the ROM's Random2 law, draw order/count and value transformations from a deterministic presentation-only stream (session seed + policy, reproducible on replay/reset). Surrogate frames are \"faithful random\", never oracle-exact; pinned-word proofs establish controlled bodies only. Faithful-random adapters add no exact coverage, implementedCount or Factory acceptance, and never touch gameplay RNG."
   },
-  "faithfulTimingCount": 26,
+  "faithfulTimingCount": 27,
   "faithfulTimingAdapters": [
     {
       "id": 183,
@@ -6487,6 +6476,56 @@
       ],
       "proofCommands": [
         "sh tools/integration/sp103Run.sh .integration/validation/<fresh>"
+      ]
+    },
+    {
+      "id": 108,
+      "move": "MOVE_SMOKESCREEN",
+      "timingParameters": [
+        {
+          "kind": "optional-lag-age",
+          "age": 49,
+          "fixedLagAges": [],
+          "iterations": 124,
+          "use": "first",
+          "alternatives": [
+            { "phase": "event", "bodyRows": 125, "measured": 1 },
+            { "phase": "no-event", "bodyRows": 124, "measured": 15 }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 49,
+          "fixedLagAges": [],
+          "iterations": 124,
+          "use": "later",
+          "alternatives": [
+            { "phase": "event", "bodyRows": 125, "measured": 7 },
+            { "phase": "no-event", "bodyRows": 124, "measured": 1 }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        }
+      ],
+      "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
+      "alternatePhaseResidual": {
+        "ages": [49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122],
+        "rows": 74,
+        "maxPixelsPerRow": 1283,
+        "cause": "AnimBlackSmoke_Step (invisible ^= 1 and the x2 drift every frame, 75 frames) runs one frame ahead from row 49 in the 124-row phase: a window in the other phase shows the smoke flicker parity inverted on rows 49..122 (tmr136SmokeCheck: the use-1 125-row window pb-aud129-wide-109-108-169-103-c1 and the later-use 124-row window pb-aud129-phase-smokescreen-opp-s1-c3, 74 rows / 83,292 px each, max 1,283 px/row); ROM rows 49..123 == the 125-row body's ages 50..124, 0 px (aud129-shift-base.txt 16 / 16); every row before 49 as the policy phase"
+      },
+      "d3": false,
+      "evidence": [
+        "reclassified from scoped exact (S10A tmr136, #151 precedent: the adapter gained a measured CPU-phase parameter keyed by the move's use in the battle; liveMoveAnimation.ts case 108 = liveMoveTimingBodyRows(108, use): 124 rows for the battle's first Smokescreen, 125 for later ones, 125 for an unknown use; liveSmokescreenAheadFromAge: rows >= 49 show age + 1 in the no-lag phase); the existing exact proofs stay valid in their proved scope (generated command input seeds 143/283/287, opponent-side; seed 4 player KOFFING -> BUTTERFREE twice)",
+        "use source: the Scene ON x2 history host (liveBattlerX2History.ts moveUses / LiveMoveBattlerX2Input.moveUse): a per-battle fold of the battle's own MOVE_ANIMATION kernel events with the order host's cursor discipline (advanced strictly before the body's own event); unseen events -> unknown (the status quo 125 rows); never RNG, never gameplay state",
+        "tools/integration/fixtures/aud129/aud129-phase-base.txt + aud129-shift-base.txt (24 windows: first use 15 : 1, later uses 1 : 7; shift proof 16 / 16)",
+        "tools/integration/fixtures/tmr136/smoke-final.json (tmr136SmokeCheck.ts through production with the host's use ordinal, two fresh direct-mGBA probes per scenario: r1 == r2 24 / 24; the 22 policy-phase windows 0 px; the 2 other-phase windows only on rows 49..122) and smoke-revert.json (moveUse withheld: 16 windows in the other phase)",
+        "tools/integration/fixtures/tmr136-live-receipt.json"
+      ],
+      "proofCommands": [
+        "sh tools/integration/tmr136Run.sh .integration/validation/<fresh>"
       ]
     }
   ],

@@ -1013,7 +1013,8 @@ function liveMoveUniversalRowAge(
   const rows = liveMoveUniversalRows(request, field);
   const age = Math.max(0, state.lifecycle.phaseElapsed - rows.pre - liveMoveIdleLeadRows(request, field));
   if (rows.post === 0) return age;
-  const live = liveMoveAnimationDuration(request, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput));
+  const live = liveMoveAnimationDuration(request, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput),
+    state.liveMoveBattlerX2Input?.moveUse);
   return live === null ? age : Math.min(age, live - 1);
 }
 
@@ -1022,6 +1023,8 @@ export function battleResolutionCommandDuration(
   field: BattleResolutionDisplayedField,
   // The presented move body's order-host body class (liveMoveTimingBodyOf; d4later body-keyed D4 phases); default the first body.
   bodyClass: LiveMoveTimingBody = "first",
+  // tmr136: the presented move body's use ordinal in the battle (the x2 history host's LiveMoveBattlerX2Input.moveUse; absent = unknown).
+  moveUse?: number,
 ): number {
   switch (command.type) {
     case "message":
@@ -1033,7 +1036,7 @@ export function battleResolutionCommandDuration(
         battleStringPrintableLength(command.lines),
       ) + command.timing.holdFrames;
     case "move-animation": {
-      const live = command.animation ? liveMoveAnimationDuration(command.animation, field, bodyClass) : null;
+      const live = command.animation ? liveMoveAnimationDuration(command.animation, field, bodyClass, moveUse) : null;
       if (live === null) return command.timing.minimumFrames;
       const rows = liveMoveUniversalRows(command.animation!, field);
       return rows.pre + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post;
@@ -1106,7 +1109,8 @@ export function isBattleResolutionCommandComplete(
     field = applyCompletedCommand(field, segment.commands[index]!);
   }
   return state.lifecycle.phaseElapsed + 1
-    >= battleResolutionCommandDuration(command, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput));
+    >= battleResolutionCommandDuration(command, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput),
+      state.liveMoveBattlerX2Input?.moveUse);
 }
 
 export function isBattleResolutionButtonMessageReady(
