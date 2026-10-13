@@ -30,17 +30,21 @@ def gate_at(events, i):
     if any((x.startswith("msg:") and x != EMPTY) or x.startswith("sa:") or (x.startswith("anim:") and not x.startswith("anim:HIT_ANIMATION"))
            for x in tail):
         return "closed", 0
-    mv = next((events[j] for j in range(i - 1, -1, -1) if events[j].startswith("anim:MOVE_ANIMATION")), None)
-    move, atk = (mv.split(":")[2], int(mv.split(":")[3])) if mv else (None, None)
+    # the hit: its MOVE_ANIMATION (Scene ON) / SCENE_OFF_ATTACK_PAUSE (Scene OFF, no move id)
+    mv = next((events[j] for j in range(i - 1, -1, -1) if events[j].startswith(("anim:MOVE_ANIMATION", "anim:SCENE_OFF_ATTACK_PAUSE"))), None)
+    move = mv.split(":")[2] if mv and mv.startswith("anim:MOVE_ANIMATION") else None
     nxt = next((x[4:] for x in events[i + 1:] if x.startswith("msg:")), None)
     _, aid, a0, b = events[i].split(":")
     if aid == "STATS_CHANGE":
-        cls = "speed-boost" if nxt == "STRINGID_PKMNRAISEDSPEED" else (
-            ("stats-change-attacker-psca" if move in SELF_DROP_PSCA else "stats-change-all-stats-up" if move in ALL_STATS_UP
-             else "stats-change-attacker" if nxt == "STRINGID_ATTACKERSSTATROSE" else "stats-change-other") if atk == int(b)
-            else "stats-change-target" if nxt == "STRINGID_DEFENDERSSTATFELL" else "stats-change-other")
+        prev = next((x for x in reversed(tail) if x not in ("set-battler-pp-data", "game-stat-increment")), None)
+        cls = "speed-boost" if nxt == "STRINGID_PKMNRAISEDSPEED" else \
+            "stats-change-target" if prev == "stat-stage-change" and nxt == "STRINGID_DEFENDERSSTATFELL" else \
+            "stats-change-attacker" if prev == "stat-stage-change" and nxt == "STRINGID_ATTACKERSSTATROSE" else \
+            "stats-change-attacker-psca" if move in SELF_DROP_PSCA else "stats-change-all-stats-up" if move in ALL_STATS_UP else "stats-change-other"
+        if mv is None:
+            return cls, 0
     else:
-        cls = "multi-hit" if EMPTY in tail and move == a0 and not (nxt or "").startswith("STRINGID_PKMN") else "move-animation-other"
+        cls = "multi-hit" if EMPTY in tail and move is not None and move == a0 and not (nxt or "").startswith("STRINGID_PKMN") else "move-animation-other"
     fixed = rules["fixedRows"].get(cls)
     if fixed is None:
         return cls, None

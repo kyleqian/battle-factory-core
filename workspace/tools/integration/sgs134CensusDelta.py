@@ -5,10 +5,12 @@ output per tree x scene (<dir>/<tree>-<scene><k>.jsonl), docs/sgs134-se-gate-oth
 Per battle (paired by seed): the end, the kernel-events digest (gameplay) and the segment / command-type sequence must be identical; per
 command, presented frames = next command start - start (the battle's last command: the battle's end frame). Checked:
   - every command whose frames differ carries seGateFrames (patched) and differs by EXACTLY it; every seGateFrames command differs;
+    the ONE exception is the census driver's input parity: it presses A on even frames while a message awaits dismissal, so after an
+    odd cumulative shift a button-dismissed message lasts 1 frame more / less (reported as `messageParity`: a message, |delta| == 1,
+    and the cumulative shift before it odd — never anything else);
   - only `stats-change` (both scenes) and `move-animation` (Scene ON) commands carry seGateFrames;
-  - the gated commands == sgs134ExposureSummary.py's projection (exposure.json openReceipts with gate > 0, Scene ON): per (seed, class)
-    counts and frames; projected receipts with no presented command (a stats-change behind a Substitute / after a Double Team body) are
-    counted, never silently dropped.
+  - the gated commands == sgs134ExposureSummary.py's projection (exposure.json openReceipts with gate > 0, Scene ON kernel): per
+    (seed, command type) frames; Scene OFF: the stats-change cells (same kernel gameplay, same rule); cells that differ are listed.
 usage: sgs134CensusDelta.py <delta-dir> <exposure.json> <out.json>
 """
 import collections, glob, json, os, sys
@@ -47,6 +49,7 @@ for scene in ("on", "off"):
         cb = [c for g in b["segments"] for c in g["cmds"]]
         da = [ca[i + 1]["f"] - c["f"] if i + 1 < len(ca) else a["frames"] - c["f"] for i, c in enumerate(ca)]
         db = [cb[i + 1]["f"] - c["f"] if i + 1 < len(cb) else b["frames"] - c["f"] for i, c in enumerate(cb)]
+        shift = 0
         for c, x, y in zip(cb, da, db):
             r["commands"] += 1
             sg = c.get("sg", 0)
@@ -54,22 +57,25 @@ for scene in ("on", "off"):
                 gated[c["t"]] += 1
                 gated_frames[c["t"]] += sg
                 per_seed[(seed, c["t"])] += sg
-            if y - x != sg:
-                bad.append({"seed": seed, "why": f"{c['t']} frames {x} -> {y}, seGateFrames {sg}"})
+            if y - x != sg and c["t"] == "message" and abs(y - x) == 1 and shift % 2 == 1 and not sg:
+                r["messageParity"] += 1
+            elif y - x != sg:
+                bad.append({"seed": seed, "why": f"{c['t']} frames {x} -> {y}, seGateFrames {sg}, shift {shift}"})
             elif sg:
                 r["gatedExact"] += 1
             else:
                 r["ungatedIdentical"] += 1
+            shift += y - x
         r["framesBase"] += a["frames"]
         r["framesPatched"] += b["frames"]
     allowed = {"stats-change", "move-animation"} if scene == "on" else {"stats-change"}
     if set(gated) - allowed:
         bad.append({"why": f"unexpected gated command types {sorted(set(gated) - allowed)}"})
     sres = {**r, "gatedCommands": dict(gated), "gateFrames": dict(gated_frames), "problems": bad[:20], "problemCount": len(bad)}
-    if scene == "on":
+    if True:
         proj = collections.Counter()
         for x in exposure["openReceipts"]:
-            if x["gate"]:
+            if x["gate"] and (scene == "on" or x["cls"] != "multi-hit"):
                 t = "move-animation" if x["cls"] == "multi-hit" else "stats-change"
                 proj[(x["seed"], t)] += x["gate"]
         match = sum(1 for k in proj if per_seed.get(k, 0) == proj[k])

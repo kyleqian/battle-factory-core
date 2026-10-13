@@ -97,3 +97,20 @@ describe("sgs134 production today (seeds 0..199): short by exactly the gate", ()
     for (const deltas of Object.values(m.deltaByGate as Record<string, Record<string, number>>)) expect(Object.keys(deltas)).toEqual(["0"]);
   });
 });
+
+describe("sgs134 banked patch: census delta 0..999 (base vs patched archive copies)", () => {
+  const d = json(`${F}/census-delta.json`);
+  it("changes only the gated commands, each by exactly its gate == the projection; gameplay identical", () => {
+    expect(d.ok).toBe(true);
+    for (const scene of ["on", "off"]) {
+      expect(d[scene].battles).toBe(1000);
+      expect(d[scene].sameEndDigestCommandTypes).toBe(1000);
+      expect(d[scene].problemCount).toBe(0);
+      expect(d[scene].projection.cellsEqual).toBe(d[scene].projection.seedClassCells);
+    }
+    expect(d.on.gatedCommands).toEqual({ "move-animation": 126, "stats-change": 240 });
+    expect(d.on.gateFrames).toEqual({ "move-animation": 540, "stats-change": 3114 });
+    expect(d.off.gatedCommands).toEqual({ "stats-change": 240 });
+    expect(d.off.gateFrames).toEqual({ "stats-change": 3114 });
+  });
+});

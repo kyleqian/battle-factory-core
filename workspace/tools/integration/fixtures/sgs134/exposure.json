@@ -591,14 +591,15 @@
    "openDrainMin": 7
   },
   "stats-change-all-stats-up": {
-   "receiptsAfterSe": 39,
+   "receiptsAfterSe": 42,
    "open": 17,
    "openBySe": {
     "13": 17
    },
    "closedBy": {
-    "super-effective": 5,
+    "super-effective": 6,
     "not-very-effective": 10,
+    "animation script": 2,
     "other print": 2,
     "crit": 5
    },
@@ -623,13 +624,13 @@
    "openDrainMin": 2
   },
   "stats-change-attacker": {
-   "receiptsAfterSe": 30,
+   "receiptsAfterSe": 29,
    "open": 19,
    "openBySe": {
     "13": 19
    },
    "closedBy": {
-    "not-very-effective": 9,
+    "not-very-effective": 8,
     "crit": 2
    },
    "unmeasured": 0,
@@ -694,17 +695,17 @@
    "openDrainMin": 4
   },
   "stats-change-other": {
-   "receiptsAfterSe": 724,
+   "receiptsAfterSe": 898,
    "open": 1,
    "openBySe": {
     "13": 1
    },
    "closedBy": {
-    "not-very-effective": 124,
-    "other print": 356,
-    "animation script": 100,
-    "super-effective": 96,
-    "crit": 47
+    "animation script": 116,
+    "not-very-effective": 162,
+    "other print": 452,
+    "super-effective": 109,
+    "crit": 58
    },
    "unmeasured": 1,
    "unmeasuredBound": {
@@ -727,17 +728,17 @@
    "openDrainMin": 56
   },
   "stats-change-target": {
-   "receiptsAfterSe": 890,
+   "receiptsAfterSe": 714,
    "open": 440,
    "openBySe": {
     "13": 440
    },
    "closedBy": {
-    "animation script": 19,
-    "not-very-effective": 165,
-    "super-effective": 124,
-    "other print": 97,
-    "crit": 45
+    "not-very-effective": 128,
+    "super-effective": 110,
+    "crit": 34,
+    "animation script": 1,
+    "other print": 1
    },
    "unmeasured": 0,
    "unmeasuredBound": {

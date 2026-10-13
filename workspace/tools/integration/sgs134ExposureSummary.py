@@ -10,8 +10,9 @@ usage: sgs134ExposureSummary.py <dir-with-e*.jsonl> <exposure.json> <fixed-rows.
             no animation script in between (a MOVE_ANIMATION / B_ANIM_* / status animation: its Cmd_end waits until IsSEPlaying is FALSE,
             battle_anim.c:476-503, so the SE is drained before the receipt; HIT_ANIMATION is a sprite blink, not a script); closed
             receipts are counted by the first closer (NOTVERYEFFECTIVE / SUPEREFFECTIVE / CRITICALHIT / other print / animation script).
-  class     stats-change-target (B_ANIM_STATS_CHANGE on the move's target, next print DEFENDERSSTATFELL: BattleScript_StatDown) /
-            stats-change-attacker (on the attacker = the battler of the last MOVE_ANIMATION, ATTACKERSSTATROSE: BattleScript_StatUp) /
+  class     stats-change-target / stats-change-attacker (B_ANIM_STATS_CHANGE right after a `stat-stage-change` = SetMoveEffect's
+            ChangeStatBuffs, next print DEFENDERSSTATFELL: BattleScript_StatDown on the target / ATTACKERSSTATROSE: StatUp on the attacker;
+            on census 0..999 exactly the receipts on the target / on the attacker = the battler of the last MOVE_ANIMATION) /
             stats-change-attacker-psca (Overheat / Psycho Boost / Superpower self-drops) / stats-change-all-stats-up (AncientPower /
             Silver Wind) / speed-boost (next print PKMNRAISEDSPEED) / stats-change-other, multi-hit (MOVE_ANIMATION of the same move as the last one with EMPTYSTRING3 in between: the 2nd+ hit),
             move-animation-other (open: a two-turn move's charge turn, whose opener print is EMPTYSTRING3), held-item
@@ -40,12 +41,17 @@ def classify(r):
     _, aid, a0, b = t.split(":")
     nxt = r["nextMessage"]
     if aid == "STATS_CHANGE":
+        # SetMoveEffect's ChangeStatBuffs (`stat-stage-change`) right before the request = BattleScript_StatDown / StatUp (a hit's
+        # secondary); the playstatchangeanimation paths (Overheat / Superpower / AncientPower) animate before their stat change.
+        stat_first = bool(r["tail"]) and r["tail"][-1] == "stat-stage-change"
         if nxt == "STRINGID_PKMNRAISEDSPEED":
             return "speed-boost"
-        if r.get("atk") == int(b):
-            return "stats-change-attacker-psca" if r["move"] in SELF_DROP_PSCA else "stats-change-all-stats-up" if r["move"] in ALL_STATS_UP \
-                else "stats-change-attacker" if nxt == "STRINGID_ATTACKERSSTATROSE" else "stats-change-other"
-        return "stats-change-target" if nxt == "STRINGID_DEFENDERSSTATFELL" else "stats-change-other"
+        if stat_first and nxt == "STRINGID_DEFENDERSSTATFELL":
+            return "stats-change-target"
+        if stat_first and nxt == "STRINGID_ATTACKERSSTATROSE":
+            return "stats-change-attacker"
+        return "stats-change-attacker-psca" if r["move"] in SELF_DROP_PSCA else "stats-change-all-stats-up" if r["move"] in ALL_STATS_UP \
+            else "stats-change-other"
     if aid == "MOVE_ANIMATION":
         # the 2nd+ hit of a multi-hit move: same move, the loop's EMPTYSTRING3 in between, and not a two-turn move's charge turn (whose
         # next print is its "dug a hole" / "took in sunlight" string)
