@@ -25,7 +25,7 @@ const cases: { id: number; move: string; duration: Pair; shadowRow: 0 | undefine
   { id: 72, move: "MEGA_DRAIN", duration: [218, 218], shadowRow: 0, alt: ["TANGELA", "ONIX"], route: { seed: 29, moves: [0], streak: 7 } },
   { id: 71, move: "ABSORB", duration: [194, 194], shadowRow: undefined, alt: ["LOMBRE", "ONIX"], route: { seed: 23, moves: [3], streak: 0 } },
   { id: 138, move: "DREAM_EATER", duration: [266, 267], shadowRow: 0, alt: ["JYNX", "ONIX"], route: { seed: 41, moves: [1, 2], streak: 14 } },
-  { id: 104, move: "DOUBLE_TEAM", duration: [230, 230], shadowRow: undefined, alt: ["DELCATTY", "ONIX"], route: { seed: 0, moves: [2], streak: 7 } },
+  { id: 104, move: "DOUBLE_TEAM", duration: [239, 239], /* tmr136: 230 + 9 tail rows */ shadowRow: undefined, alt: ["DELCATTY", "ONIX"], route: { seed: 0, moves: [2], streak: 7 } },
   { id: 297, move: "FEATHER_DANCE", duration: [168, 168], shadowRow: 0, alt: ["PIDGEOT", "ONIX"], route: { seed: 3, moves: [2], streak: 0 } },
 ];
 

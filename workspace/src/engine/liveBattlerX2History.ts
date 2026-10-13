@@ -28,6 +28,7 @@ import type { BattleKernelSemanticEvent } from "./battleDecisionBoundary.ts";
 import { battleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
+import { LIVE_MOVE_TIMING_USE_KEYED_IDS } from "./liveMoveTimingPolicy.ts";
 
 export type LiveBattlerX2State = "idle" | "zeroed" | "unknown";
 export type LiveBattlerX2Side = "player" | "opponent";
@@ -37,6 +38,12 @@ export type LiveMoveBattlerX2Input = Readonly<{
   zeroed: readonly LiveBattlerX2Side[];
   /** Endeavor (283) bodies only: the stale gBattleMovePower may have been written by the unported Battle TV loop (W3). */
   staleMovePowerUnknown?: true;
+  /**
+   * tmr136: use-keyed D4 timing moves only (liveMoveTimingPolicy.ts LIVE_MOVE_TIMING_USE_KEYED_IDS, Smokescreen 108): this body's ordinal
+   * among the battle's bodies of the same move (1 = the battle's first), counted by the host from the battle's own MOVE_ANIMATION events.
+   * Absent = unknown history (events unseen): the use-keyed policy falls back to the status quo.
+   */
+  moveUse?: number;
 }>;
 
 export type LiveBattlerX2Event =
@@ -251,6 +258,10 @@ export interface LiveBattlerX2Host {
   readonly staleMovePowerUnknown?: true;
   /** Next unapplied semantic event of the presented resolution; `drained` once its last segment is applied. */
   readonly cursor: Readonly<{ requestId: number; segmentIndex: number; nextEventIndex: number; drained: boolean }> | null;
+  /** tmr136: applied MOVE_ANIMATION bodies of the use-keyed moves in this battle, by move id (absent = none yet). */
+  readonly moveUses?: Readonly<Record<number, number>>;
+  /** tmr136: set once events were unseen (the use counts are unknown for the rest of the battle). */
+  readonly moveUsesUnknown?: true;
 }
 
 interface ResolutionView {
@@ -270,8 +281,10 @@ export function createLiveBattlerX2Host(
 export function invalidateLiveBattlerX2Host(host: LiveBattlerX2Host, reason: string, eventsUnseen = false): LiveBattlerX2Host {
   const history = applyLiveBattlerX2Event(host.history, { kind: "unknown", side: "both", reason });
   const stale = host.staleMovePowerUnknown === true || eventsUnseen;
-  return history === host.history && stale === (host.staleMovePowerUnknown === true)
-    ? host : Object.freeze({ ...host, history, ...(stale ? { staleMovePowerUnknown: true as const } : {}) });
+  const usesUnknown = host.moveUsesUnknown === true || eventsUnseen;
+  return history === host.history && stale === (host.staleMovePowerUnknown === true) && usesUnknown === (host.moveUsesUnknown === true)
+    ? host : Object.freeze({ ...host, history, ...(stale ? { staleMovePowerUnknown: true as const } : {}),
+      ...(usesUnknown ? { moveUsesUnknown: true as const } : {}) });
 }
 
 /** The x2 input of one move body; an Endeavor body also carries the host's stale-power status. */
@@ -279,6 +292,10 @@ export function liveMoveBattlerX2InputForBody(
   host: LiveBattlerX2Host, request: Readonly<{ moveId: number }>,
 ): LiveMoveBattlerX2Input | undefined {
   const input = liveMoveBattlerX2Input(host.history);
+  // tmr136: a use-keyed move's body carries its use ordinal (the host was advanced strictly before this body's own event).
+  if (LIVE_MOVE_TIMING_USE_KEYED_IDS.has(request.moveId) && host.moveUsesUnknown !== true) {
+    return Object.freeze({ zeroed: input?.zeroed ?? Object.freeze([]), moveUse: (host.moveUses?.[request.moveId] ?? 0) + 1 });
+  }
   if (request.moveId !== 283 || !host.staleMovePowerUnknown) return input;
   return Object.freeze({ zeroed: input?.zeroed ?? Object.freeze([]), staleMovePowerUnknown: true as const });
 }
@@ -294,18 +311,26 @@ export function advanceLiveBattlerX2Host(
   const requestId = resolution.resolutionId.requestId;
   let history = host.history;
   let stale = host.staleMovePowerUnknown === true;
+  let uses = host.moveUses;
+  let usesUnknown = host.moveUsesUnknown === true;
   let cursor = host.cursor;
   if (cursor?.requestId !== requestId) {
     if (cursor !== null && !cursor.drained) {
       history = applyLiveBattlerX2Event(history, { kind: "unknown", side: "both", reason: "previous resolution not fully applied" });
       stale = true;
+      usesUnknown = true;
     }
     cursor = { requestId, segmentIndex: 0, nextEventIndex: 0, drained: false };
   }
   const apply = (events: readonly BattleKernelSemanticEvent[], from: number, limit: number, strict: boolean) => {
     let index = from;
     while (index < events.length && (strict ? events[index]!.sequence < limit : events[index]!.sequence <= limit)) {
-      for (const event of liveBattlerX2EventsOf(events[index]!)) history = applyLiveBattlerX2Event(history, event);
+      for (const event of liveBattlerX2EventsOf(events[index]!)) {
+        history = applyLiveBattlerX2Event(history, event);
+        if (event.kind === "move-body" && LIVE_MOVE_TIMING_USE_KEYED_IDS.has(event.moveId)) {
+          uses = Object.freeze({ ...uses, [event.moveId]: (uses?.[event.moveId] ?? 0) + 1 });
+        }
+      }
       if (liveStaleMovePowerTaintedBy(events[index]!)) stale = true;
       index += 1;
     }
@@ -323,8 +348,10 @@ export function advanceLiveBattlerX2Host(
       drained: nextEventIndex >= events.length && cursor.segmentIndex === resolution.segments.length - 1,
     };
   }
-  if (history === host.history && stale === (host.staleMovePowerUnknown === true) && cursor.requestId === host.cursor?.requestId
+  if (history === host.history && stale === (host.staleMovePowerUnknown === true) && uses === host.moveUses
+    && usesUnknown === (host.moveUsesUnknown === true) && cursor.requestId === host.cursor?.requestId
     && cursor.segmentIndex === host.cursor.segmentIndex && cursor.nextEventIndex === host.cursor.nextEventIndex
     && cursor.drained === host.cursor.drained) return host;
-  return Object.freeze({ history, cursor: Object.freeze(cursor), ...(stale ? { staleMovePowerUnknown: true as const } : {}) });
+  return Object.freeze({ history, cursor: Object.freeze(cursor), ...(stale ? { staleMovePowerUnknown: true as const } : {}),
+    ...(uses === undefined ? {} : { moveUses: uses }), ...(usesUnknown ? { moveUsesUnknown: true as const } : {}) });
 }

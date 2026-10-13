@@ -47,18 +47,18 @@ describe("shp116: Shadow Punch age-90 restore lag (D4)", () => {
     expect(LIVE_MOVE_TIMING_POLICY[325]!.parameters.map((p) => [p.side, p.alternatives[0].measured, p.alternatives[1].measured])).toEqual([["opponent", 12, 4], ["player", 13, 3]]);
   });
 
-  it("accounting: Shadow Punch moved from scoped exact to faithful timing (237 + 13 + 26 = 276; Struggle the separate + 1)", () => {
+  it("accounting: Shadow Punch moved from scoped exact to faithful timing (236 + 13 + 27 = 276 after tmr136's Smokescreen; Struggle the separate + 1)", () => {
     expect(LIVE_MOVE_ANIMATION_IDS).not.toContain(325);
     expect(LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS).toContain(325);
     const status = JSON.parse(readFileSync("docs/animation-integration-live-status.json", "utf8"));
-    expect([status.implementedCount - Object.keys(status.additionalRequiredBodies).length, status.faithfulRandomCount, status.faithfulTimingCount]).toEqual([237, 13, 26]);
-    expect(status.implementedCount).toBe(238);
+    expect([status.implementedCount - Object.keys(status.additionalRequiredBodies).length, status.faithfulRandomCount, status.faithfulTimingCount]).toEqual([236, 13, 27]);
+    expect(status.implementedCount).toBe(237);
     expect(status.implementedAdapters.some((e: { id: number }) => e.id === 325)).toBe(false);
     const entry = status.faithfulTimingAdapters.find((e: { id: number }) => e.id === 325);
     expect(entry.timingParameters).toEqual(LIVE_MOVE_TIMING_POLICY[325]!.parameters.map(({ evidence: _evidence, ...p }) => p));
     expect(entry.alternatePhaseResidual).toMatchObject({ ages: [...range(83, 98), 101], maxPixelsPerRow: 18176 });
     const census = JSON.parse(readFileSync("tools/integration/fixtures/remaining-adapters-census.json", "utf8"));
-    expect(census.summary?.sumsTo ?? census.sumsTo).toBe("237+13+26+0+0=276");
+    expect(census.summary?.sumsTo ?? census.sumsTo).toBe("236+13+27+0+0=276");
   });
 
   it("the live adapter follows the policy: 107 player / 106 opponent rows and liveFadeHost deferrals 1", () => {

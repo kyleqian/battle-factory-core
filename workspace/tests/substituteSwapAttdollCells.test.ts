@@ -63,7 +63,7 @@ describe("attacker-doll swap cells (prep40)", () => {
       // land82 (doll81)
       [142, 152, 153, 0, ["player", "opponent"]], [320, 225, 221, 0, ["player", "opponent"]], // ctl95: opponent widened
       // doll90: Double Team (self-target), the doll-free controls' calibrated shift -1
-      [104, 230, 159, -1, ["player", "opponent"]],
+      [104, 239, 159, -1, ["player", "opponent"]], // tmr136: adapter 230 + 9 tail rows; the framed ROM body is unchanged
       // ctl95: Recover (self-target), the accepted window's age 0 = the first orb (activation + 10)
       [105, 169, 184, -10, ["player", "opponent"]],
     ];

@@ -61,7 +61,21 @@ export type LiveMoveTimingParameter = Readonly<{
    * presentation unit (the order host's lend without `firstBody`), measured per class (d4later: Sheer Cold / Extrasensory opponent attacker).
    */
   body?: LiveMoveTimingBody;
+  /**
+   * The move's use in the battle this parameter applies to (absent = every use): "first" = the battle's first body of this move, "later" =
+   * any later one (tmr136: Smokescreen). The use ordinal comes from the Scene ON x2 history host's per-battle fold of the battle's own
+   * MOVE_ANIMATION events (liveBattlerX2History.ts `moveUse`); an unknown history matches no use-keyed parameter.
+   */
+  use?: LiveMoveTimingUse;
 }>;
+
+/** A move's use in the battle: "first" = the battle's first body of the move (use ordinal 1), "later" = ordinal >= 2. */
+export type LiveMoveTimingUse = "first" | "later";
+
+/** The use class of a body's use ordinal (liveBattlerX2History.ts LiveMoveBattlerX2Input.moveUse); undefined = unknown history. */
+export function liveMoveTimingUseOf(moveUse: number | undefined): LiveMoveTimingUse | undefined {
+  return moveUse === undefined ? undefined : moveUse <= 1 ? "first" : "later";
+}
 
 /** The order host's body class: "first" = the battle's first presentation unit (lend `firstBody`), "later" = any known lend after it. */
 export type LiveMoveTimingBody = "first" | "later";
@@ -614,6 +628,30 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
    * no lag for counters 0..3, the row-112 lag for counter 4. A lag row repeats the previous hardware OAM, holds the sprites and moves the task
    * step one row earlier. Later counters take the seam-resolved deferred lend (docs/s10a-random2-order-lend-blocker.md design 1). Also D3.
    */
+  /**
+   * tmr136 (docs/tmr136-timing-remainders.md; docs/aud129-live-audit-27.md s2; tools/integration/fixtures/aud129/aud129-phase-base.txt +
+   * aud129-shift-base.txt): Smokescreen's ROM body is 124 or 125 rows; every row before 49 is the same. In the 124-row phase the black-smoke
+   * sprites (AnimBlackSmoke_Step: `invisible ^= 1` and the x2 drift every frame) run one frame ahead from row 49 (ROM rows 49..123 ==
+   * the 125-row body's ages 50..124, 0 px, 16 / 16): an optional lag before row 49. The phase follows the move's use in the battle:
+   * the battle's first Smokescreen 15 no lag : 1 lag, later ones 1 : 7 (24 measured windows). The source mechanism of the first-use
+   * dependence (the CPU work around SmokescreenImpact's sheet load near row 48) is not identified; the key is measured.
+   */
+  108: {
+    move: "MOVE_SMOKESCREEN",
+    parameters: [{
+      kind: "optional-lag-age", age: 49, fixedLagAges: [], iterations: 124, use: "first",
+      alternatives: [{ phase: "event", bodyRows: 125, measured: 1 }, { phase: "no-event", bodyRows: 124, measured: 15 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/aud129/aud129-phase-base.txt (SMOKESCREEN use1: romBody 124 x 15, 125 x 1)",
+        "tools/integration/fixtures/aud129/aud129-shift-base.txt (ROM rows 49..123 == production ages 50..124, 0 px, 16 / 16)",
+        "docs/aud129-live-audit-27.md s2"],
+    }, {
+      kind: "optional-lag-age", age: 49, fixedLagAges: [], iterations: 124, use: "later",
+      alternatives: [{ phase: "event", bodyRows: 125, measured: 7 }, { phase: "no-event", bodyRows: 124, measured: 1 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/aud129/aud129-phase-base.txt (SMOKESCREEN use2+: romBody 125 x 7, 124 x 1)", "docs/aud129-live-audit-27.md s2"],
+    }],
+  },
   301: {
     move: "MOVE_ICE_BALL",
     parameters: [
@@ -644,9 +682,10 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
  * an unkeyed one of the same kind / side.
  */
 function liveMoveTimingParameterFor(moveId: number, kind: LiveMoveTimingParameterKind, side?: "player" | "opponent",
-  body: LiveMoveTimingBody = "first"): LiveMoveTimingParameter | null {
+  body: LiveMoveTimingBody = "first", use?: LiveMoveTimingUse): LiveMoveTimingParameter | null {
   const matches = (LIVE_MOVE_TIMING_POLICY[moveId]?.parameters ?? []).filter((p) => p.kind === kind
-    && (side === undefined || p.side === undefined || p.side === side) && (p.body === undefined || p.body === body));
+    && (side === undefined || p.side === undefined || p.side === side) && (p.body === undefined || p.body === body)
+    && (p.use === undefined || p.use === use));
   return matches.find((p) => p.body !== undefined) ?? matches[0] ?? null;
 }
 
@@ -681,8 +720,9 @@ export function liveMoveTimingParameter(moveId: number, kind: LiveMoveTimingPara
  * The chosen optional lag age (the lag is rendered), or null when the chosen phase has no optional lag / the move has none. `side` / `body`
  * select a side- or body-keyed parameter (default: the first-body parameter of either side).
  */
-export function liveMoveOptionalLagAge(moveId: number, side?: "player" | "opponent", body: LiveMoveTimingBody = "first"): number | null {
-  const p = liveMoveTimingParameterFor(moveId, "optional-lag-age", side, body);
+export function liveMoveOptionalLagAge(moveId: number, side?: "player" | "opponent", body: LiveMoveTimingBody = "first",
+  use?: LiveMoveTimingUse): number | null {
+  const p = liveMoveTimingParameterFor(moveId, "optional-lag-age", side, body, use);
   return p !== null && p.chosen === "event" ? p.age : null;
 }
 
@@ -691,11 +731,16 @@ export function liveMoveCounterTimingParameter(moveId: number, kind: LiveMoveTim
   return LIVE_MOVE_TIMING_POLICY[moveId]?.parameters.find((p) => p.kind === kind && p.rolloutCounter === rolloutCounter) ?? null;
 }
 
-/** Body rows in the chosen phase of the move's optional-lag parameter (null without one). */
-export function liveMoveTimingBodyRows(moveId: number, side?: "player" | "opponent", body: LiveMoveTimingBody = "first"): number | null {
-  const p = liveMoveTimingParameterFor(moveId, "optional-lag-age", side, body);
+/** Body rows in the chosen phase of the move's optional-lag parameter (null without one; `use`: a use-keyed parameter, tmr136). */
+export function liveMoveTimingBodyRows(moveId: number, side?: "player" | "opponent", body: LiveMoveTimingBody = "first",
+  use?: LiveMoveTimingUse): number | null {
+  const p = liveMoveTimingParameterFor(moveId, "optional-lag-age", side, body, use);
   return p === null ? null : p.alternatives.find((a) => a.phase === p.chosen)!.bodyRows;
 }
+
+/** Moves with a use-keyed parameter (tmr136): the x2 history host counts their bodies per battle (liveBattlerX2History.ts). */
+export const LIVE_MOVE_TIMING_USE_KEYED_IDS: ReadonlySet<number> = new Set(Object.entries(LIVE_MOVE_TIMING_POLICY)
+  .filter(([, entry]) => entry.parameters.some((p) => p.use !== undefined)).map(([id]) => Number(id)));
 
 /** Production faithful-timing consumers (disjoint from LIVE_MOVE_ANIMATION_IDS and the faithful-random list). */
 export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object.freeze([
@@ -760,6 +805,10 @@ export const LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS: readonly number[] = Object
   // shadowPunchFadeHost.ts restoreTaskStartCallbackDeferrals 1); exact fixtures stay valid in scope; other-phase windows
   // tools/integration/fixtures/sp103/windows/*.
   325,
+  // S10A tmr136 (reclassified from scoped exact, #151 precedent): Smokescreen, the use-keyed optional lag before row 49 (the battle's first
+  // Smokescreen 124 rows, later ones 125; liveMoveAnimation.ts case 108); exact fixtures stay valid in scope; windows tools/integration/
+  // fixtures/aud129 (the phase / shift receipts) and tools/integration/fixtures/tmr136/smokescreen.
+  108,
 ]);
 
 /**

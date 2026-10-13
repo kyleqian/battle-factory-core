@@ -1,0 +1,232 @@
+{
+ "schema": "tmr136-live-receipt/v1",
+ "base": {
+  "commit": "439575012",
+  "src": "58fa6ec74"
+ },
+ "testedCode": {
+  "commit": "ee9a55430fe2acbad42b180dacae50fd6962ae36",
+  "src": "efd12bbb0af9e8b8ad20f26b4c8fdc98d90fba41",
+  "note": "final production code; later commits are docs / runner / receipt only"
+ },
+ "A_doubleTeamTail": {
+  "change": "liveMoveAnimation.ts case 104: 230 -> 230 + LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS (9) = 239; ages 230..238 = General_StatsChange rel 69..77",
+  "probes": "tmr136Probes.sh (tmr136Probe.py, direct mGBA, Scene ON, scenario seeds pinned), r1 == r2 6 / 6",
+  "windows": 12,
+  "allBodyRowsZeroPx": true,
+  "allTailRowsZeroPx": true,
+  "romGlyphAge239": 12,
+  "rOneEqualsTwo": 12,
+  "rows": [
+   {
+    "fixture": "dt60-opp-gardevoir-c0.json",
+    "side": "opponent",
+    "species": "GARDEVOIR/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-opp-gardevoir-c1.json",
+    "side": "opponent",
+    "species": "GARDEVOIR/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-opp-scyther-c0.json",
+    "side": "opponent",
+    "species": "SCYTHER/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-opp-scyther-c1.json",
+    "side": "opponent",
+    "species": "SCYTHER/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-opp-umbreon-c0.json",
+    "side": "opponent",
+    "species": "UMBREON/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-opp-umbreon-c1.json",
+    "side": "opponent",
+    "species": "UMBREON/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-ply-metagross-c0.json",
+    "side": "player",
+    "species": "METAGROSS/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-ply-metagross-c1.json",
+    "side": "player",
+    "species": "METAGROSS/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-ply-scyther-c0.json",
+    "side": "player",
+    "species": "SCYTHER/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-ply-scyther-c1.json",
+    "side": "player",
+    "species": "SCYTHER/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-ply-umbreon-c0.json",
+    "side": "player",
+    "species": "UMBREON/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   },
+   {
+    "fixture": "dt60-ply-umbreon-c1.json",
+    "side": "player",
+    "species": "UMBREON/SNORLAX",
+    "duration": 239,
+    "bodyRows": 231,
+    "bodyPx": 0,
+    "tailRows": 9,
+    "tailPx": 0,
+    "romGlyphAge": 239,
+    "romGlyphAgeR2": 239,
+    "same": true
+   }
+  ]
+ },
+ "B_smokescreen": {
+  "change": "liveMoveTimingPolicy.ts 108 use-keyed optional-lag-age 49 (first 124 / later 125 rows; unknown 125); use = liveBattlerX2History.ts moveUses",
+  "final": {
+   "windows": 24,
+   "rOneEqualsTwo": 24,
+   "inPhase": 22,
+   "inPhaseZeroPx": 22,
+   "tally": {
+    "OK use1 rom124 dur124": 15,
+    "OK use2+ rom125 dur125": 7,
+    "PHASE use1 rom125 dur124": 1,
+    "PHASE use2+ rom124 dur125": 1
+   }
+  },
+  "revert": {
+   "windows": 24,
+   "rOneEqualsTwo": 24,
+   "inPhase": 8,
+   "inPhaseZeroPx": 8,
+   "tally": {
+    "OK None rom125 dur125": 8,
+    "PHASE None rom124 dur125": 16
+   }
+  },
+  "otherPhase": "2 windows (use1 ROM 125 wide-109-108-169-103-c1; use2 ROM 124 phase-smokescreen-opp-s1-c3): rows 49..122 only, 74 rows, 83,292 px, max 1,283 px/row",
+  "route": "seed 4 player KOFFING x3: 130/130/130 -> 129/130/130; ON/OFF rules, RNG, facility equal"
+ },
+ "accounting": {
+  "before": "237+13+26+0+0=276",
+  "after": "236+13+27+0+0=276",
+  "implementedCount": "238 -> 237 (incl. Struggle)",
+  "remainingAdaptersCensus": "live 85.07 %, faithful random 3.84 %, faithful timing 10.60 % (the census's usage-weighted shares)"
+ },
+ "pinsMoved": [
+  "sc106StatsChangeCommand (DT route message 837 -> 846, body->message 230 -> 239, total +54 = 6 x 9; doll fields 239/239/244/244)",
+  "doll90DollCells (230 -> 239)",
+  "substituteSwapAttdollCells (adapter 230 -> 239)",
+  "animation/liveDoubleTeamSides (230 -> 239, ages 0..238)",
+  "animation/livePrep9MoveAdapters (DT [230,230] -> [239,239])",
+  "liveStatusImplementedCount / animation/factoryAnimationInventory / fp100 / shp116 (237+13+26 -> 236+13+27)"
+ ],
+ "gates": {
+  "targeted": "DT test set (60 files) + Smokescreen / accounting / x2 / policy set (95 files) green after the pin moves; tmr136TimingRemainders 9 / 9",
+  "typecheck": "passed",
+  "smoke": "448 / 448",
+  "fullSuite": "4 shards x 4 workers on ee9a55430: 413+411+410+414 = 1,648 files passed (44 skipped), 2,978+4,173+3,260+3,256 = 13,667 tests passed (223 skipped), 0 failed",
+  "build": "passed (887 modules)",
+  "differential": "--base 439575012: fight-submenu 235 / 235 and battle1-postwin-next-prompt 216 / 216 byte-identical (canonical); presentation-rng-playable-live-bodies-seeded-on 172 / 173 (frame 3622, 673 px); vs 506abb5e1 (A only) 173 / 173 -> the moved capture is the DT change (A), (B) moves none",
+  "census": "NOT RUN (time cap): sar131Census.sh base vs final 0..999 is the open acceptance item",
+  "diffCheck": "git diff --check clean",
+  "runner": "tmr136Run.sh from a fresh git-archive copy of d91a131e0 (.integration/validation): probes r1 == r2 6 / 6; same x 6 dt-tail, same smoke-derive.txt / smoke-final.json / smoke-revert.json (ALL SAME)"
+ },
+ "runner": "sh tools/integration/tmr136Run.sh <fresh-out-dir>"
+}

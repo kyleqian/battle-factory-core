@@ -35,10 +35,11 @@ const render = (f: Fixture, age: number) => {
 const strip = (v: { rules: any }) => ({ ...v.rules, rulesContext: { ...v.rules.rulesContext, hitMarker: v.rules.rulesContext.hitMarker & ~0x80 } });
 
 describe("S10A sides: Double Team (104) opponent attacker", () => {
-  it("is live for both attacker sides with the same 230-row window and no #142 activation row", () => {
+  it("is live for both attacker sides with the same 239-row window (230 + the tmr136 stats-change tail) and no #142 activation row", () => {
     for (const attacker of [0, 1] as const) {
       const req = { moveId: 104, attacker, target: (1 - attacker) as 0 | 1, power: 0, damage: 0, friendship: 70, multihit: 0, turn: 0 };
-      expect(liveMoveAnimationDuration(req as BattleMoveAnimationRequest)).toBe(230);
+      // tmr136 (ISSUES #166): + 9 rows (rel 69..77 of the owned General_StatsChange; tools/integration/fixtures/tmr136-live-receipt.json).
+      expect(liveMoveAnimationDuration(req as BattleMoveAnimationRequest)).toBe(239);
     }
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[104]).toBeUndefined();
   });
@@ -102,7 +103,7 @@ describe("S10A sides: Double Team (104) opponent attacker", () => {
     const on = generatedCommandAnimationReplay(3014, "on", [2], 14);
     const off = generatedCommandAnimationReplay(3014, "off", [2], 14);
     const body = on.animations.find((a) => a.moveId === 104 && a.attacker === 1);
-    expect(body?.ages).toEqual(Array.from({ length: 230 }, (_, age) => age));
+    expect(body?.ages).toEqual(Array.from({ length: 239 }, (_, age) => age)); // tmr136: 230 + 9 tail rows
     expect(body?.adapterActive.every(Boolean)).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);

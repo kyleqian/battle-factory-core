@@ -104,7 +104,7 @@ import skyAttackAsset from "../animation/assets/sky-attack.json" with { type: "j
 import snoreAsset from "../animation/assets/snore.json" with { type: "json" };
 import spitUpRedOrbAsset from "../animation/assets/spit-up-red-orb.json" with { type: "json" };
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
-import { liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
+import { LIVE_MOVE_TIMING_POLICY, liveMoveBgWriteRow, liveMoveCounterTimingParameter, liveMoveOptionalLagAge, liveMovePaletteTransferRow, liveMoveTimingBodyOf, liveMoveTimingBodyRows, liveMoveTimingParameter, liveMoveTimingSidePhase, liveMoveTimingUseOf, type LiveMoveTimingBody } from "./liveMoveTimingPolicy.ts";
 import { decodeSpriteOrderPlan, resolveSpriteOrderDeferredLend, type SpriteOrderDeferredCarry, type SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
 import type { PresentationRngHost, PresentationRngWords } from "./presentationRngHost.ts";
 import { isWordsOrderDeferredUnit, WORDS_ORDER_GENERAL_ANIMATION } from "./wordsOrderUnits.ts";
@@ -230,7 +230,9 @@ const liveIceBallCounter = (rolloutCounter: number | undefined): 0 | 1 | 2 | 3 |
 
 export const LIVE_MOVE_ANIMATION_IDS = Object.freeze([
   2, 5, 9, 11, 12, 14, 21, 23, 25, 27, 29, 34, 36, 38, 39, 41, 42, 43, 44, 47, 48, 49, 50,
-  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 95, 97, 101, 103, 105, 106, 108, 112,
+  // Smokescreen 108 reclassified to faithful timing (tmr136, liveMoveTimingPolicy.ts 108, the use-keyed optional lag before row 49); its
+  // exact fixtures stay valid in scope.
+  51, 55, 65, 66, 67, 68, 74, 75, 78, 79, 83, 92, 93, 95, 97, 101, 103, 105, 106, 112,
   // Light Screen 113 reclassified to faithful timing (lsbz, liveMoveTimingPolicy.ts 113, the opponent's row-59 BLDALPHA write phase);
   // its exact fixtures stay valid in scope.
   114, 115, 122, 124, 131, 136, 147, 148, 151, 154, 156, 158, 162, 163, 172, 178, 180, 182, 186, 188, 201, 204,
@@ -1105,15 +1107,34 @@ export function liveMoveSubstituteDollDeclines(
 }
 
 /**
+ * tmr136 (D4, liveMoveTimingPolicy.ts 108): the first row of Smokescreen's no-lag phase (the use-keyed policy chose no optional lag before
+ * row 49: rows 49..123 show the 125-row body's ages 50..124), or null in the lag phase / for an unknown use.
+ */
+export function liveSmokescreenAheadFromAge(moveUse: number | undefined): number | null {
+  const use = liveMoveTimingUseOf(moveUse);
+  if (use === undefined || liveMoveOptionalLagAge(108, undefined, "first", use) !== null) return null;
+  return LIVE_MOVE_TIMING_POLICY[108]!.parameters.find((p) => p.use === use)!.age;
+}
+
+/**
+ * tmr136 (ISSUES #166): the rows a live Double Team window holds after its stats banner (rel 69..77 of the General_StatsChange it owns;
+ * the banner's registers are restored on rel 68 = age 229, the ROM's next script instruction runs on rel 77 and the next print's first
+ * glyph shows on rel 78 = age 239). Dense direct-mGBA windows: tools/integration/fixtures/tmr136-live-receipt.json.
+ */
+export const LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS = 9;
+
+/**
  * The presented body rows of a live move body (null: no live duration). `bodyClass` is the order host lend's body class
  * (liveMoveTimingBodyOf; default "first"): d4later's body-keyed D4 parameters (Sheer Cold 329 / Extrasensory 326 opponent later bodies).
  */
 export function liveMoveAnimationDuration(
   request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField, bodyClass: LiveMoveTimingBody = "first",
+  /** tmr136: the body's use ordinal in the battle (LiveMoveBattlerX2Input.moveUse; absent = unknown): use-keyed D4 phases (Smokescreen). */
+  moveUse?: number,
 ): number | null {
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
     const bodyField = substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1);
-    const body = liveMoveAnimationDuration(request, bodyField, bodyClass);
+    const body = liveMoveAnimationDuration(request, bodyField, bodyClass, moveUse);
     return body === null ? null
       : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body, request, bodyField).rows);
   }
@@ -1190,7 +1211,9 @@ export function liveMoveAnimationDuration(
     case 103: return SCREECH_FIRST_INACTIVE_AGE + 1;
     case 105: return 169; // Recover's final blend/star source-owned row.
     case 106: return 101; // Harden source body through its final blend row.
-    case 108: return 125; // smokescreenAtAge: active through 123.
+    // smokescreenAtAge: active through 123. tmr136 (faithful timing, liveMoveTimingPolicy.ts 108): the battle's first Smokescreen is the
+    // 124-row no-lag phase, later ones the 125-row lag phase; an unknown use (no x2 history host, events unseen) keeps 125.
+    case 108: return liveMoveTimingBodyRows(108, undefined, "first", liveMoveTimingUseOf(moveUse)) ?? 125;
     case 109: return CONFUSE_RAY_FRAME_COUNT;
     // Script activation through the two inactive controller displays after
     // resource destruction. The following success printer starts next.
@@ -1406,8 +1429,11 @@ export function liveMoveAnimationDuration(
     case 254: return 99; // Stockpile 205..303 / 207..305 (after a Peck body).
     case 192: return 112; // Zap Cannon 84..195 / 80..191.
     // Double Team 71..300 (first-body lab run, activation 70): row -1. Opponent attacker 78..307 (S10A sides: activation 77, same
-    // 230 rows; tools/integration/fixtures/s10a-live/double-team-opponent-*.json).
-    case 104: return 230;
+    // 230 rows; tools/integration/fixtures/s10a-live/double-team-opponent-*.json). tmr136 (ISSUES #166): + 9 rows (ages 230..238 = the
+    // General_StatsChange's rel 69..77: the field after the banner, until the ROM's next instruction on rel 77), so the following
+    // message's first glyph lands on rel 78 as on the ROM (docs/tmr136-timing-remainders.md). The swap composite frames the ROM body
+    // (LIVE_SUBSTITUTE_SWAP_BODY_FRAMING 159 rows) and is unchanged.
+    case 104: return 230 + LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS;
     // Feather Dance: activation..script end (79..246 / 83..250); the controller's stat banner and messages that follow are
     // queue commands (prep7 s2.2). The reducer is relative to the printer, +44 at the activation frame.
     case 297: return 168;
@@ -4446,7 +4472,10 @@ export function liveMoveAnimationPresentation(
   // Sweet Scent's accepted rows start at reducer age -4 (the pointer-owned setup rows, sweetScentFramebuffer.ts:101).
   const setupAge = request.moveId === 230 ? 4 : 0;
   // Feather Dance: the reducer age is the printer-relative age, 44 at the activation frame (prep7 s2.2).
-  return { config, age: wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1
+  // tmr136: Smokescreen's no-lag phase (the battle's first use): from row 49 the black smoke runs one frame ahead (row r = age r + 1).
+  const smokescreenAhead = request.moveId === 108 && liveSmokescreenAheadFromAge(battlerX2Input?.moveUse) !== null
+    && age >= liveSmokescreenAheadFromAge(battlerX2Input?.moveUse)!;
+  return { config, age: smokescreenAhead ? age + 1 : wallAnchorOffset ? age - wallAnchorOffset : shineBody ? age - 1
     : request.moveId === 297 ? age + 44 : age - setupAge, ...(faithfulRandomHistory ? { faithfulRandomHistory: true as const } : {}) };
 }
 

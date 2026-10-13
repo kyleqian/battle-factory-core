@@ -1,0 +1,218 @@
+{
+ "schema": "tmr136-dt-tail/v1",
+ "scenario": "dt60-ply-metagross",
+ "rows": [
+  {
+   "fixture": "dt60-ply-metagross-c0.json",
+   "side": "player",
+   "species": "METAGROSS/SNORLAX",
+   "live": true,
+   "orderInvalid": null,
+   "window": {
+    "startFrame": 75,
+    "endFrame": 233,
+    "ageOffset": -1
+   },
+   "duration": 239,
+   "digests": [
+    "bb7f19a6ebde2d0f",
+    "bb7f19a6ebde2d0f"
+   ],
+   "same": true,
+   "digest": "bb7f19a6ebde2d0f",
+   "rows": 240,
+   "bodyRows": 231,
+   "bodyPx": 0,
+   "bodyResidual": [],
+   "tailRows": 9,
+   "tailPx": 0,
+   "tailPerRow": [
+    [
+     230,
+     0
+    ],
+    [
+     231,
+     0
+    ],
+    [
+     232,
+     0
+    ],
+    [
+     233,
+     0
+    ],
+    [
+     234,
+     0
+    ],
+    [
+     235,
+     0
+    ],
+    [
+     236,
+     0
+    ],
+    [
+     237,
+     0
+    ],
+    [
+     238,
+     0
+    ]
+   ],
+   "romGlyphAge": 239,
+   "romGlyphBox": {
+    "px": 908,
+    "bbox": [
+     16,
+     96,
+     124,
+     149
+    ]
+   },
+   "romChanges": [
+    {
+     "age": 239,
+     "px": 908,
+     "bbox": [
+      16,
+      96,
+      124,
+      149
+     ]
+    },
+    {
+     "age": 240,
+     "px": 42,
+     "bbox": [
+      22,
+      27,
+      124,
+      133
+     ]
+    },
+    {
+     "age": 241,
+     "px": 28,
+     "bbox": [
+      28,
+      33,
+      124,
+      133
+     ]
+    }
+   ],
+   "romGlyphAgeR2": 239
+  },
+  {
+   "fixture": "dt60-ply-metagross-c1.json",
+   "side": "player",
+   "species": "METAGROSS/SNORLAX",
+   "live": true,
+   "orderInvalid": null,
+   "window": {
+    "startFrame": 1409,
+    "endFrame": 1567,
+    "ageOffset": -1
+   },
+   "duration": 239,
+   "digests": [
+    "bb7f19a6ebde2d0f",
+    "bb7f19a6ebde2d0f"
+   ],
+   "same": true,
+   "digest": "bb7f19a6ebde2d0f",
+   "rows": 240,
+   "bodyRows": 231,
+   "bodyPx": 0,
+   "bodyResidual": [],
+   "tailRows": 9,
+   "tailPx": 0,
+   "tailPerRow": [
+    [
+     230,
+     0
+    ],
+    [
+     231,
+     0
+    ],
+    [
+     232,
+     0
+    ],
+    [
+     233,
+     0
+    ],
+    [
+     234,
+     0
+    ],
+    [
+     235,
+     0
+    ],
+    [
+     236,
+     0
+    ],
+    [
+     237,
+     0
+    ],
+    [
+     238,
+     0
+    ]
+   ],
+   "romGlyphAge": 239,
+   "romGlyphBox": {
+    "px": 908,
+    "bbox": [
+     16,
+     96,
+     124,
+     149
+    ]
+   },
+   "romChanges": [
+    {
+     "age": 239,
+     "px": 908,
+     "bbox": [
+      16,
+      96,
+      124,
+      149
+     ]
+    },
+    {
+     "age": 240,
+     "px": 42,
+     "bbox": [
+      22,
+      27,
+      124,
+      133
+     ]
+    },
+    {
+     "age": 241,
+     "px": 28,
+     "bbox": [
+      28,
+      33,
+      124,
+      133
+     ]
+    }
+   ],
+   "romGlyphAgeR2": 239
+  }
+ ]
+}

@@ -70,10 +70,10 @@ describe("live inventory claim buckets", () => {
     const status = JSON.parse(readFileSync(join(import.meta.dirname, "../../docs/animation-integration-live-status.json"), "utf8"));
     // implementedCount keeps meaning the scoped-exact live adapters; faithful random is a disjoint bucket.
     // d4later: Sky Attack -> faithful timing; fp100: Focus Punch -> faithful timing; shp116 (sp103): Shadow Punch -> faithful timing;
-    // stl109: + Struggle 165, the one required body outside the 276
+    // stl109: + Struggle 165, the one required body outside the 276; tmr136: Smokescreen -> faithful timing (use-keyed lag before row 49)
     const additional = Object.keys(status.additionalRequiredBodies);
     expect(additional).toEqual(["MOVE_STRUGGLE"]);
-    expect(status.implementedCount).toBe(237 + additional.length);
+    expect(status.implementedCount).toBe(236 + additional.length);
     // Faithful-random adapters (liveMovePresentationRng.ts): the production list, nothing more.
     expect(status.faithfulRandomCount).toBe(LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS.length);
     expect(status.faithfulRandomAdapters).toHaveLength(status.faithfulRandomCount);
@@ -131,7 +131,7 @@ describe("live inventory claim buckets", () => {
       live: (status.implementedAdapters as { id: number }[]).filter((entry) => entry.id === 165).length,
     };
     expect(report).toEqual({ required: 1, accepted: 1, live: 1 });
-    expect(status.implementedCount).toBe(238); // 237 scoped exact (shp116: - Shadow Punch) + Struggle
+    expect(status.implementedCount).toBe(237); // 236 scoped exact (shp116: - Shadow Punch; tmr136: - Smokescreen) + Struggle
   });
 });
 
