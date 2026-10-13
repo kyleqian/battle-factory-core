@@ -209,7 +209,7 @@ describe("off148: Scene OFF no-hit pause remainder", () => {
   });
 
   it("unmeasured next receipts keep no pause: sprite-visibility next (Wish, Roar), a held print before the attack (Magnitude, a Magic Coat bounce)", () => {
-    for (const [seed, move, attacker, heldPrint] of [[41, 273, 0, false], [12, 46, 0, false], [286, 222, 1, true], [651, 78, 0, true]] as const) {
+    for (const [seed, move, attacker, heldPrint] of [[41, 273, 0, false], [12, 46, 0, false], [286, 222, 1, true], [682, 184, 1, true]] as const) {
       const bodies = noHitBodies(battleUses(seed, "off"), move, attacker)
         .filter((u) => !heldPrint || u.follow.some((r) => r[1] === "message" && r[0] < u.attack![0]));
       expect(bodies.length).toBeGreaterThan(0);
