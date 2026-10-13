@@ -1,0 +1,46 @@
+{
+ "schema": "rcp154-action-time-receipt/v1",
+ "receipt": "C2u",
+ "followUpTo": "ISSUES #140 (rng146 'possible adjacent gap': mid-turn Encore before the target acts)",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp154-action-time.py",
+ "builder": "tools/probe/build-rcp154-receipt.py",
+ "verify": "tools/probe/verify-rcp154.ts",
+ "card": "tools/probe/rcp154/c2-encore-snorlax-plusle-off.json",
+ "probeSlotPlan": "1,0",
+ "title": "Control for C2 with a user-targeted encored move: Encored mid-turn before acting, the battler runs the encored DEFENSE CURL (MOVE_TARGET_USER) instead of its selected TACKLE; GetMoveTarget draws nothing for MOVE_TARGET_USER, so the turn's only draws are the Encore user's",
+ "scenario": "Same card as C2, opposite slot plan: SNORLAX uses slot 1 DEFENSE CURL on turn 1 (PLUSLE's Encore fails), SELECTS slot 0 TACKLE on turn 2 (one LEFT press), PLUSLE Encores DEFENSE CURL (pos 1) first, and SNORLAX's action runs DEFENSE CURL via battle_util.c:111-117. The port at HEAD runs the turn-start TACKLE (acc / crit / dmg / SEWC that the ROM never draws).",
+ "portPlayerSlots": [
+  1,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "sourceUnderTest": {
+  "encoreArm": "reference/pokeemerald/src/battle_util.c:111-117 HandleAction_UseMove: encoredMove != MOVE_NONE && encoredMove == moves[encoredMovePos] -> gCurrentMove = encoredMove, gCurrMovePos = encoredMovePos, moveTarget = GetMoveTarget(gCurrentMove, NO_TARGET_OVERRIDE). Evaluated at the battler's OWN action, so an Encore set earlier in the same turn applies",
+  "encoreOverwrittenArm": "reference/pokeemerald/src/battle_util.c:119-128 (encored slot overwritten -> clear Encore, use the slot) -- not reachable here",
+  "setEncore": "reference/pokeemerald/src/battle_script_commands.c:8017 Cmd_trysetencore: encoredMove = moves[i] where moves[i] == gLastMoves[target]; encoreTimer = (Random() & 3) + 3 at :8039",
+  "selectionBank": "reference/pokeemerald/src/battle_main.c:4194 (encored at selection -> gChosenMoveByBattler = encoredMove) / :4399 (slot move) -- on turn 2 SNORLAX is not encored at selection, so it banks DEFENSE CURL",
+  "getMoveTarget": "reference/pokeemerald/src/battle_util.c:3828 GetMoveTarget; MOVE_TARGET_SELECTED do { Random() % gBattlersCount } while (target == attacker ...) :3850-3853"
+ },
+ "portPlayerTargets": [
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "portSitesAtHead": {
+  "turnStartEncore": "src/engine/factoryBattleScriptFullTurnDecision.ts:3151-3155 playerRetargets / trainerRetargets = actionRetargetsAtExecution(rules.rulesContext, ...) (function :1628-1636) read the TURN-START rules context; the move id / slot come from actionMoveId (:2416-2442) on the same turn-start context (lockedMoveDecision :2366-2395 only auto-confirms an Encore that already existed at selection)",
+  "actionTimeCheck": "src/engine/factoryBattleScriptFullTurnDecision.ts:1677-1690 runMoveAction re-evaluates only the :130-134 arm (actionTakesChosenMoveChangedArm :1666-1675) on priorState.rulesContext; for action 2 (call site :3012-3022, second.moveId / second.moveSlot / second.retargetsAtExecution) an Encore written by action 1's trysetencore is never consulted",
+  "whatThePortRuns": "turn 2: the banked TACKLE with its full hit chain (accuracycheck where the ROM draws BattleTurnPassed) -- first divergence turn 2 index 2"
+ },
+ "fixShape": "In runMoveAction (factoryBattleScriptFullTurnDecision.ts:1677), before the :130-134 check, evaluate HandleAction_UseMove's Encore arms on the ACTION-TIME battler (priorState.rulesContext.battlers[mover]): (a) battle_util.c:111-117 encoredMove != 0 && moves[encoredMovePos] == encoredMove -> executed move = encoredMove, move slot (gCurrMovePos / chosenMovePositions, PP deduction) = encoredMovePos, retarget via drawActionMoveTarget; (b) :119-128 encoredMove != 0 && moves[encoredMovePos] != encoredMove -> clear Encore, run moves[encoredMovePos], retarget. Only when neither fires fall through to :130-134 / plain. This subsumes the turn-start retargetsAtExecution for Encore (action 1 sees the same state either way). Post-fix sequence = the ROM's (turn 2: acc, Encore timer, GetMoveTarget, acc, crit, dmg, SEWC, BTP)."
+}

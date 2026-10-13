@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import c1 from "../tools/probe/receipts/rcp154-c1-dragged-in-before-acting-off.json" with { type: "json" };
 import c2 from "../tools/probe/receipts/rcp154-c2-encored-mid-turn-selected-off.json" with { type: "json" };
+import c2u from "../tools/probe/receipts/rcp154-c2u-encored-mid-turn-user-target-off.json" with { type: "json" };
 
 /**
  * STEP rcp154 -- stock-ROM receipts for two action-time move choices the
@@ -14,7 +15,7 @@ type Action = Readonly<{
   attacker: number; activeSpecies: number; currentMove: number; currMovePos: number;
   chosenMoveByBattler: number; slotMoveAtCurrMovePos: number;
 }>;
-type Receipt = typeof c1 | typeof c2;
+type Receipt = typeof c1 | typeof c2 | typeof c2u;
 
 const LCG = (value: number) => (Math.imul(value, 0x41c64e6d) + 0x6073) >>> 0;
 const SPECIES = { RHYHORN: 111, ZIGZAGOON: 288, POOCHYENA: 286, PIDGEOT: 18, SNORLAX: 143, PLUSLE: 353 } as const;
@@ -169,5 +170,42 @@ describe("rcp154 C2 -- a battler Encored mid-turn before acting uses the encored
 
   it("predicts the ROM sequence post-fix", () => {
     expectPredictionIsRom(c2);
+  });
+});
+
+describe("rcp154 C2u -- control: the encored move is user-targeted (DEFENSE CURL), the selected one is TACKLE", () => {
+  const turn2 = c2u.rom.turns[1];
+
+  it("is a reproducible, cross-checked stock-ROM receipt on the C2 card with the opposite slot plan", () => {
+    expectProvenance(c2u);
+    expect(c2u.card).toBe(c2.card);
+    expect(c2u.parties).toEqual(c2.parties);
+    expect(c2u.slotPlan).toEqual([1, 0]);
+    expect(c2u.inputSubstitutions.map((step) => [step.menuEntry, step.buttons])).toEqual([[1, ["RIGHT"]], [2, ["LEFT"]]]);
+  });
+
+  it("turn 2: SNORLAX banked TACKLE, was Encored first, ran DEFENSE CURL from slot 1 and drew nothing itself", () => {
+    expect(turn2.actions[1]).toMatchObject({
+      attacker: 0, chosenMoveByBattler: MOVE.TACKLE, currentMove: MOVE.DEFENSE_CURL, currMovePos: 1,
+      encore: [MOVE.DEFENSE_CURL, 1, expect.any(Number)],
+    });
+    expect(messageTexts(turn2)).toEqual(expect.arrayContaining(["SNORLAX got\nan ENCORE!", "SNORLAX used\nDEFENSE CURL!"]));
+    // GetMoveTarget(MOVE_TARGET_USER) runs (battle_util.c:117) but draws nothing.
+    expect(turn2.draws.map((draw) => draw.callerFunction)).toEqual(["Cmd_accuracycheck", "Cmd_trysetencore", "BattleTurnPassed"]);
+  });
+
+  it("port at HEAD FAILs at turn 2 index 2: it runs the turn-start TACKLE's hit chain", () => {
+    expect(c2u.comparison.verdictToday).toBe("FAIL");
+    expect(c2u.comparison.firstDivergence).toMatchObject({
+      turn: 2, index: 2,
+      rom: { reason: "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)" },
+      port: { reason: "accuracycheck" },
+    });
+    expect(c2u.comparison.romActiveHp[1]).toEqual(c2u.comparison.romActiveHp[0]);
+    expect(c2u.comparison.portActiveHp[1][1]).toBeLessThan(c2u.comparison.portActiveHp[0][1]);
+  });
+
+  it("predicts the ROM sequence post-fix", () => {
+    expectPredictionIsRom(c2u);
   });
 });
