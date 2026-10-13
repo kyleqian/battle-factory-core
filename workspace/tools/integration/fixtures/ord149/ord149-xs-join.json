@@ -1,0 +1,1430 @@
+{
+ "schema": "ord149-xs-join/v1",
+ "windows": [
+  {
+   "fixture": "xs-pla-espeon-crobat-xs-1.json",
+   "window": [
+    1213,
+    1374
+   ],
+   "affectedAges": "43..117 (69)",
+   "residualPixels": 11293,
+   "exactRows": 93,
+   "writeRows": [
+    {
+     "age": 43,
+     "data1": 2,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 15,
+     "firstBodySplit": 7
+    },
+    {
+     "age": 44,
+     "data1": 3,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 15,
+     "firstBodySplit": 18
+    },
+    {
+     "age": 45,
+     "data1": 4,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 14,
+     "split": 16,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 46,
+     "data1": 5,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 14,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 47,
+     "data1": 6,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 4,
+     "split": 5,
+     "firstBodySplit": 7
+    },
+    {
+     "age": 48,
+     "data1": 7,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 5,
+     "split": 5,
+     "firstBodySplit": 8
+    },
+    {
+     "age": 49,
+     "data1": 8,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 4,
+     "split": 4,
+     "firstBodySplit": 7
+    },
+    {
+     "age": 50,
+     "data1": 9,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 4,
+     "split": 5,
+     "firstBodySplit": 7
+    },
+    {
+     "age": 51,
+     "data1": 10,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 4,
+     "split": 4,
+     "firstBodySplit": 8
+    },
+    {
+     "age": 52,
+     "data1": 11,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 12,
+     "split": 13,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 53,
+     "data1": 12,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 9,
+     "split": 10,
+     "firstBodySplit": 16
+    },
+    {
+     "age": 54,
+     "data1": 13,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 6,
+     "split": 7,
+     "firstBodySplit": 12
+    },
+    {
+     "age": 55,
+     "data1": 14,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 15,
+     "split": 16,
+     "firstBodySplit": 11
+    },
+    {
+     "age": 56,
+     "data1": 15,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 15,
+     "firstBodySplit": 11
+    },
+    {
+     "age": 57,
+     "data1": 16,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 15,
+     "firstBodySplit": 12
+    },
+    {
+     "age": 58,
+     "data1": 17,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 14,
+     "split": 16,
+     "firstBodySplit": 12
+    },
+    {
+     "age": 59,
+     "data1": 18,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 14,
+     "firstBodySplit": 10
+    },
+    {
+     "age": 60,
+     "data1": 19,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 15,
+     "firstBodySplit": 11
+    },
+    {
+     "age": 61,
+     "data1": 20,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 14,
+     "split": 16,
+     "firstBodySplit": 8
+    },
+    {
+     "age": 62,
+     "data1": 21,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 15,
+     "firstBodySplit": 19
+    },
+    {
+     "age": 63,
+     "data1": 22,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 8,
+     "split": 9,
+     "firstBodySplit": 8
+    },
+    {
+     "age": 64,
+     "data1": 23,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 17,
+     "split": 19,
+     "firstBodySplit": 8
+    },
+    {
+     "age": 67,
+     "data1": 0,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 28,
+     "split": 31,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 68,
+     "data1": 1,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 14,
+     "split": 16,
+     "firstBodySplit": 16
+    },
+    {
+     "age": 69,
+     "data1": 2,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 14,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 70,
+     "data1": 3,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 14,
+     "split": 15,
+     "firstBodySplit": 16
+    },
+    {
+     "age": 71,
+     "data1": 4,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 14,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 72,
+     "data1": 5,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 14,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 73,
+     "data1": 6,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 15,
+     "firstBodySplit": 8
+    },
+    {
+     "age": 74,
+     "data1": 7,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 8,
+     "split": 9,
+     "firstBodySplit": 8
+    },
+    {
+     "age": 75,
+     "data1": 8,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 7,
+     "split": 8,
+     "firstBodySplit": 7
+    },
+    {
+     "age": 76,
+     "data1": 9,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 7,
+     "split": 8,
+     "firstBodySplit": 8
+    },
+    {
+     "age": 77,
+     "data1": 10,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 8,
+     "split": 9,
+     "firstBodySplit": 7
+    },
+    {
+     "age": 78,
+     "data1": 11,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 15,
+     "split": 16,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 79,
+     "data1": 12,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 14,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 80,
+     "data1": 13,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 14,
+     "split": 16,
+     "firstBodySplit": 16
+    },
+    {
+     "age": 81,
+     "data1": 14,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 13,
+     "split": 15,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 82,
+     "data1": 15,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 14,
+     "split": 15,
+     "firstBodySplit": 16
+    },
+    {
+     "age": 83,
+     "data1": 16,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 16,
+     "split": 17,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 84,
+     "data1": 17,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 11,
+     "split": 12,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 85,
+     "data1": 18,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 10,
+     "split": 11,
+     "firstBodySplit": 14
+    },
+    {
+     "age": 86,
+     "data1": 19,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 12,
+     "split": 13,
+     "firstBodySplit": 16
+    },
+    {
+     "age": 87,
+     "data1": 20,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 11,
+     "split": 12,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 88,
+     "data1": 21,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 11,
+     "split": 12,
+     "firstBodySplit": 15
+    },
+    {
+     "age": 89,
+     "data1": 22,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 6,
+     "split": 6,
+     "firstBodySplit": 9
+    },
+    {
+     "age": 90,
+     "data1": 23,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 4,
+     "split": 4,
+     "firstBodySplit": 5
+    },
+    {
+     "age": 93,
+     "data1": 0,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 37,
+     "split": 41,
+     "firstBodySplit": 31
+    },
+    {
+     "age": 94,
+     "data1": 1,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 25,
+     "split": 28,
+     "firstBodySplit": 25
+    },
+    {
+     "age": 95,
+     "data1": 2,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 25,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 96,
+     "data1": 3,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 23,
+     "split": 26,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 97,
+     "data1": 4,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 19
+    },
+    {
+     "age": 98,
+     "data1": 5,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 28
+    },
+    {
+     "age": 99,
+     "data1": 6,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 25
+    },
+    {
+     "age": 100,
+     "data1": 7,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 25
+    },
+    {
+     "age": 101,
+     "data1": 8,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 31,
+     "split": 34,
+     "firstBodySplit": 27
+    },
+    {
+     "age": 102,
+     "data1": 9,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 25
+    },
+    {
+     "age": 103,
+     "data1": 10,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 104,
+     "data1": 11,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 25
+    },
+    {
+     "age": 105,
+     "data1": 12,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 25,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 106,
+     "data1": 13,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 25
+    },
+    {
+     "age": 107,
+     "data1": 14,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 26
+    },
+    {
+     "age": 108,
+     "data1": 15,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 109,
+     "data1": 16,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 110,
+     "data1": 17,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 20,
+     "split": 22,
+     "firstBodySplit": 18
+    },
+    {
+     "age": 111,
+     "data1": 18,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 16,
+     "split": 18,
+     "firstBodySplit": 17
+    },
+    {
+     "age": 112,
+     "data1": 19,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 15,
+     "split": 17,
+     "firstBodySplit": 17
+    },
+    {
+     "age": 113,
+     "data1": 20,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 23,
+     "split": 26,
+     "firstBodySplit": 26
+    },
+    {
+     "age": 114,
+     "data1": 21,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 23,
+     "split": 26,
+     "firstBodySplit": 25
+    },
+    {
+     "age": 115,
+     "data1": 22,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 25,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 116,
+     "data1": 23,
+     "window": [
+      2,
+      66
+     ],
+     "entryVcount": 22,
+     "split": 25,
+     "firstBodySplit": 24
+    }
+   ]
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-0.json",
+   "window": [
+    218,
+    378
+   ],
+   "affectedAges": "95..158 (18)",
+   "residualPixels": 298066,
+   "exactRows": 143,
+   "writeRows": [
+    {
+     "age": 95,
+     "data1": 2,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 96,
+     "data1": 3,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 97,
+     "data1": 4,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 20,
+     "split": 22,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 98,
+     "data1": 5,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 19,
+     "split": 20,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 99,
+     "data1": 6,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 19,
+     "split": 20,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 100,
+     "data1": 7,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 20,
+     "split": 22,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 101,
+     "data1": 8,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 20,
+     "split": 22,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 102,
+     "data1": 9,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 19,
+     "split": 20,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 103,
+     "data1": 10,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 19,
+     "split": 20,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 104,
+     "data1": 11,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 15,
+     "split": 16,
+     "firstBodySplit": 16
+    },
+    {
+     "age": 105,
+     "data1": 12,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 24,
+     "split": 26,
+     "firstBodySplit": 26
+    },
+    {
+     "age": 106,
+     "data1": 13,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 107,
+     "data1": 14,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 108,
+     "data1": 15,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 22,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 109,
+     "data1": 16,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 23,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 110,
+     "data1": 17,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 111,
+     "data1": 18,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 22,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 112,
+     "data1": 19,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 113,
+     "data1": 20,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 23,
+     "split": 24,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 114,
+     "data1": 21,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 115,
+     "data1": 22,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 23,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 116,
+     "data1": 23,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 22,
+     "firstBodySplit": 22
+    }
+   ]
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-1.json",
+   "window": [
+    1352,
+    1512
+   ],
+   "affectedAges": "98..158 (21)",
+   "residualPixels": 298102,
+   "exactRows": 140,
+   "writeRows": [
+    {
+     "age": 98,
+     "data1": 5,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 25,
+     "split": 27,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 99,
+     "data1": 6,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 100,
+     "data1": 7,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 101,
+     "data1": 8,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 24,
+     "split": 27,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 102,
+     "data1": 9,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 103,
+     "data1": 10,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 104,
+     "data1": 11,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 15,
+     "split": 16,
+     "firstBodySplit": 16
+    },
+    {
+     "age": 105,
+     "data1": 12,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 15,
+     "split": 16,
+     "firstBodySplit": 26
+    },
+    {
+     "age": 106,
+     "data1": 13,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 16,
+     "split": 18,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 107,
+     "data1": 14,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 28,
+     "split": 31,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 108,
+     "data1": 15,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 109,
+     "data1": 16,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 23,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 110,
+     "data1": 17,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 111,
+     "data1": 18,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 112,
+     "data1": 19,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 113,
+     "data1": 20,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 114,
+     "data1": 21,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 115,
+     "data1": 22,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 116,
+     "data1": 23,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 25,
+     "split": 28,
+     "firstBodySplit": 22
+    }
+   ]
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-2.json",
+   "window": [
+    2486,
+    2647
+   ],
+   "affectedAges": "95..98 (2)",
+   "residualPixels": 18,
+   "exactRows": 160,
+   "writeRows": [
+    {
+     "age": 95,
+     "data1": 2,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 20,
+     "split": 21,
+     "firstBodySplit": 23
+    },
+    {
+     "age": 96,
+     "data1": 3,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 23,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 97,
+     "data1": 4,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 22,
+     "split": 24,
+     "firstBodySplit": 22
+    },
+    {
+     "age": 98,
+     "data1": 5,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 22,
+     "firstBodySplit": 20
+    }
+   ]
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-xs-1.json",
+   "window": [
+    1214,
+    1375
+   ],
+   "affectedAges": "95..101 (3)",
+   "residualPixels": 55,
+   "exactRows": 159,
+   "writeRows": [
+    {
+     "age": 95,
+     "data1": 2,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 20
+    },
+    {
+     "age": 96,
+     "data1": 3,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 25
+    },
+    {
+     "age": 97,
+     "data1": 4,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 23,
+     "split": 25,
+     "firstBodySplit": 28
+    },
+    {
+     "age": 98,
+     "data1": 5,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 99,
+     "data1": 6,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 24
+    },
+    {
+     "age": 100,
+     "data1": 7,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 29,
+     "split": 31,
+     "firstBodySplit": 25
+    },
+    {
+     "age": 101,
+     "data1": 8,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 24,
+     "split": 26,
+     "firstBodySplit": 25
+    }
+   ]
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-xs-2.json",
+   "window": [
+    2348,
+    2509
+   ],
+   "affectedAges": "98..98 (1)",
+   "residualPixels": 16,
+   "exactRows": 161,
+   "writeRows": [
+    {
+     "age": 98,
+     "data1": 5,
+     "window": [
+      8,
+      72
+     ],
+     "entryVcount": 21,
+     "split": 23,
+     "firstBodySplit": 24
+    }
+   ]
+  }
+ ]
+}
