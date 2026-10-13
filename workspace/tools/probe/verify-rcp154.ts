@@ -11,7 +11,8 @@
  * draw, with the ROM's per-turn AI-selection draws injected between turns.
  * Differences from rcp143: the player's bench (party slots 1/2) and the
  * trainer's bench are staged too (C1 drags a bench mon in), the player's move
- * slot per turn comes from the receipt's `portPlayerSlots`, and every move the
+ * slot (and target) per turn comes from the receipt's `portPlayerSlots` /
+ * `portPlayerTargets`, and every move the
  * port announces (`STRINGID_USEDMOVE` events are counted per turn) is
  * compared with the ROM's per-turn `HandleAction_UseMove` dispatch count.
  * Exit 0 = PASS (draws, HP and dispatch count match), exit 1 = FAIL.
@@ -32,7 +33,7 @@ export const RCP154_CALLER_TO_PORT_REASON: Readonly<Record<string, string>> = Ob
   // Cmd_forcerandomswitch's do { i = Random() % monsCount; } while (...) pick loop (battle_script_commands.c:7346).
   Cmd_forcerandomswitch: "forcerandomswitch:pick",
   // Cmd_trysetencore's encoreTimer = (Random() & 3) + 3 (battle_script_commands.c:8039).
-  Cmd_trysetencore: "trysetencore:timer",
+  Cmd_trysetencore: "Encore duration ((Random() & 3) + 3)",
 });
 
 type RomDraw = Readonly<{
@@ -52,6 +53,8 @@ type PartyMon = Readonly<{
 type Receipt = Record<string, unknown> & Readonly<{
   receipt: string;
   portPlayerSlots: readonly (0 | 1 | 2 | 3)[];
+  /** Optional per-turn decision target (0 for a user-targeted move); defaults to the foe, 1. */
+  portPlayerTargets?: readonly (0 | 1)[];
   parties: Readonly<{ player: readonly PartyMon[]; opponent: readonly PartyMon[] }>;
   rom: Readonly<{ turns: readonly RomTurn[] }>;
 }>;
@@ -124,7 +127,7 @@ export function verifyReceipt(receipt: Receipt) {
     turns.map((turn, index) => ({
       injectAiDraws: turn.turn === 1 ? 0 : turn.aiSelectionDrawCount,
       playerMoveSlot: receipt.portPlayerSlots[index] ?? 0,
-      playerTargetBattler: 1,
+      playerTargetBattler: receipt.portPlayerTargets?.[index] ?? 1,
     })),
   );
   const portTurns = turns.map((turn) => ({

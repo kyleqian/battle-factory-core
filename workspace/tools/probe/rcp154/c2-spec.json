@@ -1,0 +1,46 @@
+{
+ "schema": "rcp154-action-time-receipt/v1",
+ "receipt": "C2",
+ "followUpTo": "ISSUES #140 (rng146 'possible adjacent gap': mid-turn Encore before the target acts)",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp154-action-time.py",
+ "builder": "tools/probe/build-rcp154-receipt.py",
+ "verify": "tools/probe/verify-rcp154.ts",
+ "card": "tools/probe/rcp154/c2-encore-snorlax-plusle-off.json",
+ "probeSlotPlan": "0,1",
+ "title": "A battler Encored mid-turn by a faster foe before it acts uses the ENCORED move that same turn (HandleAction_UseMove :111-117 at action time), paying GetMoveTarget's MOVE_TARGET_SELECTED draw for it",
+ "scenario": "Player SNORLAX (Tackle / Defense Curl / Amnesia / Headbutt, speed 50) uses slot 0 TACKLE on turn 1 (faster PLUSLE's Encore fails: no last move). Turn 2 it SELECTS slot 1 (DEFENSE CURL, MOVE_TARGET_USER; the probe presses RIGHT once in the move menu). PLUSLE (Encore x4, Bold, 255 HP / 255 Def EVs, speed 115) acts first: 'SNORLAX got an ENCORE!' (encoredMove TACKLE, pos 0). SNORLAX's action then runs TACKLE, not DEFENSE CURL, with one GetMoveTarget draw. Turns 3+ are ordinary encored turns (selection banks the Encore move, battle_main.c:4194).",
+ "portPlayerSlots": [
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "sourceUnderTest": {
+  "encoreArm": "reference/pokeemerald/src/battle_util.c:111-117 HandleAction_UseMove: encoredMove != MOVE_NONE && encoredMove == moves[encoredMovePos] -> gCurrentMove = encoredMove, gCurrMovePos = encoredMovePos, moveTarget = GetMoveTarget(gCurrentMove, NO_TARGET_OVERRIDE). Evaluated at the battler's OWN action, so an Encore set earlier in the same turn applies",
+  "encoreOverwrittenArm": "reference/pokeemerald/src/battle_util.c:119-128 (encored slot overwritten -> clear Encore, use the slot) -- not reachable here",
+  "setEncore": "reference/pokeemerald/src/battle_script_commands.c:8017 Cmd_trysetencore: encoredMove = moves[i] where moves[i] == gLastMoves[target]; encoreTimer = (Random() & 3) + 3 at :8039",
+  "selectionBank": "reference/pokeemerald/src/battle_main.c:4194 (encored at selection -> gChosenMoveByBattler = encoredMove) / :4399 (slot move) -- on turn 2 SNORLAX is not encored at selection, so it banks DEFENSE CURL",
+  "getMoveTarget": "reference/pokeemerald/src/battle_util.c:3828 GetMoveTarget; MOVE_TARGET_SELECTED do { Random() % gBattlersCount } while (target == attacker ...) :3850-3853"
+ },
+ "portPlayerTargets": [
+  1,
+  0,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "portSitesAtHead": {
+  "turnStartEncore": "src/engine/factoryBattleScriptFullTurnDecision.ts:3151-3155 playerRetargets / trainerRetargets = actionRetargetsAtExecution(rules.rulesContext, ...) (function :1628-1636) read the TURN-START rules context; the move id / slot come from actionMoveId (:2416-2442) on the same turn-start context (lockedMoveDecision :2366-2395 only auto-confirms an Encore that already existed at selection)",
+  "actionTimeCheck": "src/engine/factoryBattleScriptFullTurnDecision.ts:1677-1690 runMoveAction re-evaluates only the :130-134 arm (actionTakesChosenMoveChangedArm :1666-1675) on priorState.rulesContext; for action 2 (call site :3012-3022, second.moveId / second.moveSlot / second.retargetsAtExecution) an Encore written by action 1's trysetencore is never consulted",
+  "whatThePortRuns": "turn 2: SNORLAX's banked DEFENSE CURL (STRINGID_DEFENDERSSTATROSE), no GetMoveTarget, no TACKLE hit chain -- first divergence turn 2 index 2"
+ },
+ "fixShape": "In runMoveAction (factoryBattleScriptFullTurnDecision.ts:1677), before the :130-134 check, evaluate HandleAction_UseMove's Encore arms on the ACTION-TIME battler (priorState.rulesContext.battlers[mover]): (a) battle_util.c:111-117 encoredMove != 0 && moves[encoredMovePos] == encoredMove -> executed move = encoredMove, move slot (gCurrMovePos / chosenMovePositions, PP deduction) = encoredMovePos, retarget via drawActionMoveTarget; (b) :119-128 encoredMove != 0 && moves[encoredMovePos] != encoredMove -> clear Encore, run moves[encoredMovePos], retarget. Only when neither fires fall through to :130-134 / plain. This subsumes the turn-start retargetsAtExecution for Encore (action 1 sees the same state either way). Post-fix sequence = the ROM's (turn 2: acc, Encore timer, GetMoveTarget, acc, crit, dmg, SEWC, BTP)."
+}
