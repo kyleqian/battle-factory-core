@@ -1,0 +1,26 @@
+{
+ "inv142-love-ply.json": {
+  "digger": "player",
+  "path": "CANCELER_IN_LOVE",
+  "seed": 305419899,
+  "turns": 6
+ },
+ "inv142-love-opp.json": {
+  "digger": "opponent",
+  "path": "CANCELER_IN_LOVE",
+  "seed": 305419898,
+  "turns": 6
+ },
+ "inv142-yawn-ply.json": {
+  "digger": "player",
+  "path": "ENDTURN_YAWN",
+  "seed": 305419897,
+  "turns": 5
+ },
+ "inv142-yawn-opp.json": {
+  "digger": "opponent",
+  "path": "ENDTURN_YAWN",
+  "seed": 305419897,
+  "turns": 5
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "age+1": {
+  "summary": {
+   "neg": "age+1",
+   "windows": 5,
+   "zeroPxWindows": 0,
+   "perRowDigest": "e19c0e5b437584e8"
+  },
+  "px": {
+   "inv142-love-opp@1733": 13227,
+   "inv142-love-opp@6035": 13227,
+   "inv142-love-ply@1401": 13407,
+   "inv142-yawn-opp@3371": 11472,
+   "inv142-yawn-ply@1937": 12167
+  }
+ },
+ "wrong-side": {
+  "summary": {
+   "neg": "wrong-side",
+   "windows": 5,
+   "zeroPxWindows": 0,
+   "perRowDigest": "d7d3b9abd37c7439"
+  },
+  "px": {
+   "inv142-love-opp@1733": 57234,
+   "inv142-love-opp@6035": 57234,
+   "inv142-love-ply@1401": 57234,
+   "inv142-yawn-opp@3371": 26814,
+   "inv142-yawn-ply@1937": 26578
+  }
+ }
+}

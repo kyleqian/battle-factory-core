@@ -1,0 +1,156 @@
+{
+ "schema": "inv142-exposure-summary/v1",
+ "seeds": "0..999",
+ "battles": 1000,
+ "statusAnimationCommands": 8063,
+ "invisibleCommands": 5,
+ "dollCommands": 0,
+ "wouldDrawWithVisibilityForced": 5,
+ "table": {
+  "INFATUATION | opponent | CANCELLER_IN_LOVE (own move cancelled: BattleScript_MoveUsedIsInLove) | semi-invulnerable live-body hide (hidden by the battler's DIG charge body)": 2,
+  "INFATUATION | player | CANCELLER_IN_LOVE (own move cancelled: BattleScript_MoveUsedIsInLove) | semi-invulnerable live-body hide (hidden by the battler's DIG charge body)": 1,
+  "SLP | player | ENDTURN_YAWN (BattleScript_YawnMakesAsleep) | semi-invulnerable live-body hide (hidden by the battler's DIG charge body)": 2
+ },
+ "commands": [
+  {
+   "battle": 18,
+   "seed": 18,
+   "streak": 2,
+   "key": "33:1:5",
+   "battler": 0,
+   "side": "player",
+   "animation": "INFATUATION",
+   "minimumFrames": 97,
+   "seGateFrames": 0,
+   "species": "PUPITAR",
+   "doll": false,
+   "spriteVisible": false,
+   "cause": {
+    "spriteVisibilityReceipt": false,
+    "semiInvulnerableBodyHide": true
+   },
+   "hiddenBy": "DIG",
+   "hider": null,
+   "previousMessages": [
+    "Foe EEVEE used ENDURE!",
+    "Foe EEVEE braced itself!",
+    "PUPITAR is in love with Foe EEVEE!"
+   ],
+   "nextMessage": "PUPITAR is immobilized by love!",
+   "wouldDraw": true,
+   "spritesAtAge0": 0
+  },
+  {
+   "battle": 208,
+   "seed": 208,
+   "streak": 34,
+   "key": "39:0:12",
+   "battler": 0,
+   "side": "player",
+   "animation": "SLP",
+   "minimumFrames": 97,
+   "seGateFrames": 0,
+   "species": "SHIFTRY",
+   "doll": false,
+   "spriteVisible": false,
+   "cause": {
+    "spriteVisibilityReceipt": false,
+    "semiInvulnerableBodyHide": true
+   },
+   "hiddenBy": "DIG",
+   "hider": null,
+   "previousMessages": [
+    "SHIFTRY dug a hole!",
+    "Foe SLAKING’s LEFTOVERS restored its HP a little!",
+    "Foe SLAKING’s health is sapped by LEECH SEED!"
+   ],
+   "nextMessage": "SHIFTRY fell asleep!",
+   "wouldDraw": true,
+   "spritesAtAge0": 0
+  },
+  {
+   "battle": 208,
+   "seed": 208,
+   "streak": 34,
+   "key": "47:0:12",
+   "battler": 0,
+   "side": "player",
+   "animation": "SLP",
+   "minimumFrames": 97,
+   "seGateFrames": 0,
+   "species": "SHIFTRY",
+   "doll": false,
+   "spriteVisible": false,
+   "cause": {
+    "spriteVisibilityReceipt": false,
+    "semiInvulnerableBodyHide": true
+   },
+   "hiddenBy": "DIG",
+   "hider": null,
+   "previousMessages": [
+    "SHIFTRY dug a hole!",
+    "Foe SLAKING’s LEFTOVERS restored its HP a little!",
+    "Foe SLAKING’s health is sapped by LEECH SEED!"
+   ],
+   "nextMessage": "SHIFTRY fell asleep!",
+   "wouldDraw": true,
+   "spritesAtAge0": 0
+  },
+  {
+   "battle": 357,
+   "seed": 357,
+   "streak": 7,
+   "key": "68:1:1",
+   "battler": 1,
+   "side": "opponent",
+   "animation": "INFATUATION",
+   "minimumFrames": 97,
+   "seGateFrames": 0,
+   "species": "ARBOK",
+   "doll": false,
+   "spriteVisible": false,
+   "cause": {
+    "spriteVisibilityReceipt": false,
+    "semiInvulnerableBodyHide": true
+   },
+   "hiddenBy": "DIG",
+   "hider": null,
+   "previousMessages": [
+    "WIGGLYTUFF used SING!",
+    "WIGGLYTUFF’s attack missed!",
+    "Foe ARBOK is in love with WIGGLYTUFF!"
+   ],
+   "nextMessage": "Foe ARBOK is immobilized by love!",
+   "wouldDraw": true,
+   "spritesAtAge0": 0
+  },
+  {
+   "battle": 760,
+   "seed": 760,
+   "streak": 30,
+   "key": "107:1:4",
+   "battler": 1,
+   "side": "opponent",
+   "animation": "INFATUATION",
+   "minimumFrames": 97,
+   "seGateFrames": 0,
+   "species": "SHUCKLE",
+   "doll": false,
+   "spriteVisible": false,
+   "cause": {
+    "spriteVisibilityReceipt": false,
+    "semiInvulnerableBodyHide": true
+   },
+   "hiddenBy": "DIG",
+   "hider": null,
+   "previousMessages": [
+    "BLISSEY used SING!",
+    "BLISSEY’s attack missed!",
+    "Foe SHUCKLE is in love with BLISSEY!"
+   ],
+   "nextMessage": "Foe SHUCKLE is immobilized by love!",
+   "wouldDraw": true,
+   "spritesAtAge0": 0
+  }
+ ]
+}
