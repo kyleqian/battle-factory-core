@@ -1,0 +1,274 @@
+{
+ "schema": "sgs134-production/v1",
+ "skippedSegments": {
+  "stats-change": 143
+ },
+ "statsChange": {
+  "commands": 733,
+  "framesEqualOwnTiming": 733,
+  "gated": 63,
+  "gatedFramesEqualOwnTiming": 63,
+  "gatedShortByExactlyGate": 63,
+  "gateFrames": 789,
+  "byClass": {
+   "stats-change-target": 60,
+   "stats-change-attacker": 3
+  },
+  "examples": [
+   {
+    "seed": 0,
+    "seg": "12:0",
+    "cls": "stats-change-target",
+    "gate": 6,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 0,
+    "seg": "20:0",
+    "cls": "stats-change-target",
+    "gate": 6,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 0,
+    "seg": "28:0",
+    "cls": "stats-change-target",
+    "gate": 8,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 0,
+    "seg": "36:0",
+    "cls": "stats-change-target",
+    "gate": 9,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 0,
+    "seg": "49:0",
+    "cls": "stats-change-target",
+    "gate": 9,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 9,
+    "seg": "36:0",
+    "cls": "stats-change-attacker",
+    "gate": 28,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 10,
+    "seg": "5:0",
+    "cls": "stats-change-target",
+    "gate": 8,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 14,
+    "seg": "21:0",
+    "cls": "stats-change-attacker",
+    "gate": 15,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 19,
+    "seg": "1:0",
+    "cls": "stats-change-target",
+    "gate": 22,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 19,
+    "seg": "1:3",
+    "cls": "stats-change-target",
+    "gate": 23,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 19,
+    "seg": "10:0",
+    "cls": "stats-change-target",
+    "gate": 23,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 19,
+    "seg": "26:0",
+    "cls": "stats-change-target",
+    "gate": 22,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   }
+  ]
+ },
+ "multiHit": {
+  "laterHits": 60,
+  "gated": 22,
+  "deltaByGate": {
+   "0": {
+    "0": 38
+   },
+   "1": {
+    "0": 3
+   },
+   "2": {
+    "0": 2
+   },
+   "3": {
+    "0": 3
+   },
+   "4": {
+    "0": 3
+   },
+   "5": {
+    "0": 4
+   },
+   "8": {
+    "0": 4
+   },
+   "9": {
+    "0": 1
+   },
+   "10": {
+    "0": 1
+   },
+   "11": {
+    "0": 1
+   }
+  },
+  "examples": [
+   {
+    "seed": 0,
+    "seg": "10:0",
+    "move": "3",
+    "gate": 2,
+    "frames": 37,
+    "firstHitFrames": 37,
+    "delta": 0
+   },
+   {
+    "seed": 0,
+    "seg": "18:0",
+    "move": "3",
+    "gate": 8,
+    "frames": 37,
+    "firstHitFrames": 37,
+    "delta": 0
+   },
+   {
+    "seed": 0,
+    "seg": "18:0",
+    "move": "3",
+    "gate": 8,
+    "frames": 37,
+    "firstHitFrames": 37,
+    "delta": 0
+   },
+   {
+    "seed": 0,
+    "seg": "26:0",
+    "move": "3",
+    "gate": 8,
+    "frames": 37,
+    "firstHitFrames": 37,
+    "delta": 0
+   },
+   {
+    "seed": 0,
+    "seg": "42:0",
+    "move": "3",
+    "gate": 5,
+    "frames": 37,
+    "firstHitFrames": 37,
+    "delta": 0
+   },
+   {
+    "seed": 19,
+    "seg": "101:0",
+    "move": "42",
+    "gate": 3,
+    "frames": 98,
+    "firstHitFrames": 98,
+    "delta": 0
+   },
+   {
+    "seed": 19,
+    "seg": "111:0",
+    "move": "42",
+    "gate": 3,
+    "frames": 98,
+    "firstHitFrames": 98,
+    "delta": 0
+   },
+   {
+    "seed": 19,
+    "seg": "111:0",
+    "move": "42",
+    "gate": 3,
+    "frames": 98,
+    "firstHitFrames": 98,
+    "delta": 0
+   },
+   {
+    "seed": 19,
+    "seg": "111:0",
+    "move": "42",
+    "gate": 2,
+    "frames": 98,
+    "firstHitFrames": 98,
+    "delta": 0
+   },
+   {
+    "seed": 27,
+    "seg": "18:0",
+    "move": "24",
+    "gate": 11,
+    "frames": 39,
+    "firstHitFrames": 39,
+    "delta": 0
+   },
+   {
+    "seed": 27,
+    "seg": "26:0",
+    "move": "24",
+    "gate": 9,
+    "frames": 39,
+    "firstHitFrames": 39,
+    "delta": 0
+   },
+   {
+    "seed": 27,
+    "seg": "34:0",
+    "move": "24",
+    "gate": 10,
+    "frames": 39,
+    "firstHitFrames": 39,
+    "delta": 0
+   }
+  ]
+ }
+}

@@ -1,5 +1,6 @@
 {
  "schema": "sgs134-rom/v1",
+ "mode": "on",
  "scenarios": {
   "sgs134-bonemerang-chansey-opp": {
    "class": "multi-hit 2 (Bonemerang)",

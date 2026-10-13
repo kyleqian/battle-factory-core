@@ -1,0 +1,134 @@
+{
+ "schema": "sgs134-production/v1",
+ "skippedSegments": {
+  "move-animation": 1897,
+  "stats-change": 3
+ },
+ "statsChange": {
+  "commands": 917,
+  "framesEqualOwnTiming": 917,
+  "gated": 60,
+  "gatedFramesEqualOwnTiming": 60,
+  "gatedShortByExactlyGate": 60,
+  "gateFrames": 738,
+  "byClass": {
+   "stats-change-target": 60
+  },
+  "examples": [
+   {
+    "seed": 0,
+    "seg": "12:0",
+    "cls": "stats-change-target",
+    "gate": 6,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 0,
+    "seg": "20:0",
+    "cls": "stats-change-target",
+    "gate": 6,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 0,
+    "seg": "28:0",
+    "cls": "stats-change-target",
+    "gate": 8,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 0,
+    "seg": "36:0",
+    "cls": "stats-change-target",
+    "gate": 9,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 0,
+    "seg": "49:0",
+    "cls": "stats-change-target",
+    "gate": 9,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 10,
+    "seg": "5:0",
+    "cls": "stats-change-target",
+    "gate": 8,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 19,
+    "seg": "1:0",
+    "cls": "stats-change-target",
+    "gate": 22,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 19,
+    "seg": "1:3",
+    "cls": "stats-change-target",
+    "gate": 23,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 19,
+    "seg": "10:0",
+    "cls": "stats-change-target",
+    "gate": 23,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 19,
+    "seg": "26:0",
+    "cls": "stats-change-target",
+    "gate": 22,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 19,
+    "seg": "38:0",
+    "cls": "stats-change-target",
+    "gate": 23,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   },
+   {
+    "seed": 20,
+    "seg": "3:0",
+    "cls": "stats-change-target",
+    "gate": 7,
+    "frames": 77,
+    "own": 77,
+    "mf": 76
+   }
+  ]
+ },
+ "multiHit": {
+  "laterHits": 0,
+  "gated": 0,
+  "deltaByGate": {},
+  "examples": []
+ }
+}

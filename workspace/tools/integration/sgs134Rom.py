@@ -11,7 +11,7 @@ battle_script_commands.h enum order, IsSEPlaying on SE1 / SE2), per receipt:
   se            the last fresh SE1 / SE2 start before poll (song, start S, L, age = poll - S, hpDrain over both battlers since S, fixed =
                 age - hpDrain) and ruleGate = clamp(L - age, 0, 29) (seg127's rule; ruleGate == seGate is the 0-residual check);
   base          delay - seGate (must be a per-opcode constant: the gate is exactly the extra delay).
-usage: sgs134Rom.py <probe-dir> <scenario-index.json> <out.json>        (<probe-dir>/<stem>-on.json)
+usage: sgs134Rom.py <probe-dir> <scenario-index.json> <out.json> [on|off]    (<probe-dir>/<stem>-<on|off>.json; default on)
        sgs134Rom.py --one <probe.json>
 """
 import bisect, json, os, re, sys
@@ -97,11 +97,12 @@ if sys.argv[1] == "--one":
               "drain", se.get("hpDrain"), "fixed", se.get("fixed"))
     sys.exit(0)
 probe_dir, index_path, out_path = sys.argv[1:4]
+mode = sys.argv[4] if len(sys.argv) > 4 else "on"
 index = json.load(open(index_path))
-out = {"schema": "sgs134-rom/v1", "scenarios": {}}
+out = {"schema": "sgs134-rom/v1", "mode": mode, "scenarios": {}}
 for name, meta in sorted(index.items()):
     stem = name[:-5]
-    rows = json.load(open(os.path.join(probe_dir, f"{stem}-on.json")))["rows"]
+    rows = json.load(open(os.path.join(probe_dir, f"{stem}-{mode}.json")))["rows"]
     out["scenarios"][stem] = {**meta, "rows": len(rows), "requests": analyse(rows)}
 reqs = [(k, a) for k, v in out["scenarios"].items() for a in v["requests"]]
 res = [(k, a) for k, a in reqs if a["seGate"] != a["ruleGate"]]
