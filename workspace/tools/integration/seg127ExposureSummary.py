@@ -10,11 +10,14 @@ Per receipt (ctx = the segment's compact events before it; seg127Exposure.ts):
             the plain infliction string) / contact-ability (the next message is an ability "...BY" string: PKMNWASPARALYZEDBY,
             PKMNPOISONEDBY, PKMNBURNEDBY, PKMNMADESLEEP, PKMNSXINFATUATEDY, with no other status animation since the move) / synchronize
             (a "...BY" string right after another battler's status animation) / thrash-fatigue (PKMNFATIGUECONFUSION) / yawn
-            (PKMNFELLASLEEP with no move animation since the last print) / status-move (no effectiveness SE since the move animation);
+            (PKMNFELLASLEEP after a print or an effectiveness SE since the last move animation: ENDTURN_YAWN; no Gen 3 damaging move
+            inflicts plain sleep) / status-move (no effectiveness SE since the move animation);
             turn-start and end-turn keep their path as class.
   se        the songId of the last effectivenesssound (`play-se` 12 / 13 / 14) in the segment, or null; `open` = no message event between
             that SE and the receipt (the only shape the gate can be nonzero in, §0d); `drain` = |from - to| of the last hp-change after
             that SE (the HP bar rows, 1 HP per row for max HP >= 48: healthboxAssembly.ts battleHealthBarAnimationFrames).
+  tail      open receipts: the compact events from the last print before the SE to the receipt (exposure.json openReceipts; the
+            module test replays them through seg127StatusSeGateFromEvents).
   gate      (with <rule.json>) open receipts: clamp(seRows[se] - (fixedRows[class] + drain), 0, 29) (Cute Charm = the INFATUATION
             contact-ability receipts: fixedRows "cute-charm"); a class without fixedRows would be reported as unmeasured (none left);
             every closed receipt: 0.
@@ -48,7 +51,7 @@ def classify(a):
             cls = "thrash-fatigue"
         elif nxt in BY:
             cls = "synchronize" if sa_since_mv else "contact-ability"
-        elif nxt == "STRINGID_PKMNFELLASLEEP" and last_msg > last_mv:
+        elif nxt == "STRINGID_PKMNFELLASLEEP" and (last_msg > last_mv or last_se > last_mv):  # no Gen 3 hit inflicts plain sleep
             cls = "yawn"
         elif last_mv >= 0 and last_se > last_mv:
             cls = "hit-secondary"
@@ -74,9 +77,11 @@ for f in sorted(glob.glob(os.path.join(src, "e*.jsonl"))):
                 gate = None if fixed is None else max(0, min(rule["cap"], rule["seRows"][str(se)] - (fixed + drain)))
             elif rule:
                 gate = 0
+            msgs = [i for i, t in enumerate(ctx[:last_se]) if t.startswith("msg:")] if last_se >= 0 else []
             rows.append({"seed": b["seed"], "k": k, "anim": a["anim"], "side": "player" if a["battler"] % 2 == 0 else "opponent",
-                         "path": path, "cls": cls, "se": se, "open": is_open, "drain": drain, "gate": gate})
-by = collections.Counter((r["cls"], r["anim"], r["side"]) for r in rows)
+                         "path": path, "cls": key, "se": se, "open": is_open, "drain": drain, "gate": gate,
+                         "tail": ctx[msgs[-1] if msgs else 0:] if is_open else None, "next": a["nextMessage"]})
+by = collections.Counter((r["cls"], r["anim"], r["side"]) for r in rows)  # cls: contact-ability INFATUATION is "cute-charm"
 opens = collections.Counter((r["cls"], r["se"], r["anim"], r["side"]) for r in rows if r["open"])
 summary = {"schema": "seg127-exposure/v1", "receipts": len(rows), "unclassified": sum(1 for r in rows if r["cls"] is None),
            "byClass": dict(sorted(collections.Counter(r["cls"] for r in rows).items())),
@@ -100,6 +105,7 @@ if rule:
     for e in proj.values():
         e["gates"] = dict(sorted(e["gates"].items(), key=lambda x: int(x[0])))
     summary["projection"] = dict(sorted(proj.items()))
+    summary["openReceipts"] = [{k: r[k] for k in ("seed", "k", "anim", "side", "cls", "se", "drain", "gate", "tail", "next")} for r in rows if r["open"]]
     by_cls = collections.defaultdict(lambda: {"receipts": 0, "open": 0, "gated": 0, "frames": 0, "unmeasuredOpen": 0})
     for r in rows:
         c = by_cls[r["cls"]]

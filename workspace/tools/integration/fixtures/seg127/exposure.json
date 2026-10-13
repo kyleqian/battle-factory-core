@@ -3,26 +3,27 @@
  "receipts": 8080,
  "unclassified": 0,
  "byClass": {
-  "contact-ability": 96,
+  "contact-ability": 91,
+  "cute-charm": 5,
   "end-turn": 1298,
-  "hit-secondary": 384,
+  "hit-secondary": 373,
   "status-move": 1529,
   "synchronize": 20,
   "thrash-fatigue": 51,
   "turn-start": 4629,
-  "yawn": 73
+  "yawn": 84
  },
  "byClassAnimationSide": {
   "contact-ability|BRN|opponent": 7,
   "contact-ability|BRN|player": 10,
-  "contact-ability|INFATUATION|opponent": 4,
-  "contact-ability|INFATUATION|player": 1,
   "contact-ability|PRZ|opponent": 16,
   "contact-ability|PRZ|player": 14,
   "contact-ability|PSN|opponent": 22,
   "contact-ability|PSN|player": 19,
   "contact-ability|SLP|opponent": 1,
   "contact-ability|SLP|player": 2,
+  "cute-charm|INFATUATION|opponent": 4,
+  "cute-charm|INFATUATION|player": 1,
   "end-turn|BRN|opponent": 193,
   "end-turn|BRN|player": 164,
   "end-turn|CURSED|opponent": 1,
@@ -41,8 +42,6 @@
   "hit-secondary|PRZ|player": 75,
   "hit-secondary|PSN|opponent": 27,
   "hit-secondary|PSN|player": 24,
-  "hit-secondary|SLP|opponent": 6,
-  "hit-secondary|SLP|player": 5,
   "status-move|BRN|opponent": 23,
   "status-move|BRN|player": 8,
   "status-move|CONFUSION|opponent": 429,
@@ -70,18 +69,18 @@
   "turn-start|PRZ|player": 307,
   "turn-start|SLP|opponent": 544,
   "turn-start|SLP|player": 958,
-  "yawn|SLP|opponent": 31,
-  "yawn|SLP|player": 42
+  "yawn|SLP|opponent": 37,
+  "yawn|SLP|player": 47
  },
  "seOpenByClassSongAnimationSide": {
   "contact-ability|13|BRN|opponent": 5,
   "contact-ability|13|BRN|player": 2,
-  "contact-ability|13|INFATUATION|opponent": 3,
   "contact-ability|13|PRZ|opponent": 7,
   "contact-ability|13|PRZ|player": 4,
   "contact-ability|13|PSN|opponent": 11,
   "contact-ability|13|PSN|player": 6,
   "contact-ability|13|SLP|player": 1,
+  "cute-charm|13|INFATUATION|opponent": 3,
   "hit-secondary|13|BRN|opponent": 10,
   "hit-secondary|13|BRN|player": 10,
   "hit-secondary|13|CONFUSION|opponent": 18,
@@ -92,18 +91,17 @@
   "hit-secondary|13|PRZ|player": 54,
   "hit-secondary|13|PSN|opponent": 20,
   "hit-secondary|13|PSN|player": 14,
-  "hit-secondary|13|SLP|opponent": 6,
-  "hit-secondary|13|SLP|player": 5,
   "thrash-fatigue|13|CONFUSION|opponent": 4,
   "thrash-fatigue|13|CONFUSION|player": 5,
-  "yawn|13|SLP|opponent": 1,
-  "yawn|13|SLP|player": 4
+  "yawn|13|SLP|opponent": 7,
+  "yawn|13|SLP|player": 9
  },
  "seOpenByClass": {
-  "contact-ability": 39,
-  "hit-secondary": 248,
+  "contact-ability": 36,
+  "cute-charm": 3,
+  "hit-secondary": 237,
   "thrash-fatigue": 9,
-  "yawn": 5
+  "yawn": 16
  },
  "projection": {
   "contact-ability|BRN|opponent": {
@@ -125,15 +123,6 @@
    "unmeasured": 0,
    "gates": {
     "0": 2
-   }
-  },
-  "contact-ability|INFATUATION|opponent": {
-   "open": 3,
-   "gated": 0,
-   "frames": 0,
-   "unmeasured": 0,
-   "gates": {
-    "0": 3
    }
   },
   "contact-ability|PRZ|opponent": {
@@ -182,6 +171,15 @@
    "unmeasured": 0,
    "gates": {
     "0": 1
+   }
+  },
+  "cute-charm|INFATUATION|opponent": {
+   "open": 3,
+   "gated": 0,
+   "frames": 0,
+   "unmeasured": 0,
+   "gates": {
+    "0": 3
    }
   },
   "hit-secondary|BRN|opponent": {
@@ -321,25 +319,6 @@
     "26": 1
    }
   },
-  "hit-secondary|SLP|opponent": {
-   "open": 6,
-   "gated": 1,
-   "frames": 8,
-   "unmeasured": 0,
-   "gates": {
-    "0": 5,
-    "8": 1
-   }
-  },
-  "hit-secondary|SLP|player": {
-   "open": 5,
-   "gated": 0,
-   "frames": 0,
-   "unmeasured": 0,
-   "gates": {
-    "0": 5
-   }
-  },
   "thrash-fatigue|CONFUSION|opponent": {
    "open": 4,
    "gated": 1,
@@ -360,20 +339,22 @@
    }
   },
   "yawn|SLP|opponent": {
-   "open": 1,
+   "open": 7,
    "gated": 1,
    "frames": 11,
    "unmeasured": 0,
    "gates": {
+    "0": 6,
     "11": 1
    }
   },
   "yawn|SLP|player": {
-   "open": 4,
+   "open": 9,
    "gated": 4,
    "frames": 34,
    "unmeasured": 0,
    "gates": {
+    "0": 5,
     "5": 1,
     "6": 1,
     "11": 1,
@@ -381,12 +362,6010 @@
    }
   }
  },
+ "openReceipts": [
+  {
+   "seed": 0,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 57,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:143:86"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 3,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 18,
+   "gate": 11,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:166:148",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 4,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 53,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:95:42",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 5,
+   "k": 5,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 47,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:324:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:56:9"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 7,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 64,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:166:102",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 20,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 51,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:232:181",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 24,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:158:114",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 27,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 23,
+   "gate": 6,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:153:130",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 27,
+   "k": 14,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 23,
+   "gate": 6,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:117:94",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 33,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:88:44",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 39,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 52,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:98:46",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 40,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 34,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:145:111",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 49,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 86,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:146:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:177:91"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 53,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 43,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:139:96",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 54,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 45,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:113:68",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 55,
+   "k": 9,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 62,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:143:81",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 58,
+   "k": 0,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 34,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:44:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:128:94",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 58,
+   "k": 4,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 37,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:44:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:51:14",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 58,
+   "k": 8,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "thrash-fatigue",
+   "se": 13,
+   "drain": 88,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:80:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:133:45",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFATIGUECONFUSION"
+  },
+  {
+   "seed": 61,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 33,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:164:131",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 62,
+   "k": 1,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 82,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:165:83",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 64,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 51,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:58:7",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 66,
+   "k": 0,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 43,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:53:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:187:144",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 68,
+   "k": 28,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 46,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:203:157",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 69,
+   "k": 1,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 77,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:185:108",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 70,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 34,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:7:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:125:91",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 72,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 36,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:305:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:161:125",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNBADLYPOISONED"
+  },
+  {
+   "seed": 76,
+   "k": 2,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 67,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:7:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:97:30",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 77,
+   "k": 3,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 36,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:61:25",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 84,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 53,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:165:112",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 84,
+   "k": 1,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 51,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:7:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:73:22",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 97,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 56,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:124:68",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 98,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 12,
+   "gate": 17,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:122:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:32:20",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 101,
+   "k": 2,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 84,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:161:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:133:49",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 103,
+   "k": 0,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 31,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:52:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:172:141",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 103,
+   "k": 3,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 58,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:340:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:131:73",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 107,
+   "k": 2,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 67,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:153:86",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 109,
+   "k": 2,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 54,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:86:32",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 127,
+   "k": 2,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 89,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:183:94",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 140,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 53,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:29:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:158:105",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 143,
+   "k": 2,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 55,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:124:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:126:71",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 143,
+   "k": 7,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 60,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:63:3",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 150,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 103,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:9:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:158:55",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 167,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 13,
+   "gate": 16,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:121:108",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 179,
+   "k": 1,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 45,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:93:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:116:71"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 180,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 116,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:132:16",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 193,
+   "k": 3,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 74,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:121:47",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 196,
+   "k": 3,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 7,
+   "gate": 22,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:22:15",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 199,
+   "k": 3,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 75,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:126:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:152:77",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 206,
+   "k": 0,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 25,
+   "gate": 4,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:52:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:61:36",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 209,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 27,
+   "gate": 2,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:147:120",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 210,
+   "k": 5,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 33,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:159:126",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 211,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 53,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:59:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:89:36",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 215,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 46,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:60:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:171:125"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 216,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 32,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:44:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:187:155",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 219,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 48,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:194:146"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 219,
+   "k": 2,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 54,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:146:92"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 220,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 70,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:105:35",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 221,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 25,
+   "gate": 4,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:50:25",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 223,
+   "k": 17,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 38,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:163:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:84:46",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 226,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 55,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:130:75",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 230,
+   "k": 4,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 15,
+   "gate": 5,
+   "tail": [
+    "msg:STRINGID_ITHURTCONFUSION",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:31:16",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 241,
+   "k": 11,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 38,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:246:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:77:39",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 242,
+   "k": 3,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 17,
+   "gate": 12,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:152:135",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 254,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 27,
+   "gate": 2,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:53:26",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 259,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 31,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:114:83",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 260,
+   "k": 6,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 81,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:86:5",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 262,
+   "k": 11,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 52,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:126:74",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 264,
+   "k": 2,
+   "anim": "SLP",
+   "side": "opponent",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 9,
+   "gate": 11,
+   "tail": [
+    "msg:STRINGID_PKMNBUFFETEDBYSANDSTORM",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:41:32"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 268,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 26,
+   "gate": 3,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:56:30",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 270,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 16,
+   "gate": 13,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:156:140",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 271,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 77,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:85:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:116:39",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 277,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 57,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:109:52",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 277,
+   "k": 1,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 20,
+   "gate": 9,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:26:6",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 282,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 47,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:97:50",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 282,
+   "k": 3,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:150:106",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 283,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 55,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:71:16",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 288,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 93,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:87:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:186:93",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 294,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 22,
+   "gate": 7,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:99:77"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 296,
+   "k": 0,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 15,
+   "gate": 9,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:98:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:73:58",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNBURNEDBY"
+  },
+  {
+   "seed": 304,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 11,
+   "gate": 18,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:122:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:94:83",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 311,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 88,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:25:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:192:104",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 313,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 46,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:168:122",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 314,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 17,
+   "gate": 12,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:133:116",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 321,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 49,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:73:24",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 321,
+   "k": 3,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 67,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:128:61",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 328,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 43,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:165:122",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 328,
+   "k": 2,
+   "anim": "SLP",
+   "side": "opponent",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 21,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:246:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:157:136",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 328,
+   "k": 7,
+   "anim": "SLP",
+   "side": "opponent",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 32,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:246:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:136:104",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 328,
+   "k": 14,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 21,
+   "gate": 8,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:65:44",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 329,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 99,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:126:27",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 340,
+   "k": 3,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 46,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:129:83",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 340,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 28,
+   "gate": 1,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:145:117",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 344,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:44:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:144:100",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 348,
+   "k": 0,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 75,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:172:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:133:58",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 348,
+   "k": 2,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 21,
+   "gate": 8,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:93:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:98:77"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 348,
+   "k": 5,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 19,
+   "gate": 10,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:93:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:89:70"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 350,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 36,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:137:101",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 352,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 132,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:283:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:150:18",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 356,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:170:126",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 357,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 69,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:340:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:116:47",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 357,
+   "k": 12,
+   "anim": "INFATUATION",
+   "side": "opponent",
+   "cls": "cute-charm",
+   "se": 13,
+   "drain": 35,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:91:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:203:168"
+   ],
+   "next": "STRINGID_PKMNSXINFATUATEDY"
+  },
+  {
+   "seed": 357,
+   "k": 27,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 32,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:57:25",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 358,
+   "k": 4,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 37,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:68:31",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 362,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 54,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:340:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:121:67",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 370,
+   "k": 7,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 40,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:52:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:153:113",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 373,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 85,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:178:93",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 379,
+   "k": 0,
+   "anim": "SLP",
+   "side": "opponent",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:153:109",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 379,
+   "k": 7,
+   "anim": "SLP",
+   "side": "opponent",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 66,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:138:72",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 381,
+   "k": 13,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 8,
+   "gate": 12,
+   "tail": [
+    "msg:STRINGID_PKMNPELTEDBYHAIL",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:30:22"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 382,
+   "k": 3,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 65,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:141:76",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 383,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 98,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:85:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:133:35",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 385,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 35,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:9:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:93:58",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 387,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 63,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:337:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:183:120",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 388,
+   "k": 16,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 23,
+   "gate": 6,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:93:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:111:88"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 388,
+   "k": 33,
+   "anim": "SLP",
+   "side": "opponent",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 52,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:128:76",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 391,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 11,
+   "gate": 18,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:85:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:264:253",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 391,
+   "k": 1,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 21,
+   "gate": 8,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:85:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:156:135",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 392,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 29,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:152:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:163:134",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 392,
+   "k": 4,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "thrash-fatigue",
+   "se": 13,
+   "drain": 22,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:185:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:133:111",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFATIGUECONFUSION"
+  },
+  {
+   "seed": 393,
+   "k": 5,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 56,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:153:97",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 394,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 78,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:186:108",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 397,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 37,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:131:94"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 397,
+   "k": 38,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 20,
+   "gate": 9,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:93:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:34:14"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 406,
+   "k": 1,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "thrash-fatigue",
+   "se": 13,
+   "drain": 58,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:80:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:66:8",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFATIGUECONFUSION"
+  },
+  {
+   "seed": 412,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 65,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:177:112",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 413,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 60,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:85:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:97:37",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 414,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 96,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:178:82",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 419,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 101,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:283:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:163:62",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 424,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 40,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:192:152",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 424,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 22,
+   "gate": 7,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:101:79",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 428,
+   "k": 3,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 12,
+   "gate": 17,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:79:67",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 433,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 9,
+   "gate": 20,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:60:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:86:77"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 437,
+   "k": 2,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 24,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:44:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:120:96",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 437,
+   "k": 9,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 25,
+   "gate": 4,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:93:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:143:118"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 439,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 53,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:126:73",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 439,
+   "k": 1,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 35,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:112:77",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 440,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 61,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:59:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:70:9",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 440,
+   "k": 5,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 11,
+   "gate": 18,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:59:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:300:289",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 446,
+   "k": 9,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 18,
+   "gate": 11,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:81:63"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 446,
+   "k": 11,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 19,
+   "gate": 5,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:340:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:51:32",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 464,
+   "k": 3,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 33,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:46:13",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 467,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 23,
+   "gate": 6,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:9:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:122:99",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 468,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 36,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:69:33",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 468,
+   "k": 1,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 38,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:324:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:42:4"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 476,
+   "k": 5,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 97,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:25:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:145:48",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 476,
+   "k": 39,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 19,
+   "gate": 10,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:85:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:76:57",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 478,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 41,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:48:7",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 483,
+   "k": 12,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 45,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:263:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:174:129",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 483,
+   "k": 14,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 63,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:207:144",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 486,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 54,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:148:94",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 487,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 37,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:8:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:70:33",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 490,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:124:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:62:18",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 491,
+   "k": 4,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:200:156"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 496,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 65,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:223:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:108:43"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 498,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 98,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:59:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:103:5",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 499,
+   "k": 5,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 69,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:67:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:138:69",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNBURNEDBY"
+  },
+  {
+   "seed": 507,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 67,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:252:185",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 516,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 71,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:59:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:170:99",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 519,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 58,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:177:119",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 524,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 61,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:340:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:95:34",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 526,
+   "k": 5,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 87,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:140:53",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 527,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 117,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:223:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:119:2"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 527,
+   "k": 1,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 82,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:223:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:104:22"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 528,
+   "k": 2,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 49,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:166:117",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 531,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 69,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:158:89",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 532,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "thrash-fatigue",
+   "se": 13,
+   "drain": 52,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:29:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:136:84",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFATIGUECONFUSION"
+  },
+  {
+   "seed": 533,
+   "k": 10,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 36,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:19:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:94:58",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 534,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 51,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:140:89",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 540,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 34,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:67:33",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 541,
+   "k": 2,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 80,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:229:149",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 541,
+   "k": 8,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 15,
+   "gate": 14,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:99:84",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 542,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 28,
+   "gate": 1,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:131:103",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 542,
+   "k": 25,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 41,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:167:126",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 542,
+   "k": 29,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:167:123",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 547,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 14,
+   "gate": 15,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:59:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:224:210",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 547,
+   "k": 9,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 15,
+   "gate": 14,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:59:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:299:284",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 553,
+   "k": 0,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 22,
+   "gate": 7,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:52:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:148:126",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 553,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 26,
+   "gate": 3,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:143:117",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 554,
+   "k": 9,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 78,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:53:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:136:58",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 557,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 73,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:80:7"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 564,
+   "k": 85,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 43,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:234:191",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 567,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 67,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:223:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:77:10"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 569,
+   "k": 1,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 59,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:8:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:75:16",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 569,
+   "k": 3,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 54,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:8:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:69:15",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 571,
+   "k": 0,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 36,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:52:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:124:88",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 572,
+   "k": 0,
+   "anim": "INFATUATION",
+   "side": "opponent",
+   "cls": "cute-charm",
+   "se": 13,
+   "drain": 50,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:218:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:151:101"
+   ],
+   "next": "STRINGID_PKMNSXINFATUATEDY"
+  },
+  {
+   "seed": 579,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 16,
+   "gate": 13,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:9:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:35:19",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 584,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 43,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:138:95"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 584,
+   "k": 2,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 58,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:280:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:95:37",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 591,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 35,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:156:121",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 593,
+   "k": 3,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 7,
+   "gate": 17,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:228:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:104:97",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNBURNEDBY"
+  },
+  {
+   "seed": 594,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 22,
+   "gate": 7,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:104:82",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 594,
+   "k": 5,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 24,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:29:5",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 599,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 173,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:252:79",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 600,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:87:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:161:117",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 632,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 65,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:178:113",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 633,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 37,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:90:53",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 642,
+   "k": 2,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 19,
+   "gate": 10,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:116:97",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 643,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 40,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:171:131",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 652,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 26,
+   "gate": 3,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:63:37",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 655,
+   "k": 10,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 61,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:332:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:138:77",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNBURNEDBY"
+  },
+  {
+   "seed": 655,
+   "k": 15,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 32,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:60:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:58:26"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 660,
+   "k": 1,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 40,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:149:109"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 664,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 17,
+   "gate": 7,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:210:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:133:116",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 664,
+   "k": 1,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 24,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:301:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:72:48",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 668,
+   "k": 5,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 70,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:156:86",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 680,
+   "k": 2,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 75,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:57:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:122:47",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 688,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 85,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:29:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:126:41",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 689,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 61,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:94:33",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 689,
+   "k": 2,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 66,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:123:57",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 691,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 62,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:9:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:131:69",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 700,
+   "k": 9,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 34,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:91:57",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 705,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 17,
+   "gate": 12,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:124:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:167:150",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 714,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 47,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:119:72",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 720,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 65,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:97:32",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 722,
+   "k": 14,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "thrash-fatigue",
+   "se": 13,
+   "drain": 77,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:80:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:88:11",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFATIGUECONFUSION"
+  },
+  {
+   "seed": 725,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 72,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:87:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:109:37",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 732,
+   "k": 3,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 44,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:70:26"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 733,
+   "k": 22,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 39,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:161:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:148:109",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 751,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 72,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:173:101",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 758,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 38,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:163:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:149:111",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 765,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 45,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:162:117",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 768,
+   "k": 33,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 32,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:166:134",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 773,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 47,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:105:58",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 777,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "thrash-fatigue",
+   "se": 13,
+   "drain": 43,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:332:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:141:98",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFATIGUECONFUSION"
+  },
+  {
+   "seed": 780,
+   "k": 20,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 40,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:82:42"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 780,
+   "k": 24,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 24,
+   "gate": 5,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:93:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:153:129"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 782,
+   "k": 5,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 38,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:7:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:107:69",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 791,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 26,
+   "gate": 3,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:67:41",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 802,
+   "k": 6,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 23,
+   "gate": 1,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:332:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:40:17",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 802,
+   "k": 15,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "thrash-fatigue",
+   "se": 13,
+   "drain": 9,
+   "gate": 10,
+   "tail": [
+    "msg:STRINGID_PKMNBUFFETEDBYSANDSTORM",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:131:122"
+   ],
+   "next": "STRINGID_PKMNFATIGUECONFUSION"
+  },
+  {
+   "seed": 804,
+   "k": 8,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 9,
+   "gate": 11,
+   "tail": [
+    "msg:STRINGID_PKMNPELTEDBYHAIL",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:116:107"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 804,
+   "k": 12,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 18,
+   "gate": 6,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:29:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:38:20",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNBURNEDBY"
+  },
+  {
+   "seed": 804,
+   "k": 14,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 7,
+   "gate": 17,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:29:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:12:5",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNBURNEDBY"
+  },
+  {
+   "seed": 808,
+   "k": 12,
+   "anim": "FRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 58,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:133:75",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 816,
+   "k": 12,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 88,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:290:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:91:3",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 822,
+   "k": 0,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 53,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:7:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:120:67",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 832,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 49,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:57:8",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 834,
+   "k": 0,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 31,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:52:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:120:89",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 845,
+   "k": 6,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 49,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:258:209",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 848,
+   "k": 3,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 50,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:186:136",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 856,
+   "k": 7,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 7,
+   "gate": 22,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:93:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:20:13"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 857,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 48,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:161:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:154:106",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 861,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 30,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:64:34",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 869,
+   "k": 5,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 60,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:172:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:153:93",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 869,
+   "k": 7,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 30,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:60:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:120:90"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 871,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 66,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:135:69",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 873,
+   "k": 0,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 78,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:126:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:163:85",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 877,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 67,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:133:66",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 885,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 38,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:337:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:79:41",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZEDBY"
+  },
+  {
+   "seed": 888,
+   "k": 15,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 64,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:175:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:142:78",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNMADESLEEP"
+  },
+  {
+   "seed": 890,
+   "k": 7,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 61,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:135:74",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 891,
+   "k": 0,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 32,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:98:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:138:106",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNBURNEDBY"
+  },
+  {
+   "seed": 893,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 14,
+   "gate": 15,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:150:136",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 894,
+   "k": 0,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 74,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:58:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:157:83",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 896,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 3,
+   "gate": 26,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:305:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:121:118",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNBADLYPOISONED"
+  },
+  {
+   "seed": 896,
+   "k": 6,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 5,
+   "gate": 24,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:324:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:182:177"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 900,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 16,
+   "gate": 13,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:135:119",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 900,
+   "k": 5,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 8,
+   "gate": 21,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:61:53",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 902,
+   "k": 5,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 20,
+   "gate": 9,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:8:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:47:27",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 910,
+   "k": 2,
+   "anim": "FRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 42,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:161:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:91:49",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASFROZEN"
+  },
+  {
+   "seed": 912,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 64,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:87:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:300:236",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 912,
+   "k": 4,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 45,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:126:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:130:85",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 916,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 23,
+   "gate": 6,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:198:175",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 919,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 29,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:134:105",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 921,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 100,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:136:36",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 927,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 28,
+   "gate": 1,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:158:130",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 928,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 22,
+   "gate": 7,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:161:139",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 929,
+   "k": 19,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 99,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:114:15",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 929,
+   "k": 22,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 50,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:141:91",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 929,
+   "k": 23,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 46,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:188:142",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 931,
+   "k": 4,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 5,
+   "gate": 24,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:123:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:77:72",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 932,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 24,
+   "gate": 5,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:93:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:153:129"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 933,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 64,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:147:83",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 941,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 38,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:209:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:164:126",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 948,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 97,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:127:30",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 950,
+   "k": 2,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 32,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:153:121"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 951,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 48,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:53:5",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 951,
+   "k": 7,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 34,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:177:143",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 955,
+   "k": 1,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 51,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:188:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:113:62",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPOISONED"
+  },
+  {
+   "seed": 961,
+   "k": 0,
+   "anim": "BRN",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 52,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:7:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:114:62",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 961,
+   "k": 3,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 45,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:223:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:111:66"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 963,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "opponent",
+   "cls": "thrash-fatigue",
+   "se": 13,
+   "drain": 63,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:80:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:148:85",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFATIGUECONFUSION"
+  },
+  {
+   "seed": 965,
+   "k": 13,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 75,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:246:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:115:40",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 965,
+   "k": 17,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 91,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:246:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:147:56",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 965,
+   "k": 21,
+   "anim": "SLP",
+   "side": "player",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 14,
+   "gate": 6,
+   "tail": [
+    "msg:STRINGID_ITHURTCONFUSION",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:156:142",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 971,
+   "k": 10,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 46,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:53:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:166:120",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 974,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 22,
+   "gate": 7,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:112:90",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 976,
+   "k": 15,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "thrash-fatigue",
+   "se": 13,
+   "drain": 53,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:21:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:103:50",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFATIGUECONFUSION"
+  },
+  {
+   "seed": 977,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 64,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:122:58",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 979,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 148,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:87:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:183:35",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 980,
+   "k": 0,
+   "anim": "PSN",
+   "side": "player",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 36,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:232:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:62:26",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 982,
+   "k": 0,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 51,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:34:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:156:105",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 982,
+   "k": 4,
+   "anim": "PRZ",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 57,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:225:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:139:82",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASPARALYZED"
+  },
+  {
+   "seed": 984,
+   "k": 0,
+   "anim": "SLP",
+   "side": "opponent",
+   "cls": "yawn",
+   "se": 13,
+   "drain": 71,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:56:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:156:85",
+    "set-battler-sprite-visibility",
+    "set-battler-sprite-visibility"
+   ],
+   "next": "STRINGID_PKMNFELLASLEEP"
+  },
+  {
+   "seed": 986,
+   "k": 29,
+   "anim": "INFATUATION",
+   "side": "opponent",
+   "cls": "cute-charm",
+   "se": 13,
+   "drain": 49,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:218:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:204:155"
+   ],
+   "next": "STRINGID_PKMNSXINFATUATEDY"
+  },
+  {
+   "seed": 991,
+   "k": 0,
+   "anim": "BRN",
+   "side": "opponent",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 153,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:126:0",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:1",
+    "hp:1:172:19",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNWASBURNED"
+  },
+  {
+   "seed": 993,
+   "k": 0,
+   "anim": "PSN",
+   "side": "opponent",
+   "cls": "contact-ability",
+   "se": 13,
+   "drain": 89,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:65:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:156:67",
+    "set-battler-status-data"
+   ],
+   "next": "STRINGID_PKMNPOISONEDBY"
+  },
+  {
+   "seed": 998,
+   "k": 0,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 45,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:183:138"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  },
+  {
+   "seed": 998,
+   "k": 14,
+   "anim": "CONFUSION",
+   "side": "player",
+   "cls": "hit-secondary",
+   "se": 13,
+   "drain": 58,
+   "gate": 0,
+   "tail": [
+    "msg:STRINGID_USEDMOVE",
+    "anim:MOVE_ANIMATION:352:1",
+    "se:13",
+    "anim:HIT_ANIMATION",
+    "hb:0",
+    "hp:0:69:11"
+   ],
+   "next": "STRINGID_PKMNWASCONFUSED"
+  }
+ ],
  "projectionByClass": {
   "contact-ability": {
-   "receipts": 96,
-   "open": 39,
+   "receipts": 91,
+   "open": 36,
    "gated": 7,
    "frames": 62,
+   "unmeasuredOpen": 0
+  },
+  "cute-charm": {
+   "receipts": 5,
+   "open": 3,
+   "gated": 0,
+   "frames": 0,
    "unmeasuredOpen": 0
   },
   "end-turn": {
@@ -397,10 +6376,10 @@
    "unmeasuredOpen": 0
   },
   "hit-secondary": {
-   "receipts": 384,
-   "open": 248,
-   "gated": 60,
-   "frames": 620,
+   "receipts": 373,
+   "open": 237,
+   "gated": 59,
+   "frames": 612,
    "unmeasuredOpen": 0
   },
   "status-move": {
@@ -432,16 +6411,16 @@
    "unmeasuredOpen": 0
   },
   "yawn": {
-   "receipts": 73,
-   "open": 5,
+   "receipts": 84,
+   "open": 16,
    "gated": 5,
    "frames": 45,
    "unmeasuredOpen": 0
   }
  },
  "projectionTotal": {
-  "gated": 73,
-  "frames": 737,
+  "gated": 72,
+  "frames": 729,
   "unmeasuredOpen": 0
  }
 }
