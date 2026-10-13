@@ -31,7 +31,7 @@ export const ROM_CALLER_TO_PORT_REASON: Readonly<Record<string, string>> = Objec
   Cmd_seteffectwithchance: "seteffectwithchance",
   AtkCanceler_UnableToUseMove: "attackcanceler:unable-to-use-move",
   BattleTurnPassed: "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
-  // GetMoveTarget's MOVE_TARGET_SELECTED do/while (battle_util.c:119-122), the issue140 reason.
+  // GetMoveTarget's MOVE_TARGET_SELECTED do/while (battle_util.c:3850-3853), the issue140 reason.
   GetMoveTarget: "GetMoveTarget(MOVE_TARGET_SELECTED)",
   // SetMoveEffect owns three draw sites here: MOVE_EFFECT_THRASH's (Random() & 1) + 2
   // (battle_script_commands.c:2859), MOVE_EFFECT_CONFUSION's (Random() % 4) + 2 and

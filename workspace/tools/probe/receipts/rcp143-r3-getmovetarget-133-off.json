@@ -16,7 +16,7 @@
   "lockedArm": "reference/pokeemerald/src/battle_util.c:106-109 (STATUS2_MULTIPLETURNS | STATUS2_RECHARGE -> gLockedMoves, no GetMoveTarget) -- precedes :133",
   "chosenMoveReset": "reference/pokeemerald/src/battle_main.c:4001-4005 BattleTurnPassed resets gChosenMoveByBattler[i] = MOVE_NONE every turn; written again only by selection (:4194 Encore, :4399 chosen slot) -- a battler locked at selection time keeps MOVE_NONE",
   "lockCancelBySleep": "reference/pokeemerald/src/battle_script_commands.c:2296 (SetMoveEffect sleep arm: CancelMultiTurnMoves(gEffectBattler)); same shape for freeze :2392 and Spite-to-0-PP :8357",
-  "getMoveTarget": "reference/pokeemerald/src/battle_util.c:6052+ GetMoveTarget MOVE_TARGET_SELECTED do/while Random() % gBattlersCount (see issue140 receipt)"
+  "getMoveTarget": "reference/pokeemerald/src/battle_util.c:3828 GetMoveTarget; MOVE_TARGET_SELECTED arm :3841, do { Random() % gBattlersCount } while (...) :3850-3853"
  },
  "portSitesAtHead": {
   "actionMoveId": "src/engine/factoryBattleScriptFullTurnDecision.ts:2367 actionMoveId reads the live slot; no selection-time gChosenMoveByBattler bank exists, so :133 cannot be detected",
