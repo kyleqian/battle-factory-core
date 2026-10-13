@@ -65,6 +65,7 @@ Receipt: `tools/integration/fixtures/tmr136-live-receipt.json` (commit / src tre
   Command: `sh tools/integration/sar131Census.sh shards <fresh-base> 439575012` and `... <fresh-final> <final-commit>`, then
   `python3 tools/integration/sar131CensusDelta.py <base> <final> <out.json>`.
 - `git diff --check`: clean.
+- `tmr136Run.sh` from a fresh git-archive copy of `d91a131e0`: probes r1 == r2 6 / 6, **ALL `same`** (6 DT tail receipts, smoke-derive / smoke-final / smoke-revert).
 
 ## 6. Reproduction (from workspace/)
 
