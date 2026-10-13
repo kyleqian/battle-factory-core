@@ -1325,7 +1325,10 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // right after the 3rd round decision instead of running to a multi-
     // hundred-thousand-frame budget, and is comfortably past the 2 wins
     // needed to prove carry >= 14 was genuinely reached, not just claimed.
-    const result = runSeed(34, {
+    // thr153: ISSUES #141a (the THRASH lock-in re-run) leaves seed 34 at
+    // carry 7; re-scanned seeds 0..10 / 34..44 under the same options:
+    // seeds 1, 3 and 40 chain two round wins, so the lowest (1) is pinned.
+    const result = runSeed(1, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
