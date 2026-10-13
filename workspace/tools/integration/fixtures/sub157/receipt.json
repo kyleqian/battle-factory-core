@@ -179,5 +179,51 @@
   "rowsPerRun": 435,
   "residualPixels": 0
  },
- "x2Note": "before the OFF x2 input the GOLEM -> ONIX player window drew ONIX at its Scene ON front idle rest (x2 +1): 94,917 px = 1,091 px/row x 87; the ROM skips the front animation in Scene OFF (pokemon.c:6805)"
+ "x2Note": "before the OFF x2 input the GOLEM -> ONIX player window drew ONIX at its Scene ON front idle rest (x2 +1): 94,917 px = 1,091 px/row x 87; the ROM skips the front animation in Scene OFF (pokemon.c:6805)",
+ "transform": {
+  "scenarios": [
+   "tools/battle-lab/sub157-off-player-ditto-transform.json",
+   "tools/battle-lab/sub157-on-player-ditto-transform.json"
+  ],
+  "runner": "OUT=<fresh> sh tools/integration/prep37Probes.sh sub157-off-player-ditto-transform sub157-on-player-ditto-transform (direct mGBA x2 fresh, r1 == r2 2 / 2)",
+  "files": [
+   {
+    "file": "sub157-off-player-ditto-transform-r1.json",
+    "sha256": "1f7705cc8f83b5bb"
+   },
+   {
+    "file": "sub157-off-player-ditto-transform-r2.json",
+    "sha256": "1f7705cc8f83b5bb"
+   },
+   {
+    "file": "sub157-on-player-ditto-transform-r1.json",
+    "sha256": "dd7de8a03ee01bb1"
+   },
+   {
+    "file": "sub157-on-player-ditto-transform-r2.json",
+    "sha256": "dd7de8a03ee01bb1"
+   }
+  ],
+  "rom": {
+   "off": {
+    "firstActiveFrame": 67,
+    "activeRows": 108
+   },
+   "on": {
+    "firstActiveFrame": 67,
+    "activeRows": 108
+   }
+  },
+  "production": {
+   "off": "move-animation command with the request, 32-frame fallback (no Transform live adapter), equal to Scene ON's",
+   "on": "32-frame fallback (unchanged)"
+  },
+  "remainder": "Move_TRANSFORM is 108 rows in both ROM scenes; production presents 32 undrawn frames in both scenes (-76 frames + the mosaic / sprite swap body): a missing live adapter, not a Scene OFF defect"
+ },
+ "timing": {
+  "tool": "node --experimental-strip-types --no-warnings tools/integration/sub157Timing.ts --seeds=17,74,197 --scene=on|off",
+  "production": "Substitute body command 90 frames in both scenes (census seeds 17 / 74, both sides); HP command at +90, message at +130 / +133 (HP drop dependent)",
+  "rom": "aud118 aud118-substitute-ply-primeape-onix (tools/integration/fixtures/aud118/off-rom-r1.json), OFF == ON: attackanimation G+5, waitanimation G+6..G+95 (90 rows), HP run G+97 (first change G+98), print G+138, first glyph G+140",
+  "residual": "production's command after the opener starts on G+1, so the body is G+1..G+90 and the HP command starts on G+91: HP bar -6 vs the ROM run (aud118's first-change - 1 convention: -7; was -57), the same in both scenes (Scene ON route timing; out of scope here)"
+ }
 }
