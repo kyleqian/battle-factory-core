@@ -1,0 +1,27 @@
+{
+ "roar-1": {
+  "frames": 340,
+  "sha": "e8b74cd9fd447a8c",
+  "r1EqualsR2": true
+ },
+ "roar-12": {
+  "frames": 340,
+  "sha": "71585cee58d08967",
+  "r1EqualsR2": true
+ },
+ "roar-16": {
+  "frames": 340,
+  "sha": "a698ca1320135466",
+  "r1EqualsR2": true
+ },
+ "roar-157": {
+  "frames": 340,
+  "sha": "1fd14ef805cbc850",
+  "r1EqualsR2": true
+ },
+ "roar-385": {
+  "frames": 340,
+  "sha": "bb10b626cd5d0bbe",
+  "r1EqualsR2": true
+ }
+}

@@ -80,3 +80,46 @@ export function sceneOffOpponentSwitchInDuration(species: number, nickname: stri
   const cryBound = (SEND_IN_TAIL_OFF_CRY_FRAMES[species] ?? 0) + SCENE_OFF_SEND_IN_CRY_TO_MESSAGE;
   return sceneOffOpponentSwitchInVisualDelay(species) + Math.max(slideBound, cryBound);
 }
+
+/**
+ * plr162 (ISSUES #146; docs/plr162-player-forced-send-in.md, from offs152 R2): the Scene OFF PLAYER send-in after a FORCED switch
+ * (Roar / Whirlwind `returntoball BS_TARGET` on the player). `PlayerHandleSwitchInAnim` -> `SwitchIn_HandleSoundAndEnd` waits for the
+ * send-in cry (!IsCryPlayingOrClearCrySongs), and the next printstring ("... was dragged out!") follows the controller end directly,
+ * so the command lasts
+ *   shift + max(SLIDE_TO_MESSAGE_FLOOR 91, cryFrames(species) + 66)
+ * with the healthbox slide at 65 + shift (shift 1 = CASTFORM only on the player side; SPINDA's opponent-side +1 does not apply).
+ * Direct-mGBA Scene OFF sweep of the 339 stageable Factory species with the player as the Roar target, twice fresh
+ * (tools/integration/fixtures/offs152/species-sweep-player-target-off.txt): slide 339 / 339, message 339 / 339 with the source-derived
+ * cry (src/data/sendInTailOff.ts). A VOLUNTARY player switch keeps the calibrated 66 / 91 + 11 (its next print is the opponent's move,
+ * after the move-load hold; ISSUES #78). Scene ON's player-target message also waits for the attacker's Roar cry (not modelled).
+ */
+export const SCENE_OFF_PLAYER_FORCED_SEND_IN_SLIDE = 65;
+export const SCENE_OFF_PLAYER_FORCED_SEND_IN_FLOOR = 91;
+export const SCENE_OFF_PLAYER_FORCED_SEND_IN_CRY_TO_MESSAGE = 66;
+
+/** Scene OFF forced player send-in: CASTFORM's whole send-in runs one frame late (sweep: y2 start, slide and message +1). */
+function sceneOffPlayerForcedSwitchInShift(species: number): number {
+  return species === SEND_IN_TAIL_CASTFORM ? 1 : 0;
+}
+
+/**
+ * Scene OFF forced player send-in: frames the send-in visuals run late against the renderer's player cadence (calibrated on the
+ * voluntary switch: ball from elapsed 3). The forced send-in's ball, emerge, fade and particles run ONE FRAME EARLIER than that
+ * cadence (dense Scene OFF windows aligned on the offs152-proven removal row: the ROM ball shows at elapsed 2), so -1 (+ CASTFORM's 1).
+ */
+export function sceneOffPlayerForcedSwitchInVisualDelay(species: number): number {
+  return sceneOffPlayerForcedSwitchInShift(species) - 1;
+}
+
+/** Scene OFF forced player send-in: the `switch-in` elapsed of the healthbox slide's first frame. */
+export function sceneOffPlayerForcedSwitchInHealthboxSlideElapsed(species: number): number {
+  return SCENE_OFF_PLAYER_FORCED_SEND_IN_SLIDE + sceneOffPlayerForcedSwitchInShift(species);
+}
+
+/** Scene OFF forced player send-in: the `switch-in` command's whole duration (= the "dragged out!" print's first frame). */
+export function sceneOffPlayerForcedSwitchInDuration(species: number): number {
+  return sceneOffPlayerForcedSwitchInShift(species) + Math.max(
+    SCENE_OFF_PLAYER_FORCED_SEND_IN_FLOOR,
+    (SEND_IN_TAIL_OFF_CRY_FRAMES[species] ?? 0) + SCENE_OFF_PLAYER_FORCED_SEND_IN_CRY_TO_MESSAGE,
+  );
+}
