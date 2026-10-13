@@ -1,5 +1,6 @@
 // fra151 (docs/fra151-front-send-in-animation.md): the Scene ON opponent send-in draws the species front animation
 // (sAnim_<Name>_1 frame + the Anim_* callback motion) from the settled emerge; Scene OFF and the player side never launch it.
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   MID_BATTLE_SWITCH_FRONT_ANIM_FRAME_START_ELAPSED,
@@ -12,6 +13,7 @@ import {
   frontSendOutInitializerTicks, frontSendOutPaletteAtTick,
 } from "../src/animation/sendOutDispatcher.ts";
 import { frontSendOutSpriteFrameAtTick } from "../src/animation/sendOutSpriteFrame.ts";
+import { speciesFrontIdleRestOffsetOrZero } from "../src/animation/speciesIdleAnim.ts";
 
 describe("fra151 Scene ON opponent send-in front animation", () => {
   it("starts the sAnim_<Name>_1 program at el 34 and the Anim_* motion at el 35 (+ delay - 1)", () => {
@@ -91,5 +93,21 @@ describe("fra151 Scene ON opponent send-in front animation", () => {
     expect(frontSendOutPaletteAtTick("HAUNTER", 1).invisible).toBe(true);
     expect(frontSendOutPaletteAtTick("HAUNTER", 2).invisible).toBe(false);
     expect(frontSendOutPaletteAtTick("TAILLOW", 10)).toEqual({ invisible: false, blend: null });
+  });
+
+  it("settles every Factory species at the rest the live movers read and the ROM measured (R3)", () => {
+    // tools/integration/fixtures/x2-history/species-rest-x2.json: direct mGBA, 376 species, opponent front x2 / y2 at the first body.
+    const rom = JSON.parse(readFileSync("tools/integration/fixtures/x2-history/species-rest-x2.json", "utf8")).all as
+      Record<string, { opponentFront: { x2: number; y2: number } }>;
+    expect(Object.keys(rom)).toHaveLength(376);
+    for (const [species, measured] of Object.entries(rom)) {
+      const settled = midBattleSwitchInFrontAnimAt(species, 400)!;
+      const idle = speciesFrontIdleRestOffsetOrZero(species);
+      expect([species, settled.x2, settled.y2]).toEqual([species, idle.x2, idle.y2]);
+      expect([species, settled.x2, settled.y2]).toEqual([species, measured.opponentFront.x2, measured.opponentFront.y2]);
+      expect([species, settled.frame, settled.invisible]).toEqual([species, 0, false]);
+      expect(settled.matrix === null || settled.matrix.join() === "256,0,0,256").toBe(true);
+      expect(settled.blend === null || settled.blend.coefficient === 0).toBe(true);
+    }
   });
 });
