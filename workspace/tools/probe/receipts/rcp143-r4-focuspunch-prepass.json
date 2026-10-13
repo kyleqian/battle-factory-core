@@ -1118,11 +1118,11 @@
    {
     "arm": "off-focus-punch",
     "portMessageIds": [
+     "STRINGID_EMPTYSTRING3",
+     "STRINGID_PKMNTIGHTENINGFOCUS",
      "STRINGID_USEDMOVE",
      "STRINGID_DEFENDERSSTATFELL",
-     "STRINGID_USEDMOVE",
-     "STRINGID_TARGETFAINTED",
-     "STRINGID_PLAYERDEFEATEDTRAINER1"
+     "STRINGID_USEDMOVE"
     ],
     "portDraws": [
      {
@@ -1147,6 +1147,18 @@
      }
     ],
     "portEventsToday": [
+     {
+      "kind": "message",
+      "id": "STRINGID_EMPTYSTRING3"
+     },
+     {
+      "kind": "animation",
+      "id": "FOCUS_PUNCH_SETUP"
+     },
+     {
+      "kind": "message",
+      "id": "STRINGID_PKMNTIGHTENINGFOCUS"
+     },
      {
       "kind": "message",
       "id": "STRINGID_USEDMOVE"
@@ -1256,12 +1268,12 @@
   ]
  },
  "comparison": {
-  "verdictToday": "FAIL",
+  "verdictToday": "PASS",
   "arms": [
    {
     "arm": "off-focus-punch",
-    "verdictToday": "FAIL",
-    "messagesMatch": false,
+    "verdictToday": "PASS",
+    "messagesMatch": true,
     "drawsMatch": true,
     "romMessageIds": [
      "STRINGID_EMPTYSTRING3",

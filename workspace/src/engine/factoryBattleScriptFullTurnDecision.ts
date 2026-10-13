@@ -213,6 +213,7 @@ const ABILITY_ARENA_TRAP = 71;
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
 /** include/constants/moves.h. */
 const MOVE_PURSUIT = 228;
+const MOVE_FOCUS_PUNCH = 264;
 /** include/battle.h:27-39 -- the action-kind globals gChosenActionByBattler/gActionsByTurnOrder carry. */
 const B_ACTION_USE_MOVE = 0;
 /** include/constants/battle.h B_ACTION_SWITCH. */
@@ -1671,6 +1672,39 @@ function actionTakesChosenMoveChangedArm(
   if (battlerStatusMoveLock(actionRulesContext, battler) !== 0) return false;
   return actionRulesContext.battlers[battler]!.moves[moveSlot]
     !== actionRulesContext.chosenMoveByBattler[battler];
+}
+
+/**
+ * ISSUES #139 -- CheckFocusPunch_ClearVarsBeforeTurnStarts (battle_main.c:4906-4923),
+ * between turn-order fixing and action 1: in battler-index order, every battler
+ * whose banked gChosenMoveByBattler is MOVE_FOCUS_PUNCH and that is not asleep,
+ * not Truant-loafing and not noValidMoves runs BattleScript_FocusPunchSetUp
+ * (battle_scripts_1.s:3709-3715) as its own end2 script with gActiveBattler =
+ * gBattlerAttacker = that battler. noValidMoves is subsumed by the bank: an
+ * AreAllMovesUnusable battler banks MOVE_NONE (selectionChosenMove). The script
+ * draws no RNG (rcp143 R4); its playanimation takes Cmd_playanimation's own
+ * HITMARKER_NO_ANIMATIONS / semi-invulnerable gates (Scene OFF: Pausex20).
+ */
+function runFocusPunchSetUpPrePass(handlers: Handlers, priorState: MachineState): RunToOwnEndResult {
+  let state = priorState;
+  for (const battler of [0, 1] as const) {
+    const rules = state.rulesContext;
+    const mon = rules.battlers[battler]!;
+    if (rules.chosenMoveByBattler[battler] !== MOVE_FOCUS_PUNCH) continue;
+    if ((mon.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0) continue;
+    if (mon.truantCounter !== 0) continue;
+    const started = startBattleScriptExecute(PROGRAM, "BattleScript_FocusPunchSetUp", {
+      ...state,
+      rulesContext: createBattleScriptRulesContext({
+        ...rules,
+        selectorRoles: { ...rules.selectorRoles, attacker: battler },
+      }),
+    });
+    const run = runScriptToOwnEnd(PROGRAM, handlers, started);
+    if (run.kind !== "terminal") return run;
+    state = run.state;
+  }
+  return Object.freeze({ kind: "terminal", state });
 }
 
 /** Runs one battler's chosen move from its LITERAL topology entry (census precedent, `factoryBattleScriptDecision.ts`'s own mechanism). */
@@ -3252,9 +3286,22 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     events: Object.freeze([]),
   });
 
+  const prePass = runFocusPunchSetUpPrePass(handlers, initialState);
+  if (prePass.kind === "barrier") {
+    return finishFullTurn(
+      ctx.rng, rngBefore.calls, prePass.state,
+      buildRules(prePass.state.rulesContext, rules.phase, rules.pendingPlayerDecision),
+      machineBarrierBoundary(prePass.instruction, prePass.state.instructionsExecuted),
+    );
+  }
+  if (prePass.kind === "player-choice") {
+    throw new Error("BattleScript_FocusPunchSetUp has no openpartyscreen");
+  }
+  const actionsInitialState = prePass.state;
+
   const action1 = mover1SwitchPartyIndex !== null
     ? runVoluntarySwitchAction(
-      initialState,
+      actionsInitialState,
       mover1 as BattleSinglesBattler,
       mover1SwitchPartyIndex,
       mover1 === 0 ? trainerMoveId : playerMoveId,
@@ -3264,7 +3311,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     : runMoveAction(
       PROGRAM,
       handlers,
-      initialState,
+      actionsInitialState,
       mover1,
       mover1MoveId,
       mover1MoveSlot,

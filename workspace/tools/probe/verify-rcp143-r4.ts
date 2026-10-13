@@ -89,7 +89,9 @@ export function verifyArm(arm: Arm, playerMoveSlot: 0 | 2) {
   const messagesMatch = JSON.stringify(romIds) === JSON.stringify(portIds);
   const drawsMatch = JSON.stringify(romDraws) === JSON.stringify(portDraws);
   const firstUsedMove = portEvents.findIndex((event) => event.id === "STRINGID_USEDMOVE");
-  const predicted = playerMoveSlot === 2
+  // After the #139 fix (fpp150) the port already emits the pre-pass; only a pre-fix port needs it spliced in.
+  const portHasPrePass = portEvents.some((event) => event.id === "STRINGID_PKMNTIGHTENINGFOCUS");
+  const predicted = playerMoveSlot === 2 && !portHasPrePass
     ? [...portEvents.slice(0, firstUsedMove), ...PRE_PASS_EVENTS, ...portEvents.slice(firstUsedMove)]
     : portEvents;
   return {

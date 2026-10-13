@@ -263,18 +263,21 @@ describe("rcp143 R4 -- Focus Punch pre-pass before ANY action, no RNG (ISSUES #1
     });
   });
 
-  it("records the port at HEAD skipping the pre-pass (expected FAIL today) with the RNG already in step", () => {
-    expect(r4.comparison.verdictToday).toBe("FAIL");
+  it("records the port running the pre-pass (fpp150 fix: PASS) with the RNG unchanged", () => {
+    expect(r4.comparison.verdictToday).toBe("PASS");
     const [focus, control] = r4.comparison.arms;
-    expect(focus).toMatchObject({ arm: "off-focus-punch", messagesMatch: false, drawsMatch: true });
+    expect(focus).toMatchObject({ arm: "off-focus-punch", messagesMatch: true, drawsMatch: true });
     expect(control).toMatchObject({ arm: "off-control", messagesMatch: true, drawsMatch: true });
-    expect(r4.port.arms[0].portMessageIds[0]).toBe("STRINGID_USEDMOVE");
+    expect(r4.port.arms[0].portMessageIds.slice(0, 3)).toEqual([
+      "STRINGID_EMPTYSTRING3", "STRINGID_PKMNTIGHTENINGFOCUS", "STRINGID_USEDMOVE",
+    ]);
     expect(r4.predictedPostFix.arms[0].events.slice(0, 4)).toEqual([
       { kind: "message", id: "STRINGID_EMPTYSTRING3" },
       { kind: "animation", id: "FOCUS_PUNCH_SETUP" },
       { kind: "message", id: "STRINGID_PKMNTIGHTENINGFOCUS" },
       { kind: "message", id: "STRINGID_USEDMOVE" },
     ]);
+    expect(r4.predictedPostFix.arms[0].events).toEqual(r4.port.arms[0].portEventsToday);
     expect(r4.predictedPostFix.arms[1].events).toEqual(r4.port.arms[1].portEventsToday);
   });
 });
