@@ -2228,32 +2228,28 @@ fourteen-move physical batch is verified and folded. Helping Hand remains
 unaccepted pending legal doubles staging. No whole-playable arbitrary-history
 framebuffer exactness is claimed.
 
-Next (2026-10-11 evening): 237 scoped-exact + 13 faithful-random + 26 faithful-timing live adapters for the historical 276 (census
-`237+13+26+0+0=276`; Shadow Punch moved to faithful timing under D4) **plus Struggle 165 live** (the one additional required body,
-`additionalRequiredBodies.MOVE_STRUGGLE`). The 2026-10-11 afternoon session landed: Struggle (stg107 / stl109 / sdl119: 15 / 15 + 11 doll
-windows 0 px; 895 / 1,001 census Struggle commands live), General_StatsChange in both scenes (ISSUES #166 slices a..f: sc106 command,
-scd112 renderer, scf117 alignment / x2 rows / order plan; `generalAnimations.STATS_CHANGE`, a separate line), Scene OFF no-hit pauses +
-the MoveMissedPause hold (olnd113, #167), the Scene OFF `status` command (off121), the Scene ON no-effect attackanimation hold (fix122, 12
-classes), idle98's universal pre / post rows (iu120: 23,870 live commands +3 / +5), shadow105 + Shadow Punch D4 + its shadow-return defect
-(shp116), live-defect fixes from audits 25 / 26 (fix114: Taunt / Harden / Swagger; fix122: Struggle target x2), and the soak driver's
-decoupled press stream (soak111). Ordinary-play census (`.integration/validation/final-2131feda7/census/merged.json`, src `b4befa039`):
-**98.95 % of move-animation commands / 99.32 % of frames live** (session start 95.38 / 98.72), Struggle included. Resume points:
+Next (2026-10-13): 236 scoped-exact + 13 faithful-random + 27 faithful-timing live adapters for the historical 276 (census
+`236+13+27+0+0=276`; Smokescreen moved to faithful timing under D4) **plus Struggle 165 live** (`additionalRequiredBodies.MOVE_STRUGGLE`).
+The 2026-10-12 evening session finished ISSUES #168: every Scene ON status-condition animation (PSN, PRZ, BRN, SLP, CONFUSION,
+INFATUATION, FRZ, CURSED, NIGHTMARE) is presented with the ROM's controller rows (sa125), the IsBattleSEPlaying wait after a neutral hit
+(seg127 / sag130 / gaf140) and its drawing (sar131 / sad133 / sae135: 88 dense ROM windows 0 px; `generalAnimations` status-animation line);
+the same SE wait now precedes stats-change banners (both scenes) and multi-hit 2nd+ hits (sgs134 / sgl138); #166's Double Team tail and
+Smokescreen's first-use phase (tmr136); ordinary Scene ON rows draw ONIX's tracked idle rest (rst139 / rsl141); ord124's order plans
+landed (ordl126). Ordinary-play census (`.integration/validation/final-63f6850b2/census/merged.json`): **99.34 % of move-animation
+commands / 99.60 % of frames live** (session start 98.95 / 99.32). Live audits 27 / 28: 0 defects. Resume points:
 0. ISSUES #165 (GAMEPLAY, outside S10A's presentation-only mandate — needs a run where gameplay changes are in scope): the ROM Factory
    builds every mon with friendship 0 and turns Return into Frustration; production keeps Return (drawn as ReturnWeak, ret88).
-1. ISSUES #168 — the Scene ON status-condition animations (B_ANIM_STATUS_PSN 71 / PRZ 39 / BRN 39 / SLP 97 rows) are not presented
-   (thousands of census occurrences). Prep pack: docs/sta123-status-animations-design.md (if landed; else start with that evidence step),
-   then the stats-change pattern: a presented command + durations, renderers by shared component, host effects, census + audit.
-2. FIRST (cheap): land the BANKED ord124 patch (docs/ord124-order-plans.md §4: computed Odor Sleuth 316 + False Swipe 206 order plans;
-   +106 commands -> 99.34 % / 99.60 % on its patched copy). Then audit the Golbat Mega Punch first-window flag it raised (287,402 px).
-   Remaining fallbacks after it: Hyper Beam 63 (Random2 orb words, 12), Astonish 5, Extrasensory player later bodies 23, doll cells (33 / 26),
-   Castform weather keys (#143), stale move power (Endeavor), Extrasensory player later bodies, Memento after a Dragon Dance.
-3. Timeline remainders: #166 (the live Double Team window ends 9 rows before the ROM's next message), #167 (Rest's OFF attack pause,
-   sprite-visibility / stat-stage-change next receipts, the charge-turn EMPTYSTRING3 print), #153 (Scene OFF skips the Substitute body:
-   HP bar -57 / message -71), idle94's unproven lead moves and per-move tails; post / pre rows for Struggle (measured 0 / 0 by default).
-4. The app-only differential trace `presentation-rng-playable-live-bodies-seeded-on` samples fixed capture frames on the pre-iu120
-   timeline (120 / 173 captures moved): regenerate its capture frames with tools/integration/presentationRngTraces.ts.
-5. A live audit after every batch (audits 21..26 tools; ALWAYS on production accepted windows: tools/integration/audit21Align.py).
-   Audits 25 / 26 each found real live defects after widening species / histories — keep doing it.
+1. FIRST (cheap): land the BANKED inv142 patch (docs/inv142-status-animation-invisible-battler.md: a status animation over a hidden Dig
+   battler draws its sprites; 5 census commands). Then FRZ's frozen-turn 115 / 116 phase (aud137 §; D4 class, 1 frame).
+2. Remaining move-animation fallbacks (census 181 commands): Hyper Beam 63 (Random2 orb words), Astonish 310 (small words law),
+   Extrasensory 326 player later bodies (scanout split), doll cells, Castform weather keys (#143), stale move power (Endeavor), Memento after
+   a Dragon Dance; `unknown` x2-history rows (rst139: 12,477 ONIX frames not claimable).
+3. Timeline remainders: #167 (Rest's OFF attack pause, sprite-visibility / stat-stage-change next receipts, the charge-turn EMPTYSTRING3
+   print), #153 (Scene OFF skips the Substitute body), idle94's unproven lead moves / per-move tails; the SE gate's unmeasured paths
+   (Overheat / Superpower / AncientPower self-drops, Yawn after a hit, Thrash after sandstorm: sgs134 / sag130 docs).
+4. The app-only differential trace `presentation-rng-playable-live-bodies-seeded-on` samples fixed capture frames (1 / 173 moved tonight
+   by the Double Team tail): regenerate its capture frames with tools/integration/presentationRngTraces.ts.
+5. A live audit after every batch (audits 21..28 tools; ALWAYS on production accepted windows: tools/integration/audit21Align.py).
 Struggle is required by the 2026-10-11 user decision; its adapter is live since 2026-10-11 (stl109), with the remaining declines above.
 Validate new adapters with alternate-species dense proofs whose windows are the production accepted window aligned to the
 source activation frame (tools/integration/audit21Align.py), not only the accepted fixture species.

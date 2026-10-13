@@ -5,28 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-12 (evening, in progress) — S10A: status-condition animations in Scene ON — timing + SE gate live, 6 / 9 drawn (#168); ord124 order plans landed (99.34 / 99.60 %)
+## 2026-10-12 (evening) .. 2026-10-13 — S10A: Scene ON status-condition animations DONE (#168: timed + all nine drawn), sound-effect waits, Double Team / Smokescreen timing, ordinary-row idle rest; live share 0..999 98.95 -> 99.34 % of commands (99.32 -> 99.60 % of frames)
 
-- **State:** local master `53419e533`; production src = union `a1730a1f9` (sa125 + ordl126) + stp128's unwired reducer module. Supervisor
-  union gates on `a1730a1f9`: typecheck, smoke 448, full suite 1,642 files / 13,555 tests 0 failed, build. Session start `cfe4e26ca` (src
-  `b4befa039`, the 2026-10-11 final-gated tree: receipt reused).
-- **Did (production, each supervisor-reproduced from the worker's runner into a fresh dir):** ordl126 (ord124's banked Odor Sleuth 316 +
-  False Swipe 206 order plans: census 0..999 98.95 / 99.32 -> **99.34 / 99.60 %**, +106 commands, 0 other changes); sa125 (ISSUES #168
-  SA1 + SA3: a Scene ON `status-animation` command per kernel receipt with the ROM controller rows PSN 71 / CONFUSION 100 / BRN 39 /
-  INFATUATION 97 / SLP 97 / PRZ 39 / FRZ 117 / CURSED 75 / NIGHTMARE 75; the 32-frame `status` stand-in ends at it (off121's rule in ON);
-  212 / 212 anchored census commands land on the ROM row; +650,788 / -85,797 frames on 0..999; Scene OFF 10 / 10 shards byte-identical;
-  canonical + app-only differential 624 / 624 identical; timing only, nothing drawn yet).
-- **Did (evidence, new files):** seg127 (the IsBattleSEPlaying gate: `clamp(seRows - seAge, 0, 29)`, 56 / 56 ROM receipts, 72 gated / 729
-  frames on 0..999; banked unwired rule), stp128 (CURSED / NIGHTMARE / CONFUSION / FRZ unwired reducer, 34 / 34 dense ROM windows 0 px),
-  aud129 live audit 27 (105 windows: 85 OK, 20 D4 timing phases incl. ord124's Golbat Mega Punch flag, 0 defects).
-- **Also folded (union `7511dc63d`, full suite 1,646 files / 13,649 tests, build):** sag130 (#168 SA2: the IsBattleSEPlaying gate in the
-  status-animation command, 72 commands +729 frames == the ROM rule), sar131 (#168 SA4: **PSN / PRZ drawn**, 17 / 17 ROM windows 0 px;
-  source-derived x2 rows for all nine), stq132 (SLP / BRN / INFATUATION reducer, unwired, 37 / 37 windows 0 px).
-- **Also folded (union `b6884121b`):** sad133 (#168: **CURSED / NIGHTMARE / CONFUSION / FRZ drawn**, 34 / 34 ROM windows 0 px on every
-  command row) + a supervisor union fix (stq132 x sad133 typecheck break, TS2366). sgs134 evidence: the SE gate also applies to stats-change
-  (both scenes) and multi-hit 2nd+ hits (ON) — production short by exactly the gate; banked patch.
-- **In flight:** sae135 (draw SLP / BRN / INFATUATION), tmr136 (Double Team window + Smokescreen first-use timing), sgl138 (land sgs134).
-- **Notes:** no DEFERRED entries. Oracle freshness FAIL = known false positive (services 2026-10-06 postdate the last oracle/ commit).
+- **State:** local master `63f6850b2` (production src == union `c4d38e1f3`). Supervisor FINAL gates on that union: typecheck, smoke 448,
+  full suite 1,653 files / 13,710 tests 0 failed, build; differential vs session start `cfe4e26ca`: both canonical railroad traces
+  byte-identical (235 + 216), the app-only presentation-rng trace 172 / 173 (Double Team's intended +9 tail). Census 0..999: **99.34 % /
+  99.60 %** live (27,221 / 27,402 commands), 0 render throws. Catalogue `236+13+27+0+0=276` + Struggle (Smokescreen -> faithful timing).
+  Preview <http://127.0.0.1:5191/> serves `63f6850b2` (4 samples hash-equal, export + ON -> OFF restart passed, no browser errors).
+  Soak on `74cbec2b8` (last Scene OFF change): vanilla 0:20 20 / 20, full 0:60 60 / 60, winning 0:60 and winning-swap 0:60 still running at this commit;
+  fifth gate 100 / 100 x 4.
+- **Did (production; every worker runner re-run by the supervisor into a fresh dir, ALL SAME; unions gated in detached worktrees):**
+  ordl126 (ord124 order plans: +106 commands live), sa125 (#168 SA1 + SA3: the status-animation command with ROM controller rows, the
+  32-frame stand-in removed), sag130 (the IsBattleSEPlaying gate before status animations: 72 commands / 729 frames), sar131 + sad133 +
+  sae135 (**all nine status animations drawn**: 88 dense ROM windows 0 px on every command row; source-derived x2 rows), gaf140 (the
+  drawn animation waits out the gate: a union defect sae135 found), sgl138 (the same gate on stats-change in both scenes and multi-hit
+  2nd+ hits: 366 / 240 commands), tmr136 (#166 Double Team tail +9 rows; Smokescreen first-use D4 phase), rsl141 (ordinary Scene ON rows
+  draw ONIX's idle rest: 22,746 / 22,746 ROM rows 0 px).
+- **Did (evidence):** seg127, stp128, stq132, sgs134, rst139 (prep for the above); live audits 27 (aud129: Golbat Mega Punch flag = a D4
+  phase, 0 defects) and 28 (aud137: 121 / 121 status-animation command rows 0 px, 0 new defects); inv142 (a status animation over a hidden
+  Dig battler: the ROM draws its sprites; banked patch, 5 census cases, not landed).
+- **Supervisor union fixes:** sad133 x stq132 typecheck break (TS2366); sad133 x sae135 diverged `liveStatusAnimationRow` signatures (5-file
+  resolution); tmr136 x sgl138 render conflict + one route-total re-pin (seed 9: 3 live Double Teams).
+- **Next:** ROADMAP S10A "Next (2026-10-13)": land inv142 (banked); FRZ 115 / 116 frozen-turn phase (aud137, D4); #167 remainders; Hyper
+  Beam / Astonish / Extrasensory / doll-cell fallbacks; the app-only differential trace's capture frames; a live audit after every batch.
+- **Notes:** no DEFERRED entries. ISSUES: #168 trimmed to inv142's remainder, #166 removed (fixed). Worker branches merged, worktrees
+  removed (scratch under `.integration/validation/*-2026101[23]/`, transcripts `.codex-logs/workers/`).
 
 ---
 

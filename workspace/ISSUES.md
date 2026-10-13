@@ -17,19 +17,14 @@ backlog.
 
 # Open
 
-## #168 — Scene ON: the status-condition animations (B_ANIM_STATUS_*) are not drawn (S10A, found 2026-10-11 by off121; TIMING fixed 2026-10-12)
+## #168 — remainder: a Scene ON status animation over an INVISIBLE battler draws nothing (S10A; #168 otherwise DONE 2026-10-13)
 
-Remainder after sa125 / sag130 / sar131 / sad133 (timing exact incl. the IsBattleSEPlaying gate; PSN / PRZ / CURSED / NIGHTMARE /
-CONFUSION / FRZ drawn at 0 px on every command row; source-derived x2 rows for all nine): SLP / BRN / INFATUATION (sae135, stq132's
-reducer) are not drawn yet. Design: docs/sta123-status-animations-design.md §5.
-
-## #166 — remainder: the live Double Team window ends 9 rows before the ROM's next message (Scene ON) (S10A, 2026-10-11)
-
-General_StatsChange is DONE in both scenes (sc106 command, scd112 renderer, scf117 alignment / x2 rows / order plan / accounting:
-`generalAnimations.STATS_CHANGE`). Remaining: after a LIVE Double Team body (which owns its stats change, so no `stats-change` command
-follows), the window ends at stats-change rel 68 while the ROM's next instruction is at rel 77: the next message starts 8 rows early (9 to
-the visible box) — pre-existing, docs/sc106-stats-change-command.md (DT evidence) and docs/scf117-stats-change-finish.md §6. Fix options:
-extend the DT window by the measured rows, or trim it to its body and let the generic command own the banner (moves the DT pins).
+All nine B_ANIM_STATUS_* animations are timed (sa125 + the IsBattleSEPlaying gate, sag130) and drawn (sar131 / sad133 / sae135 / gaf140;
+88 + 16 dense ROM windows 0 px; live audit 28 clean). Remaining: when the battler's sprite is hidden but not semi-invulnerable (a Dig
+charge turn followed by the battler's own in-love check), the ROM runs the script and draws its sprites (hearts / letter Z) over the
+hidden battler; production's guard draws nothing. Census 0..999: 5 / 8,063 commands. Banked patch + proofs: docs/inv142-status-animation-
+invisible-battler.md (`tools/integration/fixtures/inv142/inv142-invisible.diff`, 5 / 5 windows 0 px, census identical; landing recipe
+there). Also open (D4 class, aud137): FRZ's frozen-turn active rows are 115 vs production's 116 on 4 / 10 windows (next message 1 frame late).
 
 ## #167 — remainder: Scene OFF Rest attack pause and unmeasured next receipts (S10A, 2026-10-11)
 

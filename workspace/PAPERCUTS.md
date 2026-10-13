@@ -1788,3 +1788,22 @@ current app stage should be rejected before replay.
 - **Two independently green production branches can break as a union** (land86 added a call to a function cast83 had renamed /
   un-imported: clean textual merge, ReferenceError at runtime, 17 census battles aborted). Run the census (it records per-battle
   `errors`) and typecheck on every union before launching a worker on it. (supervisor)
+
+## 2026-10-12 / 13 — S10A evening supervisor: union / runner / harness friction (worker-reported, supervisor-verified where noted)
+
+- **Bare `npx vitest --shard` / `npx tsc --noEmit` run out of memory** (bumped again: 4 workers hit it tonight, ~2-6 min each). Use
+  `npm test -- --shard=k/n` and `npm run typecheck` (both carry the 8 GB heap).
+- **`npm run typecheck | tail` hides the exit status**: a type error slipped into a commit and forced a census restart (sag130, ~5 min).
+- **`git apply` of a workspace-relative diff from `workspace/` (or inside an archive copy nested in the repo) silently skips files**;
+  `patch -p1` works but leaves `.orig` files when a hunk applies at an offset — they broke a runner's directory compare (ordl126,
+  sgl138, rst139; ~2-3 min each).
+- **Branch runners' route checks go stale on unions**: sar131 / sad133 / sae135's `routes-delta` classify only their own slice's
+  animations, so on master they report the other slices' newly drawn commands as "unexplained" (supervisor + gaf140, ~6 min each to
+  prove). Window comparators stay byte-identical — trust those; refresh the route classifiers when next touched.
+- **`compare:differential` does not say which command a moved capture falls on** (tmr136, ~4 min).
+- **`sar131RouteRender.ts --scan`: one seed's "lost battle ownership" error kills its whole shard** (12 / 20 shards lost; gaf140).
+- **Census timing deltas need a ±1 message-parity allowance** (the census driver presses A on even frames; sgs134) and a
+  frame-budget-truncated battle (e.g. 796) shifts record pairing for the rest of its shard (supervisor, tmr136 census).
+- **`audit21Check.ts` lists at most 40 residual rows** (aud129, tmr136, ~2 min each).
+- **battle_lab rejects an impossible gender silently through the probe wrapper** (male Chansey: the job just produced no output; sgs134).
+- **A 0:60 soak gate with `--parallel 3` prints nothing until its children finish** (~56 min under load tonight) — not a hang.

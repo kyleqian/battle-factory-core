@@ -1,7 +1,32 @@
 # Animation integration progress
 
-## 2026-10-12 (evening, in progress) — S10A: #168 status animations — timing + SE gate live, all 9 drawn; SE gate on stats-change / multi-hit; #166 DT tail; Smokescreen D4; 99.34 / 99.60 % live
+## 2026-10-12 (evening) .. 2026-10-13 — S10A: ISSUES #168 DONE (all nine Scene ON status animations timed + drawn), SE gates, #166 DT tail, Smokescreen D4, ordinary-row idle rest; 98.95 / 99.32 -> 99.34 / 99.60 % live
 
+- **Final (supervisor):** master `63f6850b2` (production src == union `c4d38e1f3`). Gates on that union: typecheck, smoke 448, full suite
+  1,653 files / 13,710 tests 0 failed, build; differential vs session start `cfe4e26ca`: fight-submenu 235 / 235 + battle1-postwin-next-prompt
+  216 / 216 byte-identical, app-only presentation-rng trace 172 / 173 (frame 3622, 673 px: tmr136's Double Team tail). Census 0..999
+  (`.integration/validation/final-63f6850b2/census/merged.json`): **27,221 / 27,402 commands (99.34 %), 4,149,717 / 4,166,351 frames
+  (99.60 %)**, 0 render throws (session start 98.95 / 99.32 %). Catalogue `236+13+27+0+0=276` + Struggle. Status animations: 8,063
+  Scene ON commands, all nine drawn. Preview <http://127.0.0.1:5191/> serves `63f6850b2`: 4 samples hash-equal, session export + ON -> OFF
+  restart passed, no browser errors (`tools/integration/fixtures/playable-preview-63f6850b2-receipt.json`). Soak (run because sgl138 changed
+  Scene OFF timing) on `74cbec2b8` (the last Scene OFF change; later folds are Scene ON only): vanilla 0:20 **20 / 20**, full 0:60 **60 / 60**,
+  winning 0:60 and winning-swap 0:60 still running at this commit (see the follow-up commit); fifth gate winning --vary-rng carry 0 / 14 / 28 **100 / 100 each**, winning-swap carry
+  0 **100 / 100**.
+- gaf140 (MAIN lane, Opus, on master `dd3c20914` .. `26000aa80`): the union DEFECT fixed — the status-animation command carries
+  `seGateFrames`; the render effect age = command age - gate (the ordinary field during the gate): **16 / 16 gated ROM windows 0 px on every
+  row incl. the 139 gate rows**; controls (pre-fix, gate +- 1) 0 / 16; census identical; 4 gated routes OK. Supervisor: gaf140Run.sh
+  --census ALL SAME.
+- Live audit 28 (aud137, INTEGRATION, Opus, new files only, base `dcf042dc7`): status animations widened — 127 windows, **121 / 121 command
+  rows 0 px**, 153 ROM timing receipts rule-exact (2 gated), x2 next-body checks OK, **no new defect**; FRZ active 115 vs production's 116
+  on 4 / 10 frozen-turn windows = a 1-frame TIMING-PHASE (D4 class; next message 1 frame late; cause named, not proven). Supervisor:
+  aud137Run.sh ALL SAME.
+- rsl141 (SIDE, Opus, `1d154b127` .. `3fe8af720`, cap-killed during its final full suite with everything committed; supervisor salvage +
+  doc): rst139's ordinary-row idle rest LANDED — 22,746 / 22,746 ROM rows 0 px, routes 4,349 changed == at stake, census identical.
+  Supervisor: rsl141Run.sh ALL SAME; union `c4d38e1f3` gates above.
+- inv142 (INTEGRATION, Opus, new files only): a status animation over an INVISIBLE battler (Dig charge, the battler's own in-love check):
+  the ROM runs the script and draws its sprites (hearts / letter Z) while the battler stays hidden; production draws nothing (sar131's
+  guard); census exposure 5 / 8,063; banked `fixtures/inv142/inv142-invisible.diff` 5 / 5 windows 0 px, census identical. NOT landed (time).
+  Supervisor: inv142Run.sh ALL SAME.
 - Session start: master `cfe4e26ca`, production src `b4befa039` == the 2026-10-11 final gates' tree -> baseline receipt reused. Oracle
   freshness FAIL = the known false positive (services 2026-10-06; last `oracle/` commit 2026-08-15).
 - ordl126 (SIDE, Sonnet, merged `1352d2130`): ord124's banked plans landed through the table generator (src hunk == the banked hunk,
