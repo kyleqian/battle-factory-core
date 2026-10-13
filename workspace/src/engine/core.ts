@@ -677,6 +677,8 @@ import {
   completeFactoryRoundPresentation,
   createFactoryRoundBattleOrchestrator,
   factoryHeardBrainSpeech,
+  factoryRoundBattleOpponentIdleRest,
+  factoryRoundBattleResolutionForRender,
   markFactoryBrainSpeechHeard,
   preGenerateFactoryRoundNextOpponent,
   type FactoryRoundBattleOrchestratorState,
@@ -3511,7 +3513,8 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     } else {
       renderBattleResolutionPresentation(
         fb,
-        resolution,
+        // rst139: the handoff rows read the battle's current tracked x2 history.
+        factoryRoundBattleResolutionForRender(state.factoryRoundBattleOrchestrator) ?? resolution,
         { drawScene: renderBattleResolutionLiveView },
         state.presentationRng?.host ?? null,
       );
@@ -3525,7 +3528,9 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     if (selector) {
       renderBattlePartySelect(fb, selector, partySelectCloseRenderAssets(presentation));
     } else {
-      renderGeneratedBattleCommandPresentation(fb, presentation);
+      // rst139: the tracked x2 history of this battle (Scene ON only) puts an idle opponent at its front idle rest.
+      renderGeneratedBattleCommandPresentation(fb, presentation, "all", undefined,
+        factoryRoundBattleOpponentIdleRest(state.factoryRoundBattleOrchestrator));
     }
     return fb;
   }

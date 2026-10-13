@@ -1438,7 +1438,7 @@ import {
 } from "../animation/shadowPunch.ts";
 import { shadowPunchLiveBackgroundBldy } from "../animation/shadowPunchFadeHost.ts";
 import {
-  speciesFrontIdleRestOffset,
+  speciesFrontIdleRestOffset, speciesFrontIdleRestOffsetOrZero,
 } from "../animation/speciesIdleAnim.ts";
 import { shakeMonOffsetAtTick } from "../animation/shakeMon.ts";
 import { rockBlastDisplayedTargetOffsetAtAge } from "../animation/rockBlast.ts";
@@ -14912,7 +14912,17 @@ export function renderGeneratedBattleCommandPresentation(
   presentation: BattleCommandPresentationState,
   layer: "all" | "obj-only" = "all",
   openElapsed?: number,
+  /** rst139: the orchestrator's tracked x2 history says the opponent is at its species front idle rest (Scene ON). */
+  opponentIdleRest = false,
 ): void {
+  // rst139 (docs/rst139-ordinary-row-rest.md): the command menu's opponent stands at its tracked front idle rest.
+  const restArt = (art: BattleCommandFieldArtView): BattleCommandFieldArtView => {
+    if (!opponentIdleRest || art.opponent.substituteDoll === true) return art;
+    const rest = speciesFrontIdleRestOffsetOrZero(art.opponent.speciesSymbol);
+    if (rest.x2 === 0 && rest.y2 === 0) return art;
+    return Object.freeze({ ...art, opponent: Object.freeze({
+      ...art.opponent, origin: Object.freeze({ x: art.opponent.origin.x + rest.x2, y: art.opponent.origin.y + rest.y2 }) }) });
+  };
   const bounceTick = presentation.idleBounceElapsed
     + battleCommandBounceAgeOffset(presentation);
   const idleBounce = commandMenuBounceY2(bounceTick);
@@ -14930,7 +14940,7 @@ export function renderGeneratedBattleCommandPresentation(
         bounce,
         revealed,
         view.healthboxes,
-        view.fieldArt,
+        restArt(view.fieldArt),
         view.spriteVisibility,
         layer,
         openElapsed,
@@ -14948,7 +14958,7 @@ export function renderGeneratedBattleCommandPresentation(
         bounce,
         true,
         view.healthboxes,
-        view.fieldArt,
+        restArt(view.fieldArt),
         view.spriteVisibility,
         layer,
         openElapsed,
@@ -14970,7 +14980,7 @@ export function renderGeneratedBattleCommandPresentation(
         bounce,
         true,
         view.healthboxes,
-        view.fieldArt,
+        restArt(view.fieldArt),
         view.spriteVisibility,
         layer,
         openElapsed,

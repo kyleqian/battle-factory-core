@@ -1,0 +1,85 @@
+{
+ "rst139-confuse-ray-ply-onix.json": {
+  "player": "PRIMEAPE",
+  "playerMove": 109,
+  "opponent": "ONIX",
+  "opponentMove": 33,
+  "opponentBench": null,
+  "turns": 3,
+  "purpose": "a: Confuse Ray body (target keep); b: CONFUSION on ONIX; e: menus",
+  "seed": 305419897
+ },
+ "rst139-tail-whip-ply-onix.json": {
+  "player": "PRIMEAPE",
+  "playerMove": 39,
+  "opponent": "ONIX",
+  "opponentMove": 33,
+  "opponentBench": null,
+  "turns": 3,
+  "purpose": "c: Tail Whip stats change on ONIX (target keep); e",
+  "seed": 305419897
+ },
+ "rst139-karate-chop-ply-onix.json": {
+  "player": "PRIMEAPE",
+  "playerMove": 2,
+  "opponent": "ONIX",
+  "opponentMove": 33,
+  "opponentBench": null,
+  "turns": 2,
+  "purpose": "a: Karate Chop (target zeroed) -> ONIX x2 0 after; e",
+  "seed": 305419897
+ },
+ "rst139-harden-opp-onix.json": {
+  "player": "PRIMEAPE",
+  "playerMove": 150,
+  "opponent": "ONIX",
+  "opponentMove": 106,
+  "opponentBench": null,
+  "turns": 2,
+  "purpose": "c: ONIX Harden (self stats change); Splash keeps; e",
+  "seed": 305419897
+ },
+ "rst139-roar-ply-snorlax.json": {
+  "player": "PRIMEAPE",
+  "playerMove": 46,
+  "opponent": "SNORLAX",
+  "opponentMove": 33,
+  "opponentBench": [
+   "ONIX",
+   "RATTATA"
+  ],
+  "turns": 3,
+  "purpose": "d: Roar drags ONIX / RATTATA in (send-in rest); e",
+  "seed": 305419897
+ },
+ "rst139-confuse-ray-ply-rattata.json": {
+  "player": "PRIMEAPE",
+  "playerMove": 109,
+  "opponent": "RATTATA",
+  "opponentMove": 33,
+  "opponentBench": null,
+  "turns": 3,
+  "purpose": "a / b / e on RATTATA (rest +1)",
+  "seed": 305419897
+ },
+ "rst139-confuse-ray-opp-onix.json": {
+  "player": "ONIX",
+  "playerMove": 33,
+  "opponent": "PRIMEAPE",
+  "opponentMove": 109,
+  "opponentBench": null,
+  "turns": 3,
+  "purpose": "player-side ONIX (back sprite): CONFUSION on the player; e",
+  "seed": 305419897
+ },
+ "rst139-confuse-ray-ply-golbat.json": {
+  "player": "PRIMEAPE",
+  "playerMove": 109,
+  "opponent": "GOLBAT",
+  "opponentMove": 33,
+  "opponentBench": null,
+  "turns": 2,
+  "purpose": "control: zero-rest elevated GOLBAT opponent",
+  "seed": 305419897
+ }
+}
