@@ -71,6 +71,8 @@ const DEFAULT_STAT_STAGES = Object.freeze([
 /** include/constants/battle.h:213/217. */
 const SIDE_STATUS_SPIKES = 1 << 4;
 const SIDE_STATUS_SPIKES_DAMAGED = 1 << 9;
+/** include/battle.h:39-40 -- B_ACTION_CANCEL_PARTNER (== B_ACTION_FINISHED). */
+const B_ACTION_CANCEL_PARTNER = 12;
 const STATUS2_DESTINY_BOND = 1 << 25;
 const HITMARKER_DESTINYBOND = 1 << 6;
 const ABILITY_LEVITATE = 26;
@@ -1326,6 +1328,16 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     // body. `nextRules` already carries the unconditional HITMARKER_FAINTED clear.
     const sideStatuses = [...nextRules.sideStatuses] as [number, number];
     sideStatuses[side] = (sideStatuses[side] & ~SIDE_STATUS_SPIKES_DAMAGED) >>> 0;
+    // ISSUES #169 -- `:5270-5274`: the switched-in battler's turn-order slot
+    // becomes B_ACTION_CANCEL_PARTNER (12 == B_ACTION_FINISHED,
+    // include/battle.h:39-40), so a battler dragged in by Roar/Whirlwind
+    // before its own action takes none (HandleAction_ActionFinished,
+    // battle_util.c:658-663). Receipts rcp154-c1 / rcp154-c1f.
+    const actionsByTurnOrder = nextRules.actionsByTurnOrder.map((action, slot) =>
+      slot < nextRules.battleTopology.battlersCount && nextRules.battlerByTurnOrder[slot] === battler
+        ? B_ACTION_CANCEL_PARTNER
+        : action
+    ) as unknown as BattleScriptRulesContext["actionsByTurnOrder"];
     return transitionBattleScriptCommand(
       context,
       Object.freeze({ kind: "advance" }),
@@ -1333,6 +1345,7 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
         rulesContext: Object.freeze({
           ...nextRules,
           sideStatuses: Object.freeze(sideStatuses),
+          actionsByTurnOrder: Object.freeze(actionsByTurnOrder),
         }),
       },
     );

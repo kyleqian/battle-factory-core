@@ -93,20 +93,18 @@ describe("rcp154 C1 -- a battler dragged in by Whirlwind before acting does not 
     });
   });
 
-  it("port at HEAD FAILs at turn 1 index 2: it runs GetMoveTarget + TACKLE for the dragged-in mon", () => {
-    expect(c1.comparison.verdictToday).toBe("FAIL");
-    expect(c1.comparison.firstDivergence).toMatchObject({
-      turn: 1, index: 2,
-      rom: { reason: "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)" },
-      port: { reason: "GetMoveTarget(MOVE_TARGET_SELECTED)" },
-    });
-    expect(c1.comparison.romMoveDispatches[0]).toBe(1);
-    expect(c1.comparison.portUsedMoveMessages[0]).toBe(2);
+  it("port PASSes after act156 F1 (ISSUES #169): the dragged-in mon takes no action, draw for draw", () => {
+    // Before act156 the port FAILed at turn 1 index 2: it ran GetMoveTarget + the
+    // dragged-in ZIGZAGOON's slot-0 TACKLE (8 draws, 2 USEDMOVE).
+    expect(c1.comparison.verdictToday).toBe("PASS");
+    expect(c1.comparison.firstDivergence).toBeNull();
+    expect(c1.comparison.portUsedMoveMessages).toEqual(c1.comparison.romMoveDispatches);
+    expect(c1.comparison.portActiveHp).toEqual(c1.comparison.romActiveHp);
     expect(c1.port.turns[0].draws.map((draw) => draw.reason)).toEqual([
-      "accuracycheck", "forcerandomswitch:pick", "GetMoveTarget(MOVE_TARGET_SELECTED)",
-      "accuracycheck", "critcalc", "adjustnormaldamage", "seteffectwithchance",
-      "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "accuracycheck", "forcerandomswitch:pick", "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
     ]);
+    expect(c1.port.turns.map((turn) => turn.draws.map((draw) => draw.rngBefore)))
+      .toEqual(c1.rom.turns.map((turn) => turn.draws.map((draw) => draw.rngBefore)));
   });
 
   it("predicts the ROM sequence post-fix", () => {
@@ -139,13 +137,15 @@ describe("rcp154 C1f -- census-811 side: the foe dragged in by the player's Whir
     expect(c1f.rom.turns[1].actions[0]).toMatchObject({ attacker: 1, activeSpecies: SPECIES.VOLBEAT, currentMove: MOVE.MOONLIGHT });
   });
 
-  it("port at HEAD matches every draw and HP but announces a MOONLIGHT the ROM never runs (FAIL by dispatch count)", () => {
-    expect(c1f.comparison.verdictToday).toBe("FAIL");
+  it("port PASSes after act156 F1 (ISSUES #169): no MOONLIGHT announced for the dragged-in foe", () => {
+    // Before act156 the port matched every draw and HP but announced the dragged-in
+    // mon's MOONLIGHT every dragged turn (USEDMOVE [2,2,2,2,2,2,2] vs ROM dispatches).
+    expect(c1f.comparison.verdictToday).toBe("PASS");
     expect(c1f.comparison.firstDivergence).toBeNull();
     expect(c1f.comparison.portActiveHp).toEqual(c1f.comparison.romActiveHp);
     expect(c1f.comparison.romMoveDispatches).toEqual([1, 2, 1, 2, 1, 2, 1]);
-    expect(c1f.comparison.portUsedMoveMessages).toEqual([2, 2, 2, 2, 2, 2, 2]);
-    expect(c1f.port.turns[0].events).toContain("message:STRINGID_PKMNHPFULL");
+    expect(c1f.comparison.portUsedMoveMessages).toEqual([1, 2, 1, 2, 1, 2, 1]);
+    expect(c1f.port.turns[0].events).not.toContain("message:STRINGID_PKMNHPFULL");
   });
 
   it("predicts the ROM sequence post-fix", () => {

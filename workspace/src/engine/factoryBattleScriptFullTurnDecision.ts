@@ -218,6 +218,8 @@ const B_ACTION_USE_MOVE = 0;
 /** include/constants/battle.h B_ACTION_SWITCH. */
 const B_ACTION_SWITCH = 2;
 const B_ACTION_TRY_FINISH = 11;
+/** include/battle.h:39-40 -- B_ACTION_CANCEL_PARTNER == B_ACTION_FINISHED. */
+const B_ACTION_CANCEL_PARTNER = 12;
 
 /**
  * Run Away is an honest Factory no-op at this adapter's decision boundary.
@@ -2057,6 +2059,22 @@ export function runStagedVoluntarySwitch(
  * `chosenMoveByBattler` (gChosenMoveByBattler) is banked the same way; see
  * `selectionChosenMove`.
  */
+/**
+ * SetActionsAndBattlersTurnOrder (battle_main.c:4816-4850) rewrites
+ * gActionsByTurnOrder[0..gBattlersCount) from gChosenActionByBattler every
+ * turn, so a previous turn's TRY_FINISH / CANCEL_PARTNER (ISSUES #169) never
+ * leaks into this one. Singles: slots 2-3 are untouched, as in source.
+ */
+function withTurnStartActions(
+  rulesContext: BattleScriptRulesContext,
+  actionsInTurnOrder: readonly [number, number],
+): BattleScriptRulesContext {
+  const actionsByTurnOrder = rulesContext.actionsByTurnOrder.map((action, slot) =>
+    slot < 2 ? actionsInTurnOrder[slot]! : action
+  ) as unknown as BattleScriptRulesContext["actionsByTurnOrder"];
+  return Object.freeze({ ...rulesContext, actionsByTurnOrder: Object.freeze(actionsByTurnOrder) });
+}
+
 function withTurnOrderPositions(
   rulesContext: BattleScriptRulesContext,
   currentTurnActionNumber: number,
@@ -2983,12 +3001,19 @@ function continueFullTurnAfterAction(
         & ~BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
       ) >>> 0,
     });
-    if (betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_TRY_FINISH) {
+    if (
+      betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_TRY_FINISH
+      || betweenActionsRules.actionsByTurnOrder[1] === B_ACTION_CANCEL_PARTNER
+    ) {
       // Pursuit interception during action 1 rewrote mover2's turn-order slot
       // to B_ACTION_TRY_FINISH (Cmd_jumpifnopursuitswitchdmg,
       // battle_script_commands.c:8751-8753), so RunTurnActionsFunctions never
       // dispatches mover2's own move -- the switch script already landed the
       // double-power Pursuit hit. Skip straight to end-turn.
+      // ISSUES #169: a battler dragged in by action 1's Roar/Whirlwind had its
+      // slot set to B_ACTION_CANCEL_PARTNER by Cmd_switchineffects
+      // (battle_script_commands.c:5270-5274); HandleAction_ActionFinished
+      // dispatches nothing for it (receipts rcp154-c1 / rcp154-c1f).
       preEndTurnState = Object.freeze({ ...preEndTurnState, rulesContext: betweenActionsRules });
     } else {
       const preAction2State: MachineState = Object.freeze({
@@ -3234,7 +3259,10 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     instructionsExecuted: 0,
     haltReason: null,
     scheduler: createBattleScriptSchedulerState(),
-    rulesContext: withTurnOrderPositions(rc0, 0, mover1, mover2, [
+    rulesContext: withTurnOrderPositions(withTurnStartActions(rc0, [
+      mover1SwitchPartyIndex !== null ? B_ACTION_SWITCH : B_ACTION_USE_MOVE,
+      mover2SwitchPartyIndex !== null ? B_ACTION_SWITCH : B_ACTION_USE_MOVE,
+    ]), 0, mover1, mover2, [
       // HandleTurnActionSelectionState's banked gChosenActionByBattler
       // (battle_main.c:159): B_ACTION_SWITCH for a party swap, otherwise
       // B_ACTION_USE_MOVE. Read back by ENDTURN_ORDER's re-sort.
