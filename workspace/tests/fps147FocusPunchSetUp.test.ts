@@ -4,6 +4,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_ROWS,
   FOCUS_PUNCH_SETUP_ROWS,
   focusPunchSetUpDisplayRow,
   focusPunchSetUpSourceRow,
@@ -15,7 +16,10 @@ type Row = {
   spr: number[][]; n: number; vt: number; sc: number[];
 };
 type Window = { side: "player" | "opponent"; species: string; S: number; R: number; E: number; battler: number; rows: Row[] };
-const rom = JSON.parse(readFileSync(`${FIX}/rom-windows.json`, "utf8")) as { windows: Record<string, Window> };
+type SkippedWindow = Omit<Window, "R" | "E"> & { R: null; E: null };
+const rom = JSON.parse(readFileSync(`${FIX}/rom-windows.json`, "utf8")) as {
+  windows: Record<string, Window>; noAnimationWindows: Record<string, SkippedWindow>;
+};
 const shas = JSON.parse(readFileSync(`${FIX}/probe-sha256.json`, "utf8")) as { jobs: Record<string, { equal: boolean }> };
 const windows = Object.entries(rom.windows);
 const coordOf = (side: "player" | "opponent") => side === "player" ? { x: 72, y: 80 } : { x: 176, y: 40 };
@@ -34,7 +38,7 @@ describe("fps147 General_FocusPunchSetUp reducer vs dense ROM windows", () => {
     const species = (side: string) => new Set(windows.filter(([, w]) => w.side === side).map(([, w]) => w.species));
     expect(species("player").size).toBeGreaterThanOrEqual(2);
     expect(species("opponent").size).toBeGreaterThanOrEqual(2);
-    expect(Object.keys(shas.jobs).sort()).toEqual(windows.map(([k]) => k).sort());
+    expect(Object.keys(shas.jobs).sort()).toEqual([...windows.map(([k]) => k), ...Object.keys(rom.noAnimationWindows)].sort());
     expect(Object.values(shas.jobs).every((j) => j.equal)).toBe(true);
   });
 
@@ -46,6 +50,7 @@ describe("fps147 General_FocusPunchSetUp reducer vs dense ROM windows", () => {
       Array.from({ length: FOCUS_PUNCH_SETUP_ROWS.activeRows }, (_, i) => i));
     // the empty box: the first screen change since the row before the script
     expect(w.rows.find((r) => r.d && r.d[0])!.rel).toBe(FOCUS_PUNCH_SETUP_ROWS.emptyBoxDisplay);
+    expect(w.rows.find((r) => r.bs === 13)!.rel).toBe(FOCUS_PUNCH_SETUP_ROWS.playanimationRow);
     // printstring STRINGID_PKMNTIGHTENINGFOCUS (bs 16 = past printstring 0 / waitmessage 3 / playanimation 6 / ... ) and its first glyph
     expect(w.rows.find((r) => r.bs === 16)!.rel).toBe(FOCUS_PUNCH_SETUP_ROWS.focusPrintRow);
     expect(w.rows.find((r) => r.rel > 0 && r.box > 0)!.rel).toBe(FOCUS_PUNCH_SETUP_ROWS.focusFirstGlyphDisplay);
@@ -103,6 +108,23 @@ describe("fps147 General_FocusPunchSetUp reducer vs dense ROM windows", () => {
       expect(control.summary).toMatchObject({ neg, windows: windows.length, reducerZeroPxWindows: 0 });
       for (const [key] of windows) expect(control.result[key].animationRowsPx).toBeGreaterThan(0);
     }
+  });
+
+  it("behind a substitute: no animation, the focus message 121 rows earlier", () => {
+    const subs = Object.values(rom.noAnimationWindows);
+    expect(subs).toHaveLength(1);
+    for (const w of subs) {
+      expect([w.R, w.E]).toEqual([null, null]);
+      const b = w.battler;
+      expect(w.rows.every((r) => r.act === 0 && r.spr.length === 0 && r.vt === 0 && r.bat[b]![3] === 0)).toBe(true);
+      // through the focus waitmessage (bs < 19 = before end2; on rel 100 the turn moves on and loads other palettes)
+      expect(new Set(w.rows.filter((r) => r.rel >= -1 && r.bs >= 0 && r.bs < 19).map((r) => JSON.stringify(r.pal))).size).toBe(1);
+      expect(w.rows.find((r) => r.d && r.d[0])!.rel).toBe(FOCUS_PUNCH_SETUP_ROWS.emptyBoxDisplay);
+      expect(w.rows.find((r) => r.bs === 13)!.rel).toBe(FOCUS_PUNCH_SETUP_ROWS.playanimationRow);
+      expect(w.rows.find((r) => r.bs === 16)!.rel).toBe(FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_ROWS.focusPrintRow);
+      expect(w.rows.find((r) => r.rel > 0 && r.box > 0)!.rel).toBe(FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_ROWS.focusFirstGlyphDisplay);
+    }
+    expect(FOCUS_PUNCH_SETUP_ROWS.focusFirstGlyphDisplay - FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_ROWS.focusFirstGlyphDisplay).toBe(121);
   });
 
   it("is unwired: no production module imports it", () => {

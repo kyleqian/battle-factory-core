@@ -27,6 +27,8 @@ export const FOCUS_PUNCH_SETUP_ROWS = Object.freeze({
   scriptStart: -6,
   /** The empty message box is first on screen. */
   emptyBoxDisplay: -4,
+  /** Cmd_playanimation executes (the controller's B_ANIM_FOCUS_PUNCH_SETUP command): row X; R = X + 2. */
+  playanimationRow: -2,
   /** gAnimScriptActive is set on rel 0 .. activeRows - 1. */
   activeRows: 120,
   /** The ShakeMon2 / BlendColorCycle tasks are created on this row. */
@@ -35,6 +37,15 @@ export const FOCUS_PUNCH_SETUP_ROWS = Object.freeze({
   focusPrintRow: 122,
   /** The first glyph of "…is tightening its focus!" is on screen. */
   focusFirstGlyphDisplay: 123,
+});
+
+/**
+ * Behind a substitute TryHandleLaunchBattleTableAnimation skips B_ANIM_FOCUS_PUNCH_SETUP (it is not one of
+ * ShouldAnimBeDoneRegardlessOfSubstitute's ids): nothing is drawn. Rows rel to the same nominal R = X + 2 (1 / 1 ROM window).
+ */
+export const FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_ROWS = Object.freeze({
+  focusPrintRow: 1,
+  focusFirstGlyphDisplay: 2,
 });
 
 export interface FocusPunchSetUpSprite extends FocusEnergySprite {

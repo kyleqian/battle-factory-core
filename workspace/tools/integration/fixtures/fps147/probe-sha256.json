@@ -31,6 +31,12 @@
    "equal": true,
    "dumpRgb": "0d319ed7b07b1197e931d215e3812b7f748e58e6a5dd893f8368f5b4fb92fd1f"
   },
+  "p-machamp-sub": {
+   "r1": "f067711f15dee4ec8bf0f731b02cb494262c090bcb08e72166a537cfcccd4ce2",
+   "r2": "f067711f15dee4ec8bf0f731b02cb494262c090bcb08e72166a537cfcccd4ce2",
+   "equal": true,
+   "dumpRgb": "7683d611f6777e62d8b782536027ebed4c0b327ca76aba342a557660f702d139"
+  },
   "p-machamp": {
    "r1": "9317ebfce17828cefa4ec35ba842ca3f0a22966c0b54a25a0f9abf2ec603763a",
    "r2": "9317ebfce17828cefa4ec35ba842ca3f0a22966c0b54a25a0f9abf2ec603763a",

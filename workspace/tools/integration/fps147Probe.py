@@ -6,7 +6,8 @@ battle-scene-on, the scenario's own explicit lab "seed". stp128Probe.py's shape.
 
 usage: fps147Probe.py <scenario.json> <output.json>
 The window opens on the first row gBattlescriptCurrInstr is inside BattleScript_FocusPunchSetUp (row S; the two rows before are kept) and
-closes at E + 8 (E = the first row gAnimScriptActive is 0 again after its rise R). rel = frame - R. Per row (every key on every row):
+closes at E + 8 (E = the first row gAnimScriptActive is 0 again after its rise R). rel = frame - R. A window whose animation never
+launches (a battler behind a substitute) closes at S + 200 with R / E null and rel = frame - (S + 6). Per row (every key on every row):
   rel / f / act / bs        rel, trace frame, gAnimScriptActive, gBattlescriptCurrInstr - BattleScript_FocusPunchSetUp (-1 outside 0..31)
   scr                       sha256[:16] of the raw RGB888 screen
   d                         [changed px, x0, y0, x1, y1] vs row S - 1 ([0] when equal)
@@ -146,6 +147,8 @@ def main() -> None:
                 cur["E"] = frame
             if cur["E"] is not None and frame == cur["E"] + 8:
                 close()
+            elif cur["R"] is None and frame == cur["S"] + 200:
+                close()
         else:
             hist.append((full_row(img, rgb, []), img))
             del hist[:-2]
@@ -159,7 +162,7 @@ def main() -> None:
                 for im in cur["frames"]:
                     fh.write(im.tobytes())
         for r in cur["rows"]:
-            r["rel"] = r["f"] - cur["R"]
+            r["rel"] = r["f"] - (cur["R"] if cur["R"] is not None else cur["S"] + 6)
         window.update({"S": cur["S"], "R": cur["R"], "E": cur["E"], "battler": cur["battler"], "preSprites": cur["pre"],
                        "firstRel": cur["rows"][0]["rel"], "rows": cur["rows"]})
         cur = None
