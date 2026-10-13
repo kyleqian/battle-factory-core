@@ -9,6 +9,7 @@ Per frame n (after n trace frames; frame 0 = the lab's start) one row, compact (
   act               gAnimScriptActive
   c0 / c1           gBattlerControllerFuncs[0 / 1] as its linker symbol (HandleInputChooseAction = the action menu, ...)
   b0 / b1           battler 0 / 1 sprite (gBattlerSpriteIds): [spriteId, x, y, x2, y2, invisible, species-pic tile]
+  m                 [gBattleMons[0].species, gBattleMons[1].species]
   scr               sha256[:16] of the raw RGB888 screen
 Optional env RST139_DUMP=<dir>: also write <dir>/<output stem>.npz (`frames`: every row's full RGB, uint8 [N, 160, 240, 3]); scratch only.
 """
@@ -67,6 +68,7 @@ def main() -> None:
     sy, rev = symbols(ref / "pokeemerald.elf")
     u8, u16, u32 = oracle.read_u8, oracle.read_u16, oracle.read_u32
     act_a, spr_a, bsid_a, ctl_a = sy["gAnimScriptActive"], sy["gSprites"], sy["gBattlerSpriteIds"], sy["gBattlerControllerFuncs"]
+    mons_a = sy["gBattleMons"]  # struct BattlePokemon: species at 0x00, size 0x58
     dump_dir = os.environ.get("RST139_DUMP")
     rows: list[dict] = []
     frames: list[np.ndarray] = []
@@ -86,6 +88,7 @@ def main() -> None:
             b = spr_a + sid * SZ
             row[f"b{bt}"] = [sid, s16(u16(b + 0x20)), s16(u16(b + 0x22)), s16(u16(b + 0x24)), s16(u16(b + 0x26)), (u8(b + 0x3E) >> 2) & 1,
                              u16(b + 4) & 0x3FF]
+        row["m"] = [u16(mons_a), u16(mons_a + 0x58)]
         out = {"f": frame}
         for k, v in row.items():
             if last.get(k) != v:
