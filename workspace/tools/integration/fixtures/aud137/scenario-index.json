@@ -371,7 +371,7 @@
    "role": "target",
    "species": "SKARMORY"
   },
-  "seed": 305419955
+  "seed": 1
  },
  "aud137-frz-ply-snorlax.json": {
   "animation": "FRZ",
@@ -393,7 +393,7 @@
    "role": "target",
    "species": "SNORLAX"
   },
-  "seed": 305419955
+  "seed": 1
  },
  "aud137-psn-ply-crobat-onix.json": {
   "animation": "PSN",

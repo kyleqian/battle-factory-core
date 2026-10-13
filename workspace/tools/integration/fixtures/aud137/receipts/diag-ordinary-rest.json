@@ -1,9 +1,9 @@
 {
  "summary": {
   "diag": "ordinary-rest",
-  "windows": 121,
-  "zeroPxWindows": 120,
-  "perRowDigest": "f3cd6f583422d7ba"
+  "windows": 127,
+  "zeroPxWindows": 126,
+  "perRowDigest": "3373a748617dd3ab"
  },
  "windows": {
   "aud137-brn-opp-crobat#0": 0,
@@ -40,6 +40,12 @@
   "aud137-curse-ply-crobat#1": 0,
   "aud137-curse-ply-ninjask#0": 0,
   "aud137-curse-ply-ninjask#1": 0,
+  "aud137-frz-opp-skarmory#0": 0,
+  "aud137-frz-opp-skarmory#1": 0,
+  "aud137-frz-opp-skarmory#2": 0,
+  "aud137-frz-opp-snorlax#0": 0,
+  "aud137-frz-opp-snorlax#1": 0,
+  "aud137-frz-opp-snorlax#2": 0,
   "aud137-frz-ply-skarmory#0": 0,
   "aud137-frz-ply-skarmory#1": 0,
   "aud137-frz-ply-snorlax#0": 0,

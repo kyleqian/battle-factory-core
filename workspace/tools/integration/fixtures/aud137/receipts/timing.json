@@ -607,8 +607,112 @@
     "check": "ok"
    }
   ],
-  "aud137-frz-opp-skarmory": [],
-  "aud137-frz-opp-snorlax": [],
+  "aud137-frz-opp-skarmory": [
+   {
+    "label": "BattleScript_MoveEffectFreeze+0",
+    "X": 991,
+    "gate": 0,
+    "rule": 0,
+    "act": 116,
+    "ctl": 117,
+    "mrf": 0,
+    "mv": 58,
+    "se": "se_effective",
+    "L": "73",
+    "age": "74",
+    "tableAnimation": "FRZ",
+    "ruleResidual": 0,
+    "ctlIdentity": true,
+    "check": "ok"
+   },
+   {
+    "label": "BattleScript_MoveUsedIsFrozen+6",
+    "X": 1306,
+    "gate": 0,
+    "rule": 0,
+    "act": 116,
+    "ctl": 117,
+    "mrf": 0,
+    "mv": 33,
+    "se": "se_m_hail",
+    "L": "32",
+    "age": "290",
+    "tableAnimation": "FRZ",
+    "ruleResidual": 0,
+    "ctlIdentity": true,
+    "check": "ok"
+   },
+   {
+    "label": "BattleScript_MoveUsedIsFrozen+6",
+    "X": 2029,
+    "gate": 0,
+    "rule": 0,
+    "act": 115,
+    "ctl": 116,
+    "mrf": 0,
+    "mv": 33,
+    "se": "se_effective",
+    "L": "73",
+    "age": "178",
+    "tableAnimation": null,
+    "ruleResidual": 0,
+    "ctlIdentity": true,
+    "check": "FRZ act 115 phase"
+   }
+  ],
+  "aud137-frz-opp-snorlax": [
+   {
+    "label": "BattleScript_MoveEffectFreeze+0",
+    "X": 982,
+    "gate": 8,
+    "rule": 8,
+    "act": 115,
+    "ctl": 124,
+    "mrf": 0,
+    "mv": 58,
+    "se": "se_effective",
+    "L": "73",
+    "age": "65",
+    "tableAnimation": null,
+    "ruleResidual": 0,
+    "ctlIdentity": true,
+    "check": "FRZ act 115 phase"
+   },
+   {
+    "label": "BattleScript_MoveUsedIsFrozen+6",
+    "X": 1302,
+    "gate": 0,
+    "rule": 0,
+    "act": 116,
+    "ctl": 117,
+    "mrf": 0,
+    "mv": 33,
+    "se": "se_m_hail",
+    "L": "32",
+    "age": "288",
+    "tableAnimation": "FRZ",
+    "ruleResidual": 0,
+    "ctlIdentity": true,
+    "check": "ok"
+   },
+   {
+    "label": "BattleScript_MoveUsedIsFrozen+6",
+    "X": 2019,
+    "gate": 0,
+    "rule": 0,
+    "act": 115,
+    "ctl": 116,
+    "mrf": 0,
+    "mv": 33,
+    "se": "se_effective",
+    "L": "73",
+    "age": "168",
+    "tableAnimation": null,
+    "ruleResidual": 0,
+    "ctlIdentity": true,
+    "check": "FRZ act 115 phase"
+   }
+  ],
   "aud137-frz-ply-skarmory": [
    {
     "label": "BattleScript_MoveEffectFreeze+0",
@@ -2592,15 +2696,15 @@
  "summary": {
   "probes": 54,
   "r1EqualsR2": 54,
-  "receipts": 147,
-  "gated": 1,
-  "gateFrames": 8,
+  "receipts": 153,
+  "gated": 2,
+  "gateFrames": 16,
   "ruleResidualNonZero": 0,
   "noAnimation": 6,
   "checks": {
-   "FRZ act 115 phase": 1,
+   "FRZ act 115 phase": 4,
    "no status animation (no controller emission)": 6,
-   "ok": 140
+   "ok": 143
   }
  }
 }

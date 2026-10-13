@@ -47,6 +47,9 @@ PLAN += [("psn", "opp", "aud137-psn-opp-castform-rain", "target", "CASTFORM", {"
 # CONFUSION self-check then PRZ can't-move on one battler
 PLAN += [("slp", "ply", "aud137-slp-psn-ply-primeape-crobat", "target", "CROBAT", {"moves": [92, 92, 92, 92]}),
          ("prz", "ply", "aud137-prz-conf-ply-primeape-tauros", "target", "TAUROS", {"moves": [37, 37, 37, 37], "gender": "male"})]
+# the two opponent-attacker Ice Beam routes do not freeze at the template seed: lab seed 1 (aud137's seg127Probe sweep, seeds 1..12: the
+# first with BattleScript_MoveEffectFreeze; SKARMORY seeds 1 / 8, SNORLAX 1 / 8)
+SEED = {"aud137-frz-opp-skarmory": 1, "aud137-frz-opp-snorlax": 1}
 index = {}
 for slug, tag, name, role, sp, extra in PLAN:
     rel, anim = TEMPLATES[slug]
@@ -61,6 +64,8 @@ for slug, tag, name, role, sp, extra in PLAN:
         mon["gender"] = "female"
     for k, v in extra.items():
         mon[k] = v
+    if name in SEED:
+        d["seed"] = SEED[name]
     for s in ("player", "opponent"):
         for p in d["overrides"]["parties"][s]:
             assert sum(p["evs"].values()) <= 510

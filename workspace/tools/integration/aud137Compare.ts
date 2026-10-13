@@ -3,8 +3,8 @@
 // C(a) = ROM(rel -1) except where production's P(a) != its reference R(a), where it is P(a); C == ROM(a) needs every pixel production
 // changes to equal the ROM's AND every ROM change on the row to be one production makes. Full screen, rows a = -1 .. minimumFrames + 1
 // (activation - 1 .. release + 2) where the ROM window has them; on the next command's rows (a >= minimumFrames) the message box band
-// (y >= 112: the next instruction's print) is reported apart. Also per window: ROM E + 1 vs STATUS_ANIMATION_ADDED_ROWS (the table rows;
-// FRZ inflicted: E 115 + the status command's row, sad133's accounting) and the battler / opponent x2 on rel -1 and E + 3.
+// (y >= 112: the next instruction's print) is reported apart. Also per window: ROM E + 1 vs STATUS_ANIMATION_ADDED_ROWS (the table rows)
+// and the battler / opponent x2 on rel -1 and E + 3.
 // `--forms=<forms.json>` (aud137Forms.py): the CASTFORM weather form per window key. `--diag=ordinary-rest` (sae135's mechanism check of
 // the pre-existing next-command-row residual, sar131 §6): the next command's rows drawn with the opponent at its tracked rest.
 //   node --experimental-strip-types --no-warnings tools/integration/aud137Compare.ts <rom-windows.json> <raw-dir> <out.json>
@@ -76,7 +76,8 @@ for (const [key, w] of Object.entries(rom.windows)) {
   if (zero) clean++;
   digest.update(`${key}:${JSON.stringify(perRow)}\n`);
   const rowAt = (rel: number) => w.rows.find((r) => r.rel === rel);
-  const tableRows = win.rows, romRows = w.E + 1 + (win.inflicted ? 1 : 0);
+  // ROM active rows + 1 (the controller rows without a gate) vs the table; no path adjustment (FRZ: act 115 / 116 is a phase, §2)
+  const tableRows = win.rows, romRows = w.E + 1;
   result[key] = {
     animation: w.animation, side: w.side, scenario: w.scenario, rise: w.rise, romE: w.E, inflicted: win.inflicted, castformForm: forms[key] ?? null,
     timing: { tableRows, romRows, delta: romRows - tableRows },
