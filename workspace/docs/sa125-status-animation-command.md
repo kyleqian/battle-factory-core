@@ -62,4 +62,3 @@ Toxic / Thunder Wave / Rest), Scene ON's following print lands on the ROM row on
 No measured path fails the anchor except the gated FRZ-after-Ice-Beam class (SA2's).
 
 __CENSUS__
-

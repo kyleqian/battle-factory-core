@@ -216,7 +216,7 @@ describe("sa125: the kernel suppresses the receipt (no command) behind a Substit
     ["semi-invulnerable (STATUS3_ON_AIR)", 0x40, 0, 0, "suppress"],
     ["Scene OFF (HITMARKER_NO_ANIMATIONS)", 0, 0, 0x80, "suppress"],
   ])("%s", (_, status3, sub, hitMarker, kind) => {
-    expect(prepareRulesStatusAnimation(context(status3 as number, sub as number, hitMarker as number), 0 as any, { kind: "live-status1" } as any).kind).toBe(kind);
+    expect(prepareRulesStatusAnimation(context(status3 as number, sub as number, hitMarker as number), 0 as any, { kind: "live-status1" } as any)?.kind).toBe(kind);
   });
 });
 
@@ -295,4 +295,3 @@ describe("sa125: Scene ON / OFF gameplay parity on two real routes (presentation
     expect(battleSegments(seed, "on").flatMap((s) => s.commands).filter((c: any) => c.type === "status-animation").length).toBeGreaterThan(0);
   });
 });
-
