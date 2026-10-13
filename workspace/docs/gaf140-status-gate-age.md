@@ -62,7 +62,25 @@ match, census zero, routes OK); every window's production frame sha256 per row =
 - `sae135Run.sh`: stq132 probes / rom-windows / comparator (r1 == r2 == committed) / diag / redraw / four controls / next-body **SAME**;
   routes 5 / 6 OK -> DIFF (route 34:0's 88 "unexplained" frames are inside a CONFUSION command, drawn since sad133, unknown to sae135's
   delta; its 6 routes byte-identical 74cbec2b8 vs final).
-- `sad133Run.sh`: see the handoff (result recorded in the final message).
+- `sad133Run.sh`: stp128 probes 14 / 14 r1 == r2 (28 / 28 sha256) / rom-windows / comparator (31 / 34 all rows, 34 / 34 command rows;
+  r1 == r2 == committed) / seven controls / x2 34 / 34 / sar131 PSN / PRZ 17 / 17 / sad133 test 16 / 16 **SAME**; routes 3 / 5 OK ->
+  DIFF. Of its 5 routes, 4 render byte-identically 74cbec2b8 vs final (incl. the failing 19:0: 319 "unexplained" frames pre-existing);
+  22:0 differs on **57 frames, all inside its gated PSN command** (RATICATE after Endeavor, gate 3: this fix) — its other 893
+  "unexplained" frames are pre-existing.
+
+## 4b. Gates (final code)
+
+- Targeted (4 workers): gaf140StatusGateAge, sa125, sag130, sar131, sad133, sae135, sgl138, battleResolutionPresentation,
+  animation/factoryAnimationInventory, playableAnimationIntegration: **10 files / 118 tests passed**.
+- `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
+- Full suite, four shards x 4 workers: shard 1 **414 files / 2,995 tests**, shard 2 **412 / 4,171**, shard 3 **411 / 3,277**, shard 4
+  **415 / 3,262** passed (44 files / 223 tests skipped); total **1,652 files / 13,705 tests passed, 0 failed**.
+- `npm run build`: green.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 74cbec2b8`:
+  **PASS, 624 / 624 captures byte-identical**.
+- `git diff --check 74cbec2b8 HEAD`: clean.
+- `sh tools/integration/gaf140Run.sh <out> --census` from a fresh git-archive copy (HEAD `519c5434c`, `git init` + empty commit):
+  **ALL SAME** (windows, probes 16 / 16 r1 == r2, rom-r1, comparator, controls, probe sha256, routes 4 / 4, census delta, receipt).
 
 ## 5. Rerun
 
