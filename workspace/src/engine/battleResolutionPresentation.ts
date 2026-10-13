@@ -322,13 +322,14 @@ export type BattleResolutionPresentationCommand =
        * Scene ON only, at the kernel `status-animation` receipt (the kernel already skips Scene OFF, a Substitute and a
        * semi-invulnerable battler). `animation` is InitAndLaunchChosenStatusAnimation's pick (spriteOrderStatusAnimationName);
        * minimumFrames = the IsBattleSEPlaying gate (sag130 SA2, docs/seg127-status-se-gate.md) + STATUS_ANIMATION_ADDED_ROWS[animation],
-       * the controller rows the next instruction waits (docs/sta123-status-animations-design.md §4).
+       * the controller rows the next instruction waits (docs/sta123-status-animations-design.md §4). gaf140
+       * (docs/gaf140-status-gate-age.md): seGateFrames (present only when > 0) = that gate, the rows before the animation's first row.
        */
       type: "status-animation";
       eventSequence: number;
       battler: 0 | 1;
       animation: BattleStatusAnimationName;
-      timing: Readonly<{ minimumFrames: number }>;
+      timing: Readonly<{ minimumFrames: number; seGateFrames?: number }>;
     }>
   | Readonly<{
       /** `Cmd_trainerslidein`/`Cmd_trainerslideout` -- generic across any trainer/outcome, see `TRAINER_SLIDE_TIMING`. */
@@ -3995,12 +3996,15 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "status-animation") {
       const animation = statusAnimationPresented(payload.isStatus2, payload.status);
       if (animation !== null) {
+        const seGate = statusAnimationSeGate(events, index);
         commands.push(Object.freeze({
           type: "status-animation",
           eventSequence: event.sequence,
           battler: singlesBattler(payload.battler, "status animation"),
           animation,
-          timing: Object.freeze({ minimumFrames: statusAnimationSeGate(events, index) + STATUS_ANIMATION_ADDED_ROWS[animation] }),
+          timing: Object.freeze({
+            minimumFrames: seGate + STATUS_ANIMATION_ADDED_ROWS[animation], ...(seGate > 0 ? { seGateFrames: seGate } : {}),
+          }),
         }));
       }
       continue;

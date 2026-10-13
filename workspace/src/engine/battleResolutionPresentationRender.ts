@@ -1613,11 +1613,13 @@ export function createBattleResolutionPresentationRenderView(
         age: state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0),
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
-    } else if (command.type === "status-animation") {
-      // sar131: the status animation over the field as it is (battleScene.ts statusAnimationRenderView).
+    } else if (command.type === "status-animation" && state.lifecycle.phaseElapsed >= (command.timing.seGateFrames ?? 0)) {
+      // sar131: the status animation over the field as it is (battleScene.ts statusAnimationRenderView). gaf140: after the
+      // controller's IsBattleSEPlaying rows (seGateFrames; the field as it is, shadow and rest included, until the launch).
       const previous = state.commandIndex > 0 ? segment.commands[state.commandIndex - 1] : undefined;
       effect = Object.freeze({
-        type: "status-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed,
+        type: "status-animation", battler: command.battler, animation: command.animation,
+        age: state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0),
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
         ...(previous?.type === "status" && previous.battler === command.battler ? { inflicted: true as const } : {}),
       });
