@@ -6,7 +6,7 @@
 import { applyLiveScanlineHistoryEvent, type LiveScanlineHistory } from "../../src/engine/liveScanlineHistory.ts";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cpSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import moveData from "../../src/data/gen/moves.json" with { type: "json" };
@@ -390,7 +390,10 @@ export function fixturePresentationRng(f: Fixture, request: BattleMoveAnimationR
 export function fixtureBattlerX2Input(f: Fixture): LiveMoveBattlerX2Input | undefined {
   if (process.env.POKEBENCH_LIVE_X2_INPUT === "species-rest") return undefined;
   // sub157: a Battle Scene OFF scenario has no x2 host; production's OFF bodies read both sides zeroed (no front animation ran).
-  if ((JSON.parse(readFileSync(resolve(root, f.scenario), "utf8")) as { profile?: string }).profile === "battle-scene-off") {
+  // (Some fixtures name a probe-built scenario instead of a battle-lab file: those are Scene ON.)
+  const scenarioPath = resolve(root, f.scenario);
+  if (f.scenario.endsWith(".json") && existsSync(scenarioPath)
+    && (JSON.parse(readFileSync(scenarioPath, "utf8")) as { profile?: string }).profile === "battle-scene-off") {
     return LIVE_BATTLER_X2_SCENE_OFF_INPUT;
   }
   let history = LIVE_BATTLER_X2_IDLE;
