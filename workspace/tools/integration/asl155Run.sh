@@ -2,6 +2,7 @@
 # asl155 reproduction (docs/asl155-astonish-extrasensory-live.md). Run from workspace/ with a FRESH <out-dir> INSIDE the repo; direct mGBA only.
 #   sh tools/integration/asl155Run.sh <fresh-out-dir>                       # A (census + windows) and B (windows), ~12 min
 #   ASL155_PARTS="census-a windows-a" sh tools/integration/asl155Run.sh <dir> # a subset of census-a / windows-a / census-b / windows-b
+# census-a + census-b share the landed census; each census arm is 10 shards (~10 min on a loaded machine).
 # The LANDED tree is a git-archive copy of this checkout's HEAD. The A base arm is the same copy with ord149-astonish-words-unit.diff reversed
 # (= before the Astonish landing); the B base arm reverses fixtures/asl155/asl155-extrasensory-later.diff (= before the Extrasensory D4 entry).
 # Works from a fresh git-archive copy of the repo (needs `git init` + one commit there). Receipts land in <out-dir>/rec; `same` / `DIFF` lines
@@ -32,6 +33,15 @@ python3 $T/ord124Attribution.py "$OUT/census-landed/merged.jsonl" "$REC/asl155-a
 python3 $T/ord149CensusDelta.py "$OUT/census-base-a/merged.jsonl" "$OUT/census-landed/merged.jsonl" "$REC/asl155-census-delta-a.json" | tail -1
 python3 $T/land82CensusCheck.py "$OUT/census-base-a" "$OUT/census-base-a/merged.json" "$OUT/census-base-a/merged.jsonl" "$OUT/census-landed" \
   "$OUT/census-landed/merged.json" "$OUT/census-landed/merged.jsonl" "$REC/asl155-census-check-a.json" > /dev/null
+# the committed receipts were measured at aef0c63c3 (before the B landing); on a later HEAD compare the A delta itself (status changes and
+# reasons, without the gate source lines that move with any later edit): both arms carry every later change
+python3 - "$F/asl155-census-delta-a.json" "$REC/asl155-census-delta-a.json" <<'PY'
+import json, sys
+st = lambda d: None if d is None else d.get("reason")
+key = lambda p: (lambda d: (d["lifted"], d["regressed"], d["changedWithoutEarlierPlayerAstonish"], [(c["battle"], c["command"], c["move"], c["side"],
+  c["before"][0], st(c["before"][1]), c["after"][0], st(c["after"][1])) for c in d["changed"]]))(json.load(open(p)))
+print("same census-a delta (lifted / regressed / changed commands)" if key(sys.argv[1]) == key(sys.argv[2]) else "DIFF census-a delta")
+PY
 for f in asl155-attr-base-a.json asl155-attr-landed.json asl155-census-delta-a.json asl155-census-check-a.json; do same "$F/$f" "$REC/$f"; done
 fi
 
@@ -58,4 +68,34 @@ for tree in base-a landed; do
 done
 # the landed arm reproduces ord149's patched windows byte for byte, the base arm ord149's base windows
 same "$ORD/ord149-windows-patched.txt" "$REC/asl155-windows-a-landed.txt"; same "$ORD/ord149-windows-base.txt" "$REC/asl155-windows-a-base-a.txt"
+fi
+
+# B: census 0..999 base-b vs landed (the Extrasensory player later landing; base-b = HEAD with asl155-extrasensory-later.diff reversed):
+# per-command delta (asl155CensusDelta.py: status and frame changes confined to player Extrasensory), land82CensusCheck
+if part census-b; then
+census base-b; census landed
+python3 $T/asl155CensusDelta.py "$OUT/census-base-b/merged.jsonl" "$OUT/census-landed/merged.jsonl" "$REC/asl155-census-delta-b.json"
+python3 $T/land82CensusCheck.py "$OUT/census-base-b" "$OUT/census-base-b/merged.json" "$OUT/census-base-b/merged.jsonl" "$OUT/census-landed" \
+  "$OUT/census-landed/merged.json" "$OUT/census-landed/merged.jsonl" "$REC/asl155-census-check-b.json" > /dev/null || true
+python3 - "$F/asl155-census-delta-b.json" "$REC/asl155-census-delta-b.json" <<'PY'
+import json, sys
+key = lambda p: (lambda d: (d["lifted"], d["regressed"], d["changedOutsidePlayerExtrasensory"], d["frameChanges"], d["playerExtrasensory"],
+  [(c["battle"], c["command"], c["before"], c["after"]) for c in d["changed"]]))(json.load(open(p)))
+print("same census-b delta (lifted / regressed / frame changes / player Extrasensory statuses)" if key(sys.argv[1]) == key(sys.argv[2]) else "DIFF census-b delta")
+PY
+for f in asl155-census-delta-b.json asl155-census-check-b.json; do same "$F/$f" "$REC/$f"; done
+fi
+
+# B: the player Extrasensory windows (scan93 xs-pla-* + later58 extrasensory-pla-*) through the LANDED production renderer (later58Check.sh:
+# two fresh direct-mGBA probes per scenario), then the per-row policy receipt from ord149's instruction-stepped split (asl155XsPolicy.py)
+if part windows-b; then
+mkdir -p "$OUT/sel-b"; cp $T/fixtures/scan93/live/xs-pla-*.json $T/fixtures/later58/live/extrasensory-pla-*.json "$OUT/sel-b/"
+(cd "$OUT/landed" && OUT="$OUT/chk-b" JOBS=${JOBS:-8} sh $T/later58Check.sh "$OUT/sel-b" "$REC/asl155-windows-b.json" > "$OUT/windows-b.log" 2>&1)
+python3 - "$F/asl155-windows-b.json" "$REC/asl155-windows-b.json" <<'PY'
+import json, sys
+key = lambda p: [(r["fixture"], r["live"], [(x["rows"], x["exactRows"], x["residualPixels"], x["digest"]) for x in r["runs"]]) for r in json.load(open(p))["rows"]]
+print("same windows-b (fixture, live, rows, px, render digests)" if key(sys.argv[1]) == key(sys.argv[2]) else "DIFF windows-b")
+PY
+python3 $T/asl155XsPolicy.py "$REC/asl155-xs-policy.json" | tail -1
+same "$F/asl155-xs-policy.json" "$REC/asl155-xs-policy.json"
 fi
