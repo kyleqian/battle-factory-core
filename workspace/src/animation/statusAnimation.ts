@@ -319,6 +319,11 @@ function statusConditionSprites(sprite: StatusConditionDisplaySprite, paletteRot
       for (let i = 0; i < 3; i += 1) palette[13 + i] = ICE_CUBE.palette[13 + ((i + paletteRotation) % 3)]!;
       return ICE_CUBE.pieces.map((piece) => ({ x: sprite.left + piece.x, y: sprite.top + piece.y, tileset: piece.tileset, palette, ...blend }));
     }
+    // stq132's SLP / BRN / INFATUATION templates: not in STATUS_ANIMATIONS_DRAWN on this tree (sae135 draws them), so unreachable here.
+    case "gSleepLetterZSpriteTemplate":
+    case "gBurnFlameSpriteTemplate":
+    case "gMagentaHeartSpriteTemplate":
+      return [];
   }
 }
 
