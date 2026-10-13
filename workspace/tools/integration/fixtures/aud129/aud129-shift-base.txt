@@ -1,0 +1,25 @@
+pb-aud129-flag-opp-143-42-5-s11-c0 MEGA_PUNCH player   -              live=1 rows=18  exact=18  px=0       r1==r2=1 entry=0
+pb-aud129-iso2-opp-109-108-143-c0  SMOKESCREEN opponent -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-iso2-opp-109-108-95-c0   SMOKESCREEN opponent -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-iso2-opp-110-108-169-c1  SMOKESCREEN opponent -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-iso2-ply-109-108-143-c0  SMOKESCREEN player   -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-iso2-ply-109-108-95-c0   SMOKESCREEN player   -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-iso2-ply-110-108-169-c1  SMOKESCREEN player   -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-phase-crunch-ply-s2-c2   CRUNCH     player   -              live=1 rows=18  exact=18  px=0       r1==r2=1 entry=0
+pb-aud129-phase-smokescreen-opp-s0-c1 SMOKESCREEN opponent -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-phase-smokescreen-opp-s1-c1 SMOKESCREEN opponent -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-phase-smokescreen-opp-s1-c3 SMOKESCREEN opponent -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-phase-smokescreen-opp-s2-c1 SMOKESCREEN opponent -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-phase-smokescreen-opp-s3-c1 SMOKESCREEN opponent -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-phase-smokescreen-ply-s0-c1 SMOKESCREEN player   -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-phase-smokescreen-ply-s1-c1 SMOKESCREEN player   -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-phase-smokescreen-ply-s2-c1 SMOKESCREEN player   -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-phase-smokescreen-ply-s3-c1 SMOKESCREEN player   -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-wide-169-103-109-108-c1  SMOKESCREEN opponent -              live=1 rows=75  exact=75  px=0       r1==r2=1 entry=0
+pb-aud129-wide-334-242-302-163-c0  CRUNCH     player   -              live=1 rows=18  exact=18  px=0       r1==r2=1 entry=0
+TOTAL all            windows=19 live=19 live-0px=19 r1==r2=19
+TOTAL after-struggle windows=0 live=0 live-0px=0 r1==r2=0
+pb-aud129-flag-opp-143-42-5-s11-c0 MEGA_PUNCH player   -              live=1 rows=1   exact=1   px=0       r1==r2=1 entry=0
+pb-aud129-flag-ply-143-42-5-s11-c0 MEGA_PUNCH opponent -              live=1 rows=1   exact=1   px=0       r1==r2=1 entry=0
+TOTAL all            windows=2 live=2 live-0px=2 r1==r2=2
+TOTAL after-struggle windows=0 live=0 live-0px=0 r1==r2=0

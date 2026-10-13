@@ -4,7 +4,8 @@
 # (derive / lends r1 == r2) and two more fresh probes per scenario inside audit21Check.ts (r1 == r2 per-row digests). Production = a
 # git-archive copy of the FIXED base 1352d2130 inside <out-dir> only. Receipts land in <out-dir>/rec, compared with
 # tools/integration/fixtures/aud129/ (`same` / `DIFF`).
-#   sh tools/integration/aud129Run.sh <fresh-out-dir>    (~6 min)
+#   sh tools/integration/aud129Run.sh <fresh-out-dir>                  (~8 min)
+#   AUD129_CENSUS=1 sh tools/integration/aud129Run.sh <fresh-out-dir>  # + census 0..999 on the base (stg107Census.sh) -> exposure receipt
 set -e
 OUT=${1:?usage: aud129Run.sh <fresh-out-dir>}
 [ ! -e "$OUT" ] || { echo "refusing: $OUT exists"; exit 1; }
@@ -40,5 +41,16 @@ python3 $T/aud129Phase.py "$OUT/check" "$OUT/fxa" > "$REC/aud129-phase-base.txt"
 mkdir -p "$OUT/fxu"; for n in $(grep -l '"move": "SPARK"' "$OUT"/fxh/*.json | sed 's/-c[0-9]*\.json$//' | sort -u); do cp "$n"-c*.json "$OUT/fxu/"; done
 STF115_CHECK=audit21Check sh $T/stf115Check.sh "$OUT/fxu" "$OUT/base" "$OUT/check-unaligned"
 python3 $T/stf115Summary.py "$OUT/check-unaligned" "$OUT/lends1.jsonl" | grep -E "SPARK|^TOTAL all" > "$REC/aud129-spark-unaligned.txt"
-for f in aud129-derive.txt aud129-lends-base.jsonl aud129-windows-base.txt aud129-phase-base.txt aud129-spark-unaligned.txt; do same "$F/$f" "$REC/$f"; done
+# every PHASE window is exactly the other one-frame phase: its shifted rows vs production one age off (aud129Shift.py), 0 px
+python3 $T/aud129Shift.py "$OUT/fxa" "$REC/aud129-phase-base.txt" "$OUT/shift-tail" "$OUT/shift-write"
+STF115_CHECK=audit21Check sh $T/stf115Check.sh "$OUT/shift-tail" "$OUT/base" "$OUT/check-shift-tail"
+STF115_CHECK=audit21Check sh $T/stf115Check.sh "$OUT/shift-write" "$OUT/base" "$OUT/check-shift-write"
+{ python3 $T/stf115Summary.py "$OUT/check-shift-tail"; python3 $T/stf115Summary.py "$OUT/check-shift-write"; } > "$REC/aud129-shift-base.txt"
+for f in aud129-derive.txt aud129-lends-base.jsonl aud129-windows-base.txt aud129-phase-base.txt aud129-spark-unaligned.txt \
+  aud129-shift-base.txt; do same "$F/$f" "$REC/$f"; done
 grep "^TOTAL all" "$REC/aud129-windows-base.txt"; grep "^VERDICTS" "$REC/aud129-phase-base.txt"
+if [ -n "$AUD129_CENSUS" ]; then
+  sh $T/stg107Census.sh "$OUT/census" "$OUT/base"
+  python3 $T/aud129Exposure.py "$OUT/census/merged.jsonl" "$REC/aud129-exposure-base-1352d2130.json" > /dev/null
+  same "$F/aud129-exposure-base-1352d2130.json" "$REC/aud129-exposure-base-1352d2130.json"
+fi
