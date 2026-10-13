@@ -1,0 +1,21 @@
+{
+ "schema": "rcp143-engine-fix-receipt/v1",
+ "receipt": "R3-control",
+ "issue": 140,
+ "part": "Mimic/Transform premise check",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp143-random-callers.py",
+ "builder": "tools/probe/build-rcp143-receipt.py",
+ "verify": "tools/probe/verify-rcp143.ts",
+ "card": "tools/probe/rcp143/r3-control-transform-ditto-snorlax-off.json",
+ "title": "Transform overwrites the chosen slot, but using the overwritten slot on a LATER turn does not take battle_util.c:133 (selection re-banks gChosenMoveByBattler): 0 GetMoveTarget draws",
+ "scenario": "Player DITTO (Transform only, genderless) vs slower SNORLAX (Tackle x4, Brave, Speed IV 0). Turn 1 Ditto transforms (slot 0 becomes TACKLE); turns 2-4 Ditto selects slot 0 (TACKLE, MOVE_TARGET_SELECTED). Post-Transform Ditto copies Snorlax's Speed, so GetWhoStrikesFirst draws a speed tie each turn.",
+ "sourceUnderTest": {
+  "selectionBank": "reference/pokeemerald/src/battle_main.c:4399 gChosenMoveByBattler = moves[chosenMovePositions] at selection (post-Transform moveset), so :133's compare is equal on every later turn",
+  "transformWriter": "Cmd_transformdataexecution writes only gBattleMons[gBattlerAttacker] during the user's own action; Cmd_mimicattackcopy likewise writes only gBattleMons[gBattlerAttacker].moves[gCurrMovePos]"
+ },
+ "portSitesAtHead": {
+  "actionMoveId": "src/engine/factoryBattleScriptFullTurnDecision.ts:2367"
+ },
+ "fixShape": "None needed for this path: the fixed :133 compare must stay equal here (0 draws)."
+}

@@ -1,0 +1,39 @@
+{
+ "schema": "rcp143-engine-fix-receipt/v1",
+ "receipt": "R4",
+ "issue": 139,
+ "title": "CheckFocusPunch_ClearVarsBeforeTurnStarts pre-pass: '<mon> is tightening its focus!' before ANY action, no Random()",
+ "oracleUrls": {
+  "battle-scene-off": "http://127.0.0.1:8014",
+  "battle-scene-on": "http://127.0.0.1:8012"
+ },
+ "probe": "tools/probe/probe-rcp143-random-callers.py",
+ "builder": "tools/probe/build-rcp143-r4-receipt.py",
+ "verify": "tools/probe/verify-rcp143-r4.ts",
+ "scenario": "Player BRELOOM (Giga Drain/Leech Seed/Focus Punch/Headbutt, Speed 90) vs faster JOLTEON (Sand-Attack x4, Speed 150; MOVE_TARGET_SELECTED, no damage, so Focus Punch is not interrupted). Focus Punch arm: A, DOWN, A (slot 2). Control arm: A, A (Giga Drain, slot 0). Same seed, both scene modes, each run twice fresh with a dense PNG per frame 0..766.",
+ "sourceUnderTest": {
+  "prePass": "reference/pokeemerald/src/battle_main.c:4906-4935 CheckFocusPunch_ClearVarsBeforeTurnStarts (battler-index walk of gBattleStruct->focusPunchBattlerId; gChosenMoveByBattler == MOVE_FOCUS_PUNCH && !SLEEP && !truantCounter && !noValidMoves -> BattleScriptExecute(BattleScript_FocusPunchSetUp))",
+  "entry": "reference/pokeemerald/src/battle_main.c:4811-4812 and :4853-4854 (SetActionsAndBattlersTurnOrder hands off to the pre-pass with focusPunchBattlerId = 0)",
+  "script": "reference/pokeemerald/data/battle_scripts_1.s:3709-3715 BattleScript_FocusPunchSetUp (printstring STRINGID_EMPTYSTRING3 / waitmessage 1 / playanimation BS_ATTACKER, B_ANIM_FOCUS_PUNCH_SETUP / printstring STRINGID_PKMNTIGHTENINGFOCUS / waitmessage B_WAIT_TIME_LONG / end2)",
+  "sceneOffAnimation": "Cmd_playanimation under HITMARKER_NO_ANIMATIONS substitutes BattleScript_Pausex20 (battle_scripts_1.s:3151-3153, pause B_WAIT_TIME_SHORT) for B_ANIM_FOCUS_PUNCH_SETUP",
+  "sceneOnAnimation": "reference/pokeemerald/data/battle_anim_scripts.s:10635-10646 General_FocusPunchSetUp (3x call EndureEffect, blend_color_cycle red, AnimTask_ShakeMon2)"
+ },
+ "portSitesAtHead": {
+  "turnOrderToAction1": "src/engine/factoryBattleScriptFullTurnDecision.ts:3159-3213 -- reduceFactoryFullTurnDecision fixes mover1/mover2 (:3161-3168), builds initialState (:3181-3197) and runs action1 (:3199) with nothing in between",
+  "animationRegistration": "src/engine/battleScriptStatbuffchangeOpcode.ts:257-268 (B_ANIM_FOCUS_PUNCH_SETUP registered only as a playanimation id)",
+  "focusPunchBattlerId": "grep -rn focusPunchBattlerId src/ is empty at HEAD"
+ },
+ "fixShape": "Between turn-order fixing and action 1 (factoryBattleScriptFullTurnDecision.ts, after :3197 / before :3199), walk battlers 0..1 in index order and, for each whose chosen move this turn is MOVE_FOCUS_PUNCH and who is not asleep, not Truant-loafing and not noValidMoves, run BattleScript_FocusPunchSetUp as its own end2 script (gBattlerAttacker = that battler) so its two message events and the FOCUS_PUNCH_SETUP playanimation precede action 1. No RNG: the ROM spends 0 Random() in the pre-pass.",
+ "serviceCrossCheck": {
+  "note": "The probe runs the stock ROM in-process with each profile's own bootstrap (oracle/bootstrap/factory.json for battle-scene-on, factory-battle-scene-off.json for battle-scene-off -- the same mapping oracle/server.py uses). The Focus Punch arm was also run through the live services (bin/oracle --profile <p> lab, captureFrames below); every service framebuffer sha256 equals the probe's rgbSha256 for that frame.",
+  "frames": [
+   76,
+   140,
+   198,
+   304,
+   766
+  ],
+  "battle-scene-on (:8012)": "all equal",
+  "battle-scene-off (:8014)": "all equal"
+ }
+}

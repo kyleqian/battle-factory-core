@@ -1,0 +1,26 @@
+{
+ "schema": "rcp143-engine-fix-receipt/v1",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp143-random-callers.py",
+ "builder": "tools/probe/build-rcp143-receipt.py",
+ "verify": "tools/probe/verify-rcp143.ts",
+ "attribution": "Pass 1: sRandCount (0x020249C0) per-frame deltas cross-checked against a gRngValue LCG replay. Pass 2: a fresh emulator single-steps only the flagged frames and records every entry into Random() (0x0806F5CC) with its caller (LR bisected against arm-none-eabi-nm text symbols), the pre-draw gRngValue and gBattlescriptCurrInstr. Pass-2 hit count == pass-1 window total (attributionReconciled).",
+ "receipt": "R2",
+ "issue": 141,
+ "part": "b",
+ "card": "tools/probe/rcp143/r2-covet-linoone-gulpin-stickyhold-off.json",
+ "title": "Thief/Covet into Sticky Hold returns onto seteffectwithchance (BattleScriptPushCursor) and re-runs it (one wasted Random() % 100)",
+ "scenario": "Player LINOONE (Covet/Headbutt/Sand-Attack/Tackle, Adamant, no item) vs GULPIN (abilitySlot 1 = STICKY_HOLD, holding SOOTHE_BELL, Pound x4, Speed IV 0). Covet selected every turn (slot 0); Sticky Hold blocks it each time.",
+ "sourceUnderTest": {
+  "stealItemCase": "reference/pokeemerald/src/battle_script_commands.c:2764-2775 (MOVE_EFFECT_STEAL_ITEM Sticky Hold arm: BattleScriptPushCursor(); gBattlescriptCurrInstr = BattleScript_NoItemSteal)",
+  "pushCursor": "reference/pokeemerald/src/battle_util.c:966-969 (BattleScriptPushCursor pushes the CURRENT instruction)",
+  "noItemSteal": "reference/pokeemerald/data/battle_scripts_1.s:4209-4213 (BattleScript_NoItemSteal ... return)",
+  "seteffectwithchance": "reference/pokeemerald/src/battle_script_commands.c:2908-2937"
+ },
+ "portSitesAtHead": {
+  "stickyHoldCall": "src/engine/battleScriptHitChainOpcode.ts:3148-3162 -- returns { kind: \"call\", programCounter } at :3160 (return address = next instruction)",
+  "machineCall": "src/engine/battleScriptMachine.ts:998-1009 (\"call\" pushes programCounter + 1)",
+  "machineCallCurrent": "src/engine/battleScriptMachine.ts:1010-1021 (\"call-current\" pushes programCounter)"
+ },
+ "fixShape": "Change the Sticky Hold arm's directive at battleScriptHitChainOpcode.ts:3160 from { kind: \"call\" } to { kind: \"call-current\" } so BattleScript_NoItemSteal's return lands back on seteffectwithchance, which re-runs with moveEffectByte 0, draws once more and advances."
+}
