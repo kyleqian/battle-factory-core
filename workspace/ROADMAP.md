@@ -20,8 +20,8 @@ The current main mission is **S10A plus the Factory accuracy finish-up**:
 remaining animation variants, presentation corrections and battle-engine
 defects are all authorized by the user's 2026-10-13 direction. See
 `docs/factory-finish-scope.md`; the presentation-only restriction is superseded
-for source-proven engine fixes in that scope. Start with Return -> Frustration
-(#165), then the RNG fixes (#141 / #140) and Focus Punch preparation (#139).
+for source-proven engine fixes in that scope. Return -> Frustration (#165) is
+DONE (ret165, 2026-10-13); next the RNG fixes (#141 / #140) and Focus Punch preparation (#139).
 Run the normal `./run-supervisor.sh`; the roadmap determines its mission.
 Integration is local master work, with bounded temporary worker checkouts and
 the existing model routing. There is no separate integration supervisor program.
@@ -2252,7 +2252,7 @@ Smokescreen's first-use phase (tmr136); ordinary Scene ON rows draw ONIX's track
 landed (ordl126). Ordinary-play census (`.integration/validation/final-63f6850b2/census/merged.json`): **99.34 % of move-animation
 commands / 99.60 % of frames live** (session start 98.95 / 99.32). Live audits 27 / 28: 0 defects. Resume points:
 0. FIRST, AUTHORIZED 2026-10-13: fix the battle-engine accuracy backlog through main-lane steps under `docs/factory-finish-scope.md`.
-   #165: Factory friendship 0 + Return -> Frustration (player/opponent builds and swaps; verify summaries); then #141's missing
+   [x] #165 Return -> Frustration DONE (ret165, docs/ret165-return-to-frustration.md: ROM receipt, census Return 84 -> 0); then #141's missing
    rampage / Sticky Hold RNG draws, #140's Mimic/Transform overwritten chosen-move targeting draw, and #139's Focus Punch pre-pass.
    Intentional source-correct damage / AI / RNG / event-order changes are permitted; prove them and run the gameplay gates.
 1. Presentation (cheap, can proceed independently): land the BANKED inv142 patch (docs/inv142-status-animation-invisible-battler.md: a status animation over a hidden Dig

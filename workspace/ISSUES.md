@@ -19,7 +19,7 @@ backlog.
 
 **Current scope, user-approved 2026-10-13:** the remaining Factory animation,
 presentation and battle-engine accuracy defects are all authorized in the
-finish-up mission (`docs/factory-finish-scope.md`). #165 / #141 / #140 / #139
+finish-up mission (`docs/factory-finish-scope.md`). #141 / #140 / #139
 may change gameplay/RNG when proved against source; use main-lane ownership
 and gameplay gates. Historical presentation-only exclusions are superseded.
 Settled/parked records and unrelated expansions retain their existing status.
@@ -40,24 +40,6 @@ alignment), off121 (OFF `status` command), fix122 (Scene ON no-effect attackanim
 "went to sleep!" + waitmessage + the status icon gets no OFF pause (ROM att G+128, F_after G+163, HP bar G+166; off108 §1 "Open", off121 §1c);
 no-hit bodies whose next receipt is a sprite-visibility (298 census bodies) or a stat-stage-change without STATS_CHANGE (Curse-like paths)
 get no OFF pause (unmeasured); the charge-turn EMPTYSTRING3 print is a 24-frame message in production vs 2 ROM rows (off108 notes).
-
-## #165 — GAMEPLAY: the ROM's Factory turns Return into Frustration (friendship 0); production keeps Return (found 2026-10-10 by ret80)
-
-The ROM builds every Factory rental and opponent with `friendship = 0` and writes each move through `SetMonMoveAvoidReturn`
-(`reference/pokeemerald/src/battle_factory.c:459-462`, `:501`, `:820-823`, `:913-919`: `MOVE_RETURN` -> `MOVE_FRUSTRATION`), so a Factory
-battle never contains Return: the 11 Level-50 sets that list Return (`src/data/gen/battle-frontier-mons.json`: TOGEPI 26, MARILL 28,
-CLEFAIRY 107, TOGETIC 288, DRAGONAIR 306, PIDGEOT 355, GYARADOS 459 / 747, EXEGGUTOR 534, FEAROW 567, ...) fight with Frustration
-(power (255 - 0) * 10 / 25 = 102). Production has no such mapping (no `AvoidReturn` anywhere in `src/`): those sets keep Return at
-friendship 0 (power 1) — different damage, AI scores (Factory AI CheckBadMove treats the two effects differently) and animation. Since ret88
-(2026-10-11) production's live Return renders the ROM's ReturnWeak branch (friendship < 61: 88 rows, order key 40216) — what the ROM plays for
-production's own friendship-0 Return; ReturnStrongest stays proven for friendship > 200. docs/next-adapters-prep18.md s4's "255 for every Return user" cites
-battle_tower.c, which the Factory does not use. Still unfixed; the user authorized this gameplay correction on 2026-10-13
-under `docs/factory-finish-scope.md`. The former presentation-only scope blocker is resolved.
-Resume (a gameplay-parity step): map Return -> Frustration where the Factory builds battle parties (player rentals and opponents, both
-the battle-start and swap paths), check what the draft / swap summary screens show for those sets in the ROM (the screens may read
-`gFacilityTrainerMons` directly), re-run the Factory battle / AI / soak gates, then retire or re-scope the live Return adapter and
-ret80's / ret88's Return order keys (Frustration's animation is the one that plays). Census 0..999 (2026-10-11): 84 Return commands, all live
-as ReturnWeak.
 
 ## #161 — Dive attack: an extra lag frame at age 17 on poisoned player-diver routes (S10A, found 2026-10-10 by st76)
 
