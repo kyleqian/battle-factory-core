@@ -1012,9 +1012,11 @@ function liveMoveUniversalRowAge(
   state: BattleResolutionPresentationState,
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
+  // sgs134: HandleMoveAnimation's IsBattleSEPlaying rows (a multi-hit's 2nd+ hit), presented before the pre rows.
+  seGate = 0,
 ): number {
   const rows = liveMoveUniversalRows(request, field);
-  const age = Math.max(0, state.lifecycle.phaseElapsed - rows.pre - liveMoveIdleLeadRows(request, field));
+  const age = Math.max(0, state.lifecycle.phaseElapsed - seGate - rows.pre - liveMoveIdleLeadRows(request, field));
   if (rows.post === 0) return age;
   const live = liveMoveAnimationDuration(request, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput));
   return live === null ? age : Math.min(age, live - 1);
@@ -1037,9 +1039,11 @@ export function battleResolutionCommandDuration(
       ) + command.timing.holdFrames;
     case "move-animation": {
       const live = command.animation ? liveMoveAnimationDuration(command.animation, field, bodyClass) : null;
-      if (live === null) return command.timing.minimumFrames;
+      // sgs134: + HandleMoveAnimation's IsBattleSEPlaying rows (seGateFrames: a multi-hit move's 2nd+ hit).
+      const seGate = command.timing.seGateFrames ?? 0;
+      if (live === null) return seGate + command.timing.minimumFrames;
       const rows = liveMoveUniversalRows(command.animation!, field);
-      return rows.pre + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post;
+      return seGate + rows.pre + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post;
     }
     case "hit-animation":
       return command.timing.minimumFrames;
@@ -1571,10 +1575,11 @@ export function createBattleResolutionPresentationRenderView(
     } else if (command.type === "move-animation" && command.animation) {
       const lead = liveMoveIdleLeadRows(command.animation, field);
       // iu120: the pre rows show the activation row's image (idle98: F_att..A-1 == row A), so a lead > 0 command's pre rows keep it.
-      const pre = liveMoveUniversalRows(command.animation, field).pre;
+      const seGate = command.timing.seGateFrames ?? 0;
+      const pre = seGate + liveMoveUniversalRows(command.animation, field).pre;
       effect = Object.freeze({
         type: "move", request: command.animation,
-        age: liveMoveUniversalRowAge(state, command.animation, field),
+        age: liveMoveUniversalRowAge(state, command.animation, field, seGate),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
@@ -1591,10 +1596,13 @@ export function createBattleResolutionPresentationRenderView(
         type: "substitute-fade", battler: command.battler, age: state.lifecycle.phaseElapsed,
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
-    } else if (command.type === "stats-change" && fieldBattler(field, command.battler).substituteDoll !== true) {
+    } else if (command.type === "stats-change" && fieldBattler(field, command.battler).substituteDoll !== true
+      && state.lifecycle.phaseElapsed >= (command.timing.seGateFrames ?? 0)) {
       // scd112: the banner over the field as it is (battleScene.ts statsChangeRenderView); never over the doll (the ROM plays nothing).
+      // sgs134: after HandleBattleAnimation's IsBattleSEPlaying rows (seGateFrames; the field as it is until then).
       effect = Object.freeze({
-        type: "stats-change", battler: command.battler, argument: command.argument, age: state.lifecycle.phaseElapsed,
+        type: "stats-change", battler: command.battler, argument: command.argument,
+        age: state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0),
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "status-animation") {
