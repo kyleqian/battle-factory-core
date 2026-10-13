@@ -907,6 +907,17 @@ export type BattleScriptRulesContext = Readonly<
      */
     chosenActionByBattler: BattleScriptMoveEndBytes;
     /**
+     * Source u16 gChosenMoveByBattler[MAX_BATTLERS_COUNT] (battle_main.c:196),
+     * keyed by BATTLER. Banked at action selection -- the selected slot's
+     * move (:4399) or the Encore move (:4194) -- and left MOVE_NONE for a
+     * battler that skips selection (STATUS2_MULTIPLETURNS / RECHARGE,
+     * :4098-4104), takes the AreAllMovesUnusable script, or switches.
+     * BattleTurnPassed resets it to MOVE_NONE (:4001-4005).
+     * HandleAction_UseMove compares it with the live chosen slot
+     * (battle_util.c:130-134) and re-derives the target when they differ.
+     */
+    chosenMoveByBattler: BattleScriptMoveEndHalfwords;
+    /**
      * Source u8 gCurrentTurnActionNumber (battle_main.c:162) -- the action
      * index of the currently-executing battler's script. Paired with each
      * battler's own turnOrderNum (see BattleScriptRulesBattlerBase) by
@@ -1040,6 +1051,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   battlerByTurnOrder?: readonly number[];
   actionsByTurnOrder?: readonly number[];
   chosenActionByBattler?: readonly number[];
+  chosenMoveByBattler?: readonly number[];
   currentTurnActionNumber?: number;
 }>;
 
@@ -2848,6 +2860,11 @@ export function createBattleScriptRulesContext(
       0xff,
       "chosenActionByBattler",
     ) as BattleScriptMoveEndBytes,
+    chosenMoveByBattler: createMoveEndArray(
+      input.chosenMoveByBattler ?? [0, 0, 0, 0],
+      0xffff,
+      "chosenMoveByBattler",
+    ) as BattleScriptMoveEndHalfwords,
     currentTurnActionNumber: requireUnsigned(
       input.currentTurnActionNumber ?? 0,
       0xff,

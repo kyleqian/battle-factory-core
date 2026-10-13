@@ -166,20 +166,15 @@ describe("rcp143 R3 -- HandleAction_UseMove:133 reached in singles without Mimic
     expect(texts.filter((text) => text === "SNORLAX\nfell asleep!")).toHaveLength(3);
   });
 
-  it("records the port at HEAD skipping the :133 draw loop (expected FAIL today)", () => {
-    expect(r3.comparison.verdictToday).toBe("FAIL");
-    expect(r3.comparison.firstDivergence).toMatchObject({
-      turn: 4,
-      index: 2,
-      rom: { reason: "GetMoveTarget(MOVE_TARGET_SELECTED)" },
-      port: { reason: "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)" },
-    });
-    // Identical through turn 3 and the first two draws of turn 4.
-    expect(r3.port.turns.slice(0, 3)).toEqual(r3.predictedPostFix.turns.slice(0, 3).map((turn) => ({
+  it("records the fixed port (rng146 F3) running the :133 draw loop like the ROM", () => {
+    expect(r3.comparison.verdictToday).toBe("PASS");
+    expect(r3.comparison.firstDivergence).toBeNull();
+    expect(r3.port.turns).toEqual(r3.predictedPostFix.turns.map((turn) => ({
       turn: turn.turn,
       draws: turn.draws,
       activeHpAtTurnEnd: turn.activeHpAtTurnEnd,
     })));
+    expect(r3.port.turns[3].draws[2]).toMatchObject({ reason: "GetMoveTarget(MOVE_TARGET_SELECTED)", value: 35099 });
   });
 
   it("pins the predicted post-fix port sequence to the ROM's own", () => {

@@ -226,6 +226,9 @@ describe("source-shaped Battle Script rules context", () => {
       // ENDTURN_ORDER's GetWhoStrikesFirst(..., FALSE) reads it (ISSUES #131).
       "chosenActionByBattler",
       "chosenMove",
+      // gChosenMoveByBattler (battle_main.c:196), banked at selection and read by
+      // HandleAction_UseMove's :130-134 arm (ISSUES #140, rng146 F3).
+      "chosenMoveByBattler",
       "chosenMovePositions",
       "critMultiplier",
       "currentMove",

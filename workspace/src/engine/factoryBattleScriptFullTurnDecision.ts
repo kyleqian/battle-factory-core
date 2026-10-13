@@ -1620,11 +1620,10 @@ function drawActionMoveTarget(
  * STATUS2_MULTIPLETURNS / STATUS2_RECHARGE lock (`:107-110`) is the one forced
  * action that calls no `GetMoveTarget` at all, and it falls out as `false`
  * because `battlerUsesForcedStruggle` already returns false for it and a
- * locked battler carries no Encore. The fourth branch (`:133`, the chosen slot
- * overwritten by Mimic/Transform between selection and execution) needs
- * `gChosenMoveByBattler`, a selection-time bank this reducer does not model --
- * see `actionMoveId`, which reads the live slot -- so it cannot be detected
- * here; it is named rather than silently folded in.
+ * locked battler carries no Encore. The fourth branch (`:130-134`, the live
+ * chosen slot differs from the banked gChosenMoveByBattler) depends on state
+ * at the battler's own action, so `runMoveAction` resolves it there; see
+ * `actionTakesChosenMoveChangedArm`.
  */
 function actionRetargetsAtExecution(
   preClearRulesContext: BattleScriptRulesContext,
@@ -1634,6 +1633,44 @@ function actionRetargetsAtExecution(
   if (forcedStruggle) return true;
   const source = preClearRulesContext.battlers[battler]!;
   return source.encoreTimer !== 0 && source.encoredMove !== 0;
+}
+
+/**
+ * gChosenMoveByBattler as HandleTurnActionSelectionState banks it, read from
+ * the selection-time rules context: MOVE_NONE for a STATUS2_MULTIPLETURNS /
+ * RECHARGE battler that skips selection (battle_main.c:4098-4104) and for the
+ * AreAllMovesUnusable script (:4184-4191), the Encore move for an Encored
+ * battler (:4192-4196), otherwise the selected slot's move (:4399).
+ */
+function selectionChosenMove(
+  selectionRulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+  moveSlot: BattleMoveSlot,
+): number {
+  if (battlerStatusMoveLock(selectionRulesContext, battler) !== 0) return 0;
+  if (battlerHasNoUsableMoveSlot(selectionRulesContext, battler)) return 0;
+  const source = selectionRulesContext.battlers[battler]!;
+  if (source.encoredMove !== 0) return source.encoredMove;
+  return source.moves[moveSlot]!;
+}
+
+/**
+ * `HandleAction_UseMove`'s `:130-134` arm (ISSUES #140, rcp143 R3), evaluated
+ * on the rules context at this battler's own action, after the noValidMoves
+ * and Encore arms (the caller's `forcedStruggle` / `retargetsAtExecution`).
+ * In singles it fires when a lock banked MOVE_NONE at selection and a faster
+ * foe cancelled it mid-turn (sleep / freeze `CancelMultiTurnMoves`, Spite to
+ * 0 PP): the locked arm no longer matches, so source runs the live chosen
+ * slot's move and pays `GetMoveTarget`'s draws.
+ */
+function actionTakesChosenMoveChangedArm(
+  actionRulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+  moveSlot: BattleMoveSlot,
+): boolean {
+  if (battlerStatusMoveLock(actionRulesContext, battler) !== 0) return false;
+  return actionRulesContext.battlers[battler]!.moves[moveSlot]
+    !== actionRulesContext.chosenMoveByBattler[battler];
 }
 
 /** Runs one battler's chosen move from its LITERAL topology entry (census precedent, `factoryBattleScriptDecision.ts`'s own mechanism). */
@@ -1648,15 +1685,21 @@ function runMoveAction(
   forcedStruggle = false,
   retargetsAtExecution = false,
 ): ActionResult {
-  const topology = TOPOLOGY_BY_MOVE.get(moveId);
-  if (!topology) throw new Error(`move ${moveId} has no source Battle Script entry`);
-  const retarget = retargetsAtExecution
-    ? drawActionMoveTarget(program, priorState, mover, moveId, topology.entryScript)
+  const chosenMoveChanged = !forcedStruggle
+    && !retargetsAtExecution
+    && actionTakesChosenMoveChangedArm(priorState.rulesContext, mover as BattleSinglesBattler, moveSlot);
+  const executedMoveId = chosenMoveChanged
+    ? priorState.rulesContext.battlers[mover]!.moves[moveSlot]!
+    : moveId;
+  const topology = TOPOLOGY_BY_MOVE.get(executedMoveId);
+  if (!topology) throw new Error(`move ${executedMoveId} has no source Battle Script entry`);
+  const retarget = retargetsAtExecution || chosenMoveChanged
+    ? drawActionMoveTarget(program, priorState, mover, executedMoveId, topology.entryScript)
     : null;
   const actionContext = buildActionContext(
     priorState.rulesContext,
     mover,
-    moveId,
+    executedMoveId,
     moveSlot,
     retarget?.target ?? target,
     forcedStruggle,
@@ -2011,6 +2054,8 @@ export function runStagedVoluntarySwitch(
  * `GetWhoStrikesFirst(..., ignoreChosenMoves = FALSE)` needs it to tell a
  * move action's priority bracket from a switch's MOVE_NONE. Omitting it
  * preserves the prior value, which is what the per-action re-calls want.
+ * `chosenMoveByBattler` (gChosenMoveByBattler) is banked the same way; see
+ * `selectionChosenMove`.
  */
 function withTurnOrderPositions(
   rulesContext: BattleScriptRulesContext,
@@ -2018,6 +2063,7 @@ function withTurnOrderPositions(
   mover1: BattleScriptBattlerId,
   mover2: BattleScriptBattlerId,
   chosenActionByBattler?: readonly number[],
+  chosenMoveByBattler?: readonly number[],
 ): BattleScriptRulesContext {
   const battlers = rulesContext.battlers.map((battler, index) => {
     if (index === mover1) return Object.freeze({ ...battler, turnOrderNum: 0 });
@@ -2036,6 +2082,9 @@ function withTurnOrderPositions(
     chosenActionByBattler: chosenActionByBattler === undefined
       ? rulesContext.chosenActionByBattler
       : (Object.freeze([...chosenActionByBattler]) as unknown as BattleScriptRulesContext["chosenActionByBattler"]),
+    chosenMoveByBattler: chosenMoveByBattler === undefined
+      ? rulesContext.chosenMoveByBattler
+      : (Object.freeze([...chosenMoveByBattler]) as unknown as BattleScriptRulesContext["chosenMoveByBattler"]),
     currentTurnActionNumber,
   });
 }
@@ -2533,6 +2582,8 @@ function runEndTurnTail(
     rulesContext: Object.freeze({
       ...endTurn.state.rulesContext,
       randomTurnNumber,
+      // BattleTurnPassed's closing loop (battle_main.c:4001-4005).
+      chosenMoveByBattler: Object.freeze([0, 0, 0, 0] as const),
     }),
     rng: createBattleScriptRngState(boundaryCursor.value),
   });
@@ -3191,6 +3242,11 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       trainerSwitch ? B_ACTION_SWITCH : B_ACTION_USE_MOVE,
       B_ACTION_USE_MOVE,
       B_ACTION_USE_MOVE,
+    ], [
+      playerSwitch ? 0 : selectionChosenMove(rules.rulesContext, 0, playerMoveSlot),
+      trainerSwitch ? 0 : selectionChosenMove(rules.rulesContext, 1, trainerMoveSlot),
+      0,
+      0,
     ]),
     rng: createBattleScriptRngState(rngBefore.value),
     events: Object.freeze([]),
