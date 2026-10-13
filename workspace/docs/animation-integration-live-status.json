@@ -4302,6 +4302,8 @@
             123
           ],
           "iterations": 161,
+          "side": "opponent",
+          "body": "later",
           "alternatives": [
             {
               "phase": "event",
@@ -4315,9 +4317,54 @@
             }
           ],
           "chosen": "event",
-          "tieRuleUsed": false,
-          "side": "opponent",
-          "body": "later"
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "optional-lag-age",
+          "age": 142,
+          "fixedLagAges": [
+            122,
+            123
+          ],
+          "iterations": 161,
+          "side": "player",
+          "body": "later",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 162,
+              "measured": 9
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 161,
+              "measured": 2
+            }
+          ],
+          "chosen": "event",
+          "tieRuleUsed": false
+        },
+        {
+          "kind": "scanline-split-line",
+          "age": 98,
+          "fixedLagAges": [],
+          "iterations": 161,
+          "side": "player",
+          "body": "later",
+          "alternatives": [
+            {
+              "phase": "event",
+              "bodyRows": 162,
+              "measured": 0
+            },
+            {
+              "phase": "no-event",
+              "bodyRows": 162,
+              "measured": 5
+            }
+          ],
+          "chosen": "no-event",
+          "tieRuleUsed": false
         }
       ],
       "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
@@ -4490,6 +4537,74 @@
             "pixels": 306721,
             "maxPixelsPerRow": 18473,
             "cause": "both parameters: the scanout split on CROBAT's lines 3..18 of the displayed distortion rows (prep30 s1.4: 11551 px at S = 0, the row-98 source-fitted split cannot be exact for an elevated target) + the lag window's restore fade one row early on 143..158"
+          },
+          "asl155-player-later-xs-pla-nuzleaf-shuckle-xs-1": {
+            "ages": [
+              95,
+              101
+            ],
+            "rows": 2,
+            "pixels": 39,
+            "cause": "scanline-split-line (player later, S = 0 policy): the ROM split S >= 27 on the listed distortion rows (ord149 B1: S is a CPU phase; fixtures/asl155/asl155-xs-policy.json)"
+          },
+          "asl155-player-later-xs-pla-nuzleaf-shuckle-qa-2": {
+            "ages": [
+              95
+            ],
+            "rows": 1,
+            "pixels": 2,
+            "cause": "scanline-split-line (player later, S = 0 policy): the ROM split S >= 27 on the listed distortion rows (ord149 B1: S is a CPU phase; fixtures/asl155/asl155-xs-policy.json)"
+          },
+          "asl155-player-later-xs-pla-nuzleaf-shuckle-qa-0": {
+            "ages": [
+              95,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156,
+              157,
+              158
+            ],
+            "rows": 17,
+            "pixels": 298050,
+            "cause": "scanline-split-line (player later, S = 0 policy): the ROM split S >= 27 on the listed distortion rows (ord149 B1: S is a CPU phase; fixtures/asl155/asl155-xs-policy.json); optional-lag-age: a measured no-lag window under the player later lag policy (rows 143..158)"
+          },
+          "asl155-player-later-xs-pla-nuzleaf-shuckle-qa-1": {
+            "ages": [
+              99,
+              102,
+              108,
+              117,
+              143,
+              144,
+              145,
+              146,
+              147,
+              148,
+              149,
+              150,
+              151,
+              152,
+              153,
+              154,
+              155,
+              156,
+              157,
+              158
+            ],
+            "rows": 20,
+            "pixels": 298086,
+            "cause": "scanline-split-line (player later, S = 0 policy): the ROM split S >= 27 on the listed distortion rows (ord149 B1: S is a CPU phase; fixtures/asl155/asl155-xs-policy.json); optional-lag-age: a measured no-lag window under the player later lag policy (rows 143..158)"
           }
         }
       },
@@ -4499,13 +4614,15 @@
         "tools/integration/fixtures/d4a-live/extrasensory-*.json (6 dense windows, both orientations, all first bodies: accepted NUZLEAF -> SHUCKLE, prep25 ALAKAZAM -> GOLEM, prep30 ESPEON -> CROBAT (elevated opponent: distortion window 2..66 from the reducer's targetYElevation input))",
         "docs/next-adapters-prep30.md s0.2 / s1.4 / s1.5 + tools/integration/fixtures/prep30/extrasensory-{check,pixels,split}.json (lag in 2 of 6; split residual in 2 of 6; re-measured by the D4c probes: identical rows / pixels)",
         "scanline history gate: the entry buffers are the first-body battle-intro residue (the Dig / Rapid Spin S0 constant); liveMoveAnimation.ts case 326 requires spriteOrderInput.firstBody (a later body declines: an earlier scanline body may have left other buffers)",
-        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4c Extrasensory: registration, dense receipt, reducer default window pin, gates, ordinary route Scene ON/OFF parity)"
+        "tests/animation/liveFaithfulTimingAdapters.test.ts (D4c Extrasensory: registration, dense receipt, reducer default window pin, gates, ordinary route Scene ON/OFF parity)",
+        "asl155 (docs/asl155-astonish-extrasensory-live.md): a PLAYER attacker's later body is live (history known, non-elevated target, first visible monbg line >= 27): player later lag policy 9 : 2 (scan93) + S = 0 on every row (ord149 xs per-row dominant class 69 / 69, fitted row 0 of 5); dense tools/integration/fixtures/asl155/asl155-windows-b.json (12 later SHUCKLE windows live: 5 at 0 px, the rest only on the documented rows); GOLEM-class (line 18), CROBAT (elevated) and DD-history later bodies decline"
       ],
       "proofCommands": [
         "sh tools/integration/prep22Probes.sh PROBEDIR 1 mechanic-extrasensory-player-nuzleaf-opponent-shuckle mechanic-extrasensory-opponent-nuzleaf-player-shuckle prep25-extrasensory-alt-player-alakazam-golem prep25-extrasensory-alt-opponent-alakazam-golem prep30-extrasensory-alt-player-espeon-crobat prep30-extrasensory-alt-opponent-espeon-crobat",
         "python3 tools/integration/d4aFixtures.py PROBEDIR EXTRASENSORY",
         "node --experimental-strip-types --no-warnings tools/integration/d4aTimingCheck.ts OUT.json tools/integration/fixtures/d4a-live/extrasensory-*.json",
-        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts"
+        "npx vitest run tests/animation/liveFaithfulTimingAdapters.test.ts tests/animation/liveMoveTimingPolicy.test.ts",
+        "sh tools/integration/asl155Run.sh .integration/validation/<fresh>  # asl155: census + dense windows of the player later bodies"
       ]
     },
     {

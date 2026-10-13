@@ -289,6 +289,25 @@ export const LIVE_MOVE_TIMING_POLICY: Readonly<Record<number, LiveMoveTimingEntr
       chosen: "event", tieRuleUsed: false,
       evidence: ["tools/integration/fixtures/d4later/counters.json (opponent later bodies: counter lag age 141 = task row 142, 11 of 11)",
         "tools/integration/fixtures/later58/check-extrasensory.json (11 of 11 opponent later windows in the lag phase)", "docs/next-adapters-d4later.md"],
+    }, {
+      // asl155 (scan93 patch B; docs/asl155-astonish-extrasensory-live.md): a PLAYER attacker's LATER body (opponent target) lags at task row 142
+      // in 9 of 11 measured later windows (scan93 scenarios, twice fresh); first bodies keep the parameter above.
+      kind: "optional-lag-age", age: 142, fixedLagAges: [122, 123], iterations: 161, side: "player", body: "later",
+      alternatives: [{ phase: "event", bodyRows: 162, measured: 9 }, { phase: "no-event", bodyRows: 161, measured: 2 }],
+      chosen: "event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/scan93/check-B.json (player later windows: timing.measured optional-lag-age event in 9 of 11)",
+        "docs/next-adapters-scan93.md"],
+    }, {
+      // asl155 (ord149 B1, docs/ord149-astonish-extrasensory.md s2): a PLAYER attacker's LATER body's per-row split line S is a CPU phase
+      // (instruction-stepped: not keyed by stage / row across bodies). Per (stage, row) over the 5 measured SHUCKLE-class later bodies the
+      // dominant display class is S <= 26 (== S = 0: the target's first monbg line is 27) on 68 of 69 rows, and on 1 row (stage 3 data[1] 1:
+      // S <= 26 2, S 27 2, S 28 1) by the tie rule. `age` 98 is the one row whose chosen phase differs from the first bodies: the first-body
+      // source-fitted split (stage 3 data[1] 5, lines <= 28 show the preceding row; "event") measured 0 of 5, S <= 26 ("no-event") 5 of 5.
+      kind: "scanline-split-line", age: 98, fixedLagAges: [], iterations: 161, side: "player", body: "later",
+      alternatives: [{ phase: "event", bodyRows: 162, measured: 0 }, { phase: "no-event", bodyRows: 162, measured: 5 }],
+      chosen: "no-event", tieRuleUsed: false,
+      evidence: ["tools/integration/fixtures/ord149/ord149-xs-split.json (per write row S, 3 routes x 3 bodies, A == B)",
+        "tools/integration/fixtures/asl155/asl155-xs-policy.json (per-row classes, policy vs alternates)", "docs/asl155-astonish-extrasensory-live.md"],
     }],
   },
   /**
@@ -709,6 +728,16 @@ export function liveMovePaletteTransferRow(moveId: number): number | null {
 export function liveMoveTimingSidePhase(moveId: number, kind: LiveMoveTimingParameterKind, side: "player" | "opponent",
   body: LiveMoveTimingBody = "first"): LiveMoveTimingPhase | null {
   return liveMoveTimingParameterFor(moveId, kind, side, body)?.chosen ?? null;
+}
+
+/**
+ * asl155: whether the reducer's source-fitted scanout split row stays (Extrasensory's stage-3 data[1] 5 row): true under the first-body
+ * scanline-split-line parameter (its S = 0 phase keeps the source-fitted row), else the body-keyed parameter's chosen phase ("event" = the
+ * fitted split, "no-event" = S = 0 on that row too).
+ */
+export function liveMoveScanoutSplitRow(moveId: number, side: "player" | "opponent", body: LiveMoveTimingBody): boolean {
+  const p = liveMoveTimingParameterFor(moveId, "scanline-split-line", side, body);
+  return p === null || p.body === undefined || p.chosen === "event";
 }
 
 /** The policy parameter of a move, or null when the move has no D4 timing parameter of that kind. */

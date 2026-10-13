@@ -1,0 +1,896 @@
+{
+ "schema": "asl155-xs-policy/v1",
+ "visibleLine": 27,
+ "laterBodies": 5,
+ "rowKeys": 69,
+ "dominantNoEvent": 69,
+ "ties": 1,
+ "fittedRow": {
+  "stage": 2,
+  "data1": 4,
+  "laterClasses": {
+   "0": 5
+  },
+  "firstBody": 28
+ },
+ "rows": [
+  {
+   "stage": 0,
+   "data1": 1,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 2,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 3,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 4,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 5,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 6,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 7,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 8,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 9,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 10,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 11,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 12,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 13,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 14,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 15,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 16,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 17,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 18,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 19,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 20,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 21,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 22,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 0,
+   "data1": 23,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 1,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 2,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 3,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 4,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 5,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 6,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 7,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 8,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 9,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 10,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 11,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 12,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 13,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 14,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 15,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 16,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 17,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 18,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 19,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 20,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 21,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 22,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 1,
+   "data1": 23,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 1,
+   "classes": {
+    "0": 2,
+    "27": 2,
+    "28": 1
+   },
+   "chosen": 0,
+   "tie": true,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 2,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 3,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 4,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 28
+  },
+  {
+   "stage": 2,
+   "data1": 5,
+   "classes": {
+    "0": 4,
+    "27": 1
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 6,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 7,
+   "classes": {
+    "0": 4,
+    "31": 1
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 8,
+   "classes": {
+    "0": 4,
+    "27": 1
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 9,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 10,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 11,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 12,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 13,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 14,
+   "classes": {
+    "0": 4,
+    "31": 1
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 15,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 16,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 17,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 18,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 19,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 20,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 21,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 22,
+   "classes": {
+    "0": 5
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  },
+  {
+   "stage": 2,
+   "data1": 23,
+   "classes": {
+    "0": 4,
+    "28": 1
+   },
+   "chosen": 0,
+   "tie": false,
+   "firstBody": 0
+  }
+ ],
+ "windows": [
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-xs-1.json",
+   "policyRows": 2,
+   "patchBRows": 3,
+   "policyKeys": [
+    [
+     2,
+     1
+    ],
+    [
+     2,
+     7
+    ]
+   ],
+   "policyAges": [
+    95,
+    101
+   ],
+   "patchBKeys": [
+    [
+     2,
+     1
+    ],
+    [
+     2,
+     4
+    ],
+    [
+     2,
+     7
+    ]
+   ],
+   "asAlternatePhaseRows": {
+    "xs-pla-nuzleaf-shuckle-xs-2.json": 2,
+    "xs-pla-nuzleaf-shuckle-qa-0.json": 2,
+    "xs-pla-nuzleaf-shuckle-qa-1.json": 6,
+    "xs-pla-nuzleaf-shuckle-qa-2.json": 2
+   }
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-xs-2.json",
+   "policyRows": 0,
+   "patchBRows": 1,
+   "policyKeys": [],
+   "policyAges": [],
+   "patchBKeys": [
+    [
+     2,
+     4
+    ]
+   ],
+   "asAlternatePhaseRows": {
+    "xs-pla-nuzleaf-shuckle-xs-1.json": 2,
+    "xs-pla-nuzleaf-shuckle-qa-0.json": 1,
+    "xs-pla-nuzleaf-shuckle-qa-1.json": 4,
+    "xs-pla-nuzleaf-shuckle-qa-2.json": 1
+   }
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-0.json",
+   "policyRows": 1,
+   "patchBRows": 2,
+   "policyKeys": [
+    [
+     2,
+     1
+    ]
+   ],
+   "policyAges": [
+    95
+   ],
+   "patchBKeys": [
+    [
+     2,
+     1
+    ],
+    [
+     2,
+     4
+    ]
+   ],
+   "asAlternatePhaseRows": {
+    "xs-pla-nuzleaf-shuckle-xs-1.json": 2,
+    "xs-pla-nuzleaf-shuckle-xs-2.json": 1,
+    "xs-pla-nuzleaf-shuckle-qa-1.json": 5,
+    "xs-pla-nuzleaf-shuckle-qa-2.json": 0
+   }
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-1.json",
+   "policyRows": 4,
+   "patchBRows": 5,
+   "policyKeys": [
+    [
+     2,
+     5
+    ],
+    [
+     2,
+     8
+    ],
+    [
+     2,
+     14
+    ],
+    [
+     2,
+     23
+    ]
+   ],
+   "policyAges": [
+    99,
+    102,
+    108,
+    117
+   ],
+   "patchBKeys": [
+    [
+     2,
+     4
+    ],
+    [
+     2,
+     5
+    ],
+    [
+     2,
+     8
+    ],
+    [
+     2,
+     14
+    ],
+    [
+     2,
+     23
+    ]
+   ],
+   "asAlternatePhaseRows": {
+    "xs-pla-nuzleaf-shuckle-xs-1.json": 6,
+    "xs-pla-nuzleaf-shuckle-xs-2.json": 4,
+    "xs-pla-nuzleaf-shuckle-qa-0.json": 5,
+    "xs-pla-nuzleaf-shuckle-qa-2.json": 5
+   }
+  },
+  {
+   "fixture": "xs-pla-nuzleaf-shuckle-qa-2.json",
+   "policyRows": 1,
+   "patchBRows": 2,
+   "policyKeys": [
+    [
+     2,
+     1
+    ]
+   ],
+   "policyAges": [
+    95
+   ],
+   "patchBKeys": [
+    [
+     2,
+     1
+    ],
+    [
+     2,
+     4
+    ]
+   ],
+   "asAlternatePhaseRows": {
+    "xs-pla-nuzleaf-shuckle-xs-1.json": 2,
+    "xs-pla-nuzleaf-shuckle-xs-2.json": 1,
+    "xs-pla-nuzleaf-shuckle-qa-0.json": 0,
+    "xs-pla-nuzleaf-shuckle-qa-1.json": 5
+   }
+  }
+ ],
+ "totals": {
+  "policyRows": 8,
+  "patchBRows": 13
+ }
+}
