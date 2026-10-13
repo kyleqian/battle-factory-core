@@ -58,7 +58,11 @@ elevated shadow ages (all three); the x2 / routes / census receipts. **Revert ex
   (none falls on a drawn SLP / BRN / INFATUATION frame).
 - `git diff --check 7511dc63d HEAD`: clean.
 - Census and routes: section 1 (run on the final production src `ebd71373e`).
-- `sh tools/integration/sae135Run.sh .integration/validation/run1/out`: see the session report (RUNNER_PLACEHOLDER).
+- `sh tools/integration/sae135Run.sh .integration/validation/run1/out --census` (archive copies of `7511dc63d` and HEAD `359d52b47`,
+  production src `ebd71373e`; 7 m 45 s): **ALL SAME** — stq132 probes 26 / 26 sha256 (r1 == r2), rom-windows SAME, r2 == r1, comparator
+  r1 == r2 == committed (31 / 37 all rows, 37 / 37 command rows), diag 37 / 37, redraw 2,946 / 2,946, controls 0 / 0 / 0 / 23 of 37,
+  next-body probes 4 / 4 (sha256 SAME, rom SAME, r2 == r1, next-body-x2 SAME), routes 6 / 6 OK SAME, census delta SAME (0 changes),
+  receipt SAME.
 
 ## 6. Open (not in scope)
 
