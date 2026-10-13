@@ -64,14 +64,16 @@ describe("sgl138: the gate in production (census routes, both scenes)", () => {
   }
 
   it("the receipt covers every gated class x side, stats-change in both scenes, multi-hit in Scene ON", () => {
+    // thr153: seed 32 -> 808 (stats-change-attacker battler 0; see SGL138_SEEDS) moved anchors 90 -> 98, gate frames 416 -> 438,
+    // stats-change 79 -> 87; every class x side cell and every equality below is unchanged.
     expect(receipt.summary).toEqual({
-      anchors: 90, gated: 33, gateFrames: 416, gateEqualsProjection: 90,
+      anchors: 98, gated: 33, gateFrames: 438, gateEqualsProjection: 98,
       cells: [
         "off|stats-change-attacker|0", "off|stats-change-attacker|1", "off|stats-change-target|0", "off|stats-change-target|1",
         "on|multi-hit|0", "on|multi-hit|1", "on|stats-change-attacker|0", "on|stats-change-attacker|1",
         "on|stats-change-target|0", "on|stats-change-target|1",
       ],
-      statsChangeBannerAtGate: 79, statsChangeGlyphAtGatePlusRowsPlusHold: 79, statsChange: 79,
+      statsChangeBannerAtGate: 87, statsChangeGlyphAtGatePlusRowsPlusHold: 87, statsChange: 87,
       laterHitShiftEqualsGate: 11, laterHits: 11, gateRowsEqualPrevious: 33,
     });
   });

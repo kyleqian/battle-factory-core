@@ -168,7 +168,9 @@ function anchors(seed: number): { anchors: Anchor[]; unanchored: number; offAnim
 
 // Census seeds (0..99, sa125LiveShareCensus.ts) carrying every animation x path the sta123 scenarios stage except CURSED / NIGHTMARE /
 // the frozen turn (none in 0..99; their constants are checked against the ROM receipts below and by the census delta).
-const SEEDS = [7, 11, 12, 18, 19, 20, 60, 76, 87];
+// Seed 49 (thr153): ISSUES #141a's THRASH lock-in re-run moved census battles 18 / 76 off their player BRN route; 49 carries
+// BRN|inflicted|player and BRN|STRINGID_PKMNHURTBYBURN|player (first such seed in 0..79 not moved by the fix).
+const SEEDS = [7, 11, 12, 18, 19, 20, 49, 60, 76, 87];
 
 describe("sa125: the ROM receipts (sta123 rom-r1.json, 18 scenarios both sides)", () => {
   const all = Object.entries(ROM).flatMap(([stem, s]) => s.on.statusAnimations.map((a) => ({ stem, side: s.attackerSide, ...a })));

@@ -5,7 +5,7 @@ import { iu120Extra } from "./helpers/iu120Rows.ts";
 
 describe("generated Scene ON queue lifecycle and rule isolation", () => {
   it("preserves rules and RNG across 40 generated matchups including forced replacement", () => {
-    expect(verifySceneModeParity()).toBe(470);
+    expect(verifySceneModeParity()).toBe(467); // ISSUES #141a (thr153) THRASH lock-in re-run: 470 -> 467
   }, 60000);
 
   it("keeps each multi-hit receipt, its remaining-hit counter, and separate HP command", () => {

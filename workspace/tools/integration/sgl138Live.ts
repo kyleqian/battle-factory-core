@@ -35,8 +35,10 @@ export function sgl138OpenReceipts(): Sgl138Open[] {
   return (JSON.parse(readFileSync("tools/integration/fixtures/sgs134/exposure.json", "utf8")) as { openReceipts: Sgl138Open[] }).openReceipts;
 }
 // The first census seed of every gated class x battler of sgs134's projection (exposure.json openReceipts, gate > 0): multi-hit
-// battler 0 / 1 = seeds 0 / 19, stats-change-target 0 / 0 (+ 19), stats-change-attacker 32 / 9.
-export const SGL138_SEEDS = [0, 9, 19, 32];
+// battler 0 / 1 = seeds 0 / 19, stats-change-target 0 / 0 (+ 19), stats-change-attacker 808 / 9. (Was 32 until thr153: ISSUES #141a's
+// THRASH lock-in re-run moved census battle 32 onto a Dig whose charge + strike share a segment, a non-multi-hit 2nd move-animation the
+// later-hit anchor misreads; 808 is the next projected stats-change-attacker battler-0 seed and the fix leaves its battle unchanged.)
+export const SGL138_SEEDS = [0, 9, 19, 808];
 
 export type Sgl138Command = {
   seg: string; index: number; type: string; i: number; seq: number | null; frame: number; startElapsed: number;

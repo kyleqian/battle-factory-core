@@ -5,13 +5,13 @@
   0,
   9,
   19,
-  32
+  808
  ],
  "summary": {
-  "anchors": 90,
+  "anchors": 98,
   "gated": 33,
-  "gateFrames": 416,
-  "gateEqualsProjection": 90,
+  "gateFrames": 438,
+  "gateEqualsProjection": 98,
   "cells": [
    "off|stats-change-attacker|0",
    "off|stats-change-attacker|1",
@@ -24,9 +24,9 @@
    "on|stats-change-target|0",
    "on|stats-change-target|1"
   ],
-  "statsChangeBannerAtGate": 79,
-  "statsChangeGlyphAtGatePlusRowsPlusHold": 79,
-  "statsChange": 79,
+  "statsChangeBannerAtGate": 87,
+  "statsChangeGlyphAtGatePlusRowsPlusHold": 87,
+  "statsChange": 87,
   "laterHitShiftEqualsGate": 11,
   "laterHits": 11,
   "gateRowsEqualPrevious": 33
@@ -1791,33 +1791,69 @@
     }
    ]
   },
-  "32-on": {
-   "frames": 19338,
+  "808-on": {
+   "frames": 20530,
    "anchors": [
     {
-     "seg": "19:0",
-     "i": 8,
+     "seg": "1:0",
+     "i": 13,
      "type": "stats-change",
      "battler": 0,
      "move": null,
-     "cls": "stats-change-attacker",
-     "gate": 8,
-     "projected": 8,
-     "rows": 76,
-     "minimumFrames": 84,
+     "cls": null,
+     "gate": 0,
+     "projected": 0,
+     "rows": 90,
+     "minimumFrames": 90,
      "holdFrames": 1,
-     "span": 85,
-     "glyph": 85,
-     "effectStart": 8,
+     "span": 91,
+     "glyph": 91,
+     "effectStart": 0,
      "first": null,
      "gateRowsEqualPrevious": true,
-     "gateEffects": [
-      "none"
-     ]
+     "gateEffects": []
     },
     {
-     "seg": "39:0",
-     "i": 4,
+     "seg": "20:0",
+     "i": 9,
+     "type": "stats-change",
+     "battler": 0,
+     "move": null,
+     "cls": null,
+     "gate": 0,
+     "projected": 0,
+     "rows": 90,
+     "minimumFrames": 90,
+     "holdFrames": 1,
+     "span": 91,
+     "glyph": 91,
+     "effectStart": 0,
+     "first": null,
+     "gateRowsEqualPrevious": true,
+     "gateEffects": []
+    },
+    {
+     "seg": "45:0",
+     "i": 19,
+     "type": "stats-change",
+     "battler": 1,
+     "move": null,
+     "cls": null,
+     "gate": 0,
+     "projected": 0,
+     "rows": 76,
+     "minimumFrames": 76,
+     "holdFrames": 1,
+     "span": 77,
+     "glyph": 77,
+     "effectStart": 0,
+     "first": null,
+     "gateRowsEqualPrevious": true,
+     "gateEffects": []
+    },
+    {
+     "seg": "49:0",
+     "i": 9,
      "type": "stats-change",
      "battler": 1,
      "move": null,
@@ -1833,36 +1869,112 @@
      "first": null,
      "gateRowsEqualPrevious": true,
      "gateEffects": []
+    },
+    {
+     "seg": "57:0",
+     "i": 15,
+     "type": "stats-change",
+     "battler": 1,
+     "move": null,
+     "cls": null,
+     "gate": 0,
+     "projected": 0,
+     "rows": 90,
+     "minimumFrames": 90,
+     "holdFrames": 1,
+     "span": 91,
+     "glyph": 91,
+     "effectStart": 0,
+     "first": null,
+     "gateRowsEqualPrevious": true,
+     "gateEffects": []
+    },
+    {
+     "seg": "59:0",
+     "i": 18,
+     "type": "stats-change",
+     "battler": 0,
+     "move": null,
+     "cls": "stats-change-attacker",
+     "gate": 19,
+     "projected": 19,
+     "rows": 76,
+     "minimumFrames": 95,
+     "holdFrames": 1,
+     "span": 96,
+     "glyph": 96,
+     "effectStart": 19,
+     "first": null,
+     "gateRowsEqualPrevious": true,
+     "gateEffects": [
+      "none"
+     ]
     }
    ]
   },
-  "32-off": {
-   "frames": 14372,
+  "808-off": {
+   "frames": 14056,
    "anchors": [
     {
-     "seg": "19:0",
+     "seg": "1:0",
+     "i": 13,
+     "type": "stats-change",
+     "battler": 0,
+     "move": null,
+     "cls": null,
+     "gate": 0,
+     "projected": 0,
+     "rows": 90,
+     "minimumFrames": 90,
+     "holdFrames": 1,
+     "span": 91,
+     "glyph": 91,
+     "effectStart": 0,
+     "first": null,
+     "gateRowsEqualPrevious": true,
+     "gateEffects": []
+    },
+    {
+     "seg": "20:0",
      "i": 8,
      "type": "stats-change",
      "battler": 0,
      "move": null,
-     "cls": "stats-change-attacker",
-     "gate": 8,
-     "projected": 8,
-     "rows": 76,
-     "minimumFrames": 84,
+     "cls": null,
+     "gate": 0,
+     "projected": 0,
+     "rows": 90,
+     "minimumFrames": 90,
      "holdFrames": 1,
-     "span": 85,
-     "glyph": 85,
-     "effectStart": 8,
+     "span": 91,
+     "glyph": 91,
+     "effectStart": 0,
      "first": null,
      "gateRowsEqualPrevious": true,
-     "gateEffects": [
-      "none"
-     ]
+     "gateEffects": []
     },
     {
-     "seg": "39:0",
-     "i": 4,
+     "seg": "45:0",
+     "i": 19,
+     "type": "stats-change",
+     "battler": 1,
+     "move": null,
+     "cls": null,
+     "gate": 0,
+     "projected": 0,
+     "rows": 76,
+     "minimumFrames": 76,
+     "holdFrames": 1,
+     "span": 77,
+     "glyph": 77,
+     "effectStart": 0,
+     "first": null,
+     "gateRowsEqualPrevious": true,
+     "gateEffects": []
+    },
+    {
+     "seg": "49:0",
+     "i": 9,
      "type": "stats-change",
      "battler": 1,
      "move": null,
@@ -1878,6 +1990,46 @@
      "first": null,
      "gateRowsEqualPrevious": true,
      "gateEffects": []
+    },
+    {
+     "seg": "57:0",
+     "i": 15,
+     "type": "stats-change",
+     "battler": 1,
+     "move": null,
+     "cls": null,
+     "gate": 0,
+     "projected": 0,
+     "rows": 90,
+     "minimumFrames": 90,
+     "holdFrames": 1,
+     "span": 91,
+     "glyph": 91,
+     "effectStart": 0,
+     "first": null,
+     "gateRowsEqualPrevious": true,
+     "gateEffects": []
+    },
+    {
+     "seg": "59:0",
+     "i": 18,
+     "type": "stats-change",
+     "battler": 0,
+     "move": null,
+     "cls": "stats-change-attacker",
+     "gate": 19,
+     "projected": 19,
+     "rows": 76,
+     "minimumFrames": 95,
+     "holdFrames": 1,
+     "span": 96,
+     "glyph": 96,
+     "effectStart": 19,
+     "first": null,
+     "gateRowsEqualPrevious": true,
+     "gateEffects": [
+      "none"
+     ]
     }
    ]
   }

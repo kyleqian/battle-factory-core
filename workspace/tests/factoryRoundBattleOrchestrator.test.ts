@@ -2118,8 +2118,14 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // loses with the swap still pending: seed 58 reproduces the ORIGINAL shape
     // exactly -- accept after battle 0, lose battle 1 -- so only the seed
     // moves and every assertion below keeps its meaning.
+    //
+    // ISSUES #141a (thr153: the THRASH lock-in re-runs seteffectwithchance)
+    // makes seed 58 win battle 1 after a Petal Dance lock-in. Re-scanned seeds
+    // 1..260 accepting after battle 0 (plus 1..60 accepting after 1..5): seed
+    // 250 is the only round that loses with the swap still pending, again
+    // accept after battle 0 and lose battle 1.
     const lostAfterSwap = driveGeneratedRoundToCompletion(
-      58,
+      250,
       undefined,
       (state) => state.round.rules.battleIndex === 0
         ? { type: "accept", playerPartyIndex: 2, opponentPartyIndex: 0 }
@@ -2771,14 +2777,14 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     [13, 2553, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 2221 -> 2553
     [14, 1897, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1921 -> 1897
     [15, 1503, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1551 -> 1503
-    [16, 1315, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1523 -> 1315
+    [16, 1294, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1523 -> 1315; rng146 F1 Petal Dance lock-in re-run: 1315 -> 1294
     [18, 1775, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1948 -> 1775
     [19, 1116, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1938 -> 1116
     [20, 1644, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1999 -> 1644
     [21, 1559, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1476 -> 1559
     [22, 1671, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1517 -> 1671
     [23, 2191, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 2330 -> 2191
-    [24, 1623, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1473 -> 1623
+    [24, 1479, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1473 -> 1623; rng146 F1 Petal Dance lock-in re-run: 1623 -> 1479
     [26, 1669, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1672 -> 1669
     [29, 1506, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1832 -> 1506
     [30, 1737, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1366 -> 1737
