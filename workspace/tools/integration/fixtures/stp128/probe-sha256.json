@@ -1,0 +1,58 @@
+{
+ "stp128-confuse-ray-opp-primeape-golbat.json": {
+  "r1": "f1305d192ca0d8b104edc400d3f4bb56d42bd44d26d108f5e207039ce6a6f02a",
+  "r2": "f1305d192ca0d8b104edc400d3f4bb56d42bd44d26d108f5e207039ce6a6f02a"
+ },
+ "stp128-confuse-ray-opp-primeape-onix.json": {
+  "r1": "6f7fca7c322e3769da3d0194a13a506448509c8b66ebe9d432b0ece107961a6f",
+  "r2": "6f7fca7c322e3769da3d0194a13a506448509c8b66ebe9d432b0ece107961a6f"
+ },
+ "stp128-confuse-ray-ply-primeape-golbat.json": {
+  "r1": "00555d38642f46a516301786c2edcfee67704949010497fc2eac4c836a784e92",
+  "r2": "00555d38642f46a516301786c2edcfee67704949010497fc2eac4c836a784e92"
+ },
+ "stp128-confuse-ray-ply-primeape-onix.json": {
+  "r1": "ec232eca19fc03ec78a814ac4b1a557ab79a06381383a613086a7d7a2165fc46",
+  "r2": "ec232eca19fc03ec78a814ac4b1a557ab79a06381383a613086a7d7a2165fc46"
+ },
+ "stp128-curse-opp-gengar-golbat.json": {
+  "r1": "5afb686bc2c6eb3127627813ee7a57653a688697641c5a9e6e0592c79513ead1",
+  "r2": "5afb686bc2c6eb3127627813ee7a57653a688697641c5a9e6e0592c79513ead1"
+ },
+ "stp128-curse-opp-gengar-onix.json": {
+  "r1": "86d5f65996914f144119f95717faa9a7f7d9e16c29e5ac742395b481d12548f6",
+  "r2": "86d5f65996914f144119f95717faa9a7f7d9e16c29e5ac742395b481d12548f6"
+ },
+ "stp128-curse-ply-gengar-golbat.json": {
+  "r1": "13fb0729a39e4972e349e15221b856c3ccd92e2112fe3a856e25870ed3663f5c",
+  "r2": "13fb0729a39e4972e349e15221b856c3ccd92e2112fe3a856e25870ed3663f5c"
+ },
+ "stp128-curse-ply-gengar-onix.json": {
+  "r1": "7207a4c02426a076873b45da2f792507578a6a338397188d693a664258400d89",
+  "r2": "7207a4c02426a076873b45da2f792507578a6a338397188d693a664258400d89"
+ },
+ "stp128-ice-beam-opp-delcatty-shuckle.json": {
+  "r1": "22b9d9b7c03d21d6e51885c42cad8248626d867937657ec4d9daa9766c155a1b",
+  "r2": "22b9d9b7c03d21d6e51885c42cad8248626d867937657ec4d9daa9766c155a1b"
+ },
+ "stp128-ice-beam-ply-delcatty-shuckle.json": {
+  "r1": "b8933add54082192653cb8504b571ffd1769067d954ed4f97b7c3817d4f1bc7f",
+  "r2": "b8933add54082192653cb8504b571ffd1769067d954ed4f97b7c3817d4f1bc7f"
+ },
+ "stp128-nightmare-opp-gengar-golbat.json": {
+  "r1": "b2549521e1d993ffc1ec8af49d95904304adf9b1e72058059e48b1b4284b3610",
+  "r2": "b2549521e1d993ffc1ec8af49d95904304adf9b1e72058059e48b1b4284b3610"
+ },
+ "stp128-nightmare-opp-haunter-shuckle.json": {
+  "r1": "74b54cd4fe34dd3a2e3072b80528de94dc4a2a2b7a9abbf84211f375e343f196",
+  "r2": "74b54cd4fe34dd3a2e3072b80528de94dc4a2a2b7a9abbf84211f375e343f196"
+ },
+ "stp128-nightmare-ply-gengar-golbat.json": {
+  "r1": "494de6c273099c7551f8a44d186ebfb673a2c6ece5d1d126b83cecf0f7029b3a",
+  "r2": "494de6c273099c7551f8a44d186ebfb673a2c6ece5d1d126b83cecf0f7029b3a"
+ },
+ "stp128-nightmare-ply-haunter-shuckle.json": {
+  "r1": "f99829d6712e07eb4c6a6e6353afaf6dfb0758b70d685716b6e9a21389f0f050",
+  "r2": "f99829d6712e07eb4c6a6e6353afaf6dfb0758b70d685716b6e9a21389f0f050"
+ }
+}
