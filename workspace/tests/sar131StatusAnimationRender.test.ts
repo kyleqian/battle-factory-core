@@ -21,8 +21,8 @@ describe("sar131: PSN / PRZ rows (statusAnimation.ts liveStatusAnimationRow)", (
   it("draws PSN and PRZ only; every other B_ANIM_STATUS_* leaves the field as it is", () => {
     for (const name of Object.keys(STATUS_ANIMATION_ADDED_ROWS)) {
       const drawn = liveStatusAnimationRow(name, 10, "opponent") !== null;
-      // sae135 (SA5): + SLP / BRN (tests/sae135StatusAnimationRender.test.ts).
-      expect(drawn, name).toBe(name === "PSN" || name === "PRZ" || name === "SLP" || name === "BRN");
+      // sae135 (SA5): + SLP / BRN / INFATUATION (tests/sae135StatusAnimationRender.test.ts).
+      expect(drawn, name).toBe(name === "PSN" || name === "PRZ" || name === "SLP" || name === "BRN" || name === "INFATUATION");
       expect(STATUS_ANIMATIONS_DRAWN.has(name), name).toBe(drawn);
     }
   });
@@ -83,9 +83,9 @@ describe("sar131: production frames == the ROM comparator's 0 px receipt (17 / 1
   });
   it("over the doll or for an undrawn animation: no status-animation view (the field as it is)", () => {
     const w = rom["sta123-toxic-ply-primeape-onix"].windows[0];
-    const win = sar131Window("sta123-toxic-ply-primeape-onix", { ...w, animation: "BRN" }, []);
-    expect(statusAnimationRenderView(win.viewAt(5))).toBeNull();
+    // sae135: BRN is drawn now; an animation name without a liveStatusAnimationRow case stands in for "undrawn".
     const view = sar131Window("sta123-toxic-ply-primeape-onix", w, []).viewAt(5);
+    expect(statusAnimationRenderView({ ...view, effect: { ...(view.effect as never as object), animation: "WRAPPED" } } as never)).toBeNull();
     const doll = { ...view, field: { ...view.field, opponent: { ...view.field.opponent, substituteDoll: true } } };
     expect(statusAnimationRenderView(doll as never)).toBeNull();
   });

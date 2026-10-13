@@ -318,6 +318,8 @@ export function liveStatusAnimationRow(
       return statusParticles("SLP", age, side, battler);
     case "BRN":
       return statusParticles("BRN", age, side, battler);
+    case "INFATUATION":
+      return statusParticles("INFATUATION", age, side, battler);
     default:
       return null;
   }
