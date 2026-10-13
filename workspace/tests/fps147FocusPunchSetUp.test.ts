@@ -144,17 +144,18 @@ describe("fps147 General_FocusPunchSetUp reducer vs dense ROM windows", () => {
     expect(FOCUS_PUNCH_SETUP_ROWS.focusFirstGlyphDisplay - FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_ROWS.focusFirstGlyphDisplay).toBe(121);
   });
 
-  it("is unwired: no production module imports it", () => {
+  // fpp150 (ISSUES #139) wired it: battleScene.ts generalAnimationRenderView draws the general-animation command from it.
+  it("is wired by fpp150: only the battleScene.ts render seam imports it", () => {
     const hits: string[] = [];
     const walk = (dir: string) => {
       for (const name of readdirSync(dir)) {
         const p = join(dir, name);
         if (statSync(p).isDirectory()) walk(p);
         else if (/\.tsx?$/.test(name) && p !== join("src", "animation", "focusPunchSetUp.ts")
-          && readFileSync(p, "utf8").includes("focusPunchSetUp.ts")) hits.push(p);
+          && /from "[^"]*focusPunchSetUp\.ts"/.test(readFileSync(p, "utf8"))) hits.push(p);
       }
     };
     walk("src");
-    expect(hits).toEqual([]);
+    expect(hits).toEqual([join("src", "engine", "battleScene.ts")]);
   });
 });

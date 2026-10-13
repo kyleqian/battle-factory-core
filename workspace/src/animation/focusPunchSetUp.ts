@@ -4,7 +4,7 @@ import type { FocusEnergySide, FocusEnergySprite } from "./focusEnergy.ts";
 /**
  * fps147 (ISSUES #139 presentation half; docs/fps147-focus-punch-setup.md): General_FocusPunchSetUp, the Scene ON
  * B_ANIM_FOCUS_PUNCH_SETUP that BattleScript_FocusPunchSetUp plays between its empty box and "…is tightening its focus!".
- * UNWIRED: no production module imports this file yet.
+ * Wired by fpp150 (ISSUES #139): battleScene.ts generalAnimationRenderView draws the general-animation command from it.
  *
  * The script (battle_anim_scripts.s:10635-10646) is byte-identical to Move_ENDURE (:3196-3207): three EndureEffect waves,
  * the red BlendColorCycle (2, 2, 0, 11) and AnimTask_ShakeMon2 (ATTACKER, 1, 0, 32, 1). Only the host differs. A general
