@@ -24,24 +24,32 @@ may change gameplay/RNG when proved against source; use main-lane ownership
 and gameplay gates. Historical presentation-only exclusions are superseded.
 Settled/parked records and unrelated expansions retain their existing status.
 
-## #168 — remainder: a Scene ON status animation over an INVISIBLE battler draws nothing (S10A; #168 otherwise DONE 2026-10-13)
+## #171 — Encore residuals after act156 (found 2026-10-13 by act156)
 
-All nine B_ANIM_STATUS_* animations are timed (sa125 + the IsBattleSEPlaying gate, sag130) and drawn (sar131 / sad133 / sae135 / gaf140;
-88 + 16 dense ROM windows 0 px; live audit 28 clean). Remaining: when the battler's sprite is hidden but not semi-invulnerable (a Dig
-charge turn followed by the battler's own in-love check), the ROM runs the script and draws its sprites (hearts / letter Z) over the
-hidden battler; production's guard draws nothing. Census 0..999: 5 / 8,063 commands. Banked patch + proofs: docs/inv142-status-animation-
-invisible-battler.md (`tools/integration/fixtures/inv142/inv142-invisible.diff`, 5 / 5 windows 0 px, census identical; landing recipe
-there). Also open (D4 class, aud137): FRZ's frozen-turn active rows are 115 vs production's 116 on 4 / 10 windows (next message 1 frame late).
+act156 fixed #170 (a battler Encored earlier in the same turn uses the encored move: HandleAction_UseMove's Encore arms run at its own
+action) and #169 (a battler dragged in by Roar / Whirlwind before acting takes no action; B_ACTION_CANCEL_PARTNER). Open, both without a
+receipt: (a) an OVERWRITTEN Encore (the encored slot's move changed by Mimic / Transform / Sketch) is still cleared at turn start for both
+battlers, while source clears it only at the battler's own action (`battle_util.c:119-128`); (b) a mid-turn Encore into a move that locks
+the user (Thrash family, Uproar, Rollout) may trip the round orchestrator's locked-move check — census 0..999 never reaches it. Resume: a
+ROM receipt per case (rcp154's driver), then the port fix.
 
-## #167 — remainder: Scene OFF Rest attack pause and unmeasured next receipts (S10A, 2026-10-11)
+## #168 — remainder: FRZ frozen-turn timing phase (S10A; #168 otherwise DONE 2026-10-13)
 
-Landed: olnd113 (OFF no-hit pause per class + the MoveMissedPause / failed / Protect-blocked hold in both scenes), scf117 (post-stats-change
-alignment), off121 (OFF `status` command), fix122 (Scene ON no-effect attackanimation hold, 12 classes). Open: Rest's attack receipt after
-"went to sleep!" + waitmessage + the status icon gets no OFF pause (ROM att G+128, F_after G+163, HP bar G+166; off108 §1 "Open", off121 §1c);
-no-hit bodies whose next receipt is a sprite-visibility (298 census bodies) or a stat-stage-change without STATS_CHANGE (Curse-like paths)
-get no OFF pause (unmeasured); the charge-turn EMPTYSTRING3 print is a 24-frame message in production vs 2 ROM rows (off108 notes).
-(fpp150 fixed the Focus Punch pre-pass's EMPTYSTRING3 only; the charge-turn one needs a dense charge-turn card per scene and an anchor
-run like `tools/integration/fpp150Anchors.ts` -- docs/fpp150-focus-punch-prepass.md §4.)
+All nine B_ANIM_STATUS_* animations are timed and drawn (88 + 16 dense ROM windows 0 px; live audit 28 clean), and since inl144
+(2026-10-13, merged `d019cd6b4`) a status animation over an INVISIBLE battler draws its sprites while the battler stays hidden (inv142's
+banked patch landed; inv142Run.sh ALL SAME). Open (D4 class, aud137): FRZ's frozen-turn active rows are 115 vs production's 116 on 4 / 10
+windows (the next message one frame late); cause named, not proven.
+
+## #167 — remainder: Scene OFF no-hit pauses for Wish / Baton Pass / charge-turn EMPTYSTRING3 (S10A, 2026-10-11)
+
+Landed: olnd113, scf117, off121, fix122 (see git), and off148 (2026-10-13, docs/off148-scene-off-pauses-remainder.md): Rest (466 / 466
+census bodies) and the stat-stage-change-next class (Curse / Swagger / Flatter / Tickle, 401 / 401) land on the ROM row (anchor table
+5 / 5 classes residual 0). Open: (a) Wish (155 bodies): the next drawn change is the next action's "used" message, whose production length
+(fixed 24-frame minimum) differs from the ROM's 20 / 16 rows — choose the anchor with that message; (b) sprite-visibility next after Roar /
+Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);
+(c) nothing next (35, player Baton Pass: the party menu opens; unstaged); (d) the two-turn charge-turn EMPTYSTRING3 print (24-frame message
+vs 2 ROM rows; fpp150 fixed only the Focus Punch pre-pass's; needs a dense charge-turn card per scene, docs/fpp150-focus-punch-prepass.md §4);
+(e) small: Curse's 2nd / 3rd messages +1 frame each; Rest's status icon on G+127 vs ROM G+125 (total to the attack row exact).
 
 ## #161 — Dive attack: an extra lag frame at age 17 on poisoned player-diver routes (S10A, found 2026-10-10 by st76)
 
@@ -156,36 +164,21 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   frame early vs the party-HP write); Sky Uppercut with a COMBUSKEN attacker measured d = 0 vs the
   table's 1; Dream Eater / Sleep Talk swaps not harness-staged (table from the ROM d values only).
 
-## #146 — Forced switch-out and send-in presentation timing differ from the ROM (S10A, found 2026-10-05)
+## #146 — Switch-out / send-in presentation remainder (S10A, found 2026-10-05; Scene ON opponent send-in tail + front animation FIXED 2026-10-13)
 
-- **Evidence:** `docs/forced-switch-continuation.md` (ROM probes twice fresh; production rendered
-  per frame on four Roar/Whirlwind routes; supervisor reran the production render).
-- **Forced switch-out (`returntoball`, Roar / Whirlwind / Baton Pass):** the ROM removes the
-  battler instantly (`Cmd_returntoball` skipAnim TRUE, `battle_script_commands.c:5346`;
-  `OpponentHandleReturnMonToBall` destroy branch): sprite + healthbox hidden at E+4, send-in at
-  E+10. Production emits the 32-frame voluntary `switch-out` (recall scale-up frames 0-26, target
-  drawn at rest), hides at +27/+32 and starts the send-in at +33
-  (`battleResolutionPresentation.ts:3496-3535`). Scene ON blocks live Roar/Whirlwind bodies (the
-  recall would redraw the slid-off target). Scene OFF: the ROM continuation is identical in OFF;
-  production OFF has the same recall chain (removal -> ball-open 51 frames vs ROM 24; the older
-  `docs/issue84-whirlwind-opponent-recall.md` claim "with animation enabled" contradicts the
-  source) — no OFF pixel compare yet.
-- **Send-in tail timing (all send-ins):** opponent healthbox slide starts send-in +70..+234 and
-  the message +96..+260 depending on the species' front animation (339 Factory species swept);
-  production uses a fixed 91+11-frame span calibrated on RATTATA (slide +33, message +102).
-  Player side: slide constant (+65 vs +66), message +101..+210 (cry overlap).
-- **Scene ON forced switch-out FIXED 2026-10-05 (merge of `634207ed8`):** no recall, hold 4 +
-  hide 6, send-in at the framebuffer E+11 (ROM E+4/E+10 are RAM writes, shown one frame later);
-  tracker `forced-switch-out` + side-generic switch-in units. Player-attacker Roar/Whirlwind exact
-  from body start through the emerge (128/128, 112/112).
-- **Open remainder:** (1) the send-in tail after a forced switch: production runs the ball-open
-  white fade + particles only for a voluntary switch (`sourceDecision.kind === "switch"`), then the
-  species-keyed healthbox slide / message above; (2) opponent-attacker Roar: the player-side ball
-  throw path differs from k=13 (6,718 px); (3) after any live body by an ELEVATED opponent attacker
-  (BUTTERFREE Whirlwind) the ordinary field drawing differs from the body's last frame by 1,444 px
-  (pre-existing, likely affects other live moves; untriaged); (4) Scene OFF forced switch-out is
-  still the recall chain (no OFF pixel compare yet); (5) Baton Pass (same opcode on the attacker)
-  unchanged.
+- **Fixed 2026-10-13:** snd145 (species-keyed Scene ON opponent healthbox slide + next-command start for every send-in; send-in fade +
+  particles keyed to every switch-in; docs/snd145-send-in-tail-live.md) and fra151 (Scene ON opponent send-in draws the species front
+  animation: 12 snd145 windows + 56 / 57 more species 0 px; docs/fra151-front-send-in-animation.md). Scene ON forced switch-out fixed
+  2026-10-05 (`634207ed8`).
+- **Open (offs152 in flight 2026-10-13):** (1) Scene OFF send-in tail: the ROM slides the opponent healthbox at el 36 and prints at ~62,
+  production 33 / 102 (68 rows per window; cry-bound species unmeasured); (2) Scene OFF forced switch-out after Roar / Whirlwind / Baton
+  Pass is still the 32-frame recall chain (ROM: one-row removal, `Cmd_returntoball` skipAnim); (3) Scene ON genderless species (37 not in
+  the snd145 sweep; LUNATONE / MAGNEMITE / STARYU / SOLROCK slide + message earlier than the ROM); (4) SOLROCK's affine rotation not read
+  (170,860 px).
+- **Open (not in flight):** player-side back send-out animations and battle-start intro send-outs (Scene ON; fra151 doc says what they
+  need); shiny send-ins; PONYTA glow mid-frame palette row (D4 class, 616 px); TYPHLOSION faint-path slide lag frame (D4); the faint-path
+  blank row one frame late; opponent-attacker Roar player-side ball-throw path (6,718 px); the elevated-attacker post-body field
+  difference (1,444 px, untriaged).
 
 ## #145 — Live-adapter species audit: residual remainder (S10A; 7 defects FIXED 2026-10-05)
 
