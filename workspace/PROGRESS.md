@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-13 — sub157: #153 Scene OFF plays the Substitute / Transform attack animations (main/ts, presentation only)
+
+- **State:** local master, production src `ca4ea3618` (kernel) + `eec0aca08` (OFF x2). 5 / 5 dense Scene OFF Substitute ROM windows
+  (PERSIAN<->SLOWBRO, GOLEM<->ONIX both sides, prep37 OFF) **87 / 87 rows 0 px** through production `renderBattleResolutionLiveView`.
+- **Did:** `Cmd_attackanimation` exempts Transform / Substitute from HITMARKER_NO_ANIMATIONS (`:1748`). OFF command streams now == ON
+  (30 / 30 uses, seeds 0..399). OFF bodies / fades read x2 {0,0} (no front animation in OFF, `pokemon.c:6805`; GOLEM -> ONIX was
+  94,917 px). `liveShareCensus.ts --scene=on|off` + `sub157Census.sh`.
+- **Ripple:** census 0..999 ON 10 / 10 shards byte-identical. OFF: 27 battles changed, all attributed (47 bodies live +50 frames each,
+  1 Transform 39 -> 32, 6 fades now live, battle 881's stalled tail -1 command); `battleDigestExcludingFrames` identical.
+  Differential 641 / 641 byte-identical.
+- **Next:** #153 remainder (both scenes): Substitute HP command −6 vs ROM (Scene ON route timing); Transform has no live adapter
+  (ROM 108 rows, production 32 undrawn); unmeasured OFF fade window and doll <-> mon swaps.
+- **Notes:** gates: typecheck 0, smoke 448; full `npm test`, build, soak PENDING (see the final commit). Docs
+  `docs/sub157-scene-off-substitute.md`; receipt `tools/integration/fixtures/sub157/receipt.json`; scratch `.integration/validation/sub157/`.
+
+---
+
 ## 2026-10-13 — fpp150: #139 Focus Punch pre-pass — kernel + Scene OFF / ON timing + drawn general animation (main/ts)
 
 - **State:** local master, production src `d44b83144` (kernel) + `49c6c7c7b` (presentation / render). verify-rcp143-r4 **PASS**
@@ -40,21 +57,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   core-rs has no port of the THRASH arm (not edited). sgs134 `exposure.json` is a census projection from before F1, so it is stale
   for the 46 moved battles (no test reads those seeds). docs/rng146-rng-draw-fixes.md § thr153. Scratch: `.integration/validation/thr153/`.
 
----
-
-## 2026-10-13 — rng146: #141b Sticky Hold + #140 `:133` RNG draws FIXED; #141a THRASH fix built but deferred (main/ts gameplay)
-
-- **State:** local master; production src `e8843465a` (F2 `8726675ec` + F3) with F1 `0f9b5301e` reverted in `52340a10e`.
-  verify-rcp143 R2 / R3 / R3-control PASS, R1 FAIL (deferred). Census 0..999 27,271 / 27,090 live (99.34 % / 99.60 %).
-- **Did:** F2: STEAL_ITEM Sticky Hold arm `"call-current"` (BattleScriptPushCursor). F3: the rules-context cell
-  `chosenMoveByBattler` (gChosenMoveByBattler, threaded with chosenActionByBattler), banked at selection and reset at
-  BattleTurnPassed; `runMoveAction` takes `battle_util.c:130-134` at the battler's own action (GetMoveTarget draws).
-  F1 (THRASH re-runs seteffectwithchance) is correct (R1 PASS) but moves 8 pins, all via Petal Dance / Thrash lock-ins
-  (per-fix toggles), and 5 of them need new-seed scans, so it was reverted. Docs: docs/rng146-rng-draw-fixes.md.
-- **Ripple (landed tree):** tests moved: none beyond the receipt pins. Census vs ret165: 2 battles changed, both F3
-  (269 Solar Beam slept by GrassWhistle; 811 a Whirlwind-dragged GLOOM now runs its own slot move instead of ROAR;
-  this route was not anticipated and has no ROM receipt yet). Soak vanilla 0:20 20 / 20 OK, per-seed lines identical.
-- **Next:** re-land #141a: cherry-pick `0f9b5301e` + the 8 re-pins listed in ISSUES #141 (expect census 45 battles,
-  vanilla soak b2 t16 -> b4 t0). Optional ROM card for the 811 phazing route. Then #139 (reuses the F3 bank).
-- **Notes:** gates on `299f35e0e`: typecheck 0, full `npm test` (2 shards) 1,657 files / 13,747 tests passed, 0 failed
-  (44 / 223 skipped), build OK; smoke 448 earlier. ISSUES #140 removed; #141 trimmed to #141a. Scratch: `.integration/validation/rng146/`.

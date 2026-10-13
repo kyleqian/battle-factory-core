@@ -1,3 +1,22 @@
+## 2026-10-13 — rng146: #141b Sticky Hold + #140 `:133` RNG draws FIXED; #141a THRASH fix built but deferred (main/ts gameplay)
+
+- **State:** local master; production src `e8843465a` (F2 `8726675ec` + F3) with F1 `0f9b5301e` reverted in `52340a10e`.
+  verify-rcp143 R2 / R3 / R3-control PASS, R1 FAIL (deferred). Census 0..999 27,271 / 27,090 live (99.34 % / 99.60 %).
+- **Did:** F2: STEAL_ITEM Sticky Hold arm `"call-current"` (BattleScriptPushCursor). F3: the rules-context cell
+  `chosenMoveByBattler` (gChosenMoveByBattler, threaded with chosenActionByBattler), banked at selection and reset at
+  BattleTurnPassed; `runMoveAction` takes `battle_util.c:130-134` at the battler's own action (GetMoveTarget draws).
+  F1 (THRASH re-runs seteffectwithchance) is correct (R1 PASS) but moves 8 pins, all via Petal Dance / Thrash lock-ins
+  (per-fix toggles), and 5 of them need new-seed scans, so it was reverted. Docs: docs/rng146-rng-draw-fixes.md.
+- **Ripple (landed tree):** tests moved: none beyond the receipt pins. Census vs ret165: 2 battles changed, both F3
+  (269 Solar Beam slept by GrassWhistle; 811 a Whirlwind-dragged GLOOM now runs its own slot move instead of ROAR;
+  this route was not anticipated and has no ROM receipt yet). Soak vanilla 0:20 20 / 20 OK, per-seed lines identical.
+- **Next:** re-land #141a: cherry-pick `0f9b5301e` + the 8 re-pins listed in ISSUES #141 (expect census 45 battles,
+  vanilla soak b2 t16 -> b4 t0). Optional ROM card for the 811 phazing route. Then #139 (reuses the F3 bank).
+- **Notes:** gates on `299f35e0e`: typecheck 0, full `npm test` (2 shards) 1,657 files / 13,747 tests passed, 0 failed
+  (44 / 223 skipped), build OK; smoke 448 earlier. ISSUES #140 removed; #141 trimmed to #141a. Scratch: `.integration/validation/rng146/`.
+
+---
+
 ## 2026-10-13 — ret165: Factory parties turn Return into Frustration (ISSUES #165 FIXED; main/ts gameplay correction)
 
 - **State:** local master; production src changed by `cd99c8073` (helper + tests + attributed re-pins); ROM receipt `98f4f8a05`.

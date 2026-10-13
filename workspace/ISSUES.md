@@ -81,15 +81,16 @@ hazard is that "two fresh runs identical" inside one batch does not prove cross-
 Resume: rerun one ou-ply job at several wall-clock times and diff `lab.prepare`'s staged state (gRngValue, party structs, the
 frame count to CB2_InitBattle); check whether the lab seed is applied before or after a frame-dependent step.
 
-## #153 — Scene OFF skips the Substitute body (kernel attackanimation port vs source; S10A, found 2026-10-07)
+## #153 — remainder: Substitute / Transform presentation shared by both scenes (Scene OFF body FIXED 2026-10-13, sub157)
 
-Source plays Substitute (and Transform) through `Cmd_attackanimation` even when battle animations are off
-(`battle_script_commands.c:1748` exempts them; prep37 measured the 87-row body and the 103-row fade identically under
-Scene OFF). The kernel's attackanimation port (`battleScriptHitChainOpcode.ts` ~:2224) takes the no-animation pause
-for Substitute instead, so under Scene OFF the doll only appears from the next prompt (presentation timing only; no
-logical outcome measured to change). Gameplay-kernel owned: needs a main-lane fix with Scene OFF frame-timing proof.
-Evidence: `docs/next-adapters-prep37.md`, `tools/integration/fixtures/subst-live-receipt.json`. Quantified by live audit 26 (2026-10-11,
-docs/aud118-live-audit-26.md): 16 census uses; ROM OFF waitanimation 90 rows, HP bar G+98, glyph G+140; production HP bar -57, message -71.
+FIXED (`ca4ea3618` / `eec0aca08`): Scene OFF emits the Transform / Substitute move animation (`battle_script_commands.c:1748`).
+OFF bodies read x2 {0,0} because there is no front animation in OFF (`pokemon.c:6805`). 5 / 5 dense OFF Substitute windows are
+0 px (`docs/sub157-scene-off-substitute.md`). Open, the same in both scenes (ROM OFF == ON):
+- **Substitute turn timing:** the HP command starts on G+91 against the ROM's G+97 HP run (−6), because the 5 pre-attackanimation rows
+  and the healthbarupdate row are not presented. Scene ON route-timing owner.
+- **Transform:** ROM Move_TRANSFORM is 108 rows (DITTO, both scenes). Production shows 32 undrawn frames in both scenes (no live adapter).
+- **Not measured:** a dense OFF fade window (6 OFF census fades are now live), and the switch-out SUBSTITUTE_TO_MON / Baton Pass
+  MON_TO_SUBSTITUTE special animations (scene-independent in source; neither scene presents them).
 
 ## #152 — Species audits 9-14 remainder: idle-rest attacker class, Extrasensory split rows, Confuse Ray CPU phase, TYRANITAR rows (S10A, 2026-10-07)
 
