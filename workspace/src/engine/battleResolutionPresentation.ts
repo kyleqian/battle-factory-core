@@ -48,6 +48,7 @@ import { battleResolutionFieldBeforeCommand } from "./battleResolutionPresentati
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
+import { opponentSwitchInDuration } from "./switchInTail.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
   (frontierHeldItemsData.entries as readonly Readonly<{
@@ -1032,6 +1033,16 @@ const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: SWITCH_IN_SPAN_FRAMES } 
  * command's duration carries it on top of the 91-frame controller span.
  */
 export const SWITCH_IN_WAITSTATE_HOLD_FRAMES = 11;
+/**
+ * snd145 (ISSUES #146 remainder): the opponent's send-in tail is species-keyed (the healthbox slide waits for the front animation,
+ * the next printstring for the controller end; src/engine/switchInTail.ts), so its controller span is the species' whole duration
+ * minus the shared waitstate hold. The player side keeps the calibrated 91-frame span (its message is cry-bound, not modelled).
+ */
+export function switchInTiming(battler: 0 | 1, species: number): BattleSwitchInTiming {
+  return battler === 0
+    ? SWITCH_IN_TIMING
+    : Object.freeze({ minimumFrames: opponentSwitchInDuration(species) - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
+}
 /**
  * ISSUES #78 slice 4: the real `CONTROLLER_RETURNMONTOBALL` receipt's
  * 32-frame lifetime (`returnatktoball` -> `PlayerHandleReturnMonToBall` ->
@@ -4191,7 +4202,7 @@ export function projectBattleResolutionCommands(
         toPartyIndex: switched.toPartyIndex,
         incoming: incoming.field,
         incomingStatus1: incoming.status1,
-        timing: SWITCH_IN_TIMING,
+        timing: switchInTiming(battler, incoming.field.species),
         settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
       }));
     }

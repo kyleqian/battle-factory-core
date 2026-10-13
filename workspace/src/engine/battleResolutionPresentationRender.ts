@@ -26,6 +26,7 @@ import type {
   BattleResolutionPresentationCommand,
   BattleResolutionPresentationState,
 } from "./battleResolutionPresentation.ts";
+import { opponentSwitchInHealthboxSlideElapsed } from "./switchInTail.ts";
 import {
   BATTLE_SCRIPT_STATUS1_BURN,
   BATTLE_SCRIPT_STATUS1_FREEZE,
@@ -304,6 +305,11 @@ export type MidBattleSwitchInView = Readonly<{
 export function midBattleSwitchInAt(
   elapsed: number,
   battler: 0 | 1,
+  /**
+   * snd145: the opponent's species-keyed slide start (`opponentSwitchInHealthboxSlideElapsed(incoming species)`, what the
+   * production render passes); omitted = the player constant / the pre-snd145 opponent 33 for direct callers.
+   */
+  healthboxSlideStart?: number,
 ): MidBattleSwitchInView {
   const side = battler === 0 ? "player" : "opponent";
   // DoPokeballSendOutAnimation routes by GetBattlerSide. Player send-outs
@@ -356,9 +362,9 @@ export function midBattleSwitchInAt(
       ? 16
       : Math.max(0, 15 - (opponentMaterializeLocal - 23))
     : 0;
-  const healthboxSlideElapsed = side === "player"
+  const healthboxSlideElapsed = healthboxSlideStart ?? (side === "player"
     ? MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED
-    : 33;
+    : 33);
   const healthboxDx =
     elapsed < healthboxSlideElapsed
       ? null
@@ -1697,6 +1703,7 @@ export function createBattleResolutionPresentationRenderView(
       midBattleSwitchIn = midBattleSwitchInAt(
         state.lifecycle.phaseElapsed,
         command.battler,
+        command.battler === 1 ? opponentSwitchInHealthboxSlideElapsed(command.incoming.species) : undefined,
       );
       fainted.delete(command.battler);
     } else if (command.type === "switch-out") {
