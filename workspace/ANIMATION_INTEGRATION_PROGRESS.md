@@ -10,7 +10,7 @@
   Scene ON commands, all nine drawn. Preview <http://127.0.0.1:5191/> serves `63f6850b2`: 4 samples hash-equal, session export + ON -> OFF
   restart passed, no browser errors (`tools/integration/fixtures/playable-preview-63f6850b2-receipt.json`). Soak (run because sgl138 changed
   Scene OFF timing) on `74cbec2b8` (the last Scene OFF change; later folds are Scene ON only): vanilla 0:20 **20 / 20**, full 0:60 **60 / 60**,
-  winning 0:60 and winning-swap 0:60 still running at this commit (see the follow-up commit); fifth gate winning --vary-rng carry 0 / 14 / 28 **100 / 100 each**, winning-swap carry
+  winning 0:60 **60 / 60**, winning-swap 0:60 **60 / 60** OK (all budget-ended; the script's own repeat of the fifth gate also 100 / 100 x 4); fifth gate winning --vary-rng carry 0 / 14 / 28 **100 / 100 each**, winning-swap carry
   0 **100 / 100**.
 - gaf140 (MAIN lane, Opus, on master `dd3c20914` .. `26000aa80`): the union DEFECT fixed — the status-animation command carries
   `seGateFrames`; the render effect age = command age - gate (the ordinary field during the gate): **16 / 16 gated ROM windows 0 px on every

@@ -12,7 +12,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   byte-identical (235 + 216), the app-only presentation-rng trace 172 / 173 (Double Team's intended +9 tail). Census 0..999: **99.34 % /
   99.60 %** live (27,221 / 27,402 commands), 0 render throws. Catalogue `236+13+27+0+0=276` + Struggle (Smokescreen -> faithful timing).
   Preview <http://127.0.0.1:5191/> serves `63f6850b2` (4 samples hash-equal, export + ON -> OFF restart passed, no browser errors).
-  Soak on `74cbec2b8` (last Scene OFF change): vanilla 0:20 20 / 20, full 0:60 60 / 60, winning 0:60 and winning-swap 0:60 still running at this commit;
+  Soak on `74cbec2b8` (last Scene OFF change): vanilla 0:20 20 / 20, full 0:60 60 / 60, winning 0:60 60 / 60, winning-swap 0:60 60 / 60;
   fifth gate 100 / 100 x 4.
 - **Did (production; every worker runner re-run by the supervisor into a fresh dir, ALL SAME; unions gated in detached worktrees):**
   ordl126 (ord124 order plans: +106 commands live), sa125 (#168 SA1 + SA3: the status-animation command with ROM controller rows, the
