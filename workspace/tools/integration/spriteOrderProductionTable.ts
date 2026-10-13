@@ -175,7 +175,7 @@ export function renderSpriteOrderProductionTableFromFixtures(): string {
     fixture("prep28/plan-rows.json").bodies, fixture("prep28/plan-rows-sky-attack.json").bodies,
   ], [fixture("prep43/plan-rows.json"), fixture("prep45/plan-rows.json"), fixture("plans48/plan-rows.json"), fixture("plans51/plan-rows.json"),
     fixture("plans54/plan-rows.json"), fixture("prep61/plan-rows.json"), fixture("prep64/plan-rows.json"), fixture("plans69/plan-rows.json"),
-    fixture("ret80/plan-rows.json"), fixture("ret88/plan-rows.json")],
+    fixture("ret80/plan-rows.json"), fixture("ret88/plan-rows.json"), fixture("ord124/ord124-plan-rows.json")],
   fixture("cf78/plan-overrides.json").bodies);
 }
 

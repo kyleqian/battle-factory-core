@@ -4,6 +4,14 @@ How often ordinary Battle Factory play (Scene ON) shows a **live adapter** for a
 which production gate made each fallback. Tooling + evidence only: `tools/integration/liveShareCensus.ts` (driver) and
 `tools/integration/liveShareCensusGates.ts` (classifier); no `src/` change, no oracle. Production tree as of master `4efff4321`.
 
+## ordl126 landing (2026-10-12; base master `cfe4e26ca`, production src `b4befa039` + the generated Odor Sleuth 316 / False Swipe 206 plans)
+
+Seeds 0..999, 10 `--index-from` shards (`stg107Census.sh`, both arms, merged reports): **27,245 / 27,426 move-animation commands live (99.34 %),
+4,144,162 / 4,160,787 frames (99.60 %)** (base arm: 27,139 / 98.95 %, 4,132,330 / 99.32 %). +106 commands / +11,832 frames, all in battle 705
+(Struggle after a Metronome-called Odor Sleuth); 0 other status changes, `battleDigest` identical. Sprite-order lend unknown 125 / 15,490 ->
+**19 / 3,658** commands / frames. Residual: Hyper Beam `63:player` 12 / 2,229, Astonish `310:player` 5 / 912, next-mon summary 2 / 517,
+later-body (Extrasensory 326 scanout split) 23 / 3,772. `docs/ordl126-order-plans-live.md`, `tools/integration/fixtures/ordl126-live-receipt.json`.
+
 ## Final 2026-10-11 afternoon session (master `2131feda7`, production src `b4befa039`)
 
 Seeds 0..999, 10 `--index-from` shards (`ret88Census.sh shards`, supervisor): **27,139 / 27,426 move-animation commands live (98.95 %),
