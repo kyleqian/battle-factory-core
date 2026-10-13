@@ -1,0 +1,65 @@
+diff --git a/src/engine/liveMoveAnimation.ts b/src/engine/liveMoveAnimation.ts
+index fb750709..7447a202 100644
+--- a/src/engine/liveMoveAnimation.ts
++++ b/src/engine/liveMoveAnimation.ts
+@@ -1619,6 +1619,8 @@ export function liveWordsOrderDeferredCarry(
+     if (unit.generalAnimation === undefined && unit.moveId === 260) {
+       return unit.bodySpecies === undefined ? null : liveFlatterWordsPostFree(unit, activationFree, wordsOf(unit.key), unit.bodySpecies);
+     }
++    // ord149: Astonish carries through its droplets' rises (liveAstonishWordsPostFree; species-free: both droplets start at the target's point).
++    if (unit.generalAnimation === undefined && unit.moveId === 310) return liveAstonishWordsPostFree(activationFree, wordsOf(unit.key));
+     const dirt = unit.generalAnimation === undefined && unit.moveId !== 240;
+     if (dirt && unit.bodySpecies !== undefined) {
+       const bodyAnchors = liveWordsBodyAnchors(unit.bodySpecies);
+@@ -4698,6 +4700,35 @@ function liveDiveWordsPlan(
+   return { text, profile: real };
+ }
+ 
++/**
++ * ord149: an Astonish 310 droplet's rise on the last SortSprites before its destroy (AnimSprayWaterDroplet_Step, battle_anim_flying.c:1139:
++ * data[1] = 896 + v2 (v2 odd) / 896 - v2 (even), `y2 -= data[1] >> 8; data[1] -= 32` per step; the 31st step destroys, so 30 steps are sorted).
++ */
++export function liveAstonishDropletRise(v2: number): number {
++  let data1 = v2 % 2 ? 896 + v2 : 896 - v2, rise = 0;
++  for (let step = 0; step < 30; step++, data1 -= 32) rise += data1 >> 8;
++  return rise;
++}
++
++/**
++ * ord149 (docs/ord149-astonish-extrasensory.md): the Astonish body's order plan from its 4 words. Move_ASTONISH creates its two droplets in one
++ * frame at the target's point; they die in the same frame, and SortSprites (equal priority words) puts the lower one (the smaller rise)
++ * first and never swaps equal keys, so the pair leaves by rise, ties in the lend order: the P words are the rises (the cursor sorts the pair
++ * by them, ties by F index at creation). Null without the body's 4 words. ROM: 36 / 36 bodies exact per window (fixtures/ord149).
++ */
++export function liveAstonishWordsPlanText(words: PresentationRngWords | null): string | null {
++  if (words === null || words.words.length !== 4) return null;
++  return `Cf;D0;Cff;D1,2/P${liveAstonishDropletRise(words.words[1]! & 0x7f)},${liveAstonishDropletRise(words.words[3]! & 0x7f)}`;
++}
++
++/** ord149: the free order after an Astonish body (liveAstonishWordsPlanText applied with the production plan cursor), or null. */
++export function liveAstonishWordsPostFree(activationFree: readonly number[], words: PresentationRngWords | null): readonly number[] | null {
++  const text = liveAstonishWordsPlanText(words);
++  if (text === null) return null;
++  const cursor = applySpriteOrderUnitPlan(createSpriteOrderPlanCursor({ known: true, free: activationFree, pendingDestroyed: [] }), decodeSpriteOrderPlan(text));
++  return cursor.order.known ? Object.freeze([...cursor.order.free]) : null;
++}
++
+ /** land68 (prep65): the free order after a Dive body (liveDiveWordsPlanText applied with the production plan cursor), or null. */
+ export function liveDiveWordsPostFree(
+   unit: Pick<SpriteOrderDeferredLend, "attackerSide" | "turn">, activationFree: readonly number[], words: PresentationRngWords | null,
+diff --git a/src/engine/wordsOrderUnits.ts b/src/engine/wordsOrderUnits.ts
+index 9d4ba660..f15cfcf4 100644
+--- a/src/engine/wordsOrderUnits.ts
++++ b/src/engine/wordsOrderUnits.ts
+@@ -12,8 +12,10 @@ import type { SpriteOrderDeferredLend } from "./spriteOrderEventTransform.ts";
+  * liveIceBallInputs(...).postBodyFree at the body's words, rollout counter and displayed species; docs/ice72-ice-ball-words-unit.md).
+  * flat84: Flatter 260 (its 38 confetti die together, FLATTER_K burst 65 .. end 97; their slots keep the SortSprites y-order of their last frame, which
+  * follows their own words: liveFlatterInputs' carried order at the last row, liveFlatterWordsPostFree; docs/next-adapters-flat84.md).
++ * ord149: Astonish 310 (its two droplets die together in the SortSprites order of their rises, which follow their own v2 words:
++ * liveAstonishWordsPostFree; docs/ord149-astonish-extrasensory.md). The 310:opponent table row keeps that side known (the marker drops).
+  */
+-export const WORDS_ORDER_UNIT_MOVE_IDS: readonly number[] = Object.freeze([28, 189, 240, 260, 291, 301]);
++export const WORDS_ORDER_UNIT_MOVE_IDS: readonly number[] = Object.freeze([28, 189, 240, 260, 291, 301, 310]);
+ /** The general animation whose order unit is words-dependent (General_Rain); its marker is keyed per event. */
+ export const WORDS_ORDER_GENERAL_ANIMATION = "RAIN_CONTINUES";
+ 
