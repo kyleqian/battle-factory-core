@@ -1034,6 +1034,13 @@ const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: SWITCH_IN_SPAN_FRAMES } 
  */
 export const SWITCH_IN_WAITSTATE_HOLD_FRAMES = 11;
 /**
+ * snd145 (ISSUES #146 remainder): an opponent faint replacement that ends the turn. The ROM blanks the message box 10 frames after
+ * the species' send-in tail (where a forced switch prints "dragged out!") and draws the action menu at +17 (dense Scene ON windows,
+ * 5 / 5 species without a switch-in effect; docs/snd145-send-in-tail-live.md); production's next-command handoff shows 6 blank
+ * frames, so the switch-in holds 11 more frames: menu exact, the blank one frame late.
+ */
+export const OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES = 11;
+/**
  * snd145 (ISSUES #146 remainder): the opponent's send-in tail is species-keyed (the healthbox slide waits for the front animation,
  * the next printstring for the controller end; src/engine/switchInTail.ts), so its controller span is the species' whole duration
  * minus the shared waitstate hold. The player side keeps the calibrated 91-frame span (its message is cry-bound, not modelled).
@@ -4261,6 +4268,16 @@ export function projectBattleResolutionCommands(
       }
     }
     commands.splice(0, commands.length, ...ordered);
+  }
+  // snd145: an opponent FAINT REPLACEMENT that ends the turn holds its settled send-in through the source's post-`switchinanim`
+  // turn-end work (`switchineffects`, the rest of `BattleScript_HandleFaintedMon`, `BattleTurnPassed`) before the action prompt.
+  const last = commands[commands.length - 1];
+  if (last?.type === "switch-in" && last.battler === 1
+    && commands.some((command) => command.type === "faint" && command.battler === 1)) {
+    commands[commands.length - 1] = Object.freeze({
+      ...last,
+      settleHoldFrames: (last.settleHoldFrames ?? 0) + OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES,
+    });
   }
   if (!commands.some(
     (command) => command.type === "message" && command.advance === "button",

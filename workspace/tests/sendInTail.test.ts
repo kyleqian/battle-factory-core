@@ -121,3 +121,11 @@ describe("snd145 CASTFORM whole-send-in delay", () => {
     expect([304, 341, 95, 397, 157].map(opponentSwitchInVisualDelay)).toEqual([0, 0, 0, 0, 0]);
   });
 });
+
+describe("snd145 opponent faint-replacement turn-end hold", () => {
+  it("is 11 frames: the ROM draws the action menu 17 frames after the species' send-in tail (production's handoff shows 6 blank frames)", async () => {
+    const { OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES } = await import("../src/engine/battleResolutionPresentation.ts");
+    const { BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES } = await import("../src/engine/battleResolutionPresentationRender.ts");
+    expect(OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES + BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES).toBe(17);
+  });
+});

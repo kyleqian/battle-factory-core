@@ -16,7 +16,9 @@ import { inflateSync } from "node:zlib";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
-import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../../src/engine/battleResolutionPresentation.ts";
+import {
+  OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES, SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming,
+} from "../../src/engine/battleResolutionPresentation.ts";
 import { opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay } from "../../src/engine/switchInTail.ts";
 import * as renderModule from "../../src/engine/battleResolutionPresentationRender.ts";
 
@@ -72,12 +74,15 @@ const message = (seq: number, lines: string[]) => Object.freeze({ type: "message
   noCursor: false, timing: { minimumFrames: 24, holdFrames: 0 } });
 const slide = opt("slide");
 const timing = opt("duration") === null ? switchInTiming(1, species) : { minimumFrames: opt("duration")! - SWITCH_IN_WAITSTATE_HOLD_FRAMES };
-const duration = timing.minimumFrames + SWITCH_IN_WAITSTATE_HOLD_FRAMES;
+// A faint replacement that ends the turn carries production's extra turn-end hold (the action prompt follows outside this segment:
+// rows are compared through the hold's last row; snd145RouteProbe.ts measures the prompt itself).
+const settleHoldFrames = SWITCH_IN_WAITSTATE_HOLD_FRAMES + (kind === "faint" ? OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES : 0);
+const duration = timing.minimumFrames + settleHoldFrames;
 const commands = [
   message(1, before),
   Object.freeze({ type: "sprite-visibility", eventSequence: 2, battler: 1, visible: false, recall: true, timing: { minimumFrames: 1 } }),
   Object.freeze({ type: "switch-in", eventSequence: 3, battler: 1, fromPartyIndex: 0, toPartyIndex: 1, incoming, incomingStatus1: 0,
-    timing, settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES }),
+    timing, settleHoldFrames }),
   message(4, after),
 ];
 const viewAt = (e: number) => createBattleResolutionPresentationRenderView({
@@ -110,7 +115,7 @@ if (anchorFrame === undefined) throw new Error("no ROM frame shows production's 
 const base = anchorFrame - anchorElapsed;
 const playerHalf = (x: number, y: number) => (x < 120 && y >= 48 && y < 112) || (x >= 120 && y >= 64 && y < 112);
 const region = (x: number, y: number) => y >= 112 ? "msg" : x < 120 && y < 48 ? "hb" : x >= 120 && y < 64 ? "opp" : "bg";
-const until = opt("until") ?? duration + 2;
+const until = opt("until") ?? (kind === "faint" ? duration - 1 : duration + 2);
 const rows: { e: number; frame: number; total: number; hb: number; opp: number; msg: number; bg: number }[] = [];
 for (let e = 0; e <= until; e += 1) {
   const r = rom.get(base + e);
