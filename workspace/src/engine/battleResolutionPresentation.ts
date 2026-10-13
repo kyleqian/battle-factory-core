@@ -180,6 +180,47 @@ function focusPunchPrePassMessageTiming(
   return null;
 }
 
+/**
+ * chg161 (ISSUES #167 (d), docs/chg161-charge-turn-print.md): a two-turn move's charge-turn empty box (BattleScriptFirstChargingTurn:
+ * printstring STRINGID_EMPTYSTRING3, ppreduce, attackanimation, waitanimation, ... printfromtable). The ROM clears the box on one row
+ * (rel 0) and the script reaches attackanimation on the next (rel 1 = off108's G + 2; gAnimScriptActive rises at rel 4), 6 / 6 dense
+ * windows (Dig / Razor Wind / Solar Beam, both scenes). Scene OFF: the box is that one row and BattleScript_Pausex20's pause command
+ * (sceneOffNoHitPauseFrames, counted from the box's first row) presents the rest. Scene ON: production has no command for the rows
+ * between waitanimation's release and the charge print; the box carries them, one frame per interpreter execution to the charge
+ * print (the attackanimation execution's own rows are the move-animation command), so the charge print's first glyph lands on the
+ * ROM row. Null if the shape differs.
+ */
+function chargeTurnEmptyBoxTiming(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+): BattleMessageTiming | null {
+  const event = events[index]!;
+  if (event.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT || event.payload.kind !== "message"
+    || event.payload.messageId !== "STRINGID_EMPTYSTRING3") return null;
+  const from = event.provenance.instructionExecution;
+  let attack: BattleKernelSemanticEvent | null = null;
+  for (let next = index + 1; next < events.length; next += 1) {
+    const candidate = events[next]!;
+    if (candidate.provenance?.sourceLabel !== CHARGE_TURN_SCRIPT) return null;
+    const payload = candidate.payload;
+    if (attack === null) {
+      if (payload.kind === "set-battler-pp-data") continue;
+      if (payload.kind !== "animation"
+        || (payload.animationId !== "MOVE_ANIMATION" && payload.animationId !== "SCENE_OFF_ATTACK_PAUSE")) return null;
+      attack = candidate;
+      if (payload.animationId === "SCENE_OFF_ATTACK_PAUSE") return CHARGE_TURN_EMPTY_BOX_ROW_TIMING;
+      continue;
+    }
+    if (payload.kind !== "message") return null;
+    const to = candidate.provenance?.instructionExecution;
+    if (from === undefined || to === undefined || to <= from) return null;
+    return Object.freeze({ minimumFrames: to - from, holdFrames: 0 });
+  }
+  return null;
+}
+const CHARGE_TURN_SCRIPT = "BattleScriptFirstChargingTurn";
+const CHARGE_TURN_EMPTY_BOX_ROW_TIMING = Object.freeze({ minimumFrames: 1, holdFrames: 0 });
+
 /** fpp150: the turn opens with BattleScript_FocusPunchSetUp (CheckFocusPunch_ClearVarsBeforeTurnStarts runs before action 1). */
 export function battleResolutionOpensWithFocusPunchPrePass(events: readonly BattleKernelSemanticEvent[]): boolean {
   return events.find((event) => event.sequence >= 0)?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT;
@@ -855,6 +896,8 @@ function sceneOffNoHitPauseFrames(
   attackIndex: number,
   openerIndex: number | null,
   presentedSinceOpener: readonly BattleResolutionPresentationCommand[],
+  // chg161: frames the opener's own command presents from G + 1 (the charge-turn empty box); 0 for a USEDMOVE (it ends on G).
+  openerFrames = 0,
 ): number | null {
   if (openerIndex === null) return null;
   const opener = events[openerIndex]!.provenance?.instructionExecution;
@@ -866,7 +909,7 @@ function sceneOffNoHitPauseFrames(
     execution = next;
   }
   const attack = execution;
-  let presented = 0;
+  let presented = openerFrames;
   let held = false;
   for (const command of presentedSinceOpener) {
     const timing = (command as { timing?: { minimumFrames: number; holdFrames?: number } }).timing;
@@ -3855,6 +3898,7 @@ export function projectBattleResolutionCommands(
   // off108: the opener print's event index and the command count after it.
   let pauseOpenerIndex: number | null = null;
   let pauseOpenerCommands = 0;
+  let pauseOpenerFrames = 0;
   const zeroHpBattlers = new Set<0 | 1>();
   const fieldArt = createBattleCommandFieldArtView(field);
   // `gBattlerPartyIndexes[battler]` (battle_message.c's `BufferStringBattle`
@@ -3974,12 +4018,14 @@ export function projectBattleResolutionCommands(
                   ?? (WAITMESSAGE_LONG_MESSAGE_IDS.has(payload.messageId)
                   ? WAITMESSAGE_LONG_TIMING
                   : MESSAGE_TIMING);
-                return focusPunchPrePassMessageTiming(events, index, base) ?? base;
+                return focusPunchPrePassMessageTiming(events, index, base) ?? chargeTurnEmptyBoxTiming(events, index) ?? base;
               })(),
       }));
       if (payload.messageId === "STRINGID_USEDMOVE" || payload.messageId === "STRINGID_EMPTYSTRING3") {
         pauseOpenerIndex = index;
         pauseOpenerCommands = commands.length;
+        // chg161: the charge-turn box starts on off108's G + 1 (a USEDMOVE ends on G), so the Scene OFF pause counts it.
+        pauseOpenerFrames = chargeTurnEmptyBoxTiming(events, index)?.minimumFrames ?? 0;
       }
       pendingStatusMessageBattler = null;
       pendingHeldItemEffectBattler = null;
@@ -4066,7 +4112,7 @@ export function projectBattleResolutionCommands(
         // controller-specific presentation; Scene OFF still runs
         // BattleScript_Pausex20 for it (off108, ISSUES #167).
         const pause = payload.animationId === "SCENE_OFF_ATTACK_PAUSE"
-          ? sceneOffNoHitPauseFrames(events, index, pauseOpenerIndex, commands.slice(pauseOpenerCommands))
+          ? sceneOffNoHitPauseFrames(events, index, pauseOpenerIndex, commands.slice(pauseOpenerCommands), pauseOpenerFrames)
           : null;
         if (pause !== null) {
           commands.push(Object.freeze({
