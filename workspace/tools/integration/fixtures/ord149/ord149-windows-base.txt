@@ -1,0 +1,28 @@
+pb-ord149-was-opp-143-42-5-s11-c0  ASTONISH   opponent -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-143-42-5-s11-c1  MEGA_PUNCH player   -              live=1 rows=159 exact=143 px=270496  r1==r2=1 entry=270496 lend=1
+pb-ord149-was-opp-143-42-5-s11-c2  ASTONISH   opponent -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-143-42-5-s11-c3  MEGA_PUNCH player   -              live=1 rows=160 exact=160 px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-143-42-5-s11-c4  ASTONISH   opponent -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-371-95-106-s7-c0 HARDEN     player   -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-371-95-106-s7-c1 ASTONISH   opponent -              live=1 rows=63  exact=61  px=9       r1==r2=1 entry=9 lend=1
+pb-ord149-was-opp-371-95-106-s7-c2 HARDEN     player   -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-371-95-106-s7-c3 ASTONISH   opponent -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-371-95-106-s7-c4 HARDEN     player   -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-371-95-106-s7-c5 ASTONISH   opponent -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-42-143-106-s0-c0 HARDEN     player   -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-42-143-106-s0-c1 HARDEN     player   -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-opp-42-143-106-s0-c2 HARDEN     player   -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-ply-143-42-5-s11-c0  MEGA_PUNCH opponent -              live=1 rows=160 exact=159 px=17984   r1==r2=1 entry=17984 lend=1
+pb-ord149-was-ply-143-42-5-s11-c1  ASTONISH   player   -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-ply-143-42-5-s11-c2  MEGA_PUNCH opponent -              live=1 rows=160 exact=160 px=0       r1==r2=1 entry=0 lend=0
+pb-ord149-was-ply-143-42-5-s11-c3  ASTONISH   player   -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=0 lend=0
+pb-ord149-was-ply-371-95-106-s7-c0 HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-ply-371-95-106-s7-c1 ASTONISH   player   -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-ply-371-95-106-s7-c2 HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=109067 lend=0
+pb-ord149-was-ply-371-95-106-s7-c3 ASTONISH   player   -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=34912 lend=0
+pb-ord149-was-ply-371-95-106-s7-c4 HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=109067 lend=0
+pb-ord149-was-ply-371-95-106-s7-c5 ASTONISH   player   -              live=1 rows=63  exact=63  px=0       r1==r2=1 entry=34912 lend=0
+pb-ord149-was-ply-42-143-106-s0-c0 HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+pb-ord149-was-ply-42-143-106-s0-c1 HARDEN     opponent -              live=1 rows=101 exact=101 px=0       r1==r2=1 entry=0 lend=1
+TOTAL all            windows=26 live=26 live-0px=23 r1==r2=26 lend==ROM=20
+TOTAL after-struggle windows=0 live=0 live-0px=0 r1==r2=0 lend==ROM=0
