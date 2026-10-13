@@ -1,0 +1,442 @@
+{
+ "inv142-love-opp": [
+  {
+   "X": 717,
+   "op": "status2animation",
+   "ptr": "0x82db32d",
+   "battler": 1,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 718,
+   "F": 814,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 12,
+   "changedPxMax": 498,
+   "firstVisibleRow": 717,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-love-opp-718.npz",
+   "invisible": false
+  },
+  {
+   "X": 1733,
+   "op": "status2animation",
+   "ptr": "0x82db32d",
+   "battler": 1,
+   "invisibleAtX": [
+    0,
+    1
+   ],
+   "spritesInUseAtX": 9,
+   "R": 1734,
+   "F": 1830,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 96,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 12,
+   "changedPxMax": 498,
+   "firstVisibleRow": 1937,
+   "visibleAfterF": 107,
+   "visibleBy": "moveend",
+   "dump": "inv142-love-opp-1734.npz",
+   "invisible": true
+  },
+  {
+   "X": 3167,
+   "op": "status2animation",
+   "ptr": "0x82db32d",
+   "battler": 1,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 3168,
+   "F": 3264,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 12,
+   "changedPxMax": 498,
+   "firstVisibleRow": 3167,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-love-opp-3168.npz",
+   "invisible": false
+  },
+  {
+   "X": 4601,
+   "op": "status2animation",
+   "ptr": "0x82db32d",
+   "battler": 1,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 4602,
+   "F": 4698,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 12,
+   "changedPxMax": 498,
+   "firstVisibleRow": 4601,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-love-opp-4602.npz",
+   "invisible": false
+  },
+  {
+   "X": 6035,
+   "op": "status2animation",
+   "ptr": "0x82db32d",
+   "battler": 1,
+   "invisibleAtX": [
+    0,
+    1
+   ],
+   "spritesInUseAtX": 9,
+   "R": 6036,
+   "F": 6132,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 96,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 12,
+   "changedPxMax": 498,
+   "firstVisibleRow": 6239,
+   "visibleAfterF": 107,
+   "visibleBy": "moveend",
+   "dump": "inv142-love-opp-6036.npz",
+   "invisible": true
+  },
+  {
+   "X": 7469,
+   "op": "status2animation",
+   "ptr": "0x82db32d",
+   "battler": 1,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 7470,
+   "F": 7566,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 12,
+   "changedPxMax": 498,
+   "firstVisibleRow": 7469,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-love-opp-7470.npz",
+   "invisible": false
+  }
+ ],
+ "inv142-love-ply": [
+  {
+   "X": 717,
+   "op": "status2animation",
+   "ptr": "0x82db32d",
+   "battler": 0,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 718,
+   "F": 814,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 12,
+   "changedPxMax": 698,
+   "firstVisibleRow": 717,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-love-ply-718.npz",
+   "invisible": false
+  },
+  {
+   "X": 1401,
+   "op": "status2animation",
+   "ptr": "0x82db32d",
+   "battler": 0,
+   "invisibleAtX": [
+    1,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 1402,
+   "F": 1498,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 96,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 12,
+   "changedPxMax": 698,
+   "firstVisibleRow": 1601,
+   "visibleAfterF": 103,
+   "visibleBy": "moveend",
+   "dump": "inv142-love-ply-1402.npz",
+   "invisible": true
+  },
+  {
+   "X": 3171,
+   "op": "status2animation",
+   "ptr": "0x82db32d",
+   "battler": 0,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 3172,
+   "F": 3268,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 12,
+   "changedPxMax": 698,
+   "firstVisibleRow": 3171,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-love-ply-3172.npz",
+   "invisible": false
+  }
+ ],
+ "inv142-yawn-opp": [
+  {
+   "X": 3371,
+   "op": "statusanimation",
+   "ptr": "0x82db378",
+   "battler": 1,
+   "invisibleAtX": [
+    0,
+    1
+   ],
+   "spritesInUseAtX": 9,
+   "R": 3372,
+   "F": 3468,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 96,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 11,
+   "changedPxMax": 259,
+   "firstVisibleRow": 3564,
+   "visibleAfterF": 96,
+   "visibleBy": "makevisible",
+   "dump": "inv142-yawn-opp-3372.npz",
+   "invisible": true
+  },
+  {
+   "X": 4444,
+   "op": "statusanimation",
+   "ptr": "0x82db219",
+   "battler": 1,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 4445,
+   "F": 4541,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 11,
+   "changedPxMax": 259,
+   "firstVisibleRow": 4444,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-yawn-opp-4445.npz",
+   "invisible": false
+  },
+  {
+   "X": 5878,
+   "op": "statusanimation",
+   "ptr": "0x82db219",
+   "battler": 1,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 5879,
+   "F": 5975,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 11,
+   "changedPxMax": 259,
+   "firstVisibleRow": 5878,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-yawn-opp-5879.npz",
+   "invisible": false
+  }
+ ],
+ "inv142-yawn-ply": [
+  {
+   "X": 1937,
+   "op": "statusanimation",
+   "ptr": "0x82db378",
+   "battler": 0,
+   "invisibleAtX": [
+    1,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 1938,
+   "F": 2034,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 96,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 11,
+   "changedPxMax": 293,
+   "firstVisibleRow": 2126,
+   "visibleAfterF": 92,
+   "visibleBy": "makevisible",
+   "dump": "inv142-yawn-ply-1938.npz",
+   "invisible": true
+  },
+  {
+   "X": 3006,
+   "op": "statusanimation",
+   "ptr": "0x82db219",
+   "battler": 0,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 3007,
+   "F": 3103,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 11,
+   "changedPxMax": 293,
+   "firstVisibleRow": 3006,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-yawn-ply-3007.npz",
+   "invisible": false
+  },
+  {
+   "X": 4440,
+   "op": "statusanimation",
+   "ptr": "0x82db219",
+   "battler": 0,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 4441,
+   "F": 4537,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 11,
+   "changedPxMax": 293,
+   "firstVisibleRow": 4440,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-yawn-ply-4441.npz",
+   "invisible": false
+  },
+  {
+   "X": 5874,
+   "op": "statusanimation",
+   "ptr": "0x82db219",
+   "battler": 0,
+   "invisibleAtX": [
+    0,
+    0
+   ],
+   "spritesInUseAtX": 9,
+   "R": 5875,
+   "F": 5971,
+   "gate": 0,
+   "activeRows": 96,
+   "battlerInvisibleRows": 0,
+   "battlerX2": [
+    0,
+    0
+   ],
+   "spritesInUseMax": 11,
+   "changedPxMax": 293,
+   "firstVisibleRow": 5874,
+   "visibleAfterF": -97,
+   "visibleBy": "waitmessage",
+   "dump": "inv142-yawn-ply-5875.npz",
+   "invisible": false
+  }
+ ]
+}
