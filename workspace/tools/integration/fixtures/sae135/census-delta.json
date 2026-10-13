@@ -1,0 +1,95 @@
+{
+ "shards": {
+  "0": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "1": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "2": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "3": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "4": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "5": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "6": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "7": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "8": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  },
+  "9": {
+   "battleDigestExcludingFrames": true,
+   "battleDigest": true,
+   "battleFrames": true,
+   "commandDigest": true
+  }
+ },
+ "moveRecords": 27403,
+ "keyMismatches": 0,
+ "frameChanges": 0,
+ "statusChanges": [],
+ "liveFrameChanges": 0,
+ "declineChanges": 0,
+ "battleMismatches": 0,
+ "segmentMismatches": 0,
+ "totals": {
+  "base.live": 27187,
+  "base.commands": 27368,
+  "base.liveFrames": 4137884,
+  "base.frames": 4154509,
+  "final.live": 27187,
+  "final.commands": 27368,
+  "final.liveFrames": 4137884,
+  "final.frames": 4154509,
+  "base.statusAnimationCommands": 8063,
+  "base.battleFrames": 15915831,
+  "final.statusAnimationCommands": 8063,
+  "final.battleFrames": 15915831
+ },
+ "allShardDigestsSame": {
+  "battleDigestExcludingFrames": true,
+  "battleDigest": true,
+  "battleFrames": true,
+  "commandDigest": true
+ },
+ "verdict": {
+  "zeroFrameChanges": true
+ }
+}
