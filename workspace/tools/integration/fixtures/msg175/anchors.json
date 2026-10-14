@@ -1,0 +1,941 @@
+{
+ "schema": "msg175-anchors/v1",
+ "durations": [
+  {
+   "scenario": "off108-bulk-up-ply-primeape-onix",
+   "scene": "on",
+   "mv": 339,
+   "romRows": 21,
+   "L": 21,
+   "text": "PRIMEAPE used\\nBULK UP!"
+  },
+  {
+   "scenario": "off108-bulk-up-ply-primeape-onix",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-bulk-up-ply-primeape-onix",
+   "scene": "off",
+   "mv": 339,
+   "romRows": 21,
+   "L": 21,
+   "text": "PRIMEAPE used\\nBULK UP!"
+  },
+  {
+   "scenario": "off108-bulk-up-ply-primeape-onix",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-double-team-ply-primeape-onix",
+   "scene": "on",
+   "mv": 104,
+   "romRows": 25,
+   "L": 25,
+   "text": "PRIMEAPE used\\nDOUBLE TEAM!"
+  },
+  {
+   "scenario": "off108-double-team-ply-primeape-onix",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-double-team-ply-primeape-onix",
+   "scene": "off",
+   "mv": 104,
+   "romRows": 25,
+   "L": 25,
+   "text": "PRIMEAPE used\\nDOUBLE TEAM!"
+  },
+  {
+   "scenario": "off108-double-team-ply-primeape-onix",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-sand-attack-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 28,
+   "romRows": 25,
+   "L": 25,
+   "text": "PRIMEAPE used\\nSAND-ATTACK!"
+  },
+  {
+   "scenario": "off108-sand-attack-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-sand-attack-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 28,
+   "romRows": 25,
+   "L": 25,
+   "text": "PRIMEAPE used\\nSAND-ATTACK!"
+  },
+  {
+   "scenario": "off108-sand-attack-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-confuse-ray-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 109,
+   "romRows": 25,
+   "L": 25,
+   "text": "PRIMEAPE used\\nCONFUSE RAY!"
+  },
+  {
+   "scenario": "off108-confuse-ray-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 109,
+   "romRows": 25,
+   "L": 25,
+   "text": "PRIMEAPE used\\nCONFUSE RAY!"
+  },
+  {
+   "scenario": "off108-confuse-ray-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off108-toxic-ply-primeape-onix",
+   "scene": "on",
+   "mv": 92,
+   "romRows": 19,
+   "L": 19,
+   "text": "PRIMEAPE used\\nTOXIC!"
+  },
+  {
+   "scenario": "off108-toxic-ply-primeape-onix",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-toxic-ply-primeape-onix",
+   "scene": "off",
+   "mv": 92,
+   "romRows": 19,
+   "L": 19,
+   "text": "PRIMEAPE used\\nTOXIC!"
+  },
+  {
+   "scenario": "off108-toxic-ply-primeape-onix",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-thunder-wave-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 86,
+   "romRows": 26,
+   "L": 26,
+   "text": "PRIMEAPE used\\nTHUNDER WAVE!"
+  },
+  {
+   "scenario": "off108-thunder-wave-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off108-thunder-wave-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 86,
+   "romRows": 26,
+   "L": 26,
+   "text": "PRIMEAPE used\\nTHUNDER WAVE!"
+  },
+  {
+   "scenario": "off108-thunder-wave-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off108-protect-ply-primeape-onix",
+   "scene": "on",
+   "mv": 182,
+   "romRows": 21,
+   "L": 21,
+   "text": "PRIMEAPE used\\nPROTECT!"
+  },
+  {
+   "scenario": "off108-protect-ply-primeape-onix",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-protect-ply-primeape-onix",
+   "scene": "off",
+   "mv": 182,
+   "romRows": 21,
+   "L": 21,
+   "text": "PRIMEAPE used\\nPROTECT!"
+  },
+  {
+   "scenario": "off108-protect-ply-primeape-onix",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-detect-ply-primeape-onix",
+   "scene": "on",
+   "mv": 197,
+   "romRows": 20,
+   "L": 20,
+   "text": "PRIMEAPE used\\nDETECT!"
+  },
+  {
+   "scenario": "off108-detect-ply-primeape-onix",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-detect-ply-primeape-onix",
+   "scene": "off",
+   "mv": 197,
+   "romRows": 20,
+   "L": 20,
+   "text": "PRIMEAPE used\\nDETECT!"
+  },
+  {
+   "scenario": "off108-detect-ply-primeape-onix",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-rest-ply-snorlax-onix",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-rest-ply-snorlax-onix",
+   "scene": "on",
+   "mv": 156,
+   "romRows": 17,
+   "L": 17,
+   "text": "SNORLAX used\\nREST!"
+  },
+  {
+   "scenario": "off108-rest-ply-snorlax-onix",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-rest-ply-snorlax-onix",
+   "scene": "off",
+   "mv": 156,
+   "romRows": 17,
+   "L": 17,
+   "text": "SNORLAX used\\nREST!"
+  },
+  {
+   "scenario": "off108-dig-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-dig-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 91,
+   "romRows": 17,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off108-dig-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-dig-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-dig-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 91,
+   "romRows": 17,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off108-dig-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-razor-wind-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-razor-wind-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 13,
+   "romRows": 24,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off108-razor-wind-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-razor-wind-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-razor-wind-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 13,
+   "romRows": 24,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off108-razor-wind-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-solar-beam-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-solar-beam-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 76,
+   "romRows": 23,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off108-solar-beam-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-solar-beam-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-solar-beam-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 76,
+   "romRows": 23,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off108-solar-beam-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-snore-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 173,
+   "romRows": 19,
+   "L": 19,
+   "text": "PRIMEAPE used\\nSNORE!"
+  },
+  {
+   "scenario": "off108-snore-ply-primeape-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-snore-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 173,
+   "romRows": 19,
+   "L": 19,
+   "text": "PRIMEAPE used\\nSNORE!"
+  },
+  {
+   "scenario": "off108-snore-ply-primeape-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-dynamic-punch-ply-machamp-snorlax",
+   "scene": "on",
+   "mv": 223,
+   "romRows": 25,
+   "L": 25,
+   "text": "MACHAMP used\\nDYNAMICPUNCH!"
+  },
+  {
+   "scenario": "off108-dynamic-punch-ply-machamp-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-dynamic-punch-ply-machamp-snorlax",
+   "scene": "off",
+   "mv": 223,
+   "romRows": 25,
+   "L": 25,
+   "text": "MACHAMP used\\nDYNAMICPUNCH!"
+  },
+  {
+   "scenario": "off108-dynamic-punch-ply-machamp-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-dynamic-punch-opp-machamp-snorlax",
+   "scene": "on",
+   "mv": 223,
+   "romRows": 29,
+   "L": 29,
+   "text": "Foe MACHAMP used\\nDYNAMICPUNCH!"
+  },
+  {
+   "scenario": "off108-dynamic-punch-opp-machamp-snorlax",
+   "scene": "on",
+   "mv": 33,
+   "romRows": 19,
+   "L": 19,
+   "text": "SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off108-dynamic-punch-opp-machamp-snorlax",
+   "scene": "off",
+   "mv": 223,
+   "romRows": 29,
+   "L": 29,
+   "text": "Foe MACHAMP used\\nDYNAMICPUNCH!"
+  },
+  {
+   "scenario": "off108-dynamic-punch-opp-machamp-snorlax",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 19,
+   "L": 19,
+   "text": "SNORLAX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off148-curse-ply",
+   "scene": "off",
+   "mv": 174,
+   "romRows": 19,
+   "L": 19,
+   "text": "PRIMEAPE used\\nCURSE!"
+  },
+  {
+   "scenario": "off148-curse-ply",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off148-curse-opp",
+   "scene": "off",
+   "mv": 174,
+   "romRows": 23,
+   "L": 23,
+   "text": "Foe PRIMEAPE used\\nCURSE!"
+  },
+  {
+   "scenario": "off148-curse-opp",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 16,
+   "L": 16,
+   "text": "ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off148-swagger-ply",
+   "scene": "off",
+   "mv": 207,
+   "romRows": 21,
+   "L": 21,
+   "text": "PRIMEAPE used\\nSWAGGER!"
+  },
+  {
+   "scenario": "off148-swagger-ply",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off148-flatter-ply",
+   "scene": "off",
+   "mv": 260,
+   "romRows": 21,
+   "L": 21,
+   "text": "PRIMEAPE used\\nFLATTER!"
+  },
+  {
+   "scenario": "off148-flatter-ply",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": null,
+   "text": null
+  },
+  {
+   "scenario": "off148-agility-ply",
+   "scene": "off",
+   "mv": 97,
+   "romRows": 21,
+   "L": 21,
+   "text": "PRIMEAPE used\\nAGILITY!"
+  },
+  {
+   "scenario": "off148-agility-ply",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off148-wish-ply",
+   "scene": "off",
+   "mv": 273,
+   "romRows": 18,
+   "L": 18,
+   "text": "PRIMEAPE used\\nWISH!"
+  },
+  {
+   "scenario": "off148-wish-ply",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off148-wish-opp",
+   "scene": "off",
+   "mv": 273,
+   "romRows": 22,
+   "L": 22,
+   "text": "Foe PRIMEAPE used\\nWISH!"
+  },
+  {
+   "scenario": "off148-wish-opp",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 16,
+   "L": 16,
+   "text": "ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off148-roar-ply",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 20,
+   "L": 20,
+   "text": "Foe ONIX used\\nTACKLE!"
+  },
+  {
+   "scenario": "off148-roar-ply",
+   "scene": "off",
+   "mv": 46,
+   "romRows": 18,
+   "L": 18,
+   "text": "PRIMEAPE used\\nROAR!"
+  },
+  {
+   "scenario": "off148-baton-pass-opp",
+   "scene": "off",
+   "mv": 226,
+   "romRows": 28,
+   "L": 28,
+   "text": "Foe PRIMEAPE used\\nBATON PASS!"
+  },
+  {
+   "scenario": "off148-baton-pass-opp",
+   "scene": "off",
+   "mv": 33,
+   "romRows": 16,
+   "L": 16,
+   "text": "ONIX used\\nTACKLE!"
+  }
+ ],
+ "edges": [
+  {
+   "scenario": "off108-bulk-up-ply-primeape-onix",
+   "scene": "on",
+   "class": "stat",
+   "L1": 21,
+   "rom": 409,
+   "production": 393,
+   "residual": -16,
+   "oldResidual": -13
+  },
+  {
+   "scenario": "off108-bulk-up-ply-primeape-onix",
+   "scene": "off",
+   "class": "stat",
+   "L1": 21,
+   "rom": 332,
+   "production": 320,
+   "residual": -12,
+   "oldResidual": -9
+  },
+  {
+   "scenario": "off108-double-team-ply-primeape-onix",
+   "scene": "on",
+   "class": "stat",
+   "L1": 25,
+   "rom": 375,
+   "production": 358,
+   "residual": -17,
+   "oldResidual": -17
+  },
+  {
+   "scenario": "off108-double-team-ply-primeape-onix",
+   "scene": "off",
+   "class": "stat",
+   "L1": 25,
+   "rom": 247,
+   "production": 235,
+   "residual": -12,
+   "oldResidual": -12
+  },
+  {
+   "scenario": "off108-sand-attack-ply-primeape-snorlax",
+   "scene": "on",
+   "class": "stat",
+   "L1": 25,
+   "rom": 276,
+   "production": 258,
+   "residual": -18,
+   "oldResidual": -18
+  },
+  {
+   "scenario": "off108-sand-attack-ply-primeape-snorlax",
+   "scene": "off",
+   "class": "stat",
+   "L1": 25,
+   "rom": 248,
+   "production": 236,
+   "residual": -12,
+   "oldResidual": -12
+  },
+  {
+   "scenario": "off108-toxic-ply-primeape-onix",
+   "scene": "on",
+   "class": "status",
+   "L1": 19,
+   "rom": 451,
+   "production": 414,
+   "residual": -37,
+   "oldResidual": -32
+  },
+  {
+   "scenario": "off108-toxic-ply-primeape-onix",
+   "scene": "off",
+   "class": "status",
+   "L1": 19,
+   "rom": 180,
+   "production": 162,
+   "residual": -18,
+   "oldResidual": -13
+  },
+  {
+   "scenario": "off108-protect-ply-primeape-onix",
+   "scene": "on",
+   "class": "protect",
+   "L1": 21,
+   "rom": 254,
+   "production": 239,
+   "residual": -15,
+   "oldResidual": -12
+  },
+  {
+   "scenario": "off108-protect-ply-primeape-onix",
+   "scene": "off",
+   "class": "protect",
+   "L1": 21,
+   "rom": 162,
+   "production": 150,
+   "residual": -12,
+   "oldResidual": -9
+  },
+  {
+   "scenario": "off108-detect-ply-primeape-onix",
+   "scene": "on",
+   "class": "protect",
+   "L1": 20,
+   "rom": 240,
+   "production": 225,
+   "residual": -15,
+   "oldResidual": -11
+  },
+  {
+   "scenario": "off108-detect-ply-primeape-onix",
+   "scene": "off",
+   "class": "protect",
+   "L1": 20,
+   "rom": 161,
+   "production": 149,
+   "residual": -12,
+   "oldResidual": -8
+  },
+  {
+   "scenario": "off108-rest-ply-snorlax-onix",
+   "scene": "on",
+   "class": "rest",
+   "L1": 20,
+   "rom": 135,
+   "production": 117,
+   "residual": -18,
+   "oldResidual": -14
+  },
+  {
+   "scenario": "off108-rest-ply-snorlax-onix",
+   "scene": "off",
+   "class": "rest",
+   "L1": 20,
+   "rom": 124,
+   "production": 127,
+   "residual": 3,
+   "oldResidual": 7
+  },
+  {
+   "scenario": "off108-snore-ply-primeape-snorlax",
+   "scene": "on",
+   "class": "failed",
+   "L1": 19,
+   "rom": 148,
+   "production": 146,
+   "residual": -2,
+   "oldResidual": 3
+  },
+  {
+   "scenario": "off108-snore-ply-primeape-snorlax",
+   "scene": "off",
+   "class": "failed",
+   "L1": 19,
+   "rom": 148,
+   "production": 146,
+   "residual": -2,
+   "oldResidual": 3
+  },
+  {
+   "scenario": "off108-dynamic-punch-ply-machamp-snorlax",
+   "scene": "on",
+   "class": "miss",
+   "L1": 25,
+   "rom": 162,
+   "production": 151,
+   "residual": -11,
+   "oldResidual": -11
+  },
+  {
+   "scenario": "off108-dynamic-punch-ply-machamp-snorlax",
+   "scene": "off",
+   "class": "miss",
+   "L1": 25,
+   "rom": 162,
+   "production": 151,
+   "residual": -11,
+   "oldResidual": -11
+  },
+  {
+   "scenario": "off108-dynamic-punch-opp-machamp-snorlax",
+   "scene": "on",
+   "class": "miss",
+   "L1": 29,
+   "rom": 170,
+   "production": 158,
+   "residual": -12,
+   "oldResidual": -12
+  },
+  {
+   "scenario": "off108-dynamic-punch-opp-machamp-snorlax",
+   "scene": "off",
+   "class": "miss",
+   "L1": 29,
+   "rom": 170,
+   "production": 158,
+   "residual": -12,
+   "oldResidual": -12
+  },
+  {
+   "scenario": "off148-curse-ply",
+   "scene": "off",
+   "class": "stat-stage",
+   "L1": 19,
+   "rom": 341,
+   "production": 331,
+   "residual": -10,
+   "oldResidual": -5
+  },
+  {
+   "scenario": "off148-curse-opp",
+   "scene": "off",
+   "class": "stat-stage",
+   "L1": 23,
+   "rom": 357,
+   "production": 341,
+   "residual": -16,
+   "oldResidual": -15
+  },
+  {
+   "scenario": "off148-agility-ply",
+   "scene": "off",
+   "class": "control-stats-change",
+   "L1": 21,
+   "rom": 259,
+   "production": 247,
+   "residual": -12,
+   "oldResidual": -9
+  },
+  {
+   "scenario": "off148-wish-ply",
+   "scene": "off",
+   "class": "sprite-visibility",
+   "L1": 18,
+   "rom": 68,
+   "production": 68,
+   "residual": 0,
+   "oldResidual": 6
+  },
+  {
+   "scenario": "off148-wish-opp",
+   "scene": "off",
+   "class": "sprite-visibility",
+   "L1": 22,
+   "rom": 72,
+   "production": 72,
+   "residual": 0,
+   "oldResidual": 2
+  },
+  {
+   "scenario": "off148-roar-ply",
+   "scene": "off",
+   "class": "sprite-visibility",
+   "L1": 20,
+   "rom": 125,
+   "production": 127,
+   "residual": 2,
+   "oldResidual": 6
+  },
+  {
+   "scenario": "off148-baton-pass-opp",
+   "scene": "off",
+   "class": "sprite-visibility",
+   "L1": 28,
+   "rom": 223,
+   "production": 155,
+   "residual": -68,
+   "oldResidual": -68
+  }
+ ]
+}
