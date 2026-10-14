@@ -57,6 +57,8 @@ if [[ "$POKEBENCH_ARCH" == aarch64 ]]; then
   require_equal reference-elf-sha256 "$POKEBENCH_REFERENCE_ELF_SHA256" "$(sha256sum "${VENDOR_ROOT}/pokeemerald/pokeemerald.elf" | awk '{print $1}')"
   require_equal reference-map-sha256 "$POKEBENCH_REFERENCE_MAP_SHA256" "$(sha256sum "${VENDOR_ROOT}/pokeemerald/pokeemerald.map" | awk '{print $1}')"
   require_equal bindings-commit "$POKEBENCH_LIBMGBA_PY_COMMIT" "$(git -C "${VENDOR_ROOT}/libmgba-py-src" rev-parse HEAD)"
+  (cd "${VENDOR_ROOT}/pokeemerald" && sha256sum --check "${SCRIPT_DIR}/reference-assets.sha256")
+  echo "ok native reference assets"
 fi
 
 PYTHONPATH="${VENDOR_ROOT}/libmgba-py" "${VENDOR_ROOT}/mgba-venv/bin/python" -c 'import cffi, mgba, PIL'

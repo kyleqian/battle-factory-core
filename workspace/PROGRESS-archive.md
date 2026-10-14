@@ -1,3 +1,22 @@
+## 2026-10-13 — fpp150: #139 Focus Punch pre-pass — kernel + Scene OFF / ON timing + drawn general animation (main/ts)
+
+- **State:** local master, production src `d44b83144` (kernel) + `49c6c7c7b` (presentation / render). verify-rcp143-r4 **PASS**
+  (pin flipped). R4 anchors == ROM in both scenes (empty box 72; focus glyph 109 / 199; foe's glyph 215 / 305). fps147's 7 Scene ON
+  windows **0 px through the production render** (controls 0 / 7). Census 0..999 27,196 / 27,016 live (unchanged).
+- **Did:** the kernel runs BattleScript_FocusPunchSetUp before action 1 (index order; sleep / Truant guards; no RNG). The presentation
+  adds a `general-animation` command (124 frames; 3 behind a Substitute). Pre-pass prints: empty box = interpreter rows + 1
+  (ON 3 / OFF 37); focus print + 11-frame action lead. The handoff ends at stop-bounce-request. The render draws the fps147 reducer
+  (`generalAnimationRenderView`). x2 history zeroes the attacker. The census reports general animations apart.
+- **Ripple:** census: 36 battles frames-only (+20,848). All 36 attributed: alone == after, and == base with the pre-pass off.
+  100 general animations (opp 65 / player 35). Differential 641 / 641 byte-identical. Tests moved: rcp143 R4 pin, fps147 "unwired" pin.
+- **Next:** #139 remainder (voluntary-switch recall order; two-user / other-prologue leads unprobed). Charge-turn EMPTYSTRING3
+  (#167 sentence kept): needs a dense charge-turn card per scene + an anchor run like `fpp150Anchors.ts` (doc §4).
+- **Notes:** gates on the final tree: typecheck 0, smoke 448, full `npm test` (4 shards) 1,663 files / 13,822 tests passed, 0 failed
+  (44 / 223 skipped), build OK; soak vanilla 0:20 20 / 20 OK, per-seed lines identical to thr153 (`b4 t0`). core-rs: no port (not edited).
+  Docs `docs/fpp150-focus-punch-prepass.md`; scratch `.integration/validation/fpp150/`.
+
+---
+
 ## 2026-10-13 — thr153: #141a THRASH / OUTRAGE / PETAL DANCE lock-in re-run RE-LANDED (ISSUES #141 FIXED; main/ts gameplay)
 
 - **State:** local master; F1 `0f9b5301e` re-applied (cherry-pick) + 8 attributed re-pins. verify-rcp143 R1 / R2 / R3 /

@@ -7,6 +7,14 @@
 > `ANIMATION_INTEGRATION_PROGRESS.md` before continuing. Archived refs/logs and
 > unfinished work are local; do not recreate a server or remote workers.
 
+> **2026-10-13 exception, user requested:** a CAX31 ARM runner is set up
+> and validated (`docs/cax31-arm-runner.md`). This supersedes the server-creation
+> prohibition for that host. The Mac remains canonical and its current run
+> continues. When work is explicitly assigned to this runner, its checkout is
+> `/srv/pokebench/pokeemerald-factory-core/workspace`; use the assigned branch
+> and one writer per checkout. Do not revive old timers or start a duplicate
+> main campaign as part of setup. No GitHub pushes are authorized.
+
 A native-TypeScript browser reproduction of **Pokémon Emerald's Battle
 Factory**: the rental-draft + 7-battle challenge loop of the Battle Frontier
 facility, matching the real game's pixels and behavior frame-by-frame. This

@@ -74,7 +74,9 @@ apt-get install -y --no-install-recommends \
   python3 \
   python3-dev \
   python3-venv \
+  ripgrep \
   rsync \
+  tmux \
   unzip \
   xz-utils \
   zlib1g-dev
@@ -252,6 +254,9 @@ build_reference_rom() {
     for artifact in pokeemerald.gba pokeemerald.elf pokeemerald.map; do
       install -m 644 -o "$RUNNER_USER" -g "$RUNNER_USER" "${artifacts}/${artifact}" "${emerald_root}/${artifact}"
     done
+    # Source extractors consume generated maps, graphics and MIDI assembly.
+    # Build them natively without relinking the verified ROM/ELF/map.
+    runuser -u "$RUNNER_USER" -- bash "${SCRIPT_DIR}/prepare-reference-assets.sh" "$emerald_root" "$JOBS"
     return
   fi
   runuser -u "$RUNNER_USER" -- bash -lc "cd '$agbcc_root' && ./build.sh && ./install.sh '$emerald_root'"
@@ -309,6 +314,6 @@ prepare_repository
 runner_home="$(getent passwd "$RUNNER_USER" | cut -d: -f6)"
 runuser -u "$RUNNER_USER" -- env \
   HOME="$runner_home" \
-  PATH="${runner_home}/.local/bin:${runner_home}/.cargo/bin:/usr/local/bin:/usr/bin:/bin" \
+  PATH="${SCRIPT_DIR}/bin:${runner_home}/.local/bin:${runner_home}/.cargo/bin:/usr/local/bin:/usr/bin:/bin" \
   "${SCRIPT_DIR}/verify-runner.sh" --skip-baselines
 echo "bootstrap-ubuntu: reproducible dependencies and oracle smoke checks passed"
