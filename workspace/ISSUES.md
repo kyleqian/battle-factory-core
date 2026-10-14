@@ -166,21 +166,16 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   frame early vs the party-HP write); Sky Uppercut with a COMBUSKEN attacker measured d = 0 vs the
   table's 1; Dream Eater / Sleep Talk swaps not harness-staged (table from the ROM d values only).
 
-## #146 — Switch-out / send-in presentation remainder (S10A, found 2026-10-05; Scene ON opponent send-in tail + front animation FIXED 2026-10-13)
+## #146 — Switch-out / send-in presentation remainder (S10A, found 2026-10-05; most tails FIXED 2026-10-13)
 
-- **Fixed 2026-10-13:** snd145 (species-keyed Scene ON opponent healthbox slide + next-command start for every send-in; send-in fade +
-  particles keyed to every switch-in; docs/snd145-send-in-tail-live.md) and fra151 (Scene ON opponent send-in draws the species front
-  animation: 12 snd145 windows + 56 / 57 more species 0 px; docs/fra151-front-send-in-animation.md). Scene ON forced switch-out fixed
-  2026-10-05 (`634207ed8`).
-- **Open (offs152 in flight 2026-10-13):** (1) Scene OFF send-in tail: the ROM slides the opponent healthbox at el 36 and prints at ~62,
-  production 33 / 102 (68 rows per window; cry-bound species unmeasured); (2) Scene OFF forced switch-out after Roar / Whirlwind / Baton
-  Pass is still the 32-frame recall chain (ROM: one-row removal, `Cmd_returntoball` skipAnim); (3) Scene ON genderless species (37 not in
-  the snd145 sweep; LUNATONE / MAGNEMITE / STARYU / SOLROCK slide + message earlier than the ROM); (4) SOLROCK's affine rotation not read
-  (170,860 px).
-- **Open (not in flight):** player-side back send-out animations and battle-start intro send-outs (Scene ON; fra151 doc says what they
-  need); shiny send-ins; PONYTA glow mid-frame palette row (D4 class, 616 px); TYPHLOSION faint-path slide lag frame (D4); the faint-path
-  blank row one frame late; opponent-attacker Roar player-side ball-throw path (6,718 px); the elevated-attacker post-body field
-  difference (1,444 px, untriaged).
+- **Fixed:** snd145 / fra151 (Scene ON opponent send-in tail + front animation), offs152 (Scene OFF opponent send-in tail, Scene OFF
+  forced switch-out one-row removal, Scene ON genderless / male-only tails, SOLROCK matrix; docs/offs152-scene-off-send-in-tail.md),
+  plr162 (Scene OFF forced player send-in: slide 65, print max(91, cry + 66); docs/plr162-player-forced-send-in.md, folded 2026-10-14).
+- **Open:** Scene ON forced player send-in message (it also waits for the attacker's Roar cry; 205 / 339 species later than
+  max(91, cry + 66)); player faint-replacement send-in (same controller, unmeasured); player-side back send-out animations and
+  battle-start intro send-outs (Scene ON; fra151 doc says what they need); shiny send-ins; CRY_MODE_WEAK send-ins; PONYTA glow
+  mid-frame palette row (D4 class, 616 px); TYPHLOSION faint-path slide lag frame (D4); the faint-path blank row one frame late;
+  opponent-attacker Roar player-side ball-throw path (6,718 px); the elevated-attacker post-body field difference (1,444 px, untriaged).
 
 ## #145 — Live-adapter species audit: residual remainder (S10A; 7 defects FIXED 2026-10-05)
 
