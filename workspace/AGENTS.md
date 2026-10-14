@@ -9,8 +9,8 @@
 
 > **2026-10-13 exception, user requested:** a CAX31 ARM runner is set up
 > and validated (`docs/cax31-arm-runner.md`). This supersedes the server-creation
-> prohibition for that host. The Mac remains canonical and its current run
-> continues. When work is explicitly assigned to this runner, its checkout is
+> prohibition for that host. The Mac remains canonical; its last run ended at
+> the 10-hour cap. When work is explicitly assigned to this runner, its checkout is
 > `/srv/pokebench/pokeemerald-factory-core/workspace`; use the assigned branch
 > and one writer per checkout. Do not revive old timers or start a duplicate
 > main campaign as part of setup. No GitHub pushes are authorized.

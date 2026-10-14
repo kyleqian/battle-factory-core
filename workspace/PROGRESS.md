@@ -9,15 +9,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** separate `codex/cax31-arm-setup` branch from game snapshot `b3e988d67`,
   plus the Mac's committed charge-turn test re-pins `36b23e98c`; no new game code.
-  Helsinki CAX31 provisioned, native setup `42bced813`. Mac work remains canonical.
+  Helsinki CAX31 provisioned, native setup `42bced813`. Mac work remains canonical;
+  its last supervisor ended at the 10-hour cap. No project run is active.
 - **Did:** native ARM Node/mGBA/Python/Rust setup; both oracle hashes match, and two
   fresh stock-ROM rcp143 R1 probes reproduce the committed battle/RNG receipt.
   Typecheck, 448 smoke tests, Rust tests and WASM build/adapter checks passed;
   all 9,550 native-generated reference data targets == Mac SHA256;
   13,878 TypeScript cases verified (full run + 25 files / 174 cases retested
   after Mac test pins, reference asset generation and GNU tar PATH fixes); build passed.
-- **Next:** fresh Claude login; sync newer
-  Mac commits before assigning a remote campaign. No timers or duplicate run started.
+  Fresh Claude Max login completed; CLI upgraded to 2.1.280 (required by Opus 5.5);
+  Opus 5.5 and Sonnet 5.5 no-tools inference probes passed.
+- **Next:** verify/merge the Mac's saved Encore/locked-move and forced player
+  switch-in worker branches; sync newer game commits before assigning a remote
+  campaign. No timers or duplicate run started.
 - **Notes:** `docs/cax31-arm-runner.md` records access, validation and limits;
   raw receipts/logs are ignored under `.integration/validation/cax31-arm-20261013/`.
 

@@ -1,7 +1,8 @@
 # CAX31 ARM runner
 
 The user requested this setup on 2026-10-13. It is a separate validation
-runner; the current Mac run continues and remains canonical.
+runner; the Mac remains canonical. Its last supervisor run ended at the
+10-hour cap. No project run is active on this server.
 
 ## Host and access
 
@@ -32,7 +33,7 @@ known-hosts file. Without the alias, pass
 
 Setup commit `42bced813` adds native ARM support to the Ubuntu bootstrap.
 Node 22.22.3 ARM64 is checked against its published SHA256. Codex 0.160.0,
-Claude Code 2.1.251 and Rust 1.97.1 are installed. mGBA 0.10.5 and the pinned
+Claude Code 2.1.280 and Rust 1.97.1 are installed. mGBA 0.10.5 and the pinned
 libmgba-py fork are compiled natively, with a generated build-path shim only.
 Reference source and ROM/ELF/map hashes remain unchanged; native dependencies
 are not restored from the old x86 filesystem archive.
@@ -61,8 +62,11 @@ Verification:
   44 files / 223 cases. No production game code was changed for these fixes.
 
 - Production build passed (typecheck + Vite; Vite phase 27.45s).
-Claude requires a fresh browser login before Opus/Sonnet runs; Codex login is
-optional for the current Claude default. Do not copy Mac provider credentials.
+Fresh Claude Max login is complete. No-tools inference probes return `READY`
+with `is_error=false` for both `claude-opus-5-5` and `claude-sonnet-5-5`.
+The earlier Opus request was rejected because Claude Code 2.1.251 was too old;
+the required 2.1.280 upgrade resolved it. Codex login is optional for the
+current Claude default. Do not copy Mac provider credentials.
 
 Receipts/logs on the VM are under
 `workspace/.integration/validation/cax31-arm-20261013/`; bootstrap log:
@@ -87,5 +91,5 @@ cd /srv/pokebench/pokeemerald-factory-core/workspace
 
 Ripgrep and tmux are installed. When a run is assigned, launch it inside
 tmux so an SSH disconnect does not kill the supervisor. The checkout retains
-the existing Opus 5.5 supervisor / Sonnet 5.5 worker defaults. Provider login
-must be completed before launching it.
+the existing Opus 5.5 supervisor / Sonnet 5.5 worker defaults. Claude is
+authenticated and ready for an assigned run.
