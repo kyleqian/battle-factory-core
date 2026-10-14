@@ -24,15 +24,6 @@ may change gameplay/RNG when proved against source; use main-lane ownership
 and gameplay gates. Historical presentation-only exclusions are superseded.
 Settled/parked records and unrelated expansions retain their existing status.
 
-## #171 — Encore residuals after act156 (found 2026-10-13 by act156)
-
-act156 fixed #170 (a battler Encored earlier in the same turn uses the encored move: HandleAction_UseMove's Encore arms run at its own
-action) and #169 (a battler dragged in by Roar / Whirlwind before acting takes no action; B_ACTION_CANCEL_PARTNER). Open, both without a
-receipt: (a) an OVERWRITTEN Encore (the encored slot's move changed by Mimic / Transform / Sketch) is still cleared at turn start for both
-battlers, while source clears it only at the battler's own action (`battle_util.c:119-128`); (b) a mid-turn Encore into a move that locks
-the user (Thrash family, Uproar, Rollout) may trip the round orchestrator's locked-move check — census 0..999 never reaches it. Resume: a
-ROM receipt per case (rcp154's driver), then the port fix.
-
 ## #168 — remainder: FRZ frozen-turn timing phase (S10A; #168 otherwise DONE 2026-10-13)
 
 All nine B_ANIM_STATUS_* animations are timed and drawn (88 + 16 dense ROM windows 0 px; live audit 28 clean), and since inl144

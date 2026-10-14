@@ -16,7 +16,7 @@ The deliverable is the evidence: three new ROM receipts, a pinning test, and a s
 | Tests | `tests/enc173Receipts.test.ts`, 9 tests. Vitest quartet plus the new file: 5 files / 63 tests pass. `npm run typecheck` and `npm run test:smoke` (8 files / 448 tests) pass |
 | Census 0..999 | **Not run: it cannot move.** `src/` is byte-identical to the base commit, so every battle trajectory is identical by construction. No moved battle needs attributing |
 | Acceptance item "staged kernel control that fails without the fix" | **Not met, deliberately.** There is no fix, so no control can fail without it. Inventing one would be fabricated evidence |
-| Full `npm test` / `npm run build`, soak | see section 5 |
+| Full `npm test` / `npm run build`, soak | Not required (no production change; ANIMATION_VERIFICATION.md evidence/tooling gates). Worker soak vanilla 0:20: 20 / 20 OK. Supervisor (2026-10-14): fresh rerun of `enc173-rol` byte-identical to the receipt; the five receipt test files 63 / 63; typecheck on the fold |
 
 ## 2. Part (b): a mid-turn Encore into a locking move
 

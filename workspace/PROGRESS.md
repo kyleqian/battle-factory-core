@@ -18,7 +18,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   build OK; soak vanilla 0:20 --parallel 2 **20 / 20 OK** (all budget; 2,710 s). Varied-RNG fifth gate: running.
 - **Gate scheduling decision:** on CAX31 a 0:20 vanilla soak takes 45 min, so the three 0:60 gates would take ~6 h serially.
   They run once on the session's final engine tree (covering every engine fold); per-step folds run vanilla + the varied sweeps.
-- **Next:** enc173 (#171 Encore residuals, engine, side worktree) running; then Transform live body (#153), Substitute HP
+- **enc173 (#171, side worktree, Sonnet; folded):** no engine change needed. 3 new ROM receipts (mid-turn Encore into THRASH /
+  UPROAR / ROLLOUT) PASS at base; overwritten Encore cannot reach a turn start (ENDTURN_ENCORE clears it, trysetencore refuses a
+  lost slot), so the port's turn-start clear is equivalent. Supervisor: fresh enc173-rol rerun byte-identical; 5 receipt files 63 / 63;
+  typecheck 0. Worker stopped before its unneeded full suite (tooling/evidence only). ISSUES #171 removed.
+- **Fifth gate on `5e78e4030`:** winning --vary-rng carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
+- **Next:**  Transform live body (#153), Substitute HP
   timing, Focus Punch edge routes (#139), Wish / charge "used" handoffs (#167).
 
 ---
