@@ -1,6 +1,7 @@
 // trf174: render each fixture's window through the PRODUCTION live renderer (liveAdapterFramebuffer.ts liveView ->
 // renderBattleResolutionLiveView) against an existing trf174Probe.py run's RGB (no new emulator run). Fast iteration aid; the
 // receipts of record come from liveFixtureDriver.ts (2 fresh probe processes).
+// TRF174_AGE_SHIFT=<n>: control rendering production age + n (must NOT be exact).
 // usage: node --experimental-strip-types --no-warnings tools/integration/trf174Check.ts <probe-dir> <fixture.json>...
 import { readFileSync } from "node:fs";
 import { basename, join } from "node:path";
@@ -17,7 +18,7 @@ for (const path of paths) {
   for (let frame = f.denseWindow!.startFrame; frame <= f.denseWindow!.endFrame; frame++) {
     const rgb = inflateSync(readFileSync(join(dir!, `${name}-r1-rgb`, `${String(frame).padStart(5, "0")}.rgb.z`)));
     const rgba = new Uint8Array(240 * 160 * 4);
-    renderBattleResolutionLiveView(rgba, liveView(f, frame - f.denseWindow!.startFrame));
+    renderBattleResolutionLiveView(rgba, liveView(f, Math.max(0, Math.min(108, frame - f.denseWindow!.startFrame + Number(process.env.TRF174_AGE_SHIFT ?? 0)))));
     let n = 0;
     for (let p = 0; p < 240 * 160; p++) {
       if (rgb[p * 3] !== rgba[p * 4] || rgb[p * 3 + 1] !== rgba[p * 4 + 1] || rgb[p * 3 + 2] !== rgba[p * 4 + 2]) n++;
