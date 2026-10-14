@@ -1,0 +1,32 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "TRANSFORM",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/trf174-on-opponent-ditto-golbat.json",
+ "denseWindow": {
+  "startFrame": 71,
+  "endFrame": 179
+ },
+ "windowSource": "window = [activation, first inactive row] of the scenario's Move_TRANSFORM body (108 script rows + 1) from 2 fresh trf174Probe.py runs (r1 == r2)",
+ "attacker": {
+  "species": "DITTO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "GOLBAT",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 182,
+  "playerMaxHp": 182,
+  "opponentHp": 155,
+  "opponentMaxHp": 155,
+  "playerGender": "male",
+  "opponentGender": "genderless"
+ },
+ "attackerPersonality": 1793700000
+}

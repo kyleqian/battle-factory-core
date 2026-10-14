@@ -46,6 +46,9 @@ import {
 } from "../animation/struggle.ts";
 import { DOUBLE_EDGE_FRAME_COUNT } from "../animation/doubleEdge.ts";
 import { speciesFrontIdleRestOffsetOrZero } from "../animation/speciesIdleAnim.ts";
+import {
+  LIVE_TRANSFORM_MOVE_ID, LIVE_TRANSFORM_ROWS, liveTransformDeclineReason, liveTransformedBattlerDeclines,
+} from "./liveTransform.ts";
 import { liveTrackedFrontIdleRest, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { digAtAge } from "../animation/dig.ts";
 import { dreamEaterSpriteOrderPlanText } from "../animation/dreamEater.ts";
@@ -679,7 +682,7 @@ export function liveBattlerAnchors(
     pictureHeight: 64 - 2 * art[battler].coords.yOffset,
     // The species rest until a body runs an absolute-reset task on the battler (liveBattlerX2History.ts, ISSUES #148).
     frontIdleRest: battler === "opponent" && !doll
-      ? liveTrackedFrontIdleRest(battler, speciesFrontIdleRestOffsetOrZero(art[battler].speciesSymbol), x2Input)
+      ? liveTrackedFrontIdleRest(battler, speciesFrontIdleRestOffsetOrZero(art[battler].restSpeciesSymbol ?? art[battler].speciesSymbol), x2Input)
       : { x2: 0, y2: 0 },
   };
 }
@@ -1139,7 +1142,12 @@ export function liveMoveAnimationDuration(
       : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body, request, bodyField).rows);
   }
   if (field !== undefined && liveMoveSubstituteDollDeclines(request, field)) return null;
+  // trf174: no other body is proven with a transformed battler's copied picture; the Transform body has its own gate.
+  if (field !== undefined && liveTransformedBattlerDeclines(request, field)) return null;
   switch (request.moveId) {
+    // trf174 (liveTransform.ts): Move_TRANSFORM, activation .. first inactive row, both scenes and sides.
+    case LIVE_TRANSFORM_MOVE_ID:
+      return field !== undefined && liveTransformDeclineReason(request, field) !== null ? null : LIVE_TRANSFORM_ROWS;
     // Shock Wave (prep33): activation .. the derived first inactive row (262..266 measured), only defined with the displayed field.
     // Eruption (prep36 s2): the first inactive row = E2 + 294 from the attacker sprite y (476..500 rows measured), only defined with the field.
     case 284: {
