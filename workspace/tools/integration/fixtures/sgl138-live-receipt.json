@@ -33,7 +33,7 @@
  },
  "battles": {
   "0-on": {
-   "frames": 22650,
+   "frames": 22618,
    "anchors": [
     {
      "seg": "4:0",
@@ -421,7 +421,7 @@
    ]
   },
   "0-off": {
-   "frames": 18312,
+   "frames": 18264,
    "anchors": [
     {
      "seg": "4:0",

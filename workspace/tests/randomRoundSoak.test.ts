@@ -396,7 +396,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // offs152 (the Scene OFF opponent send-in tail + forced switch-out,
       // docs/offs152-scene-off-send-in-tail.md): frames 37_645 -> 37_332,
       // renderCalls 2_697 -> 2_667; same battle 7, turn 3, seven wins and diagnostics.
-      frames: 37_332,
+      // chg161 (the charge-turn empty box, docs/chg161-charge-turn-print.md): frames only, 37_332 -> 37_302,
+      // renderCalls 2_667 -> 2_654; same battle 7, turn 3, end state and diagnostics.
+      frames: 37_302,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -408,7 +410,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_667,
+        renderCalls: 2_654,
       },
     });
     expect(second).toEqual(first);
@@ -791,8 +793,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // send-in tail + forced switch-out): frames only, 17557 -> 17423 and
     // 26869 -> 26878 (a cry-bound send-in outlasts the old 102); same battle /
     // turn / end state.
+    // chg161 (the charge-turn empty box): frames only, 17423 -> 17242; same battle / turn / end state.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 17423,
+      frames: 17242,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
