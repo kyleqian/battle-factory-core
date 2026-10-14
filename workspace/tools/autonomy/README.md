@@ -1,10 +1,45 @@
 # One-week Hetzner autonomy runner
 
-This directory turns a clean Ubuntu 24.04 x86_64 VM into a disposable,
+This directory turns a clean Ubuntu 24.04 x86_64 or aarch64 VM into a disposable,
 reproducible Animation/Rust runner. It intentionally does not copy the
 laptop's `node_modules`, Cargo targets, worktrees, or mGBA build. The bootstrap
 reconstructs those machine-local inputs from pinned public sources and refuses
 to continue unless the ROM and oracle framebuffer hashes match the laptop.
+
+## User-approved CAX31 runner — 2026-10-13
+
+The user requested a new CAX31 ARM setup after the previous x86 server was
+retired. See `docs/cax31-arm-runner.md` for its status and validation receipt.
+The Mac checkout remains canonical; this is a separate validation runner.
+No historical campaign timers, automatic pushes or duplicate supervisor runs
+are enabled by the setup. Authenticate providers freshly on this machine.
+
+ARM uses the pinned Node ARM64 archive and builds the pinned libmgba-py source
+against the same pinned mGBA library. The legacy agbcc x86 host build is not
+copied or run on ARM. Instead, supply the verified, architecture-independent
+GBA ROM, ELF and map together in `POKEBENCH_REFERENCE_ARTIFACTS`; bootstrap
+checks all three hashes and retains the pinned reference source for probes.
+Native host tools generate map headers, MIDI assembly, graphics and samples
+needed by the current extractors/tests. The pinned scanner retains INCGFX flags;
+`reference-assets.sha256` checks representative outputs against the Mac.
+The x86 bootstrap still builds the reference ROM from source as before.
+
+Example, after restoring the repository and reference artifacts:
+
+```sh
+sudo POKEBENCH_ARCH=aarch64 POKEBENCH_BUILD_JOBS=4 \
+  POKEBENCH_REFERENCE_ARTIFACTS=/srv/pokebench/reference-artifacts \
+  bash workspace/tools/autonomy/bootstrap-ubuntu.sh \
+  pokebench /srv/pokebench/pokeemerald-factory-core
+```
+
+On the 16 GB runner, serialize heavy checks and set
+`POKEBENCH_VITEST_MAX_WORKERS=2` / `CARGO_BUILD_JOBS=4`. The swapfile is an OOM
+guard. The older one-week campaign instructions below are examples, not an
+authorization to resume those retired campaigns.
+
+Keep `workspace/tools/autonomy/bin` first in the runner's `PATH`; its GNU tar
+wrapper excludes Mac resource-fork metadata from framebuffer evidence archives.
 
 ## Operating shape
 

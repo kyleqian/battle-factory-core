@@ -156,11 +156,15 @@ committed partial work before salvage; resume only from a verified base.
 
 ## Local operation and interruption
 
-This Mac has 16 CPUs and 128 GiB RAM. Bound Vitest to four workers and serialize
-full tests, typecheck and builds. Services are local ON 8012 / OFF 8014; vendor
+The assigned host is recorded in `AGENTS.md` and `LOCAL_SETUP.md`. For the
+user-authorized CAX31 session, read `docs/cax31-session-handoff.md`: 16 GiB RAM,
+two Vitest workers, four build jobs, and one heavy job or worker at a time.
+The Mac has 16 CPUs and 128 GiB RAM; there, bound Vitest to four workers.
+Serialize full tests, typecheck and builds. Services are local ON 8012 / OFF 8014; vendor
 ROM/ELF/map and direct mGBA Python are under local harness/vendor paths. Resolve
 them through existing helpers. Do not mutate shared HTTP staging for source
-probes; use independent direct mGBA runs. There is no hcloud resource to contact.
+probes; use independent direct mGBA runs. CAX31 is the assigned remote host;
+the earlier deleted hcloud resource remains historical.
 
 Keep truthful progress with tested commit IDs, fresh evidence, remaining gaps
 and the next executable step. Update `PROGRESS.md` at checkpoints and wind-down,

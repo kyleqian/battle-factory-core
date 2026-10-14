@@ -6,7 +6,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 WORKSPACE_ROOT="${REPO_ROOT}/workspace"
 VENDOR_ROOT="$(dirname "$REPO_ROOT")/vendor"
+export POKEBENCH_ARCH="${POKEBENCH_ARCH:-$(uname -m)}"
 source "${SCRIPT_DIR}/versions.env"
+case "$POKEBENCH_ARCH" in
+  x86_64|aarch64) ;;
+  *) echo "verify-runner: unsupported architecture ${POKEBENCH_ARCH}" >&2; exit 2 ;;
+esac
 cd "$WORKSPACE_ROOT"
 
 SKIP_BASELINES=0
@@ -48,6 +53,13 @@ require_equal agbcc-commit "$POKEBENCH_AGBCC_COMMIT" "$(git -C "${VENDOR_ROOT}/a
 require_equal mgba-commit "$POKEBENCH_MGBA_COMMIT" "$(git -C "${VENDOR_ROOT}/mgba-src" rev-parse HEAD)"
 require_equal rom-sha1 "$POKEBENCH_ROM_SHA1" "$(sha1sum "${VENDOR_ROOT}/pokeemerald/pokeemerald.gba" | awk '{print $1}')"
 require_equal rom-sha256 "$POKEBENCH_ROM_SHA256" "$(sha256sum "${VENDOR_ROOT}/pokeemerald/pokeemerald.gba" | awk '{print $1}')"
+if [[ "$POKEBENCH_ARCH" == aarch64 ]]; then
+  require_equal reference-elf-sha256 "$POKEBENCH_REFERENCE_ELF_SHA256" "$(sha256sum "${VENDOR_ROOT}/pokeemerald/pokeemerald.elf" | awk '{print $1}')"
+  require_equal reference-map-sha256 "$POKEBENCH_REFERENCE_MAP_SHA256" "$(sha256sum "${VENDOR_ROOT}/pokeemerald/pokeemerald.map" | awk '{print $1}')"
+  require_equal bindings-commit "$POKEBENCH_LIBMGBA_PY_COMMIT" "$(git -C "${VENDOR_ROOT}/libmgba-py-src" rev-parse HEAD)"
+  (cd "${VENDOR_ROOT}/pokeemerald" && sha256sum --check "${SCRIPT_DIR}/reference-assets.sha256")
+  echo "ok native reference assets"
+fi
 
 PYTHONPATH="${VENDOR_ROOT}/libmgba-py" "${VENDOR_ROOT}/mgba-venv/bin/python" -c 'import cffi, mgba, PIL'
 echo "ok libmgba-py import"

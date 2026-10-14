@@ -21,10 +21,14 @@ remaining animation variants, presentation corrections and battle-engine
 defects are all authorized by the user's 2026-10-13 direction. See
 `docs/factory-finish-scope.md`; the presentation-only restriction is superseded
 for source-proven engine fixes in that scope. Return -> Frustration (#165) is
-DONE (ret165, 2026-10-13); next the RNG fixes (#141 / #140) and Focus Punch preparation (#139).
+DONE (ret165, 2026-10-13); RNG fixes (#141 / #140) and Focus Punch preparation
+(#139) have landed, with their named edge cases still open. The next CAX31
+session first verifies and folds the saved enc160 and plr162 worker branches
+under `docs/cax31-session-handoff.md`, then continues remaining finish-up gaps.
 Run the normal `./run-supervisor.sh`; the roadmap determines its mission.
-Integration is local master work, with bounded temporary worker checkouts and
-the existing model routing. There is no separate integration supervisor program.
+Integration runs on `master` in the assigned host's checkout, with bounded
+temporary worker checkouts and the existing model routing. There is no separate
+integration supervisor program. The Mac supervisor stays stopped during CAX31 work.
 This user-directed priority supersedes historical optional-animation and
 Scene-ON-selector deferrals below. Fix the in-scope mechanics debt instead of
 parking it behind the animation stage. Reuse earlier proofs where valid;

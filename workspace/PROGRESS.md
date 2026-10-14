@@ -5,6 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-13 — CAX31 next-session handoff (infrastructure only)
+
+- **State:** separate `codex/cax31-arm-setup` branch from game snapshot `b3e988d67`,
+  plus the Mac's committed charge-turn test re-pins `36b23e98c`; no new game code.
+  Helsinki CAX31 validated; user authorized commit + push + the next remote main
+  session. Remote `master` is assigned; the Mac supervisor is stopped at its
+  previous 10-hour cap and must stay stopped until remote results are imported.
+- **Did:** native ARM Node/mGBA/Python/Rust setup; both oracle hashes match, and two
+  fresh stock-ROM rcp143 R1 probes reproduce the committed battle/RNG receipt.
+  Typecheck, 448 smoke tests, Rust tests and WASM build/adapter checks passed;
+  all 9,550 native-generated reference data targets == Mac SHA256;
+  13,878 TypeScript cases verified (full run + 25 files / 174 cases retested
+  after Mac test pins, reference asset generation and GNU tar PATH fixes); build passed.
+  Fresh Claude Max login completed; CLI upgraded to 2.1.280 (required by Opus 5.5);
+  Opus 5.5 and Sonnet 5.5 no-tools inference probes passed. Prepared the host
+  assignment, portable supervisor prompt and `docs/cax31-session-handoff.md`.
+- **Next:** remote supervisor first verifies/folds enc160 `worker/side-20261013-160913`
+  (`09589b431`) and plr162 `worker/integration-20261013-163536` (`ca658cd6f`),
+  runs required union gates, then continues the authorized Factory finish-up.
+  Launch: Opus / Sonnet, headless tmux, 10-hour cap; no timers or automatic push.
+- **Notes:** `docs/cax31-arm-runner.md` records access, validation and limits;
+  raw receipts/logs are ignored under `.integration/validation/cax31-arm-20261013/`.
+
+---
+
 ## 2026-10-13 — chg161: #167 (d) charge-turn EMPTYSTRING3 box per scene (main/ts, presentation only)
 
 - **State:** local master, production src `b048842dc` (+ pins `8ac2edd8f`). off108's Dig / Razor Wind / Solar Beam windows re-probed fresh
@@ -41,22 +66,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   0 failing after one attributed re-pin (`substituteDollFieldState` BLISSEY 60/28 asserted the old OFF doll-from-prompt; its file 7 / 7).
   Docs
   `docs/sub157-scene-off-substitute.md`; receipt `tools/integration/fixtures/sub157/receipt.json`; scratch `.integration/validation/sub157/`.
-
----
-
-## 2026-10-13 — fpp150: #139 Focus Punch pre-pass — kernel + Scene OFF / ON timing + drawn general animation (main/ts)
-
-- **State:** local master, production src `d44b83144` (kernel) + `49c6c7c7b` (presentation / render). verify-rcp143-r4 **PASS**
-  (pin flipped). R4 anchors == ROM in both scenes (empty box 72; focus glyph 109 / 199; foe's glyph 215 / 305). fps147's 7 Scene ON
-  windows **0 px through the production render** (controls 0 / 7). Census 0..999 27,196 / 27,016 live (unchanged).
-- **Did:** the kernel runs BattleScript_FocusPunchSetUp before action 1 (index order; sleep / Truant guards; no RNG). The presentation
-  adds a `general-animation` command (124 frames; 3 behind a Substitute). Pre-pass prints: empty box = interpreter rows + 1
-  (ON 3 / OFF 37); focus print + 11-frame action lead. The handoff ends at stop-bounce-request. The render draws the fps147 reducer
-  (`generalAnimationRenderView`). x2 history zeroes the attacker. The census reports general animations apart.
-- **Ripple:** census: 36 battles frames-only (+20,848). All 36 attributed: alone == after, and == base with the pre-pass off.
-  100 general animations (opp 65 / player 35). Differential 641 / 641 byte-identical. Tests moved: rcp143 R4 pin, fps147 "unwired" pin.
-- **Next:** #139 remainder (voluntary-switch recall order; two-user / other-prologue leads unprobed). Charge-turn EMPTYSTRING3
-  (#167 sentence kept): needs a dense charge-turn card per scene + an anchor run like `fpp150Anchors.ts` (doc §4).
-- **Notes:** gates on the final tree: typecheck 0, smoke 448, full `npm test` (4 shards) 1,663 files / 13,822 tests passed, 0 failed
-  (44 / 223 skipped), build OK; soak vanilla 0:20 20 / 20 OK, per-seed lines identical to thr153 (`b4 t0`). core-rs: no port (not edited).
-  Docs `docs/fpp150-focus-punch-prepass.md`; scratch `.integration/validation/fpp150/`.
