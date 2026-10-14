@@ -63,7 +63,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // Base: the "GRIMER's DEFENSE sharply rose!" message (and its first glyph) started on frame 976.
     // iu120: + the opponent's Dig setup (91) and the Acid Armor (151) bodies before it.
     // chg161: - 16, the opponent Dig's charge-turn empty box (24 -> 8, docs/chg161-charge-turn-print.md).
-    const shift = iu([91, O], [151, P]) - 16;
+    // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 2.
+    const shift = iu([91, O], [151, P]) - 16 - 2;
     expect(a.statsChange).toEqual({ frame: 976 + shift, frames: 90 });
     // scf117: + 1 hold frame (the print executes on rel 91 and shows its first glyph on rel 92).
     expect(a.following).toMatchObject({ type: "message", frame: 976 + shift + 90 + 1, glyph: 976 + shift + 90 + 1 });
@@ -75,7 +76,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // sgl138: + 8 + 9 = sgs134: the route's two gated Icy Wind secondaries (IsBattleSEPlaying, docs/sgs134-se-gate-other-requests.md).
     // snd145: + the Foe WOBBUFFET faint replacement's Scene ON species-keyed send-in tail + turn-end hold (158 vs the old 91 + 11).
     expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1 + iu([91, O, 4], [151, P, 3], [196, P, 4], [219, O], [204, O]) - 2 + 8 + 9
-      + snd145FaintReplacement(202) - 16 * CHG161_SEED0_ON_CHARGE_TURNS);
+      + snd145FaintReplacement(202) - 16 * CHG161_SEED0_ON_CHARGE_TURNS
+      - 17); // msg175: the route's used prints last their printable length (no 24-frame floor).
   });
 
   it("status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76", () => {
@@ -116,7 +118,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // iu120: + the six live bodies before it (player 23, 93 x2; opponent 18, 60, 318).
     // snd145: + Foe GROWLITHE's own Scene ON species-keyed send-in tail (131 vs the old 91 + 11; Intimidate follows: no turn-end hold).
     const shift = iu([23, P], [18, O], [60, O], [93, P, 2], [318, O]) + opponentSwitchInDuration(58) - SWITCH_IN_SPAN_FRAMES
-      - SWITCH_IN_WAITSTATE_HOLD_FRAMES;
+      - SWITCH_IN_WAITSTATE_HOLD_FRAMES
+      - 10; // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 10.
     expect(a.statsChange).toEqual({ frame: 2694 + 10 + shift, frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 2694 + 10 + shift + 76 + 1, glyph: 2694 + 10 + shift + 76 + 1 });
     expect(a.following!.text).toContain("INTIMIDATE");
@@ -129,7 +132,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a.before?.type).toBe("move-animation");
     // olnd113 (ISSUES #167): + the two ATTACKMISSED used-move holds before it (39 at 1140, 40 at 1625) = +79.
     // iu120: + the four live bodies before it (player 205; opponent 55 x2, the Tickle 321).
-    const shift = iu([205, P], [55, O, 2], [321, O]);
+    // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 13.
+    const shift = iu([205, P], [55, O, 2], [321, O]) - 13;
     expect(a.statsChange).toEqual({ frame: 1929 + 79 + shift, frames: 76 });
     // One animation for the group: the stat write that follows (ATK) starts 76 frames later; DEF's write has no second command.
     // scf117: + 3 hold frames (setstatchanger + statbuffchange + jumpifbyte + printfromtable after rel 77: the ATK write's `stat`
@@ -145,7 +149,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + iu([205, P, 6], [55, O, 3], [321, O, 2], [246, O], [341, O], [44, O], [260, O], [148, P, 2], [24, O, 4])
       + 4 * SA125_STATUS_ANIMATION_ROWS.CONFUSION! + 2 * SA125_STATUS_ANIMATION_ROWS.PRZ! - (SA125_BASE_STATUS_FRAMES - 2)
       // snd145: + the Foe NIDORINA faint replacement's send-in tail + turn-end hold (123 vs 102), - 1 frame of dismissal parity (odd 21).
-      + snd145FaintReplacement(30) - 1);
+      + snd145FaintReplacement(30) - 1
+      - 46); // msg175: the route's used prints last their printable length (no 24-frame floor).
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 239-row window (tmr136) owns the banner; the message moves + 9", () => {
@@ -155,14 +160,15 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(dt.every((x) => x.statsChange === null && x.before?.type === "move-animation")).toBe(true);
     // tmr136 (ISSUES #166): the window holds 9 more rows (rel 69..77), so the message's first glyph lands on rel 78 as on the ROM
     // (the box changes on window age 239 in 12 / 12 dense direct-mGBA windows, tools/integration/fixtures/tmr136-live-receipt.json): + 9.
-    expect(dt[0]!.following).toMatchObject({ type: "message", frame: 846, text: "YANMA’s evasiveness / rose!" });
+    expect(dt[0]!.following).toMatchObject({ type: "message", frame: 844 /* msg175: 846 -> 844, shorter used prints before it */, text: "YANMA’s evasiveness / rose!" });
     expect(dt[0]!.following!.frame - dt[0]!.before!.frame).toBe(239);
     // The opponent's Acid Armor (arg 40) in the same route does present: 3 x 90.
     expect(route.anchors.filter((x) => x.statsChange !== null).map((x) => x.statsChange!.frames)).toEqual([90, 90, 90]);
     // scf117: + 3 x 1 hold frame after the three Acid Armor commands.
     // iu120: + the opponent's live bodies (Barrier 112 x3, Headbutt 29 x2, Confusion 93 x2); Double Team 104 is masked (P 0, T 0).
     // tmr136: + 9 tail rows per live Double Team body (6 bodies).
-    expect(route.frames).toBe(4600 + 270 + 3 + iu([112, O, 3], [29, O, 2], [93, O, 2], [104, P, 6]) + 6 * LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS);
+    expect(route.frames).toBe(4600 + 270 + 3 + iu([112, O, 3], [29, O, 2], [93, O, 2], [104, P, 6]) + 6 * LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS
+      - 16); // msg175: the route's used prints last their printable length (no 24-frame floor).
   });
 });
 
