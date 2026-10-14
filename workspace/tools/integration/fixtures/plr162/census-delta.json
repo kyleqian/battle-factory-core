@@ -1,0 +1,99 @@
+{
+ "battles": 2000,
+ "forcedPlayerSwitchInsByScene": {
+  "off": 32,
+  "on": 32
+ },
+ "errors": [
+  [
+   [
+    "off",
+    434
+   ],
+   "Error: frame budget",
+   "Error: frame budget"
+  ],
+  [
+   [
+    "off",
+    796
+   ],
+   "Error: frame budget",
+   "Error: frame budget"
+  ],
+  [
+   [
+    "off",
+    881
+   ],
+   "Error: frame budget",
+   "Error: frame budget"
+  ],
+  [
+   [
+    "on",
+    434
+   ],
+   "Error: frame budget",
+   "Error: frame budget"
+  ],
+  [
+   [
+    "on",
+    796
+   ],
+   "Error: frame budget",
+   "Error: frame budget"
+  ],
+  [
+   [
+    "on",
+    881
+   ],
+   "Error: frame budget",
+   "Error: frame budget"
+  ]
+ ],
+ "eventsDigestDiffer": [],
+ "typeSequenceDiffer": [],
+ "commands": 612024,
+ "changed": 32,
+ "changedNonForcedPlayer": [],
+ "forcedPlayerSwitchIns": 64,
+ "frameDelta": 404,
+ "changes": {
+  "off species 119: 91+11 slide None vd None -> 110+11 slide 65 vd -1": 1,
+  "off species 137: 91+11 slide None vd None -> 112+11 slide 65 vd -1": 1,
+  "off species 139: 91+11 slide None vd None -> 93+11 slide 65 vd -1": 1,
+  "off species 176: 91+11 slide None vd None -> 80+11 slide 65 vd -1": 1,
+  "off species 182: 91+11 slide None vd None -> 95+11 slide 65 vd -1": 1,
+  "off species 184: 91+11 slide None vd None -> 103+11 slide 65 vd -1": 1,
+  "off species 185: 91+11 slide None vd None -> 101+11 slide 65 vd -1": 2,
+  "off species 192: 91+11 slide None vd None -> 100+11 slide 65 vd -1": 1,
+  "off species 226: 91+11 slide None vd None -> 100+11 slide 65 vd -1": 1,
+  "off species 278: 91+11 slide None vd None -> 113+11 slide 65 vd -1": 1,
+  "off species 289: 91+11 slide None vd None -> 142+11 slide 65 vd -1": 1,
+  "off species 302: 91+11 slide None vd None -> 90+11 slide 65 vd -1": 2,
+  "off species 30: 91+11 slide None vd None -> 91+11 slide 65 vd -1": 1,
+  "off species 320: 91+11 slide None vd None -> 93+11 slide 65 vd -1": 1,
+  "off species 322: 91+11 slide None vd None -> 88+11 slide 65 vd -1": 1,
+  "off species 340: 91+11 slide None vd None -> 121+11 slide 65 vd -1": 1,
+  "off species 344: 91+11 slide None vd None -> 81+11 slide 65 vd -1": 1,
+  "off species 363: 91+11 slide None vd None -> 86+11 slide 65 vd -1": 2,
+  "off species 373: 91+11 slide None vd None -> 107+11 slide 65 vd -1": 1,
+  "off species 381: 91+11 slide None vd None -> 112+11 slide 65 vd -1": 1,
+  "off species 383: 91+11 slide None vd None -> 114+11 slide 65 vd -1": 1,
+  "off species 387: 91+11 slide None vd None -> 104+11 slide 65 vd -1": 1,
+  "off species 396: 91+11 slide None vd None -> 112+11 slide 65 vd -1": 1,
+  "off species 411: 91+11 slide None vd None -> 84+11 slide 65 vd -1": 1,
+  "off species 44: 91+11 slide None vd None -> 91+11 slide 65 vd -1": 1,
+  "off species 75: 91+11 slide None vd None -> 134+11 slide 65 vd -1": 2,
+  "off species 98: 91+11 slide None vd None -> 124+11 slide 65 vd -1": 2
+ },
+ "changedByScene": {
+  "off": 27
+ },
+ "base": "9483a2551 (src cc58816f)",
+ "final": "a8e3a5b86.. (src a5161d37)",
+ "seeds": "0..999 x {on, off}"
+}

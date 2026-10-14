@@ -1,0 +1,233 @@
+[
+ {
+  "name": "BULBASAUR",
+  "base": false,
+  "slide": 65,
+  "duration": 113,
+  "romRemoval": -6,
+  "romNextText": 113,
+  "rows": 167,
+  "zeroRows": 101,
+  "px": {
+   "total": 5374,
+   "phb": 0,
+   "mon": 5374,
+   "msg": 0
+  },
+  "preSendInNonZero": 0,
+  "hbMsgNonZeroRows": 0,
+  "hbMsgNonZero": [],
+  "monNonZeroRows": 66,
+  "monRange": [
+   5,
+   86
+  ]
+ },
+ {
+  "name": "BUTTERFREE",
+  "base": false,
+  "slide": 65,
+  "duration": 95,
+  "romRemoval": -6,
+  "romNextText": 95,
+  "rows": 149,
+  "zeroRows": 77,
+  "px": {
+   "total": 7737,
+   "phb": 0,
+   "mon": 7737,
+   "msg": 0
+  },
+  "preSendInNonZero": 0,
+  "hbMsgNonZeroRows": 0,
+  "hbMsgNonZero": [],
+  "monNonZeroRows": 72,
+  "monRange": [
+   6,
+   86
+  ]
+ },
+ {
+  "name": "CASTFORM",
+  "base": false,
+  "slide": 66,
+  "duration": 103,
+  "romRemoval": -6,
+  "romNextText": 103,
+  "rows": 157,
+  "zeroRows": 72,
+  "px": {
+   "total": 10710,
+   "phb": 2,
+   "mon": 10708,
+   "msg": 0
+  },
+  "preSendInNonZero": 0,
+  "hbMsgNonZeroRows": 2,
+  "hbMsgNonZero": [
+   [
+    76,
+    1,
+    0
+   ],
+   [
+    84,
+    1,
+    0
+   ]
+  ],
+  "monNonZeroRows": 85,
+  "monRange": [
+   4,
+   88
+  ]
+ },
+ {
+  "name": "PIDGEY",
+  "base": false,
+  "slide": 65,
+  "duration": 91,
+  "romRemoval": -6,
+  "romNextText": 91,
+  "rows": 145,
+  "zeroRows": 74,
+  "px": {
+   "total": 6795,
+   "phb": 0,
+   "mon": 6795,
+   "msg": 0
+  },
+  "preSendInNonZero": 0,
+  "hbMsgNonZeroRows": 0,
+  "hbMsgNonZero": [],
+  "monNonZeroRows": 71,
+  "monRange": [
+   6,
+   86
+  ]
+ },
+ {
+  "name": "TYPHLOSION",
+  "base": false,
+  "slide": 65,
+  "duration": 174,
+  "romRemoval": -6,
+  "romNextText": 174,
+  "rows": 228,
+  "zeroRows": 146,
+  "px": {
+   "total": 9134,
+   "phb": 0,
+   "mon": 9134,
+   "msg": 0
+  },
+  "preSendInNonZero": 0,
+  "hbMsgNonZeroRows": 0,
+  "hbMsgNonZero": [],
+  "monNonZeroRows": 82,
+  "monRange": [
+   3,
+   87
+  ]
+ },
+ {
+  "name": "PIDGEY",
+  "base": true,
+  "slide": 66,
+  "duration": 102,
+  "romRemoval": -5,
+  "romNextText": 92,
+  "rows": 156,
+  "zeroRows": 71,
+  "px": {
+   "total": 20738,
+   "phb": 3384,
+   "mon": 8459,
+   "msg": 8895
+  },
+  "preSendInNonZero": 1,
+  "hbMsgNonZeroRows": 14,
+  "hbMsgNonZero": [
+   [
+    -6,
+    3384,
+    0
+   ],
+   [
+    92,
+    0,
+    785
+   ],
+   [
+    93,
+    0,
+    797
+   ],
+   [
+    94,
+    0,
+    794
+   ],
+   [
+    95,
+    0,
+    812
+   ],
+   [
+    96,
+    0,
+    805
+   ]
+  ],
+  "monNonZeroRows": 72,
+  "monRange": [
+   -6,
+   87
+  ]
+ },
+ {
+  "name": "TYPHLOSION",
+  "base": true,
+  "slide": 66,
+  "duration": 102,
+  "romRemoval": -5,
+  "romNextText": 175,
+  "rows": 156,
+  "zeroRows": 70,
+  "px": {
+   "total": 16607,
+   "phb": 3384,
+   "mon": 10798,
+   "msg": 2425
+  },
+  "preSendInNonZero": 1,
+  "hbMsgNonZeroRows": 4,
+  "hbMsgNonZero": [
+   [
+    -6,
+    3384,
+    0
+   ],
+   [
+    102,
+    0,
+    800
+   ],
+   [
+    103,
+    0,
+    812
+   ],
+   [
+    104,
+    0,
+    813
+   ]
+  ],
+  "monNonZeroRows": 83,
+  "monRange": [
+   -6,
+   88
+  ]
+ }
+]
