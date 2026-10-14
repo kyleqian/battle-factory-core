@@ -5,6 +5,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-14 — CAX31 session: enc160 + plr162 folded (supervisor, in progress)
+
+- **State:** master `5e78e4030` = enc160 (`worker/side-20261013-160913`, #172 engine: a LOCKED + ENCORED battler takes
+  `HandleAction_UseMove`'s locked arm, no retarget draw) + plr162 (`worker/integration-20261013-163536`, #146 Scene OFF forced
+  player send-in tail; presentation only). Both refs retained. `4f65407b8`: oracle freshness check works on Linux and compares
+  against oracle-code commits (it failed on every game commit since the graft).
+- **Verified:** source order `battle_util.c:107-128` (locked arm before Encore arms). Fresh CAX31 ROM rerun of enc160-hbenc
+  twice: r1 == r2, rebuilt receipt identical to the committed one, verify PASS. plr162 CASTFORM Scene OFF window fresh through
+  `plr162Compare.ts`: message 0 px, healthbox 2 px (sprite edge), next text 103 == duration, as the doc claims. Affected tests 17 / 17.
+- **Union gates (`5e78e4030`):** typecheck 0; smoke 448; full `npm test` 1,674 files / **13,895 passed, 0 failed** (2,842 s);
+  build OK; soak vanilla 0:20 --parallel 2 **20 / 20 OK** (all budget; 2,710 s). Varied-RNG fifth gate: running.
+- **Gate scheduling decision:** on CAX31 a 0:20 vanilla soak takes 45 min, so the three 0:60 gates would take ~6 h serially.
+  They run once on the session's final engine tree (covering every engine fold); per-step folds run vanilla + the varied sweeps.
+- **Next:** enc173 (#171 Encore residuals, engine, side worktree) running; then Transform live body (#153), Substitute HP
+  timing, Focus Punch edge routes (#139), Wish / charge "used" handoffs (#167).
+
+---
+
 ## 2026-10-13 — CAX31 next-session handoff (infrastructure only)
 
 - **State:** separate `codex/cax31-arm-setup` branch from game snapshot `b3e988d67`,
