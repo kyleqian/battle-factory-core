@@ -1,3 +1,23 @@
+## 2026-10-13 — sub157: #153 Scene OFF plays the Substitute / Transform attack animations (main/ts, presentation only)
+
+- **State:** local master `62b8de71f`, production src `ca4ea3618` (kernel) + `eec0aca08` (OFF x2). 5 / 5 dense Scene OFF Substitute ROM windows
+  (PERSIAN<->SLOWBRO, GOLEM<->ONIX both sides, prep37 OFF) **87 / 87 rows 0 px** through production `renderBattleResolutionLiveView`.
+- **Did:** `Cmd_attackanimation` exempts Transform / Substitute from HITMARKER_NO_ANIMATIONS (`:1748`). OFF command streams now == ON
+  (30 / 30 uses, seeds 0..399). OFF bodies / fades read x2 {0,0} (no front animation in OFF, `pokemon.c:6805`; GOLEM -> ONIX was
+  94,917 px). `liveShareCensus.ts --scene=on|off` + `sub157Census.sh`.
+- **Ripple:** census 0..999 ON 10 / 10 shards byte-identical. OFF: 27 battles changed, all attributed (47 bodies live +50 frames each,
+  1 Transform 39 -> 32, 6 fades now live, battle 881's stalled tail -1 command); `battleDigestExcludingFrames` identical.
+  Differential 641 / 641 byte-identical.
+- **Next:** #153 remainder (both scenes): Substitute HP command −6 vs ROM (Scene ON route timing); Transform has no live adapter
+  (ROM 108 rows, production 32 undrawn); unmeasured OFF fade window and doll <-> mon swaps.
+- **Notes:** gates: typecheck 0, smoke 448, build OK; soak vanilla 0:20 --parallel 10 20 / 20 OK, per-seed lines identical to a base
+  (`bbd9c6748`) run; full `npm test` (4 shards) 1,667 files / 13,851 tests,
+  0 failing after one attributed re-pin (`substituteDollFieldState` BLISSEY 60/28 asserted the old OFF doll-from-prompt; its file 7 / 7).
+  Docs
+  `docs/sub157-scene-off-substitute.md`; receipt `tools/integration/fixtures/sub157/receipt.json`; scratch `.integration/validation/sub157/`.
+
+---
+
 ## 2026-10-13 — fpp150: #139 Focus Punch pre-pass — kernel + Scene OFF / ON timing + drawn general animation (main/ts)
 
 - **State:** local master, production src `d44b83144` (kernel) + `49c6c7c7b` (presentation / render). verify-rcp143-r4 **PASS**

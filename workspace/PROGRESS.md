@@ -5,48 +5,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-14 — CAX31 session: enc160 / plr162 / enc173 / trf174 / msg175 folded (supervisor)
+## 2026-10-14 — CAX31 session wind-down: enc160 / plr162 / enc173 / trf174 / msg175 / trn176 / fpc177 folded (supervisor)
 
-- **State:** master `5e78e4030` = enc160 (`worker/side-20261013-160913`, #172 engine: a LOCKED + ENCORED battler takes
-  `HandleAction_UseMove`'s locked arm, no retarget draw) + plr162 (`worker/integration-20261013-163536`, #146 Scene OFF forced
-  player send-in tail; presentation only). Both refs retained. `4f65407b8`: oracle freshness check works on Linux and compares
-  against oracle-code commits (it failed on every game commit since the graft).
-- **Verified:** source order `battle_util.c:107-128` (locked arm before Encore arms). Fresh CAX31 ROM rerun of enc160-hbenc
-  twice: r1 == r2, rebuilt receipt identical to the committed one, verify PASS. plr162 CASTFORM Scene OFF window fresh through
-  `plr162Compare.ts`: message 0 px, healthbox 2 px (sprite edge), next text 103 == duration, as the doc claims. Affected tests 17 / 17.
-- **Union gates (`5e78e4030`):** typecheck 0; smoke 448; full `npm test` 1,674 files / **13,895 passed, 0 failed** (2,842 s);
-  build OK; soak vanilla 0:20 --parallel 2 **20 / 20 OK** (all budget; 2,710 s). Varied-RNG fifth gate: running.
-- **Gate scheduling decision:** on CAX31 a 0:20 vanilla soak takes 45 min, so the three 0:60 gates would take ~6 h serially.
-  They run once on the session's final engine tree (covering every engine fold); per-step folds run vanilla + the varied sweeps.
-- **enc173 (#171, side worktree, Sonnet; folded):** no engine change needed. 3 new ROM receipts (mid-turn Encore into THRASH /
-  UPROAR / ROLLOUT) PASS at base; overwritten Encore cannot reach a turn start (ENDTURN_ENCORE clears it, trysetencore refuses a
-  lost slot), so the port's turn-start clear is equivalent. Supervisor: fresh enc173-rol rerun byte-identical; 5 receipt files 63 / 63;
-  typecheck 0. Worker stopped before its unneeded full suite (tooling/evidence only). ISSUES #171 removed.
-- **Fifth gate on `5e78e4030`:** winning --vary-rng carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
-- **trf174 (#153 Transform, integration, Opus; clean fold on `78e61e8c1`):** Move_TRANSFORM body live in both scenes (109 rows:
-  mosaic 1..15, species swap row 49, back to 0) + the transformed field (copied pic, whitened palette, elevation / shadow) until
-  switch-out. Supervisor reproduced fresh: 8 / 8 windows (ON / OFF x player / opponent DITTO x SLOWBRO / GOLBAT) r1 == r2,
-  **109 / 109 rows 0 px**, field **140 / 140 rows 0 px**. Worker: census both scenes digests identical (only battle 197 changes),
-  differential 641 / 641, full suite **13,909 passed / 0 failed**, build OK, soak vanilla 0:20 **20 / 20 OK**
-  (evidence `.integration/validation/from-workers/trf174/`). Supervisor on the fold: smoke 448, `trf174Transform.test.ts` 5 / 5.
-- **0:60 gates (frozen worktree `78e61e8c1`, src == `5e78e4030`, the session's only engine change):** full 0:60 **60 / 60**,
-  winning 0:60 **60 / 60**, winning-swap 0:60 **60 / 60** OK (all budget-ended; seeds 0..34 / 0..20 / 0..20 serial, the rest with
-  --parallel after measuring ~7.5 min/seed). With vanilla 20 / 20 and the fifth gate 4 x 100 / 100, all five gameplay gates are green.
-- **msg175 (#167 (a), integration, Opus; folded `68efe8acb` + `3937ecad0`):** the "used" print lasts its printable length L
-  (one glyph per row, 72 / 72 committed ROM uses both scenes) instead of a 24-frame floor; Scene OFF Wish pause lands (residual 0 / 0).
-  Census both scenes: kernel digests identical, ~35k used prints retimed, 0 unattributed; differential 641 / 641. Supervisor:
-  `msg175Anchors.ts` output identical; fresh ROM probe of off148-wish-ply byte-identical to its committed sha. Worker hit its cap
-  mid-suite with 7 failures: all frame-total pins, re-pinned by the supervisor with cause (soak seeds 0 / 1 / 21: same battle /
-  turn / end state; sgl138's 8 battles: regenerated receipt differs only in `frames`).
-- **Final gates on `3937ecad0`:** running (typecheck, smoke, full suite, build, soak vanilla 0:20).
-- **trn176 (side, Sonnet, evidence only; folded):** source-derived action-transition rule P = d + 6 + u (docs/trn176-action-transition.md),
-  21 / 22 comparable Scene OFF receipts exact + 12 / 12 Scene ON; 5 new hit-path ROM scenarios r1 == r2. Supervisor: predictor output
-  identical, fresh trn176-scratch-opp probe == committed sha. No src / test change.
-- **Next:** land trn176's rule in production (#167 (a'): the generic MoveEnd sprite-visibility branch, both scenes; re-pin OFF frames
-  with cause; confirm hit-path rows on the real-stat route); Substitute HP timing −6 (#153);
-  Focus Punch edge routes (#139 a/b); Transform inventory accounting + other bodies over a transformed battler; #146 Scene ON forced
-  player send-in message.
-
+- **State:** master `7ddbfbb7a`, clean; production src == `3937ecad0` (later commits: tests / tools / docs only). No open DEFERRED items.
+  Worker refs retained: `worker/side-20261013-160913` (enc160), `worker/integration-20261013-163536` (plr162),
+  `worker/side-20261014-062550` (enc173), `worker/integration-20261014-074723` (trf174), `worker/integration-20261014-104448` (msg175),
+  `worker/side-20261014-131640` (trn176), `worker/side-20261014-133659` (fpc177); all merged. Worker logs `.codex-logs/workers/`,
+  evidence `.integration/validation/{sv-20261014-*,from-workers/}`. Preview server not started (remote host; build verified instead).
+- **Engine (gameplay/RNG):** enc160 (#172: a LOCKED + ENCORED battler takes the locked arm, no retarget draw; supervisor reran the
+  hbenc ROM receipt fresh, byte-identical). enc173 (#171 closed): Encore residuals PASS at base, no engine change (3 new ROM receipts).
+- **Presentation:** plr162 (#146 Scene OFF forced player send-in tail); trf174 (#153 Transform body + transformed field live, both
+  scenes; supervisor fresh 8 / 8 windows 109 / 109 rows 0 px, field 140 / 140); msg175 (#167 (a): "used" print = printable length,
+  Scene OFF Wish pause; supervisor reproduced anchors + a fresh Wish probe). Census digests identical for every presentation fold.
+- **Evidence for next steps:** trn176 (#167 (a') action-transition rule P = d + 6 + u, 21 / 22 OFF + 12 / 12 ON receipts) and
+  fpc177 (#139 Focus Punch edges: order, leads 7 -> 5, action lead 5 + u; 12 cards both scenes). Both reproduced by the supervisor.
+- **Gates:** union `5e78e4030` (enc160 + plr162): typecheck, smoke 448, full suite 13,895 / 0 failed, build, all five gameplay gates
+  (vanilla 20 / 20; full / winning / winning-swap 0:60 **60 / 60** each on the frozen engine tree; varied-RNG 4 x **100 / 100**).
+  Final `3937ecad0`: typecheck 0, smoke 448, build OK, soak vanilla 0:20 **20 / 20**; full suite 1,676 files / 13,908 passed,
+  4 failed = msg175 frame-position pins in `sc106StatsChangeCommand.test.ts` (durations / anchors unchanged), re-pinned with cause in
+  `aec6435e8`, file 11 / 11 after, typecheck 0.
+- **Next:** (1) land trn176's transition hold (#167 (a'), both scenes; re-pin OFF frames with cause); (2) land fpc177's three Focus
+  Punch fixes (#139); (3) Substitute HP timing -6 (#153); (4) Transform inventory accounting + other bodies over a transformed
+  battler; (5) #146 Scene ON forced player send-in message. Budget gates for this host: full suite ~47 min, vanilla soak ~45 min,
+  0:60 gates need range fan-out (PAPERCUTS 2026-10-14).
 ---
 
 ## 2026-10-13 — CAX31 next-session handoff (infrastructure only)
@@ -90,23 +71,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   re-pins (seed 0 / 21 soak frames, sc106 seed 0 -16 x Dig box, sgl138 receipt 0-on -32 / 0-off -48), files 81 / 81 after.
   Docs `docs/chg161-charge-turn-print.md`; receipt
   `tools/integration/fixtures/chg161/receipt.json`; scratch `.integration/validation/chg161/`.
-
----
-
-## 2026-10-13 — sub157: #153 Scene OFF plays the Substitute / Transform attack animations (main/ts, presentation only)
-
-- **State:** local master `62b8de71f`, production src `ca4ea3618` (kernel) + `eec0aca08` (OFF x2). 5 / 5 dense Scene OFF Substitute ROM windows
-  (PERSIAN<->SLOWBRO, GOLEM<->ONIX both sides, prep37 OFF) **87 / 87 rows 0 px** through production `renderBattleResolutionLiveView`.
-- **Did:** `Cmd_attackanimation` exempts Transform / Substitute from HITMARKER_NO_ANIMATIONS (`:1748`). OFF command streams now == ON
-  (30 / 30 uses, seeds 0..399). OFF bodies / fades read x2 {0,0} (no front animation in OFF, `pokemon.c:6805`; GOLEM -> ONIX was
-  94,917 px). `liveShareCensus.ts --scene=on|off` + `sub157Census.sh`.
-- **Ripple:** census 0..999 ON 10 / 10 shards byte-identical. OFF: 27 battles changed, all attributed (47 bodies live +50 frames each,
-  1 Transform 39 -> 32, 6 fades now live, battle 881's stalled tail -1 command); `battleDigestExcludingFrames` identical.
-  Differential 641 / 641 byte-identical.
-- **Next:** #153 remainder (both scenes): Substitute HP command −6 vs ROM (Scene ON route timing); Transform has no live adapter
-  (ROM 108 rows, production 32 undrawn); unmeasured OFF fade window and doll <-> mon swaps.
-- **Notes:** gates: typecheck 0, smoke 448, build OK; soak vanilla 0:20 --parallel 10 20 / 20 OK, per-seed lines identical to a base
-  (`bbd9c6748`) run; full `npm test` (4 shards) 1,667 files / 13,851 tests,
-  0 failing after one attributed re-pin (`substituteDollFieldState` BLISSEY 60/28 asserted the old OFF doll-from-prompt; its file 7 / 7).
-  Docs
-  `docs/sub157-scene-off-substitute.md`; receipt `tools/integration/fixtures/sub157/receipt.json`; scratch `.integration/validation/sub157/`.
