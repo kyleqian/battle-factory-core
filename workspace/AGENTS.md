@@ -9,11 +9,14 @@
 
 > **2026-10-13 exception, user requested:** a CAX31 ARM runner is set up
 > and validated (`docs/cax31-arm-runner.md`). This supersedes the server-creation
-> prohibition for that host. The Mac remains canonical; its last run ended at
-> the 10-hour cap. When work is explicitly assigned to this runner, its checkout is
-> `/srv/pokebench/pokeemerald-factory-core/workspace`; use the assigned branch
-> and one writer per checkout. Do not revive old timers or start a duplicate
-> main campaign as part of setup. No GitHub pushes are authorized.
+> prohibition for that host. The user then authorized committing, pushing the
+> checkpoint and starting the next remote session. CAX31's `master` checkout at
+> `/srv/pokebench/pokeemerald-factory-core/workspace` owns that session; the Mac
+> supervisor is stopped and must remain stopped while the remote writer runs.
+> Read `docs/cax31-session-handoff.md` first. Keep one writer per checkout and
+> do not revive old timers. The launch checkpoint and two pending worker refs
+> are authorized for push; the remote supervisor commits locally and does not
+> push automatically. Import its results before resuming a Mac writer.
 
 A native-TypeScript browser reproduction of **Pokémon Emerald's Battle
 Factory**: the rental-draft + 7-battle challenge loop of the Battle Frontier

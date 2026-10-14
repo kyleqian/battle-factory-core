@@ -7,9 +7,10 @@ Do not restart remote workers or provision a replacement server.
 
 **User-requested exception, 2026-10-13:** the new CAX31 ARM runner is
 set up and validated under `docs/cax31-arm-runner.md`. This does not restore
-the old hcloud-only policy; the Mac remains canonical. Its last supervisor
-run ended at the 10-hour cap; no remote campaign has started.
-Remote agent runs/timers require an explicit work assignment after validation.
+the old hcloud-only policy. The user has now authorized the next main session
+on CAX31's `master` checkout; see `docs/cax31-session-handoff.md`. The Mac's
+last run ended at the 10-hour cap. Keep its supervisor stopped until the
+remote results are imported. No recurring timers are authorized.
 
 ## Play and develop
 

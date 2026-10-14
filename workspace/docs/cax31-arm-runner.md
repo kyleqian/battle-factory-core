@@ -1,8 +1,9 @@
 # CAX31 ARM runner
 
 The user requested this setup on 2026-10-13. It is a separate validation
-runner; the Mac remains canonical. Its last supervisor run ended at the
-10-hour cap. No project run is active on this server.
+runner. The user subsequently authorized the next main session here; see
+`cax31-session-handoff.md`. The Mac's last supervisor ended at the 10-hour cap
+and stays stopped while the remote main writer runs.
 
 ## Host and access
 
@@ -14,12 +15,14 @@ runner; the Mac remains canonical. Its last supervisor run ended at the
 - Firewall `11798520` permits SSH and ICMP only. Oracle/preview ports are not
   exposed publicly. Password SSH login is disabled.
 - Checkout: `/srv/pokebench/pokeemerald-factory-core/workspace`, branch
-  `codex/cax31-arm-setup`; game snapshot `b3e988d675cd0d107a906d298bd91e1936d2d24d`.
+  `master` for the assigned session (`codex/cax31-arm-setup` preserves setup);
+  game snapshot `b3e988d675cd0d107a906d298bd91e1936d2d24d`.
   The Mac's later charge-turn test re-pins `36b23e98c` are included as
   `f9c90600d`; production game code is unchanged from the initial snapshot.
-- No remote agent run, campaign timer, automatic push or Mac handoff is enabled.
-  Sync newer committed game work before assigning a remote run; keep one
-  writer per checkout and preserve/import branch results through local bundles.
+- The requested remote session uses tmux with a 10-hour cap. No campaign timer
+  or automatic push is enabled. The launch checkpoint and saved worker branches
+  are pushed from the Mac; preserve/import remote results through local bundles
+  before resuming the Mac's main writer.
 
 ```sh
 ssh pokebench-cax31
