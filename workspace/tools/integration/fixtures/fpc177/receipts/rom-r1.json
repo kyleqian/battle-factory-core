@@ -1,0 +1,3808 @@
+{
+ "schema": "fpc177-rom/v1",
+ "cards": {
+  "fpc177-a-switch-control-off.json": {
+   "meta": {
+    "case": "a-switch-control",
+    "scene": "off",
+    "description": "control: the same switch against an opponent BRELOOM that picks Giga Drain (no pre-pass); calibrates the recall row",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       28,
+       28,
+       28,
+       28
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       202,
+       202,
+       202
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-off",
+   "turnOrderRow": 308,
+   "checkFocusPunchRows": [
+    309
+   ],
+   "runTurnActionsRow": 310,
+   "messages": [
+    {
+     "row": 313,
+     "firstGlyph": 314,
+     "text": "JOLTEON, that\u2019s enough!\nCome back!"
+    },
+    {
+     "row": 395,
+     "firstGlyph": 396,
+     "text": "Go! MAGIKARP!"
+    },
+    {
+     "row": 475,
+     "firstGlyph": 476,
+     "text": "<FC><02><02>MAGIKARP<FC><01><0B><B5>"
+    },
+    {
+     "row": 542,
+     "firstGlyph": 543,
+     "text": "Foe BRELOOM used\nGIGA DRAIN!"
+    },
+    {
+     "row": 747,
+     "firstGlyph": 748,
+     "text": "It\u2019s super effective!"
+    },
+    {
+     "row": 843,
+     "firstGlyph": 844,
+     "text": "MAGIKARP had its\nenergy drained!"
+    },
+    {
+     "row": 1025,
+     "firstGlyph": 1026,
+     "text": "MAGIKARP\nfainted!\n"
+    }
+   ],
+   "animSpans": [
+    {
+     "frame": 358,
+     "active": 1,
+     "script": "Special_SwitchOutPlayerMon+0x9"
+    },
+    {
+     "frame": 386,
+     "active": 0,
+     "script": null
+    }
+   ],
+   "partyChanges": [
+    {
+     "frame": 391,
+     "partyIndex": [
+      1,
+      0
+     ]
+    },
+    {
+     "frame": 393,
+     "species": [
+      129,
+      307
+     ]
+    }
+   ],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 576,
+     "script": "BattleScript_Pausex20"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 310,
+     "to": 2
+    },
+    {
+     "frame": 311,
+     "to": 10
+    },
+    {
+     "frame": 536,
+     "to": 11
+    },
+    {
+     "frame": 537,
+     "to": 12
+    },
+    {
+     "frame": 538,
+     "to": 0
+    },
+    {
+     "frame": 539,
+     "to": 10
+    }
+   ],
+   "randomCalls": 3,
+   "randomRows": [
+    541,
+    572,
+    575
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 1,
+     "script": "BattleScript_FaintTarget+0xc",
+     "currentMove": 202,
+     "attacker": 1,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      0,
+      135
+     ],
+     "species": [
+      129,
+      307
+     ],
+     "partyIndex": [
+      1,
+      0
+     ],
+     "execFlags": 2
+    },
+    "playerParty": [
+     {
+      "species": 135,
+      "hp": 140
+     },
+     {
+      "species": 129,
+      "hp": 0
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 307,
+      "hp": 135
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "bb7d0d90ad8fcb8ef287b6355f485696ddffc2339cb821c69075038f91ed7e33"
+  },
+  "fpc177-a-switch-control-on.json": {
+   "meta": {
+    "case": "a-switch-control",
+    "scene": "on",
+    "description": "control: the same switch against an opponent BRELOOM that picks Giga Drain (no pre-pass); calibrates the recall row",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       28,
+       28,
+       28,
+       28
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       202,
+       202,
+       202
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-on",
+   "turnOrderRow": 308,
+   "checkFocusPunchRows": [
+    309
+   ],
+   "runTurnActionsRow": 310,
+   "messages": [
+    {
+     "row": 313,
+     "firstGlyph": 314,
+     "text": "JOLTEON, that\u2019s enough!\nCome back!"
+    },
+    {
+     "row": 395,
+     "firstGlyph": 396,
+     "text": "Go! MAGIKARP!"
+    },
+    {
+     "row": 475,
+     "firstGlyph": 476,
+     "text": "<FC><02><02>MAGIKARP<FC><01><0B><B5>"
+    },
+    {
+     "row": 557,
+     "firstGlyph": 558,
+     "text": "Foe BRELOOM used\nGIGA DRAIN!"
+    },
+    {
+     "row": 961,
+     "firstGlyph": 962,
+     "text": "It\u2019s super effective!"
+    },
+    {
+     "row": 1057,
+     "firstGlyph": 1058,
+     "text": "MAGIKARP had its\nenergy drained!"
+    }
+   ],
+   "animSpans": [
+    {
+     "frame": 358,
+     "active": 1,
+     "script": "Special_SwitchOutPlayerMon+0x9"
+    },
+    {
+     "frame": 386,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 593,
+     "active": 1,
+     "script": "Move_GIGA_DRAIN"
+    },
+    {
+     "frame": 822,
+     "active": 0,
+     "script": null
+    }
+   ],
+   "partyChanges": [
+    {
+     "frame": 391,
+     "partyIndex": [
+      1,
+      0
+     ]
+    },
+    {
+     "frame": 393,
+     "species": [
+      129,
+      307
+     ]
+    }
+   ],
+   "focusPunchScriptEntries": [],
+   "actionFuncIdChanges": [
+    {
+     "frame": 310,
+     "to": 2
+    },
+    {
+     "frame": 311,
+     "to": 10
+    },
+    {
+     "frame": 551,
+     "to": 11
+    },
+    {
+     "frame": 552,
+     "to": 12
+    },
+    {
+     "frame": 553,
+     "to": 0
+    },
+    {
+     "frame": 554,
+     "to": 10
+    }
+   ],
+   "randomCalls": 3,
+   "randomRows": [
+    556,
+    587,
+    590
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 1,
+     "script": "BattleScript_FaintTarget+0x7",
+     "currentMove": 202,
+     "attacker": 1,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      0,
+      135
+     ],
+     "species": [
+      129,
+      307
+     ],
+     "partyIndex": [
+      1,
+      0
+     ],
+     "execFlags": 1
+    },
+    "playerParty": [
+     {
+      "species": 135,
+      "hp": 140
+     },
+     {
+      "species": 129,
+      "hp": 0
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 307,
+      "hp": 135
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "14dc5b323f0b78ea96dba710b6a50cdfaf0e908812c24cc6a82e9b951167bb71"
+  },
+  "fpc177-a-switch-off.json": {
+   "meta": {
+    "case": "a-switch",
+    "scene": "off",
+    "description": "player JOLTEON voluntarily switches to MAGIKARP; opponent BRELOOM Focus Punch x4",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       28,
+       28,
+       28,
+       28
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       264,
+       264,
+       264,
+       264
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-off",
+   "turnOrderRow": 308,
+   "checkFocusPunchRows": [
+    309,
+    450
+   ],
+   "runTurnActionsRow": 451,
+   "messages": [
+    {
+     "row": 311,
+     "firstGlyph": 312,
+     "text": ""
+    },
+    {
+     "row": 348,
+     "firstGlyph": 349,
+     "text": "Foe BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 454,
+     "firstGlyph": 455,
+     "text": "JOLTEON, that\u2019s enough!\nCome back!"
+    },
+    {
+     "row": 536,
+     "firstGlyph": 537,
+     "text": "Go! MAGIKARP!"
+    },
+    {
+     "row": 616,
+     "firstGlyph": 617,
+     "text": "<FC><02><02>MAGIKARP<FC><01><0B><B5>"
+    },
+    {
+     "row": 684,
+     "firstGlyph": 685,
+     "text": "Foe BRELOOM used\nFOCUS PUNCH!"
+    },
+    {
+     "row": 977,
+     "firstGlyph": 978,
+     "text": "MAGIKARP\nfainted!\n"
+    }
+   ],
+   "animSpans": [
+    {
+     "frame": 499,
+     "active": 1,
+     "script": "Special_SwitchOutPlayerMon+0x9"
+    },
+    {
+     "frame": 527,
+     "active": 0,
+     "script": null
+    }
+   ],
+   "partyChanges": [
+    {
+     "frame": 532,
+     "partyIndex": [
+      1,
+      0
+     ]
+    },
+    {
+     "frame": 534,
+     "species": [
+      129,
+      307
+     ]
+    }
+   ],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 310,
+     "script": "BattleScript_FocusPunchSetUp"
+    },
+    {
+     "frame": 314,
+     "script": "BattleScript_Pausex20"
+    },
+    {
+     "frame": 719,
+     "script": "BattleScript_Pausex20"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 449,
+     "to": 11
+    },
+    {
+     "frame": 451,
+     "to": 2
+    },
+    {
+     "frame": 452,
+     "to": 10
+    },
+    {
+     "frame": 677,
+     "to": 11
+    },
+    {
+     "frame": 678,
+     "to": 12
+    },
+    {
+     "frame": 679,
+     "to": 0
+    },
+    {
+     "frame": 680,
+     "to": 10
+    }
+   ],
+   "randomCalls": 4,
+   "randomRows": [
+    683,
+    715,
+    718,
+    892
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 1,
+     "script": "BattleScript_FaintTarget+0xc",
+     "currentMove": 264,
+     "attacker": 1,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      0,
+      135
+     ],
+     "species": [
+      129,
+      307
+     ],
+     "partyIndex": [
+      1,
+      0
+     ],
+     "execFlags": 2
+    },
+    "playerParty": [
+     {
+      "species": 135,
+      "hp": 140
+     },
+     {
+      "species": 129,
+      "hp": 0
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 307,
+      "hp": 135
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "bb7d0d90ad8fcb8ef287b6355f485696ddffc2339cb821c69075038f91ed7e33"
+  },
+  "fpc177-a-switch-on.json": {
+   "meta": {
+    "case": "a-switch",
+    "scene": "on",
+    "description": "player JOLTEON voluntarily switches to MAGIKARP; opponent BRELOOM Focus Punch x4",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       28,
+       28,
+       28,
+       28
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       264,
+       264,
+       264,
+       264
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-on",
+   "turnOrderRow": 308,
+   "checkFocusPunchRows": [
+    309,
+    538
+   ],
+   "runTurnActionsRow": 539,
+   "messages": [
+    {
+     "row": 311,
+     "firstGlyph": 312,
+     "text": ""
+    },
+    {
+     "row": 436,
+     "firstGlyph": 437,
+     "text": "Foe BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 542,
+     "firstGlyph": 543,
+     "text": "JOLTEON, that\u2019s enough!\nCome back!"
+    },
+    {
+     "row": 624,
+     "firstGlyph": 625,
+     "text": "Go! MAGIKARP!"
+    },
+    {
+     "row": 704,
+     "firstGlyph": 705,
+     "text": "<FC><02><02>MAGIKARP<FC><01><0B><B5>"
+    },
+    {
+     "row": 787,
+     "firstGlyph": 788,
+     "text": "Foe BRELOOM used\nFOCUS PUNCH!"
+    },
+    {
+     "row": 1204,
+     "firstGlyph": 1205,
+     "text": "MAGIKARP\nfainted!\n"
+    }
+   ],
+   "animSpans": [
+    {
+     "frame": 314,
+     "active": 1,
+     "script": "General_FocusPunchSetUp+0x3"
+    },
+    {
+     "frame": 434,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 587,
+     "active": 1,
+     "script": "Special_SwitchOutPlayerMon+0x9"
+    },
+    {
+     "frame": 615,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 824,
+     "active": 1,
+     "script": "Move_FOCUS_PUNCH"
+    },
+    {
+     "frame": 978,
+     "active": 0,
+     "script": null
+    }
+   ],
+   "partyChanges": [
+    {
+     "frame": 620,
+     "partyIndex": [
+      1,
+      0
+     ]
+    },
+    {
+     "frame": 622,
+     "species": [
+      129,
+      307
+     ]
+    }
+   ],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 310,
+     "script": "BattleScript_FocusPunchSetUp"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 537,
+     "to": 11
+    },
+    {
+     "frame": 539,
+     "to": 2
+    },
+    {
+     "frame": 540,
+     "to": 10
+    },
+    {
+     "frame": 780,
+     "to": 11
+    },
+    {
+     "frame": 781,
+     "to": 12
+    },
+    {
+     "frame": 782,
+     "to": 0
+    },
+    {
+     "frame": 783,
+     "to": 10
+    }
+   ],
+   "randomCalls": 4,
+   "randomRows": [
+    786,
+    818,
+    821,
+    1119
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 1,
+     "script": "BattleScript_FaintTarget+0xc",
+     "currentMove": 264,
+     "attacker": 1,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      0,
+      135
+     ],
+     "species": [
+      129,
+      307
+     ],
+     "partyIndex": [
+      1,
+      0
+     ],
+     "execFlags": 2
+    },
+    "playerParty": [
+     {
+      "species": 135,
+      "hp": 140
+     },
+     {
+      "species": 129,
+      "hp": 0
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 307,
+      "hp": 135
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "fea861b7fcd0aa49e98692c85ab7bee2930989fb601c65fd8e39f482083b23c9"
+  },
+  "fpc177-b1-two-users-off.json": {
+   "meta": {
+    "case": "b1-two-users",
+    "scene": "off",
+    "description": "player BRELOOM Focus Punch + opponent HITMONLEE Focus Punch: two pre-passes",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 106,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 7,
+      "moves": [
+       264,
+       264,
+       264,
+       264
+      ],
+      "hp": 125,
+      "maxHp": 125,
+      "stats": {
+       "attack": 140,
+       "defense": 73,
+       "speed": 107,
+       "spAttack": 55,
+       "spDefense": 130
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-off",
+   "turnOrderRow": 68,
+   "checkFocusPunchRows": [
+    69,
+    206,
+    349
+   ],
+   "runTurnActionsRow": 350,
+   "messages": [
+    {
+     "row": 71,
+     "firstGlyph": 72,
+     "text": ""
+    },
+    {
+     "row": 108,
+     "firstGlyph": 109,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 208,
+     "firstGlyph": 209,
+     "text": ""
+    },
+    {
+     "row": 245,
+     "firstGlyph": 246,
+     "text": "Foe HITMONLEE is tightening\nits focus!"
+    },
+    {
+     "row": 355,
+     "firstGlyph": 356,
+     "text": "Foe HITMONLEE used\nFOCUS PUNCH!"
+    },
+    {
+     "row": 691,
+     "firstGlyph": 692,
+     "text": "BRELOOM\nfainted!\n"
+    }
+   ],
+   "animSpans": [],
+   "partyChanges": [],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 70,
+     "script": "BattleScript_FocusPunchSetUp"
+    },
+    {
+     "frame": 74,
+     "script": "BattleScript_Pausex20"
+    },
+    {
+     "frame": 207,
+     "script": "BattleScript_FocusPunchSetUp"
+    },
+    {
+     "frame": 211,
+     "script": "BattleScript_Pausex20"
+    },
+    {
+     "frame": 392,
+     "script": "BattleScript_Pausex20"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 205,
+     "to": 11
+    },
+    {
+     "frame": 207,
+     "to": 0
+    },
+    {
+     "frame": 348,
+     "to": 11
+    },
+    {
+     "frame": 350,
+     "to": 0
+    },
+    {
+     "frame": 351,
+     "to": 10
+    }
+   ],
+   "randomCalls": 4,
+   "randomRows": [
+    354,
+    388,
+    391,
+    605
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 0,
+     "script": "BattleScript_FaintTarget+0xc",
+     "currentMove": 264,
+     "attacker": 1,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      0,
+      125
+     ],
+     "species": [
+      307,
+      106
+     ],
+     "partyIndex": [
+      0,
+      0
+     ],
+     "execFlags": 2
+    },
+    "playerParty": [
+     {
+      "species": 307,
+      "hp": 0
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 106,
+      "hp": 125
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "efc64be4dc0a7125f1594ad55d6f2e70d940407db12aa3600fc560a04e7a06b2"
+  },
+  "fpc177-b1-two-users-on.json": {
+   "meta": {
+    "case": "b1-two-users",
+    "scene": "on",
+    "description": "player BRELOOM Focus Punch + opponent HITMONLEE Focus Punch: two pre-passes",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 106,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 7,
+      "moves": [
+       264,
+       264,
+       264,
+       264
+      ],
+      "hp": 125,
+      "maxHp": 125,
+      "stats": {
+       "attack": 140,
+       "defense": 73,
+       "speed": 107,
+       "spAttack": 55,
+       "spDefense": 130
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-on",
+   "turnOrderRow": 68,
+   "checkFocusPunchRows": [
+    69,
+    296,
+    527
+   ],
+   "runTurnActionsRow": 528,
+   "messages": [
+    {
+     "row": 71,
+     "firstGlyph": 72,
+     "text": ""
+    },
+    {
+     "row": 198,
+     "firstGlyph": 199,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 298,
+     "firstGlyph": 299,
+     "text": ""
+    },
+    {
+     "row": 423,
+     "firstGlyph": 424,
+     "text": "Foe HITMONLEE is tightening\nits focus!"
+    },
+    {
+     "row": 533,
+     "firstGlyph": 534,
+     "text": "Foe HITMONLEE used\nFOCUS PUNCH!"
+    },
+    {
+     "row": 992,
+     "firstGlyph": 993,
+     "text": "BRELOOM\nfainted!\n"
+    }
+   ],
+   "animSpans": [
+    {
+     "frame": 76,
+     "active": 1,
+     "script": "General_FocusPunchSetUp+0x3"
+    },
+    {
+     "frame": 196,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 301,
+     "active": 1,
+     "script": "General_FocusPunchSetUp+0x3"
+    },
+    {
+     "frame": 421,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 572,
+     "active": 1,
+     "script": "Move_FOCUS_PUNCH"
+    },
+    {
+     "frame": 725,
+     "active": 0,
+     "script": null
+    }
+   ],
+   "partyChanges": [],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 70,
+     "script": "BattleScript_FocusPunchSetUp"
+    },
+    {
+     "frame": 297,
+     "script": "BattleScript_FocusPunchSetUp"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 295,
+     "to": 11
+    },
+    {
+     "frame": 297,
+     "to": 0
+    },
+    {
+     "frame": 526,
+     "to": 11
+    },
+    {
+     "frame": 528,
+     "to": 0
+    },
+    {
+     "frame": 529,
+     "to": 10
+    }
+   ],
+   "randomCalls": 4,
+   "randomRows": [
+    532,
+    566,
+    569,
+    906
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 0,
+     "script": "BattleScript_FaintTarget+0xc",
+     "currentMove": 264,
+     "attacker": 1,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      0,
+      125
+     ],
+     "species": [
+      307,
+      106
+     ],
+     "partyIndex": [
+      0,
+      0
+     ],
+     "execFlags": 2
+    },
+    "playerParty": [
+     {
+      "species": 307,
+      "hp": 0
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 106,
+      "hp": 125
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "efc64be4dc0a7125f1594ad55d6f2e70d940407db12aa3600fc560a04e7a06b2"
+  },
+  "fpc177-b2-hit-scratch-off.json": {
+   "meta": {
+    "case": "b2-hit-scratch",
+    "scene": "off",
+    "description": "action 1 = Jolteon Scratch (hit)",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       10,
+       10,
+       10,
+       10
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-off",
+   "turnOrderRow": 68,
+   "checkFocusPunchRows": [
+    69,
+    206
+   ],
+   "runTurnActionsRow": 207,
+   "messages": [
+    {
+     "row": 71,
+     "firstGlyph": 72,
+     "text": ""
+    },
+    {
+     "row": 108,
+     "firstGlyph": 109,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 212,
+     "firstGlyph": 213,
+     "text": "Foe JOLTEON used\nSCRATCH!"
+    },
+    {
+     "row": 343,
+     "firstGlyph": 344,
+     "text": "BRELOOM\u2019s EFFECT SPORE\nparalyzed Foe JOLTEON!\nIt may be unable to move!"
+    }
+   ],
+   "animSpans": [],
+   "partyChanges": [],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 70,
+     "script": "BattleScript_FocusPunchSetUp"
+    },
+    {
+     "frame": 74,
+     "script": "BattleScript_Pausex20"
+    },
+    {
+     "frame": 243,
+     "script": "BattleScript_Pausex20"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 205,
+     "to": 11
+    },
+    {
+     "frame": 207,
+     "to": 0
+    },
+    {
+     "frame": 208,
+     "to": 10
+    }
+   ],
+   "randomCalls": 7,
+   "randomRows": [
+    211,
+    239,
+    242,
+    336,
+    339
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 0,
+     "script": "BattleScript_MoveEffectParalysis+0x7",
+     "currentMove": 10,
+     "attacker": 1,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      120,
+      140
+     ],
+     "species": [
+      307,
+      135
+     ],
+     "partyIndex": [
+      0,
+      0
+     ],
+     "execFlags": 2
+    },
+    "playerParty": [
+     {
+      "species": 307,
+      "hp": 120
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 135,
+      "hp": 140
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "f3f5d90ba295562dc5b09b8d8b426c1c2afe10e59be7df23713d55fd36048e43"
+  },
+  "fpc177-b2-hit-scratch-on.json": {
+   "meta": {
+    "case": "b2-hit-scratch",
+    "scene": "on",
+    "description": "action 1 = Jolteon Scratch (hit)",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       10,
+       10,
+       10,
+       10
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-on",
+   "turnOrderRow": 68,
+   "checkFocusPunchRows": [
+    69,
+    296
+   ],
+   "runTurnActionsRow": 297,
+   "messages": [
+    {
+     "row": 71,
+     "firstGlyph": 72,
+     "text": ""
+    },
+    {
+     "row": 198,
+     "firstGlyph": 199,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 302,
+     "firstGlyph": 303,
+     "text": "Foe JOLTEON used\nSCRATCH!"
+    },
+    {
+     "row": 483,
+     "firstGlyph": 484,
+     "text": "BRELOOM\u2019s EFFECT SPORE\nparalyzed Foe JOLTEON!\nIt may be unable to move!"
+    }
+   ],
+   "animSpans": [
+    {
+     "frame": 76,
+     "active": 1,
+     "script": "General_FocusPunchSetUp+0x3"
+    },
+    {
+     "frame": 196,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 335,
+     "active": 1,
+     "script": "Move_SCRATCH"
+    },
+    {
+     "frame": 367,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 443,
+     "active": 1,
+     "script": "Status_Paralysis+0x3"
+    },
+    {
+     "frame": 481,
+     "active": 0,
+     "script": null
+    }
+   ],
+   "partyChanges": [],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 70,
+     "script": "BattleScript_FocusPunchSetUp"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 295,
+     "to": 11
+    },
+    {
+     "frame": 297,
+     "to": 0
+    },
+    {
+     "frame": 298,
+     "to": 10
+    }
+   ],
+   "randomCalls": 7,
+   "randomRows": [
+    301,
+    329,
+    332,
+    428,
+    431
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 0,
+     "script": "BattleScript_MoveEffectParalysis+0x7",
+     "currentMove": 10,
+     "attacker": 1,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      120,
+      140
+     ],
+     "species": [
+      307,
+      135
+     ],
+     "partyIndex": [
+      0,
+      0
+     ],
+     "execFlags": 2
+    },
+    "playerParty": [
+     {
+      "species": 307,
+      "hp": 120
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 135,
+      "hp": 140
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "f3f5d90ba295562dc5b09b8d8b426c1c2afe10e59be7df23713d55fd36048e43"
+  },
+  "fpc177-b2-statup-agility-off.json": {
+   "meta": {
+    "case": "b2-statup-agility",
+    "scene": "off",
+    "description": "action 1 = Jolteon Agility (self stat up)",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       97,
+       97,
+       97,
+       97
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-off",
+   "turnOrderRow": 68,
+   "checkFocusPunchRows": [
+    69,
+    206
+   ],
+   "runTurnActionsRow": 207,
+   "messages": [
+    {
+     "row": 71,
+     "firstGlyph": 72,
+     "text": ""
+    },
+    {
+     "row": 108,
+     "firstGlyph": 109,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 212,
+     "firstGlyph": 213,
+     "text": "Foe JOLTEON used\nAGILITY!"
+    },
+    {
+     "row": 368,
+     "firstGlyph": 369,
+     "text": "Foe JOLTEON\u2019s SPEED\nsharply rose!"
+    },
+    {
+     "row": 477,
+     "firstGlyph": 478,
+     "text": "BRELOOM used\nFOCUS PUNCH!"
+    },
+    {
+     "row": 812,
+     "firstGlyph": 813,
+     "text": "Foe JOLTEON\nfainted!\n"
+    }
+   ],
+   "animSpans": [
+    {
+     "frame": 277,
+     "active": 1,
+     "script": "General_StatsChange+0x7"
+    },
+    {
+     "frame": 366,
+     "active": 0,
+     "script": null
+    }
+   ],
+   "partyChanges": [],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 70,
+     "script": "BattleScript_FocusPunchSetUp"
+    },
+    {
+     "frame": 74,
+     "script": "BattleScript_Pausex20"
+    },
+    {
+     "frame": 241,
+     "script": "BattleScript_Pausex20"
+    },
+    {
+     "frame": 508,
+     "script": "BattleScript_Pausex20"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 205,
+     "to": 11
+    },
+    {
+     "frame": 207,
+     "to": 0
+    },
+    {
+     "frame": 208,
+     "to": 10
+    },
+    {
+     "frame": 470,
+     "to": 11
+    },
+    {
+     "frame": 471,
+     "to": 12
+    },
+    {
+     "frame": 472,
+     "to": 0
+    },
+    {
+     "frame": 473,
+     "to": 10
+    }
+   ],
+   "randomCalls": 4,
+   "randomRows": [
+    476,
+    504,
+    507,
+    726
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 1,
+     "script": "BattleScript_FaintTarget+0xc",
+     "currentMove": 264,
+     "attacker": 0,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      135,
+      0
+     ],
+     "species": [
+      307,
+      135
+     ],
+     "partyIndex": [
+      0,
+      0
+     ],
+     "execFlags": 1
+    },
+    "playerParty": [
+     {
+      "species": 307,
+      "hp": 135
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 135,
+      "hp": 0
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "7dadc19eb90f6bc9f00b99c9253d15dff689d35f3e338039af8b1d310c116940"
+  },
+  "fpc177-b2-statup-agility-on.json": {
+   "meta": {
+    "case": "b2-statup-agility",
+    "scene": "on",
+    "description": "action 1 = Jolteon Agility (self stat up)",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       97,
+       97,
+       97,
+       97
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-on",
+   "turnOrderRow": 68,
+   "checkFocusPunchRows": [
+    69,
+    296
+   ],
+   "runTurnActionsRow": 297,
+   "messages": [
+    {
+     "row": 71,
+     "firstGlyph": 72,
+     "text": ""
+    },
+    {
+     "row": 198,
+     "firstGlyph": 199,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 302,
+     "firstGlyph": 303,
+     "text": "Foe JOLTEON used\nAGILITY!"
+    },
+    {
+     "row": 514,
+     "firstGlyph": 515,
+     "text": "Foe JOLTEON\u2019s SPEED\nsharply rose!"
+    },
+    {
+     "row": 623,
+     "firstGlyph": 624,
+     "text": "BRELOOM used\nFOCUS PUNCH!"
+    }
+   ],
+   "animSpans": [
+    {
+     "frame": 76,
+     "active": 1,
+     "script": "General_FocusPunchSetUp+0x3"
+    },
+    {
+     "frame": 196,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 333,
+     "active": 1,
+     "script": "Move_AGILITY"
+    },
+    {
+     "frame": 419,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 423,
+     "active": 1,
+     "script": "General_StatsChange+0x7"
+    },
+    {
+     "frame": 512,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 656,
+     "active": 1,
+     "script": "Move_FOCUS_PUNCH"
+    },
+    {
+     "frame": 809,
+     "active": 0,
+     "script": null
+    }
+   ],
+   "partyChanges": [],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 70,
+     "script": "BattleScript_FocusPunchSetUp"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 295,
+     "to": 11
+    },
+    {
+     "frame": 297,
+     "to": 0
+    },
+    {
+     "frame": 298,
+     "to": 10
+    },
+    {
+     "frame": 616,
+     "to": 11
+    },
+    {
+     "frame": 617,
+     "to": 12
+    },
+    {
+     "frame": 618,
+     "to": 0
+    },
+    {
+     "frame": 619,
+     "to": 10
+    }
+   ],
+   "randomCalls": 3,
+   "randomRows": [
+    622,
+    650,
+    653
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "actionFuncId": 10,
+     "turnActionNumber": 1,
+     "script": "BattleScript_HitFromAtkAnimation+0x5",
+     "currentMove": 264,
+     "attacker": 0,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      135,
+      140
+     ],
+     "species": [
+      307,
+      135
+     ],
+     "partyIndex": [
+      0,
+      0
+     ],
+     "execFlags": 2
+    },
+    "playerParty": [
+     {
+      "species": 307,
+      "hp": 135
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 135,
+      "hp": 140
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "3ee1bc3c9ed3c4d201c7a257b7b09f751cda368159c9c12e43b70e7efea9adf3"
+  },
+  "fpc177-b2-status-thunder-wave-off.json": {
+   "meta": {
+    "case": "b2-status-thunder-wave",
+    "scene": "off",
+    "description": "action 1 = Jolteon Thunder Wave (status ailment)",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       86,
+       86,
+       86,
+       86
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-off",
+   "turnOrderRow": 68,
+   "checkFocusPunchRows": [
+    69,
+    206
+   ],
+   "runTurnActionsRow": 207,
+   "messages": [
+    {
+     "row": 71,
+     "firstGlyph": 72,
+     "text": ""
+    },
+    {
+     "row": 108,
+     "firstGlyph": 109,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 210,
+     "firstGlyph": 211,
+     "text": "Foe JOLTEON used\nTHUNDER WAVE!"
+    },
+    {
+     "row": 288,
+     "firstGlyph": 289,
+     "text": "BRELOOM is paralyzed!\nIt may be unable to move!"
+    },
+    {
+     "row": 417,
+     "firstGlyph": 418,
+     "text": "BRELOOM is paralyzed!\nIt can\u2019t move!"
+    },
+    {
+     "row": 533,
+     "firstGlyph": 534,
+     "text": "What will\nBRELOOM do?"
+    }
+   ],
+   "animSpans": [],
+   "partyChanges": [],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 70,
+     "script": "BattleScript_FocusPunchSetUp"
+    },
+    {
+     "frame": 74,
+     "script": "BattleScript_Pausex20"
+    },
+    {
+     "frame": 250,
+     "script": "BattleScript_Pausex20"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 205,
+     "to": 11
+    },
+    {
+     "frame": 207,
+     "to": 0
+    },
+    {
+     "frame": 208,
+     "to": 10
+    },
+    {
+     "frame": 412,
+     "to": 11
+    },
+    {
+     "frame": 413,
+     "to": 12
+    },
+    {
+     "frame": 414,
+     "to": 0
+    },
+    {
+     "frame": 415,
+     "to": 10
+    },
+    {
+     "frame": 525,
+     "to": 11
+    },
+    {
+     "frame": 526,
+     "to": 12
+    },
+    {
+     "frame": 527,
+     "to": 0
+    }
+   ],
+   "randomCalls": 8,
+   "randomRows": [
+    248,
+    416,
+    529,
+    536,
+    537
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "HandleTurnActionSelectionState",
+     "actionFuncId": 0,
+     "turnActionNumber": 2,
+     "script": "BattleScript_MoveEnd+0x9",
+     "currentMove": 0,
+     "attacker": 0,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      135,
+      140
+     ],
+     "species": [
+      307,
+      135
+     ],
+     "partyIndex": [
+      0,
+      0
+     ],
+     "execFlags": 1
+    },
+    "playerParty": [
+     {
+      "species": 307,
+      "hp": 135
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 135,
+      "hp": 140
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "b23c469072fbde166306ce6348b24183ae9a099241a83c0d221ee44a8d245f05"
+  },
+  "fpc177-b2-status-thunder-wave-on.json": {
+   "meta": {
+    "case": "b2-status-thunder-wave",
+    "scene": "on",
+    "description": "action 1 = Jolteon Thunder Wave (status ailment)",
+    "seed": 305419897
+   },
+   "parties": {
+    "player": [
+     {
+      "species": 307,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 27,
+      "moves": [
+       202,
+       73,
+       264,
+       29
+      ],
+      "hp": 135,
+      "maxHp": 135,
+      "stats": {
+       "attack": 150,
+       "defense": 100,
+       "speed": 90,
+       "spAttack": 80,
+       "spDefense": 80
+      },
+      "level": 50,
+      "personality": 2349019075
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 777692550
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 3365026700
+     }
+    ],
+    "opponent": [
+     {
+      "species": 135,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 10,
+      "moves": [
+       86,
+       86,
+       86,
+       86
+      ],
+      "hp": 140,
+      "maxHp": 140,
+      "stats": {
+       "attack": 85,
+       "defense": 80,
+       "speed": 150,
+       "spAttack": 130,
+       "spDefense": 115
+      },
+      "level": 50,
+      "personality": 1793700000
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 86062825
+     },
+     {
+      "species": 129,
+      "item": 0,
+      "abilitySlot": 0,
+      "ability": 33,
+      "moves": [
+       150,
+       150,
+       150,
+       150
+      ],
+      "hp": 95,
+      "maxHp": 95,
+      "stats": {
+       "attack": 30,
+       "defense": 75,
+       "speed": 100,
+       "spAttack": 35,
+       "spDefense": 40
+      },
+      "level": 50,
+      "personality": 2809695375
+     }
+    ]
+   },
+   "seed": 305419897,
+   "oracleProfile": "battle-scene-on",
+   "turnOrderRow": 68,
+   "checkFocusPunchRows": [
+    69,
+    296
+   ],
+   "runTurnActionsRow": 297,
+   "messages": [
+    {
+     "row": 71,
+     "firstGlyph": 72,
+     "text": ""
+    },
+    {
+     "row": 198,
+     "firstGlyph": 199,
+     "text": "BRELOOM is tightening\nits focus!"
+    },
+    {
+     "row": 300,
+     "firstGlyph": 301,
+     "text": "Foe JOLTEON used\nTHUNDER WAVE!"
+    },
+    {
+     "row": 506,
+     "firstGlyph": 507,
+     "text": "BRELOOM is paralyzed!\nIt may be unable to move!"
+    },
+    {
+     "row": 635,
+     "firstGlyph": 636,
+     "text": "BRELOOM is paralyzed!\nIt can\u2019t move!"
+    },
+    {
+     "row": 790,
+     "firstGlyph": 791,
+     "text": "What will\nBRELOOM do?"
+    }
+   ],
+   "animSpans": [
+    {
+     "frame": 76,
+     "active": 1,
+     "script": "General_FocusPunchSetUp+0x3"
+    },
+    {
+     "frame": 196,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 342,
+     "active": 1,
+     "script": "Move_THUNDER_WAVE"
+    },
+    {
+     "frame": 461,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 466,
+     "active": 1,
+     "script": "Status_Paralysis+0x3"
+    },
+    {
+     "frame": 504,
+     "active": 0,
+     "script": null
+    },
+    {
+     "frame": 736,
+     "active": 1,
+     "script": "Status_Paralysis+0x3"
+    },
+    {
+     "frame": 774,
+     "active": 0,
+     "script": null
+    }
+   ],
+   "partyChanges": [],
+   "focusPunchScriptEntries": [
+    {
+     "frame": 70,
+     "script": "BattleScript_FocusPunchSetUp"
+    }
+   ],
+   "actionFuncIdChanges": [
+    {
+     "frame": 295,
+     "to": 11
+    },
+    {
+     "frame": 297,
+     "to": 0
+    },
+    {
+     "frame": 298,
+     "to": 10
+    },
+    {
+     "frame": 630,
+     "to": 11
+    },
+    {
+     "frame": 631,
+     "to": 12
+    },
+    {
+     "frame": 632,
+     "to": 0
+    },
+    {
+     "frame": 633,
+     "to": 10
+    },
+    {
+     "frame": 782,
+     "to": 11
+    },
+    {
+     "frame": 783,
+     "to": 12
+    },
+    {
+     "frame": 784,
+     "to": 0
+    }
+   ],
+   "randomCalls": 8,
+   "randomRows": [
+    338,
+    634,
+    786,
+    793,
+    794
+   ],
+   "final": {
+    "watch": {
+     "battleMainFunc": "HandleTurnActionSelectionState",
+     "actionFuncId": 0,
+     "turnActionNumber": 2,
+     "script": "BattleScript_MoveEnd+0x9",
+     "currentMove": 0,
+     "attacker": 0,
+     "animActive": 0,
+     "animScript": null,
+     "activeHp": [
+      135,
+      140
+     ],
+     "species": [
+      307,
+      135
+     ],
+     "partyIndex": [
+      0,
+      0
+     ],
+     "execFlags": 1
+    },
+    "playerParty": [
+     {
+      "species": 307,
+      "hp": 135
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "opponentParty": [
+     {
+      "species": 135,
+      "hp": 140
+     },
+     {
+      "species": 129,
+      "hp": 95
+     },
+     {
+      "species": 129,
+      "hp": 95
+     }
+    ],
+    "battleOutcome": 0
+   },
+   "framebufferSha256": "b23c469072fbde166306ce6348b24183ae9a099241a83c0d221ee44a8d245f05"
+  }
+ }
+}

@@ -1,0 +1,53 @@
+{
+ "schema": "fpc177-probe-sha256/v1",
+ "probes": {
+  "fpc177-a-switch-control-off.json": {
+   "r1": "1d8f3f6dff11f939401a9bbcee465427ddc32b60ea0b2807365fc8d6708a0902",
+   "r2": "1d8f3f6dff11f939401a9bbcee465427ddc32b60ea0b2807365fc8d6708a0902"
+  },
+  "fpc177-a-switch-control-on.json": {
+   "r1": "45aa9543e6afdaa171e1cc3320297acdcab04c301564721bb3dbaf95721569c3",
+   "r2": "45aa9543e6afdaa171e1cc3320297acdcab04c301564721bb3dbaf95721569c3"
+  },
+  "fpc177-a-switch-off.json": {
+   "r1": "5d7266a5c465442bad861c4045b19999cbb37b053e9a9e51bc9282aa36f0edfc",
+   "r2": "5d7266a5c465442bad861c4045b19999cbb37b053e9a9e51bc9282aa36f0edfc"
+  },
+  "fpc177-a-switch-on.json": {
+   "r1": "2474259729c9a1afb326fe86b3cfa9624bf0149a9f3de265ddff23d404684501",
+   "r2": "2474259729c9a1afb326fe86b3cfa9624bf0149a9f3de265ddff23d404684501"
+  },
+  "fpc177-b1-two-users-off.json": {
+   "r1": "67106a4ab4a5917d6123360ea91ebcb742cb0bccb49856e0f4992f067c609444",
+   "r2": "67106a4ab4a5917d6123360ea91ebcb742cb0bccb49856e0f4992f067c609444"
+  },
+  "fpc177-b1-two-users-on.json": {
+   "r1": "cd74447a1b83487932ce93e48e7608261e5979d7b081bf37b824922962238d66",
+   "r2": "cd74447a1b83487932ce93e48e7608261e5979d7b081bf37b824922962238d66"
+  },
+  "fpc177-b2-hit-scratch-off.json": {
+   "r1": "00e54a62b115068ad35f3cd3e7336bdac995616b5d0401ad75ad0c5bf4dbdeb8",
+   "r2": "00e54a62b115068ad35f3cd3e7336bdac995616b5d0401ad75ad0c5bf4dbdeb8"
+  },
+  "fpc177-b2-hit-scratch-on.json": {
+   "r1": "4c5c851f3175d460da828c99bf5ffdc46bc64079992a0d8c7514796ed9503fed",
+   "r2": "4c5c851f3175d460da828c99bf5ffdc46bc64079992a0d8c7514796ed9503fed"
+  },
+  "fpc177-b2-statup-agility-off.json": {
+   "r1": "a190526314f54a6660e121cc2b1babb9105061d833d12e826842ba14948da063",
+   "r2": "a190526314f54a6660e121cc2b1babb9105061d833d12e826842ba14948da063"
+  },
+  "fpc177-b2-statup-agility-on.json": {
+   "r1": "74d43a319740504101d8bcfe27e17c5d7275bc7b234deb1e2858a9671b566d63",
+   "r2": "74d43a319740504101d8bcfe27e17c5d7275bc7b234deb1e2858a9671b566d63"
+  },
+  "fpc177-b2-status-thunder-wave-off.json": {
+   "r1": "17e85e2c60d756fdcf3d17dab030637b8bdb221b951f26a80d02b91eabb99ef5",
+   "r2": "17e85e2c60d756fdcf3d17dab030637b8bdb221b951f26a80d02b91eabb99ef5"
+  },
+  "fpc177-b2-status-thunder-wave-on.json": {
+   "r1": "fe1a64e764b198bf855c008df9e9e6f0965755b5fef457047b9bdeb8d0a38e12",
+   "r2": "fe1a64e764b198bf855c008df9e9e6f0965755b5fef457047b9bdeb8d0a38e12"
+  }
+ }
+}

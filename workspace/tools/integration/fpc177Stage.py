@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """fpc177: stage the Focus Punch edge-route cards (ISSUES #139) from the R4 BRELOOM-vs-JOLTEON template, Scene OFF and ON.
-  a-switch      player voluntary switch (Pokemon -> party slot 1 -> SHIFT) against an opponent BRELOOM that picks Focus Punch (x4 slots)
+  a-switch(-control) player voluntary switch (Pokemon -> party slot 1 -> SHIFT) against an opponent BRELOOM that picks Focus Punch (x4 slots)
   b1-two-users  player BRELOOM (Focus Punch, slot 2) vs opponent HITMONLEE (Focus Punch x4): two pre-passes in one turn
   b2-*          R4 card (player BRELOOM Focus Punch vs faster JOLTEON) with Jolteon's action-1 move swapped: Scratch / Thunder Wave / Agility
 usage: fpc177Stage.py <out-dir>   (also writes <out-dir>/../scenario-index.json)
@@ -29,6 +29,8 @@ bench = lambda: [mon(MAGI, [150] * 4), mon(MAGI, [150] * 4)]
 CASES = {  # slug: (player party, opponent party, trace head, idle frames, description)
     "a-switch": ([mon(JOLT, [28] * 4)] + bench(), [mon(BREL, [264] * 4)] + bench(), SWITCH_TRACE, 1300,
                  "player JOLTEON voluntarily switches to MAGIKARP; opponent BRELOOM Focus Punch x4"),
+    "a-switch-control": ([mon(JOLT, [28] * 4)] + bench(), [mon(BREL, [202] * 4)] + bench(), SWITCH_TRACE, 1000,
+                         "control: the same switch against an opponent BRELOOM that picks Giga Drain (no pre-pass); calibrates the recall row"),
     "b1-two-users": ([mon(BREL, FOCUS)] + bench(), [mon(HITL, [264] * 4)] + bench(), FP_TRACE, 1500,
                      "player BRELOOM Focus Punch + opponent HITMONLEE Focus Punch: two pre-passes"),
     "b2-hit-scratch": ([mon(BREL, FOCUS)] + bench(), [mon(JOLT, [10] * 4)] + bench(), FP_TRACE, 766, "action 1 = Jolteon Scratch (hit)"),

@@ -11,6 +11,18 @@
   "description": "player JOLTEON voluntarily switches to MAGIKARP; opponent BRELOOM Focus Punch x4",
   "seed": 305419897
  },
+ "fpc177-a-switch-control-off.json": {
+  "case": "a-switch-control",
+  "scene": "off",
+  "description": "control: the same switch against an opponent BRELOOM that picks Giga Drain (no pre-pass); calibrates the recall row",
+  "seed": 305419897
+ },
+ "fpc177-a-switch-control-on.json": {
+  "case": "a-switch-control",
+  "scene": "on",
+  "description": "control: the same switch against an opponent BRELOOM that picks Giga Drain (no pre-pass); calibrates the recall row",
+  "seed": 305419897
+ },
  "fpc177-b1-two-users-off.json": {
   "case": "b1-two-users",
   "scene": "off",
