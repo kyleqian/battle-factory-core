@@ -23,8 +23,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   lost slot), so the port's turn-start clear is equivalent. Supervisor: fresh enc173-rol rerun byte-identical; 5 receipt files 63 / 63;
   typecheck 0. Worker stopped before its unneeded full suite (tooling/evidence only). ISSUES #171 removed.
 - **Fifth gate on `5e78e4030`:** winning --vary-rng carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
-- **Next:**  Transform live body (#153), Substitute HP
-  timing, Focus Punch edge routes (#139), Wish / charge "used" handoffs (#167).
+- **trf174 (#153 Transform, integration, Opus; clean fold on `78e61e8c1`):** Move_TRANSFORM body live in both scenes (109 rows:
+  mosaic 1..15, species swap row 49, back to 0) + the transformed field (copied pic, whitened palette, elevation / shadow) until
+  switch-out. Supervisor reproduced fresh: 8 / 8 windows (ON / OFF x player / opponent DITTO x SLOWBRO / GOLBAT) r1 == r2,
+  **109 / 109 rows 0 px**, field **140 / 140 rows 0 px**. Worker: census both scenes digests identical (only battle 197 changes),
+  differential 641 / 641, full suite **13,909 passed / 0 failed**, build OK, soak vanilla 0:20 **20 / 20 OK**
+  (evidence `.integration/validation/from-workers/trf174/`). Supervisor on the fold: smoke 448, `trf174Transform.test.ts` 5 / 5.
+- **0:60 gates (frozen worktree `78e61e8c1`, src == `5e78e4030`):** seeds 0..20 / 0..34 serial, the rest re-split with --parallel
+  after measuring ~7.5 min/seed for winning (per-seed lines are identical by design) — running.
+- **Next:** msg175 ("used" message duration + #167 a/d anchors) running; then Substitute HP timing (#153), Focus Punch edge
+  routes (#139), Transform inventory accounting.
 
 ---
 
