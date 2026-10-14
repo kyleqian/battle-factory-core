@@ -29,8 +29,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **109 / 109 rows 0 px**, field **140 / 140 rows 0 px**. Worker: census both scenes digests identical (only battle 197 changes),
   differential 641 / 641, full suite **13,909 passed / 0 failed**, build OK, soak vanilla 0:20 **20 / 20 OK**
   (evidence `.integration/validation/from-workers/trf174/`). Supervisor on the fold: smoke 448, `trf174Transform.test.ts` 5 / 5.
-- **0:60 gates (frozen worktree `78e61e8c1`, src == `5e78e4030`):** seeds 0..20 / 0..34 serial, the rest re-split with --parallel
-  after measuring ~7.5 min/seed for winning (per-seed lines are identical by design) — running.
+- **0:60 gates (frozen worktree `78e61e8c1`, src == `5e78e4030`, the session's only engine change):** full 0:60 **60 / 60**,
+  winning 0:60 **60 / 60**, winning-swap 0:60 **60 / 60** OK (all budget-ended; seeds 0..34 / 0..20 / 0..20 serial, the rest with
+  --parallel after measuring ~7.5 min/seed). With vanilla 20 / 20 and the fifth gate 4 x 100 / 100, all five gameplay gates are green.
 - **Next:** msg175 ("used" message duration + #167 a/d anchors) running; then Substitute HP timing (#153), Focus Punch edge
   routes (#139), Transform inventory accounting.
 
