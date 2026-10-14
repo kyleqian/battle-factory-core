@@ -17,6 +17,8 @@ history.
   trf174 added a job-limited pool (`trf174Census.sh`, `TRF174_CENSUS_JOBS`) (~15 min). (4) `pkill -f <pattern>` killed the
   worker's own shell (~3 min; same class as the mgba entry below). (5) `run-subagent.sh` prints
   `[claude-code:unrecognized_model] claude-sonnet-5-5` at launch; harmless (the worker initializes on that model).
+  (6) `off108Run.sh` / `off148Run.sh` hard-code the Mac mGBA venv path (`/Users/kyle/...`); CAX31 uses
+  `/srv/pokebench/vendor/mgba-venv/bin/python` (~10 min; `trn176Run.sh` takes `TRN176_PY`).
   (Fixed this session: `check-oracle-freshness.sh` used BSD-only `date` flags and compared against every game commit.)
 - **Hits:** 1 session (2026-10-14), ~1.5 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
