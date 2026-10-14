@@ -1,0 +1,74 @@
+{
+ "fpc177-a-switch-off.json": {
+  "case": "a-switch",
+  "scene": "off",
+  "description": "player JOLTEON voluntarily switches to MAGIKARP; opponent BRELOOM Focus Punch x4",
+  "seed": 305419897
+ },
+ "fpc177-a-switch-on.json": {
+  "case": "a-switch",
+  "scene": "on",
+  "description": "player JOLTEON voluntarily switches to MAGIKARP; opponent BRELOOM Focus Punch x4",
+  "seed": 305419897
+ },
+ "fpc177-a-switch-control-off.json": {
+  "case": "a-switch-control",
+  "scene": "off",
+  "description": "control: the same switch against an opponent BRELOOM that picks Giga Drain (no pre-pass); calibrates the recall row",
+  "seed": 305419897
+ },
+ "fpc177-a-switch-control-on.json": {
+  "case": "a-switch-control",
+  "scene": "on",
+  "description": "control: the same switch against an opponent BRELOOM that picks Giga Drain (no pre-pass); calibrates the recall row",
+  "seed": 305419897
+ },
+ "fpc177-b1-two-users-off.json": {
+  "case": "b1-two-users",
+  "scene": "off",
+  "description": "player BRELOOM Focus Punch + opponent HITMONLEE Focus Punch: two pre-passes",
+  "seed": 305419897
+ },
+ "fpc177-b1-two-users-on.json": {
+  "case": "b1-two-users",
+  "scene": "on",
+  "description": "player BRELOOM Focus Punch + opponent HITMONLEE Focus Punch: two pre-passes",
+  "seed": 305419897
+ },
+ "fpc177-b2-hit-scratch-off.json": {
+  "case": "b2-hit-scratch",
+  "scene": "off",
+  "description": "action 1 = Jolteon Scratch (hit)",
+  "seed": 305419897
+ },
+ "fpc177-b2-hit-scratch-on.json": {
+  "case": "b2-hit-scratch",
+  "scene": "on",
+  "description": "action 1 = Jolteon Scratch (hit)",
+  "seed": 305419897
+ },
+ "fpc177-b2-status-thunder-wave-off.json": {
+  "case": "b2-status-thunder-wave",
+  "scene": "off",
+  "description": "action 1 = Jolteon Thunder Wave (status ailment)",
+  "seed": 305419897
+ },
+ "fpc177-b2-status-thunder-wave-on.json": {
+  "case": "b2-status-thunder-wave",
+  "scene": "on",
+  "description": "action 1 = Jolteon Thunder Wave (status ailment)",
+  "seed": 305419897
+ },
+ "fpc177-b2-statup-agility-off.json": {
+  "case": "b2-statup-agility",
+  "scene": "off",
+  "description": "action 1 = Jolteon Agility (self stat up)",
+  "seed": 305419897
+ },
+ "fpc177-b2-statup-agility-on.json": {
+  "case": "b2-statup-agility",
+  "scene": "on",
+  "description": "action 1 = Jolteon Agility (self stat up)",
+  "seed": 305419897
+ }
+}
