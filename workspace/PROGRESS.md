@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-14 — CAX31 session: enc160 + plr162 folded (supervisor, in progress)
+## 2026-10-14 — CAX31 session: enc160 / plr162 / enc173 / trf174 / msg175 folded (supervisor)
 
 - **State:** master `5e78e4030` = enc160 (`worker/side-20261013-160913`, #172 engine: a LOCKED + ENCORED battler takes
   `HandleAction_UseMove`'s locked arm, no retarget draw) + plr162 (`worker/integration-20261013-163536`, #146 Scene OFF forced
@@ -32,8 +32,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **0:60 gates (frozen worktree `78e61e8c1`, src == `5e78e4030`, the session's only engine change):** full 0:60 **60 / 60**,
   winning 0:60 **60 / 60**, winning-swap 0:60 **60 / 60** OK (all budget-ended; seeds 0..34 / 0..20 / 0..20 serial, the rest with
   --parallel after measuring ~7.5 min/seed). With vanilla 20 / 20 and the fifth gate 4 x 100 / 100, all five gameplay gates are green.
-- **Next:** msg175 ("used" message duration + #167 a/d anchors) running; then Substitute HP timing (#153), Focus Punch edge
-  routes (#139), Transform inventory accounting.
+- **msg175 (#167 (a), integration, Opus; folded `68efe8acb` + `3937ecad0`):** the "used" print lasts its printable length L
+  (one glyph per row, 72 / 72 committed ROM uses both scenes) instead of a 24-frame floor; Scene OFF Wish pause lands (residual 0 / 0).
+  Census both scenes: kernel digests identical, ~35k used prints retimed, 0 unattributed; differential 641 / 641. Supervisor:
+  `msg175Anchors.ts` output identical; fresh ROM probe of off148-wish-ply byte-identical to its committed sha. Worker hit its cap
+  mid-suite with 7 failures: all frame-total pins, re-pinned by the supervisor with cause (soak seeds 0 / 1 / 21: same battle /
+  turn / end state; sgl138's 8 battles: regenerated receipt differs only in `frames`).
+- **Final gates on `3937ecad0`:** running (typecheck, smoke, full suite, build, soak vanilla 0:20).
+- **Next:** #167 (a') the uniform -12 action-transition hold (MoveEnd + dispatch, both scenes); Substitute HP timing −6 (#153);
+  Focus Punch edge routes (#139 a/b); Transform inventory accounting + other bodies over a transformed battler; #146 Scene ON forced
+  player send-in message.
 
 ---
 

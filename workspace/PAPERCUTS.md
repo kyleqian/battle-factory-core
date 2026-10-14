@@ -8,6 +8,20 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## CAX31 (16 GiB ARM) host friction, 2026-10-14
+
+- **What / cost:** (1) Gate wall-clock: vanilla 0:20 soak ~45 min, winning / winning-swap 0:60 ~7.5 min per seed serial (~7.5 h
+  each); the supervisor had to split the seed ranges mid-run (~1 h of schedule). (2) The full suite (~47 min) exceeds the 10-min
+  tool limit; a worker hand-chunked it, a killed chunk left orphaned vitest forks holding ~10 GB, and the retry was OOM-killed
+  (~15 min). Run it under `nohup` with a summary file instead. (3) Census scripts launch 10 shards per arm, too many for 16 GiB;
+  trf174 added a job-limited pool (`trf174Census.sh`, `TRF174_CENSUS_JOBS`) (~15 min). (4) `pkill -f <pattern>` killed the
+  worker's own shell (~3 min; same class as the mgba entry below). (5) `run-subagent.sh` prints
+  `[claude-code:unrecognized_model] claude-sonnet-5-5` at launch; harmless (the worker initializes on that model).
+  (Fixed this session: `check-oracle-freshness.sh` used BSD-only `date` flags and compared against every game commit.)
+- **Hits:** 1 session (2026-10-14), ~1.5 h total.
+- **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
+  and the supervisor; census job limit from `/etc/pokebench-runner.env`.
+
 ## Tooling gaps hit on 2026-10-11 (S10A afternoon)
 
 - **What / cost:** (1) Evidence runners hard-code their base revision and patch-apply their own banked diff (off108Run.sh,

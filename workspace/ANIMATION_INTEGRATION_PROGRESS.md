@@ -7,6 +7,9 @@
   `trf174Field.ts` 140 / 140 rows 0 px (own / unblended controls nonzero). Census both scenes: kernel digests identical; only battle 197
   (CHANSEY Metronome -> Transform) moves. Differential 641 / 641. Not yet in `LIVE_MOVE_ANIMATION_IDS` / live-status counts.
 - **plr162 (INTEGRATION, folded from the Mac's saved ref):** Scene OFF forced player send-in tail; supervisor reproduced CASTFORM fresh.
+- **msg175 (INTEGRATION, Opus):** "used" print = printable length (no 24-frame floor), Scene OFF Wish pause (#167 (a)); census both
+  scenes digests identical, every retimed print attributed; supervisor reproduced the anchor table and a fresh off148 Wish probe.
+  docs/msg175-used-message-duration.md.
 - Union gates and engine folds: see PROGRESS.md 2026-10-14.
 
 ## 2026-10-13 (day, in progress) — finish-up session: engine fixes #165 / #141b / #140 + presentation landings

@@ -35,8 +35,10 @@ windows (the next message one frame late); cause named, not proven.
 
 Landed: olnd113, scf117, off121, fix122 (see git), and off148 (2026-10-13, docs/off148-scene-off-pauses-remainder.md): Rest (466 / 466
 census bodies) and the stat-stage-change-next class (Curse / Swagger / Flatter / Tickle, 401 / 401) land on the ROM row (anchor table
-5 / 5 classes residual 0). Open: (a) Wish (155 bodies): the next drawn change is the next action's "used" message, whose production length
-(fixed 24-frame minimum) differs from the ROM's 20 / 16 rows — choose the anchor with that message; (b) sprite-visibility next after Roar /
+5 / 5 classes residual 0). (a) Wish: LANDED by msg175 (2026-10-14, docs/msg175-used-message-duration.md; the "used" print now lasts its printable
+length L, 72 / 72 ROM uses; Scene OFF Wish residual 0 / 0; Wish then end of turn / switch / pre-move print unmeasured). Open: (a') the
+action transition: the Scene OFF no-hit -> next "used" edge is a uniform -12 (Bulk Up / Double Team / Sand-Attack / Protect / Detect /
+Agility; ON adds -3 .. -6), a single source-derived MoveEnd + dispatch hold looks landable; (b) sprite-visibility next after Roar /
 Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);
 (c) nothing next (35, player Baton Pass: the party menu opens; unstaged); (d) charge turn (chg161, docs/chg161-charge-turn-print.md: the
 box now lands the charge glyph, OFF 3 / 3, ON 2 / 3 + Razor Wind -1 adapter): Scene ON's live charge animation starts 7 rows late (the box
