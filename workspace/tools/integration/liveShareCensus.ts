@@ -33,6 +33,9 @@ import movesJson from "../../src/data/gen/moves.json" with { type: "json" };
 import monsJson from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import policyJson from "../../src/data/gen/factory-round-policy.json" with { type: "json" };
 import { classifyDurationDecline, classifyPresentationDecline, type Decline } from "./liveShareCensusGates.ts";
+// trf174: Transform (144) renders through renderLiveTransformBody when liveMoveAnimationDuration has its case (absent on older trees,
+// which this overlaid census also runs: there the id never reaches the branch with a non-null duration).
+const LIVE_TRANSFORM_MOVE_ID = 144;
 
 const arg = (name: string, fallback?: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 const battleScene = arg("scene", "on") as "on" | "off";
@@ -144,6 +147,9 @@ function playBattle(battle: number, seed: number, streak: number): void {
       // renderBattleResolutionLiveView's own decision order.
       const swap = liveSubstituteSwapView(view);
       if (swap?.kind === "swap") { live = true; rec.swapFrames++; }
+      // trf174: the renderer's live Transform body (renderLiveTransformBody), before the adapter presentation.
+      else if (view.effect.request.moveId === LIVE_TRANSFORM_MOVE_ID
+        && liveMoveAnimationDuration(view.effect.request, (swap ? swap.view : view).field) !== null) live = true;
       else {
         const v = swap ? swap.view : view, e = v.effect;
         if (e?.type === "move") {
