@@ -138,9 +138,9 @@ export function transitionInputs(a: any[], b: any[]): Transition | { reason: str
 }
 
 /** The production rows of the transition: the anchor command's end and the next action's "used" start. */
-function productionGap(rows: Row[], usedTexts: [string, string]) {
+function productionGap(rows: Row[], usedTexts: [string, string], chargeOpener: boolean) {
   const second = rows.find((row) => row.type === "message" && row.text.startsWith(usedTexts[1] + " used"));
-  const first = rows.find((row) => row.type === "message" && row.text.startsWith(usedTexts[0] + " used"));
+  const first = chargeOpener ? rows[0] : rows.find((row) => row.type === "message" && row.text.startsWith(usedTexts[0] + " used"));
   if (!second || !first) return null;
   let anchor: Row | null = null;
   for (const row of rows) if (row.start >= first.start && row.start < second.start && (row.type === "message" || row.type === "hp" || row.type === "status-icon") && row !== first) anchor = row;
@@ -211,7 +211,7 @@ export function trn176Evaluate(c: Case) {
   if ("reason" in t) return { ...result, skipped: t.reason };
   const firstName = uses[0].atk === 0 ? playerSpecies : `Foe ${opponentSpecies}`;
   const secondName = uses[1].atk === 0 ? playerSpecies : `Foe ${opponentSpecies}`;
-  const gap = productionGap(prod.rows, [firstName, secondName]);
+  const gap = productionGap(prod.rows, [firstName, secondName], uses[0].opener === "EMPTYSTRING3");
   if (gap === null) return { ...result, skipped: "no used rows" };
   const prodEdge = gap.secondStart - gap.firstStart;
   const pause = t.required - gap.gap;
@@ -220,6 +220,9 @@ export function trn176Evaluate(c: Case) {
     productionEdge: prodEdge, residual: prodEdge - c.romEdge, anchor: gap.anchor, between: gap.gap, pause, predictedResidual: prodEdge + pause - c.romEdge,
     anchorFrames: gap.anchorFrames, romWaitRows: rom?.waitRows ?? null, anchorDelta: rom?.waitRows == null ? null : gap.anchorFrames - rom.waitRows,
     anchorEndDelta: rom?.waitRows == null || rom?.waitGlyph == null || gap.anchorType === "status-icon" ? null : gap.anchorStart - gap.firstStart - rom.waitGlyph + gap.anchorFrames - rom.waitRows + 1,
+    // ROM-only check of the rule, independent of production: rows from the anchor's release E (the last row of the controller wait run) to the next first glyph.
+    romCheck: rom?.waitRows == null || rom?.waitGlyph == null || gap.anchorType === "status-icon" ? null
+      : c.romEdge - (rom.waitGlyph + rom.waitRows - 2) - (1 + t.d + t.n + 6 + t.u),
     romWaitGlyph: rom?.waitGlyph ?? null, anchorStartDelta: rom?.waitGlyph == null ? null : gap.anchorStart - gap.firstStart - rom.waitGlyph,
   };
 }
@@ -236,7 +239,7 @@ if (process.argv[1]?.endsWith("trn176Predict.ts")) {
     console.log("fixture/scenario scene | class | e1 n u d | ROM glyph-m0 (rule) | ROM edge | prod edge (resid) | between | P | predicted resid");
     for (const r of results) {
       if (r.skipped) { console.log(`${r.name} ${r.scene} | ${r.class} | skipped: ${r.skipped}`); continue; }
-      console.log(`${r.name} ${r.scene} | ${r.class} | e1 ${r.e1} n ${r.n} u ${r.u} d ${r.d} (${r.anchorKind}) | ROM ${r.rom?.glyphFromM0 ?? "?"} (rule ${r.rom?.ruleGlyphFromM0}; rom n ${r.rom?.n}) | ${r.romEdge} | ${r.productionEdge} (${r.residual}) | ${r.between} | P ${r.pause} | ${r.predictedResidual} | anchor ${r.anchor} vs ROM wait ${r.romWaitRows} (${r.anchorDelta}) start Δ ${r.anchorStartDelta} => anchor-end Δ ${r.anchorEndDelta}`);
+      console.log(`${r.name} ${r.scene} | ${r.class} | e1 ${r.e1} n ${r.n} u ${r.u} d ${r.d} (${r.anchorKind}) | ROM ${r.rom?.glyphFromM0 ?? "?"} (rule ${r.rom?.ruleGlyphFromM0}; rom n ${r.rom?.n}) | ${r.romEdge} | ${r.productionEdge} (${r.residual}) | ${r.between} | P ${r.pause} | ${r.predictedResidual} | anchor ${r.anchor} vs ROM wait ${r.romWaitRows} (${r.anchorDelta}) start Δ ${r.anchorStartDelta} => anchor-end Δ ${r.anchorEndDelta} | ROM-only rule check ${r.romCheck}`);
     }
   }
 }

@@ -1,0 +1,25 @@
+{
+ "schema": "trn176-probe-sha256/v1",
+ "probes": {
+  "trn176-double-edge-ply-off.json": {
+   "r1": "c1030ce6144461f0acf4a53b2769950c7e6349036370e292058883ab17305f38",
+   "r2": "c1030ce6144461f0acf4a53b2769950c7e6349036370e292058883ab17305f38"
+  },
+  "trn176-fire-punch-ply-off.json": {
+   "r1": "08d82bc60d0094d25fb263126497de5f2d173f0e0d3a1252978debf7eb514f06",
+   "r2": "08d82bc60d0094d25fb263126497de5f2d173f0e0d3a1252978debf7eb514f06"
+  },
+  "trn176-karate-chop-ply-off.json": {
+   "r1": "3d663fac0546bdf833ab2ee815a1acf22b7b6940f8062b318d69c8607b5cef32",
+   "r2": "3d663fac0546bdf833ab2ee815a1acf22b7b6940f8062b318d69c8607b5cef32"
+  },
+  "trn176-scratch-opp-off.json": {
+   "r1": "86349016a3cb688c96689a67ef56782f5e342682462bb75906add8fc3369edf3",
+   "r2": "86349016a3cb688c96689a67ef56782f5e342682462bb75906add8fc3369edf3"
+  },
+  "trn176-scratch-ply-off.json": {
+   "r1": "4905c738ec0cf606ff8133bece60ce93f2fdf52de359b6dad84578c83ecc7e34",
+   "r2": "4905c738ec0cf606ff8133bece60ce93f2fdf52de359b6dad84578c83ecc7e34"
+  }
+ }
+}

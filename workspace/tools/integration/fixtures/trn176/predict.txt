@@ -1,39 +1,44 @@
 fixture/scenario scene | class | e1 n u d | ROM glyph-m0 (rule) | ROM edge | prod edge (resid) | between | P | predicted resid
-off108-bulk-up-ply-primeape-onix off | stat | e1 180 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 332 | 320 (-12) | 1 | P 12 | 0 | anchor message@231+88 vs ROM wait 88 (0) start Δ -1 => anchor-end Δ 0
-off108-bulk-up-ply-primeape-onix on | stat | e1 147 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 409 | 393 (-16) | 1 | P 12 | -4 | anchor message@304+88 vs ROM wait 88 (0) start Δ -5 => anchor-end Δ -4
-off108-double-team-ply-primeape-onix off | stat | e1 111 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 247 | 235 (-12) | 1 | P 12 | 0 | anchor message@143+91 vs ROM wait 92 (-1) start Δ 0 => anchor-end Δ 0
-off108-double-team-ply-primeape-onix on | stat | e1 78 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 375 | 358 (-17) | 1 | P 12 | -5 | anchor message@266+91 vs ROM wait 92 (-1) start Δ -5 => anchor-end Δ -5
-off108-sand-attack-ply-primeape-snorlax off | stat | e1 114 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 248 | 236 (-12) | 2 | P 12 | 0 | anchor message@143+91 vs ROM wait 92 (-1) start Δ 0 => anchor-end Δ 0
-off108-sand-attack-ply-primeape-snorlax on | stat | e1 81 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 276 | 258 (-18) | 2 | P 12 | -6 | anchor message@165+91 vs ROM wait 92 (-1) start Δ -6 => anchor-end Δ -6
+off108-bulk-up-ply-primeape-onix off | stat | e1 180 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 332 | 320 (-12) | 1 | P 12 | 0 | anchor message@231+88 vs ROM wait 88 (0) start Δ -1 => anchor-end Δ 0 | ROM-only rule check 0
+off108-bulk-up-ply-primeape-onix on | stat | e1 147 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 409 | 393 (-16) | 1 | P 12 | -4 | anchor message@304+88 vs ROM wait 88 (0) start Δ -5 => anchor-end Δ -4 | ROM-only rule check 0
+off108-double-team-ply-primeape-onix off | stat | e1 111 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 247 | 235 (-12) | 1 | P 12 | 0 | anchor message@143+91 vs ROM wait 92 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
+off108-double-team-ply-primeape-onix on | stat | e1 78 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 375 | 358 (-17) | 1 | P 12 | -5 | anchor message@266+91 vs ROM wait 92 (-1) start Δ -5 => anchor-end Δ -5 | ROM-only rule check 0
+off108-sand-attack-ply-primeape-snorlax off | stat | e1 114 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 248 | 236 (-12) | 2 | P 12 | 0 | anchor message@143+91 vs ROM wait 92 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
+off108-sand-attack-ply-primeape-snorlax on | stat | e1 81 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 276 | 258 (-18) | 2 | P 12 | -6 | anchor message@165+91 vs ROM wait 92 (-1) start Δ -6 => anchor-end Δ -6 | ROM-only rule check 0
 off108-confuse-ray-ply-primeape-snorlax off | status | skipped: next action does not open with a USEDMOVE print
-off108-toxic-ply-primeape-onix off | status | e1 124 n 2 u 4 d 6 (icon) | ROM 12 (rule 12; rom n 2) | 180 | 162 (-18) | 2 | P 16 | -2 | anchor status-icon@159+1 vs ROM wait 91 (-90) start Δ 90 => anchor-end Δ null
-off108-toxic-ply-primeape-onix on | status | e1 91 n 2 u 4 d 6 (icon) | ROM 12 (rule 12; rom n 2) | 451 | 414 (-37) | 2 | P 16 | -21 | anchor status-icon@411+1 vs ROM wait 91 (-90) start Δ 71 => anchor-end Δ null
+off108-toxic-ply-primeape-onix off | status | e1 124 n 2 u 4 d 6 (icon) | ROM 12 (rule 12; rom n 2) | 180 | 162 (-18) | 2 | P 16 | -2 | anchor status-icon@159+1 vs ROM wait 91 (-90) start Δ 90 => anchor-end Δ null | ROM-only rule check null
+off108-toxic-ply-primeape-onix on | status | e1 91 n 2 u 4 d 6 (icon) | ROM 12 (rule 12; rom n 2) | 451 | 414 (-37) | 2 | P 16 | -21 | anchor status-icon@411+1 vs ROM wait 91 (-90) start Δ 71 => anchor-end Δ null | ROM-only rule check null
 off108-thunder-wave-ply-primeape-snorlax off | status | skipped: next action does not open with a USEDMOVE print
 off108-thunder-wave-ply-primeape-snorlax on | status | skipped: next action does not open with a USEDMOVE print
-off108-protect-ply-primeape-onix off | protect | e1 107 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 162 | 150 (-12) | 1 | P 12 | 0 | anchor message@60+89 vs ROM wait 90 (-1) start Δ 0 => anchor-end Δ 0
-off108-protect-ply-primeape-onix on | protect | e1 74 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 254 | 239 (-15) | 1 | P 12 | -3 | anchor message@149+89 vs ROM wait 90 (-1) start Δ -3 => anchor-end Δ -3
-off108-detect-ply-primeape-onix off | protect | e1 107 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 161 | 149 (-12) | 1 | P 12 | 0 | anchor message@59+89 vs ROM wait 90 (-1) start Δ 0 => anchor-end Δ 0
-off108-detect-ply-primeape-onix on | protect | e1 74 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 240 | 225 (-15) | 1 | P 12 | -3 | anchor message@135+89 vs ROM wait 90 (-1) start Δ -3 => anchor-end Δ -3
-off108-rest-ply-snorlax-onix off | rest | e1 57 n 2 u 2 d 7 (hp) | ROM 10 (rule 10; rom n 2) | 124 | 127 (3) | 2 | P 15 | 18 | anchor hp@97+28 vs ROM wait 10 (18) start Δ -1 => anchor-end Δ 18
-off108-rest-ply-snorlax-onix on | rest | e1 24 n 2 u 2 d 7 (hp) | ROM 10 (rule 10; rom n 2) | 135 | 117 (-18) | 2 | P 15 | -3 | anchor hp@87+28 vs ROM wait 10 (18) start Δ -22 => anchor-end Δ -3
-off108-dig-ply-primeape-snorlax off | two-turn | skipped: no used rows
-off108-dig-ply-primeape-snorlax on | two-turn | skipped: no used rows
-off108-razor-wind-ply-primeape-snorlax off | two-turn | skipped: no used rows
-off108-razor-wind-ply-primeape-snorlax on | two-turn | skipped: no used rows
-off108-solar-beam-ply-primeape-snorlax off | two-turn | skipped: no used rows
-off108-solar-beam-ply-primeape-snorlax on | two-turn | skipped: no used rows
-off108-snore-ply-primeape-snorlax off | failed | e1 106 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 148 | 146 (-2) | 2 | P 12 | 10 | anchor message@56+88 vs ROM wait 79 (9) start Δ 0 => anchor-end Δ 10
-off108-snore-ply-primeape-snorlax on | failed | e1 106 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 148 | 146 (-2) | 2 | P 12 | 10 | anchor message@56+88 vs ROM wait 79 (9) start Δ 0 => anchor-end Δ 10
-off108-dynamic-punch-ply-machamp-snorlax off | miss | e1 108 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 162 | 151 (-11) | 2 | P 12 | 1 | anchor message@61+88 vs ROM wait 88 (0) start Δ 0 => anchor-end Δ 1
-off108-dynamic-punch-ply-machamp-snorlax on | miss | e1 108 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 162 | 151 (-11) | 2 | P 12 | 1 | anchor message@61+88 vs ROM wait 88 (0) start Δ 0 => anchor-end Δ 1
-off108-dynamic-punch-opp-machamp-snorlax off | miss | e1 108 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 170 | 158 (-12) | 2 | P 12 | 0 | anchor message@65+91 vs ROM wait 92 (-1) start Δ 0 => anchor-end Δ 0
-off108-dynamic-punch-opp-machamp-snorlax on | miss | e1 108 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 170 | 158 (-12) | 2 | P 12 | 0 | anchor message@65+91 vs ROM wait 92 (-1) start Δ 0 => anchor-end Δ 0
-off148-curse-ply off | stat-stage | e1 246 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 341 | 331 (-10) | 1 | P 12 | 2 | anchor message@242+88 vs ROM wait 88 (0) start Δ 1 => anchor-end Δ 2
-off148-curse-opp off | stat-stage | e1 246 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 357 | 341 (-16) | 1 | P 12 | -4 | anchor message@249+91 vs ROM wait 92 (-1) start Δ -4 => anchor-end Δ -4
+off108-protect-ply-primeape-onix off | protect | e1 107 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 162 | 150 (-12) | 1 | P 12 | 0 | anchor message@60+89 vs ROM wait 90 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
+off108-protect-ply-primeape-onix on | protect | e1 74 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 254 | 239 (-15) | 1 | P 12 | -3 | anchor message@149+89 vs ROM wait 90 (-1) start Δ -3 => anchor-end Δ -3 | ROM-only rule check 0
+off108-detect-ply-primeape-onix off | protect | e1 107 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 161 | 149 (-12) | 1 | P 12 | 0 | anchor message@59+89 vs ROM wait 90 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
+off108-detect-ply-primeape-onix on | protect | e1 74 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 240 | 225 (-15) | 1 | P 12 | -3 | anchor message@135+89 vs ROM wait 90 (-1) start Δ -3 => anchor-end Δ -3 | ROM-only rule check 0
+off108-rest-ply-snorlax-onix off | rest | e1 57 n 2 u 2 d 7 (hp) | ROM 10 (rule 10; rom n 2) | 124 | 127 (3) | 2 | P 15 | 18 | anchor hp@97+28 vs ROM wait 10 (18) start Δ -1 => anchor-end Δ 18 | ROM-only rule check 0
+off108-rest-ply-snorlax-onix on | rest | e1 24 n 2 u 2 d 7 (hp) | ROM 10 (rule 10; rom n 2) | 135 | 117 (-18) | 2 | P 15 | -3 | anchor hp@87+28 vs ROM wait 10 (18) start Δ -22 => anchor-end Δ -3 | ROM-only rule check 0
+off108-dig-ply-primeape-snorlax off | two-turn | e1 120 n 2 u 4 d 4 (print+64) | ROM 12 (rule 12; rom n 2) | 142 | 132 (-10) | 2 | P 14 | 4 | anchor message@42+88 vs ROM wait 85 (3) start Δ 0 => anchor-end Δ 4 | ROM-only rule check 0
+off108-dig-ply-primeape-snorlax on | two-turn | e1 87 n 1 u 4 d 4 (print+64) | ROM 11 (rule 11; rom n 1) | 305 | 295 (-10) | 1 | P 14 | 4 | anchor message@206+88 vs ROM wait 85 (3) start Δ 0 => anchor-end Δ 4 | ROM-only rule check 0
+off108-razor-wind-ply-primeape-snorlax off | two-turn | e1 115 n 2 u 4 d 3 (print+64) | ROM 12 (rule 12; rom n 2) | 152 | 139 (-13) | 2 | P 13 | 0 | anchor message@42+95 vs ROM wait 96 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
+off108-razor-wind-ply-primeape-snorlax on | two-turn | e1 82 n 2 u 4 d 3 (print+64) | ROM 12 (rule 12; rom n 2) | 167 | 153 (-14) | 2 | P 13 | -1 | anchor message@56+95 vs ROM wait 96 (-1) start Δ -1 => anchor-end Δ -1 | ROM-only rule check 0
+off108-solar-beam-ply-primeape-snorlax off | two-turn | e1 118 n 2 u 4 d 3 (print+64) | ROM 12 (rule 12; rom n 2) | 146 | 133 (-13) | 2 | P 13 | 0 | anchor message@42+89 vs ROM wait 90 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
+off108-solar-beam-ply-primeape-snorlax on | two-turn | e1 85 n 2 u 4 d 3 (print+64) | ROM 12 (rule 12; rom n 2) | 223 | 210 (-13) | 2 | P 13 | 0 | anchor message@119+89 vs ROM wait 90 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
+off108-snore-ply-primeape-snorlax off | failed | e1 106 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 148 | 146 (-2) | 2 | P 12 | 10 | anchor message@56+88 vs ROM wait 79 (9) start Δ 0 => anchor-end Δ 10 | ROM-only rule check 0
+off108-snore-ply-primeape-snorlax on | failed | e1 106 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 148 | 146 (-2) | 2 | P 12 | 10 | anchor message@56+88 vs ROM wait 79 (9) start Δ 0 => anchor-end Δ 10 | ROM-only rule check 0
+off108-dynamic-punch-ply-machamp-snorlax off | miss | e1 108 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 162 | 151 (-11) | 2 | P 12 | 1 | anchor message@61+88 vs ROM wait 88 (0) start Δ 0 => anchor-end Δ 1 | ROM-only rule check 0
+off108-dynamic-punch-ply-machamp-snorlax on | miss | e1 108 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 162 | 151 (-11) | 2 | P 12 | 1 | anchor message@61+88 vs ROM wait 88 (0) start Δ 0 => anchor-end Δ 1 | ROM-only rule check 0
+off108-dynamic-punch-opp-machamp-snorlax off | miss | e1 108 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 170 | 158 (-12) | 2 | P 12 | 0 | anchor message@65+91 vs ROM wait 92 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
+off108-dynamic-punch-opp-machamp-snorlax on | miss | e1 108 n 2 u 4 d 2 (print+64) | ROM 12 (rule 12; rom n 2) | 170 | 158 (-12) | 2 | P 12 | 0 | anchor message@65+91 vs ROM wait 92 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
+off148-curse-ply off | stat-stage | e1 246 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 341 | 331 (-10) | 1 | P 12 | 2 | anchor message@242+88 vs ROM wait 88 (0) start Δ 1 => anchor-end Δ 2 | ROM-only rule check 0
+off148-curse-opp off | stat-stage | e1 246 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 357 | 341 (-16) | 1 | P 12 | -4 | anchor message@249+91 vs ROM wait 92 (-1) start Δ -4 => anchor-end Δ -4 | ROM-only rule check 0
 off148-swagger-ply off | stat-stage | skipped: next action does not open with a USEDMOVE print
 off148-flatter-ply off | stat-stage | skipped: next action does not open with a USEDMOVE print
-off148-agility-ply off | control-stats-change | e1 112 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 259 | 247 (-12) | 1 | P 12 | 0 | anchor message@153+93 vs ROM wait 94 (-1) start Δ 0 => anchor-end Δ 0
+off148-agility-ply off | control-stats-change | e1 112 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 259 | 247 (-12) | 1 | P 12 | 0 | anchor message@153+93 vs ROM wait 94 (-1) start Δ 0 => anchor-end Δ 0 | ROM-only rule check 0
 off148-wish-ply off | sprite-visibility | skipped: anchor is the used print itself
 off148-wish-opp off | sprite-visibility | skipped: anchor is the used print itself
-off148-roar-ply off | sprite-visibility | e1 57 n 2 u 2 d 7 (hp) | ROM 10 (rule 10; rom n 2) | 125 | 127 (2) | 2 | P 15 | 17 | anchor hp@97+28 vs ROM wait 11 (17) start Δ -1 => anchor-end Δ 17
-off148-baton-pass-opp off | sprite-visibility | e1 106 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 223 | 155 (-68) | 1 | P 12 | -56 | anchor message@66+88 vs ROM wait 94 (-6) start Δ -52 => anchor-end Δ -57
+off148-roar-ply off | sprite-visibility | e1 57 n 2 u 2 d 7 (hp) | ROM 10 (rule 10; rom n 2) | 125 | 127 (2) | 2 | P 15 | 17 | anchor hp@97+28 vs ROM wait 11 (17) start Δ -1 => anchor-end Δ 17 | ROM-only rule check 0
+off148-baton-pass-opp off | sprite-visibility | e1 106 n 1 u 4 d 2 (print+64) | ROM 11 (rule 11; rom n 1) | 223 | 155 (-68) | 1 | P 12 | -56 | anchor message@66+88 vs ROM wait 94 (-6) start Δ -52 => anchor-end Δ -57 | ROM-only rule check -1
+trn176-scratch-ply off | hit | e1 120 n 2 u 4 d 3 (print+64) | ROM 12 (rule 12; rom n 2) | 212 | 216 (4) | 2 | P 13 | 17 | anchor message@126+88 vs ROM wait 89 (-1) start Δ 17 => anchor-end Δ 17 | ROM-only rule check 0
+trn176-scratch-opp off | hit | e1 120 n 2 u 4 d 3 (print+64) | ROM 12 (rule 12; rom n 2) | 216 | 220 (4) | 2 | P 13 | 17 | anchor message@130+88 vs ROM wait 89 (-1) start Δ 17 => anchor-end Δ 17 | ROM-only rule check 0
+trn176-karate-chop-ply off | hit-supereffective | e1 120 n 2 u 4 d 3 (print+64) | ROM 12 (rule 12; rom n 2) | 245 | 259 (14) | 2 | P 13 | 27 | anchor message@169+88 vs ROM wait 86 (2) start Δ 24 => anchor-end Δ 27 | ROM-only rule check 0
+trn176-double-edge-ply off | hit-recoil | e1 194 n 2 u 4 d 4 (print+64) | ROM 12 (rule 12; rom n 2) | 329 | 339 (10) | 2 | P 14 | 24 | anchor message@246+91 vs ROM wait 92 (-1) start Δ 24 => anchor-end Δ 24 | ROM-only rule check 0
+trn176-fire-punch-ply off | hit-secondary | e1 122 n 2 u 4 d 3 (print+64) | ROM 12 (rule 12; rom n 2) | 224 | 219 (-5) | 2 | P 13 | 8 | anchor message@129+88 vs ROM wait 90 (-2) start Δ 9 => anchor-end Δ 8 | ROM-only rule check 0
