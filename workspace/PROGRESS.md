@@ -39,7 +39,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   mid-suite with 7 failures: all frame-total pins, re-pinned by the supervisor with cause (soak seeds 0 / 1 / 21: same battle /
   turn / end state; sgl138's 8 battles: regenerated receipt differs only in `frames`).
 - **Final gates on `3937ecad0`:** running (typecheck, smoke, full suite, build, soak vanilla 0:20).
-- **Next:** #167 (a') the uniform -12 action-transition hold (MoveEnd + dispatch, both scenes); Substitute HP timing −6 (#153);
+- **trn176 (side, Sonnet, evidence only; folded):** source-derived action-transition rule P = d + 6 + u (docs/trn176-action-transition.md),
+  21 / 22 comparable Scene OFF receipts exact + 12 / 12 Scene ON; 5 new hit-path ROM scenarios r1 == r2. Supervisor: predictor output
+  identical, fresh trn176-scratch-opp probe == committed sha. No src / test change.
+- **Next:** land trn176's rule in production (#167 (a'): the generic MoveEnd sprite-visibility branch, both scenes; re-pin OFF frames
+  with cause; confirm hit-path rows on the real-stat route); Substitute HP timing −6 (#153);
   Focus Punch edge routes (#139 a/b); Transform inventory accounting + other bodies over a transformed battler; #146 Scene ON forced
   player send-in message.
 

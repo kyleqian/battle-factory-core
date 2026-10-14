@@ -38,7 +38,8 @@ census bodies) and the stat-stage-change-next class (Curse / Swagger / Flatter /
 5 / 5 classes residual 0). (a) Wish: LANDED by msg175 (2026-10-14, docs/msg175-used-message-duration.md; the "used" print now lasts its printable
 length L, 72 / 72 ROM uses; Scene OFF Wish residual 0 / 0; Wish then end of turn / switch / pre-move print unmeasured). Open: (a') the
 action transition: the Scene OFF no-hit -> next "used" edge is a uniform -12 (Bulk Up / Double Team / Sand-Attack / Protect / Detect /
-Agility; ON adds -3 .. -6), a single source-derived MoveEnd + dispatch hold looks landable; (b) sprite-visibility next after Roar /
+Agility; ON adds -3 .. -6), rule derived by trn176 (docs/trn176-action-transition.md: P = d + 6 + u after the action's first MoveEnd sprite-visibility
+receipt; 21 / 22 comparable Scene OFF receipts exact, 12 / 12 Scene ON) — production step pending; (b) sprite-visibility next after Roar /
 Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);
 (c) nothing next (35, player Baton Pass: the party menu opens; unstaged); (d) charge turn (chg161, docs/chg161-charge-turn-print.md: the
 box now lands the charge glyph, OFF 3 / 3, ON 2 / 3 + Razor Wind -1 adapter): Scene ON's live charge animation starts 7 rows late (the box
