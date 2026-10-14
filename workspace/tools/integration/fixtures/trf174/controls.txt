@@ -1,0 +1,18 @@
+shift 1
+trf174-off-opponent-ditto-golbat: 78/109 rows 0 px, residual 27128
+trf174-off-opponent-ditto-slowbro: 78/109 rows 0 px, residual 31750
+trf174-off-player-ditto-golbat: 77/109 rows 0 px, residual 22577
+trf174-off-player-ditto-slowbro: 78/109 rows 0 px, residual 26717
+trf174-on-opponent-ditto-golbat: 78/109 rows 0 px, residual 27128
+trf174-on-opponent-ditto-slowbro: 78/109 rows 0 px, residual 31750
+trf174-on-player-ditto-golbat: 77/109 rows 0 px, residual 22577
+trf174-on-player-ditto-slowbro: 78/109 rows 0 px, residual 26717
+shift -1
+trf174-off-opponent-ditto-golbat: 78/109 rows 0 px, residual 27128
+trf174-off-opponent-ditto-slowbro: 78/109 rows 0 px, residual 31750
+trf174-off-player-ditto-golbat: 77/109 rows 0 px, residual 22577
+trf174-off-player-ditto-slowbro: 78/109 rows 0 px, residual 26717
+trf174-on-opponent-ditto-golbat: 78/109 rows 0 px, residual 27128
+trf174-on-opponent-ditto-slowbro: 78/109 rows 0 px, residual 31750
+trf174-on-player-ditto-golbat: 77/109 rows 0 px, residual 22577
+trf174-on-player-ditto-slowbro: 78/109 rows 0 px, residual 26717

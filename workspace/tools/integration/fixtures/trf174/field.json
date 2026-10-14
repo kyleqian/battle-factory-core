@@ -1,0 +1,146 @@
+{
+ "trf174-off-opponent-ditto-golbat": {
+  "firstFrame": 180,
+  "transformed": {
+   "rows": 140,
+   "exactRows": 140,
+   "residual": 0
+  },
+  "own": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 260120
+  },
+  "unblended": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 183400
+  }
+ },
+ "trf174-off-opponent-ditto-slowbro": {
+  "firstFrame": 180,
+  "transformed": {
+   "rows": 140,
+   "exactRows": 140,
+   "residual": 0
+  },
+  "own": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 292320
+  },
+  "unblended": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 285320
+  }
+ },
+ "trf174-off-player-ditto-golbat": {
+  "firstFrame": 176,
+  "transformed": {
+   "rows": 140,
+   "exactRows": 140,
+   "residual": 0
+  },
+  "own": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 242060
+  },
+  "unblended": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 232820
+  }
+ },
+ "trf174-off-player-ditto-slowbro": {
+  "firstFrame": 176,
+  "transformed": {
+   "rows": 140,
+   "exactRows": 140,
+   "residual": 0
+  },
+  "own": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 290920
+  },
+  "unblended": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 285740
+  }
+ },
+ "trf174-on-opponent-ditto-golbat": {
+  "firstFrame": 180,
+  "transformed": {
+   "rows": 140,
+   "exactRows": 140,
+   "residual": 0
+  },
+  "own": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 260120
+  },
+  "unblended": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 183400
+  }
+ },
+ "trf174-on-opponent-ditto-slowbro": {
+  "firstFrame": 180,
+  "transformed": {
+   "rows": 140,
+   "exactRows": 140,
+   "residual": 0
+  },
+  "own": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 292320
+  },
+  "unblended": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 285320
+  }
+ },
+ "trf174-on-player-ditto-golbat": {
+  "firstFrame": 176,
+  "transformed": {
+   "rows": 140,
+   "exactRows": 140,
+   "residual": 0
+  },
+  "own": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 242060
+  },
+  "unblended": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 232820
+  }
+ },
+ "trf174-on-player-ditto-slowbro": {
+  "firstFrame": 176,
+  "transformed": {
+   "rows": 140,
+   "exactRows": 140,
+   "residual": 0
+  },
+  "own": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 290920
+  },
+  "unblended": {
+   "rows": 140,
+   "exactRows": 0,
+   "residual": 285740
+  }
+ }
+}
