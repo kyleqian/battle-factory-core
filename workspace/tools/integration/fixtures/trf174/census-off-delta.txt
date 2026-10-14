@@ -1,0 +1,4 @@
+commands 27998 (pairing mismatches 1, regressions 0); live by count 0.29
+live count 82 -> 83 (0.29 % -> 0.3 %), live frames 7890 -> 8002 (0.64 % -> 0.65 %)
+      112 frames /    1 cmds live of      32 /    1  duration: no adapter (no liveMoveAnimationDuration case)  | still: []
+        0 frames /    0 cmds live of 1228811 / 27915  request: move-animation command without an animation request  | still: [('request: move-animation command without an animation request', 27915)]

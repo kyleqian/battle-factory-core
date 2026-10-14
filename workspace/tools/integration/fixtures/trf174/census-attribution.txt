@@ -1,0 +1,16 @@
+on: base 78e61e8c1 vs head 11fefbbd5 (src == 64cf938b4); 27207 == 27207 records; changed 34 in battles [197]
+  1 x (197, 'AERIAL ACE', 'opponent', 'live', 'fallback', 55, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  5 x (197, 'AERIAL ACE', 'player', 'live', 'fallback', 55, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  5 x (197, 'BUBBLEBEAM', 'opponent', 'live', 'fallback', 244, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  5 x (197, 'BUBBLEBEAM', 'player', 'live', 'fallback', 244, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  3 x (197, 'CONFUSE RAY', 'opponent', 'live', 'fallback', 275, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  1 x (197, 'FUTURE SIGHT', 'opponent', 'live', 'fallback', 122, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  2 x (197, 'ICY WIND', 'opponent', 'live', 'fallback', 290, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  4 x (197, 'ICY WIND', 'player', 'live', 'fallback', 290, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  2 x (197, 'MAGIC COAT', 'opponent', 'fallback', 'fallback', 81, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  2 x (197, 'PSYBEAM', 'opponent', 'live', 'fallback', 165, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  1 x (197, 'RAIN DANCE', 'opponent', 'live', 'fallback', 190, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  2 x (197, 'RAIN DANCE', 'player', 'live', 'fallback', 190, 32, 'transformed battler: no body proven on the copied picture (trf174)')
+  1 x (197, 'TRANSFORM', 'player', 'fallback', 'live', 32, 112, '')
+off: base 78e61e8c1 vs head 11fefbbd5 (src == 64cf938b4); 27998 == 27998 records; changed 1 in battles [197]
+  1 x (197, 'TRANSFORM', 'player', 'fallback', 'live', 32, 112, '')

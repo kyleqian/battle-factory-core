@@ -1,0 +1,7 @@
+PASS same command count
+PASS same KEY sequence
+FAIL same frames per command
+FAIL same battle digest
+PASS same command KEY digest
+FAIL 0 live -> non-live regressions
+gained commands 1 / frames 112; regressions [(197, 'RAIN DANCE', 'opponent'), (197, 'AERIAL ACE', 'player'), (197, 'AERIAL ACE', 'opponent'), (197, 'BUBBLEBEAM', 'opponent'), (197, 'ICY WIND', 'player'), (197, 'BUBBLEBEAM', 'player'), (197, 'AERIAL ACE', 'player'), (197, 'BUBBLEBEAM', 'opponent'), (197, 'RAIN DANCE', 'player'), (197, 'BUBBLEBEAM', 'opponent')]

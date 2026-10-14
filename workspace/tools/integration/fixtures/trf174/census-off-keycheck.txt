@@ -1,0 +1,7 @@
+PASS same command count
+PASS same KEY sequence
+FAIL same frames per command
+FAIL same battle digest
+PASS same command KEY digest
+PASS 0 live -> non-live regressions
+gained commands 1 / frames 112; regressions []
