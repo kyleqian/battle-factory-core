@@ -84,7 +84,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     };
   }));
   if (process.argv.includes("--json")) console.log(JSON.stringify(results.map(({ rows, ...rest }) => rest), null, 1));
-  for (const r of results) {
+  else for (const r of results) {
     console.log(`${r.arm}: box ${r.production.boxFrames}  charge glyph ROM ${r.rom.chargeGlyph} prod ${r.production.chargeGlyph} (${r.residual.chargeGlyph})  foe used glyph ROM ${r.rom.foeUsedGlyph} prod ${r.production.foeUsedGlyph} (${r.residual.foeUsedGlyph})`);
     if (process.argv.includes("--rows")) for (const row of r.rows.slice(0, 8)) console.log(`    ${row.start} ${row.type} ${row.frames} ${row.text}`);
   }

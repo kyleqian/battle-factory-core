@@ -1,3 +1,21 @@
+## 2026-10-13 — thr153: #141a THRASH / OUTRAGE / PETAL DANCE lock-in re-run RE-LANDED (ISSUES #141 FIXED; main/ts gameplay)
+
+- **State:** local master; F1 `0f9b5301e` re-applied (cherry-pick) + 8 attributed re-pins. verify-rcp143 R1 / R2 / R3 /
+  R3-control all PASS. Census 0..999 **27,196 / 27,016 live** (99.34 % / 99.60 %); vanilla soak 0:20 20 / 20 OK, every seed `b4 t0`.
+- **Did:** R1 pin flipped (rng146 test + rcp143). Re-pins (only diff vs master is F1; F1-off toggle restores every old value):
+  orchestrator seed 16 1315 -> 1294, seed 24 1623 -> 1479, scene parity 470 -> 467 (one Petal Dance lock-in each); rentsCount
+  "lost after swap" seed 58 -> 250 (58 now wins after a lock-in; 250 = only accept-0 / lose-1 round in 1..260); sa125 + seed 49
+  (BRN player routes; battles 18 / 76 moved); fix122 move 113 battle 32 -> 41; sgl138 seed 32 -> 808 (32 now carries a Dig the
+  later-hit anchor misreads; receipt regenerated, summary 90 -> 98 anchors, all cells / equalities kept); soak (b) seed 34 -> 1.
+- **Ripple:** census vs master (27,271 / 27,090): 46 battles changed, each first diverging at / right after a Petal Dance / Thrash /
+  Outrage (rng146's 45 + 811, an F3 battle that now also hits a lock-in). 0 unattributed. Soak: every seed b2 t16 -> b4 t0 (expected).
+- **Next:** #139 (Focus Punch pre-pass; reuses the F3 `chosenMoveByBattler` bank). Optional ROM card for rng146's 811 phazing route.
+- **Notes:** gates: typecheck 0, smoke 448, full `npm test` (2 shards) 1,660 files / 13,789 tests passed, 0 failed, build OK.
+  core-rs has no port of the THRASH arm (not edited). sgs134 `exposure.json` is a census projection from before F1, so it is stale
+  for the 46 moved battles (no test reads those seeds). docs/rng146-rng-draw-fixes.md § thr153. Scratch: `.integration/validation/thr153/`.
+
+---
+
 ## 2026-10-13 — rng146: #141b Sticky Hold + #140 `:133` RNG draws FIXED; #141a THRASH fix built but deferred (main/ts gameplay)
 
 - **State:** local master; production src `e8843465a` (F2 `8726675ec` + F3) with F1 `0f9b5301e` reverted in `52340a10e`.

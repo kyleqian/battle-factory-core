@@ -47,9 +47,10 @@ census bodies) and the stat-stage-change-next class (Curse / Swagger / Flatter /
 5 / 5 classes residual 0). Open: (a) Wish (155 bodies): the next drawn change is the next action's "used" message, whose production length
 (fixed 24-frame minimum) differs from the ROM's 20 / 16 rows — choose the anchor with that message; (b) sprite-visibility next after Roar /
 Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);
-(c) nothing next (35, player Baton Pass: the party menu opens; unstaged); (d) the two-turn charge-turn EMPTYSTRING3 print (24-frame message
-vs 2 ROM rows; fpp150 fixed only the Focus Punch pre-pass's; needs a dense charge-turn card per scene, docs/fpp150-focus-punch-prepass.md §4);
-(e) small: Curse's 2nd / 3rd messages +1 frame each; Rest's status icon on G+127 vs ROM G+125 (total to the attack row exact).
+(c) nothing next (35, player Baton Pass: the party menu opens; unstaged); (d) charge turn (chg161, docs/chg161-charge-turn-print.md: the
+box now lands the charge glyph, OFF 3 / 3, ON 2 / 3 + Razor Wind -1 adapter): Scene ON's live charge animation starts 7 rows late (the box
+carries the post-waitanimation rows; needs a presented post-animation hold), and the held print -> next action's "used" edge is -10 .. -14
+(general: Sand-Attack control -12; same family as (a)); (e) small: Curse's 2nd / 3rd messages +1 frame each; Rest's status icon on G+127 vs ROM G+125 (total to the attack row exact).
 
 ## #161 — Dive attack: an extra lag frame at age 17 on poisoned player-diver routes (S10A, found 2026-10-10 by st76)
 

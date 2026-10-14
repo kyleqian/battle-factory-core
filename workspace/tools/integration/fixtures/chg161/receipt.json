@@ -1,0 +1,133 @@
+{
+ "schema": "chg161-receipt/v1",
+ "base": "9483a2551",
+ "head": "b048842dc",
+ "rom": "off108 scenarios re-probed by tools/integration/chg161Run.sh (idle94Probe.py, direct mGBA, fresh process per job): 6 / 6 r1 == r2 == off108 receipts/probe-sha256.json",
+ "anchors": [
+  {
+   "arm": "dig-ply-primeape-snorlax-on",
+   "rom": {
+    "box": 50,
+    "chargeGlyph": 206,
+    "foeUsedGlyph": 305
+   },
+   "production": {
+    "boxFrames": 8,
+    "chargeGlyph": 206,
+    "foeUsedGlyph": 295
+   },
+   "residual": {
+    "chargeGlyph": 0,
+    "foeUsedGlyph": -10
+   }
+  },
+  {
+   "arm": "dig-ply-primeape-snorlax-off",
+   "rom": {
+    "box": 50,
+    "chargeGlyph": 42,
+    "foeUsedGlyph": 142
+   },
+   "production": {
+    "boxFrames": 1,
+    "chargeGlyph": 42,
+    "foeUsedGlyph": 132
+   },
+   "residual": {
+    "chargeGlyph": 0,
+    "foeUsedGlyph": -10
+   }
+  },
+  {
+   "arm": "razor-wind-ply-primeape-snorlax-on",
+   "rom": {
+    "box": 46,
+    "chargeGlyph": 57,
+    "foeUsedGlyph": 167
+   },
+   "production": {
+    "boxFrames": 8,
+    "chargeGlyph": 56,
+    "foeUsedGlyph": 153
+   },
+   "residual": {
+    "chargeGlyph": -1,
+    "foeUsedGlyph": -14
+   }
+  },
+  {
+   "arm": "razor-wind-ply-primeape-snorlax-off",
+   "rom": {
+    "box": 46,
+    "chargeGlyph": 42,
+    "foeUsedGlyph": 152
+   },
+   "production": {
+    "boxFrames": 1,
+    "chargeGlyph": 42,
+    "foeUsedGlyph": 139
+   },
+   "residual": {
+    "chargeGlyph": 0,
+    "foeUsedGlyph": -13
+   }
+  },
+  {
+   "arm": "solar-beam-ply-primeape-snorlax-on",
+   "rom": {
+    "box": 49,
+    "chargeGlyph": 119,
+    "foeUsedGlyph": 223
+   },
+   "production": {
+    "boxFrames": 8,
+    "chargeGlyph": 119,
+    "foeUsedGlyph": 210
+   },
+   "residual": {
+    "chargeGlyph": 0,
+    "foeUsedGlyph": -13
+   }
+  },
+  {
+   "arm": "solar-beam-ply-primeape-snorlax-off",
+   "rom": {
+    "box": 49,
+    "chargeGlyph": 42,
+    "foeUsedGlyph": 146
+   },
+   "production": {
+    "boxFrames": 1,
+    "chargeGlyph": 42,
+    "foeUsedGlyph": 133
+   },
+   "residual": {
+    "chargeGlyph": 0,
+    "foeUsedGlyph": -13
+   }
+  }
+ ],
+ "census0to999": {
+  "on": {
+   "battlesChanged": 252,
+   "framesDelta": -10224,
+   "perChargeTurn": -16,
+   "chargeTurns": 639,
+   "everyDeltaAMultiple": true,
+   "battleDigestExcludingFramesIdentical": "9 / 10 shards; shard 7 differs only in budget-stalled seed 796 (FRAME_BUDGET in both, same 312 turns / commands; the stall now cuts at next-command-handoff instead of resolution presenting); land82CensusCheck: identical True outside stalled tails",
+   "commandKeysIdentical": true,
+   "live": "27084 / 27261 both"
+  },
+  "off": {
+   "battlesChanged": 252,
+   "framesDelta": -15336,
+   "perChargeTurn": -24,
+   "chargeTurns": 639,
+   "everyDeltaAMultiple": true,
+   "battleDigestExcludingFramesIdentical": true,
+   "commands": "28047 -> 28048 (battle 881: stalled at the census FRAME_BUDGET in both; its tail runs one command further)"
+  },
+  "bothScenes": "the same 252 battles changed; per-battle charge-turn counts equal (ON delta / -16 == OFF delta / -24)"
+ },
+ "differential": "PASS 641 / 641 captures byte-identical (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs 9483a2551"
+}
