@@ -34,7 +34,11 @@ receipts / census / doc after.
 
 - `npx vitest run tests/plr162PlayerForcedSendIn.test.ts`: 6 / 6 (model 339 / 339; `switchInTiming` split; census seeds 23 (Roar) /
   76 (Whirlwind) on the player: Scene OFF forced send-ins carry the tail, every other player send-in keeps 91 / no slide; Scene ON unchanged).
-- `npm run typecheck` OK; `npm run test:smoke` 448 / 448; full `npm test` and `npm run build`: see the final commit message / report.
+- `npm run typecheck` OK (on `a8e3a5b86`); `npm run test:smoke` 448 / 448; `git diff --check 9483a2551 HEAD` clean.
+- Full `npm test` on `4ffdba6f5` (src `a5161d37` = the production commit; later commits are doc / receipts only): **1,672 files passed,
+  44 skipped; 13,881 tests passed, 0 failed, 223 skipped** (1,318 s). No existing pin moved (census / soak / differential pins do not
+  stage a Scene OFF Roar on the player).
+- `npm run build` OK on `09817391e` (same src).
 
 ## Reproduce
 
