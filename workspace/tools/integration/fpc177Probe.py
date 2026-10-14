@@ -213,7 +213,7 @@ def main() -> None:
             mismatches.append({"frame": frame, "sRandCount": calls, "lcgDistance": lcg_calls})
         now = watch()
         if calls:
-            per_frame.append({"frame": frame, "calls": calls, "script": now["script"], "battleMainFunc": now["battleMainFunc"]})
+            per_frame.append({"frame": frame, "calls": calls, "rngBefore": rng_before, "rngAfter": rng_after, "script": now["script"], "battleMainFunc": now["battleMainFunc"]})
         total += calls
         count_before, rng_before = count_after, rng_after
         changed = {key: [previous[key], now[key]] for key in now if now[key] != previous[key]}

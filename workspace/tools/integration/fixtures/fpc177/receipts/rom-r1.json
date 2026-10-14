@@ -262,6 +262,7 @@
     572,
     575
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -579,6 +580,7 @@
     587,
     590
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -910,6 +912,7 @@
     718,
     892
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -1253,6 +1256,7 @@
     821,
     1119
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -1554,6 +1558,7 @@
     391,
     605
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -1874,6 +1879,7 @@
     569,
     906
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -2149,6 +2155,7 @@
     336,
     339
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -2447,6 +2454,7 @@
     428,
     431
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -2762,6 +2770,7 @@
     507,
     726
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -3089,6 +3098,7 @@
     650,
     653
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "RunTurnActionsFunctions",
@@ -3402,6 +3412,7 @@
     536,
     537
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "HandleTurnActionSelectionState",
@@ -3748,6 +3759,7 @@
     793,
     794
    ],
+   "firstDrawRngBefore": 960307641,
    "final": {
     "watch": {
      "battleMainFunc": "HandleTurnActionSelectionState",

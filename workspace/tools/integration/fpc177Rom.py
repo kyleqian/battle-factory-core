@@ -25,7 +25,7 @@ for name in sorted(index):
     result["cards"][name] = {
         "meta": index[name], "parties": d["parties"], "seed": d["seed"], "oracleProfile": d["oracleProfile"], "turnOrderRow": turn_order, "checkFocusPunchRows": [t["frame"] for t in tr if t["changed"].get("battleMainFunc", [0, 0])[1] == "CheckFocusPunch_ClearVarsBeforeTurnStarts"],
         "runTurnActionsRow": run_actions, "messages": msgs, "animSpans": anim, "partyChanges": party, "focusPunchScriptEntries": entries,
-        "actionFuncIdChanges": action_fn, "randomCalls": d["totalRandomCalls"], "randomRows": [r["frame"] for r in d["perFrameDraws"]],
+        "actionFuncIdChanges": action_fn, "randomCalls": d["totalRandomCalls"], "randomRows": [r["frame"] for r in d["perFrameDraws"]], "firstDrawRngBefore": (d["perFrameDraws"][0]["rngBefore"] if d["perFrameDraws"] else None),
         "final": d["final"], "framebufferSha256": d["framebufferSha256"],
     }
 json.dump(result, open(out_path, "w"), indent=1)
