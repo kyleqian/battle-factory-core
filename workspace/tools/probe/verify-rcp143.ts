@@ -39,6 +39,8 @@ export const ROM_CALLER_TO_PORT_REASON: Readonly<Record<string, string>> = Objec
   "SetMoveEffect+0x113c": "SetMoveEffect Thrash-family lock-in duration ((Random() & 1) + 2)",
   "SetMoveEffect+0x92e": "SetMoveEffect confusion duration ((Random() % 4) + 2)",
   "SetMoveEffect+0x6ba": "SetMoveEffect sleep duration ((Random() & 3) + 2)",
+  // MOVE_EFFECT_UPROAR's STATUS2_UPROAR_TURN((Random() & 3) + 2) (battle_script_commands.c:2573); ROM +0xa32.
+  "SetMoveEffect+0xa32": "SetMoveEffect Uproar duration ((Random() & 3) + 2)",
 });
 
 const ABILITY_INTIMIDATE = 22;

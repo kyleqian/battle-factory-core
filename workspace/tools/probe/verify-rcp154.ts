@@ -65,9 +65,14 @@ type Receipt = Record<string, unknown> & Readonly<{
  * attackstring, or -- for a STATUS2_RECHARGE battler, whose locked arm
  * (battle_util.c:107-110) still dispatches the Hyper Beam script -- the
  * attackcanceler's BattleScript_MoveUsedMustRecharge string (receipt
- * enc160-hbenc).
+ * enc160-hbenc) -- or, for a confused battler that hurts itself, the
+ * ITHURTCONFUSION string (the dispatch announces no move; receipt enc173-thr).
  */
-const DISPATCH_MESSAGE_IDS: ReadonlySet<string | null> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNMUSTRECHARGE"]);
+const DISPATCH_MESSAGE_IDS: ReadonlySet<string | null> = new Set([
+  "STRINGID_USEDMOVE",
+  "STRINGID_PKMNMUSTRECHARGE",
+  "STRINGID_ITHURTCONFUSION",
+]);
 
 const MOVE_PP = new Map(movesData.moves.map((move) => [move.id, move.pp]));
 const ppOf = (moves: readonly number[]) =>
