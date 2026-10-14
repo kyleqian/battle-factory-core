@@ -38,6 +38,7 @@ import {
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
   BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS2_TRANSFORMED,
 } from "./battleScriptSourceConstants.ts";
 import type { HealthboxContentParams } from "./healthboxAssembly.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
@@ -105,6 +106,16 @@ export type BattleCommandFieldBattler = Readonly<{
    * or the queue. Absent = the normal form.
    */
   castformForm?: number;
+  /**
+   * trf174 (ISSUES #153): presentation-only "shown transformed" — the species and personality whose picture the battler sprite
+   * shows after a Transform body (HandleSpeciesGfxDataChange, battle_gfx_sfx_util.c:935: the target's party species, pic drawn
+   * with gTransformedPersonalities = the target's personality, palette blended 6/16 toward white). At a reducer boundary it
+   * mirrors STATUS2_TRANSFORMED (species = the copied battle species, personality = transformedMonPersonality); inside a resolution
+   * the display queue sets it after a completed Transform body (battleResolutionPresentationRender.ts applyCompletedCommand). A
+   * switch-in replaces the battler, so it reverts with the battler as the ROM's ClearTemporarySpeciesSpriteData does. Read only by
+   * the field art and the live adapter gates; never by rules, RNG or the queue. Absent = the battler's own species is shown.
+   */
+  transform?: Readonly<{ species: number; personality: number }>;
 }>;
 
 export type BattleCommandPresentationPhase =
@@ -392,6 +403,9 @@ function fieldBattler(
     ...battleCommandFieldBattlerFromPartyMember(side, battlerId, partyIndex, partyMember),
     // At a reducer boundary the doll is up exactly while the gameplay bit is (read, never written here).
     ...((active.status2 & BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE) !== 0 ? { substituteDoll: true as const } : {}),
+    // trf174: a transformed battler shows the copied species (read, never written here).
+    ...((active.status2 & BATTLE_SCRIPT_STATUS2_TRANSFORMED) !== 0
+      ? { transform: Object.freeze({ species: active.species, personality: active.transformedMonPersonality >>> 0 }) } : {}),
     hp: active.hp,
     maxHP: active.maxHP,
     status: battleCommandUiStatusFromStatus1(active.status1),

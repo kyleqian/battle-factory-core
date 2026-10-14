@@ -1,4 +1,5 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
+import { LIVE_TRANSFORM_MOVE_ID, liveTransformOf, withLiveTransform } from "./liveTransform.ts";
 import {
   liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput, type LiveMoveRandom2PlanContext,
 } from "./liveMovePresentationRng.ts";
@@ -993,6 +994,12 @@ function applyCompletedCommand(
   command: BattleResolutionPresentationCommand,
 ): BattleResolutionDisplayedField {
   field = applySubstituteDollCommand(field, command);
+  // trf174: a completed Transform body leaves its attacker showing the copied species (HandleSpeciesGfxDataChange; both scenes play
+  // it). The ROM transforms whether or not the body is drawn live; a switch-in below replaces the battler (the revert).
+  if (command.type === "move-animation" && command.animation?.moveId === LIVE_TRANSFORM_MOVE_ID
+    && command.animation.attacker !== command.animation.target) {
+    field = withLiveTransform(field, command.animation.attacker === 0 ? 0 : 1, liveTransformOf(command.animation, field));
+  }
   if (command.type === "hp") {
     return withDisplayedHp(field, command.battler, command.to);
   }

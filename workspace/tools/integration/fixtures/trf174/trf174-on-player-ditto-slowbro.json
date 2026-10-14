@@ -1,0 +1,32 @@
+{
+ "schema": "s10a-live-adapter-fixture/v1",
+ "move": "TRANSFORM",
+ "probe": "tools/probe/run-battle-lab-rgb.py",
+ "scenario": "tools/battle-lab/trf174-on-player-ditto-slowbro.json",
+ "denseWindow": {
+  "startFrame": 67,
+  "endFrame": 175
+ },
+ "windowSource": "window = [activation, first inactive row] of the scenario's Move_TRANSFORM body (108 script rows + 1) from 2 fresh trf174Probe.py runs (r1 == r2)",
+ "attacker": {
+  "species": "DITTO",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "target": {
+  "species": "SLOWBRO",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 155,
+  "playerMaxHp": 155,
+  "opponentHp": 202,
+  "opponentMaxHp": 202,
+  "playerGender": "genderless",
+  "opponentGender": "male"
+ },
+ "attackerPersonality": 2349019075
+}

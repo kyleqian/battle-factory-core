@@ -44,6 +44,13 @@ export type BattleCommandFieldArtBattler = Readonly<{
    * follow the form (castformFieldArtForm). Absent for every other battler and for the normal form.
    */
   castformForm?: number;
+  /**
+   * trf174: set when the battler is shown transformed (BattleCommandFieldBattler.transform): `species` / `speciesSymbol` /
+   * `coords` / `origin` / elevation are the copied species' (GetBattlerSpriteDefault_Y and the shadow read transformSpecies) and
+   * `pic` is its back (player) / front (opponent) picture with the transform palette (battleCommandTransformPalette). The x2
+   * the sprite keeps is the battler's own: `restSpeciesSymbol` names the species whose front idle rest it still holds.
+   */
+  restSpeciesSymbol?: string;
 }>;
 
 export type BattleCommandFieldArtView = Readonly<{
@@ -113,12 +120,45 @@ const SUBSTITUTE_DOLL_ORIGIN = Object.freeze({
   opponent: Object.freeze({ x: 144, y: 24 }),
 });
 
+/**
+ * trf174: HandleSpeciesGfxDataChange's palette (battle_gfx_sfx_util.c:1005-1017): the copied species' palette, then
+ * BlendPalette(paletteOffset, 16, 6, RGB_WHITE) — each 5-bit channel c + (((31 - c) * 6) >> 4) — copied into the unfaded buffer, so the
+ * transformed battler keeps the blend for the rest of its stay. (The shiny pick from the user's own personality / OT is not modelled:
+ * a shiny transformer's body declines, liveTransform.ts.)
+ */
+export function battleCommandTransformPalette(palette: readonly RgbColor[]): readonly RgbColor[] {
+  const blend = (c8: number) => {
+    const c5 = c8 >> 3;
+    const b5 = c5 + (((31 - c5) * 6) >> 4);
+    return (b5 << 3) | (b5 >> 2);
+  };
+  return Object.freeze(palette.map((color) => Object.freeze({ r: blend(color.r), g: blend(color.g), b: blend(color.b) })));
+}
+
+const transformPaletteCache = new Map<string, readonly RgbColor[]>();
+
 function fieldArtBattler(
   species: number,
   side: "player" | "opponent",
   doll = false,
   castformForm?: number,
+  transform?: Readonly<{ species: number; personality: number }>,
 ): BattleCommandFieldArtBattler {
+  if (transform !== undefined && !doll) {
+    const own = speciesSymbolById.get(species);
+    // The copied species' art; a transformed CASTFORM shows its normal form here (the target's form is not tracked).
+    const shown = fieldArtBattler(transform.species, side);
+    const key = `${side}/${shown.speciesSymbol}`;
+    let palette = transformPaletteCache.get(key);
+    if (palette === undefined) {
+      palette = battleCommandTransformPalette(shown.pic.palette);
+      transformPaletteCache.set(key, palette);
+    }
+    return Object.freeze({
+      ...shown, pic: Object.freeze({ tileset: shown.pic.tileset, palette }),
+      ...(own === undefined ? {} : { restSpeciesSymbol: own }),
+    });
+  }
   const speciesSymbol = speciesSymbolById.get(species);
   if (speciesSymbol === undefined) {
     throw new Error(`battle-command field art: unknown species id ${species}`);
@@ -181,8 +221,10 @@ export function createBattleCommandFieldArtView(
   field: BattleCommandPresentationState["field"],
 ): BattleCommandFieldArtView {
   return Object.freeze({
-    player: fieldArtBattler(field.player.species, "player", field.player.substituteDoll === true, field.player.castformForm),
-    opponent: fieldArtBattler(field.opponent.species, "opponent", field.opponent.substituteDoll === true, field.opponent.castformForm),
+    player: fieldArtBattler(field.player.species, "player", field.player.substituteDoll === true, field.player.castformForm,
+      field.player.transform),
+    opponent: fieldArtBattler(field.opponent.species, "opponent", field.opponent.substituteDoll === true, field.opponent.castformForm,
+      field.opponent.transform),
   });
 }
 

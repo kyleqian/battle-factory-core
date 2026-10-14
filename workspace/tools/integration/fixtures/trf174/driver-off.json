@@ -1,0 +1,66 @@
+{
+ "tools/integration/fixtures/trf174/trf174-off-opponent-ditto-golbat.json": {
+  "rows": 109,
+  "expectedDuration": 109,
+  "residual": [
+   0,
+   0
+  ],
+  "exactRows": [
+   109,
+   109
+  ],
+  "digests": [
+   "857d423d1a8d5db533972561af55c52c82d3f39635b009008a82a8cb094a5a2d",
+   "857d423d1a8d5db533972561af55c52c82d3f39635b009008a82a8cb094a5a2d"
+  ]
+ },
+ "tools/integration/fixtures/trf174/trf174-off-opponent-ditto-slowbro.json": {
+  "rows": 109,
+  "expectedDuration": 109,
+  "residual": [
+   0,
+   0
+  ],
+  "exactRows": [
+   109,
+   109
+  ],
+  "digests": [
+   "69df4564086673e104b1bc5b694e496cc9f305ba6053f221a9b358f1e9c7ab76",
+   "69df4564086673e104b1bc5b694e496cc9f305ba6053f221a9b358f1e9c7ab76"
+  ]
+ },
+ "tools/integration/fixtures/trf174/trf174-off-player-ditto-golbat.json": {
+  "rows": 109,
+  "expectedDuration": 109,
+  "residual": [
+   0,
+   0
+  ],
+  "exactRows": [
+   109,
+   109
+  ],
+  "digests": [
+   "5a4138a9db18e7a3bf536518303de2d6277c8d8bf528c4402385a3298359e829",
+   "5a4138a9db18e7a3bf536518303de2d6277c8d8bf528c4402385a3298359e829"
+  ]
+ },
+ "tools/integration/fixtures/trf174/trf174-off-player-ditto-slowbro.json": {
+  "rows": 109,
+  "expectedDuration": 109,
+  "residual": [
+   0,
+   0
+  ],
+  "exactRows": [
+   109,
+   109
+  ],
+  "digests": [
+   "6d5fba3d74346bdae0851529fe42aeab668408bb34a77e3eddf0d0dfa4080310",
+   "6d5fba3d74346bdae0851529fe42aeab668408bb34a77e3eddf0d0dfa4080310"
+  ]
+ }
+}

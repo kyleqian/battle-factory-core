@@ -1,0 +1,7 @@
+live count 82 -> 83 (0.29 % -> 0.3 %), live frames 7890 -> 8002 (0.64 % -> 0.65 %)
+stalled in both runs: [(434, 21), (796, 34), (881, 38)] | truncated tails: []
+command keys identical (outside stalled tails) True | battleDigestExcludingFrames identical True | battles played / terminal / stalled (1000, 997, 3) == (1000, 997, 3) | live -> non-live 0
+Substitute-doll declines (all commands): 0 commands / 0 frames -> 0 / 0
+newly live (move, side): commands / live frames gained
+  144 player: 1 / 112
+remaining doll declines (move, side, reason) >= 3:

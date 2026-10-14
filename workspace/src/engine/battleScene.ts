@@ -2,7 +2,8 @@ import {
   LIVE_MOVE_NO_HIDDEN_SIDES, liveMoveAnimationPresentation, liveMoveHiddenSides, liveMoveOpponentShadowRow, liveMoveOpponentShadowReturn,
   type LiveMoveHiddenSides,
 } from "./liveMoveAnimation.ts";
-import { liveBattlerAnchors } from "./liveMoveAnimation.ts";
+import { liveBattlerAnchors, liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
+import { LIVE_TRANSFORM_MOVE_ID, LIVE_TRANSFORM_SWAP_ROW, liveTransformMosaicLevel, liveTransformOf, withLiveTransform } from "./liveTransform.ts";
 import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
@@ -826,7 +827,9 @@ import {
 } from "./battleCommandPresentationRender.ts";
 import type { BattleCommandFieldArtBattler, BattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import { battleCommandFieldArtElevation } from "./battleCommandFieldArt.ts";
-import { battleCommandFieldSpriteOrigin } from "./battleCommandFieldArt.ts";
+import { battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
+import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import type {
   BattleResolutionRenderEffect,
   BattleResolutionPresentationRenderView,
@@ -14979,7 +14982,7 @@ export function renderGeneratedBattleCommandPresentation(
   // rst139 (docs/rst139-ordinary-row-rest.md): the command menu's opponent stands at its tracked front idle rest.
   const restArt = (art: BattleCommandFieldArtView): BattleCommandFieldArtView => {
     if (!opponentIdleRest || art.opponent.substituteDoll === true) return art;
-    const rest = speciesFrontIdleRestOffsetOrZero(art.opponent.speciesSymbol);
+    const rest = speciesFrontIdleRestOffsetOrZero(art.opponent.restSpeciesSymbol ?? art.opponent.speciesSymbol);
     if (rest.x2 === 0 && rest.y2 === 0) return art;
     return Object.freeze({ ...art, opponent: Object.freeze({
       ...art.opponent, origin: Object.freeze({ x: art.opponent.origin.x + rest.x2, y: art.opponent.origin.y + rest.y2 }) }) });
@@ -55572,6 +55575,63 @@ export function renderSceneOffTurnView(
 }
 
 
+/**
+ * trf174 (liveTransform.ts): one Move_TRANSFORM body row. The ordinary field (healthboxes, message) is the Scene OFF view's; from the
+ * swap row it shows the attacker transformed (copied species picture, transform palette, copied species' corner / elevation). While
+ * the BG mosaic is non-zero the attacker sprite is hidden and its anim-BG copy is drawn with screen-space mosaic blocks: each pixel
+ * takes the block's top-left screen pixel of the picture (transparent: the battle background shows). The enemy shadow shows on the
+ * activation row only (SpriteCB_EnemyShadow hides it while the script runs). The opponent keeps its tracked front idle rest.
+ */
+function renderLiveTransformBody(
+  fb: Uint8Array,
+  view: BattleResolutionPresentationRenderView,
+  request: BattleMoveAnimationRequest,
+  age: number,
+  battlerX2Input: LiveMoveBattlerX2Input | undefined,
+): void {
+  const side = request.attacker === 0 ? "player" : "opponent";
+  const field = age >= LIVE_TRANSFORM_SWAP_ROW
+    ? withLiveTransform(view.field, request.attacker === 0 ? 0 : 1, liveTransformOf(request, view.field)) : view.field;
+  const art = createBattleCommandFieldArtView(field);
+  const rest = liveBattlerAnchors("opponent", art, battlerX2Input).frontIdleRest;
+  const fieldArt: BattleCommandFieldArtView = rest.x2 === 0 && rest.y2 === 0 ? art : Object.freeze({
+    ...art,
+    opponent: Object.freeze({ ...art.opponent, origin: Object.freeze({ x: art.opponent.origin.x + rest.x2, y: art.opponent.origin.y + rest.y2 }) }),
+  });
+  const level = liveTransformMosaicLevel(age);
+  renderBattleResolutionSceneOffView(fb, Object.freeze({
+    ...view, field, fieldArt, effect: null, postBodyShadowHidden: age >= 1,
+    visibility: level === 0 ? view.visibility : Object.freeze({
+      ...view.visibility, [side]: Object.freeze({ ...view.visibility[side], sprite: false }),
+    }),
+  }));
+  if (level === 0 || !view.visibility[side].sprite) return;
+  const pic = fieldArt[side].pic;
+  const corner = battleCommandFieldSpriteOrigin(fieldArt[side], side);
+  const block = level + 1;
+  const width = Math.min(64, pic.tileset.columns * 8), height = Math.min(64, pic.tileset.rows * 8);
+  // The battle text window (BG0, opaque below row 112) covers the anim BG.
+  for (let y = Math.max(0, corner.y); y < Math.min(112, corner.y + height + block); y += 1) {
+    const sy = y - (y % block) - corner.y;
+    if (sy < 0 || sy >= height) continue;
+    for (let x = Math.max(0, corner.x); x < Math.min(240, corner.x + width + block); x += 1) {
+      const sx = x - (x % block) - corner.x;
+      if (sx < 0 || sx >= width) continue;
+      const index = pic.tileset.tiles[Math.floor(sy / 8) * pic.tileset.columns + Math.floor(sx / 8)]?.[(sy % 8) * 8 + (sx % 8)] ?? 0;
+      if (index === 0) continue;
+      const color = pic.palette[index];
+      if (color) setPixel(fb, x, y, color);
+    }
+  }
+  // The healthboxes are OBJ above the anim BG (the opponent's mosaic blocks reach the player healthbox's top rows).
+  if (view.visibility.opponent.healthbox) {
+    drawSendOutHealthbox(fb, 0, composeOpponentHealthbox(healthboxAssemblyAssets, view.healthboxes.opponent));
+  }
+  if (view.visibility.player.healthbox) {
+    drawComposedPlayerHealthbox(fb, composePlayerHealthbox(playerHealthboxAssets, view.healthboxes.player));
+  }
+}
+
 /** Live queue owns messages/HP/menu; the move compositor owns only its body. */
 export function renderBattleResolutionLiveView(
   fb: Uint8Array, view: BattleResolutionPresentationRenderView,
@@ -55585,6 +55645,12 @@ export function renderBattleResolutionLiveView(
   }
   const subbedOpponentAttacker = swap !== null && view.effect?.type === "move" && view.effect.request.attacker === 1;
   if (swap) view = swap.view;
+  // trf174 (liveTransform.ts): the live Move_TRANSFORM body, both scenes.
+  if (view.effect?.type === "move" && view.effect.request.moveId === LIVE_TRANSFORM_MOVE_ID
+    && liveMoveAnimationDuration(view.effect.request, view.field) !== null) {
+    renderLiveTransformBody(fb, view, view.effect.request, view.effect.age, view.effect.battlerX2Input);
+    return;
+  }
   const effect = view.effect;
   // hide66 (ISSUES #159): the non-attacker battler the view hides (a semi-invulnerable Fly / Bounce / Dig / Dive charger) is
   // invisible in the ROM for the whole body; its own strike body (the attacker) reveals itself.

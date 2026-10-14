@@ -1,0 +1,17 @@
+live count 27030 -> 27000 (99.35 % -> 99.24 %), live frames 4139338 -> 4133093 (99.63 % -> 99.48 %)
+stalled in both runs: [(434, 21), (796, 34), (881, 38)] | truncated tails: []
+command keys identical (outside stalled tails) True | battleDigestExcludingFrames identical True | battles played / terminal / stalled (1000, 997, 3) == (1000, 997, 3) | live -> non-live 31
+Substitute-doll declines (all commands): 74 commands / 2368 frames -> 74 / 2368
+newly live (move, side): commands / live frames gained
+  144 player: 1 / 112
+remaining doll declines (move, side, reason) >= 3:
+  76 opponent 10  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  264 opponent 9  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  76 player 7  attacker doll: both battlers shown as dolls
+  91 player 7  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  38 player 4  defender doll: other-side body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  8 opponent 3  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  76 player 3  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  91 opponent 3  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)
+  138 player 3  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS)
+  231 opponent 3  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)

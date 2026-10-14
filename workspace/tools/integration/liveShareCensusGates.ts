@@ -15,6 +15,7 @@ import {
   liveMoveSubstituteDollDeclines, type LiveMoveHiddenSides,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { liveSubstituteSwapApplies, substituteSwapBodyField } from "../../src/engine/liveSubstituteSwap.ts";
+import { LIVE_TRANSFORM_MOVE_ID, liveTransformDeclineReason, liveTransformedBattlerDeclines } from "../../src/engine/liveTransform.ts";
 import { liveBattlerIsShiny } from "../../src/engine/liveMovePaletteComposite.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
@@ -92,6 +93,9 @@ const SWAP_CELL = lineOf(swapLines, "LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(request
 const SWAP_HIT = lineOf(swapLines, "request.multihit < 2", SWAP_APPLIES);
 const DOLL_DECLINES = lineOf(lmaLines, "export function liveMoveSubstituteDollDeclines(");
 const DOLL_CELL = lineOf(lmaLines, "LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS.get(request.moveId)", DOLL_DECLINES);
+// trf174: the transformed-battler gate and the Transform body's own gate (liveTransform.ts).
+const TRANSFORMED_GATE = lineOf(lmaLines, "if (field !== undefined && liveTransformedBattlerDeclines(request, field)) return null;");
+const TRANSFORM_CASE = lineOf(lmaLines, "case LIVE_TRANSFORM_MOVE_ID:");
 
 /** Split a condition at its top-level `||`. */
 function disjuncts(cond: string): string[] {
@@ -181,6 +185,12 @@ export function classifyDurationDecline(request: BattleMoveAnimationRequest, fie
     const proven = (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS.get(request.moveId) ?? []).length > 0;
     return { stage: "duration", reason: `${prefix}defender doll: ${proven ? "other-side" : "unproven"} body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS)`,
       gate: cite(LMA, DOLL_CELL) };
+  }
+  if (liveTransformedBattlerDeclines(request, field)) {
+    return { stage: "duration", reason: `${prefix}transformed battler: no body proven on the copied picture (trf174)`, gate: cite(LMA, TRANSFORMED_GATE) };
+  }
+  if (request.moveId === LIVE_TRANSFORM_MOVE_ID) {
+    return { stage: "duration", reason: `${prefix}transform: ${liveTransformDeclineReason(request, field) ?? "unknown"}`, gate: cite(LMA, TRANSFORM_CASE) };
   }
   const caseLine = DURATION.labels.get(request.moveId);
   if (caseLine === undefined) return { stage: "duration", reason: `${prefix}no adapter (no liveMoveAnimationDuration case)`, gate: cite(LMA, DURATION.end) };
