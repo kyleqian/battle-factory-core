@@ -215,7 +215,11 @@ ROM) and the drawn general animation (fps147's 7 windows 0 px through production
 opponent Focus Punch presents `withSynthesizedSwitchRecallEvents`' recall receipts (sequences -2 / -1) BEFORE the pre-pass (kernel
 order is right; the null-handoff timing there is unmeasured); (b) unprobed rows: two Focus Punch users in one turn
 (`FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES` 7) and the 11-frame end2 -> action lead after action-1 prologues other than R4's
-StatDown (production's fixed confirm handoff shares that assumption). A dense card per case would settle both.
+StatDown (production's fixed confirm handoff shares that assumption). MEASURED by fpc177 (2026-10-14,
+docs/fpc177-focus-punch-edges.md; 12 ROM cards both scenes, twice fresh): (a) ROM order is pre-pass -> recall -> Go! (production
+recall first; then switch hold 9 -> 7, recall lead 11 -> 7); (b1) next-pre-pass lead 7 -> 5; (b2) action lead = 5 + u (u = the next
+used print's instructionExecution; Sand-Attack 6 -> 11 unchanged, Scratch / Agility +2, Thunder Wave +4). Production step pending.
+Scene ON: switch-card pre-pass print 125 vs 127 rows unexplained; the switch control's Go! -> used gap is -31 (send-in tail, not FP).
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 
