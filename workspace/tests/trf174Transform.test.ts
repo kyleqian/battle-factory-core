@@ -65,7 +65,7 @@ describe("trf174 live Transform", () => {
 
   it("a completed Transform body transforms its attacker in the display ledger; a switch-in reverts it", () => {
     const view = liveView(fixture("trf174-on-player-ditto-slowbro"), 0);
-    const request = view.effect!.type === "move" ? view.effect.request : null;
+    const request = view.effect?.type === "move" ? view.effect.request : null;
     const body = { type: "move-animation", animation: request!, eventSequence: 1, battler: 0, timing: {} } as unknown as BattleResolutionPresentationCommand;
     const incoming = { ...view.field.player, species: 67 };
     const switchIn = { type: "switch-in", battler: 0, incoming } as unknown as BattleResolutionPresentationCommand;
@@ -78,7 +78,7 @@ describe("trf174 live Transform", () => {
 
   it("declines outside the proven scope; every other live body declines while a battler is shown transformed", () => {
     const view = liveView(fixture("trf174-on-player-ditto-slowbro"), 0);
-    const request = view.effect!.type === "move" ? view.effect.request : null;
+    const request = view.effect?.type === "move" ? view.effect.request : null;
     expect(liveTransformDeclineReason(request!, view.field)).toBeNull();
     expect(liveTransformDeclineReason(request!, { ...view.field, opponent: { ...view.field.opponent, species: SPINDA } })).toMatch(/SPINDA/);
     expect(liveTransformDeclineReason(request!, withLiveTransform(view.field, 1, { species: GOLBAT, personality: 0 }))).toMatch(/transformed/);
