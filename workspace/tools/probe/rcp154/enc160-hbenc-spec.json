@@ -1,0 +1,61 @@
+{
+ "schema": "rcp154-action-time-receipt/v1",
+ "receipt": "ENC160-HBENC",
+ "followUpTo": "ISSUES #172 (#140 family): a LOCKED + ENCORED battler must not take the Encore retarget draw (audit aud159, STEP enc160)",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp154-action-time.py",
+ "builder": "tools/probe/build-rcp154-receipt.py",
+ "verify": "tools/probe/verify-rcp154.ts",
+ "card": "tools/probe/rcp154/enc160-hbenc-hyperbeam-recharge-encore-off.json",
+ "probeSlotPlan": "0",
+ "title": "A STATUS2_RECHARGE battler that is also Encored takes HandleAction_UseMove's locked arm: no GetMoveTarget draw on the recharge turn",
+ "scenario": "Player SNORLAX (HYPER BEAM / TACKLE / AMNESIA / HEADBUTT) vs slower WOBBUFFET (ENCORE x4). Turn 1: SNORLAX HYPER BEAM, then WOBBUFFET's Encore lands (encoredMove HYPER BEAM). Turn 2: SNORLAX is RECHARGE-locked AND Encored -- 'SNORLAX must recharge!', no GetMoveTarget; WOBBUFFET's Encore fails. The cycle repeats (turns 3-6).",
+ "portPlayerSlots": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "sourceUnderTest": {
+  "lockedArm": "reference/pokeemerald/src/battle_util.c:107-110 HandleAction_UseMove: gBattleMons[attacker].status2 & (STATUS2_MULTIPLETURNS | STATUS2_RECHARGE) -> gCurrentMove = gChosenMove = gLockedMoves[attacker], NO GetMoveTarget call (the target banked at the locking turn rides). Checked BEFORE the Encore arms",
+  "encoreArm": "reference/pokeemerald/src/battle_util.c:111-117 (encoredMove == moves[encoredMovePos] -> GetMoveTarget) and :119-128 (overwritten -> clear Encore, GetMoveTarget) -- only reached when the locked arm does not match",
+  "setEncore": "reference/pokeemerald/src/battle_script_commands.c:8017 Cmd_trysetencore: no STATUS2_MULTIPLETURNS / RECHARGE check, so a locked battler can be Encored; encoreTimer = (Random() & 3) + 3 at :8039",
+  "getMoveTarget": "reference/pokeemerald/src/battle_util.c:3828 GetMoveTarget; MOVE_TARGET_SELECTED do { Random() % gBattlersCount } while (target == attacker ...) :3850-3853"
+ },
+ "portPlayerTargets": [
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "portSitesAtHead": {
+  "turnStart": "src/engine/factoryBattleScriptFullTurnDecision.ts actionRetargetsAtExecution (pre-fix): returned encoreTimer != 0 && encoredMove != 0 with no lock guard (its comment claimed 'a locked battler carries no Encore'); playerRetargets / trainerRetargets feed runMoveAction's retargetsAtExecution, which calls drawActionMoveTarget",
+  "actionTime": "actionEncoreArm / actionTakesChosenMoveChangedArm already return early on battlerStatusMoveLock(...) != 0",
+  "preFix": {
+   "firstDivergence": {
+    "turn": 2,
+    "index": 0,
+    "rom": "accuracycheck (WOBBUFFET's Encore)",
+    "port": "GetMoveTarget(MOVE_TARGET_SELECTED) for the recharging SNORLAX"
+   },
+   "verdict": "FAIL"
+  }
+ },
+ "fixShape": "ISSUES #172 / STEP enc160: actionRetargetsAtExecution returns false when battlerStatusMoveLock(preClearRulesContext, battler) != 0 (source order: the :107-110 locked arm precedes the :111-128 Encore arms). If a faster foe clears the lock mid-turn, runMoveAction's action-time actionEncoreArm still takes the Encore arm and draws."
+}

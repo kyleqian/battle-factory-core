@@ -272,6 +272,8 @@ export type FactoryFullTurnBattlerConfig = Readonly<{
   item?: number;
   /** Source `gBattleMons[].friendship`; omitted legacy configs retain the old zero default. */
   friendship?: number;
+  /** Source `gBattleMons[].level` (the damage formula's level term); omitted configs keep the Level 50 default. */
+  level?: number;
   attack: number;
   defense: number;
   spAttack: number;
@@ -500,7 +502,7 @@ function activeBattler(
     spAttack: config.spAttack,
     spDefense: config.spDefense,
     speed: config.speed,
-    level: 50,
+    level: config.level ?? 50,
     friendship: config.friendship ?? 0,
     types: config.types ?? (["TYPE_NORMAL", "TYPE_NORMAL"] as const),
     moves: Object.freeze(moves),
@@ -535,7 +537,7 @@ function partySlot(config: FactoryFullTurnBattlerConfig): BattleScriptPartyMembe
     abilityNum: config.abilityNum ?? 0,
     ivs: FACTORY_FIRST_CHALLENGE_IVS,
     personality: config.personality ?? 0,
-    level: 50,
+    level: config.level ?? 50,
     friendship: config.friendship ?? 0,
     hp: config.hp,
     maxHP: config.maxHp ?? config.hp,
@@ -1622,9 +1624,13 @@ function drawActionMoveTarget(
  * `forcedStruggle` is the caller's own `battlerUsesForcedStruggle` answer, so
  * this stays consistent with the branch the reducer actually executes; the
  * STATUS2_MULTIPLETURNS / STATUS2_RECHARGE lock (`:107-110`) is the one forced
- * action that calls no `GetMoveTarget` at all, and it falls out as `false`
- * because `battlerUsesForcedStruggle` already returns false for it and a
- * locked battler carries no Encore. The fourth branch (`:130-134`, the live
+ * action that calls no `GetMoveTarget` at all, and it is checked BEFORE the
+ * Encore arms (`:111-128`), so a locked battler that also carries an Encore
+ * returns `false` (ISSUES #172, receipts enc160-hbenc / enc160-c2ice):
+ * `Cmd_trysetencore` (`battle_script_commands.c:8017`) never checks for a
+ * lock, so Thrash / Ice Ball / Uproar / Bide / a recharge turn can be
+ * Encored. If a faster foe clears the lock mid-turn, `runMoveAction`'s
+ * action-time `actionEncoreArm` takes the Encore arm. The fourth branch (`:130-134`, the live
  * chosen slot differs from the banked gChosenMoveByBattler) depends on state
  * at the battler's own action, so `runMoveAction` resolves it there; see
  * `actionTakesChosenMoveChangedArm`.
@@ -1635,6 +1641,7 @@ function actionRetargetsAtExecution(
   forcedStruggle: boolean,
 ): boolean {
   if (forcedStruggle) return true;
+  if (battlerStatusMoveLock(preClearRulesContext, battler) !== 0) return false;
   const source = preClearRulesContext.battlers[battler]!;
   return source.encoreTimer !== 0 && source.encoredMove !== 0;
 }

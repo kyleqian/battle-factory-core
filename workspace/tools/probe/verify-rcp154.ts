@@ -60,6 +60,15 @@ type Receipt = Record<string, unknown> & Readonly<{
   rom: Readonly<{ turns: readonly RomTurn[] }>;
 }>;
 
+/**
+ * Port events that announce one `HandleAction_UseMove` dispatch: the move's
+ * attackstring, or -- for a STATUS2_RECHARGE battler, whose locked arm
+ * (battle_util.c:107-110) still dispatches the Hyper Beam script -- the
+ * attackcanceler's BattleScript_MoveUsedMustRecharge string (receipt
+ * enc160-hbenc).
+ */
+const DISPATCH_MESSAGE_IDS: ReadonlySet<string | null> = new Set(["STRINGID_USEDMOVE", "STRINGID_PKMNMUSTRECHARGE"]);
+
 const MOVE_PP = new Map(movesData.moves.map((move) => [move.id, move.pp]));
 const ppOf = (moves: readonly number[]) =>
   moves.map((move) => (move === 0 ? 0 : MOVE_PP.get(move) ?? 0)) as [number, number, number, number];
@@ -79,6 +88,7 @@ function active(mon: PartyMon): FactoryFullTurnBattlerConfig {
     abilityNum: mon.abilitySlot,
     item: mon.item,
     personality: mon.personality,
+    level: mon.level,
     attack: mon.stats.attack,
     defense: mon.stats.defense,
     spAttack: mon.stats.spAttack,
@@ -136,7 +146,7 @@ export function verifyReceipt(receipt: Receipt) {
     draws: run.draws
       .filter((draw: PortDraw) => draw.turn === turn.turn && draw.kind === "port")
       .map(({ reason, rngBefore, value }) => ({ reason, rngBefore, value })),
-    usedMoveMessages: run.events.filter((event) => event.turn === turn.turn && event.id === "STRINGID_USEDMOVE").length,
+    usedMoveMessages: run.events.filter((event) => event.turn === turn.turn && DISPATCH_MESSAGE_IDS.has(event.id)).length,
     events: run.events.filter((event) => event.turn === turn.turn).map((event) => `${event.kind}:${event.id}`),
     activeHpAtTurnEnd: run.hpAfterTurn[turn.turn - 1] ?? null,
   }));
