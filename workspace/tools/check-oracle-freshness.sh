@@ -29,11 +29,16 @@ if [[ "$#" -ne 0 ]]; then
   exit 2
 fi
 
-if ! HARNESS_HEAD_EPOCH="$(git -C "${HARNESS_ROOT}" log -1 --format=%ct 2>/dev/null)"; then
+# Since the 2026-08-11 graft the workspace shares the harness repo, so plain
+# HEAD moves with every game commit; only commits touching the oracle service
+# code can make a running service stale.
+ORACLE_PATHS=(oracle run-oracle.sh)
+if ! HARNESS_HEAD_EPOCH="$(git -C "${HARNESS_ROOT}" log -1 --format=%ct -- "${ORACLE_PATHS[@]}" 2>/dev/null)" \
+    || [ -z "${HARNESS_HEAD_EPOCH}" ]; then
   echo "FAIL: cannot read harness git history at ${HARNESS_ROOT}" >&2
   exit 1
 fi
-HARNESS_HEAD="$(git -C "${HARNESS_ROOT}" log -1 --format='%h %s' 2>/dev/null)"
+HARNESS_HEAD="$(git -C "${HARNESS_ROOT}" log -1 --format='%h %s' -- "${ORACLE_PATHS[@]}" 2>/dev/null)"
 
 # "Fri Jul 24 15:44:38 2026" -> epoch. Spaces are squeezed first because ps
 # pads single-digit days ("Jul  4").
@@ -41,7 +46,13 @@ start_epoch_of_pid() {
   local lstart
   lstart="$(ps -p "$1" -o lstart= 2>/dev/null | tr -s ' ' | sed 's/^ *//;s/ *$//')"
   [ -n "${lstart}" ] || return 1
-  date -j -f '%a %b %d %H:%M:%S %Y' "${lstart}" +%s 2>/dev/null
+  date -j -f '%a %b %d %H:%M:%S %Y' "${lstart}" +%s 2>/dev/null \
+    || date -d "${lstart}" +%s 2>/dev/null
+}
+
+# BSD `date -r EPOCH` vs GNU `date -d @EPOCH`.
+fmt_epoch() {
+  date -r "$1" '+%Y-%m-%d %H:%M:%S' 2>/dev/null || date -d "@$1" '+%Y-%m-%d %H:%M:%S'
 }
 
 status=0
@@ -60,7 +71,7 @@ for port in 8014 8012; do
     continue
   fi
   checked=$((checked + 1))
-  human="$(date -r "${started}" '+%Y-%m-%d %H:%M:%S')"
+  human="$(fmt_epoch "${started}")"
   if [ "${started}" -lt "${HARNESS_HEAD_EPOCH}" ]; then
     echo "FAIL: port ${port} (pid ${pid}) started ${human}, BEFORE harness HEAD ${HARNESS_HEAD}"
     echo "      Restart it before staging — its schema predates the current oracle."
@@ -70,7 +81,7 @@ for port in 8014 8012; do
   fi
 done
 
-echo "harness HEAD: ${HARNESS_HEAD} ($(date -r "${HARNESS_HEAD_EPOCH}" '+%Y-%m-%d %H:%M:%S'))"
+echo "harness HEAD: ${HARNESS_HEAD} ($(fmt_epoch "${HARNESS_HEAD_EPOCH}"))"
 
 if [ "${status}" -eq 1 ]; then
   exit 1
