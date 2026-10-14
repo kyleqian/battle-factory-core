@@ -890,13 +890,14 @@ function returnToBallOperand(event: BattleKernelSemanticEvent): string | null {
  * `returntoball` executes on row R and removes the target on R + 2 (off148 OFF probes), the forced hold's 4 frames end there, so the
  * switch-out command starts on R - 2 = the print convention's R + 2 (lead 1) minus 4.
  */
+const SCENE_OFF_RETURN_TO_BALL_LEAD = -3; // 1 - FORCED_RETURN_TO_BALL_HOLD_FRAMES (declared below; pinned in tests/offs152SceneOffForcedSwitch.test.ts)
+
 /**
  * msg175 (docs/msg175-used-message-duration.md, off148 §3 Wish): rows from the MoveEnd sprite-visibility receipt's execution to the
  * next action's "used" first glyph, less that action's own instructionExecution u: MoveEnd's remaining cases + the action dispatch
  * (next script on Δ + 5 = G + 45 with u counted from there, attackstring on u, first glyph two rows later).
  */
 const SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS = 7;
-const SCENE_OFF_RETURN_TO_BALL_LEAD = -3; // 1 - FORCED_RETURN_TO_BALL_HOLD_FRAMES (declared below; pinned in tests/offs152SceneOffForcedSwitch.test.ts)
 
 function sceneOffNoHitPauseFrames(
   events: readonly BattleKernelSemanticEvent[],
