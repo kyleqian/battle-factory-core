@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 # Build every machine-local dependency needed by the supervisors on a clean
-# Ubuntu 24.04 x86_64 host. Run as root after the repository has been restored.
+# Ubuntu 24.04 x86_64 or aarch64 host. Run as root after restoring the repository.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export POKEBENCH_ARCH="${POKEBENCH_ARCH:-$(uname -m)}"
 source "${SCRIPT_DIR}/versions.env"
+case "$POKEBENCH_ARCH" in
+  x86_64|aarch64) ;;
+  *) echo "bootstrap-ubuntu: unsupported architecture ${POKEBENCH_ARCH}" >&2; exit 2 ;;
+esac
 
 RUNNER_USER="${1:-pokebench}"
 REPO_ROOT="${2:-/srv/pokebench/pokeemerald-factory-core}"
@@ -42,6 +47,10 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
+multilib_packages=()
+if [[ "$POKEBENCH_ARCH" == x86_64 ]]; then
+  multilib_packages=(g++-multilib gcc-multilib)
+fi
 apt-get install -y --no-install-recommends \
   binutils-arm-none-eabi \
   build-essential \
@@ -49,8 +58,7 @@ apt-get install -y --no-install-recommends \
   cmake \
   curl \
   file \
-  g++-multilib \
-  gcc-multilib \
+  "${multilib_packages[@]}" \
   git \
   jq \
   libavcodec-dev \
@@ -64,6 +72,7 @@ apt-get install -y --no-install-recommends \
   ninja-build \
   pkg-config \
   python3 \
+  python3-dev \
   python3-venv \
   rsync \
   unzip \
@@ -71,14 +80,22 @@ apt-get install -y --no-install-recommends \
   zlib1g-dev
 
 install_node() {
-  local install_root="/usr/local/lib/node-v${POKEBENCH_NODE_VERSION}-linux-x64"
+  local node_arch node_sha
+  if [[ "$POKEBENCH_ARCH" == aarch64 ]]; then
+    node_arch=arm64
+    node_sha="$POKEBENCH_NODE_LINUX_ARM64_SHA256"
+  else
+    node_arch=x64
+    node_sha="$POKEBENCH_NODE_LINUX_X64_SHA256"
+  fi
+  local install_root="/usr/local/lib/node-v${POKEBENCH_NODE_VERSION}-linux-${node_arch}"
   local archive
   archive="$(mktemp)"
   if [[ ! -x "${install_root}/bin/node" ]]; then
     curl --fail --location --silent --show-error \
-      "https://nodejs.org/dist/v${POKEBENCH_NODE_VERSION}/node-v${POKEBENCH_NODE_VERSION}-linux-x64.tar.xz" \
+      "https://nodejs.org/dist/v${POKEBENCH_NODE_VERSION}/node-v${POKEBENCH_NODE_VERSION}-linux-${node_arch}.tar.xz" \
       --output "$archive"
-    echo "${POKEBENCH_NODE_LINUX_X64_SHA256}  ${archive}" | sha256sum --check --status
+    echo "${node_sha}  ${archive}" | sha256sum --check --status
     tar -xJf "$archive" -C /usr/local/lib
   fi
   ln -sfn "${install_root}/bin/node" /usr/local/bin/node
@@ -162,6 +179,10 @@ install_mgba() {
 }
 
 install_libmgba_python() {
+  if [[ "$POKEBENCH_ARCH" == aarch64 ]]; then
+    install_libmgba_python_native
+    return
+  fi
   local archive="${VENDOR_ROOT}/libmgba-py_${POKEBENCH_LIBMGBA_PY_VERSION}_ubuntu-lunar.zip"
   local binding_root="${VENDOR_ROOT}/libmgba-py"
   if [[ ! -f "$archive" ]] || ! echo "${POKEBENCH_LIBMGBA_PY_SHA256}  ${archive}" | sha256sum --check --status; then
@@ -183,11 +204,56 @@ install_libmgba_python() {
     "${VENDOR_ROOT}/mgba-venv/bin/python" -c 'import cffi, mgba, PIL'
 }
 
+install_libmgba_python_native() {
+  local binding_source="${VENDOR_ROOT}/libmgba-py-src"
+  local binding_build="${VENDOR_ROOT}/libmgba-py-native-build"
+  local binding_root="${VENDOR_ROOT}/libmgba-py"
+  checkout_exact https://github.com/hanzi/libmgba-py.git "$binding_source" "$POKEBENCH_LIBMGBA_PY_COMMIT"
+  install -d -o "$RUNNER_USER" -g "$RUNNER_USER" "$binding_build" "$binding_root"
+  runuser -u "$RUNNER_USER" -- git -C "$binding_source" archive "$POKEBENCH_LIBMGBA_PY_COMMIT" | \
+    tar -x -C "$binding_build"
+  # The upstream Linux helper assumes its Docker paths. Change only this
+  # generated build copy's paths; compile the pinned binding source natively.
+  python3 - "$binding_build" "${VENDOR_ROOT}/mgba-src" <<'PY'
+from pathlib import Path
+import sys
+binding = Path(sys.argv[1])
+mgba = Path(sys.argv[2])
+values = {"path_to_libmgba_py": str(binding), "path_to_mgba_root": str(mgba),
+          "path_to_mgba_build": str(mgba / "build-linux")}
+(binding / "_config.py").write_text("from pathlib import Path\n" +
+    "\n".join(f"{key} = Path({value!r})" for key, value in values.items()) + "\n")
+PY
+  chown -R "$RUNNER_USER:$RUNNER_USER" "$binding_build"
+  runuser -u "$RUNNER_USER" -- python3 -m venv "${VENDOR_ROOT}/mgba-venv"
+  runuser -u "$RUNNER_USER" -- "${VENDOR_ROOT}/mgba-venv/bin/pip" install --quiet \
+    "setuptools==${POKEBENCH_SETUPTOOLS_VERSION}" "cffi==${POKEBENCH_CFFI_VERSION}" "pillow==${POKEBENCH_PILLOW_VERSION}"
+  (
+    cd "$binding_build"
+    runuser -u "$RUNNER_USER" -- "${VENDOR_ROOT}/mgba-venv/bin/python" setup.py build --build-lib "$binding_root"
+  )
+  runuser -u "$RUNNER_USER" -- env PYTHONPATH="$binding_root" \
+    "${VENDOR_ROOT}/mgba-venv/bin/python" -c 'import cffi, mgba, PIL'
+}
+
 build_reference_rom() {
   local agbcc_root="${VENDOR_ROOT}/agbcc"
   local emerald_root="${VENDOR_ROOT}/pokeemerald"
   checkout_exact https://github.com/pret/agbcc.git "$agbcc_root" "$POKEBENCH_AGBCC_COMMIT"
   checkout_exact https://github.com/pret/pokeemerald.git "$emerald_root" "$POKEBENCH_POKEEMERALD_COMMIT"
+  if [[ "$POKEBENCH_ARCH" == aarch64 ]]; then
+    # The legacy agbcc host build uses x86 multilib. Preserve the already
+    # verified GBA artifacts instead: these are ARM7 ROM/ELF data, not host
+    # executables. Source remains pinned for probes/extractors on this runner.
+    local artifacts="${POKEBENCH_REFERENCE_ARTIFACTS:?ARM bootstrap needs the verified reference artifact directory}"
+    echo "${POKEBENCH_ROM_SHA256}  ${artifacts}/pokeemerald.gba" | sha256sum --check --status
+    echo "${POKEBENCH_REFERENCE_ELF_SHA256}  ${artifacts}/pokeemerald.elf" | sha256sum --check --status
+    echo "${POKEBENCH_REFERENCE_MAP_SHA256}  ${artifacts}/pokeemerald.map" | sha256sum --check --status
+    for artifact in pokeemerald.gba pokeemerald.elf pokeemerald.map; do
+      install -m 644 -o "$RUNNER_USER" -g "$RUNNER_USER" "${artifacts}/${artifact}" "${emerald_root}/${artifact}"
+    done
+    return
+  fi
   runuser -u "$RUNNER_USER" -- bash -lc "cd '$agbcc_root' && ./build.sh && ./install.sh '$emerald_root'"
   runuser -u "$RUNNER_USER" -- make -C "$emerald_root" -j "$JOBS"
   runuser -u "$RUNNER_USER" -- make -C "$emerald_root" compare
