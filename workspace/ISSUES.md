@@ -80,7 +80,10 @@ OFF bodies read x2 {0,0} because there is no front animation in OFF (`pokemon.c:
 0 px (`docs/sub157-scene-off-substitute.md`). Open, the same in both scenes (ROM OFF == ON):
 - **Substitute turn timing:** the HP command starts on G+91 against the ROM's G+97 HP run (−6), because the 5 pre-attackanimation rows
   and the healthbarupdate row are not presented. Scene ON route-timing owner.
-- **Transform:** ROM Move_TRANSFORM is 108 rows (DITTO, both scenes). Production shows 32 undrawn frames in both scenes (no live adapter).
+- **Transform:** body + transformed field LIVE in both scenes since trf174 (2026-10-14, docs/trf174-transform-live.md; 8 / 8 dense
+  windows 109 / 109 rows 0 px, field 140 / 140, supervisor-reproduced fresh). Open: declined Transform bodies (shiny DITTO, SPINDA
+  target, CASTFORM, a doll on either side); every OTHER live body declines while a battler is shown transformed; Transform is not
+  yet counted in `LIVE_MOVE_ANIMATION_IDS` / the live-status inventory.
 - **Not measured:** a dense OFF fade window (6 OFF census fades are now live), and the switch-out SUBSTITUTE_TO_MON / Baton Pass
   MON_TO_SUBSTITUTE special animations (scene-independent in source; neither scene presents them).
 

@@ -1,5 +1,14 @@
 # Animation integration progress
 
+## 2026-10-14 — CAX31 session: Transform live (trf174) + enc160 / plr162 / enc173 folds
+
+- **trf174 (INTEGRATION, Opus, merged on master after `78e61e8c1`):** Move_TRANSFORM live in both scenes + the transformed field
+  (docs/trf174-transform-live.md). Supervisor: fresh `trf174Probes.sh` 8 / 8 r1 == r2; `trf174Check.ts` 109 / 109 rows 0 px on all 8;
+  `trf174Field.ts` 140 / 140 rows 0 px (own / unblended controls nonzero). Census both scenes: kernel digests identical; only battle 197
+  (CHANSEY Metronome -> Transform) moves. Differential 641 / 641. Not yet in `LIVE_MOVE_ANIMATION_IDS` / live-status counts.
+- **plr162 (INTEGRATION, folded from the Mac's saved ref):** Scene OFF forced player send-in tail; supervisor reproduced CASTFORM fresh.
+- Union gates and engine folds: see PROGRESS.md 2026-10-14.
+
 ## 2026-10-13 (day, in progress) — finish-up session: engine fixes #165 / #141b / #140 + presentation landings
 
 - **Engine (main/ts lane, see PROGRESS.md):** ret165 (#165 Return -> Frustration; census Return 84 -> 0, Frustration 90 -> 154 all live;
