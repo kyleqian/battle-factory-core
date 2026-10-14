@@ -14,8 +14,8 @@ Production commit `64cf938b4` (src tree `9f2269bce9b6`); tests / tools / receipt
 | Post-body field (`trf174Field.ts`: rows y < 112 from the first row after the window, 140 rows or up to the next script) | **8 / 8 windows, 140 / 140 rows 0 px**: the copied species' picture, the transform palette, its corner, an elevated GOLBAT's elevation and enemy shadow (opponent DITTO), DITTO's own idle rest. Controls: the untransformed DITTO field 0 / 140 rows (242,060–292,320 px), the copied species with its raw palette 0 / 140 (183,400–285,740 px) | `tools/integration/fixtures/trf174/field.json` |
 | Tier-1 (`tests/trf174Transform.test.ts`, 5 tests) | all 8 x 109 ROM rows sha256-exact through the live renderer; the mosaic law; field art (pic, blend, elevation, own rest); ledger set on completion / reverted by a switch-in; declines | — |
 | Ordinary route, census seed 197 (`trf174Route.ts`, production only), both scenes | the Transform command (CHANSEY via Metronome -> MANTINE) is **live: 112 frames = 3 pre rows (age 0) + 109 body rows (ages 0..108)**, then every view of the rest of the battle (12,498 ON / 11,771 OFF frames: messages, menus, HP, hits, stats-change, status animations, switch-ins of the other side, faint) shows the battler as MANTINE | `tools/integration/fixtures/trf174/route-seed197-{on,off}.jsonl` |
-| Census 0..999 | CENSUS_PLACEHOLDER | CENSUS_EVIDENCE |
-| Differential | DIFF_PLACEHOLDER | |
+| Census 0..999, both scenes (`trf174Census.sh`, base `78e61e8c1` vs head `11fefbbd5`, src == `64cf938b4`) | **Command KEY sequences and `battleDigestExcludingFrames` identical** in both scenes; played / terminal / stalled 1000 / 997 / 3 unchanged. Every change is in **battle 197** (the census's only Transform: CHANSEY's Metronome -> Transform copying MANTINE). ON: 34 records — the Transform 32-frame fallback -> **live 112 frames**, and 33 later bodies of that battle (Aerial Ace 6, BubbleBeam 10, Confuse Ray 3, Future Sight 1, Icy Wind 6, Magic Coat 2, Psybeam 2, Rain Dance 3) now decline with "transformed battler: no body proven on the copied picture" (31 were live: they drew CHANSEY where the ROM shows MANTINE; 2 Magic Coat were already presentation fallbacks with an 81-frame live duration). Live 27,030 -> 27,000 commands (99.35 -> 99.24 %), 4,139,338 -> 4,133,093 frames. OFF: 1 record — the Transform 32 -> live 112 (live 82 -> 83) | `tools/integration/fixtures/trf174/census-{on,off}-{check,delta,keycheck}.txt`, `census-attribution.txt` |
+| Differential (`fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 78e61e8c1`) | **641 / 641 captures byte-identical** (235 + 216 + 190) | `tools/integration/fixtures/trf174/differential.log` |
 | Gates on the final production tree | GATES_PLACEHOLDER | |
 
 ## Source and measured law
@@ -60,8 +60,8 @@ elevated copied species. The opponent battler keeps its own x2 (DITTO's front id
 ## Named remainders
 
 - **Declined Transform bodies** (fall back, field still transformed afterwards): a shiny transformer (the copied species'
-  shiny palette is not modelled), a SPINDA target (spots by the target personality; the field art draws no Spinda spots
-  anywhere), a CASTFORM attacker / target (form-keyed frames and palette), a doll on either side, a transformed battler.
+  shiny palette is not modelled), a SPINDA target (spots by the target personality; battleCommandFieldArt.ts has no Spinda spot path
+  for any field battler), a CASTFORM attacker / target (form-keyed frames and palette), a doll on either side, a transformed battler.
 - **Other bodies while a battler is transformed decline** (static field, correct transformed picture, body effects undrawn);
   per-move proof on the copied picture is future work.
 - **Next print timing**: ROM first glyph of the post-Transform message at activation + 112; production's message command starts
