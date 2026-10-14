@@ -481,7 +481,7 @@ describe("battle resolution presentation receipt ownership", () => {
         lines: ["ONIX used", "ROCK SLIDE!"],
         advance: "automatic",
         noCursor: false,
-        timing: { minimumFrames: 24, holdFrames: 0 },
+        timing: { minimumFrames: 0, holdFrames: 0 },
       },
       {
         type: "hp",
@@ -557,7 +557,7 @@ describe("battle resolution presentation receipt ownership", () => {
         c.type === "message" && c.lines[0] === "ONIX used",
     )!;
     expect(usedMoveCommand.timing).toEqual({
-      minimumFrames: 24,
+      minimumFrames: 0,
       holdFrames: 0,
     });
     // The faint-family ids are button-dismissed (advance "button") and their
@@ -627,7 +627,7 @@ describe("battle resolution presentation receipt ownership", () => {
     const unheldMove = unheld.segments[0]!.commands[0]! as Extract<
       BattleResolutionPresentationCommand, { type: "message" }
     >;
-    expect(unheldMove.timing).toEqual({ minimumFrames: 24, holdFrames: 0 });
+    expect(unheldMove.timing).toEqual({ minimumFrames: 0, holdFrames: 0 });
 
     const routed = createBattleResolutionPresentation(Object.freeze({
       ...inputFor(events(), NEXT_COMMAND),
@@ -1741,7 +1741,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
         resolution.segments[0]!.commands[0]!,
         resolution.field,
       ),
-    ).toBe(24);
+    ).toBe(20);
 
     const result = createBattleResolutionPresentationRenderView(
       atRenderClock(resolution, 2, 2),
@@ -1979,22 +1979,23 @@ describe("battle resolution typed Scene-OFF renderer", () => {
       + battleResolutionCommandDuration(messageCommand!, fellResolution.field),
     ).toBe(90);
 
-    // A non-stat-change message (the ordinary "used move!" banner) keeps the
-    // old floor -- the hold is scoped to the six stat-change STRINGIDs, not
-    // every message this pipeline prints.
+    // A non-stat-change message (the ordinary "used move!" banner) gets no
+    // hold -- the hold is scoped to the six stat-change STRINGIDs, not every
+    // message this pipeline prints. msg175: it lasts its printable length
+    // (20 glyphs here), not the 24-frame floor.
     const usedMoveResolution = createBattleResolutionPresentation(inputFor([
       event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
       event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
     ], NEXT_COMMAND));
     expect(usedMoveResolution.segments[0]!.commands[0]).toMatchObject({
-      timing: { minimumFrames: 24, holdFrames: 0 },
+      timing: { minimumFrames: 0, holdFrames: 0 },
     });
     expect(
       battleResolutionCommandDuration(
         usedMoveResolution.segments[0]!.commands[0]!,
         usedMoveResolution.field,
       ),
-    ).toBe(24);
+    ).toBe(20);
 
     // Repeats identically for every one of the six stat-change STRINGIDs
     // (BattleScript_StatUp/StatDown's own gStatUpStringIds/gStatDownStringIds

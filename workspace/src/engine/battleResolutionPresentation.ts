@@ -890,6 +890,12 @@ function returnToBallOperand(event: BattleKernelSemanticEvent): string | null {
  * `returntoball` executes on row R and removes the target on R + 2 (off148 OFF probes), the forced hold's 4 frames end there, so the
  * switch-out command starts on R - 2 = the print convention's R + 2 (lead 1) minus 4.
  */
+/**
+ * msg175 (docs/msg175-used-message-duration.md, off148 §3 Wish): rows from the MoveEnd sprite-visibility receipt's execution to the
+ * next action's "used" first glyph, less that action's own instructionExecution u: MoveEnd's remaining cases + the action dispatch
+ * (next script on Δ + 5 = G + 45 with u counted from there, attackstring on u, first glyph two rows later).
+ */
+const SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS = 7;
 const SCENE_OFF_RETURN_TO_BALL_LEAD = -3; // 1 - FORCED_RETURN_TO_BALL_HOLD_FRAMES (declared below; pinned in tests/offs152SceneOffForcedSwitch.test.ts)
 
 function sceneOffNoHitPauseFrames(
@@ -934,6 +940,18 @@ function sceneOffNoHitPauseFrames(
     if (payload.kind === "stat-stage-change") {
       if (payload.from !== payload.to) skipped += STAT_TIMING.minimumFrames;
       continue;
+    }
+    // msg175 (ISSUES #167 (a), Wish): a MoveEnd sprite-visibility receipt next (its 1-frame command draws nothing), then the next
+    // action's USEDMOVE at instructionExecution u (the kernel restarts the count): the ROM's next first glyph is G + Δ(moveend) +
+    // SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS + u (off148 OFF, both sides G + 51 = 40 + 7 + 4). Production: the pause from G + 1, the
+    // sprite-visibility frame, then that print. Any other continuation (end of turn, a switch, a pre-move print) stays unmeasured.
+    if (payload.kind === "set-battler-sprite-visibility" && candidate.provenance?.opcodeName === "B_SCR_OP_MOVEEND" && !held) {
+      const following = events[index + 1];
+      const used = following?.provenance?.instructionExecution;
+      if (following === undefined || used === undefined || used >= next || following.payload.kind !== "message"
+        || following.payload.messageId !== "STRINGID_USEDMOVE") return null;
+      const frames = next - opener + SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS + used - 1 - 1 - presented - skipped;
+      return frames > 0 ? frames : null;
     }
     const lead = payload.kind === "message" || payload.kind === "set-battler-status-data"
       || (payload.kind === "animation" && payload.animationId === "STATS_CHANGE")
@@ -4003,21 +4021,18 @@ export function projectBattleResolutionCommands(
           ? { faintBattler: lastFaintBattler! }
           : {}),
         noCursor: TERMINAL_SEAM_QUOTE_MESSAGE_IDS.has(payload.messageId),
+        // msg175 (docs/msg175-used-message-duration.md): the attackstring print runs one glyph per row, first glyph -> final
+        // glyph G in exactly its printable length L (line breaks cost no row; 67 / 67 ROM uses, both scenes), and the next
+        // presented event starts on G + 1. So the typing term is L itself, never the 24-frame `MESSAGE_TIMING` floor: the
+        // route-scoped hold (`docs/battle-message-pacing-ground-truth.md` §3.3, the 23-glyph "…used\nSPLASH!" clears at
+        // +62) and off108's source-pause hold both count from G.
         timing: payload.messageId === "STRINGID_USEDMOVE"
-          ? usedMessageHoldFrames > 0
-            // The route-scoped used-move hold counts from print completion
-            // (`docs/battle-message-pacing-ground-truth.md` §3.3: the
-            // `pause B_WAIT_TIME_SHORT` / controller span starts after the
-            // attackstring finishes), so the typing term is the exact
-            // printable length, not the 24-frame `MESSAGE_TIMING` floor --
-            // the 23-glyph "…used\nSPLASH!" must clear at +62, not +63.
-            ? Object.freeze({ minimumFrames: 0, holdFrames: usedMessageHoldFrames })
-            : (() => {
-              const hold = sourcePauseUsedMoveHoldFrames(events, index);
-              return hold === null
-                ? MESSAGE_TIMING
-                : Object.freeze({ minimumFrames: MESSAGE_TIMING.minimumFrames, holdFrames: hold });
-            })()
+          ? Object.freeze({
+            minimumFrames: 0,
+            holdFrames: usedMessageHoldFrames > 0
+              ? usedMessageHoldFrames
+              : sourcePauseUsedMoveHoldFrames(events, index) ?? 0,
+          })
           : payload.messageId === "STRINGID_RETURNMON"
             ? RETURN_MON_TIMING
             : payload.messageId === "STRINGID_SWITCHINMON"
