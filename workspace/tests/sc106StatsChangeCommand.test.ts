@@ -52,6 +52,8 @@ const P = "player" as const, O = "opponent" as const;
 const iu = (...bodies: (readonly [number, "player" | "opponent", number?])[]) =>
   bodies.reduce((n, [id, side, times]) => n + iu120Extra(id, side) * (times ?? 1), 0);
 
+/** chg161: the Dig charge turns seed 0's Scene ON route plays (each box 24 -> 8 frames). */
+const CHG161_SEED0_ON_CHARGE_TURNS = 2;
 describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54)", () => {
   it("status stat move, sharply (seed 0, slot 2: GRIMER Acid Armor, arg 40): command after the body, message +90", () => {
     const route = scanRoute(0, Array(8).fill(2), "on");
@@ -60,7 +62,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a.before?.type).toBe("move-animation");
     // Base: the "GRIMER's DEFENSE sharply rose!" message (and its first glyph) started on frame 976.
     // iu120: + the opponent's Dig setup (91) and the Acid Armor (151) bodies before it.
-    const shift = iu([91, O], [151, P]);
+    // chg161: - 16, the opponent Dig's charge-turn empty box (24 -> 8, docs/chg161-charge-turn-print.md).
+    const shift = iu([91, O], [151, P]) - 16;
     expect(a.statsChange).toEqual({ frame: 976 + shift, frames: 90 });
     // scf117: + 1 hold frame (the print executes on rel 91 and shows its first glyph on rel 92).
     expect(a.following).toMatchObject({ type: "message", frame: 976 + shift + 90 + 1, glyph: 976 + shift + 90 + 1 });
@@ -72,7 +75,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // sgl138: + 8 + 9 = sgs134: the route's two gated Icy Wind secondaries (IsBattleSEPlaying, docs/sgs134-se-gate-other-requests.md).
     // snd145: + the Foe WOBBUFFET faint replacement's Scene ON species-keyed send-in tail + turn-end hold (158 vs the old 91 + 11).
     expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1 + iu([91, O, 4], [151, P, 3], [196, P, 4], [219, O], [204, O]) - 2 + 8 + 9
-      + snd145FaintReplacement(202));
+      + snd145FaintReplacement(202) - 16 * CHG161_SEED0_ON_CHARGE_TURNS);
   });
 
   it("status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76", () => {

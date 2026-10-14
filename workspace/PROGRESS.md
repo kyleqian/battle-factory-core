@@ -17,7 +17,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   641 / 641 byte-identical.
 - **Next:** #167 (d) remainder: the ON live charge animation starts 7 rows late (it needs a presented post-animation hold). The
   held print -> next "used" edge is -10 .. -14 (general: the Sand-Attack control is -12; same family as (a)).
-- **Notes:** gates: typecheck 0, smoke 448, full `npm test` (see commit), build. Docs `docs/chg161-charge-turn-print.md`; receipt
+- **Notes:** gates: typecheck 0, smoke 448, build OK; full `npm test`: 1,669 files / 13,874 passed, 4 failed = 4 attributed frame
+  re-pins (seed 0 / 21 soak frames, sc106 seed 0 -16 x Dig box, sgl138 receipt 0-on -32 / 0-off -48), files 81 / 81 after.
+  Docs `docs/chg161-charge-turn-print.md`; receipt
   `tools/integration/fixtures/chg161/receipt.json`; scratch `.integration/validation/chg161/`.
 
 ---
