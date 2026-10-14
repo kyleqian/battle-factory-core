@@ -141,8 +141,10 @@ function startOfN(use: Use, nLabel: string, nDelta: number, attDelta: number | n
   if (!n || use.commands.length === 0) return null;
   const at = use.commands.findIndex((c, i) => i > 0 && c[0] >= n[0]);
   if (at < 0) return null;
-  return (use.commands[0]![3] ?? 0) + use.commands.slice(1, at).reduce((sum, c) => sum + (c[2] ?? 0) + (c[3] ?? 0), 0);
+  return (use.commands[0]![3] ?? 0) + chargeBoxFrames(use) + use.commands.slice(1, at).reduce((sum, c) => sum + (c[2] ?? 0) + (c[3] ?? 0), 0);
 }
+/** chg161: a USEDMOVE opener ends on G; the charge-turn empty box (EMPTYSTRING3) starts on G + 1, so its own row counts. */
+const chargeBoxFrames = (use: Use) => (use.opener === "STRINGID_EMPTYSTRING3" ? use.commands[0]![2] ?? 0 : 0);
 
 /** off108Verify.py's selection: the class move, or (Protect-blocked Tackle) any move whose attack the target's Protect blocked. */
 const matching = (row: ClassRow, uses: Use[]) =>
@@ -172,7 +174,7 @@ describe("olnd113: Scene OFF no-hit pause, per class on production routes", () =
       const pause = use.raw.find((c: any) => c.eventSequence === use.attack![0]) as any;
       expect(pause).toMatchObject({ type: "move-animation" });
       expect(pause.animation).toBeUndefined();
-      expect(pause.timing.minimumFrames).toBe(row.rule!.P + (row.prod!.N[1] === "STATS_CHANGE" ? 1 : 0));
+      expect(pause.timing.minimumFrames).toBe(row.rule!.P + (row.prod!.N[1] === "STATS_CHANGE" ? 1 : 0) - chargeBoxFrames(use));
     }
   });
 
