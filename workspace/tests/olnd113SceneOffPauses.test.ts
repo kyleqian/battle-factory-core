@@ -237,7 +237,7 @@ describe("olnd113: the miss / fail / Protect-blocked used-move hold, BOTH scenes
       const uses = matching(row, battleUses(row.prod!.exampleSeed, scene));
       expect(uses.length).toBeGreaterThan(0);
       for (const use of uses) {
-        expect(use.commands[0]).toEqual([use.commands[0]![0], "message", 24, row.rule!.P]);
+        expect(use.commands[0]).toEqual([use.commands[0]![0], "message", 0, row.rule!.P]); // msg175: the used print lasts L (no 24 floor)
         expect(startOfN(use, row.prod!.N[2], row.prod!.N[3], null)).toBe(row.rule!.romAnchor);
       }
     },
@@ -249,7 +249,7 @@ describe("olnd113: the miss / fail / Protect-blocked used-move hold, BOTH scenes
       const uses = matching(row, battleUses(seed, scene)).filter((u) => u.attacker === side);
       expect(uses.length).toBeGreaterThan(0);
       for (const use of uses) {
-        expect(use.commands[0]).toEqual([use.commands[0]![0], "message", 24, 36]);
+        expect(use.commands[0]).toEqual([use.commands[0]![0], "message", 0, 36]); // msg175
         expect(startOfN(use, row.prod!.N[2], row.prod!.N[3], null)).toBe(row.rule!.romAnchor);
       }
     }

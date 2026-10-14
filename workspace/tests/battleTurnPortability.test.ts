@@ -155,7 +155,7 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         lines: ["ONIX used", "ROCK SLIDE!"],
         advance: "automatic",
         noCursor: false,
-        timing: { minimumFrames: 24, holdFrames: 0 },
+        timing: { minimumFrames: 0, holdFrames: 0 },
       },
       {
         type: "move-animation",
@@ -202,7 +202,7 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         lines: ["Foe KABUTO used", "SAND-ATTACK!"],
         advance: "automatic",
         noCursor: false,
-        timing: { minimumFrames: 24, holdFrames: 0 },
+        timing: { minimumFrames: 0, holdFrames: 0 },
       },
       {
         type: "stat",
