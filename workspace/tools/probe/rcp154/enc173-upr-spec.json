@@ -1,0 +1,70 @@
+{
+ "schema": "rcp154-action-time-receipt/v1",
+ "receipt": "ENC173-UPR",
+ "followUpTo": "ISSUES #171 (Encore residuals after act156), STEP enc173, part (b)",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp154-action-time.py",
+ "builder": "tools/probe/build-rcp154-receipt.py",
+ "verify": "tools/probe/verify-rcp154.ts",
+ "card": "tools/probe/rcp154/enc173-upr-uproar-midturn-encore-off.json",
+ "probeSlotPlan": "0,1",
+ "title": "Mid-turn Encore into UPROAR: draw count, Uproar duration and HP match the ROM; the locked-move check does not trip",
+ "scenario": "Staged through mechanicLab overrides.parties by tools/probe/gen-enc173-cards.py; see docs/enc173-encore-residuals.md",
+ "portPlayerSlots": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0
+ ],
+ "portPlayerTargets": [
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "sourceUnderTest": {
+  "useMoveArms": "reference/pokeemerald/src/battle_util.c:107-134 HandleAction_UseMove: locked arm, Encore arm 1 (:111-117), Encore arm 2 (:119-128), chosen-move-changed arm (:130-134)",
+  "setEncore": "reference/pokeemerald/src/battle_script_commands.c:8017 Cmd_trysetencore"
+ },
+ "portSitesAtHead": {
+  "turnStart": "src/engine/factoryBattleScriptFullTurnDecision.ts actionRetargetsAtExecution / clearOverwrittenEncoreAtAction at the turn-start site",
+  "actionTime": "actionEncoreArm / lockedMoveDecision in runMoveAction",
+  "preFix": {
+   "firstDivergence": null,
+   "verdict": "PASS"
+  }
+ },
+ "fixShape": "None needed: PASS at base commit 5e78e4030 (no engine change); the case is shown not to diverge."
+}

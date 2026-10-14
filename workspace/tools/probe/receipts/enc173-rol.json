@@ -1,0 +1,7706 @@
+{
+ "schema": "rcp154-action-time-receipt/v1",
+ "receipt": "ENC173-ROL",
+ "followUpTo": "ISSUES #171 (Encore residuals after act156), STEP enc173, part (b)",
+ "oracleUrl": "http://127.0.0.1:8014",
+ "probe": "tools/probe/probe-rcp154-action-time.py",
+ "builder": "tools/probe/build-rcp154-receipt.py",
+ "verify": "tools/probe/verify-rcp154.ts",
+ "card": "tools/probe/rcp154/enc173-rol-rollout-midturn-encore-off.json",
+ "probeSlotPlan": "0,1",
+ "title": "Mid-turn Encore into ROLLOUT from a free state with a differing chosen move (turns 13 and 19): action-time Encore arm with GetMoveTarget matches the ROM",
+ "scenario": "Staged through mechanicLab overrides.parties by tools/probe/gen-enc173-cards.py; see docs/enc173-encore-residuals.md",
+ "portPlayerSlots": [
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0
+ ],
+ "portPlayerTargets": [
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1
+ ],
+ "sourceUnderTest": {
+  "useMoveArms": "reference/pokeemerald/src/battle_util.c:107-134 HandleAction_UseMove: locked arm, Encore arm 1 (:111-117), Encore arm 2 (:119-128), chosen-move-changed arm (:130-134)",
+  "setEncore": "reference/pokeemerald/src/battle_script_commands.c:8017 Cmd_trysetencore"
+ },
+ "portSitesAtHead": {
+  "turnStart": "src/engine/factoryBattleScriptFullTurnDecision.ts actionRetargetsAtExecution / clearOverwrittenEncoreAtAction at the turn-start site",
+  "actionTime": "actionEncoreArm / lockedMoveDecision in runMoveAction",
+  "preFix": {
+   "firstDivergence": null,
+   "verdict": "PASS"
+  }
+ },
+ "fixShape": "None needed: PASS at base commit 5e78e4030 (no engine change); the case is shown not to diverge.",
+ "oracleProfile": "battle-scene-off",
+ "seed": 305419897,
+ "runs": 2,
+ "probeOutputSha256": "6329d564d71b68164addad903a3c441939ca6379e8f8ab425ae7b5ecd1f59818",
+ "probeOutputSha256Rerun": "6329d564d71b68164addad903a3c441939ca6379e8f8ab425ae7b5ecd1f59818",
+ "byteIdenticalAcrossRuns": true,
+ "drawCountCrossChecked": true,
+ "attributionReconciled": true,
+ "framebufferSha256": "1b18b987449a01e7eaa0d110d3d9c17c60e38402807cacee1ab4767e1e67efb1",
+ "slotPlan": [
+  0,
+  1
+ ],
+ "inputSubstitutions": [
+  {
+   "frame": 3909,
+   "menuEntry": 2,
+   "cursor": 0,
+   "plannedSlot": 1,
+   "buttons": [
+    "RIGHT"
+   ]
+  }
+ ],
+ "parties": {
+  "player": [
+   {
+    "species": 183,
+    "item": 0,
+    "abilitySlot": 0,
+    "ability": 47,
+    "moves": [
+     205,
+     33,
+     39,
+     33
+    ],
+    "hp": 50,
+    "maxHp": 50,
+    "stats": {
+     "attack": 15,
+     "defense": 24,
+     "speed": 21,
+     "spAttack": 15,
+     "spDefense": 24
+    },
+    "level": 15,
+    "personality": 2349019075
+   },
+   {
+    "species": 129,
+    "item": 0,
+    "abilitySlot": 0,
+    "ability": 33,
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "hp": 95,
+    "maxHp": 95,
+    "stats": {
+     "attack": 30,
+     "defense": 75,
+     "speed": 100,
+     "spAttack": 35,
+     "spDefense": 40
+    },
+    "level": 50,
+    "personality": 777692550
+   },
+   {
+    "species": 129,
+    "item": 0,
+    "abilitySlot": 0,
+    "ability": 33,
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "hp": 95,
+    "maxHp": 95,
+    "stats": {
+     "attack": 30,
+     "defense": 75,
+     "speed": 100,
+     "spAttack": 35,
+     "spDefense": 40
+    },
+    "level": 50,
+    "personality": 3365026700
+   }
+  ],
+  "opponent": [
+   {
+    "species": 353,
+    "item": 0,
+    "abilitySlot": 0,
+    "ability": 57,
+    "moves": [
+     227,
+     227,
+     227,
+     227
+    ],
+    "hp": 167,
+    "maxHp": 167,
+    "stats": {
+     "attack": 63,
+     "defense": 101,
+     "speed": 115,
+     "spAttack": 105,
+     "spDefense": 95
+    },
+    "level": 50,
+    "personality": 1793700005
+   },
+   {
+    "species": 129,
+    "item": 0,
+    "abilitySlot": 0,
+    "ability": 33,
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "hp": 95,
+    "maxHp": 95,
+    "stats": {
+     "attack": 30,
+     "defense": 75,
+     "speed": 100,
+     "spAttack": 35,
+     "spDefense": 40
+    },
+    "level": 50,
+    "personality": 86062825
+   },
+   {
+    "species": 129,
+    "item": 0,
+    "abilitySlot": 0,
+    "ability": 33,
+    "moves": [
+     150,
+     150,
+     150,
+     150
+    ],
+    "hp": 95,
+    "maxHp": 95,
+    "stats": {
+     "attack": 30,
+     "defense": 75,
+     "speed": 100,
+     "spAttack": 35,
+     "spDefense": 40
+    },
+    "level": 50,
+    "personality": 2809695375
+   }
+  ]
+ },
+ "rom": {
+  "totalRandomCalls": 279,
+  "attributionWindow": [
+   0,
+   9028
+  ],
+  "turns": [
+   {
+    "turn": 1,
+    "aiSelectionDrawCount": 0,
+    "aiSelectionDraws": [],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     165
+    ],
+    "actions": [
+     {
+      "frame": 39,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       0,
+       0
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 189,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 205,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       0,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 188,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 310,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 2,
+      "text": "TAIL WHIP"
+     },
+     {
+      "frame": 3,
+      "text": "TYPE/<FC><06><01>ROCK"
+     },
+     {
+      "frame": 42,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 101,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 191,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 41,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 449897005,
+      "value": 27560,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 214,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1806197660,
+      "value": 52148,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 218,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 3417592287,
+      "value": 40499,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 221,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 2654154342,
+      "value": 48338,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 302,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 3167892961,
+      "value": 16113,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 312,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 1056038720,
+      "value": 27265,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 2,
+    "aiSelectionDrawCount": 9,
+    "aiSelectionDraws": [
+     {
+      "frame": 318,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1786900147,
+      "value": 383,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 318,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 25136298,
+      "value": 30119,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 318,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1973883093,
+      "value": 6401,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 318,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 419524900,
+      "value": 48110,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 318,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3152970951,
+      "value": 59885,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 318,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3924658990,
+      "value": 20000,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 318,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1310762761,
+      "value": 45250,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 318,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2965519688,
+      "value": 7952,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 319,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 521168923,
+      "value": 39318,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 7,
+    "activeHpAtTurnEnd": [
+     50,
+     163
+    ],
+    "actions": [
+     {
+      "frame": 325,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 2,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 483,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       4
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 324,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 482,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 603,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 328,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 389,
+      "text": "MARILL got\nan ENCORE!"
+     },
+     {
+      "frame": 485,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 327,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 2576805362,
+      "value": 56559,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 353,
+      "caller": "Cmd_trysetencore+0xb6",
+      "callerFunction": "Cmd_trysetencore",
+      "rngBefore": 3706678397,
+      "value": 43693,
+      "script": "BattleScript_EffectEncore+0xa",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 507,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 2863507372,
+      "value": 61455,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 511,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 4027526319,
+      "value": 54381,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 514,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 3563960566,
+      "value": 25943,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 595,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 1700205873,
+      "value": 33647,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 605,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 2205111376,
+      "value": 26615,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 3,
+    "aiSelectionDrawCount": 9,
+    "aiSelectionDraws": [
+     {
+      "frame": 611,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1744283267,
+      "value": 50560,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 611,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3313512506,
+      "value": 11554,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 611,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 757241125,
+      "value": 32969,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 611,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2160666420,
+      "value": 42447,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 611,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2781866391,
+      "value": 62588,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 611,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 4101822398,
+      "value": 15832,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 611,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1037574233,
+      "value": 52407,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 611,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3434562648,
+      "value": 13547,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 612,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 887835115,
+      "value": 3958,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 3,
+    "activeHpAtTurnEnd": [
+     50,
+     163
+    ],
+    "actions": [
+     {
+      "frame": 618,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 2,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 768,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       3
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 617,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 767,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 923,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 621,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 680,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 770,
+      "text": "MARILL used\nROLLOUT!"
+     },
+     {
+      "frame": 828,
+      "text": "MARILL’s\nattack missed!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 620,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 259421058,
+      "value": 1325,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 792,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 86846157,
+      "value": 7892,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 925,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 517214140,
+      "value": 42110,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 4,
+    "aiSelectionDrawCount": 9,
+    "aiSelectionDraws": [
+     {
+      "frame": 932,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2759744383,
+      "value": 36072,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 932,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2364016518,
+      "value": 35002,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 932,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2293917825,
+      "value": 38908,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 932,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2549886304,
+      "value": 1138,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 932,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 74642003,
+      "value": 27128,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 932,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1777915850,
+      "value": 8431,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 932,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 552586613,
+      "value": 46130,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 932,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3023208772,
+      "value": 23420,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 933,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 1534861927,
+      "value": 35072,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 10,
+    "activeHpAtTurnEnd": [
+     50,
+     161
+    ],
+    "actions": [
+     {
+      "frame": 951,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 1101,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 205,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       2
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 950,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 1100,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 1222,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 929,
+      "text": "What will\nMARILL do?"
+     },
+     {
+      "frame": 954,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 1013,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 1103,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 953,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 2298505294,
+      "value": 61256,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 1101,
+      "caller": "GetMoveTarget+0x18e",
+      "callerFunction": "GetMoveTarget",
+      "rngBefore": 4014509481,
+      "value": 30404,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1101,
+      "caller": "GetMoveTarget+0x18e",
+      "callerFunction": "GetMoveTarget",
+      "rngBefore": 1992568680,
+      "value": 27242,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1101,
+      "caller": "GetMoveTarget+0x18e",
+      "callerFunction": "GetMoveTarget",
+      "rngBefore": 1785348027,
+      "value": 29770,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1101,
+      "caller": "GetMoveTarget+0x18e",
+      "callerFunction": "GetMoveTarget",
+      "rngBefore": 1951038738,
+      "value": 33727,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1126,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 2210340125,
+      "value": 13484,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1130,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 883727308,
+      "value": 20670,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1133,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 1354686031,
+      "value": 35099,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1214,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 2300254742,
+      "value": 25985,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1224,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 1702965201,
+      "value": 41273,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 5,
+    "aiSelectionDrawCount": 9,
+    "aiSelectionDraws": [
+     {
+      "frame": 1230,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2704894576,
+      "value": 59008,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1230,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3867202083,
+      "value": 52978,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1230,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3471999834,
+      "value": 29411,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1230,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1927526853,
+      "value": 238,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1230,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 15630164,
+      "value": 57168,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1230,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3746574135,
+      "value": 65297,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1230,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 4279319774,
+      "value": 19606,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1230,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1284959993,
+      "value": 42665,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1231,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 2796158584,
+      "value": 2746,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     159
+    ],
+    "actions": [
+     {
+      "frame": 1237,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 2,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 1387,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       1
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 1236,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 1386,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 1507,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 1240,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 1299,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 1389,
+      "text": "MARILL used\nROLLOUT!"
+     },
+     {
+      "frame": 1510,
+      "text": "MARILL’s ENCORE\nended!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 1239,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 179980683,
+      "value": 32828,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 1411,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 2151418530,
+      "value": 16410,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1415,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 1075463021,
+      "value": 7944,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1418,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 520637404,
+      "value": 17869,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1499,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 1171109151,
+      "value": 23231,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1599,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 1522528422,
+      "value": 25968,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 6,
+    "aiSelectionDrawCount": 9,
+    "aiSelectionDraws": [
+     {
+      "frame": 1604,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1701866273,
+      "value": 44552,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1604,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2919762816,
+      "value": 61934,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1604,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 4058924531,
+      "value": 26806,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1604,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1756771050,
+      "value": 58387,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1604,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3826473493,
+      "value": 750,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1604,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 49160548,
+      "value": 1257,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1604,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 82382855,
+      "value": 18056,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1604,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1183339886,
+      "value": 37672,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1605,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 2468889673,
+      "value": 18025,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 7,
+    "activeHpAtTurnEnd": [
+     50,
+     156
+    ],
+    "actions": [
+     {
+      "frame": 1611,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 1769,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       3
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 1610,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 1768,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 1890,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 1614,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 1675,
+      "text": "MARILL got\nan ENCORE!"
+     },
+     {
+      "frame": 1771,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 1613,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1181331848,
+      "value": 1608,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 1639,
+      "caller": "Cmd_trysetencore+0xb6",
+      "callerFunction": "Cmd_trysetencore",
+      "rngBefore": 105408347,
+      "value": 51124,
+      "script": "BattleScript_EffectEncore+0xa",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 1793,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 3350469682,
+      "value": 26867,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1797,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 1760796093,
+      "value": 59128,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1800,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 3875020780,
+      "value": 36327,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1882,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 2380783599,
+      "value": 62415,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 1892,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 4090465078,
+      "value": 28045,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 7,
+    "aiSelectionDrawCount": 9,
+    "aiSelectionDraws": [
+     {
+      "frame": 1898,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1837963889,
+      "value": 51081,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1898,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3347648656,
+      "value": 6088,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1898,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 399003075,
+      "value": 53196,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1898,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3486312058,
+      "value": 9427,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1898,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 617852517,
+      "value": 46178,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1898,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3026347892,
+      "value": 16675,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1898,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1092863191,
+      "value": 30590,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1898,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2004791806,
+      "value": 41889,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 1899,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 2745273753,
+      "value": 16964,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 3,
+    "activeHpAtTurnEnd": [
+     50,
+     156
+    ],
+    "actions": [
+     {
+      "frame": 1905,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 2055,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       2
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 1904,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 2054,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 2210,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 1908,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 1967,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 2057,
+      "text": "MARILL used\nROLLOUT!"
+     },
+     {
+      "frame": 2115,
+      "text": "MARILL’s\nattack missed!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 1907,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1111771288,
+      "value": 49857,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 2079,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 3267467563,
+      "value": 19291,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2212,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 1264300482,
+      "value": 50240,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 8,
+    "aiSelectionDrawCount": 9,
+    "aiSelectionDraws": [
+     {
+      "frame": 2219,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3292539917,
+      "value": 31693,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2219,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2077038588,
+      "value": 48266,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2219,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3163184831,
+      "value": 13954,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2219,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 914549190,
+      "value": 11804,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2219,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 773602753,
+      "value": 285,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2219,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 18708896,
+      "value": 9819,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2219,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 643557779,
+      "value": 20735,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2219,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1358929418,
+      "value": 9401,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2220,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 616150709,
+      "value": 32188,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 7,
+    "activeHpAtTurnEnd": [
+     50,
+     154
+    ],
+    "actions": [
+     {
+      "frame": 2231,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 2381,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 205,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       1
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 2230,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 2380,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 2502,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 2216,
+      "text": "What will\nMARILL do?"
+     },
+     {
+      "frame": 2234,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 2293,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 2383,
+      "text": "MARILL used\nROLLOUT!"
+     },
+     {
+      "frame": 2505,
+      "text": "MARILL’s ENCORE\nended!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 2233,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 2109493636,
+      "value": 31261,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 2381,
+      "caller": "GetMoveTarget+0x18e",
+      "callerFunction": "GetMoveTarget",
+      "rngBefore": 2048740775,
+      "value": 25165,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2406,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1649234574,
+      "value": 20967,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2410,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 1374145257,
+      "value": 39098,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2413,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 2562376616,
+      "value": 60178,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2494,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 3943882491,
+      "value": 2075,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2594,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 136039250,
+      "value": 65332,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 9,
+    "aiSelectionDrawCount": 9,
+    "aiSelectionDraws": [
+     {
+      "frame": 2599,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 4281658973,
+      "value": 49944,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2599,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3273143308,
+      "value": 48754,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2599,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3195154831,
+      "value": 34131,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2599,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2236812374,
+      "value": 29346,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2599,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1923274001,
+      "value": 34918,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2599,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2288404144,
+      "value": 39222,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2599,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2570459491,
+      "value": 32087,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2599,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2102876570,
+      "value": 25242,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2600,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 1654289157,
+      "value": 17836,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 7,
+    "activeHpAtTurnEnd": [
+     50,
+     152
+    ],
+    "actions": [
+     {
+      "frame": 2606,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 2764,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       4
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 2605,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 2763,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 2884,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 2609,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 2670,
+      "text": "MARILL got\nan ENCORE!"
+     },
+     {
+      "frame": 2766,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 2608,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1168957332,
+      "value": 55090,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 2634,
+      "caller": "Cmd_trysetencore+0xb6",
+      "callerFunction": "Cmd_trysetencore",
+      "rngBefore": 3610421879,
+      "value": 8077,
+      "script": "BattleScript_EffectEncore+0xa",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 2788,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 529348382,
+      "value": 46367,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2792,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 3038772281,
+      "value": 27278,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2795,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 1787699896,
+      "value": 16233,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2876,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 1063860427,
+      "value": 34589,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 2886,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 2266851554,
+      "value": 65094,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 10,
+    "aiSelectionDrawCount": 8,
+    "aiSelectionDraws": [
+     {
+      "frame": 2892,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 4266058925,
+      "value": 43178,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2892,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2829743132,
+      "value": 43420,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2892,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2845595743,
+      "value": 21240,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2892,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1392046822,
+      "value": 29157,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2892,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1910890593,
+      "value": 46404,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2892,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3041163200,
+      "value": 26915,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2892,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1763958067,
+      "value": 47645,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 2893,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 3122469162,
+      "value": 15498,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     149
+    ],
+    "actions": [
+     {
+      "frame": 2899,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 3049,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       3
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 2898,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 3048,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 3170,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 2902,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 2961,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 3051,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 2901,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1015735125,
+      "value": 33061,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 3073,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 2166690212,
+      "value": 37120,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3077,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 2432752455,
+      "value": 40983,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3080,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 2685886382,
+      "value": 30639,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3162,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 2007966089,
+      "value": 2751,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3172,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 180315592,
+      "value": 25905,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 11,
+    "aiSelectionDrawCount": 8,
+    "aiSelectionDraws": [
+     {
+      "frame": 3178,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1697752731,
+      "value": 28105,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3178,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1841924722,
+      "value": 11563,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3178,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 757796605,
+      "value": 11924,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3178,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 781506604,
+      "value": 36165,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3178,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2370163503,
+      "value": 45677,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3178,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2993528182,
+      "value": 7658,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3178,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 501899185,
+      "value": 6617,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3179,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 433654992,
+      "value": 56370,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     143
+    ],
+    "actions": [
+     {
+      "frame": 3185,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 3335,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       2
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 3184,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 3334,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 3459,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 3188,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 3247,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 3337,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 3187,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 3694277891,
+      "value": 53465,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 3359,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 3503938746,
+      "value": 16352,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3363,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 1071646629,
+      "value": 17237,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3366,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 1129703348,
+      "value": 49508,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3451,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 3244613655,
+      "value": 15620,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3461,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 1023724606,
+      "value": 10042,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 12,
+    "aiSelectionDrawCount": 8,
+    "aiSelectionDraws": [
+     {
+      "frame": 3467,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 658127577,
+      "value": 3727,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3467,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 244288728,
+      "value": 46873,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3467,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3071879275,
+      "value": 3529,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3467,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 231288834,
+      "value": 52950,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3467,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3470159181,
+      "value": 32040,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3467,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2099798076,
+      "value": 16875,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3467,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1105961471,
+      "value": 59114,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3468,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 3874098182,
+      "value": 29685,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     132
+    ],
+    "actions": [
+     {
+      "frame": 3474,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 3624,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       1
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 3473,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 3623,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 3753,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 3477,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 3536,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 3626,
+      "text": "MARILL used\nROLLOUT!"
+     },
+     {
+      "frame": 3756,
+      "text": "MARILL’s ENCORE\nended!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 3476,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1945457409,
+      "value": 37509,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 3648,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 2458191328,
+      "value": 21934,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3652,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 1437475027,
+      "value": 32598,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3655,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 2136384586,
+      "value": 31022,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3745,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 2033115125,
+      "value": 19888,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 3845,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 1303404996,
+      "value": 13179,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 13,
+    "aiSelectionDrawCount": 8,
+    "aiSelectionDraws": [
+     {
+      "frame": 3852,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 863746279,
+      "value": 18350,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3852,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1202617550,
+      "value": 33958,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3852,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2225489961,
+      "value": 23935,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3852,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1568643048,
+      "value": 5388,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3852,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 353156667,
+      "value": 62725,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3852,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 4110768530,
+      "value": 19837,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3852,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1300103069,
+      "value": 62198,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 3853,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 4076211276,
+      "value": 14666,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 8,
+    "activeHpAtTurnEnd": [
+     50,
+     130
+    ],
+    "actions": [
+     {
+      "frame": 3947,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 3,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 4105,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 33,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       6
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 3946,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 4104,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 4226,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 3847,
+      "text": "What will\nMARILL do?"
+     },
+     {
+      "frame": 3878,
+      "text": "TAIL WHIP"
+     },
+     {
+      "frame": 3879,
+      "text": "TYPE/<FC><06><01>ROCK"
+     },
+     {
+      "frame": 3909,
+      "text": "TYPE/<FC><06><01>NORMAL"
+     },
+     {
+      "frame": 3950,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 4011,
+      "text": "MARILL got\nan ENCORE!"
+     },
+     {
+      "frame": 4107,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 3949,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 961201359,
+      "value": 62439,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 3975,
+      "caller": "Cmd_trysetencore+0xb6",
+      "callerFunction": "Cmd_trysetencore",
+      "rngBefore": 4092018326,
+      "value": 52363,
+      "script": "BattleScript_EffectEncore+0xa",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 4105,
+      "caller": "GetMoveTarget+0x18e",
+      "callerFunction": "GetMoveTarget",
+      "rngBefore": 3431709265,
+      "value": 21993,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4130,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1441358576,
+      "value": 9764,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4134,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 639934627,
+      "value": 1948,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4137,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 127692762,
+      "value": 50252,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4218,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 3293342789,
+      "value": 8165,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4228,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 535134164,
+      "value": 13218,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 14,
+    "aiSelectionDrawCount": 8,
+    "aiSelectionDraws": [
+     {
+      "frame": 4234,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 866280887,
+      "value": 39341,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4234,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2578280798,
+      "value": 54296,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4234,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3558361465,
+      "value": 16720,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4234,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1095796472,
+      "value": 46137,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4234,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3023661067,
+      "value": 32167,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4234,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2108098338,
+      "value": 35478,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4234,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2325136877,
+      "value": 13518,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4235,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 885972060,
+      "value": 20064,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     128
+    ],
+    "actions": [
+     {
+      "frame": 4241,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 4391,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 33,
+      "encore": [
+       205,
+       0,
+       5
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 4240,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 4390,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 4511,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 4244,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 4303,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 4393,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 4243,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1314929567,
+      "value": 11550,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 4415,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 756954406,
+      "value": 11122,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4419,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 728929697,
+      "value": 1255,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4422,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 82256896,
+      "value": 23394,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4503,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 1533195379,
+      "value": 49140,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4513,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 3220455274,
+      "value": 7245,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 15,
+    "aiSelectionDrawCount": 7,
+    "aiSelectionDraws": [
+     {
+      "frame": 4519,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 474852501,
+      "value": 2022,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4519,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 132530660,
+      "value": 24437,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4519,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1601562247,
+      "value": 9434,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4519,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 618310126,
+      "value": 11509,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4519,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 754269897,
+      "value": 30211,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4519,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1979931144,
+      "value": 61196,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4519,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 4010550747,
+      "value": 24087,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     125
+    ],
+    "actions": [
+     {
+      "frame": 4526,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 3,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 4676,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 33,
+      "encore": [
+       205,
+       0,
+       4
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 4525,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 4675,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 4797,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 4529,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 4588,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 4678,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 4528,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1578580146,
+      "value": 11989,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 4700,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 785760317,
+      "value": 15811,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4704,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 1036243052,
+      "value": 38249,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4707,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 2506688111,
+      "value": 50823,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4789,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 3330797494,
+      "value": 36782,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4799,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 2410603761,
+      "value": 47775,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 16,
+    "aiSelectionDrawCount": 7,
+    "aiSelectionDraws": [
+     {
+      "frame": 4805,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3131001104,
+      "value": 36981,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4805,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2423610435,
+      "value": 41703,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4805,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2733052666,
+      "value": 60295,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4805,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3951534309,
+      "value": 12771,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4805,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 837003252,
+      "value": 30163,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4805,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1976777559,
+      "value": 33615,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 4805,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 2203002494,
+      "value": 51682,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     120
+    ],
+    "actions": [
+     {
+      "frame": 4812,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 2,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 4962,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 33,
+      "encore": [
+       205,
+       0,
+       3
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 4811,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 4961,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 5085,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 4815,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 4874,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 4964,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 4814,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 3387041817,
+      "value": 14809,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 4986,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 970527000,
+      "value": 5425,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4990,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 355596203,
+      "value": 14590,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 4993,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 956231234,
+      "value": 64047,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 5077,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 4197445261,
+      "value": 28453,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 5087,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 1864755324,
+      "value": 11234,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 17,
+    "aiSelectionDrawCount": 7,
+    "aiSelectionDraws": [
+     {
+      "frame": 5093,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 736240959,
+      "value": 25693,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5093,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1683844678,
+      "value": 17285,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5093,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1132832833,
+      "value": 7282,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5093,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 477286944,
+      "value": 48553,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5093,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3182008339,
+      "value": 57149,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5093,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 3745376906,
+      "value": 23439,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5093,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 1536117045,
+      "value": 47182,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     108
+    ],
+    "actions": [
+     {
+      "frame": 5100,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 2,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 5250,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 33,
+      "encore": [
+       205,
+       0,
+       2
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 5099,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 5249,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 5380,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 5103,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 5162,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 5252,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 5102,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 3092165124,
+      "value": 9943,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 5274,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 651650087,
+      "value": 34659,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 5278,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 2271471374,
+      "value": 22724,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 5281,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 1489241449,
+      "value": 23890,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 5372,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 1565699112,
+      "value": 15255,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 5382,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 999808379,
+      "value": 11591,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 18,
+    "aiSelectionDrawCount": 6,
+    "aiSelectionDraws": [
+     {
+      "frame": 5390,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 759637970,
+      "value": 5082,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5390,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 333074653,
+      "value": 41094,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5390,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2693145740,
+      "value": 2184,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5390,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 143169551,
+      "value": 43799,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5390,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 2870456534,
+      "value": 11387,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5390,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 746315665,
+      "value": 27138,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 4,
+    "activeHpAtTurnEnd": [
+     50,
+     108
+    ],
+    "actions": [
+     {
+      "frame": 5419,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 3,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 5569,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 205,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       1
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 5418,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 5568,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 5725,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 5386,
+      "text": "What will\nMARILL do?"
+     },
+     {
+      "frame": 5422,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 5481,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 5571,
+      "text": "MARILL used\nROLLOUT!"
+     },
+     {
+      "frame": 5630,
+      "text": "MARILL’s\nattack missed!"
+     },
+     {
+      "frame": 5728,
+      "text": "MARILL’s ENCORE\nended!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 5421,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1778564912,
+      "value": 2188,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 5569,
+      "caller": "GetMoveTarget+0x18e",
+      "callerFunction": "GetMoveTarget",
+      "rngBefore": 143419363,
+      "value": 26625,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 5594,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1744946714,
+      "value": 42297,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 5817,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 2772018565,
+      "value": 46040,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 19,
+    "aiSelectionDrawCount": 6,
+    "aiSelectionDraws": [
+     {
+      "frame": 5823,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3017302036,
+      "value": 58335,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5823,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3823067383,
+      "value": 52145,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5823,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 3417435038,
+      "value": 19135,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5823,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1254086329,
+      "value": 21297,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5823,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1395731256,
+      "value": 3178,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 5823,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 208328523,
+      "value": 26136,
+      "script": "BattleScript_EncoredNoMore+0x6",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 8,
+    "activeHpAtTurnEnd": [
+     50,
+     105
+    ],
+    "actions": [
+     {
+      "frame": 5867,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 3,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 6025,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 0,
+      "chosenMoveByBattler": 33,
+      "slotMoveAtCurrMovePos": 205,
+      "encore": [
+       205,
+       0,
+       4
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 5866,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 6024,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 6147,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 5820,
+      "text": "What will\nMARILL do?"
+     },
+     {
+      "frame": 5830,
+      "text": "TAIL WHIP"
+     },
+     {
+      "frame": 5831,
+      "text": "TYPE/<FC><06><01>NORMAL"
+     },
+     {
+      "frame": 5870,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 5931,
+      "text": "MARILL got\nan ENCORE!"
+     },
+     {
+      "frame": 6027,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 5869,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1712907618,
+      "value": 23113,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 5895,
+      "caller": "Cmd_trysetencore+0xb6",
+      "callerFunction": "Cmd_trysetencore",
+      "rngBefore": 1514792749,
+      "value": 12213,
+      "script": "BattleScript_EffectEncore+0xa",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 6025,
+      "caller": "GetMoveTarget+0x18e",
+      "callerFunction": "GetMoveTarget",
+      "rngBefore": 800425116,
+      "value": 52057,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 6050,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 3411631839,
+      "value": 53103,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 6054,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 3480205158,
+      "value": 6998,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 6057,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 458656481,
+      "value": 36144,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 6139,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 2368737344,
+      "value": 37866,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 6149,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 2481638323,
+      "value": 33915,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   },
+   {
+    "turn": 20,
+    "aiSelectionDrawCount": 6,
+    "aiSelectionDraws": [
+     {
+      "frame": 6155,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2222695850,
+      "value": 24731,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 6155,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1620817365,
+      "value": 19313,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 6155,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 1265742372,
+      "value": 44936,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 6155,
+      "caller": "BattleAI_SetupAIData+0x82",
+      "callerFunction": "BattleAI_SetupAIData",
+      "rngBefore": 2944938439,
+      "value": 17170,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 6155,
+      "caller": "Cmd_get_ability+0x9c",
+      "callerFunction": "Cmd_get_ability",
+      "rngBefore": 1125266478,
+      "value": 9274,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     },
+     {
+      "frame": 6155,
+      "caller": "ChooseMoveOrAction_Singles+0xf6",
+      "callerFunction": "ChooseMoveOrAction_Singles",
+      "rngBefore": 607820809,
+      "value": 16501,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 227
+     }
+    ],
+    "drawCount": 6,
+    "activeHpAtTurnEnd": [
+     50,
+     103
+    ],
+    "actions": [
+     {
+      "frame": 6161,
+      "attacker": 1,
+      "activeSpecies": 353,
+      "activeMoves": [
+       227,
+       227,
+       227,
+       227
+      ],
+      "partyIndex": 0,
+      "currentMove": 227,
+      "currMovePos": 3,
+      "chosenMoveByBattler": 227,
+      "slotMoveAtCurrMovePos": 227,
+      "encore": [
+       0,
+       0,
+       0
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectEncore"
+     },
+     {
+      "frame": 6311,
+      "attacker": 0,
+      "activeSpecies": 183,
+      "activeMoves": [
+       205,
+       33,
+       39,
+       33
+      ],
+      "partyIndex": 0,
+      "currentMove": 205,
+      "currMovePos": 1,
+      "chosenMoveByBattler": 0,
+      "slotMoveAtCurrMovePos": 33,
+      "encore": [
+       205,
+       0,
+       3
+      ],
+      "lastMoves": [
+       205,
+       227
+      ],
+      "script": "BattleScript_EffectRollout"
+     }
+    ],
+    "actionCursor": [
+     {
+      "frame": 6160,
+      "turnActionNumber": 0,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 6310,
+      "turnActionNumber": 1,
+      "actionFuncId": 0
+     },
+     {
+      "frame": 6431,
+      "turnActionNumber": 2,
+      "actionFuncId": 0
+     }
+    ],
+    "messages": [
+     {
+      "frame": 6164,
+      "text": "Foe PLUSLE used\nENCORE!"
+     },
+     {
+      "frame": 6223,
+      "text": "But it failed!"
+     },
+     {
+      "frame": 6313,
+      "text": "MARILL used\nROLLOUT!"
+     }
+    ],
+    "draws": [
+     {
+      "frame": 6163,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 1081445960,
+      "value": 38679,
+      "script": "BattleScript_EffectEncore+0x1",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 1,
+      "currentMove": 227
+     },
+     {
+      "frame": 6335,
+      "caller": "Cmd_accuracycheck+0x304",
+      "callerFunction": "Cmd_accuracycheck",
+      "rngBefore": 2534925595,
+      "value": 43741,
+      "script": "BattleScript_RolloutCheckAccuracy",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 6339,
+      "caller": "Cmd_critcalc+0x126",
+      "callerFunction": "Cmd_critcalc",
+      "rngBefore": 2866620146,
+      "value": 45875,
+      "script": "BattleScript_HitFromCritCalc",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 6342,
+      "caller": "Cmd_adjustnormaldamage+0x6",
+      "callerFunction": "Cmd_adjustnormaldamage",
+      "rngBefore": 3006509437,
+      "value": 4293,
+      "script": "BattleScript_HitFromCritCalc+0x3",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 6423,
+      "caller": "Cmd_seteffectwithchance+0x80",
+      "callerFunction": "Cmd_seteffectwithchance",
+      "rngBefore": 281348268,
+      "value": 36241,
+      "script": "BattleScript_HitFromAtkAnimation+0x12",
+      "battleMainFunc": "RunTurnActionsFunctions",
+      "attacker": 0,
+      "currentMove": 205
+     },
+     {
+      "frame": 6433,
+      "caller": "BattleTurnPassed+0x156",
+      "callerFunction": "BattleTurnPassed",
+      "rngBefore": 2375121327,
+      "value": 9822,
+      "script": "BattleScript_MoveEnd+0x9",
+      "battleMainFunc": "HandleTurnActionSelectionState",
+      "attacker": 0,
+      "currentMove": 0
+     }
+    ]
+   }
+  ],
+  "incompleteTailDraws": {
+   "turn": 21,
+   "aiSelectionDraws": [],
+   "draws": [
+    {
+     "frame": 6447,
+     "caller": "GetMoveTarget+0x18e",
+     "callerFunction": "GetMoveTarget",
+     "rngBefore": 643727862,
+     "value": 7194,
+     "script": "BattleScript_NoMovesLeft+0x3",
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "attacker": 1,
+     "currentMove": 165
+    },
+    {
+     "frame": 6454,
+     "caller": "Cmd_accuracycheck+0x304",
+     "callerFunction": "Cmd_accuracycheck",
+     "rngBefore": 471509553,
+     "value": 10779,
+     "script": "BattleScript_HitFromAccCheck",
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "attacker": 1,
+     "currentMove": 165
+    },
+    {
+     "frame": 6482,
+     "caller": "Cmd_critcalc+0x126",
+     "callerFunction": "Cmd_critcalc",
+     "rngBefore": 706463056,
+     "value": 20433,
+     "script": "BattleScript_HitFromCritCalc",
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "attacker": 1,
+     "currentMove": 165
+    },
+    {
+     "frame": 6485,
+     "caller": "Cmd_adjustnormaldamage+0x6",
+     "callerFunction": "Cmd_adjustnormaldamage",
+     "rngBefore": 1339147139,
+     "value": 24628,
+     "script": "BattleScript_HitFromCritCalc+0x3",
+     "battleMainFunc": "RunTurnActionsFunctions",
+     "attacker": 1,
+     "currentMove": 165
+    }
+   ]
+  },
+  "final": {
+   "watch": {
+    "battleMainFunc": "RunBattleScriptCommands_PopCallbacksStack",
+    "actionFuncId": 0,
+    "turnActionNumber": 0,
+    "script": "BattleScript_FaintedMonTryChoose+0x6",
+    "currentMove": 165,
+    "attacker": 1,
+    "animActive": 0,
+    "animScript": null,
+    "activeHp": [
+     0,
+     91
+    ],
+    "activeSpecies": [
+     183,
+     353
+    ],
+    "activeMoves": [
+     [
+      205,
+      33,
+      39,
+      33
+     ],
+     [
+      227,
+      227,
+      227,
+      227
+     ]
+    ],
+    "partyIndex": [
+     0,
+     0
+    ],
+    "chosenMoveByBattler": [
+     0,
+     0
+    ],
+    "currMovePos": 3,
+    "chosenMovePos": 3,
+    "chosenMove": 165,
+    "lastMoves": [
+     0,
+     165
+    ],
+    "encore": [
+     [
+      0,
+      0,
+      0
+     ],
+     [
+      0,
+      0,
+      0
+     ]
+    ],
+    "playerController": "WaitForMonSelection",
+    "status2": [
+     0,
+     0
+    ]
+   },
+   "playerParty": [
+    {
+     "species": 183,
+     "hp": 0
+    },
+    {
+     "species": 129,
+     "hp": 95
+    },
+    {
+     "species": 129,
+     "hp": 95
+    }
+   ],
+   "opponentParty": [
+    {
+     "species": 353,
+     "hp": 91
+    },
+    {
+     "species": 129,
+     "hp": 95
+    },
+    {
+     "species": 129,
+     "hp": 95
+    }
+   ],
+   "battleOutcome": 0
+  }
+ },
+ "pngEvidence": {
+  "note": "One PNG per displayed-string change (probe --png-after-message); frame -> sha256 of the raw RGB framebuffer. PNGs are not committed; rerun the probe to regenerate them.",
+  "frames": {}
+ },
+ "port": {
+  "kernel": "src/engine/factoryBattleScriptFullTurnDecision.ts reduceFactoryFullTurnDecision via tools/probe/rcp154PortDriver.ts (benches staged by tools/probe/verify-rcp154.ts)",
+  "seededFromRomRngBefore": 449897005,
+  "injectedAiSelectionDraws": [
+   0,
+   9,
+   9,
+   9,
+   9,
+   9,
+   9,
+   9,
+   9,
+   8,
+   8,
+   8,
+   8,
+   8,
+   7,
+   7,
+   7,
+   6,
+   6,
+   6
+  ],
+  "playerSlots": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0
+  ],
+  "stoppedEarly": null,
+  "turns": [
+   {
+    "turn": 1,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 449897005,
+      "value": 27560
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1806197660,
+      "value": 52148
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 3417592287,
+      "value": 40499
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2654154342,
+      "value": 48338
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3167892961,
+      "value": 16113
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1056038720,
+      "value": 27265
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     165
+    ]
+   },
+   {
+    "turn": 2,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2576805362,
+      "value": 56559
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 3706678397,
+      "value": 43693
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2863507372,
+      "value": 61455
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 4027526319,
+      "value": 54381
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 3563960566,
+      "value": 25943
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1700205873,
+      "value": 33647
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2205111376,
+      "value": 26615
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "message:STRINGID_PKMNGOTENCORE",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     163
+    ]
+   },
+   {
+    "turn": 3,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 259421058,
+      "value": 1325
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 86846157,
+      "value": 7892
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 517214140,
+      "value": 42110
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "message:STRINGID_ATTACKMISSED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     163
+    ]
+   },
+   {
+    "turn": 4,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2298505294,
+      "value": 61256
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 4014509481,
+      "value": 30404
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 1992568680,
+      "value": 27242
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 1785348027,
+      "value": 29770
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 1951038738,
+      "value": 33727
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2210340125,
+      "value": 13484
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 883727308,
+      "value": 20670
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 1354686031,
+      "value": 35099
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2300254742,
+      "value": 25985
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1702965201,
+      "value": 41273
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     161
+    ]
+   },
+   {
+    "turn": 5,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 179980683,
+      "value": 32828
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2151418530,
+      "value": 16410
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1075463021,
+      "value": 7944
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 520637404,
+      "value": 17869
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1171109151,
+      "value": 23231
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1522528422,
+      "value": 25968
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_PKMNENCOREENDED"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     159
+    ]
+   },
+   {
+    "turn": 6,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1181331848,
+      "value": 1608
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 105408347,
+      "value": 51124
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3350469682,
+      "value": 26867
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1760796093,
+      "value": 59128
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 3875020780,
+      "value": 36327
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2380783599,
+      "value": 62415
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 4090465078,
+      "value": 28045
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "message:STRINGID_PKMNGOTENCORE",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     156
+    ]
+   },
+   {
+    "turn": 7,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1111771288,
+      "value": 49857
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3267467563,
+      "value": 19291
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1264300482,
+      "value": 50240
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "message:STRINGID_ATTACKMISSED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     156
+    ]
+   },
+   {
+    "turn": 8,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2109493636,
+      "value": 31261
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 2048740775,
+      "value": 25165
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1649234574,
+      "value": 20967
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1374145257,
+      "value": 39098
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2562376616,
+      "value": 60178
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3943882491,
+      "value": 2075
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 136039250,
+      "value": 65332
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_PKMNENCOREENDED"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     154
+    ]
+   },
+   {
+    "turn": 9,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1168957332,
+      "value": 55090
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 3610421879,
+      "value": 8077
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 529348382,
+      "value": 46367
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 3038772281,
+      "value": 27278
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 1787699896,
+      "value": 16233
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1063860427,
+      "value": 34589
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2266851554,
+      "value": 65094
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "message:STRINGID_PKMNGOTENCORE",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     152
+    ]
+   },
+   {
+    "turn": 10,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1015735125,
+      "value": 33061
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2166690212,
+      "value": 37120
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 2432752455,
+      "value": 40983
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2685886382,
+      "value": 30639
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2007966089,
+      "value": 2751
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 180315592,
+      "value": 25905
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     149
+    ]
+   },
+   {
+    "turn": 11,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3694277891,
+      "value": 53465
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3503938746,
+      "value": 16352
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1071646629,
+      "value": 17237
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 1129703348,
+      "value": 49508
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3244613655,
+      "value": 15620
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1023724606,
+      "value": 10042
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     143
+    ]
+   },
+   {
+    "turn": 12,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1945457409,
+      "value": 37509
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2458191328,
+      "value": 21934
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1437475027,
+      "value": 32598
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2136384586,
+      "value": 31022
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2033115125,
+      "value": 19888
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1303404996,
+      "value": 13179
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_PKMNENCOREENDED"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     132
+    ]
+   },
+   {
+    "turn": 13,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 961201359,
+      "value": 62439
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 4092018326,
+      "value": 52363
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 3431709265,
+      "value": 21993
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1441358576,
+      "value": 9764
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 639934627,
+      "value": 1948
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 127692762,
+      "value": 50252
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3293342789,
+      "value": 8165
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 535134164,
+      "value": 13218
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "message:STRINGID_PKMNGOTENCORE",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     130
+    ]
+   },
+   {
+    "turn": 14,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1314929567,
+      "value": 11550
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 756954406,
+      "value": 11122
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 728929697,
+      "value": 1255
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 82256896,
+      "value": 23394
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1533195379,
+      "value": 49140
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 3220455274,
+      "value": 7245
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     128
+    ]
+   },
+   {
+    "turn": 15,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1578580146,
+      "value": 11989
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 785760317,
+      "value": 15811
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1036243052,
+      "value": 38249
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2506688111,
+      "value": 50823
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3330797494,
+      "value": 36782
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2410603761,
+      "value": 47775
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     125
+    ]
+   },
+   {
+    "turn": 16,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3387041817,
+      "value": 14809
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 970527000,
+      "value": 5425
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 355596203,
+      "value": 14590
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 956231234,
+      "value": 64047
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 4197445261,
+      "value": 28453
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1864755324,
+      "value": 11234
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     120
+    ]
+   },
+   {
+    "turn": 17,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3092165124,
+      "value": 9943
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 651650087,
+      "value": 34659
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 2271471374,
+      "value": 22724
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 1489241449,
+      "value": 23890
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1565699112,
+      "value": 15255
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 999808379,
+      "value": 11591
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     108
+    ]
+   },
+   {
+    "turn": 18,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1778564912,
+      "value": 2188
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 143419363,
+      "value": 26625
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1744946714,
+      "value": 42297
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2772018565,
+      "value": 46040
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_ATTACKMISSED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_PKMNENCOREENDED"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     108
+    ]
+   },
+   {
+    "turn": 19,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1712907618,
+      "value": 23113
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 1514792749,
+      "value": 12213
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 800425116,
+      "value": 52057
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3411631839,
+      "value": 53103
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 3480205158,
+      "value": 6998
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 458656481,
+      "value": 36144
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2368737344,
+      "value": 37866
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2481638323,
+      "value": 33915
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "message:STRINGID_PKMNGOTENCORE",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     105
+    ]
+   },
+   {
+    "turn": 20,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1081445960,
+      "value": 38679
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2534925595,
+      "value": 43741
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 2866620146,
+      "value": 45875
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 3006509437,
+      "value": 4293
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 281348268,
+      "value": 36241
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2375121327,
+      "value": 9822
+     }
+    ],
+    "usedMoveMessages": 2,
+    "events": [
+     "message:STRINGID_USEDMOVE",
+     "set-battler-pp-data:null",
+     "message:STRINGID_BUTITFAILED",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null",
+     "message:STRINGID_USEDMOVE",
+     "animation:MOVE_ANIMATION",
+     "play-se:null",
+     "animation:HIT_ANIMATION",
+     "health-bar-update:null",
+     "hp-change:null",
+     "set-battler-sprite-visibility:null",
+     "set-battler-sprite-visibility:null"
+    ],
+    "activeHpAtTurnEnd": [
+     50,
+     103
+    ]
+   }
+  ]
+ },
+ "comparison": {
+  "verdictToday": "PASS",
+  "romDrawCounts": [
+   6,
+   7,
+   3,
+   10,
+   6,
+   7,
+   3,
+   7,
+   7,
+   6,
+   6,
+   6,
+   8,
+   6,
+   6,
+   6,
+   6,
+   4,
+   8,
+   6
+  ],
+  "portDrawCounts": [
+   6,
+   7,
+   3,
+   10,
+   6,
+   7,
+   3,
+   7,
+   7,
+   6,
+   6,
+   6,
+   8,
+   6,
+   6,
+   6,
+   6,
+   4,
+   8,
+   6
+  ],
+  "romMoveDispatches": [
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "portUsedMoveMessages": [
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2,
+   2
+  ],
+  "romActiveHp": [
+   [
+    50,
+    165
+   ],
+   [
+    50,
+    163
+   ],
+   [
+    50,
+    163
+   ],
+   [
+    50,
+    161
+   ],
+   [
+    50,
+    159
+   ],
+   [
+    50,
+    156
+   ],
+   [
+    50,
+    156
+   ],
+   [
+    50,
+    154
+   ],
+   [
+    50,
+    152
+   ],
+   [
+    50,
+    149
+   ],
+   [
+    50,
+    143
+   ],
+   [
+    50,
+    132
+   ],
+   [
+    50,
+    130
+   ],
+   [
+    50,
+    128
+   ],
+   [
+    50,
+    125
+   ],
+   [
+    50,
+    120
+   ],
+   [
+    50,
+    108
+   ],
+   [
+    50,
+    108
+   ],
+   [
+    50,
+    105
+   ],
+   [
+    50,
+    103
+   ]
+  ],
+  "portActiveHp": [
+   [
+    50,
+    165
+   ],
+   [
+    50,
+    163
+   ],
+   [
+    50,
+    163
+   ],
+   [
+    50,
+    161
+   ],
+   [
+    50,
+    159
+   ],
+   [
+    50,
+    156
+   ],
+   [
+    50,
+    156
+   ],
+   [
+    50,
+    154
+   ],
+   [
+    50,
+    152
+   ],
+   [
+    50,
+    149
+   ],
+   [
+    50,
+    143
+   ],
+   [
+    50,
+    132
+   ],
+   [
+    50,
+    130
+   ],
+   [
+    50,
+    128
+   ],
+   [
+    50,
+    125
+   ],
+   [
+    50,
+    120
+   ],
+   [
+    50,
+    108
+   ],
+   [
+    50,
+    108
+   ],
+   [
+    50,
+    105
+   ],
+   [
+    50,
+    103
+   ]
+  ],
+  "firstDivergence": null
+ },
+ "predictedPostFix": {
+  "note": "The ROM's own turn-execution draws in the port's reason vocabulary plus its per-turn move-dispatch count: after a fix the kernel must emit exactly this (reason, rngBefore) sequence, this many USEDMOVE announcements and these HPs.",
+  "turns": [
+   {
+    "turn": 1,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 449897005,
+      "value": 27560
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1806197660,
+      "value": 52148
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 3417592287,
+      "value": 40499
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2654154342,
+      "value": 48338
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3167892961,
+      "value": 16113
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1056038720,
+      "value": 27265
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     165
+    ]
+   },
+   {
+    "turn": 2,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2576805362,
+      "value": 56559
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 3706678397,
+      "value": 43693
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2863507372,
+      "value": 61455
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 4027526319,
+      "value": 54381
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 3563960566,
+      "value": 25943
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1700205873,
+      "value": 33647
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2205111376,
+      "value": 26615
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     163
+    ]
+   },
+   {
+    "turn": 3,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 259421058,
+      "value": 1325
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 86846157,
+      "value": 7892
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 517214140,
+      "value": 42110
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     163
+    ]
+   },
+   {
+    "turn": 4,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2298505294,
+      "value": 61256
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 4014509481,
+      "value": 30404
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 1992568680,
+      "value": 27242
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 1785348027,
+      "value": 29770
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 1951038738,
+      "value": 33727
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2210340125,
+      "value": 13484
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 883727308,
+      "value": 20670
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 1354686031,
+      "value": 35099
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2300254742,
+      "value": 25985
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1702965201,
+      "value": 41273
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     161
+    ]
+   },
+   {
+    "turn": 5,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 179980683,
+      "value": 32828
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2151418530,
+      "value": 16410
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1075463021,
+      "value": 7944
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 520637404,
+      "value": 17869
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1171109151,
+      "value": 23231
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1522528422,
+      "value": 25968
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     159
+    ]
+   },
+   {
+    "turn": 6,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1181331848,
+      "value": 1608
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 105408347,
+      "value": 51124
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3350469682,
+      "value": 26867
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1760796093,
+      "value": 59128
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 3875020780,
+      "value": 36327
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2380783599,
+      "value": 62415
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 4090465078,
+      "value": 28045
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     156
+    ]
+   },
+   {
+    "turn": 7,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1111771288,
+      "value": 49857
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3267467563,
+      "value": 19291
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1264300482,
+      "value": 50240
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     156
+    ]
+   },
+   {
+    "turn": 8,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2109493636,
+      "value": 31261
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 2048740775,
+      "value": 25165
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1649234574,
+      "value": 20967
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1374145257,
+      "value": 39098
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2562376616,
+      "value": 60178
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3943882491,
+      "value": 2075
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 136039250,
+      "value": 65332
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     154
+    ]
+   },
+   {
+    "turn": 9,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1168957332,
+      "value": 55090
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 3610421879,
+      "value": 8077
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 529348382,
+      "value": 46367
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 3038772281,
+      "value": 27278
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 1787699896,
+      "value": 16233
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1063860427,
+      "value": 34589
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2266851554,
+      "value": 65094
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     152
+    ]
+   },
+   {
+    "turn": 10,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1015735125,
+      "value": 33061
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2166690212,
+      "value": 37120
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 2432752455,
+      "value": 40983
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2685886382,
+      "value": 30639
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2007966089,
+      "value": 2751
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 180315592,
+      "value": 25905
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     149
+    ]
+   },
+   {
+    "turn": 11,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3694277891,
+      "value": 53465
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3503938746,
+      "value": 16352
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1071646629,
+      "value": 17237
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 1129703348,
+      "value": 49508
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3244613655,
+      "value": 15620
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1023724606,
+      "value": 10042
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     143
+    ]
+   },
+   {
+    "turn": 12,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1945457409,
+      "value": 37509
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2458191328,
+      "value": 21934
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1437475027,
+      "value": 32598
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2136384586,
+      "value": 31022
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2033115125,
+      "value": 19888
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1303404996,
+      "value": 13179
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     132
+    ]
+   },
+   {
+    "turn": 13,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 961201359,
+      "value": 62439
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 4092018326,
+      "value": 52363
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 3431709265,
+      "value": 21993
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1441358576,
+      "value": 9764
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 639934627,
+      "value": 1948
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 127692762,
+      "value": 50252
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3293342789,
+      "value": 8165
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 535134164,
+      "value": 13218
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     130
+    ]
+   },
+   {
+    "turn": 14,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1314929567,
+      "value": 11550
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 756954406,
+      "value": 11122
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 728929697,
+      "value": 1255
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 82256896,
+      "value": 23394
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1533195379,
+      "value": 49140
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 3220455274,
+      "value": 7245
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     128
+    ]
+   },
+   {
+    "turn": 15,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1578580146,
+      "value": 11989
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 785760317,
+      "value": 15811
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 1036243052,
+      "value": 38249
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 2506688111,
+      "value": 50823
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 3330797494,
+      "value": 36782
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2410603761,
+      "value": 47775
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     125
+    ]
+   },
+   {
+    "turn": 16,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3387041817,
+      "value": 14809
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 970527000,
+      "value": 5425
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 355596203,
+      "value": 14590
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 956231234,
+      "value": 64047
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 4197445261,
+      "value": 28453
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 1864755324,
+      "value": 11234
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     120
+    ]
+   },
+   {
+    "turn": 17,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3092165124,
+      "value": 9943
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 651650087,
+      "value": 34659
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 2271471374,
+      "value": 22724
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 1489241449,
+      "value": 23890
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 1565699112,
+      "value": 15255
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 999808379,
+      "value": 11591
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     108
+    ]
+   },
+   {
+    "turn": 18,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1778564912,
+      "value": 2188
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 143419363,
+      "value": 26625
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1744946714,
+      "value": 42297
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2772018565,
+      "value": 46040
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     108
+    ]
+   },
+   {
+    "turn": 19,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1712907618,
+      "value": 23113
+     },
+     {
+      "reason": "Encore duration ((Random() & 3) + 3)",
+      "rngBefore": 1514792749,
+      "value": 12213
+     },
+     {
+      "reason": "GetMoveTarget(MOVE_TARGET_SELECTED)",
+      "rngBefore": 800425116,
+      "value": 52057
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 3411631839,
+      "value": 53103
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 3480205158,
+      "value": 6998
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 458656481,
+      "value": 36144
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 2368737344,
+      "value": 37866
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2481638323,
+      "value": 33915
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     105
+    ]
+   },
+   {
+    "turn": 20,
+    "draws": [
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 1081445960,
+      "value": 38679
+     },
+     {
+      "reason": "accuracycheck",
+      "rngBefore": 2534925595,
+      "value": 43741
+     },
+     {
+      "reason": "critcalc",
+      "rngBefore": 2866620146,
+      "value": 45875
+     },
+     {
+      "reason": "adjustnormaldamage",
+      "rngBefore": 3006509437,
+      "value": 4293
+     },
+     {
+      "reason": "seteffectwithchance",
+      "rngBefore": 281348268,
+      "value": 36241
+     },
+     {
+      "reason": "BattleTurnPassed gRandomTurnNumber (battle_main.c:4013)",
+      "rngBefore": 2375121327,
+      "value": 9822
+     }
+    ],
+    "moveDispatches": 2,
+    "activeHpAtTurnEnd": [
+     50,
+     103
+    ]
+   }
+  ]
+ }
+}
