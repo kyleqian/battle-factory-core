@@ -149,12 +149,19 @@ describe("sub157: Scene OFF Substitute / Transform keep the controller move anim
       expect(body.animation).toMatchObject({ moveId: move, attacker });
       expect(body.timing).toEqual({ minimumFrames: 32 });
     }
-    // trn178 (docs/trn178-action-transition-live.md): Scene OFF alone adds the draw-nothing action-transition pause (a move-animation
-    // without a request) before the first MoveEnd sprite-visibility receipt; apart from it the streams are identical.
+    // trn178 / trn181 (docs/trn181-action-transition-on.md): both scenes add the same draw-nothing action-transition pause (a
+    // move-animation without a request) before the first MoveEnd sprite-visibility receipt; Scene ON's carries the render-exemption
+    // marker `actionTransition: true`. Apart from the pause the streams are identical, and the pauses agree in count and frames.
     const transitionPause = (x: any, i: number, all: any[]) =>
       x.type === "move-animation" && x.animation === undefined && all[i + 1]?.type === "sprite-visibility";
-    expect(on.every((u) => !u.commands.some(transitionPause as never))).toBe(true);
-    expect(off.map((u) => ({ ...u, commands: u.commands.filter((x, i, all) => !transitionPause(x, i, all)) }))).toEqual(on);
+    const pauses = (u: any) => u.commands.filter(transitionPause);
+    for (const [a, b] of off.map((u, i) => [u, on[i]] as const)) {
+      expect(pauses(b).every((x: any) => x.actionTransition === true)).toBe(true);
+      expect(pauses(a).some((x: any) => x.actionTransition !== undefined)).toBe(false);
+      expect(pauses(b).map((x: any) => x.timing)).toEqual(pauses(a).map((x: any) => x.timing));
+    }
+    const stripped = (u: any) => ({ ...u, commands: u.commands.filter((x: any, i: number, all: any[]) => !transitionPause(x, i, all)) });
+    expect(off.map(stripped)).toEqual(on.map(stripped));
   });
 
   it("control: every other move's OFF body keeps BattleScript_Pausex20 (SCENE_OFF_ATTACK_PAUSE; no move-animation request)", () => {
