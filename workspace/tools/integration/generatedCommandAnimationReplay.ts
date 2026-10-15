@@ -100,6 +100,8 @@ export function generatedCommandAnimationReplay(
       const currentCommand = `${r.resolutionId.requestId}:${r.segmentIndex}:${r.commandIndex}`;
       if (currentCommand !== commandKey) {
         commandKey = currentCommand;
+        // trn181: Scene ON's draw-nothing action-transition pause is not a body; the OFF pause (no marker) stays listed as before.
+        if (command.type === "move-animation" && command.actionTransition) return;
         commands.push({
           type: command.type,
           frame,

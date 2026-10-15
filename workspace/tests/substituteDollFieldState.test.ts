@@ -130,8 +130,9 @@ describe("Substitute doll on ordinary routes", () => {
     expect(run.requests.map((q) => `${q.moveId}:${q.attacker}`).slice(0, 2)).toEqual(["164:0", "188:1"]);
     const types = run.commands.map((c) => c.type);
     const body = types.indexOf("move-animation");
-    // The doll appears on the command after the 87-row-body command and goes at the faded message (command 9 of the first resolution).
-    expect(seen).toEqual(["00@prompt", `10@1:${body + 1}`, "00@1:9"]);
+    // The doll appears on the command after the 87-row-body command and goes at the faded message (command 10 of the first resolution; 9 before trn181's
+    // Scene ON action-transition pause, a command inserted ahead of it).
+    expect(seen).toEqual(["00@prompt", `10@1:${body + 1}`, "00@1:10"]);
     const fadeMessage = run.commands.find((c) => (c.command as { substituteFadeBattler?: number }).substituteFadeBattler !== undefined);
     expect((fadeMessage!.command as { substituteFadeBattler: number }).substituteFadeBattler).toBe(0);
     expect(run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");

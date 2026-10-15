@@ -1,0 +1,280 @@
+[
+ {
+  "name": "off108-bulk-up-ply-primeape-onix",
+  "class": "stat",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 409,
+  "before": {
+   "residual": -16,
+   "transition": -12
+  },
+  "after": {
+   "residual": -4,
+   "transition": 0
+  },
+  "predictedAfter": -4,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-double-team-ply-primeape-onix",
+  "class": "stat",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 375,
+  "before": {
+   "residual": -17,
+   "transition": -12
+  },
+  "after": {
+   "residual": -5,
+   "transition": 0
+  },
+  "predictedAfter": -5,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-sand-attack-ply-primeape-snorlax",
+  "class": "stat",
+  "d": 2,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 276,
+  "before": {
+   "residual": -18,
+   "transition": -12
+  },
+  "after": {
+   "residual": -6,
+   "transition": 0
+  },
+  "predictedAfter": -6,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-toxic-ply-primeape-onix",
+  "class": "status",
+  "d": 6,
+  "n": 2,
+  "u": 4,
+  "anchor": "icon",
+  "P": 16,
+  "romEdge": 451,
+  "before": {
+   "residual": -37,
+   "transition": null
+  },
+  "after": {
+   "residual": -21,
+   "transition": null
+  },
+  "predictedAfter": -21,
+  "landed": true,
+  "romCheck": null
+ },
+ {
+  "name": "off108-thunder-wave-ply-primeape-snorlax",
+  "class": "status",
+  "skipped": "next action does not open with a USEDMOVE print"
+ },
+ {
+  "name": "off108-protect-ply-primeape-onix",
+  "class": "protect",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 254,
+  "before": {
+   "residual": -15,
+   "transition": -12
+  },
+  "after": {
+   "residual": -3,
+   "transition": 0
+  },
+  "predictedAfter": -3,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-detect-ply-primeape-onix",
+  "class": "protect",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 240,
+  "before": {
+   "residual": -15,
+   "transition": -12
+  },
+  "after": {
+   "residual": -3,
+   "transition": 0
+  },
+  "predictedAfter": -3,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-rest-ply-snorlax-onix",
+  "class": "rest",
+  "d": 7,
+  "n": 2,
+  "u": 2,
+  "anchor": "hp",
+  "P": 15,
+  "romEdge": 135,
+  "before": {
+   "residual": -18,
+   "transition": -15
+  },
+  "after": {
+   "residual": -3,
+   "transition": 0
+  },
+  "predictedAfter": -3,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-dig-ply-primeape-snorlax",
+  "class": "two-turn",
+  "d": 4,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 14,
+  "romEdge": 305,
+  "before": {
+   "residual": -10,
+   "transition": -14
+  },
+  "after": {
+   "residual": 4,
+   "transition": 0
+  },
+  "predictedAfter": 4,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-razor-wind-ply-primeape-snorlax",
+  "class": "two-turn",
+  "d": 3,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 13,
+  "romEdge": 167,
+  "before": {
+   "residual": -14,
+   "transition": -13
+  },
+  "after": {
+   "residual": -1,
+   "transition": 0
+  },
+  "predictedAfter": -1,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-solar-beam-ply-primeape-snorlax",
+  "class": "two-turn",
+  "d": 3,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 13,
+  "romEdge": 223,
+  "before": {
+   "residual": -13,
+   "transition": -13
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-snore-ply-primeape-snorlax",
+  "class": "failed",
+  "d": 2,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 148,
+  "before": {
+   "residual": -2,
+   "transition": -12
+  },
+  "after": {
+   "residual": 10,
+   "transition": 0
+  },
+  "predictedAfter": 10,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-dynamic-punch-ply-machamp-snorlax",
+  "class": "miss",
+  "d": 2,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 162,
+  "before": {
+   "residual": -11,
+   "transition": -12
+  },
+  "after": {
+   "residual": 1,
+   "transition": 0
+  },
+  "predictedAfter": 1,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-dynamic-punch-opp-machamp-snorlax",
+  "class": "miss",
+  "d": 2,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 170,
+  "before": {
+   "residual": -12,
+   "transition": -12
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ }
+]

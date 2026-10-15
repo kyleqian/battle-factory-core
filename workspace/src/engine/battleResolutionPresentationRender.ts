@@ -1424,6 +1424,7 @@ export function applyLiveSemiInvulnerableCommand(
   const battler = command.battler;
   let next: boolean;
   if (command.type === "move-animation") {
+    if (command.actionTransition) return hidden;
     const hide = command.animation ? liveSemiInvulnerableHideBattler(command.animation) : null;
     if (hide !== null) {
       next = true;
@@ -1955,7 +1956,7 @@ export function createBattleResolutionPresentationRenderView(
       && (effect === null || effect.type === "hit" || effect.type === "stat" || effect.type === "status")
       && !(command !== null && state.lifecycle.phase !== "next-command-handoff" && state.lifecycle.phase !== "confirm-handoff"
         && (command.type === "switch-in" || command.type === "switch-out" || command.type === "party-summary"
-          || command.type === "trainer-slide" || command.type === "move-animation"))
+          || command.type === "trainer-slide" || (command.type === "move-animation" && !command.actionTransition)))
       && switchIn === null && midBattleSwitchIn === null && switchOut === null && partySummary === null
       && field.opponent.substituteDoll !== true
     ? liveBattlerAnchors("opponent", baseFieldArt).frontIdleRest : null;

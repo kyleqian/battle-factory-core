@@ -189,8 +189,11 @@ describe("x2 history over ordinary generated routes with ONIX opponents (docs/x2
     // that body in segment 1:0 (sa125 adds no other command); bodies, inputs and ON / OFF parity unchanged.
     // sar131: + 5 bodies ("5:0:1", "7:0:1", "11:0:1", "13:0:1", "15:0:1") whose ONIX an earlier status animation left unknown and
     // the source-derived status-animation rows (LIVE_BATTLER_X2_STATUS_ANIMATION) now know zeroed (bodies / parity unchanged).
-    [110, 14, 10, 8, ["1:0:18", "3:0:1", "5:0:1", "5:0:7", "7:0:1", "11:0:1", "13:0:1", "15:0:1"]],
-    [134, 15, 13, 9, ["3:0:9", "5:0:6", "7:0:1", "7:0:5", "9:0:8", "13:0:1", "13:0:8", "15:0:1", "17:0:5"]],
+    // trn181 (docs/trn181-action-transition-on.md): "1:0:18" -> "1:0:19", "5:0:7" -> "5:0:8" (seed 110) and "3:0:9" -> "3:0:10", "5:0:6" ->
+    // "5:0:7", "7:0:5" -> "7:0:6", "9:0:8" -> "9:0:9", "13:0:8" -> "13:0:9", "17:0:5" -> "17:0:6" (seed 134): Scene ON's action-transition
+    // pause is one more command ahead of each of those bodies in its segment; bodies, inputs and parity unchanged.
+    [110, 14, 10, 8, ["1:0:19", "3:0:1", "5:0:1", "5:0:8", "7:0:1", "11:0:1", "13:0:1", "15:0:1"]],
+    [134, 15, 13, 9, ["3:0:10", "5:0:7", "7:0:1", "7:0:6", "9:0:9", "13:0:1", "13:0:9", "15:0:1", "17:0:6"]],
   ] as const)("seed %i: %i bodies, %i with an ONIX opponent, %i inputs changed; Scene ON/OFF logic, RNG, boundaries equal",
     (seed, bodies, rest, changed, keys) => {
       const route = x2TrackerRouteReplay(seed);

@@ -1,0 +1,15 @@
+scenario (ON) | class | d n u anchor | P | ROM edge | before resid (transition) | after resid (transition) | trn176 predicted after | landed
+off108-bulk-up-ply-primeape-onix | stat | 2 1 4 print+64 | 12 | 409 | -16 (-12) | -4 (0) | -4 | yes
+off108-double-team-ply-primeape-onix | stat | 2 1 4 print+64 | 12 | 375 | -17 (-12) | -5 (0) | -5 | yes
+off108-sand-attack-ply-primeape-snorlax | stat | 2 2 4 print+64 | 12 | 276 | -18 (-12) | -6 (0) | -6 | yes
+off108-toxic-ply-primeape-onix | status | 6 2 4 icon | 16 | 451 | -37 (null) | -21 (null) | -21 | yes
+off108-thunder-wave-ply-primeape-snorlax | status | skipped: next action does not open with a USEDMOVE print
+off108-protect-ply-primeape-onix | protect | 2 1 4 print+64 | 12 | 254 | -15 (-12) | -3 (0) | -3 | yes
+off108-detect-ply-primeape-onix | protect | 2 1 4 print+64 | 12 | 240 | -15 (-12) | -3 (0) | -3 | yes
+off108-rest-ply-snorlax-onix | rest | 7 2 2 hp | 15 | 135 | -18 (-15) | -3 (0) | -3 | yes
+off108-dig-ply-primeape-snorlax | two-turn | 4 1 4 print+64 | 14 | 305 | -10 (-14) | 4 (0) | 4 | yes
+off108-razor-wind-ply-primeape-snorlax | two-turn | 3 2 4 print+64 | 13 | 167 | -14 (-13) | -1 (0) | -1 | yes
+off108-solar-beam-ply-primeape-snorlax | two-turn | 3 2 4 print+64 | 13 | 223 | -13 (-13) | 0 (0) | 0 | yes
+off108-snore-ply-primeape-snorlax | failed | 2 2 4 print+64 | 12 | 148 | -2 (-12) | 10 (0) | 10 | yes
+off108-dynamic-punch-ply-machamp-snorlax | miss | 2 2 4 print+64 | 12 | 162 | -11 (-12) | 1 (0) | 1 | yes
+off108-dynamic-punch-opp-machamp-snorlax | miss | 2 2 4 print+64 | 12 | 170 | -12 (-12) | 0 (0) | 0 | yes

@@ -2485,7 +2485,8 @@ function prepareResolutionPalette(
       spriteInput = resolution.liveMoveSpriteAllocatorInput;
       spriteOrderInput = resolution.liveMoveSpriteOrderInput;
     }
-  } else if (command !== undefined && (command.type === "move-animation"
+  } else if (command !== undefined && !(command.type === "move-animation" && command.actionTransition)
+    && (command.type === "move-animation"
     || command.type === "switch-out" || command.type === "switch-in"
     || command.type === "party-summary" || command.type === "trainer-slide"
     || (command.type === "sprite-visibility" && command.recall))) {

@@ -71,12 +71,13 @@ describe("trn178: the Scene OFF action-transition pause", () => {
     expect(transitionPauses(wish.rows)).toEqual([49]);
   });
 
-  it("Scene ON is unchanged: no transition pause, the trn176 ON residuals stay (Bulk Up -16, Sand-Attack -18, Protect -15, Rest -18)", () => {
-    for (const [move, species] of [[MOVE.BULK_UP, "PRIMEAPE"], [MOVE.SCRATCH, "PRIMEAPE"], [MOVE.TOXIC, "PRIMEAPE"], [MOVE.REST, "SNORLAX"]] as const) {
-      expect(transitionPauses(trn176Production(species, move, "ONIX", MOVE.TACKLE, true, "on").rows)).toEqual([]);
+  it("Scene ON presents the same pause (trn181): Bulk Up 12, Scratch 13, Rest 15, Toxic 16; the residual is the anchor-end error", () => {
+    for (const [move, species, pause] of [[MOVE.BULK_UP, "PRIMEAPE", 12], [MOVE.SCRATCH, "PRIMEAPE", 13], [MOVE.REST, "SNORLAX", 15], [MOVE.TOXIC, "PRIMEAPE", 16]] as const) {
+      const rows = trn176Production(species, move, "ONIX", MOVE.TACKLE, species === "PRIMEAPE", "on").rows;
+      expect([move, transitionPauses(rows)]).toEqual([move, [pause]]);
     }
     const on = ["off108-bulk-up-ply-primeape-onix", "off108-sand-attack-ply-primeape-snorlax", "off108-protect-ply-primeape-onix",
       "off108-rest-ply-snorlax-onix"].map((name) => evaluate(name, "on").residual);
-    expect(on).toEqual([-16, -18, -15, -18]);
+    expect(on).toEqual([-4, -6, -3, -3]);
   });
 });

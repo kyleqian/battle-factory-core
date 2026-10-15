@@ -294,6 +294,8 @@ export type BattleResolutionPresentationCommand =
   | Readonly<{
       type: "move-animation";
       animation?: BattleMoveAnimationRequest;
+      /** trn181: the Scene ON action-transition pause (draw-nothing; leaves hides and live hosts untouched). */
+      actionTransition?: true;
       eventSequence: number;
       battler: 0 | 1;
       timing: BattleMoveAnimationTiming;
@@ -931,7 +933,8 @@ const SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS = 1 + ACTION_TRANSITION_ROWS;
 const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
 
 /**
- * trn178 (ISSUES #167 (a'), docs/trn178-action-transition-live.md; rule: docs/trn176-action-transition.md): the draw-nothing pause
+ * trn178 / trn181 (ISSUES #167 (a'), docs/trn178-action-transition-live.md, docs/trn181-action-transition-on.md; rule:
+ * docs/trn176-action-transition.md; one rule for both scene modes): the draw-nothing pause
  * before an action's FIRST MoveEnd sprite-visibility receipt when only MoveEnd receipts follow and then the next action's
  * STRINGID_USEDMOVE (instructionExecution u, the kernel's count restarted). The anchor is the action's last print (E = its
  * instructionExecution + its `waitmessage B_WAIT_TIME_LONG`), HP update (`datahpupdate`) or status icon (`updatestatusicon`), whose
@@ -940,7 +943,7 @@ const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.fre
  * print itself (Wish: sceneOffNoHitPauseFrames), a print without that wait, a switch / faint / end of turn / pre-move print next)
  * stays unmeasured: null.
  */
-function sceneOffActionTransitionPauseFrames(
+function actionTransitionPauseFrames(
   events: readonly BattleKernelSemanticEvent[],
   receiptIndex: number,
   commands: readonly BattleResolutionPresentationCommand[],
@@ -4432,12 +4435,12 @@ export function projectBattleResolutionCommands(
         }));
       }
       const transitionPause = event.provenance?.opcodeName === "B_SCR_OP_MOVEEND"
-        && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
-        ? sceneOffActionTransitionPauseFrames(events, index, commands)
+        ? actionTransitionPauseFrames(events, index, commands)
         : null;
       if (transitionPause !== null) {
         commands.push(Object.freeze({
           type: "move-animation",
+          ...((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0 ? { actionTransition: true as const } : {}),
           eventSequence: event.sequence,
           battler,
           timing: Object.freeze({ minimumFrames: transitionPause }),

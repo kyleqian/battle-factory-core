@@ -180,6 +180,14 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         healthValue: 28,
         timing: { minimumFrames: 28 },
       },
+      // trn181 (docs/trn181-action-transition-on.md): the action-transition pause P = d + 6 + u (HP anchor), Scene ON like OFF.
+      {
+        type: "move-animation",
+        actionTransition: true,
+        eventSequence: 7,
+        battler: 0,
+        timing: { minimumFrames: 19 },
+      },
       {
         type: "sprite-visibility",
         eventSequence: 7,

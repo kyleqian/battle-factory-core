@@ -1,0 +1,42 @@
+{
+ "schema": "trn181-census-delta/v1",
+ "battles": 1000,
+ "digestMismatch": [],
+ "errorMismatch": [],
+ "budgetStalled": [
+  434,
+  796,
+  881
+ ],
+ "baseCommands": 316756,
+ "commands": 316756,
+ "unchanged": 316756,
+ "identicalBattles": 1000,
+ "transitionPause": {
+  "commands": 0,
+  "frames": 0,
+  "battles": 0,
+  "framesHistogram": {},
+  "byUsed": {}
+ },
+ "budgetTail": {},
+ "unattributed": [],
+ "finalTransitions": {
+  "total": 14677,
+  "paused": 13776,
+  "skipped": 901,
+  "skippedByAnchor": {
+   "message": 320,
+   "hp": 23,
+   "message:hold64": 516,
+   "switch-in": 36,
+   "status-icon": 6
+  }
+ },
+ "baseTransitions": {
+  "total": 14677,
+  "paused": 13776
+ },
+ "scene": "off",
+ "unattributedCount": 0
+}

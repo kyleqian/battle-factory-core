@@ -52,6 +52,8 @@ const P = "player" as const, O = "opponent" as const;
 const iu = (...bodies: (readonly [number, "player" | "opponent", number?])[]) =>
   bodies.reduce((n, [id, side, times]) => n + iu120Extra(id, side) * (times ?? 1), 0);
 
+/** trn181: the Scene ON action-transition pause frames before seed 0's first stats-change anchor (one pause, Dig's 14; trn181PinShift.ts 0 2). */
+const TRN181_SEED0_PAUSES_BEFORE_FIRST_ANCHOR = 14;
 /** chg161: the Dig charge turns seed 0's Scene ON route plays (each box 24 -> 8 frames). */
 const CHG161_SEED0_ON_CHARGE_TURNS = 2;
 describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54)", () => {
@@ -64,7 +66,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // iu120: + the opponent's Dig setup (91) and the Acid Armor (151) bodies before it.
     // chg161: - 16, the opponent Dig's charge-turn empty box (24 -> 8, docs/chg161-charge-turn-print.md).
     // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 2.
-    const shift = iu([91, O], [151, P]) - 16 - 2;
+    // trn181 (docs/trn181-action-transition-on.md): + 14, the Scene ON action-transition pauses before it (tools/integration/trn181PinShift.ts 0 2).
+    const shift = iu([91, O], [151, P]) - 16 - 2 + TRN181_SEED0_PAUSES_BEFORE_FIRST_ANCHOR;
     expect(a.statsChange).toEqual({ frame: 976 + shift, frames: 90 });
     // scf117: + 1 hold frame (the print executes on rel 91 and shows its first glyph on rel 92).
     expect(a.following).toMatchObject({ type: "message", frame: 976 + shift + 90 + 1, glyph: 976 + shift + 90 + 1 });
@@ -77,7 +80,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // snd145: + the Foe WOBBUFFET faint replacement's Scene ON species-keyed send-in tail + turn-end hold (158 vs the old 91 + 11).
     expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1 + iu([91, O, 4], [151, P, 3], [196, P, 4], [219, O], [204, O]) - 2 + 8 + 9
       + snd145FaintReplacement(202) - 16 * CHG161_SEED0_ON_CHARGE_TURNS
-      - 17); // msg175: the route's used prints last their printable length (no 24-frame floor).
+      - 17 // msg175: the route's used prints last their printable length (no 24-frame floor).
+      + 79 + 1); // trn181: the route's six Scene ON action-transition pauses (79 frames) + 1 frame of dismissal parity (odd 79).
   });
 
   it("status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76", () => {
@@ -86,6 +90,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a).toMatchObject({ path: "status-move", argument: 27, battler: 1, prevEvent: "animation:MOVE_ANIMATION:28,0,0,0,0,0" });
     expect(a.before?.type).toBe("move-animation");
     // iu120: + the Sand-Attack (28) body before it.
+    // trn181: the first anchor has no pause before it (shift 0); the later ones below carry the pauses crossed.
     expect(a.statsChange).toEqual({ frame: 641 + iu([28, P]), frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 641 + iu([28, P]) + 76 + 1, glyph: 641 + iu([28, P]) + 76 + 1 });
     // olnd113 (ISSUES #167): + the source-pause used-move holds crossed before each anchor (36 each: ITDOESNTAFFECT at 812, ATTACKMISSED
@@ -94,7 +99,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       // scf117: + 1 hold frame per crossed stats-change command (i + 1).
       // iu120: + the i + 1 Sand-Attack bodies (and, before the sixth, the opponent's Water Gun 55) crossed.
       [641, 974, 1310, 1643, 1979, 2421].map((f, i) => f + 76 * (i + 1) + [0, 36, 72, 108, 144, 144][i]! + (i + 1)
-        + iu([28, P, i + 1]) + (i === 5 ? iu([55, O]) : 0)),
+      // trn181: + the Scene ON action-transition pauses crossed before each anchor (14 each; 12 before the sixth; trn181PinShift.ts 3 3).
+        + iu([28, P, i + 1]) + (i === 5 ? iu([55, O]) : 0) + [0, 14, 28, 42, 56, 68][i]!),
     );
   });
 
@@ -104,7 +110,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a).toMatchObject({ path: "secondary", argument: 24, battler: 0, prevEvent: "stat-stage-change:speed" });
     expect(a.before?.type).toBe("stat");
     // iu120: + the three live bodies before it (player 98 x2, opponent 317).
-    const shift = iu([98, P, 2], [317, O]);
+    // trn181: + 38, the Scene ON action-transition pauses before it (trn181PinShift.ts 3 1).
+    const shift = iu([98, P, 2], [317, O]) + 38;
     expect(a.statsChange).toEqual({ frame: 1379 + shift, frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 1379 + shift + 76 + 1, glyph: 1379 + shift + 76 + 1 });
   });
@@ -119,7 +126,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // snd145: + Foe GROWLITHE's own Scene ON species-keyed send-in tail (131 vs the old 91 + 11; Intimidate follows: no turn-end hold).
     const shift = iu([23, P], [18, O], [60, O], [93, P, 2], [318, O]) + opponentSwitchInDuration(58) - SWITCH_IN_SPAN_FRAMES
       - SWITCH_IN_WAITSTATE_HOLD_FRAMES
-      - 10; // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 10.
+      - 10 // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 10.
+      + 45 - 1; // trn181 (docs/trn181-action-transition-on.md): the Scene ON action-transition pauses before it (45; trn181PinShift.ts 6 0), - 1 frame of dismissal parity.
     expect(a.statsChange).toEqual({ frame: 2694 + 10 + shift, frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 2694 + 10 + shift + 76 + 1, glyph: 2694 + 10 + shift + 76 + 1 });
     expect(a.following!.text).toContain("INTIMIDATE");
@@ -133,7 +141,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // olnd113 (ISSUES #167): + the two ATTACKMISSED used-move holds before it (39 at 1140, 40 at 1625) = +79.
     // iu120: + the four live bodies before it (player 205; opponent 55 x2, the Tickle 321).
     // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 13.
-    const shift = iu([205, P], [55, O, 2], [321, O]) - 13;
+    // trn181: + 39, the Scene ON action-transition pauses before it (trn181PinShift.ts 13 3).
+    const shift = iu([205, P], [55, O, 2], [321, O]) - 13 + 39;
     expect(a.statsChange).toEqual({ frame: 1929 + 79 + shift, frames: 76 });
     // One animation for the group: the stat write that follows (ATK) starts 76 frames later; DEF's write has no second command.
     // scf117: + 3 hold frames (setstatchanger + statbuffchange + jumpifbyte + printfromtable after rel 77: the ATK write's `stat`
@@ -150,7 +159,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + 4 * SA125_STATUS_ANIMATION_ROWS.CONFUSION! + 2 * SA125_STATUS_ANIMATION_ROWS.PRZ! - (SA125_BASE_STATUS_FRAMES - 2)
       // snd145: + the Foe NIDORINA faint replacement's send-in tail + turn-end hold (123 vs 102), - 1 frame of dismissal parity (odd 21).
       + snd145FaintReplacement(30) - 1
-      - 46); // msg175: the route's used prints last their printable length (no 24-frame floor).
+      - 46 // msg175: the route's used prints last their printable length (no 24-frame floor).
+      + 109 + 1); // trn181: the route's seven Scene ON action-transition pauses (109 frames) + 1 frame of dismissal parity (odd 109).
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 239-row window (tmr136) owns the banner; the message moves + 9", () => {
@@ -168,7 +178,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // iu120: + the opponent's live bodies (Barrier 112 x3, Headbutt 29 x2, Confusion 93 x2); Double Team 104 is masked (P 0, T 0).
     // tmr136: + 9 tail rows per live Double Team body (6 bodies).
     expect(route.frames).toBe(4600 + 270 + 3 + iu([112, O, 3], [29, O, 2], [93, O, 2], [104, P, 6]) + 6 * LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS
-      - 16); // msg175: the route's used prints last their printable length (no 24-frame floor).
+      - 16 // msg175: the route's used prints last their printable length (no 24-frame floor).
+      + 104); // trn181: the route's eight Scene ON action-transition pauses (104 frames; the first Double Team anchor has none before it).
   });
 });
 

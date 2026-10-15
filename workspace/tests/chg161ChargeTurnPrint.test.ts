@@ -25,11 +25,10 @@ describe("chg161 charge-turn empty box", () => {
   it("a charge turn's ROM box clears on G + 1 and the foe's next print stays on the general end-of-action residual", () => {
     const residual = (scene: "on" | "off") => CHG161_ARMS.map((arm) =>
       chg161Production(arm.move, scene).foeUsedGlyph! - chg161Rom(arm.scenario, scene).foeUsedGlyph);
-    // Scene ON, ISSUES #167 remainder: the held print -> next action's "used" transition (Sand-Attack control: -12 on the same edge).
-    for (const r of residual("on")) {
-      expect(r).toBeGreaterThanOrEqual(-14);
-      expect(r).toBeLessThanOrEqual(-10);
-    }
+    // Scene ON, trn181 (docs/trn181-action-transition-on.md): the same action-transition pause as Scene OFF (Dig 14, Razor Wind /
+    // Solar Beam 13; was -10..-14, the held print -> next "used" transition) leaves the existing anchor-end errors: Dig +4 (its print),
+    // Razor Wind -1 (its live adapter, the box test above), Solar Beam 0.
+    expect(residual("on")).toEqual([4, -1, 0]);
     // Scene OFF, trn178 (docs/trn178-action-transition-live.md): the action-transition pause (P = d + 6 + u: Dig 14, Razor Wind /
     // Solar Beam 13) lands Razor Wind / Solar Beam exactly (was -13 / -13); Dig keeps its print's own +4 ("dug a hole!" 88 vs the ROM's 85
     // + the lead row; was -10).
