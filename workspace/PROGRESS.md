@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-15 (evening, in progress) — CAX31 recovery session (supervisor, Opus 5.5)
+
+- **State:** master folds trn178 (`40793066b`, Scene OFF action-transition pause, #167 (a')) and snd179 (`a641cc285`, Scene ON
+  forced player send-in evidence, #146); union smoke 448 / 448. Production now differs from `3937ecad0` by trn178 only.
+- **Did:** independently verified both saved refs (trn176Predict OFF rows reproduced; 17 / 17 targeted tests; 4 fresh snd179 ROM
+  probes exact); worktrees removed (only wasm artifacts), refs kept. Details in ANIMATION_INTEGRATION_PROGRESS.md.
+- **Running:** fpc180 (integration lane, `worker/integration-20261015-170019`, cap 150) — fpc177's four Focus Punch presentation fixes.
+- **Next:** Scene ON action transition (#167 (a')), snd179 production wiring (#146), Substitute HP timing -6 (#153). Reserve the final
+  ~1 h 45 min for one independent full suite + build on the final tree.
+
+---
+
 ## 2026-10-15 — repair headless supervisor waiting; prepare fresh 10-hour recovery
 
 - **State:** master game code remains `0c8e67acc` / production `3937ecad0`; no game edits in this repair. Prior supervisor exited
@@ -48,26 +60,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   battler; (5) #146 Scene ON forced player send-in message. Budget gates for this host: full suite ~47 min, vanilla soak ~45 min,
   0:60 gates need range fan-out (PAPERCUTS 2026-10-14).
 ---
-
-## 2026-10-13 — CAX31 next-session handoff (infrastructure only)
-
-- **State:** separate `codex/cax31-arm-setup` branch from game snapshot `b3e988d67`,
-  plus the Mac's committed charge-turn test re-pins `36b23e98c`; no new game code.
-  Helsinki CAX31 validated; user authorized commit + push + the next remote main
-  session. Remote `master` is assigned; the Mac supervisor is stopped at its
-  previous 10-hour cap and must stay stopped until remote results are imported.
-- **Did:** native ARM Node/mGBA/Python/Rust setup; both oracle hashes match, and two
-  fresh stock-ROM rcp143 R1 probes reproduce the committed battle/RNG receipt.
-  Typecheck, 448 smoke tests, Rust tests and WASM build/adapter checks passed;
-  all 9,550 native-generated reference data targets == Mac SHA256;
-  13,878 TypeScript cases verified (full run + 25 files / 174 cases retested
-  after Mac test pins, reference asset generation and GNU tar PATH fixes); build passed.
-  Fresh Claude Max login completed; CLI upgraded to 2.1.280 (required by Opus 5.5);
-  Opus 5.5 and Sonnet 5.5 no-tools inference probes passed. Prepared the host
-  assignment, portable supervisor prompt and `docs/cax31-session-handoff.md`.
-- **Next:** remote supervisor first verifies/folds enc160 `worker/side-20261013-160913`
-  (`09589b431`) and plr162 `worker/integration-20261013-163536` (`ca658cd6f`),
-  runs required union gates, then continues the authorized Factory finish-up.
-  Launch: Opus / Sonnet, headless tmux, 10-hour cap; no timers or automatic push.
-- **Notes:** `docs/cax31-arm-runner.md` records access, validation and limits;
-  raw receipts/logs are ignored under `.integration/validation/cax31-arm-20261013/`.

@@ -1,3 +1,28 @@
+## 2026-10-13 — CAX31 next-session handoff (infrastructure only)
+
+- **State:** separate `codex/cax31-arm-setup` branch from game snapshot `b3e988d67`,
+  plus the Mac's committed charge-turn test re-pins `36b23e98c`; no new game code.
+  Helsinki CAX31 validated; user authorized commit + push + the next remote main
+  session. Remote `master` is assigned; the Mac supervisor is stopped at its
+  previous 10-hour cap and must stay stopped until remote results are imported.
+- **Did:** native ARM Node/mGBA/Python/Rust setup; both oracle hashes match, and two
+  fresh stock-ROM rcp143 R1 probes reproduce the committed battle/RNG receipt.
+  Typecheck, 448 smoke tests, Rust tests and WASM build/adapter checks passed;
+  all 9,550 native-generated reference data targets == Mac SHA256;
+  13,878 TypeScript cases verified (full run + 25 files / 174 cases retested
+  after Mac test pins, reference asset generation and GNU tar PATH fixes); build passed.
+  Fresh Claude Max login completed; CLI upgraded to 2.1.280 (required by Opus 5.5);
+  Opus 5.5 and Sonnet 5.5 no-tools inference probes passed. Prepared the host
+  assignment, portable supervisor prompt and `docs/cax31-session-handoff.md`.
+- **Next:** remote supervisor first verifies/folds enc160 `worker/side-20261013-160913`
+  (`09589b431`) and plr162 `worker/integration-20261013-163536` (`ca658cd6f`),
+  runs required union gates, then continues the authorized Factory finish-up.
+  Launch: Opus / Sonnet, headless tmux, 10-hour cap; no timers or automatic push.
+- **Notes:** `docs/cax31-arm-runner.md` records access, validation and limits;
+  raw receipts/logs are ignored under `.integration/validation/cax31-arm-20261013/`.
+
+---
+
 ## 2026-10-13 — sub157: #153 Scene OFF plays the Substitute / Transform attack animations (main/ts, presentation only)
 
 - **State:** local master `62b8de71f`, production src `ca4ea3618` (kernel) + `eec0aca08` (OFF x2). 5 / 5 dense Scene OFF Substitute ROM windows
