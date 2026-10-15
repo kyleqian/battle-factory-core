@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 folded
+## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 + trn181 folded
 
 - **trn178 (INTEGRATION, saved ref `4a8a25431`, merged `40793066b`):** Scene OFF action-transition pause (#167 (a'); P = d + 6 + u
   before an action's first MoveEnd sprite-visibility receipt; docs/trn178-action-transition-live.md). Supervisor: `trn176Predict.ts
@@ -15,6 +15,13 @@
   row 0 (switch order / Go!, two users, Scratch / Agility / Thunder Wave / Sand-Attack); ON +2 only on the known 125-vs-127 pre-pass
   row; src diff presentation-only. Worker: census both scenes digests identical, 65 changed commands per scene all attributed; differential
   641 / 641; full suite 13,926 / 0 failed on the final src; build. Union smoke 448 / 448.
+- **trn181 (INTEGRATION, merged `253a9ff9e`):** the action-transition pause in Scene ON (#167 (a')): one shared rule
+  (`actionTransitionPauseFrames`), the ON pause marked `actionTransition` so live-render consumers treat it as draw-nothing
+  (docs/trn181-action-transition-on.md). Supervisor: `trn176Predict.ts --scene=on` reproduced 13 / 13 ON rows on prediction
+  (remaining = anchor-end errors). Worker: dense ON windows (Bulk Up / Scratch pause rows 0 px), census OFF byte-identical, ON 12,942
+  pauses 0 unattributed, digests identical (bar the 3 budget-stalled tails); seeded-ON differential 144 / 190 moved, all attributed.
+  Worker capped while its suite finished; the suite log (`.integration/validation/from-workers/trn181/t2`) shows 13,930 / 0 failed on
+  src-final `e52b80ce0`, build OK. Union: typecheck 0, smoke 448, trn178 / trn181 / fpc180 tests 18 / 18.
 - Union `a641cc285`: smoke 448 / 448 (master's later commits since the worker base are tooling only).
 
 ## 2026-10-14 — CAX31 session: Transform live (trf174) + enc160 / plr162 / enc173 folds

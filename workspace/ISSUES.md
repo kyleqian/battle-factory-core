@@ -38,7 +38,9 @@ census bodies) and the stat-stage-change-next class (Curse / Swagger / Flatter /
 5 / 5 classes residual 0). (a) Wish: LANDED by msg175 (2026-10-14, docs/msg175-used-message-duration.md; the "used" print now lasts its printable
 length L, 72 / 72 ROM uses; Scene OFF Wish residual 0 / 0; Wish then end of turn / switch / pre-move print unmeasured). (a') the action
 transition: Scene OFF LANDED by trn178 (2026-10-15, docs/trn178-action-transition-live.md; P = d + 6 + u, 23 / 23 comparable OFF rows
-on trn176's prediction, census 13,706 pauses, digests identical). Open: (a') Scene ON (same rule; ON edges -13 .. -18 today), and the
+on trn176's prediction, census 13,706 pauses, digests identical). Scene ON LANDED by trn181 (2026-10-15, docs/trn181-action-transition-on.md; one rule
+for both scenes, 13 / 13 ON rows on prediction, census ON 12,942 pauses, 1,626 transitions skipped by the guard). Open: (a') the ON
+body-tail anchor errors (-3 .. -6), Toxic's upstream -19 (status body before the message) and the
 named print-length residuals (Snore +10, Dig +4, Dynamic Punch ply +1, Toxic -2, Curse +2 / -4); switches / faints / end of turn /
 pre-move prints after the anchor stay unmeasured; (b) sprite-visibility next after Roar /
 Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);
