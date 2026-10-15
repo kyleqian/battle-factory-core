@@ -1,0 +1,38 @@
+[
+ {
+  "id": "roar-pidgey-by-jynx",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 16,
+  "nature": 6,
+  "attacker": 124,
+  "attackerGender": "female"
+ },
+ {
+  "id": "roar-charizard-by-jynx",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 6,
+  "nature": 6,
+  "attacker": 124,
+  "attackerGender": "female"
+ },
+ {
+  "id": "roar-pidgey-by-att329",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 16,
+  "nature": 6,
+  "attacker": 329,
+  "attackerGender": "male"
+ },
+ {
+  "id": "roar-charizard-by-att329",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 6,
+  "nature": 6,
+  "attacker": 329,
+  "attackerGender": "male"
+ }
+]

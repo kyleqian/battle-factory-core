@@ -1,0 +1,118 @@
+[
+ {
+  "id": "roar-pidgey-by-jynx",
+  "case": {
+   "id": "roar-pidgey-by-jynx",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 16,
+   "nature": 6,
+   "attacker": 124,
+   "attackerGender": "female"
+  },
+  "E": 315,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   16,
+   124
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 99,
+  "txtStart": 101,
+  "message": 91,
+  "sha256": "c5c8684af18ada1e67162850f87ec1880eb6086ce252199ebc173864e67c7866",
+  "bytes": 124108
+ },
+ {
+  "id": "roar-charizard-by-jynx",
+  "case": {
+   "id": "roar-charizard-by-jynx",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 6,
+   "nature": 6,
+   "attacker": 124,
+   "attackerGender": "female"
+  },
+  "E": 315,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   6,
+   124
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 206,
+  "txtStart": 208,
+  "message": 198,
+  "sha256": "353ba9746660ce7a1dd182588dc4bb04851a0e61378e23e392cce1414560ca87",
+  "bytes": 129997
+ },
+ {
+  "id": "roar-pidgey-by-att329",
+  "case": {
+   "id": "roar-pidgey-by-att329",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 16,
+   "nature": 6,
+   "attacker": 329,
+   "attackerGender": "male"
+  },
+  "E": 309,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   16,
+   329
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 99,
+  "txtStart": 101,
+  "message": 91,
+  "sha256": "5a2d8e523f31e7d4a292ace1553451bb4f52632b51dd6188afc09a16daef9e62",
+  "bytes": 124110
+ },
+ {
+  "id": "roar-charizard-by-att329",
+  "case": {
+   "id": "roar-charizard-by-att329",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 6,
+   "nature": 6,
+   "attacker": 329,
+   "attackerGender": "male"
+  },
+  "E": 309,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   6,
+   329
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 206,
+  "txtStart": 208,
+  "message": 198,
+  "sha256": "9f3cb7630ff7da2589ebbce8509147d226394cb04d97b3a05fe4176b8d775fce",
+  "bytes": 129999
+ }
+]
