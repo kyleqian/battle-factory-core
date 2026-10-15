@@ -8,8 +8,12 @@
  * the ball shows from elapsed 2, opens at 18), so the model's frames are the command's elapsed directly (ROM-verified on dense Scene ON
  * windows, docs/snd145-send-in-tail-live.md). The player side keeps its calibrated constants (slide 66, span 91 + 11).
  */
+import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
+import { selectBackSendOutAnimation } from "../animation/backSendOutAnim.ts";
+import { BACK_SEND_OUT_REDUCERS } from "../animation/sendOutDispatcher.ts";
 import { SEND_IN_TAIL_CASTFORM, sendInTail } from "../data/sendInTail.ts";
 import { SEND_IN_TAIL_OFF_CRY_FRAMES } from "../data/sendInTailOff.ts";
+import { natureFromPersonality } from "./opponentGen.ts";
 
 /** Opponent send-in: the `switch-in` elapsed of the healthbox slide's first frame (x2 -110). */
 export function opponentSwitchInHealthboxSlideElapsed(species: number): number {
@@ -91,7 +95,7 @@ export function sceneOffOpponentSwitchInDuration(species: number, nickname: stri
  * Direct-mGBA Scene OFF sweep of the 339 stageable Factory species with the player as the Roar target, twice fresh
  * (tools/integration/fixtures/offs152/species-sweep-player-target-off.txt): slide 339 / 339, message 339 / 339 with the source-derived
  * cry (src/data/sendInTailOff.ts). A VOLUNTARY player switch keeps the calibrated 66 / 91 + 11 (its next print is the opponent's move,
- * after the move-load hold; ISSUES #78). Scene ON's player-target message also waits for the attacker's Roar cry (not modelled).
+ * after the move-load hold; ISSUES #78). Scene ON's forced player send-in is `sceneOnPlayerForcedSwitchInDuration` below.
  */
 export const SCENE_OFF_PLAYER_FORCED_SEND_IN_SLIDE = 65;
 export const SCENE_OFF_PLAYER_FORCED_SEND_IN_FLOOR = 91;
@@ -121,5 +125,56 @@ export function sceneOffPlayerForcedSwitchInDuration(species: number): number {
   return sceneOffPlayerForcedSwitchInShift(species) + Math.max(
     SCENE_OFF_PLAYER_FORCED_SEND_IN_FLOOR,
     (SEND_IN_TAIL_OFF_CRY_FRAMES[species] ?? 0) + SCENE_OFF_PLAYER_FORCED_SEND_IN_CRY_TO_MESSAGE,
+  );
+}
+
+/**
+ * snd182 (ISSUES #146; docs/snd179-scene-on-forced-player-send-in.md, docs/snd182-scene-on-forced-player-send-in-live.md): the Scene ON
+ * PLAYER send-in after a FORCED switch. `SwitchIn_CleanShinyAnimShowSubstitute` waits for the back animation (Scene ON runs it;
+ * HITMARKER_NO_ANIMATIONS makes it a no-op in Scene OFF), `SwitchIn_HandleSoundAndEnd` for the cry, and the next printstring follows:
+ *   shift + max(91, cryFrames(species) + 66, T_back(species, nature) + 70)
+ * T_back = the first tick the species' back-animation reducer (selectBackSendOutAnimation -> BACK_SEND_OUT_REDUCERS) reports WaitAnimEnd.
+ * The attacker's Roar cry does not matter (it ends before the send-in starts). 339 / 339 sweep rows, 27 fresh ROM probes (snd179).
+ */
+export const SCENE_ON_PLAYER_FORCED_SEND_IN_BACK_ANIM_TO_MESSAGE = 70;
+
+const BACK_ANIM_WAIT_TICK_LIMIT = 400;
+const SPECIES_NAME_BY_ID: ReadonlyMap<number, string> = new Map(
+  (speciesStatsData as { species: { id: number; name: string }[] }).species.map((row) => [row.id, row.name.replace(/^SPECIES_/, "")]),
+);
+const backAnimWaitTickCache = new Map<number, number | null>();
+
+/** First back-animation tick at which the reducer's callback is WaitAnimEnd (null: the species has no back-animation reducer). */
+export function backAnimWaitTick(species: number, natureId: number): number | null {
+  const key = species * 32 + natureId;
+  const cached = backAnimWaitTickCache.get(key);
+  if (cached !== undefined) return cached;
+  let found: number | null = null;
+  const name = SPECIES_NAME_BY_ID.get(species);
+  const selection = name === undefined ? null : selectBackSendOutAnimation(name, natureId);
+  const reducer = selection === null ? undefined : BACK_SEND_OUT_REDUCERS[selection.backAnimSet];
+  if (name !== undefined && reducer !== undefined) {
+    for (let tick = 0; tick < BACK_ANIM_WAIT_TICK_LIMIT; tick += 1) {
+      const result = reducer(name, natureId, tick) as { callback?: string } | null;
+      if (result === null) break;
+      if (result.callback === "WaitAnimEnd") { found = tick; break; }
+    }
+  }
+  backAnimWaitTickCache.set(key, found);
+  return found;
+}
+
+/** The sent-in mon's nature (`GetNature`: personality % 25). */
+export function sendInNature(personality: number): number {
+  return natureFromPersonality(personality >>> 0);
+}
+
+/** Scene ON forced player send-in: the `switch-in` command's whole duration (= the "dragged out!" print's first frame). */
+export function sceneOnPlayerForcedSwitchInDuration(species: number, personality: number): number {
+  const back = backAnimWaitTick(species, sendInNature(personality));
+  return sceneOffPlayerForcedSwitchInShift(species) + Math.max(
+    SCENE_OFF_PLAYER_FORCED_SEND_IN_FLOOR,
+    (SEND_IN_TAIL_OFF_CRY_FRAMES[species] ?? 0) + SCENE_OFF_PLAYER_FORCED_SEND_IN_CRY_TO_MESSAGE,
+    back === null ? 0 : back + SCENE_ON_PLAYER_FORCED_SEND_IN_BACK_ANIM_TO_MESSAGE,
   );
 }

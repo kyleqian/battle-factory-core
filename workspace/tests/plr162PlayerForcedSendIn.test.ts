@@ -1,7 +1,7 @@
 // plr162 (ISSUES #146; docs/plr162-player-forced-send-in.md): the Scene OFF PLAYER send-in after a FORCED switch (Roar / Whirlwind
 // `returntoball BS_TARGET` on the player). offs152 R2's measured model (slide 65, "dragged out!" at max(91, cry + 66); CASTFORM +1)
 // against the twice-fresh direct-mGBA player-target sweep, and production's switch-in commands on census battles: only the forced
-// player send-in moves (Scene OFF); player faint replacements / Scene ON keep the calibrated 66 / 91 + 11 (ISSUES #78).
+// player send-in moves (both scenes; Scene ON is snd182's); player faint replacements / voluntary switches keep the calibrated 66 / 91 + 11 (ISSUES #78).
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
@@ -17,7 +17,8 @@ import { tickLiveMovePresentationRngSession } from "../src/engine/liveMovePresen
 import { PARTY_LIST_INPUT_ELAPSED } from "../src/engine/partySelect";
 import { SWITCH_IN_SPAN_FRAMES, SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation";
 import {
-  sceneOffPlayerForcedSwitchInDuration, sceneOffPlayerForcedSwitchInHealthboxSlideElapsed, sceneOffPlayerForcedSwitchInVisualDelay,
+  opponentSwitchInDuration, sceneOffPlayerForcedSwitchInDuration, sceneOffPlayerForcedSwitchInHealthboxSlideElapsed,
+  sceneOffPlayerForcedSwitchInVisualDelay, sceneOnPlayerForcedSwitchInDuration,
 } from "../src/engine/switchInTail";
 import { SEND_IN_TAIL_OFF_CRY_FRAMES } from "../src/data/sendInTailOff";
 import type { GbaButton } from "../src/input";
@@ -44,7 +45,7 @@ describe("plr162: the Scene OFF forced player send-in model", () => {
   it("switchInTiming: only the Scene OFF forced player send-in moves", () => {
     expect(switchInTiming(0, 157, false, "TYPHLOSION", true)).toEqual({ minimumFrames: 174 - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
     expect(switchInTiming(0, 16, false, "PIDGEY", true)).toEqual({ minimumFrames: 91 - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
-    for (const [sceneOn, forced] of [[false, false], [true, false], [true, true]] as const) {
+    for (const [sceneOn, forced] of [[false, false], [true, false]] as const) {
       expect(switchInTiming(0, 157, sceneOn, "TYPHLOSION", forced)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
     }
   });
@@ -145,13 +146,26 @@ describe.each([["Roar", 23], ["Whirlwind", 76]] as const)("plr162: %s on the pla
     }
   }, 120000);
 
-  it("Scene ON: the forced player send-in is unchanged (its message waits for the Roar cry too: not modelled)", () => {
-    const forced = switchIns(seed, "on").filter((s) => s.command.battler === 0 && isForced(s));
+  it("Scene ON (snd182): the forced player send-in carries the Scene ON tail; other player send-ins keep 66 / 91 + 11", () => {
+    const player = switchIns(seed, "on").filter((s) => s.command.battler === 0);
+    const forced = player.filter(isForced);
     expect(forced.length).toBeGreaterThan(0);
     for (const { command } of forced) {
+      const species = command.incoming.species as number;
+      expect(command).toMatchObject({
+        healthboxSlideElapsed: sceneOffPlayerForcedSwitchInHealthboxSlideElapsed(species),
+        sendInVisualDelay: sceneOffPlayerForcedSwitchInVisualDelay(species),
+        timing: { minimumFrames: sceneOnPlayerForcedSwitchInDuration(species, command.incoming.personality) - SWITCH_IN_WAITSTATE_HOLD_FRAMES },
+        settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
+      });
+    }
+    for (const { command } of player.filter((s) => !isForced(s))) {
       expect(command.timing).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
       expect(command.healthboxSlideElapsed).toBeUndefined();
       expect(command.sendInVisualDelay).toBeUndefined();
+    }
+    for (const { command } of switchIns(seed, "on").filter((s) => s.command.battler === 1)) {
+      expect(command.timing).toEqual({ minimumFrames: opponentSwitchInDuration(command.incoming.species) - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
     }
   }, 120000);
 });
