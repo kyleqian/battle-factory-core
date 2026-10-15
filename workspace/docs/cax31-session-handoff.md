@@ -1,40 +1,62 @@
-# CAX31 next-session handoff — 2026-10-14
+# CAX31 recovery-session handoff — 2026-10-15
 
-The user requested another commit, push and remote session. Continue the normal
-main supervisor on CAX31's `master` at
-`/srv/pokebench/pokeemerald-factory-core/workspace`, with Opus 5.5 supervising
-Sonnet 5.5 workers, headless in tmux, capped at 10 hours. The preceding session
-finished cleanly at `3d13717a9`; its commits, all worker refs, logs and supervisor
-receipts have been imported to the Mac. The launch checkpoint and retained
-worker refs are pushed to GitHub before launch. This session commits locally;
-it does not push automatically or enable recurring timers. Keep the Mac's
-supervisor stopped while this remote writer owns main.
+The user requested a launcher fix and a fresh 10-hour run. Continue on CAX31's
+`master` at `/srv/pokebench/pokeemerald-factory-core/workspace`, Opus 5.5
+supervisor and Sonnet 5.5 workers, headless in tmux. Keep the Mac supervisor
+stopped. Commit locally; no automatic pushes or recurring timers.
 
-## Continue from the finished run
+The preceding supervisor exited after about 14 minutes while relying on
+background notifications. Its workers finished and committed the two branches
+below, but neither was verified/folded by the supervisor. Their refs, logs and
+briefs are backed up on the Mac under
+`.integration/validation/cax31-session-20261015/`. Preserve remote raw evidence.
 
-All seven prior worker branches are merged. Do not repeat the enc160 / plr162
-folds or redo Transform's landed live body. Read the top `PROGRESS.md` entry,
-`ROADMAP.md`, `ANIMATION_INTEGRATION_PROGRESS.md` and the current issue backlog.
+## First: verify and fold the saved work
 
-1. Implement trn176's action-transition hold (#167 (a')) in both scenes. Read
-   `docs/trn176-action-transition.md`: P = d + 6 + u, source-derived receipts
-   21 / 22 OFF and 12 / 12 ON. Preserve the named Baton Pass and anchor residuals;
-   the formula alone does not eliminate every existing timing error. Re-pin
-   affected frame expectations only with source/oracle attribution.
-2. Implement fpc177's Focus Punch corrections (#139), using
-   `docs/fpc177-focus-punch-edges.md` and its twelve twice-fresh ROM cards:
-   voluntary-switch recall order, pre-pass/switch entry timing, and the measured
-   leads (including the action-specific 5 + u rule).
-3. Continue Substitute HP timing (-6 frames, #153), Transform inventory
-   accounting and other move bodies over transformed battlers, and Scene ON
-   forced player send-in messages (#146), then the remaining authorized Factory
-   animation/presentation/engine finish-up gaps. Audio stays deferred; existing
-   D3/D4 permissions and acceptance limits remain in force.
+1. `worker/integration-20261015-041827` at `4a8a25431`: trn178, Scene OFF
+   action-transition hold (#167 (a')). Read its
+   `docs/trn178-action-transition-live.md`, independently reproduce the central
+   timing claim and review each attributed re-pin. Worker final gates:
+   13,918 tests / zero failed, build, typecheck and 448 smoke checks. The
+   implementation intentionally leaves Scene ON unchanged. Reuse matching
+   full-suite/build receipts only under `ANIMATION_VERIFICATION.md`; do not
+   claim supervisor acceptance before independently checking the change.
+2. `worker/side-20261015-041923` at `84b46c795`: snd179, evidence only for
+   Scene ON forced player send-in timing (#146). Read
+   `docs/snd179-scene-on-forced-player-send-in.md`. The predictor matches
+   338 / 339 sweep rows; preserve the named LAIRON/nature issue and verify
+   message-anchor compatibility before wiring production. The worker ran
+   smoke, typecheck and build; it changed no production modules and ran no
+   full suite. Independently verify representative source/ROM claims and fold
+   the evidence without inventing implementation credit.
 
-Delegate bounded changes under the existing ownership contract; independently
-verify central claims, fold only green results, retain worker refs/evidence,
-and update the ledgers. No new user-level decisions are open. Continue useful
-in-scope work through the session; leave a clean handoff before the cap.
+Then implement fpc177's Focus Punch corrections (#139), using
+`docs/fpc177-focus-punch-edges.md` and its twelve twice-fresh ROM cards.
+Continue Scene ON action-transition timing, Substitute HP timing (-6 frames,
+#153), Transform inventory/other live bodies over transformed battlers and
+Scene ON forced player send-in messages. Read the current roadmap, issue
+backlog and integration ledger; all previous Factory finish-up scope and D3/D4
+permissions remain valid. Audio stays deferred.
+
+## Headless execution discipline
+
+`tools/run-claude-supervisor.py` owns the one original campaign deadline.
+Never use Monitor, ScheduleWakeup or end your turn waiting for notifications.
+Retain worker PIDs/logs and poll with bounded foreground calls. If a turn
+accidentally ends, the controller waits for worker completion and resumes the
+same conversation; it does not reset the clock or duplicate the worker.
+
+State lives next to the raw log in `.controller.json`. Before a genuine final
+exit, commit a clean handoff and write the JSON file named by
+`POKEBENCH_SUPERVISOR_STOP_FILE`, with `session_id` from
+`POKEBENCH_SUPERVISOR_SESSION_ID`, `status=complete|blocked|wind_down` and a
+nonempty `reason`. This is not a waiting mechanism. A stop cannot leave active
+workers or a dirty checkout; wind-down is accepted only in the last 20 minutes.
+Usage limits/provider failures stop the controller without automatic retries.
+Use one worker at a time on this 16 GiB machine. Budget validation before
+launching more production work; do not dispatch a worker whose cap exceeds
+remaining campaign time. Apply the normal scoped verification/fold policy and
+leave a truthful committed handoff before the cap.
 
 ## Baseline and host budget
 

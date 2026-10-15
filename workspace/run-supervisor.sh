@@ -572,10 +572,16 @@ if [[ "$HEADLESS" == "1" ]]; then
   fi
   echo "Streaming to the terminal; raw JSONL in $SUPERVISOR_LOG (tail -f to follow)"
   if [[ "$PROVIDER" == "claude" ]]; then
-    POKEBENCH_ROLE=supervisor claude -p --verbose --output-format stream-json \
-      --model "$MODEL" \
-      --dangerously-skip-permissions "$PROMPT" \
-      > >(tee -a "$SUPERVISOR_LOG" | node tools/stream-pretty.mjs) &
+    # Claude -p exits when a turn ends, even if workers still run. Keep the
+    # campaign deadline outside that turn and resume the same conversation
+    # after worker completion instead of depending on background notifications.
+    SUPERVISOR_LANE_DIR="/tmp/pokebench-worker-lanes-$(pwd | shasum | cut -c1-12)"
+    status=0
+    POKEBENCH_ROLE=supervisor python3 tools/run-claude-supervisor.py \
+      --deadline "$DEADLINE_EPOCH" --model "$MODEL" --log "$SUPERVISOR_LOG" \
+      --lane-dir "$SUPERVISOR_LANE_DIR" --prompt "$PROMPT" \
+      > >(node tools/stream-pretty.mjs) || status=$?
+    exit "$status"
   else
     POKEBENCH_ROLE=supervisor codex exec --json \
       --ignore-user-config \
@@ -616,8 +622,8 @@ else
     exit "$status"
   fi
 fi
-# Headless supervisors and interactive Claude retain the original lightweight
-# shell watchdog. Interactive Codex exits through the foreground wrapper.
+# Headless Codex and interactive Claude retain the lightweight shell watchdog.
+# Headless Claude and interactive Codex use their foreground controllers above.
 agent_pid=$!
 ( sleeper_pid=""
   trap '[[ -z "$sleeper_pid" ]] || kill "$sleeper_pid" 2>/dev/null; exit 0' TERM INT

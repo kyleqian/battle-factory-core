@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-15 — repair headless supervisor waiting; prepare fresh 10-hour recovery
+
+- **State:** master game code remains `0c8e67acc` / production `3937ecad0`; no game edits in this repair. Prior supervisor exited
+  while waiting for notifications; trn178 and snd179 finished on worker branches, not merged. Both refs/logs/briefs backed up locally.
+- **Did:** `run-claude-supervisor.py` owns the original deadline, waits on scoped worker PIDs and resumes the same Claude session
+  after a premature turn exit. Notification waiting disabled; clean completion requires an explicit stop record. Errors/account
+  limits do not retry; deadline/cancellation terminate owned model/worker groups. Launcher profile checks 62 / 62; controller
+  lifecycle cases 11 / 11 locally and on ARM; live Opus stop + same-session resume smoke passed. No full game-suite rerun for tooling only.
+- **Next:** start the authorized fresh 10-hour CAX31 run. Verify/fold `worker/integration-20261015-041827` (`4a8a25431`, trn178,
+  Scene OFF transition; worker 13,918 tests / 0 failed + build) and `worker/side-20261015-041923` (`84b46c795`, snd179 evidence only).
+  Then Focus Punch corrections, Scene ON transition, Substitute HP timing and remaining Factory finish-up. Mac stays stopped.
+- **Notes:** `docs/cax31-session-handoff.md` records recovery, acceptance and the stop protocol. Prior evidence remains on CAX31;
+  copied refs/logs/briefs are in `.integration/validation/cax31-session-20261015/`. No timers or automatic push.
+
+---
+
 ## 2026-10-14 — CAX31 session wind-down: enc160 / plr162 / enc173 / trf174 / msg175 / trn176 / fpc177 folded (supervisor)
 
 - **Restart handoff:** user authorized commit + push + next CAX31 session. Finished commits/worker refs and logs imported to the Mac;
@@ -55,22 +71,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Launch: Opus / Sonnet, headless tmux, 10-hour cap; no timers or automatic push.
 - **Notes:** `docs/cax31-arm-runner.md` records access, validation and limits;
   raw receipts/logs are ignored under `.integration/validation/cax31-arm-20261013/`.
-
----
-
-## 2026-10-13 — chg161: #167 (d) charge-turn EMPTYSTRING3 box per scene (main/ts, presentation only)
-
-- **State:** local master, production src `b048842dc` (+ pins `8ac2edd8f`). off108's Dig / Razor Wind / Solar Beam windows re-probed fresh
-  (6 / 6 r1 == r2 == off108). Charge print's first glyph vs ROM: OFF **0 / 0 / 0** (was +24), ON **0 / -1 / 0** (was +16 / +15 / +16;
-  Razor Wind -1 = its 48-frame live adapter vs the 49-row ROM run).
-- **Did:** `chargeTurnEmptyBoxTiming` (BattleScriptFirstChargingTurn's box, every two-turn move): OFF 1 row (the off108 pause counts it,
-  P 42 -> 41); ON one frame per interpreter execution to the charge print (8). olnd113's 3 charge rows re-pinned (box from G + 1).
-- **Ripple:** census 0..999: the same 252 battles in both scenes, 639 charge turns (ON -16, OFF -24 each); ON keys / live 27,084
-  unchanged; `battleDigestExcludingFrames` identical outside the budget-stalled tails (796 ON, 881 OFF +1 command). Differential
-  641 / 641 byte-identical.
-- **Next:** #167 (d) remainder: the ON live charge animation starts 7 rows late (it needs a presented post-animation hold). The
-  held print -> next "used" edge is -10 .. -14 (general: the Sand-Attack control is -12; same family as (a)).
-- **Notes:** gates: typecheck 0, smoke 448, build OK; full `npm test`: 1,669 files / 13,874 passed, 4 failed = 4 attributed frame
-  re-pins (seed 0 / 21 soak frames, sc106 seed 0 -16 x Dig box, sgl138 receipt 0-on -32 / 0-off -48), files 81 / 81 after.
-  Docs `docs/chg161-charge-turn-print.md`; receipt
-  `tools/integration/fixtures/chg161/receipt.json`; scratch `.integration/validation/chg161/`.

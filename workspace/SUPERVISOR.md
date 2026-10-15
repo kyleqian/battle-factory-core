@@ -179,6 +179,18 @@ edit.
      foreground Bash call times out long before a worker finishes. Retain the
      launcher's PID and output path and poll until it exits. The initial shell
      return only means the launcher was started, not that its worker finished.
+     **Headless Claude:** never use `Monitor`, `ScheduleWakeup`, or end a turn
+     waiting for notifications. Poll retained launcher PIDs/logs in bounded
+     foreground calls. `tools/run-claude-supervisor.py` owns the campaign's
+     original deadline: if a turn ends early, it waits for worker state to
+     change and resumes the same Claude session. It does not restart failed
+     requests or account-limit stops. State is recorded next to the raw log
+     as `.controller.json`. A genuine clean completion requires the JSON stop
+     file named by `POKEBENCH_SUPERVISOR_STOP_FILE`, containing `session_id`
+     from `POKEBENCH_SUPERVISOR_SESSION_ID`, `status` (`complete`, `blocked`,
+     or `wind_down`) and a nonempty `reason`. No active workers or dirty
+     checkout may be left behind; `wind_down` is accepted only in the final
+     20 minutes. Never write a stop file merely to wait for workers.
      For DeepSeek workers, disable the Claude Bash tool's host sandbox on the
      launcher call so OpenCode can read its credential store; OpenCode still
      runs headlessly inside the selected lane/worktree with `--auto`.
