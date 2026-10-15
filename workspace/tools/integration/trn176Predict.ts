@@ -41,7 +41,7 @@ const battler = (species: number, moves: number[], speed: number, hp: number) =>
 };
 
 type Row = { type: string; start: number; frames: number; text: string };
-type Production = { rows: Row[]; events: any[] };
+type Production = { rows: Row[]; events: any[]; commands: any[]; field: any; beforeRules: any; afterRules: any };
 
 export function trn176Production(
   playerSpecies: string, playerMove: number, opponentSpecies: string, opponentMove: number, playerFirst: boolean, scene: "on" | "off",
@@ -84,7 +84,7 @@ export function trn176Production(
     const lines = command.type === "message" ? (command as any).lines as string[] : [];
     return { type: command.type, start, frames, text: lines.join("\\n") };
   });
-  return { rows, events: b.events as any[] };
+  return { rows, events: b.events as any[], commands: commands as any[], field, beforeRules, afterRules: b.state.rules };
 }
 
 const exec = (event: any): number => event.provenance?.instructionExecution;
