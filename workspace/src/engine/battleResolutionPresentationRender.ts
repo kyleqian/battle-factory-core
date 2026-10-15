@@ -1147,7 +1147,7 @@ const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
   [69, 3], [78, 3], [79, 3], [83, 3], [85, 3], [86, 3], [87, 3], [88, 3], [90, 3], [93, 3], [94, 3], [95, 3], [97, 3], [98, 3],
   [101, 3], [103, 3], [106, 3], [107, 3], [108, 3], [109, 3], [111, 3], [112, 3], [114, 3], [115, 3], [116, 3], [118, 3], [122, 3], [126, 1],
   [129, 3], [131, 3], [133, 3], [136, 3], [147, 3], [148, 3], [151, 3], [152, 3], [154, 3], [156, 3], [162, 3], [163, 3], [172, 3], [178, 3],
-  [180, 3], [182, 3], [186, 3], [187, 3], [192, 1], [195, 3], [197, 3], [201, 3], [203, 3], [211, 3], [212, 3], [213, 3], [214, 2], [215, 3],
+  [164, 3], [180, 3], [182, 3], [186, 3], [187, 3], [192, 1], [195, 3], [197, 3], [201, 3], [203, 3], [211, 3], [212, 3], [213, 3], [214, 2], [215, 3],
   [218, 3], [219, 3], [226, 3], [230, 3], [231, 3], [236, 3], [238, 3], [242, 3], [243, 3], [246, 3], [250, 3], [253, 3], [254, 3], [257, 3],
   [259, 3], [263, 3], [264, 3], [265, 3], [266, 3], [269, 3], [271, 3], [272, 3], [275, 3], [277, 3], [280, 3], [281, 3], [283, 3], [287, 3],
   [288, 3], [290, 3], [294, 3], [302, 3], [306, 3], [312, 3], [317, 3], [319, 3], [321, 3], [332, 3], [334, 3], [335, 3], [336, 3], [339, 3],
@@ -1211,7 +1211,7 @@ export function battleResolutionCommandDuration(
       const seGate = command.timing.seGateFrames ?? 0;
       if (live === null) return seGate + command.timing.minimumFrames;
       const rows = liveMoveUniversalRows(command.animation!, field);
-      return seGate + rows.pre + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post;
+      return seGate + (command.timing.scriptLeadFrames ?? 0) + rows.pre + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post;
     }
     case "hit-animation":
       return command.timing.minimumFrames;
@@ -1226,7 +1226,7 @@ export function battleResolutionCommandDuration(
           from: command.from,
           to: command.to,
         }) + 1,
-      );
+      ) + (command.timing.tailFrames ?? 0);
     }
     case "stat":
       return Math.max(
@@ -1750,7 +1750,8 @@ export function createBattleResolutionPresentationRenderView(
     } else if (command.type === "move-animation" && command.animation) {
       const lead = liveMoveIdleLeadRows(command.animation, field);
       // iu120: the pre rows show the activation row's image (idle98: F_att..A-1 == row A), so a lead > 0 command's pre rows keep it.
-      const seGate = command.timing.seGateFrames ?? 0;
+      // sub183: the script lead rows precede the seGate rows and show the same age-0 field.
+      const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0);
       const pre = seGate + liveMoveUniversalRows(command.animation, field).pre;
       effect = Object.freeze({
         type: "move", request: command.animation,

@@ -96,12 +96,18 @@ export type BattleMessageTiming =
  * sgs134 (docs/sgs134-se-gate-other-requests.md): seGateFrames (present only when > 0) = HandleMoveAnimation's IsBattleSEPlaying rows
  * before a multi-hit move's 2nd+ hit (sgs134RequestSeGate); the live command presents them before its pre rows (the field as it is).
  */
-export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number; seGateFrames?: number }>;
+/**
+ * sub183 (docs/sub183-substitute-turn-timing.md): scriptLeadFrames (present only when > 0) = the script rows between the controller's
+ * release of "X used Y!" and `attackanimation`, presented as a live body's first rows (the field as it is, before the seGate and pre
+ * rows); only a script whose `attackstring` is followed by `waitstate` has them (BattleScript_EffectSubstitute).
+ */
+export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number; seGateFrames?: number; scriptLeadFrames?: number }>;
 export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35;
   firstDisplayedAge: 1;
 }>;
-export type BattleHpTiming = Readonly<{ minimumFrames: 28 }>;
+/** sub183: tailFrames (present only when > 0) = the script rows between the bar's last row and the next print's first glyph (see hpPrintTailTiming). */
+export type BattleHpTiming = Readonly<{ minimumFrames: 28; tailFrames?: number }>;
 /**
  * The RAM stat write is silent for exactly 2 frames before the message box
  * clears (`docs/issue69-omniboost-off-ground-truth.md` §2: every one of the
@@ -1301,12 +1307,52 @@ function moveAnimationSeGateTiming(events: readonly BattleKernelSemanticEvent[],
   return seGate > 0 ? { seGateFrames: seGate } : {};
 }
 
+/**
+ * sub183 (ISSUES #153): `attackstring; waitstate` holds the script until the controller releases the used print (its release row is the
+ * waitstate's), so every instruction up to `attackanimation` runs AFTER the print: BattleScript_EffectSubstitute's jumpifstatus2,
+ * setsubstitute and jumpifbyte, then attackanimation (ROM G+2..G+5 against the release row G+1: 5 / 5 windows, both scenes and sides).
+ * An ordinary script runs its post-attackstring instructions while the print types, so `attackanimation` is the release row itself
+ * (production's body starts there) and the lead is 0. The lead is the kernel's instructionExecution(MOVE_ANIMATION) - (waitstate's).
+ */
+function moveAnimationScriptLeadTiming(events: readonly BattleKernelSemanticEvent[], index: number): { scriptLeadFrames?: number } {
+  const animation = instructionExecutionOf(events[index]!);
+  for (let i = index - 1; i >= 0; i -= 1) {
+    const candidate = events[i]!;
+    const payload = candidate.payload;
+    if (payload.kind !== "message" || payload.messageId !== "STRINGID_USEDMOVE") continue;
+    const used = instructionExecutionOf(candidate);
+    const programCounter = candidate.provenance?.programCounter;
+    if (programCounter === undefined || animation <= used) return {};
+    const lead = animation - (used + 1);
+    return BATTLE_SCRIPT_PROGRAM.instructions[programCounter + 1]?.opcodeName === "B_SCR_OP_WAITSTATE" && lead > 0
+      ? { scriptLeadFrames: lead } : {};
+  }
+  return {};
+}
+
 /** sa125 SA1: the presented B_ANIM_STATUS_* of a kernel `status-animation` receipt, or null (WRAPPED / none: no table entry). */
 function statusAnimationPresented(isStatus2: number, status: number): BattleStatusAnimationName | null {
   const name = spriteOrderStatusAnimationName(isStatus2 !== 0, status);
   return name !== null && Object.hasOwn(STATUS_ANIMATION_ADDED_ROWS, name) ? name as BattleStatusAnimationName : null;
 }
 const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
+
+/**
+ * sub183 (ISSUES #153): BattleScript_EffectSubstitute's `datahpupdate; printfromtable; waitmessage`. The ROM's datahpupdate run is the
+ * bar's frames + 2 where the HP command is bar + 1 (1 row), and the print's first glyph follows the printfromtable and waitmessage
+ * rows (2 rows): 3 rows, 45 + 1 + 1 = G+97..G+143 then the glyph at G+144, both scenes, both sides (4 / 4 dense windows, 0 px).
+ * Only the Substitute script is measured, so the rule requires its `attackanimation; waitanimation; healthbarupdate` lead-in (the
+ * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
+ */
+const HP_PRINT_TAIL_FRAMES = 3;
+function hpPrintTailTiming(event: BattleKernelSemanticEvent): typeof HP_TIMING | Readonly<{ minimumFrames: 28; tailFrames: number }> {
+  const programCounter = event.provenance?.programCounter;
+  if (programCounter === undefined) return HP_TIMING;
+  const at = (offset: number) => BATTLE_SCRIPT_PROGRAM.instructions[programCounter + offset]?.opcodeName;
+  return at(0) === "B_SCR_OP_DATAHPUPDATE" && at(1) === "B_SCR_OP_PRINTFROMTABLE" && at(-1) === "B_SCR_OP_HEALTHBARUPDATE"
+    && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
+    ? Object.freeze({ minimumFrames: 28, tailFrames: HP_PRINT_TAIL_FRAMES } as const) : HP_TIMING;
+}
 const STAT_TIMING = Object.freeze({ minimumFrames: 2 } as const);
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 /**
@@ -4234,7 +4280,9 @@ export function projectBattleResolutionCommands(
           animation,
           // An unadapted move retains a bounded pause, explicitly reported by
           // the readiness registry. No substitute effect receives exact credit.
-          timing: Object.freeze({ minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index) }),
+          timing: Object.freeze({
+            minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index),
+          }),
         }));
         continue;
       }
@@ -4325,7 +4373,7 @@ export function projectBattleResolutionCommands(
         from: payload.from,
         to: payload.to,
         healthValue: health.healthValue,
-        timing: HP_TIMING,
+        timing: hpPrintTailTiming(event),
       }));
       if (payload.to === 0) zeroHpBattlers.add(battler);
       continue;
