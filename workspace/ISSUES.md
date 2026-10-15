@@ -36,10 +36,11 @@ windows (the next message one frame late); cause named, not proven.
 Landed: olnd113, scf117, off121, fix122 (see git), and off148 (2026-10-13, docs/off148-scene-off-pauses-remainder.md): Rest (466 / 466
 census bodies) and the stat-stage-change-next class (Curse / Swagger / Flatter / Tickle, 401 / 401) land on the ROM row (anchor table
 5 / 5 classes residual 0). (a) Wish: LANDED by msg175 (2026-10-14, docs/msg175-used-message-duration.md; the "used" print now lasts its printable
-length L, 72 / 72 ROM uses; Scene OFF Wish residual 0 / 0; Wish then end of turn / switch / pre-move print unmeasured). Open: (a') the
-action transition: the Scene OFF no-hit -> next "used" edge is a uniform -12 (Bulk Up / Double Team / Sand-Attack / Protect / Detect /
-Agility; ON adds -3 .. -6), rule derived by trn176 (docs/trn176-action-transition.md: P = d + 6 + u after the action's first MoveEnd sprite-visibility
-receipt; 21 / 22 comparable Scene OFF receipts exact, 12 / 12 Scene ON) — production step pending; (b) sprite-visibility next after Roar /
+length L, 72 / 72 ROM uses; Scene OFF Wish residual 0 / 0; Wish then end of turn / switch / pre-move print unmeasured). (a') the action
+transition: Scene OFF LANDED by trn178 (2026-10-15, docs/trn178-action-transition-live.md; P = d + 6 + u, 23 / 23 comparable OFF rows
+on trn176's prediction, census 13,706 pauses, digests identical). Open: (a') Scene ON (same rule; ON edges -13 .. -18 today), and the
+named print-length residuals (Snore +10, Dig +4, Dynamic Punch ply +1, Toxic -2, Curse +2 / -4); switches / faints / end of turn /
+pre-move prints after the anchor stay unmeasured; (b) sprite-visibility next after Roar /
 Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);
 (c) nothing next (35, player Baton Pass: the party menu opens; unstaged); (d) charge turn (chg161, docs/chg161-charge-turn-print.md: the
 box now lands the charge glyph, OFF 3 / 3, ON 2 / 3 + Razor Wind -1 adapter): Scene ON's live charge animation starts 7 rows late (the box
@@ -168,8 +169,9 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Fixed:** snd145 / fra151 (Scene ON opponent send-in tail + front animation), offs152 (Scene OFF opponent send-in tail, Scene OFF
   forced switch-out one-row removal, Scene ON genderless / male-only tails, SOLROCK matrix; docs/offs152-scene-off-send-in-tail.md),
   plr162 (Scene OFF forced player send-in: slide 65, print max(91, cry + 66); docs/plr162-player-forced-send-in.md, folded 2026-10-14).
-- **Open:** Scene ON forced player send-in message (it also waits for the attacker's Roar cry; 205 / 339 species later than
-  max(91, cry + 66)); player faint-replacement send-in (same controller, unmeasured); player-side back send-out animations and
+- **Open:** Scene ON forced player send-in message: MEASURED by snd179 (2026-10-15, docs/snd179-scene-on-forced-player-send-in.md):
+  message = max(91, cry + 66, T_back + 70) (+1 CASTFORM), 339 / 339 sweep rows, 27 fresh ROM probes; the attacker's cry is irrelevant.
+  Production step pending (needs the sent-in mon's nature threaded to the timing call; census 0..99 reaches 4 such send-ins); player faint-replacement send-in (same controller, unmeasured); player-side back send-out animations and
   battle-start intro send-outs (Scene ON; fra151 doc says what they need); shiny send-ins; CRY_MODE_WEAK send-ins; PONYTA glow
   mid-frame palette row (D4 class, 616 px); TYPHLOSION faint-path slide lag frame (D4); the faint-path blank row one frame late;
   opponent-attacker Roar player-side ball-throw path (6,718 px); the elevated-attacker post-body field difference (1,444 px, untriaged).

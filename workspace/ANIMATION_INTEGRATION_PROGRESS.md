@@ -1,5 +1,17 @@
 # Animation integration progress
 
+## 2026-10-15 — CAX31 recovery session: trn178 + snd179 folded
+
+- **trn178 (INTEGRATION, saved ref `4a8a25431`, merged `40793066b`):** Scene OFF action-transition pause (#167 (a'); P = d + 6 + u
+  before an action's first MoveEnd sprite-visibility receipt; docs/trn178-action-transition-live.md). Supervisor: `trn176Predict.ts
+  --scene=off` on the worker tree reproduces every claimed row (stat / protect / control / two-turn 0; HIT transitions 0; Baton Pass +1);
+  trn178 / msg175 / chg161 / sub157 tests 17 / 17; src diff is one presentation-only Scene OFF branch. Worker: census 1,000 battles both
+  scenes digests identical (OFF 13,706 pauses, ON byte-identical), differential 641 / 641, full suite 13,918 / 0 failed, build.
+- **snd179 (SIDE, evidence only, saved ref `84b46c795`, merged `a641cc285`):** Scene ON forced player send-in message
+  = max(91, cry + 66, T_back + 70) (+1 CASTFORM), 339 / 339 sweep rows (docs/snd179-scene-on-forced-player-send-in.md). Supervisor:
+  predictor + both probe receipts reproduced; 4 fresh ROM probes (slide / cry / 2 back-anim bound) 4 / 4 exact. No production change.
+- Union `a641cc285`: smoke 448 / 448 (master's later commits since the worker base are tooling only).
+
 ## 2026-10-14 — CAX31 session: Transform live (trf174) + enc160 / plr162 / enc173 folds
 
 - **trf174 (INTEGRATION, Opus, merged on master after `78e61e8c1`):** Move_TRANSFORM live in both scenes + the transformed field
