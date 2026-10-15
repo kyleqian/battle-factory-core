@@ -1,0 +1,31 @@
+{
+ "schema": "sub183-census-delta/v1",
+ "battles": 1000,
+ "digestMismatch": [],
+ "errorMismatch": [],
+ "budgetStalled": [
+  434,
+  796,
+  881
+ ],
+ "baseCommands": 320378,
+ "commands": 320378,
+ "unchanged": 320284,
+ "identicalBattles": 974,
+ "typeSequenceChanged": [],
+ "substituteBodies": {
+  "liveChanged": 47,
+  "nonLiveChanged": 0,
+  "frames": 282,
+  "battles": 26
+ },
+ "hpTails": {
+  "changed": 47,
+  "frames": 141
+ },
+ "substituteBodiesInBase": 47,
+ "budgetTail": {},
+ "unattributed": [],
+ "scene": "on",
+ "unattributedCount": 0
+}
