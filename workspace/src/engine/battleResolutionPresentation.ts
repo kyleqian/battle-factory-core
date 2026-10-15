@@ -180,7 +180,13 @@ function focusPunchPrePassMessageTiming(
     return Object.freeze({ minimumFrames: to - from + 1, holdFrames: 0 });
   }
   if (event.payload.messageId === "STRINGID_PKMNTIGHTENINGFOCUS") {
-    const next = events[index + 1];
+    // The next print (skipping silent events such as the PP update that precedes a Substitute's used print).
+    let next: BattleKernelSemanticEvent | undefined;
+    for (let following = index + 1; following < events.length; following += 1) {
+      next = events[following]!;
+      if (next.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT || next.payload.kind === "message") break;
+      next = undefined;
+    }
     let lead: number;
     if (next?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT) lead = FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES;
     else if (next?.provenance?.dispatcher === SYNTHESIZED_SWITCH_DISPATCHER) lead = FOCUS_PUNCH_PRE_PASS_SWITCH_RECALL_LEAD_FRAMES;

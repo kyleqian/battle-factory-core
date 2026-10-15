@@ -160,7 +160,7 @@ export function allResults() {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const results = allResults();
-  if (process.argv.includes("--json")) console.log(JSON.stringify(results, null, 1));
+  if (process.argv.includes("--json")) console.log(JSON.stringify(results.map(({ events: _e, field: _f, beforeRules: _b, afterRules: _a, commands: _c, ...rest }) => rest), null, 1));
   else for (const r of results) {
     console.log(`${r.name}  turn order ${r.turnOrderRow}, command 0 ${r.commandZero} (handoff ${r.handoffFrames}), used execution ${JSON.stringify(r.usedExecution)}`);
     console.log("  kernel messages: " + r.kernelMessageIds.join(" > "));

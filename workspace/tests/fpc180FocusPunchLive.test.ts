@@ -90,4 +90,15 @@ describe("fpc180 -- Focus Punch pre-pass edge routes", () => {
     expect(without.holdFrames - withUsed.holdFrames).toBe(FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_FRAMES - (5 + 4));
     expect(without.holdFrames).toBe(withUsed.holdFrames + 2);
   });
+
+  it("a silent PP update between the focus print and the used print does not hide the used print (u counts from it)", () => {
+    const card = results["fpc177-b2-hit-scratch-off"]!;
+    const used = card.events.findIndex((e: any) => e.payload.kind === "message" && e.payload.messageId === "STRINGID_USEDMOVE");
+    const pp = { sequence: 0, payload: { kind: "set-battler-pp-data", battler: 1 }, provenance: { ...card.events[used]!.provenance } };
+    const events = [...card.events.slice(0, used), pp, ...card.events.slice(used)].map((e: any, i: number) => ({ ...e, sequence: i }));
+    const hold = (list: readonly any[]) => (projectBattleResolutionCommands(list as never, card.beforeRules, card.afterRules, card.field as never, null)
+      .find((c: any) => c.type === "message" && c.lines.join("").includes("tightening")) as any).timing.holdFrames;
+    const plain = card.events.map((e: any, i: number) => ({ ...e, sequence: i }));
+    expect(hold(events)).toBe(hold(plain));
+  });
 });
