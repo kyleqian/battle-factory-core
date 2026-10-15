@@ -27,13 +27,15 @@ describe("msg175: the used-move print duration", () => {
     ]);
   });
 
-  it("named remainder: the Scene OFF no-hit -> next used edge is a uniform -12 (the action transition, not the print)", () => {
+  // trn178 (docs/trn178-action-transition-live.md): msg175's named -12 remainder was the action transition; its Scene OFF pause
+  // (P = d + 6 + u = 12 on all six) lands every edge.
+  it("named remainder landed (trn178): the Scene OFF no-hit -> next used edge is 0 (was a uniform -12, the action transition)", () => {
     const { edges } = msg175Measure([
       "off108-bulk-up-ply-primeape-onix", "off108-double-team-ply-primeape-onix", "off108-sand-attack-ply-primeape-snorlax",
       "off108-protect-ply-primeape-onix", "off108-detect-ply-primeape-onix", "off148-agility-ply",
     ]);
     const off = edges.filter((e) => e.scene === "off");
     expect(off).toHaveLength(6);
-    for (const e of off) expect([e.scenario, e.residual]).toEqual([e.scenario, -12]);
+    for (const e of off) expect([e.scenario, e.residual]).toEqual([e.scenario, 0]);
   });
 });

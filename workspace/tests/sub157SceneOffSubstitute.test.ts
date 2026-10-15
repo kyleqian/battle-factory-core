@@ -149,7 +149,12 @@ describe("sub157: Scene OFF Substitute / Transform keep the controller move anim
       expect(body.animation).toMatchObject({ moveId: move, attacker });
       expect(body.timing).toEqual({ minimumFrames: 32 });
     }
-    expect(off).toEqual(on);
+    // trn178 (docs/trn178-action-transition-live.md): Scene OFF alone adds the draw-nothing action-transition pause (a move-animation
+    // without a request) before the first MoveEnd sprite-visibility receipt; apart from it the streams are identical.
+    const transitionPause = (x: any, i: number, all: any[]) =>
+      x.type === "move-animation" && x.animation === undefined && all[i + 1]?.type === "sprite-visibility";
+    expect(on.every((u) => !u.commands.some(transitionPause as never))).toBe(true);
+    expect(off.map((u) => ({ ...u, commands: u.commands.filter((x, i, all) => !transitionPause(x, i, all)) }))).toEqual(on);
   });
 
   it("control: every other move's OFF body keeps BattleScript_Pausex20 (SCENE_OFF_ATTACK_PAUSE; no move-animation request)", () => {
