@@ -8,11 +8,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ## 2026-10-15 (evening, in progress) — CAX31 recovery session (supervisor, Opus 5.5)
 
 - **State:** master folds trn178 (`40793066b`, Scene OFF action-transition pause, #167 (a')) and snd179 (`a641cc285`, Scene ON
-  forced player send-in evidence, #146); union smoke 448 / 448. Production now differs from `3937ecad0` by trn178 only.
+  forced player send-in evidence, #146); union smoke 448 / 448. Production now differs from `3937ecad0` by trn178 + fpc180 (presentation only).
 - **Did:** independently verified both saved refs (trn176Predict OFF rows reproduced; 17 / 17 targeted tests; 4 fresh snd179 ROM
   probes exact); worktrees removed (only wasm artifacts), refs kept. Details in ANIMATION_INTEGRATION_PROGRESS.md.
-- **Running:** fpc180 (integration lane, `worker/integration-20261015-170019`, cap 150) — fpc177's four Focus Punch presentation fixes.
-- **Next:** Scene ON action transition (#167 (a')), snd179 production wiring (#146), Substitute HP timing -6 (#153). Reserve the final
+- **fpc180 folded** (`5cf23a253`): fpc177's four Focus Punch presentation fixes (#139); supervisor reproduced every OFF card row 0.
+- **Running:** trn181 (integration lane, cap 150) — the action-transition pause in Scene ON (#167 (a')).
+- **Next:** snd179 production wiring (snd182 brief staged in `.integration/validation/sv-20261015b/`), Substitute HP timing -6 (#153). Reserve the final
   ~1 h 45 min for one independent full suite + build on the final tree.
 
 ---

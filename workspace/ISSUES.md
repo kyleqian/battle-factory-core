@@ -210,18 +210,13 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   a D4 candidate); the Substitute-swap composite still declines with a form shown; the latent front coords width (source 32 vs app 24,
   `battle_anim_mons.c:2253-2255`) for width-dependent moves is unexercised.
 
-## #139 — remainder: Focus Punch pre-pass presentation edge routes (kernel + both scenes FIXED 2026-10-13, fpp150)
+## #139 — remainder: Focus Punch pre-pass presentation edge routes (kernel + both scenes FIXED 2026-10-13, fpp150; edges fpc180)
 
-Landed (docs/fpp150-focus-punch-prepass.md): the kernel pre-pass (verify-rcp143-r4 PASS), the Scene OFF / ON timing (R4 anchors ==
-ROM) and the drawn general animation (fps147's 7 windows 0 px through production). Open: (a) a player VOLUNTARY SWITCH against an
-opponent Focus Punch presents `withSynthesizedSwitchRecallEvents`' recall receipts (sequences -2 / -1) BEFORE the pre-pass (kernel
-order is right; the null-handoff timing there is unmeasured); (b) unprobed rows: two Focus Punch users in one turn
-(`FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES` 7) and the 11-frame end2 -> action lead after action-1 prologues other than R4's
-StatDown (production's fixed confirm handoff shares that assumption). MEASURED by fpc177 (2026-10-14,
-docs/fpc177-focus-punch-edges.md; 12 ROM cards both scenes, twice fresh): (a) ROM order is pre-pass -> recall -> Go! (production
-recall first; then switch hold 9 -> 7, recall lead 11 -> 7); (b1) next-pre-pass lead 7 -> 5; (b2) action lead = 5 + u (u = the next
-used print's instructionExecution; Sand-Attack 6 -> 11 unchanged, Scratch / Agility +2, Thunder Wave +4). Production step pending.
-Scene ON: switch-card pre-pass print 125 vs 127 rows unexplained; the switch control's Go! -> used gap is -31 (send-in tail, not FP).
+Landed: fpp150 (kernel pre-pass, Scene OFF / ON timing, drawn general animation) and fpc180 (2026-10-15,
+docs/fpc180-focus-punch-live.md): recall after the pre-pass (lead 7), pre-pass switch hold 7, next-pre-pass lead 5, action lead 5 + u;
+fpc177's 12 ROM cards: every OFF row 0. Open: Scene ON pre-pass animation print 127 rows after the empty box vs the ROM's 125 on the
+switch and two-user cards (+2, unexplained); the voluntary-switch Go! -> used tail (-31, a send-in tail item, see #146); `5 + u` has
+no ROM card for Substitute / weather / Protect / multi-stage prologues, and a pre-move print after the focus print keeps 11.
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
 

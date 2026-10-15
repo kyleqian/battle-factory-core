@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-15 — CAX31 recovery session: trn178 + snd179 folded
+## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 folded
 
 - **trn178 (INTEGRATION, saved ref `4a8a25431`, merged `40793066b`):** Scene OFF action-transition pause (#167 (a'); P = d + 6 + u
   before an action's first MoveEnd sprite-visibility receipt; docs/trn178-action-transition-live.md). Supervisor: `trn176Predict.ts
@@ -10,6 +10,11 @@
 - **snd179 (SIDE, evidence only, saved ref `84b46c795`, merged `a641cc285`):** Scene ON forced player send-in message
   = max(91, cry + 66, T_back + 70) (+1 CASTFORM), 339 / 339 sweep rows (docs/snd179-scene-on-forced-player-send-in.md). Supervisor:
   predictor + both probe receipts reproduced; 4 fresh ROM probes (slide / cry / 2 back-anim bound) 4 / 4 exact. No production change.
+- **fpc180 (INTEGRATION, merged `5cf23a253`):** fpc177's Focus Punch presentation fixes (#139): recall after the pre-pass, switch hold
+  7, next-pre-pass lead 5, action lead 5 + u (docs/fpc180-focus-punch-live.md). Supervisor: `fpc180Compare.ts` reproduced every OFF card
+  row 0 (switch order / Go!, two users, Scratch / Agility / Thunder Wave / Sand-Attack); ON +2 only on the known 125-vs-127 pre-pass
+  row; src diff presentation-only. Worker: census both scenes digests identical, 65 changed commands per scene all attributed; differential
+  641 / 641; full suite 13,926 / 0 failed on the final src; build. Union smoke 448 / 448.
 - Union `a641cc285`: smoke 448 / 448 (master's later commits since the worker base are tooling only).
 
 ## 2026-10-14 — CAX31 session: Transform live (trf174) + enc160 / plr162 / enc173 folds
