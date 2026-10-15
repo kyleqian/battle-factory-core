@@ -1,0 +1,32 @@
+{
+ "seeds": "0..99",
+ "scene": "on",
+ "errors": 0,
+ "switchIns": 359,
+ "forcedPlayer": [
+  {
+   "seed": 23,
+   "species": 383,
+   "minimumFrames": 91,
+   "settleHoldFrames": 11
+  },
+  {
+   "seed": 68,
+   "species": 322,
+   "minimumFrames": 91,
+   "settleHoldFrames": 11
+  },
+  {
+   "seed": 76,
+   "species": 363,
+   "minimumFrames": 91,
+   "settleHoldFrames": 11
+  },
+  {
+   "seed": 76,
+   "species": 137,
+   "minimumFrames": 91,
+   "settleHoldFrames": 11
+  }
+ ]
+}
