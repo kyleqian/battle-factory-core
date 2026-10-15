@@ -138,7 +138,7 @@ function cardRows(name: string, k: number | null, reorder = false) {
   const prodMessages: MessageRow[] = rows.filter((r) => r.type === "message").map((r) => ({ glyph: r.start, text: r.text }));
   const used = events.filter((e: any) => e.payload.kind === "message" && e.payload.messageId === "STRINGID_USEDMOVE")
     .map((e: any) => e.provenance?.instructionExecution);
-  return { name, case: card.meta.case, scene: card.meta.scene, turnOrderRow: card.turnOrderRow, commandZero, handoffFrames, rows, romMessages, prodMessages, usedExecution: used,
+  return { events, field, beforeRules, afterRules, commands, name, case: card.meta.case, scene: card.meta.scene, turnOrderRow: card.turnOrderRow, commandZero, handoffFrames, rows, romMessages, prodMessages, usedExecution: used,
     kernelMessageIds: events.filter((e: any) => e.payload.kind === "message").map((e: any) => e.payload.messageId) };
 }
 
