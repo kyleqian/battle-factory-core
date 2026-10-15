@@ -105,22 +105,6 @@
   "nature": 10
  },
  {
-  "id": "roar-pidgey-by-jynx",
-  "scenario": "mechanic-roar-opponent-houndour-player-onix",
-  "slot": 1,
-  "species": 16,
-  "nature": 6,
-  "attacker": 124
- },
- {
-  "id": "roar-charizard-by-jynx",
-  "scenario": "mechanic-roar-opponent-houndour-player-onix",
-  "slot": 1,
-  "species": 6,
-  "nature": 6,
-  "attacker": 124
- },
- {
   "id": "roar-pidgey-by-att295",
   "scenario": "mechanic-roar-opponent-houndour-player-onix",
   "slot": 1,
