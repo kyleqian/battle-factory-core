@@ -1109,6 +1109,9 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(moveAnimations).toEqual([
       // MOVE_HAIL: Pausex20 -> the "hail" print (lead 1)
       { receipt: "SCENE_OFF_ATTACK_PAUSE", label: "BattleScript_MoveWeatherChange", beforeLoop: true, live: false, frames: 40 },
+      // trn178 (docs/trn178-action-transition-live.md): the Scene OFF action-transition pause before MOVE_HAIL's first MoveEnd
+      // receipt, the next action being MOVE_HARDEN's "used" print: P = d + 6 + u from the hail print's waitmessage release.
+      { receipt: "set-battler-sprite-visibility", label: "BattleScript_MoveEnd", beforeLoop: true, live: false, frames: 21 },
       // MOVE_HARDEN: Pausex20 -> STATS_CHANGE (lead 1), less its 2-frame `stat` command presented before the attack receipt
       { receipt: "SCENE_OFF_ATTACK_PAUSE", label: "BattleScript_StatUpAttackAnim", beforeLoop: true, live: false, frames: 39 },
     ]);

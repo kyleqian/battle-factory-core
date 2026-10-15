@@ -1,0 +1,26 @@
+{
+ "schema": "trn178-census-delta/v1",
+ "battles": 1000,
+ "digestMismatch": [],
+ "errorMismatch": [],
+ "budgetStalled": [
+  434,
+  796,
+  881
+ ],
+ "baseCommands": 307633,
+ "commands": 307633,
+ "unchanged": 307633,
+ "identicalBattles": 1000,
+ "transitionPause": {
+  "commands": 0,
+  "frames": 0,
+  "battles": 0,
+  "framesHistogram": {},
+  "byUsed": {}
+ },
+ "budgetTail": {},
+ "unattributed": [],
+ "scene": "on",
+ "unattributedCount": 0
+}

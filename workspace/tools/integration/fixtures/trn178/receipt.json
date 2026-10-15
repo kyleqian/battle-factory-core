@@ -1,0 +1,515 @@
+[
+ {
+  "name": "off108-bulk-up-ply-primeape-onix",
+  "class": "stat",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 332,
+  "before": {
+   "residual": -12,
+   "transition": -12
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-double-team-ply-primeape-onix",
+  "class": "stat",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 247,
+  "before": {
+   "residual": -12,
+   "transition": -12
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-sand-attack-ply-primeape-snorlax",
+  "class": "stat",
+  "d": 2,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 248,
+  "before": {
+   "residual": -12,
+   "transition": -12
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-confuse-ray-ply-primeape-snorlax",
+  "class": "status",
+  "skipped": "next action does not open with a USEDMOVE print"
+ },
+ {
+  "name": "off108-toxic-ply-primeape-onix",
+  "class": "status",
+  "d": 6,
+  "n": 2,
+  "u": 4,
+  "anchor": "icon",
+  "P": 16,
+  "romEdge": 180,
+  "before": {
+   "residual": -18,
+   "transition": null
+  },
+  "after": {
+   "residual": -2,
+   "transition": null
+  },
+  "predictedAfter": -2,
+  "landed": true,
+  "romCheck": null
+ },
+ {
+  "name": "off108-thunder-wave-ply-primeape-snorlax",
+  "class": "status",
+  "skipped": "next action does not open with a USEDMOVE print"
+ },
+ {
+  "name": "off108-protect-ply-primeape-onix",
+  "class": "protect",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 162,
+  "before": {
+   "residual": -12,
+   "transition": -12
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-detect-ply-primeape-onix",
+  "class": "protect",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 161,
+  "before": {
+   "residual": -12,
+   "transition": -12
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-rest-ply-snorlax-onix",
+  "class": "rest",
+  "d": 7,
+  "n": 2,
+  "u": 2,
+  "anchor": "hp",
+  "P": 15,
+  "romEdge": 124,
+  "before": {
+   "residual": 3,
+   "transition": -15
+  },
+  "after": {
+   "residual": 18,
+   "transition": 0
+  },
+  "predictedAfter": 18,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-dig-ply-primeape-snorlax",
+  "class": "two-turn",
+  "d": 4,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 14,
+  "romEdge": 142,
+  "before": {
+   "residual": -10,
+   "transition": -14
+  },
+  "after": {
+   "residual": 4,
+   "transition": 0
+  },
+  "predictedAfter": 4,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-razor-wind-ply-primeape-snorlax",
+  "class": "two-turn",
+  "d": 3,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 13,
+  "romEdge": 152,
+  "before": {
+   "residual": -13,
+   "transition": -13
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-solar-beam-ply-primeape-snorlax",
+  "class": "two-turn",
+  "d": 3,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 13,
+  "romEdge": 146,
+  "before": {
+   "residual": -13,
+   "transition": -13
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-snore-ply-primeape-snorlax",
+  "class": "failed",
+  "d": 2,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 148,
+  "before": {
+   "residual": -2,
+   "transition": -12
+  },
+  "after": {
+   "residual": 10,
+   "transition": 0
+  },
+  "predictedAfter": 10,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-dynamic-punch-ply-machamp-snorlax",
+  "class": "miss",
+  "d": 2,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 162,
+  "before": {
+   "residual": -11,
+   "transition": -12
+  },
+  "after": {
+   "residual": 1,
+   "transition": 0
+  },
+  "predictedAfter": 1,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off108-dynamic-punch-opp-machamp-snorlax",
+  "class": "miss",
+  "d": 2,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 170,
+  "before": {
+   "residual": -12,
+   "transition": -12
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off148-curse-ply",
+  "class": "stat-stage",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 341,
+  "before": {
+   "residual": -10,
+   "transition": -12
+  },
+  "after": {
+   "residual": 2,
+   "transition": 0
+  },
+  "predictedAfter": 2,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off148-curse-opp",
+  "class": "stat-stage",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 357,
+  "before": {
+   "residual": -16,
+   "transition": -12
+  },
+  "after": {
+   "residual": -4,
+   "transition": 0
+  },
+  "predictedAfter": -4,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off148-swagger-ply",
+  "class": "stat-stage",
+  "skipped": "next action does not open with a USEDMOVE print"
+ },
+ {
+  "name": "off148-flatter-ply",
+  "class": "stat-stage",
+  "skipped": "next action does not open with a USEDMOVE print"
+ },
+ {
+  "name": "off148-agility-ply",
+  "class": "control-stats-change",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 259,
+  "before": {
+   "residual": -12,
+   "transition": -12
+  },
+  "after": {
+   "residual": 0,
+   "transition": 0
+  },
+  "predictedAfter": 0,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off148-wish-ply",
+  "class": "sprite-visibility",
+  "skipped": "anchor is the used print itself"
+ },
+ {
+  "name": "off148-wish-opp",
+  "class": "sprite-visibility",
+  "skipped": "anchor is the used print itself"
+ },
+ {
+  "name": "off148-roar-ply",
+  "class": "sprite-visibility",
+  "d": 7,
+  "n": 2,
+  "u": 2,
+  "anchor": "hp",
+  "P": 15,
+  "romEdge": 125,
+  "before": {
+   "residual": 2,
+   "transition": -15
+  },
+  "after": {
+   "residual": 17,
+   "transition": 0
+  },
+  "predictedAfter": 17,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "off148-baton-pass-opp",
+  "class": "sprite-visibility",
+  "d": 2,
+  "n": 1,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 12,
+  "romEdge": 223,
+  "before": {
+   "residual": -68,
+   "transition": -11
+  },
+  "after": {
+   "residual": -56,
+   "transition": 1
+  },
+  "predictedAfter": -56,
+  "landed": true,
+  "romCheck": -1
+ },
+ {
+  "name": "trn176-scratch-ply",
+  "class": "hit",
+  "d": 3,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 13,
+  "romEdge": 212,
+  "before": {
+   "residual": 4,
+   "transition": -13
+  },
+  "after": {
+   "residual": 17,
+   "transition": 0
+  },
+  "predictedAfter": 17,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "trn176-scratch-opp",
+  "class": "hit",
+  "d": 3,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 13,
+  "romEdge": 216,
+  "before": {
+   "residual": 4,
+   "transition": -13
+  },
+  "after": {
+   "residual": 17,
+   "transition": 0
+  },
+  "predictedAfter": 17,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "trn176-karate-chop-ply",
+  "class": "hit-supereffective",
+  "d": 3,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 13,
+  "romEdge": 245,
+  "before": {
+   "residual": 14,
+   "transition": -13
+  },
+  "after": {
+   "residual": 27,
+   "transition": 0
+  },
+  "predictedAfter": 27,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "trn176-double-edge-ply",
+  "class": "hit-recoil",
+  "d": 4,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 14,
+  "romEdge": 329,
+  "before": {
+   "residual": 10,
+   "transition": -14
+  },
+  "after": {
+   "residual": 24,
+   "transition": 0
+  },
+  "predictedAfter": 24,
+  "landed": true,
+  "romCheck": 0
+ },
+ {
+  "name": "trn176-fire-punch-ply",
+  "class": "hit-secondary",
+  "d": 3,
+  "n": 2,
+  "u": 4,
+  "anchor": "print+64",
+  "P": 13,
+  "romEdge": 224,
+  "before": {
+   "residual": -5,
+   "transition": -13
+  },
+  "after": {
+   "residual": 8,
+   "transition": 0
+  },
+  "predictedAfter": 8,
+  "landed": true,
+  "romCheck": 0
+ }
+]

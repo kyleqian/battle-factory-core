@@ -893,11 +893,92 @@ function returnToBallOperand(event: BattleKernelSemanticEvent): string | null {
 const SCENE_OFF_RETURN_TO_BALL_LEAD = -3; // 1 - FORCED_RETURN_TO_BALL_HOLD_FRAMES (declared below; pinned in tests/offs152SceneOffForcedSwitch.test.ts)
 
 /**
+ * trn176 (docs/trn176-action-transition.md): the action transition's fixed rows, `end`, HandleAction_TryFinish,
+ * HandleAction_ActionFinished, HandleAction_UseMove and the next script's first row, plus the print's row after its attackstring:
+ * the ROM's next "used" first glyph is E + 1 + d + n + 6 + u (E the previous action's last blocking row, d the rows from E to the
+ * first `moveend`, n the MoveEnd sprite-visibility receipts, u the next USEDMOVE's instructionExecution).
+ */
+const ACTION_TRANSITION_ROWS = 6;
+
+/**
  * msg175 (docs/msg175-used-message-duration.md, off148 §3 Wish): rows from the MoveEnd sprite-visibility receipt's execution to the
  * next action's "used" first glyph, less that action's own instructionExecution u: MoveEnd's remaining cases + the action dispatch
- * (next script on Δ + 5 = G + 45 with u counted from there, attackstring on u, first glyph two rows later).
+ * (next script on Δ + 5 = G + 45 with u counted from there, attackstring on u, first glyph two rows later). trn176: n + 6 with
+ * Wish's single (attacker) receipt.
  */
-const SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS = 7;
+const SCENE_OFF_MOVEEND_NEXT_USED_GLYPH_ROWS = 1 + ACTION_TRANSITION_ROWS;
+
+const ACTION_TRANSITION_WAIT_ROWS: Readonly<Record<string, number>> = Object.freeze({ B_WAIT_TIME_LONG: WAITMESSAGE_LONG_HOLD_FRAMES });
+
+/**
+ * trn178 (ISSUES #167 (a'), docs/trn178-action-transition-live.md; rule: docs/trn176-action-transition.md): the draw-nothing pause
+ * before an action's FIRST MoveEnd sprite-visibility receipt when only MoveEnd receipts follow and then the next action's
+ * STRINGID_USEDMOVE (instructionExecution u, the kernel's count restarted). The anchor is the action's last print (E = its
+ * instructionExecution + its `waitmessage B_WAIT_TIME_LONG`), HP update (`datahpupdate`) or status icon (`updatestatusicon`), whose
+ * production command ends on E. Production presents each of the n receipts as one frame, so the n cancels:
+ * P = d + 6 + u - (frames presented after the anchor's command), d = e1 - E - 1. Any other shape (no anchor, the anchor is the used
+ * print itself (Wish: sceneOffNoHitPauseFrames), a print without that wait, a switch / faint / end of turn / pre-move print next)
+ * stays unmeasured: null.
+ */
+function sceneOffActionTransitionPauseFrames(
+  events: readonly BattleKernelSemanticEvent[],
+  receiptIndex: number,
+  commands: readonly BattleResolutionPresentationCommand[],
+): number | null {
+  const isMoveEndReceipt = (event: BattleKernelSemanticEvent) =>
+    event.payload.kind === "set-battler-sprite-visibility" && event.provenance?.opcodeName === "B_SCR_OP_MOVEEND";
+  const e1 = events[receiptIndex]!.provenance?.instructionExecution;
+  if (e1 === undefined) return null;
+  let execution = e1;
+  let used: number | null = null;
+  for (let index = receiptIndex + 1; index < events.length; index += 1) {
+    const event = events[index]!;
+    const next = event.provenance?.instructionExecution;
+    if (next === undefined) return null;
+    if (next > execution && isMoveEndReceipt(event)) {
+      execution = next;
+      continue;
+    }
+    if (next >= e1 || event.payload.kind !== "message" || event.payload.messageId !== "STRINGID_USEDMOVE") return null;
+    used = next;
+    break;
+  }
+  if (used === null) return null;
+  execution = e1;
+  let anchor: BattleKernelSemanticEvent | null = null;
+  for (let index = receiptIndex - 1; index >= 0; index -= 1) {
+    const event = events[index]!;
+    const previous = event.provenance?.instructionExecution;
+    if (previous === undefined || previous > execution || isMoveEndReceipt(event)) return null;
+    execution = previous;
+    const kind = event.payload.kind;
+    if (kind === "message" || kind === "hp-change" || kind === "status-icon-update") {
+      anchor = event;
+      break;
+    }
+  }
+  if (anchor === null) return null;
+  let anchorExecution = anchor.provenance!.instructionExecution;
+  if (anchor.payload.kind === "message") {
+    if (anchor.payload.messageId === "STRINGID_USEDMOVE" || anchor.payload.messageId === "STRINGID_EMPTYSTRING3") return null;
+    const following = BATTLE_SCRIPT_PROGRAM.instructions[anchor.provenance!.programCounter + 1];
+    const wait = following?.opcodeName === "B_SCR_OP_WAITMESSAGE"
+      ? ACTION_TRANSITION_WAIT_ROWS[following.operands[0]?.expression ?? ""]
+      : undefined;
+    if (wait === undefined) return null;
+    anchorExecution += wait;
+  }
+  let presented = 0;
+  for (let index = commands.length - 1; index >= 0; index -= 1) {
+    const command = commands[index]!;
+    if (!("eventSequence" in command) || command.eventSequence <= anchor.sequence) break;
+    const timing = (command as { timing?: { minimumFrames: number; holdFrames?: number } }).timing;
+    if (timing === undefined || (timing.holdFrames ?? 0) > 0) return null;
+    presented += timing.minimumFrames;
+  }
+  const frames = e1 - anchorExecution - 1 + ACTION_TRANSITION_ROWS + used - presented;
+  return frames > 0 ? frames : null;
+}
 
 function sceneOffNoHitPauseFrames(
   events: readonly BattleKernelSemanticEvent[],
@@ -4328,6 +4409,18 @@ export function projectBattleResolutionCommands(
             : forcedRemoval
               ? { timing: FORCED_SWITCH_OUT_TIMING, skipAnimation: true as const }
               : { timing: SWITCH_OUT_TIMING }),
+        }));
+      }
+      const transitionPause = event.provenance?.opcodeName === "B_SCR_OP_MOVEEND"
+        && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+        ? sceneOffActionTransitionPauseFrames(events, index, commands)
+        : null;
+      if (transitionPause !== null) {
+        commands.push(Object.freeze({
+          type: "move-animation",
+          eventSequence: event.sequence,
+          battler,
+          timing: Object.freeze({ minimumFrames: transitionPause }),
         }));
       }
       commands.push(Object.freeze({

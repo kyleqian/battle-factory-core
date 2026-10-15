@@ -29,8 +29,8 @@ import { loadBattleScriptProgram } from "../../src/engine/battleScriptProgram.ts
 const PROGRAM = loadBattleScriptProgram();
 const SPECIES: Record<string, number> = { PRIMEAPE: 57, SNORLAX: 143, ONIX: 95, MACHAMP: 68, ALAKAZAM: 65, GENGAR: 94, DUGTRIO: 51, PIDGEOT: 18 };
 const WAIT_TICKS: Record<string, number> = { B_WAIT_TIME_LONG: 64, B_WAIT_TIME_MED: 48, B_WAIT_TIME_SHORT: 32 };
-const MOVEEND_ROWS_AFTER_END = 4; // `end`, TryFinish, ActionFinished, UseMove: the pointer stays on `end` for 4 rows
-const POST_ATTACKSTRING_ROWS = 1; // the controller starts the print one row after attackstring executes
+export const MOVEEND_ROWS_AFTER_END = 4; // `end`, TryFinish, ActionFinished, UseMove: the pointer stays on `end` for 4 rows
+export const POST_ATTACKSTRING_ROWS = 1; // the controller starts the print one row after attackstring executes
 
 const battler = (species: number, moves: number[], speed: number, hp: number) => {
   const entry = speciesTypes.species[species - 1]!;

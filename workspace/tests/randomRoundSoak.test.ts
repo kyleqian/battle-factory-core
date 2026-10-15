@@ -400,7 +400,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // renderCalls 2_667 -> 2_654; same battle 7, turn 3, end state and diagnostics.
       // msg175 (the "used" print lasts its printable length, no 24-frame floor): frames 37_302 -> 37_298,
       // renderCalls 2_654 -> 2_655; same battle 7, turn 3, end state and diagnostics.
-      frames: 37_298,
+      // trn178 (the Scene OFF action-transition pause, docs/trn178-action-transition-live.md): frames 37_298 -> 37_738,
+      // renderCalls 2_655 -> 2_694; same battle 7, turn 3, end state and diagnostics.
+      frames: 37_738,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -412,7 +414,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_655,
+        renderCalls: 2_694,
       },
     });
     expect(second).toEqual(first);
@@ -797,7 +799,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // turn / end state.
     // chg161 (the charge-turn empty box): frames only, 17423 -> 17242; same battle / turn / end state.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 17232, // msg175: 17242 -> 17232 (shorter used prints; same battle / turn / end state)
+      // msg175: 17242 -> 17232 (shorter used prints); trn178 (the Scene OFF action-transition pause): 17232 -> 17493; same battle / turn / end state.
+      frames: 17493,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -805,7 +808,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       turn: 30,
     });
     expect(runSeed(1, options)).toMatchObject({
-      frames: 26810, // msg175: 26878 -> 26810 (shorter used prints; same battle / turn / end state)
+      // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
+      frames: 27058,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -833,7 +837,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // off121 (the Scene OFF `status` command): frames only, 9145 -> 9130 and
     // 9205 -> 9033; decision and canonical logs identical to 9d23a17c4's.
     expect(runSeed(0, options)).toMatchObject({
-      frames: 9128, // msg175: 9130 -> 9128 (shorter used prints; same battle / turn / end state)
+      // msg175: 9130 -> 9128 (shorter used prints); trn178 (the Scene OFF action-transition pause): 9128 -> 9154; same battle / turn / end state.
+      frames: 9154,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -850,7 +855,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // the round genuinely re-chains right after the answer is given, so the
     // frozen last-pre-chain snapshot lands much earlier, at the real frame.
     expect(runSeed(1, options)).toMatchObject({
-      frames: 8946, // msg175: 9033 -> 8946 (shorter used prints; same battle / turn / end state)
+      // msg175: 9033 -> 8946 (shorter used prints); trn178 (the Scene OFF action-transition pause): 8946 -> 9232; same battle / turn / end state.
+      frames: 9232,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

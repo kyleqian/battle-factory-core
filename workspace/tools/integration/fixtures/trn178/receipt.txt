@@ -1,0 +1,30 @@
+scenario (OFF) | class | d n u anchor | P | ROM edge | before resid (transition) | after resid (transition) | trn176 predicted after | landed
+off108-bulk-up-ply-primeape-onix | stat | 2 1 4 print+64 | 12 | 332 | -12 (-12) | 0 (0) | 0 | yes
+off108-double-team-ply-primeape-onix | stat | 2 1 4 print+64 | 12 | 247 | -12 (-12) | 0 (0) | 0 | yes
+off108-sand-attack-ply-primeape-snorlax | stat | 2 2 4 print+64 | 12 | 248 | -12 (-12) | 0 (0) | 0 | yes
+off108-confuse-ray-ply-primeape-snorlax | status | skipped: next action does not open with a USEDMOVE print
+off108-toxic-ply-primeape-onix | status | 6 2 4 icon | 16 | 180 | -18 (null) | -2 (null) | -2 | yes
+off108-thunder-wave-ply-primeape-snorlax | status | skipped: next action does not open with a USEDMOVE print
+off108-protect-ply-primeape-onix | protect | 2 1 4 print+64 | 12 | 162 | -12 (-12) | 0 (0) | 0 | yes
+off108-detect-ply-primeape-onix | protect | 2 1 4 print+64 | 12 | 161 | -12 (-12) | 0 (0) | 0 | yes
+off108-rest-ply-snorlax-onix | rest | 7 2 2 hp | 15 | 124 | 3 (-15) | 18 (0) | 18 | yes
+off108-dig-ply-primeape-snorlax | two-turn | 4 2 4 print+64 | 14 | 142 | -10 (-14) | 4 (0) | 4 | yes
+off108-razor-wind-ply-primeape-snorlax | two-turn | 3 2 4 print+64 | 13 | 152 | -13 (-13) | 0 (0) | 0 | yes
+off108-solar-beam-ply-primeape-snorlax | two-turn | 3 2 4 print+64 | 13 | 146 | -13 (-13) | 0 (0) | 0 | yes
+off108-snore-ply-primeape-snorlax | failed | 2 2 4 print+64 | 12 | 148 | -2 (-12) | 10 (0) | 10 | yes
+off108-dynamic-punch-ply-machamp-snorlax | miss | 2 2 4 print+64 | 12 | 162 | -11 (-12) | 1 (0) | 1 | yes
+off108-dynamic-punch-opp-machamp-snorlax | miss | 2 2 4 print+64 | 12 | 170 | -12 (-12) | 0 (0) | 0 | yes
+off148-curse-ply | stat-stage | 2 1 4 print+64 | 12 | 341 | -10 (-12) | 2 (0) | 2 | yes
+off148-curse-opp | stat-stage | 2 1 4 print+64 | 12 | 357 | -16 (-12) | -4 (0) | -4 | yes
+off148-swagger-ply | stat-stage | skipped: next action does not open with a USEDMOVE print
+off148-flatter-ply | stat-stage | skipped: next action does not open with a USEDMOVE print
+off148-agility-ply | control-stats-change | 2 1 4 print+64 | 12 | 259 | -12 (-12) | 0 (0) | 0 | yes
+off148-wish-ply | sprite-visibility | skipped: anchor is the used print itself
+off148-wish-opp | sprite-visibility | skipped: anchor is the used print itself
+off148-roar-ply | sprite-visibility | 7 2 2 hp | 15 | 125 | 2 (-15) | 17 (0) | 17 | yes
+off148-baton-pass-opp | sprite-visibility | 2 1 4 print+64 | 12 | 223 | -68 (-11) | -56 (1) | -56 | yes
+trn176-scratch-ply | hit | 3 2 4 print+64 | 13 | 212 | 4 (-13) | 17 (0) | 17 | yes
+trn176-scratch-opp | hit | 3 2 4 print+64 | 13 | 216 | 4 (-13) | 17 (0) | 17 | yes
+trn176-karate-chop-ply | hit-supereffective | 3 2 4 print+64 | 13 | 245 | 14 (-13) | 27 (0) | 27 | yes
+trn176-double-edge-ply | hit-recoil | 4 2 4 print+64 | 14 | 329 | 10 (-14) | 24 (0) | 24 | yes
+trn176-fire-punch-ply | hit-secondary | 3 2 4 print+64 | 13 | 224 | -5 (-13) | 8 (0) | 8 | yes
