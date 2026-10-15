@@ -5,16 +5,16 @@ usage: sub183CensusDelta.py <base-arm-dir> <final-arm-dir> [<out.json>]
 
 Per battle: the kernel-event digest must be identical (gameplay / RNG / damage / turn order unchanged) and the error field equal.
 Commands are compared pairwise (equal length and types: a duration change adds or removes no command). A changed command must be
-  (a) a Substitute (request move 164) move-animation whose ONLY change is scriptLeadFrames [12] 0 -> 4  (+6 frames when the body is live
+  (a) a Substitute (request move 164) move-animation whose ONLY change is scriptLeadFrames [13] 0 -> 4  (+6 frames when the body is live
       [11] == 1: 4 lead rows + 2 universal post rows; +0 when it is a draw-nothing pause), or
-  (b) the hp command right after such a body whose ONLY change is tailFrames [13] 0 -> 3  (+3 frames).
+  (b) the hp command right after such a body whose ONLY change is tailFrames [14] 0 -> 3  (+3 frames).
 Anything else is UNATTRIBUTED (exit 1). A battle that hits the tool's 200k-frame budget in BOTH trees (434 / 796 / 881, pre-existing) is
 reported as budget-tail from its first non-explainable difference on (its event digest then covers different events)."""
 import glob, json, os, sys
 
 base_dir, final_dir = sys.argv[1:3]
 out_path = sys.argv[3] if len(sys.argv) > 3 else None
-TYPE, LIVE, LEAD, TAIL, MOVE = 0, 11, 12, 13, 14
+TYPE, LIVE, LEAD, TAIL, MOVE = 0, 11, 13, 14, 15
 
 
 def load(path):

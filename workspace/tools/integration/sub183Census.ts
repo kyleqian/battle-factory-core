@@ -1,5 +1,5 @@
-// sub183 (docs/sub183-substitute-turn-timing.md): fpc180Census.ts with fields [12] = a move-animation's scriptLeadFrames (0 absent), [13] = an hp
-// command's tailFrames (0 absent), [14] = a move-animation's request moveId; sub183CensusDelta.py attributes every changed command.
+// sub183 (docs/sub183-substitute-turn-timing.md): fpc180Census.ts with fields [13] = a move-animation's scriptLeadFrames (0 absent), [14] = an hp
+// command's tailFrames (0 absent), [15] = a move-animation's request moveId; sub183CensusDelta.py attributes every changed command.
 // fpc180 (docs/fpc180-focus-punch-live.md): trn178Census.ts + field [12] on every message command = for a Focus Punch pre-pass print
 // ("is tightening") the u of the next USEDMOVE print (the kernel's instructionExecution), "pre" when another pre-pass print follows, -1 when
 // the next print is not a USEDMOVE; null otherwise. fpc180CensusDelta.py attributes every changed command to the rules with it.
