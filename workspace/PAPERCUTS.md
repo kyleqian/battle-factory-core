@@ -20,7 +20,10 @@ history.
   (6) `off108Run.sh` / `off148Run.sh` hard-code the Mac mGBA venv path (`/Users/kyle/...`); CAX31 uses
   `/srv/pokebench/vendor/mgba-venv/bin/python` (~10 min; `trn176Run.sh` takes `TRN176_PY`).
   (Fixed this session: `check-oracle-freshness.sh` used BSD-only `date` flags and compared against every game commit.)
-- **Hits:** 1 session (2026-10-14), ~1.5 h total.
+  (7, 2026-10-15 fpc180) A new test that imports a `tools/` file puts it under `tsc -b`; a typecheck run before the test existed
+  missed its type errors until build (~4 min). (8) `trn178Census.sh` has no shard / resume option, so a 40-job census cannot be
+  driven inside the 10-min tool limit; `fpc180Census.sh` adds `FPC180_SHARDS` + resume on an existing root.
+- **Hits:** 2 sessions (2026-10-14, 2026-10-15), ~1.6 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
   and the supervisor; census job limit from `/etc/pokebench-runner.env`.
 
