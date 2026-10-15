@@ -1,0 +1,634 @@
+[
+ {
+  "id": "roar-pidgey",
+  "case": {
+   "id": "roar-pidgey",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 16,
+   "nature": 6
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   16,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 99,
+  "txtStart": 101,
+  "message": 91,
+  "sha256": "157c7862520189518d1718102535eda033ff2fab27b3c4fc3ec2f21c9a2c0da9",
+  "bytes": 124100
+ },
+ {
+  "id": "roar-metapod",
+  "case": {
+   "id": "roar-metapod",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 11,
+   "nature": 6
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   11,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 140,
+  "txtStart": 142,
+  "message": 132,
+  "sha256": "609e069d94b0e4510b0fc6316d97ba3e1bb517d598cd2d8d181131ece7fc0588",
+  "bytes": 127757
+ },
+ {
+  "id": "roar-mankey",
+  "case": {
+   "id": "roar-mankey",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 56,
+   "nature": 6
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   56,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 121,
+  "txtStart": 123,
+  "message": 113,
+  "sha256": "97bde32236db9542b532024a0dc2a778a5d78e5e5a20ea625051b97689a5cd2f",
+  "bytes": 126330
+ },
+ {
+  "id": "roar-primeape",
+  "case": {
+   "id": "roar-primeape",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 57,
+   "nature": 6
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   57,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 121,
+  "txtStart": 123,
+  "message": 113,
+  "sha256": "8bb792f9bf19d1e317d611d1169257bd260e61b2e4c0d16b1bd4193bfb0b05da",
+  "bytes": 126301
+ },
+ {
+  "id": "roar-torkoal",
+  "case": {
+   "id": "roar-torkoal",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 321,
+   "nature": 6
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   321,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 206,
+  "txtStart": 208,
+  "message": 198,
+  "sha256": "5dd8cd3a410183ab4d8ac2a52057d27a4dc3b000172d8c0490c02d82d7dcc7f6",
+  "bytes": 129713
+ },
+ {
+  "id": "roar-wigglytuff",
+  "case": {
+   "id": "roar-wigglytuff",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 40,
+   "nature": 6
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   40,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 142,
+  "txtStart": 144,
+  "message": 134,
+  "sha256": "054d88373f52ebe1c262cf9c3325af0170860e0e2ea3988425a5760b94b16302",
+  "bytes": 126321
+ },
+ {
+  "id": "roar-butterfree",
+  "case": {
+   "id": "roar-butterfree",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 12,
+   "nature": 6
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   12,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 165,
+  "txtStart": 167,
+  "message": 157,
+  "sha256": "c1d758f5ee2baaf6e7b86903335dfcdb82a3dcfd0b257f36b1d456ef4e7ba7b1",
+  "bytes": 127742
+ },
+ {
+  "id": "roar-castform",
+  "case": {
+   "id": "roar-castform",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 385,
+   "nature": 6
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   385,
+   228
+  ],
+  "ball": 10,
+  "y2start": 59,
+  "hbslide": 76,
+  "ctrlIdle": 166,
+  "txtStart": 168,
+  "message": 158,
+  "sha256": "d57d1d1e91d6c83614817314bfdc6645d16a108bdea7e0495acaa99f0ae2cedb",
+  "bytes": 128319
+ },
+ {
+  "id": "roar-pikachu",
+  "case": {
+   "id": "roar-pikachu",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 25,
+   "nature": 6
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   25,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 134,
+  "txtStart": 136,
+  "message": 126,
+  "sha256": "be50eff592a5ae519d9f2cb4a63345175df522341a739bd126a26cb6134826de",
+  "bytes": 126889
+ },
+ {
+  "id": "roar-torkoal-nature0",
+  "case": {
+   "id": "roar-torkoal-nature0",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 321,
+   "nature": 0
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   321,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 206,
+  "txtStart": 208,
+  "message": 198,
+  "sha256": "976cf1d5fbb65ee2696cc922a728bdf90331604aa8b78052b63c4b305d70a6ad",
+  "bytes": 129718
+ },
+ {
+  "id": "roar-torkoal-nature10",
+  "case": {
+   "id": "roar-torkoal-nature10",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 321,
+   "nature": 10
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   321,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 206,
+  "txtStart": 208,
+  "message": 198,
+  "sha256": "980cb46e52a15f9a2db5d88109539dd7568e3718ac4f7b3250f9393d9c6ebfa9",
+  "bytes": 129758
+ },
+ {
+  "id": "roar-bulbasaur-nature0",
+  "case": {
+   "id": "roar-bulbasaur-nature0",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 1,
+   "nature": 0
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   1,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 140,
+  "txtStart": 142,
+  "message": 132,
+  "sha256": "4f30d692240a3a365372ab9cb3fd476e998beaa3de69ff8c5c2736a10f15ec9f",
+  "bytes": 126879
+ },
+ {
+  "id": "roar-bulbasaur-nature10",
+  "case": {
+   "id": "roar-bulbasaur-nature10",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 1,
+   "nature": 10
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   1,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 169,
+  "txtStart": 171,
+  "message": 161,
+  "sha256": "669252f0f30f8594cdc872a4f0eb2a575dd5d7868848c7ee1bbba6838156ff9b",
+  "bytes": 128184
+ },
+ {
+  "id": "roar-wigglytuff-nature0",
+  "case": {
+   "id": "roar-wigglytuff-nature0",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 40,
+   "nature": 0
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   40,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 143,
+  "txtStart": 145,
+  "message": 135,
+  "sha256": "4c2407ac3229df46c563b4bd0774a752c86aec5c294b5516c6f24e471905af29",
+  "bytes": 126373
+ },
+ {
+  "id": "roar-wigglytuff-nature10",
+  "case": {
+   "id": "roar-wigglytuff-nature10",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 40,
+   "nature": 10
+  },
+  "E": 321,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   40,
+   228
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 192,
+  "txtStart": 194,
+  "message": 184,
+  "sha256": "02f657d386bcae3e6a78fa83406bd336af600b98841254f21fb7e993c6aec10e",
+  "bytes": 128530
+ },
+ {
+  "id": "roar-pidgey-by-jynx",
+  "failed": true
+ },
+ {
+  "id": "roar-charizard-by-jynx",
+  "failed": true
+ },
+ {
+  "id": "roar-pidgey-by-att295",
+  "case": {
+   "id": "roar-pidgey-by-att295",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 16,
+   "nature": 6,
+   "attacker": 295
+  },
+  "E": 318,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   16,
+   295
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 99,
+  "txtStart": 101,
+  "message": 91,
+  "sha256": "bbdceaae0102c6ea47820d25d176b28fac6b663b4eb09db5c2bac64b5fbc3750",
+  "bytes": 124110
+ },
+ {
+  "id": "roar-charizard-by-att295",
+  "case": {
+   "id": "roar-charizard-by-att295",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 6,
+   "nature": 6,
+   "attacker": 295
+  },
+  "E": 318,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   6,
+   295
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 206,
+  "txtStart": 208,
+  "message": 198,
+  "sha256": "22401a9c111d4b35a1032fba26525455acf722c7120ad4c5c3aff0ae8a3e4dc5",
+  "bytes": 129999
+ },
+ {
+  "id": "roar-wigglytuff-by-typhlosion",
+  "case": {
+   "id": "roar-wigglytuff-by-typhlosion",
+   "scenario": "mechanic-roar-opponent-houndour-player-onix",
+   "slot": 1,
+   "species": 40,
+   "nature": 6,
+   "attacker": 157
+  },
+  "E": 312,
+  "pidx": [
+   1,
+   0
+  ],
+  "species": [
+   40,
+   157
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 142,
+  "txtStart": 144,
+  "message": 134,
+  "sha256": "1edd3917c1cdc0efb3d0bd55df4ea6c197594c759c6bd2b4c925b958631ba4df",
+  "bytes": 126335
+ },
+ {
+  "id": "whirlwind-pidgey",
+  "case": {
+   "id": "whirlwind-pidgey",
+   "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+   "slot": 2,
+   "species": 16,
+   "nature": 0
+  },
+  "E": 397,
+  "pidx": [
+   2,
+   0
+  ],
+  "species": [
+   16,
+   12
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 115,
+  "txtStart": 117,
+  "message": 107,
+  "sha256": "69383d29e99098a8292d15ae78973285cb21c951317fd8e27b1562c85360a258",
+  "bytes": 124244
+ },
+ {
+  "id": "whirlwind-metapod",
+  "case": {
+   "id": "whirlwind-metapod",
+   "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+   "slot": 2,
+   "species": 11,
+   "nature": 0
+  },
+  "E": 397,
+  "pidx": [
+   2,
+   0
+  ],
+  "species": [
+   11,
+   12
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 140,
+  "txtStart": 142,
+  "message": 132,
+  "sha256": "1a5ff8af70ba3c65d940a9ca72bb2a330c4b9959bcc6019d7cfdb3d687f74908",
+  "bytes": 127115
+ },
+ {
+  "id": "whirlwind-charizard",
+  "case": {
+   "id": "whirlwind-charizard",
+   "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+   "slot": 2,
+   "species": 6,
+   "nature": 0
+  },
+  "E": 397,
+  "pidx": [
+   2,
+   0
+  ],
+  "species": [
+   6,
+   12
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 206,
+  "txtStart": 208,
+  "message": 198,
+  "sha256": "27ca7584c732e509296b84bd966b053f9663994529c6db789ca50239dcfe63de",
+  "bytes": 129315
+ },
+ {
+  "id": "whirlwind-wigglytuff",
+  "case": {
+   "id": "whirlwind-wigglytuff",
+   "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+   "slot": 2,
+   "species": 40,
+   "nature": 0
+  },
+  "E": 397,
+  "pidx": [
+   2,
+   0
+  ],
+  "species": [
+   40,
+   12
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 143,
+  "txtStart": 145,
+  "message": 135,
+  "sha256": "fddb77d2f4c6a8ba16895b04d24bbf321cbfccb9daaa97941bd9b100f1bc0f03",
+  "bytes": 125694
+ },
+ {
+  "id": "whirlwind-torkoal",
+  "case": {
+   "id": "whirlwind-torkoal",
+   "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+   "slot": 2,
+   "species": 321,
+   "nature": 0
+  },
+  "E": 397,
+  "pidx": [
+   2,
+   0
+  ],
+  "species": [
+   321,
+   12
+  ],
+  "ball": 10,
+  "y2start": 58,
+  "hbslide": 75,
+  "ctrlIdle": 206,
+  "txtStart": 208,
+  "message": 198,
+  "sha256": "25f67aa055600ff4e2675bb6d83e1bd2b18c80fb53068baec1c41deb3790b705",
+  "bytes": 129039
+ }
+]

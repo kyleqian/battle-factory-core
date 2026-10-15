@@ -1,0 +1,182 @@
+[
+ {
+  "id": "roar-pidgey",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 16,
+  "nature": 6
+ },
+ {
+  "id": "roar-metapod",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 11,
+  "nature": 6
+ },
+ {
+  "id": "roar-mankey",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 56,
+  "nature": 6
+ },
+ {
+  "id": "roar-primeape",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 57,
+  "nature": 6
+ },
+ {
+  "id": "roar-torkoal",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 321,
+  "nature": 6
+ },
+ {
+  "id": "roar-wigglytuff",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 40,
+  "nature": 6
+ },
+ {
+  "id": "roar-butterfree",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 12,
+  "nature": 6
+ },
+ {
+  "id": "roar-castform",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 385,
+  "nature": 6
+ },
+ {
+  "id": "roar-pikachu",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 25,
+  "nature": 6
+ },
+ {
+  "id": "roar-torkoal-nature0",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 321,
+  "nature": 0
+ },
+ {
+  "id": "roar-torkoal-nature10",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 321,
+  "nature": 10
+ },
+ {
+  "id": "roar-bulbasaur-nature0",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 1,
+  "nature": 0
+ },
+ {
+  "id": "roar-bulbasaur-nature10",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 1,
+  "nature": 10
+ },
+ {
+  "id": "roar-wigglytuff-nature0",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 40,
+  "nature": 0
+ },
+ {
+  "id": "roar-wigglytuff-nature10",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 40,
+  "nature": 10
+ },
+ {
+  "id": "roar-pidgey-by-jynx",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 16,
+  "nature": 6,
+  "attacker": 124
+ },
+ {
+  "id": "roar-charizard-by-jynx",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 6,
+  "nature": 6,
+  "attacker": 124
+ },
+ {
+  "id": "roar-pidgey-by-att295",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 16,
+  "nature": 6,
+  "attacker": 295
+ },
+ {
+  "id": "roar-charizard-by-att295",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 6,
+  "nature": 6,
+  "attacker": 295
+ },
+ {
+  "id": "roar-wigglytuff-by-typhlosion",
+  "scenario": "mechanic-roar-opponent-houndour-player-onix",
+  "slot": 1,
+  "species": 40,
+  "nature": 6,
+  "attacker": 157
+ },
+ {
+  "id": "whirlwind-pidgey",
+  "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+  "slot": 2,
+  "species": 16,
+  "nature": 0
+ },
+ {
+  "id": "whirlwind-metapod",
+  "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+  "slot": 2,
+  "species": 11,
+  "nature": 0
+ },
+ {
+  "id": "whirlwind-charizard",
+  "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+  "slot": 2,
+  "species": 6,
+  "nature": 0
+ },
+ {
+  "id": "whirlwind-wigglytuff",
+  "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+  "slot": 2,
+  "species": 40,
+  "nature": 0
+ },
+ {
+  "id": "whirlwind-torkoal",
+  "scenario": "mechanic-whirlwind-opponent-butterfree-player-onix",
+  "slot": 2,
+  "species": 321,
+  "nature": 0
+ }
+]
