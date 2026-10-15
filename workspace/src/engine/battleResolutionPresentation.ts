@@ -142,10 +142,20 @@ export const FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES = 3;
  * pre-pass (unprobed, fps147 §4h) the action prologue is replaced by CheckFocusPunch's re-entry: 4 rows fewer.
  */
 export const FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_FRAMES = 11;
-export const FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES = 7;
+export const FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES = 5;
+/**
+ * fpc180 (docs/fpc177-focus-punch-edges.md, 12 twice-fresh ROM cards, both scenes): the lead after the last pre-pass print is
+ * `5 + u` (u = the next USEDMOVE print's instructionExecution; FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_FRAMES is the fallback when no
+ * USEDMOVE print is the next print), 7 into a voluntary switch's recall (focus glyph -> recall glyph 106 in the ROM), and the
+ * party-select close hold before a pre-pass-opening voluntary switch is 7 (the empty box starts at turn order + 4).
+ */
+export const FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_BASE_FRAMES = 5;
+export const FOCUS_PUNCH_PRE_PASS_SWITCH_RECALL_LEAD_FRAMES = 7;
+export const FOCUS_PUNCH_PRE_PASS_SWITCH_CLOSE_FIELD_HOLD_FRAMES = 7;
 export const FOCUS_PUNCH_SETUP_SCRIPT = "BattleScript_FocusPunchSetUp";
 /** STATUS2_SUBSTITUTE (include/constants/battle.h:216). */
 const FOCUS_PUNCH_STATUS2_SUBSTITUTE = 1 << 24;
+const SYNTHESIZED_SWITCH_DISPATCHER = "synthesized-voluntary-switch";
 
 /**
  * fpp150: a pre-pass print's timing. The empty box (printstring STRINGID_EMPTYSTRING3 + waitmessage 1) lasts one frame per
@@ -171,12 +181,16 @@ function focusPunchPrePassMessageTiming(
   }
   if (event.payload.messageId === "STRINGID_PKMNTIGHTENINGFOCUS") {
     const next = events[index + 1];
-    const nextPrePass = next?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT;
-    return Object.freeze({
-      minimumFrames: base.minimumFrames,
-      holdFrames: base.holdFrames
-        + (nextPrePass ? FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES : FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_FRAMES),
-    });
+    let lead: number;
+    if (next?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT) lead = FOCUS_PUNCH_PRE_PASS_NEXT_PRE_PASS_LEAD_FRAMES;
+    else if (next?.provenance?.dispatcher === SYNTHESIZED_SWITCH_DISPATCHER) lead = FOCUS_PUNCH_PRE_PASS_SWITCH_RECALL_LEAD_FRAMES;
+    else {
+      const used = next?.payload.kind === "message" && next.payload.messageId === "STRINGID_USEDMOVE"
+        ? next.provenance?.instructionExecution
+        : undefined;
+      lead = used === undefined ? FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_FRAMES : FOCUS_PUNCH_PRE_PASS_ACTION_LEAD_BASE_FRAMES + used;
+    }
+    return Object.freeze({ minimumFrames: base.minimumFrames, holdFrames: base.holdFrames + lead });
   }
   return null;
 }
@@ -4025,12 +4039,12 @@ export function projectBattleResolutionCommands(
 
   for (let index = 0; index < events.length; index += 1) {
     const event = events[index]!;
-    if (!Number.isSafeInteger(event.sequence) || event.sequence <= lastSequence) {
+    if (!Number.isSafeInteger(event.sequence) || (event.sequence <= lastSequence && event.provenance?.dispatcher !== SYNTHESIZED_SWITCH_DISPATCHER)) {
       throw new Error(
         `battle resolution event sequence ${event.sequence} is not strictly increasing after ${lastSequence}`,
       );
     }
-    lastSequence = event.sequence;
+    if (event.provenance?.dispatcher !== SYNTHESIZED_SWITCH_DISPATCHER) lastSequence = event.sequence;
     const payload = event.payload;
     if (payload.kind === "set-battler-pp-data") {
       lastMoveAttacker = singlesBattler(payload.battler, "PP update");
@@ -4781,7 +4795,12 @@ function withSynthesizedSwitchRecallEvents(
     const ratio = (outgoing.hp * 4) / outgoing.maxHP;
     return ratio >= 3 ? 0 : ratio >= 2 ? 1 : ratio >= 1 ? 2 : 3;
   })();
+  // fpc180: CheckFocusPunch_ClearVarsBeforeTurnStarts runs the pre-pass before BattleScript_ActionSwitch, so the recall follows
+  // the last FocusPunchSetUp event (the synthesized receipts keep their negative sequences; the sequence order check skips them).
+  let recallAt = 0;
+  while (events[recallAt]?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT) recallAt += 1;
   return Object.freeze([
+    ...events.slice(0, recallAt),
     Object.freeze({
       sequence: -2,
       payload: Object.freeze({
@@ -4795,7 +4814,7 @@ function withSynthesizedSwitchRecallEvents(
         programCounter: -1,
         opcodeId: -1,
         opcodeName: "B_SCR_OP_PRINTSTRING",
-        dispatcher: "synthesized-voluntary-switch",
+        dispatcher: SYNTHESIZED_SWITCH_DISPATCHER,
         sourceLabel: "BattleScript_ActionSwitch",
         sourceStatementLine: -1,
         instructionExecution: -1,
@@ -4812,13 +4831,13 @@ function withSynthesizedSwitchRecallEvents(
         programCounter: -1,
         opcodeId: -1,
         opcodeName: "B_SCR_OP_RETURNATKTOBALL",
-        dispatcher: "synthesized-voluntary-switch",
+        dispatcher: SYNTHESIZED_SWITCH_DISPATCHER,
         sourceLabel: "BattleScript_ActionSwitch",
         sourceStatementLine: -1,
         instructionExecution: -1,
       }),
     }),
-    ...events,
+    ...events.slice(recallAt),
   ]);
 }
 
@@ -4860,7 +4879,12 @@ export function advanceBattleResolutionConfirmHandoff(
     // field idle 1035-1043), then the recall message's first glyph lands at
     // the fixture's 1044 edge.
     const nextElapsed = state.lifecycle.phaseElapsed + 1;
-    if (nextElapsed < PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES) {
+    // fpc180: a pre-pass-opening voluntary-switch turn's empty box begins at turn order + 4, not + 6.
+    const closeHold = state.sourceDecision.kind === "switch" && state.segmentIndex === 0
+      && battleResolutionOpensWithFocusPunchPrePass(state.segments[0]?.events ?? [])
+      ? FOCUS_PUNCH_PRE_PASS_SWITCH_CLOSE_FIELD_HOLD_FRAMES
+      : PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES;
+    if (nextElapsed < closeHold) {
       return Object.freeze({
         ...state,
         lifecycle: Object.freeze({

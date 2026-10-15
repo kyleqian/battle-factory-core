@@ -1,0 +1,108 @@
+fpc177-a-switch-control-off.json  turn order 308, command 0 314 (handoff 9), used execution [3]
+  kernel messages: STRINGID_SWITCHINMON > STRINGID_USEDMOVE
+  ROM  314 JOLTEON, that’s enough!\nCom | prod  314 JOLTEON, that’s enough!\nCom
+  ROM  396 Go! MAGIKARP!                | prod  396 Go! MAGIKARP!
+  ROM  476 <FC><02><02>MAGIKARP<FC><01> | prod  512 Foe BRELOOM used\nGIGA DRAIN
+  ROM  543 Foe BRELOOM used\nGIGA DRAIN | prod    - 
+  ROM  748 It’s super effective!        | prod    - 
+  ROM  844 MAGIKARP had its\nenergy dra | prod    - 
+  ROM 1026 MAGIKARP\nfainted!\n         | prod    - 
+fpc177-a-switch-control-on.json  turn order 308, command 0 314 (handoff 9), used execution [3]
+  kernel messages: STRINGID_SWITCHINMON > STRINGID_USEDMOVE
+  ROM  314 JOLTEON, that’s enough!\nCom | prod  314 JOLTEON, that’s enough!\nCom
+  ROM  396 Go! MAGIKARP!                | prod  396 Go! MAGIKARP!
+  ROM  476 <FC><02><02>MAGIKARP<FC><01> | prod  512 Foe BRELOOM used\nGIGA DRAIN
+  ROM  558 Foe BRELOOM used\nGIGA DRAIN | prod    - 
+  ROM  962 It’s super effective!        | prod    - 
+  ROM 1058 MAGIKARP had its\nenergy dra | prod    - 
+fpc177-a-switch-off.json  turn order 308, command 0 312 (handoff 7), used execution [4]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_SWITCHINMON > STRINGID_USEDMOVE
+  ROM  312                              | prod  312 
+  ROM  349 Foe BRELOOM is tightening\ni | prod  349 Foe BRELOOM is tightening\ni
+  ROM  455 JOLTEON, that’s enough!\nCom | prod  455 JOLTEON, that’s enough!\nCom
+  ROM  537 Go! MAGIKARP!                | prod  537 Go! MAGIKARP!
+  ROM  617 <FC><02><02>MAGIKARP<FC><01> | prod  653 Foe BRELOOM used\nFOCUS PUNC
+  ROM  685 Foe BRELOOM used\nFOCUS PUNC | prod    - 
+  ROM  978 MAGIKARP\nfainted!\n         | prod    - 
+fpc177-a-switch-on.json  turn order 308, command 0 312 (handoff 7), used execution [4]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_SWITCHINMON > STRINGID_USEDMOVE
+  ROM  312                              | prod  312 
+  ROM  437 Foe BRELOOM is tightening\ni | prod  439 Foe BRELOOM is tightening\ni
+  ROM  543 JOLTEON, that’s enough!\nCom | prod  545 JOLTEON, that’s enough!\nCom
+  ROM  625 Go! MAGIKARP!                | prod  627 Go! MAGIKARP!
+  ROM  705 <FC><02><02>MAGIKARP<FC><01> | prod  743 Foe BRELOOM used\nFOCUS PUNC
+  ROM  788 Foe BRELOOM used\nFOCUS PUNC | prod    - 
+  ROM 1205 MAGIKARP\nfainted!\n         | prod    - 
+fpc177-b1-two-users-off.json  turn order 68, command 0 72 (handoff 1), used execution [4]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  109 BRELOOM is tightening\nits f | prod  109 BRELOOM is tightening\nits f
+  ROM  209                              | prod  209 
+  ROM  246 Foe HITMONLEE is tightening\ | prod  246 Foe HITMONLEE is tightening\
+  ROM  356 Foe HITMONLEE used\nFOCUS PU | prod  356 Foe HITMONLEE used\nFOCUS PU
+  ROM  692 BRELOOM\nfainted!\n          | prod    - 
+fpc177-b1-two-users-on.json  turn order 68, command 0 72 (handoff 1), used execution [4]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  199 BRELOOM is tightening\nits f | prod  199 BRELOOM is tightening\nits f
+  ROM  299                              | prod  299 
+  ROM  424 Foe HITMONLEE is tightening\ | prod  426 Foe HITMONLEE is tightening\
+  ROM  534 Foe HITMONLEE used\nFOCUS PU | prod  536 Foe HITMONLEE used\nFOCUS PU
+  ROM  993 BRELOOM\nfainted!\n          | prod    - 
+fpc177-b2-hit-scratch-off.json  turn order 68, command 0 72 (handoff 1), used execution [4]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  109 BRELOOM is tightening\nits f | prod  109 BRELOOM is tightening\nits f
+  ROM  213 Foe JOLTEON used\nSCRATCH!   | prod  213 Foe JOLTEON used\nSCRATCH!
+  ROM  344 BRELOOM’s EFFECT SPORE\npara | prod    - 
+fpc177-b2-hit-scratch-on.json  turn order 68, command 0 72 (handoff 1), used execution [4]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  199 BRELOOM is tightening\nits f | prod  199 BRELOOM is tightening\nits f
+  ROM  303 Foe JOLTEON used\nSCRATCH!   | prod  303 Foe JOLTEON used\nSCRATCH!
+  ROM  484 BRELOOM’s EFFECT SPORE\npara | prod    - 
+fpc177-b2-statup-agility-off.json  turn order 68, command 0 72 (handoff 1), used execution [4]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  109 BRELOOM is tightening\nits f | prod  109 BRELOOM is tightening\nits f
+  ROM  213 Foe JOLTEON used\nAGILITY!   | prod  213 Foe JOLTEON used\nAGILITY!
+  ROM  369 Foe JOLTEON’s SPEED\nsharply | prod    - 
+  ROM  478 BRELOOM used\nFOCUS PUNCH!   | prod    - 
+  ROM  813 Foe JOLTEON\nfainted!\n      | prod    - 
+fpc177-b2-statup-agility-on.json  turn order 68, command 0 72 (handoff 1), used execution [4]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  199 BRELOOM is tightening\nits f | prod  199 BRELOOM is tightening\nits f
+  ROM  303 Foe JOLTEON used\nAGILITY!   | prod  303 Foe JOLTEON used\nAGILITY!
+  ROM  515 Foe JOLTEON’s SPEED\nsharply | prod    - 
+  ROM  624 BRELOOM used\nFOCUS PUNCH!   | prod    - 
+fpc177-b2-status-thunder-wave-off.json  turn order 68, command 0 72 (handoff 1), used execution [2]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  109 BRELOOM is tightening\nits f | prod  109 BRELOOM is tightening\nits f
+  ROM  211 Foe JOLTEON used\nTHUNDER WA | prod  211 Foe JOLTEON used\nTHUNDER WA
+  ROM  289 BRELOOM is paralyzed!\nIt ma | prod    - 
+  ROM  418 BRELOOM is paralyzed!\nIt ca | prod    - 
+  ROM  534 What will\nBRELOOM do?       | prod    - 
+fpc177-b2-status-thunder-wave-on.json  turn order 68, command 0 72 (handoff 1), used execution [2]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  199 BRELOOM is tightening\nits f | prod  199 BRELOOM is tightening\nits f
+  ROM  301 Foe JOLTEON used\nTHUNDER WA | prod  301 Foe JOLTEON used\nTHUNDER WA
+  ROM  507 BRELOOM is paralyzed!\nIt ma | prod    - 
+  ROM  636 BRELOOM is paralyzed!\nIt ca | prod    - 
+  ROM  791 What will\nBRELOOM do?       | prod    - 
+r4-b2-statdown-sand-attack-off  turn order 68, command 0 72 (handoff 1), used execution [6]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  109 BRELOOM is tightening\nits f | prod  109 BRELOOM is tightening\nits f
+  ROM  215 Foe JOLTEON used\nSAND-ATTAC | prod  215 Foe JOLTEON used\nSAND-ATTAC
+  ROM  361 BRELOOM’s accuracy\nfell!    | prod    - 
+  ROM  462 BRELOOM used\nFOCUS PUNCH!   | prod    - 
+r4-b2-statdown-sand-attack-on  turn order 68, command 0 72 (handoff 1), used execution [6]
+  kernel messages: STRINGID_EMPTYSTRING3 > STRINGID_PKMNTIGHTENINGFOCUS > STRINGID_USEDMOVE
+  ROM   72                              | prod   72 
+  ROM  199 BRELOOM is tightening\nits f | prod  199 BRELOOM is tightening\nits f
+  ROM  305 Foe JOLTEON used\nSAND-ATTAC | prod  305 Foe JOLTEON used\nSAND-ATTAC
+  ROM  479 BRELOOM’s accuracy\nfell!    | prod    - 
+  ROM  580 BRELOOM used\nFOCUS PUNCH!   | prod    - 
