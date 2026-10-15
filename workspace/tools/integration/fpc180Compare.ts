@@ -1,5 +1,5 @@
 // fpc180 (copy of fpc177Compare.ts; switch cards: command 0 = the real presentation's confirm hold, the recall-after-pre-pass prediction rows are the landed order) -- fpc177 (ISSUES #139, docs/fpc177-focus-punch-edges.md): the six Focus Punch edge-route cards THROUGH THE PRODUCTION PRESENTATION, per scene,
-// against the ROM rows (fixtures/fpc177/receipts/rom-r1.json). Read-only: no src change. Method as fpp150Anchors.ts: the full-turn kernel
+// against the ROM rows (fixtures/fpc177/receipts/rom-r1.json).  Method as fpp150Anchors.ts: the full-turn kernel
 // (Scene OFF = HITMARKER_NO_ANIMATIONS staged, as factoryBattleStart.ts does) emits the turn's events, production projects its commands
 // and battleResolutionCommandDuration times them; a message command's first frame is its first glyph (ROM change row + 1).
 //   b-cases: command 0 = turn-order row + STOP_BOUNCE_REQUEST_LAG (3) + the focus-punch confirm handoff frames (fpp150's calibration).
@@ -48,26 +48,10 @@ const benchInput = (mon: any) => ({
   pp: [35, 35, 35, 35] as const,
 });
 
-/** The fix the evidence asks for, modelled outside src: withSynthesizedSwitchRecallEvents' two receipts (battleResolutionPresentation.ts:4682) placed after the pre-pass events instead of in front of every event. */
-function withRecallAfterPrePass(events: readonly any[], field: any): readonly any[] {
-  const outgoing = field.player;
-  const ratio = (outgoing.hp * 4) / outgoing.maxHP;
-  const hpScale = ratio >= 3 ? 0 : ratio >= 2 ? 1 : ratio >= 1 ? 2 : 3;
-  const provenance = (opcodeName: string) => ({ programCounter: -1, opcodeId: -1, opcodeName, dispatcher: "synthesized-voluntary-switch",
-    sourceLabel: "BattleScript_ActionSwitch", sourceStatementLine: -1, instructionExecution: -1 });
-  const recall = [
-    { sequence: 0, payload: { kind: "message", messageId: "STRINGID_RETURNMON", substitutions: [], introBattler: 0, introHpScale: hpScale }, provenance: provenance("B_SCR_OP_PRINTSTRING") },
-    { sequence: 0, payload: { kind: "set-battler-sprite-visibility", battler: 0, invisible: true }, provenance: provenance("B_SCR_OP_RETURNATKTOBALL") },
-  ];
-  let at = 0;
-  while (at < events.length && events[at].provenance?.sourceLabel === "BattleScript_FocusPunchSetUp") at++;
-  return [...events.slice(0, at), ...recall, ...events.slice(at)].map((event, i) => ({ ...event, sequence: i }));
-}
-
 type Row = { type: string; start: number; frames: number; text: string };
 type MessageRow = { glyph: number; text: string };
 
-function cardRows(name: string, k: number | null, reorder = false) {
+function cardRows(name: string, k: number | null) {
   const card = rom.cards[name];
   const off = card.oracleProfile === "battle-scene-off";
   const { player, opponent } = card.parties;
@@ -81,7 +65,7 @@ function cardRows(name: string, k: number | null, reorder = false) {
     state = { ...state, rules: { ...state.rules, rulesContext } } as typeof state;
   }
   const beforeRules = state.rules.rulesContext;
-  const sourceRequest = state.boundary.request;
+  const sourceRequest = (state.boundary as any).request;
   const decision = isSwitch ? { kind: "switch", partyIndex: 1 } : { kind: "use-move", moveSlot: 2, targetBattler: 1 };
   const a = submitFactoryFullTurnDecision(state, { requestId: 1, side: "player", decision } as never);
   const trainerDecision = (a.state.boundary as any).request.legalDecisions.find((d: any) => d.kind === "use-move" && d.moveSlot === 0);
@@ -98,24 +82,19 @@ function cardRows(name: string, k: number | null, reorder = false) {
   const usedAt = all.findIndex((e) => e.payload.kind === "message" && e.payload.messageId === "STRINGID_USEDMOVE");
   let cutAt = all.length;
   for (let i = usedAt + 1; usedAt >= 0 && i < all.length; i++) if (all[i].payload.kind === "message") { cutAt = i; break; }
-  let events = all.slice(0, cutAt);
-  if (reorder) events = withRecallAfterPrePass(events, field);
+  const events = all.slice(0, cutAt);
   let commands: readonly any[];
   let commandZero: number;
   let handoffFrames = 0;
   if (isSwitch) {
     const transition = {
-      kind: "decision-required", events, nextRequest: b.state.boundary.request,
-      state: createBattleState({ rules: b.state.rules, rngSeed: 9, request: b.state.boundary.request }),
+      kind: "decision-required", events, nextRequest: (b.state.boundary as any).request,
+      state: createBattleState({ rules: b.state.rules, rngSeed: 9, request: (b.state.boundary as any).request }),
     } as never;
-    if (reorder) {
-      commands = projectBattleResolutionCommands(events as never, beforeRules, afterRules, field, null);
-    } else {
-      const resolution = createBattleResolutionPresentation({ sourceRequest, sourceDecision: decision, beforeRules: state.rules, transition, fieldBoundary: field } as never);
-      commands = resolution.segments[0]!.commands;
-      let hold = resolution as any;
-      while (hold.lifecycle.phase === "confirm-handoff") { hold = advanceBattleResolutionConfirmHandoff(hold); handoffFrames++; }
-    }
+    const resolution = createBattleResolutionPresentation({ sourceRequest, sourceDecision: decision, beforeRules: state.rules, transition, fieldBoundary: field } as never);
+    commands = resolution.segments[0]!.commands;
+    let hold = resolution as any;
+    while (hold.lifecycle.phase === "confirm-handoff") { hold = advanceBattleResolutionConfirmHandoff(hold); handoffFrames++; }
     commandZero = card.turnOrderRow + (k ?? 0) - PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES + handoffFrames;
   } else {
     commands = projectBattleResolutionCommands(events as never, beforeRules, afterRules, field, null);
