@@ -94,6 +94,11 @@ describe("animation/engine boundary ratchet", () => {
       // frontSendOutInitializerTicks, src/animation/sendOutSpriteFrame.ts frontSendOutSpriteFrameAtTick); presentation pixels only,
       // never battle rules, RNG, timing or AI.
       join("src", "engine", "battleResolutionPresentationRender.ts"),
+      // snd182 (ISSUES #146, step brief: Scene ON forced player send-in "dragged out!" = max(91, cry + 66, T_back + 70);
+      // docs/snd182-scene-on-forced-player-send-in-live.md): sceneOnPlayerForcedSwitchInDuration reads only the pure back send-out
+      // reducers (src/animation/backSendOutAnim.ts selectBackSendOutAnimation, src/animation/sendOutDispatcher.ts BACK_SEND_OUT_REDUCERS)
+      // for the first WaitAnimEnd tick; presentation timing only, never battle rules, RNG or AI.
+      join("src", "engine", "switchInTail.ts"),
     ]);
     const violations: string[] = [];
     for (const file of collectTsFiles("src")) {
