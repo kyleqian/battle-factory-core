@@ -8,14 +8,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ## 2026-10-15 (evening, in progress) — CAX31 recovery session (supervisor, Opus 5.5)
 
 - **State:** master folds trn178 (`40793066b`, Scene OFF action-transition pause, #167 (a')) and snd179 (`a641cc285`, Scene ON
-  forced player send-in evidence, #146); union smoke 448 / 448. Production now differs from `3937ecad0` by trn178 + fpc180 + trn181 (presentation only).
+  forced player send-in evidence, #146); union smoke 448 / 448. Production now differs from `3937ecad0` by trn178 + fpc180 + trn181 + snd182 (presentation only).
 - **Did:** independently verified both saved refs (trn176Predict OFF rows reproduced; 17 / 17 targeted tests; 4 fresh snd179 ROM
   probes exact); worktrees removed (only wasm artifacts), refs kept. Details in ANIMATION_INTEGRATION_PROGRESS.md.
 - **fpc180 folded** (`5cf23a253`): fpc177's four Focus Punch presentation fixes (#139); supervisor reproduced every OFF card row 0.
 - **trn181 folded** (`253a9ff9e`): the action-transition pause in Scene ON (#167 (a')); 13 / 13 ON rows reproduced; union typecheck,
   smoke 448. Worker capped during its full suite; the saved log shows 13,930 / 0 failed on the final src.
-- **Running:** snd182 (integration lane, cap 140) — snd179's Scene ON forced player send-in timing in production (#146).
-- **Next:** Substitute HP timing -6 (#153; sub183 brief staged in `.integration/validation/sv-20261015b/`). Reserve the final
+- **snd182 folded** (`ecf277b0e`): Scene ON forced player send-in timing (#146), 27 / 27 ROM cases reproduced; union smoke 448.
+  Decision: `switchInTail.ts` joins the engine->animation ratchet allowlist (pure back-anim reducers, presentation timing only).
+- **Running:** sub183 (integration lane, cap 140) — Substitute turn HP timing -6 (#153). Reserve the final
   ~1 h 45 min for one independent full suite + build on the final tree.
 
 ---

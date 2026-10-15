@@ -25,7 +25,9 @@ history.
   driven inside the 10-min tool limit; `fpc180Census.sh` adds `FPC180_SHARDS` + resume on an existing root.
   (9, 2026-10-15 trn181) A 150-min worker spent ~100 min on implementation / census / differential and was capped while its 48-min
   full suite finished (result recovered from its `/tmp` log). Briefs now say when to start the suite.
-- **Hits:** 2 sessions (2026-10-14, 2026-10-15), ~1.7 h total.
+  (10, snd182) `animationBoundaryRatchet` failures print only `expected [ …(2) ] to deeply equal []`; the violating files need a
+  verbose rerun. An `until ! pgrep -f tsc` poll matches itself (~3 min); poll an exit file.
+- **Hits:** 2 sessions (2026-10-14, 2026-10-15), ~1.8 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
   and the supervisor; census job limit from `/etc/pokebench-runner.env`.
 

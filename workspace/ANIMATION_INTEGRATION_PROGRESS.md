@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 + trn181 folded
+## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 + trn181 + snd182 folded
 
 - **trn178 (INTEGRATION, saved ref `4a8a25431`, merged `40793066b`):** Scene OFF action-transition pause (#167 (a'); P = d + 6 + u
   before an action's first MoveEnd sprite-visibility receipt; docs/trn178-action-transition-live.md). Supervisor: `trn176Predict.ts
@@ -22,6 +22,13 @@
   pauses 0 unattributed, digests identical (bar the 3 budget-stalled tails); seeded-ON differential 144 / 190 moved, all attributed.
   Worker capped while its suite finished; the suite log (`.integration/validation/from-workers/trn181/t2`) shows 13,930 / 0 failed on
   src-final `e52b80ce0`, build OK. Union: typecheck 0, smoke 448, trn178 / trn181 / fpc180 tests 18 / 18.
+- **snd182 (INTEGRATION, merged `ecf277b0e`):** Scene ON forced player send-in "dragged out!" timing in production (#146), nature =
+  personality % 25 (docs/snd182-scene-on-forced-player-send-in-live.md). Supervisor: `snd182Rows.ts` rerun, 27 / 27 cases exact, receipt
+  byte-identical; src diff presentation-only. Worker: 6 dense ON windows (healthbox + message 0 px; mon region = the undrawn back
+  animation, predates), census OFF byte-identical, ON 32 commands in 20 battles all forced player send-ins, differential 641 / 641, full
+  suite on final src 13,933 passed + 2 files fixed by attributed re-pins (14 / 14), typecheck, smoke, build. **Supervisor decision:**
+  accepted `src/engine/switchInTail.ts` in the animation-boundary ratchet allowlist (pure back send-out reducers, presentation timing
+  only; same precedent as `battleResolutionPresentationRender.ts`). Union: smoke 448, affected 25 / 25.
 - Union `a641cc285`: smoke 448 / 448 (master's later commits since the worker base are tooling only).
 
 ## 2026-10-14 — CAX31 session: Transform live (trf174) + enc160 / plr162 / enc173 folds

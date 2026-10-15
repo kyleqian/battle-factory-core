@@ -171,9 +171,9 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Fixed:** snd145 / fra151 (Scene ON opponent send-in tail + front animation), offs152 (Scene OFF opponent send-in tail, Scene OFF
   forced switch-out one-row removal, Scene ON genderless / male-only tails, SOLROCK matrix; docs/offs152-scene-off-send-in-tail.md),
   plr162 (Scene OFF forced player send-in: slide 65, print max(91, cry + 66); docs/plr162-player-forced-send-in.md, folded 2026-10-14).
-- **Open:** Scene ON forced player send-in message: MEASURED by snd179 (2026-10-15, docs/snd179-scene-on-forced-player-send-in.md):
-  message = max(91, cry + 66, T_back + 70) (+1 CASTFORM), 339 / 339 sweep rows, 27 fresh ROM probes; the attacker's cry is irrelevant.
-  Production step pending (needs the sent-in mon's nature threaded to the timing call; census 0..99 reaches 4 such send-ins); player faint-replacement send-in (same controller, unmeasured); player-side back send-out animations and
+- **Fixed 2026-10-15:** snd182 (Scene ON forced player send-in message = max(91, cry + 66, T_back + 70) (+1 CASTFORM), nature from
+  personality; snd179 evidence; 27 / 27 ROM cases exact; docs/snd182-scene-on-forced-player-send-in-live.md).
+- **Open:** Scene ON player back send-out animation is not drawn by the live renderer (mon-region px on every player send-in window); player faint-replacement send-in (same controller, unmeasured); player-side back send-out animations and
   battle-start intro send-outs (Scene ON; fra151 doc says what they need); shiny send-ins; CRY_MODE_WEAK send-ins; PONYTA glow
   mid-frame palette row (D4 class, 616 px); TYPHLOSION faint-path slide lag frame (D4); the faint-path blank row one frame late;
   opponent-attacker Roar player-side ball-throw path (6,718 px); the elevated-attacker post-body field difference (1,444 px, untriaged).
