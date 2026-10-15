@@ -67,12 +67,12 @@ describe("iu120 universal rows: P / T per class", () => {
     expect(rows(214, 1).post).toBe(2);
   });
 
-  it("the masks: 13 no-pre moves (idle98 s3.2: the leads land97 does not cover), 130 post-row moves / 257 sides", () => {
+  it("the masks: 13 no-pre moves (idle98 s3.2: the leads land97 does not cover), 131 post-row moves / 259 sides", () => {
     expect(IU120_NO_PRE_ROW_SIDES.size).toBe(13);
     for (const id of IU120_NO_PRE_ROW_SIDES.keys()) expect(LAND97_LEAD_ROWS.has(id), `move ${id}`).toBe(false);
-    expect(IU120_POST_ROW_SIDES.size).toBe(130);
+    expect(IU120_POST_ROW_SIDES.size).toBe(131);
     const sides = [...IU120_POST_ROW_SIDES.values()].reduce((n, mask) => n + (mask & 1) + ((mask >> 1) & 1), 0);
-    expect(sides).toBe(257);
+    expect(sides).toBe(259);
     expect([...IU120_UNMEASURED_IDS]).toEqual([165]);
   });
 
