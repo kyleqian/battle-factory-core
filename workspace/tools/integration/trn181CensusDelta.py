@@ -9,8 +9,7 @@ Commands are aligned two-pointer (base and final advance together on equal comma
                     (the first MoveEnd receipt), ISSUES #167 (a') / trn176's P = d + 6 + u (both scenes);
   budget-tail       a battle that hits the census tool's 200k-frame input budget in BOTH trees (pre-existing: 434 / 796 / 881): the
                     first non-pause difference and everything after it (its event digest then covers different events);
-anything else is UNATTRIBUTED (exit 1). Scene OFF must additionally be byte-identical to base (no inserted pause is expected in a
-base-vs-base compare; pass --off-identical to require it).
+anything else is UNATTRIBUTED (exit 1). Scene OFF must additionally be byte-identical to base (every battle identical, 0 inserted pauses, else exit 1).
 Guard accounting (final tree): a "transition" is a message carrying " used\n" directly preceded by a run of sprite-visibility commands
 (the action's MoveEnd receipts). It is paused when a draw-nothing move-animation precedes that run, else skipped: keyed by the command
 before the run (the anchor class, with its hold / missing timing).
@@ -109,6 +108,6 @@ print(json.dumps({k: v for k, v in res.items() if k not in ("unattributed",)})[:
 for u in res["unattributed"][:5]:
     print("UNATTRIBUTED", json.dumps(u)[:400])
 ok = not res["digestMismatch"] and not res["errorMismatch"] and not res["unattributedCount"] \
-    and (scene != "on" or res["identicalBattles"] == res["battles"])
+    and (scene != "off" or (res["identicalBattles"] == res["battles"] and not res["transitionPause"]["commands"]))
 print("trn181CensusDelta:", "OK" if ok else "FAIL")
 sys.exit(0 if ok else 1)
