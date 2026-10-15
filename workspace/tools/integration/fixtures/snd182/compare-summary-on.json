@@ -1,0 +1,199 @@
+{
+ "pidgey": {
+  "species": "PIDGEY",
+  "scenario": "roar-pidgey-a.json",
+  "duration": 91,
+  "romNextText": 91,
+  "baseDuration": 102,
+  "baseRomNextText": 92,
+  "ballAnchorElapsed": 2,
+  "rows": 92,
+  "zeroRows": 21,
+  "px": {
+   "total": 26828,
+   "phb": 0,
+   "mon": 26828,
+   "msg": 0
+  },
+  "preSendIn_constructed_nonzero_rows": 45,
+  "hbMsgNonZero": [],
+  "monPx_e_le_base_window": {
+   "final": 26828,
+   "base": 26828,
+   "compareRows": 92
+  },
+  "basePx": {
+   "total": 35723,
+   "phb": 0,
+   "mon": 26828,
+   "msg": 8895
+  },
+  "compareR1EqualsR2": true
+ },
+ "metapod": {
+  "species": "METAPOD",
+  "scenario": "roar-metapod-a.json",
+  "duration": 132,
+  "romNextText": 132,
+  "baseDuration": 102,
+  "baseRomNextText": 133,
+  "ballAnchorElapsed": 2,
+  "rows": 133,
+  "zeroRows": 48,
+  "px": {
+   "total": 30206,
+   "phb": 0,
+   "mon": 30206,
+   "msg": 0
+  },
+  "preSendIn_constructed_nonzero_rows": 45,
+  "hbMsgNonZero": [],
+  "monPx_e_le_base_window": {
+   "final": 21604,
+   "base": 21006,
+   "compareRows": 103
+  },
+  "basePx": {
+   "total": 23408,
+   "phb": 0,
+   "mon": 21006,
+   "msg": 2402
+  },
+  "compareR1EqualsR2": true
+ },
+ "torkoal": {
+  "species": "TORKOAL",
+  "scenario": "roar-torkoal-a.json",
+  "duration": 198,
+  "romNextText": 198,
+  "baseDuration": 102,
+  "baseRomNextText": 199,
+  "ballAnchorElapsed": 2,
+  "rows": 199,
+  "zeroRows": 27,
+  "px": {
+   "total": 205446,
+   "phb": 0,
+   "mon": 205446,
+   "msg": 0
+  },
+  "preSendIn_constructed_nonzero_rows": 45,
+  "hbMsgNonZero": [],
+  "monPx_e_le_base_window": {
+   "final": 46894,
+   "base": 45088,
+   "compareRows": 103
+  },
+  "basePx": {
+   "total": 47473,
+   "phb": 0,
+   "mon": 45088,
+   "msg": 2385
+  },
+  "compareR1EqualsR2": true
+ },
+ "castform": {
+  "species": "CASTFORM",
+  "scenario": "roar-castform-a.json",
+  "duration": 158,
+  "romNextText": 158,
+  "baseDuration": 102,
+  "baseRomNextText": 158,
+  "ballAnchorElapsed": 3,
+  "rows": 158,
+  "zeroRows": 11,
+  "px": {
+   "total": 80121,
+   "phb": 2,
+   "mon": 80119,
+   "msg": 0
+  },
+  "preSendIn_constructed_nonzero_rows": 45,
+  "hbMsgNonZero": [
+   [
+    76,
+    1,
+    0
+   ],
+   [
+    84,
+    1,
+    0
+   ]
+  ],
+  "monPx_e_le_base_window": {
+   "final": 43026,
+   "base": 43026,
+   "compareRows": 102
+  },
+  "basePx": {
+   "total": 45409,
+   "phb": 2,
+   "mon": 43026,
+   "msg": 2381
+  },
+  "compareR1EqualsR2": true
+ },
+ "bulbasaur0": {
+  "species": "BULBASAUR",
+  "scenario": "roar-bulbasaur0-a.json",
+  "duration": 132,
+  "romNextText": 132,
+  "baseDuration": 102,
+  "baseRomNextText": 133,
+  "ballAnchorElapsed": 2,
+  "rows": 133,
+  "zeroRows": 33,
+  "px": {
+   "total": 42293,
+   "phb": 0,
+   "mon": 42293,
+   "msg": 0
+  },
+  "preSendIn_constructed_nonzero_rows": 45,
+  "hbMsgNonZero": [],
+  "monPx_e_le_base_window": {
+   "final": 26985,
+   "base": 26272,
+   "compareRows": 103
+  },
+  "basePx": {
+   "total": 28603,
+   "phb": 0,
+   "mon": 26272,
+   "msg": 2331
+  },
+  "compareR1EqualsR2": true
+ },
+ "bulbasaur10": {
+  "species": "BULBASAUR",
+  "scenario": "roar-bulbasaur10-a.json",
+  "duration": 161,
+  "romNextText": 161,
+  "baseDuration": 102,
+  "baseRomNextText": 162,
+  "ballAnchorElapsed": 2,
+  "rows": 162,
+  "zeroRows": 31,
+  "px": {
+   "total": 63654,
+   "phb": 0,
+   "mon": 63654,
+   "msg": 0
+  },
+  "preSendIn_constructed_nonzero_rows": 45,
+  "hbMsgNonZero": [],
+  "monPx_e_le_base_window": {
+   "final": 29187,
+   "base": 28336,
+   "compareRows": 103
+  },
+  "basePx": {
+   "total": 30667,
+   "phb": 0,
+   "mon": 28336,
+   "msg": 2331
+  },
+  "compareR1EqualsR2": true
+ }
+}
