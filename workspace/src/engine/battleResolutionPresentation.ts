@@ -52,7 +52,7 @@ import {
   opponentSwitchInDuration, opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay,
   sceneOffOpponentSwitchInDuration, sceneOffOpponentSwitchInHealthboxSlideElapsed, sceneOffOpponentSwitchInLagElapsed,
   sceneOffOpponentSwitchInVisualDelay, sceneOffPlayerForcedSwitchInDuration, sceneOffPlayerForcedSwitchInHealthboxSlideElapsed,
-  sceneOffPlayerForcedSwitchInVisualDelay,
+  sceneOffPlayerForcedSwitchInVisualDelay, sceneOnPlayerForcedSwitchInDuration,
 } from "./switchInTail.ts";
 
 const FACTORY_ITEM_NAME_BY_ID = new Map(
@@ -1359,11 +1359,15 @@ export const OPPONENT_FAINT_REPLACEMENT_TURN_END_FRAMES = 11;
  * slide- or cry-bound Scene OFF tail (`sceneOffOpponentSwitchInDuration`, keyed by species and the incoming nickname's length).
  */
 export function switchInTiming(
-  battler: 0 | 1, species: number, sceneOn = true, nickname = "", forcedPlayer = false,
+  battler: 0 | 1, species: number, sceneOn = true, nickname = "", forcedPlayer = false, personality = 0,
 ): BattleSwitchInTiming {
-  // plr162: a Scene OFF forced (Roar / Whirlwind) player send-in lasts its cry- or floor-bound tail (src/engine/switchInTail.ts).
-  if (battler === 0 && forcedPlayer && !sceneOn) {
-    return Object.freeze({ minimumFrames: sceneOffPlayerForcedSwitchInDuration(species) - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
+  // plr162 / snd182: a forced (Roar / Whirlwind) player send-in lasts its cry- or floor-bound tail, plus the back animation's wait in
+  // Scene ON (src/engine/switchInTail.ts; `personality` supplies the nature that picks the back animation).
+  if (battler === 0 && forcedPlayer) {
+    const duration = sceneOn
+      ? sceneOnPlayerForcedSwitchInDuration(species, personality)
+      : sceneOffPlayerForcedSwitchInDuration(species);
+    return Object.freeze({ minimumFrames: duration - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
   }
   if (battler === 0) return SWITCH_IN_TIMING;
   const duration = sceneOn ? opponentSwitchInDuration(species) : sceneOffOpponentSwitchInDuration(species, nickname);
@@ -4019,8 +4023,8 @@ export function projectBattleResolutionCommands(
   let lastMoveAttacker: 0 | 1 | null = null;
   // Target of the latest Scene ON MOVE_ANIMATION receipt (Scene OFF has none): its `returntoball` is the forced removal.
   let sceneOnMoveTarget: 0 | 1 | null = null;
-  // plr162: battlers whose Scene OFF `returntoball BS_TARGET` (Roar / Whirlwind) removal awaits its forced send-in.
-  const sceneOffDraggedOut = new Set<0 | 1>();
+  // plr162 / snd182: battlers whose forced `returntoball BS_TARGET` (Roar / Whirlwind) removal awaits its send-in (both scenes).
+  const forcedDraggedOut = new Set<0 | 1>();
   let pendingHeldItemEffectBattler: 0 | 1 | null = null;
   const heldItems = [
     beforeRules.battlers[0]!.item,
@@ -4415,7 +4419,7 @@ export function projectBattleResolutionCommands(
       const sceneOffRemoval = returnToBall && (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0;
       const forcedRemoval = returnToBall && (sceneOffRemoval || sceneOnMoveTarget === battler);
       if (forcedRemoval) sceneOnMoveTarget = null;
-      if (sceneOffRemoval && returnToBallOperand(event) === "BS_TARGET") sceneOffDraggedOut.add(battler);
+      if (forcedRemoval && returnToBallOperand(event) === "BS_TARGET") forcedDraggedOut.add(battler);
       const removalGap = sceneOffRemoval && returnToBallOperand(event) === "BS_ATTACKER"
         ? SCENE_OFF_BATON_PASS_RETURN_TO_BALL_PRINT_GAP_FRAMES
         : FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES;
@@ -4574,8 +4578,8 @@ export function projectBattleResolutionCommands(
         : Object.freeze({ ...currentField, opponent: incoming.field });
       const sceneOn = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
       const speciesTail = battler === 1 && sceneOn;
-      const forcedPlayer = battler === 0 && !sceneOn && sceneOffDraggedOut.has(0);
-      sceneOffDraggedOut.delete(battler);
+      const forcedPlayer = battler === 0 && forcedDraggedOut.has(0);
+      forcedDraggedOut.delete(battler);
       commands.push(Object.freeze({
         type: "switch-in",
         eventSequence: event.sequence,
@@ -4584,10 +4588,10 @@ export function projectBattleResolutionCommands(
         toPartyIndex: switched.toPartyIndex,
         incoming: incoming.field,
         incomingStatus1: incoming.status1,
-        timing: switchInTiming(battler, incoming.field.species, sceneOn, incoming.field.name, forcedPlayer),
+        timing: switchInTiming(battler, incoming.field.species, sceneOn, incoming.field.name, forcedPlayer, incoming.field.personality),
         settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
         ...(forcedPlayer ? {
-          // plr162: the Scene OFF forced player tail (slide 65; CASTFORM's whole send-in +1).
+          // plr162 / snd182: the forced player tail (slide 65; CASTFORM's whole send-in +1).
           healthboxSlideElapsed: sceneOffPlayerForcedSwitchInHealthboxSlideElapsed(incoming.field.species),
           sendInVisualDelay: sceneOffPlayerForcedSwitchInVisualDelay(incoming.field.species),
         } : {}),

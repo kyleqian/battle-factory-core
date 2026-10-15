@@ -1,0 +1,38 @@
+{
+ "pidgey": {
+  "r1": "50a3cd64dec14a61c5784120bd8494f0bb12f6689cc1e62e7d97a4d44991d819",
+  "r2": "50a3cd64dec14a61c5784120bd8494f0bb12f6689cc1e62e7d97a4d44991d819",
+  "identical": true,
+  "frames": 291
+ },
+ "metapod": {
+  "r1": "061e172643ec9632256ed42f28b659050c7f1c0419e7e3a11337b6a67cab2807",
+  "r2": "061e172643ec9632256ed42f28b659050c7f1c0419e7e3a11337b6a67cab2807",
+  "identical": true,
+  "frames": 291
+ },
+ "torkoal": {
+  "r1": "d08887489b919d4c08c035bfe0aebb22bb1d10af36bb5b9bc65e7070edd5ccee",
+  "r2": "d08887489b919d4c08c035bfe0aebb22bb1d10af36bb5b9bc65e7070edd5ccee",
+  "identical": true,
+  "frames": 291
+ },
+ "castform": {
+  "r1": "87467386965607fbd2a9612fd59029b4cdae3651d5fc51ec779e848542239fc1",
+  "r2": "87467386965607fbd2a9612fd59029b4cdae3651d5fc51ec779e848542239fc1",
+  "identical": true,
+  "frames": 291
+ },
+ "bulbasaur0": {
+  "r1": "8ac5decc98d60f4bf4e3682e70ad4aee977c1110565ec101e99a2b34ac36ffa7",
+  "r2": "8ac5decc98d60f4bf4e3682e70ad4aee977c1110565ec101e99a2b34ac36ffa7",
+  "identical": true,
+  "frames": 291
+ },
+ "bulbasaur10": {
+  "r1": "655f4e2ab83a6a093d990b866cc769f3ffcb7990584412bf1bafda5e7ac8a7da",
+  "r2": "655f4e2ab83a6a093d990b866cc769f3ffcb7990584412bf1bafda5e7ac8a7da",
+  "identical": true,
+  "frames": 291
+ }
+}

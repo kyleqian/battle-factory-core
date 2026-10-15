@@ -127,7 +127,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     const shift = iu([23, P], [18, O], [60, O], [93, P, 2], [318, O]) + opponentSwitchInDuration(58) - SWITCH_IN_SPAN_FRAMES
       - SWITCH_IN_WAITSTATE_HOLD_FRAMES
       - 10 // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 10.
-      + 45 - 1; // trn181 (docs/trn181-action-transition-on.md): the Scene ON action-transition pauses before it (45; trn181PinShift.ts 6 0), - 1 frame of dismissal parity.
+      + 45 - 1 // trn181 (docs/trn181-action-transition-on.md): the Scene ON action-transition pauses before it (45; trn181PinShift.ts 6 0), - 1 frame of dismissal parity.
+      + 46; // snd182 (docs/snd182-scene-on-forced-player-send-in-live.md): the Foe's Roar / Whirlwind drags out the player's DROWZEE at frame 849 (Scene ON forced player send-in: 137 + 11 = 148 vs the old 91 + 11 = 102).
     expect(a.statsChange).toEqual({ frame: 2694 + 10 + shift, frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 2694 + 10 + shift + 76 + 1, glyph: 2694 + 10 + shift + 76 + 1 });
     expect(a.following!.text).toContain("INTIMIDATE");

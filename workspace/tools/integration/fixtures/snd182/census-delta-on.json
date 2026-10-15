@@ -1,0 +1,478 @@
+{
+ "schema": "snd182-census-delta/v1",
+ "battles": 1000,
+ "digestMismatch": [],
+ "errorMismatch": [],
+ "budgetStalled": [
+  434,
+  796,
+  881
+ ],
+ "baseCommands": 320378,
+ "commands": 320378,
+ "unchanged": 320346,
+ "identicalBattles": 980,
+ "typeSequenceChanged": [],
+ "forcedPlayerSwitchIns": {
+  "changed": 32,
+  "unchangedForced": 0,
+  "frames": 1136,
+  "battles": 20,
+  "bySpecies": {
+   "383": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     114
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "322": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     100
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "363": {
+    "count": 2,
+    "baseMin": 91,
+    "finalMin": [
+     187,
+     187
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "137": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     112
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "381": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     112
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "302": {
+    "count": 2,
+    "baseMin": 91,
+    "finalMin": [
+     100,
+     100
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "289": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     142
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "192": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     100
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "139": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     120
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "226": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     100
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "119": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     146
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "396": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     112
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "411": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     146
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "182": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     190
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "387": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     146
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "344": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     102
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "185": {
+    "count": 2,
+    "baseMin": 91,
+    "finalMin": [
+     101,
+     101
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "176": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     146
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "278": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     113
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "44": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     100
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "98": {
+    "count": 2,
+    "baseMin": 91,
+    "finalMin": [
+     124,
+     124
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "340": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     187
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "373": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     120
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "75": {
+    "count": 2,
+    "baseMin": 91,
+    "finalMin": [
+     134,
+     134
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "320": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     137
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "30": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     91
+    ],
+    "slide": 65,
+    "delay": -1
+   },
+   "184": {
+    "count": 1,
+    "baseMin": 91,
+    "finalMin": [
+     120
+    ],
+    "slide": 65,
+    "delay": -1
+   }
+  },
+  "bySeed": {
+   "23": [
+    [
+     "383",
+     91,
+     114
+    ]
+   ],
+   "68": [
+    [
+     "322",
+     91,
+     100
+    ]
+   ],
+   "76": [
+    [
+     "363",
+     91,
+     187
+    ],
+    [
+     "137",
+     91,
+     112
+    ]
+   ],
+   "157": [
+    [
+     "381",
+     91,
+     112
+    ]
+   ],
+   "237": [
+    [
+     "302",
+     91,
+     100
+    ],
+    [
+     "302",
+     91,
+     100
+    ]
+   ],
+   "246": [
+    [
+     "289",
+     91,
+     142
+    ]
+   ],
+   "317": [
+    [
+     "192",
+     91,
+     100
+    ]
+   ],
+   "344": [
+    [
+     "139",
+     91,
+     120
+    ],
+    [
+     "363",
+     91,
+     187
+    ],
+    [
+     "226",
+     91,
+     100
+    ]
+   ],
+   "424": [
+    [
+     "119",
+     91,
+     146
+    ],
+    [
+     "396",
+     91,
+     112
+    ]
+   ],
+   "509": [
+    [
+     "411",
+     91,
+     146
+    ],
+    [
+     "182",
+     91,
+     190
+    ]
+   ],
+   "517": [
+    [
+     "387",
+     91,
+     146
+    ]
+   ],
+   "637": [
+    [
+     "344",
+     91,
+     102
+    ],
+    [
+     "185",
+     91,
+     101
+    ],
+    [
+     "176",
+     91,
+     146
+    ],
+    [
+     "185",
+     91,
+     101
+    ]
+   ],
+   "704": [
+    [
+     "278",
+     91,
+     113
+    ],
+    [
+     "44",
+     91,
+     100
+    ]
+   ],
+   "722": [
+    [
+     "98",
+     91,
+     124
+    ]
+   ],
+   "807": [
+    [
+     "340",
+     91,
+     187
+    ]
+   ],
+   "811": [
+    [
+     "373",
+     91,
+     120
+    ]
+   ],
+   "843": [
+    [
+     "75",
+     91,
+     134
+    ]
+   ],
+   "882": [
+    [
+     "75",
+     91,
+     134
+    ]
+   ],
+   "887": [
+    [
+     "98",
+     91,
+     124
+    ],
+    [
+     "320",
+     91,
+     137
+    ]
+   ],
+   "940": [
+    [
+     "30",
+     91,
+     91
+    ],
+    [
+     "184",
+     91,
+     120
+    ]
+   ]
+  }
+ },
+ "budgetTail": {},
+ "unattributed": [],
+ "scene": "on",
+ "unattributedCount": 0
+}
