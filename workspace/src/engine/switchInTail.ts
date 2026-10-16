@@ -13,6 +13,7 @@ import { selectBackSendOutAnimation } from "../animation/backSendOutAnim.ts";
 import { BACK_SEND_OUT_REDUCERS } from "../animation/sendOutDispatcher.ts";
 import { SEND_IN_TAIL_CASTFORM, sendInTail } from "../data/sendInTail.ts";
 import { SEND_IN_TAIL_OFF_CRY_FRAMES } from "../data/sendInTailOff.ts";
+import { PARTY_SENDOUT_ACTION_MENU_START, PARTY_SENDOUT_BLANK_MESSAGE_START, type PartySendOutTiming } from "./partySelect.ts";
 import { natureFromPersonality } from "./opponentGen.ts";
 
 /** Opponent send-in: the `switch-in` elapsed of the healthbox slide's first frame (x2 -110). */
@@ -178,3 +179,29 @@ export function sceneOnPlayerForcedSwitchInDuration(species: number, personality
     back === null ? 0 : back + SCENE_ON_PLAYER_FORCED_SEND_IN_BACK_ANIM_TO_MESSAGE,
   );
 }
+
+/**
+ * pfr192 (ISSUES #146 remainder; docs/pfr185-player-faint-replacement-send-in.md, docs/pfr192-player-faint-replacement-production.md):
+ * the PLAYER faint-replacement send-in, counted from the SEND OUT confirm. The ROM chain is the forced-player one: the ball spawns at
+ * B = 91 + length(nickname), the controller idles at B + D - 2, the next print is at B + D + 10 (CASTFORM + 11) and the action prompt
+ * at B + D + 17, with D the forced duration above (`sceneOn` picks Scene ON's back-animation bound).  The healthbox slide is ball-relative
+ * (B + 65, CASTFORM + 1) in both scenes.  `followingFrames` = the turn-end + next-command-handoff frames production runs after the span
+ * (they sit inside the ROM's B + D + 17), so the span ends that much earlier.
+ */
+export function playerFaintReplacementSendOutTiming(input: Readonly<{
+  species: number; nameLength: number; personality: number; sceneOn: boolean; followingFrames: number; goTextChars: number;
+}>): PartySendOutTiming {
+  const ball = 91 + input.nameLength;
+  const duration = input.sceneOn
+    ? sceneOnPlayerForcedSwitchInDuration(input.species, input.personality)
+    : sceneOffPlayerForcedSwitchInDuration(input.species);
+  const prompt = ball + duration + 17;
+  return Object.freeze({
+    ballShift: ball - MAGBY_SEND_IN_BALL_SPAWN,
+    releaseExtra: sceneOffPlayerForcedSwitchInHealthboxSlideElapsed(input.species) - SCENE_OFF_PLAYER_FORCED_SEND_IN_SLIDE,
+    readyAt: prompt - input.followingFrames,
+    blankStart: prompt - (PARTY_SENDOUT_ACTION_MENU_START - PARTY_SENDOUT_BLANK_MESSAGE_START),
+    goTextChars: input.goTextChars,
+  });
+}
+const MAGBY_SEND_IN_BALL_SPAWN = 96;

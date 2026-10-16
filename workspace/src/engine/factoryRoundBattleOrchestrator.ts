@@ -115,6 +115,7 @@ import {
   type LiveSemiInvulnerableHidden,
   isBattleResolutionButtonMessageReady,
   isBattleResolutionCommandComplete,
+  playerFaintReplacementSendOutTimingOfSegment,
 } from "./battleResolutionPresentationRender.ts";
 import {
   advancePartySelect,
@@ -2784,7 +2785,10 @@ function advanceFactoryRoundBattleResolutionCore(
       "presenting-switch-in",
       elapsed,
     );
-    if (!partySendOutBattleMenuReady(elapsed)) {
+    if (!partySendOutBattleMenuReady(
+      elapsed,
+      playerFaintReplacementSendOutTimingOfSegment(resolution.segments[resolution.segmentIndex]!) ?? undefined,
+    )) {
       return Object.freeze({
         ...state,
         battleResolutionPresentation: advancedResolution,

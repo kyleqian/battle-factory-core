@@ -319,9 +319,39 @@ export const PARTY_SENDOUT_HEALTHBOX_STEP = 5;
  */
 export const PARTY_SENDOUT_BLANK_MESSAGE_START = 305;
 export const PARTY_SENDOUT_ACTION_MENU_START = PARTY_SENDOUT_BLANK_MESSAGE_START + 6;
+/**
+ * pfr192 (ISSUES #146 remainder): the player's faint-replacement send-in is keyed on (species, nickname length, nature, scene) like the
+ * ROM's forced-player chain (docs/pfr185-player-faint-replacement-send-in.md): the ball spawns at B = 91 + length(name) frames after the
+ * SEND OUT confirm and the action prompt follows at B + D + 17.  The MAGBY / Scene ON constants above are the default (`timing` absent:
+ * the canonical turn-15..17 trace, whose party select never leaves this clock).  Every ball-relative rung (ball, release, healthbox slide)
+ * is MAGBY's calibration shifted by `ballShift` (+ `releaseExtra` for CASTFORM's late release); `readyAt` is where the span hands the
+ * lifecycle on (the prompt minus any following turn-end + next-command handoff, which sit INSIDE the ROM's B + D + 17).
+ */
+export type PartySendOutTiming = Readonly<{
+  ballShift: number;
+  releaseExtra: number;
+  readyAt: number;
+  blankStart: number;
+  goTextChars: number;
+}>;
+export const PARTY_SENDOUT_DEFAULT_TIMING: PartySendOutTiming = Object.freeze({
+  ballShift: 0,
+  releaseExtra: 0,
+  readyAt: PARTY_SENDOUT_ACTION_MENU_START,
+  blankStart: PARTY_SENDOUT_BLANK_MESSAGE_START,
+  goTextChars: PARTY_SENDOUT_GO_TEXT.length,
+});
 /** True once the ordinary battle action controller owns input again. */
-export function partySendOutBattleMenuReady(elapsed: number): boolean {
-  return elapsed >= PARTY_SENDOUT_ACTION_MENU_START;
+export function partySendOutBattleMenuReady(elapsed: number, timing: PartySendOutTiming = PARTY_SENDOUT_DEFAULT_TIMING): boolean {
+  return elapsed >= timing.readyAt;
+}
+/** The elapsed the MAGBY-calibrated ball / release / healthbox rungs see: this send-in's ball-relative clock. */
+export function partySendOutBallClock(elapsed: number, timing: PartySendOutTiming = PARTY_SENDOUT_DEFAULT_TIMING): number {
+  return elapsed - timing.ballShift;
+}
+/** The elapsed the release and healthbox-slide rungs see (CASTFORM's whole release runs one frame late). */
+export function partySendOutReleaseClock(elapsed: number, timing: PartySendOutTiming = PARTY_SENDOUT_DEFAULT_TIMING): number {
+  return elapsed - timing.ballShift - timing.releaseExtra;
 }
 /** Re-anchor the freshly-created action-menu bounce task onto its original generator. */
 export function partySendOutMenuBounceTick(elapsed: number): number {
@@ -369,17 +399,17 @@ export function partySendOutBattleFadeBldy(elapsed: number): number {
 }
 
 /** FAST text speed: one charged character per VBlank, including the space. */
-export function partySendOutGoTextVisibleChars(elapsed: number): number {
-  return Math.max(0, Math.min(PARTY_SENDOUT_GO_TEXT.length, elapsed - PARTY_SENDOUT_GO_TEXT_START + 1));
+export function partySendOutGoTextVisibleChars(elapsed: number, timing: PartySendOutTiming = PARTY_SENDOUT_DEFAULT_TIMING): number {
+  return Math.max(0, Math.min(timing.goTextChars, elapsed - PARTY_SENDOUT_GO_TEXT_START + 1));
 }
 
-export function partySendOutPhase(elapsed: number): PartySendOutPhase {
+export function partySendOutPhase(elapsed: number, timing: PartySendOutTiming = PARTY_SENDOUT_DEFAULT_TIMING): PartySendOutPhase {
   if (elapsed < PARTY_SENDOUT_FADE_OUT_START) return "submenuHold";
   if (elapsed < PARTY_SENDOUT_BLACK_START) return "fadingOut";
   if (elapsed < PARTY_SENDOUT_BATTLE_FADE_IN_START) return "black";
-  if (elapsed < PARTY_SENDOUT_BLANK_MESSAGE_START) return "battleFadeIn";
-  if (elapsed < PARTY_SENDOUT_ACTION_MENU_START) return "blankMessage";
-  return "actionMenu";
+  if (elapsed >= timing.readyAt) return "actionMenu";
+  if (elapsed < timing.blankStart) return "battleFadeIn";
+  return "blankMessage";
 }
 
 /** The list is usable only after its press-relative fade-in has settled. */

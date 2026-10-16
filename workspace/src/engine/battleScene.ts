@@ -725,7 +725,7 @@ import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with {
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import revengeAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
-import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, partySendOutBallClock, partySendOutBallPhase, partySendOutReleaseClock, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_RELEASE_VISIBLE_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
   battlePartySelectStateForForcedParty,
   PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START,
@@ -55361,7 +55361,10 @@ export function renderBattleResolutionForcedPartySelect(
     const canonicalIncoming =
       view.field.player.name === "MAGBY"
       && view.field.player.species === 240;
-    const releaseTick = partySendOutReleaseLogicalTick(elapsed);
+    const sendOutTiming = view.switchIn.timing ?? undefined;
+    const ballClock = partySendOutBallClock(elapsed, sendOutTiming);
+    const releaseClock = partySendOutReleaseClock(elapsed, sendOutTiming);
+    const releaseTick = partySendOutReleaseLogicalTick(releaseClock);
     if (canonicalIncoming) {
       drawMode0Ppu(fb, {
         ...turn15FieldPpuAsset,
@@ -55388,7 +55391,7 @@ export function renderBattleResolutionForcedPartySelect(
           fb[o + 2] = blendComponentToWhite(fb[o + 2]!, bldy);
         }
       }
-      if (elapsed < PARTY_SENDOUT_RELEASE_VISIBLE_START && view.switchIn.partyStates !== null) {
+      if (releaseClock < PARTY_SENDOUT_RELEASE_VISIBLE_START && view.switchIn.partyStates !== null) {
         drawTypedPartyStatusSummary(
           fb,
           view.switchIn.battler,
@@ -55397,7 +55400,7 @@ export function renderBattleResolutionForcedPartySelect(
       }
     }
 
-    drawTurn15ForcedSwitchBall(fb, elapsed);
+    drawTurn15ForcedSwitchBall(fb, ballClock);
     if (releaseTick !== null) {
       if (canonicalIncoming) {
         drawTurn15ForcedSwitchRelease(fb, releaseTick, view.field.player.name);
@@ -55434,7 +55437,7 @@ export function renderBattleResolutionForcedPartySelect(
         );
       }
     }
-    const healthboxDx = partySendOutHealthboxDx(elapsed);
+    const healthboxDx = partySendOutHealthboxDx(releaseClock);
     if (healthboxDx !== null) {
       if (canonicalIncoming) {
         drawTurn15MagbyHealthbox(fb, healthboxDx);
