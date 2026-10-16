@@ -17,7 +17,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Decision:** `src/engine/switchInTail.ts` joined the engine -> animation ratchet allowlist (pure back send-out reducers, presentation
   timing only; precedent `battleResolutionPresentationRender.ts`).
 - **Gates (final src):** supervisor full suite 1,682 files / 13,940 tests passed, 0 failed; build OK; worker censuses / differentials per
-  step. Vanilla soak 0:20 (`--parallel 4`) started on the final tree (result below if it finished). Logs `.integration/validation/sv-20261016-final/`.
+  step. Vanilla soak 0:20 (`--parallel 4`) **20 / 20 OK** (all `budget`, the rigid canary) on the final tree. Logs `.integration/validation/sv-20261016-final/`.
 - **Next:** (1) pfr185 production step: route the player faint-replacement send-in through the forced-player model (prompt D + 17) instead
   of partySelect's fixed SEND OUT clock; (2) Transform accounting (live body outside the 276 catalogue, like Struggle) + other bodies over
   a transformed battler; (3) #167 ON body-tail anchor errors (-3 .. -6) and print-length residuals; (4) Focus Punch ON 125-vs-127 pre-pass
