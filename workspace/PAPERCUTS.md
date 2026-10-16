@@ -27,7 +27,9 @@ history.
   full suite finished (result recovered from its `/tmp` log). Briefs now say when to start the suite.
   (10, snd182) `animationBoundaryRatchet` failures print only `expected [ …(2) ] to deeply equal []`; the violating files need a
   verbose rerun. An `until ! pgrep -f tsc` poll matches itself (~3 min); poll an exit file.
-- **Hits:** 2 sessions (2026-10-14, 2026-10-15), ~1.8 h total.
+  (11, sub183) `prep37Probes.sh` and siblings hard-code Mac paths (another wrapper, `sub183Probes.sh`); every census needs a copied
+  `.ts` / `.sh` / delta script because the census row layout is positional (a field index slipped by one).
+- **Hits:** 2 sessions (2026-10-14, 2026-10-15), ~2 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
   and the supervisor; census job limit from `/etc/pokebench-runner.env`.
 

@@ -84,8 +84,9 @@ frame count to CB2_InitBattle); check whether the lab seed is applied before or 
 FIXED (`ca4ea3618` / `eec0aca08`): Scene OFF emits the Transform / Substitute move animation (`battle_script_commands.c:1748`).
 OFF bodies read x2 {0,0} because there is no front animation in OFF (`pokemon.c:6805`). 5 / 5 dense OFF Substitute windows are
 0 px (`docs/sub157-scene-off-substitute.md`). Open, the same in both scenes (ROM OFF == ON):
-- **Substitute turn timing:** the HP command starts on G+91 against the ROM's G+97 HP run (−6), because the 5 pre-attackanimation rows
-  and the healthbarupdate row are not presented. Scene ON route-timing owner.
+- **Substitute turn timing:** FIXED by sub183 (2026-10-15, docs/sub183-substitute-turn-timing.md): 4 script-lead rows, 2 post rows,
+  HP -> print tail 3; HP start, doll, next print and next used print exact (4 dense windows, 291 / 291 rows 0 px, both scenes).
+  Open: HP bars under the 28-frame floor (unmeasured); Leech Seed's turn-end `datahpupdate; printfromtable` (same shape, no ROM window).
 - **Transform:** body + transformed field LIVE in both scenes since trf174 (2026-10-14, docs/trf174-transform-live.md; 8 / 8 dense
   windows 109 / 109 rows 0 px, field 140 / 140, supervisor-reproduced fresh). Open: declined Transform bodies (shiny DITTO, SPINDA
   target, CASTFORM, a doll on either side); every OTHER live body declines while a battler is shown transformed; Transform is not

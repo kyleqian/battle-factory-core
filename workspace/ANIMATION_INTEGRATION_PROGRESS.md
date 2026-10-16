@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 + trn181 + snd182 folded
+## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 + trn181 + snd182 + sub183 folded
 
 - **trn178 (INTEGRATION, saved ref `4a8a25431`, merged `40793066b`):** Scene OFF action-transition pause (#167 (a'); P = d + 6 + u
   before an action's first MoveEnd sprite-visibility receipt; docs/trn178-action-transition-live.md). Supervisor: `trn176Predict.ts
@@ -29,6 +29,12 @@
   suite on final src 13,933 passed + 2 files fixed by attributed re-pins (14 / 14), typecheck, smoke, build. **Supervisor decision:**
   accepted `src/engine/switchInTail.ts` in the animation-boundary ratchet allowlist (pure back send-out reducers, presentation timing
   only; same precedent as `battleResolutionPresentationRender.ts`). Union: smoke 448, affected 25 / 25.
+- **sub183 (INTEGRATION, merged `a4b477dc1`):** Substitute turn timing (#153): `scriptLeadFrames` 4 (`attackstring; waitstate` ..
+  `attackanimation`), 164 post rows 2, HP -> print `tailFrames` 3 (docs/sub183-substitute-turn-timing.md). Supervisor: fresh direct-mGBA
+  probes (prep37 ON opponent, sub157 OFF opponent; r1 == r2) through `sub183Dense.ts`: 291 / 291 rows 0 px in both scenes, rows equal to
+  the committed fixtures. Worker: 4 / 4 dense windows 0 px (before 135-142 / 291 rows), census both scenes digests identical, 94 changed
+  commands per scene all Substitute, differential 641 / 641; full suite on `6a01829c0` 1 failure (attributed re-pin `122a5b69a`, file 4 / 4),
+  typecheck, smoke, build on final. Evidence copied to `.integration/validation/from-workers/sub183/`.
 - Union `a641cc285`: smoke 448 / 448 (master's later commits since the worker base are tooling only).
 
 ## 2026-10-14 — CAX31 session: Transform live (trf174) + enc160 / plr162 / enc173 folds
