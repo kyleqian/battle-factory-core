@@ -402,7 +402,9 @@ describe("random round soak driver (green milestone pin)", () => {
       // renderCalls 2_654 -> 2_655; same battle 7, turn 3, end state and diagnostics.
       // trn178 (the Scene OFF action-transition pause, docs/trn178-action-transition-live.md): frames 37_298 -> 37_738,
       // renderCalls 2_655 -> 2_694; same battle 7, turn 3, end state and diagnostics.
-      frames: 37_738,
+      // pfr192 (the player faint-replacement send-in clock keyed on species / name length / nature / scene): frames 37_738 -> 37_536,
+      // renderCalls 2_694 -> 2_688; same battle 7, turn 3, end state and diagnostics.
+      frames: 37_536,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -414,7 +416,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_694,
+        renderCalls: 2_688,
       },
     });
     expect(second).toEqual(first);
@@ -800,7 +802,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // chg161 (the charge-turn empty box): frames only, 17423 -> 17242; same battle / turn / end state.
     expect(runSeed(0, options)).toMatchObject({
       // msg175: 17242 -> 17232 (shorter used prints); trn178 (the Scene OFF action-transition pause): 17232 -> 17493; same battle / turn / end state.
-      frames: 17493,
+      // pfr192 (the keyed player faint-replacement send-in clock): 17493 -> 17175; same battle / turn / end state.
+      frames: 17175,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -809,7 +812,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
-      frames: 27058,
+      // pfr192 (the keyed player faint-replacement send-in clock): 27058 -> 26866; same battle / turn / end state.
+      frames: 26866,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -838,7 +842,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // 9205 -> 9033; decision and canonical logs identical to 9d23a17c4's.
     expect(runSeed(0, options)).toMatchObject({
       // msg175: 9130 -> 9128 (shorter used prints); trn178 (the Scene OFF action-transition pause): 9128 -> 9154; same battle / turn / end state.
-      frames: 9154,
+      // pfr192 (the keyed player faint-replacement send-in clock): 9154 -> 8928; same battle / turn / end state.
+      frames: 8928,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -856,7 +861,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     // frozen last-pre-chain snapshot lands much earlier, at the real frame.
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 9033 -> 8946 (shorter used prints); trn178 (the Scene OFF action-transition pause): 8946 -> 9232; same battle / turn / end state.
-      frames: 9232,
+      // pfr192 (the keyed player faint-replacement send-in clock): 9232 -> 8979; same battle / turn / end state.
+      frames: 8979,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
