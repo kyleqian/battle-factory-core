@@ -93,7 +93,8 @@ describe("S10A Substitute body (164) scoped exact", () => {
     const off = generatedCommandAnimationReplay(11, "off", [3], 35, true, true);
     const bodies = on.animations.filter((a) => a.moveId === 164 && a.attacker === 0);
     expect(bodies).toHaveLength(1);
-    expect(bodies[0]!.ages).toEqual(iu120Ages(164, 87));
+    // sub183: the command is 4 script-lead rows (attackstring; waitstate ... attackanimation) + 3 pre + 87 + 2 post rows (164 joined the post-row masks) = 96.
+    expect(bodies[0]!.ages).toEqual(iu120Ages(164, 87 + 4));
     expect(bodies[0]!.adapterActive.every(Boolean)).toBe(true);
     // Hand-off: the first frame of the next command shows the doll (applySubstituteDollCommand), not the mon.
     expect(after[0]?.doll).toBe(true);
