@@ -28,9 +28,9 @@ describe("fpc180 -- Focus Punch pre-pass edge routes", () => {
     const off = glyphs("fpc177-a-switch-off");
     expect(off.slice(0, 4)).toEqual(rom("fpc177-a-switch-off").slice(0, 4));
     expect(off[2]! - off[1]!).toBe(106);
-    // ON: the ROM's pre-pass animation row (125 vs 127, ISSUES #139 remainder) is +2; the order and spans are the ROM's.
+    // ON: ont193 (fpo187) took the voluntary-switch turn's pre-pass launch to the ROM's 125 rows, so ON is on the ROM too.
     const on = glyphs("fpc177-a-switch-on");
-    expect(on.slice(0, 4).map((g, i) => g - rom("fpc177-a-switch-on")[i]!)).toEqual([0, 2, 2, 2]);
+    expect(on.slice(0, 4).map((g, i) => g - rom("fpc177-a-switch-on")[i]!)).toEqual([0, 0, 0, 0]);
     expect(on[2]! - on[1]!).toBe(106);
   });
 

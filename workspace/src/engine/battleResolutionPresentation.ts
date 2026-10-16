@@ -164,6 +164,22 @@ const FOCUS_PUNCH_STATUS2_SUBSTITUTE = 1 << 24;
 const SYNTHESIZED_SWITCH_DISPATCHER = "synthesized-voluntary-switch";
 
 /**
+ * fpo187 (docs/fpo187-focus-punch-on-prepass-row.md, ont193): Scene ON only, the pre-pass `playanimation` launch
+ * (Player/OpponentHandleBattleAnimation, gated by IsBattleSEPlaying) waits for the player's last menu SE_SELECT (10 frames) when
+ * the first pre-pass of a turn follows a Fight-menu A confirm (animWait 2 -> empty glyph to tightening glyph 127). With no SE in
+ * play (a voluntary-switch turn, or any later pre-pass of the turn) the launch is 2 rows earlier -> 125. Scene OFF has no
+ * animation receipt (Pausex20 path) and never takes the term.
+ */
+export const FOCUS_PUNCH_PRE_PASS_MENU_SE_LAUNCH_WAIT_FRAMES = 2;
+function focusPunchPrePassLaunchWaitsForMenuSe(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const isPrePassBox = (event: BattleKernelSemanticEvent): boolean =>
+    event.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT && event.payload.kind === "message"
+    && event.payload.messageId === "STRINGID_EMPTYSTRING3";
+  if (events.findIndex(isPrePassBox) !== index) return false;
+  return !events.some((event) => event.provenance?.dispatcher === SYNTHESIZED_SWITCH_DISPATCHER);
+}
+
+/**
  * fpp150: a pre-pass print's timing. The empty box (printstring STRINGID_EMPTYSTRING3 + waitmessage 1) lasts one frame per
  * kernel interpreter execution to the script's next presented receipt plus waitmessage 1's controller row (the kernel does not
  * count the printer's busy row): Scene ON the playanimation (2 + 1: rows X - 3 .. X - 1, the general-animation command then
@@ -183,7 +199,10 @@ function focusPunchPrePassMessageTiming(
     const from = event.provenance.instructionExecution;
     const to = next?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT ? next.provenance.instructionExecution : undefined;
     if (from === undefined || to === undefined || to <= from) return null;
-    return Object.freeze({ minimumFrames: to - from + 1, holdFrames: 0 });
+    const animWait = next?.payload.kind === "animation" && !focusPunchPrePassLaunchWaitsForMenuSe(events, index)
+      ? FOCUS_PUNCH_PRE_PASS_MENU_SE_LAUNCH_WAIT_FRAMES
+      : 0;
+    return Object.freeze({ minimumFrames: Math.max(1, to - from + 1 - animWait), holdFrames: 0 });
   }
   if (event.payload.messageId === "STRINGID_PKMNTIGHTENINGFOCUS") {
     // The next print (skipping silent events such as the PP update that precedes a Substitute's used print).
