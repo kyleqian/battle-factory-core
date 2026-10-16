@@ -11,9 +11,10 @@ JOBS=${JOBS:-"mechanic-leech-seed-player-exeggcute-opponent-onix:off mechanic-le
 LIST="$OUT/.jobs"; : > "$LIST"
 for j in $JOBS; do for r in 1 2; do echo "${j%:*} ${j#*:} $r" >> "$LIST"; done; done
 run_one() {
-  s=$1; m=$2; r=$3; o="$OUT/$s-$m-r$r.json"
+  s=$1; m=$2; r=$3; o="$OUT/$(basename $s)-$m-r$r.json"
+  case $s in */*) sp=$s;; *) sp=tools/battle-lab/$s.json;; esac
   [ ! -e "$o" ] || { echo "refusing to reuse $o"; exit 2; }
-  python3 tools/run-mgba-probe.py "$o" -- "$PY" tools/integration/sub183RomFrames.py tools/battle-lab/$s.json $m "$o" > "$o.out" 2>&1 || echo "FAIL $s $m r$r"
+  python3 tools/run-mgba-probe.py "$o" -- "$PY" tools/integration/sub183RomFrames.py "$sp" $m "$o" > "$o.out" 2>&1 || echo "FAIL $s $m r$r"
 }
 while read -r s m r; do
   run_one "$s" "$m" "$r" &

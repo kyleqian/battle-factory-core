@@ -1,0 +1,506 @@
+[
+ {
+  "case": "tackled-player-seeds",
+  "variants": {
+   "current": {
+    "glyphAt": 58,
+    "deltaToRom": -25,
+    "hp2Start": 30
+   },
+   "tail3-on-second-hp-only": {
+    "glyphAt": 61,
+    "deltaToRom": -22,
+    "hp2Start": 30
+   },
+   "lead-only": {
+    "glyphAt": 102,
+    "deltaToRom": 19,
+    "hp2Start": 74
+   },
+   "floor-removed-plus-tail3": {
+    "glyphAt": 31,
+    "deltaToRom": -52,
+    "hp2Start": 16
+   },
+   "lead-floor-removed-tail3-only": {
+    "glyphAt": 75,
+    "deltaToRom": -8,
+    "hp2Start": 60
+   },
+   "lead-floor-removed-tail8-tail3": {
+    "glyphAt": 83,
+    "deltaToRom": 0,
+    "hp2Start": 68
+   }
+  },
+  "requiredLead": 44,
+  "scene": "off",
+  "seederSide": "player",
+  "seed": 57,
+  "anchor": "A = first row after the 'was seeded' print",
+  "rom": {
+   "leadRowsBeforeDrain": 10,
+   "drainStart": 10,
+   "animStart": 11,
+   "animLen": 32,
+   "hp1Start": 46,
+   "hp1Len": 15,
+   "hp1Changes": 6,
+   "hp1FirstChange": 47,
+   "gapRowsBetweenHp": 7,
+   "hp2Start": 68,
+   "hp2Len": 13,
+   "hp2Changes": 11,
+   "hp2FirstChange": 69,
+   "printfromtable": 81,
+   "waitStart": 82,
+   "firstGlyph": 83
+  },
+  "production": {
+   "leadCommands": [
+    "sprite-visibility:1",
+    "sprite-visibility:1"
+   ],
+   "anim": "none (Pausex20 not presented)",
+   "hp1Start": 2,
+   "hp1Len": 28,
+   "hp1Bar": 13,
+   "hp1FirstChange": 3,
+   "hp2Start": 30,
+   "hp2Len": 28,
+   "hp2Bar": 11,
+   "hp2FirstChange": 31,
+   "firstGlyph": 58,
+   "messageLen": 105
+  },
+  "delta": {
+   "hp1Start": -44,
+   "hp1FirstChange": -44,
+   "hp1Len": 13,
+   "hp2Start": -38,
+   "hp2FirstChange": -38,
+   "hp2Len": 15,
+   "firstGlyph": -25
+  }
+ },
+ {
+  "case": "tackled-opponent-seeds",
+  "variants": {
+   "current": {
+    "glyphAt": 58,
+    "deltaToRom": -24,
+    "hp2Start": 30
+   },
+   "tail3-on-second-hp-only": {
+    "glyphAt": 61,
+    "deltaToRom": -21,
+    "hp2Start": 30
+   },
+   "lead-only": {
+    "glyphAt": 102,
+    "deltaToRom": 20,
+    "hp2Start": 74
+   },
+   "floor-removed-plus-tail3": {
+    "glyphAt": 30,
+    "deltaToRom": -52,
+    "hp2Start": 16
+   },
+   "lead-floor-removed-tail3-only": {
+    "glyphAt": 74,
+    "deltaToRom": -8,
+    "hp2Start": 60
+   },
+   "lead-floor-removed-tail8-tail3": {
+    "glyphAt": 82,
+    "deltaToRom": 0,
+    "hp2Start": 68
+   }
+  },
+  "requiredLead": 44,
+  "scene": "off",
+  "seederSide": "opponent",
+  "seed": 4,
+  "anchor": "A = first row after the 'was seeded' print",
+  "rom": {
+   "leadRowsBeforeDrain": 10,
+   "drainStart": 10,
+   "animStart": 11,
+   "animLen": 32,
+   "hp1Start": 46,
+   "hp1Len": 15,
+   "hp1Changes": 13,
+   "hp1FirstChange": 47,
+   "gapRowsBetweenHp": 7,
+   "hp2Start": 68,
+   "hp2Len": 12,
+   "hp2Changes": 4,
+   "hp2FirstChange": 69,
+   "printfromtable": 80,
+   "waitStart": 81,
+   "firstGlyph": 82
+  },
+  "production": {
+   "leadCommands": [
+    "sprite-visibility:1",
+    "sprite-visibility:1"
+   ],
+   "anim": "none (Pausex20 not presented)",
+   "hp1Start": 2,
+   "hp1Len": 28,
+   "hp1Bar": 13,
+   "hp1FirstChange": 3,
+   "hp2Start": 30,
+   "hp2Len": 28,
+   "hp2Bar": 10,
+   "hp2FirstChange": 31,
+   "firstGlyph": 58,
+   "messageLen": 101
+  },
+  "delta": {
+   "hp1Start": -44,
+   "hp1FirstChange": -44,
+   "hp1Len": 13,
+   "hp2Start": -38,
+   "hp2FirstChange": -38,
+   "hp2Len": 16,
+   "firstGlyph": -24
+  }
+ },
+ {
+  "case": "fullhp-player-seeds",
+  "variants": {
+   "current": {
+    "glyphAt": 58,
+    "deltaToRom": -14,
+    "hp2Start": 30
+   },
+   "tail3-on-second-hp-only": {
+    "glyphAt": 61,
+    "deltaToRom": -11,
+    "hp2Start": 30
+   },
+   "lead-only": {
+    "glyphAt": 102,
+    "deltaToRom": 30,
+    "hp2Start": 74
+   },
+   "floor-removed-plus-tail3": {
+    "glyphAt": 20,
+    "deltaToRom": -52,
+    "hp2Start": 16
+   },
+   "lead-floor-removed-tail3-only": {
+    "glyphAt": 64,
+    "deltaToRom": -8,
+    "hp2Start": 60
+   },
+   "lead-floor-removed-tail8-tail3": {
+    "glyphAt": 72,
+    "deltaToRom": 0,
+    "hp2Start": 68
+   }
+  },
+  "requiredLead": 44,
+  "scene": "off",
+  "seederSide": "player",
+  "seed": 4,
+  "anchor": "A = first row after the 'was seeded' print",
+  "rom": {
+   "leadRowsBeforeDrain": 10,
+   "drainStart": 10,
+   "animStart": 11,
+   "animLen": 32,
+   "hp1Start": 46,
+   "hp1Len": 15,
+   "hp1Changes": 6,
+   "hp1FirstChange": 47,
+   "gapRowsBetweenHp": 7,
+   "hp2Start": 68,
+   "hp2Len": 2,
+   "hp2Changes": 0,
+   "hp2FirstChange": null,
+   "printfromtable": 70,
+   "waitStart": 71,
+   "firstGlyph": 72
+  },
+  "production": {
+   "leadCommands": [
+    "sprite-visibility:1",
+    "sprite-visibility:1"
+   ],
+   "anim": "none (Pausex20 not presented)",
+   "hp1Start": 2,
+   "hp1Len": 28,
+   "hp1Bar": 13,
+   "hp1FirstChange": 3,
+   "hp2Start": 30,
+   "hp2Len": 28,
+   "hp2Bar": 0,
+   "hp2FirstChange": 31,
+   "firstGlyph": 58,
+   "messageLen": 105
+  },
+  "delta": {
+   "hp1Start": -44,
+   "hp1FirstChange": -44,
+   "hp1Len": 13,
+   "hp2Start": -38,
+   "hp2FirstChange": null,
+   "hp2Len": 26,
+   "firstGlyph": -14
+  }
+ },
+ {
+  "case": "tackled-player-seeds",
+  "variants": {
+   "current": {
+    "glyphAt": 58,
+    "deltaToRom": -199,
+    "hp2Start": 30
+   },
+   "tail3-on-second-hp-only": {
+    "glyphAt": 61,
+    "deltaToRom": -196,
+    "hp2Start": 30
+   },
+   "lead-only": {
+    "glyphAt": 276,
+    "deltaToRom": 19,
+    "hp2Start": 248
+   },
+   "floor-removed-plus-tail3": {
+    "glyphAt": 31,
+    "deltaToRom": -226,
+    "hp2Start": 16
+   },
+   "lead-floor-removed-tail3-only": {
+    "glyphAt": 249,
+    "deltaToRom": -8,
+    "hp2Start": 234
+   },
+   "lead-floor-removed-tail8-tail3": {
+    "glyphAt": 257,
+    "deltaToRom": 0,
+    "hp2Start": 242
+   }
+  },
+  "requiredLead": 218,
+  "scene": "on",
+  "seederSide": "player",
+  "seed": 57,
+  "anchor": "A = first row after the 'was seeded' print",
+  "rom": {
+   "leadRowsBeforeDrain": 10,
+   "drainStart": 10,
+   "animStart": 11,
+   "animLen": 208,
+   "hp1Start": 220,
+   "hp1Len": 15,
+   "hp1Changes": 6,
+   "hp1FirstChange": 221,
+   "gapRowsBetweenHp": 7,
+   "hp2Start": 242,
+   "hp2Len": 13,
+   "hp2Changes": 11,
+   "hp2FirstChange": 243,
+   "printfromtable": 255,
+   "waitStart": 256,
+   "firstGlyph": 257
+  },
+  "production": {
+   "leadCommands": [
+    "sprite-visibility:1",
+    "sprite-visibility:1"
+   ],
+   "anim": "none (no LEECH_SEED_DRAIN command)",
+   "hp1Start": 2,
+   "hp1Len": 28,
+   "hp1Bar": 13,
+   "hp1FirstChange": 3,
+   "hp2Start": 30,
+   "hp2Len": 28,
+   "hp2Bar": 11,
+   "hp2FirstChange": 31,
+   "firstGlyph": 58,
+   "messageLen": 105
+  },
+  "delta": {
+   "hp1Start": -218,
+   "hp1FirstChange": -218,
+   "hp1Len": 13,
+   "hp2Start": -212,
+   "hp2FirstChange": -212,
+   "hp2Len": 15,
+   "firstGlyph": -199
+  }
+ },
+ {
+  "case": "tackled-opponent-seeds",
+  "variants": {
+   "current": {
+    "glyphAt": 58,
+    "deltaToRom": -198,
+    "hp2Start": 30
+   },
+   "tail3-on-second-hp-only": {
+    "glyphAt": 61,
+    "deltaToRom": -195,
+    "hp2Start": 30
+   },
+   "lead-only": {
+    "glyphAt": 276,
+    "deltaToRom": 20,
+    "hp2Start": 248
+   },
+   "floor-removed-plus-tail3": {
+    "glyphAt": 30,
+    "deltaToRom": -226,
+    "hp2Start": 16
+   },
+   "lead-floor-removed-tail3-only": {
+    "glyphAt": 248,
+    "deltaToRom": -8,
+    "hp2Start": 234
+   },
+   "lead-floor-removed-tail8-tail3": {
+    "glyphAt": 256,
+    "deltaToRom": 0,
+    "hp2Start": 242
+   }
+  },
+  "requiredLead": 218,
+  "scene": "on",
+  "seederSide": "opponent",
+  "seed": 4,
+  "anchor": "A = first row after the 'was seeded' print",
+  "rom": {
+   "leadRowsBeforeDrain": 10,
+   "drainStart": 10,
+   "animStart": 11,
+   "animLen": 208,
+   "hp1Start": 220,
+   "hp1Len": 15,
+   "hp1Changes": 13,
+   "hp1FirstChange": 221,
+   "gapRowsBetweenHp": 7,
+   "hp2Start": 242,
+   "hp2Len": 12,
+   "hp2Changes": 4,
+   "hp2FirstChange": 243,
+   "printfromtable": 254,
+   "waitStart": 255,
+   "firstGlyph": 256
+  },
+  "production": {
+   "leadCommands": [
+    "sprite-visibility:1",
+    "sprite-visibility:1"
+   ],
+   "anim": "none (no LEECH_SEED_DRAIN command)",
+   "hp1Start": 2,
+   "hp1Len": 28,
+   "hp1Bar": 13,
+   "hp1FirstChange": 3,
+   "hp2Start": 30,
+   "hp2Len": 28,
+   "hp2Bar": 10,
+   "hp2FirstChange": 31,
+   "firstGlyph": 58,
+   "messageLen": 101
+  },
+  "delta": {
+   "hp1Start": -218,
+   "hp1FirstChange": -218,
+   "hp1Len": 13,
+   "hp2Start": -212,
+   "hp2FirstChange": -212,
+   "hp2Len": 16,
+   "firstGlyph": -198
+  }
+ },
+ {
+  "case": "fullhp-player-seeds",
+  "variants": {
+   "current": {
+    "glyphAt": 58,
+    "deltaToRom": -188,
+    "hp2Start": 30
+   },
+   "tail3-on-second-hp-only": {
+    "glyphAt": 61,
+    "deltaToRom": -185,
+    "hp2Start": 30
+   },
+   "lead-only": {
+    "glyphAt": 276,
+    "deltaToRom": 30,
+    "hp2Start": 248
+   },
+   "floor-removed-plus-tail3": {
+    "glyphAt": 20,
+    "deltaToRom": -226,
+    "hp2Start": 16
+   },
+   "lead-floor-removed-tail3-only": {
+    "glyphAt": 238,
+    "deltaToRom": -8,
+    "hp2Start": 234
+   },
+   "lead-floor-removed-tail8-tail3": {
+    "glyphAt": 246,
+    "deltaToRom": 0,
+    "hp2Start": 242
+   }
+  },
+  "requiredLead": 218,
+  "scene": "on",
+  "seederSide": "player",
+  "seed": 4,
+  "anchor": "A = first row after the 'was seeded' print",
+  "rom": {
+   "leadRowsBeforeDrain": 10,
+   "drainStart": 10,
+   "animStart": 11,
+   "animLen": 208,
+   "hp1Start": 220,
+   "hp1Len": 15,
+   "hp1Changes": 6,
+   "hp1FirstChange": 221,
+   "gapRowsBetweenHp": 7,
+   "hp2Start": 242,
+   "hp2Len": 2,
+   "hp2Changes": 0,
+   "hp2FirstChange": null,
+   "printfromtable": 244,
+   "waitStart": 245,
+   "firstGlyph": 246
+  },
+  "production": {
+   "leadCommands": [
+    "sprite-visibility:1",
+    "sprite-visibility:1"
+   ],
+   "anim": "none (no LEECH_SEED_DRAIN command)",
+   "hp1Start": 2,
+   "hp1Len": 28,
+   "hp1Bar": 13,
+   "hp1FirstChange": 3,
+   "hp2Start": 30,
+   "hp2Len": 28,
+   "hp2Bar": 0,
+   "hp2FirstChange": 31,
+   "firstGlyph": 58,
+   "messageLen": 105
+  },
+  "delta": {
+   "hp1Start": -218,
+   "hp1FirstChange": -218,
+   "hp1Len": 13,
+   "hp2Start": -212,
+   "hp2FirstChange": null,
+   "hp2Len": 26,
+   "firstGlyph": -188
+  }
+ }
+]
