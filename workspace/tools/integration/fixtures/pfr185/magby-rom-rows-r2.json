@@ -1,0 +1,56 @@
+[
+ {
+  "id": "magby-n6",
+  "scene": "off",
+  "case": {
+   "id": "magby-n6",
+   "species": 240,
+   "nature": 6
+  },
+  "sha256": "fe505b3e5109a16006e2b26f7c1d88d7805bd60345420fca11ee26f10b912592",
+  "bytes": 249815,
+  "H": 217,
+  "closed": 366,
+  "ballFrame": 408,
+  "goTextStart": -13,
+  "ctrlStart": 0,
+  "hbslide": 65,
+  "cleanShiny": 65,
+  "soundAndEnd": 88,
+  "ctrlIdle": 105,
+  "mainRunTurnActions": 112,
+  "battleTurnPassed": 116,
+  "actionSelection": 117,
+  "nextTxt": 117,
+  "actionPrompt": 124,
+  "species": 240,
+  "pidx": 1
+ },
+ {
+  "id": "magby-n6",
+  "scene": "on",
+  "case": {
+   "id": "magby-n6",
+   "species": 240,
+   "nature": 6
+  },
+  "sha256": "9da3c9c72a323208a3e359ad317bde5b0a52d4ad2085db33ecf7990363ee907b",
+  "bytes": 291153,
+  "H": 266,
+  "closed": 366,
+  "ballFrame": 408,
+  "goTextStart": -13,
+  "ctrlStart": 0,
+  "hbslide": 65,
+  "cleanShiny": 65,
+  "soundAndEnd": 195,
+  "ctrlIdle": 196,
+  "mainRunTurnActions": 203,
+  "battleTurnPassed": 207,
+  "actionSelection": 208,
+  "nextTxt": 208,
+  "actionPrompt": 215,
+  "species": 240,
+  "pidx": 1
+ }
+]

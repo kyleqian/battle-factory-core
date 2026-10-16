@@ -1,0 +1,24 @@
+[
+ {
+  "key": "magby-n6-off",
+  "sha256": "fe505b3e5109a16006e2b26f7c1d88d7805bd60345420fca11ee26f10b912592",
+  "confirm": 312,
+  "menuClosedFromConfirm": 54,
+  "ballFromConfirm": 96,
+  "idleFromConfirm": 201,
+  "nextTxtFromConfirm": 213,
+  "promptFromConfirm": 220,
+  "r2Identical": true
+ },
+ {
+  "key": "magby-n6-on",
+  "sha256": "9da3c9c72a323208a3e359ad317bde5b0a52d4ad2085db33ecf7990363ee907b",
+  "confirm": 312,
+  "menuClosedFromConfirm": 54,
+  "ballFromConfirm": 96,
+  "idleFromConfirm": 292,
+  "nextTxtFromConfirm": 304,
+  "promptFromConfirm": 311,
+  "r2Identical": true
+ }
+]
