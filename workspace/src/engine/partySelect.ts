@@ -291,6 +291,8 @@ export const PARTY_SENDOUT_FADE_OUT_START = PARTY_SENDOUT_SUBMENU_HOLD_FRAMES;
 export const PARTY_SENDOUT_BLACK_START = PARTY_SENDOUT_FADE_OUT_START + PARTY_SENDOUT_FADE_OUT_FRAMES;
 export const PARTY_SENDOUT_BATTLE_FADE_IN_START = PARTY_SENDOUT_BLACK_START + PARTY_SENDOUT_BLACK_FRAMES;
 /** First `Go! MAGBY!` glyph, after the field's palette has settled. */
+/** The ROM drops the party-summary tray with the battle fade-in (frame 70 is its last), confirmation-relative for every species (pfr192 dense frames). */
+export const PARTY_SENDOUT_SUMMARY_TRAY_END = PARTY_SENDOUT_BATTLE_FADE_IN_START + 15;
 export const PARTY_SENDOUT_GO_TEXT_START = PARTY_SENDOUT_BATTLE_FADE_IN_START + 28;
 export const PARTY_SENDOUT_GO_TEXT = "Go! MAGBY!";
 
@@ -345,11 +347,7 @@ export const PARTY_SENDOUT_DEFAULT_TIMING: PartySendOutTiming = Object.freeze({
 export function partySendOutBattleMenuReady(elapsed: number, timing: PartySendOutTiming = PARTY_SENDOUT_DEFAULT_TIMING): boolean {
   return elapsed >= timing.readyAt;
 }
-/** The elapsed the MAGBY-calibrated ball / release / healthbox rungs see: this send-in's ball-relative clock. */
-export function partySendOutBallClock(elapsed: number, timing: PartySendOutTiming = PARTY_SENDOUT_DEFAULT_TIMING): number {
-  return elapsed - timing.ballShift;
-}
-/** The elapsed the release and healthbox-slide rungs see (CASTFORM's whole release runs one frame late). */
+/** The elapsed the MAGBY-calibrated ball, release and healthbox-slide rungs see: ball-relative, and CASTFORM's whole post-spawn timeline (first ball texel included) runs one frame late (pfr192 dense ROM frames). */
 export function partySendOutReleaseClock(elapsed: number, timing: PartySendOutTiming = PARTY_SENDOUT_DEFAULT_TIMING): number {
   return elapsed - timing.ballShift - timing.releaseExtra;
 }
