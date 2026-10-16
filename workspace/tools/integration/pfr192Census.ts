@@ -149,6 +149,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
       until(() => phase() === "action-menu");
     }
   } catch (e) { error = String(e); }
+  if (siStart !== null) sendIns.push([siInfo[0], siInfo[1], siInfo[2], frame - siStart, siInfo[3], siInfo[4], siInfo[5], siMoveAnim]);
   lines.push(JSON.stringify({ seed, scene, error, eventsDigest: events.digest("hex").slice(0, 16), commands, frames: frame, moveAnimFrames, sendIns }));
 }
 writeFileSync(arg("out")!, lines.join("\n") + "\n");
