@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-15 / 16 — CAX31 recovery session wind-down (supervisor, Opus 5.5): trn178 / snd179 / fpc180 / trn181 / snd182 / sub183 / pfr185
+## 2026-10-15 / 16 — CAX31 recovery session wind-down (supervisor, Opus 5.5): trn178 / snd179 / fpc180 / trn181 / snd182 / sub183 / pfr185 / lsd186
 
 - **State:** master clean; production src tree `0eee3727b` (= union `a4b477dc1`; later commits docs / tools only). No open DEFERRED items.
   All changes this session are presentation timing (kernel digests identical in every census); no gameplay / RNG change.
@@ -21,7 +21,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** (1) pfr185 production step: route the player faint-replacement send-in through the forced-player model (prompt D + 17) instead
   of partySelect's fixed SEND OUT clock; (2) Transform accounting (live body outside the 276 catalogue, like Struggle) + other bodies over
   a transformed battler; (3) #167 ON body-tail anchor errors (-3 .. -6) and print-length residuals; (4) Focus Punch ON 125-vs-127 pre-pass
-  row; (5) remaining #146 / #168 / #143 items. Budget on this host: full suite ~48 min at 2 workers; tell workers when to start it.
+  row; (5) Leech Seed drain (lsd186: no ON drain animation, ON print ~-190); (6) remaining #146 / #168 / #143 items. Budget on this host: full suite ~48 min at 2 workers; tell workers when to start it.
 - **Notes:** worker refs kept (`worker/integration-20261015-{170019,184353,211449,222935}`, `worker/side-20261016-002710`); worktrees
   removed after copying evidence (`.integration/validation/from-workers/{trn181,sub183}`). Briefs in `.integration/validation/sv-20261015b/`.
   No push (commit locally only).

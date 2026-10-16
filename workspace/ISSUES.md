@@ -86,7 +86,11 @@ OFF bodies read x2 {0,0} because there is no front animation in OFF (`pokemon.c:
 0 px (`docs/sub157-scene-off-substitute.md`). Open, the same in both scenes (ROM OFF == ON):
 - **Substitute turn timing:** FIXED by sub183 (2026-10-15, docs/sub183-substitute-turn-timing.md): 4 script-lead rows, 2 post rows,
   HP -> print tail 3; HP start, doll, next print and next used print exact (4 dense windows, 291 / 291 rows 0 px, both scenes).
-  Open: HP bars under the 28-frame floor (unmeasured); Leech Seed's turn-end `datahpupdate; printfromtable` (same shape, no ROM window).
+  Open: HP bars under the 28-frame floor (unmeasured). Leech Seed turn-end drain MEASURED by lsd186 (2026-10-16,
+  docs/lsd186-leech-seed-drain-timing.md; 3 routes x 2 scenes, twice fresh): production presents no drain lead / animation (ROM
+  Pausex20 in OFF; a 208-row LEECH_SEED_DRAIN general animation in ON) and floors both HP bars at 28: the next print is -198 .. -188
+  early in ON (OFF -22 .. -11). A fitted change (lead 44 OFF / 218 ON, no floor, tails 8 + 3) lands 6 / 6 rows; derive it from source
+  before landing; the ON animation body itself is undrawn (animation work). "was seeded!" print over-holds (88 vs 80 / 84).
 - **Transform:** body + transformed field LIVE in both scenes since trf174 (2026-10-14, docs/trf174-transform-live.md; 8 / 8 dense
   windows 109 / 109 rows 0 px, field 140 / 140, supervisor-reproduced fresh). Open: declined Transform bodies (shiny DITTO, SPINDA
   target, CASTFORM, a doll on either side); every OTHER live body declines while a battler is shown transformed; Transform is not

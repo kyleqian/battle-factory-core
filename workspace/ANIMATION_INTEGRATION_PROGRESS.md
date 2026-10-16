@@ -39,6 +39,9 @@
   model (D = `scene{On,Off}PlayerForcedSwitchInDuration`; idle D - 2, next print D + 10, prompt D + 17); production's partySelect SEND OUT
   clock is fixed (prompt 325 from confirm), late by up to +120. Supervisor: `pfr185Model.ts` receipt byte-identical; a fresh METAPOD
   probe (both scenes) byte-identical to the committed rows. Production step = route the faint-replacement clock through that model.
+- **lsd186 (SIDE, evidence only, merged `9a4443717`):** Leech Seed turn-end drain timing (#153 note): production lacks the drain lead /
+  ON general animation (208 rows) and floors the HP bars; ON print -198 .. -188. Supervisor: `lsd186Compare.ts` receipt byte-identical;
+  a fresh ON probe rows byte-identical to the committed fixture. The 4-term "exact change" is a fit over 6 cases, not yet source-derived.
 - **Final union gates (`a4b477dc1`, src tree `0eee3727b`; later commits docs/tools only):** supervisor full suite 1,682 files /
   13,940 tests passed, 0 failed; build OK. Logs `.integration/validation/sv-20261016-final/`.
 - Union `a641cc285`: smoke 448 / 448 (master's later commits since the worker base are tooling only).
