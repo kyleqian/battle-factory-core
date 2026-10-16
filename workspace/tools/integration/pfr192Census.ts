@@ -2,7 +2,8 @@
 // the party select / orchestrator), so each player replacement is recorded as a 'sendIn' = [species, name length, personality, frames from the SEND OUT
 // confirm (first presenting-switch-in frame) to the first action-menu frame, readyAt (final tree only; null where the keyed clock is absent), expected
 // prompt (91 + name + D + 17, from the scene durations; null where absent), trailing command types] and the battle's total frame count.
-// pfr192CensusDelta.py attributes every difference with them.   (fpc180Census.ts's description follows.)
+// The message-dismiss A press is phase-relative (phaseElapsed % 2) instead of absolute-frame (frame % 2), so a send-in that lasts an odd number of frames
+// longer cannot flip the later dismiss parity. pfr192CensusDelta.py attributes every difference with them.   (fpc180Census.ts's description follows.)
 // fpc180 (docs/fpc180-focus-punch-live.md): trn178Census.ts + field [12] on every message command = for a Focus Punch pre-pass print
 // ("is tightening") the u of the next USEDMOVE print (the kernel's instructionExecution), "pre" when another pre-pass print follows, -1 when
 // the next print is not a USEDMOVE; null otherwise. fpc180CensusDelta.py attributes every changed command to the rules with it.
@@ -114,7 +115,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
       const s = forcedSelector();
       if (s) { pulse(s.message !== null ? "A" : s.cursor === "onix" && !s.submenuOpen ? "DOWN" : "A"); continue; }
       step((state.battleStartIntro && frame % 16 === 0)
-        || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0) ? ["A"] : []);
+        || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && state.battleResolutionPresentation.lifecycle.phaseElapsed % 2 === 0) ? ["A"] : []);
     }
   };
   try {

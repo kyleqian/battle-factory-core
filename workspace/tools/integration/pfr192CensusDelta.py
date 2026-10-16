@@ -7,8 +7,8 @@ identical (the keyed clock lives in the party select / orchestrator, no projecte
 replacement's send-in length (sendIn = [species, name length, personality, frames confirm->action menu, readyAt, expected prompt, trailing]).
 A changed sendIn is attributed iff  final - base == readyAt - 311  (base resumes the lifecycle at the fixed party-select frame 311, final at
 the keyed readyAt; everything after is the same commands) AND, when only `turn-end` follows the switch-in, final == 91 + name + D + 17 (the
-ROM prompt frame).  A battle's total frame delta must equal the sum of its sendIn deltas; a residual of +-1 is the census driver's
-`frame % 2` message-dismiss A press landing on the other parity ("parity"), anything else is UNATTRIBUTED (exit 1).  A battle that hits the
+ROM prompt frame).  A battle's total frame delta must equal the sum of its sendIn deltas exactly (the census driver's message-dismiss press is
+phase-relative, so nothing else may move); anything else is UNATTRIBUTED (exit 1).  A battle that hits the
 200k-frame input budget in BOTH trees is "budget-tail" (its event digest covers different events), as in fpc180CensusDelta.py.
 """
 import glob, json, os, sys
@@ -17,7 +17,7 @@ base_dir, final_dir = sys.argv[1:3]
 out_path = sys.argv[3] if len(sys.argv) > 3 else None
 res = {"schema": "pfr192-census-delta/v1", "battles": 0, "digestMismatch": [], "errorMismatch": [], "budgetStalled": [], "commandRows": 0, "commandRowsChanged": 0,
        "sendIns": 0, "sendInsChanged": 0, "sendInsUnchanged": 0, "byTrailing": {}, "turnEndOnlyExact": 0, "deltaMin": None, "deltaMax": None,
-       "battlesWithSendIn": 0, "battlesFrameChanged": 0, "paritySteps": 0, "budgetTail": [], "unattributed": []}
+       "battlesWithSendIn": 0, "battlesFrameChanged": 0, "budgetTail": [], "unattributed": []}
 scene = None
 for bpath in sorted(glob.glob(os.path.join(base_dir, "r*.jsonl"))):
     load = lambda p: {r["seed"]: r for r in map(json.loads, filter(None, open(p).read().split("\n")))}
@@ -75,10 +75,7 @@ for bpath in sorted(glob.glob(os.path.join(base_dir, "r*.jsonl"))):
             res["battlesFrameChanged"] += 1
         if extra == 0:
             continue
-        if abs(extra) <= 1:
-            res["paritySteps"] += 1
-        else:
-            res["unattributed"].append({"seed": seed, "why": "frame residual", "extra": extra, "base": b["frames"], "final": f["frames"]})
+        res["unattributed"].append({"seed": seed, "why": "frame residual", "extra": extra, "base": b["frames"], "final": f["frames"]})
 res["scene"] = scene
 res["unattributedCount"] = len(res["unattributed"])
 res["unattributed"] = res["unattributed"][:20]
