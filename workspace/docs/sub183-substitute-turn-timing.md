@@ -86,4 +86,10 @@ npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presen
 `sub157Timing.ts` (production, ON seeds 17 / 74, OFF the same): body 90 → 96 frames, HP command at +90 → +96 from the body start, next
 print at +130 / +133 → +139 / +142.
 
-Gates on the final commit: see the commit message of the doc update.
+## Gates
+
+- `npm run typecheck` 0 (re-run after the tests importing `tools/` files), `npm run test:smoke` 448 / 448, `npm run build` OK, on the final tree.
+- Full `npm test` (nohup, `POKEBENCH_VITEST_MAX_WORKERS=2`, one process, 48 min) on `6a01829c0`: 1,726 files / 14,163 tests, **1 failure**:
+  `tests/animation/liveSubstituteBodyAdapter.test.ts` route 11/35 JYNX (the body command's row sequence 92 -> 96). Re-pinned in `122a5b69a`
+  (test file only; the file passes alone, 4 / 4). Every other file ran against the identical source and tests, and the final commits differ
+  from `6a01829c0` in that one test file (plus this doc). A second full run did not fit the 140-minute cap.
