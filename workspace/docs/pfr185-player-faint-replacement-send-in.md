@@ -104,3 +104,18 @@ node --experimental-strip-types --no-warnings tools/integration/pfr185Model.ts /
 ```
 
 Receipts: `tools/integration/fixtures/pfr185/` (`cases.json`, `rom-rows-r1/r2.json`, `confirm-edge.json`, `magby-*`, `prod-timing.json`, `comparison.json`). Driver: `tools/integration/pfr185Probe.py` / `pfr185Run.py`.
+
+## Production plan (supervisor, from the read-only pfp191 audit, 2026-10-16; not implemented)
+
+- Today: `presenting-switch-in` waits on partySelect's fixed clock (`PARTY_SENDOUT_ACTION_MENU_START = 311`, `src/engine/partySelect.ts:320-323`;
+  `factoryRoundBattleOrchestrator.ts:2771-2789`), then `TURN_END_TIMING` 8 (`battleResolutionPresentation.ts:1455`, pushed ~4727) and the
+  6-frame next-command handoff (`battleResolutionPresentationRender.ts:62`): prompt 325 from confirm in every case. `switchInTiming` only uses
+  the D functions for `forcedDraggedOut` (Roar-style) removals (~4638).
+- Target: the ROM, i.e. action prompt at B + D + 17 from confirm (B = confirm -> ball, measured above), blank / next print at B + D + 10
+  (CASTFORM + 11). MAGBY ON's ROM prompt is **311** (production 325, +14), so the old 311 / 325 pins are not the target.
+- Species / personality / scene: the faint-replacement `switch-in` command's `incoming.field` (species, name, personality) and the local
+  `sceneOn` (~4630-4639; store `sceneOn` on the command); key the orchestrator's ready test and `partySendOutPhase` (`partySelect.ts:377-381`)
+  on them; decide whether turn-end 8 + handoff 6 are inside or after the keyed span from a dense ROM window, not by fitting.
+- Pins to re-attribute: `tests/partySelect.test.ts:259-271`, `tests/fightSubmenu.test.ts:364-371`, `tests/battleSceneResolutionOwner.test.ts:64`;
+  check `ACTION_MENU_BLANK_START_OFFSET = 325` (`battleSceneCanonical.ts:17`, `tests/battle2ActionMenu.test.ts:29`); re-run the ball / slide dense
+  receipts once B depends on the species.
