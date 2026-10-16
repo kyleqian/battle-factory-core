@@ -7,7 +7,7 @@ identical (the keyed clock lives in the party select / orchestrator, no projecte
 replacement's send-in length (sendIn = [species, name length, personality, frames confirm->action menu, readyAt, expected prompt, trailing]).
 A changed sendIn is attributed iff  final - base == readyAt - 311  (base resumes the lifecycle at the fixed party-select frame 311, final at
 the keyed readyAt; everything after is the same commands) AND, when only `turn-end` follows the switch-in, final == 91 + name + D + 17 (the
-ROM prompt frame).  A battle's total frame delta must equal the sum of its sendIn deltas exactly (the census driver's message-dismiss press is
+ROM prompt frame).  A battle's total frame delta must equal the sum of its sendIn clock deltas plus its move-animation frame delta exactly (the census driver's message-dismiss press is
 phase-relative, so nothing else may move); anything else is UNATTRIBUTED (exit 1).  A battle that hits the
 200k-frame input budget in BOTH trees is "budget-tail" (its event digest covers different events), as in fpc180CensusDelta.py.
 """
@@ -54,11 +54,15 @@ for bpath in sorted(glob.glob(os.path.join(base_dir, "r*.jsonl"))):
             if x[:3] != y[:3] or x[6] != y[6]:
                 res["unattributed"].append({"seed": seed, "why": "sendIn identity", "base": x, "final": y}); bad = True; break
             d = y[3] - x[3]
-            total += d
+            total += d - (y[7] - x[7])
             if d == 0:
                 res["sendInsUnchanged"] += 1
             res["sendInsChanged"] += 1 if d else 0
-            ok = d == y[4] - 311 and (tr != "turn-end" or y[3] == y[5])
+            # a move animation after the send-in runs on the frame-indexed presentation Random2 stream (tickLiveMovePresentationRngSession),
+            # so its own length may differ by exactly the frames measured inside it; the clock part is still strictly readyAt - 311
+            dma = y[7] - x[7]
+            res["moveAnimShifted"] = res.get("moveAnimShifted", 0) + (1 if dma else 0)
+            ok = d - dma == y[4] - 311 and (tr != "turn-end" or y[3] == y[5]) and (dma == 0 or "move-animation" in tr)
             if tr == "turn-end" and y[3] == y[5]:
                 res["turnEndOnlyExact"] += 1
             res["byTrailing"][key] = res["byTrailing"].get(key, 0) + 1
@@ -70,7 +74,8 @@ for bpath in sorted(glob.glob(os.path.join(base_dir, "r*.jsonl"))):
             continue
         if bs:
             res["battlesWithSendIn"] += 1
-        extra = (f["frames"] - b["frames"]) - total
+        extra = (f["frames"] - b["frames"]) - (f["moveAnimFrames"] - b["moveAnimFrames"]) - total
+        res["moveAnimFramesShifted"] = res.get("moveAnimFramesShifted", 0) + (1 if f["moveAnimFrames"] != b["moveAnimFrames"] else 0)
         if f["frames"] != b["frames"]:
             res["battlesFrameChanged"] += 1
         if extra == 0:

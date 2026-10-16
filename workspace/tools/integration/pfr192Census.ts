@@ -59,6 +59,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
   let rng = createPresentationRngSession();
   let frame = 0; let ended = false; let error: string | null = null;
   const sendIns: unknown[] = []; let siStart: number | null = null; let siInfo: any[] = [];
+  let moveAnimFrames = 0; let siMoveAnim = 0;
   const seen = new Set<unknown>(); const slotUses = [0, 0, 0, 0]; let lastUsed: string | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
@@ -68,6 +69,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
     else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons) as never);
     rng = tickLiveMovePresentationRngSession(rng, state, liveMoveRandom2PlanContextAt);
     const r = state.battleResolutionPresentation as any;
+    if (r?.segments[r.segmentIndex]?.commands[r.commandIndex]?.type === "move-animation") { moveAnimFrames++; if (siStart !== null) siMoveAnim++; }
     if (r) {
       for (const s of r.segments) {
         if (seen.has(s)) continue;
@@ -95,11 +97,11 @@ for (let seed = from!; seed <= to!; seed += 1) {
         const d = scene === "on" ? tail.sceneOnPlayerForcedSwitchInDuration(sw.incoming.species, personality) : tail.sceneOffPlayerForcedSwitchInDuration(sw.incoming.species);
         expected = 91 + sw.incoming.name.length + d + 17;
       }
-      siStart = frame;
+      siStart = frame; siMoveAnim = 0;
       siInfo = [sw.incoming.species, sw.incoming.name.length, personality, keyed ? keyed(seg)?.readyAt ?? null : null, expected, seg.commands.slice(k + 1).map((c: any) => c.type).join(",")];
     }
     if (siStart !== null && state.battleCommandPresentation?.lifecycle.phase === "action-menu") {
-      sendIns.push([siInfo[0], siInfo[1], siInfo[2], frame - siStart, siInfo[3], siInfo[4], siInfo[5]]);
+      sendIns.push([siInfo[0], siInfo[1], siInfo[2], frame - siStart, siInfo[3], siInfo[4], siInfo[5], siMoveAnim]);
       siStart = null;
     }
     if (!owned()) ended = true;
@@ -138,6 +140,6 @@ for (let seed = from!; seed <= to!; seed += 1) {
       until(() => phase() === "action-menu");
     }
   } catch (e) { error = String(e); }
-  lines.push(JSON.stringify({ seed, scene, error, eventsDigest: events.digest("hex").slice(0, 16), commands, frames: frame, sendIns }));
+  lines.push(JSON.stringify({ seed, scene, error, eventsDigest: events.digest("hex").slice(0, 16), commands, frames: frame, moveAnimFrames, sendIns }));
 }
 writeFileSync(arg("out")!, lines.join("\n") + "\n");
