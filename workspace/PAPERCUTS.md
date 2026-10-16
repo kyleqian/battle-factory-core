@@ -36,7 +36,9 @@ history.
   reported "no commits" for the branch. The launcher should refuse or detect a main-tree HEAD move by a side / integration worker.
 - **Hits:** 2 sessions (2026-10-14, 2026-10-15/16), ~2 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
-  and the supervisor; census job limit from `/etc/pokebench-runner.env`.
+  and the supervisor; census job limit from `/etc/pokebench-runner.env`. Vendor paths: 155 `tools/**/*.sh` hard-code
+  `/Users/kyle/Developer/pokebench/vendor`; replace with `${POKEBENCH_VENDOR_DIR:-…}` and export it from the runner env (one sweep +
+  spot-run a few probes on each host).
 
 ## Tooling gaps hit on 2026-10-11 (S10A afternoon)
 
