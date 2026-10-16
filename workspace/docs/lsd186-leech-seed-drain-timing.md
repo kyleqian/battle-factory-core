@@ -15,8 +15,8 @@ command row 0). Receipts: `tools/integration/fixtures/lsd186/`.
   D = the first row at `BattleScript_LeechSeedTurnDrain`). Production's next command after that print starts at A.
 - Production: the real kernel (`createFactoryFullTurnBattleState` / `submitFactoryFullTurnDecision`, real level-50 stats and HP, Scene OFF = `HITMARKER_NO_ANIMATIONS`)
   + `projectBattleResolutionCommands` + `battleResolutionCommandDuration` (`lsd186Production.ts`). The kernel RNG seed is chosen so Tackle's roll equals the ROM's
-  (seed 57 → 11 HP, seed 4 → 10 HP). Scene ON and OFF produce the same drain commands. Cross-checked on ordinary census battles (`lsd186Timing.ts`, seeds 0..29 OFF):
-  the same three-command shape everywhere (below).
+  (seed 57 → 11 HP, seed 4 → 10 HP). Scene ON and OFF produce the same drain commands. Cross-checked on ordinary census battles (`lsd186Timing.ts`, seeds 0..29 OFF: 7 drains, all in seed 16):
+  the same three-command shape in all 7 (below).
 
 ## ROM script rows (identical in structure for both sides; BS_ATTACKER = the seeded mon, BS_TARGET = the HP receiver)
 
@@ -91,7 +91,7 @@ extending the tail without the floor and lead would worsen nothing but fix nothi
 
 ## Observations (not changed)
 
-- Every census drain has the same shape (seeds 0..29, OFF): `hp` (seeded) 28 → `hp` (receiver) 28 → `message` (101/105/107). `from == to` receiver commands (full-HP) are common.
+- Every census drain has the same shape (7 of 7, seeds 0..29, OFF): `hp` (seeded) 28 → `hp` (receiver) 28 → `message` (101/105/107). `from == to` receiver commands (full-HP) are common.
 - The preceding **"ONIX was seeded!" print** is held 88 rows in production (`max(24, printable) + 64`) against the ROM's first glyph → next command 80 (16 chars) / 84 ("Foe ONIX …", 20 chars): production is +8 / +4 late.
   The `minimumFrames 24` floor over-holds short prints here. Out of this step's scope; measured from the same probes (waitmessage run D−91..D−11 and D−95..D−11).
 - Not staged: Liquid Ooze (`BattleScript_LeechSeedTurnPrintLiquidOoze`, same tail shape), a faint on the drain (`tryfaintmon` after the print), a 2nd drain in one turn end, bars > 27 rows.
