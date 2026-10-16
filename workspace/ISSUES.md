@@ -40,7 +40,10 @@ length L, 72 / 72 ROM uses; Scene OFF Wish residual 0 / 0; Wish then end of turn
 transition: Scene OFF LANDED by trn178 (2026-10-15, docs/trn178-action-transition-live.md; P = d + 6 + u, 23 / 23 comparable OFF rows
 on trn176's prediction, census 13,706 pauses, digests identical). Scene ON LANDED by trn181 (2026-10-15, docs/trn181-action-transition-on.md; one rule
 for both scenes, 13 / 13 ON rows on prediction, census ON 12,942 pauses, 1,626 transitions skipped by the guard). Open: (a') the ON
-body-tail anchor errors (-3 .. -6), Toxic's upstream -19 (status body before the message) and the
+body-tail anchor errors (-3 .. -6): EXPLAINED by btl188 (2026-10-16, docs/btl188-scene-on-anchor-start.md): the script rows after
+`waitanimation` releases (release row, setbyte / playstatchangeanimation or printfromtable / waitmessage) are not presented after an
+ON no-hit live body; tail = Δ(next receipt) − Δ(attack) + 1 + (release row − body end) fits Bulk Up / Protect / Detect / Sand-Attack
+(Double Team owns its banner; Rest needs a real-stat route) — production step pending; Toxic's upstream -19 (status body before the message) and the
 named print-length residuals (Snore +10, Dig +4, Dynamic Punch ply +1, Toxic -2, Curse +2 / -4); switches / faints / end of turn /
 pre-move prints after the anchor stay unmeasured; (b) sprite-visibility next after Roar /
 Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);

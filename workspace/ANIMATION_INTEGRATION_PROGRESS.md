@@ -44,6 +44,8 @@
   a fresh ON probe rows byte-identical to the committed fixture. The 4-term "exact change" is a fit over 6 cases, not yet source-derived.
 - **fpo187 (SIDE, evidence only, merged `de9044cec`):** the Scene ON Focus Punch pre-pass +2 row is the controller's `IsBattleSEPlaying`
   wait for the player's last SE_SELECT before `General_FocusPunchSetUp` (source-named). Supervisor: fresh a-switch-on probe byte-identical.
+- **btl188 (SIDE, evidence only, merged `75c92d2a3`):** the Scene ON -3 .. -6 anchor-start errors are the unpresented post-waitanimation
+  script rows after a no-hit live body (rule in docs/btl188-scene-on-anchor-start.md). Supervisor: `btl188Rows.ts` output == committed rows.
 - **Final union gates (`a4b477dc1`, src tree `0eee3727b`; later commits docs/tools only):** supervisor full suite 1,682 files /
   13,940 tests passed, 0 failed; build OK. Logs `.integration/validation/sv-20261016-final/`.
 - Union `a641cc285`: smoke 448 / 448 (master's later commits since the worker base are tooling only).
