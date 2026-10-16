@@ -80,6 +80,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // snd145: + the Foe WOBBUFFET faint replacement's Scene ON species-keyed send-in tail + turn-end hold (158 vs the old 91 + 11).
     expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1 + iu([91, O, 4], [151, P, 3], [196, P, 4], [219, O], [204, O]) - 2 + 8 + 9
       + snd145FaintReplacement(202) - 16 * CHG161_SEED0_ON_CHARGE_TURNS
+      - 99 - 1 // pfr192: the one player faint replacement (readyAt 212 vs the fixed 311) + 1 frame of dismissal parity (odd 99).
       - 17 // msg175: the route's used prints last their printable length (no 24-frame floor).
       + 79 + 1); // trn181: the route's six Scene ON action-transition pauses (79 frames) + 1 frame of dismissal parity (odd 79).
   });
@@ -161,7 +162,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       // snd145: + the Foe NIDORINA faint replacement's send-in tail + turn-end hold (123 vs 102), - 1 frame of dismissal parity (odd 21).
       + snd145FaintReplacement(30) - 1
       - 46 // msg175: the route's used prints last their printable length (no 24-frame floor).
-      + 109 + 1); // trn181: the route's seven Scene ON action-transition pauses (109 frames) + 1 frame of dismissal parity (odd 109).
+      + 109 + 1 // trn181: the route's seven Scene ON action-transition pauses (109 frames) + 1 frame of dismissal parity (odd 109).
+      - 57); // pfr192: the route's player faint replacements (readyAt - 311; the keyed send-in clock).
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 239-row window (tmr136) owns the banner; the message moves + 9", () => {

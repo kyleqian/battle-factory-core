@@ -1,0 +1,1602 @@
+{
+ "model": [
+  {
+   "id": "pidgey-n6",
+   "scene": "off",
+   "species": 16,
+   "nature": 6,
+   "ballFromConfirm": 97,
+   "romNextPrint": 198,
+   "romPrompt": 205,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 120,
+   "baseMinusRomNext": 107,
+   "keyedBlankStart": 199,
+   "keyedFirstMenu": 205,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 1,
+   "releaseExtra": 0,
+   "readyAt": 191
+  },
+  {
+   "id": "pidgey-n6",
+   "scene": "on",
+   "species": 16,
+   "nature": 6,
+   "ballFromConfirm": 97,
+   "romNextPrint": 198,
+   "romPrompt": 205,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 120,
+   "baseMinusRomNext": 107,
+   "keyedBlankStart": 199,
+   "keyedFirstMenu": 205,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 1,
+   "releaseExtra": 0,
+   "readyAt": 191
+  },
+  {
+   "id": "metapod-n6",
+   "scene": "off",
+   "species": 11,
+   "nature": 6,
+   "ballFromConfirm": 98,
+   "romNextPrint": 240,
+   "romPrompt": 247,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 78,
+   "baseMinusRomNext": 65,
+   "keyedBlankStart": 241,
+   "keyedFirstMenu": 247,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 2,
+   "releaseExtra": 0,
+   "readyAt": 233
+  },
+  {
+   "id": "metapod-n6",
+   "scene": "on",
+   "species": 11,
+   "nature": 6,
+   "ballFromConfirm": 98,
+   "romNextPrint": 240,
+   "romPrompt": 247,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 78,
+   "baseMinusRomNext": 65,
+   "keyedBlankStart": 241,
+   "keyedFirstMenu": 247,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 2,
+   "releaseExtra": 0,
+   "readyAt": 233
+  },
+  {
+   "id": "torkoal-n6",
+   "scene": "off",
+   "species": 321,
+   "nature": 6,
+   "ballFromConfirm": 98,
+   "romNextPrint": 201,
+   "romPrompt": 208,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 117,
+   "baseMinusRomNext": 104,
+   "keyedBlankStart": 202,
+   "keyedFirstMenu": 208,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 2,
+   "releaseExtra": 0,
+   "readyAt": 194
+  },
+  {
+   "id": "torkoal-n6",
+   "scene": "on",
+   "species": 321,
+   "nature": 6,
+   "ballFromConfirm": 98,
+   "romNextPrint": 306,
+   "romPrompt": 313,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 12,
+   "baseMinusRomNext": -1,
+   "keyedBlankStart": 307,
+   "keyedFirstMenu": 313,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 2,
+   "releaseExtra": 0,
+   "readyAt": 299
+  },
+  {
+   "id": "torkoal-n0",
+   "scene": "off",
+   "species": 321,
+   "nature": 0,
+   "ballFromConfirm": 98,
+   "romNextPrint": 201,
+   "romPrompt": 208,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 117,
+   "baseMinusRomNext": 104,
+   "keyedBlankStart": 202,
+   "keyedFirstMenu": 208,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 2,
+   "releaseExtra": 0,
+   "readyAt": 194
+  },
+  {
+   "id": "torkoal-n0",
+   "scene": "on",
+   "species": 321,
+   "nature": 0,
+   "ballFromConfirm": 98,
+   "romNextPrint": 306,
+   "romPrompt": 313,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 12,
+   "baseMinusRomNext": -1,
+   "keyedBlankStart": 307,
+   "keyedFirstMenu": 313,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 2,
+   "releaseExtra": 0,
+   "readyAt": 299
+  },
+  {
+   "id": "torkoal-n10",
+   "scene": "off",
+   "species": 321,
+   "nature": 10,
+   "ballFromConfirm": 98,
+   "romNextPrint": 201,
+   "romPrompt": 208,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 117,
+   "baseMinusRomNext": 104,
+   "keyedBlankStart": 202,
+   "keyedFirstMenu": 208,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 2,
+   "releaseExtra": 0,
+   "readyAt": 194
+  },
+  {
+   "id": "torkoal-n10",
+   "scene": "on",
+   "species": 321,
+   "nature": 10,
+   "ballFromConfirm": 98,
+   "romNextPrint": 306,
+   "romPrompt": 313,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 12,
+   "baseMinusRomNext": -1,
+   "keyedBlankStart": 307,
+   "keyedFirstMenu": 313,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 2,
+   "releaseExtra": 0,
+   "readyAt": 299
+  },
+  {
+   "id": "butterfree-n6",
+   "scene": "off",
+   "species": 12,
+   "nature": 6,
+   "ballFromConfirm": 101,
+   "romNextPrint": 206,
+   "romPrompt": 213,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 112,
+   "baseMinusRomNext": 99,
+   "keyedBlankStart": 207,
+   "keyedFirstMenu": 213,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 5,
+   "releaseExtra": 0,
+   "readyAt": 199
+  },
+  {
+   "id": "butterfree-n6",
+   "scene": "on",
+   "species": 12,
+   "nature": 6,
+   "ballFromConfirm": 101,
+   "romNextPrint": 268,
+   "romPrompt": 275,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 50,
+   "baseMinusRomNext": 37,
+   "keyedBlankStart": 269,
+   "keyedFirstMenu": 275,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 5,
+   "releaseExtra": 0,
+   "readyAt": 261
+  },
+  {
+   "id": "bulbasaur-n0",
+   "scene": "off",
+   "species": 1,
+   "nature": 0,
+   "ballFromConfirm": 100,
+   "romNextPrint": 223,
+   "romPrompt": 230,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 95,
+   "baseMinusRomNext": 82,
+   "keyedBlankStart": 224,
+   "keyedFirstMenu": 230,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 4,
+   "releaseExtra": 0,
+   "readyAt": 216
+  },
+  {
+   "id": "bulbasaur-n0",
+   "scene": "on",
+   "species": 1,
+   "nature": 0,
+   "ballFromConfirm": 100,
+   "romNextPrint": 242,
+   "romPrompt": 249,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 76,
+   "baseMinusRomNext": 63,
+   "keyedBlankStart": 243,
+   "keyedFirstMenu": 249,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 4,
+   "releaseExtra": 0,
+   "readyAt": 235
+  },
+  {
+   "id": "bulbasaur-n10",
+   "scene": "off",
+   "species": 1,
+   "nature": 10,
+   "ballFromConfirm": 100,
+   "romNextPrint": 223,
+   "romPrompt": 230,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 95,
+   "baseMinusRomNext": 82,
+   "keyedBlankStart": 224,
+   "keyedFirstMenu": 230,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 4,
+   "releaseExtra": 0,
+   "readyAt": 216
+  },
+  {
+   "id": "bulbasaur-n10",
+   "scene": "on",
+   "species": 1,
+   "nature": 10,
+   "ballFromConfirm": 100,
+   "romNextPrint": 271,
+   "romPrompt": 278,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 47,
+   "baseMinusRomNext": 34,
+   "keyedBlankStart": 272,
+   "keyedFirstMenu": 278,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 4,
+   "releaseExtra": 0,
+   "readyAt": 264
+  },
+  {
+   "id": "wigglytuff-n6",
+   "scene": "off",
+   "species": 40,
+   "nature": 6,
+   "ballFromConfirm": 101,
+   "romNextPrint": 202,
+   "romPrompt": 209,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 116,
+   "baseMinusRomNext": 103,
+   "keyedBlankStart": 203,
+   "keyedFirstMenu": 209,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 5,
+   "releaseExtra": 0,
+   "readyAt": 195
+  },
+  {
+   "id": "wigglytuff-n6",
+   "scene": "on",
+   "species": 40,
+   "nature": 6,
+   "ballFromConfirm": 101,
+   "romNextPrint": 245,
+   "romPrompt": 252,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 73,
+   "baseMinusRomNext": 60,
+   "keyedBlankStart": 246,
+   "keyedFirstMenu": 252,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 5,
+   "releaseExtra": 0,
+   "readyAt": 238
+  },
+  {
+   "id": "typhlosion-n6",
+   "scene": "off",
+   "species": 157,
+   "nature": 6,
+   "ballFromConfirm": 101,
+   "romNextPrint": 285,
+   "romPrompt": 292,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 33,
+   "baseMinusRomNext": 20,
+   "keyedBlankStart": 286,
+   "keyedFirstMenu": 292,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 5,
+   "releaseExtra": 0,
+   "readyAt": 278
+  },
+  {
+   "id": "typhlosion-n6",
+   "scene": "on",
+   "species": 157,
+   "nature": 6,
+   "ballFromConfirm": 101,
+   "romNextPrint": 309,
+   "romPrompt": 316,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 9,
+   "baseMinusRomNext": -4,
+   "keyedBlankStart": 310,
+   "keyedFirstMenu": 316,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 5,
+   "releaseExtra": 0,
+   "readyAt": 302
+  },
+  {
+   "id": "castform-n6",
+   "scene": "off",
+   "species": 385,
+   "nature": 6,
+   "ballFromConfirm": 99,
+   "romNextPrint": 213,
+   "romPrompt": 219,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 106,
+   "baseMinusRomNext": 92,
+   "keyedBlankStart": 213,
+   "keyedFirstMenu": 219,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 0,
+   "ballShift": 3,
+   "releaseExtra": 1,
+   "readyAt": 205
+  },
+  {
+   "id": "castform-n6",
+   "scene": "on",
+   "species": 385,
+   "nature": 6,
+   "ballFromConfirm": 99,
+   "romNextPrint": 268,
+   "romPrompt": 274,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 51,
+   "baseMinusRomNext": 37,
+   "keyedBlankStart": 268,
+   "keyedFirstMenu": 274,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 0,
+   "ballShift": 3,
+   "releaseExtra": 1,
+   "readyAt": 260
+  },
+  {
+   "id": "magby-n6",
+   "scene": "off",
+   "species": 240,
+   "nature": 6,
+   "ballFromConfirm": 96,
+   "romNextPrint": 213,
+   "romPrompt": 220,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 105,
+   "baseMinusRomNext": 92,
+   "keyedBlankStart": 214,
+   "keyedFirstMenu": 220,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 0,
+   "releaseExtra": 0,
+   "readyAt": 206
+  },
+  {
+   "id": "magby-n6",
+   "scene": "on",
+   "species": 240,
+   "nature": 6,
+   "ballFromConfirm": 96,
+   "romNextPrint": 304,
+   "romPrompt": 311,
+   "baseBlankStart": 305,
+   "baseFirstMenu": 325,
+   "baseMinusRomPrompt": 14,
+   "baseMinusRomNext": 1,
+   "keyedBlankStart": 305,
+   "keyedFirstMenu": 311,
+   "keyedMinusRomPrompt": 0,
+   "keyedBlankMinusRomNext": 1,
+   "ballShift": 0,
+   "releaseExtra": 0,
+   "readyAt": 297
+  }
+ ],
+ "routes": [
+  {
+   "scene": "off",
+   "seed": 1,
+   "species": 70,
+   "name": "WEEPINBELL",
+   "personality": 2915862467,
+   "prompt": 226,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 212,
+   "blankStart": 220,
+   "measuredTurnEndStart": 212,
+   "measuredFirstMenu": 226,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 212,
+    "next-command-handoff:undefined": 220,
+    "command:action-menu": 226
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 2,
+   "species": 58,
+   "name": "GROWLITHE",
+   "personality": 2991490881,
+   "prompt": 221,
+   "trailing": [
+    "stat",
+    "stats-change",
+    "message",
+    "turn-end"
+   ],
+   "readyAt": 221,
+   "blankStart": 215,
+   "measuredTurnEndStart": 414,
+   "measuredFirstMenu": 428,
+   "menuMinusExpectedPrompt": 207,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:stat": 221,
+    "presenting:stats-change": 223,
+    "presenting:message": 300,
+    "presenting:turn-end": 414,
+    "next-command-handoff:undefined": 422,
+    "command:action-menu": 428
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 3,
+   "species": 95,
+   "name": "ONIX",
+   "personality": 116865875,
+   "prompt": 248,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 234,
+   "blankStart": 242,
+   "measuredTurnEndStart": 234,
+   "measuredFirstMenu": 248,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 234,
+    "next-command-handoff:undefined": 242,
+    "command:action-menu": 248
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 4,
+   "species": 382,
+   "name": "ARON",
+   "personality": 3717558781,
+   "prompt": 204,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 190,
+   "blankStart": 198,
+   "measuredTurnEndStart": 190,
+   "measuredFirstMenu": 204,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 190,
+    "next-command-handoff:undefined": 198,
+    "command:action-menu": 204
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 5,
+   "species": 322,
+   "name": "SABLEYE",
+   "personality": 82756226,
+   "prompt": 214,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 200,
+   "blankStart": 208,
+   "measuredTurnEndStart": 200,
+   "measuredFirstMenu": 214,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 200,
+    "next-command-handoff:undefined": 208,
+    "command:action-menu": 214
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 7,
+   "species": 15,
+   "name": "BEEDRILL",
+   "personality": 87737429,
+   "prompt": 237,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 223,
+   "blankStart": 231,
+   "measuredTurnEndStart": 223,
+   "measuredFirstMenu": 237,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 223,
+    "next-command-handoff:undefined": 231,
+    "command:action-menu": 237
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 9,
+   "species": 193,
+   "name": "YANMA",
+   "personality": 1102435432,
+   "prompt": 227,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 213,
+   "blankStart": 221,
+   "measuredTurnEndStart": 213,
+   "measuredFirstMenu": 227,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 213,
+    "next-command-handoff:undefined": 221,
+    "command:action-menu": 227
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 10,
+   "species": 102,
+   "name": "EXEGGCUTE",
+   "personality": 1264181804,
+   "prompt": 237,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 223,
+   "blankStart": 231,
+   "measuredTurnEndStart": 223,
+   "measuredFirstMenu": 237,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 223,
+    "next-command-handoff:undefined": 231,
+    "command:action-menu": 237
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 13,
+   "species": 47,
+   "name": "PARASECT",
+   "personality": 4155265069,
+   "prompt": 268,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 254,
+   "blankStart": 262,
+   "measuredTurnEndStart": 254,
+   "measuredFirstMenu": 268,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 254,
+    "next-command-handoff:undefined": 262,
+    "command:action-menu": 268
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 14,
+   "species": 88,
+   "name": "GRIMER",
+   "personality": 3812054374,
+   "prompt": 210,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 196,
+   "blankStart": 204,
+   "measuredTurnEndStart": 196,
+   "measuredFirstMenu": 210,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 196,
+    "next-command-handoff:undefined": 204,
+    "command:action-menu": 210
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 15,
+   "species": 222,
+   "name": "CORSOLA",
+   "personality": 2323841883,
+   "prompt": 218,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 204,
+   "blankStart": 212,
+   "measuredTurnEndStart": 204,
+   "measuredFirstMenu": 218,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 204,
+    "next-command-handoff:undefined": 212,
+    "command:action-menu": 218
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 17,
+   "species": 294,
+   "name": "DUSTOX",
+   "personality": 2361260631,
+   "prompt": 216,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 202,
+   "blankStart": 210,
+   "measuredTurnEndStart": 202,
+   "measuredFirstMenu": 216,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 202,
+    "next-command-handoff:undefined": 210,
+    "command:action-menu": 216
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 20,
+   "species": 284,
+   "name": "MARSHTOMP",
+   "personality": 2122461725,
+   "prompt": 231,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 217,
+   "blankStart": 225,
+   "measuredTurnEndStart": 217,
+   "measuredFirstMenu": 231,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 217,
+    "next-command-handoff:undefined": 225,
+    "command:action-menu": 231
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 21,
+   "species": 292,
+   "name": "BEAUTIFLY",
+   "personality": 1687734306,
+   "prompt": 208,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 194,
+   "blankStart": 202,
+   "measuredTurnEndStart": 194,
+   "measuredFirstMenu": 208,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 194,
+    "next-command-handoff:undefined": 202,
+    "command:action-menu": 208
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 22,
+   "species": 20,
+   "name": "RATICATE",
+   "personality": 2161712339,
+   "prompt": 209,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 195,
+   "blankStart": 203,
+   "measuredTurnEndStart": 195,
+   "measuredFirstMenu": 209,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 195,
+    "next-command-handoff:undefined": 203,
+    "command:action-menu": 209
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 23,
+   "species": 180,
+   "name": "FLAAFFY",
+   "personality": 3735994191,
+   "prompt": 220,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 206,
+   "blankStart": 214,
+   "measuredTurnEndStart": 206,
+   "measuredFirstMenu": 220,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 206,
+    "next-command-handoff:undefined": 214,
+    "command:action-menu": 220
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 24,
+   "species": 278,
+   "name": "GROVYLE",
+   "personality": 3718768682,
+   "prompt": 239,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 225,
+   "blankStart": 233,
+   "measuredTurnEndStart": 225,
+   "measuredFirstMenu": 239,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 225,
+    "next-command-handoff:undefined": 233,
+    "command:action-menu": 239
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 25,
+   "species": 61,
+   "name": "POLIWHIRL",
+   "personality": 2447276124,
+   "prompt": 208,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 194,
+   "blankStart": 202,
+   "measuredTurnEndStart": 194,
+   "measuredFirstMenu": 208,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 194,
+    "next-command-handoff:undefined": 202,
+    "command:action-menu": 208
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 27,
+   "species": 30,
+   "name": "NIDORINA",
+   "personality": 2586408299,
+   "prompt": 218,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 204,
+   "blankStart": 212,
+   "measuredTurnEndStart": 204,
+   "measuredFirstMenu": 218,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 204,
+    "next-command-handoff:undefined": 212,
+    "command:action-menu": 218
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 31,
+   "species": 308,
+   "name": "SPINDA",
+   "personality": 2161819207,
+   "prompt": 215,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 201,
+   "blankStart": 209,
+   "measuredTurnEndStart": 201,
+   "measuredFirstMenu": 215,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 201,
+    "next-command-handoff:undefined": 209,
+    "command:action-menu": 215
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 33,
+   "species": 58,
+   "name": "GROWLITHE",
+   "personality": 1139504931,
+   "prompt": 221,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 207,
+   "blankStart": 215,
+   "measuredTurnEndStart": 207,
+   "measuredFirstMenu": 221,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 207,
+    "next-command-handoff:undefined": 215,
+    "command:action-menu": 221
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 34,
+   "species": 2,
+   "name": "IVYSAUR",
+   "personality": 3157602296,
+   "prompt": 228,
+   "trailing": [
+    "message",
+    "turn-end"
+   ],
+   "readyAt": 228,
+   "blankStart": 222,
+   "measuredTurnEndStart": 316,
+   "measuredFirstMenu": 330,
+   "menuMinusExpectedPrompt": 102,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:message": 228,
+    "presenting:turn-end": 316,
+    "next-command-handoff:undefined": 324,
+    "command:action-menu": 330
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 37,
+   "species": 373,
+   "name": "CLAMPERL",
+   "personality": 2055064606,
+   "prompt": 234,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 220,
+   "blankStart": 228,
+   "measuredTurnEndStart": 220,
+   "measuredFirstMenu": 234,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 220,
+    "next-command-handoff:undefined": 228,
+    "command:action-menu": 234
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 39,
+   "species": 190,
+   "name": "AIPOM",
+   "personality": 4245242932,
+   "prompt": 219,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 205,
+   "blankStart": 213,
+   "measuredTurnEndStart": 205,
+   "measuredFirstMenu": 219,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 205,
+    "next-command-handoff:undefined": 213,
+    "command:action-menu": 219
+   }
+  },
+  {
+   "scene": "off",
+   "seed": 40,
+   "species": 184,
+   "name": "AZUMARILL",
+   "personality": 160380081,
+   "prompt": 231,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 217,
+   "blankStart": 225,
+   "measuredTurnEndStart": 217,
+   "measuredFirstMenu": 231,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 217,
+    "next-command-handoff:undefined": 225,
+    "command:action-menu": 231
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 1,
+   "species": 70,
+   "name": "WEEPINBELL",
+   "personality": 2915862467,
+   "prompt": 229,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 215,
+   "blankStart": 223,
+   "measuredTurnEndStart": 215,
+   "measuredFirstMenu": 229,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 215,
+    "next-command-handoff:undefined": 223,
+    "command:action-menu": 229
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 2,
+   "species": 58,
+   "name": "GROWLITHE",
+   "personality": 2991490881,
+   "prompt": 221,
+   "trailing": [
+    "stat",
+    "stats-change",
+    "message",
+    "turn-end"
+   ],
+   "readyAt": 221,
+   "blankStart": 215,
+   "measuredTurnEndStart": 414,
+   "measuredFirstMenu": 428,
+   "menuMinusExpectedPrompt": 207,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:stat": 221,
+    "presenting:stats-change": 223,
+    "presenting:message": 300,
+    "presenting:turn-end": 414,
+    "next-command-handoff:undefined": 422,
+    "command:action-menu": 428
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 3,
+   "species": 95,
+   "name": "ONIX",
+   "personality": 116865875,
+   "prompt": 248,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 234,
+   "blankStart": 242,
+   "measuredTurnEndStart": 234,
+   "measuredFirstMenu": 248,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 234,
+    "next-command-handoff:undefined": 242,
+    "command:action-menu": 248
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 4,
+   "species": 382,
+   "name": "ARON",
+   "personality": 3717558781,
+   "prompt": 212,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 198,
+   "blankStart": 206,
+   "measuredTurnEndStart": 198,
+   "measuredFirstMenu": 212,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 198,
+    "next-command-handoff:undefined": 206,
+    "command:action-menu": 212
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 5,
+   "species": 322,
+   "name": "SABLEYE",
+   "personality": 82756226,
+   "prompt": 226,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 212,
+   "blankStart": 220,
+   "measuredTurnEndStart": 212,
+   "measuredFirstMenu": 226,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 212,
+    "next-command-handoff:undefined": 220,
+    "command:action-menu": 226
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 7,
+   "species": 15,
+   "name": "BEEDRILL",
+   "personality": 87737429,
+   "prompt": 237,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 223,
+   "blankStart": 231,
+   "measuredTurnEndStart": 223,
+   "measuredFirstMenu": 237,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 223,
+    "next-command-handoff:undefined": 231,
+    "command:action-menu": 237
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 9,
+   "species": 193,
+   "name": "YANMA",
+   "personality": 1102435432,
+   "prompt": 270,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 256,
+   "blankStart": 264,
+   "measuredTurnEndStart": 256,
+   "measuredFirstMenu": 270,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 256,
+    "next-command-handoff:undefined": 264,
+    "command:action-menu": 270
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 10,
+   "species": 102,
+   "name": "EXEGGCUTE",
+   "personality": 1264181804,
+   "prompt": 237,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 223,
+   "blankStart": 231,
+   "measuredTurnEndStart": 223,
+   "measuredFirstMenu": 237,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 223,
+    "next-command-handoff:undefined": 231,
+    "command:action-menu": 237
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 13,
+   "species": 47,
+   "name": "PARASECT",
+   "personality": 4155265069,
+   "prompt": 268,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 254,
+   "blankStart": 262,
+   "measuredTurnEndStart": 254,
+   "measuredFirstMenu": 268,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 254,
+    "next-command-handoff:undefined": 262,
+    "command:action-menu": 268
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 14,
+   "species": 88,
+   "name": "GRIMER",
+   "personality": 3812054374,
+   "prompt": 215,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 201,
+   "blankStart": 209,
+   "measuredTurnEndStart": 201,
+   "measuredFirstMenu": 215,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 201,
+    "next-command-handoff:undefined": 209,
+    "command:action-menu": 215
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 15,
+   "species": 222,
+   "name": "CORSOLA",
+   "personality": 2323841883,
+   "prompt": 218,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 204,
+   "blankStart": 212,
+   "measuredTurnEndStart": 204,
+   "measuredFirstMenu": 218,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 204,
+    "next-command-handoff:undefined": 212,
+    "command:action-menu": 218
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 17,
+   "species": 294,
+   "name": "DUSTOX",
+   "personality": 2361260631,
+   "prompt": 216,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 202,
+   "blankStart": 210,
+   "measuredTurnEndStart": 202,
+   "measuredFirstMenu": 216,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 202,
+    "next-command-handoff:undefined": 210,
+    "command:action-menu": 216
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 20,
+   "species": 284,
+   "name": "MARSHTOMP",
+   "personality": 2122461725,
+   "prompt": 252,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 238,
+   "blankStart": 246,
+   "measuredTurnEndStart": 238,
+   "measuredFirstMenu": 252,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 238,
+    "next-command-handoff:undefined": 246,
+    "command:action-menu": 252
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 21,
+   "species": 292,
+   "name": "BEAUTIFLY",
+   "personality": 1687734306,
+   "prompt": 274,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 260,
+   "blankStart": 268,
+   "measuredTurnEndStart": 260,
+   "measuredFirstMenu": 274,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 260,
+    "next-command-handoff:undefined": 268,
+    "command:action-menu": 274
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 22,
+   "species": 20,
+   "name": "RATICATE",
+   "personality": 2161712339,
+   "prompt": 219,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 205,
+   "blankStart": 213,
+   "measuredTurnEndStart": 205,
+   "measuredFirstMenu": 219,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 205,
+    "next-command-handoff:undefined": 213,
+    "command:action-menu": 219
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 23,
+   "species": 180,
+   "name": "FLAAFFY",
+   "personality": 3735994191,
+   "prompt": 276,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 262,
+   "blankStart": 270,
+   "measuredTurnEndStart": 262,
+   "measuredFirstMenu": 276,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 262,
+    "next-command-handoff:undefined": 270,
+    "command:action-menu": 276
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 24,
+   "species": 278,
+   "name": "GROVYLE",
+   "personality": 3718768682,
+   "prompt": 239,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 225,
+   "blankStart": 233,
+   "measuredTurnEndStart": 225,
+   "measuredFirstMenu": 239,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 225,
+    "next-command-handoff:undefined": 233,
+    "command:action-menu": 239
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 25,
+   "species": 61,
+   "name": "POLIWHIRL",
+   "personality": 2447276124,
+   "prompt": 226,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 212,
+   "blankStart": 220,
+   "measuredTurnEndStart": 212,
+   "measuredFirstMenu": 226,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 212,
+    "next-command-handoff:undefined": 220,
+    "command:action-menu": 226
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 27,
+   "species": 30,
+   "name": "NIDORINA",
+   "personality": 2586408299,
+   "prompt": 218,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 204,
+   "blankStart": 212,
+   "measuredTurnEndStart": 204,
+   "measuredFirstMenu": 218,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 204,
+    "next-command-handoff:undefined": 212,
+    "command:action-menu": 218
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 31,
+   "species": 308,
+   "name": "SPINDA",
+   "personality": 2161819207,
+   "prompt": 215,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 201,
+   "blankStart": 209,
+   "measuredTurnEndStart": 201,
+   "measuredFirstMenu": 215,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 201,
+    "next-command-handoff:undefined": 209,
+    "command:action-menu": 215
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 33,
+   "species": 58,
+   "name": "GROWLITHE",
+   "personality": 1139504931,
+   "prompt": 221,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 207,
+   "blankStart": 215,
+   "measuredTurnEndStart": 207,
+   "measuredFirstMenu": 221,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 207,
+    "next-command-handoff:undefined": 215,
+    "command:action-menu": 221
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 34,
+   "species": 2,
+   "name": "IVYSAUR",
+   "personality": 3157602296,
+   "prompt": 266,
+   "trailing": [
+    "message",
+    "turn-end"
+   ],
+   "readyAt": 266,
+   "blankStart": 260,
+   "measuredTurnEndStart": 354,
+   "measuredFirstMenu": 368,
+   "menuMinusExpectedPrompt": 102,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:message": 266,
+    "presenting:turn-end": 354,
+    "next-command-handoff:undefined": 362,
+    "command:action-menu": 368
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 37,
+   "species": 373,
+   "name": "CLAMPERL",
+   "personality": 2055064606,
+   "prompt": 247,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 233,
+   "blankStart": 241,
+   "measuredTurnEndStart": 233,
+   "measuredFirstMenu": 247,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 233,
+    "next-command-handoff:undefined": 241,
+    "command:action-menu": 247
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 39,
+   "species": 190,
+   "name": "AIPOM",
+   "personality": 4245242932,
+   "prompt": 226,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 212,
+   "blankStart": 220,
+   "measuredTurnEndStart": 212,
+   "measuredFirstMenu": 226,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 212,
+    "next-command-handoff:undefined": 220,
+    "command:action-menu": 226
+   }
+  },
+  {
+   "scene": "on",
+   "seed": 40,
+   "species": 184,
+   "name": "AZUMARILL",
+   "personality": 160380081,
+   "prompt": 248,
+   "trailing": [
+    "turn-end"
+   ],
+   "readyAt": 234,
+   "blankStart": 242,
+   "measuredTurnEndStart": 234,
+   "measuredFirstMenu": 248,
+   "menuMinusExpectedPrompt": 0,
+   "phases": {
+    "presenting-switch-in:party-summary": 0,
+    "presenting:turn-end": 234,
+    "next-command-handoff:undefined": 242,
+    "command:action-menu": 248
+   }
+  }
+ ]
+}

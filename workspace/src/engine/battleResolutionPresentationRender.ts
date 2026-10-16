@@ -26,7 +26,10 @@ import type {
   BattleResolutionDisplayedField,
   BattleResolutionPresentationCommand,
   BattleResolutionPresentationState,
+  BattleResolutionSegment,
 } from "./battleResolutionPresentation.ts";
+import { playerFaintReplacementSendOutTiming } from "./switchInTail.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import {
   BATTLE_SCRIPT_STATUS1_BURN,
   BATTLE_SCRIPT_STATUS1_FREEZE,
@@ -51,6 +54,7 @@ import {
 import {
   partySendOutGoTextVisibleChars,
   type PartySendOutPhase,
+  type PartySendOutTiming,
   partySendOutPhase,
 } from "./partySelect.ts";
 import { genericHitReactionAtAge } from "./battleMenu.ts";
@@ -61,6 +65,29 @@ import { frontSendOutSpriteFrameAtTick } from "../animation/sendOutSpriteFrame.t
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
   BATTLE_COMMAND_ACTION_ENTER_DELAY;
+/**
+ * pfr192: the keyed clock of the player's faint-replacement send-in a segment owns (the forced party selector's presenting-switch-in
+ * span), from its typed switch-in command (species / nickname / nature), the segment's scene and its "Go!" message.  When the segment
+ * continues with exactly `turn-end`, that command's frames and the next-command handoff are inside the ROM's B + D + 17, so the span
+ * ends that much earlier.  Null when the segment has no player switch-in (the party select then keeps its canonical clock).
+ */
+export function playerFaintReplacementSendOutTimingOfSegment(segment: BattleResolutionSegment): PartySendOutTiming | null {
+  const index = segment.commands.findIndex((candidate) => candidate.type === "switch-in");
+  const command = segment.commands[index];
+  if (command === undefined || command.type !== "switch-in" || command.battler !== 0) return null;
+  const message = segment.commands.find((candidate) => candidate.type === "message");
+  if (message === undefined || message.type !== "message") return null;
+  const rest = segment.commands.slice(index + 1);
+  const turnEnd = rest.length === 1 && rest[0]!.type === "turn-end" ? rest[0] : undefined;
+  return playerFaintReplacementSendOutTiming({
+    species: command.incoming.species,
+    nameLength: command.incoming.name.length,
+    personality: command.incoming.personality ?? 0,
+    sceneOn: (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0,
+    followingFrames: turnEnd?.type === "turn-end" ? turnEnd.timing.minimumFrames + BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES : 0,
+    goTextChars: battleStringPrintableLength(message.lines),
+  });
+}
 /**
  * The stat RAM write is silent for exactly 2 frames before the message box
  * clears -- oracle-measured across all 5 omniboost banners (`docs/issue69-
@@ -808,6 +835,8 @@ export type BattleResolutionPresentationRenderView = Readonly<{
   switchIn: Readonly<{
     elapsed: number;
     phase: PartySendOutPhase;
+    /** pfr192: the faint-replacement send-in's keyed clock (null = the canonical MAGBY / Scene ON constants). */
+    timing: PartySendOutTiming | null;
     battler: 0 | 1;
     /**
      * Null when this switch-in's own script never called
@@ -1633,9 +1662,11 @@ export function createBattleResolutionPresentationRenderView(
       switchCommand.incoming,
     ), switchCommand.battler, false);
     latestMessage = message.lines;
+    const sendOutTiming = playerFaintReplacementSendOutTimingOfSegment(segment);
     switchIn = Object.freeze({
       elapsed: state.lifecycle.phaseElapsed,
-      phase: partySendOutPhase(state.lifecycle.phaseElapsed),
+      phase: partySendOutPhase(state.lifecycle.phaseElapsed, sendOutTiming ?? undefined),
+      timing: sendOutTiming,
       battler: switchCommand.battler,
       partyStates: summary?.states ?? null,
     });
@@ -1681,7 +1712,7 @@ export function createBattleResolutionPresentationRenderView(
     ? 0
     : switchIn === null
       ? battleStringPrintableLength(latestMessage)
-      : partySendOutGoTextVisibleChars(switchIn.elapsed);
+      : partySendOutGoTextVisibleChars(switchIn.elapsed, switchIn.timing ?? undefined);
   let hpTarget: Readonly<{ battler: 0 | 1; to: number }> | null = null;
   let waitCursor: Readonly<{ age: number }> | null = null;
   let activeTrainerSlide: Readonly<{ battler: 0 | 1; offscreenX2: number }> | null = null;
