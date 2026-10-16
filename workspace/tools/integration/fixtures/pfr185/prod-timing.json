@@ -1,0 +1,124 @@
+[
+ {
+  "scene": "off",
+  "seed": 9,
+  "confirmFrame": 1979,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:turn-end": 311,
+   "next-command-handoff:undefined": 319,
+   "command:action-menu": 325
+  },
+  "actionMenuFromConfirm": 325
+ },
+ {
+  "scene": "off",
+  "seed": 20,
+  "confirmFrame": 2429,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:turn-end": 311,
+   "next-command-handoff:undefined": 319,
+   "command:action-menu": 325
+  },
+  "actionMenuFromConfirm": 325
+ },
+ {
+  "scene": "off",
+  "seed": 61,
+  "confirmFrame": 1667,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:turn-end": 311,
+   "next-command-handoff:undefined": 319,
+   "command:action-menu": 325
+  },
+  "actionMenuFromConfirm": 325
+ },
+ {
+  "scene": "off",
+  "seed": 76,
+  "confirmFrame": 3059,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:message": 311,
+   "presenting:turn-end": 412,
+   "next-command-handoff:undefined": 420,
+   "command:action-menu": 426
+  },
+  "actionMenuFromConfirm": 426
+ },
+ {
+  "scene": "off",
+  "seed": 84,
+  "confirmFrame": 1733,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:turn-end": 311,
+   "next-command-handoff:undefined": 319,
+   "command:action-menu": 325
+  },
+  "actionMenuFromConfirm": 325
+ },
+ {
+  "scene": "on",
+  "seed": 9,
+  "confirmFrame": 2365,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:turn-end": 311,
+   "next-command-handoff:undefined": 319,
+   "command:action-menu": 325
+  },
+  "actionMenuFromConfirm": 325
+ },
+ {
+  "scene": "on",
+  "seed": 20,
+  "confirmFrame": 2911,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:turn-end": 311,
+   "next-command-handoff:undefined": 319,
+   "command:action-menu": 325
+  },
+  "actionMenuFromConfirm": 325
+ },
+ {
+  "scene": "on",
+  "seed": 61,
+  "confirmFrame": 1903,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:turn-end": 311,
+   "next-command-handoff:undefined": 319,
+   "command:action-menu": 325
+  },
+  "actionMenuFromConfirm": 325
+ },
+ {
+  "scene": "on",
+  "seed": 76,
+  "confirmFrame": 4797,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:message": 311,
+   "presenting:turn-end": 412,
+   "next-command-handoff:undefined": 420,
+   "command:action-menu": 426
+  },
+  "actionMenuFromConfirm": 426
+ },
+ {
+  "scene": "on",
+  "seed": 84,
+  "confirmFrame": 2409,
+  "phasesFromConfirm": {
+   "presenting-switch-in:party-summary": 0,
+   "presenting:turn-end": 311,
+   "next-command-handoff:undefined": 319,
+   "command:action-menu": 325
+  },
+  "actionMenuFromConfirm": 325
+ }
+]
