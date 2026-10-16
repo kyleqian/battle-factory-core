@@ -174,7 +174,10 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   plr162 (Scene OFF forced player send-in: slide 65, print max(91, cry + 66); docs/plr162-player-forced-send-in.md, folded 2026-10-14).
 - **Fixed 2026-10-15:** snd182 (Scene ON forced player send-in message = max(91, cry + 66, T_back + 70) (+1 CASTFORM), nature from
   personality; snd179 evidence; 27 / 27 ROM cases exact; docs/snd182-scene-on-forced-player-send-in-live.md).
-- **Open:** Scene ON player back send-out animation is not drawn by the live renderer (mon-region px on every player send-in window); player faint-replacement send-in (same controller, unmeasured); player-side back send-out animations and
+- **Open:** Scene ON player back send-out animation is not drawn by the live renderer (mon-region px on every player send-in window); player faint-replacement send-in: MEASURED by pfr185 (2026-10-16,
+  docs/pfr185-player-faint-replacement-send-in.md; 11 species x 2 scenes, twice fresh): the ROM follows the live forced-player model
+  (next print D + 10, prompt D + 17; 22 / 22 prompts exact), but production uses partySelect's fixed SEND OUT clock (MAGBY-calibrated
+  311 / prompt 325): -9 .. +120 frames late. Production step pending; player-side back send-out animations and
   battle-start intro send-outs (Scene ON; fra151 doc says what they need); shiny send-ins; CRY_MODE_WEAK send-ins; PONYTA glow
   mid-frame palette row (D4 class, 616 px); TYPHLOSION faint-path slide lag frame (D4); the faint-path blank row one frame late;
   opponent-attacker Roar player-side ball-throw path (6,718 px); the elevated-attacker post-body field difference (1,444 px, untriaged).

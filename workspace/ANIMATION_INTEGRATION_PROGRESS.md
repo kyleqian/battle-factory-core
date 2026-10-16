@@ -1,6 +1,6 @@
 # Animation integration progress
 
-## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 + trn181 + snd182 + sub183 folded
+## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 + trn181 + snd182 + sub183 + pfr185 folded
 
 - **trn178 (INTEGRATION, saved ref `4a8a25431`, merged `40793066b`):** Scene OFF action-transition pause (#167 (a'); P = d + 6 + u
   before an action's first MoveEnd sprite-visibility receipt; docs/trn178-action-transition-live.md). Supervisor: `trn176Predict.ts
@@ -35,6 +35,12 @@
   the committed fixtures. Worker: 4 / 4 dense windows 0 px (before 135-142 / 291 rows), census both scenes digests identical, 94 changed
   commands per scene all Substitute, differential 641 / 641; full suite on `6a01829c0` 1 failure (attributed re-pin `122a5b69a`, file 4 / 4),
   typecheck, smoke, build on final. Evidence copied to `.integration/validation/from-workers/sub183/`.
+- **pfr185 (SIDE, evidence only, merged `0b6806c01`):** player faint-replacement send-in timing (#146): the ROM follows the forced-player
+  model (D = `scene{On,Off}PlayerForcedSwitchInDuration`; idle D - 2, next print D + 10, prompt D + 17); production's partySelect SEND OUT
+  clock is fixed (prompt 325 from confirm), late by up to +120. Supervisor: `pfr185Model.ts` receipt byte-identical; a fresh METAPOD
+  probe (both scenes) byte-identical to the committed rows. Production step = route the faint-replacement clock through that model.
+- **Final union gates (`a4b477dc1`, src tree `0eee3727b`; later commits docs/tools only):** supervisor full suite 1,682 files /
+  13,940 tests passed, 0 failed; build OK. Logs `.integration/validation/sv-20261016-final/`.
 - Union `a641cc285`: smoke 448 / 448 (master's later commits since the worker base are tooling only).
 
 ## 2026-10-14 — CAX31 session: Transform live (trf174) + enc160 / plr162 / enc173 folds
