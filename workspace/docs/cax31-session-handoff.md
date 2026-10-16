@@ -1,42 +1,56 @@
-# CAX31 recovery-session handoff — 2026-10-15
+# CAX31 next-session handoff — 2026-10-16
 
-The user requested a launcher fix and a fresh 10-hour run. Continue on CAX31's
-`master` at `/srv/pokebench/pokeemerald-factory-core/workspace`, Opus 5.5
-supervisor and Sonnet 5.5 workers, headless in tmux. Keep the Mac supervisor
-stopped. Commit locally; no automatic pushes or recurring timers.
+The user requested another 10-hour run after reviewing the remaining animation
+work. Run the normal main supervisor on CAX31's `master` at
+`/srv/pokebench/pokeemerald-factory-core/workspace`: Opus 5.5 supervisor,
+Sonnet 5.5 workers, headless in tmux. Keep the Mac supervisor stopped. Commit
+locally; do not push automatically or enable recurring timers.
 
-The preceding supervisor exited after about 14 minutes while relying on
-background notifications. Its workers finished and committed the two branches
-below, but neither was verified/folded by the supervisor. Their refs, logs and
-briefs are backed up on the Mac under
-`.integration/validation/cax31-session-20261015/`. Preserve remote raw evidence.
+The prior recovery run finished cleanly at `d7a93289a`; its controller accepted
+wind-down in the final 20 minutes. All worker branches were folded. Results,
+worker refs, logs, briefs and supervisor evidence are imported to the Mac at
+`.integration/validation/cax31-session-20261016/` and backed up to GitHub
+before this launch. Do not redo trn178 / trn181 / fpc180 / snd182 / sub183.
 
-## First: verify and fold the saved work
+## Work queue
 
-1. `worker/integration-20261015-041827` at `4a8a25431`: trn178, Scene OFF
-   action-transition hold (#167 (a')). Read its
-   `docs/trn178-action-transition-live.md`, independently reproduce the central
-   timing claim and review each attributed re-pin. Worker final gates:
-   13,918 tests / zero failed, build, typecheck and 448 smoke checks. The
-   implementation intentionally leaves Scene ON unchanged. Reuse matching
-   full-suite/build receipts only under `ANIMATION_VERIFICATION.md`; do not
-   claim supervisor acceptance before independently checking the change.
-2. `worker/side-20261015-041923` at `84b46c795`: snd179, evidence only for
-   Scene ON forced player send-in timing (#146). Read
-   `docs/snd179-scene-on-forced-player-send-in.md`. The predictor matches
-   338 / 339 sweep rows; preserve the named LAIRON/nature issue and verify
-   message-anchor compatibility before wiring production. The worker ran
-   smoke, typecheck and build; it changed no production modules and ran no
-   full suite. Independently verify representative source/ROM claims and fold
-   the evidence without inventing implementation credit.
+Read the current `PROGRESS.md`, `ROADMAP.md`, `ISSUES.md` and integration
+ledger. Continue the full user-authorized Factory finish-up scope under
+`docs/factory-finish-scope.md`; preserve existing D3/D4 decisions. Audio stays
+deferred. This is an implementation session: use the banked source/ROM work
+and prioritize verified production fixes over repeating completed surveys.
 
-Then implement fpc177's Focus Punch corrections (#139), using
-`docs/fpc177-focus-punch-edges.md` and its twelve twice-fresh ROM cards.
-Continue Scene ON action-transition timing, Substitute HP timing (-6 frames,
-#153), Transform inventory/other live bodies over transformed battlers and
-Scene ON forced player send-in messages. Read the current roadmap, issue
-backlog and integration ledger; all previous Factory finish-up scope and D3/D4
-permissions remain valid. Audio stays deferred.
+1. **Player faint-replacement send-in (#146):** implement the plan at the end
+   of `docs/pfr185-player-faint-replacement-send-in.md`. Use species,
+   personality and scene for the clock rather than partySelect's fixed SEND
+   OUT timing. The measured target is prompt B + D + 17, not the existing
+   311 / 325 pins. Prove the actual generated faint/replacement route and
+   dense production render, including where turn-end 8 and handoff 6 belong;
+   the prior evidence did not yet compare those pixels. Attribute every re-pin.
+2. **Prepared timing corrections:** `docs/btl188-scene-on-anchor-start.md`
+   (post-waitanimation script rows), `docs/msg189-seeded-print-hold.md`
+   (24-frame floor on short long-wait prints), and
+   `docs/fpo187-focus-punch-on-prepass-row.md` (127 only after Fight confirm,
+   otherwise 125). Batch related corrections in the shared presentation seam
+   when their acceptance is clear, retaining per-case controls and attribution.
+3. **Leech Seed drain:** `docs/lsd186-leech-seed-drain-timing.md`. The drain
+   animation is still missing in Scene ON. Derive the lead, animation and HP
+   timing from source before landing: the six-case fitted timing recipe alone
+   is insufficient. Prove the drawn general animation as well as message rows.
+4. **Remaining animation variants/visuals:** other live move bodies over a
+   transformed battler, player back send-out and intro visuals, Castform and
+   Substitute combinations, species/history/layer gaps and remaining scoped
+   #146 / #168 / #143 / #145 / #152 items. Prioritize executable shared fixes.
+
+Support for effects over transformed battlers is already in #153's approved
+scope. Keep required-catalogue membership unchanged; accurate reporting of an
+existing live Transform adapter does not require making a new body mandatory.
+Do not block authorized implementation on that optional accounting distinction.
+
+Independently verify every central claim and fold only green changes. Keep
+required tests/censuses/differentials and truthful live inventory. One bounded
+worker at a time; reserve final validation time early. When a new unknown
+needs research, retain a bounded source/ROM proof and a concrete next action.
 
 ## Headless execution discipline
 
@@ -60,35 +74,25 @@ leave a truthful committed handoff before the cap.
 
 ## Baseline and host budget
 
-Production is unchanged since `3937ecad0`; later commits are tests/tools/docs.
-The preceding session passed typecheck, 448 smoke checks, production build and
-vanilla soak 20 / 20. Its full suite had 13,908 passes and four msg175 frame-pin
-failures, corrected with attribution in `aec6435e8`; the affected file then
-passed 11 / 11 and typecheck passed. The entire suite was not rerun after that
-test-only change. Earlier union `5e78e4030` passed 13,895 tests / zero failures
-and all five gameplay gates. Reuse unchanged receipts under
-`ANIMATION_VERIFICATION.md`; new production changes require their scoped and
-union gates. Do not report a fresh whole-suite pass without running it.
+Final production src tree is `0eee3727b` (= union `a4b477dc1`; later commits
+through `d7a93289a` are docs/tools). Supervisor final gates: 1,682 files /
+13,940 tests passed, zero failed; production build passed; vanilla soak 0:20
+20 / 20 OK. Logs are in `.integration/validation/sv-20261016-final/`.
+Reuse this unchanged baseline under `ANIMATION_VERIFICATION.md`; documentation
+alone does not invalidate it. New production changes need affected semantic /
+dense render controls, worker full gates and supervisor independent acceptance;
+run the final union gates required by that policy. Preserve presentation-only
+kernel/RNG equality; gameplay corrections retain their separate stronger gates.
 
 Source `/etc/pokebench-runner.env`: two Vitest workers, four build/Cargo jobs,
-16 GiB RAM and 8 GiB swap. Full tests take ~47 min; vanilla 0:20 soak ~45 min.
-Read the 2026-10-14 CAX31 entry in `PAPERCUTS.md` before scheduling gates.
-Serialize full tests/typecheck/build; run long gates in a retained background
-job with a PID, log, exit status and summary, rather than killing/retrying at a
-tool timeout. Do not leave orphaned Vitest forks. Keep worker/census concurrency
-bounded; any soak seed-range fan-out must fit measured free memory, preserve
-identical per-seed inputs and collect every exit/result. Avoid Mac defaults and
-unbounded ten-shard launches. Reserve gate time early instead of filling the
-last hour with new production work.
+16 GiB RAM and 8 GiB swap. Full suite ~48 minutes; serialize heavy tests,
+typecheck/build and census work. Read the CAX31 entries in `PAPERCUTS.md`.
+Track long-running jobs by PID, log, exit status and summary, never by a future
+notification. Bound any soak fan-out to measured memory and collect every
+per-seed result. Avoid unbounded ten-shard launches and Mac path assumptions.
+Use `/srv/pokebench/vendor/mgba-venv/bin/python` for direct probes.
 
-Claude Code 2.1.280 is pinned and fresh Claude Max auth was verified on both
-exact models. Oracle services stay localhost-only, ON 8012 / OFF 8014. Use the
-host path helpers and `/srv/pokebench/vendor/mgba-venv/bin/python` for direct
-probes; do not reuse hard-coded Mac paths. Preserve the pinned ROM/ELF/map.
-No copied provider credentials, additional infrastructure or automatic push.
-
-Prior raw evidence remains on the VM under `.integration/validation/`, with
-committed receipts in the repo. The Mac backup is
-`.integration/validation/cax31-session-20261014/` (results bundle plus logs and
-supervisor evidence). Import the next session's results before resuming a Mac
-writer; do not delete remote worktrees that hold the only copy of ignored data.
+Claude Code 2.1.280 is pinned; both exact models were verified. Oracle ON 8012
+and OFF 8014 remain localhost-only. Preserve the pinned ROM/ELF/map, raw
+reference evidence and worker refs. No copied provider credentials or new
+infrastructure. Import this run's results before resuming a Mac writer.
