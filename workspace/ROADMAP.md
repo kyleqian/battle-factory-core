@@ -24,8 +24,9 @@ for source-proven engine fixes in that scope. Return -> Frustration (#165) is
 DONE (ret165, 2026-10-13); RNG fixes (#141 / #140) and Focus Punch preparation
 (#139) have landed, with their named edge cases still open. The 2026-10-14
 CAX31 session folded enc160 / plr162 / enc173 / trf174 / msg175 and banked the
-trn176 / fpc177 evidence; continue from PROGRESS.md's top entry (next: land the
-trn176 transition hold and the fpc177 Focus Punch fixes).
+trn176 / fpc177 evidence; the 2026-10-15 recovery session landed them (trn178 / trn181 / fpc180) plus
+snd182 / sub183 and banked pfr185. Continue from PROGRESS.md's top entry (next: the pfr185 player
+faint-replacement send-in production step).
 Run the normal `./run-supervisor.sh`; the roadmap determines its mission.
 Integration runs on `master` in the assigned host's checkout, with bounded
 temporary worker checkouts and the existing model routing. There is no separate

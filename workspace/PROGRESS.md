@@ -5,19 +5,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-15 (evening, in progress) — CAX31 recovery session (supervisor, Opus 5.5)
+## 2026-10-15 / 16 — CAX31 recovery session wind-down (supervisor, Opus 5.5): trn178 / snd179 / fpc180 / trn181 / snd182 / sub183 / pfr185
 
-- **State:** master folds trn178 (`40793066b`, Scene OFF action-transition pause, #167 (a')) and snd179 (`a641cc285`, Scene ON
-  forced player send-in evidence, #146); union smoke 448 / 448. Production now differs from `3937ecad0` by trn178 + fpc180 + trn181 + snd182 (presentation only).
-- **Did:** independently verified both saved refs (trn176Predict OFF rows reproduced; 17 / 17 targeted tests; 4 fresh snd179 ROM
-  probes exact); worktrees removed (only wasm artifacts), refs kept. Details in ANIMATION_INTEGRATION_PROGRESS.md.
-- **fpc180 folded** (`5cf23a253`): fpc177's four Focus Punch presentation fixes (#139); supervisor reproduced every OFF card row 0.
-- **trn181 folded** (`253a9ff9e`): the action-transition pause in Scene ON (#167 (a')); 13 / 13 ON rows reproduced; union typecheck,
-  smoke 448. Worker capped during its full suite; the saved log shows 13,930 / 0 failed on the final src.
-- **snd182 folded** (`ecf277b0e`): Scene ON forced player send-in timing (#146), 27 / 27 ROM cases reproduced; union smoke 448.
-  Decision: `switchInTail.ts` joins the engine->animation ratchet allowlist (pure back-anim reducers, presentation timing only).
-- **Running:** sub183 (integration lane, cap 140) — Substitute turn HP timing -6 (#153). Reserve the final
-  ~1 h 45 min for one independent full suite + build on the final tree.
+- **State:** master clean; production src tree `0eee3727b` (= union `a4b477dc1`; later commits docs / tools only). No open DEFERRED items.
+  All changes this session are presentation timing (kernel digests identical in every census); no gameplay / RNG change.
+- **Folded (each independently verified):** trn178 (#167 (a') Scene OFF action-transition pause; predictor rows reproduced),
+  snd179 (#146 evidence; 4 fresh ROM probes), fpc180 (#139 Focus Punch recall order / switch hold 7 / leads 5 and 5 + u; every OFF card 0),
+  trn181 (#167 (a') same rule in Scene ON; 13 / 13 ON rows), snd182 (#146 Scene ON forced player send-in = max(91, cry + 66, T_back + 70);
+  27 / 27 ROM cases), sub183 (#153 Substitute turn timing; fresh probes 291 / 291 rows 0 px both scenes), pfr185 (#146 player
+  faint-replacement evidence; fresh probe byte-identical). Details: ANIMATION_INTEGRATION_PROGRESS.md 2026-10-15.
+- **Decision:** `src/engine/switchInTail.ts` joined the engine -> animation ratchet allowlist (pure back send-out reducers, presentation
+  timing only; precedent `battleResolutionPresentationRender.ts`).
+- **Gates (final src):** supervisor full suite 1,682 files / 13,940 tests passed, 0 failed; build OK; worker censuses / differentials per
+  step. Vanilla soak 0:20 (`--parallel 4`) started on the final tree (result below if it finished). Logs `.integration/validation/sv-20261016-final/`.
+- **Next:** (1) pfr185 production step: route the player faint-replacement send-in through the forced-player model (prompt D + 17) instead
+  of partySelect's fixed SEND OUT clock; (2) Transform accounting (live body outside the 276 catalogue, like Struggle) + other bodies over
+  a transformed battler; (3) #167 ON body-tail anchor errors (-3 .. -6) and print-length residuals; (4) Focus Punch ON 125-vs-127 pre-pass
+  row; (5) remaining #146 / #168 / #143 items. Budget on this host: full suite ~48 min at 2 workers; tell workers when to start it.
+- **Notes:** worker refs kept (`worker/integration-20261015-{170019,184353,211449,222935}`, `worker/side-20261016-002710`); worktrees
+  removed after copying evidence (`.integration/validation/from-workers/{trn181,sub183}`). Briefs in `.integration/validation/sv-20261015b/`.
+  No push (commit locally only).
 
 ---
 
