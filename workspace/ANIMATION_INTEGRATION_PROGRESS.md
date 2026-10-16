@@ -46,6 +46,9 @@
   wait for the player's last SE_SELECT before `General_FocusPunchSetUp` (source-named). Supervisor: fresh a-switch-on probe byte-identical.
 - **btl188 (SIDE, evidence only, merged `75c92d2a3`):** the Scene ON -3 .. -6 anchor-start errors are the unpresented post-waitanimation
   script rows after a no-hit live body (rule in docs/btl188-scene-on-anchor-start.md). Supervisor: `btl188Rows.ts` output == committed rows.
+- **msg189 (SIDE, evidence only, `110b53198`):** short `waitmessage B_WAIT_TIME_LONG` prints over-hold by max(0, 24 − L): the 24-frame
+  floor in `WAITMESSAGE_LONG_TIMING` (ROM = L + 64; "was seeded!" +8 / +4). Supervisor: code lines confirmed. Lane slip: the worker
+  committed its doc directly on master instead of its side branch (doc only; kept after review).
 - **Final union gates (`a4b477dc1`, src tree `0eee3727b`; later commits docs/tools only):** supervisor full suite 1,682 files /
   13,940 tests passed, 0 failed; build OK. Logs `.integration/validation/sv-20261016-final/`.
 - Union `a641cc285`: smoke 448 / 448 (master's later commits since the worker base are tooling only).

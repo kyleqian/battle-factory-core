@@ -32,6 +32,8 @@ history.
   (12, 2026-10-16 evidence steps) `sub183Probes.sh` launches every job at once (no concurrency cap; lsd186 wrote `lsd186Probes.sh`);
   `fpc177Probe.py` has no per-frame controller / SE state mode (fpo187 wrote `fpo187Probe.py`); `nm`-built symbol dicts drop duplicate
   static names (pfr185); the generic worker footer "npm test and npm run build green" conflicts with evidence-only briefs that forbid them.
+  (13, msg189) A side-lane worker committed onto master in the main checkout (doc only) instead of its worktree branch; the launcher
+  reported "no commits" for the branch. The launcher should refuse or detect a main-tree HEAD move by a side / integration worker.
 - **Hits:** 2 sessions (2026-10-14, 2026-10-15/16), ~2 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
   and the supervisor; census job limit from `/etc/pokebench-runner.env`.
