@@ -19,8 +19,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Gates (final src):** supervisor full suite 1,682 files / 13,940 tests passed, 0 failed; build OK; worker censuses / differentials per
   step. Vanilla soak 0:20 (`--parallel 4`) **20 / 20 OK** (all `budget`, the rigid canary) on the final tree. Logs `.integration/validation/sv-20261016-final/`.
 - **Next:** (1) pfr185 production step: route the player faint-replacement send-in through the forced-player model (prompt D + 17) instead
-  of partySelect's fixed SEND OUT clock; (2) Transform accounting (live body outside the 276 catalogue, like Struggle) + other bodies over
-  a transformed battler; (3) #167 ON body-tail anchor errors (-3 .. -6; btl188 rule) and print-length residuals (msg189: drop the 24 floor in `WAITMESSAGE_LONG_TIMING`, re-pin + census); (4) Focus Punch ON pre-pass SE wait (fpo187 rule: 127 only after a
+  of partySelect's fixed SEND OUT clock; (2) other live bodies over a transformed battler (Transform's inventory count is accounting only and,
+  per the trs190 audit, would need a user call to make a Metronome-only body "required" like Struggle; optional, not blocking); (3) #167 ON body-tail anchor errors (-3 .. -6; btl188 rule) and print-length residuals (msg189: drop the 24 floor in `WAITMESSAGE_LONG_TIMING`, re-pin + census); (4) Focus Punch ON pre-pass SE wait (fpo187 rule: 127 only after a
   Fight-menu confirm, else 125); (5) Leech Seed drain (lsd186: no ON drain animation, ON print ~-190); (6) remaining #146 / #168 / #143 items. Budget on this host: full suite ~48 min at 2 workers; tell workers when to start it.
 - **Notes:** worker refs kept (`worker/integration-20261015-{170019,184353,211449,222935}`, `worker/side-20261016-002710`); worktrees
   removed after copying evidence (`.integration/validation/from-workers/{trn181,sub183}`). Briefs in `.integration/validation/sv-20261015b/`.

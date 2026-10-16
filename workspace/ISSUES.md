@@ -98,7 +98,9 @@ OFF bodies read x2 {0,0} because there is no front animation in OFF (`pokemon.c:
 - **Transform:** body + transformed field LIVE in both scenes since trf174 (2026-10-14, docs/trf174-transform-live.md; 8 / 8 dense
   windows 109 / 109 rows 0 px, field 140 / 140, supervisor-reproduced fresh). Open: declined Transform bodies (shiny DITTO, SPINDA
   target, CASTFORM, a doll on either side); every OTHER live body declines while a battler is shown transformed; Transform is not
-  yet counted in `LIVE_MOVE_ANIMATION_IDS` / the live-status inventory.
+  yet counted in `LIVE_MOVE_ANIMATION_IDS` / the live-status inventory: accounting only (trs190 audit 2026-10-16: no production
+  reader; reachable only via Metronome, CHANSEY_1 / CLEFABLE_1; outside the 276). Counting it as a *required* body like Struggle
+  needs a user scope call; until then it stays a live body outside the counted catalogue.
 - **Not measured:** a dense OFF fade window (6 OFF census fades are now live), and the switch-out SUBSTITUTE_TO_MON / Baton Pass
   MON_TO_SUBSTITUTE special animations (scene-independent in source; neither scene presents them).
 
