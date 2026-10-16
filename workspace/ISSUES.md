@@ -225,7 +225,9 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 Landed: fpp150 (kernel pre-pass, Scene OFF / ON timing, drawn general animation) and fpc180 (2026-10-15,
 docs/fpc180-focus-punch-live.md): recall after the pre-pass (lead 7), pre-pass switch hold 7, next-pre-pass lead 5, action lead 5 + u;
 fpc177's 12 ROM cards: every OFF row 0. Open: Scene ON pre-pass animation print 127 rows after the empty box vs the ROM's 125 on the
-switch and two-user cards (+2, unexplained); the voluntary-switch Go! -> used tail (-31, a send-in tail item, see #146); `5 + u` has
+switch and two-user cards (+2): EXPLAINED by fpo187 (2026-10-16, docs/fpo187-focus-punch-on-prepass-row.md): `playanimation`'s
+controller handler waits for the player's last 10-frame SE_SELECT (`IsBattleSEPlaying`); 127 only for a turn's first pre-pass after a
+Fight-menu confirm, else 125. Production step pending; the voluntary-switch Go! -> used tail (-31, a send-in tail item, see #146); `5 + u` has
 no ROM card for Substitute / weather / Protect / multi-stage prologues, and a pre-move print after the focus print keeps 11.
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
