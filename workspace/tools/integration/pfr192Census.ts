@@ -59,7 +59,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
   let rng = createPresentationRngSession();
   let frame = 0; let ended = false; let error: string | null = null;
   const sendIns: unknown[] = []; let siStart: number | null = null; let siInfo: any[] = [];
-  let moveAnimFrames = 0; let siMoveAnim = 0;
+  let siSeg = -1; let lastTrace = ""; let moveAnimFrames = 0; let siMoveAnim = 0;
   const seen = new Set<unknown>(); const slotUses = [0, 0, 0, 0]; let lastUsed: string | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
@@ -89,7 +89,12 @@ for (let seed = from!; seed <= to!; seed += 1) {
         });
       }
     }
+    if (r?.lifecycle.phase === "presenting-switch-in" && siStart !== null && r.segmentIndex !== siSeg) {
+      sendIns.push([siInfo[0], siInfo[1], siInfo[2], frame - siStart, siInfo[3], siInfo[4], siInfo[5], siMoveAnim]);
+      siStart = null;
+    }
     if (r?.lifecycle.phase === "presenting-switch-in" && siStart === null) {
+      siSeg = r.segmentIndex;
       const seg = r.segments[r.segmentIndex]; const k = seg.commands.findIndex((c: any) => c.type === "switch-in" && c.battler === 0);
       const sw = seg.commands[k]; const personality = sw.incoming.personality ?? 0;
       let expected: number | null = null;
@@ -99,6 +104,10 @@ for (let seed = from!; seed <= to!; seed += 1) {
       }
       siStart = frame; siMoveAnim = 0;
       siInfo = [sw.incoming.species, sw.incoming.name.length, personality, keyed ? keyed(seg)?.readyAt ?? null : null, expected, seg.commands.slice(k + 1).map((c: any) => c.type).join(",")];
+    }
+    if (process.env.PFR192_TRACE && siStart !== null && r) {
+      const t = `${r.lifecycle.phase}|${r.segmentIndex}|${r.commandIndex}|${r.segments[r.segmentIndex]?.commands[r.commandIndex]?.type}`;
+      if (t !== lastTrace) { console.error(`T ${frame - siStart} ${t}`); lastTrace = t; }
     }
     if (siStart !== null && state.battleCommandPresentation?.lifecycle.phase === "action-menu") {
       sendIns.push([siInfo[0], siInfo[1], siInfo[2], frame - siStart, siInfo[3], siInfo[4], siInfo[5], siMoveAnim]);
