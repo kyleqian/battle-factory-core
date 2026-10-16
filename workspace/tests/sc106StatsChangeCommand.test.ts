@@ -67,7 +67,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // chg161: - 16, the opponent Dig's charge-turn empty box (24 -> 8, docs/chg161-charge-turn-print.md).
     // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 2.
     // trn181 (docs/trn181-action-transition-on.md): + 14, the Scene ON action-transition pauses before it (tools/integration/trn181PinShift.ts 0 2).
-    const shift = iu([91, O], [151, P]) - 16 - 2 + TRN181_SEED0_PAUSES_BEFORE_FIRST_ANCHOR;
+    // ont193 (docs/ont193-scene-on-tails.md): + 3, Acid Armor's own script tail (3 rows after the waitanimation release; source-derived, no ROM row).
+    const shift = iu([91, O], [151, P]) - 16 - 2 + TRN181_SEED0_PAUSES_BEFORE_FIRST_ANCHOR + 3;
     expect(a.statsChange).toEqual({ frame: 976 + shift, frames: 90 });
     // scf117: + 1 hold frame (the print executes on rel 91 and shows its first glyph on rel 92).
     expect(a.following).toMatchObject({ type: "message", frame: 976 + shift + 90 + 1, glyph: 976 + shift + 90 + 1 });
@@ -82,7 +83,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + snd145FaintReplacement(202) - 16 * CHG161_SEED0_ON_CHARGE_TURNS
       - 99 - 1 // pfr192: the one player faint replacement (readyAt 212 vs the fixed 311) + 1 frame of dismissal parity (odd 99).
       - 17 // msg175: the route's used prints last their printable length (no 24-frame floor).
-      + 79 + 1); // trn181: the route's six Scene ON action-transition pauses (79 frames) + 1 frame of dismissal parity (odd 79).
+      + 79 + 1 // trn181: the route's six Scene ON action-transition pauses (79 frames) + 1 frame of dismissal parity (odd 79).
+      + 3 * 3 + 4 - 1); // ont193: the route's script tails (Acid Armor 151 x3 = 3 each, the opponent's 219 = 4) - 1 frame of dismissal parity (odd 13).
   });
 
   it("status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76", () => {
@@ -92,8 +94,9 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a.before?.type).toBe("move-animation");
     // iu120: + the Sand-Attack (28) body before it.
     // trn181: the first anchor has no pause before it (shift 0); the later ones below carry the pauses crossed.
-    expect(a.statsChange).toEqual({ frame: 641 + iu([28, P]), frames: 76 });
-    expect(a.following).toMatchObject({ type: "message", frame: 641 + iu([28, P]) + 76 + 1, glyph: 641 + iu([28, P]) + 76 + 1 });
+    // ont193: + 6, the Sand-Attack's script tail (ROM-measured, btl188 short 6 -> 0); the later anchors below carry one tail per crossed body.
+    expect(a.statsChange).toEqual({ frame: 641 + iu([28, P]) + 6, frames: 76 });
+    expect(a.following).toMatchObject({ type: "message", frame: 641 + iu([28, P]) + 6 + 76 + 1, glyph: 641 + iu([28, P]) + 6 + 76 + 1 });
     // olnd113 (ISSUES #167): + the source-pause used-move holds crossed before each anchor (36 each: ITDOESNTAFFECT at 812, ATTACKMISSED
     // at 1257, ITDOESNTAFFECT at 1705, ATTACKMISSED at 2150; the next one, 3116, is after the last anchor).
     expect(route.anchors.map((x) => x.following!.frame)).toEqual(
@@ -101,7 +104,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       // iu120: + the i + 1 Sand-Attack bodies (and, before the sixth, the opponent's Water Gun 55) crossed.
       [641, 974, 1310, 1643, 1979, 2421].map((f, i) => f + 76 * (i + 1) + [0, 36, 72, 108, 144, 144][i]! + (i + 1)
       // trn181: + the Scene ON action-transition pauses crossed before each anchor (14 each; 12 before the sixth; trn181PinShift.ts 3 3).
-        + iu([28, P, i + 1]) + (i === 5 ? iu([55, O]) : 0) + [0, 14, 28, 42, 56, 68][i]!),
+        + iu([28, P, i + 1]) + (i === 5 ? iu([55, O]) : 0) + [0, 14, 28, 42, 56, 68][i]! + 6 * (i + 1)),
     );
   });
 
@@ -144,7 +147,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // iu120: + the four live bodies before it (player 205; opponent 55 x2, the Tickle 321).
     // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 13.
     // trn181: + 39, the Scene ON action-transition pauses before it (trn181PinShift.ts 13 3).
-    const shift = iu([205, P], [55, O, 2], [321, O]) - 13 + 39;
+    // ont193: + 5, the Tickle's own script tail (source-derived, no ROM row).
+    const shift = iu([205, P], [55, O, 2], [321, O]) - 13 + 39 + 5;
     expect(a.statsChange).toEqual({ frame: 1929 + 79 + shift, frames: 76 });
     // One animation for the group: the stat write that follows (ATK) starts 76 frames later; DEF's write has no second command.
     // scf117: + 3 hold frames (setstatchanger + statbuffchange + jumpifbyte + printfromtable after rel 77: the ATK write's `stat`
@@ -163,7 +167,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + snd145FaintReplacement(30) - 1
       - 46 // msg175: the route's used prints last their printable length (no 24-frame floor).
       + 109 + 1 // trn181: the route's seven Scene ON action-transition pauses (109 frames) + 1 frame of dismissal parity (odd 109).
-      - 57); // pfr192: the route's player faint replacements (readyAt - 311; the keyed send-in clock).
+      - 57 // pfr192: the route's player faint replacements (readyAt - 311; the keyed send-in clock).
+      + 2 * 5 + 2 * 3); // ont193: the route's script tails (Tickle 321 x2 = 5 each, 148 x2 = 3 each).
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 239-row window (tmr136) owns the banner; the message moves + 9", () => {
@@ -182,7 +187,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // tmr136: + 9 tail rows per live Double Team body (6 bodies).
     expect(route.frames).toBe(4600 + 270 + 3 + iu([112, O, 3], [29, O, 2], [93, O, 2], [104, P, 6]) + 6 * LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS
       - 16 // msg175: the route's used prints last their printable length (no 24-frame floor).
-      + 104); // trn181: the route's eight Scene ON action-transition pauses (104 frames; the first Double Team anchor has none before it).
+      + 104 // trn181: the route's eight Scene ON action-transition pauses (104 frames; the first Double Team anchor has none before it).
+      + 3 * 3); // ont193: the route's script tails (Barrier 112 x3 = 3 each; the masked Double Team 104 bodies carry none).
   });
 });
 

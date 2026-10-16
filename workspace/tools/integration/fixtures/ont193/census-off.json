@@ -1,0 +1,42 @@
+{
+ "schema": "ont193-census-delta/v1",
+ "battles": 1000,
+ "digestMismatch": [],
+ "errorMismatch": [],
+ "budgetStalled": [
+  434,
+  796,
+  881
+ ],
+ "baseCommands": 316756,
+ "commands": 316756,
+ "unchanged": 316755,
+ "identicalBattles": 999,
+ "changedBattles": 1,
+ "typeSequenceChanged": [],
+ "scriptTail": {
+  "commands": 1,
+  "frames": 0,
+  "byMove": {
+   "144": {
+    "rom": null,
+    "commands": 1,
+    "frames": 0,
+    "tailRows": {
+     "6": 1
+    },
+    "frameDelta": {
+     "0": 1
+    }
+   }
+  }
+ },
+ "prePassTightening": {
+  "commands": 0,
+  "frames": 0
+ },
+ "budgetTail": {},
+ "unattributed": [],
+ "scene": "off",
+ "unattributedCount": 0
+}

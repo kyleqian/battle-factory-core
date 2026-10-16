@@ -1,0 +1,793 @@
+{
+ "schema": "ont193-census-delta/v1",
+ "battles": 1000,
+ "digestMismatch": [],
+ "errorMismatch": [],
+ "budgetStalled": [
+  434,
+  796,
+  881
+ ],
+ "baseCommands": 320378,
+ "commands": 320378,
+ "unchanged": 314548,
+ "identicalBattles": 123,
+ "changedBattles": 877,
+ "typeSequenceChanged": [],
+ "scriptTail": {
+  "commands": 5830,
+  "frames": 11839,
+  "byMove": {
+   "104": {
+    "rom": null,
+    "commands": 893,
+    "frames": 0,
+    "tailRows": {
+     "6": 893
+    },
+    "frameDelta": {
+     "0": 893
+    }
+   },
+   "182": {
+    "rom": "Protect",
+    "commands": 549,
+    "frames": 1647,
+    "tailRows": {
+     "6": 549
+    },
+    "frameDelta": {
+     "3": 549
+    }
+   },
+   "240": {
+    "rom": null,
+    "commands": 202,
+    "frames": 0,
+    "tailRows": {
+     "6": 202
+    },
+    "frameDelta": {
+     "0": 202
+    }
+   },
+   "266": {
+    "rom": null,
+    "commands": 198,
+    "frames": 594,
+    "tailRows": {
+     "6": 198
+    },
+    "frameDelta": {
+     "3": 198
+    }
+   },
+   "184": {
+    "rom": null,
+    "commands": 182,
+    "frames": 0,
+    "tailRows": {
+     "6": 182
+    },
+    "frameDelta": {
+     "0": 182
+    }
+   },
+   "113": {
+    "rom": null,
+    "commands": 178,
+    "frames": 0,
+    "tailRows": {
+     "7": 178
+    },
+    "frameDelta": {
+     "0": 178
+    }
+   },
+   "201": {
+    "rom": null,
+    "commands": 163,
+    "frames": 652,
+    "tailRows": {
+     "7": 163
+    },
+    "frameDelta": {
+     "4": 163
+    }
+   },
+   "28": {
+    "rom": "Sand-Attack",
+    "commands": 146,
+    "frames": 876,
+    "tailRows": {
+     "6": 146
+    },
+    "frameDelta": {
+     "6": 146
+    }
+   },
+   "97": {
+    "rom": null,
+    "commands": 144,
+    "frames": 432,
+    "tailRows": {
+     "6": 144
+    },
+    "frameDelta": {
+     "3": 144
+    }
+   },
+   "133": {
+    "rom": null,
+    "commands": 142,
+    "frames": 426,
+    "tailRows": {
+     "6": 142
+    },
+    "frameDelta": {
+     "3": 142
+    }
+   },
+   "203": {
+    "rom": null,
+    "commands": 141,
+    "frames": 423,
+    "tailRows": {
+     "6": 141
+    },
+    "frameDelta": {
+     "3": 141
+    }
+   },
+   "108": {
+    "rom": null,
+    "commands": 136,
+    "frames": 408,
+    "tailRows": {
+     "6": 136
+    },
+    "frameDelta": {
+     "3": 136
+    }
+   },
+   "347": {
+    "rom": null,
+    "commands": 120,
+    "frames": 0,
+    "tailRows": {
+     "7": 119,
+     "8": 1
+    },
+    "frameDelta": {
+     "0": 120
+    }
+   },
+   "14": {
+    "rom": null,
+    "commands": 115,
+    "frames": 345,
+    "tailRows": {
+     "6": 115
+    },
+    "frameDelta": {
+     "3": 115
+    }
+   },
+   "241": {
+    "rom": null,
+    "commands": 113,
+    "frames": 0,
+    "tailRows": {
+     "7": 113
+    },
+    "frameDelta": {
+     "0": 113
+    }
+   },
+   "349": {
+    "rom": null,
+    "commands": 112,
+    "frames": 448,
+    "tailRows": {
+     "7": 112
+    },
+    "frameDelta": {
+     "4": 112
+    }
+   },
+   "219": {
+    "rom": null,
+    "commands": 108,
+    "frames": 432,
+    "tailRows": {
+     "7": 108
+    },
+    "frameDelta": {
+     "4": 108
+    }
+   },
+   "204": {
+    "rom": null,
+    "commands": 105,
+    "frames": 0,
+    "tailRows": {
+     "6": 105
+    },
+    "frameDelta": {
+     "0": 105
+    }
+   },
+   "281": {
+    "rom": null,
+    "commands": 102,
+    "frames": 918,
+    "tailRows": {
+     "12": 102
+    },
+    "frameDelta": {
+     "9": 102
+    }
+   },
+   "103": {
+    "rom": null,
+    "commands": 91,
+    "frames": 273,
+    "tailRows": {
+     "6": 91
+    },
+    "frameDelta": {
+     "3": 91
+    }
+   },
+   "244": {
+    "rom": null,
+    "commands": 89,
+    "frames": 0,
+    "tailRows": {
+     "6": 89
+    },
+    "frameDelta": {
+     "0": 89
+    }
+   },
+   "313": {
+    "rom": null,
+    "commands": 87,
+    "frames": 0,
+    "tailRows": {
+     "6": 87
+    },
+    "frameDelta": {
+     "0": 87
+    }
+   },
+   "213": {
+    "rom": null,
+    "commands": 80,
+    "frames": 296,
+    "tailRows": {
+     "7": 80
+    },
+    "frameDelta": {
+     "4": 74,
+     "0": 6
+    }
+   },
+   "73": {
+    "rom": null,
+    "commands": 77,
+    "frames": 0,
+    "tailRows": {
+     "40": 77
+    },
+    "frameDelta": {
+     "0": 77
+    }
+   },
+   "215": {
+    "rom": null,
+    "commands": 72,
+    "frames": 288,
+    "tailRows": {
+     "7": 72
+    },
+    "frameDelta": {
+     "4": 72
+    }
+   },
+   "230": {
+    "rom": null,
+    "commands": 72,
+    "frames": 216,
+    "tailRows": {
+     "6": 72
+    },
+    "frameDelta": {
+     "3": 72
+    }
+   },
+   "112": {
+    "rom": null,
+    "commands": 69,
+    "frames": 207,
+    "tailRows": {
+     "6": 69
+    },
+    "frameDelta": {
+     "3": 69
+    }
+   },
+   "115": {
+    "rom": null,
+    "commands": 68,
+    "frames": 204,
+    "tailRows": {
+     "6": 68
+    },
+    "frameDelta": {
+     "3": 68
+    }
+   },
+   "258": {
+    "rom": null,
+    "commands": 67,
+    "frames": 0,
+    "tailRows": {
+     "7": 67
+    },
+    "frameDelta": {
+     "0": 67
+    }
+   },
+   "107": {
+    "rom": null,
+    "commands": 65,
+    "frames": 195,
+    "tailRows": {
+     "6": 65
+    },
+    "frameDelta": {
+     "3": 65
+    }
+   },
+   "277": {
+    "rom": null,
+    "commands": 65,
+    "frames": 126,
+    "tailRows": {
+     "5": 65
+    },
+    "frameDelta": {
+     "2": 63,
+     "0": 2
+    }
+   },
+   "322": {
+    "rom": null,
+    "commands": 60,
+    "frames": 0,
+    "tailRows": {
+     "7": 60
+    },
+    "frameDelta": {
+     "0": 60
+    }
+   },
+   "248": {
+    "rom": null,
+    "commands": 57,
+    "frames": 0,
+    "tailRows": {
+     "6": 57
+    },
+    "frameDelta": {
+     "0": 57
+    }
+   },
+   "197": {
+    "rom": "Detect",
+    "commands": 55,
+    "frames": 165,
+    "tailRows": {
+     "6": 55
+    },
+    "frameDelta": {
+     "3": 55
+    }
+   },
+   "334": {
+    "rom": null,
+    "commands": 55,
+    "frames": 165,
+    "tailRows": {
+     "6": 55
+    },
+    "frameDelta": {
+     "3": 55
+    }
+   },
+   "178": {
+    "rom": null,
+    "commands": 55,
+    "frames": 165,
+    "tailRows": {
+     "6": 55
+    },
+    "frameDelta": {
+     "3": 55
+    }
+   },
+   "151": {
+    "rom": null,
+    "commands": 53,
+    "frames": 159,
+    "tailRows": {
+     "6": 53
+    },
+    "frameDelta": {
+     "3": 53
+    }
+   },
+   "254": {
+    "rom": null,
+    "commands": 49,
+    "frames": 147,
+    "tailRows": {
+     "6": 49
+    },
+    "frameDelta": {
+     "3": 49
+    }
+   },
+   "339": {
+    "rom": "Bulk Up",
+    "commands": 49,
+    "frames": 196,
+    "tailRows": {
+     "7": 49
+    },
+    "frameDelta": {
+     "4": 49
+    }
+   },
+   "285": {
+    "rom": null,
+    "commands": 39,
+    "frames": 0,
+    "tailRows": {
+     "7": 39
+    },
+    "frameDelta": {
+     "0": 39
+    }
+   },
+   "74": {
+    "rom": null,
+    "commands": 38,
+    "frames": 0,
+    "tailRows": {
+     "6": 38
+    },
+    "frameDelta": {
+     "0": 38
+    }
+   },
+   "288": {
+    "rom": null,
+    "commands": 38,
+    "frames": 114,
+    "tailRows": {
+     "6": 38
+    },
+    "frameDelta": {
+     "3": 38
+    }
+   },
+   "106": {
+    "rom": null,
+    "commands": 38,
+    "frames": 114,
+    "tailRows": {
+     "6": 38
+    },
+    "frameDelta": {
+     "3": 38
+    }
+   },
+   "148": {
+    "rom": null,
+    "commands": 36,
+    "frames": 108,
+    "tailRows": {
+     "6": 36
+    },
+    "frameDelta": {
+     "3": 36
+    }
+   },
+   "194": {
+    "rom": null,
+    "commands": 35,
+    "frames": 0,
+    "tailRows": {
+     "6": 35
+    },
+    "frameDelta": {
+     "0": 35
+    }
+   },
+   "195": {
+    "rom": null,
+    "commands": 35,
+    "frames": 105,
+    "tailRows": {
+     "6": 35
+    },
+    "frameDelta": {
+     "3": 35
+    }
+   },
+   "227": {
+    "rom": null,
+    "commands": 34,
+    "frames": 0,
+    "tailRows": {
+     "6": 34
+    },
+    "frameDelta": {
+     "0": 34
+    }
+   },
+   "259": {
+    "rom": null,
+    "commands": 33,
+    "frames": 132,
+    "tailRows": {
+     "7": 33
+    },
+    "frameDelta": {
+     "4": 33
+    }
+   },
+   "297": {
+    "rom": null,
+    "commands": 29,
+    "frames": 0,
+    "tailRows": {
+     "6": 29
+    },
+    "frameDelta": {
+     "0": 29
+    }
+   },
+   "269": {
+    "rom": null,
+    "commands": 29,
+    "frames": 116,
+    "tailRows": {
+     "7": 29
+    },
+    "frameDelta": {
+     "4": 29
+    }
+   },
+   "39": {
+    "rom": null,
+    "commands": 27,
+    "frames": 81,
+    "tailRows": {
+     "6": 27
+    },
+    "frameDelta": {
+     "3": 27
+    }
+   },
+   "275": {
+    "rom": null,
+    "commands": 26,
+    "frames": 78,
+    "tailRows": {
+     "6": 26
+    },
+    "frameDelta": {
+     "3": 26
+    }
+   },
+   "180": {
+    "rom": null,
+    "commands": 24,
+    "frames": 96,
+    "tailRows": {
+     "7": 24
+    },
+    "frameDelta": {
+     "4": 24
+    }
+   },
+   "193": {
+    "rom": null,
+    "commands": 22,
+    "frames": 0,
+    "tailRows": {
+     "6": 22
+    },
+    "frameDelta": {
+     "0": 22
+    }
+   },
+   "43": {
+    "rom": null,
+    "commands": 21,
+    "frames": 63,
+    "tailRows": {
+     "6": 21
+    },
+    "frameDelta": {
+     "3": 21
+    }
+   },
+   "278": {
+    "rom": null,
+    "commands": 20,
+    "frames": 0,
+    "tailRows": {
+     "6": 20
+    },
+    "frameDelta": {
+     "0": 20
+    }
+   },
+   "321": {
+    "rom": null,
+    "commands": 20,
+    "frames": 100,
+    "tailRows": {
+     "8": 20
+    },
+    "frameDelta": {
+     "5": 20
+    }
+   },
+   "271": {
+    "rom": null,
+    "commands": 20,
+    "frames": 100,
+    "tailRows": {
+     "8": 20
+    },
+    "frameDelta": {
+     "5": 20
+    }
+   },
+   "50": {
+    "rom": null,
+    "commands": 17,
+    "frames": 68,
+    "tailRows": {
+     "7": 17
+    },
+    "frameDelta": {
+     "4": 17
+    }
+   },
+   "319": {
+    "rom": null,
+    "commands": 14,
+    "frames": 42,
+    "tailRows": {
+     "6": 14
+    },
+    "frameDelta": {
+     "3": 14
+    }
+   },
+   "191": {
+    "rom": null,
+    "commands": 14,
+    "frames": 0,
+    "tailRows": {
+     "5": 14
+    },
+    "frameDelta": {
+     "0": 14
+    }
+   },
+   "272": {
+    "rom": null,
+    "commands": 10,
+    "frames": 40,
+    "tailRows": {
+     "7": 10
+    },
+    "frameDelta": {
+     "4": 10
+    }
+   },
+   "294": {
+    "rom": null,
+    "commands": 9,
+    "frames": 27,
+    "tailRows": {
+     "6": 9
+    },
+    "frameDelta": {
+     "3": 9
+    }
+   },
+   "336": {
+    "rom": null,
+    "commands": 8,
+    "frames": 24,
+    "tailRows": {
+     "6": 8
+    },
+    "frameDelta": {
+     "3": 8
+    }
+   },
+   "116": {
+    "rom": null,
+    "commands": 5,
+    "frames": 20,
+    "tailRows": {
+     "7": 5
+    },
+    "frameDelta": {
+     "4": 5
+    }
+   },
+   "312": {
+    "rom": null,
+    "commands": 2,
+    "frames": 8,
+    "tailRows": {
+     "7": 2
+    },
+    "frameDelta": {
+     "4": 2
+    }
+   },
+   "144": {
+    "rom": null,
+    "commands": 1,
+    "frames": 0,
+    "tailRows": {
+     "6": 1
+    },
+    "frameDelta": {
+     "0": 1
+    }
+   },
+   "316": {
+    "rom": null,
+    "commands": 1,
+    "frames": 0,
+    "tailRows": {
+     "6": 1
+    },
+    "frameDelta": {
+     "0": 1
+    }
+   },
+   "176": {
+    "rom": null,
+    "commands": 1,
+    "frames": 0,
+    "tailRows": {
+     "6": 1
+    },
+    "frameDelta": {
+     "0": 1
+    }
+   }
+  }
+ },
+ "prePassTightening": {
+  "commands": 0,
+  "frames": 0
+ },
+ "budgetTail": {},
+ "unattributed": [],
+ "scene": "on",
+ "unattributedCount": 0
+}

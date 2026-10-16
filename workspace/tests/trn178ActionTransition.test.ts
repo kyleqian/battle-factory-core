@@ -78,6 +78,7 @@ describe("trn178: the Scene OFF action-transition pause", () => {
     }
     const on = ["off108-bulk-up-ply-primeape-onix", "off108-sand-attack-ply-primeape-snorlax", "off108-protect-ply-primeape-onix",
       "off108-rest-ply-snorlax-onix"].map((name) => evaluate(name, "on").residual);
-    expect(on).toEqual([-4, -6, -3, -3]);
+    // ont193 (docs/ont193-scene-on-tails.md): the script tail closes Bulk Up, Sand-Attack and Protect to 0; Rest (synthetic route) stays -3.
+    expect(on).toEqual([0, 0, 0, -3]);
   });
 });
