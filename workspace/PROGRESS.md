@@ -13,7 +13,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   snd179 (#146 evidence; 4 fresh ROM probes), fpc180 (#139 Focus Punch recall order / switch hold 7 / leads 5 and 5 + u; every OFF card 0),
   trn181 (#167 (a') same rule in Scene ON; 13 / 13 ON rows), snd182 (#146 Scene ON forced player send-in = max(91, cry + 66, T_back + 70);
   27 / 27 ROM cases), sub183 (#153 Substitute turn timing; fresh probes 291 / 291 rows 0 px both scenes), pfr185 (#146 player
-  faint-replacement evidence; fresh probe byte-identical). Details: ANIMATION_INTEGRATION_PROGRESS.md 2026-10-15.
+  faint-replacement evidence; fresh probe byte-identical), lsd186 (#153 Leech Seed drain evidence; fresh probe byte-identical). Details: ANIMATION_INTEGRATION_PROGRESS.md 2026-10-15.
 - **Decision:** `src/engine/switchInTail.ts` joined the engine -> animation ratchet allowlist (pure back send-out reducers, presentation
   timing only; precedent `battleResolutionPresentationRender.ts`).
 - **Gates (final src):** supervisor full suite 1,682 files / 13,940 tests passed, 0 failed; build OK; worker censuses / differentials per
