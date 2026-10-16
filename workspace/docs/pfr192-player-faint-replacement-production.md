@@ -116,7 +116,33 @@ does not move OFF); CASTFORM (ball shift 3, release extra 1, 219 / 274, blank 21
 
 ### 4. Census 0..999, both scenes (`tools/integration/pfr192Census.{ts,sh}`, `pfr192CensusDelta.py`, `fixtures/pfr192/census-delta-{on,off}.json`)
 
-CENSUS_PLACEHOLDER
+Base `4aaf090be` vs final `b1694ccd4` (src tree `002bf2b23df54f824201e353e3b588bb5f51fa26`), seeds
+0..999, 6 jobs (10 shards x 4 arms, resumable). The census drives each battle through the real orchestrator, presses the message dismiss
+phase-relative, and records per battle the kernel-event digest, every presentation command row, and for every PLAYER replacement
+`[species, name length, personality, frames confirm -> action menu, readyAt, expected prompt (91 + name + D + 17), trailing command types]`.
+
+| | Scene ON | Scene OFF |
+|---|---|---|
+| battles | 1000 | 1000 |
+| kernel-event digest mismatches | 0 | 0 |
+| error mismatches | 0 | 0 |
+| presentation command rows (compared) | 320,378 (0 changed) | 316,756 (0 changed) |
+| player send-ins | 1,722 (all changed) | 1,722 (all changed) |
+| `[turn-end]`-only send-ins, final == ROM prompt exactly | 1,239 / 1,239 | 1,239 / 1,239 |
+| send-ins with other trailing commands (attributed: delta == readyAt - 311) | 483 | 483 |
+| send-in delta min / max (frames) | -118 / +8 | -120 / +1 |
+| battles with a send-in / battle frame total changed | 927 / 927 | 927 / 927 |
+| **unattributed** | **0** | **0** |
+| budget-tail (hit the 200k-frame input budget in BOTH trees) | 434, 796, 881 | 434, 796, 881 |
+
+Attribution rule (strict, `pfr192CensusDelta.py`): digest + error identical; command rows identical; each send-in `final - base == readyAt - 311`
+(base resumes the lifecycle at the fixed party-select frame 311, final at the keyed readyAt; everything after is the same commands) and, for
+`[turn-end]`-only, `final == expectedPrompt`; each battle's total frame delta equals the sum of its send-in deltas exactly. The move-animation-length
+allowance added to the driver (a move animation after a send-in runs on the frame-indexed presentation Random2 stream) was never needed:
+`moveAnimShifted = 0` in both scenes. Driver fixes found on the way (all census-tooling, none touch `src/`): phase-relative message-dismiss press
+(the old `frame % 2` was absolute-frame dependent), one record per forced-replacement segment (a faint chain folds two replacements into one window),
+and the send-in still open at battle end (seeds 183 / 702) recorded. Both census arms' `src` trees are `002bf2b23df...` for the final side, identical
+to the tested code tree.
 
 ### 5. `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 4aaf090be`
 
