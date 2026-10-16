@@ -1182,6 +1182,9 @@ const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
   [288, 3], [290, 3], [294, 3], [302, 3], [306, 3], [312, 3], [317, 3], [319, 3], [321, 3], [332, 3], [334, 3], [335, 3], [336, 3], [339, 3],
   [341, 3], [345, 3], [348, 3], [349, 3],
 ]);
+// ont193: the adapter trail (idle94 table) of the no-post-row bodies whose script tail is ROM-measured (btl188: Sand-Attack's waitanimation
+// run is P + N + D + 1 rows). A post-row side's trail is -1 by definition; any other body has no tail (null).
+const LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS: ReadonlyMap<number, number> = new Map([[28, 0]]);
 // iu120: bodies live only after idle98's evidence (base 3dd2b74b9) whose rows it never measured (lead / trail unknown): Struggle
 // (stl109 / sdl119, incl. its doll cells) keeps 0 / 0.
 const LIVE_MOVE_UNMEASURED_UNIVERSAL_ROW_IDS: ReadonlySet<number> = new Set([165]);
@@ -1201,6 +1204,25 @@ export function liveMoveUniversalRows(
   });
 }
 
+/**
+ * ont193 (docs/ont193-scene-on-tails.md): the rows a Scene ON no-hit live body holds its last row after its post rows, up to the next
+ * command: `scriptTailRows + trail - post` (the ROM release row is attackanimation + P + N + D + trail + 1; the body presents P + N + D +
+ * post). 0 when the command has no script tail, no universal rows (unmeasured / swap / declined) or no known trail.
+ */
+export function liveMoveScriptTailFrames(
+  timing: { readonly scriptTailRows?: number },
+  request: BattleMoveAnimationRequest,
+  field: BattleResolutionDisplayedField,
+): number {
+  const tailRows = timing.scriptTailRows ?? 0;
+  if (tailRows <= 0) return 0;
+  const rows = liveMoveUniversalRows(request, field);
+  if (rows.pre === 0) return 0;
+  const trail = rows.post > 0 ? -1 : LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS.get(request.moveId);
+  if (trail === undefined) return 0;
+  return Math.max(0, tailRows + trail - rows.post);
+}
+
 /** The body age shown on this row: held at 0 over the pre + lead rows and at the last body row over the post rows. */
 function liveMoveUniversalRowAge(
   state: BattleResolutionPresentationState,
@@ -1208,10 +1230,11 @@ function liveMoveUniversalRowAge(
   field: BattleResolutionDisplayedField,
   // sgs134: HandleMoveAnimation's IsBattleSEPlaying rows (a multi-hit's 2nd+ hit), presented before the pre rows.
   seGate = 0,
+  scriptTail = 0,
 ): number {
   const rows = liveMoveUniversalRows(request, field);
   const age = Math.max(0, state.lifecycle.phaseElapsed - seGate - rows.pre - liveMoveIdleLeadRows(request, field));
-  if (rows.post === 0) return age;
+  if (rows.post === 0 && scriptTail === 0) return age;
   const live = liveMoveAnimationDuration(request, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput),
     state.liveMoveBattlerX2Input?.moveUse);
   return live === null ? age : Math.min(age, live - 1);
@@ -1240,7 +1263,8 @@ export function battleResolutionCommandDuration(
       const seGate = command.timing.seGateFrames ?? 0;
       if (live === null) return seGate + command.timing.minimumFrames;
       const rows = liveMoveUniversalRows(command.animation!, field);
-      return seGate + (command.timing.scriptLeadFrames ?? 0) + rows.pre + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post;
+      return seGate + (command.timing.scriptLeadFrames ?? 0) + rows.pre + liveMoveIdleLeadRows(command.animation!, field) + live + rows.post
+        + liveMoveScriptTailFrames(command.timing, command.animation!, field);
     }
     case "hit-animation":
       return command.timing.minimumFrames;
@@ -1786,7 +1810,7 @@ export function createBattleResolutionPresentationRenderView(
       const pre = seGate + liveMoveUniversalRows(command.animation, field).pre;
       effect = Object.freeze({
         type: "move", request: command.animation,
-        age: liveMoveUniversalRowAge(state, command.animation, field, seGate),
+        age: liveMoveUniversalRowAge(state, command.animation, field, seGate, liveMoveScriptTailFrames(command.timing, command.animation, field)),
         ...(lead > 0 && state.lifecycle.phaseElapsed <= pre ? { preActivationRow: true as const } : {}),
         paletteInput: state.liveMovePaletteInput,
         spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
