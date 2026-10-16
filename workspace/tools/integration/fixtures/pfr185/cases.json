@@ -1,0 +1,13 @@
+[
+ {"id": "pidgey-n6", "species": 16, "nature": 6},
+ {"id": "metapod-n6", "species": 11, "nature": 6},
+ {"id": "torkoal-n6", "species": 321, "nature": 6},
+ {"id": "torkoal-n0", "species": 321, "nature": 0},
+ {"id": "torkoal-n10", "species": 321, "nature": 10},
+ {"id": "butterfree-n6", "species": 12, "nature": 6},
+ {"id": "bulbasaur-n0", "species": 1, "nature": 0},
+ {"id": "bulbasaur-n10", "species": 1, "nature": 10},
+ {"id": "wigglytuff-n6", "species": 40, "nature": 6},
+ {"id": "typhlosion-n6", "species": 157, "nature": 6},
+ {"id": "castform-n6", "species": 385, "nature": 6}
+]
