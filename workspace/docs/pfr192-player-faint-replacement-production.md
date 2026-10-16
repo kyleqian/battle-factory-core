@@ -151,13 +151,27 @@ byte-identical (641 / 641, 0 differences). Expected: all three traces use the ca
 
 ### 6. Re-pins
 
-None needed. `tests/partySelect.test.ts` (:259-271), `tests/fightSubmenu.test.ts` (:364-371), `tests/battleSceneResolutionOwner.test.ts` (:64) and
-`tests/battle2ActionMenu.test.ts` (`ACTION_MENU_BLANK_START_OFFSET`) pass unchanged: they drive the canonical (default-timing) path. (Full-suite
-result below.)
+Canonical-path pins needed none: `tests/partySelect.test.ts` (:259-271), `tests/fightSubmenu.test.ts` (:364-371), `tests/battleSceneResolutionOwner.test.ts` (:64) and
+`tests/battle2ActionMenu.test.ts` (`ACTION_MENU_BLANK_START_OFFSET`) pass unchanged: they drive the canonical (default-timing) path. The route/census-driven pins that DO move are listed in section 7 (re-pinned in `ec6a1ca85`).
 
 ### 7. Gates
 
-GATES_PLACEHOLDER
+Tested code identity: `src` tree `002bf2b23df54f824201e353e3b588bb5f51fa26` is identical at every commit from a4c01d663 through the final commit
+(`git diff a4c01d663 HEAD -- src` empty); every later commit changes only tools, tests, fixtures and this doc.
+
+- `npm run typecheck`: exit 0 (at 0b8ef511a and again at the final commit `ec6a1ca85`).
+- `npm run test:smoke`: 8 files / 448 tests passed (at 0b8ef511a, same src tree).
+- `npm run build`: exit 0 (same src tree).
+- Full `npm test` (nohup, `POKEBENCH_VITEST_MAX_WORKERS=2`, log + exit file) at **9117f4ad1** (tree `06e72c0b0...`, src tree as above):
+  **10 failed in 4 files** / 13,938 passed / 223 skipped (1,727 files, 3,006 s). NOT zero. All 10 are downstream of the keyed clock:
+  `battleResolutionPresentation` (view shape gained `switchIn.timing`), `randomRoundSoak` x3 (frames of seed 21 / full / vanilla), `sc106StatsChangeCommand` x2,
+  `sgl138SeGateLive` x4 (census-route receipts). Attribution: with the keyed clock disabled by a temporary env hook (reverted, never committed) the
+  9 frame pins pass unchanged and only the view-shape pin fails, so the clock alone moves them. Re-pinned in `ec6a1ca85` with per-pin numbers in the
+  commit message (sc106 seed 0: -100 = -99 (one send-in, readyAt 212) -1 dismissal parity; sgl138 receipts -194 / -218 / -162 / -214 / -118 / -168 /
+  -184 / -186 vs census sums -195 / -220 / -163 / -213 / -118 / -170 / -185 / -185, +-2 frames of those drivers' absolute-frame dismissal parity).
+- After the re-pins, only the 5 affected files were re-run (`randomRoundSoak` 64 / 64, `sc106StatsChangeCommand`, `sgl138SeGateLive`,
+  `battleResolutionPresentation`, `pfr192PlayerFaintSendInClock`: all pass). **The full suite was not re-run end to end on the final commit**: it takes
+  ~50 min and the 170-min cap did not leave room. The remaining 1,722 other files passed at 9117f4ad1 and are unaffected by test-only re-pins.
 
 ## Residuals / not done
 
