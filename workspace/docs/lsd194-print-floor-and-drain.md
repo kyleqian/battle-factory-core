@@ -187,3 +187,31 @@ before the DEFENSE print's wait run (`BulkUpTryDef+28`, first glyph one row late
 
 `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 6b6d1d128`: **PASS, 641 captures byte-identical across 3 traces**
 (235 + 216 + 190). No difference to attribute.
+
+## 8. Re-pins found by the full suite (per-pin attribution) and the gates
+
+The full suite (`npm test`, `POKEBENCH_VITEST_MAX_WORKERS=2`, nohup + exit file) found frames-only pin movements in four files beyond ont193's (all kernel-digest-identical; battle / turn / end state unchanged).
+Every moved pin was attributed by measurement and re-pinned (`495a7d6f0`, `8b820a135`); the attribution tools are committed (`lsd194SoakPins.ts`, `lsd194ScAttribution.ts`).
+
+| file / pin | before -> after | attribution |
+|---|---|---|
+| `randomRoundSoak` seven wins (seed 21) | frames 37,536 -> 37,478; renderCalls 2,688 -> 2,681 | floor drop 37,536 -> 37,456 (2,675), Leech Seed drain rows 37,456 -> 37,478 (2,681); measured on archived trees `6b6d1d128` / `5a11553e1` / final |
+| `randomRoundSoak` "full" seed 0 / seed 1 | 17,175 -> 17,125; 26,866 -> 26,804 | floor drop only (identical on the floor-only tree) |
+| `randomRoundSoak` "vanilla" seed 0 / seed 1 | 8,928 -> 8,895; 8,979 -> 8,920 | floor drop only |
+| `sc106StatsChangeCommand` anchor seed 0 slot 2 | 983 -> 982 | -1: "dug a hole!" (L = 23) |
+| anchor seed 3 slot 1 | 1,432 -> 1,429 | -3: one "It's super effective!" (L = 21) |
+| anchor seed 6 slot 0 | 2,839 -> 2,831 | -9 floor (three L = 21 prints) +1 dismissal parity (the replay presses A on even frames; the old pin already carried a -1 parity term) |
+| anchor seed 13 slot 3 | 2,053 -> 2,051 | -2: two "attack missed!" (L = 23) |
+| `route.frames` (seed 0 slot 2 / seed 13 slot 3) | 6,738 -> 6,701; 9,668 -> 9,619 | -39 floor +2 parity (8 short prints); -49 floor (13 short prints) |
+| `off148SceneOffPauses` (Rest command shape, 4 pins) | the `startOf` proxy is `min + hold` and summed 24 + 64 for every WAITMESSAGE_LONG print | the proxy keeps 24 (`proxyFrames`); production did not move for the Rest print (its L >= 24); the Rest `message` row now reads `[message, 0, 64]` |
+
+**Residual found while attributing (not fixed, Rest is out of scope):** with the real printable length the Rest chain since the opener ends at 136 (player, census seed 12), not the ROM's attackanimation row 127, and the Rest pause rule's other anchors read 173 / 161 vs 164:
+the off148 "exact on the ROM row" fit was only exact under the `min + hold` proxy. Next action: recompute the Rest pause P (`off148`) from the real print lengths against `off108` `rom-r1.json`, then drop the proxy.
+
+### Gates
+
+- `npm run typecheck`: exit 0 on `3ded8b23f` (the final production / test source before the re-pins; the later commits changed only tests, tools and docs -- see the final message for the tested tree).
+- `npm run build`: exit 0.
+- `npm run test:smoke`: 8 files, 448 tests pass.
+- `git diff --check 6b6d1d128..HEAD`: clean. `npm run animation:audit`: exact. `npm run animation:coverage`: runs (no ledger edited).
+- Full `npm test`: see the final message -- the suite did not complete inside the 120-minute cap (one run was killed by memory pressure when `npm run build` ran concurrently with it, and was restarted alone at 02:51 UTC); the failing files it reported are listed and re-run above.
