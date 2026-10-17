@@ -5,17 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-16 / 17 — CAX31 session (supervisor, Opus 5.5): pfr192 folded; ont193 running
+## 2026-10-16 / 17 — CAX31 session (supervisor, Opus 5.5): pfr192 + ont193 folded; lsd194 running
 
-- **State:** master `42695ae16` (pfr192 merged); production src changed (presentation timing only; kernel digests identical).
+- **State:** master `73fe07e4f` (pfr192 + ont193 merged); production src changed (presentation timing only; kernel digests identical).
 - **Folded:** pfr192 (#146 player faint-replacement send-in): the forced party select's SEND OUT clock is keyed on species / nickname /
   nature / scene (ball B = 91 + len(name), prompt B + D + 17; turn-end 8 + handoff 6 are inside the ROM span). Supervisor reran
   `pfr192Prod.ts`: 24 / 24 ROM prompt rows 0, routes 9 / 20 / 61 / 84 / 33 both scenes 0 (seed 76 has a trailing message, documented).
-  Worker census 0..999 both scenes: 0 digest mismatches, 0 unattributed; differential 641 / 641 identical. Supervisor full suite on
-  `740eb2938`: 1,683 files / 13,948 passed / 0 failed; build OK on the merge.
-- **Running:** ont193 (btl188 Scene ON no-hit tail rows + fpo187 Focus Punch SE wait), brief `.integration/validation/sv-20261016b/`.
-- **Next:** msg189 print floor (with ROM checks of the other short prints), Leech Seed drain (lsd186), remaining #146 visuals.
-
+  Census 0..999 both scenes 0 unattributed; differential 641 / 641. Supervisor full suite `740eb2938`: 13,948 passed / 0 failed; build OK.
+- **Folded:** ont193 (#167 btl188 Scene ON no-hit script tail; #139 fpo187 Focus Punch menu-SE wait 127 / 125). Supervisor reran
+  `btl188Rows.ts` (Protect / Detect / Sand-Attack short 0). Census ON 5,830 changed commands, 0 unattributed, digests 1000 / 1000;
+  differential 641 / 641. Worker suite was sharded across re-pins; supervisor full suite on `6b6d1d128`: 1,684 files / 13,955 passed / 0 failed.
+- **Running:** lsd194 (msg189 print floor + lsd186 Leech Seed drain rows), base `6b6d1d128`, brief `.integration/validation/sv-20261016b/`.
+- **Next:** Scene ON Leech Seed drain animation drawing; Double Team window tail; remaining #146 visuals (non-MAGBY forced renderer).
 ---
 
 ## 2026-10-15 / 16 — CAX31 recovery session wind-down (supervisor, Opus 5.5): trn178 / snd179 / fpc180 / trn181 / snd182 / sub183 / pfr185 / lsd186 / fpo187 / btl188 / msg189

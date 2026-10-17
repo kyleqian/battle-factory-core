@@ -42,8 +42,10 @@ on trn176's prediction, census 13,706 pauses, digests identical). Scene ON LANDE
 for both scenes, 13 / 13 ON rows on prediction, census ON 12,942 pauses, 1,626 transitions skipped by the guard). Open: (a') the ON
 body-tail anchor errors (-3 .. -6): EXPLAINED by btl188 (2026-10-16, docs/btl188-scene-on-anchor-start.md): the script rows after
 `waitanimation` releases (release row, setbyte / playstatchangeanimation or printfromtable / waitmessage) are not presented after an
-ON no-hit live body; tail = Δ(next receipt) − Δ(attack) + 1 + (release row − body end) fits Bulk Up / Protect / Detect / Sand-Attack
-(Double Team owns its banner; Rest needs a real-stat route) — production step pending; Toxic's upstream -19 (status body before the message) and the
+ON no-hit live body; tail = Δ(next receipt) − Δ(attack) + 1 + (release row − body end): LANDED by ont193 (2026-10-17,
+docs/ont193-scene-on-tails.md; Protect / Detect / Sand-Attack start Δ 0, Bulk Up −1 shared with OFF; 41 further moves moved by the
+source-derived tail without their own ROM rows, 24 carry a 0-frame tail pending a ROM scenario). Still open: Double Team (−5, owns its
+banner), Rest (real-stat route); Toxic's upstream -19 (status body before the message) and the
 named print-length residuals (Snore +10, Dig +4, Dynamic Punch ply +1, Toxic -2, Curse +2 / -4); switches / faints / end of turn /
 pre-move prints after the anchor stay unmeasured; (b) sprite-visibility next after Roar /
 Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);
@@ -231,7 +233,7 @@ docs/fpc180-focus-punch-live.md): recall after the pre-pass (lead 7), pre-pass s
 fpc177's 12 ROM cards: every OFF row 0. Open: Scene ON pre-pass animation print 127 rows after the empty box vs the ROM's 125 on the
 switch and two-user cards (+2): EXPLAINED by fpo187 (2026-10-16, docs/fpo187-focus-punch-on-prepass-row.md): `playanimation`'s
 controller handler waits for the player's last 10-frame SE_SELECT (`IsBattleSEPlaying`); 127 only for a turn's first pre-pass after a
-Fight-menu confirm, else 125. Production step pending; the voluntary-switch Go! -> used tail (-31, a send-in tail item, see #146); `5 + u` has
+Fight-menu confirm, else 125. LANDED by ont193 (2026-10-17; tightening glyph residual 0 on a-switch-on and both b1 pre-passes). Open: the voluntary-switch Go! -> used tail (-31, a send-in tail item, see #146); `5 + u` has
 no ROM card for Substitute / weather / Protect / multi-stage prologues, and a pre-move print after the focus print keeps 11.
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
