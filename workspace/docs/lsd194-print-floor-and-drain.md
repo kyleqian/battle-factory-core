@@ -158,3 +158,32 @@ before the DEFENSE print's wait run (`BulkUpTryDef+28`, first glyph one row late
 3. Dense ROM window across the drain: section 2.4 (opponent-seeds OFF 263 / 263 rows pixel-exact; all other cases exact outside the ON animation span except the constant foe-pose px).
 4. Tier-1: `tests/lsd194PrintFloorAndDrain.test.ts` (12 tests: floor L < 24 x 2 scenes, L >= 24 control x 2 scenes, MESSAGE_TIMING control, drain layouts x 6, 208-row hold).
 5-8: see section 7 (census, differential, gates).
+
+## 7. Census, differential and gates
+
+### 7.1 Census 0..999, both scenes, base `6b6d1d128` vs final `3ded8b23f` (src/tools identical to `f088fa73e`)
+
+`lsd194Census.sh` (6 jobs, 25-seed parts) + `lsd194CensusDelta.py`; receipts `tools/integration/fixtures/lsd194/census-{on,off}.json`. 1000 battles per scene.
+
+- **Kernel digests identical**: `digestMismatch = []`, `errorMismatch = []`, `typeSequenceChanged = []` (the command *type* sequence is unchanged once the inserted `LEECH_SEED_DRAIN` animations are skipped) in both scenes.
+  85 battles per scene end in an error in BOTH trees (identical text): 84 are the pre-existing `battleHealthBar: invalid HP program` throw of the census harness (also in the base tree) and 1 is `frame budget`;
+  for those the digest is compared too (82 / 85 equal; the three that differ -- seeds 434, 796, 881 -- are the `frame budget` stalls, cut at a different command because the presentation frames shifted; reported as `budgetTail`).
+- **0 unattributed commands** in both scenes. Every changed command is one of:
+
+| class | ON | OFF |
+|---|---|---|
+| Print floor, L < 24 (msg189), frames = L - 24 exactly | 15,782 commands, -69,105 frames | 15,806 commands, -69,185 frames |
+| Print floor, L >= 24 (timing 24 -> 0, frames unchanged) | 32,564 commands, 0 frames | 32,960 commands, 0 frames |
+| Inserted `LEECH_SEED_DRAIN` animations | 451 (445 x 218 rows, 6 x 11 rows = animation not played) in 48 battles | 451 x 44 rows in 48 battles |
+| Seeded `hp` (min 28 -> 0, tail 0 -> 8) | 451 | 451 |
+| Receiver `hp` (min 28 -> 0, tail 0 -> 3) | 442 | 442 |
+
+  Print floor by L (commands, ON | OFF): 12 29 | 29, 13 8 | 8, 14 2417 | 2417, 15 1142 | 1149, 16 172 | 172, 17 415 | 415, 18 307 | 307, 19 984 | 984, 20 1292 | 1292, 21 3712 | 3712, 22 1570 | 1570, 23 3734 | 3751
+  (frames = -(24 - L) each). Messages with extra hold rows (hold != 64, e.g. the 73-row move-name prints) are included: only `minimumFrames` 24 -> 0 and the presented frames change.
+  The seeded / receiver frame deltas are not a constant: they are `28 - (bar + 1)` over-hold removed plus the new tail (seeded +8, receiver +3), a per-battle function of the bar length; the delta histograms are in the receipts.
+- Battles: 995 of 1000 changed (every battle has a short print), 5 identical, per scene.
+
+### 7.2 Differential
+
+`npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 6b6d1d128`: **PASS, 641 captures byte-identical across 3 traces**
+(235 + 216 + 190). None of the three traces reaches a short print with a presentation change, so no difference to attribute.
