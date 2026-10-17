@@ -148,7 +148,8 @@ describe("sub157: Scene OFF Substitute / Transform keep the controller move anim
       const body = use.commands.find((x: any) => x.type === "move-animation") as any;
       expect(body.animation).toMatchObject({ moveId: move, attacker });
       // sub183: Substitute's attackstring/waitstate script lead (4 rows); Transform has none.
-      expect(body.timing).toEqual(move === MOVE_SUBSTITUTE ? { minimumFrames: 32, scriptLeadFrames: 4 } : { minimumFrames: 32 });
+      expect(body.timing).toEqual(move === MOVE_SUBSTITUTE ? { minimumFrames: 32, scriptLeadFrames: 4 }
+        : { minimumFrames: 32, scriptTailRows: 6 }); // ont193: Transform carries the source-derived tail rows (0 presented frames: no live body / masked pre)
     }
     // trn178 / trn181 (docs/trn181-action-transition-on.md): both scenes add the same draw-nothing action-transition pause (a
     // move-animation without a request) before the first MoveEnd sprite-visibility receipt; Scene ON's carries the render-exemption
