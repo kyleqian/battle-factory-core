@@ -5,10 +5,10 @@ usage: lsd194CensusDelta.py <base-arm-dir> <final-arm-dir> [<out.json>]
 
 Per battle the kernel-event digest and error field must be equal (gameplay / RNG / damage unchanged). Commands are compared pairwise after skipping the
 inserted LEECH_SEED_DRAIN general-animation commands of the final tree. A changed command must be
-  (A) a message with timing (24, 64) -> (0, 64) whose ONLY other change is the presented frames [18] (WAITMESSAGE_LONG floor drop):
+  (A) a message with timing (24, h) -> (0, h) (any equal hold h: 64 plain, larger when the print carries extra hold rows) whose ONLY other change is the presented frames [18] (WAITMESSAGE_LONG floor drop):
       L = printable length [9]; L >= 24 -> frames unchanged ("floor L>=24"), L < 24 -> frames - (24 - L) ("floor L<24", per L), or
   (B) the hp command right after an inserted drain animation (seeded: min 28 -> 0, tail 0 -> 8) or the next hp command (receiver: min 28 -> 0, tail 0 -> 3),
-      whose ONLY changes are [20] minimumFrames, [14] tailFrames and the frames [18]; frame deltas counted per role.
+      whose ONLY changes are [2] / [20] minimumFrames, [14] tailFrames and the frames [18]; frame deltas counted per role.
 Inserted drain animations are counted with their frames (the field-hold of the animation + the lead). Anything else is UNATTRIBUTED (exit 1).
 A battle that hits the 200k-frame budget in BOTH trees is reported as budget-tail from its first non-explainable difference on."""
 import glob, json, os, sys
@@ -33,7 +33,7 @@ res = {"schema": "lsd194-census-delta/v1", "battles": 0, "digestMismatch": [], "
        "drain": {"battlesWithDrain": 0, "insertedAnimations": 0, "animationFrames": {}, "seededHp": {"commands": 0, "frameDelta": {}}, "receiverHp": {"commands": 0, "frameDelta": {}}}}
 by_l = defaultdict(lambda: {"commands": 0, "frames": 0})
 scene = None
-for bpath in sorted(glob.glob(os.path.join(base_dir, "r*.jsonl"))):
+for bpath in sorted(glob.glob(os.path.join(base_dir, "r[0-9].jsonl"))):
     base, final = load(bpath), load(os.path.join(final_dir, os.path.basename(bpath)))
     for seed in sorted(base):
         b, f = base[seed], final[seed]
@@ -81,7 +81,7 @@ for bpath in sorted(glob.glob(os.path.join(base_dir, "r*.jsonl"))):
                 res["unchanged"] += 1
                 continue
             if x is not None and y is not None and x[TYPE] == y[TYPE] == "message" and only(x, y, (MIN, FRAMES)) and x[MIN] == 24 and y[MIN] == 0 \
-                    and x[HOLD] == y[HOLD] == 64:
+                    and x[HOLD] == y[HOLD]:
                 L = y[LEN]
                 dlt = y[FRAMES] - x[FRAMES]
                 p = res["printFloor"]
@@ -96,8 +96,8 @@ for bpath in sorted(glob.glob(os.path.join(base_dir, "r*.jsonl"))):
                     res["unattributed"].append({"seed": seed, "at": i, "base": x, "final": y, "why": "print frames"})
                     break
                 changed = True
-            elif x is not None and y is not None and x[TYPE] == y[TYPE] == "hp" and role.get(i) and only(x, y, (HPMIN, TAILF, FRAMES)) \
-                    and x[HPMIN] == 28 and y[HPMIN] == 0 and x[TAILF] == 0 and y[TAILF] == (8 if role[i] == "seeded" else 3):
+            elif x is not None and y is not None and x[TYPE] == y[TYPE] == "hp" and role.get(i) and only(x, y, (MIN, HPMIN, TAILF, FRAMES)) \
+                    and x[MIN] == 28 and y[MIN] == 0 and x[HPMIN] == 28 and y[HPMIN] == 0 and x[TAILF] == 0 and y[TAILF] == (8 if role[i] == "seeded" else 3):
                 key = "seededHp" if role[i] == "seeded" else "receiverHp"
                 d = res["drain"][key]
                 d["commands"] += 1
