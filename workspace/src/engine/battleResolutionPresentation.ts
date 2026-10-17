@@ -115,7 +115,7 @@ export type BattleHitAnimationTiming = Readonly<{
   firstDisplayedAge: 1;
 }>;
 /** sub183: tailFrames (present only when > 0) = the script rows between the bar's last row and the next print's first glyph (see hpPrintTailTiming). */
-export type BattleHpTiming = Readonly<{ minimumFrames: 28; tailFrames?: number }>;
+export type BattleHpTiming = Readonly<{ minimumFrames: 28 | 0; tailFrames?: number }>;
 /**
  * The RAM stat write is silent for exactly 2 frames before the message box
  * clears (`docs/issue69-omniboost-off-ground-truth.md` §2: every one of the
@@ -523,7 +523,7 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP";
+      animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN";
       timing: Readonly<{ minimumFrames: number }>;
     }>
   | Readonly<{
@@ -1437,7 +1437,7 @@ const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
  * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
  */
 const HP_PRINT_TAIL_FRAMES = 3;
-function hpPrintTailTiming(event: BattleKernelSemanticEvent): typeof HP_TIMING | Readonly<{ minimumFrames: 28; tailFrames: number }> {
+function hpPrintTailTiming(event: BattleKernelSemanticEvent): BattleHpTiming {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined) return HP_TIMING;
   const at = (offset: number) => BATTLE_SCRIPT_PROGRAM.instructions[programCounter + offset]?.opcodeName;
@@ -1445,6 +1445,48 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent): typeof HP_TIMING |
     && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
     ? Object.freeze({ minimumFrames: 28, tailFrames: HP_PRINT_TAIL_FRAMES } as const) : HP_TIMING;
 }
+/**
+ * lsd194 (docs/lsd194-print-floor-and-drain.md; lsd186 receipts, 6 ROM cases: 3 scenarios x both scenes, twice-fresh): the turn-end Leech
+ * Seed drain, `BattleScript_LeechSeedTurnDrain` (`playanimation; orword; healthbarupdate; datahpupdate; copyword; jumpifability;
+ * manipulatedamage; setbyte; goto`) then `BattleScript_LeechSeedTurnPrintAndUpdateHp` (`orword; healthbarupdate; datahpupdate;
+ * printfromtable; waitmessage`). HITMARKER_PASSIVE_HP_UPDATE only gates Counter / Mirror Coat / Shell Bell records
+ * (Cmd_datahpupdate, battle_script_commands.c:1932-1960), never a wait: each `datahpupdate` blocks on the preceding `healthbarupdate`'s
+ * controller exactly like any other, so a bar's ROM run is the bar's frames + 2 with no 28-row floor.
+ *   - Lead (from the last presented MoveEnd row to the seeded bar): the print's `goto` + MoveEnd rows beyond the two presented
+ *     sprite-visibility rows (LEECH_SEED_DRAIN_PRE_ROWS) + the script's own executions through the seeded `healthbarupdate`
+ *     (`instructionExecution`: `playanimation`, Scene OFF's Pausex20 33 rows, `orword`, `healthbarupdate` = 36) + Scene ON's
+ *     animation rows beyond the `orword` row its 208-row run already holds (LEECH_SEED_DRAIN_ANIMATION_ROWS: `delay 0` = 2 ticks
+ *     + Move_ABSORB's 206 rows, the 10-row window lead + 194 window + 2 to the script end).
+ *   - Seeded bar: no floor; tail = the executions to the receiver's `datahpupdate` (8 = the run's `datahpupdate` row + 7 script rows).
+ *   - Receiver bar: no floor; tail = HP_PRINT_TAIL_FRAMES (the `datahpupdate` row, `printfromtable`, the `waitmessage` row).
+ * Only the ordinary path is measured (no Liquid Ooze: its `jumpifability` skips rows, so the tail would not be 8 and the rule is off).
+ */
+const LEECH_SEED_DRAIN_PRE_ROWS = 8;
+export const LEECH_SEED_DRAIN_ANIMATION_ROWS = 208;
+const LEECH_SEED_DRAIN_SEEDED_TAIL = 8;
+function datahpupdatePcAfter(label: string): number {
+  let programCounter = BATTLE_SCRIPT_PROGRAM.labelEntries[label]!.programCounter;
+  while (BATTLE_SCRIPT_PROGRAM.instructions[programCounter]!.opcodeName !== "B_SCR_OP_DATAHPUPDATE") programCounter += 1;
+  return programCounter;
+}
+const LEECH_SEED_DRAIN_SEEDED_PC = datahpupdatePcAfter("BattleScript_LeechSeedTurnDrain");
+const LEECH_SEED_DRAIN_RECEIVER_PC = datahpupdatePcAfter("BattleScript_LeechSeedTurnPrintAndUpdateHp");
+/** The drain role of the hp-change at events[index], or null (not a measured ordinary drain). */
+function leechSeedDrainRole(events: readonly BattleKernelSemanticEvent[], index: number): "seeded" | "receiver" | null {
+  const event = events[index]!;
+  const pc = event.provenance?.programCounter;
+  if (pc === LEECH_SEED_DRAIN_RECEIVER_PC) {
+    const seeded = events.slice(0, index).reverse().find((e) => e.payload.kind === "hp-change");
+    return seeded?.provenance?.programCounter === LEECH_SEED_DRAIN_SEEDED_PC
+      && event.provenance!.instructionExecution! - seeded.provenance.instructionExecution! === LEECH_SEED_DRAIN_SEEDED_TAIL ? "receiver" : null;
+  }
+  if (pc !== LEECH_SEED_DRAIN_SEEDED_PC) return null;
+  const receiver = events.slice(index + 1).find((e) => e.payload.kind === "hp-change");
+  return receiver?.provenance?.programCounter === LEECH_SEED_DRAIN_RECEIVER_PC
+    && receiver.provenance.instructionExecution! - event.provenance!.instructionExecution! === LEECH_SEED_DRAIN_SEEDED_TAIL ? "seeded" : null;
+}
+const LEECH_SEED_DRAIN_SEEDED_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: LEECH_SEED_DRAIN_SEEDED_TAIL } as const);
+const LEECH_SEED_DRAIN_RECEIVER_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: HP_PRINT_TAIL_FRAMES } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 2 } as const);
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 /**
@@ -4144,7 +4186,8 @@ export function projectBattleResolutionCommands(
   usedMessageHoldFrames = 0,
 ): readonly BattleResolutionPresentationCommand[] {
   const commands: BattleResolutionPresentationCommand[] = [];
-  const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number }>();
+  const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number; instructionExecution: number | undefined }>();
+  let leechDrainAnimated = false;
   const pendingSwitch = new Map<
     0 | 1,
     { eventSequence: number; fromPartyIndex: BattlePartyIndex; toPartyIndex: BattlePartyIndex }
@@ -4197,6 +4240,7 @@ export function projectBattleResolutionCommands(
     }
     if (event.provenance?.dispatcher !== SYNTHESIZED_SWITCH_DISPATCHER) lastSequence = event.sequence;
     const payload = event.payload;
+    if (payload.kind === "animation" && payload.animationId === "LEECH_SEED_DRAIN") leechDrainAnimated = true;
     if (payload.kind === "set-battler-pp-data") {
       lastMoveAttacker = singlesBattler(payload.battler, "PP update");
       continue;
@@ -4452,6 +4496,7 @@ export function projectBattleResolutionCommands(
       pendingHealth.set(battler, {
         eventSequence: event.sequence,
         healthValue: payload.healthValue,
+        instructionExecution: event.provenance?.instructionExecution,
       });
       continue;
     }
@@ -4462,6 +4507,20 @@ export function projectBattleResolutionCommands(
         throw new Error(`battle resolution HP change for battler ${battler} has no health-bar update`);
       }
       pendingHealth.delete(battler);
+      const drainRole = leechSeedDrainRole(events, index);
+      if (drainRole === "seeded") {
+        commands.push(Object.freeze({
+          type: "general-animation",
+          eventSequence: health.eventSequence,
+          battler,
+          animation: "LEECH_SEED_DRAIN",
+          timing: Object.freeze({
+            minimumFrames: LEECH_SEED_DRAIN_PRE_ROWS + health.instructionExecution!
+              + (leechDrainAnimated ? LEECH_SEED_DRAIN_ANIMATION_ROWS - 1 : 0),
+          }),
+        }));
+      }
+      leechDrainAnimated = false;
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
@@ -4469,7 +4528,8 @@ export function projectBattleResolutionCommands(
         from: payload.from,
         to: payload.to,
         healthValue: health.healthValue,
-        timing: hpPrintTailTiming(event),
+        timing: drainRole === "seeded" ? LEECH_SEED_DRAIN_SEEDED_HP_TIMING
+          : drainRole === "receiver" ? LEECH_SEED_DRAIN_RECEIVER_HP_TIMING : hpPrintTailTiming(event),
       }));
       if (payload.to === 0) zeroHpBattlers.add(battler);
       continue;
