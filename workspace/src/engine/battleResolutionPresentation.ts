@@ -79,7 +79,7 @@ export type PartyBallState = "empty" | "healthy" | "status" | "fainted";
  * here -- see `WAITMESSAGE_LONG_MESSAGE_IDS` at the call site.
  */
 export type BattleMessageTiming =
-  | Readonly<{ minimumFrames: 24; holdFrames: 0 | 64 }>
+  | Readonly<{ minimumFrames: 24; holdFrames: 0 }>
   | Readonly<{ minimumFrames: 24; holdFrames: 9 }>
   | Readonly<{ minimumFrames: 13; holdFrames: 0 }>
   // ISSUES #81 4b route-scoped used-move hold: the failed/no-anim path's
@@ -785,10 +785,11 @@ export const USED_MESSAGE_SPLASH_CONTROLLER_HOLD_FRAMES = 39;
  * and then runs `waitmessage B_WAIT_TIME_LONG`. The hold counts down from
  * print completion, not from the print command (see
  * `docs/battle-message-hold-cadence-ground-truth.md` §2), so `holdFrames` is
- * strictly additive to the print floor/length term.
+ * strictly additive to the printable length. lsd194 (docs/lsd194-print-floor-and-drain.md): the ROM's first glyph -> next
+ * instruction is exactly L + 64 for L = 14 .. 24 (no 24-frame floor, both scenes), so `minimumFrames` is 0 (msg175's USEDMOVE rule).
  */
 export const WAITMESSAGE_LONG_TIMING = Object.freeze({
-  minimumFrames: 24,
+  minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES,
 } as const);
 /**

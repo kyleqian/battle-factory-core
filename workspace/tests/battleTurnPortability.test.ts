@@ -245,7 +245,7 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         lines: ["ONIX’s accuracy", "fell!"],
         advance: "automatic",
         noCursor: false,
-        timing: { minimumFrames: 24, holdFrames: 64 },
+        timing: { minimumFrames: 0, holdFrames: 64 },
       },
       {
         type: "sprite-visibility",
