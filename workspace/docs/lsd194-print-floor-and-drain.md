@@ -166,8 +166,8 @@ before the DEFENSE print's wait run (`BulkUpTryDef+28`, first glyph one row late
 `lsd194Census.sh` (6 jobs, 25-seed parts) + `lsd194CensusDelta.py`; receipts `tools/integration/fixtures/lsd194/census-{on,off}.json`. 1000 battles per scene.
 
 - **Kernel digests identical**: `digestMismatch = []`, `errorMismatch = []`, `typeSequenceChanged = []` (the command *type* sequence is unchanged once the inserted `LEECH_SEED_DRAIN` animations are skipped) in both scenes.
-  85 battles per scene end in an error in BOTH trees (identical text): 84 are the pre-existing `battleHealthBar: invalid HP program` throw of the census harness (also in the base tree) and 1 is `frame budget`;
-  for those the digest is compared too (82 / 85 equal; the three that differ -- seeds 434, 796, 881 -- are the `frame budget` stalls, cut at a different command because the presentation frames shifted; reported as `budgetTail`).
+  85 battles per scene end in an error in BOTH trees (identical text): 82 are the pre-existing `battleHealthBar: invalid HP program` throw of the census harness (present in the base tree; digests equal, 82 / 82)
+  and 3 (seeds 434, 796, 881) are `frame budget` stalls, whose digest differs only because the 200k-frame budget cuts the battle at a different command once the presentation frames shifted (reported as `budgetTail`, not a gameplay change).
 - **0 unattributed commands** in both scenes. Every changed command is one of:
 
 | class | ON | OFF |
@@ -186,4 +186,4 @@ before the DEFENSE print's wait run (`BulkUpTryDef+28`, first glyph one row late
 ### 7.2 Differential
 
 `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 6b6d1d128`: **PASS, 641 captures byte-identical across 3 traces**
-(235 + 216 + 190). None of the three traces reaches a short print with a presentation change, so no difference to attribute.
+(235 + 216 + 190). No difference to attribute.
