@@ -89,4 +89,3 @@ for (const o of out) {
 }
 console.log("residual rows", out.length, "nonzero fields", nonzero);
 writeFileSync(process.argv[3]!, JSON.stringify(out, null, 1) + "\n");
-
