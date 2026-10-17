@@ -14,6 +14,11 @@ before this launch. Do not redo trn178 / trn181 / fpc180 / snd182 / sub183.
 
 ## Work queue
 
+**Status after the 2026-10-16 / 17 run (read PROGRESS.md first):** item 1 (pfr192) and the btl188 /
+fpo187 parts of item 2 (ont193) are folded and verified; do not redo them. msg189 + Leech Seed (item 3
+timing) are on the unfolded branch `worker/integration-20261017-013328` (lsd194) with open suite
+failures; PROGRESS.md lists the triage and the next action.
+
 Read the current `PROGRESS.md`, `ROADMAP.md`, `ISSUES.md` and integration
 ledger. Continue the full user-authorized Factory finish-up scope under
 `docs/factory-finish-scope.md`; preserve existing D3/D4 decisions. Audio stays

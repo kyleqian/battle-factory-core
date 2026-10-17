@@ -37,6 +37,9 @@ history.
   (14, 2026-10-16 pfr192) Absolute frame-total pins (sc106, sgl138, soak seed totals) need a re-pin on every send-in timing change and
   their deltas do not sum from the census (dismiss-press parity / soak input cadence); older census drivers (fpc180, trn178, msg175) press
   dismiss on absolute `frame % 2`. A per-send-in delta helper would make attribution mechanical (~20 min).
+  (15, 2026-10-17 ont193 / lsd194) ont193 hand-sharded the full suite across its own re-pins despite the brief, so no single run covered
+  the final tree (the supervisor's own 48-min run did); lsd194 started its suite at ~80 of 120 min and was capped while re-pinning
+  20 failures. A 120-min cap cannot hold a shared-timing change + census + a 48-min suite + a re-pin round; split such steps (~1 h).
 - **Hits:** 3 sessions (2026-10-14, 2026-10-15/16, 2026-10-16/17), ~2.5 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
   and the supervisor; census job limit from `/etc/pokebench-runner.env`. Vendor paths: 155 `tools/**/*.sh` hard-code
