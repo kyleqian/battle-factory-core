@@ -4176,6 +4176,26 @@ function statsChangeNextReceiptHoldFrames(
   return 0;
 }
 
+/**
+ * lsd196: a `stat` between two prints (Bulk Up's ATTACK -> DEFENSE: `printfromtable; waitmessage` ... `setstatchanger; statbuffchange;
+ * jumpifbyte; printfromtable`). The first print's `waitmessage B_WAIT_TIME_LONG` hold is `previous.timing.holdFrames` executions of the
+ * kernel's count; every further execution up to the next print is one single-row instruction (ROM off108 Bulk Up: 4 rows, then the next
+ * print's first glyph one row later). Rows = those instructions + the first-glyph lead; the `stat` command presents all of them.
+ */
+function statBetweenPrintsFrames(
+  events: readonly BattleKernelSemanticEvent[],
+  previous: BattleResolutionPresentationCommand,
+  stat: Extract<BattleResolutionPresentationCommand, { type: "stat" }>,
+  following: BattleResolutionPresentationCommand,
+): number {
+  if (previous.type !== "message" || following.type !== "message") return 0;
+  const first = events.find((event) => event.sequence === previous.eventSequence)?.provenance?.instructionExecution;
+  const second = events.find((event) => event.sequence === following.eventSequence)?.provenance?.instructionExecution;
+  if (first === undefined || second === undefined || second <= first) return 0;
+  const lead = 1;
+  return Math.max(stat.timing.minimumFrames, second - first - previous.timing.holdFrames + lead);
+}
+
 export function projectBattleResolutionCommands(
   events: readonly BattleKernelSemanticEvent[],
   beforeRules: BattleScriptRulesContext,
@@ -4869,6 +4889,14 @@ export function projectBattleResolutionCommands(
       }
     }
     commands.splice(0, commands.length, ...ordered);
+  }
+  for (let index = 1; index < commands.length - 1; index += 1) {
+    const command = commands[index]!;
+    if (command.type !== "stat") continue;
+    const rows = statBetweenPrintsFrames(events, commands[index - 1]!, command, commands[index + 1]!);
+    if (rows > command.timing.minimumFrames) {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: rows }) });
+    }
   }
   // snd145: an opponent FAINT REPLACEMENT that ends the turn holds its settled send-in through the source's post-`switchinanim`
   // turn-end work (`switchineffects`, the rest of `BattleScript_HandleFaintedMon`, `BattleTurnPassed`) before the action prompt.
