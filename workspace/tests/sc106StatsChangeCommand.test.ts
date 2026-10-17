@@ -68,7 +68,9 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 2.
     // trn181 (docs/trn181-action-transition-on.md): + 14, the Scene ON action-transition pauses before it (tools/integration/trn181PinShift.ts 0 2).
     // ont193 (docs/ont193-scene-on-tails.md): + 3, Acid Armor's own script tail (3 rows after the waitanimation release; source-derived, no ROM row).
-    const shift = iu([91, O], [151, P]) - 16 - 2 + TRN181_SEED0_PAUSES_BEFORE_FIRST_ANCHOR + 3;
+    // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): - 1, the WAITMESSAGE_LONG 24-row floor is gone: the opponent's "Foe VIBRAVA dug a hole!" print (L = 23) lasts L + 64
+    // (tools/integration/lsd194ScAttribution.ts 0 2; base 983 -> 982, unchanged by the drain rows).
+    const shift = iu([91, O], [151, P]) - 16 - 2 + TRN181_SEED0_PAUSES_BEFORE_FIRST_ANCHOR + 3 - 1;
     expect(a.statsChange).toEqual({ frame: 976 + shift, frames: 90 });
     // scf117: + 1 hold frame (the print executes on rel 91 and shows its first glyph on rel 92).
     expect(a.following).toMatchObject({ type: "message", frame: 976 + shift + 90 + 1, glyph: 976 + shift + 90 + 1 });
@@ -79,7 +81,9 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // (two later dismissals land one frame earlier relative to the timeline shifted by an odd 27 / 29 frames).
     // sgl138: + 8 + 9 = sgs134: the route's two gated Icy Wind secondaries (IsBattleSEPlaying, docs/sgs134-se-gate-other-requests.md).
     // snd145: + the Foe WOBBUFFET faint replacement's Scene ON species-keyed send-in tail + turn-end hold (158 vs the old 91 + 11).
-    expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1 + iu([91, O, 4], [151, P, 3], [196, P, 4], [219, O], [204, O]) - 2 + 8 + 9
+    // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): - 37 = the 8 short WAITMESSAGE_LONG prints on the route lose their floor (L 23 x2, 21 x3, 15 x2, 14: - 39,
+    // tools/integration/lsd194ScAttribution.ts 0 2 all) + 2 frames of dismissal parity (measured: 6738 -> 6701 on the final tree).
+    expect(route.frames).toBe(6045 + 588 + 36 + 7 + 1 - 37 + iu([91, O, 4], [151, P, 3], [196, P, 4], [219, O], [204, O]) - 2 + 8 + 9
       + snd145FaintReplacement(202) - 16 * CHG161_SEED0_ON_CHARGE_TURNS
       - 99 - 1 // pfr192: the one player faint replacement (readyAt 212 vs the fixed 311) + 1 frame of dismissal parity (odd 99).
       - 17 // msg175: the route's used prints last their printable length (no 24-frame floor).
@@ -115,7 +119,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(a.before?.type).toBe("stat");
     // iu120: + the three live bodies before it (player 98 x2, opponent 317).
     // trn181: + 38, the Scene ON action-transition pauses before it (trn181PinShift.ts 3 1).
-    const shift = iu([98, P, 2], [317, O]) + 38;
+    // lsd194: - 3, the floor is gone: the one "It's super effective!" print (L = 21) before it lasts L + 64 (lsd194ScAttribution.ts 3 1; base 1432 -> 1429).
+    const shift = iu([98, P, 2], [317, O]) + 38 - 3;
     expect(a.statsChange).toEqual({ frame: 1379 + shift, frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 1379 + shift + 76 + 1, glyph: 1379 + shift + 76 + 1 });
   });
@@ -131,7 +136,9 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     const shift = iu([23, P], [18, O], [60, O], [93, P, 2], [318, O]) + opponentSwitchInDuration(58) - SWITCH_IN_SPAN_FRAMES
       - SWITCH_IN_WAITSTATE_HOLD_FRAMES
       - 10 // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 10.
-      + 45 - 1 // trn181 (docs/trn181-action-transition-on.md): the Scene ON action-transition pauses before it (45; trn181PinShift.ts 6 0), - 1 frame of dismissal parity.
+      - 9 // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the three "It's super effective!" prints (L = 21) before it lose their floor, 3 rows each (lsd194ScAttribution.ts 6 0).
+      + 45 // trn181 (docs/trn181-action-transition-on.md): the Scene ON action-transition pauses before it (45; trn181PinShift.ts 6 0); the old - 1 frame of dismissal parity is 0 after the odd lsd194 shift
+      // (measured on archived trees: base 2839, floor-only tree 2831 = - 9 + 1 at the faint command, final 2831; the dismissal poll lands one frame later).
       + 46; // snd182 (docs/snd182-scene-on-forced-player-send-in-live.md): the Foe's Roar / Whirlwind drags out the player's DROWZEE at frame 849 (Scene ON forced player send-in: 137 + 11 = 148 vs the old 91 + 11 = 102).
     expect(a.statsChange).toEqual({ frame: 2694 + 10 + shift, frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 2694 + 10 + shift + 76 + 1, glyph: 2694 + 10 + shift + 76 + 1 });
@@ -148,7 +155,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // msg175 (docs/msg175-used-message-duration.md): the used prints before it last their printable length (no 24-frame floor): - 13.
     // trn181: + 39, the Scene ON action-transition pauses before it (trn181PinShift.ts 13 3).
     // ont193: + 5, the Tickle's own script tail (source-derived, no ROM row).
-    const shift = iu([205, P], [55, O, 2], [321, O]) - 13 + 39 + 5;
+    // lsd194: - 2, the two "WAILMER's attack missed!" prints (L = 23) before it lose their floor, 1 row each (lsd194ScAttribution.ts 13 3; base 2053 -> 2051).
+    const shift = iu([205, P], [55, O, 2], [321, O]) - 13 + 39 + 5 - 2;
     expect(a.statsChange).toEqual({ frame: 1929 + 79 + shift, frames: 76 });
     // One animation for the group: the stat write that follows (ATK) starts 76 frames later; DEF's write has no second command.
     // scf117: + 3 hold frames (setstatchanger + statbuffchange + jumpifbyte + printfromtable after rel 77: the ATK write's `stat`
@@ -160,7 +168,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // iu120: + every live body's universal rows on the route.
     // sa125 (docs/sa125-status-animation-command.md): + the route's Scene ON status animations (CONFUSION x4, PRZ x2) and its one SA3
     // status command (Thunder Wave's PRZ write 32 -> 2), all after this anchor: 9177 -> 9625 (base / final measured).
-    expect(route.frames).toBe(8557 + 456 + 79 - 1 + 10 + 1
+    // lsd194: - 49 = the route's 13 short WAITMESSAGE_LONG prints lose their floor (L 23 x3, 22 x2, 21 x2, 20 x4, 14 x2; lsd194ScAttribution.ts 13 3 all), no parity change (9668 -> 9619).
+    expect(route.frames).toBe(8557 + 456 + 79 - 1 + 10 + 1 - 49
       + iu([205, P, 6], [55, O, 3], [321, O, 2], [246, O], [341, O], [44, O], [260, O], [148, P, 2], [24, O, 4])
       + 4 * SA125_STATUS_ANIMATION_ROWS.CONFUSION! + 2 * SA125_STATUS_ANIMATION_ROWS.PRZ! - (SA125_BASE_STATUS_FRAMES - 2)
       // snd145: + the Foe NIDORINA faint replacement's send-in tail + turn-end hold (123 vs 102), - 1 frame of dismissal parity (odd 21).

@@ -145,7 +145,11 @@ function romRows(use: RomUse) {
 /** N's command start, frames after G + 1 (the opener's hold + every command before N's). */
 function startOf(use: Use, nSequence: number): number {
   const at = use.commands.findIndex((c, i) => i > 0 && c[0] >= nSequence);
-  return (use.commands[0]![3] ?? 0) + use.commands.slice(1, at).reduce((sum, c) => sum + (c[2] ?? 0) + (c[3] ?? 0), 0);
+  // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): this proxy is min + hold, and a WAITMESSAGE_LONG print's minimum used to be 24, so it summed 24 + 64 for every such print.
+  // The floor is gone (production: max(min, printable length) + hold, unchanged for the Rest print, L >= 24), so the proxy keeps the old 24 to stay the pre-lsd194 measurement:
+  // with real lengths the Rest chain ends at 136 (player seed 12) rather than 127, an off148 residual listed in section 8 (production did not move; only this proxy would).
+  const proxyFrames = (c: Use["commands"][number]) => (c[1] === "message" && c[2] === 0 && c[3] === 64 ? 24 : (c[2] ?? 0)) + (c[3] ?? 0);
+  return (use.commands[0]![3] ?? 0) + use.commands.slice(1, at).reduce((sum, c) => sum + proxyFrames(c), 0);
 }
 const noHitBodies = (uses: Use[], move: number, attacker: number) =>
   uses.filter((u) => u.move === move && u.attacker === attacker && u.attack?.[2] === "SCENE_OFF_ATTACK_PAUSE" && !u.hit);
@@ -204,7 +208,7 @@ describe("off148: Scene OFF no-hit pause remainder", () => {
     const [use] = noHitBodies(battleUses(12, "off"), 156, 0);
     expect(startOf(use!, use!.attack![0])).toBe(128 - 1);
     expect(use!.commands.slice(1, 4).map((c) => [c[1], c[2], c[3]])).toEqual([
-      ["status", 38, null], ["message", 24, 64], ["status-icon", 1, null],
+      ["status", 38, null], ["message", 0, 64], ["status-icon", 1, null],
     ]);
   });
 
