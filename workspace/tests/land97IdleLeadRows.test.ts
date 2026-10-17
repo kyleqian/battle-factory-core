@@ -89,7 +89,8 @@ describe("land97 idle lead rows", () => {
       // iu120: the P pre rows come before the N lead rows (both the age-0 frame); the T post rows repeat the last body row.
       const N = 4, P = iu120Pre(339), T = iu120Post(339);
       expect(body).toHaveLength(104);
-      expect(nowBody).toHaveLength(P + N + 104 + T);
+      const SCRIPT_TAIL = 4; // ont193 (docs/ont193-scene-on-tails.md): the held last body row after the post rows (Bulk Up: tail 7 + trail -1 - post 2).
+      expect(nowBody).toHaveLength(P + N + 104 + T + SCRIPT_TAIL);
       for (let i = 0; i < P + N; i += 1) {
         expect(nowBody[i]!.sha).toBe(body[0]!.sha);
         expect(nowBody[i]!.age).toBe(0);
@@ -99,7 +100,7 @@ describe("land97 idle lead rows", () => {
         expect(nowBody[P + N + k]!.sha, `row ${k}`).toBe(body[k]!.sha);
         expect(nowBody[P + N + k]!.age).toBe(body[k]!.age);
       }
-      for (let j = 0; j < T; j += 1) expect(nowBody[P + N + body.length + j]!.sha).toBe(body.at(-1)!.sha);
+      for (let j = 0; j < T + SCRIPT_TAIL; j += 1) expect(nowBody[P + N + body.length + j]!.sha).toBe(body.at(-1)!.sha);
       expect(now.render.find((r) => r.after)!.sha).toBe(base.render.find((r) => r.after)!.sha);
     } finally {
       rmSync(dir, { recursive: true, force: true });

@@ -44,7 +44,7 @@ import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
 import { substituteFadeDuration } from "./liveSubstituteFade.ts";
 import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
-import { battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
+import { battleResolutionCommandDuration, battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
@@ -101,7 +101,15 @@ export type BattleMessageTiming =
  * release of "X used Y!" and `attackanimation`, presented as a live body's first rows (the field as it is, before the seGate and pre
  * rows); only a script whose `attackstring` is followed by `waitstate` has them (BattleScript_EffectSubstitute).
  */
-export type BattleMoveAnimationTiming = Readonly<{ minimumFrames: number; seGateFrames?: number; scriptLeadFrames?: number }>;
+/**
+ * ont193 (docs/btl188-scene-on-anchor-start.md, ISSUES #167 (a')): scriptTailRows (present only when > 0) = the source-derived rows from a
+ * Scene ON no-hit body's start to the next command's first row, beyond the body's own pre + idle lead + live rows:
+ * `(Δ(N) − Δ(attack) + 1) + k + 1` (moveAnimationScriptTailTiming). `liveMoveScriptTailFrames` subtracts the body's post rows and adds
+ * the adapter's trail to get the rows the live body presents after its last row (the held last body row).
+ */
+export type BattleMoveAnimationTiming = Readonly<{
+  minimumFrames: number; seGateFrames?: number; scriptLeadFrames?: number; scriptTailRows?: number;
+}>;
 export type BattleHitAnimationTiming = Readonly<{
   minimumFrames: 35;
   firstDisplayedAge: 1;
@@ -164,6 +172,22 @@ const FOCUS_PUNCH_STATUS2_SUBSTITUTE = 1 << 24;
 const SYNTHESIZED_SWITCH_DISPATCHER = "synthesized-voluntary-switch";
 
 /**
+ * fpo187 (docs/fpo187-focus-punch-on-prepass-row.md, ont193): Scene ON only, the pre-pass `playanimation` launch
+ * (Player/OpponentHandleBattleAnimation, gated by IsBattleSEPlaying) waits for the player's last menu SE_SELECT (10 frames) when
+ * the first pre-pass of a turn follows a Fight-menu A confirm (animWait 2 -> empty glyph to tightening glyph 127). With no SE in
+ * play (a voluntary-switch turn, or any later pre-pass of the turn) the launch is 2 rows earlier -> 125. Scene OFF has no
+ * animation receipt (Pausex20 path) and never takes the term.
+ */
+export const FOCUS_PUNCH_PRE_PASS_MENU_SE_LAUNCH_WAIT_FRAMES = 2;
+function focusPunchPrePassLaunchWaitsForMenuSe(events: readonly BattleKernelSemanticEvent[], index: number): boolean {
+  const isPrePassBox = (event: BattleKernelSemanticEvent): boolean =>
+    event.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT && event.payload.kind === "message"
+    && event.payload.messageId === "STRINGID_EMPTYSTRING3";
+  if (events.findIndex(isPrePassBox) !== index) return false;
+  return !events.some((event) => event.provenance?.dispatcher === SYNTHESIZED_SWITCH_DISPATCHER);
+}
+
+/**
  * fpp150: a pre-pass print's timing. The empty box (printstring STRINGID_EMPTYSTRING3 + waitmessage 1) lasts one frame per
  * kernel interpreter execution to the script's next presented receipt plus waitmessage 1's controller row (the kernel does not
  * count the printer's busy row): Scene ON the playanimation (2 + 1: rows X - 3 .. X - 1, the general-animation command then
@@ -183,7 +207,10 @@ function focusPunchPrePassMessageTiming(
     const from = event.provenance.instructionExecution;
     const to = next?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT ? next.provenance.instructionExecution : undefined;
     if (from === undefined || to === undefined || to <= from) return null;
-    return Object.freeze({ minimumFrames: to - from + 1, holdFrames: 0 });
+    const animWait = next?.payload.kind === "animation" && !focusPunchPrePassLaunchWaitsForMenuSe(events, index)
+      ? FOCUS_PUNCH_PRE_PASS_MENU_SE_LAUNCH_WAIT_FRAMES
+      : 0;
+    return Object.freeze({ minimumFrames: Math.max(1, to - from + 1 - animWait), holdFrames: 0 });
   }
   if (event.payload.messageId === "STRINGID_PKMNTIGHTENINGFOCUS") {
     // The next print (skipping silent events such as the PP update that precedes a Substitute's used print).
@@ -1328,6 +1355,70 @@ function moveAnimationScriptLeadTiming(events: readonly BattleKernelSemanticEven
       ? { scriptLeadFrames: lead } : {};
   }
   return {};
+}
+
+const SCRIPT_TAIL_BETWEEN_OPCODES: ReadonlySet<string> = new Set(["B_SCR_OP_WAITANIMATION", "B_SCR_OP_SETBYTE", "B_SCR_OP_SETGRAPHICALSTATCHANGEVALUES"]);
+const SCRIPT_TAIL_NEXT_OPCODES: ReadonlySet<string> = new Set([
+  "B_SCR_OP_PLAYSTATCHANGEANIMATION", "B_SCR_OP_PLAYANIMATION", "B_SCR_OP_PRINTFROMTABLE", "B_SCR_OP_PRINTSTRING",
+]);
+/**
+ * ont193 (ISSUES #167 (a')): a Scene ON no-hit live body (`attackanimation; waitanimation; [setbyte;] <next receipt>`: the stat / protect /
+ * status scripts) ends on the ROM's `waitanimation` release row, but the next script instruction runs `Δ(N) − Δ(attack)` rows later and the next
+ * receipt's controller work starts one row after that. The body starts on the used print's release row (G + 1) and the script reaches
+ * `attackanimation` k rows later (k = Δ(attack) − Δ(used) − 1 less the rows presented in between: Sand-Attack's 2-row `stat` command); the
+ * ROM release row is `attackanimation + (P + N + D + trail + 1)`. Returns Δ(N) − Δ(attack) + 1 + k + 1 (the caller's pre + lead + live
+ * excluded); null when the script shape differs (a hit body, a charge turn, a Substitute, an unpresented command between).
+ */
+function moveAnimationScriptTailTiming(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+  usedExecution: number | null,
+  presentedSinceUsed: number | null,
+): { scriptTailRows?: number } {
+  const attack = events[index]!;
+  const attackExecution = attack.provenance?.instructionExecution;
+  const attackPc = attack.provenance?.programCounter;
+  if (usedExecution === null || presentedSinceUsed === null || attackExecution === undefined || attackPc === undefined
+    || attack.provenance?.sourceLabel === CHARGE_TURN_SCRIPT) return {};
+  let next: BattleKernelSemanticEvent | undefined;
+  for (let following = index + 1; following < events.length; following += 1) {
+    const candidate = events[following]!;
+    if (candidate.payload.kind === "set-battler-pp-data" || candidate.payload.kind === "game-stat-increment") continue;
+    next = candidate;
+    break;
+  }
+  if (next === undefined) return {};
+  const isStatsChange = next.payload.kind === "animation" && next.payload.animationId === "STATS_CHANGE";
+  if (next.payload.kind !== "message" && !isStatsChange) return {};
+  const nextExecution = next.provenance?.instructionExecution;
+  const nextPc = next.provenance?.programCounter;
+  if (nextExecution === undefined || nextPc === undefined || nextExecution <= attackExecution) return {};
+  const instructions = BATTLE_SCRIPT_PROGRAM.instructions;
+  if (nextPc - attackPc !== nextExecution - attackExecution || instructions[attackPc + 1]?.opcodeName !== "B_SCR_OP_WAITANIMATION"
+    || !SCRIPT_TAIL_NEXT_OPCODES.has(instructions[nextPc]?.opcodeName ?? "")) return {};
+  for (let pc = attackPc + 1; pc < nextPc; pc += 1) {
+    if (!SCRIPT_TAIL_BETWEEN_OPCODES.has(instructions[pc]?.opcodeName ?? "")) return {};
+  }
+  const lead = attackExecution - usedExecution - 1 - presentedSinceUsed;
+  if (lead < 0) return {};
+  return { scriptTailRows: nextExecution - attackExecution + 1 + lead + 1 };
+}
+
+/** ont193: the rows presented since the used print's release (only silent-RAM `stat` commands are accepted), else null. */
+function commandsPresentedSinceUsedPrint(
+  events: readonly BattleKernelSemanticEvent[],
+  openerIndex: number | null,
+  since: readonly BattleResolutionPresentationCommand[],
+  field: BattleResolutionDisplayedField,
+): number | null {
+  const opener = openerIndex === null ? undefined : events[openerIndex];
+  if (opener?.payload.kind !== "message" || opener.payload.messageId !== "STRINGID_USEDMOVE") return null;
+  let rows = 0;
+  for (const command of since) {
+    if (command.type !== "stat") return null;
+    rows += battleResolutionCommandDuration(command, field);
+  }
+  return rows;
 }
 
 /** sa125 SA1: the presented B_ANIM_STATUS_* of a kernel `status-animation` receipt, or null (WRAPPED / none: no table entry). */
@@ -4282,6 +4373,10 @@ export function projectBattleResolutionCommands(
           // the readiness registry. No substitute effect receives exact credit.
           timing: Object.freeze({
             minimumFrames: SCENE_OFF_MOVE_PAUSE_FRAMES, ...moveAnimationSeGateTiming(events, index), ...moveAnimationScriptLeadTiming(events, index),
+            ...moveAnimationScriptTailTiming(
+              events, index, usedMoveInstructionExecution,
+              commandsPresentedSinceUsedPrint(events, pauseOpenerIndex, commands.slice(pauseOpenerCommands), field),
+            ),
           }),
         }));
         continue;

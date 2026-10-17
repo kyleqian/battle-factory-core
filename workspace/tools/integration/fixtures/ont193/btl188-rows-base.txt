@@ -1,0 +1,25 @@
+bulk-up-ply-primeape-onix
+  ROM: attackanimation c3, waitanimation c4..c114 (111 rows), next controller wait c117 (77), its first screen change c124
+  prod: body c1..c113 (113 = pre 3 + lead 4 + live 104 + post 2), next stats-change at c114
+  kernel: attackanimation 5, next emit STATS_CHANGE 8 (n-a 3)
+  body end -> ROM release 0; expected next c118; short 4; formula (n-a)+1+(release-bodyEnd) = 4
+protect-ply-primeape-onix
+  ROM: attackanimation c3, waitanimation c4..c129 (126 rows), next controller wait c131 (90), its first screen change c132
+  prod: body c1..c128 (128 = pre 3 + lead 0 + live 123 + post 2), next message at c129
+  kernel: attackanimation 5, next emit STRINGID_PKMNPROTECTEDITSELF2 7 (n-a 2)
+  body end -> ROM release 0; expected next c132; short 3; formula (n-a)+1+(release-bodyEnd) = 3
+detect-ply-primeape-onix
+  ROM: attackanimation c3, waitanimation c4..c116 (113 rows), next controller wait c118 (90), its first screen change c119
+  prod: body c1..c115 (115 = pre 3 + lead 0 + live 110 + post 2), next message at c116
+  kernel: attackanimation 5, next emit STRINGID_PKMNPROTECTEDITSELF2 7 (n-a 2)
+  body end -> ROM release 0; expected next c119; short 3; formula (n-a)+1+(release-bodyEnd) = 3
+sand-attack-ply-primeape-snorlax
+  ROM: attackanimation c4, waitanimation c5..c66 (62 rows), next controller wait c69 (77), its first screen change c76
+  prod: body c3..c63 (61 = pre 3 + lead 0 + live 58 + post 0), next stats-change at c64
+  kernel: attackanimation 10, next emit STATS_CHANGE 13 (n-a 3)
+  body end -> ROM release 2; expected next c70; short 6; formula (n-a)+1+(release-bodyEnd) = 6
+double-team-ply-primeape-onix
+  ROM: attackanimation c4, waitanimation c5..c166 (162 rows), next controller wait c246 (92), its first screen change c247; stat-anim wait c169 (77)
+  prod: body c3..c241 (239 = pre 0 + lead 0 + live 239 + post 0), next message at c242
+  kernel: attackanimation 7, next emit STATS_CHANGE 10 (n-a 3)
+  body end -> ROM release -76; expected next c247; short 5; formula (n-a)+1+(release-bodyEnd) = -72 (a stats-change would start c170 = release c166 + 3 + 1 = c170; the window owns that span)

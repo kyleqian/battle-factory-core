@@ -29,9 +29,9 @@ describe("trn181: the action-transition pause in Scene ON", () => {
     expect((trn176Evaluate(tw) as any).skipped).toBeTruthy();
   });
 
-  it("ON residuals land on the anchor-end error (Bulk Up -4, Sand-Attack -6, Protect -3, Rest -3, Solar Beam 0)", () => {
-    for (const [name, residual] of [["off108-bulk-up-ply-primeape-onix", -4], ["off108-sand-attack-ply-primeape-snorlax", -6],
-      ["off108-protect-ply-primeape-onix", -3], ["off108-rest-ply-snorlax-onix", -3], ["off108-solar-beam-ply-primeape-snorlax", 0]] as const) {
+  it("ON residuals land on the anchor-end error (ont193: Bulk Up 0, Sand-Attack 0, Protect 0 after the script tail; Rest -3, Solar Beam 0)", () => {
+    for (const [name, residual] of [["off108-bulk-up-ply-primeape-onix", 0], ["off108-sand-attack-ply-primeape-snorlax", 0],
+      ["off108-protect-ply-primeape-onix", 0], ["off108-rest-ply-snorlax-onix", -3], ["off108-solar-beam-ply-primeape-snorlax", 0]] as const) {
       const c = trn176Cases(["off108"], [name]).find((x) => x.scene === "on")!;
       const r = trn176Evaluate(c) as any;
       expect([name, r.residual, r.residual - r.anchorEndDelta]).toEqual([name, residual, 0]);

@@ -43,13 +43,22 @@ export function iu120Extra(id: number, side: Iu120Side = "player"): number {
   return iu120Pre(id, side) + iu120Post(id, side);
 }
 
+/**
+ * ont193 (docs/ont193-scene-on-tails.md): the Scene ON source-derived script tail frames a no-hit body of move `id` presents after its live rows
+ * (census 0..999 per-move frame delta; the same tail every Scene ON body of that move carries). 0 for every other move.
+ */
+const ONT193_SCRIPT_TAIL_FRAMES: ReadonlyMap<number, number> = new Map(Object.entries({ 14: 3, 28: 6, 39: 3, 43: 3, 50: 4, 97: 3, 103: 3, 106: 3, 107: 3, 108: 3, 112: 3, 115: 3, 116: 4, 133: 3, 148: 3, 151: 3, 178: 3, 180: 4, 182: 3, 195: 3, 197: 3, 201: 4, 203: 3, 213: 4, 215: 4, 219: 4, 230: 3, 254: 3, 259: 4, 266: 3, 269: 4, 271: 5, 272: 4, 275: 3, 277: 2, 281: 9, 288: 3, 294: 3, 312: 4, 319: 3, 321: 5, 334: 3, 336: 3, 339: 4, 349: 4 }).map(([id, frames]) => [Number(id), frames]));
+export function ont193ScriptTail(id: number): number {
+  return ONT193_SCRIPT_TAIL_FRAMES.get(id) ?? 0;
+}
+
 /** The per-row phaseElapsed sequence of an ordinary live body whose accepted body lasts `duration` rows: 0 .. P + N + D + T - 1. */
 export function iu120Ages(id: number, duration: number, side: Iu120Side = "player"): number[] {
-  return Array.from({ length: duration + (LAND97_LEAD_ROWS.get(id) ?? 0) + iu120Extra(id, side) }, (_, row) => row);
+  return Array.from({ length: duration + (LAND97_LEAD_ROWS.get(id) ?? 0) + iu120Extra(id, side) + ont193ScriptTail(id) }, (_, row) => row);
 }
 
 /** The per-row effect ages of an ordinary live body of `duration` rows: [0 x (P + N + 1), 1 .. D - 1, (D - 1) x T]. */
 export function iu120EffectAges(id: number, duration: number, side: Iu120Side = "player"): number[] {
   const hold = iu120Pre(id, side) + (LAND97_LEAD_ROWS.get(id) ?? 0);
-  return [...Array(hold).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1)];
+  return [...Array(hold).fill(0), ...Array.from({ length: duration }, (_, age) => age), ...Array(iu120Post(id, side)).fill(duration - 1), ...Array(ont193ScriptTail(id)).fill(duration - 1)];
 }

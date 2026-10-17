@@ -227,7 +227,8 @@ describe("Battle Scene OFF full-turn kernel portability", () => {
         battler: 1,
         animation: { moveId: 28, attacker: 1, target: 0, turn: 0,
           power: 0, damage: 0, friendship: 0, multihit: 0 },
-        timing: { minimumFrames: 32 },
+        // ont193: the source-derived Scene ON script tail rows (docs/ont193-scene-on-tails.md); 0 presented frames with no live body
+        timing: { minimumFrames: 32, scriptTailRows: 6 },
       },
       // sc106: General_StatsChange (B_ANIM_STATS_CHANGE, accuracy down 1 on ONIX) at its kernel event, 76 frames; scf117: + 1 hold
       // frame, the print (the next instruction, rel 77) shows its first glyph on rel 78.
