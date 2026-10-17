@@ -24,12 +24,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   tip `66e89d36e`). Capped mid re-pin; triage `docs/lsd195-lsd194-triage.md`: everything is a legitimate pin except the Scene OFF Bulk
   Up anchor 0 -> -3 (the second stat's 4 script rows before DEFENSE's print are unpriced once the 24 floor stops masking them;
   extend `statsChangeNextReceiptHoldFrames` to the second stat) and the off148 Rest pause hidden by a `proxyFrames` 24.
-- **Next:** (1) finish lsd194 on its branch: Bulk Up second-stat rule (ROM rows in off108 `rom-r1.json`), Rest P from real print
-  lengths, chg161 pin `[0,-1,0]` / `[0,0,0]`, then one full suite and fold. Split it: the fix + re-pins first, the suite as its own
+- **lsd196 (late, unfolded):** branch `worker/integration-20261017-041629` (tip `d057453ab`, on top of lsd194) adds the second-stat rule
+  (a `stat` between two prints presents `exec(print2) - exec(print1) - hold + 1` rows, floor 2): Bulk Up -3 -> 0 both scenes, chg161 pins
+  to the ROM, Curse / Agility 0; 11 touched files pass alone. Typecheck (OOM in the worker), build, census, full suite NOT run.
+- **Next:** (1) finish lsd194 + lsd196 from `worker/integration-20261017-041629`: Rest P from real print lengths (drop off148's
+  `proxyFrames`), typecheck, census 0..999 (message -> stat -> message chains), full suite, then fold. Split it: the fix + re-pins first, the suite as its own
   step. (2) Scene ON LEECH_SEED_DRAIN animation drawing (lsd194 holds 208 rows). (3) Double Team window tail (-5); 24 moves with
   0-frame tails need ROM scenarios. (4) non-MAGBY forced send-in renderer visuals (#146). Full suite ~48 min here.
 - **Notes:** worker refs kept: `worker/integration-20261016-{191306,224922}` (merged), `worker/integration-20261017-013328`
-  (unmerged). Worktrees removed after copying logs. Briefs in `.integration/validation/sv-20261016b/`. No push.
+  and `worker/integration-20261017-041629` (unmerged). Worktrees removed after copying logs. Briefs in `.integration/validation/sv-20261016b/`. No push.
 ---
 
 ## 2026-10-15 / 16 — CAX31 recovery session wind-down (supervisor, Opus 5.5): trn178 / snd179 / fpc180 / trn181 / snd182 / sub183 / pfr185 / lsd186 / fpo187 / btl188 / msg189
