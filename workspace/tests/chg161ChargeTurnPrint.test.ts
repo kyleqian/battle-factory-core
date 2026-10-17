@@ -26,12 +26,12 @@ describe("chg161 charge-turn empty box", () => {
     const residual = (scene: "on" | "off") => CHG161_ARMS.map((arm) =>
       chg161Production(arm.move, scene).foeUsedGlyph! - chg161Rom(arm.scenario, scene).foeUsedGlyph);
     // Scene ON, trn181 (docs/trn181-action-transition-on.md): the same action-transition pause as Scene OFF (Dig 14, Razor Wind /
-    // Solar Beam 13; was -10..-14, the held print -> next "used" transition) leaves the existing anchor-end errors: Dig +4 (its print),
-    // Razor Wind -1 (its live adapter, the box test above), Solar Beam 0.
-    expect(residual("on")).toEqual([4, -1, 0]);
+    // Solar Beam 13; was -10..-14, the held print -> next "used" transition) leaves Razor Wind -1 (its live adapter, the box test
+    // above); Dig's old +4 was the 24 print floor's over-hold (lsd194), now 0.
+    expect(residual("on")).toEqual([0, -1, 0]);
     // Scene OFF, trn178 (docs/trn178-action-transition-live.md): the action-transition pause (P = d + 6 + u: Dig 14, Razor Wind /
-    // Solar Beam 13) lands Razor Wind / Solar Beam exactly (was -13 / -13); Dig keeps its print's own +4 ("dug a hole!" 88 vs the ROM's 85
-    // + the lead row; was -10).
-    expect(residual("off")).toEqual([4, 0, 0]);
+    // Solar Beam 13) lands Razor Wind / Solar Beam exactly (was -13 / -13); Dig's old +4 (the "dug a hole!" 24 print floor over-hold,
+    // lsd194) is now 0.
+    expect(residual("off")).toEqual([0, 0, 0]);
   });
 });
