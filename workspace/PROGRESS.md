@@ -5,18 +5,29 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-16 / 17 — CAX31 session (supervisor, Opus 5.5): pfr192 + ont193 folded; lsd194 running
+## 2026-10-16 / 17 — CAX31 session wind-down (supervisor, Opus 5.5): pfr192 / ont193 folded; lsd194 unfolded (triaged lsd195)
 
-- **State:** master `73fe07e4f` (pfr192 + ont193 merged); production src changed (presentation timing only; kernel digests identical).
-- **Folded:** pfr192 (#146 player faint-replacement send-in): the forced party select's SEND OUT clock is keyed on species / nickname /
-  nature / scene (ball B = 91 + len(name), prompt B + D + 17; turn-end 8 + handoff 6 are inside the ROM span). Supervisor reran
-  `pfr192Prod.ts`: 24 / 24 ROM prompt rows 0, routes 9 / 20 / 61 / 84 / 33 both scenes 0 (seed 76 has a trailing message, documented).
-  Census 0..999 both scenes 0 unattributed; differential 641 / 641. Supervisor full suite `740eb2938`: 13,948 passed / 0 failed; build OK.
-- **Folded:** ont193 (#167 btl188 Scene ON no-hit script tail; #139 fpo187 Focus Punch menu-SE wait 127 / 125). Supervisor reran
-  `btl188Rows.ts` (Protect / Detect / Sand-Attack short 0). Census ON 5,830 changed commands, 0 unattributed, digests 1000 / 1000;
-  differential 641 / 641. Worker suite was sharded across re-pins; supervisor full suite on `6b6d1d128`: 1,684 files / 13,955 passed / 0 failed.
-- **Running:** lsd194 (msg189 print floor + lsd186 Leech Seed drain rows), base `6b6d1d128`, brief `.integration/validation/sv-20261016b/`.
-- **Next:** Scene ON Leech Seed drain animation drawing; Double Team window tail; remaining #146 visuals (non-MAGBY forced renderer).
+- **State:** master clean; production src tree `9e7ac718f` (= ont193 tip `6b6d1d128`; later commits docs only). Presentation timing
+  only this session (kernel digests identical in every census); no gameplay / RNG change. No open DEFERRED items.
+- **Folded:** pfr192 (#146 player faint-replacement send-in): SEND OUT clock keyed on species / nickname / nature / scene (ball
+  B = 91 + len(name), prompt B + D + 17; turn-end 8 + handoff 6 inside the ROM span). Supervisor reran `pfr192Prod.ts`: 24 / 24 ROM
+  prompt rows 0; real routes 9 / 20 / 33 / 61 / 84 both scenes 0 (seed 76 has a trailing message, documented). Census 0..999 0
+  unattributed; differential 641 / 641. ont193 (#167 btl188 Scene ON no-hit script tail; #139 fpo187 Focus Punch menu-SE wait
+  127 / 125): supervisor reran `btl188Rows.ts` (Protect / Detect / Sand-Attack short 0). Census ON 5,830 changed commands, 0
+  unattributed; differential 641 / 641. Both docs: `docs/pfr192-*.md`, `docs/ont193-scene-on-tails.md`.
+- **Gates (supervisor):** full suite on `740eb2938` (pfr192) 13,948 / 0 failed; on `6b6d1d128` (= final src) 1,684 files / 13,955
+  passed / 0 failed; build OK on the final src; vanilla soak 0:20 `--parallel 4` on `73fe07e4f` (= final src) **20 / 20 OK** (all
+  `budget`). Logs `.integration/validation/sv-20261016b/{pfr192,ont193,soak-73fe07e4f,final}/`.
+- **Not folded:** lsd194 (msg189 floor drop + lsd186 Leech Seed drain rows, both scenes; branch `worker/integration-20261017-013328`,
+  tip `66e89d36e`). Capped mid re-pin; triage `docs/lsd195-lsd194-triage.md`: everything is a legitimate pin except the Scene OFF Bulk
+  Up anchor 0 -> -3 (the second stat's 4 script rows before DEFENSE's print are unpriced once the 24 floor stops masking them;
+  extend `statsChangeNextReceiptHoldFrames` to the second stat) and the off148 Rest pause hidden by a `proxyFrames` 24.
+- **Next:** (1) finish lsd194 on its branch: Bulk Up second-stat rule (ROM rows in off108 `rom-r1.json`), Rest P from real print
+  lengths, chg161 pin `[0,-1,0]` / `[0,0,0]`, then one full suite and fold. Split it: the fix + re-pins first, the suite as its own
+  step. (2) Scene ON LEECH_SEED_DRAIN animation drawing (lsd194 holds 208 rows). (3) Double Team window tail (-5); 24 moves with
+  0-frame tails need ROM scenarios. (4) non-MAGBY forced send-in renderer visuals (#146). Full suite ~48 min here.
+- **Notes:** worker refs kept: `worker/integration-20261016-{191306,224922}` (merged), `worker/integration-20261017-013328`
+  (unmerged). Worktrees removed after copying logs. Briefs in `.integration/validation/sv-20261016b/`. No push.
 ---
 
 ## 2026-10-15 / 16 — CAX31 recovery session wind-down (supervisor, Opus 5.5): trn178 / snd179 / fpc180 / trn181 / snd182 / sub183 / pfr185 / lsd186 / fpo187 / btl188 / msg189
