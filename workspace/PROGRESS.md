@@ -17,7 +17,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   unattributed; differential 641 / 641. Both docs: `docs/pfr192-*.md`, `docs/ont193-scene-on-tails.md`.
 - **Gates (supervisor):** full suite on `740eb2938` (pfr192) 13,948 / 0 failed; on `6b6d1d128` (= final src) 1,684 files / 13,955
   passed / 0 failed; build OK on the final src; vanilla soak 0:20 `--parallel 4` on `73fe07e4f` (= final src) **20 / 20 OK** (all
-  `budget`). Logs `.integration/validation/sv-20261016b/{pfr192,ont193,soak-73fe07e4f,final}/`.
+  `budget`); varied-RNG first-round sweeps on the final src: winning carry 0 / 14 / 28 and winning-swap carry 0 **100 / 100** each.
+  The 0:60 full / winning / winning-swap gates were not run (~7.5 h each here; presentation-only session). Logs
+  `.integration/validation/sv-20261016b/{pfr192,ont193,soak-73fe07e4f,final}/`.
 - **Not folded:** lsd194 (msg189 floor drop + lsd186 Leech Seed drain rows, both scenes; branch `worker/integration-20261017-013328`,
   tip `66e89d36e`). Capped mid re-pin; triage `docs/lsd195-lsd194-triage.md`: everything is a legitimate pin except the Scene OFF Bulk
   Up anchor 0 -> -3 (the second stat's 4 script rows before DEFENSE's print are unpriced once the 24 floor stops masking them;
