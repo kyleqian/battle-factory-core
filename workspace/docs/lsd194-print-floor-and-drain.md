@@ -1,0 +1,160 @@
+# lsd194 -- the `waitmessage B_WAIT_TIME_LONG` print floor (msg189) and the Leech Seed turn-end drain (lsd186)
+
+Base `6b6d1d128`. Branch `worker/integration-20261017-013328`. Presentation only: no kernel event, RNG draw, HP value or turn order changes
+(census section 7: kernel-event digests identical in every battle, both scenes).
+Receipts: `tools/integration/fixtures/lsd194/` (`rom/`, `drain/`, `dense/`, `scenarios/`, `rom-print-runs.json`, `print-production-vs-rom.json`,
+`drain-production-vs-rom.json`, `census-{on,off}.json`). Tools: `lsd194Probes.sh`, `lsd194PrintRuns.py`, `lsd194Production.ts`, `lsd194PrintCompare.ts`,
+`lsd194DrainCompare.ts`, `lsd194DrainDense.ts`, `lsd194Census.{ts,sh}`, `lsd194CensusDelta.py`. Tests: `tests/lsd194PrintFloorAndDrain.test.ts`.
+
+## 1. Part A -- the 24-row floor on `WAITMESSAGE_LONG_TIMING` is an over-hold
+
+Production printed a `waitmessage B_WAIT_TIME_LONG` line for `max(24, L) + 64` rows (L = printable glyph count), the ROM prints it for `L + 64`
+(typing is one glyph per row, `B_WAIT_TIME_LONG` = 64, `reference/pokeemerald/include/constants/battle.h:324`). The 24 came from the
+effectiveness-line cards of `docs/battle-message-hold-cadence-ground-truth.md` (sec. 4-5 there; "It's not very effective..." is exactly 24 glyphs and
+"hold after typing = 64 + 13 / 64 + 2" is the 64 plus the *next* action's pre-print rows, not part of the print). Its sec. 5 `max(24, 21) = 24` bind-plan text
+is historical: `STAT_CHANGE_MESSAGE_TIMING` copied the 24 from `MESSAGE_TIMING` (a non-print message floor), which is a different mechanism.
+
+Change: `WAITMESSAGE_LONG_TIMING = {minimumFrames: 0, holdFrames: 64}` (commit `5a11553e1`). `MESSAGE_TIMING` (24 / 0), `RETURN_MON_TIMING` and
+`SWITCH_IN_MESSAGE_TIMING` are untouched (no ROM rows of their own; Tier-1 control in `lsd194PrintFloorAndDrain.test.ts`).
+
+### 1.1 ROM rows (twice-fresh: r1 == r2 byte-identical rows and RGB for every receipt, `rom/r1-r2-identity.txt`)
+
+A "print run" is a `waitmessage` run (consecutive frames on one `gBattlescriptCurrInstr`) whose first glyph is at run row `first`; `toNext` = run length - first =
+first glyph -> the next instruction = `L + 64` (production's next command starts on G + 1). Five classes x both scenes, 15 prints, residual vs production = 0 on all:
+
+| class (scenario) | print | L | ROM first glyph -> next | production (`lsd194Production.ts`) | residual |
+| --- | --- | ---: | ---: | ---: | ---: |
+| super effective (mechanic-hit-chain, Water Gun vs NOSEPASS) | "It's super effective!" | 21 | 85 (OFF = ON) | 85 | 0 |
+| crit (mechanic-hit-chain-crit) | "A critical hit!" | 15 | 79 (OFF = ON) | 79 | 0 |
+| failed (off108 Snore) | "But it failed!" | 14 | 78 (OFF = ON) | 78 | 0 |
+| OHKO (gate6-ohko-hit) | "It's a one-hit KO!" | 18 | 82 (OFF = ON) | 82 | 0 |
+| stat up (off108 Bulk Up) | "PRIMEAPE's ATTACK rose!" | 22 | 86 (OFF = ON) | 86 | 0 |
+| stat up (off108 Bulk Up) | "PRIMEAPE's DEFENSE rose!" | 23 | 87 (OFF = ON) | 87 | 0 |
+| controls, L >= 24 | "It's not very effective..." (x2 classes) | 24 | 88 (OFF = ON) | 88 | 0 |
+
+(15 rows in `print-production-vs-rom.json`: 5 classes x 2 scenes, the not-very-effective control inside the super-effective and crit scenarios.)
+The old floor over-held every L < 24 print by `24 - L` (3 / 9 / 10 / 6 / 2 / 1 rows for the six lengths above); an L >= 24 print never changed.
+
+## 2. Part B -- the Leech Seed turn-end drain
+
+### 2.1 Derived from source
+
+`BattleScript_LeechSeedTurnDrain` (`data/battle_scripts_1.s`): `playanimation BS_ATTACKER, B_ANIM_LEECH_SEED_DRAIN, sB_ANIM_ARG1; orword gHitMarker,
+HITMARKER_IGNORE_SUBSTITUTE | HITMARKER_PASSIVE_HP_UPDATE; healthbarupdate; datahpupdate; copyword gBattleMoveDamage, gHpDealt; jumpifability LIQUID_OOZE; manipulatedamage;
+setbyte; goto BattleScript_LeechSeedTurnPrintAndUpdateHp` (`orword; healthbarupdate; datahpupdate; printfromtable; waitmessage B_WAIT_TIME_LONG`).
+
+- **The passive-bar rule is the ordinary bar rule.** `HITMARKER_PASSIVE_HP_UPDATE` is read in exactly one place, `Cmd_datahpupdate`
+  (`battle_script_commands.c:1932-1960`): it only suppresses the Counter / Mirror Coat / Shell Bell damage records. It adds no wait. `Cmd_healthbarupdate`
+  queues the controller request and `Cmd_datahpupdate` blocks on that controller, so the `datahpupdate` run is `bar + 2` rows (the bar's frames plus the
+  request / release rows), with **no 28-row floor** (the 28 is the ordinary hit's `attackanimation; waitanimation; healthbarupdate` floor, not part of `healthbarupdate`).
+- **Lead** (last presented MoveEnd row -> the seeded bar's first row): the "was seeded!" print's `goto` row + 9 MoveEnd rows are 10 rows; production presents 2 of them as
+  the sprite-visibility rows (`LEECH_SEED_DRAIN_PRE_ROWS = 8` are the rest) plus the drain script's own executions through the seeded `healthbarupdate`
+  (`provenance.instructionExecution` of the `datahpupdate`: `playanimation`, Scene OFF's `Pausex20` 33 rows (32 + a return row), `orword`, `healthbarupdate` = 36 on OFF)
+  = 8 + 36 = 44 rows + the 2 sprite rows = 46 (ROM OFF seeded bar at A + 46).
+- **Scene ON**: `playanimation` runs the real `General_LeechSeedDrain`; the script (`data/battle_anim_scripts.s`, `LEECH_SEED_DRAIN`) is `delay 0` (2 ticks) +
+  `Move_ABSORB`'s body (206 rows: 10-row window lead + 194-row window + 2 to the script end, the same 194 as the liveMoveAnimation case 71 comment) = **208 rows**.
+  `LEECH_SEED_DRAIN_ANIMATION_ROWS = 208`; the lead term grows by `208 - 1` (the `orword` row the 208-row run already holds) and Scene ON has no `Pausex20`, so its script executions
+  through the `healthbarupdate` are 3 (`playanimation`, `orword`, `healthbarupdate`): lead = 8 + 3 + 207 = 218 rows + the 2 sprite rows = 220 (ROM ON seeded bar at A + 220).
+- **Gap**: the seeded bar's tail = the executions from the seeded `datahpupdate` to the receiver's (`datahpupdate`, `copyword`, `jumpifability`, `manipulatedamage`, `setbyte`,
+  `goto`, then `orword; healthbarupdate`): 8 rows, so the receiver bar starts `bar + 2 + 7` rows after the seeded one (the "7 gap rows").
+- **Receiver bar + print**: `datahpupdate`, `printfromtable`, `waitmessage` = `HP_PRINT_TAIL_FRAMES` (3); the sapped print then types from its first glyph.
+- **Liquid Ooze** (`jumpifability` skips `manipulatedamage; setbyte`): the executions differ, so the 8-row tail does not hold; `leechSeedDrainRole` requires the receiver's
+  `instructionExecution` to be exactly 8 after the seeded one and falls back to the unchanged hp timing otherwise (not measured, left as is).
+
+### 2.2 Implementation (`src/engine/battleResolutionPresentation.ts`, shared by both scenes)
+
+- `leechSeedDrainRole(events, i)`: "seeded" / "receiver" by the program counter of the `datahpupdate` after `BattleScript_LeechSeedTurnDrain` / `...PrintAndUpdateHp` and the paired
+  8-execution difference. Seeded hp command: `{minimumFrames: 0, tailFrames: 8}`, preceded by a `general-animation` command `LEECH_SEED_DRAIN` whose duration is the lead
+  (`8 + instructionExecution`, `+ 207` when the event stream carries the `LEECH_SEED_DRAIN` animation payload = Scene ON). Receiver hp: `{minimumFrames: 0, tailFrames: 3}`.
+- The renderer needs no change: `battleResolutionCommandDuration` already prices `general-animation` as `timing.minimumFrames` and `hp` as `max(min, bar + 1) + tail`;
+  `generalAnimationRenderView` returns null for any animation but FOCUS_PUNCH_SETUP, so the field is held (both bars full, "was seeded!" box) for those rows.
+- `BattleHpTiming.minimumFrames` is now `28 | 0`; every non-drain hp command keeps 28.
+
+### 2.3 ROM rows vs production (rows relative to A = the first row after the "was seeded!" print; every row residual 0, `drain-production-vs-rom.json`)
+
+Six cases (3 scenarios x both scenes). ROM receipts are lsd186's, re-run fresh a third time (`drain/r1-r2-identity.txt`: r1 == r2, rows and RGB identical, and the fresh r1 reproduce
+the lsd186 receipts byte-identically).
+
+| case | scene | lead (A -> seeded bar) | seeded bar start | gap rows | receiver bar start | sapped print first glyph | residual (every row) |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| player seeds, tackled (seed 57) | OFF | 44 + 2 sprite rows | 46 | 7 | 68 | 83 | 0 |
+| opponent seeds, tackled (seed 4) | OFF | 44 + 2 | 46 | 7 | 68 | 82 | 0 |
+| player seeds, receiver at full HP (seed 4, Tail Whip) | OFF | 44 + 2 | 46 | 7 | 68 | 72 | 0 |
+| player seeds, tackled | ON | 218 + 2 | 220 | 7 | 242 | 257 | 0 |
+| opponent seeds, tackled | ON | 218 + 2 | 220 | 7 | 242 | 256 | 0 |
+| player seeds, full HP | ON | 218 + 2 | 220 | 7 | 242 | 246 | 0 |
+
+Compared fields per row: lead, seeded bar start and command length, gap, receiver bar start and command length, both bars' first changed pixel row, the print's first glyph
+(the hp bar's row counts come from `battleHealthBarAnimationFrames`; receiver at full HP is a 0-HP-change bar, command length 4). The "was seeded!" print itself is now exact too ("ONIX was seeded!" L = 16 -> 80 rows, "Foe ONIX was seeded!" L = 20 -> 84 rows; both were 88 under the floor).
+Scene OFF's `Pausex20` rows are not presented as a separate command in production; the same `general-animation` hold spans them (44 rows = 8 + 36).
+
+### 2.4 Dense ROM pixel window across the drain through production (`dense/`, `lsd194DrainDense.ts`)
+
+Window = the "was seeded!" print's first row .. the end of the "sapped by LEECH SEED!" print, ROM raw RGB vs `renderBattleResolutionLiveView` at each production row (A <-> ROM D - 10).
+
+| case | scene | rows | pixel-exact rows | px: message box / healthboxes+other / player sprite / opponent sprite |
+| --- | --- | ---: | ---: | --- |
+| opponent seeds, tackled | OFF | 263 | **263** | 0 / 0 / 0 / 0 |
+| opponent seeds, tackled | ON | 437 | 259 (all 219 non-animation rows + 40 animation rows) | outside the 218-row animation span: 0 / 0 / 0 / 0 |
+| player seeds, tackled | OFF | 272 | 44 | 0 / 0 / 0 / 248,748 (1,091 px per row, constant) |
+| player seeds, tackled | ON | 446 | 99 | outside the animation span: 0 / 0 / 0 / 154,922 (1,091 px per row, 142 rows) |
+| player seeds, full HP | OFF | 261 | 44 | 0 / 0 / 0 / 236,747 (1,091 px per row) |
+| player seeds, full HP | ON | 435 | 40 | outside the animation span: 0 / 0 / 0 / 236,747 (1,091 px per row) |
+
+- **Every message-box, healthbox (HP bar, HP numerals, names) and player-sprite pixel outside the Scene ON animation span matches the ROM** in all six cases, so the bars, the 7-row gap, the
+  lead and both prints are pixel-exact, not only timing-exact.
+- Scene ON animation span (218 rows = 2 sprite rows + the 208-row hold + the row): the ROM draws Absorb's orbs / hit splat and darkens the background; production holds the field. The differences
+  there are the expected undrawn animation (it is the residual in section 5), e.g. opponent-seeds ON: 751,551 opp / 682,935 player-sprite / 1,700,278 other px over the 218 rows.
+- The constant 1,091 px per row in the player-seeds cases is the **foe ONIX's idle pose** (the foe sprite that used Tackle earlier in the same turn): it is present from the first row of the
+  "was seeded!" print (before any drain row), identical on every row, absent in the opponent-seeds cases (ONIX is the player's back sprite there, exact), and the ROM's pose is
+  constant across the window. It is not a drain row and was not touched; see section 5.
+
+## 3. The other passive-bar users (poison / burn / weather / Leftovers / Wish): same bar path, different script shapes, no ROM rows -> not extended
+
+All five end in the same `healthbarupdate; datahpupdate` pair, so the bar-is-`bar + 2` rule is the same source path, but the lead and tail script shapes differ, and every one needs its own ROM row:
+
+| user | script (source) | lead before the bar | tail after `datahpupdate` | `HITMARKER_PASSIVE_HP_UPDATE` |
+| --- | --- | --- | --- | --- |
+| poison / Toxic / burn | `BattleScript_PoisonTurnDmg` / `BurnTurnDmg`: `printstring; waitmessage 64; statusanimation; orword; healthbarupdate; datahpupdate; tryfaintmon; checkteamslost; end2` | print + 64 hold + status animation (`statusanimation` is a real animation on ON, skipped on OFF) | `tryfaintmon`, `checkteamslost`, `end2` | set |
+| sandstorm / hail | `BattleScript_DamagingWeatherContinues`: `printfromtable; waitmessage 64; playanimation_var; setbyte; orword; effectivenesssound; hitanimation; waitstate; healthbarupdate; datahpupdate; tryfaintmon; ...` | print + 64 + weather animation + hit animation + waitstate | as above | set |
+| Leftovers | `BattleScript_ItemHealHP_RemoveItem`: `playanimation B_ANIM_HELD_ITEM_EFFECT; printstring; waitmessage 64; orword; healthbarupdate; datahpupdate; removeitem; end2` | item animation + print + 64 | `removeitem`, `end2` | **not set** (IGNORE_SUBSTITUTE only) |
+| Wish | `BattleScript_WishComesTrue`: `trywish; playanimation B_ANIM_WISH_HEAL; printstring; waitmessage 64; orword; healthbarupdate; datahpupdate; printstring; waitmessage 64` | wish animation + print + 64 | the "regained health" print | **not set** |
+
+So (a) the passive flag is *not* what makes the bar shape; Leftovers and Wish have no passive flag and the same `bar + 2`; (b) each user's lead (animation + print + hold) and tail
+differ from Leech Seed's, and no twice-fresh ROM rows with row-level bar starts exist in `tools/integration/fixtures` or the docs for them (`docs/end-turn-ground-truth.md` has the HP-landing
+frames of burn / Toxic ticks, not bar rows). Their hp commands therefore still carry the 28-row floor and their current residuals are exactly the lsd186 pattern (a floor over-hold of
+`28 - (bar + 1)` rows and an unmodelled lead); they are listed here and not extended. Next action: stage poison, burn, sandstorm, Leftovers, Wish (and Toxic) lab scenarios the way
+`lsd186` staged Leech Seed, run `lsd194Probes.sh` twice, and add each user's lead/tail with its own ROM row.
+
+## 4. Re-pins (frames moved by my change only; none of ont193's pins moved by the drain)
+
+Floor drop (`5a11553e1`): `tests/battleResolutionPresentation.test.ts` and `tests/battleTurnPortability.test.ts`, every moved pin attributed to its print's `24 - L` in the commit message.
+`tests/ont193SceneOnTails.test.ts` (`9d04fca52`): the trn176 anchor evaluator for Bulk Up moved by exactly the two stat prints' over-holds -- first print L = 22 (-2), second L = 23 (-1):
+ON `anchorStartDelta` -1 -> -3 (-2), `anchorEndDelta` 0 -> -3 (-2, -1), `residual` 0 -> -3; OFF `anchorStartDelta` -1 -> -3, `anchorEndDelta` 0 -> -3; Sand-Attack / Protect / Detect unchanged.
+The earlier 0 / -1 hid a -3 offset located between the two stat prints (OFF, localised against `off108` ROM `rom-r1.json`): the ATTACK print (`BulkUpDoMoveAnim+40`) matches
+exactly (first glyph production row 141), then the ROM runs four single-row instructions (`BulkUpTryDef+0 / +6 / +12 / +23` = `setstatchanger`, `statbuffchange`, `jumpifbyte`, `printfromtable`)
+before the DEFENSE print's wait run (`BulkUpTryDef+28`, first glyph one row later), whereas production presents the 2-row `stat` command and starts the DEFENSE message 3 rows early
+(229 vs ROM 232). The floor's over-hold happened to cancel it; it is not a print row, was not introduced by lsd194, and is listed in section 5.
+
+## 5. Residuals and next actions
+
+1. **Scene ON drawing of `General_LeechSeedDrain`** (208 rows, held field now). Next action: draw it as `Move_ABSORB`'s body: the existing ABSORB live body in `src/animation/`
+   (the liveMoveAnimation case 71 window, 194 rows) driven by the `general-animation` command's age (`generalAnimationRenderView` currently returns null for LEECH_SEED_DRAIN), reusing the ABSORB body's existing orb / hit-splat /
+   heal components and assets; the drawing work is wiring that body to the drain's battler pair and the 2 + 206 row offsets above. Then re-run
+   `lsd194DrainDense.ts` ON: the animation-span pixel counts in section 2.4 are the acceptance numbers to take to 0.
+2. **Foe-sprite pose after the foe's own Tackle** (1,091 px per row, opp region, player-seeds cases only, from the print's first row): not a timing row; next action: dump the ROM foe ONIX frame
+   vs `renderBattleResolutionLiveView`'s (`lsd194DrainDense.ts --dump=-40`, `.png` side by side) and compare the idle pose source (`liveBattlerX2History` for the foe after a no-hit attacker).
+3. **Bulk Up -3 offset between the two stat prints** (ON and OFF; `ont193SceneOnTails` Bulk Up pins -3 / -3 / -3): localised (not fixed): ROM has 4 single-row instruction runs
+   (`BulkUpTryDef+0 / +6 / +12 / +23`) after the first stat print, production's second `stat` command is 2 rows. Next action: model the second `statbuffchange` gap (the first stat
+   command's pre-print rows with `setstatchanger` / `statbuffchange` / `jumpifbyte` / `printfromtable` executed, plus the first glyph row) with its own ROM row, then un-pin the -3.
+4. **Poison / burn / weather / Leftovers / Wish bars** (section 3): floor 28 retained, no ROM rows.
+5. **Unpinned scope of the drain**: the 8-row pre-lead was measured with the "was seeded!" print as the only predecessor (all six ROM cases); a drain after another end-of-turn
+   effect (a status tick, weather) has different MoveEnd rows before it; Liquid Ooze drains fall back to the old hp timing.
+
+## 6. Acceptance numbers
+
+1. Print classes: 15 / 15 ROM prints at residual 0 (5 classes x 2 scenes), r1 == r2 for all 10 print receipts + 6 drain receipts.
+2. Six lsd186 ROM drain receipts vs production: every row (lead, bars, gap, print glyph) residual 0 in both scenes (`lsd194DrainCompare.ts`).
+3. Dense ROM window across the drain: section 2.4 (opponent-seeds OFF 263 / 263 rows pixel-exact; all other cases exact outside the ON animation span except the constant foe-pose px).
+4. Tier-1: `tests/lsd194PrintFloorAndDrain.test.ts` (12 tests: floor L < 24 x 2 scenes, L >= 24 control x 2 scenes, MESSAGE_TIMING control, drain layouts x 6, 208-row hold).
+5-8: see section 7 (census, differential, gates).
