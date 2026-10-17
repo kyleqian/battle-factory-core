@@ -134,4 +134,9 @@ fight-submenu 235/235, battle1-postwin-next-prompt 216/216, presentation-rng-pla
 
 ## 10. Verification
 
-Filled in after the gates run (see the final report): tested commit, `git rev-parse HEAD:workspace/src`, typecheck, smoke, full `npm test`, build, `git diff --check`.
+Tested production tree: `git rev-parse HEAD:workspace/src` = `9e7ac718f43c51f87a2f933d189163077ba7c7cd` (code commit `423163476`; later commits touch tests, tools, fixtures and docs only). Test/receipt commit `fab170e51`.
+- `npm run typecheck`: pass (after the tools-importing tests were added). `npm run test:smoke`: 8 files / 448 tests pass. `npm run build`: pass. `git diff --check`: clean.
+- Full suite as 10 foreground `vitest --shard=i/10` chunks (`--pool=forks --testTimeout=20000`, 2 workers), run while the re-pins below were still being made: shards 1-5, 7 and 9 had failures
+  (all attributed to the script tail / the 0-frame `scriptTailRows` metadata and re-pinned in `fab170e51`: iu120 helper tail rows, Wall, tmr136, battleTurnPortability, sub157, the sgl138 receipt's ON route totals); shards 6, 8, 10 were clean.
+- Failing files re-run alone after the re-pins: liveGlow + battleTurnPortability (pass), the 13 shard 1-5 files (10 pass, 3 re-pinned and then pass: tmr136, Random2R5, Wall), sub157, sgl138 (pass).
+- NOT done: one single end-to-end green `npm test` over the final tree. A re-run of all 73 files that import `tests/helpers/iu120Rows.ts` timed out at 560 s with 43 files passed and 0 failed; the rest (apart from Wall and sgl138, which passed alone) were not re-run before the 170-minute cap.
