@@ -23,7 +23,9 @@ describe("trn178: the Scene OFF action-transition pause", () => {
     const off = trn176Production("PRIMEAPE", MOVE.BULK_UP, "ONIX", MOVE.TACKLE, true, "off");
     expect(transitionPauses(off.rows)).toEqual([12]);
     const r = evaluate("off108-bulk-up-ply-primeape-onix", "off");
-    expect([r.d, r.u, r.n, r.residual, r.pause]).toEqual([2, 4, 1, 0, 0]);
+    // lsd194 (docs/lsd194-print-floor-and-drain.md section 4): residual 0 -> -3: the two stat prints' floor over-holds (-2, -1) no longer cancel the Bulk Up chain's pre-existing -3
+    // (located between the two stat prints; the pause itself is unchanged: 12 above).
+    expect([r.d, r.u, r.n, r.residual, r.pause]).toEqual([2, 4, 1, -3, 0]);
   });
 
   it("stat / protect / control / miss classes: residual 0 (Dynamic Punch ply keeps its miss print's own +1)", () => {
@@ -32,7 +34,9 @@ describe("trn178: the Scene OFF action-transition pause", () => {
       "off108-protect-ply-primeape-onix", "off108-detect-ply-primeape-onix", "off148-agility-ply",
       "off108-dynamic-punch-opp-machamp-snorlax", "off108-dynamic-punch-ply-machamp-snorlax",
     ].map((name) => [name, evaluate(name, "off").residual]);
-    expect(rows.map((x) => x[1])).toEqual([0, 0, 0, 0, 0, 0, 0, 1]);
+    // lsd194: Bulk Up 0 -> -3 (the unmasked pre-existing offset between its two stat prints); Dynamic Punch ply 1 -> 0 (its miss print "attack missed!" L = 23 lost the 1-row floor over-hold:
+    // that +1 was the floor, not a ROM row).
+    expect(rows.map((x) => x[1])).toEqual([-3, 0, 0, 0, 0, 0, 0, 0]);
   });
 
   it("HIT class (Scratch, Double-Edge): P 13 / 14 after the effectiveness / recoil print; the transition itself is exact", () => {
@@ -79,6 +83,7 @@ describe("trn178: the Scene OFF action-transition pause", () => {
     const on = ["off108-bulk-up-ply-primeape-onix", "off108-sand-attack-ply-primeape-snorlax", "off108-protect-ply-primeape-onix",
       "off108-rest-ply-snorlax-onix"].map((name) => evaluate(name, "on").residual);
     // ont193 (docs/ont193-scene-on-tails.md): the script tail closes Bulk Up, Sand-Attack and Protect to 0; Rest (synthetic route) stays -3.
-    expect(on).toEqual([0, 0, 0, -3]);
+    // lsd194: Bulk Up 0 -> -3 (see the stat-class test above).
+    expect(on).toEqual([-3, 0, 0, -3]);
   });
 });
