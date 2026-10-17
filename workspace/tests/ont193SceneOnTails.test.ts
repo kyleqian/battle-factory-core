@@ -27,14 +27,14 @@ describe("ont193 A: Scene ON live no-hit bodies carry the source-derived script 
   });
 
   // lsd194 re-pin: Bulk Up's two stat prints ("ATTACK rose!" L=22, "DEFENSE rose!" L=23) were held 24-floor (88 / 88+1 rows); the ROM is L+64 (86 / 87),
-  // so the start delta moves -1 -> -3 (-2 from the first print) and the end delta 0 -> -3 (-2 and -1). The old 0 / -1 hid a -3 offset that sits before the
-  // first stat print and is unchanged by lsd194 (not a print row). Sand-Attack / Protect / Detect have no short print and keep their pins.
-  it("ROM anchor-end delta 0 on Sand-Attack / Protect / Detect; Bulk Up -3 / -3 (lsd194: the 24-floor over-hold of its two short stat prints no longer masks a -3 offset before them)", () => {
-    for (const [name, startDelta, endDelta, residual] of [["bulk-up-ply-primeape-onix", -3, -3, -3], ["sand-attack-ply-primeape-snorlax", 0, 0, 0], ["protect-ply-primeape-onix", 0, 0, 0], ["detect-ply-primeape-onix", 0, 0, 0]] as const) {
+  // so the floor drop unmasked a -3 that sits between the two stat prints (the ROM's 4 single-row instructions BulkUpTryDef+0 / +6 / +12 / +23).
+  // lsd196 closes it at the source: the `stat` between the prints presents those rows (instructionExecution delta), so Bulk Up is 0 / 0 / 0 again.
+  it("ROM anchor-end delta 0 on Sand-Attack / Protect / Detect; Bulk Up 0 / 0 (lsd196: the second stat's single-row instructions)", () => {
+    for (const [name, startDelta, endDelta, residual] of [["bulk-up-ply-primeape-onix", 0, 0, 0], ["sand-attack-ply-primeape-snorlax", 0, 0, 0], ["protect-ply-primeape-onix", 0, 0, 0], ["detect-ply-primeape-onix", 0, 0, 0]] as const) {
       const r = evaluate(`off108-${name}`, "on");
       expect([name, r.anchorStartDelta, r.anchorEndDelta, r.residual]).toEqual([name, startDelta, endDelta, residual]);
     }
-    expect(evaluate("off108-bulk-up-ply-primeape-onix", "off").anchorStartDelta).toBe(-3);
+    expect(evaluate("off108-bulk-up-ply-primeape-onix", "off").anchorStartDelta).toBe(0);
   });
 
   it("the Double Team window (masked pre), Rest (synthetic route) and Scene OFF keep their pre-ont193 values", () => {
@@ -45,7 +45,7 @@ describe("ont193 A: Scene ON live no-hit bodies carry the source-derived script 
       const b = body(species, move, target, "off");
       expect([move, b.tailRows, b.tailFrames, b.frames]).toEqual([move, undefined, null, frames]);
     }
-    for (const [name, endDelta] of [["bulk-up-ply-primeape-onix", -3], ["sand-attack-ply-primeape-snorlax", 0], ["protect-ply-primeape-onix", 0], ["detect-ply-primeape-onix", 0]] as const) {
+    for (const [name, endDelta] of [["bulk-up-ply-primeape-onix", 0], ["sand-attack-ply-primeape-snorlax", 0], ["protect-ply-primeape-onix", 0], ["detect-ply-primeape-onix", 0]] as const) {
       const r = evaluate(`off108-${name}`, "off");
       expect([name, r.anchorEndDelta]).toEqual([name, endDelta]);
     }
