@@ -2,7 +2,8 @@
 // the next-receipt classes off108 left unmeasured, on PRODUCTION routes. ROM rows: direct mGBA Scene OFF probes, r1 == r2
 // (tools/integration/fixtures/off148/receipts/rom-r1.json; Rest from off108's receipts/rom-r1.json). A stat-stage-change receipt next
 // (Curse / Swagger / Flatter) is skipped and its 2-frame `stat` command subtracted: P = delta(N) + lead(N) - D_between - 2. Rest (a held
-// print + the status icon before the attack receipt): P = delta(N) - delta(attack) + 1 + lead(N). Each class is replayed on an example
+// print + the status icon before the attack receipt): P = delta(N) - delta(icon) + 1 + lead(N) (rst197: the icon command is the
+// `updatestatusicon` row; the ROM's waitstate + goto then precede attackanimation). Each class is replayed on an example
 // census battle (off108Route.ts's battle loop) and N's command start, counted from G + 1, must equal the ROM anchor.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
