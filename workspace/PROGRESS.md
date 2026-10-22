@@ -7,6 +7,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-16 / 17 — CAX31 session wind-down (supervisor, Opus 5.5): pfr192 / ont193 folded; lsd194 unfolded (triaged lsd195)
 
+- **Restart 2026-10-22:** user authorized another 10-hour run. Master and retained lsd194/lsd196 refs, logs and briefs imported
+  to the Mac. Updated `docs/cax31-session-handoff.md`: Rest repair, isolated final-code validation, then fold and draw the drain.
 - **State:** master clean; production src tree `9e7ac718f` (= ont193 tip `6b6d1d128`; later commits docs only). Presentation timing
   only this session (kernel digests identical in every census); no gameplay / RNG change. No open DEFERRED items.
 - **Folded:** pfr192 (#146 player faint-replacement send-in): SEND OUT clock keyed on species / nickname / nature / scene (ball
