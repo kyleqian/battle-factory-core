@@ -177,7 +177,9 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       - 46 // msg175: the route's used prints last their printable length (no 24-frame floor).
       + 109 + 1 // trn181: the route's seven Scene ON action-transition pauses (109 frames) + 1 frame of dismissal parity (odd 109).
       - 57 // pfr192: the route's player faint replacements (readyAt - 311; the keyed send-in clock).
-      + 2 * 5 + 2 * 3); // ont193: the route's script tails (Tickle 321 x2 = 5 each, 148 x2 = 3 each).
+      + 2 * 5 + 2 * 3 // ont193: the route's script tails (Tickle 321 x2 = 5 each, 148 x2 = 3 each).
+      + 2 * 4); // lsd196 (rst197 verification): Tickle's DEF `stat` (BattleScript_TickleTryLowerDef) sits between two prints like Bulk Up's, 2 -> 6 rows each x 2 uses
+      // (events 44 / 63; measured: pre-lsd196 production file 9619, final 9627). Source-derived (same single-row instructions); no Tickle ROM row exists, so this is not a ROM-proven value.
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 239-row window (tmr136) owns the banner; the message moves + 9", () => {
