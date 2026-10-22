@@ -930,8 +930,10 @@ const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
  * it is skipped and its `stat` command's frames are subtracted. A held message
  * since the opener (Rest: "went to sleep!" + waitmessage + the status icon)
  * breaks the one-frame-per-execution mapping before the attack receipt, but
- * production's commands since the opener then end on the ROM's attackanimation
- * row, and the mapping holds again from there: P = Δ(N) − Δ(attack) + 1 + lead.
+ * the print's rows are exactly L + 64 (lsd194) and production's status-icon
+ * command is the `updatestatusicon` row itself, so the mapping holds again from
+ * that icon's execution (the ROM then runs waitstate's 2 rows and `goto` before
+ * attackanimation): P = Δ(N) − Δ(icon) + 1 + lead (rst197; independent of L).
  */
 /** The battler operand (`BS_TARGET` / `BS_ATTACKER`) of a `returntoball` receipt's source instruction, if known. */
 function returnToBallOperand(event: BattleKernelSemanticEvent): string | null {
@@ -1054,13 +1056,14 @@ function sceneOffNoHitPauseFrames(
     if (next === undefined || next < execution) return null;
     execution = next;
   }
-  const attack = execution;
   let presented = openerFrames;
   let held = false;
+  let iconSequence: number | null = null;
   for (const command of presentedSinceOpener) {
     const timing = (command as { timing?: { minimumFrames: number; holdFrames?: number } }).timing;
     if (command.type === "move-animation" || command.type === "hit-animation" || timing === undefined) return null;
     if (command.type === "message" || (timing.holdFrames ?? 0) > 0) held = true;
+    if (command.type === "status-icon") iconSequence = command.eventSequence;
     presented += timing.minimumFrames;
   }
   // The held-message path is ROM-anchored only for Rest's shape: trysetrest's
@@ -1068,6 +1071,14 @@ function sceneOffNoHitPauseFrames(
   // held prints before the attack receipt (Magnitude, a Magic Coat bounce)
   // are unmeasured.
   if (held && presentedSinceOpener.map((command) => command.type).join() !== "status,message,status-icon") return null;
+  // rst197: the held chain's last command is Rest's `updatestatusicon` (one frame = the ROM row it executes on, the print + its
+  // waitmessage being exactly L + 64 rows); the ROM runs `waitstate` (2 rows) and `goto` before attackanimation, so the pause (from the
+  // frame after the icon command) is anchored on that icon's execution: P = Δ(N) - Δ(icon) + 1 + lead.
+  let iconExecution: number | null = null;
+  if (held) {
+    iconExecution = events.find((event) => event.sequence === iconSequence)?.provenance?.instructionExecution ?? null;
+    if (iconExecution === null) return null;
+  }
   let skipped = 0;
   for (let index = attackIndex + 1; index < events.length; index += 1) {
     const candidate = events[index]!;
@@ -1102,8 +1113,8 @@ function sceneOffNoHitPauseFrames(
           ? SCENE_OFF_RETURN_TO_BALL_LEAD
           : null;
     if (lead === null) return null;
-    const frames = held
-      ? next - attack + 1 + lead - skipped
+    const frames = iconExecution !== null
+      ? next - iconExecution + 1 + lead - skipped
       : next - opener + lead - presented - skipped;
     return frames > 0 ? frames : null;
   }

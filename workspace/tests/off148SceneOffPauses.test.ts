@@ -16,11 +16,12 @@ import {
 import { liveMoveRandom2PlanContextAt } from "../src/engine/battleResolutionPresentationRender";
 import { createPresentationRngSession } from "../src/engine/presentationRngHost";
 import { tickLiveMovePresentationRngSession } from "../src/engine/liveMovePresentationRng";
+import { battleStringPrintableLength } from "../src/engine/battleStringResolver";
 import { PARTY_LIST_INPUT_ELAPSED } from "../src/engine/partySelect";
 import type { GbaButton } from "../src/input";
 
 type Row = [number, string, string, string | null, number | null];
-type Command = [number, string, number | null, number | null];
+type Command = [number, string, number | null, number | null, number];
 type Use = {
   seed: number; move: number; attacker: number; u: number; opener: string;
   attack: Row | null; hit: boolean; follow: Row[]; commands: Command[]; raw: unknown[];
@@ -55,7 +56,8 @@ function usesOf(seed: number, segment: any, out: Use[]) {
     out.push({
       seed, move: p.actionSnapshot?.currentMove ?? null, attacker: p.actionSnapshot?.attacker ?? null, u, opener: p.messageId,
       attack, hit, follow, raw,
-      commands: raw.map((c) => [c.eventSequence, c.type, c.timing?.minimumFrames ?? null, c.timing?.holdFrames ?? null]),
+      commands: raw.map((c) => [c.eventSequence, c.type, c.timing?.minimumFrames ?? null, c.timing?.holdFrames ?? null,
+        c.type === "message" ? battleStringPrintableLength(c.lines) : 0]),
     });
   }
 }
@@ -145,11 +147,9 @@ function romRows(use: RomUse) {
 /** N's command start, frames after G + 1 (the opener's hold + every command before N's). */
 function startOf(use: Use, nSequence: number): number {
   const at = use.commands.findIndex((c, i) => i > 0 && c[0] >= nSequence);
-  // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): this proxy is min + hold, and a WAITMESSAGE_LONG print's minimum used to be 24, so it summed 24 + 64 for every such print.
-  // The floor is gone (production: max(min, printable length) + hold, unchanged for the Rest print, L >= 24), so the proxy keeps the old 24 to stay the pre-lsd194 measurement:
-  // with real lengths the Rest chain ends at 136 (player seed 12) rather than 127, an off148 residual listed in section 8 (production did not move; only this proxy would).
-  const proxyFrames = (c: Use["commands"][number]) => (c[1] === "message" && c[2] === 0 && c[3] === 64 ? 24 : (c[2] ?? 0)) + (c[3] ?? 0);
-  return (use.commands[0]![3] ?? 0) + use.commands.slice(1, at).reduce((sum, c) => sum + proxyFrames(c), 0);
+  // rst197: a message presents max(minimumFrames, printable length) + hold (the print floor is gone: lsd194); the printable length is c[4].
+  const frames = (c: Use["commands"][number]) => Math.max(c[2] ?? 0, c[4]) + (c[3] ?? 0);
+  return (use.commands[0]![3] ?? 0) + use.commands.slice(1, at).reduce((sum, c) => sum + frames(c), 0);
 }
 const noHitBodies = (uses: Use[], move: number, attacker: number) =>
   uses.filter((u) => u.move === move && u.attacker === attacker && u.attack?.[2] === "SCENE_OFF_ATTACK_PAUSE" && !u.hit);
@@ -157,13 +157,16 @@ const pauseOf = (use: Use) =>
   use.raw.find((c: any) => c.eventSequence === use.attack![0] && c.type === "move-animation") as any;
 
 // (class, example census seed, move, attacker side, N kind, ROM scenario, the ROM anchor of N's command, P)
+// Rest's anchor is the ROM probe's (a 21-glyph print: waitmessage's run is L + 65 rows); another print shifts every later row by its L difference.
+const REST_ROM_PRINT_L = romUse(rom108, "off108-rest-ply-snorlax-onix", 156).runs.find((r) => r[0] === "BattleScript_EffectRest+31")![2] - 65;
+const restPrintL = (use: Use) => use.commands[2]![4];
 const CASES = [
   ["Curse (player)", 7, 174, 0, "message", "off148-curse-ply", 44, 41],
   ["Curse (opponent)", 3, 174, 1, "message", "off148-curse-opp", 44, 41],
   ["Swagger (player)", 3, 207, 0, "STATS_CHANGE", "off148-swagger-ply", 44, 41],
   ["Flatter (player)", 27, 260, 0, "STATS_CHANGE", "off148-flatter-ply", 44, 41],
-  ["Rest (player)", 12, 156, 0, "health-bar-update", "off108-rest-ply-snorlax-onix", 165, 37],
-  ["Rest (opponent)", 3, 156, 1, "health-bar-update", "off108-rest-ply-snorlax-onix", 165, 37],
+  ["Rest (player)", 12, 156, 0, "health-bar-update", "off108-rest-ply-snorlax-onix", 165, 40],
+  ["Rest (opponent)", 3, 156, 1, "health-bar-update", "off108-rest-ply-snorlax-onix", 165, 40],
 ] as const;
 
 describe("off148: Scene OFF no-hit pause remainder", () => {
@@ -200,16 +203,26 @@ describe("off148: Scene OFF no-hit pause remainder", () => {
       expect(pause).toBeDefined();
       expect(pause.animation).toBeUndefined();
       expect(pause.timing).toEqual({ minimumFrames: frames });
-      expect(startOf(use, n[0])).toBe(anchor - 1);
+      expect(startOf(use, n[0])).toBe(anchor - 1 + (kind === "health-bar-update" ? restPrintL(use) - REST_ROM_PRINT_L : 0));
     }
   });
 
-  it("Rest: production's commands since the opener end on the ROM attackanimation row (status 38, held print 88, icon 1)", () => {
-    const [use] = noHitBodies(battleUses(12, "off"), 156, 0);
-    expect(startOf(use!, use!.attack![0])).toBe(128 - 1);
-    expect(use!.commands.slice(1, 4).map((c) => [c[1], c[2], c[3]])).toEqual([
-      ["status", 38, null], ["message", 0, 64], ["status-icon", 1, null],
-    ]);
+  it("Rest: production's chain since the opener (status 38, held print L + 64, icon 1) meets the ROM attackanimation row 128 after waitstate + goto (3 rows)", () => {
+    const rest = romRows(romUse(rom108, "off108-rest-ply-snorlax-onix", 156));
+    const bodies = [...noHitBodies(battleUses(12, "off"), 156, 0), ...noHitBodies(battleUses(3, "off"), 156, 1)];
+    expect(bodies.length).toBeGreaterThan(0);
+    for (const use of bodies) {
+      expect(use.commands.slice(1, 4).map((c) => [c[1], c[2], c[3]])).toEqual([
+        ["status", 38, null], ["message", 0, 64], ["status-icon", 1, null],
+      ]);
+      const icon = use.follow.find((r) => r[1] === "status-icon-update")!;
+      const att = use.attack!;
+      // the chain ends on the ROM's updatestatusicon row (the print is L + 64 rows after printfromtable's row 38), and the kernel's
+      // Δ(att) - Δ(icon) = 3 is the ROM's waitstate (2 rows) + goto before attackanimation
+      expect(startOf(use, att[0])).toBe(38 + restPrintL(use) + 64 + 1);
+      expect(att[4]! - icon[4]!).toBe(3);
+      expect(startOf(use, att[0]) + (att[4]! - icon[4]!) + 1 - (restPrintL(use) - REST_ROM_PRINT_L)).toBe(rest.att);
+    }
   });
 
   // offs152: Roar / Whirlwind / Baton Pass's `returntoball` receipt is now measured (tests/offs152SceneOffForcedSwitch.test.ts).
