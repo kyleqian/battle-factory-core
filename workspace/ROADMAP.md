@@ -22,11 +22,12 @@ defects are all authorized by the user's 2026-10-13 direction. See
 `docs/factory-finish-scope.md`; the presentation-only restriction is superseded
 for source-proven engine fixes in that scope. Return -> Frustration (#165) is
 DONE (ret165, 2026-10-13); RNG fixes (#141 / #140) and Focus Punch preparation
-(#139) have landed, with their named edge cases still open. The 2026-10-14
-CAX31 session folded enc160 / plr162 / enc173 / trf174 / msg175 and banked the
-trn176 / fpc177 evidence; the 2026-10-15 recovery session landed them (trn178 / trn181 / fpc180) plus
-snd182 / sub183 and banked pfr185. Continue from PROGRESS.md's top entry (next: the pfr185 player
-faint-replacement send-in production step).
+(#139) have landed, with their named edge cases still open. CAX31 has also
+landed trn178 / trn181 / fpc180 / snd182 / sub183 / pfr192 / ont193. The next
+2026-10-22 session first repairs and validates the retained lsd194 + lsd196
+branch before folding it, then draws the Leech Seed drain animation and
+continues remaining variants. Follow PROGRESS.md's top entry and
+`docs/cax31-session-handoff.md`; do not repeat already accepted work.
 Run the normal `./run-supervisor.sh`; the roadmap determines its mission.
 Integration runs on `master` in the assigned host's checkout, with bounded
 temporary worker checkouts and the existing model routing. There is no separate

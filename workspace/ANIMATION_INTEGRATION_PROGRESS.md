@@ -1,5 +1,20 @@
 # Animation integration progress
 
+## 2026-10-23 — CAX31 session: lsd194 + lsd196 + rst197 folded (final-code gates by the supervisor)
+
+- **Fold (`worker/integration-20261022-230803`, tested `8bee336e6` / src tree `9f76866e2`, re-pin `b1797e9ed`, gates doc `62d5f0d6c`):**
+  lsd194 (24-frame `WAITMESSAGE_LONG_TIMING` floor dropped, prints are L + 64; Leech Seed turn-end drain rows from source, both scenes),
+  lsd196 (a `stat` between two prints presents its instruction-execution rows; Bulk Up -3 -> 0), rst197 (Scene OFF Rest pause anchored on
+  the status icon's execution, P 37 -> 40; 15 / 15 census bodies -3 -> 0; off148's 24-frame `proxyFrames` removed), and a
+  `BattleStatTiming` type widening that fixed lsd196's typecheck error. Presentation timing only.
+- **Supervisor gates on the exact code:** typecheck 0; census 0..999 both scenes vs lsd194's audited `3ded8b23f`: digests / errors /
+  type sequences identical in 1000 / 1000, changed commands = 961 second-stat rows per scene (4 / 5 / 6 rows by script shape) + 451
+  OFF Rest pauses, nothing else (`rst197CensusDelta.py`); differential 641 / 641; full suite 13,965 passed / 2 failed (randomRoundSoak
+  pins moved by lsd196 through the jittered press cooldown, attributed on four trees and re-pinned; file 64 / 64); build 0.
+  Master's commits since the branch base were docs only, so the union src / tests equal the tested tree. Details:
+  docs/lsd194-print-floor-and-drain.md sections 9-10. Logs `.integration/validation/sv-20261022/rst197/`.
+- **Open:** Scene ON drain animation body (lsd198 in flight); Tickle / Memento / Superpower / Silver Wind second-stat rows lack own ROM rows.
+
 ## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 + trn181 + snd182 + sub183 + pfr185 folded
 
 - **trn178 (INTEGRATION, saved ref `4a8a25431`, merged `40793066b`):** Scene OFF action-transition pause (#167 (a'); P = d + 6 + u

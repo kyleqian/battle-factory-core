@@ -16,7 +16,8 @@
 > Read `docs/cax31-session-handoff.md` first. Keep one writer per checkout and
 > do not revive old timers. The user renewed commit + push + next-session
 > authorization on 2026-10-14, then requested the waiting fix and another
-> 10-hour remote run on 2026-10-15 and another on 2026-10-16.
+> 10-hour remote run on 2026-10-15, another on 2026-10-16, and renewed
+> the 10-hour run on 2026-10-22.
 > The finished checkpoint and retained worker refs
 > are authorized for push. The remote supervisor commits locally and does not
 > push automatically. Import its results before resuming a Mac writer.

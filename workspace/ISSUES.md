@@ -42,9 +42,13 @@ on trn176's prediction, census 13,706 pauses, digests identical). Scene ON LANDE
 for both scenes, 13 / 13 ON rows on prediction, census ON 12,942 pauses, 1,626 transitions skipped by the guard). Open: (a') the ON
 body-tail anchor errors (-3 .. -6): EXPLAINED by btl188 (2026-10-16, docs/btl188-scene-on-anchor-start.md): the script rows after
 `waitanimation` releases (release row, setbyte / playstatchangeanimation or printfromtable / waitmessage) are not presented after an
-ON no-hit live body; tail = Δ(next receipt) − Δ(attack) + 1 + (release row − body end) fits Bulk Up / Protect / Detect / Sand-Attack
-(Double Team owns its banner; Rest needs a real-stat route) — production step pending; Toxic's upstream -19 (status body before the message) and the
-named print-length residuals (Snore +10, Dig +4, Dynamic Punch ply +1, Toxic -2, Curse +2 / -4); switches / faints / end of turn /
+ON no-hit live body; tail = Δ(next receipt) − Δ(attack) + 1 + (release row − body end): LANDED by ont193 (2026-10-17,
+docs/ont193-scene-on-tails.md; Protect / Detect / Sand-Attack start Δ 0, Bulk Up −1 shared with OFF; 41 further moves moved by the
+source-derived tail without their own ROM rows, 24 carry a 0-frame tail pending a ROM scenario). Rest's Scene OFF pause and Bulk Up's second stat: LANDED by rst197 / lsd196 (2026-10-23; Rest P from the status icon's
+execution, 15 / 15 bodies -3 -> 0; a `stat` between two prints presents its instruction-execution rows; Dig / Dynamic Punch +4 / +1 were
+the print floor). Still open: Double Team (−5, owns its banner); Tickle / Memento / Superpower / Silver Wind second-stat rows lack their
+own ROM rows; Toxic's upstream -19 (status body before the message) and the named residuals (Snore +10, Toxic -2, Curse +2 / -4 (re-measure after the floor drop), msg175's Rest-route
+Tackle HP anchor -3 ON / +18 OFF, Roar OFF +17, Baton Pass OFF -66); switches / faints / end of turn /
 pre-move prints after the anchor stay unmeasured; (b) sprite-visibility next after Roar /
 Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);
 (c) nothing next (35, player Baton Pass: the party menu opens; unstaged); (d) charge turn (chg161, docs/chg161-charge-turn-print.md: the
@@ -89,12 +93,9 @@ OFF bodies read x2 {0,0} because there is no front animation in OFF (`pokemon.c:
 0 px (`docs/sub157-scene-off-substitute.md`). Open, the same in both scenes (ROM OFF == ON):
 - **Substitute turn timing:** FIXED by sub183 (2026-10-15, docs/sub183-substitute-turn-timing.md): 4 script-lead rows, 2 post rows,
   HP -> print tail 3; HP start, doll, next print and next used print exact (4 dense windows, 291 / 291 rows 0 px, both scenes).
-  Open: HP bars under the 28-frame floor (unmeasured). Leech Seed turn-end drain MEASURED by lsd186 (2026-10-16,
-  docs/lsd186-leech-seed-drain-timing.md; 3 routes x 2 scenes, twice fresh): production presents no drain lead / animation (ROM
-  Pausex20 in OFF; a 208-row LEECH_SEED_DRAIN general animation in ON) and floors both HP bars at 28: the next print is -198 .. -188
-  early in ON (OFF -22 .. -11). A fitted change (lead 44 OFF / 218 ON, no floor, tails 8 + 3) lands 6 / 6 rows; derive it from source
-  before landing; the ON animation body itself is undrawn (animation work). "was seeded!" print over-holds (88 vs 80 / 84): msg189 (docs/msg189-seeded-print-hold.md) names
-  `WAITMESSAGE_LONG_TIMING.minimumFrames` 24 (duration max(24, L) + 64 vs the ROM's L + 64); other short long-wait prints share it.
+  Leech Seed turn-end drain timing + the 24-frame print floor: LANDED by lsd194 / rst197 (folded 2026-10-23,
+  docs/lsd194-print-floor-and-drain.md; drain rows residual 0 in 6 / 6 ROM cases, prints L + 64). Open: the Scene ON drain animation
+  BODY is undrawn on master (lsd198 in flight: Move_ABSORB body, 1 residual row per orientation at body age 20).
 - **Transform:** body + transformed field LIVE in both scenes since trf174 (2026-10-14, docs/trf174-transform-live.md; 8 / 8 dense
   windows 109 / 109 rows 0 px, field 140 / 140, supervisor-reproduced fresh). Open: declined Transform bodies (shiny DITTO, SPINDA
   target, CASTFORM, a doll on either side); every OTHER live body declines while a battler is shown transformed; Transform is not
@@ -182,12 +183,10 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Fixed:** snd145 / fra151 (Scene ON opponent send-in tail + front animation), offs152 (Scene OFF opponent send-in tail, Scene OFF
   forced switch-out one-row removal, Scene ON genderless / male-only tails, SOLROCK matrix; docs/offs152-scene-off-send-in-tail.md),
   plr162 (Scene OFF forced player send-in: slide 65, print max(91, cry + 66); docs/plr162-player-forced-send-in.md, folded 2026-10-14).
+- **Fixed 2026-10-16:** pfr192 (player faint-replacement send-in clock keyed on species / name / nature / scene; census 0..999 both scenes 0 unattributed).
 - **Fixed 2026-10-15:** snd182 (Scene ON forced player send-in message = max(91, cry + 66, T_back + 70) (+1 CASTFORM), nature from
   personality; snd179 evidence; 27 / 27 ROM cases exact; docs/snd182-scene-on-forced-player-send-in-live.md).
-- **Open:** Scene ON player back send-out animation is not drawn by the live renderer (mon-region px on every player send-in window); player faint-replacement send-in: MEASURED by pfr185 (2026-10-16,
-  docs/pfr185-player-faint-replacement-send-in.md; 11 species x 2 scenes, twice fresh): the ROM follows the live forced-player model
-  (next print D + 10, prompt D + 17; 22 / 22 prompts exact), but production uses partySelect's fixed SEND OUT clock (MAGBY-calibrated
-  311 / prompt 325): -9 .. +120 frames late. Production step pending; player-side back send-out animations and
+- **Open:** Scene ON player back send-out animation is not drawn by the live renderer (mon-region px on every player send-in window); player faint-replacement send-in renderer fidelity for non-MAGBY species (pfr192 timing FIXED 2026-10-16: keyed clock B + D + 17, 24 / 24 ROM prompts exact; remaining: release palette fade, Scene ON back animation, fade-in palette rows 56-70, species ball y path, male MAGBY healthbox art; docs/pfr192-player-faint-replacement-production.md); player-side back send-out animations and
   battle-start intro send-outs (Scene ON; fra151 doc says what they need); shiny send-ins; CRY_MODE_WEAK send-ins; PONYTA glow
   mid-frame palette row (D4 class, 616 px); TYPHLOSION faint-path slide lag frame (D4); the faint-path blank row one frame late;
   opponent-attacker Roar player-side ball-throw path (6,718 px); the elevated-attacker post-body field difference (1,444 px, untriaged).
@@ -233,7 +232,7 @@ docs/fpc180-focus-punch-live.md): recall after the pre-pass (lead 7), pre-pass s
 fpc177's 12 ROM cards: every OFF row 0. Open: Scene ON pre-pass animation print 127 rows after the empty box vs the ROM's 125 on the
 switch and two-user cards (+2): EXPLAINED by fpo187 (2026-10-16, docs/fpo187-focus-punch-on-prepass-row.md): `playanimation`'s
 controller handler waits for the player's last 10-frame SE_SELECT (`IsBattleSEPlaying`); 127 only for a turn's first pre-pass after a
-Fight-menu confirm, else 125. Production step pending; the voluntary-switch Go! -> used tail (-31, a send-in tail item, see #146); `5 + u` has
+Fight-menu confirm, else 125. LANDED by ont193 (2026-10-17; tightening glyph residual 0 on a-switch-on and both b1 pre-passes). Open: the voluntary-switch Go! -> used tail (-31, a send-in tail item, see #146); `5 + u` has
 no ROM card for Substitute / weather / Protect / multi-stage prologues, and a pre-move print after the focus print keeps 11.
 
 ## #121 — [PROBED 2026-08-22: NOT a divergence] `AI_monToSwitchIntoId` / `monToSwitchIntoId` are a dormant coupled pair
