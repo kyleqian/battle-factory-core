@@ -315,7 +315,8 @@ function faintScriptPreCryFrames(
     anchorIndex -= 1;
   }
   const anchor = commands[anchorIndex];
-  if (anchor === undefined || (anchor.type === "message" && anchor.advance !== "automatic")) return 0;
+  if (anchor === undefined || (anchor.type !== "hp" && anchor.type !== "message")) return 0;
+  if (anchor.type === "message" && anchor.advance !== "automatic") return 0;
   const anchorExecution = events.find((event) => event.sequence === anchor.eventSequence)?.provenance?.instructionExecution;
   if (anchorExecution === undefined || cryExecution <= anchorExecution) return 0;
   const after = anchor.type === "message"
