@@ -1,0 +1,683 @@
+{
+ "tl204-calm-mind-s11.json-on-r1.json": {
+  "move": "calm-mind",
+  "usedF": 42,
+  "usedRunStart": 41,
+  "usedRunEnd": 66,
+  "usedLabel": "BattleScript_EffectCalmMind+2",
+  "printF": 262,
+  "printRunStart": 261,
+  "printRunEnd": 349,
+  "printLabel": "BattleScript_CalmMindDoMoveAnim+40",
+  "printLast": 23,
+  "chainF": [
+   262,
+   354
+  ],
+  "nextF": 454,
+  "nextLabel": "BattleScript_HitFromAtkString+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectCalmMind+2",
+    "start": 41,
+    "end": 66,
+    "len": 25,
+    "changes": 21,
+    "firstChange": 42,
+    "lastChange": 64
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectCalmMind+3",
+    "start": 66,
+    "end": 68,
+    "len": 2,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_CalmMindDoMoveAnim+1",
+    "start": 68,
+    "end": 179,
+    "len": 111,
+    "changes": 95,
+    "firstChange": 78,
+    "lastChange": 173
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_CalmMindDoMoveAnim+2",
+    "start": 179,
+    "end": 181,
+    "len": 2,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_CalmMindDoMoveAnim+12",
+    "start": 181,
+    "end": 258,
+    "len": 77,
+    "changes": 59,
+    "firstChange": 188,
+    "lastChange": 246
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_CalmMindDoMoveAnim+18",
+    "start": 258,
+    "end": 261,
+    "len": 3,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   }
+  ],
+  "bodyFirstChange": 78,
+  "bodyLastChange": 246,
+  "releaseRow": 258
+ },
+ "tl204-charm-s11.json-on-r1.json": {
+  "move": "charm",
+  "usedF": 46,
+  "usedRunStart": 45,
+  "usedRunEnd": 66,
+  "usedLabel": "BattleScript_EffectStatDown+19",
+  "printF": 264,
+  "printRunStart": 263,
+  "printRunEnd": 358,
+  "printLabel": "BattleScript_StatDownPrintString+5",
+  "printLast": 30,
+  "chainF": [
+   264
+  ],
+  "nextF": 372,
+  "nextLabel": "BattleScript_PrintMoveMissed+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectStatDown+19",
+    "start": 45,
+    "end": 66,
+    "len": 21,
+    "changes": 18,
+    "firstChange": 46,
+    "lastChange": 64
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectStatDown+20",
+    "start": 66,
+    "end": 69,
+    "len": 3,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_StatDownDoAnim+1",
+    "start": 69,
+    "end": 170,
+    "len": 101,
+    "changes": 90,
+    "firstChange": 76,
+    "lastChange": 168
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_StatDownDoAnim+2",
+    "start": 170,
+    "end": 172,
+    "len": 2,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_StatDownPrintString+0",
+    "start": 172,
+    "end": 263,
+    "len": 91,
+    "changes": 81,
+    "firstChange": 179,
+    "lastChange": 259
+   }
+  ],
+  "bodyFirstChange": 76,
+  "bodyLastChange": 259,
+  "releaseRow": 263
+ },
+ "tl204-double-team-s11.json-on-r1.json": {
+  "move": "double-team",
+  "usedF": 43,
+  "usedRunStart": 42,
+  "usedRunEnd": 69,
+  "usedLabel": "BattleScript_EffectStatUpAfterAtkCanceler+1",
+  "printF": 314,
+  "printRunStart": 313,
+  "printRunEnd": 405,
+  "printLabel": "BattleScript_StatUpPrintString+5",
+  "printLast": 27,
+  "chainF": [
+   314
+  ],
+  "nextF": 418,
+  "nextLabel": "BattleScript_HitFromAtkString+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectStatUpAfterAtkCanceler+1",
+    "start": 42,
+    "end": 69,
+    "len": 27,
+    "changes": 23,
+    "firstChange": 43,
+    "lastChange": 67
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectStatUpAfterAtkCanceler+2",
+    "start": 69,
+    "end": 72,
+    "len": 3,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_StatUpAttackAnim+1",
+    "start": 72,
+    "end": 234,
+    "len": 162,
+    "changes": 113,
+    "firstChange": 77,
+    "lastChange": 204
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_StatUpDoAnim+0",
+    "start": 234,
+    "end": 236,
+    "len": 2,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_StatUpPrintString+0",
+    "start": 236,
+    "end": 313,
+    "len": 77,
+    "changes": 59,
+    "firstChange": 243,
+    "lastChange": 301
+   }
+  ],
+  "bodyFirstChange": 77,
+  "bodyLastChange": 301,
+  "releaseRow": 313
+ },
+ "tl204-fake-tears-s11.json-on-r1.json": {
+  "move": "fake-tears",
+  "usedF": 46,
+  "usedRunStart": 45,
+  "usedRunEnd": 71,
+  "usedLabel": "BattleScript_EffectStatDown+19",
+  "printF": 255,
+  "printRunStart": 254,
+  "printRunEnd": 350,
+  "printLabel": "BattleScript_StatDownPrintString+5",
+  "printLast": 31,
+  "chainF": [
+   255
+  ],
+  "nextF": 364,
+  "nextLabel": "BattleScript_PrintMoveMissed+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectStatDown+19",
+    "start": 45,
+    "end": 71,
+    "len": 26,
+    "changes": 22,
+    "firstChange": 46,
+    "lastChange": 69
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectStatDown+20",
+    "start": 71,
+    "end": 74,
+    "len": 3,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_StatDownDoAnim+1",
+    "start": 74,
+    "end": 161,
+    "len": 87,
+    "changes": 72,
+    "firstChange": 88,
+    "lastChange": 159
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_StatDownDoAnim+2",
+    "start": 161,
+    "end": 163,
+    "len": 2,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_StatDownPrintString+0",
+    "start": 163,
+    "end": 254,
+    "len": 91,
+    "changes": 81,
+    "firstChange": 170,
+    "lastChange": 250
+   }
+  ],
+  "bodyFirstChange": 88,
+  "bodyLastChange": 250,
+  "releaseRow": 254
+ },
+ "tl204-hail-s11.json-on-r1.json": {
+  "move": "hail",
+  "usedF": 42,
+  "usedRunStart": 41,
+  "usedRunEnd": 61,
+  "usedLabel": "BattleScript_EffectHail+2",
+  "printF": 227,
+  "printRunStart": 226,
+  "printRunEnd": 310,
+  "printLabel": "BattleScript_MoveWeatherChange+7",
+  "printLast": 19,
+  "chainF": [
+   227
+  ],
+  "nextF": 332,
+  "nextLabel": "BattleScript_HitFromAtkString+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectHail+2",
+    "start": 41,
+    "end": 61,
+    "len": 20,
+    "changes": 17,
+    "firstChange": 42,
+    "lastChange": 59
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectHail+3",
+    "start": 61,
+    "end": 64,
+    "len": 3,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_MoveWeatherChange+1",
+    "start": 64,
+    "end": 225,
+    "len": 161,
+    "changes": 104,
+    "firstChange": 80,
+    "lastChange": 223
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_MoveWeatherChange+2",
+    "start": 225,
+    "end": 226,
+    "len": 1,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   }
+  ],
+  "bodyFirstChange": 80,
+  "bodyLastChange": 223,
+  "releaseRow": 225
+ },
+ "tl204-leech-seed-s11.json-on-r1.json": {
+  "move": "leech-seed",
+  "usedF": 42,
+  "usedRunStart": 41,
+  "usedRunEnd": 98,
+  "usedLabel": "BattleScript_EffectLeechSeed+2",
+  "printF": 249,
+  "printRunStart": 248,
+  "printRunEnd": 333,
+  "printLabel": "BattleScript_DoLeechSeed+8",
+  "printLast": 20,
+  "chainF": [
+   249
+  ],
+  "nextF": 347,
+  "nextLabel": "BattleScript_PrintMoveMissed+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectLeechSeed+2",
+    "start": 41,
+    "end": 98,
+    "len": 57,
+    "changes": 22,
+    "firstChange": 42,
+    "lastChange": 65
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectLeechSeed+5",
+    "start": 98,
+    "end": 103,
+    "len": 5,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_DoLeechSeed+2",
+    "start": 103,
+    "end": 247,
+    "len": 144,
+    "changes": 83,
+    "firstChange": 110,
+    "lastChange": 239
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_DoLeechSeed+3",
+    "start": 247,
+    "end": 248,
+    "len": 1,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   }
+  ],
+  "bodyFirstChange": 110,
+  "bodyLastChange": 239,
+  "releaseRow": 247
+ },
+ "tl204-light-screen-s11.json-on-r1.json": {
+  "move": "light-screen",
+  "usedF": 42,
+  "usedRunStart": 41,
+  "usedRunEnd": 69,
+  "usedLabel": "BattleScript_EffectLightScreen+2",
+  "printF": 163,
+  "printRunStart": 162,
+  "printRunEnd": 261,
+  "printLabel": "BattleScript_PrintReflectLightScreenSafeguardString+7",
+  "printLast": 34,
+  "chainF": [
+   163
+  ],
+  "nextF": 274,
+  "nextLabel": "BattleScript_HitFromAtkString+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectLightScreen+2",
+    "start": 41,
+    "end": 69,
+    "len": 28,
+    "changes": 24,
+    "firstChange": 42,
+    "lastChange": 67
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectLightScreen+3",
+    "start": 69,
+    "end": 72,
+    "len": 3,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_PrintReflectLightScreenSafeguardString+1",
+    "start": 72,
+    "end": 161,
+    "len": 89,
+    "changes": 52,
+    "firstChange": 83,
+    "lastChange": 156
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_PrintReflectLightScreenSafeguardString+2",
+    "start": 161,
+    "end": 162,
+    "len": 1,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   }
+  ],
+  "bodyFirstChange": 83,
+  "bodyLastChange": 156,
+  "releaseRow": 161
+ },
+ "tl204-rain-dance-s11.json-on-r1.json": {
+  "move": "rain-dance",
+  "usedF": 42,
+  "usedRunStart": 41,
+  "usedRunEnd": 67,
+  "usedLabel": "BattleScript_EffectRainDance+2",
+  "printF": 261,
+  "printRunStart": 260,
+  "printRunEnd": 344,
+  "printLabel": "BattleScript_MoveWeatherChange+7",
+  "printLast": 19,
+  "chainF": [
+   261
+  ],
+  "nextF": 366,
+  "nextLabel": "BattleScript_HitFromAtkString+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectRainDance+2",
+    "start": 41,
+    "end": 67,
+    "len": 26,
+    "changes": 22,
+    "firstChange": 42,
+    "lastChange": 65
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectRainDance+3",
+    "start": 67,
+    "end": 69,
+    "len": 2,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_MoveWeatherChange+1",
+    "start": 69,
+    "end": 259,
+    "len": 190,
+    "changes": 142,
+    "firstChange": 80,
+    "lastChange": 257
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_MoveWeatherChange+2",
+    "start": 259,
+    "end": 260,
+    "len": 1,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   }
+  ],
+  "bodyFirstChange": 80,
+  "bodyLastChange": 257,
+  "releaseRow": 259
+ },
+ "tl204-scary-face-s11.json-on-r1.json": {
+  "move": "scary-face",
+  "usedF": 46,
+  "usedRunStart": 45,
+  "usedRunEnd": 71,
+  "usedLabel": "BattleScript_EffectStatDown+19",
+  "printF": 379,
+  "printRunStart": 378,
+  "printRunEnd": 472,
+  "printLabel": "BattleScript_StatDownPrintString+5",
+  "printLast": 29,
+  "chainF": [
+   379
+  ],
+  "nextF": 486,
+  "nextLabel": "BattleScript_PrintMoveMissed+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectStatDown+19",
+    "start": 45,
+    "end": 71,
+    "len": 26,
+    "changes": 22,
+    "firstChange": 46,
+    "lastChange": 69
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectStatDown+20",
+    "start": 71,
+    "end": 74,
+    "len": 3,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_StatDownDoAnim+1",
+    "start": 74,
+    "end": 285,
+    "len": 211,
+    "changes": 78,
+    "firstChange": 85,
+    "lastChange": 264
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_StatDownDoAnim+2",
+    "start": 285,
+    "end": 287,
+    "len": 2,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_StatDownPrintString+0",
+    "start": 287,
+    "end": 378,
+    "len": 91,
+    "changes": 81,
+    "firstChange": 294,
+    "lastChange": 374
+   }
+  ],
+  "bodyFirstChange": 85,
+  "bodyLastChange": 374,
+  "releaseRow": 378
+ },
+ "tl204-sunny-day-s11.json-on-r1.json": {
+  "move": "sunny-day",
+  "usedF": 42,
+  "usedRunStart": 41,
+  "usedRunEnd": 66,
+  "usedLabel": "BattleScript_EffectSunnyDay+2",
+  "printF": 232,
+  "printRunStart": 231,
+  "printRunEnd": 320,
+  "printLabel": "BattleScript_MoveWeatherChange+7",
+  "printLast": 24,
+  "chainF": [
+   232
+  ],
+  "nextF": 342,
+  "nextLabel": "BattleScript_HitFromAtkString+1",
+  "segments": [
+   {
+    "kind": "used-print",
+    "label": "BattleScript_EffectSunnyDay+2",
+    "start": 41,
+    "end": 66,
+    "len": 25,
+    "changes": 21,
+    "firstChange": 42,
+    "lastChange": 64
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_EffectSunnyDay+3",
+    "start": 66,
+    "end": 69,
+    "len": 3,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   },
+   {
+    "kind": "window",
+    "label": "BattleScript_MoveWeatherChange+1",
+    "start": 69,
+    "end": 230,
+    "len": 161,
+    "changes": 109,
+    "firstChange": 81,
+    "lastChange": 191
+   },
+   {
+    "kind": "script",
+    "label": "BattleScript_MoveWeatherChange+2",
+    "start": 230,
+    "end": 231,
+    "len": 1,
+    "changes": 0,
+    "firstChange": null,
+    "lastChange": null
+   }
+  ],
+  "bodyFirstChange": 81,
+  "bodyLastChange": 191,
+  "releaseRow": 230
+ }
+}
