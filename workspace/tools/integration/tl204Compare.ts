@@ -65,15 +65,18 @@ export function compareCase(r: Rom) {
     // residual = (stat rows production presents - ROM script rows) + (production body rows - ROM window rows) + (production used print - ROM glyph rows)
     accounting: (() => {
       const between = p.rows.slice(1, p.p);
-      const prodBody = between.filter((x) => x.type === "move-animation" || x.type === "stats-change").reduce((a, x) => a + x.dur, 0);
+      // tl205: the body rows exclude the script tail frames the rule now adds (they are the script rows, counted on the script side)
+      const c0 = p.commands.find((x: any) => x.type === "move-animation");
+      const tailFrames = c0?.animation ? liveMoveScriptTailFrames(c0.timing, c0.animation, p.field) : 0;
+      const prodBody = between.filter((x) => x.type === "move-animation" || x.type === "stats-change").reduce((a, x) => a + x.dur, 0) - tailFrames;
       const prodStat = between.filter((x) => x.type === "stat").reduce((a, x) => a + x.dur, 0);
       const romWindows = r.segments.filter((s) => s.kind === "window").reduce((a, s) => a + s.len, 0);
       const romScript = r.printF - r.usedF - r.usedGlyphs - romWindows;
       const tailRows = bodyRows[0]?.timing?.scriptTailRows ?? 0;
-      const scriptResidual = prodStat - romScript, bodyResidual = prodBody - romWindows, usedResidual = used.dur - r.usedGlyphs;
+      const scriptResidual = prodStat + tailFrames - romScript, bodyResidual = prodBody - romWindows, usedResidual = used.dur - r.usedGlyphs;
       // the hypothesis the doc proposes: tail frames = scriptTailRows - 1 (trail -1, post 0) on the first body command
-      return { romScriptRows: romScript, productionStatRows: prodStat, scriptResidual, romWindowRows: romWindows, productionBodyRows: prodBody, bodyResidual, usedResidual,
-        hypothesisTailFrames: Math.max(0, tailRows - 1), residualAfterHypothesis: first.start - used.start - (r.printF - r.usedF) + Math.max(0, tailRows - 1) };
+      return { romScriptRows: romScript, productionStatRows: prodStat, productionTailFrames: tailFrames, scriptResidual, romWindowRows: romWindows, productionBodyRows: prodBody, bodyResidual, usedResidual,
+        hypothesisTailFrames: Math.max(0, tailRows - 1), residualAfterHypothesis: first.start - used.start - (r.printF - r.usedF) - tailFrames + Math.max(0, tailRows - 1) };
     })(),
     romRelease: { releaseRow: r.segments.filter((s) => s.kind === "window").slice(-1)[0]!.end, printRunStart: r.printRunStart },
   };

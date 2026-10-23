@@ -11,11 +11,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 6,
   "usedToPrint": {
    "rom": 220,
-   "production": 210,
-   "residual": -10
+   "production": 216,
+   "residual": -4
   },
   "printToNext": {
    "rom": 100,
@@ -28,7 +28,7 @@
     92
    ],
    "production": [
-    210,
+    216,
     92
    ]
   },
@@ -43,7 +43,7 @@
    },
    "bodyToPrint": {
     "rom": 193,
-    "production": 187
+    "production": 193
    },
    "romSegments": [
     "used-print:EffectCalmMind+2:25",
@@ -55,7 +55,7 @@
    ],
    "productionCommands": [
     "message:23",
-    "move-animation:107",
+    "move-animation:113",
     "stats-change:78",
     "stat:2",
     "message:87"
@@ -64,7 +64,8 @@
   "accounting": {
    "romScriptRows": 9,
    "productionStatRows": 2,
-   "scriptResidual": -7,
+   "productionTailFrames": 6,
+   "scriptResidual": -1,
    "romWindowRows": 188,
    "productionBodyRows": 185,
    "bodyResidual": -3,
@@ -89,11 +90,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 5,
   "usedToPrint": {
    "rom": 218,
-   "production": 212,
-   "residual": -6
+   "production": 217,
+   "residual": -1
   },
   "printToNext": {
    "rom": 108,
@@ -105,7 +106,7 @@
     218
    ],
    "production": [
-    212
+    217
    ]
   },
   "decomposition": {
@@ -119,7 +120,7 @@
    },
    "bodyToPrint": {
     "rom": 194,
-    "production": 191
+    "production": 196
    },
    "romSegments": [
     "used-print:EffectStatDown+19:21",
@@ -131,7 +132,7 @@
    "productionCommands": [
     "message:19",
     "stat:2",
-    "move-animation:100",
+    "move-animation:105",
     "stats-change:91",
     "message:94"
    ]
@@ -139,7 +140,8 @@
   "accounting": {
    "romScriptRows": 7,
    "productionStatRows": 2,
-   "scriptResidual": -5,
+   "productionTailFrames": 5,
+   "scriptResidual": 0,
    "romWindowRows": 192,
    "productionBodyRows": 191,
    "bodyResidual": -1,
@@ -164,11 +166,11 @@
    "pre": 0,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 5,
   "usedToPrint": {
    "rom": 271,
-   "production": 266,
-   "residual": -5
+   "production": 271,
+   "residual": 0
   },
   "printToNext": {
    "rom": 104,
@@ -180,7 +182,7 @@
     271
    ],
    "production": [
-    266
+    271
    ]
   },
   "decomposition": {
@@ -194,7 +196,7 @@
    },
    "bodyToPrint": {
     "rom": 241,
-    "production": 239
+    "production": 244
    },
    "romSegments": [
     "used-print:EffectStatUpAfterAtkCanceler+1:27",
@@ -206,14 +208,15 @@
    "productionCommands": [
     "message:25",
     "stat:2",
-    "move-animation:239",
+    "move-animation:244",
     "message:91"
    ]
   },
   "accounting": {
    "romScriptRows": 7,
    "productionStatRows": 2,
-   "scriptResidual": -5,
+   "productionTailFrames": 5,
+   "scriptResidual": 0,
    "romWindowRows": 239,
    "productionBodyRows": 239,
    "bodyResidual": 0,
@@ -238,11 +241,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 5,
   "usedToPrint": {
    "rom": 209,
-   "production": 208,
-   "residual": -1
+   "production": 213,
+   "residual": 4
   },
   "printToNext": {
    "rom": 109,
@@ -254,7 +257,7 @@
     209
    ],
    "production": [
-    208
+    213
    ]
   },
   "decomposition": {
@@ -268,7 +271,7 @@
    },
    "bodyToPrint": {
     "rom": 180,
-    "production": 182
+    "production": 187
    },
    "romSegments": [
     "used-print:EffectStatDown+19:26",
@@ -280,7 +283,7 @@
    "productionCommands": [
     "message:24",
     "stat:2",
-    "move-animation:91",
+    "move-animation:96",
     "stats-change:91",
     "message:95"
    ]
@@ -288,7 +291,8 @@
   "accounting": {
    "romScriptRows": 7,
    "productionStatRows": 2,
-   "scriptResidual": -5,
+   "productionTailFrames": 5,
+   "scriptResidual": 0,
    "romWindowRows": 178,
    "productionBodyRows": 182,
    "bodyResidual": 4,
@@ -312,11 +316,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 6,
   "usedToPrint": {
    "rom": 185,
-   "production": 179,
-   "residual": -6
+   "production": 185,
+   "residual": 0
   },
   "printToNext": {
    "rom": 105,
@@ -328,7 +332,7 @@
     185
    ],
    "production": [
-    179
+    185
    ]
   },
   "decomposition": {
@@ -342,7 +346,7 @@
    },
    "bodyToPrint": {
     "rom": 162,
-    "production": 161
+    "production": 167
    },
    "romSegments": [
     "used-print:EffectHail+2:20",
@@ -352,14 +356,15 @@
    ],
    "productionCommands": [
     "message:18",
-    "move-animation:161",
+    "move-animation:167",
     "message:83"
    ]
   },
   "accounting": {
    "romScriptRows": 6,
    "productionStatRows": 0,
-   "scriptResidual": -6,
+   "productionTailFrames": 6,
+   "scriptResidual": 0,
    "romWindowRows": 161,
    "productionBodyRows": 161,
    "bodyResidual": 0,
@@ -383,11 +388,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 39,
   "usedToPrint": {
    "rom": 207,
-   "production": 168,
-   "residual": -39
+   "production": 207,
+   "residual": 0
   },
   "printToNext": {
    "rom": 98,
@@ -399,7 +404,7 @@
     207
    ],
    "production": [
-    168
+    207
    ]
   },
   "decomposition": {
@@ -413,7 +418,7 @@
    },
    "bodyToPrint": {
     "rom": 145,
-    "production": 144
+    "production": 183
    },
    "romSegments": [
     "used-print:EffectLeechSeed+2:57",
@@ -423,14 +428,15 @@
    ],
    "productionCommands": [
     "message:24",
-    "move-animation:144",
+    "move-animation:183",
     "message:84"
    ]
   },
   "accounting": {
    "romScriptRows": 39,
    "productionStatRows": 0,
-   "scriptResidual": -39,
+   "productionTailFrames": 39,
+   "scriptResidual": 0,
    "romWindowRows": 144,
    "productionBodyRows": 144,
    "bodyResidual": 0,
@@ -455,11 +461,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 6,
   "usedToPrint": {
    "rom": 121,
-   "production": 117,
-   "residual": -4
+   "production": 123,
+   "residual": 2
   },
   "printToNext": {
    "rom": 111,
@@ -471,7 +477,7 @@
     121
    ],
    "production": [
-    117
+    123
    ]
   },
   "decomposition": {
@@ -485,7 +491,7 @@
    },
    "bodyToPrint": {
     "rom": 90,
-    "production": 91
+    "production": 97
    },
    "romSegments": [
     "used-print:EffectLightScreen+2:28",
@@ -495,14 +501,15 @@
    ],
    "productionCommands": [
     "message:26",
-    "move-animation:91",
+    "move-animation:97",
     "message:98"
    ]
   },
   "accounting": {
    "romScriptRows": 6,
    "productionStatRows": 0,
-   "scriptResidual": -6,
+   "productionTailFrames": 6,
+   "scriptResidual": 0,
    "romWindowRows": 89,
    "productionBodyRows": 91,
    "bodyResidual": 2,
@@ -526,11 +533,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 5,
   "usedToPrint": {
    "rom": 219,
-   "production": 214,
-   "residual": -5
+   "production": 219,
+   "residual": 0
   },
   "printToNext": {
    "rom": 105,
@@ -542,7 +549,7 @@
     219
    ],
    "production": [
-    214
+    219
    ]
   },
   "decomposition": {
@@ -556,7 +563,7 @@
    },
    "bodyToPrint": {
     "rom": 191,
-    "production": 190
+    "production": 195
    },
    "romSegments": [
     "used-print:EffectRainDance+2:26",
@@ -566,14 +573,15 @@
    ],
    "productionCommands": [
     "message:24",
-    "move-animation:190",
+    "move-animation:195",
     "message:83"
    ]
   },
   "accounting": {
    "romScriptRows": 5,
    "productionStatRows": 0,
-   "scriptResidual": -5,
+   "productionTailFrames": 5,
+   "scriptResidual": 0,
    "romWindowRows": 190,
    "productionBodyRows": 190,
    "bodyResidual": 0,
@@ -598,11 +606,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 5,
   "usedToPrint": {
    "rom": 333,
-   "production": 314,
-   "residual": -19
+   "production": 319,
+   "residual": -14
   },
   "printToNext": {
    "rom": 107,
@@ -614,7 +622,7 @@
     333
    ],
    "production": [
-    314
+    319
    ]
   },
   "decomposition": {
@@ -628,7 +636,7 @@
    },
    "bodyToPrint": {
     "rom": 304,
-    "production": 288
+    "production": 293
    },
    "romSegments": [
     "used-print:EffectStatDown+19:26",
@@ -640,7 +648,7 @@
    "productionCommands": [
     "message:24",
     "stat:2",
-    "move-animation:197",
+    "move-animation:202",
     "stats-change:91",
     "message:93"
    ]
@@ -648,7 +656,8 @@
   "accounting": {
    "romScriptRows": 7,
    "productionStatRows": 2,
-   "scriptResidual": -5,
+   "productionTailFrames": 5,
+   "scriptResidual": 0,
    "romWindowRows": 302,
    "productionBodyRows": 288,
    "bodyResidual": -14,
@@ -672,11 +681,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 0,
+  "tailFrames": 6,
   "usedToPrint": {
    "rom": 190,
-   "production": 184,
-   "residual": -6
+   "production": 190,
+   "residual": 0
   },
   "printToNext": {
    "rom": 110,
@@ -688,7 +697,7 @@
     190
    ],
    "production": [
-    184
+    190
    ]
   },
   "decomposition": {
@@ -702,7 +711,7 @@
    },
    "bodyToPrint": {
     "rom": 162,
-    "production": 161
+    "production": 167
    },
    "romSegments": [
     "used-print:EffectSunnyDay+2:25",
@@ -712,14 +721,15 @@
    ],
    "productionCommands": [
     "message:23",
-    "move-animation:161",
+    "move-animation:167",
     "message:88"
    ]
   },
   "accounting": {
    "romScriptRows": 6,
    "productionStatRows": 0,
-   "scriptResidual": -6,
+   "productionTailFrames": 6,
+   "scriptResidual": 0,
    "romWindowRows": 161,
    "productionBodyRows": 161,
    "bodyResidual": 0,

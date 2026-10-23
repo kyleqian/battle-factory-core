@@ -1184,7 +1184,12 @@ const LIVE_MOVE_POST_ROW_SIDES: ReadonlyMap<number, number> = new Map([
 ]);
 // ont193: the adapter trail (idle94 table) of the no-post-row bodies whose script tail is ROM-measured (btl188: Sand-Attack's waitanimation
 // run is P + N + D + 1 rows). A post-row side's trail is -1 by definition; any other body has no tail (null).
-const LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS: ReadonlyMap<number, number> = new Map([[28, 0]]);
+// tl205 (docs/tl204-zero-tail-rows.md): the no-post-row bodies whose script tail tl204 measured against fresh ROM rows (Scene ON, twice fresh) have trail -1
+// (the ROM release row is the body's last row + 1: tail frames = scriptTailRows - 1): Double Team, Rain Dance, Sunny Day, Hail, Leech Seed, Light Screen,
+// Charm, Fake Tears, Calm Mind, Scary Face. The other zero-frame ont193 moves stay unknown (0 frames) until measured.
+const LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS: ReadonlyMap<number, number> = new Map([
+  [28, 0], [104, -1], [240, -1], [241, -1], [258, -1], [73, -1], [113, -1], [204, -1], [313, -1], [347, -1], [184, -1],
+]);
 // iu120: bodies live only after idle98's evidence (base 3dd2b74b9) whose rows it never measured (lead / trail unknown): Struggle
 // (stl109 / sdl119, incl. its doll cells) keeps 0 / 0.
 const LIVE_MOVE_UNMEASURED_UNIVERSAL_ROW_IDS: ReadonlySet<number> = new Set([165]);
@@ -1217,9 +1222,11 @@ export function liveMoveScriptTailFrames(
   const tailRows = timing.scriptTailRows ?? 0;
   if (tailRows <= 0) return 0;
   const rows = liveMoveUniversalRows(request, field);
-  if (rows.pre === 0) return 0;
   const trail = rows.post > 0 ? -1 : LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS.get(request.moveId);
   if (trail === undefined) return 0;
+  // A masked pre (Double Team: its window owns the banner) gates the tail only when the trail is unmeasured; a declined / swap / unmeasured body has none.
+  if (rows.pre === 0 && (LIVE_MOVE_UNMEASURED_UNIVERSAL_ROW_IDS.has(request.moveId) || liveSubstituteSwapApplies(request, field) === true
+    || liveMoveAnimationDuration(request, field) === null)) return 0;
   return Math.max(0, tailRows + trail - rows.post);
 }
 
