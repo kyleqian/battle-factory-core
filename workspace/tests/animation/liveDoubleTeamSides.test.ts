@@ -103,8 +103,8 @@ describe("S10A sides: Double Team (104) opponent attacker", () => {
     const on = generatedCommandAnimationReplay(3014, "on", [2], 14);
     const off = generatedCommandAnimationReplay(3014, "off", [2], 14);
     const body = on.animations.find((a) => a.moveId === 104 && a.attacker === 1);
-    expect(body?.ages).toEqual(Array.from({ length: 239 }, (_, age) => age)); // tmr136: 230 + 9 tail rows
-    expect(body?.adapterActive.every(Boolean)).toBe(true);
+    expect(body?.ages).toEqual(Array.from({ length: 244 }, (_, age) => age)); // tmr136: 230 + 9 rows; tl205: + the 5 script-tail rows
+    expect(body?.adapterActive.every(Boolean)).toBe(true); // the tail rows hold the last body age (liveMoveUniversalRowAge), so the adapter stays active
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);
     expect(on.boundaries.length).toBeGreaterThan(0);
