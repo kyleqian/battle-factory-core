@@ -199,6 +199,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // tmr136: + 9 tail rows per live Double Team body (6 bodies).
     expect(route.frames).toBe(4600 + 270 + 3 + iu([112, O, 3], [29, O, 2], [93, O, 2], [104, P, 6]) + 6 * LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS
       - 16 // msg175: the route's used prints last their printable length (no 24-frame floor).
+      + 6 * 5 // tl205: 6 Double Team bodies x 5 script-tail rows.
       + 104 // trn181: the route's eight Scene ON action-transition pauses (104 frames; the first Double Team anchor has none before it).
       + 3 * 3); // ont193: the route's script tails (Barrier 112 x3 = 3 each; the masked Double Team 104 bodies carry none).
   });
