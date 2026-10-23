@@ -51,20 +51,22 @@ describe("lsd199: only the drain's request is task-hosted", () => {
   }
 });
 
-describe("lsd199: RAM probe receipt (direct mGBA, lsd199ShakeProbe.py, player attacker, target = battler 1)", () => {
+describe("lsd199: RAM probe receipt (direct mGBA, lsd199ShakeProbe.py; the target is the seeded / Absorb-target battler)", () => {
   const SHAKE = 0x080d5221, UPDATE_MON_BG = 0x080a47d9, TABLE_TASK = 0x0805da49;
   // Move_ABSORB's ShakeMon is the priority-5 one (createvisualtask AnimTask_ShakeMon, 5, ...); an earlier priority-2 ShakeMon belongs to another script.
   const shakeRows = (rows: any[]) => rows.filter((r) => r.tasks.some((t: any) => Number(t[0]) === SHAKE && t[1] === 5));
-  it("ordinary Absorb (controller-hosted): end-of-frame y2 on the creation frame is already stepped back to 0; ShakeMon runs ahead of Task_UpdateMonBg", () => {
-    const rows = shakeRows(fixture("ram/absorb-player-on.json").rows).filter((r: any) => r.tasks.some((t: any) => Number(t[0]) === UPDATE_MON_BG && t[1] === 10));
-    expect(rows.map((r: any) => r.b1[1])).toEqual([0, 0, 5, 5, 0, 0, 5, 5]);
-    expect(rows[0].tasks.map((t: any) => [Number(t[0]), t[1]])).toEqual([[SHAKE, 5], [UPDATE_MON_BG, 10]]);
-  });
-  it("drain (task-hosted): the creation frame ends at y2 +5 (no same-pass step), the script task and Task_UpdateMonBg (priority 10) follow ShakeMon (priority 5)", () => {
-    const rows = shakeRows(fixture("ram/leech-seed-drain-player-on.json").rows).filter((r: any) => r.tasks.some((t: any) => Number(t[0]) === TABLE_TASK));
-    expect(rows.map((r: any) => r.b1)).toEqual([[0, 5], [0, 0], [0, 0], [0, 5], [0, 5], [0, 0], [0, 0], [0, 5], [0, 5]]);
-    expect(rows[0].tasks.map((t: any) => [Number(t[0]), t[1]])).toEqual([[SHAKE, 5], [TABLE_TASK, 10], [UPDATE_MON_BG, 10]]);
-  });
+  for (const [side, target] of [["player", "b1"], ["opponent", "b0"]] as const) {
+    it(`ordinary Absorb, ${side} attacker (controller-hosted): the creation frame ends already stepped back to y2 0; ShakeMon runs ahead of Task_UpdateMonBg`, () => {
+      const rows = shakeRows(fixture(`ram/absorb-${side}-on.json`).rows);
+      expect(rows.map((r: any) => r[target])).toEqual([[0, 0], [0, 0], [0, 5], [0, 5], [0, 0], [0, 0], [0, 5], [0, 5]]);
+      expect(rows[0].tasks.map((t: any) => [Number(t[0]), t[1]])).toEqual([[SHAKE, 5], [UPDATE_MON_BG, 10]]);
+    });
+    it(`drain, ${side} seeds (task-hosted): the creation frame ends at y2 +5 (no same-pass step); the script task and Task_UpdateMonBg (priority 10) follow ShakeMon (priority 5)`, () => {
+      const rows = shakeRows(fixture(`ram/leech-seed-drain-${side}-on.json`).rows);
+      expect(rows.map((r: any) => r[target])).toEqual([[0, 5], [0, 0], [0, 0], [0, 5], [0, 5], [0, 0], [0, 0], [0, 5], [0, 5]]);
+      expect(rows[0].tasks.map((t: any) => [Number(t[0]), t[1]])).toEqual([[SHAKE, 5], [TABLE_TASK, 10], [UPDATE_MON_BG, 10]]);
+    });
+  }
 });
 
 describe("lsd199: dense receipt (lsd198DrainDense.ts, tools/integration/fixtures/lsd199/dense; r1 == r2 byte-identical)", () => {
