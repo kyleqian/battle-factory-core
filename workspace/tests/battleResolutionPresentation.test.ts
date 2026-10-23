@@ -888,7 +888,10 @@ describe("battle resolution presentation receipt ownership", () => {
         pixelsPerFrame: 5,
         spriteRows: 64,
         healthboxVanishFrame: 18,
-        minimumFrames: 20,
+        // fnt201: + BattleScript_FaintTarget/Attacker's playfaintcry (1) + pause B_WAIT_TIME_LONG (64) + dofaintanimation dispatch (1)
+        // before the sink starts (these hand-fed events carry no instruction provenance, so no extra script rows).
+        leadFrames: 66,
+        minimumFrames: 86,
       },
     });
   });
@@ -1705,7 +1708,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
     ], forced));
 
     const sinking = createBattleResolutionPresentationRenderView(
-      atRenderClock(resolution, 1, 6),
+      atRenderClock(resolution, 1, 66 + 6), // fnt201: the sink starts after the 66-row cry / pause / dispatch lead
     );
     expect(sinking.effect).toEqual({
       type: "faint",
