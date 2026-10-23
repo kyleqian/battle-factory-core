@@ -87,7 +87,7 @@ describe("lsd198: fixture data never feeds production rendering", () => {
   });
 });
 
-describe("lsd198: recorded ROM receipt (tools/integration/fixtures/lsd198/dense, lsd198DrainDense.ts; r1 == r2 byte-identical)", () => {
+describe("lsd198: recorded ROM receipt before the lsd199 fix (tools/integration/fixtures/lsd198/dense, lsd198DrainDense.ts; r1 == r2 byte-identical; the current receipt is fixtures/lsd199)", () => {
   const receipt = (name: string) => JSON.parse(readFileSync(new URL(`../tools/integration/fixtures/lsd198/dense/${name}`, import.meta.url), "utf8"));
   it("player seeds: 446 rows, every row outside the 218-row animation command pixel-exact, one residual row at body age 20", () => {
     const r = receipt("p-on.json");
