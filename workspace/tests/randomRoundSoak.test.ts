@@ -411,7 +411,10 @@ describe("random round soak driver (green milestone pin)", () => {
       // lsd196 (b0032b17a: a stat between two prints presents its ROM rows) frames 37_478 -> 37_467, renderCalls 2_681 -> 2_674 (fewer
       // frames although stat rows only grow: the jittered press cooldown draws shift with presentation length); rst197 (Rest pause) moves
       // neither; measured with lsd194SoakPins.ts on 66e89d36e / b0032b17a / a3c34152d / 8bee336e6. Same battle 7, turn 3, end state.
-      frames: 37_467,
+      // rep203 (docs/fnt201-faint-timing.md): fnt201 (the faint script lead: playfaintcry + pause, the player slide, the pre-cry rows) frames
+      // 37_467 -> 39_117, renderCalls 2_674 -> 2_782; hpb202 (the Q24.8 bar port, maxHp < 48) adds 0 here (measured with lsd194SoakPins.ts on
+      // a6f9cbdb1 / 420b14c21 / the union c7d8eab9a: 39_117 / 2_782 on both fnt201-only and the union). Same battle 7, turn 3, end state.
+      frames: 39_117,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -423,7 +426,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_674,
+        renderCalls: 2_782,
       },
     });
     expect(second).toEqual(first);
@@ -811,7 +814,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // msg175: 17242 -> 17232 (shorter used prints); trn178 (the Scene OFF action-transition pause): 17232 -> 17493; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 17493 -> 17175; same battle / turn / end state.
       // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the floor drop alone (no Leech Seed in this trajectory): 17175 -> 17125; same battle / turn / end state.
-      frames: 17125,
+      // rep203: fnt201 (the faint script lead) 17125 -> 17485; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
+      frames: 17485,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -823,7 +827,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pfr192 (the keyed player faint-replacement send-in clock): 27058 -> 26866; same battle / turn / end state.
       // lsd194: the floor drop alone: 26866 -> 26804; same battle / turn / end state.
       // lsd196 (second-stat rows): 26804 -> 26817; rst197 does not move it (lsd194SoakPins.ts); same battle / turn / end state.
-      frames: 26817,
+      // rep203: fnt201 (the faint script lead) 26817 -> 27295; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
+      frames: 27295,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -854,7 +859,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // msg175: 9130 -> 9128 (shorter used prints); trn178 (the Scene OFF action-transition pause): 9128 -> 9154; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 9154 -> 8928; same battle / turn / end state.
       // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the floor drop alone: 8928 -> 8895; same battle / turn / end state.
-      frames: 8895,
+      // rep203: fnt201 (the faint script lead) 8895 -> 9140; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
+      frames: 9140,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -874,7 +880,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // msg175: 9033 -> 8946 (shorter used prints); trn178 (the Scene OFF action-transition pause): 8946 -> 9232; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 9232 -> 8979; same battle / turn / end state.
       // lsd194: the floor drop alone: 8979 -> 8920; same battle / turn / end state.
-      frames: 8920,
+      // rep203: fnt201 (the faint script lead) 8920 -> 9190; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
+      frames: 9190,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
