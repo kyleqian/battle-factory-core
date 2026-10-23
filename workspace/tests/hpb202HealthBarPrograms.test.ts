@@ -3,6 +3,7 @@
  * SHEDINJA (maxHp 1) - `1 -> 0 / 1` used to throw "did not converge"; (b) an hp command's program is validated against the displayed
  * field BEFORE the command (a switch-in earlier in the segment changes maxHP). Hermetic, healthbox + duration functions only.
  */
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   battleHealthBarAnimationFrames, battleHealthBarFillValueAtFrame, battleHealthBarValueAtFrame, calcBarFilledPixels,
@@ -88,4 +89,20 @@ describe("hpb202 b: an hp command's program is validated on the field before the
     const field = battleResolutionFieldBeforeCommand(segmentStart, commands, 1);
     expect(battleResolutionCommandDuration(commands[1]!, field)).toBe(31);
   });
+});
+
+describe("hpb202 c: ROM receipts - SHEDINJA damage-KO health bar, production vs direct-mGBA frames (healthbox rectangle, twice-fresh ROM)", () => {
+  for (const side of ["opp", "ply"] as const) {
+    for (const scene of ["off", "on"] as const) {
+      it(`${scene} / SHEDINJA ${side === "opp" ? "opponent" : "player"}: 53 hp-command rows, residual 0 at a unique offset`, () => {
+        const r = JSON.parse(readFileSync(new URL(`../tools/integration/fixtures/hpb202/compare/shedinja-ko-${side}-${scene}.json`, import.meta.url), "utf8"));
+        expect(r.hpCommand).toMatchObject({ from: 1, to: 0 });
+        expect(r.barFrames).toBe(52);
+        expect(r.perRow).toHaveLength(53);
+        expect(r.best).toMatchObject({ box: 0, bar: 0 });
+        expect(r.perRow.every((row: { box: number; bar: number }) => row.box === 0 && row.bar === 0)).toBe(true);
+        expect(r.runnerUp.box).toBeGreaterThan(0);
+      });
+    }
+  }
 });
