@@ -19,13 +19,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   641 / 641; full suite 1,690 files / 14,051 tests, 0 failed; build; soak vanilla 0:20 **20 / 20 OK**; varied-RNG first-round winning
   carry 0 / 14 / 28 and winning-swap carry 0 **100 / 100** each. The 0:60 soak profiles were not run (~7.5 h each here). Logs
   `.integration/validation/sv-20261022/`.
-- **Next:** (1) tl205 (`worker/integration-20261023-060455`, unfolded unless a later entry says so): Scene ON script tail for the tl204
-  zero-tail moves (Double Team / Rain Dance / Sunny Day / Hail / Leech Seed -> 0); needs supervisor review that the rule is source-derived
-  (not a move list), then census, suite, build. (2) tl204's body-window remainders (Scary Face -14, Calm Mind -4, Fake Tears +4, Light
-  Screen +2, Charm -1) and the other 14 zero-tail moves. (3) The Explosion-breaks-Substitute faint (+135 lead, unmeasured). (4)
-  msg175 residuals (Toxic, Roar, Baton Pass, Snore), non-MAGBY forced send-in visuals (#146).
+- **tl205 NOT folded (gates ran, suite red):** branch `worker/integration-20261023-060455` (tip `8dddfc698`, worker capped after committing),
+  union with master `worker/union-tl205` (`875695e43`). It extends ont193's measured-trail table (trail -1) for the 9 tl204-measured
+  zero-tail moves (Fake Tears held out). Supervisor checks on the union: typecheck 0; `tl204Compare.ts` Double Team / Rain Dance / Sunny
+  Day / Hail / Leech Seed 0, Calm Mind -4, Charm -1, Scary Face -14, Light Screen +2, Fake Tears -1 (all |residual| improved or equal);
+  census ON digests identical, only those 9 moves' move-animation tails +5 / +6 / +39; OFF 1000 / 1000 identical. Full suite: 13 failures
+  in 8 files (`.integration/validation/sv-20261022/tl205/failing-files.txt`): live route tests assert "adapter active every age" over the
+  whole command (now incl. the tail rows: liveDoubleTeamSides, liveLsbzTiming, liveNext5 / Prep9 / Prep11 / Random2R4 adapters,
+  playableAnimationIntegration) and sgl138's route totals. Next: make those assertions tail-aware (as ont193 did), re-pin sgl138 with
+  `sgl138Live.ts`, rerun the suite + build on the union, fold.
+- **Next after tl205:** tl204's body-window remainders and the other 14 zero-tail moves; the Explosion-breaks-Substitute faint (+135,
+  unmeasured); msg175 residuals (Toxic, Roar, Baton Pass, Snore); #146 non-MAGBY forced send-in visuals.
 - **Notes:** worker refs kept (merged): `worker/integration-20261022-230803`, `-20261023-{000807,010407,014655,021547,034106,045023,052730}`,
-  `worker/union-fnt201-hpb202`. Worktrees removed after their evidence was committed or copied. No push.
+  `worker/union-fnt201-hpb202`; unmerged: `worker/integration-20261023-060455`, `worker/union-tl205`. Worktrees removed after their evidence was committed or copied. No push.
 ---
 
 ## 2026-10-16 / 17 — CAX31 session wind-down (supervisor, Opus 5.5): pfr192 / ont193 folded; lsd194 unfolded (triaged lsd195)

@@ -14,8 +14,9 @@ tl205 (Scene ON script tail for the tl204-measured moves): see the top PROGRESS.
 
 ## Next work (in order)
 
-1. If tl205 is not on master: its branch `worker/integration-20261023-060455` (+ union commits in PROGRESS) needs census + full suite +
-   build on master + tl205, then fold. Then the remaining tl204 body-window residuals (Scary Face -14, Calm Mind -4, Light Screen +2,
+1. tl205 is NOT on master. Start from `worker/union-tl205` (`875695e43` = master + tl205; census both scenes and typecheck already
+   green there, see PROGRESS). Make the 8 failing files' "adapter active every age" assertions tail-aware and re-pin sgl138
+   (`sgl138Live.ts`), then full suite + build on that exact code, then fold. Then the remaining tl204 body-window residuals (Scary Face -14, Calm Mind -4, Light Screen +2,
    Charm / Fake Tears -1) and the other 14 zero-tail moves (docs/tl204-zero-tail-rows.md).
 2. The Explosion-that-broke-a-Substitute faint (+135 lead in the fnt201 census, unmeasured): one ROM scenario.
 3. msg175's open edges (Toxic -21 ON / -2 OFF, Roar OFF +17, Baton Pass OFF -66, Snore +10, the Rest-route Tackle HP anchor).
