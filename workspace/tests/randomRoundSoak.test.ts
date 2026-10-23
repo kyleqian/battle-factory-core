@@ -408,7 +408,10 @@ describe("random round soak driver (green milestone pin)", () => {
       // the floor drop (5a11553e1, WAITMESSAGE_LONG_TIMING 24 -> 0: short prints are L + 64) frames 37_536 -> 37_456, renderCalls 2_688 -> 2_675;
       // the Leech Seed drain rows (9d04fca52: the held lead + the bar+2 rule replacing the 28-row hp floors) frames 37_456 -> 37_478, renderCalls 2_675 -> 2_681;
       // same battle 7, turn 3, end state and diagnostics.
-      frames: 37_478,
+      // lsd196 (b0032b17a: a stat between two prints presents its ROM rows) frames 37_478 -> 37_467, renderCalls 2_681 -> 2_674 (fewer
+      // frames although stat rows only grow: the jittered press cooldown draws shift with presentation length); rst197 (Rest pause) moves
+      // neither; measured with lsd194SoakPins.ts on 66e89d36e / b0032b17a / a3c34152d / 8bee336e6. Same battle 7, turn 3, end state.
+      frames: 37_467,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -420,7 +423,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_681,
+        renderCalls: 2_674,
       },
     });
     expect(second).toEqual(first);
@@ -819,7 +822,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 27058 -> 26866; same battle / turn / end state.
       // lsd194: the floor drop alone: 26866 -> 26804; same battle / turn / end state.
-      frames: 26804,
+      // lsd196 (second-stat rows): 26804 -> 26817; rst197 does not move it (lsd194SoakPins.ts); same battle / turn / end state.
+      frames: 26817,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
