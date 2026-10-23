@@ -26,12 +26,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   census ON digests identical, only those 9 moves' move-animation tails +5 / +6 / +39; OFF 1000 / 1000 identical. Full suite: 13 failures
   in 8 files (`.integration/validation/sv-20261022/tl205/failing-files.txt`): live route tests assert "adapter active every age" over the
   whole command (now incl. the tail rows: liveDoubleTeamSides, liveLsbzTiming, liveNext5 / Prep9 / Prep11 / Random2R4 adapters,
-  playableAnimationIntegration) and sgl138's route totals. Next: make those assertions tail-aware (as ont193 did), re-pin sgl138 with
-  `sgl138Live.ts`, rerun the suite + build on the union, fold.
+  playableAnimationIntegration) and sgl138's route totals. tl206 (`worker/integration-20261023-080938`, tip `ea0846220`, on top of
+  `worker/union-tl205`, tests / fixtures only) fixed all 13 (each file alone passes; the adapter holds the last body age through the tail,
+  so the `every` assertions stay; shared helper `tests/helpers/iu120Rows.ts` ont193ScriptTail gained the nine moves; sgl138 ON route totals
+  +18 / +20 / +12 / +10). Next: full suite + build on `ea0846220` (also covers liveWallMoveAdapters / tl204ZeroTailRows, not rerun), fold.
 - **Next after tl205:** tl204's body-window remainders and the other 14 zero-tail moves; the Explosion-breaks-Substitute faint (+135,
   unmeasured); msg175 residuals (Toxic, Roar, Baton Pass, Snore); #146 non-MAGBY forced send-in visuals.
 - **Notes:** worker refs kept (merged): `worker/integration-20261022-230803`, `-20261023-{000807,010407,014655,021547,034106,045023,052730}`,
-  `worker/union-fnt201-hpb202`; unmerged: `worker/integration-20261023-060455`, `worker/union-tl205`. Worktrees removed after their evidence was committed or copied. No push.
+  `worker/union-fnt201-hpb202`; unmerged: `worker/integration-20261023-060455`, `worker/union-tl205`, `worker/integration-20261023-080938` (tl206, the one to fold). Worktrees removed after their evidence was committed or copied. No push.
 ---
 
 ## 2026-10-16 / 17 — CAX31 session wind-down (supervisor, Opus 5.5): pfr192 / ont193 folded; lsd194 unfolded (triaged lsd195)
