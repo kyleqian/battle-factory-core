@@ -84,4 +84,21 @@ Only the faint routes change: no kernel event, RNG draw or outcome is touched, a
 
 ## Results
 
-See the final session report for the test commands and outcomes (pins moved by this change are listed there).
+Single vitest files, one at a time, `POKEBENCH_VITEST_MAX_WORKERS=1`, each under `timeout`; all pass after the change:
+`fnt201FaintTiming` (18, new), `battleResolutionPresentation` (39), `sst200SecondStatRows` (27), `pfr192PlayerFaintSendInClock` (8),
+`msg175UsedMessageDuration` (3), `offs152SceneOffForcedSwitch` (6), `offs152SendInTailOff` (7), `factoryRoundBattleOrchestrator` (56, 62 s),
+`turn5ResolutionAdapterEquivalence`, `turn13ResolutionAdapterEquivalence`, `turn5FaintPresentationStaging`, `turn13DragonBreathPresentationStaging`,
+`presentationTerminalSeamTrainerSlide`, `gate6OhkoReceipt`, `land75HiddenBattler`.
+
+Pins that moved (all attributed to the 66-row `playfaintcry` / `pause B_WAIT_TIME_LONG` / dispatch lead):
+- `battleResolutionPresentation.test.ts` "retains a genuine player forced-switch boundary...": faint timing gains `leadFrames: 66`, `minimumFrames` 20 -> 86
+  (`healthboxVanishFrame` 18 unchanged: ONIX back y_offset 0).
+- same file, "sinks a zero-HP battler...": the sink geometry is now sampled at lead + 6 (skipPixelRows 30 unchanged).
+- `sst200SecondStatRows.test.ts`: Memento's next print ("PRIMEAPE fainted!") is now asserted, ROM 181 in both scenes (production was 116 OFF / 147 ON).
+
+Not present in this checkout: `pfr185*`, `battleResolutionFaint*`. Not run (216 test files mention "faint"; only those with faint timing/command
+pins above were run): the full suite, `npm run build`, `npm run typecheck` (supervisor instruction). Production code changed, so the
+supervisor's full suite / build / typecheck is still required for this commit.
+
+Open: 1-HP healthbars (Shedinja) still have no converging `battleHealthBar` program (`source program did not converge 1->0/1`); unrelated to the
+rule above and outside the Factory rental set, left unchanged (the tool's `lenientHp` option only keeps the timeline comparable).
