@@ -7,6 +7,11 @@
    "rose!"
   ],
   "tailRows": 7,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 220,
    "production": 210,
@@ -80,6 +85,11 @@
    "harshly fell!"
   ],
   "tailRows": 6,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 218,
    "production": 212,
@@ -150,6 +160,11 @@
    "rose!"
   ],
   "tailRows": 6,
+  "universalRows": {
+   "pre": 0,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 271,
    "production": 266,
@@ -219,6 +234,11 @@
    "harshly fell!"
   ],
   "tailRows": 6,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 209,
    "production": 208,
@@ -288,6 +308,11 @@
    "It started to hail!"
   ],
   "tailRows": 7,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 185,
    "production": 179,
@@ -354,6 +379,11 @@
    "Foe ONIX was seeded!"
   ],
   "tailRows": 40,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 207,
    "production": 168,
@@ -421,6 +451,11 @@
    "raised SP. DEF!"
   ],
   "tailRows": 7,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 121,
    "production": 117,
@@ -487,6 +522,11 @@
    "It started to rain!"
   ],
   "tailRows": 6,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 219,
    "production": 214,
@@ -554,6 +594,11 @@
    "harshly fell!"
   ],
   "tailRows": 6,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 333,
    "production": 314,
@@ -623,6 +668,11 @@
    "The sunlight got bright!"
   ],
   "tailRows": 7,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 190,
    "production": 184,

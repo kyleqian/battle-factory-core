@@ -6,6 +6,7 @@
 //   node --experimental-strip-types --no-warnings tools/integration/tl204Compare.ts tools/integration/fixtures/tl204/rom-rows.json tools/integration/fixtures/tl204/production-vs-rom.json
 import { readFileSync, writeFileSync } from "node:fs";
 import { MONS, lsd194Production } from "./lsd194Production.ts";
+import { liveMoveScriptTailFrames, liveMoveUniversalRows } from "../../src/engine/battleResolutionPresentationRender.ts";
 
 export const TL204_MOVES: Record<string, { id: number; self: boolean }> = {
   "double-team": { id: 104, self: true }, "rain-dance": { id: 240, self: true }, "scary-face": { id: 184, self: false }, "light-screen": { id: 113, self: true },
@@ -22,8 +23,8 @@ const FAILED = /failed|missed|But/;
 export function productionFor(move: string, chain: number) {
   const m = TL204_MOVES[move]!;
   for (let seed = 1; seed <= 400; seed += 1) {
-    let rows: Row[];
-    try { rows = lsd194Production({ scene: "on", seed, player: MONS.PRIMEAPE, opponent: MONS.ONIX, pMove: m.id, oMove: 33, pSelf: m.self }).rows as Row[]; } catch { continue; }
+    let rows: Row[], commands: any[], field: any;
+    try { ({ rows, commands, field } = lsd194Production({ scene: "on", seed, player: MONS.PRIMEAPE, opponent: MONS.ONIX, pMove: m.id, oMove: 33, pSelf: m.self }) as any); } catch { continue; }
     const used = rows[0]!;
     const p = rows.findIndex(isPrint);
     if (used.type !== "message" || p < 0 || FAILED.test((rows[p]!.lines ?? []).join(" "))) continue;
@@ -34,7 +35,7 @@ export function productionFor(move: string, chain: number) {
     if (prints.length !== chain) continue;
     const nxt = rows.findIndex((r, i) => i > prints[prints.length - 1]! && r.type === "message" && (r.lines ?? [])[0]?.startsWith("Foe ONIX used"));
     if (nxt < 0) continue;
-    return { seed, rows, p, prints, nxt };
+    return { seed, rows, commands, field, p, prints, nxt };
   }
   throw new Error(`no production seed for ${move}`);
 }
@@ -49,6 +50,8 @@ export function compareCase(r: Rom) {
   const prodChain = p.prints.map((idx, i) => p.rows[idx]!.start - (i ? p.rows[p.prints[i - 1]!]!.start : used.start));
   const row = {
     move: r.move, productionSeed: p.seed, firstPrint: first.lines, tailRows: bodyRows[0]?.timing?.scriptTailRows ?? null,
+    universalRows: (() => { const c = p.commands.find((x: any) => x.type === "move-animation"); return c?.animation ? liveMoveUniversalRows(c.animation, p.field) : null; })(),
+    tailFrames: (() => { const c = p.commands.find((x: any) => x.type === "move-animation"); return c?.animation ? liveMoveScriptTailFrames(c.timing, c.animation, p.field) : null; })(),
     usedToPrint: { rom: r.printF - r.usedF, production: first.start - used.start, residual: first.start - used.start - (r.printF - r.usedF) },
     printToNext: { rom: r.nextF - r.chainF[r.chainF.length - 1]!, production: nxt.start - last.start, residual: nxt.start - last.start - (r.nextF - r.chainF[r.chainF.length - 1]!) },
     chainGaps: { rom: romChain, production: prodChain },

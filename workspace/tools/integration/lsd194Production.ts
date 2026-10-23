@@ -47,7 +47,7 @@ export function lsd194Production(o: { scene: "on" | "off"; player: Mon; opponent
     at += dur;
     return row;
   });
-  return { rows, events: b.events as any[] };
+  return { rows, events: b.events as any[], commands, field };
 }
 
 // Classes: the staged ROM scenarios of tools/integration/fixtures/lsd194/scenarios (seed = a kernel seed whose outcome class matches the ROM's).
