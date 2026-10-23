@@ -1,0 +1,6 @@
+lsd186-leech-seed-fullhp-player-exeggcute-opponent-onix.json-off rows r1==r2 rgb r1:61389aa9e24e3c29 r2:61389aa9e24e3c29
+lsd186-leech-seed-fullhp-player-exeggcute-opponent-onix.json-on rows r1==r2 rgb r1:95e37afa272b3703 r2:95e37afa272b3703
+mechanic-leech-seed-opponent-exeggcute-player-onix-off rows r1==r2 rgb r1:74238cc317c748d9 r2:74238cc317c748d9
+mechanic-leech-seed-opponent-exeggcute-player-onix-on rows r1==r2 rgb r1:b8ededf10e05bde4 r2:b8ededf10e05bde4
+mechanic-leech-seed-player-exeggcute-opponent-onix-off rows r1==r2 rgb r1:8e5ac196bf1c41ba r2:8e5ac196bf1c41ba
+mechanic-leech-seed-player-exeggcute-opponent-onix-on rows r1==r2 rgb r1:d69482ec68c026df r2:d69482ec68c026df

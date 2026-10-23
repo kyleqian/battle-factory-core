@@ -23,6 +23,8 @@ describe("trn178: the Scene OFF action-transition pause", () => {
     const off = trn176Production("PRIMEAPE", MOVE.BULK_UP, "ONIX", MOVE.TACKLE, true, "off");
     expect(transitionPauses(off.rows)).toEqual([12]);
     const r = evaluate("off108-bulk-up-ply-primeape-onix", "off");
+    // lsd196: the `stat` between the two stat prints presents the ROM's 4 single-row instructions (instructionExecution delta), so the
+    // lsd194 floor drop's -3 is closed at the source (the pause itself is unchanged: 12 above).
     expect([r.d, r.u, r.n, r.residual, r.pause]).toEqual([2, 4, 1, 0, 0]);
   });
 
@@ -32,7 +34,9 @@ describe("trn178: the Scene OFF action-transition pause", () => {
       "off108-protect-ply-primeape-onix", "off108-detect-ply-primeape-onix", "off148-agility-ply",
       "off108-dynamic-punch-opp-machamp-snorlax", "off108-dynamic-punch-ply-machamp-snorlax",
     ].map((name) => [name, evaluate(name, "off").residual]);
-    expect(rows.map((x) => x[1])).toEqual([0, 0, 0, 0, 0, 0, 0, 1]);
+    // lsd194: Dynamic Punch ply 1 -> 0 (its miss print "attack missed!" L = 23 lost the 1-row floor over-hold: that +1 was the floor,
+    // not a ROM row). Bulk Up stays 0 (lsd196: the second stat's single-row instructions).
+    expect(rows.map((x) => x[1])).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
   });
 
   it("HIT class (Scratch, Double-Edge): P 13 / 14 after the effectiveness / recoil print; the transition itself is exact", () => {

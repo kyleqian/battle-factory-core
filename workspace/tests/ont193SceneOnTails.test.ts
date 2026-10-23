@@ -26,12 +26,15 @@ describe("ont193 A: Scene ON live no-hit bodies carry the source-derived script 
     }
   });
 
-  it("ROM anchor-end delta 0 on the four targets (Bulk Up / Sand-Attack / Protect / Detect); Bulk Up's start delta stays the pre-existing -1 that OFF also has", () => {
-    for (const [name, startDelta] of [["bulk-up-ply-primeape-onix", -1], ["sand-attack-ply-primeape-snorlax", 0], ["protect-ply-primeape-onix", 0], ["detect-ply-primeape-onix", 0]] as const) {
+  // lsd194 re-pin: Bulk Up's two stat prints ("ATTACK rose!" L=22, "DEFENSE rose!" L=23) were held 24-floor (88 / 88+1 rows); the ROM is L+64 (86 / 87),
+  // so the floor drop unmasked a -3 that sits between the two stat prints (the ROM's 4 single-row instructions BulkUpTryDef+0 / +6 / +12 / +23).
+  // lsd196 closes it at the source: the `stat` between the prints presents those rows (instructionExecution delta), so Bulk Up is 0 / 0 / 0 again.
+  it("ROM anchor-end delta 0 on Sand-Attack / Protect / Detect; Bulk Up 0 / 0 (lsd196: the second stat's single-row instructions)", () => {
+    for (const [name, startDelta, endDelta, residual] of [["bulk-up-ply-primeape-onix", 0, 0, 0], ["sand-attack-ply-primeape-snorlax", 0, 0, 0], ["protect-ply-primeape-onix", 0, 0, 0], ["detect-ply-primeape-onix", 0, 0, 0]] as const) {
       const r = evaluate(`off108-${name}`, "on");
-      expect([name, r.anchorStartDelta, r.anchorEndDelta, r.residual]).toEqual([name, startDelta, 0, 0]);
+      expect([name, r.anchorStartDelta, r.anchorEndDelta, r.residual]).toEqual([name, startDelta, endDelta, residual]);
     }
-    expect(evaluate("off108-bulk-up-ply-primeape-onix", "off").anchorStartDelta).toBe(-1);
+    expect(evaluate("off108-bulk-up-ply-primeape-onix", "off").anchorStartDelta).toBe(0);
   });
 
   it("the Double Team window (masked pre), Rest (synthetic route) and Scene OFF keep their pre-ont193 values", () => {
@@ -42,9 +45,9 @@ describe("ont193 A: Scene ON live no-hit bodies carry the source-derived script 
       const b = body(species, move, target, "off");
       expect([move, b.tailRows, b.tailFrames, b.frames]).toEqual([move, undefined, null, frames]);
     }
-    for (const name of ["bulk-up-ply-primeape-onix", "sand-attack-ply-primeape-snorlax", "protect-ply-primeape-onix", "detect-ply-primeape-onix"]) {
+    for (const [name, endDelta] of [["bulk-up-ply-primeape-onix", 0], ["sand-attack-ply-primeape-snorlax", 0], ["protect-ply-primeape-onix", 0], ["detect-ply-primeape-onix", 0]] as const) {
       const r = evaluate(`off108-${name}`, "off");
-      expect([name, r.anchorEndDelta]).toEqual([name, 0]);
+      expect([name, r.anchorEndDelta]).toEqual([name, endDelta]);
     }
   });
 

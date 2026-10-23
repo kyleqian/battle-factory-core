@@ -1,0 +1,338 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 2,
+  "battleNum": 2,
+  "trainerId": 110,
+  "playerSetIds": [
+    274,
+    354,
+    338
+  ],
+  "opponentSetIds": [
+    349,
+    339,
+    327
+  ],
+  "seed": 1,
+  "overrides": {
+    "parties": {
+      "player": [
+        {
+          "species": 296,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            55,
+            55,
+            55,
+            55
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 1,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            33,
+            33,
+            33,
+            33
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 4,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            33,
+            33,
+            33,
+            33
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        }
+      ],
+      "opponent": [
+        {
+          "species": 320,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            89,
+            89,
+            89,
+            89
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 320,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            89,
+            89,
+            89,
+            89
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 320,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            89,
+            89,
+            89,
+            89
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        }
+      ]
+    }
+  },
+  "trace": {
+    "segments": [
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 30,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 700,
+        "buttons": []
+      }
+    ],
+    "captureFrames": [
+      44,
+      50,
+      60,
+      64,
+      65,
+      70,
+      90,
+      110,
+      130,
+      150,
+      170,
+      179,
+      180,
+      183,
+      190,
+      200,
+      203,
+      204,
+      220,
+      240,
+      260,
+      267,
+      280,
+      281,
+      290,
+      300,
+      308,
+      309,
+      330,
+      360,
+      390,
+      413,
+      417,
+      430,
+      440,
+      441,
+      460,
+      480,
+      500,
+      504,
+      506,
+      507,
+      510,
+      515,
+      520,
+      522,
+      527,
+      540,
+      560,
+      580,
+      600,
+      620,
+      640,
+      660,
+      680,
+      700
+    ]
+  }
+}

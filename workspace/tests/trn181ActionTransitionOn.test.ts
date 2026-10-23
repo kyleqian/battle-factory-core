@@ -29,7 +29,7 @@ describe("trn181: the action-transition pause in Scene ON", () => {
     expect((trn176Evaluate(tw) as any).skipped).toBeTruthy();
   });
 
-  it("ON residuals land on the anchor-end error (ont193: Bulk Up 0, Sand-Attack 0, Protect 0 after the script tail; Rest -3, Solar Beam 0)", () => {
+  it("ON residuals land on the anchor-end error (ont193 + lsd196: Bulk Up 0 (the second stat's single-row instructions), Sand-Attack 0, Protect 0 after the script tail; Rest -3, Solar Beam 0)", () => {
     for (const [name, residual] of [["off108-bulk-up-ply-primeape-onix", 0], ["off108-sand-attack-ply-primeape-snorlax", 0],
       ["off108-protect-ply-primeape-onix", 0], ["off108-rest-ply-snorlax-onix", -3], ["off108-solar-beam-ply-primeape-snorlax", 0]] as const) {
       const c = trn176Cases(["off108"], [name]).find((x) => x.scene === "on")!;

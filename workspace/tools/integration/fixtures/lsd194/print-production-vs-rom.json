@@ -1,0 +1,351 @@
+[
+ {
+  "class": "super-effective",
+  "scene": "off",
+  "label": "BattleScript_HitFromAtkAnimation+15",
+  "rom": {
+   "last": 21,
+   "hold": 64,
+   "toNext": 85
+  },
+  "seed": 1,
+  "production": {
+   "lines": [
+    "It’s super effective!"
+   ],
+   "L": 21,
+   "dur": 85,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "super-effective",
+  "scene": "off",
+  "label": "BattleScript_DoHitAllWithUndergroundBonus+26",
+  "rom": {
+   "last": 24,
+   "hold": 64,
+   "toNext": 88
+  },
+  "seed": 1,
+  "production": {
+   "lines": [
+    "It’s not very effective…"
+   ],
+   "L": 24,
+   "dur": 88,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "super-effective",
+  "scene": "on",
+  "label": "BattleScript_HitFromAtkAnimation+15",
+  "rom": {
+   "last": 21,
+   "hold": 64,
+   "toNext": 85
+  },
+  "seed": 1,
+  "production": {
+   "lines": [
+    "It’s super effective!"
+   ],
+   "L": 21,
+   "dur": 85,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "crit",
+  "scene": "off",
+  "label": "BattleScript_HitFromAtkAnimation+11",
+  "rom": {
+   "last": 15,
+   "hold": 64,
+   "toNext": 79
+  },
+  "seed": 50,
+  "production": {
+   "lines": [
+    "A critical hit!"
+   ],
+   "L": 15,
+   "dur": 79,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "crit",
+  "scene": "off",
+  "label": "BattleScript_HitFromAtkAnimation+15",
+  "rom": {
+   "last": 24,
+   "hold": 64,
+   "toNext": 88
+  },
+  "seed": 50,
+  "production": {
+   "lines": [
+    "It’s not very effective…"
+   ],
+   "L": 24,
+   "dur": 88,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "crit",
+  "scene": "on",
+  "label": "BattleScript_HitFromAtkAnimation+11",
+  "rom": {
+   "last": 15,
+   "hold": 64,
+   "toNext": 79
+  },
+  "seed": 50,
+  "production": {
+   "lines": [
+    "A critical hit!"
+   ],
+   "L": 15,
+   "dur": 79,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "crit",
+  "scene": "on",
+  "label": "BattleScript_HitFromAtkAnimation+15",
+  "rom": {
+   "last": 24,
+   "hold": 64,
+   "toNext": 88
+  },
+  "seed": 50,
+  "production": {
+   "lines": [
+    "It’s not very effective…"
+   ],
+   "L": 24,
+   "dur": 88,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "failed",
+  "scene": "off",
+  "label": "BattleScript_ButItFailed+10",
+  "rom": {
+   "last": 14,
+   "hold": 64,
+   "toNext": 78
+  },
+  "seed": 1,
+  "production": {
+   "lines": [
+    "But it failed!"
+   ],
+   "L": 14,
+   "dur": 78,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "failed",
+  "scene": "on",
+  "label": "BattleScript_ButItFailed+10",
+  "rom": {
+   "last": 14,
+   "hold": 64,
+   "toNext": 78
+  },
+  "seed": 1,
+  "production": {
+   "lines": [
+    "But it failed!"
+   ],
+   "L": 14,
+   "dur": 78,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "ohko",
+  "scene": "off",
+  "label": "BattleScript_OneHitKOMsg+3",
+  "rom": {
+   "last": 18,
+   "hold": 64,
+   "toNext": 82
+  },
+  "seed": 3,
+  "production": {
+   "lines": [
+    "It’s a one-hit KO!"
+   ],
+   "L": 18,
+   "dur": 82,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "ohko",
+  "scene": "on",
+  "label": "BattleScript_OneHitKOMsg+3",
+  "rom": {
+   "last": 18,
+   "hold": 64,
+   "toNext": 82
+  },
+  "seed": 3,
+  "production": {
+   "lines": [
+    "It’s a one-hit KO!"
+   ],
+   "L": 18,
+   "dur": 82,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "stat-up",
+  "scene": "off",
+  "label": "BattleScript_BulkUpDoMoveAnim+40",
+  "rom": {
+   "last": 22,
+   "hold": 64,
+   "toNext": 86
+  },
+  "seed": 1,
+  "production": {
+   "lines": [
+    "PRIMEAPE’s ATTACK",
+    "rose!"
+   ],
+   "L": 22,
+   "dur": 86,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "stat-up",
+  "scene": "off",
+  "label": "BattleScript_BulkUpTryDef+28",
+  "rom": {
+   "last": 23,
+   "hold": 64,
+   "toNext": 87
+  },
+  "seed": 1,
+  "production": {
+   "lines": [
+    "PRIMEAPE’s DEFENSE",
+    "rose!"
+   ],
+   "L": 23,
+   "dur": 87,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "stat-up",
+  "scene": "on",
+  "label": "BattleScript_BulkUpDoMoveAnim+40",
+  "rom": {
+   "last": 22,
+   "hold": 64,
+   "toNext": 86
+  },
+  "seed": 1,
+  "production": {
+   "lines": [
+    "PRIMEAPE’s ATTACK",
+    "rose!"
+   ],
+   "L": 22,
+   "dur": 86,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ },
+ {
+  "class": "stat-up",
+  "scene": "on",
+  "label": "BattleScript_BulkUpTryDef+28",
+  "rom": {
+   "last": 23,
+   "hold": 64,
+   "toNext": 87
+  },
+  "seed": 1,
+  "production": {
+   "lines": [
+    "PRIMEAPE’s DEFENSE",
+    "rose!"
+   ],
+   "L": 23,
+   "dur": 87,
+   "timing": {
+    "minimumFrames": 0,
+    "holdFrames": 64
+   }
+  },
+  "residual": 0
+ }
+]

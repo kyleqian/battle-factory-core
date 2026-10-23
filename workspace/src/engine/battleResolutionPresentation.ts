@@ -79,7 +79,7 @@ export type PartyBallState = "empty" | "healthy" | "status" | "fainted";
  * here -- see `WAITMESSAGE_LONG_MESSAGE_IDS` at the call site.
  */
 export type BattleMessageTiming =
-  | Readonly<{ minimumFrames: 24; holdFrames: 0 | 64 }>
+  | Readonly<{ minimumFrames: 24; holdFrames: 0 }>
   | Readonly<{ minimumFrames: 24; holdFrames: 9 }>
   | Readonly<{ minimumFrames: 13; holdFrames: 0 }>
   // ISSUES #81 4b route-scoped used-move hold: the failed/no-anim path's
@@ -115,7 +115,7 @@ export type BattleHitAnimationTiming = Readonly<{
   firstDisplayedAge: 1;
 }>;
 /** sub183: tailFrames (present only when > 0) = the script rows between the bar's last row and the next print's first glyph (see hpPrintTailTiming). */
-export type BattleHpTiming = Readonly<{ minimumFrames: 28; tailFrames?: number }>;
+export type BattleHpTiming = Readonly<{ minimumFrames: 28 | 0; tailFrames?: number }>;
 /**
  * The RAM stat write is silent for exactly 2 frames before the message box
  * clears (`docs/issue69-omniboost-off-ground-truth.md` §2: every one of the
@@ -123,9 +123,10 @@ export type BattleHpTiming = Readonly<{ minimumFrames: 28; tailFrames?: number }
  * 283->285, 375->377, 468->470, 559->561, 652->654). The visible post-print
  * hold is a `message` property in source (`waitmessage` follows
  * `printfromtable`, not `statbuffchange`), not a `stat` one -- see
- * `BattleMessageTiming`.
+ * `BattleMessageTiming`. Usually 2; a `stat` between two prints presents the
+ * ROM's single-row instructions up to the next print (lsd196).
  */
-export type BattleStatTiming = Readonly<{ minimumFrames: 2 }>;
+export type BattleStatTiming = Readonly<{ minimumFrames: number }>;
 /**
  * 32 frames; Scene OFF: the frames to the next print (off121, `sceneOffStatusFrames`); Scene ON, when a status animation of
  * the same execution follows: the same frames (sa125 SA3, `sceneOnStatusFrames`).
@@ -523,7 +524,7 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP";
+      animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN";
       timing: Readonly<{ minimumFrames: number }>;
     }>
   | Readonly<{
@@ -785,10 +786,11 @@ export const USED_MESSAGE_SPLASH_CONTROLLER_HOLD_FRAMES = 39;
  * and then runs `waitmessage B_WAIT_TIME_LONG`. The hold counts down from
  * print completion, not from the print command (see
  * `docs/battle-message-hold-cadence-ground-truth.md` §2), so `holdFrames` is
- * strictly additive to the print floor/length term.
+ * strictly additive to the printable length. lsd194 (docs/lsd194-print-floor-and-drain.md): the ROM's first glyph -> next
+ * instruction is exactly L + 64 for L = 14 .. 24 (no 24-frame floor, both scenes), so `minimumFrames` is 0 (msg175's USEDMOVE rule).
  */
 export const WAITMESSAGE_LONG_TIMING = Object.freeze({
-  minimumFrames: 24,
+  minimumFrames: 0,
   holdFrames: WAITMESSAGE_LONG_HOLD_FRAMES,
 } as const);
 /**
@@ -929,8 +931,10 @@ const SCENE_OFF_MOVE_PAUSE_FRAMES = 32;
  * it is skipped and its `stat` command's frames are subtracted. A held message
  * since the opener (Rest: "went to sleep!" + waitmessage + the status icon)
  * breaks the one-frame-per-execution mapping before the attack receipt, but
- * production's commands since the opener then end on the ROM's attackanimation
- * row, and the mapping holds again from there: P = Δ(N) − Δ(attack) + 1 + lead.
+ * the print's rows are exactly L + 64 (lsd194) and production's status-icon
+ * command is the `updatestatusicon` row itself, so the mapping holds again from
+ * that icon's execution (the ROM then runs waitstate's 2 rows and `goto` before
+ * attackanimation): P = Δ(N) − Δ(icon) + 1 + lead (rst197; independent of L).
  */
 /** The battler operand (`BS_TARGET` / `BS_ATTACKER`) of a `returntoball` receipt's source instruction, if known. */
 function returnToBallOperand(event: BattleKernelSemanticEvent): string | null {
@@ -1053,13 +1057,14 @@ function sceneOffNoHitPauseFrames(
     if (next === undefined || next < execution) return null;
     execution = next;
   }
-  const attack = execution;
   let presented = openerFrames;
   let held = false;
+  let iconSequence: number | null = null;
   for (const command of presentedSinceOpener) {
     const timing = (command as { timing?: { minimumFrames: number; holdFrames?: number } }).timing;
     if (command.type === "move-animation" || command.type === "hit-animation" || timing === undefined) return null;
     if (command.type === "message" || (timing.holdFrames ?? 0) > 0) held = true;
+    if (command.type === "status-icon") iconSequence = command.eventSequence;
     presented += timing.minimumFrames;
   }
   // The held-message path is ROM-anchored only for Rest's shape: trysetrest's
@@ -1067,6 +1072,14 @@ function sceneOffNoHitPauseFrames(
   // held prints before the attack receipt (Magnitude, a Magic Coat bounce)
   // are unmeasured.
   if (held && presentedSinceOpener.map((command) => command.type).join() !== "status,message,status-icon") return null;
+  // rst197: the held chain's last command is Rest's `updatestatusicon` (one frame = the ROM row it executes on, the print + its
+  // waitmessage being exactly L + 64 rows); the ROM runs `waitstate` (2 rows) and `goto` before attackanimation, so the pause (from the
+  // frame after the icon command) is anchored on that icon's execution: P = Δ(N) - Δ(icon) + 1 + lead.
+  let iconExecution: number | null = null;
+  if (held) {
+    iconExecution = events.find((event) => event.sequence === iconSequence)?.provenance?.instructionExecution ?? null;
+    if (iconExecution === null) return null;
+  }
   let skipped = 0;
   for (let index = attackIndex + 1; index < events.length; index += 1) {
     const candidate = events[index]!;
@@ -1101,8 +1114,8 @@ function sceneOffNoHitPauseFrames(
           ? SCENE_OFF_RETURN_TO_BALL_LEAD
           : null;
     if (lead === null) return null;
-    const frames = held
-      ? next - attack + 1 + lead - skipped
+    const frames = iconExecution !== null
+      ? next - iconExecution + 1 + lead - skipped
       : next - opener + lead - presented - skipped;
     return frames > 0 ? frames : null;
   }
@@ -1436,7 +1449,7 @@ const HP_TIMING = Object.freeze({ minimumFrames: 28 } as const);
  * other `datahpupdate; printfromtable`, Leech Seed's turn-end drain, has no ROM window here).
  */
 const HP_PRINT_TAIL_FRAMES = 3;
-function hpPrintTailTiming(event: BattleKernelSemanticEvent): typeof HP_TIMING | Readonly<{ minimumFrames: 28; tailFrames: number }> {
+function hpPrintTailTiming(event: BattleKernelSemanticEvent): BattleHpTiming {
   const programCounter = event.provenance?.programCounter;
   if (programCounter === undefined) return HP_TIMING;
   const at = (offset: number) => BATTLE_SCRIPT_PROGRAM.instructions[programCounter + offset]?.opcodeName;
@@ -1444,6 +1457,48 @@ function hpPrintTailTiming(event: BattleKernelSemanticEvent): typeof HP_TIMING |
     && at(-2) === "B_SCR_OP_WAITANIMATION" && at(-3) === "B_SCR_OP_ATTACKANIMATION"
     ? Object.freeze({ minimumFrames: 28, tailFrames: HP_PRINT_TAIL_FRAMES } as const) : HP_TIMING;
 }
+/**
+ * lsd194 (docs/lsd194-print-floor-and-drain.md; lsd186 receipts, 6 ROM cases: 3 scenarios x both scenes, twice-fresh): the turn-end Leech
+ * Seed drain, `BattleScript_LeechSeedTurnDrain` (`playanimation; orword; healthbarupdate; datahpupdate; copyword; jumpifability;
+ * manipulatedamage; setbyte; goto`) then `BattleScript_LeechSeedTurnPrintAndUpdateHp` (`orword; healthbarupdate; datahpupdate;
+ * printfromtable; waitmessage`). HITMARKER_PASSIVE_HP_UPDATE only gates Counter / Mirror Coat / Shell Bell records
+ * (Cmd_datahpupdate, battle_script_commands.c:1932-1960), never a wait: each `datahpupdate` blocks on the preceding `healthbarupdate`'s
+ * controller exactly like any other, so a bar's ROM run is the bar's frames + 2 with no 28-row floor.
+ *   - Lead (from the last presented MoveEnd row to the seeded bar): the print's `goto` + MoveEnd rows beyond the two presented
+ *     sprite-visibility rows (LEECH_SEED_DRAIN_PRE_ROWS) + the script's own executions through the seeded `healthbarupdate`
+ *     (`instructionExecution`: `playanimation`, Scene OFF's Pausex20 33 rows, `orword`, `healthbarupdate` = 36) + Scene ON's
+ *     animation rows beyond the `orword` row its 208-row run already holds (LEECH_SEED_DRAIN_ANIMATION_ROWS: `delay 0` = 2 ticks
+ *     + Move_ABSORB's 206 rows, the 10-row window lead + 194 window + 2 to the script end).
+ *   - Seeded bar: no floor; tail = the executions to the receiver's `datahpupdate` (8 = the run's `datahpupdate` row + 7 script rows).
+ *   - Receiver bar: no floor; tail = HP_PRINT_TAIL_FRAMES (the `datahpupdate` row, `printfromtable`, the `waitmessage` row).
+ * Only the ordinary path is measured (no Liquid Ooze: its `jumpifability` skips rows, so the tail would not be 8 and the rule is off).
+ */
+const LEECH_SEED_DRAIN_PRE_ROWS = 8;
+export const LEECH_SEED_DRAIN_ANIMATION_ROWS = 208;
+const LEECH_SEED_DRAIN_SEEDED_TAIL = 8;
+function datahpupdatePcAfter(label: string): number {
+  let programCounter = BATTLE_SCRIPT_PROGRAM.labelEntries[label]!.programCounter;
+  while (BATTLE_SCRIPT_PROGRAM.instructions[programCounter]!.opcodeName !== "B_SCR_OP_DATAHPUPDATE") programCounter += 1;
+  return programCounter;
+}
+const LEECH_SEED_DRAIN_SEEDED_PC = datahpupdatePcAfter("BattleScript_LeechSeedTurnDrain");
+const LEECH_SEED_DRAIN_RECEIVER_PC = datahpupdatePcAfter("BattleScript_LeechSeedTurnPrintAndUpdateHp");
+/** The drain role of the hp-change at events[index], or null (not a measured ordinary drain). */
+function leechSeedDrainRole(events: readonly BattleKernelSemanticEvent[], index: number): "seeded" | "receiver" | null {
+  const event = events[index]!;
+  const pc = event.provenance?.programCounter;
+  if (pc === LEECH_SEED_DRAIN_RECEIVER_PC) {
+    const seeded = events.slice(0, index).reverse().find((e) => e.payload.kind === "hp-change");
+    return seeded?.provenance?.programCounter === LEECH_SEED_DRAIN_SEEDED_PC
+      && event.provenance!.instructionExecution! - seeded.provenance.instructionExecution! === LEECH_SEED_DRAIN_SEEDED_TAIL ? "receiver" : null;
+  }
+  if (pc !== LEECH_SEED_DRAIN_SEEDED_PC) return null;
+  const receiver = events.slice(index + 1).find((e) => e.payload.kind === "hp-change");
+  return receiver?.provenance?.programCounter === LEECH_SEED_DRAIN_RECEIVER_PC
+    && receiver.provenance.instructionExecution! - event.provenance!.instructionExecution! === LEECH_SEED_DRAIN_SEEDED_TAIL ? "seeded" : null;
+}
+const LEECH_SEED_DRAIN_SEEDED_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: LEECH_SEED_DRAIN_SEEDED_TAIL } as const);
+const LEECH_SEED_DRAIN_RECEIVER_HP_TIMING = Object.freeze({ minimumFrames: 0, tailFrames: HP_PRINT_TAIL_FRAMES } as const);
 const STAT_TIMING = Object.freeze({ minimumFrames: 2 } as const);
 const STATUS_TIMING = Object.freeze({ minimumFrames: 32 } as const);
 /**
@@ -4133,6 +4188,26 @@ function statsChangeNextReceiptHoldFrames(
   return 0;
 }
 
+/**
+ * lsd196: a `stat` between two prints (Bulk Up's ATTACK -> DEFENSE: `printfromtable; waitmessage` ... `setstatchanger; statbuffchange;
+ * jumpifbyte; printfromtable`). The first print's `waitmessage B_WAIT_TIME_LONG` hold is `previous.timing.holdFrames` executions of the
+ * kernel's count; every further execution up to the next print is one single-row instruction (ROM off108 Bulk Up: 4 rows, then the next
+ * print's first glyph one row later). Rows = those instructions + the first-glyph lead; the `stat` command presents all of them.
+ */
+function statBetweenPrintsFrames(
+  events: readonly BattleKernelSemanticEvent[],
+  previous: BattleResolutionPresentationCommand,
+  stat: Extract<BattleResolutionPresentationCommand, { type: "stat" }>,
+  following: BattleResolutionPresentationCommand,
+): number {
+  if (previous.type !== "message" || following.type !== "message") return 0;
+  const first = events.find((event) => event.sequence === previous.eventSequence)?.provenance?.instructionExecution;
+  const second = events.find((event) => event.sequence === following.eventSequence)?.provenance?.instructionExecution;
+  if (first === undefined || second === undefined || second <= first) return 0;
+  const lead = 1;
+  return Math.max(stat.timing.minimumFrames, second - first - previous.timing.holdFrames + lead);
+}
+
 export function projectBattleResolutionCommands(
   events: readonly BattleKernelSemanticEvent[],
   beforeRules: BattleScriptRulesContext,
@@ -4143,7 +4218,8 @@ export function projectBattleResolutionCommands(
   usedMessageHoldFrames = 0,
 ): readonly BattleResolutionPresentationCommand[] {
   const commands: BattleResolutionPresentationCommand[] = [];
-  const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number }>();
+  const pendingHealth = new Map<0 | 1, { eventSequence: number; healthValue: number; instructionExecution: number | undefined }>();
+  let leechDrainAnimated = false;
   const pendingSwitch = new Map<
     0 | 1,
     { eventSequence: number; fromPartyIndex: BattlePartyIndex; toPartyIndex: BattlePartyIndex }
@@ -4196,6 +4272,7 @@ export function projectBattleResolutionCommands(
     }
     if (event.provenance?.dispatcher !== SYNTHESIZED_SWITCH_DISPATCHER) lastSequence = event.sequence;
     const payload = event.payload;
+    if (payload.kind === "animation" && payload.animationId === "LEECH_SEED_DRAIN") leechDrainAnimated = true;
     if (payload.kind === "set-battler-pp-data") {
       lastMoveAttacker = singlesBattler(payload.battler, "PP update");
       continue;
@@ -4451,6 +4528,7 @@ export function projectBattleResolutionCommands(
       pendingHealth.set(battler, {
         eventSequence: event.sequence,
         healthValue: payload.healthValue,
+        instructionExecution: event.provenance?.instructionExecution,
       });
       continue;
     }
@@ -4461,6 +4539,20 @@ export function projectBattleResolutionCommands(
         throw new Error(`battle resolution HP change for battler ${battler} has no health-bar update`);
       }
       pendingHealth.delete(battler);
+      const drainRole = leechSeedDrainRole(events, index);
+      if (drainRole === "seeded") {
+        commands.push(Object.freeze({
+          type: "general-animation",
+          eventSequence: health.eventSequence,
+          battler,
+          animation: "LEECH_SEED_DRAIN",
+          timing: Object.freeze({
+            minimumFrames: LEECH_SEED_DRAIN_PRE_ROWS + health.instructionExecution!
+              + (leechDrainAnimated ? LEECH_SEED_DRAIN_ANIMATION_ROWS - 1 : 0),
+          }),
+        }));
+      }
+      leechDrainAnimated = false;
       commands.push(Object.freeze({
         type: "hp",
         eventSequence: health.eventSequence,
@@ -4468,7 +4560,8 @@ export function projectBattleResolutionCommands(
         from: payload.from,
         to: payload.to,
         healthValue: health.healthValue,
-        timing: hpPrintTailTiming(event),
+        timing: drainRole === "seeded" ? LEECH_SEED_DRAIN_SEEDED_HP_TIMING
+          : drainRole === "receiver" ? LEECH_SEED_DRAIN_RECEIVER_HP_TIMING : hpPrintTailTiming(event),
       }));
       if (payload.to === 0) zeroHpBattlers.add(battler);
       continue;
@@ -4808,6 +4901,14 @@ export function projectBattleResolutionCommands(
       }
     }
     commands.splice(0, commands.length, ...ordered);
+  }
+  for (let index = 1; index < commands.length - 1; index += 1) {
+    const command = commands[index]!;
+    if (command.type !== "stat") continue;
+    const rows = statBetweenPrintsFrames(events, commands[index - 1]!, command, commands[index + 1]!);
+    if (rows > command.timing.minimumFrames) {
+      commands[index] = Object.freeze({ ...command, timing: Object.freeze({ minimumFrames: rows }) });
+    }
   }
   // snd145: an opponent FAINT REPLACEMENT that ends the turn holds its settled send-in through the source's post-`switchinanim`
   // turn-end work (`switchineffects`, the rest of `BattleScript_HandleFaintedMon`, `BattleTurnPassed`) before the action prompt.

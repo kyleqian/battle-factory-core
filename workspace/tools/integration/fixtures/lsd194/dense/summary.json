@@ -1,0 +1,338 @@
+[
+ {
+  "case": "player-seeds-tackled off",
+  "rows": 272,
+  "exactRows": 44,
+  "px": {
+   "box": 0,
+   "opp": 248748,
+   "ply": 0,
+   "other": 0
+  },
+  "animationSpan": {
+   "rows": 44,
+   "exactRows": 44,
+   "px": {
+    "box": 0,
+    "opp": 0,
+    "ply": 0,
+    "other": 0
+   }
+  },
+  "outsideAnimation": {
+   "rows": 228,
+   "px": {
+    "box": 0,
+    "opp": 248748,
+    "ply": 0,
+    "other": 0
+   }
+  },
+  "bySegment": {
+   "seededPrint": {
+    "rows": 84,
+    "exactRows": 0
+   },
+   "lead(sprite-visibility)": {
+    "rows": 2,
+    "exactRows": 0
+   },
+   "animation(general-animation)": {
+    "rows": 44,
+    "exactRows": 44
+   },
+   "seededBar+gap(hp)": {
+    "rows": 22,
+    "exactRows": 0
+   },
+   "receiverBar(hp)": {
+    "rows": 15,
+    "exactRows": 0
+   },
+   "sappedPrint": {
+    "rows": 105,
+    "exactRows": 0
+   }
+  }
+ },
+ {
+  "case": "player-seeds-tackled on",
+  "rows": 446,
+  "exactRows": 99,
+  "px": {
+   "box": 0,
+   "opp": 936931,
+   "ply": 752707,
+   "other": 1700296
+  },
+  "animationSpan": {
+   "rows": 218,
+   "exactRows": 13,
+   "px": {
+    "box": 0,
+    "opp": 782009,
+    "ply": 752707,
+    "other": 1700296
+   }
+  },
+  "outsideAnimation": {
+   "rows": 228,
+   "px": {
+    "box": 0,
+    "opp": 154922,
+    "ply": 0,
+    "other": 0
+   }
+  },
+  "bySegment": {
+   "seededPrint": {
+    "rows": 84,
+    "exactRows": 84
+   },
+   "lead(sprite-visibility)": {
+    "rows": 2,
+    "exactRows": 2
+   },
+   "animation(general-animation)": {
+    "rows": 218,
+    "exactRows": 13
+   },
+   "seededBar+gap(hp)": {
+    "rows": 22,
+    "exactRows": 0
+   },
+   "receiverBar(hp)": {
+    "rows": 15,
+    "exactRows": 0
+   },
+   "sappedPrint": {
+    "rows": 105,
+    "exactRows": 0
+   }
+  }
+ },
+ {
+  "case": "opponent-seeds-tackled off",
+  "rows": 263,
+  "exactRows": 263,
+  "px": {
+   "box": 0,
+   "opp": 0,
+   "ply": 0,
+   "other": 0
+  },
+  "animationSpan": {
+   "rows": 44,
+   "exactRows": 44,
+   "px": {
+    "box": 0,
+    "opp": 0,
+    "ply": 0,
+    "other": 0
+   }
+  },
+  "outsideAnimation": {
+   "rows": 219,
+   "px": {
+    "box": 0,
+    "opp": 0,
+    "ply": 0,
+    "other": 0
+   }
+  },
+  "bySegment": {
+   "seededPrint": {
+    "rows": 80,
+    "exactRows": 80
+   },
+   "lead(sprite-visibility)": {
+    "rows": 2,
+    "exactRows": 2
+   },
+   "animation(general-animation)": {
+    "rows": 44,
+    "exactRows": 44
+   },
+   "seededBar+gap(hp)": {
+    "rows": 22,
+    "exactRows": 22
+   },
+   "receiverBar(hp)": {
+    "rows": 14,
+    "exactRows": 14
+   },
+   "sappedPrint": {
+    "rows": 101,
+    "exactRows": 101
+   }
+  }
+ },
+ {
+  "case": "opponent-seeds-tackled on",
+  "rows": 437,
+  "exactRows": 259,
+  "px": {
+   "box": 0,
+   "opp": 751551,
+   "ply": 682935,
+   "other": 1700278
+  },
+  "animationSpan": {
+   "rows": 218,
+   "exactRows": 40,
+   "px": {
+    "box": 0,
+    "opp": 751551,
+    "ply": 682935,
+    "other": 1700278
+   }
+  },
+  "outsideAnimation": {
+   "rows": 219,
+   "px": {
+    "box": 0,
+    "opp": 0,
+    "ply": 0,
+    "other": 0
+   }
+  },
+  "bySegment": {
+   "seededPrint": {
+    "rows": 80,
+    "exactRows": 80
+   },
+   "lead(sprite-visibility)": {
+    "rows": 2,
+    "exactRows": 2
+   },
+   "animation(general-animation)": {
+    "rows": 218,
+    "exactRows": 40
+   },
+   "seededBar+gap(hp)": {
+    "rows": 22,
+    "exactRows": 22
+   },
+   "receiverBar(hp)": {
+    "rows": 14,
+    "exactRows": 14
+   },
+   "sappedPrint": {
+    "rows": 101,
+    "exactRows": 101
+   }
+  }
+ },
+ {
+  "case": "player-seeds-fullhp off",
+  "rows": 261,
+  "exactRows": 44,
+  "px": {
+   "box": 0,
+   "opp": 236747,
+   "ply": 0,
+   "other": 0
+  },
+  "animationSpan": {
+   "rows": 44,
+   "exactRows": 44,
+   "px": {
+    "box": 0,
+    "opp": 0,
+    "ply": 0,
+    "other": 0
+   }
+  },
+  "outsideAnimation": {
+   "rows": 217,
+   "px": {
+    "box": 0,
+    "opp": 236747,
+    "ply": 0,
+    "other": 0
+   }
+  },
+  "bySegment": {
+   "seededPrint": {
+    "rows": 84,
+    "exactRows": 0
+   },
+   "lead(sprite-visibility)": {
+    "rows": 2,
+    "exactRows": 0
+   },
+   "animation(general-animation)": {
+    "rows": 44,
+    "exactRows": 44
+   },
+   "seededBar+gap(hp)": {
+    "rows": 22,
+    "exactRows": 0
+   },
+   "receiverBar(hp)": {
+    "rows": 4,
+    "exactRows": 0
+   },
+   "sappedPrint": {
+    "rows": 105,
+    "exactRows": 0
+   }
+  }
+ },
+ {
+  "case": "player-seeds-fullhp on",
+  "rows": 435,
+  "exactRows": 40,
+  "px": {
+   "box": 0,
+   "opp": 975885,
+   "ply": 752707,
+   "other": 1700296
+  },
+  "animationSpan": {
+   "rows": 218,
+   "exactRows": 40,
+   "px": {
+    "box": 0,
+    "opp": 739138,
+    "ply": 752707,
+    "other": 1700296
+   }
+  },
+  "outsideAnimation": {
+   "rows": 217,
+   "px": {
+    "box": 0,
+    "opp": 236747,
+    "ply": 0,
+    "other": 0
+   }
+  },
+  "bySegment": {
+   "seededPrint": {
+    "rows": 84,
+    "exactRows": 0
+   },
+   "lead(sprite-visibility)": {
+    "rows": 2,
+    "exactRows": 0
+   },
+   "animation(general-animation)": {
+    "rows": 218,
+    "exactRows": 40
+   },
+   "seededBar+gap(hp)": {
+    "rows": 22,
+    "exactRows": 0
+   },
+   "receiverBar(hp)": {
+    "rows": 4,
+    "exactRows": 0
+   },
+   "sappedPrint": {
+    "rows": 105,
+    "exactRows": 0
+   }
+  }
+ }
+]

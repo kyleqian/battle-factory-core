@@ -404,7 +404,14 @@ describe("random round soak driver (green milestone pin)", () => {
       // renderCalls 2_655 -> 2_694; same battle 7, turn 3, end state and diagnostics.
       // pfr192 (the player faint-replacement send-in clock keyed on species / name length / nature / scene): frames 37_738 -> 37_536,
       // renderCalls 2_694 -> 2_688; same battle 7, turn 3, end state and diagnostics.
-      frames: 37_536,
+      // lsd194 (docs/lsd194-print-floor-and-drain.md section 8), measured on three archived trees with tools/integration/lsd194SoakPins.ts:
+      // the floor drop (5a11553e1, WAITMESSAGE_LONG_TIMING 24 -> 0: short prints are L + 64) frames 37_536 -> 37_456, renderCalls 2_688 -> 2_675;
+      // the Leech Seed drain rows (9d04fca52: the held lead + the bar+2 rule replacing the 28-row hp floors) frames 37_456 -> 37_478, renderCalls 2_675 -> 2_681;
+      // same battle 7, turn 3, end state and diagnostics.
+      // lsd196 (b0032b17a: a stat between two prints presents its ROM rows) frames 37_478 -> 37_467, renderCalls 2_681 -> 2_674 (fewer
+      // frames although stat rows only grow: the jittered press cooldown draws shift with presentation length); rst197 (Rest pause) moves
+      // neither; measured with lsd194SoakPins.ts on 66e89d36e / b0032b17a / a3c34152d / 8bee336e6. Same battle 7, turn 3, end state.
+      frames: 37_467,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -416,7 +423,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_688,
+        renderCalls: 2_674,
       },
     });
     expect(second).toEqual(first);
@@ -803,7 +810,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     expect(runSeed(0, options)).toMatchObject({
       // msg175: 17242 -> 17232 (shorter used prints); trn178 (the Scene OFF action-transition pause): 17232 -> 17493; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 17493 -> 17175; same battle / turn / end state.
-      frames: 17175,
+      // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the floor drop alone (no Leech Seed in this trajectory): 17175 -> 17125; same battle / turn / end state.
+      frames: 17125,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -813,7 +821,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 27058 -> 26866; same battle / turn / end state.
-      frames: 26866,
+      // lsd194: the floor drop alone: 26866 -> 26804; same battle / turn / end state.
+      // lsd196 (second-stat rows): 26804 -> 26817; rst197 does not move it (lsd194SoakPins.ts); same battle / turn / end state.
+      frames: 26817,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -843,7 +853,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     expect(runSeed(0, options)).toMatchObject({
       // msg175: 9130 -> 9128 (shorter used prints); trn178 (the Scene OFF action-transition pause): 9128 -> 9154; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 9154 -> 8928; same battle / turn / end state.
-      frames: 8928,
+      // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the floor drop alone: 8928 -> 8895; same battle / turn / end state.
+      frames: 8895,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -862,7 +873,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 9033 -> 8946 (shorter used prints); trn178 (the Scene OFF action-transition pause): 8946 -> 9232; same battle / turn / end state.
       // pfr192 (the keyed player faint-replacement send-in clock): 9232 -> 8979; same battle / turn / end state.
-      frames: 8979,
+      // lsd194: the floor drop alone: 8979 -> 8920; same battle / turn / end state.
+      frames: 8920,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

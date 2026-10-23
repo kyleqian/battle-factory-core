@@ -45,7 +45,7 @@ export function lsd186Production(o: { scene: "on" | "off"; seederSide: "player" 
     at += dur;
     return row;
   });
-  return { rows, events: b.events as any[] };
+  return { rows, events: b.events as any[], commands, field, beforeRules, afterRules: b.state.rules };
 }
 
 if (process.argv[1]?.endsWith("lsd186Production.ts")) {

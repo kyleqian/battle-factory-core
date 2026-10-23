@@ -498,7 +498,7 @@ describe("battle resolution presentation receipt ownership", () => {
         lines: ["It’s super effective!"],
         advance: "automatic",
         noCursor: false,
-        timing: { minimumFrames: 24, holdFrames: 64 },
+        timing: { minimumFrames: 0, holdFrames: 64 },
       },
       { type: "turn-end", timing: { minimumFrames: 8 } },
     ]);
@@ -529,12 +529,12 @@ describe("battle resolution presentation receipt ownership", () => {
       lines: ["A critical hit!"],
       advance: "automatic",
       noCursor: false,
-      timing: { minimumFrames: 24, holdFrames: 64 },
+      timing: { minimumFrames: 0, holdFrames: 64 },
     });
     expect(criticalCommand.timing).toBe(WAITMESSAGE_LONG_TIMING);
-    // The duration formula carries the 64-frame post-print hold on top of the
-    // 24-frame floor (print length 14 < 24, so 24 + 64 = 88).
-    expect(battleResolutionCommandDuration(criticalCommand, critical.field)).toBe(88);
+    // The duration formula is the printable length plus the 64-frame post-print hold (lsd194: no 24-frame floor;
+    // print length 15, ROM first glyph -> next instruction 79 = 15 + 64).
+    expect(battleResolutionCommandDuration(criticalCommand, critical.field)).toBe(79);
     // STRINGID_NOTVERYEFFECTIVE (Cmd_resultmessage -> waitmessage, :264).
     const notVery = createBattleResolutionPresentation(inputFor([
       event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
@@ -598,8 +598,8 @@ describe("battle resolution presentation receipt ownership", () => {
         c.type === "message" && c.lines[0] === "But it failed!",
     )!;
     expect(failedCommand.timing).toBe(WAITMESSAGE_LONG_TIMING);
-    // print length 14 < the 24-frame floor, so 24 + 64 = 88.
-    expect(battleResolutionCommandDuration(failedCommand, failed.field)).toBe(88);
+    // print length 14: 14 + 64 = 78 (lsd194 ROM receipt, both scenes).
+    expect(battleResolutionCommandDuration(failedCommand, failed.field)).toBe(78);
     const nothing = createBattleResolutionPresentation(inputFor([
       event(0, { kind: "message", messageId: "STRINGID_USEDMOVE", substitutions: [] }),
       event(1, { kind: "set-battler-pp-data", battler: 0, movePosition: 0, pp: 9 }),
@@ -1962,16 +1962,15 @@ describe("battle resolution typed Scene-OFF renderer", () => {
     expect(
       battleResolutionCommandDuration(statCommand!, fellResolution.field),
     ).toBe(2);
-    // The message's own duration carries print time (the 24-frame floor, this
-    // line is short) PLUS the source's 64-frame post-print hold -- a hold
-    // *after* printing completes, not a fudge on the print-speed floor/length
-    // term itself.
+    // The message's own duration is its print length (20 glyphs; lsd194: no
+    // 24-frame floor) PLUS the source's 64-frame post-print hold -- a hold
+    // *after* printing completes, not a fudge on the length term itself.
     expect(messageCommand).toMatchObject({
-      timing: { minimumFrames: 24, holdFrames: 64 },
+      timing: { minimumFrames: 0, holdFrames: 64 },
     });
     expect(
       battleResolutionCommandDuration(messageCommand!, fellResolution.field),
-    ).toBe(88);
+    ).toBe(84);
     // One banner's total (stat + message) is ~92 frames per the oracle's own
     // measured cadence (docs/issue69-omniboost-off-ground-truth.md §2's four
     // measured gaps: 92/93/91/93, mean 92.25) -- state-level phase breakdown,
@@ -1979,7 +1978,7 @@ describe("battle resolution typed Scene-OFF renderer", () => {
     expect(
       battleResolutionCommandDuration(statCommand!, fellResolution.field)
       + battleResolutionCommandDuration(messageCommand!, fellResolution.field),
-    ).toBe(90);
+    ).toBe(86);
 
     // A non-stat-change message (the ordinary "used move!" banner) gets no
     // hold -- the hold is scoped to the six stat-change STRINGIDs, not every
