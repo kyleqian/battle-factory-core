@@ -56,6 +56,17 @@
     "message:87"
    ]
   },
+  "accounting": {
+   "romScriptRows": 9,
+   "productionStatRows": 2,
+   "scriptResidual": -7,
+   "romWindowRows": 188,
+   "productionBodyRows": 185,
+   "bodyResidual": -3,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 6,
+   "residualAfterHypothesis": -4
+  },
   "romRelease": {
    "releaseRow": 258,
    "printRunStart": 261
@@ -115,6 +126,17 @@
     "message:94"
    ]
   },
+  "accounting": {
+   "romScriptRows": 7,
+   "productionStatRows": 2,
+   "scriptResidual": -5,
+   "romWindowRows": 192,
+   "productionBodyRows": 191,
+   "bodyResidual": -1,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": -1
+  },
   "romRelease": {
    "releaseRow": 263,
    "printRunStart": 263
@@ -172,6 +194,17 @@
     "move-animation:239",
     "message:91"
    ]
+  },
+  "accounting": {
+   "romScriptRows": 7,
+   "productionStatRows": 2,
+   "scriptResidual": -5,
+   "romWindowRows": 239,
+   "productionBodyRows": 239,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": 0
   },
   "romRelease": {
    "releaseRow": 313,
@@ -232,6 +265,17 @@
     "message:95"
    ]
   },
+  "accounting": {
+   "romScriptRows": 7,
+   "productionStatRows": 2,
+   "scriptResidual": -5,
+   "romWindowRows": 178,
+   "productionBodyRows": 182,
+   "bodyResidual": 4,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": 4
+  },
   "romRelease": {
    "releaseRow": 254,
    "printRunStart": 254
@@ -287,6 +331,17 @@
     "message:83"
    ]
   },
+  "accounting": {
+   "romScriptRows": 6,
+   "productionStatRows": 0,
+   "scriptResidual": -6,
+   "romWindowRows": 161,
+   "productionBodyRows": 161,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 6,
+   "residualAfterHypothesis": 0
+  },
   "romRelease": {
    "releaseRow": 225,
    "printRunStart": 226
@@ -341,6 +396,17 @@
     "move-animation:144",
     "message:84"
    ]
+  },
+  "accounting": {
+   "romScriptRows": 39,
+   "productionStatRows": 0,
+   "scriptResidual": -39,
+   "romWindowRows": 144,
+   "productionBodyRows": 144,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 39,
+   "residualAfterHypothesis": 0
   },
   "romRelease": {
    "releaseRow": 247,
@@ -398,6 +464,17 @@
     "message:98"
    ]
   },
+  "accounting": {
+   "romScriptRows": 6,
+   "productionStatRows": 0,
+   "scriptResidual": -6,
+   "romWindowRows": 89,
+   "productionBodyRows": 91,
+   "bodyResidual": 2,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 6,
+   "residualAfterHypothesis": 2
+  },
   "romRelease": {
    "releaseRow": 161,
    "printRunStart": 162
@@ -452,6 +529,17 @@
     "move-animation:190",
     "message:83"
    ]
+  },
+  "accounting": {
+   "romScriptRows": 5,
+   "productionStatRows": 0,
+   "scriptResidual": -5,
+   "romWindowRows": 190,
+   "productionBodyRows": 190,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": 0
   },
   "romRelease": {
    "releaseRow": 259,
@@ -512,6 +600,17 @@
     "message:93"
    ]
   },
+  "accounting": {
+   "romScriptRows": 7,
+   "productionStatRows": 2,
+   "scriptResidual": -5,
+   "romWindowRows": 302,
+   "productionBodyRows": 288,
+   "bodyResidual": -14,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": -14
+  },
   "romRelease": {
    "releaseRow": 378,
    "printRunStart": 378
@@ -566,6 +665,17 @@
     "move-animation:161",
     "message:88"
    ]
+  },
+  "accounting": {
+   "romScriptRows": 6,
+   "productionStatRows": 0,
+   "scriptResidual": -6,
+   "romWindowRows": 161,
+   "productionBodyRows": 161,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 6,
+   "residualAfterHypothesis": 0
   },
   "romRelease": {
    "releaseRow": 230,

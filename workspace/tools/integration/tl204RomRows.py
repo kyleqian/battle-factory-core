@@ -45,7 +45,7 @@ for path in sys.argv[1:]:
     x = chain[-1]["b"] + 1
     while x + 12 < len(rows) and not (chg(x) and sum(chg(x + k) for k in range(12)) >= 8): x += 1
     wins = [s for s in seg if s["kind"] == "window"]
-    out[name] = {"move": move, "usedF": U["a"] + U["first"], "usedRunStart": U["a"], "usedRunEnd": U["b"] + 1, "usedLabel": U["label"],
+    out[name] = {"move": move, "usedF": U["a"] + U["first"], "usedRunStart": U["a"], "usedRunEnd": U["b"] + 1, "usedLabel": U["label"], "usedGlyphs": U["last"] - U["first"] + 1,
                  "printF": P["a"] + P["first"], "printRunStart": P["a"], "printRunEnd": P["b"] + 1, "printLabel": P["label"], "printLast": P["last"],
                  "chainF": [r["a"] + r["first"] for r in chain], "nextF": x, "nextLabel": lab(rows[x]["ptr"]), "segments": seg,
                  "bodyFirstChange": wins[0]["firstChange"] if wins else None, "bodyLastChange": wins[-1]["lastChange"] if wins else None,
