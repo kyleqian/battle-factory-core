@@ -66,6 +66,6 @@ Compact results: `fixtures/hpb202/compare/*.json` (pinned by `tests/hpb202Health
 ## Gates and scope
 
 * `tests/hpb202HealthBarPrograms.test.ts` (14): maxHp 1 both directions, the sliver rule, maxHp 20 text rounding, a sweep of every maxHp 1..47 program, the maxHp >= 48 control, the (b) field-before-command class, the ROM receipts.
-* Run singly: `healthboxAssembly`, `battleSceneHealthboxFactories`, `battleHealthbox`, `lsd194PrintFloorAndDrain`, `battleResolutionPresentation`, `sub183SubstituteTurnTiming` pass unchanged.
+* Run singly (each under `timeout 300`): `healthboxAssembly` (30), `battleSceneHealthboxFactories` (12), `battleHealthbox` (7), `lsd194PrintFloorAndDrain` (12), `battleResolutionPresentation` (39), `sub183SubstituteTurnTiming` (5), `fightMenuChromeGroundTruth` (10), `battleScene` (306) pass unchanged.
 * Production code changed (`healthboxAssembly.ts`, `battleResolutionPresentationRender.ts`): the supervisor must still run the full `npm test`, `npm run build`, `npm run typecheck` and the 0..999 census; this session was forbidden to.
 * Out of scope: faint timing (fnt201), drain animation, gameplay / RNG.
