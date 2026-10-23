@@ -1261,6 +1261,8 @@ function leechSeedDrainAbsorbEffect(
   const owner = command.battler === 0 ? 1 : 0;
   const request: BattleMoveAnimationRequest = Object.freeze({
     moveId: LEECH_SEED_DRAIN_ABSORB_MOVE_ID, attacker: owner, target: command.battler, turn: 0, power: 0, damage: 0, friendship: 0, multihit: 0,
+    // TryHandleLaunchBattleTableAnimation runs the script from Task_ClearBitWhenBattleTableAnimDone (absorbAtAge `taskHostedScript`).
+    taskHostedScript: true,
   });
   return Object.freeze({
     type: "move", request, age,
