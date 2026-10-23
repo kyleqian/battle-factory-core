@@ -4,7 +4,7 @@ import { createInitialState, tick, render } from "../src/engine/core.ts";
 import { playableAnimationReplay } from "../tools/integration/playableAnimationReplay.ts";
 import { battleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
-import { iu120Ages, iu120Extra } from "./helpers/iu120Rows.ts";
+import { iu120Ages, iu120Extra, ont193ScriptTail } from "./helpers/iu120Rows.ts";
 
 describe("ordinary playable animation queue", () => {
   it("plays damaging and no-hit moves from draft input, resumes commands, and preserves rules/RNG", () => {
@@ -94,7 +94,7 @@ describe("ordinary playable animation queue", () => {
       const body = on.animations.filter(animation => animation.moveId === 113);
       expect(body).toHaveLength(1);
       expect(body[0]!.ages).toEqual(iu120Ages(113, 88));
-      expect(body[0]!.adapterActive).toEqual(Array(88 + iu120Extra(113)).fill(exact));
+      expect(body[0]!.adapterActive).toEqual(Array(88 + iu120Extra(113) + ont193ScriptTail(113)).fill(exact));
       const lsCommand = on.commands.find(row => row.type === "move-animation"
         && (row.command as { animation?: { moveId: number } }).animation?.moveId === 113)!;
       expect(lsCommand.spriteInputHistoryKnown === true).toBe(exact);
