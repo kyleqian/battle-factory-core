@@ -23,7 +23,7 @@ export function scenario(name: string) {
 }
 export function production(name: string, scene: "on" | "off", seed: number) {
   const s = scenario(name);
-  return lsd194Production({ scene, seed, ...s });
+  return lsd194Production({ scene, seed, ...s, pSelf: s.pMove === 201 });
 }
 if (process.argv[1]?.endsWith("fnt201Production.ts")) {
   const [name, scene, seed] = [process.argv[2]!, process.argv[3]! as "on" | "off", Number(process.argv[4] ?? 1)];
