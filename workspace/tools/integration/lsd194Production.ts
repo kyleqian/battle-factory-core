@@ -23,7 +23,7 @@ const battler = (m: Mon, move: number) => {
     spAttack: m.spAttack, spDefense: m.spDefense, speed: m.speed, hp: m.hp, maxHp: m.hp, types: [entry.types[0], entry.types[1]] as const };
 };
 
-export function lsd194Production(o: { scene: "on" | "off"; player: Mon; opponent: Mon; pMove: number; oMove: number; seed: number; selfMoves?: boolean; oSelf?: boolean; pSelf?: boolean }) {
+export function lsd194Production(o: { scene: "on" | "off"; player: Mon; opponent: Mon; pMove: number; oMove: number; seed: number; selfMoves?: boolean; oSelf?: boolean; pSelf?: boolean; lenientHp?: boolean }) {
   let state = createFactoryFullTurnBattleState({ requestId: 1, rngSeed: o.seed, player: battler(o.player, o.pMove), trainer: battler(o.opponent, o.oMove) } as never);
   if (o.scene === "off") {
     const rulesContext = { ...state.rules.rulesContext, hitMarker: (state.rules.rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) >>> 0 };
@@ -41,7 +41,9 @@ export function lsd194Production(o: { scene: "on" | "off"; player: Mon; opponent
   const commands = projectBattleResolutionCommands(b.events as never, beforeRules, b.state.rules.rulesContext, field, null, { className: "TRAINER", name: "LSD194", speechLose: ["a", "b"], speechWin: ["a", "b"] } as never) as any[];
   let at = 0;
   const rows = commands.map((c) => {
-    const dur = battleResolutionCommandDuration(c, field);
+    // fnt201: a 1-HP bar (Shedinja) has no converging source program; lenientHp keeps the command's minimum so the rest of the timeline stays comparable.
+    let dur: number;
+    try { dur = battleResolutionCommandDuration(c, field); } catch (e) { if (!o.lenientHp || c.type !== "hp") throw e; dur = c.timing.minimumFrames + 1; }
     const row = { type: c.type, battler: c.battler ?? null, from: c.from ?? null, to: c.to ?? null, lines: c.lines ?? null, timing: c.timing ?? null, start: at, dur,
       messageId: c.payload?.messageId ?? c.messageId ?? null };
     at += dur;

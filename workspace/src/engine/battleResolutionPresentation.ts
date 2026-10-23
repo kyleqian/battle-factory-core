@@ -281,11 +281,57 @@ export function battleResolutionOpensWithFocusPunchPrePass(events: readonly Batt
   return events.find((event) => event.sequence >= 0)?.provenance?.sourceLabel === FOCUS_PUNCH_SETUP_SCRIPT;
 }
 export type BattleStatusIconTiming = Readonly<{ minimumFrames: 1 }>;
+/**
+ * fnt201: BattleScript_FaintTarget / BattleScript_FaintAttacker (data/battle_scripts_1.s:2809-2823) run
+ * `playfaintcry` (1 row), `pause B_WAIT_TIME_LONG` (64 rows) and the `dofaintanimation` dispatch (1 row) before the
+ * sink starts; PlayerHandleFaintAnimation / OpponentHandleFaintAnimation only begin on that third instruction.
+ * ROM: anim row - cry row = 66 in every staged route and scene (tools/integration/fixtures/fnt201/rom-rows.json).
+ */
+export const FAINT_SCRIPT_LEAD_FRAMES = 66;
+
+/**
+ * fnt201: the script rows between the previous timed command and `playfaintcry` (BattleScript_FaintTarget / FaintAttacker is
+ * entered by Cmd_tryfaintmon / a gotoscript with no controller work of its own). The kernel numbers each executed row
+ * (`instructionExecution`): after an HP update (the `hp` command carries healthbarupdate's execution, datahpupdate is the next
+ * row) the cry is `cry - healthbarupdate - 1` rows after the controller idles (7 for a target KO: critmessage,
+ * waitmessage, resultmessage, waitmessage, seteffectwithchance, tryfaintmon...); after a print the ROM's idle run is the print's
+ * `waitmessage B_WAIT_TIME_LONG` hold (the message command's own `holdFrames`) plus `cry - print - 1 - hold` rows. Rows that
+ * commands emitted in between already present (the one-frame MoveEnd sprite-visibility receipts) are not counted twice.
+ */
+function faintScriptPreCryFrames(
+  events: readonly BattleKernelSemanticEvent[],
+  index: number,
+  commands: readonly BattleResolutionPresentationCommand[],
+): number {
+  let cry: BattleKernelSemanticEvent | undefined;
+  for (let at = index - 1; at >= 0 && cry === undefined; at -= 1) {
+    if (events[at]!.payload.kind === "play-faint-cry") cry = events[at];
+  }
+  const cryExecution = cry?.provenance?.instructionExecution;
+  if (cryExecution === undefined) return 0;
+  let anchorIndex = commands.length - 1;
+  while (anchorIndex >= 0 && commands[anchorIndex]!.type !== "hp" && commands[anchorIndex]!.type !== "message") {
+    if (commands[anchorIndex]!.type !== "sprite-visibility" && commands[anchorIndex]!.type !== "status") return 0;
+    anchorIndex -= 1;
+  }
+  const anchor = commands[anchorIndex];
+  if (anchor === undefined || (anchor.type !== "hp" && anchor.type !== "message")) return 0;
+  if (anchor.type === "message" && anchor.advance !== "automatic") return 0;
+  const anchorExecution = events.find((event) => event.sequence === anchor.eventSequence)?.provenance?.instructionExecution;
+  if (anchorExecution === undefined || cryExecution <= anchorExecution) return 0;
+  const after = anchor.type === "message"
+    ? cryExecution - anchorExecution - 1 - anchor.timing.holdFrames
+    : cryExecution - anchorExecution - 1;
+  let shown = 0;
+  for (let at = anchorIndex + 1; at < commands.length; at += 1) shown += commands[at]!.type === "sprite-visibility" ? 1 : 0;
+  return Math.max(0, after - shown);
+}
 export type BattleFaintTiming =
   | Readonly<{
       minimumFrames: number;
       sink: "opponent-tile-rows";
       steps: number;
+      leadFrames?: number;
       healthboxVanishFrame: number;
     }>
   | Readonly<{
@@ -293,6 +339,7 @@ export type BattleFaintTiming =
       sink: "player-pixel-rows";
       pixelsPerFrame: 5;
       spriteRows: number;
+      leadFrames?: number;
       healthboxVanishFrame: number;
     }>;
 export type BattleSwitchInTiming = Readonly<{ minimumFrames: number }>;
@@ -4600,7 +4647,9 @@ export function projectBattleResolutionCommands(
     if (payload.kind === "set-battler-status-data") {
       const battler = singlesBattler(payload.battler, "status change");
       pendingStatusMessageBattler = battler;
+      // fnt201: BattleScript_Faint* `cleareffectsonfaint` -> `printstring` is one instruction row in both scenes (no animation).
       const sceneOffStatus = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0
+        || event.provenance?.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT"
         ? sceneOffStatusFrames(events, index, pauseOpenerIndex, commands.length - pauseOpenerCommands)
         : sceneOnStatusFrames(events, index);
       commands.push(Object.freeze({
@@ -4723,25 +4772,32 @@ export function projectBattleResolutionCommands(
           `battle resolution faint animation for battler ${battler} has no zero-HP event`,
         );
       }
+      const leadFrames = FAINT_SCRIPT_LEAD_FRAMES + faintScriptPreCryFrames(events, index, commands);
       const timing: BattleFaintTiming = battler === 1
         ? (() => {
             const steps = 8 - Math.floor(fieldArt.opponent.coords.yOffset / 8);
             const healthboxVanishFrame = 2 * steps + 3;
             return Object.freeze({
-              minimumFrames: healthboxVanishFrame + 2,
+              minimumFrames: leadFrames + healthboxVanishFrame + 2,
               sink: "opponent-tile-rows" as const,
               steps,
+              leadFrames,
               healthboxVanishFrame,
             });
           })()
         : (() => {
             const spriteRows = fieldArt.player.pic.tileset.rows * 8;
-            const healthboxVanishFrame = Math.ceil(spriteRows / 5) + 5;
+            // PlayerHandleFaintAnimation: sSpeedY 5 per frame from the sprite's y (GetBattlerSpriteDefault_Y = 80 + the back pic
+            // y_offset, battle_anim_mons.c:112-170, :269-292) until FreeMonSpriteAfterFaintAnim sees y + y2 > DISPLAY_HEIGHT (160)
+            // and frees it with the healthbox: floor((80 - y_offset) / 5) + 1 callback frames, + 1 controller-completion row
+            // (ROM dofaintanimation busy rows: ABRA 15, PRIMEAPE 16; an offset-0 sprite gives the previous 18).
+            const healthboxVanishFrame = Math.floor((80 - fieldArt.player.coords.yOffset) / 5) + 2;
             return Object.freeze({
-              minimumFrames: healthboxVanishFrame + 2,
+              minimumFrames: leadFrames + healthboxVanishFrame + 2,
               sink: "player-pixel-rows" as const,
               pixelsPerFrame: 5 as const,
               spriteRows,
+              leadFrames,
               healthboxVanishFrame,
             });
           })();

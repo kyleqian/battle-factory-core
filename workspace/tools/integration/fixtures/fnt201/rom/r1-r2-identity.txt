@@ -1,0 +1,14 @@
+fnt201-ko-foe-s11.json-off-r1.json r1==r2 rows: yes rgb: 572fbf518651d687
+fnt201-ko-foe-s11.json-on-r1.json r1==r2 rows: yes rgb: 52a7015903726b77
+fnt201-ko-player-s11.json-off-r1.json r1==r2 rows: yes rgb: 174696057c9bae24
+fnt201-ko-player-s11.json-on-r1.json r1==r2 rows: yes rgb: 33afc6f9537b8834
+fnt201-selfdestruct-onix-s11.json-off-r1.json r1==r2 rows: yes rgb: e1bdefa5e9b58221
+fnt201-selfdestruct-onix-s11.json-on-r1.json r1==r2 rows: yes rgb: d9c424e364cfebe0
+fnt201-selfdestruct-survivor-s11.json-off-r1.json r1==r2 rows: yes rgb: e0a801e7316cc209
+fnt201-selfdestruct-survivor-s11.json-on-r1.json r1==r2 rows: yes rgb: 837d06ac0c814957
+fnt201-toxic-shedinja-s11.json-off-r1.json r1==r2 rows: yes rgb: 4becce6f5167eca9
+fnt201-toxic-shedinja-s11.json-on-r1.json r1==r2 rows: yes rgb: aac419d21cd69df5
+fnt201-sandstorm-shedinja-s11.json-off-r1.json r1==r2 rows: yes rgb: f62824d7bed658e7
+fnt201-sandstorm-shedinja-s11.json-on-r1.json r1==r2 rows: yes rgb: 5e56e84841769c3f
+fnt201-selfdestruct-both-s11.json-off-r1.json r1==r2 rows: yes rgb: a10b0a3a697c74fe
+fnt201-selfdestruct-both-s11.json-on-r1.json r1==r2 rows: yes rgb: aba7bd6734bc677d

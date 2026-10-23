@@ -61,6 +61,12 @@ export interface HealthboxContentParams {
    * zero while `hpFraction` still walks through its final positive values.
    */
   hpTargetFraction?: number;
+  /**
+   * The controller's Q_24_8 `currValue` / maxHP when it is fractional (max HP
+   * below the 48-pixel bar, i.e. SHEDINJA): `CalcBarFilledPixels` fills the
+   * bar from this, while `hpFraction` (the integer `ret`) stays the HP text.
+   */
+  hpBarFraction?: number;
   status: "none" | "sleep" | "poison" | "burn" | "freeze" | "paralysis";
 }
 
@@ -94,56 +100,78 @@ function assertBattleHealthBarProgram(
  * command-relative display value. Frame 0 is the controller's old value;
  * each subsequent frame applies one `MoveBattleBar` step. Real Factory HP
  * is normally at least the 48-pixel bar width and therefore moves one HP per
- * frame. The Q24.8 branch is retained for low-max-HP source completeness.
+ * frame. Below that (SHEDINJA, max HP 1) the source takes the Q_24_8 branch:
+ * `currValue` is a fixed-point number stepping by `Q_24_8(maxValue) / 48`
+ * per frame, `ret` (what the HP text prints) is its integer part (rounded up
+ * while moving left), and `Q_24_8_TO_INT` is an arithmetic shift (floor,
+ * also for the transient negative `currValue` of a draining bar).
  */
 export function battleHealthBarValueAtFrame(
   program: BattleHealthBarProgram,
   frame: number,
 ): number {
+  return battleHealthBarControllerAtFrame(program, frame).value;
+}
+
+/**
+ * The controller's `currValue` at `frame` in whole-HP units (fractional for
+ * the Q_24_8 branch): the value `CalcBarFilledPixels` turns into bar pixels,
+ * as opposed to `battleHealthBarValueAtFrame`'s `ret` shown as HP text.
+ */
+export function battleHealthBarFillValueAtFrame(
+  program: BattleHealthBarProgram,
+  frame: number,
+): number {
+  return battleHealthBarControllerAtFrame(program, frame).fill;
+}
+
+function battleHealthBarControllerAtFrame(
+  program: BattleHealthBarProgram,
+  frame: number,
+): { value: number; fill: number } {
   assertBattleHealthBarProgram(program);
   if (!Number.isSafeInteger(frame)) {
     throw new Error(`battleHealthBar: frame must be a safe integer, got ${frame}`);
   }
   const age = Math.max(0, frame);
-  if (program.from === program.to || age === 0) return program.from;
+  if (program.from === program.to || age === 0) {
+    return { value: program.from, fill: program.from };
+  }
 
   if (program.maxHp >= HP_BAR_TOTAL_PIXELS) {
     const direction = program.to > program.from ? 1 : -1;
     const stepped = program.from + direction * age;
-    return direction > 0
+    const value = direction > 0
       ? Math.min(program.to, stepped)
       : Math.max(program.to, stepped);
+    return { value, fill: value };
   }
 
-  // Q_24_8(maxValue) / 48, exactly as the source's low-max-value branch.
+  // toAdd = Q_24_8(maxValue) / scale, exactly as the source's low-max-value branch.
   const fixedStep = Math.floor((program.maxHp * 256) / HP_BAR_TOTAL_PIXELS);
+  const movingRight = program.to > program.from;
   let current = program.from * 256;
+  let ret = program.from;
   for (let tick = 0; tick < age; tick += 1) {
-    if (program.to > program.from) {
+    if (Math.floor(current / 256) === program.to && (current & 0xff) === 0) break;
+    if (movingRight) {
       current += fixedStep;
-      const displayed = Math.floor(current / 256);
-      if (displayed >= program.to) {
+      ret = Math.floor(current / 256);
+      if (ret >= program.to) {
         current = program.to * 256;
-        break;
+        ret = program.to;
       }
     } else {
       current -= fixedStep;
-      const truncated = Math.trunc(current / 256);
-      const displayed = truncated + (current % 256 === 0 ? 0 : 1);
-      if (displayed <= program.to) {
+      ret = Math.floor(current / 256);
+      if ((current & 0xff) > 0) ret += 1;
+      if (ret <= program.to) {
         current = program.to * 256;
-        break;
+        ret = program.to;
       }
     }
   }
-  if (program.to > program.from) {
-    return Math.min(program.to, Math.floor(current / 256));
-  }
-  const truncated = Math.trunc(current / 256);
-  return Math.max(
-    program.to,
-    truncated + (current % 256 === 0 ? 0 : 1),
-  );
+  return { value: ret, fill: current / 256 };
 }
 
 /** Number of `MoveBattleBar` steps needed to reach the semantic endpoint. */
@@ -593,7 +621,7 @@ export function composeOpponentHealthbox(assets: HealthboxAssets, params: Health
   // OAM-index z-order guess, which had it backwards for this pair).
   const hpBarTiles = hpBarLocalTiles(
     assets,
-    params.hpFraction,
+    params.hpBarFraction ?? params.hpFraction,
     params.status !== "none",
     params.hpTargetFraction,
   );
@@ -740,12 +768,12 @@ export interface PlayerHealthboxAssets extends PlayerHealthboxHpOverlayAssets {
  * it paints already matches the static harvest's own baked full-HP content,
  * oracle-confirmed this session at trace tick 2999/3095/3098).
  */
-export function composePlayerHealthboxHpOverlay(assets: PlayerHealthboxHpOverlayAssets, currentHp: number, maxHp: number): { width: number; height: number; pixels: (RgbColor | null)[] } {
+export function composePlayerHealthboxHpOverlay(assets: PlayerHealthboxHpOverlayAssets, currentHp: number, maxHp: number, barFraction: number = currentHp / maxHp, targetFraction: number = barFraction): { width: number; height: number; pixels: (RgbColor | null)[] } {
   const width = 103;
   const height = 36;
   const canvas: (RgbColor | null)[] = new Array(width * height).fill(null);
 
-  const { filledPixels, columns } = calcBarFilledPixels(currentHp / maxHp);
+  const { filledPixels, columns } = calcBarFilledPixels(barFraction, targetFraction);
   const band = pickHpBarBand(filledPixels);
   const fillSheet = band === "green" ? assets.hpbar : assets.hpbarAnim;
   const fillBase = band === "green" ? HP_BAR_GREEN_BASE : band === "yellow" ? HP_BAR_YELLOW_BASE : HP_BAR_RED_BASE;
@@ -832,7 +860,7 @@ export function composePlayerHealthbox(
 
   // `sHealthBar_Subsprites_Player`: two adjacent 32x8 pieces at canvas
   // x=32. The first two tiles are HP; the remaining six are the fill.
-  drawHpBarSubsprite(canvas, width, height, hpBarLocalTiles(assets, params.currentHp / params.maxHp), 32, 16);
+  drawHpBarSubsprite(canvas, width, height, hpBarLocalTiles(assets, params.hpBarFraction ?? params.currentHp / params.maxHp, false, params.hpTargetFraction), 32, 16);
   // Rental mons enter at their level's exact base experience, so the
   // 64-pixel EXP strip is eight copies of the sheet's 0px tile.
   drawHpBarSubsprite(
@@ -857,7 +885,7 @@ export function composePlayerHealthbox(
 
   // Reuse the already oracle-pinned player bar/digit overlay. Its historic
   // tight-crop coordinates begin one pixel right and two down from canvas.
-  const overlay = composePlayerHealthboxHpOverlay(assets, params.currentHp, params.maxHp);
+  const overlay = composePlayerHealthboxHpOverlay(assets, params.currentHp, params.maxHp, params.hpBarFraction, params.hpTargetFraction);
   for (let py = 0; py < overlay.height; py += 1) {
     for (let px = 0; px < overlay.width; px += 1) {
       const color = overlay.pixels[py * overlay.width + px];

@@ -1,0 +1,274 @@
+{
+ "fnt201-ko-foe-s11.json-off-r1.json": [
+  {
+   "prevGlyph": 148,
+   "script": "BattleScript_FaintTarget",
+   "prev": 232,
+   "execIdle": 233,
+   "cry": 240,
+   "pauseEnd": 305,
+   "pauseRows": 64,
+   "anim": 306,
+   "animRows": 17,
+   "oam": 309,
+   "scrFirst": 309,
+   "scrLast": 319,
+   "glyph": 326
+  }
+ ],
+ "fnt201-ko-foe-s11.json-on-r1.json": [
+  {
+   "prevGlyph": 346,
+   "script": "BattleScript_FaintTarget",
+   "prev": 430,
+   "execIdle": 431,
+   "cry": 438,
+   "pauseEnd": 503,
+   "pauseRows": 64,
+   "anim": 504,
+   "animRows": 17,
+   "oam": 507,
+   "scrFirst": 507,
+   "scrLast": 517,
+   "glyph": 524
+  }
+ ],
+ "fnt201-ko-player-s11.json-off-r1.json": [
+  {
+   "prevGlyph": 152,
+   "script": "BattleScript_FaintTarget",
+   "prev": 237,
+   "execIdle": 237,
+   "cry": 244,
+   "pauseEnd": 309,
+   "pauseRows": 64,
+   "anim": 310,
+   "animRows": 15,
+   "oam": 312,
+   "scrFirst": 312,
+   "scrLast": 320,
+   "glyph": 328
+  }
+ ],
+ "fnt201-ko-player-s11.json-on-r1.json": [
+  {
+   "prevGlyph": 350,
+   "script": "BattleScript_FaintTarget",
+   "prev": 435,
+   "execIdle": 435,
+   "cry": 442,
+   "pauseEnd": 507,
+   "pauseRows": 64,
+   "anim": 508,
+   "animRows": 15,
+   "oam": 510,
+   "scrFirst": 510,
+   "scrLast": 518,
+   "glyph": 526
+  }
+ ],
+ "fnt201-sandstorm-shedinja-s11.json-off-r1.json": [
+  {
+   "prevGlyph": 738,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 789,
+   "execIdle": 790,
+   "cry": 792,
+   "pauseEnd": 857,
+   "pauseRows": 64,
+   "anim": 858,
+   "animRows": 17,
+   "oam": 861,
+   "scrFirst": 861,
+   "scrLast": 871,
+   "glyph": 878
+  }
+ ],
+ "fnt201-sandstorm-shedinja-s11.json-on-r1.json": [
+  {
+   "prevGlyph": 1053,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 1104,
+   "execIdle": 1105,
+   "cry": 1107,
+   "pauseEnd": 1172,
+   "pauseRows": 64,
+   "anim": 1173,
+   "animRows": 17,
+   "oam": 1176,
+   "scrFirst": 1176,
+   "scrLast": 1186,
+   "glyph": 1193
+  }
+ ],
+ "fnt201-selfdestruct-both-s11.json-off-r1.json": [
+  {
+   "prevGlyph": 153,
+   "script": "BattleScript_FaintTarget",
+   "prev": 237,
+   "execIdle": 238,
+   "cry": 244,
+   "pauseEnd": 309,
+   "pauseRows": 64,
+   "anim": 310,
+   "animRows": 17,
+   "oam": 313,
+   "scrFirst": 313,
+   "scrLast": 323,
+   "glyph": 330
+  }
+ ],
+ "fnt201-selfdestruct-both-s11.json-on-r1.json": [
+  {
+   "prevGlyph": 249,
+   "script": "BattleScript_FaintTarget",
+   "prev": 333,
+   "execIdle": 334,
+   "cry": 340,
+   "pauseEnd": 405,
+   "pauseRows": 64,
+   "anim": 406,
+   "animRows": 17,
+   "oam": 409,
+   "scrFirst": 409,
+   "scrLast": 419,
+   "glyph": 426
+  }
+ ],
+ "fnt201-selfdestruct-onix-s11.json-off-r1.json": [
+  {
+   "prevGlyph": 207,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 231,
+   "execIdle": 231,
+   "cry": 302,
+   "pauseEnd": 367,
+   "pauseRows": 64,
+   "anim": 368,
+   "animRows": 16,
+   "oam": 370,
+   "scrFirst": 370,
+   "scrLast": 379,
+   "glyph": 387
+  }
+ ],
+ "fnt201-selfdestruct-onix-s11.json-on-r1.json": [
+  {
+   "prevGlyph": 303,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 327,
+   "execIdle": 327,
+   "cry": 398,
+   "pauseEnd": 463,
+   "pauseRows": 64,
+   "anim": 464,
+   "animRows": 16,
+   "oam": 466,
+   "scrFirst": 466,
+   "scrLast": 475,
+   "glyph": 483
+  }
+ ],
+ "fnt201-selfdestruct-survivor-s11.json-off-r1.json": [
+  {
+   "prevGlyph": 194,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 218,
+   "execIdle": 218,
+   "cry": 289,
+   "pauseEnd": 354,
+   "pauseRows": 64,
+   "anim": 355,
+   "animRows": 16,
+   "oam": 357,
+   "scrFirst": 357,
+   "scrLast": 366,
+   "glyph": 374
+  }
+ ],
+ "fnt201-selfdestruct-survivor-s11.json-on-r1.json": [
+  {
+   "prevGlyph": 290,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 314,
+   "execIdle": 314,
+   "cry": 385,
+   "pauseEnd": 450,
+   "pauseRows": 64,
+   "anim": 451,
+   "animRows": 16,
+   "oam": 453,
+   "scrFirst": 453,
+   "scrLast": 462,
+   "glyph": 470
+  }
+ ],
+ "fnt201-toxic-shedinja-s11.json-off-r1.json": [
+  {
+   "prevGlyph": 488,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 539,
+   "execIdle": 540,
+   "cry": 542,
+   "pauseEnd": 607,
+   "pauseRows": 64,
+   "anim": 608,
+   "animRows": 17,
+   "oam": 611,
+   "scrFirst": 611,
+   "scrLast": 621,
+   "glyph": 628
+  }
+ ],
+ "fnt201-toxic-shedinja-s11.json-on-r1.json": [
+  {
+   "prevGlyph": 830,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 881,
+   "execIdle": 882,
+   "cry": 884,
+   "pauseEnd": 949,
+   "pauseRows": 64,
+   "anim": 950,
+   "animRows": 17,
+   "oam": 953,
+   "scrFirst": 953,
+   "scrLast": 963,
+   "glyph": 970
+  }
+ ],
+ "sst200-memento-s11.json-off-r1.json": [
+  {
+   "prevGlyph": 302,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 333,
+   "execIdle": 333,
+   "cry": 398,
+   "pauseEnd": 463,
+   "pauseRows": 64,
+   "anim": 464,
+   "animRows": 16,
+   "oam": 466,
+   "scrFirst": 466,
+   "scrLast": 475,
+   "glyph": 483
+  }
+ ],
+ "sst200-memento-s11.json-on-r1.json": [
+  {
+   "prevGlyph": 450,
+   "script": "BattleScript_FaintAttacker",
+   "prev": 481,
+   "execIdle": 481,
+   "cry": 546,
+   "pauseEnd": 611,
+   "pauseRows": 64,
+   "anim": 612,
+   "animRows": 16,
+   "oam": 614,
+   "scrFirst": 614,
+   "scrLast": 623,
+   "glyph": 631
+  }
+ ]
+}

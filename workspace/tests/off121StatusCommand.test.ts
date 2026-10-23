@@ -29,6 +29,8 @@ type Status = {
   frames: number; framesFromUsed: number | null;
   /** sa125 SA3: the battler's status animation runs in the same execution (right before the print, or right after it). */
   animated: boolean;
+  /** fnt201: the BattleScript_Faint* `cleareffectsonfaint` status write (event provenance opcodeName B_SCR_OP_CLEAREFFECTSONFAINT). */
+  faintClear: boolean;
 };
 const FRAME_BUDGET = 200000;
 
@@ -62,6 +64,7 @@ function statusesOf(segment: any, out: Status[]) {
         ? cmds.slice(usedAt + 1, printAt).reduce((sum: number, c: any) => sum + c.timing.minimumFrames + (c.timing.holdFrames ?? 0), 0)
         : null,
       animated,
+      faintClear: ev[i].provenance.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT",
     });
   }
 }
@@ -217,8 +220,10 @@ describe("off121: the Scene OFF status command on production census routes", () 
   it("Scene ON: every status command stays 32 frames unless its status animation follows (sa125 SA3: delta(print) - delta(status))", () => {
     const on = [11, 12].flatMap((seed) => battleStatuses(seed, "on"));
     expect(on.length).toBeGreaterThan(5);
-    for (const s of on) expect(s.frames).toBe(s.animated ? s.deltaPrint : 32);
+    // rep203 (fnt201, docs/fnt201-faint-timing.md): the faint script's `cleareffectsonfaint` status is one instruction row in both scenes (pinned, not hidden).
+    for (const s of on) expect(s.frames).toBe(s.faintClear ? 1 : s.animated ? s.deltaPrint : 32);
+    expect(on.filter((s) => s.faintClear).length).toBeGreaterThan(0);
     expect(on.filter((s) => s.animated).length).toBeGreaterThan(0);
-    expect(on.filter((s) => !s.animated).length).toBeGreaterThan(0);
+    expect(on.filter((s) => !s.animated && !s.faintClear).length).toBeGreaterThan(0);
   });
 });

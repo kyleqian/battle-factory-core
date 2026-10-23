@@ -20,9 +20,9 @@ const STAT_ROWS: Record<string, readonly number[]> = {
   tickle: [6], memento: [6], superpower: [6], "silver-wind": [4, 4, 4, 4], "ancient-power": [4, 4, 4, 4],
   "calm-mind": [5], "dragon-dance": [5], "cosmic-power": [5], curse: [4, 4],
 };
-// Last stat print -> the foe's "used" print (the post-chain message); Memento's next print is "fainted!" (the faint script, not the stat rule); a foe-side chain ends the turn (no next print).
+// Last stat print -> the foe's "used" print (the post-chain message); Memento's next print is "fainted!" (the faint script, fnt201); a foe-side chain ends the turn (no next print).
 const ROM_NEXT: Record<string, number> = {
-  tickle: 101, superpower: 102, "silver-wind": 102, "ancient-power": 102, "calm-mind": 100, "dragon-dance": 98, "cosmic-power": 100, curse: 100,
+  tickle: 101, memento: 181, superpower: 102, "silver-wind": 102, "ancient-power": 102, "calm-mind": 100, "dragon-dance": 98, "cosmic-power": 100, curse: 100,
 };
 
 describe("sst200: second-stat rows against the ROM (both scenes)", () => {
@@ -37,9 +37,10 @@ describe("sst200: second-stat rows against the ROM (both scenes)", () => {
       const gaps = p.chain.slice(1).map((m, k) => start(m) - start(p.chain[k]!));
       expect(gaps).toEqual(romGaps);
       expect(p.chain.slice(1).map((m) => p.rows[m - 1]!.dur)).toEqual(STAT_ROWS[move]);
-      if (move === "memento" || rom.foe === true || rom.next === null) return;
+      if (rom.foe === true || rom.next === null) return;
       const next = p.rows[p.next]!;
-      expect(next.lines!.join(" ")).toMatch(/used/);
+      // fnt201: Memento's next print is "PRIMEAPE fainted!" (BattleScript_FaintAttacker); the faint script's cry / pause / dispatch rows now present, ROM 181 in both scenes.
+      expect(next.lines!.join(" ")).toMatch(move === "memento" ? /fainted/ : /used/);
       expect(start(p.next) - start(p.chain[p.chain.length - 1]!)).toBe(rom.next.F - rom.chain[rom.chain.length - 1]!.F);
       expect(rom.next.F - rom.chain[rom.chain.length - 1]!.F).toBe(ROM_NEXT[move]);
     });
