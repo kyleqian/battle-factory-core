@@ -9,12 +9,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { crc32, deflateSync, gunzipSync } from "node:zlib";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { battleResolutionCommandDuration, createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
-import { createLiveBattlerX2Host } from "../../src/engine/liveBattlerX2History.ts";
-import { createLiveSpriteOrderHost, beginLiveSpriteOrderTurn, liveSpriteOrderHostOrder } from "../../src/engine/liveSpriteOrderHost.ts";
-import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
-import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
-import { prepareResolutionPalette } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import { lsd186Production } from "./lsd186Production.ts";
+import { lsd198Route } from "./lsd198Route.ts";
 
 const arg = (n: string, d?: string) => process.argv.find((a) => a.startsWith(`--${n}=`))?.slice(n.length + 3) ?? d;
 const [runsPath, romName, romRgb, outPath] = process.argv.slice(2, 6) as [string, string, string, string];
@@ -25,25 +21,7 @@ const D = (JSON.parse(readFileSync(runsPath, "utf8")) as Record<string, { D: num
 const prod = lsd186Production({ scene: "on", seederSide: side, seed: Number(arg("seed")), onixMove: Number(arg("onixMove", "33")) });
 const commands = prod.commands as any[];
 
-const callStart = 0;
-const order = knownEntrySpriteOrderState("ordinary-factory");
-const orderHost = beginLiveSpriteOrderTurn(createLiveSpriteOrderHost(order), 1, true, false);
-let orchestratorState: any = {
-  config: { battleScene: "on" }, activeBattleCallStart: callStart,
-  liveMoveSpriteAllocatorHost: { battleCallStart: callStart, commandKey: "", host: createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove,
-    order: liveSpriteOrderHostOrder(orderHost), orderHost },
-  liveBattlerX2Host: { battleCallStart: callStart, commandKey: "", host: createLiveBattlerX2Host() },
-};
-const resolutionAt = (commandIndex: number, phaseElapsed: number) => ({
-  field: prod.field, resolutionId: { requestId: 1 }, segments: [{ field: prod.field, beforeRules: prod.beforeRules, afterRules: prod.afterRules, events: prod.events, commands }],
-  segmentIndex: 0, commandIndex, lifecycle: { phase: "presenting", phaseElapsed }, confirmHandoff: null, opponentTrainer: null, sourceDecision: { kind: "use-move" }, fadeTick: 0,
-});
-// The orchestrator threads one prepare per command (its first presented row; the rows after read the retained result).
-const prepared: any[] = [];
-for (let k = 0; k < commands.length; k++) {
-  orchestratorState = prepareResolutionPalette({ ...orchestratorState, battleResolutionPresentation: resolutionAt(k, 0) });
-  prepared.push(orchestratorState.battleResolutionPresentation);
-}
+const { prepared } = lsd198Route({ seederSide: side, seed: Number(arg("seed")), onixMove: Number(arg("onixMove", "33")) });
 const fb = new Uint8Array(W * H * 4);
 const render = (k: number, phaseElapsed: number) => {
   const state = { ...prepared[k], lifecycle: { phase: "presenting", phaseElapsed } };
