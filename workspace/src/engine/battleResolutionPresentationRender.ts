@@ -1880,8 +1880,9 @@ export function createBattleResolutionPresentationRenderView(
         age: state.lifecycle.phaseElapsed,
       });
     } else if (command.type === "faint") {
+      const faintElapsed = Math.max(0, state.lifecycle.phaseElapsed - (command.timing.leadFrames ?? 0));
       if (command.timing.sink === "opponent-tile-rows") {
-        const d = state.lifecycle.phaseElapsed - 1;
+        const d = faintElapsed - 1;
         const erased = d <= 0
           ? 0
           : Math.min(command.timing.steps, Math.ceil(d / 2));
@@ -1889,7 +1890,7 @@ export function createBattleResolutionPresentationRenderView(
           type: "faint",
           battler: command.battler,
           healthboxVisible:
-            state.lifecycle.phaseElapsed
+            faintElapsed
             < command.timing.healthboxVanishFrame,
           sink: Object.freeze({
             type: "opponent-tile-rows",
@@ -1902,13 +1903,13 @@ export function createBattleResolutionPresentationRenderView(
           type: "faint",
           battler: command.battler,
           healthboxVisible:
-            state.lifecycle.phaseElapsed
+            faintElapsed
             < command.timing.healthboxVanishFrame,
           sink: Object.freeze({
             type: "player-pixel-rows",
             skipPixelRows: Math.min(
               command.timing.spriteRows,
-              command.timing.pixelsPerFrame * state.lifecycle.phaseElapsed,
+              command.timing.pixelsPerFrame * faintElapsed,
             ),
           }),
         });

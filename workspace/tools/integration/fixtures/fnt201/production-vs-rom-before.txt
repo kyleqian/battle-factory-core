@@ -1,0 +1,16 @@
+ko-foe                 off  hp-end/idle  toSink 73/0/-73   toGlyph 20/20/0    total 93/20/-73
+ko-foe                 on   hp-end/idle  toSink 73/0/-73   toGlyph 20/51/31   total 93/51/-42
+ko-player              off  hp-end/idle  toSink 73/0/-73   toGlyph 18/21/3    total 91/21/-70
+ko-player              on   hp-end/idle  toSink 73/0/-73   toGlyph 18/52/34   total 91/52/-39
+selfdestruct-both      off  hp-end/idle  toSink 72/0/-72   toGlyph 20/20/0    total 92/20/-72
+selfdestruct-both      on   hp-end/idle  toSink 72/0/-72   toGlyph 20/51/31   total 92/51/-41
+selfdestruct-onix      off  print-glyph  toSink 161/90/-71 toGlyph 19/21/2    total 180/111/-69
+selfdestruct-onix      on   print-glyph  toSink 161/90/-71 toGlyph 19/52/33   total 180/142/-38
+selfdestruct-survivor  off  print-glyph  toSink 161/90/-71 toGlyph 19/21/2    total 180/111/-69
+selfdestruct-survivor  on   print-glyph  toSink 161/90/-71 toGlyph 19/52/33   total 180/142/-38
+memento                off  print-glyph  toSink 162/95/-67 toGlyph 19/21/2    total 181/116/-65
+memento                on   print-glyph  toSink 162/95/-67 toGlyph 19/52/33   total 181/147/-34
+sandstorm-shedinja     off  hp-end/idle  toSink 68/0/-68   toGlyph 20/20/0    total 88/20/-68
+sandstorm-shedinja     on   hp-end/idle  toSink 68/0/-68   toGlyph 20/51/31   total 88/51/-37
+toxic-shedinja         off  hp-end/idle  toSink 68/0/-68   toGlyph 20/20/0    total 88/20/-68
+toxic-shedinja         on   hp-end/idle  toSink 68/0/-68   toGlyph 20/51/31   total 88/51/-37
