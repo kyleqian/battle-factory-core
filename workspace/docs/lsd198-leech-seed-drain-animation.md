@@ -64,3 +64,60 @@ The 1,091 px foe-pose residual reported in lsd194 for the drain was an artefact 
 ## 5. Not run
 
 Per the supervisor's instruction (heavy gates running on the host) the full `npm test`, `npm run build`, `npm run typecheck` and any census were not run; production changes normally need them. Out of scope: Scene OFF, other general animations, Ingrain / Wish heals, Double Team.
+
+## lsd199 -- the residual row: the drain's script is task-hosted (fixed, 0 residual both orientations)
+
+Branch `worker/integration-20261023-010407`. Presentation only, Scene ON only: no kernel event, RNG draw, HP value, command or timing total changes.
+
+### Mechanism (source)
+
+- Ordinary moves run their anim script from the battler controller (`battle_controller_{player,opponent}.c` `*DoMoveAnimation` case 2: `gAnimScriptCallback()`),
+  i.e. in `BattleMainCB1`, before `BattleMainCB2` (`AnimateSprites; BuildOamBuffer; ...; RunTasks`). General animations run it from
+  `Task_ClearBitWhenBattleTableAnimDone` (`battle_gfx_sfx_util.c`, created by `TryHandleLaunchBattleTableAnimation` with priority 10), i.e. inside `RunTasks`.
+- `Cmd_createvisualtask` (`battle_anim.c`) does `CreateTask(AnimTask_ShakeMon, 5); taskFunc(taskId)`. `AnimTask_ShakeMon` (`battle_anim_mon_movement.c`) writes
+  x2 = 0, y2 = 5 and its immediate first `AnimTask_ShakeMon_Step` only decrements the delay counter, so the creation state is x2 0 / y2 +5.
+- `InsertTask` (`task.c`) puts the priority-5 task ahead of every priority-10 task. Controller-hosted: the task is new before `RunTasks`, so it steps once more in the
+  same pass (y2 back to 0) before `Task_UpdateMonBg` (`battle_anim.c`, priority 10) copies `x2/y2` into the monbg layer's BG1 scroll; the +5 never shows.
+  Task-hosted (the drain): the task is inserted ahead of the running `Task_ClearBitWhenBattleTableAnimDone`, so `RunTasks` does not reach it this pass, but
+  `Task_UpdateMonBg` (later in the list) does, and copies the creation state (x2 0, y2 +5). From the next pass both hosts hold the same shake state.
+- The monbg target is a BG copy, which is why no OBJ entry for the target exists in `gMain.oamBuffer` while monbg is up (`oy` = null in the probe).
+
+### RAM evidence (direct mGBA, `tools/integration/lsd199ShakeProbe.py`, receipts `tools/integration/fixtures/lsd199/ram/`)
+
+End-of-frame target `gSprites[gBattlerSpriteIds[target]].{x2,y2}` and the `RunTasks` list while Move_ABSORB's priority-5 ShakeMon is alive
+(`AnimTask_ShakeMon_Step` = 0x080d5221, `Task_UpdateMonBg` = 0x080a47d9, `Task_ClearBitWhenBattleTableAnimDone` = 0x0805da49, static symbols located between their map neighbours):
+
+| case | first ShakeMon frame | y2 per frame | task list on the creation frame |
+| --- | ---: | --- | --- |
+| ordinary Absorb, player attacker (`mechanic-absorb-player-lombre-opponent-onix`) | 243 | 0 0 5 5 0 0 5 5 | ShakeMon p5, UpdateMonBg p10 |
+| ordinary Absorb, opponent attacker | 243 | 0 0 5 5 0 0 5 5 | ShakeMon p5, UpdateMonBg p10 |
+| drain, player seeds (`mechanic-leech-seed-player-...`) | 516 | **5** 0 0 5 5 0 0 5 5 | ShakeMon p5, table task p10, UpdateMonBg p10 |
+| drain, opponent seeds | 511 | **5** 0 0 5 5 0 0 5 5 | ShakeMon p5, table task p10, UpdateMonBg p10 |
+
+x2 is 0 on every listed row (the idle x2 before it). Hypothesis (a) is refuted: the ordinary Absorb has no such row (its prep9 window covers body age 20 and the RAM shows
+y2 already 0); (b) is right in kind (ShakeMon's creation write) and (c) is not a VBlank/OAM latch but the task order above.
+
+### Fix
+
+- `absorbAtAge(..., taskHostedScript = false)` (`src/animation/absorb.ts`): with the flag the ShakeMon creation pass is displayed at source age 19 (y2 +5, x2 0);
+  the task-hosted script frame is one source age earlier than the controller-hosted one (its sprite effects reach OAM one pass later), so from age 20 the state is
+  identical. New `AbsorbState.targetPoseOwned` (`age >= 20`, or the creation pass) replaces the renderer's `absorbState.age < 21` idle-x2 rule (`battleScene.ts`;
+  identical for the ordinary body: displayed age = source age + 1).
+- Plumbing: `BattleMoveAnimationRequest.taskHostedScript?: true` (presentation-only, like `rolloutCounter`), set by `leechSeedDrainAbsorbEffect`; `liveMoveAnimation.ts`
+  case 71 forwards it to `SceneOnAbsorbConfig.taskHostedScript`; `sceneOnAbsorbView` passes it to `absorbAtAge`. No frame-number special case: the flag names the host.
+
+### Proof (tested tree = the lsd199 commits on this branch)
+
+- Drain dense (`lsd198DrainDense.ts`, fresh ROM runs via `lsd194Probes.sh` r1/r2; ROM rows byte-identical to the lsd198 receipts, RGB `d69482ec68c026df` / `b8ededf10e05bde4`
+  as before): player seeds 446 / 446 exact, opponent seeds 437 / 437 exact (animation span 218 / 218 both, box / opp / ply / other all 0). Run against r1 and r2: the
+  output JSONs are byte-identical (`p` `ab0f8d967f6cb15d`, `o` `d0b9f4b377d07076`). Receipts `fixtures/lsd199/dense/{p,o}-on-r1.json`.
+- Ordinary Absorb: `tools/integration/lsd199AbsorbRenderIdentity.ts` renders the live MOVE_ABSORB adapter at every age -2..196, both orientations, LOMBRE and VENUSAUR
+  attackers; base `556d1057d` and lsd199 give identical digests (`all` `47219a5f2ca88264`, `fixtures/lsd199/ordinary-absorb-render-identity.txt`), so the prep9
+  dense zero-residual proof still describes the ordinary body unchanged. A new ordinary dense window from the activation edge was not run (pixels provably unchanged).
+- Tests (each alone, `timeout 300`, `POKEBENCH_VITEST_MAX_WORKERS=1`, green): lsd199DrainShakeCreation (10, new), lsd198LeechSeedDrainAnimation (15; the receipt block is now
+  titled as the pre-fix receipt), lsd194PrintFloorAndDrain (12), battleResolutionPresentation (39), animation/animationBoundaryRatchet (3), animation/absorb (7),
+  animation/livePrep9MoveAdapters (12), elevatedRendererPostBody (7), animation/factoryAnimationInventory (8), liveMoveAnimationPalette (14), leechSeed (5),
+  leechSeedSourceCheckpoint (4), leechSeedEvidenceCheckpoint (3), seedProjectileLeechSeedTrack (4), greenSparkleMoonlightTrack (4), ingrainSource (1),
+  dreamEater / gigaDrain / megaDrain SourceCheckpoint (4 / 4 / 4) and Evidence (5 / 4 / 5), waterPulseSourceCheckpoint (2), spriteOrderGigaDrainGeometry (10),
+  spriteOrderDreamEaterGeometry (4), recover (5). `git diff --check` clean.
+- Not run (supervisor instruction): full `npm test`, `npm run build`, `npm run typecheck`, census. Production files changed, so those gates remain owed.
