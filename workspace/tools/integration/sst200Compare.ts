@@ -26,9 +26,9 @@ export function chainOf(rows: readonly Row[]) {
   return { chain, next };
 }
 
-export function productionFor(move: string, scene: "on" | "off", wanted: number) {
+export function productionFor(move: string, scene: "on" | "off", wanted: number, from = 1) {
   const m = SST200_MOVES[move]!;
-  for (let seed = 1; seed <= 800; seed += 1) {
+  for (let seed = from; seed <= 800; seed += 1) {
     let rows: Row[];
     try { rows = lsd194Production({ scene, seed, player: MONS.PRIMEAPE, opponent: MONS.ONIX, pMove: m.id, oMove: 33, pSelf: m.self }).rows as Row[]; } catch { continue; }
     const c = chainOf(rows);
