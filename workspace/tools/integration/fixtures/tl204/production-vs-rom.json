@@ -1,0 +1,735 @@
+[
+ {
+  "move": "calm-mind",
+  "productionSeed": 1,
+  "firstPrint": [
+   "PRIMEAPE’s SP. ATK",
+   "rose!"
+  ],
+  "tailRows": 7,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 220,
+   "production": 210,
+   "residual": -10
+  },
+  "printToNext": {
+   "rom": 100,
+   "production": 100,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    220,
+    92
+   ],
+   "production": [
+    210,
+    92
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 25,
+    "production": 23
+   },
+   "preBody": {
+    "rom": 2,
+    "production": 0
+   },
+   "bodyToPrint": {
+    "rom": 193,
+    "production": 187
+   },
+   "romSegments": [
+    "used-print:EffectCalmMind+2:25",
+    "script:EffectCalmMind+3:2",
+    "window:CalmMindDoMoveAnim+1:111",
+    "script:CalmMindDoMoveAnim+2:2",
+    "window:CalmMindDoMoveAnim+12:77",
+    "script:CalmMindDoMoveAnim+18:3"
+   ],
+   "productionCommands": [
+    "message:23",
+    "move-animation:107",
+    "stats-change:78",
+    "stat:2",
+    "message:87"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 9,
+   "productionStatRows": 2,
+   "scriptResidual": -7,
+   "romWindowRows": 188,
+   "productionBodyRows": 185,
+   "bodyResidual": -3,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 6,
+   "residualAfterHypothesis": -4
+  },
+  "romRelease": {
+   "releaseRow": 258,
+   "printRunStart": 261
+  }
+ },
+ {
+  "move": "charm",
+  "productionSeed": 1,
+  "firstPrint": [
+   "Foe ONIX’s ATTACK",
+   "harshly fell!"
+  ],
+  "tailRows": 6,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 218,
+   "production": 212,
+   "residual": -6
+  },
+  "printToNext": {
+   "rom": 108,
+   "production": 108,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    218
+   ],
+   "production": [
+    212
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 21,
+    "production": 19
+   },
+   "preBody": {
+    "rom": 3,
+    "production": 2
+   },
+   "bodyToPrint": {
+    "rom": 194,
+    "production": 191
+   },
+   "romSegments": [
+    "used-print:EffectStatDown+19:21",
+    "script:EffectStatDown+20:3",
+    "window:StatDownDoAnim+1:101",
+    "script:StatDownDoAnim+2:2",
+    "window:StatDownPrintString+0:91"
+   ],
+   "productionCommands": [
+    "message:19",
+    "stat:2",
+    "move-animation:100",
+    "stats-change:91",
+    "message:94"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 7,
+   "productionStatRows": 2,
+   "scriptResidual": -5,
+   "romWindowRows": 192,
+   "productionBodyRows": 191,
+   "bodyResidual": -1,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": -1
+  },
+  "romRelease": {
+   "releaseRow": 263,
+   "printRunStart": 263
+  }
+ },
+ {
+  "move": "double-team",
+  "productionSeed": 1,
+  "firstPrint": [
+   "PRIMEAPE’s evasiveness",
+   "rose!"
+  ],
+  "tailRows": 6,
+  "universalRows": {
+   "pre": 0,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 271,
+   "production": 266,
+   "residual": -5
+  },
+  "printToNext": {
+   "rom": 104,
+   "production": 104,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    271
+   ],
+   "production": [
+    266
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 27,
+    "production": 25
+   },
+   "preBody": {
+    "rom": 3,
+    "production": 2
+   },
+   "bodyToPrint": {
+    "rom": 241,
+    "production": 239
+   },
+   "romSegments": [
+    "used-print:EffectStatUpAfterAtkCanceler+1:27",
+    "script:EffectStatUpAfterAtkCanceler+2:3",
+    "window:StatUpAttackAnim+1:162",
+    "script:StatUpDoAnim+0:2",
+    "window:StatUpPrintString+0:77"
+   ],
+   "productionCommands": [
+    "message:25",
+    "stat:2",
+    "move-animation:239",
+    "message:91"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 7,
+   "productionStatRows": 2,
+   "scriptResidual": -5,
+   "romWindowRows": 239,
+   "productionBodyRows": 239,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": 0
+  },
+  "romRelease": {
+   "releaseRow": 313,
+   "printRunStart": 313
+  }
+ },
+ {
+  "move": "fake-tears",
+  "productionSeed": 1,
+  "firstPrint": [
+   "Foe ONIX’s SP. DEF",
+   "harshly fell!"
+  ],
+  "tailRows": 6,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 209,
+   "production": 208,
+   "residual": -1
+  },
+  "printToNext": {
+   "rom": 109,
+   "production": 109,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    209
+   ],
+   "production": [
+    208
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 26,
+    "production": 24
+   },
+   "preBody": {
+    "rom": 3,
+    "production": 2
+   },
+   "bodyToPrint": {
+    "rom": 180,
+    "production": 182
+   },
+   "romSegments": [
+    "used-print:EffectStatDown+19:26",
+    "script:EffectStatDown+20:3",
+    "window:StatDownDoAnim+1:87",
+    "script:StatDownDoAnim+2:2",
+    "window:StatDownPrintString+0:91"
+   ],
+   "productionCommands": [
+    "message:24",
+    "stat:2",
+    "move-animation:91",
+    "stats-change:91",
+    "message:95"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 7,
+   "productionStatRows": 2,
+   "scriptResidual": -5,
+   "romWindowRows": 178,
+   "productionBodyRows": 182,
+   "bodyResidual": 4,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": 4
+  },
+  "romRelease": {
+   "releaseRow": 254,
+   "printRunStart": 254
+  }
+ },
+ {
+  "move": "hail",
+  "productionSeed": 1,
+  "firstPrint": [
+   "It started to hail!"
+  ],
+  "tailRows": 7,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 185,
+   "production": 179,
+   "residual": -6
+  },
+  "printToNext": {
+   "rom": 105,
+   "production": 105,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    185
+   ],
+   "production": [
+    179
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 20,
+    "production": 18
+   },
+   "preBody": {
+    "rom": 3,
+    "production": 0
+   },
+   "bodyToPrint": {
+    "rom": 162,
+    "production": 161
+   },
+   "romSegments": [
+    "used-print:EffectHail+2:20",
+    "script:EffectHail+3:3",
+    "window:MoveWeatherChange+1:161",
+    "script:MoveWeatherChange+2:1"
+   ],
+   "productionCommands": [
+    "message:18",
+    "move-animation:161",
+    "message:83"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 6,
+   "productionStatRows": 0,
+   "scriptResidual": -6,
+   "romWindowRows": 161,
+   "productionBodyRows": 161,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 6,
+   "residualAfterHypothesis": 0
+  },
+  "romRelease": {
+   "releaseRow": 225,
+   "printRunStart": 226
+  }
+ },
+ {
+  "move": "leech-seed",
+  "productionSeed": 1,
+  "firstPrint": [
+   "Foe ONIX was seeded!"
+  ],
+  "tailRows": 40,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 207,
+   "production": 168,
+   "residual": -39
+  },
+  "printToNext": {
+   "rom": 98,
+   "production": 98,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    207
+   ],
+   "production": [
+    168
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 57,
+    "production": 24
+   },
+   "preBody": {
+    "rom": 5,
+    "production": 0
+   },
+   "bodyToPrint": {
+    "rom": 145,
+    "production": 144
+   },
+   "romSegments": [
+    "used-print:EffectLeechSeed+2:57",
+    "script:EffectLeechSeed+5:5",
+    "window:DoLeechSeed+2:144",
+    "script:DoLeechSeed+3:1"
+   ],
+   "productionCommands": [
+    "message:24",
+    "move-animation:144",
+    "message:84"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 39,
+   "productionStatRows": 0,
+   "scriptResidual": -39,
+   "romWindowRows": 144,
+   "productionBodyRows": 144,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 39,
+   "residualAfterHypothesis": 0
+  },
+  "romRelease": {
+   "releaseRow": 247,
+   "printRunStart": 248
+  }
+ },
+ {
+  "move": "light-screen",
+  "productionSeed": 1,
+  "firstPrint": [
+   "Ally’s LIGHT SCREEN",
+   "raised SP. DEF!"
+  ],
+  "tailRows": 7,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 121,
+   "production": 117,
+   "residual": -4
+  },
+  "printToNext": {
+   "rom": 111,
+   "production": 111,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    121
+   ],
+   "production": [
+    117
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 28,
+    "production": 26
+   },
+   "preBody": {
+    "rom": 3,
+    "production": 0
+   },
+   "bodyToPrint": {
+    "rom": 90,
+    "production": 91
+   },
+   "romSegments": [
+    "used-print:EffectLightScreen+2:28",
+    "script:EffectLightScreen+3:3",
+    "window:PrintReflectLightScreenSafeguardString+1:89",
+    "script:PrintReflectLightScreenSafeguardString+2:1"
+   ],
+   "productionCommands": [
+    "message:26",
+    "move-animation:91",
+    "message:98"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 6,
+   "productionStatRows": 0,
+   "scriptResidual": -6,
+   "romWindowRows": 89,
+   "productionBodyRows": 91,
+   "bodyResidual": 2,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 6,
+   "residualAfterHypothesis": 2
+  },
+  "romRelease": {
+   "releaseRow": 161,
+   "printRunStart": 162
+  }
+ },
+ {
+  "move": "rain-dance",
+  "productionSeed": 1,
+  "firstPrint": [
+   "It started to rain!"
+  ],
+  "tailRows": 6,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 219,
+   "production": 214,
+   "residual": -5
+  },
+  "printToNext": {
+   "rom": 105,
+   "production": 105,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    219
+   ],
+   "production": [
+    214
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 26,
+    "production": 24
+   },
+   "preBody": {
+    "rom": 2,
+    "production": 0
+   },
+   "bodyToPrint": {
+    "rom": 191,
+    "production": 190
+   },
+   "romSegments": [
+    "used-print:EffectRainDance+2:26",
+    "script:EffectRainDance+3:2",
+    "window:MoveWeatherChange+1:190",
+    "script:MoveWeatherChange+2:1"
+   ],
+   "productionCommands": [
+    "message:24",
+    "move-animation:190",
+    "message:83"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 5,
+   "productionStatRows": 0,
+   "scriptResidual": -5,
+   "romWindowRows": 190,
+   "productionBodyRows": 190,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": 0
+  },
+  "romRelease": {
+   "releaseRow": 259,
+   "printRunStart": 260
+  }
+ },
+ {
+  "move": "scary-face",
+  "productionSeed": 1,
+  "firstPrint": [
+   "Foe ONIX’s SPEED",
+   "harshly fell!"
+  ],
+  "tailRows": 6,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 333,
+   "production": 314,
+   "residual": -19
+  },
+  "printToNext": {
+   "rom": 107,
+   "production": 107,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    333
+   ],
+   "production": [
+    314
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 26,
+    "production": 24
+   },
+   "preBody": {
+    "rom": 3,
+    "production": 2
+   },
+   "bodyToPrint": {
+    "rom": 304,
+    "production": 288
+   },
+   "romSegments": [
+    "used-print:EffectStatDown+19:26",
+    "script:EffectStatDown+20:3",
+    "window:StatDownDoAnim+1:211",
+    "script:StatDownDoAnim+2:2",
+    "window:StatDownPrintString+0:91"
+   ],
+   "productionCommands": [
+    "message:24",
+    "stat:2",
+    "move-animation:197",
+    "stats-change:91",
+    "message:93"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 7,
+   "productionStatRows": 2,
+   "scriptResidual": -5,
+   "romWindowRows": 302,
+   "productionBodyRows": 288,
+   "bodyResidual": -14,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 5,
+   "residualAfterHypothesis": -14
+  },
+  "romRelease": {
+   "releaseRow": 378,
+   "printRunStart": 378
+  }
+ },
+ {
+  "move": "sunny-day",
+  "productionSeed": 1,
+  "firstPrint": [
+   "The sunlight got bright!"
+  ],
+  "tailRows": 7,
+  "universalRows": {
+   "pre": 3,
+   "post": 0
+  },
+  "tailFrames": 0,
+  "usedToPrint": {
+   "rom": 190,
+   "production": 184,
+   "residual": -6
+  },
+  "printToNext": {
+   "rom": 110,
+   "production": 110,
+   "residual": 0
+  },
+  "chainGaps": {
+   "rom": [
+    190
+   ],
+   "production": [
+    184
+   ]
+  },
+  "decomposition": {
+   "usedPrint": {
+    "rom": 25,
+    "production": 23
+   },
+   "preBody": {
+    "rom": 3,
+    "production": 0
+   },
+   "bodyToPrint": {
+    "rom": 162,
+    "production": 161
+   },
+   "romSegments": [
+    "used-print:EffectSunnyDay+2:25",
+    "script:EffectSunnyDay+3:3",
+    "window:MoveWeatherChange+1:161",
+    "script:MoveWeatherChange+2:1"
+   ],
+   "productionCommands": [
+    "message:23",
+    "move-animation:161",
+    "message:88"
+   ]
+  },
+  "accounting": {
+   "romScriptRows": 6,
+   "productionStatRows": 0,
+   "scriptResidual": -6,
+   "romWindowRows": 161,
+   "productionBodyRows": 161,
+   "bodyResidual": 0,
+   "usedResidual": 0,
+   "hypothesisTailFrames": 6,
+   "residualAfterHypothesis": 0
+  },
+  "romRelease": {
+   "releaseRow": 230,
+   "printRunStart": 231
+  }
+ }
+]
