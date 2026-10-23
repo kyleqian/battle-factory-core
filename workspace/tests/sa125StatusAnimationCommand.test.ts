@@ -262,6 +262,7 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
 
   it("SA3: a Scene ON status command followed by its battler's status animation lasts the Scene OFF frames; the rest keep 32", () => {
     const table = new Map<string, Set<string>>();
+    let faintClears = 0;
     for (const seed of SEEDS) {
       const on = battleSegments(seed, "on").flatMap((s) => s.commands.map((c: any, i: number) => ({ c, next: s.commands[i + 1], events: s.events })));
       const off = battleSegments(seed, "off").flatMap((s) => s.commands);
@@ -274,18 +275,23 @@ describe("sa125: production routes (census seeds, Scene ON vs OFF, same gameplay
         const following = x.events.slice(at + 1).filter((e: any) => e.payload.kind !== "set-battler-pp-data" && e.payload.kind !== "play-se");
         const animated = (following[0]?.payload.kind === "status-animation" && following[0].payload.battler === x.c.battler)
           || (following[0]?.payload.kind === "message" && following[1]?.payload.kind === "status-animation" && following[1].payload.battler === x.c.battler);
-        const want = animated ? offStatus[k].timing.minimumFrames : 32;
+        // rep203 (fnt201, docs/fnt201-faint-timing.md): the faint script's `cleareffectsonfaint` status is one instruction row in both scenes (pinned, not hidden).
+        const faintClear = x.events[at].provenance?.opcodeName === "B_SCR_OP_CLEAREFFECTSONFAINT";
+        const want = faintClear ? 1 : animated ? offStatus[k].timing.minimumFrames : 32;
         expect(x.c.timing.minimumFrames, `seed ${seed} status ${k} ${print}`).toBe(want);
+        if (faintClear) faintClears += 1;
         const key = `${print}|${animated}`;
         table.set(key, (table.get(key) ?? new Set()).add(`32->${x.c.timing.minimumFrames}`));
       });
     }
+    expect(faintClears).toBeGreaterThan(0);
     const t = Object.fromEntries([...table].map(([k, v]) => [k, [...v].sort()]));
     expect(t["STRINGID_PKMNWASPARALYZED|true"]).toEqual(["32->2"]);
     expect(t["STRINGID_PKMNFELLASLEEP|true"]).toEqual(["32->2"]);
     expect(t["STRINGID_PKMNBADLYPOISONED|true"]).toEqual(["32->2"]);
     expect(t["STRINGID_PKMNFASTASLEEP|true"]).toEqual(["32->1"]);
-    for (const k of ["STRINGID_TARGETFAINTED|false", "STRINGID_PKMNWOKEUP|false", "STRINGID_PKMNWENTTOSLEEP|false"]) expect(t[k], k).toEqual(["32->32"]);
+    expect(t["STRINGID_TARGETFAINTED|false"]).toEqual(["32->1"]); // rep203: fnt201's cleareffectsonfaint row (was 32->32)
+    for (const k of ["STRINGID_PKMNWOKEUP|false", "STRINGID_PKMNWENTTOSLEEP|false"]) expect(t[k], k).toEqual(["32->32"]);
   });
 });
 
