@@ -102,3 +102,23 @@ supervisor's full suite / build / typecheck is still required for this commit.
 
 Open: 1-HP healthbars (Shedinja) still have no converging `battleHealthBar` program (`source program did not converge 1->0/1`); unrelated to the
 rule above and outside the Factory rental set, left unchanged (the tool's `lenientHp` option only keeps the timeline comparable).
+
+## rep203 re-pins (union c7d8eab9a = master a6f9cbdb1 + fnt201 420b14c21 + hpb202)
+
+Every pin below was re-measured on the master, fnt201-only (`git archive 420b14c21`) and union trees; hpb202 contributed 0 to every one of them
+(fnt201-only and union numbers are identical). Battle / turn / end state unchanged in every soak pin. No surprise pin: all movement is the faint lead.
+
+- `randomRoundSoak.test.ts` (`tools/integration/lsd194SoakPins.ts`): seven-wins seed 21 37,467 -> 39,117 (renderCalls 2,674 -> 2,782); full seed 0
+  17,125 -> 17,485, seed 1 26,817 -> 27,295; vanilla seed 0 8,895 -> 9,140, seed 1 8,920 -> 9,190 (all fnt201).
+- `sc106StatsChangeCommand.test.ts` (`tools/integration/rep203FaintCount.ts`): seed 0 slot 2 Acid Armor route total 6,701 -> 6,771 (+70; 2 faint
+  commands, both after the anchor, so the anchor and the +90 are unchanged); seed 6 slot 0 Intimidate anchor 2,831 -> 2,867 (+36; 1 faint before
+  it; the +76 is unchanged); seed 13 slot 3 Tickle route total 9,627 -> 9,707 (+80; 2 faints after the anchor). All fnt201.
+- `sa125StatusAnimationCommand.test.ts` SA3 and `off121StatusCommand.test.ts` Scene ON status: the `cleareffectsonfaint` status (event provenance
+  opcodeName `B_SCR_OP_CLEAREFFECTSONFAINT`) is asserted to be 1 frame (sa125's `STRINGID_TARGETFAINTED|false` table row 32->32 -> 32->1) and must
+  occur; every other status keeps 32 (or the animated delta).
+- `sgl138SeGateLive.test.ts` / `fixtures/sgl138-live-receipt.json` (regenerated with `sgl138Live.ts`; diff = only the 8 `battles/<seed>-<scene>/frames`
+  totals, every banner / hit / print anchor and gate row unchanged): seed 0 on 22,560 -> 22,748, off 18,164 -> 18,506; seed 9 on 15,446 -> 15,592,
+  off 12,812 -> 13,078; seed 19 on 41,662 -> 41,854, off 33,080 -> 33,428; seed 808 on 20,490 -> 20,686, off 14,072 -> 14,422 (all fnt201).
+
+Each file passes alone (`POKEBENCH_VITEST_MAX_WORKERS=2`), plus `fnt201FaintTiming` (18), `hpb202HealthBarPrograms` (14), `sst200SecondStatRows` (27),
+`battleResolutionPresentation` (39), `lsd194PrintFloorAndDrain` (12). The full suite / build / typecheck / census were not run (supervisor).
