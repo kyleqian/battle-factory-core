@@ -12,7 +12,7 @@ import speciesStats from "../../src/data/gen/species-stats.json" with { type: "j
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
-import { iu120Extra } from "../helpers/iu120Rows.ts";
+import { iu120Extra, ont193ScriptTail } from "../helpers/iu120Rows.ts";
 
 const request = (moveId: number, attacker: 0 | 1, extra: Partial<BattleMoveAnimationRequest> = {}): BattleMoveAnimationRequest => ({
   moveId, attacker, target: attacker === 0 ? 1 : 0, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0, ...extra,
@@ -143,7 +143,7 @@ describe("live prep11 move adapters", () => {
     const bodies = on.animations.filter(a => a.moveId === r.id && a.attacker === 0);
     // Petal Dance locks in for several turns: every body is complete (one input, 2-3 bodies).
     expect(bodies.length).toBeGreaterThan(0);
-    expect(bodies.map(b => b.ages.length)).toEqual(bodies.map(() => DURATION[r.id]! + iu120Extra(r.id)));
+    expect(bodies.map(b => b.ages.length)).toEqual(bodies.map(() => DURATION[r.id]! + iu120Extra(r.id) + ont193ScriptTail(r.id)));
     for (const body of bodies) {
       expect(body.ages).toEqual(Array.from({ length: body.ages.length }, (_, age) => age));
       expect(body.adapterActive.every(Boolean)).toBe(true);
