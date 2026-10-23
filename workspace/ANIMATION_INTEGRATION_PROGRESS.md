@@ -1,5 +1,25 @@
 # Animation integration progress
 
+## 2026-10-23 (later) — CAX31: lsd198 / lsd199 drain animation, sst200, fnt201 + hpb202, tl204 folded
+
+- **lsd198 + lsd199 (INTEGRATION, merged `a6f9cbdb1`):** Scene ON LEECH_SEED_DRAIN draws Move_ABSORB's body through the live ABSORB
+  adapter (seed owner = attacker, seeded = target, body age = command age - 21). lsd199 (Opus) named the last row: the general-animation
+  script is task-hosted (Task_ClearBitWhenBattleTableAnimDone, priority 10), so AnimTask_ShakeMon's creation state (y2 +5) reaches
+  Task_UpdateMonBg one pass early (InsertTask order); RAM probes both orientations. Supervisor: fresh `lsd198Probes.sh` r1 == r2, dense
+  446 / 446 and 437 / 437 rows 0 px (animation span 218 / 218 each); ordinary Absorb render digests unchanged at every age.
+  Union gates: typecheck (after a `findLast` fix), census both scenes identical, differential 641 / 641, suite 13,983 / 0 (one lost
+  vitest fork, its file rerun 9 / 9), build.
+- **sst200 (evidence, merged `af6d84b40`):** second-stat rows vs ROM, 26 twice-fresh cases both scenes residual 0 (Tickle, Memento,
+  Superpower, Silver Wind, AncientPower, Calm Mind, Dragon Dance, Cosmic Power, Curse, foe sides). Found the faint gap below.
+- **fnt201 + hpb202 + rep203 (merged `eaf8d6ef7`):** fnt201: every faint route lacked BattleScript_FaintTarget / FaintAttacker's
+  `playfaintcry` + `pause B_WAIT_TIME_LONG` + `dofaintanimation` rows (66) and the pre-cry rows; player slide length from the back-pic
+  y_offset; the `cleareffectsonfaint` status 1 row in both scenes (was 32 in ON). 16 / 16 route x scene cases 0 (ordinary KO both
+  sides, Self-Destruct, Memento, Sandstorm / Toxic). hpb202: `CalcNewBarValue`'s Q24.8 path ported (maxHp < 48): a SHEDINJA (rental
+  set 21) KO threw `did not converge 1->0/1` in ordinary play; fixed, Shedinja KO 0 px both scenes / sides; the census "invalid HP
+  program" throws were a harness stale-field bug (fixed). rep203 re-pinned 12 attributed frame pins. Gates: docs/fnt201-faint-timing.md.
+- **tl204 (evidence, merged `f5d66d068`):** Scene ON zero-tail live bodies vs ROM, 10 moves: the next print is early -1 .. -39
+  (missing battle-script rows after the body); proposed source rule; tl205 implementing it (unfolded at this writing).
+
 ## 2026-10-23 — CAX31 session: lsd194 + lsd196 + rst197 folded (final-code gates by the supervisor)
 
 - **Fold (`worker/integration-20261022-230803`, tested `8bee336e6` / src tree `9f76866e2`, re-pin `b1797e9ed`, gates doc `62d5f0d6c`):**
@@ -13,7 +33,7 @@
   pins moved by lsd196 through the jittered press cooldown, attributed on four trees and re-pinned; file 64 / 64); build 0.
   Master's commits since the branch base were docs only, so the union src / tests equal the tested tree. Details:
   docs/lsd194-print-floor-and-drain.md sections 9-10. Logs `.integration/validation/sv-20261022/rst197/`.
-- **Open:** Scene ON drain animation body (lsd198 in flight); Tickle / Memento / Superpower / Silver Wind second-stat rows lack own ROM rows.
+- **Open (then):** drain animation body and second-stat ROM rows -- both closed later the same day (entry above).
 
 ## 2026-10-15 — CAX31 recovery session: trn178 + snd179 + fpc180 + trn181 + snd182 + sub183 + pfr185 folded
 

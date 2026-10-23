@@ -46,9 +46,10 @@ ON no-hit live body; tail = Δ(next receipt) − Δ(attack) + 1 + (release row �
 docs/ont193-scene-on-tails.md; Protect / Detect / Sand-Attack start Δ 0, Bulk Up −1 shared with OFF; 41 further moves moved by the
 source-derived tail without their own ROM rows, 24 carry a 0-frame tail pending a ROM scenario). Rest's Scene OFF pause and Bulk Up's second stat: LANDED by rst197 / lsd196 (2026-10-23; Rest P from the status icon's
 execution, 15 / 15 bodies -3 -> 0; a `stat` between two prints presents its instruction-execution rows; Dig / Dynamic Punch +4 / +1 were
-the print floor). Still open: Double Team (−5, owns its banner); Tickle / Memento / Superpower / Silver Wind second-stat rows lack their
-own ROM rows; Toxic's upstream -19 (status body before the message) and the named residuals (Snore +10, Toxic -2, Curse +2 / -4 (re-measure after the floor drop), msg175's Rest-route
-Tackle HP anchor -3 ON / +18 OFF, Roar OFF +17, Baton Pass OFF -66); switches / faints / end of turn /
+the print floor). Second-stat rows ROM-proven by sst200 (26 cases, 0). Still open: the Scene ON zero-tail live bodies measured by tl204 (2026-10-23,
+docs/tl204-zero-tail-rows.md; next print early: Double Team -5, Rain Dance -5, Sunny Day / Hail -6, Leech Seed -39, Light Screen -4, Charm
+-6, Fake Tears -1, Calm Mind -10, Scary Face -19; tl205 implementing the script-row tail on a branch); Toxic's upstream -19 (status body before the message) and the named residuals (Snore +10, Toxic -2, Curse +2 / -4 (re-measure after the floor drop), msg175's Rest-route
+Tackle HP anchor -3 ON / +18 OFF, Roar OFF +17, Baton Pass OFF -66); faints LANDED by fnt201 (2026-10-23, docs/fnt201-faint-timing.md: the faint script's cry + pause + dispatch rows, 16 / 16 route x scene cases 0); switches / end of turn /
 pre-move prints after the anchor stay unmeasured; (b) sprite-visibility next after Roar /
 Whirlwind / opponent Baton Pass (141 bodies): needs #146's Scene OFF forced switch-out first (the ROM removes the sprite in one row);
 (c) nothing next (35, player Baton Pass: the party menu opens; unstaged); (d) charge turn (chg161, docs/chg161-charge-turn-print.md: the
@@ -94,8 +95,8 @@ OFF bodies read x2 {0,0} because there is no front animation in OFF (`pokemon.c:
 - **Substitute turn timing:** FIXED by sub183 (2026-10-15, docs/sub183-substitute-turn-timing.md): 4 script-lead rows, 2 post rows,
   HP -> print tail 3; HP start, doll, next print and next used print exact (4 dense windows, 291 / 291 rows 0 px, both scenes).
   Leech Seed turn-end drain timing + the 24-frame print floor: LANDED by lsd194 / rst197 (folded 2026-10-23,
-  docs/lsd194-print-floor-and-drain.md; drain rows residual 0 in 6 / 6 ROM cases, prints L + 64). Open: the Scene ON drain animation
-  BODY is undrawn on master (lsd198 in flight: Move_ABSORB body, 1 residual row per orientation at body age 20).
+  docs/lsd194-print-floor-and-drain.md; drain rows residual 0 in 6 / 6 ROM cases, prints L + 64). The Scene ON drain animation body is
+  LIVE (lsd198 / lsd199, 2026-10-23: Move_ABSORB's body, task-hosted ShakeMon creation row; dense 446 / 446 + 437 / 437 rows 0 px).
 - **Transform:** body + transformed field LIVE in both scenes since trf174 (2026-10-14, docs/trf174-transform-live.md; 8 / 8 dense
   windows 109 / 109 rows 0 px, field 140 / 140, supervisor-reproduced fresh). Open: declined Transform bodies (shiny DITTO, SPINDA
   target, CASTFORM, a doll on either side); every OTHER live body declines while a battler is shown transformed; Transform is not

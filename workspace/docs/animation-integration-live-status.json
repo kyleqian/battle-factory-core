@@ -3688,6 +3688,17 @@
         "the live Double Team window ends 9 rows before the ROM's following glyph (Scene ON; docs/sc106-stats-change-command.md section 2)"
       ]
     },
+    "LEECH_SEED_DRAIN": {
+      "animation": "General_LeechSeedDrain (B_ANIM_LEECH_SEED_DRAIN: AnimTask_GetBattlersFromArg; delay 0; goto Move_ABSORB)",
+      "kind": "general animation (not a move body)",
+      "state": "live",
+      "scenes": [
+        "on"
+      ],
+      "command": "general-animation LEECH_SEED_DRAIN (animated) at the turn-end drain: 208 held rows (lsd194); Move_ABSORB's body through the live ABSORB adapter at command age - 21, seed owner = attacker, seeded = target, task-hosted ShakeMon creation row (lsd199); Scene OFF plays no animation",
+      "evidence": "docs/lsd198-leech-seed-drain-animation.md: dense full-framebuffer vs fresh ROM, both orientations, twice fresh: 446 / 446 and 437 / 437 rows 0 px (animation span 218 / 218 each)",
+      "landed": "2026-10-23 (merged a6f9cbdb1)"
+    },
     "STATUS_ANIMATION": {
       "animation": "B_ANIM_STATUS_* (Cmd_statusanimation / status2animation / chosenstatusanimation -> InitAndLaunchChosenStatusAnimation)",
       "kind": "general animation (not a move body)",

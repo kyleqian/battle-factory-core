@@ -5,19 +5,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-23 — CAX31 session (supervisor, Opus 5.5): lsd194 + lsd196 + rst197 folded; lsd198 drain animation in verification
+## 2026-10-23 — CAX31 session (supervisor, Opus 5.5): lsd194/196 + rst197, lsd198/199, sst200, fnt201 + hpb202, tl204 folded
 
-- **State:** master = fold of `worker/integration-20261022-230803` (tested `8bee336e6`, src tree `9f76866e2`). Presentation timing only;
-  kernel digests identical in the census. No open DEFERRED items.
-- **Folded:** the saved lsd194 / lsd196 branch plus rst197 (Rest's Scene OFF pause from the status icon's execution; off148 proxy removed)
-  and a typecheck fix (`BattleStatTiming` literal 2 -> number). Supervisor-owned final gates on the exact code: typecheck, census both
-  scenes fully attributed (961 second-stat rows + 451 OFF Rest pauses), differential 641 / 641, full suite 13,965 / 2 failed -> both
-  randomRoundSoak pins attributed to lsd196 and re-pinned (64 / 64), build. See ANIMATION_INTEGRATION_PROGRESS.md 2026-10-23.
-- **In flight:** lsd198 (`worker/integration-20261023-000807`, tip `556d1057d`): Scene ON LEECH_SEED_DRAIN drawn as Move_ABSORB's body
-  (seed owner = attacker, seeded = target, body age = command age - 21); dense ROM 445 / 446 and 436 / 437 rows, one target-sprite row at
-  body age 20 unexplained. lsd199 (Opus) is diagnosing that row on top of lsd198.
-- **Next:** verify lsd199 / lsd198, then their gates (typecheck, ON census, suite, build) and fold; then Double Team (-5), ROM rows for
-  Tickle / Memento / Superpower second stats, non-MAGBY forced send-in visuals (#146).
+- **State:** master `f5d66d068`+ (production src tree `d8fda5802`, tested on `f96e8e805`). Presentation only; kernel digests identical
+  in every census. One playable crash fixed (Shedinja KO health bar). No open DEFERRED items.
+- **Folded (each with supervisor final-code gates on the exact code):** (1) the saved lsd194 / lsd196 branch + rst197 (print floor drop,
+  Leech Seed drain rows, second-stat rows, Rest's OFF pause from the status icon; 15 / 15 Rest bodies -3 -> 0). (2) lsd198 + lsd199:
+  Scene ON drain draws Move_ABSORB's body, 446 / 446 + 437 / 437 rows 0 px (supervisor reran fresh). (3) sst200: 26 second-stat ROM
+  cases 0. (4) fnt201: every faint lacked the faint script's cry + 64-row pause + dispatch rows (-62 .. -76 per faint); now 16 / 16
+  route x scene cases 0. (5) hpb202: `CalcNewBarValue` Q24.8 port; a SHEDINJA KO threw in ordinary play, now 0 px vs ROM; the census
+  "invalid HP program" throws were a harness bug. (6) tl204 evidence (zero-tail bodies, below). Details: ANIMATION_INTEGRATION_PROGRESS.md.
+- **Gates on the final src:** typecheck; census 0..999 both scenes fully attributed (faint + second-stat + Rest classes); differential
+  641 / 641; full suite 1,690 files / 14,051 tests, 0 failed; build; soak vanilla 0:20 **20 / 20 OK**; varied-RNG first-round winning
+  carry 0 / 14 / 28 and winning-swap carry 0 **100 / 100** each. The 0:60 soak profiles were not run (~7.5 h each here). Logs
+  `.integration/validation/sv-20261022/`.
+- **Next:** (1) tl205 (`worker/integration-20261023-060455`, unfolded unless a later entry says so): Scene ON script tail for the tl204
+  zero-tail moves (Double Team / Rain Dance / Sunny Day / Hail / Leech Seed -> 0); needs supervisor review that the rule is source-derived
+  (not a move list), then census, suite, build. (2) tl204's body-window remainders (Scary Face -14, Calm Mind -4, Fake Tears +4, Light
+  Screen +2, Charm -1) and the other 14 zero-tail moves. (3) The Explosion-breaks-Substitute faint (+135 lead, unmeasured). (4)
+  msg175 residuals (Toxic, Roar, Baton Pass, Snore), non-MAGBY forced send-in visuals (#146).
+- **Notes:** worker refs kept (merged): `worker/integration-20261022-230803`, `-20261023-{000807,010407,014655,021547,034106,045023,052730}`,
+  `worker/union-fnt201-hpb202`. Worktrees removed after their evidence was committed or copied. No push.
 ---
 
 ## 2026-10-16 / 17 — CAX31 session wind-down (supervisor, Opus 5.5): pfr192 / ont193 folded; lsd194 unfolded (triaged lsd195)
@@ -85,17 +93,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   only).
 
 ---
-
-## 2026-10-15 — repair headless supervisor waiting; prepare fresh 10-hour recovery
-
-- **State:** master game code remains `0c8e67acc` / production `3937ecad0`; no game edits in this repair. Prior supervisor exited
-  while waiting for notifications; trn178 and snd179 finished on worker branches, not merged. Both refs/logs/briefs backed up locally.
-- **Did:** `run-claude-supervisor.py` owns the original deadline, waits on scoped worker PIDs and resumes the same Claude session
-  after a premature turn exit. Notification waiting disabled; clean completion requires an explicit stop record. Errors/account
-  limits do not retry; deadline/cancellation terminate owned model/worker groups. Launcher profile checks 62 / 62; controller
-  lifecycle cases 11 / 11 locally and on ARM; live Opus stop + same-session resume smoke passed. No full game-suite rerun for tooling only.
-- **Next:** start the authorized fresh 10-hour CAX31 run. Verify/fold `worker/integration-20261015-041827` (`4a8a25431`, trn178,
-  Scene OFF transition; worker 13,918 tests / 0 failed + build) and `worker/side-20261015-041923` (`84b46c795`, snd179 evidence only).
-  Then Focus Punch corrections, Scene ON transition, Substitute HP timing and remaining Factory finish-up. Mac stays stopped.
-- **Notes:** `docs/cax31-session-handoff.md` records recovery, acceptance and the stop protocol. Prior evidence remains on CAX31;
-  copied refs/logs/briefs are in `.integration/validation/cax31-session-20261015/`. No timers or automatic push.
