@@ -123,9 +123,10 @@ export type BattleHpTiming = Readonly<{ minimumFrames: 28 | 0; tailFrames?: numb
  * 283->285, 375->377, 468->470, 559->561, 652->654). The visible post-print
  * hold is a `message` property in source (`waitmessage` follows
  * `printfromtable`, not `statbuffchange`), not a `stat` one -- see
- * `BattleMessageTiming`.
+ * `BattleMessageTiming`. Usually 2; a `stat` between two prints presents the
+ * ROM's single-row instructions up to the next print (lsd196).
  */
-export type BattleStatTiming = Readonly<{ minimumFrames: 2 }>;
+export type BattleStatTiming = Readonly<{ minimumFrames: number }>;
 /**
  * 32 frames; Scene OFF: the frames to the next print (off121, `sceneOffStatusFrames`); Scene ON, when a status animation of
  * the same execution follows: the same frames (sa125 SA3, `sceneOnStatusFrames`).
