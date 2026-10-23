@@ -1,8 +1,8 @@
 /**
- * tl204 (docs/tl204-zero-tail-rows.md): the ROM rows (Scene ON, direct mGBA, twice fresh) around the live body of ten no-hit moves whose ont193 script tail is 0 frames,
- * pinned side by side with production's current command timeline. The residuals are DATA: this test documents the gap, it does not hide it. When the proposed rule
- * lands (tail frames = scriptTailRows - 1, Double Team's masked pre not gating it) the production columns and `tailFrames` move and these pins are re-pinned.
- * Hermetic: reads the committed ROM receipt (tools/integration/fixtures/tl204/rom-rows.json) and runs the real kernel + projection in-process.
+ * tl204 (docs/tl204-zero-tail-rows.md) / tl205: the ROM rows (Scene ON, direct mGBA, twice fresh) around the live body of ten no-hit moves whose ont193 script tail was
+ * 0 frames, pinned side by side with production's command timeline. tl205 landed the rule (tail frames = scriptTailRows - 1: trail -1, post 0; a masked pre no longer gates a
+ * measured trail): Double Team, Rain Dance, Sunny Day, Hail and Leech Seed are at residual 0; the other five keep their body-window-length remainders (data, not hidden).
+ * Hermetic: reads the committed ROM receipt (tools/integration/fixtures/tl204/rom-rows.json) and runs the real kernel + projection in-process. The ROM rows are expectations only.
  */
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -16,18 +16,18 @@ const byMove = new Map(Object.values(rom).map((r) => [r.move as string, r]));
 // print -> next = that print (chain end) to the foe's "used TACKLE!". Production columns are what the code produces today.
 const PINS: Record<string, {
   romUsedToPrint: number; productionUsedToPrint: number; romPrintToNext: number; productionPrintToNext: number; tailRows: number; tailFrames: number; pre: number;
-  romScriptRows: number; productionStatRows: number; romWindowRows: number; productionBodyRows: number; residualAfterHypothesis: number;
+  romScriptRows: number; productionStatRows: number; romWindowRows: number; productionBodyRows: number; residualAfterHypothesis: number; residualBefore: number;
 }> = {
-  "double-team": { romUsedToPrint: 271, productionUsedToPrint: 266, romPrintToNext: 104, productionPrintToNext: 104, tailRows: 6, tailFrames: 0, pre: 0, romScriptRows: 7, productionStatRows: 2, romWindowRows: 239, productionBodyRows: 239, residualAfterHypothesis: 0 },
-  "rain-dance": { romUsedToPrint: 219, productionUsedToPrint: 214, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 6, tailFrames: 0, pre: 3, romScriptRows: 5, productionStatRows: 0, romWindowRows: 190, productionBodyRows: 190, residualAfterHypothesis: 0 },
-  "scary-face": { romUsedToPrint: 333, productionUsedToPrint: 314, romPrintToNext: 107, productionPrintToNext: 107, tailRows: 6, tailFrames: 0, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 302, productionBodyRows: 288, residualAfterHypothesis: -14 },
-  "light-screen": { romUsedToPrint: 121, productionUsedToPrint: 117, romPrintToNext: 111, productionPrintToNext: 111, tailRows: 7, tailFrames: 0, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 89, productionBodyRows: 91, residualAfterHypothesis: 2 },
-  "calm-mind": { romUsedToPrint: 220, productionUsedToPrint: 210, romPrintToNext: 100, productionPrintToNext: 100, tailRows: 7, tailFrames: 0, pre: 3, romScriptRows: 9, productionStatRows: 2, romWindowRows: 188, productionBodyRows: 185, residualAfterHypothesis: -4 },
-  "sunny-day": { romUsedToPrint: 190, productionUsedToPrint: 184, romPrintToNext: 110, productionPrintToNext: 110, tailRows: 7, tailFrames: 0, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0 },
-  "charm": { romUsedToPrint: 218, productionUsedToPrint: 212, romPrintToNext: 108, productionPrintToNext: 108, tailRows: 6, tailFrames: 0, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 192, productionBodyRows: 191, residualAfterHypothesis: -1 },
-  "fake-tears": { romUsedToPrint: 209, productionUsedToPrint: 208, romPrintToNext: 109, productionPrintToNext: 109, tailRows: 6, tailFrames: 0, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 178, productionBodyRows: 182, residualAfterHypothesis: 4 },
-  "leech-seed": { romUsedToPrint: 207, productionUsedToPrint: 168, romPrintToNext: 98, productionPrintToNext: 98, tailRows: 40, tailFrames: 0, pre: 3, romScriptRows: 39, productionStatRows: 0, romWindowRows: 144, productionBodyRows: 144, residualAfterHypothesis: 0 },
-  "hail": { romUsedToPrint: 185, productionUsedToPrint: 179, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 7, tailFrames: 0, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0 },
+  "double-team": { romUsedToPrint: 271, productionUsedToPrint: 271, romPrintToNext: 104, productionPrintToNext: 104, tailRows: 6, tailFrames: 5, pre: 0, romScriptRows: 7, productionStatRows: 2, romWindowRows: 239, productionBodyRows: 239, residualAfterHypothesis: 0, residualBefore: -5 },
+  "rain-dance": { romUsedToPrint: 219, productionUsedToPrint: 219, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 6, tailFrames: 5, pre: 3, romScriptRows: 5, productionStatRows: 0, romWindowRows: 190, productionBodyRows: 190, residualAfterHypothesis: 0, residualBefore: -5 },
+  "scary-face": { romUsedToPrint: 333, productionUsedToPrint: 319, romPrintToNext: 107, productionPrintToNext: 107, tailRows: 6, tailFrames: 5, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 302, productionBodyRows: 288, residualAfterHypothesis: -14, residualBefore: -19 },
+  "light-screen": { romUsedToPrint: 121, productionUsedToPrint: 123, romPrintToNext: 111, productionPrintToNext: 111, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 89, productionBodyRows: 91, residualAfterHypothesis: 2, residualBefore: -4 },
+  "calm-mind": { romUsedToPrint: 220, productionUsedToPrint: 216, romPrintToNext: 100, productionPrintToNext: 100, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 9, productionStatRows: 2, romWindowRows: 188, productionBodyRows: 185, residualAfterHypothesis: -4, residualBefore: -10 },
+  "sunny-day": { romUsedToPrint: 190, productionUsedToPrint: 190, romPrintToNext: 110, productionPrintToNext: 110, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
+  "charm": { romUsedToPrint: 218, productionUsedToPrint: 217, romPrintToNext: 108, productionPrintToNext: 108, tailRows: 6, tailFrames: 5, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 192, productionBodyRows: 191, residualAfterHypothesis: -1, residualBefore: -6 },
+  "fake-tears": { romUsedToPrint: 209, productionUsedToPrint: 208, romPrintToNext: 109, productionPrintToNext: 109, tailRows: 6, tailFrames: 0, pre: 3, romScriptRows: 7, productionStatRows: 2, romWindowRows: 178, productionBodyRows: 182, residualAfterHypothesis: 4, residualBefore: -1 },
+  "leech-seed": { romUsedToPrint: 207, productionUsedToPrint: 207, romPrintToNext: 98, productionPrintToNext: 98, tailRows: 40, tailFrames: 39, pre: 3, romScriptRows: 39, productionStatRows: 0, romWindowRows: 144, productionBodyRows: 144, residualAfterHypothesis: 0, residualBefore: -39 },
+  "hail": { romUsedToPrint: 185, productionUsedToPrint: 185, romPrintToNext: 105, productionPrintToNext: 105, tailRows: 7, tailFrames: 6, pre: 3, romScriptRows: 6, productionStatRows: 0, romWindowRows: 161, productionBodyRows: 161, residualAfterHypothesis: 0, residualBefore: -6 },
 };
 
 describe("tl204: Scene ON zero-tail no-hit moves, ROM rows vs production (residuals are data)", () => {
@@ -60,14 +60,15 @@ describe("tl204: Scene ON zero-tail no-hit moves, ROM rows vs production (residu
     });
   });
 
-  it("every residual is production early (negative) and is exactly script rows + body rows (+ used-print rows, none)", () => {
+  it("residual = script residual + body residual (+ used-print rows, none); before tl205 every residual was production early", () => {
     for (const [move, pin] of Object.entries(PINS)) {
       const { row } = compareCase(byMove.get(move)!);
       const a = row.accounting;
       expect(a.usedResidual).toBe(0);
       expect(row.usedToPrint.residual).toBe(a.scriptResidual + a.bodyResidual);
-      expect(row.usedToPrint.residual).toBeLessThan(0);
-      expect(pin.productionUsedToPrint).toBeLessThan(pin.romUsedToPrint);
+      expect(pin.residualBefore).toBeLessThan(0);
+      expect(row.usedToPrint.residual).toBe(pin.productionUsedToPrint - pin.romUsedToPrint);
+      expect(a.productionTailFrames).toBe(pin.tailFrames);
     }
   });
 
@@ -75,18 +76,24 @@ describe("tl204: Scene ON zero-tail no-hit moves, ROM rows vs production (residu
     for (const move of Object.keys(PINS)) expect(compareCase(byMove.get(move)!).row.printToNext.residual).toBe(0);
   });
 
-  it("the proposed rule (tail frames = scriptTailRows - 1) would clear the script residual: only body-length residuals remain", () => {
-    for (const [move, pin] of Object.entries(PINS)) {
-      const { row } = compareCase(byMove.get(move)!);
-      const a = row.accounting;
-      // exact body windows (Double Team, Rain Dance, Sunny Day, Hail, Leech Seed): the script residual is the whole residual and the hypothesis lands on 0
-      if (a.bodyResidual === 0) expect([move, a.residualAfterHypothesis]).toEqual([move, 0]);
-      else expect(a.residualAfterHypothesis).toBe(a.bodyResidual + (a.scriptResidual + Math.max(0, pin.tailRows - 1)));
-    }
-    // the five exact-window moves carry scriptTailRows - 1 = the full script deficit
+  it("tl205: the five exact-window moves are at residual 0 (tail frames = scriptTailRows - 1); the others are no worse than before; Fake Tears is held out", () => {
     for (const move of ["double-team", "rain-dance", "sunny-day", "hail", "leech-seed"]) {
       const { row } = compareCase(byMove.get(move)!);
-      expect(-row.accounting.scriptResidual).toBe(row.tailRows! - 1);
+      expect([move, row.usedToPrint.residual]).toEqual([move, 0]);
+      expect(row.tailFrames).toBe(row.tailRows! - 1);
+      expect(-row.accounting.scriptResidual + row.tailFrames!).toBe(row.tailRows! - 1);
+    }
+    for (const [move, pin] of Object.entries(PINS)) {
+      const { row } = compareCase(byMove.get(move)!);
+      expect([move, Math.abs(row.usedToPrint.residual)]).toEqual([move, Math.abs(pin.productionUsedToPrint - pin.romUsedToPrint)]);
+      expect(Math.abs(row.usedToPrint.residual)).toBeLessThanOrEqual(Math.abs(pin.residualBefore));
+      // Fake Tears is held out of the trail table (rule would give +4, worse than its -1): its tail stays 0 and the hypothesis column is the would-be value
+      if (move !== "fake-tears") expect(row.accounting.residualAfterHypothesis).toBe(row.usedToPrint.residual);
+    }
+    expect(compareCase(byMove.get("fake-tears")!).row.accounting.residualAfterHypothesis).toBe(4);
+    // the remaining non-zero residuals are the body-window lengths (data/battle_anim_scripts.s), not tail rules
+    for (const [move, residual] of [["light-screen", 2], ["charm", -1], ["fake-tears", -1], ["calm-mind", -4], ["scary-face", -14]] as const) {
+      expect([move, compareCase(byMove.get(move)!).row.usedToPrint.residual]).toEqual([move, residual]);
     }
   });
 });

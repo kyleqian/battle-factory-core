@@ -37,9 +37,10 @@ describe("ont193 A: Scene ON live no-hit bodies carry the source-derived script 
     expect(evaluate("off108-bulk-up-ply-primeape-onix", "off").anchorStartDelta).toBe(0);
   });
 
-  it("the Double Team window (masked pre), Rest (synthetic route) and Scene OFF keep their pre-ont193 values", () => {
-    expect(body("PRIMEAPE", 104, "ONIX", "on")).toMatchObject({ frames: 239, tailFrames: 0 });
-    expect(evaluate("off108-double-team-ply-primeape-onix", "on")).toMatchObject({ anchorStartDelta: -5, anchorEndDelta: -5 });
+  // tl205 re-pin (docs/tl204-zero-tail-rows.md): Double Team (masked pre, trail -1 measured by tl204) now carries its 5-row script tail: 239 -> 244 rows, anchors -5 -> 0.
+  it("the Double Team window (tl205: 239 + 5 tail rows), Rest (synthetic route) and Scene OFF keep their pre-ont193 values", () => {
+    expect(body("PRIMEAPE", 104, "ONIX", "on")).toMatchObject({ frames: 244, tailFrames: 5 });
+    expect(evaluate("off108-double-team-ply-primeape-onix", "on")).toMatchObject({ anchorStartDelta: 0, anchorEndDelta: 0 });
     expect(evaluate("off108-rest-ply-snorlax-onix", "on")).toMatchObject({ anchorStartDelta: -22, anchorEndDelta: -3 });
     for (const [species, move, target, frames] of [["PRIMEAPE", 339, "ONIX", 40], ["PRIMEAPE", 182, "ONIX", 39], ["PRIMEAPE", 197, "ONIX", 39], ["PRIMEAPE", 28, "SNORLAX", 39]] as const) {
       const b = body(species, move, target, "off");

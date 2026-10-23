@@ -87,6 +87,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + snd145FaintReplacement(202) - 16 * CHG161_SEED0_ON_CHARGE_TURNS
       - 99 - 1 // pfr192: the one player faint replacement (readyAt 212 vs the fixed 311) + 1 frame of dismissal parity (odd 99).
       - 17 // msg175: the route's used prints last their printable length (no 24-frame floor).
+      + 5 // tl205: the route's one Double Team presents its 5-row script tail (tl204-measured trail -1).
       + 79 + 1 // trn181: the route's six Scene ON action-transition pauses (79 frames) + 1 frame of dismissal parity (odd 79).
       + 3 * 3 + 4 - 1 // ont193: the route's script tails (Acid Armor 151 x3 = 3 each, the opponent's 219 = 4) - 1 frame of dismissal parity (odd 13).
       + 70); // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the route's 2 faint commands, both after the anchor (6701 -> 6771; hpb202 adds 0;
@@ -193,8 +194,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(dt.every((x) => x.statsChange === null && x.before?.type === "move-animation")).toBe(true);
     // tmr136 (ISSUES #166): the window holds 9 more rows (rel 69..77), so the message's first glyph lands on rel 78 as on the ROM
     // (the box changes on window age 239 in 12 / 12 dense direct-mGBA windows, tools/integration/fixtures/tmr136-live-receipt.json): + 9.
-    expect(dt[0]!.following).toMatchObject({ type: "message", frame: 844 /* msg175: 846 -> 844, shorter used prints before it */, text: "YANMA’s evasiveness / rose!" });
-    expect(dt[0]!.following!.frame - dt[0]!.before!.frame).toBe(239);
+    expect(dt[0]!.following).toMatchObject({ type: "message", frame: 849 /* msg175: 846 -> 844, shorter used prints before it; tl205: + 5 script-tail rows */, text: "YANMA’s evasiveness / rose!" });
+    expect(dt[0]!.following!.frame - dt[0]!.before!.frame).toBe(244 /* tl205: 239 window + 5 tail rows */);
     // The opponent's Acid Armor (arg 40) in the same route does present: 3 x 90.
     expect(route.anchors.filter((x) => x.statsChange !== null).map((x) => x.statsChange!.frames)).toEqual([90, 90, 90]);
     // scf117: + 3 x 1 hold frame after the three Acid Armor commands.
@@ -202,6 +203,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // tmr136: + 9 tail rows per live Double Team body (6 bodies).
     expect(route.frames).toBe(4600 + 270 + 3 + iu([112, O, 3], [29, O, 2], [93, O, 2], [104, P, 6]) + 6 * LIVE_DOUBLE_TEAM_STATS_CHANGE_TAIL_ROWS
       - 16 // msg175: the route's used prints last their printable length (no 24-frame floor).
+      + 6 * 5 // tl205: 6 Double Team bodies x 5 script-tail rows.
       + 104 // trn181: the route's eight Scene ON action-transition pauses (104 frames; the first Double Team anchor has none before it).
       + 3 * 3); // ont193: the route's script tails (Barrier 112 x3 = 3 each; the masked Double Team 104 bodies carry none).
   });
