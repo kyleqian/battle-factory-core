@@ -1836,6 +1836,8 @@ export interface SceneOnAbsorbConfig {
     readonly stars: readonly number[];
     readonly paletteController: number;
   }>;
+  /** The script runs from a RunTasks task, not the controller (absorbAtAge `taskHostedScript`). */
+  readonly taskHostedScript?: boolean;
 }
 
 /** Presentation-only source geometry for either retained Leech Seed body. */
@@ -7172,6 +7174,7 @@ export function sceneOnAbsorbView(
       state.config.absorptionCenter,
       state.config.attacker.geometry.side,
       state.config.healingCenter,
+      state.config.taskHostedScript === true,
     ),
   };
 }

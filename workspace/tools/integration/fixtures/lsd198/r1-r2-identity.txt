@@ -1,0 +1,2 @@
+mechanic-leech-seed-opponent-exeggcute-player-onix.json-on-r1.json rows: cec8221e7c592aaa r2: cec8221e7c592aaa rgb: b8ededf10e05bde4
+mechanic-leech-seed-player-exeggcute-opponent-onix.json-on-r1.json rows: 210c92a47abdc4ca r2: 210c92a47abdc4ca rgb: d69482ec68c026df

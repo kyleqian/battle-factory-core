@@ -44973,7 +44973,7 @@ export function renderSceneOnMovePresentation(
       onix.tileset,
       onix.palette,
       view.target.geometry.spriteCorner.x
-        + (absorbState.age < 21 ? targetIdle.x2 : targetDisplayed.targetX2),
+        + (targetDisplayed.targetPoseOwned ? targetDisplayed.targetX2 : targetIdle.x2),
       view.target.geometry.spriteCorner.y
         + targetIdle.y2 + targetDisplayed.targetY2,
     );

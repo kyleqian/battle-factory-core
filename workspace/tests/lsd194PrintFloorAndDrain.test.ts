@@ -53,7 +53,7 @@ describe("lsd194 B: Leech Seed drain row layout (rows relative to A = the row af
       expect(r.filter((x) => x[0] === "hp")[1]![1] - seededBar).toBe(22);
     });
   }
-  it("Scene ON presents the 208 source animation rows as a held field; Scene OFF's lead (Pausex20 stand-in) is 44 rows, the same command", () => {
+  it("Scene ON holds the 208 source animation rows (lsd198 draws the Absorb body over them, tests/lsd198LeechSeedDrainAnimation.test.ts); Scene OFF's lead (Pausex20 stand-in) is 44 rows, the same command", () => {
     expect(LEECH_SEED_DRAIN_ANIMATION_ROWS).toBe(208);
     expect(layout("on", "player", 57, 33).find((x) => x[0] === "general-animation")![2]).toBe(218);
     expect(layout("off", "player", 57, 33).find((x) => x[0] === "general-animation")![2]).toBe(44);

@@ -10,6 +10,8 @@ export interface BattleMoveAnimationRequest {
   readonly multihit: number;
   /** Presentation-only Rollout counter (1..5), present only for MOVE_ROLLOUT (205). */
   readonly rolloutCounter?: number;
+  /** Presentation-only: the body runs from Task_ClearBitWhenBattleTableAnimDone (a general animation that jumps into a move body), not the controller. */
+  readonly taskHostedScript?: true;
 }
 
 export function battleMoveAnimationRequest(

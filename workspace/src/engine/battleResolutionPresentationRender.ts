@@ -1240,6 +1240,36 @@ function liveMoveUniversalRowAge(
   return live === null ? age : Math.min(age, live - 1);
 }
 
+/**
+ * lsd198 (docs/lsd198-leech-seed-drain-animation.md): General_LeechSeedDrain is `createvisualtask AnimTask_GetBattlersFromArg, 5; delay 0;
+ * goto Move_ABSORB`. playanimation hands the script gBattleScripting.animArg1 | animArg2 << 8 (battle_script_commands.c Cmd_playanimation;
+ * battle_util.c ENDTURN_LEECH_SEED sets animArg1 = gBattlerTarget = the HP receiver, animArg2 = gBattlerAttacker = the seeded mon) and the task
+ * writes gBattleAnimAttacker = animArg & 0xff, gBattleAnimTarget = animArg >> 8 (battle_anim_throw.c): the ABSORB body's attacker (the healed
+ * side, orbs fly to it) is the seed's owner, its target (hit splat, drained) the seeded battler = the command's `battler` (the healthbarupdate
+ * BS_ATTACKER). Singles: the owner is the other battler. The body is the existing live ABSORB adapter (liveMoveAnimation.ts case 71, 194 rows).
+ */
+export const LEECH_SEED_DRAIN_ABSORB_MOVE_ID = 71;
+export const LEECH_SEED_DRAIN_BODY_START_AGE = 21;
+const LEECH_SEED_DRAIN_BODY_ROWS = 194;
+
+function leechSeedDrainAbsorbEffect(
+  command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>,
+  state: BattleResolutionPresentationState,
+): BattleResolutionRenderEffect | null {
+  const age = state.lifecycle.phaseElapsed - LEECH_SEED_DRAIN_BODY_START_AGE;
+  if (age < 0 || age >= LEECH_SEED_DRAIN_BODY_ROWS) return null;
+  const owner = command.battler === 0 ? 1 : 0;
+  const request: BattleMoveAnimationRequest = Object.freeze({
+    moveId: LEECH_SEED_DRAIN_ABSORB_MOVE_ID, attacker: owner, target: command.battler, turn: 0, power: 0, damage: 0, friendship: 0, multihit: 0,
+    // TryHandleLaunchBattleTableAnimation runs the script from Task_ClearBitWhenBattleTableAnimDone (absorbAtAge `taskHostedScript`).
+    taskHostedScript: true,
+  });
+  return Object.freeze({
+    type: "move", request, age,
+    spriteOrderInput: state.liveMoveSpriteOrderInput,
+    ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+  });
+}
 export function battleResolutionCommandDuration(
   command: BattleResolutionPresentationCommand,
   field: BattleResolutionDisplayedField,
@@ -1846,6 +1876,15 @@ export function createBattleResolutionPresentationRenderView(
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
         ...(previous?.type === "status" && previous.battler === command.battler ? { inflicted: true as const } : {}),
       });
+    } else if (command.type === "general-animation" && command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
+      // Behind a doll the ROM plays nothing. Before the body (ages < 21) the rows are ordinary (the foe stands at its tracked idle rest); after
+      // it the body has left the battlers at x2 0 (the general-animation effect, which draws nothing for this animation).
+      const doll = fieldBattler(field, command.battler).substituteDoll === true;
+      const body = doll ? null : leechSeedDrainAbsorbEffect(command, state);
+      effect = body ?? (doll || state.lifecycle.phaseElapsed < LEECH_SEED_DRAIN_BODY_START_AGE ? null : Object.freeze({
+        type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      }));
     } else if (command.type === "general-animation" && fieldBattler(field, command.battler).substituteDoll !== true) {
       // fpp150 (fps147 §4d): command age a is ROM row X + 1 + a, so the reducer's rel is a - 1. Behind the doll the ROM plays
       // nothing (TryHandleLaunchBattleTableAnimation), the field stays as it is.

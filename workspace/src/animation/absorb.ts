@@ -43,6 +43,8 @@ export interface AbsorbState {
   readonly sprites: readonly AbsorbSprite[];
   readonly targetX2: number;
   readonly targetY2: number;
+  /** AnimTask_ShakeMon owns the target's x2 / y2 (from its creation pass). */
+  readonly targetPoseOwned: boolean;
   readonly targetOnMonBg: boolean;
   readonly splitBgPriorityFoes: boolean;
   readonly alpha: Readonly<{ eva: 12; evb: 8 }> | null;
@@ -130,6 +132,12 @@ export function absorbAtAge(
   attackerCenter: Readonly<{ x: number; y: number }>,
   attackerSide: "player" | "opponent",
   healingCenter: Readonly<{ x: number; y: number }> = attackerCenter,
+  // The script runs inside a RunTasks task (Task_ClearBitWhenBattleTableAnimDone, priority 10: a general-animation table entry that jumps into
+  // Move_ABSORB, e.g. General_LeechSeedDrain), not from the controller in CB1 (battle_gfx_sfx_util.c). Cmd_createvisualtask's AnimTask_ShakeMon
+  // (priority 5) is then inserted ahead of the running task, so it skips its same-pass step, and the later Task_UpdateMonBg (priority 10,
+  // battle_anim.c) copies its creation state (x2 0, y2 +5) to the monbg layer. The task-hosted script frame is one source age earlier, so the
+  // creation pass lands at age 19; from age 20 the shake state equals the controller-hosted one (docs/lsd198-leech-seed-drain-animation.md, lsd199).
+  taskHostedScript = false,
 ): AbsorbState {
   const sprites: AbsorbSprite[] = [];
   if (age >= 16 && age <= 25) {
@@ -156,7 +164,9 @@ export function absorbAtAge(
   })));
   // The creation pass is not displayed; five on/off toggles leave the two
   // complete two-display "on" intervals below before the terminal reset.
-  const shakeY = (age >= 22 && age <= 23) || (age >= 26 && age <= 27)
+  const shakeCreationDisplayed = taskHostedScript && age === 19;
+  const shakeY = shakeCreationDisplayed
+    || (age >= 22 && age <= 23) || (age >= 26 && age <= 27)
     ? 5 : 0;
   const orbRestart = age >= ABSORB_ORB_FIRST_AGE
     && age <= ABSORB_ORB_FIRST_AGE + 7 * ABSORB_ORB_SPAWN_PERIOD
@@ -165,6 +175,7 @@ export function absorbAtAge(
     sprites,
     targetX2: 0,
     targetY2: shakeY,
+    targetPoseOwned: age >= 20 || shakeCreationDisplayed,
     targetOnMonBg: age >= 0 && age < 191,
     splitBgPriorityFoes: age >= 0 && age < 191,
     alpha: age >= 3 && age < 191 ? { eva: 12, evb: 8 } : null,
