@@ -23,14 +23,14 @@ const battler = (m: Mon, move: number) => {
     spAttack: m.spAttack, spDefense: m.spDefense, speed: m.speed, hp: m.hp, maxHp: m.hp, types: [entry.types[0], entry.types[1]] as const };
 };
 
-export function lsd194Production(o: { scene: "on" | "off"; player: Mon; opponent: Mon; pMove: number; oMove: number; seed: number; selfMoves?: boolean; oSelf?: boolean }) {
+export function lsd194Production(o: { scene: "on" | "off"; player: Mon; opponent: Mon; pMove: number; oMove: number; seed: number; selfMoves?: boolean; oSelf?: boolean; pSelf?: boolean }) {
   let state = createFactoryFullTurnBattleState({ requestId: 1, rngSeed: o.seed, player: battler(o.player, o.pMove), trainer: battler(o.opponent, o.oMove) } as never);
   if (o.scene === "off") {
     const rulesContext = { ...state.rules.rulesContext, hitMarker: (state.rules.rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) >>> 0 };
     state = { ...state, rules: { ...state.rules, rulesContext } } as typeof state;
   }
   const beforeRules = state.rules.rulesContext;
-  const a = submitFactoryFullTurnDecision(state, { requestId: 1, side: "player", decision: { kind: "use-move", moveSlot: 0, targetBattler: o.selfMoves ? 0 : 1 } as never });
+  const a = submitFactoryFullTurnDecision(state, { requestId: 1, side: "player", decision: { kind: "use-move", moveSlot: 0, targetBattler: (o.pSelf ?? o.selfMoves) ? 0 : 1 } as never });
   const b = submitFactoryFullTurnDecision(a.state, { requestId: 2, side: "trainer", decision: { kind: "use-move", moveSlot: 0, targetBattler: o.selfMoves || o.oSelf ? 1 : 0 } as never });
   const make = (index: 0 | 1, m: Mon, move: number, rules: any) => Object.freeze({
     species: m.id, name: m.name, side: index === 0 ? "player" as const : "trainer" as const, battler: index, partyIndex: 0 as const, level: 50,
@@ -38,7 +38,7 @@ export function lsd194Production(o: { scene: "on" | "off"; player: Mon; opponent
     moveIds: [move, move, move, move], currentPP: [10, 10, 10, 10] as const, ppBonuses: 0,
   });
   const field = Object.freeze({ player: make(0, o.player, o.pMove, beforeRules), opponent: make(1, o.opponent, o.oMove, beforeRules) }) as never;
-  const commands = projectBattleResolutionCommands(b.events as never, beforeRules, b.state.rules.rulesContext, field, null, { className: "TRAINER", name: "LSD194", speechLose: ["a", "b"] } as never) as any[];
+  const commands = projectBattleResolutionCommands(b.events as never, beforeRules, b.state.rules.rulesContext, field, null, { className: "TRAINER", name: "LSD194", speechLose: ["a", "b"], speechWin: ["a", "b"] } as never) as any[];
   let at = 0;
   const rows = commands.map((c) => {
     const dur = battleResolutionCommandDuration(c, field);
