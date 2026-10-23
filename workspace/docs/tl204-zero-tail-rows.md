@@ -75,7 +75,7 @@ Code under test: `src/` tree `git rev-parse HEAD:workspace/src` at the tl204 com
 
 ## tl205: the script tail rule in production
 
-Code: `liveMoveScriptTailFrames` (src/engine/battleResolutionPresentationRender.ts). The tail rows are, as in ont193, the kernel's own `instructionExecution` between the `attackanimation` emit and the next print / STATS_CHANGE emit (`moveAnimationScriptTailTiming`: `Δ(N) − Δ(attack) + 1 + k + 1`, with the intervening `pause` countdown, `ppreduce`, `setrain`, ... rows all counted by the kernel, so Leech Seed's `pause B_WAIT_TIME_SHORT` gives 40 without a constant). tl205 changes only the trail: the ten tl204-measured moves enter `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` with trail -1, giving tail frames = `scriptTailRows + (-1) - post(0)` = `scriptTailRows - 1`. The table holds the measured trail (a body property: the ROM release row relative to the body's last row, as Sand-Attack's 0 is), never a tail length.
+Code: `liveMoveScriptTailFrames` (src/engine/battleResolutionPresentationRender.ts). The tail rows are, as in ont193, the kernel's own `instructionExecution` between the `attackanimation` emit and the next print / STATS_CHANGE emit (`moveAnimationScriptTailTiming`: `Δ(N) − Δ(attack) + 1 + k + 1`, with the intervening `pause` countdown, `ppreduce`, `setrain`, ... rows all counted by the kernel, so Leech Seed's `pause B_WAIT_TIME_SHORT` gives 40 without a constant). tl205 changes only the trail: nine of the ten tl204-measured moves enter `LIVE_MOVE_SCRIPT_TAIL_TRAIL_ROWS` with trail -1 (Fake Tears is held out, below), giving tail frames = `scriptTailRows + (-1) - post(0)` = `scriptTailRows - 1`. The table holds the measured trail (a body property: the ROM release row relative to the body's last row, as Sand-Attack's 0 is), never a tail length.
 
 Second change: `rows.pre === 0` no longer returns 0. A masked pre (Double Team: its window owns the banner) only means the body's pre rows are not proven; the tail starts at the script's release row after the body and does not depend on it. The early return is kept for a declined body, a Substitute swap and the unmeasured Struggle (these have pre = post = 0 from `liveMoveUniversalRows` for another reason), and for any masked-pre move whose trail is unknown (still 0 frames).
 
@@ -92,11 +92,11 @@ Scene OFF has no `scriptTailRows` and is untouched. Kernel events, RNG, damage, 
 | Leech Seed | -39 | 39 | **0** | |
 | Light Screen | -4 | 6 | +2 | body window 91 vs ROM 89 |
 | Charm | -6 | 5 | -1 | body window 191 vs 192 |
-| Fake Tears | -1 | 5 | +4 | body window 182 vs 178 |
+| Fake Tears | -1 | 0 (held out) | -1 | body window 182 vs 178; the rule alone would give +4 |
 | Calm Mind | -10 | 6 | -4 | window 185 vs 188 (-3) and one third post-arrow row folded into a 2-row `stat` (-1) |
 | Scary Face | -19 | 5 | -14 | body window 288 vs 302 |
 
-All ten equal tl204's "after rule" column; none is worse in absolute value than BEFORE, so no source-named restriction was needed. `print -> next` stays residual 0 for all ten. The 14 other zero-frame ont193 moves are untouched (their trail is still unknown). ont193's measured moves (Protect 3, Detect 3, Bulk Up 4, Sand-Attack 6) are unchanged.
+Nine equal tl204's "after rule" column and none of them is worse in absolute value than BEFORE. Fake Tears would be (-1 -> +4: the rule is exact on the script rows, 5 of 5, but the Move_FAKE_TEARS body window is 4 rows longer than the ROM's, and the two errors currently cancel to -1), so it is the one restriction: 313 is left out of the trail table, tail 0, residual -1 exactly as before. Re-add `[313, -1]` when the Fake Tears body is corrected (then it lands at 0). The restriction is a hold-out for a known wrong body, not a claim that the tail differs. `print -> next` stays residual 0 for all ten. The 14 other zero-frame ont193 moves are untouched (their trail is still unknown). ont193's measured moves (Protect 3, Detect 3, Bulk Up 4, Sand-Attack 6) are unchanged.
 
 `tl204Compare.ts` change: `productionBodyRows` now excludes the tail frames (reported as `accounting.productionTailFrames`, counted on the script side) so the window residual stays a pure body-length number and `residualAfterHypothesis` equals the real residual.
 

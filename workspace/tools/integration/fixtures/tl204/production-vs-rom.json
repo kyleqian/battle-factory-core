@@ -241,11 +241,11 @@
    "pre": 3,
    "post": 0
   },
-  "tailFrames": 5,
+  "tailFrames": 0,
   "usedToPrint": {
    "rom": 209,
-   "production": 213,
-   "residual": 4
+   "production": 208,
+   "residual": -1
   },
   "printToNext": {
    "rom": 109,
@@ -257,7 +257,7 @@
     209
    ],
    "production": [
-    213
+    208
    ]
   },
   "decomposition": {
@@ -271,7 +271,7 @@
    },
    "bodyToPrint": {
     "rom": 180,
-    "production": 187
+    "production": 182
    },
    "romSegments": [
     "used-print:EffectStatDown+19:26",
@@ -283,7 +283,7 @@
    "productionCommands": [
     "message:24",
     "stat:2",
-    "move-animation:96",
+    "move-animation:91",
     "stats-change:91",
     "message:95"
    ]
@@ -291,8 +291,8 @@
   "accounting": {
    "romScriptRows": 7,
    "productionStatRows": 2,
-   "productionTailFrames": 5,
-   "scriptResidual": 0,
+   "productionTailFrames": 0,
+   "scriptResidual": -5,
    "romWindowRows": 178,
    "productionBodyRows": 182,
    "bodyResidual": 4,
