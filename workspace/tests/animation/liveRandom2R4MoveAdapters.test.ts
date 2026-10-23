@@ -15,7 +15,7 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import { fixturePresentationRng, liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 import { generatedCommandAnimationReplay } from "../../tools/integration/generatedCommandAnimationReplay.ts";
 import { random2Route } from "../../tools/integration/random2R1/routeHarness.ts";
-import { iu120Ages, iu120Extra, iu120EffectAges } from "../helpers/iu120Rows.ts";
+import { iu120Ages, iu120Extra, iu120EffectAges, ont193ScriptTail } from "../helpers/iu120Rows.ts";
 
 // docs/next-adapters-prep14.md: Rain Dance (240) and Water Pulse (352) faithful-random, Hail (258) exact. The dense framebuffer
 // proofs are tools/integration/fixtures/prep14-live/*.json (receipt random2-r4-live-receipt.json).
@@ -236,7 +236,7 @@ describe("live prep14 ordinary routes", () => {
   it("route HAIL 1/0 DELIBIRD: body reached, adapter active every age, following prompt reached, ON/OFF rules/RNG/boundary equal", () => {
     const on = generatedCommandAnimationReplay(1, "on", [3], 0), off = generatedCommandAnimationReplay(1, "off", [3], 0);
     const bodies = on.animations.filter((a) => a.moveId === 258 && a.attacker === 0);
-    expect(bodies.map((b) => b.ages.length)).toEqual([158 + iu120Extra(258)]);
+    expect(bodies.map((b) => b.ages.length)).toEqual([158 + iu120Extra(258) + ont193ScriptTail(258)]);
     for (const body of bodies) {
       expect(body.ages).toEqual(iu120Ages(258, 158));
       expect(body.adapterActive.every(Boolean)).toBe(true);
