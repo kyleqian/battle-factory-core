@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-23 — CAX31 session (supervisor, Opus 5.5): lsd194 + lsd196 + rst197 folded; lsd198 drain animation in verification
+
+- **State:** master = fold of `worker/integration-20261022-230803` (tested `8bee336e6`, src tree `9f76866e2`). Presentation timing only;
+  kernel digests identical in the census. No open DEFERRED items.
+- **Folded:** the saved lsd194 / lsd196 branch plus rst197 (Rest's Scene OFF pause from the status icon's execution; off148 proxy removed)
+  and a typecheck fix (`BattleStatTiming` literal 2 -> number). Supervisor-owned final gates on the exact code: typecheck, census both
+  scenes fully attributed (961 second-stat rows + 451 OFF Rest pauses), differential 641 / 641, full suite 13,965 / 2 failed -> both
+  randomRoundSoak pins attributed to lsd196 and re-pinned (64 / 64), build. See ANIMATION_INTEGRATION_PROGRESS.md 2026-10-23.
+- **In flight:** lsd198 (`worker/integration-20261023-000807`, tip `556d1057d`): Scene ON LEECH_SEED_DRAIN drawn as Move_ABSORB's body
+  (seed owner = attacker, seeded = target, body age = command age - 21); dense ROM 445 / 446 and 436 / 437 rows, one target-sprite row at
+  body age 20 unexplained. lsd199 (Opus) is diagnosing that row on top of lsd198.
+- **Next:** verify lsd199 / lsd198, then their gates (typecheck, ON census, suite, build) and fold; then Double Team (-5), ROM rows for
+  Tickle / Memento / Superpower second stats, non-MAGBY forced send-in visuals (#146).
+---
+
 ## 2026-10-16 / 17 — CAX31 session wind-down (supervisor, Opus 5.5): pfr192 / ont193 folded; lsd194 unfolded (triaged lsd195)
 
 - **Restart 2026-10-22:** user authorized another 10-hour run. Master and retained lsd194/lsd196 refs, logs and briefs imported
