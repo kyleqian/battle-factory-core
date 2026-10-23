@@ -378,6 +378,180 @@
   }
  },
  {
+  "move": "calm-mind",
+  "scene": "off",
+  "productionSeed": 1,
+  "gaps": [
+   {
+    "print": 2,
+    "rom": 92,
+    "production": 92,
+    "residual": 0,
+    "stat": 5,
+    "lines": [
+     "Foe ONIX’s SP. DEF",
+     "rose!"
+    ]
+   }
+  ],
+  "next": null
+ },
+ {
+  "move": "calm-mind",
+  "scene": "on",
+  "productionSeed": 1,
+  "gaps": [
+   {
+    "print": 2,
+    "rom": 92,
+    "production": 92,
+    "residual": 0,
+    "stat": 5,
+    "lines": [
+     "Foe ONIX’s SP. DEF",
+     "rose!"
+    ]
+   }
+  ],
+  "next": null
+ },
+ {
+  "move": "curse",
+  "scene": "off",
+  "productionSeed": 1,
+  "gaps": [
+   {
+    "print": 2,
+    "rom": 89,
+    "production": 89,
+    "residual": 0,
+    "stat": 4,
+    "lines": [
+     "Foe ONIX’s ATTACK",
+     "rose!"
+    ]
+   },
+   {
+    "print": 3,
+    "rom": 90,
+    "production": 90,
+    "residual": 0,
+    "stat": 4,
+    "lines": [
+     "Foe ONIX’s DEFENSE",
+     "rose!"
+    ]
+   }
+  ],
+  "next": null
+ },
+ {
+  "move": "curse",
+  "scene": "on",
+  "productionSeed": 1,
+  "gaps": [
+   {
+    "print": 2,
+    "rom": 89,
+    "production": 89,
+    "residual": 0,
+    "stat": 4,
+    "lines": [
+     "Foe ONIX’s ATTACK",
+     "rose!"
+    ]
+   },
+   {
+    "print": 3,
+    "rom": 90,
+    "production": 90,
+    "residual": 0,
+    "stat": 4,
+    "lines": [
+     "Foe ONIX’s DEFENSE",
+     "rose!"
+    ]
+   }
+  ],
+  "next": null
+ },
+ {
+  "move": "superpower",
+  "scene": "off",
+  "productionSeed": 1,
+  "gaps": [
+   {
+    "print": 2,
+    "rom": 92,
+    "production": 92,
+    "residual": 0,
+    "stat": 6,
+    "lines": [
+     "Foe ONIX’s DEFENSE",
+     "fell!"
+    ]
+   }
+  ],
+  "next": null
+ },
+ {
+  "move": "superpower",
+  "scene": "on",
+  "productionSeed": 1,
+  "gaps": [
+   {
+    "print": 2,
+    "rom": 92,
+    "production": 92,
+    "residual": 0,
+    "stat": 6,
+    "lines": [
+     "Foe ONIX’s DEFENSE",
+     "fell!"
+    ]
+   }
+  ],
+  "next": null
+ },
+ {
+  "move": "tickle",
+  "scene": "off",
+  "productionSeed": 1,
+  "gaps": [
+   {
+    "print": 2,
+    "rom": 92,
+    "production": 92,
+    "residual": 0,
+    "stat": 6,
+    "lines": [
+     "PRIMEAPE’s DEFENSE",
+     "fell!"
+    ]
+   }
+  ],
+  "next": null
+ },
+ {
+  "move": "tickle",
+  "scene": "on",
+  "productionSeed": 1,
+  "gaps": [
+   {
+    "print": 2,
+    "rom": 92,
+    "production": 92,
+    "residual": 0,
+    "stat": 6,
+    "lines": [
+     "PRIMEAPE’s DEFENSE",
+     "fell!"
+    ]
+   }
+  ],
+  "next": null
+ },
+ {
   "move": "memento",
   "scene": "off",
   "productionSeed": 1,

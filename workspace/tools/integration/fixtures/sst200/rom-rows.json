@@ -407,6 +407,260 @@
    "label": "BattleScript_HitFromAtkString+1"
   }
  },
+ "sst200-foe-calm-mind-s11.json-off-r1.json": {
+  "move": "calm-mind",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_CalmMindDoMoveAnim+40",
+    "run": 42,
+    "frame": 394,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 395,
+    "end": 482
+   },
+   {
+    "label": "BattleScript_CalmMindTrySpDef+28",
+    "run": 47,
+    "frame": 486,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 487,
+    "end": 574
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-calm-mind-s11.json-on-r1.json": {
+  "move": "calm-mind",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_CalmMindDoMoveAnim+40",
+    "run": 38,
+    "frame": 482,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 483,
+    "end": 570
+   },
+   {
+    "label": "BattleScript_CalmMindTrySpDef+28",
+    "run": 43,
+    "frame": 574,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 575,
+    "end": 662
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-curse-s11.json-off-r1.json": {
+  "move": "curse",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_CurseTrySpeed+35",
+    "run": 42,
+    "frame": 314,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 315,
+    "end": 400
+   },
+   {
+    "label": "BattleScript_CurseTryAttack+17",
+    "run": 46,
+    "frame": 403,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 404,
+    "end": 490
+   },
+   {
+    "label": "BattleScript_CurseTryDefense+17",
+    "run": 50,
+    "frame": 493,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 494,
+    "end": 581
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-curse-s11.json-on-r1.json": {
+  "move": "curse",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_CurseTrySpeed+35",
+    "run": 38,
+    "frame": 470,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 471,
+    "end": 556
+   },
+   {
+    "label": "BattleScript_CurseTryAttack+17",
+    "run": 42,
+    "frame": 559,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 560,
+    "end": 646
+   },
+   {
+    "label": "BattleScript_CurseTryDefense+17",
+    "run": 46,
+    "frame": 649,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 650,
+    "end": 737
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-superpower-s11.json-off-r1.json": {
+  "move": "superpower",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_AtkDefDown+42",
+    "run": 60,
+    "frame": 478,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 479,
+    "end": 565
+   },
+   {
+    "label": "BattleScript_AtkDefDown_TryDef+32",
+    "run": 66,
+    "frame": 570,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 571,
+    "end": 658
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-superpower-s11.json-on-r1.json": {
+  "move": "superpower",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_AtkDefDown+42",
+    "run": 56,
+    "frame": 706,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 707,
+    "end": 793
+   },
+   {
+    "label": "BattleScript_AtkDefDown_TryDef+32",
+    "run": 62,
+    "frame": 798,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 799,
+    "end": 886
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-tickle-s11.json-off-r1.json": {
+  "move": "tickle",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_TickleDoMoveAnim+51",
+    "run": 44,
+    "frame": 393,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 394,
+    "end": 480
+   },
+   {
+    "label": "BattleScript_TickleTryLowerDef+32",
+    "run": 50,
+    "frame": 485,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 486,
+    "end": 573
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-tickle-s11.json-on-r1.json": {
+  "move": "tickle",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_TickleDoMoveAnim+51",
+    "run": 40,
+    "frame": 578,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 579,
+    "end": 665
+   },
+   {
+    "label": "BattleScript_TickleTryLowerDef+32",
+    "run": 46,
+    "frame": 670,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 671,
+    "end": 758
+   }
+  ],
+  "next": null
+ },
  "sst200-memento-s11.json-off-r1.json": {
   "move": "memento",
   "chain": [

@@ -19,6 +19,7 @@ out = {}
 for path in sys.argv[1:]:
     name = os.path.basename(path)
     move = re.match(r"sst200-(.+)-s\d+\.json-(on|off)-r1\.json", name).group(1)
+    foe = move.startswith("foe-"); move = move.removeprefix("foe-")
     rows = json.load(open(path))["rows"]
     runs, f = [], 0
     while f < len(rows):
@@ -38,6 +39,9 @@ for path in sys.argv[1:]:
             chain.append(p)
             if len(chain) == N[move]: break
     after = chain[-1]["end"]
+    if foe:
+        out[name] = {"move": move, "foe": True, "chain": chain, "next": None}
+        continue
     nxt = next((p for p in prints if p["label"].startswith("BattleScript_FaintAttacker") and p["frame"] >= after), None)
     kind = "faint print"
     if nxt is None:

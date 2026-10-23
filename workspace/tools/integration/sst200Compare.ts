@@ -26,11 +26,11 @@ export function chainOf(rows: readonly Row[]) {
   return { chain, next };
 }
 
-export function productionFor(move: string, scene: "on" | "off", wanted: number, from = 1) {
+export function productionFor(move: string, scene: "on" | "off", wanted: number, from = 1, foe = false) {
   const m = SST200_MOVES[move]!;
   for (let seed = from; seed <= 800; seed += 1) {
     let rows: Row[];
-    try { rows = lsd194Production({ scene, seed, player: MONS.PRIMEAPE, opponent: MONS.ONIX, pMove: m.id, oMove: 33, pSelf: m.self }).rows as Row[]; } catch { continue; }
+    try { rows = lsd194Production({ scene, seed, player: MONS.PRIMEAPE, opponent: MONS.ONIX, pMove: foe ? 33 : m.id, oMove: foe ? m.id : 33, pSelf: foe ? false : m.self, oSelf: foe ? m.self : false }).rows as Row[]; } catch { continue; }
     const c = chainOf(rows);
     if (c.chain.length === wanted) return { seed, rows, ...c };
   }
@@ -38,25 +38,25 @@ export function productionFor(move: string, scene: "on" | "off", wanted: number,
 }
 
 if (process.argv[1]?.endsWith("sst200Compare.ts")) {
-  const rom = JSON.parse(readFileSync(process.argv[2]!, "utf8")) as Record<string, { move: string; chain: { F: number; first: number; last: number }[]; next: { kind: string; F: number; label: string } }>;
+  const rom = JSON.parse(readFileSync(process.argv[2]!, "utf8")) as Record<string, { move: string; foe?: boolean; chain: { F: number; first: number; last: number }[]; next: { kind: string; F: number; label: string } | null }>;
   const out: any[] = [];
   let nonzero = 0;
   for (const [file, r] of Object.entries(rom)) {
     const scene = file.includes("-on-r1") ? "on" as const : "off" as const;
-    const p = productionFor(r.move, scene, r.chain.length);
+    const p = productionFor(r.move, scene, r.chain.length, 1, r.foe === true);
     const start = (i: number) => p.rows[i]!.start;
     const gaps = r.chain.slice(1).map((c, k) => {
       const romGap = c.F - r.chain[k]!.F, prodGap = start(p.chain[k + 1]!) - start(p.chain[k]!);
       return { print: k + 2, rom: romGap, production: prodGap, residual: prodGap - romGap, stat: p.rows[p.chain[k + 1]! - 1]!.dur, lines: p.rows[p.chain[k + 1]!]!.lines };
     });
     const lastRom = r.chain[r.chain.length - 1]!;
-    const nextRow = p.next >= 0 ? p.rows[p.next]! : null;
-    const nextGap = nextRow ? { rom: r.next.F - lastRom.F, production: nextRow.start - start(p.chain[p.chain.length - 1]!), kind: r.next.kind, romLabel: r.next.label, lines: nextRow.lines } : null;
+    const nextRow = !r.foe && p.next >= 0 ? p.rows[p.next]! : null;
+    const nextGap = nextRow && r.next ? { rom: r.next.F - lastRom.F, production: nextRow.start - start(p.chain[p.chain.length - 1]!), kind: r.next.kind, romLabel: r.next.label, lines: nextRow.lines } : null;
     const nextResidual = nextGap ? nextGap.production - nextGap.rom : null;
     const row = { move: r.move, scene, productionSeed: p.seed, gaps, next: nextGap && { ...nextGap, residual: nextResidual } };
-    nonzero += gaps.filter((g) => g.residual !== 0).length + (nextResidual !== 0 ? 1 : 0);
+    nonzero += gaps.filter((g) => g.residual !== 0).length + (nextGap !== null && nextResidual !== 0 ? 1 : 0);
     out.push(row);
-    console.log(r.move.padEnd(14), scene, "seed", String(p.seed).padStart(3), "gaps rom/prod/res", gaps.map((g) => `${g.rom}/${g.production}/${g.residual}`).join(" "), "| next", nextGap ? `${nextGap.rom}/${nextGap.production}/${nextResidual}` : "none", JSON.stringify(nextRow?.lines ?? null));
+    console.log((r.foe ? "foe-" : "") + r.move.padEnd(14), scene, "seed", String(p.seed).padStart(3), "gaps rom/prod/res", gaps.map((g) => `${g.rom}/${g.production}/${g.residual}`).join(" "), "| next", nextGap ? `${nextGap.rom}/${nextGap.production}/${nextResidual}` : "none", JSON.stringify(nextRow?.lines ?? null));
   }
   writeFileSync(process.argv[3]!, JSON.stringify(out, null, 1) + "\n");
   console.log("cases", out.length, "nonzero residuals", nonzero);

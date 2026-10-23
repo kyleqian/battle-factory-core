@@ -16,3 +16,11 @@ sst200-superpower-s11.json-off rows r1==r2 rgb sha 29b074471efa3bc3 == 29b074471
 sst200-superpower-s11.json-on rows r1==r2 rgb sha 7437273e448d8225 == 7437273e448d8225
 sst200-tickle-s11.json-off rows r1==r2 rgb sha b5185268c19e8170 == b5185268c19e8170
 sst200-tickle-s11.json-on rows r1==r2 rgb sha 6f05addba191f1c5 == 6f05addba191f1c5
+sst200-foe-calm-mind-s11.json-off rows r1==r2 rgb sha 54b8fddc805878c8 == 54b8fddc805878c8
+sst200-foe-calm-mind-s11.json-on rows r1==r2 rgb sha 552e62aadf6581cc == 552e62aadf6581cc
+sst200-foe-curse-s11.json-off rows r1==r2 rgb sha 28894e881e93ac17 == 28894e881e93ac17
+sst200-foe-curse-s11.json-on rows r1==r2 rgb sha a869d73fb21a164c == a869d73fb21a164c
+sst200-foe-superpower-s11.json-off rows r1==r2 rgb sha 0ae9e030cfcd4f33 == 0ae9e030cfcd4f33
+sst200-foe-superpower-s11.json-on rows r1==r2 rgb sha 3135599fed4ca60f == 3135599fed4ca60f
+sst200-foe-tickle-s11.json-off rows r1==r2 rgb sha bacd32dde449ecd9 == bacd32dde449ecd9
+sst200-foe-tickle-s11.json-on rows r1==r2 rgb sha 347cd7430f430693 == 347cd7430f430693
