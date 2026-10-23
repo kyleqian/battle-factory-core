@@ -88,7 +88,9 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       - 99 - 1 // pfr192: the one player faint replacement (readyAt 212 vs the fixed 311) + 1 frame of dismissal parity (odd 99).
       - 17 // msg175: the route's used prints last their printable length (no 24-frame floor).
       + 79 + 1 // trn181: the route's six Scene ON action-transition pauses (79 frames) + 1 frame of dismissal parity (odd 79).
-      + 3 * 3 + 4 - 1); // ont193: the route's script tails (Acid Armor 151 x3 = 3 each, the opponent's 219 = 4) - 1 frame of dismissal parity (odd 13).
+      + 3 * 3 + 4 - 1 // ont193: the route's script tails (Acid Armor 151 x3 = 3 each, the opponent's 219 = 4) - 1 frame of dismissal parity (odd 13).
+      + 70); // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the route's 2 faint commands, both after the anchor (6701 -> 6771; hpb202 adds 0;
+      // tools/integration/rep203FaintCount.ts 0 2: 0 faints before the anchor, so the +90 / message frames above are unchanged).
   });
 
   it("status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76", () => {
@@ -139,7 +141,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       - 9 // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the three "It's super effective!" prints (L = 21) before it lose their floor, 3 rows each (lsd194ScAttribution.ts 6 0).
       + 45 // trn181 (docs/trn181-action-transition-on.md): the Scene ON action-transition pauses before it (45; trn181PinShift.ts 6 0); the old - 1 frame of dismissal parity is 0 after the odd lsd194 shift
       // (measured on archived trees: base 2839, floor-only tree 2831 = - 9 + 1 at the faint command, final 2831; the dismissal poll lands one frame later).
-      + 46; // snd182 (docs/snd182-scene-on-forced-player-send-in-live.md): the Foe's Roar / Whirlwind drags out the player's DROWZEE at frame 849 (Scene ON forced player send-in: 137 + 11 = 148 vs the old 91 + 11 = 102).
+      + 46 // snd182 (docs/snd182-scene-on-forced-player-send-in-live.md): the Foe's Roar / Whirlwind drags out the player's DROWZEE at frame 849 (Scene ON forced player send-in: 137 + 11 = 148 vs the old 91 + 11 = 102).
+      + 36; // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the 1 faint command before the anchor (2831 -> 2867; hpb202 adds 0; tools/integration/rep203FaintCount.ts 6 0).
     expect(a.statsChange).toEqual({ frame: 2694 + 10 + shift, frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 2694 + 10 + shift + 76 + 1, glyph: 2694 + 10 + shift + 76 + 1 });
     expect(a.following!.text).toContain("INTIMIDATE");
@@ -178,8 +181,9 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + 109 + 1 // trn181: the route's seven Scene ON action-transition pauses (109 frames) + 1 frame of dismissal parity (odd 109).
       - 57 // pfr192: the route's player faint replacements (readyAt - 311; the keyed send-in clock).
       + 2 * 5 + 2 * 3 // ont193: the route's script tails (Tickle 321 x2 = 5 each, 148 x2 = 3 each).
-      + 2 * 4); // lsd196 (rst197 verification): Tickle's DEF `stat` (BattleScript_TickleTryLowerDef) sits between two prints like Bulk Up's, 2 -> 6 rows each x 2 uses
+      + 2 * 4 // lsd196 (rst197 verification): Tickle's DEF `stat` (BattleScript_TickleTryLowerDef) sits between two prints like Bulk Up's, 2 -> 6 rows each x 2 uses
       // (events 44 / 63; measured: pre-lsd196 production file 9619, final 9627). Source-derived (same single-row instructions); no Tickle ROM row exists, so this is not a ROM-proven value.
+      + 80); // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the route's 2 faint commands, both after the anchor (9627 -> 9707; hpb202 adds 0; rep203FaintCount.ts 13 3: 0 before the anchor).
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 239-row window (tmr136) owns the banner; the message moves + 9", () => {
