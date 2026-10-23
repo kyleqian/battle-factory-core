@@ -1874,9 +1874,15 @@ export function createBattleResolutionPresentationRenderView(
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
         ...(previous?.type === "status" && previous.battler === command.battler ? { inflicted: true as const } : {}),
       });
-    } else if (command.type === "general-animation" && command.animation === "LEECH_SEED_DRAIN" && command.animated === true
-      && leechSeedDrainAbsorbEffect(command, state) !== null) {
-      effect = leechSeedDrainAbsorbEffect(command, state)!;
+    } else if (command.type === "general-animation" && command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
+      // Behind a doll the ROM plays nothing. Before the body (ages < 21) the rows are ordinary (the foe stands at its tracked idle rest); after
+      // it the body has left the battlers at x2 0 (the general-animation effect, which draws nothing for this animation).
+      const doll = fieldBattler(field, command.battler).substituteDoll === true;
+      const body = doll ? null : leechSeedDrainAbsorbEffect(command, state);
+      effect = body ?? (doll || state.lifecycle.phaseElapsed < LEECH_SEED_DRAIN_BODY_START_AGE ? null : Object.freeze({
+        type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+      }));
     } else if (command.type === "general-animation" && fieldBattler(field, command.battler).substituteDoll !== true) {
       // fpp150 (fps147 §4d): command age a is ROM row X + 1 + a, so the reducer's rel is a - 1. Behind the doll the ROM plays
       // nothing (TryHandleLaunchBattleTableAnimation), the field stays as it is.
