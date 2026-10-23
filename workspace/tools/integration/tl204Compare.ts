@@ -87,7 +87,7 @@ if (process.argv[1]?.endsWith("tl204Compare.ts")) {
   const rom = JSON.parse(readFileSync(process.argv[2]!, "utf8")) as Record<string, Rom>;
   const out: any[] = [];
   let nonzero = 0;
-  for (const [file, r] of Object.entries(rom)) {
+  for (const r of Object.values(rom)) {
     const { row } = compareCase(r);
     nonzero += (row.usedToPrint.residual !== 0 ? 1 : 0) + (row.printToNext.residual !== 0 ? 1 : 0);
     out.push(row);
