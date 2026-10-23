@@ -121,3 +121,17 @@ y2 already 0); (b) is right in kind (ShakeMon's creation write) and (c) is not a
   dreamEater / gigaDrain / megaDrain SourceCheckpoint (4 / 4 / 4) and Evidence (5 / 4 / 5), waterPulseSourceCheckpoint (2), spriteOrderGigaDrainGeometry (10),
   spriteOrderDreamEaterGeometry (4), recover (5). `git diff --check` clean.
 - Not run (supervisor instruction): full `npm test`, `npm run build`, `npm run typecheck`, census. Production files changed, so those gates remain owed.
+
+## Final-code gates (supervisor, 2026-10-23, CAX31)
+
+Tested union `d779565e1` (lsd198 + lsd199 + a `findLast` -> reverse/find typecheck fix `4eb686dc9` + master `a4fbda815`). Logs:
+`.integration/validation/sv-20261022/lsd199/` (ignored).
+
+- Supervisor reran `OUT=<fresh> bash tools/integration/lsd198Probes.sh` on the lsd199 tip: fresh ROM r1 == r2, dense player 446 / 446 rows
+  exact (animation span 218 / 218), opponent 437 / 437 (218 / 218); dense r1 == r2.
+- `npm run typecheck`: 0 (after `4eb686dc9`; the project lib is ES2022).
+- Census 0..999 both scenes, master `a4fbda815` vs `d779565e1` (`rst197CensusDelta.py`): 1000 / 1000 battles identical per scene
+  (render-only change; the `animated` flag is not a census field).
+- Differential (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on, base `a4fbda815`): 641 / 641.
+- Full suite: 1,686 files / 13,983 tests passed, 0 failed; one vitest worker exited unexpectedly (memory pressure, a concurrent worker),
+  leaving `tests/animation/livePhysical2aMoveAdapters.test.ts` unreported: rerun alone 9 / 9. Build 0.
