@@ -44,6 +44,7 @@ import {
 } from "./battleStringResolver.ts";
 import {
   battleHealthBarAnimationFrames,
+  battleHealthBarFillValueAtFrame,
   battleHealthBarValueAtFrame,
   type HealthboxContentParams,
 } from "./healthboxAssembly.ts";
@@ -1469,6 +1470,7 @@ function substituteSwapTailSideAt(
 function healthboxParams(
   battler: BattleCommandFieldBattler,
   targetHp?: number,
+  barFill?: number,
 ): HealthboxContentParams {
   return Object.freeze({
     name: battler.name,
@@ -1478,6 +1480,7 @@ function healthboxParams(
     ...(targetHp === undefined
       ? {}
       : { hpTargetFraction: targetHp / battler.maxHP }),
+    ...(barFill === undefined ? {} : { hpBarFraction: barFill / battler.maxHP }),
     status: battler.status,
   });
 }
@@ -1767,7 +1770,7 @@ export function createBattleResolutionPresentationRenderView(
     : switchIn === null
       ? battleStringPrintableLength(latestMessage)
       : partySendOutGoTextVisibleChars(switchIn.elapsed, switchIn.timing ?? undefined);
-  let hpTarget: Readonly<{ battler: 0 | 1; to: number }> | null = null;
+  let hpTarget: Readonly<{ battler: 0 | 1; to: number; barFill?: number }> | null = null;
   let waitCursor: Readonly<{ age: number }> | null = null;
   let activeTrainerSlide: Readonly<{ battler: 0 | 1; offscreenX2: number }> | null = null;
   // S10A fade: presented only over a battler shown as the doll at its start (else the ordinary field for its rows).
@@ -1823,15 +1826,17 @@ export function createBattleResolutionPresentationRenderView(
           `battle resolution HP controller ${command.healthValue} resolves ${command.from}->${semanticEndpoint}, event endpoint is ${command.to}`,
         );
       }
+      const barProgram = { maxHp: battler.maxHP, from: command.from, to: command.to };
       field = withDisplayedHp(
         field,
         command.battler,
-        battleHealthBarValueAtFrame(
-          { maxHp: battler.maxHP, from: command.from, to: command.to },
-          state.lifecycle.phaseElapsed,
-        ),
+        battleHealthBarValueAtFrame(barProgram, state.lifecycle.phaseElapsed),
       );
-      hpTarget = Object.freeze({ battler: command.battler, to: command.to });
+      // hpb202: below the bar's 48 pixels the Q_24_8 currValue (not the integer HP text) fills the bar.
+      hpTarget = Object.freeze({
+        battler: command.battler, to: command.to,
+        ...(battler.maxHP < 48 ? { barFill: battleHealthBarFillValueAtFrame(barProgram, state.lifecycle.phaseElapsed) } : {}),
+      });
     } else if (command.type === "move-animation" && command.animation) {
       const lead = liveMoveIdleLeadRows(command.animation, field);
       // iu120: the pre rows show the activation row's image (idle98: F_att..A-1 == row A), so a lead > 0 command's pre rows keep it.
@@ -2031,6 +2036,8 @@ export function createBattleResolutionPresentationRenderView(
     hpTarget?.battler === 0 ? hpTarget.to : undefined;
   const opponentTarget =
     hpTarget?.battler === 1 ? hpTarget.to : undefined;
+  const playerBarFill = hpTarget?.battler === 0 ? hpTarget.barFill : undefined;
+  const opponentBarFill = hpTarget?.battler === 1 ? hpTarget.barFill : undefined;
   const playerFaint = effect?.type === "faint" && effect.battler === 0
     ? effect
     : null;
@@ -2073,11 +2080,11 @@ export function createBattleResolutionPresentationRenderView(
     fieldArt,
     healthboxes: Object.freeze({
       player: Object.freeze({
-        ...healthboxParams(field.player, playerTarget),
+        ...healthboxParams(field.player, playerTarget, playerBarFill),
         currentHp: field.player.hp,
         maxHp: field.player.maxHP,
       }),
-      opponent: healthboxParams(field.opponent, opponentTarget),
+      opponent: healthboxParams(field.opponent, opponentTarget, opponentBarFill),
     }),
     message:
       latestMessage === null

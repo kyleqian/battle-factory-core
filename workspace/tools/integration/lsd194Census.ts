@@ -1,3 +1,4 @@
+// hpb202: durations use the displayed field BEFORE each command (battleResolutionFieldBeforeCommand, as production does) - the old segment-start field made an hp command after an in-segment switch-in throw "invalid HP program" (docs/hpb202-health-bar-programs.md).
 // lsd194 (docs/lsd194-print-floor-and-drain.md): ont193Census.ts with fields [18] = every command's presented frames (battleResolutionCommandDuration on the segment
 // field), [19] = a general-animation's animation name (null otherwise) and [20] = an hp command's timing.minimumFrames (null otherwise);
 // lsd194CensusDelta.py attributes every changed command to the print-floor drop or the Leech Seed drain rows. Runs unchanged on the base tree.
@@ -26,7 +27,7 @@ import {
   advanceFactoryRoundBattleCommand, advanceFactoryRoundBattleResolution, advanceFactoryRoundBattleStartIntro,
   beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
-import { battleResolutionCommandDuration, liveMoveRandom2PlanContextAt } from "../../src/engine/battleResolutionPresentationRender.ts";
+import { battleResolutionCommandDuration, battleResolutionFieldBeforeCommand, liveMoveRandom2PlanContextAt } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { createPresentationRngSession } from "../../src/engine/presentationRngHost.ts";
 import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePresentationRng.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
@@ -83,9 +84,9 @@ for (let seed = from!; seed <= to!; seed += 1) {
             c.type === "message" && c.lines.join("\n").includes("is tightening") ? nextPrintU(s.events, c.eventSequence) : null,
             c.type === "move-animation" ? (c.timing.scriptLeadFrames ?? 0) : null, c.type === "hp" ? (c.timing.tailFrames ?? 0) : null,
             c.type === "move-animation" ? (c.animation?.moveId ?? null) : null,
-            c.type === "move-animation" ? battleResolutionCommandDuration(c, s.field) : null,
+            c.type === "move-animation" ? battleResolutionCommandDuration(c, battleResolutionFieldBeforeCommand(s.field, s.commands, i)) : null,
             c.type === "move-animation" ? (c.timing.scriptTailRows ?? 0) : null,
-            battleResolutionCommandDuration(c, s.field), c.type === "general-animation" ? c.animation : null,
+            battleResolutionCommandDuration(c, battleResolutionFieldBeforeCommand(s.field, s.commands, i)), c.type === "general-animation" ? c.animation : null,
             c.type === "hp" ? c.timing.minimumFrames : null]);
         });
       }
