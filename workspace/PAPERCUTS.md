@@ -40,7 +40,13 @@ history.
   (15, 2026-10-17 ont193 / lsd194) ont193 hand-sharded the full suite across its own re-pins despite the brief, so no single run covered
   the final tree (the supervisor's own 48-min run did); lsd194 started its suite at ~80 of 120 min and was capped while re-pinning
   20 failures. A 120-min cap cannot hold a shared-timing change + census + a 48-min suite + a re-pin round; split such steps (~1 h).
-- **Hits:** 3 sessions (2026-10-14, 2026-10-15/16, 2026-10-16/17), ~2.5 h total.
+  (16, 2026-10-23) `lsd194Probes.sh` fails under `sh` ("jobs: Illegal option -r"; run it with `bash`); `lsd194SoakPins.ts` needs a manual
+  `git archive` + `node_modules` symlink per older tree (a `--tree=<rev>` flag would remove it); `lsd194CensusDelta.py` assumes only the
+  final tree carries the drain, so later censuses need `rst197CensusDelta.py`; a full suite beside a worker's single-file vitest lost one
+  vitest fork ("Worker exited unexpectedly"; the missing file had to be found by diffing reported files against `git ls-files`, ~10 min);
+  worker-only typecheck skips let `findLast` (lib ES2022) and two narrowing errors reach the supervisor's gate (~10 min); lsd198's drain
+  RGB dumps are not committed, so its dense compare first regenerates ROM frames; each single vitest file spends ~75 s collecting.
+- **Hits:** 4 sessions (2026-10-14, 2026-10-15/16, 2026-10-16/17, 2026-10-23), ~3 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
   and the supervisor; census job limit from `/etc/pokebench-runner.env`. Vendor paths: 155 `tools/**/*.sh` hard-code
   `/Users/kyle/Developer/pokebench/vendor`; replace with `${POKEBENCH_VENDOR_DIR:-…}` and export it from the runner env (one sweep +
