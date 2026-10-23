@@ -1,0 +1,986 @@
+{
+ "sst200-ancient-power-s11.json-off-r1.json": {
+  "move": "ancient-power",
+  "chain": [
+   {
+    "label": "BattleScript_AllStatsUpAtk+27",
+    "run": 32,
+    "frame": 332,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 333,
+    "end": 419
+   },
+   {
+    "label": "BattleScript_AllStatsUpDef+17",
+    "run": 36,
+    "frame": 422,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 423,
+    "end": 510
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpeed+17",
+    "run": 40,
+    "frame": 513,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 514,
+    "end": 599
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpAtk+17",
+    "run": 44,
+    "frame": 602,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 603,
+    "end": 690
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpDef+17",
+    "run": 48,
+    "frame": 693,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 694,
+    "end": 781
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 796,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-ancient-power-s11.json-on-r1.json": {
+  "move": "ancient-power",
+  "chain": [
+   {
+    "label": "BattleScript_AllStatsUpAtk+27",
+    "run": 30,
+    "frame": 429,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 430,
+    "end": 516
+   },
+   {
+    "label": "BattleScript_AllStatsUpDef+17",
+    "run": 34,
+    "frame": 519,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 520,
+    "end": 607
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpeed+17",
+    "run": 38,
+    "frame": 610,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 611,
+    "end": 696
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpAtk+17",
+    "run": 42,
+    "frame": 699,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 700,
+    "end": 787
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpDef+17",
+    "run": 46,
+    "frame": 790,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 791,
+    "end": 878
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 893,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-calm-mind-s11.json-off-r1.json": {
+  "move": "calm-mind",
+  "chain": [
+   {
+    "label": "BattleScript_CalmMindDoMoveAnim+40",
+    "run": 15,
+    "frame": 184,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 185,
+    "end": 272
+   },
+   {
+    "label": "BattleScript_CalmMindTrySpDef+28",
+    "run": 20,
+    "frame": 276,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 277,
+    "end": 364
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 377,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-calm-mind-s11.json-on-r1.json": {
+  "move": "calm-mind",
+  "chain": [
+   {
+    "label": "BattleScript_CalmMindDoMoveAnim+40",
+    "run": 13,
+    "frame": 261,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 262,
+    "end": 349
+   },
+   {
+    "label": "BattleScript_CalmMindTrySpDef+28",
+    "run": 18,
+    "frame": 353,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 354,
+    "end": 441
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 454,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-cosmic-power-s11.json-off-r1.json": {
+  "move": "cosmic-power",
+  "chain": [
+   {
+    "label": "BattleScript_CosmicPowerDoMoveAnim+40",
+    "run": 15,
+    "frame": 187,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 188,
+    "end": 275
+   },
+   {
+    "label": "BattleScript_CosmicPowerTrySpDef+28",
+    "run": 20,
+    "frame": 279,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 280,
+    "end": 367
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 380,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-cosmic-power-s11.json-on-r1.json": {
+  "move": "cosmic-power",
+  "chain": [
+   {
+    "label": "BattleScript_CosmicPowerDoMoveAnim+40",
+    "run": 13,
+    "frame": 397,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 398,
+    "end": 485
+   },
+   {
+    "label": "BattleScript_CosmicPowerTrySpDef+28",
+    "run": 18,
+    "frame": 489,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 490,
+    "end": 577
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 590,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-curse-s11.json-off-r1.json": {
+  "move": "curse",
+  "chain": [
+   {
+    "label": "BattleScript_CurseTrySpeed+35",
+    "run": 15,
+    "frame": 104,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 105,
+    "end": 190
+   },
+   {
+    "label": "BattleScript_CurseTryAttack+17",
+    "run": 19,
+    "frame": 193,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 194,
+    "end": 280
+   },
+   {
+    "label": "BattleScript_CurseTryDefense+17",
+    "run": 23,
+    "frame": 283,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 284,
+    "end": 371
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 384,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-curse-s11.json-on-r1.json": {
+  "move": "curse",
+  "chain": [
+   {
+    "label": "BattleScript_CurseTrySpeed+35",
+    "run": 13,
+    "frame": 249,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 250,
+    "end": 335
+   },
+   {
+    "label": "BattleScript_CurseTryAttack+17",
+    "run": 17,
+    "frame": 338,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 339,
+    "end": 425
+   },
+   {
+    "label": "BattleScript_CurseTryDefense+17",
+    "run": 21,
+    "frame": 428,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 429,
+    "end": 516
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 529,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-dragon-dance-s11.json-off-r1.json": {
+  "move": "dragon-dance",
+  "chain": [
+   {
+    "label": "BattleScript_DragonDanceDoMoveAnim+40",
+    "run": 15,
+    "frame": 187,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 188,
+    "end": 274
+   },
+   {
+    "label": "BattleScript_DragonDanceTrySpeed+28",
+    "run": 20,
+    "frame": 278,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 279,
+    "end": 364
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 377,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-dragon-dance-s11.json-on-r1.json": {
+  "move": "dragon-dance",
+  "chain": [
+   {
+    "label": "BattleScript_DragonDanceDoMoveAnim+40",
+    "run": 13,
+    "frame": 298,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 299,
+    "end": 385
+   },
+   {
+    "label": "BattleScript_DragonDanceTrySpeed+28",
+    "run": 18,
+    "frame": 389,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 390,
+    "end": 475
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 488,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-foe-calm-mind-s11.json-off-r1.json": {
+  "move": "calm-mind",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_CalmMindDoMoveAnim+40",
+    "run": 42,
+    "frame": 394,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 395,
+    "end": 482
+   },
+   {
+    "label": "BattleScript_CalmMindTrySpDef+28",
+    "run": 47,
+    "frame": 486,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 487,
+    "end": 574
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-calm-mind-s11.json-on-r1.json": {
+  "move": "calm-mind",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_CalmMindDoMoveAnim+40",
+    "run": 38,
+    "frame": 482,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 483,
+    "end": 570
+   },
+   {
+    "label": "BattleScript_CalmMindTrySpDef+28",
+    "run": 43,
+    "frame": 574,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 575,
+    "end": 662
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-curse-s11.json-off-r1.json": {
+  "move": "curse",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_CurseTrySpeed+35",
+    "run": 42,
+    "frame": 314,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 315,
+    "end": 400
+   },
+   {
+    "label": "BattleScript_CurseTryAttack+17",
+    "run": 46,
+    "frame": 403,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 404,
+    "end": 490
+   },
+   {
+    "label": "BattleScript_CurseTryDefense+17",
+    "run": 50,
+    "frame": 493,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 494,
+    "end": 581
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-curse-s11.json-on-r1.json": {
+  "move": "curse",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_CurseTrySpeed+35",
+    "run": 38,
+    "frame": 470,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 471,
+    "end": 556
+   },
+   {
+    "label": "BattleScript_CurseTryAttack+17",
+    "run": 42,
+    "frame": 559,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 560,
+    "end": 646
+   },
+   {
+    "label": "BattleScript_CurseTryDefense+17",
+    "run": 46,
+    "frame": 649,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 650,
+    "end": 737
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-superpower-s11.json-off-r1.json": {
+  "move": "superpower",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_AtkDefDown+42",
+    "run": 60,
+    "frame": 478,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 479,
+    "end": 565
+   },
+   {
+    "label": "BattleScript_AtkDefDown_TryDef+32",
+    "run": 66,
+    "frame": 570,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 571,
+    "end": 658
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-superpower-s11.json-on-r1.json": {
+  "move": "superpower",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_AtkDefDown+42",
+    "run": 56,
+    "frame": 706,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 707,
+    "end": 793
+   },
+   {
+    "label": "BattleScript_AtkDefDown_TryDef+32",
+    "run": 62,
+    "frame": 798,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 799,
+    "end": 886
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-tickle-s11.json-off-r1.json": {
+  "move": "tickle",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_TickleDoMoveAnim+51",
+    "run": 44,
+    "frame": 393,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 394,
+    "end": 480
+   },
+   {
+    "label": "BattleScript_TickleTryLowerDef+32",
+    "run": 50,
+    "frame": 485,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 486,
+    "end": 573
+   }
+  ],
+  "next": null
+ },
+ "sst200-foe-tickle-s11.json-on-r1.json": {
+  "move": "tickle",
+  "foe": true,
+  "chain": [
+   {
+    "label": "BattleScript_TickleDoMoveAnim+51",
+    "run": 40,
+    "frame": 578,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 579,
+    "end": 665
+   },
+   {
+    "label": "BattleScript_TickleTryLowerDef+32",
+    "run": 46,
+    "frame": 670,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 671,
+    "end": 758
+   }
+  ],
+  "next": null
+ },
+ "sst200-memento-s11.json-off-r1.json": {
+  "move": "memento",
+  "chain": [
+   {
+    "label": "BattleScript_EffectMemento+74",
+    "run": 19,
+    "frame": 201,
+    "len": 95,
+    "first": 1,
+    "last": 30,
+    "hold": 64,
+    "F": 202,
+    "end": 296
+   },
+   {
+    "label": "BattleScript_EffectMemento+109",
+    "run": 25,
+    "frame": 301,
+    "len": 96,
+    "first": 1,
+    "last": 31,
+    "hold": 64,
+    "F": 302,
+    "end": 397
+   }
+  ],
+  "next": {
+   "kind": "faint print",
+   "F": 483,
+   "label": "BattleScript_FaintAttacker+12"
+  }
+ },
+ "sst200-memento-s11.json-on-r1.json": {
+  "move": "memento",
+  "chain": [
+   {
+    "label": "BattleScript_EffectMemento+74",
+    "run": 17,
+    "frame": 349,
+    "len": 95,
+    "first": 1,
+    "last": 30,
+    "hold": 64,
+    "F": 350,
+    "end": 444
+   },
+   {
+    "label": "BattleScript_EffectMemento+109",
+    "run": 23,
+    "frame": 449,
+    "len": 96,
+    "first": 1,
+    "last": 31,
+    "hold": 64,
+    "F": 450,
+    "end": 545
+   }
+  ],
+  "next": {
+   "kind": "faint print",
+   "F": 631,
+   "label": "BattleScript_FaintAttacker+12"
+  }
+ },
+ "sst200-silver-wind-s11.json-off-r1.json": {
+  "move": "silver-wind",
+  "chain": [
+   {
+    "label": "BattleScript_AllStatsUpAtk+27",
+    "run": 32,
+    "frame": 264,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 265,
+    "end": 351
+   },
+   {
+    "label": "BattleScript_AllStatsUpDef+17",
+    "run": 36,
+    "frame": 354,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 355,
+    "end": 442
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpeed+17",
+    "run": 40,
+    "frame": 445,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 446,
+    "end": 531
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpAtk+17",
+    "run": 44,
+    "frame": 534,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 535,
+    "end": 622
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpDef+17",
+    "run": 48,
+    "frame": 625,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 626,
+    "end": 713
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 728,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-silver-wind-s11.json-on-r1.json": {
+  "move": "silver-wind",
+  "chain": [
+   {
+    "label": "BattleScript_AllStatsUpAtk+27",
+    "run": 30,
+    "frame": 426,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 427,
+    "end": 513
+   },
+   {
+    "label": "BattleScript_AllStatsUpDef+17",
+    "run": 34,
+    "frame": 516,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 517,
+    "end": 604
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpeed+17",
+    "run": 38,
+    "frame": 607,
+    "len": 86,
+    "first": 1,
+    "last": 21,
+    "hold": 64,
+    "F": 608,
+    "end": 693
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpAtk+17",
+    "run": 42,
+    "frame": 696,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 697,
+    "end": 784
+   },
+   {
+    "label": "BattleScript_AllStatsUpSpDef+17",
+    "run": 46,
+    "frame": 787,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 788,
+    "end": 875
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 890,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-superpower-s11.json-off-r1.json": {
+  "move": "superpower",
+  "chain": [
+   {
+    "label": "BattleScript_AtkDefDown+42",
+    "run": 33,
+    "frame": 405,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 406,
+    "end": 492
+   },
+   {
+    "label": "BattleScript_AtkDefDown_TryDef+32",
+    "run": 39,
+    "frame": 497,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 498,
+    "end": 585
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 600,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-superpower-s11.json-on-r1.json": {
+  "move": "superpower",
+  "chain": [
+   {
+    "label": "BattleScript_AtkDefDown+42",
+    "run": 31,
+    "frame": 622,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 623,
+    "end": 709
+   },
+   {
+    "label": "BattleScript_AtkDefDown_TryDef+32",
+    "run": 37,
+    "frame": 714,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 715,
+    "end": 802
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 817,
+   "label": "BattleScript_HitFromAtkString+1"
+  }
+ },
+ "sst200-tickle-s11.json-off-r1.json": {
+  "move": "tickle",
+  "chain": [
+   {
+    "label": "BattleScript_TickleDoMoveAnim+51",
+    "run": 17,
+    "frame": 183,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 184,
+    "end": 270
+   },
+   {
+    "label": "BattleScript_TickleTryLowerDef+32",
+    "run": 23,
+    "frame": 275,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 276,
+    "end": 363
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 377,
+   "label": "BattleScript_PrintMoveMissed+1"
+  }
+ },
+ "sst200-tickle-s11.json-on-r1.json": {
+  "move": "tickle",
+  "chain": [
+   {
+    "label": "BattleScript_TickleDoMoveAnim+51",
+    "run": 15,
+    "frame": 357,
+    "len": 87,
+    "first": 1,
+    "last": 22,
+    "hold": 64,
+    "F": 358,
+    "end": 444
+   },
+   {
+    "label": "BattleScript_TickleTryLowerDef+32",
+    "run": 21,
+    "frame": 449,
+    "len": 88,
+    "first": 1,
+    "last": 23,
+    "hold": 64,
+    "F": 450,
+    "end": 537
+   }
+  ],
+  "next": {
+   "kind": "typed burst",
+   "F": 551,
+   "label": "BattleScript_PrintMoveMissed+1"
+  }
+ }
+}
