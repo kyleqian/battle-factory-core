@@ -571,6 +571,11 @@ export type BattleResolutionPresentationCommand =
       eventSequence: number;
       battler: 0 | 1;
       animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN";
+      /**
+       * lsd198: a LEECH_SEED_DRAIN whose event stream carries the kernel's animation receipt (Scene ON: General_LeechSeedDrain
+       * plays); the render draws it as Move_ABSORB's body (battleResolutionPresentationRender.ts leechSeedDrainAbsorbEffect).
+       */
+      animated?: true;
       timing: Readonly<{ minimumFrames: number }>;
     }>
   | Readonly<{
@@ -4592,6 +4597,7 @@ export function projectBattleResolutionCommands(
           eventSequence: health.eventSequence,
           battler,
           animation: "LEECH_SEED_DRAIN",
+          ...(leechDrainAnimated ? { animated: true as const } : {}),
           timing: Object.freeze({
             minimumFrames: LEECH_SEED_DRAIN_PRE_ROWS + health.instructionExecution!
               + (leechDrainAnimated ? LEECH_SEED_DRAIN_ANIMATION_ROWS - 1 : 0),

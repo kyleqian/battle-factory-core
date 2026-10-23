@@ -3262,7 +3262,8 @@ export function liveMoveAnimationPresentation(
         }
         case 71:
           config = { move: "ABSORB", attacker, target, fieldProfile, healingCenter: healing, absorptionCenter: healing,
-            allocatorProfile: { hitsplat: 3, orbs: [3, 4, 5, 7, 9, 3, 4, 10], stars, paletteController: 3 } };
+            allocatorProfile: { hitsplat: 3, orbs: [3, 4, 5, 7, 9, 3, 4, 10], stars, paletteController: 3 },
+            ...(request.taskHostedScript ? { taskHostedScript: true } : {}) };
           break;
         default: {
           const orderSeed = seedFor([3, 4, 5, 7, 9, ...range(10, 21)]);

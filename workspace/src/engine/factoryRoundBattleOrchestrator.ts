@@ -111,6 +111,7 @@ import {
   battleResolutionMoveAnimationField,
   BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES,
   createBattleResolutionPresentationRenderView,
+  LEECH_SEED_DRAIN_ABSORB_MOVE_ID,
   LIVE_SEMI_INVULNERABLE_NONE,
   type LiveSemiInvulnerableHidden,
   isBattleResolutionButtonMessageReady,
@@ -2292,7 +2293,7 @@ function withSceneOffBattlerX2Input(state: FactoryRoundBattleOrchestratorState):
  * kernel boundary remains immutable, and the next command UI does not exist
  * until the six displayed blank handoff frames have completed.
  */
-function prepareResolutionPalette(
+export function prepareResolutionPalette(
   state: FactoryRoundBattleOrchestratorState,
 ): FactoryRoundBattleOrchestratorState {
   if (state.config.battleScene !== "on") return withSceneOffBattlerX2Input(state);
@@ -2436,12 +2437,21 @@ function prepareResolutionPalette(
   // strictly before this command, lend the order to a move body at its
   // activation edge, then apply the command's own event (the body plan).
   const bodyPlanAt = liveSpriteOrderBodyPlanAt(resolution);
-  if (orderHost) orderHost = advanceLiveSpriteOrderHost(orderHost, resolution, commandSequence, true, bodyPlanAt);
+  // lsd198: a Scene ON LEECH_SEED_DRAIN plays Move_ABSORB's body; its lend is the order strictly before the drain's own animation receipt
+  // (the command's event is the later healthbarupdate); the battler x2 history cuts at the same event (the drain's rows stand at the pose before it).
+  const drainBody = command?.type === "general-animation" && command.animation === "LEECH_SEED_DRAIN" && command.animated === true;
+  const drainAnimationSequence = drainBody
+    ? [...segment.events].reverse().find((event) => event.sequence < commandSequence && event.payload.kind === "animation"
+      && event.payload.animationId === "LEECH_SEED_DRAIN")?.sequence
+    : undefined;
+  if (orderHost) {
+    orderHost = advanceLiveSpriteOrderHost(orderHost, resolution, drainAnimationSequence ?? commandSequence, true, bodyPlanAt);
+  }
   // Battler x2 history (liveBattlerX2History.ts): the same event cursor discipline; a body reads the history at its
   // activation edge, then its own event (the body's end-state class) applies.
   const retainedX2 = state.liveBattlerX2Host?.battleCallStart === state.activeBattleCallStart
     ? state.liveBattlerX2Host : undefined;
-  let x2Host = retainedX2 ? advanceLiveBattlerX2Host(retainedX2.host, resolution, commandSequence, true) : undefined;
+  let x2Host = retainedX2 ? advanceLiveBattlerX2Host(retainedX2.host, resolution, drainAnimationSequence ?? commandSequence, true) : undefined;
   // rst139: the history before this command (every event strictly before it) for its ordinary rows.
   const ordinaryX2History = x2Host?.history;
   let battlerX2Input: LiveMoveBattlerX2Input | undefined;
@@ -2486,6 +2496,10 @@ function prepareResolutionPalette(
       spriteInput = resolution.liveMoveSpriteAllocatorInput;
       spriteOrderInput = resolution.liveMoveSpriteOrderInput;
     }
+  } else if (drainBody && orderHost) {
+    // lsd198: Move_ABSORB's body inside General_LeechSeedDrain reads the same lend as the ordinary ABSORB (liveMoveAnimation.ts case 71).
+    spriteOrderInput = retainedSprites?.commandKey === commandKey
+      ? resolution.liveMoveSpriteOrderInput : lendLiveSpriteOrder(orderHost, LEECH_SEED_DRAIN_ABSORB_MOVE_ID);
   } else if (command !== undefined && !(command.type === "move-animation" && command.actionTransition)
     && (command.type === "move-animation"
     || command.type === "switch-out" || command.type === "switch-in"
