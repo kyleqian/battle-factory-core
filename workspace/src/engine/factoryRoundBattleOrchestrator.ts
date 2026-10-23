@@ -2441,7 +2441,7 @@ export function prepareResolutionPalette(
   // (the command's event is the later healthbarupdate); the battler x2 history cuts at the same event (the drain's rows stand at the pose before it).
   const drainBody = command?.type === "general-animation" && command.animation === "LEECH_SEED_DRAIN" && command.animated === true;
   const drainAnimationSequence = drainBody
-    ? segment.events.findLast((event) => event.sequence < commandSequence && event.payload.kind === "animation"
+    ? [...segment.events].reverse().find((event) => event.sequence < commandSequence && event.payload.kind === "animation"
       && event.payload.animationId === "LEECH_SEED_DRAIN")?.sequence
     : undefined;
   if (orderHost) {
