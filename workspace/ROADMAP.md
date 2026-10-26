@@ -14,7 +14,34 @@ battles, and the open-level rule set (until the single-battle loop is solid).
 later milestone — stage S11 below (user decision, 2026-07-28). No earlier
 stage's acceptance includes audio.
 
-## Current execution priority — 2026-10-13
+## Current execution priority — 2026-10-26 (finish plan)
+
+The user approved `docs/finish-plan.md` on 2026-10-26. It is the mission until
+its definition of done is met; the 2026-10-13 priority below is superseded as
+an ordering (its scope authorizations stay in force). Order of work:
+
+1. **Crashes.** Randomized soaks with Battle Scene ON and rendering on every
+   frame; in-app containment so a presentation throw degrades to the pause
+   instead of ending the battle. Bar: 0 CRASH / 0 HANG over 3,000 battles per
+   scene, nightly.
+2. **Every animation plays.** A new **approximate** claim class (user
+   decision 2026-10-26): when an adapter would decline for provenance reasons,
+   draw the body with the best available inputs and report the command as
+   approximate. The static-field hold remains only where no body exists. Then
+   the player's back send-out and intro send-outs in Scene ON, Castform forms,
+   weather-continues side. Exact / faithful counts never move for this work.
+3. **Production.** Test-only data out of `src/`, bundle splitting, title
+   screen, touch + gamepad input, saved streak, static-host deploy + CI.
+4. **Cleanup**, interleaved, one reversible commit per step: one-off step
+   scripts, ledger archive, provider / lane code, `core-rs` to its own branch,
+   a 5-minute test gate with the full suite nightly, stale refs.
+5. **Timing residuals** last. They are logged in ISSUES, never blocking.
+
+Follow `docs/cax31-session-handoff.md` for the host, the current step and
+the gates. Audio stays deferred (S11). The settled exceptions below are unchanged.
+
+### Superseded ordering — 2026-10-13 (scope authorizations remain valid)
+
 
 The current main mission is **S10A plus the Factory accuracy finish-up**:
 remaining animation variants, presentation corrections and battle-engine

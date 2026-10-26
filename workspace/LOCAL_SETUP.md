@@ -10,7 +10,8 @@ set up and validated under `docs/cax31-arm-runner.md`. This does not restore
 the old hcloud-only policy. The user has now authorized the next main session
 on CAX31's `master` checkout; see `docs/cax31-session-handoff.md`. The Mac's
 last run ended at the 10-hour cap. Keep its supervisor stopped until the
-remote results are imported. No recurring timers are authorized.
+remote results are imported. Since 2026-10-26 a daily 21:30 UTC CAX31 run is
+authorized (`docs/cax31-session-handoff.md`); the mission is `docs/finish-plan.md`.
 
 ## Play and develop
 

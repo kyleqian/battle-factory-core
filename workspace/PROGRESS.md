@@ -5,13 +5,28 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-26 / 27 — CAX31 session (supervisor, Opus 5.5): tl205 + tl206 folded (in progress)
+## 2026-10-26 — User decision: finish plan approved; CAX31 run restarted on it (top layer, docs only)
+
+- **State:** master `ef511e03d` + these docs commits; production src tree `21f22b324` (tl205 + tl206 folded below, supervisor gates
+  typecheck / full suite 1,691 files 14,065 tests 0 failed / build on `80c0a8c56`). No open DEFERRED items. Phase 0's tl206 item is done.
+- **Did:** top-layer audit → `docs/finish-plan.md` (approved): crashes first (Scene ON soaks with rendering on; in-app containment),
+  then every animation plays (new **approximate** claim class replaces the static-field hold; 177 / 27,261 census commands fall back
+  today, all with existing bodies), then production + cleanup interleaved, timing last. ROADMAP "Current execution priority" rewritten;
+  `docs/cax31-session-handoff.md` rewritten (incl. the standing daily-run authorization: cron 21:30 UTC on the box); AGENTS.md /
+  LOCAL_SETUP.md notes; live-status `pending` corrected. The 21:29 UTC run was stopped at the user's request after folding tl205/tl206;
+  its exs207 worker branches are kept as long-tail work.
+- **Next:** handoff "Next work" 1 → 4 (Scene ON soak option + first ON sweeps; in-app containment; approximate contract).
+- **Notes:** no push (user's step); the Mac imports box results through bundles.
+---
+
+## 2026-10-26 — CAX31 session (supervisor, Opus 5.5): tl205 + tl206 folded; stopped by the user at 22:40 UTC for the finish-plan restart (entry above)
 
 - **State:** master `80c0a8c56` (src tree `21f22b324`). Presentation only so far.
 - **Folded:** tl205 + tl206 (Scene ON script tail, trail -1, for the 9 tl204-measured zero-tail moves; 13 tail-aware test re-pins).
   Supervisor gates on the exact merged code `80c0a8c56`: typecheck 0; full suite 1,691 files / 14,065 tests passed, 0 failed; build 0
   (`.integration/validation/sv-20261026/tl206/`). Census / tl204Compare were run on the union in the 2026-10-23 session (unchanged src).
-- **Running:** exs207 (Explosion-breaks-Substitute faint, ROM rows both scenes; `worker/integration-20261026-213055`).
+- **Stopped mid-step:** exs207 (Explosion-breaks-Substitute faint, ROM rows both scenes): refs `worker/integration-20261026-213055`,
+  `worker/integration-20261026-223044`, `worker/union-exs207` kept; not folded, no gates. Timing work: long tail under the finish plan.
 - **Next:** tl204 body-window residuals + the other 14 zero-tail moves; msg175 residuals; #146 visuals.
 ---
 

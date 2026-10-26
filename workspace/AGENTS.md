@@ -22,6 +22,12 @@
 > are authorized for push. The remote supervisor commits locally and does not
 > push automatically. Import its results before resuming a Mac writer.
 
+> **2026-10-26, user decision:** `docs/finish-plan.md` is the mission (crashes,
+> then every animation plays, then production and cleanup; timing last). A
+> daily 21:30 UTC CAX31 run is scheduled and authorized; see
+> `docs/cax31-session-handoff.md`. Earlier "no timers" wording is superseded
+> for that schedule only. Commit locally; pushing stays the user's step.
+
 A native-TypeScript browser reproduction of **Pokémon Emerald's Battle
 Factory**: the rental-draft + 7-battle challenge loop of the Battle Frontier
 facility, matching the real game's pixels and behavior frame-by-frame. This

@@ -1,33 +1,76 @@
-# CAX31 next-session handoff — 2026-10-23
+# CAX31 session handoff — 2026-10-26 (finish plan)
 
-The 2026-10-22/23 CAX31 session (Opus 5.5 supervisor, Sonnet 5.5 / Opus workers) ended cleanly; see the top PROGRESS.md entry.
-Any further run needs a fresh user authorization. Continue on CAX31's `master` at `/srv/pokebench/pokeemerald-factory-core/workspace`
-only if the user renews it; keep the Mac supervisor stopped while CAX31 writes, commit locally, no automatic push or timers.
-Import the results (master + retained `worker/*` refs + `.integration/validation/sv-20261022/` + `.codex-logs/`) before a Mac writer resumes.
+The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
+running CAX31 session on it. Run on CAX31's `master` at
+`/srv/pokebench/pokeemerald-factory-core/workspace`, Opus 5.5 supervisor,
+Sonnet 5.5 workers, headless in tmux. Commit locally; never push. Keep the
+Mac supervisor stopped. Read the plan first, then PROGRESS.md's top entry.
 
-## Done this session (do not repeat)
+## Standing user authorization (2026-10-26): daily runs
 
-lsd194 / lsd196 / rst197 (print floor drop, Leech Seed drain rows, second-stat rows, Rest pause), lsd198 / lsd199 (Scene ON drain
-animation = Move_ABSORB body, 0 px), sst200 (second-stat ROM rows), fnt201 (faint script lead, 16 / 16 cases 0), hpb202 (health bar
-Q24.8 port; Shedinja KO crash fixed), tl204 (zero-tail evidence). Each folded after supervisor gates on the exact code.
-tl205 (Scene ON script tail for the tl204-measured moves): see the top PROGRESS.md entry for whether it was folded.
+The user asked on 2026-10-26 for a 10-hour run every day. The pokebench
+crontab starts `/srv/pokebench/ops/daily-run.sh` at 21:30 UTC, and each run
+it starts is authorized. This supersedes the "fresh user authorization" and
+"no recurring timers" wording in earlier handoffs, AGENTS.md and
+LOCAL_SETUP.md; automatic push stays off. Do not edit or disable the
+schedule. Leave this handoff ready for the next day's run and keep this
+section when rewriting it. An OPEN entry in DEFERRED.md stops the next runs
+from starting until the user resolves it, so use one only for a real user
+decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
+worker on `worker/integration-20261026-213055`) was timing work; its branch is
+kept and is long-tail.
 
-## Next work (in order)
+## State at restart
 
-1. tl205 is NOT on master. Start from `worker/integration-20261023-080938` (tl206 tip `ea0846220` = master + tl205 + the 13 test
-   re-pins; census both scenes and typecheck green on its src, see PROGRESS). Run the full suite + build on that exact code (check
-   liveWallMoveAdapters / tl204ZeroTailRows, not rerun by tl206), then fold. Then the remaining tl204 body-window residuals (Scary Face -14, Calm Mind -4, Light Screen +2,
-   Charm / Fake Tears -1) and the other 14 zero-tail moves (docs/tl204-zero-tail-rows.md).
-2. The Explosion-that-broke-a-Substitute faint (+135 lead in the fnt201 census, unmeasured): one ROM scenario.
-3. msg175's open edges (Toxic -21 ON / -2 OFF, Roar OFF +17, Baton Pass OFF -66, Snore +10, the Rest-route Tackle HP anchor).
-4. #146 non-MAGBY forced send-in visuals, player back send-out / intro visuals, transformed-battler effects, Castform / Substitute /
-   species / history variants (ISSUES.md). Audio stays deferred.
+- master `ef511e03d` + the 2026-10-26 re-aim commit (docs only). Production src tree `21f22b324`: tl205 + tl206 (Scene ON
+  script tails, 13 tail-aware re-pins) were folded by the 21:29 UTC run before it was stopped; supervisor gates on the exact
+  merged code `80c0a8c56`: typecheck 0, full suite 1,691 files / 14,065 tests 0 failed, build 0
+  (`.integration/validation/sv-20261026/tl206/`). Census / differential / soaks were not rerun after that fold: run census
+  both scenes + differential once as the first light gate of this session (presentation-only change, kernel digests must match).
+- exs207 (Explosion-breaks-Substitute faint timing) was stopped mid-step: refs `worker/integration-20261026-213055`,
+  `worker/integration-20261026-223044`, `worker/union-exs207` kept, worktrees under `.worktrees/` may be removed after copying
+  logs. Not folded, no gates. Timing: long tail (Next work 4).
+- No open DEFERRED items. The 5 dead tmux sessions were killed at restart.
 
-Gate recipe that worked here (serialize heavy jobs; one worker beside them at most): typecheck; `lsd194Census.sh` both scenes with
-`LSD194_CENSUS_JOBS=4 LSD194_SPLIT=4` + `tools/integration/rst197CensusDelta.py`; `compare:differential` (3 traces); full suite under
-`nohup` with an exit file (~47-66 min; diff reported files against `git ls-files` if a vitest fork dies); build; soaks at wind-down.
-A supervisor verification checkout made with `git worktree add` needs the `reference` symlink, `node_modules` and
-`artifacts/wasm/factory_wasm.wasm` (the launcher does this for worker worktrees).
+## Next work (in order) — see `docs/finish-plan.md` for acceptance
+
+1. **Phase 1, crash hardening.** (a) Worker: `tools/soak` gains
+   `--scene on|off|both`; with `on`, `createInitialState({battleSceneMode:"on"})`
+   and `--render-every 1` so the Scene ON renderer runs every frame. Smoke it
+   on 3 seeds. (b) Supervisor: vanilla 0:20 ON, then full 0:60 ON
+   `--vary-rng` with `--parallel` bounded to free memory (one full suite OR one
+   soak fan-out at a time on 16 GiB). Every CRASH / HANG becomes a worker step
+   with a source-rule fix and a Tier-1 test. (c) Worker: in-app containment
+   — a throw raised while computing or drawing a presentation command
+   degrades that command to the pause, logs the error + session trace, and
+   the battle continues; gameplay-state throws keep the overlay; tests pin
+   both. (d) Playwright random play (10 min, both scenes) against the built
+   bundle, collecting `pageerror`; make it a tool, not a one-off.
+2. **Phase 2, every animation plays.** First the approximate contract in
+   `ANIMATION_VERIFICATION.md` + a census column, then promotions by weight:
+   Substitute doll cells (74 commands), order / allocator unknown (51),
+   Castform (~20), Endeavor (12), turn 0 (7), hidden target (3), the 12
+   no-adapter cases; then player back send-out + intro send-outs in Scene ON
+   and the weather-continues battler (#157). Acceptance: Scene ON census
+   0..999 with 0 static-field commands.
+3. **Phase 3, production** and **Cleanup** per the plan, interleaved: start
+   cleanup steps 1–3 (one-off scripts, ledger archive, provider / lane code)
+   as soon as a worker slot is free, each one commit, each verified by
+   typecheck + full suite + build.
+4. **Timing** residuals (tl204 body windows, msg175 edges, the Explosion /
+   Substitute faint) only when nothing above is ready. Record them in ISSUES.
+
+## Gate recipe (unchanged)
+
+Serialize heavy jobs; at most one worker beside them. typecheck;
+`lsd194Census.sh` both scenes with `LSD194_CENSUS_JOBS=4 LSD194_SPLIT=4` +
+`rst197CensusDelta.py`; `compare:differential` (3 traces); full suite under
+`nohup` with an exit file (~47–66 min; diff reported files against
+`git ls-files` if a vitest fork dies); build; soaks at wind-down. A supervisor
+verification checkout made with `git worktree add` needs the `reference`
+symlink, `node_modules` and `artifacts/wasm/factory_wasm.wasm` (the launcher
+does this for worker worktrees). Production changes need full suite + build on
+the exact folded code; evidence / tooling-only changes use the affected gates.
 
 ## Headless execution discipline
 
@@ -46,26 +89,19 @@ workers or a dirty checkout; wind-down is accepted only in the last 20 minutes.
 Usage limits/provider failures stop the controller without automatic retries.
 Use one worker at a time on this 16 GiB machine. Budget validation before
 launching more production work; do not dispatch a worker whose cap exceeds
-remaining campaign time. Apply the normal scoped verification/fold policy and
-leave a truthful committed handoff before the cap.
+remaining campaign time. Leave a truthful committed handoff before the cap:
+rewrite "State at restart" and "Next work" above, keep the daily-runs section.
 
-## Baseline and host budget
-
-Master production src tree `d8fda5802` (tested on `f96e8e805`; later master commits through the wind-down are docs / tools / evidence
-tests unless PROGRESS says tl205 folded). Supervisor gates on that src: typecheck, census both scenes attributed, differential 641 / 641,
-full suite 1,690 files / 14,051 tests 0 failed, build; soak vanilla 0:20 20 / 20; varied-RNG winning carry 0 / 14 / 28 and winning-swap
-carry 0 100 / 100 each. The 0:60 soak profiles were not run (~7.5 h each here). Evidence: `.integration/validation/sv-20261022/`.
+## Host budget
 
 Source `/etc/pokebench-runner.env`: two Vitest workers, four build/Cargo jobs,
 16 GiB RAM and 8 GiB swap. Full suite ~48 minutes. Serialize typecheck, full
-suite, build and census work; use retained PID/log/status files for long jobs
-and keep polling in bounded calls. Do not kill/retry a job just because its
-shell tool yielded. Read CAX31 `PAPERCUTS.md`; bound any soak fan-out to free
-memory and collect every per-seed result. Use host path helpers and
-`/srv/pokebench/vendor/mgba-venv/bin/python`, not Mac-specific paths.
-
-Claude Code 2.1.280 and the Opus/Sonnet model defaults remain pinned. The
-controller owns one deadline and resumes the same supervisor conversation.
+suite, build, census and soak fan-outs; use retained PID/log/status files for
+long jobs and keep polling in bounded calls. Do not kill/retry a job just
+because its shell tool yielded. Read CAX31 `PAPERCUTS.md`; bound any soak
+fan-out to free memory and collect every per-seed result. Use host path
+helpers and `/srv/pokebench/vendor/mgba-venv/bin/python`, not Mac-specific
+paths. Claude Code 2.1.280 and the Opus/Sonnet model defaults remain pinned.
 Oracle services stay localhost-only, ON 8012 / OFF 8014. Preserve pinned
 ROM/ELF/map, worker refs and evidence. No copied provider credentials or new
-infrastructure. Import the results before resuming a Mac writer.
+infrastructure. The Mac imports results through bundles; never push.
