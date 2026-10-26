@@ -75,6 +75,19 @@
 //                      never decides is OK ("budget") while it keeps
 //                      progressing; HANG only after --stall-frames frozen
 //                      frames, exactly as in continuous play.
+//   --scene S          on | off | both. Absent = today's behaviour,
+//                      byte-identical (Scene OFF, no scene tags anywhere).
+//                      `on` starts every seed from battleSceneMode "on" (fresh,
+//                      --start-carry and --vary-rng starts alike), so render()
+//                      -- the same entry point the browser calls -- runs the
+//                      real Scene ON battle-scene drawing. `off` is the same
+//                      as absent but tags lines/JSON/summary with the scene.
+//                      `both` runs every seed twice (off, then on), each
+//                      seed's pair adjacent, and the summary adds one count
+//                      line per scene. Works with --parallel. Rejected with
+//                      --coverage-json when `both` (a seed would be counted
+//                      twice). A throw from render() is a CRASH
+//                      (errorPhase "render"), like an engine throw.
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
 //   --verbose          per-action log for a single-seed repro
@@ -120,11 +133,14 @@ import {
   type SeedOutcome,
   type SeedResult,
   type SoakPolicy,
+  type SoakScene,
 } from "./randomRoundSoakDriver.ts";
 
 // ---------------------------------------------------------------------------
 // --parallel fan-out (parent side)
 // ---------------------------------------------------------------------------
+
+type SceneFlag = SoakScene | "both" | null;
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 
@@ -225,10 +241,11 @@ async function runParallelFanOut(options: {
   seeds: readonly number[];
   parallel: number;
   policy: SoakPolicy;
+  scene: SceneFlag;
   jsonPath: string | null;
   coverageJsonPath: string | null;
 }): Promise<void> {
-  const { args, seeds, parallel, policy, jsonPath, coverageJsonPath } = options;
+  const { args, seeds, parallel, policy, scene, jsonPath, coverageJsonPath } = options;
   const temporaryDirectory = mkdtempSync(join(tmpdir(), "soak-parallel-"));
   const startedAt = Date.now();
   let failed = false;
@@ -279,7 +296,7 @@ async function runParallelFanOut(options: {
       }
     }
 
-    const counts = printSoakSummary(results, policy, ((Date.now() - startedAt) / 1000).toFixed(1));
+    const counts = printSoakSummary(results, policy, ((Date.now() - startedAt) / 1000).toFixed(1), scene);
 
     if (jsonPath) {
       writeFileSync(jsonPath, JSON.stringify({ counts, results }, null, 2));
@@ -309,6 +326,7 @@ function printSoakSummary(
   results: readonly SeedResult[],
   policy: SoakPolicy,
   totalSeconds: string,
+  scene: SceneFlag = null,
 ): Record<SeedOutcome, number> {
   // Aggregate
   const counts = { OK: 0, CRASH: 0, HANG: 0 } as Record<SeedOutcome, number>;
@@ -329,7 +347,11 @@ function printSoakSummary(
   }
 
   console.log("");
-  console.log(`=== soak summary: ${results.length} seeds (policy ${policy}) in ${totalSeconds}s ===`);
+  const sceneLabel = scene === null ? "" : `, scene ${scene}`;
+  console.log(
+    `=== soak summary: ${results.length} ${scene === "both" ? "runs" : "seeds"}`
+      + ` (policy ${policy}${sceneLabel}) in ${totalSeconds}s ===`,
+  );
   // `budget` is a subset of OK (broken out again in the OK breakdown
   // below): seeds that reached --max-frames while still progressing — a
   // stalemate or an endlessly chaining run, not a hang. On the headline
@@ -338,6 +360,18 @@ function printSoakSummary(
   console.log(
     `OK ${counts.OK}  CRASH ${counts.CRASH}  HANG ${counts.HANG}  budget ${budgetSeeds}`,
   );
+  if (scene !== null) {
+    for (const sceneName of ["off", "on"] as const) {
+      const subset = results.filter((r) => r.scene === sceneName);
+      if (subset.length === 0) continue;
+      const count = (outcome: SeedOutcome) => subset.filter((r) => r.outcome === outcome).length;
+      console.log(
+        `scene ${sceneName.padEnd(3)}: ${subset.length} runs  OK ${count("OK")}`
+          + `  CRASH ${count("CRASH")}  HANG ${count("HANG")}`
+          + `  budget ${subset.filter((r) => r.endState === "budget").length}`,
+      );
+    }
+  }
 
   // Depth distribution: how many seeds ever carried a win streak reaching
   // each challengeNum threshold (challengeNum = floor(factoryWinStreak / 7),
@@ -386,7 +420,8 @@ function printSoakSummary(
     console.log(`\n[${list.length}/${results.length}] ${signature}`);
     console.log(`  seeds: ${seedsList}${list.length > 8 ? ", …" : ""}`);
     const sample = list[0]!;
-    console.log(`  first at: seed ${sample.seed}, battle ${sample.battle}, turn ${sample.turn}, frame ${sample.frames}`);
+    const sampleScene = sample.scene !== undefined ? ` (scene ${sample.scene})` : "";
+    console.log(`  first at: seed ${sample.seed}${sampleScene}, battle ${sample.battle}, turn ${sample.turn}, frame ${sample.frames}`);
   }
 
   return counts;
@@ -427,6 +462,16 @@ async function main(): Promise<void> {
     );
     process.exit(2);
   }
+  const sceneFlag = getFlag("--scene");
+  if (args.includes("--scene") && sceneFlag !== "on" && sceneFlag !== "off" && sceneFlag !== "both") {
+    console.error(`bad --scene: ${sceneFlag} (want on|off|both)`);
+    process.exit(2);
+  }
+  const scene = sceneFlag as SceneFlag;
+  if (scene === "both" && getFlag("--coverage-json") !== null) {
+    console.error("bad --scene: both cannot be combined with --coverage-json (each seed would be counted twice)");
+    process.exit(2);
+  }
   const maxFramesFlag = getFlag("--max-frames");
   const maxFrames = resolveMaxFrames(policy, maxFramesFlag !== null ? Number(maxFramesFlag) : undefined);
   const stallFramesFlag = getFlag("--stall-frames");
@@ -458,7 +503,7 @@ async function main(): Promise<void> {
   // Opt-in process fan-out. A --seed run (and a degenerate 1-seed range) has
   // nothing to split, so it stays in-process regardless of --parallel.
   if (singleSeed === null && parallel > 1 && seeds.length > 1) {
-    await runParallelFanOut({ args, seeds, parallel, policy, jsonPath, coverageJsonPath });
+    await runParallelFanOut({ args, seeds, parallel, policy, scene, jsonPath, coverageJsonPath });
     return;
   }
 
@@ -466,7 +511,7 @@ async function main(): Promise<void> {
   // enters a single line of the instrument.
   const coverage = coverageJsonPath !== null ? new SoakCoverageCollector(policy) : null;
 
-  const options: Partial<RunOptions> = {
+  const baseOptions: Partial<RunOptions> = {
     maxFrames,
     renderEvery,
     verbose,
@@ -475,20 +520,29 @@ async function main(): Promise<void> {
     stopAtFirstRoundDecision: firstRound,
     stallFrames,
     maxRounds,
-    ...(startCarry !== 0 || varyRng
-      ? { stateFactory: (seed: number) => createStartCarryState(startCarry, varyRng ? seed : 0) }
-      : {}),
     ...(coverage !== null ? { coverage } : {}),
   };
+  const optionsFor = (sceneName: SoakScene | null): Partial<RunOptions> => ({
+    ...baseOptions,
+    ...(sceneName !== null ? { scene: sceneName } : {}),
+    ...(startCarry !== 0 || varyRng
+      ? {
+        stateFactory: (seed: number) =>
+          createStartCarryState(startCarry, varyRng ? seed : 0, sceneName ?? "off"),
+      }
+      : {}),
+  });
+  const scenes: (SoakScene | null)[] = scene === "both" ? ["off", "on"] : [scene];
   const results: SeedResult[] = [];
   const startedAt = Date.now();
 
-  for (const seed of seeds) {
+  for (const seed of seeds) for (const sceneName of scenes) {
     const seedStart = Date.now();
-    const result = runSeed(seed, options);
+    const result = runSeed(seed, optionsFor(sceneName));
     results.push(result);
     const elapsed = ((Date.now() - seedStart) / 1000).toFixed(1);
-    const head = `seed ${String(seed).padStart(4)}  ${result.outcome.padEnd(5)}`
+    const sceneTag = sceneName !== null ? ` ${sceneName.padEnd(3)}` : "";
+    const head = `seed ${String(seed).padStart(4)}${sceneTag}  ${result.outcome.padEnd(5)}`
       + `  b${result.battle} t${result.turn}  ${String(result.frames).padStart(6)}f  ${elapsed}s`;
     const depthSuffix = `  carry<=${result.maxCarriedWinStreak ?? "-"} depth<=${result.maxBattleDepth ?? "-"}`;
     if (result.outcome === "OK") {
@@ -508,7 +562,7 @@ async function main(): Promise<void> {
     }
   }
 
-  const counts = printSoakSummary(results, policy, ((Date.now() - startedAt) / 1000).toFixed(1));
+  const counts = printSoakSummary(results, policy, ((Date.now() - startedAt) / 1000).toFixed(1), scene);
 
   if (jsonPath) {
     writeFileSync(jsonPath, JSON.stringify({ counts, results }, null, 2));
