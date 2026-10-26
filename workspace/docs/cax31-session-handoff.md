@@ -1,68 +1,33 @@
-# CAX31 next-session handoff — 2026-10-22
+# CAX31 next-session handoff — 2026-10-23
 
-The user authorized another 10-hour run. Continue on CAX31's `master` at
-`/srv/pokebench/pokeemerald-factory-core/workspace`, Opus 5.5 supervisor and
-Sonnet 5.5 workers, headless in tmux. Keep the Mac supervisor stopped. Commit
-locally; do not push automatically or enable recurring timers.
+The 2026-10-22/23 CAX31 session (Opus 5.5 supervisor, Sonnet 5.5 / Opus workers) ended cleanly; see the top PROGRESS.md entry.
+Any further run needs a fresh user authorization. Continue on CAX31's `master` at `/srv/pokebench/pokeemerald-factory-core/workspace`
+only if the user renews it; keep the Mac supervisor stopped while CAX31 writes, commit locally, no automatic push or timers.
+Import the results (master + retained `worker/*` refs + `.integration/validation/sv-20261022/` + `.codex-logs/`) before a Mac writer resumes.
 
-The last session finished cleanly at `d1a9f66a8`, with pfr192 and ont193 folded.
-Do not repeat those completed fixes. Master is green; the unmerged Leech Seed /
-message work below is NOT accepted. All master/worker refs, logs, briefs and
-supervisor evidence were imported to the Mac under
-`.integration/validation/cax31-session-20261022/` and pushed before launch.
-Preserve the raw evidence still on the VM.
+## Done this session (do not repeat)
 
-## First: finish the saved implementation, then validate and fold
+lsd194 / lsd196 / rst197 (print floor drop, Leech Seed drain rows, second-stat rows, Rest pause), lsd198 / lsd199 (Scene ON drain
+animation = Move_ABSORB body, 0 px), sst200 (second-stat ROM rows), fnt201 (faint script lead, 16 / 16 cases 0), hpb202 (health bar
+Q24.8 port; Shedinja KO crash fixed), tl204 (zero-tail evidence). Each folded after supervisor gates on the exact code.
+tl205 (Scene ON script tail for the tl204-measured moves): see the top PROGRESS.md entry for whether it was folded.
 
-Start from `worker/integration-20261017-041629` at `d057453ab` (lsd196), which
-already includes lsd194 at `66e89d36e` from
-`worker/integration-20261017-013328`. These worktrees were removed; recreate a
-bounded worker with `tools/run-subagent.sh --lane integration --base
-worker/integration-20261017-041629`, or an equivalent isolated verification
-checkout with the usual reference/node/WASM prerequisites. Do not start again
-from master and lose the saved fixes or re-pins.
+## Next work (in order)
 
-Read `docs/lsd195-lsd194-triage.md` on master and the lsd194/lsd196 docs on the
-retained branch. The latest branch has the print-floor drop, Leech Seed drain
-holds and Bulk Up's second-stat row rule. Eleven touched test files passed
-alone; this is NOT a full-suite/typecheck/build receipt. A prior typecheck
-OOMed. No new user decision is needed to finish this presentation-only work.
+1. tl205 is NOT on master. Start from `worker/integration-20261023-080938` (tl206 tip `ea0846220` = master + tl205 + the 13 test
+   re-pins; census both scenes and typecheck green on its src, see PROGRESS). Run the full suite + build on that exact code (check
+   liveWallMoveAdapters / tl204ZeroTailRows, not rerun by tl206), then fold. Then the remaining tl204 body-window residuals (Scary Face -14, Calm Mind -4, Light Screen +2,
+   Charm / Fake Tears -1) and the other 14 zero-tail moves (docs/tl204-zero-tail-rows.md).
+2. The Explosion-that-broke-a-Substitute faint (+135 lead in the fnt201 census, unmeasured): one ROM scenario.
+3. msg175's open edges (Toxic -21 ON / -2 OFF, Roar OFF +17, Baton Pass OFF -66, Snore +10, the Rest-route Tackle HP anchor).
+4. #146 non-MAGBY forced send-in visuals, player back send-out / intro visuals, transformed-battler effects, Castform / Substitute /
+   species / history variants (ISSUES.md). Audio stays deferred.
 
-1. Repair Rest's pause using the real print lengths and the ROM row; remove
-   off148's masking `proxyFrames` 24. Keep Bulk Up's measured residual at 0;
-   do not accept the old triage suggestion to pin a known -3 regression.
-   Independently verify source/ROM claims and attribute every changed frame pin.
-2. Separate repair from final validation so a worker cap cannot strand a
-   48-minute suite again. A repair checkpoint with affected tests is staged
-   work, not acceptance. Then run serialized typecheck, scene ON/OFF census
-   0..999 (especially message -> stat -> message chains), affected/differential
-   gates, the complete suite and build on the exact repaired code. Retain each
-   log/exit status and the tested commit/tree. Give the validation step enough
-   wall-clock budget, or have the supervisor own it directly. No overlapping
-   heavy jobs, no suite hand-chunking, and no uncommitted repair folded into main.
-3. Only after green final-code gates and independent supervisor acceptance,
-   fold into master and update the issues/integration/progress ledgers. Reuse
-   same-code receipts under `ANIMATION_VERIFICATION.md`; new union code,
-   conflicts or missing receipts require fresh gates. A passing re-pin must
-   never hide a regression against the ROM.
-
-## Continue the animation finish-up
-
-- Draw Scene ON `LEECH_SEED_DRAIN`: lsd194 currently holds 208 rows of the right
-  duration without the animation body. Timing alone is not animation acceptance;
-  prove the actual production renderer with dense source/ROM windows.
-- Correct Double Team's ending (-5) and measure the 24 moves with zero-frame
-  tails where required; reuse the current source/evidence rather than repeating
-  completed surveys.
-- Continue non-MAGBY forced send-in visuals, player back send-out/intro visuals,
-  transformed-battler effects, Castform/Substitute/species/history variants and
-  other current Factory finish-up issues. Keep catalogue membership unchanged;
-  fixing already-authorized transformed-battler support needs no new permission.
-
-Read the current roadmap, backlog and integration ledger. The full
-`docs/factory-finish-scope.md` authorization and D3/D4 policies remain active;
-audio stays deferred. Prefer verified implementation progress. Keep one worker
-at a time and reserve final union-gate time before launching another change.
+Gate recipe that worked here (serialize heavy jobs; one worker beside them at most): typecheck; `lsd194Census.sh` both scenes with
+`LSD194_CENSUS_JOBS=4 LSD194_SPLIT=4` + `tools/integration/rst197CensusDelta.py`; `compare:differential` (3 traces); full suite under
+`nohup` with an exit file (~47-66 min; diff reported files against `git ls-files` if a vitest fork dies); build; soaks at wind-down.
+A supervisor verification checkout made with `git worktree add` needs the `reference` symlink, `node_modules` and
+`artifacts/wasm/factory_wasm.wasm` (the launcher does this for worker worktrees).
 
 ## Headless execution discipline
 
@@ -86,15 +51,10 @@ leave a truthful committed handoff before the cap.
 
 ## Baseline and host budget
 
-Current master production src tree `9e7ac718f` equals ont193 `6b6d1d128`;
-later commits through `d1a9f66a8` are documentation. Supervisor final gates:
-1,684 files / 13,955 tests passed, zero failed; build passed; vanilla soak
-20 / 20; varied-RNG winning carries 0 / 14 / 28 and winning-swap carry 0
-100 / 100 each. The long 0:60 soak profiles were not run in this presentation-
-only session. Evidence is in `.integration/validation/sv-20261016b/`.
-Reuse the unchanged master baseline under `ANIMATION_VERIFICATION.md`; this
-launch changes documentation only. The unmerged lsd branch has NO matching
-final-code full-gate receipt yet. Do not confuse the two baselines.
+Master production src tree `d8fda5802` (tested on `f96e8e805`; later master commits through the wind-down are docs / tools / evidence
+tests unless PROGRESS says tl205 folded). Supervisor gates on that src: typecheck, census both scenes attributed, differential 641 / 641,
+full suite 1,690 files / 14,051 tests 0 failed, build; soak vanilla 0:20 20 / 20; varied-RNG winning carry 0 / 14 / 28 and winning-swap
+carry 0 100 / 100 each. The 0:60 soak profiles were not run (~7.5 h each here). Evidence: `.integration/validation/sv-20261022/`.
 
 Source `/etc/pokebench-runner.env`: two Vitest workers, four build/Cargo jobs,
 16 GiB RAM and 8 GiB swap. Full suite ~48 minutes. Serialize typecheck, full
