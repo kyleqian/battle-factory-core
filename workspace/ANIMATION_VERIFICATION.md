@@ -132,6 +132,36 @@ to further evidenced cases of the same class without renewed approval. Follow
   already reproduced evidence for unchanged claims; do not repeatedly probe a
   settled CPU-phase limitation. New code needs its integration proof and gates.
 
+## Approximate playback — user-approved 2026-10-26 (finish plan)
+
+`docs/finish-plan.md` adds a fourth claim class, **approximate**. When a live
+adapter would decline for a *provenance* reason (an input the ROM would supply
+is not proven: Substitute doll cells, unknown sprite-order / allocator
+history, Castform form, Endeavor stale power, turn 0, hidden-target lag phase,
+no adapter case), the command draws the move's existing body with the best
+available inputs instead of the static-field hold, and is reported as
+approximate. No further user approval is needed for this class.
+
+- Scope: provenance declines only. The static-field hold remains only where
+  no body exists. Every approximate command names its decline reason (the
+  reason code it would have declined with) and its fallback input choice.
+- Gameplay outcomes, gameplay RNG, kernel digests and facility progression
+  are unchanged; the presentation RNG (D3) is consumed only by bodies that
+  already consume it. Duration may change only for the approximate command
+  itself and must be render-pure and deterministic on replay/reset.
+- Accounting: exact, faithful-random and faithful-timing counts never move for
+  this work; the 276 accepted bodies stay unchanged. The census reports, per
+  command, live / approximate (with reason) / static, and the Phase 2
+  acceptance is a Scene ON census 0..999 with **0 static-field commands** for
+  moves that have a body.
+- Evidence per promoted class: a PNG strip of one representative command under
+  `tools/integration/fixtures/approximate/`, eyeballed once by the supervisor;
+  the census delta (only that class's commands change); differential on the
+  standard three traces (unchanged where no approximate command is reached);
+  full suite + build. No ROM pixel receipt is claimed for approximate frames.
+- An exact proof that later arrives for an approximate input moves those
+  commands back to their exact/faithful class through the normal gates.
+
 ## Keep move checks local
 
 Global totals, work-plan accounting, and queue priority are checked centrally in
