@@ -1938,20 +1938,26 @@ export class RandomPlayer {
       return this.press(button, 8);
     }
     const roll = this.rng.float();
-    if (this.summaryPresses >= 60 || (roll < 0.12 && this.summaryPresses > 3)) {
+    if (this.summaryPresses >= 60 || (roll < 0.10 && this.summaryPresses > 3)) {
       this.summaryPresses = 0;
       this.note(state, "summary: exit (B)");
       return this.press("B", 12);
     }
-    if (roll < 0.40) {
+    const movesPage = summary.page === "battleMoves" || summary.page === "contestMoves";
+    if (movesPage && roll < 0.55) {
       this.note(state, `summary: A on ${summary.page}`);
       return this.press("A", 10);
     }
-    if (roll < 0.70) {
-      return this.press(this.rng.pick(["LEFT", "RIGHT"] as const), 12);
+    if (roll < (movesPage ? 0.70 : 0.75)) {
+      // Lean right so the Moves pages are reached from Info.
+      const button = this.rng.chance(movesPage ? 0.5 : 0.8) ? "RIGHT" : "LEFT";
+      this.note(state, `summary: ${button} on ${summary.page}`);
+      return this.press(button, 12);
     }
     // Mon change: hold long enough for the replacement's front animation.
-    return this.press(this.rng.pick(["UP", "DOWN"] as const), 60);
+    const button = this.rng.pick(["UP", "DOWN"] as const);
+    this.note(state, `summary: ${button} (mon) on ${summary.page}`);
+    return this.press(button, 60);
   }
 
   // -- battle start intro ---------------------------------------------------
