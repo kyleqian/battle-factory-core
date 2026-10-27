@@ -32,5 +32,6 @@ describe("soak render throw", () => {
     });
     expect(result.stackTop!.length).toBeGreaterThan(0);
     expect(result.signature).toContain("scene-on draw exploded");
-  });
+    // A fresh import of the engine graph takes ~15 s on the CAX31 host under load.
+  }, 120_000);
 });
