@@ -89,6 +89,22 @@ describe("goal-directed browser play (tools/browser/goalPlay.ts)", () => {
     expect(director.stats.lobbyPresses).toBeGreaterThan(5);
   });
 
+  it("hands over to the next challenge once its frame budget is spent, but never cuts a lobby short", () => {
+    const director = new GoalPlayDirector({ seed: 1, scene: "off", budgetFrames: 300 });
+    for (let i = 0; i < 10 && !director.done; i += 1) director.runFrames(100);
+    expect(director.restart).toBe("budget");
+    expect(director.frame).toBeGreaterThanOrEqual(300);
+    expect(director.frame).toBeLessThan(300 + 10);
+    const lobby = new GoalPlayDirector({
+      seed: 1,
+      scene: "off",
+      budgetFrames: 1,
+      initialState: { ...createInitialState({ battleScene: "off" }), lobbyFreeRoam: createFactoryLobbyFreeRoamState() },
+    });
+    for (let i = 0; i < 20 && !lobby.done; i += 1) lobby.runFrames(60);
+    expect(lobby.restart).toBe("lobby");
+  });
+
   it("stops without throwing when the mirror engine cannot run", () => {
     const broken = { ...createInitialState({ battleScene: "off" }), draftScreen: null } as unknown as ReturnType<typeof createInitialState>;
     const director = new GoalPlayDirector({ seed: 1, scene: "off", initialState: broken });

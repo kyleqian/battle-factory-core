@@ -310,7 +310,7 @@ async function runSceneGoal(browser, port, scene, options, outDir, log) {
     plantedCaught: false,
     goal: {
       challenges: 0,
-      restarts: { lobby: 0, stall: 0, crash: 0 },
+      restarts: { lobby: 0, stall: 0, budget: 0, crash: 0 },
       policyPresses: 0,
       randomPresses: 0,
       lobbyPresses: 0,
@@ -614,7 +614,7 @@ async function main() {
     if (r.goal) {
       const g = r.goal;
       log(
-        `  goal mode: ${g.challenges} challenges (restarts: lobby ${g.restarts.lobby}, stall ${g.restarts.stall}, crash ${g.restarts.crash}), policies ${JSON.stringify(g.policies)}, ` +
+        `  goal mode: ${g.challenges} challenges (restarts: lobby ${g.restarts.lobby}, stall ${g.restarts.stall}, budget ${g.restarts.budget}, crash ${g.restarts.crash}), policies ${JSON.stringify(g.policies)}, ` +
           `presses policy ${g.policyPresses} / random ${g.randomPresses} / lobby ${g.lobbyPresses}, live swap screens ${g.swapScreens}, live max depth ${g.maxBattleDepth}, ` +
           `mirror-only throws ${g.mirrorOnlyThrows}, divergences ${g.divergences}`,
       );

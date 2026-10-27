@@ -20,6 +20,8 @@ export const LOBBY_WANDER_FRAMES = 540;
 export const STALL_RESTART_FRAMES = 14_400;
 /** Frames with no progress after which random mixing becomes aggressive (the stalled weights). */
 export const STALL_MIX_FRAMES = 1_800;
+/** Frames one challenge may run before a fresh page and the next policy in the cycle take over (the winners never lose on their own). */
+export const CHALLENGE_BUDGET_FRAMES = 120_000;
 /** A policy press is held 2..4 frames, like a keyboard tap in the browser (the soak itself presses for 1). */
 const MIN_TAP_FRAMES = 2;
 const MAX_TAP_FRAMES = 4;
@@ -32,7 +34,7 @@ export interface FrameSegment {
   buttons: GbaButton[];
 }
 
-export type RestartReason = "lobby" | "stall";
+export type RestartReason = "lobby" | "stall" | "budget";
 
 export interface GoalPlayOptions {
   seed: number;
@@ -44,6 +46,8 @@ export interface GoalPlayOptions {
   policies?: readonly SoakPolicy[];
   /** Probability that a policy press is replaced by a short burst of uniform-random presses. */
   mixRate?: number;
+  /** Frames this challenge may run before it asks for a restart; defaults to CHALLENGE_BUDGET_FRAMES. */
+  budgetFrames?: number;
   /** Test seam: start from this state instead of the anchor draft. */
   initialState?: EngineState;
 }
@@ -92,6 +96,7 @@ export class GoalPlayDirector {
   private readonly rng: Rng;
   private readonly generator: InputGenerator;
   private readonly mixRate: number;
+  private readonly budgetFrames: number;
   private heldButtons: GbaButton[] = [];
   private holdLeft = 0;
   private gapLeft = 0;
@@ -110,6 +115,7 @@ export class GoalPlayDirector {
     this.player.summaryExplore = this.policy === "full";
     this.generator = createInputGenerator(streamSeed ^ 0x5eed);
     this.mixRate = options.mixRate ?? 0.04;
+    this.budgetFrames = options.budgetFrames ?? CHALLENGE_BUDGET_FRAMES;
     this.state =
       options.initialState ??
       createInitialState({
@@ -175,6 +181,10 @@ export class GoalPlayDirector {
       return [];
     }
     const state = this.state;
+    if (state.lobbyFreeRoam === null && state.frame >= this.budgetFrames) {
+      this.restart = "budget";
+      return [];
+    }
     const key = `${this.player.surface(state)}|${this.player.battle}|${this.player.turn}|${state.factoryRoundBattleOrchestrator?.config.id ?? ""}`;
     if (key !== this.progressKey) {
       this.progressKey = key;
