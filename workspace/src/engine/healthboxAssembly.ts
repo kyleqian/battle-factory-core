@@ -586,13 +586,52 @@ function drawHealthboxText(canvas: (RgbColor | null)[], canvasWidth: number, can
  * this pipeline doesn't (yet) know the color of (unimplemented content
  * regions) rather than guessing - callers must not blit those cells.
  */
-export function composeOpponentHealthbox(assets: HealthboxAssets, params: HealthboxContentParams): { width: number; height: number; pixels: (RgbColor | null)[] } {
+type ComposedHealthbox = { width: number; height: number; pixels: (RgbColor | null)[] };
+
+/**
+ * perf211: compose results per (assets identity, exact read params), shared like the per-caller caches in
+ * battleScene.ts already share them (composed canvases are never mutated). Bounded, oldest first.
+ */
+const COMPOSE_MEMO_LIMIT = 64;
+const composeMemo = new WeakMap<object, Map<string, ComposedHealthbox>>();
+// Input guards run in the exported wrappers, before the memo, so a bad input throws from the same frame as before.
+
+function memoValue(value: number | string | undefined): string {
+  if (value === undefined) return "u";
+  if (typeof value === "number") return Object.is(value, -0) ? "-0" : `n${value}`;
+  return `s${value.length}:${value}`;
+}
+
+function memoizedCompose(
+  assets: object,
+  key: string,
+  compose: () => ComposedHealthbox,
+): ComposedHealthbox {
+  let byKey = composeMemo.get(assets);
+  if (!byKey) composeMemo.set(assets, byKey = new Map());
+  const cached = byKey.get(key);
+  if (cached) return cached;
+  const composed = compose();
+  byKey.set(key, composed);
+  if (byKey.size > COMPOSE_MEMO_LIMIT) byKey.delete(byKey.keys().next().value!);
+  return composed;
+}
+
+export function composeOpponentHealthbox(assets: HealthboxAssets, params: HealthboxContentParams): ComposedHealthbox {
   if (!(params.hpFraction >= 0 && params.hpFraction <= 1)) {
     throw new Error(`composeOpponentHealthbox: hpFraction must be in [0,1], got ${params.hpFraction}`);
   }
   if (params.status !== "none" && !(params.status in STATUS_ICON_ROWS)) {
     throw new Error(`composeOpponentHealthbox: unknown status ${params.status}`);
   }
+  const key = [
+    params.name, params.level, params.gender, params.hpFraction, params.hpTargetFraction, params.hpBarFraction,
+    params.status,
+  ].map(memoValue).join("|");
+  return memoizedCompose(assets, key, () => composeOpponentHealthboxUncached(assets, params));
+}
+
+function composeOpponentHealthboxUncached(assets: HealthboxAssets, params: HealthboxContentParams): ComposedHealthbox {
 
   const { width, height } = FRAME_SIZE;
   const canvas: (RgbColor | null)[] = new Array(width * height).fill(null);
@@ -834,14 +873,24 @@ export function composePlayerHealthboxHpOverlay(assets: PlayerHealthboxHpOverlay
 export function composePlayerHealthbox(
   assets: PlayerHealthboxAssets,
   params: HealthboxContentParams & { currentHp: number; maxHp: number },
-): { width: number; height: number; pixels: (RgbColor | null)[] } {
+): ComposedHealthbox {
   if (!(params.currentHp >= 0 && params.currentHp <= params.maxHp) || params.maxHp <= 0) {
     throw new Error(`composePlayerHealthbox: invalid HP ${params.currentHp}/${params.maxHp}`);
   }
   if (params.status !== "none" && !(params.status in STATUS_ICON_ROWS)) {
     throw new Error(`composePlayerHealthbox: unknown status ${params.status}`);
   }
+  const key = [
+    params.name, params.level, params.gender, params.hpTargetFraction, params.hpBarFraction, params.status,
+    params.currentHp, params.maxHp,
+  ].map(memoValue).join("|");
+  return memoizedCompose(assets, key, () => composePlayerHealthboxUncached(assets, params));
+}
 
+function composePlayerHealthboxUncached(
+  assets: PlayerHealthboxAssets,
+  params: HealthboxContentParams & { currentHp: number; maxHp: number },
+): ComposedHealthbox {
   const width = 128;
   const height = 64;
   const canvas: (RgbColor | null)[] = new Array(width * height).fill(null);
