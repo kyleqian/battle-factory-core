@@ -7,6 +7,10 @@
 
 import type { GbaButton } from "./input.ts";
 import type { PresentationRngTraceMetadata } from "./engine/presentationRngHost.ts";
+import type { ContainedPresentationError } from "./engine/presentationContainment.ts";
+
+/** contain209: a contained presentation throw, stamped with the session frame (tick count) it was first seen after. */
+export type SessionContainedError = ContainedPresentationError & Readonly<{ frame: number }>;
 
 export interface RecordedSegment {
   frames: number;
@@ -25,6 +29,8 @@ export interface SessionTrace {
    * exports, which replay with the documented default (presentationRngFromTrace).
    */
   presentationRng?: PresentationRngTraceMetadata;
+  /** contain209: presentation throws the session contained (presentationContainment.ts); absent when there were none. */
+  containedErrors?: SessionContainedError[];
   segments: RecordedSegment[];
 }
 
@@ -78,6 +84,7 @@ export class SessionRecorder {
     battleScene?: "on" | "off";
     presentationRng?: PresentationRngTraceMetadata;
     error?: unknown;
+    containedErrors?: readonly SessionContainedError[];
   }): SessionTrace {
     const trace: SessionTrace = {
       appRoute: options.appRoute,
@@ -87,6 +94,9 @@ export class SessionRecorder {
       frame: this.frames,
       ...(options.presentationRng
         ? { presentationRng: { seed: options.presentationRng.seed, policy: options.presentationRng.policy } }
+        : {}),
+      ...(options.containedErrors !== undefined && options.containedErrors.length > 0
+        ? { containedErrors: options.containedErrors.map((entry) => ({ ...entry })) }
         : {}),
       segments: this.segments.map((segment) => ({
         frames: segment.frames,

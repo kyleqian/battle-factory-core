@@ -60,6 +60,11 @@ import {
 } from "./partySelect.ts";
 import { genericHitReactionAtAge } from "./battleMenu.ts";
 import {
+  markPresentationCommandDegraded,
+  presentationCommandDegradation,
+  recordContainedPresentationError,
+} from "./presentationContainment.ts";
+import {
   frontSendOutAffineAtTick, frontSendOutAnimationDelay, frontSendOutFrameAtTick, frontSendOutInitializerTicks, frontSendOutPaletteAtTick,
 } from "../animation/sendOutDispatcher.ts";
 import { frontSendOutSpriteFrameAtTick } from "../animation/sendOutSpriteFrame.ts";
@@ -910,6 +915,14 @@ export type BattleResolutionPresentationRenderAssets = Readonly<{
     framebuffer: Uint8Array,
     view: BattleResolutionPresentationRenderView,
   ): void;
+  /**
+   * contain209: the decline path's static draw (battleScene.ts renderBattleResolutionSceneOffView) a contained command falls
+   * back to; absent = no containment (a draw throw propagates). Draws onto a zeroed framebuffer.
+   */
+  drawStaticScene?(
+    framebuffer: Uint8Array,
+    view: BattleResolutionPresentationRenderView,
+  ): void;
 }>;
 
 function uiStatusFromStatus1(status1: number): BattleCommandUiStatus {
@@ -1371,13 +1384,53 @@ export function isBattleResolutionCommandComplete(
   if (command.type === "message" && command.advance === "button") {
     return isBattleResolutionButtonMessageReady(state);
   }
-  let field = state.field;
-  for (let index = 0; index < state.commandIndex; index += 1) {
-    field = applyCompletedCommand(field, segment.commands[index]!);
-  }
-  return state.lifecycle.phaseElapsed + 1
-    >= battleResolutionCommandDuration(command, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput),
+  // contain209 (presentationContainment.ts): a throw computing the presented command's duration holds it for its fallback
+  // length (a pure function of the command and its field, re-evaluated identically every frame) and draws it static.
+  let duration: number;
+  try {
+    let field = state.field;
+    for (let index = 0; index < state.commandIndex; index += 1) {
+      field = applyCompletedCommand(field, segment.commands[index]!);
+    }
+    duration = battleResolutionCommandDuration(command, field, liveMoveTimingBodyOf(state.liveMoveSpriteOrderInput),
       state.liveMoveBattlerX2Input?.moveUse);
+  } catch (error) {
+    recordContainedPresentationError("duration", command.type, error, presentationCommandDetail(state));
+    markPresentationCommandDegraded(command, 1);
+    duration = battleResolutionCommandFallbackDuration(command);
+  }
+  return state.lifecycle.phaseElapsed + 1 >= duration;
+}
+
+/**
+ * contain209: the length a contained command holds the static field for -- the decline path's: a move-animation without a live
+ * duration presents seGate + minimumFrames (battleResolutionCommandDuration), every other command its timing floor.
+ */
+export function battleResolutionCommandFallbackDuration(command: BattleResolutionPresentationCommand): number {
+  if (command.type === "move-animation") return Math.max(1, (command.timing.seGateFrames ?? 0) + command.timing.minimumFrames);
+  const timing = (command as { timing?: { minimumFrames?: number } }).timing;
+  return Math.max(1, timing?.minimumFrames ?? 1);
+}
+
+function containedHistoryRead<T>(
+  what: string,
+  segment: ReturnType<typeof currentSegment>,
+  state: BattleResolutionPresentationState,
+  declined: T,
+  read: () => T,
+): T {
+  try {
+    return read();
+  } catch (error) {
+    const previous = segment.commands[state.commandIndex - 1];
+    recordContainedPresentationError("draw", previous?.type ?? "unknown", error, `${what}: ${presentationCommandDetail(state)}`);
+    return declined;
+  }
+}
+
+function presentationCommandDetail(state: BattleResolutionPresentationState): string {
+  return `request ${state.resolutionId.requestId} segment ${state.segmentIndex} command ${state.commandIndex}`
+    + ` ${state.lifecycle.phase} @${state.lifecycle.phaseElapsed}`;
 }
 
 export function isBattleResolutionButtonMessageReady(
@@ -1626,6 +1679,8 @@ export function createBattleResolutionPresentationRenderView(
   state: BattleResolutionPresentationState,
   /** Read-only presentation Random2 host (EngineState.presentationRng.host); render never draws from it. */
   presentationRngHost?: PresentationRngHost | null,
+  /** contain209: drop the current command's own presentation (a contained command whose ordinary view threw): the static field. */
+  withoutCurrentCommand = false,
 ): BattleResolutionPresentationRenderView {
   const segment = currentSegment(state);
   let field = state.field;
@@ -1697,7 +1752,7 @@ export function createBattleResolutionPresentationRenderView(
           window: "recall" as const,
           schedules: midBattleSwitchParticleSchedulesAt(recallTraceFrame, "recall"),
         });
-  if (state.lifecycle.phase === "presenting-switch-in") {
+  if (state.lifecycle.phase === "presenting-switch-in" && !withoutCurrentCommand) {
     const switchCommand = segment.commands.find(
       (candidate): candidate is Extract<
         BattleResolutionPresentationCommand,
@@ -1799,6 +1854,7 @@ export function createBattleResolutionPresentationRenderView(
       || state.lifecycle.phase === "forced-party-handoff"
     )
     && command
+    && !withoutCurrentCommand
   ) {
     if (command.type === "message") {
       latestMessage = command.lines;
@@ -2023,7 +2079,8 @@ export function createBattleResolutionPresentationRenderView(
       });
     }
   } else if (
-    state.lifecycle.phase !== "confirm-handoff"
+    !withoutCurrentCommand
+    && state.lifecycle.phase !== "confirm-handoff"
     &&
     state.lifecycle.phase !== "next-command-handoff"
     && state.lifecycle.phase !== "terminal-handoff"
@@ -2055,7 +2112,9 @@ export function createBattleResolutionPresentationRenderView(
     : null;
   // cf78: a displayed CASTFORM in a weather form (its slot's gBattleMonForms at this command) declines every live body.
   field = withLiveCastformForms(field, liveCastformFormsAt(state, command));
-  const tailSide = substituteSwapTailSideAt(state, segment, field);
+  // contain209: these two re-read an EARLIER live body; a throw there is that body's contained fault, and a declined body has
+  // neither a swap tail nor a post-body shadow hide.
+  const tailSide = containedHistoryRead("substitute swap tail", segment, state, null, () => substituteSwapTailSideAt(state, segment, field));
   const baseFieldArt = tailSide === null
     ? createBattleCommandFieldArtView(field)
     : substituteSwapTailFieldArt(createBattleCommandFieldArtView(field), tailSide);
@@ -2103,7 +2162,7 @@ export function createBattleResolutionPresentationRenderView(
             visibleCharacters,
           }),
     effect,
-    postBodyShadowHidden: postBodyShadowHiddenAt(state, segment),
+    postBodyShadowHidden: containedHistoryRead("post-body shadow", segment, state, false, () => postBodyShadowHiddenAt(state, segment)),
     visibility: Object.freeze({
       player: Object.freeze({
         sprite: (spriteVisibility.get(0) ?? true)
@@ -2186,14 +2245,49 @@ export function createBattleResolutionPresentationRenderView(
   });
 }
 
+/**
+ * contain209 (presentationContainment.ts): the presented command a draw-time throw degrades -- the current command of a
+ * presenting phase (the switch-in command while the send-out plays), else null (handoff rows are not contained).
+ */
+function containedPresentationCommand(state: BattleResolutionPresentationState): BattleResolutionPresentationCommand | null {
+  const segment = state.segments[state.segmentIndex];
+  if (segment === undefined) return null;
+  if (state.lifecycle.phase === "presenting-switch-in") return segment.commands.find((candidate) => candidate.type === "switch-in") ?? null;
+  if (state.lifecycle.phase !== "presenting" && state.lifecycle.phase !== "awaiting-message-dismiss"
+    && state.lifecycle.phase !== "forced-party-handoff") return null;
+  return segment.commands[state.commandIndex] ?? null;
+}
+
 export function renderBattleResolutionPresentation(
   framebuffer: Uint8Array,
   state: BattleResolutionPresentationState,
   assets: BattleResolutionPresentationRenderAssets,
   presentationRngHost?: PresentationRngHost | null,
 ): void {
-  assets.drawScene(
-    framebuffer,
-    createBattleResolutionPresentationRenderView(state, presentationRngHost),
-  );
+  const command = assets.drawStaticScene === undefined ? null : containedPresentationCommand(state);
+  if (command === null || presentationCommandDegradation(command) === undefined) {
+    try {
+      assets.drawScene(framebuffer, createBattleResolutionPresentationRenderView(state, presentationRngHost));
+      return;
+    } catch (error) {
+      if (command === null) throw error;
+      recordContainedPresentationError("draw", command.type, error, presentationCommandDetail(state));
+      markPresentationCommandDegraded(command, 1);
+    }
+  }
+  // The decline path: the static draw of the command's ordinary view (what a declined live body shows); if that view or its
+  // draw throws too, the view without the command's own presentation. A throw there is not contained.
+  const drawStatic = assets.drawStaticScene!;
+  if (presentationCommandDegradation(command) === 1) {
+    try {
+      framebuffer.fill(0);
+      drawStatic(framebuffer, createBattleResolutionPresentationRenderView(state, presentationRngHost));
+      return;
+    } catch (error) {
+      recordContainedPresentationError("draw", command.type, error, presentationCommandDetail(state));
+      markPresentationCommandDegraded(command, 2);
+    }
+  }
+  framebuffer.fill(0);
+  drawStatic(framebuffer, createBattleResolutionPresentationRenderView(state, presentationRngHost, true));
 }

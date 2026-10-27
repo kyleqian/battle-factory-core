@@ -31,6 +31,11 @@
 // different random game; now it only moves frame numbers.
 
 import {
+  clearContainedPresentationErrors,
+  containedPresentationErrorCount,
+  containedPresentationErrors,
+} from "../../src/engine/presentationContainment.ts";
+import {
   createInitialState,
   render,
   tick,
@@ -1314,6 +1319,12 @@ export type SeedResult = {
    * `oracle-strength fallback: <reason>`). Always 0 for every other policy.
    */
   oracleStrengthFallbacks: number;
+  /**
+   * contain209: distinct presentation throws the engine contained during this seed (src/engine/presentationContainment.ts;
+   * the battle went on with that command drawn static) and the first one's message. Absent when there were none.
+   */
+  contained?: number;
+  containedFirstMessage?: string;
   /** Opt-in test diagnostics; absent from ordinary CLI/full/vanilla runs. */
   diagnostics?: RunDiagnostics;
 };
@@ -2769,6 +2780,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const options: RunOptions = { ...DEFAULT_RUN_OPTIONS, ...optionsIn, maxFrames };
   const stallFrames = options.stallFrames ?? DEFAULT_STALL_FRAMES;
   const rng = new Rng(seed);
+  clearContainedPresentationErrors();
   const log = new ActionLog(options.verbose, options.onNote);
   const coverage = options.coverage ?? null;
   coverage?.beginSeed(seed);
@@ -2867,6 +2879,9 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
         (entry) => `f=${entry.frame} b${entry.battle} t${entry.turn} ${entry.what}`,
       ),
       ...(options.scene !== undefined ? { scene: options.scene } : {}),
+      ...(containedPresentationErrorCount() > 0
+        ? { contained: containedPresentationErrorCount(), containedFirstMessage: containedPresentationErrors()[0]!.message }
+        : {}),
       ...extra,
     };
     return options.collectDiagnostics === true

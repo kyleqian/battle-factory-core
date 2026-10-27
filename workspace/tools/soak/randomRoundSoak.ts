@@ -360,6 +360,8 @@ function printSoakSummary(
   console.log(
     `OK ${counts.OK}  CRASH ${counts.CRASH}  HANG ${counts.HANG}  budget ${budgetSeeds}`,
   );
+  const containedSeeds = results.filter((r) => r.contained !== undefined).length;
+  if (containedSeeds > 0) console.log(`CONTAINED ${containedSeeds} (presentation throws degraded to the static field)`);
   if (scene !== null) {
     for (const sceneName of ["off", "on"] as const) {
       const subset = results.filter((r) => r.scene === sceneName);
@@ -544,7 +546,9 @@ async function main(): Promise<void> {
     const sceneTag = sceneName !== null ? ` ${sceneName.padEnd(3)}` : "";
     const head = `seed ${String(seed).padStart(4)}${sceneTag}  ${result.outcome.padEnd(5)}`
       + `  b${result.battle} t${result.turn}  ${String(result.frames).padStart(6)}f  ${elapsed}s`;
-    const depthSuffix = `  carry<=${result.maxCarriedWinStreak ?? "-"} depth<=${result.maxBattleDepth ?? "-"}`;
+    // contain209: presentation throws the engine contained (the seed's outcome is unchanged).
+    const depthSuffix = `  carry<=${result.maxCarriedWinStreak ?? "-"} depth<=${result.maxBattleDepth ?? "-"}`
+      + (result.contained !== undefined ? `  CONTAINED ${result.contained}: ${result.containedFirstMessage}` : "");
     if (result.outcome === "OK") {
       console.log(`${head}  ${result.endState}${depthSuffix}`);
     } else if (result.outcome === "CRASH") {
