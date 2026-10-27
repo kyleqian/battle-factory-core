@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-10-27 09:xx UTC wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-10-27 09:10 UTC wind-down; PROGRESS.md top entry has details)
 
 - Phase 1 tooling landed: `npm run soak -- --scene on|off|both` (soakscene208); in-app containment of presentation throws
   (contain209 + contain213: adapter / duration / draw / tick-side field reads / command projection / order hosts); render
@@ -32,8 +32,8 @@ kept and is long-tail.
 - Scene ON soaks so far all clean: winning carry 0 / 14 / 28 + winning-swap (0:30 each) and carry 0 30:130 at
   `--render-every 1`, vanilla 0:20 ON; 0 CRASH / 0 HANG / 0 CONTAINED.
 - Browser random play found real crashes on the draft **Summary** screen in both scenes (6-species front-animation table;
-  Battle Moves detail `moves[powerMoveIndex]`; Contest Moves cancel row). sfa214 fixes them — see PROGRESS.md for whether it
-  was folded; if not, its branch is named there: verify (tests, differential, the 17 saved sessions replayed with render,
+  Battle Moves detail `moves[powerMoveIndex]`; Contest Moves cancel row). sfa214 fixes them on the UNFOLDED branch
+  `worker/integration-20261027-065233` (worktree kept; its suite was cut by the deadline): verify (tests, differential, the 17 saved sessions replayed with render,
   full suite + build on the union) and fold first.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance

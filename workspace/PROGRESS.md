@@ -5,7 +5,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-26 / 27 — CAX31 session (supervisor, Opus 5.5): finish plan Phase 1 started (in progress)
+## 2026-10-26 / 27 — CAX31 session wind-down (supervisor, Opus 5.5): finish plan Phase 1 tooling + containment; Phase 2 plumbing
 
 - **State:** master `31ba4d4ec`+; production src tree `c7bb4e59d` (contain209 + perf211 + apx210 + contain213).
 - **Light gates on src `21f22b324` (reused + one rerun):** census 0..999 both scenes already existed twice for this exact src
@@ -75,7 +75,25 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **Loosened on purpose:** a malformed kernel receipt inside the resolution builder is now a recorded `commands` error, not
   fatal. Worker: full suite 1,701 passed / 1 failed (that fail-closed pin, re-pinned `5644b2414`), build 0. Supervisor: 7 files
   / 50 tests, differential 641 / 641, census 0..999 ON and OFF vs `6a021c074` **1,000 / 1,000 identical**, 0 digest mismatch.
-- **Running:** sfa214 (Summary-screen crashes + soak blind spot, Opus worker).
+- **Scene ON vanilla 0:20 (`--render-every 1`, on `31ba4d4ec`):** **20 / 20 OK** (all `budget`, 4,613 s).
+- **Wind-down gates on `f3a62945c` (= final src `c7bb4e59d`):** vanilla 0:20 **20 / 20 OK** (all `budget`); varied-RNG first-round
+  winning carry 0 / 14 / 28 **100 / 100** each; winning-swap carry 0 **100 / 100**
+  (`.integration/validation/sv-20261026b/gates-f3a62945c/`). The 0:60 full / winning / winning-swap gates were not run (hours
+  each here; same practice as the last sessions).
+- **NOT folded — sfa214** (Summary-screen crashes; branch `worker/integration-20261027-065233`, worktree kept at
+  `.worktrees/integration-20261027-065233`): CANCEL-row rule per ChangeSelectedMove (the 'power' crash), Summary front animation
+  + portrait for every Factory species (new motion types incl. ANIM_V_STRETCH with oracle traces), MOVE_NONE slots, a Contest
+  Moves CANCEL crash, `replay-session-trace --render`, soak `full` policy now explores the Summary (default on,
+  `--no-summary-explore`) and the worker reports the extended soak CRASHes on base and passes on the fix. Its full suite was
+  ~60 % through with no failure at the deadline (log `.worktrees/integration-20261027-065233/workspace/.integration/sfa214-fullsuite.log`);
+  build not run. **Next run, first step:** read its final message in the launcher log
+  (`.integration/validation/sv-20261026b/sfa214.launcher.out`), then supervisor gates on the union with master: new tests, the
+  17 saved sessions with `--render`, differential, census both scenes (anchors must not move), full suite + build; fold.
+- **Next:** sfa214 fold; `npm run play:random -- --minutes 10 --scene both` on the new build; apx215 (brief ready,
+  substitute-doll 74); then the other static classes by weight. `docs/cax31-session-handoff.md` "Next work" has the order.
+- **Notes:** no DEFERRED items. Worker refs kept: `worker/integration-20261026-232941` (soakscene208), `-20261027-002733`
+  (contain209), `-015833` (perf211), `-033627` (apx210), `-044651` (play212), `-052237` (contain213) — all merged;
+  `-065233` (sfa214) unmerged. Briefs + evidence in `.integration/validation/sv-20261026b/`. No push.
 ---
 
 ## 2026-10-26 — User decision: finish plan approved; CAX31 run restarted on it (top layer, docs only)
