@@ -55,8 +55,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`tools/browser/randomPlay.mjs`). Chromium needed 9 missing system libraries; supervisor unpacked their Ubuntu .debs without
   root into the ignored `.integration/browser/syslibs/root` (run with `LD_LIBRARY_PATH=<that>/usr/lib/aarch64-linux-gnu`).
   Self-test catches + saves a planted page error; 2 min per scene: ~60 fps, 0 page errors, but no battle reached (too short).
-- **Running:** contain213 (remaining containment seams, Opus worker); Scene ON census 0..999 with field [21] on `6a021c074`;
-  10-minute browser run per scene.
+- **Scene ON census 0..999 on `6a021c074` (field [21], ~7 min at 4 jobs):** 40,110 move-animation commands = 26,959 live /
+  0 approximate / **207 static** / 12,944 pause. Static: substitute-doll 74, transform 33, castform-form 18,
+  extrasensory-player-later 17, sprite-order-unknown 16, endeavor-power 12, no-adapter 11, turn-0 7, hidden-target 3,
+  later-body-idle-rest 2, allocator-unknown 1, **13 from unnamed gates** (moves 63, 174, 28, 210, 69, 352). Errors: the 3 known
+  frame-budget stalemates (434 / 796 / 881), unchanged. `.integration/validation/sv-20261026b/census-6a021c074/`.
+- **Folded:** play212 (`3fd2b9601`, tools only; supervisor added auto `LD_LIBRARY_PATH` for the unpacked libraries and the
+  overlay's crash message in incidents). `npm run build && npm run play:random -- --minutes 10 --scene both`.
+- **NEW CRASHES (browser random play, 10 min per scene on build `6b6e803e9`):** Scene ON 9 overlays, OFF 8, all on the draft
+  rental **Summary** screen (the soak never opens it), never reaching a battle: (a) "missing summary front animation for
+  BUTTERFREE / BAYLEEF" — `src/data/gen/summary-front-animation.json` covers only the 6 S9 anchor species; (b) "Cannot read
+  properties of undefined (reading 'power')" at `summaryInfoPage.ts:791` (`pageRental.moves[powerMoveIndex]`, Battle Moves
+  detail). Reproduced headlessly by tick + render replay of the saved sessions
+  (`.integration/validation/sv-20261026b/random-play/2026-10-27T05-22-17-450Z/`). Brief sfa214 queued.
+- **Running:** contain213 (remaining containment seams, Opus worker).
 ---
 
 ## 2026-10-26 — User decision: finish plan approved; CAX31 run restarted on it (top layer, docs only)
