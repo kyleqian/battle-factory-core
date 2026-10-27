@@ -1,3 +1,7 @@
+// apx210 (finish plan Phase 2, liveMovePlayback.ts): trailing field [21] = a move-animation's playback class ("live", "static:<reason>",
+// later "approx:<reason>", "pause" = no body request; null otherwise). Set from (command, field before it) when the segment is seen, then
+// refined on the command's first presenting row from the production render view (the presentation gates). Fields [0..20] are unchanged.
+// apx210CensusSummary.py totals it per arm. A base tree without liveMovePlayback.ts writes null.
 // hpb202: durations use the displayed field BEFORE each command (battleResolutionFieldBeforeCommand, as production does) - the old segment-start field made an hp command after an in-segment switch-in throw "invalid HP program" (docs/hpb202-health-bar-programs.md).
 // lsd194 (docs/lsd194-print-floor-and-drain.md): ont193Census.ts with fields [18] = every command's presented frames (battleResolutionCommandDuration on the segment
 // field), [19] = a general-animation's animation name (null otherwise) and [20] = an hp command's timing.minimumFrames (null otherwise);
@@ -32,6 +36,10 @@ import { createPresentationRngSession } from "../../src/engine/presentationRngHo
 import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePresentationRng.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { battleStringPrintableLength } from "../../src/engine/battleStringResolver.ts";
+import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
+
+// apx210: optional so the file still runs on a tree without the classifier.
+const playback = await import("../../src/engine/liveMovePlayback.ts").catch(() => null);
 
 function nextPrintU(events: readonly any[], sequence: number): number | string {
   const at = events.findIndex((e) => e.sequence === sequence);
@@ -57,7 +65,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
   }));
   let rng = createPresentationRngSession();
   let frame = 0; let ended = false; let error: string | null = null;
-  const seen = new Set<unknown>(); const slotUses = [0, 0, 0, 0]; let lastUsed: string | null = null;
+  const seen = new Set<unknown>(); const rows = new Map<unknown, unknown[]>(); const classified = new Set<unknown>(); const slotUses = [0, 0, 0, 0]; let lastUsed: string | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
     if (++frame > 200000) throw new Error("frame budget");
@@ -76,7 +84,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
           const prev = s.commands[i - 1]; const out = s.commands[i - 2];
           const forcedPlayer = c.type === "switch-in" && c.battler === 0 && prev?.type === "sprite-visibility" && prev.recall === true
             && out?.type === "switch-out" && out.skipAnimation === true;
-          commands.push([c.type, c.battler ?? null, c.timing?.minimumFrames ?? null, c.timing?.holdFrames ?? null,
+          const row: unknown[] = [c.type, c.battler ?? null, c.timing?.minimumFrames ?? null, c.timing?.holdFrames ?? null,
             c.settleHoldFrames ?? null, c.healthboxSlideElapsed ?? null, c.sendInVisualDelay ?? null, forcedPlayer ? 1 : 0,
             c.type === "switch-in" ? c.incoming.species : null,
             c.type === "message" ? battleStringPrintableLength(c.lines) : null, lastUsed,
@@ -87,8 +95,23 @@ for (let seed = from!; seed <= to!; seed += 1) {
             c.type === "move-animation" ? battleResolutionCommandDuration(c, battleResolutionFieldBeforeCommand(s.field, s.commands, i)) : null,
             c.type === "move-animation" ? (c.timing.scriptTailRows ?? 0) : null,
             battleResolutionCommandDuration(c, battleResolutionFieldBeforeCommand(s.field, s.commands, i)), c.type === "general-animation" ? c.animation : null,
-            c.type === "hp" ? c.timing.minimumFrames : null]);
+            c.type === "hp" ? c.timing.minimumFrames : null];
+          const cls = playback?.liveMovePlaybackClassification(c, battleResolutionFieldBeforeCommand(s.field, s.commands, i)) ?? null;
+          row.push(cls === null ? null : playback!.liveMovePlaybackCode(cls));
+          rows.set(c, row);
+          commands.push(row);
         });
+      }
+    }
+    // apx210: refine [21] on the command's first presenting row with the render view's presentation gates.
+    if (playback && r?.lifecycle.phase === "presenting") {
+      const s = r.segments[r.segmentIndex]; const c = s?.commands[r.commandIndex];
+      const row = rows.get(c);
+      if (c?.type === "move-animation" && c.animation && row && !classified.has(c)) {
+        classified.add(c);
+        const cls = playback.liveMovePlaybackClassification(c, battleResolutionFieldBeforeCommand(s.field, s.commands, r.commandIndex),
+          createBattleResolutionPresentationRenderView(r, rng.host));
+        row[21] = cls === null ? null : playback.liveMovePlaybackCode(cls);
       }
     }
     if (!owned()) ended = true;

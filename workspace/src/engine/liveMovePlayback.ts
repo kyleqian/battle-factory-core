@@ -1,0 +1,140 @@
+// apx210 (docs/finish-plan.md Phase 2; ANIMATION_VERIFICATION.md "Approximate playback"): every Scene ON move-animation command is
+// classified live / approximate(reason) / static(reason). A static command is one the live renderer declines: it holds the static field
+// (battleResolutionCommandDuration's seGate + minimumFrames when the live duration is null; the live duration when only the body's
+// presentation declines, renderBattleResolutionLiveView -> renderBattleResolutionSceneOffView). Every decline names one reason code.
+// The approximate hook is LIVE_MOVE_APPROXIMATE_POLICY: a later step promotes ONE reason class to "approximate" (draw the existing body
+// with best-effort inputs); in this step every class is "static" and nothing reads the policy to draw, so behaviour is unchanged.
+// Presentation-only diagnostics: never read by rules, RNG, the queue or the renderer.
+import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "./battleResolutionPresentation.ts";
+import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
+import {
+  liveMoveAnimationDuration, liveMoveAnimationDurationCaseMissing, liveMoveAnimationPresentation, liveMoveHiddenSides,
+  liveMoveSubstituteDollDeclines, type LiveMoveDeclineSink,
+} from "./liveMoveAnimation.ts";
+import { liveSubstituteSwapApplies, liveSubstituteSwapView, substituteSwapBodyField } from "./liveSubstituteSwap.ts";
+import { LIVE_TRANSFORM_MOVE_ID, liveTransformedBattlerDeclines } from "./liveTransform.ts";
+
+/** The decline classes (finish-plan decline table). "other" is always named: `other:<name>`. */
+export const LIVE_MOVE_DECLINE_CLASSES = Object.freeze([
+  "substitute-doll", "sprite-order-unknown", "allocator-unknown", "castform-form", "endeavor-power", "turn-0", "hidden-target",
+  "no-adapter", "transform", "other",
+] as const);
+export type LiveMoveDeclineClass = (typeof LIVE_MOVE_DECLINE_CLASSES)[number];
+export type LiveMoveDeclineReason = Exclude<LiveMoveDeclineClass, "other"> | `other:${string}`;
+
+export function liveMoveDeclineClassOf(reason: LiveMoveDeclineReason): LiveMoveDeclineClass {
+  return reason.startsWith("other:") ? "other" : reason as LiveMoveDeclineClass;
+}
+
+/** Per decline class: "static" holds the static field (today's decline path); "approximate" will draw the body with best-effort inputs. */
+export type LiveMovePlaybackPolicy = Readonly<Record<LiveMoveDeclineClass, "static" | "approximate">>;
+export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freeze({
+  "substitute-doll": "static", "sprite-order-unknown": "static", "allocator-unknown": "static", "castform-form": "static",
+  "endeavor-power": "static", "turn-0": "static", "hidden-target": "static", "no-adapter": "static", "transform": "static",
+  "other": "static",
+});
+
+export type LiveMovePlaybackClassification =
+  | Readonly<{ kind: "live" }>
+  | Readonly<{ kind: "approximate"; reason: LiveMoveDeclineReason }>
+  | Readonly<{ kind: "static"; reason: LiveMoveDeclineReason }>
+  // A move-animation command without a body request (the trn181 action-transition / no-hit attack pauses): no body exists.
+  | Readonly<{ kind: "pause" }>;
+
+const LIVE = Object.freeze({ kind: "live" as const });
+const PAUSE = Object.freeze({ kind: "pause" as const });
+
+/** The census code: "live", "approx:<reason>", "static:<reason>" or "pause". */
+export function liveMovePlaybackCode(classification: LiveMovePlaybackClassification): string {
+  return classification.kind === "live" || classification.kind === "pause" ? classification.kind
+    : `${classification.kind === "approximate" ? "approx" : "static"}:${classification.reason}`;
+}
+
+const sideFlip = (battler: number) => (battler === 0 ? 1 : 0);
+
+/**
+ * Why liveMoveAnimationDuration(request, field) is null (null: it is not), in the duration's own gate order: the Substitute swap /
+ * doll gates, the transformed-battler gate, Move_TRANSFORM's own gate, a move without a case, then the request dimension whose flip
+ * makes the production duration non-null (attacker side, turn, rollout counter, power, friendship). A pure function of (request, field).
+ */
+export function liveMoveDurationDeclineReason(
+  request: BattleMoveAnimationRequest,
+  field: BattleResolutionDisplayedField,
+): LiveMoveDeclineReason | null {
+  if (liveMoveAnimationDuration(request, field) !== null) return null;
+  const swap = liveSubstituteSwapApplies(request, field);
+  if (swap === true) {
+    return liveMoveDurationDeclineReason(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1))
+      ?? "other:substitute-swap-composite";
+  }
+  if (swap === false || liveMoveSubstituteDollDeclines(request, field)) return "substitute-doll";
+  if (liveTransformedBattlerDeclines(request, field) || request.moveId === LIVE_TRANSFORM_MOVE_ID) return "transform";
+  if (liveMoveAnimationDurationCaseMissing(request, field)) return "no-adapter";
+  const live = (r: BattleMoveAnimationRequest) => liveMoveAnimationDuration(r, field) !== null;
+  if (live({ ...request, attacker: sideFlip(request.attacker), target: sideFlip(request.target) })) return "other:attacker-side";
+  if ([0, 1, 2, 3].some((turn) => turn !== request.turn && live({ ...request, turn }))) {
+    return request.turn === 0 ? "turn-0" : `other:turn-${request.turn}`;
+  }
+  if ([1, 2, 3, 4, 5].some((c) => c !== request.rolloutCounter && live({ ...request, rolloutCounter: c }))) return "other:rollout-counter";
+  if ([20, 40, 70, 110, 150].some((p) => p !== request.power && live({ ...request, power: p }))) return "other:power-branch";
+  if ([0, 70, 150, 255].some((f) => f !== request.friendship && live({ ...request, friendship: f }))) return "other:friendship-branch";
+  return "other:duration-null";
+}
+
+/**
+ * Why the live renderer draws the static field for this render view's move body (null: it draws the body), in
+ * renderBattleResolutionLiveView's own order: the Substitute swap composite (its body rows), the Transform body, then
+ * liveMoveAnimationPresentation with the view's hidden sides; the reason is the attributed gate's code. A pure function of the view.
+ */
+export function liveMovePresentationDeclineReason(view: BattleResolutionPresentationRenderView): LiveMoveDeclineReason | null {
+  const effect = view.effect;
+  if (effect?.type !== "move") return null;
+  let swap = liveSubstituteSwapView(view);
+  if (swap?.kind === "swap") {
+    // A presented swap composite's own rows are drawn; its body rows decide the body (the first body age of the composite).
+    const rows = liveMoveAnimationDuration(effect.request, view.field) ?? 0;
+    swap = null;
+    for (let age = 0; age < rows && swap === null; age += 1) {
+      const at = liveSubstituteSwapView(Object.freeze({ ...view, effect: Object.freeze({ ...effect, age }) }));
+      if (at?.kind === "body") swap = at;
+    }
+    if (swap === null) return null;
+  }
+  if (swap) view = swap.view;
+  const e = view.effect;
+  if (e?.type !== "move") return null;
+  if (e.request.moveId === LIVE_TRANSFORM_MOVE_ID && liveMoveAnimationDuration(e.request, view.field) !== null) return null;
+  const sink: LiveMoveDeclineSink = {};
+  let presented: unknown;
+  try {
+    presented = liveMoveAnimationPresentation(e.request, view.field, e.age, e.paletteInput, e.spriteAllocatorInput, e.spriteOrderInput,
+      e.presentationRng, e.battlerX2Input, liveMoveHiddenSides(view.visibility, e.request), sink);
+  } catch {
+    return "other:presentation-throw";
+  }
+  if (presented !== null) return null;
+  return liveMoveDurationDeclineReason(e.request, view.field) ?? sink.reason ?? `other:unattributed-gate-${e.request.moveId}`;
+}
+
+function byPolicy(reason: LiveMoveDeclineReason, policy: LiveMovePlaybackPolicy): LiveMovePlaybackClassification {
+  return Object.freeze({ kind: policy[liveMoveDeclineClassOf(reason)] === "approximate" ? "approximate" : "static", reason });
+}
+
+/**
+ * A command's playback class (null: not a move-animation command). `field` is the displayed field before the command
+ * (battleResolutionFieldBeforeCommand); `view` (optional) is a render view presenting it (createBattleResolutionPresentationRenderView),
+ * which adds the presentation gates (sprite order / allocator history, Castform form, Endeavor power, hidden target, ...). Without a
+ * view only the duration gates are decided (a pure function of (command, field)).
+ */
+export function liveMovePlaybackClassification(
+  command: BattleResolutionPresentationCommand,
+  field: BattleResolutionDisplayedField,
+  view?: BattleResolutionPresentationRenderView,
+  policy: LiveMovePlaybackPolicy = LIVE_MOVE_APPROXIMATE_POLICY,
+): LiveMovePlaybackClassification | null {
+  if (command.type !== "move-animation") return null;
+  if (!command.animation) return PAUSE;
+  const reason = liveMoveDurationDeclineReason(command.animation, field) ?? (view ? liveMovePresentationDeclineReason(view) : null);
+  return reason === null ? LIVE : byPolicy(reason, policy);
+}
