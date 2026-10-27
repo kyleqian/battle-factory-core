@@ -1697,6 +1697,7 @@ export class RandomPlayer {
   /** Decide this frame's held buttons. */
   decide(state: EngineState): ReadonlySet<GbaButton> {
     this.trackProgress(state);
+    if (!state.summaryScreen.isOpen) this.summaryPresses = 0;
     if (this.cooldown > 0) {
       this.cooldown -= 1;
       return NO_BUTTONS;
@@ -1821,9 +1822,13 @@ export class RandomPlayer {
     }
     // Menu mode: steer to RENT (or peek SUMMARY once).
     if (!isMonPicInputReady(draft.monPic)) return NO_BUTTONS;
-    const wantSummary = this.draft.peekedSummary === true
-      && this.draft.rented === 0
-      && this.rng.chance(0.5);
+    // sfa214: "full" may peek at the SUMMARY on any menu visit (the other
+    // policies keep their single 25 % x 50 % peek and its draws).
+    const wantSummary = this.policy === "full"
+      ? this.rng.chance(0.3)
+      : this.draft.peekedSummary === true
+        && this.draft.rented === 0
+        && this.rng.chance(0.5);
     const target = wantSummary ? MENU_OPTION_SUMMARY : MENU_OPTION_RENT;
     if (draft.menuCursorPos !== target) {
       return this.press(draft.menuCursorPos < target ? "DOWN" : "UP", 6);
@@ -1884,15 +1889,69 @@ export class RandomPlayer {
     return null;
   }
 
+  /**
+   * sfa214: "full" renders every frame while the Summary is open, so the
+   * front animation and every move-select detail state are drawn (the
+   * default cadence rendered 1 frame in 8 there). Rendering never feeds
+   * tick, so trajectories are unchanged; other policies keep their cadence.
+   */
+  rendersEveryFrame(state: EngineState): boolean {
+    return this.policy === "full" && (state.summaryScreen.isOpen || state.summaryScreen.transition !== null);
+  }
+
+  /** sfa214: "full"'s presses on the current Summary visit. */
+  private summaryPresses = 0;
+
   private onSummary(state: EngineState): ReadonlySet<GbaButton> {
     if (state.summaryScreen.transition || state.summaryScreen.pageTransition
       || state.summaryScreen.monTransition) return NO_BUTTONS;
+    if (this.policy === "full") return this.onFullSummary(state);
     // Wander a little, then leave with B.
     if (this.explores && this.rng.chance(0.3)) {
       return this.press(this.rng.pick(["UP", "DOWN", "LEFT", "RIGHT"] as const), 12);
     }
     this.note(state, "summary: exit (B)");
     return this.press("B", 12);
+  }
+
+  /**
+   * sfa214: "full" explores the Summary like a player: pages (LEFT/RIGHT),
+   * other rentals (UP/DOWN, which replaces the front sprite and restarts its
+   * animation), and the Battle / Contest Moves move-select mode (A) with the
+   * cursor over every row including CANCEL, closed with A or B. Only "full"
+   * reaches this, so the other policies' decision streams are untouched.
+   */
+  private onFullSummary(state: EngineState): ReadonlySet<GbaButton> {
+    const summary = state.summaryScreen;
+    const select = summary.moveSelect;
+    this.summaryPresses += 1;
+    if (select) {
+      if (select.phase === "closing") return NO_BUTTONS;
+      const roll = this.rng.float();
+      if (roll < 0.75 && this.summaryPresses < 60) {
+        const button = this.rng.pick(["UP", "DOWN"] as const);
+        this.note(state, `summary move-select: ${button} (row ${select.selectedMoveIndex})`);
+        return this.press(button, 8);
+      }
+      const button = this.rng.chance(0.5) ? "A" : "B";
+      this.note(state, `summary move-select: close (${button}) on row ${select.selectedMoveIndex}`);
+      return this.press(button, 8);
+    }
+    const roll = this.rng.float();
+    if (this.summaryPresses >= 60 || (roll < 0.12 && this.summaryPresses > 3)) {
+      this.summaryPresses = 0;
+      this.note(state, "summary: exit (B)");
+      return this.press("B", 12);
+    }
+    if (roll < 0.40) {
+      this.note(state, `summary: A on ${summary.page}`);
+      return this.press("A", 10);
+    }
+    if (roll < 0.70) {
+      return this.press(this.rng.pick(["LEFT", "RIGHT"] as const), 12);
+    }
+    // Mon change: hold long enough for the replacement's front animation.
+    return this.press(this.rng.pick(["UP", "DOWN"] as const), 60);
   }
 
   // -- battle start intro ---------------------------------------------------
@@ -2901,7 +2960,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       lastSurface = surface;
       if (
         options.renderEvery > 0
-        && (surfaceChangedThisTick || frame % options.renderEvery === 0)
+        && (surfaceChangedThisTick || frame % options.renderEvery === 0 || player.rendersEveryFrame(state))
       ) {
         phase = "render";
         render(state);

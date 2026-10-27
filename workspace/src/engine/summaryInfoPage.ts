@@ -502,7 +502,6 @@ function compose(
   }
 
   const movePanel = moveSelect ? summaryMovePanelPresentation(moveSelect) : null;
-  const moveSelectInstalled = movePanel !== null;
   // A fully slid-out panel (CANCEL row) leaves only defaultTile 0 columns,
   // the same tilemap the closed page shows.
   if (moveSelect && movePanel && movePanel.hiddenColumns < 10) {
