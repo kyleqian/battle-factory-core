@@ -66,9 +66,116 @@ export interface SummaryMoveSelectState {
   /** Non-null through the source's two-tick BG/OAM handoff after navigation. */
   readonly pendingPresentedMoveIndex: number | null;
   readonly pendingPresentationTicks: number;
+  /**
+   * ChangeSelectedMove's CANCEL-row branches restart Task_SlidePowerAccWindow:
+   * a move -> CANCEL step slides the effect panel out (0, +3) and clears the
+   * POWER/ACCURACY + description windows; CANCEL -> a move slides it back in
+   * (9, -3) and re-puts the label window when the slide ends. Absent/null
+   * until the cursor first enters or leaves the CANCEL row.
+   */
+  readonly cancelSlide?: SummaryMoveCancelSlide | null;
+}
+
+export interface SummaryMoveCancelSlide {
+  readonly toCancel: boolean;
+  /** First render (in `elapsed`) that shows a CANCEL -> move step. */
+  readonly revealAt: number;
+  /** Ticks since the accepting tick (0 renders the prior panel). */
+  readonly elapsed: number;
+  /** Panel presentation the accepting tick would have rendered without the step. */
+  readonly prior: SummaryMovePanelPresentation;
+}
+
+/** BG0/BG1-2 state of the move-effect sliding panel for one render. */
+export interface SummaryMovePanelPresentation {
+  /** CopyNColumnsToTilemap's tVisibleColumns (0 = fully shown, 10 = gone). */
+  readonly hiddenColumns: number;
+  /** PSS_LABEL_WINDOW_MOVES_POWER_ACC / APPEAL_JAM tilemap is put. */
+  readonly labelsShown: boolean;
+  /** PSS_LABEL_WINDOW_PORTRAIT_SPECIES tilemap is put. */
+  readonly speciesShown: boolean;
+}
+
+const SLIDING_WINDOW_WIDTH = 10; // sPowerAccSlidingWindow / sAppealJamSlidingWindow .width
+
+function cancelSlidePanel(slide: SummaryMoveCancelSlide): SummaryMovePanelPresentation {
+  const n = slide.elapsed;
+  if (n === 0) return slide.prior;
+  if (slide.toCancel) {
+    // PositionPowerAccSlidingWindow(0, 3): the task's first step runs on the
+    // accepting tick; each step reaches the screen on the following render.
+    // Reaching the width re-puts the portrait species window.
+    const hiddenColumns = Math.min(SLIDING_WINDOW_WIDTH, n * 3);
+    return { hiddenColumns, labelsShown: false, speciesShown: hiddenColumns >= SLIDING_WINDOW_WIDTH };
+  }
+  // PositionPowerAccSlidingWindow(9, -3) after the species window is cleared;
+  // reaching 0 re-puts the POWER/ACCURACY (APPEAL/JAM) label window. Oracle
+  // (summary-{battle,contest}-move-select-cancel-row): the step reaches the
+  // screen with the ordinary two-render selector handoff on Contest and one
+  // render later on Battle (PrintMovePowerAndAccuracy's extra print), then
+  // slides 6 / 3 / 0.
+  if (n < slide.revealAt) return slide.prior;
+  const hiddenColumns = Math.max(0, 6 - (n - slide.revealAt) * 3);
+  return { hiddenColumns, labelsShown: hiddenColumns === 0, speciesShown: false };
+}
+
+/**
+ * The move-effect panel for a move-select render, or null when the ordinary
+ * page panel (no move-select tilemap) is shown.
+ */
+export function summaryMovePanelPresentation(
+  select: SummaryMoveSelectState,
+): SummaryMovePanelPresentation | null {
+  if (select.phase === "closing") {
+    // CloseMoveSelectMode only restarts the slide-out when the cursor is on a
+    // move; from CANCEL the earlier slide-out keeps running untouched.
+    if (select.selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX && select.cancelSlide) {
+      const panel = cancelSlidePanel(select.cancelSlide);
+      return { ...panel, labelsShown: false };
+    }
+    // The accepting tick still renders the panel the open phase left.
+    if (select.elapsed === 0 && select.cancelSlide) return cancelSlidePanel(select.cancelSlide);
+    return {
+      hiddenColumns: Math.min(SLIDING_WINDOW_WIDTH, select.elapsed * 3),
+      labelsShown: select.elapsed === 0,
+      speciesShown: false,
+    };
+  }
+  if (select.cancelSlide) return cancelSlidePanel(select.cancelSlide);
+  if (select.elapsed < SUMMARY_MOVE_SELECT_INSTALL_TICKS) return null;
+  const hiddenColumns = Math.max(0, 9 - (select.elapsed - 2) * 3);
+  return { hiddenColumns, labelsShown: select.elapsed >= 5, speciesShown: false };
+}
+
+/** Render-time move index whose details (POWER/ACCURACY, description) are drawn, or null. */
+export function summaryMoveDetailIndex(select: SummaryMoveSelectState): number | null {
+  // PrintMovePowerAndAccuracy's already-mapped label window reaches VRAM one
+  // tick before the description/selector OAM handoff.
+  const index =
+    select.pendingPresentationTicks > 1 ? select.presentedMoveIndex : select.selectedMoveIndex;
+  // PrintMoveDetails(MOVE_NONE) clears the description window on CANCEL.
+  if (index === SUMMARY_MOVE_CANCEL_INDEX || select.presentedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX) {
+    return null;
+  }
+  return index;
 }
 
 export const SUMMARY_MOVE_CANCEL_INDEX = 4;
+/** Renders until a CANCEL -> move step reaches the selector, description and panel. */
+export function summaryMoveCancelLeaveTicks(page: SummaryPage): number {
+  return page === "battleMoves" ? 3 : 2;
+}
+
+/**
+ * Selector row for a move-select render. A move -> CANCEL step only clears
+ * windows, so its selector lands one render before the ordinary two-tick
+ * handoff (oracle: summary-battle-move-select-cancel-row frame 200).
+ */
+export function summaryMoveSelectorRow(select: SummaryMoveSelectState): number {
+  return select.selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX && select.pendingPresentationTicks <= 1
+    ? SUMMARY_MOVE_CANCEL_INDEX
+    : select.presentedMoveIndex;
+}
 export const SUMMARY_MOVE_SELECT_INSTALL_TICKS = 3;
 export const SUMMARY_MOVE_SELECT_CLOSE_TICKS = 4;
 
@@ -314,14 +421,28 @@ export function requestSummaryMoveSelectionChange(
   const selectedMoveIndex =
     (select.selectedMoveIndex + delta + SUMMARY_MOVE_CANCEL_INDEX + 1) %
     (SUMMARY_MOVE_CANCEL_INDEX + 1);
+  const leavesCancel = select.selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX;
+  const leaveTicks = summaryMoveCancelLeaveTicks(state.page);
+  const entersCancel = selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX;
+  // Before the install render the ordinary page (no panel, species shown) is up.
+  const prior = summaryMovePanelPresentation(select) ?? {
+    hiddenColumns: SLIDING_WINDOW_WIDTH,
+    labelsShown: false,
+    speciesShown: true,
+  };
+  const cancelSlide =
+    leavesCancel || entersCancel
+      ? { toCancel: entersCancel, revealAt: entersCancel ? 1 : leaveTicks, elapsed: 0, prior }
+      : select.cancelSlide ?? null;
   return {
     ...state,
     moveSelect: {
       ...select,
       selectedMoveIndex,
+      ...(cancelSlide ? { cancelSlide } : {}),
       selectorAnimationClock: 0,
       pendingPresentedMoveIndex: selectedMoveIndex,
-      pendingPresentationTicks: 2,
+      pendingPresentationTicks: leavesCancel ? leaveTicks : 2,
     },
   };
 }
@@ -342,6 +463,13 @@ export function requestSummaryMoveSelectClose(state: SummaryScreenState): Summar
   };
 }
 
+function advancedCancelSlide(select: SummaryMoveSelectState): { cancelSlide?: SummaryMoveCancelSlide } {
+  const slide = select.cancelSlide;
+  if (!slide) return {};
+  // The slide task stops at its end column; cap the clock there.
+  return { cancelSlide: { ...slide, elapsed: Math.min(slide.elapsed + 1, 8) } };
+}
+
 /** Advance entry/exit and page-scroll state machines by one tick. Call every engine tick. */
 export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenState {
   if (state.moveSelect) {
@@ -358,7 +486,7 @@ export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenSt
       }
       return {
         ...state,
-        moveSelect: { ...select, elapsed },
+        moveSelect: { ...select, elapsed, ...advancedCancelSlide(select) },
         openElapsed: state.openElapsed + 1,
         monAnimClock: state.monAnimClock === null ? null : state.monAnimClock + 1,
       };
@@ -382,6 +510,7 @@ export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenSt
         pendingPresentedMoveIndex:
           installPending ? null : select.pendingPresentedMoveIndex,
         pendingPresentationTicks,
+        ...advancedCancelSlide(select),
       },
       openElapsed: state.openElapsed + (advanceMonClock ? 1 : 0),
       monAnimClock:

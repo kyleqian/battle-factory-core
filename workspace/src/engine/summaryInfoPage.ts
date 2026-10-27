@@ -29,7 +29,12 @@ import type {
   SummaryPage,
   SummaryPageTransition,
 } from "./summaryScreen.ts";
-import { summaryPageLayerOffsets } from "./summaryScreen.ts";
+import {
+  summaryMoveDetailIndex,
+  summaryMovePanelPresentation,
+  summaryMoveSelectorRow,
+  summaryPageLayerOffsets,
+} from "./summaryScreen.ts";
 import {
   glyphLastRowColumnsForTransfer,
   glyphRasterRowsForTransfer,
@@ -480,15 +485,15 @@ function compose(
     }
   }
 
-  const moveSelectInstalled =
-    moveSelect !== undefined &&
-    (moveSelect.phase === "closing" || moveSelect.elapsed >= 3);
-  if (moveSelectInstalled) {
-    const hiddenColumns =
-      moveSelect.phase === "closing"
-        ? Math.min(10, moveSelect.elapsed * 3)
-        : Math.max(0, 9 - (moveSelect.elapsed - 2) * 3);
-    const presentedMove = rental.moves[moveSelect.presentedMoveIndex]!;
+  const movePanel = moveSelect ? summaryMovePanelPresentation(moveSelect) : null;
+  const moveSelectInstalled = movePanel !== null;
+  // A fully slid-out panel (CANCEL row) leaves only defaultTile 0 columns,
+  // the same tilemap the closed page shows.
+  if (moveSelect && movePanel && movePanel.hiddenColumns < 10) {
+    const hiddenColumns = movePanel.hiddenColumns;
+    // Hearts are drawn only at hiddenColumns 0, which the CANCEL row never
+    // reaches; DrawContestMoveHearts(MOVE_NONE) writes nothing there.
+    const presentedMove = rental.moves[moveSelect.presentedMoveIndex];
     drawTilePatchFaded(
       fb,
       summaryBg.tileset,
@@ -496,8 +501,8 @@ function compose(
       moveEffectPatch(
         page as "battleMoves" | "contestMoves",
         hiddenColumns,
-        presentedMove.contest.appeal,
-        presentedMove.contest.jam,
+        presentedMove?.contest.appeal ?? 0,
+        presentedMove?.contest.jam ?? 0,
       ),
       0,
       13 * 8,
@@ -562,7 +567,7 @@ function compose(
   text(rental.name, WIN_NICKNAME.x, WIN_NICKNAME.y + 1, COLOR_1, PAL6);
 
   // gText_LevelSymbol = "{LV}" + the (left-aligned, not zero-padded) level.
-  if (!moveSelectInstalled) {
+  if (!movePanel || movePanel.speciesShown) {
     const lvGlyphWidth = drawGlyphCode(
       fb,
       GLYPH_CODE_LV,
@@ -750,25 +755,21 @@ function compose(
       text("CANCEL", WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + 65, COLOR_1, PAL6);
     }
     if (showMoveDetails) {
-      const presentedMove = pageRental.moves[moveSelect.presentedMoveIndex]!;
+      // CANCEL row: PrintMoveDetails(MOVE_NONE) clears the description and
+      // ChangeSelectedMove clears the POWER/ACCURACY label window.
+      const detailIndex = summaryMoveDetailIndex(moveSelect);
+      const presentedMove = detailIndex === null ? null : pageRental.moves[moveSelect.presentedMoveIndex]!;
       const description =
-        page === "contestMoves"
+        presentedMove === null
+          ? ""
+          : page === "contestMoves"
           ? presentedMove.contest.description
           : presentedMove.description;
       for (const [lineIndex, line] of description.split("\n").entries()) {
         text(line, 86, 121 + lineIndex * 16, COLOR_0, PAL6);
       }
-      const panelFullyOpen =
-        (moveSelect.phase === "open" && moveSelect.elapsed >= 5) ||
-        (moveSelect.phase === "closing" && moveSelect.elapsed === 0);
-      if (panelFullyOpen) {
-        // PrintMovePowerAndAccuracy's already-mapped label window reaches
-        // VRAM one tick before the description/selector OAM handoff.
-        const powerMoveIndex =
-          moveSelect.pendingPresentationTicks > 1
-            ? moveSelect.presentedMoveIndex
-            : moveSelect.selectedMoveIndex;
-        const detailMove = pageRental.moves[powerMoveIndex]!;
+      if (movePanel?.labelsShown && detailIndex !== null) {
+        const detailMove = pageRental.moves[detailIndex]!;
         text(page === "contestMoves" ? "APPEAL" : "POWER", 8, 121, COLOR_1, PAL6);
         text(page === "contestMoves" ? "JAM" : "ACCURACY", 8, 137, COLOR_1, PAL6);
         if (page === "contestMoves") {
@@ -816,7 +817,7 @@ function compose(
             MOVE_SELECTOR_SHEET,
             moveSelector.palette,
             i * 16 + 89,
-            40 + moveSelect.presentedMoveIndex * 16,
+            40 + summaryMoveSelectorRow(moveSelect) * 16,
             2,
             2,
             i === 0 || i === 9 ? 8 : 10,
