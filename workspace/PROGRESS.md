@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-26 / 27 — CAX31 session (supervisor, Opus 5.5): finish plan Phase 1 started (in progress)
 
-- **State:** master `5dd00cd59`+; production src tree `369a7ad85` (contain209 + perf211).
+- **State:** master `6a021c074`+; production src tree `71e610860` (contain209 + perf211 + apx210).
 - **Light gates on src `21f22b324` (reused + one rerun):** census 0..999 both scenes already existed twice for this exact src
   (tl205 union `875695e43`, exs207 base `ef511e03d`); delta between them 1,000 / 1,000 battles identical, 0 digest / 0 error
   mismatch, 0 unattributed. Differential (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on,
@@ -41,7 +41,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   most frames outside battle (~60–70k frames per first-round seed, ~1.2 battles). 3,000 battles at `--render-every 1` is still
   ~13 h wall here, so the nightly Scene ON bulk count uses the default `--render-every 8` (which also renders on every surface
   change) and a smaller `--render-every 1` sample rides beside it.
-- **Running:** apx210 (Phase 2 step 1, approximate plumbing, Opus worker); Scene ON render-every-1 sweep 30:130.
+- **Scene ON sweep on perf211 code:** winning carry 0 `--vary-rng --first-round --render-every 1` seeds 30:130 **100 / 100 OK**
+  (3,593 s at `--parallel 3`). Soak RSS plateaus at ~1.2–1.4 GB per process (render caches bounded).
+- **Folded:** apx210 (`6a021c074`, src `71e610860`): `src/engine/liveMovePlayback.ts` reason codes + `LIVE_MOVE_APPROXIMATE_POLICY`
+  (all static); every move-animation decline names a reason (`return declined(sink, reason)`); census field [21]
+  (`live` / `approx:<r>` / `static:<r>` / `pause`), `tools/integration/apx210CensusSummary.py`. Worker: census ON 0..199
+  fields [0..20] identical to master's arm, 7,716 move animations = 5,196 live / 51 static / 2,469 pause (no body request);
+  static = transform 33, substitute-doll 9, extrasensory-player-later 3, hidden-target 3, no-adapter 2, turn-0 1.
+  Supervisor union gate (apx210 + master, `dc8241bcd`): full suite 1 failed / 1,698 passed — `cf78NeedleArmTie` via
+  `tools/integration/liveShareCensusGates.ts`, a source-text gate parser that only knew `return null`; fixed (`ac33930e2`), the
+  parsed gate set now differs from master only by the 4 compound gates split into 2 equivalent ifs; cf78 4 / 4; build 0.
+- **Browser random play (play212, branch `worker/integration-20261027-044651`, not folded yet):** `npm run play:random`
+  (`tools/browser/randomPlay.mjs`). Chromium needed 9 missing system libraries; supervisor unpacked their Ubuntu .debs without
+  root into the ignored `.integration/browser/syslibs/root` (run with `LD_LIBRARY_PATH=<that>/usr/lib/aarch64-linux-gnu`).
+  Self-test catches + saves a planted page error; 2 min per scene: ~60 fps, 0 page errors, but no battle reached (too short).
+- **Running:** contain213 (remaining containment seams, Opus worker); Scene ON census 0..999 with field [21] on `6a021c074`;
+  10-minute browser run per scene.
 ---
 
 ## 2026-10-26 — User decision: finish plan approved; CAX31 run restarted on it (top layer, docs only)
