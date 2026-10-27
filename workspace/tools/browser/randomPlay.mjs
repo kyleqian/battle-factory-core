@@ -11,6 +11,8 @@
  *   npx playwright install chromium            # default PLAYWRIGHT_BROWSERS_PATH (~/.cache/ms-playwright)
  *   # Linux needs system libs; on Ubuntu/Debian (root): npx playwright install-deps chromium, or at least
  *   #   apt-get install libnspr4 libnss3 libatk1.0-0t64 libatspi2.0-0t64 libxcomposite1 libxdamage1 libxrandr2 libgbm1
+ *   # Without root: cd .integration/browser && mkdir -p syslibs/debs && cd syslibs/debs && apt-get download <those> libxi6
+ *   #   && cd .. && for d in debs/*.deb; do dpkg -x $d root; done   (picked up automatically, see launchEnv below)
  *   # check with: find ~/.cache/ms-playwright -name chrome-headless-shell -type f | xargs ldd | grep 'not found'
  * Run:
  *   npm run build && npm run play:random -- --minutes 10 --scene both --seed 1
@@ -233,7 +235,15 @@ async function runScene(browser, port, scene, options, outDir, log) {
       const trace = await page.evaluate(() => window.__POKEBENCH_SESSION__()).catch(() => null);
       if (snapshot.overlay) {
         result.overlays += 1;
-        await saveIncident("overlay", trace?.error ? `${trace.error.name}: ${trace.error.message}` : "crash overlay", trace);
+        // The overlay's own textarea holds the crash trace WITH the error (the live session export has none).
+        const overlayTrace = await page.evaluate(() => {
+          const text = document.querySelector('[data-testid="crash-overlay"] textarea')?.value;
+          try { return text ? JSON.parse(text) : null; } catch { return null; }
+        }).catch(() => null);
+        const crash = overlayTrace ?? trace;
+        const message = crash?.error ? (typeof crash.error === "string" ? crash.error : `${crash.error.name ?? "Error"}: ${crash.error.message ?? JSON.stringify(crash.error)}`) : "crash overlay";
+        result.overlayMessages = [...(result.overlayMessages ?? []), message];
+        await saveIncident("overlay", message, crash);
       }
       for (const incident of incidents) {
         result.pageErrors.push(incident.text);
@@ -309,7 +319,13 @@ async function main() {
   log(`random play: dist=${options.dist} port=${port} seed=${options.seed} minutes/scene=${options.minutes} scenes=${options.scene} out=${outDir}`);
   if (manifest) log(`build: ${manifest.build ?? manifest.commit ?? JSON.stringify(manifest).slice(0, 80)}`);
   const scenes = options.scene === "both" ? ["on", "off"] : [options.scene];
-  const browser = await chromium.launch({ headless: !options.headed });
+  // Hosts without root (CAX31): system libraries unpacked from their .debs into .integration/browser/syslibs/root
+  // (apt-get download <pkgs> && dpkg -x <deb> root) are put on the browser's library path automatically.
+  const syslibs = resolve(".integration/browser/syslibs/root/usr/lib/aarch64-linux-gnu");
+  const launchEnv = existsSync(syslibs)
+    ? { ...process.env, LD_LIBRARY_PATH: [syslibs, process.env.LD_LIBRARY_PATH].filter(Boolean).join(":") }
+    : undefined;
+  const browser = await chromium.launch({ headless: !options.headed, ...(launchEnv ? { env: launchEnv } : {}) });
   const results = [];
   try {
     for (const scene of scenes) {
@@ -336,6 +352,7 @@ async function main() {
           : ", battles n/a"),
     );
     for (const text of r.pageErrors) log(`  pageerror: ${text.split("\n")[0]}`);
+    for (const text of r.overlayMessages ?? []) log(`  overlay: ${text.split("\n")[0]}`);
     for (const text of [...new Set(r.consoleErrors)].slice(0, 10)) log(`  console.error: ${text.split("\n")[0]}`);
     for (const entry of r.containedErrors.slice(0, 10)) log(`  contained: ${JSON.stringify(entry).slice(0, 200)}`);
     for (const file of r.saved) log(`  saved: ${file}`);
