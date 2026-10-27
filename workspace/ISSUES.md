@@ -24,6 +24,14 @@ may change gameplay/RNG when proved against source; use main-lane ownership
 and gameplay gates. Historical presentation-only exclusions are superseded.
 Settled/parked records and unrelated expansions retain their existing status.
 
+## #188 — Summary front animation: 137 species approximate-static motion; QUILAVA replacement one render late (finish plan, sfa214 2026-10-27)
+
+sfa214 made the draft Summary screen crash-free for every Factory species. Open, non-crash residuals:
+(a) 137 / 376 species (42 `pokemon_animation.c` motion types) play the frame program only, no source motion
+(`summaryFrontAnimation.ts` `motionClaim`); (b) `summary-info-quilava-v-stretch` (mon-change replacement sprite)
+48 / 91 vs the Scene OFF oracle: the whole replacement animation shows one render later in the ROM; the initial-sprite
+trace is 108 / 121 (2-8 px affine-edge residual on 13 frames). Anchor Summary traces stay exact. Timing class: long tail.
+
 ## #168 — remainder: FRZ frozen-turn timing phase (S10A; #168 otherwise DONE 2026-10-13)
 
 All nine B_ANIM_STATUS_* animations are timed and drawn (88 + 16 dense ROM windows 0 px; live audit 28 clean), and since inl144

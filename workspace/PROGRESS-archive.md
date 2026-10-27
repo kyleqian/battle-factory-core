@@ -1,3 +1,6 @@
+
+---
+
 ## 2026-10-23 — CAX31 session (supervisor, Opus 5.5): lsd194/196 + rst197, lsd198/199, sst200, fnt201 + hpb202, tl204 folded
 
 - **State:** master `f5d66d068`+ (production src tree `d8fda5802`, tested on `f96e8e805`). Presentation only; kernel digests identical
