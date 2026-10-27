@@ -5,6 +5,23 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-26 / 27 — CAX31 session (supervisor, Opus 5.5): finish plan Phase 1 started (in progress)
+
+- **State:** master `8b0c936e3`; production src tree `21f22b324` unchanged so far.
+- **Light gates on src `21f22b324` (reused + one rerun):** census 0..999 both scenes already existed twice for this exact src
+  (tl205 union `875695e43`, exs207 base `ef511e03d`); delta between them 1,000 / 1,000 battles identical, 0 digest / 0 error
+  mismatch, 0 unattributed. Differential (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on,
+  base `f5d66d068`) **641 / 641 identical** (`.integration/validation/sv-20261026b/diff-21f22b324/`).
+- **Folded:** soakscene208 (Phase 1a): `npm run soak -- --scene on|off|both`; Scene ON states for fresh / --start-carry /
+  --vary-rng; per-scene lines + summary; parallel parity; render throws are CRASH with `errorPhase: "render"`. Tools / tests only.
+  Supervisor reran the 3 soak test files (one 5 s timeout under load raised to 120 s, `1f576d35f`). Smoke ON 3 / 3 OK.
+- **Sizing:** `--render-every 1` costs ~3 ms / frame here (ON ~1.25x OFF): a first-round seed takes 1.5–5 min. Scene mode changes
+  frame counts, so the random player's press RNG gives different ON / OFF trajectories for the same seed.
+- **Also:** `ANIMATION_VERIFICATION.md` gained the approximate-playback contract (Phase 2). Removed the three stopped exs207
+  worktrees (clean; branches kept) and killed an orphan `tsc -b` (7 GB) left in one of them.
+- **Running:** contain209 (Phase 1c, in-app containment, Opus worker); Scene ON winning --vary-rng first-round sweep 0:30.
+---
+
 ## 2026-10-26 — User decision: finish plan approved; CAX31 run restarted on it (top layer, docs only)
 
 - **State:** master `ef511e03d` + these docs commits; production src tree `21f22b324` (tl205 + tl206 folded below, supervisor gates
