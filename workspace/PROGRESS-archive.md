@@ -1,4 +1,12 @@
+## 2026-10-26 — CAX31 session (supervisor, Opus 5.5): tl205 + tl206 folded; stopped by the user at 22:40 UTC for the finish-plan restart (entry above)
 
+- **State:** master `80c0a8c56` (src tree `21f22b324`). Presentation only so far.
+- **Folded:** tl205 + tl206 (Scene ON script tail, trail -1, for the 9 tl204-measured zero-tail moves; 13 tail-aware test re-pins).
+  Supervisor gates on the exact merged code `80c0a8c56`: typecheck 0; full suite 1,691 files / 14,065 tests passed, 0 failed; build 0
+  (`.integration/validation/sv-20261026/tl206/`). Census / tl204Compare were run on the union in the 2026-10-23 session (unchanged src).
+- **Stopped mid-step:** exs207 (Explosion-breaks-Substitute faint, ROM rows both scenes): refs `worker/integration-20261026-213055`,
+  `worker/integration-20261026-223044`, `worker/union-exs207` kept; not folded, no gates. Timing work: long tail under the finish plan.
+- **Next:** tl204 body-window residuals + the other 14 zero-tail moves; msg175 residuals; #146 visuals.
 ---
 
 ## 2026-10-23 — CAX31 session (supervisor, Opus 5.5): lsd194/196 + rst197, lsd198/199, sst200, fnt201 + hpb202, tl204 folded
