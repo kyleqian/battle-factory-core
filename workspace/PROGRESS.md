@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-26 / 27 — CAX31 session (supervisor, Opus 5.5): finish plan Phase 1 started (in progress)
 
-- **State:** master `8b0c936e3`; production src tree `21f22b324` unchanged so far.
+- **State:** master `1d8fa9bb8`+; production src tree `5355decad` (contain209).
 - **Light gates on src `21f22b324` (reused + one rerun):** census 0..999 both scenes already existed twice for this exact src
   (tl205 union `875695e43`, exs207 base `ef511e03d`); delta between them 1,000 / 1,000 battles identical, 0 digest / 0 error
   mismatch, 0 unattributed. Differential (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on,
@@ -19,7 +19,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   frame counts, so the random player's press RNG gives different ON / OFF trajectories for the same seed.
 - **Also:** `ANIMATION_VERIFICATION.md` gained the approximate-playback contract (Phase 2). Removed the three stopped exs207
   worktrees (clean; branches kept) and killed an orphan `tsc -b` (7 GB) left in one of them.
-- **Running:** contain209 (Phase 1c, in-app containment, Opus worker); Scene ON winning --vary-rng first-round sweep 0:30.
+- **Folded:** contain209 (Phase 1c, `1d8fa9bb8`, src tree `5355decad`): new `src/engine/presentationContainment.ts`; a throw in
+  live adapter selection or command duration degrades that command to the decline hold (decline length); a Scene ON / OFF draw
+  throw draws the static field from that row on, keeping the scheduled length (render never feeds tick). Sticky per frozen
+  command (WeakMap), deduped bounded log (32), `console.error` once, `__POKEBENCH_SESSION__().containedErrors`, bench
+  `__POKEBENCH__.containedErrors()`, soak `CONTAINED n` per seed + summary. Gameplay throws still reach the overlay. Worker gates
+  on the tip: typecheck 0, full suite 1,697 files / 14,082 tests 0 failed, build 0. Supervisor reran the 4 new test files (6 / 6)
+  and the differential vs `8b0c936e3` (641 / 641 identical); merged src tree = tested tree. **Not contained (open):** render-view
+  field reads inside `tick()` (`core.ts:1041/1046`, `factoryRoundBattleOrchestrator.ts:2769/2952`), `createBattleResolutionPresentation`
+  command building, order-host updates (`withResolutionLifecycle`, `commitCompletedResolutionCommand`).
+- **Scene ON sweeps (render every frame, `--vary-rng --first-round`, 0:30, `--parallel 3`):** winning carry 0 **30 / 30 OK**
+  (37 battles, 2,242 s); carry 14 **30 / 30 OK** (32 battles, 2,041 s). 0 CRASH / 0 HANG. At ~1 battle / min the 3,000-battle
+  nightly bar is out of reach on this host; perf211 (renderer profiling, pixel-neutral) is the response.
+- **Running:** perf211 (Opus worker); Scene ON carry 28 + winning-swap sweeps.
 ---
 
 ## 2026-10-26 — User decision: finish plan approved; CAX31 run restarted on it (top layer, docs only)
