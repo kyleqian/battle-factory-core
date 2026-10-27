@@ -3,6 +3,7 @@
 // (standard GBA convention - palette index 0 of a BG subpalette is never drawn).
 
 import { SCREEN_HEIGHT, SCREEN_WIDTH, setPixel } from "./framebuffer.ts";
+import { drawCompiledTileBg } from "./tileBgCache.ts";
 
 export interface RgbColor {
   r: number;
@@ -21,6 +22,18 @@ export interface TileBg {
 }
 
 export function drawTileBg(fb: Uint8Array, bg: TileBg, scrollX = 0, scrollY = 0): void {
+  // perf211: the compiled layer when it applies (tileBgCache.ts); the raster below otherwise.
+  if (drawCompiledTileBg(fb, bg.tileset, bg.tilemap, bg.subpalettes, {
+    width: bg.tilemap.width * 8,
+    height: bg.tilemap.height * 8,
+    scrollX,
+    scrollY,
+    fallbackRow0: true,
+  })) return;
+  drawTileBgRaster(fb, bg, scrollX, scrollY);
+}
+
+function drawTileBgRaster(fb: Uint8Array, bg: TileBg, scrollX: number, scrollY: number): void {
   const tilesPerRow = bg.tilemap.width;
   const mapWidth = bg.tilemap.width * 8;
   const mapHeight = bg.tilemap.height * 8;
