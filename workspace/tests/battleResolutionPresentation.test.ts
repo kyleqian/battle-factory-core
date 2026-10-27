@@ -6,6 +6,7 @@ import {
   appendBattleResolutionContinuation,
   createBattleResolutionPresentation,
   createBattleTerminalResolutionPresentation,
+  projectBattleResolutionCommands,
   storeBattleTerminalPresentationDismiss,
   FORCED_RETURN_TO_BALL_HOLD_FRAMES,
   FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES,
@@ -49,6 +50,7 @@ import {
   type FactoryFullTurnDecisionRules,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { iu120Extra } from "./helpers/iu120Rows.ts";
+import { clearContainedPresentationErrors, containedPresentationErrors } from "../src/engine/presentationContainment.ts";
 
 function initialBattle() {
   return createFactoryFullTurnBattleState({
@@ -1479,16 +1481,35 @@ describe("battle resolution presentation receipt ownership", () => {
   });
 
   it("fails closed on unpaired HP, missing switch-in markers, and out-of-order sequences", () => {
-    expect(() => createBattleResolutionPresentation(inputFor([
-      event(0, { kind: "hp-change", battler: 1, from: 91, to: 80 }),
-    ], NEXT_COMMAND))).toThrow(/no health-bar update/);
-    expect(() => createBattleResolutionPresentation(inputFor([
-      event(0, { kind: "switch", side: "player", fromPartyIndex: 0, toPartyIndex: 1 }),
-    ], NEXT_COMMAND))).toThrow(/no switch-in-animation/);
-    expect(() => createBattleResolutionPresentation(inputFor([
-      event(2, { kind: "health-bar-update", battler: 1, healthValue: 11 }),
-      event(1, { kind: "hp-change", battler: 1, from: 91, to: 80 }),
-    ], NEXT_COMMAND))).toThrow(/not strictly increasing/);
+    const malformed: readonly [readonly BattleKernelSemanticEvent[], RegExp][] = [
+      [[event(0, { kind: "hp-change", battler: 1, from: 91, to: 80 })], /no health-bar update/],
+      [[event(0, { kind: "switch", side: "player", fromPartyIndex: 0, toPartyIndex: 1 })], /no switch-in-animation/],
+      [[
+        event(2, { kind: "health-bar-update", battler: 1, healthValue: 11 }),
+        event(1, { kind: "hp-change", battler: 1, from: 91, to: 80 }),
+      ], /not strictly increasing/],
+    ];
+    for (const [events, message] of malformed) {
+      // The projector itself fails closed.
+      const input = inputFor(events, NEXT_COMMAND);
+      expect(() => projectBattleResolutionCommands(
+        input.transition.events,
+        input.beforeRules.rulesContext,
+        input.transition.state.rules.rulesContext,
+        input.fieldBoundary,
+        null,
+      )).toThrow(message);
+      // contain213 (presentationContainment.ts "commands"): the resolution contains it -- recorded once, and the span presents
+      // the minimal list (here no HP / party change at the kernel's endpoint: the closing turn-end alone).
+      clearContainedPresentationErrors();
+      const resolution = createBattleResolutionPresentation(input);
+      expect(resolution.segments[0]!.events).toBe(input.transition.events);
+      expect(resolution.segments[0]!.commands.map((command) => command.type)).toEqual(["turn-end"]);
+      expect(containedPresentationErrors()).toHaveLength(1);
+      expect(containedPresentationErrors()[0]).toMatchObject({ site: "commands", commandType: "segment" });
+      expect(containedPresentationErrors()[0]!.message).toMatch(message);
+    }
+    clearContainedPresentationErrors();
   });
 
   it("models the mid-battle switch-in ball-release emerge on the RAM-pinned pa ramp (ISSUES #78 slice 2)", () => {

@@ -1,3 +1,4 @@
+import { recordContainedPresentationError } from "./presentationContainment.ts";
 import {
   createLiveMovePaletteHost, invalidateLiveMovePaletteHost, prepareLiveMovePalette,
   returnLiveMovePaletteHostAfterOrdinaryPartyCancel,
@@ -110,7 +111,7 @@ import {
   applySubstituteDollCommand,
   battleResolutionMoveAnimationField,
   BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES,
-  createBattleResolutionPresentationRenderView,
+  containedBattleResolutionDisplayedField,
   LEECH_SEED_DRAIN_ABSORB_MOVE_ID,
   LIVE_SEMI_INVULNERABLE_NONE,
   type LiveSemiInvulnerableHidden,
@@ -1990,6 +1991,21 @@ function commitCompletedResolutionCommand(
   command: BattleResolutionPresentationCommand,
 ): FactoryBattlePresentationBoundaries {
   const displayed = commitCompletedResolutionCommandDisplay(boundaries, resolution, command);
+  // contain213 (presentationContainment.ts "order"): a throw in the presentation-only extras below keeps their earlier values.
+  try {
+    return commitCompletedResolutionCommandExtras(displayed, resolution, command);
+  } catch (error) {
+    recordContainedPresentationError("order", command.type, error,
+      `ledger extras: request ${resolution.resolutionId.requestId} segment ${resolution.segmentIndex}`);
+    return displayed;
+  }
+}
+
+function commitCompletedResolutionCommandExtras(
+  displayed: FactoryBattlePresentationBoundaries,
+  resolution: BattleResolutionPresentationState,
+  command: BattleResolutionPresentationCommand,
+): FactoryBattlePresentationBoundaries {
   // Presentation-only Substitute doll (applySubstituteDollCommand): the ledger field mirrors the resolution's display.
   const dollField = { player: displayed[0].field, opponent: displayed[1].field };
   const dollAfter = applySubstituteDollCommand(dollField, command);
@@ -2583,9 +2599,52 @@ export function advanceFactoryRoundBattleResolution(
   state: FactoryRoundBattleOrchestratorState,
   newKeys: ReadonlySet<GbaButton> = new Set(),
 ): FactoryRoundBattleOrchestratorState {
-  return prepareResolutionPalette(
-    advanceFactoryRoundBattleResolutionCore(prepareResolutionPalette(state), newKeys),
+  return containedPrepareResolutionPalette(
+    advanceFactoryRoundBattleResolutionCore(containedPrepareResolutionPalette(state), newKeys),
   );
+}
+
+/**
+ * contain213 (presentationContainment.ts "order"): a throw updating the presentation hosts for the current command leaves this
+ * battle's palette, allocator, sprite-order and battler-x2 histories unknown (the state later adapters decline / classify on) and
+ * drops the command's inputs; the next frame runs the update again from the unknown hosts.
+ */
+function containedPrepareResolutionPalette(
+  state: FactoryRoundBattleOrchestratorState,
+): FactoryRoundBattleOrchestratorState {
+  try {
+    return prepareResolutionPalette(state);
+  } catch (error) {
+    const resolution = state.battleResolutionPresentation;
+    const command = resolution?.segments[resolution.segmentIndex]?.commands[resolution.commandIndex];
+    recordContainedPresentationError("order", command?.type ?? "handoff", error, resolution
+      ? `request ${resolution.resolutionId.requestId} segment ${resolution.segmentIndex} command ${resolution.commandIndex}`
+        + ` ${resolution.lifecycle.phase} @${resolution.lifecycle.phaseElapsed}`
+      : null);
+    const reason = "contained presentation host update";
+    const palette = state.liveMovePaletteHost?.battleCallStart === state.activeBattleCallStart
+      ? state.liveMovePaletteHost : undefined;
+    const sprites = state.liveMoveSpriteAllocatorHost?.battleCallStart === state.activeBattleCallStart
+      ? state.liveMoveSpriteAllocatorHost : undefined;
+    return Object.freeze({
+      ...state,
+      ...(palette ? { liveMovePaletteHost: Object.freeze({ ...palette, host: invalidateLiveMovePaletteHost(palette.host) }) } : {}),
+      ...(sprites ? {
+        liveMoveSpriteAllocatorHost: Object.freeze({
+          ...withOrderHost(sprites, invalidateLiveSpriteOrderHost(orderHostOf(sprites), reason)),
+          host: invalidateLiveSpriteAllocatorHost(sprites.host),
+        }),
+      } : {}),
+      liveBattlerX2Host: invalidateX2Host(state, reason),
+      battleResolutionPresentation: resolution ? Object.freeze({
+        ...resolution,
+        liveMovePaletteInput: undefined,
+        liveMoveSpriteAllocatorInput: undefined,
+        liveMoveSpriteOrderInput: undefined,
+        liveMoveBattlerX2Input: undefined,
+      }) : resolution,
+    });
+  }
 }
 
 function advanceFactoryRoundBattleResolutionCore(
@@ -2765,8 +2824,8 @@ function advanceFactoryRoundBattleResolutionCore(
     const appended = appendBattleResolutionContinuation({
       resolution,
       transition: transitionFromDriveReceipt(receipt),
-      fieldBoundary:
-        createBattleResolutionPresentationRenderView(resolution).field,
+      // contain213: a presentation throw reading the boundary field degrades it (presentationContainment.ts "field").
+      fieldBoundary: containedBattleResolutionDisplayedField(resolution, "forced continuation boundary"),
     });
     return Object.freeze({
       ...state,
@@ -2949,7 +3008,7 @@ function advanceFactoryRoundBattleResolutionCore(
     const appended = appendBattleResolutionActionContinuation({
       resolution: advanced,
       transition: transitionFromDriveReceipt(receipt),
-      fieldBoundary: createBattleResolutionPresentationRenderView(advanced).field,
+      fieldBoundary: containedBattleResolutionDisplayedField(advanced, "action continuation boundary"),
     });
     return Object.freeze({
       ...state,

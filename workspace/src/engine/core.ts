@@ -690,6 +690,7 @@ import {
 } from "./factoryAnchorSession.ts";
 import { CANONICAL_DESTIN_PRESENTATION } from "./factoryTrainerPresentation.ts";
 import {
+  containedBattleResolutionRenderView,
   createBattleResolutionPresentationRenderView,
   liveMoveRandom2PlanContextAt,
   renderBattleResolutionPresentation,
@@ -1038,12 +1039,13 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         : generatedCommandType === "battleWon"
           ? createPostwinStateFromRound(
               generatedRound,
-              createBattleResolutionPresentationRenderView(preAdvanceResolution),
+              // contain213: a presentation throw in the frozen scene degrades it (presentationContainment.ts "field").
+              containedBattleResolutionRenderView(preAdvanceResolution, "postwin frozen scene"),
             )
           : generatedCommandType === "roundLost"
               || generatedCommandType === "roundCompleted"
             ? createBattleReturnHoldState(
-                createBattleResolutionPresentationRenderView(preAdvanceResolution),
+                containedBattleResolutionRenderView(preAdvanceResolution, "return-hold frozen scene"),
               )
             : postwin;
     const generatedTerminalCommand = terminalCommandForRound(generatedRound);

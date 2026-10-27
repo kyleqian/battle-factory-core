@@ -574,7 +574,7 @@ const GENERATED_ROUTE_INITIAL_ELAPSED = 1;
  */
 export function createPostwinStateFromRound(
   round: RoundControllerState,
-  frozenSceneView: BattleResolutionPresentationRenderView,
+  frozenSceneView: BattleResolutionPresentationRenderView | null,
 ): PostwinState {
   const pending = round.presentation;
   const lastBattle = round.rules.lastBattle;
@@ -645,7 +645,7 @@ export function createPostwinStateFromRound(
  * placeholder values, since a non-WIN outcome is never meant to reach them.
  */
 export function createBattleReturnHoldState(
-  frozenSceneView: BattleResolutionPresentationRenderView,
+  frozenSceneView: BattleResolutionPresentationRenderView | null,
 ): PostwinState {
   return {
     elapsed: GENERATED_ROUTE_INITIAL_ELAPSED,
