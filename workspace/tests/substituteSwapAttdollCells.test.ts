@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
-import { liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
+import { liveMoveAnimationDuration, liveMoveSubstituteDollUnproven } from "../src/engine/liveMoveAnimation.ts";
 import {
   LIVE_SUBSTITUTE_SWAP_BODY_CELLS, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING, LIVE_SUBSTITUTE_SWAP_BODY_IDS, liveSubstituteSwapView,
   substituteSwapTailFieldArt, substituteSwapTailX2,
@@ -23,6 +23,10 @@ const field = (playerDoll: boolean, opponentDoll: boolean): BattleResolutionDisp
 const req = (moveId: number, attacker: 0 | 1, extra: Partial<BattleMoveAnimationRequest> = {}): BattleMoveAnimationRequest =>
   ({ moveId, attacker, target: attacker === 0 ? 1 : 0, turn: 0, power: 0, damage: 0, friendship: 70, multihit: 0, ...extra }) as BattleMoveAnimationRequest;
 const SWAPS = { player: 85, opponent: 81 } as const;
+// apx215 (liveMovePlayback.ts approximate "substitute-doll"): the duration the PROVEN doll cells give (null outside them, the old static
+// hold); outside them the body is drawn approximately (liveSubstituteSwapApplies / liveMoveSubstituteDollDeclines).
+const provenDuration = (r: BattleMoveAnimationRequest, f: BattleResolutionDisplayedField) =>
+  liveMoveSubstituteDollUnproven(r, f) ? null : liveMoveAnimationDuration(r, f);
 
 describe("attacker-doll swap cells (prep40)", () => {
   it("rung a: the one-batch bodies are presented with the swaps at their own adapter length, per proven side", () => {
@@ -38,21 +42,24 @@ describe("attacker-doll swap cells (prep40)", () => {
       for (const side of ["player", "opponent"] as const) {
         const attacker = side === "player" ? 0 : 1;
         const plain = liveMoveAnimationDuration(req(moveId, attacker), field(false, false));
-        const subbed = liveMoveAnimationDuration(req(moveId, attacker), field(side === "player", side === "opponent"));
+        const subbed = provenDuration(req(moveId, attacker), field(side === "player", side === "opponent"));
         if (sides.includes(side)) expect(subbed).toBe(plain! + SWAPS[side]);
         else expect(subbed).toBeNull();
       }
     }
     // Aerial Ace opponent: the doll-free control's own 1 px is not an accepted scope, so the subbed opponent still declines.
     expect(liveMoveAnimationDuration(req(332, 1), field(false, false))).toBe(50);
-    expect(liveMoveAnimationDuration(req(332, 1), field(false, true))).toBeNull();
+    expect(provenDuration(req(332, 1), field(false, true))).toBeNull();
     // Rock Slide: the plain player attacker is live (S10A sides, 138 rows); a subbed player attacker is not a proven swap cell.
     expect(liveMoveAnimationDuration(req(157, 0), field(false, false))).toBe(138);
-    expect(liveMoveAnimationDuration(req(157, 0), field(true, false))).toBeNull();
+    expect(provenDuration(req(157, 0), field(true, false))).toBeNull();
     // Multi-hit, both dolls and unproven bodies keep declining.
+    expect(provenDuration(req(57, 0, { multihit: 2 }), field(true, false))).toBeNull();
+    expect(provenDuration(req(57, 0), field(true, true))).toBeNull();
+    expect(provenDuration(req(98, 0), field(true, false))).toBeNull(); // Quick Attack: pair residual
+    // apx215: outside the proven cells the swaps run around the doll-free body (approximate); a multi-hit earlier hit still declines.
+    expect(liveMoveAnimationDuration(req(98, 0), field(true, false))).toBe(liveMoveAnimationDuration(req(98, 0), field(false, false))! + 85);
     expect(liveMoveAnimationDuration(req(57, 0, { multihit: 2 }), field(true, false))).toBeNull();
-    expect(liveMoveAnimationDuration(req(57, 0), field(true, true))).toBeNull();
-    expect(liveMoveAnimationDuration(req(98, 0), field(true, false))).toBeNull(); // Quick Attack: pair residual
   });
   it("rung b: framed bodies end at the ROM body's first inactive row and show adapter age row + shift", () => {
     // [move, adapter duration, ROM rows (activation .. first inactive), shift, sides]; prep40 s1: every window 0 px framed this way.
@@ -78,7 +85,7 @@ describe("attacker-doll swap cells (prep40)", () => {
         if (sides.includes(side)) expect(liveMoveAnimationDuration(req(moveId, attacker), field(false, false))).toBe(adapter);
         const subbed = field(side === "player", side === "opponent");
         // prep40 window rows: swap-in 42 / 40 + idle + ROM body + swap-back + first inactive.
-        expect(liveMoveAnimationDuration(req(moveId, attacker), subbed)).toBe(sides.includes(side) ? rows + SWAPS[side] : null);
+        expect(provenDuration(req(moveId, attacker), subbed)).toBe(sides.includes(side) ? rows + SWAPS[side] : null);
         if (!sides.includes(side)) continue;
         const view = (age: number) => liveSubstituteSwapView({ healthboxes: {}, message: null, visibility: {}, waitCursor: null,
           field: subbed, effect: { type: "move", request: req(moveId, attacker), age } } as never);
@@ -95,7 +102,7 @@ describe("attacker-doll swap cells (prep40)", () => {
     }
     // Shadow Ball (ROM body 154 / 155 rows between windows) and Swagger / Faint Attack / Psychic opponent (pair residuals) decline.
     for (const moveId of [247, 207, 185]) expect(LIVE_SUBSTITUTE_SWAP_BODY_IDS.has(moveId)).toBe(false);
-    expect(liveMoveAnimationDuration(req(94, 1), field(false, true))).toBeNull();
+    expect(provenDuration(req(94, 1), field(false, true))).toBeNull();
   });
   it("rung d: order-dependent bodies (the Substitute body is order-neutral) are presented at their own adapter length", () => {
     for (const [moveId, adapter] of [[58, 203], [85, 237], [202, 230], [315, 230], [69, 228], [224, 177]] as const) {
@@ -106,7 +113,7 @@ describe("attacker-doll swap cells (prep40)", () => {
     }
     // Mud-Slap needs the first-body order lend (not production's): declined.
     expect(liveMoveAnimationDuration(req(189, 0), field(false, false))).toBe(51);
-    expect(liveMoveAnimationDuration(req(189, 0), field(true, false))).toBeNull();
+    expect(provenDuration(req(189, 0), field(true, false))).toBeNull();
   });
   it("rung c: the tail row latches the doll at the swap-back's last moving x2 (-5 / +5), not a longer composite", () => {
     expect(substituteSwapTailX2("player")).toBe(-5);

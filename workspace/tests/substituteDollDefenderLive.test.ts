@@ -6,7 +6,7 @@ import { createBattleCommandFieldArtView } from "../src/engine/battleCommandFiel
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
 import {
   LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveBattlerAnchors, liveMoveAnimationDuration, liveMoveAnimationPresentation,
-  liveMoveSubstituteDollDeclines,
+  liveMoveSubstituteDollDeclines, liveMoveSubstituteDollUnproven,
 } from "../src/engine/liveMoveAnimation.ts";
 import { applySpriteOrderPresentationEvent, createSpriteOrderTracker, spriteOrderTrackerLend } from "../src/engine/spriteOrderEventTransform.ts";
 import { knownEntrySpriteOrderState } from "../src/engine/spriteOrderProvider.ts";
@@ -50,21 +50,23 @@ describe("defender shown as the Substitute doll: proven cells live, everything e
       "165:opponent", "165:player",
     ].sort());
   });
-  it("a proven cell keeps its doll-free duration; unproven orientations / moves and both-doll bodies decline", () => {
+  // apx215 (liveMovePlayback.ts approximate "substitute-doll"): the unproven ones are drawn on the doll at the doll-free length.
+  it("a proven cell keeps its doll-free duration; unproven orientations / moves and both-doll bodies are unproven (approximate)", () => {
     for (const [moveId, sides] of LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS) for (const side of sides) {
       const attacker = side === "player" ? 0 : 1;
       expect(liveMoveSubstituteDollDeclines(req(moveId, attacker), defenderDoll(attacker))).toBe(false);
       expect(liveMoveAnimationDuration(req(moveId, attacker), defenderDoll(attacker)))
         .toBe(liveMoveAnimationDuration(req(moveId, attacker), field(false, false)));
-      expect(liveMoveAnimationDuration(req(moveId, attacker), field(true, true))).toBeNull();
+      expect(liveMoveSubstituteDollUnproven(req(moveId, attacker), field(true, true))).toBe(true);
     }
     // Unproven orientations (residuals: Aerial Ace / Shadow Ball opponent = the doll-free control's, Quick Attack / Double-Edge player
     // unresolved) and unmeasured moves (Headbutt, Leech Seed) decline.
     for (const [moveId, attacker] of [[332, 1], [247, 1], [98, 0], [38, 0], [29, 0], [29, 1], [73, 0], [73, 1]] as const) {
       expect(liveMoveAnimationDuration(req(moveId, attacker), field(false, false))).not.toBeNull();
-      expect(liveMoveSubstituteDollDeclines(req(moveId, attacker), defenderDoll(attacker))).toBe(true);
-      expect(liveMoveAnimationDuration(req(moveId, attacker), defenderDoll(attacker))).toBeNull();
-      expect(liveMoveAnimationPresentation(req(moveId, attacker), defenderDoll(attacker), 0)).toBeNull();
+      expect(liveMoveSubstituteDollUnproven(req(moveId, attacker), defenderDoll(attacker))).toBe(true);
+      expect(liveMoveSubstituteDollDeclines(req(moveId, attacker), defenderDoll(attacker))).toBe(false);
+      expect(liveMoveAnimationDuration(req(moveId, attacker), defenderDoll(attacker)))
+        .toBe(liveMoveAnimationDuration(req(moveId, attacker), field(false, false)));
     }
   });
   it("doll anchors: hit / effect anchors on the species corner (elevation included), the OBJ at the doll corner, idle rest 0", () => {

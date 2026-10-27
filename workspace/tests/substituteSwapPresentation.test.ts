@@ -3,9 +3,11 @@ import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimati
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
 import { LIVE_BATTLER_X2_IDLE, applyLiveBattlerX2Event } from "../src/engine/liveBattlerX2History.ts";
-import { liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveSubstituteDollDeclines } from "../src/engine/liveMoveAnimation.ts";
 import {
-  LIVE_SUBSTITUTE_SWAP_BODY_IDS, liveSubstituteSwapView, substituteSwapCompositeDuration, substituteSwapFrameAt, substituteSwapRows,
+  liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveSubstituteDollDeclines, liveMoveSubstituteDollUnproven,
+} from "../src/engine/liveMoveAnimation.ts";
+import {
+  LIVE_SUBSTITUTE_SWAP_BODY_IDS, liveSubstituteSwapApplies, liveSubstituteSwapProven, liveSubstituteSwapView, substituteSwapCompositeDuration, substituteSwapFrameAt, substituteSwapRows,
   substituteSwapScriptRows,
 } from "../src/engine/liveSubstituteSwap.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
@@ -57,7 +59,10 @@ describe("Substitute swap task (AnimTask_SwapMonSpriteToFromSubstitute)", () => 
 });
 
 describe("live adapters with a Substitute doll", () => {
-  it("a subbed ATTACKER's proven body is presented with the swaps; the defender doll and unproven bodies still decline", () => {
+  // apx215 (liveMovePlayback.ts approximate "substitute-doll"): the unproven doll bodies are drawn approximately (the swaps around the body
+  // for a subbed attacker, the body on the doll for a doll defender); the proven rule is liveSubstituteSwapProven /
+  // liveMoveSubstituteDollUnproven. Only a multi-hit body's earlier hit still declines.
+  it("a subbed ATTACKER's proven body is presented with the swaps; the defender doll and unproven bodies are approximate", () => {
     expect([29, 34, 73].every((id) => LIVE_SUBSTITUTE_SWAP_BODY_IDS.has(id))).toBe(true);
     const plain = field(false, false);
     for (const [moveId, body] of [[29, 48], [34, 107], [73, 141]] as const) {
@@ -65,22 +70,32 @@ describe("live adapters with a Substitute doll", () => {
       expect(liveMoveAnimationDuration(req(moveId, 0), field(true, false))).toBe(body + 85);
       expect(liveMoveAnimationDuration(req(moveId, 1), field(false, true))).toBe(body + 81);
       expect(liveMoveSubstituteDollDeclines(req(moveId, 0), field(true, false))).toBe(false);
-      // Defender doll (either direction): declined, except Body Slam, a proven defender-doll cell on both sides (prep38; drawn on the
-      // doll, tests/substituteDollDefenderLive.test.ts). Both dolls: declined.
-      expect(liveMoveAnimationDuration(req(moveId, 0), field(false, true))).toBe(moveId === 34 ? body : null);
-      expect(liveMoveAnimationDuration(req(moveId, 1), field(true, false))).toBe(moveId === 34 ? body : null);
-      expect(liveMoveAnimationDuration(req(moveId, 0), field(true, true))).toBeNull();
-      // A multi-hit chain's non-final hit (multihit >= 2): no MON_TO_SUBSTITUTE in the source; not proven, declined.
+      expect(liveSubstituteSwapProven(req(moveId, 0), field(true, false))).toBe(true);
+      // Defender doll (either direction): proven only for Body Slam (prep38; drawn on the doll, tests/substituteDollDefenderLive.test.ts);
+      // apx215: the unproven ones draw the body on the doll at the doll-free length. Both dolls: proven never; apx215: the swaps around the
+      // body on the defender's doll.
+      expect(liveMoveSubstituteDollUnproven(req(moveId, 0), field(false, true))).toBe(moveId !== 34);
+      expect(liveMoveSubstituteDollUnproven(req(moveId, 1), field(true, false))).toBe(moveId !== 34);
+      expect(liveMoveAnimationDuration(req(moveId, 0), field(false, true))).toBe(body);
+      expect(liveMoveAnimationDuration(req(moveId, 1), field(true, false))).toBe(body);
+      expect(liveSubstituteSwapProven(req(moveId, 0), field(true, true))).toBe(false);
+      expect(liveSubstituteSwapApplies(req(moveId, 0), field(true, true))).toBe(true);
+      expect(liveMoveAnimationDuration(req(moveId, 0), field(true, true))).toBe(body + 85);
+      // A multi-hit chain's non-final hit (multihit >= 2): no MON_TO_SUBSTITUTE in the source; not proven, declined (also approximately).
+      expect(liveSubstituteSwapApplies(req(moveId, 0, { multihit: 2 }), field(true, false))).toBe(false);
       expect(liveMoveAnimationDuration(req(moveId, 0, { multihit: 2 }), field(true, false))).toBeNull();
     }
-    // Unproven bodies keep declining while the attacker is the doll (Swagger live without the doll; prep40: pair residual).
-    expect(liveMoveAnimationDuration(req(207, 0), plain)).not.toBeNull();
-    expect(liveMoveAnimationDuration(req(207, 0), field(true, false))).toBeNull();
-    expect(liveMoveAnimationPresentation(req(207, 0), field(true, false), 0)).toBeNull();
-    // Self-targeted requests by the doll's battler are defender-doll requests.
-    expect(liveMoveAnimationDuration({ ...req(29, 0), target: 0 }, field(true, false))).toBeNull();
+    // Unproven bodies while the attacker is the doll (Swagger live without the doll; prep40: pair residual): apx215, the swaps around the body.
+    const swagger = liveMoveAnimationDuration(req(207, 0), plain)!;
+    expect(swagger).not.toBeNull();
+    expect(liveSubstituteSwapProven(req(207, 0), field(true, false))).toBe(false);
+    expect(liveMoveAnimationDuration(req(207, 0), field(true, false))).toBe(swagger + 85);
+    // Self-targeted requests by the doll's battler: unproven for Headbutt; apx215, the swaps around the body.
+    expect(liveMoveSubstituteDollUnproven({ ...req(29, 0), target: 0 }, field(true, false))).toBe(true);
+    expect(liveMoveAnimationDuration({ ...req(29, 0), target: 0 }, field(true, false))).toBe(48 + 85);
   });
-  it("a SHINY battler declines the swaps (audit 13 defect 2: the ROM shows the shiny palette, the swap rows / body art have none)", () => {
+  // apx215: unproven, now approximate (the swap rows and body drawn with the field art's palette).
+  it("a SHINY battler is outside the proven swaps (audit 13 defect 2: the ROM shows the shiny palette, the swap rows / body art have none)", () => {
     // ROM shiny personalities of the audit's STEELIX attackers (species-audit-13/swap-personality.tsv), Factory OT 416049562.
     const SHINY_OPPONENT = 3251286175, SHINY_PLAYER = 1586573250, PLAIN = 0x12345678;
     const withPersonality = (f: BattleResolutionDisplayedField, player: number, opponent: number) =>
@@ -88,12 +103,14 @@ describe("live adapters with a Substitute doll", () => {
     for (const [moveId, body] of [[29, 48], [34, 107], [73, 141]] as const) {
       expect(liveMoveAnimationDuration(req(moveId, 0), withPersonality(field(true, false), PLAIN, PLAIN))).toBe(body + 85);
       expect(liveMoveAnimationDuration(req(moveId, 1), withPersonality(field(false, true), PLAIN, PLAIN))).toBe(body + 81);
-      // Shiny subbed attacker (either side) and a shiny target: the whole command falls back.
-      expect(liveMoveAnimationDuration(req(moveId, 0), withPersonality(field(true, false), SHINY_PLAYER, PLAIN))).toBeNull();
-      expect(liveMoveAnimationDuration(req(moveId, 1), withPersonality(field(false, true), PLAIN, SHINY_OPPONENT))).toBeNull();
-      expect(liveMoveAnimationDuration(req(moveId, 0), withPersonality(field(true, false), PLAIN, SHINY_OPPONENT))).toBeNull();
-      expect(liveMoveSubstituteDollDeclines(req(moveId, 0), withPersonality(field(true, false), SHINY_PLAYER, PLAIN))).toBe(true);
-      expect(liveMoveAnimationPresentation(req(moveId, 1), withPersonality(field(false, true), PLAIN, SHINY_OPPONENT), 0)).toBeNull();
+      // Shiny subbed attacker (either side) and a shiny target: not proven; apx215, presented approximately with the swaps.
+      expect(liveSubstituteSwapProven(req(moveId, 0), withPersonality(field(true, false), SHINY_PLAYER, PLAIN))).toBe(false);
+      expect(liveSubstituteSwapProven(req(moveId, 1), withPersonality(field(false, true), PLAIN, SHINY_OPPONENT))).toBe(false);
+      expect(liveSubstituteSwapProven(req(moveId, 0), withPersonality(field(true, false), PLAIN, SHINY_OPPONENT))).toBe(false);
+      expect(liveMoveSubstituteDollUnproven(req(moveId, 0), withPersonality(field(true, false), SHINY_PLAYER, PLAIN))).toBe(true);
+      expect(liveMoveSubstituteDollDeclines(req(moveId, 0), withPersonality(field(true, false), SHINY_PLAYER, PLAIN))).toBe(false);
+      expect(liveMoveAnimationDuration(req(moveId, 0), withPersonality(field(true, false), SHINY_PLAYER, PLAIN))).toBe(body + 85);
+      expect(liveMoveAnimationDuration(req(moveId, 1), withPersonality(field(false, true), PLAIN, SHINY_OPPONENT))).toBe(body + 81);
     }
   });
   it("swap rows draw the doll / mon at the task x2; body rows run the adapter on the mon with the attacker's x2 zeroed", () => {

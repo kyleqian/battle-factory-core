@@ -3,9 +3,9 @@ import monAnimData3 from "../data/gen/dt60-mon-anim-data3.json" with { type: "js
 import sendOutAnimSelectorTables from "../data/gen/send-out-anim-selector-tables.json" with { type: "json" };
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
-import { liveSubstituteSwapApplies, substituteSwapBodyField, substituteSwapBodyFraming, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
+import { liveSubstituteSwapApplies, liveSubstituteSwapProven, substituteSwapBodyField, substituteSwapBodyFraming, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
-import type { LiveMoveDeclineReason } from "./liveMovePlayback.ts";
+import { LIVE_MOVE_APPROXIMATE_POLICY, type LiveMoveDeclineReason } from "./liveMovePlayback.ts";
 import { recordContainedPresentationError } from "./presentationContainment.ts";
 import { battleCommandFieldSpeciesSpriteOrigin, battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -1104,7 +1104,17 @@ export const LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS: ReadonlyMap<number, readonly (
 export function liveMoveSubstituteDollDeclines(
   request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
 ): boolean {
-  const swap = liveSubstituteSwapApplies(request, field);
+  if (!liveMoveSubstituteDollUnproven(request, field)) return false;
+  // apx215 (liveMovePlayback.ts approximate "substitute-doll"): an unproven defender-doll body is drawn on the doll as the proven
+  // cells are (liveSceneOnBattlerArt); an unproven subbed-attacker body is presented with the swaps (liveSubstituteSwapApplies).
+  return LIVE_MOVE_APPROXIMATE_POLICY["substitute-doll"] !== "approximate" || liveSubstituteSwapApplies(request, field) === false;
+}
+
+/** apx215: whether the displayed Substitute doll(s) put the body outside the PROVEN cells (liveMoveSubstituteDollDeclines' strict rule). */
+export function liveMoveSubstituteDollUnproven(
+  request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
+): boolean {
+  const swap = liveSubstituteSwapProven(request, field);
   if (swap !== null) return !swap;
   if ((request.target === 0 ? field.player : field.opponent).substituteDoll !== true) return false;
   return request.target === request.attacker

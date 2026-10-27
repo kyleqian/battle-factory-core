@@ -1,5 +1,6 @@
 // apx210 (docs/finish-plan.md Phase 2; src/engine/liveMovePlayback.ts): every move-animation command is classified live / approximate(reason)
-// / static(reason) / pause; each decline path names one reason code, and the approximate policy is all-static (no behaviour change).
+// / static(reason) / pause; each decline path names one reason code. apx215 promoted "substitute-doll" to approximate
+// (tests/apx215SubstituteDollApproximate.test.ts); every other class stays static.
 import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "../src/engine/battleResolutionPresentation.ts";
@@ -35,10 +36,8 @@ const classify = (request: BattleMoveAnimationRequest, field: BattleResolutionDi
   liveMovePlaybackClassification(command(request), field, view);
 
 describe("apx210: decline reasons", () => {
-  it("duration gates (a pure function of (command, field)): substitute-doll, no-adapter, turn-0, transform -> static, hold unchanged", () => {
+  it("duration gates (a pure function of (command, field)): no-adapter, turn-0, transform -> static, hold unchanged", () => {
     const cases: [BattleMoveAnimationRequest, BattleResolutionDisplayedField, string][] = [
-      // Headbutt has no proven defender-doll cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS).
-      [req(29), fieldOf({}, { substituteDoll: true }), "substitute-doll"],
       [req(1), fieldOf(), "no-adapter"], // Pound: no liveMoveAnimationDuration case
       [req(174), fieldOf(), "turn-0"], // Curse's Ghost branch (turn 0)
       [req(29), fieldOf({}, { transform: { species: 132 } }), "transform"], // trf174: a transformed battler on the field
@@ -86,19 +85,20 @@ describe("apx210: decline reasons", () => {
 });
 
 describe("apx210: the approximate hook", () => {
-  it("is all-static in this step", () => {
-    for (const c of LIVE_MOVE_DECLINE_CLASSES) expect(LIVE_MOVE_APPROXIMATE_POLICY[c]).toBe("static");
+  it("is static except apx215's substitute-doll", () => {
+    for (const c of LIVE_MOVE_DECLINE_CLASSES) expect(LIVE_MOVE_APPROXIMATE_POLICY[c]).toBe(c === "substitute-doll" ? "approximate" : "static");
     expect(liveMoveDeclineClassOf("other:shiny")).toBe("other");
     expect(liveMoveDeclineClassOf("substitute-doll")).toBe("substitute-doll");
   });
 
-  it("a policy promoting ONE class reclassifies only that class (classification only: nothing draws it yet)", () => {
-    const policy = { ...LIVE_MOVE_APPROXIMATE_POLICY, "substitute-doll": "approximate" as const };
+  it("a policy promoting ONE class reclassifies only that class", () => {
+    const policy = { ...LIVE_MOVE_APPROXIMATE_POLICY, "no-adapter": "approximate" as const };
+    expect(liveMovePlaybackClassification(command(req(1)), fieldOf(), undefined, policy)).toEqual({ kind: "approximate", reason: "no-adapter" });
+    expect(liveMovePlaybackClassification(command(req(174)), fieldOf(), undefined, policy)).toEqual({ kind: "static", reason: "turn-0" });
+    // Headbutt has no proven defender-doll cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): approximate under the shipped policy.
     const doll = fieldOf({}, { substituteDoll: true });
-    const promoted = liveMovePlaybackClassification(command(req(29)), doll, undefined, policy)!;
+    const promoted = liveMovePlaybackClassification(command(req(29)), doll)!;
     expect(promoted).toEqual({ kind: "approximate", reason: "substitute-doll" });
     expect(liveMovePlaybackCode(promoted)).toBe("approx:substitute-doll");
-    expect(liveMovePlaybackClassification(command(req(1)), fieldOf(), undefined, policy)).toEqual({ kind: "static", reason: "no-adapter" });
-    expect(battleResolutionCommandDuration(command(req(29)), doll)).toBe(23);
   });
 });
