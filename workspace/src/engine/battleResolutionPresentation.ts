@@ -5017,7 +5017,7 @@ function projectResolutionSegmentCommands(
   } catch (error) {
     let contained: readonly BattleResolutionPresentationCommand[];
     try {
-      contained = containedResolutionSegmentCommands(events, beforeRules, transition.state.rules.rulesContext, field);
+      contained = containedResolutionSegmentCommands(events, beforeRules, transition.state.rules.rulesContext, field, opponentTrainer);
     } catch {
       throw error;
     }
@@ -5028,15 +5028,16 @@ function projectResolutionSegmentCommands(
 }
 
 /**
- * contain213: the minimal command list of a span whose projection threw -- per active battler, a typed switch-in when the receipt
- * changed its party slot (the display ledger and the forced send-out require one), else its HP bar / status icon moved to the
- * kernel's endpoint; then a turn-end, which settles the display ledger to the rules boundary.
+ * contain213: the minimal command list of a span whose projection threw -- per active battler, its send-in message and typed
+ * switch-in when the receipt changed its party slot (the display ledger and the forced send-out require both), else its HP bar /
+ * status icon moved to the kernel's endpoint; then a turn-end, which settles the display ledger to the rules boundary.
  */
 function containedResolutionSegmentCommands(
   events: readonly BattleKernelSemanticEvent[],
   beforeRules: BattleScriptRulesContext,
   afterRules: BattleScriptRulesContext,
   field: BattleResolutionDisplayedField,
+  opponentTrainer: BattleResolutionOpponentTrainer | null,
 ): readonly BattleResolutionPresentationCommand[] {
   const settled = createBattleCommandDisplayedField(afterRules);
   const sceneOn = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
@@ -5047,6 +5048,13 @@ function containedResolutionSegmentCommands(
     const after = battler === 0 ? settled.player : settled.opponent;
     const active = afterRules.battlers[battler]!;
     if (before.partyIndex !== after.partyIndex) {
+      commands.push(Object.freeze({
+        type: "message", eventSequence,
+        lines: Object.freeze(battler === 0 || opponentTrainer === null
+          ? [`Go! ${after.name}!`]
+          : [`${opponentTrainer.className} ${opponentTrainer.name} sent`, `out ${after.name}!`]),
+        advance: "automatic", noCursor: false, timing: SWITCH_IN_MESSAGE_TIMING,
+      }));
       commands.push(Object.freeze({
         type: "switch-in", eventSequence, battler,
         fromPartyIndex: before.partyIndex, toPartyIndex: after.partyIndex,

@@ -17,8 +17,9 @@
 //     the postwin renderer's existing black hold; postwin timing and state are unchanged).
 //   - "commands": turning a kernel receipt into presentation commands (projectResolutionSegmentCommands,
 //     battleResolutionPresentation.ts; the fresh resolution and every appended continuation segment). A throw presents the span as
-//     one typed switch-in per active battler whose party slot the receipt changed (the kernel's after-receipt snapshot; the
-//     display ledger and the forced send-out need it) and then a turn-end (TURN_END_TIMING), which settles the display ledger to
+//     a send-in message + typed switch-in per active battler whose party slot the receipt changed (the kernel's after-receipt
+//     snapshot; the display ledger and the forced send-out need both), else that battler's HP bar / status icon to the kernel's
+//     endpoint, and then a turn-end (TURN_END_TIMING), which settles the display ledger to
 //     the kernel's rules boundary -- so the next action menu / round end shows the outcome. The receipt's events stay on the
 //     segment unchanged. The structural guards before projection (legal decision, sequence order, request identity) stay fatal.
 //   - "order": the per-command presentation host update (prepareResolutionPalette, factoryRoundBattleOrchestrator.ts: palette,
