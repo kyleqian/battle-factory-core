@@ -5,6 +5,7 @@ import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import { liveSubstituteSwapApplies, substituteSwapBodyField, substituteSwapBodyFraming, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+import { recordContainedPresentationError } from "./presentationContainment.ts";
 import { battleCommandFieldSpeciesSpriteOrigin, battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
 import type {
@@ -1135,9 +1136,22 @@ export function liveMoveAnimationDuration(
   /** tmr136: the body's use ordinal in the battle (LiveMoveBattlerX2Input.moveUse; absent = unknown): use-keyed D4 phases (Smokescreen). */
   moveUse?: number,
 ): number | null {
+  // contain209 (presentationContainment.ts): live adapter selection is presentation-only; a throw declines the body.
+  try {
+    return liveMoveAnimationDurationOf(request, field, bodyClass, moveUse);
+  } catch (error) {
+    recordContainedPresentationError("adapter", "move-animation", error, `move ${request.moveId} attacker ${request.attacker}`);
+    return null;
+  }
+}
+
+function liveMoveAnimationDurationOf(
+  request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField | undefined, bodyClass: LiveMoveTimingBody,
+  moveUse: number | undefined,
+): number | null {
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
     const bodyField = substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1);
-    const body = liveMoveAnimationDuration(request, bodyField, bodyClass, moveUse);
+    const body = liveMoveAnimationDurationOf(request, bodyField, bodyClass, moveUse);
     return body === null ? null
       : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body, request, bodyField).rows);
   }

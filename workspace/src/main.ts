@@ -5,7 +5,12 @@
 
 import { buttonForKey, normalizeButtons, type GbaButton } from "./input.ts";
 import { createInitialState, render, tick as engineTick, SCREEN_WIDTH, SCREEN_HEIGHT } from "./engine/core.ts";
-import { SessionRecorder, type SessionTrace } from "./sessionRecorder.ts";
+import { SessionRecorder, type SessionContainedError, type SessionTrace } from "./sessionRecorder.ts";
+import {
+  clearContainedPresentationErrors,
+  containedPresentationErrorCount,
+  containedPresentationErrors,
+} from "./engine/presentationContainment.ts";
 import {
   DEFAULT_PRESENTATION_RNG_SEED,
   parsePresentationSeed,
@@ -70,10 +75,27 @@ function draw(): void {
   ctx.putImageData(imageData, 0, 0);
 }
 
+// contain209: presentation throws the engine contained (presentationContainment.ts) -- the battle went on with that command
+// drawn static. Each is console.error'd once and rides along in the session export.
+const containedErrors: SessionContainedError[] = [];
+let containedSeen = 0;
+function collectContainedErrors(): void {
+  const count = containedPresentationErrorCount();
+  if (count === containedSeen) return;
+  for (const entry of containedPresentationErrors()) {
+    if (entry.ordinal <= containedSeen) continue;
+    const stamped = Object.freeze({ ...entry, frame: recorder.frameCount });
+    containedErrors.push(stamped);
+    console.error("POKEBENCH contained presentation error (the battle continues; copy __POKEBENCH_SESSION__()):", stamped);
+  }
+  containedSeen = count;
+}
+
 function tick(buttons: ReadonlySet<GbaButton>): void {
   recorder.recordTick(buttons);
   state = engineTick(state, buttons);
   draw();
+  collectContainedErrors();
 }
 draw();
 
@@ -84,6 +106,7 @@ function currentSessionTrace(error?: unknown): SessionTrace {
     build: BUILD_STAMP,
     presentationRng: presentationRngTraceMetadata(state.presentationRng),
     error,
+    containedErrors,
   });
 }
 
@@ -180,6 +203,9 @@ if (benchMode) {
       state = createInitialState({ battleScene, presentationSeed });
       held.clear();
       recorder.reset();
+      clearContainedPresentationErrors();
+      containedErrors.length = 0;
+      containedSeen = 0;
       draw();
     },
     advance(segments: Array<{ frames: number; buttons?: string[] }>): void {
@@ -188,6 +214,12 @@ if (benchMode) {
         for (let index = 0; index < segment.frames; index += 1) tick(buttons);
       }
       draw();
+      collectContainedErrors();
+    },
+    // contain209: the presentation throws contained so far (a contained throw never escapes advance()).
+    containedErrors(): SessionContainedError[] {
+      collectContainedErrors();
+      return containedErrors.map((entry) => ({ ...entry }));
     },
   };
 }

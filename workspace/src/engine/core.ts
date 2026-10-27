@@ -3515,7 +3515,8 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
         fb,
         // rst139: the handoff rows read the battle's current tracked x2 history.
         factoryRoundBattleResolutionForRender(state.factoryRoundBattleOrchestrator) ?? resolution,
-        { drawScene: renderBattleResolutionLiveView },
+        // contain209: a contained presentation throw draws the decline path (presentationContainment.ts).
+        { drawScene: renderBattleResolutionLiveView, drawStaticScene: renderBattleResolutionSceneOffView },
         state.presentationRng?.host ?? null,
       );
     }
