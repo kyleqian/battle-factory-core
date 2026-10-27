@@ -1822,9 +1822,9 @@ export class RandomPlayer {
     }
     // Menu mode: steer to RENT (or peek SUMMARY once).
     if (!isMonPicInputReady(draft.monPic)) return NO_BUTTONS;
-    // sfa214: "full" may peek at the SUMMARY on any menu visit (the other
-    // policies keep their single 25 % x 50 % peek and its draws).
-    const wantSummary = this.policy === "full"
+    // sfa214: summary-exploring "full" may peek at the SUMMARY on any menu
+    // visit (everything else keeps the single 25 % x 50 % peek and its draws).
+    const wantSummary = this.exploresSummary
       ? this.rng.chance(0.3)
       : this.draft.peekedSummary === true
         && this.draft.rented === 0
@@ -1896,16 +1896,27 @@ export class RandomPlayer {
    * tick, so trajectories are unchanged; other policies keep their cadence.
    */
   rendersEveryFrame(state: EngineState): boolean {
-    return this.policy === "full" && (state.summaryScreen.isOpen || state.summaryScreen.transition !== null);
+    return this.exploresSummary && (state.summaryScreen.isOpen || state.summaryScreen.transition !== null);
   }
 
   /** sfa214: "full"'s presses on the current Summary visit. */
   private summaryPresses = 0;
 
+  /**
+   * sfa214: RunOptions.summaryExplore ("full" only). Off by default so the
+   * library's pinned "full" trajectories stay byte-identical; the CLI turns
+   * it on unless --no-summary-explore.
+   */
+  public summaryExplore = false;
+
+  private get exploresSummary(): boolean {
+    return this.policy === "full" && this.summaryExplore;
+  }
+
   private onSummary(state: EngineState): ReadonlySet<GbaButton> {
     if (state.summaryScreen.transition || state.summaryScreen.pageTransition
       || state.summaryScreen.monTransition) return NO_BUTTONS;
-    if (this.policy === "full") return this.onFullSummary(state);
+    if (this.exploresSummary) return this.onFullSummary(state);
     // Wander a little, then leave with B.
     if (this.explores && this.rng.chance(0.3)) {
       return this.press(this.rng.pick(["UP", "DOWN", "LEFT", "RIGHT"] as const), 12);
@@ -2719,6 +2730,13 @@ export type RunOptions = {
   /** Opt into read-only route diagnostics without changing ordinary results. */
   collectDiagnostics?: boolean;
   /**
+   * sfa214, "full" only: explore the Summary (pages, mon changes, move-select
+   * over every row incl. CANCEL) and render every frame while it is open.
+   * Absent/false keeps the pinned "full" decision stream; the CLI enables it
+   * unless --no-summary-explore.
+   */
+  summaryExplore?: boolean;
+  /**
    * Stop with OK ("milestone:first-action-menu") as soon as battle 1's first
    * live action menu is interactive. This is the Tier-1 pin surface: the
    * whole draft -> prebattle room -> battle room -> generated intro ->
@@ -2850,6 +2868,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const coverage = options.coverage ?? null;
   coverage?.beginSeed(seed);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy, coverage);
+  player.summaryExplore = options.summaryExplore === true;
   let state = options.stateFactory?.(seed)
     ?? createInitialState(options.scene !== undefined ? { battleScene: options.scene } : {});
   let frame = 0;

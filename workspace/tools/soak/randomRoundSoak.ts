@@ -90,6 +90,12 @@
 //                      (errorPhase "render"), like an engine throw.
 //   --milestone        stop each seed at battle 1's first action menu (the
 //                      Tier-1 pin surface)
+//   --no-summary-explore  "full" only: keep the legacy Summary behaviour (wander
+//                      with directions, leave with B; 1-in-N renders). By
+//                      default the CLI's "full" explores the Summary like a
+//                      player (pages, mon changes, A into move-select over
+//                      every row incl. CANCEL) and renders every frame there
+//                      (sfa214). Other policies are unaffected either way.
 //   --verbose          per-action log for a single-seed repro
 //   --parallel N       opt-in: run the seed list as N contiguous slices in N
 //                      child processes of this same script (default 1 =
@@ -516,6 +522,7 @@ async function main(): Promise<void> {
   const baseOptions: Partial<RunOptions> = {
     maxFrames,
     renderEvery,
+    summaryExplore: !args.includes("--no-summary-explore"),
     verbose,
     policy,
     stopAtFirstActionMenu: milestone,
