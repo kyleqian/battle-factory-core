@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-26 / 27 — CAX31 session (supervisor, Opus 5.5): finish plan Phase 1 started (in progress)
 
-- **State:** master `1d8fa9bb8`+; production src tree `5355decad` (contain209).
+- **State:** master `5dd00cd59`+; production src tree `369a7ad85` (contain209 + perf211).
 - **Light gates on src `21f22b324` (reused + one rerun):** census 0..999 both scenes already existed twice for this exact src
   (tl205 union `875695e43`, exs207 base `ef511e03d`); delta between them 1,000 / 1,000 battles identical, 0 digest / 0 error
   mismatch, 0 unattributed. Differential (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on,
@@ -31,7 +31,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Scene ON sweeps (render every frame, `--vary-rng --first-round`, 0:30, `--parallel 3`):** winning carry 0 **30 / 30 OK**
   (37 battles, 2,242 s); carry 14 **30 / 30 OK** (32 battles, 2,041 s). 0 CRASH / 0 HANG. At ~1 battle / min the 3,000-battle
   nightly bar is out of reach on this host; perf211 (renderer profiling, pixel-neutral) is the response.
-- **Running:** perf211 (Opus worker); Scene ON carry 28 + winning-swap sweeps.
+  Carry 28 **30 / 30 OK** (1,947 s); winning-swap carry 0 **30 / 30 OK** (2,797 s). 0 CONTAINED in all four.
+- **Folded:** perf211 (`5dd00cd59`, src tree `369a7ad85`): pixel-neutral render caches (`tileBgCache.ts` palette-independent tile
+  BG compile, memoized healthbox compose + run blits, `opaqueDrawMemo.ts` for room tile layers). Worker gates on the tip:
+  typecheck 0, full suite 1,698 files / 14,089 tests 0 failed, build 0, differential 641 / 641. Supervisor reran
+  `tools/soak/frameHashes.ts` (new, kept) on unseen seeds 7:9, 40,000 frames each, base `1d8fa9bb8` vs tip: ON and OFF
+  80,000 / 80,000 frame hashes identical; ON 2.98 -> 0.79 ms / frame, OFF 2.70 -> 0.46 (`.integration/validation/sv-20261026b/perf211-hash/`).
+- **Nightly sizing decision (reversible):** rendering is the soak's whole cost (tick alone ~0.015 ms / frame); a seed spends
+  most frames outside battle (~60–70k frames per first-round seed, ~1.2 battles). 3,000 battles at `--render-every 1` is still
+  ~13 h wall here, so the nightly Scene ON bulk count uses the default `--render-every 8` (which also renders on every surface
+  change) and a smaller `--render-every 1` sample rides beside it.
+- **Running:** apx210 (Phase 2 step 1, approximate plumbing, Opus worker); Scene ON render-every-1 sweep 30:130.
 ---
 
 ## 2026-10-26 — User decision: finish plan approved; CAX31 run restarted on it (top layer, docs only)

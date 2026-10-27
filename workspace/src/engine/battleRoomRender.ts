@@ -42,6 +42,7 @@ import downArrowAsset from "../assets/gen/battle-interface-down-arrow.json" with
 import msgboxAssetData from "../assets/gen/prebattle-room-msgbox.json" with { type: "json" };
 
 import { OBJ_EVENT_GFX, type ObjectEventGfxId, facilityTrainerGfxIdForClass } from "./factoryTrainerOverworldGfx.ts";
+import { OpaqueDrawMemo } from "./opaqueDrawMemo.ts";
 
 interface TileEntry {
   tile: number;
@@ -124,7 +125,14 @@ function blockAt(bx: number, by: number): Block {
 }
 
 /** Draws every on-screen block (room + border fallback) at the given panning origin. */
+/** perf211: the room tiles are a pure function of (origin, fadeY) that only write opaque pixels (opaqueDrawMemo.ts). */
+const roomTilesMemo = new OpaqueDrawMemo(8);
+
 function drawRoomTiles(fb: Uint8Array, origin: { x: number; y: number }, fadeY: number): void {
+  roomTilesMemo.draw(fb, `${origin.x},${origin.y},${fadeY}`, (target) => paintRoomTiles(target, origin, fadeY));
+}
+
+function paintRoomTiles(fb: Uint8Array, origin: { x: number; y: number }, fadeY: number): void {
   const bxMin = Math.floor((0 + origin.x) / 16) - 1;
   const bxMax = Math.floor((240 + origin.x) / 16) + 1;
   const byMin = Math.floor((0 + origin.y) / 16) - 1;

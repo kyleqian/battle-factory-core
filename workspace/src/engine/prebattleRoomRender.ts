@@ -55,6 +55,7 @@ import stdWindow from "../assets/gen/prebattle-room-std-window.json" with { type
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import { MESSAGE_TEXT } from "./prebattleRoom.ts";
+import { OpaqueDrawMemo } from "./opaqueDrawMemo.ts";
 
 interface TileEntry {
   tile: number;
@@ -138,7 +139,14 @@ function drawBlockLayer(fb: Uint8Array, entries: TileEntry[], screenX: number, s
   }
 }
 
+/** perf211: the room tiles are a pure function of (origin, fadeY) that only write opaque pixels (opaqueDrawMemo.ts). */
+const roomTilesMemo = new OpaqueDrawMemo(8);
+
 function drawRoomTiles(fb: Uint8Array, origin: { x: number; y: number }, fadeY: number): void {
+  roomTilesMemo.draw(fb, `${origin.x},${origin.y},${fadeY}`, (target) => paintRoomTiles(target, origin, fadeY));
+}
+
+function paintRoomTiles(fb: Uint8Array, origin: { x: number; y: number }, fadeY: number): void {
   const { width, height, blocks } = roomLayout;
   for (let by = 0; by < height; by += 1) {
     for (let bx = 0; bx < width; bx += 1) {
