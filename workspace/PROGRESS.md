@@ -85,8 +85,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   + portrait for every Factory species (new motion types incl. ANIM_V_STRETCH with oracle traces), MOVE_NONE slots, a Contest
   Moves CANCEL crash, `replay-session-trace --render`, soak `full` policy now explores the Summary (default on,
   `--no-summary-explore`) and the worker reports the extended soak CRASHes on base and passes on the fix. Its full suite was
-  ~60 % through with no failure at the deadline (log `.worktrees/integration-20261027-065233/workspace/.integration/sfa214-fullsuite.log`);
-  build not run. **Next run, first step:** read its final message in the launcher log
+  ~85 % through at the deadline (log `.worktrees/integration-20261027-065233/workspace/.integration/sfa214-fullsuite.log`);
+  build not run. Known red so far: `tests/compareTraceAppRoute.test.ts` — sfa214's 5 new compare traces lack `appRoute`
+  (declare it explicitly). **Next run, first step:** read its final message in the launcher log
   (`.integration/validation/sv-20261026b/sfa214.launcher.out`), then supervisor gates on the union with master: new tests, the
   17 saved sessions with `--render`, differential, census both scenes (anchors must not move), full suite + build; fold.
 - **Next:** sfa214 fold; `npm run play:random -- --minutes 10 --scene both` on the new build; apx215 (brief ready,
