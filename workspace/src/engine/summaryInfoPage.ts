@@ -44,6 +44,7 @@ import {
 } from "./summaryWindowTransfer.ts";
 import {
   summaryFrontAnimationForSpecies,
+  summaryFrontSpriteIsFlipped,
   summaryFrontSpritePresentation,
 } from "./summaryFrontAnimation.ts";
 import type { FactoryRentalPresentation } from "./factoryRentalPresentation.ts";
@@ -54,6 +55,7 @@ import summaryMarkingsData from "../assets/gen/summary-markings.json" with { typ
 import summaryButtonsData from "../assets/gen/summary-buttons.json" with { type: "json" };
 import summaryBallData from "../assets/gen/summary-ball.json" with { type: "json" };
 import frontSpritesData from "../assets/gen/front-sprites.json" with { type: "json" };
+import opponentFrontSpritesData from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import summaryMoveEffectBattleData from "../assets/gen/summary-move-effect-battle.json" with { type: "json" };
@@ -81,6 +83,19 @@ const markings = summaryMarkingsData as unknown as { tileset: TileGrid; spritePa
 const buttons = summaryButtonsData as unknown as { a: { tileset: TileGrid; palette: RgbColor[] } };
 const ball = summaryBallData as unknown as { tileset: TileGrid; palette: RgbColor[] };
 const frontSprites = frontSpritesData as unknown as Record<string, { tileset: TileGrid; animationFrame1: TileGrid; palette: RgbColor[] }>;
+const opponentFrontSprites = opponentFrontSpritesData as unknown as Record<string, { tileset: TileGrid; frame2: TileGrid; palette: RgbColor[] }>;
+
+/**
+ * gMonFrontPicTable + gMonPaletteTable for any Battle Frontier species. The
+ * battle-opponent asset is the same source pic (frame 2 = animation frame 1;
+ * byte-identical for the six summary rentals that have both).
+ */
+function summaryFrontSprite(species: string): { tileset: TileGrid; animationFrame1: TileGrid; palette: RgbColor[] } | undefined {
+  const own = frontSprites[species];
+  if (own) return own;
+  const opponent = opponentFrontSprites[species];
+  return opponent && { tileset: opponent.tileset, animationFrame1: opponent.frame2, palette: opponent.palette };
+}
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>((charmapData as { entries: [string, number][] }).entries);
 const moveEffectBattle = summaryMoveEffectBattleData as unknown as {
@@ -436,15 +451,16 @@ function compose(
   }
 
   // CreateMonSprite(..., 40, 64, 5): hFlip = !IsMonSpriteNotFlipped(species)
-  // - all 6 anchor species have noFlip=FALSE in species_info.h, so hFlip is
-  // always TRUE here (unlike the draft screen's unflipped ball-open pic).
+  // (species_info.h .noFlip, extracted per species; the six draft anchors are
+  // all flipped, unlike the draft screen's unflipped ball-open pic).
   const spriteRental = rentals[spriteSlot]!;
   if (!spriteRental) throw new Error(`summary sprite rental slot ${spriteSlot} is unavailable`);
-  const frontSprite = frontSprites[spriteRental.frontPicSpecies];
-  // The current front-pic asset tranche covers the canonical six. A live
+  const frontSprite = summaryFrontSprite(spriteRental.frontPicSpecies);
+  const hFlip = summaryFrontSpriteIsFlipped(spriteRental.frontPicSpecies);
+  // Every Battle Frontier species has a front pic (summaryFrontSprite). A
   // generated rental keeps its exact front-pic identity in state and never
-  // substitutes anchor art; until that species asset exists, only the
-  // portrait layer is absent while all record-backed text remains visible.
+  // substitutes anchor art; a species outside those assets only loses the
+  // portrait layer while all record-backed text remains visible.
   if (frontSprite) {
     let presentationClock = monAnimClock;
     if (monReplacement.replacementAnimationDelay) {
@@ -473,7 +489,7 @@ function compose(
         frontSprite.palette.map((color) => fadeColor(color, objY)),
         monX,
         monY,
-        -frontPresentation.affine.xScale,
+        hFlip ? -frontPresentation.affine.xScale : frontPresentation.affine.xScale,
         0,
         0,
         frontPresentation.affine.yScale,
@@ -481,7 +497,7 @@ function compose(
         true,
       );
     } else if (monReplacement.showMon !== false) {
-      sprite({ tileset: monTileset }, frontSprite.palette, monX, monY, 8, 8, 0, true);
+      sprite({ tileset: monTileset }, frontSprite.palette, monX, monY, 8, 8, 0, hFlip);
     }
   }
 
@@ -683,11 +699,17 @@ function compose(
       const windowTransfer = monReplacement.movesWindowTransfer;
       const namesTransfer = windowTransfer?.names ?? { completeRows: 4 };
       const ppTransfer = windowTransfer?.pp ?? { completeRows: 4 };
+      // PrintMoveNameAndPP: a MOVE_NONE slot prints gText_OneDash ("-",
+      // moves.json's MOVE_NONE name) and a centered gText_TwoDashes in
+      // sTextColors[12] (the full-PP colors).
+      const emptySlot = move.id === 0;
       if (i < namesTransfer.completeRows) {
         text(move.name, WIN_MOVES_NAMES.x, WIN_MOVES_NAMES.y + y, COLOR_1, PAL6);
       }
       const currentPp = move.currentPp;
-      const ppCodes = [
+      const ppCodes = emptySlot
+        ? [charmap.get("-")!, charmap.get("-")!]
+        : [
         GLYPH_CODE_PP,
         ...String(currentPp).padStart(2, " ").split("").map((char) =>
           char === " " ? CHAR_SPACER : charmap.get(char)!),
@@ -695,7 +717,9 @@ function compose(
         ...String(move.maxPp).padStart(2, " ").split("").map((char) =>
           char === " " ? CHAR_SPACER : charmap.get(char)!),
       ];
-      const ppX = WIN_MOVES_PP.x + 44 - codeWidth(ppCodes);
+      const ppX = emptySlot
+        ? WIN_MOVES_PP.x + Math.trunc((44 - codeWidth(ppCodes)) / 2)
+        : WIN_MOVES_PP.x + 44 - codeWidth(ppCodes);
       if (i < ppTransfer.completeRows) {
         drawGlyphCodes(
           fb,
@@ -730,6 +754,8 @@ function compose(
           glyphX += font.widths[code] ?? font.cellSize;
         }
       }
+      // Set(Contest)MoveTypeIcons hide a MOVE_NONE slot's icon sprite.
+      if (iconRental.moves[i]!.id === 0) continue;
       const icon =
         page === "contestMoves"
           ? typeIcons.contestCategories[

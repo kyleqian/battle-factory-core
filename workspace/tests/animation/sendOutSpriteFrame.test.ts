@@ -22,8 +22,11 @@ describe("send-out sprite-frame programs JSON", () => {
     for (const row of (summaryFrontAnimation.species as readonly SummaryRow[])) {
       const key = row.species.replace(/^SPECIES_/, "");
       if (row.spriteFrameProgram === null) {
-        // SPINDA's sAnims array has no index-1 program (GeneralFrame0 only).
-        expect(programs[key], key).toBeUndefined();
+        // HasTwoFramesAnimation excludes these from the summary's
+        // StartSpriteAnim(..., 1); SPINDA's sAnims array has no index-1
+        // program at all (GeneralFrame0 only).
+        expect(["CASTFORM", "DEOXYS", "SPINDA", "UNOWN"], key).toContain(key);
+        if (key === "SPINDA") expect(programs[key], key).toBeUndefined();
       } else {
         expect(programs[key], key).toEqual([...row.spriteFrameProgram]);
       }

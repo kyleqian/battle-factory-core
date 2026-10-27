@@ -414,13 +414,20 @@ export function requestSummaryMoveSelect(state: SummaryScreenState): SummaryScre
 export function requestSummaryMoveSelectionChange(
   state: SummaryScreenState,
   direction: SummaryMonDirection,
+  /** Per move slot: summary.moves[i] != MOVE_NONE (default: all four). */
+  populatedMoves: readonly boolean[] = [true, true, true, true],
 ): SummaryScreenState {
   const select = state.moveSelect;
   if (!select || select.phase !== "open" || select.elapsed < 1) return state;
   const delta = direction === "down" ? 1 : -1;
-  const selectedMoveIndex =
-    (select.selectedMoveIndex + delta + SUMMARY_MOVE_CANCEL_INDEX + 1) %
-    (SUMMARY_MOVE_CANCEL_INDEX + 1);
+  // ChangeSelectedMove: step past MOVE_NONE slots (at most MAX_MON_MOVES
+  // steps); CANCEL (newMove == MOVE_NONE) always stops the walk.
+  let selectedMoveIndex = select.selectedMoveIndex;
+  for (let i = 0; i < SUMMARY_MOVE_CANCEL_INDEX; i += 1) {
+    selectedMoveIndex =
+      (selectedMoveIndex + delta + SUMMARY_MOVE_CANCEL_INDEX + 1) % (SUMMARY_MOVE_CANCEL_INDEX + 1);
+    if (selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX || populatedMoves[selectedMoveIndex] !== false) break;
+  }
   const leavesCancel = select.selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX;
   const leaveTicks = summaryMoveCancelLeaveTicks(state.page);
   const entersCancel = selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX;
