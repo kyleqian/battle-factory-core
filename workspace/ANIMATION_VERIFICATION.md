@@ -161,6 +161,13 @@ approximate. No further user approval is needed for this class.
   full suite + build. No ROM pixel receipt is claimed for approximate frames.
 - An exact proof that later arrives for an approximate input moves those
   commands back to their exact/faithful class through the normal gates.
+- Reason codes and the per-class policy live in `src/engine/liveMovePlayback.ts`
+  (`LIVE_MOVE_APPROXIMATE_POLICY`, apx210). The census reports them in lsd194
+  field [21] (`live` / `approx:<reason>` / `static:<reason>` / `pause`), totalled
+  by `tools/integration/apx210CensusSummary.py`. `pause` commands carry no body
+  request (action-transition / no-hit pauses) and are outside the 0-static
+  target. An `other:unattributed-gate-<move>` reason must be named before its
+  class is promoted.
 
 ## Keep move checks local
 

@@ -20,45 +20,34 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart
+## State at restart (written at the 2026-10-27 09:10 UTC wind-down; PROGRESS.md top entry has details)
 
-- master `ef511e03d` + the 2026-10-26 re-aim commit (docs only). Production src tree `21f22b324`: tl205 + tl206 (Scene ON
-  script tails, 13 tail-aware re-pins) were folded by the 21:29 UTC run before it was stopped; supervisor gates on the exact
-  merged code `80c0a8c56`: typecheck 0, full suite 1,691 files / 14,065 tests 0 failed, build 0
-  (`.integration/validation/sv-20261026/tl206/`). Census / differential / soaks were not rerun after that fold: run census
-  both scenes + differential once as the first light gate of this session (presentation-only change, kernel digests must match).
-- exs207 (Explosion-breaks-Substitute faint timing) was stopped mid-step: refs `worker/integration-20261026-213055`,
-  `worker/integration-20261026-223044`, `worker/union-exs207` kept, worktrees under `.worktrees/` may be removed after copying
-  logs. Not folded, no gates. Timing: long tail (Next work 4).
-- No open DEFERRED items. The 5 dead tmux sessions were killed at restart.
+- Phase 1 tooling landed: `npm run soak -- --scene on|off|both` (soakscene208); in-app containment of presentation throws
+  (contain209 + contain213: adapter / duration / draw / tick-side field reads / command projection / order hosts); render
+  caches ~4x faster, pixel-identical (perf211; `tools/soak/frameHashes.ts`); `npm run play:random` drives the built bundle
+  in headless Chromium (play212; Playwright + Chromium + unpacked system libraries live in the ignored
+  `.integration/browser/`, picked up automatically; no root needed).
+- Phase 2 plumbing landed: apx210 reason codes / `LIVE_MOVE_APPROXIMATE_POLICY` (all static) / census field [21].
+  Scene ON census 0..999 on `6a021c074`: 207 static commands (table in PROGRESS.md), 0 approximate.
+- Scene ON soaks so far all clean: winning carry 0 / 14 / 28 + winning-swap (0:30 each) and carry 0 30:130 at
+  `--render-every 1`, vanilla 0:20 ON; 0 CRASH / 0 HANG / 0 CONTAINED.
+- Browser random play found real crashes on the draft **Summary** screen in both scenes (6-species front-animation table;
+  Battle Moves detail `moves[powerMoveIndex]`; Contest Moves cancel row). sfa214 fixes them on the UNFOLDED branch
+  `worker/integration-20261027-065233` (worktree kept; its suite was cut by the deadline): verify (tests, differential, the 17 saved sessions replayed with render,
+  full suite + build on the union) and fold first.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
-1. **Phase 1, crash hardening.** (a) Worker: `tools/soak` gains
-   `--scene on|off|both`; with `on`, `createInitialState({battleSceneMode:"on"})`
-   and `--render-every 1` so the Scene ON renderer runs every frame. Smoke it
-   on 3 seeds. (b) Supervisor: vanilla 0:20 ON, then full 0:60 ON
-   `--vary-rng` with `--parallel` bounded to free memory (one full suite OR one
-   soak fan-out at a time on 16 GiB). Every CRASH / HANG becomes a worker step
-   with a source-rule fix and a Tier-1 test. (c) Worker: in-app containment
-   — a throw raised while computing or drawing a presentation command
-   degrades that command to the pause, logs the error + session trace, and
-   the battle continues; gameplay-state throws keep the overlay; tests pin
-   both. (d) Playwright random play (10 min, both scenes) against the built
-   bundle, collecting `pageerror`; make it a tool, not a one-off.
-2. **Phase 2, every animation plays.** First the approximate contract in
-   `ANIMATION_VERIFICATION.md` + a census column, then promotions by weight:
-   Substitute doll cells (74 commands), order / allocator unknown (51),
-   Castform (~20), Endeavor (12), turn 0 (7), hidden target (3), the 12
-   no-adapter cases; then player back send-out + intro send-outs in Scene ON
-   and the weather-continues battler (#157). Acceptance: Scene ON census
-   0..999 with 0 static-field commands.
-3. **Phase 3, production** and **Cleanup** per the plan, interleaved: start
-   cleanup steps 1–3 (one-off scripts, ledger archive, provider / lane code)
-   as soon as a worker slot is free, each one commit, each verified by
-   typecheck + full suite + build.
-4. **Timing** residuals (tl204 body windows, msg175 edges, the Explosion /
-   Substitute faint) only when nothing above is ready. Record them in ISSUES.
+1. **Crashes.** After sfa214: `npm run build && npm run play:random -- --minutes 10 --scene both`; every overlay /
+   pageerror becomes a fix step (replay saved sessions with tick + render). Extend soak exploring policies whenever the
+   browser finds a screen the soak does not reach. Nightly Scene ON bulk: `--render-every 8` (rendering every frame is
+   ~1 battle / min / process here; see PROGRESS sizing note) plus a `--render-every 1` sample.
+2. **Every animation plays.** Brief ready: `.integration/validation/sv-20261026b/apx215.txt` (substitute-doll, 74
+   commands). Then by weight: transform 33, castform-form 18, extrasensory-player-later 17, sprite-order-unknown 16,
+   endeavor-power 12, no-adapter 11, turn-0 7, hidden-target 3; first name the 13 `other:unattributed-gate-*` commands.
+   Then player back send-out + intro send-outs in Scene ON, weather-continues side (#157).
+3. **Production + cleanup** per the plan, interleaved (cleanup steps 1–3 first).
+4. **Timing** residuals last (exs207 refs kept: `worker/integration-20261026-213055`, `-223044`, `worker/union-exs207`).
 
 ## Gate recipe (unchanged)
 

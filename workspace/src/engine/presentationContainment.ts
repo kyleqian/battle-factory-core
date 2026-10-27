@@ -7,6 +7,28 @@
 //   - renderBattleResolutionPresentation (same file): the per-frame draw; a throw draws the static field instead.
 // Gameplay (kernel / round / facility / RNG / damage) is never wrapped and still reaches the crash overlay / advance() caller.
 //
+// contain213 adds the tick-side presentation seams contain209 left open. Each degrades to the narrowest state that keeps the
+// kernel's already-decided outcome reachable; none can change a gameplay value (the kernel ran before any of them):
+//   - "field": render-view reads inside tick() (containedBattleResolutionRenderView / containedBattleResolutionDisplayedField,
+//     battleResolutionPresentationRender.ts): the forced / action continuation's segment boundary field and the postwin /
+//     return-hold frozen scene. A throw from the view's guards (e.g. the HP endpoint) falls back to the view without the current
+//     command's own presentation (the field already displayed before it). Then the field read falls back to the segment field
+//     with every completed command applied (skipping any command whose application throws), and the frozen scene to none (null:
+//     the postwin renderer's existing black hold; postwin timing and state are unchanged).
+//   - "commands": turning a kernel receipt into presentation commands (projectResolutionSegmentCommands,
+//     battleResolutionPresentation.ts; the fresh resolution and every appended continuation segment). A throw presents the span as
+//     a send-in message + typed switch-in per active battler whose party slot the receipt changed (the kernel's after-receipt
+//     snapshot; the display ledger and the forced send-out need both), else that battler's HP bar / status icon to the kernel's
+//     endpoint, and then a turn-end (TURN_END_TIMING), which settles the display ledger to
+//     the kernel's rules boundary -- so the next action menu / round end shows the outcome. The receipt's events stay on the
+//     segment unchanged. The structural guards before projection (legal decision, sequence order, request identity) stay fatal.
+//   - "order": the per-command presentation host update (prepareResolutionPalette, factoryRoundBattleOrchestrator.ts: palette,
+//     allocator, sprite-order and battler-x2 hosts and the command's inputs). A throw invalidates all four hosts (the existing
+//     unknown-history state later adapters decline / classify on) and drops the current command's inputs; the next frame runs the
+//     update again from the unknown hosts. Likewise the presentation-only ledger extras of commitCompletedResolutionCommand
+//     (Substitute doll, semi-invulnerable hide, Castform forms) keep their earlier value on a throw. withResolutionLifecycle is a
+//     pure freeze and cannot throw. The ledger's HP / status / party checks against the kernel stay fatal.
+//
 // Degradation is sticky per command object (the frozen command in the presentation queue): once degraded, every later frame of
 // that command draws static without retrying the live path. Tick-side degradation (adapter, duration) is a pure function of the
 // command and its displayed field, so timing and the presentation RNG follow the trace. A draw-time throw cannot change the
@@ -16,7 +38,7 @@
 // Contained errors are kept in a bounded module-level list (first CONTAINED_PRESENTATION_ERROR_LIMIT distinct errors, deduped
 // by command type + message) so headless callers (the soak, the bench ABI) and the browser session export can see them.
 
-export type ContainedPresentationSite = "adapter" | "duration" | "draw";
+export type ContainedPresentationSite = "adapter" | "duration" | "draw" | "field" | "commands" | "order";
 
 export type ContainedPresentationError = Readonly<{
   /** 1-based ordinal over distinct errors since the last clear. */
