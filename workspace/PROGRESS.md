@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-10-26 / 27 — CAX31 session (supervisor, Opus 5.5): finish plan Phase 1 started (in progress)
 
-- **State:** master `6a021c074`+; production src tree `71e610860` (contain209 + perf211 + apx210).
+- **State:** master `31ba4d4ec`+; production src tree `c7bb4e59d` (contain209 + perf211 + apx210 + contain213).
 - **Light gates on src `21f22b324` (reused + one rerun):** census 0..999 both scenes already existed twice for this exact src
   (tl205 union `875695e43`, exs207 base `ef511e03d`); delta between them 1,000 / 1,000 battles identical, 0 digest / 0 error
   mismatch, 0 unattributed. Differential (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on,
@@ -68,7 +68,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   properties of undefined (reading 'power')" at `summaryInfoPage.ts:791` (`pageRental.moves[powerMoveIndex]`, Battle Moves
   detail). Reproduced headlessly by tick + render replay of the saved sessions
   (`.integration/validation/sv-20261026b/random-play/2026-10-27T05-22-17-450Z/`). Brief sfa214 queued.
-- **Running:** contain213 (remaining containment seams, Opus worker).
+- **Folded:** contain213 (`31ba4d4ec`, src `c7bb4e59d`): tick-side render-view field reads fall back (last good field ->
+  segment field with completed commands -> frozen scene `null` = black hold); command projection throws -> a minimal command
+  list from the kernel's post-turn state (send-in message + switch-in, or HP bar + status icon, then turn-end; the projector
+  function itself still fails closed); `prepareResolutionPalette` throws -> palette / allocator / order / x2 hosts unknown.
+  **Loosened on purpose:** a malformed kernel receipt inside the resolution builder is now a recorded `commands` error, not
+  fatal. Worker: full suite 1,701 passed / 1 failed (that fail-closed pin, re-pinned `5644b2414`), build 0. Supervisor: 7 files
+  / 50 tests, differential 641 / 641, census 0..999 ON and OFF vs `6a021c074` **1,000 / 1,000 identical**, 0 digest mismatch.
+- **Running:** sfa214 (Summary-screen crashes + soak blind spot, Opus worker).
 ---
 
 ## 2026-10-26 — User decision: finish plan approved; CAX31 run restarted on it (top layer, docs only)
