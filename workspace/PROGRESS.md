@@ -5,6 +5,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-27 / 28 — CAX31 daily run (supervisor, Opus 5.5): sfa214 folded; apx215 running
+
+- **State:** master `ce7e3b7ab` (src = tested tree `b28ebe50a`).
+- **Folded:** sfa214 (Summary-screen crashes found by browser random play). Supervisor finished the cut-off branch: merged
+  master, added `appRoute` to its 5 new compare traces (the only red test). Gates on `b28ebe50a`: typecheck 0; full suite
+  **1,705 files / 14,121 tests, 0 failed**; build 0; the 18 saved random-play sessions replay clean with `--render`;
+  differential 641 / 641; census 0..999 ON + OFF vs contain213 **1,000 / 1,000 identical**, 0 digest mismatch; anchor Summary
+  traces exact (magby / onix / mon-down / move-select / ...). Open: QUILAVA V_STRETCH replacement 48 / 91, 137 species
+  frame-program-only motion -> ISSUES #188 (non-crash). Evidence `.integration/validation/sv-20261027/`.
+- **Running:** apx215 (substitute-doll approximate, opus worker, integration lane); browser random play 10 min / scene on
+  the `ce7e3b7ab` build.
+---
+
 ## 2026-10-26 / 27 — CAX31 session wind-down (supervisor, Opus 5.5): finish plan Phase 1 tooling + containment; Phase 2 plumbing
 
 - **State:** master `31ba4d4ec`+; production src tree `c7bb4e59d` (contain209 + perf211 + apx210 + contain213).
@@ -109,15 +122,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   its exs207 worker branches are kept as long-tail work.
 - **Next:** handoff "Next work" 1 → 4 (Scene ON soak option + first ON sweeps; in-app containment; approximate contract).
 - **Notes:** no push (user's step); the Mac imports box results through bundles.
----
-
-## 2026-10-26 — CAX31 session (supervisor, Opus 5.5): tl205 + tl206 folded; stopped by the user at 22:40 UTC for the finish-plan restart (entry above)
-
-- **State:** master `80c0a8c56` (src tree `21f22b324`). Presentation only so far.
-- **Folded:** tl205 + tl206 (Scene ON script tail, trail -1, for the 9 tl204-measured zero-tail moves; 13 tail-aware test re-pins).
-  Supervisor gates on the exact merged code `80c0a8c56`: typecheck 0; full suite 1,691 files / 14,065 tests passed, 0 failed; build 0
-  (`.integration/validation/sv-20261026/tl206/`). Census / tl204Compare were run on the union in the 2026-10-23 session (unchanged src).
-- **Stopped mid-step:** exs207 (Explosion-breaks-Substitute faint, ROM rows both scenes): refs `worker/integration-20261026-213055`,
-  `worker/integration-20261026-223044`, `worker/union-exs207` kept; not folded, no gates. Timing work: long tail under the finish plan.
-- **Next:** tl204 body-window residuals + the other 14 zero-tail moves; msg175 residuals; #146 visuals.
 ---

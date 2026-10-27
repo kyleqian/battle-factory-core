@@ -2543,10 +2543,11 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
   } else if (summaryScreen.isOpen) {
     // pokemon_summary_screen.c Task_HandleInput's exact directional priority.
     if (summaryScreen.moveSelect) {
+      const populatedMoves = draftScreen.rentals[summaryScreen.selectedSlot]?.moves.map((move) => move.id !== 0);
       if (newKeys.has("UP")) {
-        summaryScreen = requestSummaryMoveSelectionChange(summaryScreen, "up");
+        summaryScreen = requestSummaryMoveSelectionChange(summaryScreen, "up", populatedMoves);
       } else if (newKeys.has("DOWN")) {
-        summaryScreen = requestSummaryMoveSelectionChange(summaryScreen, "down");
+        summaryScreen = requestSummaryMoveSelectionChange(summaryScreen, "down", populatedMoves);
       } else if (newKeys.has("A") || newKeys.has("B")) {
         summaryScreen = requestSummaryMoveSelectClose(summaryScreen);
       }

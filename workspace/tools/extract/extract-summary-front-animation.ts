@@ -1,11 +1,15 @@
-// Dev-time extractor for the deferred Summary screen's front-sprite idle
-// animation data for the six S9 anchor rentals. It follows the exact source
-// path used by PokemonSummaryDoMonAnimation:
+// Dev-time extractor for the Summary screen's front-sprite idle animation
+// data: the six S9 anchor rentals first, then every other species in the
+// Battle Frontier mon table (every Factory rental and opponent, both Level 50
+// and Open sets; sfa214). It follows the exact source path used by
+// PokemonSummaryDoMonAnimation:
 //
 //   pokemon.c:sMonAnimationDelayTable -> delay (implicit table entries are 0)
 //   pokemon.c:sMonFrontAnimIdsTable   -> animation id/type
 //   pokemon_animation.c:sMonAnimFunctions -> movement callback
 //   front_pic_anims.h                 -> StartSpriteAnim(..., 1) frame program
+//                                        (gMonFrontAnimsPtrTable names it)
+//   species_info.h .noFlip            -> IsMonSpriteNotFlipped = sDontFlip
 //
 // Spinda is deliberately the exceptional single-frame species in
 // HasTwoFramesAnimation, so it has no index-1 frame program. This extractor
@@ -24,14 +28,7 @@ const RUN_ROOT = join(HERE, "..", "..");
 const REF = join(RUN_ROOT, "reference", "pokeemerald");
 const DEFAULT_OUTPUT = join(RUN_ROOT, "src", "data", "gen", "summary-front-animation.json");
 
-const ANCHOR_SPECIES = [
-  ["ONIX", "Onix"],
-  ["MAGBY", "Magby"],
-  ["VOLBEAT", "Volbeat"],
-  ["ELECTRIKE", "Electrike"],
-  ["SPINDA", "Spinda"],
-  ["SWABLU", "Swablu"],
-] as const;
+const ANCHOR_SPECIES = ["ONIX", "MAGBY", "VOLBEAT", "ELECTRIKE", "SPINDA", "SWABLU"] as const;
 
 type Frame = { frame: number; duration: number };
 type SpeciesAnimation = {
@@ -40,6 +37,7 @@ type SpeciesAnimation = {
   motion: { id: number; type: string; callback: string };
   startsSecondSpriteFrame: boolean;
   spriteFrameProgram: Frame[] | null;
+  noFlip: boolean;
 };
 
 export type SummaryFrontAnimationData = {
@@ -92,19 +90,50 @@ function excludedFromTwoFrames(pokemonC: string): Set<string> {
   return new Set([...match[1]!.matchAll(/species != SPECIES_(\w+)/g)].map((entry) => entry[1]!));
 }
 
+function frontAnimationName(frontPicAnimsH: string, species: string): string {
+  const match = new RegExp(`\\[SPECIES_${species}\\]\\s*=\\s*sAnims_(\\w+)`).exec(
+    initializer(frontPicAnimsH, "gMonFrontAnimsPtrTable"),
+  );
+  if (!match) throw new Error(`front anims pointer not found: SPECIES_${species}`);
+  return match[1]!;
+}
+
+function notFlippedSpecies(speciesInfoH: string): Set<string> {
+  const result = new Set<string>();
+  for (const block of speciesInfoH.split(/\n    \[SPECIES_/).slice(1)) {
+    const name = /^(\w+)\]/.exec(block)?.[1];
+    if (name && /\.noFlip\s*=\s*TRUE/.test(block)) result.add(name);
+  }
+  return result;
+}
+
+/** Anchors first, then every other Battle Frontier species in mon-table order. */
+export function summaryFrontAnimationSpeciesList(frontierMons: { entries: ReadonlyArray<{ species: string }> }): string[] {
+  const species: string[] = [...ANCHOR_SPECIES];
+  for (const entry of frontierMons.entries) {
+    const name = entry.species.replace(/^SPECIES_/, "");
+    if (!species.includes(name)) species.push(name);
+  }
+  return species;
+}
+
 export function buildSummaryFrontAnimationData(sources: {
   pokemonC: string;
   pokemonAnimationC: string;
   pokemonAnimationH: string;
   frontPicAnimsH: string;
+  speciesInfoH: string;
+  speciesList: readonly string[];
 }): SummaryFrontAnimationData {
   const delayTable = initializer(sources.pokemonC, "sMonAnimationDelayTable");
   const frontAnimationTable = initializer(sources.pokemonC, "sMonFrontAnimIdsTable");
   const noSecondFrame = excludedFromTwoFrames(sources.pokemonC);
+  const notFlipped = notFlippedSpecies(sources.speciesInfoH);
 
   return {
     schema: "summary-front-animation/v1",
-    species: ANCHOR_SPECIES.map(([species, animationName]) => {
+    species: sources.speciesList.map((species) => {
+      const animationName = frontAnimationName(sources.frontPicAnimsH, species);
       const type = tableValue(frontAnimationTable, species);
       if (!type?.startsWith("ANIM_")) throw new Error(`front animation type not found: SPECIES_${species}`);
       const delayText = tableValue(delayTable, species);
@@ -124,6 +153,7 @@ export function buildSummaryFrontAnimationData(sources: {
         spriteFrameProgram: startsSecondSpriteFrame
           ? frameProgram(sources.frontPicAnimsH, `sAnim_${animationName}_1`)
           : null,
+        noFlip: notFlipped.has(species),
       };
     }),
   };
@@ -135,6 +165,10 @@ function readSources() {
     pokemonAnimationC: readFileSync(join(REF, "src", "pokemon_animation.c"), "utf8"),
     pokemonAnimationH: readFileSync(join(REF, "include", "pokemon_animation.h"), "utf8"),
     frontPicAnimsH: readFileSync(join(REF, "src", "data", "pokemon_graphics", "front_pic_anims.h"), "utf8"),
+    speciesInfoH: readFileSync(join(REF, "src", "data", "pokemon", "species_info.h"), "utf8"),
+    speciesList: summaryFrontAnimationSpeciesList(
+      JSON.parse(readFileSync(join(RUN_ROOT, "src", "data", "gen", "battle-frontier-mons.json"), "utf8")),
+    ),
   };
 }
 

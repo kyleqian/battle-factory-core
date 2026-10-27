@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import summaryFrontAnimation from "../src/data/gen/summary-front-animation.json" with { type: "json" };
-import { buildSummaryFrontAnimationData } from "../tools/extract/extract-summary-front-animation.ts";
+import frontierMons from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
+import {
+  buildSummaryFrontAnimationData,
+  summaryFrontAnimationSpeciesList,
+} from "../tools/extract/extract-summary-front-animation.ts";
 import {
   SUMMARY_INITIAL_MON_ANIMATION_START,
   summaryFrontAnimationForSpecies,
@@ -21,11 +25,20 @@ describe("summary front-animation extraction", () => {
       pokemonAnimationC: source("src/pokemon_animation.c"),
       pokemonAnimationH: source("include/pokemon_animation.h"),
       frontPicAnimsH: source("src/data/pokemon_graphics/front_pic_anims.h"),
+      speciesInfoH: source("src/data/pokemon/species_info.h"),
+      speciesList: summaryFrontAnimationSpeciesList(frontierMons),
     })).toEqual(summaryFrontAnimation);
   });
 
+  it("covers every Battle Frontier species (all Factory rentals and opponents, Level 50 and Open)", () => {
+    const extracted = new Set(summaryFrontAnimation.species.map((entry) => entry.species));
+    const frontier = new Set(frontierMons.entries.map((entry) => entry.species));
+    expect(extracted).toEqual(frontier);
+    expect(extracted.size).toBe(376);
+  });
+
   it("pins the six S9 anchors' delay, callback type, and source frame programs", () => {
-    expect(summaryFrontAnimation).toEqual({
+    expect({ ...summaryFrontAnimation, species: summaryFrontAnimation.species.slice(0, 6) }).toMatchObject({
       schema: "summary-front-animation/v1",
       species: [
         { species: "SPECIES_ONIX", delay: 0, motion: { id: 67, type: "ANIM_RAPID_H_HOPS", callback: "Anim_RapidHorizontalHops" }, startsSecondSpriteFrame: true, spriteFrameProgram: [{ frame: 1, duration: 50 }, { frame: 1, duration: 30 }, { frame: 0, duration: 30 }] },
@@ -81,7 +94,7 @@ describe("summary front-animation presentation", () => {
       }
       let elapsed = 0;
       for (const command of entry.spriteFrameProgram) {
-        const clock = SUMMARY_INITIAL_MON_ANIMATION_START + elapsed + 1;
+        const clock = SUMMARY_INITIAL_MON_ANIMATION_START + entry.delay + elapsed + 1;
         expect(summaryFrontSpritePresentation(species, clock, false).frame).toBe(
           command.frame,
         );
