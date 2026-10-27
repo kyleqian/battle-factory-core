@@ -5,8 +5,8 @@
 // and a palette color. Everything but the palette lookup depends only on (tileset, tilemap), so it is compiled once
 // into an index layer: per pixel the entry's palette row (as a slot into `rowValues`) and the color index, or -1
 // where the raster skips the pixel. Drawing then only resolves colors for the frame's palette. Stable palettes also
-// get a full RGBA copy, keyed by exact palette content (`tileBgPaletteKey`), so palettes rebuilt each frame (fades,
-// darkens) share it.
+// get a full RGBA copy once drawn a few times, keyed by exact palette content (`tileBgPaletteKey`), so palettes
+// rebuilt each frame with the same colors share it.
 //
 // Purity: the output is a function of the inputs alone. Layers are cached by tileset / tilemap identity and
 // re-validated on every draw against the entry and tile references they read (an entries array edited in place
@@ -36,11 +36,14 @@ type IndexLayer = {
   cellRows: number;
   entryRefs: (Entry | undefined)[];
   tileRefs: (number[] | undefined)[];
-  rgbaByKey: Map<string, CompiledRgba | null>;
+  /** RGBA per palette key, or how many times the key was drawn indexed so far */
+  rgbaByKey: Map<string, CompiledRgba | number>;
 };
 
 const SEEN_ONCE = null;
 const RGBA_LIMIT = 8;
+/** a palette key drawn this many times through the index layer gets its RGBA copy (ramps rarely repeat a step) */
+const RGBA_AFTER = 3;
 const layers = new WeakMap<object, WeakMap<object, Map<string, IndexLayer | typeof SEEN_ONCE>>>();
 
 /** Exact content key of a subpalette list: every row's length and every slot's r,g,b; holes and missing rows apart. */
@@ -254,18 +257,21 @@ export function drawCompiledTileBg(
   if (fallbackRow0 && resolved.some((row) => row === undefined || row === null)) return false;
   const key = tileBgPaletteKey(subpalettes);
   const cached = layer.rgbaByKey.get(key);
-  if (cached === undefined) {
-    // First sighting of this palette: draw through the index layer, remember the key.
-    layer.rgbaByKey.set(key, null);
-    if (layer.rgbaByKey.size > RGBA_LIMIT) layer.rgbaByKey.delete(layer.rgbaByKey.keys().next().value!);
-    blitIndexed(fb, layer, resolved, scrollX, scrollY);
-    return true;
+  if (cached === undefined || typeof cached === "number") {
+    const seen = cached ?? 0;
+    if (seen < RGBA_AFTER) {
+      // A palette not seen often yet (a fade step): draw through the index layer and count it.
+      layer.rgbaByKey.delete(key);
+      layer.rgbaByKey.set(key, seen + 1);
+      if (layer.rgbaByKey.size > RGBA_LIMIT) layer.rgbaByKey.delete(layer.rgbaByKey.keys().next().value!);
+      blitIndexed(fb, layer, resolved, scrollX, scrollY);
+      return true;
+    }
   }
-  let compiled = cached;
-  if (compiled === null) {
-    compiled = compileRgba(layer, resolved);
-    layer.rgbaByKey.set(key, compiled);
-  }
+  const compiled = typeof cached === "object" ? cached : compileRgba(layer, resolved);
+  // Most recently drawn last, so a steady palette outlives a stream of one-off fade steps.
+  layer.rgbaByKey.delete(key);
+  layer.rgbaByKey.set(key, compiled);
   blitRgba(fb, layer, compiled, scrollX, scrollY);
   return true;
 }
