@@ -5,6 +5,7 @@ import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import { liveSubstituteSwapApplies, substituteSwapBodyField, substituteSwapBodyFraming, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+import type { LiveMoveDeclineReason } from "./liveMovePlayback.ts";
 import { recordContainedPresentationError } from "./presentationContainment.ts";
 import { battleCommandFieldSpeciesSpriteOrigin, battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -1145,13 +1146,29 @@ export function liveMoveAnimationDuration(
   }
 }
 
+/**
+ * apx210 (liveMovePlayback.ts): whether liveMoveAnimationDuration's move switch has no case for the request's move (the "no adapter"
+ * decline), past the Substitute / Transform gates. Presentation-only diagnostics; a throw is not "no adapter".
+ */
+export function liveMoveAnimationDurationCaseMissing(request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField): boolean {
+  const noCase = { hit: false };
+  try {
+    liveMoveAnimationDurationOf(request, field, "first", undefined, noCase);
+  } catch {
+    return false;
+  }
+  return noCase.hit;
+}
+
 function liveMoveAnimationDurationOf(
   request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField | undefined, bodyClass: LiveMoveTimingBody,
   moveUse: number | undefined,
+  // apx210: set when the move switch falls through to `default` (liveMoveAnimationDurationCaseMissing).
+  noCase?: { hit: boolean },
 ): number | null {
   if (field !== undefined && liveSubstituteSwapApplies(request, field) === true) {
     const bodyField = substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1);
-    const body = liveMoveAnimationDurationOf(request, bodyField, bodyClass, moveUse);
+    const body = liveMoveAnimationDurationOf(request, bodyField, bodyClass, moveUse, noCase);
     return body === null ? null
       : substituteSwapCompositeDuration(request.attacker === 0 ? "player" : "opponent", substituteSwapBodyFraming(request.moveId, body, request, bodyField).rows);
   }
@@ -1575,7 +1592,9 @@ function liveMoveAnimationDurationOf(
       return request.attacker === 0 ? willOWispTimeline("player", player, opponent).cleanup + 1
         : willOWispTimeline("opponent", opponent, player).cleanup + 1;
     }
-    default: return null;
+    default:
+      if (noCase) noCase.hit = true;
+      return null;
   }
 }
 
@@ -1840,6 +1859,13 @@ export function liveCastformFormDeclines(
   return liveCastformFormDeclineReason(field, request) !== null;
 }
 
+/** apx210 (liveMovePlayback.ts): the decline reason of an attributed liveMoveAnimationPresentation gate (unattributed gates leave it unset). */
+export type LiveMoveDeclineSink = { reason?: LiveMoveDeclineReason };
+function declined(sink: LiveMoveDeclineSink | undefined, reason: LiveMoveDeclineReason): null {
+  if (sink) sink.reason = reason;
+  return null;
+}
+
 export function liveMoveAnimationPresentation(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
@@ -1851,10 +1877,12 @@ export function liveMoveAnimationPresentation(
   battlerX2Input?: LiveMoveBattlerX2Input,
   /** hide66: the live view's hidden sides (liveMoveHiddenSides); absent = none hidden. */
   hiddenSides: LiveMoveHiddenSides = LIVE_MOVE_NO_HIDDEN_SIDES,
+  /** apx210 (liveMovePlayback.ts): receives the attributed gate's decline reason when this returns null; production passes none. */
+  declineSink?: LiveMoveDeclineSink,
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request, field) === null) return null;
-  if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return null;
-  if (liveCastformFormDeclines(field, request)) return null;
+  if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return declined(declineSink, "hidden-target");
+  if (liveCastformFormDeclines(field, request)) return declined(declineSink, "castform-form");
   const art = createBattleCommandFieldArtView(field);
   // prep46: after a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) ANY consumer's lend is the
   // word-free deferred marker; resolve it here, render-pure: carry the unit's activation order through the unit with ITS recorded
@@ -2121,7 +2149,7 @@ export function liveMoveAnimationPresentation(
     case 108: config = { move: "SMOKESCREEN", attacker, target, fieldProfile }; break;
     case 109: config = { move: "CONFUSE_RAY", attacker, target, fieldProfile }; break;
     case 113:
-      if (!spriteAllocatorInput?.historyKnown) return null;
+      if (!spriteAllocatorInput?.historyKnown) return declined(declineSink, "allocator-unknown");
       config = {
         move: "LIGHT_SCREEN", attacker, target, fieldProfile,
         allocatorProfile: {
@@ -2133,7 +2161,7 @@ export function liveMoveAnimationPresentation(
       };
       break;
     case 112: case 115: case 182: case 243: case 277: {
-      if (!spriteAllocatorInput?.historyKnown) return null;
+      if (!spriteAllocatorInput?.historyKnown) return declined(declineSink, "allocator-unknown");
       const wall = spriteAllocatorInput.wall;
       const sparkles = spriteAllocatorInput.sparkles;
       config = request.moveId === 112
@@ -2227,8 +2255,8 @@ export function liveMoveAnimationPresentation(
       // droplets around the attacker battlePositionCenter, hitsplats at the target picOffsetPoint mirrored by its side) and the stale
       // gAnimMovePower = the engine's battleMovePower register (request.power; W1/W2/W4/carry). The Battle TV loop (W3) is not
       // ported: a possible W3 write declines. HP is unchanged inside the script body. A shiny pair declines (normal palettes).
-      if (battlerX2Input?.staleMovePowerUnknown) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (battlerX2Input?.staleMovePowerUnknown) return declined(declineSink, "endeavor-power");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const targetHp = field[target.geometry.side].hp;
       config = { move: "ENDEAVOR", attacker, target,
         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" },
@@ -2239,7 +2267,7 @@ export function liveMoveAnimationPresentation(
     case 226:
       // batonPassAtAge(age, attacker.geometry.animationCenter) = liveBattlerAnchors(...).picOffsetPoint (prep27 s0.1: 53/53 component
       // rows on 4 pairs). The attacker palette blend reads the normal battle palette: a shiny pair declines.
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       config = { move: "BATON_PASS", attacker, target, fieldProfile };
       break;
     case 242: config = { move: "CRUNCH", attacker, target, fieldProfile }; break;
@@ -2442,7 +2470,7 @@ export function liveMoveAnimationPresentation(
     case 164:
       // Species audit 12: before the doll appears (ages 0..10) the body draws the attacker without its shiny palette
       // (shiny STEELIX 12,471 / 13,778 px); decline shiny battlers as the other live adapters do.
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       config = { move: "SUBSTITUTE", attacker, target, fieldProfile };
       break;
     case 212:
@@ -2537,7 +2565,7 @@ export function liveMoveAnimationPresentation(
     case 215: {
       // Order consumer (docs/order-consumer-prep.md §0): the persistent sort replays from F filtered to the six reused
       // slots at activation. Unknown tracked order (liveSpriteOrderHost.ts) -> null, the bounded scene-off view.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const noteOrderSeed = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] },
         HEAL_BELL_REUSED_ORDER_SLOTS);
       if (noteOrderSeed === null) return null;
@@ -2556,7 +2584,7 @@ export function liveMoveAnimationPresentation(
     case 161: {
       // prep11 s0.2: allocator constants equal the accepted corpus (triangle slot 3 matrix 0; flame/lightning/ice slots; palette
       // blends 3, 12); the 64-entry order is the lent one, so the known-entry baseline gates it (no lend -> scene-off).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const fullOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
@@ -2573,7 +2601,7 @@ export function liveMoveAnimationPresentation(
     case 194: case 314: {
       // prep11 s0.2: allocator/task/resource constants equal the accepted corpora (the order is the lent one: no lend -> scene-off).
       // monbg (prep11-monbg-formula.json): the target battler sprite position incl. the species front-idle x2.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
@@ -2606,7 +2634,7 @@ export function liveMoveAnimationPresentation(
     case 193: {
       // prep11 s0.2: constants equal the accepted corpora; target bounds are the GetBattlerSpriteCoordAttr rectangle (pic offset
       // +-half the pic coords; the corpus holds bottom one pixel inside and the right-top corner one below top).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
@@ -2626,7 +2654,7 @@ export function liveMoveAnimationPresentation(
     }
     case 327: {
       // prep11 s0.2: constants equal the accepted corpora; subpriorities are the attacker slide (-2) and target impact (-3) offsets.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
@@ -2654,7 +2682,7 @@ export function liveMoveAnimationPresentation(
       // prep11 s0.2: constants equal the accepted corpora. The reducer's attacker/target centers are the thread origin and web
       // centre: the InitSpritePosToAnim* pic-offset points; subpriorities are the battler ones minus 2 (thread: target, web:
       // attacker) and the attacker's minus 5 (palette blend).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
@@ -2690,7 +2718,7 @@ export function liveMoveAnimationPresentation(
       // prep11 s0.2: slots/tasks/matrix constants equal the accepted corpora. The thirteen flower translation steps are
       // InitAnimLinearTranslation's (|dy| << 8) / duration with the movingUp bit, from the script arguments: the big flowers
       // start at the BATTLER_COORD_Y position (+ initial y), the small ones at the pic offset (+ initial y); all end at pic offset + target y.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
@@ -2728,7 +2756,7 @@ export function liveMoveAnimationPresentation(
     case 348: {
       // Order consumer (docs/order-consumer-prep.md §0): F filtered to the blade + trail slots at activation seeds the
       // persistent sort; unknown order -> null (scene-off fallback).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const oamOrderSeed = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] },
         LEAF_BLADE_OAM_ORDER_SLOTS);
       if (oamOrderSeed === null) return null;
@@ -2743,7 +2771,7 @@ export function liveMoveAnimationPresentation(
     case 299: {
       // Order consumer (docs/order-consumer-prep.md §0): F filtered to the ten lowest-free slots before the foot
       // allocation seeds the sort (pixel-sensitive: reversed/ascending seeds change 8 ages); unknown -> null.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const spriteSlots = [...spriteOrderInput.free].sort((l, r) => l - r).slice(0, 10);
       const spriteOrderSeed = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] },
         spriteSlots);
@@ -2760,7 +2788,7 @@ export function liveMoveAnimationPresentation(
       // Order consumer (docs/order-consumer-prep.md §0): the profile's 64-entry seed is the known-entry occupied
       // prefix + F (valid only while the occupants are the known-entry ones: the host lends only then, and the prefix
       // order is the known one at every such real-route body edge, tests/spriteOrderEventTransform.test.ts).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const spriteOrderSeed = spriteOrderWithOccupiedPrefix(
         { known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (spriteOrderSeed === null) return null;
@@ -2773,7 +2801,7 @@ export function liveMoveAnimationPresentation(
       // Order consumer (docs/order-consumer-prep.md §0): equal-centerY notes inherit the free order of their
       // creation window; unknown order -> null. The 3/3 perish counts are the battle engine's immutable result
       // (next-adapters-prep5 §2.2): a live Perish Song always starts both timers at three.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const noteOrderSeed = perishSongNoteOrderFromFree(spriteOrderInput.free);
       if (noteOrderSeed === null) return null;
       config = { move: "PERISH_SONG", attacker, target, noteOrderSeed,
@@ -2812,7 +2840,7 @@ export function liveMoveAnimationPresentation(
       // Order consumer (docs/order-consumer-prep.md §0): the six flames take the six lowest free slots in one
       // sort window and inherit their relative free order, so only a host-supplied order is exact. Unknown tracked
       // order (liveSpriteOrderHost.ts) -> null, the bounded scene-off view.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lowestFree = [...spriteOrderInput.free].sort((left, right) => left - right).slice(0, 6);
       const seed = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, lowestFree);
       if (lowestFree.length !== 6 || seed === null) return null;
@@ -2874,10 +2902,10 @@ export function liveMoveAnimationPresentation(
       // body after a scanline body differs), non-shiny (live battler art draws normal palettes). The attacker's self-KO / stat drops are
       // gameplay-owned and never read inside the body; the HUD shows the displayed HP 0 (prep6 Self-Destruct path) under the live field.
       // scan93: a later body reads the order host's scanline history (liveScanlineHistory.ts; absent = an unmodelled writer since: declines).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const mementoHistory = spriteOrderInput.firstBody ? [] : spriteOrderInput.scanlineHistory;
       if (mementoHistory === undefined || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const mementoScanline = liveScanlineEntry(FIRST_BODY_SCANLINE, mementoHistory, (side) => art[side].speciesSymbol);
       config = { move: "MEMENTO", attacker, target,
         fieldProfile: { playerHp: field.player.hp, playerMaxHp: field.player.maxHP, opponentHp: field.opponent.hp, opponentMaxHp: field.opponent.maxHP },
@@ -2888,7 +2916,7 @@ export function liveMoveAnimationPresentation(
       // Extreme Speed (docs/next-adapters-prep34.md s1.4 / s1.5): reducer age 43 at the activation row (live age 0), both sides; the attacker's
       // pic-coords yOffset is the A input of the stretch y2. The renderer draws the live battler art at the field corners: zero idle rests
       // (the impact program writes the target x2 absolutely; no rest window was measured) and non-shiny battlers (normal palettes).
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const targetRest = liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest;
       if (attackerAnchors.frontIdleRest.x2 !== 0 || attackerAnchors.frontIdleRest.y2 !== 0 || targetRest.x2 !== 0 || targetRest.y2 !== 0) return null;
       // The hit splats' anchor is the target battler sprite (x, y) on both sides (prep34 s1.4 A: DUGTRIO (72, 91), GOLEM (72, 96)).
@@ -2944,7 +2972,7 @@ export function liveMoveAnimationPresentation(
       // resolution profile is the measured neutral constant (no HP commit / roll / burn: never-reached ages; the burn flames are
       // the separate Status_Burn body, which the live renderer never draws from this config). The opponent's idle rest is drawn by the
       // renderer (the target's hit shake replaces it at reducer age 72).
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       config = { move: "FIRE_PUNCH", attacker, target, animationAgeOffset: 27, moveTextStartAge: 0,
         resolutionProfile: { startHp: 0, endHp: 0, initialStatus: "none", hpCommitAge: 1_000_000, hpDrainFirstAge: 1_000_000,
           hitWobbleFirstAge: 1_000_000, hitBlinkFirstAge: 1_000_000, secondaryRollAge: 1_000_000, secondaryRollSucceeded: false,
@@ -2998,7 +3026,7 @@ export function liveMoveAnimationPresentation(
       // First-body gate (prep7 s2.3): the reducer's own 64-entry literal (fireBlast.ts FIRE_BLAST_ORDER_SEED) differs from
       // the provider order (occupied prefix + F) only in slots 3/4 and renders identically (0 differing pixels / 197 ages,
       // both orientations), so no reducer input exists; a body without a known tracked order is not proven -> null.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       config = { move: "FIRE_BLAST", attacker, target, fieldProfile,
         animationProfile: { attackerPictureCenter: attackerAnchors.picOffsetPoint,
           targetPictureCenter: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).picOffsetPoint,
@@ -3010,7 +3038,7 @@ export function liveMoveAnimationPresentation(
       // `allocationOrder` = each orb's index in the provider's free order restricted to those slots ([4,3,5,10,9,7] ->
       // [1,0,2,5,4,3], reproduces the ROM orb order at age 20). Unknown tracked order -> null (Grudge recipe). The orb
       // radius is max(width, height) >> 1 of the attacker's picture.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const allocationSlots = [3, 4, 5, 7, 9, 10];
       const providerOrder = spriteOrderForSlots({ known: true, free: spriteOrderInput.free, pendingDestroyed: [] }, allocationSlots);
       if (providerOrder === null) return null;
@@ -3025,7 +3053,7 @@ export function liveMoveAnimationPresentation(
       // baseline (matrix bitmap 0x6, no task, equal to the ROM plan at all 481 activations, allocator-plan-v2-evidence.md),
       // valid only while the known-entry history holds: gate on the lent tracked order. The caller-owned RNG is echoed
       // into the view and never read for pixels; the live seam has none, so it is 0.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const attackerSlot = attacker.geometry.side === "player" ? 6 : 8;
       const targetSlot = target.geometry.side === "player" ? 6 : 8;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
@@ -3052,7 +3080,7 @@ export function liveMoveAnimationPresentation(
       // iteration is a lag frame (the renderer's age-43 view(-1)), so the spriteAge-0 state is never displayed and any
       // advance in {0,1} renders identically: all-zero for both sides. The tie order is the accepted artifact (the
       // SortSprites history of sSpriteOrder, not derived), so the known-order lend gate applies to both attackers.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       config = { move: "SPARK", attacker, target, fieldProfile,
         attackerPictureOffset: attackerAnchors.picOffsetPoint, targetPictureOffset: targetAnchors.battlePositionCenter,
@@ -3080,7 +3108,7 @@ export function liveMoveAnimationPresentation(
       // prep10 s3.8: one body per hit (request.turn 0..n-1). Allocator ids are the known-entry constants (lunge 3, rock 4,
       // hitsplat 3, fragments 4,5,7,9, ShakeMon task 0; matrix bitmap 0x6, no task at activation), identical for every hit:
       // gate on the lent order. The reducer reads no order; the caller-owned RNG is echoed only.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const slotOf = (side: "player" | "opponent") => side === "player" ? 6 : 8;
       config = { move: "ROCK_BLAST", attacker, target, bodies: [{ fieldProfile, moveTextVisible: false,
@@ -3111,7 +3139,7 @@ export function liveMoveAnimationPresentation(
     case 222: {
       // prep10 s3.1: request.power is gBattleMovePower (the engine's own Random()%100 roll). The battler allocator slots and
       // the 64-entry order are the known-entry constants (matrix bitmap 0x6, no task at activation): gate on the lent order.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const fullOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
@@ -3128,7 +3156,7 @@ export function liveMoveAnimationPresentation(
       // (matrix bitmap 0x6, no task, equal to the ROM plan at all 481 activations; docs/allocator-plan-v2-evidence.md), valid
       // only while the known-entry history holds, which is exactly when the host lends the tracked order: no lend -> null.
       // Every order field is taken from the lent free order (64-entry occupied prefix + free order, or its slot subsets).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
@@ -3242,7 +3270,7 @@ export function liveMoveAnimationPresentation(
       // prep9 (docs/next-adapters-prep9.md s0/s2): the allocator profiles are per-move constants (equal to the ROM first-free
       // replay in 12/12 histories, and to the accepted literals), valid only on the known-entry baseline, which is exactly when
       // the host lends the tracked order: no lend -> null. Order fields come from the lend; they are pixel-neutral (s2.3).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (fullOrder === null) return null;
@@ -3290,7 +3318,7 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 104: {
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       // dt60: the clone step counter starts at the attacker sprite's data[3]. >= 1: one call ahead (table index age + 1) and destroyed one
       // frame earlier; everything else unchanged (0 px, docs/dt60-double-team-phase.md). < 0 (TUMBLING_FRONT_FLIP*) is unproven: decline.
       const side = attacker.geometry.side;
@@ -3309,7 +3337,7 @@ export function liveMoveAnimationPresentation(
       break;
     }
     case 297:
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       config = { move: "FEATHER_DANCE", attacker, target, fieldProfile: { ...fieldProfile, playerStatus: "none" },
         controllerProfile: { attackStageBefore: 0, attackStageAfter: 0 }, moveTextStartAge: 0, animationAgeOffset: 0 };
       break;
@@ -3448,7 +3476,7 @@ export function liveMoveAnimationPresentation(
       // prep13 s1.1: geometry from the anchors, the monbg base from the target's source sprite centre + idle x2 (the first
       // Task_UpdateMonBg data), every other field a constant/echo; the 64-entry activation order is the lent order (it
       // alone reproduces the ROM order rows), so an unknown tracked order is not proven -> null.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const initialOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (initialOrder === null) return null;
@@ -3507,8 +3535,8 @@ export function liveMoveAnimationPresentation(
       // production-derivable (liveProfileMoves.ts); the effect pictures are drawn from the displayed species art, so only a tracker lend
       // (the first-body / known-order gate: the activation order differs between bodies of one battle) and a non-shiny pair are required.
       // Lovely Kiss reads its activation value from the presentation host (the four `% 180` draws replay from it); no host = decline.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       if (palettes === null) return null;
       const targetSide = target.geometry.side;
@@ -3533,8 +3561,9 @@ export function liveMoveAnimationPresentation(
       // and BGnCNT / DISPCNT / BG1VOFS are history, but no pixel reads them (WININ = WINOUT); the allocator (tile bitmap, palette tags,
       // matrices, tasks) is the first body's at every later activation. The one history the pixels read besides the order is the battler
       // x2 rest, so a later body declines unless both species rests are {0,0} (an opponent ONIX after its Quick Attack: 40,367 px).
-      if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3550,8 +3579,9 @@ export function liveMoveAnimationPresentation(
       // LATER body WIN0 / BGnCNT / DISPCNT / BG1VOFS are history the pixels never read (the body writes the monbg layer and the fades it shows)
       // and the allocator (tile bitmap, palette tags, matrices, tasks) is the first body's; later windows are exact in the policy's age-171 phase
       // and differ only on the documented BLDY tail rows in the other. The target / attacker rests are read: later, both species rests {0,0}.
-      if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (lentOrder === null) return null;
@@ -3569,7 +3599,7 @@ export function liveMoveAnimationPresentation(
       // is unread and the allocator is the first body's. The battler x2 rests are read: a later charge needs both species rests {0,0}.
       const strike = (request.turn & 1) === 1;
       if (!spriteOrderInput?.known || (!strike && !spriteOrderInput.firstBody && !liveBattlersRestFree(art))) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3588,7 +3618,7 @@ export function liveMoveAnimationPresentation(
       // battler x2 rests are read, so a later hit needs both species rests {0,0}.
       if (!spriteOrderInput?.known
         || (spriteOrderInput.firstBody !== true && spriteOrderInput.afterBonemerangHit1 !== true && !liveBattlersRestFree(art))) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (lentOrder === null) return null;
@@ -3600,8 +3630,8 @@ export function liveMoveAnimationPresentation(
     }
     case 229: {
       // prep29 R1 / B.3: Rapid Spin. The spin sprite is at the attacker's battle-position centre, the hit splat at the target's picture offset point.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (lentOrder === null) return null;
@@ -3619,8 +3649,9 @@ export function liveMoveAnimationPresentation(
       // prep29 R1 / B.6: Outrage (the S0 registers). later58 (docs/next-adapters-later58.md): a LATER body (after Quick Attack / Growl / Splash /
       // its own rampage turn) starts from history WIN0 / BGnCNT / DISPCNT / BG1VOFS that no pixel reads, with the first body's allocator; the
       // battler x2 rests are read, so a later body needs both species rests {0,0}.
-      if (spriteOrderInput?.known !== true || (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art))) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (spriteOrderInput?.known !== true) return declined(declineSink, "sprite-order-unknown");
+      if (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3641,8 +3672,9 @@ export function liveMoveAnimationPresentation(
       // (docs/next-adapters-later58.md): at a LATER body BG3HOFS / BLDCNT / BLDALPHA / BLDY are still S0 and the allocator (tile bitmap, palette
       // tags incl. the healthbar trace bank 9, matrices, tasks) is the first body's; WIN0 / BGnCNT / DISPCNT history is unread. The later
       // windows are exact in the policy phase and differ only on the documented lag rows in the other. Later: both species rests {0,0}.
-      if (spriteOrderInput?.known !== true || (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art))) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (spriteOrderInput?.known !== true) return declined(declineSink, "sprite-order-unknown");
+      if (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3658,8 +3690,8 @@ export function liveMoveAnimationPresentation(
     case 173: {
       // prep25 Q2 / prep28: Snore (the user is asleep, so a known lend exists only behind planned sleep bodies: Sleep Powder + the sleep status animations).
       // No first-body gate: the registers follow the body history (firstBody false once any unit ran).
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3672,8 +3704,8 @@ export function liveMoveAnimationPresentation(
     }
     case 328: {
       // prep25 Q2: Sand Tomb through the SandTombAnimationProfile builder (no register input); lent order + non-shiny.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (lentOrder === null) return null;
@@ -3685,8 +3717,8 @@ export function liveMoveAnimationPresentation(
     }
     case 123: {
       // prep25 Q2: Smog. No WIN0 input (the BG control registers are S0 plus the monbg / split writes); lent order + non-shiny + composite.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3698,8 +3730,8 @@ export function liveMoveAnimationPresentation(
     }
     case 304: {
       // prep25 Q2: Hyper Voice. No register input; the lent order (any known history) and the assets-only composite are the inputs.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3720,7 +3752,7 @@ export function liveMoveAnimationPresentation(
       // pixels read besides the order is the battler x2 rest, so a later body declines unless both species rests are {0,0}.
       // Geometry from the anchors, every allocator/task/matrix field is the measured constant (both corpora, FLYGON/GOLEM, both sides).
       const unleash = (request.turn & 1) === 1;
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       if (!spriteOrderInput.firstBody && !spriteOrderInput.afterDigSetup && !liveBattlersRestFree(art)) return null;
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3875,8 +3907,8 @@ export function liveMoveAnimationPresentation(
       // docs/later-bodies-overheat-psychup.md), dense-exact after Tackle/Splash/Psychic/Growl+stat/Swords Dance+stat. A later
       // Overheat after an earlier Overheat has no order plan, so `known` declines it. Non-shiny (no shiny battle palette).
       // Everything else is the measured first-body constant set (liveBgSnapshotMoves.ts) + anchors + the assets-only composite.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       // doll90: a Psych Up target shown as the Substitute doll has gSubstituteDollPal in its OBJ bank (as Megahorn's monbg reads it);
       // identical to composeLiveArtPalettes when neither battler is the doll.
       const palettes = request.moveId === 244 ? composeLiveFieldPalettes(art) : composeLiveArtPalettes(art);
@@ -3918,8 +3950,8 @@ export function liveMoveAnimationPresentation(
       // composite palette are proven there (every dense fixture); non-shiny (no shiny battle palette); zero idle rests. Later bodies
       // (any known lend) are exact too: 12/12 lb26 fixtures after Tackle / Splash / Psychic / Growl+unit / Swords Dance+unit / Surf, both
       // sides (docs/later-bodies-curse-oam.md; the unfaded palette / known-entry allocator hold across those predecessors).
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3944,7 +3976,7 @@ export function liveMoveAnimationPresentation(
       // overwrite, and the only move sprite is the OBJ-window copy in the lowest free slot); tasks / registers / BG scroll /
       // palette from curseModel.ts; non-shiny (no shiny battle palette); zero idle rests (liveCurseStatsInputs).
       if ((request.turn & 1) !== 1 || !spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3970,7 +4002,7 @@ export function liveMoveAnimationPresentation(
       // Swords Dance / Surf bodies; the body length is the D4 policy's lag phase), non-shiny, zero idle rests. Hardware OAM + matrices from
       // the assembler; palette / BLDY / monbg / shake registers from the source schedule (liveOamMoves.ts livePursuitInputs).
       if ((request.turn & 1) !== 0 || !spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3997,7 +4029,7 @@ export function liveMoveAnimationPresentation(
       // (counter & 1) and the complex palette blend (liveFuryCutterBlendRows); nothing else of the previous body is read (Step2 restores
       // the palettes, the blend sprite is invisible). 40 / 40 ROM windows (counters 1..5, both sides, two pairs) 0 px. Without the payload
       // a later body keeps the later58 power rule (10 / 15 = counter 1).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const furyCutterCounter = request.rolloutCounter
         ?? (spriteOrderInput.firstBody || request.power === 10 || request.power === 15 ? 1 : undefined);
       if (furyCutterCounter !== 1 && furyCutterCounter !== 2 && furyCutterCounter !== 3 && furyCutterCounter !== 4
@@ -4009,7 +4041,7 @@ export function liveMoveAnimationPresentation(
         return rest.x2 === 0 && rest.y2 === 0; };
       if (!spriteOrderInput.firstBody
         && !(furyCutterCounter >= 2 ? restFree("player") && restFree("opponent") : liveBattlersRestFree(art))) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4026,9 +4058,9 @@ export function liveMoveAnimationPresentation(
       // stg107 (docs/stg107-struggle.md): Struggle, the forced move. Return's gates: any known lend (the known-entry allocator IMPACT /
       // MOVEMENT_WAVES tiles 305 / 321, palette slots 7 / 8, matrix 0 at every probed activation), non-shiny, a later body only with
       // zero idle rests (both ShakeMonInPlace tasks are relative to the battler's x2).
-      if (!spriteOrderInput?.known) return null;
-      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       // stf115: a battler shown as the Substitute doll has gSubstituteDollPal in its OBJ bank (doll90's Psych Up rule); identical to
       // composeLiveArtPalettes when neither battler is the doll.
       const palettes = composeLiveFieldPalettes(art);
@@ -4055,9 +4087,9 @@ export function liveMoveAnimationPresentation(
       // Strong (AnimTask_GetReturnPowerLevel on gAnimFriendship) decline.
       const returnLevel = returnPowerLevel(request.friendship);
       if (returnLevel !== 3 && returnLevel !== 0) return null;
-      if (!spriteOrderInput?.known) return null;
-      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4074,8 +4106,8 @@ export function liveMoveAnimationPresentation(
       // D4 faithful timing: Superpower (prep31 s1 / s3; liveSuperpowerInputs.ts). Known lend (the prep31 WEEZING player window follows a Tackle:
       // the renderer branch reads only registers the body writes, as Revenge), known-entry allocator (orb / meteor / rock tiles 305 / 537 / 433,
       // banks 7 / 8 / 9, matrix 0), non-shiny, zero idle rests. The monbg write row (10 | 11) is the policy's, per side.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4093,8 +4125,8 @@ export function liveMoveAnimationPresentation(
     case 255: {
       // Spit Up (prep31 s3): every Stockpile counter (request.turn 1..3), any known lend (the bodies follow Stockpile / Growl units; the
       // host's lent 64-slot order is the L input), known-entry allocator, non-shiny, zero idle rests. Registers never change (prep31 s2.1).
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4112,8 +4144,8 @@ export function liveMoveAnimationPresentation(
       // D4b faithful timing: Megahorn (prep24 s1.4; liveOamMoves.ts liveMegahornInputs). Known lend (the corpora follow a Tackle; any known lend:
       // the renderer branch reads no activation register the body does not overwrite), known-entry allocator (horn / impact tiles 305 / 313,
       // palette slots 7 / 8, matrices 0 / 3), non-shiny, the attacker's idle rest zero. Both CPU-phase bits come from the timing policy.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       // A defender shown as the Substitute doll: its OBJ bank holds the doll palette (the monbg draws the doll with it).
       const palettes = composeLiveFieldPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
@@ -4132,8 +4164,8 @@ export function liveMoveAnimationPresentation(
       // Shock Wave (prep33 s1 / s3 item 1; liveOamMoves.ts liveShockWaveInputs). Any known lend (the lent 64-slot order is the L input), known-entry
       // allocator (orb / circle / spark / lightning tiles 305 / 537 / 309 / 601), non-shiny, zero idle rests (the attacker's monbg origin and the
       // target ShakeMon x2 start from the sprite centre). The reducer derives its timing from the seam geometry (shockWaveTimingFor).
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4163,8 +4195,8 @@ export function liveMoveAnimationPresentation(
       // always follows an earlier body: the Hypnosis + SLP status history changes only the free tail, the occupied part equals the known entry;
       // the tracker's carried free order makes the 64-slot order exact), known-entry allocator (the clone takes slot 3), non-shiny, zero idle
       // rests (the ShakeMon x2 program starts from 0). Both CPU-phase bits come from the timing policy (lag at 149; BG-palette restore row).
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4189,8 +4221,8 @@ export function liveMoveAnimationPresentation(
       // the accepted opponent follows a Tackle), known-entry allocator (BLUE_RING tile 305, palette slot 7, matrices 1 / 2 held), non-shiny.
       // Psywave never moves a battler: the ring origin / destination are the X_2 / Y_PIC_OFFSET coordinates (not the sprite position), and the
       // battler OBJ keeps its idle rest (battlerObject; the accepted ONIX opponent target rests at a non-zero x2 / y2). The late lag is the policy's.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4215,7 +4247,7 @@ export function liveMoveAnimationPresentation(
       const rng = liveMovePresentationRngWords(presentationRngInput);
       if (rng === null || rng.words.length !== 114) return null;
       if (!spriteOrderInput?.known || (!spriteOrderInput.firstBody && !spriteAllocatorInput?.historyKnown)) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4247,8 +4279,8 @@ export function liveMoveAnimationPresentation(
       // over the known entry), non-shiny. Idle-rest battlers engage (species audit 12, ISSUES #152: ONIX / RATTATA attacker and target, both
       // sides, 0 px; the swap programs write absolute x2 / positions before any rest shows). Both CPU-phase bits come from the timing policy
       // (lag at 176; the display-neutral bank-2 restore row).
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4285,13 +4317,13 @@ export function liveMoveAnimationPresentation(
       // That phase is dominant only for a target whose first visible monbg line is >= 27 (SHUCKLE class): a higher-reaching target (GOLEM 18,
       // NUZLEAF / ESPEON 24, STANTLER / CROBAT 9) shows the split on rows where no S dominates, and declines. An ELEVATED opponent target
       // (CROBAT class) declines too: its residual is not the split alone (prep30's generated distortion window for elevation 6).
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const xsHistory = spriteOrderInput.firstBody ? [] : spriteOrderInput.scanlineHistory;
       const xsPlayerLater = !spriteOrderInput.firstBody && attacker.geometry.side === "player";
-      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return null;
+      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
       if (xsPlayerLater && (xsHistory === undefined || liveOpponentElevation(art.opponent.speciesSymbol) !== 0
-        || liveFieldArtTopLine(art.opponent) < EXTRASENSORY_PLAYER_LATER_MIN_TOP_LINE)) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+        || liveFieldArtTopLine(art.opponent) < EXTRASENSORY_PLAYER_LATER_MIN_TOP_LINE)) return declined(declineSink, "other:extrasensory-player-later-target");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const xsScanline = xsHistory === undefined ? FIRST_BODY_SCANLINE : liveScanlineEntry(FIRST_BODY_SCANLINE, xsHistory, (side) => art[side].speciesSymbol);
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
@@ -4314,8 +4346,8 @@ export function liveMoveAnimationPresentation(
     case 279: {
       // D4b faithful timing: Revenge (prep26 s2 / s4; liveOamMoves.ts liveRevengeInputs). Known lend (the accepted bodies are first bodies, the
       // alternates follow a Tackle), known-entry allocator, non-shiny, a zero TARGET idle rest (an attacker rest is exact, species audit 9). The monbg BGnCNT write row comes from the timing policy.
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4338,7 +4370,7 @@ export function liveMoveAnimationPresentation(
       // target's Y_PIC_OFFSET point (the accepted seam: opponent target = its sprite centre, player target = centre + 8).
       // The METEOR_MASH branch draws status-free healthboxes; the live view redraws both healthboxes (status icon included) over them,
       // and BG_COSMIC's fade targets BG3 + backdrop only, so a displayed status is exact (st76: docs/st76-status-gates.md, 8 windows 0 px).
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const words = liveMovePresentationRngWords(presentationRngInput)?.words;
       if (words === undefined || words.length !== 96) return null;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
@@ -4363,8 +4395,8 @@ export function liveMoveAnimationPresentation(
       // body's real-slot profile from liveDiveWordsPlan (the order carry's own allocation), the target impact anchor (B.1a). The diver
       // reveals itself (dive.ts attackerInvisible < 83; the hide ends with this body, applyLiveSemiInvulnerableCommand); an elevated
       // opponent diver declines (its enemy shadow's return is unmeasured).
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const side = attacker.geometry.side;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const a = attackerAnchors, t = targetAnchors;
@@ -4405,7 +4437,7 @@ export function liveMoveAnimationPresentation(
       // battle units, for any consumer); an unresolved marker leaves no lend and the body declines.
       const counter = liveIceBallCounter(request.rolloutCounter);
       if (counter === null || !spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const rng = liveMovePresentationRngWords(presentationRngInput);
       const palettes = composeLiveArtPalettes(art);
       if (rng === null || palettes === null) return null;
@@ -4468,8 +4500,8 @@ export function liveMoveAnimationPresentation(
       // Eruption (prep36 s2; liveProfileMoves.ts liveEruptionProfile): the Spikes gates (known lend, non-shiny, the assets-only composite) plus a
       // zero attacker idle rest (the launch task zeroes x2: an idle-rest attacker misses rows 0-20 / one launch row, prep36 s1.4; CAMERUPT, the
       // only Factory user, rests at 0). No first-body gate: the branch reads no BG / WIN register (prep36 s1.1).
-      if (!spriteOrderInput?.known) return null;
-      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
+      if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       if (attackerAnchors.frontIdleRest.x2 !== 0 || attackerAnchors.frontIdleRest.y2 !== 0) return null;
       const order = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -4482,7 +4514,7 @@ export function liveMoveAnimationPresentation(
     case 323: {
       // prep13 s1.2: the 64-entry activation order is the lent order (known entry + tracked history), pixel-relevant for the
       // painter ties; an unknown tracked order is not proven -> null.
-      if (!spriteOrderInput?.known) return null;
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const order = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
       if (order === null) return null;
