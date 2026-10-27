@@ -2258,6 +2258,57 @@ function containedPresentationCommand(state: BattleResolutionPresentationState):
   return segment.commands[state.commandIndex] ?? null;
 }
 
+/**
+ * contain213 (presentationContainment.ts "field"): a render view built inside tick() (the postwin / return-hold frozen scene). A
+ * throw from the ordinary view's guards falls back to the view without the current command's own presentation; a throw there is
+ * not contained.
+ */
+export function containedBattleResolutionRenderView(
+  state: BattleResolutionPresentationState,
+  what: string,
+): BattleResolutionPresentationRenderView {
+  try {
+    return createBattleResolutionPresentationRenderView(state);
+  } catch (error) {
+    recordContainedPresentationError("field", containedPresentationCommand(state)?.type ?? "view", error,
+      `${what}: ${presentationCommandDetail(state)}`);
+  }
+  return createBattleResolutionPresentationRenderView(state, null, true);
+}
+
+/**
+ * contain213 (presentationContainment.ts "field"): the displayed field a tick-side read takes from the render view (a continuation
+ * segment's boundary). On a throw: the field without the current command's own presentation, then the segment field with every
+ * completed command applied (a command whose application throws is skipped).
+ */
+export function containedBattleResolutionDisplayedField(
+  state: BattleResolutionPresentationState,
+  what: string,
+): BattleResolutionPresentationRenderView["field"] {
+  const record = (error: unknown) => recordContainedPresentationError("field",
+    containedPresentationCommand(state)?.type ?? "view", error, `${what}: ${presentationCommandDetail(state)}`);
+  try {
+    return createBattleResolutionPresentationRenderView(state).field;
+  } catch (error) {
+    record(error);
+  }
+  try {
+    return createBattleResolutionPresentationRenderView(state, null, true).field;
+  } catch (error) {
+    record(error);
+  }
+  let field = state.field;
+  const commands = state.segments[state.segmentIndex]?.commands ?? [];
+  for (let index = 0; index < Math.min(state.commandIndex, commands.length); index += 1) {
+    try {
+      field = applyCompletedCommand(field, commands[index]!);
+    } catch (error) {
+      record(error);
+    }
+  }
+  return field;
+}
+
 export function renderBattleResolutionPresentation(
   framebuffer: Uint8Array,
   state: BattleResolutionPresentationState,

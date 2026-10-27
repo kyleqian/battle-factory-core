@@ -41,6 +41,7 @@ import {
   type BattleIntroStringEntry,
 } from "../data/battleIntroStrings.ts";
 import { loadBattleScriptProgram } from "./battleScriptProgram.ts";
+import { recordContainedPresentationError } from "./presentationContainment.ts";
 import { substituteFadeDuration } from "./liveSubstituteFade.ts";
 import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
@@ -4991,6 +4992,86 @@ export function projectBattleResolutionCommands(
 }
 
 /**
+ * contain213 (presentationContainment.ts "commands"): a resolution segment's presentation commands. A throw while projecting the
+ * kernel receipt presents the span as containedResolutionSegmentCommands instead (the kernel's outcome is already decided).
+ */
+function projectResolutionSegmentCommands(
+  events: readonly BattleKernelSemanticEvent[],
+  beforeRules: BattleScriptRulesContext,
+  transition: BattleDecisionTransitionResult<FactoryFullTurnDecisionRules>,
+  field: BattleResolutionDisplayedField,
+  opponentTrainer: BattleResolutionOpponentTrainer | null,
+  usedMessageHoldFrames: number,
+  requestId: number,
+): readonly BattleResolutionPresentationCommand[] {
+  try {
+    return projectBattleResolutionCommands(
+      events,
+      beforeRules,
+      transition.state.rules.rulesContext,
+      field,
+      fieldAfter(transition),
+      opponentTrainer,
+      usedMessageHoldFrames,
+    );
+  } catch (error) {
+    let contained: readonly BattleResolutionPresentationCommand[];
+    try {
+      contained = containedResolutionSegmentCommands(events, beforeRules, transition.state.rules.rulesContext, field);
+    } catch {
+      throw error;
+    }
+    recordContainedPresentationError("commands", "segment", error,
+      `request ${requestId} events ${events[0]?.sequence ?? "-"}..${events.at(-1)?.sequence ?? "-"}`);
+    return contained;
+  }
+}
+
+/**
+ * contain213: the minimal command list of a span whose projection threw -- per active battler, a typed switch-in when the receipt
+ * changed its party slot (the display ledger and the forced send-out require one), else its HP bar / status icon moved to the
+ * kernel's endpoint; then a turn-end, which settles the display ledger to the rules boundary.
+ */
+function containedResolutionSegmentCommands(
+  events: readonly BattleKernelSemanticEvent[],
+  beforeRules: BattleScriptRulesContext,
+  afterRules: BattleScriptRulesContext,
+  field: BattleResolutionDisplayedField,
+): readonly BattleResolutionPresentationCommand[] {
+  const settled = createBattleCommandDisplayedField(afterRules);
+  const sceneOn = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
+  const eventSequence = events.at(-1)?.sequence ?? 0;
+  const commands: BattleResolutionPresentationCommand[] = [];
+  for (const battler of [0, 1] as const) {
+    const before = battler === 0 ? field.player : field.opponent;
+    const after = battler === 0 ? settled.player : settled.opponent;
+    const active = afterRules.battlers[battler]!;
+    if (before.partyIndex !== after.partyIndex) {
+      commands.push(Object.freeze({
+        type: "switch-in", eventSequence, battler,
+        fromPartyIndex: before.partyIndex, toPartyIndex: after.partyIndex,
+        incoming: after, incomingStatus1: active.status1,
+        timing: switchInTiming(battler, after.species, sceneOn, after.name, false, after.personality),
+        settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
+      }));
+      continue;
+    }
+    if (before.hp !== after.hp) {
+      commands.push(Object.freeze({
+        type: "hp", eventSequence, battler, from: before.hp, to: after.hp, healthValue: before.hp - after.hp, timing: HP_TIMING,
+      }));
+    }
+    if (before.status !== after.status) {
+      commands.push(Object.freeze({
+        type: "status-icon", eventSequence, battler, status1: active.status1, status2: active.status2, timing: STATUS_ICON_TIMING,
+      }));
+    }
+  }
+  commands.push(Object.freeze({ type: "turn-end", timing: TURN_END_TIMING }));
+  return Object.freeze(commands);
+}
+
+/**
  * The player-side forced-switch request a freshly published boundary is
  * waiting on, if any. Every resolution owner -- the fresh one and all three
  * continuation appenders -- derives its `forcedRequest` from its own pending
@@ -5048,14 +5129,14 @@ export function createBattleResolutionPresentation(
     beforeRules: input.beforeRules,
     afterRules: input.transition.state.rules,
     events,
-    commands: projectBattleResolutionCommands(
+    commands: projectResolutionSegmentCommands(
       events,
       input.beforeRules.rulesContext,
-      input.transition.state.rules.rulesContext,
+      input.transition,
       field,
-      fieldAfter(input.transition),
       input.opponentTrainer ?? null,
       input.usedMessageHoldFrames ?? 0,
+      input.sourceRequest.requestId,
     ),
   });
   const boundary = input.transition.state.boundary;
@@ -5343,13 +5424,14 @@ function appendResolutionSegment(
     beforeRules: resolution.pendingBattle.rules,
     afterRules: transition.state.rules,
     events: transition.events,
-    commands: projectBattleResolutionCommands(
+    commands: projectResolutionSegmentCommands(
       transition.events,
       resolution.pendingBattle.rules.rulesContext,
-      transition.state.rules.rulesContext,
+      transition,
       fieldBoundary,
-      fieldAfter(transition),
       resolution.opponentTrainer,
+      0,
+      resolution.resolutionId.requestId,
     ),
   });
 }
