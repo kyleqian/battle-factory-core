@@ -1412,6 +1412,22 @@ export function battleResolutionCommandFallbackDuration(command: BattleResolutio
   return Math.max(1, timing?.minimumFrames ?? 1);
 }
 
+function containedHistoryRead<T>(
+  what: string,
+  segment: ReturnType<typeof currentSegment>,
+  state: BattleResolutionPresentationState,
+  declined: T,
+  read: () => T,
+): T {
+  try {
+    return read();
+  } catch (error) {
+    const previous = segment.commands[state.commandIndex - 1];
+    recordContainedPresentationError("draw", previous?.type ?? "unknown", error, `${what}: ${presentationCommandDetail(state)}`);
+    return declined;
+  }
+}
+
 function presentationCommandDetail(state: BattleResolutionPresentationState): string {
   return `request ${state.resolutionId.requestId} segment ${state.segmentIndex} command ${state.commandIndex}`
     + ` ${state.lifecycle.phase} @${state.lifecycle.phaseElapsed}`;
@@ -2096,7 +2112,9 @@ export function createBattleResolutionPresentationRenderView(
     : null;
   // cf78: a displayed CASTFORM in a weather form (its slot's gBattleMonForms at this command) declines every live body.
   field = withLiveCastformForms(field, liveCastformFormsAt(state, command));
-  const tailSide = substituteSwapTailSideAt(state, segment, field);
+  // contain209: these two re-read an EARLIER live body; a throw there is that body's contained fault, and a declined body has
+  // neither a swap tail nor a post-body shadow hide.
+  const tailSide = containedHistoryRead("substitute swap tail", segment, state, null, () => substituteSwapTailSideAt(state, segment, field));
   const baseFieldArt = tailSide === null
     ? createBattleCommandFieldArtView(field)
     : substituteSwapTailFieldArt(createBattleCommandFieldArtView(field), tailSide);
@@ -2144,7 +2162,7 @@ export function createBattleResolutionPresentationRenderView(
             visibleCharacters,
           }),
     effect,
-    postBodyShadowHidden: postBodyShadowHiddenAt(state, segment),
+    postBodyShadowHidden: containedHistoryRead("post-body shadow", segment, state, false, () => postBodyShadowHiddenAt(state, segment)),
     visibility: Object.freeze({
       player: Object.freeze({
         sprite: (spriteVisibility.get(0) ?? true)
