@@ -156,11 +156,15 @@ describe("live prep2 move adapters", () => {
     expect(on.state.battle!.rng).toEqual(off.state.battle!.rng);
   }, 120000);
 
-  it("Explosion into a Substitute doll (route 17/35 FORRETRESS): the body declines to the fallback; ON/OFF rules and RNG equal", () => {
+  // apx215 (liveMovePlayback.ts approximate "substitute-doll"): Explosion has no proven defender-doll cell; the body is now drawn on the doll
+  // (approximate) instead of the static-field fallback.
+  it("Explosion into a Substitute doll (route 17/35 FORRETRESS): the body is drawn approximately on the doll; ON/OFF rules and RNG equal", () => {
     const on = generatedCommandAnimationReplay(17, "on", [0], 35, true);
     const off = generatedCommandAnimationReplay(17, "off", [0], 35, true);
     expect(on.requests.map((q) => `${q.moveId}:${q.attacker}->${q.target}`)).toEqual(["164:1->1", "153:0->1"]);
-    expect(on.animations.find(a => a.moveId === 153)).toBeUndefined();
+    const explosion = on.animations.find(a => a.moveId === 153)!;
+    expect(explosion).toBeDefined();
+    expect(explosion.adapterActive.filter(Boolean).length).toBeGreaterThan(explosion.adapterActive.length * 0.9);
     expect(on.stalled).toBe(true);
     expect(off.stalled).toBe(true);
     expect(rulesWithoutSceneMarker(on.state.battle as never)).toEqual(rulesWithoutSceneMarker(off.state.battle as never));
