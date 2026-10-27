@@ -12,9 +12,9 @@
 //   - "field": render-view reads inside tick() (containedBattleResolutionRenderView / containedBattleResolutionDisplayedField,
 //     battleResolutionPresentationRender.ts): the forced / action continuation's segment boundary field and the postwin /
 //     return-hold frozen scene. A throw from the view's guards (e.g. the HP endpoint) falls back to the view without the current
-//     command's own presentation (the field already displayed before it); the field read alone falls back once more to the
-//     segment field with every completed command applied, skipping any command whose application throws. A frozen scene whose
-//     command-less view throws too is not contained.
+//     command's own presentation (the field already displayed before it). Then the field read falls back to the segment field
+//     with every completed command applied (skipping any command whose application throws), and the frozen scene to none (null:
+//     the postwin renderer's existing black hold; postwin timing and state are unchanged).
 //   - "commands": turning a kernel receipt into presentation commands (projectResolutionSegmentCommands,
 //     battleResolutionPresentation.ts; the fresh resolution and every appended continuation segment). A throw presents the span as
 //     one typed switch-in per active battler whose party slot the receipt changed (the kernel's after-receipt snapshot; the

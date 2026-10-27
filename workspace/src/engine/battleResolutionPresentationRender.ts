@@ -2260,20 +2260,26 @@ function containedPresentationCommand(state: BattleResolutionPresentationState):
 
 /**
  * contain213 (presentationContainment.ts "field"): a render view built inside tick() (the postwin / return-hold frozen scene). A
- * throw from the ordinary view's guards falls back to the view without the current command's own presentation; a throw there is
- * not contained.
+ * throw from the ordinary view falls back to the view without the current command's own presentation, and if that throws too, to
+ * no frozen scene (null: the postwin renderer's existing black hold).
  */
 export function containedBattleResolutionRenderView(
   state: BattleResolutionPresentationState,
   what: string,
-): BattleResolutionPresentationRenderView {
+): BattleResolutionPresentationRenderView | null {
+  const record = (error: unknown) => recordContainedPresentationError("field",
+    containedPresentationCommand(state)?.type ?? "view", error, `${what}: ${presentationCommandDetail(state)}`);
   try {
     return createBattleResolutionPresentationRenderView(state);
   } catch (error) {
-    recordContainedPresentationError("field", containedPresentationCommand(state)?.type ?? "view", error,
-      `${what}: ${presentationCommandDetail(state)}`);
+    record(error);
   }
-  return createBattleResolutionPresentationRenderView(state, null, true);
+  try {
+    return createBattleResolutionPresentationRenderView(state, null, true);
+  } catch (error) {
+    record(error);
+  }
+  return null;
 }
 
 /**
