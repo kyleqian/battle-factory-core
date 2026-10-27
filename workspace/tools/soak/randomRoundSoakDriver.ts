@@ -1260,6 +1260,8 @@ export class ActionLog {
 
 export type SeedOutcome = "OK" | "CRASH" | "HANG";
 
+export type SoakScene = "on" | "off";
+
 export type SeedResult = {
   seed: number;
   outcome: SeedOutcome;
@@ -1284,6 +1286,8 @@ export type SeedResult = {
   errorOrigin?: string;
   /** thrown during "tick" or "render" */
   errorPhase?: string;
+  /** Battle Scene mode the seed ran under; present only when a run asked for one (`--scene on|both`). */
+  scene?: SoakScene;
   stackTop?: string[];
   signature?: string;
   lastActions?: string[];
@@ -2580,12 +2584,16 @@ function factorySymbolsCountForStartCarry(startCarry: number): 0 | 1 | 2 {
  * (a legal fresh challenge-0 draft off the walked cursor) instead of the
  * pinned anchor snapshot, so anchor-style sweeps can be varied too.
  */
-export function createStartCarryState(startCarry: number, rngWalk = 0): EngineState {
+export function createStartCarryState(
+  startCarry: number,
+  rngWalk = 0,
+  scene: SoakScene = "off",
+): EngineState {
   validateStartCarry(startCarry);
   if (!Number.isInteger(rngWalk) || rngWalk < 0) {
     throw new Error(`bad rngWalk: ${rngWalk} (want a non-negative integer)`);
   }
-  if (startCarry === 0 && rngWalk === 0) return createInitialState();
+  if (startCarry === 0 && rngWalk === 0) return createInitialState({ battleScene: scene });
   let bootRngValue = ANCHOR_RNG_VALUE;
   for (let step = 0; step < rngWalk; step += 1) bootRngValue = advanceRngValue(bootRngValue);
   const carry: FactoryCarry = Object.freeze({
@@ -2597,7 +2605,7 @@ export function createStartCarryState(startCarry: number, rngWalk = 0): EngineSt
   });
   const { generation, draftScreen } = generateFactoryChallengeDraft(carry, bootRngValue);
   return {
-    ...createInitialState(),
+    ...createInitialState({ battleScene: scene }),
     draftScreen,
     rngValue: generation.rngValue,
     factoryCarry: carry,
@@ -2624,6 +2632,14 @@ export type RunOptions = {
    * (`--vary-rng`'s per-seed RNG walk); ignore it for a fixed state.
    */
   stateFactory?: (seed: number) => EngineState;
+  /**
+   * Battle Scene mode. Absent = today's behaviour (Scene OFF, no `scene`
+   * field on the result). When set, the default initial state is built with
+   * it and the result carries it; a `stateFactory` must build matching
+   * states itself (the CLI does). `render(state)` is the same entry point
+   * the browser calls, so Scene ON draws the real battle-scene path.
+   */
+  scene?: SoakScene;
   /** Opt into read-only route diagnostics without changing ordinary results. */
   collectDiagnostics?: boolean;
   /**
@@ -2757,7 +2773,8 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const coverage = options.coverage ?? null;
   coverage?.beginSeed(seed);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy, coverage);
-  let state = options.stateFactory?.(seed) ?? createInitialState();
+  let state = options.stateFactory?.(seed)
+    ?? createInitialState(options.scene !== undefined ? { battleScene: options.scene } : {});
   let frame = 0;
   let firstEndState: string | null = null;
   let chainingCommitted = false;
@@ -2849,6 +2866,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
       lastActions: log.tail(15).map(
         (entry) => `f=${entry.frame} b${entry.battle} t${entry.turn} ${entry.what}`,
       ),
+      ...(options.scene !== undefined ? { scene: options.scene } : {}),
       ...extra,
     };
     return options.collectDiagnostics === true
