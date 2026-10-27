@@ -4364,7 +4364,112 @@ const drawExtractedTileBg: typeof drawExtractedTileBgBase = (fb, bg, ...rest) =>
   }
 };
 
+/**
+ * perf211: a 240x160 tile BG raster, compiled once per (tileset, tilemap, subpalettes) identity. `rgba` holds the opaque
+ * pixels exactly as `drawTileBgRaster` writes them; `runs` are [start, end) byte ranges of opaque pixels. The `*Refs`
+ * snapshot every input the raster read (visible entries, their tiles, the palette rows and their colors), so a reused
+ * array that was edited in place after compiling is detected and recompiled; tile pixels, entry fields and color
+ * channels are never mutated in src/.
+ */
+type CompiledTileBg = {
+  rgba: Uint8Array;
+  runs: Int32Array;
+  width: number;
+  entryRefs: (TilemapEntry | undefined)[];
+  tileRefs: (number[] | undefined)[];
+  rowRefs: (RgbColor[] | undefined)[];
+  colorRefs: (RgbColor | undefined)[][];
+};
+const TILE_BG_SEEN_ONCE = 0;
+const compiledTileBgs = new WeakMap<Tileset, WeakMap<Tilemap, WeakMap<RgbColor[][], CompiledTileBg | typeof TILE_BG_SEEN_ONCE>>>();
+
+function compileTileBg(tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): CompiledTileBg {
+  const rgba = new Uint8Array(240 * 160 * 4);
+  const opaque = new Uint8Array(240 * 160);
+  drawTileBgRaster(rgba, tileset, tilemap, subpalettes, opaque);
+  const runs: number[] = [];
+  for (let screenY = 0; screenY < 160; screenY += 1) {
+    let start = -1;
+    for (let screenX = 0; screenX <= 240; screenX += 1) {
+      const p = screenY * 240 + screenX;
+      if (screenX < 240 && opaque[p] === 1) {
+        if (start < 0) start = p;
+      } else if (start >= 0) {
+        runs.push(start * 4, p * 4);
+        start = -1;
+      }
+    }
+  }
+  const entryRefs: (TilemapEntry | undefined)[] = [];
+  const tileRefs: (number[] | undefined)[] = [];
+  for (let tileRow = 0; tileRow < 20; tileRow += 1) {
+    for (let tileCol = 0; tileCol < 30; tileCol += 1) {
+      const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+      entryRefs.push(entry);
+      tileRefs.push(entry ? tileset.tiles[entry.tile] : undefined);
+    }
+  }
+  const rowRefs = subpalettes.slice();
+  return {
+    rgba,
+    runs: Int32Array.from(runs),
+    width: tilemap.width,
+    entryRefs,
+    tileRefs,
+    rowRefs,
+    colorRefs: rowRefs.map((row) => row?.slice() ?? []),
+  };
+}
+
+function compiledTileBgCurrent(compiled: CompiledTileBg, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): boolean {
+  if (compiled.width !== tilemap.width || compiled.rowRefs.length !== subpalettes.length) return false;
+  for (let tileRow = 0, cell = 0; tileRow < 20; tileRow += 1) {
+    for (let tileCol = 0; tileCol < 30; tileCol += 1, cell += 1) {
+      const entry = tilemap.entries[tileRow * tilemap.width + tileCol];
+      if (entry !== compiled.entryRefs[cell]) return false;
+      if (entry && tileset.tiles[entry.tile] !== compiled.tileRefs[cell]) return false;
+    }
+  }
+  for (let row = 0; row < subpalettes.length; row += 1) {
+    const colors = subpalettes[row];
+    if (colors !== compiled.rowRefs[row]) return false;
+    if (!colors) continue;
+    const snapshot = compiled.colorRefs[row]!;
+    if (colors.length !== snapshot.length) return false;
+    for (let index = 0; index < colors.length; index += 1) if (colors[index] !== snapshot[index]) return false;
+  }
+  return true;
+}
+
 function drawTileBgBase(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): void {
+  let byTilemap = compiledTileBgs.get(tileset);
+  if (!byTilemap) compiledTileBgs.set(tileset, byTilemap = new WeakMap());
+  let byPalette = byTilemap.get(tilemap);
+  if (!byPalette) byTilemap.set(tilemap, byPalette = new WeakMap());
+  let compiled = byPalette.get(subpalettes);
+  if (compiled === undefined) {
+    // A palette built for one frame (fades, blends) is drawn directly; compile only inputs that come back.
+    byPalette.set(subpalettes, TILE_BG_SEEN_ONCE);
+    drawTileBgRaster(fb, tileset, tilemap, subpalettes);
+    return;
+  }
+  if (compiled === TILE_BG_SEEN_ONCE || !compiledTileBgCurrent(compiled, tileset, tilemap, subpalettes)) {
+    compiled = compileTileBg(tileset, tilemap, subpalettes);
+    byPalette.set(subpalettes, compiled);
+  }
+  const { rgba, runs } = compiled;
+  for (let index = 0; index < runs.length; index += 2) {
+    const start = runs[index]!;
+    const end = runs[index + 1]!;
+    if (end - start >= 64) {
+      fb.set(rgba.subarray(start, end), start);
+    } else {
+      for (let o = start; o < end; o += 1) fb[o] = rgba[o]!;
+    }
+  }
+}
+
+function drawTileBgRaster(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][], opaque?: Uint8Array): void {
   for (let screenY = 0; screenY < 160; screenY += 1) {
     const tileRow = Math.floor(screenY / 8);
     const inTileY = screenY % 8;
@@ -4382,6 +4487,7 @@ function drawTileBgBase(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subp
       const c = subpalettes[entry.palette]?.[idx];
       if (!c) continue;
       setPixel(fb, screenX, screenY, c);
+      if (opaque) opaque[screenY * 240 + screenX] = 1;
     }
   }
 }
