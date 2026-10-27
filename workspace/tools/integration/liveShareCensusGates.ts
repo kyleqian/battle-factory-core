@@ -56,7 +56,8 @@ function caseBlocks(fnNeedle: string): { labels: Map<number, number>; gates: Map
     // Single-line case-body consts (the case's own base indent) are evaluated before its gates when they only read scope values.
     const c = /^      const (\w+) = (.*);\s*$/.exec(text);
     if (c) consts.push({ name: c[1]!, expr: c[2]! });
-    if (text.includes("return null")) {
+    // apx210: a gate may also decline through `return declined(declineSink, "<reason>")` (same null result).
+    if (text.includes("return null") || text.includes("return declined(")) {
       let ifLine = n;
       while (ifLine > n - 5 && !lmaLines[ifLine - 1]!.includes("if (")) ifLine--;
       block.push({ line: n, cond: gateCondition(n), nested: !/^      (if \(|\S)/.test(lmaLines[ifLine - 1]!) || /^      [}\]]/.test(lmaLines[ifLine - 1]!),
@@ -69,7 +70,7 @@ function caseBlocks(fnNeedle: string): { labels: Map<number, number>; gates: Map
 /** The `if (COND) return null` condition ending on line n (joined over up to 4 earlier lines), or null (unconditional). */
 function gateCondition(n: number): string | null {
   const joined = lmaLines.slice(Math.max(0, n - 5), n).join(" ");
-  const at = joined.lastIndexOf("return null");
+  const at = Math.max(joined.lastIndexOf("return null"), joined.lastIndexOf("return declined("));
   const head = joined.slice(0, at).trimEnd();
   if (!head.endsWith(")")) return null;
   let depth = 0;
@@ -83,9 +84,9 @@ const DURATION = caseBlocks("export function liveMoveAnimationDuration(");
 const PRESENTATION = caseBlocks("export function liveMoveAnimationPresentation(");
 const PRESENT_DURATION_GATE = lineOf(lmaLines, "if (liveMoveAnimationDuration(request, field) === null) return null;", PRESENTATION.start - 80);
 // hide66: the hidden-target gate right after the duration gate (liveMoveHiddenTargetDeclines).
-const PRESENT_HIDDEN_TARGET_GATE = lineOf(lmaLines, "if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return null;", PRESENTATION.start - 80);
+const PRESENT_HIDDEN_TARGET_GATE = lineOf(lmaLines, "if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return ", PRESENTATION.start - 80);
 // cf78: the Castform weather-form gate right after it (liveCastformFormDeclines).
-const PRESENT_CASTFORM_GATE = lineOf(lmaLines, "if (liveCastformFormDeclines(field, request)) return null;", PRESENTATION.start - 80);
+const PRESENT_CASTFORM_GATE = lineOf(lmaLines, "if (liveCastformFormDeclines(field, request)) return ", PRESENTATION.start - 80);
 const SWAP_APPLIES = lineOf(swapLines, "export function liveSubstituteSwapApplies(");
 const SWAP_SELF = lineOf(swapLines, "return (request.target === request.attacker", SWAP_APPLIES);
 const SWAP_BOTH = lineOf(swapLines, "battlerOf(field, request.target).substituteDoll !== true", SWAP_APPLIES);
