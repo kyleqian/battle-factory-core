@@ -4416,6 +4416,14 @@ const liveSubstituteDollSides = { player: false, opponent: false };
  * form's frame + castformPalette[form] (src/assets/gen/castform-forms.json) for it.
  */
 const liveCastformFormSides: { player: number | undefined; opponent: number | undefined } = { player: undefined, opponent: undefined };
+/**
+ * apx217 (liveTransform.ts, approximate "transform"): the copied species and transform palette of a side shown transformed during a
+ * live body (armed by renderBattleResolutionLiveView from the field art: HandleSpeciesGfxDataChange's blended palette stays for the
+ * battler's stay): the side's species sheet map returns that species' sheet with the transform palette (liveShownFormSheets).
+ */
+const liveTransformSides: { player: LiveTransformSheetOverride | undefined; opponent: LiveTransformSheetOverride | undefined } =
+  { player: undefined, opponent: undefined };
+type LiveTransformSheetOverride = Readonly<{ species: string; palette: readonly RgbColor[] }>;
 
 export function drawTileBg(fb: Uint8Array, tileset: Tileset, tilemap: Tilemap, subpalettes: RgbColor[][]): void {
   drawTileBgBase(fb, tileset, tilemap, subpalettes);
@@ -15173,9 +15181,16 @@ function liveHiddenBattlerArt<T extends LiveHiddenBattlerSheet>(art: T): T {
 
 /**
  * cast83: a species sheet map whose CASTFORM entry is the side's armed weather form (liveCastformFormSides; the player side reads only
- * the back sheets, the opponent only the front sheets), or the map itself when the side has no form armed.
+ * the back sheets, the opponent only the front sheets), or the map itself when the side has no form armed. apx217: a side armed
+ * transformed (liveTransformSides) reads its copied species' sheet with the transform palette instead.
  */
-function liveCastformFormSheets<T extends object>(sheets: T, side: "player" | "opponent"): T {
+function liveShownFormSheets<T extends object>(sheets: T, side: "player" | "opponent"): T {
+  const transform = liveTransformSides[side];
+  if (transform !== undefined) {
+    const own = Reflect.get(sheets, transform.species) as object | undefined;
+    const sheet = own === undefined ? undefined : { ...own, palette: transform.palette };
+    return new Proxy(sheets, { get: (target, key) => (key === transform.species ? sheet : Reflect.get(target, key)) });
+  }
   const form = liveCastformFormSides[side];
   if (form === undefined) return sheets;
   const art = (castformFormsAsset as unknown as { forms: readonly { front: unknown; back: unknown }[] }).forms[form];
@@ -15203,8 +15218,8 @@ function liveSceneOnBattlerSheet(battler: { species: string; geometry: { side: "
   const doll = liveSubstituteDollArt(battler.geometry.side);
   if (doll) return doll;
   const source = battler.geometry.side === "player"
-    ? (liveCastformFormSheets(battleBackSpritesAsset, "player") as Record<string, BattleBackSpriteAsset>)[battler.species]
-    : (liveCastformFormSheets(opponentFrontSpritesAsset, "opponent") as Record<string, OpponentFrontSpriteAsset>)[battler.species];
+    ? (liveShownFormSheets(battleBackSpritesAsset, "player") as Record<string, BattleBackSpriteAsset>)[battler.species]
+    : (liveShownFormSheets(opponentFrontSpritesAsset, "opponent") as Record<string, OpponentFrontSpriteAsset>)[battler.species];
   if (!source) throw new Error(`missing live animation art for ${battler.species}`);
   return {
     ...source,
@@ -15226,11 +15241,11 @@ export function renderSceneOnMovePresentation(
     return hiddenSides[battler.geometry.side] ? liveHiddenBattlerArt(art) : art;
   };
   const battleBackSpritesAsset = hiddenSides.player
-    ? liveHiddenBattlerSheets(liveCastformFormSheets(battlerBackSheets, "player"))
-    : liveCastformFormSheets(battlerBackSheets, "player");
+    ? liveHiddenBattlerSheets(liveShownFormSheets(battlerBackSheets, "player"))
+    : liveShownFormSheets(battlerBackSheets, "player");
   const opponentFrontSpritesAsset = hiddenSides.opponent
-    ? liveHiddenBattlerSheets(liveCastformFormSheets(battlerFrontSheets, "opponent"))
-    : liveCastformFormSheets(battlerFrontSheets, "opponent");
+    ? liveHiddenBattlerSheets(liveShownFormSheets(battlerFrontSheets, "opponent"))
+    : liveShownFormSheets(battlerFrontSheets, "opponent");
   if (state.config.move === "WATER_SPOUT") {
     const waterSpoutState = state as SceneOnMovePresentationState<SceneOnWaterSpoutConfig>;
     const view = sceneOnWaterSpoutView(waterSpoutState);
@@ -55701,6 +55716,15 @@ function renderLiveTransformBody(
   }
 }
 
+/** apx217: a side shown transformed (not as the doll): its copied species and the field art's transform palette. */
+function liveTransformSheetOverride(
+  view: BattleResolutionPresentationRenderView, side: "player" | "opponent",
+): LiveTransformSheetOverride | undefined {
+  const battler = view.field[side];
+  if (battler.transform === undefined || battler.substituteDoll === true) return undefined;
+  return Object.freeze({ species: view.fieldArt[side].speciesSymbol, palette: view.fieldArt[side].pic.palette });
+}
+
 /** Live queue owns messages/HP/menu; the move compositor owns only its body. */
 export function renderBattleResolutionLiveView(
   fb: Uint8Array, view: BattleResolutionPresentationRenderView,
@@ -55743,6 +55767,8 @@ export function renderBattleResolutionLiveView(
   liveSubstituteDollSides.opponent = view.field.opponent.substituteDoll === true;
   liveCastformFormSides.player = view.fieldArt.player.castformForm;
   liveCastformFormSides.opponent = view.fieldArt.opponent.castformForm;
+  liveTransformSides.player = liveTransformSheetOverride(view, "player");
+  liveTransformSides.opponent = liveTransformSheetOverride(view, "opponent");
   // SpriteCB_EnemyShadow (battle_gfx_sfx_util.c:1214) also hides the shadow of an `invisible` battler sprite (hide66).
   // shadow105: a lead > 0 command's row 0 is the ROM's activation row, whose OAM still shows the shadow (the hide shows from row 1).
   liveOpponentShadow.species = effect?.type === "move" && view.field.opponent.hp !== 0 && !subbedOpponentAttacker
@@ -55759,6 +55785,8 @@ export function renderBattleResolutionLiveView(
     liveSubstituteDollSides.opponent = false;
     liveCastformFormSides.player = undefined;
     liveCastformFormSides.opponent = undefined;
+    liveTransformSides.player = undefined;
+    liveTransformSides.opponent = undefined;
   }
   // Encore's hardware fade targets OBJ as well as BG3. The live seam
   // replaces the staged healthboxes below with their controller-owned

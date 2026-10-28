@@ -24,7 +24,7 @@ import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { liveMovePlaybackClassification, liveMovePlaybackCode } from "../../src/engine/liveMovePlayback.ts";
 
 export type Apx217Strip = { seed: number; moveId: number; attacker: number; code: string; rows: number; nonStaticRows: number; sha256: string;
-  frames: Uint8Array[] };
+  frames: Uint8Array[]; staticFrame: Uint8Array | null };
 
 /** The census battle of `seed` up to the end of the first approx (moveId, attacker) command; null when none is reached. */
 export function apx217Strip(seed: number, moveId: number, attacker: number, codePrefix = "approx:transform",
@@ -38,7 +38,7 @@ export function apx217Strip(seed: number, moveId: number, attacker: number, code
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;
   let target: unknown = null, seen: unknown = null, code = "", done = false, commandCount = 0;
-  const frames: Uint8Array[] = []; let nonStatic = 0;
+  const frames: Uint8Array[] = []; let nonStatic = 0; let staticFrame: Uint8Array | null = null;
   const hash = createHash("sha256");
   const live = new Uint8Array(240 * 160 * 4), still = new Uint8Array(240 * 160 * 4);
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
@@ -69,6 +69,7 @@ export function apx217Strip(seed: number, moveId: number, attacker: number, code
       hash.update(live);
       if (!Buffer.from(live).equals(Buffer.from(still))) nonStatic += 1;
       frames.push(Uint8Array.from(live));
+      staticFrame ??= Uint8Array.from(still);
     }
     if (!owned()) ended = true;
   };
@@ -106,7 +107,7 @@ export function apx217Strip(seed: number, moveId: number, attacker: number, code
     until(() => phase() === "action-menu");
   }
   return target === null ? null
-    : { seed, moveId, attacker, code, rows: frames.length, nonStaticRows: nonStatic, sha256: hash.digest("hex"), frames };
+    : { seed, moveId, attacker, code, rows: frames.length, nonStaticRows: nonStatic, sha256: hash.digest("hex"), frames, staticFrame };
 }
 
 /** RGB PNG of every `every`-th frame (RGBA 240x160) in a `columns`-wide grid, 1x. */
@@ -138,6 +139,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const strip = apx217Strip(Number(arg("seed")), Number(arg("move")), Number(arg("attacker")), arg("code") ?? "approx:transform");
   if (strip === null) { console.error("no command with that code reached"); process.exit(1); }
   writeFileSync(arg("out")!, apx217StripPng(strip.frames));
-  const { frames: _f, ...summary } = strip;
+  // --static-out: the command's first static-hold row (the Scene OFF view), for comparison.
+  if (arg("static-out") && strip.staticFrame) writeFileSync(arg("static-out")!, apx217StripPng([strip.staticFrame]));
+  const { frames: _f, staticFrame: _s, ...summary } = strip;
   console.log(JSON.stringify(summary));
 }
