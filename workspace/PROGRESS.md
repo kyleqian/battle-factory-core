@@ -5,9 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-27 / 28 — CAX31 daily run (supervisor, Opus 5.5): sfa214 + apx215 + play216 folded; apx217 running
+## 2026-10-27 / 28 — CAX31 daily run (supervisor, Opus 5.5): sfa214 + apx215 + play216 + apx217 folded
 
-- **State:** master `ee22a664f`+ (src = tested tree `1d25251b6`).
+- **State:** master `f5f8c945e`+ (src = worker-tested `d8ebb1239`).
 - **Folded:** sfa214 (Summary-screen crashes found by browser random play). Supervisor finished the cut-off branch: merged
   master, added `appRoute` to its 5 new compare traces (the only red test). Gates on `b28ebe50a`: typecheck 0; full suite
   **1,705 files / 14,121 tests, 0 failed**; build 0; the 18 saved random-play sessions replay clean with `--render`;
@@ -28,7 +28,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Found:** RETIRE -> YES after a win draws the Lobby arrival but the state never leaves the post-win question (no
   `factoryTerminal`, never `lobbyFreeRoam`): a player hang. Brief `.integration/validation/sv-20261027/ret218.txt` queued.
 - **Soak (Scene ON, `--policy full --vary-rng`, seeds 0:30, render every 8, on `ee22a664f`):** **30 / 30 OK**, 0 CRASH / 0 HANG.
-- **Running:** apx217 (name the 13 unattributed static gates; Transform 33 -> approximate). Evidence `.integration/validation/sv-20261027/`.
+- **Folded:** apx217: the 13 unattributed static gates named (Sand-Attack / Hyper Beam / Curse / Water Pulse -> sprite-order-unknown,
+  Seismic Toss -> other:seismic-toss-damage-branch, Fury Cutter -> other:later-body-idle-rest); bodies with a transformed battler
+  draw from the copied species' art (approximate). Worker on `d8ebb1239`: full suite 1,707 files / 14,130 tests 0 failed, build 0,
+  differential 641 / 641, census OFF 1,000 / 1,000. Supervisor (union `cfa1242c0`, same src): typecheck 0, build 0, new tests;
+  independent census ON: 7 battles changed, 0 digest / error mismatch. **Scene ON static 133 -> 102 (sprite-order-unknown 26,
+  castform 18, extrasensory 17, endeavor 12, no-adapter 11, turn-0 7, idle-rest 4, hidden 3, allocator 3, seismic 1);
+  approximate 105 (substitute 74, transform 31); unnamed 0.** Magic Coat x2 in seed 197 moved transform -> allocator-unknown.
+- **Browser goal play on `91984abfe` (10 min / scene, seed 7):** ON 29 battles / 16 swap screens, OFF 46 / 19, 0 errors.
+- **Running:** ret218 (RETIRE-YES hand-off), apx219 (sprite-order-unknown + allocator-unknown -> approximate; two workers this
+  time, census at 2 jobs). Evidence `.integration/validation/sv-20261027/`.
 ---
 
 ## 2026-10-26 / 27 — CAX31 session wind-down (supervisor, Opus 5.5): finish plan Phase 1 tooling + containment; Phase 2 plumbing
