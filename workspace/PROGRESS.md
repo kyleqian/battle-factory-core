@@ -5,6 +5,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-28 / 29 — CAX31 daily run (supervisor, Opus 5.5) — in progress
+
+- **State:** master `a21dd5f89` (apx219 + apx220 folded, fast-forward: master tree == worker-tested tree).
+- **Folded:** apx219 + apx220 (sprite-order-unknown 26 + allocator-unknown 3 -> approximate, known-entry first-action input).
+  Worker (Sonnet, branch `worker/integration-20261028-213053`): clean merge of master; typecheck 0; full suite 1,754 files: 1,708
+  passed / 2 failed -> both re-pinned (liveDiveSetupAdapter, liveWallMoveAdapters: decline pins now read
+  `liveMoveAnimationPresentationProven`), rerun 30 / 30; build 0; differential 641 / 641. Supervisor: OFF census 0..999 shards
+  **byte-identical** to `census-apx215/off-1d25251b6` (the `lsd194CensusDelta.py` OFF FAIL is a tool misfire on identical data);
+  ON delta vs `census-apx217/on-cfa1242c0`: 10 battles changed, **bad 0**, only field [21]; the 3 touched test files 30 / 30;
+  Sand-Attack strip eyeballed. **Scene ON static 102 -> 73**, approximate 134. Evidence `.integration/validation/sv-20261028/`.
+- **Next:** apx221 (castform-form, extrasensory later target, endeavor-power, later-body idle rest, seismic toss -> approximate).
+---
+
 ## 2026-10-27 / 28 — CAX31 daily run wind-down (supervisor, Opus 5.5): sfa214, apx215, play216, apx217, ret218 folded; apx219 unfolded
 
 - **State:** master `3f6754b25`+ (final src = apx217 + ret218 union `6201dc8e9`). **Final gates on `9fb159322` (same src): typecheck 0;
