@@ -4,6 +4,7 @@ import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimati
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
 import {
   LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveSubstituteDollDeclines,
+  liveMoveSubstituteDollUnproven,
 } from "../src/engine/liveMoveAnimation.ts";
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../src/engine/liveMoveSpriteAllocator.ts";
 import { LIVE_SUBSTITUTE_SWAP_BODY_CELLS, liveSubstituteSwapApplies, substituteSwapCompositeDuration } from "../src/engine/liveSubstituteSwap.ts";
@@ -50,11 +51,13 @@ describe("sdl119: Struggle 165 Substitute-doll cells", () => {
     }
   });
 
-  it("both battlers shown as dolls still decline", () => {
+  // apx215: unproven, now approximate (the swaps around the body on the defender's doll, liveSubstituteSwapApplies).
+  it("both battlers shown as dolls are unproven (approximate swaps)", () => {
     for (const attacker of [0, 1] as const) {
       const field = displayed("SNORLAX", "GOLBAT", { playerDoll: true, opponentDoll: true });
-      expect(liveMoveSubstituteDollDeclines(request(attacker), field)).toBe(true);
-      expect(liveMoveAnimationDuration(request(attacker), field)).toBeNull();
+      expect(liveMoveSubstituteDollUnproven(request(attacker), field)).toBe(true);
+      expect(liveMoveSubstituteDollDeclines(request(attacker), field)).toBe(false);
+      expect(liveMoveAnimationDuration(request(attacker), field)).toBe(attacker === 0 ? 197 : 193);
     }
   });
 

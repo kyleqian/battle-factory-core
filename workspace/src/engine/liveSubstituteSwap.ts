@@ -23,6 +23,7 @@ import type { BattleResolutionPresentationRenderView } from "./battleResolutionP
 import { applyLiveBattlerX2Event, liveMoveBattlerX2Input, type LiveBattlerX2History, type LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { liveBattlerAnchors, liveCastformFormDeclines, liveMoveAnimationDuration, liveSingBodyRows } from "./liveMoveAnimation.ts";
 import { liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
+import { LIVE_MOVE_APPROXIMATE_POLICY } from "./liveMovePlayback.ts";
 
 type Side = "player" | "opponent";
 
@@ -193,13 +194,31 @@ export function substituteSwapBodyField(
 }
 
 /**
- * Whether a move-animation request is presented with the swaps: the attacker is displayed as the doll, the target is not,
+ * Whether a move-animation request is presented with the swaps (apx215: proven or approximate). Proven cells:
+ * liveSubstituteSwapProven. While LIVE_MOVE_APPROXIMATE_POLICY["substitute-doll"] is "approximate", every other subbed-attacker
+ * body that is the last (or only) hit is presented with the swaps too, by the source rule the proven cells follow (*DoMoveAnimation
+ * runs SUBSTITUTE_TO_MON / MON_TO_SUBSTITUTE around any body while behindSubstitute, whatever the move, turn or target): an unproven
+ * (move, side) cell, a target shown as the doll too (the body then runs on the target's doll, as the defender-doll cells draw it), a
+ * self-target body outside LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS, Solar Beam's fire turn, a shiny battler (drawn with the field art's
+ * palette). Not a multi-hit body's earlier hit (the swap-back runs only on the last; which hit swapped in is not tracked): it declines.
+ * Null = not a subbed-attacker body.
+ */
+export function liveSubstituteSwapApplies(
+  request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
+): boolean | null {
+  const proven = liveSubstituteSwapProven(request, field);
+  if (proven !== false || LIVE_MOVE_APPROXIMATE_POLICY["substitute-doll"] !== "approximate") return proven;
+  return !(request.multihit >= 2);
+}
+
+/**
+ * Whether a move-animation request is presented with the PROVEN swaps: the attacker is displayed as the doll, the target is not,
  * the body is proven, it is the last (or only) hit, and neither battler is shiny. Null = not a subbed-attacker body.
  * Shiny: the ROM brings the mon back from the doll in its shiny palette, but the swap rows (Scene OFF field art) and the body art
  * have no shiny palette (docs/live-species-audit-13.md defect 2: shiny STEELIX 133k..322k px), so the swaps decline as the other
  * S10A adapters' shiny gates do (both battlers).
  */
-export function liveSubstituteSwapApplies(
+export function liveSubstituteSwapProven(
   request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
 ): boolean | null {
   if (battlerOf(field, request.attacker).substituteDoll !== true) return null;

@@ -4,7 +4,7 @@ import type { BattleResolutionDisplayedField } from "../src/engine/battleResolut
 import { createBattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
 import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveMoveAnimationDuration, liveMoveAnimationPresentation,
-  liveMoveSubstituteDollDeclines,
+  liveMoveSubstituteDollDeclines, liveMoveSubstituteDollUnproven,
 } from "../src/engine/liveMoveAnimation.ts";
 import { generatedCommandAnimationReplay } from "../tools/integration/generatedCommandAnimationReplay.ts";
 
@@ -12,13 +12,18 @@ import { generatedCommandAnimationReplay } from "../tools/integration/generatedC
 // defender or attacker is the Substitute doll, except the proven defender-doll cells (prep38, LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS,
 // tests/substituteDollDefenderLive.test.ts) and the attacker swaps (tests/substituteSwapPresentation.test.ts). Routes from tools/integration/substRouteScan.ts over the
 // r3ProfileRouteSearch.ts 164 16 1 4000 candidates (rentals[0] knows Substitute; turn 1 = Substitute, then slot + 1).
+// apx215 (liveMovePlayback.ts approximate "substitute-doll"): the bodies outside the proven cells (`unproven`, the old static hold) are now
+// drawn approximately (the swaps around a subbed attacker's body, the body on a defender's doll): `declined` is false for every one.
 const withoutDolls = (f: BattleResolutionDisplayedField): BattleResolutionDisplayedField => {
   const { substituteDoll: _p, ...player } = f.player;
   const { substituteDoll: _o, ...opponent } = f.opponent;
   return { player, opponent };
 };
 
-type Seen = { request: string; direction: "attacker" | "defender" | null; provenCell: boolean; declined: boolean; liveWithoutDoll: boolean; ages: number };
+type Seen = {
+  request: string; direction: "attacker" | "defender" | null; provenCell: boolean; unproven: boolean; declined: boolean; liveWithoutDoll: boolean;
+  ages: number;
+};
 function route(seed: number, streak: number, slots: readonly (0 | 1 | 2 | 3)[], scene: "on" | "off") {
   const seen: Seen[] = [];
   let key = "";
@@ -38,6 +43,7 @@ function route(seed: number, streak: number, slots: readonly (0 | 1 | 2 | 3)[], 
         direction: doll(a.attacker) ? "attacker" : doll(a.target) ? "defender" : null,
         provenCell: !doll(a.attacker) && a.target !== a.attacker
           && (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS.get(a.moveId) ?? []).includes(a.attacker === 0 ? "player" : "opponent"),
+        unproven: liveMoveSubstituteDollUnproven(a, view.field),
         declined: liveMoveAnimationDuration(a, view.field) === null,
         liveWithoutDoll: liveMoveAnimationDuration(a, withoutDolls(view.field)) !== null,
         ages: 0,
@@ -70,7 +76,7 @@ function expectParity(on: ReturnType<typeof route>["run"], off: ReturnType<typeo
 }
 
 describe("live adapters decline while the Substitute doll is shown", () => {
-  it("unit: either side flagged declines every request direction (duration and presentation) outside the proven defender cells", () => {
+  it("unit: either side flagged is unproven in every request direction outside the proven defender cells (apx215: drawn approximately)", () => {
     const { run } = route(11, 35, [3], "on");
     const mon = run.state.battleCommandPresentation!.field;
     const plain = withoutDolls(mon);
@@ -86,11 +92,11 @@ describe("live adapters decline while the Substitute doll is shown", () => {
         const defenderDoll = (flagged === "player") !== (attacker === 0);
         // Sludge Bomb (188) is a proven defender-doll cell on both sides (prep38); Headbutt (29) is not.
         for (const moveId of defenderDoll ? [29] : [188, 29]) {
-          expect(liveMoveSubstituteDollDeclines(req(attacker, moveId), field)).toBe(true);
-          expect(liveMoveAnimationDuration(req(attacker, moveId), field)).toBeNull();
-          expect(liveMoveAnimationPresentation(req(attacker, moveId), field, 0)).toBeNull();
+          expect(liveMoveSubstituteDollUnproven(req(attacker, moveId), field)).toBe(true);
+          expect(liveMoveSubstituteDollDeclines(req(attacker, moveId), field)).toBe(false);
+          expect(liveMoveAnimationDuration(req(attacker, moveId), field)).not.toBeNull();
         }
-        if (defenderDoll) expect(liveMoveSubstituteDollDeclines(req(attacker), field)).toBe(false);
+        if (defenderDoll) expect(liveMoveSubstituteDollUnproven(req(attacker), field)).toBe(false);
       }
     }
   }, 240000);
@@ -110,12 +116,17 @@ describe("live adapters decline while the Substitute doll is shown", () => {
     const off = route(seed, streak, slots, "off");
     const hit = on.seen.find((s) => s.request === request && s.direction === (direction === "swapped" ? "attacker" : direction))!;
     expect(hit).toBeDefined();
-    expect(hit.declined).toBe(direction === "swapped" ? false : !hit.provenCell);
+    expect(hit.unproven).toBe(direction === "swapped" ? false : !hit.provenCell);
+    expect(hit.declined).toBe(false);
     expect(hit.provenCell).toBe(direction === "defender");
     // The same request with the doll removed would have been live: the decline is the doll's.
     expect(hit.liveWithoutDoll).toBe(true);
-    // Every doll-involved body outside the proven defender cells declined; every other live body is unaffected by the gate.
-    for (const s of on.seen) expect(s.direction === null ? true : direction === "swapped" ? s.declined === (s.ages === 32) : s.declined === !s.provenCell).toBe(true);
+    // Every doll-involved body outside the proven defender cells is unproven (the fire turns of the swapped route too), and drawn (apx215).
+    for (const s of on.seen) {
+      if (direction !== "swapped") expect(s.direction === null || s.unproven === !s.provenCell).toBe(true);
+      if (s.direction !== null && s.liveWithoutDoll) expect(s.declined).toBe(false);
+    }
+    if (direction === "swapped") expect(on.seen.some((s) => s.direction === "attacker" && s.unproven)).toBe(true);
     expect(on.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(off.run.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expectParity(on.run, off.run);

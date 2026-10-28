@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../src/engine/battleResolutionPresentation.ts";
-import { LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveMoveAnimationDuration, liveMoveSubstituteDollDeclines } from "../src/engine/liveMoveAnimation.ts";
+import {
+  LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS, liveMoveAnimationDuration, liveMoveSubstituteDollDeclines, liveMoveSubstituteDollUnproven,
+} from "../src/engine/liveMoveAnimation.ts";
 import {
   LIVE_SUBSTITUTE_SWAP_BODY_CELLS, LIVE_SUBSTITUTE_SWAP_BODY_FRAMING, LIVE_SUBSTITUTE_SWAP_SELF_TARGET_IDS, liveSubstituteSwapApplies,
+  liveSubstituteSwapProven,
 } from "../src/engine/liveSubstituteSwap.ts";
 
 // land82 (docs/land82-doll-cells.md): the 13 doll81 (move, side) cells. Evidence: tools/integration/fixtures/doll81/,
@@ -28,8 +31,9 @@ describe("land82: doll81 Substitute-doll cells", () => {
     for (const [id, sides] of cells) expect([...LIVE_SUBSTITUTE_SWAP_BODY_CELLS.get(id)!]).toEqual(sides);
     for (const [id, sides] of cells) for (const side of ["player", "opponent"] as const) {
       const a = side === "player" ? 0 : 1;
-      expect(liveSubstituteSwapApplies(req(id, a, id === 241 ? { target: a } : {}), attackerDoll(a))).toBe(sides.includes(side));
-      if (!sides.includes(side) && id !== 241) expect(liveMoveAnimationDuration(req(id, a), attackerDoll(a))).toBeNull();
+      // apx215: the proven rule is liveSubstituteSwapProven; the unproven side is presented approximately with the swaps.
+      expect(liveSubstituteSwapProven(req(id, a, id === 241 ? { target: a } : {}), attackerDoll(a))).toBe(sides.includes(side));
+      if (!sides.includes(side) && id !== 241) expect(liveMoveSubstituteDollUnproven(req(id, a), attackerDoll(a))).toBe(true);
     }
   });
   it("framings: GrassWhistle 221/0, Lovely Kiss 153/0, Sing 246/0", () => {
@@ -50,12 +54,14 @@ describe("land82: doll81 Substitute-doll cells", () => {
       }
     }
   });
-  it("SolarBeam turn gate: the charge turn (t0) swaps, the fire turn (t1) declines", () => {
+  it("SolarBeam turn gate: the charge turn (t0) swaps, the fire turn (t1) is unproven (apx215: approximate swaps)", () => {
     for (const a of [0, 1] as const) {
       expect(liveSubstituteSwapApplies(req(76, a, { turn: 0 }), attackerDoll(a))).toBe(true);
       expect(liveMoveAnimationDuration(req(76, a, { turn: 0 }), attackerDoll(a))).not.toBeNull();
-      expect(liveSubstituteSwapApplies(req(76, a, { turn: 1 }), attackerDoll(a))).toBe(false);
-      expect(liveMoveAnimationDuration(req(76, a, { turn: 1 }), attackerDoll(a))).toBeNull();
+      expect(liveSubstituteSwapProven(req(76, a, { turn: 1 }), attackerDoll(a))).toBe(false);
+      expect(liveMoveSubstituteDollUnproven(req(76, a, { turn: 1 }), attackerDoll(a))).toBe(true);
+      expect(liveSubstituteSwapApplies(req(76, a, { turn: 1 }), attackerDoll(a))).toBe(true);
+      expect(liveMoveAnimationDuration(req(76, a, { turn: 1 }), attackerDoll(a))).not.toBeNull();
     }
   });
   it("defender-doll cells: Leaf Blade 348 and ThunderPunch 9, both sides, keep the doll-free duration", () => {

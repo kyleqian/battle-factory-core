@@ -2,15 +2,16 @@
 // classified live / approximate(reason) / static(reason). A static command is one the live renderer declines: it holds the static field
 // (battleResolutionCommandDuration's seGate + minimumFrames when the live duration is null; the live duration when only the body's
 // presentation declines, renderBattleResolutionLiveView -> renderBattleResolutionSceneOffView). Every decline names one reason code.
-// The approximate hook is LIVE_MOVE_APPROXIMATE_POLICY: a later step promotes ONE reason class to "approximate" (draw the existing body
-// with best-effort inputs); in this step every class is "static" and nothing reads the policy to draw, so behaviour is unchanged.
+// The approximate hook is LIVE_MOVE_APPROXIMATE_POLICY: a step promotes ONE reason class to "approximate" (draw the existing body
+// with best-effort inputs). apx215: "substitute-doll" is approximate (liveSubstituteSwapApplies / liveMoveSubstituteDollDeclines read
+// the policy: an unproven subbed-attacker body is presented with the swaps, an unproven defender-doll body is drawn on the doll).
 // Presentation-only diagnostics: never read by rules, RNG, the queue or the renderer.
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "./battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 import {
   liveMoveAnimationDuration, liveMoveAnimationDurationCaseMissing, liveMoveAnimationPresentation, liveMoveHiddenSides,
-  liveMoveSubstituteDollDeclines, type LiveMoveDeclineSink,
+  liveMoveSubstituteDollDeclines, liveMoveSubstituteDollUnproven, type LiveMoveDeclineSink,
 } from "./liveMoveAnimation.ts";
 import { liveSubstituteSwapApplies, liveSubstituteSwapView, substituteSwapBodyField } from "./liveSubstituteSwap.ts";
 import { LIVE_TRANSFORM_MOVE_ID, liveTransformedBattlerDeclines } from "./liveTransform.ts";
@@ -30,7 +31,7 @@ export function liveMoveDeclineClassOf(reason: LiveMoveDeclineReason): LiveMoveD
 /** Per decline class: "static" holds the static field (today's decline path); "approximate" will draw the body with best-effort inputs. */
 export type LiveMovePlaybackPolicy = Readonly<Record<LiveMoveDeclineClass, "static" | "approximate">>;
 export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freeze({
-  "substitute-doll": "static", "sprite-order-unknown": "static", "allocator-unknown": "static", "castform-form": "static",
+  "substitute-doll": "approximate", "sprite-order-unknown": "static", "allocator-unknown": "static", "castform-form": "static",
   "endeavor-power": "static", "turn-0": "static", "hidden-target": "static", "no-adapter": "static", "transform": "static",
   "other": "static",
 });
@@ -57,18 +58,22 @@ const sideFlip = (battler: number) => (battler === 0 ? 1 : 0);
  * Why liveMoveAnimationDuration(request, field) is null (null: it is not), in the duration's own gate order: the Substitute swap /
  * doll gates, the transformed-battler gate, Move_TRANSFORM's own gate, a move without a case, then the request dimension whose flip
  * makes the production duration non-null (attacker side, turn, rollout counter, power, friendship). A pure function of (request, field).
+ * apx215: a body drawn only through the approximate Substitute rule (outside the proven doll cells) is "substitute-doll" too.
  */
 export function liveMoveDurationDeclineReason(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
 ): LiveMoveDeclineReason | null {
-  if (liveMoveAnimationDuration(request, field) !== null) return null;
+  if (liveMoveAnimationDuration(request, field) !== null) return liveMoveSubstituteDollUnproven(request, field) ? "substitute-doll" : null;
   const swap = liveSubstituteSwapApplies(request, field);
   if (swap === true) {
     return liveMoveDurationDeclineReason(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1))
       ?? "other:substitute-swap-composite";
   }
-  if (swap === false || liveMoveSubstituteDollDeclines(request, field)) return "substitute-doll";
+  if (swap === false || liveMoveSubstituteDollDeclines(request, field)) {
+    // apx215: past the approximate rule only a multi-hit body's earlier hit declines (which hit swapped in is not tracked).
+    return LIVE_MOVE_APPROXIMATE_POLICY["substitute-doll"] === "approximate" ? "other:substitute-earlier-hit" : "substitute-doll";
+  }
   if (liveTransformedBattlerDeclines(request, field) || request.moveId === LIVE_TRANSFORM_MOVE_ID) return "transform";
   if (liveMoveAnimationDurationCaseMissing(request, field)) return "no-adapter";
   const live = (r: BattleMoveAnimationRequest) => liveMoveAnimationDuration(r, field) !== null;
@@ -114,7 +119,9 @@ export function liveMovePresentationDeclineReason(view: BattleResolutionPresenta
     return "other:presentation-throw";
   }
   if (presented !== null) return null;
-  return liveMoveDurationDeclineReason(e.request, view.field) ?? sink.reason ?? `other:unattributed-gate-${e.request.moveId}`;
+  // A drawn duration (apx215: an approximate doll body too) leaves the presentation gate's own reason.
+  return (liveMoveAnimationDuration(e.request, view.field) === null ? liveMoveDurationDeclineReason(e.request, view.field) : null)
+    ?? sink.reason ?? `other:unattributed-gate-${e.request.moveId}`;
 }
 
 function byPolicy(reason: LiveMoveDeclineReason, policy: LiveMovePlaybackPolicy): LiveMovePlaybackClassification {
@@ -135,6 +142,10 @@ export function liveMovePlaybackClassification(
 ): LiveMovePlaybackClassification | null {
   if (command.type !== "move-animation") return null;
   if (!command.animation) return PAUSE;
-  const reason = liveMoveDurationDeclineReason(command.animation, field) ?? (view ? liveMovePresentationDeclineReason(view) : null);
+  const duration = liveMoveDurationDeclineReason(command.animation, field);
+  // apx215: an approximate doll body (a drawn duration) still passes the presentation gates; a declined presentation names its own gate.
+  const presentation = view && (duration === null || liveMoveAnimationDuration(command.animation, field) !== null)
+    ? liveMovePresentationDeclineReason(view) : null;
+  const reason = presentation ?? duration;
   return reason === null ? LIVE : byPolicy(reason, policy);
 }

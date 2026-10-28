@@ -8,6 +8,7 @@ import {
 } from "../src/animation/struggle.ts";
 import {
   LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveSubstituteDollDeclines,
+  liveMoveSubstituteDollUnproven,
 } from "../src/engine/liveMoveAnimation.ts";
 import { liveSubstituteSwapApplies, substituteSwapCompositeDuration } from "../src/engine/liveSubstituteSwap.ts";
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../src/engine/liveMoveSpriteAllocator.ts";
@@ -143,7 +144,7 @@ describe("stl109: Struggle gates", () => {
     expect(present(request(0), displayed("SNORLAX", "PIDGEOT", { personality: shiny }), firstBodyOrder())).toBeNull();
   });
 
-  it("a Substitute doll is live on either side (sdl119): the defender doll presents, the attacker doll swaps (197 player / 193 opponent); both dolls decline", () => {
+  it("a Substitute doll is live on either side (sdl119): the defender doll presents, the attacker doll swaps (197 player / 193 opponent); both dolls unproven (apx215: approximate)", () => {
     for (const attacker of [0, 1] as const) {
       const defenderDoll = displayed("SNORLAX", "GOLBAT", attacker === 0 ? { opponentDoll: true } : { playerDoll: true });
       const attackerDoll = displayed("SNORLAX", "GOLBAT", attacker === 0 ? { playerDoll: true } : { opponentDoll: true });
@@ -153,9 +154,9 @@ describe("stl109: Struggle gates", () => {
       expect(liveMoveAnimationDuration(request(attacker), attackerDoll))
         .toBe(substituteSwapCompositeDuration(attacker === 0 ? "player" : "opponent", 112));
       const both = displayed("SNORLAX", "GOLBAT", { playerDoll: true, opponentDoll: true });
-      expect(liveMoveSubstituteDollDeclines(request(attacker), both)).toBe(true);
-      expect(liveMoveAnimationDuration(request(attacker), both)).toBeNull();
-      expect(present(request(attacker), both, firstBodyOrder())).toBeNull();
+      expect(liveMoveSubstituteDollUnproven(request(attacker), both)).toBe(true);
+      expect(liveMoveSubstituteDollDeclines(request(attacker), both)).toBe(false);
+      expect(liveMoveAnimationDuration(request(attacker), both)).toBe(attacker === 0 ? 197 : 193);
     }
   });
 });
