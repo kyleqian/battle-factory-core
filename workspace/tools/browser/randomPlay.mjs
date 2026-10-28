@@ -14,10 +14,20 @@
  *   # Without root: cd .integration/browser && mkdir -p syslibs/debs && cd syslibs/debs && apt-get download <those> libxi6
  *   #   && cd .. && for d in debs/*.deb; do dpkg -x $d root; done   (picked up automatically, see launchEnv below)
  *   # check with: find ~/.cache/ms-playwright -name chrome-headless-shell -type f | xargs ldd | grep 'not found'
+ * Two modes. Goal-directed (default): a node-side MIRROR engine runs the soak's RandomPlayer policy
+ *   (winning-swap / winning / full, cycled per challenge; tools/browser/goalPlay.ts) and the frames it produces are
+ *   replayed in the page through the ?pokebench=1 __POKEBENCH__.advance() ABI with the page's rAF loop disabled, so
+ *   node and page stay in lockstep (no wall-clock timing) and the page is checked against the mirror (frame count and
+ *   canvas hash). It plays the whole Factory loop -- draft, battles, faint/switch prompts, swap screen, next round --
+ *   mixes in random menu/Summary/B/START presses, and starts a fresh page (a new challenge) after a loss or a stall.
+ *   It bypasses real key events, the rAF loop and the crash overlay; run --uniform for those.
+ * Uniform (--uniform): the original wall-clock key-press fuzz through real keyboard events (never finishes the draft).
  * Run:
  *   npm run build && npm run play:random -- --minutes 10 --scene both --seed 1
  *   npm run play:random -- --self-test        # plants a page error, expects it to be caught + saved
- * Flags: --minutes N (per scene, default 10) --scene on|off|both (default both) --seed N|0xHEX (default 1)
+ * Flags: --uniform (the original mode) --mix-rate P (goal mode: chance a policy press becomes a random burst, default 0.04)
+ *        --render-every N (goal mode: the page draws every Nth frame, default 1 = every frame, like the real loop)
+ *        --minutes N (per scene, default 10) --scene on|off|both (default both) --seed N|0xHEX (default 1)
  *        --out DIR (default .integration/random-play/<timestamp>) --dist DIR (default dist)
  *        --no-replay-stats (skip the offline engine replay that counts battles) --headed
  * The browser-side input is wall-clock timed, so a run is not bit-reproducible; the saved session JSON is
@@ -29,6 +39,7 @@ import { extname, join, normalize, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
 import { KEY_FOR_BUTTON, createInputGenerator, parseSeed, presentationSeedHex } from "./randomPlayInput.ts";
+import { GoalPlayDirector, frameHash } from "./goalPlay.ts";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -42,7 +53,7 @@ const MIME = {
 };
 
 function parseArgs(argv) {
-  const options = { minutes: 10, scene: "both", seed: 1, out: null, dist: "dist", selfTest: false, replayStats: true, headed: false };
+  const options = { minutes: 10, scene: "both", seed: 1, out: null, dist: "dist", selfTest: false, replayStats: true, headed: false, uniform: false, mixRate: 0.04, renderEvery: 1 };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     const value = () => {
@@ -58,9 +69,13 @@ function parseArgs(argv) {
     else if (arg === "--self-test") options.selfTest = true;
     else if (arg === "--no-replay-stats") options.replayStats = false;
     else if (arg === "--headed") options.headed = true;
+    else if (arg === "--uniform") options.uniform = true;
+    else if (arg === "--mix-rate") options.mixRate = Number(value());
+    else if (arg === "--render-every") options.renderEvery = Number(value());
     else throw new Error(`unknown argument: ${arg}`);
   }
   if (!(options.minutes > 0)) throw new Error("--minutes must be > 0");
+  if (!(Number.isInteger(options.renderEvery) && options.renderEvery >= 1)) throw new Error("--render-every must be an integer >= 1");
   if (!["on", "off", "both"].includes(options.scene)) throw new Error("--scene must be on|off|both");
   if (options.selfTest && !argvHas(argv, "--minutes")) options.minutes = 0.25;
   if (options.selfTest && !argvHas(argv, "--scene")) options.scene = "on";
@@ -119,7 +134,7 @@ async function pollPage(page) {
   });
 }
 
-async function runScene(browser, port, scene, options, outDir, log) {
+async function runSceneUniform(browser, port, scene, options, outDir, log) {
   const result = {
     scene,
     wallMs: 0,
@@ -263,6 +278,242 @@ async function runScene(browser, port, scene, options, outDir, log) {
   return result;
 }
 
+const GOAL_CHUNK_FRAMES = 240;
+const GOAL_CHECK_EVERY_CHUNKS = 25;
+const MAX_SAVED_PER_SIGNATURE = 3;
+const MAX_SAVED_TOTAL = 30;
+
+/** Page-side twin of goalPlay.frameHash over the visible canvas. */
+function pageCanvasHash() {
+  const canvas = document.querySelector('[data-testid="game-surface"]');
+  const data = canvas.getContext("2d").getImageData(0, 0, 240, 160).data;
+  let hash = 0;
+  for (let i = 0; i < data.length; i += 4) hash = (Math.imul(hash, 31) + (data[i] | (data[i + 1] << 8) | (data[i + 2] << 16))) | 0;
+  return hash;
+}
+
+/**
+ * Goal-directed scene run (see the header). Each challenge is one fresh page; a loss (free-roam lobby), a stall or a
+ * crash ends it and the next challenge starts on a new page with presentationSeed = seed + challenge.
+ */
+async function runSceneGoal(browser, port, scene, options, outDir, log) {
+  const core = await import(pathToFileURL(resolve("src/engine/core.ts")).href);
+  const result = {
+    scene,
+    mode: "goal",
+    wallMs: 0,
+    frames: 0,
+    reloads: 0,
+    pageErrors: [],
+    consoleErrors: [],
+    containedErrors: [],
+    overlays: 0,
+    saved: [],
+    traces: [],
+    plantedCaught: false,
+    goal: {
+      challenges: 0,
+      restarts: { lobby: 0, stall: 0, budget: 0, crash: 0 },
+      policyPresses: 0,
+      randomPresses: 0,
+      lobbyPresses: 0,
+      swapScreens: 0,
+      maxBattleDepth: 0,
+      policies: {},
+      mirrorOnlyThrows: 0,
+      divergences: 0,
+    },
+  };
+  const savedBySignature = new Map();
+  let challenge = 0;
+  let page = null;
+  let incidents = [];
+  let url = "";
+
+  const open = async () => {
+    url = `http://127.0.0.1:${port}/?pokebench=1&battleScene=${scene}&presentationSeed=${presentationSeedHex(options.seed + challenge)}`;
+    page = await browser.newPage({ viewport: { width: 900, height: 700 } });
+    // The mirror feeds every frame through __POKEBENCH__.advance(); the page's own real-time loop must not add frames.
+    await page.addInitScript(() => {
+      window.requestAnimationFrame = () => 0;
+    });
+    page.on("pageerror", (error) => incidents.push({ kind: "pageerror", text: String(error?.stack ?? error) }));
+    page.on("console", (message) => {
+      if (message.type() !== "error") return;
+      const text = message.text();
+      if (text.startsWith("POKEBENCH contained presentation error") || text.startsWith("POKEBENCH CRASH")) return;
+      result.consoleErrors.push(text.slice(0, 500));
+    });
+    await page.goto(url, { waitUntil: "load", timeout: 120_000 });
+    await page.waitForFunction(() => typeof window.__POKEBENCH__ === "object", null, { timeout: 60_000 });
+    result.goal.challenges += 1;
+  };
+
+  const harvest = async () => {
+    const trace = await page.evaluate(() => window.__POKEBENCH_SESSION__()).catch(() => null);
+    if (trace) {
+      result.traces.push(trace);
+      result.frames += trace.frame;
+    }
+    return trace;
+  };
+
+  const saveIncident = async (kind, detail, trace) => {
+    const signature = `${kind}:${String(detail).split("\n")[0].replace(/\d+/g, "#").slice(0, 120)}`;
+    const count = (savedBySignature.get(signature) ?? 0) + 1;
+    savedBySignature.set(signature, count);
+    const text = String(detail).split("\n")[0].slice(0, 160);
+    if (count > MAX_SAVED_PER_SIGNATURE || result.saved.length >= MAX_SAVED_TOTAL * 2) {
+      log(`  [${scene}] ${kind}: ${text} (repeat #${count}, not saved)`);
+      return;
+    }
+    const base = join(outDir, `${scene}-${String(result.saved.length + 1).padStart(2, "0")}-${kind}`);
+    const files = [];
+    try {
+      writeFileSync(`${base}.session.json`, JSON.stringify({ kind, detail, url, session: trace }, null, 2) + "\n");
+      files.push(`${base}.session.json`);
+    } catch (error) {
+      log(`  could not write session: ${error}`);
+    }
+    try {
+      await page.screenshot({ path: `${base}.png` });
+      files.push(`${base}.png`);
+    } catch (error) {
+      log(`  could not take screenshot: ${error}`);
+    }
+    result.saved.push(...files);
+    log(`  [${scene}] ${kind}: ${text} -> ${files.join(", ")}`);
+  };
+
+  const absorb = (director) => {
+    const g = result.goal;
+    g.policyPresses += director.stats.policyPresses;
+    g.randomPresses += director.stats.randomPresses;
+    g.lobbyPresses += director.stats.lobbyPresses;
+    g.swapScreens += director.stats.swapScreens;
+    g.maxBattleDepth = Math.max(g.maxBattleDepth, director.stats.maxBattleDepth);
+    g.policies[director.policy] = (g.policies[director.policy] ?? 0) + 1;
+  };
+
+  const newDirector = () =>
+    new GoalPlayDirector({ seed: options.seed, scene, challenge, presentationSeed: (options.seed + challenge) >>> 0, mixRate: options.mixRate });
+
+  await open();
+  let director = newDirector();
+  const start = Date.now();
+  const deadline = start + options.minutes * 60_000;
+  let chunks = 0;
+  let containedSeen = 0;
+  let planted = false;
+  let nextLog = start + 30_000;
+
+  const nextChallenge = async (reason) => {
+    absorb(director);
+    await harvest();
+    await page.close().catch(() => {});
+    if (reason === "crash") result.reloads += 1;
+    result.goal.restarts[reason] += 1;
+    incidents = [];
+    containedSeen = 0;
+    challenge += 1;
+    await open();
+    director = newDirector();
+  };
+
+  while (Date.now() < deadline) {
+    if (options.selfTest && !planted && Date.now() - start > Math.min(3000, options.minutes * 20_000)) {
+      planted = true;
+      await page.evaluate(() => {
+        setTimeout(() => {
+          throw new Error("planted");
+        }, 0);
+      });
+    }
+    const segments = director.runFrames(GOAL_CHUNK_FRAMES);
+    chunks += 1;
+    let pageThrew = null;
+    let contained = containedSeen;
+    if (segments.length > 0) {
+      try {
+        // advance() draws once per call, so split the chunk into renderEvery-frame calls (default: draw every frame).
+        contained = await page.evaluate(([segs, every]) => {
+          for (const seg of segs) {
+            for (let f = 0; f < seg.frames; f += every) {
+              window.__POKEBENCH__.advance([{ frames: Math.min(every, seg.frames - f), buttons: seg.buttons }]);
+            }
+          }
+          return window.__POKEBENCH__.containedErrors().length;
+        }, [segments, options.renderEvery]);
+      } catch (error) {
+        pageThrew = String(error?.stack ?? error).replace(/^Error: page\.evaluate: /, "");
+      }
+    }
+
+    if (pageThrew === null && director.mirrorError !== null) {
+      // Node threw on a frame the page survived: the mirror and the page disagree.
+      result.goal.mirrorOnlyThrows += 1;
+      const trace = await page.evaluate(() => window.__POKEBENCH_SESSION__()).catch(() => null);
+      result.pageErrors.push(`mirror-only throw (page survived): ${director.mirrorError.stack ?? director.mirrorError}`);
+      await saveIncident("mirror-only-throw", director.mirrorError.stack ?? String(director.mirrorError), trace);
+      await nextChallenge("crash");
+      continue;
+    }
+    if (pageThrew === null && chunks % GOAL_CHECK_EVERY_CHUNKS === 0) {
+      const probe = await Promise.all([page.evaluate(() => window.__POKEBENCH_SESSION__().frame), page.evaluate(pageCanvasHash)])
+        .then(([frame, hash]) => ({ frame, hash }))
+        .catch(() => null);
+      const mirrorHash = frameHash(core.render(director.state));
+      if (probe && (probe.frame !== director.frame || probe.hash !== mirrorHash)) {
+        result.goal.divergences += 1;
+        const trace = await page.evaluate(() => window.__POKEBENCH_SESSION__()).catch(() => null);
+        const detail = `page frame ${probe.frame} hash ${probe.hash} vs mirror frame ${director.frame} hash ${mirrorHash}`;
+        result.pageErrors.push(`mirror divergence: ${detail}`);
+        await saveIncident("divergence", detail, trace);
+        await nextChallenge("crash");
+        continue;
+      }
+    }
+
+    if (contained > containedSeen) {
+      const trace = await page.evaluate(() => window.__POKEBENCH_SESSION__()).catch(() => null);
+      const entries = await page.evaluate(() => window.__POKEBENCH__.containedErrors()).catch(() => []);
+      for (const entry of entries.slice(containedSeen)) result.containedErrors.push(entry);
+      await saveIncident("contained", JSON.stringify(entries[contained - 1] ?? {}).slice(0, 300), trace);
+      containedSeen = contained;
+    }
+
+    if (pageThrew !== null || incidents.length > 0) {
+      const trace = await page.evaluate(() => window.__POKEBENCH_SESSION__()).catch(() => null);
+      if (pageThrew !== null) incidents.push({ kind: "pageerror", text: pageThrew });
+      for (const incident of incidents) {
+        result.pageErrors.push(incident.text);
+        if (options.selfTest && incident.text.includes("planted")) result.plantedCaught = true;
+        await saveIncident(incident.kind, incident.text, trace);
+      }
+      await nextChallenge("crash");
+      continue;
+    }
+
+    if (director.restart !== null) {
+      await nextChallenge(director.restart);
+      continue;
+    }
+
+    if (Date.now() >= nextLog) {
+      nextLog = Date.now() + 30_000;
+      log(
+        `  [${scene}] ${((Date.now() - start) / 60_000).toFixed(1)} min: challenge ${challenge} (${director.policy}), frame ${director.frame}, ` +
+          `depth ${director.stats.maxBattleDepth}, swaps ${director.stats.swapScreens}, total frames ${result.frames + director.frame}`,
+      );
+    }
+  }
+  absorb(director);
+  await harvest();
+  await page.close().catch(() => {});
+  result.wallMs = Date.now() - start;
+  return result;
+}
+
 /** Replay the recorded browser sessions headlessly to count battles; null when the engine cannot be loaded. */
 export async function replayStats(traces, scene, log) {
   let core;
@@ -276,12 +527,15 @@ export async function replayStats(traces, scene, log) {
     log(`  replay stats unavailable: ${String(error).split("\n")[0]}`);
     return null;
   }
-  const stats = { battleRoomEntries: 0, orchestratorBattles: 0, maxWinStreak: 0, replayThrows: 0, frames: 0 };
+  const stats = { battleRoomEntries: 0, orchestratorBattles: 0, swapScreens: 0, roundAdvances: 0, lobbyVisits: 0, maxWinStreak: 0, maxBattleDepth: 0, replayThrows: 0, frames: 0 };
   for (const trace of traces) {
     const rng = rngHost.presentationRngFromTrace(trace);
     let state = core.createInitialState({ battleScene: scene, presentationSeed: rng.seed, presentationRngPolicy: rng.policy });
     let battleRoom = false;
     let battle = false;
+    let swap = false;
+    let lobby = false;
+    let roundId = null;
     try {
       for (const segment of trace.segments) {
         const buttons = new Set(inputMod.normalizeButtons(segment.buttons ?? []));
@@ -294,6 +548,20 @@ export async function replayStats(traces, scene, log) {
           if (inBattle && !battle) stats.orchestratorBattles += 1;
           battleRoom = inRoom;
           battle = inBattle;
+          const swapping = state.factorySwap != null;
+          if (swapping && !swap) stats.swapScreens += 1;
+          swap = swapping;
+          const inLobby = state.lobbyFreeRoam != null;
+          if (inLobby && !lobby) stats.lobbyVisits += 1;
+          lobby = inLobby;
+          const orch = state.factoryRoundBattleOrchestrator;
+          if (orch != null) {
+            if (roundId !== null && orch.config.id !== roundId) stats.roundAdvances += 1;
+            roundId = orch.config.id;
+            const carry = orch.config.factoryWinStreak;
+            stats.maxWinStreak = Math.max(stats.maxWinStreak, carry);
+            stats.maxBattleDepth = Math.max(stats.maxBattleDepth, carry + orch.round.rules.battleIndex);
+          }
         }
       }
     } catch (error) {
@@ -316,7 +584,7 @@ async function main() {
   const { chromium } = await import(pathToFileURL(playwrightPath).href);
   const { server, port } = await serveDist(options.dist);
   const manifest = existsSync(join(options.dist, "build.json")) ? JSON.parse(readFileSync(join(options.dist, "build.json"), "utf8")) : null;
-  log(`random play: dist=${options.dist} port=${port} seed=${options.seed} minutes/scene=${options.minutes} scenes=${options.scene} out=${outDir}`);
+  log(`random play (${options.uniform ? "uniform" : "goal-directed"}): dist=${options.dist} port=${port} seed=${options.seed} minutes/scene=${options.minutes} scenes=${options.scene} out=${outDir}`);
   if (manifest) log(`build: ${manifest.build ?? manifest.commit ?? JSON.stringify(manifest).slice(0, 80)}`);
   const scenes = options.scene === "both" ? ["on", "off"] : [options.scene];
   // Hosts without root (CAX31): system libraries unpacked from their .debs into .integration/browser/syslibs/root
@@ -330,7 +598,7 @@ async function main() {
   try {
     for (const scene of scenes) {
       log(`-- scene ${scene}: ${options.minutes} min`);
-      const result = await runScene(browser, port, scene, options, outDir, log);
+      const result = await (options.uniform ? runSceneUniform : runSceneGoal)(browser, port, scene, options, outDir, log);
       result.replay = options.replayStats ? await replayStats(result.traces, scene, log) : null;
       results.push(result);
     }
@@ -347,10 +615,18 @@ async function main() {
       `scene ${r.scene}: ${(r.wallMs / 60_000).toFixed(2)} min, frames ${r.frames} (${fps}/s), reloads ${r.reloads}, ` +
         `pageerrors ${r.pageErrors.length}, console errors ${r.consoleErrors.length}, contained ${r.containedErrors.length}, overlays ${r.overlays}` +
         (r.replay
-          ? `, battle-room entries ${r.replay.battleRoomEntries}, orchestrator battles ${r.replay.orchestratorBattles}, max win streak ${r.replay.maxWinStreak}` +
+          ? `, battle-room entries ${r.replay.battleRoomEntries}, orchestrator battles ${r.replay.orchestratorBattles}, swap screens ${r.replay.swapScreens}, round advances ${r.replay.roundAdvances}, max win streak ${r.replay.maxWinStreak}, max battle depth ${r.replay.maxBattleDepth}` +
             (r.replay.replayThrows ? `, REPLAY THROWS ${r.replay.replayThrows}` : "")
           : ", battles n/a"),
     );
+    if (r.goal) {
+      const g = r.goal;
+      log(
+        `  goal mode: ${g.challenges} challenges (restarts: lobby ${g.restarts.lobby}, stall ${g.restarts.stall}, budget ${g.restarts.budget}, crash ${g.restarts.crash}), policies ${JSON.stringify(g.policies)}, ` +
+          `presses policy ${g.policyPresses} / random ${g.randomPresses} / lobby ${g.lobbyPresses}, live swap screens ${g.swapScreens}, live max depth ${g.maxBattleDepth}, ` +
+          `mirror-only throws ${g.mirrorOnlyThrows}, divergences ${g.divergences}`,
+      );
+    }
     for (const text of r.pageErrors) log(`  pageerror: ${text.split("\n")[0]}`);
     for (const text of r.overlayMessages ?? []) log(`  overlay: ${text.split("\n")[0]}`);
     for (const text of [...new Set(r.consoleErrors)].slice(0, 10)) log(`  console.error: ${text.split("\n")[0]}`);

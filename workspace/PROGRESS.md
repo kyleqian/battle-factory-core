@@ -5,17 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-27 / 28 — CAX31 daily run (supervisor, Opus 5.5): sfa214 folded; apx215 running
+## 2026-10-27 / 28 — CAX31 daily run (supervisor, Opus 5.5): sfa214 + apx215 + play216 folded; apx217 running
 
-- **State:** master `ce7e3b7ab` (src = tested tree `b28ebe50a`).
+- **State:** master `ee22a664f`+ (src = tested tree `1d25251b6`).
 - **Folded:** sfa214 (Summary-screen crashes found by browser random play). Supervisor finished the cut-off branch: merged
   master, added `appRoute` to its 5 new compare traces (the only red test). Gates on `b28ebe50a`: typecheck 0; full suite
   **1,705 files / 14,121 tests, 0 failed**; build 0; the 18 saved random-play sessions replay clean with `--render`;
-  differential 641 / 641; census 0..999 ON + OFF vs contain213 **1,000 / 1,000 identical**, 0 digest mismatch; anchor Summary
-  traces exact (magby / onix / mon-down / move-select / ...). Open: QUILAVA V_STRETCH replacement 48 / 91, 137 species
-  frame-program-only motion -> ISSUES #188 (non-crash). Evidence `.integration/validation/sv-20261027/`.
-- **Running:** apx215 (substitute-doll approximate, opus worker, integration lane); browser random play 10 min / scene on
-  the `ce7e3b7ab` build.
+  differential 641 / 641; census 0..999 ON + OFF vs contain213 **1,000 / 1,000 identical**; anchor Summary traces exact.
+  Open: QUILAVA V_STRETCH replacement 48 / 91, 137 species frame-program-only motion -> ISSUES #188 (non-crash).
+- **Folded:** apx215 (first approximate class): unproven Substitute-doll cells draw the body (subbed attacker: doll slides off,
+  mon in, body, doll back; defender doll: body on the doll). Gates on the union `1d25251b6`: typecheck 0; full suite 1,706 files
+  / 14,125 tests 0 failed (one vitest fork OOM-killed under a parallel worker; its file `liveR2GatesRoutes` rerun alone 8 / 8);
+  build 0; census vs sfa214: OFF **1,000 / 1,000 identical**; ON 982 identical, 16 changed only in the 74 substitute commands'
+  fields [16][18][21] + later timing; 796 / 881 (frame-budget stalemates) partial digests moved because bodies are longer
+  (worker: 796 matches base at a 600k budget, 881 is an exact prefix). **Scene ON census: static 207 -> 133, approximate 74.**
+  Strips `tools/integration/fixtures/approximate/substitute-doll/` eyeballed (Attract, Dream Eater, Focus Punch).
+- **Folded:** play216 (tools): `npm run play:random` goal mode is the default — a node mirror engine runs the soak policies and
+  feeds the page through `__POKEBENCH__.advance` (lockstep, canvas-hash checked); supervisor made the page draw every frame
+  (`--render-every`, default 1). ON seed 3, 6 min: 14 battles, 8 swap screens, 0 errors / 0 divergences; worker 7 min / scene:
+  ON 34 battles, OFF 53, 0 errors. Uniform key fuzz on `ce7e3b7ab` (10 min / scene): 0 errors but never left the draft.
+  Playwright must be installed in `.integration/browser/node_modules` (ignored; reinstalled this run with `npm install playwright`).
+- **Found:** RETIRE -> YES after a win draws the Lobby arrival but the state never leaves the post-win question (no
+  `factoryTerminal`, never `lobbyFreeRoam`): a player hang. Brief `.integration/validation/sv-20261027/ret218.txt` queued.
+- **Soak (Scene ON, `--policy full --vary-rng`, seeds 0:30, render every 8, on `ee22a664f`):** **30 / 30 OK**, 0 CRASH / 0 HANG.
+- **Running:** apx217 (name the 13 unattributed static gates; Transform 33 -> approximate). Evidence `.integration/validation/sv-20261027/`.
 ---
 
 ## 2026-10-26 / 27 — CAX31 session wind-down (supervisor, Opus 5.5): finish plan Phase 1 tooling + containment; Phase 2 plumbing
