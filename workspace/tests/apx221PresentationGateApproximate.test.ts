@@ -16,13 +16,16 @@ describe("apx221: the policy", () => {
 });
 
 const PROMOTED_CLASSES = ["substitute-doll", "sprite-order-unknown", "allocator-unknown", "transform", "castform-form"];
-const PROMOTED_OTHER: string[] = [];
+const PROMOTED_OTHER: string[] = ["other:extrasensory-player-later-target"];
 
 describe("apx221: one staged command per class draws non-static rows, classifies approx, deterministic on replay", () => {
   it.each([
     // [name, census seed, moveId, attacker, code, presented rows (the body's own live duration)]
     ["castform-form: Icy Wind 196 by the player's rain-form CASTFORM (residual key 196:by:2)", 651, 196, 0, "approx:castform-form", 290],
     ["castform-form: Fly 19 by the opponent at a hail-form CASTFORM (19:at:3 not proven)", 950, 19, 1, "approx:castform-form", 46],
+    ["extrasensory-player-later-target: Extrasensory 326 by the player's later body (target top line < 27 / scanline history unknown)", 19, 326, 0,
+      "approx:other:extrasensory-player-later-target", 165],
+    ["extrasensory-player-later-target: Extrasensory 326, a second census battle", 767, 326, 0, "approx:other:extrasensory-player-later-target", 165],
   ] as [string, number, number, number, string, number][])("%s", (_name, seed, moveId, attacker, code, rows) => {
     const first = apx217Strip(seed, moveId, attacker, code)!;
     expect(first).not.toBeNull();
