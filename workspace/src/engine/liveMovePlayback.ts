@@ -39,7 +39,7 @@ export function liveMoveDeclineClassOf(reason: LiveMoveDeclineReason): LiveMoveD
 export type LiveMovePlaybackPolicy = Readonly<Record<LiveMoveDeclineClass, "static" | "approximate">>;
 export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freeze({
   "substitute-doll": "approximate", "sprite-order-unknown": "approximate", "allocator-unknown": "approximate", "castform-form": "approximate",
-  "endeavor-power": "static", "turn-0": "static", "hidden-target": "static", "no-adapter": "static", "transform": "approximate",
+  "endeavor-power": "approximate", "turn-0": "static", "hidden-target": "static", "no-adapter": "static", "transform": "approximate",
   "other": "static",
 });
 

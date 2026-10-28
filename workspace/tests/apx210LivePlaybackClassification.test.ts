@@ -57,7 +57,7 @@ describe("apx210: decline reasons", () => {
     expect(classify(req(29), fieldOf())).toEqual({ kind: "live" });
   });
 
-  it("presentation gates (the render view): endeavor-power, hidden-target -> static, body still null; apx219 / apx221: sprite-order-unknown, castform-form -> approximate, body drawn", () => {
+  it("presentation gates (the render view): hidden-target -> static, body still null; apx219 / apx221: sprite-order-unknown, castform-form, endeavor-power -> approximate, body drawn", () => {
     const plain = fieldOf();
     const castform = fieldOf({}, { castformForm: 1 }, ["SWELLOW", "CASTFORM"]);
     const cases: [BattleMoveAnimationRequest, BattleResolutionDisplayedField, BattleResolutionPresentationRenderView, string][] = [
@@ -70,7 +70,7 @@ describe("apx210: decline reasons", () => {
       // The duration gate passes: only the field-only classification says live; the view names the presentation gate.
       expect(liveMoveAnimationDuration(request, field)).not.toBeNull();
       expect(classify(request, field)).toEqual({ kind: "live" });
-      const approximate = reason === "sprite-order-unknown" || reason === "castform-form";
+      const approximate = reason !== "hidden-target";
       expect(classify(request, field, view)).toEqual({ kind: approximate ? "approximate" : "static", reason });
       const e = (view.effect as { battlerX2Input?: never });
       const body = liveMoveAnimationPresentation(request, field, 0, undefined, undefined, undefined, undefined, e.battlerX2Input,
@@ -92,7 +92,7 @@ describe("apx210: decline reasons", () => {
 
 describe("apx210: the approximate hook", () => {
   it("is static except apx215's substitute-doll, apx217's transform, apx219's sprite-order-unknown / allocator-unknown and apx221's classes", () => {
-    const promoted = ["substitute-doll", "transform", "sprite-order-unknown", "allocator-unknown", "castform-form"];
+    const promoted = ["substitute-doll", "transform", "sprite-order-unknown", "allocator-unknown", "castform-form", "endeavor-power"];
     for (const c of LIVE_MOVE_DECLINE_CLASSES) {
       expect(LIVE_MOVE_APPROXIMATE_POLICY[c]).toBe(promoted.includes(c) ? "approximate" : "static");
     }

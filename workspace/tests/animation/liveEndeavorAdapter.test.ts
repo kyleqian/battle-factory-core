@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveAnimationPresentationProven,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
@@ -66,8 +66,12 @@ describe("live Endeavor (283) script-body adapter", () => {
     for (const side of ["player", "opponent"] as const) {
       expect(liveMoveAnimationPresentation(req, { ...view.field, [side]: { ...view.field[side], personality: shiny } }, 0)).toBeNull();
     }
-    expect(liveMoveAnimationPresentation(req, view.field, 0, undefined, undefined, undefined, undefined,
-      { zeroed: [], staleMovePowerUnknown: true })).toBeNull();
+    // apx221: the wrapper retries an unknown stale power as an approximate class; the proven gate still declines it.
+    const unknownPower = { zeroed: [], staleMovePowerUnknown: true };
+    expect(liveMoveAnimationPresentationProven(req, view.field, 0, undefined, undefined, undefined, undefined, unknownPower)).toBeNull();
+    const sink: { reason?: string; approximate?: string } = {};
+    expect(liveMoveAnimationPresentation(req, view.field, 0, undefined, undefined, undefined, undefined, unknownPower, undefined, sink as never)).not.toBeNull();
+    expect(sink.approximate).toBe("endeavor-power");
     expect(liveMoveAnimationPresentation(req, view.field, 0, undefined, undefined, undefined, undefined, { zeroed: [] })).not.toBeNull();
   });
 
