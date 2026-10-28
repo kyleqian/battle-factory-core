@@ -6,8 +6,10 @@ import {
   STRUGGLE_BLEND, STRUGGLE_CLEAR_MONBG, STRUGGLE_FIRST_INACTIVE, STRUGGLE_MONBG, STRUGGLE_ROWS, STRUGGLE_SPLAT, STRUGGLE_SPLAT_LIFE,
   STRUGGLE_WAVES, STRUGGLE_WAVES_DESTROYED, STRUGGLE_WAVE_ANIMS, struggleAttackerOamX2, struggleAttackerX2, struggleTargetX2, struggleWaveFrame,
 } from "../src/animation/struggle.ts";
+// apx219: these gate pins read the proven body (an unknown order / allocator history is drawn approximately by the production
+// liveMoveAnimationPresentation; tests/apx219SpriteOrderAllocatorApproximate.test.ts).
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveSubstituteDollDeclines,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentationProven as liveMoveAnimationPresentation, liveMoveSubstituteDollDeclines,
   liveMoveSubstituteDollUnproven,
 } from "../src/engine/liveMoveAnimation.ts";
 import { liveSubstituteSwapApplies, substituteSwapCompositeDuration } from "../src/engine/liveSubstituteSwap.ts";

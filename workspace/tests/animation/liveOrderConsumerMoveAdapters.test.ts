@@ -6,8 +6,10 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
+// apx219: these gate pins read the proven body (an unknown order / allocator history is drawn approximately by the production
+// liveMoveAnimationPresentation; tests/apx219SpriteOrderAllocatorApproximate.test.ts).
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentationProven as liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import {

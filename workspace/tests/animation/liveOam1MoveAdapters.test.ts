@@ -3,8 +3,10 @@ import { gunzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
+// apx219: these gate pins read the proven body (an unknown order / allocator history is drawn approximately by the production
+// liveMoveAnimationPresentation; tests/apx219SpriteOrderAllocatorApproximate.test.ts).
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentationProven as liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { carryLiveSpriteOrder, type LiveOamSprite } from "../../src/engine/liveMoveOamAssembler.ts";
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
