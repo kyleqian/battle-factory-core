@@ -1,6 +1,7 @@
 // apx210 (docs/finish-plan.md Phase 2; src/engine/liveMovePlayback.ts): every move-animation command is classified live / approximate(reason)
 // / static(reason) / pause; each decline path names one reason code. apx215 promoted "substitute-doll" to approximate
-// (tests/apx215SubstituteDollApproximate.test.ts); every other class stays static.
+// (tests/apx215SubstituteDollApproximate.test.ts), apx217 "transform" (tests/apx217TransformApproximate.test.ts); every other class
+// stays static.
 import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "../src/engine/battleResolutionPresentation.ts";
@@ -36,11 +37,10 @@ const classify = (request: BattleMoveAnimationRequest, field: BattleResolutionDi
   liveMovePlaybackClassification(command(request), field, view);
 
 describe("apx210: decline reasons", () => {
-  it("duration gates (a pure function of (command, field)): no-adapter, turn-0, transform -> static, hold unchanged", () => {
+  it("duration gates (a pure function of (command, field)): no-adapter, turn-0 -> static, hold unchanged", () => {
     const cases: [BattleMoveAnimationRequest, BattleResolutionDisplayedField, string][] = [
       [req(1), fieldOf(), "no-adapter"], // Pound: no liveMoveAnimationDuration case
       [req(174), fieldOf(), "turn-0"], // Curse's Ghost branch (turn 0)
-      [req(29), fieldOf({}, { transform: { species: 132 } }), "transform"], // trf174: a transformed battler on the field
     ];
     for (const [request, field, reason] of cases) {
       expect(liveMoveAnimationDuration(request, field)).toBeNull();
@@ -50,7 +50,10 @@ describe("apx210: decline reasons", () => {
       // Still the static hold: battleResolutionCommandDuration's decline length (seGate 0 + minimumFrames).
       expect(battleResolutionCommandDuration(c, field)).toBe(23);
     }
-    // The same Headbutt without the doll is live.
+    // apx217: Headbutt with a transformed battler on the field (trf174's gate) is drawn approximately; without it, live.
+    const transformed = fieldOf({}, { transform: { species: 132 } });
+    expect(liveMoveAnimationDuration(req(29), transformed)).toBe(liveMoveAnimationDuration(req(29), fieldOf()));
+    expect(classify(req(29), transformed)).toEqual({ kind: "approximate", reason: "transform" });
     expect(classify(req(29), fieldOf())).toEqual({ kind: "live" });
   });
 
@@ -85,8 +88,10 @@ describe("apx210: decline reasons", () => {
 });
 
 describe("apx210: the approximate hook", () => {
-  it("is static except apx215's substitute-doll", () => {
-    for (const c of LIVE_MOVE_DECLINE_CLASSES) expect(LIVE_MOVE_APPROXIMATE_POLICY[c]).toBe(c === "substitute-doll" ? "approximate" : "static");
+  it("is static except apx215's substitute-doll and apx217's transform", () => {
+    for (const c of LIVE_MOVE_DECLINE_CLASSES) {
+      expect(LIVE_MOVE_APPROXIMATE_POLICY[c]).toBe(c === "substitute-doll" || c === "transform" ? "approximate" : "static");
+    }
     expect(liveMoveDeclineClassOf("other:shiny")).toBe("other");
     expect(liveMoveDeclineClassOf("substitute-doll")).toBe("substitute-doll");
   });

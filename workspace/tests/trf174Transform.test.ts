@@ -7,7 +7,8 @@ import type { BattleResolutionPresentationCommand } from "../src/engine/battleRe
 import { battleResolutionFieldBeforeCommand } from "../src/engine/battleResolutionPresentationRender.ts";
 import { liveBattlerAnchors, liveMoveAnimationDuration } from "../src/engine/liveMoveAnimation.ts";
 import {
-  LIVE_TRANSFORM_ROWS, liveTransformDeclineReason, liveTransformMosaicLevel, liveTransformOf, withLiveTransform,
+  LIVE_TRANSFORM_ROWS, liveTransformDeclineReason, liveTransformedBattlerDeclines, liveTransformedBattlerUnproven, liveTransformMosaicLevel,
+  liveTransformOf, withLiveTransform,
 } from "../src/engine/liveTransform.ts";
 import { liveView, type Fixture } from "../tools/integration/liveAdapterFramebuffer.ts";
 
@@ -76,7 +77,7 @@ describe("trf174 live Transform", () => {
     expect(liveTransformOf(request!, view.field)).toEqual({ species: SLOWBRO, personality: 0 });
   });
 
-  it("declines outside the proven scope; every other live body declines while a battler is shown transformed", () => {
+  it("declines outside the proven scope (apx217: drawn approximately); every other body is unproven while a battler is shown transformed", () => {
     const view = liveView(fixture("trf174-on-player-ditto-slowbro"), 0);
     const request = view.effect?.type === "move" ? view.effect.request : null;
     expect(liveTransformDeclineReason(request!, view.field)).toBeNull();
@@ -85,9 +86,13 @@ describe("trf174 live Transform", () => {
     // A shiny DITTO (FACTORY_OT_ID 416049562-relative personality) would copy the shiny palette.
     const shiny = (((416_049_562 >>> 16) ^ (416_049_562 & 0xffff)) << 16) >>> 0;
     expect(liveTransformDeclineReason(request!, { ...view.field, player: { ...view.field.player, personality: shiny } })).toMatch(/shiny/);
-    expect(liveMoveAnimationDuration(request!, { ...view.field, player: { ...view.field.player, personality: shiny } })).toBeNull();
+    // apx217 (approximate "transform"): outside the proven scope the body is drawn approximately with its own length.
+    expect(liveMoveAnimationDuration(request!, { ...view.field, player: { ...view.field.player, personality: shiny } })).toBe(LIVE_TRANSFORM_ROWS);
     const earthquake = { ...request!, moveId: 89 };
     expect(liveMoveAnimationDuration(earthquake, view.field)).not.toBeNull();
-    expect(liveMoveAnimationDuration(earthquake, withLiveTransform(view.field, 0, { species: SLOWBRO, personality: 0 }))).toBeNull();
+    const transformed = withLiveTransform(view.field, 0, { species: SLOWBRO, personality: 0 });
+    expect(liveTransformedBattlerUnproven(earthquake, transformed)).toBe(true);
+    expect(liveTransformedBattlerDeclines(earthquake, transformed)).toBe(false);
+    expect(liveMoveAnimationDuration(earthquake, transformed)).toBe(liveMoveAnimationDuration(earthquake, view.field));
   });
 });

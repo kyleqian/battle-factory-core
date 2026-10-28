@@ -21,6 +21,7 @@ import type { BattleCommandFieldBattler } from "./battleCommandPresentation.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
 import { liveBattlerIsShiny } from "./liveMovePaletteComposite.ts";
+import { LIVE_MOVE_APPROXIMATE_POLICY } from "./liveMovePlayback.ts";
 
 export const LIVE_TRANSFORM_MOVE_ID = 144;
 /** Activation .. first inactive row (108 Move_TRANSFORM script rows + 1), both scenes, both sides. */
@@ -75,13 +76,37 @@ export function liveTransformDeclineReason(
 }
 
 /**
- * Every OTHER live body declines while either battler is shown transformed: adapters draw species art keyed by the displayed party
- * species and have no proof with the copied picture / blended palette.
+ * Every OTHER live body is unproven while either battler is shown transformed: no adapter has a proof with the copied picture /
+ * blended palette. apx217 (liveMovePlayback.ts approximate "transform"): while LIVE_MOVE_APPROXIMATE_POLICY.transform is
+ * "approximate" such a body is drawn from the field art (the copied species' picture, corner, elevation and transform palette:
+ * createBattleCommandFieldArtView; the renderer's species sheets take the transform palette, renderBattleResolutionLiveView) with its
+ * own live duration, and only declines otherwise.
  */
 export function liveTransformedBattlerDeclines(
   request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
 ): boolean {
+  return LIVE_MOVE_APPROXIMATE_POLICY.transform !== "approximate" && liveTransformedBattlerUnproven(request, field);
+}
+
+/** apx217: liveTransformedBattlerDeclines' strict rule (a non-Transform body while either battler is shown transformed). */
+export function liveTransformedBattlerUnproven(
+  request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
+): boolean {
   return request.moveId !== LIVE_TRANSFORM_MOVE_ID && (field.player.transform !== undefined || field.opponent.transform !== undefined);
+}
+
+/**
+ * Why the Transform body holds the static field (null: it is drawn). apx217: while the transform class is approximate, a body outside
+ * the proven scope for a picture reason (a transformed battler, a shiny attacker, a SPINDA / CASTFORM target or attacker, a CASTFORM
+ * form) is drawn by the same body: the copied species' party picture with the transform palette (no shiny pick, no SPINDA spots, the
+ * normal CASTFORM form) over the attacker's displayed art. A self target and a Substitute doll still decline.
+ */
+export function liveTransformBodyDeclineReason(
+  request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField,
+): string | null {
+  const reason = liveTransformDeclineReason(request, field);
+  if (reason === null || LIVE_MOVE_APPROXIMATE_POLICY.transform !== "approximate") return reason;
+  return reason === "not transform" || reason === "self target" || reason === "substitute doll" ? reason : null;
 }
 
 /** `field` with `battler` shown transformed into `transform` (or back to its own species when null). */

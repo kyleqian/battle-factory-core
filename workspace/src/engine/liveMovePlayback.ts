@@ -5,6 +5,8 @@
 // The approximate hook is LIVE_MOVE_APPROXIMATE_POLICY: a step promotes ONE reason class to "approximate" (draw the existing body
 // with best-effort inputs). apx215: "substitute-doll" is approximate (liveSubstituteSwapApplies / liveMoveSubstituteDollDeclines read
 // the policy: an unproven subbed-attacker body is presented with the swaps, an unproven defender-doll body is drawn on the doll).
+// apx217: "transform" is approximate (liveTransformedBattlerDeclines / liveTransformBodyDeclineReason read the policy: a body while a
+// battler is shown transformed is drawn from the copied species' field art; the Transform body draws outside its proven picture scope).
 // Presentation-only diagnostics: never read by rules, RNG, the queue or the renderer.
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "./battleResolutionPresentation.ts";
@@ -14,7 +16,10 @@ import {
   liveMoveSubstituteDollDeclines, liveMoveSubstituteDollUnproven, type LiveMoveDeclineSink,
 } from "./liveMoveAnimation.ts";
 import { liveSubstituteSwapApplies, liveSubstituteSwapView, substituteSwapBodyField } from "./liveSubstituteSwap.ts";
-import { LIVE_TRANSFORM_MOVE_ID, liveTransformedBattlerDeclines } from "./liveTransform.ts";
+import {
+  LIVE_TRANSFORM_MOVE_ID, liveTransformBodyDeclineReason, liveTransformDeclineReason, liveTransformedBattlerDeclines,
+  liveTransformedBattlerUnproven,
+} from "./liveTransform.ts";
 
 /** The decline classes (finish-plan decline table). "other" is always named: `other:<name>`. */
 export const LIVE_MOVE_DECLINE_CLASSES = Object.freeze([
@@ -32,7 +37,7 @@ export function liveMoveDeclineClassOf(reason: LiveMoveDeclineReason): LiveMoveD
 export type LiveMovePlaybackPolicy = Readonly<Record<LiveMoveDeclineClass, "static" | "approximate">>;
 export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freeze({
   "substitute-doll": "approximate", "sprite-order-unknown": "static", "allocator-unknown": "static", "castform-form": "static",
-  "endeavor-power": "static", "turn-0": "static", "hidden-target": "static", "no-adapter": "static", "transform": "static",
+  "endeavor-power": "static", "turn-0": "static", "hidden-target": "static", "no-adapter": "static", "transform": "approximate",
   "other": "static",
 });
 
@@ -59,12 +64,18 @@ const sideFlip = (battler: number) => (battler === 0 ? 1 : 0);
  * doll gates, the transformed-battler gate, Move_TRANSFORM's own gate, a move without a case, then the request dimension whose flip
  * makes the production duration non-null (attacker side, turn, rollout counter, power, friendship). A pure function of (request, field).
  * apx215: a body drawn only through the approximate Substitute rule (outside the proven doll cells) is "substitute-doll" too.
+ * apx217: a body drawn only through the approximate Transform rule (a transformed battler; the Transform body outside its proven
+ * picture scope) is "transform"; a Transform body that still declines names its gate (self target / Substitute doll).
  */
 export function liveMoveDurationDeclineReason(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
 ): LiveMoveDeclineReason | null {
-  if (liveMoveAnimationDuration(request, field) !== null) return liveMoveSubstituteDollUnproven(request, field) ? "substitute-doll" : null;
+  if (liveMoveAnimationDuration(request, field) !== null) {
+    if (liveMoveSubstituteDollUnproven(request, field)) return "substitute-doll";
+    return liveTransformedBattlerUnproven(request, field)
+      || (request.moveId === LIVE_TRANSFORM_MOVE_ID && liveTransformDeclineReason(request, field) !== null) ? "transform" : null;
+  }
   const swap = liveSubstituteSwapApplies(request, field);
   if (swap === true) {
     return liveMoveDurationDeclineReason(request, substituteSwapBodyField(field, request.attacker === 0 ? 0 : 1))
@@ -74,7 +85,11 @@ export function liveMoveDurationDeclineReason(
     // apx215: past the approximate rule only a multi-hit body's earlier hit declines (which hit swapped in is not tracked).
     return LIVE_MOVE_APPROXIMATE_POLICY["substitute-doll"] === "approximate" ? "other:substitute-earlier-hit" : "substitute-doll";
   }
-  if (liveTransformedBattlerDeclines(request, field) || request.moveId === LIVE_TRANSFORM_MOVE_ID) return "transform";
+  if (liveTransformedBattlerDeclines(request, field)) return "transform";
+  if (request.moveId === LIVE_TRANSFORM_MOVE_ID) {
+    const gate = liveTransformBodyDeclineReason(request, field);
+    return gate === "self target" ? "other:transform-self-target" : gate === "substitute doll" ? "other:transform-substitute-doll" : "transform";
+  }
   if (liveMoveAnimationDurationCaseMissing(request, field)) return "no-adapter";
   const live = (r: BattleMoveAnimationRequest) => liveMoveAnimationDuration(r, field) !== null;
   if (live({ ...request, attacker: sideFlip(request.attacker), target: sideFlip(request.target) })) return "other:attacker-side";

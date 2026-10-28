@@ -26,8 +26,8 @@ const command = (animation: BattleMoveAnimationRequest) => Object.freeze({
 }) as BattleResolutionPresentationCommand;
 
 describe("apx215: approximate substitute-doll", () => {
-  it("the policy promotes only substitute-doll", () => {
-    expect(Object.entries(LIVE_MOVE_APPROXIMATE_POLICY).filter(([, p]) => p === "approximate").map(([c]) => c)).toEqual(["substitute-doll"]);
+  it("the policy promotes substitute-doll (apx217: and transform)", () => {
+    expect(Object.entries(LIVE_MOVE_APPROXIMATE_POLICY).filter(([, p]) => p === "approximate").map(([c]) => c)).toEqual(["substitute-doll", "transform"]);
   });
 
   it("duration = the body's own live duration (defender doll) / the swap composite around it (subbed attacker); classified approx", () => {
