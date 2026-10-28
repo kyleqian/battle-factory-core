@@ -1,7 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import speciesNames from "../src/data/gen/species-names.json" with { type: "json" };
-import { liveMoveAnimationPresentation } from "../src/engine/liveMoveAnimation.ts";
+// apx219: these gate pins read the proven body (an unknown order / allocator history is drawn approximately by the production
+// liveMoveAnimationPresentation; tests/apx219SpriteOrderAllocatorApproximate.test.ts).
+import { liveMoveAnimationPresentationProven as liveMoveAnimationPresentation } from "../src/engine/liveMoveAnimation.ts";
 import { FIRST_BODY_SCANLINE } from "../src/engine/liveOamMoves.ts";
 import {
   applyLiveScanlineHistoryEvent, liveScanlineEntry, type LiveScanlineHistory, type LiveScanlineSide,

@@ -1039,7 +1039,7 @@ const singBodyRowsCache = new Map<string, number | null>();
 export function liveSingBodyRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number | null {
   const key = `${request.attacker}/${field.player.species}/${field.opponent.species}`;
   if (singBodyRowsCache.has(key)) return singBodyRowsCache.get(key)!;
-  const state = liveMoveAnimationPresentationWith(request, field, 0);
+  const state = liveMoveAnimationPresentationProven(request, field, 0);
   let rows: number | null = null;
   if (state !== null && state.config.move === "SING") {
     const { attacker, target } = state.config as unknown as Record<"attacker" | "target", { geometry: { animationCenter: { x: number; y: number } } }>;
@@ -1921,7 +1921,7 @@ export function liveMoveAnimationPresentation(
 ): SceneOnMovePresentationState | null {
   let sink: LiveMoveDeclineSink = {};
   let approximate: LiveMoveDeclineSink["approximate"];
-  let state = liveMoveAnimationPresentationWith(request, field, age, paletteInput, spriteAllocatorInput, spriteOrderInput,
+  let state = liveMoveAnimationPresentationProven(request, field, age, paletteInput, spriteAllocatorInput, spriteOrderInput,
     presentationRngInput, battlerX2Input, hiddenSides, sink);
   // A body may gate on both histories: at most one retry per class, in the order the gates fire.
   for (let attempt = 0; state === null && attempt < 2; attempt += 1) {
@@ -1937,7 +1937,7 @@ export function liveMoveAnimationPresentation(
       break;
     }
     sink = {};
-    state = liveMoveAnimationPresentationWith(request, field, age, paletteInput, spriteAllocatorInput, spriteOrderInput,
+    state = liveMoveAnimationPresentationProven(request, field, age, paletteInput, spriteAllocatorInput, spriteOrderInput,
       presentationRngInput, battlerX2Input, hiddenSides, sink);
   }
   // A fallback that still declines holds the static field under the remaining gate (named after the fallback when unattributed).
@@ -1947,7 +1947,8 @@ export function liveMoveAnimationPresentation(
   return state;
 }
 
-function liveMoveAnimationPresentationWith(
+/** apx219: the proven body only (no approximate fallback): null where an unknown order / allocator history declines. */
+export function liveMoveAnimationPresentationProven(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
   age: number,

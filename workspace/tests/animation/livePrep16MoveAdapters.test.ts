@@ -5,8 +5,10 @@ import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnim
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
+// apx219: these gate pins read the proven body (an unknown order / allocator history is drawn approximately by the production
+// liveMoveAnimationPresentation; tests/apx219SpriteOrderAllocatorApproximate.test.ts).
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveBattlerAnchors, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveBattlerAnchors, liveMoveAnimationDuration, liveMoveAnimationPresentationProven as liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { composeLivePalettes, liveBattlerIsShiny } from "../../src/engine/liveMovePaletteComposite.ts";
 import { createLiveMovePaletteHost, prepareLiveMovePalette } from "../../src/engine/liveMoveAnimationPalette.ts";
@@ -199,8 +201,9 @@ describe("live prep16 move adapters (Overheat, Silver Wind, Psych Up player: fir
     { move: "PSYCH_UP 66/7 JUMPLUFF", id: 244, seed: 66, streak: 7, slot: 2, ages: 179, active: true },
     { move: "PSYCH_UP 15/28 METAGROSS", id: 244, seed: 15, streak: 28, slot: 2, ages: 179, active: true },
     // A later body after the foe's Sand-Attack (no production order plan for 28 -> order unknown): the live seam declines and
-    // the scene-off view plays (later bodies with a known lend: tests/animation/liveLaterBodiesBg.test.ts).
-    { move: "SILVER_WIND 9/0 BUTTERFREE (not first)", id: 318, seed: 9, streak: 0, slot: 0, ages: 193, active: false },
+    // the scene-off view plays (later bodies with a known lend: tests/animation/liveLaterBodiesBg.test.ts). apx219: the body is drawn
+    // approximately with the known-entry first-action order (approx:sprite-order-unknown), every age.
+    { move: "SILVER_WIND 9/0 BUTTERFREE (not first)", id: 318, seed: 9, streak: 0, slot: 0, ages: 193, active: true },
   ];
   it.each(routes)("completes ordinary $move and preserves ON/OFF rules and RNG", r => {
     const on = generatedCommandAnimationReplay(r.seed, "on", [r.slot], r.streak);

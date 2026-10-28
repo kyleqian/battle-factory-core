@@ -5,7 +5,9 @@ import type { SceneOnMovePresentationState } from "../../src/animation/sceneOnPr
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import { renderSceneOnMovePresentation } from "../../src/engine/battleScene.ts";
-import { liveMoveAnimationDuration, liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
+// apx219: these gate pins read the proven body (an unknown order / allocator history is drawn approximately by the production
+// liveMoveAnimationPresentation; tests/apx219SpriteOrderAllocatorApproximate.test.ts).
+import { liveMoveAnimationDuration, liveMoveAnimationPresentationProven as liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
@@ -124,8 +126,9 @@ describe("live later-body Silver Wind / Psych Up (BG-register history not consum
   const routes = [
     { name: "106/0 player SILVER_WIND after foe Fury Swipes x2", seed: 106, slots: [0] as const, attacker: 0, index: 2, active: true },
     { name: "160/0 foe SILVER_WIND after the player's Silver Wind", seed: 160, slots: [0] as const, attacker: 1, index: 1, active: true },
-    // Later body after Sand-Attack (no production order plan -> order unknown): still declines.
-    { name: "9/0 player SILVER_WIND after foe Sand-Attack", seed: 9, slots: [0] as const, attacker: 0, index: 1, active: false },
+    // Later body after Sand-Attack (no production order plan -> order unknown): the proven body declines; apx219: drawn approximately
+    // with the known-entry first-action order (approx:sprite-order-unknown), every age.
+    { name: "9/0 player SILVER_WIND after foe Sand-Attack", seed: 9, slots: [0] as const, attacker: 0, index: 1, active: true },
   ];
   it.each(routes)("ordinary route $name: ON/OFF rules and RNG unchanged", r => {
     const on = generatedCommandAnimationReplay(r.seed, "on", r.slots, 0);
