@@ -2,7 +2,8 @@ import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "jso
 import monAnimData3 from "../data/gen/dt60-mon-anim-data3.json" with { type: "json" };
 import sendOutAnimSelectorTables from "../data/gen/send-out-anim-selector-tables.json" with { type: "json" };
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
-import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+import { prepareLiveMoveSpriteAllocator, type LiveMoveSpriteAllocatorInput, type LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
+import { createKnownEntrySpriteAllocatorProvider } from "./knownEntrySpriteAllocator.ts";
 import { liveSubstituteSwapApplies, liveSubstituteSwapProven, substituteSwapBodyField, substituteSwapBodyFraming, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import { LIVE_MOVE_APPROXIMATE_POLICY, type LiveMoveDeclineReason } from "./liveMovePlayback.ts";
@@ -94,7 +95,7 @@ import { ROCK_THROW_ANIMATION_PROFILE } from "../animation/rockThrow.ts";
 import { perishSongNoteOrderFromFree } from "../animation/perishSong.ts";
 import { LEAF_BLADE_OAM_ORDER_SLOTS } from "../animation/leafBlade.ts";
 import { HEAL_BELL_REUSED_ORDER_SLOTS } from "../animation/healBell.ts";
-import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "./spriteOrderProvider.ts";
+import { applySpriteOrderUnitPlan, createSpriteOrderPlanCursor, KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER, spriteOrderForSlots, spriteOrderWithOccupiedPrefix } from "./spriteOrderProvider.ts";
 import { DOUBLE_KICK_FRAME_COUNT } from "../animation/doubleKick.ts";
 import { waterSpoutTimeline, type WaterSpoutLiveInputs } from "../animation/waterSpout.ts";
 import { hiddenPowerUnownFormIndex } from "../animation/hiddenPower.ts";
@@ -1038,7 +1039,7 @@ const singBodyRowsCache = new Map<string, number | null>();
 export function liveSingBodyRows(request: BattleMoveAnimationRequest, field: BattleResolutionDisplayedField): number | null {
   const key = `${request.attacker}/${field.player.species}/${field.opponent.species}`;
   if (singBodyRowsCache.has(key)) return singBodyRowsCache.get(key)!;
-  const state = liveMoveAnimationPresentation(request, field, 0);
+  const state = liveMoveAnimationPresentationWith(request, field, 0);
   let rows: number | null = null;
   if (state !== null && state.config.move === "SING") {
     const { attacker, target } = state.config as unknown as Record<"attacker" | "target", { geometry: { animationCenter: { x: number; y: number } } }>;
@@ -1871,13 +1872,82 @@ export function liveCastformFormDeclines(
 }
 
 /** apx210 (liveMovePlayback.ts): the decline reason of an attributed liveMoveAnimationPresentation gate (unattributed gates leave it unset). */
-export type LiveMoveDeclineSink = { reason?: LiveMoveDeclineReason };
+export type LiveMoveDeclineSink = {
+  reason?: LiveMoveDeclineReason;
+  /** apx219: set when the body was drawn only through an approximate fallback input (the reason it would have declined with). */
+  approximate?: "sprite-order-unknown" | "allocator-unknown";
+};
 function declined(sink: LiveMoveDeclineSink | undefined, reason: LiveMoveDeclineReason): null {
   if (sink) sink.reason = reason;
   return null;
 }
 
+/**
+ * apx219 (ANIMATION_VERIFICATION.md "Approximate playback"): the fallback inputs of a body that declines for unknown sprite-order /
+ * allocator history. Every body takes the same state, the known-entry first-action one: it is the state the order / allocator hosts
+ * lend to the first body of every battle (lendLiveSpriteOrder on a fresh known-entry host: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER with
+ * firstBody; prepareLiveMoveSpriteAllocator on createKnownEntrySpriteAllocatorProvider's firstMove host), so it is both the most
+ * common proven state per body and side and the one every order / allocator consumer's dense ROM proof was taken on. Later-body
+ * histories differ per battle and none is more common than the entry for any body.
+ */
+const APPROXIMATE_SPRITE_ORDER_INPUT: LiveMoveSpriteOrderInput = Object.freeze({
+  known: true as const, free: KNOWN_ENTRY_FIRST_ACTION_FREE_ORDER, firstBody: true as const,
+});
+const approximateAllocatorInputs = new Map<number, LiveMoveSpriteAllocatorInput | undefined>();
+function approximateSpriteAllocatorInput(request: BattleMoveAnimationRequest): LiveMoveSpriteAllocatorInput | undefined {
+  if (!approximateAllocatorInputs.has(request.moveId)) {
+    approximateAllocatorInputs.set(request.moveId,
+      prepareLiveMoveSpriteAllocator(createKnownEntrySpriteAllocatorProvider("ordinary-factory").firstMove, request).input);
+  }
+  return approximateAllocatorInputs.get(request.moveId);
+}
+
+/**
+ * The live body state at `age` (null: the static field). apx219: a body whose only decline is unknown sprite-order / allocator
+ * history (LIVE_MOVE_APPROXIMATE_POLICY approximate) is drawn with the known-entry fallback input instead; a body that draws with
+ * its own inputs is unchanged (the fallback is only tried after the proven call declined with that reason). Render-pure.
+ */
 export function liveMoveAnimationPresentation(
+  request: BattleMoveAnimationRequest,
+  field: BattleResolutionDisplayedField,
+  age: number,
+  paletteInput?: LiveMovePaletteInput,
+  spriteAllocatorInput?: LiveMoveSpriteAllocatorInput,
+  spriteOrderInput?: LiveMoveSpriteOrderInput,
+  presentationRngInput?: LiveMovePresentationRngInput,
+  battlerX2Input?: LiveMoveBattlerX2Input,
+  hiddenSides: LiveMoveHiddenSides = LIVE_MOVE_NO_HIDDEN_SIDES,
+  declineSink?: LiveMoveDeclineSink,
+): SceneOnMovePresentationState | null {
+  let sink: LiveMoveDeclineSink = {};
+  let approximate: LiveMoveDeclineSink["approximate"];
+  let state = liveMoveAnimationPresentationWith(request, field, age, paletteInput, spriteAllocatorInput, spriteOrderInput,
+    presentationRngInput, battlerX2Input, hiddenSides, sink);
+  // A body may gate on both histories: at most one retry per class, in the order the gates fire.
+  for (let attempt = 0; state === null && attempt < 2; attempt += 1) {
+    if (sink.reason === "sprite-order-unknown" && LIVE_MOVE_APPROXIMATE_POLICY["sprite-order-unknown"] === "approximate"
+      && spriteOrderInput !== APPROXIMATE_SPRITE_ORDER_INPUT) {
+      spriteOrderInput = APPROXIMATE_SPRITE_ORDER_INPUT;
+      approximate ??= "sprite-order-unknown";
+    } else if (sink.reason === "allocator-unknown" && LIVE_MOVE_APPROXIMATE_POLICY["allocator-unknown"] === "approximate"
+      && !spriteAllocatorInput?.historyKnown && approximateSpriteAllocatorInput(request) !== undefined) {
+      spriteAllocatorInput = approximateSpriteAllocatorInput(request);
+      approximate ??= "allocator-unknown";
+    } else {
+      break;
+    }
+    sink = {};
+    state = liveMoveAnimationPresentationWith(request, field, age, paletteInput, spriteAllocatorInput, spriteOrderInput,
+      presentationRngInput, battlerX2Input, hiddenSides, sink);
+  }
+  // A fallback that still declines holds the static field under the remaining gate (named after the fallback when unattributed).
+  const reason = state !== null ? undefined : sink.reason ?? (approximate === undefined ? undefined : `other:${approximate}-fallback` as const);
+  if (declineSink && reason !== undefined) declineSink.reason = reason;
+  if (declineSink && state !== null && approximate !== undefined) declineSink.approximate = approximate;
+  return state;
+}
+
+function liveMoveAnimationPresentationWith(
   request: BattleMoveAnimationRequest,
   field: BattleResolutionDisplayedField,
   age: number,

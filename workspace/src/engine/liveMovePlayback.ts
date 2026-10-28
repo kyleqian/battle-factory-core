@@ -7,6 +7,8 @@
 // the policy: an unproven subbed-attacker body is presented with the swaps, an unproven defender-doll body is drawn on the doll).
 // apx217: "transform" is approximate (liveTransformedBattlerDeclines / liveTransformBodyDeclineReason read the policy: a body while a
 // battler is shown transformed is drawn from the copied species' field art; the Transform body draws outside its proven picture scope).
+// apx219: "sprite-order-unknown" / "allocator-unknown" are approximate (liveMoveAnimationPresentation retries a body that declines
+// for unknown order / allocator history with the known-entry first-action input; the sink's `approximate` names the class).
 // Presentation-only diagnostics: never read by rules, RNG, the queue or the renderer.
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "./battleResolutionPresentation.ts";
@@ -36,7 +38,7 @@ export function liveMoveDeclineClassOf(reason: LiveMoveDeclineReason): LiveMoveD
 /** Per decline class: "static" holds the static field (today's decline path); "approximate" will draw the body with best-effort inputs. */
 export type LiveMovePlaybackPolicy = Readonly<Record<LiveMoveDeclineClass, "static" | "approximate">>;
 export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freeze({
-  "substitute-doll": "approximate", "sprite-order-unknown": "static", "allocator-unknown": "static", "castform-form": "static",
+  "substitute-doll": "approximate", "sprite-order-unknown": "approximate", "allocator-unknown": "approximate", "castform-form": "static",
   "endeavor-power": "static", "turn-0": "static", "hidden-target": "static", "no-adapter": "static", "transform": "approximate",
   "other": "static",
 });
@@ -133,7 +135,8 @@ export function liveMovePresentationDeclineReason(view: BattleResolutionPresenta
   } catch {
     return "other:presentation-throw";
   }
-  if (presented !== null) return null;
+  // apx219: a body drawn only with the known-entry fallback order / allocator input names the reason it would have declined with.
+  if (presented !== null) return sink.approximate ?? null;
   // A drawn duration (apx215: an approximate doll body too) leaves the presentation gate's own reason.
   return (liveMoveAnimationDuration(e.request, view.field) === null ? liveMoveDurationDeclineReason(e.request, view.field) : null)
     ?? sink.reason ?? `other:unattributed-gate-${e.request.moveId}`;

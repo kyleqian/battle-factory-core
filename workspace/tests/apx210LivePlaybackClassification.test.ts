@@ -57,7 +57,7 @@ describe("apx210: decline reasons", () => {
     expect(classify(req(29), fieldOf())).toEqual({ kind: "live" });
   });
 
-  it("presentation gates (the render view): sprite-order-unknown, endeavor-power, castform-form, hidden-target -> static, body still null", () => {
+  it("presentation gates (the render view): endeavor-power, castform-form, hidden-target -> static, body still null; apx219: sprite-order-unknown -> approximate, body drawn", () => {
     const plain = fieldOf();
     const castform = fieldOf({}, { castformForm: 1 }, ["SWELLOW", "CASTFORM"]);
     const cases: [BattleMoveAnimationRequest, BattleResolutionDisplayedField, BattleResolutionPresentationRenderView, string][] = [
@@ -70,10 +70,13 @@ describe("apx210: decline reasons", () => {
       // The duration gate passes: only the field-only classification says live; the view names the presentation gate.
       expect(liveMoveAnimationDuration(request, field)).not.toBeNull();
       expect(classify(request, field)).toEqual({ kind: "live" });
-      expect(classify(request, field, view)).toEqual({ kind: "static", reason });
+      const approximate = reason === "sprite-order-unknown";
+      expect(classify(request, field, view)).toEqual({ kind: approximate ? "approximate" : "static", reason });
       const e = (view.effect as { battlerX2Input?: never });
-      expect(liveMoveAnimationPresentation(request, field, 0, undefined, undefined, undefined, undefined, e.battlerX2Input,
-        reason === "hidden-target" ? { player: false, opponent: true } : undefined)).toBeNull();
+      const body = liveMoveAnimationPresentation(request, field, 0, undefined, undefined, undefined, undefined, e.battlerX2Input,
+        reason === "hidden-target" ? { player: false, opponent: true } : undefined);
+      if (approximate) expect(body).not.toBeNull();
+      else expect(body).toBeNull();
     }
     // Endeavor with a known stale power is live; the plain Quick Attack is live.
     expect(classify(req(283), plain, viewOf(req(283), plain))).toEqual({ kind: "live" });
@@ -88,9 +91,10 @@ describe("apx210: decline reasons", () => {
 });
 
 describe("apx210: the approximate hook", () => {
-  it("is static except apx215's substitute-doll and apx217's transform", () => {
+  it("is static except apx215's substitute-doll, apx217's transform and apx219's sprite-order-unknown / allocator-unknown", () => {
+    const promoted = ["substitute-doll", "transform", "sprite-order-unknown", "allocator-unknown"];
     for (const c of LIVE_MOVE_DECLINE_CLASSES) {
-      expect(LIVE_MOVE_APPROXIMATE_POLICY[c]).toBe(c === "substitute-doll" || c === "transform" ? "approximate" : "static");
+      expect(LIVE_MOVE_APPROXIMATE_POLICY[c]).toBe(promoted.includes(c) ? "approximate" : "static");
     }
     expect(liveMoveDeclineClassOf("other:shiny")).toBe("other");
     expect(liveMoveDeclineClassOf("substitute-doll")).toBe("substitute-doll");
