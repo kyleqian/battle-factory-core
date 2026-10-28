@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
+// apx219: the allocator-history decline pins read the proven body (an unknown allocator history is drawn approximately by the
+// production liveMoveAnimationPresentation; tests/apx219SpriteOrderAllocatorApproximate.test.ts).
 import {
-  LIVE_MOVE_ANIMATION_IDS, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+  LIVE_MOVE_ANIMATION_IDS, liveMoveAnimationDuration, liveMoveAnimationPresentationProven as liveMoveAnimationPresentation,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { createKnownEntrySpriteAllocatorProvider } from "../../src/engine/knownEntrySpriteAllocator.ts";
 import { prepareLiveMoveSpriteAllocator } from "../../src/engine/liveMoveSpriteAllocator.ts";

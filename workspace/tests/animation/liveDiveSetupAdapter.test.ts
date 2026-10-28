@@ -4,9 +4,11 @@ import { diveAtAge, type DiveGeometry, type DiveProfile } from "../../src/animat
 import type { SceneOnDiveConfig } from "../../src/animation/sceneOnPresentation.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
+// apx219: the decline pins read the proven body (an unknown order / allocator history is drawn approximately by the production
+// liveMoveAnimationPresentation; tests/apx219SpriteOrderAllocatorApproximate.test.ts).
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveDiveSetupSplashBirth, liveMoveAnimationDuration, liveMoveAnimationPresentation,
-  liveSemiInvulnerableHideBattler,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveDiveSetupSplashBirth, liveMoveAnimationDuration,
+  liveMoveAnimationPresentationProven as liveMoveAnimationPresentation, liveSemiInvulnerableHideBattler,
 } from "../../src/engine/liveMoveAnimation.ts";
 import {
   LIVE_DIVE_RANDOM2_PLANS, LIVE_FAITHFUL_RANDOM_MOVE_ANIMATION_IDS, liveMoveRandom2Plan,
