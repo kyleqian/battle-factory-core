@@ -24,6 +24,13 @@ may change gameplay/RNG when proved against source; use main-lane ownership
 and gameplay gates. Historical presentation-only exclusions are superseded.
 Settled/parked records and unrelated expansions retain their existing status.
 
+## #189 — RETIRE-YES Lobby path residuals (ret218, 2026-10-28)
+
+ret218 hands RETIRE-YES to the loss terminal (no more hang). `retire-yes-lobby-freeroam-off` (Scene OFF) 1243 / 1482:
+(a) the record prompt starts ~6 ticks later on the retire path than the loss-pinned 169-tick delay (frames 7544-7627, cause
+unknown); (b) the wandering lobby NPC's schedule depends on `gRngValue` history keyed to the loss run's ticks (frames 8033-8193).
+The terminal-arrival branch of `renderPostwinRetireWarp` (core.ts) is probably dead now. Timing class: long tail.
+
 ## #188 — Summary front animation: 137 species approximate-static motion; QUILAVA replacement one render late (finish plan, sfa214 2026-10-27)
 
 sfa214 made the draft Summary screen crash-free for every Factory species. Open, non-crash residuals:
