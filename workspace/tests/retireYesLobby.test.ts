@@ -45,9 +45,10 @@ describe("RETIRE -> YES after a won battle continues into the Lobby like a loss"
     expect(s.factoryTerminal).toBeNull();
 
     let handoffAge: number | null = null;
-    for (let i = 0; i < 80 && s.factoryTerminal === null; i += 1) {
+    for (let i = 0; i < 80 && handoffAge === null; i += 1) {
       press(null, 1);
-      if (s.factoryTerminal !== null) handoffAge = s.factoryTerminal.age;
+      const terminal = (s as EngineState).factoryTerminal;
+      if (terminal !== null) handoffAge = terminal.age;
     }
     expect(handoffAge).toBe(FACTORY_LOSS_TERMINAL_PROFILE.fieldFirstAge);
     expect(s.postwin).toBeNull();
