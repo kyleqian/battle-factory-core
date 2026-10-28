@@ -46,7 +46,11 @@ history.
   vitest fork ("Worker exited unexpectedly"; the missing file had to be found by diffing reported files against `git ls-files`, ~10 min);
   worker-only typecheck skips let `findLast` (lib ES2022) and two narrowing errors reach the supervisor's gate (~10 min); lsd198's drain
   RGB dumps are not committed, so its dense compare first regenerates ROM frames; each single vitest file spends ~75 s collecting.
-- **Hits:** 4 sessions (2026-10-14, 2026-10-15/16, 2026-10-16/17, 2026-10-23), ~3 h total.
+  (12, 2026-10-27/28) Playwright lived only in a removed worker worktree's ignored `.integration/browser/node_modules`, so the
+  first `play:random` on master failed (~5 min; reinstalled in the main checkout). A full suite beside a census-running worker was
+  OOM-killed in one fork (~5 min to find + rerun the unreported file). `lsd194CensusDelta.py` prints FAIL and a 51-battle
+  `typeSequenceChanged` list for identical arms; use `rst197CensusDelta.py` (apx215 worker ~10 min).
+- **Hits:** 5 sessions (2026-10-14, 2026-10-15/16, 2026-10-16/17, 2026-10-23, 2026-10-27/28), ~3.3 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
   and the supervisor; census job limit from `/etc/pokebench-runner.env`. Vendor paths: 155 `tools/**/*.sh` hard-code
   `/Users/kyle/Developer/pokebench/vendor`; replace with `${POKEBENCH_VENDOR_DIR:-…}` and export it from the runner env (one sweep +
