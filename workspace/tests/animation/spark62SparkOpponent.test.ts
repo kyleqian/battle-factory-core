@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField } from "../../src/engine/battleResolutionPresentation.ts";
 import { renderSceneOnMovePresentation } from "../../src/engine/battleScene.ts";
-import { liveMoveAnimationDuration, liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
+import { liveMoveAnimationDuration, liveMoveAnimationPresentation, type LiveMoveDeclineSink } from "../../src/engine/liveMoveAnimation.ts";
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
 import { knownEntrySpriteOrderState } from "../../src/engine/spriteOrderProvider.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
@@ -51,8 +51,13 @@ describe("spark62: Spark opponent-attacker live adapter", () => {
   it("keeps the known-order lend gate for the opponent attacker (the tie order is history, not derived)", () => {
     const field = displayed("SHUCKLE", "VOLTORB");
     expect(presentation(field, 1, 0, knownOrder())).not.toBeNull();
-    expect(presentation(field, 1, 0, { known: false } as never)).toBeNull();
-    expect(presentation(field, 1, 0)).toBeNull();
+    // apx219: an unknown order still declines the proven body; it is drawn approximately with the known-entry first-action order.
+    for (const unknown of [undefined, { known: false } as never]) {
+      const sink: LiveMoveDeclineSink = {};
+      expect(liveMoveAnimationPresentation(request(1), field, 0, undefined, undefined, unknown, undefined, undefined, undefined, sink))
+        .not.toBeNull();
+      expect(sink.approximate).toBe("sprite-order-unknown");
+    }
     const config = presentation(field, 1, 0, knownOrder())!.config as any;
     expect(config.attacker.geometry.side).toBe("opponent");
     expect(config.flashingInitialCallbackAdvances).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);

@@ -96,7 +96,8 @@ describe("cf78: census route 950 through the production orchestrator, Scene ON /
     expect(r.castformBodiesOn).toBe(19);
     // cast83: Shock Wave / Icy Wind / Water Pulse by the ice-form CASTFORM (351 / 196 / 352 :by:3) are live; Ember (residual), Rest,
     // Hail, Ice Ball and Fly at it still decline (docs/cast83-castform-forms.md).
-    expect(r.castformLiveBodiesOn).toBe(9);
+    // apx219: + the ice-form Water Pulse 352 after an unknown order history (census seed 950), drawn approximately (known-entry order).
+    expect(r.castformLiveBodiesOn).toBe(10);
     // Every other body keeps its decision: the 9 live on c68111480 (census battle 950, docs/cf78-castform-needle-arm.md).
     expect(r.liveBodiesOn - r.castformLiveBodiesOn).toBe(9);
     // The form at every one of them: hail (3), on the player's slot (SEALEO's Hail from turn 6).

@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation, type LiveMoveDeclineSink,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
@@ -74,8 +74,13 @@ describe("live Sheer Cold (329) first-body adapter", () => {
     expect(liveMoveAnimationPresentation(onixEffect.request, onix.field, 0, undefined, undefined, onixEffect.spriteOrderInput as never)).not.toBeNull();
     expect(liveMoveAnimationPresentation(onixEffect.request, onix.field, 0, undefined, undefined,
       { ...onixEffect.spriteOrderInput, firstBody: undefined } as never)).toBeNull();
-    expect(call(undefined)).toBeNull();
-    expect(call({ known: false })).toBeNull();
+    // apx219: an unknown order still declines the proven body; it is drawn approximately with the known-entry first-action order.
+    for (const unknown of [undefined, { known: false }]) {
+      const sink: LiveMoveDeclineSink = {};
+      expect(liveMoveAnimationPresentation(effect.request, view.field, 0, undefined, undefined, unknown as never, undefined, undefined,
+        undefined, sink)).not.toBeNull();
+      expect(sink.approximate).toBe("sprite-order-unknown");
+    }
     const shiny = ((416_049_562 >>> 16) ^ (416_049_562 & 0xffff)) >>> 0;
     for (const side of ["player", "opponent"] as const) {
       expect(call(effect.spriteOrderInput, { ...view.field, [side]: { ...view.field[side], personality: shiny } })).toBeNull();

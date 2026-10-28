@@ -6,7 +6,7 @@ import type { BattleResolutionDisplayedField } from "../../src/engine/battleReso
 import type { BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation, type LiveMoveDeclineSink,
 } from "../../src/engine/liveMoveAnimation.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { prepareLiveMoveSpriteOrder, type LiveMoveSpriteOrderInput } from "../../src/engine/liveMoveSpriteAllocator.ts";
@@ -81,8 +81,13 @@ describe("live prep9 move adapters", () => {
     for (const c of cases) for (const a of [0, 1] as const) {
       if (c.duration[a] === null) continue;
       const field = a === 0 ? displayed(c.alt[0], c.alt[1]) : displayed(c.alt[1], c.alt[0]);
-      expect(cfg(field, request(c.id, a)), `${c.move} ${a}`).toBeNull();
-      expect(cfg(field, request(c.id, a), { known: false } as never), `${c.move} ${a}`).toBeNull();
+      // apx219: an unknown order still declines the proven body; it is drawn approximately with the known-entry first-action order.
+      for (const unknown of [undefined, { known: false } as never]) {
+        const sink: LiveMoveDeclineSink = {};
+        expect(liveMoveAnimationPresentation(request(c.id, a), field, 0, undefined, undefined, unknown, undefined, undefined, undefined, sink),
+          `${c.move} ${a}`).not.toBeNull();
+        expect(sink.approximate, `${c.move} ${a}`).toBe("sprite-order-unknown");
+      }
       expect(cfg(field, request(c.id, a), knownOrder(c.id)), `${c.move} ${a}`).not.toBeNull();
     }
     expect(cfg(displayed("ONIX", "GROVYLE"), request(104, 1), knownOrder(104))).not.toBeNull();
