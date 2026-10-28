@@ -1721,6 +1721,16 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       rngMode = "vblank";
       battleScene = null;
     }
+    // RETIRE-YES (WarpToLobbyLost == the loss script, docs/postwin-record-
+    // retire-ground-truth.md §4): at the Lobby-arrival fade-in frame the
+    // post-win question hands off to the LOSS terminal at the same age the
+    // warp render already used, so input advances LostChallenge exactly as
+    // after a loss. The never-matching commandId keeps it from completing a
+    // real presentation command.
+    const retireHandoff =
+      postwin !== null &&
+      nextPostwin.question?.kind === "retire" &&
+      postwinQuestionYesDelay(nextPostwin) === POSTWIN_RETIRE_FADE_IN_DELAY;
     return {
       ...state,
       frame: state.frame + 1,
@@ -1730,13 +1740,26 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       prebattleRoom,
       battleRoom,
       battleScene,
-      postwin: postwin === null ? null : nextPostwin,
+      postwin: postwin === null || retireHandoff ? null : nextPostwin,
       battleSetup,
       rngMode,
       rngValue,
       factorySwap,
       roundController,
       factoryRoundBattleOrchestrator,
+      factoryTerminal: retireHandoff
+        ? {
+            ...createFactoryTerminalLossPresentation({
+              type: "roundLost",
+              commandId: -1,
+              battleIndex:
+                factoryRoundBattleOrchestrator?.round.rules.battleIndex ??
+                roundController?.rules.battleIndex ??
+                0,
+            }),
+            age: FACTORY_LOSS_TERMINAL_PROFILE.fieldFirstAge,
+          }
+        : state.factoryTerminal,
     };
   }
 
