@@ -5,9 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-27 / 28 — CAX31 daily run (supervisor, Opus 5.5): sfa214 + apx215 + play216 + apx217 folded
+## 2026-10-27 / 28 — CAX31 daily run wind-down (supervisor, Opus 5.5): sfa214, apx215, play216, apx217, ret218 folded; apx219 unfolded
 
-- **State:** master `f5f8c945e`+ (src = worker-tested `d8ebb1239`).
+- **State:** master `3f6754b25`+ (final src = apx217 + ret218 union `6201dc8e9`). **Final gates on `9fb159322` (same src): typecheck 0;
+  build 0; full suite 1,709 files / 14,141 tests, 0 failed** (`.integration/validation/sv-20261027/final-9fb159322/`).
 - **Folded:** sfa214 (Summary-screen crashes found by browser random play). Supervisor finished the cut-off branch: merged
   master, added `appRoute` to its 5 new compare traces (the only red test). Gates on `b28ebe50a`: typecheck 0; full suite
   **1,705 files / 14,121 tests, 0 failed**; build 0; the 18 saved random-play sessions replay clean with `--render`;
@@ -36,8 +37,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   castform 18, extrasensory 17, endeavor 12, no-adapter 11, turn-0 7, idle-rest 4, hidden 3, allocator 3, seismic 1);
   approximate 105 (substitute 74, transform 31); unnamed 0.** Magic Coat x2 in seed 197 moved transform -> allocator-unknown.
 - **Browser goal play on `91984abfe` (10 min / scene, seed 7):** ON 29 battles / 16 swap screens, OFF 46 / 19, 0 errors.
-- **Running:** ret218 (RETIRE-YES hand-off), apx219 (sprite-order-unknown + allocator-unknown -> approximate; two workers this
-  time, census at 2 jobs). Evidence `.integration/validation/sv-20261027/`.
+- **Folded:** ret218: RETIRE-YES after a win hands off to the loss `factoryTerminal` at the warp's Lobby-arrival frame (was a
+  permanent hang); source: WarpToLobbyLost == the loss script. Worker on `edc45e88f`: full suite 1,708 / 14,136 0 failed, build 0,
+  differential 641 / 641, winning-swap 0:10 per-seed identical, every postwin-* / loss-terminal-* trace unchanged; new
+  `retire-yes-lobby-freeroam-off` 1243 / 1482 (ISSUES #189). Supervisor on the union: typecheck 0, new test 2 / 2, the four
+  compares rerun. (Supervisor full suite + build on the union were OOM-killed beside apx219; covered by the final gates below.)
+- **NOT folded — apx219** (sprite-order-unknown 26 + allocator-unknown 3 -> approximate; branch `worker/animation-20261028-040709`,
+  7 commits; stopped by the supervisor at 06:05 to keep the final gates safe). Census on `c7f8a558a`: ON 10 changed / 0 bad, OFF
+  1,000 / 1,000; **static 102 -> 73**. Full suite unfinished (many gate-pin tests re-pinned to `liveMoveAnimationPresentationProven`);
+  no strips yet. Handoff "Next work" 1 has the fold recipe.
+- **Wind-down soak gates on src `f5f8c945e` (= final src minus ret218's retire-only branch, which no soak reaches):** varied-RNG
+  first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 `--scene both`
+  **ON 20 / 20, OFF 20 / 20** (all `budget`). The 0:60 full / winning / winning-swap gates were not run (hours each here).
+- **Host:** two workers at once (separate lanes) OOM-killed a supervisor full suite and two builds; keep one worker at a time.
+- **Notes:** no DEFERRED items. Worker refs kept: `worker/integration-20261027-065233` (sfa214), `-20261027-213054` (apx215),
+  `-20261027-232252` (play216), `-20261028-005213` (apx217), `-20261028-023556` (ret218) — merged; `worker/animation-20261028-040709`
+  (apx219) unmerged. Evidence `.integration/validation/sv-20261027/`. No push.
 ---
 
 ## 2026-10-26 / 27 — CAX31 session wind-down (supervisor, Opus 5.5): finish plan Phase 1 tooling + containment; Phase 2 plumbing
