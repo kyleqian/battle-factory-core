@@ -26,6 +26,7 @@
  *   npm run build && npm run play:random -- --minutes 10 --scene both --seed 1
  *   npm run play:random -- --self-test        # plants a page error, expects it to be caught + saved
  * Flags: --uniform (the original mode) --mix-rate P (goal mode: chance a policy press becomes a random burst, default 0.04)
+ *        --render-every N (goal mode: the page draws every Nth frame, default 1 = every frame, like the real loop)
  *        --minutes N (per scene, default 10) --scene on|off|both (default both) --seed N|0xHEX (default 1)
  *        --out DIR (default .integration/random-play/<timestamp>) --dist DIR (default dist)
  *        --no-replay-stats (skip the offline engine replay that counts battles) --headed
@@ -52,7 +53,7 @@ const MIME = {
 };
 
 function parseArgs(argv) {
-  const options = { minutes: 10, scene: "both", seed: 1, out: null, dist: "dist", selfTest: false, replayStats: true, headed: false, uniform: false, mixRate: 0.04 };
+  const options = { minutes: 10, scene: "both", seed: 1, out: null, dist: "dist", selfTest: false, replayStats: true, headed: false, uniform: false, mixRate: 0.04, renderEvery: 1 };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     const value = () => {
@@ -70,9 +71,11 @@ function parseArgs(argv) {
     else if (arg === "--headed") options.headed = true;
     else if (arg === "--uniform") options.uniform = true;
     else if (arg === "--mix-rate") options.mixRate = Number(value());
+    else if (arg === "--render-every") options.renderEvery = Number(value());
     else throw new Error(`unknown argument: ${arg}`);
   }
   if (!(options.minutes > 0)) throw new Error("--minutes must be > 0");
+  if (!(Number.isInteger(options.renderEvery) && options.renderEvery >= 1)) throw new Error("--render-every must be an integer >= 1");
   if (!["on", "off", "both"].includes(options.scene)) throw new Error("--scene must be on|off|both");
   if (options.selfTest && !argvHas(argv, "--minutes")) options.minutes = 0.25;
   if (options.selfTest && !argvHas(argv, "--scene")) options.scene = "on";
@@ -432,10 +435,15 @@ async function runSceneGoal(browser, port, scene, options, outDir, log) {
     let contained = containedSeen;
     if (segments.length > 0) {
       try {
-        contained = await page.evaluate((segs) => {
-          window.__POKEBENCH__.advance(segs);
+        // advance() draws once per call, so split the chunk into renderEvery-frame calls (default: draw every frame).
+        contained = await page.evaluate(([segs, every]) => {
+          for (const seg of segs) {
+            for (let f = 0; f < seg.frames; f += every) {
+              window.__POKEBENCH__.advance([{ frames: Math.min(every, seg.frames - f), buttons: seg.buttons }]);
+            }
+          }
           return window.__POKEBENCH__.containedErrors().length;
-        }, segments);
+        }, [segments, options.renderEvery]);
       } catch (error) {
         pageThrew = String(error?.stack ?? error).replace(/^Error: page\.evaluate: /, "");
       }
