@@ -4,8 +4,10 @@ import { describe, expect, it } from "vitest";
 import type { SceneOnDiveConfig } from "../../src/animation/sceneOnPresentation.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
+// apx219: these gate pins read the proven body (an unknown order / allocator history is drawn approximately by the production
+// liveMoveAnimationPresentation; tests/apx219SpriteOrderAllocatorApproximate.test.ts).
 import {
-  liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveOpponentShadowRow, liveSemiInvulnerableHideBattler,
+  liveMoveAnimationDuration, liveMoveAnimationPresentationProven as liveMoveAnimationPresentation, liveMoveOpponentShadowRow, liveSemiInvulnerableHideBattler,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { LIVE_DIVE_RANDOM2_PLANS, liveMoveRandom2Plan } from "../../src/engine/liveMovePresentationRng.ts";
 import { presentationRngFromTrace, presentationRngTraceMetadata } from "../../src/engine/presentationRngHost.ts";
