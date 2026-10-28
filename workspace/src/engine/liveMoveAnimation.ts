@@ -3169,7 +3169,7 @@ export function liveMoveAnimationPresentation(
       if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentState = { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] };
       const fullOrder = spriteOrderWithOccupiedPrefix(lentState, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
-      if (fullOrder === null) return null;
+      if (fullOrder === null) return declined(declineSink, "other:occupied-prefix-unknown");
       const orderIndex = (slot: number) => fullOrder.indexOf(slot);
       const side = attacker.geometry.side;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
@@ -3190,7 +3190,7 @@ export function liveMoveAnimationPresentation(
           break;
         case 69: {
           // AnimTask_GetSeismicTossDamageLevel: gAnimMoveDmg 33..65 is the medium branch the reducer ports.
-          if (request.damage < 33 || request.damage > 65) return null;
+          if (request.damage < 33 || request.damage > 65) return declined(declineSink, "other:seismic-toss-damage-branch");
           const wave = (slots: number[], matrices: number[]) => slots.map((slot, i) =>
             ({ slot, matrixNum: matrices[i]!, persistentOrder: orderIndex(slot) }));
           const rocks = [wave([4, 5, 7, 9], [3, 4, 5, 6]), wave([10, 11, 12, 13], [7, 8, 9, 10]), wave([4, 5, 7, 9], [3, 4, 5, 6])];
@@ -3508,10 +3508,11 @@ export function liveMoveAnimationPresentation(
       // after its birth (the reducer's own lifetime, so a pass with placeholder slots measures it); persistentOrder = the
       // slot's index in the lent order. Geometry/rest from the anchors. Unknown tracked order -> null.
       const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
-      if (draws === undefined || draws.length !== 26 || draws.some((group) => group.length !== 6) || !spriteOrderInput?.known) return null;
+      if (draws === undefined || draws.length !== 26 || draws.some((group) => group.length !== 6)) return declined(declineSink, "other:presentation-rng-words");
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
-      if (lentOrder === null) return null;
+      if (lentOrder === null) return declined(declineSink, "other:occupied-prefix-unknown");
       const side = attacker.geometry.side;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const animationGeometry = { attackerPictureCenter: attackerAnchors.picOffsetPoint, targetPictureCenter: targetAnchors.picOffsetPoint,
@@ -3825,15 +3826,16 @@ export function liveMoveAnimationPresentation(
       // (prep46 s1: exact on every body, including the second Mud-Slap bodies the former "4 then 3 -> swap" rule declined).
       // Unknown tracked order -> null.
       const draws = liveMovePresentationRngWords(presentationRngInput)?.draws;
-      if (draws === undefined || !spriteOrderInput?.known) return null;
+      if (draws === undefined) return declined(declineSink, "other:presentation-rng-words");
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
-      if (lentOrder === null) return null;
+      if (lentOrder === null) return declined(declineSink, "other:occupied-prefix-unknown");
       const mud = request.moveId === 189;
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const profile = liveDirtScatterProfile(mud ? 189 : 28, attacker.geometry.side, lentOrder, draws,
         attackerAnchors.picOffsetPoint, targetAnchors.picOffsetPoint);
-      if (profile === null) return null;
+      if (profile === null) return declined(declineSink, "other:dirt-scatter-profile");
       const common = { attacker, target, animationAgeOffset: DIRT_ANIMATION_AGE_OFFSET[mud ? "mud" : "sand"], moveTextStartAge: 0,
         fieldProfile: { playerHp: field.player.hp, opponentHp: field.opponent.hp, playerStatus: "none" as const } };
       config = mud
@@ -3860,10 +3862,11 @@ export function liveMoveAnimationPresentation(
       // prep14 s1.2 (faithful random, first-body order lent): geometry from the anchors (sprite centres, picture offsets), the
       // monbg snapshot from the target's source sprite centre + idle x2, allocator constants equal 3/3 scenarios + both corpora.
       const words = liveMovePresentationRngWords(presentationRngInput);
-      if (words === null || !spriteOrderInput?.known) return null;
+      if (words === null) return declined(declineSink, "other:presentation-rng-words");
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const initialOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
-      if (initialOrder === null) return null;
+      if (initialOrder === null) return declined(declineSink, "other:occupied-prefix-unknown");
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const playerAttacker = attacker.geometry.side === "player";
       const snapshot = { x: targetAnchors.spriteCenter.x + targetAnchors.frontIdleRest.x2, y: targetAnchors.spriteCenter.y };
@@ -3985,19 +3988,21 @@ export function liveMoveAnimationPresentation(
       // from the assembler over the lent order (any known lend: the renderer reads no activation BG register the body does not
       // overwrite, and the only move sprite is the OBJ-window copy in the lowest free slot); tasks / registers / BG scroll /
       // palette from curseModel.ts; non-shiny (no shiny battle palette); zero idle rests (liveCurseStatsInputs).
-      if ((request.turn & 1) !== 1 || !spriteOrderInput?.known) return null;
+      if ((request.turn & 1) !== 1) return declined(declineSink, "other:curse-ghost-branch");
+      if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
-      if (palettes === null || activationOrder === null) return null;
+      if (palettes === null) return declined(declineSink, "other:palette-compose");
+      if (activationOrder === null) return declined(declineSink, "other:occupied-prefix-unknown");
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const inputs = liveCurseStatsInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
         free: spriteOrderInput.free, sort: sortGbaSpriteOrder,
         model: { rows: CURSE_STATS_ROWS, tasksAt: curseStatsTasksAt, registersAt: curseStatsRegistersAt, battleBgAt: curseStatsBattleBgAt,
           paletteAt: curseStatsPaletteAt, spritesAt: curseStatsSpritesAt } });
-      if (inputs === null) return null;
+      if (inputs === null) return declined(declineSink, "other:curse-inputs");
       // The CURSE seam centres are the battler sprite centres (gSprites x / y, as the staged seam); the renderer reads geometry only
       // for the age-0 enemy shadow (battlePositionCenter.y - (attr0 y - 8) = the shadow's y 40).
       const withCenter = (battler: SceneOnPresentationBattler, center: { x: number; y: number }): SceneOnPresentationBattler => ({
@@ -4043,24 +4048,25 @@ export function liveMoveAnimationPresentation(
       const furyCutterCounter = request.rolloutCounter
         ?? (spriteOrderInput.firstBody || request.power === 10 || request.power === 15 ? 1 : undefined);
       if (furyCutterCounter !== 1 && furyCutterCounter !== 2 && furyCutterCounter !== 3 && furyCutterCounter !== 4
-        && furyCutterCounter !== 5) return null;
+        && furyCutterCounter !== 5) return declined(declineSink, "other:fury-cutter-counter");
       // fury99: at counter 2+ the user's previous Fury Cutter body zeroed its target's x2 (ShakeMon; the x2 tracker's "zeroed" target role):
       // a species rest counts only while the tracker does not have it zeroed (ROM opponent ONIX x2 1 at counter 1, 0 at counters 2..5;
       // 4 / 4 windows 0 px). Counter 1 keeps the species rule.
       const restFree = (side: "player" | "opponent") => { const rest = liveBattlerAnchors(side, art, battlerX2Input).frontIdleRest;
         return rest.x2 === 0 && rest.y2 === 0; };
       if (!spriteOrderInput.firstBody
-        && !(furyCutterCounter >= 2 ? restFree("player") && restFree("opponent") : liveBattlersRestFree(art))) return null;
+        && !(furyCutterCounter >= 2 ? restFree("player") && restFree("opponent") : liveBattlersRestFree(art))) return declined(declineSink, "other:later-body-idle-rest");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
-      if (palettes === null || activationOrder === null) return null;
+      if (palettes === null) return declined(declineSink, "other:palette-compose");
+      if (activationOrder === null) return declined(declineSink, "other:occupied-prefix-unknown");
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
       const inputs = liveFuryCutterInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
         targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
         counter: furyCutterCounter, sort: sortGbaSpriteOrder });
-      if (inputs === null) return null;
+      if (inputs === null) return declined(declineSink, "other:fury-cutter-inputs");
       config = { move: "FURY_CUTTER", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
       break;
     }
