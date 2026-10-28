@@ -20,34 +20,40 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-10-27 09:10 UTC wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-10-28 ~06:20 UTC wind-down; PROGRESS.md top entry has details)
 
-- Phase 1 tooling landed: `npm run soak -- --scene on|off|both` (soakscene208); in-app containment of presentation throws
-  (contain209 + contain213: adapter / duration / draw / tick-side field reads / command projection / order hosts); render
-  caches ~4x faster, pixel-identical (perf211; `tools/soak/frameHashes.ts`); `npm run play:random` drives the built bundle
-  in headless Chromium (play212; Playwright + Chromium + unpacked system libraries live in the ignored
-  `.integration/browser/`, picked up automatically; no root needed).
-- Phase 2 plumbing landed: apx210 reason codes / `LIVE_MOVE_APPROXIMATE_POLICY` (all static) / census field [21].
-  Scene ON census 0..999 on `6a021c074`: 207 static commands (table in PROGRESS.md), 0 approximate.
-- Scene ON soaks so far all clean: winning carry 0 / 14 / 28 + winning-swap (0:30 each) and carry 0 30:130 at
-  `--render-every 1`, vanilla 0:20 ON; 0 CRASH / 0 HANG / 0 CONTAINED.
-- Browser random play found real crashes on the draft **Summary** screen in both scenes (6-species front-animation table;
-  Battle Moves detail `moves[powerMoveIndex]`; Contest Moves cancel row). sfa214 fixes them on the UNFOLDED branch
-  `worker/integration-20261027-065233` (worktree kept; its suite was cut by the deadline): verify (tests, differential, the 17 saved sessions replayed with render,
-  full suite + build on the union) and fold first.
+- Phase 1: soak `--scene`, containment (contain209 / 213), render caches (perf211), Summary crash fixes (sfa214, folded
+  2026-10-27). `npm run play:random` now plays the real Factory loop in headless Chromium (play216 goal mode: node mirror
+  engine + soak policies through `__POKEBENCH__.advance`, every frame drawn; ~30 battles / 10 min ON, ~45 OFF; 0 errors so
+  far). Playwright must exist in `.integration/browser/node_modules` (ignored; `cd .integration/browser && npm install playwright`).
+  RETIRE-YES after a win no longer hangs (ret218). After a loss / retire the player ends in the walkable Lobby with no way to
+  start a new challenge except reloading (silent NPCs, 2026-08-05 user decision) — Phase 3 title-screen work.
+- Phase 2: approximate class live for substitute-doll (74, apx215) and transform (31, apx217); all 13 unattributed gates
+  named. Scene ON census 0..999 on master: **static 102**, approximate 105, live 26,956.
+- **apx219 UNFOLDED** (stopped at the deadline): branch `worker/animation-20261028-040709` (7 commits, base `03fbb15a6`):
+  sprite-order-unknown 26 + allocator-unknown 3 -> approximate using the known-entry first-action input; census on
+  `c7f8a558a` ON 10 battles changed / 0 bad, OFF 1,000 / 1,000 identical, static 102 -> 73
+  (`.integration/validation/sv-20261027/apx219-worktree-evidence/`). Its later commits re-pin gate-pin tests to
+  `liveMoveAnimationPresentationProven`; full suite NOT run to completion. First step next run: merge master into it, run
+  the full suite under nohup ALONE (no second worker; it was OOM-killed twice beside another worker), rerun census ON on the
+  union vs `census-apx217/on-cfa1242c0`, strips under `tools/integration/fixtures/approximate/sprite-order/` (NOT made yet; add them),
+  build, fold.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
-1. **Crashes.** After sfa214: `npm run build && npm run play:random -- --minutes 10 --scene both`; every overlay /
-   pageerror becomes a fix step (replay saved sessions with tick + render). Extend soak exploring policies whenever the
-   browser finds a screen the soak does not reach. Nightly Scene ON bulk: `--render-every 8` (rendering every frame is
-   ~1 battle / min / process here; see PROGRESS sizing note) plus a `--render-every 1` sample.
-2. **Every animation plays.** Brief ready: `.integration/validation/sv-20261026b/apx215.txt` (substitute-doll, 74
-   commands). Then by weight: transform 33, castform-form 18, extrasensory-player-later 17, sprite-order-unknown 16,
-   endeavor-power 12, no-adapter 11, turn-0 7, hidden-target 3; first name the 13 `other:unattributed-gate-*` commands.
-   Then player back send-out + intro send-outs in Scene ON, weather-continues side (#157).
-3. **Production + cleanup** per the plan, interleaved (cleanup steps 1–3 first).
-4. **Timing** residuals last (exs207 refs kept: `worker/integration-20261026-213055`, `-223044`, `worker/union-exs207`).
+1. **Fold apx219** (above).
+2. **Every animation plays**, by weight: castform-form 18, extrasensory-player-later 17, endeavor-power 12, no-adapter 11
+   (needs adapters), turn-0 7, later-body-idle-rest 4, hidden-target 3, seismic-toss-damage-branch 1. Then player back
+   send-out + intro send-outs in Scene ON, weather-continues side (#157). Pattern: apx215 / apx217 (policy flag, census
+   delta, strips, Tier-1 test).
+3. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak bulk at
+   `--render-every 8` plus a `--render-every 1` sample. Every overlay / pageerror becomes a fix step.
+4. **Production + cleanup** per the plan, interleaved (cleanup steps 1–3 first; a "new challenge" path from the Lobby or a
+   title screen belongs here).
+5. **Timing** residuals last (ISSUES #188 Summary motion, #189 retire path; exs207 refs kept).
+
+**Host note (2026-10-28):** two workers at once on 16 GiB caused repeated OOM kills (each worker's full suite / census plus a
+supervisor build). Keep ONE worker at a time; the launcher allows one per lane, so a second worker needs another lane anyway.
 
 ## Gate recipe (unchanged)
 
