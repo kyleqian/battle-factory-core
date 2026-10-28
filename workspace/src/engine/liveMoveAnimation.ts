@@ -6,7 +6,7 @@ import { prepareLiveMoveSpriteAllocator, type LiveMoveSpriteAllocatorInput, type
 import { createKnownEntrySpriteAllocatorProvider } from "./knownEntrySpriteAllocator.ts";
 import { liveSubstituteSwapApplies, liveSubstituteSwapProven, substituteSwapBodyField, substituteSwapBodyFraming, substituteSwapCompositeDuration } from "./liveSubstituteSwap.ts";
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
-import { LIVE_MOVE_APPROXIMATE_POLICY, type LiveMoveDeclineReason } from "./liveMovePlayback.ts";
+import { LIVE_MOVE_APPROXIMATE_POLICY, liveMoveReasonIsApproximate, type LiveMoveDeclineReason } from "./liveMovePlayback.ts";
 import { recordContainedPresentationError } from "./presentationContainment.ts";
 import { battleCommandFieldSpeciesSpriteOrigin, battleCommandFieldSpriteOrigin, createBattleCommandFieldArtView } from "./battleCommandFieldArt.ts";
 import type { BattleResolutionDisplayedField } from "./battleResolutionPresentation.ts";
@@ -1875,8 +1875,18 @@ export function liveCastformFormDeclines(
 export type LiveMoveDeclineSink = {
   reason?: LiveMoveDeclineReason;
   /** apx219: set when the body was drawn only through an approximate fallback input (the reason it would have declined with). */
-  approximate?: "sprite-order-unknown" | "allocator-unknown";
+  approximate?: LiveMoveDeclineReason;
 };
+/** apx221: the provenance gates of liveMoveAnimationPresentationProven a retry lifts (each flag is one decline reason). */
+export type LiveMoveApproximations = Readonly<{
+  castformForm?: true; hiddenTarget?: true; extrasensoryLaterTarget?: true; endeavorPower?: true; laterBodyRest?: true; seismicTossBranch?: true;
+}>;
+const NO_APPROXIMATIONS: LiveMoveApproximations = Object.freeze({});
+/** The flag a declined reason lifts (the gates above name it in a comment); order / allocator reasons are apx219's inputs, not flags. */
+const APPROXIMATION_OF_REASON: Readonly<Record<string, keyof LiveMoveApproximations>> = Object.freeze({
+  "castform-form": "castformForm", "hidden-target": "hiddenTarget", "endeavor-power": "endeavorPower", "other:later-body-idle-rest": "laterBodyRest",
+  "other:extrasensory-player-later-target": "extrasensoryLaterTarget", "other:seismic-toss-damage-branch": "seismicTossBranch",
+});
 function declined(sink: LiveMoveDeclineSink | undefined, reason: LiveMoveDeclineReason): null {
   if (sink) sink.reason = reason;
   return null;
@@ -1921,24 +1931,30 @@ export function liveMoveAnimationPresentation(
 ): SceneOnMovePresentationState | null {
   let sink: LiveMoveDeclineSink = {};
   let approximate: LiveMoveDeclineSink["approximate"];
+  let approximations: LiveMoveApproximations = NO_APPROXIMATIONS;
   let state = liveMoveAnimationPresentationProven(request, field, age, paletteInput, spriteAllocatorInput, spriteOrderInput,
-    presentationRngInput, battlerX2Input, hiddenSides, sink);
-  // A body may gate on both histories: at most one retry per class, in the order the gates fire.
-  for (let attempt = 0; state === null && attempt < 2; attempt += 1) {
-    if (sink.reason === "sprite-order-unknown" && LIVE_MOVE_APPROXIMATE_POLICY["sprite-order-unknown"] === "approximate"
+    presentationRngInput, battlerX2Input, hiddenSides, sink, approximations);
+  // A body may gate on several provenance inputs: one retry per class, in the order the gates fire (the first names the command).
+  for (let attempt = 0; state === null && attempt < 8; attempt += 1) {
+    const reason = sink.reason;
+    const flag = reason === undefined ? undefined : APPROXIMATION_OF_REASON[reason];
+    if (reason === "sprite-order-unknown" && LIVE_MOVE_APPROXIMATE_POLICY["sprite-order-unknown"] === "approximate"
       && spriteOrderInput !== APPROXIMATE_SPRITE_ORDER_INPUT) {
       spriteOrderInput = APPROXIMATE_SPRITE_ORDER_INPUT;
       approximate ??= "sprite-order-unknown";
-    } else if (sink.reason === "allocator-unknown" && LIVE_MOVE_APPROXIMATE_POLICY["allocator-unknown"] === "approximate"
+    } else if (reason === "allocator-unknown" && LIVE_MOVE_APPROXIMATE_POLICY["allocator-unknown"] === "approximate"
       && !spriteAllocatorInput?.historyKnown && approximateSpriteAllocatorInput(request) !== undefined) {
       spriteAllocatorInput = approximateSpriteAllocatorInput(request);
       approximate ??= "allocator-unknown";
+    } else if (reason !== undefined && flag !== undefined && approximations[flag] !== true && liveMoveReasonIsApproximate(reason)) {
+      approximations = Object.freeze({ ...approximations, [flag]: true as const });
+      approximate ??= reason;
     } else {
       break;
     }
     sink = {};
     state = liveMoveAnimationPresentationProven(request, field, age, paletteInput, spriteAllocatorInput, spriteOrderInput,
-      presentationRngInput, battlerX2Input, hiddenSides, sink);
+      presentationRngInput, battlerX2Input, hiddenSides, sink, approximations);
   }
   // A fallback that still declines holds the static field under the remaining gate (named after the fallback when unattributed).
   const reason = state !== null ? undefined : sink.reason ?? (approximate === undefined ? undefined : `other:${approximate}-fallback` as const);
@@ -1961,10 +1977,15 @@ export function liveMoveAnimationPresentationProven(
   hiddenSides: LiveMoveHiddenSides = LIVE_MOVE_NO_HIDDEN_SIDES,
   /** apx210 (liveMovePlayback.ts): receives the attributed gate's decline reason when this returns null; production passes none. */
   declineSink?: LiveMoveDeclineSink,
+  /** apx221: the provenance gates the caller lifts (liveMoveAnimationPresentation retries a declined body with the reason's flag). */
+  approximations: LiveMoveApproximations = NO_APPROXIMATIONS,
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request, field) === null) return null;
-  if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return declined(declineSink, "hidden-target");
-  if (liveCastformFormDeclines(field, request)) return declined(declineSink, "castform-form");
+  // apx221 hidden-target: draw the body with the target transparent (hide66's rows 0..149) and the visible-target lag phase (the policy's
+  // [148, 149] / [68, 69] ages); the ROM's skipped lag frames after the age-150 / 70 mark are not modelled, so those rows may lead by 1..2 frames.
+  if (approximations.hiddenTarget !== true && liveMoveHiddenTargetDeclines(request, hiddenSides)) return declined(declineSink, "hidden-target");
+  // apx221 castform-form: draw the form art the field shows (castformFieldArtForm) whether or not this (move, role, form) was ROM-measured.
+  if (approximations.castformForm !== true && liveCastformFormDeclines(field, request)) return declined(declineSink, "castform-form");
   const art = createBattleCommandFieldArtView(field);
   // prep46: after a words-dependent order unit (Sand-Attack / Mud-Slap / Rain Dance / RAIN_CONTINUES) ANY consumer's lend is the
   // word-free deferred marker; resolve it here, render-pure: carry the unit's activation order through the unit with ITS recorded
@@ -2337,7 +2358,9 @@ export function liveMoveAnimationPresentationProven(
       // droplets around the attacker battlePositionCenter, hitsplats at the target picOffsetPoint mirrored by its side) and the stale
       // gAnimMovePower = the engine's battleMovePower register (request.power; W1/W2/W4/carry). The Battle TV loop (W3) is not
       // ported: a possible W3 write declines. HP is unchanged inside the script body. A shiny pair declines (normal palettes).
-      if (battlerX2Input?.staleMovePowerUnknown) return declined(declineSink, "endeavor-power");
+      // apx221 endeavor-power: the unported W3 (Battle TV) write may have changed the stale register; draw with the engine's battleMovePower
+      // register (request.power, the value every proven Endeavor body reads), the only power the presentation has.
+      if (battlerX2Input?.staleMovePowerUnknown && approximations.endeavorPower !== true) return declined(declineSink, "endeavor-power");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const targetHp = field[target.geometry.side].hp;
       config = { move: "ENDEAVOR", attacker, target,
@@ -3262,7 +3285,9 @@ export function liveMoveAnimationPresentationProven(
           break;
         case 69: {
           // AnimTask_GetSeismicTossDamageLevel: gAnimMoveDmg 33..65 is the medium branch the reducer ports.
-          if (request.damage < 33 || request.damage > 65) return declined(declineSink, "other:seismic-toss-damage-branch");
+          // apx221 seismic-toss-damage-branch: only the medium (33..65) AnimTask_GetSeismicTossDamageLevel branch is ported; the low / high
+          // levels draw it (the one proven branch; the body duration is damage independent, 228 rows).
+          if ((request.damage < 33 || request.damage > 65) && approximations.seismicTossBranch !== true) return declined(declineSink, "other:seismic-toss-damage-branch");
           const wave = (slots: number[], matrices: number[]) => slots.map((slot, i) =>
             ({ slot, matrixNum: matrices[i]!, persistentOrder: orderIndex(slot) }));
           const rocks = [wave([4, 5, 7, 9], [3, 4, 5, 6]), wave([10, 11, 12, 13], [7, 8, 9, 10]), wave([4, 5, 7, 9], [3, 4, 5, 6])];
@@ -3645,7 +3670,7 @@ export function liveMoveAnimationPresentationProven(
       // matrices, tasks) is the first body's at every later activation. The one history the pixels read besides the order is the battler
       // x2 rest, so a later body declines unless both species rests are {0,0} (an opponent ONIX after its Quick Attack: 40,367 px).
       if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
-      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (!spriteOrderInput.firstBody && !(approximations.laterBodyRest === true || liveBattlersRestFree(art))) return declined(declineSink, "other:later-body-idle-rest");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
@@ -3663,7 +3688,7 @@ export function liveMoveAnimationPresentationProven(
       // and the allocator (tile bitmap, palette tags, matrices, tasks) is the first body's; later windows are exact in the policy's age-171 phase
       // and differ only on the documented BLDY tail rows in the other. The target / attacker rests are read: later, both species rests {0,0}.
       if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
-      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (!spriteOrderInput.firstBody && !(approximations.laterBodyRest === true || liveBattlersRestFree(art))) return declined(declineSink, "other:later-body-idle-rest");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const lentOrder = spriteOrderWithOccupiedPrefix(
         { known: true as const, free: spriteOrderInput.free, pendingDestroyed: [] }, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER);
@@ -3733,7 +3758,7 @@ export function liveMoveAnimationPresentationProven(
       // its own rampage turn) starts from history WIN0 / BGnCNT / DISPCNT / BG1VOFS that no pixel reads, with the first body's allocator; the
       // battler x2 rests are read, so a later body needs both species rests {0,0}.
       if (spriteOrderInput?.known !== true) return declined(declineSink, "sprite-order-unknown");
-      if (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (spriteOrderInput.firstBody !== true && !(approximations.laterBodyRest === true || liveBattlersRestFree(art))) return declined(declineSink, "other:later-body-idle-rest");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
@@ -3756,7 +3781,7 @@ export function liveMoveAnimationPresentationProven(
       // tags incl. the healthbar trace bank 9, matrices, tasks) is the first body's; WIN0 / BGnCNT / DISPCNT history is unread. The later
       // windows are exact in the policy phase and differ only on the documented lag rows in the other. Later: both species rests {0,0}.
       if (spriteOrderInput?.known !== true) return declined(declineSink, "sprite-order-unknown");
-      if (spriteOrderInput.firstBody !== true && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (spriteOrderInput.firstBody !== true && !(approximations.laterBodyRest === true || liveBattlersRestFree(art))) return declined(declineSink, "other:later-body-idle-rest");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const lentOrder = spriteOrderWithOccupiedPrefix(
@@ -4127,7 +4152,7 @@ export function liveMoveAnimationPresentationProven(
       const restFree = (side: "player" | "opponent") => { const rest = liveBattlerAnchors(side, art, battlerX2Input).frontIdleRest;
         return rest.x2 === 0 && rest.y2 === 0; };
       if (!spriteOrderInput.firstBody
-        && !(furyCutterCounter >= 2 ? restFree("player") && restFree("opponent") : liveBattlersRestFree(art))) return declined(declineSink, "other:later-body-idle-rest");
+        && !(approximations.laterBodyRest === true || (furyCutterCounter >= 2 ? restFree("player") && restFree("opponent") : liveBattlersRestFree(art)))) return declined(declineSink, "other:later-body-idle-rest");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
@@ -4135,8 +4160,12 @@ export function liveMoveAnimationPresentationProven(
       if (palettes === null) return declined(declineSink, "other:palette-compose");
       if (activationOrder === null) return declined(declineSink, "other:occupied-prefix-unknown");
       const targetAnchors = liveBattlerAnchors(target.geometry.side, art, battlerX2Input);
+      // apx221 later-body-idle-rest: the hardware rows are modelled at a zero target rest (liveFuryCutterInputs declines otherwise); the
+      // approximate body takes them at rest 0 while the target sprite itself is drawn at its current rest offsets (battler() liveIdleRest).
+      const furyTarget = approximations.laterBodyRest === true && (targetAnchors.frontIdleRest.x2 !== 0 || targetAnchors.frontIdleRest.y2 !== 0)
+        ? { ...targetAnchors, frontIdleRest: Object.freeze({ x2: 0, y2: 0 }) } : targetAnchors;
       const inputs = liveFuryCutterInputs({ attackerSide: attacker.geometry.side, attackerSpecies: art[attacker.geometry.side].speciesSymbol,
-        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: targetAnchors, palettes, activationOrder,
+        targetSpecies: art[target.geometry.side].speciesSymbol, attacker: attackerAnchors, target: furyTarget, palettes, activationOrder,
         counter: furyCutterCounter, sort: sortGbaSpriteOrder });
       if (inputs === null) return declined(declineSink, "other:fury-cutter-inputs");
       config = { move: "FURY_CUTTER", attacker, target, fieldProfile, animationInputs: inputs.animationInputsAt(age) as never };
@@ -4147,7 +4176,7 @@ export function liveMoveAnimationPresentationProven(
       // MOVEMENT_WAVES tiles 305 / 321, palette slots 7 / 8, matrix 0 at every probed activation), non-shiny, a later body only with
       // zero idle rests (both ShakeMonInPlace tasks are relative to the battler's x2).
       if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
-      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (!spriteOrderInput.firstBody && !(approximations.laterBodyRest === true || liveBattlersRestFree(art))) return declined(declineSink, "other:later-body-idle-rest");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       // stf115: a battler shown as the Substitute doll has gSubstituteDollPal in its OBJ bank (doll90's Psych Up rule); identical to
       // composeLiveArtPalettes when neither battler is the doll.
@@ -4176,7 +4205,7 @@ export function liveMoveAnimationPresentationProven(
       const returnLevel = returnPowerLevel(request.friendship);
       if (returnLevel !== 3 && returnLevel !== 0) return null;
       if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
-      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
+      if (!spriteOrderInput.firstBody && !(approximations.laterBodyRest === true || liveBattlersRestFree(art))) return declined(declineSink, "other:later-body-idle-rest");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);
       const activationOrder = spriteOrderWithOccupiedPrefix(
@@ -4408,8 +4437,10 @@ export function liveMoveAnimationPresentationProven(
       if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       const xsHistory = spriteOrderInput.firstBody ? [] : spriteOrderInput.scanlineHistory;
       const xsPlayerLater = !spriteOrderInput.firstBody && attacker.geometry.side === "player";
-      if (!spriteOrderInput.firstBody && !liveBattlersRestFree(art)) return declined(declineSink, "other:later-body-idle-rest");
-      if (xsPlayerLater && (xsHistory === undefined || liveOpponentElevation(art.opponent.speciesSymbol) !== 0
+      if (!spriteOrderInput.firstBody && !(approximations.laterBodyRest === true || liveBattlersRestFree(art))) return declined(declineSink, "other:later-body-idle-rest");
+      // apx221 extrasensory-player-later-target: draw the player-later branch (asl155's dominant phase) for any target top line / elevation
+      // and an unknown scanline history (the first-body scanline entry stands in for it).
+      if (xsPlayerLater && approximations.extrasensoryLaterTarget !== true && (xsHistory === undefined || liveOpponentElevation(art.opponent.speciesSymbol) !== 0
         || liveFieldArtTopLine(art.opponent) < EXTRASENSORY_PLAYER_LATER_MIN_TOP_LINE)) return declined(declineSink, "other:extrasensory-player-later-target");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const xsScanline = xsHistory === undefined ? FIRST_BODY_SCANLINE : liveScanlineEntry(FIRST_BODY_SCANLINE, xsHistory, (side) => art[side].speciesSymbol);

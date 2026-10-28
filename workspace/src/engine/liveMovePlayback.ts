@@ -38,10 +38,21 @@ export function liveMoveDeclineClassOf(reason: LiveMoveDeclineReason): LiveMoveD
 /** Per decline class: "static" holds the static field (today's decline path); "approximate" will draw the body with best-effort inputs. */
 export type LiveMovePlaybackPolicy = Readonly<Record<LiveMoveDeclineClass, "static" | "approximate">>;
 export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freeze({
-  "substitute-doll": "approximate", "sprite-order-unknown": "approximate", "allocator-unknown": "approximate", "castform-form": "static",
+  "substitute-doll": "approximate", "sprite-order-unknown": "approximate", "allocator-unknown": "approximate", "castform-form": "approximate",
   "endeavor-power": "static", "turn-0": "static", "hidden-target": "static", "no-adapter": "static", "transform": "approximate",
   "other": "static",
 });
+
+/**
+ * apx221: the named `other:<name>` reasons promoted to approximate (the "other" class stays static for every other name). Each reason's
+ * gate in liveMoveAnimationPresentationProven reads its flag (liveMoveAnimationPresentation retries with it) and names its fallback input.
+ */
+export const LIVE_MOVE_APPROXIMATE_OTHER_REASONS: ReadonlySet<string> = Object.freeze(new Set<string>([
+]));
+export function liveMoveReasonIsApproximate(reason: LiveMoveDeclineReason): boolean {
+  return reason.startsWith("other:") ? LIVE_MOVE_APPROXIMATE_OTHER_REASONS.has(reason)
+    : LIVE_MOVE_APPROXIMATE_POLICY[liveMoveDeclineClassOf(reason)] === "approximate";
+}
 
 export type LiveMovePlaybackClassification =
   | Readonly<{ kind: "live" }>
@@ -143,7 +154,9 @@ export function liveMovePresentationDeclineReason(view: BattleResolutionPresenta
 }
 
 function byPolicy(reason: LiveMoveDeclineReason, policy: LiveMovePlaybackPolicy): LiveMovePlaybackClassification {
-  return Object.freeze({ kind: policy[liveMoveDeclineClassOf(reason)] === "approximate" ? "approximate" : "static", reason });
+  const approximate = reason.startsWith("other:") ? LIVE_MOVE_APPROXIMATE_OTHER_REASONS.has(reason)
+    : policy[liveMoveDeclineClassOf(reason)] === "approximate";
+  return Object.freeze({ kind: approximate ? "approximate" : "static", reason });
 }
 
 /**

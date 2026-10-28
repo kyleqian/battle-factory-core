@@ -25,7 +25,8 @@ const entryOrder = Object.freeze({ known: true as const, free: KNOWN_ENTRY_FIRST
 describe("apx219: approximate sprite-order-unknown / allocator-unknown", () => {
   it("the policy promotes both classes", () => {
     expect(Object.entries(LIVE_MOVE_APPROXIMATE_POLICY).filter(([, p]) => p === "approximate").map(([c]) => c))
-      .toEqual(["substitute-doll", "sprite-order-unknown", "allocator-unknown", "transform"]);
+      // apx221 promotes further classes (tests/apx221*.test.ts pin the full list); these four stay approximate.
+      .toEqual(expect.arrayContaining(["substitute-doll", "sprite-order-unknown", "allocator-unknown", "transform"]));
   });
 
   it("an unknown order draws the known-entry body and names the class; a known input is untouched", () => {

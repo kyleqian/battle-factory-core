@@ -3,7 +3,9 @@ import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
-import { liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
+// apx221: the gate pins read the proven body (a later body on non-zero rests is drawn approximately by liveMoveAnimationPresentation;
+// tests/apx221LaterBodyRestApproximate.test.ts).
+import { liveMoveAnimationPresentationProven as liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
 import { liveFuryCutterBlendRows } from "../../src/engine/liveOamMoves.ts";
 import { liveView, type Fixture } from "../../tools/integration/liveAdapterFramebuffer.ts";
 

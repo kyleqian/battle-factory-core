@@ -28,7 +28,8 @@ const command = (animation: BattleMoveAnimationRequest) => Object.freeze({
 describe("apx215: approximate substitute-doll", () => {
   it("the policy promotes substitute-doll (apx217: and transform; apx219: sprite-order-unknown, allocator-unknown)", () => {
     expect(Object.entries(LIVE_MOVE_APPROXIMATE_POLICY).filter(([, p]) => p === "approximate").map(([c]) => c))
-      .toEqual(["substitute-doll", "sprite-order-unknown", "allocator-unknown", "transform"]);
+      // apx221 promotes further classes (tests/apx221*.test.ts pin the full list); these four stay approximate.
+      .toEqual(expect.arrayContaining(["substitute-doll", "sprite-order-unknown", "allocator-unknown", "transform"]));
   });
 
   it("duration = the body's own live duration (defender doll) / the swap composite around it (subbed attacker); classified approx", () => {
