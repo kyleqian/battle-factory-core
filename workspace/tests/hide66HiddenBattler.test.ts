@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { renderBattleResolutionLiveView } from "../src/engine/battleScene.ts";
 import {
-  LIVE_MOVE_NO_HIDDEN_SIDES, liveMoveAnimationPresentation, liveMoveHiddenSides, liveMoveHiddenTargetDeclines,
+  LIVE_MOVE_NO_HIDDEN_SIDES, liveMoveAnimationPresentation, liveMoveAnimationPresentationProven, liveMoveHiddenSides, liveMoveHiddenTargetDeclines,
 } from "../src/engine/liveMoveAnimation.ts";
 import type { BattleResolutionPresentationRenderView } from "../src/engine/battleResolutionPresentationRender.ts";
 import { liveView, type Fixture } from "../tools/integration/liveAdapterFramebuffer.ts";
@@ -82,8 +82,11 @@ describe("hide66: live bodies do not draw a hidden (semi-invulnerable) battler",
     expect(liveMoveHiddenTargetDeclines(e.request, hidden)).toBe(true);
     expect(liveMoveHiddenTargetDeclines(e.request, LIVE_MOVE_NO_HIDDEN_SIDES)).toBe(false);
     expect(liveMoveHiddenTargetDeclines({ ...e.request, moveId: 215 }, hidden)).toBe(false);
-    expect(liveMoveAnimationPresentation(e.request, v.field, 0, e.paletteInput, e.spriteAllocatorInput, e.spriteOrderInput,
+    expect(liveMoveAnimationPresentationProven(e.request, v.field, 0, e.paletteInput, e.spriteAllocatorInput, e.spriteOrderInput,
       e.presentationRng, e.battlerX2Input, hidden)).toBeNull();
+    // apx222: the production presentation draws the body approximately (the hidden battler stays hidden).
+    expect(liveMoveAnimationPresentation(e.request, v.field, 0, e.paletteInput, e.spriteAllocatorInput, e.spriteOrderInput,
+      e.presentationRng, e.battlerX2Input, hidden)).not.toBeNull();
     // The fallback (scene-off) view renders, without the hidden battler.
     expect(() => render(withHidden(v, "opponent", true))).not.toThrow();
   });

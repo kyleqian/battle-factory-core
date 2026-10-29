@@ -11,7 +11,8 @@
 // for unknown order / allocator history with the known-entry first-action input; the sink's `approximate` names the class).
 // apx221: "castform-form", "endeavor-power" and the named other: reasons in LIVE_MOVE_APPROXIMATE_OTHER_REASONS (extrasensory-player-later-target,
 // later-body-idle-rest, seismic-toss-damage-branch) are approximate (the retry loop in liveMoveAnimationPresentation passes per-reason
-// LiveMoveApproximations; each gate names its choice). turn-0, hidden-target and no-adapter stay static.
+// LiveMoveApproximations; each gate names its choice). apx222: hidden-target is approximate (the body is drawn with the hidden battler kept hidden).
+// turn-0 and no-adapter stay static.
 // Presentation-only diagnostics: never read by rules, RNG, the queue or the renderer.
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "./battleResolutionPresentation.ts";
@@ -42,7 +43,7 @@ export function liveMoveDeclineClassOf(reason: LiveMoveDeclineReason): LiveMoveD
 export type LiveMovePlaybackPolicy = Readonly<Record<LiveMoveDeclineClass, "static" | "approximate">>;
 export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freeze({
   "substitute-doll": "approximate", "sprite-order-unknown": "approximate", "allocator-unknown": "approximate", "castform-form": "approximate",
-  "endeavor-power": "approximate", "turn-0": "static", "hidden-target": "static", "no-adapter": "static", "transform": "approximate",
+  "endeavor-power": "approximate", "turn-0": "static", "hidden-target": "approximate", "no-adapter": "static", "transform": "approximate",
   "other": "static",
 });
 

@@ -1981,6 +1981,7 @@ export function liveMoveAnimationPresentationProven(
   approximations: LiveMoveApproximations = NO_APPROXIMATIONS,
 ): SceneOnMovePresentationState | null {
   if (liveMoveAnimationDuration(request, field) === null) return null;
+  // apx222 hidden-target (approximate): the body is drawn with the hidden battler kept hidden, the visibility the field shows.
   // apx221 hidden-target: draw the body with the target transparent (hide66's rows 0..149) and the visible-target lag phase (the policy's
   // [148, 149] / [68, 69] ages); the ROM's skipped lag frames after the age-150 / 70 mark are not modelled, so those rows may lead by 1..2 frames.
   if (approximations.hiddenTarget !== true && liveMoveHiddenTargetDeclines(request, hiddenSides)) return declined(declineSink, "hidden-target");
