@@ -76,6 +76,11 @@ export type FactoryBattleStartIntroState = Readonly<{
    * `MEASURED_GOLD_BRAIN_REVEAL_READY_LAG_OFFSET`'s doc in `battleScene.ts`.
    */
   isGoldBrainReveal: boolean;
+  /**
+   * bso226: Battle Scene ON (`config.battleScene === "on"`). Presentation only: the intro's timing, text and RNG are shared; ON adds
+   * the species send-out animations (opponent front, player back) that Scene OFF's SKIP_FRONT_ANIM path never launches.
+   */
+  sceneOn: boolean;
 }>;
 
 export function createFactoryBattleStartIntro(
@@ -84,6 +89,7 @@ export function createFactoryBattleStartIntro(
   sceneAssemblyDisplayLag: 0 | 1 = 0,
   isSilverBrainReveal = false,
   isGoldBrainReveal = false,
+  sceneOn = false,
 ): FactoryBattleStartIntroState {
   return Object.freeze({
     command,
@@ -93,6 +99,7 @@ export function createFactoryBattleStartIntro(
     isCanonicalAnchorIntro,
     isSilverBrainReveal,
     isGoldBrainReveal,
+    sceneOn,
   });
 }
 

@@ -842,6 +842,9 @@ import {
   MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR,
   MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED,
   MID_BATTLE_SWITCH_OUT_SCALE_START,
+  generatedBattleStartOpponentAnimAt,
+  generatedBattleStartPlayerAnimAt,
+  type MidBattleSwitchInFrontAnim,
   type MidBattleSwitchInView,
   type MidBattleSwitchOutView,
 } from "./battleResolutionPresentationRender.ts";
@@ -5389,13 +5392,19 @@ export function drawGeneratedOpponentRelease(
   t: number,
   handoffTick: number,
   fieldView: ReturnType<typeof createBattleCommandFieldRenderView>,
+  sceneOn = false,
 ): void {
   const elapsed = t - handoffTick;
   if (elapsed < MATERIALIZE_START_OFFSET) return;
   const local = elapsed - MATERIALIZE_START_OFFSET;
+  // bso226: Scene ON runs the species front animation (`SpriteCB_OpponentMonFromBall` -> `DoMonFrontSpriteAnimation`) and the
+  // fra151 release-tint cadence that goes with it; Scene OFF keeps the SKIP_FRONT_ANIM path below unchanged.
+  const sceneOnAnim = sceneOn
+    ? generatedBattleStartOpponentAnimAt(fieldView.fieldArt.opponent.speciesSymbol, local)
+    : null;
   // Intro release reaches Task_FadeMon_ToNormal's poll one controller
   // callback after the ordinary switch-in chain reused below.
-  const coeff = turn5MaterializeCoeff(
+  const coeff = sceneOnAnim?.monTintCoefficient ?? turn5MaterializeCoeff(
     TURN5_BALL_HANDOFF_TICK + MATERIALIZE_START_OFFSET + local - 1,
   );
   const pic = fieldView.fieldArt.opponent.pic;
@@ -5404,6 +5413,18 @@ export function drawGeneratedOpponentRelease(
     y: fieldView.fieldArt.opponent.origin.y
       - battleCommandFieldArtElevation(fieldView.fieldArt.opponent, "opponent"),
   };
+  if (sceneOnAnim?.frontAnim) {
+    drawOpponentFrontAnimSprite(
+      fb,
+      fieldView.fieldArt.opponent,
+      origin.y,
+      affineEmergeAccumulator(local + 1),
+      MATERIALIZE_Y2_TABLE[local] ?? 0,
+      sceneOnAnim.frontAnim,
+      coeff,
+    );
+    return;
+  }
   if (coeff === 0) {
     // Battle Scene OFF never launches the front-sprite animation task
     // (SKIP_FRONT_ANIM, pokemon.c:6803-6852) - x2/y2 stay {0,0} for every
@@ -5566,7 +5587,7 @@ export function renderGeneratedBattleStartOpponentRelease(
       OPPONENT_CORNER.y,
     );
   }
-  drawGeneratedOpponentRelease(fb, t, handoffTick, fieldView);
+  drawGeneratedOpponentRelease(fb, t, handoffTick, fieldView, state.sceneOn);
   drawSendOutBall(fb, t, handoffTick);
   drawBallOpenParticles(fb, t, handoffTick, "destin", {
     // Per-route/species stall value - see `generatedParticleStallLag`'s own
@@ -5720,6 +5741,8 @@ export function drawGeneratedPlayerMaterialize(
   fb: Uint8Array,
   playerVisualT: number,
   fieldView: ReturnType<typeof createBattleCommandFieldRenderView>,
+  /** bso226: Scene ON's player mon personality (`GetNature`) once the intro plays the species back animation; null = Scene OFF. */
+  sceneOnPersonality: number | null = null,
 ): void {
   const art = fieldView.fieldArt.player;
   const origin = art.origin;
@@ -5738,6 +5761,30 @@ export function drawGeneratedPlayerMaterialize(
     return;
   }
   if (playerVisualT < PLAYER_MATERIALIZE_SETTLE_START_TICK) return;
+  const backAnim = sceneOnPersonality === null
+    ? null
+    : generatedBattleStartPlayerAnimAt(
+      art.speciesSymbol,
+      sceneOnPersonality,
+      playerVisualT - PLAYER_MATERIALIZE_START_TICK,
+    );
+  if (backAnim !== null) {
+    // bso226: `SpriteCB_PlayerMonFromBall` -> `BattleAnimateBackSprite` (bso225's mid-battle view at the equivalent send-in elapsed).
+    // A glow / flash `BlendPalette` replaces the release tint on the frames the fade task does not rewrite the palette.
+    const glow = backAnim.blend !== null && !backAnim.tintTaskWrites;
+    const tint = glow ? 0 : playerMaterializeSettleTintCoeff(playerVisualT);
+    const palette = glow
+      ? blendPaletteToward(art.pic.palette as RgbColor[], bgr555ToRgb8(backAnim.blend!.color), backAnim.blend!.coefficient)
+      : art.pic.palette as RgbColor[];
+    if (backAnim.matrix !== null) {
+      drawSpriteSheetAffineRotate(fb, art.pic.tileset as Tileset, palette, origin.x + 32 + backAnim.x2, origin.y + 32 + backAnim.y2,
+        backAnim.matrix[0], backAnim.matrix[1], backAnim.matrix[2], backAnim.matrix[3], undefined, true, MATERIALIZE_TINT_COLOR, tint);
+    } else {
+      drawSpriteSheetAffineTintedBlend(fb, art.pic.tileset as Tileset, palette, origin.x, origin.y, 256,
+        MATERIALIZE_TINT_COLOR, tint, backAnim.y2, backAnim.x2);
+    }
+    return;
+  }
   drawSpriteSheetAffineStretch(
     fb,
     art.pic.tileset as Tileset,
@@ -5801,14 +5848,19 @@ export function renderGeneratedBattleStartPlayerRelease(
   // never launches the front-sprite animation task (SKIP_FRONT_ANIM,
   // pokemon.c:6803-6852) - x2/y2 stay {0,0} for every species; see ISSUES
   // #71's Slice-D record.
-  drawSpriteSheet(
-    fb,
-    fieldView.fieldArt.opponent.pic.tileset as Tileset,
-    fieldView.fieldArt.opponent.pic.palette as RgbColor[],
-    fieldView.fieldArt.opponent.origin.x,
-    fieldView.fieldArt.opponent.origin.y
-      - battleCommandFieldArtElevation(fieldView.fieldArt.opponent, "opponent"),
-  );
+  if (state.sceneOn) {
+    // bso226: Scene ON's opponent front animation continues past the player's throw.
+    drawGeneratedOpponentRelease(fb, t, handoffTick, fieldView, true);
+  } else {
+    drawSpriteSheet(
+      fb,
+      fieldView.fieldArt.opponent.pic.tileset as Tileset,
+      fieldView.fieldArt.opponent.pic.palette as RgbColor[],
+      fieldView.fieldArt.opponent.origin.x,
+      fieldView.fieldArt.opponent.origin.y
+        - battleCommandFieldArtElevation(fieldView.fieldArt.opponent, "opponent"),
+    );
+  }
   const throwFrame = brendanThrowFrame(playerVisualT);
   if (playerVisualT < BRENDAN_THROW_START_TICK) {
     drawSpriteSheet(
@@ -5852,7 +5904,14 @@ export function renderGeneratedBattleStartPlayerRelease(
       ballSpin.pd,
     );
   }
-  drawGeneratedPlayerMaterialize(fb, playerVisualT, fieldView);
+  drawGeneratedPlayerMaterialize(
+    fb,
+    playerVisualT,
+    fieldView,
+    state.sceneOn
+      ? state.command.parties.player[state.command.activePartyIndexes.player].personality
+      : null,
+  );
   drawPlayerBallOpen(fb, playerVisualT, playerThrowTargetY);
   drawPlayerBallOpenParticles(fb, playerVisualT, playerThrowTargetY);
   drawBallIcons(fb, playerVisualT, {
@@ -54848,6 +54907,35 @@ export const SCENE_OFF_TURN_DEFAULT_IDENTITY: SceneOffTurnIdentity = {
  * arrive in the render view; this layer performs no battle-rule lookup.
  */
 /**
+ * fra151 / bso226: the Scene ON opponent's species front animation (`sAnim_<Name>_1` frame, the `Anim_*` callback's x2 / y2 and, for
+ * an affine family, its double-size OAM matrix) drawn under the release tint. A glow / flash family's `BlendPalette` is already
+ * resolved into `front.blend` by `midBattleSwitchInPalette`; Anim_FlickerIncreasing hides the sprite on its odd frames.
+ */
+function drawOpponentFrontAnimSprite(
+  fb: Uint8Array,
+  art: BattleCommandFieldArtBattler,
+  originY: number,
+  accumulator: number,
+  emergeY2: number,
+  front: MidBattleSwitchInFrontAnim,
+  monTintCoefficient: number,
+): void {
+  if (front.invisible) return;
+  const tileset = (front.frame === 1 ? (art.pic as { frame2?: Tileset }).frame2 ?? art.pic.tileset : art.pic.tileset) as Tileset;
+  const palette = front.blend !== null
+    ? blendPaletteToward(art.pic.palette as RgbColor[], bgr555ToRgb8(front.blend.color), front.blend.coefficient)
+    : art.pic.palette as RgbColor[];
+  if (front.matrix !== null) {
+    drawSpriteSheetAffineRotate(fb, tileset, palette, art.origin.x + 32 + front.x2,
+      originY + 32 + emergeY2 + front.y2, front.matrix[0], front.matrix[1], front.matrix[2], front.matrix[3], undefined, true,
+      MATERIALIZE_TINT_COLOR, monTintCoefficient);
+  } else {
+    drawSpriteSheetAffineTintedBlend(fb, tileset, palette, art.origin.x, originY, accumulator,
+      MATERIALIZE_TINT_COLOR, monTintCoefficient, emergeY2 + front.y2, front.x2);
+  }
+}
+
+/**
  * ISSUES #78 slice 2/3: the mid-battle switch-in's battler pixels -- the
  * closed-ball throw, then the ball-release scale-down
  * (`sAffineAnim_Battler_Emerge` entered at accumulator 58, pa 1129 per the
@@ -54930,19 +55018,7 @@ function drawMidBattleSwitchInSprite(
         // frame, the Anim_* callback's x2 / y2 and, for an affine family, its double-size OAM matrix) under the release tint.
         // A glow / flash family's BlendPalette shows whenever the release fade task does not rewrite the palette that frame
         // (midBattleSwitchInPalette); Anim_FlickerIncreasing hides the sprite on its odd frames.
-        if (front.invisible) return;
-        const tileset = (front.frame === 1 ? (art.pic as { frame2?: Tileset }).frame2 ?? art.pic.tileset : art.pic.tileset) as Tileset;
-        const palette = front.blend !== null
-          ? blendPaletteToward(art.pic.palette as RgbColor[], bgr555ToRgb8(front.blend.color), front.blend.coefficient)
-          : art.pic.palette as RgbColor[];
-        if (front.matrix !== null) {
-          drawSpriteSheetAffineRotate(fb, tileset, palette, art.origin.x + 32 + front.x2,
-            originY + 32 + emergeY2 + front.y2, front.matrix[0], front.matrix[1], front.matrix[2], front.matrix[3], undefined, true,
-            MATERIALIZE_TINT_COLOR, state.monTintCoefficient);
-        } else {
-          drawSpriteSheetAffineTintedBlend(fb, tileset, palette, art.origin.x, originY, state.emergeAccumulator,
-            MATERIALIZE_TINT_COLOR, state.monTintCoefficient, emergeY2 + front.y2, front.x2);
-        }
+        drawOpponentFrontAnimSprite(fb, art, originY, state.emergeAccumulator, emergeY2, front, state.monTintCoefficient);
       } else if (state.side === "opponent") {
         // Same source release reducer as the generated battle-start opponent:
         // accumulator -> inverse affine matrix, species elevation, y2 descent,
