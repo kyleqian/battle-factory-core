@@ -24,7 +24,9 @@ import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { liveMovePlaybackClassification, liveMovePlaybackCode } from "../../src/engine/liveMovePlayback.ts";
 
 export type Apx217Strip = { seed: number; moveId: number; attacker: number; code: string; rows: number; nonStaticRows: number; sha256: string;
-  frames: Uint8Array[]; staticFrame: Uint8Array | null };
+  frames: Uint8Array[]; staticFrame: Uint8Array | null;
+  /** The orchestrator state on the frame the target command was first presented (apx223 stages the ROM lab from it). */
+  targetState: unknown };
 
 /** The census battle of `seed` up to the end of the first approx (moveId, attacker) command; null when none is reached. */
 export function apx217Strip(seed: number, moveId: number, attacker: number, codePrefix = "approx:transform",
@@ -37,7 +39,7 @@ export function apx217Strip(seed: number, moveId: number, attacker: number, code
   }));
   let rng = createPresentationRngSession();
   let frame = 0, ended = false;
-  let target: unknown = null, seen: unknown = null, code = "", done = false, commandCount = 0;
+  let targetState: unknown = null; let target: unknown = null, seen: unknown = null, code = "", done = false, commandCount = 0;
   const frames: Uint8Array[] = []; let nonStatic = 0; let staticFrame: Uint8Array | null = null;
   const hash = createHash("sha256");
   const live = new Uint8Array(240 * 160 * 4), still = new Uint8Array(240 * 160 * 4);
@@ -58,7 +60,7 @@ export function apx217Strip(seed: number, moveId: number, attacker: number, code
       const at = cls === null ? "" : liveMovePlaybackCode(cls);
       list?.(commandCount++, c.animation.moveId, c.animation.attacker, at);
       if (target === null && list === undefined && c.animation.moveId === moveId && c.animation.attacker === attacker
-        && at.startsWith(codePrefix)) { target = c; code = at; }
+        && at.startsWith(codePrefix)) { target = c; code = at; targetState = state; }
     }
     if (target !== null && !done) {
       if (c !== target) { done = true; return; }
@@ -107,7 +109,7 @@ export function apx217Strip(seed: number, moveId: number, attacker: number, code
     until(() => phase() === "action-menu");
   }
   return target === null ? null
-    : { seed, moveId, attacker, code, rows: frames.length, nonStaticRows: nonStatic, sha256: hash.digest("hex"), frames, staticFrame };
+    : { seed, moveId, attacker, code, rows: frames.length, nonStaticRows: nonStatic, sha256: hash.digest("hex"), frames, staticFrame, targetState };
 }
 
 /** RGB PNG of every `every`-th frame (RGBA 240x160) in a `columns`-wide grid, 1x. */
@@ -141,6 +143,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   writeFileSync(arg("out")!, apx217StripPng(strip.frames));
   // --static-out: the command's first static-hold row (the Scene OFF view), for comparison.
   if (arg("static-out") && strip.staticFrame) writeFileSync(arg("static-out")!, apx217StripPng([strip.staticFrame]));
-  const { frames: _f, staticFrame: _s, ...summary } = strip;
+  const { frames: _f, staticFrame: _s, targetState: _t, ...summary } = strip;
   console.log(JSON.stringify(summary));
 }
