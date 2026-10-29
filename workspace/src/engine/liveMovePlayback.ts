@@ -9,6 +9,9 @@
 // battler is shown transformed is drawn from the copied species' field art; the Transform body draws outside its proven picture scope).
 // apx219: "sprite-order-unknown" / "allocator-unknown" are approximate (liveMoveAnimationPresentation retries a body that declines
 // for unknown order / allocator history with the known-entry first-action input; the sink's `approximate` names the class).
+// apx221: "castform-form", "endeavor-power" and the named other: reasons in LIVE_MOVE_APPROXIMATE_OTHER_REASONS (extrasensory-player-later-target,
+// later-body-idle-rest, seismic-toss-damage-branch) are approximate (the retry loop in liveMoveAnimationPresentation passes per-reason
+// LiveMoveApproximations; each gate names its choice). turn-0, hidden-target and no-adapter stay static.
 // Presentation-only diagnostics: never read by rules, RNG, the queue or the renderer.
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "./battleResolutionPresentation.ts";
@@ -48,7 +51,7 @@ export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freez
  * gate in liveMoveAnimationPresentationProven reads its flag (liveMoveAnimationPresentation retries with it) and names its fallback input.
  */
 export const LIVE_MOVE_APPROXIMATE_OTHER_REASONS: ReadonlySet<string> = Object.freeze(new Set<string>([
-  "other:extrasensory-player-later-target", "other:later-body-idle-rest",
+  "other:extrasensory-player-later-target", "other:later-body-idle-rest", "other:seismic-toss-damage-branch",
 ]));
 export function liveMoveReasonIsApproximate(reason: LiveMoveDeclineReason): boolean {
   return reason.startsWith("other:") ? LIVE_MOVE_APPROXIMATE_OTHER_REASONS.has(reason)
