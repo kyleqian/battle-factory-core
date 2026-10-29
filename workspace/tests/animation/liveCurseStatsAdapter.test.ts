@@ -64,16 +64,17 @@ describe("curse-live: MOVE_CURSE non-Ghost (CurseStats) source model", () => {
 });
 
 describe("curse-live: MOVE_CURSE live adapter (174)", () => {
-  it("registers the 176-row stats body (gAnimMoveTurn & 1) with the activation shadow row; the Ghost branch declines", () => {
+  it("registers the 176-row stats body (gAnimMoveTurn & 1) with the activation shadow row; the Ghost branch is the apx222 approximate script body", () => {
     expect(LIVE_MOVE_ANIMATION_IDS).toContain(174);
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[174]).toBe(0);
     for (const a of [0, 1] as const) {
       expect(liveMoveAnimationDuration(request(a))).toBe(CURSE_STATS_ROWS);
-      expect(liveMoveAnimationDuration(request(a, { turn: 0 }))).toBeNull();
+      // apx222: the Ghost branch (turn 0) is approxScript.ts's CURSE_GHOST body (350 body rows, 353 presented), classified approx:turn-0.
+      expect(liveMoveAnimationDuration(request(a, { turn: 0 }))).toBe(350);
     }
     const field = displayed("SNORLAX", "GOLBAT");
     expect(liveMoveAnimationPresentation(request(0), field, 90, undefined, undefined, knownOrder())?.config.move).toBe("CURSE");
-    expect(liveMoveAnimationPresentation(request(0, { turn: 0 }), field, 90, undefined, undefined, knownOrder())).toBeNull();
+    expect(liveMoveAnimationPresentation(request(0, { turn: 0 }), field, 90, undefined, undefined, knownOrder())?.config.move).toBe("APPROX_SCRIPT");
   });
 
   it("declines without a known order lend, for shiny battlers and for a non-zero idle rest", () => {
@@ -129,15 +130,15 @@ describe("curse-live: MOVE_CURSE live adapter (174)", () => {
       }
     }, 240000);
 
-  // The only Factory Ghost-type Curse user (DUSCLOPS, set 666): the Ghost body declines to the bounded scene-off pause.
-  it("route 143/42 slot 2 DUSCLOPS: the Ghost Curse body declines cleanly, prompt reached, ON/OFF parity", () => {
+  // The only Factory Ghost-type Curse user (DUSCLOPS, set 666): the Ghost body is the apx222 approximate script body (no proven adapter).
+  it("route 143/42 slot 2 DUSCLOPS: the Ghost Curse approximate body draws, prompt reached, ON/OFF parity", () => {
     const on = generatedCommandAnimationReplay(143, "on", [2], 42);
     const off = generatedCommandAnimationReplay(143, "off", [2], 42);
     const ghost = on.requests.filter(q => q.moveId === 174 && q.attacker === 0);
     expect(ghost).toHaveLength(1);
     expect(ghost[0]!.turn & 1).toBe(0);
     const bodies = on.animations.filter(a => a.moveId === 174 && a.attacker === 0);
-    expect(bodies.every(b => b.adapterActive.every(active => !active))).toBe(true);
+    expect(bodies.some(b => b.adapterActive.some(Boolean))).toBe(true);
     expect(on.state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
     expect(on.stalled).toBe(off.stalled);
     expect(off.boundaries).toHaveLength(on.boundaries.length);
