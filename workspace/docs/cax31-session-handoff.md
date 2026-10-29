@@ -27,7 +27,7 @@ kept and is long-tail.
   `.integration/browser/node_modules`, ignored; `cd .integration/browser && npm install playwright`). RETIRE-YES after a win no
   longer hangs (ret218). After a loss / retire the player ends in the walkable Lobby with no way to start a new challenge except
   reloading (silent NPCs, 2026-08-05 user decision) — Phase 3 title-screen work.
-- Phase 2 move bodies: **Scene ON census 0..999 has 0 static move-animation commands** (2026-10-29, master `f07c843af`):
+- Phase 2 move bodies: **Scene ON census 0..999 has 0 static move-animation commands** (2026-10-29, master `f07c843af`, unchanged by apx224):
   live 26,956, approximate 207 (substitute-doll 74, transform 31, sprite-order-unknown 26, castform-form 18, extrasensory later
   target 17, endeavor-power 12, no-adapter 11, turn-0 7, idle-rest 4, hidden-target 3, allocator-unknown 3, seismic 1), pause
   12,941. Steps apx215 / 217 / 219-222; strips under `tools/integration/fixtures/approximate/<class>/`. New approximate bodies for
@@ -39,7 +39,8 @@ kept and is long-tail.
 
 1. **Rest of Phase 2:** player back send-out + battle-start intro send-outs drawn in Scene ON (ISSUES #71 and the #205-area
    "Open" lines; `docs/send-out-intro-animation-program.md`), Castform form changes, weather-continues takes battler 0 (#157).
-   Then a cheap oracle spot-check of 1–2 apx222 bodies (Scene ON 8012) to size their residuals.
+   Then Conversion 2 (white palette blend, projectile) and Ghost Curse (fade timing) per `docs/apx223-approximate-oracle-check.md`
+   (apx224 fixed the other six; `tools/integration/apx223OracleCheck.ts` re-measures).
 2. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak bulk at
    `--render-every 8` plus a `--render-every 1` sample. Every overlay / pageerror becomes a fix step.
 3. **Production + cleanup** per the plan, interleaved (cleanup steps 1–3 first; a "new challenge" path from the Lobby or a

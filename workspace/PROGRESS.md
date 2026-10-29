@@ -5,9 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-28 / 29 — CAX31 daily run (supervisor, Opus 5.5) — in progress
+## 2026-10-28 / 29 — CAX31 daily run wind-down (supervisor, Opus 5.5): apx219-224 folded; Scene ON static 0
 
-- **State:** master `f07c843af`+ (apx219 + apx220 + apx221 + apx222 folded, all fast-forward: master tree == worker-tested tree).
+- **State:** master `c7d99ba26`+ (apx219-222 fast-forward; apx223 / apx224 merges; final src == apx224 worker-tested tree `25e824041`).
 - **Folded:** apx219 + apx220 (sprite-order-unknown 26 + allocator-unknown 3 -> approximate, known-entry first-action input).
   Worker (Sonnet, branch `worker/integration-20261028-213053`): clean merge of master; typecheck 0; full suite 1,754 files: 1,708
   passed / 2 failed -> both re-pinned (liveDiveSetupAdapter, liveWallMoveAdapters: decline pins now read
@@ -41,6 +41,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Ghost Curse / False Swipe middles near-exact; Gust (funnel ~15 px low, no target shake), Barrage (ball too fast), Odor Sleuth
   (duplicate target), Conversion 2 (no white blend) clearly wrong; every ROM body has 7–15 idle lead-in frames ours skips. The 4
   importing approximate tests 31 / 31 after the merge; Gust PNG eyeballed (confirms the funnel offset).
+- **Folded:** apx224 (`c7d99ba26`; src `src/animation/approxScript.ts` + the apx222 test threshold 0.4 -> 0.3 for idle lead-in
+  rows): Gust funnel 16 px higher, Odor Sleuth clone blink order, Barrage ball rotation / aim, Peck (exact over its staged visible
+  body), Pay Day and False Swipe lead-ins; table in `docs/apx223-approximate-oracle-check.md` ("after apx224"). Conversion 2 and
+  Ghost Curse not touched. Worker: full suite on the final src **1,712 files / 14,167 tests, 0 failed**; build 0; differential
+  641 / 641. Supervisor: census ON vs `apx222-evidence/on-bad3db32c` 3 battles changed (Peck / False Swipe / Pay Day row counts),
+  bad 0, **eventsDigest + error identical on all 1,000**; static still 0. (The wind-down soaks / browser play below ran on
+  `f07c843af`; apx224 changes only Scene ON approximate-body pixels / lengths, which `--render-every 0` soaks do not draw.)
+- **Next:** handoff "Next work" 1 (send-out intros in Scene ON, #157, Conversion 2 / Ghost Curse body fixes).
+- **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/animation-20261028-040709` (apx219),
+  `worker/integration-20261028-213053` (apx220), `-20261028-225012` (apx221), `-20261029-012954` (apx222), `-045744` (apx223),
+  `-052326` (apx224). Evidence `.integration/validation/sv-20261028/`. No push.
 - **Browser goal play on build `f07c843af` (10 min / scene, seed 11):** ON 17 battles / 7 swap screens, OFF 47 / 23; 0 page errors,
   0 overlays, 0 contained, 0 divergences.
 ---
