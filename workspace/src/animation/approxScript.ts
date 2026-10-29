@@ -176,25 +176,29 @@ function gust(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
 // ---- Move_PAY_DAY: a rotated coin thrown at the target (speed 1152), then a hit splat, ShakeMon2 and a bouncing falling coin ----
 const PAY_DAY_SHAKE = shakeMon2Sequence(1, 0, 6, 1);
 const COIN_FRAME = [8, 2, 2] as const;
-const FALLING_COIN_LIFE = 52;
-// InitAnimLinearTranslationWithSpeedAndPos at speed 1152 (4.5 px per tick) over the singles attacker-target distance (~114 px).
-const PAY_DAY_FLIGHT_TICKS = 25;
+const FALLING_COIN_LIFE = 50;
+// The ROM draws nothing for 13 frames after the command starts (the driver holds age 0 for 4 rows): the body starts at age 10.
+// InitAnimLinearTranslationWithSpeedAndPos at speed 1152: the coin is drawn for 19 ticks, the splat lands 20 ticks after the throw.
+const PAY_DAY_LEAD = 10;
+const PAY_DAY_COIN_TICKS = 19;
+const PAY_DAY_FLIGHT_TICKS = 20;
 const payDayFrom = (ctx: ApproxScriptContext): ApproxScriptPoint =>
   ({ x: ctx.attackerCenter.x + towardTarget(ctx) * 20, y: ctx.attackerCenter.y });
 function payDay(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+  const tick = age - PAY_DAY_LEAD;
   const from = payDayFrom(ctx);
   const to = ctx.targetCenter;
   const sprites: ApproxScriptSprite[] = [];
-  if (age < PAY_DAY_FLIGHT_TICKS) {
-    const t = age / PAY_DAY_FLIGHT_TICKS;
+  if (tick >= 0 && tick < PAY_DAY_COIN_TICKS) {
+    const t = tick / 18;
     const angle = Math.round(Math.atan2(to.y - from.y, to.x - from.x) * 65536 / (2 * Math.PI)) - 0x4000;
     sprites.push(sprite("coin", Math.round(from.x + (to.x - from.x) * t), Math.round(from.y + (to.y - from.y) * t),
       rotationMatrix(angle), COIN_FRAME));
   }
   const landed = PAY_DAY_FLIGHT_TICKS;
-  sprites.push(...basicSplat(age, landed, ctx, 2));
+  sprites.push(...basicSplat(tick, landed, ctx, 2));
   // AnimFallingCoin_Step: x2 drifts away at half a pixel per tick, y2 = Sin(phase, -16) then -8, phase +5 per tick, two bounces.
-  const k = age - landed;
+  const k = tick - landed;
   if (k >= 0 && k < FALLING_COIN_LIFE) {
     const bounce = Math.floor(k / 26);
     const phase = (k % 26) * 5;
@@ -202,7 +206,7 @@ function payDay(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
     sprites.push(sprite("coin", ctx.targetCenter.x + (ctx.attackerSide === "player" ? -drift : drift),
       ctx.targetCenter.y + 8 + sineOf(phase, bounce === 0 ? -16 : -8), rotationMatrix(((k + 1) * 10 & 0xff) << 8), COIN_FRAME));
   }
-  return frameOf(age, landed + FALLING_COIN_LIFE, { targetOffset: atTick(PAY_DAY_SHAKE, age - landed), sprites });
+  return frameOf(age, PAY_DAY_LEAD + landed + FALLING_COIN_LIFE, { targetOffset: atTick(PAY_DAY_SHAKE, k + 1), sprites });
 }
 
 // ---- Move_BARRAGE: AnimTask_BarrageBall (a red ball arcing to the target; affine anim 1: -4 per tick, anim 2 for an opponent: -64 then +4 per tick, 24 ticks) + ShakeMon at age 26 ---------------------------------
