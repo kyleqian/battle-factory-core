@@ -88,7 +88,7 @@ PNG strips (ours | ROM per frame at e = 70, 90, 98, 106, mon region, magenta sep
 production route is not pixel-aligned with the ROM on the mon region **even before bso225**: the ROM mon emerges earlier than
 production in some frames (per-frame best offset between -4 and +3 ticks, e.g. SKARMORY e = 150). With the back animation drawn at
 `releaseTick - 17` the mon-region total moved: SKARMORY 200615 -> 195351, KINGDRA 364911 -> 338352, ONIX 214818 -> 209096 but
-ALAKAZAM 219917 -> 223774 (worse); scanning the anchor (14..28) only trades one against the other. It is not provable as exact, one
+ALAKAZAM 219917 -> 223774 (worse); scanning the SKARMORY anchor (back tick = releaseTick - 14..28) leaves ~190-220k px of mon residual at every value, so the offset is not the cause. It is not provable as exact, one
 window regresses, so the wiring was reverted. Remaining: fit the pfr192 emerge/mon timing first (its own step), then wire
 `backSendOutFrameAtTick` at back tick = `releaseTick - 17`.
 
