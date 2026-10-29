@@ -37,10 +37,10 @@ const classify = (request: BattleMoveAnimationRequest, field: BattleResolutionDi
   liveMovePlaybackClassification(command(request), field, view);
 
 describe("apx210: decline reasons", () => {
-  it("duration gates (a pure function of (command, field)): an unscripted no-adapter move, turn-0 -> static, hold unchanged", () => {
+  it("duration gates (a pure function of (command, field)): an unscripted no-adapter move, an unproven turn -> static, hold unchanged", () => {
     const cases: [BattleMoveAnimationRequest, BattleResolutionDisplayedField, string][] = [
       [req(1), fieldOf(), "other:no-adapter-unscripted"], // Pound: no liveMoveAnimationDuration case and no script body (approxScript.ts)
-      [req(174), fieldOf(), "turn-0"], // Curse's Ghost branch (turn 0)
+      [req(256), fieldOf(), "other:turn-0"], // Swallow at stockpile 0: a duration only at another turn
     ];
     for (const [request, field, reason] of cases) {
       expect(liveMoveAnimationDuration(request, field)).toBeNull();
@@ -90,7 +90,7 @@ describe("apx210: decline reasons", () => {
 
 describe("apx210: the approximate hook", () => {
   it("is static except apx215's substitute-doll, apx217's transform, apx219's sprite-order-unknown / allocator-unknown and apx221's and apx222's classes", () => {
-    const promoted = ["substitute-doll", "transform", "sprite-order-unknown", "allocator-unknown", "castform-form", "endeavor-power", "hidden-target", "no-adapter"];
+    const promoted = ["substitute-doll", "transform", "sprite-order-unknown", "allocator-unknown", "castform-form", "endeavor-power", "hidden-target", "no-adapter", "turn-0"];
     for (const c of LIVE_MOVE_DECLINE_CLASSES) {
       expect(LIVE_MOVE_APPROXIMATE_POLICY[c]).toBe(promoted.includes(c) ? "approximate" : "static");
     }
@@ -103,7 +103,10 @@ describe("apx210: the approximate hook", () => {
     // apx222: Peck's script body is approximate under the shipped policy; with the class demoted it holds static again.
     expect(liveMovePlaybackClassification(command(req(64)), fieldOf())).toEqual({ kind: "approximate", reason: "no-adapter" });
     expect(liveMovePlaybackClassification(command(req(64)), fieldOf(), undefined, policy)).toEqual({ kind: "static", reason: "no-adapter" });
-    expect(liveMovePlaybackClassification(command(req(174)), fieldOf(), undefined, policy)).toEqual({ kind: "static", reason: "turn-0" });
+    // apx222: Curse's Ghost branch (turn 0) is the script-built CURSE_GHOST body, approximate "turn-0"; the Stats branch (turn 1) is live.
+    expect(liveMovePlaybackClassification(command(req(174)), fieldOf())).toEqual({ kind: "approximate", reason: "turn-0" });
+    expect(liveMovePlaybackClassification(command(req(174, 0, { turn: 1 })), fieldOf())).toEqual({ kind: "live" });
+    expect(liveMovePlaybackClassification(command(req(174)), fieldOf(), undefined, { ...policy, "turn-0": "static" })).toEqual({ kind: "static", reason: "turn-0" });
     // Headbutt has no proven defender-doll cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): approximate under the shipped policy.
     const doll = fieldOf({}, { substituteDoll: true });
     const promoted = liveMovePlaybackClassification(command(req(29)), doll)!;

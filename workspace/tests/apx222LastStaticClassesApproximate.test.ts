@@ -9,6 +9,9 @@ describe("apx222: one staged command per class / new body draws non-static rows,
     // [name, census seed, moveId, attacker, code, presented rows (the body's own live duration)]
     ["hidden-target: Light Screen 113 by the player at a hidden opponent", 41, 113, 0, "approx:hidden-target", 97],
     ["hidden-target: Sky Uppercut 327 by the opponent at a hidden player", 81, 327, 1, "approx:hidden-target", 191],
+    // turn-0: Curse's Ghost branch (CURSE_GHOST, Move_CURSE / CurseGhost): the black field, the nail's three scratches, the rising ghost
+    ["turn-0: Curse 174 (Ghost branch) by the player", 231, 174, 0, "approx:turn-0", 353],
+    ["turn-0: Curse 174 (Ghost branch) by the opponent", 138, 174, 1, "approx:turn-0", 353],
     // no-adapter: each body is built from its source script (src/animation/approxScript.ts); [rows] is its own duration
     ["no-adapter: Peck 64 by the opponent (Move_PECK)", 51, 64, 1, "approx:no-adapter", 18],
     ["no-adapter: Odor Sleuth 316 by the player (Move_ODOR_SLEUTH)", 705, 316, 0, "approx:no-adapter", 85],

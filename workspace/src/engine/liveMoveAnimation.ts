@@ -1162,9 +1162,9 @@ export function liveMoveAnimationDuration(
  * apx210 (liveMovePlayback.ts): whether liveMoveAnimationDuration's move switch has no case for the request's move (the "no adapter"
  * decline), past the Substitute / Transform gates. Presentation-only diagnostics; a throw is not "no adapter".
  */
-/** apx222: a request drawn by a script-built approximate body (src/animation/approxScript.ts): "no-adapter" (no proven adapter exists). */
-export function liveMoveApproximateScriptReason(request: BattleMoveAnimationRequest): "no-adapter" | null {
-  return APPROX_SCRIPT_MOVE_BODY[request.moveId] !== undefined ? "no-adapter" : null;
+/** apx222: a request drawn by a script-built approximate body (src/animation/approxScript.ts): "no-adapter" (no proven adapter exists), "turn-0" (Curse's Ghost branch). */
+export function liveMoveApproximateScriptReason(request: BattleMoveAnimationRequest): "no-adapter" | "turn-0" | null {
+  return request.moveId === 174 && (request.turn & 1) === 0 ? "turn-0" : APPROX_SCRIPT_MOVE_BODY[request.moveId] !== undefined ? "no-adapter" : null;
 }
 
 export function liveMoveAnimationDurationCaseMissing(request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField): boolean {
@@ -1604,7 +1604,8 @@ function liveMoveAnimationDurationOf(
     // Curse (curse-live): MOVE_CURSE's choosetwoturnanim picks CurseStats when gAnimMoveTurn & 1 (BattleScript_EffectCurse
     // setbyte sB_ANIM_TURN 1 for a non-Ghost attacker, battle_scripts_1.s:1491-1492): 176 rows (first inactive age 175 + 1).
     // The Ghost branch (turn 0) declines: its row-26 palette-transfer scanline and BG2 scroll phase are frame-phase inputs.
-    case 174: return (request.turn & 1) === 1 ? CURSE_STATS_ROWS : null;
+    // apx222 (approximate, "turn-0"): the Ghost branch (request.turn & 1 = 0) is the script-built CURSE_GHOST body of approxScript.ts.
+    case 174: return (request.turn & 1) === 1 ? CURSE_STATS_ROWS : approxScriptDuration("CURSE_GHOST");
     case 261: {
       const player = { x: 72, y: 0 }, opponent = { x: 176, y: 0 };
       return request.attacker === 0 ? willOWispTimeline("player", player, opponent).cleanup + 1
@@ -4095,7 +4096,11 @@ export function liveMoveAnimationPresentationProven(
       // from the assembler over the lent order (any known lend: the renderer reads no activation BG register the body does not
       // overwrite, and the only move sprite is the OBJ-window copy in the lowest free slot); tasks / registers / BG scroll /
       // palette from curseModel.ts; non-shiny (no shiny battle palette); zero idle rests (liveCurseStatsInputs).
-      if ((request.turn & 1) !== 1) return declined(declineSink, "other:curse-ghost-branch");
+      if ((request.turn & 1) !== 1) {
+        // apx222 (approximate, "turn-0"): the Ghost branch has no proven body; draw the script-built one (approxScript.ts CURSE_GHOST).
+        config = { move: "APPROX_SCRIPT", body: "CURSE_GHOST", attacker, target, fieldProfile };
+        break;
+      }
       if (!spriteOrderInput?.known) return declined(declineSink, "sprite-order-unknown");
       if (liveBattlerIsShiny(field.player.personality) || liveBattlerIsShiny(field.opponent.personality)) return declined(declineSink, "other:shiny");
       const palettes = composeLiveArtPalettes(art);

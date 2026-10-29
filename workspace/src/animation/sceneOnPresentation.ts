@@ -2541,7 +2541,7 @@ export interface SceneOnDrillPeckConfig {
 /** apx222: an approximate body built from its battle_anim_scripts.s script (src/animation/approxScript.ts). */
 export interface SceneOnApproxScriptConfig {
   readonly move: "APPROX_SCRIPT";
-  readonly body: Exclude<ApproxScriptBody, "CURSE_GHOST">;
+  readonly body: ApproxScriptBody;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;

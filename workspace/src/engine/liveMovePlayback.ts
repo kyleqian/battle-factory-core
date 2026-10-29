@@ -12,7 +12,7 @@
 // apx221: "castform-form", "endeavor-power" and the named other: reasons in LIVE_MOVE_APPROXIMATE_OTHER_REASONS (extrasensory-player-later-target,
 // later-body-idle-rest, seismic-toss-damage-branch) are approximate (the retry loop in liveMoveAnimationPresentation passes per-reason
 // LiveMoveApproximations; each gate names its choice). apx222: hidden-target is approximate (the body is drawn with the hidden battler kept hidden).
-// apx222: "no-adapter" is approximate for the moves with a script-built body (src/animation/approxScript.ts: Peck, Gust, Barrage, Pay Day,
+// apx222: "turn-0" (Curse's Ghost branch) and "no-adapter" are approximate for the moves with a script-built body (src/animation/approxScript.ts: Peck, Gust, Barrage, Pay Day,
 // False Swipe, Odor Sleuth, Conversion 2); a move with no case and no script body holds the static field as static:other:no-adapter-unscripted.
 // Presentation-only diagnostics: never read by rules, RNG, the queue or the renderer.
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
@@ -44,7 +44,7 @@ export function liveMoveDeclineClassOf(reason: LiveMoveDeclineReason): LiveMoveD
 export type LiveMovePlaybackPolicy = Readonly<Record<LiveMoveDeclineClass, "static" | "approximate">>;
 export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freeze({
   "substitute-doll": "approximate", "sprite-order-unknown": "approximate", "allocator-unknown": "approximate", "castform-form": "approximate",
-  "endeavor-power": "approximate", "turn-0": "static", "hidden-target": "approximate", "no-adapter": "approximate", "transform": "approximate",
+  "endeavor-power": "approximate", "turn-0": "approximate", "hidden-target": "approximate", "no-adapter": "approximate", "transform": "approximate",
   "other": "static",
 });
 
@@ -114,7 +114,7 @@ export function liveMoveDurationDeclineReason(
   const live = (r: BattleMoveAnimationRequest) => liveMoveAnimationDuration(r, field) !== null;
   if (live({ ...request, attacker: sideFlip(request.attacker), target: sideFlip(request.target) })) return "other:attacker-side";
   if ([0, 1, 2, 3].some((turn) => turn !== request.turn && live({ ...request, turn }))) {
-    return request.turn === 0 ? "turn-0" : `other:turn-${request.turn}`;
+    return `other:turn-${request.turn}`;
   }
   if ([1, 2, 3, 4, 5].some((c) => c !== request.rolloutCounter && live({ ...request, rolloutCounter: c }))) return "other:rollout-counter";
   if ([20, 40, 70, 110, 150].some((p) => p !== request.power && live({ ...request, power: p }))) return "other:power-branch";

@@ -10,7 +10,7 @@ import { shakeMon2Sequence } from "./shakeMon2.ts";
 
 export type ApproxScriptBody =
   | "PECK" | "ODOR_SLEUTH" | "FALSE_SWIPE" | "GUST" | "PAY_DAY" | "BARRAGE" | "CONVERSION_2" | "CURSE_GHOST";
-export type ApproxScriptSheet = "impact" | "slash2" | "gust" | "coin" | "conversion" | "redBall" | "ghostlySpirit";
+export type ApproxScriptSheet = "impact" | "slash2" | "gust" | "coin" | "conversion" | "redBall" | "ghostlySpirit" | "nail" | "nailFlip";
 export type ApproxScriptSide = "player" | "opponent";
 export interface ApproxScriptPoint { readonly x: number; readonly y: number }
 export interface ApproxScriptMatrix { readonly a: number; readonly b: number; readonly c: number; readonly d: number }
@@ -45,6 +45,8 @@ export interface ApproxScriptFrame {
   readonly targetMatrix: ApproxScriptMatrix | null;
   /** Extra copies of the target battler (Odor Sleuth's clones), drawn over the target. */
   readonly targetClones: readonly ApproxScriptOffset[];
+  /** BLDY darken (0..16) of the battle background only (Curse's black field). */
+  readonly bgDark: number;
   readonly sprites: readonly ApproxScriptSprite[];
 }
 
@@ -95,7 +97,7 @@ function atTick(sequence: readonly ApproxScriptOffset[], tick: number): ApproxSc
 
 const frameOf = (age: number, last: number, parts: Partial<ApproxScriptFrame>): ApproxScriptFrame => ({
   active: age >= 0 && age <= last, attackerOffset: ZERO, attackerMatrix: null, targetOffset: ZERO, targetMatrix: null,
-  targetClones: [], sprites: [], ...parts,
+  targetClones: [], bgDark: 0, sprites: [], ...parts,
 });
 
 // ---- Move_PECK: AnimTask_RotateMonToSideAndRestore (3 ticks out, 3 back) + a flashing hit splat at x=-12 -------------------------
@@ -247,9 +249,53 @@ function conversion2(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return frameOf(age, CONVERSION_LAST, { sprites });
 }
 
+// ---- Move_CURSE, CurseGhost branch (turn-0): the field goes black, a nail scratches the attacker three times, a ghost rises from the target ----
+// Not modelled: the expanding black window of AnimTask_CurseStretchingBlackBg (only its palette fade to black), sound, OAM priorities.
+const CURSE_FADE_IN_START = 16;
+const CURSE_NAIL_SPAWN = 56;
+const CURSE_NAIL_HITS = [64, 108, 152] as const;
+const CURSE_NAIL_FADE_START = 183;
+const CURSE_NAIL_END = 231;
+const CURSE_ATTACKER_SHAKE = shakeMon2Sequence(4, 0, 10, 0);
+const CURSE_ATTACKER_SHAKE_STARTS = [62, 105, 148] as const;
+const CURSE_GHOST_SPAWN = CURSE_NAIL_SPAWN + CURSE_NAIL_END + 2;
+const CURSE_GHOST_TICKS = 40;
+const CURSE_TARGET_SHAKE = shakeMon2Sequence(2, 0, 14, 1);
+const CURSE_FADE_OUT_START = CURSE_GHOST_SPAWN + CURSE_GHOST_TICKS + 2;
+const CURSE_LAST = CURSE_FADE_OUT_START + 17;
+function curseGhost(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+  const sprites: ApproxScriptSprite[] = [];
+  // The nail (32x16, 4 frames, flipped for a player attacker): -+24 px from the attacker, 4 ticks of +-2 px per scratch.
+  const nailAge = age - CURSE_NAIL_SPAWN;
+  if (nailAge >= 0 && nailAge < CURSE_NAIL_END) {
+    const player = ctx.attackerSide === "player";
+    const step = player ? -2 : 2;
+    const done = CURSE_NAIL_HITS.filter((hit) => nailAge >= hit).length;
+    const last = done === 0 ? 0 : CURSE_NAIL_HITS[done - 1]!;
+    const moving = nailAge - (done === 0 ? 60 : last + 40);
+    const x2 = moving >= 1 && moving <= 3 && done < 3 ? step * moving : 0;
+    const fade = nailAge < CURSE_NAIL_FADE_START ? null : nailAge < CURSE_NAIL_FADE_START + 3 ? 16
+      : 16 - Math.floor((nailAge - CURSE_NAIL_FADE_START) / 3);
+    sprites.push(sprite(player ? "nailFlip" : "nail", ctx.attackerCenter.x + (player ? 24 : -24) + done * 8 * (player ? -1 : 1) + x2,
+      ctx.attackerCenter.y, null, [done * 8, 4, 2], fade));
+  }
+  const ghostAge = age - CURSE_GHOST_SPAWN;
+  if (ghostAge >= 1 && ghostAge <= CURSE_GHOST_TICKS) {
+    const sway = sineOf((ghostAge - 1) * 6 & 0xff, 12);
+    sprites.push(sprite("ghostlySpirit", ctx.targetCenter.x + (ctx.attackerSide === "player" ? sway : -sway), ctx.targetCenter.y - ghostAge,
+      null, null, ghostAge <= 30 ? 11 : 11 - (ghostAge - 30)));
+  }
+  const bgDark = age < CURSE_FADE_OUT_START ? Math.min(16, Math.max(0, age - CURSE_FADE_IN_START + 1))
+    : Math.max(0, 16 - (age - CURSE_FADE_OUT_START));
+  return frameOf(age, CURSE_LAST, {
+    attackerOffset: { x2: CURSE_ATTACKER_SHAKE_STARTS.reduce((sum, start) => sum + atTick(CURSE_ATTACKER_SHAKE, age - start).x2, 0), y2: 0 },
+    targetOffset: atTick(CURSE_TARGET_SHAKE, ghostAge), bgDark, sprites,
+  });
+}
+
 type BodyFn = (age: number, ctx: ApproxScriptContext) => ApproxScriptFrame;
-const BODIES: Readonly<Record<Exclude<ApproxScriptBody, "CURSE_GHOST">, BodyFn>> = {
-  PECK: peck, ODOR_SLEUTH: odorSleuth, FALSE_SWIPE: falseSwipe, GUST: gust, PAY_DAY: payDay, BARRAGE: barrage, CONVERSION_2: conversion2,
+const BODIES: Readonly<Record<ApproxScriptBody, BodyFn>> = {
+  PECK: peck, ODOR_SLEUTH: odorSleuth, FALSE_SWIPE: falseSwipe, GUST: gust, PAY_DAY: payDay, BARRAGE: barrage, CONVERSION_2: conversion2, CURSE_GHOST: curseGhost,
 };
 
 /** The move ids drawn by these bodies, classified `approx:no-adapter` (Curse's Ghost branch is `approx:turn-0`). */
@@ -257,7 +303,7 @@ export const APPROX_SCRIPT_MOVE_BODY: Readonly<Record<number, Exclude<ApproxScri
   64: "PECK", 316: "ODOR_SLEUTH", 206: "FALSE_SWIPE", 16: "GUST", 6: "PAY_DAY", 140: "BARRAGE", 176: "CONVERSION_2",
 });
 
-export function approxScriptAtAge(body: Exclude<ApproxScriptBody, "CURSE_GHOST">, age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+export function approxScriptAtAge(body: ApproxScriptBody, age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return BODIES[body](age, ctx);
 }
 
@@ -265,7 +311,7 @@ const SAMPLE_CONTEXT: ApproxScriptContext = {
   attackerSide: "player", targetSide: "opponent", attackerCenter: { x: 72, y: 104 }, targetCenter: { x: 176, y: 56 },
 };
 /** Rows of a body: the first age past its last active age, plus the display latch (Drill Peck: last active 89, rows 91). */
-export function approxScriptDuration(body: Exclude<ApproxScriptBody, "CURSE_GHOST">, ctx: ApproxScriptContext = SAMPLE_CONTEXT): number {
+export function approxScriptDuration(body: ApproxScriptBody, ctx: ApproxScriptContext = SAMPLE_CONTEXT): number {
   let age = 0;
   while (BODIES[body](age, ctx).active) age += 1;
   return age + 1;

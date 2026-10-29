@@ -15,7 +15,7 @@ describe("apx221: the policy", () => {
   });
 });
 
-const PROMOTED_CLASSES = ["substitute-doll", "sprite-order-unknown", "allocator-unknown", "transform", "castform-form", "endeavor-power", "hidden-target", "no-adapter"];
+const PROMOTED_CLASSES = ["substitute-doll", "sprite-order-unknown", "allocator-unknown", "transform", "castform-form", "endeavor-power", "hidden-target", "no-adapter", "turn-0"];
 const PROMOTED_OTHER: string[] = ["other:extrasensory-player-later-target", "other:later-body-idle-rest", "other:seismic-toss-damage-branch"];
 
 describe("apx221: one staged command per class draws non-static rows, classifies approx, deterministic on replay", () => {

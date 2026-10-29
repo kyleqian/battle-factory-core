@@ -673,6 +673,7 @@ import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { t
 import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" with { type: "json" };
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
+import type { ApproxScriptSheet } from "../animation/approxScript.ts";
 import battleAnimApx222Asset from "../assets/gen/battle-anim-apx222.json" with { type: "json" };
 import movementWavesAsset from "../assets/gen/battle-anim-movement-waves.json" with { type: "json" };
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
@@ -2515,10 +2516,10 @@ const swiftYellowStar = swiftYellowStarAsset as { tileset: Tileset; palette: Rgb
 const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFeatherAsset;
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 export const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
-const battleAnimApx222 = battleAnimApx222Asset as unknown as Record<"coin" | "conversion" | "redBall" | "slash2" | "ghostlySpirit",
+const battleAnimApx222 = battleAnimApx222Asset as unknown as Record<"coin" | "conversion" | "redBall" | "slash2" | "ghostlySpirit" | "nail" | "nailFlip",
   { tileset: Tileset; palette: RgbColor[] }>;
 /** apx222: the sprite sheet of an approximate script body sprite (src/animation/approxScript.ts). */
-function approxScriptSheet(sheet: "impact" | "slash2" | "gust" | "coin" | "conversion" | "redBall" | "ghostlySpirit"): { tileset: Tileset; palette: RgbColor[] } {
+function approxScriptSheet(sheet: ApproxScriptSheet): { tileset: Tileset; palette: RgbColor[] } {
   return sheet === "impact" ? battleAnimHitsplat : sheet === "gust" ? razorWindArt.gust : battleAnimApx222[sheet];
 }
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
@@ -20488,7 +20489,12 @@ export function renderSceneOnMovePresentation(
     const view = sceneOnApproxScriptView(state as SceneOnMovePresentationState<SceneOnApproxScriptConfig>);
     const attackerArt = liveSceneOnBattlerArt(view.attacker);
     const targetArt = liveSceneOnBattlerArt(view.target);
-    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    // Curse's black field: the BG palettes fade toward black (BLDY); the battlers and sprites are not darkened.
+    const bgPalette = view.bgDark === 0 ? battleBg.palette : battleBg.palette.map((bank) => bank.map((color) => {
+      const packed = mgbaDarkenColor(color.r | (color.g << 8) | (color.b << 16), view.bgDark);
+      return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
+    }));
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, bgPalette);
     const idle = (battler: typeof view.target) =>
       battler.geometry.side === "opponent" ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
     const drawBattler = (
