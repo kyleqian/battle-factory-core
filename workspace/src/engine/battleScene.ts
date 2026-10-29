@@ -673,6 +673,7 @@ import battleAnimTablesAsset from "../data/gen/battle-anim-tables.json" with { t
 import battleAnimParticlesAsset from "../assets/gen/battle-anim-particles.json" with { type: "json" };
 import battleAnimSweatDropAsset from "../assets/gen/battle-anim-sweat-drop.json" with { type: "json" };
 import battleAnimHitsplatAsset from "../assets/gen/battle-anim-hitsplat.json" with { type: "json" };
+import battleAnimApx222Asset from "../assets/gen/battle-anim-apx222.json" with { type: "json" };
 import movementWavesAsset from "../assets/gen/battle-anim-movement-waves.json" with { type: "json" };
 import battleAnimCuttingSliceAsset from "../assets/gen/battle-anim-cutting-slice.json" with { type: "json" };
 import battleAnimSlashSliceAsset from "../assets/gen/battle-anim-slash-slice.json" with { type: "json" };
@@ -1001,6 +1002,7 @@ import {
   sceneOnHeadbuttView,
   sceneOnSubmissionView,
   sceneOnDrillPeckView,
+  sceneOnApproxScriptView,
   sceneOnWhirlwindView,
   sceneOnBlockView,
   sceneOnRockTombView,
@@ -1290,6 +1292,7 @@ import {
   type SceneOnHeadbuttConfig,
   type SceneOnSubmissionConfig,
   type SceneOnDrillPeckConfig,
+  type SceneOnApproxScriptConfig,
   type SceneOnWhirlwindConfig,
   type SceneOnBlockConfig,
   type SceneOnRockTombConfig,
@@ -2512,6 +2515,12 @@ const swiftYellowStar = swiftYellowStarAsset as { tileset: Tileset; palette: Rgb
 const battleAnimWhiteFeather = battleAnimWhiteFeatherAsset as BattleAnimWhiteFeatherAsset;
 const battleAnimSweatDrop = battleAnimSweatDropAsset as BattleAnimSweatDropAsset;
 export const battleAnimHitsplat = battleAnimHitsplatAsset as BattleAnimHitsplatAsset;
+const battleAnimApx222 = battleAnimApx222Asset as unknown as Record<"coin" | "conversion" | "redBall" | "slash2" | "ghostlySpirit",
+  { tileset: Tileset; palette: RgbColor[] }>;
+/** apx222: the sprite sheet of an approximate script body sprite (src/animation/approxScript.ts). */
+function approxScriptSheet(sheet: "impact" | "slash2" | "gust" | "coin" | "conversion" | "redBall" | "ghostlySpirit"): { tileset: Tileset; palette: RgbColor[] } {
+  return sheet === "impact" ? battleAnimHitsplat : sheet === "gust" ? razorWindArt.gust : battleAnimApx222[sheet];
+}
 const battleAnimCuttingSlice = battleAnimCuttingSliceAsset as BattleAnimCuttingSliceAsset;
 const battleAnimSlashSlice = battleAnimSlashSliceAsset as BattleAnimCuttingSliceAsset;
 const battleAnimLick = battleAnimLickAsset as BattleAnimCuttingSliceAsset;
@@ -20469,6 +20478,64 @@ export function renderSceneOnMovePresentation(
       "DRILL PECK!",
       99,
     );
+    }
+    return;
+  }
+
+  if (state.config.move === "APPROX_SCRIPT") {
+    // apx222: an approximate script body (src/animation/approxScript.ts); live field only (the field art, hidden sides and idle rests).
+    if (!liveField) throw new Error("APPROX_SCRIPT is a live-field body");
+    const view = sceneOnApproxScriptView(state as SceneOnMovePresentationState<SceneOnApproxScriptConfig>);
+    const attackerArt = liveSceneOnBattlerArt(view.attacker);
+    const targetArt = liveSceneOnBattlerArt(view.target);
+    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+    const idle = (battler: typeof view.target) =>
+      battler.geometry.side === "opponent" ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
+    const drawBattler = (
+      battler: typeof view.target, art: typeof targetArt, offset: { x2: number; y2: number },
+      matrix: { a: number; b: number; c: number; d: number } | null,
+    ) => {
+      const rest = idle(battler);
+      if (matrix) {
+        drawSpriteSheetAffineRotate(
+          fb, art.tileset, art.palette,
+          battler.geometry.animationCenter.x + rest.x2 + offset.x2, battler.geometry.animationCenter.y + rest.y2 + offset.y2,
+          matrix.a, matrix.b, matrix.c, matrix.d, undefined, true,
+        );
+      } else {
+        drawSpriteSheet(
+          fb, art.tileset, art.palette,
+          battler.geometry.spriteCorner.x + rest.x2 + offset.x2, battler.geometry.spriteCorner.y + rest.y2 + offset.y2,
+        );
+      }
+    };
+    const drawTargetBattler = () => {
+      drawBattler(view.target, targetArt, view.targetOffset, view.targetMatrix);
+      for (const clone of view.targetClones) drawBattler(view.target, targetArt, { x2: view.targetOffset.x2 + clone.x2, y2: view.targetOffset.y2 + clone.y2 }, null);
+    };
+    const drawAttackerBattler = () => drawBattler(view.attacker, attackerArt, view.attackerOffset, view.attackerMatrix);
+    // Both battlers use OBJ priority 2; the opponent's front sprite sits below the player's back sprite.
+    if (view.target.geometry.side === "opponent") {
+      drawTargetBattler();
+      drawAttackerBattler();
+    } else {
+      drawAttackerBattler();
+      drawTargetBattler();
+    }
+    for (const part of view.sprites) {
+      const sheet = approxScriptSheet(part.sheet);
+      const frame: Tileset = {
+        columns: part.columns, rows: part.rows, tiles: sheet.tileset.tiles.slice(part.tile, part.tile + part.columns * part.rows),
+      };
+      if (part.matrix) {
+        drawSpriteSheetAffineRotate(
+          fb, frame, sheet.palette, part.x, part.y, part.matrix.a, part.matrix.b, part.matrix.c, part.matrix.d, undefined, false,
+        );
+      } else if (part.blend !== null) {
+        drawSpriteSheetBlendedOverFb(fb, frame, sheet.palette, part.x - part.columns * 4, part.y - part.rows * 4, part.blend, 16 - part.blend);
+      } else {
+        drawSpriteSheet(fb, frame, sheet.palette, part.x - part.columns * 4, part.y - part.rows * 4);
+      }
     }
     return;
   }

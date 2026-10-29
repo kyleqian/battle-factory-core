@@ -12,13 +12,14 @@
 // apx221: "castform-form", "endeavor-power" and the named other: reasons in LIVE_MOVE_APPROXIMATE_OTHER_REASONS (extrasensory-player-later-target,
 // later-body-idle-rest, seismic-toss-damage-branch) are approximate (the retry loop in liveMoveAnimationPresentation passes per-reason
 // LiveMoveApproximations; each gate names its choice). apx222: hidden-target is approximate (the body is drawn with the hidden battler kept hidden).
-// turn-0 and no-adapter stay static.
+// apx222: "no-adapter" is approximate for the moves with a script-built body (src/animation/approxScript.ts: Peck, Gust, Barrage, Pay Day,
+// False Swipe, Odor Sleuth, Conversion 2); a move with no case and no script body holds the static field as static:other:no-adapter-unscripted.
 // Presentation-only diagnostics: never read by rules, RNG, the queue or the renderer.
 import type { BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
 import type { BattleResolutionDisplayedField, BattleResolutionPresentationCommand } from "./battleResolutionPresentation.ts";
 import type { BattleResolutionPresentationRenderView } from "./battleResolutionPresentationRender.ts";
 import {
-  liveMoveAnimationDuration, liveMoveAnimationDurationCaseMissing, liveMoveAnimationPresentation, liveMoveHiddenSides,
+  liveMoveAnimationDuration, liveMoveAnimationDurationCaseMissing, liveMoveAnimationPresentation, liveMoveApproximateScriptReason, liveMoveHiddenSides,
   liveMoveSubstituteDollDeclines, liveMoveSubstituteDollUnproven, type LiveMoveDeclineSink,
 } from "./liveMoveAnimation.ts";
 import { liveSubstituteSwapApplies, liveSubstituteSwapView, substituteSwapBodyField } from "./liveSubstituteSwap.ts";
@@ -43,7 +44,7 @@ export function liveMoveDeclineClassOf(reason: LiveMoveDeclineReason): LiveMoveD
 export type LiveMovePlaybackPolicy = Readonly<Record<LiveMoveDeclineClass, "static" | "approximate">>;
 export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freeze({
   "substitute-doll": "approximate", "sprite-order-unknown": "approximate", "allocator-unknown": "approximate", "castform-form": "approximate",
-  "endeavor-power": "approximate", "turn-0": "static", "hidden-target": "approximate", "no-adapter": "static", "transform": "approximate",
+  "endeavor-power": "approximate", "turn-0": "static", "hidden-target": "approximate", "no-adapter": "approximate", "transform": "approximate",
   "other": "static",
 });
 
@@ -91,8 +92,9 @@ export function liveMoveDurationDeclineReason(
 ): LiveMoveDeclineReason | null {
   if (liveMoveAnimationDuration(request, field) !== null) {
     if (liveMoveSubstituteDollUnproven(request, field)) return "substitute-doll";
-    return liveTransformedBattlerUnproven(request, field)
-      || (request.moveId === LIVE_TRANSFORM_MOVE_ID && liveTransformDeclineReason(request, field) !== null) ? "transform" : null;
+    if (liveTransformedBattlerUnproven(request, field)
+      || (request.moveId === LIVE_TRANSFORM_MOVE_ID && liveTransformDeclineReason(request, field) !== null)) return "transform";
+    return liveMoveApproximateScriptReason(request);
   }
   const swap = liveSubstituteSwapApplies(request, field);
   if (swap === true) {
@@ -108,7 +110,7 @@ export function liveMoveDurationDeclineReason(
     const gate = liveTransformBodyDeclineReason(request, field);
     return gate === "self target" ? "other:transform-self-target" : gate === "substitute doll" ? "other:transform-substitute-doll" : "transform";
   }
-  if (liveMoveAnimationDurationCaseMissing(request, field)) return "no-adapter";
+  if (liveMoveAnimationDurationCaseMissing(request, field)) return "other:no-adapter-unscripted";
   const live = (r: BattleMoveAnimationRequest) => liveMoveAnimationDuration(r, field) !== null;
   if (live({ ...request, attacker: sideFlip(request.attacker), target: sideFlip(request.target) })) return "other:attacker-side";
   if ([0, 1, 2, 3].some((turn) => turn !== request.turn && live({ ...request, turn }))) {

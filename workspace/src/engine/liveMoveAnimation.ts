@@ -15,6 +15,7 @@ import type {
 } from "../animation/sceneOnPresentation.ts";
 import { GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE } from "../animation/sceneOnPresentation.ts";
 import { wavyMusicNotesGeometryAtAge } from "../animation/sing.ts";
+import { APPROX_SCRIPT_MOVE_BODY, approxScriptDuration } from "../animation/approxScript.ts";
 import { PRESENT_DAMAGE_FRAME_COUNT, PRESENT_HEAL_FRAME_COUNT } from "../animation/present.ts";
 import { SOLAR_BEAM_SETUP_FIRST_INACTIVE_AGE, SOLAR_BEAM_UNLEASH_FIRST_INACTIVE_AGE } from "../animation/solarBeam.ts";
 import { reduceMemento, type MementoBattlerConfig, type MementoConfig } from "../animation/memento.ts";
@@ -1161,6 +1162,11 @@ export function liveMoveAnimationDuration(
  * apx210 (liveMovePlayback.ts): whether liveMoveAnimationDuration's move switch has no case for the request's move (the "no adapter"
  * decline), past the Substitute / Transform gates. Presentation-only diagnostics; a throw is not "no adapter".
  */
+/** apx222: a request drawn by a script-built approximate body (src/animation/approxScript.ts): "no-adapter" (no proven adapter exists). */
+export function liveMoveApproximateScriptReason(request: BattleMoveAnimationRequest): "no-adapter" | null {
+  return APPROX_SCRIPT_MOVE_BODY[request.moveId] !== undefined ? "no-adapter" : null;
+}
+
 export function liveMoveAnimationDurationCaseMissing(request: BattleMoveAnimationRequest, field?: BattleResolutionDisplayedField): boolean {
   const noCase = { hit: false };
   try {
@@ -1604,6 +1610,9 @@ function liveMoveAnimationDurationOf(
       return request.attacker === 0 ? willOWispTimeline("player", player, opponent).cleanup + 1
         : willOWispTimeline("opponent", opponent, player).cleanup + 1;
     }
+    // apx222 (approximate, "no-adapter"): the script-built bodies of src/animation/approxScript.ts; liveMovePlayback.ts classifies them.
+    case 64: case 316: case 206: case 16: case 6: case 140: case 176:
+      return approxScriptDuration(APPROX_SCRIPT_MOVE_BODY[request.moveId]!);
     default:
       if (noCase) noCase.hit = true;
       return null;
@@ -4642,6 +4651,12 @@ export function liveMoveAnimationPresentationProven(
       if (animationInputs === null) return null;
       config = { move: "WATER_SPOUT", attacker, target, fieldProfile, animationInputs,
         targetIdleX2: liveBattlerAnchors(target.geometry.side, art, battlerX2Input).frontIdleRest.x2 };
+      break;
+    }
+    case 64: case 316: case 206: case 16: case 6: case 140: case 176: {
+      // apx222 (approximate, "no-adapter"): a script-built body (approxScript.ts); Peck's target rotates about its unshifted sprite center.
+      const body = APPROX_SCRIPT_MOVE_BODY[request.moveId]!;
+      config = { move: "APPROX_SCRIPT", body, attacker, target: body === "PECK" ? affineCenterBattler(target) : target, fieldProfile };
       break;
     }
     default: return null;

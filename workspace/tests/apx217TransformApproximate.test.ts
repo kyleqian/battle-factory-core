@@ -45,7 +45,7 @@ describe("apx217: approximate transform", () => {
       expect(liveMovePlaybackClassification(command(headbutt), field())).toEqual({ kind: "live" });
     }
     // A body without a case keeps its own reason (the transform gate no longer masks it).
-    expect(liveMovePlaybackClassification(command(req(1, 0)), transformed)).toEqual({ kind: "static", reason: "no-adapter" });
+    expect(liveMovePlaybackClassification(command(req(1, 0)), transformed)).toEqual({ kind: "static", reason: "other:no-adapter-unscripted" });
   });
 
   it("the Transform body outside its proven picture scope draws with its own length; self target / doll still decline", () => {

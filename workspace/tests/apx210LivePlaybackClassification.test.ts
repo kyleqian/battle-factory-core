@@ -37,9 +37,9 @@ const classify = (request: BattleMoveAnimationRequest, field: BattleResolutionDi
   liveMovePlaybackClassification(command(request), field, view);
 
 describe("apx210: decline reasons", () => {
-  it("duration gates (a pure function of (command, field)): no-adapter, turn-0 -> static, hold unchanged", () => {
+  it("duration gates (a pure function of (command, field)): an unscripted no-adapter move, turn-0 -> static, hold unchanged", () => {
     const cases: [BattleMoveAnimationRequest, BattleResolutionDisplayedField, string][] = [
-      [req(1), fieldOf(), "no-adapter"], // Pound: no liveMoveAnimationDuration case
+      [req(1), fieldOf(), "other:no-adapter-unscripted"], // Pound: no liveMoveAnimationDuration case and no script body (approxScript.ts)
       [req(174), fieldOf(), "turn-0"], // Curse's Ghost branch (turn 0)
     ];
     for (const [request, field, reason] of cases) {
@@ -90,7 +90,7 @@ describe("apx210: decline reasons", () => {
 
 describe("apx210: the approximate hook", () => {
   it("is static except apx215's substitute-doll, apx217's transform, apx219's sprite-order-unknown / allocator-unknown and apx221's and apx222's classes", () => {
-    const promoted = ["substitute-doll", "transform", "sprite-order-unknown", "allocator-unknown", "castform-form", "endeavor-power", "hidden-target"];
+    const promoted = ["substitute-doll", "transform", "sprite-order-unknown", "allocator-unknown", "castform-form", "endeavor-power", "hidden-target", "no-adapter"];
     for (const c of LIVE_MOVE_DECLINE_CLASSES) {
       expect(LIVE_MOVE_APPROXIMATE_POLICY[c]).toBe(promoted.includes(c) ? "approximate" : "static");
     }
@@ -99,8 +99,10 @@ describe("apx210: the approximate hook", () => {
   });
 
   it("a policy promoting ONE class reclassifies only that class", () => {
-    const policy = { ...LIVE_MOVE_APPROXIMATE_POLICY, "no-adapter": "approximate" as const };
-    expect(liveMovePlaybackClassification(command(req(1)), fieldOf(), undefined, policy)).toEqual({ kind: "approximate", reason: "no-adapter" });
+    const policy = { ...LIVE_MOVE_APPROXIMATE_POLICY, "no-adapter": "static" as const };
+    // apx222: Peck's script body is approximate under the shipped policy; with the class demoted it holds static again.
+    expect(liveMovePlaybackClassification(command(req(64)), fieldOf())).toEqual({ kind: "approximate", reason: "no-adapter" });
+    expect(liveMovePlaybackClassification(command(req(64)), fieldOf(), undefined, policy)).toEqual({ kind: "static", reason: "no-adapter" });
     expect(liveMovePlaybackClassification(command(req(174)), fieldOf(), undefined, policy)).toEqual({ kind: "static", reason: "turn-0" });
     // Headbutt has no proven defender-doll cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): approximate under the shipped policy.
     const doll = fieldOf({}, { substituteDoll: true });

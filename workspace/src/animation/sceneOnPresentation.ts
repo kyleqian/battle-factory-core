@@ -69,6 +69,7 @@ import {
   drillPeckAtAge,
   type DrillPeckState,
 } from "./drillPeck.ts";
+import { approxScriptAtAge, type ApproxScriptBody, type ApproxScriptFrame } from "./approxScript.ts";
 import {
   bodySlamAtAge,
   type BodySlamState,
@@ -2537,6 +2538,15 @@ export interface SceneOnDrillPeckConfig {
   readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
 }
 
+/** apx222: an approximate body built from its battle_anim_scripts.s script (src/animation/approxScript.ts). */
+export interface SceneOnApproxScriptConfig {
+  readonly move: "APPROX_SCRIPT";
+  readonly body: Exclude<ApproxScriptBody, "CURSE_GHOST">;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+  readonly fieldProfile: Readonly<SceneOnDragonRageFieldProfile>;
+}
+
 export interface SceneOnWhirlwindConfig {
   readonly move: "WHIRLWIND";
   readonly attacker: SceneOnPresentationBattler;
@@ -4432,6 +4442,7 @@ export type SceneOnMoveConfig =
   | SceneOnHeadbuttConfig
   | SceneOnSubmissionConfig
   | SceneOnDrillPeckConfig
+  | SceneOnApproxScriptConfig
   | SceneOnWhirlwindConfig
   | SceneOnBlockConfig
   | SceneOnRockTombConfig
@@ -5175,6 +5186,12 @@ export interface SceneOnSubmissionView extends SubmissionState {
 }
 
 export interface SceneOnDrillPeckView extends DrillPeckState {
+  readonly age: number;
+  readonly attacker: SceneOnPresentationBattler;
+  readonly target: SceneOnPresentationBattler;
+}
+
+export interface SceneOnApproxScriptView extends ApproxScriptFrame {
   readonly age: number;
   readonly attacker: SceneOnPresentationBattler;
   readonly target: SceneOnPresentationBattler;
@@ -6652,7 +6669,7 @@ export function createSceneOnMovePresentation<
     | SceneOnHazeConfig
     | SceneOnRecycleConfig
     | SceneOnBiteConfig
-    | SceneOnHeadbuttConfig | SceneOnSubmissionConfig | SceneOnDrillPeckConfig
+    | SceneOnHeadbuttConfig | SceneOnSubmissionConfig | SceneOnDrillPeckConfig | SceneOnApproxScriptConfig
   | SceneOnBodySlamConfig | SceneOnSlamConfig
     | SceneOnSecretPowerConfig
     | SceneOnWhirlwindConfig | SceneOnBlockConfig
@@ -8673,6 +8690,26 @@ export function sceneOnDrillPeckView(
       state.config.target.geometry.side,
       state.config.target.geometry.animationCenter,
     ),
+  };
+}
+
+/** `age=0` is the first display of an approximate script body. */
+export function sceneOnApproxScriptView(
+  state: SceneOnMovePresentationState<SceneOnApproxScriptConfig>,
+): SceneOnApproxScriptView {
+  if (state.config.move !== "APPROX_SCRIPT") {
+    throw new Error(`expected APPROX_SCRIPT presentation, got ${state.config.move}`);
+  }
+  return {
+    age: state.age,
+    attacker: state.config.attacker,
+    target: state.config.target,
+    ...approxScriptAtAge(state.config.body, state.age, {
+      attackerSide: state.config.attacker.geometry.side,
+      targetSide: state.config.target.geometry.side,
+      attackerCenter: state.config.attacker.geometry.animationCenter,
+      targetCenter: state.config.target.geometry.animationCenter,
+    }),
   };
 }
 
