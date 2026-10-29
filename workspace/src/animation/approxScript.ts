@@ -201,7 +201,7 @@ function payDay(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return frameOf(age, landed + FALLING_COIN_LIFE, { targetOffset: atTick(PAY_DAY_SHAKE, age - landed), sprites });
 }
 
-// ---- Move_BARRAGE: AnimTask_BarrageBall (a red ball arcing to the target) + ShakeMon at age 26 ---------------------------------
+// ---- Move_BARRAGE: AnimTask_BarrageBall (a red ball arcing to the target; affine anim 1: -4 per tick, anim 2 for an opponent: -64 then +4 per tick, 24 ticks) + ShakeMon at age 26 ---------------------------------
 const BARRAGE_SHAKE = shakeMonSequence(0, 4, 20, 1);
 const BARRAGE_SHAKE_START = 26;
 const BARRAGE_BALL_END = 57;
@@ -211,14 +211,15 @@ function barrage(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   if (age < BARRAGE_BALL_END) {
     // Two ticks per step for 8 steps, then one tick per step (16 in all); TranslateAnimHorizontalArc resets y2 to the linear y each step, then adds Sin(step * 0x8000/16 >> 8, -32).
     const steps = age < 2 ? 0 : age <= 16 ? Math.floor(age / 2) : Math.min(16, 8 + age - 16);
-    const target = { x: ctx.targetCenter.x, y: ctx.targetCenter.y + 8 };
+    // Y_PIC_OFFSET + HEIGHT / 4 (the species' own height is not carried by the context: 48 / 4).
+    const target = { x: ctx.targetCenter.x, y: ctx.targetCenter.y + 12 };
     const arc = steps === 0 ? 0 : sineOf(steps * 8, -32);
     const flicker = age >= 27 ? Math.floor((age - 25) / 2) % 2 === 1 : false;
     if (!flicker) {
       sprites.push(sprite("redBall",
         Math.round(ctx.attackerCenter.x + (target.x - ctx.attackerCenter.x) * steps / 16),
         Math.round(ctx.attackerCenter.y + (target.y - ctx.attackerCenter.y) * steps / 16) + arc,
-        rotationMatrix(((steps * -4 * 24 / 16 | 0) & 0xff) << 8)));
+        rotationMatrix(((ctx.attackerSide === "opponent" ? -64 + 4 * Math.min(24, age) : -4 * Math.min(24, age)) & 0xff) << 8)));
     }
   }
   return frameOf(age, BARRAGE_LAST, { targetOffset: atTick(BARRAGE_SHAKE, age - BARRAGE_SHAKE_START), sprites });
