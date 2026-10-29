@@ -54959,15 +54959,29 @@ function drawMidBattleSwitchInSprite(
         );
       }
     } else if (state.emergeAccumulator > MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
-      drawSpriteSheet(
-        fb,
-        art.pic.tileset as Tileset,
-        paletteOverride ?? (art.pic.palette as RgbColor[]),
-        art.origin.x,
-        state.side === "opponent"
-          ? art.origin.y - battleCommandFieldArtElevation(art, "opponent")
-          : art.origin.y,
-      );
+      const back = state.side === "player" ? state.backAnim : null;
+      if (back !== null) {
+        // bso225: the Scene ON player send-in plays the species `BattleAnimateBackSprite` animation (the `Anim_*` callback's
+        // x2 / y2, the double-size OAM matrix of an affine family and a glow / flash family's `BlendPalette`).
+        const basePalette = paletteOverride ?? (art.pic.palette as RgbColor[]);
+        const palette = back.blend !== null ? blendPaletteToward(basePalette, bgr555ToRgb8(back.blend.color), back.blend.coefficient) : basePalette;
+        if (back.matrix !== null) {
+          drawSpriteSheetAffineRotate(fb, art.pic.tileset as Tileset, palette, art.origin.x + 32 + back.x2, art.origin.y + 32 + back.y2,
+            back.matrix[0], back.matrix[1], back.matrix[2], back.matrix[3]);
+        } else {
+          drawSpriteSheet(fb, art.pic.tileset as Tileset, palette, art.origin.x + back.x2, art.origin.y + back.y2);
+        }
+      } else {
+        drawSpriteSheet(
+          fb,
+          art.pic.tileset as Tileset,
+          paletteOverride ?? (art.pic.palette as RgbColor[]),
+          art.origin.x,
+          state.side === "opponent"
+            ? art.origin.y - battleCommandFieldArtElevation(art, "opponent")
+            : art.origin.y,
+        );
+      }
     }
   }
   // Opponent release creates the ball after the mon sprite; its open OAM

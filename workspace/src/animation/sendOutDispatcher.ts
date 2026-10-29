@@ -561,3 +561,76 @@ export function frontSendOutPaletteAtTick(
     blend: blend === null ? null : Object.freeze(blend),
   });
 }
+
+const BACK_BLEND_COLORS: Readonly<Record<string, number>> = Object.freeze({
+  RGB_RED: 0x001f,
+  RGB_GREEN: 0x03e0,
+  RGB_BLUE: 0x7c00,
+  RGB_YELLOW: 0x03ff,
+});
+
+type BackRawFrame = SpeciesIdleOffset & Omit<FrontAffineFields, "blendColor"> & Readonly<{
+  blendColor?: string | null;
+  rotationU16?: number | null;
+  affineWrites?: readonly Readonly<{ xScale?: number; yScale?: number; rotationU16?: number }>[];
+}>;
+
+/** bso225: the full back reducer frame at `ticksSinceStart`, or null (unknown species / nature / tick). */
+function backSendOutRawFrame(species: string, nature: string, ticksSinceStart: number): BackRawFrame | null {
+  if (!Number.isInteger(ticksSinceStart) || ticksSinceStart < 0) return null;
+  const natureId = BACK_ANIM_NATURE_ORDER.indexOf(nature);
+  if (natureId === -1) return null;
+  const selection = selectBackSendOutAnimation(species, natureId);
+  const reducer = selection === null ? undefined : BACK_SEND_OUT_REDUCERS[selection.backAnimSet];
+  if (reducer === undefined) return null;
+  return reducer(species, natureId, ticksSinceStart) as BackRawFrame | null;
+}
+
+function backLastWritten<T>(species: string, nature: string, tick: number, read: (f: BackRawFrame) => T | null | undefined): T | null {
+  for (let t = tick; t >= 0; t -= 1) {
+    const frame = backSendOutRawFrame(species, nature, t);
+    if (frame === null) return null;
+    const value = read(frame);
+    if (value !== null && value !== undefined) return value;
+  }
+  return null;
+}
+
+/**
+ * bso225: the OAM matrix the species' back `Anim_*` callback leaves at `ticksSinceStart`, or null while the sprite is untransformed
+ * (identity scale, no rotation: the plain back pic). Same `SetAffineData` / BIOS `ObjAffineSet` math as `frontSendOutAffineAtTick`
+ * (`Task_HandleMonAnimation` sets `sDontFlip` for every mon animation); a tick without a write keeps the last matrix.
+ */
+export function backSendOutAffineAtTick(
+  species: string,
+  nature: string,
+  ticksSinceStart: number,
+): readonly [number, number, number, number] | null {
+  const frame = backSendOutRawFrame(species, nature, ticksSinceStart);
+  if (frame === null || frame.affineMode !== "double") return null;
+  const lastWrite = (f: BackRawFrame) => f.affineWrites?.[f.affineWrites.length - 1];
+  const xScale = backLastWritten(species, nature, ticksSinceStart, (f) => f.xScale ?? lastWrite(f)?.xScale) ?? 256;
+  const yScale = backLastWritten(species, nature, ticksSinceStart, (f) => f.yScale ?? lastWrite(f)?.yScale) ?? 256;
+  const rotation = (backLastWritten(species, nature, ticksSinceStart, (f) => f.rotationU16 ?? lastWrite(f)?.rotationU16) ?? 0) & 0xffff;
+  if (xScale === 256 && yScale === 256 && rotation === 0) return null;
+  const theta = ((rotation >> 8) / 128) * Math.PI;
+  const sx = xScale / 256;
+  const sy = yScale / 256;
+  return Object.freeze([
+    Math.trunc(Math.cos(theta) * sx * 256) + 0,
+    Math.trunc(-Math.sin(theta) * sx * 256) + 0,
+    Math.trunc(Math.sin(theta) * sy * 256) + 0,
+    Math.trunc(Math.cos(theta) * sy * 256) + 0,
+  ] as const);
+}
+
+/** bso225: the last `BlendPalette` write of a shake-glow / shake-flash back family (coefficient toward a BGR555 color); null = no write yet. */
+export function backSendOutPaletteAtTick(
+  species: string,
+  nature: string,
+  ticksSinceStart: number,
+): Readonly<{ coefficient: number; color: number }> | null {
+  const blend = backLastWritten(species, nature, ticksSinceStart, (f) => f.blendCoefficient !== null && f.blendCoefficient !== undefined
+    ? { coefficient: f.blendCoefficient, color: BACK_BLEND_COLORS[f.blendColor ?? ""] ?? 0 } : null);
+  return blend === null ? null : Object.freeze(blend);
+}

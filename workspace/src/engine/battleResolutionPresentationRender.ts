@@ -65,8 +65,11 @@ import {
   recordContainedPresentationError,
 } from "./presentationContainment.ts";
 import {
+  backSendOutAffineAtTick, backSendOutFrameAtTick, backSendOutPaletteAtTick,
   frontSendOutAffineAtTick, frontSendOutAnimationDelay, frontSendOutFrameAtTick, frontSendOutInitializerTicks, frontSendOutPaletteAtTick,
 } from "../animation/sendOutDispatcher.ts";
+import { BACK_ANIM_NATURE_ORDER } from "../animation/backSendOutAnim.ts";
+import { natureFromPersonality } from "./opponentGen.ts";
 import { frontSendOutSpriteFrameAtTick } from "../animation/sendOutSpriteFrame.ts";
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
@@ -334,6 +337,19 @@ export type MidBattleSwitchInView = Readonly<{
    * player side and in Scene OFF, whose SKIP_FRONT_ANIM path never launches it).
    */
   frontAnim: MidBattleSwitchInFrontAnim | null;
+  /**
+   * bso225: a Scene ON player send-in's species back animation once the emerge has ended (null before it starts, for the opponent
+   * side, in Scene OFF -- whose SKIP_FRONT_ANIM path never calls `BattleAnimateBackSprite` -- and for a mon with no back reducer).
+   */
+  backAnim: MidBattleSwitchInBackAnim | null;
+}>;
+
+/** bso225: the player's back `Anim_*` state on one rendered frame (x2 / y2 offsets, OAM matrix, `BlendPalette` write). */
+export type MidBattleSwitchInBackAnim = Readonly<{
+  x2: number;
+  y2: number;
+  matrix: readonly [number, number, number, number] | null;
+  blend: Readonly<{ coefficient: number; color: number }> | null;
 }>;
 
 /** fra151: the settled send-in sprite's front animation state on one rendered frame. */
@@ -378,6 +394,31 @@ function midBattleSwitchInPalette(
     : { monTintCoefficient: 0, frontAnim };
 }
 
+/**
+ * bso225 (ISSUES #146 / #71 remainder, docs/bso225-player-back-send-out.md): Scene ON player send-in elapsed on which the back
+ * animation's reducer tick 0 renders. `SpriteCB_PlayerMonFromBall` (battle_main.c:2987) calls `BattleAnimateBackSprite` (pokemon.c:6886)
+ * on the first callback after the emerge's `affineAnimEnded`; the callback is the species' `3 * GetSpeciesBackAnimSet + natureMod` entry.
+ */
+export const MID_BATTLE_SWITCH_BACK_ANIM_START_ELAPSED = 60;
+
+export function midBattleSwitchInBackAnimAt(species: string, nature: string, elapsed: number): MidBattleSwitchInBackAnim | null {
+  const tick = elapsed - MID_BATTLE_SWITCH_BACK_ANIM_START_ELAPSED;
+  if (tick < 0) return null;
+  const offset = backSendOutFrameAtTick(species, nature, tick);
+  if (offset === null) return null;
+  return Object.freeze({
+    x2: offset.x2,
+    y2: offset.y2,
+    matrix: backSendOutAffineAtTick(species, nature, tick),
+    blend: backSendOutPaletteAtTick(species, nature, tick),
+  });
+}
+
+/** bso225: the back animation's selector inputs for a player mon (`GetNature` = personality % 25). */
+export function backAnimNatureName(personality: number | undefined): string {
+  return BACK_ANIM_NATURE_ORDER[natureFromPersonality((personality ?? 0) >>> 0)]!;
+}
+
 export function midBattleSwitchInFrontAnimAt(species: string, elapsed: number): MidBattleSwitchInFrontAnim | null {
   const frameTick = elapsed - MID_BATTLE_SWITCH_FRONT_ANIM_FRAME_START_ELAPSED;
   if (frameTick < 0) return null;
@@ -414,6 +455,8 @@ export function midBattleSwitchInAt(
   healthboxSlideStart?: number,
   /** fra151: the Scene ON opponent send-in species whose front animation plays (omitted = none: player side, Scene OFF). */
   frontAnimSpecies?: string,
+  /** bso225: the Scene ON player send-in's back animation inputs (omitted = none: opponent side, Scene OFF). */
+  backAnimMon?: Readonly<{ species: string; nature: string }>,
 ): MidBattleSwitchInView {
   const side = battler === 0 ? "player" : "opponent";
   // DoPokeballSendOutAnimation routes by GetBattlerSide. Player send-outs
@@ -507,6 +550,7 @@ export function midBattleSwitchInAt(
     monVisible,
     emergeAccumulator,
     healthboxDx,
+    backAnim: backAnimMon === undefined || side !== "player" ? null : midBattleSwitchInBackAnimAt(backAnimMon.species, backAnimMon.nature, elapsed),
     ...midBattleSwitchInPalette(
       frontAnimSpecies === undefined || side !== "opponent" ? null : midBattleSwitchInFrontAnimAt(frontAnimSpecies, elapsed),
       monTintCoefficient,
@@ -2044,6 +2088,11 @@ export function createBattleResolutionPresentationRenderView(
         // fra151: only the Scene ON opponent send-in (the species-keyed tail) launches the front animation (offs152: Scene OFF skips it).
         command.healthboxSlideElapsed === undefined || command.battler !== 1 || command.skipFrontAnimation === true
           ? undefined : createBattleCommandFieldArtView(field).opponent.speciesSymbol,
+        // bso225: the Scene ON player send-in (voluntary, forced and any other `switch-in`) runs the species back animation.
+        command.battler === 0 && segment.beforeRules !== null && segment.beforeRules !== undefined
+          && (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0
+          ? Object.freeze({ species: createBattleCommandFieldArtView(field).player.speciesSymbol, nature: backAnimNatureName(command.incoming.personality) })
+          : undefined,
       );
       midBattleSwitchFade = midBattleSwitchSendInFadeAt(sendInElapsed, command.battler) ?? midBattleSwitchFade;
       midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(sendInElapsed, command.battler) ?? midBattleSwitchParticles;
