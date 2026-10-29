@@ -25,7 +25,8 @@ describe("apx222: one staged command per class / new body draws non-static rows,
     expect(first).not.toBeNull();
     expect(first.code).toBe(code);
     expect(first.rows).toBe(rows);
-    expect(first.nonStaticRows).toBeGreaterThan(rows * 0.4);
+    // apx224: a body may start with idle lead-in rows (the ROM draws nothing for 7-15 frames after the command starts).
+    expect(first.nonStaticRows).toBeGreaterThan(rows * 0.3);
     const again = apx217Strip(seed, moveId, attacker, code)!;
     expect(again.rows).toBe(first.rows);
     expect(again.nonStaticRows).toBe(first.nonStaticRows);
