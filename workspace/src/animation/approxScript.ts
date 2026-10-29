@@ -85,9 +85,9 @@ function basicSplat(age: number, spawn: number, ctx: ApproxScriptContext, animat
 }
 
 /** AnimFlashingHitSplat_Step: toggles every tick, destroyed after 14 callbacks. */
-function flashingSplat(age: number, spawn: number, ctx: ApproxScriptContext, animation: 1 | 2 | 3, dx = 0, dy = 0): ApproxScriptSprite[] {
+function flashingSplat(age: number, spawn: number, ctx: ApproxScriptContext, animation: 1 | 2 | 3, dx = 0, dy = 0, lastTick = 13): ApproxScriptSprite[] {
   const local = age - spawn;
-  if (local < 0 || local > 13 || local % 2 === 1) return [];
+  if (local < 0 || local > lastTick || local % 2 === 1) return [];
   return [sprite("impact", ctx.targetCenter.x + towardTarget(ctx) * dx, ctx.targetCenter.y + dy, SPLAT_MATRIX[animation])];
 }
 
@@ -101,26 +101,30 @@ const frameOf = (age: number, last: number, parts: Partial<ApproxScriptFrame>): 
 });
 
 // ---- Move_PECK: AnimTask_RotateMonToSideAndRestore (3 ticks out, 3 back) + a flashing hit splat at x=-12 -------------------------
-const PECK_LAST = 13;
+// The ROM draws nothing for 8 frames after the command starts; the driver holds age 0 for 4 rows, so the body starts at age 5.
+// The flashing splat (14 callbacks) is last visible on its 11th tick; the splat sits at the target's pic offset, 8 px below the center.
+const PECK_LEAD = 5;
+const PECK_LAST = PECK_LEAD + 10;
 function peck(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+  const tick = age - PECK_LEAD;
   // data3 = -+768 * step (sign flips for an opponent target), the y2 offset is |matrix c| >> 3 (SetBattlerSpriteYOffsetFromRotation).
-  const steps = [1, 2, 3, 2, 1, 0][age] ?? 0;
+  const steps = [1, 2, 3, 2, 1, 0][tick] ?? 0;
   const angle = (ctx.targetSide === "opponent" ? -768 : 768) * steps;
-  const targetMatrix = age <= 5 ? rotationMatrix(angle) : null;
+  const targetMatrix = tick >= 0 && tick <= 4 ? rotationMatrix(angle) : null;
   return frameOf(age, PECK_LAST, {
     targetMatrix, targetOffset: targetMatrix ? { x2: 0, y2: Math.abs(targetMatrix.c) >> 3 } : ZERO,
-    sprites: flashingSplat(age, 0, ctx, 3, -12),
+    sprites: flashingSplat(tick, 0, ctx, 3, -12, 8, 10),
   });
 }
 
 // ---- Move_ODOR_SLEUTH: two blend clones of the target swinging +-24 px for 60 ticks, shrinking; two attacker lunges --------------
 const ODOR_SLEUTH_LAST = 80;
 function odorSleuth(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
-  // MoveOdorSleuthClone: x2 = Cos(angle, amplitude); angle steps +16 / -16; amplitude 24 for 60 ticks, then -2 per tick; flicker every 2.
+  // MoveOdorSleuthClone: x2 = Cos(angle, amplitude); angle steps +16 / -16; amplitude 24 for 60 ticks, then -2 per tick; the toggle runs first in each callback (tick n = age + 1), so one clone is visible per tick.
   const clone = (start: number, step: number, visibleFirst: boolean): ApproxScriptOffset[] => {
     if (age > 72) return [];
     const amplitude = age < 60 ? 24 : Math.max(0, 24 - 2 * (age - 60));
-    const visible = (Math.floor(age / 2) % 2 === 0) === visibleFirst;
+    const visible = (Math.floor((age + 1) / 2) % 2 === 0) === visibleFirst;
     return visible ? [{ x2: cosineOf(start + step * (age + 1), amplitude), y2: 0 }] : [];
   };
   const lunge = horizontalLungeX2AtTick(3, 4, ctx.attackerSide, age - 26) + horizontalLungeX2AtTick(3, 4, ctx.attackerSide, age - 34);
@@ -130,32 +134,33 @@ function odorSleuth(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
 }
 
 // ---- Move_FALSE_SWIPE: a slash_2 slice sweeping the target, six positioned slices, then ShakeMon + a hit splat ---------------
+// The ROM draws nothing for 10 frames after the command starts (the driver holds age 0 for 4 rows): the body starts at age 7. Its first
+// slice frame is shown for 3 ticks, the main slice does not blink and is last drawn the tick before the splat.
 const SLASH_FRAME = (frame: number) => [frame * 16, 4, 4] as const;
+const FALSE_SWIPE_LEAD = 7;
 const FALSE_SWIPE_SLICE_END = 58;
 const FALSE_SWIPE_SHAKE = shakeMonSequence(5, 0, 6, 1);
-const FALSE_SWIPE_LAST = FALSE_SWIPE_SLICE_END + FALSE_SWIPE_SHAKE.length;
+const FALSE_SWIPE_LAST = FALSE_SWIPE_LEAD + FALSE_SWIPE_SLICE_END + FALSE_SWIPE_SHAKE.length;
 function falseSwipe(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+  const tick = age - FALSE_SWIPE_LEAD;
   const tx = ctx.targetCenter.x - 48;
   const sprites: ApproxScriptSprite[] = [];
-  // AnimFalseSwipeSlice: 4 frames x 4 ticks, a 9-tick wait, 12 steps of +8 px, then an every-2-ticks blink until destroyed at age 58.
-  if (age < FALSE_SWIPE_SLICE_END) {
-    const blinks = age >= 41 ? Math.floor((age - 39) / 2) : 0;
-    if (blinks % 2 === 0) {
-      sprites.push(sprite("slash2", tx + 8 * Math.min(12, Math.max(0, age - 25)), ctx.targetCenter.y, null,
-        SLASH_FRAME(Math.min(3, Math.floor(age / 4)))));
-    }
+  // AnimFalseSwipeSlice: 4 frames x 4 ticks, a 9-tick wait, then 12 steps of +8 px until it is destroyed.
+  if (tick >= 0 && tick < FALSE_SWIPE_SLICE_END - 1) {
+    sprites.push(sprite("slash2", tx + 8 * Math.min(12, Math.max(0, tick - 25)), ctx.targetCenter.y, null,
+      SLASH_FRAME(Math.min(3, Math.floor((tick + 1) / 4)))));
   }
-  // AnimFalseSwipePositionedSlice x6 every 4 ticks from age 18: the last frame, blinking every 2 ticks for 18 ticks.
+  // AnimFalseSwipePositionedSlice x6 every 4 ticks from tick 18: the last frame, blinking every 2 ticks for 18 ticks.
   for (let i = 0; i < 6; i += 1) {
-    const local = age - (18 + 4 * i);
+    const local = tick - (18 + 4 * i);
     if (local < 0 || local > 17 || (local >= 2 && Math.floor(local / 2) % 2 === 1)) continue;
     sprites.push(sprite("slash2", tx + 16 * i, ctx.targetCenter.y, null, SLASH_FRAME(3)));
   }
-  sprites.push(...basicSplat(age, FALSE_SWIPE_SLICE_END, ctx, 3));
-  return frameOf(age, FALSE_SWIPE_LAST, { targetOffset: atTick(FALSE_SWIPE_SHAKE, age - FALSE_SWIPE_SLICE_END), sprites });
+  sprites.push(...basicSplat(tick, FALSE_SWIPE_SLICE_END, ctx, 3));
+  return frameOf(age, FALSE_SWIPE_LAST, { targetOffset: atTick(FALSE_SWIPE_SHAKE, tick - FALSE_SWIPE_SLICE_END), sprites });
 }
 
-// ---- Move_GUST: AnimEllipticalGust (71 ticks) -> ShakeMon2 + a hit splat -------------------------------------------------------
+// ---- Move_GUST: AnimEllipticalGust (spawned at (0, -16) from the target, then y += 20; 71 ticks) -> ShakeMon2 + a hit splat -------------------------------------------------------
 const GUST_END = 70;
 const GUST_SHAKE = shakeMon2Sequence(1, 0, 7, 1);
 const GUST_LAST = GUST_END + 1 + GUST_SHAKE.length;
@@ -163,7 +168,7 @@ function gust(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   const sprites: ApproxScriptSprite[] = [];
   if (age < GUST_END) {
     const angle = 191 + 5 * age;
-    sprites.push(sprite("gust", ctx.targetCenter.x + sineOf(angle, 32), ctx.targetCenter.y + 20 + cosineOf(angle, 8)));
+    sprites.push(sprite("gust", ctx.targetCenter.x + sineOf(angle, 32), ctx.targetCenter.y + 4 + cosineOf(angle, 8)));
   }
   sprites.push(...basicSplat(age, GUST_END + 1, ctx, 2));
   return frameOf(age, GUST_LAST, { targetOffset: atTick(GUST_SHAKE, age - GUST_END - 1), sprites });
@@ -172,25 +177,29 @@ function gust(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
 // ---- Move_PAY_DAY: a rotated coin thrown at the target (speed 1152), then a hit splat, ShakeMon2 and a bouncing falling coin ----
 const PAY_DAY_SHAKE = shakeMon2Sequence(1, 0, 6, 1);
 const COIN_FRAME = [8, 2, 2] as const;
-const FALLING_COIN_LIFE = 52;
-// InitAnimLinearTranslationWithSpeedAndPos at speed 1152 (4.5 px per tick) over the singles attacker-target distance (~114 px).
-const PAY_DAY_FLIGHT_TICKS = 25;
+const FALLING_COIN_LIFE = 50;
+// The ROM draws nothing for 13 frames after the command starts (the driver holds age 0 for 4 rows): the body starts at age 10.
+// InitAnimLinearTranslationWithSpeedAndPos at speed 1152: the coin is drawn for 19 ticks, the splat lands 20 ticks after the throw.
+const PAY_DAY_LEAD = 10;
+const PAY_DAY_COIN_TICKS = 19;
+const PAY_DAY_FLIGHT_TICKS = 20;
 const payDayFrom = (ctx: ApproxScriptContext): ApproxScriptPoint =>
   ({ x: ctx.attackerCenter.x + towardTarget(ctx) * 20, y: ctx.attackerCenter.y });
 function payDay(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+  const tick = age - PAY_DAY_LEAD;
   const from = payDayFrom(ctx);
   const to = ctx.targetCenter;
   const sprites: ApproxScriptSprite[] = [];
-  if (age < PAY_DAY_FLIGHT_TICKS) {
-    const t = age / PAY_DAY_FLIGHT_TICKS;
+  if (tick >= 0 && tick < PAY_DAY_COIN_TICKS) {
+    const t = tick / 18;
     const angle = Math.round(Math.atan2(to.y - from.y, to.x - from.x) * 65536 / (2 * Math.PI)) - 0x4000;
     sprites.push(sprite("coin", Math.round(from.x + (to.x - from.x) * t), Math.round(from.y + (to.y - from.y) * t),
       rotationMatrix(angle), COIN_FRAME));
   }
   const landed = PAY_DAY_FLIGHT_TICKS;
-  sprites.push(...basicSplat(age, landed, ctx, 2));
+  sprites.push(...basicSplat(tick, landed, ctx, 2));
   // AnimFallingCoin_Step: x2 drifts away at half a pixel per tick, y2 = Sin(phase, -16) then -8, phase +5 per tick, two bounces.
-  const k = age - landed;
+  const k = tick - landed;
   if (k >= 0 && k < FALLING_COIN_LIFE) {
     const bounce = Math.floor(k / 26);
     const phase = (k % 26) * 5;
@@ -198,10 +207,10 @@ function payDay(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
     sprites.push(sprite("coin", ctx.targetCenter.x + (ctx.attackerSide === "player" ? -drift : drift),
       ctx.targetCenter.y + 8 + sineOf(phase, bounce === 0 ? -16 : -8), rotationMatrix(((k + 1) * 10 & 0xff) << 8), COIN_FRAME));
   }
-  return frameOf(age, landed + FALLING_COIN_LIFE, { targetOffset: atTick(PAY_DAY_SHAKE, age - landed), sprites });
+  return frameOf(age, PAY_DAY_LEAD + landed + FALLING_COIN_LIFE, { targetOffset: atTick(PAY_DAY_SHAKE, k + 1), sprites });
 }
 
-// ---- Move_BARRAGE: AnimTask_BarrageBall (a red ball arcing to the target) + ShakeMon at age 26 ---------------------------------
+// ---- Move_BARRAGE: AnimTask_BarrageBall (a red ball arcing to the target; affine anim 1: -4 per tick, anim 2 for an opponent: -64 then +4 per tick, 24 ticks) + ShakeMon at age 26 ---------------------------------
 const BARRAGE_SHAKE = shakeMonSequence(0, 4, 20, 1);
 const BARRAGE_SHAKE_START = 26;
 const BARRAGE_BALL_END = 57;
@@ -211,14 +220,15 @@ function barrage(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   if (age < BARRAGE_BALL_END) {
     // Two ticks per step for 8 steps, then one tick per step (16 in all); TranslateAnimHorizontalArc resets y2 to the linear y each step, then adds Sin(step * 0x8000/16 >> 8, -32).
     const steps = age < 2 ? 0 : age <= 16 ? Math.floor(age / 2) : Math.min(16, 8 + age - 16);
-    const target = { x: ctx.targetCenter.x, y: ctx.targetCenter.y + 8 };
+    // Y_PIC_OFFSET + HEIGHT / 4 (the species' own height is not carried by the context: 48 / 4).
+    const target = { x: ctx.targetCenter.x, y: ctx.targetCenter.y + 12 };
     const arc = steps === 0 ? 0 : sineOf(steps * 8, -32);
     const flicker = age >= 27 ? Math.floor((age - 25) / 2) % 2 === 1 : false;
     if (!flicker) {
       sprites.push(sprite("redBall",
         Math.round(ctx.attackerCenter.x + (target.x - ctx.attackerCenter.x) * steps / 16),
         Math.round(ctx.attackerCenter.y + (target.y - ctx.attackerCenter.y) * steps / 16) + arc,
-        rotationMatrix(((steps * -4 * 24 / 16 | 0) & 0xff) << 8)));
+        rotationMatrix(((ctx.attackerSide === "opponent" ? -64 + 4 * Math.min(24, age) : -4 * Math.min(24, age)) & 0xff) << 8)));
     }
   }
   return frameOf(age, BARRAGE_LAST, { targetOffset: atTick(BARRAGE_SHAKE, age - BARRAGE_SHAKE_START), sprites });

@@ -71,3 +71,22 @@ Conversion 2 20 / 80 / 150.
 - Conversion 2's 818-frame ROM command spans both turns (staged with the other lead on Tackle); its visible body is 165 frames.
 - A first Barrage window used a stale field (wrong opponent species); only the corrected window is reported. The Curse opponent-side
   case (seed 138) was not run.
+
+## After apx224
+
+apx224 (only `src/animation/approxScript.ts`; bodies stay `approx:*`) fixed the worst defects above using these checks. Residual =
+mismatched field pixels per our visible row (17 056 px field), median / max; same ROM runs, same census commands.
+
+| Body | Rows before -> after | Start-aligned before | Start-aligned after apx224 | Best shift before | Best shift after apx224 | What changed / what remains |
+| --- | --- | --- | --- | --- | --- | --- |
+| Gust | 90 -> 90 | 1 233 / 1 585 | 1 349 / 1 740 | 1 037 / 1 291 (2 exact) | 986 / 1 320 (2 exact) | Funnel raised (target y + 4 instead of + 20). Remaining residual is the tornado palette rotation, which the renderer does not model (out of scope). |
+| Odor Sleuth | 85 -> 85 | 1 942 / 4 145 | 1 949 / 4 382 | 876 / 3 922 (37 exact) | **0** / 1 486 (60 exact) | Clone blink toggles before the move (floor((age+1)/2)); matches once shifted. The first 3-4 rows still show the clone during the ROM lead-in (no lead added), so start-aligned did not improve. |
+| Barrage | 71 -> 71 | 1 055 / 4 416 | 1 055 / 4 346 | 393 / 3 292 (4 exact) | 235 / 3 292 (33 exact) | Ball rotation follows the source affine anim (side-dependent, per tick); target aim at pic offset + height/4. Remaining max is the background Y shake (SHAKE_BG_Y), not modelled. |
+| Peck | 18 -> 20 | 233 / 1 183 | **0 / 0** (11 of 11 exact) | 233 / 883 | 0 / 0 | 5-tick lead-in, source shake steps, impact splat flashing at the pic offset (dy +8). Exact over the whole visible body. |
+| Pay Day | 82 -> 85 | 170 / 1 945 | 60 / 1 270 | 100 / 1 516 (9 exact) | 60 / 1 270 (shift 0) | 10-tick lead-in, 19-tick coin, splat at tick 20, 50-tick falling coin, shake one tick earlier. Start-aligned now equals best shift. |
+| False Swipe | 75 -> 82 | 209 / 1 684 | 91 / 609 (10 exact) | 84 / 609 (10 exact) | 91 / 609 (shift 0) | 7-tick lead-in, 3-tick first slice frame, main slice without blink. Start-aligned now equals best shift. |
+
+Not touched: Conversion 2 and Ghost Curse (skipped for time). The apx222 row-count test now allows idle lead-in rows (non-static
+threshold 0.3 of rows). Evidence: `.integration/validation/sv-20261028/apx224-evidence/` (oracle-check summaries and PNGs,
+`census/on-2c619ac34`, `census-delta.json`). Census ON 0..999 versus `on-bad3db32c`: 997 identical battles, 3 changed (seeds 51
+Peck, 705 False Swipe, 923 Pay Day; move-animation length changes only); eventsDigest, error and seed identical on all 1 000.
