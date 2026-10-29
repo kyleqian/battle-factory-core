@@ -155,7 +155,7 @@ function falseSwipe(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return frameOf(age, FALSE_SWIPE_LAST, { targetOffset: atTick(FALSE_SWIPE_SHAKE, age - FALSE_SWIPE_SLICE_END), sprites });
 }
 
-// ---- Move_GUST: AnimEllipticalGust (71 ticks) -> ShakeMon2 + a hit splat -------------------------------------------------------
+// ---- Move_GUST: AnimEllipticalGust (spawned at (0, -16) from the target, then y += 20; 71 ticks) -> ShakeMon2 + a hit splat -------------------------------------------------------
 const GUST_END = 70;
 const GUST_SHAKE = shakeMon2Sequence(1, 0, 7, 1);
 const GUST_LAST = GUST_END + 1 + GUST_SHAKE.length;
@@ -163,7 +163,7 @@ function gust(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   const sprites: ApproxScriptSprite[] = [];
   if (age < GUST_END) {
     const angle = 191 + 5 * age;
-    sprites.push(sprite("gust", ctx.targetCenter.x + sineOf(angle, 32), ctx.targetCenter.y + 20 + cosineOf(angle, 8)));
+    sprites.push(sprite("gust", ctx.targetCenter.x + sineOf(angle, 32), ctx.targetCenter.y + 4 + cosineOf(angle, 8)));
   }
   sprites.push(...basicSplat(age, GUST_END + 1, ctx, 2));
   return frameOf(age, GUST_LAST, { targetOffset: atTick(GUST_SHAKE, age - GUST_END - 1), sprites });
