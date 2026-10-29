@@ -15,7 +15,7 @@ describe("apx222: one staged command per class / new body draws non-static rows,
     // no-adapter: each body is built from its source script (src/animation/approxScript.ts); [rows] is its own duration
     ["no-adapter: Peck 64 by the opponent (Move_PECK)", 51, 64, 1, "approx:no-adapter", 20],
     ["no-adapter: Odor Sleuth 316 by the player (Move_ODOR_SLEUTH)", 705, 316, 0, "approx:no-adapter", 85],
-    ["no-adapter: False Swipe 206 by the player (Move_FALSE_SWIPE)", 705, 206, 0, "approx:no-adapter", 75],
+    ["no-adapter: False Swipe 206 by the player (Move_FALSE_SWIPE)", 705, 206, 0, "approx:no-adapter", 82],
     ["no-adapter: Gust 16 by the player (Move_GUST)", 197, 16, 0, "approx:no-adapter", 90],
     ["no-adapter: Pay Day 6 by the player (Move_PAY_DAY)", 923, 6, 0, "approx:no-adapter", 85],
     ["no-adapter: Barrage 140 by the opponent (Move_BARRAGE)", 803, 140, 1, "approx:no-adapter", 71],

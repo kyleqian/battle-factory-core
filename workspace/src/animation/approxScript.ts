@@ -134,29 +134,30 @@ function odorSleuth(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
 }
 
 // ---- Move_FALSE_SWIPE: a slash_2 slice sweeping the target, six positioned slices, then ShakeMon + a hit splat ---------------
+// The ROM draws nothing for 10 frames after the command starts (the driver holds age 0 for 4 rows): the body starts at age 7. Its first
+// slice frame is shown for 3 ticks, the main slice does not blink and is last drawn the tick before the splat.
 const SLASH_FRAME = (frame: number) => [frame * 16, 4, 4] as const;
+const FALSE_SWIPE_LEAD = 7;
 const FALSE_SWIPE_SLICE_END = 58;
 const FALSE_SWIPE_SHAKE = shakeMonSequence(5, 0, 6, 1);
-const FALSE_SWIPE_LAST = FALSE_SWIPE_SLICE_END + FALSE_SWIPE_SHAKE.length;
+const FALSE_SWIPE_LAST = FALSE_SWIPE_LEAD + FALSE_SWIPE_SLICE_END + FALSE_SWIPE_SHAKE.length;
 function falseSwipe(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+  const tick = age - FALSE_SWIPE_LEAD;
   const tx = ctx.targetCenter.x - 48;
   const sprites: ApproxScriptSprite[] = [];
-  // AnimFalseSwipeSlice: 4 frames x 4 ticks, a 9-tick wait, 12 steps of +8 px, then an every-2-ticks blink until destroyed at age 58.
-  if (age < FALSE_SWIPE_SLICE_END) {
-    const blinks = age >= 41 ? Math.floor((age - 39) / 2) : 0;
-    if (blinks % 2 === 0) {
-      sprites.push(sprite("slash2", tx + 8 * Math.min(12, Math.max(0, age - 25)), ctx.targetCenter.y, null,
-        SLASH_FRAME(Math.min(3, Math.floor(age / 4)))));
-    }
+  // AnimFalseSwipeSlice: 4 frames x 4 ticks, a 9-tick wait, then 12 steps of +8 px until it is destroyed.
+  if (tick >= 0 && tick < FALSE_SWIPE_SLICE_END - 1) {
+    sprites.push(sprite("slash2", tx + 8 * Math.min(12, Math.max(0, tick - 25)), ctx.targetCenter.y, null,
+      SLASH_FRAME(Math.min(3, Math.floor((tick + 1) / 4)))));
   }
-  // AnimFalseSwipePositionedSlice x6 every 4 ticks from age 18: the last frame, blinking every 2 ticks for 18 ticks.
+  // AnimFalseSwipePositionedSlice x6 every 4 ticks from tick 18: the last frame, blinking every 2 ticks for 18 ticks.
   for (let i = 0; i < 6; i += 1) {
-    const local = age - (18 + 4 * i);
+    const local = tick - (18 + 4 * i);
     if (local < 0 || local > 17 || (local >= 2 && Math.floor(local / 2) % 2 === 1)) continue;
     sprites.push(sprite("slash2", tx + 16 * i, ctx.targetCenter.y, null, SLASH_FRAME(3)));
   }
-  sprites.push(...basicSplat(age, FALSE_SWIPE_SLICE_END, ctx, 3));
-  return frameOf(age, FALSE_SWIPE_LAST, { targetOffset: atTick(FALSE_SWIPE_SHAKE, age - FALSE_SWIPE_SLICE_END), sprites });
+  sprites.push(...basicSplat(tick, FALSE_SWIPE_SLICE_END, ctx, 3));
+  return frameOf(age, FALSE_SWIPE_LAST, { targetOffset: atTick(FALSE_SWIPE_SHAKE, tick - FALSE_SWIPE_SLICE_END), sprites });
 }
 
 // ---- Move_GUST: AnimEllipticalGust (spawned at (0, -16) from the target, then y += 20; 71 ticks) -> ShakeMon2 + a hit splat -------------------------------------------------------
