@@ -27,13 +27,18 @@ const mon = (species: number, move: number, gender: string, personality?: number
   gender, shiny: false, ...(personality === undefined ? {} : { personality }),
 });
 const lead = (m: any, move: number) => mon(m.species, move, m.gender);
+// --other=<moveId>: the non-attacking lead's move (default Splash); --spam: press A every 20 frames after turn 1 so a second turn is played
+// (Conversion 2 plays no animation until the target has used a move).
+const otherMove = Number(arg("other") ?? 150), spam = process.argv.includes("--spam");
 const labFor = (frames: number[]) => ({
   schemaVersion: 1, mode: "mechanicLab", profile: "battle-scene-on", level: 50, challengeNum: 2, battleNum: 2, trainerId: 110,
   playerSetIds: [274, 354, 338], opponentSetIds: [349, 339, 327], seed: 1,
   overrides: { parties: {
-    player: [lead(field.player, attacker === 0 ? moveId : 150), mon(1, 33, "male"), mon(4, 10, "male")],
-    opponent: [lead(field.opponent, attacker === 1 ? moveId : 150), mon(187, 150, "female"), mon(129, 150, "female")] } },
-  trace: { segments: [{ frames: 2, buttons: ["A"] }, { frames: 30, buttons: [] }, { frames: 2, buttons: ["A"] }, { frames: Math.max(...frames) - 33, buttons: [] }],
+    player: [lead(field.player, attacker === 0 ? moveId : otherMove), mon(1, 33, "male"), mon(4, 10, "male")],
+    opponent: [lead(field.opponent, attacker === 1 ? moveId : otherMove), mon(187, 150, "female"), mon(129, 150, "female")] } },
+  trace: { segments: [{ frames: 2, buttons: ["A"] }, { frames: 30, buttons: [] }, { frames: 2, buttons: ["A"] },
+    ...(spam ? Array.from({ length: Math.ceil((Math.max(...frames) - 34) / 20) }, () => [{ frames: 18, buttons: [] }, { frames: 2, buttons: ["A"] }]).flat()
+      : [{ frames: Math.max(...frames) - 33, buttons: [] }])],
     captureFrames: frames },
 });
 /** One oracle run (<= 256 captures); cached per directory. */
@@ -121,16 +126,31 @@ const exact = [...cmd.entries()].filter(([f, c]) => c === MOVEANIMATION && f >= 
 const romStart = exact[0]!, romEnd = exact.at(-1)!, romRows = romEnd - romStart + 1;
 console.log(`ROM MOVEANIMATION frames ${romStart}..${romEnd} (${romRows}); ours ${ours.rows} rows`);
 const at = (f: number) => rom.get(f) ?? rom.get(romEnd + 1) ?? rom.get(romEnd)!;
+// Visible extent (a run of changed frames; an idle gap of more than 4 frames ends it, which drops the post-move hit blink): the first / last frame whose battle-field region differs from the idle field (ROM: the frame before the command; ours: the
+// command's static hold). The command stays active past the visible body (the HP drain), so these, not the command length, size the body.
+const GAP = 4;
+const extent = (frames: (i: number) => Uint8Array, idle: Uint8Array, from: number, to: number) => {
+  let first = -1, last = -1;
+  for (let i = from; i <= to; i += 1) if (diffMask(frames(i), idle) > 0) { if (first < 0) first = i; else if (i - last > GAP) break; last = i; }
+  return { first, last, rows: first < 0 ? 0 : last - first + 1 };
+};
+const romIdle = rom.get(romStart - 1)!;
+const romVis = extent(at, romIdle, romStart, romEnd);
+const oursVis = extent((i) => ours.frames[i]!, ours.staticFrame!, 0, ours.rows - 1);
+const visShift = romVis.first - oursVis.first - romStart;
+console.log(`ROM command ${romStart}..${romEnd} (${romRows}); visible field change ${romVis.first}..${romVis.last} (${romVis.rows}); ours ${ours.rows} rows, visible ${oursVis.first}..${oursVis.last} (${oursVis.rows})`);
 const costAt = (off: number) => { let c = 0; for (let i = 0; i < ours.rows; i += 1) c += diffMask(at(off + i), ours.frames[i]!); return c; };
 const stats = (arr: number[]) => { const q = [...arr].sort((a, b) => a - b); return { median: q[Math.floor(q.length / 2)]!, max: q.at(-1)!, mean: Math.round(arr.reduce((a, b) => a + b, 0) / arr.length), zero: arr.filter((v) => v === 0).length }; };
 const perAt = (off: number) => ours.frames.map((fr, i) => diffMask(at(off + i), fr));
-let bestOff = romStart, bestCost = Infinity;
-for (let off = romStart - 40; off <= romStart + 40; off += 1) { if (!rom.has(off)) continue; const c = costAt(off); if (c < bestCost) { bestCost = c; bestOff = off; } }
-const startAligned = perAt(romStart), bestAligned = perAt(bestOff);
-const endAligned = ours.frames.map((fr, i) => diffMask(at(romEnd - (ours.rows - 1) + i), fr));
+// Stats over ours' visible rows only (the idle rows around the body match trivially).
+const visSlice = (arr: number[]) => arr.slice(oursVis.first, oursVis.last + 1);
+let bestOff = romStart + visShift, bestCost = Infinity;
+for (let off = romStart + visShift - 25; off <= romStart + visShift + 25; off += 1) { if (!rom.has(off)) continue; const c = costAt(off); if (c < bestCost) { bestCost = c; bestOff = off; } }
+const startAligned = perAt(romStart + visShift), bestAligned = perAt(bestOff);
 const summary = {
-  name, seed, moveId, attacker, code: ours.code, oursRows: ours.rows, romRows, romStart, romEnd, fieldPixels: fieldPx.length,
-  startAligned: stats(startAligned), bestShift: { shift: bestOff - romStart, ...stats(bestAligned) }, endAligned: stats(endAligned),
+  name, seed, moveId, attacker, code: ours.code, oursRows: ours.rows, oursVisible: oursVis, romCommandRows: romRows, romStart, romEnd,
+  romVisible: romVis, fieldPixels: fieldPx.length,
+  startAligned: { shift: visShift, ...stats(visSlice(startAligned)) }, bestShift: { shift: bestOff - romStart, ...stats(visSlice(bestAligned)) },
   perFrameStartAligned: startAligned, perFrameBestShift: bestAligned,
 };
 writeFileSync(`${work}/summary.json`, JSON.stringify(summary));
@@ -143,7 +163,7 @@ if (outDir) {
   const picks = (arg("at") ?? "").split(",").filter(Boolean).map(Number);
   if (!picks.length) picks.push(...[0.15, 0.5, 0.85].map((q) => Math.floor(q * (ours.rows - 1))));
   picks.forEach((i) => {
-    const a = at(romStart + shift + i), b = ours.frames[i]!;
+    const a = at(romStart + visShift + shift + i), b = ours.frames[i]!;
     const img = new Uint8Array(720 * 160 * 4);
     for (let y = 0; y < 160; y++) for (let x = 0; x < 240; x++) {
       const p = y * 240 + x;
@@ -155,3 +175,12 @@ if (outDir) {
     writeFileSync(`${outDir}/${name}-row${String(i).padStart(3, "0")}.png`, writePng(720, 160, img));
   });
 }
+
+// --romat=k,l,m: a ROM-only strip of the body frames romStart+k.. (to see the body's tail past ours).
+if (arg("romat") && outDir) {
+  const ks = arg("romat")!.split(",").map(Number);
+  const img = new Uint8Array(240 * ks.length * 160 * 4);
+  ks.forEach((k, n) => { const a = at(romStart + k); for (let y = 0; y < 160; y++) for (let x = 0; x < 240; x++) for (let c = 0; c < 4; c++) img[(y * 240 * ks.length + n * 240 + x) * 4 + c] = a[(y * 240 + x) * 4 + c]!; });
+  writeFileSync(`${outDir}/${name}-rom-only.png`, writePng(240 * ks.length, 160, img));
+}
+if (process.argv.includes("--series")) console.log("ROM field px vs idle, per command frame:", JSON.stringify(Array.from({ length: romRows }, (_, k) => diffMask(at(romStart + k), romIdle))));
