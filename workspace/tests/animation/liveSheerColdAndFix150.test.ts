@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS } from "../../src/engine/liveMoveTimingPolicy.ts";
 import {
-  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation, type LiveMoveDeclineSink,
+  LIVE_MOVE_ANIMATION_IDS, LIVE_MOVE_OPPONENT_SHADOW_ROW, liveMoveAnimationDuration, liveMoveAnimationPresentation, liveMoveAnimationPresentationProven, type LiveMoveDeclineSink,
 } from "../../src/engine/liveMoveAnimation.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import type { BattleMoveAnimationRequest } from "../../src/engine/battleMoveAnimation.ts";
@@ -72,8 +72,13 @@ describe("live Sheer Cold (329) first-body adapter", () => {
     const onix = liveView({ ...f, target: { ...f.target, species: "ONIX" } }, 0);
     const onixEffect = onix.effect as unknown as { request: BattleMoveAnimationRequest; spriteOrderInput: object };
     expect(liveMoveAnimationPresentation(onixEffect.request, onix.field, 0, undefined, undefined, onixEffect.spriteOrderInput as never)).not.toBeNull();
-    expect(liveMoveAnimationPresentation(onixEffect.request, onix.field, 0, undefined, undefined,
-      { ...onixEffect.spriteOrderInput, firstBody: undefined } as never)).toBeNull();
+    const laterOnix = { ...onixEffect.spriteOrderInput, firstBody: undefined } as never;
+    expect(liveMoveAnimationPresentationProven(onixEffect.request, onix.field, 0, undefined, undefined, laterOnix)).toBeNull();
+    // apx221: the proven decline stands; the wrapper draws the later body with the battlers' current rest offsets.
+    const restSink: LiveMoveDeclineSink = {};
+    expect(liveMoveAnimationPresentation(onixEffect.request, onix.field, 0, undefined, undefined, laterOnix, undefined, undefined,
+      undefined, restSink)).not.toBeNull();
+    expect(restSink.approximate).toBe("other:later-body-idle-rest");
     // apx219: an unknown order still declines the proven body; it is drawn approximately with the known-entry first-action order.
     for (const unknown of [undefined, { known: false }]) {
       const sink: LiveMoveDeclineSink = {};

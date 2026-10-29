@@ -48,7 +48,7 @@ export const LIVE_MOVE_APPROXIMATE_POLICY: LiveMovePlaybackPolicy = Object.freez
  * gate in liveMoveAnimationPresentationProven reads its flag (liveMoveAnimationPresentation retries with it) and names its fallback input.
  */
 export const LIVE_MOVE_APPROXIMATE_OTHER_REASONS: ReadonlySet<string> = Object.freeze(new Set<string>([
-  "other:extrasensory-player-later-target",
+  "other:extrasensory-player-later-target", "other:later-body-idle-rest",
 ]));
 export function liveMoveReasonIsApproximate(reason: LiveMoveDeclineReason): boolean {
   return reason.startsWith("other:") ? LIVE_MOVE_APPROXIMATE_OTHER_REASONS.has(reason)
