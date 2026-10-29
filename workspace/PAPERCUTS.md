@@ -27,6 +27,9 @@ history.
   full suite finished (result recovered from its `/tmp` log). Briefs now say when to start the suite.
   (10, snd182) `animationBoundaryRatchet` failures print only `expected [ …(2) ] to deeply equal []`; the violating files need a
   verbose rerun. An `until ! pgrep -f tsc` poll matches itself (~3 min); poll an exit file.
+  (2026-10-29, apx220 / apx222) `lsd194CensusDelta.py` prints FAIL (51 `typeSequenceChanged` seeds) on byte-identical OFF
+  shards; compare OFF arms with `cmp` (~5 min). Census and `npm test` exceed the 600 s tool limit and `npm run typecheck`
+  chained with another command is auto-backgrounded at 120 s; run them under nohup with an exit file (~20 min, apx222).
   (11, sub183) `prep37Probes.sh` and siblings hard-code Mac paths (another wrapper, `sub183Probes.sh`); every census needs a copied
   `.ts` / `.sh` / delta script because the census row layout is positional (a field index slipped by one).
   (12, 2026-10-16 evidence steps) `sub183Probes.sh` launches every job at once (no concurrency cap; lsd186 wrote `lsd186Probes.sh`);

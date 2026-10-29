@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-10-29)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,37 +20,31 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-10-28 ~06:20 UTC wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-10-29 ~05:00 UTC wind-down; PROGRESS.md top entry has details)
 
-- Phase 1: soak `--scene`, containment (contain209 / 213), render caches (perf211), Summary crash fixes (sfa214, folded
-  2026-10-27). `npm run play:random` now plays the real Factory loop in headless Chromium (play216 goal mode: node mirror
-  engine + soak policies through `__POKEBENCH__.advance`, every frame drawn; ~30 battles / 10 min ON, ~45 OFF; 0 errors so
-  far). Playwright must exist in `.integration/browser/node_modules` (ignored; `cd .integration/browser && npm install playwright`).
-  RETIRE-YES after a win no longer hangs (ret218). After a loss / retire the player ends in the walkable Lobby with no way to
-  start a new challenge except reloading (silent NPCs, 2026-08-05 user decision) — Phase 3 title-screen work.
-- Phase 2: approximate class live for substitute-doll (74, apx215) and transform (31, apx217); all 13 unattributed gates
-  named. Scene ON census 0..999 on master: **static 102**, approximate 105, live 26,956.
-- **apx219 UNFOLDED** (stopped at the deadline): branch `worker/animation-20261028-040709` (7 commits, base `03fbb15a6`):
-  sprite-order-unknown 26 + allocator-unknown 3 -> approximate using the known-entry first-action input; census on
-  `c7f8a558a` ON 10 battles changed / 0 bad, OFF 1,000 / 1,000 identical, static 102 -> 73
-  (`.integration/validation/sv-20261027/apx219-worktree-evidence/`). Its later commits re-pin gate-pin tests to
-  `liveMoveAnimationPresentationProven`; full suite NOT run to completion. First step next run: merge master into it, run
-  the full suite under nohup ALONE (no second worker; it was OOM-killed twice beside another worker), rerun census ON on the
-  union vs `census-apx217/on-cfa1242c0`, strips under `tools/integration/fixtures/approximate/sprite-order/` (NOT made yet; add them),
-  build, fold.
+- Phase 1: soak `--scene`, containment (contain209 / 213), render caches (perf211), Summary crash fixes (sfa214).
+  `npm run play:random` plays the real Factory loop in headless Chromium (play216 goal mode; Playwright must exist in
+  `.integration/browser/node_modules`, ignored; `cd .integration/browser && npm install playwright`). RETIRE-YES after a win no
+  longer hangs (ret218). After a loss / retire the player ends in the walkable Lobby with no way to start a new challenge except
+  reloading (silent NPCs, 2026-08-05 user decision) — Phase 3 title-screen work.
+- Phase 2 move bodies: **Scene ON census 0..999 has 0 static move-animation commands** (2026-10-29, master `f07c843af`):
+  live 26,956, approximate 207 (substitute-doll 74, transform 31, sprite-order-unknown 26, castform-form 18, extrasensory later
+  target 17, endeavor-power 12, no-adapter 11, turn-0 7, idle-rest 4, hidden-target 3, allocator-unknown 3, seismic 1), pause
+  12,941. Steps apx215 / 217 / 219-222; strips under `tools/integration/fixtures/approximate/<class>/`. New approximate bodies for
+  the no-adapter moves + Ghost Curse live in `src/animation/approxScript.ts` (no oracle check yet; Ghost Curse's black stretching
+  window not drawn). A no-case move without a script body would be `static:other:no-adapter-unscripted` (none in 0..999).
+  Census baseline for the next step: `.integration/validation/sv-20261028/apx222-evidence/census/{on,off}-bad3db32c` (src == master).
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
-1. **Fold apx219** (above).
-2. **Every animation plays**, by weight: castform-form 18, extrasensory-player-later 17, endeavor-power 12, no-adapter 11
-   (needs adapters), turn-0 7, later-body-idle-rest 4, hidden-target 3, seismic-toss-damage-branch 1. Then player back
-   send-out + intro send-outs in Scene ON, weather-continues side (#157). Pattern: apx215 / apx217 (policy flag, census
-   delta, strips, Tier-1 test).
-3. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak bulk at
+1. **Rest of Phase 2:** player back send-out + battle-start intro send-outs drawn in Scene ON (ISSUES #71 and the #205-area
+   "Open" lines; `docs/send-out-intro-animation-program.md`), Castform form changes, weather-continues takes battler 0 (#157).
+   Then a cheap oracle spot-check of 1–2 apx222 bodies (Scene ON 8012) to size their residuals.
+2. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak bulk at
    `--render-every 8` plus a `--render-every 1` sample. Every overlay / pageerror becomes a fix step.
-4. **Production + cleanup** per the plan, interleaved (cleanup steps 1–3 first; a "new challenge" path from the Lobby or a
+3. **Production + cleanup** per the plan, interleaved (cleanup steps 1–3 first; a "new challenge" path from the Lobby or a
    title screen belongs here).
-5. **Timing** residuals last (ISSUES #188 Summary motion, #189 retire path; exs207 refs kept).
+4. **Timing** residuals last (ISSUES #188 Summary motion, #189 retire path; exs207 refs kept).
 
 **Host note (2026-10-28):** two workers at once on 16 GiB caused repeated OOM kills (each worker's full suite / census plus a
 supervisor build). Keep ONE worker at a time; the launcher allows one per lane, so a second worker needs another lane anyway.
