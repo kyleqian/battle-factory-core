@@ -7,6 +7,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { crc32, deflateSync, inflateSync } from "node:zlib";
+import { battleResolutionFieldBeforeCommand } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { apx217Strip } from "./apx217TransformStrips.ts";
 
 const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
@@ -17,7 +18,10 @@ mkdirSync(work, { recursive: true });
 
 const ours = apx217Strip(seed, moveId, attacker, arg("code") ?? "approx:")!;
 if (!ours) throw new Error("census command not reached");
-const field = (ours.targetState as any).battleResolutionPresentation.segments[(ours.targetState as any).battleResolutionPresentation.segmentIndex].field;
+const field = (() => {
+  const r = (ours.targetState as any).battleResolutionPresentation, seg = r.segments[r.segmentIndex];
+  return battleResolutionFieldBeforeCommand(seg.field, seg.commands, r.commandIndex) as any;
+})();
 
 // ---- stage the ROM lab -------------------------------------------------------------------------------------------------------
 const iv = { hp: 31, attack: 31, defense: 31, speed: 31, spAttack: 31, spDefense: 31 };
