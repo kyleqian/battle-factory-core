@@ -1,0 +1,197 @@
+{
+ "shedinja": {
+  "species": "SHEDINJA",
+  "romFrames": 256,
+  "romFramesSha256": "7592e643dc81ef744ed9c4b57cae6e7eed5b7e64bb94a30cea61c558b7365b1a",
+  "before": {
+   "sendInMonPx": 36482,
+   "monPxE88plus": 14719
+  },
+  "after": {
+   "sendInMonPx": 7639,
+   "monPxE88plus": 0,
+   "nonzeroE65plus": [
+    [
+     65,
+     84
+    ],
+    [
+     66,
+     85
+    ],
+    [
+     67,
+     93
+    ],
+    [
+     68,
+     99
+    ],
+    [
+     69,
+     111
+    ],
+    [
+     70,
+     109
+    ]
+   ]
+  }
+ },
+ "skarmory": {
+  "species": "SKARMORY",
+  "romFrames": 256,
+  "romFramesSha256": "16c606e888572ee4372c09f24d371daff380fdf94d14caa34dffe371f440687b",
+  "before": {
+   "sendInMonPx": 41453,
+   "monPxE88plus": 8835
+  },
+  "after": {
+   "sendInMonPx": 8935,
+   "monPxE88plus": 0,
+   "nonzeroE65plus": [
+    [
+     65,
+     100
+    ],
+    [
+     66,
+     101
+    ],
+    [
+     67,
+     88
+    ],
+    [
+     68,
+     99
+    ],
+    [
+     69,
+     103
+    ],
+    [
+     70,
+     105
+    ]
+   ]
+  }
+ },
+ "alakazam": {
+  "species": "ALAKAZAM",
+  "romFrames": 256,
+  "romFramesSha256": "d81bd11582c5c635efcf8c4bd388a98147db1f1b84bc99e6013cc22b069824ff",
+  "before": {
+   "sendInMonPx": 51247,
+   "monPxE88plus": 8440
+  },
+  "after": {
+   "sendInMonPx": 8672,
+   "monPxE88plus": 0,
+   "nonzeroE65plus": [
+    [
+     65,
+     110
+    ],
+    [
+     66,
+     116
+    ],
+    [
+     67,
+     113
+    ],
+    [
+     68,
+     122
+    ],
+    [
+     69,
+     135
+    ],
+    [
+     70,
+     134
+    ]
+   ]
+  }
+ },
+ "onix": {
+  "species": "ONIX",
+  "romFrames": 256,
+  "romFramesSha256": "b02c61aef8ce1cc051310f71337847d7b74067a4da498c14f68c78dfe1c08fa1",
+  "before": {
+   "sendInMonPx": 41967,
+   "monPxE88plus": 15645
+  },
+  "after": {
+   "sendInMonPx": 10728,
+   "monPxE88plus": 0,
+   "nonzeroE65plus": [
+    [
+     65,
+     112
+    ],
+    [
+     66,
+     122
+    ],
+    [
+     67,
+     137
+    ],
+    [
+     68,
+     128
+    ],
+    [
+     69,
+     142
+    ],
+    [
+     70,
+     122
+    ]
+   ]
+  }
+ },
+ "entei": {
+  "species": "ENTEI",
+  "romFrames": 256,
+  "romFramesSha256": "3edbcbffea964d839f2710b3d5a0a7ed31f7625cc8d1cc407c15b3a5c876818a",
+  "before": {
+   "sendInMonPx": 206525,
+   "monPxE88plus": 186367
+  },
+  "after": {
+   "sendInMonPx": 9826,
+   "monPxE88plus": 0,
+   "nonzeroE65plus": [
+    [
+     65,
+     88
+    ],
+    [
+     66,
+     95
+    ],
+    [
+     67,
+     99
+    ],
+    [
+     68,
+     2126
+    ],
+    [
+     69,
+     138
+    ],
+    [
+     70,
+     129
+    ]
+   ]
+  }
+ }
+}
