@@ -85,9 +85,9 @@ function basicSplat(age: number, spawn: number, ctx: ApproxScriptContext, animat
 }
 
 /** AnimFlashingHitSplat_Step: toggles every tick, destroyed after 14 callbacks. */
-function flashingSplat(age: number, spawn: number, ctx: ApproxScriptContext, animation: 1 | 2 | 3, dx = 0, dy = 0): ApproxScriptSprite[] {
+function flashingSplat(age: number, spawn: number, ctx: ApproxScriptContext, animation: 1 | 2 | 3, dx = 0, dy = 0, lastTick = 13): ApproxScriptSprite[] {
   const local = age - spawn;
-  if (local < 0 || local > 13 || local % 2 === 1) return [];
+  if (local < 0 || local > lastTick || local % 2 === 1) return [];
   return [sprite("impact", ctx.targetCenter.x + towardTarget(ctx) * dx, ctx.targetCenter.y + dy, SPLAT_MATRIX[animation])];
 }
 
@@ -101,15 +101,19 @@ const frameOf = (age: number, last: number, parts: Partial<ApproxScriptFrame>): 
 });
 
 // ---- Move_PECK: AnimTask_RotateMonToSideAndRestore (3 ticks out, 3 back) + a flashing hit splat at x=-12 -------------------------
-const PECK_LAST = 13;
+// The ROM draws nothing for 8 frames after the command starts; the driver holds age 0 for 4 rows, so the body starts at age 5.
+// The flashing splat (14 callbacks) is last visible on its 11th tick; the splat sits at the target's pic offset, 8 px below the center.
+const PECK_LEAD = 5;
+const PECK_LAST = PECK_LEAD + 10;
 function peck(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
+  const tick = age - PECK_LEAD;
   // data3 = -+768 * step (sign flips for an opponent target), the y2 offset is |matrix c| >> 3 (SetBattlerSpriteYOffsetFromRotation).
-  const steps = [1, 2, 3, 2, 1, 0][age] ?? 0;
+  const steps = [1, 2, 3, 2, 1, 0][tick] ?? 0;
   const angle = (ctx.targetSide === "opponent" ? -768 : 768) * steps;
-  const targetMatrix = age <= 5 ? rotationMatrix(angle) : null;
+  const targetMatrix = tick >= 0 && tick <= 4 ? rotationMatrix(angle) : null;
   return frameOf(age, PECK_LAST, {
     targetMatrix, targetOffset: targetMatrix ? { x2: 0, y2: Math.abs(targetMatrix.c) >> 3 } : ZERO,
-    sprites: flashingSplat(age, 0, ctx, 3, -12),
+    sprites: flashingSplat(tick, 0, ctx, 3, -12, 8, 10),
   });
 }
 

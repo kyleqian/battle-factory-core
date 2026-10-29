@@ -13,7 +13,7 @@ describe("apx222: one staged command per class / new body draws non-static rows,
     ["turn-0: Curse 174 (Ghost branch) by the player", 231, 174, 0, "approx:turn-0", 353],
     ["turn-0: Curse 174 (Ghost branch) by the opponent", 138, 174, 1, "approx:turn-0", 353],
     // no-adapter: each body is built from its source script (src/animation/approxScript.ts); [rows] is its own duration
-    ["no-adapter: Peck 64 by the opponent (Move_PECK)", 51, 64, 1, "approx:no-adapter", 18],
+    ["no-adapter: Peck 64 by the opponent (Move_PECK)", 51, 64, 1, "approx:no-adapter", 20],
     ["no-adapter: Odor Sleuth 316 by the player (Move_ODOR_SLEUTH)", 705, 316, 0, "approx:no-adapter", 85],
     ["no-adapter: False Swipe 206 by the player (Move_FALSE_SWIPE)", 705, 206, 0, "approx:no-adapter", 75],
     ["no-adapter: Gust 16 by the player (Move_GUST)", 197, 16, 0, "approx:no-adapter", 90],
