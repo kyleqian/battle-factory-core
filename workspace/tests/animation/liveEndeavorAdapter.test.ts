@@ -67,7 +67,7 @@ describe("live Endeavor (283) script-body adapter", () => {
       expect(liveMoveAnimationPresentation(req, { ...view.field, [side]: { ...view.field[side], personality: shiny } }, 0)).toBeNull();
     }
     // apx221: the wrapper retries an unknown stale power as an approximate class; the proven gate still declines it.
-    const unknownPower = { zeroed: [], staleMovePowerUnknown: true };
+    const unknownPower = { zeroed: [], staleMovePowerUnknown: true } as const;
     expect(liveMoveAnimationPresentationProven(req, view.field, 0, undefined, undefined, undefined, undefined, unknownPower)).toBeNull();
     const sink: { reason?: string; approximate?: string } = {};
     expect(liveMoveAnimationPresentation(req, view.field, 0, undefined, undefined, undefined, undefined, unknownPower, undefined, sink as never)).not.toBeNull();
