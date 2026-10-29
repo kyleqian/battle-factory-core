@@ -84,9 +84,9 @@ const DURATION = caseBlocks("export function liveMoveAnimationDuration(");
 const PRESENTATION = caseBlocks("export function liveMoveAnimationPresentation(");
 const PRESENT_DURATION_GATE = lineOf(lmaLines, "if (liveMoveAnimationDuration(request, field) === null) return null;", PRESENTATION.start - 80);
 // hide66: the hidden-target gate right after the duration gate (liveMoveHiddenTargetDeclines).
-const PRESENT_HIDDEN_TARGET_GATE = lineOf(lmaLines, "if (liveMoveHiddenTargetDeclines(request, hiddenSides)) return ", PRESENTATION.start - 80);
+const PRESENT_HIDDEN_TARGET_GATE = lineOf(lmaLines, "liveMoveHiddenTargetDeclines(request, hiddenSides)) return ", PRESENTATION.start - 80);
 // cf78: the Castform weather-form gate right after it (liveCastformFormDeclines).
-const PRESENT_CASTFORM_GATE = lineOf(lmaLines, "if (liveCastformFormDeclines(field, request)) return ", PRESENTATION.start - 80);
+const PRESENT_CASTFORM_GATE = lineOf(lmaLines, "liveCastformFormDeclines(field, request)) return ", PRESENTATION.start - 80);
 const SWAP_APPLIES = lineOf(swapLines, "export function liveSubstituteSwapApplies(");
 const SWAP_SELF = lineOf(swapLines, "return (request.target === request.attacker", SWAP_APPLIES);
 const SWAP_BOTH = lineOf(swapLines, "battlerOf(field, request.target).substituteDoll !== true", SWAP_APPLIES);
