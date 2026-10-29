@@ -30,6 +30,8 @@ history.
   (2026-10-29, apx220 / apx222) `lsd194CensusDelta.py` prints FAIL (51 `typeSequenceChanged` seeds) on byte-identical OFF
   shards; compare OFF arms with `cmp` (~5 min). Census and `npm test` exceed the 600 s tool limit and `npm run typecheck`
   chained with another command is auto-backgrounded at 120 s; run them under nohup with an exit file (~20 min, apx222).
+  Hits +1 (2026-10-29 bso225: typecheck ~4 min auto-backgrounded, ~5 min; `lsd194Census.sh` first call hit the 590 s tool cap
+  during tree setup before its resume finished, ~10 min).
   (11, sub183) `prep37Probes.sh` and siblings hard-code Mac paths (another wrapper, `sub183Probes.sh`); every census needs a copied
   `.ts` / `.sh` / delta script because the census row layout is positional (a field index slipped by one).
   (12, 2026-10-16 evidence steps) `sub183Probes.sh` launches every job at once (no concurrency cap; lsd186 wrote `lsd186Probes.sh`);

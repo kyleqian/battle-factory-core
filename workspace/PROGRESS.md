@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-29 / 30 — CAX31 daily run (supervisor, Opus 5.5): in progress
+
+- **Folded:** bso225 (`633d97700`, fast-forward; branch `worker/integration-20261029-213114`): Scene ON player BACK send-out
+  animation on the mid-battle switch-in (voluntary + Roar / Whirlwind "dragged out"); banked back reducers, selector species +
+  `personality % 25`, reducer tick 0 at view elapsed 66; 625 / 625 Factory (species, nature) pairs have a reducer. 5 ROM windows
+  (SHEDINJA, SKARMORY, ALAKAZAM, ONIX, ENTEI) exact from elapsed 88 (was 8–186k px); ball / emerge / sparkle residual before e 88
+  unchanged; ENTEI glow 1 lag frame (e 68). Doc `docs/bso225-player-back-send-out.md`, strips
+  `tools/integration/fixtures/back-send-out/`. Worker on the exact tip tree: typecheck 0, full suite **1,713 files / 14,173 tests,
+  0 failed**, build 0, differential 641 / 641. Supervisor: OFF census shards byte-identical to `off-bad3db32c`; ON eventsDigest +
+  error identical on 1,000 / 1,000 (3 changed = the known apx224 rows); new test 6 / 6; ENTEI strip eyeballed.
+  Not wired: faint-replacement send-in (path B; the pfr192 emerge route is not pixel-aligned yet), battle-start player (path C).
+- **Running:** bso226 (battle-start intro send-outs in Scene ON, both sides).
+---
+
 ## 2026-10-28 / 29 — CAX31 daily run wind-down (supervisor, Opus 5.5): apx219-224 folded; Scene ON static 0
 
 - **State:** master `c7d99ba26`+ (apx219-222 fast-forward; apx223 / apx224 merges; final src == apx224 worker-tested tree `25e824041`).
