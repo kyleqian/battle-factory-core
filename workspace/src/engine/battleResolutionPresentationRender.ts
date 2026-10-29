@@ -350,6 +350,8 @@ export type MidBattleSwitchInBackAnim = Readonly<{
   y2: number;
   matrix: readonly [number, number, number, number] | null;
   blend: Readonly<{ coefficient: number; color: number }> | null;
+  /** The release fade task rewrites the mon's palette this frame, so a glow / flash `BlendPalette` write does not show. */
+  tintTaskWrites: boolean;
 }>;
 
 /** fra151: the settled send-in sprite's front animation state on one rendered frame. */
@@ -399,7 +401,7 @@ function midBattleSwitchInPalette(
  * animation's reducer tick 0 renders. `SpriteCB_PlayerMonFromBall` (battle_main.c:2987) calls `BattleAnimateBackSprite` (pokemon.c:6886)
  * on the first callback after the emerge's `affineAnimEnded`; the callback is the species' `3 * GetSpeciesBackAnimSet + natureMod` entry.
  */
-export const MID_BATTLE_SWITCH_BACK_ANIM_START_ELAPSED = 60;
+export const MID_BATTLE_SWITCH_BACK_ANIM_START_ELAPSED = 66;
 
 export function midBattleSwitchInBackAnimAt(species: string, nature: string, elapsed: number): MidBattleSwitchInBackAnim | null {
   const tick = elapsed - MID_BATTLE_SWITCH_BACK_ANIM_START_ELAPSED;
@@ -411,7 +413,20 @@ export function midBattleSwitchInBackAnimAt(species: string, nature: string, ela
     y2: offset.y2,
     matrix: backSendOutAffineAtTick(species, nature, tick),
     blend: backSendOutPaletteAtTick(species, nature, tick),
+    tintTaskWrites: backTintTaskWritesAt(elapsed),
   });
+}
+
+/**
+ * bso225: `Task_FadeMon_ToNormal` (the player's release fade, `midBattleSwitchSendInFadeAt`) rewrites the mon palette from the unfaded
+ * buffer on the frame before its ramp and while it ramps (obj 16 .. 0: ROM rows 70..86 from the send-in start, `elapsed` 71..87); during its hold and after, a glow / flash family's `BlendPalette` -- whose first
+ * write (coefficient 0) restores the plain palette over the held tint -- is what shows. ROM (bso225 ENTEI SHAKE_GLOW_RED window).
+ */
+function backTintTaskWritesAt(elapsed: number): boolean {
+  const fade = midBattleSwitchSendInFadeAt(elapsed, 0);
+  if (fade === null) return false;
+  if (fade.obj >= 16) return (midBattleSwitchSendInFadeAt(elapsed + 1, 0)?.obj ?? 16) < 16;
+  return fade.obj > 0 || (midBattleSwitchSendInFadeAt(elapsed - 1, 0)?.obj ?? 0) > 0;
 }
 
 /** bso225: the back animation's selector inputs for a player mon (`GetNature` = personality % 25). */

@@ -54898,7 +54898,21 @@ function drawMidBattleSwitchInSprite(
     // oracle 1188 has zero mon pixels, 1189 has 57). The accumulator formula
     // below yields acc 40 at elapsed 48 (the invisible 1187 RAM value), so gate
     // the draw on the accumulator reaching the visible 58.
-    if (state.emergeAccumulator >= MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR
+    const back = state.side === "player" ? state.backAnim : null;
+    if (back !== null && state.emergeAccumulator >= MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
+      // bso225: once the emerge has settled, the Scene ON player send-in plays the species `BattleAnimateBackSprite` animation (the
+      // `Anim_*` callback's x2 / y2, the double-size OAM matrix of an affine family and a glow / flash family's `BlendPalette`, which
+      // starts from the plain palette over the release tint and shows on every frame the release fade task does not rewrite).
+      const palette = back.blend !== null && !back.tintTaskWrites
+        ? blendPaletteToward(art.pic.palette as RgbColor[], bgr555ToRgb8(back.blend.color), back.blend.coefficient)
+        : paletteOverride ?? (art.pic.palette as RgbColor[]);
+      if (back.matrix !== null) {
+        drawSpriteSheetAffineRotate(fb, art.pic.tileset as Tileset, palette, art.origin.x + 32 + back.x2, art.origin.y + 32 + back.y2,
+          back.matrix[0], back.matrix[1], back.matrix[2], back.matrix[3]);
+      } else {
+        drawSpriteSheet(fb, art.pic.tileset as Tileset, palette, art.origin.x + back.x2, art.origin.y + back.y2);
+      }
+    } else if (state.emergeAccumulator >= MID_BATTLE_SWITCH_EMERGE_START_ACCUMULATOR
       && state.emergeAccumulator <= MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
       const scale = Math.trunc(0x10000 / state.emergeAccumulator);
       const materializeLocal = state.side === "opponent"
@@ -54959,29 +54973,15 @@ function drawMidBattleSwitchInSprite(
         );
       }
     } else if (state.emergeAccumulator > MID_BATTLE_SWITCH_EMERGE_NEUTRAL_ACCUMULATOR) {
-      const back = state.side === "player" ? state.backAnim : null;
-      if (back !== null) {
-        // bso225: the Scene ON player send-in plays the species `BattleAnimateBackSprite` animation (the `Anim_*` callback's
-        // x2 / y2, the double-size OAM matrix of an affine family and a glow / flash family's `BlendPalette`).
-        const basePalette = paletteOverride ?? (art.pic.palette as RgbColor[]);
-        const palette = back.blend !== null ? blendPaletteToward(basePalette, bgr555ToRgb8(back.blend.color), back.blend.coefficient) : basePalette;
-        if (back.matrix !== null) {
-          drawSpriteSheetAffineRotate(fb, art.pic.tileset as Tileset, palette, art.origin.x + 32 + back.x2, art.origin.y + 32 + back.y2,
-            back.matrix[0], back.matrix[1], back.matrix[2], back.matrix[3]);
-        } else {
-          drawSpriteSheet(fb, art.pic.tileset as Tileset, palette, art.origin.x + back.x2, art.origin.y + back.y2);
-        }
-      } else {
-        drawSpriteSheet(
-          fb,
-          art.pic.tileset as Tileset,
-          paletteOverride ?? (art.pic.palette as RgbColor[]),
-          art.origin.x,
-          state.side === "opponent"
-            ? art.origin.y - battleCommandFieldArtElevation(art, "opponent")
-            : art.origin.y,
-        );
-      }
+      drawSpriteSheet(
+        fb,
+        art.pic.tileset as Tileset,
+        paletteOverride ?? (art.pic.palette as RgbColor[]),
+        art.origin.x,
+        state.side === "opponent"
+          ? art.origin.y - battleCommandFieldArtElevation(art, "opponent")
+          : art.origin.y,
+      );
     }
   }
   // Opponent release creates the ball after the mon sprite; its open OAM
