@@ -116,11 +116,11 @@ function peck(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
 // ---- Move_ODOR_SLEUTH: two blend clones of the target swinging +-24 px for 60 ticks, shrinking; two attacker lunges --------------
 const ODOR_SLEUTH_LAST = 80;
 function odorSleuth(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
-  // MoveOdorSleuthClone: x2 = Cos(angle, amplitude); angle steps +16 / -16; amplitude 24 for 60 ticks, then -2 per tick; flicker every 2.
+  // MoveOdorSleuthClone: x2 = Cos(angle, amplitude); angle steps +16 / -16; amplitude 24 for 60 ticks, then -2 per tick; the toggle runs first in each callback (tick n = age + 1), so one clone is visible per tick.
   const clone = (start: number, step: number, visibleFirst: boolean): ApproxScriptOffset[] => {
     if (age > 72) return [];
     const amplitude = age < 60 ? 24 : Math.max(0, 24 - 2 * (age - 60));
-    const visible = (Math.floor(age / 2) % 2 === 0) === visibleFirst;
+    const visible = (Math.floor((age + 1) / 2) % 2 === 0) === visibleFirst;
     return visible ? [{ x2: cosineOf(start + step * (age + 1), amplitude), y2: 0 }] : [];
   };
   const lunge = horizontalLungeX2AtTick(3, 4, ctx.attackerSide, age - 26) + horizontalLungeX2AtTick(3, 4, ctx.attackerSide, age - 34);
