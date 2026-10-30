@@ -57,14 +57,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   153,995 -> 278 (= the prototype's prediction); healthbox residual 0 in 6. No row / digest change. Worker on the exact tree:
   typecheck 0; census OFF shards byte-identical, ON eventsDigest + error 1,000 / 1,000 (supervisor re-checked both); static 0;
   differential 641 / 641; full suite (12 shards) **1,715 files / 14,187 tests, 0 failed**; build 0. Supervisor short gates on the
-  merge: see the line below. **Not run on this src:** vanilla `--scene both` (39 min, no room before the deadline) and the
-  0:30 Scene ON render-8 soak; both are green on the parent `fa622452c` above, and pfb229 changes only Scene ON forced-send-in
-  drawing. Next run: run them first.
+  merge: see the line below. **Not run on this src:** the 0:30 Scene ON render-8 soak (45 min); green on the parent `fa622452c`
+  above, and pfb229 changes only Scene ON forced-send-in drawing. Next run: run it first.
 - **Short gates on the pfb229 merge `bb9029a37` (`.integration/validation/sv-20261029/gates-bb9029a37/`):** build 0; varied-RNG
   first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; Scene ON winning first-round 0:6
   `--render-every 1` **6 / 6**; browser goal play Scene ON 3 min (seed 17): 8 battles / 6 swap screens, 0 page errors / overlays /
-  divergences.
-- **Next:** handoff "Next work" 1 (the two soaks above on `bb9029a37`+, then the #146 remainder), 2 Castform form changes.
+  divergences; vanilla 0:20 `--scene on` (`--parallel 5`, 606 s) **20 / 20** (all `budget`; OFF unaffected by this Scene ON-only
+  change, 20 / 20 on the parent).
+- **Next:** handoff "Next work" 1 (the Scene ON render-8 soak on `bb9029a37`+, then the #146 remainder), 2 Castform form changes.
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261029-213114` (bso225), `-20261029-233450`
   (bso226), `-20261030-023040` (apx227), `-20261030-042229` (pfb228), `-20261030-050141` (pfb229). Evidence `.integration/validation/sv-20261029/`. No push.
 ---

@@ -30,13 +30,12 @@ kept and is long-tail.
 - Phase 2: **Scene ON census 0..999 static 0** (approximate 206, live 26,957 after apx227). Send-out animations in Scene ON:
   mid-battle player switch-in back animation (bso225), battle-start intro opponent front + player back (bso226) are drawn.
   #157 fixed (apx227). Conversion 2 / Ghost Curse approximate bodies refit (apx227; Ghost icon palette still off).
-- Faint-replacement player send-in (path B) folded at 06:46 as pfb229 (`bb9029a37`); its vanilla `--scene both` and Scene ON
-  render-8 soaks were not run on that src (no time) — run them first next session.
+- Faint-replacement player send-in (path B) folded at 06:46 as pfb229 (`bb9029a37`); vanilla `--scene on` 20 / 20 on it; the Scene ON
+  render-8 soak was not run on that src (no time) — run it first next session.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
-1. **Gates on `bb9029a37`+ first:** vanilla 0:20 `--scene both` and Scene ON `--policy full --vary-rng` 0:30 `--render-every 8`
-   (not run on pfb229's src). Then the remaining #146 lines worth a player's eye (shiny send-ins, CRY_MODE_WEAK, Roar
+1. **Gate on `bb9029a37`+ first:** Scene ON `--policy full --vary-rng` 0:30 `--render-every 8` (not run on pfb229's src). Then the remaining #146 lines worth a player's eye (shiny send-ins, CRY_MODE_WEAK, Roar
    opponent-attacker ball path, ENTEI / KINGDRA glow-lag frame) and the bso226 ONIX intro window residual.
 2. **Castform form changes** (finish plan Phase 2 item 4; ISSUES #143 remainder).
 3. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak `--render-every 8`
