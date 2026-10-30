@@ -1845,6 +1845,9 @@ export const LIVE_CASTFORM_FORM_PROVEN: ReadonlySet<string> = new Set([
   // window alignment (live audit 21: the accepted windows start at activation + 4); aligned, 14 / 14 windows are 0 px, both Castform
   // sides, r1 == r2 (tools/integration/fixtures/audit-21/receipts/c83-aligned-lifted/).
   "52:by:1", "53:by:1", "184:at:3",
+  // cff230 (docs/cff230-castform-forms.md): Ember by a CASTFORM in hail / rain, dense ROM windows (every frame of the body, mechanicLab, turn 2 after the
+  // opponent set the weather): 0 px over all 62 / 66 visible rows start-aligned, r1 == r2 (tools/integration/fixtures/castform-forms/keys/).
+  "52:by:2", "52:by:3",
 ]);
 /** Measured, not proven (cast83 windows): these keep declining with the residual named. */
 export const LIVE_CASTFORM_FORM_RESIDUAL: ReadonlyMap<string, string> = new Map([

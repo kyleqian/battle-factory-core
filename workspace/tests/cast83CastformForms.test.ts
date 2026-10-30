@@ -134,7 +134,7 @@ describe("cast83: the weather-form gate lifts only ROM-proven (move, Castform ro
   const lifted = JSON.parse(readFileSync("tools/integration/fixtures/cast83/receipt-lifted.json", "utf8")) as typeof receipt;
   it("every proven key: live in the final-code receipt, every live window 0 px, r1 == r2, both Castform sides", () => {
     // qa91: three keys lifted on live audit 21's aligned windows (their receipt: tests/qa91QuickAttackCastformKeys.test.ts).
-    const qa91Lifted = new Set(["52:by:1", "53:by:1", "184:at:3"]);
+    const qa91Lifted = new Set(["52:by:1", "53:by:1", "184:at:3", "52:by:2", "52:by:3"]); // + cff230 (tests/cff230CastformForms.test.ts)
     expect(LIVE_CASTFORM_FORM_PROVEN.size).toBe(29 + qa91Lifted.size);
     for (const key of LIVE_CASTFORM_FORM_PROVEN) {
       if (qa91Lifted.has(key)) continue;

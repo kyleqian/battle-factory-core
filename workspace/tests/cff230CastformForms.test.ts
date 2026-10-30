@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import {
   projectBattleResolutionCommands, type BattleResolutionPresentationCommand,
 } from "../src/engine/battleResolutionPresentation.ts";
+import { LIVE_CASTFORM_FORM_PROVEN } from "../src/engine/liveMoveAnimation.ts";
 import { battleResolutionCommandDuration, battleResolutionFieldBeforeCommand } from "../src/engine/battleResolutionPresentationRender.ts";
 import { CASTFORM_CHANGE_COMMAND_FRAMES, CASTFORM_CHANGE_LEAD_FRAMES, LIVE_TRANSFORM_ROWS, LIVE_TRANSFORM_SWAP_ROW } from "../src/engine/liveTransform.ts";
 import { boxHash, CFF230_CLASSES } from "../tools/integration/cff230Fixtures.ts";
@@ -82,4 +83,14 @@ describe("cff230: the committed ROM receipts (battle-scene-on lab frames, Castfo
       expect(segment.commands[klass.command]).toMatchObject({ type: "general-animation", animation: "CASTFORM_CHANGE" });
     }, 120000);
   }
+});
+
+describe("cff230: Ember by a CASTFORM in rain / hail is ROM-proven from dense windows", () => {
+  it.each(["ember-by-hail-52-by-3", "ember-by-rain-52-by-2"])("%s: 0 px on every visible row, r1 == r2", (name) => {
+    const s = JSON.parse(readFileSync(`tools/integration/fixtures/castform-forms/keys/${name}.json`, "utf8"));
+    const rows = s.perFrameStartAligned.slice(s.oursVisible.first, s.oursVisible.last + 1) as number[];
+    expect(rows.length).toBeGreaterThan(60);
+    expect(rows.every((v) => v === 0)).toBe(true);
+    expect(LIVE_CASTFORM_FORM_PROVEN.has(`${s.moveId}:by:${name.endsWith("3") ? 3 : 2}`)).toBe(true);
+  });
 });

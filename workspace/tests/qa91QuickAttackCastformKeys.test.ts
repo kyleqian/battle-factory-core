@@ -72,7 +72,7 @@ describe("qa91: Quick Attack's target leaves its drawn rest when AnimTask_ShakeM
 describe("qa91: the Castform proven-key set", () => {
   const LIFTED = ["52:by:1", "53:by:1", "184:at:3"];
   it("lifts sun Ember / Flamethrower and hail Scary Face; rain Icy Wind stays a named TIMING-PHASE residual", () => {
-    expect(LIVE_CASTFORM_FORM_PROVEN.size).toBe(32);
+    expect(LIVE_CASTFORM_FORM_PROVEN.size).toBe(34); // cff230: + 52:by:2 / 52:by:3
     for (const key of LIFTED) expect([LIVE_CASTFORM_FORM_PROVEN.has(key), LIVE_CASTFORM_FORM_RESIDUAL.has(key)], key).toEqual([true, false]);
     expect([...LIVE_CASTFORM_FORM_RESIDUAL.keys()]).toEqual(["196:by:2", "196:at:2"]);
     expect(liveCastformFormDeclineReason(fieldOf("CASTFORM", "GOLBAT", [1]), { moveId: 52, attacker: 0 })).toBeNull();
