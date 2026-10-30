@@ -1,0 +1,212 @@
+{
+ "skarmory": {
+  "B": 99,
+  "monY": 84,
+  "family": "JOLT_RIGHT",
+  "romRawSha256": "9992f2390fa72d5a384426fb587e877dc499d84078f0c16dd05f4af6d518c4c7",
+  "before": {
+   "flight": 5374,
+   "emerge": 10742,
+   "backanim": 94120,
+   "tail": 0,
+   "total_e>90": 110236,
+   "phb_e>90": 47777
+  },
+  "pathA_plus_ball_arc": {
+   "flight": 49,
+   "emerge": 469,
+   "backanim": 2532,
+   "tail": 0,
+   "total_e>90": 3050,
+   "phb_e>90": 0
+  },
+  "predicted": {
+   "flight": 49,
+   "emerge": 20,
+   "backanim": 5,
+   "tail": 0,
+   "total_e>90": 74,
+   "phb_e>90": 0
+  }
+ },
+ "alakazam": {
+  "B": 99,
+  "monY": 85,
+  "family": "GROW_STUTTER",
+  "romRawSha256": "630bea65a138154b4117f156205a3639f3ba31112dee21ef7268499d3098f76b",
+  "before": {
+   "flight": 5063,
+   "emerge": 11362,
+   "backanim": 113139,
+   "tail": 0,
+   "total_e>90": 129564,
+   "phb_e>90": 47777
+  },
+  "pathA_plus_ball_arc": {
+   "flight": 26,
+   "emerge": 378,
+   "backanim": 2646,
+   "tail": 0,
+   "total_e>90": 3050,
+   "phb_e>90": 0
+  },
+  "predicted": {
+   "flight": 26,
+   "emerge": 4,
+   "backanim": 3,
+   "tail": 0,
+   "total_e>90": 33,
+   "phb_e>90": 0
+  }
+ },
+ "onix": {
+  "B": 95,
+  "monY": 80,
+  "family": "V_SHAKE",
+  "romRawSha256": "7331b278f8a147bca5a9f5dd70b652ed27b3cab0f0cb3986d0ed306db41d5c01",
+  "before": {
+   "flight": 6402,
+   "emerge": 12388,
+   "backanim": 98016,
+   "tail": 8001,
+   "total_e>90": 124807,
+   "phb_e>90": 47778
+  },
+  "pathA_plus_ball_arc": {
+   "flight": 100,
+   "emerge": 893,
+   "backanim": 3037,
+   "tail": 0,
+   "total_e>90": 4030,
+   "phb_e>90": 2
+  },
+  "predicted": {
+   "flight": 100,
+   "emerge": 165,
+   "backanim": 7,
+   "tail": 0,
+   "total_e>90": 272,
+   "phb_e>90": 0
+  }
+ },
+ "entei": {
+  "B": 96,
+  "monY": 86,
+  "family": "SHAKE_GLOW_RED",
+  "romRawSha256": "0cd284f5e3ad255af4838df9068d1221de14643cac5a2ab143b6c5ff9c911e2b",
+  "before": {
+   "flight": 4282,
+   "emerge": 9598,
+   "backanim": 100872,
+   "tail": 209954,
+   "total_e>90": 324706,
+   "phb_e>90": 47777
+  },
+  "pathA_plus_ball_arc": {
+   "flight": 16,
+   "emerge": 297,
+   "backanim": 4532,
+   "tail": 0,
+   "total_e>90": 4845,
+   "phb_e>90": 0
+  },
+  "predicted": {
+   "flight": 16,
+   "emerge": 0,
+   "backanim": 2063,
+   "tail": 0,
+   "total_e>90": 2079,
+   "phb_e>90": 0
+  }
+ },
+ "shedinja": {
+  "B": 99,
+  "monY": 86,
+  "family": "SHRINK_GROW_VIBRATE",
+  "romRawSha256": "c0651c10225ef447e8678aed8c4a5cb6dd93983742cc4b2b27bf89e65c006586",
+  "before": {
+   "flight": 4282,
+   "emerge": 12050,
+   "backanim": 95546,
+   "tail": 8711,
+   "total_e>90": 120589,
+   "phb_e>90": 51947
+  },
+  "pathA_plus_ball_arc": {
+   "flight": 16,
+   "emerge": 297,
+   "backanim": 2345,
+   "tail": 0,
+   "total_e>90": 2658,
+   "phb_e>90": 4170
+  },
+  "predicted": {
+   "flight": 16,
+   "emerge": 0,
+   "backanim": 0,
+   "tail": 0,
+   "total_e>90": 16,
+   "phb_e>90": 4170
+  }
+ },
+ "kingdra": {
+  "B": 98,
+  "monY": 86,
+  "family": "SHAKE_GLOW_BLUE",
+  "romRawSha256": "327e75683cd73b10a602e6b7264605db389d23808e07544fe9ffaf0525ae6837",
+  "before": {
+   "flight": 4282,
+   "emerge": 11859,
+   "backanim": 93712,
+   "tail": 153356,
+   "total_e>90": 263209,
+   "phb_e>90": 47777
+  },
+  "pathA_plus_ball_arc": {
+   "flight": 16,
+   "emerge": 297,
+   "backanim": 3840,
+   "tail": 0,
+   "total_e>90": 4153,
+   "phb_e>90": 0
+  },
+  "predicted": {
+   "flight": 16,
+   "emerge": 0,
+   "backanim": 1477,
+   "tail": 0,
+   "total_e>90": 1493,
+   "phb_e>90": 0
+  }
+ },
+ "castform": {
+  "B": 99,
+  "monY": 80,
+  "family": "CONVEX_DOUBLE_ARC",
+  "romRawSha256": "713722bbbed210f54b603a6c4c001e4a252ca908b348ad61a8c01a71f97d7ddc",
+  "before": {
+   "flight": 6385,
+   "emerge": 12094,
+   "backanim": 89599,
+   "tail": 45917,
+   "total_e>90": 153995,
+   "phb_e>90": 47778
+  },
+  "pathA_plus_ball_arc": {
+   "flight": 83,
+   "emerge": 816,
+   "backanim": 3080,
+   "tail": 0,
+   "total_e>90": 3979,
+   "phb_e>90": 2
+  },
+  "predicted": {
+   "flight": 83,
+   "emerge": 182,
+   "backanim": 13,
+   "tail": 0,
+   "total_e>90": 278,
+   "phb_e>90": 0
+  }
+ }
+}
