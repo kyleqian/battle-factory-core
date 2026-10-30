@@ -29,6 +29,8 @@
  *        --render-every N (goal mode: the page draws every Nth frame, default 1 = every frame, like the real loop)
  *        --minutes N (per scene, default 10) --scene on|off|both (default both) --seed N|0xHEX (default 1)
  *        --out DIR (default .integration/random-play/<timestamp>) --dist DIR (default dist)
+ *        --lobby-new-challenge (goal mode, nch231: after a loss / RETIRE-YES the director wanders the Lobby, walks back to
+ *          the singles attendant and presses A, so the SAME page plays the next challenge; default off: a lobby ends the page)
  *        --no-replay-stats (skip the offline engine replay that counts battles) --headed
  * The browser-side input is wall-clock timed, so a run is not bit-reproducible; the saved session JSON is
  * (tools/replay-session-trace.ts). Battles reached are derived by replaying the session traces in node.
@@ -53,7 +55,7 @@ const MIME = {
 };
 
 function parseArgs(argv) {
-  const options = { minutes: 10, scene: "both", seed: 1, out: null, dist: "dist", selfTest: false, replayStats: true, headed: false, uniform: false, mixRate: 0.04, renderEvery: 1 };
+  const options = { minutes: 10, scene: "both", seed: 1, out: null, dist: "dist", selfTest: false, replayStats: true, headed: false, uniform: false, mixRate: 0.04, renderEvery: 1, lobbyNewChallenge: false };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     const value = () => {
@@ -71,6 +73,7 @@ function parseArgs(argv) {
     else if (arg === "--headed") options.headed = true;
     else if (arg === "--uniform") options.uniform = true;
     else if (arg === "--mix-rate") options.mixRate = Number(value());
+    else if (arg === "--lobby-new-challenge") options.lobbyNewChallenge = true;
     else if (arg === "--render-every") options.renderEvery = Number(value());
     else throw new Error(`unknown argument: ${arg}`);
   }
@@ -317,6 +320,7 @@ async function runSceneGoal(browser, port, scene, options, outDir, log) {
       policyPresses: 0,
       randomPresses: 0,
       lobbyPresses: 0,
+      lobbyNewChallenges: 0,
       swapScreens: 0,
       maxBattleDepth: 0,
       policies: {},
@@ -390,13 +394,14 @@ async function runSceneGoal(browser, port, scene, options, outDir, log) {
     g.policyPresses += director.stats.policyPresses;
     g.randomPresses += director.stats.randomPresses;
     g.lobbyPresses += director.stats.lobbyPresses;
+    g.lobbyNewChallenges += director.stats.lobbyNewChallenges;
     g.swapScreens += director.stats.swapScreens;
     g.maxBattleDepth = Math.max(g.maxBattleDepth, director.stats.maxBattleDepth);
     g.policies[director.policy] = (g.policies[director.policy] ?? 0) + 1;
   };
 
   const newDirector = () =>
-    new GoalPlayDirector({ seed: options.seed, scene, challenge, presentationSeed: (options.seed + challenge) >>> 0, mixRate: options.mixRate });
+    new GoalPlayDirector({ seed: options.seed, scene, challenge, presentationSeed: (options.seed + challenge) >>> 0, mixRate: options.mixRate, newChallengeFromLobby: options.lobbyNewChallenge });
 
   await open();
   let director = newDirector();
@@ -527,7 +532,7 @@ export async function replayStats(traces, scene, log) {
     log(`  replay stats unavailable: ${String(error).split("\n")[0]}`);
     return null;
   }
-  const stats = { battleRoomEntries: 0, orchestratorBattles: 0, swapScreens: 0, roundAdvances: 0, lobbyVisits: 0, maxWinStreak: 0, maxBattleDepth: 0, replayThrows: 0, frames: 0 };
+  const stats = { battleRoomEntries: 0, orchestratorBattles: 0, swapScreens: 0, roundAdvances: 0, lobbyVisits: 0, lobbyNewChallenges: 0, maxWinStreak: 0, maxBattleDepth: 0, replayThrows: 0, frames: 0 };
   for (const trace of traces) {
     const rng = rngHost.presentationRngFromTrace(trace);
     let state = core.createInitialState({ battleScene: scene, presentationSeed: rng.seed, presentationRngPolicy: rng.policy });
@@ -553,6 +558,7 @@ export async function replayStats(traces, scene, log) {
           swap = swapping;
           const inLobby = state.lobbyFreeRoam != null;
           if (inLobby && !lobby) stats.lobbyVisits += 1;
+          if (!inLobby && lobby) stats.lobbyNewChallenges += 1;
           lobby = inLobby;
           const orch = state.factoryRoundBattleOrchestrator;
           if (orch != null) {
@@ -623,7 +629,7 @@ async function main() {
       const g = r.goal;
       log(
         `  goal mode: ${g.challenges} challenges (restarts: lobby ${g.restarts.lobby}, stall ${g.restarts.stall}, budget ${g.restarts.budget}, crash ${g.restarts.crash}), policies ${JSON.stringify(g.policies)}, ` +
-          `presses policy ${g.policyPresses} / random ${g.randomPresses} / lobby ${g.lobbyPresses}, live swap screens ${g.swapScreens}, live max depth ${g.maxBattleDepth}, ` +
+          `presses policy ${g.policyPresses} / random ${g.randomPresses} / lobby ${g.lobbyPresses} (new challenges from the lobby ${g.lobbyNewChallenges}), live swap screens ${g.swapScreens}, live max depth ${g.maxBattleDepth}, ` +
           `mirror-only throws ${g.mirrorOnlyThrows}, divergences ${g.divergences}`,
       );
     }
