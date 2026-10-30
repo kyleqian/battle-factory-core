@@ -1,3 +1,52 @@
+## 2026-10-27 / 28 — CAX31 daily run wind-down (supervisor, Opus 5.5): sfa214, apx215, play216, apx217, ret218 folded; apx219 unfolded
+
+- **State:** master `3f6754b25`+ (final src = apx217 + ret218 union `6201dc8e9`). **Final gates on `9fb159322` (same src): typecheck 0;
+  build 0; full suite 1,709 files / 14,141 tests, 0 failed** (`.integration/validation/sv-20261027/final-9fb159322/`).
+- **Folded:** sfa214 (Summary-screen crashes found by browser random play). Supervisor finished the cut-off branch: merged
+  master, added `appRoute` to its 5 new compare traces (the only red test). Gates on `b28ebe50a`: typecheck 0; full suite
+  **1,705 files / 14,121 tests, 0 failed**; build 0; the 18 saved random-play sessions replay clean with `--render`;
+  differential 641 / 641; census 0..999 ON + OFF vs contain213 **1,000 / 1,000 identical**; anchor Summary traces exact.
+  Open: QUILAVA V_STRETCH replacement 48 / 91, 137 species frame-program-only motion -> ISSUES #188 (non-crash).
+- **Folded:** apx215 (first approximate class): unproven Substitute-doll cells draw the body (subbed attacker: doll slides off,
+  mon in, body, doll back; defender doll: body on the doll). Gates on the union `1d25251b6`: typecheck 0; full suite 1,706 files
+  / 14,125 tests 0 failed (one vitest fork OOM-killed under a parallel worker; its file `liveR2GatesRoutes` rerun alone 8 / 8);
+  build 0; census vs sfa214: OFF **1,000 / 1,000 identical**; ON 982 identical, 16 changed only in the 74 substitute commands'
+  fields [16][18][21] + later timing; 796 / 881 (frame-budget stalemates) partial digests moved because bodies are longer
+  (worker: 796 matches base at a 600k budget, 881 is an exact prefix). **Scene ON census: static 207 -> 133, approximate 74.**
+  Strips `tools/integration/fixtures/approximate/substitute-doll/` eyeballed (Attract, Dream Eater, Focus Punch).
+- **Folded:** play216 (tools): `npm run play:random` goal mode is the default — a node mirror engine runs the soak policies and
+  feeds the page through `__POKEBENCH__.advance` (lockstep, canvas-hash checked); supervisor made the page draw every frame
+  (`--render-every`, default 1). ON seed 3, 6 min: 14 battles, 8 swap screens, 0 errors / 0 divergences; worker 7 min / scene:
+  ON 34 battles, OFF 53, 0 errors. Uniform key fuzz on `ce7e3b7ab` (10 min / scene): 0 errors but never left the draft.
+  Playwright must be installed in `.integration/browser/node_modules` (ignored; reinstalled this run with `npm install playwright`).
+- **Found:** RETIRE -> YES after a win draws the Lobby arrival but the state never leaves the post-win question (no
+  `factoryTerminal`, never `lobbyFreeRoam`): a player hang. Brief `.integration/validation/sv-20261027/ret218.txt` queued.
+- **Soak (Scene ON, `--policy full --vary-rng`, seeds 0:30, render every 8, on `ee22a664f`):** **30 / 30 OK**, 0 CRASH / 0 HANG.
+- **Folded:** apx217: the 13 unattributed static gates named (Sand-Attack / Hyper Beam / Curse / Water Pulse -> sprite-order-unknown,
+  Seismic Toss -> other:seismic-toss-damage-branch, Fury Cutter -> other:later-body-idle-rest); bodies with a transformed battler
+  draw from the copied species' art (approximate). Worker on `d8ebb1239`: full suite 1,707 files / 14,130 tests 0 failed, build 0,
+  differential 641 / 641, census OFF 1,000 / 1,000. Supervisor (union `cfa1242c0`, same src): typecheck 0, build 0, new tests;
+  independent census ON: 7 battles changed, 0 digest / error mismatch. **Scene ON static 133 -> 102 (sprite-order-unknown 26,
+  castform 18, extrasensory 17, endeavor 12, no-adapter 11, turn-0 7, idle-rest 4, hidden 3, allocator 3, seismic 1);
+  approximate 105 (substitute 74, transform 31); unnamed 0.** Magic Coat x2 in seed 197 moved transform -> allocator-unknown.
+- **Browser goal play on `91984abfe` (10 min / scene, seed 7):** ON 29 battles / 16 swap screens, OFF 46 / 19, 0 errors.
+- **Folded:** ret218: RETIRE-YES after a win hands off to the loss `factoryTerminal` at the warp's Lobby-arrival frame (was a
+  permanent hang); source: WarpToLobbyLost == the loss script. Worker on `edc45e88f`: full suite 1,708 / 14,136 0 failed, build 0,
+  differential 641 / 641, winning-swap 0:10 per-seed identical, every postwin-* / loss-terminal-* trace unchanged; new
+  `retire-yes-lobby-freeroam-off` 1243 / 1482 (ISSUES #189). Supervisor on the union: typecheck 0, new test 2 / 2, the four
+  compares rerun. (Supervisor full suite + build on the union were OOM-killed beside apx219; covered by the final gates below.)
+- **NOT folded — apx219** (sprite-order-unknown 26 + allocator-unknown 3 -> approximate; branch `worker/animation-20261028-040709`,
+  7 commits; stopped by the supervisor at 06:05 to keep the final gates safe). Census on `c7f8a558a`: ON 10 changed / 0 bad, OFF
+  1,000 / 1,000; **static 102 -> 73**. Full suite unfinished (many gate-pin tests re-pinned to `liveMoveAnimationPresentationProven`);
+  no strips yet. Handoff "Next work" 1 has the fold recipe.
+- **Wind-down soak gates on src `f5f8c945e` (= final src minus ret218's retire-only branch, which no soak reaches):** varied-RNG
+  first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 `--scene both`
+  **ON 20 / 20, OFF 20 / 20** (all `budget`). The 0:60 full / winning / winning-swap gates were not run (hours each here).
+- **Host:** two workers at once (separate lanes) OOM-killed a supervisor full suite and two builds; keep one worker at a time.
+- **Notes:** no DEFERRED items. Worker refs kept: `worker/integration-20261027-065233` (sfa214), `-20261027-213054` (apx215),
+  `-20261027-232252` (play216), `-20261028-005213` (apx217), `-20261028-023556` (ret218) — merged; `worker/animation-20261028-040709`
+  (apx219) unmerged. Evidence `.integration/validation/sv-20261027/`. No push.
+---
 ## 2026-10-26 / 27 — CAX31 session wind-down (supervisor, Opus 5.5): finish plan Phase 1 tooling + containment; Phase 2 plumbing
 
 - **State:** master `31ba4d4ec`+; production src tree `c7bb4e59d` (contain209 + perf211 + apx210 + contain213).

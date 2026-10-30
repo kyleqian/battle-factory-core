@@ -229,6 +229,11 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Live claim (cf78, 2026-10-10; was ISSUES #162):** every live body declines while a CASTFORM is shown in a weather form
   (presentation-only per-slot form from the CASTFORM_CHANGE argument; live audit 19 had found 44 live windows drawing the normal form);
   the fallback draws the same normal-form pixels until the per-form art below lands, then the decline can lift.
+- **Fixed 2026-10-30 (cff230, docs/cff230-castform-forms.md):** Scene ON draws the CASTFORM_CHANGE morph (Transform mosaic ramp,
+  form swap on body row 50, enemy shadow hidden rows 1..109, 117-row command); ICE / WATER weather change and WATER send-in 0 px vs
+  the ROM; Ember by a rain / hail CASTFORM promoted (`52:by:2`, `52:by:3`). **Open:** Scene OFF does not draw the morph (the ROM
+  plays it in OFF too; our OFF keeps the form change at the command boundary); Flamethrower by WATER needs a +7 alignment
+  explanation; the "at"-role keys (Fly / Ice Ball / Rest / Hail / Rain Dance / Scary Face) are unmeasured; revert / switch-out unmeasured.
 - **Per-form art LANDED (cast83, 2026-10-10 night; qa91 +3 keys):** form frame, castformPalette[form], front coords, elevation and
   back Y per form in the field view and the live renderer; 32 (move, Castform role, form) keys ROM-proven live
   (`LIVE_CASTFORM_FORM_PROVEN`). **Open remainder:** unmeasured keys keep declining (census 0..999: ~15 commands — Ember / Rain Dance /
