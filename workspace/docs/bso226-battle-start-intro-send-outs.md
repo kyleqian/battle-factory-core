@@ -107,4 +107,14 @@ node --experimental-strip-types --no-warnings tools/integration/bso226Run.ts <pa
 
 ## Gates
 
-(see the end of this file; filled in after the runs)
+Tested code commit `ebe23c6bbad238d8e78a43023f9718e36b00a2bb` (tree `6f2d9108cb7b98688b7307e94fb24bc23f9c65ef`); later commits are documentation only. Evidence:
+`.integration/validation/sv-20261029/bso226-evidence/`.
+
+- `npm run typecheck`: exit 0 (4 min).
+- Census seeds 0..999 vs the bso225 baselines (`on-/off-633d97700`): Scene OFF shards r0..r9 byte-identical; Scene ON 1,000 / 1,000 battles identical
+  (`rst197CensusDelta.py`: 320,777 commands, identicalBattles 1000; python digest + error compare: 0 mismatches); static 0.
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base master`: PASS, 641
+  captures byte-identical (also `presentation-rng-playable-live-bodies-on`, 190/190). No capture changed: the generated-orchestrator Scene ON traces
+  capture after the intro, the other traces never run the generated intro.
+- Full suite `npm test` in 12 foreground `--shard=k/12` runs (workers 2): all exit 0; 1,714 files passed (44 skipped), 14,180 tests passed (223 skipped).
+- `npm run build`: exit 0.
