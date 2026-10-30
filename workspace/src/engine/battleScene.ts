@@ -20561,7 +20561,21 @@ export function renderSceneOnMovePresentation(
       const packed = mgbaDarkenColor(color.r | (color.g << 8) | (color.b << 16), view.bgDark);
       return { r: packed & 0xff, g: (packed >>> 8) & 0xff, b: (packed >>> 16) & 0xff };
     }));
-    drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, bgPalette);
+    if (view.bgWindow === null) {
+      drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, bgPalette);
+    } else {
+      // WIN0 (BLDCNT darken inside): the lit background everywhere, the darkened background copied into the window.
+      drawTileBg(fb, battleBg.static.tileset, battleBg.static.tilemap, battleBg.palette);
+      const dark = new Uint8Array(fb.length);
+      drawTileBg(dark, battleBg.static.tileset, battleBg.static.tilemap, bgPalette);
+      const { left, right, top, bottom } = view.bgWindow;
+      for (let y = Math.max(0, top); y < Math.min(160, bottom); y += 1) {
+        for (let x = Math.max(0, left); x < Math.min(240, right); x += 1) {
+          const o = (y * 240 + x) * 4;
+          fb[o] = dark[o]!; fb[o + 1] = dark[o + 1]!; fb[o + 2] = dark[o + 2]!;
+        }
+      }
+    }
     const idle = (battler: typeof view.target) =>
       battler.geometry.side === "opponent" ? sceneOnBattlerFrontIdleRest(battler) : { x2: 0, y2: 0 };
     const drawBattler = (
