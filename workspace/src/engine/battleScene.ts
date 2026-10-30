@@ -5774,8 +5774,12 @@ export function drawGeneratedPlayerMaterialize(
   if (backAnim !== null) {
     // bso226: `SpriteCB_PlayerMonFromBall` -> `BattleAnimateBackSprite` (bso225's mid-battle view at the equivalent send-in elapsed).
     // A glow / flash `BlendPalette` replaces the release tint on the frames the fade task does not rewrite the palette.
-    const glow = backAnim.blend !== null && !backAnim.tintTaskWrites;
-    const tint = glow ? 0 : playerMaterializeSettleTintCoeff(playerVisualT);
+    const coeff = playerMaterializeSettleTintCoeff(playerVisualT);
+    const next = playerMaterializeSettleTintCoeff(playerVisualT + 1);
+    const prev = playerMaterializeSettleTintCoeff(playerVisualT - 1);
+    const tintTaskWrites = coeff >= 16 ? next < 16 : coeff > 0 || prev > 0;
+    const glow = backAnim.blend !== null && !tintTaskWrites;
+    const tint = glow ? 0 : coeff;
     const palette = glow
       ? blendPaletteToward(art.pic.palette as RgbColor[], bgr555ToRgb8(backAnim.blend!.color), backAnim.blend!.coefficient)
       : art.pic.palette as RgbColor[];
