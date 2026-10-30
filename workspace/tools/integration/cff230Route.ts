@@ -1,7 +1,6 @@
 // cff230 (Castform weather forms, Scene ON): census-route driver (lsd194Census.ts' input loop) that records every presented frame of the
 // resolution segments carrying a CASTFORM_CHANGE animation event, with the command index per frame, plus a structure dump.
 //   node --experimental-strip-types --no-warnings tools/integration/cff230Route.ts --seed=950 [--dump] [--out=dir]
-import { mkdirSync, writeFileSync } from "node:fs";
 import {
   advanceFactoryRoundBattleCommand, advanceFactoryRoundBattleResolution, advanceFactoryRoundBattleStartIntro,
   beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,

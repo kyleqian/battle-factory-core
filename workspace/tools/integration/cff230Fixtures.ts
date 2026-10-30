@@ -5,6 +5,7 @@
 //   node --experimental-strip-types --no-warnings tools/integration/cff230Fixtures.ts
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
+// @ts-expect-error pngjs ships no type declarations in this repo
 import { PNG } from "pngjs";
 import { cff230Route } from "./cff230Route.ts";
 
