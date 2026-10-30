@@ -3,7 +3,7 @@ import {
   type LiveMoveHiddenSides,
 } from "./liveMoveAnimation.ts";
 import { liveBattlerAnchors, liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
-import { LIVE_TRANSFORM_MOVE_ID, LIVE_TRANSFORM_SWAP_ROW, liveTransformMosaicLevel, liveTransformOf, withLiveTransform } from "./liveTransform.ts";
+import { LIVE_TRANSFORM_MOVE_ID, LIVE_TRANSFORM_ROWS, LIVE_TRANSFORM_SWAP_ROW, liveTransformMosaicLevel, liveTransformOf, withLiveTransform } from "./liveTransform.ts";
 import { statsChangeParams, statsChangeRow } from "../animation/statsChange.ts";
 import { liveStatusAnimationRow, type LiveStatusAnimationSprite } from "../animation/statusAnimation.ts";
 import { focusPunchSetUpDisplayRow } from "../animation/focusPunchSetUp.ts";
@@ -850,6 +850,7 @@ import {
 } from "./battleResolutionPresentationRender.ts";
 import type { MidBattleSwitchParticle } from "./battleResolutionPresentationRender.ts";
 import type {
+  BattleResolutionDisplayedField,
   BattleStatName,
   BattleTerminalResolutionPresentationState,
 } from "./battleResolutionPresentation.ts";
@@ -55869,9 +55870,40 @@ function renderLiveTransformBody(
   age: number,
   battlerX2Input: LiveMoveBattlerX2Input | undefined,
 ): void {
-  const side = request.attacker === 0 ? "player" : "opponent";
-  const field = age >= LIVE_TRANSFORM_SWAP_ROW
-    ? withLiveTransform(view.field, request.attacker === 0 ? 0 : 1, liveTransformOf(request, view.field)) : view.field;
+  renderMosaicSwapBody(fb, view, request.attacker === 0 ? 0 : 1, age,
+    age >= LIVE_TRANSFORM_SWAP_ROW ? withLiveTransform(view.field, request.attacker === 0 ? 0 : 1, liveTransformOf(request, view.field)) : view.field,
+    battlerX2Input);
+}
+
+/**
+ * cff230 (docs/cff230-castform-forms.md): General_CastformChange (Scene ON) is the Transform body's mosaic ramp on the CASTFORM
+ * (AnimTask_TransformMon, then HandleSpeciesGfxDataChange with the target form's picture / palette on the same swap row). `age` is
+ * the body row (negative before it starts, past LIVE_TRANSFORM_ROWS - 1 after it ends: the ordinary field).
+ */
+function renderCastformChangeBody(
+  fb: Uint8Array,
+  view: BattleResolutionPresentationRenderView,
+  battler: 0 | 1,
+  form: number,
+  age: number,
+  battlerX2Input: LiveMoveBattlerX2Input | undefined,
+): void {
+  const mon = battler === 0 ? view.field.player : view.field.opponent;
+  const { castformForm: _shown, ...rest } = mon;
+  const next = Object.freeze(form === 0 ? rest : { ...rest, castformForm: form });
+  const swapped = Object.freeze(battler === 0 ? { ...view.field, player: next } : { ...view.field, opponent: next });
+  renderMosaicSwapBody(fb, view, battler, age, age >= LIVE_TRANSFORM_SWAP_ROW ? swapped : view.field, battlerX2Input);
+}
+
+function renderMosaicSwapBody(
+  fb: Uint8Array,
+  view: BattleResolutionPresentationRenderView,
+  battler: 0 | 1,
+  age: number,
+  field: BattleResolutionDisplayedField,
+  battlerX2Input: LiveMoveBattlerX2Input | undefined,
+): void {
+  const side = battler === 0 ? "player" : "opponent";
   const art = createBattleCommandFieldArtView(field);
   const rest = liveBattlerAnchors("opponent", art, battlerX2Input).frontIdleRest;
   const fieldArt: BattleCommandFieldArtView = rest.x2 === 0 && rest.y2 === 0 ? art : Object.freeze({
@@ -55880,7 +55912,7 @@ function renderLiveTransformBody(
   });
   const level = liveTransformMosaicLevel(age);
   renderBattleResolutionSceneOffView(fb, Object.freeze({
-    ...view, field, fieldArt, effect: null, postBodyShadowHidden: age >= 1,
+    ...view, field, fieldArt, effect: null, postBodyShadowHidden: age >= 1 && age < LIVE_TRANSFORM_ROWS,
     visibility: level === 0 ? view.visibility : Object.freeze({
       ...view.visibility, [side]: Object.freeze({ ...view.visibility[side], sprite: false }),
     }),
@@ -55938,6 +55970,11 @@ export function renderBattleResolutionLiveView(
   if (view.effect?.type === "move" && view.effect.request.moveId === LIVE_TRANSFORM_MOVE_ID
     && liveMoveAnimationDuration(view.effect.request, view.field) !== null) {
     renderLiveTransformBody(fb, view, view.effect.request, view.effect.age, view.effect.battlerX2Input);
+    return;
+  }
+  // cff230: the Scene ON CASTFORM_CHANGE command (the morph, then the target form).
+  if (view.effect?.type === "general-animation" && view.effect.animation === "CASTFORM_CHANGE" && view.effect.castformForm !== undefined) {
+    renderCastformChangeBody(fb, view, view.effect.battler, view.effect.castformForm, view.effect.age, view.effect.battlerX2Input);
     return;
   }
   const effect = view.effect;

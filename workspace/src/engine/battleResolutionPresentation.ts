@@ -46,6 +46,7 @@ import { substituteFadeDuration } from "./liveSubstituteFade.ts";
 import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import { battleResolutionCommandDuration, battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
+import { CASTFORM_CHANGE_COMMAND_FRAMES } from "./liveTransform.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
@@ -151,6 +152,7 @@ export type BattleStatusAnimationName = keyof typeof STATUS_ANIMATION_ADDED_ROWS
  */
 export const FOCUS_PUNCH_SETUP_COMMAND_FRAMES = 124;
 export const FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES = 3;
+const CASTFORM_CHANGE_SUBSTITUTE = 1 << 7;
 /**
  * fpp150 (rcp143 R4, both scenes): the rows from the end of the "…is tightening its focus!" print + `waitmessage
  * B_WAIT_TIME_LONG` (L + 64) to the next action's first glyph: end2, RunTurnActionsFunctions and action 1's prologue
@@ -572,7 +574,9 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN";
+      animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE";
+      /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
+      castformForm?: number;
       /**
        * lsd198: a LEECH_SEED_DRAIN whose event stream carries the kernel's animation receipt (Scene ON: General_LeechSeedDrain
        * plays); the render draws it as Move_ABSORB's body (battleResolutionPresentationRender.ts leechSeedDrainAbsorbEffect).
@@ -4454,6 +4458,25 @@ export function projectBattleResolutionCommands(
           minimumFrames: behindSubstitute ? FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES : FOCUS_PUNCH_SETUP_COMMAND_FRAMES,
         }),
       }));
+      continue;
+    }
+    if (payload.kind === "animation" && payload.animationId === "CASTFORM_CHANGE") {
+      // cff230: Scene ON plays General_CastformChange (Scene OFF keeps its rows as before); behind a Substitute the ROM skips it.
+      const argument = Number(payload.arguments[0]);
+      if (
+        (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0
+        && Number.isInteger(argument) && (argument & CASTFORM_CHANGE_SUBSTITUTE) === 0
+        && (payload.battler === 0 || payload.battler === 1)
+      ) {
+        commands.push(Object.freeze({
+          type: "general-animation",
+          eventSequence: event.sequence,
+          battler: payload.battler,
+          animation: "CASTFORM_CHANGE",
+          castformForm: argument,
+          timing: Object.freeze({ minimumFrames: CASTFORM_CHANGE_COMMAND_FRAMES }),
+        }));
+      }
       continue;
     }
     if (payload.kind === "animation" && payload.animationId === "SUBSTITUTE_FADE") {

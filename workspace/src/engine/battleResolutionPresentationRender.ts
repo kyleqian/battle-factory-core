@@ -1,5 +1,5 @@
 import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
-import { LIVE_TRANSFORM_MOVE_ID, liveTransformOf, withLiveTransform } from "./liveTransform.ts";
+import { CASTFORM_CHANGE_LEAD_FRAMES, LIVE_TRANSFORM_MOVE_ID, liveTransformOf, withLiveTransform } from "./liveTransform.ts";
 import {
   liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput, type LiveMoveRandom2PlanContext,
 } from "./liveMovePresentationRng.ts";
@@ -949,7 +949,11 @@ export type BattleResolutionRenderEffect =
    * fpp150 (ISSUES #139): a general animation (B_ANIM_FOCUS_PUNCH_SETUP) at the reducer's rel (= command age - 1; fps147 §4d);
    * drawn by battleScene.ts generalAnimationRenderView (src/animation/focusPunchSetUp.ts). `battlerX2Input` as status-animation.
    */
-  | Readonly<{ type: "general-animation"; battler: 0 | 1; animation: string; age: number; battlerX2Input?: LiveMoveBattlerX2Input }>
+  | Readonly<{
+      type: "general-animation"; battler: 0 | 1; animation: string; age: number; battlerX2Input?: LiveMoveBattlerX2Input;
+      /** cff230: a CASTFORM_CHANGE's target form; its `age` is the morph body row (negative before the body starts). */
+      castformForm?: number;
+    }>
   | Readonly<{
       type: "hit";
       battler: 0 | 1;
@@ -2161,8 +2165,11 @@ export function createBattleResolutionPresentationRenderView(
     } else if (command.type === "general-animation" && fieldBattler(field, command.battler).substituteDoll !== true) {
       // fpp150 (fps147 §4d): command age a is ROM row X + 1 + a, so the reducer's rel is a - 1. Behind the doll the ROM plays
       // nothing (TryHandleLaunchBattleTableAnimation), the field stays as it is.
+      const castform = command.animation === "CASTFORM_CHANGE";
       effect = Object.freeze({
-        type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
+        type: "general-animation", battler: command.battler, animation: command.animation,
+        age: state.lifecycle.phaseElapsed - (castform ? CASTFORM_CHANGE_LEAD_FRAMES : 1),
+        ...(castform ? { castformForm: command.castformForm ?? 0 } : {}),
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "hit-animation") {

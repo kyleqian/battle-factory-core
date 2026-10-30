@@ -29,6 +29,14 @@ export const LIVE_TRANSFORM_ROWS = 109;
 /** First display row that shows the copied species (HandleSpeciesGfxDataChange on RAM row 49, latched one row later). */
 export const LIVE_TRANSFORM_SWAP_ROW = 50;
 
+/**
+ * cff230 (docs/cff230-castform-forms.md): the Scene ON CASTFORM_CHANGE command (BattleScript_DoCastformChange's playanimation
+ * B_ANIM_CASTFORM_CHANGE + waitstate; a Substitute skips it, argument & 0x80). ROM (battle-scene-on lab, hail): the weather print's
+ * wait ends, 5 rows later the body starts (this file's Transform machinery: BG mosaic ramp, the form swap on body row 50),
+ * it runs 109 rows, and the "transformed!" print's first glyph follows 3 rows after: 117 rows between the two prints.
+ */
+export const CASTFORM_CHANGE_LEAD_FRAMES = 5;
+export const CASTFORM_CHANGE_COMMAND_FRAMES = 117;
 const SPECIES_SPINDA = 308;
 const SPECIES_CASTFORM = 385;
 
