@@ -5368,6 +5368,9 @@ export function generatedBattleStartCommandReady(
       >= handoffTick + generatedPlayerDispatchDelay(state) + generatedPlayerReadyLag(state);
 }
 
+/** A release-local tick far past every front animation's terminal tick (the animation reducers clamp to their stable terminal frame). */
+const GENERATED_INTRO_OPPONENT_SETTLED_LOCAL = 4096;
+
 /**
  * Opponent ReleaseMonFromBall projection. This is the same affine-emerge/
  * tint ramp used by the typed Slice-5 switch-in view; Battle Scene OFF skips
@@ -5849,8 +5852,9 @@ export function renderGeneratedBattleStartPlayerRelease(
   // pokemon.c:6803-6852) - x2/y2 stay {0,0} for every species; see ISSUES
   // #71's Slice-D record.
   if (state.sceneOn) {
-    // bso226: Scene ON's opponent front animation continues past the player's throw.
-    drawGeneratedOpponentRelease(fb, t, handoffTick, fieldView, true);
+    // bso226: the ROM holds "Go!" until the opponent's front animation has ended, so Scene ON stands the opponent at the
+    // animation's terminal frame (species idle rest) for the whole player throw.
+    drawGeneratedOpponentRelease(fb, handoffTick + GENERATED_INTRO_OPPONENT_SETTLED_LOCAL, handoffTick, fieldView, true);
   } else {
     drawSpriteSheet(
       fb,
