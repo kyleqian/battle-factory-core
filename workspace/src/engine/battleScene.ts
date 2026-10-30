@@ -7365,6 +7365,7 @@ function drawMidBattleSwitchBallOpenParticles(
   fb: Uint8Array,
   window: "recall" | "send-in" | "opponent-send-in",
   schedules: readonly MidBattleSwitchParticle[],
+  sendInOriginY = 119,
 ): void {
   if (schedules.length === 0) return;
   // snd145: an opponent send-in bursts at the opponent ball (176,64) - 5, the battle-start opponent's PARTICLE_ORIGIN; no terrain clip.
@@ -7372,7 +7373,7 @@ function drawMidBattleSwitchBallOpenParticles(
     ? { x: 68, y: 108 }
     : window === "opponent-send-in"
       ? PARTICLE_ORIGIN
-      : { x: 68, y: 119 };
+      : { x: 68, y: sendInOriginY };
   const anim = battleAnimParticles.regularBallAnim;
   const alive: AliveParticle[] = schedules.map((p) => ({
     i: p.i,
@@ -55324,6 +55325,7 @@ export function renderBattleResolutionSceneOffView(
       fb,
       view.midBattleSwitchParticles.window,
       view.midBattleSwitchParticles.schedules,
+      view.midBattleSwitchParticles.originY,
     );
   }
   // sad133: the status animation's priority-3 OAM (the confusion ducks' far half) behind the battlers.
@@ -55636,6 +55638,7 @@ export function renderBattleResolutionForcedPartySelect(
     const sendOutTiming = view.switchIn.timing ?? undefined;
     const releaseClock = partySendOutReleaseClock(elapsed, sendOutTiming);
     const releaseTick = partySendOutReleaseLogicalTick(releaseClock);
+    let pathASendIn = false;
     if (canonicalIncoming) {
       drawMode0Ppu(fb, {
         ...turn15FieldPpuAsset,
@@ -55646,6 +55649,9 @@ export function renderBattleResolutionForcedPartySelect(
             : turn15ReleaseFieldPalette(releaseTick),
       });
     } else {
+      // pfb229: once the view carries the path-A send-in (Scene ON, non-MAGBY), that composition owns the ball, release, emerge,
+      // back animation, particles and healthbox slide; the generic release below is Scene OFF's.
+      pathASendIn = view.midBattleSwitchIn !== null && view.midBattleSwitchIn.battler === 0;
       renderBattleResolutionSceneOffView(fb, {
         ...view,
         visibility: Object.freeze({
@@ -55671,8 +55677,8 @@ export function renderBattleResolutionForcedPartySelect(
       }
     }
 
-    drawTurn15ForcedSwitchBall(fb, releaseClock);
-    if (releaseTick !== null) {
+    if (!pathASendIn) drawTurn15ForcedSwitchBall(fb, releaseClock);
+    if (releaseTick !== null && !pathASendIn) {
       if (canonicalIncoming) {
         drawTurn15ForcedSwitchRelease(fb, releaseTick, view.field.player.name);
       } else if (releaseTick <= 16) {
@@ -55708,7 +55714,7 @@ export function renderBattleResolutionForcedPartySelect(
         );
       }
     }
-    const healthboxDx = partySendOutHealthboxDx(releaseClock);
+    const healthboxDx = pathASendIn ? null : partySendOutHealthboxDx(releaseClock);
     if (healthboxDx !== null) {
       if (canonicalIncoming) {
         drawTurn15MagbyHealthbox(fb, healthboxDx);
