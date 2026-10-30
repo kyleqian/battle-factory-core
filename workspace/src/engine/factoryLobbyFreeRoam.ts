@@ -14,7 +14,9 @@
 // WALKABLE with no exit warp (the real game warps out through the (9,11)/
 // (10,11) door mat, §3c — those two tiles are BLOCKED here instead), no PC
 // interaction, and SILENT NPCs (A on an NPC is a no-op; the real game opens
-// the attendant's welcome dialogue). The walk-cycle poses follow the source
+// the attendant's welcome dialogue). nch231 exception: A facing the SINGLES
+// attendant (isFactoryLobbyFacingSinglesAttendant) starts a new challenge —
+// core.ts hands off to the draft screen (docs/nch231-new-challenge.md). The walk-cycle poses follow the source
 // anim tables (sAnim_GoSouth/North/West/East, 8 ticks per pose); the
 // in-place turn's own 2-pose 8-frame animation (measured §2) is rendered as
 // the target direction's standing frame (named residual, no committed spec).
@@ -328,6 +330,25 @@ export function advanceFactoryLobbyFreeRoam(
 
 export function isFactoryLobbyIdle(state: FactoryLobbyFreeRoamState): boolean {
   return state.turnRemaining === 0 && state.stepRemaining === 0;
+}
+
+/** Map cell of the singles attendant (map.json object_events; localId FACTORY_ATTENDANT_SINGLES). */
+export const LOBBY_SINGLES_ATTENDANT_CELL = Object.freeze({ x: 4, y: 7 });
+
+/**
+ * True when the player stands still (no turn/step in flight; a border bump
+ * counts as standing) and faces the singles attendant's cell, i.e. an A press
+ * would run `BattleFrontier_BattleFactoryLobby_EventScript_SinglesAttendant`.
+ */
+export function isFactoryLobbyFacingSinglesAttendant(
+  state: FactoryLobbyFreeRoamState,
+): boolean {
+  if (!isFactoryLobbyIdle(state)) return false;
+  const { dx, dy } = DIR_DELTA[state.facing];
+  return (
+    state.x + dx === LOBBY_SINGLES_ATTENDANT_CELL.x &&
+    state.y + dy === LOBBY_SINGLES_ATTENDANT_CELL.y
+  );
 }
 
 /**

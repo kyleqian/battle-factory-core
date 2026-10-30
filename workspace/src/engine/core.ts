@@ -647,12 +647,14 @@ import {
 } from "./factoryTerminalPresentation.ts";
 import {
   advanceFactoryCarry,
+  carryForNewChallengeAfterLobby,
   createInitialFactoryCarry,
   generateFactoryChallengeDraft,
   type FactoryCarry,
 } from "./factoryRoundChaining.ts";
 import {
   advanceFactoryLobbyFreeRoam,
+  isFactoryLobbyFacingSinglesAttendant,
   createFactoryLobbyFreeRoamState,
   type FactoryLobbyFreeRoamState,
   type LobbyDirection,
@@ -927,6 +929,47 @@ function lobbyHeldDirections(buttons: ReadonlySet<GbaButton>): ReadonlySet<Lobby
   return held;
 }
 
+/**
+ * Re-enters the app's boot flow (the Lv-50 singles rental draft, "Select the
+ * first POKeMON.") with a freshly generated rental pool. The ROM's Random()
+ * cursor is one continuous global, so generation starts from `rngValueBefore`;
+ * frame, scene mode, route and the presentation session are kept.
+ */
+function enterChainedFactoryChallenge(
+  state: EngineState,
+  keyRepeat: KeyRepeatState,
+  nextCarry: FactoryCarry,
+  rngValueBefore: number,
+): EngineState {
+  const { generation, draftScreen: nextDraftScreen } =
+    generateFactoryChallengeDraft(nextCarry, rngValueBefore);
+  return {
+    ...state,
+    frame: state.frame + 1,
+    battle1OpponentConstructionRngValues: Object.freeze([]),
+    draftScreen: nextDraftScreen,
+    keyRepeat,
+    summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
+    prebattleRoom: null,
+    battleRoom: null,
+    battleScene: null,
+    postwin: null,
+    battleSetup: null,
+    rngMode: "vblank",
+    rngValue: generation.rngValue,
+    battleControllerExecFlags: 0,
+    roundController: null,
+    stagedBattleTurn: null,
+    sceneOnPresentation: null,
+    factorySwap: null,
+    factoryTerminal: null,
+    factoryRoundBattleOrchestrator: null,
+    lobbyFreeRoam: null,
+    factoryCarry: nextCarry,
+    pendingGeneratedRound: Object.freeze({ rngValueBefore, carry: nextCarry }),
+  };
+}
+
 export function createInitialState(
   options: InitialEngineStateOptions = {},
 ): EngineState {
@@ -1105,7 +1148,21 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
   if (state.lobbyFreeRoam) {
     // Free-roam Lobby overworld owns both input and rendering once the
     // terminal decline chain has handed off (factoryLobbyFreeRoam.ts). A/B
-    // are no-ops (silent NPCs, no PC, no exit warp — user decisions).
+    // are no-ops (silent NPCs, no PC, no exit warp — user decisions), except
+    // A facing the singles attendant, which starts a new challenge from the
+    // live gameplay RNG cursor (nch231, docs/nch231-new-challenge.md).
+    if (
+      state.appRoute === "generated-orchestrator" &&
+      newKeys.has("A") &&
+      isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)
+    ) {
+      return enterChainedFactoryChallenge(
+        state,
+        keyRepeat,
+        carryForNewChallengeAfterLobby(state.factoryCarry),
+        rngValue,
+      );
+    }
     const lobbyFreeRoam = advanceFactoryLobbyFreeRoam(state.lobbyFreeRoam, {
       heldDirs: lobbyHeldDirections(buttons),
     });
@@ -1182,33 +1239,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // factoryRoundBattleOrchestrator.test.ts's "uninterrupted orchestrator
       // cursor" case).
       const rngValueBefore = factoryRoundBattleOrchestrator.round.rules.rngValue;
-      const { generation, draftScreen: nextDraftScreen } =
-        generateFactoryChallengeDraft(nextCarry, rngValueBefore);
-      return {
-        ...state,
-        frame: state.frame + 1,
-        battle1OpponentConstructionRngValues: Object.freeze([]),
-        draftScreen: nextDraftScreen,
-        keyRepeat,
-        summaryScreen: CLOSED_SUMMARY_SCREEN_STATE,
-        prebattleRoom: null,
-        battleRoom: null,
-        battleScene: null,
-        postwin: null,
-        battleSetup: null,
-        rngMode: "vblank",
-        rngValue: generation.rngValue,
-        battleControllerExecFlags: 0,
-        roundController: null,
-        stagedBattleTurn: null,
-        sceneOnPresentation: null,
-        factorySwap: null,
-        factoryTerminal: null,
-        factoryRoundBattleOrchestrator: null,
-        lobbyFreeRoam: null,
-        factoryCarry: nextCarry,
-        pendingGeneratedRound: Object.freeze({ rngValueBefore, carry: nextCarry }),
-      };
+      return enterChainedFactoryChallenge(state, keyRepeat, nextCarry, rngValueBefore);
     }
     const freeRoamBoxGoneAge = factoryTerminalDeclineBoxGoneAge(factoryTerminal);
     const lobbyFreeRoam =
