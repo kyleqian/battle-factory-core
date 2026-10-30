@@ -13,12 +13,12 @@ import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePre
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 
 export type RouteFrame = { frame: number; segment: number; command: number; type: string; rgba: Uint8Array };
-export type RouteSegment = { index: number; events: any[]; commands: any[]; frames: RouteFrame[]; startFrame: number };
+export type RouteSegment = { index: number; events: any[]; commands: any[]; frames: RouteFrame[]; startFrame: number; raw: any };
 
 /** Plays census seed `seed`; returns the segments whose events hold a CASTFORM_CHANGE (frames rendered when `render`). */
-export function cff230Route(seed: number, render: boolean, stopAfterSegments = 99): { segments: RouteSegment[] } {
+export function cff230Route(seed: number, render: boolean, stopAfterSegments = 99, scene: "on" | "off" = "on"): { segments: RouteSegment[] } {
   let state = beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
-    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: "on",
+    id: `live-share-census-${seed}-${(seed * 11) % 49}`, rngValue: seed, battleScene: scene,
     factoryWinStreak: (seed * 11) % 49, playerTrainerId: 416049562,
     battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
     rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
@@ -39,7 +39,7 @@ export function cff230Route(seed: number, render: boolean, stopAfterSegments = 9
       for (const s of r.segments) {
         if (bySeg.has(s)) continue;
         if (s.events.some((e: any) => e.payload.kind === "animation" && e.payload.animationId === "CASTFORM_CHANGE")) {
-          const seg: RouteSegment = { index: out.length, events: s.events, commands: s.commands, frames: [], startFrame: frame };
+          const seg: RouteSegment = { index: out.length, events: s.events, commands: s.commands, frames: [], startFrame: frame, raw: s };
           bySeg.set(s, seg); out.push(seg);
         } else bySeg.set(s, null as never);
       }
