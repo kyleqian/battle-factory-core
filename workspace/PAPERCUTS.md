@@ -34,6 +34,8 @@ history.
   during tree setup before its resume finished, ~10 min).
   (2026-10-30 bso226) The bso225/226 window harness crashes when a window needs ROM frames at or past 2008, and `--drift` has no
   bound (~10 min).
+  (2026-10-30 apx227) `rst197CensusDelta.py` has no output-file argument; the cached apx223 ROM scout went stale (Conversion 2 had
+  no opponent MOVEANIMATION until recaptured); internal species ids vs national numbers make census seed triage error-prone.
   (11, sub183) `prep37Probes.sh` and siblings hard-code Mac paths (another wrapper, `sub183Probes.sh`); every census needs a copied
   `.ts` / `.sh` / delta script because the census row layout is positional (a field index slipped by one).
   (12, 2026-10-16 evidence steps) `sub183Probes.sh` launches every job at once (no concurrency cap; lsd186 wrote `lsd186Probes.sh`);

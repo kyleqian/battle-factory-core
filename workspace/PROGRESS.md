@@ -27,7 +27,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   full suite (12 shards) **1,714 files / 14,180 tests, 0 failed**; build 0; differential 641 / 641 (the committed ON traces capture
   after the intro). Supervisor: census OFF + ON vs bso225: eventsDigest + error identical 1,000 / 1,000 each; merged src ==
   tested src; bso225 + bso226 tests 13 / 13; SPINDA strip eyeballed.
-- **Running:** apx227 (#157 weather-continues side, Conversion 2 + Ghost Curse approximate bodies).
+- **Folded:** apx227 (merge `fa622452c`; branch `worker/integration-20261030-023040`, src == suite-tested `885f2deba`):
+  **#157 fixed** — the only reader of the weather-continues event battler was the Scene ON x2 history (`liveBattlerX2History.ts`);
+  sandstorm / hail continues (WEATHER_VAR 12 / 13) with battler 1 erased the opponent's zeroed rest pose; the seam now takes battler
+  0 (kernel event unchanged). Seed 27 window: 2,166 frames move (opponent ONIX pose); 6 other opponent-weather seeds identical; seed
+  851 Fury Cutter approximate -> live (live 26,956 -> 26,957). Conversion 2 body (16x16 blended tile grid on the user): ROM residual
+  median 3,253 -> 119 px. Ghost Curse (stretching black window, later nail, longer hold): median 47 -> 0, exact frames 144 -> 228;
+  ghost icon palette not changed (cause not isolated). Worker: typecheck 0; census ON eventsDigest + error 1,000 / 1,000 identical
+  (supervisor re-checked), static 0, 7 battles changed as expected; OFF not reachable (x2 host and approx bodies are Scene ON only;
+  supervisor read the diff); differential 641 / 641; full suite on `885f2deba` 1,713 / 1,714 files, 1 stale Curse row pin ->
+  re-pinned test-only (`1a5ecb4ab`); build 0 on the tip. Supervisor: the 3 re-pinned files 43 / 43 on master.
 ---
 
 ## 2026-10-28 / 29 — CAX31 daily run wind-down (supervisor, Opus 5.5): apx219-224 folded; Scene ON static 0

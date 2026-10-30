@@ -79,15 +79,6 @@ docs/st76-status-gates.md: 5 of 34 PSN player-attacker windows run 94 rows (lags
 the dominant 93-row phase (29 / 34). Mechanism unknown (RAM at activation identical). Resume: name the age-17 lag source from counters,
 then record it as a third Dive D4 parameter (docs/faithful-timing-policy.md) or gate the shape.
 
-## #157 — Weather-continuing animations: kernel event battler is the last attacker, the ROM plays them on battler 0 (S10A, found 2026-10-09 by aud56)
-
-The kernel's MOVE / general-animation event for RAIN / HAIL / SANDSTORM_CONTINUES carries the last attacker as its battler; the ROM
-plays them on battler 0 in every Factory battle (end-of-turn effects use the first non-absent battler; in singles battler 0 is
-never absent there; 32 / 32 probed instances, `tools/integration/fixtures/aud56-net-zero-audit.json`). Harmless for the allocator
-(aud56 dropped the side key; a side-keyed draft cost 35 live commands), but a Scene ON renderer that reads the event battler
-(pan / position) may draw or pan these on the wrong side. Resume: check the RAIN_CONTINUES / weather renderers' use of the event
-battler; if any reads it, take battler 0 at the seam (presentation only) with a dense window on an opponent-set weather.
-
 ## #154 — Staged lab probe trajectories differ between batches run at different times (S10A, found 2026-10-09)
 
 plans51's Outrage jobs (`tools/integration/plans51Probe.py`, BODY200; base scenarios `tools/battle-lab/mechanic-outrage-*.json`,
