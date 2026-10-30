@@ -234,9 +234,14 @@ function barrage(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return frameOf(age, BARRAGE_LAST, { targetOffset: atTick(BARRAGE_SHAKE, age - BARRAGE_SHAKE_START), sprites });
 }
 
-// ---- Move_CONVERSION_2: 16 conversion tiles at the target, each held then flying to the attacker over 30 ticks; BLDALPHA 0 -> 16 ----
+// ---- Move_CONVERSION_2: 16 conversion tiles (16x16: affine 0x200 on 8x8) on the anim target, each held then flying to the attacker over 30 ticks; BLDALPHA 0 -> 16 ----
+// MOVE_CONVERSION_2 is MOVE_TARGET_USER, so the anim target is the user: the grid sits on the user (ROM: the user whitens under the tiles
+// and is revealed row by row as they converge on its centre).
 const CONVERSION_GRID = [-24, -8, 8, 24] as const;
 const CONVERSION_SPAWN = 2;
+// The tiles start on BATTLER_COORD_Y_2 and land on Y_PIC_OFFSET; measured against the ROM the start sits 8 px above the pic-offset centre.
+const CONVERSION_START_Y_RISE = 8;
+const CONVERSION_MATRIX: ApproxScriptMatrix = Object.freeze({ a: 128, b: 0, c: 0, d: 128 });
 const CONVERSION_LAST = CONVERSION_SPAWN + 135 + 31;
 function conversion2(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   const sprites: ApproxScriptSprite[] = [];
@@ -246,7 +251,7 @@ function conversion2(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
     const dx = CONVERSION_GRID[i % 4]!;
     const dy = CONVERSION_GRID[Math.floor(i / 4)]!;
     const hold = 60 + 5 * i;
-    const start = { x: ctx.targetCenter.x + towardTarget(ctx) * dx, y: ctx.targetCenter.y + dy };
+    const start = { x: ctx.attackerCenter.x + towardTarget(ctx) * dx, y: ctx.attackerCenter.y + dy - CONVERSION_START_Y_RISE };
     const local = age - CONVERSION_SPAWN;
     const flightStart = hold + 1;
     if (local < 0 || local > flightStart + 30) continue;
@@ -254,7 +259,7 @@ function conversion2(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
     const frame = local <= flightStart ? 0 : Math.min(3, Math.floor((local - flightStart) / 5));
     if (t === 1 || blend <= 0) continue;
     sprites.push(sprite("conversion", Math.round(start.x + (ctx.attackerCenter.x - start.x) * t),
-      Math.round(start.y + (ctx.attackerCenter.y - start.y) * t), null, [frame, 1, 1], blend));
+      Math.round(start.y + (ctx.attackerCenter.y - start.y) * t), CONVERSION_MATRIX, [frame, 1, 1], blend));
   }
   return frameOf(age, CONVERSION_LAST, { sprites });
 }

@@ -20600,7 +20600,12 @@ export function renderSceneOnMovePresentation(
       const frame: Tileset = {
         columns: part.columns, rows: part.rows, tiles: sheet.tileset.tiles.slice(part.tile, part.tile + part.columns * part.rows),
       };
-      if (part.matrix) {
+      if (part.matrix && part.blend !== null) {
+        drawSpriteSheetAffineStretchBlendedOverFb(
+          fb, frame, sheet.palette, part.x - part.columns * 4, part.y - part.rows * 4, part.matrix.a, part.matrix.d,
+          part.blend, 16 - part.blend, true, "live",
+        );
+      } else if (part.matrix) {
         drawSpriteSheetAffineRotate(
           fb, frame, sheet.palette, part.x, part.y, part.matrix.a, part.matrix.b, part.matrix.c, part.matrix.d, undefined, false,
         );

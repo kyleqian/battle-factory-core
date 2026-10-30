@@ -90,3 +90,9 @@ Not touched: Conversion 2 and Ghost Curse (skipped for time). The apx222 row-cou
 threshold 0.3 of rows). Evidence: `.integration/validation/sv-20261028/apx224-evidence/` (oracle-check summaries and PNGs,
 `census/on-2c619ac34`, `census-delta.json`). Census ON 0..999 versus `on-bad3db32c`: 997 identical battles, 3 changed (seeds 51
 Peck, 705 False Swipe, 923 Pay Day; move-animation length changes only); eventsDigest, error and seed identical on all 1 000.
+
+## After apx227
+
+| Body | Rows before -> after | Start-aligned before | Start-aligned after apx227 | Best shift before | Best shift after apx227 | What changed / what remains |
+| --- | --- | --- | --- | --- | --- | --- |
+| Conversion 2 (736, opponent Chansey v Hitmontop) | 173 -> 173 | 3 253 / 4 288 | 119 / 328 (58 of 162 frames exact) | 31: 2 519 / 4 288 | 119 / 328 (shift 6, equals start-aligned) | MOVE_CONVERSION_2 is `MOVE_TARGET_USER`: the anim target is the user, so the 4x4 tile grid sits on the user (not on the other battler). The tiles are 16x16 (affine 0x200 on the 8x8 sprite), alpha-blended over the field (BLDALPHA 0 -> 16), which whitens the user under the grid and reveals it row by row as the tiles converge on its centre. Tiles start 8 px above the pic-offset centre (BATTLER_COORD_Y_2). The remaining residual is the silver band's tile palette and edges. |
