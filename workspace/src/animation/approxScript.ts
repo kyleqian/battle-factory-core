@@ -16,6 +16,8 @@ export interface ApproxScriptPoint { readonly x: number; readonly y: number }
 export interface ApproxScriptMatrix { readonly a: number; readonly b: number; readonly c: number; readonly d: number }
 export interface ApproxScriptOffset { readonly x2: number; readonly y2: number }
 
+export interface ApproxScriptWindow { readonly left: number; readonly right: number; readonly top: number; readonly bottom: number }
+
 export interface ApproxScriptContext {
   readonly attackerSide: ApproxScriptSide;
   readonly targetSide: ApproxScriptSide;
@@ -47,6 +49,8 @@ export interface ApproxScriptFrame {
   readonly targetClones: readonly ApproxScriptOffset[];
   /** BLDY darken (0..16) of the battle background only (Curse's black field). */
   readonly bgDark: number;
+  /** When set, `bgDark` darkens only this window (WIN0, [left, right) x [top, bottom)); null: the whole background. */
+  readonly bgWindow: ApproxScriptWindow | null;
   readonly sprites: readonly ApproxScriptSprite[];
 }
 
@@ -97,7 +101,7 @@ function atTick(sequence: readonly ApproxScriptOffset[], tick: number): ApproxSc
 
 const frameOf = (age: number, last: number, parts: Partial<ApproxScriptFrame>): ApproxScriptFrame => ({
   active: age >= 0 && age <= last, attackerOffset: ZERO, attackerMatrix: null, targetOffset: ZERO, targetMatrix: null,
-  targetClones: [], bgDark: 0, sprites: [], ...parts,
+  targetClones: [], bgDark: 0, bgWindow: null, sprites: [], ...parts,
 });
 
 // ---- Move_PECK: AnimTask_RotateMonToSideAndRestore (3 ticks out, 3 back) + a flashing hit splat at x=-12 -------------------------
@@ -234,9 +238,14 @@ function barrage(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   return frameOf(age, BARRAGE_LAST, { targetOffset: atTick(BARRAGE_SHAKE, age - BARRAGE_SHAKE_START), sprites });
 }
 
-// ---- Move_CONVERSION_2: 16 conversion tiles at the target, each held then flying to the attacker over 30 ticks; BLDALPHA 0 -> 16 ----
+// ---- Move_CONVERSION_2: 16 conversion tiles (16x16: affine 0x200 on 8x8) on the anim target, each held then flying to the attacker over 30 ticks; BLDALPHA 0 -> 16 ----
+// MOVE_CONVERSION_2 is MOVE_TARGET_USER, so the anim target is the user: the grid sits on the user (ROM: the user whitens under the tiles
+// and is revealed row by row as they converge on its centre).
 const CONVERSION_GRID = [-24, -8, 8, 24] as const;
 const CONVERSION_SPAWN = 2;
+// The tiles start on BATTLER_COORD_Y_2 and land on Y_PIC_OFFSET; measured against the ROM the start sits 8 px above the pic-offset centre.
+const CONVERSION_START_Y_RISE = 8;
+const CONVERSION_MATRIX: ApproxScriptMatrix = Object.freeze({ a: 128, b: 0, c: 0, d: 128 });
 const CONVERSION_LAST = CONVERSION_SPAWN + 135 + 31;
 function conversion2(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   const sprites: ApproxScriptSprite[] = [];
@@ -246,7 +255,7 @@ function conversion2(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
     const dx = CONVERSION_GRID[i % 4]!;
     const dy = CONVERSION_GRID[Math.floor(i / 4)]!;
     const hold = 60 + 5 * i;
-    const start = { x: ctx.targetCenter.x + towardTarget(ctx) * dx, y: ctx.targetCenter.y + dy };
+    const start = { x: ctx.attackerCenter.x + towardTarget(ctx) * dx, y: ctx.attackerCenter.y + dy - CONVERSION_START_Y_RISE };
     const local = age - CONVERSION_SPAWN;
     const flightStart = hold + 1;
     if (local < 0 || local > flightStart + 30) continue;
@@ -254,7 +263,7 @@ function conversion2(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
     const frame = local <= flightStart ? 0 : Math.min(3, Math.floor((local - flightStart) / 5));
     if (t === 1 || blend <= 0) continue;
     sprites.push(sprite("conversion", Math.round(start.x + (ctx.attackerCenter.x - start.x) * t),
-      Math.round(start.y + (ctx.attackerCenter.y - start.y) * t), null, [frame, 1, 1], blend));
+      Math.round(start.y + (ctx.attackerCenter.y - start.y) * t), CONVERSION_MATRIX, [frame, 1, 1], blend));
   }
   return frameOf(age, CONVERSION_LAST, { sprites });
 }
@@ -262,17 +271,23 @@ function conversion2(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
 // ---- Move_CURSE, CurseGhost branch (turn-0): the field goes black, a nail scratches the attacker three times, a ghost rises from the target ----
 // Not modelled: the expanding black window of AnimTask_CurseStretchingBlackBg (only its palette fade to black), sound, OAM priorities.
 const CURSE_FADE_IN_START = 16;
-const CURSE_NAIL_SPAWN = 56;
+const CURSE_WINDOW_STEPS = 16;
+const CURSE_HOLD_EXTRA = 10;
+// The window task plus the palette snap take 4 ticks longer than the fade alone, so the nail starts 4 ticks later than a bare delay 20.
+const CURSE_MIDDLE_LAG = 4;
+const CURSE_NAIL_SPAWN = 56 + CURSE_MIDDLE_LAG;
 const CURSE_NAIL_HITS = [64, 108, 152] as const;
 const CURSE_NAIL_FADE_START = 183;
 const CURSE_NAIL_END = 231;
 const CURSE_ATTACKER_SHAKE = shakeMon2Sequence(4, 0, 10, 0);
-const CURSE_ATTACKER_SHAKE_STARTS = [62, 105, 148] as const;
+const CURSE_ATTACKER_SHAKE_STARTS = [62 + CURSE_MIDDLE_LAG, 105 + CURSE_MIDDLE_LAG, 148 + CURSE_MIDDLE_LAG] as const;
 const CURSE_GHOST_SPAWN = CURSE_NAIL_SPAWN + CURSE_NAIL_END + 2;
 const CURSE_GHOST_TICKS = 40;
 const CURSE_TARGET_SHAKE = shakeMon2Sequence(2, 0, 14, 1);
-const CURSE_FADE_OUT_START = CURSE_GHOST_SPAWN + CURSE_GHOST_TICKS + 2;
-const CURSE_LAST = CURSE_FADE_OUT_START + 17;
+const CURSE_FADE_OUT_START = CURSE_GHOST_SPAWN + CURSE_GHOST_TICKS + 2 + CURSE_HOLD_EXTRA;
+// simple_palette_blend selector=F_PAL_BG, delay=1, 16 -> 0: BLDY -2 every 3 ticks as measured on the ROM.
+const CURSE_FADE_OUT_STEP_TICKS = 3;
+const CURSE_LAST = CURSE_FADE_OUT_START + 8 * CURSE_FADE_OUT_STEP_TICKS;
 function curseGhost(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
   const sprites: ApproxScriptSprite[] = [];
   // The nail (32x16, 4 frames, flipped for a player attacker): -+24 px from the attacker, 4 ticks of +-2 px per scratch.
@@ -295,11 +310,17 @@ function curseGhost(age: number, ctx: ApproxScriptContext): ApproxScriptFrame {
     sprites.push(sprite("ghostlySpirit", ctx.targetCenter.x + (ctx.attackerSide === "player" ? sway : -sway), ctx.targetCenter.y - ghostAge,
       null, null, ghostAge <= 30 ? 11 : 11 - (ghostAge - 30)));
   }
-  const bgDark = age < CURSE_FADE_OUT_START ? Math.min(16, Math.max(0, age - CURSE_FADE_IN_START + 1))
-    : Math.max(0, 16 - (age - CURSE_FADE_OUT_START));
+  // AnimTask_CurseStretchingBlackBg: a BLDY-16 window grows from (200 | 40, 40) over 16 steps (bottom to 112), then the BG palettes snap black.
+  const step = age - CURSE_FADE_IN_START;
+  const startX = ctx.attackerSide === "player" ? 200 : 40;
+  const grow = (from: number, distance: number, sign: 1 | -1) => Math.trunc(from + sign * distance * 0.0625 * step);
+  const bgWindow = step >= 1 && step < CURSE_WINDOW_STEPS
+    ? { left: grow(startX, startX, -1), right: grow(startX, 240 - startX, 1), top: grow(40, 40, -1), bottom: grow(40, 72, 1) } : null;
+  const bgDark = age >= CURSE_FADE_OUT_START ? Math.max(0, 14 - 2 * Math.floor((age - CURSE_FADE_OUT_START) / CURSE_FADE_OUT_STEP_TICKS))
+    : step >= 1 ? 16 : 0;
   return frameOf(age, CURSE_LAST, {
     attackerOffset: { x2: CURSE_ATTACKER_SHAKE_STARTS.reduce((sum, start) => sum + atTick(CURSE_ATTACKER_SHAKE, age - start).x2, 0), y2: 0 },
-    targetOffset: atTick(CURSE_TARGET_SHAKE, ghostAge), bgDark, sprites,
+    targetOffset: atTick(CURSE_TARGET_SHAKE, ghostAge), bgDark, bgWindow, sprites,
   });
 }
 

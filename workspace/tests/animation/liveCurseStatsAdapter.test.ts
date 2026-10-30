@@ -69,8 +69,8 @@ describe("curse-live: MOVE_CURSE live adapter (174)", () => {
     expect(LIVE_MOVE_OPPONENT_SHADOW_ROW[174]).toBe(0);
     for (const a of [0, 1] as const) {
       expect(liveMoveAnimationDuration(request(a))).toBe(CURSE_STATS_ROWS);
-      // apx222: the Ghost branch (turn 0) is approxScript.ts's CURSE_GHOST body (350 body rows, 353 presented), classified approx:turn-0.
-      expect(liveMoveAnimationDuration(request(a, { turn: 0 }))).toBe(350);
+      // apx222: the Ghost branch (turn 0) is approxScript.ts's CURSE_GHOST body, classified approx:turn-0. apx227: 371 body rows (350 + 21: window fade-in, nail lag, longer black hold, 8-step restore), 374 presented.
+      expect(liveMoveAnimationDuration(request(a, { turn: 0 }))).toBe(371);
     }
     const field = displayed("SNORLAX", "GOLBAT");
     expect(liveMoveAnimationPresentation(request(0), field, 90, undefined, undefined, knownOrder())?.config.move).toBe("CURSE");

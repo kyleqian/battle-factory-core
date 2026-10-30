@@ -102,6 +102,14 @@ describe("live battler x2 history (ISSUES #148, presentation-only)", () => {
     expect(liveBattlerX2EventsOf(event(5, { kind: "status-animation", battler: 1, isStatus2: 0, status: 8 })))
       .toEqual([{ kind: "status-animation", side: "opponent", animation: "PSN" }]);
     expect(liveBattlerX2EventsOf(event(6, { kind: "faint-animation", battler: 1 }))).toEqual([]);
+    // apx227 (ISSUES #157): the sandstorm / hail continues events carry the last attacker; the ROM plays them on battler 0, so an
+    // opponent-set weather must not erase the opponent's tracked pose.
+    for (const argument of ["12", "13"]) {
+      expect(liveBattlerX2EventsOf(event(8, { kind: "animation", animationId: "WEATHER_VAR", battler: 1, target: 1, arguments: [argument] })))
+        .toEqual([{ kind: "unknown", side: "player", reason: "WEATHER_VAR" }]);
+    }
+    expect(liveBattlerX2EventsOf(event(9, { kind: "animation", animationId: "WEATHER_VAR", battler: 1, target: 1, arguments: ["11"] })))
+      .toEqual([{ kind: "unknown", side: "opponent", reason: "WEATHER_VAR" }]);
     expect(liveBattlerX2EventsOf(event(7, { kind: "message", text: "x" }))).toEqual([]);
   });
 
@@ -193,7 +201,9 @@ describe("x2 history over ordinary generated routes with ONIX opponents (docs/x2
     // "5:0:7", "7:0:5" -> "7:0:6", "9:0:8" -> "9:0:9", "13:0:8" -> "13:0:9", "17:0:5" -> "17:0:6" (seed 134): Scene ON's action-transition
     // pause is one more command ahead of each of those bodies in its segment; bodies, inputs and parity unchanged.
     [110, 14, 10, 8, ["1:0:19", "3:0:1", "5:0:1", "5:0:8", "7:0:1", "11:0:1", "13:0:1", "15:0:1"]],
-    [134, 15, 13, 9, ["3:0:10", "5:0:7", "7:0:1", "7:0:6", "9:0:9", "13:0:1", "13:0:9", "15:0:1", "17:0:6"]],
+    // apx227 (ISSUES #157): + "9:0:1" (seed 134): an opponent-set sandstorm / hail continues event no longer marks the opponent's x2
+    // unknown (the ROM plays it on battler 0), so the opponent's zeroed pose now reaches that body; bodies and parity unchanged.
+    [134, 15, 13, 10, ["3:0:10", "5:0:7", "7:0:1", "7:0:6", "9:0:1", "9:0:9", "13:0:1", "13:0:9", "15:0:1", "17:0:6"]],
   ] as const)("seed %i: %i bodies, %i with an ONIX opponent, %i inputs changed; Scene ON/OFF logic, RNG, boundaries equal",
     (seed, bodies, rest, changed, keys) => {
       const route = x2TrackerRouteReplay(seed);
