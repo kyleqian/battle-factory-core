@@ -142,6 +142,10 @@ const KEEP_ANIMATIONS: ReadonlySet<string> = new Set([
   "HIT_ANIMATION", "STATS_CHANGE", "RAIN_CONTINUES", "SUN_CONTINUES", "SANDSTORM_CONTINUES", "HAIL_CONTINUES",
 ]);
 
+const WEATHER_CONTINUES_ANIMATIONS: ReadonlySet<string> = new Set([
+  "RAIN_CONTINUES", "SUN_CONTINUES", "SANDSTORM_CONTINUES", "HAIL_CONTINUES",
+]);
+
 /** End-of-body class of `role` for move `moveId` (measured table, then the documented fallback). */
 export function liveBattlerX2MoveRoleClass(moveId: number, role: "attacker" | "target", turn = 1): LiveBattlerX2RoleClass {
   const sets = ROLE_SETS[role];
@@ -227,7 +231,10 @@ export function liveBattlerX2EventsOf(event: BattleKernelSemanticEvent): readonl
     return side === null ? [{ kind: "unknown", side: "both", reason: "switch-in battler" }] : [{ kind: "send-in", side }];
   }
   if (payload.kind === "animation") {
-    const side = sideOf(payload.battler);
+    // ISSUES #157: the kernel carries the last attacker on weather-continues events; the ROM plays them on battler 0 in singles.
+    const weatherContinues = WEATHER_CONTINUES_ANIMATIONS.has(payload.animationId)
+      || (payload.animationId === "WEATHER_VAR" && (payload.arguments[0] === "12" || payload.arguments[0] === "13"));
+    const side = sideOf(weatherContinues ? 0 : payload.battler);
     if (side === null) return [{ kind: "unknown", side: "both", reason: `animation battler ${payload.battler}` }];
     if (payload.animationId === "MOVE_ANIMATION") {
       try {
@@ -240,7 +247,7 @@ export function liveBattlerX2EventsOf(event: BattleKernelSemanticEvent): readonl
     if (KEEP_ANIMATIONS.has(payload.animationId)) return [];
     if (payload.animationId === "SUBSTITUTE_FADE") return [{ kind: "substitute-fade", side }];
     if (payload.animationId === "FOCUS_PUNCH_SETUP") return [{ kind: "general-animation", side }];
-    const target = sideOf(payload.target);
+    const target = weatherContinues ? null : sideOf(payload.target);
     const unknown = (at: LiveBattlerX2Side): LiveBattlerX2Event => ({ kind: "unknown", side: at, reason: payload.animationId });
     return target === null || target === side ? [unknown(side)] : [unknown(side), unknown(target)];
   }
