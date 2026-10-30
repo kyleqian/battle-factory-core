@@ -1,0 +1,172 @@
+[
+ {
+  "tag": "yoshi",
+  "seed": 42,
+  "trainerId": 49,
+  "playerSetIds": [
+   110,
+   130,
+   150
+  ],
+  "opponentSetIds": [
+   189,
+   155,
+   168
+  ],
+  "playerLead": "GRIMER",
+  "playerLeadPersonality": 2737562574,
+  "playerBackAnimSet": "BACK_ANIM_V_STRETCH",
+  "opponentLead": "COMBUSKEN",
+  "opponentFrontAnim": "ANIM_V_JUMPS_H_JUMPS",
+  "offset": 1171,
+  "ack": 369,
+  "end": 688,
+  "lag": null,
+  "before": {
+   "opp": 106807,
+   "pm": 16697,
+   "rest": 76336
+  },
+  "after": {
+   "opp": 12,
+   "pm": 0,
+   "rest": 69744
+  }
+ },
+ {
+  "tag": "wailmer",
+  "seed": 5,
+  "trainerId": 55,
+  "playerSetIds": [
+   170,
+   130,
+   150
+  ],
+  "opponentSetIds": [
+   163,
+   161,
+   189
+  ],
+  "playerLead": "WAILMER",
+  "playerLeadPersonality": 509295856,
+  "playerBackAnimSet": "BACK_ANIM_SHAKE_GLOW_BLUE",
+  "opponentLead": "SABLEYE",
+  "opponentFrontAnim": "ANIM_GLOW_BLACK",
+  "offset": 1140,
+  "ack": 400,
+  "end": 698,
+  "lag": "98@517",
+  "before": {
+   "opp": 24840,
+   "pm": 62540,
+   "rest": 7688
+  },
+  "after": {
+   "opp": 132,
+   "pm": 9806,
+   "rest": 6370
+  }
+ },
+ {
+  "tag": "spinda",
+  "seed": 22,
+  "trainerId": 63,
+  "playerSetIds": [
+   145,
+   112,
+   150
+  ],
+  "opponentSetIds": [
+   197,
+   131,
+   189
+  ],
+  "playerLead": "SPINDA",
+  "playerLeadPersonality": 2645623632,
+  "playerBackAnimSet": "BACK_ANIM_CIRCLE_COUNTERCLOCKWISE",
+  "opponentLead": "RATICATE",
+  "opponentFrontAnim": "ANIM_FIGURE_8",
+  "offset": 1175,
+  "ack": 365,
+  "end": 620,
+  "lag": "39@475",
+  "before": {
+   "opp": 41645,
+   "pm": 35115,
+   "rest": 15934
+  },
+  "after": {
+   "opp": 11,
+   "pm": 1855,
+   "rest": 4165
+  }
+ },
+ {
+  "tag": "onix",
+  "seed": 35,
+  "trainerId": 53,
+  "playerSetIds": [
+   156,
+   112,
+   150
+  ],
+  "opponentSetIds": [
+   143,
+   154,
+   146
+  ],
+  "playerLead": "ONIX",
+  "playerLeadPersonality": 2143260825,
+  "playerBackAnimSet": "BACK_ANIM_V_SHAKE",
+  "opponentLead": "ELEKID",
+  "opponentFrontAnim": "ANIM_FLASH_YELLOW",
+  "offset": 1157,
+  "ack": 383,
+  "end": 673,
+  "lag": "45@495",
+  "before": {
+   "opp": 62261,
+   "pm": 48993,
+   "rest": 53013
+  },
+  "after": {
+   "opp": 40787,
+   "pm": 14502,
+   "rest": 51282
+  }
+ },
+ {
+  "tag": "koffing",
+  "seed": 11,
+  "trainerId": 49,
+  "playerSetIds": [
+   127,
+   130,
+   150
+  ],
+  "opponentSetIds": [
+   153,
+   196,
+   120
+  ],
+  "playerLead": "KOFFING",
+  "playerLeadPersonality": 2841070199,
+  "playerBackAnimSet": "BACK_ANIM_GROW",
+  "opponentLead": "BUTTERFREE",
+  "opponentFrontAnim": "ANIM_H_SLIDE_WOBBLE",
+  "offset": 1151,
+  "ack": 389,
+  "end": 674,
+  "lag": "74@505",
+  "before": {
+   "opp": 42765,
+   "pm": 63669,
+   "rest": 114
+  },
+  "after": {
+   "opp": 12,
+   "pm": 97,
+   "rest": 6
+  }
+ }
+]
