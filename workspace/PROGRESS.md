@@ -16,7 +16,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   0 failed**, build 0, differential 641 / 641. Supervisor: OFF census shards byte-identical to `off-bad3db32c`; ON eventsDigest +
   error identical on 1,000 / 1,000 (3 changed = the known apx224 rows); new test 6 / 6; ENTEI strip eyeballed.
   Not wired: faint-replacement send-in (path B; the pfr192 emerge route is not pixel-aligned yet), battle-start player (path C).
-- **Running:** bso226 (battle-start intro send-outs in Scene ON, both sides).
+- **Folded:** bso226 (merge `5a9cb0fc5`; branch `worker/integration-20261029-233450`, src == tested `ebe23c6bb`): the Scene ON
+  battle-start intro plays the opponent FRONT and player BACK species animations (banked reducers; new presentation-only
+  `sceneOn` on the intro state; the ONIX-only settle hand-fit is replaced by the dispatcher in Scene ON, kept in OFF). 5 ROM windows,
+  differing px opp / player before -> after: yoshi 106,807 / 16,697 -> 12 / 0; wailmer 24,840 / 62,540 -> 132 / 7,903 (ball +
+  sparkles); spinda 41,645 / 35,115 -> 11 / 1,855; koffing 42,765 / 63,669 -> 12 / 97; onix 62,261 / 48,993 -> 40,787 / 14,502
+  (lab opponent gender differs + release frames unattributed). Timing residual found: the ROM waits for the opponent's front
+  animation before "Go!", 39–98 frames later than our fixed timeline on long animations (ISSUES #146 timing line). Doc
+  `docs/bso226-battle-start-intro-send-outs.md`, strips `tools/integration/fixtures/battle-start-intro/`. Worker: typecheck 0;
+  full suite (12 shards) **1,714 files / 14,180 tests, 0 failed**; build 0; differential 641 / 641 (the committed ON traces capture
+  after the intro). Supervisor: census OFF + ON vs bso225: eventsDigest + error identical 1,000 / 1,000 each; merged src ==
+  tested src; bso225 + bso226 tests 13 / 13; SPINDA strip eyeballed.
+- **Running:** apx227 (#157 weather-continues side, Conversion 2 + Ghost Curse approximate bodies).
 ---
 
 ## 2026-10-28 / 29 — CAX31 daily run wind-down (supervisor, Opus 5.5): apx219-224 folded; Scene ON static 0
