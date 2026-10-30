@@ -1061,6 +1061,7 @@ export function beginFactoryRoundBattleStartIntro(
         sceneAssemblyDisplayLag,
         isSilverBrainReveal,
         isGoldBrainReveal,
+        state.config.battleScene === "on",
       ),
       elapsed: -GENERATED_BATTLE_INTRO_ROOM_HANDOFF_DELAY,
     }),

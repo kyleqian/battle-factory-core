@@ -453,6 +453,34 @@ export function midBattleSwitchInFrontAnimAt(species: string, elapsed: number): 
 }
 
 /**
+ * bso226 (docs/bso226-battle-start-intro-send-outs.md): the battle-start intro's Scene ON send-out animations ride the same ROM
+ * callbacks as a mid-battle send-in (`SpriteCB_OpponentMonFromBall` -> `DoMonFrontSpriteAnimation`, `SpriteCB_PlayerMonFromBall` ->
+ * `BattleAnimateBackSprite`), so the generated intro reuses the mid-battle views at an equivalent send-in elapsed. The opponent's emerge
+ * starts at elapsed 19 (`MATERIALIZE_START_OFFSET`); the player's mon is first visible at elapsed 49 (= `PLAYER_MATERIALIZE_START_TICK`).
+ * The shifts are the ROM fits on the battle-start windows (0 = the mid-battle anchors).
+ */
+export const GENERATED_INTRO_OPPONENT_ANIM_ELAPSED_SHIFT = -1;
+export const GENERATED_INTRO_PLAYER_ANIM_ELAPSED_SHIFT = 1;
+
+/** Opponent release tint + front animation for the generated intro's `local` = ticks since the opponent materialize started. */
+export function generatedBattleStartOpponentAnimAt(species: string, local: number): Readonly<{
+  monTintCoefficient: number;
+  frontAnim: MidBattleSwitchInFrontAnim | null;
+}> {
+  const view = midBattleSwitchInAt(local + 19 + GENERATED_INTRO_OPPONENT_ANIM_ELAPSED_SHIFT, 1, undefined, species);
+  return Object.freeze({ monTintCoefficient: view.monTintCoefficient, frontAnim: view.frontAnim });
+}
+
+/** Player back animation for the generated intro's `local` = ticks since the player mon became visible (`PLAYER_MATERIALIZE_START_TICK`). */
+export function generatedBattleStartPlayerAnimAt(species: string, personality: number | undefined, local: number): MidBattleSwitchInBackAnim | null {
+  return midBattleSwitchInBackAnimAt(
+    species,
+    backAnimNatureName(personality),
+    local + MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED + 1 + GENERATED_INTRO_PLAYER_ANIM_ELAPSED_SHIFT,
+  );
+}
+
+/**
  * Projects the mid-battle switch-in's visible state from the `switch-in`
  * command's phaseElapsed alone. The source send-in is
  * `SpriteCB_PlayerMonSendOut_1/2` (`pokeball.c:911-985`) for the ball throw,
