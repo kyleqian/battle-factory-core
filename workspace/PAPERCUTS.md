@@ -39,6 +39,8 @@ history.
   (2026-10-30 pfb228) `bso225Dense.ts` auto-delta search is bounded at +4 and silently picks the boundary (caused the bso225 "-4..+3
   offset" misdiagnosis, ~20 min); no PIL on the host (hand-written PNG writer, ~5 min); MEW has no player battle pic in
   `fieldArtBattler` (throws, ~2 min); `pkill -f` killed the worker's own shell again (~3 min).
+  (pfb229) Briefs should name `npm test -- --shard=i/12` foreground chunks as the accepted full-suite form; `lsd194Census.sh` resumes
+  only in ~560 s chunks and reports static only inside per-command fields (no summary line).
   (11, sub183) `prep37Probes.sh` and siblings hard-code Mac paths (another wrapper, `sub183Probes.sh`); every census needs a copied
   `.ts` / `.sh` / delta script because the census row layout is positional (a field index slipped by one).
   (12, 2026-10-16 evidence steps) `sub183Probes.sh` launches every job at once (no concurrency cap; lsd186 wrote `lsd186Probes.sh`);

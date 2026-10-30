@@ -30,16 +30,14 @@ kept and is long-tail.
 - Phase 2: **Scene ON census 0..999 static 0** (approximate 206, live 26,957 after apx227). Send-out animations in Scene ON:
   mid-battle player switch-in back animation (bso225), battle-start intro opponent front + player back (bso226) are drawn.
   #157 fixed (apx227). Conversion 2 / Ghost Curse approximate bodies refit (apx227; Ghost icon palette still off).
-- **Unfolded branch for the next run:** pfb229 (`worker/integration-20261030-050141`; see PROGRESS.md top entry
-  and its gate status) implements docs/pfb228-faint-replacement-emerge.md's recipe for the faint-replacement player send-in (path B).
-  It was started too late for the session's soak gates and was deliberately not folded.
+- Faint-replacement player send-in (path B) folded at 06:46 as pfb229 (`bb9029a37`); its vanilla `--scene both` and Scene ON
+  render-8 soaks were not run on that src (no time) — run them first next session.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
-1. **Verify and fold pfb229** (faint-replacement back send-out): its census / suite receipts in
-   `.integration/validation/sv-20261029/pfb229-evidence/`; finish any unfinished gate; re-measure one pfb228 window; then the soak
-   gates. Then the remaining #146 lines worth a player's eye (shiny send-ins, CRY_MODE_WEAK, Roar opponent-attacker ball path) and
-   the bso226 ONIX intro window residual (lab gender + release frames).
+1. **Gates on `bb9029a37`+ first:** vanilla 0:20 `--scene both` and Scene ON `--policy full --vary-rng` 0:30 `--render-every 8`
+   (not run on pfb229's src). Then the remaining #146 lines worth a player's eye (shiny send-ins, CRY_MODE_WEAK, Roar
+   opponent-attacker ball path, ENTEI / KINGDRA glow-lag frame) and the bso226 ONIX intro window residual.
 2. **Castform form changes** (finish plan Phase 2 item 4; ISSUES #143 remainder).
 3. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak `--render-every 8`
    bulk plus a `--render-every 1` sample. Every overlay / pageerror becomes a fix step.
