@@ -55912,7 +55912,7 @@ function renderMosaicSwapBody(
   });
   const level = liveTransformMosaicLevel(age);
   renderBattleResolutionSceneOffView(fb, Object.freeze({
-    ...view, field, fieldArt, effect: null, postBodyShadowHidden: age >= 1 && age < LIVE_TRANSFORM_ROWS,
+    ...view, field, fieldArt, effect: null, postBodyShadowHidden: age >= 1 && age <= LIVE_TRANSFORM_ROWS,
     visibility: level === 0 ? view.visibility : Object.freeze({
       ...view.visibility, [side]: Object.freeze({ ...view.visibility[side], sprite: false }),
     }),
