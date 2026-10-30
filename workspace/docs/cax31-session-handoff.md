@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-10-29)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-10-30)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,32 +20,31 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-10-29 ~05:00 UTC wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-10-30 ~05:10 UTC wind-down; PROGRESS.md top entry has details)
 
-- Phase 1: soak `--scene`, containment (contain209 / 213), render caches (perf211), Summary crash fixes (sfa214).
-  `npm run play:random` plays the real Factory loop in headless Chromium (play216 goal mode; Playwright must exist in
-  `.integration/browser/node_modules`, ignored; `cd .integration/browser && npm install playwright`). RETIRE-YES after a win no
-  longer hangs (ret218). After a loss / retire the player ends in the walkable Lobby with no way to start a new challenge except
-  reloading (silent NPCs, 2026-08-05 user decision) — Phase 3 title-screen work.
-- Phase 2 move bodies: **Scene ON census 0..999 has 0 static move-animation commands** (2026-10-29, master `f07c843af`, unchanged by apx224):
-  live 26,956, approximate 207 (substitute-doll 74, transform 31, sprite-order-unknown 26, castform-form 18, extrasensory later
-  target 17, endeavor-power 12, no-adapter 11, turn-0 7, idle-rest 4, hidden-target 3, allocator-unknown 3, seismic 1), pause
-  12,941. Steps apx215 / 217 / 219-222; strips under `tools/integration/fixtures/approximate/<class>/`. New approximate bodies for
-  the no-adapter moves + Ghost Curse live in `src/animation/approxScript.ts` (no oracle check yet; Ghost Curse's black stretching
-  window not drawn). A no-case move without a script body would be `static:other:no-adapter-unscripted` (none in 0..999).
-  Census baseline for the next step: `.integration/validation/sv-20261028/apx222-evidence/census/{on,off}-bad3db32c` (src == master).
+- Phase 1: soak `--scene`, containment, render caches, Summary crash fixes done. `npm run play:random` plays the real Factory loop
+  in headless Chromium (Playwright in `.integration/browser/node_modules`, ignored; `cd .integration/browser && npm install
+  playwright`). 2026-10-30 nightly on `fa622452c`: browser 10 min / scene 0 page errors; varied-RNG sweeps 100 / 100 x4; vanilla
+  `--scene both` 20 / 20 each. After a loss / retire the player ends in the walkable Lobby with no new-challenge path except reload
+  (Phase 3 title-screen work).
+- Phase 2: **Scene ON census 0..999 static 0** (approximate 206, live 26,957 after apx227). Send-out animations in Scene ON:
+  mid-battle player switch-in back animation (bso225), battle-start intro opponent front + player back (bso226) are drawn.
+  #157 fixed (apx227). Conversion 2 / Ghost Curse approximate bodies refit (apx227; Ghost icon palette still off).
+- **Unfolded branch for the next run:** pfb229 (`worker/integration-20261030-050141`; see PROGRESS.md top entry
+  and its gate status) implements docs/pfb228-faint-replacement-emerge.md's recipe for the faint-replacement player send-in (path B).
+  It was started too late for the session's soak gates and was deliberately not folded.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
-1. **Rest of Phase 2:** player back send-out + battle-start intro send-outs drawn in Scene ON (ISSUES #71 and the #205-area
-   "Open" lines; `docs/send-out-intro-animation-program.md`), Castform form changes, weather-continues takes battler 0 (#157).
-   Then Conversion 2 (white palette blend, projectile) and Ghost Curse (fade timing) per `docs/apx223-approximate-oracle-check.md`
-   (apx224 fixed the other six; `tools/integration/apx223OracleCheck.ts` re-measures).
-2. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak bulk at
-   `--render-every 8` plus a `--render-every 1` sample. Every overlay / pageerror becomes a fix step.
-3. **Production + cleanup** per the plan, interleaved (cleanup steps 1–3 first; a "new challenge" path from the Lobby or a
-   title screen belongs here).
-4. **Timing** residuals last (ISSUES #188 Summary motion, #189 retire path; exs207 refs kept).
+1. **Verify and fold pfb229** (faint-replacement back send-out): its census / suite receipts in
+   `.integration/validation/sv-20261029/pfb229-evidence/`; finish any unfinished gate; re-measure one pfb228 window; then the soak
+   gates. Then the remaining #146 lines worth a player's eye (shiny send-ins, CRY_MODE_WEAK, Roar opponent-attacker ball path) and
+   the bso226 ONIX intro window residual (lab gender + release frames).
+2. **Castform form changes** (finish plan Phase 2 item 4; ISSUES #143 remainder).
+3. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak `--render-every 8`
+   bulk plus a `--render-every 1` sample. Every overlay / pageerror becomes a fix step.
+4. **Production + cleanup** per the plan (cleanup steps 1–3 first; a "new challenge" path from the Lobby or a title screen).
+5. **Timing** residuals last (ISSUES #188, #189, the bso226 "Go!" wait on long front animations; exs207 refs kept).
 
 **Host note (2026-10-28):** two workers at once on 16 GiB caused repeated OOM kills (each worker's full suite / census plus a
 supervisor build). Keep ONE worker at a time; the launcher allows one per lane, so a second worker needs another lane anyway.
