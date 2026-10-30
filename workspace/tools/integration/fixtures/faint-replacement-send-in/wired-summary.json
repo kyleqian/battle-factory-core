@@ -1,0 +1,72 @@
+{
+ "skarmory": {
+  "B": 99,
+  "before_mon": 110236,
+  "predicted_mon": 74,
+  "actual_mon": 74,
+  "before_phb": 47777,
+  "actual_phb": 0,
+  "actual_msg": 0,
+  "before_msg": 0
+ },
+ "alakazam": {
+  "B": 99,
+  "before_mon": 129564,
+  "predicted_mon": 33,
+  "actual_mon": 33,
+  "before_phb": 47777,
+  "actual_phb": 0,
+  "actual_msg": 0,
+  "before_msg": 0
+ },
+ "onix": {
+  "B": 95,
+  "before_mon": 124807,
+  "predicted_mon": 272,
+  "actual_mon": 272,
+  "before_phb": 47778,
+  "actual_phb": 0,
+  "actual_msg": 0,
+  "before_msg": 0
+ },
+ "entei": {
+  "B": 96,
+  "before_mon": 324706,
+  "predicted_mon": 2079,
+  "actual_mon": 2079,
+  "before_phb": 47777,
+  "actual_phb": 0,
+  "actual_msg": 0,
+  "before_msg": 0
+ },
+ "shedinja": {
+  "B": 99,
+  "before_mon": 120589,
+  "predicted_mon": 16,
+  "actual_mon": 16,
+  "before_phb": 51947,
+  "actual_phb": 4170,
+  "actual_msg": 0,
+  "before_msg": 0
+ },
+ "kingdra": {
+  "B": 98,
+  "before_mon": 263209,
+  "predicted_mon": 1493,
+  "actual_mon": 1493,
+  "before_phb": 47777,
+  "actual_phb": 0,
+  "actual_msg": 0,
+  "before_msg": 0
+ },
+ "castform": {
+  "B": 99,
+  "before_mon": 153995,
+  "predicted_mon": 278,
+  "actual_mon": 278,
+  "before_phb": 47778,
+  "actual_phb": 0,
+  "actual_msg": 440,
+  "before_msg": 440
+ }
+}

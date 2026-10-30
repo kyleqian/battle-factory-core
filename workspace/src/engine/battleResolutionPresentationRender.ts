@@ -54,11 +54,12 @@ import {
 } from "./fightSubmenuText.ts";
 import {
   partySendOutGoTextVisibleChars,
+  partySendOutReleaseClock,
   type PartySendOutPhase,
   type PartySendOutTiming,
   partySendOutPhase,
 } from "./partySelect.ts";
-import { genericHitReactionAtAge } from "./battleMenu.ts";
+import { GBA_SINE_TABLE_256, genericHitReactionAtAge } from "./battleMenu.ts";
 import {
   markPresentationCommandDegraded,
   presentationCommandDegradation,
@@ -397,6 +398,92 @@ function midBattleSwitchInPalette(
 }
 
 /**
+ * pfb229 (docs/pfb228-faint-replacement-emerge.md): the player send-out ball's arc is species-keyed. `SpriteCB_PlayerMonSendOut_1`
+ * (pokeball.c:911) targets `GetBattlerSpriteCoord(Y_PIC_OFFSET) + 24` = the mon sprite's `y + 32` (our `fieldArt.player.origin.y + 32`),
+ * `InitAnimLinearTranslation` gives stepX 490 / stepY ((monY - 36) << 8) / 25 & ~1, and `SpriteCB_PlayerMonSendOut_2` adds the horizontal
+ * arc (amplitude -30, with the data[7] 35..80 slow zone).  Port of tools/integration/pfb228Ball.py `ball_arc` (0 mismatching ticks in 8 ROM
+ * windows).  The 43 entries are the ball sprite's (x2, y2) per `_2` callback tick; the last one is the landing tick.
+ * `MID_BATTLE_SWITCH_BALL_MON_Y` (93) is the fitted voluntary-switch species' arc and reproduces `MID_BATTLE_SWITCH_BALL_THROW_TABLE`.
+ */
+export const MID_BATTLE_SWITCH_BALL_MON_Y = 93;
+/** The MAGBY-calibrated forced-select ball clock's spawn (`switchInTail.ts` ballShift = B - 96): path-A elapsed 0 = release clock 96. */
+const FORCED_SEND_IN_PATH_A_BALL_SPAWN = 96;
+/** The canonical turn-15..17 MAGBY forced send-in, whose forced-selector release is hand-calibrated and stays as is. */
+function isCanonicalMagbyIncoming(mon: Readonly<{ name: string; species: number }>): boolean {
+  return mon.name === "MAGBY" && mon.species === 240;
+}
+const BALL_ARC_BASE_X = 24;
+const BALL_ARC_BASE_Y = 68;
+const BALL_ARC_TARGET_X = 72;
+const BALL_ARC_TICKS = 25;
+const BALL_ARC_AMPLITUDE = -30;
+
+export function playerSendOutBallArc(monY: number): readonly Readonly<{ x2: number; y2: number }>[] {
+  const sin = (index: number, amplitude: number): number => (GBA_SINE_TABLE_256[index & 0xff]! * amplitude) >> 8;
+  const dx = BALL_ARC_TARGET_X - BALL_ARC_BASE_X;
+  const dy = monY + 32 - BALL_ARC_BASE_Y;
+  let stepX = Math.floor((Math.abs(dx) * 256) / BALL_ARC_TICKS);
+  let stepY = Math.floor((Math.abs(dy) * 256) / BALL_ARC_TICKS);
+  stepX = dx < 0 ? stepX | 1 : stepX & ~1;
+  stepY = dy < 0 ? stepY | 1 : stepY & ~1;
+  const angleStep = Math.floor(0x8000 / BALL_ARC_TICKS);
+  let remaining = BALL_ARC_TICKS;
+  let accX = 0;
+  let accY = 0;
+  let angle = 0;
+  let affine = 0;
+  const out: { x2: number; y2: number }[] = [];
+  for (let guard = 0; guard < 200; guard += 1) {
+    const slow = ((angle >> 8) & 0xff) >= 35 && ((angle >> 8) & 0xff) < 80;
+    if (!slow && remaining === 0) return out;
+    if (slow && (affine & 0xff00) === 0) {
+      stepX = ((Math.floor(stepX / 3)) & ~1) | (stepX & 1);
+      stepY = ((Math.floor(stepY / 3)) & ~1) | (stepY & 1);
+    }
+    const kept = remaining;
+    accX = (accX + stepX) & 0xffff;
+    accY = (accY + stepY) & 0xffff;
+    remaining -= 1;
+    const x2 = (stepX & 1) !== 0 ? -(accX >> 8) : accX >> 8;
+    let y2 = (stepY & 1) !== 0 ? -(accY >> 8) : accY >> 8;
+    if (slow) {
+      angle += Math.floor(angleStep / 3);
+      y2 += sin((angle >> 8) & 0xff, BALL_ARC_AMPLITUDE);
+      affine += 0x100;
+      remaining = (affine >> 8) % 3 !== 0 ? kept : kept - 1;
+      if (((angle >> 8) & 0xff) >= 80) {
+        stepX = ((stepX * 3) & ~1) | (stepX & 1);
+        stepY = ((stepY * 3) & ~1) | (stepY & 1);
+      }
+    } else {
+      angle += angleStep;
+      y2 += sin((angle >> 8) & 0xff, BALL_ARC_AMPLITUDE);
+    }
+    out.push(Object.freeze({ x2, y2 }));
+  }
+  return out;
+}
+
+const ballTableByMonY = new Map<number, typeof MID_BATTLE_SWITCH_BALL_THROW_TABLE>();
+
+/** The per-tick ball table for a mon sprite y: table[0] = (0, 0), table[t] = arc[t - 1]; the affine rotation entries are species-independent. */
+export function midBattleSwitchBallTable(monY: number): typeof MID_BATTLE_SWITCH_BALL_THROW_TABLE {
+  const cached = ballTableByMonY.get(monY);
+  if (cached !== undefined) return cached;
+  const arc = playerSendOutBallArc(monY);
+  const table = MID_BATTLE_SWITCH_BALL_THROW_TABLE.map((entry, t) => t === 0
+    ? entry
+    : Object.freeze({ ...entry, x2: arc[t - 1]!.x2, y2: arc[t - 1]!.y2 }));
+  ballTableByMonY.set(monY, Object.freeze(table));
+  return table;
+}
+
+/** The ball-open particle burst's y for a player send-in: the landing tick's ball y2 + 59 (ROM spawn row 63 + y2, minus the 4 px tile half); monY 93 -> 119. */
+export function midBattleSwitchSendInParticleY(monY: number): number {
+  return playerSendOutBallArc(monY).at(-1)!.y2 + 59;
+}
+
+/**
  * bso225 (ISSUES #146 / #71 remainder, docs/bso225-player-back-send-out.md): Scene ON player send-in elapsed on which the back
  * animation's reducer tick 0 renders. `SpriteCB_PlayerMonFromBall` (battle_main.c:2987) calls `BattleAnimateBackSprite` (pokemon.c:6886)
  * on the first callback after the emerge's `affineAnimEnded`; the callback is the species' `3 * GetSpeciesBackAnimSet + natureMod` entry.
@@ -500,6 +587,8 @@ export function midBattleSwitchInAt(
   frontAnimSpecies?: string,
   /** bso225: the Scene ON player send-in's back animation inputs (omitted = none: opponent side, Scene OFF). */
   backAnimMon?: Readonly<{ species: string; nature: string }>,
+  /** pfb229: the Scene ON player send-in's mon sprite y (`fieldArt.player.origin.y + 32`) keying the ball arc (omitted = the fitted 93). */
+  playerMonY: number = MID_BATTLE_SWITCH_BALL_MON_Y,
 ): MidBattleSwitchInView {
   const side = battler === 0 ? "player" : "opponent";
   // DoPokeballSendOutAnimation routes by GetBattlerSide. Player send-outs
@@ -516,7 +605,7 @@ export function midBattleSwitchInAt(
   const playerBallVisible = ballEntry >= 0
     && ballEntry < MID_BATTLE_SWITCH_BALL_THROW_TABLE.length;
   const ball = side === "player" && playerBallVisible
-    ? MID_BATTLE_SWITCH_BALL_THROW_TABLE[ballEntry]!
+    ? midBattleSwitchBallTable(playerMonY)[ballEntry]!
     : null;
   const opponentBallPose = elapsed < 2 || elapsed >= 29
     ? null
@@ -813,11 +902,17 @@ export function midBattleSwitchSendInFadeAt(elapsed: number, battler: 0 | 1): Mi
 export function midBattleSwitchSendInParticlesAt(
   elapsed: number,
   battler: 0 | 1,
-): Readonly<{ window: "send-in" | "opponent-send-in"; schedules: readonly MidBattleSwitchParticle[] }> | null {
+  /** pfb229: the player send-in's mon sprite y keying the burst's origin (omitted = the fitted 93: y 119). */
+  playerMonY?: number,
+): Readonly<{ window: "send-in" | "opponent-send-in"; schedules: readonly MidBattleSwitchParticle[]; originY?: number }> | null {
   if (battler === 0) {
     const traceFrame = MID_BATTLE_SWITCH_PLAYER_SEND_IN_TRACE + elapsed;
     return traceFrame >= MID_BATTLE_SWITCH_SEND_IN_PARTICLE_START_TRACE
-      ? Object.freeze({ window: "send-in", schedules: midBattleSwitchParticleSchedulesAt(traceFrame, "send-in") })
+      ? Object.freeze({
+          window: "send-in",
+          schedules: midBattleSwitchParticleSchedulesAt(traceFrame, "send-in"),
+          ...(playerMonY === undefined ? {} : { originY: midBattleSwitchSendInParticleY(playerMonY) }),
+        })
       : null;
   }
   const start = MID_BATTLE_SWITCH_OPPONENT_SEND_IN_PARTICLE_START;
@@ -981,6 +1076,8 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     /** snd145: "opponent-send-in" = an opponent switch-in's burst at the opponent ball (base (176,59), prio 1, no terrain clip). */
     window: "recall" | "send-in" | "opponent-send-in";
     schedules: readonly MidBattleSwitchParticle[];
+    /** pfb229: a Scene ON player send-in's species-keyed burst y (omitted = the fitted 119). */
+    originY?: number;
   }> | null;
   /**
    * The terminal win/loss-text trainer slide-in/out, generic across any
@@ -1877,6 +1974,26 @@ export function createBattleResolutionPresentationRenderView(
       battler: switchCommand.battler,
       partyStates: summary?.states ?? null,
     });
+    // pfb229 (docs/pfb228-faint-replacement-emerge.md): a Scene ON non-MAGBY faint-replacement send-in runs the path-A ball / release / emerge /
+    // back-animation timeline translated by the keyed ball clock: A = partySendOutReleaseClock(e) - 96 = e - B - releaseExtra.
+    // Scene OFF and the canonical MAGBY window keep the forced selector's generic release.
+    const sceneOn = segment.beforeRules !== null && segment.beforeRules !== undefined
+      && (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
+    const forcedElapsed = sendOutTiming === null ? -1 : partySendOutReleaseClock(state.lifecycle.phaseElapsed, sendOutTiming) - FORCED_SEND_IN_PATH_A_BALL_SPAWN;
+    if (sceneOn && sendOutTiming !== null && switchCommand.battler === 0 && !isCanonicalMagbyIncoming(field.player) && forcedElapsed >= 0) {
+      const art = createBattleCommandFieldArtView(field);
+      const playerMonY = art.player.origin.y + 32;
+      midBattleSwitchIn = midBattleSwitchInAt(
+        forcedElapsed,
+        0,
+        undefined,
+        undefined,
+        Object.freeze({ species: art.player.speciesSymbol, nature: backAnimNatureName(switchCommand.incoming.personality) }),
+        playerMonY,
+      );
+      midBattleSwitchFade = midBattleSwitchSendInFadeAt(forcedElapsed, 0) ?? midBattleSwitchFade;
+      midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(forcedElapsed, 0, playerMonY) ?? midBattleSwitchParticles;
+    }
   }
   for (let index = 0; index < state.commandIndex; index += 1) {
     const completed = segment.commands[index]!;
@@ -2124,6 +2241,10 @@ export function createBattleResolutionPresentationRenderView(
       // offs152: a Scene OFF long-nickname send-in repeats the slide's first frame (lag frame): later visuals run one frame late.
       const lagged = command.sendInLagElapsed !== undefined && state.lifecycle.phaseElapsed >= command.sendInLagElapsed ? 1 : 0;
       const sendInElapsed = state.lifecycle.phaseElapsed - visualDelay - lagged;
+      // pfb229: Scene ON keys the player ball arc and burst origin on the incoming mon's sprite y (Scene OFF keeps the fitted 93).
+      const sceneOn = segment.beforeRules !== null && segment.beforeRules !== undefined
+        && (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0;
+      const playerMonY = command.battler === 0 && sceneOn ? createBattleCommandFieldArtView(field).player.origin.y + 32 : undefined;
       midBattleSwitchIn = midBattleSwitchInAt(
         sendInElapsed,
         command.battler,
@@ -2136,9 +2257,10 @@ export function createBattleResolutionPresentationRenderView(
           && (segment.beforeRules.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0
           ? Object.freeze({ species: createBattleCommandFieldArtView(field).player.speciesSymbol, nature: backAnimNatureName(command.incoming.personality) })
           : undefined,
+        playerMonY,
       );
       midBattleSwitchFade = midBattleSwitchSendInFadeAt(sendInElapsed, command.battler) ?? midBattleSwitchFade;
-      midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(sendInElapsed, command.battler) ?? midBattleSwitchParticles;
+      midBattleSwitchParticles = midBattleSwitchSendInParticlesAt(sendInElapsed, command.battler, playerMonY) ?? midBattleSwitchParticles;
       fainted.delete(command.battler);
     } else if (command.type === "switch-out") {
       // ISSUES #78 slice 4: the outgoing mon's return-to-ball scale-up owns

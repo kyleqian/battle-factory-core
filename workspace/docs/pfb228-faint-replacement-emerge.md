@@ -177,3 +177,37 @@ generated arcs, `summary.json`, the scratch patch, schedule and ball-arc listing
 - MEW has no player battle pic in our engine (`createBattleCommandFieldArtView` throws "missing player battle pic for SPECIES_MEW").
 - SHEDINJA's forced-send-in healthbox differs from the ROM by 4170 px even after the wiring (genderless healthbox row).
 - `bso225Dense.ts`'s auto `delta` search is range-bounded at +4 (see above); the other pfr192/bso225 harnesses that copy it have the same flaw.
+
+## pfb229: the recipe, wired (production route, re-measured)
+
+Step pfb229 wired the recipe; **the 7 renderable windows' actual residuals equal the prediction exactly** (production
+`renderBattleResolutionForcedPartySelect`, `bso225Dense.ts --delta=0`, mon region e > 90; raw ROM frames from the pfb228 run).
+
+| Window | B | before | predicted | actual | healthbox (x >= 120) before -> actual |
+|---|---|---|---|---|---|
+| SKARMORY | 99 | 110236 | 74 | **74** | 47777 -> 0 |
+| ALAKAZAM | 99 | 129564 | 33 | **33** | 47777 -> 0 |
+| ONIX | 95 | 124807 | 272 | **272** | 47778 -> 0 |
+| ENTEI | 96 | 324706 | 2079 | **2079** | 47777 -> 0 |
+| SHEDINJA | 99 | 120589 | 16 | **16** | 51947 -> 4170 (genderless healthbox, out of scope) |
+| KINGDRA | 98 | 263209 | 1493 | **1493** | 47777 -> 0 |
+| CASTFORM | 99 | 153995 | 278 | **278** | 47778 -> 0 (message region 440 px before and after: CASTFORM message region, out of scope) |
+
+Per-segment (`pfb228Segments.py`): flight 16-100, emerge 0-182, back animation 0-13 except the two known glow lag frames (ENTEI 2063, KINGDRA 1477 at B + 69);
+tail 0. Strips (ours | ROM | diff at B+20, +52, +62, +75, +90): `tools/integration/fixtures/faint-replacement-send-in/<window>-wired-*.png`
+(SKARMORY, ONIX, ENTEI, CASTFORM); numbers in `wired-summary.json`.
+
+What changed (presentation only; no kernel event, command, message frame, RNG or gameplay change):
+
+- `createBattleResolutionPresentationRenderView`'s `presenting-switch-in` branch: for a Scene ON, non-MAGBY player switch-in, once
+  `A = partySendOutReleaseClock(e, timing) - 96 >= 0` (= `e - B - releaseExtra`) the view also carries `midBattleSwitchIn` (with the bso225 back
+  animation inputs), `midBattleSwitchFade` and `midBattleSwitchParticles` at that elapsed. No `sendInVisualDelay` is added to the command:
+  the keyed `PartySendOutTiming` already holds `B` and `releaseExtra`, so command rows / digests are unchanged.
+- `renderBattleResolutionForcedPartySelect` (non-canonical branch): when the view carries the player `midBattleSwitchIn`, `renderBattleResolutionSceneOffView`'s
+  path-A layers own the ball, release, emerge, back animation, particles and healthbox slide; the generic ball / `drawPlayerSideAffineMaterialize` /
+  `drawSpriteSheet` / `drawCleanSwitchinParticles` / selector healthbox are skipped. Scene OFF and MAGBY keep them. The selector's message, tray and white fade are unchanged.
+- Species-keyed ball arc `playerSendOutBallArc(monY)` (TS port of `pfb228Ball.py ball_arc`), `monY = fieldArt.player.origin.y + 32`, used by
+  `midBattleSwitchInAt(..., playerMonY)`; burst origin y = final ball y2 + 59 (`midBattleSwitchSendInParticleY`, monY 93 -> 119). Both are keyed only on **Scene ON** player
+  send-ins (the forced route above and the Scene ON voluntary `switch-in` command, whose fitted species has monY 93 and is unchanged); Scene OFF keeps the fitted 93.
+- Test: `tests/pfb229FaintReplacementSendIn.test.ts` (monY 93 reproduces the old table and y 119, monY 84 the ROM arc, view elapsed = e - B, back animation at B + 66, CASTFORM +1,
+  Scene OFF / MAGBY carry no path-A view).
