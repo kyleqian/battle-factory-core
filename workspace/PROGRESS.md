@@ -5,7 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-29 / 30 — CAX31 daily run (supervisor, Opus 5.5): in progress
+## 2026-10-29 / 30 — CAX31 daily run wind-down (supervisor, Opus 5.5): bso225 / bso226 / apx227 / pfb228 folded; pfb229 unfolded
+
+- **State:** master `1a78dbea8`+; final src == `fa622452c` == apx227 suite-tested `885f2deba` src.
 
 - **Folded:** bso225 (`633d97700`, fast-forward; branch `worker/integration-20261029-213114`): Scene ON player BACK send-out
   animation on the mid-battle switch-in (voluntary + Roar / Whirlwind "dragged out"); banked back reducers, selector species +
@@ -37,6 +39,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (supervisor re-checked), static 0, 7 battles changed as expected; OFF not reachable (x2 host and approx bodies are Scene ON only;
   supervisor read the diff); differential 641 / 641; full suite on `885f2deba` 1,713 / 1,714 files, 1 stale Curse row pin ->
   re-pinned test-only (`1a5ecb4ab`); build 0 on the tip. Supervisor: the 3 re-pinned files 43 / 43 on master.
+- **Merged:** pfb228 (`d4b136a80`, fast-forward; evidence / tools only, no src / tests diff — checked): the Scene ON faint-replacement
+  send-in already starts ball / release / emerge on the ROM's ticks (B = 91 + name length; the bso225 "-4..+3" offset was a
+  delta-search boundary artifact); the gap is content (generic release, one-species ball arc, fixed particle y). Recipe + RAM
+  schedules in `docs/pfb228-faint-replacement-emerge.md`; scratch prototype predicts 7 windows 110k–325k px -> 16–2,079 px.
+- **Wind-down gates on src `fa622452c` (`.integration/validation/sv-20261029/gates-fa622452c/`):** build 0; varied-RNG first-round
+  winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 `--scene both` **ON 20 / 20, OFF
+  20 / 20** (all `budget`); Scene ON `--policy full --vary-rng` 0:30 `--render-every 8` **30 / 30**; Scene ON winning first-round 0:6
+  `--render-every 1` **6 / 6**; browser goal play 10 min / scene (seed 13): ON 24 battles / 11 swap screens, OFF 41 / 14, **0 page
+  errors, 0 overlays, 0 contained, 0 divergences**. Full suite: no independent supervisor rerun (one worker + one suite at a time on
+  this host; pfb229's gates ran then) — covered by apx227's full suite on the same src plus the supervisor's rerun of the re-pinned
+  files. The 0:60 full / winning / winning-swap gates were not run (hours each here; same practice as earlier sessions).
+- **NOT folded — pfb229** (`worker/integration-20261030-050141`): implements the pfb228 recipe. Started 05:01 with no room for the
+  session's soak gates after it; left for the next run (handoff "Next work" 1). Its status at the cap is in the line below.
+- **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261029-213114` (bso225), `-20261029-233450`
+  (bso226), `-20261030-023040` (apx227), `-20261030-042229` (pfb228). Evidence `.integration/validation/sv-20261029/`. No push.
 ---
 
 ## 2026-10-28 / 29 — CAX31 daily run wind-down (supervisor, Opus 5.5): apx219-224 folded; Scene ON static 0
