@@ -5,9 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): cff230 folded; nch231 running
+## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): cff230 + nch231 folded; cff232 running
 
-- **State:** master `e6a5ee6e9`+ (cff230 fast-forward; branch `worker/integration-20261030-213142`, src == worker-tested tip).
+- **State:** master `6af3a1505`+ (cff230 fast-forward; nch231 merge; src + tests == nch231 worker-tested `732f19724`).
 - **Gate carried over from the last run, on `8d7916813` (src == pfb229 merge;
   `.integration/validation/sv-20261030/gates-8d7916813/`):** Scene ON `--policy full --vary-rng` 0:30 `--render-every 8` **30 / 30**
   (all `budget`); build 0; browser goal play 10 min / scene (seed 1): ON 30 battles / 13 swap screens, OFF 44 / 22, **0 page errors,
@@ -21,7 +21,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   eventsDigest + error identical 1,000 / 1,000, only battles 603 / 643 / 651 / 950 changed (one morph command each; live 26,957 ->
   26,960); 3 touched test files 24 / 24 on master; rain strip eyeballed (ROM == ours). Found: the ROM plays the morph in Scene OFF
   too; ours does not (ISSUES #143 open line).
-- **Running:** nch231 (new challenge from the Lobby attendant after a loss / retire; brief `.integration/validation/sv-20261030/nch231.txt`).
+- **Folded:** nch231 (merge `6af3a1505`; branch `worker/integration-20261030-233859`; `docs/nch231-new-challenge.md`): in the free-roam
+  Lobby, A facing the singles attendant ((4,8) facing north) starts a new challenge: fresh draft from the LIVE gameplay RNG cursor,
+  presentation seed / scene / recorder kept, streak + rents reset per `InitFactoryChallenge` (battle_factory.c:208-212; a retire
+  does not keep the streak either). Attendant dialogue / save prompt / door walk are skipped (documented divergence, untimed).
+  Finding: a LOSS never reaches the Lobby on the app route — the record answer already auto-chains into the next challenge; only
+  RETIRE-YES lands there (the old handoff line "no new-challenge path after a loss" was wrong). Opt-in `--lobby-new-challenge`
+  on the soak and play:random (default results unchanged). Worker: typecheck 0; census both scenes byte-identical to cff230's
+  (supervisor `cmp` 20 / 20 shards); differential 641 + 3,713 lobby / terminal captures identical; play:random flagged 4 min /
+  scene: 2 new challenges each, 0 page errors; full suite **1,718 files / 14,208 tests, 0 failed**; build 0. Supervisor: the 3
+  touched test files 21 / 21 on master.
+- **Running:** cff232 (Scene OFF Castform morph; brief `.integration/validation/sv-20261030/cff232.txt`).
 - **Notes:** no DEFERRED items. No push.
 ---
 
