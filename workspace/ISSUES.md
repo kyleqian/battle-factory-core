@@ -196,9 +196,14 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Fixed 2026-10-29:** bso225 (Scene ON player back send-out animation on the mid-battle switch-in, exact from elapsed 88; docs/bso225-player-back-send-out.md).
 - **Fixed 2026-10-30:** bso226 (Scene ON battle-start intro: opponent front + player back animations; docs/bso226-battle-start-intro-send-outs.md).
 - **Timing (not blocking):** the ROM waits for the opponent's battle-start front animation before "Go!" (39–98 frames later than our fixed intro timeline on long animations; bso226).
+- **Not a renderer defect (shd234 read-only scout, 2026-10-31):** the "SHEDINJA genderless healthbox" residual is the comparison
+  harnesses computing maxHP without the ROM's SHEDINJA rule (pokemon.c:2845-2848 `newMaxHP = 1`): `bso225Dense.ts:42`,
+  `bso225Compare.ts:72`, `pfr192Dense.ts:34`, `snd182Compare.ts:66`, `plr162Compare.ts:66`, `pfb228Proto.ts:45`, `snd182Rows.ts:22`
+  (a patched copy gives 0 px). **Check:** `src/engine/factoryCorpusParty.ts:291` has the same omission (setId 21 -> maxHP 94);
+  it feeds `postwin.ts` — verify whether any visible / logical path reads it before fixing (main lane, source rule).
 - **Fixed 2026-10-31:** snd233 (Scene ON player send-in ball tail above the terrain clip row for monY 80..84 species, Roar + faint paths; the
   old "opponent Roar ball path 6,718 px" line was stale; docs/snd233-scene-on-send-in-fixes.md). Remainder: star-particle 3–7 px at e 64.
-- **Fixed 2026-10-30:** pfb229 (Scene ON faint-replacement send-in: back animation, species ball arc, particle origin; 7 windows 16–2,079 px; docs/pfb228-faint-replacement-emerge.md). Remainder: ENTEI / KINGDRA glow-lag frame at B+69, SHEDINJA genderless healthbox, CASTFORM message region, MEW has no player back pic.
+- **Fixed 2026-10-30:** pfb229 (Scene ON faint-replacement send-in: back animation, species ball arc, particle origin; 7 windows 16–2,079 px; docs/pfb228-faint-replacement-emerge.md). Remainder: ENTEI / KINGDRA glow-lag frame at B+69, CASTFORM message region, MEW has no player back pic.
 - **Open:** player faint-replacement send-in renderer fidelity for non-MAGBY species (pfr192 timing FIXED 2026-10-16: keyed clock B + D + 17, 24 / 24 ROM prompts exact; remaining: release palette fade, Scene ON back animation, fade-in palette rows 56-70, species ball y path, male MAGBY healthbox art; docs/pfr192-player-faint-replacement-production.md); player-side back send-out animations and
   battle-start intro send-outs (Scene ON; fra151 doc says what they need); shiny send-ins; CRY_MODE_WEAK send-ins; PONYTA glow
   mid-frame palette row (D4 class, 616 px); TYPHLOSION faint-path slide lag frame (D4); the faint-path blank row one frame late;

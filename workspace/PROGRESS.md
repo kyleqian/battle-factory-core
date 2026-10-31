@@ -49,9 +49,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   SHEDINJA 16 -> 0, ENTEI 2,079 -> 2,063 (glow-lag); the faint-replacement path shares it (CASTFORM 278 -> 13). Worker: typecheck 0;
   full suite **1,720 files / 14,219 tests, 0 failed**; build 0; differential 641 / 641. Supervisor: OFF shards byte-identical to
   cff232's; ON eventsDigest + error identical 1,000 / 1,000, only battle 651 changed (117 -> 120 rows); ONIX strip eyeballed.
-- **Wind-down gates on `9670f00cc` (`.integration/validation/sv-20261030/gates-final/`):** GATES_PENDING
-- **Next:** handoff "Next work".
-- **Notes:** no DEFERRED items. No push.
+- **Wind-down gates on `9670f00cc` (`.integration/validation/sv-20261030/gates-final/`):** **independent full suite 1,720 files / 14,219 tests,
+  0 failed**; build 0; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla
+  0:20 `--scene on` **20 / 20** (all `budget`; OFF 20 / 20 on `0a222a6c4`, src since then Scene ON only); Scene ON winning first-round
+  0:6 `--render-every 1` **6 / 6**; browser goal play `--lobby-new-challenge` 3 min / scene: ON 8 battles, OFF 17, 2 new challenges
+  from the Lobby each, **0 page errors / overlays / contained / divergences**. The 0:60 full / winning / winning-swap gates were not
+  run (hours each here; same practice as earlier sessions).
+  Extra: Scene ON `--policy full --vary-rng` 0:16 `--render-every 8` on `9670f00cc` **16 / 16** (all `budget`).
+- **Scout:** shd234 (read-only, 06:32): the SHEDINJA send-in healthbox residual is a compare-harness maxHP bug (no SHEDINJA max-HP-1
+  rule), not the renderer; `factoryCorpusParty.ts:291` has the same omission, unverified downstream (ISSUES #146). Launched before I
+  saw the user's mid-session re-aim; it made no edits.
+- **User re-aim landed mid-session** (ops commits `736bdc78b`, `c038fad08`, `ed7f141c4`, `ea0e200ca`, docs only, already under the
+  gates above): next run starts with the core library API (contract v2; fold `worker/lib-v2-mac` if present — absent on this box at
+  wind-down), then audio (S11) and cleanup; #146 / send-out residuals are timing-class now.
+- **Next:** handoff "Next work" item 1.
+- **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261030-213142` (cff230), `-20261030-233859`
+  (nch231), `-20261031-015154` (cff232), `-20261031-031746` (snd233). Evidence `.integration/validation/sv-20261030/`. No push.
 ---
 
 

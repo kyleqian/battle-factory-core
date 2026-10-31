@@ -62,7 +62,14 @@ cleanup step.
    treat it as a finished worker: merge master into it, run the gates above
    (full suite, build, census both scenes identical to master's, browser
    play both scenes), fold it, and move on. Build it yourself only if the
-   branch is absent.
+   branch is absent. When folding, note two things the Mac integration found:
+   (a) `ENGINE_BUILD` is the commit stamp, so every rebuild strands the
+   website's open challenges (a challenge resumes only on the build that
+   played it) — make it a content hash of the headless graph so a rebuild
+   without engine changes keeps the stamp; (b) the headless entry still
+   carries sprite pixels (22 MB raw / 2.1 MB gz) because
+   `battleCommandFieldArt` embeds mon pics in presentation commands — fine
+   for now, a bundle-hygiene item later.
 2. **Audio (S11), re-opened by the user:** design step first (docs only; the
    supervisor accepts it), then sound-event parity by census, then playback —
    `docs/finish-plan.md` "Audio (S11)". Expect this to be the main program for
@@ -88,8 +95,8 @@ cleanup step.
    `--lobby-new-challenge` run); Scene ON soak
    `--render-every 8` 0:30 plus a `--render-every 1` sample; varied-RNG sweeps; vanilla both scenes. Every overlay / pageerror /
    CRASH / HANG becomes a fix step before anything else.
-6. **Timing / visible residuals** last, never while items 1–4 have ready work: #146 / #143 remainders (SHEDINJA genderless
-   healthbox, CASTFORM message region on the faint path, ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform
+6. **Timing / visible residuals** last, never while items 1–4 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
+   compare-harness maxHP bug + `factoryCorpusParty.ts:291` check, ISSUES #146 shd234; CASTFORM message region on the faint path, ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform
    "at"-role keys, Flamethrower +7 alignment, revert / switch-out unmeasured), #188, #189, the bso226 "Go!" wait, the Lobby
    attendant dialogue (nch231 skips it); exs207 refs kept.
 
