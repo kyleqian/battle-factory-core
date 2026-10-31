@@ -76,7 +76,7 @@ directly) has no extra rows (class 3: 0).
 **What changed.** `battleResolutionPresentation.ts`: the command is built in both scenes (the `NO_ANIMATIONS` test is gone; the Substitute-bit skip stays).
 A Scene OFF change at battler 1 whose previous kernel event is the weather print adds `CASTFORM_CHANGE_WEATHER_LOOP_FRAMES = 3`
 (`castformLeadExtra`, command 120 rows, effect age = elapsed - 5 - 3). `battleResolutionPresentationRender.ts` reads it; the morph body is
-cff230's `renderCastformChangeBody` (no copy). **Scene ON is unchanged** (byte-identical), including its battler-1 timing: ours ON has the same
+cff230's `renderCastformChangeBody` (no copy). **Scene ON was unchanged by cff232** (the shortfall below was closed by snd233, see docs/snd233-scene-on-send-in-fixes.md), including its battler-1 timing: ours ON has the same
 3-row shortfall at the foe's weather print (checked: ON ours vs the ON lab, `cff232Compare.ts --scene=on --romStart=346 --lead=83`: Castform box
 0 px, text box 18 rows, all in the weather print's first glyphs, 62..104 px). Moving ON is a one-line follow-up (drop the Scene OFF test on `extra`);
 it was kept out of this step by the "Scene ON byte-identical" constraint.
