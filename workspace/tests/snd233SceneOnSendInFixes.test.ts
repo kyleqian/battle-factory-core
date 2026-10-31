@@ -1,6 +1,6 @@
 // snd233 Part B: the player send-out ball's tail (landing ticks, closed ball, open / open-final) for species whose ball lands above the terrain clip row.
 import { describe, expect, it } from "vitest";
-import { midBattleSwitchInAt, playerSendOutBallArc } from "../src/engine/battleResolutionPresentationRender.ts";
+import { midBattleSwitchInAt } from "../src/engine/battleResolutionPresentationRender.ts";
 
 const poses = (monY: number, from: number, to: number) =>
   Array.from({ length: to - from + 1 }, (_, k) => {
