@@ -22,15 +22,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const scene = (arg("scene") ?? "off") as "on" | "off";
   const seg = cff230Route(klass.seed, true, 1, scene).segments[0]!;
   const anchor = seg.frames.findIndex((f) => f.command === klass.anchorCommand);
-  const romFrom = klass.romCommandStart - klass.leadRows;
+  // --romStart= / --lead= retarget the ROM window (Scene ON control: the ON lab's command start, ours with its 83-row print lead).
+  const lead = Number(arg("lead") ?? klass.leadRows);
+  const romFrom = Number(arg("romStart") ?? klass.romCommandStart) - lead;
   const box = { total: 0, peak: 0, differing: 0 }, text = { total: 0, peak: 0, differing: 0 }; let n = 0;
   const rows: string[] = [];
-  for (let k = 0; k < klass.leadRows + 117 + klass.tailRows; k++) {
+  for (let k = 0; k < lead + 117 + klass.tailRows; k++) {
     const o = seg.frames[anchor + k]; if (!o) break;
     const r = romFrame(arg("rom")!, romFrom + k);
     const b = boxDiff(o.rgba, r, klass.box), t = boxDiff(o.rgba, r, TEXT_BOX);
     for (const [m, v] of [[box, b], [text, t]] as const) { m.total += v; m.peak = Math.max(m.peak, v); if (v) m.differing++; }
-    n++; if (b || t) rows.push(`${k - klass.leadRows}:${b}/${t}`);
+    n++; if (b || t) rows.push(`${k - lead}:${b}/${t}`);
   }
   console.log(`${klass.name} (${scene}) rows ${n} (row 0 = the morph command's first row)`);
   console.log(`castform box: total ${box.total} peak ${box.peak} differing ${box.differing}/${n}`);
