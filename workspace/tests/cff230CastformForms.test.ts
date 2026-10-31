@@ -64,9 +64,13 @@ describe("cff230: census route 950 (the player's CASTFORM turns ICE after the fo
       ? { ...e, payload: { ...e.payload, arguments: [String(0x80 | 3)] } } : e);
     const project = (events: readonly unknown[]) => projectBattleResolutionCommands(
       events as never, raw.beforeRules.rulesContext, raw.afterRules.rulesContext, raw.field, null);
-    expect(project(raw.events).filter((c) => c.type === "general-animation").map((c) => c.type === "general-animation" ? c.animation : "")).toEqual(["CASTFORM_CHANGE"]);
-    expect(project(behind).some((c) => c.type === "general-animation")).toBe(false);
-    expect(project(behind).map((c) => c.type)).toEqual(project(raw.events).filter((c) => c.type !== "general-animation").map((c) => c.type));
+    // wth236: in Scene ON the end-turn hail body (HAIL_CONTINUES) follows the morph; the Substitute-flagged argument drops only the morph.
+    const animations = (commands: readonly BattleResolutionPresentationCommand[]) =>
+      commands.filter((c) => c.type === "general-animation").map((c) => c.type === "general-animation" ? c.animation : "");
+    expect(animations(project(raw.events))).toEqual(["CASTFORM_CHANGE", "HAIL_CONTINUES"]);
+    expect(animations(project(behind))).toEqual(["HAIL_CONTINUES"]);
+    expect(project(behind).map((c) => c.type)).toEqual(
+      project(raw.events).filter((c) => !(c.type === "general-animation" && c.animation === "CASTFORM_CHANGE")).map((c) => c.type));
   });
 });
 
