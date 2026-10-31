@@ -70,6 +70,21 @@ cleanup step.
    carries sprite pixels (22 MB raw / 2.1 MB gz) because
    `battleCommandFieldArt` embeds mon pics in presentation commands — fine
    for now, a bundle-hygiene item later.
+   **Update 2026-10-31 ~21:45 UTC (Mac, after this run started):**
+   `worker/lib-v2-mac` moved from f43590bc4 to e4258ab03. Three commits fix
+   two bugs the user hit on the website: the forced party menu after a faint
+   now has the ROM's three-slot + CANCEL cursor and prints its refusals in the
+   message window (fsw235, two commits), and Scene ON draws the end-of-turn
+   weather animations (Hail / Sandstorm / Rain / Sun continues, wth236). They
+   touch `src/engine/` party-menu and presentation files, tests,
+   `tools/soak/randomRoundSoakDriver.ts` and one-line pulse edits in
+   `tools/integration` — none of the files the library fold edits (vite
+   configs, `factorySession.ts`). Merge the new tip into the fold's
+   integration branch before running its gates. The soak policies now move
+   the cursor in party menus, so soak results are not comparable with runs
+   before this tip; the branch already re-pins the exploring soak seeds
+   (ISSUES #89's search took ~90 min), and any further change to what the
+   soak driver sees in a party menu re-rolls them again.
 2. **Audio (S11), re-opened by the user:** design step first (docs only; the
    supervisor accepts it), then sound-event parity by census, then playback —
    `docs/finish-plan.md` "Audio (S11)". Expect this to be the main program for
