@@ -110,3 +110,33 @@ an unchanged engine does not strand open challenges.
   editing docs + a test + a tool + `src/main.ts`, gives the same value; a
   one-constant edit in `src/factorySession.ts` changes it; an unused export
   added to a headless-graph module (tree-shaken) does not.
+
+## Built size and consuming the package (measured 2026-10-31)
+
+Every emitted file is under 20 MB raw (Cloudflare's per-file limit is 25 MiB),
+raw / gzip, readable (unminified) output:
+
+| Entry | Files | Total | Largest file |
+| --- | --- | --- | --- |
+| headless (`dist-lib/headless.js` + `chunks-headless/`) | 6 | 22.3 MB / 2.03 MB | `assets-sprites` 11.8 MB / 0.90 MB |
+| browser (`dist-lib/index.js` + `chunks/`) | 6 | 40.2 MB / 3.41 MB | `assets-sprites` 14.5 MB / 1.04 MB |
+
+The headless graph still carries sprite pixels (`battleCommandFieldArt`, 11.8
+MB of its 22.3 MB): the bundle-hygiene item, not yet done. The tarball
+(`npm pack`) is 5.4 MB.
+
+A consumer's own bundler concatenates the package's static chunk imports, so a
+default Vite build of an app that imports only `mountFactoryGame` emits ONE
+33 MB file (importing both entries: 52 MB; headless only: 19 MB). Split it in
+the consumer's `vite.config` (verified in a scratch app: largest file 12.2 MB):
+
+```js
+build: { rollupOptions: { output: { manualChunks(id) {
+  const m = /@pokebench\/factory\/dist-lib\/chunks(?:-headless)?\/([a-z-]+?)-[\w-]{8}\.js$/.exec(id);
+  return m ? `factory-${m[1]}` : undefined;
+} } } }
+```
+
+The headless entry runs under plain node (`replayChallenge` of a 500-frame
+trace: ~5-10 ms) and is meant for the server; do not ship it to the browser
+page that mounts the game (the pixel data would be duplicated).
