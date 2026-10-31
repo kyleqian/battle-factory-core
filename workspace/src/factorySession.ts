@@ -70,6 +70,7 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
 }
 
 export class FactorySession {
+  readonly options: FactorySessionOptions;
   state: EngineState;
   readonly recorder = new SessionRecorder();
   readonly battles: ReplayBattle[] = [];
@@ -84,7 +85,9 @@ export class FactorySession {
   private prevPhase: string | null = null;
   private prevLobby = false;
 
-  constructor(readonly options: FactorySessionOptions) {
+  // No parameter properties: tools import src/ under node --experimental-strip-types, which cannot transform them.
+  constructor(options: FactorySessionOptions) {
+    this.options = options;
     clearContainedPresentationErrors();
     this.state = createChallengeState(options);
     this.syncMarkers();
