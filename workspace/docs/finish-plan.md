@@ -138,41 +138,69 @@ with `exports` + `types`); `src/main.ts` becomes a thin dev shell over it
 unchanged — every existing browser test and tool keeps working). The website
 is being built against this exact contract, so keep the names:
 
+**Contract v2 (2026-10-31, after the anti-cheat design):** there is no
+opaque save blob. A challenge is fully determined by its seeds and its input
+trace, so *resume* = replay the trace (tick without drawing, ~0.015 ms per
+frame), and the website keeps the trace server-side. This drops the
+snapshot / restore work entirely and is what server-side verification needs.
+
 ```ts
+// @pokebench/factory  (src/lib.ts — browser entry)
+export type GbaButton = "A" | "B" | "START" | "SELECT" | "UP" | "DOWN" | "LEFT" | "RIGHT" | "L" | "R";
+export interface TraceSegment { frames: number; buttons: GbaButton[]; t?: number }
+  // the SessionRecorder's RLE runs; `t` = wall-clock ms since mount at the run's first frame
+  // (optional, written by the library, ignored by every existing tool and test)
 export interface FactoryGameOptions {
   canvas: HTMLCanvasElement;          // 240x160; the host page scales it
   battleScene: "on" | "off";
+  gameplaySeed?: number;              // u32 RNG start (what --vary-rng sets); default = the ROM anchor's state
   presentationSeed?: number;
-  save?: FactorySave | null;          // resume an in-progress challenge
+  resume?: TraceSegment[];            // fast-forward through these before the player gets control
   onEvent?: (event: FactoryEvent) => void;
 }
 export type FactoryEvent =
-  | { type: "challenge-start" }
-  | { type: "battle-end"; result: "win" | "loss"; streak: number }
-  | { type: "round-end"; streak: number }
-  | { type: "challenge-end"; reason: "loss" | "retire"; streak: number }
-  | { type: "save"; save: FactorySave }        // at every checkpoint
-  | { type: "contained-error"; message: string };
-export interface FactorySave { version: 1; streak: number; data: unknown }  // opaque JSON
+  | { type: "ready"; frame: number }                                            // after any resume
+  | { type: "battle-end"; result: "win" | "loss"; streak: number; frame: number }
+  | { type: "round-end"; streak: number; frame: number }                        // 7 wins
+  | { type: "challenge-end"; reason: "loss" | "retire"; streak: number; frame: number }
+  | { type: "contained-error"; message: string; frame: number };
 export interface FactoryGame {
-  press(button: GbaButton): void;              // for an on-screen pad / gamepad
+  readonly engine: string;            // build stamp of this package
+  readonly frame: number;
+  press(button: GbaButton): void;     // for an on-screen pad / gamepad
   release(button: GbaButton): void;
-  getSave(): FactorySave;
+  trace(fromSegment?: number): TraceSegment[];   // the input trace so far (RLE), optionally a tail
   destroy(): void;
 }
 export function mountFactoryGame(options: FactoryGameOptions): FactoryGame;
+
+// @pokebench/factory/headless  (src/headless.ts — no canvas, no DOM, no sprite / tile assets)
+export interface ReplayResult {
+  frames: number; streak: number; ended: "loss" | "retire" | null;
+  battles: Array<{ result: "win" | "loss"; streak: number; frame: number }>;
+  digest: string;                     // the kernel events digest the census already computes
+}
+export function replayChallenge(options: {
+  battleScene: "on" | "off"; gameplaySeed?: number; presentationSeed?: number; segments: TraceSegment[];
+}): ReplayResult;
+export const ENGINE_BUILD: string;
 ```
 
-`FactorySave.data` is whatever the engine needs to resume at a checkpoint
-(the draft, a battle start, the swap screen; decide the checkpoints from the
-state machine — never mid-battle); it must round-trip through `JSON` and
-restore to an identical `tick` stream (test: save at a checkpoint, resume,
-compare frame hashes against the uninterrupted run). `streak` is the
-Factory's win streak as the ROM counts it. Events come from the kernel's
-existing semantic events; `contained-error` mirrors `containedErrors`.
-Acceptance: typecheck, new Tier-1 tests (mount / events / save round-trip),
-full suite + build, `npm run play:random` both scenes, and
-`npm pack` yields a package another Vite app can import.
+Rules: one mount = one challenge (after `challenge-end` the host remounts
+with a new seed; the in-game Lobby new-challenge path stays for the dev
+shell and soaks). `streak` is the Factory's win streak as the ROM counts it.
+Events come from the kernel's existing semantic events; `contained-error`
+mirrors `containedErrors`. `resume` must reproduce the uninterrupted run
+exactly (test: play N frames, mount again with the trace, compare frame
+hashes and the digest with the uninterrupted run, both scenes). The headless
+entry's import graph must not include the renderer's pixel assets — report
+its built size (target: under 10 MB compressed so a Cloudflare Worker can
+run it; if the presentation timing needs the animation code, that is fine,
+only the sprite / tile data must stay out).
+Acceptance: typecheck, new Tier-1 tests (mount / events / resume equality /
+`replayChallenge` == the browser run's events and digest), full suite +
+build, `npm run play:random` both scenes, and `npm pack` yields a package a
+scratch Vite app can import (both entries).
 
 - Then bundle hygiene: test-only JSON out of `src/` (tests import from
   `tests/fixtures/data/`); lazy-load sprite sheets and large tables; gamepad

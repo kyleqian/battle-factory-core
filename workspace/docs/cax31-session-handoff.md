@@ -44,14 +44,19 @@ here. One worker at a time; each run folds the next item plus at least one
 cleanup step.
 
 1. **Core library API — first step of the next run.** `src/lib.ts` +
-   `mountFactoryGame` with the exact contract in `docs/finish-plan.md`
-   Phase 3 (names are fixed: the website is built against them), Vite lib
-   build + `package.json` `exports` (`@pokebench/factory`), `src/main.ts` a
-   thin shell over it with every existing ABI / query / overlay unchanged.
-   Save checkpoints only between battles (draft, battle start, swap screen);
-   a save-resume test compares frame hashes with the uninterrupted run.
-   Gates: typecheck, new tests, full suite + build, browser play both scenes,
-   `npm pack` importable from a scratch Vite app.
+   `mountFactoryGame` and `src/headless.ts` + `replayChallenge`, with the
+   exact **contract v2** in `docs/finish-plan.md` Phase 3 (names are fixed:
+   the website is built against them). No save blob: resume = seeds + input
+   trace fast-forward; `gameplaySeed` is the RNG start `--vary-rng` already
+   sets; the recorder's runs gain an optional wall-clock `t`. Vite lib build
+   with two entries + `package.json` `exports` (`@pokebench/factory`,
+   `@pokebench/factory/headless`); `src/main.ts` a thin shell over the
+   browser entry with every existing ABI / query / overlay unchanged. Gates:
+   typecheck, new tests (resume equality, headless replay == browser events
+   + digest), full suite + build, browser play both scenes, `npm pack`
+   importable from a scratch Vite app; report the headless entry's built size.
+   This is a one-run step; if it will not fit, land the browser entry first
+   and the headless entry as the next step.
 2. **Audio (S11), re-opened by the user:** design step first (docs only; the
    supervisor accepts it), then sound-event parity by census, then playback —
    `docs/finish-plan.md` "Audio (S11)". Expect this to be the main program for
