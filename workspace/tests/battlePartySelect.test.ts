@@ -460,6 +460,78 @@ describe("voluntary battle party selector", () => {
     expect(advanceBattlePartySelect(state, new Set(["A"]))).toMatchObject({ message: null, cursor: active, outcome: null });
   });
 
+  it("right-aligns the current HP in a three-character field (DisplayPartyPokemonHP, STR_CONV_MODE_RIGHT_ALIGN 3): one slash, never two", () => {
+    // Slot 1's card: hp text origin (198,20), max HP "/137" at (213,20); FONT_SMALL digits, the slash and CHAR_SPACER are 5 px.
+    const base = liveSelector();
+    const withHp = (hp: number) => ({ ...base, rows: base.rows.map((row, i) => (i === 1 ? { ...row, hp, maxHP: 137 } : row)) as unknown as typeof base.rows });
+    const render = (hp: number) => { const fb = createFramebuffer(); renderBattlePartySelect(fb, withHp(hp)); return fb; };
+    // Glyph ink rows 23..30 (the HP bar sits above, rows 18-21, and its fill changes with the HP).
+    const block = (fb: Uint8Array, x0: number, x1: number) => {
+      const out: number[] = [];
+      for (let y = 23; y < 32; y += 1) for (let x = x0; x < x1; x += 1) { const o = (y * 240 + x) * 4; out.push(fb[o]!, fb[o + 1]!, fb[o + 2]!); }
+      return out;
+    };
+    const full = render(137), two = render(40), one = render(4);
+    // The slash column (+15..+19) is the same whatever the digit count: the current HP's "/" lands on the max HP's "/".
+    expect(block(two, 213, 218)).toEqual(block(full, 213, 218));
+    expect(block(one, 213, 218)).toEqual(block(full, 213, 218));
+    // "40" sits at +5..+14 and "4" at +10..+14: the "4" of "40" equals the "4" of "4" shifted right by one cell.
+    expect(block(two, 203, 208)).toEqual(block(one, 208, 213));
+    // The padding cells are blank (no white ink): +0..+4 for "40", +0..+9 for "4".
+    const hasInk = (fb: Uint8Array, x0: number, x1: number) => block(fb, x0, x1).some((v, i) => i % 3 === 0 && v === 255 && block(fb, x0, x1)[i + 1] === 255 && block(fb, x0, x1)[i + 2] === 255);
+    expect(hasInk(two, 198, 203)).toBe(false);
+    expect(hasInk(one, 198, 208)).toBe(false);
+    expect(hasInk(full, 198, 203)).toBe(true);
+    expect(hasInk(two, 203, 213)).toBe(true);
+  });
+
+  it("highlights the CANCEL button while the cursor is on it (AnimatePartySlot PARTY_SIZE+1: bank 2 + the open ball) and prints no marker in the prompt box", () => {
+    const base = liveSelector();
+    const idle = createFramebuffer();
+    renderBattlePartySelect(idle, base);
+    const onCancel = createFramebuffer();
+    renderBattlePartySelect(onCancel, { ...base, cursor: "cancel" });
+    const px = (fb: Uint8Array, x: number, y: number) => { const o = (y * 240 + x) * 4; return [fb[o], fb[o + 1], fb[o + 2]]; };
+    // Interior (colour 15) and frame (colour 1) take bank 2's colours; the checkerboard rows stay.
+    expect(px(idle, 210, 140)).toEqual([115, 90, 181]);
+    expect(px(onCancel, 210, 140)).toEqual([165, 115, 247]);
+    expect(px(idle, 220, 136)).toEqual([74, 74, 99]);
+    expect(px(onCancel, 220, 136)).toEqual([255, 115, 49]);
+    expect(px(onCancel, 184, 134)).toEqual(px(idle, 184, 134));
+    // The ball shows its open frame: the 16x16 ball footprint differs from the closed one.
+    const ball = (fb: Uint8Array) => { const out: number[] = []; for (let y = 136; y < 152; y += 1) for (let x = 186; x < 202; x += 1) out.push(...px(fb, x, y) as number[]); return out; };
+    expect(ball(onCancel)).not.toEqual(ball(idle));
+    // Nothing is printed under the "Choose a POKéMON." box: the former "▶ CANCEL" marker region (x 168-200, y 145-156) is unchanged.
+    const region = (fb: Uint8Array) => { const out: number[] = []; for (let y = 145; y < 157; y += 1) for (let x = 168; x < 184; x += 1) out.push(...px(fb, x, y) as number[]); return out; };
+    expect(region(onCancel)).toEqual(region(idle));
+  });
+
+  it("colours a fainted box orange-brown, the fainted cursor slot pink, the living cursor slot light blue (LoadPartyBoxPalette, GetPartyBoxPaletteFlags)", () => {
+    const base = liveSelector();
+    const faintedRow1 = { ...base, rows: base.rows.map((row, i) => (i === 1 ? { ...row, hp: 0, fainted: true } : row)) as unknown as typeof base.rows };
+    const colorsIn = (fb: Uint8Array, x0: number, y0: number, x1: number, y1: number) => {
+      const seen = new Set<string>();
+      for (let y = y0; y < y1; y += 1) for (let x = x0; x < x1; x += 1) { const o = (y * 240 + x) * 4; seen.add(`${fb[o]},${fb[o + 1]},${fb[o + 2]}`); }
+      return seen;
+    };
+    // Slot 1's wide box: x 96..239, y 8..31 (the wide box tiles use palette colours 4 and 5; 6 is the main box's).
+    const unselected = createFramebuffer();
+    renderBattlePartySelect(unselected, faintedRow1);
+    const box = colorsIn(unselected, 96, 8, 240, 32);
+    expect(box.has("214,165,33") && box.has("198,107,16")).toBe(true);
+    expect(box.has("181,255,165") || box.has("123,222,132")).toBe(false);
+    const selected = createFramebuffer();
+    renderBattlePartySelect(selected, { ...faintedRow1, cursor: 1 });
+    const selBox = colorsIn(selected, 96, 8, 240, 32);
+    expect(selBox.has("255,214,222") && selBox.has("255,189,148")).toBe(true);
+    expect(selBox.has("173,239,255") || selBox.has("214,165,33")).toBe(false);
+    const living = createFramebuffer();
+    renderBattlePartySelect(living, { ...base, cursor: 2 });
+    const livingBox = colorsIn(living, 96, 32, 240, 56);
+    expect(livingBox.has("173,239,255") && livingBox.has("123,214,239")).toBe(true);
+    expect(livingBox.has("214,165,33") || livingBox.has("255,214,222")).toBe(false);
+  });
+
   it("swaps the message window to the 16x2 sDoWhatWithMonMsgWindowTemplate on the submenu-open edge and keeps it through the close (ISSUES #80 (c))", () => {
     // docs/fade-layer-forensics.md §7(b): sDoWhatWithMonMsgWindowTemplate
     // (data/party_menu.h:430-439) is 16x2 -> px (8,136)-(136,152) with the
