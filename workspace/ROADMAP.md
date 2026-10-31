@@ -26,24 +26,40 @@ been clean every night. Do not open new send-out / animation residual steps:
 remaining #146 lines, the bso226 "Go!" wait and anything measured in frames
 or a few hundred pixels are **timing residuals** (item 4). Order of work:
 
-1. **Production** (finish plan Phase 3). Player-facing first: title screen
-   with Battle Scene ON / OFF and a new challenge; on-screen pad for touch
-   and gamepad input; streak + current round saved in `localStorage`. Then
-   the bundle: test-only data out of `src/`, lazy-loaded sprite sheets and
-   large tables, `base` / title / favicon, CI build + smoke, static-host
-   config (the user deploys).
-2. **Cleanup** (finish plan Cleanup 1–7), alternating with production steps
-   so each run folds at least one of each: one-off step scripts + their
-   fixtures, ledger archive, provider / lane code, the 5-minute test gate,
-   `core-rs` to its own branch, stale refs, evidence out of git. One
-   reversible commit per step, each verified by typecheck + full suite + build.
-3. **Crashes, nightly** (unchanged): `npm run play:random` both scenes and the
+**Split decided 2026-10-31 (user):** this repo is the **game core**, an
+independent library that a separate website repo consumes (`factory-web`:
+login, saved streaks, hosting, later leaderboards — not this repo's work).
+The core never knows about accounts or servers; it exposes one small
+mount / event / save API (finish plan Phase 3, "Core library API"). Title
+screen, login, streak storage and the on-screen pad UI are the website's.
+**Audio (S11) is back in scope** from 2026-10-31 (user decision); the
+2026-08-10 out-of-scope note is superseded.
+
+1. **Core library API** (finish plan Phase 3, first): `src/lib.ts` +
+   `mountFactoryGame` with the exact contract in `docs/finish-plan.md`, a Vite
+   lib build and `package.json` `exports`; `src/main.ts` becomes a thin shell
+   over it (the test ABI, `?battleScene=`, `?pokebench=1` and the crash
+   overlay unchanged). One step, with full suite + build + browser play.
+2. **Audio (S11)**, the main program after step 1: a design step first
+   (oracle audio-event log from the ELF symbols for `PlaySE` / `PlayCry*` /
+   `PlayBGM` / `PlayFanfare`; our kernel already emits `play-se` /
+   `play-fanfare` / `play-faint-cry`), then sound-event parity by census like
+   the animations, then playback (mGBA-recorded cries / SFX / music through
+   WebAudio, off by default in tools). Acceptance in `docs/finish-plan.md`.
+3. **Cleanup** (finish plan Cleanup 1–7), at least one step per run: one-off
+   step scripts + their fixtures, ledger archive, provider / lane code, the
+   5-minute test gate, `core-rs` to its own branch, stale refs, evidence out
+   of git. One reversible commit per step, verified by typecheck + full suite
+   + build.
+4. **Bundle hygiene** (the rest of Phase 3): test-only data out of `src/`,
+   lazy-loaded sprite sheets and large tables, gamepad input in the library.
+5. **Crashes, nightly** (unchanged): `npm run play:random` both scenes and the
    Scene ON soaks on the final src. Every overlay / pageerror / CRASH / HANG
    is a fix step before anything else.
-4. **Timing residuals** last, logged in ISSUES, never blocking.
+6. **Timing residuals** last, logged in ISSUES, never blocking.
 
 Follow `docs/cax31-session-handoff.md` for the host, the current step and
-the gates. Audio stays deferred (S11). The settled exceptions below are unchanged.
+the gates. The settled exceptions below are unchanged.
 
 ### Superseded ordering — 2026-10-26 (finish plan phases 1–2, met)
 
@@ -2366,12 +2382,12 @@ Acceptance:
   with the existing integration replay tools. Record the served revision and
   browser receipt. A first preview does not finish the remaining adapters.
 
-### [ ] S11 — Audio (separate milestone, user-directed 2026-07-28)
+### [ ] S11 — Audio (separate milestone, user-directed 2026-07-28; RE-OPENED 2026-10-31)
 
-**OUT OF SCOPE for now (user decision 2026-08-10):** do not schedule,
-brief, or begin this stage. The entry stays in the roadmap by explicit user
-instruction ("just write that it's out of scope for now, but don't remove
-it"); a future user decision re-opens it.
+**In scope since 2026-10-31 (user decision):** scheduled as item 2 of the
+current execution priority, after the core library API. Acceptance and the
+program shape are in `docs/finish-plan.md` "Audio (S11)". The 2026-08-10
+out-of-scope note is superseded.
 
 Sound effects, mon cries, fanfares, and background music across the draft,
 battle, swap, and ending flows. Deliberately unscheduled until S10's parity

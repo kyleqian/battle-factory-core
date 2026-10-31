@@ -14,3 +14,9 @@ Status 2026-10-31: the crash and animation phases are met after five runs
 (blank holds 207 → 0, send-outs and Castform drawn, nightly crash checks
 clean). Kyle re-aimed the runs at production + cleanup, alternating; the
 remaining send-out residuals are long-tail timing work.
+
+Later on 2026-10-31 Kyle split the product: this repo is the **game core
+library** (`@pokebench/factory`, mount / event / save API first, then
+**audio (S11), back in scope**, then cleanup and bundle hygiene). The website
+— login, saved streaks, hosting on Cloudflare Workers + D1 — is a separate
+repo, `~/Developer/pokebench/factory-web`, built from the Mac.

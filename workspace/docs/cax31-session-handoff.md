@@ -33,27 +33,30 @@ kept and is long-tail.
 - Faint-replacement player send-in (path B) folded at 06:46 as pfb229 (`bb9029a37`); vanilla `--scene on` 20 / 20 on it; the Scene ON
   render-8 soak was not run on that src (no time) — run it first next session.
 
-## Next work (in order) — user re-aim 2026-10-31; see `docs/finish-plan.md` Phase 3 + Cleanup for acceptance
+## Next work (in order) — user re-aim 2026-10-31 (second revision, same day); see `docs/finish-plan.md`
 
 Phases 1 and 2 are met (ROADMAP "Current execution priority — 2026-10-31").
 Finish snd233 if it is green; do not brief further #146 / send-out / intro
-residual steps — they are timing residuals (item 4). Each run folds at least
-one production step and one cleanup step, alternating, one worker at a time.
+residual steps — they are timing residuals (item 5). This repo is now the
+**game core library**; a separate website repo (built from the Mac) owns
+login, streaks, menus, the on-screen pad and hosting — never brief those
+here. One worker at a time; each run folds the next item plus at least one
+cleanup step.
 
-1. **Production (Phase 3), player-facing first.** (a) Title screen: Battle
-   Scene ON / OFF choice and "new challenge", replacing the `?battleScene=`
-   query as the player's path (the query keeps working for tools and tests);
-   both scenes' existing traces unchanged. (b) On-screen pad for touch +
-   gamepad input mapped to the same key events; no change to tick / RNG.
-   (c) Streak + current round saved in `localStorage` (restore on load, clear
-   on loss / retire per `InitFactoryChallenge`); tools and soaks run with it
-   off. (d) Bundle: test-only JSON out of `src/` (tests import from
-   `tests/fixtures/data/`), lazy-loaded sprite sheets and large tables, `base`
-   / title / favicon, CI build + smoke, a static-host config (GitHub Pages or
-   Cloudflare Pages; the user deploys). Gates per step: typecheck, the touched
-   tests, differential, full suite + build on the folded src, browser play
-   both scenes.
-2. **Cleanup (one commit per step, each verified by typecheck + full suite +
+1. **Core library API — first step of the next run.** `src/lib.ts` +
+   `mountFactoryGame` with the exact contract in `docs/finish-plan.md`
+   Phase 3 (names are fixed: the website is built against them), Vite lib
+   build + `package.json` `exports` (`@pokebench/factory`), `src/main.ts` a
+   thin shell over it with every existing ABI / query / overlay unchanged.
+   Save checkpoints only between battles (draft, battle start, swap screen);
+   a save-resume test compares frame hashes with the uninterrupted run.
+   Gates: typecheck, new tests, full suite + build, browser play both scenes,
+   `npm pack` importable from a scratch Vite app.
+2. **Audio (S11), re-opened by the user:** design step first (docs only; the
+   supervisor accepts it), then sound-event parity by census, then playback —
+   `docs/finish-plan.md` "Audio (S11)". Expect this to be the main program for
+   several runs; it alternates with cleanup, not with timing work.
+3. **Cleanup (one commit per step, each verified by typecheck + full suite +
    build), in this order:** (1) delete one-off step scripts in
    `tools/integration` / `tools/compare` and the fixtures only they read —
    keep census, soak, compare, differential, probe runner, extract, preview,
@@ -68,10 +71,12 @@ one production step and one cleanup step, alternating, one worker at a time.
    `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs`
    + its adapter / tests; (6) prune merged `worker/*` refs; (7) evidence stops
    going into git.
-3. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak
+4. **Bundle hygiene** (rest of Phase 3): test-only JSON out of `src/`, lazy-loaded sprite sheets and large tables, gamepad
+   input through the library's `press` / `release`.
+5. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak
    `--render-every 8` 0:30 plus a `--render-every 1` sample; varied-RNG sweeps; vanilla both scenes. Every overlay / pageerror /
    CRASH / HANG becomes a fix step before anything else.
-4. **Timing** residuals last (ISSUES #146 remainder, #188, #189, the bso226 "Go!" wait on long front animations; exs207 refs kept).
+6. **Timing** residuals last (ISSUES #146 remainder, #188, #189, the bso226 "Go!" wait on long front animations; exs207 refs kept).
 
 **Host note (2026-10-28):** two workers at once on 16 GiB caused repeated OOM kills (each worker's full suite / census plus a
 supervisor build). Keep ONE worker at a time; the launcher allows one per lane, so a second worker needs another lane anyway.

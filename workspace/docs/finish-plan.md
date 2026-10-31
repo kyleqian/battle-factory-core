@@ -122,13 +122,91 @@ green on one try, else park with a note.
   `tools/integration/fixtures/approximate/` and eyeballed once; differential
   gates; full suite + build.
 
-### Phase 3 — Production (2 runs + user decisions)
-- Move test-only JSON out of `src/` (tests import from `tests/fixtures/data/`);
-  lazy-load sprite sheets and large tables; `base`, title, favicon; CI build +
-  smoke; static host (GitHub Pages / Cloudflare Pages) — the user deploys.
-- Title screen with Scene ON/OFF; on-screen pad for touch; gamepad; streak +
-  current round saved in `localStorage`; "copy trace" kept behind a key.
-- User decisions, not blocking: public vs unlisted; audio (S11) stays deferred.
+### Phase 3 — Production (revised 2026-10-31: core library + website split)
+
+**Decision (user, 2026-10-31):** the game is an independent library; a
+separate repo (`factory-web`, Cloudflare Workers + D1, built from the Mac)
+owns login, streak storage, title / menu UI, the on-screen pad and hosting.
+The core knows nothing about accounts or servers. Title screen, `localStorage`
+streak and the static-host config are therefore **not** core work any more.
+
+**Core library API — the first production step.** New `src/lib.ts`, built as a
+library (Vite lib mode, `dist-lib/`, `package.json` `name` `@pokebench/factory`
+with `exports` + `types`); `src/main.ts` becomes a thin dev shell over it
+(the `__POKEBENCH__` test ABI, `?battleScene=`, `?pokebench=1`,
+`?presentationSeed=`, the crash overlay and `__POKEBENCH_SESSION__` all
+unchanged — every existing browser test and tool keeps working). The website
+is being built against this exact contract, so keep the names:
+
+```ts
+export interface FactoryGameOptions {
+  canvas: HTMLCanvasElement;          // 240x160; the host page scales it
+  battleScene: "on" | "off";
+  presentationSeed?: number;
+  save?: FactorySave | null;          // resume an in-progress challenge
+  onEvent?: (event: FactoryEvent) => void;
+}
+export type FactoryEvent =
+  | { type: "challenge-start" }
+  | { type: "battle-end"; result: "win" | "loss"; streak: number }
+  | { type: "round-end"; streak: number }
+  | { type: "challenge-end"; reason: "loss" | "retire"; streak: number }
+  | { type: "save"; save: FactorySave }        // at every checkpoint
+  | { type: "contained-error"; message: string };
+export interface FactorySave { version: 1; streak: number; data: unknown }  // opaque JSON
+export interface FactoryGame {
+  press(button: GbaButton): void;              // for an on-screen pad / gamepad
+  release(button: GbaButton): void;
+  getSave(): FactorySave;
+  destroy(): void;
+}
+export function mountFactoryGame(options: FactoryGameOptions): FactoryGame;
+```
+
+`FactorySave.data` is whatever the engine needs to resume at a checkpoint
+(the draft, a battle start, the swap screen; decide the checkpoints from the
+state machine — never mid-battle); it must round-trip through `JSON` and
+restore to an identical `tick` stream (test: save at a checkpoint, resume,
+compare frame hashes against the uninterrupted run). `streak` is the
+Factory's win streak as the ROM counts it. Events come from the kernel's
+existing semantic events; `contained-error` mirrors `containedErrors`.
+Acceptance: typecheck, new Tier-1 tests (mount / events / save round-trip),
+full suite + build, `npm run play:random` both scenes, and
+`npm pack` yields a package another Vite app can import.
+
+- Then bundle hygiene: test-only JSON out of `src/` (tests import from
+  `tests/fixtures/data/`); lazy-load sprite sheets and large tables; gamepad
+  input through `press` / `release`; "copy trace" stays behind a key.
+- User decisions, not blocking: public vs unlisted (the website's `noindex`
+  stays until decided); custom domain.
+
+### Audio (S11) — re-opened by the user 2026-10-31
+
+Sound effects, cries, fanfares and music across the draft, battle, swap and
+ending flows, with the same evidence discipline as the animations:
+
+1. **Design step (one worker, docs only):** read the S11 roadmap entry and
+   `docs/issue55-*audio*` / `docs/soundproof-off-evidence.md`; propose the
+   oracle hook (mGBA breakpoints on `PlaySE`, `PlayCry_*`, `PlayBGM`,
+   `PlayFanfare`, `m4aSongNumStart` from the pinned ELF / map) that logs
+   `(frame, kind, id, pan)` per sound; the kernel-side event list (today:
+   `play-se` / `play-fanfare` / `play-faint-cry`); the asset plan (record each
+   cry / SE / BGM / fanfare once from mGBA to OGG under
+   `src/assets/gen/audio/`, loops with their ROM loop points); and the
+   playback layer (`src/audio/` behind a `FactoryGameOptions.audio` flag,
+   WebAudio, off by default in tools and tests). The supervisor accepts the
+   design before any src change.
+2. **Sound-event parity by census:** our engine emits every sound event the
+   ROM does at the same frame for the census seeds (a `(frame, kind, id)`
+   column next to the animation census); misses become fix steps like
+   animation declines did.
+3. **Playback:** the recorded assets play on the events; a muted default,
+   a user-facing toggle through the library API, no pixel change anywhere
+   (frame hashes identical with audio on and off).
+
+Acceptance: census 0..999 with 0 missing / 0 extra sound events in both
+scenes, both players' audio RAM probes still byte-pinned where the animation
+lane already pins them, full suite + build, soaks unchanged.
 
 ### Cleanup (2–3 runs, interleaved; one commit per step)
 1. Delete step-id one-off scripts in `tools/integration` and `tools/compare`
@@ -154,5 +232,6 @@ certain (it inverts a rule enforced at ~150 sites); its first run shows the
 real size.
 
 ## Not doing
-Git history rewrite. Finishing the Rust port. Audio. Frame residuals below
-~10 frames before everything above is done.
+Git history rewrite. Finishing the Rust port. Website concerns in this repo
+(login, streak storage, menus, hosting). Frame residuals below ~10 frames
+before everything above is done.
