@@ -27,6 +27,9 @@ export const CHALLENGE_BUDGET_FRAMES = 120_000;
 const MIN_TAP_FRAMES = 2;
 const MAX_TAP_FRAMES = 4;
 
+/** With newChallengeFromLobby the continuation menu picks RETIRE this often (a loss auto-chains past the lobby, so only RETIRE-YES reaches it). */
+const LOBBY_RETIRE_RATE = 0.5;
+
 /** One policy per challenge, cycled: mostly the swap-reaching winner, with the plain winner and the random "full" explorer. */
 export const DEFAULT_POLICY_CYCLE: readonly SoakPolicy[] = ["winning-swap", "winning", "winning-swap", "full"];
 
@@ -131,6 +134,7 @@ export class GoalPlayDirector {
     this.mixRate = options.mixRate ?? 0.04;
     this.budgetFrames = options.budgetFrames ?? CHALLENGE_BUDGET_FRAMES;
     this.newChallengeFromLobby = options.newChallengeFromLobby ?? false;
+    if (this.newChallengeFromLobby) this.player.retireRate = LOBBY_RETIRE_RATE;
     this.lobbyWanderFrames = options.lobbyWanderFrames ?? 120;
     this.state =
       options.initialState ??

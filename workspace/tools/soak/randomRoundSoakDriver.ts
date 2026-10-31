@@ -1568,6 +1568,8 @@ type DraftPlan = {
 export class RandomPlayer {
   /** nch231 (opt-in): in the free-roam Lobby press A at the singles attendant, starting the next challenge. */
   public newChallengeFromLobby = false;
+  /** Opt-in (goal play with the lobby option): chance the continuation menu picks RETIRE (and answers YES). null = the normal rolls. */
+  public retireRate: number | null = null;
   private cooldown = 0;
   private draft: DraftPlan;
   // Sampled intents, keyed by decision surface identity so a new decision
@@ -2392,7 +2394,7 @@ export class RandomPlayer {
       const wantYes = !this.explores
         ? false
         : postwin.question.kind === "retire"
-          ? questionRoll < 0.15
+          ? (this.retireRate !== null ? true : questionRoll < 0.15)
           : questionRoll < 0.5;
       const targetPos = wantYes ? 0 : 1;
       if (postwin.questionCursorPos !== targetPos) {
@@ -2467,7 +2469,9 @@ export class RandomPlayer {
       );
       const target = !this.explores
         ? 0
-        : roll < 0.85 ? 0 : roll < 0.92 ? 1 : roll < 0.96 ? 2 : 3;
+        : this.retireRate !== null
+          ? (roll < this.retireRate ? 3 : 0)
+          : roll < 0.85 ? 0 : roll < 0.92 ? 1 : roll < 0.96 ? 2 : 3;
       if (postwin.continuationCursorPos !== target) {
         return this.press(postwin.continuationCursorPos < target ? "DOWN" : "UP", 6);
       }
