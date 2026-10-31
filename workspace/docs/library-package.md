@@ -76,3 +76,37 @@ trace, resume, continue: identical events, frame hashes and digest), and
 the mount loop with a stub canvas (ready, latched taps, trace, chunked and
 synchronous resume, the bench ABI). `tests/sha256.test.ts` pins the digest
 primitive to node:crypto.
+
+## ENGINE_BUILD
+
+`ENGINE_BUILD` (exported from both entries, reported in every trace's
+metadata and by `game.engineBuild`) is how the website decides whether an open
+challenge can resume: a trace replays only on the build that played it. It is a
+**content hash of the headless build**, not the commit stamp, so a rebuild of
+an unchanged engine does not strand open challenges.
+
+- `tools/build/engineBuild.ts` builds `src/headless.ts` in memory (same
+  options and `manualChunks` as `vite.headless.config.ts`) with the stamp left
+  as a fixed placeholder and hashes every emitted chunk (file name + code,
+  sorted). The result, `eb-<16 hex>`, is `define`d as
+  `__POKEBENCH_ENGINE_BUILD__` into the app build (`vite.config.ts`), the
+  browser-lib build and the headless build, so one tree reports one value
+  everywhere. `vite.config.ts` `engineBuildDefine(command)` computes it once
+  per build command (~16 s extra).
+- It moves exactly when rollup's output of the gameplay + event/digest graph
+  moves: engine code, generated data, anything the tree-shaken graph still
+  reaches. Docs, tests, tools, the dev shell (`src/main.ts`), renderer-only
+  modules and unused exports do not move it. It is independent of the commit,
+  the checkout path and the build time. A different vite/rollup version can
+  change it (the emitted code changes), which is the safe direction.
+- Outside a build (`npm run dev`, vitest) nothing is hashed and
+  `ENGINE_BUILD` is `"dev"`.
+- Print this tree's value without building: `node --experimental-strip-types
+  tools/build/engineBuildCheck.ts`.
+- Pinned by `tests/engineBuildHash.test.ts` (fixture project: deterministic,
+  path-independent, ignores docs / non-emitted modules, changes with an emitted
+  module, `"dev"` fallback, the headless graph never reads the commit stamp).
+  Measured on the real tree (2026-10-31): same tree built twice, and after
+  editing docs + a test + a tool + `src/main.ts`, gives the same value; a
+  one-constant edit in `src/factorySession.ts` changes it; an unused export
+  added to a headless-graph module (tree-shaken) does not.

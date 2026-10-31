@@ -59,6 +59,11 @@ describe("ENGINE_BUILD content hash", () => {
     expect(hashChunks([a, b])).not.toBe(hashChunks([a, { ...b, code: "3" }]));
   });
 
+  it("the dev server and vitest do not build: ENGINE_BUILD falls back to \"dev\"", async () => {
+    const { engineBuildDefine } = await import("../vite.config.ts");
+    expect(await engineBuildDefine("serve")).toEqual({ __POKEBENCH_ENGINE_BUILD__: '"dev"' });
+  });
+
   it("the headless graph does not read the commit stamp", () => {
     for (const file of ["src/factorySession.ts", "src/headless.ts", "src/lib.ts"]) {
       expect(readFileSync(file, "utf8"), file).not.toContain("__POKEBENCH_BUILD_STAMP__");
