@@ -33,15 +33,45 @@ kept and is long-tail.
 - Faint-replacement player send-in (path B) folded at 06:46 as pfb229 (`bb9029a37`); vanilla `--scene on` 20 / 20 on it; the Scene ON
   render-8 soak was not run on that src (no time) — run it first next session.
 
-## Next work (in order) — see `docs/finish-plan.md` for acceptance
+## Next work (in order) — user re-aim 2026-10-31; see `docs/finish-plan.md` Phase 3 + Cleanup for acceptance
 
-1. **Gate on `bb9029a37`+ first:** Scene ON `--policy full --vary-rng` 0:30 `--render-every 8` (not run on pfb229's src). Then the remaining #146 lines worth a player's eye (shiny send-ins, CRY_MODE_WEAK, Roar
-   opponent-attacker ball path, ENTEI / KINGDRA glow-lag frame) and the bso226 ONIX intro window residual.
-2. **Castform form changes** (finish plan Phase 2 item 4; ISSUES #143 remainder).
-3. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak `--render-every 8`
-   bulk plus a `--render-every 1` sample. Every overlay / pageerror becomes a fix step.
-4. **Production + cleanup** per the plan (cleanup steps 1–3 first; a "new challenge" path from the Lobby or a title screen).
-5. **Timing** residuals last (ISSUES #188, #189, the bso226 "Go!" wait on long front animations; exs207 refs kept).
+Phases 1 and 2 are met (ROADMAP "Current execution priority — 2026-10-31").
+Finish snd233 if it is green; do not brief further #146 / send-out / intro
+residual steps — they are timing residuals (item 4). Each run folds at least
+one production step and one cleanup step, alternating, one worker at a time.
+
+1. **Production (Phase 3), player-facing first.** (a) Title screen: Battle
+   Scene ON / OFF choice and "new challenge", replacing the `?battleScene=`
+   query as the player's path (the query keeps working for tools and tests);
+   both scenes' existing traces unchanged. (b) On-screen pad for touch +
+   gamepad input mapped to the same key events; no change to tick / RNG.
+   (c) Streak + current round saved in `localStorage` (restore on load, clear
+   on loss / retire per `InitFactoryChallenge`); tools and soaks run with it
+   off. (d) Bundle: test-only JSON out of `src/` (tests import from
+   `tests/fixtures/data/`), lazy-loaded sprite sheets and large tables, `base`
+   / title / favicon, CI build + smoke, a static-host config (GitHub Pages or
+   Cloudflare Pages; the user deploys). Gates per step: typecheck, the touched
+   tests, differential, full suite + build on the folded src, browser play
+   both scenes.
+2. **Cleanup (one commit per step, each verified by typecheck + full suite +
+   build), in this order:** (1) delete one-off step scripts in
+   `tools/integration` / `tools/compare` and the fixtures only they read —
+   keep census, soak, compare, differential, probe runner, extract, preview,
+   play:random and anything a kept test imports; (2) root ledgers → README,
+   AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3
+   entries), the rest to `docs/archive/` unchanged; (3) remove Codex /
+   DeepSeek / OpenCode paths and the animation / rust lane supervisors — one
+   supervisor script, one worker launcher, Claude only (keep
+   `run-supervisor.sh --headless` and `tools/run-subagent.sh` working: the
+   daily cron depends on them); (5) `npm run test:gate` ≤ 5 min for workers
+   and drop frame-pin tests the census supersedes, full suite nightly; (4)
+   `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs`
+   + its adapter / tests; (6) prune merged `worker/*` refs; (7) evidence stops
+   going into git.
+3. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak
+   `--render-every 8` 0:30 plus a `--render-every 1` sample; varied-RNG sweeps; vanilla both scenes. Every overlay / pageerror /
+   CRASH / HANG becomes a fix step before anything else.
+4. **Timing** residuals last (ISSUES #146 remainder, #188, #189, the bso226 "Go!" wait on long front animations; exs207 refs kept).
 
 **Host note (2026-10-28):** two workers at once on 16 GiB caused repeated OOM kills (each worker's full suite / census plus a
 supervisor build). Keep ONE worker at a time; the launcher allows one per lane, so a second worker needs another lane anyway.
@@ -88,6 +118,11 @@ because its shell tool yielded. Read CAX31 `PAPERCUTS.md`; bound any soak
 fan-out to free memory and collect every per-seed result. Use host path
 helpers and `/srv/pokebench/vendor/mgba-venv/bin/python`, not Mac-specific
 paths. Claude Code 2.1.280 and the Opus/Sonnet model defaults remain pinned.
+Disk: each run leaves ~5 GB under `.integration/validation/`, and the daily
+launcher refuses to start under 15 GB free. At wind-down delete evidence
+folders older than the last three runs (keep the census baselines the next
+run's delta needs; the user approved this on 2026-10-31, when the folders
+from before 2026-10-28 were removed).
 Oracle services stay localhost-only, ON 8012 / OFF 8014. Preserve pinned
 ROM/ELF/map, worker refs and evidence. No copied provider credentials or new
 infrastructure. The Mac imports results through bundles; never push.

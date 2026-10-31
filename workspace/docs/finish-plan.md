@@ -4,6 +4,18 @@ The mission for every run until its definition of done is met. Written after
 a top-layer audit of master `5d6f7d521`. Timing exactness is demoted to a
 long-tail lane; what players notice comes first.
 
+## Status 2026-10-31 (user re-aim)
+
+Phases 1 and 2 are **met** after five runs (soakscene208 .. cff232):
+Scene ON census 0..999 static 0 (approximate ~206, live ~26,960); player back
+send-out, intro send-outs, faint-replacement send-in, Castform forms and the
+weather side (#157) drawn; nightly browser play + soaks clean every night.
+Definition-of-done item 3 is accepted at the host's real throughput (Scene ON
+`--render-every 8` 0:30 + a `--render-every 1` sample + 10 min browser play
+per scene, nightly) instead of 3,000 battles. From here every run works
+**Phase 3 and Cleanup**, alternating; the remaining #146 / bso226 lines are
+timing residuals. See ROADMAP "Current execution priority — 2026-10-31".
+
 ## Decisions made 2026-10-26 (no further permission needed)
 
 - **Approximate claim class.** Beside exact, faithful-random (D3) and

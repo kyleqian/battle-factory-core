@@ -14,31 +14,45 @@ battles, and the open-level rule set (until the single-battle loop is solid).
 later milestone — stage S11 below (user decision, 2026-07-28). No earlier
 stage's acceptance includes audio.
 
-## Current execution priority — 2026-10-26 (finish plan)
+## Current execution priority — 2026-10-31 (finish plan: production + cleanup)
 
-The user approved `docs/finish-plan.md` on 2026-10-26. It is the mission until
-its definition of done is met; the 2026-10-13 priority below is superseded as
-an ordering (its scope authorizations stay in force). Order of work:
+The user approved `docs/finish-plan.md` on 2026-10-26; it stays the mission
+until its definition of done is met. **Phases 1 and 2 are met as of
+2026-10-31** (user re-aim, 2026-10-31): Scene ON census 0..999 has 0
+static-field commands; player back send-out, intro send-outs, the
+faint-replacement send-in, Castform forms and the weather side are drawn;
+the nightly crash set (browser random play both scenes + Scene ON soaks) has
+been clean every night. Do not open new send-out / animation residual steps:
+remaining #146 lines, the bso226 "Go!" wait and anything measured in frames
+or a few hundred pixels are **timing residuals** (item 4). Order of work:
 
-1. **Crashes.** Randomized soaks with Battle Scene ON and rendering on every
-   frame; in-app containment so a presentation throw degrades to the pause
-   instead of ending the battle. Bar: 0 CRASH / 0 HANG over 3,000 battles per
-   scene, nightly.
-2. **Every animation plays.** A new **approximate** claim class (user
-   decision 2026-10-26): when an adapter would decline for provenance reasons,
-   draw the body with the best available inputs and report the command as
-   approximate. The static-field hold remains only where no body exists. Then
-   the player's back send-out and intro send-outs in Scene ON, Castform forms,
-   weather-continues side. Exact / faithful counts never move for this work.
-3. **Production.** Test-only data out of `src/`, bundle splitting, title
-   screen, touch + gamepad input, saved streak, static-host deploy + CI.
-4. **Cleanup**, interleaved, one reversible commit per step: one-off step
-   scripts, ledger archive, provider / lane code, `core-rs` to its own branch,
-   a 5-minute test gate with the full suite nightly, stale refs.
-5. **Timing residuals** last. They are logged in ISSUES, never blocking.
+1. **Production** (finish plan Phase 3). Player-facing first: title screen
+   with Battle Scene ON / OFF and a new challenge; on-screen pad for touch
+   and gamepad input; streak + current round saved in `localStorage`. Then
+   the bundle: test-only data out of `src/`, lazy-loaded sprite sheets and
+   large tables, `base` / title / favicon, CI build + smoke, static-host
+   config (the user deploys).
+2. **Cleanup** (finish plan Cleanup 1–7), alternating with production steps
+   so each run folds at least one of each: one-off step scripts + their
+   fixtures, ledger archive, provider / lane code, the 5-minute test gate,
+   `core-rs` to its own branch, stale refs, evidence out of git. One
+   reversible commit per step, each verified by typecheck + full suite + build.
+3. **Crashes, nightly** (unchanged): `npm run play:random` both scenes and the
+   Scene ON soaks on the final src. Every overlay / pageerror / CRASH / HANG
+   is a fix step before anything else.
+4. **Timing residuals** last, logged in ISSUES, never blocking.
 
 Follow `docs/cax31-session-handoff.md` for the host, the current step and
 the gates. Audio stays deferred (S11). The settled exceptions below are unchanged.
+
+### Superseded ordering — 2026-10-26 (finish plan phases 1–2, met)
+
+Crashes (Scene ON soaks with rendering on, in-app containment) and every
+animation plays (the **approximate** claim class, user decision 2026-10-26:
+draw the body with the best available inputs and report the command as
+approximate; exact / faithful counts never move for this work), then the
+send-outs, Castform forms and weather side. Landed 2026-10-26 .. 2026-10-31
+(soakscene208 .. cff232); PROGRESS-archive.md has the entries.
 
 ### Superseded ordering — 2026-10-13 (scope authorizations remain valid)
 
