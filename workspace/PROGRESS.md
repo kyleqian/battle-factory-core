@@ -5,9 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): cff230 + nch231 folded; cff232 running
+## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): cff230 / nch231 / cff232 folded; snd233 running
 
-- **State:** master `6af3a1505`+ (cff230 fast-forward; nch231 merge; src + tests == nch231 worker-tested `732f19724`).
+- **State:** master `0a222a6c4`+ (cff230 fast-forward; nch231 + cff232 merges; src + tests == cff232 worker-tested `10d02dd4d`).
 - **Gate carried over from the last run, on `8d7916813` (src == pfb229 merge;
   `.integration/validation/sv-20261030/gates-8d7916813/`):** Scene ON `--policy full --vary-rng` 0:30 `--render-every 8` **30 / 30**
   (all `budget`); build 0; browser goal play 10 min / scene (seed 1): ON 30 battles / 13 swap screens, OFF 44 / 22, **0 page errors,
@@ -31,7 +31,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (supervisor `cmp` 20 / 20 shards); differential 641 + 3,713 lobby / terminal captures identical; play:random flagged 4 min /
   scene: 2 new challenges each, 0 page errors; full suite **1,718 files / 14,208 tests, 0 failed**; build 0. Supervisor: the 3
   touched test files 21 / 21 on master.
-- **Running:** cff232 (Scene OFF Castform morph; brief `.integration/validation/sv-20261030/cff232.txt`).
+- **Varied-RNG sweeps on `6af3a1505` (`gates-6af3a1505/`):** winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
+- **Folded:** cff232 (merge `0a222a6c4`; branch `worker/integration-20261031-015154`; "Scene OFF" section of
+  `docs/cff230-castform-forms.md`): the ROM plays the CASTFORM_CHANGE morph in Scene OFF too (no NO_ANIMATIONS gate); OFF now builds
+  the same command and body. ROM finding: a battler-1 change after a weather print starts 3 rows later
+  (`BattleScript_WeatherFormChanges` loops battler 0 then 1; OFF command 120 rows). OFF ROM windows, Castform box / text box before ->
+  after: 142,500 / 181 rows -> 0 / 0; 128,321 / 185 -> 0 / 0; 98,040 / 180 -> 0 / 0. Worker: typecheck 0; full suite **1,719 files /
+  14,213 tests, 0 failed**; build 0; differential 641 / 641. Supervisor: ON census shards byte-identical to nch231's; OFF eventsDigest +
+  error identical 1,000 / 1,000, only 603 / 643 / 651 / 950 changed (+1 general-animation each, 117 / 120 rows); 2 touched test files
+  14 / 14 on master; hail strip eyeballed. Scene ON keeps the 3-row battler-1 shortfall (snd233 part A).
+- **Running:** snd233 (A: the +3 rows in Scene ON; B: re-measure / fix the opponent-Roar player-side ball path; brief
+  `.integration/validation/sv-20261030/snd233.txt`).
 - **Notes:** no DEFERRED items. No push.
 ---
 
