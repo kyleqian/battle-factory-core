@@ -74,6 +74,17 @@ export function advanceFactoryCarry(
   });
 }
 
+/**
+ * Carry for a challenge entered from the Lobby after a loss or a RETIRE-YES.
+ * Both end through `WarpToLobbyLost` -> `LostChallenge`, which clears
+ * FACTORY_DATA_WIN_STREAK_ACTIVE; the next `factory_init` (`InitFactoryChallenge`,
+ * battle_factory.c:208-212) therefore zeroes the win streak and the rents count
+ * together. Symbols and Battle Points live in the save and are not touched.
+ */
+export function carryForNewChallengeAfterLobby(carry: FactoryCarry): FactoryCarry {
+  return Object.freeze({ ...carry, factoryWinStreak: 0, rentsCount: 0 });
+}
+
 export type FactoryGeneratedChallengeDraft = Readonly<{
   generation: FactoryInitialRentalGenerationResult;
   draftScreen: DraftScreenState;

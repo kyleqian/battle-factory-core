@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createInitialState, render, tick } from "../src/engine/core.ts";
+import { createInitialState, render, tick, type EngineState } from "../src/engine/core.ts";
 import { createFactoryLobbyFreeRoamState } from "../src/engine/factoryLobbyFreeRoam.ts";
 import type { GbaButton } from "../src/input.ts";
 import {
@@ -87,6 +87,28 @@ describe("goal-directed browser play (tools/browser/goalPlay.ts)", () => {
     const used = new Set(segments.flatMap((s) => s.buttons));
     expect([...used].every((b) => ["UP", "DOWN", "LEFT", "RIGHT", "A", "B"].includes(b))).toBe(true);
     expect(director.stats.lobbyPresses).toBeGreaterThan(5);
+  });
+
+  it("nch231: with newChallengeFromLobby the director walks back to the attendant and the same page starts another challenge", () => {
+    const initialState: EngineState = { ...createInitialState({ battleScene: "off" }), lobbyFreeRoam: createFactoryLobbyFreeRoamState() };
+    const director = new GoalPlayDirector({ seed: 2, scene: "off", initialState, newChallengeFromLobby: true, lobbyWanderFrames: 200 });
+    const segments: FrameSegment[] = [];
+    for (let i = 0; i < 60 && director.state.lobbyFreeRoam !== null && !director.done; i += 1) for (const segment of director.runFrames(60)) segments.push(segment);
+    expect(director.mirrorError).toBeNull();
+    expect(director.restart).toBeNull();
+    expect(director.state.lobbyFreeRoam).toBeNull();
+    expect(director.state.pendingGeneratedRound).not.toBeNull();
+    // Policy frames after the lobby (draft) count the crossing once.
+    for (const segment of director.runFrames(120)) segments.push(segment);
+    expect(director.stats.lobbyNewChallenges).toBe(1);
+    expect(totalFrames(segments)).toBeGreaterThan(200);
+    let replay = initialState;
+    for (const segment of segments) {
+      const buttons = new Set<GbaButton>(segment.buttons);
+      for (let i = 0; i < segment.frames; i += 1) replay = tick(replay, buttons);
+    }
+    expect(replay.frame).toBe(director.frame);
+    expect(frameHash(render(replay))).toBe(frameHash(render(director.state)));
   });
 
   it("hands over to the next challenge once its frame budget is spent, but never cuts a lobby short", () => {

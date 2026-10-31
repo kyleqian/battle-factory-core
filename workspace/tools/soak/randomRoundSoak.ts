@@ -51,6 +51,8 @@
 //                      resolveMaxFrames(policy), i.e. DEFAULT_MAX_FRAMES_BY_POLICY[policy])
 //   --stall-frames N   frames of zero progress before reporting HANG (default: DEFAULT_STALL_FRAMES, i.e. 30_000 — ISSUES #104 retune)
 //   --max-rounds N     finish OK ("max-rounds") once N round decisions have been observed (default: unlimited)
+//   --lobby-new-challenge  opt-in (nch231): a run that reaches the free-roam Lobby (RETIRE-YES) presses A at the singles
+//                      attendant and keeps playing the next challenge instead of finishing OK there (default: off, results unchanged)
 //   --render-every N   call render() every N frames (0 disables; default 8)
 //   --start-carry N    opt-in: start the FIRST chained round from a carried
 //                      win streak of N instead of the anchor boot -- crash
@@ -529,6 +531,7 @@ async function main(): Promise<void> {
     stopAtFirstRoundDecision: firstRound,
     stallFrames,
     maxRounds,
+    ...(args.includes("--lobby-new-challenge") ? { newChallengeFromLobby: true } : {}),
     ...(coverage !== null ? { coverage } : {}),
   };
   const optionsFor = (sceneName: SoakScene | null): Partial<RunOptions> => ({

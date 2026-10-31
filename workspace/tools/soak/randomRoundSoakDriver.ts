@@ -42,6 +42,7 @@ import {
   type EngineState,
 } from "../../src/engine/core.ts";
 import type { GbaButton } from "../../src/input.ts";
+import { isFactoryLobbyFacingSinglesAttendant } from "../../src/engine/factoryLobbyFreeRoam.ts";
 import {
   MENU_OPTION_RENT,
   MENU_OPTION_SUMMARY,
@@ -1270,6 +1271,8 @@ export type SoakScene = "on" | "off";
 export type SeedResult = {
   seed: number;
   outcome: SeedOutcome;
+  /** Only with `newChallengeFromLobby`: challenges started from the Lobby attendant. */
+  lobbyNewChallenges?: number;
   /**
    * OK sub-outcome: "budget" (frame budget reached while still making
    * progress — ISSUES #104 retune; since 2026-08-24 that includes the
@@ -1420,6 +1423,7 @@ function errorOrigin(frames: string[]): string {
 // ---------------------------------------------------------------------------
 
 const NO_BUTTONS: ReadonlySet<GbaButton> = new Set();
+const A_BUTTON: ReadonlySet<GbaButton> = new Set<GbaButton>(["A"]);
 
 /**
  * "full": arbitrary-but-legal play — every UI choice the real menus expose.
@@ -1562,6 +1566,10 @@ type DraftPlan = {
 };
 
 export class RandomPlayer {
+  /** nch231 (opt-in): in the free-roam Lobby press A at the singles attendant, starting the next challenge. */
+  public newChallengeFromLobby = false;
+  /** Opt-in (goal play with the lobby option): chance the continuation menu picks RETIRE (and answers YES). null = the normal rolls. */
+  public retireRate: number | null = null;
   private cooldown = 0;
   private draft: DraftPlan;
   // Sampled intents, keyed by decision surface identity so a new decision
@@ -1708,7 +1716,12 @@ export class RandomPlayer {
     if (orch?.battleResolutionPresentation) return this.onResolution(state);
     if (orch?.battleStartIntro) return this.onIntro(state);
     if (orch?.battleCommandPresentation) return this.onCommand(state);
-    if (state.lobbyFreeRoam) return NO_BUTTONS; // terminal — runner stops us
+    if (state.lobbyFreeRoam) {
+      // Terminal unless newChallengeFromLobby — then the runner keeps going and A at the attendant starts the next challenge.
+      return this.newChallengeFromLobby && isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)
+        ? A_BUTTON
+        : NO_BUTTONS;
+    }
     if (state.factoryTerminal) return this.onTerminal(state);
     if (state.postwin) return this.onPostwin(state);
     if (state.battleScene) return this.pressAdvance(state, "battleScene A");
@@ -2381,7 +2394,7 @@ export class RandomPlayer {
       const wantYes = !this.explores
         ? false
         : postwin.question.kind === "retire"
-          ? questionRoll < 0.15
+          ? (this.retireRate !== null ? true : questionRoll < 0.15)
           : questionRoll < 0.5;
       const targetPos = wantYes ? 0 : 1;
       if (postwin.questionCursorPos !== targetPos) {
@@ -2456,7 +2469,9 @@ export class RandomPlayer {
       );
       const target = !this.explores
         ? 0
-        : roll < 0.85 ? 0 : roll < 0.92 ? 1 : roll < 0.96 ? 2 : 3;
+        : this.retireRate !== null
+          ? (roll < this.retireRate ? 3 : 0)
+          : roll < 0.85 ? 0 : roll < 0.92 ? 1 : roll < 0.96 ? 2 : 3;
       if (postwin.continuationCursorPos !== target) {
         return this.press(postwin.continuationCursorPos < target ? "DOWN" : "UP", 6);
       }
@@ -2772,6 +2787,12 @@ export type RunOptions = {
    * a bounded number of chained rounds. Default unlimited.
    */
   maxRounds?: number;
+  /**
+   * nch231 (default false, so existing soak results do not move): a run that reaches the free-roam Lobby (RETIRE-YES)
+   * presses A at the singles attendant and plays the next challenge instead of finishing OK at the Lobby. The result
+   * then carries `lobbyNewChallenges`.
+   */
+  newChallengeFromLobby?: boolean;
   /** Test-only opt-in observer for every action-log note, independent of `verbose`. */
   onNote?: (entry: { frame: number; battle: number; turn: number; what: string }) => void;
   /**
@@ -2869,8 +2890,11 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   coverage?.beginSeed(seed);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy, coverage);
   player.summaryExplore = options.summaryExplore === true;
+  player.newChallengeFromLobby = options.newChallengeFromLobby === true;
+  let lobbyNewChallenges = 0;
   let state = options.stateFactory?.(seed)
     ?? createInitialState(options.scene !== undefined ? { battleScene: options.scene } : {});
+  let lobbySeen = state.lobbyFreeRoam !== null;
   let frame = 0;
   let firstEndState: string | null = null;
   let chainingCommitted = false;
@@ -2963,6 +2987,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
         (entry) => `f=${entry.frame} b${entry.battle} t${entry.turn} ${entry.what}`,
       ),
       ...(options.scene !== undefined ? { scene: options.scene } : {}),
+      ...(lobbyNewChallenges > 0 ? { lobbyNewChallenges } : {}),
       ...(containedPresentationErrorCount() > 0
         ? { contained: containedPresentationErrorCount(), containedFirstMessage: containedPresentationErrors()[0]!.message }
         : {}),
@@ -3074,7 +3099,11 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
     }
 
     if (state.lobbyFreeRoam !== null) {
-      return finish("OK", { endState: end ?? "roundLost" });
+      if (options.newChallengeFromLobby !== true) return finish("OK", { endState: end ?? "roundLost" });
+      lobbySeen = true;
+    } else if (lobbySeen) {
+      lobbySeen = false;
+      lobbyNewChallenges += 1;
     }
     if (options.maxRounds !== undefined && roundDecisions >= options.maxRounds) {
       return finish("OK", { endState: "max-rounds" });

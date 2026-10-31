@@ -9,6 +9,7 @@
 
 import { createInitialState, tick, type EngineState } from "../../src/engine/core.ts";
 import type { GbaButton } from "../../src/input.ts";
+import { isFactoryLobbyCellWalkable, isFactoryLobbyFacingSinglesAttendant, LOBBY_SINGLES_ATTENDANT_CELL, type LobbyDirection } from "../../src/engine/factoryLobbyFreeRoam.ts";
 import { ActionLog, RandomPlayer, Rng, type SoakPolicy } from "../soak/randomRoundSoakDriver.ts";
 import { createInputGenerator, type InputGenerator } from "./randomPlayInput.ts";
 
@@ -25,6 +26,9 @@ export const CHALLENGE_BUDGET_FRAMES = 120_000;
 /** A policy press is held 2..4 frames, like a keyboard tap in the browser (the soak itself presses for 1). */
 const MIN_TAP_FRAMES = 2;
 const MAX_TAP_FRAMES = 4;
+
+/** With newChallengeFromLobby the continuation menu picks RETIRE this often (a loss auto-chains past the lobby, so only RETIRE-YES reaches it). */
+const LOBBY_RETIRE_RATE = 0.5;
 
 /** One policy per challenge, cycled: mostly the swap-reaching winner, with the plain winner and the random "full" explorer. */
 export const DEFAULT_POLICY_CYCLE: readonly SoakPolicy[] = ["winning-swap", "winning", "winning-swap", "full"];
@@ -48,6 +52,14 @@ export interface GoalPlayOptions {
   mixRate?: number;
   /** Frames this challenge may run before it asks for a restart; defaults to CHALLENGE_BUDGET_FRAMES. */
   budgetFrames?: number;
+  /**
+   * nch231: after wandering the lobby for `lobbyWanderFrames`, walk back to the singles attendant and press A so the
+   * same page starts another challenge (no restart). Off by default: the lobby then ends the challenge as before, and
+   * the wander never presses A while facing the attendant (that press would otherwise start a new challenge).
+   */
+  newChallengeFromLobby?: boolean;
+  /** Frames of random lobby wandering before the walk back (newChallengeFromLobby only); default 120. */
+  lobbyWanderFrames?: number;
   /** Test seam: start from this state instead of the anchor draft. */
   initialState?: EngineState;
 }
@@ -57,6 +69,8 @@ export interface GoalPlayStats {
   policyPresses: number;
   randomPresses: number;
   lobbyPresses: number;
+  /** nch231: challenges started from the lobby attendant on this page. */
+  lobbyNewChallenges: number;
   maxBattleDepth: number;
   swapScreens: number;
 }
@@ -104,6 +118,9 @@ export class GoalPlayDirector {
   private progressKey = "";
   private progressFrame = 0;
   private lobbyEnteredFrame: number | null = null;
+  private readonly newChallengeFromLobby: boolean;
+  private readonly lobbyWanderFrames: number;
+  private sawLobby = false;
   private sawSwap = false;
 
   constructor(options: GoalPlayOptions) {
@@ -116,13 +133,16 @@ export class GoalPlayDirector {
     this.generator = createInputGenerator(streamSeed ^ 0x5eed);
     this.mixRate = options.mixRate ?? 0.04;
     this.budgetFrames = options.budgetFrames ?? CHALLENGE_BUDGET_FRAMES;
+    this.newChallengeFromLobby = options.newChallengeFromLobby ?? false;
+    if (this.newChallengeFromLobby) this.player.retireRate = LOBBY_RETIRE_RATE;
+    this.lobbyWanderFrames = options.lobbyWanderFrames ?? 120;
     this.state =
       options.initialState ??
       createInitialState({
         battleScene: options.scene,
         presentationSeed: options.presentationSeed ?? options.seed,
       });
-    this.stats = { policy: this.policy, policyPresses: 0, randomPresses: 0, lobbyPresses: 0, maxBattleDepth: 0, swapScreens: 0 };
+    this.stats = { policy: this.policy, policyPresses: 0, randomPresses: 0, lobbyPresses: 0, lobbyNewChallenges: 0, maxBattleDepth: 0, swapScreens: 0 };
   }
 
   get frame(): number {
@@ -197,13 +217,23 @@ export class GoalPlayDirector {
     }
 
     if (state.lobbyFreeRoam !== null) {
+      this.sawLobby = true;
       this.lobbyEnteredFrame ??= state.frame;
-      if (state.frame - this.lobbyEnteredFrame >= LOBBY_WANDER_FRAMES) {
+      const waited = state.frame - this.lobbyEnteredFrame;
+      if (this.newChallengeFromLobby && waited >= this.lobbyWanderFrames) return this.walkToAttendant(state);
+      if (!this.newChallengeFromLobby && waited >= LOBBY_WANDER_FRAMES) {
         this.restart = "lobby";
         return [];
       }
       this.stats.lobbyPresses += 1;
-      return this.press(this.rng.pick(["UP", "DOWN", "LEFT", "RIGHT", "A", "B"] as const), 6 + this.rng.int(40), 2);
+      const button = this.rng.pick(["UP", "DOWN", "LEFT", "RIGHT", "A", "B"] as const);
+      // A facing the attendant starts a new challenge: only the newChallengeFromLobby walk-back may press it.
+      const safe = button === "A" && isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam) ? "B" : button;
+      return this.press(safe, 6 + this.rng.int(40), 2);
+    }
+    if (this.sawLobby) {
+      this.sawLobby = false;
+      this.stats.lobbyNewChallenges += 1;
     }
     this.lobbyEnteredFrame = null;
 
@@ -226,6 +256,31 @@ export class GoalPlayDirector {
     return this.press(button, MIN_TAP_FRAMES + this.rng.int(MAX_TAP_FRAMES - MIN_TAP_FRAMES + 1), 0);
   }
 
+  /**
+   * One frame of the walk from wherever the player stands to the tile below the attendant, then UP into it and A.
+   * Direction is chosen per frame from the tile the player is arriving at, so a held press never overshoots.
+   */
+  private walkToAttendant(state: EngineState): readonly GbaButton[] {
+    const lobby = state.lobbyFreeRoam!;
+    if (isFactoryLobbyFacingSinglesAttendant(lobby)) {
+      return this.press("A", MIN_TAP_FRAMES, 2);
+    }
+    const target = { x: LOBBY_SINGLES_ATTENDANT_CELL.x, y: LOBBY_SINGLES_ATTENDANT_CELL.y + 1 };
+    const here = lobby.stepRemaining > 0
+      ? {
+          x: lobby.stepFromX + (lobby.stepDir === "east" ? 1 : lobby.stepDir === "west" ? -1 : 0),
+          y: lobby.stepFromY + (lobby.stepDir === "south" ? 1 : lobby.stepDir === "north" ? -1 : 0),
+        }
+      : { x: lobby.x, y: lobby.y };
+    const dir = here.x === target.x && here.y === target.y ? "north" : firstLobbyStepTowards(here, target);
+    if (dir === null) {
+      this.restart = "lobby";
+      return [];
+    }
+    this.stats.lobbyPresses += 1;
+    return [LOBBY_DIR_BUTTON[dir]];
+  }
+
   private press(button: GbaButton, holdFrames: number, gapFrames: number): readonly GbaButton[] {
     this.heldButtons = [button];
     this.holdLeft = holdFrames - 1;
@@ -239,4 +294,35 @@ export class GoalPlayDirector {
     const input = this.generator.next(stalled);
     return this.press(input.button as GbaButton, msToFrames(input.holdMs), msToFrames(input.gapMs));
   }
+}
+
+const LOBBY_DIR_BUTTON: Readonly<Record<LobbyDirection, GbaButton>> = { north: "UP", south: "DOWN", west: "LEFT", east: "RIGHT" };
+const LOBBY_STEPS: readonly (readonly [LobbyDirection, number, number])[] = [
+  ["north", 0, -1],
+  ["south", 0, 1],
+  ["west", -1, 0],
+  ["east", 1, 0],
+];
+
+/** Breadth-first first move from `from` to `to` over the lobby's walkable cells; null when unreachable. */
+function firstLobbyStepTowards(from: { x: number; y: number }, to: { x: number; y: number }): LobbyDirection | null {
+  const seen = new Set<string>([`${from.x},${from.y}`]);
+  let frontier: { x: number; y: number; first: LobbyDirection | null }[] = [{ ...from, first: null }];
+  while (frontier.length > 0) {
+    const next: typeof frontier = [];
+    for (const cell of frontier) {
+      for (const [dir, dx, dy] of LOBBY_STEPS) {
+        const x = cell.x + dx;
+        const y = cell.y + dy;
+        const key = `${x},${y}`;
+        if (seen.has(key) || !isFactoryLobbyCellWalkable(x, y)) continue;
+        seen.add(key);
+        const first = cell.first ?? dir;
+        if (x === to.x && y === to.y) return first;
+        next.push({ x, y, first });
+      }
+    }
+    frontier = next;
+  }
+  return null;
 }
