@@ -63,7 +63,7 @@ function run(seed: number, streak: number, moveIdx: number) {
   let guard = 0;
   while (guard++ < 2500) {
     const sel = state.battleForcedPartySelect;
-    const keys = (sel && frame % 8 === 1) ? [sel.sendOutElapsed === null ? (sel.cursor === "onix" || sel.cursor === sel.current ? "DOWN" : "A") : "A"] : [];
+    const keys = (sel && frame % 8 === 1) ? [sel.sendOutElapsed === null ? ((typeof sel.cursor === "number" ? !sel.party[sel.cursor]!.legal : (sel.cursor as string) === "onix") || sel.cursor === sel.current ? "DOWN" : "A") : "A"] : [];
     step(keys as any);
     if (P !== null && frame - P > 880) break;
   }

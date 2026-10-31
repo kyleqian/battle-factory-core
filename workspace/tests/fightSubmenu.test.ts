@@ -359,7 +359,7 @@ describe("battleMenu: FIGHT submenu wired through core.ts's tick() (JOY_NEW gati
           forcedPartySelect: {
             ...resolutionOwner.forcedPartySelect!,
             elapsed: 500,
-            cursor: "magby",
+            cursor: 1,
             submenuOpen: true,
             sendOutElapsed: 310,
           },

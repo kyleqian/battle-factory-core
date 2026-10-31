@@ -13615,9 +13615,11 @@ function drawTurn15ExitObjSubset(fb: Uint8Array, oam: Mode0Oam[]): void {
 const TURN15_CANONICAL_PARTY_SPECIES = ["ONIX", "MAGBY", "BAYLEEF"] as const;
 
 export function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
+  // The harvested canonical chrome covers the anchor's two cursor positions (slot 0 / 1); slot 2 and CANCEL draw through the
+  // source-composed renderer like every non-canonical party.
   if (state.party.some((member, index) =>
     member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
-  )) {
+  ) || (state.cursor !== 0 && state.cursor !== 1)) {
     renderBattlePartySelect(fb, battlePartySelectStateForForcedParty(state));
     return;
   }

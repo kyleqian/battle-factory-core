@@ -1007,7 +1007,9 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
       legalPartyIndexes: [2],
     });
 
-    // The second replacement still reaches an ordinary player command.
+    // The second replacement still reaches an ordinary player command. The
+    // menu opens on slot 0 (InitPartyMenu keepCursorPos=FALSE) whichever slot
+    // fainted, so the only legal slot, 2, is two DOWNs away.
     for (
       let budget = 0;
       budget < 400 && state.battleForcedPartySelect!.elapsed < 140;
@@ -1015,7 +1017,10 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     ) {
       state = advanceFactoryRoundBattleResolution(state);
     }
+    expect(state.battleForcedPartySelect?.cursor).toBe(0);
     state = advanceFactoryRoundBattleResolution(state, new Set(["DOWN"]));
+    state = advanceFactoryRoundBattleResolution(state, new Set(["DOWN"]));
+    expect(state.battleForcedPartySelect?.cursor).toBe(2);
     state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
     state = advanceFactoryRoundBattleResolution(state, new Set(["A"]));
     expect(state.battleForcedPartySelect?.sendOutElapsed).toBe(0);

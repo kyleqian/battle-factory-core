@@ -28,6 +28,7 @@ import type { BattleStatus } from "./battleScenario.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
 import type { PartySelectState } from "./partySelect.ts";
+import { movePartyMenuCursor, partyMenuDirection, type PartyMenuCursor } from "./partyMenuCursor.ts";
 import type { RgbColor } from "./bg.ts";
 import { blendComponentToBlack } from "./paletteFade.ts";
 import { fillFramebuffer, setPixel } from "./framebuffer.ts";
@@ -42,7 +43,7 @@ import {
 export const PARTY_NO_ENERGY_LINE_1_SUFFIX = " has no energy";
 export const PARTY_NO_ENERGY_LINE_2 = "left to battle!";
 
-export type BattlePartySelectCursor = 0 | 1 | 2 | "cancel";
+export type BattlePartySelectCursor = PartyMenuCursor;
 
 /**
  * Primary (non-volatile) status as a party-menu status-icon variant name,
@@ -368,11 +369,8 @@ export function battlePartySelectClosePhase(
 export function battlePartySelectStateForForcedParty(
   forced: PartySelectState,
 ): BattlePartySelectState {
-  const selectedPartyIndex = forced.cursor === "onix"
-    ? forced.request.faintedPartyIndex
-    : forced.request.legalPartyIndexes[0]!;
-  if (selectedPartyIndex > 2) {
-    return fail(`forced cursor points outside the three-mon party: ${selectedPartyIndex}`);
+  if (forced.cursor !== "cancel" && forced.cursor > 2) {
+    return fail(`forced cursor points outside the three-mon party: ${forced.cursor}`);
   }
   const rows = forced.party.map((member): BattlePartySelectRow => Object.freeze({
     partyIndex: member.partyIndex,
@@ -392,8 +390,8 @@ export function battlePartySelectStateForForcedParty(
   return Object.freeze({
     requestId: forced.request.requestId,
     rows: Object.freeze(rows),
-    cursor: selectedPartyIndex as 0 | 1 | 2,
-    rightColumnCursor: selectedPartyIndex === 2 ? 2 : 1,
+    cursor: forced.cursor,
+    rightColumnCursor: forced.rightColumnCursor,
     submenuOpen:
       forced.submenuOpen
       && (forced.sendOutElapsed === null || forced.sendOutElapsed === 0),
@@ -510,30 +508,6 @@ export function battlePartyNoEnergyMessage(row: BattlePartySelectRow): string {
   return `${row.name}${PARTY_NO_ENERGY_LINE_1_SUFFIX}\n${PARTY_NO_ENERGY_LINE_2}`;
 }
 
-function moveCursor(
-  state: BattlePartySelectState,
-  direction: "UP" | "DOWN" | "LEFT" | "RIGHT",
-): Pick<BattlePartySelectState, "cursor" | "rightColumnCursor"> {
-  const { cursor } = state;
-  if (direction === "UP") {
-    if (cursor === 0) return { cursor: "cancel", rightColumnCursor: state.rightColumnCursor };
-    if (cursor === "cancel") return { cursor: 2, rightColumnCursor: 2 };
-    return { cursor: (cursor - 1) as 0 | 1, rightColumnCursor: cursor === 2 ? 1 : state.rightColumnCursor };
-  }
-  if (direction === "DOWN") {
-    if (cursor === "cancel") return { cursor: 0, rightColumnCursor: state.rightColumnCursor };
-    if (cursor === 2) return { cursor: "cancel", rightColumnCursor: 2 };
-    return { cursor: (cursor + 1) as 1 | 2, rightColumnCursor: (cursor + 1) as 1 | 2 };
-  }
-  if (direction === "LEFT" && cursor !== 0 && cursor !== "cancel") {
-    return { cursor: 0, rightColumnCursor: cursor };
-  }
-  if (direction === "RIGHT" && cursor === 0) {
-    return { cursor: state.rightColumnCursor, rightColumnCursor: state.rightColumnCursor };
-  }
-  return { cursor, rightColumnCursor: state.rightColumnCursor };
-}
-
 /** Source-shaped list/submenu input for a three-mon singles Factory party. */
 export function advanceBattlePartySelect(
   state: BattlePartySelectState,
@@ -585,10 +559,9 @@ export function advanceBattlePartySelect(
   if (newKeys.has("A")) {
     return Object.freeze({ ...next, submenuOpen: true, submenuOpened: true });
   }
-  const direction = (["UP", "DOWN", "LEFT", "RIGHT"] as const)
-    .find((button) => newKeys.has(button));
+  const direction = partyMenuDirection(newKeys);
   if (direction === undefined) return next;
-  const moved = Object.freeze({ ...next, ...moveCursor(state, direction) });
+  const moved = Object.freeze({ ...next, ...movePartyMenuCursor(state, direction) });
   // AnimatePartySlot(newSlotId, 1): the moved-to slot starts bouncing on this
   // edge, so its bounce phase resets at the new elapsed.
   return moved.cursor === state.cursor
@@ -1239,13 +1212,21 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
     // (1,17), 21x2 = px (8,136)-(176,152); the frame is one tile around. Uses
     // the party-menu message-window frame style (frame1 tiles, olive corner).
     drawStandardWindowFrame(fb, 0, 128, 21, 2, PARTY_MESSAGE_WINDOW_PALETTE);
-    const message = state.message ?? "Choose a POKéMON.";
-    const [line1, line2] = message.split("\n");
-    drawStandardWindowText(fb, line1!, 8, 137);
-    if (line2) drawStandardWindowText(fb, line2, 8, 153);
+    drawStandardWindowText(fb, "Choose a POKéMON.", 8, 137);
     if (state.cursor === "cancel") drawStandardWindowText(fb, "▶ CANCEL", 168, 145);
   }
   if (!submenuVisible) drawCancelWindow(fb);
+  if (state.message !== null) {
+    // A refusal ("X has no energy / left to battle!", "X is already / in battle!") is DisplayPartyMenuMessage's
+    // PrintMessage into WIN_MSG (sSinglePartyMenuWindowTemplate[WIN_MSG]: bg 2, tilemap (1,15), 28x4 = px (8,120)-(232,152))
+    // behind the standard frame (DrawStdFrameWithCustomTileAndPalette(WIN_MSG, FALSE, 0x4F, 13)): two text rows over the
+    // "Choose a POKéMON." box and the CANCEL button, the same drawing the canonical forced route uses
+    // (battleScene.ts drawTurn15PartySelectList). The 21x2 box clipped the second line.
+    drawStandardWindowFrame(fb, 0, 112, 28, 4);
+    const [line1, line2] = state.message.split("\n");
+    drawStandardWindowText(fb, line1!, 8, 121);
+    if (line2) drawStandardWindowText(fb, line2, 8, 137);
+  }
 }
 
 /**

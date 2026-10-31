@@ -15,7 +15,7 @@ for (const r of routes.BATON_PASS.slice(0, 2)) {
   const seen: string[] = []; let key = "";
   for (let i = 0; i < 1500; i += 1) {
     const sel = state.battleForcedPartySelect;
-    const keys = new Set(i % 8 === 1 ? (sel && sel.sendOutElapsed === null ? [sel.cursor === "onix" ? "DOWN" : "A"] : ["A"]) : []) as any; // cursor starts on the current slot: DOWN to a legal pick, then A (send-out confirm)
+    const keys = new Set(i % 8 === 1 ? (sel && sel.sendOutElapsed === null ? [(typeof sel.cursor === "number" ? sel.cursor === "cancel" || !sel.party[sel.cursor]!.legal : (sel.cursor as string) === "onix") ? "DOWN" : "A"] : ["A"]) : []) as any; // cursor starts on the current slot: DOWN to a legal pick, then A (send-out confirm)
     try { state = state.battleResolutionPresentation ? advanceFactoryRoundBattleResolution(state, keys) : advanceFactoryRoundBattleCommand(state, keys); } catch (e) { console.log("  stop:", String(e).slice(0, 100)); break; }
     if (i % 150 === 0) { const f = state.battleForcedPartySelect; console.log("   tick", i, f ? JSON.stringify({ open: f.openElapsed, cursor: f.cursor, send: f.sendOutElapsed, keys: Object.keys(f).slice(0, 14) }) : "no selector"); }
     const q = state.battleResolutionPresentation; if (!q) { if (key !== "none") { key = "none"; seen.push(`(no resolution; command presentation ${state.battleCommandPresentation?.lifecycle.phase})@${i}`); } continue; }

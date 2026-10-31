@@ -125,7 +125,9 @@ for (let seed = from!; seed <= to!; seed += 1) {
   const until = (p: () => boolean) => {
     while (!ended && !p()) {
       const s = forcedSelector();
-      if (s) { pulse(s.message !== null ? "A" : s.cursor === "onix" && !s.submenuOpen ? "DOWN" : "A"); continue; }
+      // Forced party menu: DOWN until the cursor rests on a legal replacement, then A (submenu), A (SHIFT). Works on both cursor
+      // models: the two-position "onix" / "magby" one and the ROM's 0 / 1 / 2 / "cancel" one (the fainted slot refuses with a message).
+      if (s) { pulse(s.message !== null ? "A" : (!s.submenuOpen && (typeof s.cursor === "number" ? !s.party[s.cursor]!.legal : (s.cursor as string) !== "magby")) ? "DOWN" : "A"); continue; }
       step((state.battleStartIntro && frame % 16 === 0)
         || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0) ? ["A"] : []);
     }

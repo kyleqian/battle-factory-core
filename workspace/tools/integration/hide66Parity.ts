@@ -57,7 +57,7 @@ function play(scene: "on" | "off") {
     while (!ended && !p()) {
       const sel = state.battleForcedPartySelect;
       if (sel && sel.sendOutElapsed === null && sel.elapsed >= PARTY_LIST_INPUT_ELAPSED) {
-        pulse(sel.message !== null ? "A" : sel.cursor === "onix" && !sel.submenuOpen ? "DOWN" : "A"); continue;
+        pulse(sel.message !== null ? "A" : (!sel.submenuOpen && (typeof sel.cursor === "number" ? !sel.party[sel.cursor]!.legal : (sel.cursor as string) !== "magby")) ? "DOWN" : "A"); continue;
       }
       step((state.battleStartIntro && frame % 16 === 0) || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0) ? ["A"] : []);
     }

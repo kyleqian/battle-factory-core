@@ -127,7 +127,7 @@ export function sgl138Battle(seed: number, scene: "on" | "off"): { commands: Sgl
     while (!ended && !predicate()) {
       const selector = forcedSelector();
       if (selector) {
-        pulse(selector.message !== null ? "A" : selector.cursor === "onix" && !selector.submenuOpen ? "DOWN" : "A");
+        pulse(selector.message !== null ? "A" : (!selector.submenuOpen && (typeof selector.cursor === "number" ? !selector.party[selector.cursor]!.legal : (selector.cursor as string) !== "magby")) ? "DOWN" : "A");
         continue;
       }
       step((state.battleStartIntro && frame % 16 === 0)
