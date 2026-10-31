@@ -2168,7 +2168,7 @@ export function createBattleResolutionPresentationRenderView(
       const castform = command.animation === "CASTFORM_CHANGE";
       effect = Object.freeze({
         type: "general-animation", battler: command.battler, animation: command.animation,
-        age: state.lifecycle.phaseElapsed - (castform ? CASTFORM_CHANGE_LEAD_FRAMES : 1),
+        age: state.lifecycle.phaseElapsed - (castform ? CASTFORM_CHANGE_LEAD_FRAMES + (command.castformLeadExtra ?? 0) : 1),
         ...(castform ? { castformForm: command.castformForm ?? 0 } : {}),
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });

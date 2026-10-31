@@ -37,6 +37,13 @@ export const LIVE_TRANSFORM_SWAP_ROW = 50;
  */
 export const CASTFORM_CHANGE_LEAD_FRAMES = 5;
 export const CASTFORM_CHANGE_COMMAND_FRAMES = 117;
+/**
+ * cff232: BattleScript_WeatherFormChanges runs `trycastformdatachange` for battler 0 then 1, one script command per frame
+ * (addbyte, jumpifbytenotequal, trycastformdatachange): a CASTFORM at battler 1 starts its morph 3 rows later than at battler 0
+ * (battle-scene-off lab, Rain Dance: weather print 104, morph command 190 = +86 against +83 for battler 0; the same +86 on the
+ * battle-scene-on lab). Applied to Scene OFF only here; the Scene ON command keeps its pre-cff232 timing.
+ */
+export const CASTFORM_CHANGE_WEATHER_LOOP_FRAMES = 3;
 const SPECIES_SPINDA = 308;
 const SPECIES_CASTFORM = 385;
 
