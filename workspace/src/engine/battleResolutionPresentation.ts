@@ -46,7 +46,7 @@ import { substituteFadeDuration } from "./liveSubstituteFade.ts";
 import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
 import { battleResolutionCommandDuration, battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
-import { CASTFORM_CHANGE_COMMAND_FRAMES } from "./liveTransform.ts";
+import { CASTFORM_CHANGE_COMMAND_FRAMES, CASTFORM_CHANGE_WEATHER_LOOP_FRAMES } from "./liveTransform.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
 import { seg127StatusSeGateFromEvents, seg127StatusSeGateRows } from "./seg127StatusSeGate.ts";
@@ -577,6 +577,8 @@ export type BattleResolutionPresentationCommand =
       animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE";
       /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
       castformForm?: number;
+      /** cff232: extra rows before the morph's lead (Scene OFF, a weather-loop change at battler 1); absent = 0. */
+      castformLeadExtra?: number;
       /**
        * lsd198: a LEECH_SEED_DRAIN whose event stream carries the kernel's animation receipt (Scene ON: General_LeechSeedDrain
        * plays); the render draws it as Move_ABSORB's body (battleResolutionPresentationRender.ts leechSeedDrainAbsorbEffect).
@@ -4461,20 +4463,24 @@ export function projectBattleResolutionCommands(
       continue;
     }
     if (payload.kind === "animation" && payload.animationId === "CASTFORM_CHANGE") {
-      // cff230: Scene ON plays General_CastformChange (Scene OFF keeps its rows as before); behind a Substitute the ROM skips it.
+      // cff230 / cff232: General_CastformChange plays in both scenes (Cmd_docastformchangeanimation has no NO_ANIMATIONS test and the
+      // oracle shows the same 117 rows with Scene OFF); behind a Substitute the ROM skips it.
       const argument = Number(payload.arguments[0]);
       if (
-        (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0
-        && Number.isInteger(argument) && (argument & CASTFORM_CHANGE_SUBSTITUTE) === 0
+        Number.isInteger(argument) && (argument & CASTFORM_CHANGE_SUBSTITUTE) === 0
         && (payload.battler === 0 || payload.battler === 1)
       ) {
+        // cff232: the weather loop's battler-1 iteration (the weather print is the event right before; a send-in's is not) costs 3 rows.
+        const extra = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && payload.battler === 1
+          && events[index - 1]?.payload.kind === "message" ? CASTFORM_CHANGE_WEATHER_LOOP_FRAMES : 0;
         commands.push(Object.freeze({
           type: "general-animation",
           eventSequence: event.sequence,
           battler: payload.battler,
           animation: "CASTFORM_CHANGE",
           castformForm: argument,
-          timing: Object.freeze({ minimumFrames: CASTFORM_CHANGE_COMMAND_FRAMES }),
+          ...(extra === 0 ? {} : { castformLeadExtra: extra }),
+          timing: Object.freeze({ minimumFrames: CASTFORM_CHANGE_COMMAND_FRAMES + extra }),
         }));
       }
       continue;

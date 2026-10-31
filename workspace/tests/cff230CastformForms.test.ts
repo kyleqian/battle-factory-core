@@ -53,10 +53,10 @@ describe("cff230: census route 950 (the player's CASTFORM turns ICE after the fo
     expect(hash[116]).toBe(after);
   });
 
-  it("Scene OFF projects no command (the kernel's events are the same); a Substitute-flagged argument projects none in Scene ON", () => {
+  it("Scene OFF projects the same command (cff232; tests/cff232CastformOff.test.ts), the kernel's events are the same; a Substitute-flagged argument projects none", () => {
     const off = cff230Route(950, false, 1, "off");
-    expect(off.segments[0]!.commands.some((c: BattleResolutionPresentationCommand) => c.type === "general-animation")).toBe(false);
-    // The kernel emits the same CASTFORM_CHANGE in Scene OFF (it keeps its rows there: byte-identical OFF).
+    expect(off.segments[0]!.commands.filter((c: BattleResolutionPresentationCommand) => c.type === "general-animation").map((c: any) => c.animation)).toEqual(["CASTFORM_CHANGE"]);
+    // The kernel emits the same CASTFORM_CHANGE in both scenes.
     const change = (events: readonly any[]) => events.filter((e) => e.payload.animationId === "CASTFORM_CHANGE").map((e) => e.payload.arguments);
     expect(change(off.segments[0]!.events)).toEqual(change(segment.events));
     const raw = segment.raw;

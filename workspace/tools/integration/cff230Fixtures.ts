@@ -25,6 +25,19 @@ export const boxHash = (rgba: ArrayLike<number>, [bx, by, bw, bh]: [number, numb
   return h.digest("hex").slice(0, 12);
 };
 
+/** ROM (top) over ours (bottom), each cropped to `box`, 12 columns. */
+export const writeStripPng = (path: string, box: [number, number, number, number], strip: { r: Uint8Array; o: Uint8Array }[]) => {
+  const [bx, by, bw, bh] = box; const cols = 12;
+  const out = new PNG({ width: cols * bw, height: Math.ceil(strip.length / cols) * bh * 2 });
+  out.data.fill(255);
+  strip.forEach((f, k) => {
+    const ox = (k % cols) * bw, oy = Math.floor(k / cols) * bh * 2;
+    for (const [row, data] of [[0, f.r], [1, f.o]] as const) for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) for (let ch = 0; ch < 4; ch++)
+      out.data[((oy + row * bh + y) * out.width + ox + x) * 4 + ch] = data[((by + y) * 240 + bx + x) * 4 + ch]!;
+  });
+  writeFileSync(path, PNG.sync.write(out));
+};
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   for (const c of CFF230_CLASSES) {
     const seg = cff230Route(c.seed, true, 1).segments[0]!;
@@ -36,15 +49,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       if (k % 6 === 0) strip.push({ r: png.data, o: seg.frames[first + k]!.rgba });
     }
     const mismatched = rom.filter((h, k) => h !== ours[k]).length;
-    const [bx, by, bw, bh] = c.box; const cols = 12;
-    const out = new PNG({ width: cols * bw, height: Math.ceil(strip.length / cols) * bh * 2 });
-    out.data.fill(255);
-    strip.forEach((f, k) => {
-      const ox = (k % cols) * bw, oy = Math.floor(k / cols) * bh * 2;
-      for (const [row, data] of [[0, f.r], [1, f.o]] as const) for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) for (let ch = 0; ch < 4; ch++)
-        out.data[((oy + row * bh + y) * out.width + ox + x) * 4 + ch] = data[((by + y) * 240 + bx + x) * 4 + ch]!;
-    });
-    writeFileSync(`tools/integration/fixtures/castform-forms/${c.name}.png`, PNG.sync.write(out));
+    writeStripPng(`tools/integration/fixtures/castform-forms/${c.name}.png`, c.box, strip);
     writeFileSync(`tools/integration/fixtures/castform-forms/${c.name}.json`, JSON.stringify({ ...c, rom: undefined, romFrames: `oracle battle-scene-on lab frames ${c.romStart}..${c.romStart + c.rows - 1}`, mismatchedRows: mismatched, romBoxHashes: rom }, null, 1) + "\n");
     console.log(c.name, "rows", c.rows, "mismatched", mismatched);
   }
