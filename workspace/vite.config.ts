@@ -50,7 +50,7 @@ export function resolveMaxWorkers(): number {
 // Stamp every served/built app with its commit so a played build's age is
 // visible on screen and inside exported session traces (the play-preview
 // worktree serves deliberately pinned checkouts; reports need attribution).
-function buildStamp(): string {
+export function buildStamp(): string {
   try {
     const commit = execSync("git rev-parse --short HEAD", {
       encoding: "utf8",
@@ -73,6 +73,23 @@ function buildStamp(): string {
   }
 }
 
+// Cloudflare static assets (the website that bundles this package) cap each
+// file at 25 MiB and the app used to be one 32 MB chunk, so the generated
+// JSON is grouped into named chunks, each well under 20 MB. Shared by the app
+// build and the library build (vite.lib.config.ts).
+export function manualChunks(id: string): string | undefined {
+  if (!id.endsWith(".json")) return undefined;
+  const at = id.indexOf("/src/");
+  if (at === -1) return undefined;
+  const rel = id.slice(at + 5);
+  if (rel.startsWith("assets/gen/")) {
+    return /battle-opponent-front-sprites|battle-back-sprites|party-mon-icons/.test(rel) ? "assets-sprites" : "assets-gen";
+  }
+  if (rel.startsWith("animation/assets/")) return "animation-assets";
+  if (rel.startsWith("data/gen/")) return rel.startsWith("data/gen/battle-script-") ? "data-battle-script" : "data-gen";
+  return undefined;
+}
+
 export default defineConfig({
   root: ".",
   define: {
@@ -81,6 +98,11 @@ export default defineConfig({
   build: {
     outDir: "dist",
     target: "es2022",
+    rollupOptions: {
+      output: {
+        manualChunks,
+      },
+    },
   },
   server: {
     port: 5173,

@@ -1,11 +1,29 @@
 {
-  "name": "pokeemerald-factory-run",
+  "name": "@pokebench/factory",
   "private": true,
   "version": "0.1.0",
+  "description": "Pokémon Emerald's Battle Factory, rebuilt in TypeScript and verified frame-by-frame against the ROM. Browser entry: mountFactoryGame; headless entry: replayChallenge.",
   "type": "module",
+  "types": "./dist-lib/index.d.ts",
+  "module": "./dist-lib/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist-lib/index.d.ts",
+      "import": "./dist-lib/index.js"
+    },
+    "./headless": {
+      "types": "./dist-lib/headless.d.ts",
+      "import": "./dist-lib/headless.js"
+    }
+  },
+  "files": [
+    "dist-lib"
+  ],
+  "sideEffects": false,
   "scripts": {
     "dev": "vite",
     "build": "NODE_OPTIONS=--max-old-space-size=8192 tsc -b && vite build",
+    "build:lib": "NODE_OPTIONS=--max-old-space-size=8192 vite build --config vite.lib.config.ts && NODE_OPTIONS=--max-old-space-size=8192 vite build --config vite.headless.config.ts",
     "typecheck": "NODE_OPTIONS=--max-old-space-size=8192 tsc -b",
     "preview": "vite preview",
     "test": "NODE_OPTIONS=--max-old-space-size=8192 vitest run --no-watch --pool=forks --testTimeout=20000",
@@ -28,6 +46,7 @@
     "extract:facility-class-lookups": "node --experimental-strip-types tools/extract/extract-facility-class-lookups.ts",
     "extract:frontier-trainer-pics": "node --experimental-strip-types tools/extract/extract-frontier-trainer-pics.ts",
     "extract:party-mon-icons": "node --experimental-strip-types tools/extract/extract-party-mon-icons.ts",
+    "extract:battle-sprite-palettes": "node --experimental-strip-types tools/extract/extract-battle-sprite-palettes.ts",
     "extract:party-menu-source": "node --experimental-strip-types tools/extract/extract-party-menu-source.ts",
     "compare:fire-punch-portable": "node --experimental-strip-types tools/compare/firePunchPortable.ts",
     "compare:ice-punch-portable": "node --experimental-strip-types tools/compare/firePunchPortable.ts tools/compare/fixtures/ice-punch-onix-grovyle.json",

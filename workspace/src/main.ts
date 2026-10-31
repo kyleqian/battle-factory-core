@@ -1,33 +1,24 @@
-// Entry point: a 240x160 GBA-shaped canvas on a fixed timestep, with the
-// __POKEBENCH__ test ABI. This template intentionally ships no game — the
-// roadmap's stages build the engine here. Keep the contract in AGENTS.md
-// true as you do: one game-surface element, exact 240x160 under ?pokebench=1.
+// Dev shell: a 240x160 GBA-shaped canvas driven by the game library
+// (src/lib.ts), plus the __POKEBENCH__ test ABI, the crash overlay and the
+// __POKEBENCH_SESSION__ export every browser test and tool depends on. The
+// game itself (loop, input trace, events) lives in the library; keep the
+// contract in AGENTS.md true: one game-surface element, exact 240x160 under
+// ?pokebench=1.
 
-import { buttonForKey, normalizeButtons, type GbaButton } from "./input.ts";
-import { createInitialState, render, tick as engineTick, SCREEN_WIDTH, SCREEN_HEIGHT } from "./engine/core.ts";
-import { SessionRecorder, type SessionContainedError, type SessionTrace } from "./sessionRecorder.ts";
-import {
-  clearContainedPresentationErrors,
-  containedPresentationErrorCount,
-  containedPresentationErrors,
-} from "./engine/presentationContainment.ts";
-import {
-  DEFAULT_PRESENTATION_RNG_SEED,
-  parsePresentationSeed,
-  presentationRngTraceMetadata,
-} from "./engine/presentationRngHost.ts";
+import { buttonForKey, type GbaButton } from "./input.ts";
+import { FRAME_HZ, mountFactoryGameInternal, SCREEN_HEIGHT, SCREEN_WIDTH } from "./lib.ts";
+import type { FactorySession } from "./factorySession.ts";
+import type { SessionContainedError, SessionTrace } from "./sessionRecorder.ts";
+import { DEFAULT_PRESENTATION_RNG_SEED, parsePresentationSeed } from "./engine/presentationRngHost.ts";
 import "./style.css";
 
-export { SCREEN_WIDTH, SCREEN_HEIGHT };
-// GBA video: 280896 cycles/frame at 2^24 Hz.
-export const FRAME_HZ = 16_777_216 / 280_896;
+export { FRAME_HZ, SCREEN_HEIGHT, SCREEN_WIDTH };
 
 // Injected by vite.config.ts; identifies the commit a played build came from
 // so stale-preview reports are attributable at a glance.
 const BUILD_STAMP: string =
   typeof __POKEBENCH_BUILD_STAMP__ === "string" ? __POKEBENCH_BUILD_STAMP__ : "dev";
 
-const held = new Set<GbaButton>();
 const battleScene = new URLSearchParams(location.search).get("battleScene") === "off" ? "off" : "on";
 const benchMode = new URLSearchParams(location.search).has("pokebench");
 // Presentation-only Random2 seed (docs/presentation-rng.md): `presentationSeed=<hex>` pins it;
@@ -40,8 +31,6 @@ function choosePresentationSeed(): number {
   return crypto.getRandomValues(new Uint32Array(1))[0]!;
 }
 const presentationSeed = choosePresentationSeed();
-let state = createInitialState({ battleScene, presentationSeed });
-const recorder = new SessionRecorder();
 
 const app = document.querySelector<HTMLDivElement>("#app")!;
 const canvas = document.createElement("canvas");
@@ -52,8 +41,6 @@ canvas.style.width = benchMode ? `${SCREEN_WIDTH}px` : `${SCREEN_WIDTH * 3}px`;
 canvas.style.height = benchMode ? `${SCREEN_HEIGHT}px` : `${SCREEN_HEIGHT * 3}px`;
 canvas.style.imageRendering = "pixelated";
 app.appendChild(canvas);
-const ctx = canvas.getContext("2d")!;
-const imageData = ctx.createImageData(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 if (!benchMode) {
   const stamp = document.createElement("div");
@@ -70,59 +57,10 @@ if (!benchMode) {
   app.appendChild(modeLink);
 }
 
-function draw(): void {
-  imageData.data.set(render(state));
-  ctx.putImageData(imageData, 0, 0);
-}
-
-// contain209: presentation throws the engine contained (presentationContainment.ts) -- the battle went on with that command
-// drawn static. Each is console.error'd once and rides along in the session export.
-const containedErrors: SessionContainedError[] = [];
-let containedSeen = 0;
-function collectContainedErrors(): void {
-  const count = containedPresentationErrorCount();
-  if (count === containedSeen) return;
-  for (const entry of containedPresentationErrors()) {
-    if (entry.ordinal <= containedSeen) continue;
-    const stamped = Object.freeze({ ...entry, frame: recorder.frameCount });
-    containedErrors.push(stamped);
-    console.error("POKEBENCH contained presentation error (the battle continues; copy __POKEBENCH_SESSION__()):", stamped);
-  }
-  containedSeen = count;
-}
-
-function tick(buttons: ReadonlySet<GbaButton>): void {
-  recorder.recordTick(buttons);
-  state = engineTick(state, buttons);
-  draw();
-  collectContainedErrors();
-}
-draw();
-
-function currentSessionTrace(error?: unknown): SessionTrace {
-  return recorder.toTrace({
-    appRoute: state.appRoute,
-    battleScene,
-    build: BUILD_STAMP,
-    presentationRng: presentationRngTraceMetadata(state.presentationRng),
-    error,
-    containedErrors,
-  });
-}
-
-// The session trace is always exportable, not just on a crash: when a played
-// moment merely LOOKS wrong, `__POKEBENCH_SESSION__()` in the console yields
-// a deterministic replay of the whole session up to that moment.
-(window as unknown as Record<string, unknown>).__POKEBENCH_SESSION__ = () =>
-  currentSessionTrace();
-
-let crashed = false;
-function showCrashOverlay(error: unknown): void {
-  crashed = true;
-  const trace = currentSessionTrace(error);
+function showCrashOverlay(error: unknown, session: FactorySession): void {
+  const trace = session.toTrace(error);
   const json = JSON.stringify(trace);
   (window as unknown as Record<string, unknown>).__POKEBENCH_CRASH__ = trace;
-  console.error("POKEBENCH CRASH — replayable session trace:", json, error);
 
   const overlay = document.createElement("div");
   overlay.dataset.testid = "crash-overlay";
@@ -161,38 +99,31 @@ function showCrashOverlay(error: unknown): void {
   document.body.appendChild(overlay);
 }
 
+// The library owns the frame loop, the input trace and the contained-error
+// bookkeeping; the shell only wires the keyboard and the test ABI to it.
+const game = mountFactoryGameInternal({
+  canvas,
+  battleScene,
+  presentationSeed,
+  onCrash: showCrashOverlay,
+});
+
 window.addEventListener("keydown", (event) => {
   const button = buttonForKey(event.key);
   if (button) {
-    held.add(button);
+    if (!event.repeat) game.press(button);
     event.preventDefault();
   }
 });
 window.addEventListener("keyup", (event) => {
   const button = buttonForKey(event.key);
-  if (button) held.delete(button);
+  if (button) game.release(button as GbaButton);
 });
 
-let last = performance.now();
-let accumulator = 0;
-const FRAME_MS = 1000 / FRAME_HZ;
-function loop(now: number): void {
-  accumulator = Math.min(accumulator + (now - last), FRAME_MS * 8);
-  last = now;
-  while (accumulator >= FRAME_MS) {
-    // Crash containment lives HERE, not in tick(): the bench-mode advance()
-    // ABI must keep propagating engine throws to its caller unchanged.
-    try {
-      tick(held);
-    } catch (error) {
-      showCrashOverlay(error);
-      return; // stop the loop; the overlay owns the screen now
-    }
-    accumulator -= FRAME_MS;
-  }
-  if (!crashed) requestAnimationFrame(loop);
-}
-requestAnimationFrame(loop);
+// The session trace is always exportable, not just on a crash: when a played
+// moment merely LOOKS wrong, `__POKEBENCH_SESSION__()` in the console yields
+// a deterministic replay of the whole session up to that moment.
+(window as unknown as Record<string, unknown>).__POKEBENCH_SESSION__ = (): SessionTrace => game.sessionTrace();
 
 // Deterministic test ABI, mirrored from the pewter demo: reset() rewinds to
 // the real draft on the production generated route, advance() replays trace
@@ -200,26 +131,14 @@ requestAnimationFrame(loop);
 if (benchMode) {
   (window as unknown as Record<string, unknown>).__POKEBENCH__ = {
     reset(): void {
-      state = createInitialState({ battleScene, presentationSeed });
-      held.clear();
-      recorder.reset();
-      clearContainedPresentationErrors();
-      containedErrors.length = 0;
-      containedSeen = 0;
-      draw();
+      game.reset();
     },
     advance(segments: Array<{ frames: number; buttons?: string[] }>): void {
-      for (const segment of segments) {
-        const buttons = new Set(normalizeButtons(segment.buttons ?? []));
-        for (let index = 0; index < segment.frames; index += 1) tick(buttons);
-      }
-      draw();
-      collectContainedErrors();
+      game.advance(segments);
     },
     // contain209: the presentation throws contained so far (a contained throw never escapes advance()).
     containedErrors(): SessionContainedError[] {
-      collectContainedErrors();
-      return containedErrors.map((entry) => ({ ...entry }));
+      return game.containedErrors();
     },
   };
 }

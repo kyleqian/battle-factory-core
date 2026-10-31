@@ -6,8 +6,10 @@
  * bank is written by the reducers). All three arrays are identical at activation (prep16 s0.2, ROM banks 2-4/16/17).
  * Shiny battlers have no repo palette (genuinely missing): callers gate on `liveBattlerIsShiny`.
  */
-import backSprites from "../assets/gen/battle-back-sprites.json" with { type: "json" };
-import frontSprites from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
+// Palettes only (tools/extract/extract-battle-sprite-palettes.ts): this module is on the
+// gameplay tick path, and the full sprite tables (pixels) must stay out of the headless
+// library entry. tests/battleSpritePalettes.test.ts pins the file to the tables.
+import spritePalettes from "../assets/gen/battle-sprite-palettes.json" with { type: "json" };
 import battleBg from "../assets/gen/battle-bg.json" with { type: "json" };
 
 type Rgb = Readonly<{ r: number; g: number; b: number }>;
@@ -17,13 +19,13 @@ const bgr555 = (c: Rgb): number => (c.r >> 3) | (c.g >> 3) << 5 | (c.b >> 3) << 
 
 /** The composite for the two displayed species (symbolic names, e.g. "SOLROCK"), or null when an art asset is missing. */
 export function composeLivePalettes(playerSpecies: string, opponentSpecies: string): LivePaletteComposite | null {
-  const back = (backSprites as unknown as Record<string, { palette: Rgb[] }>)[playerSpecies];
-  const front = (frontSprites as unknown as Record<string, { palette: Rgb[] }>)[opponentSpecies];
+  const back = (spritePalettes.back as unknown as Record<string, Rgb[]>)[playerSpecies];
+  const front = (spritePalettes.front as unknown as Record<string, Rgb[]>)[opponentSpecies];
   if (!back || !front) return null;
   const out = new Array<number>(512).fill(0);
   const put = (bank: number, palette: readonly Rgb[]) => palette.forEach((c, i) => { out[bank * 16 + i] = bgr555(c); });
   const bg = (battleBg as unknown as { palette: Rgb[][] }).palette;
-  put(2, bg[0]!); put(3, bg[1]!); put(4, bg[2]!); put(16, back.palette); put(17, front.palette);
+  put(2, bg[0]!); put(3, bg[1]!); put(4, bg[2]!); put(16, back); put(17, front);
   return Object.freeze({ unfaded: out.slice(), faded: out.slice(), hardware: out.slice() });
 }
 

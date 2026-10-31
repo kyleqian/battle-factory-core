@@ -1,0 +1,249 @@
+// @pokebench/factory: the browser entry (contract v2, src/factoryContract.ts).
+// Mounts the game on a 240x160 canvas, runs the fixed-timestep frame loop,
+// turns button presses into the recorded input trace, fast-forwards a resumed
+// trace, and reports the challenge's events. The dev shell (src/main.ts) uses
+// mountFactoryGameInternal for its test ABI; hosts use mountFactoryGame.
+import { render, SCREEN_HEIGHT, SCREEN_WIDTH } from "./engine/core.ts";
+import type { FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
+import { ENGINE_BUILD, FactorySession } from "./factorySession.ts";
+import { normalizeButtons, type GbaButton } from "./input.ts";
+import type { SessionContainedError, SessionTrace } from "./sessionRecorder.ts";
+
+export type {
+  BattleScene,
+  FactoryEvent,
+  FactoryGame,
+  FactoryGameOptions,
+  GbaButton,
+  TraceSegment,
+} from "./factoryContract.ts";
+export { ENGINE_BUILD, SCREEN_HEIGHT, SCREEN_WIDTH };
+
+// GBA video: 280896 cycles/frame at 2^24 Hz.
+export const FRAME_HZ = 16_777_216 / 280_896;
+const FRAME_MS = 1000 / FRAME_HZ;
+/** Fast-forward work per animation frame while resuming, so the page stays responsive. */
+const RESUME_BUDGET_MS = 12;
+
+export interface MountInternalOptions extends FactoryGameOptions {
+  /** Replay `resume` inline inside the mount call instead of across animation frames. */
+  resumeSync?: boolean;
+  /** The dev shell's crash overlay: the error and the session it happened in. */
+  onCrash?: (error: unknown, session: FactorySession) => void;
+}
+
+export interface FactoryGameInternal extends FactoryGame {
+  readonly session: FactorySession;
+  /** Bench ABI: tick these runs synchronously; engine throws propagate to the caller unchanged. */
+  advance(segments: ReadonlyArray<{ frames: number; buttons?: readonly string[] }>): void;
+  /** Bench ABI: back to the challenge's first frame. */
+  reset(): void;
+  draw(): void;
+  sessionTrace(error?: unknown): SessionTrace;
+  containedErrors(): SessionContainedError[];
+}
+
+export function mountFactoryGame(options: FactoryGameOptions): FactoryGame {
+  const game = mountFactoryGameInternal(options);
+  return {
+    get engine() {
+      return game.engine;
+    },
+    get frame() {
+      return game.frame;
+    },
+    press: (button) => game.press(button),
+    release: (button) => game.release(button),
+    trace: (fromSegment) => game.trace(fromSegment),
+    destroy: () => game.destroy(),
+  };
+}
+
+export function mountFactoryGameInternal(options: MountInternalOptions): FactoryGameInternal {
+  const { canvas } = options;
+  canvas.width = SCREEN_WIDTH;
+  canvas.height = SCREEN_HEIGHT;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("mountFactoryGame: 2d canvas context unavailable");
+  const imageData = ctx.createImageData(SCREEN_WIDTH, SCREEN_HEIGHT);
+  const sessionOptions = {
+    battleScene: options.battleScene,
+    gameplaySeed: options.gameplaySeed,
+    presentationSeed: options.presentationSeed,
+  };
+  let session = new FactorySession(sessionOptions);
+  const held = new Set<GbaButton>();
+  /** Presses released before the next frame sampled them still count for one frame. */
+  const latched = new Set<GbaButton>();
+  const now = (): number => performance.now();
+  const mountedAt = now();
+  /** Animation-frame clock of the previous loop call; set on the first call so the two clocks never mix. */
+  let last: number | null = null;
+  let accumulator = 0;
+  let raf = 0;
+  let destroyed = false;
+  let crashed = false;
+  let readySent = false;
+  let resuming: { segments: TraceSegment[]; segment: number; frame: number; held: ReadonlySet<GbaButton> } | null = null;
+
+  const emit = (event: FactoryEvent): void => {
+    if (!destroyed) options.onEvent?.(event);
+  };
+
+  function draw(): void {
+    imageData.data.set(render(session.state));
+    ctx!.putImageData(imageData, 0, 0);
+  }
+
+  function sample(): ReadonlySet<GbaButton> {
+    const sampled = new Set(held);
+    for (const button of latched) sampled.add(button);
+    latched.clear();
+    return sampled;
+  }
+
+  function tickOnce(): void {
+    const events = session.tick(sample(), Math.round(now() - mountedAt));
+    for (const event of events) emit(event);
+  }
+
+  function crash(error: unknown): void {
+    crashed = true;
+    console.error("POKEBENCH CRASH — replayable session trace:", JSON.stringify(session.toTrace(error)), error);
+    options.onCrash?.(error, session);
+    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    options.onError?.({ message, frame: session.frame });
+  }
+
+  function beginResume(segments: TraceSegment[]): void {
+    resuming = { segments: segments.map((segment) => ({ ...segment, buttons: [...segment.buttons] })), segment: 0, frame: 0, held: new Set() };
+    nextResumeRun();
+  }
+
+  function nextResumeRun(): void {
+    if (!resuming) return;
+    const segment = resuming.segments[resuming.segment];
+    resuming.held = segment ? new Set(normalizeButtons(segment.buttons)) : new Set();
+    resuming.frame = 0;
+  }
+
+  /** Fast-forwards until the budget is spent; returns true once the whole trace has been replayed. */
+  function resumeStep(budgetMs: number): boolean {
+    if (!resuming) return true;
+    const deadline = now() + budgetMs;
+    while (resuming.segment < resuming.segments.length) {
+      const segment = resuming.segments[resuming.segment]!;
+      while (resuming.frame < segment.frames) {
+        session.replayStep(resuming.held);
+        resuming.frame += 1;
+        if (now() >= deadline) return false;
+      }
+      resuming.segment += 1;
+      nextResumeRun();
+    }
+    session.preloadTrace(resuming.segments);
+    resuming = null;
+    return true;
+  }
+
+  function loop(time: number): void {
+    if (destroyed || crashed) return;
+    if (resuming) {
+      try {
+        if (!resumeStep(RESUME_BUDGET_MS)) {
+          raf = requestAnimationFrame(loop);
+          return;
+        }
+      } catch (error) {
+        crash(error);
+        return;
+      }
+      last = time;
+      accumulator = 0;
+      draw();
+    }
+    if (!readySent) {
+      readySent = true;
+      emit({ type: "ready", frame: session.frame });
+    }
+    if (last === null) last = time;
+    accumulator = Math.min(accumulator + (time - last), FRAME_MS * 8);
+    last = time;
+    while (accumulator >= FRAME_MS) {
+      // Crash containment lives HERE, not in the session: the bench advance()
+      // ABI must keep propagating engine throws to its caller unchanged.
+      try {
+        tickOnce();
+      } catch (error) {
+        crash(error);
+        return;
+      }
+      accumulator -= FRAME_MS;
+    }
+    draw();
+    raf = requestAnimationFrame(loop);
+  }
+
+  if (options.resume && options.resume.length > 0) {
+    beginResume(options.resume);
+    if (options.resumeSync) {
+      try {
+        while (!resumeStep(Number.POSITIVE_INFINITY)) {
+          // resumeStep only returns false when the budget runs out.
+        }
+      } catch (error) {
+        crash(error);
+      }
+    }
+  }
+  draw();
+  if (!crashed) raf = requestAnimationFrame(loop);
+
+  return {
+    get engine() {
+      return ENGINE_BUILD;
+    },
+    get frame() {
+      return session.frame;
+    },
+    get session() {
+      return session;
+    },
+    press(button) {
+      held.add(button);
+      latched.add(button);
+    },
+    release(button) {
+      held.delete(button);
+    },
+    trace(fromSegment = 0) {
+      return session.trace(fromSegment);
+    },
+    advance(segments) {
+      for (const segment of segments) {
+        const buttons = new Set(normalizeButtons(segment.buttons ?? []));
+        for (let index = 0; index < segment.frames; index += 1) {
+          for (const event of session.tick(buttons)) emit(event);
+        }
+      }
+      draw();
+    },
+    reset() {
+      session = new FactorySession(sessionOptions);
+      held.clear();
+      latched.clear();
+      resuming = null;
+      readySent = false;
+      draw();
+    },
+    draw,
+    sessionTrace: (error) => session.toTrace(error),
+    containedErrors: () => session.containedErrors.map((entry) => ({ ...entry })),
+    destroy() {
+      destroyed = true;
+      cancelAnimationFrame(raf);
+      held.clear();
+      latched.clear();
+    },
+  };
+}

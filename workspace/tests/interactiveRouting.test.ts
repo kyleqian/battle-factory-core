@@ -240,9 +240,19 @@ describe("interactive battle routing", () => {
       new URL("../src/main.ts", import.meta.url),
       "utf8",
     );
-    // Startup and reset share the session presentation seed (docs/presentation-rng.md) and no route override.
-    expect(mainSource.match(/\bcreateInitialState\(\{ battleScene, presentationSeed \}\)/g)).toHaveLength(2);
+    const sessionSource = readFileSync(
+      new URL("../src/factorySession.ts", import.meta.url),
+      "utf8",
+    );
+    // The shell mounts the library with the scene and the session presentation seed
+    // (docs/presentation-rng.md) and no route override; the library's session builds its
+    // first state and its reset() state through the same createChallengeState(), which
+    // only ever passes the scene and presentation fields to createInitialState().
+    expect(mainSource).toMatch(/mountFactoryGameInternal\(\{\s*canvas,\s*battleScene,\s*presentationSeed,/);
     expect(mainSource).not.toContain("canonical-recorded");
+    expect(sessionSource.match(/\bcreateChallengeState\((this\.)?options\)/g)).toHaveLength(2);
+    expect(sessionSource).not.toMatch(/appRoute: "/);
+    expect(sessionSource).not.toContain("canonical-recorded");
   });
 
   it("routes a different lead and decision from its own species, moves, and PP", () => {

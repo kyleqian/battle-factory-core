@@ -15,6 +15,13 @@ export type SessionContainedError = ContainedPresentationError & Readonly<{ fram
 export interface RecordedSegment {
   frames: number;
   buttons: GbaButton[];
+  /**
+   * Wall-clock ms since mount at the run's first frame (library contract v2,
+   * src/factoryContract.ts). Only runs recorded with a timestamp carry it;
+   * toTrace() never exports it, so compare tooling and tests see the
+   * historical `{ frames, buttons }` shape unchanged.
+   */
+  t?: number;
 }
 
 export interface SessionTrace {
@@ -45,7 +52,7 @@ export class SessionRecorder {
   private frames = 0;
   private truncated = false;
 
-  recordTick(buttons: ReadonlySet<GbaButton>): void {
+  recordTick(buttons: ReadonlySet<GbaButton>, t?: number): void {
     this.frames += 1;
     if (this.truncated) return;
     const list = [...buttons].sort() as GbaButton[];
@@ -59,8 +66,43 @@ export class SessionRecorder {
       this.truncated = true;
       return;
     }
-    this.segments.push({ frames: 1, buttons: list });
+    this.segments.push(t === undefined ? { frames: 1, buttons: list } : { frames: 1, buttons: list, t });
     this.lastKey = key;
+  }
+
+  /**
+   * Seeds the log with runs that were already recorded elsewhere (a resumed
+   * challenge's server-side trace). They are kept verbatim -- never merged
+   * with each other or with the next live run -- so `segments(from)` keeps
+   * counting from the caller's offsets.
+   */
+  preload(segments: readonly RecordedSegment[]): void {
+    for (const segment of segments) {
+      if (this.segments.length >= MAX_SEGMENTS) {
+        this.truncated = true;
+        return;
+      }
+      this.segments.push(
+        segment.t === undefined
+          ? { frames: segment.frames, buttons: [...segment.buttons] }
+          : { frames: segment.frames, buttons: [...segment.buttons], t: segment.t },
+      );
+      this.frames += segment.frames;
+    }
+    this.lastKey = null;
+  }
+
+  /** Copies of the recorded runs from `fromSegment` on, timestamps included. */
+  segmentsFrom(fromSegment = 0): RecordedSegment[] {
+    return this.segments.slice(fromSegment).map((segment) =>
+      segment.t === undefined
+        ? { frames: segment.frames, buttons: [...segment.buttons] }
+        : { frames: segment.frames, buttons: [...segment.buttons], t: segment.t },
+    );
+  }
+
+  get segmentCount(): number {
+    return this.segments.length;
   }
 
   get frameCount(): number {

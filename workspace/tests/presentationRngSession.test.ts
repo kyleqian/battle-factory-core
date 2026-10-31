@@ -141,7 +141,9 @@ describe("presentation RNG on the ordinary playable route", () => {
     expect(main).toContain(`parsePresentationSeed(new URLSearchParams(location.search).get("presentationSeed"))`);
     expect(main).toContain("if (benchMode) return DEFAULT_PRESENTATION_RNG_SEED;");
     expect(main).toContain("crypto.getRandomValues(new Uint32Array(1))[0]!");
-    expect(main).toContain("presentationRng: presentationRngTraceMetadata(state.presentationRng)");
+    // The session export now lives in the library's session (src/factorySession.ts).
+    const session = readFileSync(new URL("../src/factorySession.ts", import.meta.url), "utf8");
+    expect(session).toContain("presentationRng: presentationRngTraceMetadata(this.state.presentationRng)");
     expect(main.indexOf("const benchMode")).toBeLessThan(main.indexOf("function choosePresentationSeed"));
   });
 });
