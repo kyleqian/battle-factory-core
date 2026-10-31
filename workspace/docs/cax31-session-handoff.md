@@ -71,11 +71,12 @@ cleanup step.
    `battleCommandFieldArt` embeds mon pics in presentation commands — fine
    for now, a bundle-hygiene item later.
    **Update 2026-10-31 ~21:45 UTC (Mac, after this run started):**
-   `worker/lib-v2-mac` moved from f43590bc4 to e4258ab03. Three commits fix
+   `worker/lib-v2-mac` moved from f43590bc4 to 532699911. Three commits fix
    two bugs the user hit on the website: the forced party menu after a faint
    now has the ROM's three-slot + CANCEL cursor and prints its refusals in the
    message window (fsw235, two commits), and Scene ON draws the end-of-turn
-   weather animations (Hail / Sandstorm / Rain / Sun continues, wth236). They
+   weather animations (Hail / Sandstorm / Rain / Sun continues, wth236); a
+   fourth (532699911) re-pins the 11 suite pins those changes moved. They
    touch `src/engine/` party-menu and presentation files, tests,
    `tools/soak/randomRoundSoakDriver.ts` and one-line pulse edits in
    `tools/integration` — none of the files the library fold edits (vite
