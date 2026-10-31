@@ -32,16 +32,66 @@ kept and is long-tail.
   (mid-battle, Roar, faint replacement, battle-start intro). Castform: the form-change morph is drawn in both scenes, 0 px vs the ROM
   on the measured classes (cff230 / cff232 / snd233).
 
-## Next work (in order) — see `docs/finish-plan.md` for acceptance
+## Next work (in order) — user re-aim 2026-10-31; see `docs/finish-plan.md` for acceptance
 
-1. **#146 / #143 visible remainders:** SHEDINJA genderless healthbox (3,016–4,170 px per send-in window), CASTFORM message region on
-   the faint path, ENTEI / KINGDRA glow-lag frame (D4 class), bso226 ONIX intro window; Castform "at"-role keys (Fly / Ice Ball /
-   Rest / Hail / Rain Dance / Scary Face), Flamethrower +7 alignment, revert / switch-out unmeasured.
-2. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both` (add a `--lobby-new-challenge` run);
-   Scene ON soak `--render-every 8` bulk plus a `--render-every 1` sample. Every overlay / pageerror becomes a fix step.
-3. **Production + cleanup** per the plan: cleanup steps 1–3 first; title screen; the Lobby attendant dialogue (nch231 skips it,
-   documented divergence).
-4. **Timing** residuals last (ISSUES #188, #189, the bso226 "Go!" wait on long front animations; exs207 refs kept).
+Phases 1 and 2 are met (ROADMAP "Current execution priority — 2026-10-31").
+Finish snd233 if it is green; do not brief further #146 / send-out / intro
+residual steps — they are timing residuals (item 5). This repo is now the
+**game core library**; a separate website repo (built from the Mac) owns
+login, streaks, menus, the on-screen pad and hosting — never brief those
+here. One worker at a time; each run folds the next item plus at least one
+cleanup step.
+
+1. **Core library API — first step of the next run.** `src/lib.ts` +
+   `mountFactoryGame` and `src/headless.ts` + `replayChallenge`, with the
+   exact **contract v2** in `docs/finish-plan.md` Phase 3 (names are fixed:
+   the website is built against them). No save blob: resume = seeds + input
+   trace fast-forward; `gameplaySeed` is the RNG start `--vary-rng` already
+   sets; the recorder's runs gain an optional wall-clock `t`. Vite lib build
+   with two entries + `package.json` `exports` (`@pokebench/factory`,
+   `@pokebench/factory/headless`); `src/main.ts` a thin shell over the
+   browser entry with every existing ABI / query / overlay unchanged. Gates:
+   typecheck, new tests (resume equality, headless replay == browser events
+   + digest), full suite + build, browser play both scenes, `npm pack`
+   importable from a scratch Vite app; report the headless entry's built size.
+   Emitted chunks must each stay under 20 MB (Cloudflare serves the package
+   as static assets, 25 MiB per file): split the generated sprite / tile /
+   species data with `manualChunks` or dynamic imports.
+   **A Mac session is building this step on branch `worker/lib-v2-mac`
+   (2026-10-31).** If that branch exists on this box when the run starts,
+   treat it as a finished worker: merge master into it, run the gates above
+   (full suite, build, census both scenes identical to master's, browser
+   play both scenes), fold it, and move on. Build it yourself only if the
+   branch is absent.
+2. **Audio (S11), re-opened by the user:** design step first (docs only; the
+   supervisor accepts it), then sound-event parity by census, then playback —
+   `docs/finish-plan.md` "Audio (S11)". Expect this to be the main program for
+   several runs; it alternates with cleanup, not with timing work.
+3. **Cleanup (one commit per step, each verified by typecheck + full suite +
+   build), in this order:** (1) delete one-off step scripts in
+   `tools/integration` / `tools/compare` and the fixtures only they read —
+   keep census, soak, compare, differential, probe runner, extract, preview,
+   play:random and anything a kept test imports; (2) root ledgers → README,
+   AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3
+   entries), the rest to `docs/archive/` unchanged; (3) remove Codex /
+   DeepSeek / OpenCode paths and the animation / rust lane supervisors — one
+   supervisor script, one worker launcher, Claude only (keep
+   `run-supervisor.sh --headless` and `tools/run-subagent.sh` working: the
+   daily cron depends on them); (5) `npm run test:gate` ≤ 5 min for workers
+   and drop frame-pin tests the census supersedes, full suite nightly; (4)
+   `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs`
+   + its adapter / tests; (6) prune merged `worker/*` refs; (7) evidence stops
+   going into git.
+4. **Bundle hygiene** (rest of Phase 3): test-only JSON out of `src/`, lazy-loaded sprite sheets and large tables, gamepad
+   input through the library's `press` / `release`.
+5. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
+   `--lobby-new-challenge` run); Scene ON soak
+   `--render-every 8` 0:30 plus a `--render-every 1` sample; varied-RNG sweeps; vanilla both scenes. Every overlay / pageerror /
+   CRASH / HANG becomes a fix step before anything else.
+6. **Timing / visible residuals** last, never while items 1–4 have ready work: #146 / #143 remainders (SHEDINJA genderless
+   healthbox, CASTFORM message region on the faint path, ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform
+   "at"-role keys, Flamethrower +7 alignment, revert / switch-out unmeasured), #188, #189, the bso226 "Go!" wait, the Lobby
+   attendant dialogue (nch231 skips it); exs207 refs kept.
 
 **Host note (2026-10-28):** two workers at once on 16 GiB caused repeated OOM kills (each worker's full suite / census plus a
 supervisor build). Keep ONE worker at a time; the launcher allows one per lane, so a second worker needs another lane anyway.
