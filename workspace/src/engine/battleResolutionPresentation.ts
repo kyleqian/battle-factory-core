@@ -577,7 +577,7 @@ export type BattleResolutionPresentationCommand =
       animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE";
       /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
       castformForm?: number;
-      /** cff232: extra rows before the morph's lead (Scene OFF, a weather-loop change at battler 1); absent = 0. */
+      /** cff232 / snd233: extra rows before the morph's lead (a weather-loop change at battler 1, both scenes); absent = 0. */
       castformLeadExtra?: number;
       /**
        * lsd198: a LEECH_SEED_DRAIN whose event stream carries the kernel's animation receipt (Scene ON: General_LeechSeedDrain
@@ -4471,8 +4471,7 @@ export function projectBattleResolutionCommands(
         && (payload.battler === 0 || payload.battler === 1)
       ) {
         // cff232: the weather loop's battler-1 iteration (the weather print is the event right before; a send-in's is not) costs 3 rows.
-        const extra = (beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) !== 0 && payload.battler === 1
-          && events[index - 1]?.payload.kind === "message" ? CASTFORM_CHANGE_WEATHER_LOOP_FRAMES : 0;
+        const extra = payload.battler === 1 && events[index - 1]?.payload.kind === "message" ? CASTFORM_CHANGE_WEATHER_LOOP_FRAMES : 0;
         commands.push(Object.freeze({
           type: "general-animation",
           eventSequence: event.sequence,
