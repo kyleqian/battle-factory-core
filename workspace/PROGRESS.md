@@ -55,6 +55,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   0:6 `--render-every 1` **6 / 6**; browser goal play `--lobby-new-challenge` 3 min / scene: ON 8 battles, OFF 17, 2 new challenges
   from the Lobby each, **0 page errors / overlays / contained / divergences**. The 0:60 full / winning / winning-swap gates were not
   run (hours each here; same practice as earlier sessions).
+  Extra: Scene ON `--policy full --vary-rng` 0:16 `--render-every 8` on `9670f00cc` **16 / 16** (all `budget`).
 - **Scout:** shd234 (read-only, 06:32): the SHEDINJA send-in healthbox residual is a compare-harness maxHP bug (no SHEDINJA max-HP-1
   rule), not the renderer; `factoryCorpusParty.ts:291` has the same omission, unverified downstream (ISSUES #146). Launched before I
   saw the user's mid-session re-aim; it made no edits.
