@@ -4,6 +4,9 @@ import {
   liveMovePresentationRngBodyKey, liveMoveRandom2Plan, type LiveMovePresentationRngInput, type LiveMoveRandom2PlanContext,
 } from "./liveMovePresentationRng.ts";
 import type { PresentationRngHost } from "./presentationRngHost.ts";
+import {
+  isWeatherContinuesAnimation, WEATHER_CONTINUES_BODY_ROWS, WEATHER_CONTINUES_LAUNCH_LEAD_ROWS, WEATHER_CONTINUES_MOVE_IDS,
+} from "./battleResolutionPresentation.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { liveSubstituteSwapApplies, substituteSwapTailFieldArt } from "./liveSubstituteSwap.ts";
@@ -1521,6 +1524,37 @@ function leechSeedDrainAbsorbEffect(
     ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
   });
 }
+/**
+ * wth236: an end-turn weather animation (General_Rain / Sun / Sandstorm / Hail) over the field: the weather move's own body
+ * (Rain Dance 240 / Sunny Day 241 / Sandstorm 201 / Hail 258) launched from the general table, with the ROM's battler 0 as the
+ * attacker. Command age a = ROM row X + 1 + a (X = the playanimation row); the script is active from X + 2, so the body's age is
+ * a - 1 for WEATHER_CONTINUES_BODY_ROWS rows; before and after it the field stands as it is (null).
+ */
+function weatherContinuesBodyEffect(
+  command: Extract<BattleResolutionPresentationCommand, { type: "general-animation" }>,
+  state: BattleResolutionPresentationState,
+  presentationRngHost: LiveMovePresentationRngInput["host"] | undefined,
+): BattleResolutionRenderEffect | null {
+  if (!isWeatherContinuesAnimation(command.animation)) return null;
+  const age = state.lifecycle.phaseElapsed - WEATHER_CONTINUES_LAUNCH_LEAD_ROWS;
+  if (age < 0 || age >= WEATHER_CONTINUES_BODY_ROWS[command.animation]) return null;
+  const request: BattleMoveAnimationRequest = Object.freeze({
+    moveId: WEATHER_CONTINUES_MOVE_IDS[command.animation], attacker: command.battler, target: command.battler === 0 ? 1 : 0,
+    turn: 0, power: 0, damage: 0, friendship: 0, multihit: 0,
+  });
+  return Object.freeze({
+    type: "move", request, age,
+    paletteInput: state.liveMovePaletteInput,
+    spriteAllocatorInput: state.liveMoveSpriteAllocatorInput,
+    spriteOrderInput: state.liveMoveSpriteOrderInput,
+    ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
+    // General_Rain's raindrops are a Random2 body (liveMovePresentationRng.ts): the session host + this command's key.
+    ...(liveMoveRandom2Plan(request) === null && state.liveMoveSpriteOrderInput?.deferred === undefined ? {} : {
+      presentationRng: Object.freeze({ host: presentationRngHost ?? null, key: liveMovePresentationRngBodyKey(state) }),
+    }),
+  });
+}
+
 export function battleResolutionCommandDuration(
   command: BattleResolutionPresentationCommand,
   field: BattleResolutionDisplayedField,
@@ -2193,6 +2227,12 @@ export function createBattleResolutionPresentationRenderView(
         age: state.lifecycle.phaseElapsed - (command.timing.seGateFrames ?? 0),
         ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
         ...(previous?.type === "status" && previous.battler === command.battler ? { inflicted: true as const } : {}),
+      });
+    } else if (command.type === "general-animation" && command.animated === true && isWeatherContinuesAnimation(command.animation)) {
+      // wth236: the weather body, else the field as it is (the launch lead and tail rows).
+      effect = weatherContinuesBodyEffect(command, state, presentationRngHost) ?? Object.freeze({
+        type: "general-animation", battler: command.battler, animation: command.animation, age: state.lifecycle.phaseElapsed - 1,
+        ...(state.liveMoveBattlerX2Input === undefined ? {} : { battlerX2Input: state.liveMoveBattlerX2Input }),
       });
     } else if (command.type === "general-animation" && command.animation === "LEECH_SEED_DRAIN" && command.animated === true) {
       // Behind a doll the ROM plays nothing. Before the body (ages < 21) the rows are ordinary (the foe stands at its tracked idle rest); after

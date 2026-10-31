@@ -151,6 +151,40 @@ export type BattleStatusAnimationName = keyof typeof STATUS_ANIMATION_ADDED_ROWS
  * TryHandleLaunchBattleTableAnimation returns at once (battle_gfx_sfx_util.c:468-472): first glyph at X + 4, no animation.
  */
 export const FOCUS_PUNCH_SETUP_COMMAND_FRAMES = 124;
+/**
+ * wth236: the end-turn weather animations. BattleScript_DamagingWeatherContinues' `playanimation_var BS_ATTACKER, sB_ANIM_ARG1`
+ * (General_Sandstorm / General_Hail: `goto Move_SANDSTORM` / `Move_HAIL`) and BattleScript_RainContinuesOrEnds /
+ * SunlightContinues' `playanimation BS_ATTACKER, B_ANIM_RAIN_CONTINUES / B_ANIM_SUN_CONTINUES` (General_Rain; General_Sun =
+ * `goto Move_SUNNY_DAY`) play on every continuing turn in Scene ON. Cmd_playanimation(_var) tests HITMARKER_NO_ANIMATIONS before
+ * its weather branch (battle_script_commands.c:4046-4076), so Scene OFF plays nothing and presents no command (the kernel's
+ * WEATHER_VAR receipt stays in both scenes: the digest does not move). The ROM launches the animation on battler 0 (apx227: the
+ * first non-absent battler, whatever the receipt's battler says). The command's rows are the table-animation launch structure
+ * fps147 measured for B_ANIM_FOCUS_PUNCH_SETUP (the script active from row X + 2, the next print's first glyph 3 rows after its
+ * last row) around each body's own row count (liveMoveAnimation.ts's body row table: Rain Dance 240 = 187, Sunny Day 241 = 158,
+ * Sandstorm 201 = 168, Hail 258 = 158). The row counts are not yet pinned by a weather-window receipt.
+ */
+export const WEATHER_CONTINUES_LAUNCH_LEAD_ROWS = 1;
+export const WEATHER_CONTINUES_LAUNCH_TAIL_ROWS = 3;
+export const WEATHER_CONTINUES_BODY_ROWS = Object.freeze({
+  RAIN_CONTINUES: 187, SUN_CONTINUES: 158, SANDSTORM_CONTINUES: 168, HAIL_CONTINUES: 158,
+} as const);
+export type WeatherContinuesAnimation = keyof typeof WEATHER_CONTINUES_BODY_ROWS;
+/** General_Rain / General_Sun / General_Sandstorm / General_Hail draw the weather move's own body (battle_anim_scripts.s:10511-10531). */
+export const WEATHER_CONTINUES_MOVE_IDS: Readonly<Record<WeatherContinuesAnimation, number>> = Object.freeze({
+  RAIN_CONTINUES: 240, SUN_CONTINUES: 241, SANDSTORM_CONTINUES: 201, HAIL_CONTINUES: 258,
+});
+export function isWeatherContinuesAnimation(animation: string): animation is WeatherContinuesAnimation {
+  return Object.hasOwn(WEATHER_CONTINUES_BODY_ROWS, animation);
+}
+/** The end-turn weather animation a kernel `animation` receipt names: the explicit playanimation ids, or playanimation_var's 12 / 13. */
+export function weatherContinuesAnimationOf(payload: { readonly animationId: string; readonly arguments: readonly string[] }): WeatherContinuesAnimation | null {
+  if (isWeatherContinuesAnimation(payload.animationId)) return payload.animationId;
+  if (payload.animationId !== "WEATHER_VAR") return null;
+  return payload.arguments[0] === "12" ? "SANDSTORM_CONTINUES" : payload.arguments[0] === "13" ? "HAIL_CONTINUES" : null;
+}
+export function weatherContinuesCommandFrames(animation: WeatherContinuesAnimation): number {
+  return WEATHER_CONTINUES_LAUNCH_LEAD_ROWS + WEATHER_CONTINUES_BODY_ROWS[animation] + WEATHER_CONTINUES_LAUNCH_TAIL_ROWS;
+}
 export const FOCUS_PUNCH_SETUP_BEHIND_SUBSTITUTE_COMMAND_FRAMES = 3;
 const CASTFORM_CHANGE_SUBSTITUTE = 1 << 7;
 /**
@@ -574,7 +608,7 @@ export type BattleResolutionPresentationCommand =
       type: "general-animation";
       eventSequence: number;
       battler: 0 | 1;
-      animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE";
+      animation: "FOCUS_PUNCH_SETUP" | "LEECH_SEED_DRAIN" | "CASTFORM_CHANGE" | WeatherContinuesAnimation;
       /** cff230: a CASTFORM_CHANGE's target form (the event's argument & ~CASTFORM_SUBSTITUTE; 0 = normal). */
       castformForm?: number;
       /** cff232 / snd233: extra rows before the morph's lead (a weather-loop change at battler 1, both scenes); absent = 0. */
@@ -4446,6 +4480,24 @@ export function projectBattleResolutionCommands(
         timing: TRAINER_SLIDE_TIMING,
       }));
       continue;
+    }
+    if (payload.kind === "animation") {
+      const weather = weatherContinuesAnimationOf(payload);
+      if (weather !== null) {
+        // wth236: Scene ON draws the weather body (battleResolutionPresentationRender.ts weatherContinuesBodyEffect); Scene OFF
+        // skips the animation entirely (HITMARKER_NO_ANIMATIONS precedes the weather branch of Cmd_playanimation_var).
+        if ((beforeRules.hitMarker & BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) === 0) {
+          commands.push(Object.freeze({
+            type: "general-animation",
+            eventSequence: event.sequence,
+            battler: 0,
+            animation: weather,
+            animated: true,
+            timing: Object.freeze({ minimumFrames: weatherContinuesCommandFrames(weather) }),
+          }));
+        }
+        continue;
+      }
     }
     if (payload.kind === "animation" && payload.animationId === "FOCUS_PUNCH_SETUP") {
       const battler = singlesBattler(payload.battler ?? -1, "focus punch setup");
