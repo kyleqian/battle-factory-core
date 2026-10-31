@@ -77,7 +77,8 @@ describe("cff230: the committed ROM receipts (battle-scene-on lab frames, Castfo
       expect(receipt.romBoxHashes).toHaveLength(klass.rows);
       expect(receipt.mismatchedRows).toBe(0);
       const segment = cff230Route(klass.seed, true, 1).segments[0]!;
-      const first = segment.frames.findIndex((f) => f.command === klass.command);
+      // snd233: the foe's weather-loop change carries 3 extra lead rows before the morph's first row
+      const first = segment.frames.findIndex((f) => f.command === klass.command) + ((segment.commands[klass.command] as { castformLeadExtra?: number }).castformLeadExtra ?? 0);
       const ours = receipt.romBoxHashes.map((_, k) => boxHash(segment.frames[first + k]!.rgba, klass.box));
       expect(ours).toEqual(receipt.romBoxHashes);
       expect(segment.commands[klass.command]).toMatchObject({ type: "general-animation", animation: "CASTFORM_CHANGE" });

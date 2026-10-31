@@ -464,6 +464,41 @@ export function playerSendOutBallArc(monY: number): readonly Readonly<{ x2: numb
   return out;
 }
 
+
+const BALL_ROTATE_UNITS_PER_TICK = 25;
+const BALL_ROTATION_FIRST_ENTRY = 8;
+const BALL_LANDED_OPEN_TICKS = 5;
+const BALL_LANDED_OPEN_FINAL_TICKS = 6;
+
+/**
+ * snd233: the player send-out ball after the 42 tabulated ticks (`MID_BATTLE_SWITCH_BALL_THROW_TABLE`, calibrated on the monY-93 window whose ball
+ * is under the text box from there on). A species whose ball lands higher (monY 80..88) still shows its top rows above the terrain clip row 112:
+ * arc ticks 41 and 42 (the landing tick, elapsed 46) keep rotating by `sAffineAnim_BallRotate_4`; the next row draws the closed ball unrotated
+ * (`StartSpriteAffineAnim(sprite, 0)` at the landing), then `SpriteCB_ReleaseMonFromBall`'s `sBallAnimSeq1` shows the open ball for 5 rows and the
+ * open-final ball for 6 (the opponent ball's cadence), and `HandleBallAnimEnd` hides the sprite.  Null while the ball is fully under the clip row.
+ */
+function midBattleSwitchBallTail(monY: number, elapsed: number): Readonly<{
+  flight: boolean; entry: Readonly<{ x2: number; y2: number; pa: number; pb: number; pc: number; pd: number }>; pose: "open" | "open-final" | null;
+}> | null {
+  const arc = playerSendOutBallArc(monY);
+  const arcIndex = elapsed - MID_BATTLE_SWITCH_BALL_FIRST_VISIBLE_ELAPSED - 1;
+  const last = arc.at(-1)!;
+  const at = arcIndex < arc.length ? arc[arcIndex]! : last;
+  if (MID_BATTLE_SWITCH_BALL_BASE_Y + at.y2 - 8 >= 112) return null;
+  if (arcIndex < arc.length) {
+    const angle = (BALL_ROTATE_UNITS_PER_TICK * (arcIndex + 2 - BALL_ROTATION_FIRST_ENTRY)) & 0xff;
+    const sin = GBA_SINE_TABLE_256[angle]!;
+    const cos = GBA_SINE_TABLE_256[(angle + 64) & 0xff]!;
+    return Object.freeze({ flight: true, pose: null, entry: Object.freeze({ x2: at.x2, y2: at.y2, pa: cos, pb: -sin, pc: sin, pd: cos }) });
+  }
+  const entry = Object.freeze({ x2: last.x2, y2: last.y2, pa: 256, pb: 0, pc: 0, pd: 256 });
+  const age = arcIndex - arc.length;
+  if (age === 0) return Object.freeze({ flight: true, pose: null, entry });
+  const open = age - 1;
+  if (open < 0 || open >= BALL_LANDED_OPEN_TICKS + BALL_LANDED_OPEN_FINAL_TICKS) return null;
+  return Object.freeze({ flight: false, pose: open < BALL_LANDED_OPEN_TICKS ? "open" as const : "open-final" as const, entry });
+}
+
 const ballTableByMonY = new Map<number, typeof MID_BATTLE_SWITCH_BALL_THROW_TABLE>();
 
 /** The per-tick ball table for a mon sprite y: table[0] = (0, 0), table[t] = arc[t - 1]; the affine rotation entries are species-independent. */
@@ -602,11 +637,15 @@ export function midBattleSwitchInAt(
   // shows RAM 1183's (45,47); elapsed 45's RAM 1184 state renders no opaque
   // pixels above the terrain clip). Table entry = elapsed - 2.
   const ballEntry = elapsed - MID_BATTLE_SWITCH_BALL_FIRST_VISIBLE_ELAPSED;
-  const playerBallVisible = ballEntry >= 0
+  const flightVisible = ballEntry >= 0
     && ballEntry < MID_BATTLE_SWITCH_BALL_THROW_TABLE.length;
-  const ball = side === "player" && playerBallVisible
-    ? midBattleSwitchBallTable(playerMonY)[ballEntry]!
+  const tail = side === "player" && ballEntry >= MID_BATTLE_SWITCH_BALL_THROW_TABLE.length
+    ? midBattleSwitchBallTail(playerMonY, elapsed)
     : null;
+  const playerBallVisible = flightVisible || (tail !== null && tail.flight);
+  const ball = side === "player" && flightVisible
+    ? midBattleSwitchBallTable(playerMonY)[ballEntry]!
+    : tail !== null && tail.flight ? tail.entry : null;
   const opponentBallPose = elapsed < 2 || elapsed >= 29
     ? null
     : elapsed < 18
@@ -615,7 +654,7 @@ export function midBattleSwitchInAt(
         ? "open" as const
         : "open-final" as const;
   const ballPose = side === "player"
-    ? (playerBallVisible ? "closed" as const : null)
+    ? (playerBallVisible ? "closed" as const : tail !== null ? tail.pose : null)
     : opponentBallPose;
   const ballVisible = ballPose !== null;
   const monVisible = elapsed >= (
@@ -670,7 +709,9 @@ export function midBattleSwitchInAt(
     ballVisible,
     ballPose,
     ballOrigin,
-    ballPosition: ball
+    ballPosition: tail !== null && !tail.flight && tail.pose !== null
+      ? Object.freeze({ x: MID_BATTLE_SWITCH_BALL_BASE_X + tail.entry.x2, y: MID_BATTLE_SWITCH_BALL_BASE_Y + tail.entry.y2 })
+      : ball
       ? Object.freeze({
           x: MID_BATTLE_SWITCH_BALL_BASE_X + ball.x2,
           y: MID_BATTLE_SWITCH_BALL_BASE_Y + ball.y2,

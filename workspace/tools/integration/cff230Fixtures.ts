@@ -41,7 +41,7 @@ export const writeStripPng = (path: string, box: [number, number, number, number
 if (import.meta.url === `file://${process.argv[1]}`) {
   for (const c of CFF230_CLASSES) {
     const seg = cff230Route(c.seed, true, 1).segments[0]!;
-    const first = seg.frames.findIndex((f) => f.command === c.command);
+    const first = seg.frames.findIndex((f) => f.command === c.command) + ((seg.commands[c.command] as { castformLeadExtra?: number }).castformLeadExtra ?? 0);
     const rom: string[] = []; const ours: string[] = []; const strip: { r: Uint8Array; o: Uint8Array }[] = [];
     for (let k = 0; k < c.rows; k++) {
       const png = PNG.sync.read(readFileSync(`${c.rom}/frame-${String(c.romStart + k).padStart(5, "0")}.png`));

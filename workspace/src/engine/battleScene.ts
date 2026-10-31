@@ -54989,7 +54989,7 @@ function drawMidBattleSwitchInSprite(
   state: MidBattleSwitchInView,
   paletteOverride?: RgbColor[],
 ): void {
-  if (state.ballVisible && state.side === "player") {
+  if (state.ballVisible && state.side === "player" && state.ballPose === "closed") {
     // ISSUES #78 window A: the thrown ball renders from the RAM ball sprite's
     // per-tick state (center + `sAffineAnim_BallRotate_4` matrix, one tick
     // lagged), affine-sampled around the center and clipped by the player
@@ -55091,6 +55091,18 @@ function drawMidBattleSwitchInSprite(
   }
   // Opponent release creates the ball after the mon sprite; its open OAM
   // remains visible over the pink emerging mon for one boundary frame.
+  if (state.ballVisible && state.side === "player" && state.ballPose !== "closed") {
+    // snd233: the landed player ball (`sBallAnimSeq1` open, open-final) is clipped by the terrain row 112 like the thrown one.
+    drawSpriteSheetAffineRotate(
+      fb,
+      state.ballPose === "open" ? BALL_OPEN_TILESET : BALL_OPEN_FINAL_TILESET,
+      battleAnimBallOpen.palette,
+      state.ballPosition.x,
+      state.ballPosition.y,
+      256, 0, 0, 256,
+      112,
+    );
+  }
   if (state.ballVisible && state.side === "opponent") {
     const tileset = state.ballPose === "closed"
       ? BALL_CLOSED_TILESET
