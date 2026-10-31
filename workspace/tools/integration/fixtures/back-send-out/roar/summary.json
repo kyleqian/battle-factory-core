@@ -1,0 +1,194 @@
+{
+ "note": "snd233 Part B: Roar/Whirlwind opponent-attacker, player-side ball-throw path, Scene ON; residual px per region vs the ROM lab (bso225Compare.ts, bin/oracle --profile battle-scene-on lab). mon = player sprite/ball region x<120, 48<=y<112, send-in rows (elapsed e>=0). Before = HEAD 3b2ea5f1f, after = this commit.",
+ "scenarios": {
+  "skarmory": {
+   "before": {
+    "monSendIn": 74,
+    "firstNonZero": [
+     [
+      44,
+      49
+     ],
+     [
+      52,
+      5
+     ],
+     [
+      53,
+      1
+     ],
+     [
+      54,
+      2
+     ],
+     [
+      55,
+      4
+     ],
+     [
+      56,
+      4
+     ]
+    ],
+    "healthbox_e_ge_0": 0,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   },
+   "after": {
+    "monSendIn": 5,
+    "firstNonZero": [
+     [
+      64,
+      5
+     ]
+    ],
+    "healthbox_e_ge_0": 0,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   }
+  },
+  "onix": {
+   "before": {
+    "monSendIn": 272,
+    "firstNonZero": [
+     [
+      44,
+      83
+     ],
+     [
+      45,
+      17
+     ],
+     [
+      46,
+      22
+     ],
+     [
+      47,
+      12
+     ],
+     [
+      48,
+      6
+     ],
+     [
+      49,
+      5
+     ]
+    ],
+    "healthbox_e_ge_0": 0,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   },
+   "after": {
+    "monSendIn": 7,
+    "firstNonZero": [
+     [
+      64,
+      7
+     ]
+    ],
+    "healthbox_e_ge_0": 0,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   }
+  },
+  "alakazam": {
+   "before": {
+    "monSendIn": 33,
+    "firstNonZero": [
+     [
+      44,
+      26
+     ],
+     [
+      52,
+      1
+     ],
+     [
+      55,
+      1
+     ],
+     [
+      56,
+      1
+     ],
+     [
+      57,
+      1
+     ],
+     [
+      64,
+      3
+     ]
+    ],
+    "healthbox_e_ge_0": 0,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   },
+   "after": {
+    "monSendIn": 3,
+    "firstNonZero": [
+     [
+      64,
+      3
+     ]
+    ],
+    "healthbox_e_ge_0": 0,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   }
+  },
+  "shedinja": {
+   "before": {
+    "monSendIn": 16,
+    "firstNonZero": [
+     [
+      44,
+      16
+     ]
+    ],
+    "healthbox_e_ge_0": 3016,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   },
+   "after": {
+    "monSendIn": 0,
+    "firstNonZero": [],
+    "healthbox_e_ge_0": 3016,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   }
+  },
+  "entei": {
+   "before": {
+    "monSendIn": 2079,
+    "firstNonZero": [
+     [
+      44,
+      16
+     ],
+     [
+      68,
+      2063
+     ]
+    ],
+    "healthbox_e_ge_0": 0,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   },
+   "after": {
+    "monSendIn": 2063,
+    "firstNonZero": [
+     [
+      68,
+      2063
+     ]
+    ],
+    "healthbox_e_ge_0": 0,
+    "text_e_ge_0": 0,
+    "preSendInMonPx(e<0, Roar move animation, harness does not draw)": 106640
+   }
+  }
+ }
+}
