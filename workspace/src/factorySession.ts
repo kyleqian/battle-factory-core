@@ -28,9 +28,13 @@ import type { BattleScene, FactoryEvent, ReplayBattle, TraceSegment } from "./fa
 import { normalizeButtons, type GbaButton } from "./input.ts";
 import { SessionRecorder, type SessionContainedError, type SessionTrace } from "./sessionRecorder.ts";
 
-/** Build stamp of this package (vite `define`); "dev" when run straight from source. */
+/**
+ * Content hash of the headless graph's built output (vite `define`,
+ * tools/build/engineBuild.ts): equal for equal gameplay code, whatever the
+ * commit. "dev" under the dev server, vitest and straight-from-source node.
+ */
 export const ENGINE_BUILD: string =
-  typeof __POKEBENCH_BUILD_STAMP__ === "string" ? __POKEBENCH_BUILD_STAMP__ : "dev";
+  typeof __POKEBENCH_ENGINE_BUILD__ === "string" ? __POKEBENCH_ENGINE_BUILD__ : "dev";
 
 export interface FactorySessionOptions {
   readonly battleScene: BattleScene;

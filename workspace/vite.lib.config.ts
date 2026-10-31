@@ -8,13 +8,11 @@
 //   npm run build:lib   (runs both configs)
 import { cpSync, mkdirSync } from "node:fs";
 import { defineConfig } from "vite";
-import { buildStamp, manualChunks } from "./vite.config.ts";
+import { engineBuildDefine, manualChunks } from "./vite.config.ts";
 
-export default defineConfig({
+export default defineConfig(async () => ({
   root: ".",
-  define: {
-    __POKEBENCH_BUILD_STAMP__: JSON.stringify(buildStamp()),
-  },
+  define: await engineBuildDefine("build"),
   build: {
     outDir: "dist-lib",
     emptyOutDir: true,
@@ -44,4 +42,4 @@ export default defineConfig({
       },
     },
   ],
-});
+}));

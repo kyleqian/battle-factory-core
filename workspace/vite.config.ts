@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
 import { availableParallelism } from "node:os";
 import { defineConfig, configDefaults } from "vitest/config";
+import { computeEngineBuild, ENGINE_BUILD_DEFINE } from "./tools/build/engineBuild.ts";
 
 // How many OTHER vitest runs are live right now.
 //
@@ -90,10 +91,20 @@ export function manualChunks(id: string): string | undefined {
   return undefined;
 }
 
-export default defineConfig({
+// ENGINE_BUILD (tools/build/engineBuild.ts): a content hash of the headless
+// graph's built output, computed once per build command and `define`d into the
+// app, browser-lib and headless builds alike. The dev server and vitest do not
+// build, so they report "dev".
+export async function engineBuildDefine(command: string): Promise<Record<string, string>> {
+  const value = command === "build" ? await computeEngineBuild({ root: ".", entry: "src/headless.ts", manualChunks }) : "dev";
+  return { [ENGINE_BUILD_DEFINE]: JSON.stringify(value) };
+}
+
+export default defineConfig(async ({ command }) => ({
   root: ".",
   define: {
     __POKEBENCH_BUILD_STAMP__: JSON.stringify(buildStamp()),
+    ...(await engineBuildDefine(command)),
   },
   build: {
     outDir: "dist",
@@ -136,4 +147,4 @@ export default defineConfig({
     // rather than reverting this.
     isolate: false,
   },
-});
+}));
