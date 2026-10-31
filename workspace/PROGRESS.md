@@ -55,7 +55,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   0:6 `--render-every 1` **6 / 6**; browser goal play `--lobby-new-challenge` 3 min / scene: ON 8 battles, OFF 17, 2 new challenges
   from the Lobby each, **0 page errors / overlays / contained / divergences**. The 0:60 full / winning / winning-swap gates were not
   run (hours each here; same practice as earlier sessions).
-- **Next:** handoff "Next work".
+- **Scout:** shd234 (read-only, 06:32): the SHEDINJA send-in healthbox residual is a compare-harness maxHP bug (no SHEDINJA max-HP-1
+  rule), not the renderer; `factoryCorpusParty.ts:291` has the same omission, unverified downstream (ISSUES #146). Launched before I
+  saw the user's mid-session re-aim; it made no edits.
+- **User re-aim landed mid-session** (ops commits `736bdc78b`, `c038fad08`, `ed7f141c4`, `ea0e200ca`, docs only, already under the
+  gates above): next run starts with the core library API (contract v2; fold `worker/lib-v2-mac` if present — absent on this box at
+  wind-down), then audio (S11) and cleanup; #146 / send-out residuals are timing-class now.
+- **Next:** handoff "Next work" item 1.
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261030-213142` (cff230), `-20261030-233859`
   (nch231), `-20261031-015154` (cff232), `-20261031-031746` (snd233). Evidence `.integration/validation/sv-20261030/`. No push.
 ---

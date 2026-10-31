@@ -88,8 +88,8 @@ cleanup step.
    `--lobby-new-challenge` run); Scene ON soak
    `--render-every 8` 0:30 plus a `--render-every 1` sample; varied-RNG sweeps; vanilla both scenes. Every overlay / pageerror /
    CRASH / HANG becomes a fix step before anything else.
-6. **Timing / visible residuals** last, never while items 1–4 have ready work: #146 / #143 remainders (SHEDINJA genderless
-   healthbox, CASTFORM message region on the faint path, ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform
+6. **Timing / visible residuals** last, never while items 1–4 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
+   compare-harness maxHP bug + `factoryCorpusParty.ts:291` check, ISSUES #146 shd234; CASTFORM message region on the faint path, ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform
    "at"-role keys, Flamethrower +7 alignment, revert / switch-out unmeasured), #188, #189, the bso226 "Go!" wait, the Lobby
    attendant dialogue (nch231 skips it); exs207 refs kept.
 
