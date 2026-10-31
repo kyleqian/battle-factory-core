@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-10-30)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-10-31)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,68 +20,28 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-10-30 ~05:10 UTC wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-10-31 ~06:50 UTC wind-down; PROGRESS.md top entry has details)
 
 - Phase 1: soak `--scene`, containment, render caches, Summary crash fixes done. `npm run play:random` plays the real Factory loop
   in headless Chromium (Playwright in `.integration/browser/node_modules`, ignored; `cd .integration/browser && npm install
-  playwright`). 2026-10-30 nightly on `fa622452c`: browser 10 min / scene 0 page errors; varied-RNG sweeps 100 / 100 x4; vanilla
-  `--scene both` 20 / 20 each. After a loss / retire the player ends in the walkable Lobby with no new-challenge path except reload
-  (Phase 3 title-screen work).
-- Phase 2: **Scene ON census 0..999 static 0** (approximate 206, live 26,957 after apx227). Send-out animations in Scene ON:
-  mid-battle player switch-in back animation (bso225), battle-start intro opponent front + player back (bso226) are drawn.
-  #157 fixed (apx227). Conversion 2 / Ghost Curse approximate bodies refit (apx227; Ghost icon palette still off).
-- Faint-replacement player send-in (path B) folded at 06:46 as pfb229 (`bb9029a37`); vanilla `--scene on` 20 / 20 on it; the Scene ON
-  render-8 soak was not run on that src (no time) — run it first next session.
+  playwright`; not linked into worker worktrees — symlink it). 2026-10-31 nightly gates: see PROGRESS (all green).
+- New challenge without reload (nch231): a LOSS already auto-chains into the next challenge at the record answer; RETIRE-YES lands
+  in the walkable Lobby, where A facing the singles attendant now starts a new challenge from the live RNG. `--lobby-new-challenge`
+  (opt-in) on the soak and play:random crosses into it.
+- Phase 2: Scene ON census 0..999 static 0 (approximate 203, live 26,960). Send-out animations drawn in Scene ON on every path
+  (mid-battle, Roar, faint replacement, battle-start intro). Castform: the form-change morph is drawn in both scenes, 0 px vs the ROM
+  on the measured classes (cff230 / cff232 / snd233).
 
-## Next work (in order) — user re-aim 2026-10-31 (second revision, same day); see `docs/finish-plan.md`
+## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
-Phases 1 and 2 are met (ROADMAP "Current execution priority — 2026-10-31").
-Finish snd233 if it is green; do not brief further #146 / send-out / intro
-residual steps — they are timing residuals (item 5). This repo is now the
-**game core library**; a separate website repo (built from the Mac) owns
-login, streaks, menus, the on-screen pad and hosting — never brief those
-here. One worker at a time; each run folds the next item plus at least one
-cleanup step.
-
-1. **Core library API — first step of the next run.** `src/lib.ts` +
-   `mountFactoryGame` and `src/headless.ts` + `replayChallenge`, with the
-   exact **contract v2** in `docs/finish-plan.md` Phase 3 (names are fixed:
-   the website is built against them). No save blob: resume = seeds + input
-   trace fast-forward; `gameplaySeed` is the RNG start `--vary-rng` already
-   sets; the recorder's runs gain an optional wall-clock `t`. Vite lib build
-   with two entries + `package.json` `exports` (`@pokebench/factory`,
-   `@pokebench/factory/headless`); `src/main.ts` a thin shell over the
-   browser entry with every existing ABI / query / overlay unchanged. Gates:
-   typecheck, new tests (resume equality, headless replay == browser events
-   + digest), full suite + build, browser play both scenes, `npm pack`
-   importable from a scratch Vite app; report the headless entry's built size.
-   This is a one-run step; if it will not fit, land the browser entry first
-   and the headless entry as the next step.
-2. **Audio (S11), re-opened by the user:** design step first (docs only; the
-   supervisor accepts it), then sound-event parity by census, then playback —
-   `docs/finish-plan.md` "Audio (S11)". Expect this to be the main program for
-   several runs; it alternates with cleanup, not with timing work.
-3. **Cleanup (one commit per step, each verified by typecheck + full suite +
-   build), in this order:** (1) delete one-off step scripts in
-   `tools/integration` / `tools/compare` and the fixtures only they read —
-   keep census, soak, compare, differential, probe runner, extract, preview,
-   play:random and anything a kept test imports; (2) root ledgers → README,
-   AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3
-   entries), the rest to `docs/archive/` unchanged; (3) remove Codex /
-   DeepSeek / OpenCode paths and the animation / rust lane supervisors — one
-   supervisor script, one worker launcher, Claude only (keep
-   `run-supervisor.sh --headless` and `tools/run-subagent.sh` working: the
-   daily cron depends on them); (5) `npm run test:gate` ≤ 5 min for workers
-   and drop frame-pin tests the census supersedes, full suite nightly; (4)
-   `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs`
-   + its adapter / tests; (6) prune merged `worker/*` refs; (7) evidence stops
-   going into git.
-4. **Bundle hygiene** (rest of Phase 3): test-only JSON out of `src/`, lazy-loaded sprite sheets and large tables, gamepad
-   input through the library's `press` / `release`.
-5. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both`; Scene ON soak
-   `--render-every 8` 0:30 plus a `--render-every 1` sample; varied-RNG sweeps; vanilla both scenes. Every overlay / pageerror /
-   CRASH / HANG becomes a fix step before anything else.
-6. **Timing** residuals last (ISSUES #146 remainder, #188, #189, the bso226 "Go!" wait on long front animations; exs207 refs kept).
+1. **#146 / #143 visible remainders:** SHEDINJA genderless healthbox (3,016–4,170 px per send-in window), CASTFORM message region on
+   the faint path, ENTEI / KINGDRA glow-lag frame (D4 class), bso226 ONIX intro window; Castform "at"-role keys (Fly / Ice Ball /
+   Rest / Hail / Rain Dance / Scary Face), Flamethrower +7 alignment, revert / switch-out unmeasured.
+2. **Crashes, nightly:** `npm run build && npm run play:random -- --minutes 10 --scene both` (add a `--lobby-new-challenge` run);
+   Scene ON soak `--render-every 8` bulk plus a `--render-every 1` sample. Every overlay / pageerror becomes a fix step.
+3. **Production + cleanup** per the plan: cleanup steps 1–3 first; title screen; the Lobby attendant dialogue (nch231 skips it,
+   documented divergence).
+4. **Timing** residuals last (ISSUES #188, #189, the bso226 "Go!" wait on long front animations; exs207 refs kept).
 
 **Host note (2026-10-28):** two workers at once on 16 GiB caused repeated OOM kills (each worker's full suite / census plus a
 supervisor build). Keep ONE worker at a time; the launcher allows one per lane, so a second worker needs another lane anyway.

@@ -42,6 +42,9 @@ history.
   (2026-10-30 cff230) `tools/compare/run.ts` cannot take mechanicLab custom parties and `apx223OracleCheck` cannot stage an "at"-role
   key when the weather setter must be the Castform (~20 min); `tsc` rejects `import "pngjs"` in tools files a test imports (no type
   declarations, ~10 min); the worker believed `reference/pokeemerald` was absent although the worktree link resolves (~25 min).
+  (nch231) `.integration/browser` (Playwright) is not linked into worker worktrees, so play:random fails until symlinked (~5 min);
+  play:random rarely reaches the Lobby without a forced retire (~25 min; nch231 added an opt-in retire bias).
+  (cff232) `lsd194Census.sh` resume treats part files shorter than 25 lines as complete; a killed run needs a manual check (~5 min).
   (pfb229) Briefs should name `npm test -- --shard=i/12` foreground chunks as the accepted full-suite form; `lsd194Census.sh` resumes
   only in ~560 s chunks and reports static only inside per-command fields (no summary line).
   (11, sub183) `prep37Probes.sh` and siblings hard-code Mac paths (another wrapper, `sub183Probes.sh`); every census needs a copied

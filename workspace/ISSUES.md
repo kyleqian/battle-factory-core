@@ -196,11 +196,13 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
 - **Fixed 2026-10-29:** bso225 (Scene ON player back send-out animation on the mid-battle switch-in, exact from elapsed 88; docs/bso225-player-back-send-out.md).
 - **Fixed 2026-10-30:** bso226 (Scene ON battle-start intro: opponent front + player back animations; docs/bso226-battle-start-intro-send-outs.md).
 - **Timing (not blocking):** the ROM waits for the opponent's battle-start front animation before "Go!" (39–98 frames later than our fixed intro timeline on long animations; bso226).
+- **Fixed 2026-10-31:** snd233 (Scene ON player send-in ball tail above the terrain clip row for monY 80..84 species, Roar + faint paths; the
+  old "opponent Roar ball path 6,718 px" line was stale; docs/snd233-scene-on-send-in-fixes.md). Remainder: star-particle 3–7 px at e 64.
 - **Fixed 2026-10-30:** pfb229 (Scene ON faint-replacement send-in: back animation, species ball arc, particle origin; 7 windows 16–2,079 px; docs/pfb228-faint-replacement-emerge.md). Remainder: ENTEI / KINGDRA glow-lag frame at B+69, SHEDINJA genderless healthbox, CASTFORM message region, MEW has no player back pic.
 - **Open:** player faint-replacement send-in renderer fidelity for non-MAGBY species (pfr192 timing FIXED 2026-10-16: keyed clock B + D + 17, 24 / 24 ROM prompts exact; remaining: release palette fade, Scene ON back animation, fade-in palette rows 56-70, species ball y path, male MAGBY healthbox art; docs/pfr192-player-faint-replacement-production.md); player-side back send-out animations and
   battle-start intro send-outs (Scene ON; fra151 doc says what they need); shiny send-ins; CRY_MODE_WEAK send-ins; PONYTA glow
   mid-frame palette row (D4 class, 616 px); TYPHLOSION faint-path slide lag frame (D4); the faint-path blank row one frame late;
-  opponent-attacker Roar player-side ball-throw path (6,718 px); the elevated-attacker post-body field difference (1,444 px, untriaged).
+  the elevated-attacker post-body field difference (1,444 px, untriaged).
 
 ## #145 — Live-adapter species audit: residual remainder (S10A; 7 defects FIXED 2026-10-05)
 
@@ -231,8 +233,8 @@ and the Revenge idle-rest gate narrowed to targets (ONIX / RATTATA attackers 0 p
   the fallback draws the same normal-form pixels until the per-form art below lands, then the decline can lift.
 - **Fixed 2026-10-30 (cff230, docs/cff230-castform-forms.md):** Scene ON draws the CASTFORM_CHANGE morph (Transform mosaic ramp,
   form swap on body row 50, enemy shadow hidden rows 1..109, 117-row command); ICE / WATER weather change and WATER send-in 0 px vs
-  the ROM; Ember by a rain / hail CASTFORM promoted (`52:by:2`, `52:by:3`). Scene OFF morph FIXED the same day (cff232). **Open:** Scene ON
-  lacks the +3 battler-1 weather-loop rows cff232 found (snd233); Flamethrower by WATER needs a +7 alignment
+  the ROM; Ember by a rain / hail CASTFORM promoted (`52:by:2`, `52:by:3`). Scene OFF morph FIXED the same day (cff232). Scene ON +3 battler-1 weather-loop rows FIXED (snd233). **Open:**
+  Flamethrower by WATER needs a +7 alignment
   explanation; the "at"-role keys (Fly / Ice Ball / Rest / Hail / Rain Dance / Scary Face) are unmeasured; revert / switch-out unmeasured.
 - **Per-form art LANDED (cast83, 2026-10-10 night; qa91 +3 keys):** form frame, castformPalette[form], front coords, elevation and
   back Y per form in the field view and the live renderer; 32 (move, Castform role, form) keys ROM-proven live

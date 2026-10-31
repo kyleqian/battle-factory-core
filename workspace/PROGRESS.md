@@ -5,9 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): cff230 / nch231 / cff232 folded; snd233 running
+## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): wind-down: cff230 / nch231 / cff232 / snd233 folded
 
-- **State:** master `0a222a6c4`+ (cff230 fast-forward; nch231 + cff232 merges; src + tests == cff232 worker-tested `10d02dd4d`).
+- **State:** master `9670f00cc`+ (cff230 fast-forward; nch231 / cff232 / snd233 merges; src + tests == snd233 worker-tested `2cdc0b36d`).
 - **Gate carried over from the last run, on `8d7916813` (src == pfb229 merge;
   `.integration/validation/sv-20261030/gates-8d7916813/`):** Scene ON `--policy full --vary-rng` 0:30 `--render-every 8` **30 / 30**
   (all `budget`); build 0; browser goal play 10 min / scene (seed 1): ON 30 battles / 13 swap screens, OFF 44 / 22, **0 page errors,
@@ -40,8 +40,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   14,213 tests, 0 failed**; build 0; differential 641 / 641. Supervisor: ON census shards byte-identical to nch231's; OFF eventsDigest +
   error identical 1,000 / 1,000, only 603 / 643 / 651 / 950 changed (+1 general-animation each, 117 / 120 rows); 2 touched test files
   14 / 14 on master; hail strip eyeballed. Scene ON keeps the 3-row battler-1 shortfall (snd233 part A).
-- **Running:** snd233 (A: the +3 rows in Scene ON; B: re-measure / fix the opponent-Roar player-side ball path; brief
-  `.integration/validation/sv-20261030/snd233.txt`).
+- **Vanilla Scene OFF 0:20 on `0a222a6c4`** (cff232's OFF change; `gates-0a222a6c4/`): **20 / 20** (all `budget`).
+- **Folded:** snd233 (merge `9670f00cc`; branch `worker/integration-20261031-031746`; `docs/snd233-scene-on-send-in-fixes.md`): (A) Scene
+  ON gets the +3 battler-1 weather-loop rows (rain / opponent lab text box 1,253 px -> 0); (B) the "opponent Roar ball path 6,718 px"
+  line was stale (bso225 / pfb229 already route it through the species-keyed arc); the real residual was the ball after landing for
+  monY 80..84 species (landing ticks, closed ball, 5 open + 6 open-final rows above the terrain clip row), now drawn
+  (`midBattleSwitchBallTail`). Roar windows mon region px before -> after: SKARMORY 74 -> 5, ONIX 272 -> 7, ALAKAZAM 33 -> 3,
+  SHEDINJA 16 -> 0, ENTEI 2,079 -> 2,063 (glow-lag); the faint-replacement path shares it (CASTFORM 278 -> 13). Worker: typecheck 0;
+  full suite **1,720 files / 14,219 tests, 0 failed**; build 0; differential 641 / 641. Supervisor: OFF shards byte-identical to
+  cff232's; ON eventsDigest + error identical 1,000 / 1,000, only battle 651 changed (117 -> 120 rows); ONIX strip eyeballed.
+- **Wind-down gates on `9670f00cc` (`.integration/validation/sv-20261030/gates-final/`):** GATES_PENDING
+- **Next:** handoff "Next work".
 - **Notes:** no DEFERRED items. No push.
 ---
 
