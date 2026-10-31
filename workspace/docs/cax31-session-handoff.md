@@ -62,7 +62,14 @@ cleanup step.
    treat it as a finished worker: merge master into it, run the gates above
    (full suite, build, census both scenes identical to master's, browser
    play both scenes), fold it, and move on. Build it yourself only if the
-   branch is absent.
+   branch is absent. When folding, note two things the Mac integration found:
+   (a) `ENGINE_BUILD` is the commit stamp, so every rebuild strands the
+   website's open challenges (a challenge resumes only on the build that
+   played it) — make it a content hash of the headless graph so a rebuild
+   without engine changes keeps the stamp; (b) the headless entry still
+   carries sprite pixels (22 MB raw / 2.1 MB gz) because
+   `battleCommandFieldArt` embeds mon pics in presentation commands — fine
+   for now, a bundle-hygiene item later.
 2. **Audio (S11), re-opened by the user:** design step first (docs only; the
    supervisor accepts it), then sound-event parity by census, then playback —
    `docs/finish-plan.md` "Audio (S11)". Expect this to be the main program for
