@@ -38,7 +38,12 @@ export interface FactoryGame {
   readonly frame: number;
   press(button: GbaButton): void;
   release(button: GbaButton): void;
-  /** The input trace so far (finished runs only), optionally just the tail from `fromSegment`. */
+  /**
+   * The input trace so far, finished runs only, optionally just the tail from `fromSegment`.
+   * The run still being extended is left out (reads at different times never disagree about a run
+   * already handed out); every event cuts the current run, so a read right after an event ends at
+   * the event's frame; idle runs are cut every 600 frames.
+   */
   trace(fromSegment?: number): TraceSegment[];
   destroy(): void;
 }

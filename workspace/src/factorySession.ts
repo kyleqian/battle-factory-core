@@ -69,10 +69,13 @@ export function createChallengeState(options: FactorySessionOptions): EngineStat
   };
 }
 
+/** Idle runs are closed at this length so a host can upload them while the player waits (~10 s). */
+export const MAX_TRACE_RUN_FRAMES = 600;
+
 export class FactorySession {
   readonly options: FactorySessionOptions;
   state: EngineState;
-  readonly recorder = new SessionRecorder();
+  readonly recorder = new SessionRecorder({ maxRunFrames: MAX_TRACE_RUN_FRAMES });
   readonly battles: ReplayBattle[] = [];
   /** contain209: contained presentation throws, stamped with the session frame they were first seen after. */
   readonly containedErrors: SessionContainedError[] = [];
@@ -128,9 +131,15 @@ export class FactorySession {
     return events;
   }
 
-  /** The input trace so far (finished runs), optionally only the tail from `fromSegment`. */
+  /**
+   * The input trace so far, FINISHED runs only, optionally just the tail from
+   * `fromSegment`. The run still being extended is left out, so a host that
+   * uploads tails at arbitrary moments never freezes a run short of the frames
+   * it finally had; every game event cuts the current run first, so the trace
+   * read right after an event ends exactly at the event's frame.
+   */
   trace(fromSegment = 0): TraceSegment[] {
-    return this.recorder.segmentsFrom(fromSegment);
+    return this.recorder.finishedSegmentsFrom(fromSegment);
   }
 
   /** The kernel-events digest so far: sha256 over each resolution segment's events, hex, 16 chars (as the census computes it). */
@@ -205,6 +214,8 @@ export class FactorySession {
     this.prevLobby = lobby;
     this.hashSegments();
     this.collectContained(events, frame);
+    // The trace through this frame must be readable (and uploadable) as soon as the host hears the event.
+    if (events.length > 0) this.recorder.cut();
     return events;
   }
 

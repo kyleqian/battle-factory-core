@@ -76,9 +76,12 @@ describe("FactorySession events (contract v2)", () => {
     expect(session.digest()).toMatch(/^[0-9a-f]{16}$/);
     expect(session.digest()).toBe(census.digest());
 
-    // The trace is the recorder's RLE runs with the library's wall-clock stamps.
+    // The trace is the recorder's RLE runs with the library's wall-clock stamps; the
+    // challenge-end event cut the current run, so the finished runs end exactly at its frame.
     const trace = session.trace();
     expect(trace.reduce((sum, run) => sum + run.frames, 0)).toBe(session.frame);
+    expect(trace.reduce((sum, run) => sum + run.frames, 0)).toBe(end.frame);
+    expect(trace.every((run) => run.frames <= 600)).toBe(true);
     expect(trace.every((run) => typeof run.t === "number")).toBe(true);
     expect(session.trace(trace.length - 2)).toEqual(trace.slice(-2));
     // toTrace() keeps the historical export shape (no timestamps).
@@ -130,6 +133,34 @@ describe("FactorySession events (contract v2)", () => {
   });
 });
 
+describe("trace hand-outs", () => {
+  it("never freeze a run short: tails read at different moments concatenate to the finished runs", () => {
+    const session = new FactorySession({ battleScene: "off", gameplaySeed: 3 });
+    const player = soakPlayer(2, "winning");
+    const uploaded: TraceSegment[] = [];
+    let sent = 0;
+    for (let frame = 1; frame <= 12_000; frame += 1) {
+      session.tick(player.decide(session.state), frame);
+      // An "upload" every 97 frames, like a host's periodic tail upload.
+      if (frame % 97 === 0) {
+        const tail = session.trace(sent);
+        uploaded.push(...tail);
+        sent += tail.length;
+      }
+    }
+    const tail = session.trace(sent);
+    uploaded.push(...tail);
+    expect(uploaded).toEqual(session.trace());
+    // Everything handed out is a prefix of the full recording, frame for frame.
+    const all = session.recorder.segmentsFrom();
+    expect(all.slice(0, uploaded.length)).toEqual(uploaded);
+    const sentFrames = uploaded.reduce((sum, run) => sum + run.frames, 0);
+    expect(sentFrames).toBeLessThanOrEqual(session.frame);
+    // With the 600-frame cap the handed-out part trails the live frame by less than one run.
+    expect(session.frame - sentFrames).toBeLessThan(600);
+  });
+});
+
 describe("gameplaySeed", () => {
   it("is the anchor draft when absent and a generated challenge-0 draft otherwise", () => {
     expect(createChallengeState({ battleScene: "off" })).toEqual(createInitialState({ battleScene: "off" }));
@@ -159,7 +190,8 @@ describe("resume", () => {
         if (frame % every === 0) liveHashes.set(frame, frameHash(state));
       });
       expect(liveEvents.length, "the sample must contain a battle resolution").toBeGreaterThan(0);
-      const trace = live.trace();
+      // Every run, the still-open one included (trace() hands out finished runs only).
+      const trace = live.recorder.segmentsFrom();
       const split = Math.floor(trace.length / 2);
       const prefixFrames = trace.slice(0, split).reduce((sum, run) => sum + run.frames, 0);
 
@@ -181,7 +213,7 @@ describe("resume", () => {
         }
       }
       expect(resumed.frame).toBe(live.frame);
-      expect(resumed.trace()).toEqual(trace);
+      expect(resumed.recorder.segmentsFrom()).toEqual(trace);
       expect(resumed.battles).toEqual(live.battles);
       expect(resumed.streak).toBe(live.streak);
       expect(resumed.digest()).toBe(live.digest());
@@ -244,7 +276,7 @@ describe("mountFactoryGame", () => {
     installRaf();
     const { canvas, draws } = fakeCanvas();
     const events: FactoryEvent[] = [];
-    const game = mountFactoryGame({ canvas, battleScene: "off", gameplaySeed: 9, onEvent: (event) => events.push(event) });
+    const game = mountFactoryGameInternal({ canvas, battleScene: "off", gameplaySeed: 9, onEvent: (event) => events.push(event) });
     expect(canvas.width).toBe(240);
     expect(canvas.height).toBe(160);
     expect(game.engine).toBe(ENGINE_BUILD);
@@ -262,16 +294,19 @@ describe("mountFactoryGame", () => {
     pump(34);
     game.release("RIGHT");
     pump(17);
+    // The idle run after RIGHT is still open, so trace() stops at the RIGHT run.
     const trace = game.trace();
     expect(trace.map(({ frames, buttons }) => ({ frames, buttons }))).toEqual([
       { frames: 3, buttons: [] },
       { frames: 1, buttons: ["A"] },
       { frames: 2, buttons: ["RIGHT"] },
-      { frames: 1, buttons: [] },
     ]);
     expect(trace.every((run) => typeof run.t === "number" && run.t >= 0)).toBe(true);
     expect(game.trace(2)).toEqual(trace.slice(2));
-    expect(Object.keys(game).sort()).toEqual(["destroy", "engine", "frame", "press", "release", "trace"]);
+    expect(game.session.recorder.segmentsFrom(3).map(({ frames, buttons }) => ({ frames, buttons }))).toEqual([{ frames: 1, buttons: [] }]);
+    const contractOnly = mountFactoryGame({ canvas: fakeCanvas().canvas, battleScene: "off" });
+    expect(Object.keys(contractOnly).sort()).toEqual(["destroy", "engine", "frame", "press", "release", "trace"]);
+    contractOnly.destroy();
     game.destroy();
     const before = game.frame;
     pump(100);
@@ -319,10 +354,8 @@ describe("mountFactoryGame", () => {
     const game = mountFactoryGameInternal({ canvas, battleScene: "off" });
     game.advance([{ frames: 3 }, { frames: 2, buttons: ["A"] }]);
     expect(game.frame).toBe(5);
-    expect(game.trace().map(({ frames, buttons }) => ({ frames, buttons }))).toEqual([
-      { frames: 3, buttons: [] },
-      { frames: 2, buttons: ["A"] },
-    ]);
+    // The A run is still open (no event cut it), so the contract trace stops before it.
+    expect(game.trace().map(({ frames, buttons }) => ({ frames, buttons }))).toEqual([{ frames: 3, buttons: [] }]);
     expect(game.sessionTrace().segments).toEqual([
       { frames: 3, buttons: [] },
       { frames: 2, buttons: ["A"] },

@@ -46,11 +46,28 @@ export interface SessionTrace {
 // At the cap the recorder stops extending and marks the trace truncated.
 const MAX_SEGMENTS = 500_000;
 
+export interface SessionRecorderOptions {
+  /**
+   * Close a run once it reaches this many frames and start a new one with the
+   * same buttons, so a long idle stretch still becomes a finished run that a
+   * host can upload (library contract v2). Absent = runs grow without bound,
+   * the historical behaviour the compare tooling and session exports use.
+   */
+  readonly maxRunFrames?: number;
+}
+
 export class SessionRecorder {
   private segments: RecordedSegment[] = [];
   private lastKey: string | null = null;
   private frames = 0;
   private truncated = false;
+  /** Whether the last run may still be extended by the next tick. */
+  private openRun = false;
+  private readonly maxRunFrames: number;
+
+  constructor(options: SessionRecorderOptions = {}) {
+    this.maxRunFrames = options.maxRunFrames ?? Number.POSITIVE_INFINITY;
+  }
 
   recordTick(buttons: ReadonlySet<GbaButton>, t?: number): void {
     this.frames += 1;
@@ -58,8 +75,9 @@ export class SessionRecorder {
     const list = [...buttons].sort() as GbaButton[];
     const key = list.join("+");
     const last = this.segments[this.segments.length - 1];
-    if (last !== undefined && key === this.lastKey) {
+    if (last !== undefined && key === this.lastKey && last.frames < this.maxRunFrames) {
       last.frames += 1;
+      this.openRun = true;
       return;
     }
     if (this.segments.length >= MAX_SEGMENTS) {
@@ -68,6 +86,17 @@ export class SessionRecorder {
     }
     this.segments.push(t === undefined ? { frames: 1, buttons: list } : { frames: 1, buttons: list, t });
     this.lastKey = key;
+    this.openRun = true;
+  }
+
+  /**
+   * Closes the current run: the next tick starts a new run even with the
+   * same buttons. The library cuts at every game event so the finished runs
+   * cover exactly the frames up to and including the event's frame.
+   */
+  cut(): void {
+    this.lastKey = null;
+    this.openRun = false;
   }
 
   /**
@@ -90,11 +119,25 @@ export class SessionRecorder {
       this.frames += segment.frames;
     }
     this.lastKey = null;
+    this.openRun = false;
   }
 
-  /** Copies of the recorded runs from `fromSegment` on, timestamps included. */
+  /** Copies of the recorded runs from `fromSegment` on, timestamps included, the still-open run too. */
   segmentsFrom(fromSegment = 0): RecordedSegment[] {
-    return this.segments.slice(fromSegment).map((segment) =>
+    return this.copyRuns(fromSegment, this.segments.length);
+  }
+
+  /**
+   * Copies of the FINISHED runs from `fromSegment` on: a run that may still
+   * grow is left out, so two reads at different times never disagree about
+   * a run already handed out (an upload boundary must not freeze a run short).
+   */
+  finishedSegmentsFrom(fromSegment = 0): RecordedSegment[] {
+    return this.copyRuns(fromSegment, this.openRun ? this.segments.length - 1 : this.segments.length);
+  }
+
+  private copyRuns(from: number, to: number): RecordedSegment[] {
+    return this.segments.slice(from, Math.max(from, to)).map((segment) =>
       segment.t === undefined
         ? { frames: segment.frames, buttons: [...segment.buttons] }
         : { frames: segment.frames, buttons: [...segment.buttons], t: segment.t },
@@ -118,6 +161,7 @@ export class SessionRecorder {
     this.lastKey = null;
     this.frames = 0;
     this.truncated = false;
+    this.openRun = false;
   }
 
   toTrace(options: {

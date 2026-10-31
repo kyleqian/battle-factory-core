@@ -101,3 +101,35 @@ describe("SessionRecorder round-trip determinism", () => {
     expect(Buffer.from(render(replayed)).equals(Buffer.from(render(live)))).toBe(true);
   });
 });
+
+describe("SessionRecorder finished runs (library contract v2)", () => {
+  it("leaves the still-growing run out of finishedSegmentsFrom until it is cut", () => {
+    const recorder = new SessionRecorder();
+    recorder.recordTick(heldSet());
+    recorder.recordTick(heldSet());
+    expect(recorder.finishedSegmentsFrom()).toEqual([]);
+    recorder.recordTick(heldSet("A"));
+    expect(recorder.finishedSegmentsFrom()).toEqual([{ frames: 2, buttons: [] }]);
+    expect(recorder.segmentsFrom()).toEqual([{ frames: 2, buttons: [] }, { frames: 1, buttons: ["A"] }]);
+    recorder.cut();
+    expect(recorder.finishedSegmentsFrom()).toEqual([{ frames: 2, buttons: [] }, { frames: 1, buttons: ["A"] }]);
+    // After a cut the same buttons start a new run instead of extending the finished one.
+    recorder.recordTick(heldSet("A"));
+    expect(recorder.finishedSegmentsFrom(1)).toEqual([{ frames: 1, buttons: ["A"] }]);
+    expect(recorder.segmentsFrom(1)).toEqual([{ frames: 1, buttons: ["A"] }, { frames: 1, buttons: ["A"] }]);
+    expect(recorder.frameCount).toBe(4);
+  });
+
+  it("closes idle runs at maxRunFrames so they can be handed out", () => {
+    const recorder = new SessionRecorder({ maxRunFrames: 3 });
+    for (let i = 0; i < 7; i += 1) recorder.recordTick(heldSet());
+    expect(recorder.finishedSegmentsFrom()).toEqual([{ frames: 3, buttons: [] }, { frames: 3, buttons: [] }]);
+    expect(recorder.segmentsFrom()).toEqual([{ frames: 3, buttons: [] }, { frames: 3, buttons: [] }, { frames: 1, buttons: [] }]);
+    const resumed = new SessionRecorder({ maxRunFrames: 3 });
+    resumed.preload([{ frames: 50, buttons: [] }]);
+    expect(resumed.finishedSegmentsFrom()).toEqual([{ frames: 50, buttons: [] }]);
+    resumed.recordTick(heldSet());
+    expect(resumed.finishedSegmentsFrom(1)).toEqual([]);
+  });
+});
+
