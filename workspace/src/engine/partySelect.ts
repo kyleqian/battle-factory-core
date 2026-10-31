@@ -18,8 +18,10 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import { createFactoryCorpusPartyMember } from "./factoryCorpusParty.ts";
+import { movePartyMenuCursor, partyMenuDirection, type PartyMenuCursor, type PartyMenuRightColumn } from "./partyMenuCursor.ts";
 
-export type PartySelectCursor = "onix" | "magby";
+/** Slot 0 / 1 / 2 or the CANCEL button (party_menu.c's gPartyMenu.slotId; PARTY_SIZE + 1 = CANCEL), shared with the voluntary menu. */
+export type PartySelectCursor = PartyMenuCursor;
 export type PartyMenuChromeKey = "listOnix" | "listOnixFrame1" | "listOnixMidHop" | "listMagby" | "listMagbyMidHop" | "submenu" | "sendOutExit" | "sendOutExitFrame0";
 export type PartyMenuIconLayer = {
   partyIndex: 0 | 1 | 2;
@@ -59,6 +61,8 @@ export interface PartySelectState {
   /** Frames since the actual faint-message dismiss edge. */
   elapsed: number;
   cursor: PartySelectCursor;
+  /** The right column's remembered slot for LEFT/RIGHT (partyMenuCursor.ts). */
+  rightColumnCursor: PartyMenuRightColumn;
   submenuOpen: boolean;
   /** Null until SEND OUT is confirmed; then frames since that input edge. */
   sendOutElapsed: number | null;
@@ -206,13 +210,16 @@ export function createPartySelectStateFromForcedSwitch(
       personality: corpusMember.personality,
       abilitySlot: corpusMember.abilitySlot,
       friendship: corpusMember.friendship,
-      // `faintedPartyIndex` names the outgoing slot generically (`Cmd_
-      // openpartyscreen`'s own convention, `battleScriptOpenPartyScreenOpcode
-      // .ts`) -- ISSUES #89's Baton Pass switch opens this same screen for a
-      // still-living outgoing member, matching `createBattlePartySelectState`
-      // (`battlePartySelect.ts`)'s own `fainted: member.hp === 0`: only a
-      // genuine zero-HP outgoing slot renders as fainted.
-      fainted: partyIndex === request.faintedPartyIndex && battleMember.hp === 0,
+      // The party menu tags every zero-HP member FNT (party_menu.c's HP /
+      // status draw reads each slot's own HP), not only the slot that just
+      // went down: a second forced switch in one battle lists the earlier
+      // casualty as fainted too (fsw235). `faintedPartyIndex` names the
+      // outgoing slot generically (`Cmd_openpartyscreen`'s own convention,
+      // `battleScriptOpenPartyScreenOpcode.ts`) -- ISSUES #89's Baton Pass
+      // switch opens this same screen for a still-living outgoing member,
+      // which therefore stays unfainted, matching `createBattlePartySelectState`
+      // (`battlePartySelect.ts`)'s own `fainted: member.hp === 0`.
+      fainted: battleMember.hp === 0,
       legal: legalIndexes.has(partyIndex),
       item: corpusMember.item,
     });
@@ -231,7 +238,10 @@ export function createPartySelectStateFromForcedSwitch(
 
   return {
     elapsed: 0,
-    cursor: "onix",
+    // InitPartyMenu(..., keepCursorPos = FALSE, ...) forces slot 0 (party_menu.c:524-525) for the forced send-out exactly like
+    // the voluntary menu, whichever slot fainted; the fainted slot refuses with "has no energy" when picked.
+    cursor: 0,
+    rightColumnCursor: 1,
     submenuOpen: false,
     sendOutElapsed: null,
     message: null,
@@ -247,7 +257,8 @@ export function createPartySelectStateFromForcedSwitch(
  */
 export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
   elapsed: 0,
-  cursor: "onix",
+  cursor: 0,
+  rightColumnCursor: 1,
   submenuOpen: false,
   sendOutElapsed: null,
   message: null,
@@ -476,7 +487,7 @@ export function partyMenuLayers(state: PartySelectState): PartyMenuLayers {
       status: "magby",
     };
   }
-  if (state.cursor === "onix") {
+  if (state.cursor === 0) {
     const y2 = onixSelectedHopY2(state.elapsed);
     return {
       // The persisted chrome is deliberately icon-free only at the source
@@ -518,36 +529,43 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
       ? { ...next, message: null }
       : next;
   }
-  if (!next.submenuOpen && newKeys.has("DOWN")) return { ...next, cursor: "magby" };
-  if (newKeys.has("A")) {
-    if (!next.submenuOpen) return { ...next, submenuOpen: true };
-    const selected = next.party.find((member) => member.partyIndex === selectedPartyIndex(next));
-    if (selected === undefined) return next;
+  if (next.submenuOpen) {
+    // The SHIFT / SUMMARY / CANCEL submenu (Task_TryCreateSelectionWindow): B is CursorCb_Cancel1, back to the list; A is SHIFT
+    // (the submenu cursor itself is not modelled, as in the voluntary menu: SUMMARY is unreachable).
+    if (newKeys.has("B")) return { ...next, submenuOpen: false };
+    if (!newKeys.has("A") || next.cursor === "cancel") return next;
+    const selected = next.party[next.cursor];
     if (!selected.legal) {
-      // TrySwitchInPokemon (party_menu.c:5811-5823): a zero-HP outgoing slot
-      // (the classic forced-switch dance) refuses with "has no energy"; a
-      // live outgoing slot -- ISSUES #89, Baton Pass's own still-living
-      // switch -- refuses with "is already in battle" instead. Either way
-      // the submenu must close and show a real message, not silently no-op
-      // (a no-op here left the driver's DOWN/A cycle permanently stuck,
-      // since DOWN is refused while the submenu is open).
+      // TrySwitchInPokemon (party_menu.c:5811-5823) tests the slot's HP
+      // first: any zero-HP member -- the slot that just went down or an
+      // earlier casualty in the same battle -- refuses with "has no energy";
+      // only a still-living outgoing slot (ISSUES #89, Baton Pass's own
+      // switch) refuses with "is already in battle". Either way the submenu
+      // must close and show a real message, not silently no-op (a no-op here
+      // left the driver's DOWN/A cycle permanently stuck, since DOWN is
+      // refused while the submenu is open).
       return {
         ...next,
         submenuOpen: false,
-        message: selected.fainted
+        message: selected.hp === 0
           ? `${selected.species} has no energy\nleft to battle!`
           : `${selected.species} is already\nin battle!`,
       };
     }
     return { ...next, sendOutElapsed: 0 };
   }
-  return next;
+  // HandleChooseMonCancel, PARTY_ACTION_SEND_OUT (party_menu.c:1378-1384): B and A on the CANCEL button only play SE_FAILURE;
+  // the menu stays until a replacement is sent out.
+  if (newKeys.has("B")) return next;
+  if (newKeys.has("A")) return next.cursor === "cancel" ? next : { ...next, submenuOpen: true };
+  const direction = partyMenuDirection(newKeys);
+  if (direction === undefined) return next;
+  return { ...next, ...movePartyMenuCursor(next, direction) };
 }
 
 function selectedPartyIndex(state: PartySelectState): BattlePartyIndex {
-  return state.cursor === "onix"
-    ? state.request.faintedPartyIndex
-    : state.request.legalPartyIndexes[0]!;
+  if (state.cursor === "cancel") throw new Error("party select: the CANCEL button names no party slot");
+  return state.cursor;
 }
 
 /**

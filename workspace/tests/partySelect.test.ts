@@ -4,6 +4,7 @@ import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 import { createBattleForcedSwitchRequest, createBattleState, type BattleDecisionReducer } from "../src/engine/battleDecisionBoundary.ts";
 import { battlePartySelectStateForForcedParty, renderBattlePartySelect } from "../src/engine/battlePartySelect.ts";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
+import { drawTurn15PartySelectList } from "../src/engine/battleScene.ts";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
@@ -81,7 +82,7 @@ describe("forced turn-15 party select", () => {
     };
     const presentation = {
       ...INITIAL_PARTY_SELECT_STATE,
-      cursor: "magby" as const,
+      cursor: 1 as const,
       submenuOpen: true,
     };
 
@@ -108,7 +109,7 @@ describe("forced turn-15 party select", () => {
   });
 
   it("ignores list navigation during the fade and defaults to fainted ONIX", () => {
-    expect(advancePartySelect({ ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED - 2 }, new Set(["DOWN"]))).toMatchObject({ cursor: "onix" });
+    expect(advancePartySelect({ ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED - 2 }, new Set(["DOWN"]))).toMatchObject({ cursor: 0 });
   });
 
   it("uses press-relative entry phase boundaries for both canonical and delayed dismisses", () => {
@@ -144,13 +145,13 @@ describe("forced turn-15 party select", () => {
     expect(magby).toEqual({
       ...INITIAL_PARTY_SELECT_STATE,
       elapsed: PARTY_LIST_INPUT_ELAPSED,
-      cursor: "magby",
+      cursor: 1,
     });
     const submenu = advancePartySelect(magby, new Set(["A"]));
     expect(submenu).toEqual({
       ...INITIAL_PARTY_SELECT_STATE,
       elapsed: PARTY_LIST_INPUT_ELAPSED + 1,
-      cursor: "magby",
+      cursor: 1,
       submenuOpen: true,
     });
     expect(advancePartySelect(submenu, new Set(["A"])).sendOutElapsed).toBe(0);
@@ -161,7 +162,7 @@ describe("forced turn-15 party select", () => {
       { ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 },
       new Set(["A"]),
     );
-    expect(onixSubmenu).toMatchObject({ cursor: "onix", submenuOpen: true, sendOutElapsed: null });
+    expect(onixSubmenu).toMatchObject({ cursor: 0, submenuOpen: true, sendOutElapsed: null });
     const refused = advancePartySelect(onixSubmenu, new Set(["A"]));
     expect(refused.sendOutElapsed).toBeNull();
     expect(refused.submenuOpen).toBe(false);
@@ -201,7 +202,7 @@ describe("forced turn-15 party select", () => {
       { ...state, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 },
       new Set(["A"]),
     );
-    expect(onixSubmenu).toMatchObject({ cursor: "onix", submenuOpen: true, sendOutElapsed: null });
+    expect(onixSubmenu).toMatchObject({ cursor: 0, submenuOpen: true, sendOutElapsed: null });
     const refused = advancePartySelect(onixSubmenu, new Set(["A"]));
     expect(refused.sendOutElapsed).toBeNull();
     expect(refused.submenuOpen).toBe(false);
@@ -289,7 +290,7 @@ describe("forced turn-15 party select", () => {
     expect(onixHop.chromeKey).toBe("listOnixMidHop");
     expect(onixHop.icons[0]).toMatchObject({ species: "ONIX", frame: 0, selected: true, y2: 1 });
     expect(onixHop.icons[1]).toMatchObject({ species: "MAGBY", frame: 1, selected: false, x2: -4 });
-    const magbyState = { ...INITIAL_PARTY_SELECT_STATE, elapsed: 205, cursor: "magby" as const };
+    const magbyState = { ...INITIAL_PARTY_SELECT_STATE, elapsed: 205, cursor: 1 as const };
     const magbyHop = partyMenuLayers(magbyState);
     expect(magbyHop.chromeKey).toBe("listMagbyMidHop");
     expect(magbyHop.icons[1]).toMatchObject({ species: "MAGBY", frame: 1, selected: true, y2: 1 });
@@ -312,5 +313,132 @@ describe("forced turn-15 party select", () => {
       ]);
     }
     expect(partyMenuLayers({ ...INITIAL_PARTY_SELECT_STATE, elapsed: 78 }).chromeKey).toBe("listOnix");
+  });
+});
+
+describe("forced party menu: the ROM's three-slot + CANCEL cursor (party_menu.c PARTY_ACTION_SEND_OUT)", () => {
+  const ready = { ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 };
+  const step = (state: typeof ready, ...keys: ("A" | "B" | "UP" | "DOWN" | "LEFT" | "RIGHT")[]) => {
+    let next = state;
+    for (const key of keys) next = advancePartySelect(next, new Set([key]));
+    return next;
+  };
+
+  it("reaches slot 1, slot 2 and CANCEL in every direction the single layout allows, and wraps", () => {
+    expect(INITIAL_PARTY_SELECT_STATE).toMatchObject({ cursor: 0, rightColumnCursor: 1 });
+    expect(step(ready, "DOWN").cursor).toBe(1);
+    expect(step(ready, "DOWN", "DOWN").cursor).toBe(2);
+    expect(step(ready, "DOWN", "DOWN", "DOWN").cursor).toBe("cancel");
+    expect(step(ready, "DOWN", "DOWN", "DOWN", "DOWN").cursor).toBe(0);
+    expect(step(ready, "UP").cursor).toBe("cancel");
+    expect(step(ready, "UP", "UP").cursor).toBe(2);
+    expect(step(ready, "UP", "UP", "UP").cursor).toBe(1);
+    expect(step(ready, "RIGHT").cursor).toBe(1);
+    // LEFT from the right column remembers the slot; RIGHT returns to it.
+    const fromTwo = step(ready, "DOWN", "DOWN", "LEFT");
+    expect(fromTwo).toMatchObject({ cursor: 0, rightColumnCursor: 2 });
+    expect(step(fromTwo, "RIGHT").cursor).toBe(2);
+    // LEFT on slot 0 / CANCEL and RIGHT off slot 0 do nothing.
+    expect(step(ready, "LEFT").cursor).toBe(0);
+    expect(step(ready, "DOWN", "RIGHT").cursor).toBe(1);
+    expect(step(ready, "UP", "LEFT").cursor).toBe("cancel");
+  });
+
+  it("refuses B and the CANCEL button while a replacement is required (HandleChooseMonCancel: SE_FAILURE only)", () => {
+    const afterB = step(ready, "B");
+    expect(afterB).toMatchObject({ cursor: 0, submenuOpen: false, sendOutElapsed: null, message: null });
+    const onCancel = step(ready, "UP");
+    expect(onCancel.cursor).toBe("cancel");
+    const pressed = step(onCancel, "A");
+    expect(pressed).toMatchObject({ cursor: "cancel", submenuOpen: false, sendOutElapsed: null, message: null });
+    expect(() => submitPartySelectBattleDecision(
+      { boundary: { kind: "forced-switch", request: pressed.request } } as never,
+      pressed,
+      (() => { throw new Error("must not reduce"); }) as never,
+    )).not.toThrow();
+  });
+
+  it("closes the SHIFT submenu on B (CursorCb_Cancel1) and sends out slot 2 from its submenu", () => {
+    const submenu = step(ready, "DOWN", "DOWN", "A");
+    expect(submenu).toMatchObject({ cursor: 2, submenuOpen: true });
+    expect(step(submenu, "B")).toMatchObject({ cursor: 2, submenuOpen: false, sendOutElapsed: null });
+    expect(step(submenu, "DOWN")).toMatchObject({ cursor: 2, submenuOpen: true });
+    const sent = step(submenu, "A");
+    expect(sent.sendOutElapsed).toBe(0);
+    const battle = createBattleState({ rules: { resumed: false }, rngSeed: 0x12345678, request: sent.request });
+    const reducer: BattleDecisionReducer<{ readonly resumed: boolean }> = ({ rules, decision }) => {
+      expect(decision).toEqual({ kind: "switch", partyIndex: 2 });
+      return { rules: { ...rules, resumed: true }, events: [], boundary: { kind: "terminal", outcome: "player-win" } };
+    };
+    expect(submitPartySelectBattleDecision(battle, sent, reducer)).toMatchObject({ kind: "terminal" });
+  });
+
+  it("prints both lines of the refusal for the fainted slot and draws the second line (WIN_MSG, 28x4)", () => {
+    const refused = step(ready, "A", "A");
+    expect(refused.message).toBe("ONIX has no energy\nleft to battle!");
+    const withMessage = createFramebuffer();
+    renderBattlePartySelect(withMessage, battlePartySelectStateForForcedParty(refused));
+    const dismissed = createFramebuffer();
+    renderBattlePartySelect(dismissed, battlePartySelectStateForForcedParty({ ...refused, message: null }));
+    // The second text row ("left to battle!") lives at y 137..148 inside the 28x4 message window at (8,120)-(232,152);
+    // the 21x2 "Choose a POKéMON." box could not show it.
+    const rowDiffers = (y0: number, y1: number): boolean => {
+      for (let y = y0; y < y1; y += 1) for (let x = 8; x < 120; x += 1) {
+        const o = (y * 240 + x) * 4;
+        if (withMessage[o] !== dismissed[o] || withMessage[o + 1] !== dismissed[o + 1] || withMessage[o + 2] !== dismissed[o + 2]) return true;
+      }
+      return false;
+    };
+    expect(rowDiffers(121, 133)).toBe(true);
+    expect(rowDiffers(137, 149)).toBe(true);
+    // The message window is dismissed by A or B and the menu stays.
+    expect(step(refused, "B")).toMatchObject({ message: null, cursor: 0, sendOutElapsed: null });
+  });
+
+  it("opens on slot 0 even when the fainted Pokémon sits in slot 1 (InitPartyMenu keepCursorPos=FALSE)", () => {
+    const request = createBattleForcedSwitchRequest({
+      kind: "forced-switch", requestId: 7, side: "player", battler: 0, faintedPartyIndex: 1, legalPartyIndexes: [0, 2],
+    });
+    const party = CANONICAL_FORCED_SWITCH_PARTY.map((member, index) =>
+      index === 0 ? { ...member, hp: 40 } : index === 1 ? { ...member, hp: 0 } : member
+    ) as unknown as typeof CANONICAL_FORCED_SWITCH_PARTY;
+    const state = createPartySelectStateFromForcedSwitch(request, CANONICAL_FORCED_SWITCH_RENTAL_RECORDS, party);
+    expect(state).toMatchObject({ cursor: 0, rightColumnCursor: 1 });
+    expect(state.party.map((member) => [member.fainted, member.legal])).toEqual([[false, true], [true, false], [false, true]]);
+    const live = { ...state, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 };
+    expect(step(live, "A", "A").sendOutElapsed).toBe(0);
+    expect(step(live, "DOWN", "A", "A").message).toBe("MAGBY has no energy\nleft to battle!");
+    expect(step(live, "DOWN", "DOWN", "A", "A").sendOutElapsed).toBe(0);
+  });
+
+  it("second forced switch: the earlier casualty at slot 0 reads FNT too and refuses with 'has no energy' (TrySwitchInPokemon tests HP first); the live rows draw, not the first faint's snapshot", () => {
+    // tools/compare/traces/battle1-postwin-next-prompt.json frames 22400-26000: ONIX fainted earlier, MAGBY just went down.
+    const request = createBattleForcedSwitchRequest({
+      kind: "forced-switch", requestId: 8, side: "player", battler: 0, faintedPartyIndex: 1, legalPartyIndexes: [2],
+    });
+    const party = CANONICAL_FORCED_SWITCH_PARTY.map((member, index) =>
+      index === 1 ? { ...member, hp: 0 } : member
+    ) as unknown as typeof CANONICAL_FORCED_SWITCH_PARTY;
+    const state = createPartySelectStateFromForcedSwitch(request, CANONICAL_FORCED_SWITCH_RENTAL_RECORDS, party);
+    expect(state.party.map((member) => [member.fainted, member.legal])).toEqual([[true, false], [true, false], [false, true]]);
+    expect(battlePartySelectStateForForcedParty(state).rows.map((row) => [row.fainted, row.active])).toEqual([[true, false], [true, true], [false, false]]);
+    const live = { ...state, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 };
+    expect(step(live, "A", "A").message).toBe("ONIX has no energy\nleft to battle!");
+    expect(step(live, "DOWN", "A", "A").message).toBe("MAGBY has no energy\nleft to battle!");
+    expect(step(live, "DOWN", "DOWN", "A", "A").sendOutElapsed).toBe(0);
+    // The harvested anchor chrome is a snapshot of the first faint (ONIX down at slot 0, MAGBY / BAYLEEF full and legal): this
+    // state draws its live rows through the composed renderer, while the anchor state itself still draws the snapshot.
+    const settled = { ...live, elapsed: PARTY_LIST_INPUT_ELAPSED + 40 };
+    const routed = createFramebuffer();
+    drawTurn15PartySelectList(routed, settled);
+    const composed = createFramebuffer();
+    renderBattlePartySelect(composed, battlePartySelectStateForForcedParty(settled));
+    expect(Buffer.from(routed).equals(Buffer.from(composed))).toBe(true);
+    const anchor = { ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED + 40 };
+    const anchorRouted = createFramebuffer();
+    drawTurn15PartySelectList(anchorRouted, anchor);
+    const anchorComposed = createFramebuffer();
+    renderBattlePartySelect(anchorComposed, battlePartySelectStateForForcedParty(anchor));
+    expect(Buffer.from(anchorRouted).equals(Buffer.from(anchorComposed))).toBe(false);
   });
 });

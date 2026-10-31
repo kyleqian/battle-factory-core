@@ -84,7 +84,7 @@ export function apx217Strip(seed: number, moveId: number, attacker: number, code
   const until = (p: () => boolean) => {
     while (!ended && !done && !p()) {
       const s = forcedSelector();
-      if (s) { pulse(s.message !== null ? "A" : s.cursor === "onix" && !s.submenuOpen ? "DOWN" : "A"); continue; }
+      if (s) { pulse(s.message !== null ? "A" : (!s.submenuOpen && (typeof s.cursor === "number" ? !s.party[s.cursor]!.legal : (s.cursor as string) !== "magby")) ? "DOWN" : "A"); continue; }
       step((state.battleStartIntro && frame % 16 === 0)
         || (state.battleResolutionPresentation?.lifecycle.phase === "awaiting-message-dismiss" && frame % 2 === 0) ? ["A"] : []);
     }

@@ -2305,7 +2305,12 @@ export class RandomPlayer {
       return this.press("A", 8);
     }
     if (selector.cursor !== intent.target) {
-      // DOWN cycles 0 -> 1 -> 2 -> cancel -> 0.
+      // DOWN cycles 0 -> 1 -> 2 -> cancel -> 0; exploring runs also wander UP / LEFT / RIGHT on the way.
+      if (this.explores && this.pressRng.chance(0.2)) {
+        const direction = this.pressRng.pick(["UP", "LEFT", "RIGHT"] as const);
+        this.note(state, `party: wander ${direction}`);
+        return this.press(direction, 6);
+      }
       return this.press("DOWN", 6);
     }
     if (intent.target === "cancel") {
@@ -2344,17 +2349,43 @@ export class RandomPlayer {
     if (selector.message !== null) {
       return this.pressAdvance(state, "forced-party message dismiss");
     }
-    // The forced selector's cursor model: default rests on the fainted slot
-    // (A there shows the no-energy message), DOWN moves onto the legal pick.
-    if (selector.cursor === "onix") {
-      if (this.explores && this.rng.chance(0.3)) {
-        this.note(state, "forced party: A on fainted slot");
-        return this.press("A", 10);
+    if (selector.submenuOpen) {
+      if (this.explores && this.rng.chance(0.1)) {
+        this.note(state, "forced party: close submenu (B)");
+        return this.press("B", 8);
       }
-      this.note(state, "forced party: DOWN to legal slot");
+      this.note(state, "forced party: confirm send-out");
+      return this.press("A", 10);
+    }
+    // The ROM's cursor model (partyMenuCursor.ts): slot 0 / 1 / 2 and the CANCEL button in every direction. Wander before
+    // choosing so every slot, CANCEL and the refused presses (B, A on CANCEL, A on the fainted slot) are exercised; the
+    // walk always ends on a legal slot's SEND OUT. The wander rolls come from the press-timing stream, not the decision
+    // stream, so a run's decisions (and the soak pins' battle / turn / end state) stay what they were: only frames move.
+    if (this.explores && this.pressRng.chance(0.25)) {
+      const direction = this.pressRng.pick(["UP", "DOWN", "LEFT", "RIGHT"] as const);
+      this.note(state, `forced party: wander ${direction}`);
+      return this.press(direction, 8);
+    }
+    if (this.explores && this.pressRng.chance(0.05)) {
+      this.note(state, "forced party: B (refused while forced)");
+      return this.press("B", 8);
+    }
+    if (selector.cursor === "cancel") {
+      if (this.explores && this.pressRng.chance(0.3)) {
+        this.note(state, "forced party: A on CANCEL (refused while forced)");
+        return this.press("A", 8);
+      }
       return this.press("DOWN", 8);
     }
-    this.note(state, "forced party: confirm send-out");
+    if (!selector.party[selector.cursor].legal) {
+      if (this.explores && this.rng.chance(0.3)) {
+        this.note(state, "forced party: A on fainted / active slot");
+        return this.press("A", 10);
+      }
+      this.note(state, "forced party: DOWN toward a legal slot");
+      return this.press("DOWN", 8);
+    }
+    this.note(state, "forced party: open SEND OUT");
     return this.press("A", 10);
   }
 

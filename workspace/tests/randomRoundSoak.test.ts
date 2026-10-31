@@ -509,7 +509,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 226's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 739's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -534,6 +534,16 @@ describe("random round soak driver (green milestone pin)", () => {
     // future trajectory drift fails loudly instead of silently dropping the
     // coverage. `stopAtFirstRoundDecision` snapshots THIS round's own decided
     // outcome (see ISSUES #104's note in the history of this pin).
+    //
+    // fsw235 (the forced party menu's three-slot + CANCEL cursor, the
+    // voluntary menu's already-in-battle refusal and the soak policies that
+    // wander both menus) re-rolled every exploring seed again: seed 226 now
+    // loses in battle 3 before its Baton Pass battle. A scan of full-policy
+    // seeds 0..4199 for the same joint event (a Baton Pass commit followed by
+    // a forced-selector halt on a still-living outgoing slot, first round
+    // only) found 447 and 739; 447 runs into the 80,000-frame budget still in
+    // battle 1, so 739, whose round plays out to a genuine loss in battle 3,
+    // is the pin.
     let frame = 0;
     let batonPassCommitFrame: number | null = null;
     let haltFrame: number | null = null;
@@ -550,7 +560,7 @@ describe("random round soak driver (green milestone pin)", () => {
         if (outgoing !== undefined && !outgoing.fainted) haltFrame = state.frame;
       },
     };
-    const result = runSeed(226, {
+    const result = runSeed(739, {
       maxFrames: 80_000,
       renderEvery: 0,
       stopAtFirstRoundDecision: true,
@@ -560,7 +570,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(batonPassCommitFrame).not.toBeNull();
     expect(haltFrame).not.toBeNull();
     expect(result.frames).toBeGreaterThan(haltFrame!);
-    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost", battle: 4 });
+    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost", battle: 3 });
   });
 
   // ISSUES #86's original concern (a forced replacement's terminal weather
@@ -815,12 +825,18 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pfr192 (the keyed player faint-replacement send-in clock): 17493 -> 17175; same battle / turn / end state.
       // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the floor drop alone (no Leech Seed in this trajectory): 17175 -> 17125; same battle / turn / end state.
       // rep203: fnt201 (the faint script lead) 17125 -> 17485; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
-      frames: 17485,
+      // fsw235 (the forced party menu's ROM cursor model + the policies' random party-menu walks): the exploring policy's
+      // decision ticks in the forced menu (and their "A on the fainted slot" rolls) are no longer one DOWN apart, so its
+      // random game is a new trajectory: 17485 / turn 30 -> 14107 / turn 23 (the wander rolls themselves come from the
+      // press-timing stream, so "vanilla" below only moves frames). The voluntary menu's SHIFT on the active row then
+      // stopped being a silent no-op (gText_PkmnAlreadyInBattle, the same fsw235 commit): the exploring game dismisses a
+      // message where it used to back out, so a new trajectory again: 14107 / battle 1 turn 23 -> 42311 / battle 3 turn 14.
+      frames: 42311,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 0,
-      battle: 1,
-      turn: 30,
+      maxBattleDepth: 2,
+      battle: 3,
+      turn: 14,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -828,12 +844,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // lsd194: the floor drop alone: 26866 -> 26804; same battle / turn / end state.
       // lsd196 (second-stat rows): 26804 -> 26817; rst197 does not move it (lsd194SoakPins.ts); same battle / turn / end state.
       // rep203: fnt201 (the faint script lead) 26817 -> 27295; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
-      frames: 27295,
+      // fsw235: a new trajectory for the exploring policy (see seed 0): 27295 / battle 2 turn 9 -> 25899 / battle 2 turn 6,
+      // then 25899 / battle 2 turn 6 -> 38842 / battle 2 turn 33 with the voluntary menu's already-in-battle refusal.
+      frames: 38842,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
       battle: 2,
-      turn: 9,
+      turn: 33,
     });
   });
 
@@ -860,7 +878,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pfr192 (the keyed player faint-replacement send-in clock): 9154 -> 8928; same battle / turn / end state.
       // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): the floor drop alone: 8928 -> 8895; same battle / turn / end state.
       // rep203: fnt201 (the faint script lead) 8895 -> 9140; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
-      frames: 9140,
+      // fsw235 (the forced party menu opens on slot 0, so a slot-0 replacement needs no DOWN and a slot-2 one needs two): frames
+      // only, 9140 -> 9134; decision notes identical apart from the menu presses; same battle / turn / end state.
+      frames: 9134,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -881,7 +901,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pfr192 (the keyed player faint-replacement send-in clock): 9232 -> 8979; same battle / turn / end state.
       // lsd194: the floor drop alone: 8979 -> 8920; same battle / turn / end state.
       // rep203: fnt201 (the faint script lead) 8920 -> 9190; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
-      frames: 9190,
+      // fsw235: frames only (the menu presses), 9190 -> 9186; same battle / turn / end state.
+      frames: 9186,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -1370,7 +1391,11 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // thr153: ISSUES #141a (the THRASH lock-in re-run) leaves seed 34 at
     // carry 7; re-scanned seeds 0..10 / 34..44 under the same options:
     // seeds 1, 3 and 40 chain two round wins, so the lowest (1) is pinned.
-    const result = runSeed(1, {
+    // fsw235 (the forced party menu's ROM cursor model + the policies' random
+    // party-menu walks, which "winning" also explores): seed 1 now loses its
+    // first round; re-scanned seeds 0..39: seeds 3, 13, 20 and 34 chain two
+    // round wins, so the lowest (3) is pinned.
+    const result = runSeed(3, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,
