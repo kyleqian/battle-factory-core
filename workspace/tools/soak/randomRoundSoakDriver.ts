@@ -2887,10 +2887,10 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy, coverage);
   player.summaryExplore = options.summaryExplore === true;
   player.newChallengeFromLobby = options.newChallengeFromLobby === true;
-  let lobbySeen = false;
   let lobbyNewChallenges = 0;
   let state = options.stateFactory?.(seed)
     ?? createInitialState(options.scene !== undefined ? { battleScene: options.scene } : {});
+  let lobbySeen = state.lobbyFreeRoam !== null;
   let frame = 0;
   let firstEndState: string | null = null;
   let chainingCommitted = false;
