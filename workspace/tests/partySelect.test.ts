@@ -4,6 +4,7 @@ import { bgFadeY, objFadeY } from "../src/engine/paletteFade.ts";
 import { createBattleForcedSwitchRequest, createBattleState, type BattleDecisionReducer } from "../src/engine/battleDecisionBoundary.ts";
 import { battlePartySelectStateForForcedParty, renderBattlePartySelect } from "../src/engine/battlePartySelect.ts";
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
+import { drawTurn15PartySelectList } from "../src/engine/battleScene.ts";
 import frontierMonsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../src/data/gen/natures.json" with { type: "json" };
 import { createFactoryCorpusPartyMember } from "../src/engine/factoryCorpusParty.ts";
@@ -409,5 +410,35 @@ describe("forced party menu: the ROM's three-slot + CANCEL cursor (party_menu.c 
     expect(step(live, "DOWN", "A", "A").message).toBe("MAGBY has no energy\nleft to battle!");
     expect(step(live, "DOWN", "DOWN", "A", "A").sendOutElapsed).toBe(0);
   });
-});
 
+  it("second forced switch: the earlier casualty at slot 0 reads FNT too and refuses with 'has no energy' (TrySwitchInPokemon tests HP first); the live rows draw, not the first faint's snapshot", () => {
+    // tools/compare/traces/battle1-postwin-next-prompt.json frames 22400-26000: ONIX fainted earlier, MAGBY just went down.
+    const request = createBattleForcedSwitchRequest({
+      kind: "forced-switch", requestId: 8, side: "player", battler: 0, faintedPartyIndex: 1, legalPartyIndexes: [2],
+    });
+    const party = CANONICAL_FORCED_SWITCH_PARTY.map((member, index) =>
+      index === 1 ? { ...member, hp: 0 } : member
+    ) as unknown as typeof CANONICAL_FORCED_SWITCH_PARTY;
+    const state = createPartySelectStateFromForcedSwitch(request, CANONICAL_FORCED_SWITCH_RENTAL_RECORDS, party);
+    expect(state.party.map((member) => [member.fainted, member.legal])).toEqual([[true, false], [true, false], [false, true]]);
+    expect(battlePartySelectStateForForcedParty(state).rows.map((row) => [row.fainted, row.active])).toEqual([[true, false], [true, true], [false, false]]);
+    const live = { ...state, elapsed: PARTY_LIST_INPUT_ELAPSED - 1 };
+    expect(step(live, "A", "A").message).toBe("ONIX has no energy\nleft to battle!");
+    expect(step(live, "DOWN", "A", "A").message).toBe("MAGBY has no energy\nleft to battle!");
+    expect(step(live, "DOWN", "DOWN", "A", "A").sendOutElapsed).toBe(0);
+    // The harvested anchor chrome is a snapshot of the first faint (ONIX down at slot 0, MAGBY / BAYLEEF full and legal): this
+    // state draws its live rows through the composed renderer, while the anchor state itself still draws the snapshot.
+    const settled = { ...live, elapsed: PARTY_LIST_INPUT_ELAPSED + 40 };
+    const routed = createFramebuffer();
+    drawTurn15PartySelectList(routed, settled);
+    const composed = createFramebuffer();
+    renderBattlePartySelect(composed, battlePartySelectStateForForcedParty(settled));
+    expect(Buffer.from(routed).equals(Buffer.from(composed))).toBe(true);
+    const anchor = { ...INITIAL_PARTY_SELECT_STATE, elapsed: PARTY_LIST_INPUT_ELAPSED + 40 };
+    const anchorRouted = createFramebuffer();
+    drawTurn15PartySelectList(anchorRouted, anchor);
+    const anchorComposed = createFramebuffer();
+    renderBattlePartySelect(anchorComposed, battlePartySelectStateForForcedParty(anchor));
+    expect(Buffer.from(anchorRouted).equals(Buffer.from(anchorComposed))).toBe(false);
+  });
+});

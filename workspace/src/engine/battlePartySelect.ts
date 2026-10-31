@@ -42,6 +42,8 @@ import {
 
 export const PARTY_NO_ENERGY_LINE_1_SUFFIX = " has no energy";
 export const PARTY_NO_ENERGY_LINE_2 = "left to battle!";
+export const PARTY_ALREADY_IN_BATTLE_LINE_1_SUFFIX = " is already";
+export const PARTY_ALREADY_IN_BATTLE_LINE_2 = "in battle!";
 
 export type BattlePartySelectCursor = PartyMenuCursor;
 
@@ -508,6 +510,11 @@ export function battlePartyNoEnergyMessage(row: BattlePartySelectRow): string {
   return `${row.name}${PARTY_NO_ENERGY_LINE_1_SUFFIX}\n${PARTY_NO_ENERGY_LINE_2}`;
 }
 
+/** gText_PkmnAlreadyInBattle ("{STR_VAR_1} is already\nin battle!"): TrySwitchInPokemon's refusal for the active battler's own slot. */
+export function battlePartyAlreadyInBattleMessage(row: BattlePartySelectRow): string {
+  return `${row.name}${PARTY_ALREADY_IN_BATTLE_LINE_1_SUFFIX}\n${PARTY_ALREADY_IN_BATTLE_LINE_2}`;
+}
+
 /** Source-shaped list/submenu input for a three-mon singles Factory party. */
 export function advanceBattlePartySelect(
   state: BattlePartySelectState,
@@ -537,7 +544,17 @@ export function advanceBattlePartySelect(
         message: battlePartyNoEnergyMessage(row),
       });
     }
-    if (!row.legal) return next;
+    if (!row.legal) {
+      // TrySwitchInPokemon (party_menu.c:5811-5823), after the HP test above:
+      // the active battler's own slot refuses with "is already in battle!"
+      // through DisplayPartyMenuMessage, the same WIN_MSG route as the
+      // no-energy refusal (fsw235; this was a silent no-op).
+      return Object.freeze({
+        ...next,
+        submenuOpen: false,
+        message: battlePartyAlreadyInBattleMessage(row),
+      });
+    }
     // The confirm A lands while the SEND OUT submenu is open; the real menu
     // keeps the submenu window rendered through the confirm tick (oracle frame
     // 963) and only drops it on the next frame (964), so `submenuOpen` stays

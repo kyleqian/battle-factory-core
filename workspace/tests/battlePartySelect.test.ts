@@ -446,6 +446,20 @@ describe("voluntary battle party selector", () => {
     expect(state.cursor).toBe(2);
   });
 
+  it("refuses SHIFT on the active battler's own row with 'is already in battle!' instead of a silent no-op (TrySwitchInPokemon)", () => {
+    let state = liveSelector();
+    const active = state.rows.findIndex((row) => row.active) as 0 | 1 | 2;
+    expect(state.rows[active].legal).toBe(false);
+    expect(state.rows[active].fainted).toBe(false);
+    while (state.cursor !== active) state = advanceBattlePartySelect(state, new Set(["DOWN"]));
+    state = advanceBattlePartySelect(state, new Set(["A"]));
+    expect(state.submenuOpen).toBe(true);
+    state = advanceBattlePartySelect(state, new Set(["A"]));
+    const name = state.rows[active].name;
+    expect(state).toMatchObject({ submenuOpen: false, outcome: null, message: `${name} is already\nin battle!` });
+    expect(advanceBattlePartySelect(state, new Set(["A"]))).toMatchObject({ message: null, cursor: active, outcome: null });
+  });
+
   it("swaps the message window to the 16x2 sDoWhatWithMonMsgWindowTemplate on the submenu-open edge and keeps it through the close (ISSUES #80 (c))", () => {
     // docs/fade-layer-forensics.md §7(b): sDoWhatWithMonMsgWindowTemplate
     // (data/party_menu.h:430-439) is 16x2 -> px (8,136)-(136,152) with the

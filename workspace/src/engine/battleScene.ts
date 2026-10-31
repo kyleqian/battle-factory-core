@@ -13614,12 +13614,28 @@ function drawTurn15ExitObjSubset(fb: Uint8Array, oam: Mode0Oam[]): void {
 /** The canonical turn-15 party roster, gating whether the hardcoded fast path below renders or falls back to `renderBattlePartySelect`. */
 const TURN15_CANONICAL_PARTY_SPECIES = ["ONIX", "MAGBY", "BAYLEEF"] as const;
 
+/**
+ * The harvested chrome is a snapshot of the anchor's own party state: ONIX
+ * just fainted at slot 0 with MAGBY and BAYLEEF untouched at full HP and both
+ * legal. The same roster reaches this screen again when a second member
+ * faints in the same battle (ONIX already at 0 HP, MAGBY the outgoing slot)
+ * and, through ISSUES #89's Baton Pass, with a living outgoing slot; the
+ * snapshot's rows, HP digits and FNT tags are wrong for those (fsw235), so
+ * they draw from the live rows like every non-canonical party.
+ */
+function isTurn15CanonicalPartyState(state: import("./partySelect.ts").PartySelectState): boolean {
+  const [onix, magby, bayleef] = state.party;
+  return state.party.every((member, index) => member.species === TURN15_CANONICAL_PARTY_SPECIES[index])
+    && state.request.faintedPartyIndex === 0
+    && onix.hp === 0 && !onix.legal
+    && magby.hp === magby.maxHp && magby.legal
+    && bayleef.hp === bayleef.maxHp && bayleef.legal;
+}
+
 export function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   // The harvested canonical chrome covers the anchor's two cursor positions (slot 0 / 1); slot 2 and CANCEL draw through the
   // source-composed renderer like every non-canonical party.
-  if (state.party.some((member, index) =>
-    member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
-  ) || (state.cursor !== 0 && state.cursor !== 1)) {
+  if (!isTurn15CanonicalPartyState(state) || (state.cursor !== 0 && state.cursor !== 1)) {
     renderBattlePartySelect(fb, battlePartySelectStateForForcedParty(state));
     return;
   }

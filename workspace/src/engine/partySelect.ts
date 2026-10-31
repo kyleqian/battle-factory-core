@@ -210,13 +210,16 @@ export function createPartySelectStateFromForcedSwitch(
       personality: corpusMember.personality,
       abilitySlot: corpusMember.abilitySlot,
       friendship: corpusMember.friendship,
-      // `faintedPartyIndex` names the outgoing slot generically (`Cmd_
-      // openpartyscreen`'s own convention, `battleScriptOpenPartyScreenOpcode
-      // .ts`) -- ISSUES #89's Baton Pass switch opens this same screen for a
-      // still-living outgoing member, matching `createBattlePartySelectState`
-      // (`battlePartySelect.ts`)'s own `fainted: member.hp === 0`: only a
-      // genuine zero-HP outgoing slot renders as fainted.
-      fainted: partyIndex === request.faintedPartyIndex && battleMember.hp === 0,
+      // The party menu tags every zero-HP member FNT (party_menu.c's HP /
+      // status draw reads each slot's own HP), not only the slot that just
+      // went down: a second forced switch in one battle lists the earlier
+      // casualty as fainted too (fsw235). `faintedPartyIndex` names the
+      // outgoing slot generically (`Cmd_openpartyscreen`'s own convention,
+      // `battleScriptOpenPartyScreenOpcode.ts`) -- ISSUES #89's Baton Pass
+      // switch opens this same screen for a still-living outgoing member,
+      // which therefore stays unfainted, matching `createBattlePartySelectState`
+      // (`battlePartySelect.ts`)'s own `fainted: member.hp === 0`.
+      fainted: battleMember.hp === 0,
       legal: legalIndexes.has(partyIndex),
       item: corpusMember.item,
     });
@@ -533,17 +536,18 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
     if (!newKeys.has("A") || next.cursor === "cancel") return next;
     const selected = next.party[next.cursor];
     if (!selected.legal) {
-      // TrySwitchInPokemon (party_menu.c:5811-5823): a zero-HP outgoing slot
-      // (the classic forced-switch dance) refuses with "has no energy"; a
-      // live outgoing slot -- ISSUES #89, Baton Pass's own still-living
-      // switch -- refuses with "is already in battle" instead. Either way
-      // the submenu must close and show a real message, not silently no-op
-      // (a no-op here left the driver's DOWN/A cycle permanently stuck,
-      // since DOWN is refused while the submenu is open).
+      // TrySwitchInPokemon (party_menu.c:5811-5823) tests the slot's HP
+      // first: any zero-HP member -- the slot that just went down or an
+      // earlier casualty in the same battle -- refuses with "has no energy";
+      // only a still-living outgoing slot (ISSUES #89, Baton Pass's own
+      // switch) refuses with "is already in battle". Either way the submenu
+      // must close and show a real message, not silently no-op (a no-op here
+      // left the driver's DOWN/A cycle permanently stuck, since DOWN is
+      // refused while the submenu is open).
       return {
         ...next,
         submenuOpen: false,
-        message: selected.fainted
+        message: selected.hp === 0
           ? `${selected.species} has no energy\nleft to battle!`
           : `${selected.species} is already\nin battle!`,
       };
