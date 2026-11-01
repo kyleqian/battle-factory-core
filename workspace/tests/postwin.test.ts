@@ -1419,7 +1419,11 @@ describe("pmn238: the next-match prompt follows the battle number (AskReadyForRe
     "The 2nd match is next!", "The 3rd match is next!", "The 4th match is next!", "The 5th match is next!",
     "The 6th match is next!", "Finally, the 7th match is next!",
   ] as const;
-  /** The postwin state after winning battle `won` (0-based); `challengeBattleNum` is what every constructor stores. */
+  /**
+   * The postwin state after winning battle `won` (0-based). The script reads the battle counter after this win's own
+   * write: `challengeBattleNumAfterWrite` = won + 1 (the generated route's live snapshot holds the counted value in
+   * both fields -- after win 1 it is 1 / 1 -- the canonical anchor's holds 0 / 1; only the after-write one is read).
+   */
   const afterWin = (won: number): PostwinState => ({
     ...INITIAL_POSTWIN_STATE,
     challengeBattleNum: won as PostwinState["challengeBattleNum"],

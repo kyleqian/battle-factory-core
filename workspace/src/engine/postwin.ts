@@ -223,8 +223,11 @@ export const POSTWIN_NEXT_TEXT_TOTAL =
  * always "Are you ready?". The Frontier Brain's AskReadyForHead is chosen before this by
  * frontier_getbrainstatus and keeps its own text (`CALL_SCENE_HEAD_PROMPT_*`). The
  * RECORD / RETIRE NO branch falls back through AskReadyForOpponent, so the reprint uses
- * the same line. The state's `challengeBattleNum` is the index of the battle just won, so
- * the next match is that + 2 (2..7).
+ * the same line. The script reads the counter AFTER the postwin's own bookkeeping write
+ * (`challengeBattleNumAfterWrite` = SaveBlock2.frontier.curChallengeBattleNum once this win
+ * is counted: 1 after the first win, 6 after the sixth), so the next match is that + 1
+ * (2..7). The generated route's snapshot already holds the counted value in both fields;
+ * only the "after write" one is the ROM's at the time of the read.
  */
 export function postwinNextLine1(nextMatch: number): string {
   if (nextMatch === 7) return "Finally, the 7th match is next!";
@@ -232,15 +235,15 @@ export function postwinNextLine1(nextMatch: number): string {
   return `The ${ordinal} match is next!`;
 }
 
-export function postwinNextMatch(state: Pick<PostwinState, "challengeBattleNum">): number {
-  return state.challengeBattleNum + 2;
+export function postwinNextMatch(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
+  return state.challengeBattleNumAfterWrite + 1;
 }
 
-export function postwinNextLines(state: Pick<PostwinState, "challengeBattleNum">): readonly [string, string] {
+export function postwinNextLines(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): readonly [string, string] {
   return [postwinNextLine1(postwinNextMatch(state)), POSTWIN_NEXT_LINE2];
 }
 
-export function postwinNextTextTotal(state: Pick<PostwinState, "challengeBattleNum">): number {
+export function postwinNextTextTotal(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
   const [line1, line2] = postwinNextLines(state);
   return line1.length + line2.length;
 }
@@ -251,15 +254,15 @@ export function postwinNextTextTotal(state: Pick<PostwinState, "challengeBattleN
  * 206 = settled + 4; 207 = settled + 5): identical for matches 2-6 (36 glyphs), 9 later for
  * the 7th (45 glyphs).
  */
-export function postwinNextTextSettledDelay(state: Pick<PostwinState, "challengeBattleNum">): number {
+export function postwinNextTextSettledDelay(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
   return POSTWIN_NEXT_TEXT_FIRST_DELAY + postwinNextTextTotal(state) - 1;
 }
 
-export function postwinContinuationMenuVisibleDelay(state: Pick<PostwinState, "challengeBattleNum">): number {
+export function postwinContinuationMenuVisibleDelay(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
   return postwinNextTextSettledDelay(state) + (POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY - POSTWIN_NEXT_TEXT_SETTLED_DELAY);
 }
 
-export function postwinContinuationInputReadyDelay(state: Pick<PostwinState, "challengeBattleNum">): number {
+export function postwinContinuationInputReadyDelay(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
   return postwinNextTextSettledDelay(state) + (POSTWIN_CONTINUATION_INPUT_READY_DELAY - POSTWIN_NEXT_TEXT_SETTLED_DELAY);
 }
 
