@@ -73,6 +73,9 @@ history.
   (17, 2026-10-31/11-01) The supervisor's full suite beside a worker's focused vitest (4 GB) was OOM-killed outright (exit 137,
   orphaned forks; ~10 min). A brief that fenced the worker's heavy jobs behind a wall-clock time (02:30) left it idle ~40 min when the
   supervisor's gates finished early — fence on an evidence file the supervisor writes (e.g. `<evidence>/gates.done`), not a clock.
+  (18, 2026-11-01) Again: a supervisor full suite beside a worker's full suite lost one fork (supervisor ~5 min) and the worker's
+  two unrestricted runs (exit 137; it fell back to `--maxWorkers=1`, 70+ min, unfinished at its hard stop; ~75 min). Rule: while a
+  worker may run vitest, the supervisor runs no suite; one full suite on the host at a time.
   Mid-run Mac pushes to a branch being folded cost two worker restarts (~20 min). `rst197CensusDelta.py` exits 1 on inserted
   commands; presentation-only insertions need a subsequence check. play:random in a supervisor `git worktree` also needs the
   `.integration/browser/syslibs` symlink (libnspr4).
