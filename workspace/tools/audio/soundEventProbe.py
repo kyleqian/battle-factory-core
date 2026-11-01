@@ -207,7 +207,20 @@ def main():
         if stepped[STATE_HEADER:] != post[STATE_HEADER:]:
             state["state_mismatch"] += 1
             diff = [i for i in range(STATE_HEADER, len(post)) if stepped[i] != post[i]]
-            mismatches.append({"frame": state["frame"], "bytes": len(diff), "first": hex(diff[0]), "last": hex(diff[-1])})
+            iw_base = SAVE_IWRAM - 0x3000000
+            step_pc, step_sp = gpr[15], gpr[13]
+            core.load_raw_state(post)
+            fast_pc, fast_sp = gpr[15], gpr[13]
+            caught = 0  # run_frame can end 1-2 instructions off the stepping loop's boundary; step it to the same pc/sp and re-diff
+            while (gpr[15], gpr[13]) != (step_pc, step_sp) and caught < 16:
+                native_step(native)
+                caught += 1
+            residual = [i for i in range(STATE_HEADER, len(post)) if snapshot()[i] != stepped[i]] if caught < 16 else None
+            core.load_raw_state(stepped)
+            mismatches.append({"frame": state["frame"], "bytes": len(diff), "first": hex(diff[0]), "last": hex(diff[-1]),
+                               "addrs": [hex(i - iw_base) for i in diff[:32]], "stepped": [stepped[i] for i in diff[:32]],
+                               "fast": [post[i] for i in diff[:32]], "stepped_pc": hex(step_pc), "stepped_sp": hex(step_sp), "fast_pc": hex(fast_pc), "fast_sp": hex(fast_sp),
+                               "catchup_steps": caught, "residual_bytes_after_catchup": None if residual is None else len(residual)})
 
     t0 = time.time()
     if fast:

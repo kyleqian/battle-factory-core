@@ -108,7 +108,11 @@ Proof: `tools/audio/compareProbe.py STEP.json HYBRID.json` (events and calls ide
 
 **The 20x target is met only against the original stepping loop** (raw cffi handles made the stepping reference itself 2.9x faster this step, so the like-for-like ratio is 7-13x).
 Window-only (excluding the setup replay) it is 18.6x ON and 24x OFF. Cost is now re-stepped frames (~0.04 s each, 26 in the battle window, 104 in the intro) plus ~1 ms per fast frame.
-Stepping stays the reference. Full canonical battle-1 trace (29601 f): hybrid 82.9 s, one memory-compare mismatch at frame 2096 (5 bytes, blob 0x20d40..0x20d4c, unexplained; events unaffected in the windows checked).
+Stepping stays the reference. Full canonical battle-1 trace (29601 f): hybrid 82.9 s, one memory-compare mismatch at frame 2096 (5 bytes), **explained in aud238a: benign, not sound state**.
+The bytes are IWRAM 0x03007d40, 0x03007d48/49/4b/4c (blob 0x20d40..0x20d4c): the linked IWRAM ends at 0x030078ac, so this is the CPU stack (gSoundInfo / m4a / cry RAM is 0x03006380..0x030077f0 and 0x03007800, nowhere near; not RNG, not the 0x400-byte header).
+Cause: `run_frame` and the stepping loop stop 1-2 instructions apart at the frame boundary (frame 2096: run_frame at PC 0x08002aee SP 0x03007d50, stepping at PC 0x08002af0 SP 0x03007d40, both in `CopyTileMapEntry`, mid-prologue `push`); the 5 bytes are the registers that push stored. Stepping the fast state ONE instruction to the stepping PC/SP leaves 0 differing bytes (the probe now does this catch-up on every mismatch and records `fast_pc/stepped_pc/catchup_steps/residual_bytes_after_catchup`; full trace rerun: still exactly that one mismatch, residual 0).
+Equality re-proved: hybrid vs stepping on trace frames 1-2100 (57 events + 73 calls, EQUAL, noop rows excluded) and on the draft fixture (3 + 3, EQUAL, 0 mismatches).
+Census-grade: yes for effective events (an effective call changes m4a RAM and so forces a re-step); the known limits stay (same-signature no-ops are invisible; a hooked call inside the 1-2 instruction boundary slack could be logged one frame later than in stepping, since the next re-step starts from the slightly earlier fast state; none seen).
 Known limit: a hybrid cannot see a same-signature no-op, and a sound started and finished inside one frame with no RAM trace would be missed (none observed).
 
 ## 3. Event plan (kernel + presentation)
