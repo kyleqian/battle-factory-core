@@ -24,6 +24,14 @@ may change gameplay/RNG when proved against source; use main-lane ownership
 and gameplay gates. Historical presentation-only exclusions are superseded.
 Settled/parked records and unrelated expansions retain their existing status.
 
+## #190 — Party menu cards: ailment icon in place of the level (found 2026-11-01, fold238)
+
+The composed party-menu cards (forced + voluntary menus since fsw235 / pmd237) always print "Lv50". The ROM's
+DisplayPartyPokemonLevelCheck (party_menu.c:2300-2313) prints the level only for AILMENT_NONE / AILMENT_PKRS; any other
+ailment, including FNT, shows the status icon sprite instead (SetPartyMonAilmentGfx, party_menu.c:4203). Seen at
+battle1-postwin-next-prompt frame 25800 (ONIX / MAGBY fainted, both show "Lv50"; the old anchor chrome showed FNT).
+Visible, presentation only.
+
 ## #189 — RETIRE-YES Lobby path residuals (ret218, 2026-10-28)
 
 ret218 hands RETIRE-YES to the loss terminal (no more hang). `retire-yes-lobby-freeroam-off` (Scene OFF) 1243 / 1482:

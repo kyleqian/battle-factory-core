@@ -5,20 +5,31 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-31 / 11-01 — CAX31 daily run (supervisor, Opus 5.5): IN PROGRESS
+## 2026-10-31 / 11-01 — CAX31 daily run (supervisor, Opus 5.5): IN PROGRESS — library package folded
 
-- **State:** master `777d7af98` (docs/ops only since `9670f00cc`'s green gates). Nothing folded yet.
-- **lib235** (branch `worker/integration-20261031-214213`, tip `60e816c2a`; evidence `.integration/validation/sv-20261031/lib235-evidence/`):
-  `worker/lib-v2-mac` (new tip `e4258ab03`, incl. Mac fsw235 + wth236) merged with master; ENGINE_BUILD is now a content hash of
-  the in-memory headless build (`eb-<16 hex>`, `"dev"` outside builds; `tests/engineBuildHash.test.ts`); lib-types parity test;
-  sizes headless 22.3 MB raw / 2.0 MB gz (largest chunk 11.8 MB), every chunk < 20 MB; npm pack + scratch Vite app OK both entries.
-  Census vs master: OFF 10 / 10 shards byte-identical; ON 997 / 1,000 digests identical, 330 changed battles are pure insertions of
-  wth236 weather commands, seeds 434 / 796 / 881 budget-truncated (prefix, supervisor-verified). play:random 5 min / scene 0 errors;
-  soaks winning vary-rng 100 / 100, Scene ON full 0:16 16 / 16. **Full suite RED: 5 files / 11 tests** from the Mac commits
-  (fsw235 / wth236), plus a real composed party-menu render bug (battle1-postwin f25800: "0/ /117" HP text, no FNT badge).
-  Not folded. A first lib235 launch was stopped at 21:50 when the Mac moved the branch (its commit kept as the base).
-- **Running:** fsw237 (branch `worker/integration-20261101-002545`): fix the party-menu rows vs the ROM, re-pin / fix the 11 tests.
-- **Next:** fold fsw237 if green; then audio design (aud236 brief drafted) and cleanup step 1 (cln237 brief drafted).
+- **State:** master `f88653929` (fast-forward of `fold238`): core library package (contract v2) + the Mac's `worker/lib-v2-mac`
+  tip `b7e7dc345` (fsw235 forced party menu three-slot cursor + WIN_MSG refusals, wth236 Scene ON end-of-turn weather animations,
+  the 11 re-pins, pmd237 party-card HP / fainted palettes / CANCEL highlight). Handoff "Next work" item 1 is DONE.
+- **lib235** (branch `worker/integration-20261031-214213`, tip `60e816c2a`; `.integration/validation/sv-20261031/lib235-evidence/`):
+  ENGINE_BUILD is a content hash of an in-memory headless build (`eb-<16 hex>`, `"dev"` outside builds; stable across rebuilds and
+  docs / test / renderer-only edits, moves on a headless-graph change; `tests/engineBuildHash.test.ts`); lib-types parity test;
+  contract audit: no mismatch (extras additive; `trace()` returns finished runs only, documented). Sizes: headless 22.3 MB raw /
+  2.0 MB gz (largest chunk 11.8 MB, sprite pixels via `battleCommandFieldArt` = bundle hygiene), browser lib 40.2 / 3.4 MB, every
+  file < 20 MB; a consumer app needs the documented `manualChunks` recipe (default Vite build = one 33 MB chunk). npm pack + scratch
+  Vite app: both entries import, `replayChallenge` runs in node, Chromium mount gets `ready`. Soaks: winning vary-rng carry 0
+  0:100 **100 / 100**; Scene ON full vary-rng 0:16 render-8 **16 / 16** (budget). A first lib235 launch was stopped at 21:50 when the
+  Mac moved its branch; fsw237 (a fix step for the then-red suite) was stopped at 00:27 when the Mac pushed the same fixes — no edits.
+- **Supervisor gates on the exact folded tree `f88653929`** (`sv-20261031/fold238-evidence/`): typecheck 0; census 0..999 both scenes
+  byte-identical to lib235's; lib235's census vs master `snd233` baseline: OFF 10 / 10 shards identical, ON 997 / 1,000 digests
+  identical, 330 battles pure insertions of 1,986 weather `general-animation` commands, seeds 434 / 796 / 881 budget-truncated
+  (prefix of master's stream minus the weather commands, supervisor-verified); differential vs master: fight-submenu +
+  presentation-rng identical, battle1-postwin 216 frames 23800..26009 changed (the party-menu window; f25800 eyeballed: correct
+  fainted palettes and "0/117", MAGBY now 0 HP as it should be); **full suite 1,726 files / 14,260 tests, 0 failed** (a first run
+  was OOM-killed beside a worker's vitest; rerun clean); build 0; build:lib 0; play:random 3 min / scene: ON 8 battles / 6 swaps,
+  OFF 27 / 10, **0 page errors / overlays / contained / divergences**.
+- **New:** ISSUES #190 (party cards print "Lv50" where the ROM shows the FNT / status icon).
+- **Running:** pmo239 (branch `worker/integration-20261101-002825`): party menus in battle order (SwitchPartyOrder).
+- **Next:** fold pmo239; #190; then audio design (aud236 brief drafted) and cleanup step 1 (cln237 brief drafted).
 ---
 
 ## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): wind-down: cff230 / nch231 / cff232 / snd233 folded

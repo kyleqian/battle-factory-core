@@ -42,7 +42,7 @@ login, streaks, menus, the on-screen pad and hosting — never brief those
 here. One worker at a time; each run folds the next item plus at least one
 cleanup step.
 
-1. **Core library API — first step of the next run.** `src/lib.ts` +
+1. **Core library API — DONE 2026-11-01 (folded on CAX31 as `f88653929`, incl. the Mac tip `b7e7dc345`; PROGRESS top entry).** Original text: `src/lib.ts` +
    `mountFactoryGame` and `src/headless.ts` + `replayChallenge`, with the
    exact **contract v2** in `docs/finish-plan.md` Phase 3 (names are fixed:
    the website is built against them). No save blob: resume = seeds + input
