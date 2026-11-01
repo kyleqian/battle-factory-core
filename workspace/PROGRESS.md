@@ -46,7 +46,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   debugger); fixtures draft, battle ON / OFF, intro ON / OFF; Scene OFF drops only the move-animation SEs and is its own timeline;
   hybrid fast mode (RAM signature, re-step changed frames) byte-equal to stepping on all 5 fixtures, 11-13x vs the new 2.9x-faster
   stepper (32-38x vs the original; the 20x target vs the new stepper is NOT met); one unexplained 5-byte RAM mismatch at f2096 on
-  the full battle-1 trace. `tests/audioProbeFixtures.test.ts` 27 / 27 (supervisor on master).
+  the full battle-1 trace, then EXPLAINED by aud238a (`a29d8df38`): CPU-stack bytes 0x03007d40..4c (above linked IWRAM end
+  0x030078ac, supervisor-checked in the map) from `run_frame` vs stepping stopping 1-2 instructions apart mid-`push`; one-instruction
+  catch-up leaves 0 bytes; the probe now records the catch-up proof. Hybrid judged census-grade for effective events.
+  `tests/audioProbeFixtures.test.ts` 27 / 27 (supervisor on master).
 - **Wind-down gates on `a3c1e1642`** (src == final; `sv-20261031/gates-final/`): **independent full suite 1,728 files / 14,276 tests,
   0 failed**; build 0; play:random 4 min / scene: ON 20 battles / 8 swaps, OFF 36 / 17; `--lobby-new-challenge` 2 min / scene: 4 + 2
   new challenges from the Lobby; **0 page errors / overlays / contained / divergences**; varied-RNG first-round winning carry 0 / 14 /
@@ -55,7 +58,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   full / winning / winning-swap gates were not run (hours each here; same practice as earlier sessions).
 - **Housekeeping:** evidence `sv-20261027`, `sv-20261028`, `apx215-census` deleted (older than the last three runs; 6 GB). Branch
   `worker/lib-v2-mac` is fully merged at `b7e7dc345`.
-- **Next:** handoff "Next work": audio step aud238 (probe: explain the f2096 mismatch first, then the source table), a cleanup step
+- **Next:** handoff "Next work": audio step aud238 (the sound-source table; the f2096 mismatch is explained), a cleanup step
   (cln237 brief ready), #190.
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261031-214213` (lib235), `-20261101-002825` (pmo239),
   `worker/side-20261101-044531` (aud236), `-20261101-052631` (aud237). Stopped workers this run: lib235 first launch (21:42, Mac branch

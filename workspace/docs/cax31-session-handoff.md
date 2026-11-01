@@ -31,8 +31,8 @@ kept and is long-tail.
   same way.
 - **Party menus in battle order** folded (pmo239, `da19bc407`): SwitchPartyOrder on every player switch-in; menus open on row 0.
 - **Audio design accepted** (`docs/s11-audio-design.md`, incl. "Supervisor acceptance"); probe `tools/audio/soundEventProbe.py`.
-  Probe step 1 (aud237) folded: hybrid == stepping on all 5 fixtures (11-13x; 20x vs the new stepper not met), one
-  unexplained 5-byte RAM mismatch at f2096 on the full battle-1 trace (see the doc, section 2).
+  Probe step 1 (aud237) folded: hybrid == stepping on all 5 fixtures (11-13x vs the new stepper, 32-38x vs the original); its
+  one f2096 RAM mismatch is explained (CPU stack, frame-boundary slack; aud238a) and the hybrid is census-grade.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
@@ -40,7 +40,7 @@ This repo is the **game core library**; the website repo (Mac) owns login, strea
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
 1. **Audio (S11)** — the main program for several runs: follow `docs/s11-audio-design.md` section 7 from the first unfinished
-   step (aud238; first explain aud237's f2096 RAM mismatch and decide whether the hybrid is census-grade, then the source table). Each step's acceptance is in the doc; the supervisor's decisions on its open questions are in its last section.
+   step (aud238, the sound-source table). Each step's acceptance is in the doc; the supervisor's decisions on its open questions are in its last section.
 2. **Cleanup (one commit per step, each verified by typecheck + full suite + build), in this order:** (1) delete one-off step
    scripts in `tools/integration` / `tools/compare` and the fixtures only they read (a ready brief from this run:
    `.integration/validation/sv-20261031/cln237.txt` — fill in its `<CENSUS_BASE>` / `<EVIDENCE>` / `<HARDSTOP>`; census base =
