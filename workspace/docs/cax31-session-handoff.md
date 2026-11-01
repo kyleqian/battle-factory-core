@@ -20,135 +20,49 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-10-31 ~06:50 UTC wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-01 ~06:45 UTC wind-down; PROGRESS.md top entry has details)
 
-- Phase 1: soak `--scene`, containment, render caches, Summary crash fixes done. `npm run play:random` plays the real Factory loop
-  in headless Chromium (Playwright in `.integration/browser/node_modules`, ignored; `cd .integration/browser && npm install
-  playwright`; not linked into worker worktrees — symlink it). 2026-10-31 nightly gates: see PROGRESS (all green).
-- New challenge without reload (nch231): a LOSS already auto-chains into the next challenge at the record answer; RETIRE-YES lands
-  in the walkable Lobby, where A facing the singles attendant now starts a new challenge from the live RNG. `--lobby-new-challenge`
-  (opt-in) on the soak and play:random crosses into it.
-- Phase 2: Scene ON census 0..999 static 0 (approximate 203, live 26,960). Send-out animations drawn in Scene ON on every path
-  (mid-battle, Roar, faint replacement, battle-start intro). Castform: the form-change morph is drawn in both scenes, 0 px vs the ROM
-  on the measured classes (cff230 / cff232 / snd233).
+- Phases 1 and 2 met (finish plan). Nightly crash set green on the final src (PROGRESS top entry).
+- **Core library package folded** (`f88653929`): `@pokebench/factory` (`mountFactoryGame`) + `@pokebench/factory/headless`
+  (`replayChallenge`, `ENGINE_BUILD` = content hash `eb-<16 hex>` of the headless build), `npm run build:lib`, `npm pack` works
+  from a scratch Vite app; `docs/library-package.md`. A consumer Vite app needs its `manualChunks` recipe (default = one 33 MB
+  chunk). The Mac's `worker/lib-v2-mac` up to `b7e7dc345` is folded (forced party menu cursor, WIN_MSG refusals, Scene ON
+  end-of-turn weather animations, party-card HP / fainted palettes). If the Mac moves that branch again, merge the new tip the
+  same way.
+- **Party menus in battle order** folded (pmo239, `da19bc407`): SwitchPartyOrder on every player switch-in; menus open on row 0.
+- **Audio design accepted** (`docs/s11-audio-design.md`, incl. "Supervisor acceptance"); probe `tools/audio/soundEventProbe.py`.
+  Probe step 1 (aud237) folded: hybrid == stepping on all 5 fixtures (11-13x; 20x vs the new stepper not met), one
+  unexplained 5-byte RAM mismatch at f2096 on the full battle-1 trace (see the doc, section 2).
 
-## Next work (in order) — user re-aim 2026-10-31; see `docs/finish-plan.md` for acceptance
+## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
-Phases 1 and 2 are met (ROADMAP "Current execution priority — 2026-10-31").
-Finish snd233 if it is green; do not brief further #146 / send-out / intro
-residual steps — they are timing residuals (item 5). This repo is now the
-**game core library**; a separate website repo (built from the Mac) owns
-login, streaks, menus, the on-screen pad and hosting — never brief those
-here. One worker at a time; each run folds the next item plus at least one
-cleanup step.
+This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
+never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
-1. **Core library API — DONE 2026-11-01 (folded on CAX31 as `f88653929`, incl. the Mac tip `b7e7dc345`; PROGRESS top entry).** Original text: `src/lib.ts` +
-   `mountFactoryGame` and `src/headless.ts` + `replayChallenge`, with the
-   exact **contract v2** in `docs/finish-plan.md` Phase 3 (names are fixed:
-   the website is built against them). No save blob: resume = seeds + input
-   trace fast-forward; `gameplaySeed` is the RNG start `--vary-rng` already
-   sets; the recorder's runs gain an optional wall-clock `t`. Vite lib build
-   with two entries + `package.json` `exports` (`@pokebench/factory`,
-   `@pokebench/factory/headless`); `src/main.ts` a thin shell over the
-   browser entry with every existing ABI / query / overlay unchanged. Gates:
-   typecheck, new tests (resume equality, headless replay == browser events
-   + digest), full suite + build, browser play both scenes, `npm pack`
-   importable from a scratch Vite app; report the headless entry's built size.
-   Emitted chunks must each stay under 20 MB (Cloudflare serves the package
-   as static assets, 25 MiB per file): split the generated sprite / tile /
-   species data with `manualChunks` or dynamic imports.
-   **A Mac session is building this step on branch `worker/lib-v2-mac`
-   (2026-10-31).** If that branch exists on this box when the run starts,
-   treat it as a finished worker: merge master into it, run the gates above
-   (full suite, build, census both scenes identical to master's, browser
-   play both scenes), fold it, and move on. Build it yourself only if the
-   branch is absent. When folding, note two things the Mac integration found:
-   (a) `ENGINE_BUILD` is the commit stamp, so every rebuild strands the
-   website's open challenges (a challenge resumes only on the build that
-   played it) — make it a content hash of the headless graph so a rebuild
-   without engine changes keeps the stamp; (b) the headless entry still
-   carries sprite pixels (22 MB raw / 2.1 MB gz) because
-   `battleCommandFieldArt` embeds mon pics in presentation commands — fine
-   for now, a bundle-hygiene item later.
-   **Update 2026-10-31 ~21:45 UTC (Mac, after this run started):**
-   `worker/lib-v2-mac` moved from f43590bc4 to 532699911. Three commits fix
-   two bugs the user hit on the website: the forced party menu after a faint
-   now has the ROM's three-slot + CANCEL cursor and prints its refusals in the
-   message window (fsw235, two commits), and Scene ON draws the end-of-turn
-   weather animations (Hail / Sandstorm / Rain / Sun continues, wth236); a
-   fourth (532699911) re-pins the 11 suite pins those changes moved. They
-   touch `src/engine/` party-menu and presentation files, tests,
-   `tools/soak/randomRoundSoakDriver.ts` and one-line pulse edits in
-   `tools/integration` — none of the files the library fold edits (vite
-   configs, `factorySession.ts`). Merge the new tip into the fold's
-   integration branch before running its gates. The soak policies now move
-   the cursor in party menus, so soak results are not comparable with runs
-   before this tip; the branch already re-pins the exploring soak seeds
-   (ISSUES #89's search took ~90 min), and any further change to what the
-   soak driver sees in a party menu re-rolls them again.
-   **Update 2026-11-01 ~00:30 UTC (Mac):** tip is now b7e7dc345 (pmd237,
-   renderer only, both party menus): HP under 100 right-aligned with
-   CHAR_SPACER like DisplayPartyPokemonHP (no more "40//137"), a selected
-   CANCEL highlighted (palette 2, open ball) with no stray "▶ CANCEL",
-   fainted boxes in the ROM's fainted / fainted-selected palettes. Census
-   identical both scenes; full suite 14,251 / 0 on the Mac. Merge it like the
-   others.
-   **Update 2026-11-01 ~03:30 UTC (Mac):** tip is now 059579e32 — two
-   pmn238 commits after b7e7dc345 (already folded): the attendant's "The Nth
-   match is next!" follows the battle number on every route (ROM
-   BattleFrontier_BattleFactoryPreBattleRoom ReadyFor2nd..7thOpponent; we
-   always printed "2nd"), with its glyph and input-ready timing derived from
-   the chosen line. Touches `src/engine/core.ts`, `src/engine/postwin.ts`,
-   `tests/postwin.test.ts` only. Merge it into the pmo239 branch or master
-   (whichever is next to fold); expect a small overlap in `core.ts` if pmo239
-   edits it. The battle-1 anchor is unchanged; no soak pin moved on the Mac.
-   **Then, before Audio — party menus in battle order (user-visible, found
-   playing the website):** the ROM runs SwitchPartyOrder (battle_main.c:4086)
-   on every player switch-in — voluntary, forced send-out
-   (battle_script_commands.c:5178 / 5207) and Roar / Whirlwind (:7364) — and
-   OpenPartyMenuInBattle shows that order, so the active Pokémon is always
-   row 0 and the cursor opens on it. We keep the rental order
-   (`battleScriptSwitchinOpcode.ts` leaves SwitchPartyOrder out as
-   presentation-only, but the menus are that presentation), so after a
-   switch the menu opens on a fainted or benched Pokémon. Scope from the Mac
-   session: an order permutation in the orchestrator's battle state, swapped
-   on every player switch-in; both selectors' display rows mapped back to raw
-   party indexes (the kernel keeps raw indexes); the anchor-chrome gate
-   re-expressed on raw slot 0 plus identity order (the ONIX/MAGBY anchor's
-   first faint keeps identity order, so its traces should not move). It
-   changes what the soak driver sees: budget the exploring-pin re-roll
-   (ISSUES #89's seed search ~90 min). Gates as for any party-menu change,
-   plus a browser check that after a send-out the menu opens on the new
-   active Pokémon.
-2. **Audio (S11), re-opened by the user:** design step first (docs only; the
-   supervisor accepts it), then sound-event parity by census, then playback —
-   `docs/finish-plan.md` "Audio (S11)". Expect this to be the main program for
-   several runs; it alternates with cleanup, not with timing work.
-3. **Cleanup (one commit per step, each verified by typecheck + full suite +
-   build), in this order:** (1) delete one-off step scripts in
-   `tools/integration` / `tools/compare` and the fixtures only they read —
-   keep census, soak, compare, differential, probe runner, extract, preview,
-   play:random and anything a kept test imports; (2) root ledgers → README,
-   AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3
-   entries), the rest to `docs/archive/` unchanged; (3) remove Codex /
-   DeepSeek / OpenCode paths and the animation / rust lane supervisors — one
-   supervisor script, one worker launcher, Claude only (keep
-   `run-supervisor.sh --headless` and `tools/run-subagent.sh` working: the
-   daily cron depends on them); (5) `npm run test:gate` ≤ 5 min for workers
-   and drop frame-pin tests the census supersedes, full suite nightly; (4)
-   `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs`
-   + its adapter / tests; (6) prune merged `worker/*` refs; (7) evidence stops
-   going into git.
-4. **Bundle hygiene** (rest of Phase 3): test-only JSON out of `src/`, lazy-loaded sprite sheets and large tables, gamepad
-   input through the library's `press` / `release`.
+1. **Audio (S11)** — the main program for several runs: follow `docs/s11-audio-design.md` section 7 from the first unfinished
+   step (aud238; first explain aud237's f2096 RAM mismatch and decide whether the hybrid is census-grade, then the source table). Each step's acceptance is in the doc; the supervisor's decisions on its open questions are in its last section.
+2. **Cleanup (one commit per step, each verified by typecheck + full suite + build), in this order:** (1) delete one-off step
+   scripts in `tools/integration` / `tools/compare` and the fixtures only they read (a ready brief from this run:
+   `.integration/validation/sv-20261031/cln237.txt` — fill in its `<CENSUS_BASE>` / `<EVIDENCE>` / `<HARDSTOP>`; census base =
+   `.integration/validation/sv-20261031/pmo239-evidence/census/{on,off}-7f06071c8`, which equals final master in both scenes);
+   (2) root ledgers → README, AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3 entries), the rest to
+   `docs/archive/` unchanged; (3) remove Codex / DeepSeek / OpenCode paths and the animation / rust lane supervisors — one
+   supervisor script, one worker launcher, Claude only (keep `run-supervisor.sh --headless` and `tools/run-subagent.sh` working:
+   the daily cron depends on them); (5) `npm run test:gate` ≤ 5 min for workers and drop frame-pin tests the census supersedes,
+   full suite nightly; (4) `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs` + its adapter / tests;
+   (6) prune merged `worker/*` refs; (7) evidence stops going into git.
+3. **ISSUES #190** (party cards print "Lv50" where the ROM shows the FNT / status icon; `party_menu.c:2300-2313`, `:4203`) — a
+   small visible fix; pair it with a cleanup run.
+4. **Bundle hygiene** (rest of Phase 3): test-only JSON out of `src/`, sprite pixels out of the headless graph
+   (`battleCommandFieldArt`, 11.8 MB chunk), lazy-loaded sprite sheets and large tables, gamepad input through `press` / `release`.
 5. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
-   `--lobby-new-challenge` run); Scene ON soak
-   `--render-every 8` 0:30 plus a `--render-every 1` sample; varied-RNG sweeps; vanilla both scenes. Every overlay / pageerror /
-   CRASH / HANG becomes a fix step before anything else.
+   `--lobby-new-challenge` run); Scene ON soak `--render-every 8` 0:16..0:30 plus a `--render-every 1` sample; varied-RNG sweeps;
+   vanilla both scenes. Every overlay / pageerror / CRASH / HANG becomes a fix step before anything else.
 6. **Timing / visible residuals** last, never while items 1–4 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
-   compare-harness maxHP bug + `factoryCorpusParty.ts:291` check, ISSUES #146 shd234; CASTFORM message region on the faint path, ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform
-   "at"-role keys, Flamethrower +7 alignment, revert / switch-out unmeasured), #188, #189, the bso226 "Go!" wait, the Lobby
-   attendant dialogue (nch231 skips it); exs207 refs kept.
+   compare-harness maxHP bug + `factoryCorpusParty.ts:291`, ISSUES #146 shd234; CASTFORM message region on the faint path,
+   ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform "at"-role keys, Flamethrower +7 alignment, revert /
+   switch-out unmeasured), the party-menu entry one frame early after a switch (pmo239), #188, #189, the bso226 "Go!" wait, the
+   Lobby attendant dialogue (nch231 skips it); exs207 refs kept.
 
 **Host note (2026-10-28):** two workers at once on 16 GiB caused repeated OOM kills (each worker's full suite / census plus a
 supervisor build). Keep ONE worker at a time; the launcher allows one per lane, so a second worker needs another lane anyway.

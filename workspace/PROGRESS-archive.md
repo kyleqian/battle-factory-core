@@ -1,3 +1,56 @@
+## 2026-10-28 / 29 — CAX31 daily run wind-down (supervisor, Opus 5.5): apx219-224 folded; Scene ON static 0
+
+- **State:** master `c7d99ba26`+ (apx219-222 fast-forward; apx223 / apx224 merges; final src == apx224 worker-tested tree `25e824041`).
+- **Folded:** apx219 + apx220 (sprite-order-unknown 26 + allocator-unknown 3 -> approximate, known-entry first-action input).
+  Worker (Sonnet, branch `worker/integration-20261028-213053`): clean merge of master; typecheck 0; full suite 1,754 files: 1,708
+  passed / 2 failed -> both re-pinned (liveDiveSetupAdapter, liveWallMoveAdapters: decline pins now read
+  `liveMoveAnimationPresentationProven`), rerun 30 / 30; build 0; differential 641 / 641. Supervisor: OFF census 0..999 shards
+  **byte-identical** to `census-apx215/off-1d25251b6` (the `lsd194CensusDelta.py` OFF FAIL is a tool misfire on identical data);
+  ON delta vs `census-apx217/on-cfa1242c0`: 10 battles changed, **bad 0**, only field [21]; the 3 touched test files 30 / 30;
+  Sand-Attack strip eyeballed. **Scene ON static 102 -> 73**, approximate 134. Evidence `.integration/validation/sv-20261028/`.
+- **Folded:** apx221 (`c55913015`, fast-forward; branch `worker/integration-20261028-225012`): castform-form 18 (form art the field
+  shows), extrasensory player-later target 17 (later-body branch regardless of top line), endeavor-power 12 (`request.power`),
+  later-body idle rest 4 (current rest offsets), seismic-toss damage branch 1 (nearest 33..65) -> approximate. Worker: typecheck 0;
+  full suite on `e2aab6d79` (src == tip) 1,710 / 1,711 files, 1 failed (cf78NeedleArmTie: census-gate needles; fixed tools-only,
+  rerun with the 24 dependent files green); build 0; differential 641 / 641; 8 tests re-pinned (listed in the commit range).
+  Supervisor: OFF shards **byte-identical** to `off-a21dd5f89`; ON delta 27 changed, **bad 0**, field [21] only; census src == tip
+  src; apx221 + cf78 tests 15 / 15; Castform Icy Wind strip eyeballed. **Scene ON static 73 -> 21** (no-adapter 11, turn-0 7,
+  hidden-target 3), approximate 186.
+- **Folded:** apx222 (`f07c843af`, fast-forward; branch `worker/integration-20261029-012954`): hidden-target 3 (body drawn, hidden
+  battler kept hidden), turn-0 7 (= Ghost-type Curse, a new `CurseGhost` body; its black stretching window is not drawn) and the 7
+  no-adapter moves (Peck, Odor Sleuth, False Swipe, Gust, Pay Day, Barrage, Conversion 2: new bodies built from their `Move_*`
+  scripts in `src/animation/approxScript.ts`, assets `src/assets/gen/battle-anim-apx222.json`) -> approximate. A no-case move without
+  a script body is `static:other:no-adapter-unscripted` (none in 0..999). Worker: full suite on `bad3db32c` (src == tip) 1,711 /
+  1,712 files, 2 tests failed in liveCurseStatsAdapter -> re-pinned, 7 / 7; build 0; differential 641 / 641; boundary ratchet
+  untouched. Supervisor: OFF shards byte-identical to `off-04dc4e102`; ON delta 15 changed, bad 0; **eventsDigest + error identical
+  on all 1,000 ON battles** (the new bodies lengthen those commands, fields [16][18]); Ghost Curse + Pay Day strips eyeballed.
+- **Scene ON census 0..999 on master: static 0** (finish plan Phase 2 census bar met), approximate 207, live 26,956, pause 12,941.
+- **Wind-down gates on src `f07c843af` (`.integration/validation/sv-20261028/gates-f07c843af/`):** full suite **1,712 files /
+  14,167 tests, 0 failed**; build 0; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0
+  **100 / 100**; vanilla 0:20 `--scene both` **ON 20 / 20, OFF 20 / 20** (all `budget`). The 0:60 full / winning / winning-swap
+  gates were not run (hours each here; same practice as earlier sessions).
+- **Merged:** apx223 (evidence only, no src; `4b30bb883`): `docs/apx223-approximate-oracle-check.md` compares the 8 apx222 bodies
+  with Scene ON ROM windows (`tools/integration/apx223OracleCheck.ts`, PNGs `tools/integration/fixtures/approximate/oracle-check/`).
+  Ghost Curse / False Swipe middles near-exact; Gust (funnel ~15 px low, no target shake), Barrage (ball too fast), Odor Sleuth
+  (duplicate target), Conversion 2 (no white blend) clearly wrong; every ROM body has 7–15 idle lead-in frames ours skips. The 4
+  importing approximate tests 31 / 31 after the merge; Gust PNG eyeballed (confirms the funnel offset).
+- **Folded:** apx224 (`c7d99ba26`; src `src/animation/approxScript.ts` + the apx222 test threshold 0.4 -> 0.3 for idle lead-in
+  rows): Gust funnel 16 px higher, Odor Sleuth clone blink order, Barrage ball rotation / aim, Peck (exact over its staged visible
+  body), Pay Day and False Swipe lead-ins; table in `docs/apx223-approximate-oracle-check.md` ("after apx224"). Conversion 2 and
+  Ghost Curse not touched. Worker: full suite on the final src **1,712 files / 14,167 tests, 0 failed**; build 0; differential
+  641 / 641. Supervisor: census ON vs `apx222-evidence/on-bad3db32c` 3 battles changed (Peck / False Swipe / Pay Day row counts),
+  bad 0, **eventsDigest + error identical on all 1,000**; static still 0. (The wind-down soaks / browser play below ran on
+  `f07c843af`; apx224 changes only Scene ON approximate-body pixels / lengths, which `--render-every 0` soaks do not draw.)
+- **Next:** handoff "Next work" 1 (send-out intros in Scene ON, #157, Conversion 2 / Ghost Curse body fixes).
+- **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/animation-20261028-040709` (apx219),
+  `worker/integration-20261028-213053` (apx220), `-20261028-225012` (apx221), `-20261029-012954` (apx222), `-045744` (apx223),
+  `-052326` (apx224). Evidence `.integration/validation/sv-20261028/`. No push.
+- **Browser goal play on build `f07c843af` (10 min / scene, seed 11):** ON 17 battles / 7 swap screens, OFF 47 / 23; 0 page errors,
+  0 overlays, 0 contained, 0 divergences.
+---
+
+---
+
 ## 2026-10-27 / 28 — CAX31 daily run wind-down (supervisor, Opus 5.5): sfa214, apx215, play216, apx217, ret218 folded; apx219 unfolded
 
 - **State:** master `3f6754b25`+ (final src = apx217 + ret218 union `6201dc8e9`). **Final gates on `9fb159322` (same src): typecheck 0;

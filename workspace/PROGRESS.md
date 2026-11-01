@@ -5,9 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-10-31 / 11-01 — CAX31 daily run (supervisor, Opus 5.5): IN PROGRESS — library package folded
+## 2026-10-31 / 11-01 — CAX31 daily run (supervisor, Opus 5.5): wind-down: library package / pmo239 / audio design + probe folded
 
-- **State:** master `f88653929` (fast-forward of `fold238`): core library package (contract v2) + the Mac's `worker/lib-v2-mac`
+- **State:** master `b8cf38262`+ (src == `da19bc407` pmo239 merge; later commits are docs + `tools/audio` + one hermetic test). Library fold `f88653929` (fast-forward of `fold238`): core library package (contract v2) + the Mac's `worker/lib-v2-mac`
   tip `b7e7dc345` (fsw235 forced party menu three-slot cursor + WIN_MSG refusals, wth236 Scene ON end-of-turn weather animations,
   the 11 re-pins, pmd237 party-card HP / fainted palettes / CANCEL highlight). Handoff "Next work" item 1 is DONE.
 - **lib235** (branch `worker/integration-20261031-214213`, tip `60e816c2a`; `.integration/validation/sv-20261031/lib235-evidence/`):
@@ -40,7 +40,26 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   scene 0 errors; open-on-active replay check 192 voluntary + 44 forced menus, 0 problems. Soak pins re-rolled: #89 Baton Pass halt
   seed 739 -> 19 (pin weakened: `frames > haltFrame` bound dropped, every hit now halts in the post-decision grace window), M-B (c)
   seeds 0 / 1 new frames, #104 (b) winning seed 3 -> 2. Supervisor on master: 6 focused files 111 / 111.
-- **Next:** wind-down gates on `da19bc407`; audio design (aud236) running beside them; then cleanup step 1 (cln237 brief drafted), #190.
+- **Folded:** aud236 (S11 audio design, `docs/s11-audio-design.md`; accepted, open questions decided in its last section) and aud237
+  (probe step 1, `b8cf38262`): `tools/audio/soundEventProbe.py` logs `(frame, kind, id, pan)` per sound by single-stepping the PC onto
+  `m4aSongNumStart` / `PlayCryInternal` / the SE / BGM / fanfare wrappers + fade / volume / stop / continue hooks (libmgba-py has no
+  debugger); fixtures draft, battle ON / OFF, intro ON / OFF; Scene OFF drops only the move-animation SEs and is its own timeline;
+  hybrid fast mode (RAM signature, re-step changed frames) byte-equal to stepping on all 5 fixtures, 11-13x vs the new 2.9x-faster
+  stepper (32-38x vs the original; the 20x target vs the new stepper is NOT met); one unexplained 5-byte RAM mismatch at f2096 on
+  the full battle-1 trace. `tests/audioProbeFixtures.test.ts` 27 / 27 (supervisor on master).
+- **Wind-down gates on `a3c1e1642`** (src == final; `sv-20261031/gates-final/`): **independent full suite 1,728 files / 14,276 tests,
+  0 failed**; build 0; play:random 4 min / scene: ON 20 battles / 8 swaps, OFF 36 / 17; `--lobby-new-challenge` 2 min / scene: 4 + 2
+  new challenges from the Lobby; **0 page errors / overlays / contained / divergences**; varied-RNG first-round winning carry 0 / 14 /
+  28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON **20 / 20**, Scene OFF **20 / 20** (all `budget`);
+  Scene ON winning first-round 0:6 `--render-every 1` **6 / 6**; Scene ON full vary-rng 0:16 `--render-every 8` (running at commit time; see the follow-up line). The 0:60
+  full / winning / winning-swap gates were not run (hours each here; same practice as earlier sessions).
+- **Housekeeping:** evidence `sv-20261027`, `sv-20261028`, `apx215-census` deleted (older than the last three runs; 6 GB). Branch
+  `worker/lib-v2-mac` is fully merged at `b7e7dc345`.
+- **Next:** handoff "Next work": audio step aud238 (probe: explain the f2096 mismatch first, then the source table), a cleanup step
+  (cln237 brief ready), #190.
+- **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261031-214213` (lib235), `-20261101-002825` (pmo239),
+  `worker/side-20261101-044531` (aud236), `-20261101-052631` (aud237). Stopped workers this run: lib235 first launch (21:42, Mac branch
+  moved; its commit became the base), fsw237 (00:27, the Mac pushed the same fixes; no edits). No push.
 ---
 
 ## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): wind-down: cff230 / nch231 / cff232 / snd233 folded
@@ -168,55 +187,4 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** handoff "Next work" 1 (the Scene ON render-8 soak on `bb9029a37`+, then the #146 remainder), 2 Castform form changes.
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261029-213114` (bso225), `-20261029-233450`
   (bso226), `-20261030-023040` (apx227), `-20261030-042229` (pfb228), `-20261030-050141` (pfb229). Evidence `.integration/validation/sv-20261029/`. No push.
----
-
-## 2026-10-28 / 29 — CAX31 daily run wind-down (supervisor, Opus 5.5): apx219-224 folded; Scene ON static 0
-
-- **State:** master `c7d99ba26`+ (apx219-222 fast-forward; apx223 / apx224 merges; final src == apx224 worker-tested tree `25e824041`).
-- **Folded:** apx219 + apx220 (sprite-order-unknown 26 + allocator-unknown 3 -> approximate, known-entry first-action input).
-  Worker (Sonnet, branch `worker/integration-20261028-213053`): clean merge of master; typecheck 0; full suite 1,754 files: 1,708
-  passed / 2 failed -> both re-pinned (liveDiveSetupAdapter, liveWallMoveAdapters: decline pins now read
-  `liveMoveAnimationPresentationProven`), rerun 30 / 30; build 0; differential 641 / 641. Supervisor: OFF census 0..999 shards
-  **byte-identical** to `census-apx215/off-1d25251b6` (the `lsd194CensusDelta.py` OFF FAIL is a tool misfire on identical data);
-  ON delta vs `census-apx217/on-cfa1242c0`: 10 battles changed, **bad 0**, only field [21]; the 3 touched test files 30 / 30;
-  Sand-Attack strip eyeballed. **Scene ON static 102 -> 73**, approximate 134. Evidence `.integration/validation/sv-20261028/`.
-- **Folded:** apx221 (`c55913015`, fast-forward; branch `worker/integration-20261028-225012`): castform-form 18 (form art the field
-  shows), extrasensory player-later target 17 (later-body branch regardless of top line), endeavor-power 12 (`request.power`),
-  later-body idle rest 4 (current rest offsets), seismic-toss damage branch 1 (nearest 33..65) -> approximate. Worker: typecheck 0;
-  full suite on `e2aab6d79` (src == tip) 1,710 / 1,711 files, 1 failed (cf78NeedleArmTie: census-gate needles; fixed tools-only,
-  rerun with the 24 dependent files green); build 0; differential 641 / 641; 8 tests re-pinned (listed in the commit range).
-  Supervisor: OFF shards **byte-identical** to `off-a21dd5f89`; ON delta 27 changed, **bad 0**, field [21] only; census src == tip
-  src; apx221 + cf78 tests 15 / 15; Castform Icy Wind strip eyeballed. **Scene ON static 73 -> 21** (no-adapter 11, turn-0 7,
-  hidden-target 3), approximate 186.
-- **Folded:** apx222 (`f07c843af`, fast-forward; branch `worker/integration-20261029-012954`): hidden-target 3 (body drawn, hidden
-  battler kept hidden), turn-0 7 (= Ghost-type Curse, a new `CurseGhost` body; its black stretching window is not drawn) and the 7
-  no-adapter moves (Peck, Odor Sleuth, False Swipe, Gust, Pay Day, Barrage, Conversion 2: new bodies built from their `Move_*`
-  scripts in `src/animation/approxScript.ts`, assets `src/assets/gen/battle-anim-apx222.json`) -> approximate. A no-case move without
-  a script body is `static:other:no-adapter-unscripted` (none in 0..999). Worker: full suite on `bad3db32c` (src == tip) 1,711 /
-  1,712 files, 2 tests failed in liveCurseStatsAdapter -> re-pinned, 7 / 7; build 0; differential 641 / 641; boundary ratchet
-  untouched. Supervisor: OFF shards byte-identical to `off-04dc4e102`; ON delta 15 changed, bad 0; **eventsDigest + error identical
-  on all 1,000 ON battles** (the new bodies lengthen those commands, fields [16][18]); Ghost Curse + Pay Day strips eyeballed.
-- **Scene ON census 0..999 on master: static 0** (finish plan Phase 2 census bar met), approximate 207, live 26,956, pause 12,941.
-- **Wind-down gates on src `f07c843af` (`.integration/validation/sv-20261028/gates-f07c843af/`):** full suite **1,712 files /
-  14,167 tests, 0 failed**; build 0; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0
-  **100 / 100**; vanilla 0:20 `--scene both` **ON 20 / 20, OFF 20 / 20** (all `budget`). The 0:60 full / winning / winning-swap
-  gates were not run (hours each here; same practice as earlier sessions).
-- **Merged:** apx223 (evidence only, no src; `4b30bb883`): `docs/apx223-approximate-oracle-check.md` compares the 8 apx222 bodies
-  with Scene ON ROM windows (`tools/integration/apx223OracleCheck.ts`, PNGs `tools/integration/fixtures/approximate/oracle-check/`).
-  Ghost Curse / False Swipe middles near-exact; Gust (funnel ~15 px low, no target shake), Barrage (ball too fast), Odor Sleuth
-  (duplicate target), Conversion 2 (no white blend) clearly wrong; every ROM body has 7–15 idle lead-in frames ours skips. The 4
-  importing approximate tests 31 / 31 after the merge; Gust PNG eyeballed (confirms the funnel offset).
-- **Folded:** apx224 (`c7d99ba26`; src `src/animation/approxScript.ts` + the apx222 test threshold 0.4 -> 0.3 for idle lead-in
-  rows): Gust funnel 16 px higher, Odor Sleuth clone blink order, Barrage ball rotation / aim, Peck (exact over its staged visible
-  body), Pay Day and False Swipe lead-ins; table in `docs/apx223-approximate-oracle-check.md` ("after apx224"). Conversion 2 and
-  Ghost Curse not touched. Worker: full suite on the final src **1,712 files / 14,167 tests, 0 failed**; build 0; differential
-  641 / 641. Supervisor: census ON vs `apx222-evidence/on-bad3db32c` 3 battles changed (Peck / False Swipe / Pay Day row counts),
-  bad 0, **eventsDigest + error identical on all 1,000**; static still 0. (The wind-down soaks / browser play below ran on
-  `f07c843af`; apx224 changes only Scene ON approximate-body pixels / lengths, which `--render-every 0` soaks do not draw.)
-- **Next:** handoff "Next work" 1 (send-out intros in Scene ON, #157, Conversion 2 / Ghost Curse body fixes).
-- **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/animation-20261028-040709` (apx219),
-  `worker/integration-20261028-213053` (apx220), `-20261028-225012` (apx221), `-20261029-012954` (apx222), `-045744` (apx223),
-  `-052326` (apx224). Evidence `.integration/validation/sv-20261028/`. No push.
-- **Browser goal play on build `f07c843af` (10 min / scene, seed 11):** ON 17 battles / 7 swap screens, OFF 47 / 23; 0 page errors,
-  0 overlays, 0 contained, 0 divergences.
 ---

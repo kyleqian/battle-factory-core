@@ -35,12 +35,12 @@ screen, login, streak storage and the on-screen pad UI are the website's.
 **Audio (S11) is back in scope** from 2026-10-31 (user decision); the
 2026-08-10 out-of-scope note is superseded.
 
-1. **Core library API** (finish plan Phase 3, first): `src/lib.ts` +
+1. **Core library API** — **DONE 2026-11-01** (`f88653929`; `docs/library-package.md`). (finish plan Phase 3, first): `src/lib.ts` +
    `mountFactoryGame` with the exact contract in `docs/finish-plan.md`, a Vite
    lib build and `package.json` `exports`; `src/main.ts` becomes a thin shell
    over it (the test ABI, `?battleScene=`, `?pokebench=1` and the crash
    overlay unchanged). One step, with full suite + build + browser play.
-2. **Audio (S11)**, the main program after step 1: a design step first
+2. **Audio (S11)**, the main program after step 1 (design ACCEPTED 2026-11-01: `docs/s11-audio-design.md`; its section 7 is the step list, probe step 1 folded): a design step first
    (oracle audio-event log from the ELF symbols for `PlaySE` / `PlayCry*` /
    `PlayBGM` / `PlayFanfare`; our kernel already emits `play-se` /
    `play-fanfare` / `play-faint-cry`), then sound-event parity by census like
