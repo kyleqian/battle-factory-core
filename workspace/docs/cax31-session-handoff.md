@@ -93,6 +93,15 @@ cleanup step.
    fainted boxes in the ROM's fainted / fainted-selected palettes. Census
    identical both scenes; full suite 14,251 / 0 on the Mac. Merge it like the
    others.
+   **Update 2026-11-01 ~03:30 UTC (Mac):** tip is now 059579e32 — two
+   pmn238 commits after b7e7dc345 (already folded): the attendant's "The Nth
+   match is next!" follows the battle number on every route (ROM
+   BattleFrontier_BattleFactoryPreBattleRoom ReadyFor2nd..7thOpponent; we
+   always printed "2nd"), with its glyph and input-ready timing derived from
+   the chosen line. Touches `src/engine/core.ts`, `src/engine/postwin.ts`,
+   `tests/postwin.test.ts` only. Merge it into the pmo239 branch or master
+   (whichever is next to fold); expect a small overlap in `core.ts` if pmo239
+   edits it. The battle-1 anchor is unchanged; no soak pin moved on the Mac.
    **Then, before Audio — party menus in battle order (user-visible, found
    playing the website):** the ROM runs SwitchPartyOrder (battle_main.c:4086)
    on every player switch-in — voluntary, forced send-out
