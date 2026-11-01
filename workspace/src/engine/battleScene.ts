@@ -13625,7 +13625,7 @@ const TURN15_CANONICAL_PARTY_SPECIES = ["ONIX", "MAGBY", "BAYLEEF"] as const;
  */
 function isTurn15CanonicalPartyState(state: import("./partySelect.ts").PartySelectState): boolean {
   const [onix, magby, bayleef] = state.party;
-  return state.party.every((member, index) => member.species === TURN15_CANONICAL_PARTY_SPECIES[index])
+  return state.party.every((member, index) => member.partyIndex === index && member.species === TURN15_CANONICAL_PARTY_SPECIES[index])
     && state.request.faintedPartyIndex === 0
     && onix.hp === 0 && !onix.legal
     && magby.hp === magby.maxHp && magby.legal
@@ -13867,7 +13867,7 @@ function drawPartyMenuSourceMask(mask: Uint8Array, encoded: string, width: numbe
 /** Live OBJ ownership for the party list (three icons plus two status OBJ instances). */
 export function drawTurn15PartyListObjMask(mask: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   if (state.party.some((member, index) =>
-    member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
+    member.partyIndex !== index || member.species !== TURN15_CANONICAL_PARTY_SPECIES[index]
   )) {
     renderBattlePartySelect(mask, battlePartySelectStateForForcedParty(state));
     return;

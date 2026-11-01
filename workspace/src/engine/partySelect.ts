@@ -17,6 +17,7 @@ import {
   type BattlePartyIndex,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
+import { battlePartyDisplayRows, IDENTITY_BATTLE_PARTY_ORDER, type BattlePartyCurrentOrder } from "./battlePartyOrder.ts";
 import { createFactoryCorpusPartyMember } from "./factoryCorpusParty.ts";
 import { movePartyMenuCursor, partyMenuDirection, type PartyMenuCursor, type PartyMenuRightColumn } from "./partyMenuCursor.ts";
 
@@ -70,7 +71,10 @@ export interface PartySelectState {
   message: string | null;
   /** Immutable kernel request whose selection this presentation owns. */
   request: BattleForcedSwitchRequest;
-  /** Full round identities/live HP used to construct the three visible rows. */
+  /**
+   * The three visible rows in the ROM's battle order (OpenPartyMenuInBattle: the active, or just-fainted, mon is row 0), each carrying
+   * its raw `partyIndex`; `cursor` is a row, and the confirmed decision names the row's raw index.
+   */
   party: readonly [PartySelectMember, PartySelectMember, PartySelectMember];
 }
 
@@ -169,6 +173,7 @@ export function createPartySelectStateFromForcedSwitch(
   requestInput: BattleForcedSwitchRequest,
   playerRentalRecords: FactoryRentalParty,
   playerParty: BattleParty,
+  order: BattlePartyCurrentOrder = IDENTITY_BATTLE_PARTY_ORDER,
 ): PartySelectState {
   const request = createBattleForcedSwitchRequest(requestInput);
   if (request.side !== "player") {
@@ -182,7 +187,7 @@ export function createPartySelectStateFromForcedSwitch(
   }
 
   const legalIndexes = new Set(request.legalPartyIndexes);
-  const party = playerRentalRecords.map((record, index): PartySelectMember => {
+  const rawParty = playerRentalRecords.map((record, index): PartySelectMember => {
     const partyIndex = index as 0 | 1 | 2;
     const corpusMember = createFactoryCorpusPartyMember(record);
     const battleMember = playerParty[partyIndex]!;
@@ -224,11 +229,12 @@ export function createPartySelectStateFromForcedSwitch(
       item: corpusMember.item,
     });
   }) as unknown as readonly [PartySelectMember, PartySelectMember, PartySelectMember];
+  const party = battlePartyDisplayRows(order).map((rawIndex) => rawParty[rawIndex]!) as unknown as typeof rawParty;
 
   for (const legalPartyIndex of request.legalPartyIndexes) {
     if (
       legalPartyIndex > 2
-      || party[legalPartyIndex as 0 | 1 | 2].hp === 0
+      || rawParty[legalPartyIndex as 0 | 1 | 2].hp === 0
     ) {
       throw new Error(
         `party-select presentation legal replacement ${legalPartyIndex} must be a living member of the three-mon Factory party`,
@@ -565,7 +571,7 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
 
 function selectedPartyIndex(state: PartySelectState): BattlePartyIndex {
   if (state.cursor === "cancel") throw new Error("party select: the CANCEL button names no party slot");
-  return state.cursor;
+  return state.party[state.cursor].partyIndex;
 }
 
 /**

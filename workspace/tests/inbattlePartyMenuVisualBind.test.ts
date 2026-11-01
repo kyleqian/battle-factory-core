@@ -28,6 +28,7 @@ function baseState(
     rows: Object.freeze([
       Object.freeze({
         partyIndex: 0 as const,
+        slot: 0 as const,
         species: 19,
         speciesKey: "SPECIES_RATTATA",
         name: "RATTATA",
@@ -44,6 +45,7 @@ function baseState(
       }),
       Object.freeze({
         partyIndex: 1 as const,
+        slot: 1 as const,
         species: 19,
         speciesKey: "SPECIES_RATTATA",
         name: "RATTATA",
@@ -59,6 +61,7 @@ function baseState(
       }),
       Object.freeze({
         partyIndex: 2 as const,
+        slot: 2 as const,
         species: 19,
         speciesKey: "SPECIES_RATTATA",
         name: "RATTATA",
@@ -104,6 +107,7 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
     // 52/105 = fraction 23 (>20%, <=50%) -> yellow family on a right-column card.
     const lowRow: BattlePartySelectState["rows"][number] = Object.freeze({
       partyIndex: 1 as const,
+      slot: 1 as const,
       species: 19,
       speciesKey: "SPECIES_RATTATA",
       name: "RATTATA",

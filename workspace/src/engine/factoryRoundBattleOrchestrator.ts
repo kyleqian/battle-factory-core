@@ -69,6 +69,12 @@ import {
   type BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
 import {
+  applyPlayerSwitchEvents,
+  bufferBattlePartyOrderBySide,
+  IDENTITY_BATTLE_PARTY_ORDER,
+  type BattlePartyCurrentOrder,
+} from "./battlePartyOrder.ts";
+import {
   advanceBattlePartySelect,
   battlePartySelectClosePhase,
   createBattlePartySelectState,
@@ -550,6 +556,8 @@ export type FactoryRoundBattleOrchestratorState = Readonly<{
   battlePartySelect: BattlePartySelectState | null;
   /** Request-owned forced selector, created only on faint-message dismissal. */
   battleForcedPartySelect: PartySelectState | null;
+  /** The ROM's gBattlePartyCurrentOrder for the player: reset at battle start, swapped by SwitchPartyOrder on every player switch-in. */
+  partyOrder: BattlePartyCurrentOrder;
   /** Source gMoveSelectionCursor: controller-owned, not request-owned. */
   moveSelectionCursors: FactoryBattleMoveSelectionCursors;
   /** Singles controller display/cursor state persisted across request boundaries. */
@@ -1003,6 +1011,7 @@ export function createFactoryRoundBattleOrchestrator(
     retainedLockedActionPresentationOwner: null,
     battlePartySelect: null,
     battleForcedPartySelect: null,
+    partyOrder: IDENTITY_BATTLE_PARTY_ORDER,
     moveSelectionCursors: RESET_MOVE_SELECTION_CURSORS,
     battlePresentationBoundaries: null,
     aiHistory: null,
@@ -1163,6 +1172,7 @@ function startCurrentBattle(
   return Object.freeze({
     ...state,
     battle: started,
+    partyOrder: bufferBattlePartyOrderBySide(started.rules.rulesContext.battlers[0].partyIndex),
     battleCommandPresentation,
     battleResolutionPresentation: null,
     liveMoveSpriteAllocatorHost: state.config.battleScene === "on"
@@ -1639,6 +1649,7 @@ function installDriveReceiptImmediately(
     ),
     liveBattlerX2Host: invalidateX2Host(state, "battle advanced without a presented resolution", true),
     battle: receipt.battle,
+    partyOrder: applyPlayerSwitchEvents(state.partyOrder, receipt.events),
     battleCommandPresentation,
     battleResolutionPresentation: null,
     retainedLockedActionPresentationOwner: null,
@@ -1906,6 +1917,7 @@ function beginCommandResolution(
     ...state,
     liveMoveSpriteAllocatorHost,
     battle: receipt.battle,
+    partyOrder: applyPlayerSwitchEvents(state.partyOrder, receipt.events),
     battleCommandPresentation: null,
     battleResolutionPresentation: resolution,
     retainedLockedActionPresentationOwner: null,
@@ -2195,6 +2207,7 @@ function createForcedPartySelect(
     request,
     records,
     forcedPartyForResolution(state, resolution),
+    state.partyOrder,
   );
 }
 
@@ -2831,6 +2844,7 @@ function advanceFactoryRoundBattleResolutionCore(
     return Object.freeze({
       ...state,
       battle: receipt.battle,
+      partyOrder: applyPlayerSwitchEvents(state.partyOrder, receipt.events),
       battleResolutionPresentation: appended,
       battleForcedPartySelect: advanced,
       moveSelectionCursors: resetMoveSelectionCursorsForSwitchIns(
@@ -3014,6 +3028,7 @@ function advanceFactoryRoundBattleResolutionCore(
     return Object.freeze({
       ...state,
       battle: receipt.battle,
+      partyOrder: applyPlayerSwitchEvents(state.partyOrder, receipt.events),
       battleResolutionPresentation: appended,
       battlePresentationBoundaries: applyReceiptPpToBoundaries(
         boundaries,
@@ -3186,6 +3201,7 @@ export function advanceFactoryRoundBattleCommand(
         battlePartySelect: createBattlePartySelectState(
           advanced.request,
           battle.rules.rulesContext,
+          state.partyOrder,
         ),
         moveSelectionCursors,
         battlePresentationBoundaries,

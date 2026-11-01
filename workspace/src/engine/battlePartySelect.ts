@@ -25,6 +25,7 @@ import type {
   BattlePartyIndex,
 } from "./battleDecisionBoundary.ts";
 import type { BattleStatus } from "./battleScenario.ts";
+import { battlePartyDisplayRows, IDENTITY_BATTLE_PARTY_ORDER, type BattlePartyCurrentOrder } from "./battlePartyOrder.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
 import type { PartySelectState } from "./partySelect.ts";
@@ -93,7 +94,10 @@ function primaryStatusFromBattleStatus(status: BattleStatus): PartyMenuPrimarySt
 }
 
 export type BattlePartySelectRow = Readonly<{
+  /** Raw party index: the kernel decision a confirmed row names. */
   partyIndex: 0 | 1 | 2;
+  /** Menu row the card is drawn in (the ROM's battle order); equals the array index and the cursor value. */
+  slot: 0 | 1 | 2;
   species: number;
   speciesKey: string;
   name: string;
@@ -374,8 +378,9 @@ export function battlePartySelectStateForForcedParty(
   if (forced.cursor !== "cancel" && forced.cursor > 2) {
     return fail(`forced cursor points outside the three-mon party: ${forced.cursor}`);
   }
-  const rows = forced.party.map((member): BattlePartySelectRow => Object.freeze({
+  const rows = forced.party.map((member, slot): BattlePartySelectRow => Object.freeze({
     partyIndex: member.partyIndex,
+    slot: slot as 0 | 1 | 2,
     species: member.speciesId,
     speciesKey: member.speciesKey,
     name: member.species,
@@ -450,6 +455,7 @@ export const SUBMENU_OPEN_VISUAL_DELAY = 3;
 export function createBattlePartySelectState(
   request: BattleCommandRequest,
   rules: BattleScriptRulesContext,
+  order: BattlePartyCurrentOrder = IDENTITY_BATTLE_PARTY_ORDER,
 ): BattlePartySelectState {
   const legal = new Set(
     request.legalDecisions
@@ -457,7 +463,7 @@ export function createBattlePartySelectState(
       .map((decision) => decision.partyIndex),
   );
   const activePartyIndex = rules.battlers[request.battler]!.partyIndex;
-  const rows = ([0, 1, 2] as const).map((partyIndex) => {
+  const rows = battlePartyDisplayRows(order).map((partyIndex, slot) => {
     const member = rules.party.player[partyIndex]!;
     const species = SPECIES_NAMES[member.species];
     if (
@@ -470,6 +476,7 @@ export function createBattlePartySelectState(
     }
     return Object.freeze({
       partyIndex,
+      slot: slot as 0 | 1 | 2,
       species: member.species,
       speciesKey: species.species,
       name: species.name,
@@ -787,12 +794,12 @@ function drawIcon(fb: Uint8Array, row: BattlePartySelectRow, selected: boolean, 
   const icon = partyIcons[row.speciesKey];
   if (!icon) return fail(`missing icon catalog entry ${row.speciesKey}`);
   const centers = [{ x: 16, y: 40 }, { x: 104, y: 18 }, { x: 104, y: 42 }] as const;
-  const center = centers[row.partyIndex];
+  const center = centers[row.slot];
   const sheet = monIconFrameAt(elapsed) === 0 ? icon.frame0 : icon.frame1;
-  const x2 = selected || row.partyIndex === 0 ? 0 : -4;
+  const x2 = selected || row.slot === 0 ? 0 : -4;
   const y2 = selected
     ? monIconSelectedY2(elapsed, selectedSinceElapsed)
-    : row.partyIndex === 0 ? -4 : 0;
+    : row.slot === 0 ? -4 : 0;
   for (let ty = 0; ty < sheet.rows; ty += 1) for (let tx = 0; tx < sheet.columns; tx += 1) {
     const tile = sheet.tiles[ty * sheet.columns + tx]!;
     for (let py = 0; py < 8; py += 1) for (let px = 0; px < 8; px += 1) {
@@ -876,7 +883,7 @@ function blitIconFrame(
  */
 function drawHeldItemIcon(fb: Uint8Array, row: BattlePartySelectRow): void {
   if (row.item === 0) return;
-  const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.partyIndex]!.heldItem;
+  const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.slot]!.heldItem;
   blitIconFrame(fb, heldItemAsset.frames.item, heldItemAsset.palette, centerX, centerY);
 }
 
@@ -889,7 +896,7 @@ function drawStatusIcon(fb: Uint8Array, row: BattlePartySelectRow): void {
   if (row.status === null) return;
   const frame = statusIconAsset.statusIcons.frames[row.status];
   if (!frame) return fail(`missing status-icon frame ${row.status}`);
-  const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.partyIndex]!.status;
+  const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.slot]!.status;
   blitIconFrame(fb, frame, statusIconAsset.statusIcons.palette, centerX, centerY);
 }
 
@@ -904,13 +911,13 @@ function drawStatusIcon(fb: Uint8Array, row: BattlePartySelectRow): void {
  * overlap exactly like the oracle.
  */
 function drawMenuPokeball(fb: Uint8Array, row: BattlePartySelectRow, cursor: BattlePartySelectCursor): void {
-  const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.partyIndex]!.pokeball;
+  const [centerX, centerY] = partyMenuSpriteCoords.layouts.single[row.slot]!.pokeball;
   const ball = partyMenuPokeballData as unknown as {
     frame: IconTilesetFrame;
     frameOpen: IconTilesetFrame;
     palette: readonly RgbColor[];
   };
-  const open = cursor === row.partyIndex;
+  const open = cursor === row.slot;
   blitIconFrame(fb, open ? ball.frameOpen : ball.frame, ball.palette, centerX, centerY);
 }
 
@@ -952,7 +959,7 @@ function drawGenderGlyph(fb: Uint8Array, row: BattlePartySelectRow): void {
   if (row.gender === "genderless") return;
   const glyph = genderGlyphAsset.glyphs[row.gender];
   const colors = genderGlyphAsset.colors[row.gender];
-  const info = PARTY_CARD_INFO[row.partyIndex];
+  const info = PARTY_CARD_INFO[row.slot];
   for (let py = 0; py < 8; py += 1) for (let px = 0; px < glyph.width; px += 1) {
     const value = glyph.pixels[py * glyph.width + px]!;
     if (value === 0) continue;
@@ -968,7 +975,7 @@ function drawGenderGlyph(fb: Uint8Array, row: BattlePartySelectRow): void {
  * GetScaledHPFraction(hp, maxhp, 48) pixels (min 1 for any damage).
  */
 function drawHpBar(fb: Uint8Array, row: BattlePartySelectRow): void {
-  const { x, y } = PARTY_CARD_INFO[row.partyIndex].hpBar;
+  const { x, y } = PARTY_CARD_INFO[row.slot].hpBar;
   const palette = partySource.palette;
   const fraction = row.hp <= 0 ? 0 : Math.max(1, Math.floor((row.hp * 48) / row.maxHP));
   // GetHPBarLevel (battle_interface.c:2527-2549): fraction > 50% green, > 20% yellow, else red.
@@ -992,7 +999,7 @@ function drawHpBar(fb: Uint8Array, row: BattlePartySelectRow): void {
 }
 
 function drawRowText(fb: Uint8Array, row: BattlePartySelectRow): void {
-  const info = PARTY_CARD_INFO[row.partyIndex];
+  const info = PARTY_CARD_INFO[row.slot];
   // DisplayPartyPokemonNickname/Level (party_menu.c:2287-2321) print with
   // sFontColorTable[0] = LIGHT_GRAY (the window bank's color3), which is white
   // (255,255,255) in every box bank -- not the blue CARD_TEXT_FG_* the app
@@ -1335,7 +1342,7 @@ function drawPartySelectObjLayer(fb: Uint8Array, state: BattlePartySelectState):
     // The per-slot menu Pokéball sprite sits under the mon icon (icon
     // oam.priority 1, ball default 3), so it draws first.
     drawMenuPokeball(fb, row, state.cursor);
-    drawIcon(fb, row, state.cursor === row.partyIndex, iconElapsed, iconSelectionElapsed);
+    drawIcon(fb, row, state.cursor === row.slot, iconElapsed, iconSelectionElapsed);
     // sPartyMenuSpriteCoords per-slot order: icon, heldItem, status, pokeball --
     // the item sprite draws on top of the mon icon's lower-left corner.
     drawHeldItemIcon(fb, row);
