@@ -78,7 +78,9 @@ function baseState(
     submenuOpen: false,
     submenuOpened: false,
     submenuOpenElapsed: 0,
-    message: "Choose a POKéMON.",
+    // The standard prompt ("Choose a POKéMON.") is the renderer's own default box text; `message` carries only a
+    // refusal (DisplayPartyMenuMessage into WIN_MSG, fsw235), which would cover the submenu and the prompt.
+    message: null,
     outcome: null,
     elapsed: 0,
     openElapsed: 0,

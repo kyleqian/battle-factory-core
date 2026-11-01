@@ -620,7 +620,7 @@ const charmap = new Map<string, number>(
 function drawTile(
   fb: Uint8Array,
   tileIndex: number,
-  paletteBank: number,
+  palette: number | readonly RgbColor[],
   x: number,
   y: number,
   hFlip = false,
@@ -634,9 +634,45 @@ function drawTile(
     const sy = vFlip ? 7 - py : py;
     const colorIndex = tile[sy * 8 + sx]!;
     if (transparentZero && colorIndex === 0) continue;
-    const color = partySource.palette[paletteBank * 16 + colorIndex];
+    const color = typeof palette === "number" ? partySource.palette[palette * 16 + colorIndex] : palette[colorIndex];
     if (color) setPixel(fb, x + px, y + py, color.r, color.g, color.b);
   }
+}
+
+/**
+ * LoadPartyBoxPalette (party_menu.c:2205-2280) builds a box's palette by loading three
+ * colours into bank offsets {4,5,6} (sPartyBoxPalOffsets1) and three into {1,7,8}
+ * (sPartyBoxPalOffsets2) from gPartyMenuBg_Pal -- `partySource.palette`, the
+ * 176-colour bg.png palette the ids below index (data/party_menu.h:574-596). The
+ * normal box (sPartyBoxEmptySlotPalIds {52,53,54} / {49,55,56}) is bank 3 as
+ * harvested; every other state is composed from it here. GetPartyBoxPaletteFlags
+ * (:1166): PARTY_PAL_SELECTED = the cursor slot, PARTY_PAL_FAINTED = HP 0; the
+ * SWITCHING / TO_SWITCH / SOFTBOILED flags belong to the field menu's actions
+ * and never apply in battle (CHOOSE_MON / SEND_OUT), so a fainted slot is never
+ * the green "selected for action" box.
+ */
+type PartyBoxPalIds = readonly [readonly [number, number, number], readonly [number, number, number]];
+const PARTY_BOX_PAL_OFFSETS: PartyBoxPalIds = [[4, 5, 6], [1, 7, 8]];
+const PARTY_BOX_CURR_SELECTION_PAL_IDS: PartyBoxPalIds = [[116, 117, 118], [97, 103, 104]];
+const PARTY_BOX_FAINTED_PAL_IDS: PartyBoxPalIds = [[84, 85, 86], [81, 87, 88]];
+const PARTY_BOX_CURR_SELECTION_FAINTED_PAL_IDS: PartyBoxPalIds = [[148, 149, 150], [97, 103, 104]];
+const PARTY_BOX_NORMAL_BANK = 3;
+const partyBoxPaletteCache = new Map<string, readonly RgbColor[]>();
+
+function partyBoxPalette(ids: PartyBoxPalIds): readonly RgbColor[] {
+  const key = ids.flat().join(",");
+  const cached = partyBoxPaletteCache.get(key);
+  if (cached) return cached;
+  const palette = partySource.palette.slice(PARTY_BOX_NORMAL_BANK * 16, PARTY_BOX_NORMAL_BANK * 16 + 16);
+  ids.forEach((group, g) => group.forEach((id, k) => { palette[PARTY_BOX_PAL_OFFSETS[g]![k]!] = partySource.palette[id]!; }));
+  partyBoxPaletteCache.set(key, palette);
+  return palette;
+}
+
+/** The box palette for a slot: `selected` = the cursor slot (animNum 1), `fainted` = HP 0. */
+export function partyBoxPaletteFor(selected: boolean, fainted: boolean): number | readonly RgbColor[] {
+  if (fainted) return partyBoxPalette(selected ? PARTY_BOX_CURR_SELECTION_FAINTED_PAL_IDS : PARTY_BOX_FAINTED_PAL_IDS);
+  return selected ? partyBoxPalette(PARTY_BOX_CURR_SELECTION_PAL_IDS) : PARTY_BOX_NORMAL_BANK;
 }
 
 function drawSourceBackground(fb: Uint8Array): void {
@@ -651,14 +687,14 @@ function drawSlot(
   slot: PartySourceAsset["slots"]["main"],
   x: number,
   y: number,
-  paletteBank: number,
+  palette: number | readonly RgbColor[],
   transparentZero = false,
 ): void {
   for (let ty = 0; ty < slot.height; ty += 1) for (let tx = 0; tx < slot.width; tx += 1) {
     drawTile(
       fb,
       slot.tiles[ty * slot.width + tx]!,
-      paletteBank,
+      palette,
       x + tx * 8,
       y + ty * 8,
       false,
@@ -993,10 +1029,26 @@ function drawRowText(fb: Uint8Array, row: BattlePartySelectRow): void {
     { r: 255, g: 255, b: 255 },
     CARD_TEXT_SHADOW,
   ];
-  const hpString = `${row.hp}/`;
-  drawText(fb, fontSmall, charmap, hpString, info.hp.x, info.hp.y, hpPalette, colors);
+  // DisplayPartyPokemonHP (party_menu.c:2367) prints ConvertIntToDecimalStringN(hp,
+  // STR_CONV_MODE_RIGHT_ALIGN, 3) + "/": the current HP is padded on the left to
+  // three characters with CHAR_SPACER (0x77, a blank 5 px wide in FONT_SMALL like
+  // every digit and the slash), so its "/" always lands 15 px in, on the very
+  // pixels DisplayPartyPokemonMaxHP's "/" (dimensions[16]) prints again. A
+  // left-aligned "40/" put its slash 10 px in and the card showed "40//137".
+  const hpDigitCodes = String(row.hp).split("").map((digit) => {
+    const code = codeForChar(charmap, digit);
+    if (code === undefined) return fail(`no font-small glyph for digit ${digit}`);
+    return code;
+  });
+  const slashCode = codeForChar(charmap, "/");
+  if (slashCode === undefined) return fail("no font-small glyph for /");
+  const hpCodes = [...Array.from({ length: Math.max(0, 3 - hpDigitCodes.length) }, () => CHAR_SPACER), ...hpDigitCodes, slashCode];
+  drawGlyphCodes(fb, fontSmall, hpCodes, info.hp.x, info.hp.y, hpPalette, colors);
   drawText(fb, fontSmall, charmap, `/${row.maxHP}`, info.maxHp.x, info.maxHp.y, hpPalette, colors);
 }
+
+/** charmap.txt / include/constants/characters.h: CHAR_SPACER 0x77, the blank cell STR_CONV_MODE_RIGHT_ALIGN pads with. */
+const CHAR_SPACER = 0x77;
 
 /**
  * ISSUES #80 slice 5: the CANCEL pokeball-button window over the baked bg box.
@@ -1033,17 +1085,26 @@ const CANCEL_FRAME_ROWS: ReadonlyArray<readonly [number, string]> = [
   [153, "191-196"],
 ];
 
-const CANCEL_FRAME_COLOR: RgbColor = { r: 74, g: 74, b: 99 };
-const CANCEL_INTERIOR_COLOR: RgbColor = { r: 115, g: 90, b: 181 };
+/**
+ * The CANCEL button window is bg1 tiles (23,17) 7x2 in palette bank 1; AnimatePartySlot
+ * (party_menu.c:1141, case PARTY_SIZE + 1) switches them to bank 2 while the cursor is
+ * on CANCEL (SetBgTilemapPalette(1, 23, 17, 7, 2, 2)) and back to bank 1 when it
+ * leaves. Of the colours the window uses only the frame (colour 1: (74,74,99) ->
+ * (255,115,49)) and the interior (colour 15: (115,90,181) -> (165,115,247)) differ
+ * between the banks; the checkerboard (4/5) is the same in both.
+ */
+const cancelFrameColor = (selected: boolean): RgbColor => partySource.palette[(selected ? 2 : 1) * 16 + 1]!;
+const cancelInteriorColor = (selected: boolean): RgbColor => partySource.palette[(selected ? 2 : 1) * 16 + 15]!;
 const CANCEL_CHECKER_L: RgbColor = { r: 206, g: 214, b: 123 };
 const CANCEL_CHECKER_O: RgbColor = { r: 181, g: 181, b: 90 };
 
-function drawCancelFrameRows(fb: Uint8Array): void {
+function drawCancelFrameRows(fb: Uint8Array, selected: boolean): void {
+  const color = cancelFrameColor(selected);
   for (const [y, ranges] of CANCEL_FRAME_ROWS) {
     for (const part of ranges.split(",")) {
       const [a, b] = part.split("-").map(Number);
       for (let x = a!; x <= (b ?? a)!; x += 1) {
-        setPixel(fb, x, y, CANCEL_FRAME_COLOR.r, CANCEL_FRAME_COLOR.g, CANCEL_FRAME_COLOR.b);
+        setPixel(fb, x, y, color.r, color.g, color.b);
       }
     }
   }
@@ -1064,16 +1125,17 @@ function drawCancelWindowBackground(fb: Uint8Array): void {
   }
 }
 
-function drawCancelWindow(fb: Uint8Array): void {
+function drawCancelWindow(fb: Uint8Array, selected: boolean): void {
   drawCancelWindowBackground(fb);
   // Interior color15 fills the right half (x202-235) between the divider and
   // the right frame; the ball + CANCEL text overpaint their own footprints.
+  const interior = cancelInteriorColor(selected);
   for (let y = 138; y <= 149; y += 1) {
     for (let x = 202; x <= 235; x += 1) {
-      setPixel(fb, x, y, CANCEL_INTERIOR_COLOR.r, CANCEL_INTERIOR_COLOR.g, CANCEL_INTERIOR_COLOR.b);
+      setPixel(fb, x, y, interior.r, interior.g, interior.b);
     }
   }
-  drawCancelFrameRows(fb);
+  drawCancelFrameRows(fb, selected);
   // "CANCEL" (sFontColorTable[0]: white ink + dark-grey shadow) centered in the
   // window's right half; FONT_SMALL's ink lands 4px below the draw origin, so
   // (204,137) puts the glyph bbox at the oracle's x204-233 y141-148.
@@ -1092,15 +1154,19 @@ function drawCancelWindow(fb: Uint8Array): void {
  * `drawPartySelectObjLayer` -- the close fade's layer split keys it to the
  * OBJ blend coefficient.
  */
-function drawCancelPokeball(fb: Uint8Array): void {
+function drawCancelPokeball(fb: Uint8Array, open: boolean): void {
   const ball = partyMenuPokeballData as unknown as {
     frame: IconTilesetFrame;
+    frameOpen: IconTilesetFrame;
     palette: readonly RgbColor[];
   };
+  // AnimatePartySlot (party_menu.c:1141) starts the cancel ball's anim 1 (sPokeballAnim_Open) while the cursor is on
+  // CANCEL and anim 0 (closed) when it leaves, like the slot balls.
+  const frame = open ? ball.frameOpen : ball.frame;
   const bx = 198 - 16;
   const by = 148 - 16;
-  for (let ty = 0; ty < ball.frame.rows; ty += 1) for (let tx = 0; tx < ball.frame.columns; tx += 1) {
-    const tile = ball.frame.tiles[ty * ball.frame.columns + tx]!;
+  for (let ty = 0; ty < frame.rows; ty += 1) for (let tx = 0; tx < frame.columns; tx += 1) {
+    const tile = frame.tiles[ty * frame.columns + tx]!;
     for (let py = 0; py < 8; py += 1) for (let px = 0; px < 8; px += 1) {
       const colorIndex = tile[py * 8 + px]!;
       if (colorIndex === 0) continue;
@@ -1149,10 +1215,13 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
   // LoadPartyBoxPalette (party_menu.c:2205-2280) overwrites box banks 3/4/5
   // with the same "empty slot" colors (sPartyBoxEmptySlotPalIds {52,53,54} /
   // {49,55,56} -> gPartyMenuBg_Pal bank 3), so every normal box renders from
-  // bank 3; fainted uses bank 6, the current-selection box bank 7.
-  drawSlot(fb, partySource.slots.main, 8, 24, state.cursor === 0 ? 7 : state.rows[0].fainted ? 6 : 3, true);
-  drawSlot(fb, partySource.slots.wide, 96, 8, state.cursor === 1 ? 7 : state.rows[1].fainted ? 6 : 3, true);
-  drawSlot(fb, partySource.slots.wide, 96, 32, state.cursor === 2 ? 7 : state.rows[2].fainted ? 6 : 3, true);
+  // bank 3; the cursor slot and fainted slots take their own three-colour loads
+  // (`partyBoxPaletteFor`): bank 6 was the field menu's green "selected for
+  // action" box, never a battle state, and the pink current-selection-fainted
+  // box was missing.
+  drawSlot(fb, partySource.slots.main, 8, 24, partyBoxPaletteFor(state.cursor === 0, state.rows[0].fainted), true);
+  drawSlot(fb, partySource.slots.wide, 96, 8, partyBoxPaletteFor(state.cursor === 1, state.rows[1].fainted), true);
+  drawSlot(fb, partySource.slots.wide, 96, 32, partyBoxPaletteFor(state.cursor === 2, state.rows[2].fainted), true);
   // DrawEmptySlot (party_menu.c:824-870, 2193-2195): a 3-mon party still
   // renders the six right-column boxes; slots 4-6 are empty boxes drawn from
   // sSlotTilemap_WideEmpty with the PARTY_PAL_NO_MON palette
@@ -1230,9 +1299,9 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
     // the party-menu message-window frame style (frame1 tiles, olive corner).
     drawStandardWindowFrame(fb, 0, 128, 21, 2, PARTY_MESSAGE_WINDOW_PALETTE);
     drawStandardWindowText(fb, "Choose a POKéMON.", 8, 137);
-    if (state.cursor === "cancel") drawStandardWindowText(fb, "▶ CANCEL", 168, 145);
   }
-  if (!submenuVisible) drawCancelWindow(fb);
+  // The cursor on CANCEL is shown by the button itself (bank 2 + the open ball), nothing is printed in the prompt box.
+  if (!submenuVisible) drawCancelWindow(fb, state.cursor === "cancel");
   if (state.message !== null) {
     // A refusal ("X has no energy / left to battle!", "X is already / in battle!") is DisplayPartyMenuMessage's
     // PrintMessage into WIN_MSG (sSinglePartyMenuWindowTemplate[WIN_MSG]: bg 2, tilemap (1,15), 28x4 = px (8,120)-(232,152))
@@ -1276,7 +1345,7 @@ function drawPartySelectObjLayer(fb: Uint8Array, state: BattlePartySelectState):
   // (including its confirm-tick frame, closeElapsed 0); during the 3-frame
   // pre-open hold and from the close the button is drawn again.
   if (!submenuWindowVisible(state)) {
-    drawCancelPokeball(fb);
+    drawCancelPokeball(fb, state.cursor === "cancel");
   }
 }
 

@@ -17,7 +17,9 @@ describe("cff232: Scene OFF builds the command (weather-loop rows only on the ba
   it("OFF and ON carry the same 117-row command for the player's CASTFORM (hail); both add 3 rows for the foe's after Rain Dance (snd233: ON follows the same weather loop)", () => {
     expect(CASTFORM_CHANGE_WEATHER_LOOP_FRAMES).toBe(3);
     const hailOff = general(cff230Route(950, false, 1, "off").segments[0]!.commands), hailOn = general(cff230Route(950, false, 1, "on").segments[0]!.commands);
-    expect(hailOff).toEqual(hailOn);
+    // wth236: Scene ON also presents the end-turn hail body after the morph; Scene OFF presents no weather command.
+    expect(hailOn.map((c) => c.animation)).toEqual(["CASTFORM_CHANGE", "HAIL_CONTINUES"]);
+    expect(hailOff).toEqual([hailOn[0]]);
     expect(hailOff[0]).toMatchObject({ battler: 0, castformForm: 3, timing: { minimumFrames: CASTFORM_CHANGE_COMMAND_FRAMES } });
     expect(hailOff[0]).not.toHaveProperty("castformLeadExtra");
     const rainOff = general(cff230Route(651, false, 1, "off").segments[0]!.commands), rainOn = general(cff230Route(651, false, 1, "on").segments[0]!.commands);
