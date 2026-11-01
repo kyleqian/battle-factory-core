@@ -1,8 +1,0 @@
-{"seed":350,"hit":false,"batonPassCommits":0,"halt":null,"outcome":"OK","endState":"roundLost","frames":22741,"battle":1,"turn":36,"errorMessage":null}
-{"seed":351,"hit":false,"batonPassCommits":0,"halt":null,"outcome":"OK","endState":"roundLost","frames":33355,"battle":2,"turn":28,"errorMessage":null}
-{"seed":352,"hit":false,"batonPassCommits":0,"halt":null,"outcome":"OK","endState":"roundLost","frames":13060,"battle":1,"turn":18,"errorMessage":null}
-{"seed":353,"hit":false,"batonPassCommits":0,"halt":null,"outcome":"OK","endState":"roundLost","frames":88254,"battle":5,"turn":22,"errorMessage":null}
-{"seed":354,"hit":false,"batonPassCommits":0,"halt":null,"outcome":"OK","endState":"roundLost","frames":34365,"battle":2,"turn":37,"errorMessage":null}
-{"seed":355,"hit":false,"batonPassCommits":0,"halt":null,"outcome":"OK","endState":"roundLost","frames":15105,"battle":1,"turn":25,"errorMessage":null}
-{"seed":356,"hit":true,"batonPassCommits":1,"halt":{"frame":33745,"battleIndex":0,"outgoingPartyIndex":0,"species":"MAWILE"},"outcome":"OK","endState":"roundLost","frames":26787,"battle":2,"turn":8,"errorMessage":null}
-{"seed":357,"hit":true,"batonPassCommits":1,"halt":{"frame":26284,"battleIndex":0,"outgoingPartyIndex":2,"species":"LEDIAN"},"outcome":"OK","endState":"roundLost","frames":21165,"battle":1,"turn":35,"errorMessage":null}

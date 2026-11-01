@@ -1,6 +1,0 @@
-presented: 430
-k+1 latch 0 px both runs: 430
-k+2 settled 0 px both runs: 430
-k+1 without latch nonzero (latch needed): 430
-declined (no tail: Psychic opponent): 23
-tail residual windows: none

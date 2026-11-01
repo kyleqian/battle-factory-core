@@ -1,6 +1,0 @@
-steelixBA-baton-accepted-opponent-aipom-onix	body1 REORDERED orig(226, 73, 125) sw(226, 289, 341) acc[73,125]->[289,341] rng2 1209821555->3459628249 len 52/52
-steelixBA-baton-accepted-player-aipom-onix	body1 REORDERED orig(226, 69, 121) sw(226, 289, 341) acc[69,121]->[289,341] rng2 2440601759->4036302398 len 52/52
-tyranitarBA-baton-accepted-opponent-aipom-onix BODY-MISSING [(226, 73, 125), (33, 327, 368)] []
-tyranitarBA-baton-accepted-player-aipom-onix	body1 REORDERED orig(226, 69, 121) sw(226, 293, 345) acc[69,121]->[293,345] rng2 2440601759->4103143191 len 52/52
-shinysteelixBA-baton-accepted-opponent-aipom-onix	body1 REORDERED orig(226, 73, 125) sw(226, 289, 341) acc[73,125]->[289,341] rng2 1209821555->3459628249 len 52/52
-shinysteelixBA-baton-accepted-player-aipom-onix	body1 REORDERED orig(226, 69, 121) sw(226, 289, 341) acc[69,121]->[289,341] rng2 2440601759->3459628249 len 52/52

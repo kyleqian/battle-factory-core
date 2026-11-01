@@ -149,7 +149,7 @@ function scan(file: string, rawText: string): void {
   const reason = `referenced by ${file}`;
   // 'tools', 'compare', 'x'  ->  'tools/compare/x'
   const flat = text.replace(/(['"`])\s*,\s*\1/g, '/').replace(/(['"`])\s*,\s*(['"`])/g, '/');
-  const toks = new Set(flat.match(/[A-Za-z0-9_@.\-/~]+/g) ?? []);
+  const toks = new Set([...(flat.match(/[A-Za-z0-9_@.\-/~]+/g) ?? []), ...(text.match(/[A-Za-z0-9_@.\-/~]+/g) ?? [])]);
   for (const raw of toks) {
     const hadSlash = raw.includes('/');
     let t = raw;
