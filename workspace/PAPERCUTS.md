@@ -70,7 +70,13 @@ history.
   first `play:random` on master failed (~5 min; reinstalled in the main checkout). A full suite beside a census-running worker was
   OOM-killed in one fork (~5 min to find + rerun the unreported file). `lsd194CensusDelta.py` prints FAIL and a 51-battle
   `typeSequenceChanged` list for identical arms; use `rst197CensusDelta.py` (apx215 worker ~10 min).
-- **Hits:** 5 sessions (2026-10-14, 2026-10-15/16, 2026-10-16/17, 2026-10-23, 2026-10-27/28), ~3.3 h total.
+  (17, 2026-10-31/11-01) The supervisor's full suite beside a worker's focused vitest (4 GB) was OOM-killed outright (exit 137,
+  orphaned forks; ~10 min). A brief that fenced the worker's heavy jobs behind a wall-clock time (02:30) left it idle ~40 min when the
+  supervisor's gates finished early — fence on an evidence file the supervisor writes (e.g. `<evidence>/gates.done`), not a clock.
+  Mid-run Mac pushes to a branch being folded cost two worker restarts (~20 min). `rst197CensusDelta.py` exits 1 on inserted
+  commands; presentation-only insertions need a subsequence check. play:random in a supervisor `git worktree` also needs the
+  `.integration/browser/syslibs` symlink (libnspr4).
+- **Hits:** 6 sessions (2026-10-14, 2026-10-15/16, 2026-10-16/17, 2026-10-23, 2026-10-27/28, 2026-10-31/11-01), ~4.5 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
   and the supervisor; census job limit from `/etc/pokebench-runner.env`. Vendor paths: 155 `tools/**/*.sh` hard-code
   `/Users/kyle/Developer/pokebench/vendor`; replace with `${POKEBENCH_VENDOR_DIR:-…}` and export it from the runner env (one sweep +
