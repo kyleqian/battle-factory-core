@@ -509,7 +509,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 739's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 19's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -544,6 +544,20 @@ describe("random round soak driver (green milestone pin)", () => {
     // only) found 447 and 739; 447 runs into the 80,000-frame budget still in
     // battle 1, so 739, whose round plays out to a genuine loss in battle 3,
     // is the pin.
+    //
+    // pmo239 (the party menus list rows in the ROM's battle order; the soak's
+    // forced-menu walk now stops on the first legal row the menu shows, so the
+    // exploring policies' decisions moved again): seed 739 no longer commits
+    // Baton Pass in its first round. Re-scanned full-policy seeds 0..300
+    // (soak111BatonPassSearch.ts, 80,000 frames): the lowest seeds with a Baton
+    // Pass commit followed by a forced-selector halt on a still-living
+    // outgoing slot are 19, 30, 32, 57, 58, 63, 79, 149, 188, 204, 211, 224,
+    // 234 and 242, and every one of them halts in the post-decision grace
+    // window (battleIndex 0 of the chained round, after the first round's
+    // decided outcome), none inside the first round itself. Seed 19 is the
+    // pin; unlike the pre-pmo239 pin its halt frame is therefore past the
+    // snapshotted first-round result, so the `frames > haltFrame` bound is
+    // gone and the observed halt plus the clean errorMessage carry the pin.
     let frame = 0;
     let batonPassCommitFrame: number | null = null;
     let haltFrame: number | null = null;
@@ -560,7 +574,7 @@ describe("random round soak driver (green milestone pin)", () => {
         if (outgoing !== undefined && !outgoing.fainted) haltFrame = state.frame;
       },
     };
-    const result = runSeed(739, {
+    const result = runSeed(19, {
       maxFrames: 80_000,
       renderEvery: 0,
       stopAtFirstRoundDecision: true,
@@ -569,8 +583,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.errorMessage ?? "").not.toMatch(/openpartyscreen|machine-barrier/i);
     expect(batonPassCommitFrame).not.toBeNull();
     expect(haltFrame).not.toBeNull();
-    expect(result.frames).toBeGreaterThan(haltFrame!);
-    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost", battle: 3 });
+    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost", battle: 2 });
   });
 
   // ISSUES #86's original concern (a forced replacement's terminal weather
@@ -831,12 +844,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // press-timing stream, so "vanilla" below only moves frames). The voluntary menu's SHIFT on the active row then
       // stopped being a silent no-op (gText_PkmnAlreadyInBattle, the same fsw235 commit): the exploring game dismisses a
       // message where it used to back out, so a new trajectory again: 14107 / battle 1 turn 23 -> 42311 / battle 3 turn 14.
-      frames: 42311,
+      // pmo239 (party menus in the ROM's battle order; the soak's forced-menu walk stops on the first legal row it shows, the
+      // voluntary walk maps the rolled raw party index to its menu row): a new exploring trajectory, 42311 / battle 3 turn 14 -> 37753 / battle 2 turn 26.
+      frames: 37753,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 2,
-      battle: 3,
-      turn: 14,
+      maxBattleDepth: 1,
+      battle: 2,
+      turn: 26,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -846,12 +861,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // rep203: fnt201 (the faint script lead) 26817 -> 27295; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
       // fsw235: a new trajectory for the exploring policy (see seed 0): 27295 / battle 2 turn 9 -> 25899 / battle 2 turn 6,
       // then 25899 / battle 2 turn 6 -> 38842 / battle 2 turn 33 with the voluntary menu's already-in-battle refusal.
-      frames: 38842,
+      // pmo239: a new exploring trajectory (see seed 0): 38842 / battle 2 turn 33 -> 17862 / battle 1 turn 31.
+      frames: 17862,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 1,
-      battle: 2,
-      turn: 33,
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 31,
     });
   });
 
@@ -1395,7 +1411,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // party-menu walks, which "winning" also explores): seed 1 now loses its
     // first round; re-scanned seeds 0..39: seeds 3, 13, 20 and 34 chain two
     // round wins, so the lowest (3) is pinned.
-    const result = runSeed(3, {
+    // pmo239 (the party menus list rows in the ROM's battle order, so the soak's UI-faithful row walks pick different mons): seed 3
+    // now carries 7; re-scanned seeds 0..12: only seed 2 chains two round wins (carry 14), so it is pinned.
+    const result = runSeed(2, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

@@ -2288,9 +2288,11 @@ export class RandomPlayer {
       // verbatim (including rolling onto a fainted/active row, whose own
       // no-energy message the generic press sequence below already
       // handles) -- untouched by this guard.
-      const target = this.winningLike && rawTarget !== "cancel" && !selector.rows[rawTarget]!.legal
+      // `rawTarget` is a raw party index (the heuristic's bench row / the rolled slot); the menu lists rows in the ROM's battle order.
+      const rawRow = rawTarget === "cancel" ? -1 : selector.rows.findIndex((row) => row.partyIndex === rawTarget);
+      const target = this.winningLike && rawTarget !== "cancel" && !selector.rows[rawRow]!.legal
         ? "cancel"
-        : rawTarget;
+        : rawTarget === "cancel" ? "cancel" : (rawRow as 0 | 1 | 2);
       this.partyIntent = { key: this.lastCommandKey, target };
       this.note(state, `party intent: ${target === "cancel" ? "cancel" : `row ${target}`}`);
     }
