@@ -86,6 +86,31 @@ cleanup step.
    before this tip; the branch already re-pins the exploring soak seeds
    (ISSUES #89's search took ~90 min), and any further change to what the
    soak driver sees in a party menu re-rolls them again.
+   **Update 2026-11-01 ~00:30 UTC (Mac):** tip is now b7e7dc345 (pmd237,
+   renderer only, both party menus): HP under 100 right-aligned with
+   CHAR_SPACER like DisplayPartyPokemonHP (no more "40//137"), a selected
+   CANCEL highlighted (palette 2, open ball) with no stray "▶ CANCEL",
+   fainted boxes in the ROM's fainted / fainted-selected palettes. Census
+   identical both scenes; full suite 14,251 / 0 on the Mac. Merge it like the
+   others.
+   **Then, before Audio — party menus in battle order (user-visible, found
+   playing the website):** the ROM runs SwitchPartyOrder (battle_main.c:4086)
+   on every player switch-in — voluntary, forced send-out
+   (battle_script_commands.c:5178 / 5207) and Roar / Whirlwind (:7364) — and
+   OpenPartyMenuInBattle shows that order, so the active Pokémon is always
+   row 0 and the cursor opens on it. We keep the rental order
+   (`battleScriptSwitchinOpcode.ts` leaves SwitchPartyOrder out as
+   presentation-only, but the menus are that presentation), so after a
+   switch the menu opens on a fainted or benched Pokémon. Scope from the Mac
+   session: an order permutation in the orchestrator's battle state, swapped
+   on every player switch-in; both selectors' display rows mapped back to raw
+   party indexes (the kernel keeps raw indexes); the anchor-chrome gate
+   re-expressed on raw slot 0 plus identity order (the ONIX/MAGBY anchor's
+   first faint keeps identity order, so its traces should not move). It
+   changes what the soak driver sees: budget the exploring-pin re-roll
+   (ISSUES #89's seed search ~90 min). Gates as for any party-menu change,
+   plus a browser check that after a send-out the menu opens on the new
+   active Pokémon.
 2. **Audio (S11), re-opened by the user:** design step first (docs only; the
    supervisor accepts it), then sound-event parity by census, then playback —
    `docs/finish-plan.md` "Audio (S11)". Expect this to be the main program for
