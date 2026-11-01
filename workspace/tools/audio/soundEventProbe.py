@@ -5,12 +5,16 @@ debugger, so "breakpoints" are a single-step loop that compares the Thumb PC wit
 function entries (PC == symbol + 2 is the first instruction, r0..r3 still hold
 the arguments) -- the same technique as tools/probe/trace-factory-construction-rng.py.
 
-  python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json draft [--frames N]
-  python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json lab REQUEST.json [--frames N] [--log-setup]
+  python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json draft [--frames N] [--profile on|off] [--fast]
+  python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json lab REQUEST.json [--frames N] [--log-setup] [--profile on|off] [--fast]
 
 `frame` is 1-based: an event during the k-th advance is reported at frame k, the
 first frame whose capture can show its effect. `lab` replays a battle-lab request
 (mechanicLab / factoryLegal) and logs only its trace window unless --log-setup.
+--profile selects the Scene ON (default) or Scene OFF oracle bootstrap.
+--fast is the hybrid mode: frames run at full speed and a frame is re-stepped (from the
+saved pre-frame state) only when the m4a RAM signature changed during it. Plain stepping
+is the reference; tools/audio/compareProbe.py proves a hybrid log equal to a stepping log.
 """
 import bisect, json, re, sys, time
 from pathlib import Path
@@ -20,10 +24,18 @@ HARNESS = next(p for p in (ROOT, *ROOT.parents) if (p / "oracle/emerald_core.py"
 sys.path.insert(0, str(HARNESS / "oracle"))
 from emerald_core import EmeraldOracle  # noqa: E402
 from battle_lab import BattleLab, validate_request  # noqa: E402
+from mgba import ffi  # noqa: E402
 
 REF = (ROOT / "reference/pokeemerald").resolve()
 HOOKS = ["m4aSongNumStart", "m4aSongNumStop", "PlayCryInternal", "PlaySE12WithPanning", "PlaySE1WithPanning",
-         "PlaySE2WithPanning", "SE12PanpotControl", "PlayBGM", "PlayFanfare", "PlayFanfareByFanfareNum"]
+         "PlaySE2WithPanning", "SE12PanpotControl", "PlayBGM", "PlayFanfare", "PlayFanfareByFanfareNum",
+         "m4aMPlayFadeOut", "m4aMPlayFadeOutTemporarily", "m4aMPlayFadeIn", "m4aMPlayVolumeControl",
+         "m4aMPlayStop", "m4aMPlayContinue"]
+FADE_HOOKS = {"m4aMPlayFadeOut": "out", "m4aMPlayFadeOutTemporarily": "out-temporary", "m4aMPlayFadeIn": "in"}
+PROFILES = {"on": ("battle-scene-on", "factory.json"), "off": ("battle-scene-off", "factory-battle-scene-off.json")}
+SAVE_IWRAM = 0x19000  # offset of IWRAM inside save_raw_state() (verified against live memory)
+MPLAY_INFO_SIZE, MPLAY_TRACK_SIZE = 0x40, 0x50
+STATE_HEADER = 0x400  # cpu / event-queue bookkeeping at the top of a raw state differs between run_frame and stepping; memory does not
 SE_CALLERS = {"PlaySE", "PlaySE12WithPanning", "PlaySE1WithPanning", "PlaySE2WithPanning"}
 BGM_CALLERS = {"PlayBGM", "PlayNewMapMusic", "FadeInNewBGM", "FadeOutAndPlayNewMapMusic", "FadeOutAndFadeInNewMapMusic"}
 FANFARE_CALLERS = {"PlayFanfare", "PlayFanfareByFanfareNum", "WaitFanfare", "Task_Fanfare"}
@@ -46,7 +58,9 @@ def load_defines(path, prefix_re):
 def main():
     out, mode, rest = Path(sys.argv[1]), sys.argv[2], sys.argv[3:]
     frames_cap = int(rest[rest.index("--frames") + 1]) if "--frames" in rest else None
-    oracle = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap/factory.json")
+    profile, bootstrap = PROFILES[rest[rest.index("--profile") + 1] if "--profile" in rest else "on"]
+    fast = "--fast" in rest
+    oracle = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap" / bootstrap)
     syms = sorted((a, n) for n, a in oracle.symbols.items() if a)
     addrs = [a for a, _ in syms]
     hooks = [n for n in HOOKS if oracle.symbols.get(n)]
@@ -54,8 +68,15 @@ def main():
     songs = load_defines(REF / "include/constants/songs.h", r"(?:SE|MUS)_")
     species = load_defines(REF / "include/constants/species.h", r"SPECIES_")
     cpu, core = oracle.core.cpu, oracle.core
-    state = {"frame": 0, "log": True, "steps": 0}
-    calls, events, pending = [], [], {}
+    players = {oracle.symbols[f"gMPlayInfo_{n}"]: n for n in ("BGM", "SE1", "SE2", "SE3")}
+    for i in range(2):
+        players[oracle.symbols["gPokemonCryMusicPlayers"] + i * MPLAY_INFO_SIZE] = "cry"
+    song_table = oracle.symbols["gSongTable"]
+    header_to_song = {}
+    for n in range(max(songs) + 1):
+        header_to_song.setdefault(oracle.read_u32(song_table + n * 8), n)
+    state = {"frame": 0, "log": True, "steps": 0, "fast": 0, "restepped": 0, "state_mismatch": 0}
+    calls, events, pending, watch = [], [], {}, {}
 
     def caller(lr):
         i = bisect.bisect_right(addrs, (lr & ~1) - 2) - 1
@@ -63,6 +84,7 @@ def main():
 
     def on_hook(name):
         g = [int(cpu.gprs[i]) & 0xFFFFFFFF for i in range(4)]
+        n_events = len(events)
         via = caller(g_lr())
         row = {"frame": state["frame"], "fn": name, "via": via, "r0": g[0], "r1": g[1]}
         if name == "PlayCryInternal":
@@ -83,7 +105,33 @@ def main():
             events.append({"frame": row["frame"], "kind": "pan", "id": None, "name": None, "pan": s8(g[0]), "via": via})
         elif name == "m4aSongNumStop":
             events.append({"frame": row["frame"], "kind": "stop", "id": g[0], "name": songs.get(g[0]), "pan": None, "via": via})
+        else:
+            player = players.get(g[0], f"0x{g[0]:08x}")
+            song = header_to_song.get(oracle.read_u32(g[0]))
+            ev = {"frame": row["frame"], "kind": None, "id": song, "name": songs.get(song), "pan": None, "player": player, "via": via}
+            if name in FADE_HOOKS:
+                ev.update(kind="fade", dir=FADE_HOOKS[name], speed=g[1] & 0xFFFF)
+            elif name == "m4aMPlayVolumeControl":
+                ev.update(kind="duck", tracks=g[1] & 0xFFFF, volume=g[2] & 0xFFFF)
+            elif name == "m4aMPlayStop":
+                ev["kind"] = "stop"
+            else:
+                ev["kind"] = "continue"
+            # m4aSongNumStop's own m4aMPlayStop is already reported by its "stop" event
+            if not (name == "m4aMPlayStop" and via == "m4aSongNumStop"):
+                events.append(ev)
         calls.append(row)
+        # classify the call: effective iff the m4a signature differs between entry and return (hybrid mode can only see those)
+        ret = (g_lr() & ~1) + 2
+        sig_before = signature(live_reader)
+        watch.setdefault(ret, []).append((sig_before, [row, *events[n_events:]]))
+
+    def on_return(ret):
+        sig_after = signature(live_reader)
+        for sig_before, targets in watch.pop(ret):
+            if sig_before == sig_after:
+                for t in targets:
+                    t["noop"] = True
 
     def g_lr():
         return int(cpu.gprs[14]) & 0xFFFFFFFF
@@ -93,43 +141,103 @@ def main():
         start = core.frame_counter
         state["frame"] += 1
         while core.frame_counter == start:
-            name = entry.get(int(cpu.pc))
-            if name and state["log"]:
-                on_hook(name)
+            pc = int(cpu.pc)
+            if state["log"]:
+                name = entry.get(pc)
+                if name:
+                    on_hook(name)
+                if pc in watch:
+                    on_return(pc)
             core.step()
             state["steps"] += 1
         oracle._screen_stale = False
         oracle.frame += 1
 
+    def snapshot():
+        return bytes(ffi.buffer(core.save_raw_state()))
+
+    def blob_reader(blob):
+        return lambda a, n: blob[SAVE_IWRAM + a - 0x3000000:SAVE_IWRAM + a - 0x3000000 + n]
+
+    def live_reader(a, n):
+        return bytes(core.memory.u8[a:a + n])
+
+    def signature(iw):
+        """Sound-relevant m4a RAM. Per track only the EXIST / START flag bits and the *X control fields (keyShiftX, pitX, volX,
+        panX) that m4aMPlay{Pitch,Volume,Panpot}Control write; the score-driven fields (vol, pan, tune, wait, ...) change
+        every few frames in any playing song and would defeat the fast path. Clocks are compared separately (a restart resets one)."""
+        sig, clocks = [oracle.read_u32(oracle.symbols["gMPlay_PokemonCry"])], []
+        for addr in players:
+            info = iw(addr, MPLAY_INFO_SIZE)
+            sig += [info[0:10], info[0x24:0x26], info[0x28:0x2A], info[0x2C:0x30]]
+            clocks.append(int.from_bytes(info[0xC:0x10], "little"))
+            tracks = int.from_bytes(info[0x2C:0x30], "little")
+            if 0x3000000 <= tracks < 0x3008000 - MPLAY_TRACK_SIZE * 16:
+                for t in range(min(info[8], 16)):
+                    tr = iw(tracks + t * MPLAY_TRACK_SIZE, MPLAY_TRACK_SIZE)
+                    sig.append(bytes((tr[0] & 0xC0, tr[0xB], tr[0xD], tr[0x13], tr[0x15])))
+        sig.append(iw(oracle.symbols["gPokemonCrySongs"], 0x70))
+        sig.append(iw(oracle.symbols["gPokemonCrySong"], 0x40))
+        return sig, clocks
+
+    def hybrid_advance(buttons):
+        oracle._set_buttons(list(buttons))
+        pre = snapshot()
+        sig0, clk0 = signature(blob_reader(pre))
+        core.run_frame()
+        post = snapshot()
+        sig1, clk1 = signature(blob_reader(post))
+        if sig0 == sig1 and all(b >= a for a, b in zip(clk0, clk1)):
+            state["frame"] += 1
+            state["fast"] += 1
+            oracle._screen_stale = False
+            oracle.frame += 1
+            return
+        core.load_raw_state(pre)
+        stepping_advance(buttons)
+        state["restepped"] += 1
+        if snapshot()[STATE_HEADER:] != post[STATE_HEADER:]:
+            state["state_mismatch"] += 1
+
     t0 = time.time()
+    if fast:
+        advance = hybrid_advance
+    else:
+        advance = stepping_advance
     if mode == "draft":
         oracle.new_session()
         script = [([], 20), (["RIGHT"], 2), ([], 20), (["A"], 2), ([], 40), (["B"], 2), ([], 30)]
         segments = [{"frames": n, "buttons": b} for b, n in script]
         label = "draft: 20 idle, RIGHT x2, 20 idle, A x2, 40 idle, B x2, 30 idle (canonical Battle Factory draft anchor)"
     else:
-        request = validate_request(json.loads(Path(rest[0]).read_text()), "battle-scene-on")
+        request = json.loads(Path(rest[0]).read_text())
+        request["profile"] = profile  # one request file serves both scenes; only the profile field differs
+        request = validate_request(request, profile)
         label = f"lab {Path(rest[0]).name}"
-        lab = BattleLab(oracle, "battle-scene-on")
+        lab = BattleLab(oracle, profile)
         if "--log-setup" in rest:
-            oracle.advance = stepping_advance
+            oracle.advance = advance
         else:
             state["log"] = False
         lab.prepare(request)
         state["log"] = True
         state["frame"] = 0
         segments = request["trace"]["segments"]
+    t_window = time.time()
     done = 0
     for seg in segments:
         for _ in range(seg["frames"]):
             if frames_cap is not None and done >= frames_cap:
                 break
-            stepping_advance(seg.get("buttons", []))
+            advance(seg.get("buttons", []))
             done += 1
+    if fast:  # the fast path cannot see no-op calls; a no-op that shares a re-stepped frame is dropped too, so the log is "effective rows only"
+        events, calls = [e for e in events if not e.get("noop")], [c for c in calls if not c.get("noop")]
     out.write_text(json.dumps({
-        "schema": "audio-sound-events/v1", "window": label, "profile": "battle-scene-on", "frames": done,
-        "hooks": {n: f"0x{oracle.symbols[n]:08x}" for n in hooks}, "steps": state["steps"],
-        "seconds": round(time.time() - t0, 1),
+        "schema": "audio-sound-events/v1", "window": label, "profile": profile, "frames": done,
+        "hooks": {n: f"0x{oracle.symbols[n]:08x}" for n in hooks}, "mode": "hybrid" if fast else "step",
+        "steps": state["steps"], "hybrid": {k: state[k] for k in ("fast", "restepped", "state_mismatch")},
+        "seconds": round(time.time() - t0, 1), "windowSeconds": round(time.time() - t_window, 1),
         "events": events, "calls": calls,
     }, indent=1))
 
