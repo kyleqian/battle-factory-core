@@ -28,8 +28,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   was OOM-killed beside a worker's vitest; rerun clean); build 0; build:lib 0; play:random 3 min / scene: ON 8 battles / 6 swaps,
   OFF 27 / 10, **0 page errors / overlays / contained / divergences**.
 - **New:** ISSUES #190 (party cards print "Lv50" where the ROM shows the FNT / status icon).
-- **Running:** pmo239 (branch `worker/integration-20261101-002825`): party menus in battle order (SwitchPartyOrder).
-- **Next:** fold pmo239; #190; then audio design (aud236 brief drafted) and cleanup step 1 (cln237 brief drafted).
+- **Folded:** pmo239 (merge `da19bc407`; branch `worker/integration-20261101-002825`; `sv-20261031/pmo239-evidence/`): party menus
+  list rows in the ROM's battle order (SwitchPartyOrder on every player switch-in: voluntary, forced send-out, Roar / Whirlwind;
+  battle start = active first, then ascending), both menus and scenes; the cursor opens on row 0 (the active mon / the fainted mon).
+  Kernel keeps raw indexes. Post-battle party / swap screens stay in raw order (source-read only). Oracle: voluntary 0 -> 2 switch
+  then reopened menu, capture frames 888 -> 0 px; a one-frame-early menu entry remains (non-capture frames 1,920 -> 1,467 px; timing
+  class); the forced case is ROM-observed (SHEDINJA probe) + Tier-1, no pixel proof (harness maxHP, ISSUES #146 shd234). Census both
+  scenes identical 1,000 / 1,000 (commands + digests; supervisor-verified); differential: only battle1-postwin's second forced menu
+  (216 frames, now MAGBY / ONIX / BAYLEEF = ROM [1,0,2]; eyeballed). Worker: typecheck 0; full suite 8 shards 14,276 passed / 0
+  failed (shards 1-6 on `7f06071c8`, 7-8 on `ecf05802b`; the 12 soak-importing files rerun on `ecf05802b`); build 0; play:random 3 min /
+  scene 0 errors; open-on-active replay check 192 voluntary + 44 forced menus, 0 problems. Soak pins re-rolled: #89 Baton Pass halt
+  seed 739 -> 19 (pin weakened: `frames > haltFrame` bound dropped, every hit now halts in the post-decision grace window), M-B (c)
+  seeds 0 / 1 new frames, #104 (b) winning seed 3 -> 2. Supervisor on master: 6 focused files 111 / 111.
+- **Next:** wind-down gates on `da19bc407`; audio design (aud236) running beside them; then cleanup step 1 (cln237 brief drafted), #190.
 ---
 
 ## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): wind-down: cff230 / nch231 / cff232 / snd233 folded
