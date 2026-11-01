@@ -209,10 +209,62 @@ export const POSTWIN_NEXT_TEXT_SETTLED_DELAY = 202;
 export const POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY = 206;
 export const POSTWIN_CONTINUATION_INPUT_READY_DELAY = 207;
 export const POSTWIN_HEALED_PARTY_HP = [117, 138, 153] as const;
+/** The battle-1 anchor's prompt (ReadyFor2ndOpponent); later matches pick their own line (`postwinNextLine1`). */
 export const POSTWIN_NEXT_LINE1 = "The 2nd match is next!";
 export const POSTWIN_NEXT_LINE2 = "Are you ready?";
 export const POSTWIN_NEXT_TEXT_TOTAL =
   POSTWIN_NEXT_LINE1.length + POSTWIN_NEXT_LINE2.length;
+
+/**
+ * pmn238: AskReadyForRegularOpponent (data/maps/BattleFrontier_BattleFactoryPreBattleRoom/
+ * scripts.inc:82-89) reads FRONTIER_DATA_BATTLE_NUM -- the wins so far, 1..6 -- and calls
+ * ReadyFor2ndOpponent .. ReadyFor7thOpponent (:460-482): "The Nth match is next!" with the
+ * ordinary ordinals, and "Finally, the 7th match is next!" before the last one; line 2 is
+ * always "Are you ready?". The Frontier Brain's AskReadyForHead is chosen before this by
+ * frontier_getbrainstatus and keeps its own text (`CALL_SCENE_HEAD_PROMPT_*`). The
+ * RECORD / RETIRE NO branch falls back through AskReadyForOpponent, so the reprint uses
+ * the same line. The script reads the counter AFTER the postwin's own bookkeeping write
+ * (`challengeBattleNumAfterWrite` = SaveBlock2.frontier.curChallengeBattleNum once this win
+ * is counted: 1 after the first win, 6 after the sixth), so the next match is that + 1
+ * (2..7). The generated route's snapshot already holds the counted value in both fields;
+ * only the "after write" one is the ROM's at the time of the read.
+ */
+export function postwinNextLine1(nextMatch: number): string {
+  if (nextMatch === 7) return "Finally, the 7th match is next!";
+  const ordinal = nextMatch === 2 ? "2nd" : nextMatch === 3 ? "3rd" : `${nextMatch}th`;
+  return `The ${ordinal} match is next!`;
+}
+
+export function postwinNextMatch(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
+  return state.challengeBattleNumAfterWrite + 1;
+}
+
+export function postwinNextLines(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): readonly [string, string] {
+  return [postwinNextLine1(postwinNextMatch(state)), POSTWIN_NEXT_LINE2];
+}
+
+export function postwinNextTextTotal(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
+  const [line1, line2] = postwinNextLines(state);
+  return line1.length + line2.length;
+}
+
+/**
+ * The prompt's settled / continuation-menu-visible / input-ready delays after the heal dismiss,
+ * derived from the chosen line the way the 2nd-match constants were fit (202 = 167 + 36 - 1;
+ * 206 = settled + 4; 207 = settled + 5): identical for matches 2-6 (36 glyphs), 9 later for
+ * the 7th (45 glyphs).
+ */
+export function postwinNextTextSettledDelay(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
+  return POSTWIN_NEXT_TEXT_FIRST_DELAY + postwinNextTextTotal(state) - 1;
+}
+
+export function postwinContinuationMenuVisibleDelay(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
+  return postwinNextTextSettledDelay(state) + (POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY - POSTWIN_NEXT_TEXT_SETTLED_DELAY);
+}
+
+export function postwinContinuationInputReadyDelay(state: Pick<PostwinState, "challengeBattleNumAfterWrite">): number {
+  return postwinNextTextSettledDelay(state) + (POSTWIN_CONTINUATION_INPUT_READY_DELAY - POSTWIN_NEXT_TEXT_SETTLED_DELAY);
+}
 
 export const POSTWIN_DIALOGUE_TEXT_FIRST_DELAY = 4;
 export const POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY = 2;
@@ -866,7 +918,7 @@ export function advancePostwin(state: PostwinState): PostwinState {
     ? brainMenuBaseElapsed !== null &&
       elapsed >= brainMenuBaseElapsed + CALL_SCENE_HEAD_MENU_VISIBLE_DELAY
     : state.healDismissElapsed !== null &&
-      elapsed >= state.healDismissElapsed + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY;
+      elapsed >= state.healDismissElapsed + postwinContinuationMenuVisibleDelay(state);
   const swapMenuVisible =
     state.dialoguePage === 4 &&
     state.dialoguePageEdgeElapsed !== null &&
@@ -1002,7 +1054,7 @@ export function postwinNextVisibleChars(state: PostwinState): number {
   const delay = state.elapsed - state.healDismissElapsed;
   if (delay < POSTWIN_NEXT_TEXT_FIRST_DELAY) return 0;
   return Math.min(
-    POSTWIN_NEXT_TEXT_TOTAL,
+    postwinNextTextTotal(state),
     delay - POSTWIN_NEXT_TEXT_FIRST_DELAY + 1,
   );
 }
@@ -1014,7 +1066,7 @@ export function postwinContinuationInputReady(state: PostwinState): boolean {
   }
   return state.healDismissElapsed !== null &&
     state.elapsed >=
-      state.healDismissElapsed + POSTWIN_CONTINUATION_INPUT_READY_DELAY;
+      state.healDismissElapsed + postwinContinuationInputReadyDelay(state);
 }
 
 /** Delay since the current call-scene box's own edge; null while no box is active. */
@@ -1509,7 +1561,7 @@ export function postwinReaskElapsed(state: PostwinState): number | null {
  * (docs/walkup-call-scene-ground-truth.md Windows 4-5).
  */
 function postwinQuestionReprintTotal(state: PostwinState): number {
-  return state.frontierBrain ? CALL_SCENE_HEAD_PROMPT_TOTAL : POSTWIN_NEXT_TEXT_TOTAL;
+  return state.frontierBrain ? CALL_SCENE_HEAD_PROMPT_TOTAL : postwinNextTextTotal(state);
 }
 
 /** Re-ask "2nd match is next!" (or brain's AskReadyForHead) visible glyph count after a question dismiss. */
@@ -1527,10 +1579,10 @@ export function postwinQuestionReprintVisibleChars(state: PostwinState): number 
 export function postwinQuestionReprintSettled(state: PostwinState): boolean {
   const reAsk = postwinReaskElapsed(state);
   if (state.question === null || reAsk === null) return false;
+  // One shape for both routes (pmn238): first glyph + total - 1 (= POSTWIN_QUESTION_REPRINT_SETTLED_DELAY,
+  // 40, for the 2nd-match line; 49 for the 7th; the brain's own prompt as before).
   return state.elapsed - reAsk >=
-    (state.frontierBrain
-      ? POSTWIN_QUESTION_REPRINT_FIRST_DELAY + postwinQuestionReprintTotal(state) - 1
-      : POSTWIN_QUESTION_REPRINT_SETTLED_DELAY);
+    POSTWIN_QUESTION_REPRINT_FIRST_DELAY + postwinQuestionReprintTotal(state) - 1;
 }
 
 /**
@@ -1543,9 +1595,8 @@ export function postwinQuestionReprintSettled(state: PostwinState): boolean {
  * oracle-measured for this specific re-ask window.
  */
 function postwinQuestionReprintMenuReadyDelay(state: PostwinState): number {
-  return state.frontierBrain
-    ? POSTWIN_QUESTION_REPRINT_FIRST_DELAY + postwinQuestionReprintTotal(state) - 1 + 4
-    : POSTWIN_QUESTION_MENU_READY_DELAY;
+  // = POSTWIN_QUESTION_MENU_READY_DELAY (44) for the 2nd-match line; 53 for the 7th.
+  return POSTWIN_QUESTION_REPRINT_FIRST_DELAY + postwinQuestionReprintTotal(state) - 1 + 4;
 }
 
 export function postwinQuestionMenuReady(state: PostwinState): boolean {
