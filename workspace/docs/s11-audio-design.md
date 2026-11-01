@@ -147,3 +147,17 @@ That census never touches the ROM, so the ROM side needs a deliberate design:
 3. Audio format and the Safari risk (section 5), and hosting of ~15-25 MB of Nintendo-derived audio (same user decision as the art?).
 4. Does the ROM play anything we have not found on the Brain / symbol ceremonies (`MUS_OBTAIN_SYMBOL` path) or in `text.c` control codes? The step 4 / 5 probes answer it; the inventory is grep-derived, not run-derived, for off-battle paths.
 5. Whether `FactoryGame.setAudio` should also expose a master volume and per-category mute (SE / BGM / cries).
+
+## Supervisor acceptance (2026-11-01, CAX31 run)
+
+Accepted as the S11 plan; step 1 (aud237) is next. Decisions on the open questions (reversible; revisit on evidence):
+
+1. **Census:** T1 (rule table over 0..999, both scenes) + T2 (K >= 20 sampled full ROM replays, both scenes) is the nightly
+   gate. Once aud237 proves the hybrid probe (>= 20x, byte-equal events), run the literal ROM pass over 0..999 once per scene
+   (~1.5 h on 4 jobs) as the finish-plan acceptance, and again only when the rule table changes.
+2. **Register-poke driver:** allowed for asset recording only (a dev tool); it is never parity evidence.
+3. **Format:** OGG Vorbis; aud245 verifies Safari decode and falls back to AAC if needed. Hosting the audio follows the user's
+   existing decision on the Nintendo-derived art (finish plan "User decisions, not blocking"); it does not block any step.
+4. Answered by the aud240 / aud241 probes (off-battle sounds are run-derived there).
+5. `setAudio(enabled)` plus `options.audio.volume`; per-category mute is not needed now. The contract change is additive
+   (`lib-types` + `docs/library-package.md` updated in aud245).
