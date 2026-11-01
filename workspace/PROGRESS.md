@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-10-31 / 11-01 — CAX31 daily run (supervisor, Opus 5.5): IN PROGRESS
+
+- **State:** master `777d7af98` (docs/ops only since `9670f00cc`'s green gates). Nothing folded yet.
+- **lib235** (branch `worker/integration-20261031-214213`, tip `60e816c2a`; evidence `.integration/validation/sv-20261031/lib235-evidence/`):
+  `worker/lib-v2-mac` (new tip `e4258ab03`, incl. Mac fsw235 + wth236) merged with master; ENGINE_BUILD is now a content hash of
+  the in-memory headless build (`eb-<16 hex>`, `"dev"` outside builds; `tests/engineBuildHash.test.ts`); lib-types parity test;
+  sizes headless 22.3 MB raw / 2.0 MB gz (largest chunk 11.8 MB), every chunk < 20 MB; npm pack + scratch Vite app OK both entries.
+  Census vs master: OFF 10 / 10 shards byte-identical; ON 997 / 1,000 digests identical, 330 changed battles are pure insertions of
+  wth236 weather commands, seeds 434 / 796 / 881 budget-truncated (prefix, supervisor-verified). play:random 5 min / scene 0 errors;
+  soaks winning vary-rng 100 / 100, Scene ON full 0:16 16 / 16. **Full suite RED: 5 files / 11 tests** from the Mac commits
+  (fsw235 / wth236), plus a real composed party-menu render bug (battle1-postwin f25800: "0/ /117" HP text, no FNT badge).
+  Not folded. A first lib235 launch was stopped at 21:50 when the Mac moved the branch (its commit kept as the base).
+- **Running:** fsw237 (branch `worker/integration-20261101-002545`): fix the party-menu rows vs the ROM, re-pin / fix the 11 tests.
+- **Next:** fold fsw237 if green; then audio design (aud236 brief drafted) and cleanup step 1 (cln237 brief drafted).
+---
+
 ## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): wind-down: cff230 / nch231 / cff232 / snd233 folded
 
 - **State:** master `9670f00cc`+ (cff230 fast-forward; nch231 / cff232 / snd233 merges; src + tests == snd233 worker-tested `2cdc0b36d`).
