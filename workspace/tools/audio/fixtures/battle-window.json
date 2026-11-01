@@ -13,10 +13,24 @@
   "SE12PanpotControl": "0x080a3870",
   "PlayBGM": "0x080a3778",
   "PlayFanfare": "0x080a30e4",
-  "PlayFanfareByFanfareNum": "0x080a3060"
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
  },
+ "mode": "step",
  "steps": 44131926,
- "seconds": 109.4,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 38.7,
+ "windowSeconds": 37.2,
  "events": [
   {
    "frame": 1,
@@ -43,6 +57,18 @@
    "via": "PlaySE12WithPanning"
   },
   {
+   "frame": 115,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "DestroyAnimSoundTask",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
    "frame": 118,
    "kind": "se",
    "id": 12,
@@ -56,7 +82,8 @@
    "id": 90,
    "name": "SE_LOW_HEALTH",
    "pan": null,
-   "via": "HandleLowHpMusicChange"
+   "via": "HandleLowHpMusicChange",
+   "noop": true
   },
   {
    "frame": 160,
@@ -64,7 +91,8 @@
    "id": 90,
    "name": "SE_LOW_HEALTH",
    "pan": null,
-   "via": "HandleLowHpMusicChange"
+   "via": "HandleLowHpMusicChange",
+   "noop": true
   },
   {
    "frame": 288,
@@ -72,7 +100,8 @@
    "id": 90,
    "name": "SE_LOW_HEALTH",
    "pan": null,
-   "via": "HandleLowHpMusicChange"
+   "via": "HandleLowHpMusicChange",
+   "noop": true
   },
   {
    "frame": 305,
@@ -89,6 +118,18 @@
    "name": "SE_M_VICEGRIP",
    "pan": 63,
    "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 471,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "DestroyAnimSoundTask",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
   },
   {
    "frame": 474,
@@ -129,6 +170,14 @@
    "r1": 4294967233
   },
   {
+   "frame": 115,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "DestroyAnimSoundTask",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
    "frame": 118,
    "fn": "PlaySE12WithPanning",
    "via": "InitMoveSelectionsVarsAndStrings",
@@ -147,21 +196,24 @@
    "fn": "m4aSongNumStop",
    "via": "HandleLowHpMusicChange",
    "r0": 90,
-   "r1": 1
+   "r1": 1,
+   "noop": true
   },
   {
    "frame": 160,
    "fn": "m4aSongNumStop",
    "via": "HandleLowHpMusicChange",
    "r0": 90,
-   "r1": 1
+   "r1": 1,
+   "noop": true
   },
   {
    "frame": 288,
    "fn": "m4aSongNumStop",
    "via": "HandleLowHpMusicChange",
    "r0": 90,
-   "r1": 1
+   "r1": 1,
+   "noop": true
   },
   {
    "frame": 305,
@@ -190,6 +242,14 @@
    "via": "PlaySE12WithPanning",
    "r0": 156,
    "r1": 63
+  },
+  {
+   "frame": 471,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "DestroyAnimSoundTask",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
   },
   {
    "frame": 474,

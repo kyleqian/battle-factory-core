@@ -13,10 +13,24 @@
   "SE12PanpotControl": "0x080a3870",
   "PlayBGM": "0x080a3778",
   "PlayFanfare": "0x080a30e4",
-  "PlayFanfareByFanfareNum": "0x080a3060"
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
  },
+ "mode": "step",
  "steps": 4277689,
- "seconds": 10.5,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 3.6,
+ "windowSeconds": 3.6,
  "events": [
   {
    "frame": 21,

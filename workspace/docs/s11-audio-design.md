@@ -40,7 +40,7 @@ debugger (nothing in `_builder_cdef.h`) and `core.py` never attaches one. The re
 single-step loop that compares the Thumb PC with function entries. `PC == symbol + 2` is the first instruction and r0-r3 still
 hold the arguments (verified: `PlaySE+2` and `m4aSongNumStart+2` both show r0 = 5 on a draft SELECT; `+4` is the second instruction).
 
-`tools/audio/soundEventProbe.py` (run: `python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json draft|lab REQ.json [--frames N] [--log-setup]`;
+`tools/audio/soundEventProbe.py` (run: `python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json draft|lab REQ.json|trace TRACE.json [--from N] [--frames N] [--log-setup] [--profile on|off] [--fast]`;
 a bare `/srv/.../mgba-venv/bin/python` fails with `No module named mgba`, the wrapper adds the binding path) hooks
 `m4aSongNumStart` / `m4aSongNumStop`, `PlayCryInternal` (5th arg = stack `[sp]` = mode), the `PlaySE{12,1,2}WithPanning`
 wrappers (pan = r1, joined onto the following `m4aSongNumStart`), `SE12PanpotControl`, `PlayBGM`, `PlayFanfare*`. The caller symbol comes from `lr` (so
@@ -64,18 +64,52 @@ f1814 se 15 SE_BALL_OPEN   f1827 cry SPECIES_RHYDON pan -25 vol 120 pri 10 mode 
 Battle turn window (same fixture's 934-frame trace, 110 s; 2 turns, Golbat Tackle, Rhydon Megahorn):
 ```
 f1 se 5 SELECT  f33 se 5 SELECT  f89 se 139 SE_M_COMET_PUNCH pan -63   f118 se 12 SE_NOT_EFFECTIVE pan -64
-f159,f160,f288 stop 90 SE_LOW_HEALTH (HandleLowHpMusicChange)
+f159,f160,f288 stop 90 SE_LOW_HEALTH (HandleLowHpMusicChange; all no-ops, see below)
 f305 se 171 SE_M_DRAGON_RAGE pan -64   f395 se 156 SE_M_VICEGRIP pan 63   f474 se 12 SE_NOT_EFFECTIVE pan 63
 ```
 These match the source: `Move_TACKLE` plays `SE_M_COMET_PUNCH` at `SOUND_PAN_TARGET`, `Move_MEGAHORN` plays `SE_M_DRAGON_RAGE` at ATTACKER
 then `SE_M_VICEGRIP` at TARGET; `BattleAnimAdjustPanning` flips the sign by side (63 shows as -63 when the target is the player).
 The effectiveness SE pan (-64 / 63) is the controller's side rule (`opponent.c:1824-1833`), derivable from the kernel `battler`.
 
-**Speed.** Single stepping: ~220k instr/s, ~6 frames/s (37k instr/frame). Plain `run_frame`: ~2400 frames/s idle
-(`save_raw_state` / `load_raw_state` ~0.03 ms). Stepping alone is fine for windows (≤ 1000 frames) and hopeless for full
-battles (a 5000-frame battle is ~14 min). Planned hybrid (**unproven, step 1 proves it**): run fast, and after every frame compare a small RAM
-signature (`gMPlayInfo_{BGM,SE1,SE2,SE3}` songHeader / status / track count, `gMPlay_PokemonCry`); when it changed, reload the
-pre-frame state and single-step just that frame. Same-frame double starts on one player are the risk, so the proof is byte-equal events versus the stepping log on the three fixtures.
+**Hardening (aud237, probe now has 16 hooks).** Added `m4aMPlayFadeOut` / `FadeOutTemporarily` / `FadeIn`, `m4aMPlayVolumeControl`,
+`m4aMPlayStop`, `m4aMPlayContinue`. The `MPlayInfo` pointer (r0) resolves to a player name: `BGM`, `SE1`, `SE2`, `SE3`, `cry`
+(`gPokemonCryMusicPlayers[i]`). New event kinds, all `{frame, kind, id, name, pan: null, player, via}` where id/name are the song
+loaded in that player (null when idle): `fade` (+ `dir` out / out-temporary / in, `speed`), `duck` (+ `tracks` bitmask, `volume` 0-256),
+`stop` (+ `player`; `m4aSongNumStop` stops carry the song id and no `player`), `continue`. `via` is the caller (`FadeOutBGM`,
+`DestroyAnimSoundTask`, `PlayCry_ByMode`, `IsFanfareTaskInactive`, `m4aMPlayAllStop` ...). `calls` lists every hooked entry with r0/r1.
+Real battle-end evidence (canonical trace `battle1-postwin-next-prompt`, absolute frames, `trace TRACE --from N --frames M`):
+`f23608 fade BGM MUS_VICTORY_TRAINER out speed 5 via FadeOutBGM`; `f25803 stop BGM MUS_B_FACTORY` + `fanfare MUS_HEAL` then `f25963 continue BGM MUS_B_FACTORY via IsFanfareTaskInactive`.
+Fades only occur at battle end, so the lab windows contain none.
+
+**No-op calls.** A call that leaves m4a RAM unchanged (stopping a song that is not playing, restoring a volume already set, e.g. the
+three `SE_LOW_HEALTH` stops of `HandleLowHpMusicChange`, the `volume 256` duck of `DestroyAnimSoundTask`) is flagged `"noop": true` in the
+stepping log (entry vs return signature). They change no sound, so presentation ignores them; a RAM-signature hybrid cannot see them.
+
+**Scene OFF** (`--profile off`: bootstrap `factory-battle-scene-off.json`, profile `battle-scene-off`; `battle-window-off.json`, same lab request, 934 frames).
+Effective events: `f1 SE_SELECT, f33 SE_SELECT, f107 SE_NOT_EFFECTIVE, f317 SE_NOT_EFFECTIVE`. Versus ON the three move-animation SEs
+(`SE_M_COMET_PUNCH`, `SE_M_DRAGON_RAGE`, `SE_M_VICEGRIP`) are gone and everything else is present, but the effectiveness SEs fire earlier (f107 / f317 vs f118 / f474)
+because the animation time is skipped: **OFF sound timing is not ON timing shifted, it is a different timeline, so events must come from the kernel / presentation event queue, not from fixed frame offsets.**
+The intro window has the same 38 effective events (46 with no-ops) in the same order ON vs OFF, but the last one lands at f1912 ON vs f1839 OFF (OFF is ~70 frames shorter).
+
+**Hybrid fast mode (`--fast`, proven).** Frames run at full speed (`run_frame`); per frame the m4a signature (4 SE/BGM players + cry players: songHeader/status/trackCount/priority,
+fade fields, track pointer, per-track EXIST/START flag bits and keyShiftX / pitX / volX / panX, clocks non-decreasing, `gPokemonCrySongs`) is compared from `save_raw_state` blobs
+(IWRAM at 0x19000); on change the pre-frame state is reloaded and that one frame is single-stepped with the hooks. Score-driven track fields are excluded (they change every few frames
+in any playing song). Memory after the re-step is compared with the fast frame's (bytes >= 0x400 of the blob; the header differs run_frame vs stepping): 0 mismatches on all fixtures.
+Proof: `tools/audio/compareProbe.py STEP.json HYBRID.json` (events and calls identical, noop rows excluded on both sides) is EQUAL on all five fixtures
+(draft 3+3, battle ON 7+12, battle OFF 4+6, intro ON 38+53, intro OFF 38+53 events+calls) and on two battle-1 end windows (fade: 8+11; fanfare stop/continue: 3+5).
+
+| fixture | step | hybrid | speed-up vs current step loop | vs original wrapped loop (~6 frames/s) |
+|---|---|---|---|---|
+| draft (116 f) | 3.6 s | 0.5 s | 7.2x | ~17x |
+| battle ON (934 f) | 38.7 s | 3.5 s | 11x | ~32x |
+| battle OFF (934 f) | 38.1 s | 2.9 s | 13x | ~38x |
+| intro ON (1912 f) | 82.3 s | 7.0 s | 12x | ~36x |
+| intro OFF (1839 f) | 82.4 s | 6.7 s | 12x | ~36x |
+
+**The 20x target is met only against the original stepping loop** (raw cffi handles made the stepping reference itself 2.9x faster this step, so the like-for-like ratio is 7-13x).
+Window-only (excluding the setup replay) it is 18.6x ON and 24x OFF. Cost is now re-stepped frames (~0.04 s each, 26 in the battle window, 104 in the intro) plus ~1 ms per fast frame.
+Stepping stays the reference. Full canonical battle-1 trace (29601 f): hybrid 82.9 s, one memory-compare mismatch at frame 2096 (5 bytes, blob 0x20d40..0x20d4c, unexplained; events unaffected in the windows checked).
+Known limit: a hybrid cannot see a same-signature no-op, and a sound started and finished inside one frame with no RAM trace would be missed (none observed).
 
 ## 3. Event plan (kernel + presentation)
 

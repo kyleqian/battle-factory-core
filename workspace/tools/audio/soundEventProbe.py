@@ -7,6 +7,7 @@ the arguments) -- the same technique as tools/probe/trace-factory-construction-r
 
   python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json draft [--frames N] [--profile on|off] [--fast]
   python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json lab REQUEST.json [--frames N] [--log-setup] [--profile on|off] [--fast]
+  python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json trace TRACE.json [--from N] [--frames N] [--profile on|off] [--fast]
 
 `frame` is 1-based: an event during the k-th advance is reported at frame k, the
 first frame whose capture can show its effect. `lab` replays a battle-lab request
@@ -60,6 +61,7 @@ def main():
     frames_cap = int(rest[rest.index("--frames") + 1]) if "--frames" in rest else None
     profile, bootstrap = PROFILES[rest[rest.index("--profile") + 1] if "--profile" in rest else "on"]
     fast = "--fast" in rest
+    skip_to = int(rest[rest.index("--from") + 1]) if "--from" in rest else 0  # trace mode: frames before this run unlogged at full speed
     oracle = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap" / bootstrap)
     syms = sorted((a, n) for n, a in oracle.symbols.items() if a)
     addrs = [a for a, _ in syms]
@@ -76,7 +78,7 @@ def main():
     for n in range(max(songs) + 1):
         header_to_song.setdefault(oracle.read_u32(song_table + n * 8), n)
     state = {"frame": 0, "log": True, "steps": 0, "fast": 0, "restepped": 0, "state_mismatch": 0}
-    calls, events, pending, watch = [], [], {}, {}
+    calls, events, pending, watch, mismatches = [], [], {}, {}, []
 
     def caller(lr):
         i = bisect.bisect_right(addrs, (lr & ~1) - 2) - 1
@@ -105,7 +107,7 @@ def main():
             events.append({"frame": row["frame"], "kind": "pan", "id": None, "name": None, "pan": s8(g[0]), "via": via})
         elif name == "m4aSongNumStop":
             events.append({"frame": row["frame"], "kind": "stop", "id": g[0], "name": songs.get(g[0]), "pan": None, "via": via})
-        else:
+        elif name.startswith("m4aMPlay"):
             player = players.get(g[0], f"0x{g[0]:08x}")
             song = header_to_song.get(oracle.read_u32(g[0]))
             ev = {"frame": row["frame"], "kind": None, "id": song, "name": songs.get(song), "pan": None, "player": player, "via": via}
@@ -136,20 +138,25 @@ def main():
     def g_lr():
         return int(cpu.gprs[14]) & 0xFFFFFFFF
 
+    native, gpr = core._core, cpu._native.gprs  # raw cffi handles: the wrapped core.step() / cpu.pc cost ~3x per instruction
+    native_step, native_frame_counter = native.step, native.frameCounter
+
     def stepping_advance(buttons):
         oracle._set_buttons(list(buttons))
-        start = core.frame_counter
+        start = native_frame_counter(native)
         state["frame"] += 1
-        while core.frame_counter == start:
-            pc = int(cpu.pc)
+        steps = 0
+        while native_frame_counter(native) == start:
             if state["log"]:
+                pc = gpr[15]
                 name = entry.get(pc)
                 if name:
                     on_hook(name)
                 if pc in watch:
                     on_return(pc)
-            core.step()
-            state["steps"] += 1
+            native_step(native)
+            steps += 1
+        state["steps"] += steps
         oracle._screen_stale = False
         oracle.frame += 1
 
@@ -196,8 +203,11 @@ def main():
         core.load_raw_state(pre)
         stepping_advance(buttons)
         state["restepped"] += 1
-        if snapshot()[STATE_HEADER:] != post[STATE_HEADER:]:
+        stepped = snapshot()
+        if stepped[STATE_HEADER:] != post[STATE_HEADER:]:
             state["state_mismatch"] += 1
+            diff = [i for i in range(STATE_HEADER, len(post)) if stepped[i] != post[i]]
+            mismatches.append({"frame": state["frame"], "bytes": len(diff), "first": hex(diff[0]), "last": hex(diff[-1])})
 
     t0 = time.time()
     if fast:
@@ -209,6 +219,10 @@ def main():
         script = [([], 20), (["RIGHT"], 2), ([], 20), (["A"], 2), ([], 40), (["B"], 2), ([], 30)]
         segments = [{"frames": n, "buttons": b} for b, n in script]
         label = "draft: 20 idle, RIGHT x2, 20 idle, A x2, 40 idle, B x2, 30 idle (canonical Battle Factory draft anchor)"
+    elif mode == "trace":
+        oracle.new_session()
+        segments = json.loads(Path(rest[0]).read_text())["segments"]
+        label = f"trace {Path(rest[0]).name}" + (f" from frame {skip_to}" if skip_to else "")
     else:
         request = json.loads(Path(rest[0]).read_text())
         request["profile"] = profile  # one request file serves both scenes; only the profile field differs
@@ -227,16 +241,20 @@ def main():
     done = 0
     for seg in segments:
         for _ in range(seg["frames"]):
-            if frames_cap is not None and done >= frames_cap:
+            if frames_cap is not None and done >= skip_to + frames_cap:
                 break
-            advance(seg.get("buttons", []))
+            if done < skip_to:
+                oracle.advance(seg.get("buttons", []))
+                state["frame"] += 1
+            else:
+                advance(seg.get("buttons", []))
             done += 1
     if fast:  # the fast path cannot see no-op calls; a no-op that shares a re-stepped frame is dropped too, so the log is "effective rows only"
         events, calls = [e for e in events if not e.get("noop")], [c for c in calls if not c.get("noop")]
     out.write_text(json.dumps({
-        "schema": "audio-sound-events/v1", "window": label, "profile": profile, "frames": done,
+        "schema": "audio-sound-events/v1", "window": label, "profile": profile, "frames": done - skip_to,
         "hooks": {n: f"0x{oracle.symbols[n]:08x}" for n in hooks}, "mode": "hybrid" if fast else "step",
-        "steps": state["steps"], "hybrid": {k: state[k] for k in ("fast", "restepped", "state_mismatch")},
+        "steps": state["steps"], "hybrid": {**{k: state[k] for k in ("fast", "restepped", "state_mismatch")}, "mismatches": mismatches},
         "seconds": round(time.time() - t0, 1), "windowSeconds": round(time.time() - t_window, 1),
         "events": events, "calls": calls,
     }, indent=1))
