@@ -13,17 +13,17 @@ const state: BattlePartySelectState = Object.freeze({
   requestId: 1,
   rows: Object.freeze([
     Object.freeze({
-      partyIndex: 0, species: 19, speciesKey: "SPECIES_RATTATA", name: "RATTATA",
+      partyIndex: 0, slot: 0, species: 19, speciesKey: "SPECIES_RATTATA", name: "RATTATA",
       level: 50, hp: 105, maxHP: 105, fainted: false, active: true, legal: false,
       gender: "male",
     }),
     Object.freeze({
-      partyIndex: 1, species: 19, speciesKey: "SPECIES_RATTATA", name: "RATTATA",
+      partyIndex: 1, slot: 1, species: 19, speciesKey: "SPECIES_RATTATA", name: "RATTATA",
       level: 50, hp: 105, maxHP: 105, fainted: false, active: false, legal: true,
       gender: "female",
     }),
     Object.freeze({
-      partyIndex: 2, species: 19, speciesKey: "SPECIES_RATTATA", name: "RATTATA",
+      partyIndex: 2, slot: 2, species: 19, speciesKey: "SPECIES_RATTATA", name: "RATTATA",
       level: 50, hp: 105, maxHP: 105, fainted: false, active: false, legal: true,
       gender: "female",
     }),

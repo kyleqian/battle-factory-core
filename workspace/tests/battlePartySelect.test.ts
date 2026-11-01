@@ -27,6 +27,7 @@ import {
   type BattlePartySelectState,
   type PartySelectCloseRenderAssets,
 } from "../src/engine/battlePartySelect.ts";
+import { IDENTITY_BATTLE_PARTY_ORDER, switchPartyOrder } from "../src/engine/battlePartyOrder.ts";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
 import { renderGeneratedBattleCommandPresentation } from "../src/engine/battleScene.ts";
 import {
@@ -106,6 +107,29 @@ describe("voluntary battle party selector", () => {
     expect(state.cursor).toBe(0);
     expect(state.rows[0].active).toBe(false);
     expect(state.rows[1].active).toBe(true);
+  });
+
+  it("lists rows in the ROM's battle order after a 0 -> 2 switch and maps the cursor row back to the raw party index", () => {
+    const { request, rulesContext } = liveSelectorParts();
+    const switched = Object.freeze({
+      ...rulesContext,
+      battlers: Object.freeze([
+        Object.freeze({ ...rulesContext.battlers[0]!, partyIndex: 2 }),
+        rulesContext.battlers[1]!,
+        rulesContext.battlers[2]!,
+        rulesContext.battlers[3]!,
+      ]) as typeof rulesContext.battlers,
+    });
+    const order = switchPartyOrder(IDENTITY_BATTLE_PARTY_ORDER, 0, 2);
+    const state = createBattlePartySelectState(request, switched, order);
+    expect(state.cursor).toBe(0);
+    expect(state.rows.map((row) => [row.partyIndex, row.slot, row.active])).toEqual([[2, 0, true], [1, 1, false], [0, 2, false]]);
+    expect(state.rows.map((row) => row.speciesKey)).toEqual(["SPECIES_MACHAMP", "SPECIES_HARIYAMA", "SPECIES_GRANBULL"]);
+    const down = advanceBattlePartySelect(state, new Set(["DOWN", "DOWN"] as const));
+    expect(down.cursor).toBe(1);
+    let selected = advanceBattlePartySelect(advanceBattlePartySelect(down, new Set(["A"])), new Set(["A"]));
+    for (let i = 0; i < 4 && selected.outcome === null; i += 1) selected = advanceBattlePartySelect(selected, new Set(["A"]));
+    expect(selected.outcome).toEqual({ kind: "select", partyIndex: 1 });
   });
 
   it("constructs and renders all rows from live noncanonical records and SPECIES_* icons", () => {
