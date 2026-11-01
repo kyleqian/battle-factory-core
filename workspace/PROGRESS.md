@@ -61,7 +61,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** handoff "Next work": audio step aud238 (the sound-source table; the f2096 mismatch is explained), a cleanup step
   (cln237 brief ready), #190.
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261031-214213` (lib235), `-20261101-002825` (pmo239),
-  `worker/side-20261101-044531` (aud236), `-20261101-052631` (aud237). Stopped workers this run: lib235 first launch (21:42, Mac branch
+  `worker/side-20261101-044531` (aud236), `-20261101-052631` (aud237), `-20261101-064219` (aud238a). Stopped workers this run: lib235 first launch (21:42, Mac branch
   moved; its commit became the base), fsw237 (00:27, the Mac pushed the same fixes; no edits). No push.
 ---
 
