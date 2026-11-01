@@ -1,0 +1,76 @@
+{
+ "appRoute": "generated-orchestrator",
+ "oracleProfile": "battle-scene-off",
+ "appStage": {
+  "id": "pmo239-switch-0-to-2-off",
+  "frame": 0
+ },
+ "oracleBattleLab": {
+  "scenario": "../../battle-lab/pmo239-reopen-identity-control-off.json"
+ },
+ "segments": [
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 18,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 700,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "DOWN"
+   ]
+  },
+  {
+   "frames": 38,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 118,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "B"
+   ]
+  },
+  {
+   "frames": 200,
+   "buttons": []
+  },
+  {
+   "frames": 2,
+   "buttons": [
+    "A"
+   ]
+  },
+  {
+   "frames": 200,
+   "buttons": []
+  }
+ ],
+ "captureFrames": [
+  1200
+ ]
+}

@@ -958,14 +958,38 @@ const RATTATA_LV50_BENCH: BattleScriptPartyMemberInput = Object.freeze({
   pp: [40, 40, 40, 40] as const,
 });
 
+// pmo239: the same staged battle with a distinct-species player bench (PIDGEY, MACHOP: the ROM-derived stats / personalities of
+// tools/battle-lab/pmo239-switch-0-to-2-reopen-off.json), so a reordered party menu is visible row by row.
+const PMO239_PIDGEY_BENCH: BattleScriptPartyMemberInput = Object.freeze({
+  ...RATTATA_LV50_BENCH,
+  species: 16, personality: 1013904250, hp: 115, maxHP: 115, attack: 65, defense: 60, speed: 76, spAttack: 55, spDefense: 55,
+});
+const PMO239_MACHOP_BENCH: BattleScriptPartyMemberInput = Object.freeze({
+  ...RATTATA_LV50_BENCH,
+  species: 66, personality: 3668340025, hp: 145, maxHP: 145, attack: 100, defense: 70, speed: 55, spAttack: 55, spDefense: 55,
+});
+
 function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
+  return midBattleSwitchStage(state, "mid-battle-switch-dense-off", [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105]);
+}
+
+function pmo239SwitchReopenOffStage(state: EngineState): EngineState {
+  return midBattleSwitchStage(state, "pmo239-switch-0-to-2-off", [PMO239_PIDGEY_BENCH, PMO239_MACHOP_BENCH], [115, 145]);
+}
+
+function midBattleSwitchStage(
+  state: EngineState,
+  id: string,
+  playerBench: readonly [BattleScriptPartyMemberInput, BattleScriptPartyMemberInput],
+  playerBenchHp: readonly [number, number],
+): EngineState {
   const playerRentalRecords = [
     generatedCommandRecord(664),
     generatedCommandRecord(678),
     generatedCommandRecord(527),
   ] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({
-    id: "mid-battle-switch-dense-off",
+    id,
     rngValue: 4,
     factoryWinStreak: 0,
     playerTrainerId: 0x89ab_cdef,
@@ -997,8 +1021,8 @@ function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
     rngSeed: 1,
     player: RATTATA_LV50,
     trainer: RATTATA_LV50,
-    playerBenchHp: [105, 105],
-    playerBenchOverride: [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH],
+    playerBenchHp: [...playerBenchHp],
+    playerBenchOverride: [...playerBench],
     trainerBenchHp: [105, 105],
     trainerBenchOverride: [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH],
   });
@@ -1682,6 +1706,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "loss-terminal-window-off": lossTerminalWindowStage,
   "win-terminal-window-off": winTerminalWindowStage,
   "mid-battle-switch-dense-off": midBattleSwitchDenseOffStage,
+  "pmo239-switch-0-to-2-off": pmo239SwitchReopenOffStage,
   "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
   "party-menu-status-item-off": partyMenuStatusItemOffStage,
 };
