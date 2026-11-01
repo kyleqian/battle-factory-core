@@ -541,6 +541,8 @@ import {
   acceptPostwinRecordedMessageDismiss,
   createBattleReturnHoldState,
   createPostwinState,
+  postwinNextLines,
+  postwinContinuationMenuVisibleDelay,
   createPostwinStateFromOpponentRentalRecords,
   createPostwinStateFromRound,
   POSTWIN_BATTLE_ROOM_FADE_OUT_AGE,
@@ -550,9 +552,6 @@ import {
   POSTWIN_HEAL_LINE1,
   POSTWIN_HEAL_LINE2,
   POSTWIN_NEXT_BOX_CLEAR_DELAY,
-  POSTWIN_NEXT_LINE1,
-  POSTWIN_NEXT_LINE2,
-  POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
   POSTWIN_DIALOGUE_OLD_TEXT_END_DELAY,
   POSTWIN_DIALOGUE_BLANK_DELAY,
   POSTWIN_SWAP_MENU_VISIBLE_DELAY,
@@ -3167,7 +3166,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
       // ReadyFor2ndOpponent shows, not always the ordinary one.
       const [reprintLine1, reprintLine2] = postwin.frontierBrain
         ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]
-        : [POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2];
+        : postwinNextLines(postwin);
       const dismissed = postwin.questionDismissElapsed !== null;
       const qDelay = age - q.edgeElapsed;
       const dDelay = dismissed ? age - postwin.questionDismissElapsed! : -1;
@@ -3280,7 +3279,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
     } else if (postwin.dialoguePage === 0) {
       const [line1, line2] = postwin.frontierBrain
         ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]
-        : [POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2];
+        : postwinNextLines(postwin);
       drawLines(line1, line2, postwinNextVisibleChars(postwin));
     } else if (postwin.swapDeclineElapsed !== null) {
       const declineDelay = age - postwin.swapDeclineElapsed;
@@ -3304,7 +3303,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
         if (postwin.dialoguePage === 1) {
           const [line1, line2] = postwin.frontierBrain
             ? [CALL_SCENE_HEAD_PROMPT_LINE1, CALL_SCENE_HEAD_PROMPT_LINE2]
-            : [POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2];
+            : postwinNextLines(postwin);
           drawLines(line1, line2, line1.length + line2.length);
         } else if (postwin.frontierBrain && postwin.dialoguePage === 4) {
           // Brain's short path (Brief 2): page 4's own "old text" lingering
@@ -3362,7 +3361,7 @@ function renderPostwinState(state: EngineState): Uint8Array {
           ? postwin.callSceneDismissElapsed + CALL_SCENE_TRAILING_DELAY + CALL_SCENE_HEAD_MENU_VISIBLE_DELAY
           : Number.POSITIVE_INFINITY)
       : (healDismiss !== null
-          ? healDismiss + POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY
+          ? healDismiss + postwinContinuationMenuVisibleDelay(postwin)
           : Number.POSITIVE_INFINITY);
     if (
       age >= continuationMenuVisibleAge &&

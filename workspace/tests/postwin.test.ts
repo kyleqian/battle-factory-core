@@ -70,6 +70,15 @@ import {
   POSTWIN_NEXT_TEXT_FIRST_DELAY,
   POSTWIN_NEXT_TEXT_SETTLED_DELAY,
   POSTWIN_NEXT_TEXT_TOTAL,
+  POSTWIN_NEXT_LINE1,
+  POSTWIN_NEXT_LINE2,
+  POSTWIN_QUESTION_REPRINT_SETTLED_DELAY,
+  postwinNextMatch,
+  postwinNextLines,
+  postwinNextTextTotal,
+  postwinNextTextSettledDelay,
+  postwinContinuationMenuVisibleDelay,
+  postwinContinuationInputReadyDelay,
   POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY,
   POSTWIN_CONTINUATION_INPUT_READY_DELAY,
   POSTWIN_SCOUTING_INPUT_READY_DELAYS,
@@ -103,6 +112,7 @@ import {
   postwinQuestionVisibleChars,
   postwinQuestionMenuReady,
   postwinQuestionReprintVisibleChars,
+  postwinQuestionReprintSettled,
   postwinQuestionYesDelay,
   postwinRecordedVisibleChars,
   POSTWIN_QUESTION_MENU_READY_DELAY,
@@ -1401,6 +1411,89 @@ describe("S8 Battle-1 postwin transition", () => {
         question: { kind: "retire" as const, edgeElapsed: edge },
       }))).not.toBeNull();
     });
+  });
+});
+
+describe("pmn238: the next-match prompt follows the battle number (AskReadyForRegularOpponent, scripts.inc:82-89 / 460-482)", () => {
+  const LINES = [
+    "The 2nd match is next!", "The 3rd match is next!", "The 4th match is next!", "The 5th match is next!",
+    "The 6th match is next!", "Finally, the 7th match is next!",
+  ] as const;
+  /** The postwin state after winning battle `won` (0-based); `challengeBattleNum` is what every constructor stores. */
+  const afterWin = (won: number): PostwinState => ({
+    ...INITIAL_POSTWIN_STATE,
+    challengeBattleNum: won as PostwinState["challengeBattleNum"],
+    challengeBattleNumAfterWrite: (won + 1) as PostwinState["challengeBattleNumAfterWrite"],
+  });
+
+  it("prints ReadyFor2ndOpponent .. ReadyFor7thOpponent by the battle just won, 'Are you ready?' on line 2", () => {
+    for (let won = 0; won <= 5; won += 1) {
+      expect(postwinNextMatch(afterWin(won))).toBe(won + 2);
+      expect(postwinNextLines(afterWin(won))).toEqual([LINES[won], "Are you ready?"]);
+    }
+    // The battle-1 anchor is the 2nd-match line and its fitted constants, unchanged.
+    expect(postwinNextLines(INITIAL_POSTWIN_STATE)).toEqual([POSTWIN_NEXT_LINE1, POSTWIN_NEXT_LINE2]);
+    expect(postwinNextTextTotal(INITIAL_POSTWIN_STATE)).toBe(POSTWIN_NEXT_TEXT_TOTAL);
+    expect(postwinNextTextSettledDelay(INITIAL_POSTWIN_STATE)).toBe(POSTWIN_NEXT_TEXT_SETTLED_DELAY);
+    expect(postwinContinuationMenuVisibleDelay(INITIAL_POSTWIN_STATE)).toBe(POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY);
+    expect(postwinContinuationInputReadyDelay(INITIAL_POSTWIN_STATE)).toBe(POSTWIN_CONTINUATION_INPUT_READY_DELAY);
+  });
+
+  it("derives the typing, menu and input-ready timing from the chosen line: matches 2-6 share the 2nd-match schedule, the 7th runs 9 glyphs later", () => {
+    const dismiss = 2_000;
+    const at = (won: number, delay: number): PostwinState => ({
+      ...acceptPostwinHealDismiss({ ...afterWin(won), elapsed: dismiss }),
+      elapsed: dismiss + delay,
+    });
+    for (let won = 0; won <= 5; won += 1) {
+      const total = LINES[won]!.length + "Are you ready?".length;
+      const extra = won === 5 ? 9 : 0;
+      expect(total).toBe(36 + extra);
+      expect(postwinNextVisibleChars(at(won, POSTWIN_NEXT_TEXT_FIRST_DELAY))).toBe(1);
+      expect(postwinNextVisibleChars(at(won, POSTWIN_NEXT_TEXT_SETTLED_DELAY + extra - 1))).toBe(total - 1);
+      expect(postwinNextVisibleChars(at(won, POSTWIN_NEXT_TEXT_SETTLED_DELAY + extra))).toBe(total);
+      expect(postwinNextVisibleChars(at(won, POSTWIN_NEXT_TEXT_SETTLED_DELAY + extra + 50))).toBe(total);
+      // The continuation cursor appears when advancePostwin crosses the derived menu-visible delay.
+      expect(advancePostwin(at(won, POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY + extra - 2)).continuationCursorPos).toBeNull();
+      expect(advancePostwin(at(won, POSTWIN_CONTINUATION_MENU_VISIBLE_DELAY + extra - 1)).continuationCursorPos).toBe(0);
+      expect(postwinContinuationInputReady(at(won, POSTWIN_CONTINUATION_INPUT_READY_DELAY + extra - 1))).toBe(false);
+      expect(postwinContinuationInputReady(at(won, POSTWIN_CONTINUATION_INPUT_READY_DELAY + extra))).toBe(true);
+    }
+  });
+
+  it("reprints the same line after a RECORD / RETIRE question, with the settled and menu-ready delays derived from it", () => {
+    const edge = 3_000;
+    const reask = (won: number, delay: number): PostwinState => ({
+      ...afterWin(won),
+      elapsed: edge + delay,
+      healDismissElapsed: 2_000,
+      question: { kind: "record", edgeElapsed: edge - 100 },
+      questionDismissElapsed: edge,
+    });
+    for (let won = 0; won <= 5; won += 1) {
+      const extra = won === 5 ? 9 : 0;
+      expect(postwinQuestionReprintVisibleChars(reask(won, POSTWIN_QUESTION_REPRINT_SETTLED_DELAY + extra))).toBe(36 + extra);
+      expect(postwinQuestionReprintSettled(reask(won, POSTWIN_QUESTION_REPRINT_SETTLED_DELAY + extra - 1))).toBe(false);
+      expect(postwinQuestionReprintSettled(reask(won, POSTWIN_QUESTION_REPRINT_SETTLED_DELAY + extra))).toBe(true);
+      expect(postwinQuestionMenuReady(reask(won, POSTWIN_QUESTION_MENU_READY_DELAY + extra - 1))).toBe(false);
+      expect(postwinQuestionMenuReady(reask(won, POSTWIN_QUESTION_MENU_READY_DELAY + extra))).toBe(true);
+    }
+  });
+
+  it("renders a different prompt for each of matches 2..7 and the anchor's own frame for match 2", () => {
+    const dismiss = 2_000;
+    const frame = (state: PostwinState): Uint8Array => render({
+      ...createInitialState(),
+      postwin: { ...acceptPostwinHealDismiss({ ...state, elapsed: dismiss }), elapsed: dismiss + POSTWIN_NEXT_TEXT_SETTLED_DELAY + 9 },
+    });
+    // The message box text rows, compared as bytes.
+    const box = (fb: Uint8Array): string => Buffer.from(fb.subarray(112 * 240 * 4, 160 * 240 * 4)).toString("base64");
+    const boxes = Array.from({ length: 6 }, (_, won) => box(frame(afterWin(won))));
+    expect(new Set(boxes).size).toBe(6);
+    expect(boxes[0]).toBe(box(frame(INITIAL_POSTWIN_STATE)));
+    // The 7th-match line is the long one: more ink in the first text row than the 2nd's.
+    const ink = (fb: Uint8Array): number => { let n = 0; for (let y = 120; y < 134; y += 1) for (let x = 0; x < 240; x += 1) { const o = (y * 240 + x) * 4; if (fb[o] === 99 && fb[o + 1] === 99 && fb[o + 2] === 99) n += 1; } return n; };
+    expect(ink(frame(afterWin(5)))).toBeGreaterThan(ink(frame(afterWin(0))));
   });
 });
 
