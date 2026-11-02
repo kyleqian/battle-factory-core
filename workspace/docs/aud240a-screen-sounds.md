@@ -48,4 +48,8 @@ Trace fixtures carry `"from": N` (events use absolute frames); `tests/audioProbe
 
 ## Verification
 
-See the commit message of the final aud240a commit for gate numbers (neutrality differential, typecheck, full `npm test`, builds).
+Tested commit `0e7df324c` (tree `b940721fb`), code identical to the final commit (only this section was added afterwards).
+
+- `npm run compare:differential` vs clean parent `0f39a60c2`: **PASS**, 641 / 641 (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) and **2430 / 2430 byte-identical across 27 traces** (all `battle1-postwin-*`, `battle1-swap-*`, `draft-*`).
+- `npm run typecheck` 0; full `npm test` 0 (1737 files passed, 44 skipped, 14384 tests passed, 0 failed); `npm run build` 0; `npm run build:lib` 0.
+- No pinned ratchet or ENGINE_BUILD pin moved. `tests/audioSinkNeutral.test.ts` changed (sink no longer empty); `tests/audioProbeFixtures.test.ts` gained the new fixtures and the `from` offset.
