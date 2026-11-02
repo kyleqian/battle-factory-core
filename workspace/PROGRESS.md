@@ -5,6 +5,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-02 / 03 — CAX31 daily run (supervisor, Opus 5.5): in progress
+
+- **Folded:** Mac `worker/lib-v2-mac` tip `851ee1f4c` (sum241 battle party action window + SUMMARY; spn242 species names keep
+  apostrophes / periods / gender symbols, summary portraits keyed by SPECIES_) as merge `0f39a60`. master had only .md changes since
+  the Mac base `c5b7861e0`, so the merged non-docs tree == `851ee1f4c` (checked by `git diff`); the Mac's full suite 14,363 / 0
+  (re-run by the top layer) is reused. Supervisor: typecheck 0; touched tests (sum241, spn242, inbattlePartyMenuVisualBind,
+  contain213 helper users) 85 / 85.
+- **Running:** aud240a (draft / swap / dialog-menu SEs), integration lane, `worker/integration-20261102-213642`.
+---
+
 ## 2026-11-01 / 02 — CAX31 daily run (supervisor, Opus 5.5): wind-down: pmn238 / aud238 / cln237 / aud239 / pmf240 folded
 
 - **State:** master `c5b7861e0`+ (final src == gates commit `530e835ba`; after it only the audioSinkPlumbing test fix `ffeb4b2c4` + docs).
