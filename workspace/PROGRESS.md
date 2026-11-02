@@ -12,7 +12,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   the Mac base `c5b7861e0`, so the merged non-docs tree == `851ee1f4c` (checked by `git diff`); the Mac's full suite 14,363 / 0
   (re-run by the top layer) is reused. Supervisor: typecheck 0; touched tests (sum241, spn242, inbattlePartyMenuVisualBind,
   contain213 helper users) 85 / 85.
-- **Running:** aud240a (draft / swap / dialog-menu SEs), integration lane, `worker/integration-20261102-213642`.
+- **Folded:** cln238a (cleanup step 2, first half, `ee189a74a`, supervisor): 8 root ledgers nothing reads moved unchanged to
+  `docs/archive/` (git grep: no test / tool / launcher / coverage-JSON reference). ANIMATION_COVERAGE.json + ANIMATION_LATCHES.md
+  stay (evidence paths), launcher-named lane files wait for cleanup step 3, ROADMAP / ISSUES rewrite = cln238b.
+- **Folded:** aud240a (S11 step 4a; `docs/aud240a-screen-sounds.md`; branch `worker/integration-20261102-213642`):
+  `src/engine/screenSounds.ts` `playSelectSe` + SE_SELECT emits in the draft (yes/no, cursor, menu), swap (pickers, options,
+  yes/no, duplicate species) and postwin dialog menus (question, continuation, swap offer; B silent per menu.c, NoWrap only
+  when the cursor moved, A-on-NO = two SEs). ROM windows (step mode; hybrid `--fast` drops the no-op second SE): draft 3 + 12
+  events, swap 10, decline 3, all equal; supervisor re-probed the decline window on the ON oracle: events equal the fixture.
+  Worker on the tested tree: differential 2,430 / 2,430 identical, full suite 1,737 files / 14,384 passed / 0 failed, typecheck,
+  build, build:lib 0. Supervisor on master: the 4 audio test files 56 / 56. New ISSUES #191 (dialog cursors move on held repeat).
 ---
 
 ## 2026-11-01 / 02 — CAX31 daily run (supervisor, Opus 5.5): wind-down: pmn238 / aud238 / cln237 / aud239 / pmf240 folded

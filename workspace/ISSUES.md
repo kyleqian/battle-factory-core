@@ -24,6 +24,14 @@ may change gameplay/RNG when proved against source; use main-lane ownership
 and gameplay gates. Historical presentation-only exclusions are superseded.
 Settled/parked records and unrelated expansions retain their existing status.
 
+## #191 — Dialog-menu cursors move on held-key repeat (aud240a, 2026-11-02)
+
+`Menu_ProcessInput` / `Menu_ProcessInputNoWrap` (menu.c, used by the postwin question, continuation and swap-offer
+multichoices) read D-pad `JOY_NEW` only; our postwin cursor reducers also move on `newAndRepeatedKeys`, so a held UP/DOWN
+keeps stepping the cursor (silently since aud240a: SEs are gated on new presses, matching the ROM). Not ROM-probed with a
+held key yet. Fix: gate those reducers on new keys only; prove with a held-DOWN window on the ON oracle. The draft and swap
+handlers use `JOY_REPEAT` in the ROM, so they are correct. `docs/aud240a-screen-sounds.md` "Divergences".
+
 ## #189 — RETIRE-YES Lobby path residuals (ret218, 2026-10-28)
 
 ret218 hands RETIRE-YES to the loss terminal (no more hang). `retire-yes-lobby-freeroam-off` (Scene OFF) 1243 / 1482:
