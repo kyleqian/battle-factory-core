@@ -1,9 +1,13 @@
 // aud239: the session's collection path, exercised with a stand-in emitter (no real emitter exists yet).
 // `tick` from the engine core is wrapped so frames 3 and 5 emit sounds through the same `emitSound` the
 // future emitters will call; everything else about the session is the real one.
-import { describe, expect, it, vi } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 
-vi.mock("../src/engine/core.ts", async (importOriginal) => {
+// The suite runs with isolate:false (vite.config.ts), so an earlier file in this fork may already have
+// loaded the real core / session; reset the registry and register the wrapper with doMock so the
+// imports below always see it, then undo both for the next file.
+vi.resetModules();
+vi.doMock("../src/engine/core.ts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../src/engine/core.ts")>();
   const { emitSound } = await import("../src/audio/soundEvents.ts");
   return {
@@ -25,6 +29,11 @@ const { collectSoundTick, emitSound, soundCollecting } = await import("../src/au
 type SoundEvent = import("../src/audio/soundEvents.ts").SoundEvent;
 
 const NONE = new Set<never>();
+
+afterAll(() => {
+  vi.doUnmock("../src/engine/core.ts");
+  vi.resetModules();
+});
 
 describe("session sound collection (aud239)", () => {
   it("stamps each live tick's events with the 1-based session frame, in emission order", () => {
