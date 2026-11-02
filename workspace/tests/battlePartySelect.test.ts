@@ -18,6 +18,8 @@ import {
   battlePartySelectClosePhase,
   battlePartySelectOpenPhase,
   createBattlePartySelectState,
+  partyMenuAilment,
+  primaryStatusFromStatus1,
   partySelectOpenFieldFadeBgY,
   partySelectOpenFieldFadeObjY,
   partySelectOpenMenuFadeBgY,
@@ -209,6 +211,54 @@ describe("voluntary battle party selector", () => {
     };
     expect(px(130, 51)).toEqual([255, 255, 255]);
     expect(px(132, 51)).toEqual([255, 255, 255]);
+  });
+
+  it("GetMonAilment: 0 HP is FNT before any status; PSN/PRZ/SLP/FRZ/BRN follow in the ROM's order (ISSUES #190)", () => {
+    // party_menu.c:1909-1936. status1 bits: SLP 0-2, PSN 3, BRN 4, FRZ 5, PAR 6, TOXIC 7.
+    expect(primaryStatusFromStatus1(0)).toBeNull();
+    expect(primaryStatusFromStatus1(1 << 3)).toBe("poison");
+    expect(primaryStatusFromStatus1(1 << 7)).toBe("poison");
+    expect(primaryStatusFromStatus1(1 << 6)).toBe("paralyzed");
+    expect(primaryStatusFromStatus1(2)).toBe("sleep");
+    expect(primaryStatusFromStatus1(1 << 5)).toBe("frozen");
+    expect(primaryStatusFromStatus1(1 << 4)).toBe("burn");
+    expect(partyMenuAilment(10, primaryStatusFromStatus1(1 << 4))).toBe("burn");
+    expect(partyMenuAilment(0, primaryStatusFromStatus1(1 << 4))).toBe("faint");
+    expect(partyMenuAilment(0, null)).toBe("faint");
+    expect(partyMenuAilment(1, null)).toBeNull();
+  });
+
+  it("prints the level for AILMENT_NONE and draws the status icon in its place for every other ailment, FNT included (ISSUES #190)", () => {
+    // DisplayPartyPokemonLevelCheck (party_menu.c:2300-2313) + SetPartyMonAilmentGfx
+    // (4203-4220): the 32x8 icon sits at sPartyMenuSpriteCoords' status center.
+    const base = liveSelector();
+    const renderWith = (status: Parameters<typeof partyMenuAilment>[1], hp: number) => {
+      const rows = base.rows.map((row, i) => (i === 2 ? { ...row, hp, status: partyMenuAilment(hp, status) } : row)) as unknown as BattlePartySelectState["rows"];
+      const fb = createFramebuffer();
+      renderBattlePartySelect(fb, { ...base, rows });
+      return fb;
+    };
+    const px = (fb: Uint8Array, x: number, y: number) => {
+      const i = (y * 240 + x) * 4;
+      return `${fb[i]},${fb[i + 1]},${fb[i + 2]}`;
+    };
+    const levelInk = [[130, 51], [132, 51]] as const;
+    const none = renderWith(null, 100);
+    expect(levelInk.map(([x, y]) => px(none, x, y))).toEqual(["255,255,255", "255,255,255"]);
+    const icons = new Map<string, string>();
+    for (const [name, status] of [["poison", "poison"], ["paralyzed", "paralyzed"], ["sleep", "sleep"], ["frozen", "frozen"], ["burn", "burn"], ["faint", null]] as const) {
+      const fb = renderWith(status, name === "faint" ? 0 : 100);
+      // Level text gone: the ligature's white strokes are no longer there.
+      expect(levelInk.map(([x, y]) => px(fb, x, y)), name).not.toEqual(["255,255,255", "255,255,255"]);
+      let differing = 0;
+      const key: string[] = [];
+      for (let y = 0; y < 160; y += 1) for (let x = 0; x < 240; x += 1) {
+        if (px(fb, x, y) !== px(none, x, y)) { differing += 1; key.push(px(fb, x, y)); }
+      }
+      expect(differing, name).toBeGreaterThan(0);
+      icons.set(name, key.join("|"));
+    }
+    expect(new Set(icons.values()).size).toBe(6);
   });
 
   it("closes the SHIFT submenu on the confirm edge, one frame after it lands (ISSUES #80 slice 6 + submenu bind)", () => {

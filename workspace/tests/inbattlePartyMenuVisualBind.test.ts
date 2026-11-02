@@ -266,7 +266,10 @@ describe("in-battle party menu visual binds (ISSUES #80)", () => {
     expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_BURN)).toBe("burn");
     expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_FREEZE)).toBe("frozen");
     expect(primaryStatusFromStatus1(0)).toBeNull();
-    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_PARALYSIS | BATTLE_SCRIPT_STATUS1_SLEEP)).toBe("sleep");
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_PARALYSIS | BATTLE_SCRIPT_STATUS1_SLEEP)).toBe("paralyzed");
+    // GetAilmentFromStatus (party_menu.c:1909) order: PSN, PRZ, SLP, FRZ, BRN.
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_POISON | BATTLE_SCRIPT_STATUS1_PARALYSIS)).toBe("poison");
+    expect(primaryStatusFromStatus1(BATTLE_SCRIPT_STATUS1_FREEZE | BATTLE_SCRIPT_STATUS1_BURN)).toBe("frozen");
   });
 
   it("draws the in-battle SHIFT/SUMMARY/CANCEL action window at the measured rect (ISSUES #80 submenu bind)", () => {
