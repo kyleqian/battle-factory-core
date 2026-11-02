@@ -1031,7 +1031,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
 
 function continuationMoveSounds(before: PostwinState, after: PostwinState, direction: 1 | -1): boolean {
   const cursor = before.continuationCursorPos;
-  if (cursor === null || after === before) return false;
+  if (cursor === null || after === before || before.dialoguePage !== 0) return false;
   if (postwinContinuationChoiceCount(before) === 4) return true;
   return cursor + direction >= 0 && cursor + direction <= 2;
 }

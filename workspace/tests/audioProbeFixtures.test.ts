@@ -16,6 +16,7 @@ interface Fixture {
   window: string;
   profile: string;
   frames: number;
+  from?: number;
   hooks: Record<string, string>;
   mode: string;
   events: Row[];
@@ -32,13 +33,16 @@ const files = readdirSync(fixtureDir).filter((f) => f.endsWith(".json")).sort();
 const fixtures = files.map((f) => [f, JSON.parse(readFileSync(new URL(f, fixtureDir), "utf8")) as Fixture] as const);
 
 describe("audio probe fixtures", () => {
-  it("covers the draft window and both scene profiles of the battle windows", () => {
+  it("covers the draft, swap and decline windows and both scene profiles of the battle windows", () => {
     expect(files).toEqual([
       "battle-intro-window-off.json",
       "battle-intro-window.json",
       "battle-window-off.json",
       "battle-window.json",
+      "draft-trace-window.json",
       "draft-window.json",
+      "swap-decline-window.json",
+      "swap-window.json",
     ]);
     const profiles = new Set(fixtures.map(([, d]) => d.profile));
     expect([...profiles].sort()).toEqual(["battle-scene-off", "battle-scene-on"]);
@@ -58,13 +62,14 @@ describe("audio probe fixtures", () => {
       });
 
       it("has well-formed events with 1-based, non-decreasing frames", () => {
-        let last = 1;
+        const from = d.from ?? 0; // trace windows start after `from` frames and report absolute frames
+        let last = from + 1;
         for (const e of d.events) {
           expect(EVENT_KINDS, JSON.stringify(e)).toContain(e.kind);
-          expect(Number.isInteger(e.frame) && e.frame >= 1, JSON.stringify(e)).toBe(true);
+          expect(Number.isInteger(e.frame) && e.frame > from, JSON.stringify(e)).toBe(true);
           expect(e.frame, `frames sorted: ${JSON.stringify(e)}`).toBeGreaterThanOrEqual(last);
           last = e.frame;
-          if (d.frames > 0) expect(e.frame, JSON.stringify(e)).toBeLessThanOrEqual(d.frames);
+          if (d.frames > 0) expect(e.frame, JSON.stringify(e)).toBeLessThanOrEqual(from + d.frames);
           if (e.pan !== null) {
             expect(Number.isInteger(e.pan) && e.pan >= -64 && e.pan <= 63, JSON.stringify(e)).toBe(true);
           }
@@ -117,7 +122,7 @@ describe("audio probe fixtures", () => {
       });
 
       it("has calls consistent with the hooks and events", () => {
-        let last = 1;
+        let last = (d.from ?? 0) + 1;
         for (const c of d.calls) {
           expect(Object.keys(d.hooks), JSON.stringify(c)).toContain(c.fn);
           expect(c.frame, JSON.stringify(c)).toBeGreaterThanOrEqual(last);

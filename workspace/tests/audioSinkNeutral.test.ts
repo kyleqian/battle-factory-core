@@ -1,6 +1,6 @@
 // aud239: the write-only sound sink is neutral. A session with a recording sink attached produces the
 // same per-frame sha256, kernel-events digest, battles, recorded trace and headless replay as one with
-// no sink, and (no emitter exists yet) the sink receives zero events.
+// no sink, and (aud240a) the sink only receives the screen SE_SELECT events.
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { type SoundEvent, type SoundSink } from "../src/audio/soundEvents.ts";
@@ -39,12 +39,23 @@ function play(scene: BattleScene, seed: number, policy: SoakPolicy, frames: numb
   return { frameHashes, digest: session.digest(), battles: session.battles, trace: session.trace(), finalFrame: session.frame };
 }
 
+// aud240a: screens emit SE_SELECT (kind se, id 5, pan null) and nothing else is emitted yet.
+function expectScreenSoundsOnly(events: readonly SoundEvent[], frames: number): void {
+  let last = 0;
+  for (const event of events) {
+    expect(event).toEqual({ frame: event.frame, kind: "se", id: 5, pan: null });
+    expect(event.frame).toBeGreaterThanOrEqual(last);
+    expect(event.frame).toBeLessThanOrEqual(frames);
+    last = event.frame;
+  }
+}
+
 describe("sound sink neutrality (aud239)", () => {
   for (const [scene, seed, policy, frames] of [
     ["off", 3, "winning", 4000],
     ["on", 7, "winning", 2500],
   ] as const) {
-    it(`Scene ${scene.toUpperCase()}: per-frame sha256, digest, battles and trace are identical with a sink; the sink gets nothing`, () => {
+    it(`Scene ${scene.toUpperCase()}: per-frame sha256, digest, battles and trace are identical with a sink; the sink only gets in-order screen SEs`, () => {
       const bare = play(scene, seed, policy, frames, null);
       const sink = new RecordingSink();
       const wired = play(scene, seed, policy, frames, sink);
@@ -55,7 +66,7 @@ describe("sound sink neutrality (aud239)", () => {
       expect(wired.battles).toEqual(bare.battles);
       expect(wired.trace).toEqual(bare.trace);
       expect(wired.finalFrame).toBe(bare.finalFrame);
-      expect(sink.events).toEqual([]);
+      expectScreenSoundsOnly(sink.events, frames);
       // The session never put the sink into anything it exports.
       expect(JSON.stringify(wired.trace)).not.toContain("sound");
     });
@@ -64,11 +75,12 @@ describe("sound sink neutrality (aud239)", () => {
   it("a headless replay of the sink-attached run's trace reproduces its digest (the trace carries no audio)", () => {
     const sink = new RecordingSink();
     const wired = play("off", 3, "winning", 4000, sink);
+    const heard = sink.events.length;
     const replay = replayChallenge({ battleScene: "off", gameplaySeed: 3, segments: wired.trace });
     expect(replay.frames).toBe(wired.finalFrame);
     expect(replay.digest).toBe(wired.digest);
     expect(replay.battles).toEqual(wired.battles);
-    expect(sink.events).toEqual([]);
+    expect(sink.events.length).toBe(heard); // the headless replay is silent
   });
 
   it("attaching and detaching mid-run changes nothing", () => {
