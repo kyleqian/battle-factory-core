@@ -42,6 +42,24 @@ kept and is long-tail.
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
+0. **First, merge `worker/lib-v2-mac` at 851ee1f4c (Mac, 2026-11-02; user-found on the website, live there now).** Four
+   commits on master c5b7861e0, none touching docs/ledgers except the gate6 manifest:
+   - 788f5c00a **sum241**: both in-battle party menus get the ROM's action-window cursor (SHIFT or SEND OUT / SUMMARY /
+     CANCEL, no wrap, B = CANCEL, Task_HandleSelectionMenuInput party_menu.c:2740). Before this, Up/Down did nothing and A
+     always meant SHIFT. SUMMARY opens the battle summary (CB2_ShowPokemonSummaryScreen :2777: battle order,
+     SUMMARY_MODE_LOCK_MOVES, live HP / status / PP) and returns to the last viewed mon with the window open.
+     New `battlePartySummary.ts` / `battlePartySummaryRender.ts`; `battlePartySelect.ts`, `partySelect.ts`, `core.ts`,
+     `summaryInfoPage.ts`, `factoryRentalPresentation.ts` touched.
+   - d94c78283 gate6 manifest.
+   - 635f8568e contain213 helper: its forced-menu walk pressed DOWN every 48 frames; that DOWN now lands on SUMMARY.
+   - 851ee1f4c **spn242**: the charmap extractor skipped the ROM's escaped ASCII apostrophe, so FARFETCH'D, KING'S ROCK and
+     53 move / 4 ability descriptions lost it. Summary portraits were keyed by display name, which left FARFETCH'D / MR. MIME /
+     NIDORAN♀♂ blank; they are keyed by SPECIES_ constant now.
+   Mac gates on 851ee1f4c: full suite 14,363 / 0 (re-run independently by the top layer), census 1000 / 1000 both scenes,
+   differential 1,648 captures identical, soak pins unmoved, builds green. The top layer played both menus live and checked
+   SUMMARY / CANCEL / SHIFT / SEND OUT itself. **aud240 puts party-menu and summary SEs into these same input handlers, so
+   merge this before briefing aud240.** Named approximations (fade frames) are in the sum241 commit message: timing work,
+   item 5.
 1. **Audio (S11)** — the main program for several runs: follow `docs/s11-audio-design.md` section 7 from the first unfinished
    step (aud240, screens: draft / swap / summary / party menu / lobby SEs and lobby BGM / fanfares, proven by ROM probe windows;
    emitters call `emitSound` in the screen's existing input handler; site-by-site map + suggested split aud240a..d in
