@@ -1,4 +1,0 @@
-s14plain-onix-bite-opponent@1738 BITE opponent shift -10 D 26 romBody 40 compared 26 px 0/0 identical true bad []
-s14plain-onix-bite-opponent@3404 BITE opponent shift -10 D 26 romBody 40 compared 26 px 0/0 identical true bad []
-s14plain-onix-bite-opponent@5070 BITE opponent shift -10 D 26 romBody 40 compared 26 px 0/0 identical true bad []
-s14plain-onix-bite-opponent@72 BITE opponent shift -10 D 26 romBody 40 compared 26 px 0/0 identical true bad []
