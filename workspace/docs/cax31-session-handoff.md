@@ -44,7 +44,8 @@ never brief those here. One worker at a time; each run folds the next audio step
 
 1. **Audio (S11)** — the main program for several runs: follow `docs/s11-audio-design.md` section 7 from the first unfinished
    step (aud240, screens: draft / swap / summary / party menu / lobby SEs and lobby BGM / fanfares, proven by ROM probe windows;
-   emitters call `emitSound` in the screen's existing input handler). Each step's acceptance is in the doc.
+   emitters call `emitSound` in the screen's existing input handler; site-by-site map + suggested split aud240a..d in
+   `docs/aud240-scout.md`, unverified). Each step's acceptance is in the doc.
 2. **Cleanup (one commit per step, each verified by typecheck + full suite + build), in this order:** (1) DONE (cln237);
    (2) root ledgers → README, AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3 entries), the rest to
    `docs/archive/` unchanged; (3) remove Codex / DeepSeek / OpenCode paths and the animation / rust lane supervisors — one
