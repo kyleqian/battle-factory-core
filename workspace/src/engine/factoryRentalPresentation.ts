@@ -19,6 +19,7 @@ import movesData from "../data/gen/moves.json" with { type: "json" };
 import itemNamesData from "../data/gen/item-names.json" with { type: "json" };
 import expTablesData from "../data/gen/exp-tables.json" with { type: "json" };
 import speciesTypesData from "../data/gen/species-types.json" with { type: "json" };
+import frontierHeldItemsData from "../data/gen/battle-frontier-held-items.json" with { type: "json" };
 
 type FactorySpeciesHeader = Readonly<{
   species: string;
@@ -55,6 +56,23 @@ export type FactoryRentalMovePresentation = Readonly<{
     effect: string;
     description: string;
   }>;
+}>;
+
+/** GetMonAilment's icon variants (gStatusGfx_Icons frames, the party-menu status-icon keys): FNT first, PKRS draws nothing. */
+export type SummaryAilment = "poison" | "paralyzed" | "sleep" | "frozen" | "burn" | "faint";
+
+/**
+ * The live gPlayerParty values an in-battle summary (sum241) lays over a rental record: HP, held item, moves and PP are all
+ * controller-synced party fields (REQUEST_HELDITEM_BATTLE, REQUEST_MOVES_PP_BATTLE, datahpupdate), the ailment is
+ * GetMonAilment over HP + status1.
+ */
+export type LiveBattleMemberView = Readonly<{
+  hp: number;
+  maxHP: number;
+  item: number;
+  moves: readonly number[];
+  pp: readonly number[];
+  ailment: SummaryAilment | null;
 }>;
 
 export type FactoryRentalPresentation = Readonly<{
@@ -108,6 +126,11 @@ export type FactoryRentalPresentation = Readonly<{
   }>;
   /** Species key passed to CreateMonSprite/front-pic asset selection. */
   frontPicSpecies: string;
+  /**
+   * GetMonAilment result: the summary's status icon (CreateSetStatusSprite, 64,152), its STATUS label window and the
+   * sStatusSlidingWindow strip draw only for a non-null ailment. Absent / null for every draft rental (always healthy).
+   */
+  ailment?: SummaryAilment | null;
 }>;
 
 const SPECIES_HEADERS = new Map(
@@ -138,6 +161,11 @@ const MOVES_BY_ID = new Map(
       contest: FactoryRentalMovePresentation["contest"];
     }>;
   }).moves.map((move) => [move.id, move]),
+);
+/** Held-item id -> ITEM_* key, for the live held item an in-battle summary shows (every Frontier item the party can hold or steal). */
+const ITEMS_BY_ID = new Map(
+  (frontierHeldItemsData as { entries: Array<{ itemId: number; item: string }> }).entries
+    .map((entry) => [entry.itemId, entry.item]),
 );
 const ITEM_NAMES = new Map(
   (itemNamesData as { items: Array<{ item: string; name: string }> }).items
@@ -212,5 +240,38 @@ export function createFactoryRentalPresentation(
       idText: null,
     }),
     frontPicSpecies: header.name,
+  });
+}
+
+/**
+ * PrintHeldItemName (pokemon_summary_screen.c): ITEM_NONE prints gText_None ("NONE"); any other item its CopyItemName.
+ */
+function presentedItem(itemId: number): FactoryRentalPresentation["item"] {
+  if (itemId === 0) return Object.freeze({ item: "ITEM_NONE", name: "NONE" });
+  const item = ITEMS_BY_ID.get(itemId);
+  const name = item === undefined ? undefined : ITEM_NAMES.get(item);
+  if (item === undefined || name === undefined) throw new Error(`Factory rental has no display name for item id ${itemId}`);
+  return Object.freeze({ item, name });
+}
+
+/**
+ * The rental's presentation with the live battle party laid over it (sum241): current HP, held item, moves with their current
+ * PP, and the ailment. Identity, nature, ability, stats and experience stay the record's (Factory mons never level).
+ */
+export function withLiveBattleMember(
+  presentation: FactoryRentalPresentation,
+  live: LiveBattleMemberView,
+): FactoryRentalPresentation {
+  const moves = live.moves.map((moveId, index) => {
+    const move = MOVES_BY_ID.get(moveId);
+    if (!move) throw new Error(`Factory rental has no summary move info for id ${moveId}`);
+    return Object.freeze({ ...move, currentPp: live.pp[index] ?? 0, maxPp: move.pp });
+  }) as unknown as FactoryRentalPresentation["moves"];
+  return Object.freeze({
+    ...presentation,
+    item: presentedItem(live.item),
+    moves: Object.freeze(moves),
+    stats: Object.freeze({ ...presentation.stats, hp: live.hp, maxHp: live.maxHP }),
+    ailment: live.ailment,
   });
 }

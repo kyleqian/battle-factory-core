@@ -25,7 +25,8 @@ export type SummaryPhase = "fadingOut" | "black" | "fadingIn";
 /** SUMMARY_MODE_LOCK_MOVES's reachable pages (pokemon_summary_screen.c:1121). */
 export type SummaryPage = "info" | "skills" | "battleMoves" | "contestMoves";
 export type SummaryMode = "SUMMARY_MODE_LOCK_MOVES" | "SUMMARY_MODE_NORMAL";
-export type SummaryReturnTarget = "draft" | "factorySwap";
+/** Callback destination: the draft screen, the post-win swap screen, or (sum241) the in-battle party menu (CB2_ReturnToPartyMenuFromSummaryScreen). */
+export type SummaryReturnTarget = "draft" | "factorySwap" | "battleParty";
 export type SummaryPageDirection = "left" | "right";
 
 export interface SummaryPageTransition {
@@ -359,6 +360,8 @@ export function requestSummaryPageChange(
 export function requestSummaryMonChange(
   state: SummaryScreenState,
   direction: SummaryMonDirection,
+  /** maxMonIndex: the draft's six rentals by default; an in-battle summary lists the three party rows (sum241). */
+  maxSlot: number = SUMMARY_MON_MAX_SLOT,
 ): SummaryScreenState {
   if (
     !state.isOpen ||
@@ -371,7 +374,7 @@ export function requestSummaryMonChange(
   }
   const delta = direction === "down" ? 1 : -1;
   const toSlot = state.selectedSlot + delta;
-  if (toSlot < 0 || toSlot > SUMMARY_MON_MAX_SLOT) return state;
+  if (toSlot < 0 || toSlot > maxSlot) return state;
   return {
     ...state,
     selectedSlot: toSlot,

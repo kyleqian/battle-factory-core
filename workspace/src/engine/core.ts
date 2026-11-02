@@ -664,6 +664,8 @@ import {
   renderBattlePartySelect,
   type PartySelectCloseRenderAssets,
 } from "./battlePartySelect.ts";
+import { renderBattlePartySummary } from "./battlePartySummaryRender.ts";
+import { drawTurn15PartySelectList } from "./battleScene.ts";
 import {
   createBattleCommandPresentationRenderView,
 } from "./battleCommandPresentationRender.ts";
@@ -3561,11 +3563,16 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
       state.factoryRoundBattleOrchestrator.battleResolutionPresentation;
     const forced = state.factoryRoundBattleOrchestrator.battleForcedPartySelect;
     if (forced) {
-      renderBattleResolutionForcedPartySelect(
-        fb,
-        createBattleResolutionPresentationRenderView(resolution),
-        forced,
-      );
+      if (forced.summary !== null) {
+        // sum241: the summary opened from the forced menu's SUMMARY row owns the screen; the menu is its fade host.
+        renderBattlePartySummary(fb, forced.summary, forced.summaryMons, (host) => drawTurn15PartySelectList(host, forced));
+      } else {
+        renderBattleResolutionForcedPartySelect(
+          fb,
+          createBattleResolutionPresentationRenderView(resolution),
+          forced,
+        );
+      }
     } else {
       renderBattleResolutionPresentation(
         fb,
@@ -3583,7 +3590,13 @@ function renderWithoutFactoryTerminal(state: EngineState): Uint8Array {
     const presentation = state.factoryRoundBattleOrchestrator.battleCommandPresentation;
     const selector = state.factoryRoundBattleOrchestrator.battlePartySelect;
     if (selector) {
-      renderBattlePartySelect(fb, selector, partySelectCloseRenderAssets(presentation));
+      if (selector.summary !== null) {
+        // sum241: the summary opened from the voluntary menu's SUMMARY row owns the screen; the menu is its fade host.
+        renderBattlePartySummary(fb, selector.summary, selector.summaryMons, (host) =>
+          renderBattlePartySelect(host, selector, partySelectCloseRenderAssets(presentation)));
+      } else {
+        renderBattlePartySelect(fb, selector, partySelectCloseRenderAssets(presentation));
+      }
     } else {
       // rst139: the tracked x2 history of this battle (Scene ON only) puts an idle opponent at its front idle rest.
       renderGeneratedBattleCommandPresentation(fb, presentation, "all", undefined,

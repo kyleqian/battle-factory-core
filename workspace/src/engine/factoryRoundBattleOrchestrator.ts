@@ -2208,6 +2208,7 @@ function createForcedPartySelect(
     records,
     forcedPartyForResolution(state, resolution),
     state.partyOrder,
+    resolution.pendingBattle.rules.rulesContext.party.player,
   );
 }
 
@@ -3202,6 +3203,7 @@ export function advanceFactoryRoundBattleCommand(
           advanced.request,
           battle.rules.rulesContext,
           state.partyOrder,
+          state.round.rules.playerRentalRecords,
         ),
         moveSelectionCursors,
         battlePresentationBoundaries,
