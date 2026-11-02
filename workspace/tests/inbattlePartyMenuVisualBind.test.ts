@@ -81,6 +81,10 @@ function baseState(
     submenuOpen: false,
     submenuOpened: false,
     submenuOpenElapsed: 0,
+    actions: "shift" as const,
+    actionCursor: 0 as const,
+    summaryMons: null,
+    summary: null,
     // The standard prompt ("Choose a POKéMON.") is the renderer's own default box text; `message` carries only a
     // refusal (DisplayPartyMenuMessage into WIN_MSG, fsw235), which would cover the submenu and the prompt.
     message: null,

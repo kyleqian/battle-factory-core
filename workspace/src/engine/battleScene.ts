@@ -13635,7 +13635,16 @@ function isTurn15CanonicalPartyState(state: import("./partySelect.ts").PartySele
 export function drawTurn15PartySelectList(fb: Uint8Array, state: import("./partySelect.ts").PartySelectState): void {
   // The harvested canonical chrome covers the anchor's two cursor positions (slot 0 / 1); slot 2 and CANCEL draw through the
   // source-composed renderer like every non-canonical party.
-  if (!isTurn15CanonicalPartyState(state) || (state.cursor !== 0 && state.cursor !== 1)) {
+  // sum241: the harvested "submenu" chrome is the anchor's own frame -- MAGBY (slot 1) selected, action cursor on SEND OUT. The
+  // window opened on slot 0 (the fainted ONIX, refused on A), any other action row, and the summary screen's own frames (the
+  // composition root draws the summary over this menu) take the composed renderer.
+  if (
+    !isTurn15CanonicalPartyState(state)
+    || (state.cursor !== 0 && state.cursor !== 1)
+    || (state.submenuOpen && state.cursor !== 1)
+    || state.actionCursor !== 0
+    || state.summary !== null
+  ) {
     renderBattlePartySelect(fb, battlePartySelectStateForForcedParty(state));
     return;
   }

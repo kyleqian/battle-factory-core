@@ -18,7 +18,25 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import { battlePartyDisplayRows, IDENTITY_BATTLE_PARTY_ORDER, type BattlePartyCurrentOrder } from "./battlePartyOrder.ts";
+import type { BattleScriptPartyMemberState } from "./battleScriptRulesContext.ts";
+import {
+  battlePartySummaryExitBegins,
+  battlePartySummaryReturned,
+  buildBattlePartySummaryMons,
+  liveSummaryViewFromPartyMember,
+  movePartyActionCursor,
+  openBattlePartySummary,
+  partyActionWindowDirection,
+  PARTY_ACTION_CANCEL,
+  PARTY_ACTION_SUMMARY,
+  stepBattlePartySummary,
+  summaryAilmentFromBattleStatus,
+  type BattlePartyActionCursor,
+  type BattlePartySummaryMons,
+} from "./battlePartySummary.ts";
 import { createFactoryCorpusPartyMember } from "./factoryCorpusParty.ts";
+import type { LiveBattleMemberView } from "./factoryRentalPresentation.ts";
+import type { SummaryScreenState } from "./summaryScreen.ts";
 import { movePartyMenuCursor, partyMenuDirection, type PartyMenuCursor, type PartyMenuRightColumn } from "./partyMenuCursor.ts";
 
 /** Slot 0 / 1 / 2 or the CANCEL button (party_menu.c's gPartyMenu.slotId; PARTY_SIZE + 1 = CANCEL), shared with the voluntary menu. */
@@ -65,6 +83,12 @@ export interface PartySelectState {
   /** The right column's remembered slot for LEFT/RIGHT (partyMenuCursor.ts). */
   rightColumnCursor: PartyMenuRightColumn;
   submenuOpen: boolean;
+  /** The SEND OUT / SUMMARY / CANCEL window's own cursor (sum241): 0 = SEND OUT, 1 = SUMMARY, 2 = CANCEL; 0 whenever the window opens. */
+  actionCursor: BattlePartyActionCursor;
+  /** The three rows' summary presentations in menu order (records + the live party), never null for a forced menu. */
+  summaryMons: BattlePartySummaryMons;
+  /** Non-null from the SUMMARY press until the summary's exit fade has settled on the re-inited menu (battlePartySummary.ts). */
+  summary: SummaryScreenState | null;
   /** Null until SEND OUT is confirmed; then frames since that input edge. */
   sendOutElapsed: number | null;
   /** Source party-menu refusal text; null during ordinary list/submenu input. */
@@ -174,6 +198,11 @@ export function createPartySelectStateFromForcedSwitch(
   playerRentalRecords: FactoryRentalParty,
   playerParty: BattleParty,
   order: BattlePartyCurrentOrder = IDENTITY_BATTLE_PARTY_ORDER,
+  /**
+   * The kernel's gPlayerParty mirror (moves, PP, held item, status1) for the SUMMARY rows (sum241); without it the summary
+   * takes HP / status from `playerParty` and the record's own moves, PP and item.
+   */
+  liveParty: readonly BattleScriptPartyMemberState[] | null = null,
 ): PartySelectState {
   const request = createBattleForcedSwitchRequest(requestInput);
   if (request.side !== "player") {
@@ -230,6 +259,11 @@ export function createPartySelectStateFromForcedSwitch(
     });
   }) as unknown as readonly [PartySelectMember, PartySelectMember, PartySelectMember];
   const party = battlePartyDisplayRows(order).map((rawIndex) => rawParty[rawIndex]!) as unknown as typeof rawParty;
+  const summaryMons = buildBattlePartySummaryMons(party, playerRentalRecords, (partyIndex) => {
+    const live = liveParty?.[partyIndex];
+    if (live !== undefined) return liveSummaryViewFromPartyMember(live);
+    return recordSummaryView(playerRentalRecords[partyIndex], rawParty[partyIndex]);
+  });
 
   for (const legalPartyIndex of request.legalPartyIndexes) {
     if (
@@ -249,6 +283,9 @@ export function createPartySelectStateFromForcedSwitch(
     cursor: 0,
     rightColumnCursor: 1,
     submenuOpen: false,
+    actionCursor: 0,
+    summaryMons,
+    summary: null,
     sendOutElapsed: null,
     message: null,
     request,
@@ -256,39 +293,61 @@ export function createPartySelectStateFromForcedSwitch(
   };
 }
 
+/** A row's summary view from its rental record plus the menu's own HP / status (no live kernel party available). */
+function recordSummaryView(record: FactoryRentalParty[number], member: PartySelectMember): LiveBattleMemberView {
+  const corpus = createFactoryCorpusPartyMember(record);
+  return Object.freeze({
+    hp: member.hp,
+    maxHP: member.maxHp,
+    item: member.item,
+    moves: corpus.moves,
+    pp: corpus.pp,
+    ailment: summaryAilmentFromBattleStatus(member.hp, member.status),
+  });
+}
+
 /**
  * The pre-seam canonical state remains an independent equivalence baseline.
  * The live route in core.ts constructs the same value through the generic
  * request/round-record entry point above.
  */
+const CANONICAL_PARTY_ROWS: PartySelectState["party"] = [
+  {
+    partyIndex: 0, id: "onix", speciesId: 95, speciesKey: "SPECIES_ONIX",
+    species: "ONIX", level: 50, hp: 0, maxHp: 117,
+    status: "none", personality: 1205102525, abilitySlot: 1,
+    friendship: 0, fainted: true, legal: false, item: 142,
+  },
+  {
+    partyIndex: 1, id: "magby", speciesId: 240, speciesKey: "SPECIES_MAGBY",
+    species: "MAGBY", level: 50, hp: 138, maxHp: 138,
+    status: "none", personality: 1534575931, abilitySlot: 0,
+    friendship: 0, fainted: false, legal: true, item: 221,
+  },
+  {
+    partyIndex: 2, id: "bayleef", speciesId: 153, speciesKey: "SPECIES_BAYLEEF",
+    species: "BAYLEEF", level: 50, hp: 153, maxHp: 153,
+    status: "none", personality: 1550278706, abilitySlot: 0,
+    friendship: 0, fainted: false, legal: true, item: 179,
+  },
+];
+
 export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
   elapsed: 0,
   cursor: 0,
   rightColumnCursor: 1,
   submenuOpen: false,
+  actionCursor: 0,
+  summaryMons: buildBattlePartySummaryMons(
+    CANONICAL_PARTY_ROWS,
+    CANONICAL_FORCED_SWITCH_RENTAL_RECORDS,
+    (partyIndex) => recordSummaryView(CANONICAL_FORCED_SWITCH_RENTAL_RECORDS[partyIndex], CANONICAL_PARTY_ROWS[partyIndex]),
+  ),
+  summary: null,
   sendOutElapsed: null,
   message: null,
   request: CANONICAL_FORCED_SWITCH_REQUEST,
-  party: [
-    {
-      partyIndex: 0, id: "onix", speciesId: 95, speciesKey: "SPECIES_ONIX",
-      species: "ONIX", level: 50, hp: 0, maxHp: 117,
-      status: "none", personality: 1205102525, abilitySlot: 1,
-      friendship: 0, fainted: true, legal: false, item: 142,
-    },
-    {
-      partyIndex: 1, id: "magby", speciesId: 240, speciesKey: "SPECIES_MAGBY",
-      species: "MAGBY", level: 50, hp: 138, maxHp: 138,
-      status: "none", personality: 1534575931, abilitySlot: 0,
-      friendship: 0, fainted: false, legal: true, item: 221,
-    },
-    {
-      partyIndex: 2, id: "bayleef", speciesId: 153, speciesKey: "SPECIES_BAYLEEF",
-      species: "BAYLEEF", level: 50, hp: 153, maxHp: 153,
-      status: "none", personality: 1550278706, abilitySlot: 0,
-      friendship: 0, fainted: false, legal: true, item: 179,
-    },
-  ],
+  party: CANONICAL_PARTY_ROWS,
 };
 
 /**
@@ -530,40 +589,70 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
     sendOutElapsed: state.sendOutElapsed === null ? null : state.sendOutElapsed + 1,
   };
   if (next.sendOutElapsed !== null || next.elapsed < PARTY_LIST_INPUT_ELAPSED) return next;
+  if (next.summary !== null) {
+    // The summary screen owns the screen and every key (sum241, battlePartySummary.ts).
+    const summary = stepBattlePartySummary(next.summary, newKeys, next.summaryMons);
+    if (battlePartySummaryReturned(summary)) return { ...next, summary: null };
+    if (battlePartySummaryExitBegins(next.summary, summary)) {
+      // CB2_ReturnToPartyMenuFromSummaryScreen: the menu re-inits on gLastViewedMonIndex with its action window open at row 0
+      // and PARTY_MSG_DO_WHAT_WITH_MON; those fields land now so the exit fade-in reveals the re-inited menu.
+      const cursor = summary.selectedSlot as 0 | 1 | 2;
+      return {
+        ...next,
+        summary,
+        cursor,
+        rightColumnCursor: cursor === 0 ? next.rightColumnCursor : cursor,
+        submenuOpen: true,
+        actionCursor: 0,
+        message: null,
+      };
+    }
+    return { ...next, summary };
+  }
   if (next.message !== null) {
     return newKeys.has("A") || newKeys.has("B")
       ? { ...next, message: null }
       : next;
   }
   if (next.submenuOpen) {
-    // The SHIFT / SUMMARY / CANCEL submenu (Task_TryCreateSelectionWindow): B is CursorCb_Cancel1, back to the list; A is SHIFT
-    // (the submenu cursor itself is not modelled, as in the voluntary menu: SUMMARY is unreachable).
-    if (newKeys.has("B")) return { ...next, submenuOpen: false };
-    if (!newKeys.has("A") || next.cursor === "cancel") return next;
-    const selected = next.party[next.cursor];
-    if (!selected.legal) {
-      // TrySwitchInPokemon (party_menu.c:5811-5823) tests the slot's HP
-      // first: any zero-HP member -- the slot that just went down or an
-      // earlier casualty in the same battle -- refuses with "has no energy";
-      // only a still-living outgoing slot (ISSUES #89, Baton Pass's own
-      // switch) refuses with "is already in battle". Either way the submenu
-      // must close and show a real message, not silently no-op (a no-op here
-      // left the driver's DOWN/A cycle permanently stuck, since DOWN is
-      // refused while the submenu is open).
-      return {
-        ...next,
-        submenuOpen: false,
-        message: selected.hp === 0
-          ? `${selected.species} has no energy\nleft to battle!`
-          : `${selected.species} is already\nin battle!`,
-      };
+    // The SEND OUT / SUMMARY / CANCEL window (Task_TryCreateSelectionWindow -> Task_HandleSelectionMenuInput,
+    // Menu_ProcessInputNoWrapAround_other): A runs the row under the action cursor, B runs CANCEL (CursorCb_Cancel1, back to
+    // the list on the same slot), UP / DOWN move the action cursor without wrapping (sum241; SUMMARY was unreachable before).
+    if (newKeys.has("A")) {
+      if (next.cursor === "cancel") return next;
+      if (next.actionCursor === PARTY_ACTION_CANCEL) return { ...next, submenuOpen: false, actionCursor: 0 };
+      if (next.actionCursor === PARTY_ACTION_SUMMARY) return { ...next, summary: openBattlePartySummary(next.cursor) };
+      const selected = next.party[next.cursor];
+      if (!selected.legal) {
+        // TrySwitchInPokemon (party_menu.c:5811-5823) tests the slot's HP
+        // first: any zero-HP member -- the slot that just went down or an
+        // earlier casualty in the same battle -- refuses with "has no energy";
+        // only a still-living outgoing slot (ISSUES #89, Baton Pass's own
+        // switch) refuses with "is already in battle". Either way the submenu
+        // must close and show a real message, not silently no-op (a no-op here
+        // left the driver's DOWN/A cycle permanently stuck, since DOWN is
+        // refused while the submenu is open).
+        return {
+          ...next,
+          submenuOpen: false,
+          actionCursor: 0,
+          message: selected.hp === 0
+            ? `${selected.species} has no energy\nleft to battle!`
+            : `${selected.species} is already\nin battle!`,
+        };
+      }
+      return { ...next, sendOutElapsed: 0 };
     }
-    return { ...next, sendOutElapsed: 0 };
+    if (newKeys.has("B")) return { ...next, submenuOpen: false, actionCursor: 0 };
+    const actionDirection = partyActionWindowDirection(newKeys);
+    if (actionDirection === undefined) return next;
+    return { ...next, actionCursor: movePartyActionCursor(next.actionCursor, actionDirection) };
   }
   // HandleChooseMonCancel, PARTY_ACTION_SEND_OUT (party_menu.c:1378-1384): B and A on the CANCEL button only play SE_FAILURE;
   // the menu stays until a replacement is sent out.
   if (newKeys.has("B")) return next;
-  if (newKeys.has("A")) return next.cursor === "cancel" ? next : { ...next, submenuOpen: true };
+  // DisplaySelectionWindow: InitMenuInUpperLeftCorner(..., cursorPos 0, ...) -- the window always opens on SEND OUT.
+  if (newKeys.has("A")) return next.cursor === "cancel" ? next : { ...next, submenuOpen: true, actionCursor: 0 };
   const direction = partyMenuDirection(newKeys);
   if (direction === undefined) return next;
   return { ...next, ...movePartyMenuCursor(next, direction) };

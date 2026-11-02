@@ -62,6 +62,8 @@ import summaryMoveEffectBattleData from "../assets/gen/summary-move-effect-battl
 import summaryMoveEffectContestData from "../assets/gen/summary-move-effect-contest.json" with { type: "json" };
 import summaryMoveEffectCancelData from "../assets/gen/summary-move-effect-cancel.json" with { type: "json" };
 import summaryMoveSelectData from "../assets/gen/summary-move-select.json" with { type: "json" };
+import summaryStatusWindowData from "../assets/gen/summary-status-window.json" with { type: "json" };
+import partyMenuContentData from "../assets/gen/party-menu-content.json" with { type: "json" };
 
 interface TileGrid {
   columns: number;
@@ -82,6 +84,18 @@ const typeIcons = summaryTypeIconsData as unknown as {
 const markings = summaryMarkingsData as unknown as { tileset: TileGrid; spritePalette: RgbColor[] };
 const buttons = summaryButtonsData as unknown as { a: { tileset: TileGrid; palette: RgbColor[] } };
 const ball = summaryBallData as unknown as { tileset: TileGrid; palette: RgbColor[] };
+// sStatusSlidingWindow1 (pokemon_summary_screen.c:370-378): graphics/summary_screen/status_tilemap.bin, 10x2 tiles at (0,18) of the
+// Info page's BG3 tilemap, blitted in full by PositionStatusSlidingWindow(10, ...) when the mon has an ailment (sum241).
+const statusWindow = summaryStatusWindowData as unknown as {
+  left: number;
+  top: number;
+  tilemap: { width: number; height: number; entries: Array<{ tile: number; hFlip: boolean; vFlip: boolean; palette: number }> };
+};
+// gStatusGfx_Icons / gStatusPal_Icons (sStatusIconsSpriteSheet, pokemon_summary_screen.c:1076): the same 32x8 frames the party
+// menu banks in party-menu-content.json; CreateSetStatusSprite picks frame GetMonAilment - 1.
+const statusIcons = partyMenuContentData as unknown as {
+  statusIcons: { palette: RgbColor[]; frames: Record<string, { columns: number; rows: number; tiles: number[][] }> };
+};
 const frontSprites = frontSpritesData as unknown as Record<string, { tileset: TileGrid; animationFrame1: TileGrid; palette: RgbColor[] }>;
 const opponentFrontSprites = opponentFrontSpritesData as unknown as Record<string, { tileset: TileGrid; frame2: TileGrid; palette: RgbColor[] }>;
 
@@ -414,8 +428,6 @@ function compose(
     );
   }
 
-  drawTilePatchFaded(fb, summaryBg.tileset, summaryBg.subpalettes, STATUS_WINDOW_CLOSED_TILEMAP, 0, 18 * 8, bgY);
-
   const spriteSlot = monReplacement.spriteSlot ?? selectedSlot;
   const typeSlot = monReplacement.typeSlot ?? selectedSlot;
   const monInfoSlot = monReplacement.monInfoSlot ?? selectedSlot;
@@ -425,6 +437,14 @@ function compose(
   const pageIconSlot = monReplacement.pageIconSlot ?? selectedSlot;
   const rental = rentals[monInfoSlot]!;
   if (!rental) throw new Error(`summary rental slot ${monInfoSlot} is unavailable`);
+  // The status strip at BG3 (0,18)-(10,20): PositionStatusSlidingWindow(0, 0xFF) leaves it defaultTile-filled for AILMENT_NONE
+  // (every draft rental); an in-battle summary with an ailment shows sStatusTilemap in full (sum241; the slide-in is not modelled).
+  const ailment = rental.ailment ?? null;
+  if (ailment === null) {
+    drawTilePatchFaded(fb, summaryBg.tileset, summaryBg.subpalettes, STATUS_WINDOW_CLOSED_TILEMAP, 0, 18 * 8, bgY);
+  } else {
+    drawTilePatchFaded(fb, summaryBg.tileset, summaryBg.subpalettes, statusWindow.tilemap, statusWindow.left * 8, statusWindow.top * 8, bgY);
+  }
 
   // Sprites, back to front (§7's composition order): type icon(s), markings,
   // caught-ball icon, mon front sprite.
@@ -501,6 +521,14 @@ function compose(
     }
   }
 
+  // CreateSetStatusSprite (pokemon_summary_screen.c:4079-4096): the 32x8 ailment icon centred at (64,152), visible on every page
+  // while the shown mon has an ailment (sum241; the mon-change hide / re-create is not modelled).
+  if (ailment !== null && !clearPageWindows) {
+    const frame = statusIcons.statusIcons.frames[ailment];
+    if (!frame) throw new Error(`summary status icon has no frame ${ailment}`);
+    sprite({ tileset: frame }, statusIcons.statusIcons.palette, 64, 152, frame.columns, frame.rows, 0);
+  }
+
   const movePanel = moveSelect ? summaryMovePanelPresentation(moveSelect) : null;
   // A fully slid-out panel (CANCEL row) leaves only defaultTile 0 columns,
   // the same tilemap the closed page shows.
@@ -526,6 +554,12 @@ function compose(
   }
 
   // BG0 windows, topmost.
+  // PSS_LABEL_WINDOW_POKEMON_SKILLS_STATUS (sSummaryTemplate[13]: bg 0, tile (0,18), 6x2, palette 6): gText_Status printed at
+  // (2,1) by PrintPageNamesAndStats, put on the Info / Skills pages while the status sprite is visible and cleared on the Moves
+  // pages (ChangePage's PutWindowTilemap / ClearWindowTilemap pairs, pokemon_summary_screen.c:2465-2480).
+  if (ailment !== null && !clearPageWindows && (chromePage === "info" || chromePage === "skills")) {
+    text("STATUS", 2, 18 * 8 + 1, COLOR_1, PAL6);
+  }
   text(
     chromePage === "skills" ? "POKéMON SKILLS"
       : chromePage === "battleMoves" ? "BATTLE MOVES"

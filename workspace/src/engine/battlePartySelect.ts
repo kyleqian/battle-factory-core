@@ -24,7 +24,23 @@ import type {
   BattleCommandRequest,
   BattlePartyIndex,
 } from "./battleDecisionBoundary.ts";
-import type { BattleStatus } from "./battleScenario.ts";
+import type { BattleStatus, FactoryRentalParty } from "./battleScenario.ts";
+import {
+  battlePartySummaryExitBegins,
+  battlePartySummaryReturned,
+  buildBattlePartySummaryMons,
+  liveSummaryViewFromPartyMember,
+  movePartyActionCursor,
+  openBattlePartySummary,
+  partyActionWindowDirection,
+  PARTY_ACTION_CANCEL,
+  PARTY_ACTION_SUMMARY,
+  stepBattlePartySummary,
+  type BattlePartyActionCursor,
+  type BattlePartyActions,
+  type BattlePartySummaryMons,
+} from "./battlePartySummary.ts";
+import type { SummaryScreenState } from "./summaryScreen.ts";
 import { battlePartyDisplayRows, IDENTITY_BATTLE_PARTY_ORDER, type BattlePartyCurrentOrder } from "./battlePartyOrder.ts";
 import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
@@ -156,6 +172,20 @@ export type BattlePartySelectState = Readonly<{
    * "Choose a POKéMON." window + CANCEL button) is held.
    */
   submenuOpenElapsed: number;
+  /** sPartyMenuAction_ShiftSummaryCancel ("shift", voluntary) or sPartyMenuAction_SendOutSummaryCancel ("sendOut", forced): the window's first row. */
+  actions: BattlePartyActions;
+  /**
+   * The action window's own cursor (sum241, Task_HandleSelectionMenuInput): 0 = SHIFT / SEND OUT, 1 = SUMMARY, 2 = CANCEL.
+   * DisplaySelectionWindow re-creates the window at 0 every time it opens.
+   */
+  actionCursor: BattlePartyActionCursor;
+  /** The three rows' summary presentations in menu order; null when the menu was built without rental records (SUMMARY then throws). */
+  summaryMons: BattlePartySummaryMons | null;
+  /**
+   * Non-null from the SUMMARY press (CursorCb_Summary) until the summary's exit fade has settled on the re-inited menu
+   * (CB2_ReturnToPartyMenuFromSummaryScreen); while set it owns input, and the composition root draws it over this menu.
+   */
+  summary: SummaryScreenState | null;
   message: string | null;
   outcome:
     | null
@@ -421,6 +451,10 @@ export function battlePartySelectStateForForcedParty(
     // The forced route renders the submenu already-open (its own edge is not
     // this lane's), so it always reads as past the open-delay window.
     submenuOpenElapsed: forced.submenuOpen ? SUBMENU_OPEN_VISUAL_DELAY : 0,
+    actions: "sendOut",
+    actionCursor: forced.actionCursor,
+    summaryMons: forced.summaryMons,
+    summary: forced.summary,
     message: forced.message,
     outcome: null,
     elapsed: forced.elapsed,
@@ -469,6 +503,8 @@ export function createBattlePartySelectState(
   request: BattleCommandRequest,
   rules: BattleScriptRulesContext,
   order: BattlePartyCurrentOrder = IDENTITY_BATTLE_PARTY_ORDER,
+  /** The party's rental records: with them SUMMARY shows each row's live summary (sum241); without, SUMMARY throws when pressed. */
+  records: FactoryRentalParty | null = null,
 ): BattlePartySelectState {
   const legal = new Set(
     request.legalDecisions
@@ -517,12 +553,50 @@ export function createBattlePartySelectState(
     submenuOpen: false,
     submenuOpened: false,
     submenuOpenElapsed: 0,
+    actions: "shift",
+    actionCursor: 0,
+    summaryMons: records === null
+      ? null
+      : buildBattlePartySummaryMons(rows, records, (partyIndex) => liveSummaryViewFromPartyMember(rules.party.player[partyIndex]!)),
+    summary: null,
     message: null,
     outcome: null,
     elapsed: 0,
     openElapsed: 0,
     selectedSinceElapsed: -MON_ICON_CREATION_ELAPSED_OFFSET,
     closeElapsed: null,
+  });
+}
+
+function requireSummaryMons(state: BattlePartySelectState): BattlePartySummaryMons {
+  if (state.summaryMons === null) return fail("SUMMARY needs the party's rental records (createBattlePartySelectState's records argument)");
+  return state.summaryMons;
+}
+
+/** CursorCb_Cancel1 (and the refusals' DisplayPartyMenuMessage): the action window closes; it re-opens at row 0 next time. */
+function closeActionWindow(next: BattlePartySelectState): BattlePartySelectState {
+  return Object.freeze({ ...next, submenuOpen: false, actionCursor: 0 });
+}
+
+/**
+ * CB2_ReturnToPartyMenuFromSummaryScreen (party_menu.c:2790-2795): InitPartyMenu(KEEP_PARTY_LAYOUT, keepCursorPos on
+ * gLastViewedMonIndex, PARTY_MSG_DO_WHAT_WITH_MON, Task_TryCreateSelectionWindow) -- the menu comes back on the slot the summary
+ * last showed with its action window open at row 0 and the "Do what with this POKéMON?" message, fading in from black; its icons
+ * are re-created (the selection bounce restarts as at creation). These fields land when the exit fade begins so the fade-in
+ * reveals the re-inited menu.
+ */
+function menuAfterSummaryReturn(next: BattlePartySelectState, lastViewedSlot: number): BattlePartySelectState {
+  const cursor = lastViewedSlot as 0 | 1 | 2;
+  return Object.freeze({
+    ...next,
+    cursor,
+    rightColumnCursor: cursor === 0 ? next.rightColumnCursor : cursor,
+    submenuOpen: true,
+    submenuOpened: true,
+    submenuOpenElapsed: SUBMENU_OPEN_VISUAL_DELAY,
+    actionCursor: 0,
+    message: null,
+    selectedSinceElapsed: next.elapsed - MON_ICON_CREATION_ELAPSED_OFFSET,
   });
 }
 
@@ -548,43 +622,63 @@ export function advanceBattlePartySelect(
     submenuOpenElapsed: state.submenuOpen ? state.submenuOpenElapsed + 1 : 0,
   });
   if (state.outcome !== null) return next;
+  if (state.summary !== null) {
+    // The summary screen owns the screen and every key (sum241, battlePartySummary.ts).
+    const summary = stepBattlePartySummary(state.summary, newKeys, requireSummaryMons(state));
+    if (battlePartySummaryReturned(summary)) return Object.freeze({ ...next, summary: null });
+    if (battlePartySummaryExitBegins(state.summary, summary)) {
+      return Object.freeze({ ...menuAfterSummaryReturn(next, summary.selectedSlot), summary });
+    }
+    return Object.freeze({ ...next, summary });
+  }
   if (state.message !== null) {
     return newKeys.has("A") || newKeys.has("B")
       ? Object.freeze({ ...next, message: null })
       : next;
   }
   if (state.submenuOpen) {
-    if (newKeys.has("B")) return Object.freeze({ ...next, submenuOpen: false });
-    if (!newKeys.has("A") || state.cursor === "cancel") return next;
-    const row = state.rows[state.cursor];
-    if (row.fainted) {
+    // Task_HandleSelectionMenuInput (party_menu.c:2740-2768) over the three-row window, Menu_ProcessInputNoWrapAround_other's
+    // own priority: A runs the row under the action cursor, B runs the last row (CANCEL), UP / DOWN move without wrapping.
+    if (newKeys.has("A")) {
+      if (state.cursor === "cancel") return next;
+      if (state.actionCursor === PARTY_ACTION_CANCEL) return closeActionWindow(next);
+      if (state.actionCursor === PARTY_ACTION_SUMMARY) {
+        // CursorCb_Summary -> CB2_ShowPokemonSummaryScreen on this battle-order row.
+        requireSummaryMons(state);
+        return Object.freeze({ ...next, summary: openBattlePartySummary(state.cursor) });
+      }
+      const row = state.rows[state.cursor];
+      if (row.fainted) {
+        return Object.freeze({
+          ...closeActionWindow(next),
+          message: battlePartyNoEnergyMessage(row),
+        });
+      }
+      if (!row.legal) {
+        // TrySwitchInPokemon (party_menu.c:5811-5823), after the HP test above:
+        // the active battler's own slot refuses with "is already in battle!"
+        // through DisplayPartyMenuMessage, the same WIN_MSG route as the
+        // no-energy refusal (fsw235; this was a silent no-op).
+        return Object.freeze({
+          ...closeActionWindow(next),
+          message: battlePartyAlreadyInBattleMessage(row),
+        });
+      }
+      // The confirm A lands while the SEND OUT submenu is open; the real menu
+      // keeps the submenu window rendered through the confirm tick (oracle frame
+      // 963) and only drops it on the next frame (964), so `submenuOpen` stays
+      // true while closeElapsed is 0; the render gates the window off from
+      // closeElapsed 1 (see `submenuVisible`).
       return Object.freeze({
         ...next,
-        submenuOpen: false,
-        message: battlePartyNoEnergyMessage(row),
+        outcome: Object.freeze({ kind: "select", partyIndex: row.partyIndex }),
+        closeElapsed: 0,
       });
     }
-    if (!row.legal) {
-      // TrySwitchInPokemon (party_menu.c:5811-5823), after the HP test above:
-      // the active battler's own slot refuses with "is already in battle!"
-      // through DisplayPartyMenuMessage, the same WIN_MSG route as the
-      // no-energy refusal (fsw235; this was a silent no-op).
-      return Object.freeze({
-        ...next,
-        submenuOpen: false,
-        message: battlePartyAlreadyInBattleMessage(row),
-      });
-    }
-    // The confirm A lands while the SEND OUT submenu is open; the real menu
-    // keeps the submenu window rendered through the confirm tick (oracle frame
-    // 963) and only drops it on the next frame (964), so `submenuOpen` stays
-    // true while closeElapsed is 0; the render gates the window off from
-    // closeElapsed 1 (see `submenuVisible`).
-    return Object.freeze({
-      ...next,
-      outcome: Object.freeze({ kind: "select", partyIndex: row.partyIndex }),
-      closeElapsed: 0,
-    });
+    if (newKeys.has("B")) return closeActionWindow(next);
+    const actionDirection = partyActionWindowDirection(newKeys);
+    if (actionDirection === undefined) return next;
+    return Object.freeze({ ...next, actionCursor: movePartyActionCursor(state.actionCursor, actionDirection) });
   }
   if (newKeys.has("B") || (newKeys.has("A") && state.cursor === "cancel")) {
     return Object.freeze({
@@ -594,7 +688,8 @@ export function advanceBattlePartySelect(
     });
   }
   if (newKeys.has("A")) {
-    return Object.freeze({ ...next, submenuOpen: true, submenuOpened: true });
+    // DisplaySelectionWindow: InitMenuInUpperLeftCorner(..., cursorPos 0, ...) -- the window always opens on its first row.
+    return Object.freeze({ ...next, submenuOpen: true, submenuOpened: true, actionCursor: 0 });
   }
   const direction = partyMenuDirection(newKeys);
   if (direction === undefined) return next;
@@ -1268,18 +1363,21 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
     // Three option labels, FONT_NORMAL (party_menu.c:2557), printed at
     // window-relative x=cursorDimension=8, y=(i*16)+1 -> screen origins
     // (160,105)/(160,121)/(160,137); ink rows 108-117/124-133/140-149.
-    // Line 1 is gText_Shift: this is the voluntary mid-battle switch, whose
-    // action list is sPartyMenuAction_ShiftSummaryCancel (data/party_menu.h)
+    // Line 1 is gText_Shift for the voluntary mid-battle switch, whose action
+    // list is sPartyMenuAction_ShiftSummaryCancel (data/party_menu.h:697)
     // because GetPartyMenuActionsTypeInBattle (party_menu.c:5788-5796) returns
-    // ACTIONS_SHIFT unless gPartyMenu.action == PARTY_ACTION_SEND_OUT.
-    drawStandardWindowText(fb, "SHIFT", 160, 105);
+    // ACTIONS_SHIFT unless gPartyMenu.action == PARTY_ACTION_SEND_OUT -- the
+    // forced send-out, whose list is sPartyMenuAction_SendOutSummaryCancel
+    // (gText_SendOut, sum241).
+    drawStandardWindowText(fb, state.actions === "sendOut" ? "SEND OUT" : "SHIFT", 160, 105);
     drawStandardWindowText(fb, "SUMMARY", 160, 121);
     drawStandardWindowText(fb, "CANCEL", 160, 137);
     // Cursor: a separate "▶" glyph (gText_SelectorArrow3, strings.c:1468)
-    // drawn by RedrawMenuCursor (menu.c:945) at window-relative (0,16*0+1) ->
-    // screen (152,105), i.e. on the SHIFT line (cursorPos 0, per
-    // InitMenuInUpperLeftCorner(...,0,TRUE)). NOT baked into the label text.
-    drawStandardWindowText(fb, "▶", 152, 105);
+    // drawn by RedrawMenuCursor (menu.c:945) at window-relative (0,16*pos+1) ->
+    // screen (152,105) on the first line (cursorPos 0, per
+    // InitMenuInUpperLeftCorner(...,0,TRUE)) and 16 px per row below it
+    // (sum241). NOT baked into the label text.
+    drawStandardWindowText(fb, "▶", 152, 105 + 16 * state.actionCursor);
   }
 
   // ISSUES #80 open remainder (c): from the submenu-open edge through the
