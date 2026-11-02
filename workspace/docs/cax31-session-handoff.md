@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-10-31)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-02)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,19 +20,22 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-01 ~06:45 UTC wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-02 ~07:00 UTC wind-down; PROGRESS.md top entry has details)
 
-- Phases 1 and 2 met (finish plan). Nightly crash set green on the final src (PROGRESS top entry).
-- **Core library package folded** (`f88653929`): `@pokebench/factory` (`mountFactoryGame`) + `@pokebench/factory/headless`
-  (`replayChallenge`, `ENGINE_BUILD` = content hash `eb-<16 hex>` of the headless build), `npm run build:lib`, `npm pack` works
-  from a scratch Vite app; `docs/library-package.md`. A consumer Vite app needs its `manualChunks` recipe (default = one 33 MB
-  chunk). The Mac's `worker/lib-v2-mac` up to `b7e7dc345` is folded (forced party menu cursor, WIN_MSG refusals, Scene ON
-  end-of-turn weather animations, party-card HP / fainted palettes). If the Mac moves that branch again, merge the new tip the
-  same way.
-- **Party menus in battle order** folded (pmo239, `da19bc407`): SwitchPartyOrder on every player switch-in; menus open on row 0.
-- **Audio design accepted** (`docs/s11-audio-design.md`, incl. "Supervisor acceptance"); probe `tools/audio/soundEventProbe.py`.
-  Probe step 1 (aud237) folded: hybrid == stepping on all 5 fixtures (11-13x vs the new stepper, 32-38x vs the original); its
-  one f2096 RAM mismatch is explained (CPU stack, frame-boundary slack; aud238a) and the hybrid is census-grade.
+- Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`; a consumer Vite app
+  needs its `manualChunks` recipe). The Mac's `worker/lib-v2-mac` is folded up to `059579e32` (pmn238, the attendant's
+  "Nth match is next!" line); if the Mac moves that branch again, merge the new tip the same way (typecheck, its touched tests,
+  full suite).
+- **Audio (S11):** design accepted (`docs/s11-audio-design.md`, incl. "Supervisor acceptance"); probe step 1 (aud237 / aud238a),
+  step 2 source table (aud238, `src/data/gen/audio-sound-sources.json`, `tests/audioSoundSources.test.ts`) and step 3 event type +
+  sink (aud239, `src/audio/soundEvents.ts`: `emitSound`, `FactorySession.attachSoundSink`, `animSoundPan`) are folded. No emitter
+  exists yet, so every sink receives nothing.
+- **Cleanup step 1 done** (cln237, `docs/cleanup-cln237-manifest.md`): 2,103 of 28,419 files under tools/integration +
+  tools/compare deleted. The rest is kept because kept tests read the fixtures by name; cleanup step 5 (drop frame-pin tests the
+  census supersedes) is what frees more, rerun `tools/cleanup/keepClosure.ts` after it.
+- ISSUES #190 fixed (pmf240): party-menu cards draw FNT / ailment icons per GetMonAilment (FNT, then PSN, PAR, SLP, FRZ, BRN).
+- Census baseline for the next delta: `.integration/validation/sv-20261101/cln237-evidence/census/{on,off}-4f6fa87e4` (== final
+  master both scenes; pmf240 / aud239 do not touch battle commands; supervisor-verified 20 / 20 shards vs pmo239's).
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
@@ -40,32 +43,34 @@ This repo is the **game core library**; the website repo (Mac) owns login, strea
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
 1. **Audio (S11)** — the main program for several runs: follow `docs/s11-audio-design.md` section 7 from the first unfinished
-   step (aud238, the sound-source table). Each step's acceptance is in the doc; the supervisor's decisions on its open questions are in its last section.
-2. **Cleanup (one commit per step, each verified by typecheck + full suite + build), in this order:** (1) delete one-off step
-   scripts in `tools/integration` / `tools/compare` and the fixtures only they read (a ready brief from this run:
-   `.integration/validation/sv-20261031/cln237.txt` — fill in its `<CENSUS_BASE>` / `<EVIDENCE>` / `<HARDSTOP>`; census base =
-   `.integration/validation/sv-20261031/pmo239-evidence/census/{on,off}-7f06071c8`, which equals final master in both scenes);
+   step (aud240, screens: draft / swap / summary / party menu / lobby SEs and lobby BGM / fanfares, proven by ROM probe windows;
+   emitters call `emitSound` in the screen's existing input handler). Each step's acceptance is in the doc.
+2. **Cleanup (one commit per step, each verified by typecheck + full suite + build), in this order:** (1) DONE (cln237);
    (2) root ledgers → README, AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3 entries), the rest to
    `docs/archive/` unchanged; (3) remove Codex / DeepSeek / OpenCode paths and the animation / rust lane supervisors — one
    supervisor script, one worker launcher, Claude only (keep `run-supervisor.sh --headless` and `tools/run-subagent.sh` working:
    the daily cron depends on them); (5) `npm run test:gate` ≤ 5 min for workers and drop frame-pin tests the census supersedes,
    full suite nightly; (4) `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs` + its adapter / tests;
    (6) prune merged `worker/*` refs; (7) evidence stops going into git.
-3. **ISSUES #190** (party cards print "Lv50" where the ROM shows the FNT / status icon; `party_menu.c:2300-2313`, `:4203`) — a
-   small visible fix; pair it with a cleanup run.
-4. **Bundle hygiene** (rest of Phase 3): test-only JSON out of `src/`, sprite pixels out of the headless graph
+3. **Bundle hygiene** (rest of Phase 3): test-only JSON out of `src/`, sprite pixels out of the headless graph
    (`battleCommandFieldArt`, 11.8 MB chunk), lazy-loaded sprite sheets and large tables, gamepad input through `press` / `release`.
-5. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
+4. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
    `--lobby-new-challenge` run); Scene ON soak `--render-every 8` 0:16..0:30 plus a `--render-every 1` sample; varied-RNG sweeps;
    vanilla both scenes. Every overlay / pageerror / CRASH / HANG becomes a fix step before anything else.
-6. **Timing / visible residuals** last, never while items 1–4 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
+5. **Timing / visible residuals** last, never while items 1–3 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
    compare-harness maxHP bug + `factoryCorpusParty.ts:291`, ISSUES #146 shd234; CASTFORM message region on the faint path,
    ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform "at"-role keys, Flamethrower +7 alignment, revert /
-   switch-out unmeasured), the party-menu entry one frame early after a switch (pmo239), #188, #189, the bso226 "Go!" wait, the
-   Lobby attendant dialogue (nch231 skips it); exs207 refs kept.
+   switch-out unmeasured), the party-menu entry one frame early after a switch (pmo239), the forced party card's other 486 px
+   vs the ROM (pmf240, `turn15-party-select` f20100; `tools/integration/pmf240CardProof.ts`), #188, #189, the bso226 "Go!" wait,
+   the Lobby attendant dialogue (nch231 skips it); exs207 refs kept. Note: `battle1-postwin-next-prompt` is not ROM-aligned
+   around f25800 (the oracle is already in the Lobby); use `turn15-party-select` for party-menu ROM proofs.
 
-**Host note (2026-10-28):** two workers at once on 16 GiB caused repeated OOM kills (each worker's full suite / census plus a
-supervisor build). Keep ONE worker at a time; the launcher allows one per lane, so a second worker needs another lane anyway.
+**Host note (2026-10-28, again 2026-11-01):** two full suites at once on 16 GiB OOM-kill forks. Keep ONE worker at a time, and
+the supervisor runs no suite / census while a worker may run vitest.
+
+**Test note (2026-11-02):** the suite runs `isolate: false`; a test that mocks an engine module must use `vi.resetModules()` +
+`vi.doMock` and undo both in `afterAll` (`tests/audioSinkPlumbing.test.ts`, contain209 / contain213), or it passes alone and
+fails depending on file order.
 
 ## Gate recipe (unchanged)
 
