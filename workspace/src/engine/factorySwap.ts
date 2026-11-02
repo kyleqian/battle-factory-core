@@ -1,4 +1,5 @@
 import type { BattleMon } from "./battleScenario.ts";
+import { playSelectSe } from "./screenSounds.ts";
 
 export interface FactorySwapMon extends BattleMon {
   readonly personality: number;
@@ -277,11 +278,34 @@ export function factorySwapRoundDecision(
   };
 }
 
+/**
+ * Every ROM branch that reads input in the swap screen plays one SE_SELECT: the pickers
+ * (Swap_Task_HandleChooseMons A/B plus Swap_Update{Ball,Action}CursorPosition), the option popup
+ * (Swap_Task_HandleMenu A/B plus Swap_UpdateMenuCursorPosition), the quit/accept yes-no
+ * (Swap_Task_HandleYesNo A/B/UP/DOWN) and Swap_TaskCantHaveSameMons (A or B).
+ */
+function swapInputPlaysSelect(phase: FactorySwapPhase, input: FactorySwapInput): boolean {
+  switch (phase) {
+    case "playerPicker":
+    case "enemyPicker":
+      return true;
+    case "playerOptions":
+    case "acceptPrompt":
+    case "quitPrompt":
+      return input === "UP" || input === "DOWN" || input === "A" || input === "B";
+    case "duplicateSpecies":
+      return input === "A" || input === "B";
+    default:
+      return false;
+  }
+}
+
 export function handleFactorySwapInput(
   state: FactorySwapState,
   input: FactorySwapInput,
 ): FactorySwapState {
   if (!state.inputReady || state.phase === "complete") return state;
+  if (swapInputPlaysSelect(state.phase, input)) playSelectSe();
 
   switch (state.phase) {
     case "playerPicker":
