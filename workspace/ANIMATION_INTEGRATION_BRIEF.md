@@ -72,7 +72,7 @@ switch, summary, substitute and transform ownership remain explicit gaps;
 known-entry party/B-cancel return is bounded. Read latest progress before
 repeating earlier investigations or counting any unmerged candidate.
 
-`PLAYABLE_ANIMATION_INTEGRATION_AUDIT.md` documents the original pre-integration
+`docs/archive/PLAYABLE_ANIMATION_INTEGRATION_AUDIT.md` documents the original pre-integration
 seam problems; many have since been implemented. Treat it as historical design
 context, not a fresh list of missing features. Production must supply current
 species, geometry, graphics and per-frame host state; never import capture rows

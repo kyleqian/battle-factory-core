@@ -1,6 +1,6 @@
 # Standalone runtime experiment
 
-See `../../../ANIMATION_RUNTIME_INVESTIGATION.md` for the forward-only question,
+See `../../../docs/archive/ANIMATION_RUNTIME_INVESTIGATION.md` for the forward-only question,
 results, limitations and next decision. Production files and coverage are untouched.
 
 The runtime consumes JSON instruction data extracted from the pinned ROM at

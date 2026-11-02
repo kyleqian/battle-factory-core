@@ -1,7 +1,7 @@
 # Rust lane progress ledger
 
 Newest entry on top. Keep only ~3 entries here; archive the rest to
-`RUST_PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
+`docs/archive/RUST_PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 **Local consolidation, 2026-10-02:** verified Rust tip `5691a4ef4` (through R100 / M97)
 is merged into primary local master. WASM rebuild and all 1,832 native Rust tests

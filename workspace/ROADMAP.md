@@ -68,7 +68,7 @@ animation plays (the **approximate** claim class, user decision 2026-10-26:
 draw the body with the best available inputs and report the command as
 approximate; exact / faithful counts never move for this work), then the
 send-outs, Castform forms and weather side. Landed 2026-10-26 .. 2026-10-31
-(soakscene208 .. cff232); PROGRESS-archive.md has the entries.
+(soakscene208 .. cff232); docs/archive/PROGRESS-archive.md has the entries.
 
 ### Superseded ordering — 2026-10-13 (scope authorizations remain valid)
 

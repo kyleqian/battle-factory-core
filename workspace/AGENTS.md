@@ -147,7 +147,7 @@ top entry of `PROGRESS.md` — uncommitted work is lost work.
   finished items in `ROADMAP.md`. **Keep the ledger lean:** entries stay short
   (a screenful max — headline numbers and verdicts, not a re-narration of the
   commit message), and only the ~3 most recent live here; move older ones to
-  `PROGRESS-archive.md` (git keeps the full history regardless). The top entry
+  `docs/archive/PROGRESS-archive.md` (git keeps the full history regardless). The top entry
   is the only load-bearing one.
 - **Keep `ISSUES.md` pruned:** when you fix an entry, **delete it** (or trim a
   partial fix to its still-open remainder) in the same docs commit that records

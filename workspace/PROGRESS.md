@@ -1,7 +1,7 @@
 # Progress ledger
 
 Newest entry on top. Keep only ~3 entries here; archive the rest to
-`PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
+`docs/archive/PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
 ---
 

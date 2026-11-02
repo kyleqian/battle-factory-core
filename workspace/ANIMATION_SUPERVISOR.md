@@ -20,7 +20,7 @@ substitutions:
 
 - **Yours:** `ANIMATION_PROGRESS.md` (your ledger — wind-down entries go
   here, not PROGRESS.md), `ANIMATION_COVERAGE.json`,
-  `ANIMATION_PROGRESS-archive.md`, `ANIMATION_DEFERRED.md`,
+  `docs/archive/ANIMATION_PROGRESS-archive.md`, `ANIMATION_DEFERRED.md`,
   `ANIMATION_LATCHES.md` (the display-latch/compositor reference — consult
   at orient, keep current),
   `src/animation/**`, `tests/animation/**`, and the animation
@@ -140,7 +140,7 @@ substitutions:
 - Usage/rate limits: worker exit 42 or your own limit errors → wind down
   immediately, same as SUPERVISOR.md.
 - Keep the live progress ledger to the latest three concise checkpoints. Move
-  older entries intact to `ANIMATION_PROGRESS-archive.md`; link detailed move
+  older entries intact to `docs/archive/ANIMATION_PROGRESS-archive.md`; link detailed move
   receipts instead of repeating worker and supervisor narratives.
 - Wind-down bar: `animation-main` committed and green; ANIMATION_PROGRESS.md
   top entry current (State / Did / Next / Notes, including any "For the
