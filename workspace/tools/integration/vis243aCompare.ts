@@ -1,6 +1,10 @@
 // bso225 (docs/bso225-player-back-send-out.md): snd182Compare.ts with the production segment's Scene mode switchable. Default = Scene ON
 // (a fake `beforeRules` with hitMarker 0, so the player send-in draws the species back animation); `--before` = the pre-bso225 render
 // (beforeRules null: the static back sprite). Per-row `mon` residual = player sprite region (x < 120, 48 <= y < 112) vs the ROM.
+//   node --experimental-strip-types --no-warnings tools/integration/vis243aCompare.ts <scenario.json> <rom-png-dir> <out.json> [--opp] [--until=N] [--duration=N] [--dump=t,..]
+// vis243a: voluntary player switch (default; scenario from vis243aStage.py) or, with --opp, an opponent faint-replacement send-in (vis243aStageOpp.py;
+// the player half is skipped, `mon` = the opponent sprite region x >= 120, y < 64 and `phb` = the opponent healthbox x < 120, y < 48).
+// Older header (bso225Compare.ts, the template):
 //   node --experimental-strip-types --no-warnings tools/integration/bso225Compare.ts <scenario.json> <rom-png-dir> <out.json> [--before] [--dump=t,..]
 // snd182 (ISSUES #146; docs/snd182-scene-on-forced-player-send-in-live.md; plr162Compare.ts adapted to Scene ON): a Roar forced switch with the PLAYER as the target (opponent HOUNDOUR's
 // Roar drags out the staged player party slot 1) rendered THROUGH THE PRODUCTION PATH (createBattleResolutionPresentationRenderView +
@@ -18,6 +22,7 @@
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { inflateSync } from "node:zlib";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
+import { opponentSwitchInHealthboxSlideElapsed, opponentSwitchInVisualDelay } from "../../src/engine/switchInTail.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import {
@@ -32,6 +37,7 @@ const opt = (name: string) => {
   return a === undefined ? null : Number(a.split("=")[1]);
 };
 const base = process.argv.includes("--base");
+const oppMode = process.argv.includes("--opp");
 const before = process.argv.includes("--before");
 const sceneOnRules = Object.freeze({ rulesContext: Object.freeze({ hitMarker: 0 }) });
 const stats = (id: number) => speciesStats.species.find((s) => s.id === id)!;
@@ -66,7 +72,7 @@ function readPng(path: string): Uint8Array {
 
 const scenario = JSON.parse(readFileSync(scenarioPath!, "utf8"));
 const parties = scenario.overrides.parties;
-const incomingMon = parties.player[1];
+const incomingMon = oppMode ? parties.opponent[1] : parties.player[1];
 const species = incomingMon.species as number;
 const mon = (b: 0 | 1, m: any, partyIndex: 0 | 1) => {
   const maxHP = calculateHpStat(stats(m.species).baseHp, m.ivs.hp, m.evs.hp, m.level);
@@ -77,12 +83,12 @@ const mon = (b: 0 | 1, m: any, partyIndex: 0 | 1) => {
   });
 };
 const field = Object.freeze({ player: mon(0, parties.player[0], 0), opponent: mon(1, parties.opponent[0], 0) });
-const incoming = mon(0, incomingMon, 1);
+const incoming = oppMode ? mon(1, incomingMon, 1) : mon(0, incomingMon, 1);
 const message = (seq: number, lines: string[]) => Object.freeze({ type: "message", eventSequence: seq, lines, advance: "automatic",
   noCursor: false, timing: { minimumFrames: 24, holdFrames: 0 } });
 const nature = (incomingMon.nature ?? 0) as number;
 const timing = opt("duration") !== null ? { minimumFrames: opt("duration")! - SWITCH_IN_WAITSTATE_HOLD_FRAMES }
-  : switchInTiming(0, species, true, incoming.name, false, nature);
+  : switchInTiming(oppMode ? 1 : 0, species, true, incoming.name, false, nature);
 const settleHoldFrames = SWITCH_IN_WAITSTATE_HOLD_FRAMES;
 const duration = timing.minimumFrames + settleHoldFrames;
 const slide: number | null = null;
@@ -90,9 +96,10 @@ const pause = 0;
 // Voluntary switch: [Go! message (done), switch-in, the opponent's move message]. Rows before the send-in are not compared.
 const commands = [
   message(1, [`Go! ${name(species)}!`]),
-  Object.freeze({ type: "switch-in", eventSequence: 2, battler: 0, fromPartyIndex: 0, toPartyIndex: 1, incoming, incomingStatus1: 0,
+  Object.freeze({ type: "switch-in", eventSequence: 2, battler: oppMode ? 1 : 0, fromPartyIndex: 0, toPartyIndex: 1, incoming, incomingStatus1: 0,
     timing, settleHoldFrames,
-    ...(species === 385 && opt("nocastform") === null ? { healthboxSlideElapsed: 67, sendInVisualDelay: 1 } : {}) }),
+    ...(oppMode ? { healthboxSlideElapsed: opponentSwitchInHealthboxSlideElapsed(species), sendInVisualDelay: opponentSwitchInVisualDelay(species) }
+      : species === 385 && opt("nocastform") === null ? { healthboxSlideElapsed: 67, sendInVisualDelay: 1 } : {}) }),
   message(3, [`Foe ${name(parties.opponent[0].species)} used`, "SPLASH!"]),
 ];
 const spans = commands.map((c: any) => c.type === "switch-in" ? duration : c.timing.minimumFrames);
@@ -117,9 +124,9 @@ if (process.env.BSO_PROBE) {
 const frames = readdirSync(romDir!).filter((f) => /^frame-\d+\.png$/.test(f)).map((f) => Number(f.slice(6, -4))).sort((a, b) => a - b);
 const rom = new Map(frames.map((f) => [f, readPng(`${romDir}/frame-${String(f).padStart(5, "0")}.png`)]));
 // The thrown ball's box: the pixels that differ between production's first send-in frame drawing anything new and the frame before.
-let ballT = sendInT + 1; let ball = draw(ballT); let prevFrame = draw(ballT - 1);
+let ballT = sendInT + (oppMode ? 14 : 1); let ball = draw(ballT); let prevFrame = draw(ballT - 1);
 let x0 = 240; let y0 = 160; let x1 = -1; let y1 = -1;
-for (; ballT < sendInT + 12 && x1 < 0; ballT += 1) {
+for (; ballT < sendInT + (oppMode ? 40 : 12) && x1 < 0; ballT += 1) {
   ball = draw(ballT); prevFrame = draw(ballT - 1);
   for (let y = 0; y < 112; y += 1) for (let x = 0; x < 240; x += 1) {
     const i = (y * 240 + x) * 4;
@@ -140,13 +147,17 @@ if (process.env.PLR162_DEBUG) console.log("ball", ballT - sendInT, x0, y0, x1, y
 const anchorFrame = frames.find((f) => boxEqual(rom.get(f)!) && !boxEqual(rom.get(f - 1) ?? new Uint8Array(240 * 160 * 3)));
 if (anchorFrame === undefined) throw new Error("no ROM frame shows production's first ball frame");
 const t0 = anchorFrame - ballT;
-const opponentHalf = (x: number, y: number) => (x < 120 && y < 48) || (x >= 120 && y < 64);
-const region = (x: number, y: number) => y >= 112 ? "msg" : x >= 120 ? "phb" : "mon";
+const opponentHalf = oppMode
+  ? (x: number, y: number) => y < 112 && !((x >= 120 && y < 64) || (x < 120 && y < 48))
+  : (x: number, y: number) => (x < 120 && y < 48) || (x >= 120 && y < 64);
+const region = oppMode
+  ? (x: number, y: number) => y >= 112 ? "msg" : x >= 120 ? "mon" : "phb"
+  : (x: number, y: number) => y >= 112 ? "msg" : x >= 120 ? "phb" : "mon";
 const last = opt("until") ?? (sendInT + duration + 2);
 const rows: { t: number; e: number; frame: number; total: number; phb: number; mon: number; msg: number }[] = [];
 for (let t = 0; t <= last; t += 1) {
   const r = rom.get(t0 + t);
-  if (r === undefined) break;
+  if (r === undefined) { if (rows.length === 0) continue; break; }
   const p = draw(t);
   const row = { t, e: t - sendInT, frame: t0 + t, total: 0, phb: 0, mon: 0, msg: 0 };
   for (let y = 0; y < 160; y += 1) for (let x = 0; x < 240; x += 1) {
@@ -163,7 +174,9 @@ const monBand = (f: Uint8Array) => { const o: number[] = []; for (let y = 48; y 
 const msgBand = (f: Uint8Array) => Buffer.from(f.subarray(112 * 240 * 3)).toString("base64");
 const hbBand = (f: Uint8Array) => { const o: number[] = []; for (let y = 64; y < 112; y += 1) for (let x = 120; x < 240; x += 1) for (let k = 0; k < 3; k += 1) o.push(f[(y * 240 + x) * 3 + k]!); return o.join(); };
 let romRemoval: number | null = null; let romNextText: number | null = null; let romSlide: number | null = null;
-for (let t = 1; rom.has(t0 + t); t += 1) {
+for (let t = 1; t < 1000; t += 1) {
+  if (!rom.has(t0 + t)) { if (rom.has(t0 + t - 1) || t < sendInT) continue; break; }
+  if (!rom.has(t0 + t - 1)) continue;
   if (romRemoval === null && monBand(rom.get(t0 + t)!) !== monBand(rom.get(t0 + t - 1)!)) romRemoval = t - sendInT;
   if (romSlide === null && t > sendInT + 20 && hbBand(rom.get(t0 + t)!) !== hbBand(rom.get(t0 + t - 1)!)) romSlide = t - sendInT;
   if (romNextText === null && t > sendInT + 20 && msgBand(rom.get(t0 + t)!) !== msgBand(rom.get(t0 + sendInT + 20)!)) romNextText = t - sendInT;
