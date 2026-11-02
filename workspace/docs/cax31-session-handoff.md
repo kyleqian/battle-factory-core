@@ -47,7 +47,9 @@ never brief those here. One worker at a time; each run folds the next audio step
    emitters call `emitSound` in the screen's existing input handler; site-by-site map + suggested split aud240a..d in
    `docs/aud240-scout.md`, unverified). Each step's acceptance is in the doc.
 2. **Cleanup (one commit per step, each verified by typecheck + full suite + build), in this order:** (1) DONE (cln237);
-   (2) root ledgers → README, AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3 entries), the rest to
+   (2) scout ready: `docs/cln238-ledger-scout.md` (ANIMATION_COVERAGE.json stays at the root, ~280 readers; 24 tests read
+   ANIMATION_LATCHES.md; run-supervisor.sh / run-subagent.sh name the ledgers);
+   root ledgers → README, AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3 entries), the rest to
    `docs/archive/` unchanged; (3) remove Codex / DeepSeek / OpenCode paths and the animation / rust lane supervisors — one
    supervisor script, one worker launcher, Claude only (keep `run-supervisor.sh --headless` and `tools/run-subagent.sh` working:
    the daily cron depends on them); (5) `npm run test:gate` ≤ 5 min for workers and drop frame-pin tests the census supersedes,
