@@ -541,6 +541,7 @@ import {
   acceptPostwinRecordedMessageDismiss,
   createBattleReturnHoldState,
   createPostwinState,
+  postwinContinuationChoiceCount,
   postwinNextLines,
   postwinContinuationMenuVisibleDelay,
   createPostwinStateFromOpponentRentalRecords,
@@ -708,6 +709,7 @@ import {
   type PresentationRngSession,
 } from "./presentationRngHost.ts";
 import { tickLiveMovePresentationRngSession } from "./liveMovePresentationRng.ts";
+import { playSelectSe } from "./screenSounds.ts";
 
 /**
  * Builds the source-owned completed-command chain once the turn-4 lifecycle
@@ -1025,6 +1027,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     liveMoveRandom2PlanContextAt,
   );
   return next.presentationRng === presentationRng ? next : { ...next, presentationRng };
+}
+
+function continuationMoveSounds(before: PostwinState, after: PostwinState, direction: 1 | -1): boolean {
+  const cursor = before.continuationCursorPos;
+  if (cursor === null || after === before || before.dialoguePage !== 0) return false;
+  if (postwinContinuationChoiceCount(before) === 4) return true;
+  return cursor + direction >= 0 && cursor + direction <= 2;
 }
 
 function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
@@ -1595,16 +1604,22 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // (default NO), and A resolves the choice -- NO dismisses back to the
       // re-ask, YES takes the branch route (record save / retire warp). The
       // input-ready gate lives inside each reducer (the window must draw).
+      // MULTI_YESNO (script_menu.c Task_HandleMultichoiceInput -> Menu_ProcessInputNoWrap, JOY_NEW):
+      // UP/DOWN sound only when the cursor moved; A plays one SE_SELECT either way (menu.c:1060).
+      const beforeQuestion = nextPostwin;
       if (newAndRepeatedKeys.has("UP")) {
         nextPostwin = movePostwinQuestionCursor(nextPostwin, -1);
+        if (newKeys.has("UP") && nextPostwin.questionCursorPos !== beforeQuestion.questionCursorPos) playSelectSe();
       } else if (newAndRepeatedKeys.has("DOWN")) {
         nextPostwin = movePostwinQuestionCursor(nextPostwin, 1);
+        if (newKeys.has("DOWN") && nextPostwin.questionCursorPos !== beforeQuestion.questionCursorPos) playSelectSe();
       } else if (newKeys.has("A")) {
         if (nextPostwin.questionCursorPos === 0) {
           nextPostwin = acceptPostwinQuestionYes(nextPostwin);
         } else {
           nextPostwin = acceptPostwinQuestionDismiss(nextPostwin);
         }
+        if (nextPostwin !== beforeQuestion) playSelectSe();
       }
     } else if (
       nextPostwin.question !== null &&
@@ -1621,12 +1636,23 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       nextPostwin.question === null &&
       postwinContinuationInputReady(nextPostwin)
     ) {
+      // MULTI_GO_ON_RECORD_REST_RETIRE / MULTI_GO_ON_REST_RETIRE (script_menu.c, ignoreBPress = TRUE,
+      // so B is silent): JOY_NEW. Four entries wrap (Menu_ProcessInput: SE on every press); three do not
+      // (Menu_ProcessInputNoWrap: SE only when the cursor moved). A plays SE_SELECT on any entry.
+      const beforeContinuationMove = nextPostwin;
       if (newAndRepeatedKeys.has("DOWN")) {
         nextPostwin = movePostwinContinuationCursor(nextPostwin, 1);
+        if (newKeys.has("DOWN") && continuationMoveSounds(beforeContinuationMove, nextPostwin, 1)) playSelectSe();
       } else if (newAndRepeatedKeys.has("UP")) {
         nextPostwin = movePostwinContinuationCursor(nextPostwin, -1);
+        if (newKeys.has("UP") && continuationMoveSounds(beforeContinuationMove, nextPostwin, -1)) playSelectSe();
       } else if (newKeys.has("A")) {
         const beforeContinuation = nextPostwin;
+        if (
+          beforeContinuation.dialoguePage === 0 &&
+          beforeContinuation.continuationConfirmElapsed === null &&
+          beforeContinuation.continuationCursorPos !== null
+        ) playSelectSe();
         nextPostwin = acceptPostwinContinuation(nextPostwin);
         // Source `AskSwapMon` (`pre-battle-room scripts.inc:137-149`)
         // generates the next opponent before the type/style commentary and
@@ -1684,11 +1710,21 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       nextPostwin.swapDeclineElapsed === null &&
       postwinDialogueInputReady(nextPostwin)
     ) {
+      // MSGBOX_YESNO (script_menu.c ScriptMenu_YesNo -> Menu_ProcessInputNoWrapClearOnChoose, JOY_NEW):
+      // UP/DOWN sound only when the cursor moved; A plays SE_SELECT in menu.c and, on NO, once more in
+      // Task_HandleYesNoInput (case 1).
+      const beforeSwapCursor = nextPostwin.swapCursorPos;
       if (newAndRepeatedKeys.has("DOWN")) {
         nextPostwin = movePostwinSwapCursor(nextPostwin, 1);
+        if (newKeys.has("DOWN") && beforeSwapCursor !== null && nextPostwin.swapCursorPos !== beforeSwapCursor) playSelectSe();
       } else if (newAndRepeatedKeys.has("UP")) {
         nextPostwin = movePostwinSwapCursor(nextPostwin, -1);
+        if (newKeys.has("UP") && beforeSwapCursor !== null && nextPostwin.swapCursorPos !== beforeSwapCursor) playSelectSe();
       } else if (newKeys.has("A")) {
+        if (beforeSwapCursor !== null) {
+          playSelectSe();
+          if (beforeSwapCursor === 1) playSelectSe();
+        }
         if (nextPostwin.swapCursorPos === 0) {
           const liveRound =
             factoryRoundBattleOrchestrator?.round ?? roundController;
@@ -2734,11 +2770,13 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // own blanket lockout (see isCursorInputReady's doc, same family).
       if (confirmReveal.phase === "shown") {
         if (newAndRepeatedKeys.has("UP") || newAndRepeatedKeys.has("DOWN")) {
+          playSelectSe(); // Select_Task_HandleYesNo :1573/:1578
           // Select_UpdateYesNoCursorPosition (:1390-1409): JOY_REPEAT-gated
           // 0<->1 toggle (see confirmReveal.ts's toggleYesNoCursor doc).
           yesNoCursorRedraw = { fromMenuCursorPos: draftScreen.yesNoCursorPos, elapsed: 0 };
           draftScreen = { ...draftScreen, yesNoCursorPos: toggleYesNoCursor(draftScreen.yesNoCursorPos) };
         } else if (newKeys.has("B") || (newKeys.has("A") && draftScreen.yesNoCursorPos === 1)) {
+          playSelectSe(); // :1543 (A) / :1564 (B)
           // docs/confirm-flow-notes.md §3: B-anywhere-in-YES/NO and A-on-NO
           // are source-identical decline paths - both erase the popup, drop
           // the 3rd pick (same slot RENT put it in - cursorPos never moved),
@@ -2769,6 +2807,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           };
           confirmReveal = { phase: "closing", elapsed: 0, decliningSpecies, decliningBallAnim };
         } else if (newKeys.has("A") && draftScreen.yesNoCursorPos === 0) {
+          playSelectSe(); // :1543
           // battle_factory_screen.c:1544-1550: A-on-YES calls the SAME
           // Select_HideChosenMons() decline uses (see prebattleRoom.ts's
           // module doc) - the identical 20-tick closing/un-reveal, just with
@@ -2786,16 +2825,19 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // finish before the reveal can start - no input processed either way.
     } else if (draftScreen.mode === "cursor" && isCursorInputReady(monPic)) {
       if (newAndRepeatedKeys.has("RIGHT")) {
+        playSelectSe(); // Select_Task_HandleChooseMons :1702
         const nextCursorPos = moveCursor(draftScreen.cursorPos, 1);
         cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0, fast: activeSlotsBeforeAction.length >= 2 };
         if (cursorMoveStallsBalls(draftScreen.slots[nextCursorPos]!.species)) ballAnimStall = activeSlotsBeforeAction;
         draftScreen = { ...draftScreen, cursorPos: nextCursorPos, hasActed: true };
       } else if (newAndRepeatedKeys.has("LEFT")) {
+        playSelectSe(); // :1695
         const nextCursorPos = moveCursor(draftScreen.cursorPos, -1);
         cursorRedraw = { fromCursorPos: draftScreen.cursorPos, elapsed: 0, fast: activeSlotsBeforeAction.length >= 2 };
         if (cursorMoveStallsBalls(draftScreen.slots[nextCursorPos]!.species)) ballAnimStall = activeSlotsBeforeAction;
         draftScreen = { ...draftScreen, cursorPos: nextCursorPos, hasActed: true };
       } else if (newKeys.has("A")) {
+        playSelectSe(); // :1688
         monPic = openMonPic(draftScreen.hasActed, draftScreen.hasOpenedMonPic);
         draftScreen = { ...draftScreen, mode: "menu", menuCursorPos: 0, hasOpenedMonPic: true };
         // battle_factory_screen.c:1689 - opening the popup pauses the breathe
@@ -2806,19 +2848,24 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // Select_Task_HandleMenu's STATE_MENU_HANDLE_INPUT: only reachable once
       // the mon pic finishes opening (see monPic.ts).
       if (newAndRepeatedKeys.has("DOWN")) {
+        playSelectSe(); // Select_Task_HandleMenu :1647
         menuHighlightRedraw = { fromMenuCursorPos: draftScreen.menuCursorPos, elapsed: 0 };
         draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, 1), hasActed: true };
       } else if (newAndRepeatedKeys.has("UP")) {
+        playSelectSe(); // :1642
         menuHighlightRedraw = { fromMenuCursorPos: draftScreen.menuCursorPos, elapsed: 0 };
         draftScreen = { ...draftScreen, menuCursorPos: moveMenuCursor(draftScreen.menuCursorPos, -1), hasActed: true };
       } else if (newKeys.has("B")) {
+        playSelectSe(); // :1633
         draftScreen = { ...draftScreen, mode: "cursor" };
         monPic = closeMonPic(monPic.variant);
         // battle_factory_screen.c:1636 - B-close resumes the breathe.
         speciesNameFade = activateSpeciesNameFade(speciesNameFade);
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_SUMMARY) {
+        playSelectSe(); // :1607
         summaryScreen = openSummaryScreen(draftScreen.cursorPos);
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_RENT) {
+        playSelectSe(); // :1607
         // Select_OptionRentDeselect (:1949-1970): RENT/DESELECT share this one
         // slot/handler, context-sensitive on the cursored ball's selectedId.
         const slot = draftScreen.cursorPos;
@@ -2842,6 +2889,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         // skips straight to the YES/NO task without touching `active`).
         if (!isMonsConfirmed(selectingMonsState)) speciesNameFade = activateSpeciesNameFade(speciesNameFade);
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_OTHERS) {
+        playSelectSe(); // :1607
         // Select_OptionOthers: closes the popup with no selection change,
         // identical to B.
         draftScreen = { ...draftScreen, mode: "cursor" };
