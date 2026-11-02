@@ -1,3 +1,69 @@
+## 2026-10-29 / 30 — CAX31 daily run wind-down (supervisor, Opus 5.5): bso225 / bso226 / apx227 / pfb228 / pfb229 folded
+
+- **State:** master `bb9029a37`+ (pfb229 merge); final src + tests == pfb229 worker-tested `c3a9fc037`.
+
+- **Folded:** bso225 (`633d97700`, fast-forward; branch `worker/integration-20261029-213114`): Scene ON player BACK send-out
+  animation on the mid-battle switch-in (voluntary + Roar / Whirlwind "dragged out"); banked back reducers, selector species +
+  `personality % 25`, reducer tick 0 at view elapsed 66; 625 / 625 Factory (species, nature) pairs have a reducer. 5 ROM windows
+  (SHEDINJA, SKARMORY, ALAKAZAM, ONIX, ENTEI) exact from elapsed 88 (was 8–186k px); ball / emerge / sparkle residual before e 88
+  unchanged; ENTEI glow 1 lag frame (e 68). Doc `docs/bso225-player-back-send-out.md`, strips
+  `tools/integration/fixtures/back-send-out/`. Worker on the exact tip tree: typecheck 0, full suite **1,713 files / 14,173 tests,
+  0 failed**, build 0, differential 641 / 641. Supervisor: OFF census shards byte-identical to `off-bad3db32c`; ON eventsDigest +
+  error identical on 1,000 / 1,000 (3 changed = the known apx224 rows); new test 6 / 6; ENTEI strip eyeballed.
+  Not wired: faint-replacement send-in (path B; the pfr192 emerge route is not pixel-aligned yet), battle-start player (path C).
+- **Folded:** bso226 (merge `5a9cb0fc5`; branch `worker/integration-20261029-233450`, src == tested `ebe23c6bb`): the Scene ON
+  battle-start intro plays the opponent FRONT and player BACK species animations (banked reducers; new presentation-only
+  `sceneOn` on the intro state; the ONIX-only settle hand-fit is replaced by the dispatcher in Scene ON, kept in OFF). 5 ROM windows,
+  differing px opp / player before -> after: yoshi 106,807 / 16,697 -> 12 / 0; wailmer 24,840 / 62,540 -> 132 / 7,903 (ball +
+  sparkles); spinda 41,645 / 35,115 -> 11 / 1,855; koffing 42,765 / 63,669 -> 12 / 97; onix 62,261 / 48,993 -> 40,787 / 14,502
+  (lab opponent gender differs + release frames unattributed). Timing residual found: the ROM waits for the opponent's front
+  animation before "Go!", 39–98 frames later than our fixed timeline on long animations (ISSUES #146 timing line). Doc
+  `docs/bso226-battle-start-intro-send-outs.md`, strips `tools/integration/fixtures/battle-start-intro/`. Worker: typecheck 0;
+  full suite (12 shards) **1,714 files / 14,180 tests, 0 failed**; build 0; differential 641 / 641 (the committed ON traces capture
+  after the intro). Supervisor: census OFF + ON vs bso225: eventsDigest + error identical 1,000 / 1,000 each; merged src ==
+  tested src; bso225 + bso226 tests 13 / 13; SPINDA strip eyeballed.
+- **Folded:** apx227 (merge `fa622452c`; branch `worker/integration-20261030-023040`, src == suite-tested `885f2deba`):
+  **#157 fixed** — the only reader of the weather-continues event battler was the Scene ON x2 history (`liveBattlerX2History.ts`);
+  sandstorm / hail continues (WEATHER_VAR 12 / 13) with battler 1 erased the opponent's zeroed rest pose; the seam now takes battler
+  0 (kernel event unchanged). Seed 27 window: 2,166 frames move (opponent ONIX pose); 6 other opponent-weather seeds identical; seed
+  851 Fury Cutter approximate -> live (live 26,956 -> 26,957). Conversion 2 body (16x16 blended tile grid on the user): ROM residual
+  median 3,253 -> 119 px. Ghost Curse (stretching black window, later nail, longer hold): median 47 -> 0, exact frames 144 -> 228;
+  ghost icon palette not changed (cause not isolated). Worker: typecheck 0; census ON eventsDigest + error 1,000 / 1,000 identical
+  (supervisor re-checked), static 0, 7 battles changed as expected; OFF not reachable (x2 host and approx bodies are Scene ON only;
+  supervisor read the diff); differential 641 / 641; full suite on `885f2deba` 1,713 / 1,714 files, 1 stale Curse row pin ->
+  re-pinned test-only (`1a5ecb4ab`); build 0 on the tip. Supervisor: the 3 re-pinned files 43 / 43 on master.
+- **Merged:** pfb228 (`d4b136a80`, fast-forward; evidence / tools only, no src / tests diff — checked): the Scene ON faint-replacement
+  send-in already starts ball / release / emerge on the ROM's ticks (B = 91 + name length; the bso225 "-4..+3" offset was a
+  delta-search boundary artifact); the gap is content (generic release, one-species ball arc, fixed particle y). Recipe + RAM
+  schedules in `docs/pfb228-faint-replacement-emerge.md`; scratch prototype predicts 7 windows 110k–325k px -> 16–2,079 px.
+- **Wind-down gates on src `fa622452c` (`.integration/validation/sv-20261029/gates-fa622452c/`):** build 0; varied-RNG first-round
+  winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 `--scene both` **ON 20 / 20, OFF
+  20 / 20** (all `budget`); Scene ON `--policy full --vary-rng` 0:30 `--render-every 8` **30 / 30**; Scene ON winning first-round 0:6
+  `--render-every 1` **6 / 6**; browser goal play 10 min / scene (seed 13): ON 24 battles / 11 swap screens, OFF 41 / 14, **0 page
+  errors, 0 overlays, 0 contained, 0 divergences**. Full suite: no independent supervisor rerun (one worker + one suite at a time on
+  this host; pfb229's gates ran then) — covered by apx227's full suite on the same src plus the supervisor's rerun of the re-pinned
+  files. The 0:60 full / winning / winning-swap gates were not run (hours each here; same practice as earlier sessions).
+- **Folded at 06:46:** pfb229 (merge `bb9029a37`; branch `worker/integration-20261030-050141`): the pfb228 recipe — Scene ON
+  faint-replacement player send-in drawn with the path-A composition (bso225 back animation at B+66), `playerSendOutBallArc(monY)`,
+  particle y = final ball y2 + 59 (monY 93 reproduces the old table). 7 ROM windows mon px before -> after: SKARMORY 110,236 -> 74,
+  ALAKAZAM 129,564 -> 33, ONIX 124,807 -> 272, ENTEI 324,706 -> 2,079, SHEDINJA 120,589 -> 16, KINGDRA 263,209 -> 1,493, CASTFORM
+  153,995 -> 278 (= the prototype's prediction); healthbox residual 0 in 6. No row / digest change. Worker on the exact tree:
+  typecheck 0; census OFF shards byte-identical, ON eventsDigest + error 1,000 / 1,000 (supervisor re-checked both); static 0;
+  differential 641 / 641; full suite (12 shards) **1,715 files / 14,187 tests, 0 failed**; build 0. Supervisor short gates on the
+  merge: see the line below. **Not run on this src:** the 0:30 Scene ON render-8 soak (45 min); green on the parent `fa622452c`
+  above, and pfb229 changes only Scene ON forced-send-in drawing. Next run: run it first.
+- **Short gates on the pfb229 merge `bb9029a37` (`.integration/validation/sv-20261029/gates-bb9029a37/`):** build 0; varied-RNG
+  first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; Scene ON winning first-round 0:6
+  `--render-every 1` **6 / 6**; browser goal play Scene ON 3 min (seed 17): 8 battles / 6 swap screens, 0 page errors / overlays /
+  divergences; vanilla 0:20 `--scene on` (`--parallel 5`, 606 s) **20 / 20** (all `budget`; OFF unaffected by this Scene ON-only
+  change, 20 / 20 on the parent).
+- **Next:** handoff "Next work" 1 (the Scene ON render-8 soak on `bb9029a37`+, then the #146 remainder), 2 Castform form changes.
+- **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261029-213114` (bso225), `-20261029-233450`
+  (bso226), `-20261030-023040` (apx227), `-20261030-042229` (pfb228), `-20261030-050141` (pfb229). Evidence `.integration/validation/sv-20261029/`. No push.
+---
+
+---
+
 ## 2026-10-28 / 29 — CAX31 daily run wind-down (supervisor, Opus 5.5): apx219-224 folded; Scene ON static 0
 
 - **State:** master `c7d99ba26`+ (apx219-222 fast-forward; apx223 / apx224 merges; final src == apx224 worker-tested tree `25e824041`).
