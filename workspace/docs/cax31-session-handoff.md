@@ -57,6 +57,36 @@ never brief those here. One worker at a time; each run folds the next audio step
 4. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
    `--lobby-new-challenge` run); Scene ON soak `--render-every 8` 0:16..0:30 plus a `--render-every 1` sample; varied-RNG sweeps;
    vanilla both scenes. Every overlay / pageerror / CRASH / HANG becomes a fix step before anything else.
+4b. **User-reported visuals (Kyle, playing the website, 2026-11-02): one step per run, after that run's audio + cleanup
+   steps and ahead of item 5.** Both were reproduced on the Mac by replaying Kyle's own trace (challenge
+   `09162a56c8e3bc089559492b246fc007`, seeds 432975742 / 148979268, engine 059579e32) through `FactorySession.replayStep`
+   + `render()`; frames are in the Mac session scratchpad. Fix each as a **family**, not per species, and prove it against the ROM:
+   - **(a) Send-in animations cut short.** Kyle's Koffing (player, mid-battle "Go! KOFFING!" after a voluntary switch) grows
+     to its large GROW pose, holds frozen for about 9 frames (no pixel change on app frames 10539..10547), then snaps to normal
+     size in one frame (10548) as the next turn's "Foe AIPOM used…" starts. Kyle saw the same on an opponent Spoink
+     (`ANIM_H_JUMPS_V_STRETCH_TWICE`). Likely class: the app's send-in window is a fixed length. The ROM waits for the species
+     animation to end before it goes on (bso226 found the same for the battle-start "Go!": 39..98 frames late on long
+     animations). So any back or front animation longer than the window is clamped, then dropped. Expected fix shape: the
+     send-in phase ends when the species animation ends (both sides, mid-battle and battle-start), not a per-species patch.
+     First step: census every Factory species' back and front animation length against the window, to list who is clipped.
+   - **(b) Agility clips the user's lower rows.** Kyle's opponent Aipom using Agility: the moving copies are cut at a fixed
+     horizontal line through the feet. A small piece of the tail tip stays drawn at the rest position while the copies move.
+     It is fine at rest before and after. Likely class: the monbg / clone path copies a fixed-height region, so tall species
+     (art that reaches the bottom of the 64×64 frame) lose their bottom rows. Agility was proven only on LEDYBA / ONIX
+     (`docs/animation-integration-readiness.md`). Check Aipom against the ROM first (it may be the ROM's own clip). Then sweep
+     the monbg-using moves with two or three tall species on both sides.
+   - **(c) Rate check for random outcomes (small; can ride with any step).** Kyle saw Nidorino's Double Kick crit on the
+     second hit twice in a row (both real in the replay: vs Mawile 13 then 60, vs Aipom 31 then 82; Focus Band, no crit boost).
+     The Mac ran the committed `BattleScript_EffectDoubleHit` from random RNG starts (the `battleScriptMultiHitFamily.test.ts`
+     harness; the ledger reasons give hit order) and counted crits per hit. Result: no bug. The draw order is fixed:
+     acc > crit > dmg > crit > dmg > effect, in every one of 6,000 runs. Hit 2's crit is a fresh roll, so it is exactly 1/16
+     for a uniform start. Measured over 200,000 runs: hit 1 6.22 %, hit 2 6.40 %, both 0.394 % (independent 0.391 %).
+     Kyle's pair was a 1-in-256 run of luck. Make the check permanent and general:
+     - a test that, for each RNG-consuming draw site (crit per hit index, accuracy, damage roll, multi-hit count, secondary
+       effect chance, Quick Claw, AI score rolls), runs the real script from N random RNG starts;
+     - it compares each outcome rate with the source formula (binomial bound, for example 5 SD at N = 20,000);
+     - it also checks that consecutive rolls in one action are not tied (hit-2 crit given hit-1 crit).
+     This catches the class "a roll is reused, skipped or drawn from the wrong place" without needing a lucky player report.
 5. **Timing / visible residuals** last, never while items 1–3 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
    compare-harness maxHP bug + `factoryCorpusParty.ts:291`, ISSUES #146 shd234; CASTFORM message region on the faint path,
    ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform "at"-role keys, Flamethrower +7 alignment, revert /
