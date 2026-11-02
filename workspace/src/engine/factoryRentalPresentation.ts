@@ -124,7 +124,11 @@ export type FactoryRentalPresentation = Readonly<{
     nameText: null;
     idText: null;
   }>;
-  /** Species key passed to CreateMonSprite/front-pic asset selection. */
+  /**
+   * Species key passed to CreateMonSprite/front-pic asset selection: the SPECIES_* constant without its prefix
+   * ("FARFETCHD", "MR_MIME", "NIDORAN_F"), which is how battle-opponent-front-sprites.json and summary-front-animation.json
+   * are keyed. It was the display name until spn242, which left FARFETCH'D, MR. MIME and NIDORAN♀/♂ without a portrait.
+   */
   frontPicSpecies: string;
   /**
    * GetMonAilment result: the summary's status icon (CreateSetStatusSprite, 64,152), its STATUS label window and the
@@ -239,7 +243,7 @@ export function createFactoryRentalPresentation(
       nameText: null,
       idText: null,
     }),
-    frontPicSpecies: header.name,
+    frontPicSpecies: member.speciesName.replace(/^SPECIES_/, ""),
   });
 }
 
