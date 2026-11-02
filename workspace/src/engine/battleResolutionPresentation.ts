@@ -45,7 +45,10 @@ import { recordContainedPresentationError } from "./presentationContainment.ts";
 import { substituteFadeDuration } from "./liveSubstituteFade.ts";
 import { statsChangeParams, statsChangeSpan } from "../animation/statsChange.ts";
 import { liveMoveAnimationDuration } from "./liveMoveAnimation.ts";
-import { battleResolutionCommandDuration, battleResolutionFieldBeforeCommand } from "./battleResolutionPresentationRender.ts";
+import {
+  battleResolutionCommandDuration, battleResolutionFieldBeforeCommand, MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED,
+} from "./battleResolutionPresentationRender.ts";
+import { SEND_IN_TAIL_CASTFORM } from "../data/sendInTail.ts";
 import { CASTFORM_CHANGE_COMMAND_FRAMES, CASTFORM_CHANGE_WEATHER_LOOP_FRAMES } from "./liveTransform.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import { spriteOrderStatusAnimationName } from "./spriteOrderEventTransform.ts";
@@ -1619,7 +1622,6 @@ const STATUS_ICON_TIMING = Object.freeze({ minimumFrames: 1 } as const);
  * source's 116-frame gap exactly.
  */
 export const SWITCH_IN_SPAN_FRAMES = 91;
-const SWITCH_IN_TIMING = Object.freeze({ minimumFrames: SWITCH_IN_SPAN_FRAMES } as const);
 /**
  * ISSUES #78 slice 4: the 11-frame `waitstate` release + move-load hold
  * (`switchinanim`'s `waitstate` releases 1231-1238, the opponent's move is
@@ -1654,7 +1656,14 @@ export function switchInTiming(
       : sceneOffPlayerForcedSwitchInDuration(species);
     return Object.freeze({ minimumFrames: duration - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
   }
-  if (battler === 0) return SWITCH_IN_TIMING;
+  // vis243a: the voluntary player send-in waits for the same ROM chain as the forced one (back animation in Scene ON, then the cry:
+  // SwitchIn_CleanShinyAnimShowSubstitute -> SwitchIn_HandleSoundAndEnd); its next print follows the usual 11-frame waitstate hold.
+  if (battler === 0) {
+    const duration = sceneOn
+      ? sceneOnPlayerForcedSwitchInDuration(species, personality)
+      : sceneOffPlayerForcedSwitchInDuration(species);
+    return Object.freeze({ minimumFrames: duration });
+  }
   const duration = sceneOn ? opponentSwitchInDuration(species) : sceneOffOpponentSwitchInDuration(species, nickname);
   return Object.freeze({ minimumFrames: duration - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
 }
@@ -4973,6 +4982,10 @@ export function projectBattleResolutionCommands(
           // plr162 / snd182: the forced player tail (slide 65; CASTFORM's whole send-in +1).
           healthboxSlideElapsed: sceneOffPlayerForcedSwitchInHealthboxSlideElapsed(incoming.field.species),
           sendInVisualDelay: sceneOffPlayerForcedSwitchInVisualDelay(incoming.field.species),
+        } : battler === 0 && incoming.field.species === SEND_IN_TAIL_CASTFORM ? {
+          // vis243a: a voluntary CASTFORM send-in runs one frame late as a whole (the forced path's CASTFORM shift, ball at elapsed 4).
+          healthboxSlideElapsed: MID_BATTLE_SWITCH_HEALTHBOX_SLIDE_ELAPSED + 1,
+          sendInVisualDelay: 1,
         } : {}),
         ...(speciesTail ? {
           healthboxSlideElapsed: opponentSwitchInHealthboxSlideElapsed(incoming.field.species),

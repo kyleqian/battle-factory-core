@@ -8,7 +8,7 @@ import {
   partySendOutBattleMenuReady, partySendOutPhase, partySendOutReleaseClock, PARTY_SENDOUT_ACTION_MENU_START, PARTY_SENDOUT_BLANK_MESSAGE_START,
   PARTY_SENDOUT_DEFAULT_TIMING,
 } from "../src/engine/partySelect";
-import { playerFaintReplacementSendOutTiming } from "../src/engine/switchInTail";
+import { playerFaintReplacementSendOutTiming, sceneOffPlayerForcedSwitchInDuration, sceneOnPlayerForcedSwitchInDuration } from "../src/engine/switchInTail";
 import { playerFaintReplacementSendOutTimingOfSegment } from "../src/engine/battleResolutionPresentationRender";
 
 const dir = "tools/integration/fixtures/pfr185";
@@ -77,8 +77,9 @@ describe("pfr192: keyed player faint-replacement send-in clock vs the ROM", () =
 
   it("control: the voluntary switch-in and opponent replacement timing is unchanged", () => {
     expect(SWITCH_IN_SPAN_FRAMES).toBe(91);
-    expect(switchInTiming(0, 157, true, "TYPHLOSION")).toEqual({ minimumFrames: 91 });
-    expect(switchInTiming(0, 385, false, "CASTFORM")).toEqual({ minimumFrames: 91 });
+    // vis243a: the voluntary player send-in now waits for the back animation (Scene ON) and the cry, like the forced one.
+    expect(switchInTiming(0, 157, true, "TYPHLOSION")).toEqual({ minimumFrames: sceneOnPlayerForcedSwitchInDuration(157, 0) });
+    expect(switchInTiming(0, 385, false, "CASTFORM")).toEqual({ minimumFrames: sceneOffPlayerForcedSwitchInDuration(385) });
     expect(switchInTiming(1, 16, false, "PIDGEY")).toMatchObject({ minimumFrames: expect.any(Number) });
   });
 

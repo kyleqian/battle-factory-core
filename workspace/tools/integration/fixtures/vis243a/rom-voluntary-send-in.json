@@ -1,0 +1,23 @@
+{
+  "_doc": "vis243a: ROM first frame of the opponent's next print ('Foe AIPOM used SPLASH!'), as a send-in elapsed (switch-in command elapsed 0 = the 'Go! X!' print done; the thrown ball shows at elapsed 3), for a Scene ON / OFF mechanicLab voluntary switch (tools/integration/vis243aStage.py, dense step-1 oracle windows, vis243aCompare.ts romNextText). appElapsed adds the ball visual delay CASTFORM's whole send-in carries (+1).",
+  "on": [
+    {"species": 109, "name": "KOFFING", "nature": 0, "romNextText": 146, "appElapsed": 146, "backTick": 65, "cry": 58},
+    {"species": 109, "name": "KOFFING", "nature": 7, "romNextText": 145, "appElapsed": 145, "backTick": 64, "cry": 58},
+    {"species": 109, "name": "KOFFING", "nature": 20, "romNextText": 145, "appElapsed": 145, "backTick": 64, "cry": 58},
+    {"species": 10, "name": "CATERPIE", "nature": 0, "romNextText": 102, "appElapsed": 102, "backTick": 21, "cry": 24},
+    {"species": 16, "name": "PIDGEY", "nature": 3, "romNextText": 118, "appElapsed": 118, "backTick": 37, "cry": 11},
+    {"species": 385, "name": "CASTFORM", "nature": 0, "romNextText": 182, "appElapsed": 183, "backTick": 101, "cry": 36},
+    {"species": 235, "name": "SMEARGLE", "nature": 5, "romNextText": 122, "appElapsed": 122, "backTick": 41, "cry": 29},
+    {"species": 240, "name": "MAGBY", "nature": 0, "romNextText": 209, "appElapsed": 209, "backTick": 128, "cry": 41},
+    {"species": 95, "name": "ONIX", "nature": 3, "romNextText": 147, "appElapsed": 147, "backTick": 33, "cry": 70},
+    {"species": 308, "name": "SPINDA", "nature": 0, "romNextText": 124, "appElapsed": 124, "backTick": 43, "cry": 35},
+    {"species": 351, "name": "SPOINK", "nature": 10, "romNextText": 145, "appElapsed": 145, "backTick": 64, "cry": 21},
+    {"species": 124, "name": "JYNX", "nature": 0, "romNextText": 211, "appElapsed": 211, "backTick": 62, "cry": 134}
+  ],
+  "off": [
+    {"species": 95, "name": "ONIX", "nature": 3, "romNextText": 147, "appElapsed": 147, "cry": 70},
+    {"species": 109, "name": "KOFFING", "nature": 0, "romNextText": 135, "appElapsed": 135, "cry": 58},
+    {"species": 16, "name": "PIDGEY", "nature": 3, "romNextText": 102, "appElapsed": 102, "cry": 11},
+    {"species": 308, "name": "SPINDA", "nature": 0, "romNextText": 112, "appElapsed": 112, "cry": 35}
+  ]
+}

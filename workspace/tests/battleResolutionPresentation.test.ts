@@ -10,7 +10,6 @@ import {
   storeBattleTerminalPresentationDismiss,
   FORCED_RETURN_TO_BALL_HOLD_FRAMES,
   FORCED_RETURN_TO_BALL_SEND_IN_GAP_FRAMES,
-  SWITCH_IN_SPAN_FRAMES,
   SWITCH_IN_WAITSTATE_HOLD_FRAMES,
   WAITMESSAGE_LONG_MESSAGE_IDS,
   WAITMESSAGE_LONG_TIMING,
@@ -49,6 +48,7 @@ import {
   createFactoryFullTurnBattleState,
   type FactoryFullTurnDecisionRules,
 } from "../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import { sceneOffPlayerForcedSwitchInDuration } from "../src/engine/switchInTail.ts";
 import { iu120Extra } from "./helpers/iu120Rows.ts";
 import { clearContainedPresentationErrors, containedPresentationErrors } from "../src/engine/presentationContainment.ts";
 
@@ -1344,6 +1344,8 @@ describe("battle resolution presentation receipt ownership", () => {
 
   it("times the voluntary mid-battle switch-in span so the send-out cadence holds (ISSUES #78)", () => {
     const resolution = voluntarySwitchResolution();
+    const span = sceneOffPlayerForcedSwitchInDuration(66);
+    expect(span).toBe(104);
 
     const commands = resolution.segments[0]!.commands;
     const switchIndex = commands.findIndex((command) => command.type === "switch-in");
@@ -1351,16 +1353,17 @@ describe("battle resolution presentation receipt ownership", () => {
     if (switchCommand.type !== "switch-in") {
       throw new Error("battle resolution voluntary switch has no typed switch-in command");
     }
-    // The real `CONTROLLER_SWITCHINANIM` cadence (1140-1230, 91 frames)
+    // The real `CONTROLLER_SWITCHINANIM` cadence (1140-1230, 91 frames at its
+    // floor; vis243a: the cry-bound Scene OFF wait for MACHOP, 38 + 66 = 104)
     // must gate the opponent's next move, not the old 1-frame instant swap;
     // the 11-frame waitstate/move-load hold (1231-1241) rides on top so the
     // opponent's "used" message first glyph lands at 1242.
-    expect(switchCommand.timing).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
+    expect(switchCommand.timing).toEqual({ minimumFrames: span });
     expect(battleResolutionCommandDuration(switchCommand, resolution.field))
-      .toBe(SWITCH_IN_SPAN_FRAMES + SWITCH_IN_WAITSTATE_HOLD_FRAMES);
+      .toBe(span + SWITCH_IN_WAITSTATE_HOLD_FRAMES);
     // The incoming mon is already on field while the "Go!" box owns the span.
     const view = createBattleResolutionPresentationRenderView(
-      atRenderClock(resolution, switchIndex, Math.floor(SWITCH_IN_SPAN_FRAMES / 2)),
+      atRenderClock(resolution, switchIndex, Math.floor(span / 2)),
     );
     expect(view.field.player).toMatchObject({
       partyIndex: 1,
@@ -1374,7 +1377,7 @@ describe("battle resolution presentation receipt ownership", () => {
     });
     // The switch-in command is not complete a frame early and completes
     // exactly at the end of the span (controller 91 + waitstate/move-load 11).
-    const switchInDuration = SWITCH_IN_SPAN_FRAMES + SWITCH_IN_WAITSTATE_HOLD_FRAMES;
+    const switchInDuration = span + SWITCH_IN_WAITSTATE_HOLD_FRAMES;
     expect(isBattleResolutionCommandComplete(
       atRenderClock(resolution, switchIndex, switchInDuration - 2),
     )).toBe(false);

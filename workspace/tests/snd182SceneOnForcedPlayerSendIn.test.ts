@@ -3,7 +3,7 @@
 // and the fresh ROM probes (27 cases, nature-dependent species included); production's switchInTiming for it.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { SWITCH_IN_SPAN_FRAMES, SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation";
+import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation";
 import {
   backAnimWaitTick, opponentSwitchInDuration, sceneOffPlayerForcedSwitchInDuration, sceneOnPlayerForcedSwitchInDuration,
 } from "../src/engine/switchInTail";
@@ -50,12 +50,14 @@ describe("snd182: Scene ON forced player send-in duration", () => {
     expect(duration(321, 0)).toBe(duration(321, 10));
   });
 
-  it("switchInTiming: Scene ON forced player send-in moves; voluntary, OFF-forced and opponent send-ins keep their values", () => {
+  it("switchInTiming: Scene ON forced player send-in moves; voluntary (vis243a), OFF-forced and opponent send-ins", () => {
     expect(switchInTiming(0, 321, true, "TORKOAL", true, NATURE_DOCILE)).toEqual({ minimumFrames: 198 - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
     expect(switchInTiming(0, 16, true, "PIDGEY", true, NATURE_DOCILE)).toEqual({ minimumFrames: 91 - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
     expect(switchInTiming(0, 1, true, "BULBASAUR", true, 10)).toEqual({ minimumFrames: 161 - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
-    expect(switchInTiming(0, 321, true, "TORKOAL", false, NATURE_DOCILE)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
-    expect(switchInTiming(0, 321, false, "TORKOAL", false, NATURE_DOCILE)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
+    // vis243a: the voluntary player send-in waits for the same chain, with the 11-frame waitstate hold on top (commands carry it separately).
+    expect(switchInTiming(0, 321, true, "TORKOAL", false, NATURE_DOCILE)).toEqual({ minimumFrames: 198 });
+    expect(switchInTiming(0, 321, false, "TORKOAL", false, NATURE_DOCILE)).toEqual({ minimumFrames: sceneOffPlayerForcedSwitchInDuration(321) });
+    expect(switchInTiming(0, 10, true, "CATERPIE", false, 0)).toEqual({ minimumFrames: 91 });
     expect(switchInTiming(0, 321, false, "TORKOAL", true, NATURE_DOCILE))
       .toEqual({ minimumFrames: sceneOffPlayerForcedSwitchInDuration(321) - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
     expect(switchInTiming(1, 321, true, "TORKOAL", false, NATURE_DOCILE))
