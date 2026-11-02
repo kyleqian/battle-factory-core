@@ -45,7 +45,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Housekeeping:** evidence `sv-20261029` deleted (older than the last three runs; 5.1 GB). Census baseline for the next delta:
   `sv-20261101/cln237-evidence/census/{on,off}-4f6fa87e4`.
 - **Next:** handoff "Next work": aud240 (screens; scout `docs/aud240-scout.md`), cleanup step 2 (root ledgers; scout
-  `docs/cln238-ledger-scout.md`), bundle hygiene. Both scouts are read-only worker reports, saved unverified.
+  `docs/cln238-ledger-scout.md`), bundle hygiene (scout `docs/bnd-scout.md`: headless 22.3 -> ~11 MB by dropping tile pixels). The scouts are read-only worker reports, saved unverified.
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/side-20261101-213641` (aud238), `-20261101-232920` (cln237),
   `worker/integration-20261102-014838` (aud239), `-20261102-030844` (pmf240). No push.
 ---

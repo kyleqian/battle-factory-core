@@ -55,7 +55,7 @@ never brief those here. One worker at a time; each run folds the next audio step
    the daily cron depends on them); (5) `npm run test:gate` ≤ 5 min for workers and drop frame-pin tests the census supersedes,
    full suite nightly; (4) `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs` + its adapter / tests;
    (6) prune merged `worker/*` refs; (7) evidence stops going into git.
-3. **Bundle hygiene** (rest of Phase 3): test-only JSON out of `src/`, sprite pixels out of the headless graph
+3. **Bundle hygiene** (rest of Phase 3; scout with import chains, sizes and a step split: `docs/bnd-scout.md`): test-only JSON out of `src/`, sprite pixels out of the headless graph
    (`battleCommandFieldArt`, 11.8 MB chunk), lazy-loaded sprite sheets and large tables, gamepad input through `press` / `release`.
 4. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
    `--lobby-new-challenge` run); Scene ON soak `--render-every 8` 0:16..0:30 plus a `--render-every 1` sample; varied-RNG sweeps;
