@@ -24,6 +24,7 @@ import {
 } from "./engine/presentationContainment.ts";
 import { presentationRngTraceMetadata, type PresentationRngPolicyId } from "./engine/presentationRngHost.ts";
 import { Sha256 } from "./engine/sha256.ts";
+import { collectSoundTick, type SoundSink } from "./audio/soundEvents.ts";
 import type { BattleScene, FactoryEvent, ReplayBattle, TraceSegment } from "./factoryContract.ts";
 import { normalizeButtons, type GbaButton } from "./input.ts";
 import { SessionRecorder, type SessionContainedError, type SessionTrace } from "./sessionRecorder.ts";
@@ -91,6 +92,7 @@ export class FactorySession {
   private prevLastBattle: object | null = null;
   private prevPhase: string | null = null;
   private prevLobby = false;
+  private soundSink: SoundSink | null = null;
 
   // No parameter properties: tools import src/ under node --experimental-strip-types, which cannot transform them.
   constructor(options: FactorySessionOptions) {
@@ -105,10 +107,19 @@ export class FactorySession {
     return this.state.frame;
   }
 
+  /**
+   * Attach (or detach with null) the write-only sound sink. Live `tick()` frames hand it the frame's
+   * SoundEvents in emission order; `replayStep` / `resume` fast-forward frames never do. Nothing the sink
+   * receives is read back: not by the engine, RNG, frame hash, digest, recorder, trace or export.
+   */
+  attachSoundSink(sink: SoundSink | null): void {
+    this.soundSink = sink;
+  }
+
   /** One live frame: recorded, then ticked. Returns the events it produced. */
   tick(buttons: ReadonlySet<GbaButton>, t?: number): FactoryEvent[] {
     this.recorder.recordTick(buttons, t);
-    return this.step(buttons);
+    return this.step(buttons, this.soundSink);
   }
 
   /**
@@ -185,8 +196,21 @@ export class FactorySession {
     this.prevLobby = this.state.lobbyFreeRoam !== null;
   }
 
-  private step(buttons: ReadonlySet<GbaButton>): FactoryEvent[] {
-    this.state = tick(this.state, buttons);
+  private step(buttons: ReadonlySet<GbaButton>, sink: SoundSink | null = null): FactoryEvent[] {
+    if (sink === null) {
+      this.state = tick(this.state, buttons);
+    } else {
+      // 1-based probe convention: the frame this tick produces is state.frame + 1 (tools/audio/soundEventProbe.py).
+      const ticked = collectSoundTick(this.state.frame + 1, () => tick(this.state, buttons));
+      this.state = ticked.result;
+      for (const event of ticked.events) {
+        try {
+          sink.push(event);
+        } catch (error) {
+          console.error("POKEBENCH sound sink threw (ignored; the game is unaffected):", error);
+        }
+      }
+    }
     const frame = this.state.frame;
     const events: FactoryEvent[] = [];
     const orchestrator = this.state.factoryRoundBattleOrchestrator;
