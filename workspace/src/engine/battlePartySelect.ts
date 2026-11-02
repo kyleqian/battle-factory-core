@@ -58,6 +58,7 @@ export type PartyMenuPrimaryStatus =
   | "sleep"
   | "frozen"
   | "burn"
+  | "faint"
   | null;
 
 /**
@@ -67,12 +68,24 @@ export type PartyMenuPrimaryStatus =
  * DisplayPartyPokemonLevelCheck, keeps the level line).
  */
 export function primaryStatusFromStatus1(status1: number): PartyMenuPrimaryStatus {
-  if ((status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0) return "sleep";
   if ((status1 & (BATTLE_SCRIPT_STATUS1_POISON | BATTLE_SCRIPT_STATUS1_TOXIC_POISON)) !== 0) return "poison";
-  if ((status1 & BATTLE_SCRIPT_STATUS1_BURN) !== 0) return "burn";
-  if ((status1 & BATTLE_SCRIPT_STATUS1_FREEZE) !== 0) return "frozen";
   if ((status1 & BATTLE_SCRIPT_STATUS1_PARALYSIS) !== 0) return "paralyzed";
+  if ((status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0) return "sleep";
+  if ((status1 & BATTLE_SCRIPT_STATUS1_FREEZE) !== 0) return "frozen";
+  if ((status1 & BATTLE_SCRIPT_STATUS1_BURN) !== 0) return "burn";
   return null;
+}
+
+/**
+ * GetMonAilment (party_menu.c:1924-1936): 0 HP is AILMENT_FNT before any
+ * status is consulted. The status-icon sprite replaces the "Lv" line for every
+ * ailment but NONE / PKRS (DisplayPartyPokemonLevelCheck, party_menu.c:2300).
+ */
+export function partyMenuAilment(
+  hp: number,
+  status: PartyMenuPrimaryStatus,
+): PartyMenuPrimaryStatus {
+  return hp === 0 ? "faint" : status;
 }
 
 function primaryStatusFromBattleStatus(status: BattleStatus): PartyMenuPrimaryStatus {
@@ -110,7 +123,7 @@ export type BattlePartySelectRow = Readonly<{
   gender: MonGender;
   /** Source party record's held item (`ITEM_NONE` hides the icon). */
   item: number;
-  /** Primary status; non-null hides the "Lv50" line and draws the status icon. */
+  /** GetMonAilment result (FNT first, then status1); non-null hides the "Lv50" line and draws the status icon. */
   status: PartyMenuPrimaryStatus;
 }>;
 
@@ -392,7 +405,7 @@ export function battlePartySelectStateForForcedParty(
     legal: member.legal,
     gender: memberGender(member.speciesId, member.personality),
     item: member.item,
-    status: primaryStatusFromBattleStatus(member.status),
+    status: partyMenuAilment(member.hp, primaryStatusFromBattleStatus(member.status)),
   })) as unknown as BattlePartySelectState["rows"];
   return Object.freeze({
     requestId: forced.request.requestId,
@@ -488,7 +501,7 @@ export function createBattlePartySelectState(
       legal: legal.has(partyIndex),
       gender: memberGender(member.species, member.personality),
       item: member.item ?? 0,
-      status: primaryStatusFromStatus1(member.status1 ?? 0),
+      status: partyMenuAilment(member.hp, primaryStatusFromStatus1(member.status1 ?? 0)),
     });
   }) as unknown as BattlePartySelectState["rows"];
   return Object.freeze({
