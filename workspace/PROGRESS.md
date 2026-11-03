@@ -22,6 +22,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   events, swap 10, decline 3, all equal; supervisor re-probed the decline window on the ON oracle: events equal the fixture.
   Worker on the tested tree: differential 2,430 / 2,430 identical, full suite 1,737 files / 14,384 passed / 0 failed, typecheck,
   build, build:lib 0. Supervisor on master: the 4 audio test files 56 / 56. New ISSUES #191 (dialog cursors move on held repeat).
+- **Folded:** vis243a (handoff 4b(a), Kyle's "send-in cut short"; `docs/vis243a-sendin-census.md`; branch
+  `worker/integration-20261102-230300`; evidence `sv-20261102/vis243a-evidence/`): the voluntary player send-in (also Baton Pass)
+  had a fixed 91 + 11 window; it now uses the forced path's ROM chain (SwitchIn_CleanShinyAnimShowSubstitute waits the back
+  animation in Scene ON, SwitchIn_HandleSoundAndEnd the cry): `max(91, cry + 66, T_back + 70) + 11` ON, `max(91, cry + 66) + 11` OFF.
+  Census before the fix: 343 / 376 species clipped for some nature, worst 95 frames of animation / 111 frames early. 16 dense ROM
+  probes (12 ON, 4 OFF) equal. Opponent mid-battle send-in already waited (no change); the battle-start "Go!" intro does NOT
+  (fixed canonical timeline, plan in the doc section 7) — Kyle's SPOINK is probably that path. Census 0..999 both scenes vs
+  `cln237` baseline: 0 bad battles, only `switch-in` durations rose (ON 929 battles / 1,725 commands, OFF 918 / 1,638), digests
+  equal; differential all 211 traces 38,532 / 38,532 identical (no standard trace has a clipped voluntary send-in). Worker full
+  suite on the src-identical tree: 3 failed = the 3 soak / seam pins it then re-pinned with per-pin reasons (exploring-policy
+  trajectories; #89 Baton Pass pin seed 19 -> 30 after a 0..127 re-scan); its second run hit the 180-min cap. Supervisor on
+  master: the 8 touched test files 145 / 145; the wind-down full suite covers the rest.
 ---
 
 ## 2026-11-01 / 02 — CAX31 daily run (supervisor, Opus 5.5): wind-down: pmn238 / aud238 / cln237 / aud239 / pmf240 folded
