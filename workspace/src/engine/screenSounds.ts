@@ -12,6 +12,14 @@ export function playSelectSe(): void {
   emitSound({ kind: "se", id: SE_SELECT, pan: null });
 }
 
+/** SE_FAILURE (include/constants/songs.h), pan-less `PlaySE`. */
+export const SE_FAILURE = 32;
+
+/** One `PlaySE(SE_FAILURE)` on the tick being collected. */
+export function playFailureSe(): void {
+  emitSound({ kind: "se", id: SE_FAILURE, pan: null });
+}
+
 // ---- aud240b: summary-screen cries, BGM duck and the stop events ----
 
 /** MUS_B_FACTORY: the draft screen's BGM (the ROM probe names the duck target). */
