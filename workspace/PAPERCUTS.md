@@ -31,7 +31,10 @@ history.
   shards; compare OFF arms with `cmp` (~5 min). Census and `npm test` exceed the 600 s tool limit and `npm run typecheck`
   chained with another command is auto-backgrounded at 120 s; run them under nohup with an exit file (~20 min, apx222).
   Hits +1 (2026-10-29 bso225: typecheck ~4 min auto-backgrounded, ~5 min; `lsd194Census.sh` first call hit the 590 s tool cap
-  during tree setup before its resume finished, ~10 min).
+  during tree setup before its resume finished, ~10 min). Hits +1 (2026-11-02 aud240a: typecheck + full `npm test` auto-backgrounded,
+  ~10 min to recover with a polling loop). (2026-11-03 supervisor) a standalone `npx vitest run tests/gate6CoverageManifest.test.ts`
+  OOMs at node's default 4 GB heap; run it with `NODE_OPTIONS=--max-old-space-size=8192` like `npm test` (~3 min). New test files
+  must also be listed by regenerating `tools/report/gate6-coverage-manifest.ts` (rng244 missed it; one red suite, ~5 min).
   (2026-10-30 bso226) The bso225/226 window harness crashes when a window needs ROM frames at or past 2008, and `--drift` has no
   bound (~10 min).
   (2026-10-30 apx227) `rst197CensusDelta.py` has no output-file argument; the cached apx223 ROM scout went stale (Conversion 2 had
