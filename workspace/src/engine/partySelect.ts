@@ -38,6 +38,7 @@ import { createFactoryCorpusPartyMember } from "./factoryCorpusParty.ts";
 import type { LiveBattleMemberView } from "./factoryRentalPresentation.ts";
 import type { SummaryScreenState } from "./summaryScreen.ts";
 import { movePartyMenuCursor, partyMenuDirection, type PartyMenuCursor, type PartyMenuRightColumn } from "./partyMenuCursor.ts";
+import { playFailureSe, playSelectSe } from "./screenSounds.ts";
 
 /** Slot 0 / 1 / 2 or the CANCEL button (party_menu.c's gPartyMenu.slotId; PARTY_SIZE + 1 = CANCEL), shared with the voluntary menu. */
 export type PartySelectCursor = PartyMenuCursor;
@@ -610,9 +611,10 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
     return { ...next, summary };
   }
   if (next.message !== null) {
-    return newKeys.has("A") || newKeys.has("B")
-      ? { ...next, message: null }
-      : next;
+    if (!newKeys.has("A") && !newKeys.has("B")) return next;
+    // TextPrinterWait (text.c:884-899): the refusal message's A / B press.
+    playSelectSe();
+    return { ...next, message: null };
   }
   if (next.submenuOpen) {
     // The SEND OUT / SUMMARY / CANCEL window (Task_TryCreateSelectionWindow -> Task_HandleSelectionMenuInput,
@@ -620,6 +622,8 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
     // the list on the same slot), UP / DOWN move the action cursor without wrapping (sum241; SUMMARY was unreachable before).
     if (newKeys.has("A")) {
       if (next.cursor === "cancel") return next;
+      // APressMuted window: each CursorCb_* (CancelCb1, Summary, SendMon) is the one SE_SELECT of an A.
+      playSelectSe();
       if (next.actionCursor === PARTY_ACTION_CANCEL) return { ...next, submenuOpen: false, actionCursor: 0 };
       if (next.actionCursor === PARTY_ACTION_SUMMARY) return { ...next, summary: openBattlePartySummary(next.cursor, next.summaryMons) };
       const selected = next.party[next.cursor];
@@ -643,19 +647,37 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
       }
       return { ...next, sendOutElapsed: 0 };
     }
-    if (newKeys.has("B")) return { ...next, submenuOpen: false, actionCursor: 0 };
+    if (newKeys.has("B")) {
+      // Task_HandleSelectionMenuInput's MENU_B_PRESSED SE, then CursorCb_Cancel1's.
+      playSelectSe();
+      playSelectSe();
+      return { ...next, submenuOpen: false, actionCursor: 0 };
+    }
     const actionDirection = partyActionWindowDirection(newKeys);
     if (actionDirection === undefined) return next;
-    return { ...next, actionCursor: movePartyActionCursor(next.actionCursor, actionDirection) };
+    const actionCursor = movePartyActionCursor(next.actionCursor, actionDirection);
+    // Menu_ProcessInputNoWrapAround_other sounds only when the cursor moved.
+    if (actionCursor !== next.actionCursor) playSelectSe();
+    return { ...next, actionCursor };
   }
   // HandleChooseMonCancel, PARTY_ACTION_SEND_OUT (party_menu.c:1378-1384): B and A on the CANCEL button only play SE_FAILURE;
   // the menu stays until a replacement is sent out.
-  if (newKeys.has("B")) return next;
+  if (newKeys.has("B") || (newKeys.has("A") && next.cursor === "cancel")) {
+    playFailureSe();
+    return next;
+  }
+  // HandleChooseMonSelection default branch: SE_SELECT, then Task_TryCreateSelectionWindow.
   // DisplaySelectionWindow: InitMenuInUpperLeftCorner(..., cursorPos 0, ...) -- the window always opens on SEND OUT.
-  if (newKeys.has("A")) return next.cursor === "cancel" ? next : { ...next, submenuOpen: true, actionCursor: 0 };
+  if (newKeys.has("A")) {
+    playSelectSe();
+    return { ...next, submenuOpen: true, actionCursor: 0 };
+  }
   const direction = partyMenuDirection(newKeys);
   if (direction === undefined) return next;
-  return { ...next, ...movePartyMenuCursor(next, direction) };
+  const moved = { ...next, ...movePartyMenuCursor(next, direction) };
+  // UpdateCurrentPartySelection sounds only when the slot changed.
+  if (moved.cursor !== next.cursor) playSelectSe();
+  return moved;
 }
 
 function selectedPartyIndex(state: PartySelectState): BattlePartyIndex {

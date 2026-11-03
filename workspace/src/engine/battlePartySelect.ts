@@ -46,6 +46,7 @@ import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
 import { getMonGender, type MonGender } from "./monGender.ts";
 import type { PartySelectState } from "./partySelect.ts";
 import { movePartyMenuCursor, partyMenuDirection, type PartyMenuCursor } from "./partyMenuCursor.ts";
+import { playSelectSe } from "./screenSounds.ts";
 import type { RgbColor } from "./bg.ts";
 import { blendComponentToBlack } from "./paletteFade.ts";
 import { fillFramebuffer, setPixel } from "./framebuffer.ts";
@@ -631,16 +632,23 @@ export function advanceBattlePartySelect(
     }
     return Object.freeze({ ...next, summary });
   }
+  // Task_HandleChooseMonInput / Task_HandleSelectionMenuInput run only once the open palette fade has settled
+  // (!gPaletteFade.active): an earlier press moves our cursor silently, the ROM ignores it.
+  const inputLive = state.openElapsed >= PARTY_SELECT_OPEN_TOTAL_FRAMES;
   if (state.message !== null) {
-    return newKeys.has("A") || newKeys.has("B")
-      ? Object.freeze({ ...next, message: null })
-      : next;
+    if (!newKeys.has("A") && !newKeys.has("B")) return next;
+    // TextPrinterWait (text.c:884-899): the refusal message's A / B press.
+    if (inputLive) playSelectSe();
+    return Object.freeze({ ...next, message: null });
   }
   if (state.submenuOpen) {
     // Task_HandleSelectionMenuInput (party_menu.c:2740-2768) over the three-row window, Menu_ProcessInputNoWrapAround_other's
     // own priority: A runs the row under the action cursor, B runs the last row (CANCEL), UP / DOWN move without wrapping.
     if (newKeys.has("A")) {
       if (state.cursor === "cancel") return next;
+      // The window is InitMenuInUpperLeftCorner(..., APressMuted = TRUE): menu.c plays nothing, so each CursorCb_* is the
+      // one SE_SELECT of an A (CancelCb1, Summary, SendMon; SendMon plays it before TrySwitchInPokemon's refusals).
+      if (inputLive) playSelectSe();
       if (state.actionCursor === PARTY_ACTION_CANCEL) return closeActionWindow(next);
       if (state.actionCursor === PARTY_ACTION_SUMMARY) {
         // CursorCb_Summary -> CB2_ShowPokemonSummaryScreen on this battle-order row.
@@ -675,12 +683,24 @@ export function advanceBattlePartySelect(
         closeElapsed: 0,
       });
     }
-    if (newKeys.has("B")) return closeActionWindow(next);
+    if (newKeys.has("B")) {
+      // Task_HandleSelectionMenuInput's MENU_B_PRESSED SE, then CursorCb_Cancel1's.
+      if (inputLive) {
+        playSelectSe();
+        playSelectSe();
+      }
+      return closeActionWindow(next);
+    }
     const actionDirection = partyActionWindowDirection(newKeys);
     if (actionDirection === undefined) return next;
-    return Object.freeze({ ...next, actionCursor: movePartyActionCursor(state.actionCursor, actionDirection) });
+    const actionCursor = movePartyActionCursor(state.actionCursor, actionDirection);
+    // Menu_ProcessInputNoWrapAround_other sounds only when the cursor moved.
+    if (inputLive && actionCursor !== state.actionCursor) playSelectSe();
+    return Object.freeze({ ...next, actionCursor });
   }
   if (newKeys.has("B") || (newKeys.has("A") && state.cursor === "cancel")) {
+    // HandleChooseMonCancel, default action (PARTY_ACTION_CHOOSE_MON): SE_SELECT, no yes/no for the in-battle menu, close.
+    if (inputLive) playSelectSe();
     return Object.freeze({
       ...next,
       outcome: Object.freeze({ kind: "cancel" }),
@@ -688,12 +708,16 @@ export function advanceBattlePartySelect(
     });
   }
   if (newKeys.has("A")) {
+    // HandleChooseMonSelection default branch: SE_SELECT, then Task_TryCreateSelectionWindow.
+    if (inputLive) playSelectSe();
     // DisplaySelectionWindow: InitMenuInUpperLeftCorner(..., cursorPos 0, ...) -- the window always opens on its first row.
     return Object.freeze({ ...next, submenuOpen: true, submenuOpened: true, actionCursor: 0 });
   }
   const direction = partyMenuDirection(newKeys);
   if (direction === undefined) return next;
   const moved = Object.freeze({ ...next, ...movePartyMenuCursor(state, direction) });
+  // UpdateCurrentPartySelection sounds only when the slot changed (a LEFT / RIGHT that cannot move is silent).
+  if (inputLive && moved.cursor !== state.cursor) playSelectSe();
   // AnimatePartySlot(newSlotId, 1): the moved-to slot starts bouncing on this
   // edge, so its bounce phase resets at the new elapsed.
   return moved.cursor === state.cursor
