@@ -33,6 +33,7 @@ import {
   type LiveBattleMemberView,
   type SummaryAilment,
 } from "./factoryRentalPresentation.ts";
+import { BGM_BATTLE, scheduleSummaryOpenCry, scheduleSummaryStepSounds, type SummarySoundContext } from "./screenSounds.ts";
 import {
   advanceSummaryScreen,
   openSummaryScreen,
@@ -145,8 +146,13 @@ export function buildBattlePartySummaryMons(
   })) as unknown as BattlePartySummaryMons;
 }
 
+function summarySoundContext(mons: BattlePartySummaryMons): SummarySoundContext {
+  return { bgm: BGM_BATTLE, monFor: (slot) => mons[slot] };
+}
+
 /** CursorCb_Summary: the summary opens (SUMMARY_MODE_LOCK_MOVES) on the menu row under the cursor. */
-export function openBattlePartySummary(row: 0 | 1 | 2): SummaryScreenState {
+export function openBattlePartySummary(row: 0 | 1 | 2, mons: BattlePartySummaryMons): SummaryScreenState {
+  scheduleSummaryOpenCry(summarySoundContext(mons), row);
   return openSummaryScreen(row, { mode: "SUMMARY_MODE_LOCK_MOVES", returnTarget: "battleParty" });
 }
 
@@ -161,7 +167,17 @@ export function stepBattlePartySummary(
   newKeys: ReadonlySet<GbaButton>,
   mons: BattlePartySummaryMons,
 ): SummaryScreenState {
-  const next = advanceSummaryScreen(summary);
+  const settled = advanceSummaryScreen(summary);
+  const next = stepSettledBattlePartySummary(settled, newKeys, mons);
+  scheduleSummaryStepSounds(settled, next, summarySoundContext(mons));
+  return next;
+}
+
+function stepSettledBattlePartySummary(
+  next: SummaryScreenState,
+  newKeys: ReadonlySet<GbaButton>,
+  mons: BattlePartySummaryMons,
+): SummaryScreenState {
   if (next.transition || next.pageTransition || next.monTransition || !next.isOpen) return next;
   if (next.moveSelect) {
     const populatedMoves = mons[next.selectedSlot]?.moves.map((move) => move.id !== 0);

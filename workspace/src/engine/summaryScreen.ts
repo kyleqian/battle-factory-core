@@ -19,6 +19,7 @@ import {
   EXIT_FADE_OUT_TICKS,
   FADE_IN_TICKS,
 } from "./paletteFade.ts";
+import { playSelectSe } from "./screenSounds.ts";
 
 export type SummaryPhase = "fadingOut" | "black" | "fadingIn";
 
@@ -316,6 +317,7 @@ export function openSummaryScreen(
 /** pokemon_summary_screen.c's close path, triggered by B on the (unlocked, per SUMMARY_MODE_LOCK_MOVES) Info page. */
 export function requestSummaryScreenExit(state: SummaryScreenState): SummaryScreenState {
   if (!state.isOpen || state.pageTransition || state.monTransition || state.moveSelect) return state;
+  playSelectSe(); // pokemon_summary_screen.c:1559 / :1572
   return {
     ...state,
     transition: { direction: "toDraft", phase: "fadingOut", elapsed: 0 },
@@ -336,6 +338,7 @@ export function requestSummaryPageChange(
   const delta = direction === "right" ? 1 : -1;
   const toPage = PAGE_ORDER[fromIndex + delta];
   if (!toPage) return state;
+  playSelectSe(); // ChangePage: only when the page changes
   return {
     ...state,
     page: toPage,
@@ -375,6 +378,7 @@ export function requestSummaryMonChange(
   const delta = direction === "down" ? 1 : -1;
   const toSlot = state.selectedSlot + delta;
   if (toSlot < 0 || toSlot > maxSlot) return state;
+  playSelectSe(); // ChangeSummaryPokemon: only when the mon changes
   return {
     ...state,
     selectedSlot: toSlot,
@@ -399,6 +403,7 @@ export function requestSummaryMoveSelect(state: SummaryScreenState): SummaryScre
   ) {
     return state;
   }
+  playSelectSe(); // :1565 SwitchToMoveSelection
   return {
     ...state,
     moveSelect: {
@@ -431,6 +436,7 @@ export function requestSummaryMoveSelectionChange(
       (selectedMoveIndex + delta + SUMMARY_MOVE_CANCEL_INDEX + 1) % (SUMMARY_MOVE_CANCEL_INDEX + 1);
     if (selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX || populatedMoves[selectedMoveIndex] !== false) break;
   }
+  playSelectSe(); // ChangeSelectedMove
   const leavesCancel = select.selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX;
   const leaveTicks = summaryMoveCancelLeaveTicks(state.page);
   const entersCancel = selectedMoveIndex === SUMMARY_MOVE_CANCEL_INDEX;
@@ -461,6 +467,7 @@ export function requestSummaryMoveSelectionChange(
 export function requestSummaryMoveSelectClose(state: SummaryScreenState): SummaryScreenState {
   const select = state.moveSelect;
   if (!select || select.phase !== "open" || select.elapsed < 1) return state;
+  playSelectSe(); // CloseMoveSelectMode
   return {
     ...state,
     moveSelect: {

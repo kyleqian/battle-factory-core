@@ -10,12 +10,12 @@
  * (tools/audio/soundEventProbe.py): an event produced while the k-th advance runs reports k, i.e.
  * the same value `FactorySession.frame` has once that tick returns, and the first frame whose capture
  * can show the effect. `id` is the m4a song number for se / bgm / fanfare / stop / fade / duck and the
- * species for a cry. `pan` is the m4a pan (-64 hard left .. 63 hard right) or null when the call has none.
+ * species for a cry (null for a song-less stop). `pan` is the m4a pan (-64 hard left .. 63 hard right) or null when the call has none.
  */
 export interface SoundEvent {
   readonly frame: number;
   readonly kind: "se" | "bgm" | "fanfare" | "cry" | "stop" | "fade" | "duck";
-  readonly id: number;
+  readonly id: number | null;
   readonly pan: number | null;
   /** Cry mode (PlayCry_ByMode), cries only. */
   readonly mode?: number;
@@ -23,6 +23,8 @@ export interface SoundEvent {
   readonly volume?: number;
   /** Cry priority. */
   readonly priority?: number;
+  /** The m4a player a song-less stop acts on (`StopCryAndClearCrySongs`: "cry"); then `id` is null. */
+  readonly player?: string;
 }
 
 /** Write-only: a sink receives events and nothing reads them back into the game. */

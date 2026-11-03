@@ -709,7 +709,14 @@ import {
   type PresentationRngSession,
 } from "./presentationRngHost.ts";
 import { tickLiveMovePresentationRngSession } from "./liveMovePresentationRng.ts";
-import { playSelectSe } from "./screenSounds.ts";
+import {
+  BGM_DRAFT,
+  beginScreenSoundTick,
+  playSelectSe,
+  runScheduledScreenSounds,
+  scheduleSummaryOpenCry,
+  scheduleSummaryStepSounds,
+} from "./screenSounds.ts";
 
 /**
  * Builds the source-owned completed-command chain once the turn-4 lifecycle
@@ -1017,7 +1024,9 @@ export function createInitialState(
  * scope for this stage (S4/S5).
  */
 export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
+  beginScreenSoundTick(state.frame + 1);
   const next = tickEngineState(state, buttons);
+  runScheduledScreenSounds();
   // Presentation seam, after the logical frame: one Random2 step per presented battle frame
   // (presentationRngHost.ts). Reads only the battle's identity edge, never gameplay RNG values.
   // Faithful-random bodies activate on their activation frame after that frame's step (liveMovePresentationRng.ts).
@@ -1027,6 +1036,10 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     liveMoveRandom2PlanContextAt,
   );
   return next.presentationRng === presentationRng ? next : { ...next, presentationRng };
+}
+
+function draftSummarySoundContext(draftScreen: EngineState["draftScreen"]) {
+  return { bgm: BGM_DRAFT, monFor: (slot: number) => draftScreen.rentals[slot] };
 }
 
 function continuationMoveSounds(before: PostwinState, after: PostwinState, direction: 1 | -1): boolean {
@@ -1365,9 +1378,11 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         if (
           summaryScreen.onInfoPage &&
           nextFactorySwap.phaseElapsed >= 63 &&
-          newKeys.has("B")
+          (newKeys.has("B") || newKeys.has("A"))
         ) {
+          const summaryBefore = summaryScreen;
           summaryScreen = requestSummaryScreenExit(summaryScreen);
+          scheduleSummaryStepSounds(summaryBefore, summaryScreen, draftSummarySoundContext(state.draftScreen));
           nextFactorySwap = beginFactorySwapSummaryReturn(nextFactorySwap);
         }
       } else if (
@@ -1399,6 +1414,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
               returnTarget: "factorySwap",
             },
           );
+          scheduleSummaryOpenCry(draftSummarySoundContext(state.draftScreen), summaryScreen.selectedSlot);
         }
       }
       return {
@@ -2633,6 +2649,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     // fresh input is rejected until their task returns input ownership.
   } else if (summaryScreen.isOpen) {
     // pokemon_summary_screen.c Task_HandleInput's exact directional priority.
+    const summaryBefore = summaryScreen;
     if (summaryScreen.moveSelect) {
       const populatedMoves = draftScreen.rentals[summaryScreen.selectedSlot]?.moves.map((move) => move.id !== 0);
       if (newKeys.has("UP")) {
@@ -2646,8 +2663,11 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     else if (newKeys.has("DOWN")) summaryScreen = requestSummaryMonChange(summaryScreen, "down");
     else if (newKeys.has("LEFT")) summaryScreen = requestSummaryPageChange(summaryScreen, "left");
     else if (newKeys.has("RIGHT")) summaryScreen = requestSummaryPageChange(summaryScreen, "right");
-    else if (newKeys.has("A")) summaryScreen = requestSummaryMoveSelect(summaryScreen);
-    else if (newKeys.has("B")) summaryScreen = requestSummaryScreenExit(summaryScreen);
+    else if (newKeys.has("A")) {
+      // Task_HandleInput :1556-1560: A on the Info page closes the summary like B.
+      summaryScreen = summaryScreen.page === "info" ? requestSummaryScreenExit(summaryScreen) : requestSummaryMoveSelect(summaryScreen);
+    } else if (newKeys.has("B")) summaryScreen = requestSummaryScreenExit(summaryScreen);
+    scheduleSummaryStepSounds(summaryBefore, summaryScreen, draftSummarySoundContext(draftScreen));
   } else {
     let monPic = advanceMonPic(draftScreen.monPic);
     let cursorRedraw = advanceCursorRedraw(draftScreen.cursorRedraw);
@@ -2864,6 +2884,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_SUMMARY) {
         playSelectSe(); // :1607
         summaryScreen = openSummaryScreen(draftScreen.cursorPos);
+        scheduleSummaryOpenCry(draftSummarySoundContext(draftScreen), draftScreen.cursorPos);
       } else if (newKeys.has("A") && draftScreen.menuCursorPos === MENU_OPTION_RENT) {
         playSelectSe(); // :1607
         // Select_OptionRentDeselect (:1949-1970): RENT/DESELECT share this one

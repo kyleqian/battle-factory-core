@@ -644,8 +644,8 @@ export function advanceBattlePartySelect(
       if (state.actionCursor === PARTY_ACTION_CANCEL) return closeActionWindow(next);
       if (state.actionCursor === PARTY_ACTION_SUMMARY) {
         // CursorCb_Summary -> CB2_ShowPokemonSummaryScreen on this battle-order row.
-        requireSummaryMons(state);
-        return Object.freeze({ ...next, summary: openBattlePartySummary(state.cursor) });
+        const summaryMons = requireSummaryMons(state);
+        return Object.freeze({ ...next, summary: openBattlePartySummary(state.cursor, summaryMons) });
       }
       const row = state.rows[state.cursor];
       if (row.fainted) {
