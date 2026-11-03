@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { sceneOffPlayerForcedSwitchInDuration } from "../src/engine/switchInTail";
 import {
   advanceBattleResolutionConfirmHandoff,
   createBattleResolutionPresentation,
@@ -176,11 +177,12 @@ describe("ISSUES #78 voluntary-switch presentation seam", () => {
     if (switchIn?.type !== "switch-in") {
       throw new Error("battle resolution voluntary switch has no switch-in command");
     }
-    // The real CONTROLLER_SWITCHINANIM 91-frame span gates the opponent's move
-    // (plus the 11-frame waitstate/move-load hold to the "used" message).
-    expect(switchIn.timing).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
+    // The real CONTROLLER_SWITCHINANIM chain gates the opponent's move (plus the 11-frame waitstate/move-load hold to the "used"
+    // message). vis243a: the span is the species' ROM wait (Scene OFF here: HARIYAMA is cry-bound, 113), not a fixed 91.
+    const span = sceneOffPlayerForcedSwitchInDuration(336);
+    expect(switchIn.timing).toEqual({ minimumFrames: span });
     expect(battleResolutionCommandDuration(switchIn, resolution.field))
-      .toBe(SWITCH_IN_SPAN_FRAMES + SWITCH_IN_WAITSTATE_HOLD_FRAMES);
+      .toBe(span + SWITCH_IN_WAITSTATE_HOLD_FRAMES);
 
     // The switch-in command owns the field for the whole span with the
     // incoming mon already swapped in (mid-battle switch-in view active).

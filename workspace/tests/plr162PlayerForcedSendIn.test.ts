@@ -15,7 +15,7 @@ import { liveMoveRandom2PlanContextAt } from "../src/engine/battleResolutionPres
 import { createPresentationRngSession } from "../src/engine/presentationRngHost";
 import { tickLiveMovePresentationRngSession } from "../src/engine/liveMovePresentationRng";
 import { PARTY_LIST_INPUT_ELAPSED } from "../src/engine/partySelect";
-import { SWITCH_IN_SPAN_FRAMES, SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation";
+import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation";
 import {
   opponentSwitchInDuration, sceneOffPlayerForcedSwitchInDuration, sceneOffPlayerForcedSwitchInHealthboxSlideElapsed,
   sceneOffPlayerForcedSwitchInVisualDelay, sceneOnPlayerForcedSwitchInDuration,
@@ -45,9 +45,8 @@ describe("plr162: the Scene OFF forced player send-in model", () => {
   it("switchInTiming: only the Scene OFF forced player send-in moves", () => {
     expect(switchInTiming(0, 157, false, "TYPHLOSION", true)).toEqual({ minimumFrames: 174 - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
     expect(switchInTiming(0, 16, false, "PIDGEY", true)).toEqual({ minimumFrames: 91 - SWITCH_IN_WAITSTATE_HOLD_FRAMES });
-    for (const [sceneOn, forced] of [[false, false], [true, false]] as const) {
-      expect(switchInTiming(0, 157, sceneOn, "TYPHLOSION", forced)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
-    }
+    // vis243a: the voluntary Scene OFF send-in waits for the cry like the forced one (+ the 11-frame waitstate hold on top).
+    expect(switchInTiming(0, 157, false, "TYPHLOSION", false)).toEqual({ minimumFrames: 174 });
   });
 });
 
@@ -139,10 +138,13 @@ describe.each([["Roar", 23], ["Whirlwind", 76]] as const)("plr162: %s on the pla
         settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES,
       });
     }
+    // vis243a: the other player send-ins are cry-bound too (forced duration + the waitstate hold on top).
     for (const { command } of player.filter((s) => !isForced(s))) {
-      expect(command.timing).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
-      expect(command.healthboxSlideElapsed).toBeUndefined();
-      expect(command.sendInVisualDelay).toBeUndefined();
+      expect(command.timing).toEqual({ minimumFrames: sceneOffPlayerForcedSwitchInDuration(command.incoming.species) });
+      if (command.incoming.species !== SPECIES_CASTFORM) {
+        expect(command.healthboxSlideElapsed).toBeUndefined();
+        expect(command.sendInVisualDelay).toBeUndefined();
+      }
     }
   }, 120000);
 
@@ -160,9 +162,11 @@ describe.each([["Roar", 23], ["Whirlwind", 76]] as const)("plr162: %s on the pla
       });
     }
     for (const { command } of player.filter((s) => !isForced(s))) {
-      expect(command.timing).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
-      expect(command.healthboxSlideElapsed).toBeUndefined();
-      expect(command.sendInVisualDelay).toBeUndefined();
+      expect(command.timing).toEqual({ minimumFrames: sceneOnPlayerForcedSwitchInDuration(command.incoming.species, command.incoming.personality) });
+      if (command.incoming.species !== SPECIES_CASTFORM) {
+        expect(command.healthboxSlideElapsed).toBeUndefined();
+        expect(command.sendInVisualDelay).toBeUndefined();
+      }
     }
     for (const { command } of switchIns(seed, "on").filter((s) => s.command.battler === 1)) {
       expect(command.timing).toEqual({ minimumFrames: opponentSwitchInDuration(command.incoming.species) - SWITCH_IN_WAITSTATE_HOLD_FRAMES });

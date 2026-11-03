@@ -9,7 +9,7 @@ import {
   SEND_IN_TAIL_SPECIES,
   sendInTail,
 } from "../src/data/sendInTail.ts";
-import { SWITCH_IN_SPAN_FRAMES, SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation.ts";
+import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../src/engine/battleResolutionPresentation.ts";
 import {
   midBattleSwitchFadeAt,
   midBattleSwitchInAt,
@@ -17,7 +17,7 @@ import {
   midBattleSwitchSendInFadeAt,
   midBattleSwitchSendInParticlesAt,
 } from "../src/engine/battleResolutionPresentationRender.ts";
-import { opponentSwitchInDuration, opponentSwitchInHealthboxSlideElapsed } from "../src/engine/switchInTail.ts";
+import { opponentSwitchInDuration, opponentSwitchInHealthboxSlideElapsed, sceneOnPlayerForcedSwitchInDuration } from "../src/engine/switchInTail.ts";
 
 const FX = "tools/integration/fixtures";
 const json = (path: string) => JSON.parse(readFileSync(`${FX}/${path}`, "utf8"));
@@ -95,14 +95,15 @@ describe("snd145 live switch-in tail (R2 timing, R3 send-in fade / particles)", 
   // TAILLOW (function-dominated, 70 / 96: dense Scene ON 0 px), SPHEAL (frame-dominated, 234), SALAMENCE (delayed), TYPHLOSION
   // (delayed + cry-bound message +50), CASTFORM (+1).
   const cases: [number, number, number][] = [[304, 70, 96], [341, 234, 260], [397, 145, 171], [157, 95, 145], [385, 139, 165]];
-  it("gives every opponent switch-in the species' slide start and duration; the player keeps 91 + 11 and slide 66", () => {
+  it("gives every opponent switch-in the species' slide start and duration; the player's window is the forced rule + 11 (vis243a) with slide 66", () => {
     for (const [species, slide, total] of cases) {
       expect([opponentSwitchInHealthboxSlideElapsed(species), opponentSwitchInDuration(species)]).toEqual([slide, total]);
       expect(switchInTiming(1, species).minimumFrames + SWITCH_IN_WAITSTATE_HOLD_FRAMES).toBe(total);
       expect(midBattleSwitchInAt(slide - 1, 1, slide).healthboxDx).toBeNull();
       expect(midBattleSwitchInAt(slide, 1, slide).healthboxDx).toBe(-110);
       expect(midBattleSwitchInAt(slide + 22, 1, slide).healthboxDx).toBe(0);
-      expect(switchInTiming(0, species)).toEqual({ minimumFrames: SWITCH_IN_SPAN_FRAMES });
+      // vis243a: the player send-in is back-animation / cry-bound too (Scene ON default), not the old calibrated 91.
+      expect(switchInTiming(0, species)).toEqual({ minimumFrames: sceneOnPlayerForcedSwitchInDuration(species, 0) });
     }
     // Scene OFF skips the front animation (HITMARKER_NO_ANIMATIONS -> SKIP_FRONT_ANIM): the calibrated span stays.
     // offs152: Scene OFF opponent send-ins use the OFF tail (tests/offs152SendInTailOff.test.ts), not the calibrated 91-frame span.
