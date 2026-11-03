@@ -46,6 +46,7 @@ describe("audio probe fixtures", () => {
       "summary-draft-window.json",
       "summary-party-weak-window.json",
       "summary-party-window.json",
+      "summary-swap-window.json",
       "swap-decline-window.json",
       "swap-window.json",
     ]);

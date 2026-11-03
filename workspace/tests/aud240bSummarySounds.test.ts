@@ -70,6 +70,7 @@ const WINDOWS = [
   "summary-close-at-cry",
   "summary-party-window",
   "summary-party-weak-window",
+  "summary-swap-window",
 ] as const;
 
 describe("summary screen sounds match the ROM (aud240b)", () => {
@@ -106,7 +107,7 @@ describe("summary screen sounds match the ROM (aud240b)", () => {
   });
 
   it("sound collection never changes engine state", () => {
-    for (const name of ["summary-draft-window", "summary-party-window"] as const) {
+    for (const name of ["summary-draft-window", "summary-party-window", "summary-swap-window"] as const) {
       const rom = fixture(name);
       const withSound = collect(rom, true).state;
       const without = collect(rom, false).state;
