@@ -1,0 +1,970 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "trace in-battle party SUMMARY (turn15-party-select prefix + summary route), frames 20259-20590",
+ "profile": "battle-scene-on",
+ "frames": 332,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
+ },
+ "mode": "step",
+ "steps": 22786500,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 32.1,
+ "windowSeconds": 32.1,
+ "events": [
+  {
+   "frame": 20320,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayCry_ByMode",
+   "tracks": 65535,
+   "volume": 85
+  },
+  {
+   "frame": 20320,
+   "kind": "cry",
+   "id": 240,
+   "name": "SPECIES_MAGBY",
+   "pan": 0,
+   "volume": 120,
+   "priority": 10,
+   "mode": "NORMAL",
+   "via": "PlayCry_ByMode"
+  },
+  {
+   "frame": 20348,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 20349,
+   "kind": "stop",
+   "id": null,
+   "name": null,
+   "pan": null,
+   "player": "cry",
+   "via": "StopCryAndClearCrySongs"
+  },
+  {
+   "frame": 20349,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsCryPlaying",
+   "tracks": 65535,
+   "volume": 256
+  },
+  {
+   "frame": 20369,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayCry_ByMode",
+   "tracks": 65535,
+   "volume": 85
+  },
+  {
+   "frame": 20369,
+   "kind": "cry",
+   "id": 95,
+   "name": "SPECIES_ONIX",
+   "pan": 0,
+   "volume": 120,
+   "priority": 10,
+   "mode": "WEAK",
+   "via": "PlayCry_ByMode"
+  },
+  {
+   "frame": 20440,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 20441,
+   "kind": "stop",
+   "id": null,
+   "name": null,
+   "pan": null,
+   "player": "cry",
+   "via": "StopCryAndClearCrySongs"
+  },
+  {
+   "frame": 20441,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsCryPlaying",
+   "tracks": 65535,
+   "volume": 256
+  },
+  {
+   "frame": 20461,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayCry_ByMode",
+   "tracks": 65535,
+   "volume": 85
+  },
+  {
+   "frame": 20461,
+   "kind": "cry",
+   "id": 240,
+   "name": "SPECIES_MAGBY",
+   "pan": 0,
+   "volume": 120,
+   "priority": 10,
+   "mode": "NORMAL",
+   "via": "PlayCry_ByMode"
+  },
+  {
+   "frame": 20501,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 20503,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsCryPlaying",
+   "tracks": 65535,
+   "volume": 256
+  },
+  {
+   "frame": 20523,
+   "kind": "stop",
+   "id": null,
+   "name": null,
+   "pan": null,
+   "player": "cry",
+   "via": "StopCryAndClearCrySongs"
+  },
+  {
+   "frame": 20523,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "ShowPokemonSummaryScreenHandleDeoxys",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  }
+ ],
+ "calls": [
+  {
+   "frame": 20320,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "PlayCry_ByMode",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 20320,
+   "fn": "PlayCryInternal",
+   "via": "PlayCry_ByMode",
+   "r0": 240,
+   "r1": 0
+  },
+  {
+   "frame": 20348,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 4294967295
+  },
+  {
+   "frame": 20349,
+   "fn": "m4aMPlayStop",
+   "via": "StopCryAndClearCrySongs",
+   "r0": 50361248,
+   "r1": 136054576
+  },
+  {
+   "frame": 20349,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "IsCryPlaying",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 20369,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "PlayCry_ByMode",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 20369,
+   "fn": "PlayCryInternal",
+   "via": "PlayCry_ByMode",
+   "r0": 95,
+   "r1": 0
+  },
+  {
+   "frame": 20440,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 4294967295
+  },
+  {
+   "frame": 20441,
+   "fn": "m4aMPlayStop",
+   "via": "StopCryAndClearCrySongs",
+   "r0": 50361312,
+   "r1": 136054576
+  },
+  {
+   "frame": 20441,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "IsCryPlaying",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 20461,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "PlayCry_ByMode",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 20461,
+   "fn": "PlayCryInternal",
+   "via": "PlayCry_ByMode",
+   "r0": 240,
+   "r1": 0
+  },
+  {
+   "frame": 20501,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 33782194
+  },
+  {
+   "frame": 20503,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "IsCryPlaying",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 20523,
+   "fn": "m4aMPlayStop",
+   "via": "StopCryAndClearCrySongs",
+   "r0": 50361312,
+   "r1": 65535
+  },
+  {
+   "frame": 20523,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "ShowPokemonSummaryScreenHandleDeoxys",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  }
+ ],
+ "from": 20258,
+ "trace": {
+  "route": "canonical-recorded",
+  "battleScene": "on",
+  "segments": [
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 28,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 4,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 36,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "RIGHT"
+    ]
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 28,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 4,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 36,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "RIGHT"
+    ]
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 28,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 4,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 70,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 130,
+    "buttons": []
+   },
+   {
+    "frames": 8,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 96,
+    "buttons": []
+   },
+   {
+    "frames": 24,
+    "buttons": []
+   },
+   {
+    "frames": 162,
+    "buttons": []
+   },
+   {
+    "frames": 54,
+    "buttons": []
+   },
+   {
+    "frames": 100,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 196,
+    "buttons": []
+   },
+   {
+    "frames": 14,
+    "buttons": []
+   },
+   {
+    "frames": 210,
+    "buttons": []
+   },
+   {
+    "frames": 60,
+    "buttons": []
+   },
+   {
+    "frames": 100,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 144,
+    "buttons": []
+   },
+   {
+    "frames": 180,
+    "buttons": []
+   },
+   {
+    "frames": 60,
+    "buttons": []
+   },
+   {
+    "frames": 80,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 980,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 900,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 600,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 750,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "RIGHT"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1400,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "LEFT"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1400,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1400,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 900,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1200,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 199
+   },
+   {
+    "buttons": [
+     "DOWN"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 14
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 39
+   },
+   {
+    "buttons": [
+     "DOWN"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 10
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 90
+   },
+   {
+    "buttons": [
+     "UP"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 60
+   },
+   {
+    "buttons": [
+     "UP"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 30
+   },
+   {
+    "buttons": [
+     "DOWN"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 60
+   },
+   {
+    "buttons": [
+     "B"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 120
+   }
+  ]
+ }
+}

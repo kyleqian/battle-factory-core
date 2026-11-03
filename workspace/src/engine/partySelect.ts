@@ -621,7 +621,7 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
     if (newKeys.has("A")) {
       if (next.cursor === "cancel") return next;
       if (next.actionCursor === PARTY_ACTION_CANCEL) return { ...next, submenuOpen: false, actionCursor: 0 };
-      if (next.actionCursor === PARTY_ACTION_SUMMARY) return { ...next, summary: openBattlePartySummary(next.cursor) };
+      if (next.actionCursor === PARTY_ACTION_SUMMARY) return { ...next, summary: openBattlePartySummary(next.cursor, next.summaryMons) };
       const selected = next.party[next.cursor];
       if (!selected.legal) {
         // TrySwitchInPokemon (party_menu.c:5811-5823) tests the slot's HP

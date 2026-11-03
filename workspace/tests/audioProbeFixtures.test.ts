@@ -33,7 +33,7 @@ const files = readdirSync(fixtureDir).filter((f) => f.endsWith(".json")).sort();
 const fixtures = files.map((f) => [f, JSON.parse(readFileSync(new URL(f, fixtureDir), "utf8")) as Fixture] as const);
 
 describe("audio probe fixtures", () => {
-  it("covers the draft, swap and decline windows and both scene profiles of the battle windows", () => {
+  it("covers the draft, swap, decline and summary windows and both scene profiles of the battle windows", () => {
     expect(files).toEqual([
       "battle-intro-window-off.json",
       "battle-intro-window.json",
@@ -41,6 +41,12 @@ describe("audio probe fixtures", () => {
       "battle-window.json",
       "draft-trace-window.json",
       "draft-window.json",
+      "summary-close-at-cry.json",
+      "summary-close-during-cry.json",
+      "summary-draft-window.json",
+      "summary-party-weak-window.json",
+      "summary-party-window.json",
+      "summary-swap-window.json",
       "swap-decline-window.json",
       "swap-window.json",
     ]);
@@ -106,7 +112,9 @@ describe("audio probe fixtures", () => {
             expect(e.kind, JSON.stringify(e)).toBe("stop");
             expect(Number.isInteger(e.id) && e.name !== null, JSON.stringify(e)).toBe(true);
           } else {
-            expect(PLAYERS, JSON.stringify(e)).toContain(e.player);
+            // StopCryAndClearCrySongs before any cry has played reads a null gMPlay_PokemonCry (always a no-op)
+            if (e.player === "0x00000000") expect(e.noop, JSON.stringify(e)).toBe(true);
+            else expect(PLAYERS, JSON.stringify(e)).toContain(e.player);
           }
           // a player with no song loaded has no id/name (e.g. stopping an idle SE3)
           expect(e.id === null, JSON.stringify(e)).toBe(e.name === null);
