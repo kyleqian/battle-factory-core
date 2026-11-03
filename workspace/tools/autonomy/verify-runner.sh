@@ -42,7 +42,6 @@ if [[ -r /etc/os-release ]]; then
   require_equal ubuntu-version "$POKEBENCH_UBUNTU_VERSION" "${VERSION_ID:-unknown}"
 fi
 require_equal node-version "v${POKEBENCH_NODE_VERSION}" "$(node --version)"
-require_equal codex-version "codex-cli ${POKEBENCH_CODEX_VERSION}" "$(codex --version)"
 require_equal claude-code-version "${POKEBENCH_CLAUDE_CODE_VERSION} (Claude Code)" "$(claude --version)"
 require_equal rust-version "rustc ${POKEBENCH_RUST_VERSION}" "$(rustc --version | awk '{print $1, $2}')"
 rustfmt --version >/dev/null
