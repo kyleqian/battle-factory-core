@@ -855,12 +855,15 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // voluntary walk maps the rolled raw party index to its menu row): a new exploring trajectory, 42311 / battle 3 turn 14 -> 37753 / battle 2 turn 26.
       // vis243a (the voluntary player send-in waits for the species' back animation / cry; exploring policy's press timings move with the
       // presentation clock, as at fsw235): 37753 / turn 26 -> 38729 / turn 28; same battle 2 / roundLost / depth 1.
-      frames: 38729,
+      // aud240b (A on the summary Info page closes it, pokemon_summary_screen.c:1556-1560, draft + swap summaries; the exploring
+      // policy presses A there): 38729 / turn 28 -> 43417 / turn 39; same battle 2 / roundLost / depth 1. Supervisor-checked: with both
+      // A-close sites undone the old pin passes again.
+      frames: 43417,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
       battle: 2,
-      turn: 28,
+      turn: 39,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
