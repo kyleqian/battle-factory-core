@@ -21366,7 +21366,9 @@ export function renderSceneOnMovePresentation(
       battleBg.palette,
     );
     const attackerCorner = view.attacker.geometry.spriteCorner;
-    const attackerClipY = opponentToPlayer
+    // The ROM draws the full moving copies; only the player's healthbox covers their feet.
+    // The corner.y + 55 clip is the staged LEDYBA calibration and cuts taller opponent sprites.
+    const attackerClipY = opponentToPlayer && !liveField
       ? attackerCorner.y + 55
       : 160;
     // The target is drawn first so the attacker's ellipse slides over it.
