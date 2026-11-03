@@ -7,8 +7,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-02 / 03 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Mac 851ee1f4c / aud240a / aud240b / vis243a / agi245 / rng244 / cln238 / cleanup 6 folded
 
-- **State:** master `c88d897f2`+ (agi245 merge); the soak / play gates ran on src `5d39f2c79`; agi245 (one render line) got its own
-  full suite + build + Scene ON render checks (below).
+- **State:** master `54aafa87d`+ (final src == agi245 merge `c88d897f2`); the long soak / play gates ran on src `5d39f2c79`; agi245
+  (one render line) got its own full suite + build + Scene ON render checks (below). Tree clean, no active workers.
 - **Folded:** Mac `worker/lib-v2-mac` tip `851ee1f4c` (sum241 battle party action window + SUMMARY; spn242 species names keep
   apostrophes / periods / gender symbols, summary portraits keyed by SPECIES_) as merge `0f39a60`. master had only .md changes since
   the Mac base `c5b7861e0`, so the merged non-docs tree == `851ee1f4c` (checked by `git diff`); the Mac's full suite 14,363 / 0
@@ -64,6 +64,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   CROBAT, DRAGONITE, LEDYBA, SUNKERN (before: AIPOM 62 frames / 14,833 px); new fixture `agility-opponent-aipom-player-onix` +
   `tests/animation/agilityOpponentClip.test.ts` (supervisor: fails with the fix undone); differential 641 / 641 identical;
   Agility / ont193 / scd112 tests 26 / 26. Quick Attack / Aerial Ace keep the 74 clip (LEDYBA-like species unverified, follow-up).
+  **agi245 gates** (`sv-20261102/gates-agi245/`, tree `c88d897f2`): typecheck 0; full suite 1,785 files, 14,441 passed, 1 failed =
+  gate6 manifest missing rng244's new test (regenerated `54aafa87d`, rerun 7 / 7); build 0; play:random 3 min / scene: ON 16
+  battles / 9 swaps, OFF 26 / 10, 0 page errors / overlays / contained / divergences; Scene ON full vary-rng 0:8 `--render-every 8`
+  **8 / 8** (all `budget`).
 - **Scout:** agi245 (`docs/agi245-scout.md`, read-only): Kyle's Agility clip is ours, not the ROM's — the live path still uses a
   LEDYBA-calibrated clip row `corner.y + 55` (`battleScene.ts:21369`, supervisor-read), cutting 257 opponent species; a 160 clip
   gives 0 px on 6 species vs the ROM.
