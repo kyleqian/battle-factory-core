@@ -20,94 +20,55 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-02 ~07:00 UTC wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-03 ~05:30 UTC wind-down; PROGRESS.md top entry has details)
 
-- Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`; a consumer Vite app
-  needs its `manualChunks` recipe). The Mac's `worker/lib-v2-mac` is folded up to `059579e32` (pmn238, the attendant's
-  "Nth match is next!" line); if the Mac moves that branch again, merge the new tip the same way (typecheck, its touched tests,
-  full suite).
-- **Audio (S11):** design accepted (`docs/s11-audio-design.md`, incl. "Supervisor acceptance"); probe step 1 (aud237 / aud238a),
-  step 2 source table (aud238, `src/data/gen/audio-sound-sources.json`, `tests/audioSoundSources.test.ts`) and step 3 event type +
-  sink (aud239, `src/audio/soundEvents.ts`: `emitSound`, `FactorySession.attachSoundSink`, `animSoundPan`) are folded. No emitter
-  exists yet, so every sink receives nothing.
-- **Cleanup step 1 done** (cln237, `docs/cleanup-cln237-manifest.md`): 2,103 of 28,419 files under tools/integration +
-  tools/compare deleted. The rest is kept because kept tests read the fixtures by name; cleanup step 5 (drop frame-pin tests the
-  census supersedes) is what frees more, rerun `tools/cleanup/keepClosure.ts` after it.
-- ISSUES #190 fixed (pmf240): party-menu cards draw FNT / ailment icons per GetMonAilment (FNT, then PSN, PAR, SLP, FRZ, BRN).
-- Census baseline for the next delta: `.integration/validation/sv-20261101/cln237-evidence/census/{on,off}-4f6fa87e4` (== final
-  master both scenes; pmf240 / aud239 do not touch battle commands; supervisor-verified 20 / 20 shards vs pmo239's).
+- Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
+  `worker/lib-v2-mac` is folded up to `851ee1f4c` (sum241 battle party action window + SUMMARY, spn242 species names); if the
+  Mac moves that branch again, merge the new tip the same way (typecheck, its touched tests, full suite).
+- **Audio (S11):** design accepted (`docs/s11-audio-design.md`); steps 1-3 folded (probe, source table, event type + sink);
+  step 4 screens: **aud240a** (draft / swap / dialog-menu SE_SELECT, `docs/aud240a-screen-sounds.md`) and **aud240b** (summary
+  SEs, cries, BGM duck / restore, cry stop; A on the Info page closes the summary, `docs/aud240b-summary-sounds.md`) folded.
+  Emitters live in `src/engine/screenSounds.ts`. Prove windows in probe **step mode**: the hybrid `--fast` mode drops no-op SEs.
+- **Cleanup:** step 1 (cln237), step 2 (cln238a: 8 unread ledgers to `docs/archive/`; cln238b: ROADMAP 169 lines, ISSUES open
+  only, old copies `docs/archive/{ROADMAP,ISSUES}-pre-cln238.md`) and step 6 (74 merged `worker/*` names moved to
+  `refs/archive/worker-merged-20261103/`; kept: `worker/lib-v2-mac`, the 3 unmerged exs207 refs) are done.
+- **User reports:** 4b(a) mid-battle voluntary send-in fixed (vis243a, `docs/vis243a-sendin-census.md`); 4b(c) rate check
+  is permanent (`tests/rng244OutcomeRates.test.ts`, 12 checks, ~43 s).
+- Census baseline for the next delta: `.integration/validation/sv-20261102/vis243a-evidence/census-final/{on,off}-dac9cd2fe`
+  (vis243a's tree; aud240b / rng244 do not build battle commands, not re-run).
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
-0. **First, merge `worker/lib-v2-mac` at 851ee1f4c (Mac, 2026-11-02; user-found on the website, live there now).** Four
-   commits on master c5b7861e0, none touching docs/ledgers except the gate6 manifest:
-   - 788f5c00a **sum241**: both in-battle party menus get the ROM's action-window cursor (SHIFT or SEND OUT / SUMMARY /
-     CANCEL, no wrap, B = CANCEL, Task_HandleSelectionMenuInput party_menu.c:2740). Before this, Up/Down did nothing and A
-     always meant SHIFT. SUMMARY opens the battle summary (CB2_ShowPokemonSummaryScreen :2777: battle order,
-     SUMMARY_MODE_LOCK_MOVES, live HP / status / PP) and returns to the last viewed mon with the window open.
-     New `battlePartySummary.ts` / `battlePartySummaryRender.ts`; `battlePartySelect.ts`, `partySelect.ts`, `core.ts`,
-     `summaryInfoPage.ts`, `factoryRentalPresentation.ts` touched.
-   - d94c78283 gate6 manifest.
-   - 635f8568e contain213 helper: its forced-menu walk pressed DOWN every 48 frames; that DOWN now lands on SUMMARY.
-   - 851ee1f4c **spn242**: the charmap extractor skipped the ROM's escaped ASCII apostrophe, so FARFETCH'D, KING'S ROCK and
-     53 move / 4 ability descriptions lost it. Summary portraits were keyed by display name, which left FARFETCH'D / MR. MIME /
-     NIDORAN♀♂ blank; they are keyed by SPECIES_ constant now.
-   Mac gates on 851ee1f4c: full suite 14,363 / 0 (re-run independently by the top layer), census 1000 / 1000 both scenes,
-   differential 1,648 captures identical, soak pins unmoved, builds green. The top layer played both menus live and checked
-   SUMMARY / CANCEL / SHIFT / SEND OUT itself. **aud240 puts party-menu and summary SEs into these same input handlers, so
-   merge this before briefing aud240.** Named approximations (fade frames) are in the sum241 commit message: timing work,
-   item 5.
-1. **Audio (S11)** — the main program for several runs: follow `docs/s11-audio-design.md` section 7 from the first unfinished
-   step (aud240, screens: draft / swap / summary / party menu / lobby SEs and lobby BGM / fanfares, proven by ROM probe windows;
-   emitters call `emitSound` in the screen's existing input handler; site-by-site map + suggested split aud240a..d in
-   `docs/aud240-scout.md`, unverified). Each step's acceptance is in the doc.
-2. **Cleanup (one commit per step, each verified by typecheck + full suite + build), in this order:** (1) DONE (cln237);
-   (2) scout ready: `docs/cln238-ledger-scout.md` (ANIMATION_COVERAGE.json stays at the root, ~280 readers; 24 tests read
-   ANIMATION_LATCHES.md; run-supervisor.sh / run-subagent.sh name the ledgers);
-   root ledgers → README, AGENTS, ROADMAP (≤ 200 lines), ISSUES (open only), PROGRESS (last 3 entries), the rest to
-   `docs/archive/` unchanged; (3) remove Codex / DeepSeek / OpenCode paths and the animation / rust lane supervisors — one
-   supervisor script, one worker launcher, Claude only (keep `run-supervisor.sh --headless` and `tools/run-subagent.sh` working:
-   the daily cron depends on them); (5) `npm run test:gate` ≤ 5 min for workers and drop frame-pin tests the census supersedes,
-   full suite nightly; (4) `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs` + its adapter / tests;
-   (6) prune merged `worker/*` refs; (7) evidence stops going into git.
-3. **Bundle hygiene** (rest of Phase 3; scout with import chains, sizes and a step split: `docs/bnd-scout.md`): test-only JSON out of `src/`, sprite pixels out of the headless graph
+1. **Audio (S11)** — the main program for several runs: `docs/s11-audio-design.md` section 7. Next: **aud240c** party menu
+   (voluntary + forced; the action window now exists from sum241: double SE on submenu A / B, SE_FAILURE on the forced SEND_OUT
+   cancel; party-route SEs at 20191 / 20206 / 20246 / 20257 on `turn15-party-select`), then **aud240d** Lobby / PreBattleRoom /
+   BattleRoom script SEs + fanfares + lobby BGM (first fix the aud238 extractor: `MUS_OBTAIN_B_POINTS` 459 via
+   `Std_MsgboxGetPoints` is missing), then aud241 (battle controller family). Map: `docs/aud240-scout.md` (unverified).
+2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (6) DONE;
+   (3) remove Codex / DeepSeek / OpenCode paths and the animation / rust lane supervisors — one supervisor script, one worker
+   launcher, Claude only (keep `run-supervisor.sh --headless` and `tools/run-subagent.sh` working: the daily cron depends on them;
+   the lane-named root ledgers ANIMATION_* / RUST_* go to `docs/archive/` in the same step, except ANIMATION_COVERAGE.json and
+   ANIMATION_LATCHES.md, which ~280 tests / tools read as evidence paths; fix the stale "Stage 8 reset in ROADMAP.md" prompt
+   text in `run-agent.sh:85` / `tools/run-subagent.sh:584`); (5) `npm run test:gate` <= 5 min for workers and drop frame-pin
+   tests the census supersedes, full suite nightly; (4) `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs`
+   + its adapter / tests; (7) evidence stops going into git.
+3. **Bundle hygiene** (scout: `docs/bnd-scout.md`): test-only JSON out of `src/`, sprite pixels out of the headless graph
    (`battleCommandFieldArt`, 11.8 MB chunk), lazy-loaded sprite sheets and large tables, gamepad input through `press` / `release`.
 4. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
    `--lobby-new-challenge` run); Scene ON soak `--render-every 8` 0:16..0:30 plus a `--render-every 1` sample; varied-RNG sweeps;
    vanilla both scenes. Every overlay / pageerror / CRASH / HANG becomes a fix step before anything else.
-4b. **User-reported visuals (Kyle, playing the website, 2026-11-02): one step per run, after that run's audio + cleanup
-   steps and ahead of item 5.** Both were reproduced on the Mac by replaying Kyle's own trace (challenge
-   `09162a56c8e3bc089559492b246fc007`, seeds 432975742 / 148979268, engine 059579e32) through `FactorySession.replayStep`
-   + `render()`; frames are in the Mac session scratchpad. Fix each as a **family**, not per species, and prove it against the ROM:
-   - **(a) Send-in animations cut short.** Kyle's Koffing (player, mid-battle "Go! KOFFING!" after a voluntary switch) grows
-     to its large GROW pose, holds frozen for about 9 frames (no pixel change on app frames 10539..10547), then snaps to normal
-     size in one frame (10548) as the next turn's "Foe AIPOM used…" starts. Kyle saw the same on an opponent Spoink
-     (`ANIM_H_JUMPS_V_STRETCH_TWICE`). Likely class: the app's send-in window is a fixed length. The ROM waits for the species
-     animation to end before it goes on (bso226 found the same for the battle-start "Go!": 39..98 frames late on long
-     animations). So any back or front animation longer than the window is clamped, then dropped. Expected fix shape: the
-     send-in phase ends when the species animation ends (both sides, mid-battle and battle-start), not a per-species patch.
-     First step: census every Factory species' back and front animation length against the window, to list who is clipped.
-   - **(b) Agility clips the user's lower rows.** Kyle's opponent Aipom using Agility: the moving copies are cut at a fixed
-     horizontal line through the feet. A small piece of the tail tip stays drawn at the rest position while the copies move.
-     It is fine at rest before and after. Likely class: the monbg / clone path copies a fixed-height region, so tall species
-     (art that reaches the bottom of the 64×64 frame) lose their bottom rows. Agility was proven only on LEDYBA / ONIX
-     (`docs/animation-integration-readiness.md`). Check Aipom against the ROM first (it may be the ROM's own clip). Then sweep
-     the monbg-using moves with two or three tall species on both sides.
-   - **(c) Rate check for random outcomes (small; can ride with any step).** Kyle saw Nidorino's Double Kick crit on the
-     second hit twice in a row (both real in the replay: vs Mawile 13 then 60, vs Aipom 31 then 82; Focus Band, no crit boost).
-     The Mac ran the committed `BattleScript_EffectDoubleHit` from random RNG starts (the `battleScriptMultiHitFamily.test.ts`
-     harness; the ledger reasons give hit order) and counted crits per hit. Result: no bug. The draw order is fixed:
-     acc > crit > dmg > crit > dmg > effect, in every one of 6,000 runs. Hit 2's crit is a fresh roll, so it is exactly 1/16
-     for a uniform start. Measured over 200,000 runs: hit 1 6.22 %, hit 2 6.40 %, both 0.394 % (independent 0.391 %).
-     Kyle's pair was a 1-in-256 run of luck. Make the check permanent and general:
-     - a test that, for each RNG-consuming draw site (crit per hit index, accuracy, damage roll, multi-hit count, secondary
-       effect chance, Quick Claw, AI score rolls), runs the real script from N random RNG starts;
-     - it compares each outcome rate with the source formula (binomial bound, for example 5 SD at N = 20,000);
-     - it also checks that consecutive rolls in one action are not tied (hit-2 crit given hit-1 crit).
-     This catches the class "a roll is reused, skipped or drawn from the wrong place" without needing a lucky player report.
+4b. **User-reported visuals (Kyle, website, 2026-11-02): one step per run, after that run's audio + cleanup steps.**
+   - (a) remainder: the **battle-start "Go!" intro** still runs a fixed canonical timeline instead of waiting for the species
+     animations (`Intro_WaitForShinyAnimAndHealthbox`; bso226: 39..98 frames late). Kyle's opponent SPOINK
+     (`ANIM_H_JUMPS_V_STRETCH_TWICE`) is probably this path: check first. Exact plan: `docs/vis243a-sendin-census.md` section 7.
+   - (b) **Agility clips the user's lower rows** (opponent AIPOM: copies cut at a fixed line through the feet, a tail-tip piece
+     stays at rest). Likely the monbg / clone path copies a fixed-height region. Check AIPOM against the ROM first (it may be the
+     ROM's own clip), then sweep monbg-using moves with two or three tall species on both sides.
+   - Flow gaps found by aud240a / b: ISSUES #191 (dialog cursors move on held repeat), #192 (summary: draft cursor does not follow
+     the last viewed mon, input 4 frames early, swap summary has no mon change).
 5. **Timing / visible residuals** last, never while items 1–3 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
    compare-harness maxHP bug + `factoryCorpusParty.ts:291`, ISSUES #146 shd234; CASTFORM message region on the faint path,
    ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform "at"-role keys, Flamethrower +7 alignment, revert /
