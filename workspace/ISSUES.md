@@ -24,6 +24,21 @@ may change gameplay/RNG when proved against source; use main-lane ownership
 and gameplay gates. Historical presentation-only exclusions are superseded.
 Settled/parked records and unrelated expansions retain their existing status.
 
+## #192 — Summary screen flow gaps vs the ROM (aud240b, 2026-11-03)
+
+Found while proving summary sounds (`docs/aud240b-summary-sounds.md` "Gaps"): (a) after the draft summary closes, our draft
+cursor does not move to `gLastViewedMonIndex` (the ROM re-opens on the last viewed mon; ours on the old slot); (b) summary
+input is accepted from open+59 in ours, open+63 in the ROM, so a B at open+59..62 closes ours and is ignored by the ROM; (c) the
+swap's summary has no mon change (UP/DOWN) in ours. All three are source-proven flow fixes; prove each on the ON oracle.
+
+## #193 — Summary sound scheduler debt (aud240b, 2026-11-03)
+
+`src/engine/screenSounds.ts` keeps its delayed-sound queue (open cry +63, stop +22, mon-change cry +21/+22) in module-level
+state, gated on `soundCollecting()`; it should be owned by the session's sound collector so two sessions in one process cannot
+share it. WEAK cry length is measured for ONIX only (78 frames; other species emit no BGM restore). BGM ids are constants
+(469 draft / swap, 476 battle) until a BGM state exists (aud241). The first draft mon-change cry is 1 frame late vs the ROM
+(f149 vs f148; every other change matches +21).
+
 ## #191 — Dialog-menu cursors move on held-key repeat (aud240a, 2026-11-02)
 
 `Menu_ProcessInput` / `Menu_ProcessInputNoWrap` (menu.c, used by the postwin question, continuation and swap-offer

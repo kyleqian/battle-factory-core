@@ -34,6 +34,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   suite on the src-identical tree: 3 failed = the 3 soak / seam pins it then re-pinned with per-pin reasons (exploring-policy
   trajectories; #89 Baton Pass pin seed 19 -> 30 after a 0..127 re-scan); its second run hit the 180-min cap. Supervisor on
   master: the 8 touched test files 145 / 145; the wind-down full suite covers the rest.
+- **Folded:** aud240b (S11 step 4b; `docs/aud240b-summary-sounds.md`; branch `worker/integration-20261103-020655`): draft, swap
+  and in-battle party summaries emit SE_SELECT (close, page / mon change, move select), the open / mon-change cry (NORMAL / WEAK,
+  pan 0, volume 120, priority 10), the BGM duck 85 / restore 256 and the cry stop; **A on the Info page now closes the summary**
+  (`pokemon_summary_screen.c:1556-1560`, supervisor-read). Probe fix: CRY_MODE WEAK / WEAK_DOUBLES were swapped. 6 step-mode ROM
+  windows equal (one pinned 1-frame difference, ISSUES #193); supervisor re-probed `summary-close-during-cry`: 8 / 8 events equal.
+  Worker: typecheck 0, smoke 448, 41 importing files 504 tests, build + build:lib 0, differential 4,377 / 4,377 identical over 48
+  summary / draft / party / swap traces (a scratch A-on-Info trace differs from the close on, intended). Full suite not run by
+  the worker (supervisor wind-down suite). Supervisor: 5 audio / summary files 108 / 108. New ISSUES #192 (summary flow gaps),
+  #193 (scheduler debt).
 ---
 
 ## 2026-11-01 / 02 — CAX31 daily run (supervisor, Opus 5.5): wind-down: pmn238 / aud238 / cln237 / aud239 / pmf240 folded
