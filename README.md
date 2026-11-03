@@ -32,6 +32,10 @@ mGBA oracle running a source-built Emerald ROM.
 - `workspace/bin/oracle` is the agent-facing oracle CLI copy, pinned by
   `tests/oracleTooling.test.ts`; the top-level `bin/oracle` is the human
   copy. They have drifted before — the workspace copy is authoritative.
+- Agent launchers are Claude only: `workspace/run-supervisor.sh` (one
+  supervisor) and `workspace/tools/run-subagent.sh` (one worker launcher; lanes
+  ts, side, integration). The Codex, DeepSeek, OpenCode, animation-supervisor
+  and rust-supervisor paths were removed in cln239 (`workspace/docs/cln239-launchers.md`).
 
 ## Machine-local dependencies (not in this repo)
 

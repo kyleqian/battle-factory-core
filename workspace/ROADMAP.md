@@ -127,7 +127,7 @@ reason specific pixel diffs are tolerated. Do not reopen any without a user deci
 
 ## Operational notes
 
-- **Log backup:** Codex / DeepSeek session logs (`.codex-logs/`, `.opencode-logs/`, gitignored) and Claude's local
+- **Log backup:** Launcher logs (`.codex-logs/`, a historical directory name kept for the cron; gitignored) and Claude's local
   transcripts live only on the machine's disk. At the end of a milestone or long session run
   `tools/backup-logs-to-r2.sh` (additive-only, safe to re-run; needs a local `r2` rclone remote).
 - Host, current step and gates: `docs/cax31-session-handoff.md`. Mission and phases: `docs/finish-plan.md`.

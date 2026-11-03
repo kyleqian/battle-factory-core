@@ -42,7 +42,7 @@ edit anything above this directory.
 > the canonical repo at `pokebench/pokeemerald-factory-core/workspace/`.
 > Older docs, receipts, and ledger entries that mention `runs/...` paths or
 > a `../../` harness root refer to this directory and `../` respectively.
-> The Rust rewrite lives in `core-rs/` (see `RUST_SUPERVISOR.md`); the
+> The Rust rewrite lives in `core-rs/` (see `core-rs/README.md`; the old `RUST_*` lane ledgers are in `docs/archive/`); the
 > TypeScript engine in `src/` remains the working, test-pinned
 > implementation while that port is in flight.
 
@@ -65,13 +65,9 @@ steps. The repo default is Claude Opus 5.5 with Claude Sonnet 5.5 workers.
 The normal command follows
 the current stage in `ROADMAP.md`; playable integration needs no supervisor lane
 flag. For S10A read `ANIMATION_INTEGRATION_SUPERVISOR.md`; the main supervisor
-owns local master and uses temporary integration worker worktrees. Select the
-two roles independently: `-S` / `--supervisor` accepts
-Claude or Codex, while `-s` / `--sub-agent` accepts Claude, Codex, or
-DeepSeek. Omitting the sub-agent makes it follow the supervisor; DeepSeek is
-not currently a valid supervisor. Codex workers use the Terra/Luna/Sol routing
-rubric in the supervisor guide, while DeepSeek workers are fixed at V4 Flash
-through headless OpenCode. Configuration options live in the launchers
+owns local master and uses temporary integration worker worktrees. Claude is the only provider:
+`-S` / `--supervisor` and `-s` / `--sub-agent` accept `claude` or the model
+aliases `opus`, `sonnet`, `fable`, `haiku`. Configuration options live in the launchers
 (`--help` lists them). If your prompt says you're a bounded worker session,
 you are one of those workers: this guide applies to you in full, plus the step
 brief in your prompt — and `SUPERVISOR.md` is *not* for you. **No agent
@@ -101,8 +97,9 @@ user permission is needed for the covered fixes. Audio remains deferred.
 
 - Main defines shared interfaces before another lane depends on them.
 - Scene mode may change presentation timing, never logical outcomes or RNG.
-- Animation's handoff is `ANIMATION_PROGRESS.md`; coverage and non-exclusive
-  component tracks live in `ANIMATION_COVERAGE.json`. Level 50 moves come
+- Animation coverage and non-exclusive component tracks live in
+  `ANIMATION_COVERAGE.json` (the retired animation-lane handoff
+  `ANIMATION_PROGRESS.md` is in `docs/archive/`). Level 50 moves come
   first, then Open-only, then the rest.
 - A move is the acceptance unit; a source component is the implementation
   unit. `npm run animation:coverage` ranks dependencies from
@@ -113,9 +110,8 @@ user permission is needed for the covered fixes. Audio remains deferred.
   dependency.
 - The supervisor/solo launcher owns oracle lifecycle; workers only validate
   their selected profile and never start or stop a shared oracle.
-- Side and animation use separate worktrees and do not edit `PROGRESS.md` or
-  `ISSUES.md`; animation owns its two animation ledgers, and the supervisor
-  verifies and merges worktrees one at a time.
+- Side and integration use separate worktrees and do not edit `PROGRESS.md` or
+  `ISSUES.md`; the supervisor verifies and merges worktrees one at a time.
 - Parallel capacity is optional: launch only bounded, independent work.
 
 ## Start-of-session protocol (do this first, every session)
@@ -125,8 +121,8 @@ user permission is needed for the covered fixes. Audio remains deferred.
    stages and their oracle acceptance criteria (authored by this run's
    supervisor on iteration 0 — until then it says PLAN PENDING).
 3. Skim **`ISSUES.md`** — the standing backlog of known-open bugs/debts you can pick from.
-4. Animation workers also read **`ANIMATION_PROGRESS.md`** and run
-   `npm run animation:coverage`.
+4. Integration workers also read **`ANIMATION_INTEGRATION_PROGRESS.md`** and
+   run `npm run animation:coverage`.
 5. Confirm the baseline is green: `npm test` and `npm run build` pass, and
    `bin/oracle info` answers. If not, fixing that is the next action.
 
