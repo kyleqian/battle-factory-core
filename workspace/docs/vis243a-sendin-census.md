@@ -189,9 +189,21 @@ orchestrator's intro frame counts, so it needs its own differential and census r
 | `tests/plr162PlayerForcedSendIn.test.ts` | non-forced player send-in commands (faint replacement) pin the species rule instead of `SWITCH_IN_SPAN_FRAMES`; CASTFORM carries the +1 slide / visual delay; TYPHLOSION Scene OFF voluntary = 174 (cry bound) |
 | `tests/sendInTail.test.ts` | player `switchInTiming(0, ...)` = the Scene ON rule (not the calibrated 91); the player slide stays 66 |
 | `tests/snd182SceneOnForcedPlayerSendIn.test.ts` | the voluntary `switchInTiming` expectations are now the forced duration (+ the hold carried by the command); opponent unchanged |
+| `tests/factoryVoluntarySwitchSeam.test.ts` | HARIYAMA (Scene OFF, cry-bound) voluntary switch-in span 91 -> `sceneOffPlayerForcedSwitchInDuration(336)` = 113 (+ the 11-frame hold) |
+| `tests/randomRoundSoak.test.ts` (3 pins, below) | soak trajectories moved with the presentation clock |
 | `tests/vis243aVoluntarySendIn.test.ts` | new: ROM probes, identity for all species, KOFFING production render |
 
-No soak or replay pin moved (no gameplay data changed; section 9).
+### Soak pins (per-pin explanation)
+
+The soak driver's exploring policy presses buttons from a frame-keyed cooldown stream, so any change of presentation length (here: longer player
+send-ins) shifts which phase each press lands on and gives the exploring seeds a new trajectory -- the same mechanism recorded at soak111,
+fsw235 and pmo239. This is not a gameplay change: with a fixed input script the 1000-battle census (section 9) is digest-identical.
+
+| pin | before | after | explanation |
+|---|---|---|---|
+| seed 0, `full` (M-B step 2 (c)) | 37753 frames / battle 2 / turn 26 | 38729 / battle 2 / turn 28 | new exploring trajectory; same battle, end state `roundLost`, depth 1 |
+| seed 1, `full` (same test) | 17862 / battle 1 / turn 31 | 21359 / battle 1 / turn 37 | new exploring trajectory; same battle, end state, depth 0 |
+| ISSUES #89 Baton Pass halt, seed 19 | seed 19 commits Baton Pass in battle 2 | seed 19 now plays 50860 frames / battle 3 / turn 12 with no Baton Pass; pin moved to seed 30 | re-scan of full-policy seeds 0..127 with the restored scratch `soak111BatonPassSearch.ts` (same options as the pin): hits 28, 30, 32, 57, 63, 64, 118, 127; seed 30 is the lowest ending in battle 2 as a genuine loss (3 Baton Pass commits, halt in battleIndex 0 of the chained round, as 19 had); test name and comment updated |
 
 ## 9. Gates
 

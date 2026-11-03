@@ -509,7 +509,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 19's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 30's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -558,6 +558,13 @@ describe("random round soak driver (green milestone pin)", () => {
     // pin; unlike the pre-pmo239 pin its halt frame is therefore past the
     // snapshotted first-round result, so the `frames > haltFrame` bound is
     // gone and the observed halt plus the clean errorMessage carry the pin.
+    //
+    // vis243a (the voluntary player send-in now waits for the species' back animation / cry instead of a fixed 91 + 11 -- the soak's
+    // presentation clock, so the exploring policy's press timings land on different phases): seed 19 no longer commits Baton Pass in its
+    // first round (it now plays 50860 frames / battle 3 / turn 12 with zero Baton Pass commits). Re-scanned full-policy seeds 0..127
+    // (the removed soak111BatonPassSearch.ts, restored from 4f6fa87e4^ as scratch, 80,000 frames, same options as this pin): the first
+    // hits are 28, 30, 32, 57, 63, 64, 118 and 127, all halting in the post-decision grace window like 19 did. Seed 30 is the pin
+    // (the lowest hit that, like 19, ends in battle 2 as a genuine loss; Baton Pass commits 3, halt frame 59170 in battleIndex 0 of the chained round).
     let frame = 0;
     let batonPassCommitFrame: number | null = null;
     let haltFrame: number | null = null;
@@ -574,7 +581,7 @@ describe("random round soak driver (green milestone pin)", () => {
         if (outgoing !== undefined && !outgoing.fainted) haltFrame = state.frame;
       },
     };
-    const result = runSeed(19, {
+    const result = runSeed(30, {
       maxFrames: 80_000,
       renderEvery: 0,
       stopAtFirstRoundDecision: true,
@@ -846,12 +853,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // message where it used to back out, so a new trajectory again: 14107 / battle 1 turn 23 -> 42311 / battle 3 turn 14.
       // pmo239 (party menus in the ROM's battle order; the soak's forced-menu walk stops on the first legal row it shows, the
       // voluntary walk maps the rolled raw party index to its menu row): a new exploring trajectory, 42311 / battle 3 turn 14 -> 37753 / battle 2 turn 26.
-      frames: 37753,
+      // vis243a (the voluntary player send-in waits for the species' back animation / cry; exploring policy's press timings move with the
+      // presentation clock, as at fsw235): 37753 / turn 26 -> 38729 / turn 28; same battle 2 / roundLost / depth 1.
+      frames: 38729,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
       battle: 2,
-      turn: 26,
+      turn: 28,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -862,12 +871,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // fsw235: a new trajectory for the exploring policy (see seed 0): 27295 / battle 2 turn 9 -> 25899 / battle 2 turn 6,
       // then 25899 / battle 2 turn 6 -> 38842 / battle 2 turn 33 with the voluntary menu's already-in-battle refusal.
       // pmo239: a new exploring trajectory (see seed 0): 38842 / battle 2 turn 33 -> 17862 / battle 1 turn 31.
-      frames: 17862,
+      // vis243a (see seed 0): 17862 / turn 31 -> 21359 / turn 37; same battle 1 / roundLost / depth 0.
+      frames: 21359,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
       battle: 1,
-      turn: 31,
+      turn: 37,
     });
   });
 
