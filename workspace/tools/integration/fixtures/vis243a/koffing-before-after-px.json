@@ -1,0 +1,1351 @@
+{
+"_doc": "vis243a: KOFFING (species 109, nature 0, Scene ON) voluntary switch-in, production render vs dense ROM oracle capture, per send-in elapsed e (ball at 3, back animation tick 0 at 66). before = --duration=102 (the pre-fix fixed 91+11 window), after = production (duration 146). Pixels differing from the ROM per region (mon = player sprite, msg = text box, phb = player healthbox). tools/integration/vis243aCompare.ts, scenario tools/integration/vis243aStage.py.",
+"before_summary": {
+"rows": 173,
+"monSendInPx": 32129,
+"monSendInNonZeroRows": 29
+},
+"after_summary": {
+"rows": 173,
+"monSendInPx": 94,
+"monSendInNonZeroRows": 1
+},
+"romNextText": 146,
+"rows": [
+{
+"e": 60,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 61,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 62,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 63,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 64,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 65,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 66,
+"before": {
+"total": 94,
+"mon": 94,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 94,
+"mon": 94,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 67,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 68,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 69,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 70,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 71,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 72,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 73,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 74,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 75,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 76,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 77,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 78,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 79,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 80,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 81,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 82,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 83,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 84,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 85,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 86,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 87,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 88,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 89,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 90,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 91,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 92,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 93,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 94,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 95,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 96,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 97,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 98,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 99,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 100,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 101,
+"before": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 102,
+"before": {
+"total": 1118,
+"mon": 735,
+"msg": 383,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 103,
+"before": {
+"total": 1197,
+"mon": 846,
+"msg": 351,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 104,
+"before": {
+"total": 1347,
+"mon": 981,
+"msg": 366,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 105,
+"before": {
+"total": 1437,
+"mon": 1071,
+"msg": 366,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 106,
+"before": {
+"total": 1505,
+"mon": 1150,
+"msg": 355,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 107,
+"before": {
+"total": 1548,
+"mon": 1220,
+"msg": 328,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 108,
+"before": {
+"total": 1642,
+"mon": 1314,
+"msg": 328,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 109,
+"before": {
+"total": 1718,
+"mon": 1372,
+"msg": 346,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 110,
+"before": {
+"total": 1739,
+"mon": 1420,
+"msg": 319,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 111,
+"before": {
+"total": 1772,
+"mon": 1453,
+"msg": 319,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 112,
+"before": {
+"total": 1794,
+"mon": 1479,
+"msg": 315,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 113,
+"before": {
+"total": 1806,
+"mon": 1479,
+"msg": 327,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 114,
+"before": {
+"total": 1892,
+"mon": 1530,
+"msg": 362,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 115,
+"before": {
+"total": 1881,
+"mon": 1479,
+"msg": 402,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 116,
+"before": {
+"total": 1923,
+"mon": 1479,
+"msg": 444,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 117,
+"before": {
+"total": 1937,
+"mon": 1453,
+"msg": 484,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 118,
+"before": {
+"total": 1932,
+"mon": 1420,
+"msg": 512,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 119,
+"before": {
+"total": 1930,
+"mon": 1372,
+"msg": 558,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 120,
+"before": {
+"total": 1914,
+"mon": 1314,
+"msg": 600,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 121,
+"before": {
+"total": 1864,
+"mon": 1220,
+"msg": 644,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 122,
+"before": {
+"total": 1814,
+"mon": 1150,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 123,
+"before": {
+"total": 1735,
+"mon": 1071,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 124,
+"before": {
+"total": 1645,
+"mon": 981,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 125,
+"before": {
+"total": 1510,
+"mon": 846,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 126,
+"before": {
+"total": 1399,
+"mon": 735,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 127,
+"before": {
+"total": 1274,
+"mon": 610,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 128,
+"before": {
+"total": 1110,
+"mon": 446,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 129,
+"before": {
+"total": 1073,
+"mon": 409,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 130,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 131,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 132,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 133,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 134,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 135,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 136,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 137,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 138,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 139,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 140,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 141,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 142,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 143,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 144,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 145,
+"before": {
+"total": 664,
+"mon": 0,
+"msg": 664,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 146,
+"before": {
+"total": 684,
+"mon": 0,
+"msg": 684,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 147,
+"before": {
+"total": 652,
+"mon": 0,
+"msg": 652,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+},
+{
+"e": 148,
+"before": {
+"total": 617,
+"mon": 0,
+"msg": 617,
+"phb": 0
+},
+"after": {
+"total": 0,
+"mon": 0,
+"msg": 0,
+"phb": 0
+}
+}
+]
+}
