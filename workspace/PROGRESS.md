@@ -5,9 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-02 / 03 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Mac 851ee1f4c / aud240a / aud240b / vis243a / rng244 / cln238 / cleanup 6 folded
+## 2026-11-02 / 03 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Mac 851ee1f4c / aud240a / aud240b / vis243a / agi245 / rng244 / cln238 / cleanup 6 folded
 
-- **State:** master `c0599dca5`+; src gated == `5d39f2c79` (later commits: rng244 test-only, docs, agi245 — see below).
+- **State:** master `c88d897f2`+ (agi245 merge); the soak / play gates ran on src `5d39f2c79`; agi245 (one render line) got its own
+  full suite + build + Scene ON render checks (below).
 - **Folded:** Mac `worker/lib-v2-mac` tip `851ee1f4c` (sum241 battle party action window + SUMMARY; spn242 species names keep
   apostrophes / periods / gender symbols, summary portraits keyed by SPECIES_) as merge `0f39a60`. master had only .md changes since
   the Mac base `c5b7861e0`, so the merged non-docs tree == `851ee1f4c` (checked by `git diff`); the Mac's full suite 14,363 / 0
@@ -57,6 +58,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Fixed by the supervisor:** the wind-down suite failed 1 pin (M-B (c) full seed 0): aud240b's A-on-Info close moves the
   exploring trajectory (38,729 / t28 -> 43,417 / t39, same battle / end state); with both A-close sites undone the old pin passes.
   Re-pinned (`5d39f2c79`), file 64 / 64.
+- **Folded:** agi245 (handoff 4b(b), Kyle's "Agility clips the lower rows"; scout `docs/agi245-scout.md`; branch
+  `worker/integration-20261103-050850`): `battleScene.ts:21369` the live opponent-attacker Agility clip is now 160 (the healthbox
+  covers the feet, as in the ROM); `corner.y + 55` stays only on the staged path. ROM 87-frame window 0 px for AIPOM, FEAROW,
+  CROBAT, DRAGONITE, LEDYBA, SUNKERN (before: AIPOM 62 frames / 14,833 px); new fixture `agility-opponent-aipom-player-onix` +
+  `tests/animation/agilityOpponentClip.test.ts` (supervisor: fails with the fix undone); differential 641 / 641 identical;
+  Agility / ont193 / scd112 tests 26 / 26. Quick Attack / Aerial Ace keep the 74 clip (LEDYBA-like species unverified, follow-up).
 - **Scout:** agi245 (`docs/agi245-scout.md`, read-only): Kyle's Agility clip is ours, not the ROM's — the live path still uses a
   LEDYBA-calibrated clip row `corner.y + 55` (`battleScene.ts:21369`, supervisor-read), cutting 257 opponent species; a 160 clip
   gives 0 px on 6 species vs the ROM.
@@ -70,9 +77,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Housekeeping:** evidence `sv-20261030` deleted (older than the last three runs; 5 GB). Census baseline for the next delta:
   `sv-20261102/vis243a-evidence/census-final/{on,off}-dac9cd2fe`.
 - **Next:** handoff "Next work": aud240c (party menu SEs), aud240d (lobby scripts; extractor fix for MUS_OBTAIN_B_POINTS first),
-  cleanup step 3 (providers / lanes), 4b(a) remainder (battle-start "Go!" wait; Kyle's SPOINK), ISSUES #191 / #192.
+  cleanup step 3 (providers / lanes), 4b(a) remainder (battle-start "Go!" wait; Kyle's SPOINK), ISSUES #191 / #192, a Quick Attack /
+  Aerial Ace live-clip sweep on LEDYBA-like species (agi245 scout).
 - **Notes:** no DEFERRED items. No push. Worker refs (merged, archived): integration-20261102-213642 (aud240a), -230300 (vis243a),
-  -20261103-020655 (aud240b), -032257 (cln238b), -041808 (rng244), -043917 (agi245 scout, no commits).
+  -20261103-020655 (aud240b), -032257 (cln238b), -041808 (rng244), -050850 (agi245); -043917 (agi245 scout, no commits).
 ---
 
 ## 2026-11-01 / 02 — CAX31 daily run (supervisor, Opus 5.5): wind-down: pmn238 / aud238 / cln237 / aud239 / pmf240 folded

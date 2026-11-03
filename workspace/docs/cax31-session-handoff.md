@@ -32,7 +32,8 @@ kept and is long-tail.
 - **Cleanup:** step 1 (cln237), step 2 (cln238a: 8 unread ledgers to `docs/archive/`; cln238b: ROADMAP 169 lines, ISSUES open
   only, old copies `docs/archive/{ROADMAP,ISSUES}-pre-cln238.md`) and step 6 (74 merged `worker/*` names moved to
   `refs/archive/worker-merged-20261103/`; kept: `worker/lib-v2-mac`, the 3 unmerged exs207 refs) are done.
-- **User reports:** 4b(a) mid-battle voluntary send-in fixed (vis243a, `docs/vis243a-sendin-census.md`); 4b(c) rate check
+- **User reports:** 4b(a) mid-battle voluntary send-in fixed (vis243a, `docs/vis243a-sendin-census.md`); 4b(b) Agility
+  clip fixed (agi245); 4b(c) rate check
   is permanent (`tests/rng244OutcomeRates.test.ts`, 12 checks, ~43 s).
 - Census baseline for the next delta: `.integration/validation/sv-20261102/vis243a-evidence/census-final/{on,off}-dac9cd2fe`
   (vis243a's tree; aud240b / rng244 do not build battle commands, not re-run).
@@ -64,9 +65,8 @@ never brief those here. One worker at a time; each run folds the next audio step
    - (a) remainder: the **battle-start "Go!" intro** still runs a fixed canonical timeline instead of waiting for the species
      animations (`Intro_WaitForShinyAnimAndHealthbox`; bso226: 39..98 frames late). Kyle's opponent SPOINK
      (`ANIM_H_JUMPS_V_STRETCH_TWICE`) is probably this path: check first. Exact plan: `docs/vis243a-sendin-census.md` section 7.
-   - (b) **Agility clips the user's lower rows** (opponent AIPOM: copies cut at a fixed line through the feet, a tail-tip piece
-     stays at rest). Likely the monbg / clone path copies a fixed-height region. Check AIPOM against the ROM first (it may be the
-     ROM's own clip), then sweep monbg-using moves with two or three tall species on both sides.
+   - (b) DONE 2026-11-03 (agi245, `docs/agi245-scout.md`). Follow-up: Quick Attack / Aerial Ace use the 74-row live clip;
+     the scout measured 74 off by one for LEDYBA on Agility, so sweep both moves on a LEDYBA-like species vs the ROM.
    - Flow gaps found by aud240a / b: ISSUES #191 (dialog cursors move on held repeat), #192 (summary: draft cursor does not follow
      the last viewed mon, input 4 frames early, swap summary has no mon change).
 5. **Timing / visible residuals** last, never while items 1–3 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
