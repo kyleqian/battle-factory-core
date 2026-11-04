@@ -17,7 +17,7 @@
 // (or `npm run extract:audio-sound-sources`). Never imported at runtime.
 
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -849,9 +849,119 @@ function extractBattleBgm() {
 const FACTORY_MAPS = ["BattleFrontier_BattleFactoryLobby", "BattleFrontier_BattleFactoryPreBattleRoom", "BattleFrontier_BattleFactoryBattleRoom"];
 const MAP_SOUND_OPS = ["playse", "waitse", "playfanfare", "waitfanfare", "playbgm", "savebgm", "fadedefaultbgm", "fadeoutbgm", "fadeinbgm", "fadenewbgm", "playmoncry", "waitmoncry"];
 
+// Std message scripts (data/scripts/std_msgbox.inc): `msgbox text, TYPE` is `loadword 0, text` + `callstd TYPE`,
+// so the sound ops inside the std script run at every msgbox of that type.
+function extractStdScripts() {
+  const table = readRef("data/event_scripts.s");
+  const start = table.indexOf("gStdScripts::");
+  const stdTable: Array<{ index: number; label: string; name: string }> = [];
+  let index = 0;
+  for (const line of table.slice(start, table.indexOf("gStdScripts_End::")).split("\n")) {
+    const m = /^\s*\.4byte\s+(\w+)\s*@\s*(\w+)/.exec(line);
+    if (m) stdTable.push({ index: index++, label: m[1]!, name: m[2]! });
+  }
+  return stdTable;
+}
+
+function soundOpsOfLabel(rel: string, label: string): Row[] {
+  const lines = readRef(rel).split("\n");
+  const out: Row[] = [];
+  let cur: string | null = null;
+  for (let i = 0; i < lines.length; i++) {
+    const code = lines[i]!.replace(/@.*$/, "").replace(/\s+$/, "");
+    const lm = /^([A-Za-z_][A-Za-z0-9_]*)::?$/.exec(code);
+    if (lm) {
+      cur = lm[1]!;
+      continue;
+    }
+    if (cur !== label) continue;
+    const im = /^\s+([a-z_][a-z_0-9]*)\s*(.*)$/.exec(code);
+    if (!im || !MAP_SOUND_OPS.includes(im[1]!)) continue;
+    const args = splitArgs(im[2]!);
+    const row: Row = { file: rel, line: lineNo(i), label, op: im[1]!, args };
+    const songArg = args.find((a) => songs.has(a));
+    if (songArg !== undefined) {
+      row.song = songArg;
+      row.songId = songs.get(songArg)!;
+    }
+    out.push(row);
+  }
+  return out;
+}
+
+// Script files that can define a label called from a Factory script but defined outside the Factory maps.
+const labelFileCache = new Map<string, string | null>();
+function findLabelFile(label: string): string | null {
+  const cached = labelFileCache.get(label);
+  if (cached !== undefined) return cached;
+  const found = findLabelFileUncached(label);
+  labelFileCache.set(label, found);
+  return found;
+}
+
+function findLabelFileUncached(label: string): string | null {
+  const roots = ["data/scripts", "data/maps"];
+  const candidates: string[] = [];
+  for (const root of roots) {
+    const dir = join(REF, root);
+    for (const name of readdirSync(dir)) {
+      if (root === "data/scripts") {
+        if (name.endsWith(".inc")) candidates.push(`${root}/${name}`);
+      } else if (existsSync(join(dir, name, "scripts.inc"))) {
+        candidates.push(`${root}/${name}/scripts.inc`);
+      }
+    }
+  }
+  const hit = candidates.filter((rel) => new RegExp(`^${label}::?\\s*$`, "m").test(readFileSync(join(REF, rel), "utf8")));
+  if (hit.length > 1) throw new Error(`label ${label} defined in several files: ${hit.join(", ")}`);
+  return hit[0] ?? null;
+}
+
+// Follow a script label (call / goto / callstd / msgbox) and return every map-sound op reachable from it.
+function followLabel(rel: string, label: string, seen: Set<string>, stdByName: Map<string, { label: string }>): Row[] {
+  const key = `${rel}#${label}`;
+  if (seen.has(key)) return [];
+  seen.add(key);
+  const lines = readRef(rel).split("\n");
+  const out: Row[] = soundOpsOfLabel(rel, label);
+  let cur: string | null = null;
+  for (let i = 0; i < lines.length; i++) {
+    const code = lines[i]!.replace(/@.*$/, "").replace(/\s+$/, "");
+    const lm = /^([A-Za-z_][A-Za-z0-9_]*)::?$/.exec(code);
+    if (lm) {
+      cur = lm[1]!;
+      continue;
+    }
+    if (cur !== label) continue;
+    const im = /^\s+([a-z_][a-z_0-9]*)\s*(.*)$/.exec(code);
+    if (!im) continue;
+    const args = splitArgs(im[2]!);
+    if (im[1] === "msgbox" || im[1] === "callstd" || im[1] === "gotostd") {
+      const type = args[im[1] === "msgbox" ? 1 : 0] ?? "MSGBOX_DEFAULT";
+      const std = stdByName.get(type);
+      if (std) out.push(...followLabel("data/scripts/std_msgbox.inc", std.label, seen, stdByName).map((r) => ({ ...r, via: `${im[1]} ${type}`, viaFile: rel, viaLine: lineNo(i) })));
+    } else if (/^(call|goto)(_if_[a-z]+)?$/.test(im[1]!)) {
+      const target = args[args.length - 1]!;
+      const file = findLabelFile(target);
+      if (file) out.push(...followLabel(file, target, seen, stdByName));
+    }
+  }
+  return out;
+}
+
 function extractMapMusic() {
   const maps: Row[] = [];
   const scriptOps: Row[] = [];
+  const stdScripts: Row[] = [];
+  const followedCalls: Row[] = [];
+  const stdTable = extractStdScripts();
+  const stdByName = new Map(stdTable.map((e) => [e.name, e]));
+  for (const e of stdTable) {
+    if (!existsSyncLabel("data/scripts/std_msgbox.inc", e.label)) continue;
+    stdScripts.push({ type: e.name, index: e.index, label: e.label, file: "data/scripts/std_msgbox.inc", ops: soundOpsOfLabel("data/scripts/std_msgbox.inc", e.label) });
+  }
+  const factoryDefined = new Set<string>();
+  for (const name of FACTORY_MAPS) for (const m of readRef(`data/maps/${name}/scripts.inc`).matchAll(/^([A-Za-z_][A-Za-z0-9_]*)::?\s*$/gm)) factoryDefined.add(m[1]!);
   for (const name of FACTORY_MAPS) {
     const json = JSON.parse(readRef(`data/maps/${name}/map.json`)) as { id: string; music: string };
     const music = json.music;
@@ -867,18 +977,37 @@ function extractMapMusic() {
         continue;
       }
       const im = /^\s+([a-z_][a-z_0-9]*)\s*(.*)$/.exec(code);
-      if (!im || !MAP_SOUND_OPS.includes(im[1]!)) continue;
+      if (!im) continue;
       const args = splitArgs(im[2]!);
-      const row: Row = { map: name, file: rel, line: lineNo(i), label, op: im[1]!, args };
-      const songArg = args.find((a) => songs.has(a));
-      if (songArg !== undefined) {
-        row.song = songArg;
-        row.songId = songs.get(songArg)!;
+      if (MAP_SOUND_OPS.includes(im[1]!)) {
+        const row: Row = { map: name, file: rel, line: lineNo(i), label, op: im[1]!, args };
+        const songArg = args.find((a) => songs.has(a));
+        if (songArg !== undefined) {
+          row.song = songArg;
+          row.songId = songs.get(songArg)!;
+        }
+        scriptOps.push(row);
+      } else if (im[1] === "msgbox" || im[1] === "callstd" || im[1] === "gotostd") {
+        const type = args[im[1] === "msgbox" ? 1 : 0] ?? "MSGBOX_DEFAULT";
+        const std = stdByName.get(type);
+        if (!std) throw new Error(`${rel}:${lineNo(i)}: unknown std type ${type}`);
+        for (const r of soundOpsOfLabel("data/scripts/std_msgbox.inc", std.label)) {
+          scriptOps.push({ map: name, file: rel, line: lineNo(i), label, op: r.op, args: r.args, song: r.song, songId: r.songId, via: `${im[1]} ${type}`, stdLabel: std.label, stdFile: r.file, stdLine: r.line });
+        }
+      } else if (/^(call|goto)(_if_[a-z]+)?$/.test(im[1]!)) {
+        const target = args[args.length - 1]!;
+        if (factoryDefined.has(target)) continue;
+        const file = findLabelFile(target);
+        const ops = file === null ? [] : followLabel(file, target, new Set(), stdByName);
+        followedCalls.push({ map: name, file: rel, line: lineNo(i), label, op: im[1]!, target, targetFile: file, ops });
       }
-      scriptOps.push(row);
     }
   }
-  return { maps, scriptOps };
+  return { maps, scriptOps, stdScripts, followedCalls };
+}
+
+function existsSyncLabel(rel: string, label: string): boolean {
+  return new RegExp(`^${label}::?\\s*$`, "m").test(readRef(rel));
 }
 
 // (f) -----------------------------------------------------------------------
@@ -1200,6 +1329,11 @@ function main() {
       maps: mapMusic.maps.length,
       scriptOps: mapMusic.scriptOps.length,
       scriptOpsPerOp: countBy(mapMusic.scriptOps, (r) => r.op as string),
+      scriptOpsViaStd: mapMusic.scriptOps.filter((r) => r.via !== undefined).length,
+      stdScripts: mapMusic.stdScripts.length,
+      stdScriptsWithSound: mapMusic.stdScripts.filter((r) => (r.ops as Row[]).length > 0).length,
+      followedCalls: mapMusic.followedCalls.length,
+      followedCallsWithSound: mapMusic.followedCalls.filter((r) => (r.ops as Row[]).length > 0).length,
     },
     songLoops: {
       songs: songLoops.length,

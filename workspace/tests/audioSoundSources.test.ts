@@ -24,7 +24,7 @@ const sources = data as unknown as {
     defaultTrainerSong: Row;
     factory: { brain: Row; songs: Row[]; unknownFacilityClasses: unknown[] };
   };
-  mapMusic: { maps: Row[]; scriptOps: Row[] };
+  mapMusic: { maps: Row[]; scriptOps: Row[]; stdScripts: Row[]; followedCalls: Row[] };
   songLoops: Row[];
 };
 
@@ -185,13 +185,38 @@ describe("audio sound-source table", () => {
     expect(sources.battleBgm.factory.unknownFacilityClasses).toEqual([]);
   });
 
+  it("follows std msgbox scripts and shared call targets (aud240d)", () => {
+    const { mapMusic, counts } = sources;
+    expect(counts.mapMusic).toMatchObject({
+      scriptOps: 18,
+      scriptOpsPerOp: { playfanfare: 4, playse: 5, waitfanfare: 4, waitse: 5 },
+      scriptOpsViaStd: 2,
+      stdScripts: 6,
+      stdScriptsWithSound: 1,
+      followedCalls: 9,
+      followedCallsWithSound: 2,
+    });
+    const viaStd = mapMusic.scriptOps.filter((row) => row.via !== undefined);
+    expect(viaStd.map((row) => [row.map, row.line, row.op, row.song, row.songId, row.via, row.stdLabel, row.stdLine])).toEqual([
+      ["BattleFrontier_BattleFactoryLobby", 54, "playfanfare", "MUS_OBTAIN_B_POINTS", 459, "msgbox MSGBOX_GETPOINTS", "Std_MsgboxGetPoints", 32],
+      ["BattleFrontier_BattleFactoryLobby", 54, "waitfanfare", undefined, undefined, "msgbox MSGBOX_GETPOINTS", "Std_MsgboxGetPoints", 33],
+    ]);
+    expect(mapMusic.stdScripts.filter((row) => (row.ops as Row[]).length > 0).map((row) => row.type)).toEqual(["MSGBOX_GETPOINTS"]);
+    const withSound = mapMusic.followedCalls.filter((row) => (row.ops as Row[]).length > 0);
+    expect(withSound.map((row) => [row.map, row.line, row.target, (row.ops as Row[]).map((op) => [op.op, op.songId])])).toEqual([
+      ["BattleFrontier_BattleFactoryLobby", 88, "BattleFrontier_EventScript_SaveBattle", [["playse", 55]]],
+      ["BattleFrontier_BattleFactoryPreBattleRoom", 118, "BattleFrontier_EventScript_SaveBattle", [["playse", 55]]],
+    ]);
+  });
+
   it("pins loop points for the referenced songs", () => {
     const byName = new Map(sources.songLoops.map((song) => [song.song as string, song]));
     expect(byName.get("MUS_B_FACTORY")).toMatchObject({ songId: 469, loops: true, loopStartTick: 168, loopEndTick: 3720 });
     expect(byName.get("MUS_VS_FRONTIER_BRAIN")).toMatchObject({ songId: 471, loops: true, loopStartTick: 300, loopEndTick: 7116 });
     expect(byName.get("MUS_VS_TRAINER")).toMatchObject({ songId: 476, loops: true, loopStartTick: 960, loopEndTick: 7104 });
     expect(byName.get("MUS_HEAL")).toMatchObject({ songId: 368, loops: false, totalTicks: 120 });
-    expect(sources.counts.songLoops).toEqual({ songs: 23, withLoop: 17, oneShot: 6 });
+    expect(byName.get("MUS_OBTAIN_B_POINTS")).toMatchObject({ songId: 459, loops: false });
+    expect(sources.counts.songLoops).toEqual({ songs: 24, withLoop: 17, oneShot: 7 });
   });
 });
 
