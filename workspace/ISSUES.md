@@ -13,6 +13,19 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
+
+Live Scene ON, opponent RATTATA Quick Attack vs player ONIX (`docs/qak247-clip-sweep.md`): 14,739 px over 25 of the 33 window
+frames, rows 41-73, from age 8, identical with the 74 and the 160 clip (so not the clip that qak248 removed). Every other of the
+87 measured opponent Quick Attack / Aerial Ace runs is 0 px at 160. Undiagnosed: stage it again and compare the attacker's
+position / ellipse rows first (small sprite, corner row unusual?).
+
+## #195 — aud240c flow gaps on the battle party menus (2026-11-03)
+
+`docs/aud240c-party-menu-sounds.md`: (a) the voluntary menu moves its cursor on keys pressed during the open palette fade
+(the ROM ignores input until `!gPaletteFade.active`; only the sound is gated in ours); (b) refusal messages dismiss on the
+first A / B even while the text is still printing (the ROM waits for the printer). Source-proven flow fixes; prove on the ON oracle.
+
 ## #192 — Summary screen flow gaps vs the ROM (aud240b, 2026-11-03)
 
 Found while proving summary sounds (`docs/aud240b-summary-sounds.md` "Gaps"): (a) after the draft summary closes, our draft

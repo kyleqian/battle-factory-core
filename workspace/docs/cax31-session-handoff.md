@@ -59,10 +59,11 @@ never brief those here. One worker at a time; each run folds the next audio step
 4b. **User-reported visuals (Kyle, website, 2026-11-02): one step per run, after that run's audio + cleanup steps.**
    - (a) DONE (vis243a + go246). Named residuals in `docs/go246-intro-wait.md`: ELEKID / ARON frame animation one frame long,
      the long-cry (> 74) 4-frame early message clear (both scenes), bso226 release / ball-open frames.
-   - (b) DONE (agi245). Follow-up: Quick Attack / Aerial Ace use the 74-row live clip; the scout measured 74 off by one for
-     LEDYBA on Agility, so sweep both moves on a LEDYBA-like species vs the ROM.
-   - Flow gaps: ISSUES #191 (dialog cursors move on held repeat), #192 (summary flow gaps); aud240c found two more (our voluntary
-     party cursor moves during the open fade; refusal text dismisses before it finishes printing; `docs/aud240c-party-menu-sounds.md`).
+   - (b) DONE (agi245 Agility; qak248 Quick Attack / Aerial Ace live clip 74 -> 160, `docs/qak247-clip-sweep.md`). Follow-up:
+     hermetic ROM receipts for the qak247 staging (`tools/integration/fixtures/qak247/`, like `agilityOpponentClip.test.ts`);
+     ISSUES #194 (RATTATA Quick Attack residual, not the clip).
+   - Flow gaps: ISSUES #191 (dialog cursors move on held repeat), #192 (summary flow gaps), #195 (party menu: cursor moves during the
+     open fade; refusal text dismisses before it finishes printing).
 5. **Timing / visible residuals** last, never while items 1–3 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
    compare-harness maxHP bug + `factoryCorpusParty.ts:291`, ISSUES #146 shd234; CASTFORM message region on the faint path,
    ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform "at"-role keys, Flamethrower +7 alignment, revert /
