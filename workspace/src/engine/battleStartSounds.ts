@@ -10,6 +10,7 @@ import {
 } from "./battleScene.ts";
 import type { BattleResolutionPresentationCommand, BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import type { FactoryBattleStartIntroState } from "./factoryBattleStartIntro.ts";
+import { partySendOutReleaseClock, type PartySelectState, type PartySendOutTiming } from "./partySelect.ts";
 import {
   BGM_BATTLE,
   BGM_DRAFT,
@@ -161,5 +162,32 @@ export function emitMidBattleSwitchSounds(
       cryModeFor(incoming.hp, incoming.maxHP, command.incomingStatus1 !== 0),
       command.battler === 0 ? CRY_PAN_PLAYER : CRY_PAN_OPPONENT,
     );
+  }
+}
+
+/**
+ * The player's party-menu send-out (a faint replacement or forced selection), counted from the SEND OUT confirm. Measured on the
+ * canonical trace's MAGBY replacement (ROM window 20771..21063, confirm at 20771): SE_BALL_OPEN at confirm + 143, the cry 16 later at
+ * pan -25 and the restore 42 after it. The release clock is ball-relative, so `PartySendOutTiming` carries a longer nickname or
+ * CASTFORM's late release into both.
+ */
+const PARTY_SEND_OUT_BALL_OPEN_RELEASE_CLOCK = 143;
+
+export function emitPartySendOutSounds(
+  before: PartySelectState | null,
+  after: PartySelectState | null,
+  timing: PartySendOutTiming | null,
+  frontierBrain: boolean,
+): void {
+  if (after === null || after.sendOutElapsed === null || after.cursor === "cancel") return;
+  const clockOf = (elapsed: number): number => partySendOutReleaseClock(elapsed, timing ?? undefined);
+  const previous = before?.sendOutElapsed ?? null;
+  const previousClock = previous === null ? Number.NEGATIVE_INFINITY : clockOf(previous);
+  const clock = clockOf(after.sendOutElapsed);
+  const crossed = (tick: number): boolean => previousClock < tick && tick <= clock;
+  if (crossed(PARTY_SEND_OUT_BALL_OPEN_RELEASE_CLOCK)) playBallOpenSe();
+  if (crossed(PARTY_SEND_OUT_BALL_OPEN_RELEASE_CLOCK + SWITCH_IN_CRY_AFTER_BALL_OPEN)) {
+    const mon = after.party[after.cursor];
+    playSendOutCry(factoryBattleBgm(frontierBrain), mon.speciesId, cryModeFor(mon.hp, mon.maxHp, mon.status !== "none"), CRY_PAN_PLAYER);
   }
 }

@@ -720,7 +720,8 @@ import {
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
-import { emitBattleStartBgm, emitBattleStartIntroSounds, emitMidBattleSwitchSounds } from "./battleStartSounds.ts";
+import { emitBattleStartBgm, emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
+import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
 import { soundCollecting } from "../audio/soundEvents.ts";
 
 /**
@@ -1036,7 +1037,22 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     emitBattleStartIntroSounds(introBefore, next.factoryRoundBattleOrchestrator?.battleStartIntro ?? null);
   }
   if (soundCollecting()) {
+    emitPartySendOutSounds(
+      state.battleScene?.resolutionOwner?.forcedPartySelect ?? null,
+      next.battleScene?.resolutionOwner?.forcedPartySelect ?? null,
+      null,
+      false,
+    );
     const orchestratorAfter = next.factoryRoundBattleOrchestrator;
+    if (orchestratorAfter?.battleForcedPartySelect) {
+      const resolution = orchestratorAfter.battleResolutionPresentation;
+      emitPartySendOutSounds(
+        state.factoryRoundBattleOrchestrator?.battleForcedPartySelect ?? null,
+        orchestratorAfter.battleForcedPartySelect,
+        resolution ? playerFaintReplacementSendOutTimingOfSegment(resolution.segments[resolution.segmentIndex]!) : null,
+        orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
+      );
+    }
     if (orchestratorAfter?.battleResolutionPresentation) {
       emitMidBattleSwitchSounds(
         state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,

@@ -63,6 +63,7 @@ describe("audio probe fixtures", () => {
       "swap-decline-window.json",
       "swap-window.json",
       "switch-opponent-replacement-off-window.json",
+      "switch-player-forced-sendout-on-window.json",
       "switch-player-off-window.json",
     ]);
     const profiles = new Set(fixtures.map(([, d]) => d.profile));

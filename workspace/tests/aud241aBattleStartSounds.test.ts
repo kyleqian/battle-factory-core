@@ -6,7 +6,8 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { ballTraySoundTicks } from "../src/engine/battleScene.ts";
-import { emitBattleStartBgm, emitMidBattleSwitchSounds, factoryBattleBgm } from "../src/engine/battleStartSounds.ts";
+import { emitBattleStartBgm, emitMidBattleSwitchSounds, emitPartySendOutSounds, factoryBattleBgm } from "../src/engine/battleStartSounds.ts";
+import type { PartySelectState, PartySendOutTiming } from "../src/engine/partySelect.ts";
 import type { BattleResolutionPresentationState } from "../src/engine/battleResolutionPresentation.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { FactorySession } from "../src/factorySession.ts";
@@ -32,9 +33,9 @@ interface Fixture {
   events: FixtureEvent[];
   setupEvents?: FixtureEvent[];
   trace: {
-    route: "generated-orchestrator";
+    route: "generated-orchestrator" | "canonical-recorded";
     battleScene: "on" | "off";
-    appStage: { id: string; frame: number };
+    appStage?: { id: string; frame: number };
     segments: Array<{ frames: number; buttons?: string[] }>;
   };
 }
@@ -65,7 +66,7 @@ function collectWindow(rom: Fixture, collect = true): { events: SoundEvent[]; st
   const from = rom.from ?? 0;
   let state = createInitialState({ appRoute: rom.trace.route, battleScene: rom.trace.battleScene });
   const stage = (frame: number): void => {
-    if (appStage.frame === frame) state = APP_STAGES[appStage.id]!(state);
+    if (appStage !== undefined && appStage.frame === frame) state = APP_STAGES[appStage.id]!(state);
   };
   stage(0);
   const events: SoundEvent[] = [];
@@ -135,6 +136,55 @@ describe("battle start sounds match the ROM (aud241a)", () => {
   it("switch-player-off-window.json: collecting sounds does not change the engine state", () => {
     const rom = fixture("switch-player-off-window");
     expect(collectWindow(rom, true).state).toBe(collectWindow(rom, false).state);
+  });
+
+  it("switch-player-forced-sendout-on-window.json: the party-menu forced SEND OUT's SE_SELECT, SE_BALL_OPEN, MAGBY's cry with its BGM duck and the restore (canonical route, Scene ON)", () => {
+    const rom = fixture("switch-player-forced-sendout-on-window");
+    expect(rom.profile).toBe("battle-scene-on");
+    expect(played(rom.events).map((e) => `${e.frame}:${e.kind}:${e.id}:${e.pan}`)).toEqual([
+      "20771:se:5:null", "20914:se:15:null", "20930:duck:476:null", "20930:cry:240:-25", "20972:duck:476:null",
+    ]);
+    expect(collectWindow(rom).events.map(key)).toEqual(played(rom.events).map(key));
+  });
+
+  it("switch-player-forced-sendout-on-window.json: collecting sounds does not change the engine state", () => {
+    const rom = fixture("switch-player-forced-sendout-on-window");
+    expect(collectWindow(rom, true).state).toBe(collectWindow(rom, false).state);
+  });
+
+  describe("party-menu send-out emitter on synthetic select clocks", () => {
+    const select = (sendOutElapsed: number | null, member = { speciesId: 240, hp: 100, maxHp: 100, status: "none" }): PartySelectState =>
+      ({ cursor: 0, party: [member], sendOutElapsed }) as unknown as PartySelectState;
+    const run = (timing: PartySendOutTiming | null, brain = false, member?: { speciesId: number; hp: number; maxHp: number; status: string }): SoundEvent[] => {
+      const events: SoundEvent[] = [];
+      for (let elapsed = 0; elapsed <= 260; elapsed += 1) {
+        events.push(...collectSoundTick(elapsed, () => {
+          emitPartySendOutSounds(elapsed === 0 ? select(null, member) : select(elapsed - 1, member), select(elapsed, member), timing, brain);
+        }).events);
+      }
+      return events;
+    };
+    const summary = (events: readonly SoundEvent[]) => events.map((e) => `${e.frame}:${e.kind}:${e.id}:${e.pan}`);
+
+    it("plays SE_BALL_OPEN 143 ticks after the confirm and the cry at pan -25 16 later (the restore is the scheduled screen sound, pinned by the ROM window)", () => {
+      expect(summary(run(null))).toEqual(["143:se:15:null", "159:duck:476:null", "159:cry:240:-25"]);
+    });
+
+    it("a ball shift or late release (PartySendOutTiming) moves the ball open and the cry together", () => {
+      const timing = { ballShift: 1, releaseExtra: 0 } as unknown as PartySendOutTiming;
+      expect(summary(run(timing)).filter((e) => e.includes(":se:") || e.includes(":cry:"))).toEqual(["144:se:15:null", "160:cry:240:-25"]);
+    });
+
+    it("a status or low-HP mon cries WEAK and the Factory Head's BGM is the ducked track (471)", () => {
+      expect(run(null, false, { speciesId: 95, hp: 10, maxHp: 100, status: "none" }).find((e) => e.kind === "cry")!.mode).toBe(11);
+      expect(run(null, false, { speciesId: 95, hp: 100, maxHp: 100, status: "burn" }).find((e) => e.kind === "cry")!.mode).toBe(11);
+      expect(run(null, true).filter((e) => e.kind === "duck").every((e) => e.id === 471)).toBe(true);
+    });
+
+    it("plays nothing before the send-out starts or on the cancel row", () => {
+      expect(collectSoundTick(1, () => emitPartySendOutSounds(null, select(null), null, false)).events).toEqual([]);
+      expect(collectSoundTick(1, () => emitPartySendOutSounds(null, { ...select(150), cursor: "cancel" } as unknown as PartySelectState, null, false)).events).toEqual([]);
+    });
   });
 
   describe("mid-battle send-in emitter on synthetic command clocks (the branches no ROM window replays)", () => {
