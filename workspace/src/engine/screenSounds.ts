@@ -223,3 +223,45 @@ function playFanfare(fanfare: number, bgm: number, continueDelay: number): void 
 export function scheduleHealFanfare(): void {
   scheduleAfter(1, () => playFanfare(MUS_HEAL, BGM_DRAFT, FANFARE_CONTINUE_DELAY));
 }
+
+/** Ticks from the loss terminal's second-page release to LostChallenge's `playse SE_SAVE` (oracle-probed, tools/audio/fixtures/loss-terminal-window.json). */
+export const LOSS_TERMINAL_SAVE_DELAY = 172;
+/** Ticks from the record menu's YES to SaveBattle's `playse SE_SAVE` (same fixture; the postwin record YES is RECORD_YES_SAVE_DELAY). */
+export const TERMINAL_RECORD_YES_SAVE_DELAY = 19;
+
+/** The slice of a factory terminal presentation the sound diff reads. */
+export interface TerminalSoundView {
+  readonly profile: { readonly outcome: string };
+  readonly secondPageReleaseAge?: number | null;
+  readonly firstPageReleaseAge?: number | null;
+  readonly recordPromptReleaseAge: number | null;
+  readonly recordMenuCursorChangedAge: number | null;
+  readonly recordChoice: string | null;
+}
+
+/** Diffs one terminal step: each accepted A / B / cursor move is the text printer's or menu's SE_SELECT, and the script's SE_SAVE steps are scheduled. */
+export function scheduleTerminalStepSounds(before: TerminalSoundView, after: TerminalSoundView): void {
+  if (!soundCollecting()) return;
+  const loss = after.profile.outcome === "loss";
+  if (loss) {
+    if ((before.firstPageReleaseAge ?? null) === null && (after.firstPageReleaseAge ?? null) !== null) playSelectSe();
+    if ((before.secondPageReleaseAge ?? null) === null && (after.secondPageReleaseAge ?? null) !== null) {
+      playSelectSe();
+      scheduleAfter(LOSS_TERMINAL_SAVE_DELAY, () => playScriptSe(SE_SAVE));
+    }
+  }
+  if (before.recordPromptReleaseAge === null && after.recordPromptReleaseAge !== null) playSelectSe();
+  if (after.recordMenuCursorChangedAge !== before.recordMenuCursorChangedAge) playSelectSe();
+  if (before.recordChoice === null && after.recordChoice !== null) {
+    playSelectSe();
+    if (after.recordChoice === "yes") scheduleAfter(TERMINAL_RECORD_YES_SAVE_DELAY, () => playScriptSe(SE_SAVE));
+  }
+}
+
+/** Ticks from the postwin record menu's accepted YES to SaveBattle's `playse SE_SAVE` (oracle-probed, tools/audio/fixtures/postwin-record-window.json). */
+export const POSTWIN_RECORD_YES_SAVE_DELAY = 20;
+
+/** The postwin RECORD question's accepted YES. */
+export function schedulePostwinRecordYesSave(): void {
+  scheduleAfter(POSTWIN_RECORD_YES_SAVE_DELAY, () => playScriptSe(SE_SAVE));
+}

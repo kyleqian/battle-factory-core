@@ -715,6 +715,8 @@ import {
   playSelectSe,
   runScheduledScreenSounds,
   scheduleHealFanfare,
+  schedulePostwinRecordYesSave,
+  scheduleTerminalStepSounds,
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
@@ -1201,6 +1203,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
   }
 
   if (factoryTerminal) {
+    const terminalBefore = factoryTerminal;
     factoryTerminal = advanceFactoryTerminalPresentation(
       factoryTerminal,
       {
@@ -1210,6 +1213,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         pressedDown: newKeys.has("DOWN"),
       },
     );
+    scheduleTerminalStepSounds(terminalBefore, factoryTerminal);
     const completion = factoryTerminalCompletion(factoryTerminal);
     roundController =
       completion !== null &&
@@ -1638,7 +1642,10 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         } else {
           nextPostwin = acceptPostwinQuestionDismiss(nextPostwin);
         }
-        if (nextPostwin !== beforeQuestion) playSelectSe();
+        if (nextPostwin !== beforeQuestion) {
+          playSelectSe();
+          if (nextPostwin.questionYesElapsed !== null && nextPostwin.question?.kind === "record") schedulePostwinRecordYesSave();
+        }
       }
     } else if (
       nextPostwin.question !== null &&
