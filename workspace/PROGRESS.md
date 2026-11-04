@@ -67,7 +67,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Next:** handoff "Next work": aud241 (scout `docs/aud241-scout.md`), cleanup step 5 / 4, bundle hygiene, ISSUES #194 / #195.
 - **Housekeeping:** evidence `sv-20261031` deleted (older than the last three runs; 2.8 GB); 27 GB free. No R2 remote on this host,
   so `tools/backup-logs-to-r2.sh` was not run.
-- **Notes:** no DEFERRED items. No push. Worker refs (merged, kept): integration-20261103-213048 (aud240c), -224443 (cln239),
+- **Notes:** no DEFERRED items. No push. Worker refs (merged; names moved to `refs/archive/worker-merged-20261104/`, restore with
+  `git branch <name> refs/archive/worker-merged-20261104/<name>`): integration-20261103-213048 (aud240c), -224443 (cln239),
   -20261104-000400 (aud240d), -013811 (go246), -044203 (qak247), -062420 (qak249); -032754 (aud241 scout, no commits, deleted).
 
 ---
