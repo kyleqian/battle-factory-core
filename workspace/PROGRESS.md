@@ -5,10 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-03 / 04 — CAX31 daily run (supervisor, Opus 5.5): in progress: aud240c / cln239 folded, aud240d running
+## 2026-11-03 / 04 — CAX31 daily run (supervisor, Opus 5.5): in progress: aud240c / cln239 / aud240d folded, go246 running
 
-- **State:** master `065046720`+ (src == aud240c merge `30360d7cf`). Worker aud240d (lobby / script sounds) running on
-  `worker/integration-20261104-000400`. Evidence `.integration/validation/sv-20261103/`.
+- **State:** master `4b59eed6c`+ (src == aud240d merge). Evidence `.integration/validation/sv-20261103/`.
 - **Folded:** aud240c (S11 step 4c; `docs/aud240c-party-menu-sounds.md`; branch `worker/integration-20261103-213048`): voluntary +
   forced battle party menus emit SE_SELECT on row moves (only when the slot changes), A on a mon, action-window cursor (NoWrap,
   silent at the ends), action-window A (**one** SE: `party_menu.c:2560` passes `APressMuted = TRUE`, supervisor-read; the scout's
@@ -25,7 +24,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Supervisor: both `--print-config` forms incl. the cron form exit 0, `-S codex` / `--lane animation` rejected,
   `tools/test_run_claude_supervisor.py` 11 OK, `tests/launcherProfiles.test.ts` 19 / 19, lane dir unchanged; aud240d launched with
   the new launcher. The worker briefly committed docs on master in the main checkout and reset it itself (reflog `178aed1d9`; PAPERCUTS).
-- **Next:** fold aud240d; then 4b(a) remainder (battle-start "Go!" wait, Kyle's SPOINK) or aud241; cleanup step 5 / 4.
+- **Folded:** aud240d (S11 step 4d, last screens slice; `docs/aud240d-script-sounds.md`; branch `worker/integration-20261104-000400`):
+  extractor follows std msgbox scripts + shared call targets (adds MUS_OBTAIN_B_POINTS 459, SaveBattle SE_SAVE; regeneration test
+  passes); write-only emitters for the post-win heal (MUS_HEAL fanfare + BGM stop / continue — new SoundEvent kind `continue`),
+  PreBattleRoom record SE_SELECT / SE_SAVE, Lobby loss / won terminals (page SEs, BP fanfare, SE_SAVE), Brain heal SE_POKENAV_CALL
+  (pinned as a 163-tick spacing only, absolute frame unmeasured). 5 fixtures: heal ON, record / loss / seventh-win OFF lab, Brain
+  setup spacing. Supervisor re-probed `heal-window` on the ON oracle: 3 / 3 events equal. Not emitted (unmeasured):
+  MUS_OBTAIN_SYMBOL, PauseChallenge SE_SAVE; battle-return BGM / SE_EXIT measured and left to aud241. Worker: typecheck, build,
+  build:lib 0; differential 905 / 905 identical (3 standard + 2 lobby traces); importers 362 tests. Supervisor: 5 audio files 151 / 151.
+- **Running:** go246 (4b(a) remainder: battle-start "Go!" intro waits for the species animations; Opus worker, 180 min) beside the
+  supervisor's full suite on `4b59eed6c` (`gates-aud240d/`).
+- **Next:** fold go246; aud241 (battle controller sounds); cleanup step 5 / 4.
 
 ---
 
