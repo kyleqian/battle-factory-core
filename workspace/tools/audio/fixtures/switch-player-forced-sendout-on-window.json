@@ -1,0 +1,1012 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "canonical-recorded route, Scene ON: the player's forced SEND OUT replacement (MAGBY) from the party-menu confirm; SE_SELECT at the confirm, SE_BALL_OPEN, the send-out cry with its BGM duck and the restore, frames 20761-21450 (the tail no-op rows are battle-end bookkeeping)",
+ "profile": "battle-scene-on",
+ "frames": 690,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
+ },
+ "mode": "step",
+ "steps": 32672940,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 40.8,
+ "windowSeconds": 40.8,
+ "events": [
+  {
+   "frame": 20771,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 20914,
+   "kind": "se",
+   "id": 15,
+   "name": "SE_BALL_OPEN",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 20930,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayCry_ByMode",
+   "tracks": 65535,
+   "volume": 85
+  },
+  {
+   "frame": 20930,
+   "kind": "cry",
+   "id": 240,
+   "name": "SPECIES_MAGBY",
+   "pan": -25,
+   "volume": 120,
+   "priority": 10,
+   "mode": "NORMAL",
+   "via": "PlayCry_ByMode"
+  },
+  {
+   "frame": 20972,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsCryPlaying",
+   "tracks": 65535,
+   "volume": 256
+  },
+  {
+   "frame": 21063,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "SetBattleEndCallbacks",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
+   "frame": 21063,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "HandleLowHpMusicChange",
+   "noop": true
+  }
+ ],
+ "calls": [
+  {
+   "frame": 20771,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 136007213
+  },
+  {
+   "frame": 20914,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 15,
+   "r1": 28
+  },
+  {
+   "frame": 20930,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "PlayCry_ByMode",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 20930,
+   "fn": "PlayCryInternal",
+   "via": "PlayCry_ByMode",
+   "r0": 240,
+   "r1": 4294967271
+  },
+  {
+   "frame": 20972,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "IsCryPlaying",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 21063,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "SetBattleEndCallbacks",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
+   "frame": 21063,
+   "fn": "m4aSongNumStop",
+   "via": "HandleLowHpMusicChange",
+   "r0": 90,
+   "r1": 1,
+   "noop": true
+  },
+  {
+   "frame": 21063,
+   "fn": "m4aMPlayStop",
+   "via": "m4aSongNumStop",
+   "r0": 50362368,
+   "r1": 143644164,
+   "noop": true
+  }
+ ],
+ "from": 20760,
+ "trace": {
+  "route": "canonical-recorded",
+  "battleScene": "on",
+  "segments": [
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 28,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 4,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 36,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "RIGHT"
+    ]
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 28,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 4,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 36,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "RIGHT"
+    ]
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 28,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 4,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 70,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 130,
+    "buttons": []
+   },
+   {
+    "frames": 8,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 96,
+    "buttons": []
+   },
+   {
+    "frames": 24,
+    "buttons": []
+   },
+   {
+    "frames": 162,
+    "buttons": []
+   },
+   {
+    "frames": 54,
+    "buttons": []
+   },
+   {
+    "frames": 100,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 196,
+    "buttons": []
+   },
+   {
+    "frames": 14,
+    "buttons": []
+   },
+   {
+    "frames": 210,
+    "buttons": []
+   },
+   {
+    "frames": 60,
+    "buttons": []
+   },
+   {
+    "frames": 100,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 144,
+    "buttons": []
+   },
+   {
+    "frames": 180,
+    "buttons": []
+   },
+   {
+    "frames": 60,
+    "buttons": []
+   },
+   {
+    "frames": 80,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 980,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 900,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 600,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 750,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "RIGHT"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1400,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "LEFT"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1400,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 10,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1400,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 900,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1200,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1000,
+    "buttons": []
+   },
+   {
+    "buttons": [
+     "A"
+    ],
+    "frames": 1
+   },
+   {
+    "buttons": [],
+    "frames": 199
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "B"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "B"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 99,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 20,
+    "buttons": []
+   },
+   {
+    "frames": 640,
+    "buttons": []
+   }
+  ]
+ }
+}

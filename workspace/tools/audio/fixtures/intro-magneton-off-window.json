@@ -1,0 +1,601 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "lab Factory arbitrary-intro lab (magneton stage, opponent MAGNETON), Scene OFF: battle intro from the intro stage (lab frame 1178) through the send-outs; the pre-stage BGM start is kept as setupEvents; the lab A press lands at 1541",
+ "profile": "battle-scene-off",
+ "frames": 689,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
+ },
+ "mode": "step",
+ "steps": 96985703,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 90.8,
+ "windowSeconds": 0.0,
+ "events": [
+  {
+   "frame": 1366,
+   "kind": "se",
+   "id": 114,
+   "name": "SE_BALL_TRAY_ENTER",
+   "pan": 0,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 1369,
+   "kind": "se",
+   "id": 114,
+   "name": "SE_BALL_TRAY_ENTER",
+   "pan": 0,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 1385,
+   "kind": "se",
+   "id": 115,
+   "name": "SE_BALL_TRAY_BALL",
+   "pan": 63,
+   "via": "PlaySE1WithPanning"
+  },
+  {
+   "frame": 1392,
+   "kind": "se",
+   "id": 115,
+   "name": "SE_BALL_TRAY_BALL",
+   "pan": 63,
+   "via": "PlaySE1WithPanning"
+  },
+  {
+   "frame": 1394,
+   "kind": "se",
+   "id": 115,
+   "name": "SE_BALL_TRAY_BALL",
+   "pan": -64,
+   "via": "PlaySE1WithPanning"
+  },
+  {
+   "frame": 1399,
+   "kind": "se",
+   "id": 115,
+   "name": "SE_BALL_TRAY_BALL",
+   "pan": 63,
+   "via": "PlaySE1WithPanning"
+  },
+  {
+   "frame": 1401,
+   "kind": "se",
+   "id": 115,
+   "name": "SE_BALL_TRAY_BALL",
+   "pan": -64,
+   "via": "PlaySE1WithPanning"
+  },
+  {
+   "frame": 1406,
+   "kind": "se",
+   "id": 116,
+   "name": "SE_BALL_TRAY_EXIT",
+   "pan": 63,
+   "via": "PlaySE2WithPanning"
+  },
+  {
+   "frame": 1408,
+   "kind": "se",
+   "id": 115,
+   "name": "SE_BALL_TRAY_BALL",
+   "pan": -64,
+   "via": "PlaySE1WithPanning"
+  },
+  {
+   "frame": 1413,
+   "kind": "se",
+   "id": 116,
+   "name": "SE_BALL_TRAY_EXIT",
+   "pan": 63,
+   "via": "PlaySE2WithPanning"
+  },
+  {
+   "frame": 1415,
+   "kind": "se",
+   "id": 116,
+   "name": "SE_BALL_TRAY_EXIT",
+   "pan": -64,
+   "via": "PlaySE2WithPanning"
+  },
+  {
+   "frame": 1420,
+   "kind": "se",
+   "id": 116,
+   "name": "SE_BALL_TRAY_EXIT",
+   "pan": 63,
+   "via": "PlaySE2WithPanning"
+  },
+  {
+   "frame": 1422,
+   "kind": "se",
+   "id": 116,
+   "name": "SE_BALL_TRAY_EXIT",
+   "pan": -64,
+   "via": "PlaySE2WithPanning"
+  },
+  {
+   "frame": 1429,
+   "kind": "se",
+   "id": 116,
+   "name": "SE_BALL_TRAY_EXIT",
+   "pan": -64,
+   "via": "PlaySE2WithPanning"
+  },
+  {
+   "frame": 1541,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 1600,
+   "kind": "se",
+   "id": 15,
+   "name": "SE_BALL_OPEN",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 1617,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayCry_ByMode",
+   "tracks": 65535,
+   "volume": 85
+  },
+  {
+   "frame": 1617,
+   "kind": "cry",
+   "id": 82,
+   "name": "SPECIES_MAGNETON",
+   "pan": 25,
+   "volume": 120,
+   "priority": 10,
+   "mode": "NORMAL",
+   "via": "PlayCry_ByMode"
+  },
+  {
+   "frame": 1686,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "SetControllerToOpponent",
+   "tracks": 65535,
+   "volume": 256
+  },
+  {
+   "frame": 1686,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsCryPlaying",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
+   "frame": 1786,
+   "kind": "se",
+   "id": 15,
+   "name": "SE_BALL_OPEN",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 1799,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayCry_ByMode",
+   "tracks": 65535,
+   "volume": 85
+  },
+  {
+   "frame": 1799,
+   "kind": "cry",
+   "id": 316,
+   "name": "SPECIES_DELCATTY",
+   "pan": -25,
+   "volume": 120,
+   "priority": 10,
+   "mode": "NORMAL",
+   "via": "PlayCry_ByMode"
+  },
+  {
+   "frame": 1860,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "SetBattleEndCallbacks",
+   "tracks": 65535,
+   "volume": 256
+  },
+  {
+   "frame": 1860,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsCryPlaying",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
+   "frame": 1861,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "HandleLowHpMusicChange",
+   "noop": true
+  }
+ ],
+ "calls": [
+  {
+   "frame": 1366,
+   "fn": "PlaySE12WithPanning",
+   "via": "CreatePartyStatusSummarySprites",
+   "r0": 114,
+   "r1": 0
+  },
+  {
+   "frame": 1366,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 114,
+   "r1": 0
+  },
+  {
+   "frame": 1369,
+   "fn": "PlaySE12WithPanning",
+   "via": "CreatePartyStatusSummarySprites",
+   "r0": 114,
+   "r1": 0
+  },
+  {
+   "frame": 1369,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 114,
+   "r1": 0
+  },
+  {
+   "frame": 1385,
+   "fn": "PlaySE1WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 115,
+   "r1": 63
+  },
+  {
+   "frame": 1385,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE1WithPanning",
+   "r0": 115,
+   "r1": 63
+  },
+  {
+   "frame": 1392,
+   "fn": "PlaySE1WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 115,
+   "r1": 63
+  },
+  {
+   "frame": 1392,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE1WithPanning",
+   "r0": 115,
+   "r1": 63
+  },
+  {
+   "frame": 1394,
+   "fn": "PlaySE1WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 115,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1394,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE1WithPanning",
+   "r0": 115,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1399,
+   "fn": "PlaySE1WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 115,
+   "r1": 63
+  },
+  {
+   "frame": 1399,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE1WithPanning",
+   "r0": 115,
+   "r1": 63
+  },
+  {
+   "frame": 1401,
+   "fn": "PlaySE1WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 115,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1401,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE1WithPanning",
+   "r0": 115,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1406,
+   "fn": "PlaySE2WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 116,
+   "r1": 63
+  },
+  {
+   "frame": 1406,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE2WithPanning",
+   "r0": 116,
+   "r1": 63
+  },
+  {
+   "frame": 1408,
+   "fn": "PlaySE1WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 115,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1408,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE1WithPanning",
+   "r0": 115,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1413,
+   "fn": "PlaySE2WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 116,
+   "r1": 63
+  },
+  {
+   "frame": 1413,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE2WithPanning",
+   "r0": 116,
+   "r1": 63
+  },
+  {
+   "frame": 1415,
+   "fn": "PlaySE2WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 116,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1415,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE2WithPanning",
+   "r0": 116,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1420,
+   "fn": "PlaySE2WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 116,
+   "r1": 63
+  },
+  {
+   "frame": 1420,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE2WithPanning",
+   "r0": 116,
+   "r1": 63
+  },
+  {
+   "frame": 1422,
+   "fn": "PlaySE2WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 116,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1422,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE2WithPanning",
+   "r0": 116,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1429,
+   "fn": "PlaySE2WithPanning",
+   "via": "Task_HidePartyStatusSummary",
+   "r0": 116,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1429,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE2WithPanning",
+   "r0": 116,
+   "r1": 4294967232
+  },
+  {
+   "frame": 1541,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 1600,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 15,
+   "r1": 28
+  },
+  {
+   "frame": 1617,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "PlayCry_ByMode",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 1617,
+   "fn": "PlayCryInternal",
+   "via": "PlayCry_ByMode",
+   "r0": 82,
+   "r1": 25
+  },
+  {
+   "frame": 1686,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "SetControllerToOpponent",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 1686,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "IsCryPlaying",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
+   "frame": 1786,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 15,
+   "r1": 28
+  },
+  {
+   "frame": 1799,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "PlayCry_ByMode",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 1799,
+   "fn": "PlayCryInternal",
+   "via": "PlayCry_ByMode",
+   "r0": 316,
+   "r1": 4294967271
+  },
+  {
+   "frame": 1860,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "SetBattleEndCallbacks",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 1860,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "IsCryPlaying",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
+   "frame": 1861,
+   "fn": "m4aSongNumStop",
+   "via": "HandleLowHpMusicChange",
+   "r0": 90,
+   "r1": 1,
+   "noop": true
+  }
+ ],
+ "from": 1178,
+ "setupEvents": [
+  {
+   "frame": 992,
+   "kind": "stop",
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "pan": null,
+   "player": "BGM",
+   "via": "m4aMPlayAllStop"
+  },
+  {
+   "frame": 992,
+   "kind": "bgm",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "via": "PlayBGM"
+  }
+ ],
+ "trace": {
+  "route": "generated-orchestrator",
+  "battleScene": "off",
+  "appStage": {
+   "id": "factory-arbitrary-intro-magneton-off",
+   "frame": 1178
+  },
+  "segments": [
+   {
+    "frames": 1178
+   },
+   {
+    "frames": 362
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 326
+   }
+  ]
+ }
+}

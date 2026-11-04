@@ -720,6 +720,9 @@ import {
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
+import { emitBattleStartBgm, emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
+import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
+import { soundCollecting } from "../audio/soundEvents.ts";
 
 /**
  * Builds the source-owned completed-command chain once the turn-4 lifecycle
@@ -1029,6 +1032,35 @@ export function createInitialState(
 export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
   beginScreenSoundTick(state.frame + 1);
   const next = tickEngineState(state, buttons);
+  const introBefore = state.factoryRoundBattleOrchestrator?.battleStartIntro ?? null;
+  if (introBefore !== null && soundCollecting()) {
+    emitBattleStartIntroSounds(introBefore, next.factoryRoundBattleOrchestrator?.battleStartIntro ?? null);
+  }
+  if (soundCollecting()) {
+    emitPartySendOutSounds(
+      state.battleScene?.resolutionOwner?.forcedPartySelect ?? null,
+      next.battleScene?.resolutionOwner?.forcedPartySelect ?? null,
+      null,
+      false,
+    );
+    const orchestratorAfter = next.factoryRoundBattleOrchestrator;
+    if (orchestratorAfter?.battleForcedPartySelect) {
+      const resolution = orchestratorAfter.battleResolutionPresentation;
+      emitPartySendOutSounds(
+        state.factoryRoundBattleOrchestrator?.battleForcedPartySelect ?? null,
+        orchestratorAfter.battleForcedPartySelect,
+        resolution ? playerFaintReplacementSendOutTimingOfSegment(resolution.segments[resolution.segmentIndex]!) : null,
+        orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
+      );
+    }
+    if (orchestratorAfter?.battleResolutionPresentation) {
+      emitMidBattleSwitchSounds(
+        state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,
+        orchestratorAfter.battleResolutionPresentation,
+        orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
+      );
+    }
+  }
   runScheduledScreenSounds();
   // Presentation seam, after the logical frame: one Random2 step per presented battle frame
   // (presentationRngHost.ts). Reads only the battle's identity edge, never gameplay RNG values.
@@ -1498,6 +1530,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
             ...battleRoom,
             transitionPresentation: selected.presentation,
           };
+          if (soundCollecting()) emitBattleStartBgm(false);
         } else {
           for (let i = 0; i < extraRngSteps; i += 1) {
             rngValue = advanceRngValue(rngValue);
@@ -1569,6 +1602,14 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         // BATTLE_2_SCENE_HANDOFF_ELAPSED is that already-calibrated full
         // duration (same constant the ordinary "settled" phase's own
         // handoff above already waits out for this shared transition).
+        if (
+          battleRoom !== null &&
+          battleRoom.phase === "brainSpeechSettled" &&
+          battleRoom.elapsed === brainSpeechSceneHandoffElapsed(battleRoom) &&
+          soundCollecting()
+        ) {
+          emitBattleStartBgm(true);
+        }
         if (
           battleRoom !== null &&
           battleRoom.phase === "brainSpeechSettled" &&
@@ -2483,6 +2524,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           ...battleRoom,
           transitionPresentation: selected.presentation,
         };
+        if (soundCollecting()) emitBattleStartBgm(false);
       } else {
         for (let i = 0; i < extraRngSteps; i += 1) {
           rngValue = advanceRngValue(rngValue);

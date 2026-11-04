@@ -1,6 +1,6 @@
 // aud239: the write-only sound sink is neutral. A session with a recording sink attached produces the
 // same per-frame sha256, kernel-events digest, battles, recorded trace and headless replay as one with
-// no sink, and (aud240a) the sink only receives the screen SE_SELECT events.
+// no sink, and the sink only receives the screen SE_SELECTs and (aud241a) the battle start's sounds.
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { type SoundEvent, type SoundSink } from "../src/audio/soundEvents.ts";
@@ -39,11 +39,14 @@ function play(scene: BattleScene, seed: number, policy: SoakPolicy, frames: numb
   return { frameHashes, digest: session.digest(), battles: session.battles, trace: session.trace(), finalFrame: session.frame };
 }
 
-// aud240a: screens emit SE_SELECT (kind se, id 5, pan null) and nothing else is emitted yet.
+// aud240a: screens emit SE_SELECT (kind se, id 5, pan null); aud241a: the battle start adds the battle BGM, the ball tray,
+// the ball opens and the send-out cries with their BGM duck. Nothing else is emitted in these runs yet.
+const BATTLE_START_SE_IDS = new Set([5, 15, 114, 115, 116]);
 function expectScreenSoundsOnly(events: readonly SoundEvent[], frames: number): void {
   let last = 0;
   for (const event of events) {
-    expect(event).toEqual({ frame: event.frame, kind: "se", id: 5, pan: null });
+    if (event.kind === "se") expect(BATTLE_START_SE_IDS.has(event.id!), JSON.stringify(event)).toBe(true);
+    else expect(["stop", "bgm", "cry", "duck"], JSON.stringify(event)).toContain(event.kind);
     expect(event.frame).toBeGreaterThanOrEqual(last);
     expect(event.frame).toBeLessThanOrEqual(frames);
     last = event.frame;
@@ -55,7 +58,7 @@ describe("sound sink neutrality (aud239)", () => {
     ["off", 3, "winning", 4000],
     ["on", 7, "winning", 2500],
   ] as const) {
-    it(`Scene ${scene.toUpperCase()}: per-frame sha256, digest, battles and trace are identical with a sink; the sink only gets in-order screen SEs`, () => {
+    it(`Scene ${scene.toUpperCase()}: per-frame sha256, digest, battles and trace are identical with a sink; the sink only gets in-order screen and battle-start sounds`, () => {
       const bare = play(scene, seed, policy, frames, null);
       const sink = new RecordingSink();
       const wired = play(scene, seed, policy, frames, sink);

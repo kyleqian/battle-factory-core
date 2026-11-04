@@ -43,6 +43,11 @@ describe("audio probe fixtures", () => {
       "draft-trace-window.json",
       "draft-window.json",
       "heal-window.json",
+      "intro-canonical-window.json",
+      "intro-magneton-off-window.json",
+      "intro-magneton-on-window.json",
+      "intro-yoshi-off-window.json",
+      "intro-yoshi-on-window.json",
       "loss-terminal-window.json",
       "party-forced-window.json",
       "party-summary-entry-window.json",
@@ -57,6 +62,9 @@ describe("audio probe fixtures", () => {
       "summary-swap-window.json",
       "swap-decline-window.json",
       "swap-window.json",
+      "switch-opponent-replacement-off-window.json",
+      "switch-player-forced-sendout-on-window.json",
+      "switch-player-off-window.json",
     ]);
     const profiles = new Set(fixtures.map(([, d]) => d.profile));
     expect([...profiles].sort()).toEqual(["battle-scene-off", "battle-scene-on"]);

@@ -58,8 +58,12 @@ export interface SummarySoundMon {
 
 /** battle_gfx_sfx_util.c ShouldPlayNormalMonCry: any status or an HP bar at or below yellow plays the WEAK cry. */
 export function summaryCryMode(mon: SummarySoundMon): number {
-  if (mon.ailment !== undefined && mon.ailment !== null) return CRY_MODE_WEAK;
-  const { hp, maxHp } = mon.stats;
+  return cryModeFor(mon.stats.hp, mon.stats.maxHp, mon.ailment !== undefined && mon.ailment !== null);
+}
+
+/** ShouldPlayNormalMonCry (battle_gfx_sfx_util.c): any STATUS1 or a yellow-or-worse HP bar plays the WEAK cry. */
+export function cryModeFor(hp: number, maxHp: number, hasStatus: boolean): number {
+  if (hasStatus) return CRY_MODE_WEAK;
   if (hp === maxHp) return CRY_MODE_NORMAL;
   // GetHPBarLevel: GetScaledHPFraction(hp, maxHp, 48) <= 48 * 50 / 100 is yellow or worse.
   const fraction = hp > 0 ? Math.max(1, Math.floor((hp * 48) / maxHp)) : 0;
@@ -111,12 +115,9 @@ function restoreBgm(bgm: number): void {
 }
 
 /** PlayCry_ByMode: PlayCryInternal ducks the BGM, starts the cry; Task_DuckBGMForPokemonCry restores when the cry ends. */
-function playCry(bgm: number, mon: SummarySoundMon): void {
-  const species = SPECIES_ID.get(mon.species);
-  if (species === undefined) return;
-  const mode = summaryCryMode(mon);
+function startCry(bgm: number, species: number, mode: number, pan: number): void {
   emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_DUCK_VOLUME });
-  emitSound({ kind: "cry", id: species, pan: 0, mode, volume: CRY_VOLUME, priority: CRY_PRIORITY });
+  emitSound({ kind: "cry", id: species, pan, mode, volume: CRY_VOLUME, priority: CRY_PRIORITY });
   crySerial += 1;
   const serial = crySerial;
   ducking = { serial, bgm };
@@ -128,6 +129,35 @@ function playCry(bgm: number, mon: SummarySoundMon): void {
     ducking = null;
     restoreBgm(bgm);
   });
+}
+
+/** Task_PlayCryWhenReleasedFromBall: the send-out cry at pan +25 (opponent) / -25 (player), NORMAL or WEAK by the mon's HP and status. */
+export function playSendOutCry(bgm: number, species: number, mode: number, pan: number): void {
+  startCry(bgm, species, mode, pan);
+}
+
+export const SE_BALL_OPEN = 15;
+export const SE_BALL_TRAY_ENTER = 114;
+export const SE_BALL_TRAY_BALL = 115;
+export const SE_BALL_TRAY_EXIT = 116;
+/** MUS_VS_FRONTIER_BRAIN, the Factory Head's battle BGM (GetBattleBGM). */
+export const BGM_FRONTIER_BRAIN = 471;
+
+/** One pan-less `PlaySE(SE_BALL_OPEN)` (battle_anim_throw.c) on the tick being collected. */
+export function playBallOpenSe(): void {
+  emitSound({ kind: "se", id: SE_BALL_OPEN, pan: null });
+}
+
+/** m4aMPlayAllStop then PlayBGM: the battle BGM replaces the map BGM (the same frame on the canonical Battle 2 trace; some labs show one frame between). */
+export function startBattleBgm(previousBgm: number, battleBgm: number): void {
+  emitSound({ kind: "stop", id: previousBgm, pan: null, player: "BGM" });
+  emitSound({ kind: "bgm", id: battleBgm, pan: null });
+}
+
+function playCry(bgm: number, mon: SummarySoundMon): void {
+  const species = SPECIES_ID.get(mon.species);
+  if (species === undefined) return;
+  startCry(bgm, species, summaryCryMode(mon), 0);
 }
 
 /** StopCryAndClearCrySongs; a cry that was still playing makes the duck task restore the BGM on the same frame. */
