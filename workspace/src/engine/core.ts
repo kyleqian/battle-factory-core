@@ -1598,7 +1598,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
     ) {
       const healPostwin = nextPostwin;
       nextPostwin = acceptPostwinHealDismiss(nextPostwin);
-      if (healPostwin.healDismissElapsed === null && nextPostwin.healDismissElapsed !== null) scheduleHealFanfare();
+      if (healPostwin.healDismissElapsed === null && nextPostwin.healDismissElapsed !== null) scheduleHealFanfare(healPostwin.frontierBrain);
     } else if (
       // Walk-up build step A: the brain route's call-scene boxes (phone SE,
       // attendant walk-away/return, 3-page boss message) - each advances on

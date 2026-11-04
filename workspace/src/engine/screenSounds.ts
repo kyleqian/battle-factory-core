@@ -220,9 +220,13 @@ function playFanfare(fanfare: number, bgm: number, continueDelay: number): void 
 }
 
 /** The heal scene's `playfanfare MUS_HEAL` (the postwin heal dismiss), one tick after the accepted A. */
-export function scheduleHealFanfare(): void {
+export function scheduleHealFanfare(frontierBrain = false): void {
   scheduleAfter(1, () => playFanfare(MUS_HEAL, BGM_DRAFT, FANFARE_CONTINUE_DELAY));
+  if (frontierBrain) scheduleAfter(1 + POKENAV_CALL_AFTER_HEAL_FANFARE, () => playScriptSe(SE_POKENAV_CALL));
 }
+
+/** Ticks from the heal fanfare start to the Brain branch's `playse SE_POKENAV_CALL` (continue +3 in tools/audio/fixtures/brain-heal-setup-window.json). */
+export const POKENAV_CALL_AFTER_HEAL_FANFARE = 163;
 
 /** Ticks from the terminal's party restore to the script's `playse SE_SAVE` (factory_save, then the SE; tools/audio/fixtures/loss-terminal-window.json and seventh-win-window.json). */
 export const TERMINAL_SAVE_AFTER_RESTORE = 122;

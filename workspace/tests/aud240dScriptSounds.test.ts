@@ -105,6 +105,29 @@ describe("script sounds match the ROM (aud240d)", () => {
     expect(collectWindow(rom).events.map(key)).toEqual(rom.events.map(key));
   });
 
+  it("brain-heal-setup-window.json: the Brain heal's SE_POKENAV_CALL follows the fanfare start by 163 ticks; our staged call-scene trace keeps that spacing (ROM relation from a Scene OFF lab setup log)", () => {
+    const rom = fixture("brain-heal-setup-window");
+    const named = rom.events.filter((e) => [368, 263].includes(e.id ?? -1) || e.kind === "continue");
+    expect(named.map((e) => `${e.kind}:${e.id}`)).toEqual(["fanfare:368", "continue:469", "se:263"]);
+    const [fanfare, continuation, call] = named;
+    expect(continuation!.frame - fanfare!.frame).toBe(160);
+    expect(call!.frame - fanfare!.frame).toBe(163);
+    const trace = JSON.parse(readFileSync(new URL("../tools/compare/traces/factory-brain-silver-walkup-callscene-01-off.json", import.meta.url), "utf8")) as {
+      appRoute: "generated-orchestrator";
+      battleScene?: "on" | "off";
+      appStage: { id: string; frame: number };
+      segments: Array<{ frames: number; buttons?: string[] }>;
+    };
+    const ours = collectWindow({
+      from: 0, frames: 949, profile: "battle-scene-off", events: [],
+      trace: { route: trace.appRoute, battleScene: trace.battleScene, appStage: trace.appStage, segments: trace.segments },
+    }).events;
+    const oursFanfare = ours.find((e) => e.kind === "fanfare")!;
+    expect(ours.map((e) => `${e.kind}:${e.id}`)).toEqual(["stop:469", "fanfare:368", "continue:469", "se:263"]);
+    expect(ours.find((e) => e.kind === "continue")!.frame - oursFanfare.frame).toBe(160);
+    expect(ours.find((e) => e.id === 263)!.frame - oursFanfare.frame).toBe(163);
+  });
+
   for (const name of ["heal-window", "postwin-record-window", "loss-terminal-window", "seventh-win-window"]) {
     it(`${name}.json: collecting sounds does not change the engine state`, () => {
       const rom = fixture(name);
