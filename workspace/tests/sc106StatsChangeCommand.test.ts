@@ -56,6 +56,9 @@ const iu = (...bodies: (readonly [number, "player" | "opponent", number?])[]) =>
 const TRN181_SEED0_PAUSES_BEFORE_FIRST_ANCHOR = 14;
 /** chg161: the Dig charge turns seed 0's Scene ON route plays (each box 24 -> 8 frames). */
 const CHG161_SEED0_ON_CHARGE_TURNS = 2;
+/** go246 (docs/go246-intro-wait.md): each route battle's Scene ON battle-start intro hold (generatedIntroOpponentAnimHold +
+ * generatedIntroPlayerAnimHold for its leads), ahead of every anchor: seed 0 100 + 6, 6 54 + 7, 10 21 + 44, 13 65 + 53; seed 3 holds 0. */
+const GO246_INTRO_HOLD = { 0: 106, 6: 61, 10: 65, 13: 118 } as const;
 describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d54)", () => {
   it("status stat move, sharply (seed 0, slot 2: GRIMER Acid Armor, arg 40): command after the body, message +90", () => {
     const route = scanRoute(0, Array(8).fill(2), "on");
@@ -70,7 +73,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // ont193 (docs/ont193-scene-on-tails.md): + 3, Acid Armor's own script tail (3 rows after the waitanimation release; source-derived, no ROM row).
     // lsd194 (docs/lsd194-print-floor-and-drain.md section 8): - 1, the WAITMESSAGE_LONG 24-row floor is gone: the opponent's "Foe VIBRAVA dug a hole!" print (L = 23) lasts L + 64
     // (tools/integration/lsd194ScAttribution.ts 0 2; base 983 -> 982, unchanged by the drain rows).
-    const shift = iu([91, O], [151, P]) - 16 - 2 + TRN181_SEED0_PAUSES_BEFORE_FIRST_ANCHOR + 3 - 1;
+    const shift = iu([91, O], [151, P]) - 16 - 2 + TRN181_SEED0_PAUSES_BEFORE_FIRST_ANCHOR + 3 - 1 + GO246_INTRO_HOLD[0];
     expect(a.statsChange).toEqual({ frame: 976 + shift, frames: 90 });
     // scf117: + 1 hold frame (the print executes on rel 91 and shows its first glyph on rel 92).
     expect(a.following).toMatchObject({ type: "message", frame: 976 + shift + 90 + 1, glyph: 976 + shift + 90 + 1 });
@@ -90,8 +93,9 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + 5 // tl205: the route's one Double Team presents its 5-row script tail (tl204-measured trail -1).
       + 79 + 1 // trn181: the route's six Scene ON action-transition pauses (79 frames) + 1 frame of dismissal parity (odd 79).
       + 3 * 3 + 4 - 1 // ont193: the route's script tails (Acid Armor 151 x3 = 3 each, the opponent's 219 = 4) - 1 frame of dismissal parity (odd 13).
-      + 70); // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the route's 2 faint commands, both after the anchor (6701 -> 6771; hpb202 adds 0;
+      + 70 // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the route's 2 faint commands, both after the anchor (6701 -> 6771; hpb202 adds 0;
       // tools/integration/rep203FaintCount.ts 0 2: 0 faints before the anchor, so the +90 / message frames above are unchanged).
+      + GO246_INTRO_HOLD[0]); // go246: the Scene ON battle-start intro hold (6776 -> 6882).
   });
 
   it("status stat move, non-sharp (seed 3, slot 3: Sand-Attack on Foe MARSHTOMP, arg 27): message +76", () => {
@@ -143,7 +147,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + 45 // trn181 (docs/trn181-action-transition-on.md): the Scene ON action-transition pauses before it (45; trn181PinShift.ts 6 0); the old - 1 frame of dismissal parity is 0 after the odd lsd194 shift
       // (measured on archived trees: base 2839, floor-only tree 2831 = - 9 + 1 at the faint command, final 2831; the dismissal poll lands one frame later).
       + 46 // snd182 (docs/snd182-scene-on-forced-player-send-in-live.md): the Foe's Roar / Whirlwind drags out the player's DROWZEE at frame 849 (Scene ON forced player send-in: 137 + 11 = 148 vs the old 91 + 11 = 102).
-      + 36; // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the 1 faint command before the anchor (2831 -> 2867; hpb202 adds 0; tools/integration/rep203FaintCount.ts 6 0).
+      + 36 // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the 1 faint command before the anchor (2831 -> 2867; hpb202 adds 0; tools/integration/rep203FaintCount.ts 6 0).
+      + GO246_INTRO_HOLD[6] + 1; // go246: the intro hold + 1 frame of dismissal parity (odd 61; measured 2867 -> 2929).
     expect(a.statsChange).toEqual({ frame: 2694 + 10 + shift, frames: 76 });
     expect(a.following).toMatchObject({ type: "message", frame: 2694 + 10 + shift + 76 + 1, glyph: 2694 + 10 + shift + 76 + 1 });
     expect(a.following!.text).toContain("INTIMIDATE");
@@ -160,7 +165,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     // trn181: + 39, the Scene ON action-transition pauses before it (trn181PinShift.ts 13 3).
     // ont193: + 5, the Tickle's own script tail (source-derived, no ROM row).
     // lsd194: - 2, the two "WAILMER's attack missed!" prints (L = 23) before it lose their floor, 1 row each (lsd194ScAttribution.ts 13 3; base 2053 -> 2051).
-    const shift = iu([205, P], [55, O, 2], [321, O]) - 13 + 39 + 5 - 2;
+    const shift = iu([205, P], [55, O, 2], [321, O]) - 13 + 39 + 5 - 2 + GO246_INTRO_HOLD[13];
     expect(a.statsChange).toEqual({ frame: 1929 + 79 + shift, frames: 76 });
     // One animation for the group: the stat write that follows (ATK) starts 76 frames later; DEF's write has no second command.
     // scf117: + 3 hold frames (setstatchanger + statbuffchange + jumpifbyte + printfromtable after rel 77: the ATK write's `stat`
@@ -184,7 +189,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       + 2 * 5 + 2 * 3 // ont193: the route's script tails (Tickle 321 x2 = 5 each, 148 x2 = 3 each).
       + 2 * 4 // lsd196 (rst197 verification): Tickle's DEF `stat` (BattleScript_TickleTryLowerDef) sits between two prints like Bulk Up's, 2 -> 6 rows each x 2 uses
       // (events 44 / 63; measured: pre-lsd196 production file 9619, final 9627). Source-derived (same single-row instructions); no Tickle ROM row exists, so this is not a ROM-proven value.
-      + 80); // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the route's 2 faint commands, both after the anchor (9627 -> 9707; hpb202 adds 0; rep203FaintCount.ts 13 3: 0 before the anchor).
+      + 80 // rep203 (docs/fnt201-faint-timing.md): fnt201's faint script lead on the route's 2 faint commands, both after the anchor (9627 -> 9707; hpb202 adds 0; rep203FaintCount.ts 13 3: 0 before the anchor).
+      + GO246_INTRO_HOLD[13]); // go246: the Scene ON battle-start intro hold (9707 -> 9825).
   });
 
   it("live Double Team (seed 10, slot 2: YANMA, arg 21): no command, its 239-row window (tmr136) owns the banner; the message moves + 9", () => {
@@ -194,7 +200,7 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
     expect(dt.every((x) => x.statsChange === null && x.before?.type === "move-animation")).toBe(true);
     // tmr136 (ISSUES #166): the window holds 9 more rows (rel 69..77), so the message's first glyph lands on rel 78 as on the ROM
     // (the box changes on window age 239 in 12 / 12 dense direct-mGBA windows, tools/integration/fixtures/tmr136-live-receipt.json): + 9.
-    expect(dt[0]!.following).toMatchObject({ type: "message", frame: 849 /* msg175: 846 -> 844, shorter used prints before it; tl205: + 5 script-tail rows */, text: "YANMA’s evasiveness / rose!" });
+    expect(dt[0]!.following).toMatchObject({ type: "message", frame: 849 + GO246_INTRO_HOLD[10] /* msg175: 846 -> 844, shorter used prints before it; tl205: + 5 script-tail rows; go246: + the intro hold */, text: "YANMA’s evasiveness / rose!" });
     expect(dt[0]!.following!.frame - dt[0]!.before!.frame).toBe(244 /* tl205: 239 window + 5 tail rows */);
     // The opponent's Acid Armor (arg 40) in the same route does present: 3 x 90.
     expect(route.anchors.filter((x) => x.statsChange !== null).map((x) => x.statsChange!.frames)).toEqual([90, 90, 90]);
@@ -205,7 +211,8 @@ describe("ordinary routes: one per path, Scene ON (base frames pinned on 52c181d
       - 16 // msg175: the route's used prints last their printable length (no 24-frame floor).
       + 6 * 5 // tl205: 6 Double Team bodies x 5 script-tail rows.
       + 104 // trn181: the route's eight Scene ON action-transition pauses (104 frames; the first Double Team anchor has none before it).
-      + 3 * 3); // ont193: the route's script tails (Barrier 112 x3 = 3 each; the masked Double Team 104 bodies carry none).
+      + 3 * 3 // ont193: the route's script tails (Barrier 112 x3 = 3 each; the masked Double Team 104 bodies carry none).
+      + GO246_INTRO_HOLD[10]); // go246: the Scene ON battle-start intro hold (5089 -> 5154).
   });
 });
 
