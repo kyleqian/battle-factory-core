@@ -57,6 +57,9 @@ history.
   static names (pfr185); the generic worker footer "npm test and npm run build green" conflicts with evidence-only briefs that forbid them.
   (13, msg189) A side-lane worker committed onto master in the main checkout (doc only) instead of its worktree branch; the launcher
   reported "no commits" for the branch. The launcher should refuse or detect a main-tree HEAD move by a side / integration worker.
+  Hits +1 (2026-11-03 cln239): an integration worker committed docs onto master in the main checkout, then `git reset --hard` it
+  back itself, while the supervisor's full suite ran in that tree (no damage; reflog `178aed1d9`). Also a full suite beside a
+  worker's gate6 runs lost one fork (`randomRoundSoakParallel` rerun, ~3 min).
   (14, 2026-10-16 pfr192) Absolute frame-total pins (sc106, sgl138, soak seed totals) need a re-pin on every send-in timing change and
   their deltas do not sum from the census (dismiss-press parity / soak input cadence); older census drivers (fpc180, trn178, msg175) press
   dismiss on absolute `frame % 2`. A per-send-in delta helper would make attribution mechanical (~20 min).

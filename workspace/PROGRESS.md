@@ -5,6 +5,30 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-03 / 04 — CAX31 daily run (supervisor, Opus 5.5): in progress: aud240c / cln239 folded, aud240d running
+
+- **State:** master `065046720`+ (src == aud240c merge `30360d7cf`). Worker aud240d (lobby / script sounds) running on
+  `worker/integration-20261104-000400`. Evidence `.integration/validation/sv-20261103/`.
+- **Folded:** aud240c (S11 step 4c; `docs/aud240c-party-menu-sounds.md`; branch `worker/integration-20261103-213048`): voluntary +
+  forced battle party menus emit SE_SELECT on row moves (only when the slot changes), A on a mon, action-window cursor (NoWrap,
+  silent at the ends), action-window A (**one** SE: `party_menu.c:2560` passes `APressMuted = TRUE`, supervisor-read; the scout's
+  double SE was wrong), action-window B (two SEs, ROM-confirmed), voluntary cancel, refusal dismiss; SE_FAILURE (32) on forced B /
+  A-on-CANCEL. Voluntary SEs gated until the open fade ends (the ROM ignores input then; our cursor still moves, recorded). 3 step-mode
+  ROM fixtures (forced 25 events on `turn15-party-select`, voluntary 25 via a lab request, SUMMARY entry 9). Supervisor re-probed the
+  forced window on the ON oracle: 25 / 25 events equal. Worker: differential 211 traces 38,532 / 38,532 identical; typecheck, build,
+  build:lib 0; 28 importing test files pass. Supervisor: 4 audio test files 117 / 117; **full suite on `30360d7cf`: 1,741 passed +
+  44 skipped, 0 failed, 14,465 tests**; one fork died beside a worker (`randomRoundSoakParallel` not reported), rerun 6 / 6.
+- **Folded:** cln239 (cleanup step 3; `docs/cln239-launchers.md`): `run-supervisor.sh` / `tools/run-subagent.sh` are Claude only;
+  Codex / DeepSeek / OpenCode paths, max mode, the animation / rust lanes and supervisors, `tools/autonomy` campaign scripts deleted
+  (supervisor checked each deleted file had only Codex / lane users); 8 ANIMATION_* / RUST_* ledgers to `docs/archive/`
+  (ANIMATION_COVERAGE.json, ANIMATION_LATCHES.md, ANIMATION_INTEGRATION_* and ANIMATION_VERIFICATION.md stay: read by tools / tests).
+  Supervisor: both `--print-config` forms incl. the cron form exit 0, `-S codex` / `--lane animation` rejected,
+  `tools/test_run_claude_supervisor.py` 11 OK, `tests/launcherProfiles.test.ts` 19 / 19, lane dir unchanged; aud240d launched with
+  the new launcher. The worker briefly committed docs on master in the main checkout and reset it itself (reflog `178aed1d9`; PAPERCUTS).
+- **Next:** fold aud240d; then 4b(a) remainder (battle-start "Go!" wait, Kyle's SPOINK) or aud241; cleanup step 5 / 4.
+
+---
+
 ## 2026-11-02 / 03 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Mac 851ee1f4c / aud240a / aud240b / vis243a / agi245 / rng244 / cln238 / cleanup 6 folded
 
 - **State:** master `54aafa87d`+ (final src == agi245 merge `c88d897f2`); the long soak / play gates ran on src `5d39f2c79`; agi245
@@ -130,63 +154,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `docs/cln238-ledger-scout.md`), bundle hygiene (scout `docs/bnd-scout.md`: headless 22.3 -> ~11 MB by dropping tile pixels). The scouts are read-only worker reports, saved unverified.
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/side-20261101-213641` (aud238), `-20261101-232920` (cln237),
   `worker/integration-20261102-014838` (aud239), `-20261102-030844` (pmf240). No push.
----
-
-## 2026-10-31 / 11-01 — CAX31 daily run (supervisor, Opus 5.5): wind-down: library package / pmo239 / audio design + probe folded
-
-- **State:** master `b8cf38262`+ (src == `da19bc407` pmo239 merge; later commits are docs + `tools/audio` + one hermetic test). Library fold `f88653929` (fast-forward of `fold238`): core library package (contract v2) + the Mac's `worker/lib-v2-mac`
-  tip `b7e7dc345` (fsw235 forced party menu three-slot cursor + WIN_MSG refusals, wth236 Scene ON end-of-turn weather animations,
-  the 11 re-pins, pmd237 party-card HP / fainted palettes / CANCEL highlight). Handoff "Next work" item 1 is DONE.
-- **lib235** (branch `worker/integration-20261031-214213`, tip `60e816c2a`; `.integration/validation/sv-20261031/lib235-evidence/`):
-  ENGINE_BUILD is a content hash of an in-memory headless build (`eb-<16 hex>`, `"dev"` outside builds; stable across rebuilds and
-  docs / test / renderer-only edits, moves on a headless-graph change; `tests/engineBuildHash.test.ts`); lib-types parity test;
-  contract audit: no mismatch (extras additive; `trace()` returns finished runs only, documented). Sizes: headless 22.3 MB raw /
-  2.0 MB gz (largest chunk 11.8 MB, sprite pixels via `battleCommandFieldArt` = bundle hygiene), browser lib 40.2 / 3.4 MB, every
-  file < 20 MB; a consumer app needs the documented `manualChunks` recipe (default Vite build = one 33 MB chunk). npm pack + scratch
-  Vite app: both entries import, `replayChallenge` runs in node, Chromium mount gets `ready`. Soaks: winning vary-rng carry 0
-  0:100 **100 / 100**; Scene ON full vary-rng 0:16 render-8 **16 / 16** (budget). A first lib235 launch was stopped at 21:50 when the
-  Mac moved its branch; fsw237 (a fix step for the then-red suite) was stopped at 00:27 when the Mac pushed the same fixes — no edits.
-- **Supervisor gates on the exact folded tree `f88653929`** (`sv-20261031/fold238-evidence/`): typecheck 0; census 0..999 both scenes
-  byte-identical to lib235's; lib235's census vs master `snd233` baseline: OFF 10 / 10 shards identical, ON 997 / 1,000 digests
-  identical, 330 battles pure insertions of 1,986 weather `general-animation` commands, seeds 434 / 796 / 881 budget-truncated
-  (prefix of master's stream minus the weather commands, supervisor-verified); differential vs master: fight-submenu +
-  presentation-rng identical, battle1-postwin 216 frames 23800..26009 changed (the party-menu window; f25800 eyeballed: correct
-  fainted palettes and "0/117", MAGBY now 0 HP as it should be); **full suite 1,726 files / 14,260 tests, 0 failed** (a first run
-  was OOM-killed beside a worker's vitest; rerun clean); build 0; build:lib 0; play:random 3 min / scene: ON 8 battles / 6 swaps,
-  OFF 27 / 10, **0 page errors / overlays / contained / divergences**.
-- **New:** ISSUES #190 (party cards print "Lv50" where the ROM shows the FNT / status icon).
-- **Folded:** pmo239 (merge `da19bc407`; branch `worker/integration-20261101-002825`; `sv-20261031/pmo239-evidence/`): party menus
-  list rows in the ROM's battle order (SwitchPartyOrder on every player switch-in: voluntary, forced send-out, Roar / Whirlwind;
-  battle start = active first, then ascending), both menus and scenes; the cursor opens on row 0 (the active mon / the fainted mon).
-  Kernel keeps raw indexes. Post-battle party / swap screens stay in raw order (source-read only). Oracle: voluntary 0 -> 2 switch
-  then reopened menu, capture frames 888 -> 0 px; a one-frame-early menu entry remains (non-capture frames 1,920 -> 1,467 px; timing
-  class); the forced case is ROM-observed (SHEDINJA probe) + Tier-1, no pixel proof (harness maxHP, ISSUES #146 shd234). Census both
-  scenes identical 1,000 / 1,000 (commands + digests; supervisor-verified); differential: only battle1-postwin's second forced menu
-  (216 frames, now MAGBY / ONIX / BAYLEEF = ROM [1,0,2]; eyeballed). Worker: typecheck 0; full suite 8 shards 14,276 passed / 0
-  failed (shards 1-6 on `7f06071c8`, 7-8 on `ecf05802b`; the 12 soak-importing files rerun on `ecf05802b`); build 0; play:random 3 min /
-  scene 0 errors; open-on-active replay check 192 voluntary + 44 forced menus, 0 problems. Soak pins re-rolled: #89 Baton Pass halt
-  seed 739 -> 19 (pin weakened: `frames > haltFrame` bound dropped, every hit now halts in the post-decision grace window), M-B (c)
-  seeds 0 / 1 new frames, #104 (b) winning seed 3 -> 2. Supervisor on master: 6 focused files 111 / 111.
-- **Folded:** aud236 (S11 audio design, `docs/s11-audio-design.md`; accepted, open questions decided in its last section) and aud237
-  (probe step 1, `b8cf38262`): `tools/audio/soundEventProbe.py` logs `(frame, kind, id, pan)` per sound by single-stepping the PC onto
-  `m4aSongNumStart` / `PlayCryInternal` / the SE / BGM / fanfare wrappers + fade / volume / stop / continue hooks (libmgba-py has no
-  debugger); fixtures draft, battle ON / OFF, intro ON / OFF; Scene OFF drops only the move-animation SEs and is its own timeline;
-  hybrid fast mode (RAM signature, re-step changed frames) byte-equal to stepping on all 5 fixtures, 11-13x vs the new 2.9x-faster
-  stepper (32-38x vs the original; the 20x target vs the new stepper is NOT met); one unexplained 5-byte RAM mismatch at f2096 on
-  the full battle-1 trace, then EXPLAINED by aud238a (`a29d8df38`): CPU-stack bytes 0x03007d40..4c (above linked IWRAM end
-  0x030078ac, supervisor-checked in the map) from `run_frame` vs stepping stopping 1-2 instructions apart mid-`push`; one-instruction
-  catch-up leaves 0 bytes; the probe now records the catch-up proof. Hybrid judged census-grade for effective events.
-  `tests/audioProbeFixtures.test.ts` 27 / 27 (supervisor on master).
-- **Wind-down gates on `a3c1e1642`** (src == final; `sv-20261031/gates-final/`): **independent full suite 1,728 files / 14,276 tests,
-  0 failed**; build 0; play:random 4 min / scene: ON 20 battles / 8 swaps, OFF 36 / 17; `--lobby-new-challenge` 2 min / scene: 4 + 2
-  new challenges from the Lobby; **0 page errors / overlays / contained / divergences**; varied-RNG first-round winning carry 0 / 14 /
-  28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON **20 / 20**, Scene OFF **20 / 20** (all `budget`);
-  Scene ON winning first-round 0:6 `--render-every 1` **6 / 6**; Scene ON full vary-rng 0:16 `--render-every 8` **16 / 16** (all `budget`, 1,535 s). The 0:60
-  full / winning / winning-swap gates were not run (hours each here; same practice as earlier sessions).
-- **Housekeeping:** evidence `sv-20261027`, `sv-20261028`, `apx215-census` deleted (older than the last three runs; 6 GB). Branch
-  `worker/lib-v2-mac` is fully merged at `b7e7dc345`.
-- **Next:** handoff "Next work": audio step aud238 (the sound-source table; the f2096 mismatch is explained), a cleanup step
-  (cln237 brief ready), #190.
-- **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261031-214213` (lib235), `-20261101-002825` (pmo239),
-  `worker/side-20261101-044531` (aud236), `-20261101-052631` (aud237), `-20261101-064219` (aud238a). Stopped workers this run: lib235 first launch (21:42, Mac branch
-  moved; its commit became the base), fsw237 (00:27, the Mac pushed the same fixes; no edits). No push.
