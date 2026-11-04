@@ -63,6 +63,34 @@ never brief those here. One worker at a time; each run folds the next audio step
      `tests/animation/quickAttackAerialAceOpponentClip.test.ts` (qak249). Open: ISSUES #194 (RATTATA Quick Attack residual, not the clip).
    - Flow gaps: ISSUES #191 (dialog cursors move on held repeat), #192 (summary flow gaps), #195 (party menu: cursor moves during the
      open fade; refusal text dismisses before it finishes printing).
+   - **New, Kyle 2026-11-04** (website on 851ee1f4c), reproduced on the Mac from his trace `47192107276c654fbcdc1d038304aa0e`
+     (seeds 2513123525 / 2478499883) through `FactorySession.replayStep` + `render()`. Prove each against the ROM, then fix the family:
+     - **(d) White flash after a faint replacement.** After the forced party menu's SEND OUT, the screen is black for about 37 frames
+       (app 17400..17437). Then the battle appears fully drawn but washed toward white (mean brightness 246 vs about 200 at rest)
+       and fades down to normal over about 15 frames (17438..17453). The same in the second faint (25529). Every other return from
+       black in that trace (voluntary switch 12543, battle starts) rises from black. The ROM reshow is one path for both:
+       `CB2_SetUpReshowBattleScreenAfterMenu` -> `BeginHardwarePaletteFade(0xFF, 0, 16, 0, 1)` (`reshow_battle_screen.c:162`).
+       BLDCNT 0xFF is effect 11 = brightness decrease, so it fades from black. Also, the washed frames draw the PLAYER's 6-ball
+       bar (bottom right, unfaded, gone at 17453). The ROM never draws it here: `Cmd_drawpartystatussummary` emits flags 1 =
+       "skip player side" (`battle_controllers.c:1509`). Likely class: the faint-replacement path reuses an intro / send-out
+       presentation (white fade + player bar) instead of the reshow. ROM lab:
+       `tools/battle-lab/playerfaint-slot2-sunnyday.json` (pfr185).
+     - **(e) Opponent replacement ball bar pops in and out.** After "Foe PARASECT fainted!" the 6-ball bar appears whole in one
+       frame (13365..13367), stays about 30 frames, and vanishes in one frame (13394..13397) before "BEAUTY LIZBETH sent out MINUN!"
+       starts. In the ROM, `BattleScript_FaintedMonSendOutNew` (`battle_scripts_1.s:2883`) runs
+       `drawpartystatussummary > ... > printstring STRINGID_SWITCHINMON > hidepartystatussummary`. The flags are 1, so the
+       draw delay is NOT skipped: `OpponentHandleDrawPartyStatusSummary` -> `EndDrawPartyStatusSummary` holds 93 frames
+       (`battle_controller_opponent.c:1925-1965`) before the text. The bar slides in (`SpriteCB_StatusSummaryBar_Enter`; balls via
+       `SpriteCB_StatusSummaryBalls_Enter` with per-ball delays), stays up while "sent out" prints, then exits after it
+       (`hidepartystatussummary`, `..._Exit`). `faint-switch-notes.md` §3 measured bar ~6588 and text 6687 in the ROM (≈ 93 + slide).
+       Kyle: "takes slightly longer than what we currently have".
+     - **(f) Message holds — check, likely no bug.** Kyle: "X was dragged out!" after Roar shows only briefly, and "a number of
+       text" feel the same. In his trace the line prints 32634..32657, the box clears at 32668, and the action prompt shows at
+       32674. The ROM has no `waitmessage` after `printstring STRINGID_PKMNWASDRAGGEDOUT` (`battle_scripts_1.s:3339`), so it is
+       brief in the ROM too, at the oracle save's FAST text speed (1 frame per glyph). At MID (4 / glyph, the new-save default)
+       every message lasts about 4× longer, so he may be comparing against a MID emulator. Asked him. If he wants a text-speed
+       option, that is a feature: the print term scales by `sTextSpeedFrameDelays`, the holds do not
+       (`docs/battle-message-hold-cadence-ground-truth.md`).
 5. **Timing / visible residuals** last, never while items 1–3 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
    compare-harness maxHP bug + `factoryCorpusParty.ts:291`, ISSUES #146 shd234; CASTFORM message region on the faint path,
    ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform "at"-role keys, Flamethrower +7 alignment, revert /
