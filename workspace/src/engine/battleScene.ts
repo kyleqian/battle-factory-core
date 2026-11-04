@@ -49521,10 +49521,12 @@ export function renderSceneOnMovePresentation(
       x: attacker.geometry.spriteCorner.x + attackerIdle.x2,
       y: attacker.geometry.spriteCorner.y + attackerIdle.y2,
     };
-    // The opponent platform terrain's visible bottom is an absolute screen row (74); Pidgeotto's corner + 55 equals it.
+    // The ROM's trace clone is a plain OBJ with no window (battle_anim_utility_funcs.c:243-246); only the player's healthbox
+    // covers the lunging sprite's feet, so the live field draws it in full (qak247). The staged corner + 55 clip is the
+    // PIDGEOTTO calibration (corner row 19 + 55 = the opponent terrain's visible bottom, 74).
     const attackerClipY =
       attacker.geometry.side === "opponent"
-        ? (liveField ? OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM : attackerCorner.y + 55)
+        ? (liveField ? 160 : attackerCorner.y + 55)
         : 160;
     drawSpriteSheet(
       fb,
@@ -51160,10 +51162,12 @@ export function renderSceneOnMovePresentation(
       x: attacker.geometry.spriteCorner.x + attackerIdle.x2,
       y: attacker.geometry.spriteCorner.y + attackerIdle.y2,
     };
-    // The opponent platform terrain's visible bottom is an absolute screen row (74); Pidgeotto's corner + 55 equals it.
+    // The ROM's trace clone is a plain OBJ with no window (battle_anim_utility_funcs.c:243-246); only the player's healthbox
+    // covers the lunging sprite's feet, so the live field draws it in full (qak247). The staged corner + 55 clip is the
+    // PIDGEOTTO calibration (corner row 19 + 55 = the opponent terrain's visible bottom, 74).
     const attackerClipY =
       attacker.geometry.side === "opponent"
-        ? (liveField ? OPPONENT_BATTLE_TERRAIN_VISIBLE_BOTTOM : attackerCorner.y + 55)
+        ? (liveField ? 160 : attackerCorner.y + 55)
         : 160;
     const hasTranslatedAttacker =
       view.attackerOffset.x2 !== 0
