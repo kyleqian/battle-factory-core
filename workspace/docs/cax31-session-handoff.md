@@ -31,7 +31,7 @@ kept and is long-tail.
   `src/engine/screenSounds.ts`. Prove windows in probe **step mode** (the hybrid `--fast` mode drops no-op SEs).
   aud240d left unmeasured: MUS_OBTAIN_SYMBOL, PauseChallenge SE_SAVE, the Brain SE_POKENAV_CALL absolute frame.
 - **Cleanup:** steps 1, 2, 3 (cln239: Claude-only launchers, `docs/cln239-launchers.md`) and 6 are done.
-- **User reports:** 4b(a) fully fixed (vis243a mid-battle send-in; go246 battle-start "Go!" intro waits for both species
+- **User reports:** 4b(b) also covers Quick Attack / Aerial Ace now (qak248 / qak249). 4b(a) fully fixed (vis243a mid-battle send-in; go246 battle-start "Go!" intro waits for both species
   animations in Scene ON, `docs/go246-intro-wait.md`; Kyle's SPOINK was cut short by 137 frames, now exact); 4b(b) Agility
   clip fixed (agi245); 4b(c) rate check permanent (`tests/rng244OutcomeRates.test.ts`).
 - Census baseline for the next delta: `.integration/validation/sv-20261103/go246-evidence/census/` (go246's tree; 1000 / 1000
@@ -59,9 +59,8 @@ never brief those here. One worker at a time; each run folds the next audio step
 4b. **User-reported visuals (Kyle, website, 2026-11-02): one step per run, after that run's audio + cleanup steps.**
    - (a) DONE (vis243a + go246). Named residuals in `docs/go246-intro-wait.md`: ELEKID / ARON frame animation one frame long,
      the long-cry (> 74) 4-frame early message clear (both scenes), bso226 release / ball-open frames.
-   - (b) DONE (agi245 Agility; qak248 Quick Attack / Aerial Ace live clip 74 -> 160, `docs/qak247-clip-sweep.md`). Follow-up:
-     hermetic ROM receipts for the qak247 staging (`tools/integration/fixtures/qak247/`, like `agilityOpponentClip.test.ts`);
-     ISSUES #194 (RATTATA Quick Attack residual, not the clip).
+   - (b) DONE (agi245 Agility; qak248 Quick Attack / Aerial Ace live clip 74 -> 160, `docs/qak247-clip-sweep.md`). Receipts:
+     `tests/animation/quickAttackAerialAceOpponentClip.test.ts` (qak249). Open: ISSUES #194 (RATTATA Quick Attack residual, not the clip).
    - Flow gaps: ISSUES #191 (dialog cursors move on held repeat), #192 (summary flow gaps), #195 (party menu: cursor moves during the
      open fade; refusal text dismisses before it finishes printing).
 5. **Timing / visible residuals** last, never while items 1–3 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
