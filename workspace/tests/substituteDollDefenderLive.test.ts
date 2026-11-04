@@ -123,12 +123,11 @@ describe("dense direct-mGBA windows through the production live renderer (commit
   });
   // Documented residuals that are not the doll's (docs/next-adapters-prep38.md s1), by live age: the PERSIAN player Shadow Ball's
   // doll-free control residual (ages 64..94, the adapter's PERSIAN pair) + the 156-row tail phase (132..147; the accepted pair is
-  // SABLEYE -> MAGNETON, exact); the elevated HAUNTER attacker's shadow on the pre-activation row; the Quick Attack PERSIAN pair's
-  // 1 px, equal to its doll-free control.
+  // SABLEYE -> MAGNETON, exact); the elevated HAUNTER attacker's shadow on the pre-activation row. (The Quick Attack PERSIAN pair's
+  // 1 px at age 9 was the live 74-row attacker clip; qak248's ROM-correct 160 clip makes that row exact.)
   const RESIDUAL: Readonly<Record<string, readonly number[]>> = {
     "prep38-shadow-ball-player": [64, 66, 68, ...Array.from({ length: 25 }, (_, i) => 70 + i), ...Array.from({ length: 16 }, (_, i) => 132 + i)],
     "prep38-df-psychic-haunter-kadabra-opponent": [-5],
-    "prep38-quick-attack-opponent": [9],
   };
   it.each(readdirSync(FIXTURES).filter((n) => n.endsWith(".json")).map((n) => n.replace(/\.json$/, "")))(
     "%s: every row of the window equals the ROM frame (documented non-doll residuals only)", (stem) => {
