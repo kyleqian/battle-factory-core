@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-04 / 05 — CAX31 daily run (supervisor, Opus 5.5): in progress
+
+- **State:** master `ccdfe68d3`+ (aud241a folded). Evidence `.integration/validation/sv-20261104/`. One worker at a time.
+- **Folded:** aud241a (S11 step 5, first slice; `docs/aud241a-battle-start-sounds.md`; branch `worker/integration-20261104-213051`):
+  `src/engine/battleStartSounds.ts` emits from `tick()` (guarded by `soundCollecting()`) the battle BGM (476, Brain 471) with
+  `m4aMPlayAllStop`, the ball tray ENTER / BALL / EXIT SEs (per-side pans, SE player field), SE_BALL_OPEN and the send-out cries
+  (pan +-25, NORMAL / WEAK, duck) for the intro, mid-battle recall / send-in and the forced party-menu send-out. ROM windows (step
+  mode): intro YOSHI / MAGNETON both scenes + canonical intro, Scene OFF voluntary switch, opponent replacement OFF, canonical forced
+  send-out ON. Not ROM-proven (synthetic tests only): Brain 471, WEAK send-out cry, Scene ON voluntary / opponent mid-battle.
+  Flow mismatches listed in the doc (MAGNETON ON player side 1 frame early; BGM-to-tray gap 348..374 across labs, engine 359).
+  Worker: typecheck, build, build:lib 0; smoke 448; 17 files 233 tests; differential 28 traces 7,175 identical. Supervisor: 4 audio
+  files 197 / 197.
+- **Next:** aud241b (effectiveness, faint, low-HP) running; then cln240 (cleanup 5: `npm run test:gate`), aud241c.
+
+---
+
 ## 2026-11-03 / 04 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud240c / cln239 / aud240d / go246 / qak248 / qak249 folded
 
 - **State:** master `07123061b`+ clean, src == qak248 fix `127def5d4` (suite + build green on it; the soak / play gates ran on src `710424ca8` = go246 merge). Evidence `.integration/validation/sv-20261103/`.
