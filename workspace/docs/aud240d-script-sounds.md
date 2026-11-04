@@ -97,6 +97,13 @@ map BGM start/restore after a fanfare is covered by the `continue` event, which 
 
 ## Verification record
 
-See the final commit message and the run output of this step. Commands: `npm run typecheck`, `npm run test:smoke`, the
-importer tests (`git grep` of `screenSounds` / `soundEvents`), `NODE_OPTIONS=--max-old-space-size=8192 npx vitest run tests/gate6CoverageManifest.test.ts`,
-`npm run build`, `npm run build:lib`, `npm run compare:differential` (standard set) against the parent commit.
+Tested at HEAD `faecbd347` (tree `71507e9ed1582595c5034ab72770c739491a6db9`), parent `065046720`:
+
+- `npm run typecheck` 0; `npm run build` 0; `npm run build:lib` 0.
+- `npm run test:smoke`: 8 files / 448 tests pass.
+- Audio importers and fixtures (aud240a/b/c/d, audioAnimSoundPan, audioHeadlessBoundary, audioSinkNeutral, audioSinkPlumbing, audioProbeFixtures, audioSoundSources): 10 files / 184 tests pass.
+- Terminal / postwin / orchestrator importers (engineBuildHash, factoryLobbyTerminal, factoryLobbyFreeRoam, factoryTerminalPresentation, factoryTerminalMessages, factoryTerminalRecord*Issue*, libTypesParity, newChallengeFromLobby, postwin, factoryRoundBattleOrchestrator): 11 files / 178 tests pass.
+- `gate6CoverageManifest` with `NODE_OPTIONS=--max-old-space-size=8192`: 7 tests pass.
+- `npm run compare:differential -- ... --base 065046720 --summary`: fight-submenu 235/235, battle1-postwin-next-prompt 216/216,
+  presentation-rng-playable-live-bodies-seeded-on 190/190 (the standard three), plus factory-brain-silver-walkup-callscene-01-off 131/131
+  and loss-terminal-record-yes-off 133/133: 905/905 captures byte-identical.
