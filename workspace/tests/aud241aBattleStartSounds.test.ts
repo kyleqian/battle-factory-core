@@ -6,7 +6,8 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { ballTraySoundTicks } from "../src/engine/battleScene.ts";
-import { emitBattleStartBgm, factoryBattleBgm } from "../src/engine/battleStartSounds.ts";
+import { emitBattleStartBgm, emitMidBattleSwitchSounds, factoryBattleBgm } from "../src/engine/battleStartSounds.ts";
+import type { BattleResolutionPresentationState } from "../src/engine/battleResolutionPresentation.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { FactorySession } from "../src/factorySession.ts";
 import { ActionLog, RandomPlayer, Rng } from "../tools/soak/randomRoundSoakDriver.ts";
@@ -120,6 +121,71 @@ describe("battle start sounds match the ROM (aud241a)", () => {
     expect(ours.map(key).filter((e) => e.frame < 1816)).toEqual(romEvents.filter((e) => e.frame < 1817).map(key));
     expect(ours.map((e) => ({ ...key(e), frame: e.frame + 1 })).filter((e) => e.frame >= 1817)).toEqual(playerSide.map(key));
     expect(ours).toHaveLength(romEvents.length);
+  });
+
+  it("switch-player-off-window.json: recall and send-in SE_BALL_OPEN, the send-out cry with its BGM duck and restore (Scene OFF voluntary player switch)", () => {
+    const rom = fixture("switch-player-off-window");
+    expect(rom.profile).toBe("battle-scene-off");
+    expect(played(rom.events).map((e) => `${e.frame}:${e.kind}:${e.id}`)).toEqual([
+      "883:se:5", "923:se:5", "963:se:5", "1088:se:15", "1187:se:15", "1203:duck:476", "1203:cry:19", "1227:duck:476",
+    ]);
+    expect(collectWindow(rom).events.map(key)).toEqual(played(rom.events).map(key));
+  });
+
+  it("switch-player-off-window.json: collecting sounds does not change the engine state", () => {
+    const rom = fixture("switch-player-off-window");
+    expect(collectWindow(rom, true).state).toBe(collectWindow(rom, false).state);
+  });
+
+  describe("mid-battle send-in emitter on synthetic command clocks (the branches no ROM window replays)", () => {
+    const mon = (species: number, hp: number, maxHP: number) => ({ species, hp, maxHP });
+    const sendIn = (battler: 0 | 1, incoming: ReturnType<typeof mon>, extra: object = {}, incomingStatus1 = 0) =>
+      ({ type: "switch-in", battler, incoming, incomingStatus1, ...extra });
+    const run = (command: object, brain = false, last = 100): SoundEvent[] => {
+      const resolution = (elapsed: number): BattleResolutionPresentationState =>
+        ({ lifecycle: { phase: "presenting", phaseElapsed: elapsed }, segments: [{ commands: [command] }], segmentIndex: 0, commandIndex: 0 }) as unknown as BattleResolutionPresentationState;
+      const events: SoundEvent[] = [];
+      for (let elapsed = 0; elapsed <= last; elapsed += 1) {
+        events.push(...collectSoundTick(elapsed, () => {
+          emitMidBattleSwitchSounds(elapsed === 0 ? null : resolution(elapsed - 1), resolution(elapsed), brain);
+        }).events);
+      }
+      return events;
+    };
+    const summary = (events: readonly SoundEvent[]) => events.map((e) => `${e.frame}:${e.kind}:${e.id}:${e.pan}`);
+
+    it("the ROM's opponent faint replacement spaces SE_BALL_OPEN and the cry by 16 with a NORMAL cry at pan 25; the emitter keeps that spacing and pan", () => {
+      const rom = played(fixture("switch-opponent-replacement-off-window").events).filter((e) => e.frame >= 535);
+      expect(rom.map((e) => `${e.frame}:${e.kind}:${e.id}:${e.pan}`).slice(0, 4)).toEqual(["535:se:15:null", "551:duck:476:null", "551:cry:66:25", "590:duck:476:null"]);
+      expect(rom[2]!.mode).toBe("NORMAL");
+      const ours = run(sendIn(1, mon(66, 100, 100)));
+      const open = ours.find((e) => e.kind === "se")!;
+      const cry = ours.find((e) => e.kind === "cry")!;
+      expect(cry.frame - open.frame).toBe(551 - 535);
+      expect([cry.id, cry.pan, cry.mode]).toEqual([66, 25, 0]);
+      expect(ours.find((e) => e.kind === "duck")!.volume).toBe(85);
+    });
+
+    it("the player's cry is at pan -25 and sendInVisualDelay shifts the ball open and the cry together", () => {
+      const base = run(sendIn(0, mon(19, 100, 100)));
+      const late = run(sendIn(0, mon(19, 100, 100), { sendInVisualDelay: 1 }));
+      expect(summary(base).filter((e) => e.includes(":se:") || e.includes(":cry:"))).toEqual(["47:se:15:null", "63:cry:19:-25"]);
+      expect(summary(late).filter((e) => e.includes(":se:") || e.includes(":cry:"))).toEqual(["48:se:15:null", "64:cry:19:-25"]);
+    });
+
+    it("a status or low-HP incoming mon cries WEAK, and the Factory Head's BGM is the ducked track (471)", () => {
+      expect(run(sendIn(0, mon(95, 10, 100))).find((e) => e.kind === "cry")!.mode).toBe(11);
+      expect(run(sendIn(0, mon(95, 100, 100), {}, 1 << 3)).find((e) => e.kind === "cry")!.mode).toBe(11);
+      const brain = run(sendIn(1, mon(66, 100, 100)), true);
+      expect(brain.filter((e) => e.kind === "duck").every((e) => e.id === 471)).toBe(true);
+      expect(run(sendIn(1, mon(66, 100, 100))).filter((e) => e.kind === "duck").every((e) => e.id === 476)).toBe(true);
+    });
+
+    it("the voluntary recall's SE_BALL_OPEN is 2 ticks into the switch-out; a forced removal (no recall animation) plays none", () => {
+      expect(summary(run({ type: "switch-out", battler: 0 }, false, 20))).toEqual(["2:se:15:null"]);
+      expect(run({ type: "switch-out", battler: 0, skipAnimation: true }, false, 20)).toEqual([]);
+      expect(run({ type: "switch-out", battler: 1, targetAtRest: true }, false, 20)).toEqual([]);
+    });
   });
 
   it("pins the lab's BGM start (m4aMPlayAllStop of the map BGM, then the battle BGM) before every intro window", () => {

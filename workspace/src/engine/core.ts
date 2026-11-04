@@ -720,7 +720,7 @@ import {
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
-import { emitBattleStartBgm, emitBattleStartIntroSounds } from "./battleStartSounds.ts";
+import { emitBattleStartBgm, emitBattleStartIntroSounds, emitMidBattleSwitchSounds } from "./battleStartSounds.ts";
 import { soundCollecting } from "../audio/soundEvents.ts";
 
 /**
@@ -1034,6 +1034,16 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   const introBefore = state.factoryRoundBattleOrchestrator?.battleStartIntro ?? null;
   if (introBefore !== null && soundCollecting()) {
     emitBattleStartIntroSounds(introBefore, next.factoryRoundBattleOrchestrator?.battleStartIntro ?? null);
+  }
+  if (soundCollecting()) {
+    const orchestratorAfter = next.factoryRoundBattleOrchestrator;
+    if (orchestratorAfter?.battleResolutionPresentation) {
+      emitMidBattleSwitchSounds(
+        state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,
+        orchestratorAfter.battleResolutionPresentation,
+        orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
+      );
+    }
   }
   runScheduledScreenSounds();
   // Presentation seam, after the logical frame: one Random2 step per presented battle frame

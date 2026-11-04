@@ -8,6 +8,7 @@ import {
   generatedPlayerDispatchDelay,
   generatedPlayerVisualLag,
 } from "./battleScene.ts";
+import type { BattleResolutionPresentationCommand, BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import type { FactoryBattleStartIntroState } from "./factoryBattleStartIntro.ts";
 import {
   BGM_BATTLE,
@@ -107,4 +108,58 @@ export function emitBattleStartIntroSounds(
   if (crossed(opponentOpen + CRY_AFTER_BALL_OPEN_OPPONENT)) sendOut("opponent", CRY_PAN_OPPONENT);
   if (crossed(playerOpen)) playBallOpenSe();
   if (crossed(playerOpen + CRY_AFTER_BALL_OPEN_PLAYER)) sendOut("player", CRY_PAN_PLAYER);
+}
+
+/**
+ * Mid-battle recall / send-in sounds (docs/aud241a-battle-start-sounds.md). SE_BALL_OPEN is `AnimateBallOpenParticles` in
+ * `SpriteCB_ReleaseMonFromBall` (the tick the mon is released; the emerge follows one tick later) and the cry
+ * `Task_PlayCryWhenReleasedFromBall` plays 16 ticks later, when the emerge's affine animation ended. Measured on the ROM: the
+ * recall's ball open is 2 ticks into the `switch-out` command and the Scene OFF voluntary player send-in's release is 47 ticks into
+ * the `switch-in` command (fixture `switch-player-off-window.json`, exact over the window). The opponent's release is placed one tick
+ * before its mon becomes visible (elapsed 19, `midBattleSwitchInAt`), the same relation the player has (mon visible 48, release 47);
+ * the ROM's SE-to-cry spacing of an opponent faint replacement (fixture `switch-opponent-replacement-off-window.json`) is the same 16.
+ * The command's `sendInVisualDelay` shifts both.
+ */
+const SWITCH_OUT_BALL_OPEN_ELAPSED = 2;
+const SWITCH_IN_BALL_OPEN_ELAPSED_PLAYER = 47;
+const SWITCH_IN_BALL_OPEN_ELAPSED_OPPONENT = 18;
+const SWITCH_IN_CRY_AFTER_BALL_OPEN = 16;
+
+function currentCommand(
+  resolution: BattleResolutionPresentationState | null,
+): Readonly<{ command: BattleResolutionPresentationCommand; elapsed: number }> | null {
+  if (resolution === null || resolution.lifecycle.phase !== "presenting") return null;
+  const command = resolution.segments[resolution.segmentIndex]?.commands[resolution.commandIndex];
+  return command === undefined ? null : { command, elapsed: resolution.lifecycle.phaseElapsed };
+}
+
+/** Called once per collected tick with the round's resolution presentation before and after the tick; write-only. */
+export function emitMidBattleSwitchSounds(
+  before: BattleResolutionPresentationState | null,
+  after: BattleResolutionPresentationState | null,
+  frontierBrain: boolean,
+): void {
+  const now = currentCommand(after);
+  if (now === null) return;
+  const { command, elapsed } = now;
+  if (command.type !== "switch-out" && command.type !== "switch-in") return;
+  const prior = currentCommand(before);
+  const previous = prior !== null && prior.command === command ? prior.elapsed : -1;
+  const crossed = (tick: number): boolean => previous < tick && tick <= elapsed;
+  if (command.type === "switch-out") {
+    if (command.skipAnimation !== true && command.targetAtRest !== true && crossed(SWITCH_OUT_BALL_OPEN_ELAPSED)) playBallOpenSe();
+    return;
+  }
+  const open = (command.battler === 0 ? SWITCH_IN_BALL_OPEN_ELAPSED_PLAYER : SWITCH_IN_BALL_OPEN_ELAPSED_OPPONENT)
+    + (command.sendInVisualDelay ?? 0);
+  if (crossed(open)) playBallOpenSe();
+  if (crossed(open + SWITCH_IN_CRY_AFTER_BALL_OPEN)) {
+    const { incoming } = command;
+    playSendOutCry(
+      factoryBattleBgm(frontierBrain),
+      incoming.species,
+      cryModeFor(incoming.hp, incoming.maxHP, command.incomingStatus1 !== 0),
+      command.battler === 0 ? CRY_PAN_PLAYER : CRY_PAN_OPPONENT,
+    );
+  }
 }

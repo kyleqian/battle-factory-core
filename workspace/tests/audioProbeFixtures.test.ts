@@ -62,6 +62,8 @@ describe("audio probe fixtures", () => {
       "summary-swap-window.json",
       "swap-decline-window.json",
       "swap-window.json",
+      "switch-opponent-replacement-off-window.json",
+      "switch-player-off-window.json",
     ]);
     const profiles = new Set(fixtures.map(([, d]) => d.profile));
     expect([...profiles].sort()).toEqual(["battle-scene-off", "battle-scene-on"]);
