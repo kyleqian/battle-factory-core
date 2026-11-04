@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
+import { createFactoryTerminalPresentation } from "../src/engine/factoryTerminalPresentation.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 
 interface FixtureEvent {
@@ -22,6 +23,7 @@ interface Fixture {
     route: "canonical-recorded" | "generated-orchestrator";
     battleScene?: "on" | "off";
     appStage?: { id: string; frame: number };
+    terminal?: "roundWon";
     segments: Array<{ frames: number; buttons?: string[] }>;
   };
 }
@@ -44,6 +46,11 @@ const { APP_STAGES } = (await import(/* @vite-ignore */ appTracePath)) as {
 function collectWindow(rom: Fixture, collect = true): { events: SoundEvent[]; state: string } {
   const { appStage } = rom.trace;
   let state = createInitialState({ appRoute: rom.trace.route, battleScene: rom.trace.battleScene });
+  if (rom.trace.terminal === "roundWon") {
+    // The staged seventh-win Lobby terminal (tools/probe/stage-factory-seventh-win-timeline-off.py): ROM tick k is terminal age k.
+    const command = { type: "roundCompleted", commandId: "aud240d", battleIndex: 6, opponent: {} } as unknown as Parameters<typeof createFactoryTerminalPresentation>[0];
+    state = { ...state, factoryTerminal: createFactoryTerminalPresentation(command) };
+  }
   const stage = (frame: number): void => {
     if (appStage?.frame === frame) state = APP_STAGES[appStage.id]!(state);
   };
@@ -89,7 +96,16 @@ describe("script sounds match the ROM (aud240d)", () => {
     expect(collectWindow(rom).events.map(key)).toEqual(rom.events.map(key));
   });
 
-  for (const name of ["heal-window", "postwin-record-window", "loss-terminal-window"]) {
+  it("seventh-win-window.json: the Lobby WonChallenge page SEs, the BP fanfare with its BGM stop / continue, SE_SAVE and the default-NO record menu (Scene OFF stage)", () => {
+    const rom = fixture("seventh-win-window");
+    expect(rom.profile).toBe("battle-scene-off");
+    expect(rom.events.map((e) => `${e.kind}:${e.id}`)).toEqual([
+      "se:5", "stop:469", "fanfare:459", "continue:469", "se:5", "se:55", "se:5", "se:5",
+    ]);
+    expect(collectWindow(rom).events.map(key)).toEqual(rom.events.map(key));
+  });
+
+  for (const name of ["heal-window", "postwin-record-window", "loss-terminal-window", "seventh-win-window"]) {
     it(`${name}.json: collecting sounds does not change the engine state`, () => {
       const rom = fixture(name);
       expect(collectWindow(rom, true).state).toBe(collectWindow(rom, false).state);

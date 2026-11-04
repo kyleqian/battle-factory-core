@@ -44,6 +44,7 @@ describe("audio probe fixtures", () => {
       "heal-window.json",
       "loss-terminal-window.json",
       "postwin-record-window.json",
+      "seventh-win-window.json",
       "party-forced-window.json",
       "party-summary-entry-window.json",
       "party-voluntary-window.json",

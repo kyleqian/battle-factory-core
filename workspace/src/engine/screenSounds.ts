@@ -224,33 +224,59 @@ export function scheduleHealFanfare(): void {
   scheduleAfter(1, () => playFanfare(MUS_HEAL, BGM_DRAFT, FANFARE_CONTINUE_DELAY));
 }
 
-/** Ticks from the loss terminal's second-page release to LostChallenge's `playse SE_SAVE` (oracle-probed, tools/audio/fixtures/loss-terminal-window.json). */
-export const LOSS_TERMINAL_SAVE_DELAY = 172;
-/** Ticks from the record menu's YES to SaveBattle's `playse SE_SAVE` (same fixture; the postwin record YES is RECORD_YES_SAVE_DELAY). */
+/** Ticks from the terminal's party restore to the script's `playse SE_SAVE` (factory_save, then the SE; tools/audio/fixtures/loss-terminal-window.json and seventh-win-window.json). */
+export const TERMINAL_SAVE_AFTER_RESTORE = 122;
+/** Ticks from the record menu's YES to SaveBattle's `playse SE_SAVE` (same fixture; the postwin record YES is POSTWIN_RECORD_YES_SAVE_DELAY). */
 export const TERMINAL_RECORD_YES_SAVE_DELAY = 19;
+/** Ticks from MSGBOX_GETPOINTS' fanfare start to the BGM continue (the 312-frame counter; tools/audio/fixtures/seventh-win-window.json). */
+export const BP_FANFARE_CONTINUE_DELAY = 313;
 
 /** The slice of a factory terminal presentation the sound diff reads. */
 export interface TerminalSoundView {
-  readonly profile: { readonly outcome: string };
+  readonly profile: {
+    readonly outcome: string;
+    readonly statusClearDelayFromSecondRelease?: number;
+    readonly restoreDelayFromExchangeRelease?: number;
+    readonly battlePointMutationDelay?: number;
+  };
   readonly secondPageReleaseAge?: number | null;
   readonly firstPageReleaseAge?: number | null;
+  readonly congratsScrollReleaseAge?: number | null;
+  readonly awardScrollReleaseAge?: number | null;
+  readonly awardReleaseAge?: number | null;
+  readonly exchangeReleaseAge?: number | null;
   readonly recordPromptReleaseAge: number | null;
   readonly recordMenuCursorChangedAge: number | null;
   readonly recordChoice: string | null;
 }
 
-/** Diffs one terminal step: each accepted A / B / cursor move is the text printer's or menu's SE_SELECT, and the script's SE_SAVE steps are scheduled. */
+const newlySet = (before: number | null | undefined, after: number | null | undefined): boolean =>
+  (before ?? null) === null && (after ?? null) !== null;
+
+/**
+ * Diffs one terminal step. Every accepted A on a paged text box (`\p` / `\l`, TextPrinterWaitWithDownArrow) and on a
+ * menu is SE_SELECT; a MSGBOX_DEFAULT wait (waitbuttonpress) is silent. The script's fanfare and SE_SAVE steps are scheduled.
+ */
 export function scheduleTerminalStepSounds(before: TerminalSoundView, after: TerminalSoundView): void {
   if (!soundCollecting()) return;
-  const loss = after.profile.outcome === "loss";
-  if (loss) {
-    if ((before.firstPageReleaseAge ?? null) === null && (after.firstPageReleaseAge ?? null) !== null) playSelectSe();
-    if ((before.secondPageReleaseAge ?? null) === null && (after.secondPageReleaseAge ?? null) !== null) {
+  if (after.profile.outcome === "loss") {
+    if (newlySet(before.firstPageReleaseAge, after.firstPageReleaseAge)) playSelectSe();
+    if (newlySet(before.secondPageReleaseAge, after.secondPageReleaseAge)) {
       playSelectSe();
-      scheduleAfter(LOSS_TERMINAL_SAVE_DELAY, () => playScriptSe(SE_SAVE));
+      scheduleAfter((after.profile.statusClearDelayFromSecondRelease ?? 0) + TERMINAL_SAVE_AFTER_RESTORE, () => playScriptSe(SE_SAVE));
+    }
+  } else {
+    if (newlySet(before.congratsScrollReleaseAge, after.congratsScrollReleaseAge)) playSelectSe();
+    if (newlySet(before.awardScrollReleaseAge, after.awardScrollReleaseAge)) playSelectSe();
+    if (newlySet(before.awardReleaseAge, after.awardReleaseAge)) {
+      scheduleAfter(after.profile.battlePointMutationDelay ?? 1, () => playFanfare(MUS_OBTAIN_B_POINTS, BGM_DRAFT, BP_FANFARE_CONTINUE_DELAY));
+    }
+    if (newlySet(before.exchangeReleaseAge, after.exchangeReleaseAge)) {
+      playSelectSe();
+      scheduleAfter((after.profile.restoreDelayFromExchangeRelease ?? 0) + TERMINAL_SAVE_AFTER_RESTORE, () => playScriptSe(SE_SAVE));
     }
   }
-  if (before.recordPromptReleaseAge === null && after.recordPromptReleaseAge !== null) playSelectSe();
+  if (newlySet(before.recordPromptReleaseAge, after.recordPromptReleaseAge)) playSelectSe();
   if (after.recordMenuCursorChangedAge !== before.recordMenuCursorChangedAge) playSelectSe();
   if (before.recordChoice === null && after.recordChoice !== null) {
     playSelectSe();

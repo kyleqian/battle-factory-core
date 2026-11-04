@@ -232,6 +232,32 @@ def main():
         script = [([], 20), (["RIGHT"], 2), ([], 20), (["A"], 2), ([], 40), (["B"], 2), ([], 30)]
         segments = [{"frames": n, "buttons": b} for b, n in script]
         label = "draft: 20 idle, RIGHT x2, 20 idle, A x2, 40 idle, B x2, 30 idle (canonical Battle Factory draft anchor)"
+    elif mode == "seventh-win":
+        # The staged Factory seventh-win Lobby terminal (tools/probe/stage-factory-seventh-win-timeline-off.py): the stage
+        # script's own prefix replay, staging writes and release schedule, with the sound hooks logging from its tick 1.
+        import importlib.util
+        stage_path = ROOT / "tools/probe/stage-factory-seventh-win-timeline-off.py"
+        saved_argv = sys.argv
+        sys.argv = [str(stage_path), str(out)]
+        spec = importlib.util.spec_from_file_location("stage_seventh_win", stage_path)
+        stage = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(stage)
+        sys.argv = saved_argv
+        record_a = "--record-a" in rest  # also press A on the record menu's first accepted frame (default NO)
+        state["log"] = False
+        stage.replay_and_stage(oracle, json.loads(stage.PREFIX_PATH.read_text()))
+        state["log"] = True
+        state["frame"] = 0
+        schedule = {**stage.INPUTS_TO_READY_MENU, **({stage.MENU_ACCEPT: ["A"]} if record_a else {})}
+        end = stage.FINAL_FRAME if record_a else stage.MENU_ACCEPT
+        segments, last = [], 0
+        for tick in sorted(schedule):
+            if tick - last - 1 > 0:
+                segments.append({"frames": tick - last - 1, "buttons": []})
+            segments.append({"frames": 1, "buttons": schedule[tick]})
+            last = tick
+        segments.append({"frames": end - last, "buttons": []})
+        label = "seventh-win stage (staged Factory Lobby WonChallenge, Scene OFF): A releases at " + ", ".join(map(str, sorted(schedule)))
     elif mode == "trace":
         oracle.new_session()
         segments = json.loads(Path(rest[0]).read_text())["segments"]

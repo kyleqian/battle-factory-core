@@ -1,0 +1,246 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "seventh-win stage (staged Factory Lobby WonChallenge, Scene OFF): A releases at 300, 1100, 2200, 3500, 4400, 4424",
+ "profile": "battle-scene-off",
+ "frames": 4425,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
+ },
+ "mode": "step",
+ "steps": 183269474,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 268.6,
+ "windowSeconds": 155.7,
+ "events": [
+  {
+   "frame": 1100,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 2201,
+   "kind": "stop",
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayFanfareByFanfareNum"
+  },
+  {
+   "frame": 2201,
+   "kind": "fanfare",
+   "id": 459,
+   "name": "MUS_OBTAIN_B_POINTS",
+   "pan": null,
+   "via": "PlayFanfareByFanfareNum"
+  },
+  {
+   "frame": 2514,
+   "kind": "continue",
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsFanfareTaskInactive"
+  },
+  {
+   "frame": 3500,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 3671,
+   "kind": "se",
+   "id": 55,
+   "name": "SE_SAVE",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 4400,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 4424,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  }
+ ],
+ "calls": [
+  {
+   "frame": 1100,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 2201,
+   "fn": "PlayFanfare",
+   "via": "ScrCmd_playfanfare",
+   "r0": 459,
+   "r1": 256
+  },
+  {
+   "frame": 2201,
+   "fn": "PlayFanfareByFanfareNum",
+   "via": "PlayFanfare",
+   "r0": 15,
+   "r1": 15
+  },
+  {
+   "frame": 2201,
+   "fn": "m4aMPlayStop",
+   "via": "PlayFanfareByFanfareNum",
+   "r0": 50361376,
+   "r1": 15
+  },
+  {
+   "frame": 2201,
+   "fn": "m4aSongNumStart",
+   "via": "PlayFanfareByFanfareNum",
+   "r0": 459,
+   "r1": 313
+  },
+  {
+   "frame": 2514,
+   "fn": "m4aMPlayContinue",
+   "via": "IsFanfareTaskInactive",
+   "r0": 50361376,
+   "r1": 50335566
+  },
+  {
+   "frame": 3500,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 3671,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 55,
+   "r1": 0
+  },
+  {
+   "frame": 4400,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 4424,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  }
+ ],
+ "from": 0,
+ "trace": {
+  "route": "generated-orchestrator",
+  "battleScene": "off",
+  "terminal": "roundWon",
+  "segments": [
+   {
+    "frames": 299,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 799,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1099,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1299,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 899,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 23,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 1,
+    "buttons": []
+   }
+  ]
+ }
+}
