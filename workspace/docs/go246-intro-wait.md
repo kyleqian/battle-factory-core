@@ -36,6 +36,9 @@ Constants are ROM fits, each confirmed on several windows:
   `H_SLIDE_WOBBLE` (74 = 74), SPOINK `H_JUMPS_V_STRETCH_TWICE` (137; the window becomes exact).
 * `S + 43` (frame-animation bound): ELEKID (45 = bso226's 45), ARON (128; harness lag sweep -2..1 at frame 550: -1 is the only exact
   value under the old `+44`, i.e. 43).
+* `A + delay - 1 + 44` with a nonzero `sMonAnimationDelayTable` delay: POLIWHIRL (A 74, delay 5, S 75: 122 vs 118; hold 60). Lag sweep
+  -4..4 at frame 560: lag 0 is the only exact one (opp 0 px; +-1 = 30,968 px), so the delay term is confirmed and the frame bound is not
+  what holds it.
 * COMBUSKEN (yoshi) and the canonical GROVYLE are cry-bound: hold 0.
 * `T_back + 5` (player): the menu lag of every window after the opponent hold was GRIMER 12 (three windows), KOFFING 17, WAILMER 59, SPINDA 6,
   ONIX 6; the Scene OFF oracle gives **6 on every window** (spinda, koffing, spoink: the scene-independent ready-lag residual of the
@@ -43,7 +46,7 @@ Constants are ROM fits, each confirmed on several windows:
   `max(0, T_back + 5 - cry)` for GRIMER (T_back 31, cry 30), KOFFING (64, 58), WAILMER (128, 80), SPINDA (22, 35), ONIX (33, 70). WAILMER
   was predicted before it was measured (its menu falls past the staged pre-checkpoint frames: see section 3).
 
-After the fix the menu lag is **6 on all seven Scene ON windows**, the same constant as Scene OFF: Scene ON no longer adds anything.
+After the fix the menu lag is **6 on all eight Scene ON windows**, the same constant as Scene OFF: Scene ON no longer adds anything.
 
 ## 3. Harness
 
@@ -81,6 +84,7 @@ node --experimental-strip-types --no-warnings tools/integration/bso226Run.ts /tm
 | koffing (11) | KOFFING / BUTTERFREE | 790 | 298,214 / 545,982 / 1,288,294 | **12 / 97** / 7,001 |
 | **spoink (8)** | GRIMER / **SPOINK** | 810 | 318,460 / 585,343 / 1,883,317 | **132 / 0** / 8,273 |
 | aron (4) | GRIMER / ARON | 800 | 292,469 / 591,179 / 1,794,959 | 37,516 / 14,502 / 44,713 |
+| poliwhirl (25) | GRIMER / POLIWHIRL | 760 | 274,362 / 430,220 / 1,265,674 | **6 / 0** / 268,115 |
 
 The acceptance windows with `--lag 0` on the long-animation windows: **wailmer** (bso226 98@517) and **spinda** (39@475) need no
 dispatch lag any more; the player half is the bso226 named residual (wailmer 7,903 = bso226's lagged value: frame 117 before the
@@ -94,7 +98,9 @@ Named residuals (unchanged by this step):
   (ELEKID 454..511, ARON 434..579); the dispatch itself is exact (`S + 43`). ELEKID also carries the bso226 gender mismatch. Below the
   species-animation timing class this step owns.
 * onix / aron pm 14,502 px on alternate frames 455..477 / 435..457: bso226's release / ball-open frames.
-* `rest` on every window: a constant 24 px / frame (bso226) and the 6-frame menu constant.
+* `rest` on every window: a constant 24 px / frame (bso226) and the 6-frame menu constant. poliwhirl's `rest` is 766..905 px / frame from
+  frame 194 on, before the intro proper and identical before / after (a staging difference of that window outside the mon regions; not
+  chased).
 
 ## 5. Scene OFF
 

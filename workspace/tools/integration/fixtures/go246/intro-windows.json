@@ -243,5 +243,40 @@
    "pm": 7903,
    "rest": 16768
   }
+ },
+ {
+  "tag": "poliwhirl",
+  "seed": 25,
+  "playerSetIds": [
+   110,
+   130,
+   150
+  ],
+  "playerPersonalities": [
+   3081240874,
+   1175902850,
+   3656863322
+  ],
+  "playerLead": "GRIMER",
+  "opponentLead": "POLIWHIRL",
+  "offset": 1174,
+  "ack": 362,
+  "end": 760,
+  "menuFrame": 678,
+  "romDir": "pre-checkpoint frames",
+  "parentDispatchLag": null,
+  "menuLagAfterOpponentHold": null,
+  "menuLagAfter": 6,
+  "sceneOffMenuLag": null,
+  "beforeLag0": {
+   "opp": 274362,
+   "pm": 430220,
+   "rest": 1265674
+  },
+  "afterMenuLag6": {
+   "opp": 6,
+   "pm": 0,
+   "rest": 268115
+  }
  }
 ]

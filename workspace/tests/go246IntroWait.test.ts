@@ -18,12 +18,12 @@ import {
 import type { GbaButton } from "../src/input.ts";
 
 type Window = { tag: string; seed: number; playerSetIds: number[]; playerPersonalities: number[]; parentDispatchLag: number | null;
-  menuLagAfterOpponentHold: number; menuLagAfter: number; sceneOffMenuLag: number | null;
+  menuLagAfterOpponentHold: number | null; menuLagAfter: number; sceneOffMenuLag: number | null;
   beforeLag0: { opp: number; pm: number }; afterMenuLag6: { opp: number; pm: number } };
 const windows = JSON.parse(readFileSync(new URL("../tools/integration/fixtures/go246/intro-windows.json", import.meta.url), "utf8")) as Window[];
 
 // Cry-bound dispatch delays (101 + cry - GROVYLE's 58) of the measured opponent leads.
-const OPPONENT = { COMBUSKEN: [281, 125], SABLEYE: [322, 76], RATICATE: [20, 70], ELEKID: [239, 73], BUTTERFREE: [12, 72], SPOINK: [351, 64], ARON: [382, 69], GROVYLE: [278, 101] } as const;
+const OPPONENT = { COMBUSKEN: [281, 125], SABLEYE: [322, 76], RATICATE: [20, 70], ELEKID: [239, 73], BUTTERFREE: [12, 72], SPOINK: [351, 64], ARON: [382, 69], POLIWHIRL: [61, 62], GROVYLE: [278, 101] } as const;
 
 describe("go246: ROM-fitted intro holds", () => {
   it("pins the fitted constants", () => {
@@ -43,6 +43,8 @@ describe("go246: ROM-fitted intro holds", () => {
     // Kyle's report: SPOINK's ANIM_H_JUMPS_V_STRETCH_TWICE ran 137 frames past the app's "Go!".
     expect(hold("SPOINK")).toBe(137);
     expect(hold("ARON")).toBe(128);
+    // POLIWHIRL: the sMonAnimationDelayTable term (A 74 + delay 5 - 1 = 78 + 44 beats S 75 + 43); exact at lag 0 (doc section 4).
+    expect(hold("POLIWHIRL")).toBe(60);
     // The canonical-anchor opponent (interactive-generated-intro) is cry-bound: no hold.
     expect(hold("GROVYLE")).toBe(0);
   });
