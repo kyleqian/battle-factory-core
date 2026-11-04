@@ -12,26 +12,20 @@ result, and decides what happens next. You are not the implementer — workers
 via `tools/run-subagent.sh` do the on-the-ground work and should burn most of
 the session's compute. You run rarely and think hard when you do.
 
-The launcher selects the two agent roles independently:
+Claude is the only supported provider for both roles (the Codex, DeepSeek and
+OpenCode paths, max mode and the animation/rust supervisors were removed in
+cln239; see `docs/cln239-launchers.md`):
 
 - `./run-supervisor.sh` — Claude Opus 5.5 supervisor with Sonnet 5.5 workers,
   following the current main roadmap stage;
-- `./run-supervisor.sh -S codex` — Codex Sol 6.1/high supervisor with
-  tiered Codex workers;
-- `./run-supervisor.sh -S claude -s codex` — Claude Opus 5.5 supervisor,
-  available through Claude Remote Control in interactive mode, with tiered
-  Codex workers;
-- `./run-supervisor.sh -S claude -s deepseek` — Claude Opus 5.5 supervisor
-  with workers fixed at `deepseek/deepseek-v4-flash` through headless
-  OpenCode `--auto` runs.
+- `./run-supervisor.sh --headless -S opus -s sonnet -c 10 --log <path>` — the
+  unattended form the daily cron uses;
+- `./run-supervisor.sh --print-config` prints the resolved profile and exits.
 
-`-S` / `--supervisor` accepts `claude` or `codex`; DeepSeek is not currently a
-valid supervisor. `-s` / `--sub-agent` accepts `claude`, `codex`, or
-`deepseek`. When `-s` is omitted, the sub-agent follows the supervisor. The
-supervisor and sub-agent choices are otherwise independent. DeepSeek
-sub-agents are always V4 Flash; do not pass worker model or effort overrides.
-`--max-mode` remains the special all-Codex profile and rejects either role
-being set to anything else.
+`-S` / `--supervisor` and `-s` / `--sub-agent` accept `claude` or a Claude
+model alias (`opus`, `sonnet`, `fable`, `haiku`), which selects Claude and that
+exact model in one step. When `-s` is omitted the sub-agent is Claude Sonnet
+5.5. Anything else (`codex`, `deepseek`, `opencode`) is rejected.
 
 Read `AGENTS.md`, the latest `PROGRESS.md`, and `ROADMAP.md`'s **Current execution
 priority** first. The current stage and its linked detailed guide determine the
@@ -55,7 +49,7 @@ corrected rules across scene modes. Do not ask again to fix #165 / #141 / #140
 
 `--headless` runs the supervisor non-interactively, streaming progress and saving
 event logs. Without it the supervisor uses the interactive terminal interface
-where the user can steer it. Both modes use the same mission, worker routing,
+where the user can steer it. Both modes use the same mission, worker model,
 permissions and six-hour default cap. Headless mode is still local and does not
 detach the launcher from its terminal or managed execution session.
 
@@ -108,52 +102,12 @@ edit.
    you too; any session can be killed at any moment, and the next one resumes
    from git alone).
    **Default Claude workers use Sonnet 5.5.** Inherit the launcher's worker
-   profile without Codex model or effort flags. Claude model overrides accept
-   `-m sonnet`, `-m opus`, or a full Claude model ID.
-   **Whenever the sub-agent is ordinary Codex, the supervisor chooses one
-   exact, mechanically enforced pair:**
-   - `gpt-5.6-terra` / `max`;
-   - `gpt-5.6-luna` / `max` (available and exercised — Luna workers landed
-     work on 2026-08-02; there is no availability probe, so treat it as
-     available and fall back only on an actual launch error);
-   - `gpt-5.6-sol` / `high` (launcher default).
-   No other ordinary Codex worker model or effort pairing is allowed. In particular,
-   never lower Terra or Luna below max, and never raise Sol above high.
-   A Codex supervisor defaults to `gpt-6.1-sol/high`; a Claude supervisor defaults
-   to Opus 5.5. This routing rubric applies when Codex workers are selected.
-   `./run-supervisor.sh --max-mode` remains the separate all-Sol
-   profile: the supervisor runs Sol/ultra, every worker is locked to Sol, and
-   workers default to xhigh (the worker ceiling) while permitting high.
-   Max mode rejects every non-Codex role selection and non-Sol worker override.
-
-   **DeepSeek worker mode is fixed-route.** Under `-s deepseek`, do not apply
-   the Codex routing rubric and do not pass `--sub-agent`, `--model`, or
-   `--effort` to `tools/run-subagent.sh`; the inherited selection always launches
-   `deepseek/deepseek-v4-flash` through OpenCode.
-
-   **Which pair — the routing rubric.** The three pairs are legal; choosing
-   between them is a real decision you make per brief, not a formality that
-   defaults to the launcher's Sol. Sol is for *uncertainty*, not for
-   *importance*: a brief that names a proven recipe and its exact acceptance
-   matrix is not a Sol brief no matter how load-bearing the step is.
-
-   - **Terra/max** — the shape is already established. A slice that repeats a
-     proven recipe (the next turn-N fold, the next component family), source
-     transcription, census/ratchet regeneration, mechanical deletion behind a
-     known verification matrix. Most ladder slices land here.
-   - **Luna/max** — bounded multi-phase work with moderate ambiguity. Staged
-     bridges, equivalence proofs, ground-truth scouts whose probe method is
-     known but whose answer is not, evidence lanes, lifecycle work with a
-     state machine to get right.
-   - **Sol/high** — genuinely novel or diagnostic. New mechanism design,
-     bisecting an unexplained regression, RAM/oracle archaeology,
-     affine/palette/OAM ambiguity, presentation-seam integration — anything
-     whose honest description is "we don't know what's wrong yet."
-
-   Escalate on evidence, not on nerves: if a Terra or Luna worker returns a
-   result that does not survive your verification, rebrief the same step at
-   the next tier and record why in the ledger. This is a routing rubric, not
-   an acceptance-bar waiver — the verification you run is identical either way.
+   profile. Model overrides accept `-m sonnet`, `-m opus`, `-m fable`,
+   `-m haiku`, or a full Claude model ID. A Claude supervisor defaults to
+   Opus 5.5. Choose a heavier model only on evidence: if a Sonnet worker
+   returns a result that does not survive your verification, rebrief the
+   same step with `-m opus` and record why in the ledger. The verification
+   you run is identical either way.
 
    Before every battle-lane brief, apply the **novelty gate**: name the new
    reusable mechanism, unique screen, or generic state transition it adds.
@@ -175,7 +129,7 @@ edit.
    drift this ordering exists to stop.
 3. **Delegate.** `./tools/run-subagent.sh "<brief>"` (`--help` lists
    configuration flags). Supervisor-specific launch mechanics are load-bearing:
-   - **Claude supervisor (with any sub-agent selection):** launch it in the background; a
+   - **Claude supervisor:** launch it in the background; a
      foreground Bash call times out long before a worker finishes. Retain the
      launcher's PID and output path and poll until it exits. The initial shell
      return only means the launcher was started, not that its worker finished.
@@ -191,36 +145,17 @@ edit.
      or `wind_down`) and a nonempty `reason`. No active workers or dirty
      checkout may be left behind; `wind_down` is accepted only in the final
      20 minutes. Never write a stop file merely to wait for workers.
-     For DeepSeek workers, disable the Claude Bash tool's host sandbox on the
-     launcher call so OpenCode can read its credential store; OpenCode still
-     runs headlessly inside the selected lane/worktree with `--auto`.
-   - **Codex supervisor:** invoke it directly in the execution tool with no
-     shell `&`, `nohup`, or detached wrapper. The tool yields a managed
-     cell/session while the launcher runs; retain that handle and wait on it.
-     A yielded first call means the worker is running, not that launch failed.
    The launcher starts a fresh, bounded worker with unattended full-workspace
    permissions and the run's selected configuration. Its stdout is a compact
-   digest; the full event stream is in the log it names. Codex and OpenCode
-   event JSONL and CLI stderr are separate sibling logs so the JSONL remains
-   machine-parseable.
-   With Codex selected as the sub-agent, the worker launcher inherits that
-   selection; use `--model` and `--effort` per step, for example:
-
-   ```sh
-   ./tools/run-subagent.sh --model gpt-5.6-terra --effort max --brief-file /tmp/scout.txt
-   ./tools/run-subagent.sh --model gpt-5.6-luna --effort max --brief-file /tmp/alternate.txt
-   ./tools/run-subagent.sh --model gpt-5.6-sol --effort high --brief-file /tmp/implementation.txt
-   ```
-
-   With DeepSeek selected as the sub-agent, the launcher instead inherits the
-   fixed V4 Flash model; invoke the same commands without model or effort
-   flags.
+   digest; the full event stream is in the log it names.
+   Override the model per step with `-m`, for example
+   `./tools/run-subagent.sh -m opus --brief-file /tmp/scout.txt`.
 
    Wait for it to finish before launching another into
    the same tree — two workers in one working tree fight over it, and the
    launcher refuses a second main-lane worker mechanically (exit 4). If —
    and only if — you have genuinely disjoint steps, you may use the side and
-   animation worktrees (see "Parallel workers").
+   integration worktrees (see "Parallel workers").
 4. **Verify — trust nothing.** When it finishes:
    - `git log` / `git diff` the new commits. No commits = a failed step.
    - Run `npm test` and `npm run build` yourself — **judiciously (user
@@ -259,43 +194,17 @@ edit.
    - Getting bad → exercise autonomous judgment or defer the genuinely
      unresolved decision without interrupting the session (below).
 
-## Parallel workers (max 3: main, side, animation)
-
-> **The animation program runs under its own supervisor (user directive,
-> 2026-07-26).** `./run-supervisor.sh --lane animation` launches it in the
-> persistent worktree `.worktrees/animation-main` on branch `animation-main`
-> (guide: `ANIMATION_SUPERVISOR.md`); it may run concurrently with you.
-> Consequences for you:
->
-> - **Never brief or launch `--lane animation` workers**, and skip the
->   `ANIMATION_PROGRESS.md` orientation step — that ledger, the animation
->   coverage work, `src/animation/**`, and `tests/animation/**` belong to the
->   animation supervisor.
-> - **Fold at orient:** if `git log --oneline master..animation-main` is
->   non-empty, merge `animation-main` into `master` from the main tree,
->   rerun `npm test` + `npm run build` on the union, and record the fold in
->   your `PROGRESS.md` entry (its ANIMATION_PROGRESS.md top entry may carry
->   a "For the main program:" line — read it). Check again at wind-down; an
->   unfolded `animation-main` is fine to leave, but say so in the wind-down
->   entry.
-> - `.worktrees/animation-main` is **permanent** — never remove it or count
->   it as a stale worktree; worker worktrees and `worker/animation-*`
->   branches nested under it are the animation supervisor's to clean, not
->   yours.
-> - `tests/animation/animationBoundaryRatchet.test.ts` pins the
->   engine/animation import boundary from both sides; if one of your steps
->   needs to widen it, that is a cross-program decision — record it, don't
->   slip it in.
+## Parallel workers (max 3: ts, side, integration)
 
 The launcher exposes:
 
 - `./tools/run-subagent.sh "<brief>"` — main tree, Battle Scene OFF;
 - `./tools/run-subagent.sh --lane side "<brief>"` — side worktree, Battle
   Scene OFF (`--worktree` remains an alias);
-- `./tools/run-subagent.sh --lane animation "<brief>"` — animation worktree,
-  Battle Scene ON (`--animation-worktree` is an alias).
+- `./tools/run-subagent.sh --lane integration "<brief>"` — integration
+  worktree, Battle Scene ON.
 
-The launcher enforces one worker per lane and three total. Side and animation
+The launcher enforces one worker per lane and three total. Side and integration
 each get a fresh `git worktree` under `.worktrees/`, their own branch and npm
 install. The supervisor launcher starts both shared oracles; workers only
 validate their selected profile. Each oracle is stateless per request and
@@ -304,21 +213,16 @@ serializes its trace calls.
 Parallelize only genuinely disjoint steps: different files and fixtures,
 neither depending on the other's unmerged interface work. The natural split
 is main owning the round/core interface and side owning staged scenarios or
-source-derived data. Each program still has one supervisor and one
-integration plan: you integrate main+side on `master`; the animation
-supervisor integrates its lane on `animation-main` (its briefing rules live
-in `ANIMATION_SUPERVISOR.md`); the fold-at-orient protocol above is the only
-place the two meet.
+source-derived data. You integrate every lane on the supervisor branch yourself.
 
 What makes the worktree lanes safe:
 
 - **Shared docs are yours on both worktree lanes.** Their workers are
   contract-bound not to edit `PROGRESS.md`/`ISSUES.md` (two branches rewriting
-  the same ledger top entry is a guaranteed conflict). The animation worker
-  does own `ANIMATION_PROGRESS.md`, `ANIMATION_COVERAGE.json`, and (since
-  2026-07-26, PROGRESS entry 480) the `src/animation/`+`tests/animation/`
-  directories — `tests/animation/animationBoundaryRatchet.test.ts` pins the
-  engine/animation import boundary.
+  the same ledger top entry is a guaranteed conflict). Integration workers read
+  `ANIMATION_INTEGRATION_BRIEF.md`, `ANIMATION_INTEGRATION_PROGRESS.md` and
+  `ANIMATION_VERIFICATION.md`; `tests/animation/animationBoundaryRatchet.test.ts`
+  pins the engine/animation import boundary.
 - **Verify in the worktree, then merge.** Run the step's acceptance checks
   inside the worktree (`git -C .worktrees/<id> log`, run tests there), then
   from the main tree: `git merge worker/<id>`, re-run `npm test` and
@@ -437,9 +341,8 @@ every user-facing report including wind-down summaries.
 
 - Workers start with **fresh context** every time. All they inherit is git
   history and `PROGRESS.md` — your brief plus those must be self-sufficient.
-- Worker transcripts: each run prints its JSONL log path. Codex and OpenCode
-  also print a sibling stderr-log path. `grep`/`tail` those during review
-  instead of guessing what happened.
+- Worker transcripts: each run prints its JSONL log path. `grep`/`tail` it during
+  review instead of guessing what happened.
 - The launcher owns execution, authentication, permissions, and session
   isolation. Treat every worker as disposable: durable project
   state belongs in git and `PROGRESS.md`, with the raw JSONL log retained for

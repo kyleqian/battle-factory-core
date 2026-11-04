@@ -103,8 +103,6 @@ install_node() {
   ln -sfn "${install_root}/bin/node" /usr/local/bin/node
   ln -sfn "${install_root}/bin/npm" /usr/local/bin/npm
   ln -sfn "${install_root}/bin/npx" /usr/local/bin/npx
-  npm install --global --no-audit --no-fund "@openai/codex@${POKEBENCH_CODEX_VERSION}"
-  ln -sfn "${install_root}/bin/codex" /usr/local/bin/codex
 }
 
 install_claude_code() {

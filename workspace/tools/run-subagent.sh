@@ -1,57 +1,48 @@
 #!/usr/bin/env bash
 # Run ONE bounded, disposable worker step — the supervisor's hands.
 #
-# Launches one fresh headless worker. The default is Claude Sonnet 5.5
-# (claude-sonnet-5-5); a Codex supervisor automatically selects the Codex
-# worker profile (gpt-5.6-sol at high effort). Ordinary Codex routing permits
-# exactly Terra/max, Luna/max, or Sol/high. Codex max mode remains the separate
-# all-Sol profile and defaults workers to xhigh. The DeepSeek sub-agent option
-# runs deepseek/deepseek-v4-flash through OpenCode. The transcript is summarized
-# to a fixed-size handoff and retained in the log file named below.
-# Killing a worker at any point is safe —
-# workers follow AGENTS.md's commit-often discipline, so the next step resumes
-# from git + PROGRESS.md.
+# Launches one fresh headless Claude worker (default Claude Sonnet 5.5,
+# claude-sonnet-5-5). Claude is the only supported provider: the Codex,
+# DeepSeek/OpenCode, max-mode and animation/rust worker paths were removed in
+# cln239 (docs/cln239-launchers.md). The transcript is summarized to a
+# fixed-size handoff and retained in the log file named below. Killing a
+# worker at any point is safe — workers follow AGENTS.md's commit-often
+# discipline, so the next step resumes from git + PROGRESS.md.
 #
 # Usage:
 #   tools/run-subagent.sh [options] "step brief for the worker"
 #   tools/run-subagent.sh [options] --brief-file path/to/brief.txt
 #     -c, --cap-minutes N   hard cap in minutes (default 60)
-#     -s, --sub-agent NAME  claude (default), codex, deepseek (OpenCode), or a
-#                        Claude model alias (opus, sonnet, fable, haiku) that
-#                        selects Claude and that exact model in one step
-#     -M, --max-mode        Codex Sol/xhigh worker profile
-#     -m, --model NAME      worker model (selected sub-agent's default). Also
-#                        accepts a Claude model alias (opus, sonnet, fable,
-#                        haiku), which additionally selects Claude.
-#     -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high)
+#     -s, --sub-agent NAME  claude (default) or a Claude model alias (opus,
+#                        sonnet, fable, haiku) that selects Claude and that
+#                        exact model in one step
+#     -m, --model NAME      worker model (default claude-sonnet-5-5): a full
+#                        Claude model name or an alias (opus, sonnet, fable,
+#                        haiku)
 #     -w, --worktree        alias for --lane side
-#         --animation-worktree
-#                           alias for --lane animation
-#         --lane NAME       ts, side, animation, integration, or rust
+#         --lane NAME       ts, side, or integration
 #         --log FILE        agent event log path
 #         --brief-file FILE read the step brief verbatim from a file
 #         --read-only       audit only; require a clean tree but no commit
 #     -h, --help            show this help
 #
-# Each lane permits one worker mechanically. Non-main lanes use fresh
-# worktrees. Main/side/rust use Battle Scene OFF; animation/integration use
-# Battle Scene ON. The integration supervisor serializes its workers. Each
-# lane is a pidfile in /tmp/pokebench-worker-lanes-<run>/; a second launch into
-# a live lane is refused (exit 4). Worktree workers are contract-bound NOT to
-# touch PROGRESS.md/ISSUES.md — the supervisor folds docs into each merge. The
+# Each lane permits one worker mechanically. Side and integration use fresh
+# worktrees. ts/side use Battle Scene OFF; integration uses Battle Scene ON.
+# The supervisor serializes its workers. Each lane is a pidfile in
+# /tmp/pokebench-worker-lanes-<run>/; a second launch into a live lane is
+# refused (exit 4). Worktree workers are contract-bound NOT to touch
+# PROGRESS.md/ISSUES.md — the supervisor folds docs into each merge. The
 # worktrees and branches survive the run for supervisor verification.
 #
-# Each provider runs non-interactively with the same full-access trust model as
-# its supervisor. Every provider uses git and PROGRESS.md as the durable
-# handoff, and each worker keeps its event log for later inspection.
+# The worker runs non-interactively with the same full-access trust model as
+# its supervisor. Git and PROGRESS.md are the durable handoff, and each worker
+# keeps its event log for later inspection.
 #
 # Exit status: the worker's own exit status — except 42, which means the run
 # was stopped by an account usage/rate limit (supervisor: wind down, do not
 # relaunch).
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
-source tools/codex-model-policy.sh
-source tools/deepseek-worker-policy.sh
 source tools/claude-model-policy.sh
 
 # Recursion guard: workers must never spawn agents. Every launcher exports
@@ -67,30 +58,21 @@ usage() {
 Usage: tools/run-subagent.sh [options] "step brief for the worker"
        tools/run-subagent.sh [options] --brief-file path/to/brief.txt
   -c, --cap-minutes N   hard cap in minutes (default 60)
-  -s, --sub-agent NAME  claude (default), codex, deepseek (via OpenCode), or
-                        a Claude model alias (opus, sonnet, fable, haiku)
-                        that selects Claude and that exact model at once
-  -M, --max-mode        Codex all-Sol profile: fixes the model at
-                        gpt-5.6-sol and defaults effort to xhigh
-  -m, --model NAME      worker model (sub-agent default; DeepSeek is fixed at
-                        deepseek/deepseek-v4-flash). Also accepts a Claude
-                        model alias (opus, sonnet, fable, haiku), which
-                        additionally selects Claude as the sub-agent.
-  -e, --effort EFFORT   Codex reasoning effort (Terra/Luna=max; Sol=high;
-                        max mode also permits Sol/xhigh)
-                        (aliases: --reasoning, --reasoning-effort)
+  -s, --sub-agent NAME  claude (default) or a Claude model alias (opus,
+                        sonnet, fable, haiku) that selects Claude and that
+                        exact model at once
+  -m, --model NAME      worker model (default claude-sonnet-5-5): a full
+                        Claude model name or an alias (opus, sonnet, fable,
+                        haiku)
   -w, --worktree        alias for --lane side (also --side-worktree)
-      --animation-worktree
-                        alias for --lane animation
-  -l, --lane NAME       ts, side, animation, integration, or rust ("main" is a legacy
-                        alias for ts, the shared tree). Non-ts lanes use
-                        fresh worktrees and must not touch shared docs. A
-                        trailing "-worktree"/"-lane" is accepted and stripped.
-      --base REF        base the non-main worktree on REF instead of
-                        current HEAD (name the last supervisor-verified green
-                        commit when launching while main is mid-step, so the
-                        worker doesn't inherit transiently-red intermediate
-                        states)
+  -l, --lane NAME       ts, side, or integration ("main" is a legacy alias for
+                        ts, the shared tree). Side and integration use fresh
+                        worktrees and must not touch shared docs. A trailing
+                        "-worktree"/"-lane" is accepted and stripped.
+      --base REF        base the worktree on REF instead of current HEAD
+                        (name the last supervisor-verified green commit when
+                        launching while main is mid-step, so the worker
+                        doesn't inherit transiently-red intermediate states)
       --log FILE        agent event log path
       --brief-file FILE read the step brief verbatim from a file
       --brief TEXT      alias for the positional step brief
@@ -98,22 +80,18 @@ Usage: tools/run-subagent.sh [options] "step brief for the worker"
       --audit           alias for --read-only
       --print-config    print the resolved profile without launching
   -h, --help            show this help
-Environment overrides: SUB_AGENT, WORKER_MODEL, WORKER_REASONING_EFFORT,
-POKEBENCH_CODEX_MAX_MODE, OPENCODE_BIN. Legacy MODEL remains supported for
-direct worker launches; supervisors pass their selection internally.
+Environment overrides: SUB_AGENT, WORKER_MODEL. Legacy MODEL remains supported
+for direct worker launches; supervisors pass their selection internally.
+Claude is the only provider; codex, deepseek and opencode are rejected.
 Exits with the worker's status; 42 means an account usage/rate limit stopped it
 (either this worker's own, or a sibling's — a 42 in one lane cancels the others).
 Exit 4 means the requested lane already has a live worker (one per lane).
-Exit 5 means a Codex worker violated its postflight contract (clean and
-committed for implementation work; clean and uncommitted for read-only work).
 EOF
 }
 
 CAP_MINUTES="${CAP_MINUTES:-60}"
 PROVIDER="${SUB_AGENT:-${POKEBENCH_WORKER_PROVIDER:-claude}}"
 MODEL="${WORKER_MODEL:-${MODEL:-}}"
-REASONING_EFFORT="${WORKER_REASONING_EFFORT:-}"
-MAX_MODE="${POKEBENCH_CODEX_MAX_MODE:-0}"
 AGENT_LOG="${AGENT_LOG:-}"
 LANE="${WORKER_LANE:-ts}"
 if [[ "${WORKTREE:-0}" == "1" ]]; then LANE="side"; fi
@@ -123,10 +101,6 @@ BRIEF_FILE=""
 WT_BASE_REF=""
 PRINT_CONFIG=0
 READ_ONLY=0
-SUB_AGENT_SELECTION_SET=0
-if [[ "${SUB_AGENT+x}" == "x" || "${POKEBENCH_WORKER_PROVIDER+x}" == "x" ]]; then
-  SUB_AGENT_SELECTION_SET=1
-fi
 MODEL_FLAG_SET=0
 
 while [[ $# -gt 0 ]]; do
@@ -134,20 +108,14 @@ while [[ $# -gt 0 ]]; do
     -c|--cap-minutes) CAP_MINUTES="${2:?--cap-minutes needs a number}"; shift 2 ;;
     --cap-minutes=*)  CAP_MINUTES="${1#*=}"; shift ;;
     -w|--worktree|--side-worktree|--side-lane) LANE="side"; shift ;;
-    --animation-worktree|--animation-lane) LANE="animation"; shift ;;
-    -l|--lane)        LANE="${2:?--lane needs ts, side, animation, integration, or rust}"; shift 2 ;;
+    -l|--lane)        LANE="${2:?--lane needs ts, side, or integration}"; shift 2 ;;
     --lane=*)         LANE="${1#*=}"; shift ;;
     --base)           WT_BASE_REF="${2:?--base needs a git ref}"; shift 2 ;;
     --base=*)         WT_BASE_REF="${1#*=}"; shift ;;
-    -s|--sub-agent)   PROVIDER="${2:?--sub-agent needs a name}"; SUB_AGENT_SELECTION_SET=1; shift 2 ;;
-    --sub-agent=*)    PROVIDER="${1#*=}"; SUB_AGENT_SELECTION_SET=1; shift ;;
-    -M|--max-mode)    MAX_MODE=1; shift ;;
+    -s|--sub-agent)   PROVIDER="${2:?--sub-agent needs a name}"; shift 2 ;;
+    --sub-agent=*)    PROVIDER="${1#*=}"; shift ;;
     -m|--model)       MODEL="${2:?--model needs a model name}"; MODEL_FLAG_SET=1; shift 2 ;;
     --model=*)        MODEL="${1#*=}"; MODEL_FLAG_SET=1; shift ;;
-    -e|--effort|--reasoning|--reasoning-effort)
-                      REASONING_EFFORT="${2:?--effort needs a value}"; shift 2 ;;
-    --effort=*|--reasoning=*|--reasoning-effort=*)
-                      REASONING_EFFORT="${1#*=}"; shift ;;
     --log)            AGENT_LOG="${2:?--log needs a path}"; shift 2 ;;
     --log=*)          AGENT_LOG="${1#*=}"; shift ;;
     --brief-file)     BRIEF_FILE="${2:?--brief-file needs a path}"; shift 2 ;;
@@ -167,18 +135,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ ! "$MAX_MODE" =~ ^(0|1)$ ]]; then
-  echo "run-subagent: POKEBENCH_CODEX_MAX_MODE must be 0 or 1 (got '$MAX_MODE')" >&2
-  exit 2
-fi
-
 PROVIDER="$(printf '%s' "$PROVIDER" | tr '[:upper:]' '[:lower:]')"
 
 # Claude model aliases (opus/sonnet/fable/haiku) select Claude and that exact
 # model together, wherever a provider name is accepted: -s/--sub-agent picks
-# the worker's model directly, and a bare -m/--model alias (no matching -s
-# alias) does the same. An explicit --model that disagrees with a --sub-agent
-# alias is a conflict, not a silent override.
+# the worker's model directly, and a bare -m/--model alias does the same. An
+# explicit --model that disagrees with a --sub-agent alias is a conflict, not
+# a silent override.
 if SUB_AGENT_ALIAS_MODEL="$(pokebench_claude_model_alias "$PROVIDER")"; then
   if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "$SUB_AGENT_ALIAS_MODEL" ]]; then
     echo "run-subagent: --sub-agent '$PROVIDER' already selects model '$SUB_AGENT_ALIAS_MODEL'; --model '$MODEL' conflicts with it" >&2
@@ -190,27 +153,8 @@ if SUB_AGENT_ALIAS_MODEL="$(pokebench_claude_model_alias "$PROVIDER")"; then
 elif [[ "$MODEL_FLAG_SET" == "1" ]]; then
   MODEL_LOWER="$(printf '%s' "$MODEL" | tr '[:upper:]' '[:lower:]')"
   if MODEL_ALIAS_RESOLVED="$(pokebench_claude_model_alias "$MODEL_LOWER")"; then
-    if [[ "$SUB_AGENT_SELECTION_SET" == "1" && "$PROVIDER" != "claude" ]]; then
-      echo "run-subagent: --model '$MODEL' is a Claude model alias but --sub-agent selected '$PROVIDER'" >&2
-      exit 2
-    fi
-    PROVIDER=claude
     MODEL="$MODEL_ALIAS_RESOLVED"
   fi
-fi
-
-if [[ "$MAX_MODE" == "1" ]]; then
-  if [[ "$SUB_AGENT_SELECTION_SET" == "1" && "$PROVIDER" != "codex" ]]; then
-    echo "run-subagent: --max-mode requires a Codex sub-agent (got '$PROVIDER')" >&2
-    exit 2
-  fi
-  if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "gpt-5.6-sol" ]]; then
-    echo "run-subagent: max mode only permits gpt-5.6-sol workers (got '$MODEL')" >&2
-    exit 2
-  fi
-  PROVIDER=codex
-  MODEL=gpt-5.6-sol
-  REASONING_EFFORT="${REASONING_EFFORT:-xhigh}"
 fi
 
 # `--brief TEXT` is an alias for the positional brief: supervisor briefs kept
@@ -226,11 +170,11 @@ if [[ -n "$BRIEF" && -n "$BRIEF_FILE" ]]; then
   echo "run-subagent: use either a positional brief or --brief-file, not both" >&2
   exit 2
 fi
-# Accept the conceptual lane spellings (`side-worktree`, `animation-lane`) that
-# supervisor briefs use in prose.
+# Accept the conceptual lane spellings (`side-worktree`, `integration-lane`)
+# that supervisor briefs use in prose.
 LANE="${LANE%-worktree}"
 LANE="${LANE%-lane}"
-# "main" survives as a legacy alias from before the Rust lane existed.
+# "main" survives as a legacy alias for the shared-tree lane.
 [[ "$LANE" == "main" ]] && LANE="ts"
 if [[ -n "$BRIEF_FILE" ]]; then
   if [[ ! -r "$BRIEF_FILE" ]]; then
@@ -247,120 +191,43 @@ if [[ ! "$CAP_MINUTES" =~ ^[0-9]+$ || "$CAP_MINUTES" -lt 1 ]]; then
   echo "run-subagent: --cap-minutes must be a positive integer (got '$CAP_MINUTES')" >&2
   exit 2
 fi
-if [[ ! "$PROVIDER" =~ ^(claude|codex|deepseek)$ ]]; then
-  echo "run-subagent: unsupported sub-agent '$PROVIDER' (expected claude, codex, or deepseek)" >&2
+if [[ "$PROVIDER" != "claude" ]]; then
+  echo "run-subagent: unsupported sub-agent '$PROVIDER' (Claude only: claude, opus, sonnet, fable or haiku; the Codex, DeepSeek and OpenCode paths were removed in cln239)" >&2
   exit 2
 fi
-if [[ ! "$LANE" =~ ^(ts|side|animation|integration|rust)$ ]]; then
-  echo "run-subagent: unsupported lane '$LANE' (expected ts, side, animation, integration, or rust)" >&2
+if [[ ! "$LANE" =~ ^(ts|side|integration)$ ]]; then
+  echo "run-subagent: unsupported lane '$LANE' (expected ts, side, or integration; the animation and rust worker lanes were removed in cln239)" >&2
   exit 2
 fi
 if [[ -n "$WT_BASE_REF" && "$LANE" == "ts" ]]; then
-  echo "run-subagent: --base only applies to worktree lanes (side/animation/integration/rust); the ts lane runs in the shared tree at HEAD" >&2
+  echo "run-subagent: --base only applies to worktree lanes (side/integration); the ts lane runs in the shared tree at HEAD" >&2
   exit 2
 fi
-case "$PROVIDER" in
-  claude)
-    MODEL="${MODEL:-claude-sonnet-5-5}"
-    if [[ -n "$REASONING_EFFORT" ]]; then
-      echo "run-subagent: --effort applies only to a Codex sub-agent" >&2
-      exit 2
-    fi
-    command -v claude >/dev/null 2>&1 || { echo "run-subagent: claude CLI not found on PATH" >&2; exit 127; }
-    ;;
-  codex)
-    MODEL="${MODEL:-gpt-5.6-sol}"
-    if [[ "$MAX_MODE" == "1" && "$MODEL" != "gpt-5.6-sol" ]]; then
-      echo "run-subagent: max mode only permits gpt-5.6-sol workers (got '$MODEL')" >&2
-      exit 2
-    fi
-    if [[ "$MAX_MODE" == "1" ]]; then
-      if [[ ! "$REASONING_EFFORT" =~ ^(high|xhigh)$ ]]; then
-        echo "run-subagent: max-mode worker effort must be high or xhigh (got '$REASONING_EFFORT')" >&2
-        exit 2
-      fi
-    else
-      if ! REQUIRED_CODEX_EFFORT="$(pokebench_codex_ordinary_effort "$MODEL")"; then
-        echo "run-subagent: unsupported ordinary Codex worker model '$MODEL' (allowed: gpt-5.6-terra, gpt-5.6-luna, gpt-5.6-sol)" >&2
-        exit 2
-      fi
-      REASONING_EFFORT="${REASONING_EFFORT:-$REQUIRED_CODEX_EFFORT}"
-      if [[ "$REASONING_EFFORT" != "$REQUIRED_CODEX_EFFORT" ]]; then
-        echo "run-subagent: ordinary Codex model '$MODEL' requires effort '$REQUIRED_CODEX_EFFORT' (got '$REASONING_EFFORT')" >&2
-        exit 2
-      fi
-    fi
-    command -v codex >/dev/null 2>&1 || { echo "run-subagent: codex CLI not found on PATH" >&2; exit 127; }
-    ;;
-  deepseek)
-    if [[ "$MODEL_FLAG_SET" == "1" && "$MODEL" != "$POKEBENCH_DEEPSEEK_WORKER_MODEL" ]]; then
-      echo "run-subagent: DeepSeek workers are fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL (got '$MODEL')" >&2
-      exit 2
-    fi
-    MODEL="${MODEL:-$POKEBENCH_DEEPSEEK_WORKER_MODEL}"
-    if [[ "$MODEL" != "$POKEBENCH_DEEPSEEK_WORKER_MODEL" ]]; then
-      echo "run-subagent: DeepSeek workers are fixed at $POKEBENCH_DEEPSEEK_WORKER_MODEL (got '$MODEL')" >&2
-      exit 2
-    fi
-    if [[ -n "$REASONING_EFFORT" ]]; then
-      echo "run-subagent: --effort applies only to a Codex sub-agent" >&2
-      exit 2
-    fi
-    if ! OPENCODE_BIN_RESOLVED="$(pokebench_resolve_opencode_bin)"; then
-      echo "run-subagent: OpenCode CLI not found (set OPENCODE_BIN or install it at ~/.opencode/bin/opencode)" >&2
-      exit 127
-    fi
-    ;;
-esac
-source tools/codex-git-attribution.sh
-if [[ "$PROVIDER" != "codex" ]]; then
-  # A mixed-provider worker may inherit the temporary hook config from a Codex
-  # supervisor. Remove it entirely; Claude owns its own attribution, and the
-  # DeepSeek/OpenCode route re-enables the hook under its own identity before
-  # launch.
-  codex_git_attribution_disable
-fi
+MODEL="${MODEL:-claude-sonnet-5-5}"
+command -v claude >/dev/null 2>&1 || { echo "run-subagent: claude CLI not found on PATH" >&2; exit 127; }
+
 if [[ -z "$AGENT_LOG" ]]; then
-  if [[ "$PROVIDER" == "claude" ]]; then
-    CLAUDE_LOG_ROOT="${POKEBENCH_CLAUDE_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
-    AGENT_LOG="$CLAUDE_LOG_ROOT/workers/claude-worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
-  elif [[ "$PROVIDER" == "deepseek" ]]; then
-    OPENCODE_LOG_ROOT="${POKEBENCH_OPENCODE_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.opencode-logs}}"
-    AGENT_LOG="$OPENCODE_LOG_ROOT/workers/worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
-  else
-    CODEX_LOG_ROOT="${POKEBENCH_CODEX_LOG_DIR:-${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}}"
-    AGENT_LOG="$CODEX_LOG_ROOT/workers/worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
-  fi
+  # The default log directory keeps its historical name: the daily cron and
+  # existing tooling already write logs under .codex-logs/.
+  LOG_ROOT="${POKEBENCH_AGENT_LOG_DIR:-$(pwd)/.codex-logs}"
+  AGENT_LOG="$LOG_ROOT/workers/claude-worker-$(date +%Y%m%d-%H%M%S)-$$.jsonl"
 fi
-PROVIDER_STDERR_LOG=""
-if [[ "$PROVIDER" == "codex" || "$PROVIDER" == "deepseek" ]]; then
-  if [[ "$AGENT_LOG" == *.jsonl ]]; then
-    PROVIDER_STDERR_LOG="${AGENT_LOG%.jsonl}.stderr.log"
-  else
-    PROVIDER_STDERR_LOG="${AGENT_LOG}.stderr.log"
-  fi
+if [[ "$LANE" == "integration" ]]; then
+  ORACLE_PROFILE="battle-scene-on"
+else
+  ORACLE_PROFILE="battle-scene-off"
 fi
 if [[ "$PRINT_CONFIG" == "1" ]]; then
   echo "sub_agent=$PROVIDER"
   echo "worker_model=$MODEL"
-  echo "worker_effort=${REASONING_EFFORT:-n/a}"
-  if [[ "$PROVIDER" == "deepseek" ]]; then
-    echo "worker_runtime=opencode"
-    echo "worker_headless=1"
-    echo "worker_permissions=auto"
-  fi
-  echo "max_mode=$MAX_MODE"
+  echo "worker_effort=n/a"
   echo "worker_lane=$LANE"
   if [[ "$READ_ONLY" == "1" ]]; then
     echo "worker_mode=read-only"
   else
     echo "worker_mode=implementation"
   fi
-  if [[ "$LANE" == "animation" || "$LANE" == "integration" ]]; then
-    echo "oracle_profile=battle-scene-on"
-  else
-    echo "oracle_profile=battle-scene-off"
-  fi
+  echo "oracle_profile=$ORACLE_PROFILE"
   exit 0
 fi
 mkdir -p "$(dirname "$AGENT_LOG")"
@@ -368,11 +235,11 @@ mkdir -p "$(dirname "$AGENT_LOG")"
 LAUNCH_EPOCH="$(date +%s)"
 
 # Concurrency cap, enforced mechanically (SUPERVISOR.md states the rule; this
-# makes it stick): at most one worker per lane, four lanes total. A lane file
-# holds "<launcher_pid> <worker_pid>"; a live launcher pid means the lane is
-# taken. A dead one is a stale lock from a killed run — take it over.
+# makes it stick): at most one worker per lane. A lane file holds
+# "<launcher_pid> <worker_pid>"; a live launcher pid means the lane is taken.
+# A dead one is a stale lock from a killed run — take it over.
 # Lanes are scoped per RUN: several runs of this harness can be active in
-# parallel, and each gets its own four lanes.
+# parallel, and each gets its own lanes.
 RUN_KEY="$(pwd | shasum | cut -c1-12)"
 LANE_DIR="/tmp/pokebench-worker-lanes-$RUN_KEY"
 mkdir -p "$LANE_DIR"
@@ -402,20 +269,6 @@ WT_BRANCH=""
 WT_BASE=""
 IS_WORKTREE=0
 if [[ "$LANE" != "ts" ]]; then IS_WORKTREE=1; fi
-CODEX_ACCEPTANCE_GUARDRAILS=""
-if [[ "$PROVIDER" == "codex" ]]; then
-  CODEX_ACCEPTANCE_GUARDRAILS="
-
-Codex-specific acceptance guardrails: never satisfy dynamic pixel acceptance
-with per-tick oracle screenshots, absolute-tick framebuffer lookup, baked
-interactive sprites disguised as chrome, coordinate/RGB fitting, or by thinning
-an existing trace to matching captures. If exact live behavior cannot fit,
-commit only a clean evidence checkpoint or honest partial and record the
-precisely bounded remainder. For scratch work, allocate a fresh directory with
-mktemp -d; Codex command safety rejects rm-style cleanup and directory reuse.
-Run mGBA-backed Python probes through tools/run-mgba-probe.py so their output is
-validated and known teardown crashes do not masquerade as probe failures."
-fi
 
 # Standing execution-discipline clause for every worker prompt. Bounded
 # sessions end with their turn: a backgrounded verification (or any
@@ -481,12 +334,10 @@ HARNESS_ROOT="$(pokebench_resolve_harness_root)"
 export POKEBENCH_HARNESS_ROOT="$HARNESS_ROOT"
 MAIN_ORACLE_URL="${POKEBENCH_MAIN_ORACLE_URL:-http://127.0.0.1:8014}"
 ANIMATION_ORACLE_URL="${POKEBENCH_ANIMATION_ORACLE_URL:-http://127.0.0.1:8012}"
-if [[ "$LANE" == "animation" || "$LANE" == "integration" ]]; then
+if [[ "$LANE" == "integration" ]]; then
   ORACLE_URL="$ANIMATION_ORACLE_URL"
-  ORACLE_PROFILE="battle-scene-on"
 else
   ORACLE_URL="$MAIN_ORACLE_URL"
-  ORACLE_PROFILE="battle-scene-off"
 fi
 if ! pokebench_require_oracle_profile "$ORACLE_PROFILE" "$ORACLE_URL"; then
   echo "run-subagent: the supervisor/harness must start the selected oracle before launching workers" >&2
@@ -494,56 +345,33 @@ if ! pokebench_require_oracle_profile "$ORACLE_PROFILE" "$ORACLE_URL"; then
 fi
 
 # Claude Code auto-memory is shared by repo path. Preserve the original worker
-# isolation and tripwire for Claude; Codex workers do not use it.
-MEMORY_DIR=""
-MEM_SNAP_BEFORE=""
-MEM_SNAP_AFTER=""
+# isolation and tripwire.
+MEMORY_DIR="$HOME/.claude/projects/$(pwd | tr '/' '-')/memory"
+MEM_SNAP_BEFORE="/tmp/emerald-factory-memsnap-$$-before.txt"
+MEM_SNAP_AFTER="/tmp/emerald-factory-memsnap-$$-after.txt"
 memory_snapshot() {
   [[ -n "$MEMORY_DIR" && -d "$MEMORY_DIR" ]] \
     && find "$MEMORY_DIR" -type f -exec md5 {} + 2>/dev/null | sort
 }
-if [[ "$PROVIDER" == "claude" ]]; then
-  MEMORY_DIR="$HOME/.claude/projects/$(pwd | tr '/' '-')/memory"
-  MEM_SNAP_BEFORE="/tmp/emerald-factory-memsnap-$$-before.txt"
-  MEM_SNAP_AFTER="/tmp/emerald-factory-memsnap-$$-after.txt"
-  memory_snapshot > "$MEM_SNAP_BEFORE" || true
-fi
+memory_snapshot > "$MEM_SNAP_BEFORE" || true
 
 # The step brief arrives wrapped in the standing worker contract, so the
-# supervisor's briefs stay purely about the work. The worktree lane's contract
+# supervisor's briefs stay purely about the work. The worktree lanes' contract
 # differs in one load-bearing way: shared docs (PROGRESS.md/ISSUES.md) belong
 # to the supervisor there — two branches rewriting the same ledger top entry
 # is a guaranteed merge conflict — so the worker reports in its final message
 # and the supervisor folds docs into the merge.
-# DeepSeek workers do not pace themselves from a bare cap duration: observed
-# cap-kills (exit 124) had every edit complete but uncommitted. Give that
-# route an absolute clock anchor; Claude/Codex briefs stay byte-identical.
-DEADLINE_CLAUSE_AUDIT=""
-DEADLINE_CLAUSE_WORKER=""
-if [[ "$PROVIDER" == "deepseek" ]]; then
-  WORKER_DEADLINE_EPOCH=$(( $(date +%s) + CAP_MINUTES * 60 ))
-  WORKER_DEADLINE_LOCAL="$(date -r "$WORKER_DEADLINE_EPOCH" '+%H:%M:%S %Z' 2>/dev/null \
-    || date -d "@$WORKER_DEADLINE_EPOCH" '+%H:%M:%S %Z')"
-  DEADLINE_CLAUSE_AUDIT=" Your hard deadline is ${WORKER_DEADLINE_LOCAL} (epoch ${WORKER_DEADLINE_EPOCH}): compare date +%s against it between steps, and once fewer than 10 minutes remain, stop inspecting and write your final report."
-  DEADLINE_CLAUSE_WORKER=" Your hard deadline is ${WORKER_DEADLINE_LOCAL} (epoch ${WORKER_DEADLINE_EPOCH}): compare date +%s against it between steps, and once fewer than 10 minutes remain, start nothing new — commit what is already green and report."
-fi
-
 if [[ "$READ_ONLY" == "1" ]]; then
-  SESSION_OPENING="Follow AGENTS.md. You are one bounded, explicitly read-only audit session with a hard ${CAP_MINUTES}-minute cap. Make no edits and no commits; inspect the assigned scope and return an evidence-backed report.${DEADLINE_CLAUSE_AUDIT}"
+  SESSION_OPENING="Follow AGENTS.md. You are one bounded, explicitly read-only audit session with a hard ${CAP_MINUTES}-minute cap. Make no edits and no commits; inspect the assigned scope and return an evidence-backed report."
   WORKTREE_OWNERSHIP="Work only inside this worktree. Do NOT edit or commit any file, including PROGRESS.md or ISSUES.md."
   MAIN_OWNERSHIP="Do NOT edit or commit any file, including PROGRESS.md, ISSUES.md, or PAPERCUTS.md."
   WORKTREE_FINISH_REQUIREMENT="Before finishing: leave the worktree clean. A commit is neither required nor allowed for this audit."
   MAIN_FINISH_REQUIREMENT="Before finishing: leave the main worktree clean. A commit is neither required nor allowed for this audit."
 else
-  SESSION_OPENING="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step.${DEADLINE_CLAUSE_WORKER}"
+  SESSION_OPENING="Follow AGENTS.md. You are one bounded worker session with a hard ${CAP_MINUTES}-minute cap — you can be stopped at any moment, so commit after every green step."
   WORKTREE_OWNERSHIP="Work only inside this worktree and commit only to this branch. Do NOT edit PROGRESS.md or ISSUES.md (reading them is fine): shared docs for this lane belong to the supervisor, who folds them in when merging your branch — report your results fully in your final message instead."
   MAIN_OWNERSHIP="Keep the top entry of PROGRESS.md current as you go."
-  if [[ "$LANE" == "rust" ]]; then
-    # A core-rs-only worker has no reason to launch the memory-heavy TS gate.
-    # The Rust supervisor prompt separately requires npm test/build before a
-    # fold that actually touches its narrowly allowed adapter surface.
-    WORKTREE_FINISH_REQUIREMENT="Before finishing: cargo test and cargo build -p factory-wasm --target wasm32-unknown-unknown --release green, work committed on ${WT_BRANCH}."
-  elif [[ "$LANE" == "animation" || "$LANE" == "integration" ]]; then
+  if [[ "$LANE" == "integration" ]]; then
     WORKTREE_FINISH_REQUIREMENT="Before finishing: follow ANIMATION_VERIFICATION.md. Evidence/test/tooling-only steps use all affected verifier/test and boundary/inventory gates; production/configuration changes additionally require full npm test and npm run build. Record the tested code commit/tree and outcomes, and commit on ${WT_BRANCH}. Docs-only steps need diff/ledger checks."
   else
     WORKTREE_FINISH_REQUIREMENT="Before finishing: npm test and npm run build green, work committed on ${WT_BRANCH}."
@@ -556,8 +384,6 @@ if [[ "$IS_WORKTREE" == "1" ]]; then
     LANE_CONTRACT="Use the selected ${ORACLE_PROFILE} oracle only for read-only validation relevant to the assigned audit."
   elif [[ "$LANE" == "integration" ]]; then
     LANE_CONTRACT="This is the playable animation integration lane. Read ANIMATION_INTEGRATION_BRIEF.md, ANIMATION_INTEGRATION_PROGRESS.md and ANIMATION_VERIFICATION.md. The current local migration mandate supersedes historical hcloud-only instructions. Work only on the assigned live renderer, adapter, presentation seam, fixtures and tests; necessary src/engine changes are authorized by the integration brief. Preserve gameplay outcomes, RNG, damage, turn order and facility state. Use the Battle Scene ON oracle; named OFF service is available for logical parity controls. Do not edit Factory acceptance ledgers (ANIMATION_PROGRESS.md / ANIMATION_COVERAGE.json), integration supervisor ledgers, or other program ledgers. A live adapter is not whole-playable arbitrary-history exactness. Return complete proof and commit/tree identities to the supervisor."
-  elif [[ "$LANE" == "animation" ]]; then
-    LANE_CONTRACT="This is the animation/presentation lane. Read the current ANIMATION_PROGRESS.md entry and ANIMATION_VERIFICATION.md, and run npm run animation:coverage before changing code. Work the assigned non-exclusive component track behind the battle presentation seam: prove one representative, reuse the source-derived components, and batch-check the named siblings. Moves remain independent acceptance units; shared code alone never promotes coverage. Do not own facility progression or shared battle state. Use the Battle Scene ON oracle. You own ANIMATION_PROGRESS.md, ANIMATION_COVERAGE.json, src/animation/**, and tests/animation/** (plus the animation comparators/fixtures under tools/compare/); the only engine files you may touch are battleScene.ts and core.ts, and only their animation draw/wiring cases — tests/animation/animationBoundaryRatchet.test.ts pins the import boundary and widening its lists needs brief-level justification. A canonical window alone is partial; exact requires a complete dense window through the shared seam and every evidence-required variant."
   else
     LANE_CONTRACT="This is the side implementation lane. Prefer source extraction, deterministic scenario staging, data breadth, or another file-disjoint task assigned by the supervisor. Use the Battle Scene OFF oracle."
   fi
@@ -569,7 +395,7 @@ Your selected oracle is ${ORACLE_PROFILE} at ${ORACLE_URL}, exported as POKEBENC
 
 Your assigned step (from the supervisor):
 ${BRIEF}
-${CODEX_ACCEPTANCE_GUARDRAILS}${EXECUTION_DISCIPLINE}
+${EXECUTION_DISCIPLINE}
 
 Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message instead of improvising a different plan. ${WORKTREE_FINISH_REQUIREMENT}
 
@@ -579,9 +405,9 @@ else
 
 Your assigned step (from the supervisor):
 ${BRIEF}
-${CODEX_ACCEPTANCE_GUARDRAILS}${EXECUTION_DISCIPLINE}
+${EXECUTION_DISCIPLINE}
 
-This main lane uses the Battle Scene OFF oracle. Follow the finite Stage 8 reset in ROADMAP.md and the worker-lane ownership contract in AGENTS.md; do not resume the retired canonical Battle 2 turn-by-turn march.
+This main lane uses the Battle Scene OFF oracle. Follow ROADMAP.md's \"Current execution priority\" and docs/cax31-session-handoff.md, and the worker-lane ownership contract in AGENTS.md.
 
 Stay on this step. If it turns out to be blocked or mis-scoped, say exactly why in your final message instead of improvising a different plan. ${MAIN_FINISH_REQUIREMENT}
 
@@ -589,156 +415,51 @@ You are a worker, not the supervisor: SUPERVISOR.md is not for you, and you neve
 fi
 
 CAP_SECONDS=$(( CAP_MINUTES * 60 ))
-if [[ "$PROVIDER" == "claude" ]]; then
-  echo "worker: $MODEL · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
-elif [[ "$PROVIDER" == "deepseek" ]]; then
-  echo "worker: $MODEL via OpenCode · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw JSONL: $AGENT_LOG · stderr: $PROVIDER_STDERR_LOG"
-else
-  echo "worker: $MODEL/$REASONING_EFFORT · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw JSONL: $AGENT_LOG · stderr: $PROVIDER_STDERR_LOG"
-fi
+echo "worker: $MODEL · lane $LANE · oracle $ORACLE_PROFILE · cap ${CAP_MINUTES}min · raw log: $AGENT_LOG"
 
 WORK_DIR="$(pwd)"
 if [[ "$IS_WORKTREE" == "1" ]]; then WORK_DIR="$WT_WORK_DIR"; fi
-
-if [[ "$PROVIDER" == "codex" || "$PROVIDER" == "deepseek" ]]; then
-  ENFORCED_START_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
-  ENFORCED_START_DIRTY="$(git -C "$WORK_DIR" status --porcelain=v1)"
-  if [[ -n "$ENFORCED_START_DIRTY" ]]; then
-    echo "run-subagent: refusing to launch $PROVIDER worker from a dirty $LANE lane:" >&2
-    echo "$ENFORCED_START_DIRTY" >&2
-    exit 5
-  fi
-fi
-if [[ "$PROVIDER" == "codex" ]]; then
-  # Attribute commits in either lane without changing persistent git config.
-  codex_git_attribution_enable "$WORK_DIR" "$MODEL" "$REASONING_EFFORT"
-elif [[ "$PROVIDER" == "deepseek" ]]; then
-  # Same trailer mechanism under the DeepSeek/OpenCode identity. This route
-  # has no reasoning-effort knob, so the Agent-effort trailer is omitted.
-  agent_git_attribution_enable "$WORK_DIR" "OpenCode" "$MODEL" ""
-fi
 
 # No process substitution here: sandboxed supervisor sessions can't open
 # /dev/fd/N. Stream straight to the log; the digest is produced after exit.
 # The subshell exec makes $! the agent pid itself (needed for the watchdog
 # and for sibling cancellation on a usage-limit stop).
-if [[ "$PROVIDER" == "claude" ]]; then
-  (
-    cd "$WORK_DIR"
-    export POKEBENCH_ROLE=worker CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 \
-      POKEBENCH_ORACLE_URL="$ORACLE_URL" POKEBENCH_ORACLE_PROFILE="$ORACLE_PROFILE" \
-      POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL" POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL" \
-      POKEBENCH_VITEST_MAX_WORKERS="${POKEBENCH_VITEST_MAX_WORKERS:-4}"
-    exec claude -p --verbose --output-format stream-json \
-      --model "$MODEL" \
-      --dangerously-skip-permissions "$PROMPT"
-  ) >> "$AGENT_LOG" &
-elif [[ "$PROVIDER" == "codex" ]]; then
-  (
-    cd "$WORK_DIR"
-    export POKEBENCH_ROLE=worker POKEBENCH_ORACLE_URL="$ORACLE_URL" \
-      POKEBENCH_ORACLE_PROFILE="$ORACLE_PROFILE" \
-      POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL" POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL" \
-      POKEBENCH_VITEST_MAX_WORKERS="${POKEBENCH_VITEST_MAX_WORKERS:-4}"
-    exec python3 tools/run-codex-worker-with-deadline.py \
-      "$CAP_SECONDS" \
-      "run-subagent: ${CAP_MINUTES}min cap reached — stopping Codex worker process group" -- \
-      codex exec --json \
-        --ignore-user-config \
-        --model "$MODEL" \
-        -c "model_reasoning_effort=\"$REASONING_EFFORT\"" \
-        --dangerously-bypass-approvals-and-sandbox "$PROMPT" </dev/null
-  ) >> "$AGENT_LOG" 2>> "$PROVIDER_STDERR_LOG" &
-else
-  (
-    cd "$WORK_DIR"
-    export POKEBENCH_ROLE=worker POKEBENCH_ORACLE_URL="$ORACLE_URL" \
-      POKEBENCH_ORACLE_PROFILE="$ORACLE_PROFILE" \
-      POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL" POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL" \
-      POKEBENCH_VITEST_MAX_WORKERS="${POKEBENCH_VITEST_MAX_WORKERS:-4}"
-    exec python3 tools/run-codex-worker-with-deadline.py \
-      "$CAP_SECONDS" \
-      "run-subagent: ${CAP_MINUTES}min cap reached — stopping DeepSeek/OpenCode worker process group" -- \
-      "$OPENCODE_BIN_RESOLVED" run \
-        --model "$MODEL" \
-        --format json \
-        --auto \
-        --title "pokebench-$LANE-worker" \
-        "$PROMPT" </dev/null
-  ) >> "$AGENT_LOG" 2>> "$PROVIDER_STDERR_LOG" &
-fi
+(
+  cd "$WORK_DIR"
+  export POKEBENCH_ROLE=worker CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 \
+    POKEBENCH_ORACLE_URL="$ORACLE_URL" POKEBENCH_ORACLE_PROFILE="$ORACLE_PROFILE" \
+    POKEBENCH_MAIN_ORACLE_URL="$MAIN_ORACLE_URL" POKEBENCH_ANIMATION_ORACLE_URL="$ANIMATION_ORACLE_URL" \
+    POKEBENCH_VITEST_MAX_WORKERS="${POKEBENCH_VITEST_MAX_WORKERS:-4}"
+  exec claude -p --verbose --output-format stream-json \
+    --model "$MODEL" \
+    --dangerously-skip-permissions "$PROMPT"
+) >> "$AGENT_LOG" &
 agent_pid=$!
 echo "$$ $agent_pid" > "$LANE_FILE"
 # The watchdog traps TERM and kills its own sleep: a plain `sleep CAP` would
 # be orphaned when the worker finishes early and keep the launcher's
 # stdout/stderr pipes open for the rest of the cap (a reader waiting for EOF
 # blocks that whole time).
-watchdog_pid=""
-if [[ "$PROVIDER" == "claude" ]]; then
-  ( trap 'kill "${wd_sleep:-}" 2>/dev/null; exit 0' TERM
-    sleep "$CAP_SECONDS" & wd_sleep=$!
-    wait "$wd_sleep" || exit 0
-    echo "run-subagent: ${CAP_MINUTES}min cap reached — stopping worker"
-    kill -TERM "$agent_pid" 2>/dev/null
-    sleep 15 & wd_sleep=$!
-    wait "$wd_sleep" || exit 0
-    kill -KILL "$agent_pid" 2>/dev/null ) &
-  watchdog_pid=$!
-fi
+( trap 'kill "${wd_sleep:-}" 2>/dev/null; exit 0' TERM
+  sleep "$CAP_SECONDS" & wd_sleep=$!
+  wait "$wd_sleep" || exit 0
+  echo "run-subagent: ${CAP_MINUTES}min cap reached — stopping worker"
+  kill -TERM "$agent_pid" 2>/dev/null
+  sleep 15 & wd_sleep=$!
+  wait "$wd_sleep" || exit 0
+  kill -KILL "$agent_pid" 2>/dev/null ) &
+watchdog_pid=$!
 
 status=0
 wait "$agent_pid" || status=$?
 worker_status="$status"
-if [[ -n "$watchdog_pid" ]]; then
-  kill "$watchdog_pid" 2>/dev/null || true
-  wait "$watchdog_pid" 2>/dev/null || true
-fi
-if [[ "$PROVIDER" == "codex" || "$PROVIDER" == "deepseek" ]]; then
-  ENFORCED_END_HEAD="$(git -C "$WORK_DIR" rev-parse HEAD)"
-  ENFORCED_END_DIRTY="$(git -C "$WORK_DIR" status --porcelain=v1)"
-  if [[ "$READ_ONLY" == "1" ]]; then
-    if [[ "$ENFORCED_END_HEAD" != "$ENFORCED_START_HEAD" ]]; then
-      echo "run-subagent: read-only $PROVIDER worker created a commit" >&2
-      if [[ "$status" -eq 0 ]]; then status=5; fi
-    fi
-  elif [[ "$ENFORCED_END_HEAD" == "$ENFORCED_START_HEAD" ]]; then
-    echo "run-subagent: $PROVIDER worker produced no commit" >&2
-    if [[ "$status" -eq 0 ]]; then status=5; fi
-  fi
-  if [[ -n "$ENFORCED_END_DIRTY" ]]; then
-    echo "run-subagent: $PROVIDER worker left uncommitted changes:" >&2
-    echo "$ENFORCED_END_DIRTY" >&2
-    if [[ "$status" -eq 0 ]]; then status=5; fi
-  fi
-fi
+kill "$watchdog_pid" 2>/dev/null || true
+wait "$watchdog_pid" 2>/dev/null || true
+
 # Digest the transcript for the supervisor (streamed live before the
 # no-process-substitution change; post-hoc works the same for callers).
 if [[ -f "$AGENT_LOG" ]]; then
-  if [[ "$PROVIDER" == "claude" ]]; then
-    node tools/stream-summary.mjs < "$AGENT_LOG" || true
-  elif [[ "$PROVIDER" == "deepseek" ]]; then
-    node tools/opencode-stream-summary.mjs < "$AGENT_LOG" || true
-    if [[ -s "$PROVIDER_STDERR_LOG" ]]; then
-      echo "OpenCode stderr log: $PROVIDER_STDERR_LOG"
-    fi
-  else
-    node tools/codex-stream-summary.mjs < "$AGENT_LOG" || true
-    if [[ -s "$PROVIDER_STDERR_LOG" ]]; then
-      echo "Codex stderr log: $PROVIDER_STDERR_LOG"
-    fi
-  fi
-fi
-
-# In an unattended campaign, preserve a successful implementation worker's
-# committed feature branch before handing it back for supervisor verification.
-# The backup helper writes only the isolated campaign namespace; interactive
-# workers without POKEBENCH_BACKUP_NAMESPACE never push anything.
-if [[ "$IS_WORKTREE" == "1" && "$READ_ONLY" != "1" && "$status" == "0" \
-      && -n "${POKEBENCH_BACKUP_NAMESPACE:-}" ]]; then
-  if ! tools/autonomy/backup-refs.sh; then
-    echo "run-subagent: failed to back up committed worker branch $WT_BRANCH" >&2
-    status=1
-  fi
+  node tools/stream-summary.mjs < "$AGENT_LOG" || true
 fi
 
 # Worktree handoff: the worktree and branch outlive this launcher on purpose —
@@ -765,77 +486,27 @@ if [[ "$IS_WORKTREE" == "1" ]]; then
   echo "  git worktree remove ${WT_PATH#$(pwd)/} && git branch -d $WT_BRANCH"
 fi
 
-if [[ "$PROVIDER" == "claude" ]]; then
-  memory_snapshot > "$MEM_SNAP_AFTER" || true
-  if ! cmp -s "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER"; then
-    {
-      echo "run-subagent: WARNING -- the auto-memory directory changed during this Claude worker run: $MEMORY_DIR"
-      echo "Workers launch with CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 and must never touch it. If you (the"
-      echo "supervisor) didn't write this yourself mid-run, treat it as a worker acting out of bounds:"
-      echo "review the diff, revert/rewrite anything you didn't author, and note it in your summary."
-      diff "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER" || true
-    } >&2
-  fi
-  rm -f "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER"
+memory_snapshot > "$MEM_SNAP_AFTER" || true
+if ! cmp -s "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER"; then
+  {
+    echo "run-subagent: WARNING -- the auto-memory directory changed during this Claude worker run: $MEMORY_DIR"
+    echo "Workers launch with CLAUDE_CODE_DISABLE_AUTO_MEMORY=1 and must never touch it. If you (the"
+    echo "supervisor) didn't write this yourself mid-run, treat it as a worker acting out of bounds:"
+    echo "review the diff, revert/rewrite anything you didn't author, and note it in your summary."
+    diff "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER" || true
+  } >&2
 fi
+rm -f "$MEM_SNAP_BEFORE" "$MEM_SNAP_AFTER"
 
 # Surface usage/rate-limit failures distinctly so the supervisor can stop both
 # lanes rather than repeatedly relaunching work the account cannot service.
 USAGE_STOP_MARKER="$LANE_DIR/usage-limit-stop"
 USAGE_STOPPED=0
 if [[ -f "$AGENT_LOG" ]]; then
-  if [[ "$PROVIDER" == "claude" ]]; then
-    if tail -n 3 "$AGENT_LOG" \
-        | grep -v '"type":"rate_limit_event".*"status":"allowed"' \
-        | grep -qiE 'usage limit|rate.?limit'; then
-      USAGE_STOPPED=1
-    fi
-  elif [[ "$PROVIDER" == "codex" ]]; then
-    # Codex JSON events can embed arbitrary command output and project docs.
-    # Inspect only provider failure fields (plus explicit denied rate-limit
-    # events), then scan the separate unstructured stderr stream.
-    if tail -n 50 "$AGENT_LOG" 2>/dev/null \
-        | jq -Re '
-            fromjson?
-            |
-            select(
-              (
-                (.type == "error" or .type == "turn.failed")
-                and ((.message // .error.message // .error // "") | tostring
-                  | test("usage limit|rate.?limit|quota exceeded"; "i"))
-              )
-              or (
-                .type == "rate_limit_event"
-                and (.status // "") != "allowed"
-                and (.rate_limit.status // "") != "allowed"
-              )
-            )
-          ' >/dev/null 2>&1; then
-      USAGE_STOPPED=1
-    elif tail -n 20 "$PROVIDER_STDERR_LOG" 2>/dev/null \
-        | sed -E 's/--no-rate-limit//g' \
-        | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
-      USAGE_STOPPED=1
-    fi
-  else
-    # OpenCode events put provider failures in top-level error events or in
-    # error-finished step parts. Do not scan tool output, which may merely
-    # mention rate-limit handling in project docs.
-    if tail -n 50 "$AGENT_LOG" 2>/dev/null \
-        | jq -Re '
-            fromjson?
-            |
-            select(
-              (.type == "error" or .part.reason == "error")
-              and ((.message // .error.message // .error // .part.error.message // .part.error // "")
-                | tostring | test("usage limit|rate.?limit|quota exceeded"; "i"))
-            )
-          ' >/dev/null 2>&1; then
-      USAGE_STOPPED=1
-    elif tail -n 20 "$PROVIDER_STDERR_LOG" 2>/dev/null \
-        | grep -qiE 'usage limit|rate.?limit|quota exceeded'; then
-      USAGE_STOPPED=1
-    fi
+  if tail -n 3 "$AGENT_LOG" \
+      | grep -v '"type":"rate_limit_event".*"status":"allowed"' \
+      | grep -qiE 'usage limit|rate.?limit'; then
+    USAGE_STOPPED=1
   fi
 fi
 if [[ "$USAGE_STOPPED" == "1" ]]; then
@@ -863,23 +534,15 @@ if [[ "$marker_epoch" =~ ^[0-9]+$ ]] && (( marker_epoch >= LAUNCH_EPOCH )); then
   exit 42
 fi
 # Turn authentication failures into a pointed hint instead of a mystery exit 1.
-# Cap/deadline kills (124 from the deadline wrappers) and signal deaths (>=128)
-# are NOT auth failures — a killed worker's log routinely contains
-# "401"/"unauthorized" strings from its own project work, and the old
-# unconditional hint mis-directed triage toward re-auth (PAPERCUTS
-# 2026-07-30). Name the kill for what it is; auth is fine if the next
-# launch starts.
+# Cap/deadline kills (124) and signal deaths (>=128) are NOT auth failures — a
+# killed worker's log routinely contains "401"/"unauthorized" strings from its
+# own project work, and the old unconditional hint mis-directed triage toward
+# re-auth (PAPERCUTS 2026-07-30). Name the kill for what it is; auth is fine
+# if the next launch starts.
 if [[ "$worker_status" -eq 124 || "$worker_status" -ge 128 ]]; then
   echo "run-subagent: worker was killed before turn completion (exit $worker_status — cap/deadline or signal, NOT an authentication failure). Check the digest's worker-FAILED marker and the branch's committed state." >&2
 elif [[ "$worker_status" -ne 0 && -f "$AGENT_LOG" ]] \
-    && grep -qiE 'not logged in|authentication required|unauthorized|HTTP[ /]?401' \
-      "$AGENT_LOG" ${PROVIDER_STDERR_LOG:+"$PROVIDER_STDERR_LOG"}; then
-  if [[ "$PROVIDER" == "claude" ]]; then
-    echo "run-subagent: worker exited unauthenticated — this launch was probably sandboxed. Relaunch with the Bash tool's dangerouslyDisableSandbox: true (see the header comment)." >&2
-  elif [[ "$PROVIDER" == "deepseek" ]]; then
-    echo "run-subagent: DeepSeek worker exited unauthenticated — run 'opencode providers login' and retry" >&2
-  else
-    echo "run-subagent: codex worker exited unauthenticated — log in with the codex CLI and retry" >&2
-  fi
+    && grep -qiE 'not logged in|authentication required|unauthorized|HTTP[ /]?401' "$AGENT_LOG"; then
+  echo "run-subagent: worker exited unauthenticated — this launch was probably sandboxed. Relaunch with the Bash tool's dangerouslyDisableSandbox: true (see the header comment)." >&2
 fi
 exit "$status"

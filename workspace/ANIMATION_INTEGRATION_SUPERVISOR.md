@@ -108,18 +108,13 @@ claim, required variants and finish gates. Launch from a clean verified base:
 ```
 
 The supervisor defaults to Claude Opus 5.5 with Sonnet 5.5 workers. Inherit
-that worker profile without Codex model or effort flags. With `-S codex`,
-the supervisor uses `gpt-6.1-sol/high`; ordinary Codex workers retain
-`gpt-5.6-terra/max`, `gpt-5.6-luna/max`, and `gpt-5.6-sol/high` according to
-the routing rubric in `SUPERVISOR.md`. In that profile use Sol for unresolved
-host-state ownership.
+that worker profile; use `-m opus` only on evidence (a Sonnet result that
+failed your verification, or unresolved host-state ownership).
 Workers use fresh worktrees and the Battle Scene ON oracle; OFF is the logical
 parity control. Workers do not edit supervisor progress or Factory ledgers.
 
-Follow the launcher's worker execution instructions: Claude supervisors retain
-the background job PID and output path and poll until the launcher exits;
-Codex supervisors retain the managed execution handle without shell backgrounding.
-Supervise until completion.
+Follow the launcher's worker execution instructions: retain the background job
+PID and output path and poll until the launcher exits. Supervise until completion.
 Use bounded waits, inspect the handoff and exit status, and stop on account
 usage/rate-limit exit 42 rather than retrying. A cap kill is not proof. Review
 committed partial work before salvage; resume only from a verified base.
