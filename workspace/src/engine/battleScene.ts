@@ -3717,6 +3717,39 @@ export function tableX2(table: readonly number[], createTick: number, t: number)
   return idx < table.length ? table[idx]! : 0;
 }
 
+/**
+ * The battle-start party-summary tray's SE ticks (RAM ticks, the `tableX2` index space): the two bars are created at
+ * `PLAYER_CREATE_TICK` / `OPP_CREATE_TICK` (`SE_BALL_TRAY_ENTER`, pan 0), and each icon's callback plays its SE on the tick
+ * its x2 first reaches 0 (`SpriteCB_StatusSummaryBalls_Enter`): BALL at pan 63 / -64 (player / opponent) for a real slot,
+ * EXIT for an empty one. Ticks are table ends, so the ROM's tick-by-tick x2 history is the single source.
+ */
+export interface BallTraySoundTick {
+  readonly tick: number;
+  readonly kind: "enter" | "ball" | "exit";
+  readonly side: "player" | "opponent";
+}
+export function ballTraySoundTicks(
+  summaries: Readonly<{ player: readonly PartyBallState[]; opponent: readonly PartyBallState[] }>,
+): readonly BallTraySoundTick[] {
+  const out: BallTraySoundTick[] = [
+    { tick: PLAYER_CREATE_TICK, kind: "enter", side: "player" },
+    { tick: OPP_CREATE_TICK, kind: "enter", side: "opponent" },
+  ];
+  for (let i = 0; i < 6; i += 1) {
+    out.push({
+      tick: PLAYER_CREATE_TICK + PLAYER_ICON_X2[i]!.length - 1,
+      kind: summaries.player[i] === "empty" ? "exit" : "ball",
+      side: "player",
+    });
+    out.push({
+      tick: OPP_CREATE_TICK + OPP_ICON_X2[i]!.length - 1,
+      kind: summaries.opponent[5 - i] === "empty" ? "exit" : "ball",
+      side: "opponent",
+    });
+  }
+  return out.sort((a, b) => a.tick - b.tick);
+}
+
 export interface BallIcon {
   x: number;
   y: number;
@@ -5051,7 +5084,7 @@ export function generatedBattleStartOpponentReleaseStarted(
       + SENDOUT_HANDOFF_LAG;
 }
 
-function generatedBattleStartOpponentHandoffTick(
+export function generatedBattleStartOpponentHandoffTick(
   state: FactoryBattleStartIntroState,
 ): number | null {
   const pressTick = generatedBattleStartPressTick(state);
@@ -5135,7 +5168,7 @@ function generatedPlayerSpeciesId(state: FactoryBattleStartIntroState): number {
   return state.command.parties.player[playerIndex].species;
 }
 
-function generatedPlayerDispatchDelay(state: FactoryBattleStartIntroState): number {
+export function generatedPlayerDispatchDelay(state: FactoryBattleStartIntroState): number {
   const cryDelay = GENERATED_PLAYER_DISPATCH_BASELINE_DELAY
     + (cryDurationTicks(generatedOpponentSpeciesId(state)) - GROVYLE_CRY_DURATION_TICKS);
   // go246: Scene ON also waits for the opponent's front animation (`generatedIntroOpponentAnimHold`).
@@ -5152,7 +5185,7 @@ function generatedPlayerDispatchDelay(state: FactoryBattleStartIntroState): numb
  * (docs/trainer-pic-off-window-scout.md §D): GRIMER (11 chars) and KADABRA
  * (12 chars) both land exactly on `length - 1 + 3`.
  */
-function generatedPlayerVisualLag(playerLineLength: number): number {
+export function generatedPlayerVisualLag(playerLineLength: number): number {
   return playerLineLength - 1 + SENDOUT_HANDOFF_LAG;
 }
 const GENERATED_OPPONENT_SHADOW_DELAY = 104;

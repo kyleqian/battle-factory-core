@@ -720,6 +720,8 @@ import {
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
+import { emitBattleStartBgm, emitBattleStartIntroSounds } from "./battleStartSounds.ts";
+import { soundCollecting } from "../audio/soundEvents.ts";
 
 /**
  * Builds the source-owned completed-command chain once the turn-4 lifecycle
@@ -1029,6 +1031,10 @@ export function createInitialState(
 export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
   beginScreenSoundTick(state.frame + 1);
   const next = tickEngineState(state, buttons);
+  const introBefore = state.factoryRoundBattleOrchestrator?.battleStartIntro ?? null;
+  if (introBefore !== null && soundCollecting()) {
+    emitBattleStartIntroSounds(introBefore, next.factoryRoundBattleOrchestrator?.battleStartIntro ?? null);
+  }
   runScheduledScreenSounds();
   // Presentation seam, after the logical frame: one Random2 step per presented battle frame
   // (presentationRngHost.ts). Reads only the battle's identity edge, never gameplay RNG values.
@@ -1498,6 +1504,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
             ...battleRoom,
             transitionPresentation: selected.presentation,
           };
+          if (soundCollecting()) emitBattleStartBgm(false);
         } else {
           for (let i = 0; i < extraRngSteps; i += 1) {
             rngValue = advanceRngValue(rngValue);
@@ -1569,6 +1576,14 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         // BATTLE_2_SCENE_HANDOFF_ELAPSED is that already-calibrated full
         // duration (same constant the ordinary "settled" phase's own
         // handoff above already waits out for this shared transition).
+        if (
+          battleRoom !== null &&
+          battleRoom.phase === "brainSpeechSettled" &&
+          battleRoom.elapsed === brainSpeechSceneHandoffElapsed(battleRoom) &&
+          soundCollecting()
+        ) {
+          emitBattleStartBgm(true);
+        }
         if (
           battleRoom !== null &&
           battleRoom.phase === "brainSpeechSettled" &&
@@ -2483,6 +2498,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
           ...battleRoom,
           transitionPresentation: selected.presentation,
         };
+        if (soundCollecting()) emitBattleStartBgm(false);
       } else {
         for (let i = 0; i < extraRngSteps; i += 1) {
           rngValue = advanceRngValue(rngValue);

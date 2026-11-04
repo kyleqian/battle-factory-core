@@ -23,7 +23,7 @@ export interface SoundEvent {
   readonly volume?: number;
   /** Cry priority. */
   readonly priority?: number;
-  /** The m4a player a song-less stop acts on (`StopCryAndClearCrySongs`: "cry"); then `id` is null. */
+  /** The m4a player a song-less stop acts on (`StopCryAndClearCrySongs`: "cry"; then `id` is null), or the SE player a panned SE call is routed to (`PlaySE1WithPanning` "SE1", `PlaySE2WithPanning` "SE2", `PlaySE12WithPanning` "SE12" = both). */
   readonly player?: string;
 }
 

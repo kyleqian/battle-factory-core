@@ -223,7 +223,7 @@ const FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV =
 // `state.parties.player` capture - the ROM's own values, not synthesized.
 // Closes the party-summary/healthbox gender-icon residual (docs/trainer-
 // pic-off-window-scout.md §D round 6).
-function generatedBattleStartIntroArbitraryStage(state: EngineState): EngineState {
+function generatedBattleStartIntroArbitraryStage(state: EngineState, battleScene: "on" | "off" = "off"): EngineState {
   const playerRentalRecords = [
     generatedCommandRecord(110, FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV, 2737562574),
     generatedCommandRecord(130, FACTORY_LEGAL_CHALLENGE0_INITIAL_RENTAL_FIXED_IV, 3230415900),
@@ -231,6 +231,7 @@ function generatedBattleStartIntroArbitraryStage(state: EngineState): EngineStat
   ] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({
     id: "factory-arbitrary-intro-yoshi-off",
+    battleScene,
     rngValue: 42,
     factoryWinStreak: 0,
     playerTrainerId: 0x89ab_cdef,
@@ -278,7 +279,7 @@ const FACTORY_LEGAL_CHALLENGE2_INITIAL_RENTAL_FIXED_IV =
 // Real personalities for setIds 267/268/269, read off `bin/oracle lab` on
 // `tools/battle-lab/factory-arbitrary-intro-magneton-off.json`'s own dense
 // `state.parties.player` capture - same convention as the YOSHI stage above.
-function generatedBattleStartIntroMagnetonStage(state: EngineState): EngineState {
+function generatedBattleStartIntroMagnetonStage(state: EngineState, battleScene: "on" | "off" = "off"): EngineState {
   const playerRentalRecords = [
     generatedCommandRecord(267, FACTORY_LEGAL_CHALLENGE2_INITIAL_RENTAL_FIXED_IV, 768061940),
     generatedCommandRecord(268, FACTORY_LEGAL_CHALLENGE2_INITIAL_RENTAL_FIXED_IV, 1251336124),
@@ -286,6 +287,7 @@ function generatedBattleStartIntroMagnetonStage(state: EngineState): EngineState
   ] as const;
   let orchestrator = createFactoryRoundBattleOrchestrator({
     id: "factory-arbitrary-intro-magneton-off",
+    battleScene,
     rngValue: 70,
     factoryWinStreak: 14,
     playerTrainerId: 0x89ab_cdef,
@@ -1527,6 +1529,9 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "battle-command-generated-off": generatedBattleCommandStage,
   "factory-arbitrary-intro-yoshi-off": generatedBattleStartIntroArbitraryStage,
   "factory-arbitrary-intro-magneton-off": generatedBattleStartIntroMagnetonStage,
+  // aud241a: Scene ON siblings (dev-only; same tuples), for the ROM sound windows on the Scene ON oracle.
+  "factory-arbitrary-intro-yoshi-on": (state) => generatedBattleStartIntroArbitraryStage(state, "on"),
+  "factory-arbitrary-intro-magneton-on": (state) => generatedBattleStartIntroMagnetonStage(state, "on"),
   "factory-round-battle6-lukas-reveal-off": generatedRoundBattle6LukasRevealStage,
   "factory-round-battle6-lukas-status-summary-message-off":
     generatedRoundBattle6LukasStatusSummaryMessageStage,
