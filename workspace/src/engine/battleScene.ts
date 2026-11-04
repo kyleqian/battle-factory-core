@@ -5288,11 +5288,14 @@ const MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET = 9;
 const MEASURED_GOLD_BRAIN_REVEAL_READY_LAG_OFFSET = 7;
 
 function generatedPlayerReadyLag(state: FactoryBattleStartIntroState): number {
-  // go246: Scene ON also waits for the player's back animation (`generatedIntroPlayerAnimHold`).
-  if (!state.sceneOn) return generatedPlayerCryReadyLag(state);
+  return generatedPlayerCryReadyLag(state) + generatedPlayerAnimHold(state);
+}
+
+/** go246: Scene ON also waits for the player's back animation (`generatedIntroPlayerAnimHold`); Scene OFF has none. */
+function generatedPlayerAnimHold(state: FactoryBattleStartIntroState): number {
+  if (!state.sceneOn) return 0;
   const player = state.command.parties.player[state.command.activePartyIndexes.player];
-  return generatedPlayerCryReadyLag(state)
-    + generatedIntroPlayerAnimHold(player.species, player.personality, cryDurationTicks(player.species));
+  return generatedIntroPlayerAnimHold(player.species, player.personality, cryDurationTicks(player.species));
 }
 
 function generatedPlayerCryReadyLag(state: FactoryBattleStartIntroState): number {
@@ -5853,7 +5856,8 @@ export function renderGeneratedBattleStartPlayerRelease(
   // The intro controller clears its message only after the main callback has
   // selected action input. The shared command reducer owns the subsequent
   // six blank action-enter frames and atomic menu draw.
-  const menuBlank = playerVisualT >= MENU_IDLE_BLANK_START_TICK;
+  // go246: the clear follows the ready transition, so the Scene ON back-animation hold moves it too.
+  const menuBlank = playerVisualT >= MENU_IDLE_BLANK_START_TICK + generatedPlayerAnimHold(state);
 
   drawTileBgFaded(
     fb,

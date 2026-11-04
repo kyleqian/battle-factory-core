@@ -1,0 +1,247 @@
+[
+ {
+  "tag": "yoshi",
+  "seed": 42,
+  "playerSetIds": [
+   110,
+   130,
+   150
+  ],
+  "playerPersonalities": [
+   2737562574,
+   3230415900,
+   391062422
+  ],
+  "playerLead": "GRIMER",
+  "opponentLead": "COMBUSKEN",
+  "offset": 1171,
+  "ack": 369,
+  "end": 760,
+  "menuFrame": 684,
+  "romDir": "pre-checkpoint frames",
+  "parentDispatchLag": 0,
+  "menuLagAfterOpponentHold": 12,
+  "menuLagAfter": 6,
+  "sceneOffMenuLag": null,
+  "beforeLag0": {
+   "opp": 12,
+   "pm": 26688,
+   "rest": 152638
+  },
+  "afterMenuLag6": {
+   "opp": 12,
+   "pm": 0,
+   "rest": 6
+  }
+ },
+ {
+  "tag": "koffing",
+  "seed": 11,
+  "playerSetIds": [
+   127,
+   130,
+   150
+  ],
+  "playerPersonalities": [
+   2841070199,
+   3173743075,
+   333534997
+  ],
+  "playerLead": "KOFFING",
+  "opponentLead": "BUTTERFREE",
+  "offset": 1151,
+  "ack": 389,
+  "end": 790,
+  "menuFrame": 760,
+  "romDir": "pre-checkpoint frames",
+  "parentDispatchLag": 74,
+  "menuLagAfterOpponentHold": 17,
+  "menuLagAfter": 6,
+  "sceneOffMenuLag": 6,
+  "beforeLag0": {
+   "opp": 298214,
+   "pm": 545982,
+   "rest": 1288294
+  },
+  "afterMenuLag6": {
+   "opp": 12,
+   "pm": 97,
+   "rest": 7001
+  }
+ },
+ {
+  "tag": "spinda",
+  "seed": 22,
+  "playerSetIds": [
+   145,
+   112,
+   150
+  ],
+  "playerPersonalities": [
+   2645623632,
+   22115704,
+   2810836047
+  ],
+  "playerLead": "SPINDA",
+  "opponentLead": "RATICATE",
+  "offset": 1175,
+  "ack": 365,
+  "end": 760,
+  "menuFrame": 660,
+  "romDir": "pre-checkpoint frames",
+  "parentDispatchLag": 39,
+  "menuLagAfterOpponentHold": 6,
+  "menuLagAfter": 6,
+  "sceneOffMenuLag": 6,
+  "beforeLag0": {
+   "opp": 241058,
+   "pm": 428147,
+   "rest": 841690
+  },
+  "afterMenuLag6": {
+   "opp": 11,
+   "pm": 1855,
+   "rest": 7525
+  }
+ },
+ {
+  "tag": "onix",
+  "seed": 35,
+  "playerSetIds": [
+   156,
+   112,
+   150
+  ],
+  "playerPersonalities": [
+   2143260825,
+   576060504,
+   1672526272
+  ],
+  "playerLead": "ONIX",
+  "opponentLead": "ELEKID",
+  "offset": 1157,
+  "ack": 383,
+  "end": 780,
+  "menuFrame": 719,
+  "romDir": "pre-checkpoint frames",
+  "parentDispatchLag": 45,
+  "menuLagAfterOpponentHold": 6,
+  "menuLagAfter": 6,
+  "sceneOffMenuLag": null,
+  "beforeLag0": {
+   "opp": 267078,
+   "pm": 489688,
+   "rest": 940320
+  },
+  "afterMenuLag6": {
+   "opp": 46322,
+   "pm": 14502,
+   "rest": 54599
+  }
+ },
+ {
+  "tag": "spoink",
+  "seed": 8,
+  "playerSetIds": [
+   110,
+   130,
+   150
+  ],
+  "playerPersonalities": [
+   4163111774,
+   2950683225,
+   1951969572
+  ],
+  "playerLead": "GRIMER",
+  "opponentLead": "SPOINK",
+  "offset": 1153,
+  "ack": 387,
+  "end": 810,
+  "menuFrame": 772,
+  "romDir": "pre-checkpoint frames",
+  "parentDispatchLag": null,
+  "menuLagAfterOpponentHold": 12,
+  "menuLagAfter": 6,
+  "sceneOffMenuLag": 6,
+  "beforeLag0": {
+   "opp": 318460,
+   "pm": 585343,
+   "rest": 1883317
+  },
+  "afterMenuLag6": {
+   "opp": 132,
+   "pm": 0,
+   "rest": 8273
+  }
+ },
+ {
+  "tag": "aron",
+  "seed": 4,
+  "playerSetIds": [
+   110,
+   130,
+   150
+  ],
+  "playerPersonalities": [
+   3952240574,
+   3490724225,
+   1746962372
+  ],
+  "playerLead": "GRIMER",
+  "opponentLead": "ARON",
+  "offset": 1167,
+  "ack": 373,
+  "end": 800,
+  "menuFrame": 746,
+  "romDir": "pre-checkpoint frames",
+  "parentDispatchLag": null,
+  "menuLagAfterOpponentHold": 12,
+  "menuLagAfter": 6,
+  "sceneOffMenuLag": null,
+  "beforeLag0": {
+   "opp": 292469,
+   "pm": 591179,
+   "rest": 1794959
+  },
+  "afterMenuLag6": {
+   "opp": 37516,
+   "pm": 14502,
+   "rest": 44713
+  }
+ },
+ {
+  "tag": "wailmer",
+  "seed": 5,
+  "playerSetIds": [
+   170,
+   130,
+   150
+  ],
+  "playerPersonalities": [
+   509295856,
+   3302802650,
+   560560647
+  ],
+  "playerLead": "WAILMER",
+  "opponentLead": "SABLEYE",
+  "offset": 1140,
+  "ack": 400,
+  "end": 960,
+  "menuFrame": 860,
+  "romDir": "wailmer: pre-checkpoint frames + 160 post-checkpoint frames (frame-k = pre-checkpoint 2006 + k)",
+  "parentDispatchLag": 98,
+  "menuLagAfterOpponentHold": 59,
+  "menuLagAfter": 6,
+  "sceneOffMenuLag": null,
+  "beforeLag0": {
+   "opp": 277110,
+   "pm": 560480,
+   "rest": 1939478
+  },
+  "afterMenuLag6": {
+   "opp": 132,
+   "pm": 7903,
+   "rest": 16768
+  }
+ }
+]
