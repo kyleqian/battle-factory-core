@@ -215,3 +215,16 @@ Opponent attacker vs ONIX; "frames diff" is out of the 33-frame (Quick Attack) /
 - One probe run is ~8 s, one render ~3 s; the full 88-run sweep took ~20 min of wall clock in foreground chunks.
 - Committed staging scenarios (6): `tools/integration/fixtures/qak247/mechanic-{quick-attack,aerial-ace}-opponent-<species>-player-onix.json` (SWELLOW both, RAIKOU, SCIZOR for Quick Attack; SLAKING, METAGROSS for Aerial Ace). Run them with the stager's trace via `tools/run-mgba-probe.py <out.json> -- <mgba python> <probe> <scenario> <out.json> <rgb-dir> ...` using any probe that records RGB per frame while `currentMove` is the move (for example `tools/probe/run-battle-lab-rgb.py`, then take the window above).
 - Not run (per the step's constraints): `npm test`, vitest, build, typecheck, census, soaks. Gates run: see the final message.
+
+## Receipts (qak249)
+
+Test-only follow-up to the qak248 fix (`127def5d4`). Two hermetic Scene-ON ROM receipts, built the agi245 way from the committed staging scenarios under `tools/integration/fixtures/qak247/`:
+
+| fixture | window | frames | qak247 residual at the old 74 clip | now |
+|---|---|---|---|---|
+| `tools/compare/fixtures/aerial-ace-opponent-slaking-player-onix.json` | 79..128 | 50 | 9 / 50 frames, 175 px, rows 74-79 | 50 / 50, 0 px |
+| `tools/compare/fixtures/quick-attack-opponent-raikou-player-onix.json` | 80..112 | 33 | 9 / 33 frames, 106 px, rows 74-76 | 33 / 33, 0 px |
+
+- Probe: `tools/compare/moveBodyProbe.py` (the qak247 scratch `moveProbe.py`, ROOT resolved from the file). Run with the mGBA venv: `PYTHONPATH=/srv/pokebench/vendor/libmgba-py /srv/pokebench/vendor/mgba-venv/bin/python tools/compare/moveBodyProbe.py <scenario> <out.json> <rgb-dir> <Move_START> <Move_END> <moveId>` (the fixtures' `probeArgs` hold the last three).
+- Each fixture records `romFrameSha256` per age (sha256 of the 240x160 RGB frame), and `evidenceSha256` / `secondFreshEvidenceSha256`, the sha256 of the probe output JSON from two independent fresh runs (identical for both species).
+- `tests/animation/quickAttackAerialAceOpponentClip.test.ts` renders every age with `renderBattleResolutionLiveView` and requires 0 mismatched frames. The fixture's `qak247Residual74` block records the pre-fix numbers (the 74 clip would mismatch; no clip gives 0 px); no `src/` change was made and no test re-injects the old clip.
