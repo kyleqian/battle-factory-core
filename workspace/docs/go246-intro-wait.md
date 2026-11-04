@@ -89,7 +89,11 @@ node --experimental-strip-types --no-warnings tools/integration/bso226Run.ts /tm
 The acceptance windows with `--lag 0` on the long-animation windows: **wailmer** (bso226 98@517) and **spinda** (39@475) need no
 dispatch lag any more; the player half is the bso226 named residual (wailmer 7,903 = bso226's lagged value: frame 117 before the
 intro, the in-flight ball 664..702, the ball-open sparkles 719..747; spinda 1,855 = the Spinda spot palette 606..645). wailmer's
-`rest` 850..859 (435 px/frame) is the message clear 6 frames ahead = the scene-independent 6 (shifting the lag split to 850 removes it).
+`rest` 850..859 (435 px/frame) is the "Go! WAILMER!" clear: before the clear followed the hold it was 797..859 (the fixed tick 1742
+blanked the box 63 frames early). With the lag split moved to 850 only 850..853 remain: the ROM clears 6 frames before its menu, the app
+10, because WAILMER's long cry (80) already put its cry-bound ready 10 ticks after `MENU_IDLE_BLANK_START_TICK` (the canonical ONIX route:
+6). That 4-frame offset is pre-existing for every species with cry > 74 in both scenes, unchanged by this step (named, not chased: it would
+move the Scene OFF clear).
 
 Named residuals (unchanged by this step):
 
