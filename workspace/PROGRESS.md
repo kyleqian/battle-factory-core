@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-03 / 04 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud240c / cln239 / aud240d / go246 folded
 
-- **State:** master `127def5d4`+ (src == qak248 fix; the soak / play gates ran on src `710424ca8` = go246 merge). Evidence `.integration/validation/sv-20261103/`.
+- **State:** master clean, src == qak248 fix `127def5d4` (suite + build green on it; the soak / play gates ran on src `710424ca8` = go246 merge). Evidence `.integration/validation/sv-20261103/`.
 - **Folded:** aud240c (S11 step 4c; `docs/aud240c-party-menu-sounds.md`; branch `worker/integration-20261103-213048`): voluntary +
   forced battle party menus emit SE_SELECT on row moves (only when the slot changes), A on a mon, action-window cursor (NoWrap,
   silent at the ends), action-window A (**one** SE: `party_menu.c:2560` passes `APressMuted = TRUE`, supervisor-read; the scout's
@@ -59,7 +59,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Fixed by the supervisor:** qak248 (`127def5d4`): the two live clips are 160 (staged path unchanged). Typecheck 0; Quick Attack /
   Aerial Ace / fast-contact / sceneOn / Agility-clip / later58 tests 64 / 64; supervisor rendered SLAKING / TROPIUS AA vs qak247's
   ROM frames: 0 px (were 175 / 124). Render-only: the soaks above (logic) are unaffected; full suite + build on `127def5d4`:
-  QAK_SUITE_PENDING. No standard trace or census change expected (no hermetic receipt added yet: follow-up).
+  build 0, **1,787 files: 1,742 passed + 44 skipped, 1 failed** = `substituteDollDefenderLive` now finds `prep38-quick-attack-opponent`
+  row 9 exact (its documented 1 px PERSIAN residual was this clip; residual dropped, file 60 / 60). No standard trace or census change expected (no hermetic receipt added yet: follow-up).
 - **Next:** handoff "Next work": aud241 (scout `docs/aud241-scout.md`), cleanup step 5 / 4, bundle hygiene, qak248 receipts (SWELLOW,
   RAIKOU, SCIZOR, SLAKING, METAGROSS staging under `tools/integration/fixtures/qak247/`).
 - **Notes:** no DEFERRED items. No push. Worker refs (merged, kept): integration-20261103-213048 (aud240c), -224443 (cln239),
