@@ -5,7 +5,6 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
-import { APP_STAGES } from "../tools/compare/appTrace.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 
 interface FixtureEvent {
@@ -35,6 +34,12 @@ const key = (e: { frame: number; kind: string; id: number | null; pan: number | 
   id: e.id,
   pan: e.pan,
 });
+
+// appTrace.ts is outside the typechecked tests graph (tsconfig include), so load its stage registry untyped.
+const appTracePath = "../tools/compare/appTrace.ts";
+const { APP_STAGES } = (await import(/* @vite-ignore */ appTracePath)) as {
+  APP_STAGES: Record<string, (state: ReturnType<typeof createInitialState>) => ReturnType<typeof createInitialState>>;
+};
 
 function collectWindow(rom: Fixture, collect = true): { events: SoundEvent[]; state: string } {
   const { appStage } = rom.trace;
