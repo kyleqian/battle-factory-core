@@ -1,0 +1,88 @@
+{
+ "schema": "scene-on-portable-evidence/v1",
+ "oracleProfile": "battle-scene-on",
+ "scenario": "tools/integration/fixtures/qak247/mechanic-quick-attack-opponent-raikou-player-onix.json",
+ "probe": "tools/compare/moveBodyProbe.py",
+ "probeArgs": [
+  "Move_QUICK_ATTACK",
+  "Move_RAGE",
+  "98"
+ ],
+ "pair": "RAIKOU (opponent-front) -> ONIX (player-back); all-QUICK_ATTACK RAIKOU vs Splash ONIX (speed IV 0), level 50 IV31 (qak249)",
+ "orientation": "opponent-to-player",
+ "move": "QUICK_ATTACK",
+ "denseWindow": {
+  "startFrame": 80,
+  "endFrame": 112,
+  "frameCount": 33
+ },
+ "attacker": {
+  "species": "RAIKOU",
+  "geometry": {
+   "side": "opponent"
+  }
+ },
+ "target": {
+  "species": "ONIX",
+  "geometry": {
+   "side": "player"
+  }
+ },
+ "fieldProfile": {
+  "playerHp": 110,
+  "playerMaxHp": 110,
+  "opponentHp": 165,
+  "opponentMaxHp": 165,
+  "playerGender": "male",
+  "opponentGender": "genderless"
+ },
+ "qak247Residual74": {
+  "framesDiffAt74": "9 / 33",
+  "pxAt74": 106,
+  "rowsAt74": "74-76",
+  "pxAt160": 0,
+  "note": "docs/qak247-clip-sweep.md: the pre-qak248 live clip (row 74) left these differences; no clip (160) gives 0 px"
+ },
+ "evidenceSchema": "move-body-evidence/v1",
+ "evidenceSha256": "a9b54b032f21fefa78ea1769d833f773d3d957698cc8878a5577e725ea8e2817",
+ "secondFreshEvidenceSha256": "a9b54b032f21fefa78ea1769d833f773d3d957698cc8878a5577e725ea8e2817",
+ "acceptance": {
+  "status": "exact",
+  "framebufferMatching": 33
+ },
+ "romFrameSha256": [
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "e88fff1c8c1092502cdb9d6aae0156965804f51322aca3f25182cd6029eee600",
+  "6339f582c80f180dd5b6e29976bcb218e670fb0af53a2deddb720e4349ea4273",
+  "ae9bd8fa87f2e4031ec9fbb793df0b9c9bd9b65d3aeecfeb724718e2192c0abd",
+  "ed31fcf88a36cb58ae3c302d1d7fb4d4c6148b01b95ad4db4920ce8cbec468b1",
+  "97ad50fcfd34b058aba32292212ebc0808a5a273c4a85a9705c5e833be8123c9",
+  "e9aba6a4f5f2e8f6bb098479930ac9525356668628fd4a13b18e6134d4759efe",
+  "3e27b0deeea45ef8e7ea0ac39bf8cc66f878e6d3254f1254359205107b7bd0bb",
+  "6ee0bc7c0848564e4a659d0808c40c5bded5e4a12ec135ab6f0175f048233710",
+  "3bd39cf2270c9a4e3cfebfa221491a1ecd887cdff98efa1ee5eebcc659fee67c",
+  "1feff3d491420dbd7f901bbd77bf79244009d5484fb5ef1906130b75fac6b270",
+  "1feff3d491420dbd7f901bbd77bf79244009d5484fb5ef1906130b75fac6b270",
+  "059005f0fecdd425fd5b241df28843dfaed5f65f3383d6628b80aaaf8db827eb",
+  "059005f0fecdd425fd5b241df28843dfaed5f65f3383d6628b80aaaf8db827eb",
+  "596f372b82f1fc2a4c04f9375e985f2e8975c66e41d95c5d8443b195429b08ab",
+  "596f372b82f1fc2a4c04f9375e985f2e8975c66e41d95c5d8443b195429b08ab",
+  "46220c79640b68e7fb639e25aa99f95cb3201b6ccf4ea33c402bff39c32db351",
+  "eddd7f4ebc1a5824d46e4408ff36da16986beafde23c4e16f06c2ff498ba107a",
+  "eddd7f4ebc1a5824d46e4408ff36da16986beafde23c4e16f06c2ff498ba107a",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431",
+  "d378c666cf45302434624b9a7e056401f12708785a52df2e7b09edfaabba9431"
+ ]
+}
