@@ -714,6 +714,7 @@ import {
   beginScreenSoundTick,
   playSelectSe,
   runScheduledScreenSounds,
+  scheduleHealFanfare,
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
@@ -1591,7 +1592,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       nextPostwin.healDismissElapsed === null &&
       newKeys.has("A")
     ) {
+      const healPostwin = nextPostwin;
       nextPostwin = acceptPostwinHealDismiss(nextPostwin);
+      if (healPostwin.healDismissElapsed === null && nextPostwin.healDismissElapsed !== null) scheduleHealFanfare();
     } else if (
       // Walk-up build step A: the brain route's call-scene boxes (phone SE,
       // attendant walk-away/return, 3-page boss message) - each advances on

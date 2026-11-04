@@ -195,3 +195,31 @@ export function scheduleSummaryStepSounds(
     scheduleAfter(SUMMARY_CLOSE_STOP_DELAY, () => closeSummarySounds(context.bgm));
   }
 }
+
+// ---- aud240d: script fanfares and SEs ----
+
+/** include/constants/songs.h numbers of the Factory script sounds. */
+export const SE_SAVE = 55;
+export const SE_POKENAV_CALL = 263;
+export const MUS_HEAL = 368;
+export const MUS_OBTAIN_B_POINTS = 459;
+export const MUS_OBTAIN_SYMBOL = 466;
+/** Frames from a fanfare's start to Task_Fanfare's m4aMPlayContinue(BGM) (oracle-probed, tools/audio/fixtures/heal-window.json). */
+export const FANFARE_CONTINUE_DELAY = 160;
+
+/** PlaySE(se) on the tick being collected. */
+export function playScriptSe(se: number): void {
+  emitSound({ kind: "se", id: se, pan: null });
+}
+
+/** PlayFanfareByFanfareNum: m4aMPlayStop(BGM), the fanfare, then m4aMPlayContinue(BGM) when its task ends. */
+function playFanfare(fanfare: number, bgm: number, continueDelay: number): void {
+  emitSound({ kind: "stop", id: bgm, pan: null, player: "BGM" });
+  emitSound({ kind: "fanfare", id: fanfare, pan: null });
+  scheduleAfter(continueDelay, () => emitSound({ kind: "continue", id: bgm, pan: null, player: "BGM" }));
+}
+
+/** The heal scene's `playfanfare MUS_HEAL` (the postwin heal dismiss), one tick after the accepted A. */
+export function scheduleHealFanfare(): void {
+  scheduleAfter(1, () => playFanfare(MUS_HEAL, BGM_DRAFT, FANFARE_CONTINUE_DELAY));
+}
