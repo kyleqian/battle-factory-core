@@ -14,7 +14,7 @@
  */
 export interface SoundEvent {
   readonly frame: number;
-  readonly kind: "se" | "bgm" | "fanfare" | "cry" | "stop" | "fade" | "duck";
+  readonly kind: "se" | "bgm" | "fanfare" | "cry" | "stop" | "fade" | "duck" | "continue";
   readonly id: number | null;
   readonly pan: number | null;
   /** Cry mode (PlayCry_ByMode), cries only. */

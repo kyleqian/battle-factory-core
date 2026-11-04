@@ -714,6 +714,9 @@ import {
   beginScreenSoundTick,
   playSelectSe,
   runScheduledScreenSounds,
+  scheduleHealFanfare,
+  schedulePostwinRecordYesSave,
+  scheduleTerminalStepSounds,
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
@@ -1200,6 +1203,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
   }
 
   if (factoryTerminal) {
+    const terminalBefore = factoryTerminal;
     factoryTerminal = advanceFactoryTerminalPresentation(
       factoryTerminal,
       {
@@ -1209,6 +1213,7 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         pressedDown: newKeys.has("DOWN"),
       },
     );
+    scheduleTerminalStepSounds(terminalBefore, factoryTerminal);
     const completion = factoryTerminalCompletion(factoryTerminal);
     roundController =
       completion !== null &&
@@ -1591,7 +1596,9 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       nextPostwin.healDismissElapsed === null &&
       newKeys.has("A")
     ) {
+      const healPostwin = nextPostwin;
       nextPostwin = acceptPostwinHealDismiss(nextPostwin);
+      if (healPostwin.healDismissElapsed === null && nextPostwin.healDismissElapsed !== null) scheduleHealFanfare(healPostwin.frontierBrain);
     } else if (
       // Walk-up build step A: the brain route's call-scene boxes (phone SE,
       // attendant walk-away/return, 3-page boss message) - each advances on
@@ -1635,7 +1642,10 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         } else {
           nextPostwin = acceptPostwinQuestionDismiss(nextPostwin);
         }
-        if (nextPostwin !== beforeQuestion) playSelectSe();
+        if (nextPostwin !== beforeQuestion) {
+          playSelectSe();
+          if (nextPostwin.questionYesElapsed !== null && nextPostwin.question?.kind === "record") schedulePostwinRecordYesSave();
+        }
       }
     } else if (
       nextPostwin.question !== null &&

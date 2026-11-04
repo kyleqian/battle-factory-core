@@ -1,0 +1,349 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "lab scratch-postwin-record-up-a-probe.json (Scene OFF; win terminal stage at 4623): PreBattleRoom heal, record question and RECORD-YES SaveBattle, frames 5101-6846",
+ "profile": "battle-scene-off",
+ "frames": 1746,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
+ },
+ "mode": "step",
+ "steps": 60879221,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 54.9,
+ "windowSeconds": 53.5,
+ "events": [
+  {
+   "frame": 5534,
+   "kind": "stop",
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayFanfareByFanfareNum"
+  },
+  {
+   "frame": 5534,
+   "kind": "fanfare",
+   "id": 368,
+   "name": "MUS_HEAL",
+   "pan": null,
+   "via": "PlayFanfareByFanfareNum"
+  },
+  {
+   "frame": 5694,
+   "kind": "continue",
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsFanfareTaskInactive"
+  },
+  {
+   "frame": 6635,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 6640,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 6716,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 6720,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 6740,
+   "kind": "se",
+   "id": 55,
+   "name": "SE_SAVE",
+   "pan": null,
+   "via": "PlaySE"
+  }
+ ],
+ "calls": [
+  {
+   "frame": 5534,
+   "fn": "PlayFanfare",
+   "via": "ScrCmd_playfanfare",
+   "r0": 368,
+   "r1": 256
+  },
+  {
+   "frame": 5534,
+   "fn": "PlayFanfareByFanfareNum",
+   "via": "PlayFanfare",
+   "r0": 4,
+   "r1": 4
+  },
+  {
+   "frame": 5534,
+   "fn": "m4aMPlayStop",
+   "via": "PlayFanfareByFanfareNum",
+   "r0": 50361376,
+   "r1": 4
+  },
+  {
+   "frame": 5534,
+   "fn": "m4aSongNumStart",
+   "via": "PlayFanfareByFanfareNum",
+   "r0": 368,
+   "r1": 160
+  },
+  {
+   "frame": 5694,
+   "fn": "m4aMPlayContinue",
+   "via": "IsFanfareTaskInactive",
+   "r0": 50361376,
+   "r1": 50335566
+  },
+  {
+   "frame": 6635,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 128
+  },
+  {
+   "frame": 6640,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 6716,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 135890471
+  },
+  {
+   "frame": 6720,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 6740,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 55,
+   "r1": 0
+  }
+ ],
+ "from": 5100,
+ "trace": {
+  "route": "generated-orchestrator",
+  "battleScene": null,
+  "appStage": {
+   "id": "win-terminal-window-off",
+   "frame": 4623
+  },
+  "segments": [
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 900,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 700,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 900,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 700,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 900,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 400,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 400,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 520,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 600,
+    "buttons": []
+   },
+   {
+    "frames": 500,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 3,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 74,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 2,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 125,
+    "buttons": []
+   }
+  ]
+ }
+}

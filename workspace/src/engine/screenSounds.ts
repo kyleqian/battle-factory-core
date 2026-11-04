@@ -195,3 +195,103 @@ export function scheduleSummaryStepSounds(
     scheduleAfter(SUMMARY_CLOSE_STOP_DELAY, () => closeSummarySounds(context.bgm));
   }
 }
+
+// ---- aud240d: script fanfares and SEs ----
+
+/** include/constants/songs.h numbers of the Factory script sounds. */
+export const SE_SAVE = 55;
+export const SE_POKENAV_CALL = 263;
+export const MUS_HEAL = 368;
+export const MUS_OBTAIN_B_POINTS = 459;
+export const MUS_OBTAIN_SYMBOL = 466;
+/** Frames from a fanfare's start to Task_Fanfare's m4aMPlayContinue(BGM) (oracle-probed, tools/audio/fixtures/heal-window.json). */
+export const FANFARE_CONTINUE_DELAY = 160;
+
+/** PlaySE(se) on the tick being collected. */
+export function playScriptSe(se: number): void {
+  emitSound({ kind: "se", id: se, pan: null });
+}
+
+/** PlayFanfareByFanfareNum: m4aMPlayStop(BGM), the fanfare, then m4aMPlayContinue(BGM) when its task ends. */
+function playFanfare(fanfare: number, bgm: number, continueDelay: number): void {
+  emitSound({ kind: "stop", id: bgm, pan: null, player: "BGM" });
+  emitSound({ kind: "fanfare", id: fanfare, pan: null });
+  scheduleAfter(continueDelay, () => emitSound({ kind: "continue", id: bgm, pan: null, player: "BGM" }));
+}
+
+/** The heal scene's `playfanfare MUS_HEAL` (the postwin heal dismiss), one tick after the accepted A. */
+export function scheduleHealFanfare(frontierBrain = false): void {
+  scheduleAfter(1, () => playFanfare(MUS_HEAL, BGM_DRAFT, FANFARE_CONTINUE_DELAY));
+  if (frontierBrain) scheduleAfter(1 + POKENAV_CALL_AFTER_HEAL_FANFARE, () => playScriptSe(SE_POKENAV_CALL));
+}
+
+/** Ticks from the heal fanfare start to the Brain branch's `playse SE_POKENAV_CALL` (continue +3 in tools/audio/fixtures/brain-heal-setup-window.json). */
+export const POKENAV_CALL_AFTER_HEAL_FANFARE = 163;
+
+/** Ticks from the terminal's party restore to the script's `playse SE_SAVE` (factory_save, then the SE; tools/audio/fixtures/loss-terminal-window.json and seventh-win-window.json). */
+export const TERMINAL_SAVE_AFTER_RESTORE = 122;
+/** Ticks from the record menu's YES to SaveBattle's `playse SE_SAVE` (same fixture; the postwin record YES is POSTWIN_RECORD_YES_SAVE_DELAY). */
+export const TERMINAL_RECORD_YES_SAVE_DELAY = 19;
+/** Ticks from MSGBOX_GETPOINTS' fanfare start to the BGM continue (the 312-frame counter; tools/audio/fixtures/seventh-win-window.json). */
+export const BP_FANFARE_CONTINUE_DELAY = 313;
+
+/** The slice of a factory terminal presentation the sound diff reads. */
+export interface TerminalSoundView {
+  readonly profile: {
+    readonly outcome: string;
+    readonly statusClearDelayFromSecondRelease?: number;
+    readonly restoreDelayFromExchangeRelease?: number;
+    readonly battlePointMutationDelay?: number;
+  };
+  readonly secondPageReleaseAge?: number | null;
+  readonly firstPageReleaseAge?: number | null;
+  readonly congratsScrollReleaseAge?: number | null;
+  readonly awardScrollReleaseAge?: number | null;
+  readonly awardReleaseAge?: number | null;
+  readonly exchangeReleaseAge?: number | null;
+  readonly recordPromptReleaseAge: number | null;
+  readonly recordMenuCursorChangedAge: number | null;
+  readonly recordChoice: string | null;
+}
+
+const newlySet = (before: number | null | undefined, after: number | null | undefined): boolean =>
+  (before ?? null) === null && (after ?? null) !== null;
+
+/**
+ * Diffs one terminal step. Every accepted A on a paged text box (`\p` / `\l`, TextPrinterWaitWithDownArrow) and on a
+ * menu is SE_SELECT; a MSGBOX_DEFAULT wait (waitbuttonpress) is silent. The script's fanfare and SE_SAVE steps are scheduled.
+ */
+export function scheduleTerminalStepSounds(before: TerminalSoundView, after: TerminalSoundView): void {
+  if (!soundCollecting()) return;
+  if (after.profile.outcome === "loss") {
+    if (newlySet(before.firstPageReleaseAge, after.firstPageReleaseAge)) playSelectSe();
+    if (newlySet(before.secondPageReleaseAge, after.secondPageReleaseAge)) {
+      playSelectSe();
+      scheduleAfter((after.profile.statusClearDelayFromSecondRelease ?? 0) + TERMINAL_SAVE_AFTER_RESTORE, () => playScriptSe(SE_SAVE));
+    }
+  } else {
+    if (newlySet(before.congratsScrollReleaseAge, after.congratsScrollReleaseAge)) playSelectSe();
+    if (newlySet(before.awardScrollReleaseAge, after.awardScrollReleaseAge)) playSelectSe();
+    if (newlySet(before.awardReleaseAge, after.awardReleaseAge)) {
+      scheduleAfter(after.profile.battlePointMutationDelay ?? 1, () => playFanfare(MUS_OBTAIN_B_POINTS, BGM_DRAFT, BP_FANFARE_CONTINUE_DELAY));
+    }
+    if (newlySet(before.exchangeReleaseAge, after.exchangeReleaseAge)) {
+      playSelectSe();
+      scheduleAfter((after.profile.restoreDelayFromExchangeRelease ?? 0) + TERMINAL_SAVE_AFTER_RESTORE, () => playScriptSe(SE_SAVE));
+    }
+  }
+  if (newlySet(before.recordPromptReleaseAge, after.recordPromptReleaseAge)) playSelectSe();
+  if (after.recordMenuCursorChangedAge !== before.recordMenuCursorChangedAge) playSelectSe();
+  if (before.recordChoice === null && after.recordChoice !== null) {
+    playSelectSe();
+    if (after.recordChoice === "yes") scheduleAfter(TERMINAL_RECORD_YES_SAVE_DELAY, () => playScriptSe(SE_SAVE));
+  }
+}
+
+/** Ticks from the postwin record menu's accepted YES to SaveBattle's `playse SE_SAVE` (oracle-probed, tools/audio/fixtures/postwin-record-window.json). */
+export const POSTWIN_RECORD_YES_SAVE_DELAY = 20;
+
+/** The postwin RECORD question's accepted YES. */
+export function schedulePostwinRecordYesSave(): void {
+  scheduleAfter(POSTWIN_RECORD_YES_SAVE_DELAY, () => playScriptSe(SE_SAVE));
+}
