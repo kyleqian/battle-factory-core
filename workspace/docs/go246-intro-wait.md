@@ -129,4 +129,37 @@ Tested code commit `d34e3b650` (tree `ab0720d59231427d98bc1cdb327cc41733d2cb58`)
 
 ## 7. Census
 
-See below (filled in from the run).
+`tools/integration/lsd194Census.sh` (`LSD194_CENSUS_JOBS=3 LSD194_SPLIT=4`), seeds 0..999, both scenes, tree `d34e3b650`, vs the baseline
+`.integration/validation/sv-20261102/vis243a-evidence/census-final/{on,off}-dac9cd2fe` through `rst197CensusDelta.py`:
+
+| scene | battles | commands | identical battles | bad |
+|---|---|---|---|---|
+| ON | 1,000 | 322,634 | **1,000** | **0** |
+| OFF | 1,000 | 317,269 | **1,000** | **0** |
+
+Events digests, errors (3 per scene, the same as the baseline), command type sequences and every command field equal: gameplay outcomes,
+RNG draws (the frontier battle RNG is drawn on demand, so a longer intro draws nothing) and battle results are unchanged. The census rows
+start at the first post-intro command, so the intro length itself is not a census field. Coverage of the new holds on the same 1,000
+Scene ON census battles (intro state only, `/tmp/go246/holds.ts`, copied to the evidence dir): opponent hold on **803** battles (sum 32,463
+frames, max 147), player hold on **617** (sum 21,478, max 112), either on **918**; Scene OFF 0 by construction.
+
+## 8. Gates summary
+
+Tested code commit `d34e3b650` (tree `ab0720d59231427d98bc1cdb327cc41733d2cb58`); later commits change tests / fixtures / docs only (the
+POLIWHIRL hold assertion and a `!` in the new test).
+
+* `npm run typecheck`: exit 0. `npm run build` (tsc -b + vite): exit 0 on the final tree.
+* `compare:differential` vs `4b59eed6c`: PASS, 211 traces, 38,532 / 38,532 byte-identical (section 6).
+* Census: 0 bad, 1,000 / 1,000 identical in both scenes (section 7).
+* Tests run (all pass): `go246IntroWait` (5), `bso226BattleStartIntroSendOuts`, `factoryBattleStartIntro`, `factoryBattleStartIntroAckAlignment`,
+  `factoryRoundBattleOrchestrator`, `factoryRoundIntroGeneralization`, `plr162PlayerForcedSendIn`, `presentationRngSession`, `presentationRng`,
+  `rsl141OrdinaryRowRest`, `wth236WeatherContinues`, `contain209GameplayThrow`, `contain209SoakContained`, `randomRoundSoakScene`,
+  `randomRoundSoakSceneRenderCrash`, `goalPlay`, `factoryWholeBattle`, `factoryBattleStart`, `newChallengeFromLobby`, `retireYesLobby`,
+  `aud240aScreenSounds`, `pfr192PlayerFaintSendInClock`, `ont193SceneOnTails`, `lsd194PrintFloorAndDrain`, `chg161ChargeTurnPrint`,
+  `endeavorBattleMovePowerRegister`, `factoryBattleScriptLockedMoveFullTurn`, `factoryLibrary`, `gate6EntryItemInteractions`,
+  `lsd198LeechSeedDrainAnimation`, `off121StatusCommand`, `pmo239PartyOrderBattle`, `sa125StatusAnimationCommand`, `sag130StatusSeGate`,
+  `scf117StatsChangeFinish`, `sub183SubstituteTurnTiming`, `substituteDollAdapterDecline`, `substituteDollFieldState`, `trn178ActionTransition`,
+  `fix122AuditDefects`, `issue56ActionMenuHandoffFrame`, `issue56ParticleStall`, `factoryBrainRoundShape`, `alloc50/52StatusAllocator`,
+  `aud56GeneralAnimationAllocator`, `livePaletteStatusCursor`, `cryDurationsExtraction`, `off148SceneOffPauses`, `offs152SceneOffForcedSwitch`,
+  `olnd113SceneOffPauses`, `sub157SceneOffSubstitute`, `vis243aVoluntarySendIn`, `sendInTail`, `snd182SceneOnForcedPlayerSendIn`;
+  `npm run test:smoke` 448 / 448. **No pin re-pinned.** The full `npm test` is the supervisor's (not run here).

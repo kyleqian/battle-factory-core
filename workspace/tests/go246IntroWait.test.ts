@@ -56,7 +56,7 @@ describe("go246: ROM-fitted intro holds", () => {
     for (const [tag, lead] of [["yoshi", "GRIMER"], ["spoink", "GRIMER"], ["aron", "GRIMER"], ["koffing", "KOFFING"], ["spinda", "SPINDA"], ["onix", "ONIX"], ["wailmer", "WAILMER"]] as const) {
       const w = byTag.get(tag)!;
       const hold = generatedIntroPlayerAnimHold(species[lead]!, w.playerPersonalities[0]!, cry[lead]!);
-      expect(hold, tag).toBe(w.menuLagAfterOpponentHold - 6);
+      expect(hold, tag).toBe(w.menuLagAfterOpponentHold! - 6);
       expect(w.menuLagAfter, tag).toBe(6);
     }
     for (const w of windows) if (w.sceneOffMenuLag !== null) expect(w.sceneOffMenuLag, w.tag).toBe(6);
