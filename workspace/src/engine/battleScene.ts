@@ -844,6 +844,8 @@ import {
   MID_BATTLE_SWITCH_OUT_SCALE_START,
   generatedBattleStartOpponentAnimAt,
   generatedBattleStartPlayerAnimAt,
+  generatedIntroOpponentAnimHold,
+  generatedIntroPlayerAnimHold,
   type MidBattleSwitchInFrontAnim,
   type MidBattleSwitchInView,
   type MidBattleSwitchOutView,
@@ -5134,8 +5136,12 @@ function generatedPlayerSpeciesId(state: FactoryBattleStartIntroState): number {
 }
 
 function generatedPlayerDispatchDelay(state: FactoryBattleStartIntroState): number {
-  return GENERATED_PLAYER_DISPATCH_BASELINE_DELAY
+  const cryDelay = GENERATED_PLAYER_DISPATCH_BASELINE_DELAY
     + (cryDurationTicks(generatedOpponentSpeciesId(state)) - GROVYLE_CRY_DURATION_TICKS);
+  // go246: Scene ON also waits for the opponent's front animation (`generatedIntroOpponentAnimHold`).
+  return state.sceneOn
+    ? cryDelay + generatedIntroOpponentAnimHold(generatedOpponentSpeciesId(state), cryDelay)
+    : cryDelay;
 }
 
 /**
@@ -5282,6 +5288,14 @@ const MEASURED_SILVER_BRAIN_REVEAL_READY_LAG_OFFSET = 9;
 const MEASURED_GOLD_BRAIN_REVEAL_READY_LAG_OFFSET = 7;
 
 function generatedPlayerReadyLag(state: FactoryBattleStartIntroState): number {
+  // go246: Scene ON also waits for the player's back animation (`generatedIntroPlayerAnimHold`).
+  if (!state.sceneOn) return generatedPlayerCryReadyLag(state);
+  const player = state.command.parties.player[state.command.activePartyIndexes.player];
+  return generatedPlayerCryReadyLag(state)
+    + generatedIntroPlayerAnimHold(player.species, player.personality, cryDurationTicks(player.species));
+}
+
+function generatedPlayerCryReadyLag(state: FactoryBattleStartIntroState): number {
   if (state.isCanonicalAnchorIntro) return GENERATED_PLAYER_READY_LAG;
   const speciesFormula = generatedPlayerReadyLagSpeciesFormula(state);
   if (state.isSilverBrainReveal) {

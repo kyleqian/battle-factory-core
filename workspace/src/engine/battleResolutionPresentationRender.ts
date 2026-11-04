@@ -31,7 +31,8 @@ import type {
   BattleResolutionPresentationState,
   BattleResolutionSegment,
 } from "./battleResolutionPresentation.ts";
-import { playerFaintReplacementSendOutTiming } from "./switchInTail.ts";
+import { backAnimWaitTick, playerFaintReplacementSendOutTiming, sendInNature } from "./switchInTail.ts";
+import { SEND_IN_TAIL_ANIM_IDS, SEND_IN_TAIL_FRONT_ANIM_DURATION, SEND_IN_TAIL_SPECIES } from "../data/sendInTail.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import {
   BATTLE_SCRIPT_STATUS1_BURN,
@@ -603,6 +604,39 @@ export function generatedBattleStartPlayerAnimAt(species: string, personality: n
     backAnimNatureName(personality),
     local + MID_BATTLE_SWITCH_MON_VISIBLE_ELAPSED + 1 + GENERATED_INTRO_PLAYER_ANIM_ELAPSED_SHIFT,
   );
+}
+
+/**
+ * go246 (docs/go246-intro-wait.md): the battle-start intro waits for the send-out animations like a mid-battle send-in. The opponent's
+ * `Intro_TryShinyAnimShowHealthbox` (battle_controller_opponent.c:292-383) leaves only when the cry has ended (`bgmRestored`) AND the
+ * battler sprite callback is `SpriteCallbackDummy` (the front animation ended); the player's "Go! <mon>!" dispatch follows. The app's
+ * dispatch delay was the cry bound alone; Scene ON adds this hold = max(0, front-animation bound - cry-bound delay). The front-animation
+ * bound uses the species tail's two terms (`src/data/sendInTail.ts`, the terms the mid-battle slide waits on): the function animation
+ * `A + delay - 1` + 44 (SABLEYE / RATICATE / BUTTERFREE / SPOINK windows) and the sprite frame animation `S` + 43 (ELEKID / ARON),
+ * ROM fits on dense battle-start windows. Scene OFF skips the front animation (`SKIP_FRONT_ANIM`): no hold.
+ */
+export const GENERATED_INTRO_OPPONENT_FUNCTION_ANIM_TO_DISPATCH = 44;
+export const GENERATED_INTRO_OPPONENT_FRAME_ANIM_TO_DISPATCH = 43;
+
+export function generatedIntroOpponentAnimHold(species: number, cryDispatchDelay: number): number {
+  const row = SEND_IN_TAIL_SPECIES[species];
+  if (row === undefined) return 0;
+  const functionAnim = (SEND_IN_TAIL_FRONT_ANIM_DURATION[SEND_IN_TAIL_ANIM_IDS[row[1]]!] ?? 0) + (row[2] > 0 ? row[2] - 1 : 0);
+  const bound = Math.max(row[0] + GENERATED_INTRO_OPPONENT_FRAME_ANIM_TO_DISPATCH, functionAnim + GENERATED_INTRO_OPPONENT_FUNCTION_ANIM_TO_DISPATCH);
+  return Math.max(0, bound - cryDispatchDelay);
+}
+
+/**
+ * go246: the player's `Intro_TryShinyAnimShowHealthbox` (battle_controller_player.c:979-1063) likewise waits for the cry and the back
+ * animation (`BattleAnimateBackSprite`'s `SpriteCallbackDummy_2` -> `SpriteCallbackDummy` when the animation task ends) before the
+ * first action menu. The app's ready lag was the cry bound alone; Scene ON adds max(0, T_back + 5 - cry) (`backAnimWaitTick`; ROM fit
+ * on GRIMER / KOFFING / WAILMER battle-start windows, 0 for the cry-bound SPINDA / ONIX). Scene OFF: no back animation, no hold.
+ */
+export const GENERATED_INTRO_PLAYER_BACK_ANIM_TO_READY = 5;
+
+export function generatedIntroPlayerAnimHold(species: number, personality: number, cryTicks: number): number {
+  const back = backAnimWaitTick(species, sendInNature(personality));
+  return back === null ? 0 : Math.max(0, back + GENERATED_INTRO_PLAYER_BACK_ANIM_TO_READY - cryTicks);
 }
 
 /**
