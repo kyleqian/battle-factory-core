@@ -3,6 +3,7 @@
 // no sink, and the sink only receives the screen SE_SELECTs and (aud241a) the battle start's sounds.
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
+import timingData from "../src/data/gen/anim-sound-timing.json" with { type: "json" };
 import { type SoundEvent, type SoundSink } from "../src/audio/soundEvents.ts";
 import { render } from "../src/engine/core.ts";
 import type { BattleScene, TraceSegment } from "../src/factoryContract.ts";
@@ -41,13 +42,15 @@ function play(scene: BattleScene, seed: number, policy: SoakPolicy, frames: numb
 
 // aud240a: screens emit SE_SELECT (kind se, id 5, pan null); aud241a: the battle start adds the battle BGM, the ball tray,
 // the ball opens and the send-out cries with their BGM duck; aud241b adds the effectiveness SEs (12-14), SE_FAINT (16) and
-// SE_LOW_HEALTH (90). Nothing else is emitted in these runs yet.
+// SE_LOW_HEALTH (90); aud242a adds the Scene ON move-animation script SEs (the ids of anim-sound-timing.json). Nothing else is emitted yet.
 const BATTLE_START_SE_IDS = new Set([5, 15, 114, 115, 116, 12, 13, 14, 16, 90]);
-function expectScreenSoundsOnly(events: readonly SoundEvent[], frames: number): void {
+const MOVE_ANIM_SE_IDS = new Set((timingData as { variants: { id: number }[][] }).variants.flat().map((op) => op.id));
+function expectScreenSoundsOnly(events: readonly SoundEvent[], frames: number, moveAnimations: boolean): void {
   let last = 0;
   for (const event of events) {
-    if (event.kind === "se") expect(BATTLE_START_SE_IDS.has(event.id!), JSON.stringify(event)).toBe(true);
-    else expect(["stop", "bgm", "cry", "duck"], JSON.stringify(event)).toContain(event.kind);
+    if (event.kind === "se") {
+      expect(BATTLE_START_SE_IDS.has(event.id!) || (moveAnimations && MOVE_ANIM_SE_IDS.has(event.id!)), JSON.stringify(event)).toBe(true);
+    } else expect(["stop", "bgm", "cry", "duck"], JSON.stringify(event)).toContain(event.kind);
     expect(event.frame).toBeGreaterThanOrEqual(last);
     expect(event.frame).toBeLessThanOrEqual(frames);
     last = event.frame;
@@ -70,7 +73,7 @@ describe("sound sink neutrality (aud239)", () => {
       expect(wired.battles).toEqual(bare.battles);
       expect(wired.trace).toEqual(bare.trace);
       expect(wired.finalFrame).toBe(bare.finalFrame);
-      expectScreenSoundsOnly(sink.events, frames);
+      expectScreenSoundsOnly(sink.events, frames, scene === "on");
       // The session never put the sink into anything it exports.
       expect(JSON.stringify(wired.trace)).not.toContain("sound");
     });
