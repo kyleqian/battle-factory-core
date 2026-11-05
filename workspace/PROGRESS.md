@@ -44,6 +44,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Fixed by the supervisor (`bc74a02d3`):** the wind-down suite failed only `battlesceneSplitEligibility` (function-kind eligible
   pool 1, pinned 0): aud241a's pure `ballTraySoundTicks` in `battleScene.ts`. Moved to `battleStartSounds.ts` (the four tray tables
   exported). Split / aud241a / aud241b / sink / battleScene tests 361 / 361; typecheck, build, build:lib 0; test:gate 364 / 364.
+- **Cleanup step 4, first half (supervisor):** `git subtree split -P workspace/core-rs -b core-rs-archive` -> local branch
+  `core-rs-archive` `26ce8d051` (194 commits; tree `f35070e69` == `master:workspace/core-rs`). No tree change. The user pushes it
+  to its own repo; the `git rm -r core-rs` half is next.
+- **Scouts saved (read-only, unverified):** `docs/obr248-scout.md` (handoff 4b(e): ROM bar slides in 20 f, holds 100 f to the
+  first glyph, fades 16 f, one SE_BALL_TRAY_ENTER, mirrored ball order; ours static 26 f; fix adds ~99 app frames per opponent
+  replacement, kernel digest unchanged), `docs/aud241c-scout.md` (battle-end sounds map).
+- **Folded:** aud241c-fx (evidence only; `docs/aud241c-fixtures.md`): six step-mode ROM fixtures
+  `tools/audio/fixtures/aud241c-{win,loss,brain}-{on,off}-window.json` + labs `tools/battle-lab/aud241c-*`. Win: BGM 412 at
+  dismiss+22, fade P+6, BGM 469 P+53, SE_EXIT P+79, heal P+201; loss: fade 476 P+6, same tail; Brain: 354, 469 at P+52, no
+  SE_EXIT, fanfare 466 P+219; ON == OFF from the dismiss on. Supervisor: audioProbeFixtures + testGateSelection 306 / 306.
 - **Wind-down gates** (`sv-20261104/gates-final/`, src `fef00b6c5` = final src minus the move above): typecheck 0; build 0;
   **full suite 1,792 files: 1,747 passed + 44 skipped, 1 failed (the ratchet above)**, 14,685 tests passed; play:random 4 min /
   scene: ON 23 battles / 9 swaps, OFF 35 / 16 (max streak 7); `--lobby-new-challenge` 2 min / scene: 0 page errors / overlays /
