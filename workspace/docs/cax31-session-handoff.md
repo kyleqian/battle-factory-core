@@ -35,7 +35,11 @@ kept and is long-tail.
   faint cry / low-HP (`src/engine/battleHitSounds.ts`, `docs/aud241b-battle-sounds.md`, timing deltas ISSUES #197). Both emit
   from `tick()` in `src/engine/core.ts` behind `soundCollecting()`. Lab staging for sound windows: `tools/compare/appTrace.ts`
   stages (`midBattleSwitchStage` options bag) + `tools/battle-lab/aud241*`.
-- **Cleanup:** steps 1, 2, 3 (cln239: Claude-only launchers, `docs/cln239-launchers.md`) and 6 are done.
+- **Cleanup:** steps 1, 2, 3 (cln239: Claude-only launchers, `docs/cln239-launchers.md`) and 6 are done. Step 5 first half
+  DONE (cln240: `npm run test:gate`, 364 files, ~217 s here, `docs/cln240-test-gate.md`; workers run it instead of test:smoke as
+  their fast gate, plus every file importing what they change). Step 4 first half DONE: local branch `core-rs-archive`
+  (`26ce8d051`, 194 commits, tree == `master:workspace/core-rs` `f35070e69`) made by `git subtree split`; the user pushes it to its own
+  repo. Next half: `git rm -r core-rs` + its adapter / tests / wasm users, full suite + build.
 - **User reports:** 4b(b) also covers Quick Attack / Aerial Ace now (qak248 / qak249). 4b(a) fully fixed (vis243a mid-battle send-in; go246 battle-start "Go!" intro waits for both species
   animations in Scene ON, `docs/go246-intro-wait.md`; Kyle's SPOINK was cut short by 137 frames, now exact); 4b(b) Agility
   clip fixed (agi245); 4b(c) rate check permanent (`tests/rng244OutcomeRates.test.ts`).
@@ -53,7 +57,8 @@ never brief those here. One worker at a time; each run folds the next audio step
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
    proposed split: `docs/aud241-scout.md` (read-only worker report, unverified). aud241a / aud241b DONE; next **aud241c**
    (victory BGM 412 / Brain 354, `BattleStopLowHpSound` at the win, end fade speed 5, battle return fade P+6 / BGM 469 P+53 /
-   SE_EXIT P+79, loss-terminal fade 476). Then aud242 (move-animation SEs).
+   SE_EXIT P+79, loss-terminal fade 476); ROM map `docs/aud241c-scout.md` (unverified) and step-mode fixtures from the
+   2026-11-05 evidence step (`docs/aud241c-fixtures.md` if it landed). Then aud242 (move-animation SEs).
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) `npm run test:gate` <= 5 min for workers and drop frame-pin tests the census supersedes, full suite nightly (the full
    suite is ~75 min here and lost one fork beside a worker twice on 2026-11-03: rerun the unreported file);
@@ -83,7 +88,10 @@ never brief those here. One worker at a time; each run folds the next audio step
        "skip player side" (`battle_controllers.c:1509`). Likely class: the faint-replacement path reuses an intro / send-out
        presentation (white fade + player bar) instead of the reshow. ROM lab:
        `tools/battle-lab/playerfaint-slot2-sunnyday.json` (pfr185).
-     - **(e) Opponent replacement ball bar pops in and out.** After "Foe PARASECT fainted!" the 6-ball bar appears whole in one
+     - **(e) NEXT (scouted 2026-11-05, `docs/obr248-scout.md`, unverified: ROM slides in over 20 frames, holds 100 frames to the
+       first glyph, BLDALPHA-fades out over 16, one SE_BALL_TRAY_ENTER; ours is static for 26 frames; balls must be mirrored
+       `states[5-index]`; presentation-only but adds ~99 app frames per opponent replacement, so frame-anchored pins move, kernel
+       digest unchanged; new code must stay out of `battleScene.ts`, split-eligibility ratchet).** Opponent replacement ball bar pops in and out. After "Foe PARASECT fainted!" the 6-ball bar appears whole in one
        frame (13365..13367), stays about 30 frames, and vanishes in one frame (13394..13397) before "BEAUTY LIZBETH sent out MINUN!"
        starts. In the ROM, `BattleScript_FaintedMonSendOutNew` (`battle_scripts_1.s:2883`) runs
        `drawpartystatussummary > ... > printstring STRINGID_SWITCHINMON > hidepartystatussummary`. The flags are 1, so the
