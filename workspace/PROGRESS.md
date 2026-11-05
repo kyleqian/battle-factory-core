@@ -5,9 +5,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-04 / 05 — CAX31 daily run (supervisor, Opus 5.5): in progress
+## 2026-11-04 / 05 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud241a / aud241b / frs247 / cln240 / aud241c-fx / aud241c folded
 
-- **State:** master `bc74a02d3`+ (aud241a, aud241b, frs247, cln240 folded). Tree clean. Evidence `.integration/validation/sv-20261104/`. One worker at a time.
+- **State:** master `f3440331d`+ (final src == aud241c merge). Tree clean, no active workers. Evidence `.integration/validation/sv-20261104/`.
+  The long gates below ran on src `fef00b6c5`; the final src adds only the ratchet move `bc74a02d3` and aud241c (write-only sound),
+  covered by the final full suite + build in `sv-20261104/final-suite/` (FINAL_SUITE).
 - **Folded:** aud241a (S11 step 5, first slice; `docs/aud241a-battle-start-sounds.md`; branch `worker/integration-20261104-213051`):
   `src/engine/battleStartSounds.ts` emits from `tick()` (guarded by `soundCollecting()`) the battle BGM (476, Brain 471) with
   `m4aMPlayAllStop`, the ball tray ENTER / BALL / EXIT SEs (per-side pans, SE player field), SE_BALL_OPEN and the send-out cries
@@ -54,12 +56,27 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `tools/audio/fixtures/aud241c-{win,loss,brain}-{on,off}-window.json` + labs `tools/battle-lab/aud241c-*`. Win: BGM 412 at
   dismiss+22, fade P+6, BGM 469 P+53, SE_EXIT P+79, heal P+201; loss: fade 476 P+6, same tail; Brain: 354, 469 at P+52, no
   SE_EXIT, fanfare 466 P+219; ON == OFF from the dismiss on. Supervisor: audioProbeFixtures + testGateSelection 306 / 306.
+- **Folded:** aud241c (S11 step 5, last slice; `docs/aud241c-battle-end-sounds.md`; branch `worker/integration-20261105-050415`):
+  `src/engine/battleEndSounds.ts` (tick() hook): SE_SELECT on each "fainted!" / terminal box dismiss, win victory BGM 412 (Brain 354)
+  at dismiss+22 with the low-HP stop if playing, end fade P+6, BGM 469 P+53 (Brain P+52), SE_EXIT P+79 (none for Brain); loss
+  SE_BALL_OPEN dismiss+24, fade 476 P+6, same tail. All six aud241c ROM windows: every delta 0. Generated-orchestrator route only
+  (canonical battleScene route not wired). Gaps in the doc: our "fainted!" box is dismissable at F+30 vs ROM F+43 / F+46; the
+  Explosion self-faint +18 victory gap; Brain loss unmeasured. Worker: typecheck, build, build:lib 0; test:gate 364 / 364; 66
+  importing files 1,106 tests; differential 26 traces 9,615 identical. **S11 step 5 (aud241) is complete.**
 - **Wind-down gates** (`sv-20261104/gates-final/`, src `fef00b6c5` = final src minus the move above): typecheck 0; build 0;
   **full suite 1,792 files: 1,747 passed + 44 skipped, 1 failed (the ratchet above)**, 14,685 tests passed; play:random 4 min /
   scene: ON 23 battles / 9 swaps, OFF 35 / 16 (max streak 7); `--lobby-new-challenge` 2 min / scene: 0 page errors / overlays /
   contained / divergences; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON
   **20 / 20**, Scene OFF **20 / 20** (all `budget`); Scene ON full vary-rng 0:16 `--render-every 8` **16 / 16** (all `budget`); Scene ON
   winning first-round 0:6 `--render-every 1` **6 / 6**. The 0:60 gates were not run (hours each here).
+
+- **Next:** handoff "Next work": aud242 (move-animation SEs) is the next audio step; 4b(e) opponent replacement ball bar
+  (`docs/obr248-scout.md`); cleanup 4 second half (`git rm -r core-rs`); ISSUES #196 / #197.
+- **Housekeeping:** evidence `sv-20261101` deleted (older than the last three runs); ~25 GB free. No R2 remote on this host.
+- **Notes:** no DEFERRED items. No push. Worker branches (all merged, deleted; commits reachable from master):
+  integration-20261104-213051 (aud241a), -231007 (aud241b), -20261105-005010 (frs247), side-20261105-022936 (cln240),
+  integration-20261105-045548 (aud241c-fx), -050415 (aud241c); two read-only scouts (no commits). New local branch
+  `core-rs-archive` (keep; for the user to push to its own repo).
 
 ---
 

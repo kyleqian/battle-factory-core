@@ -30,7 +30,8 @@ kept and is long-tail.
   PreBattleRoom / BattleRoom scripts, heal + BP fanfares, `docs/aud240d-script-sounds.md`). Emitters live in
   `src/engine/screenSounds.ts`. Prove windows in probe **step mode** (the hybrid `--fast` mode drops no-op SEs).
   aud240d left unmeasured: MUS_OBTAIN_SYMBOL, PauseChallenge SE_SAVE, the Brain SE_POKENAV_CALL absolute frame.
-  **Step 5 (battle controller), 2 of 3 slices DONE (2026-11-05):** aud241a battle start / send-outs
+  **Step 5 (battle controller) DONE (2026-11-05):** aud241c battle end / return (`src/engine/battleEndSounds.ts`,
+  `docs/aud241c-battle-end-sounds.md`, ROM fixtures `docs/aud241c-fixtures.md`; generated route only), aud241a battle start / send-outs
   (`src/engine/battleStartSounds.ts`, `docs/aud241a-battle-start-sounds.md`, ISSUES #196) and aud241b effectiveness / SE_FAINT /
   faint cry / low-HP (`src/engine/battleHitSounds.ts`, `docs/aud241b-battle-sounds.md`, timing deltas ISSUES #197). Both emit
   from `tick()` in `src/engine/core.ts` behind `soundCollecting()`. Lab staging for sound windows: `tools/compare/appTrace.ts`
@@ -55,10 +56,9 @@ never brief those here. One worker at a time; each run folds the next audio step
 1. **Audio (S11)** — the main program for several runs: `docs/s11-audio-design.md` section 7. Next: **aud241** battle
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
-   proposed split: `docs/aud241-scout.md` (read-only worker report, unverified). aud241a / aud241b DONE; next **aud241c**
-   (victory BGM 412 / Brain 354, `BattleStopLowHpSound` at the win, end fade speed 5, battle return fade P+6 / BGM 469 P+53 /
-   SE_EXIT P+79, loss-terminal fade 476); ROM map `docs/aud241c-scout.md` (unverified) and step-mode fixtures from the
-   2026-11-05 evidence step (`docs/aud241c-fixtures.md` if it landed). Then aud242 (move-animation SEs).
+   proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05.** Next: **aud242** (move-animation SEs, design
+   section 7 step 6: generic emitter from the decoded anim scripts through each timeline's age map; Scene ON only), then aud243
+   (census column + ROM replays). Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) `npm run test:gate` <= 5 min for workers and drop frame-pin tests the census supersedes, full suite nightly (the full
    suite is ~75 min here and lost one fork beside a worker twice on 2026-11-03: rerun the unreported file);
