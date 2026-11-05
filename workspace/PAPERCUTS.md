@@ -8,6 +8,21 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Audio-window and verification friction, 2026-11-04 / 05 run
+
+- **What / cost:** (1) No repo tool replays a trace / lab stage and prints our sound events next to a probe fixture; aud241a kept
+  replay / compare scratch scripts in `/tmp` (~10 min). (2) `midBattleSwitchStage` in `tools/compare/appTrace.ts` was a
+  fixed-argument stage builder; aud241b added an options bag to stage levels / moves / scene (a shared stage-spec type would help).
+  (3) Each vitest run spends ~80 s on transform + ~150 s collect, so many small runs add up; batch the touched files in one run
+  (~25 min, aud241a). Bare `npx vitest` OOMs on many files without `NODE_OPTIONS=--max-old-space-size=8192` (cln240, again).
+  (4) `npm run typecheck` (~4 min) and the 211-trace differential (~20 min) exceed the 2-min default / 10-min max tool timeout;
+  workers split the differential into seven batches (frs247). Run them under `nohup` with an exit file.
+  (5) cln237 deleted the pfr probes that frs247 needed; restored from git history (~5 min). (6) A worker removing its worktree
+  drops evidence written there; frs247 put its census in `/tmp/frs` (copied to the run's evidence folder by the supervisor).
+- **Hits:** 1 session, ~1 h across four workers.
+- **Fix:** a `tools/audio/replaySoundWindow.ts` (stage or trace -> our SoundEvents vs a fixture, frame deltas); a typed stage
+  spec for `appTrace.ts`; a `compare:differential --parallel` / resumable mode.
+
 ## CAX31 (16 GiB ARM) host friction, 2026-10-14
 
 - **What / cost:** (1) Gate wall-clock: vanilla 0:20 soak ~45 min, winning / winning-swap 0:60 ~7.5 min per seed serial (~7.5 h
