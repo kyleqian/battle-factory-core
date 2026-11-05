@@ -89,8 +89,8 @@ Likely superseded (a test whose assertions are "production frames on seeds N equ
 
 | File (tests, reference ms) | What it pins | Superseding evidence |
 |---|---|---|
-| `sc106StatsChangeCommand` (11; 4 failed in the reference run, 41 s) | Scene ON `stats-change` command, 76 / 90 frames per path on named seeds, "base frames pinned on 52c181d54" | Census command histogram by (type, changed fields) in `rst197CensusDelta.py`; already failing in the reference run, so it is not protecting anything today |
-| `sgl138SeGateLive` (6; 4 failed, 12 s) | SE-gate rows 44 / 62 on census seeds 0, 19, 808, 9, both scenes | Same census routes by construction ("proof through production on census routes"); also failing in the reference run |
+| `sc106StatsChangeCommand` (11; 4 failed in the reference run, 41 s) | Scene ON `stats-change` command, 76 / 90 frames per path on named seeds, "base frames pinned on 52c181d54" | Census command histogram by (type, changed fields) in `rst197CensusDelta.py`; failed in the reference run only because go246's intro hold moved its pins; re-pinned by the supervisor in `f40d5cea6` and green since |
+| `sgl138SeGateLive` (6; 4 failed, 12 s) | SE-gate rows 44 / 62 on census seeds 0, 19, 808, 9, both scenes | Same census routes by construction ("proof through production on census routes"); its reference-run failure was the same go246 re-pin (`f40d5cea6`), green since |
 | `sa125StatusAnimationCommand` (11, 42 s, 27 seed mentions) | Scene ON `status-animation` command frames per animation on named seeds | Census command-type / frame-field delta |
 | `wth236WeatherContinues` (5, 8 s, 14 seed mentions) | Weather continues general-animation command and its frames | Census command-type delta (weather side is among the "drawn" items in ROADMAP) |
 | `lsd194PrintFloorAndDrain` (12, 0.7 s, 16 seed mentions) | Leech Seed drain row layout and print floor, both scenes | `rst197CensusDelta.py` exists for this exact change (two trees both carrying the drain, no inserted commands) |
@@ -112,3 +112,8 @@ frame pins on a route; they are candidates for speeding up (shared fixtures), no
 
 Time at stake in the table above: roughly 150 s of the 4,866 s summed test time, so deleting these alone does not reach
 the "full suite under 15 minutes" target. The slow exact-proof files above are where that time is.
+
+
+Supervisor note (2026-11-05): `sc106StatsChangeCommand` / `sgl138SeGateLive` are green on master (re-pinned in `f40d5cea6` after the
+reference run); they stay out of the gate only because the durations file records them as failed. Supervisor rerun of the gate on
+`21e4f7aac`: 364 / 364 files, 2,928 tests, 217 s wall.
