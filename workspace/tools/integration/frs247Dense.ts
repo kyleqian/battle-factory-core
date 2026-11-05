@@ -6,20 +6,11 @@
 // (x < 120, y < 48 and x >= 120, y < 64) and the party-menu phases (before the battle field returns) are not compared.
 //   node --experimental-strip-types --no-warnings tools/integration/frs247Dense.ts <rom-dir> <id> <scene on|off> <out.json> [--delta=N] [--dump=e,e,..]
 import { readFileSync, writeFileSync } from "node:fs";
-import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
-import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../../src/engine/battleScriptSourceConstants.ts";
-import { renderBattleResolutionForcedPartySelect, renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
-import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
-import { BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES, playerFaintReplacementSendOutTimingOfSegment } from "../../src/engine/battleResolutionPresentationRender.ts";
-import { SWITCH_IN_WAITSTATE_HOLD_FRAMES, switchInTiming } from "../../src/engine/battleResolutionPresentation.ts";
-import { calculateHpStat } from "../../src/engine/stats.ts";
-import * as party from "../../src/engine/partySelect.ts";
+import { frs247ProductionReturn } from "./frs247Production.ts";
 
 const [romDir, id, scene, outPath] = process.argv.slice(2).filter((a) => !a.startsWith("--"));
 const opt = (name: string) => process.argv.find((x) => x.startsWith(`--${name}=`))?.split("=")[1] ?? null;
 const sceneOn = scene === "on";
-const stats = (sid: number) => speciesStats.species.find((s) => s.id === sid)!;
-const name = (sid: number) => stats(sid).name.replace(/^SPECIES_/, "");
 const scenario = JSON.parse(readFileSync(`${romDir}/${id}-${scene}.scenario.json`, "utf8"));
 const probe = JSON.parse(readFileSync(`${romDir}/${id}-${scene}.json`, "utf8"));
 const faintNo = Number(opt("faint") ?? 1);
@@ -30,52 +21,8 @@ const romFrame = (abs: number): Uint8Array | null => {
   return i < 0 || (i + 1) * FRAME > raw.length ? null : raw.subarray(i * FRAME, (i + 1) * FRAME);
 };
 
-const parties = scenario.overrides.parties;
-const mk = (b: 0 | 1, m: any, partyIndex: number) => {
-  const maxHP = calculateHpStat(stats(m.species).baseHp, m.ivs.hp, m.evs.hp, m.level);
-  return Object.freeze({
-    species: m.species as number, name: name(m.species), side: b === 0 ? "player" as const : "trainer" as const, battler: b,
-    partyIndex, level: m.level as number, hp: maxHP, maxHP, gender: m.gender as "male" | "female", status: "none" as const,
-    moveIds: [0, 0, 0, 0] as const, currentPP: [0, 0, 0, 0] as const, ppBonuses: 0,
-    personality: b === 0 && partyIndex >= 1 ? (m.nature as number) : 0,
-  });
-};
-const incomingCfg = parties.player[faintNo];
-const incoming = mk(0, incomingCfg, faintNo);
-const field = Object.freeze({ player: incoming, opponent: mk(1, parties.opponent[0], 0) });
-const states = Object.freeze(["fainted", "healthy", "healthy", "empty", "empty", "empty"]);
-const timing = switchInTiming(0, incoming.species, sceneOn, incoming.name, false, incoming.personality);
-const commands = [
-  Object.freeze({ type: "party-summary", eventSequence: 1, battler: 0, visible: true, states, timing: { minimumFrames: 7 } }),
-  Object.freeze({ type: "message", eventSequence: 2, lines: [`Go! ${incoming.name}!`], advance: "automatic", noCursor: false, timing: { minimumFrames: 13, holdFrames: 0 } }),
-  Object.freeze({ type: "party-summary", eventSequence: 3, battler: 0, visible: false, states }),
-  Object.freeze({ type: "switch-in", eventSequence: 4, battler: 0, fromPartyIndex: 0, toPartyIndex: faintNo, incoming, incomingStatus1: 0,
-    timing, settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES, sceneOn }),
-  Object.freeze({ type: "turn-end", timing: { minimumFrames: 8 } }),
-];
-const segment = { field, beforeRules: { rulesContext: { hitMarker: sceneOn ? 0 : BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } }, afterRules: null, events: [], commands } as never;
-const resolution = (commandIndex: number, phase: string, phaseElapsed: number) => ({
-  field, segments: [segment], segmentIndex: 0,
-  commandIndex, lifecycle: { phase, phaseElapsed }, confirmHandoff: null, opponentTrainer: null, sourceDecision: { kind: "use-move" }, fadeTick: 0,
-} as never);
-const sendOutTiming = playerFaintReplacementSendOutTimingOfSegment(segment) ?? undefined;
-const partyState = (e: number) => ({ sendOutElapsed: e, elapsed: 400 + e, sendOutTiming } as never);
-const ready = (e: number) => party.partySendOutBattleMenuReady(e, sendOutTiming);
-let readyE = 0; while (!ready(readyE)) readyE += 1;
-const TURN_END = 8; const HANDOFF = BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES;
-const promptE = readyE + TURN_END + HANDOFF;
-const draw = (e: number): Uint8Array => {
-  const fb = new Uint8Array(240 * 160 * 4);
-  if (e < readyE) {
-    const view = createBattleResolutionPresentationRenderView(resolution(0, "presenting-switch-in", e));
-    renderBattleResolutionForcedPartySelect(fb, view, partyState(e));
-  } else if (e < readyE + TURN_END) {
-    renderBattleResolutionLiveView(fb, createBattleResolutionPresentationRenderView(resolution(4, "presenting", e - readyE)));
-  } else {
-    renderBattleResolutionLiveView(fb, createBattleResolutionPresentationRenderView(resolution(5, "next-command-handoff", e - readyE - TURN_END)));
-  }
-  return fb;
-};
+const { incoming, readyE, promptE, draw } = frs247ProductionReturn(scenario, sceneOn, faintNo);
+const incomingCfg = scenario.overrides.parties.player[faintNo];
 const FULL = process.argv.includes("--full");
 const opponentHalf = (x: number, y: number) => !FULL && ((x < 120 && y < 48) || (x >= 120 && y < 72));
 const region = (x: number, y: number) => y >= 112 ? "msg" : x >= 120 ? "phb" : "mon";
