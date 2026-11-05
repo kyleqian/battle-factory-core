@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-04 / 05 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master `ccdfe68d3`+ (aud241a folded). Evidence `.integration/validation/sv-20261104/`. One worker at a time.
+- **State:** master `0b4fb3341`+ (aud241a, aud241b folded). Evidence `.integration/validation/sv-20261104/`. One worker at a time.
 - **Folded:** aud241a (S11 step 5, first slice; `docs/aud241a-battle-start-sounds.md`; branch `worker/integration-20261104-213051`):
   `src/engine/battleStartSounds.ts` emits from `tick()` (guarded by `soundCollecting()`) the battle BGM (476, Brain 471) with
   `m4aMPlayAllStop`, the ball tray ENTER / BALL / EXIT SEs (per-side pans, SE player field), SE_BALL_OPEN and the send-out cries
@@ -17,7 +17,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Flow mismatches listed in the doc (MAGNETON ON player side 1 frame early; BGM-to-tray gap 348..374 across labs, engine 359).
   Worker: typecheck, build, build:lib 0; smoke 448; 17 files 233 tests; differential 28 traces 7,175 identical. Supervisor: 4 audio
   files 197 / 197.
-- **Next:** aud241b (effectiveness, faint, low-HP) running; then cln240 (cleanup 5: `npm run test:gate`), aud241c.
+  Supervisor differential over all 211 traces vs `de7557c52`: **38,532 / 38,532 identical**.
+- **Folded:** aud241b (S11 step 5, second slice; `docs/aud241b-battle-sounds.md`; branch `worker/integration-20261104-231007`):
+  `src/engine/battleHitSounds.ts` emits effectiveness SEs 12 / 13 / 14 (pan by target side), SE_FAINT, the FAINT-mode cry (duck +
+  restore; restore length measured for 15 species, fitted for the rest, `src/data/faintCryFrames.ts`) and the low-HP loop
+  (SE 90 start on a red bar, real stop on faint). ROM windows (step mode, ON + OFF): opponent / player faint (all deltas 0),
+  super-effective, low-HP, low-HP then faint, 14 faint-cry lengths. Deltas recorded, not fixed: ISSUES #197. Not proven: the
+  `battle-window{,-off}` RHYDON / GOLBAT fixtures (no engine staging; ROM facts pinned only), switch-in low-HP call, non-hit hp.
+  Worker: typecheck, build, build:lib 0; 22 files 887 tests + 7 appTrace importers 90; differential 28 traces identical.
+  Supervisor: 4 audio files 316 / 316.
+- **Next:** frs247 (handoff 4b(d), faint-replacement reshow white flash) running; then cln240 (cleanup 5: `npm run test:gate`).
 
 ---
 
