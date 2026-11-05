@@ -1,0 +1,316 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "lab tools/battle-lab/aud241c-win-off.json",
+ "profile": "battle-scene-off",
+ "frames": 580,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
+ },
+ "mode": "step",
+ "steps": 25221803,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 23.8,
+ "windowSeconds": 22.3,
+ "events": [
+  {
+   "frame": 1392,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayCry_ByMode",
+   "tracks": 65535,
+   "volume": 85
+  },
+  {
+   "frame": 1392,
+   "kind": "cry",
+   "id": 19,
+   "name": "SPECIES_RATTATA",
+   "pan": 25,
+   "volume": 120,
+   "priority": 10,
+   "mode": "FAINT",
+   "via": "PlayCry_ByMode"
+  },
+  {
+   "frame": 1420,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "IsCryPlaying",
+   "tracks": 65535,
+   "volume": 256
+  },
+  {
+   "frame": 1458,
+   "kind": "se",
+   "id": 16,
+   "name": "SE_FAINT",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 1501,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 1523,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "BattleStopLowHpSound",
+   "noop": true
+  },
+  {
+   "frame": 1523,
+   "kind": "bgm",
+   "id": 412,
+   "name": "MUS_VICTORY_TRAINER",
+   "pan": null,
+   "via": "PlayBGM"
+  },
+  {
+   "frame": 1601,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 1701,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 1707,
+   "kind": "fade",
+   "id": 412,
+   "name": "MUS_VICTORY_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "FadeOutBGM",
+   "dir": "out",
+   "speed": 5
+  },
+  {
+   "frame": 1744,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "SpecialStatusesClear",
+   "noop": true
+  },
+  {
+   "frame": 1754,
+   "kind": "bgm",
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "pan": null,
+   "via": "PlayBGM"
+  },
+  {
+   "frame": 1780,
+   "kind": "se",
+   "id": 9,
+   "name": "SE_EXIT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 1902,
+   "kind": "stop",
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "pan": null,
+   "player": "BGM",
+   "via": "PlayFanfareByFanfareNum"
+  },
+  {
+   "frame": 1902,
+   "kind": "fanfare",
+   "id": 368,
+   "name": "MUS_HEAL",
+   "pan": null,
+   "via": "PlayFanfareByFanfareNum"
+  }
+ ],
+ "calls": [
+  {
+   "frame": 1392,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "PlayCry_ByMode",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 1392,
+   "fn": "PlayCryInternal",
+   "via": "PlayCry_ByMode",
+   "r0": 19,
+   "r1": 25
+  },
+  {
+   "frame": 1420,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "IsCryPlaying",
+   "r0": 50361376,
+   "r1": 65535
+  },
+  {
+   "frame": 1458,
+   "fn": "PlaySE12WithPanning",
+   "via": "SetControllerToOpponent",
+   "r0": 16,
+   "r1": 63
+  },
+  {
+   "frame": 1458,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 16,
+   "r1": 63
+  },
+  {
+   "frame": 1501,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 1523,
+   "fn": "m4aSongNumStop",
+   "via": "BattleStopLowHpSound",
+   "r0": 90,
+   "r1": 1,
+   "noop": true
+  },
+  {
+   "frame": 1523,
+   "fn": "PlayBGM",
+   "via": "SpecialStatusesClear",
+   "r0": 412,
+   "r1": 110
+  },
+  {
+   "frame": 1523,
+   "fn": "m4aSongNumStart",
+   "via": "PlayBGM",
+   "r0": 412,
+   "r1": 412
+  },
+  {
+   "frame": 1601,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 1701,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 1707,
+   "fn": "m4aMPlayFadeOut",
+   "via": "FadeOutBGM",
+   "r0": 50361376,
+   "r1": 5
+  },
+  {
+   "frame": 1744,
+   "fn": "m4aSongNumStop",
+   "via": "SpecialStatusesClear",
+   "r0": 90,
+   "r1": 2,
+   "noop": true
+  },
+  {
+   "frame": 1754,
+   "fn": "PlayBGM",
+   "via": "MapMusicMain",
+   "r0": 469,
+   "r1": 134884872
+  },
+  {
+   "frame": 1754,
+   "fn": "m4aSongNumStart",
+   "via": "PlayBGM",
+   "r0": 469,
+   "r1": 469
+  },
+  {
+   "frame": 1780,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 9,
+   "r1": 134923135
+  },
+  {
+   "frame": 1902,
+   "fn": "PlayFanfare",
+   "via": "ScrCmd_playfanfare",
+   "r0": 368,
+   "r1": 256
+  },
+  {
+   "frame": 1902,
+   "fn": "PlayFanfareByFanfareNum",
+   "via": "PlayFanfare",
+   "r0": 4,
+   "r1": 4
+  },
+  {
+   "frame": 1902,
+   "fn": "m4aMPlayStop",
+   "via": "PlayFanfareByFanfareNum",
+   "r0": 50361376,
+   "r1": 4
+  },
+  {
+   "frame": 1902,
+   "fn": "m4aSongNumStart",
+   "via": "PlayFanfareByFanfareNum",
+   "r0": 368,
+   "r1": 160
+  }
+ ],
+ "from": 1380
+}

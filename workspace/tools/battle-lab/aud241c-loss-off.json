@@ -1,0 +1,702 @@
+{
+  "schemaVersion": 1,
+  "mode": "mechanicLab",
+  "profile": "battle-scene-off",
+  "level": 50,
+  "challengeNum": 0,
+  "battleNum": 0,
+  "trainerId": 50,
+  "playerSetIds": [
+    156,
+    149,
+    180
+  ],
+  "opponentSetIds": [
+    188,
+    184,
+    135
+  ],
+  "seed": 305419896,
+  "overrides": {
+    "parties": {
+      "player": [
+        {
+          "species": 95,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            153,
+            153,
+            153,
+            153
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 213,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            153,
+            153,
+            153,
+            153
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 198,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 31,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            153,
+            153,
+            153,
+            153
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        }
+      ],
+      "opponent": [
+        {
+          "species": 362,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 0,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 362,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 0,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        },
+        {
+          "species": 362,
+          "level": 50,
+          "nature": 0,
+          "ivs": {
+            "hp": 31,
+            "attack": 31,
+            "defense": 31,
+            "speed": 0,
+            "spAttack": 31,
+            "spDefense": 31
+          },
+          "evs": {
+            "hp": 0,
+            "attack": 0,
+            "defense": 0,
+            "speed": 0,
+            "spAttack": 0,
+            "spDefense": 0
+          },
+          "moves": [
+            150,
+            150,
+            150,
+            150
+          ],
+          "ppUps": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "item": 0,
+          "abilitySlot": 0,
+          "friendship": 70,
+          "gender": "male",
+          "shiny": false
+        }
+      ]
+    }
+  },
+  "trace": {
+    "segments": [
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 30,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "B"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "DOWN"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 30,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "B"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "DOWN"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "DOWN"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 100,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 30,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 300,
+        "buttons": []
+      },
+      {
+        "frames": 2,
+        "buttons": [
+          "A"
+        ]
+      },
+      {
+        "frames": 800,
+        "buttons": []
+      }
+    ],
+    "captureFrames": [
+      0,
+      150,
+      300,
+      450,
+      600,
+      750,
+      900,
+      1050,
+      1200,
+      1350,
+      1500,
+      1650,
+      1800,
+      1950,
+      2100,
+      2250,
+      2400,
+      2550,
+      2675,
+      2900,
+      2902,
+      2904,
+      2906,
+      2908,
+      2910,
+      2912,
+      2914,
+      2916,
+      2918,
+      2920,
+      2922,
+      2924,
+      2926,
+      2928,
+      2930,
+      2932,
+      2934,
+      2936,
+      2938,
+      2940,
+      2941,
+      2942,
+      2944,
+      2945,
+      2946,
+      2948,
+      2950,
+      2951,
+      2952,
+      2954,
+      2956,
+      2958,
+      2960,
+      2962,
+      2964,
+      2966,
+      2968,
+      2970,
+      2972,
+      2974,
+      2976,
+      2978,
+      2980,
+      2982,
+      2984,
+      2986,
+      2988,
+      2990,
+      2992,
+      2994,
+      2996,
+      2998,
+      3000,
+      3002,
+      3004,
+      3006,
+      3008,
+      3010,
+      3012,
+      3014,
+      3016,
+      3018,
+      3020,
+      3022,
+      3024,
+      3026,
+      3028,
+      3030,
+      3032,
+      3034,
+      3036,
+      3038,
+      3040,
+      3042,
+      3044,
+      3046,
+      3048,
+      3050,
+      3052,
+      3054,
+      3056,
+      3058,
+      3225,
+      3227,
+      3229,
+      3231,
+      3233,
+      3235,
+      3237,
+      3239,
+      3241,
+      3243,
+      3245,
+      3247,
+      3249,
+      3251,
+      3253,
+      3255,
+      3257,
+      3259,
+      3261,
+      3263,
+      3265,
+      3267,
+      3269,
+      3271,
+      3273,
+      3274,
+      3275,
+      3277,
+      3279,
+      3281,
+      3283,
+      3285,
+      3287,
+      3289,
+      3291,
+      3293,
+      3295,
+      3297,
+      3299,
+      3301,
+      3303,
+      3305,
+      3307,
+      3309,
+      3311,
+      3313,
+      3315,
+      3317,
+      3319,
+      3321,
+      3323,
+      3325,
+      3327,
+      3329,
+      3331,
+      3333,
+      3335,
+      3337,
+      3339,
+      3341,
+      3343,
+      3345,
+      3347,
+      3349,
+      3351,
+      3353,
+      3355,
+      3357,
+      3359,
+      3361,
+      3363,
+      3365,
+      3367,
+      3369,
+      3371,
+      3373,
+      3375,
+      3377,
+      3379,
+      3381,
+      3383,
+      3385,
+      3387,
+      3389,
+      3391,
+      3393,
+      3395,
+      3397,
+      3399,
+      3401,
+      3403,
+      3405,
+      3407,
+      3409,
+      3410,
+      3560,
+      3710,
+      3860,
+      4010,
+      4160,
+      4310,
+      4460,
+      4610,
+      4760,
+      4910,
+      4938
+    ]
+  }
+}
