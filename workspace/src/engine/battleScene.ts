@@ -727,7 +727,7 @@ import megaHornAsset from "../animation/assets/mega-horn-horn-hit-2.json" with {
 import superpowerAsset from "../animation/assets/superpower-rock-orb-fire.json" with { type: "json" };
 import revengeAsset from "../animation/assets/revenge-purple-scratch-swipe.json" with { type: "json" };
 import meteorMashAsset from "../animation/assets/meteorMash.json" with { type: "json" };
-import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutReleaseClock, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, PARTY_SENDOUT_SUMMARY_TRAY_END, type PartyMenuIconLayer } from "./partySelect.ts";
+import { partyMenuLayers, partySelectEntryPhase, partySendOutBallPhase, partySendOutReleaseClock, partySendOutBattleFadeBldy, partySendOutHealthboxDx, partySendOutMenuBounceTick, partySendOutPhase, partySendOutReleaseLogicalTick, PARTY_ENTRY_FADE_IN_START, PARTY_ENTRY_FADE_OUT_START, PARTY_SENDOUT_BALL_SPIN_START, PARTY_SENDOUT_BALL_VISIBLE_START, PARTY_SENDOUT_FADE_OUT_START, type PartyMenuIconLayer } from "./partySelect.ts";
 import {
   battlePartySelectStateForForcedParty,
   PARTY_SELECT_OPEN_BACK_SPRITE_Y2_START,
@@ -55756,21 +55756,16 @@ export function renderBattleResolutionForcedPartySelect(
           player: Object.freeze({ sprite: false, healthbox: false }),
         }),
       });
+      // frs247: the reshow's BeginHardwarePaletteFade(0xFF, 0, 16, 0, 1) is a brightness DECREASE (rises from black), and the ROM draws no player ball bar.
       const bldy = partySendOutBattleFadeBldy(elapsed);
       if (bldy > 0) {
         for (let p = 0; p < 240 * 160; p += 1) {
           const o = p * 4;
-          fb[o] = blendComponentToWhite(fb[o]!, bldy);
-          fb[o + 1] = blendComponentToWhite(fb[o + 1]!, bldy);
-          fb[o + 2] = blendComponentToWhite(fb[o + 2]!, bldy);
+          const packed = mgbaDarkenColor(fb[o]! | (fb[o + 1]! << 8) | (fb[o + 2]! << 16), bldy);
+          fb[o] = packed & 0xff;
+          fb[o + 1] = (packed >>> 8) & 0xff;
+          fb[o + 2] = (packed >>> 16) & 0xff;
         }
-      }
-      if (elapsed < PARTY_SENDOUT_SUMMARY_TRAY_END && view.switchIn.partyStates !== null) {
-        drawTypedPartyStatusSummary(
-          fb,
-          view.switchIn.battler,
-          view.switchIn.partyStates,
-        );
       }
     }
 

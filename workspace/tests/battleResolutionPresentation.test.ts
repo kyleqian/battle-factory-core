@@ -1029,7 +1029,6 @@ describe("battle resolution presentation receipt ownership", () => {
       // pfr192: the view carries the keyed player faint-replacement send-in timing (MACHOP, Scene ON, turn-end tail).
       timing: { ballShift: 1, releaseExtra: 0, readyAt: 204, blankStart: 212, goTextChars: 11 },
       battler: 0,
-      partyStates: ["fainted", "healthy", "empty", "empty", "empty", "empty"],
     });
   });
 
