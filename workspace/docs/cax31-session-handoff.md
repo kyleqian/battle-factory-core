@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-04)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-05)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-04 wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-05 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
   `worker/lib-v2-mac` is folded up to `851ee1f4c`; if the Mac moves that branch again, merge the new tip the same way
@@ -30,12 +30,18 @@ kept and is long-tail.
   PreBattleRoom / BattleRoom scripts, heal + BP fanfares, `docs/aud240d-script-sounds.md`). Emitters live in
   `src/engine/screenSounds.ts`. Prove windows in probe **step mode** (the hybrid `--fast` mode drops no-op SEs).
   aud240d left unmeasured: MUS_OBTAIN_SYMBOL, PauseChallenge SE_SAVE, the Brain SE_POKENAV_CALL absolute frame.
+  **Step 5 (battle controller), 2 of 3 slices DONE (2026-11-05):** aud241a battle start / send-outs
+  (`src/engine/battleStartSounds.ts`, `docs/aud241a-battle-start-sounds.md`, ISSUES #196) and aud241b effectiveness / SE_FAINT /
+  faint cry / low-HP (`src/engine/battleHitSounds.ts`, `docs/aud241b-battle-sounds.md`, timing deltas ISSUES #197). Both emit
+  from `tick()` in `src/engine/core.ts` behind `soundCollecting()`. Lab staging for sound windows: `tools/compare/appTrace.ts`
+  stages (`midBattleSwitchStage` options bag) + `tools/battle-lab/aud241*`.
 - **Cleanup:** steps 1, 2, 3 (cln239: Claude-only launchers, `docs/cln239-launchers.md`) and 6 are done.
 - **User reports:** 4b(b) also covers Quick Attack / Aerial Ace now (qak248 / qak249). 4b(a) fully fixed (vis243a mid-battle send-in; go246 battle-start "Go!" intro waits for both species
   animations in Scene ON, `docs/go246-intro-wait.md`; Kyle's SPOINK was cut short by 137 frames, now exact); 4b(b) Agility
   clip fixed (agi245); 4b(c) rate check permanent (`tests/rng244OutcomeRates.test.ts`).
-- Census baseline for the next delta: `.integration/validation/sv-20261103/go246-evidence/census/` (go246's tree; 1000 / 1000
-  identical to `sv-20261102/vis243a-evidence/census-final/{on,off}-dac9cd2fe`, which stays valid too).
+- Census baseline for the next delta: `.integration/validation/sv-20261104/frs247-evidence/census/{on,off}-87e9366af` (frs247's
+  tree; 1000 / 1000 identical to `sv-20261103/go246-evidence/census/`, which stays valid too).
+- **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
@@ -45,7 +51,9 @@ never brief those here. One worker at a time; each run folds the next audio step
 1. **Audio (S11)** — the main program for several runs: `docs/s11-audio-design.md` section 7. Next: **aud241** battle
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
-   proposed split: `docs/aud241-scout.md` (read-only worker report, unverified). Then aud242 (move-animation SEs).
+   proposed split: `docs/aud241-scout.md` (read-only worker report, unverified). aud241a / aud241b DONE; next **aud241c**
+   (victory BGM 412 / Brain 354, `BattleStopLowHpSound` at the win, end fade speed 5, battle return fade P+6 / BGM 469 P+53 /
+   SE_EXIT P+79, loss-terminal fade 476). Then aud242 (move-animation SEs).
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) `npm run test:gate` <= 5 min for workers and drop frame-pin tests the census supersedes, full suite nightly (the full
    suite is ~75 min here and lost one fork beside a worker twice on 2026-11-03: rerun the unreported file);
@@ -65,7 +73,7 @@ never brief those here. One worker at a time; each run folds the next audio step
      open fade; refusal text dismisses before it finishes printing).
    - **New, Kyle 2026-11-04** (website on 851ee1f4c), reproduced on the Mac from his trace `47192107276c654fbcdc1d038304aa0e`
      (seeds 2513123525 / 2478499883) through `FactorySession.replayStep` + `render()`. Prove each against the ROM, then fix the family:
-     - **(d) White flash after a faint replacement.** After the forced party menu's SEND OUT, the screen is black for about 37 frames
+     - **(d) DONE 2026-11-05 (frs247).** White flash after a faint replacement. After the forced party menu's SEND OUT, the screen is black for about 37 frames
        (app 17400..17437). Then the battle appears fully drawn but washed toward white (mean brightness 246 vs about 200 at rest)
        and fades down to normal over about 15 frames (17438..17453). The same in the second faint (25529). Every other return from
        black in that trace (voluntary switch 12543, battle starts) rises from black. The ROM reshow is one path for both:
