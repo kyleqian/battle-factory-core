@@ -2,7 +2,7 @@
  "schema": "audio-sound-events/v1",
  "window": "lab tools/battle-lab/aud241c-loss-expl-on.json",
  "profile": "battle-scene-on",
- "frames": 1300,
+ "frames": 1560,
  "hooks": {
   "m4aSongNumStart": "0x082e0130",
   "m4aSongNumStop": "0x082e01fc",
@@ -22,15 +22,15 @@
   "m4aMPlayContinue": "0x082e02a8"
  },
  "mode": "step",
- "steps": 57147165,
+ "steps": 66540903,
  "hybrid": {
   "fast": 0,
   "restepped": 0,
   "state_mismatch": 0,
   "mismatches": []
  },
- "seconds": 53.2,
- "windowSeconds": 51.8,
+ "seconds": 61.5,
+ "windowSeconds": 60.0,
  "events": [
   {
    "frame": 5495,
@@ -162,6 +162,14 @@
    "name": "SE_EXIT",
    "pan": null,
    "via": "PlaySE"
+  },
+  {
+   "frame": 6933,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
   }
  ],
  "calls": [
@@ -280,6 +288,13 @@
    "via": "PlaySE",
    "r0": 9,
    "r1": 134923135
+  },
+  {
+   "frame": 6933,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
   }
  ],
  "from": 5450

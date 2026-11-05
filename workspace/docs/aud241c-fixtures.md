@@ -11,12 +11,12 @@ Command shape: `python3 tools/run-mgba-probe.py OUT -- python3 tools/audio/sound
 | `aud241c-win-off-window` | `aud241c-win-off` (Rattata Lv12 opp, Seismic Toss) | OFF | 1380 / 580 | 1392 .. 1902 |
 | `aud241c-win-on-window` | `aud241c-win-on` | ON | 2170 / 620 | 2189 .. 2702 |
 | `aud241c-loss-off-window` | `aud241c-loss-off` (Explosion, Dusclops) | OFF | 2750 / 900 | 2809 .. 3533 |
-| `aud241c-loss-on-window` | `aud241c-loss-expl-on` (doubled idle gaps) | ON | 5450 / 1560 | 5495 .. 6410 |
+| `aud241c-loss-on-window` | `aud241c-loss-expl-on` (doubled idle gaps) | ON | 5450 / 1560 | 5495 .. 6933 |
 | `aud241c-brain-off-window` | `aud241c-brain-win-off` (factoryBrain, silver) | OFF | 1380 / 600 | 1392 .. 1920 |
 | `aud241c-brain-on-window` | `aud241c-brain-win-on` | ON | 2100 / 800 | 2189 .. 2720 |
 
 Each window starts before the last faint cry and ends after the first sound that follows the return (win: heal triple; Brain: symbol
-fanfare; OFF loss: the lobby SE_SELECT; ON loss: SE_EXIT, see the caveat below).
+fanfare; loss: the lobby SE_SELECT).
 
 ## Frames relative to the last SE_FAINT (F)
 
@@ -42,7 +42,7 @@ fixtures with `noop: true`.
 | **SE_EXIT 9** | P+79 | P+79 | **absent** | **absent** | P+79 | P+79 |
 | heal stop 469 + fanfare 368 | P+201 | P+201 | - | - | - | - |
 | stop 469 + fanfare 466 (symbol) | - | - | P+219 | P+219 | - | - |
-| lobby SE_SELECT | - | - | - | - | P+302 | not in window |
+| lobby SE_SELECT | - | - | - | - | P+302 | P+602 (doubled gaps) |
 
 The bgm-412/354 row is `PlayBGM` at the same frame as the `BattleStopLowHpSound` stop, SE_SELECT + 22 in every win window.
 
@@ -70,8 +70,7 @@ Held (now also in step mode / ON):
 Corrections / still open:
 - ON Brain (open in the scout) works with `aud241c-brain-win-on` unchanged, and equals OFF after the dismiss.
 - The scout's "~1380-1820" window for the win would have cut the heal triple (P+201); the committed windows run past it.
-- The ON loss lab's A at 6933 (the OFF lab's lobby A, P+602 after the doubled gaps) produces no SE_SELECT up to 7010. The lobby SE is not
-  pinned in ON; `loss-terminal-window.json` already pins the lobby SEs. The ON loss fixture therefore ends at SE_EXIT.
+- The ON loss lab's lobby A (6933, P+602 because of the doubled idle gaps) does produce SE_SELECT in step mode; the ON loss fixture covers it.
 - Still unexplained, not tested here: the Brain bgm 469 one frame earlier (P+52 vs P+53; fade and the P+43 noop are on the same frames as the
   win, so the difference arises between P+43 and `PlayBGM`), and the scout's +18 (Explosion self-faint) vs +22 victory-BGM gap (the
   scout's step probe `win-explosion-off-step.json`; no fixture here since the aud241c win labs are the attacker-faint path).
