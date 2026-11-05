@@ -3653,9 +3653,9 @@ export function cursorState(t: number, startTick: number = CURSOR_START_TICK): {
 // interface-assets.md's "settles at tick 1292 exactly").
 
 /** Trace tick the player-side bar + all 6 player ball icons are first created/visible (RAM-confirmed). */
-const PLAYER_CREATE_TICK = 1228;
+export const PLAYER_CREATE_TICK = 1228;
 /** Trace tick the opponent-side bar + all 6 opponent ball icons are first created/visible (RAM-confirmed - 3 ticks after the player side, not simultaneous). */
-const OPP_CREATE_TICK = 1231;
+export const OPP_CREATE_TICK = 1231;
 /**
  * The player bar's own display gate needs one extra tick beyond the module's
  * usual `t-1` render lag (module doc point 3, resolved this session):
@@ -3694,7 +3694,7 @@ export const OPP_BAR_X2 = [-95, -90, -85, -80, -75, -70, -65, -60, -55, -50, -45
  * too early. Rebuilt directly from `gSprites[].x2` RAM history per icon
  * (`tools/probe/ram-probe.py`, ticks 1225-1295), full lead-in included.
  */
-const PLAYER_ICON_X2: readonly number[][] = [
+export const PLAYER_ICON_X2: readonly number[][] = [
   [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
   [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
   [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
@@ -3702,7 +3702,7 @@ const PLAYER_ICON_X2: readonly number[][] = [
   [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
   [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 117, 111, 102, 90, 75, 57, 36, 12, 0],
 ];
-const OPP_ICON_X2: readonly number[][] = [
+export const OPP_ICON_X2: readonly number[][] = [
   [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
   [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
   [-120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -120, -117, -111, -102, -90, -75, -57, -36, -12, 0],
@@ -3715,39 +3715,6 @@ export function tableX2(table: readonly number[], createTick: number, t: number)
   if (t < createTick) return 0;
   const idx = t - createTick;
   return idx < table.length ? table[idx]! : 0;
-}
-
-/**
- * The battle-start party-summary tray's SE ticks (RAM ticks, the `tableX2` index space): the two bars are created at
- * `PLAYER_CREATE_TICK` / `OPP_CREATE_TICK` (`SE_BALL_TRAY_ENTER`, pan 0), and each icon's callback plays its SE on the tick
- * its x2 first reaches 0 (`SpriteCB_StatusSummaryBalls_Enter`): BALL at pan 63 / -64 (player / opponent) for a real slot,
- * EXIT for an empty one. Ticks are table ends, so the ROM's tick-by-tick x2 history is the single source.
- */
-export interface BallTraySoundTick {
-  readonly tick: number;
-  readonly kind: "enter" | "ball" | "exit";
-  readonly side: "player" | "opponent";
-}
-export function ballTraySoundTicks(
-  summaries: Readonly<{ player: readonly PartyBallState[]; opponent: readonly PartyBallState[] }>,
-): readonly BallTraySoundTick[] {
-  const out: BallTraySoundTick[] = [
-    { tick: PLAYER_CREATE_TICK, kind: "enter", side: "player" },
-    { tick: OPP_CREATE_TICK, kind: "enter", side: "opponent" },
-  ];
-  for (let i = 0; i < 6; i += 1) {
-    out.push({
-      tick: PLAYER_CREATE_TICK + PLAYER_ICON_X2[i]!.length - 1,
-      kind: summaries.player[i] === "empty" ? "exit" : "ball",
-      side: "player",
-    });
-    out.push({
-      tick: OPP_CREATE_TICK + OPP_ICON_X2[i]!.length - 1,
-      kind: summaries.opponent[5 - i] === "empty" ? "exit" : "ball",
-      side: "opponent",
-    });
-  }
-  return out.sort((a, b) => a.tick - b.tick);
 }
 
 export interface BallIcon {

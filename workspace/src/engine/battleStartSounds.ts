@@ -2,13 +2,16 @@
 // presentation state and calls emitSound, which is a no-op unless a tick is being collected.
 import { emitSound } from "../audio/soundEvents.ts";
 import {
-  ballTraySoundTicks,
+  OPP_CREATE_TICK,
+  OPP_ICON_X2,
+  PLAYER_CREATE_TICK,
+  PLAYER_ICON_X2,
   generatedBattleIntroSourceClock,
   generatedBattleStartOpponentHandoffTick,
   generatedPlayerDispatchDelay,
   generatedPlayerVisualLag,
 } from "./battleScene.ts";
-import type { BattleResolutionPresentationCommand, BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
+import type { BattleResolutionPresentationCommand, BattleResolutionPresentationState, PartyBallState } from "./battleResolutionPresentation.ts";
 import type { FactoryBattleStartIntroState } from "./factoryBattleStartIntro.ts";
 import { partySendOutReleaseClock, type PartySelectState, type PartySendOutTiming } from "./partySelect.ts";
 import {
@@ -31,6 +34,39 @@ const TRAY_PAN_PLAYER = 63;
 /** Task_PlayCryWhenReleasedFromBall's cry pans (pokeball.c): the opponent's is +25, the player's -25. */
 const CRY_PAN_OPPONENT = 25;
 const CRY_PAN_PLAYER = -25;
+
+/**
+ * The battle-start party-summary tray's SE ticks (RAM ticks, the `tableX2` index space): the two bars are created at
+ * `PLAYER_CREATE_TICK` / `OPP_CREATE_TICK` (`SE_BALL_TRAY_ENTER`, pan 0), and each icon's callback plays its SE on the tick
+ * its x2 first reaches 0 (`SpriteCB_StatusSummaryBalls_Enter`): BALL at pan 63 / -64 (player / opponent) for a real slot,
+ * EXIT for an empty one. Ticks are table ends, so the ROM's tick-by-tick x2 history is the single source.
+ */
+export interface BallTraySoundTick {
+  readonly tick: number;
+  readonly kind: "enter" | "ball" | "exit";
+  readonly side: "player" | "opponent";
+}
+export function ballTraySoundTicks(
+  summaries: Readonly<{ player: readonly PartyBallState[]; opponent: readonly PartyBallState[] }>,
+): readonly BallTraySoundTick[] {
+  const out: BallTraySoundTick[] = [
+    { tick: PLAYER_CREATE_TICK, kind: "enter", side: "player" },
+    { tick: OPP_CREATE_TICK, kind: "enter", side: "opponent" },
+  ];
+  for (let i = 0; i < 6; i += 1) {
+    out.push({
+      tick: PLAYER_CREATE_TICK + PLAYER_ICON_X2[i]!.length - 1,
+      kind: summaries.player[i] === "empty" ? "exit" : "ball",
+      side: "player",
+    });
+    out.push({
+      tick: OPP_CREATE_TICK + OPP_ICON_X2[i]!.length - 1,
+      kind: summaries.opponent[5 - i] === "empty" ? "exit" : "ball",
+      side: "opponent",
+    });
+  }
+  return out.sort((a, b) => a.tick - b.tick);
+}
 
 /**
  * Source-clock spans measured on the ROM (docs/aud241a-battle-start-sounds.md, fixtures `intro-yoshi-*` / `intro-magneton-*`):

@@ -5,7 +5,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
-import { ballTraySoundTicks } from "../src/engine/battleScene.ts";
+import { ballTraySoundTicks } from "../src/engine/battleStartSounds.ts";
 import { emitBattleStartBgm, emitMidBattleSwitchSounds, emitPartySendOutSounds, factoryBattleBgm } from "../src/engine/battleStartSounds.ts";
 import type { PartySelectState, PartySendOutTiming } from "../src/engine/partySelect.ts";
 import type { BattleResolutionPresentationState } from "../src/engine/battleResolutionPresentation.ts";
