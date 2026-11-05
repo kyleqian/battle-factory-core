@@ -76,6 +76,22 @@ never brief those here. One worker at a time; each run folds the next audio step
      `tests/animation/quickAttackAerialAceOpponentClip.test.ts` (qak249). Open: ISSUES #194 (RATTATA Quick Attack residual, not the clip).
    - Flow gaps: ISSUES #191 (dialog cursors move on held repeat), #192 (summary flow gaps), #195 (party menu: cursor moves during the
      open fade; refusal text dismisses before it finishes printing).
+   - **(g) FIRST in 4b — not visual (found 2026-11-05 by the top layer's live-site play-test on fb5516bc0): BAG and RUN do
+     nothing in battle.** On the action menu, A on BAG or RUN is ignored: `battleCommandPresentation.ts:638-646` handles only
+     FIGHT (0) and POKéMON (2), and returns the state unchanged otherwise. No sound, no text, the cursor stays. In a site trace
+     (`437157099938d5e9c8cb6da1ee5c0a58`, test player) A on RUN at app 110024 / 110064 / 110092 changes nothing. The ROM:
+     - **BAG:** `battle_main.c:4221-4232` (FRONTIER_NO_PYRAMID) -> `BattleScript_ActionSelectionItemsCantBeUsed`
+       (`battle_scripts_1.s:4426`: printselectionstring STRINGID_ITEMSCANTBEUSEDNOW, then back to the action menu).
+     - **RUN:** `battle_main.c:4322-4330` (TRAINER + FRONTIER) -> `BattleScript_AskIfWantsToForfeitMatch` (`:4547`:
+       "Would you like to forfeit the match and quit now?" + forfeityesnobox). NO returns to the action menu.
+     - **YES:** `battle_main.c:5058-5067` sets `B_OUTCOME_FORFEITED`, then `BattleScript_PrintPlayerForfeited` (`:4552`):
+       "{B_PLAYER_NAME} forfeited the match!" + waitmessage, then the battle ends as a loss.
+     - The kernel note at `factoryBattleScriptFullTurnDecision.ts:225-240` already cites this path and leaves the forfeit UI out.
+     - **Do it in two steps.** (1) The BAG message plus the forfeit prompt with NO, which are presentation only. (2) YES: the
+       forfeit loss through the round controller to the library's battle-end / challenge-end events. A forfeit must end the
+       challenge as a loss, exactly like a lost battle, and replay identically (`replayChallenge`).
+     - **Proofs:** ROM labs for both prompts and the forfeit text window. Measure the SE_SELECT on A and the frames from A to
+       the first glyph.
    - **New, Kyle 2026-11-04** (website on 851ee1f4c), reproduced on the Mac from his trace `47192107276c654fbcdc1d038304aa0e`
      (seeds 2513123525 / 2478499883) through `FactorySession.replayStep` + `render()`. Prove each against the ROM, then fix the family:
      - **(d) DONE 2026-11-05 (frs247).** White flash after a faint replacement. After the forced party menu's SEND OUT, the screen is black for about 37 frames
