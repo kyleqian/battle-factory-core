@@ -40,7 +40,7 @@ screen, login, streak storage and the on-screen pad UI are the website's.
    lib build and `package.json` `exports`; `src/main.ts` becomes a thin shell
    over it (the test ABI, `?battleScene=`, `?pokebench=1` and the crash
    overlay unchanged). One step, with full suite + build + browser play.
-2. **Audio (S11)**, the main program after step 1 (design ACCEPTED 2026-11-01: `docs/s11-audio-design.md`; its section 7 is the step list; steps 1-3 folded by 2026-11-02, step 4 aud240a / aud240b (draft, swap, dialogs, summary) 2026-11-03, aud240c party menu next): a design step first
+2. **Audio (S11)**, the main program after step 1 (design ACCEPTED 2026-11-01: `docs/s11-audio-design.md`; its section 7 is the step list; steps 1-3 folded by 2026-11-02, step 4 (screens) DONE 2026-11-04, step 5 aud241 (battle controller) DONE 2026-11-05, aud242 move-animation SEs next): a design step first
    (oracle audio-event log from the ELF symbols for `PlaySE` / `PlayCry*` /
    `PlayBGM` / `PlayFanfare`; our kernel already emits `play-se` /
    `play-fanfare` / `play-faint-cry`), then sound-event parity by census like
@@ -49,7 +49,7 @@ screen, login, streak storage and the on-screen pad UI are the website's.
 3. **Cleanup** (finish plan Cleanup 1–7), at least one step per run: one-off
    step scripts + their fixtures, ledger archive, provider / lane code, the
    5-minute test gate, `core-rs` to its own branch, stale refs, evidence out
-   of git (steps 1 cln237, 2 cln238a/b and 6 DONE by 2026-11-03). One reversible commit per step, verified by typecheck + full suite
+   of git (steps 1 cln237, 2 cln238a/b, 3 cln239 and 6 DONE by 2026-11-04; 5 first half cln240 `test:gate` and 4 first half `core-rs-archive` branch 2026-11-05). One reversible commit per step, verified by typecheck + full suite
    + build.
 4. **Bundle hygiene** (the rest of Phase 3): test-only data out of `src/`,
    lazy-loaded sprite sheets and large tables, gamepad input in the library.
