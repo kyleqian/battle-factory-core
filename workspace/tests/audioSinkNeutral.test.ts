@@ -40,8 +40,9 @@ function play(scene: BattleScene, seed: number, policy: SoakPolicy, frames: numb
 }
 
 // aud240a: screens emit SE_SELECT (kind se, id 5, pan null); aud241a: the battle start adds the battle BGM, the ball tray,
-// the ball opens and the send-out cries with their BGM duck. Nothing else is emitted in these runs yet.
-const BATTLE_START_SE_IDS = new Set([5, 15, 114, 115, 116]);
+// the ball opens and the send-out cries with their BGM duck; aud241b adds the effectiveness SEs (12-14), SE_FAINT (16) and
+// SE_LOW_HEALTH (90). Nothing else is emitted in these runs yet.
+const BATTLE_START_SE_IDS = new Set([5, 15, 114, 115, 116, 12, 13, 14, 16, 90]);
 function expectScreenSoundsOnly(events: readonly SoundEvent[], frames: number): void {
   let last = 0;
   for (const event of events) {
