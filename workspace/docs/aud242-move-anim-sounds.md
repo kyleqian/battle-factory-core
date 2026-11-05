@@ -25,12 +25,16 @@ a body at an *age*. The age comes from one function,
 Relationship to the decoded script: the first script command executes at body age 1, so a
 command that the VM reaches at script frame `f` runs at body age `f + 1`.
 
+`liveMoveSourceAge` (same file) exposes `phaseElapsed - seGate - pre` for the emitter. It does
+NOT subtract `idleLead`: that lead was measured as the visual onset of the accepted window, but
+the ROM script runs from the `gAnimScriptActive` rising edge, i.e. during the lead rows.
+
 Script-frame costs (`battle_anim.c` / `battle_anim_scripts.s`):
 
 | op | frames |
 |---|---|
 | `loadspritegfx`, `monbg` | +3 |
-| `delay N` | N + 2 (`delay 0`: 1 frame) |
+| `delay N` | N + 2 (`delay 0` is -1: also 2 frames) |
 | `waitforvisualfinish`, `waitbgfadein/out`, `waitsound` | data-dependent: later frames are *gated* (not resolved) |
 | `choosetwoturnanim a, b` | label `b` when the move turn is odd |
 | `jumpifmoveturn n, L` | branch on equality |
@@ -77,7 +81,37 @@ battle_anim_ghost.c 2 (Confuse Ray), and one each in electric, fire, psychic.
 Sprite-callback sites depend on per-sprite state (not the script clock), so they are
 per-family slices.
 
-## 4. Slice plan
+## 4. aud242a implementation and ROM calibration
+
+- `tools/extract/extract-anim-sound-timing.ts` (`npm run extract:anim-sound-timing`) walks every
+  move body for move turns 0..5 with the VM clock above and writes
+  `src/data/gen/anim-sound-timing.json` (356 moves, 257 distinct variants, 571 ops; the sound ops
+  before the first data-dependent wait or unresolved jump; later ones are counted as `gated`).
+- `src/engine/moveAnimSounds.ts` (`emitMoveAnimSounds`, called from `tick()` inside
+  `soundCollecting()`): Scene ON only (`HITMARKER_NO_ANIMATIONS` clear), live commands only.
+  An op at script frame `f` is emitted when `age == f + 1 + 7`; 7 is the Scene ON controller lag
+  (`SCENE_ON_LAG`, battleHitSounds). Pan = `animSoundPan(op.pan, {attackerSide, targetSide})`.
+  `loopsewithpan` expands to t0, t0 + wait, then every wait + 1.
+- ROM comparison (27 hybrid `--fast` windows for calibration; 8 step-mode windows pinned in
+  `tools/audio/fixtures/aud242a-*.json`, test `tests/aud242aMoveAnimSounds.test.ts`): ids and pans
+  equal the ROM everywhere, including opponent-side `-63` / `63` swaps. Frames are exact for
+  Slam, Razor Leaf (7 SEs), Swift (5), Slash, Quick Attack, Vice Grip (contact and projectile bodies, lead 0 or 13)
+  on both sides. Constant per-move residuals (ROM minus ours), named not fitted:
+
+| move | residual | note |
+|---|---|---|
+| Ember, Acid, Bite | +2 | idle-lead moves (lead 4/7/10); lead is a visual-onset measure |
+| Twineedle | +10 | lead 10, script start aligned to the window instead |
+| Double Slap, Fury Swipes | +9 | multi-hit bodies |
+| Bind | +6 | `pre` 0 side |
+| Psybeam | +2 | plus 4 SE_M_PSYBEAM2 task SEs (createsoundtask, aud242c) |
+| Agility, Double Team, Swords Dance, Sand Attack, Light Screen, Harden | -4 / -2 / -4 / -2 / -4 / -5 | status moves |
+
+- Not emitted: declined (static / approximate) bodies (`liveMoveAnimationDuration` null: Tackle,
+  Vine Whip, Seismic Toss, ...), ops after a data-dependent wait, `jumpret*` runs, `panse*`,
+  `setpan`, `createsoundtask` (slices b/c).
+
+## 5. Slice plan
 
 1. **aud242a (this slice)**: a generic emitter for the pre-wait deterministic prefix of
    `playsewithpan` / `playse` / `waitplaysewithpan` / `loopsewithpan`, data-driven from a

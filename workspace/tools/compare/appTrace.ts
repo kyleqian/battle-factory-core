@@ -1010,6 +1010,7 @@ function aud241bStage(
   playerMoveId = 69,
   lastFaint?: "opponent" | "player",
   frontierBrain = false,
+  opponentMoveId = 69,
 ): EngineState {
   return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
     ...(lastFaint === "opponent" ? { trainerBenchHp: null } : {}),
@@ -1017,7 +1018,7 @@ function aud241bStage(
     ...(frontierBrain ? { frontierBrain } : {}),
     battleScene: scene,
     player: rattataAtLevel(playerLevel, playerMoveId),
-    trainer: rattataAtLevel(opponentLevel),
+    trainer: rattataAtLevel(opponentLevel, opponentMoveId),
     usedMessageHoldFrames: 0,
     sceneOffNoAnimations: scene === "off",
   });
@@ -1807,6 +1808,16 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud241c-loss-off": (state) => aud241bStage(state, "aud241c-loss-off", "off", 12, 50, 69, "player"),
   "aud241b-super-effective-on": (state) => aud241bStage(state, "aud241b-super-effective-on", "on", 50, 12, 2),
   "aud241b-super-effective-off": (state) => aud241bStage(state, "aud241b-super-effective-off", "off", 50, 12, 2),
+  // aud242a: Scene ON move-animation sound windows (one Level-50 attacker side each; docs/aud242-move-anim-sounds.md).
+  "aud242a-slam-player-on": (state) => aud241bStage(state, "aud242a-slam-player-on", "on", 50, 12, 21, undefined, false, 69),
+  "aud242a-slam-player-off": (state) => aud241bStage(state, "aud242a-slam-player-off", "off", 50, 12, 21, undefined, false, 69),
+  "aud242a-razorleaf-player-on": (state) => aud241bStage(state, "aud242a-razorleaf-player-on", "on", 50, 12, 75, undefined, false, 69),
+  "aud242a-swift-opponent-on": (state) => aud241bStage(state, "aud242a-swift-opponent-on", "on", 12, 50, 69, undefined, false, 129),
+  "aud242a-swordsdance-opponent-on": (state) => aud241bStage(state, "aud242a-swordsdance-opponent-on", "on", 12, 50, 69, undefined, false, 14),
+  "aud242a-slash-opponent-on": (state) => aud241bStage(state, "aud242a-slash-opponent-on", "on", 12, 50, 69, undefined, false, 163),
+  "aud242a-ember-player-on": (state) => aud241bStage(state, "aud242a-ember-player-on", "on", 50, 12, 52, undefined, false, 69),
+  "aud242a-psybeam-player-on": (state) => aud241bStage(state, "aud242a-psybeam-player-on", "on", 50, 12, 60, undefined, false, 69),
+  "aud242a-agility-player-on": (state) => aud241bStage(state, "aud242a-agility-player-on", "on", 50, 12, 97, undefined, false, 33),
   "pmo239-switch-0-to-2-off": pmo239SwitchReopenOffStage,
   "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
   "party-menu-status-item-off": partyMenuStatusItemOffStage,
