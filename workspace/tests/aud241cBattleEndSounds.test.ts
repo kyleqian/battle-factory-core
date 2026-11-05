@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
+import { beginScreenSoundTick, handleLowHpMusicChange, stopLowHpSound } from "../src/engine/screenSounds.ts";
 import type { GbaButton } from "../src/engine/core.ts";
 
 interface FixtureEvent {
@@ -100,6 +101,24 @@ const describeWindow = (name: string, window: Window, upTo: number, count: numbe
 describe("battle-end sounds match the ROM windows (aud241c)", () => {
   describeWindow("aud241c-win-on-window", { stage: "aud241c-win-on", scene: "on", dismisses: 3 }, 400, 8);
   describeWindow("aud241c-win-off-window", { stage: "aud241c-win-off", scene: "off", dismisses: 3 }, 400, 8);
+  describeWindow("aud241c-brain-on-window", { stage: "aud241c-brain-on", scene: "on", dismisses: 3 }, 400, 7);
+  describeWindow("aud241c-brain-off-window", { stage: "aud241c-brain-off", scene: "off", dismisses: 3 }, 400, 7);
   describeWindow("aud241c-loss-on-window", { stage: "aud241c-loss-on", scene: "on", dismisses: 3 }, 1400, 8);
   describeWindow("aud241c-loss-off-window", { stage: "aud241c-loss-off", scene: "off", dismisses: 3 }, 700, 8);
+});
+
+describe("write-only and the low-HP loop (aud241c)", () => {
+  it("collecting sounds does not change the engine state through the whole battle end (win, Brain win, loss; both scenes)", () => {
+    for (const [stage, scene] of [["aud241c-win-on", "on"], ["aud241c-win-off", "off"], ["aud241c-brain-on", "on"], ["aud241c-loss-off", "off"]] as const) {
+      const window: Window = { stage, scene, dismisses: 3 };
+      const presses = new Set([1, 21, 501, 601, 701, 801, 1100]);
+      expect(run(window, presses, 1300, true).state, stage).toBe(run(window, presses, 1300, false).state);
+    }
+  });
+
+  it("BattleStopLowHpSound is a real stop only while the loop plays, and clears it", () => {
+    const events = (calls: () => void) => collectSoundTick(1, () => { beginScreenSoundTick(1); calls(); }).events.map((e) => `${e.kind}:${e.id}`);
+    expect(events(() => { stopLowHpSound(); })).toEqual([]);
+    expect(events(() => { handleLowHpMusicChange(11, 61); stopLowHpSound(); stopLowHpSound(); })).toEqual(["se:90", "stop:90"]);
+  });
 });

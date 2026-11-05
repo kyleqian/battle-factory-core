@@ -1009,10 +1009,12 @@ function aud241bStage(
   opponentLevel: number,
   playerMoveId = 69,
   lastFaint?: "opponent" | "player",
+  frontierBrain = false,
 ): EngineState {
   return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
     ...(lastFaint === "opponent" ? { trainerBenchHp: null } : {}),
     ...(lastFaint === "player" ? { playerBenchNone: true } : {}),
+    ...(frontierBrain ? { frontierBrain } : {}),
     battleScene: scene,
     player: rattataAtLevel(playerLevel, playerMoveId),
     trainer: rattataAtLevel(opponentLevel),
@@ -1034,6 +1036,8 @@ type MidBattleSwitchStageOptions = Readonly<{
   /** `null`: no bench for that side (the last faint is a hard terminal, the full-turn reducer's default shape). */
   trainerBenchHp?: readonly [number, number] | null;
   playerBenchNone?: boolean;
+  /** Stage the 21st battle of the run: the Silver Factory Head round (`currentOpponent.frontierBrain`). */
+  frontierBrain?: boolean;
 }>;
 
 function midBattleSwitchStage(
@@ -1053,7 +1057,7 @@ function midBattleSwitchStage(
     id,
     ...(options.battleScene === undefined ? {} : { battleScene: options.battleScene }),
     rngValue: 4,
-    factoryWinStreak: 0,
+    factoryWinStreak: options.frontierBrain === true ? 20 : 0,
     playerTrainerId: 0x89ab_cdef,
     battleTowerLevel50WinStreak: 0,
     facilityState: { rentsCount: 0 },
@@ -1797,6 +1801,8 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   // aud241c: the battle-end windows. Last faint with both benches empty: the opponent's (win) or the player's (loss).
   "aud241c-win-on": (state) => aud241bStage(state, "aud241c-win-on", "on", 50, 12, 69, "opponent"),
   "aud241c-win-off": (state) => aud241bStage(state, "aud241c-win-off", "off", 50, 12, 69, "opponent"),
+  "aud241c-brain-on": (state) => aud241bStage(state, "aud241c-brain-on", "on", 50, 12, 69, "opponent", true),
+  "aud241c-brain-off": (state) => aud241bStage(state, "aud241c-brain-off", "off", 50, 12, 69, "opponent", true),
   "aud241c-loss-on": (state) => aud241bStage(state, "aud241c-loss-on", "on", 12, 50, 69, "player"),
   "aud241c-loss-off": (state) => aud241bStage(state, "aud241c-loss-off", "off", 12, 50, 69, "player"),
   "aud241b-super-effective-on": (state) => aud241bStage(state, "aud241b-super-effective-on", "on", 50, 12, 2),
