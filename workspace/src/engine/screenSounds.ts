@@ -185,6 +185,13 @@ export function handleLowHpMusicChange(hp: number, maxHp: number): void {
   emitSound({ kind: "stop", id: SE_LOW_HEALTH, pan: null });
 }
 
+/** BattleStopLowHpSound (battle_main.c): `m4aSongNumStop(SE_LOW_HEALTH)`, a logged no-op unless the loop was playing; clears the loop flag. */
+export function stopLowHpSound(): void {
+  if (!soundCollecting() || !lowHpPlaying) return;
+  lowHpPlaying = false;
+  emitSound({ kind: "stop", id: SE_LOW_HEALTH, pan: null });
+}
+
 export const SE_BALL_OPEN = 15;
 export const SE_BALL_TRAY_ENTER = 114;
 export const SE_BALL_TRAY_BALL = 115;
