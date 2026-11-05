@@ -47,7 +47,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Wind-down gates** (`sv-20261104/gates-final/`, src `fef00b6c5` = final src minus the move above): typecheck 0; build 0;
   **full suite 1,792 files: 1,747 passed + 44 skipped, 1 failed (the ratchet above)**, 14,685 tests passed; play:random 4 min /
   scene: ON 23 battles / 9 swaps, OFF 35 / 16 (max streak 7); `--lobby-new-challenge` 2 min / scene: 0 page errors / overlays /
-  contained / divergences; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each; GATES_PENDING
+  contained / divergences; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON
+  **20 / 20**, Scene OFF **20 / 20** (all `budget`); Scene ON full vary-rng 0:16 `--render-every 8` **16 / 16** (all `budget`); Scene ON
+  winning first-round 0:6 `--render-every 1` **6 / 6**. The 0:60 gates were not run (hours each here).
 
 ---
 
