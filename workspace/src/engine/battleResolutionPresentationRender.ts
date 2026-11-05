@@ -1108,13 +1108,6 @@ export type BattleResolutionPresentationRenderView = Readonly<{
     /** pfr192: the faint-replacement send-in's keyed clock (null = the canonical MAGBY / Scene ON constants). */
     timing: PartySendOutTiming | null;
     battler: 0 | 1;
-    /**
-     * Null when this switch-in's own script never called
-     * `drawpartystatussummary` -- e.g. `BattleScript_EffectBatonPass`
-     * (ISSUES #89), unlike `BattleScript_HandleFaintedMon`'s forced-switch
-     * dance, which always draws the tray. Source-genuine absence, not a gap.
-     */
-    partyStates: readonly import("./battleResolutionPresentation.ts").PartyBallState[] | null;
   }> | null;
   /**
    * ISSUES #78: the mid-battle voluntary switch-in presentation, populated
@@ -2056,12 +2049,6 @@ export function createBattleResolutionPresentationRenderView(
         { type: "switch-in" }
       > => candidate.type === "switch-in",
     );
-    const summary = segment.commands.find(
-      (candidate): candidate is Extract<
-        BattleResolutionPresentationCommand,
-        { type: "party-summary" }
-      > => candidate.type === "party-summary" && candidate.visible,
-    );
     const message = segment.commands.find(
       (candidate): candidate is Extract<
         BattleResolutionPresentationCommand,
@@ -2085,7 +2072,6 @@ export function createBattleResolutionPresentationRenderView(
       phase: partySendOutPhase(state.lifecycle.phaseElapsed, sendOutTiming ?? undefined),
       timing: sendOutTiming,
       battler: switchCommand.battler,
-      partyStates: summary?.states ?? null,
     });
     // pfb229 (docs/pfb228-faint-replacement-emerge.md): a Scene ON non-MAGBY faint-replacement send-in runs the path-A ball / release / emerge /
     // back-animation timeline translated by the keyed ball clock: A = partySendOutReleaseClock(e) - 96 = e - B - releaseExtra.

@@ -368,8 +368,6 @@ export const PARTY_SENDOUT_FADE_OUT_START = PARTY_SENDOUT_SUBMENU_HOLD_FRAMES;
 export const PARTY_SENDOUT_BLACK_START = PARTY_SENDOUT_FADE_OUT_START + PARTY_SENDOUT_FADE_OUT_FRAMES;
 export const PARTY_SENDOUT_BATTLE_FADE_IN_START = PARTY_SENDOUT_BLACK_START + PARTY_SENDOUT_BLACK_FRAMES;
 /** First `Go! MAGBY!` glyph, after the field's palette has settled. */
-/** The ROM drops the party-summary tray with the battle fade-in (frame 70 is its last), confirmation-relative for every species (pfr192 dense frames). */
-export const PARTY_SENDOUT_SUMMARY_TRAY_END = PARTY_SENDOUT_BATTLE_FADE_IN_START + 15;
 export const PARTY_SENDOUT_GO_TEXT_START = PARTY_SENDOUT_BATTLE_FADE_IN_START + 28;
 export const PARTY_SENDOUT_GO_TEXT = "Go! MAGBY!";
 
