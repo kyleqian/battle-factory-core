@@ -37,7 +37,6 @@ tests/animation/crunch.test.ts
 tests/animation/crushClaw.test.ts
 tests/animation/d4laterTiming.test.ts
 tests/animation/defenseCurl.test.ts
-tests/animation/destinyBondReducer.test.ts
 tests/animation/detect.test.ts
 tests/animation/disable.test.ts
 tests/animation/diveReducerCheckpoint.test.ts
@@ -61,7 +60,6 @@ tests/animation/extremeSpeed.test.ts
 tests/animation/facade.test.ts
 tests/animation/fakeOut.test.ts
 tests/animation/fakeTears.test.ts
-tests/animation/fireBlastReducer.test.ts
 tests/animation/fireSpin.test.ts
 tests/animation/fissure.test.ts
 tests/animation/flailReducer.test.ts
@@ -73,7 +71,6 @@ tests/animation/focusEnergy.test.ts
 tests/animation/focusPunch.test.ts
 tests/animation/followMe.test.ts
 tests/animation/foresightExactTranslation.test.ts
-tests/animation/furyCutterProduction.test.ts
 tests/animation/furySwipes.test.ts
 tests/animation/futureSight.test.ts
 tests/animation/gbaObjCompositor.test.ts
@@ -85,10 +82,8 @@ tests/animation/guillotine.test.ts
 tests/animation/harden.test.ts
 tests/animation/haze.test.ts
 tests/animation/headbutt.test.ts
-tests/animation/healBellEvidenceCheckpoint.test.ts
 tests/animation/heatWave.test.ts
 tests/animation/helpingHandReducer.test.ts
-tests/animation/hiJumpKick.test.ts
 tests/animation/horizontalLunge.test.ts
 tests/animation/howl.test.ts
 tests/animation/hydroPump.test.ts
@@ -96,7 +91,6 @@ tests/animation/hyperFang.test.ts
 tests/animation/hypnosis.test.ts
 tests/animation/iceBeamReducer.test.ts
 tests/animation/icePunch.test.ts
-tests/animation/icyWind.test.ts
 tests/animation/ingrain.test.ts
 tests/animation/ironDefense.test.ts
 tests/animation/ironTail.test.ts
@@ -112,8 +106,6 @@ tests/animation/liveFa185Timing.test.ts
 tests/animation/livePrep29Adapters.test.ts
 tests/animation/liveRollout.test.ts
 tests/animation/liveSpeciesAudit14Fixes.test.ts
-tests/animation/lovelyKiss.test.ts
-tests/animation/machPunchReducer.test.ts
 tests/animation/magicalLeaf.test.ts
 tests/animation/magnitudeReducer.test.ts
 tests/animation/meanLook.test.ts
@@ -146,10 +138,8 @@ tests/animation/protect.test.ts
 tests/animation/psybeam.test.ts
 tests/animation/psychUpReducer.test.ts
 tests/animation/psychic.test.ts
-tests/animation/psywaveReducer.test.ts
 tests/animation/pursuitReducer.test.ts
 tests/animation/quickAttack.test.ts
-tests/animation/rainDance.test.ts
 tests/animation/rapidSpinReducer.test.ts
 tests/animation/razorWind.test.ts
 tests/animation/recover.test.ts
@@ -173,8 +163,6 @@ tests/animation/shadowPunch.test.ts
 tests/animation/shadowPunchFadeHost.test.ts
 tests/animation/sheerColdReducer.test.ts
 tests/animation/sing.test.ts
-tests/animation/skillSwapReducer.test.ts
-tests/animation/skyAttackReducer.test.ts
 tests/animation/slam.test.ts
 tests/animation/slash.test.ts
 tests/animation/sleepPowder.test.ts
@@ -184,8 +172,6 @@ tests/animation/sludgeBomb.test.ts
 tests/animation/smellingSalt.test.ts
 tests/animation/smokescreen.test.ts
 tests/animation/snoreReducer.test.ts
-tests/animation/softBoiledReducer.test.ts
-tests/animation/solarBeam.test.ts
 tests/animation/sonicBoom.test.ts
 tests/animation/spark.test.ts
 tests/animation/spikeCannon.test.ts
@@ -223,7 +209,6 @@ tests/animation/tripleKick.test.ts
 tests/animation/twineedle.test.ts
 tests/animation/viceGrip.test.ts
 tests/animation/waterGun.test.ts
-tests/animation/waterPulseReducer.test.ts
 tests/animation/waterSpoutReducer.test.ts
 tests/animation/whirlpool.test.ts
 tests/animation/whirlwind.test.ts

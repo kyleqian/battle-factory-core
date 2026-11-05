@@ -37,7 +37,6 @@ tests/animation/crunch.test.ts	breadth fill	5
 tests/animation/crushClaw.test.ts	breadth fill	9
 tests/animation/d4laterTiming.test.ts	breadth fill	7
 tests/animation/defenseCurl.test.ts	breadth fill	2
-tests/animation/destinyBondReducer.test.ts	breadth fill	1793
 tests/animation/detect.test.ts	breadth fill	3
 tests/animation/disable.test.ts	breadth fill	3
 tests/animation/diveReducerCheckpoint.test.ts	breadth fill	936
@@ -61,7 +60,6 @@ tests/animation/extremeSpeed.test.ts	breadth fill	20
 tests/animation/facade.test.ts	breadth fill	7
 tests/animation/fakeOut.test.ts	breadth fill	21
 tests/animation/fakeTears.test.ts	breadth fill	230
-tests/animation/fireBlastReducer.test.ts	breadth fill	1735
 tests/animation/fireSpin.test.ts	breadth fill	3
 tests/animation/fissure.test.ts	breadth fill	346
 tests/animation/flailReducer.test.ts	breadth fill	324
@@ -73,7 +71,6 @@ tests/animation/focusEnergy.test.ts	breadth fill	324
 tests/animation/focusPunch.test.ts	breadth fill	3
 tests/animation/followMe.test.ts	breadth fill	169
 tests/animation/foresightExactTranslation.test.ts	breadth fill	1
-tests/animation/furyCutterProduction.test.ts	breadth fill	1930
 tests/animation/furySwipes.test.ts	breadth fill	2
 tests/animation/futureSight.test.ts	breadth fill	4
 tests/animation/gbaObjCompositor.test.ts	breadth fill	2
@@ -85,10 +82,8 @@ tests/animation/guillotine.test.ts	breadth fill	6
 tests/animation/harden.test.ts	breadth fill	1
 tests/animation/haze.test.ts	breadth fill	1
 tests/animation/headbutt.test.ts	breadth fill	394
-tests/animation/healBellEvidenceCheckpoint.test.ts	breadth fill	2098
 tests/animation/heatWave.test.ts	breadth fill	4
 tests/animation/helpingHandReducer.test.ts	breadth fill	4
-tests/animation/hiJumpKick.test.ts	breadth fill	1885
 tests/animation/horizontalLunge.test.ts	breadth fill	1
 tests/animation/howl.test.ts	breadth fill	172
 tests/animation/hydroPump.test.ts	breadth fill	52
@@ -96,7 +91,6 @@ tests/animation/hyperFang.test.ts	breadth fill	4
 tests/animation/hypnosis.test.ts	breadth fill	3
 tests/animation/iceBeamReducer.test.ts	breadth fill	620
 tests/animation/icePunch.test.ts	breadth fill	38
-tests/animation/icyWind.test.ts	breadth fill	1979
 tests/animation/ingrain.test.ts	breadth fill	4
 tests/animation/ironDefense.test.ts	breadth fill	3
 tests/animation/ironTail.test.ts	breadth fill	4
@@ -112,8 +106,6 @@ tests/animation/liveFa185Timing.test.ts	named: live animation adapters	5
 tests/animation/livePrep29Adapters.test.ts	breadth fill	636
 tests/animation/liveRollout.test.ts	named: live animation adapters	3
 tests/animation/liveSpeciesAudit14Fixes.test.ts	breadth fill	625
-tests/animation/lovelyKiss.test.ts	breadth fill	1651
-tests/animation/machPunchReducer.test.ts	breadth fill	1686
 tests/animation/magicalLeaf.test.ts	breadth fill	20
 tests/animation/magnitudeReducer.test.ts	breadth fill	4
 tests/animation/meanLook.test.ts	breadth fill	2
@@ -146,10 +138,8 @@ tests/animation/protect.test.ts	breadth fill	1412
 tests/animation/psybeam.test.ts	breadth fill	840
 tests/animation/psychUpReducer.test.ts	breadth fill	1071
 tests/animation/psychic.test.ts	breadth fill	4
-tests/animation/psywaveReducer.test.ts	breadth fill	1864
 tests/animation/pursuitReducer.test.ts	breadth fill	1316
 tests/animation/quickAttack.test.ts	breadth fill	5
-tests/animation/rainDance.test.ts	breadth fill	1675
 tests/animation/rapidSpinReducer.test.ts	breadth fill	430
 tests/animation/razorWind.test.ts	breadth fill	1115
 tests/animation/recover.test.ts	breadth fill	2
@@ -173,8 +163,6 @@ tests/animation/shadowPunch.test.ts	breadth fill	4
 tests/animation/shadowPunchFadeHost.test.ts	breadth fill	7
 tests/animation/sheerColdReducer.test.ts	breadth fill	470
 tests/animation/sing.test.ts	breadth fill	6
-tests/animation/skillSwapReducer.test.ts	breadth fill	1810
-tests/animation/skyAttackReducer.test.ts	breadth fill	1665
 tests/animation/slam.test.ts	breadth fill	585
 tests/animation/slash.test.ts	breadth fill	4
 tests/animation/sleepPowder.test.ts	breadth fill	1161
@@ -184,8 +172,6 @@ tests/animation/sludgeBomb.test.ts	breadth fill	4
 tests/animation/smellingSalt.test.ts	breadth fill	85
 tests/animation/smokescreen.test.ts	breadth fill	3
 tests/animation/snoreReducer.test.ts	breadth fill	988
-tests/animation/softBoiledReducer.test.ts	breadth fill	1553
-tests/animation/solarBeam.test.ts	breadth fill	2239
 tests/animation/sonicBoom.test.ts	breadth fill	3
 tests/animation/spark.test.ts	breadth fill	580
 tests/animation/spikeCannon.test.ts	breadth fill	4
@@ -223,7 +209,6 @@ tests/animation/tripleKick.test.ts	breadth fill	3
 tests/animation/twineedle.test.ts	breadth fill	2
 tests/animation/viceGrip.test.ts	breadth fill	5
 tests/animation/waterGun.test.ts	breadth fill	1
-tests/animation/waterPulseReducer.test.ts	breadth fill	1717
 tests/animation/waterSpoutReducer.test.ts	breadth fill	541
 tests/animation/whirlpool.test.ts	breadth fill	31
 tests/animation/whirlwind.test.ts	breadth fill	2

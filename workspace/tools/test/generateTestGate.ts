@@ -10,7 +10,7 @@ const DURATIONS = "tools/test/gate-durations.tsv";
 const LIST = "tools/test/test-gate.list";
 const PER_FILE_CAP_MS = 15_000; // no single file may cost more than this in the gate
 const NAMED_CAP_MS = 25_000; // ratchets named explicitly may cost more (audioHeadlessBoundary is 19 s)
-const DEFAULT_BUDGET_MS = 190_000; // summed per-file test time; wall is roughly half of it on 2 workers plus collect
+const DEFAULT_BUDGET_MS = 160_000; // summed per-file test time; wall is roughly half of it on 2 workers plus collect
 
 const args = process.argv.slice(2);
 const check = args.includes("--check");
