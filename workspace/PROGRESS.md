@@ -9,7 +9,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 - **State:** master `f3440331d`+ (final src == aud241c merge). Tree clean, no active workers. Evidence `.integration/validation/sv-20261104/`.
   The long gates below ran on src `fef00b6c5`; the final src adds only the ratchet move `bc74a02d3` and aud241c (write-only sound),
-  covered by the final full suite + build in `sv-20261104/final-suite/` (FINAL_SUITE).
+  covered by the final full suite + build in `sv-20261104/final-suite/` on `f3440331d`: **1,793 files: 1,749 passed + 44 skipped,
+  0 failed** (14,724 tests); build 0; build:lib 0.
 - **Folded:** aud241a (S11 step 5, first slice; `docs/aud241a-battle-start-sounds.md`; branch `worker/integration-20261104-213051`):
   `src/engine/battleStartSounds.ts` emits from `tick()` (guarded by `soundCollecting()`) the battle BGM (476, Brain 471) with
   `m4aMPlayAllStop`, the ball tray ENTER / BALL / EXIT SEs (per-side pans, SE player field), SE_BALL_OPEN and the send-out cries
