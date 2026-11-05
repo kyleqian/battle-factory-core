@@ -1008,8 +1008,13 @@ function aud241bStage(
   playerLevel: number,
   opponentLevel: number,
   playerMoveId = 69,
+  lastFaint?: "opponent" | "player",
+  frontierBrain = false,
 ): EngineState {
   return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    ...(lastFaint === "opponent" ? { trainerBenchHp: null } : {}),
+    ...(lastFaint === "player" ? { playerBenchNone: true } : {}),
+    ...(frontierBrain ? { frontierBrain } : {}),
     battleScene: scene,
     player: rattataAtLevel(playerLevel, playerMoveId),
     trainer: rattataAtLevel(opponentLevel),
@@ -1028,6 +1033,11 @@ type MidBattleSwitchStageOptions = Readonly<{
   trainer?: FactoryFullTurnBattlerConfig;
   usedMessageHoldFrames?: number;
   sceneOffNoAnimations?: boolean;
+  /** `null`: no bench for that side (the last faint is a hard terminal, the full-turn reducer's default shape). */
+  trainerBenchHp?: readonly [number, number] | null;
+  playerBenchNone?: boolean;
+  /** Stage the 21st battle of the run: the Silver Factory Head round (`currentOpponent.frontierBrain`). */
+  frontierBrain?: boolean;
 }>;
 
 function midBattleSwitchStage(
@@ -1047,7 +1057,7 @@ function midBattleSwitchStage(
     id,
     ...(options.battleScene === undefined ? {} : { battleScene: options.battleScene }),
     rngValue: 4,
-    factoryWinStreak: 0,
+    factoryWinStreak: options.frontierBrain === true ? 20 : 0,
     playerTrainerId: 0x89ab_cdef,
     battleTowerLevel50WinStreak: 0,
     facilityState: { rentsCount: 0 },
@@ -1077,10 +1087,15 @@ function midBattleSwitchStage(
     rngSeed: 1,
     player: options.player ?? RATTATA_LV50,
     trainer: options.trainer ?? RATTATA_LV50,
-    playerBenchHp: [...playerBenchHp],
-    playerBenchOverride: [...playerBench],
-    trainerBenchHp: [105, 105],
-    trainerBenchOverride: [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH],
+    ...(options.playerBenchNone === true
+      ? {}
+      : { playerBenchHp: [...playerBenchHp] as [number, number], playerBenchOverride: [...playerBench] as [BattleScriptPartyMemberInput, BattleScriptPartyMemberInput] }),
+    ...(options.trainerBenchHp === null
+      ? {}
+      : {
+          trainerBenchHp: [...(options.trainerBenchHp ?? [105, 105])] as [number, number],
+          trainerBenchOverride: [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH] as [BattleScriptPartyMemberInput, BattleScriptPartyMemberInput],
+        }),
   });
   // Scene OFF: factoryBattleStart.ts sets HITMARKER_NO_ANIMATIONS for the whole battle; the staged state starts with hitMarker 0.
   const staged = options.sceneOffNoAnimations !== true
@@ -1783,6 +1798,13 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud241b-lowhp-on": (state) => aud241bStage(state, "aud241b-lowhp-on", "on", 27, 50),
   "aud241b-lowhp-off": (state) => aud241bStage(state, "aud241b-lowhp-off", "off", 27, 50),
   // MOVE_KARATE_CHOP (2, Fighting) against a Normal Rattata: SE_SUPER_EFFECTIVE, then the faint.
+  // aud241c: the battle-end windows. Last faint with both benches empty: the opponent's (win) or the player's (loss).
+  "aud241c-win-on": (state) => aud241bStage(state, "aud241c-win-on", "on", 50, 12, 69, "opponent"),
+  "aud241c-win-off": (state) => aud241bStage(state, "aud241c-win-off", "off", 50, 12, 69, "opponent"),
+  "aud241c-brain-on": (state) => aud241bStage(state, "aud241c-brain-on", "on", 50, 12, 69, "opponent", true),
+  "aud241c-brain-off": (state) => aud241bStage(state, "aud241c-brain-off", "off", 50, 12, 69, "opponent", true),
+  "aud241c-loss-on": (state) => aud241bStage(state, "aud241c-loss-on", "on", 12, 50, 69, "player"),
+  "aud241c-loss-off": (state) => aud241bStage(state, "aud241c-loss-off", "off", 12, 50, 69, "player"),
   "aud241b-super-effective-on": (state) => aud241bStage(state, "aud241b-super-effective-on", "on", 50, 12, 2),
   "aud241b-super-effective-off": (state) => aud241bStage(state, "aud241b-super-effective-off", "off", 50, 12, 2),
   "pmo239-switch-0-to-2-off": pmo239SwitchReopenOffStage,
