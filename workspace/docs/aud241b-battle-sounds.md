@@ -67,7 +67,7 @@ pinned in the test, but the engine's Rhydon / Golbat window is not built, so "th
 
 ## Not covered (unmodelled or unverified)
 
-- **Low-HP at the switch-in** (`SwitchIn_HandleSoundAndEnd`, `battle_controller_player.c:1093/1138`, after the send-out cry's restore):
+- **Low-HP at the switch-in** (`SwitchIn_HandleSoundAndEnd`, `battle_controller_player.c:1093`, after the send-out cry's restore):
   `lowHpSong` survives a voluntary switch-out, so a green mon switched in while the loop plays gets a real `stop 90`, and a red mon
   switched in gets `se 90`. No ROM window; **not emitted**.
 - **Victory / quit stops** (`battle_main.c:4975/4985/5247` `BattleStopLowHpSound`): a real stop when the loop is playing at the win.
