@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { beginScreenSoundTick, handleLowHpMusicChange, stopLowHpSound } from "../src/engine/screenSounds.ts";
-import type { GbaButton } from "../src/engine/core.ts";
+import type { GbaButton } from "../src/input.ts";
 
 interface FixtureEvent {
   frame: number;
