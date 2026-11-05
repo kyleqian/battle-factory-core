@@ -720,6 +720,7 @@ import {
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
+import { emitBattleHitSounds } from "./battleHitSounds.ts";
 import { emitBattleStartBgm, emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
 import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
 import { soundCollecting } from "../audio/soundEvents.ts";
@@ -1055,6 +1056,13 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
     }
     if (orchestratorAfter?.battleResolutionPresentation) {
       emitMidBattleSwitchSounds(
+        state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,
+        orchestratorAfter.battleResolutionPresentation,
+        orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
+      );
+    }
+    if (orchestratorAfter?.battleResolutionPresentation) {
+      emitBattleHitSounds(
         state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,
         orchestratorAfter.battleResolutionPresentation,
         orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,

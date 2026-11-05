@@ -12,7 +12,8 @@ import { presentationRngFromTrace } from "../../src/engine/presentationRngHost.t
 import type { EngineState } from "../../src/engine/core.ts";
 import { traceAdvances } from "./traceReplay.ts";
 import { BATTLE2_OFF_TURN1_COMMAND_DURATIONS } from "../../src/engine/battle2CommandAdapter.ts";
-import { createFactoryFullTurnBattleState } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import { createFactoryFullTurnBattleState, createFactoryFullTurnBattleStateFromRulesContext } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../../src/engine/battleScriptSourceConstants.ts";
 import { stageFactoryFullTurnBattle } from "../../src/engine/stagedBattleTurn.ts";
 import {
   createSceneOnMovePresentation,
@@ -975,23 +976,76 @@ function midBattleSwitchDenseOffStage(state: EngineState): EngineState {
   return midBattleSwitchStage(state, "mid-battle-switch-dense-off", [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105]);
 }
 
+// aud241b: hit / faint / low-HP sound windows (tools/battle-lab/aud241b-*.json): both sides are Rattata at
+// the given levels with SEISMIC TOSS x4 (a fixed, RNG-free damage equal to the attacker's level), so the faint
+// and red-HP turns are deterministic. Stats are the ROM's for nature 0, IV 31, EV 0.
+function rattataAtLevel(level: number, moveId = 69): FactoryFullTurnBattlerConfig {
+  const stat = (base: number, hp = false): number => {
+    const raw = Math.floor(((2 * base + 31) * level) / 100);
+    return hp ? raw + level + 10 : raw + 5;
+  };
+  const hp = stat(30, true);
+  return Object.freeze({
+    ...RATTATA_LV50,
+    level,
+    moveId,
+    moves: [moveId, moveId, moveId, moveId] as const,
+    pp: [20, 20, 20, 20] as const,
+    attack: stat(56),
+    defense: stat(35),
+    spAttack: stat(25),
+    spDefense: stat(35),
+    speed: stat(72),
+    hp,
+    maxHp: hp,
+  });
+}
+
+function aud241bStage(
+  state: EngineState,
+  id: string,
+  scene: "on" | "off",
+  playerLevel: number,
+  opponentLevel: number,
+  playerMoveId = 69,
+): EngineState {
+  return midBattleSwitchStage(state, id, [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+    battleScene: scene,
+    player: rattataAtLevel(playerLevel, playerMoveId),
+    trainer: rattataAtLevel(opponentLevel),
+    usedMessageHoldFrames: 0,
+    sceneOffNoAnimations: scene === "off",
+  });
+}
+
 function pmo239SwitchReopenOffStage(state: EngineState): EngineState {
   return midBattleSwitchStage(state, "pmo239-switch-0-to-2-off", [PMO239_PIDGEY_BENCH, PMO239_MACHOP_BENCH], [115, 145]);
 }
+
+type MidBattleSwitchStageOptions = Readonly<{
+  battleScene?: "on" | "off";
+  player?: FactoryFullTurnBattlerConfig;
+  trainer?: FactoryFullTurnBattlerConfig;
+  usedMessageHoldFrames?: number;
+  sceneOffNoAnimations?: boolean;
+}>;
 
 function midBattleSwitchStage(
   state: EngineState,
   id: string,
   playerBench: readonly [BattleScriptPartyMemberInput, BattleScriptPartyMemberInput],
   playerBenchHp: readonly [number, number],
+  options: MidBattleSwitchStageOptions = {},
 ): EngineState {
   const playerRentalRecords = [
     generatedCommandRecord(664),
     generatedCommandRecord(678),
     generatedCommandRecord(527),
   ] as const;
+  const usedMessageHold = options.usedMessageHoldFrames ?? USED_MESSAGE_SPLASH_CONTROLLER_HOLD_FRAMES;
   let orchestrator = createFactoryRoundBattleOrchestrator({
     id,
+    ...(options.battleScene === undefined ? {} : { battleScene: options.battleScene }),
     rngValue: 4,
     factoryWinStreak: 0,
     playerTrainerId: 0x89ab_cdef,
@@ -1018,16 +1072,27 @@ function midBattleSwitchStage(
   if (orchestrator.battle === null || orchestrator.activeBattleCallStart === null) {
     throw new Error("mid-battle switch stage requires a live started battle");
   }
-  const staged = createFactoryFullTurnBattleState({
+  const stagedOn = createFactoryFullTurnBattleState({
     requestId: 1,
     rngSeed: 1,
-    player: RATTATA_LV50,
-    trainer: RATTATA_LV50,
+    player: options.player ?? RATTATA_LV50,
+    trainer: options.trainer ?? RATTATA_LV50,
     playerBenchHp: [...playerBenchHp],
     playerBenchOverride: [...playerBench],
     trainerBenchHp: [105, 105],
     trainerBenchOverride: [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH],
   });
+  // Scene OFF: factoryBattleStart.ts sets HITMARKER_NO_ANIMATIONS for the whole battle; the staged state starts with hitMarker 0.
+  const staged = options.sceneOffNoAnimations !== true
+    ? stagedOn
+    : createFactoryFullTurnBattleStateFromRulesContext({
+      requestId: 1,
+      rngSeed: 1,
+      rulesContext: Object.freeze({
+        ...stagedOn.rules.rulesContext,
+        hitMarker: (stagedOn.rules.rulesContext.hitMarker | BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS) >>> 0,
+      }),
+    });
   if (
     staged.boundary.kind !== "decision-required"
     || staged.boundary.request.kind !== "command"
@@ -1046,7 +1111,7 @@ function midBattleSwitchStage(
       // controller span (measured 39 = 1265-1303 in
       // docs/battle-message-pacing-ground-truth.md §2), shared by the
       // dense-a and pacing-b fixtures (identical scenarios).
-      USED_MESSAGE_SPLASH_CONTROLLER_HOLD_FRAMES,
+      usedMessageHold,
     ),
     // The fixture's frame 0 is the already-interactive action menu (its first
     // segment is an A press at frame 0), so the app stage must skip the
@@ -1081,7 +1146,7 @@ function midBattleSwitchStage(
     moveSelectionCursors: cursors,
     battlePresentationBoundaries: boundaries,
     aiHistory: createFactoryAiBattleHistory(staged.rules.rulesContext),
-    usedMessageHoldFrames: USED_MESSAGE_SPLASH_CONTROLLER_HOLD_FRAMES,
+    usedMessageHoldFrames: usedMessageHold,
   });
   return {
     ...state,
@@ -1711,6 +1776,15 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "loss-terminal-window-off": lossTerminalWindowStage,
   "win-terminal-window-off": winTerminalWindowStage,
   "mid-battle-switch-dense-off": midBattleSwitchDenseOffStage,
+  "aud241b-opponent-faint-on": (state) => aud241bStage(state, "aud241b-opponent-faint-on", "on", 50, 12),
+  "aud241b-opponent-faint-off": (state) => aud241bStage(state, "aud241b-opponent-faint-off", "off", 50, 12),
+  "aud241b-player-faint-on": (state) => aud241bStage(state, "aud241b-player-faint-on", "on", 12, 50),
+  "aud241b-player-faint-off": (state) => aud241bStage(state, "aud241b-player-faint-off", "off", 12, 50),
+  "aud241b-lowhp-on": (state) => aud241bStage(state, "aud241b-lowhp-on", "on", 27, 50),
+  "aud241b-lowhp-off": (state) => aud241bStage(state, "aud241b-lowhp-off", "off", 27, 50),
+  // MOVE_KARATE_CHOP (2, Fighting) against a Normal Rattata: SE_SUPER_EFFECTIVE, then the faint.
+  "aud241b-super-effective-on": (state) => aud241bStage(state, "aud241b-super-effective-on", "on", 50, 12, 2),
+  "aud241b-super-effective-off": (state) => aud241bStage(state, "aud241b-super-effective-off", "off", 50, 12, 2),
   "pmo239-switch-0-to-2-off": pmo239SwitchReopenOffStage,
   "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
   "party-menu-status-item-off": partyMenuStatusItemOffStage,
