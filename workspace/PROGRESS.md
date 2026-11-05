@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-04 / 05 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master `0b4fb3341`+ (aud241a, aud241b folded). Evidence `.integration/validation/sv-20261104/`. One worker at a time.
+- **State:** master `f3252017b`+ (aud241a, aud241b, frs247 folded). Evidence `.integration/validation/sv-20261104/`. One worker at a time.
 - **Folded:** aud241a (S11 step 5, first slice; `docs/aud241a-battle-start-sounds.md`; branch `worker/integration-20261104-213051`):
   `src/engine/battleStartSounds.ts` emits from `tick()` (guarded by `soundCollecting()`) the battle BGM (476, Brain 471) with
   `m4aMPlayAllStop`, the ball tray ENTER / BALL / EXIT SEs (per-side pans, SE player field), SE_BALL_OPEN and the send-out cries
@@ -26,7 +26,16 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `battle-window{,-off}` RHYDON / GOLBAT fixtures (no engine staging; ROM facts pinned only), switch-in low-HP call, non-hit hp.
   Worker: typecheck, build, build:lib 0; 22 files 887 tests + 7 appTrace importers 90; differential 28 traces identical.
   Supervisor: 4 audio files 316 / 316; differential 211 traces vs `ccdfe68d3` **38,532 / 38,532 identical**.
-- **Next:** frs247 (handoff 4b(d), faint-replacement reshow white flash) running; then cln240 (cleanup 5: `npm run test:gate`).
+- **Folded:** frs247 (handoff 4b(d), Kyle's white flash; `docs/frs247-faint-replacement-reshow.md`; branch
+  `worker/integration-20261105-005010`): `renderBattleResolutionForcedPartySelect` blended the reshow toward white and drew the
+  player ball tray; the ROM reshow is a brightness DECREASE (`BeginHardwarePaletteFade(0xFF,0,16,0,1)`) and flags 1 skip the player
+  summary. Now `mgbaDarkenColor` with the same BLDY ramp, tray removed (`PARTY_SENDOUT_SUMMARY_TRAY_END`, view `partyStates` gone).
+  ROM dense frames, 9 species x 2 scenes + a two-faint battle: the 15 fade rows (e56..70) went 576,000 px -> 0 in every window;
+  later residuals unchanged (OFF ball / release ~300k px, pfr192). Fixture `tools/integration/fixtures/frs247/rom-frames.json` +
+  `tests/frs247FaintReplacementReshow.test.ts` (10 / 12 fail on the parent). Re-pinned `battleResolutionPresentation.test.ts`
+  (view shape). Worker: differential 211 traces identical (no trace covers this return); census 0..999 both scenes 1000 / 1000
+  identical vs go246 baseline; 183 importing files 2,660 tests; typecheck, build, build:lib 0. Supervisor: the 2 files 51 / 51.
+- **Next:** cln240 (cleanup 5: `npm run test:gate`) running; then wind-down gates.
 
 ---
 
