@@ -22,10 +22,11 @@ const stats = (sid: number) => speciesStats.species.find((s) => s.id === sid)!;
 const name = (sid: number) => stats(sid).name.replace(/^SPECIES_/, "");
 const scenario = JSON.parse(readFileSync(`${romDir}/${id}-${scene}.scenario.json`, "utf8"));
 const probe = JSON.parse(readFileSync(`${romDir}/${id}-${scene}.json`, "utf8"));
-const raw = readFileSync(`${romDir}/${id}-${scene}.raw`);
+const faintNo = Number(opt("faint") ?? 1);
+const raw = readFileSync(`${romDir}/${id}-${scene}.raw${faintNo === 1 ? "" : `.f${faintNo}`}`);
 const FRAME = 240 * 160 * 3;
 const romFrame = (abs: number): Uint8Array | null => {
-  const i = abs - probe.rawFirstFrame;
+  const i = abs - (probe.rawFirsts?.[faintNo - 1] ?? probe.rawFirstFrame);
   return i < 0 || (i + 1) * FRAME > raw.length ? null : raw.subarray(i * FRAME, (i + 1) * FRAME);
 };
 
@@ -36,11 +37,11 @@ const mk = (b: 0 | 1, m: any, partyIndex: number) => {
     species: m.species as number, name: name(m.species), side: b === 0 ? "player" as const : "trainer" as const, battler: b,
     partyIndex, level: m.level as number, hp: maxHP, maxHP, gender: m.gender as "male" | "female", status: "none" as const,
     moveIds: [0, 0, 0, 0] as const, currentPP: [0, 0, 0, 0] as const, ppBonuses: 0,
-    personality: b === 0 && partyIndex === 1 ? (m.nature as number) : 0,
+    personality: b === 0 && partyIndex >= 1 ? (m.nature as number) : 0,
   });
 };
-const incomingCfg = parties.player[1];
-const incoming = mk(0, incomingCfg, 1);
+const incomingCfg = parties.player[faintNo];
+const incoming = mk(0, incomingCfg, faintNo);
 const field = Object.freeze({ player: incoming, opponent: mk(1, parties.opponent[0], 0) });
 const states = Object.freeze(["fainted", "healthy", "healthy", "empty", "empty", "empty"]);
 const timing = switchInTiming(0, incoming.species, sceneOn, incoming.name, false, incoming.personality);
@@ -48,7 +49,7 @@ const commands = [
   Object.freeze({ type: "party-summary", eventSequence: 1, battler: 0, visible: true, states, timing: { minimumFrames: 7 } }),
   Object.freeze({ type: "message", eventSequence: 2, lines: [`Go! ${incoming.name}!`], advance: "automatic", noCursor: false, timing: { minimumFrames: 13, holdFrames: 0 } }),
   Object.freeze({ type: "party-summary", eventSequence: 3, battler: 0, visible: false, states }),
-  Object.freeze({ type: "switch-in", eventSequence: 4, battler: 0, fromPartyIndex: 0, toPartyIndex: 1, incoming, incomingStatus1: 0,
+  Object.freeze({ type: "switch-in", eventSequence: 4, battler: 0, fromPartyIndex: 0, toPartyIndex: faintNo, incoming, incomingStatus1: 0,
     timing, settleHoldFrames: SWITCH_IN_WAITSTATE_HOLD_FRAMES, sceneOn }),
   Object.freeze({ type: "turn-end", timing: { minimumFrames: 8 } }),
 ];
@@ -88,7 +89,7 @@ const diff = (p: Uint8Array, r: Uint8Array) => {
   return o;
 };
 const FIRST_E = 56; // BATTLE_FADE_IN_START: the field returns (the party-menu phases before it are species-independent)
-const confirm = probe.confirmFrame as number;
+const confirm = (probe.confirms?.[faintNo - 1] ?? probe.confirmFrame) as number;
 // Alignment: delta = ROM frame of production e=0 relative to the confirm press frame; searched on e in [FIRST_E, FIRST_E + 80) (field return, Go! text) unless fixed.
 const fixed = opt("delta");
 const score = (delta: number) => { let s = 0; for (let e = FIRST_E; e < FIRST_E + 80; e += 1) { const r = romFrame(confirm + e + delta); if (r) s += diff(draw(e), r).total; } return s; };

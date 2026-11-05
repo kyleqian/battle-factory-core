@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""pfr192 (pfr185Probe + raw framebuffer dump, PFR_RAW=<path>): fresh direct-mGBA probe of the PLAYER faint-replacement send-in (either scene). Adaptive input driven from ROM state (the
+"""frs247 (from pfr192Frames; FRS_FAINTS=2 drives a second faint, replacement slot 2, dumping each window to <RAW>.f<n>) pfr192 (pfr185Probe + raw framebuffer dump, PFR_RAW=<path>): fresh direct-mGBA probe of the PLAYER faint-replacement send-in (either scene). Adaptive input driven from ROM state (the
 playerfaintStage.py recipe: action prompt -> FIGHT -> move slot; "<mon> fainted!" waits for A; forced party menu -> DOWN -> A -> A), then
 per-frame rows from the player-faint frame H until the next action prompt (+ a tail).  No input is pressed after the party menu's SHIFT.
 usage (workspace root, mgba venv, via tools/run-mgba-probe.py):
@@ -77,22 +77,28 @@ def row():
             "tasks": {i: name(u32(sym["gTasks"] + i * 0x28)) for i in range(16) if u8(sym["gTasks"] + i * 0x28 + 4)}}
 
 
-turns = [0]
+FAINTS = int(os.environ.get("FRS_FAINTS", "1"))
+turns = [0] * FAINTS
+faint_no = 0
 pressed, inputs = {}, []
 for at in (25, 26, 57, 58):  # the lab scenarios' own opening presses (24 idle, A, 30 idle, A)
     pressed[at] = ["A"]
 prev_ctrl, state, menu_at, H, done_at = "", "idle", None, None, None
 rows, spawns, prev_sp = {}, [], set()
 RAW = os.environ.get('PFR_RAW')
-raw_f = open(RAW, 'wb') if RAW else None
+raw_f = None
 raw_first = None
 confirm_frame = None
+confirms = []
+raw_firsts = []
 for frame in range(1, BUDGET + 1):
     o.advance(pressed.get(frame, []))
     ctrl = name(u32(sym["gBattlerControllerFuncs"]))
     cb2 = name(u32(sym["gMain"] + 4))
     hp0 = u16(sym["gBattleMons"] + 0x28)
     if ctrl == "HandleInputChooseAction" and prev_ctrl != "HandleInputChooseAction":
+        if state == "back" and turns:
+            state = "idle"
         if turns:
             slot, cur = turns.pop(0), u8(sym["gMoveSelectionCursor"])
             t = frame + 24
@@ -107,7 +113,7 @@ for frame in range(1, BUDGET + 1):
             for at, btn in seq:
                 pressed[at] = pressed[at + 1] = [btn]
             inputs.append({"frame": frame, "kind": "prompt", "presses": seq})
-        elif state == "back":
+        elif state == "back" and faint_no >= FAINTS:
             done_at = frame
     if hp0 == 0 and state == "idle" and cb2 == "BattleMainCB2" and ctrl != "HandleInputChooseAction":
         state, menu_at, H = "faint", frame, frame
@@ -117,8 +123,16 @@ for frame in range(1, BUDGET + 1):
     if state == "faint" and cb2 == "CB2_InitPartyMenu":
         state = "menu"
         t = frame + 80
-        seq = [(t, "DOWN"), (t + 12 + 18, "A"), (t + 12 + 58, "A")]
-        confirm_frame = t + 12 + 58
+        faint_no += 1
+        seq = []
+        for k in range(faint_no):
+            seq.append((t, "DOWN")); t += 12
+        seq += [(t + 18, "A"), (t + 58, "A")]
+        confirm_frame = t + 58
+        confirms.append(confirm_frame)
+        if RAW:
+            raw_f = open(RAW if faint_no == 1 else f"{RAW}.f{faint_no}", "wb")
+        raw_first = None
         for at, btn in seq:
             pressed[at] = pressed[at + 1] = [btn]
         inputs.append({"frame": frame, "kind": "party-menu-open", "presses": seq})
@@ -135,15 +149,16 @@ for frame in range(1, BUDGET + 1):
         rows[frame - H] = row()
     prev_sp = sp
     prev_ctrl = ctrl
-    if raw_f is not None and confirm_frame is not None and frame >= confirm_frame - 6:
+    if raw_f is not None and confirm_frame is not None and confirm_frame - 6 <= frame < confirm_frame + 420:
         if raw_first is None:
             raw_first = frame
+            raw_firsts.append(frame)
         raw_f.write(o.screen_rgb())
     if done_at is not None and frame >= done_at + TAIL:
         break
 else:
     sys.stderr.write("budget exhausted\n")
 OUT.write_text(json.dumps({"scenario": SCEN.name, "profile": PROFILE, "H": H, "frames": frame, "doneAt": None if done_at is None else done_at - H,
-                           "inputs": inputs, "confirmFrame": confirm_frame, "rawFirstFrame": raw_first, "rows": rows, "spawns": spawns}, separators=(",", ":")))
+                           "inputs": inputs, "confirmFrame": confirm_frame, "rawFirstFrame": raw_firsts[0] if raw_firsts else None, "confirms": confirms, "rawFirsts": raw_firsts, "rows": rows, "spawns": spawns}, separators=(",", ":")))
 sys.stdout.flush()
 os._exit(0)
