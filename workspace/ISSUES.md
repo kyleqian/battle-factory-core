@@ -20,6 +20,21 @@ frames, rows 41-73, from age 8, identical with the 74 and the 160 clip (so not t
 87 measured opponent Quick Attack / Aerial Ace runs is 0 px at 160. Undiagnosed: stage it again and compare the attacker's
 position / ellipse rows first (small sprite, corner row unusual?).
 
+## #197 — Battle timing deltas found by the aud241b sound windows (2026-11-05)
+
+`docs/aud241b-battle-sounds.md` (fixtures `tools/audio/fixtures/{super-effective,lowhp,lowhp-faint}*`, pinned as `frameDeltas` in
+`tests/aud241bBattleSounds.test.ts`): (a) "It's super effective!" holds 5 ticks short (ON `[0,-5,...]`, OFF `[-1,-6,...]`);
+(b) the second attack of a turn plays its low-HP SE 1 tick early; (c) after a red drain to 0 the faint sounds are 16 ticks late
+(our `hp` command's 28-tick floor; the ROM drains the last 8 px in 12). The same frames move pixels, so these are presentation
+timing residuals (finish plan item 6). A fix re-pins the deltas to 0.
+
+## #196 — aud241a flow mismatches (2026-11-04)
+
+`docs/aud241a-battle-start-sounds.md`: MAGNETON Scene ON player side 1 frame early (go246 hold); battle-BGM-to-tray gap is
+348 / 359 / 368 / 374 across labs (engine 359); a WEAK send-out cry gets its duck restore only for ONIX (cry length known);
+an opposing switch-in inside the forced-selector prefix gets no sound; a Baton Pass hidden-attacker recall is not
+distinguished from a plain recall. Unproven by ROM window: Brain 471, WEAK send-out cry, Scene ON voluntary / opponent mid-battle.
+
 ## #195 — aud240c flow gaps on the battle party menus (2026-11-03)
 
 `docs/aud240c-party-menu-sounds.md`: (a) the voluntary menu moves its cursor on keys pressed during the open palette fade
