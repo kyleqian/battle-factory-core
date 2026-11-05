@@ -28,6 +28,7 @@
     "preview": "vite preview",
     "test": "NODE_OPTIONS=--max-old-space-size=8192 vitest run --no-watch --pool=forks --testTimeout=20000",
     "test:smoke": "vitest run --no-watch --pool=forks --testTimeout=20000 tests/executableFrontierRatchet.test.ts tests/abilityItemParityCensus.test.ts tests/battleDecisionBoundary.test.ts tests/factoryBattleScriptFullTurnDecision.test.ts tests/roundController.test.ts tests/roundScenarioMatrix.test.ts tests/battleScene.test.ts tests/battleScriptRulesContext.test.ts",
+    "test:gate": "NODE_OPTIONS=--max-old-space-size=8192 vitest run --config vitest.gate.config.ts --no-watch --pool=forks --testTimeout=20000",
     "test:cgb4": "POKEBENCH_CGB4_EVIDENCE=1 NODE_OPTIONS=--max-old-space-size=8192 vitest run --no-watch --pool=forks --testTimeout=200000 tests/factoryM4aNoteBodyCgb4V*.test.ts",
     "play:random": "node --experimental-strip-types tools/browser/randomPlay.mjs",
     "soak": "node --experimental-strip-types tools/soak/randomRoundSoak.ts",

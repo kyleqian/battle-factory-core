@@ -182,6 +182,14 @@ top entry of `PROGRESS.md` — uncommitted work is lost work.
   kernel turn, the round controller, and `battleScene` — instead of the full
   ~5-7 min suite. It never substitutes for the full `npm test` a finish
   requirement or acceptance demands.
+- **Worker gate: `npm run test:gate`** (~3.7 min on the CAX31 host, 2 workers)
+  runs ~360 curated files from `tools/test/test-gate.list` — all of
+  `test:smoke` plus at least one test importing every `src/` directory and
+  large engine module. Run it before finishing, in addition to the test files
+  that import the modules you changed. It is a sample, not the full suite: the
+  full `npm test` stays nightly / supervisor unless your step says otherwise.
+  Rule, timings and gaps: `docs/cln240-test-gate.md`; regenerate the list with
+  `node --experimental-strip-types tools/test/generateTestGate.ts`.
 - **Two ratchets in `tests/executableFrontierRatchet.test.ts` will fail your
   step deliberately.** (1) No production module may import a canonical
   recording (`src/data/gen/*-{dump,probe,watch,boundaries}.json`) — derive
