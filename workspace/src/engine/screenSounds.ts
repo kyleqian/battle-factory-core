@@ -2,6 +2,7 @@
 // nothing here reads engine state or changes a branch's outcome.
 import { emitSound, soundCollecting } from "../audio/soundEvents.ts";
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
+import { FAINT_CRY_RESTORE_FRAMES } from "../data/faintCryFrames.ts";
 import { SEND_IN_TAIL_OFF_CRY_FRAMES } from "../data/sendInTailOff.ts";
 
 /** SE_SELECT (include/constants/songs.h), pan-less `PlaySE`. */
@@ -28,6 +29,7 @@ export const BGM_DRAFT = 469;
 export const BGM_BATTLE = 476;
 /** include/constants/pokemon.h CRY_MODE_*, the PlayCry_ByMode mode argument. */
 export const CRY_MODE_NORMAL = 0;
+export const CRY_MODE_FAINT = 5;
 export const CRY_MODE_WEAK = 11;
 /** m4aMPlayVolumeControl(&gMPlayInfo_BGM, TRACKS_ALL, volume): PlayCryInternal's duck and the restore. */
 export const BGM_DUCK_VOLUME = 85;
@@ -87,6 +89,7 @@ export function beginScreenSoundTick(frame: number): void {
   if (frame <= currentFrame) {
     queue = [];
     ducking = null;
+    lowHpPlaying = false;
   }
   currentFrame = frame;
   queue = queue.filter((entry) => entry.frame >= frame);
@@ -104,7 +107,7 @@ export function runScheduledScreenSounds(): void {
   }
 }
 
-function scheduleAfter(delay: number, run: () => void, openCry?: true): void {
+export function scheduleAfter(delay: number, run: () => void, openCry?: true): void {
   if (!soundCollecting()) return;
   if (delay === 0) run();
   else queue.push(openCry ? { frame: currentFrame + delay, run, openCry } : { frame: currentFrame + delay, run });
@@ -115,16 +118,16 @@ function restoreBgm(bgm: number): void {
 }
 
 /** PlayCry_ByMode: PlayCryInternal ducks the BGM, starts the cry; Task_DuckBGMForPokemonCry restores when the cry ends. */
-function startCry(bgm: number, species: number, mode: number, pan: number): void {
+function startCry(bgm: number, species: number, mode: number, pan: number, restoreDelay?: number): void {
   emitSound({ kind: "duck", id: bgm, pan: null, volume: BGM_DUCK_VOLUME });
   emitSound({ kind: "cry", id: species, pan, mode, volume: CRY_VOLUME, priority: CRY_PRIORITY });
   crySerial += 1;
   const serial = crySerial;
   ducking = { serial, bgm };
   // IsCryPlaying turns false one frame after the cry's last sample frame; a WEAK cry's length is known only for the measured species.
-  const length = mode === CRY_MODE_WEAK ? WEAK_CRY_FRAMES[species] : SEND_IN_TAIL_OFF_CRY_FRAMES[species];
+  const length = restoreDelay ?? (mode === CRY_MODE_WEAK ? WEAK_CRY_FRAMES[species] : SEND_IN_TAIL_OFF_CRY_FRAMES[species]);
   if (length === undefined) return;
-  scheduleAfter(length + 1, () => {
+  scheduleAfter(restoreDelay ?? length + 1, () => {
     if (ducking?.serial !== serial) return;
     ducking = null;
     restoreBgm(bgm);
@@ -134,6 +137,52 @@ function startCry(bgm: number, species: number, mode: number, pan: number): void
 /** Task_PlayCryWhenReleasedFromBall: the send-out cry at pan +25 (opponent) / -25 (player), NORMAL or WEAK by the mon's HP and status. */
 export function playSendOutCry(bgm: number, species: number, mode: number, pan: number): void {
   startCry(bgm, species, mode, pan);
+}
+
+/** aud241b: `PlayCry_ByMode(species, CRY_MODE_FAINT)` (`playfaintcry`): the BGM duck, the cry, the restore when the cry ends (fitted per species). */
+export function playFaintCry(bgm: number, species: number, pan: number): void {
+  startCry(bgm, species, CRY_MODE_FAINT, pan, FAINT_CRY_RESTORE_FRAMES[species]);
+}
+
+/** include/constants/songs.h: Cmd_effectivenesssound's SEs, dofaintanimation's SE_FAINT and the low-HP loop. */
+export const SE_NOT_EFFECTIVE = 12;
+export const SE_EFFECTIVE = 13;
+export const SE_SUPER_EFFECTIVE = 14;
+export const SE_FAINT = 16;
+export const SE_LOW_HEALTH = 90;
+/** SOUND_PAN_TARGET / SOUND_PAN_ATTACKER: PlaySE12WithPanning(se, BattleGetSide(battler) == player ? -64 : +63). */
+export const SE_PAN_PLAYER = -64;
+export const SE_PAN_OPPONENT = 63;
+
+/** One `PlaySE12WithPanning(se, pan)` on the tick being collected. */
+export function playPannedSe(se: number, pan: number): void {
+  emitSound({ kind: "se", id: se, pan });
+}
+
+let lowHpPlaying = false;
+
+/** GetHPBarLevel == HP_BAR_RED: a non-full bar whose 48-pixel fraction is 1..9. */
+function hpBarIsRed(hp: number, maxHp: number): boolean {
+  if (hp <= 0 || hp === maxHp) return false;
+  return Math.max(1, Math.floor((hp * 48) / maxHp)) <= 9;
+}
+
+/**
+ * HandleLowHpMusicChange (battle_gfx_sfx_util.c) in singles: a red bar starts SE_LOW_HEALTH unless it is already playing; any other
+ * bar clears the flag and `m4aSongNumStop(SE_LOW_HEALTH)`, which the oracle logs as a no-op unless the song was playing. Only the
+ * effective events are emitted (the no-op stops are ROM log noise, `noop: true`).
+ */
+export function handleLowHpMusicChange(hp: number, maxHp: number): void {
+  if (!soundCollecting()) return;
+  if (hpBarIsRed(hp, maxHp)) {
+    if (lowHpPlaying) return;
+    lowHpPlaying = true;
+    emitSound({ kind: "se", id: SE_LOW_HEALTH, pan: null });
+    return;
+  }
+  if (!lowHpPlaying) return;
+  lowHpPlaying = false;
+  emitSound({ kind: "stop", id: SE_LOW_HEALTH, pan: null });
 }
 
 export const SE_BALL_OPEN = 15;
