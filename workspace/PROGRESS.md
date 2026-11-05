@@ -25,7 +25,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   super-effective, low-HP, low-HP then faint, 14 faint-cry lengths. Deltas recorded, not fixed: ISSUES #197. Not proven: the
   `battle-window{,-off}` RHYDON / GOLBAT fixtures (no engine staging; ROM facts pinned only), switch-in low-HP call, non-hit hp.
   Worker: typecheck, build, build:lib 0; 22 files 887 tests + 7 appTrace importers 90; differential 28 traces identical.
-  Supervisor: 4 audio files 316 / 316.
+  Supervisor: 4 audio files 316 / 316; differential 211 traces vs `ccdfe68d3` **38,532 / 38,532 identical**.
 - **Next:** frs247 (handoff 4b(d), faint-replacement reshow white flash) running; then cln240 (cleanup 5: `npm run test:gate`).
 
 ---
