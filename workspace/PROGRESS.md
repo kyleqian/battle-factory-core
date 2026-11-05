@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-04 / 05 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master `f3252017b`+ (aud241a, aud241b, frs247 folded). Evidence `.integration/validation/sv-20261104/`. One worker at a time.
+- **State:** master `bc74a02d3`+ (aud241a, aud241b, frs247, cln240 folded). Tree clean. Evidence `.integration/validation/sv-20261104/`. One worker at a time.
 - **Folded:** aud241a (S11 step 5, first slice; `docs/aud241a-battle-start-sounds.md`; branch `worker/integration-20261104-213051`):
   `src/engine/battleStartSounds.ts` emits from `tick()` (guarded by `soundCollecting()`) the battle BGM (476, Brain 471) with
   `m4aMPlayAllStop`, the ball tray ENTER / BALL / EXIT SEs (per-side pans, SE player field), SE_BALL_OPEN and the send-out cries
@@ -35,7 +35,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `tests/frs247FaintReplacementReshow.test.ts` (10 / 12 fail on the parent). Re-pinned `battleResolutionPresentation.test.ts`
   (view shape). Worker: differential 211 traces identical (no trace covers this return); census 0..999 both scenes 1000 / 1000
   identical vs go246 baseline; 183 importing files 2,660 tests; typecheck, build, build:lib 0. Supervisor: the 2 files 51 / 51.
-- **Next:** cln240 (cleanup 5: `npm run test:gate`) running; then wind-down gates.
+- **Folded:** cln240 (finish plan Cleanup 5, first half; `docs/cln240-test-gate.md`; side branch `worker/side-20261105-022936`):
+  `npm run test:gate` = `vitest.gate.config.ts` over `tools/test/test-gate.list` (364 files, 2,928 tests: all of test:smoke, named
+  families, the cheapest importer of every src dir / large module, then a greedy coverage fill under 160 s summed test time),
+  generated deterministically by `tools/test/generateTestGate.ts` from `tools/test/gate-durations.tsv` (`--check`), pinned by
+  `tests/testGateSelection.test.ts`; `npm test` unchanged; AGENTS.md test tiers updated. Worker: 2 runs 218 / 217 s wall.
+  Supervisor: 364 / 364 in 217 s, and again on `bc74a02d3`. Frame-pin deletion candidates listed in the doc (unverified; a later step).
+- **Fixed by the supervisor (`bc74a02d3`):** the wind-down suite failed only `battlesceneSplitEligibility` (function-kind eligible
+  pool 1, pinned 0): aud241a's pure `ballTraySoundTicks` in `battleScene.ts`. Moved to `battleStartSounds.ts` (the four tray tables
+  exported). Split / aud241a / aud241b / sink / battleScene tests 361 / 361; typecheck, build, build:lib 0; test:gate 364 / 364.
+- **Wind-down gates** (`sv-20261104/gates-final/`, src `fef00b6c5` = final src minus the move above): typecheck 0; build 0;
+  **full suite 1,792 files: 1,747 passed + 44 skipped, 1 failed (the ratchet above)**, 14,685 tests passed; play:random 4 min /
+  scene: ON 23 battles / 9 swaps, OFF 35 / 16 (max streak 7); `--lobby-new-challenge` 2 min / scene: 0 page errors / overlays /
+  contained / divergences; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each; GATES_PENDING
 
 ---
 
