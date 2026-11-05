@@ -41,6 +41,14 @@ describe("audio probe fixtures", () => {
       "aud241c-loss-on-window.json",
       "aud241c-win-off-window.json",
       "aud241c-win-on-window.json",
+      "aud242a-agility-player.json",
+      "aud242a-ember-player.json",
+      "aud242a-psybeam-player.json",
+      "aud242a-razorleaf-player.json",
+      "aud242a-slam-player.json",
+      "aud242a-slash-opponent.json",
+      "aud242a-swift-opponent.json",
+      "aud242a-swordsdance-opponent.json",
       "battle-intro-window-off.json",
       "battle-intro-window.json",
       "battle-window-off.json",
@@ -123,7 +131,8 @@ describe("audio probe fixtures", () => {
           last = e.frame;
           if (d.frames > 0) expect(e.frame, JSON.stringify(e)).toBeLessThanOrEqual(from + d.frames);
           if (e.pan !== null) {
-            expect(Number.isInteger(e.pan) && e.pan >= -64 && e.pan <= 63, JSON.stringify(e)).toBe(true);
+            // the ROM's stat-change SE reaches pan +64 on an opponent target (aud242a swordsdance-opponent: SE_M_STAT_INCREASE)
+            expect(Number.isInteger(e.pan) && e.pan >= -64 && e.pan <= 64, JSON.stringify(e)).toBe(true);
           }
           expect(typeof e.via, JSON.stringify(e)).toBe("string");
           if (e.noop !== undefined) expect(e.noop).toBe(true);
