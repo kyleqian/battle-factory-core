@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-06 / 07 — CAX31 daily run (supervisor, Opus 5.5): in progress
+
+- **State:** master `efa890c0b`+; evidence `.integration/validation/sv-20261106/`. Baseline = last run's final suite (src unchanged since).
+- **Folded:** aud242b (S11 step 6, second slice; branch `worker/integration-20261106-213056`, 46 min): extractor wait resolver
+  (`waitforvisualfinish` from known task / sprite lifetimes, `jumpret*` / `jumpargeq` side branches; table schema v2, variants by turn x
+  attacker side), `docs/aud242-move-anim-sounds.md` section 6. Thin: only 4 more ops emitted; 501 stay unresolved (sprite / palette
+  lifetimes 351, bg fade 134). ROM windows pinned (`tests/aud242bMoveAnimSounds.test.ts`, 8 tests): Dragon Rage +3, Mega Punch +1, Haze
+  -6, Hyper Fang +2 (ISSUES #198). Worker: typecheck, build, build:lib 0; test:gate 362 / 362; differential 20 traces 3,540 identical.
+  Supervisor: regenerated table byte-identical; aud242a / aud242b / audioSinkNeutral 24 / 24.
+- **Running:** obr251 (handoff 4b(e) opponent replacement ball bar; integration lane).
+- **Next:** cln242 (Cleanup 5 second half, suite speed), then an aud242 fade / lifetime model or aud242c.
+
+---
+
 ## 2026-11-05 / 06 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242a / cln241 / frf250a / frf250b folded
 
 - **State:** master `cd7d6165d`+ clean, no active workers; final src == frf250b `70abc1dd3` (later commits are tests / docs).
