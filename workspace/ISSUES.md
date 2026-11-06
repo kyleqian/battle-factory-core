@@ -13,6 +13,15 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #198 — aud242a move-animation SE residuals (2026-11-06)
+
+`docs/aud242-move-anim-sounds.md`, `tests/aud242aMoveAnimSounds.test.ts`: the emitter plays a script op at body age `f + 1 + 7`
+(Scene ON lag 7, as battleHitSounds). Constant per-move offsets ROM minus ours remain: Ember / Psybeam / Acid / Bite +2, Twineedle
++10, Double Slap / Fury Swipes +9, Bind +6, Agility / Swords Dance -4, other status moves -2..-5 (`LIVE_MOVE_IDLE_LEAD_ROWS` was
+measured as visual onset, not script start; an alignment audit is the lead). Not emitted yet: ops after a data-dependent wait,
+`jumpret*` runs, `panse*` / `setpan`, `createsoundtask` (aud242b / c); declined (static) bodies (Tackle, Vine Whip, Seismic Toss)
+are silent. The ROM reaches pan +64 on `SE_M_STAT_INCREASE` vs an opponent target (check `BattleAnimAdjustPanning2`).
+
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 
 Live Scene ON, opponent RATTATA Quick Attack vs player ONIX (`docs/qak247-clip-sweep.md`): 14,739 px over 25 of the 33 window
