@@ -92,6 +92,8 @@ describe("audio probe fixtures", () => {
       "lowhp-faint-window.json",
       "lowhp-off-window.json",
       "lowhp-window.json",
+      "obr251-opponent-faint-off-window.json",
+      "obr251-opponent-faint-on-window.json",
       "party-forced-window.json",
       "party-summary-entry-window.json",
       "party-voluntary-window.json",
