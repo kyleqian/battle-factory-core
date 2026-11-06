@@ -2,7 +2,7 @@
 
 The canonical Battle Factory reproduction — the continuation of the
 warm-bison run, promoted to a standalone repo with its full history.
-A TypeScript (and, incoming, Rust/WASM) reimplementation of Pokémon
+A TypeScript reimplementation of Pokémon
 Emerald's Battle Factory, byte- and pixel-verified against a headless
 mGBA oracle running a source-built Emerald ROM.
 
@@ -26,9 +26,8 @@ mGBA oracle running a source-built Emerald ROM.
 - `workspace/` is the former `runs/20260717-004950_warm-bison` directory,
   moved wholesale. All coordination docs (AGENTS.md, SUPERVISOR.md,
   PROGRESS.md, ISSUES.md, ROADMAP.md, lane docs) are in there, unchanged.
-- `workspace/core-rs/` is the Rust rewrite (cargo workspace; compiles to
-  WASM). The TypeScript engine in `workspace/src/` remains the working,
-  test-pinned implementation while the port is in flight.
+- The Rust port was removed from master in cln241 and lives on the `core-rs-archive` branch
+  (`workspace/docs/cln241-core-rs-removal.md`). The TypeScript engine in `workspace/src/` is the only implementation.
 - `workspace/bin/oracle` is the agent-facing oracle CLI copy, pinned by
   `tests/oracleTooling.test.ts`; the top-level `bin/oracle` is the human
   copy. They have drifted before — the workspace copy is authoritative.

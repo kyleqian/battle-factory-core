@@ -42,9 +42,8 @@ edit anything above this directory.
 > the canonical repo at `pokebench/pokeemerald-factory-core/workspace/`.
 > Older docs, receipts, and ledger entries that mention `runs/...` paths or
 > a `../../` harness root refer to this directory and `../` respectively.
-> The Rust rewrite lives in `core-rs/` (see `core-rs/README.md`; the old `RUST_*` lane ledgers are in `docs/archive/`); the
-> TypeScript engine in `src/` remains the working, test-pinned
-> implementation while that port is in flight.
+> The Rust port (`core-rs/`) was removed from master in cln241; it lives on the `core-rs-archive` branch
+> (`docs/cln241-core-rs-removal.md`). The TypeScript engine in `src/` is the only implementation.
 
 ## Running / resuming
 Launch (or relaunch) a work session with **`./run-agent.sh`** from the run

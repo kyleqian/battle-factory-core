@@ -282,10 +282,8 @@ tests/endTurnFaintResumeIssue104.test.ts	breadth fill	71
 tests/endeavorBattleMovePowerRegister.test.ts	breadth fill	116
 tests/engineBuildHash.test.ts	named: headless build hash	548
 tests/executableFrontierRatchet.test.ts	test:smoke	296
-tests/factoryAiCheckBadMoveParity.test.ts	area: large src/engine/factoryAiCheckBadMove.ts	58
-tests/factoryAiSemiInvulnerableTieDraw.test.ts	area: large src/engine/factoryAiCheckViability.ts	16
+tests/factoryAiScoredWiringParity.test.ts	area: large src/engine/factoryAiCheckBadMove.ts	81
 tests/factoryAiSwitchPolicy.test.ts	breadth fill	11
-tests/factoryAiTryToFaint.test.ts	breadth fill	4
 tests/factoryBattleReturnPresentation.test.ts	area: large src/engine/battleResolutionPresentationRender.ts	9
 tests/factoryBattleScriptFullTurnDecision.test.ts	test:smoke	2913
 tests/factoryBrainOpponentRomReceipts.test.ts	breadth fill	20

@@ -282,10 +282,8 @@ tests/endTurnFaintResumeIssue104.test.ts
 tests/endeavorBattleMovePowerRegister.test.ts
 tests/engineBuildHash.test.ts
 tests/executableFrontierRatchet.test.ts
-tests/factoryAiCheckBadMoveParity.test.ts
-tests/factoryAiSemiInvulnerableTieDraw.test.ts
+tests/factoryAiScoredWiringParity.test.ts
 tests/factoryAiSwitchPolicy.test.ts
-tests/factoryAiTryToFaint.test.ts
 tests/factoryBattleReturnPresentation.test.ts
 tests/factoryBattleScriptFullTurnDecision.test.ts
 tests/factoryBrainOpponentRomReceipts.test.ts

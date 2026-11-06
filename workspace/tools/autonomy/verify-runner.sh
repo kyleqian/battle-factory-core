@@ -84,12 +84,6 @@ done
 if [[ "$SKIP_BASELINES" == 0 ]]; then
   npm --prefix "$WORKSPACE_ROOT" run typecheck
   npm --prefix "$WORKSPACE_ROOT" run test:smoke
-  (
-    cd "${WORKSPACE_ROOT}/core-rs"
-    cargo test
-    ./build-wasm.sh
-    node --experimental-strip-types adapter/smoke.mts
-  )
 fi
 
 echo "verify-runner: all requested checks passed"

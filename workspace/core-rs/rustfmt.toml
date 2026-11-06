@@ -1,5 +1,0 @@
-# Default struct_lit_width (18) forces every generated table row in
-# gen_tables.rs onto its own multi-line block; the wider budget below keeps
-# short struct literals (e.g. `FrontierMonRow { species_id: 191, .. }`) on
-# one line without changing any other default.
-struct_lit_width = 80
