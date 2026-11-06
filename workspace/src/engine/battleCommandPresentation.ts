@@ -253,6 +253,8 @@ export type BattleCommandPresentationState = Readonly<{
    * `BattleScript_AskIfWantsToForfeitMatch` starts it on NO (1).
    */
   forfeitCursor: 0 | 1;
+  /** The cursor the box draws: the ROM shows a moved yes/no cursor one frame after the press (frf250a lab). */
+  forfeitDisplayCursor: 0 | 1;
   /**
    * Route-scoped `STRINGID_USEDMOVE` post-print hold (failed/no-anim path
    * only), threaded into the resolution on `beginCommandResolution`
@@ -292,7 +294,7 @@ export const REJECTION_MESSAGE_REOPEN_FRAMES = 9;
  * the A press.
  */
 export const BAG_MESSAGE_FIRST_GLYPH_AT = 3;
-export const BAG_MESSAGE_RETURN_AT = 100;
+export const BAG_MESSAGE_RETURN_AT = 99;
 export const BAG_MESSAGE_TEXT = "Items can't be used now.";
 
 /**
@@ -305,9 +307,9 @@ export const FORFEIT_QUESTION_LINES = Object.freeze([
   "and quit now?",
 ] as const);
 export const FORFEIT_QUESTION_FIRST_GLYPH_AT = 3;
-export const FORFEIT_BOX_AT = 54;
-export const FORFEIT_BOX_CLEAR_AT = 5;
-export const FORFEIT_CLOSING_RETURN_AT = 8;
+export const FORFEIT_BOX_AT = 53;
+export const FORFEIT_BOX_CLEAR_AT = 4;
+export const FORFEIT_CLOSING_RETURN_AT = 7;
 
 export function moveBattleCommandActionCursor(
   cursor: 0 | 1 | 2 | 3,
@@ -572,6 +574,7 @@ export function createBattleCommandPresentation(
   rejectedSlot: null,
   rejectionWaitCursorAge: 0,
   forfeitCursor: 1,
+  forfeitDisplayCursor: 1,
   pendingDecision: null,
   usedMessageHoldFrames,
 });
@@ -660,6 +663,7 @@ export function advanceBattleCommandPresentation(
     }
     case "forfeit-question": {
       const elapsed = state.lifecycle.phaseElapsed + 1;
+      state = Object.freeze({ ...state, forfeitDisplayCursor: state.forfeitCursor });
       if (elapsed < FORFEIT_BOX_AT) {
         return withLifecycle(state, "forfeit-question", elapsed);
       }
@@ -682,7 +686,7 @@ export function advanceBattleCommandPresentation(
     case "forfeit-closing": {
       const elapsed = state.lifecycle.phaseElapsed + 1;
       return elapsed >= FORFEIT_CLOSING_RETURN_AT
-        ? withLifecycle(state, "action-menu", 0, { forfeitCursor: 1 })
+        ? withLifecycle(state, "action-menu", 0, { forfeitCursor: 1, forfeitDisplayCursor: 1 })
         : withLifecycle(state, "forfeit-closing", elapsed);
     }
     case "rejection-reopen": {
@@ -717,7 +721,7 @@ export function advanceBattleCommandPresentation(
         state,
         state.actionCursor === 1 ? "bag-message" : "forfeit-question",
         0,
-        { forfeitCursor: 1 },
+        { forfeitCursor: 1, forfeitDisplayCursor: 1 },
       );
     }
     const direction = (["LEFT", "RIGHT", "UP", "DOWN"] as const)

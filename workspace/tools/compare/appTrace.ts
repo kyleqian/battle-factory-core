@@ -1024,6 +1024,21 @@ function aud241bStage(
   });
 }
 
+// frf250a: the lab's frame 0 is some frames into the menu's idle bounce (the lab boots past the send-out); this staging-only
+// age aligns the app's bounce clock with each scene's ROM lab (measured: ON 27, OFF 34 of the 36-frame period).
+function frf250aStage(state: EngineState, bounceAge: number): EngineState {
+  const o = state.factoryRoundBattleOrchestrator;
+  if (o === null || o.battleCommandPresentation === null) throw new Error("frf250a stage needs a command presentation");
+  const k = bounceAge;
+  return {
+    ...state,
+    factoryRoundBattleOrchestrator: Object.freeze({
+      ...o,
+      battleCommandPresentation: Object.freeze({ ...o.battleCommandPresentation, idleBounceElapsed: k }),
+    }),
+  };
+}
+
 function pmo239SwitchReopenOffStage(state: EngineState): EngineState {
   return midBattleSwitchStage(state, "pmo239-switch-0-to-2-off", [PMO239_PIDGEY_BENCH, PMO239_MACHOP_BENCH], [115, 145]);
 }
@@ -1818,6 +1833,9 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242a-ember-player-on": (state) => aud241bStage(state, "aud242a-ember-player-on", "on", 50, 12, 52, undefined, false, 69),
   "aud242a-psybeam-player-on": (state) => aud241bStage(state, "aud242a-psybeam-player-on", "on", 50, 12, 60, undefined, false, 69),
   "aud242a-agility-player-on": (state) => aud241bStage(state, "aud242a-agility-player-on", "on", 50, 12, 97, undefined, false, 33),
+  // frf250a: BAG / RUN on the action menu (two Level-50 Rattata, both scenes; tools/battle-lab/frf250a-*.json).
+  "frf250a-bagrun-on": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-on", "on", 50, 50), 27),
+  "frf250a-bagrun-off": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-off", "off", 50, 50), 34),
   "pmo239-switch-0-to-2-off": pmo239SwitchReopenOffStage,
   "mechanic-selection-reject-torment-off": tormentSelectionRejectionOffStage,
   "party-menu-status-item-off": partyMenuStatusItemOffStage,

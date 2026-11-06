@@ -1,4 +1,5 @@
 import battleWindowData from "../assets/gen/battle-window.json" with { type: "json" };
+import yesNoFrameData from "../assets/gen/battle-yesno-frame.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import type {
@@ -51,6 +52,10 @@ type BattleWindowAsset = Readonly<{
 }>;
 
 const battleWindow = battleWindowData as unknown as BattleWindowAsset;
+const yesNoFrame = yesNoFrameData as unknown as Readonly<{
+  tiles: readonly (readonly number[])[];
+  palette: readonly RgbColor[];
+}>;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>(
   (charmapData as { entries: [string, number][] }).entries,
@@ -209,7 +214,7 @@ export function createBattleCommandPresentationRenderView(
       (phase === "forfeit-question" && elapsed >= FORFEIT_BOX_AT)
       || (phase === "forfeit-closing" && elapsed < FORFEIT_BOX_CLEAR_AT)
     ) {
-      forfeitBox = Object.freeze({ cursor: presentation.forfeitCursor });
+      forfeitBox = Object.freeze({ cursor: presentation.forfeitDisplayCursor });
     }
   }
   return Object.freeze({
@@ -285,7 +290,8 @@ const YESNO_TEXT_ORIGINS = Object.freeze([
 
 /**
  * frf250a: `forfeityesnobox` -- `HandleBattleWindow(YESNOBOX_X_Y)` frame tiles
- * (0x22-0x2A, palette 1), the `B_WIN_YESNO` text, then
+ * (0x22-0x2A, palette 1: `LoadUserWindowBorderGfx`'s gTextWindowFrame1, see
+ * tools/extract/extract-battle-yesno-frame.ts), the `B_WIN_YESNO` text, then
  * `BattleCreateYesNoCursorAt` (tiles 1/2, palette 0, at tile column 25).
  */
 export function drawBattleCommandYesNoBox(
@@ -298,8 +304,16 @@ export function drawBattleCommandYesNoBox(
     for (let tx = YESNO_BOX.x; tx <= xEnd; tx += 1) {
       const row = ty === YESNO_BOX.y ? 0 : ty === yEnd ? 2 : 1;
       const col = tx === YESNO_BOX.x ? 0 : tx === xEnd ? 2 : 1;
-      const tile = row === 0 ? 0x22 + col : row === 1 ? 0x25 + col : 0x28 + col;
-      drawBattleWindowTile(framebuffer, tile, 1, tx * 8, ty * 8);
+      const tile = yesNoFrame.tiles[row * 3 + col]!;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          const index = tile[py * 8 + px]!;
+          const color = yesNoFrame.palette[index];
+          if (index !== 0 && color !== undefined) {
+            setPixel(framebuffer, tx * 8 + px, ty * 8 + py, color.r, color.g, color.b);
+          }
+        }
+      }
     }
   }
   const fill = battleWindow.textPalette[14]!;
