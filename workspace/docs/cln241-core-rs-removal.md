@@ -81,9 +81,6 @@ TS; with the port off master they have no subject. The deleted test files remain
 `README.md`, the supervisor-owned ledgers (`PROGRESS.md`, `ROADMAP.md`, `PAPERCUTS.md`), and historical docs / receipts
 under `docs/` and `tools/integration/fixtures/`.
 
-Test-count delta against the last full run (1,787 files, 14,458 tests): the 18 deleted parity files and the 11 retained pins
-account for it.
-
 ## Follow-ups (not done here)
 
 - `tools/autonomy/bootstrap-ubuntu.sh` still installs the Rust toolchain and the wasm32 target, and `verify-runner.sh` still
