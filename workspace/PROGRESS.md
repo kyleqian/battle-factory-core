@@ -5,21 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-06 — frf250b (worker): RUN -> YES forfeits the match (loss)
+## 2026-11-05 / 06 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242a / cln241 / frf250a / frf250b folded
 
-- **State:** committed on master (not pushed). Scene OFF is ROM-exact (250 / 250 frames, SE + loss-tail sounds exact). Docs `docs/frf250b-forfeit.md`.
-- **Did:** `forfeit-message` phase, `src/engine/battleForfeit.ts` (terminal battle -> `roundLost`), `emitForfeitEndSounds`, lab + compare trace + audio
-  fixture, `tests/frf250bForfeit.test.ts` (5 tests: ROM timeline, sounds, no RNG, library battle-end + challenge-end loss in Scene OFF / ON, `replayChallenge`).
-  Gates: typecheck, build, build:lib 0; test:gate 362 / 362; differential 24 traces 1,405 captures identical vs `3fb56c975`; soak vanilla 0:20 20 / 20 OK.
-- **Next:** Scene ON gap (healthbox bounce step ~155, opponent sprite region during fade 249-284); aud242b.
-- **Notes:** the forfeit outcome is labelled `trainer-win` internally (maps to loss). Soak driver still answers B on the prompt.
-
----
-
-## 2026-11-05 / 06 — CAX31 daily run (supervisor, Opus 5.5): in progress
-
-- **State:** master clean after each fold. Baseline reused: the 2026-11-05 wind-down full suite + build on `f3440331d` (master since
-  then was docs-only). Oracles current. Evidence `.integration/validation/sv-20261105/`.
+- **State:** master `cd7d6165d`+ clean, no active workers; final src == frf250b `70abc1dd3` (later commits are tests / docs).
+  Evidence `.integration/validation/sv-20261105/`. Final gates: see the last bullet.
 - **Folded:** aud242a (S11 step 6, first slice; `docs/aud242-move-anim-sounds.md`; branch `worker/integration-20261105-213057`):
   `src/engine/moveAnimSounds.ts` (tick() hook behind `soundCollecting()`, Scene ON only) plays the decoded script `playsewithpan` /
   `playse` / `waitplaysewithpan` / `loopsewithpan` from `src/data/gen/anim-sound-timing.json` (`npm run extract:anim-sound-timing`,
@@ -30,9 +19,35 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `core-rs/` removed (535 files), its TS wasm adapters, the 18 Rust<->TS parity tests (TS-only literal pins kept in
   `tests/tsEngineRetainedPins.test.ts`), wasm seeding in `run-subagent.sh`, cargo step in `verify-runner.sh`; gate list regenerated
   (362 files). Archive: local branch `core-rs-archive` `26ce8d051` (unchanged). Worker: typecheck, build, build:lib 0; test:gate
-  362 / 362; **full suite 1,777 files (== git ls-files): 1,733 passed + 44 skipped, 0 failed**; dist bytes unchanged. Supervisor:
-  archive ref, `bash -n` launcher, retained pins 11 / 11. Untracked `core-rs/target` (5 GB) deleted. **Cleanup 4 done.**
-- **Next:** 4b(g) BAG / RUN (frf250a presentation, frf250b forfeit YES); aud242b.
+  362 / 362; full suite 1,777 files: 1,733 passed + 44 skipped, 0 failed; dist bytes unchanged. Supervisor: archive ref, `bash -n`
+  launcher, retained pins 11 / 11. Untracked `core-rs/target` (5 GB) deleted. **Cleanup 4 done.**
+- **Folded:** frf250a (handoff 4b(g) step 1, live-site bug; branch `worker/integration-20261106-012510`, worker hit its 170-min cap
+  before its report; the supervisor committed its last test edit and verified): A on BAG prints "Items can't be used now." and returns;
+  A on RUN opens "Would you like to forfeit the match and quit now?" + yes/no box (`battle-yesno-frame.json` extracted from
+  `graphics/text_window/1.png`); NO / B return to the menu; SE_SELECT fixtures both scenes. `tests/frf250aBagRunMenu.test.ts`, traces
+  `frf250a-*` (cosmetic residuals ISSUES #199). Supervisor: 5 files 429 / 429; test:gate 362 / 362; typecheck 0; compare
+  `frf250a-run-no-on` prompt frames equal the ROM; differential 32 traces 4,690 identical vs `58771d3c2`.
+- **Folded:** frf250b (4b(g) step 2; main tree; `docs/frf250b-forfeit.md`): YES prints "<PLAYER> forfeited the match!", ends the battle
+  as a loss through the normal lost-battle return (`src/engine/battleForfeit.ts`; no RNG; library battle-end + challenge-end loss;
+  `replayChallenge` replays it), ROM loss-tail sounds. `tests/frf250bForfeit.test.ts`. Worker: typecheck, build, build:lib 0; test:gate
+  362 / 362; differential 24 traces identical; vanilla 0:20 20 / 20. Supervisor stopped it at minute ~80 (it was re-running soaks and
+  had not started the full suite; all work committed). Supervisor: compare `frf250b-run-yes-off` **250 / 250** vs the ROM (forfeit
+  text through the Lobby loss pages); differential 36 traces 5,280 identical vs `3fb56c975`. Scene ON gaps in ISSUES #199.
+  **Handoff 4b(g) done.**
+- **Fixed by the supervisor (`cd7d6165d`):** the final full suite failed 3 trajectory pins in `tests/randomRoundSoak.test.ts` (the
+  exploring policy now sees real BAG / RUN screens, as at fsw235 / vis243a): Baton Pass pin seed 30 -> 32 (re-scan 0..35), swap-offer
+  seed set 0..7, full-policy (c) frames / turn. The 3 tests pass.
+- **Gates** (`sv-20261105/gates/`, src `3fb56c975` = frf250a; frf250b leaves every soak policy unchanged, `forfeitRate` null):
+  varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON
+  **20 / 20**, Scene OFF **20 / 20** (all `budget`). **Final full suite** (`final-suite/`, HEAD `4a9d7392d`, src == final): 1,778 files: 1,733 passed + 44 skipped, 1 failed
+  (`randomRoundSoak`, the 3 pins re-pinned in `cd7d6165d`), 13,908 tests passed; one fork died (low memory beside a supervisor scan): the
+  unreported `battlesceneSplitEligibility` + the re-pinned `randomRoundSoak` rerun on `cd7d6165d` **75 / 75**. Build: the worker's
+  `npm run build` / `build:lib` 0 on `70abc1dd3` (final src).
+  play:random 2 min / scene (seed 7): ON 7 battles / 3 swaps, OFF 17 / 6; 0 page errors / overlays / contained. The 0:60 gates were not run (hours each here).
+- **Next:** handoff "Next work": aud242b (wait resolver) / aud242c (panse / createsoundtask), 4b(e) opponent replacement ball bar
+  (`docs/obr248-scout.md`), cleanup 5 second half or 7, ISSUES #196 / #197 / #198 / #199.
+- **Notes:** no DEFERRED items. No push. Worker branches (all merged, deleted): integration-20261105-213057 (aud242a),
+  side-20261106-000539 (cln241), integration-20261106-012510 (frf250a); frf250b ran in the main tree. `core-rs-archive` kept for the user.
 
 ---
 
@@ -179,84 +194,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   -20261104-000400 (aud240d), -013811 (go246), -044203 (qak247), -062420 (qak249); -032754 (aud241 scout, no commits, deleted).
 
 ---
-
-## 2026-11-02 / 03 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Mac 851ee1f4c / aud240a / aud240b / vis243a / agi245 / rng244 / cln238 / cleanup 6 folded
-
-- **State:** master `54aafa87d`+ (final src == agi245 merge `c88d897f2`); the long soak / play gates ran on src `5d39f2c79`; agi245
-  (one render line) got its own full suite + build + Scene ON render checks (below). Tree clean, no active workers.
-- **Folded:** Mac `worker/lib-v2-mac` tip `851ee1f4c` (sum241 battle party action window + SUMMARY; spn242 species names keep
-  apostrophes / periods / gender symbols, summary portraits keyed by SPECIES_) as merge `0f39a60`. master had only .md changes since
-  the Mac base `c5b7861e0`, so the merged non-docs tree == `851ee1f4c` (checked by `git diff`); the Mac's full suite 14,363 / 0
-  (re-run by the top layer) is reused. Supervisor: typecheck 0; touched tests (sum241, spn242, inbattlePartyMenuVisualBind,
-  contain213 helper users) 85 / 85.
-- **Folded:** cln238a (cleanup step 2, first half, `ee189a74a`, supervisor): 8 root ledgers nothing reads moved unchanged to
-  `docs/archive/` (git grep: no test / tool / launcher / coverage-JSON reference). ANIMATION_COVERAGE.json + ANIMATION_LATCHES.md
-  stay (evidence paths), launcher-named lane files wait for cleanup step 3, ROADMAP / ISSUES rewrite = cln238b.
-- **Folded:** aud240a (S11 step 4a; `docs/aud240a-screen-sounds.md`; branch `worker/integration-20261102-213642`):
-  `src/engine/screenSounds.ts` `playSelectSe` + SE_SELECT emits in the draft (yes/no, cursor, menu), swap (pickers, options,
-  yes/no, duplicate species) and postwin dialog menus (question, continuation, swap offer; B silent per menu.c, NoWrap only
-  when the cursor moved, A-on-NO = two SEs). ROM windows (step mode; hybrid `--fast` drops the no-op second SE): draft 3 + 12
-  events, swap 10, decline 3, all equal; supervisor re-probed the decline window on the ON oracle: events equal the fixture.
-  Worker on the tested tree: differential 2,430 / 2,430 identical, full suite 1,737 files / 14,384 passed / 0 failed, typecheck,
-  build, build:lib 0. Supervisor on master: the 4 audio test files 56 / 56. New ISSUES #191 (dialog cursors move on held repeat).
-- **Folded:** vis243a (handoff 4b(a), Kyle's "send-in cut short"; `docs/vis243a-sendin-census.md`; branch
-  `worker/integration-20261102-230300`; evidence `sv-20261102/vis243a-evidence/`): the voluntary player send-in (also Baton Pass)
-  had a fixed 91 + 11 window; it now uses the forced path's ROM chain (SwitchIn_CleanShinyAnimShowSubstitute waits the back
-  animation in Scene ON, SwitchIn_HandleSoundAndEnd the cry): `max(91, cry + 66, T_back + 70) + 11` ON, `max(91, cry + 66) + 11` OFF.
-  Census before the fix: 343 / 376 species clipped for some nature, worst 95 frames of animation / 111 frames early. 16 dense ROM
-  probes (12 ON, 4 OFF) equal. Opponent mid-battle send-in already waited (no change); the battle-start "Go!" intro does NOT
-  (fixed canonical timeline, plan in the doc section 7) — Kyle's SPOINK is probably that path. Census 0..999 both scenes vs
-  `cln237` baseline: 0 bad battles, only `switch-in` durations rose (ON 929 battles / 1,725 commands, OFF 918 / 1,638), digests
-  equal; differential all 211 traces 38,532 / 38,532 identical (no standard trace has a clipped voluntary send-in). Worker full
-  suite on the src-identical tree: 3 failed = the 3 soak / seam pins it then re-pinned with per-pin reasons (exploring-policy
-  trajectories; #89 Baton Pass pin seed 19 -> 30 after a 0..127 re-scan); its second run hit the 180-min cap. Supervisor on
-  master: the 8 touched test files 145 / 145; the wind-down full suite covers the rest.
-- **Folded:** aud240b (S11 step 4b; `docs/aud240b-summary-sounds.md`; branch `worker/integration-20261103-020655`): draft, swap
-  and in-battle party summaries emit SE_SELECT (close, page / mon change, move select), the open / mon-change cry (NORMAL / WEAK,
-  pan 0, volume 120, priority 10), the BGM duck 85 / restore 256 and the cry stop; **A on the Info page now closes the summary**
-  (`pokemon_summary_screen.c:1556-1560`, supervisor-read). Probe fix: CRY_MODE WEAK / WEAK_DOUBLES were swapped. 6 step-mode ROM
-  windows equal (one pinned 1-frame difference, ISSUES #193); supervisor re-probed `summary-close-during-cry`: 8 / 8 events equal.
-  Worker: typecheck 0, smoke 448, 41 importing files 504 tests, build + build:lib 0, differential 4,377 / 4,377 identical over 48
-  summary / draft / party / swap traces (a scratch A-on-Info trace differs from the close on, intended). Full suite not run by
-  the worker (supervisor wind-down suite). Supervisor: 5 audio / summary files 108 / 108. New ISSUES #192 (summary flow gaps),
-  #193 (scheduler debt).
-- **Folded:** cln238b (cleanup step 2b, worker, docs only): ROADMAP.md 2,487 -> 169 lines, ISSUES.md 3,814 -> open only (~280
-  lines; #72 / #121 dropped, settled records moved to ROADMAP "Settled exceptions"); old copies `docs/archive/{ROADMAP,ISSUES}-pre-cln238.md`
-  (supervisor `cmp`: identical to the parent's files; open issue list checked).
-- **Folded:** rng244 (handoff 4b(c), test only): `tests/rng244OutcomeRates.test.ts` + `tests/helpers/rngRateHarness.ts`, 12 checks
-  through the real scripts from random RNG starts (crit per hit index + independence, accuracy 100 / 85 / 70 / stage -1, damage
-  roll uniform over 16, Spike Cannon 3/8 3/8 1/8 1/8, Body Slam 30 % / Thunderbolt 10 %, Quick Claw via gRandomTurnNumber
-  `battle_main.c:4653`; AI score roll skipped, no cheap path); a deliberate crit-roll reuse fails it (z = 84.8). Supervisor: 12 / 12, 43 s.
-- **Cleanup step 6 (supervisor):** 74 merged `worker/*` branch names moved to `refs/archive/worker-merged-20261103/` (restore with
-  `git branch <name> refs/archive/worker-merged-20261103/<name>`); kept `worker/lib-v2-mac` + 3 unmerged exs207 refs; a leaked
-  `/tmp/app-differential-*` worktree removed.
-- **Fixed by the supervisor:** the wind-down suite failed 1 pin (M-B (c) full seed 0): aud240b's A-on-Info close moves the
-  exploring trajectory (38,729 / t28 -> 43,417 / t39, same battle / end state); with both A-close sites undone the old pin passes.
-  Re-pinned (`5d39f2c79`), file 64 / 64.
-- **Folded:** agi245 (handoff 4b(b), Kyle's "Agility clips the lower rows"; scout `docs/agi245-scout.md`; branch
-  `worker/integration-20261103-050850`): `battleScene.ts:21369` the live opponent-attacker Agility clip is now 160 (the healthbox
-  covers the feet, as in the ROM); `corner.y + 55` stays only on the staged path. ROM 87-frame window 0 px for AIPOM, FEAROW,
-  CROBAT, DRAGONITE, LEDYBA, SUNKERN (before: AIPOM 62 frames / 14,833 px); new fixture `agility-opponent-aipom-player-onix` +
-  `tests/animation/agilityOpponentClip.test.ts` (supervisor: fails with the fix undone); differential 641 / 641 identical;
-  Agility / ont193 / scd112 tests 26 / 26. Quick Attack / Aerial Ace keep the 74 clip (LEDYBA-like species unverified, follow-up).
-  **agi245 gates** (`sv-20261102/gates-agi245/`, tree `c88d897f2`): typecheck 0; full suite 1,785 files, 14,441 passed, 1 failed =
-  gate6 manifest missing rng244's new test (regenerated `54aafa87d`, rerun 7 / 7); build 0; play:random 3 min / scene: ON 16
-  battles / 9 swaps, OFF 26 / 10, 0 page errors / overlays / contained / divergences; Scene ON full vary-rng 0:8 `--render-every 8`
-  **8 / 8** (all `budget`).
-- **Scout:** agi245 (`docs/agi245-scout.md`, read-only): Kyle's Agility clip is ours, not the ROM's — the live path still uses a
-  LEDYBA-calibrated clip row `corner.y + 55` (`battleScene.ts:21369`, supervisor-read), cutting 257 opponent species; a 160 clip
-  gives 0 px on 6 species vs the ROM.
-- **Wind-down gates** (`sv-20261102/gates-final/`, src `7717b55a4` == `5d39f2c79` src): typecheck 0; **independent full suite
-  1,783 files: 1,738 passed + 44 skipped, 1 failed (the pin above, fixed)**, 14,427 tests passed; build 0; play:random 4 min / scene:
-  ON 22 battles / 9 swaps, OFF 34 / 16 (max win streak 7); `--lobby-new-challenge` 2 min / scene: 1 + 3 new challenges; **0 page
-  errors / overlays / contained / divergences**; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap
-  carry 0 **100 / 100**; vanilla 0:20 Scene ON **20 / 20**, Scene OFF **20 / 20** (all `budget`); Scene ON winning first-round 0:6
-  `--render-every 1` **6 / 6**; Scene ON full vary-rng 0:16 `--render-every 8` **16 / 16** (all `budget`). The 0:60 gates were not
-  run (hours each here; same practice as earlier sessions).
-- **Housekeeping:** evidence `sv-20261030` deleted (older than the last three runs; 5 GB). Census baseline for the next delta:
-  `sv-20261102/vis243a-evidence/census-final/{on,off}-dac9cd2fe`.
-- **Next:** handoff "Next work": aud240c (party menu SEs), aud240d (lobby scripts; extractor fix for MUS_OBTAIN_B_POINTS first),
-  cleanup step 3 (providers / lanes), 4b(a) remainder (battle-start "Go!" wait; Kyle's SPOINK), ISSUES #191 / #192, a Quick Attack /
-  Aerial Ace live-clip sweep on LEDYBA-like species (agi245 scout).
-- **Notes:** no DEFERRED items. No push. Worker refs (merged, archived): integration-20261102-213642 (aud240a), -230300 (vis243a),
-  -20261103-020655 (aud240b), -032257 (cln238b), -041808 (rng244), -050850 (agi245); -043917 (agi245 scout, no commits).
