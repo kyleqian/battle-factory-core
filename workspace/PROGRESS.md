@@ -46,6 +46,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   play:random 2 min / scene (seed 7): ON 7 battles / 3 swaps, OFF 17 / 6; 0 page errors / overlays / contained. The 0:60 gates were not run (hours each here).
 - **Next:** handoff "Next work": aud242b (wait resolver) / aud242c (panse / createsoundtask), 4b(e) opponent replacement ball bar
   (`docs/obr248-scout.md`), cleanup 5 second half or 7, ISSUES #196 / #197 / #198 / #199.
+- **Housekeeping:** evidence `sv-20261102` deleted (older than the last three runs); ~23 GB free.
 - **Notes:** no DEFERRED items. No push. Worker branches (all merged, deleted): integration-20261105-213057 (aud242a),
   side-20261106-000539 (cln241), integration-20261106-012510 (frf250a); frf250b ran in the main tree. `core-rs-archive` kept for the user.
 
