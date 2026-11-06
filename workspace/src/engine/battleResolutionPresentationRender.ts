@@ -1504,6 +1504,24 @@ export function liveMoveScriptTailFrames(
   return Math.max(0, tailRows + trail - rows.post);
 }
 
+/**
+ * The presented live move-animation command and its unclamped body age (aud242a, docs/aud242-move-anim-sounds.md): rows since the body's
+ * age 0 (negative over the seGate / script lead / pre / idle lead rows, not held at the last body row). Null when the presented command is
+ * not a live move animation (declined bodies have no ROM-faithful clock).
+ */
+export function liveMoveSourceAge(
+  state: BattleResolutionPresentationState,
+): Readonly<{ request: BattleMoveAnimationRequest; age: number }> | null {
+  const segment = state.segments[state.segmentIndex];
+  const command = segment?.commands[state.commandIndex];
+  if (command === undefined || command.type !== "move-animation" || command.animation === undefined) return null;
+  const field = currentCommandField(state);
+  if (liveMoveAnimationDuration(command.animation, field) === null) return null;
+  const seGate = (command.timing.seGateFrames ?? 0) + (command.timing.scriptLeadFrames ?? 0);
+  const age = state.lifecycle.phaseElapsed - seGate - liveMoveUniversalRows(command.animation, field).pre;
+  return Object.freeze({ request: command.animation, age });
+}
+
 /** The body age shown on this row: held at 0 over the pre + lead rows and at the last body row over the post rows. */
 function liveMoveUniversalRowAge(
   state: BattleResolutionPresentationState,

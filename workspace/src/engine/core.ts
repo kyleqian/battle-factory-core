@@ -722,6 +722,7 @@ import {
 } from "./screenSounds.ts";
 import { emitBattleEndSounds } from "./battleEndSounds.ts";
 import { emitBattleHitSounds } from "./battleHitSounds.ts";
+import { emitMoveAnimSounds } from "./moveAnimSounds.ts";
 import { emitBattleStartBgm, emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
 import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
 import { soundCollecting } from "../audio/soundEvents.ts";
@@ -1069,6 +1070,7 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
         orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
       );
     }
+    if (orchestratorAfter?.battleResolutionPresentation) emitMoveAnimSounds(orchestratorAfter.battleResolutionPresentation);
     const resolutionBefore = state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null;
     if (resolutionBefore !== null && orchestratorAfter !== null && orchestratorAfter !== undefined) {
       emitBattleEndSounds(

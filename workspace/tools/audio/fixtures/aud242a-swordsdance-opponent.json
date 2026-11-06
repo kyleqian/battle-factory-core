@@ -1,0 +1,307 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "lab aud242a-swordsdance-opponent-on.json",
+ "profile": "battle-scene-on",
+ "frames": 822,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
+ },
+ "mode": "step",
+ "steps": 39398567,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 35.6,
+ "windowSeconds": 34.1,
+ "events": [
+  {
+   "frame": 1,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 21,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 74,
+   "kind": "se",
+   "id": 191,
+   "name": "SE_M_SWORDS_DANCE",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 136,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "DestroyAnimSoundTask",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
+   "frame": 144,
+   "kind": "se",
+   "id": 239,
+   "name": "SE_M_STAT_INCREASE",
+   "pan": 64,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 229,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "DestroyAnimSoundTask",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
+   "frame": 367,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "HandleLowHpMusicChange",
+   "noop": true
+  },
+  {
+   "frame": 407,
+   "kind": "se",
+   "id": 238,
+   "name": "SE_M_SKY_UPPERCUT",
+   "pan": 0,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 527,
+   "kind": "se",
+   "id": 214,
+   "name": "SE_M_STRENGTH",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 545,
+   "kind": "se",
+   "id": 131,
+   "name": "SE_M_ROCK_THROW",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  },
+  {
+   "frame": 595,
+   "kind": "duck",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "DestroyAnimSoundTask",
+   "tracks": 65535,
+   "volume": 256,
+   "noop": true
+  },
+  {
+   "frame": 598,
+   "kind": "se",
+   "id": 13,
+   "name": "SE_EFFECTIVE",
+   "pan": 63,
+   "via": "PlaySE12WithPanning"
+  }
+ ],
+ "calls": [
+  {
+   "frame": 1,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 33703116
+  },
+  {
+   "frame": 21,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 33703116
+  },
+  {
+   "frame": 74,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 191,
+   "r1": 63
+  },
+  {
+   "frame": 74,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 191,
+   "r1": 63
+  },
+  {
+   "frame": 136,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "DestroyAnimSoundTask",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
+   "frame": 144,
+   "fn": "PlaySE12WithPanning",
+   "via": "InitStatsChangeAnimation",
+   "r0": 239,
+   "r1": 64
+  },
+  {
+   "frame": 144,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 239,
+   "r1": 64
+  },
+  {
+   "frame": 229,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "DestroyAnimSoundTask",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
+   "frame": 367,
+   "fn": "m4aSongNumStop",
+   "via": "HandleLowHpMusicChange",
+   "r0": 90,
+   "r1": 1,
+   "noop": true
+  },
+  {
+   "frame": 407,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 238,
+   "r1": 0
+  },
+  {
+   "frame": 407,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 238,
+   "r1": 0
+  },
+  {
+   "frame": 527,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 214,
+   "r1": 63
+  },
+  {
+   "frame": 527,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 214,
+   "r1": 63
+  },
+  {
+   "frame": 545,
+   "fn": "PlaySE12WithPanning",
+   "via": "CalculatePanIncrement",
+   "r0": 131,
+   "r1": 63
+  },
+  {
+   "frame": 545,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 131,
+   "r1": 63
+  },
+  {
+   "frame": 595,
+   "fn": "m4aMPlayVolumeControl",
+   "via": "DestroyAnimSoundTask",
+   "r0": 50361376,
+   "r1": 65535,
+   "noop": true
+  },
+  {
+   "frame": 598,
+   "fn": "PlaySE12WithPanning",
+   "via": "SetControllerToOpponent",
+   "r0": 13,
+   "r1": 63
+  },
+  {
+   "frame": 598,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE12WithPanning",
+   "r0": 13,
+   "r1": 63
+  }
+ ],
+ "trace": {
+  "route": "generated-orchestrator",
+  "battleScene": "on",
+  "appStage": {
+   "id": "aud242a-swordsdance-opponent-on",
+   "frame": 0
+  },
+  "segments": [
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 18,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 800,
+    "buttons": []
+   }
+  ]
+ }
+}
