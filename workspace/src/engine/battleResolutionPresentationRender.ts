@@ -75,6 +75,7 @@ import {
 } from "../animation/sendOutDispatcher.ts";
 import { BACK_ANIM_NATURE_ORDER } from "../animation/backSendOutAnim.ts";
 import { natureFromPersonality } from "./opponentGen.ts";
+import { OPPONENT_SUMMARY_FADE_DELAY_FRAMES, OPPONENT_SUMMARY_FADE_FRAMES } from "./midBattleOpponentPartySummaryTiming.ts";
 import { frontSendOutSpriteFrameAtTick } from "../animation/sendOutSpriteFrame.ts";
 
 export const BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES =
@@ -1129,6 +1130,10 @@ export type BattleResolutionPresentationRenderView = Readonly<{
   partySummary: Readonly<{
     battler: 0 | 1;
     states: readonly import("./battleResolutionPresentation.ts").PartyBallState[];
+    /** obr251: frames since the bar's creation (draw command start minus its script lead); negative before the bar exists. */
+    createAge: number;
+    /** obr251: frames since the hide command began (the BLDALPHA fade-out runs on across later commands); null while shown. */
+    fadeAge: number | null;
   }> | null;
   /**
    * ISSUES #78 residual (1): the white ball-fade's per-frame blend
@@ -1983,6 +1988,20 @@ export function withLiveCastformForms(
   return next;
 }
 
+type OpponentSummaryAge = Readonly<{ states: readonly import("./battleResolutionPresentation.ts").PartyBallState[]; lead: number; sinceDraw: number; sinceHide: number | null }>;
+
+/** obr251: the drawn opponent summary with its ages at the current frame; kept past its hide command until the fade-out ends. */
+function opponentSummaryView(
+  summary: OpponentSummaryAge | null,
+  shown: BattleResolutionPresentationRenderView["partySummary"],
+  elapsed: number,
+): BattleResolutionPresentationRenderView["partySummary"] {
+  if (summary === null) return shown;
+  const fadeAge = summary.sinceHide === null ? null : summary.sinceHide + elapsed;
+  if (fadeAge !== null && fadeAge >= OPPONENT_SUMMARY_FADE_DELAY_FRAMES + OPPONENT_SUMMARY_FADE_FRAMES) return null;
+  return Object.freeze({ battler: 1, states: summary.states, createAge: summary.sinceDraw + elapsed - summary.lead, fadeAge });
+}
+
 export function createBattleResolutionPresentationRenderView(
   state: BattleResolutionPresentationState,
   /** Read-only presentation Random2 host (EngineState.presentationRng.host); render never draws from it. */
@@ -1997,6 +2016,9 @@ export function createBattleResolutionPresentationRenderView(
   let midBattleSwitchIn: BattleResolutionPresentationRenderView["midBattleSwitchIn"] = null;
   let switchOut: BattleResolutionPresentationRenderView["switchOut"] = null;
   let partySummary: BattleResolutionPresentationRenderView["partySummary"] = null;
+  // obr251: the opponent summary's age, summed over completed commands: since its draw began (incl. the script lead, subtracted at
+  // the end) and, once hidden, since its hide began (Task_HidePartyStatusSummary_DuringBattle's fade outlives the hide command).
+  let summary = null as OpponentSummaryAge | null;
   const fainted = new Set<0 | 1>();
   const spriteVisibility = new Map<0 | 1, boolean>([[0, true], [1, true]]);
   // Recalled battlers (real CONTROLLER_RETURNMONTOBALL receipts) lose their
@@ -2114,6 +2136,15 @@ export function createBattleResolutionPresentationRenderView(
   }
   for (let index = 0; index < state.commandIndex; index += 1) {
     const completed = segment.commands[index]!;
+    if (summary !== null) {
+      let frames: number;
+      try {
+        frames = battleResolutionCommandDuration(completed, field);
+      } catch {
+        frames = battleResolutionCommandFallbackDuration(completed);
+      }
+      summary = Object.freeze({ ...summary, sinceDraw: summary.sinceDraw + frames, sinceHide: summary.sinceHide === null ? null : summary.sinceHide + frames });
+    }
     field = applyCompletedCommand(field, completed);
     semiInvulnerableHidden = applyLiveSemiInvulnerableCommand(semiInvulnerableHidden, completed);
     if (completed.type === "message") latestMessage = completed.lines;
@@ -2137,8 +2168,18 @@ export function createBattleResolutionPresentationRenderView(
       // real game draws no player tray on the mid-battle switch route. Only
       // the opponent side (battler 1) draws via this command.
       partySummary = completed.visible && completed.battler !== 0
-        ? Object.freeze({ battler: completed.battler, states: completed.states })
+        ? Object.freeze({ battler: completed.battler, states: completed.states, createAge: 0, fadeAge: null })
         : null;
+      if (completed.battler !== 0 && completed.visible) {
+        summary = Object.freeze({
+          states: completed.states,
+          lead: completed.timing?.leadFrames ?? 0,
+          sinceDraw: battleResolutionCommandDuration(completed, field),
+          sinceHide: null,
+        });
+      } else if (summary !== null && summary.sinceHide === null) {
+        summary = Object.freeze({ ...summary, sinceHide: battleResolutionCommandDuration(completed, field) });
+      }
     }
     if (completed.type === "trainer-slide") {
       settledTrainer = completed.direction === "in"
@@ -2356,8 +2397,13 @@ export function createBattleResolutionPresentationRenderView(
       // ISSUES #78: the same skipPlayer gate as the completed-command loop
       // above -- the player side never draws the tray on the switch route.
       partySummary = command.visible && command.battler !== 0
-        ? Object.freeze({ battler: command.battler, states: command.states })
+        ? Object.freeze({ battler: command.battler, states: command.states, createAge: 0, fadeAge: null })
         : null;
+      if (command.battler !== 0 && command.visible) {
+        summary = Object.freeze({ states: command.states, lead: command.timing?.leadFrames ?? 0, sinceDraw: 0, sinceHide: null });
+      } else if (summary !== null && summary.sinceHide === null) {
+        summary = Object.freeze({ ...summary, sinceHide: 0 });
+      }
     } else if (command.type === "switch-in") {
       // The incoming mon is already the field battler; the mid-battle
       // switch-in view holds its visible onset until the ball-release emerge.
@@ -2568,7 +2614,7 @@ export function createBattleResolutionPresentationRenderView(
     switchOut,
     midBattleSwitchFade,
     midBattleSwitchParticles,
-    partySummary,
+    partySummary: opponentSummaryView(summary, partySummary, command === null ? 0 : state.lifecycle.phaseElapsed),
     trainerSlide: activeTrainerSlide !== null
       ? Object.freeze({
           battler: activeTrainerSlide.battler,

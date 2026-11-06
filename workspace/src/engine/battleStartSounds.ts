@@ -12,6 +12,7 @@ import {
   generatedPlayerVisualLag,
 } from "./battleScene.ts";
 import type { BattleResolutionPresentationCommand, BattleResolutionPresentationState, PartyBallState } from "./battleResolutionPresentation.ts";
+import { emitOpponentPartySummarySounds } from "./midBattleOpponentPartySummary.ts";
 import type { FactoryBattleStartIntroState } from "./factoryBattleStartIntro.ts";
 import { partySendOutReleaseClock, type PartySelectState, type PartySendOutTiming } from "./partySelect.ts";
 import {
@@ -176,6 +177,7 @@ export function emitMidBattleSwitchSounds(
   after: BattleResolutionPresentationState | null,
   frontierBrain: boolean,
 ): void {
+  emitOpponentPartySummarySounds(before, after);
   const now = currentCommand(after);
   if (now === null) return;
   const { command, elapsed } = now;
