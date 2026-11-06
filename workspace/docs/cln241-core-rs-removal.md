@@ -65,10 +65,24 @@ What is lost on purpose: the differential sweeps and the wasm ABI / packet-barri
 TS; with the port off master they have no subject. The deleted test files remain in master history before the removal commit (`git show <removal>^:workspace/tests/<name>`);
 `core-rs-archive` holds only the `core-rs/` subtree, so restoring the adapters means reverting the removal commit.
 
-## Verification
+## Verification (this host, 2 workers, `/etc/pokebench-runner.env`)
 
-See the final report of the step for the numbers (typecheck, build, build:lib, test:gate, full `npm test`, bundle size).
-Baseline bundle before the removal: `dist` 33,289,849 bytes, 8 files.
+| Check | Result |
+|---|---|
+| `npm run typecheck` | exit 0, 3m59s |
+| `npm run build` | exit 0, 4m42s (includes `tsc -b`) |
+| `npm run build:lib` | exit 0, 1m11s |
+| `generateTestGate.ts --check` | exit 0; gate 364 -> 362 files |
+| `npm run test:gate` | 362 / 362 files, 2,835 tests, 3m26s |
+| `npm test` (full, nohup + exit file) | exit 0; 1,733 files passed + 44 skipped = 1,777 of 1,777 in `git ls-files` (no dead fork); 13,872 tests passed, 223 skipped, 0 failed; 2,864 s |
+| Bundle | `dist` 33,289,849 bytes / 8 files before and after, byte for byte. Six of seven assets have identical content hashes; only `assets/index-*.js` differs because `vite.config.ts` embeds `git rev-parse --short HEAD`. The wasm adapter was never in the bundle |
+
+`git grep -n "core-rs\|factory_wasm"` now hits only this doc, the one-line pointers in `AGENTS.md`, `LOCAL_SETUP.md` and
+`README.md`, the supervisor-owned ledgers (`PROGRESS.md`, `ROADMAP.md`, `PAPERCUTS.md`), and historical docs / receipts
+under `docs/` and `tools/integration/fixtures/`.
+
+Test-count delta against the last full run (1,787 files, 14,458 tests): the 18 deleted parity files and the 11 retained pins
+account for it.
 
 ## Follow-ups (not done here)
 
