@@ -131,6 +131,7 @@ export type BattleCommandPresentationPhase =
   | "bag-message"
   | "forfeit-question"
   | "forfeit-closing"
+  | "forfeit-message"
   | "submitting";
 
 /**
@@ -310,6 +311,18 @@ export const FORFEIT_QUESTION_FIRST_GLYPH_AT = 3;
 export const FORFEIT_BOX_AT = 53;
 export const FORFEIT_BOX_CLEAR_AT = 4;
 export const FORFEIT_CLOSING_RETURN_AT = 7;
+/**
+ * frf250b: YES. ROM lab (Scene OFF, A on frame 150): the yes/no box and the
+ * question vanish and the first glyph of "<PLAYER> forfeited the match!"
+ * lands on frame 161 (elapsed 10), the last glyph on 187, and the end-of-battle
+ * fast fade starts on 255 (elapsed 104). `FORFEIT_MESSAGE_END_AT` is the
+ * elapsed at which the battle ends (terminal loss); the return hold owns the
+ * fade from there.
+ */
+export const FORFEIT_MESSAGE_FIRST_GLYPH_AT = 10;
+export const FORFEIT_MESSAGE_END_AT = 98;
+export const FORFEIT_MESSAGE_PLAYER_NAME = "MEMORY";
+export const FORFEIT_MESSAGE_TEXT = `${FORFEIT_MESSAGE_PLAYER_NAME} forfeited the match!`;
 
 export function moveBattleCommandActionCursor(
   cursor: 0 | 1 | 2 | 3,
@@ -594,6 +607,8 @@ export function advanceBattleCommandPresentation(
   // independent from the phase-relative window timing below.
   const bounceCallbackRuns =
     stateInput.lifecycle.phase !== "action-enter"
+    // frf250b: the forfeit YES stops the bounce (ROM lab: no sprite or healthbox step after A).
+    && stateInput.lifecycle.phase !== "forfeit-message"
     && (
       (
         stateInput.lifecycle.phase !== "fight-opening"
@@ -668,10 +683,10 @@ export function advanceBattleCommandPresentation(
         return withLifecycle(state, "forfeit-question", elapsed);
       }
       if (newKeys.has("A") || newKeys.has("B")) {
-        // TODO(frf250b): YES (cursor 0 on A) is the forfeit outcome; until
-        // that step lands it behaves exactly as NO (ROM close + redraw).
         playSelectSe();
-        return withLifecycle(state, "forfeit-closing", 0);
+        return newKeys.has("A") && state.forfeitCursor === 0
+          ? withLifecycle(state, "forfeit-message", 0)
+          : withLifecycle(state, "forfeit-closing", 0);
       }
       const direction = (["UP", "DOWN"] as const)
         .find((button) => newKeys.has(button));
@@ -688,6 +703,10 @@ export function advanceBattleCommandPresentation(
       return elapsed >= FORFEIT_CLOSING_RETURN_AT
         ? withLifecycle(state, "action-menu", 0, { forfeitCursor: 1, forfeitDisplayCursor: 1 })
         : withLifecycle(state, "forfeit-closing", elapsed);
+    }
+    case "forfeit-message": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      return withLifecycle(state, "forfeit-message", Math.min(elapsed, FORFEIT_MESSAGE_END_AT));
     }
     case "rejection-reopen": {
       const elapsed = state.lifecycle.phaseElapsed + 1;

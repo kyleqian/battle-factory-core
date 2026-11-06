@@ -82,3 +82,23 @@ export function emitBattleEndSounds(
   );
   if (!brainWin) scheduleAfter(SE_EXIT_AFTER_TEXT_DISMISS, () => emitSound({ kind: "se", id: SE_EXIT, pan: null }));
 }
+
+/**
+ * frf250b: the forfeit's end sounds (ROM lab: fade 254, MUS_B_FACTORY 300, SE_EXIT 326 for the tick that ends the battle at 249).
+ * Same sounds as the lost battle's tail, measured from the forfeit's own end tick.
+ */
+export const FORFEIT_END_FADE_AFTER_END = 5;
+export const FORFEIT_RETURN_BGM_AFTER_END = 51;
+export const FORFEIT_SE_EXIT_AFTER_END = 77;
+
+export function emitForfeitEndSounds(
+  beforePhase: string | null,
+  battleEnded: boolean,
+  frontierBrain: boolean,
+): void {
+  if (beforePhase !== "forfeit-message" || !battleEnded) return;
+  const bgm = factoryBattleBgm(frontierBrain);
+  scheduleAfter(FORFEIT_END_FADE_AFTER_END, () => emitSound({ kind: "fade", id: bgm, pan: null, player: "BGM", speed: END_FADE_SPEED }));
+  scheduleAfter(FORFEIT_RETURN_BGM_AFTER_END, () => emitSound({ kind: "bgm", id: BGM_DRAFT, pan: null }));
+  scheduleAfter(FORFEIT_SE_EXIT_AFTER_END, () => emitSound({ kind: "se", id: SE_EXIT, pan: null }));
+}

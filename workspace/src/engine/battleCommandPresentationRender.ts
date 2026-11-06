@@ -23,6 +23,8 @@ import {
   BAG_MESSAGE_TEXT,
   FORFEIT_BOX_AT,
   FORFEIT_BOX_CLEAR_AT,
+  FORFEIT_MESSAGE_FIRST_GLYPH_AT,
+  FORFEIT_MESSAGE_TEXT,
   FORFEIT_QUESTION_FIRST_GLYPH_AT,
   FORFEIT_QUESTION_LINES,
   REJECTION_MESSAGE_FIRST_GLYPH_AT,
@@ -214,6 +216,22 @@ export function createBattleCommandPresentationRenderView(
       (phase === "forfeit-question" && elapsed >= FORFEIT_BOX_AT)
       || (phase === "forfeit-closing" && elapsed < FORFEIT_BOX_CLEAR_AT)
     ) {
+      forfeitBox = Object.freeze({ cursor: presentation.forfeitDisplayCursor });
+    }
+  }
+  if (phase === "forfeit-message") {
+    const questionHeld = elapsed < FORFEIT_MESSAGE_FIRST_GLYPH_AT;
+    rejectionMessage = Object.freeze({
+      lines: questionHeld ? FORFEIT_QUESTION_LINES : Object.freeze([FORFEIT_MESSAGE_TEXT]),
+      visibleCharacters: questionHeld
+        ? battleStringPrintableLength(FORFEIT_QUESTION_LINES)
+        : Math.min(
+          FORFEIT_MESSAGE_TEXT.length,
+          elapsed - FORFEIT_MESSAGE_FIRST_GLYPH_AT + 1,
+        ),
+      waitCursorAge: null,
+    });
+    if (questionHeld) {
       forfeitBox = Object.freeze({ cursor: presentation.forfeitDisplayCursor });
     }
   }
@@ -483,6 +501,7 @@ export function renderBattleCommandPresentation(
     case "bag-message":
     case "forfeit-question":
     case "forfeit-closing":
+    case "forfeit-message":
       drawCommandMessage(framebuffer, view, assets);
       return;
     case "party-handoff":

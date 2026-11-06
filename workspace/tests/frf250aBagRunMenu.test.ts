@@ -1,6 +1,5 @@
 // frf250a: BAG and RUN on the battle action menu. BAG prints "Items can't be used now." ({PAUSE 64}, auto-dismissed) and returns to the
-// menu with the cursor on BAG; RUN asks the forfeit question with the yes/no box (cursor defaults to NO; A/B = NO). YES behaves as NO until
-// frf250b. The windows are measured on the ROM (tools/battle-lab/frf250a-*.json, compared via tools/compare/traces/frf250a-*.json); the SE
+// menu with the cursor on BAG; RUN asks the forfeit question with the yes/no box (cursor defaults to NO; A/B = NO). YES is frf250b (tests/frf250bForfeit.test.ts). The windows are measured on the ROM (tools/battle-lab/frf250a-*.json, compared via tools/compare/traces/frf250a-*.json); the SE
 // fixtures are committed oracle output of tools/audio/soundEventProbe.py. This test needs no emulator.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";

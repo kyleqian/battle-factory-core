@@ -1570,6 +1570,9 @@ export class RandomPlayer {
   public newChallengeFromLobby = false;
   /** Opt-in (goal play with the lobby option): chance the continuation menu picks RETIRE (and answers YES). null = the normal rolls. */
   public retireRate: number | null = null;
+  /** frf250b: null (every soak policy) answers the forfeit prompt NO; a rate makes that share of action menus pick RUN and answer YES. Tests only. */
+  public forfeitRate: number | null = null;
+  private forfeitIntent = false;
   private cooldown = 0;
   private draft: DraftPlan;
   // Sampled intents, keyed by decision surface identity so a new decision
@@ -2003,7 +2006,11 @@ export class RandomPlayer {
       return this.pressAdvance(state, "rejection dismiss");
     }
     if (phase === "forfeit-question") {
-      // frf250a: RUN opens the forfeit prompt; B answers NO once the box is up (early presses are dropped). YES is frf250b.
+      // frf250a/b: RUN opens the forfeit prompt; B answers NO once the box is up (early presses are dropped).
+      // Only an opted-in test player (forfeitRate) answers YES: the soak keeps B so its runs stay meaningful.
+      if (this.forfeitIntent) {
+        return presentation.forfeitCursor !== 0 ? this.press("UP", 8) : this.press("A", 8);
+      }
       return this.press("B", 8);
     }
     if (phase === "action-menu") {
@@ -2022,6 +2029,10 @@ export class RandomPlayer {
           ? this.computeSwitchRow(orch, presentation)
           : null;
         if (this.pendingSwitchRow !== null) target = 2;
+        if (this.forfeitRate !== null && this.rng.float() < this.forfeitRate) {
+          target = 3;
+          this.forfeitIntent = true;
+        }
         this.actionIntent = { key: this.lastCommandKey, target, futile: 0 };
         this.note(
           state,

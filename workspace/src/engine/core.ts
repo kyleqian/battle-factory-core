@@ -720,11 +720,12 @@ import {
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
-import { emitBattleEndSounds } from "./battleEndSounds.ts";
+import { emitBattleEndSounds, emitForfeitEndSounds } from "./battleEndSounds.ts";
 import { emitBattleHitSounds } from "./battleHitSounds.ts";
 import { emitMoveAnimSounds } from "./moveAnimSounds.ts";
 import { emitBattleStartBgm, emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
 import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
+import { advanceForfeitTerminalAge, forfeitFrozenSceneView } from "./battleForfeit.ts";
 import { soundCollecting } from "../audio/soundEvents.ts";
 
 /**
@@ -1071,6 +1072,11 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
       );
     }
     if (orchestratorAfter?.battleResolutionPresentation) emitMoveAnimSounds(orchestratorAfter.battleResolutionPresentation);
+    emitForfeitEndSounds(
+      state.factoryRoundBattleOrchestrator?.battleCommandPresentation?.lifecycle.phase ?? null,
+      orchestratorAfter !== null && orchestratorAfter !== undefined && orchestratorAfter.battle === null,
+      orchestratorAfter?.round.rules.currentOpponent.frontierBrain !== undefined,
+    );
     const resolutionBefore = state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null;
     if (resolutionBefore !== null && orchestratorAfter !== null && orchestratorAfter !== undefined) {
       emitBattleEndSounds(
@@ -1207,15 +1213,37 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
   }
 
   if (state.factoryRoundBattleOrchestrator?.battleCommandPresentation) {
+    const preAdvanceCommand =
+      state.factoryRoundBattleOrchestrator.battleCommandPresentation;
     const factoryRoundBattleOrchestrator = advanceFactoryRoundBattleCommand(
       state.factoryRoundBattleOrchestrator,
       newKeys,
     );
+    // frf250b: a forfeit ends the battle from the command presentation; the
+    // lost-battle return hold freezes the forfeit message scene.
+    const forfeitEnded =
+      preAdvanceCommand !== null
+      && preAdvanceCommand.lifecycle.phase === "forfeit-message"
+      && factoryRoundBattleOrchestrator.battle === null
+      && postwin === null;
+    const forfeitTerminalCommand = forfeitEnded
+      ? terminalCommandForRound(factoryRoundBattleOrchestrator.round)
+      : null;
     return {
       ...state,
       frame: state.frame + 1,
       keyRepeat,
       factoryRoundBattleOrchestrator,
+      ...(forfeitEnded
+        ? {
+            postwin: createBattleReturnHoldState(
+              forfeitFrozenSceneView(preAdvanceCommand),
+            ),
+            factoryTerminal: factoryTerminal === null && forfeitTerminalCommand !== null
+              ? advanceForfeitTerminalAge(createFactoryTerminalPresentation(forfeitTerminalCommand))
+              : factoryTerminal,
+          }
+        : {}),
       rngMode: "frontierBattle",
       rngValue:
         factoryRoundBattleOrchestrator.battle?.rng.value ?? state.rngValue,

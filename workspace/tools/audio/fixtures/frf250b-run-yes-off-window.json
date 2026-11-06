@@ -1,0 +1,245 @@
+{
+ "schema": "audio-sound-events/v1",
+ "window": "lab frf250b-run-yes-off.json",
+ "profile": "battle-scene-off",
+ "frames": 470,
+ "hooks": {
+  "m4aSongNumStart": "0x082e0130",
+  "m4aSongNumStop": "0x082e01fc",
+  "PlayCryInternal": "0x080a344c",
+  "PlaySE12WithPanning": "0x080a37b4",
+  "PlaySE1WithPanning": "0x080a3808",
+  "PlaySE2WithPanning": "0x080a383c",
+  "SE12PanpotControl": "0x080a3870",
+  "PlayBGM": "0x080a3778",
+  "PlayFanfare": "0x080a30e4",
+  "PlayFanfareByFanfareNum": "0x080a3060",
+  "m4aMPlayFadeOut": "0x082e02f8",
+  "m4aMPlayFadeOutTemporarily": "0x082e0308",
+  "m4aMPlayFadeIn": "0x082e0328",
+  "m4aMPlayVolumeControl": "0x082e111c",
+  "m4aMPlayStop": "0x082e0978",
+  "m4aMPlayContinue": "0x082e02a8"
+ },
+ "mode": "step",
+ "steps": 21116609,
+ "hybrid": {
+  "fast": 0,
+  "restepped": 0,
+  "state_mismatch": 0,
+  "mismatches": []
+ },
+ "seconds": 19.2,
+ "windowSeconds": 17.8,
+ "events": [
+  {
+   "frame": 1,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 33,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 65,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 131,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 151,
+   "kind": "se",
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "via": "PlaySE"
+  },
+  {
+   "frame": 254,
+   "kind": "fade",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "pan": null,
+   "player": "BGM",
+   "via": "FadeOutBGM",
+   "dir": "out",
+   "speed": 5
+  },
+  {
+   "frame": 291,
+   "kind": "stop",
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "via": "SpecialStatusesClear",
+   "noop": true
+  },
+  {
+   "frame": 300,
+   "kind": "bgm",
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "pan": null,
+   "via": "PlayBGM"
+  },
+  {
+   "frame": 326,
+   "kind": "se",
+   "id": 9,
+   "name": "SE_EXIT",
+   "pan": null,
+   "via": "PlaySE"
+  }
+ ],
+ "calls": [
+  {
+   "frame": 1,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 0
+  },
+  {
+   "frame": 33,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 1
+  },
+  {
+   "frame": 65,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 33703116
+  },
+  {
+   "frame": 131,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 64
+  },
+  {
+   "frame": 151,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 5,
+   "r1": 29
+  },
+  {
+   "frame": 254,
+   "fn": "m4aMPlayFadeOut",
+   "via": "FadeOutBGM",
+   "r0": 50361376,
+   "r1": 5
+  },
+  {
+   "frame": 291,
+   "fn": "m4aSongNumStop",
+   "via": "SpecialStatusesClear",
+   "r0": 90,
+   "r1": 2,
+   "noop": true
+  },
+  {
+   "frame": 300,
+   "fn": "PlayBGM",
+   "via": "MapMusicMain",
+   "r0": 469,
+   "r1": 134884872
+  },
+  {
+   "frame": 300,
+   "fn": "m4aSongNumStart",
+   "via": "PlayBGM",
+   "r0": 469,
+   "r1": 469
+  },
+  {
+   "frame": 326,
+   "fn": "m4aSongNumStart",
+   "via": "PlaySE",
+   "r0": 9,
+   "r1": 134923135
+  }
+ ],
+ "trace": {
+  "route": "generated-orchestrator",
+  "battleScene": "off",
+  "appStage": {
+   "id": "frf250a-bagrun-off",
+   "frame": 0
+  },
+  "segments": [
+   {
+    "frames": 2,
+    "buttons": [
+     "RIGHT"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "DOWN"
+    ]
+   },
+   {
+    "frames": 30,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 64,
+    "buttons": []
+   },
+   {
+    "frames": 1,
+    "buttons": [
+     "UP"
+    ]
+   },
+   {
+    "frames": 19,
+    "buttons": []
+   },
+   {
+    "frames": 2,
+    "buttons": [
+     "A"
+    ]
+   },
+   {
+    "frames": 900,
+    "buttons": []
+   }
+  ]
+ }
+}

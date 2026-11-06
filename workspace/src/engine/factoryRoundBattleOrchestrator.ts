@@ -68,6 +68,7 @@ import {
   submitBattleCommandPresentationDecision,
   type BattleCommandPresentationState,
 } from "./battleCommandPresentation.ts";
+import { battleForfeitMessageDone, forfeitTerminalBattle } from "./battleForfeit.ts";
 import {
   applyPlayerSwitchEvents,
   bufferBattlePartyOrderBySide,
@@ -3140,6 +3141,9 @@ export function advanceFactoryRoundBattleCommand(
     return beginCommandResolution(cleared, returned, transition, history);
   }
   const advanced = advanceBattleCommandPresentation(presentation, newKeys);
+  if (battleForfeitMessageDone(advanced)) {
+    return finishBattle(state, forfeitTerminalBattle(battle), history);
+  }
   const moveSelectionCursors = Object.freeze(
     state.moveSelectionCursors.map((cursor, battler) =>
       battler === advanced.request.battler ? advanced.fightCursor : cursor),
