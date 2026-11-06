@@ -90,6 +90,8 @@ never brief those here. One worker at a time; each run folds the next audio step
      - **Do it in two steps.** (1) The BAG message plus the forfeit prompt with NO, which are presentation only. (2) YES: the
        forfeit loss through the round controller to the library's battle-end / challenge-end events. A forfeit must end the
        challenge as a loss, exactly like a lost battle, and replay identically (`replayChallenge`).
+     - **DONE** (frf250a presentation, frf250b forfeit YES; `docs/frf250b-forfeit.md`). Scene OFF is ROM-exact; Scene ON has a named
+       healthbox / fade gap there.
      - **Proofs:** ROM labs for both prompts and the forfeit text window. Measure the SE_SELECT on A and the frames from A to
        the first glyph.
    - **New, Kyle 2026-11-04** (website on 851ee1f4c), reproduced on the Mac from his trace `47192107276c654fbcdc1d038304aa0e`

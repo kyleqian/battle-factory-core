@@ -56,6 +56,8 @@ palettes alone; it now reads `src/assets/gen/battle-sprite-palettes.json`
   `containedErrors`. After `challenge-end` nothing more is reported: one
   mount is one challenge (the in-game new-challenge path stays for the shell
   and soaks).
+- A forfeit (RUN, then YES on the forfeit box) is a lost battle: `battle-end` with outcome loss and `challenge-end loss` on the same
+  tick, and `replayChallenge` reproduces it from the input stream alone (`docs/frf250b-forfeit.md`).
 - `resume` ticks the given runs without drawing (spread over animation
   frames, ~12 ms each; `resumeSync` for tests), preloads them verbatim into
   the recorder, then emits `ready`. `trace(fromSegment)` returns the runs
