@@ -15,6 +15,7 @@ import {
   type BattleSinglesBattler,
   type BattleState,
 } from "./battleDecisionBoundary.ts";
+import { playSelectSe } from "./screenSounds.ts";
 import {
   describeIllegalMoveSelection,
   type BattleScriptSelectionRejection,
@@ -127,6 +128,9 @@ export type BattleCommandPresentationPhase =
   | "party-handoff"
   | "rejection-message"
   | "rejection-reopen"
+  | "bag-message"
+  | "forfeit-question"
+  | "forfeit-closing"
   | "submitting";
 
 /**
@@ -244,6 +248,14 @@ export type BattleCommandPresentationState = Readonly<{
    */
   rejectionWaitCursorAge: number;
   /**
+   * frf250a: the RUN forfeit yes/no cursor (`gBattleCommunication[CURSOR_POSITION]`
+   * of `PlayerHandleYesNoInput`): 0 = YES (top row), 1 = NO. The ROM's
+   * `BattleScript_AskIfWantsToForfeitMatch` starts it on NO (1).
+   */
+  forfeitCursor: 0 | 1;
+  /** The cursor the box draws: the ROM shows a moved yes/no cursor one frame after the press (frf250a lab). */
+  forfeitDisplayCursor: 0 | 1;
+  /**
    * Route-scoped `STRINGID_USEDMOVE` post-print hold (failed/no-anim path
    * only), threaded into the resolution on `beginCommandResolution`
    * (`battleResolutionPresentation.ts`'s `usedMessageHoldFrames`). Defaults
@@ -273,6 +285,31 @@ export const BATTLE_COMMAND_ACTION_ENTER_DELAY = 6;
 export const REJECTION_MESSAGE_FIRST_GLYPH_AT = 3;
 export const REJECTION_MESSAGE_HOLD_AT = 66;
 export const REJECTION_MESSAGE_REOPEN_FRAMES = 9;
+
+/**
+ * frf250a (ROM-measured, tools/battle-lab/frf250a-*.json): BAG on the action
+ * menu runs `BattleScript_ActionSelectionItemsCantBeUsed` ("Items can't be
+ * used now.{PAUSE 64}" -- auto-dismissed, not button-gated), then returns to
+ * the action menu with the cursor still on BAG. Frames are phase-relative to
+ * the A press.
+ */
+export const BAG_MESSAGE_FIRST_GLYPH_AT = 3;
+export const BAG_MESSAGE_RETURN_AT = 99;
+export const BAG_MESSAGE_TEXT = "Items can't be used now.";
+
+/**
+ * frf250a: RUN runs `BattleScript_AskIfWantsToForfeitMatch` (question typed,
+ * then `forfeityesnobox`). NO / B closes the box, clears the message and
+ * redraws the action menu with the cursor still on RUN.
+ */
+export const FORFEIT_QUESTION_LINES = Object.freeze([
+  "Would you like to forfeit the match",
+  "and quit now?",
+] as const);
+export const FORFEIT_QUESTION_FIRST_GLYPH_AT = 3;
+export const FORFEIT_BOX_AT = 53;
+export const FORFEIT_BOX_CLEAR_AT = 4;
+export const FORFEIT_CLOSING_RETURN_AT = 7;
 
 export function moveBattleCommandActionCursor(
   cursor: 0 | 1 | 2 | 3,
@@ -536,6 +573,8 @@ export function createBattleCommandPresentation(
     legalSwitchPartyIndexes: Object.freeze(legalSwitchPartyIndexes),
   rejectedSlot: null,
   rejectionWaitCursorAge: 0,
+  forfeitCursor: 1,
+  forfeitDisplayCursor: 1,
   pendingDecision: null,
   usedMessageHoldFrames,
 });
@@ -616,6 +655,40 @@ export function advanceBattleCommandPresentation(
       }
       return withLifecycle(state, "rejection-message", elapsed);
     }
+    case "bag-message": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      return elapsed >= BAG_MESSAGE_RETURN_AT
+        ? withLifecycle(state, "action-menu", 0)
+        : withLifecycle(state, "bag-message", elapsed);
+    }
+    case "forfeit-question": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      state = Object.freeze({ ...state, forfeitDisplayCursor: state.forfeitCursor });
+      if (elapsed < FORFEIT_BOX_AT) {
+        return withLifecycle(state, "forfeit-question", elapsed);
+      }
+      if (newKeys.has("A") || newKeys.has("B")) {
+        // TODO(frf250b): YES (cursor 0 on A) is the forfeit outcome; until
+        // that step lands it behaves exactly as NO (ROM close + redraw).
+        playSelectSe();
+        return withLifecycle(state, "forfeit-closing", 0);
+      }
+      const direction = (["UP", "DOWN"] as const)
+        .find((button) => newKeys.has(button));
+      if (direction !== undefined) {
+        playSelectSe();
+        return withLifecycle(state, "forfeit-question", elapsed, {
+          forfeitCursor: direction === "UP" ? 0 : 1,
+        });
+      }
+      return withLifecycle(state, "forfeit-question", elapsed);
+    }
+    case "forfeit-closing": {
+      const elapsed = state.lifecycle.phaseElapsed + 1;
+      return elapsed >= FORFEIT_CLOSING_RETURN_AT
+        ? withLifecycle(state, "action-menu", 0, { forfeitCursor: 1, forfeitDisplayCursor: 1 })
+        : withLifecycle(state, "forfeit-closing", elapsed);
+    }
     case "rejection-reopen": {
       const elapsed = state.lifecycle.phaseElapsed + 1;
       // The dismissed box stays on screen (message frozen, cursor held at
@@ -643,7 +716,13 @@ export function advanceBattleCommandPresentation(
       if (state.actionCursor === 2) {
         return withLifecycle(state, "party-handoff", 0);
       }
-      return state;
+      playSelectSe();
+      return withLifecycle(
+        state,
+        state.actionCursor === 1 ? "bag-message" : "forfeit-question",
+        0,
+        { forfeitCursor: 1, forfeitDisplayCursor: 1 },
+      );
     }
     const direction = (["LEFT", "RIGHT", "UP", "DOWN"] as const)
       .find((button) => newKeys.has(button));

@@ -2002,6 +2002,10 @@ export class RandomPlayer {
       // PAUSE_UNTIL_PRESS gate; early presses are dropped, so just mash.
       return this.pressAdvance(state, "rejection dismiss");
     }
+    if (phase === "forfeit-question") {
+      // frf250a: RUN opens the forfeit prompt; B answers NO once the box is up (early presses are dropped). YES is frf250b.
+      return this.press("B", 8);
+    }
     if (phase === "action-menu") {
       if (this.actionIntent === null || this.actionIntent.key !== this.lastCommandKey) {
         // FIGHT 0.60 / POKéMON 0.22 / BAG 0.06 / RUN 0.06 / re-roll wander 0.06
@@ -2035,7 +2039,7 @@ export class RandomPlayer {
         return this.press((intent.target & 2) !== 0 ? "DOWN" : "UP", 8);
       }
       if (intent.target === 1 || intent.target === 3) {
-        // BAG/RUN are real presses the UI ignores; press once, then resample.
+        // BAG prints its message and RUN opens the forfeit prompt (answered NO above); press twice, then resample.
         intent.futile += 1;
         if (intent.futile >= 2) {
           this.actionIntent = null;

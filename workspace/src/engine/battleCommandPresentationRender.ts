@@ -1,4 +1,5 @@
 import battleWindowData from "../assets/gen/battle-window.json" with { type: "json" };
+import yesNoFrameData from "../assets/gen/battle-yesno-frame.json" with { type: "json" };
 import charmapData from "../data/gen/charmap.json" with { type: "json" };
 import fontNormalData from "../data/gen/font-normal.json" with { type: "json" };
 import type {
@@ -18,6 +19,12 @@ import { setPixel } from "./framebuffer.ts";
 import { drawText, type FontData } from "./font.ts";
 import type { HealthboxContentParams } from "./healthboxAssembly.ts";
 import {
+  BAG_MESSAGE_FIRST_GLYPH_AT,
+  BAG_MESSAGE_TEXT,
+  FORFEIT_BOX_AT,
+  FORFEIT_BOX_CLEAR_AT,
+  FORFEIT_QUESTION_FIRST_GLYPH_AT,
+  FORFEIT_QUESTION_LINES,
   REJECTION_MESSAGE_FIRST_GLYPH_AT,
   REJECTION_MESSAGE_HOLD_AT,
 } from "./battleCommandPresentation.ts";
@@ -45,6 +52,10 @@ type BattleWindowAsset = Readonly<{
 }>;
 
 const battleWindow = battleWindowData as unknown as BattleWindowAsset;
+const yesNoFrame = yesNoFrameData as unknown as Readonly<{
+  tiles: readonly (readonly number[])[];
+  palette: readonly RgbColor[];
+}>;
 const font = fontNormalData as unknown as FontData;
 const charmap = new Map<string, number>(
   (charmapData as { entries: [string, number][] }).entries,
@@ -87,6 +98,8 @@ export type BattleCommandPresentationRenderView = Readonly<{
     visibleCharacters: number;
     waitCursorAge: number | null;
   }> | null;
+  /** frf250a: the RUN forfeit yes/no box (cursor 0 = YES, 1 = NO), or `null` while it is not on screen. */
+  forfeitBox: Readonly<{ cursor: 0 | 1 }> | null;
 }>;
 
 export type BattleCommandFieldRenderView = Readonly<{
@@ -171,6 +184,39 @@ export function createBattleCommandPresentationRenderView(
       }
     }
   }
+  let forfeitBox: BattleCommandPresentationRenderView["forfeitBox"] = null;
+  const phase = presentation.lifecycle.phase;
+  const elapsed = presentation.lifecycle.phaseElapsed;
+  if (phase === "bag-message") {
+    rejectionMessage = Object.freeze({
+      lines: Object.freeze([BAG_MESSAGE_TEXT]),
+      visibleCharacters: Math.min(
+        BAG_MESSAGE_TEXT.length,
+        Math.max(0, elapsed - BAG_MESSAGE_FIRST_GLYPH_AT + 1),
+      ),
+      waitCursorAge: null,
+    });
+  } else if (phase === "forfeit-question" || phase === "forfeit-closing") {
+    rejectionMessage = Object.freeze({
+      lines: FORFEIT_QUESTION_LINES,
+      visibleCharacters: Math.max(
+        0,
+        phase === "forfeit-closing"
+          ? battleStringPrintableLength(FORFEIT_QUESTION_LINES)
+          : Math.min(
+            battleStringPrintableLength(FORFEIT_QUESTION_LINES),
+            elapsed - FORFEIT_QUESTION_FIRST_GLYPH_AT + 1,
+          ),
+      ),
+      waitCursorAge: null,
+    });
+    if (
+      (phase === "forfeit-question" && elapsed >= FORFEIT_BOX_AT)
+      || (phase === "forfeit-closing" && elapsed < FORFEIT_BOX_CLEAR_AT)
+    ) {
+      forfeitBox = Object.freeze({ cursor: presentation.forfeitDisplayCursor });
+    }
+  }
   return Object.freeze({
     ...fieldView,
     spriteVisibility: presentation.spriteVisibility,
@@ -190,6 +236,7 @@ export function createBattleCommandPresentationRenderView(
       displayCursor: presentation.fightDisplayCursor,
     }),
     rejectionMessage,
+    forfeitBox,
   });
 }
 
@@ -233,6 +280,60 @@ function drawBattleWindowTile(
       }
     }
   }
+}
+
+const YESNO_BOX = Object.freeze({ x: 24, y: 8, width: 6, height: 6 });
+const YESNO_TEXT_ORIGINS = Object.freeze([
+  Object.freeze({ x: 208, y: 73 }),
+  Object.freeze({ x: 208, y: 89 }),
+] as const);
+
+/**
+ * frf250a: `forfeityesnobox` -- `HandleBattleWindow(YESNOBOX_X_Y)` frame tiles
+ * (0x22-0x2A, palette 1: `LoadUserWindowBorderGfx`'s gTextWindowFrame1, see
+ * tools/extract/extract-battle-yesno-frame.ts), the `B_WIN_YESNO` text, then
+ * `BattleCreateYesNoCursorAt` (tiles 1/2, palette 0, at tile column 25).
+ */
+export function drawBattleCommandYesNoBox(
+  framebuffer: Uint8Array,
+  cursor: 0 | 1,
+): void {
+  const xEnd = YESNO_BOX.x + YESNO_BOX.width - 1;
+  const yEnd = YESNO_BOX.y + YESNO_BOX.height - 1;
+  for (let ty = YESNO_BOX.y; ty <= yEnd; ty += 1) {
+    for (let tx = YESNO_BOX.x; tx <= xEnd; tx += 1) {
+      const row = ty === YESNO_BOX.y ? 0 : ty === yEnd ? 2 : 1;
+      const col = tx === YESNO_BOX.x ? 0 : tx === xEnd ? 2 : 1;
+      const tile = yesNoFrame.tiles[row * 3 + col]!;
+      for (let py = 0; py < 8; py += 1) {
+        for (let px = 0; px < 8; px += 1) {
+          const index = tile[py * 8 + px]!;
+          const color = yesNoFrame.palette[index];
+          if (index !== 0 && color !== undefined) {
+            setPixel(framebuffer, tx * 8 + px, ty * 8 + py, color.r, color.g, color.b);
+          }
+        }
+      }
+    }
+  }
+  const fill = battleWindow.textPalette[14]!;
+  for (let y = 72; y < 104; y += 1) {
+    for (let x = 208; x < 232; x += 1) setPixel(framebuffer, x, y, fill.r, fill.g, fill.b);
+  }
+  ["Yes", "No"].forEach((label, row) => {
+    drawText(
+      framebuffer,
+      font,
+      charmap,
+      label,
+      YESNO_TEXT_ORIGINS[row]!.x,
+      YESNO_TEXT_ORIGINS[row]!.y,
+      battleWindow.textPalette as RgbColor[],
+      { fg: 13, bg: 14, shadow: 15 },
+    );
+  });
+  drawBattleWindowTile(framebuffer, 1, 0, 200, 72 + 16 * cursor);
+  drawBattleWindowTile(framebuffer, 2, 0, 200, 80 + 16 * cursor);
 }
 
 /**
@@ -329,6 +430,21 @@ export type BattleCommandPresentationRenderAssets = Readonly<{
   ): void;
 }>;
 
+function drawCommandMessage(
+  framebuffer: Uint8Array,
+  view: BattleCommandPresentationRenderView,
+  assets: BattleCommandPresentationRenderAssets,
+): void {
+  const typed = view.rejectionMessage;
+  if (typed === null || typed.visibleCharacters <= 0) {
+    // The press leaves the live action menu up until the first glyph's frame.
+    assets.drawActionMenu(framebuffer, view, true);
+    return;
+  }
+  assets.drawRejectionMessage(framebuffer, view);
+  if (view.forfeitBox !== null) drawBattleCommandYesNoBox(framebuffer, view.forfeitBox.cursor);
+}
+
 /**
  * Renders one typed command lifecycle without consulting encounter identity
  * or any scene/trace clock. Open, close, cursor-display, and reopen timing are
@@ -363,6 +479,11 @@ export function renderBattleCommandPresentation(
       return;
     case "rejection-reopen":
       assets.drawRejectionMessage(framebuffer, view);
+      return;
+    case "bag-message":
+    case "forfeit-question":
+    case "forfeit-closing":
+      drawCommandMessage(framebuffer, view, assets);
       return;
     case "party-handoff":
     case "submitting":

@@ -4,6 +4,9 @@ import {
 } from "../src/engine/battleScene.ts";
 import {
   BATTLE_COMMAND_ACTION_ENTER_DELAY,
+  BAG_MESSAGE_RETURN_AT,
+  FORFEIT_BOX_AT,
+  FORFEIT_CLOSING_RETURN_AT,
   BATTLE_COMMAND_ACTION_LABELS,
   BattleCommandPresentationError,
   advanceBattleCommandPresentation,
@@ -364,14 +367,24 @@ describe("battle-command phase-relative lifecycle", () => {
 
     state = advanceBattleCommandPresentation(state, new Set(["RIGHT"] as const));
     expect(state.actionCursor).toBe(1);
+    // frf250a: BAG prints its message and comes back to the menu on BAG; RUN asks the forfeit question and NO comes back on RUN.
     state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle.phase).toBe("bag-message");
+    state = advanceFrames(state, BAG_MESSAGE_RETURN_AT);
     expect(state.lifecycle.phase).toBe("action-menu");
+    expect(state.actionCursor).toBe(1);
     expect(state.pendingDecision).toBeNull();
 
     state = advanceBattleCommandPresentation(state, new Set(["DOWN"] as const));
     expect(state.actionCursor).toBe(3);
     state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle.phase).toBe("forfeit-question");
+    state = advanceFrames(state, FORFEIT_BOX_AT);
+    state = advanceBattleCommandPresentation(state, new Set(["A"] as const));
+    expect(state.lifecycle.phase).toBe("forfeit-closing");
+    state = advanceFrames(state, FORFEIT_CLOSING_RETURN_AT);
     expect(state.lifecycle.phase).toBe("action-menu");
+    expect(state.actionCursor).toBe(3);
     expect(state.pendingDecision).toBeNull();
 
     state = advanceBattleCommandPresentation(state, new Set(["LEFT"] as const));
