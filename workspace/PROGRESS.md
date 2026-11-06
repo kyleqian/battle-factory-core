@@ -5,6 +5,20 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-05 / 06 — CAX31 daily run (supervisor, Opus 5.5): in progress
+
+- **State:** master clean after each fold. Baseline reused: the 2026-11-05 wind-down full suite + build on `f3440331d` (master since
+  then was docs-only). Oracles current. Evidence `.integration/validation/sv-20261105/`.
+- **Folded:** aud242a (S11 step 6, first slice; `docs/aud242-move-anim-sounds.md`; branch `worker/integration-20261105-213057`):
+  `src/engine/moveAnimSounds.ts` (tick() hook behind `soundCollecting()`, Scene ON only) plays the decoded script `playsewithpan` /
+  `playse` / `waitplaysewithpan` / `loopsewithpan` from `src/data/gen/anim-sound-timing.json` (`npm run extract:anim-sound-timing`,
+  356 moves) at body age `f + 1 + 7`, pan by `animSoundPan`. ROM step-mode windows: Slam, Razor Leaf, Swift, Slash exact; Ember / Psybeam
+  +2, Agility / Swords Dance -4 (named; ISSUES #198). Worker: typecheck, build, build:lib 0; test:gate 364 / 364; full suite in 8 shards
+  0 failed; differential 24 traces 4,658 identical. Supervisor: 3 audio files 356 / 356.
+- **Next:** cln241 (core-rs removal, side lane) running; then 4b(g) BAG / RUN (frf250a presentation, frf250b forfeit YES); aud242b.
+
+---
+
 ## 2026-11-04 / 05 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud241a / aud241b / frs247 / cln240 / aud241c-fx / aud241c folded
 
 - **State:** master `f3440331d`+ (final src == aud241c merge). Tree clean, no active workers. Evidence `.integration/validation/sv-20261104/`.
