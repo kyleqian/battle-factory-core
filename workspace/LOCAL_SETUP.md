@@ -55,13 +55,10 @@ and OpenCode were removed in cln239; see `docs/cln239-launchers.md`).
 
 ## Validation and reference services
 
-Node 22, dependencies, the native Rust toolchain, and the wasm32 target are
-installed locally. Rebuild WASM after Rust changes, then run the normal gates:
+Node 22 and dependencies are installed locally. (The Rust port was removed in cln241; see the `core-rs-archive`
+branch.) Run the normal gates:
 
 ```sh
-export PATH="$HOME/.rustup/toolchains/stable-aarch64-apple-darwin/bin:$PATH"
-bash core-rs/build-wasm.sh
-cargo test --manifest-path core-rs/Cargo.toml
 npm run typecheck
 PATH="$PWD/tools/autonomy/bin:$PATH" POKEBENCH_VITEST_MAX_WORKERS=4 npm test
 npm run build

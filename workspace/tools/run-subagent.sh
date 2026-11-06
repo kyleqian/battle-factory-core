@@ -315,14 +315,6 @@ if [[ "$IS_WORKTREE" == "1" ]]; then
     echo "run-subagent: worktree dependency install failed; see $WT_SETUP_LOG" >&2
     exit 1
   fi
-  # artifacts/wasm/factory_wasm.wasm is a gitignored build product the full
-  # test suite needs (wasm-parity halves fail loudly without it). Seed the
-  # worktree from the main tree's current artifact instead of making every
-  # worker rediscover ./core-rs/build-wasm.sh (recurring papercut).
-  if [[ -f "$(pwd)/artifacts/wasm/factory_wasm.wasm" ]]; then
-    mkdir -p "$WT_WORK_DIR/artifacts/wasm"
-    cp "$(pwd)/artifacts/wasm/factory_wasm.wasm" "$WT_WORK_DIR/artifacts/wasm/factory_wasm.wasm"
-  fi
 fi
 
 # The supervisor owns the shared oracle services. Workers only validate their

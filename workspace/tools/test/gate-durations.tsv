@@ -1193,7 +1193,6 @@ tests/ctl95DollFreeControls.test.ts	20	17934
 tests/curseOracleEvidence.test.ts	5	22
 tests/cursorInputGate.test.ts	2	2
 tests/damageCalc.test.ts	68	12
-tests/damageCalcParity.test.ts	14	46
 tests/defenseCurlOracleEvidence.test.ts	3	15
 tests/destinCanonicalReplacements.test.ts	6	3
 tests/destinyBondOracleEvidence.test.ts	2	12
@@ -1220,24 +1219,16 @@ tests/extract.test.ts	7	3
 tests/facilityClassLookupsExtraction.test.ts	4	228
 tests/factoryAbilityDisplayName.test.ts	2	4
 tests/factoryAiBatonPassLiveReceipt.test.ts	5	30
-tests/factoryAiBattleHistoryParity.test.ts	3	28
 tests/factoryAiBrickBreakLiveReceipt.test.ts	5	3
 tests/factoryAiCbmPreambleLiveReceipt.test.ts	6	9
 tests/factoryAiChargeUpLiveReceipt.test.ts	5	4
 tests/factoryAiCheckBadMove.test.ts	396	158
-tests/factoryAiCheckBadMoveParity.test.ts	80	58
 tests/factoryAiCheckViability.test.ts	613	368
-tests/factoryAiCheckViabilityParity.test.ts	9	131
 tests/factoryAiCurseLiveReceipt.test.ts	8	7
 tests/factoryAiDecisionPolicy.test.ts	16	15
-tests/factoryAiDecisionPolicyParity.test.ts	6	943
 tests/factoryAiDragonDanceLiveReceipt.test.ts	7	6
 tests/factoryAiFacadeLiveReceipt.test.ts	5	5
-tests/factoryAiLiveDecisionParity.test.ts	4	177
 tests/factoryAiLiveDriver.test.ts	6	13
-tests/factoryAiLivePlannerParity.test.ts	3	97
-tests/factoryAiLiveViewParity.test.ts	5	132
-tests/factoryAiMaskParity.test.ts	17	38
 tests/factoryAiMaskSelection.test.ts	32	7
 tests/factoryAiMirrorCoatLiveReceipt.test.ts	5	5
 tests/factoryAiOverheatLiveReceipt.test.ts	5	5
@@ -1250,7 +1241,6 @@ tests/factoryAiScoredWiringParity.test.ts	4	81
 tests/factoryAiScriptCatalogExtraction.test.ts	5	873
 tests/factoryAiSemiInvulnerableTieDraw.test.ts	7	16
 tests/factoryAiSwitchPolicy.test.ts	15	11
-tests/factoryAiSwitchPolicyParity.test.ts	3	132
 tests/factoryAiTryToFaint.test.ts	10	4
 tests/factoryAnimationComponents.test.ts	2	1662
 tests/factoryBattleReturnPresentation.test.ts	4	9
@@ -1296,7 +1286,6 @@ tests/factoryConstructionRngScheduleReceipt.test.ts	11	78
 tests/factoryConstructionSetBoxMonData.test.ts	6	70
 tests/factoryCorpusParty.test.ts	4	341
 tests/factoryDisobedienceOracleEvidence.test.ts	4	11
-tests/factoryDraftSelectionParity.test.ts	5	37
 tests/factoryDraftStateAdapter.test.ts	3	3
 tests/factoryEndingPolicy.test.ts	2	190
 tests/factoryFixedIvTableRomBytes.test.ts	4	1
@@ -1326,9 +1315,7 @@ tests/factoryM4aVoiceV1.test.ts	4	792
 tests/factoryM4aVolV1.test.ts	4	828
 tests/factoryM4aWaitLfoV1.test.ts	4	890
 tests/factoryOpponentGeneration.test.ts	7	38
-tests/factoryPartyMemberParity.test.ts	89	123
 tests/factoryRentalGeneration.test.ts	12	98
-tests/factoryRentalParity.test.ts	387	1006
 tests/factoryReturnToFrustration.test.ts	9	75
 tests/factoryRoundBattleOrchestrator.test.ts	56	61829
 tests/factoryRoundChaining.test.ts	8	17083
@@ -1339,7 +1326,6 @@ tests/factorySeventhWinFixture.test.ts	1	1
 tests/factorySwap.test.ts	14	8
 tests/factorySwapDuplicateSpeciesProbe.test.ts	3	3
 tests/factorySwapExtraction.test.ts	4	4
-tests/factorySwapParity.test.ts	3	20
 tests/factorySwapPresentation.test.ts	40	66
 tests/factoryTerminalMessages.test.ts	2	218
 tests/factoryTerminalPresentation.test.ts	21	755
@@ -1360,7 +1346,6 @@ tests/factoryTormentSelectionRejectionLive.test.ts	7	29
 tests/factoryTrainerOverworldGfx.test.ts	4	2
 tests/factoryTrainerPresentation.test.ts	4	2
 tests/factoryTrainerSchedule.test.ts	4	4
-tests/factoryTrainerScheduleParity.test.ts	3	96
 tests/factoryVBlankWorkloadEvidence.test.ts	2	458
 tests/factoryVBlankWorkloadInternalEvidence.test.ts	2	1363
 tests/factoryVoluntarySwitchSeam.test.ts	10	249
@@ -1458,7 +1443,6 @@ tests/itemNames.test.ts	3	1
 tests/iu120UniversalRows.test.ts	10	16332
 tests/kabutoSendOut.test.ts	11	13
 tests/keyRepeat.test.ts	5	2
-tests/keyRepeatParity.test.ts	3	62
 tests/kingsRockHookJoinBatch.test.ts	3	51
 tests/kingsRockOracleEvidence.test.ts	2	2
 tests/land75HiddenBattler.test.ts	3	7396
@@ -1594,7 +1578,6 @@ tests/revengeOracleEvidence.test.ts	3	20
 tests/rng.test.ts	7	3
 tests/rng146RngDrawFixes.test.ts	5	1169
 tests/rng244OutcomeRates.test.ts	12	41283
-tests/rngEngineParity.test.ts	73	1893
 tests/rockThrowTargetIdleX2.test.ts	1	1
 tests/rolloutOracleEvidence.test.ts	4	15
 tests/roundController.test.ts	17	14
@@ -1726,7 +1709,6 @@ tests/turn8BindPresentationStaging.test.ts	10	325
 tests/turn8ResolutionAdapterEquivalence.test.ts	5	267
 tests/turn9ResolutionAdapterEquivalence.test.ts	5	100
 tests/turnOrder.test.ts	12	2
-tests/turnOrderParity.test.ts	206	35
 tests/turnRng.test.ts	4	1
 tests/vis243aVoluntarySendIn.test.ts	4	734
 tests/vitestWorkerBudget.test.ts	3	123
