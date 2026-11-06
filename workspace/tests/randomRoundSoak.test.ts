@@ -509,7 +509,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.frames).toBeGreaterThan(31_771);
   });
 
-  it("ISSUES #89: seed 30's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
+  it("ISSUES #89: seed 32's mid-turn Baton Pass openpartyscreen halt resumes through the forced party selector", () => {
     // History: seed 27 (full policy) selected Baton Pass mid-turn and used to
     // crash at round 1 battle 1 turn 10, frame 30798, on an unimplemented
     // BattleScript_EffectBatonPass / B_SCR_OP_OPENPARTYSCREEN machine-barrier
@@ -565,6 +565,12 @@ describe("random round soak driver (green milestone pin)", () => {
     // (the removed soak111BatonPassSearch.ts, restored from 4f6fa87e4^ as scratch, 80,000 frames, same options as this pin): the first
     // hits are 28, 30, 32, 57, 63, 64, 118 and 127, all halting in the post-decision grace window like 19 did. Seed 30 is the pin
     // (the lowest hit that, like 19, ends in battle 2 as a genuine loss; Baton Pass commits 3, halt frame 59170 in battleIndex 0 of the chained round).
+    //
+    // frf250a (BAG prints its message and RUN opens the forfeit prompt instead of being silent no-ops; the exploring policy
+    // presses both, so its press timings land on new phases): seed 30 no longer commits Baton Pass (58851 frames / battle 2 /
+    // turn 53, zero commits). Re-scanned full-policy seeds 0..35 (the removed soak111BatonPassSearch.ts as scratch, 80,000
+    // frames, same options): seed 32 is the first hit (Baton Pass commits 2, halt frame 15434 on AIPOM in battleIndex 0 of the
+    // chained round, first round a genuine loss in battle 1 at 13311). Seed 32 is the pin.
     let frame = 0;
     let batonPassCommitFrame: number | null = null;
     let haltFrame: number | null = null;
@@ -581,7 +587,7 @@ describe("random round soak driver (green milestone pin)", () => {
         if (outgoing !== undefined && !outgoing.fainted) haltFrame = state.frame;
       },
     };
-    const result = runSeed(30, {
+    const result = runSeed(32, {
       maxFrames: 80_000,
       renderEvery: 0,
       stopAtFirstRoundDecision: true,
@@ -590,7 +596,7 @@ describe("random round soak driver (green milestone pin)", () => {
     expect(result.errorMessage ?? "").not.toMatch(/openpartyscreen|machine-barrier/i);
     expect(batonPassCommitFrame).not.toBeNull();
     expect(haltFrame).not.toBeNull();
-    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost", battle: 2 });
+    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost", battle: 1 });
   });
 
   // ISSUES #86's original concern (a forced replacement's terminal weather
@@ -714,8 +720,10 @@ describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered b
     // Moved from "winning" to "full" by M-B step 2 part B, rung 1: "winning"
     // now always declines (see the describe block below), so "full" is the
     // policy that still exercises both branches of this menu.
+    // frf250a (BAG / RUN now show their ROM screens; new exploring trajectories): seeds 0..6 reach only a YES (seed 6) inside
+    // 20,000 frames, seed 7 answers NO, so the set is 0..7.
     const swapOfferNotes: string[] = [];
-    for (let seed = 0; seed < 7; seed += 1) {
+    for (let seed = 0; seed < 8; seed += 1) {
       runSeed(seed, {
         policy: "full",
         maxFrames: 20_000,
@@ -858,12 +866,14 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // aud240b (A on the summary Info page closes it, pokemon_summary_screen.c:1556-1560, draft + swap summaries; the exploring
       // policy presses A there): 38729 / turn 28 -> 43417 / turn 39; same battle 2 / roundLost / depth 1. Supervisor-checked: with both
       // A-close sites undone the old pin passes again.
-      frames: 43417,
+      // frf250a (BAG prints its message, RUN opens the forfeit prompt; the exploring policy presses both, so a new trajectory
+      // as at fsw235): 43417 / turn 39 -> 39078 / turn 25; same battle 2 / roundLost / depth 1.
+      frames: 39078,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
       battle: 2,
-      turn: 39,
+      turn: 25,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -875,12 +885,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // then 25899 / battle 2 turn 6 -> 38842 / battle 2 turn 33 with the voluntary menu's already-in-battle refusal.
       // pmo239: a new exploring trajectory (see seed 0): 38842 / battle 2 turn 33 -> 17862 / battle 1 turn 31.
       // vis243a (see seed 0): 17862 / turn 31 -> 21359 / turn 37; same battle 1 / roundLost / depth 0.
-      frames: 21359,
+      // frf250a (see seed 0): 21359 / battle 1 turn 37 -> 58240 / battle 3 turn 25; roundLost, depth 2.
+      frames: 58240,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 0,
-      battle: 1,
-      turn: 37,
+      maxBattleDepth: 2,
+      battle: 3,
+      turn: 25,
     });
   });
 
