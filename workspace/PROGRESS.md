@@ -15,7 +15,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   356 moves) at body age `f + 1 + 7`, pan by `animSoundPan`. ROM step-mode windows: Slam, Razor Leaf, Swift, Slash exact; Ember / Psybeam
   +2, Agility / Swords Dance -4 (named; ISSUES #198). Worker: typecheck, build, build:lib 0; test:gate 364 / 364; full suite in 8 shards
   0 failed; differential 24 traces 4,658 identical. Supervisor: 3 audio files 356 / 356.
-- **Next:** cln241 (core-rs removal, side lane) running; then 4b(g) BAG / RUN (frf250a presentation, frf250b forfeit YES); aud242b.
+- **Folded:** cln241 (finish plan Cleanup 4, second half; `docs/cln241-core-rs-removal.md`; branch `worker/side-20261106-000539`):
+  `core-rs/` removed (535 files), its TS wasm adapters, the 18 Rust<->TS parity tests (TS-only literal pins kept in
+  `tests/tsEngineRetainedPins.test.ts`), wasm seeding in `run-subagent.sh`, cargo step in `verify-runner.sh`; gate list regenerated
+  (362 files). Archive: local branch `core-rs-archive` `26ce8d051` (unchanged). Worker: typecheck, build, build:lib 0; test:gate
+  362 / 362; **full suite 1,777 files (== git ls-files): 1,733 passed + 44 skipped, 0 failed**; dist bytes unchanged. Supervisor:
+  archive ref, `bash -n` launcher, retained pins 11 / 11. Untracked `core-rs/target` (5 GB) deleted. **Cleanup 4 done.**
+- **Next:** 4b(g) BAG / RUN (frf250a presentation, frf250b forfeit YES); aud242b.
 
 ---
 

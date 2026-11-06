@@ -146,8 +146,8 @@ Serialize heavy jobs; at most one worker beside them. typecheck;
 `nohup` with an exit file (~47–66 min; diff reported files against
 `git ls-files` if a vitest fork dies); build; soaks at wind-down. A supervisor
 verification checkout made with `git worktree add` needs the `reference`
-symlink, `node_modules` and `artifacts/wasm/factory_wasm.wasm` (the launcher
-does this for worker worktrees). Production changes need full suite + build on
+symlink and `node_modules` (the launcher does this for worker worktrees; the wasm
+artifact is gone with core-rs, cln241). Production changes need full suite + build on
 the exact folded code; evidence / tooling-only changes use the affected gates.
 
 ## Headless execution discipline
