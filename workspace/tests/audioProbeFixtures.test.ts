@@ -80,6 +80,7 @@ describe("audio probe fixtures", () => {
       "frf250a-run-b-on-window.json",
       "frf250a-run-no-off-window.json",
       "frf250a-run-no-on-window.json",
+      "frf250b-run-yes-off-window.json",
       "heal-window.json",
       "intro-canonical-window.json",
       "intro-magneton-off-window.json",
