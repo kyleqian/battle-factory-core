@@ -5,6 +5,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-06 — frf250b (worker): RUN -> YES forfeits the match (loss)
+
+- **State:** committed on master (not pushed). Scene OFF is ROM-exact (250 / 250 frames, SE + loss-tail sounds exact). Docs `docs/frf250b-forfeit.md`.
+- **Did:** `forfeit-message` phase, `src/engine/battleForfeit.ts` (terminal battle -> `roundLost`), `emitForfeitEndSounds`, lab + compare trace + audio
+  fixture, `tests/frf250bForfeit.test.ts` (5 tests: ROM timeline, sounds, no RNG, library battle-end + challenge-end loss in Scene OFF / ON, `replayChallenge`).
+  Gates: typecheck, build, build:lib 0; test:gate 362 / 362; differential 24 traces 1,405 captures identical vs `3fb56c975`; soak vanilla 0:20 20 / 20 OK.
+- **Next:** Scene ON gap (healthbox bounce step ~155, opponent sprite region during fade 249-284); aud242b.
+- **Notes:** the forfeit outcome is labelled `trainer-win` internally (maps to loss). Soak driver still answers B on the prompt.
+
+---
+
 ## 2026-11-05 / 06 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
 - **State:** master clean after each fold. Baseline reused: the 2026-11-05 wind-down full suite + build on `f3440331d` (master since
