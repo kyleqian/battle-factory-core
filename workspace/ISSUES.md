@@ -13,6 +13,14 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #199 — BAG / RUN / forfeit presentation residuals (frf250a / frf250b, 2026-11-06)
+
+Rules and text are ROM-exact; cosmetic frames remain. frf250a compares: `frf250a-bag-off` 152 / 171, `frf250a-run-no-on` 166 / 181
+frames — the differing frames are the action-menu idle bounce (healthbox / player sprite, bbox ~49..229 x 74..111), incl. frame 31 before
+any A press, so likely the settled #56 idle-bounce class; not attributed frame by frame. frf250b: Scene OFF `frf250b-run-yes-off`
+250 / 250; Scene ON unmeasured as a trace, cosmetic gaps in `docs/frf250b-forfeit.md` "Known gap: Scene ON" (healthbox bounce step
+~155, opponent sprite region during the fade 249..284). `advanceForfeitTerminalAge` is a measured +1 on the lobby-return clock.
+
 ## #198 — aud242a move-animation SE residuals (2026-11-06)
 
 `docs/aud242-move-anim-sounds.md`, `tests/aud242aMoveAnimSounds.test.ts`: the emitter plays a script op at body age `f + 1 + 7`

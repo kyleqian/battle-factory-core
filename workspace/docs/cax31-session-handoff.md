@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-05)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-06)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-05 wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-06 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
   `worker/lib-v2-mac` is folded up to `851ee1f4c`; if the Mac moves that branch again, merge the new tip the same way
@@ -36,11 +36,17 @@ kept and is long-tail.
   faint cry / low-HP (`src/engine/battleHitSounds.ts`, `docs/aud241b-battle-sounds.md`, timing deltas ISSUES #197). Both emit
   from `tick()` in `src/engine/core.ts` behind `soundCollecting()`. Lab staging for sound windows: `tools/compare/appTrace.ts`
   stages (`midBattleSwitchStage` options bag) + `tools/battle-lab/aud241*`.
-- **Cleanup:** steps 1, 2, 3 (cln239: Claude-only launchers, `docs/cln239-launchers.md`) and 6 are done. Step 5 first half
-  DONE (cln240: `npm run test:gate`, 364 files, ~217 s here, `docs/cln240-test-gate.md`; workers run it instead of test:smoke as
-  their fast gate, plus every file importing what they change). Step 4 first half DONE: local branch `core-rs-archive`
-  (`26ce8d051`, 194 commits, tree == `master:workspace/core-rs` `f35070e69`) made by `git subtree split`; the user pushes it to its own
-  repo. Next half: `git rm -r core-rs` + its adapter / tests / wasm users, full suite + build.
+- **Audio step 6 (aud242) first slice DONE (2026-11-06):** aud242a `src/engine/moveAnimSounds.ts` plays the decoded script
+  `playsewithpan` / `playse` / `waitplaysewithpan` / `loopsewithpan` (Scene ON only) from `src/data/gen/anim-sound-timing.json`
+  (`npm run extract:anim-sound-timing`) at body age `f + 1 + 7`; `docs/aud242-move-anim-sounds.md` has the age map, op inventory
+  and slice plan; residuals and unemitted families ISSUES #198.
+- **Cleanup:** steps 1, 2, 3 (cln239), 4 (cln241, 2026-11-06: `core-rs/` removed from master, `docs/cln241-core-rs-removal.md`;
+  local branch `core-rs-archive` `26ce8d051` keeps it, the user pushes it to its own repo) and 6 are done. Step 5 first half DONE
+  (cln240: `npm run test:gate`, now 362 files, ~218 s here, `docs/cln240-test-gate.md`). No wasm artifact is needed any more.
+- **4b(g) DONE (2026-11-06):** frf250a BAG prints "Items can't be used now." and RUN opens the forfeit prompt (NO / B back to the
+  menu), ROM-measured both scenes (`tests/frf250aBagRunMenu.test.ts`, traces `frf250a-*`); frf250b YES prints "<PLAYER> forfeited
+  the match!" and ends the battle as a loss through the normal lost-battle return (`src/engine/battleForfeit.ts`,
+  `tests/frf250bForfeit.test.ts`, trace `frf250b-run-yes-off`). The soak random player answers the prompt (see the driver).
 - **User reports:** 4b(b) also covers Quick Attack / Aerial Ace now (qak248 / qak249). 4b(a) fully fixed (vis243a mid-battle send-in; go246 battle-start "Go!" intro waits for both species
   animations in Scene ON, `docs/go246-intro-wait.md`; Kyle's SPOINK was cut short by 137 frames, now exact); 4b(b) Agility
   clip fixed (agi245); 4b(c) rate check permanent (`tests/rng244OutcomeRates.test.ts`).
@@ -56,14 +62,14 @@ never brief those here. One worker at a time; each run folds the next audio step
 1. **Audio (S11)** — the main program for several runs: `docs/s11-audio-design.md` section 7. Next: **aud241** battle
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
-   proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05.** Next: **aud242** (move-animation SEs, design
-   section 7 step 6: generic emitter from the decoded anim scripts through each timeline's age map; Scene ON only), then aud243
-   (census column + ROM replays). Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
+   proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05. aud242a DONE 2026-11-06** (generic script-op
+   emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). Next: **aud242b** (a wait resolver for ops after
+   `waitforvisualfinish` / `waitbgfade*`, then `jumpret*` / `jumpargeq` runs), **aud242c** (`panse*`, `setpan`, `createsoundtask`
+   families, the C-side sites), an alignment audit of the ISSUES #198 per-move offsets; then aud243 (census column + ROM replays). Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) `npm run test:gate` <= 5 min for workers and drop frame-pin tests the census supersedes, full suite nightly (the full
    suite is ~75 min here and lost one fork beside a worker twice on 2026-11-03: rerun the unreported file);
-   (4) `git subtree split -P core-rs -b core-rs-archive` then `git rm -r core-rs` + its adapter / tests (core-rs/README still
-   links the archived RUST_* ledgers); (7) evidence stops going into git.
+   (4) DONE (cln241); (7) evidence stops going into git.
 3. **Bundle hygiene** (scout: `docs/bnd-scout.md`): test-only JSON out of `src/`, sprite pixels out of the headless graph
    (`battleCommandFieldArt`, 11.8 MB chunk), lazy-loaded sprite sheets and large tables, gamepad input through `press` / `release`.
 4. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
@@ -76,7 +82,8 @@ never brief those here. One worker at a time; each run folds the next audio step
      `tests/animation/quickAttackAerialAceOpponentClip.test.ts` (qak249). Open: ISSUES #194 (RATTATA Quick Attack residual, not the clip).
    - Flow gaps: ISSUES #191 (dialog cursors move on held repeat), #192 (summary flow gaps), #195 (party menu: cursor moves during the
      open fade; refusal text dismisses before it finishes printing).
-   - **(g) FIRST in 4b — not visual (found 2026-11-05 by the top layer's live-site play-test on fb5516bc0): BAG and RUN do
+   - **(g) DONE 2026-11-06 (frf250a / frf250b; see State at restart). Next in 4b: (e) below.** Original report:
+     not visual (found 2026-11-05 by the top layer's live-site play-test on fb5516bc0): BAG and RUN do
      nothing in battle.** On the action menu, A on BAG or RUN is ignored: `battleCommandPresentation.ts:638-646` handles only
      FIGHT (0) and POKéMON (2), and returns the state unchanged otherwise. No sound, no text, the cursor stays. In a site trace
      (`437157099938d5e9c8cb6da1ee5c0a58`, test player) A on RUN at app 110024 / 110064 / 110092 changes nothing. The ROM:
