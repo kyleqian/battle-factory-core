@@ -1,4 +1,4 @@
-// S11 aud242a: the script-level move-animation SEs (playsewithpan / playse / waitplaysewithpan / loopsewithpan) of a live Scene ON move
+// S11 aud242a/b: the script-level move-animation SEs (playsewithpan / playse / waitplaysewithpan / loopsewithpan) of a live Scene ON move
 // animation, at the frame the decoded script command executes. Write-only presentation (src/audio/soundEvents.ts): reads the resolution
 // presentation, never changes it. Data: src/data/gen/anim-sound-timing.json (tools/extract/extract-anim-sound-timing.ts). docs/aud242-move-anim-sounds.md.
 import timingData from "../data/gen/anim-sound-timing.json" with { type: "json" };
@@ -17,6 +17,7 @@ interface TimedOp {
 }
 interface TimingTable {
   readonly turns: number;
+  readonly sides: number;
   readonly variants: readonly (readonly TimedOp[])[];
   readonly moves: readonly Readonly<{ move: number; variants: readonly number[] }>[];
 }
@@ -36,11 +37,12 @@ function playFrames(op: TimedOp): readonly number[] {
   return frames;
 }
 
-function variantOf(move: number, turn: number): readonly TimedOp[] {
+/** The resolved ops of the move's (turn, attacker side) walk: variant index = turn * sides + side (the side-dependent jumpret* branches resolve from the request). */
+function variantOf(move: number, turn: number, attackerSide: 0 | 1): readonly TimedOp[] {
   const entry = timing.moves[move];
   if (entry === undefined) return [];
   const turnIndex = turn < timing.turns ? turn : timing.turns - 2 + (turn & 1);
-  return timing.variants[entry.variants[turnIndex]!]!;
+  return timing.variants[entry.variants[turnIndex * timing.sides + attackerSide]!]!;
 }
 
 /** Called once per collected tick with the round's resolution presentation after the tick; emits the ops whose frame is this tick's. */
@@ -55,7 +57,7 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     attackerSide: request.attacker === 0 ? "player" : "opponent",
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
-  for (const op of variantOf(request.moveId, request.turn)) {
+  for (const op of variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1)) {
     for (const frame of playFrames(op)) {
       if (age !== frame + FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS) continue;
       emitSound({ kind: "se", id: op.id, pan: op.pan === null ? null : animSoundPan(op.pan, context) });
