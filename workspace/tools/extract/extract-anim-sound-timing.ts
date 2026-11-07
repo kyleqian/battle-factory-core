@@ -173,8 +173,21 @@ function auditInstantTasks(): void {
   }
 }
 auditInstantTasks();
+// AnimTask_BlendSpriteColor_Step2 (battle_anim_utility_funcs.c:169-198), shared by AnimTask_BlendBattleAnimPal / ...Exclude / AnimTask_BlendParticle through
+// StartBlendAnimSpriteColor (:156-167, which runs Step2 once inside the creating script step). data[9] starts at 0: calls 0..d-1 only count it up, call d blends
+// at y = start and resets it, then every d + 1 calls the y moves one toward the target; the call that blends AT the target destroys the task (:190-192).
+// Call 0 is the script step (iteration F), call k >= 1 is RunTasks of iteration F + k - 1 (the script's CB1 runs first), so the destroy call is
+// K = d + |target - start| * (d + 1) and a waitforvisualfinish polling in CB1 passes at iteration F + K: exact = K - 1 (-1 = already gone in the creating step).
+function blendAnimPalLength(delay: number, startY: number, targetY: number): number {
+  return delay + Math.abs(targetY - startY) * (delay + 1) - 1;
+}
 function lifetimeOf(cmd: Command): Lifetime {
   const { op, args } = cmd;
+  if (op === "createvisualtask" && (args[0] === "AnimTask_BlendBattleAnimPal" || args[0] === "AnimTask_BlendBattleAnimPalExclude" || args[0] === "AnimTask_BlendParticle")) {
+    const [delay, startY, targetY] = [intArg(args[3]), intArg(args[4]), intArg(args[5])];
+    if (delay === null || startY === null || targetY === null || delay < 0) return null;
+    return { exact: blendAnimPalLength(delay, startY, targetY) };
+  }
   if (op === "createvisualtask" && INSTANT_TASKS.has(args[0] ?? "")) return { exact: -1 };
   if (op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate")) {
     const parts = op === "simple_palette_blend" ? [args.find((a) => a.startsWith("delay=")), args.find((a) => a.startsWith("initial_blend_y=")), args.find((a) => a.startsWith("target_blend_y="))] : [args[4], args[5], args[6]];
