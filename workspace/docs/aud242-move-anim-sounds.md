@@ -202,3 +202,52 @@ is therefore not a function of the lead alone: for lead 4 and 7 it is about half
 script starts at the gAnimScriptActive edge, the adapters' window starts `lead` rows later at the
 visual onset, and the first rows of the script change nothing on screen), but the lead-10 / lead-13
 rows break the pattern. No fix is source-proven; the aud242a fixtures stay as they are.
+
+## 7. aud242c: background fades, pan changes, sound tasks (Scene ON)
+
+Fixtures: `tools/audio/fixtures/aud242c-*.json` (step mode, 822 frames, **with the probe's call log** and the
+replay trace), test `tests/aud242cMoveAnimSounds.test.ts`. Labs `tools/battle-lab/aud242b-*.json`, stages
+`APP_STAGES["aud242b-*-on"]` (the three new labs: Mach Punch player, Flamethrower player, Hyper Beam opponent).
+
+### 7.1 `waitbgfadein` / `waitbgfadeout` (commit 1)
+
+The model is the source state machine, with no fitted constant (comments in
+`tools/extract/extract-anim-sound-timing.ts`, `FADE_OUT_DONE` / `FADE_IN_DONE`). `Cmd_fadetobg` /
+`Cmd_restorebg` create `Task_FadeToBg` (priority 5) at iteration F; per main-loop iteration the order is
+CB1 (the script), CB2 (`UpdatePaletteFade`, then `RunTasks`), VBlank (`TransferPlttBuffer` ->
+`UpdateBlendRegisters`):
+
+| iteration | event |
+|---|---|
+| F | task state 0: `BeginHardwarePaletteFade(0xE8, 0, 0, 16, 0)` (delay 0, 0 -> 16) |
+| F+1 .. F+16 | `UpdateHardwarePaletteFade`: one y step per iteration |
+| F+17 | y = 17 > 16: finishing; VBlank clears `active` |
+| F+18 | task state 1: `sAnimBackgroundFadeState = 2` |
+| F+19 | CB1: `waitbgfadeout` passes; task state 2: `LoadMoveBg` / `LoadDefaultBg`, `BeginHardwarePaletteFade(.., 16, 0, 1)` |
+| F+20 .. F+36 | y 15 -> 0, finishing |
+| F+37 | task state 3: `DestroyTask`, state 0 |
+| F+38 | CB1: `waitbgfadein` passes |
+
+`waitbgfadein` / `waitbgfadeout` do not install `WaitAnimFrameCount`: a failed poll sets
+`sAnimFramesToWait = 1` and the callback stays `RunAnimScriptCommand`, so they re-poll every iteration and
+resume at `max(poll iteration, F+19 / F+38)`; there is no 3-frame quantisation (the doc's section 6 guess
+is withdrawn). `waitbgfadeout` only passes while the state is 2 (F+19 .. F+37). A fade started inside a
+running fade, or a `waitbgfadeout` outside that window, stays `unresolved("bg-fade")`.
+
+The 38 / 39 / 40-frame measurements (Mach Punch / Hyper Fang / Crunch) are the F+38 base (Mach Punch:
+exact, both sides) plus a per-background load lag: `LoadMoveBg` (LZDecompressVram of the tilemap and
+image, `LoadCompressedPalette`) overruns VBlank, so one wall-clock frame passes without a main-loop
+iteration. The overrun is data dependent (decompress cost), so `BG_LOAD_LAG` in the extractor is a
+**measured table, not derived**: BG_IMPACT 1 (Hyper Fang's fade and Mega Punch's `changebg`: two moves
+agree, which retires section 6's "+1 on SE123 unattributed"), BG_HIGHSPEED 0 (Mach Punch), BG_DARK 0
+(Crunch; its remaining +2 is the aud242a lead-4 class, no opening SE exists to calibrate it). I could not
+read the lag directly (the `Cmd_*` / `LoadMoveBg` entry hooks log nothing: static functions); the
+`UpdatePaletteFade` gaps in the call log are consistent with it but were not matched row by row. Other
+backgrounds count 0 (a residual, named); `restorebg`'s `LoadDefaultBg` overrun is not modelled.
+
+Result: the extractor resolves the 134 bg-fade-gated ops that were unresolved (turn 0 / player: 562 ->
+643 resolved ops). Fixtures: Mach Punch both sides frame-exact (117 / 125 opponent, 113 / 121 player; the
+opponent window was silent before), Hyper Fang 115 SE192 now emitted (+2, same as the opening SE), Crunch
+109 emitted (+2). Mega Punch SE123 moved from +1 to exact (closer to the ROM; aud242b spec `extra` removed).
+Two later move bodies became audible and are named in the aud242a / aud242b specs (`rowDelta`): Seismic
+Toss's opening SE238 after Swords Dance / Haze (+1 / +2 short of the ROM).

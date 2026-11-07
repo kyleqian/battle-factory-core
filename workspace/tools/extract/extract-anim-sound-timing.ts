@@ -140,6 +140,20 @@ function returnValue(task: string, attackerSide: number): number | null {
   }
 }
 
+/** Iterations after the fadetobg / restorebg step at which waitbgfadeout / waitbgfadein pass (Task_FadeToBg + UpdateHardwarePaletteFade, derived above). */
+const FADE_OUT_DONE = 19;
+const FADE_IN_DONE = 38;
+
+/**
+ * Wall-clock lag frames after LoadMoveBg (LZDecompressVram of the tilemap and the image + LoadCompressedPalette) overruns VBlank: the iteration after
+ * the load never runs UpdatePaletteFade / the script. The decompress cost is data dependent, so this is a measured table, not derived: the missing
+ * UpdatePaletteFade frame in the stepped ROM probe windows (tools/audio/fixtures/aud242c-*.json, docs/aud242-move-anim-sounds.md section 7):
+ * BG_IMPACT_* 1 (Hyper Fang fadetobg, Mega Punch changebg, both sides), BG_HIGHSPEED_OPPONENT 0 (Mach Punch), BG_DARK 0 (Crunch).
+ * Unmeasured backgrounds count 0 (a named residual); restorebg's LoadDefaultBg (a 1 or 2 frame, phase dependent overrun) is not modelled.
+ */
+const BG_LOAD_LAG: Readonly<Record<string, number>> = { BG_IMPACT_OPPONENT: 1, BG_IMPACT_PLAYER: 1, BG_IMPACT_CONTESTS: 1, BG_HIGHSPEED_OPPONENT: 0, BG_HIGHSPEED_PLAYER: 0, BG_DARK: 0 };
+const bgLoadLag = (bg: string | undefined): number => BG_LOAD_LAG[bg ?? ""] ?? 0;
+
 const blockers: Record<string, number> = {};
 function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
   const events: SoundOp[] = [];
@@ -150,6 +164,10 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
   let gated = 0;
   let pending: Array<{ at: number; life: Lifetime; name: string }> = [];
   let ret: number | null = null;
+  let fade: number | null = null;
+  // Wall-clock frames the ROM spends in a VBlank-overrun lag (no main-loop iteration): ops at iteration > `after` play `frames` later.
+  const lags: Array<{ after: number; frames: number }> = [];  // `after`: first affected iteration - 1 (fractional .5 = from the same iteration)
+  const shiftAt = (iteration: number): number => lags.reduce((n, l) => (iteration > l.after ? n + l.frames : n), 0);
   const finish = (end: string): Walk => ({ events, end, frame, gated, reasons });
   const unresolved = (reason: Reason): void => { frame = null; why ??= reason; };
   const gate = (): void => { gated += 1; const reason = why ?? "unresolved-branch"; reasons[reason] = (reasons[reason] ?? 0) + 1; };
@@ -193,7 +211,36 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         pending = [];
         break;
       }
-      case "waitbgfadein": case "waitbgfadeout": unresolved("bg-fade"); pending = []; break;
+      // battle_anim.c Cmd_fadetobg / Cmd_restorebg create Task_FadeToBg (priority 5) in the script step of frame F and set sAnimBackgroundFadeState = 1.
+      // Per main-loop iteration the order is CB1 (script), then CB2 (UpdatePaletteFade, RunTasks), then VBlank (TransferPlttBuffer -> UpdateBlendRegisters):
+      //   F      task state 0: BeginHardwarePaletteFade(0xE8, 0, 0, 16, 0), VBlank writes BLDY 0
+      //   F+1..16  UpdateHardwarePaletteFade y 1..16 (one step per iteration, delay 0)
+      //   F+17   y++ = 17 > 16: hardwareFadeFinishing; VBlank clears `active` (UpdateBlendRegisters)
+      //   F+18   task state 1 (active clear): state 2, sAnimBackgroundFadeState = 2
+      //   F+19   CB1: waitbgfadeout passes (state == 2); task state 2: LoadMoveBg / LoadDefaultBg, BeginHardwarePaletteFade(0xE8, 0, 16, 0, 1)
+      //   F+20..35 y 15..0;  F+36 y-1 < 0: finishing, VBlank clears `active`;  F+37 task state 3: DestroyTask, sAnimBackgroundFadeState = 0
+      //   F+38   CB1: waitbgfadein passes (state == 0)
+      // The waits do not install WaitAnimFrameCount: they re-poll every iteration (a failed poll sets sAnimFramesToWait = 1, the callback stays
+      // RunAnimScriptCommand), so a wait resumes at max(poll frame, threshold) with no 3-frame quantisation. waitbgfadeout needs state == 2, which holds
+      // for F+19..F+37 (a later poll would never pass); waitbgfadein needs 0 (also true when no fade ran).
+      case "fadetobg": case "fadetobgfromset": case "restorebg":
+        if (frame === null) break;
+        if (fade !== null && frame < fade + FADE_IN_DONE) { unresolved("bg-fade"); break; }
+        fade = frame;
+        if (op === "fadetobg") lags.push({ after: frame + FADE_OUT_DONE, frames: bgLoadLag(args[0]) });
+        else if (op === "fadetobgfromset") lags.push({ after: frame + FADE_OUT_DONE, frames: bgLoadLag(args[1 + (attackerSide === 0 ? 0 : 1)]) });
+        break;
+      // changebg: LoadMoveBg runs inside the script step itself, so the commands that follow in the same iteration already sit after the overrun.
+      case "changebg": if (frame !== null) lags.push({ after: frame - 0.5, frames: bgLoadLag(args[0]) }); break;
+      case "waitbgfadeout":
+        if (frame === null) break;
+        if (fade === null || frame >= fade + FADE_IN_DONE) { unresolved("bg-fade"); break; }
+        if (frame < fade + FADE_OUT_DONE) frame = fade + FADE_OUT_DONE;
+        break;
+      case "waitbgfadein":
+        if (frame === null) break;
+        if (fade !== null && frame < fade + FADE_IN_DONE) frame = fade + FADE_IN_DONE;
+        break;
       case "waitsound": unresolved("waitsound"); pending = []; break;
       case "jumpifmoveturn": if (value(args[0]!) === turn) pc = [args[1]!, 0]; break;
       case "choosetwoturnanim": pc = [args[(turn & 1) === 1 ? 1 : 0]!, 0]; break;
@@ -208,7 +255,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       case "playsewithpan": case "playse": case "waitplaysewithpan": case "loopsewithpan": {
         if (frame === null) { gate(); break; }
         const at = op === "waitplaysewithpan" ? frame + value(args[2]!) : frame;
-        const base = { op, frame: at, id: value(args[0]!), pan: op === "playse" ? null : value(args[1]!), line };
+        const base = { op, frame: at + shiftAt(at), id: value(args[0]!), pan: op === "playse" ? null : value(args[1]!), line };
         if (op === "waitplaysewithpan") events.push({ ...base, wait: value(args[2]!) });
         else if (op === "loopsewithpan") events.push({ ...base, wait: value(args[2]!), times: value(args[3]!) });
         else events.push(base);

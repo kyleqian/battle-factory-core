@@ -58,6 +58,8 @@ interface Spec {
   delta: number;
   /** ROM move SEs we do not emit (frame:id:pan), each named. */
   romOnly?: readonly string[];
+  /** ROM frame minus our frame for named emitted SEs of a later move body of the window (keyed by our `frame:id:pan`), replacing `delta`. */
+  rowDelta?: Readonly<Record<string, number>>;
 }
 
 // Frame-exact: the generic script clock (src/engine/moveAnimSounds.ts) reproduces the ROM. The named residuals:
@@ -66,8 +68,9 @@ interface Spec {
 //  - status moves (Agility, Swords Dance) -4 and Psybeam +2: the per-move body offset the live adapters were aligned with differs from the
 //    script start by a constant; named, not fitted (aud242b/c).
 //  - Psybeam 104..151 id 200 = SE_M_PSYBEAM2 from SoundTask_LoopSEAdjustPanning (createsoundtask, aud242c).
-//  - a later move body of the same round (Tackle 139 after Agility; Seismic Toss 238/214/131 after Swords Dance): declined bodies
-//    (liveMoveAnimationDuration null) never emit.
+//  - a later move body of the same round (Tackle 139 after Agility; Seismic Toss 214/131 after Swords Dance): declined bodies
+//    (liveMoveAnimationDuration null) never emit. Seismic Toss's opening SE 238 sits after a background fade (aud242c resolves it): it now
+//    emits, +1 frame short of the ROM (rowDelta; the LoadMoveBg / LoadDefaultBg overrun class, ISSUES #198).
 const SPECS: Record<string, Spec> = {
   "slam-player": { delta: 0 },
   "razorleaf-player": { delta: 0 },
@@ -76,7 +79,7 @@ const SPECS: Record<string, Spec> = {
   "ember-player": { delta: 2 },
   "psybeam-player": { delta: 2, romOnly: ["104:200:-64", "119:200:-16", "135:200:32", "151:200:63"] },
   "agility-player": { delta: -4, romOnly: ["391:139:-63"] },
-  "swordsdance-opponent": { delta: -4, romOnly: ["407:238:0", "527:214:63", "545:131:63"] },
+  "swordsdance-opponent": { delta: -4, romOnly: ["527:214:63", "545:131:63"], rowDelta: { "406:238:0": 1 } },
 };
 
 describe("move-animation script SEs (aud242a)", () => {
@@ -89,7 +92,7 @@ describe("move-animation script SEs (aud242a)", () => {
       const matched = theirs.filter((e) => !romOnly.has(row(e)));
       expect(theirs.filter((e) => romOnly.has(row(e))).map(row)).toEqual([...romOnly]);
       expect(ours.length).toBeGreaterThan(0);
-      expect(ours.map((e) => `${e.frame + spec.delta}:${e.id}:${e.pan}`)).toEqual(matched.map(row));
+      expect(ours.map((e) => `${e.frame + (spec.rowDelta?.[`${e.frame}:${e.id}:${e.pan}`] ?? spec.delta)}:${e.id}:${e.pan}`)).toEqual(matched.map(row));
     });
   }
 
