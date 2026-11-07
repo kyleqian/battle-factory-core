@@ -1,7 +1,0 @@
-age 363 frame 586: 0 px bbox x999--1 y999--1
-
-age 364 frame 587: 1676 px bbox x0-239 y0-6
-   720 dee7e7<-live 94ef94
-   480 ffffff<-live 9cff9c
-   476 e7e7ef<-live 94ef94
-age 365 frame 588: 0 px bbox x999--1 y999--1

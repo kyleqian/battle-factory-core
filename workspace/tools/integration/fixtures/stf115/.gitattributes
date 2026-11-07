@@ -1,2 +1,0 @@
-# stg107: a unified diff keeps " " context lines for empty source lines; exempt the banked patch from whitespace checks.
-*.diff -whitespace

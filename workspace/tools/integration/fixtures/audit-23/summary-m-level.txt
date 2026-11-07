@@ -1,7 +1,0 @@
-pb-a23fc-ply-sandslash-cleffa-growl-c0.json          FURY_CUTTER  player   SANDSLASH/CLEFFA     live=1 rows=43 exact=43 px=0 ages=- r1==r2=1 | entry live=1 px=0
-pb-a23fc-ply-sandslash-cleffa-growl-c2.json          FURY_CUTTER  player   SANDSLASH/CLEFFA     live=1 rows=43 exact=43 px=0 ages=- r1==r2=1 | entry live=1 px=0
-pb-a23fc-ply-sandslash-cleffa-growl-c3.json          FURY_CUTTER  player   SANDSLASH/MILTANK    live=1 rows=43 exact=43 px=0 ages=- r1==r2=1 | entry live=1 px=0
-pb-a23fc-ply-sandslash-cleffa-growl-c6.json          FURY_CUTTER  player   SANDSLASH/MILTANK    live=1 rows=43 exact=43 px=0 ages=- r1==r2=1 | entry live=1 px=0
-pb-a23fc-ply-sandslash-cleffa-growl-c7.json          FURY_CUTTER  player   SANDSLASH/MILTANK    live=1 rows=43 exact=43 px=0 ages=- r1==r2=1 | entry live=1 px=0
-pb-a23fc-ply-sandslash-cleffa-growl-c10.json         FURY_CUTTER  player   SANDSLASH/MILTANK    live=1 rows=43 exact=43 px=0 ages=- r1==r2=1 | entry live=1 px=0
-windows=6 live=6 0px=6 r1==r2=6 declined=0

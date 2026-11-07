@@ -1,7 +1,0 @@
-first differing frame: 2021
-pauses: 2 frames 31 first [(2019, 15), (3396, 16)]
-frames before the first pause identical: True (first pause starts 2019 )
-shifted-equal frames: 584 of 2266 ; first shifted mismatch: 2284
-shifted-equal runs (head frames): [[1700, 2283]] count 1
-captures 190 differing 144 of which in a pause window or after the first pause: 144
-ablation (ON branch forced off, same tool, final tree otherwise): frames identical to base 2266 of 2266, pause frames 0

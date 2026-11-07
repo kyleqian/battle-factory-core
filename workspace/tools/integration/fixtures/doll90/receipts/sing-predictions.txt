@@ -1,3 +1,0 @@
-Sat Oct 10 22:54:29 PDT 2026
-opponent CROBAT -> WAILORD {"x":176,"y":34} {"x":72,"y":104} lastBodyAge 134 predicted ROM script rows 230
-opponent WAILORD -> CROBAT {"x":176,"y":50} {"x":72,"y":93} lastBodyAge 152 predicted ROM script rows 248

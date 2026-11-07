@@ -1,6 +1,0 @@
-{
-  "sourceFixture": "tools/compare/fixtures/submission-player-poliwrath-opponent-lickitung.json",
-  "attacker": { "species": "POLIWRATH", "geometry": { "side": "player" } },
-  "target": { "species": "LICKITUNG", "geometry": { "side": "opponent" } },
-  "fieldProfile": { "playerHp": 197, "playerMaxHp": 197, "opponentHp": 197, "opponentMaxHp": 197, "playerGender": "male", "opponentGender": "male" }
-}

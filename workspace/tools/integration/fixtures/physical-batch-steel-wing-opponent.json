@@ -1,5 +1,0 @@
-{
-  "schema": "physical-batch-live-adapter/v1",
-  "sourceFixture": "tools/compare/fixtures/steel-wing-opponent-wingull-player-onix.json",
-  "move": "STEEL_WING"
-}

@@ -1,1 +1,0 @@
-{"schema": "wall-live-adapter/v1", "sourceFixture": "tools/compare/fixtures/protect-player-houndour-opponent-onix.json", "move": "PROTECT", "denseWindow": {"startFrame": 68, "endFrame": 190}, "probeArgs": ["protect"]}

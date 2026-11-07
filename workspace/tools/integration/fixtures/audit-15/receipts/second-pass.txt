@@ -1,4 +1,0 @@
-audit15 second full reproduction pass (sh tools/integration/audit15Run.sh, fresh scratch, 2026-10-09 06:08-06:10):
-main: 142 / 142 windows identical per-row digests + residual rows to the committed receipts/main
-entry: 117 / 117 identical to receipts/entry
-main/summary.txt and entry/summary.txt byte-identical; staged scenarios == committed, derived fixtures == committed (no WARNING)

@@ -1,6 +1,0 @@
-{
- "sourceFixture": "tools/compare/fixtures/confuse-ray-player-chinchou-opponent-onix.json",
- "move": "CONFUSE_RAY",
- "timingPhase": "event",
- "timingEvidence": "d4tails counters mechanic-confuse-ray-player-chinchou-opponent-onix: body 270 rows, lag ages [26, 229, 230, 249], r0 == r1 (accepted exact fixture, whole probe window)"
-}

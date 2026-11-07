@@ -1,7 +1,0 @@
-{
-  "sourceFixture": "tools/compare/fixtures/body-slam-opponent-lickitung-player-onix.json",
-  "move": "BODY_SLAM",
-  "attacker": { "species": "LICKITUNG", "geometry": { "side": "opponent" } },
-  "target": { "species": "ONIX", "geometry": { "side": "player" } },
-  "fieldProfile": { "playerHp": 110, "playerMaxHp": 110, "opponentHp": 165, "opponentMaxHp": 165 }
-}

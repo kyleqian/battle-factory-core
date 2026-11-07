@@ -1,8 +1,0 @@
-{
- "schema": "plans48-attract-prediction/v1",
- "recordedBefore": "the plans48 Attract species-grid probes (plans48Probe.py BODY213 jobs) were run",
- "model": "Move_ATTRACT allocates on a fixed script schedule (projectile f+21 -> destroyed f+116 when its translation ends; 6 burst hearts f+117 -> destroyed together f+157; 8 rising hearts created by consecutive createsprite commands in ONE script frame ~f+160, destroyed one per frame). The prep45 'two plans' differ only by how many rising hearts the probe sees before the frame boundary (1 or 2): plans A and B (below) leave the identical free order after the unit from every start order. Prediction for every grid pair (both sides, any species): (1) each instance is per-frame exact against A or B; (2) the free order after the unit equals plan A applied to the ROM start order F0; (3) the projectile's flight does not change with the species pair (create / destroy at the same unit-relative frames).",
- "planA": "Cf;D0;Cffffff;D3,5,6,1,4,2;Cff;Cffffff;D7;D8;D9;D11;D10;D12;D14;D13",
- "planB": "Cf;D0;Cffffff;D3,5,6,1,4,2;Cf;Cfffffff;D7;D8;D9;D11;D10;D12;D14;D13",
- "productionPlan": "planA"
-}

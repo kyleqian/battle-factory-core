@@ -1,5 +1,0 @@
-{
- "sourceFixture": "tools/integration/fixtures/q2-live/sky-attack-player-fearow-opponent-shuckle-strike.json",
- "timingPhase": "no-event",
- "note": "d4later: accepted strike, counters 180 rows (no age-161 lag)"
-}

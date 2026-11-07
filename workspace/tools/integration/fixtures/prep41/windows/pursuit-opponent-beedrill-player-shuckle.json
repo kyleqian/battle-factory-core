@@ -1,9 +1,0 @@
-{
- "sourceFixture": "tools/integration/fixtures/oam1-live/pursuit-opponent-beedrill-player-shuckle.json",
- "denseWindow": {
-  "startFrame": 77,
-  "endFrame": 179
- },
- "timingPhase": "event",
- "timingEvidence": "pursuit-counters.json: body 0 lag ages [60, 61, 82] (103 rows), counters r0 == r1 True"
-}

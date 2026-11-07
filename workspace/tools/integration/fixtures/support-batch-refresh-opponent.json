@@ -1,8 +1,0 @@
-{
-  "sourceFixture": "tools/compare/fixtures/refresh-opponent-chansey-player-onix.json",
-  "move": "REFRESH",
-  "initialField": {
-    "playerStatus": "none",
-    "opponentStatus": "poison"
-  }
-}

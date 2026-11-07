@@ -8,7 +8,7 @@ for (let index = 2; index < process.argv.length; index += 2) {
   args.set(process.argv[index]!, process.argv[index + 1]!);
 }
 
-const outputDir = args.get("--out-dir") ?? "tools/battle-lab";
+const outputDir = args.get("--out-dir") ?? ".integration/evidence/spdefup-fixtures";
 const controlReps = Number(args.get("--control-reps") ?? 70);
 const reachReps = Number(args.get("--reach-reps") ?? 125);
 if (![controlReps, reachReps].every(Number.isSafeInteger)) {

@@ -1,4 +1,0 @@
-golbat 8921a8afdce5e6fe 8921a8afdce5e6fe
-onix 4c587c1076c4cbc1 4c587c1076c4cbc1
-golbat-off 3ec7e6222dc8c339 3ec7e6222dc8c339
-onix-off 0b299b48e64b03f8 0b299b48e64b03f8

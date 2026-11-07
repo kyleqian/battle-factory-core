@@ -1,8 +1,0 @@
-   × qa91: Quick Attack's target leaves its drawn rest when AnimTask_ShakeMon starts > reducer: 0 before the impact age; -targetRestX2 from it, either side; a rest-0 target is never shifted 4ms
-   × qa91: Quick Attack's target leaves its drawn rest when AnimTask_ShakeMon starts > live seam (player attacker): NIDORINO / SNORLAX / CROBAT 0 (audit 21's 16 windows); ONIX / RATTATA -1 at rest, 0 once zeroed 5ms
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
- FAIL  tests/qa91QuickAttackCastformKeys.test.ts > qa91: Quick Attack's target leaves its drawn rest when AnimTask_ShakeMon starts > reducer: 0 before the impact age; -targetRestX2 from it, either side; a rest-0 target is never shifted
-AssertionError: expected false to be true // Object.is equality
- FAIL  tests/qa91QuickAttackCastformKeys.test.ts > qa91: Quick Attack's target leaves its drawn rest when AnimTask_ShakeMon starts > live seam (player attacker): NIDORINO / SNORLAX / CROBAT 0 (audit 21's 16 windows); ONIX / RATTATA -1 at rest, 0 once zeroed
-AssertionError: expected [ +0, -1, -1 ] to deeply equal [ +0, +0, +0 ]
-      Tests  2 failed | 4 passed (6)

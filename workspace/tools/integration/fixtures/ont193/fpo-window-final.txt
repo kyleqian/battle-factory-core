@@ -1,5 +1,0 @@
-card | pre-pass | ROM E | ROM L | E->L | ROM glyph | ROM E->glyph | prod glyph | prod - ROM
-a-switch-on | 1 | 312 | 314 | 2 | 437 | 125 | 437 | 0
-b1-two-users-on | 1 | 72 | 76 | 4 | 199 | 127 | 199 | 0
-b1-two-users-on | 2 | 299 | 301 | 2 | 424 | 125 | 424 | 0
-b2-hit-scratch-on | 1 | 72 | 76 | 4 | 199 | 127 | 199 | 0

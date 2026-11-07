@@ -1,9 +1,0 @@
-{
- "sourceFixture": "tools/integration/fixtures/species-audit-5/derived/tyranitarA-pursuit-player-beedrill-opponent-shuckle.json",
- "denseWindow": {
-  "startFrame": 74,
-  "endFrame": 175
- },
- "timingPhase": "no-event",
- "timingEvidence": "pursuit-counters.json: body 0 lag ages [60, 61] (102 rows), counters r0 == r1 True"
-}
