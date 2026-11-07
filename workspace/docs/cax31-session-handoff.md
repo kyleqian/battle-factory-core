@@ -78,7 +78,8 @@ never brief those here. One worker at a time; each run folds the next audio step
    #198 per-move offsets; then aud243 (census column + ROM replays). Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) DONE (cln240 + cln242; optional: speed up `dive.ts` for the slowest files); (4) DONE (cln241);
-   (7) evidence stops going into git (policy line in AGENTS.md DONE 2026-11-07; remaining per `docs/cln7-scout.md`: ~590 MB of tracked evidence looks write-only;
+   (7) evidence stops going into git (policy line in AGENTS.md DONE 2026-11-07; cln243 DONE 2026-11-07, 11,691 files / 204 MB untracked,
+   `docs/cln243-evidence-untrack.md`; the ~593 MB rest of `tools/compare/evidence` is read by tests; remaining per `docs/cln7-scout.md`: ~590 MB of tracked evidence looks write-only;
    first a policy + new-output default to the ignored `.integration/evidence/`, then `git rm --cached` only after a moved-aside full
    suite; no rclone / R2 remote exists on this host, so off-host backup needs the user's setup -- keep evidence local meanwhile).
 3. **Bundle hygiene** (scout: `docs/bnd-scout.md`): test-only JSON out of `src/`, sprite pixels out of the headless graph
