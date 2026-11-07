@@ -127,6 +127,19 @@ function simplePaletteBlendLength(delay: number, startY: number, targetY: number
   }
   return calls + 5;
 }
+// AnimComplexPaletteBlend (battle_anim_normal.c:344-398): the sprite's callback runs once in the script step (init: BlendPalettes y1) and Step1 runs from the
+// same iteration's AnimateSprites. Step1 counts `delay` calls down (iterations F .. F+d-1), blends at F+d (y2 first, then y1, ...) and reloads the timer to
+// `delay` (so every blend is d + 1 iterations apart: F+d, F+2d+1, ...), after `numBlends` blends one more countdown, a call that moves to Step2, and
+// Step2 (gPaletteFade.active clear) destroys the sprite: iteration F + (n + 1)(d + 1). ROM-checked on Double-Edge (BlendPalette calls at 70, 74, 79, 85 for
+// d = 4, n = 2: 15 ticks; the next SE lands exactly 28 frames after the sprite's SE).
+function complexPaletteBlendLength(delay: number, numBlends: number): number {
+  return (numBlends + 1) * (delay + 1);
+}
+const METALLIC_SHINE_LENGTH = 95;
+// Measured on two moves, both agreeing (docs section 8): 4 wall-clock frames between the shine's creation and the first op after its wait. The first 2 are
+// localised (Metal Claw's SE_M_HARDEN loop task, counted in iterations, plays its second SE exactly 2 wall frames late: 28 -> 30); the other 2 are not
+// (somewhere in the 96-call shine or its destroy, which clears the BG tilemap). The shift is applied to every later op; the loop's own second play is the named residual.
+const METALLIC_SHINE_LOAD_LAG = 4;
 // ---- Instant visual tasks (aud242d). Cmd_createvisualtask runs `taskFunc(taskId)` BEFORE `gAnimVisualTaskCount++` (battle_anim.c:437-439), and an
 // entry function whose every path is straight-line code ending in `DestroyAnimVisualTask(taskId)` (-> `gAnimVisualTaskCount--`, battle_anim.c:274-277)
 // nets to 0 in the creating step: a following waitforvisualfinish never waits for it (lifetime -1, like the PlaySE1/2WithPanning tasks). Sprites a task
@@ -188,6 +201,15 @@ function lifetimeOf(cmd: Command): Lifetime {
     if (delay === null || startY === null || targetY === null || delay < 0) return null;
     return { exact: blendAnimPalLength(delay, startY, targetY) };
   }
+  if (op === "complex_palette_blend" || (op === "createsprite" && args[0] === "gComplexPaletteBlendSpriteTemplate")) {
+    const named = (key: string): string | undefined => args.find((a) => a.startsWith(`${key}=`));
+    const [delay, numBlends] = op === "complex_palette_blend" ? [intArg(named("delay")), intArg(named("num_blends"))] : [intArg(args[4]), intArg(args[5])];
+    if (delay === null || numBlends === null || delay < 0 || numBlends < 0) return null;
+    return { exact: complexPaletteBlendLength(delay, numBlends) };
+  }
+  // AnimTask_MetallicShine (battle_anim_dark.c:822-882, step :896-935): the step adds 4 to data[10] per call; every 128 (32 calls) data[11]++, and the third
+  // wrap (96 calls) runs DestroyAnimVisualTask. Call 0 is the script step, call k >= 1 is RunTasks of iteration F + k - 1: gone 95 ticks after the creation tick.
+  if (op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) return { exact: METALLIC_SHINE_LENGTH };
   if (op === "createvisualtask" && INSTANT_TASKS.has(args[0] ?? "")) return { exact: -1 };
   if (op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate")) {
     const parts = op === "simple_palette_blend" ? [args.find((a) => a.startsWith("delay=")), args.find((a) => a.startsWith("initial_blend_y=")), args.find((a) => a.startsWith("target_blend_y="))] : [args[4], args[5], args[6]];
@@ -282,6 +304,9 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
     const { op, args, line } = cmd;
     pc = [label, index + 1];
     if (isCreation(op)) {
+      // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
+      // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
+      if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
       if (frame !== null) pending.push({ at: frame, life: lifetimeOf(cmd), name: args[0] ?? op });
       const known = returnValue(args[0] ?? "", attackerSide);
       ret = op === "createvisualtask" ? known : ret;

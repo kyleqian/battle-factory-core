@@ -1858,6 +1858,13 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242b-hyperbeam-opponent-on": (state) => aud241bStage(state, "aud242b-hyperbeam-opponent-on", "on", 12, 50, 69, undefined, false, 63),
   "aud242b-sweetscent-player-on": (state) => aud241bStage(state, "aud242b-sweetscent-player-on", "on", 50, 12, 230, undefined, false, 69),
   "aud242b-metalsound-opponent-on": (state) => aud241bStage(state, "aud242b-metalsound-opponent-on", "on", 12, 50, 69, undefined, false, 319),
+  // aud242d: the palette-family windows (BlendBattleAnimPal d > 0, Exclude, complex_palette_blend, metallic_shine; docs/aud242-move-anim-sounds.md section 8).
+  "aud242b-hail-player-on": (state) => aud241bStage(state, "aud242b-hail-player-on", "on", 50, 12, 258, undefined, false, 69),
+  "aud242b-sunnyday-player-on": (state) => aud241bStage(state, "aud242b-sunnyday-player-on", "on", 50, 12, 241, undefined, false, 69),
+  "aud242b-doubleedge-player-on": (state) => aud241bStage(state, "aud242b-doubleedge-player-on", "on", 50, 12, 38, undefined, false, 69),
+  "aud242b-calmmind-player-on": (state) => aud241bStage(state, "aud242b-calmmind-player-on", "on", 50, 12, 347, undefined, false, 69),
+  "aud242b-metalclaw-player-on": (state) => aud241bStage(state, "aud242b-metalclaw-player-on", "on", 50, 12, 232, undefined, false, 69),
+  "aud242b-steelwing-player-on": (state) => aud241bStage(state, "aud242b-steelwing-player-on", "on", 50, 12, 211, undefined, false, 69),
   "aud242b-fireblast-player-on": (state) => aud241bStage(state, "aud242b-fireblast-player-on", "on", 50, 12, 126, undefined, false, 69),
   "aud242b-dragonclaw-opponent-on": (state) => aud241bStage(state, "aud242b-dragonclaw-opponent-on", "on", 12, 50, 69, undefined, false, 337),
   "aud242b-cosmicpower-player-on": (state) => aud241bStage(state, "aud242b-cosmicpower-player-on", "on", 50, 12, 322, undefined, false, 69),
