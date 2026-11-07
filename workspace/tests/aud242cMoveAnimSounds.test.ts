@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { collectSoundTick, type SoundEvent } from "../src/audio/soundEvents.ts";
 import { createInitialState, tick } from "../src/engine/core.ts";
+import { moveAnimOpRows, type TimedOp } from "../src/engine/moveAnimSounds.ts";
 import { traceAdvances } from "../tools/compare/traceReplay.ts";
 
 interface FixtureEvent {
@@ -31,10 +32,13 @@ interface Fixture {
 const fixture = (name: string): Fixture =>
   JSON.parse(readFileSync(new URL(`../tools/audio/fixtures/aud242c-${name}.json`, import.meta.url), "utf8")) as Fixture;
 
-// The other steps' SEs in these windows: SE_SELECT (menu), the effectiveness SEs (aud241b), SE_FAINT, SE_LOW_HEALTH, SE_M_STAT_INCREASE (239).
-const OTHER_SES = [5, 12, 13, 14, 16, 90, 239];
+// The other steps' SEs in these windows: SE_SELECT (menu), the effectiveness SEs (aud241b), SE_FAINT, SE_LOW_HEALTH, SE_M_STAT_INCREASE (239) / SE_M_STAT_DECREASE (245).
+const OTHER_SES = [5, 12, 13, 14, 16, 90, 239, 245];
 const isMoveSe = (e: FixtureEvent | SoundEvent): boolean => e.kind === "se" && !OTHER_SES.includes(e.id as number);
 const row = (e: FixtureEvent | SoundEvent): string => `${e.frame}:${e.id}:${e.pan}`;
+// Pan family: SE rows plus SE12PanpotControl rows (kind "pan", id null).
+const isMoveSound = (e: FixtureEvent | SoundEvent): boolean => isMoveSe(e) || e.kind === "pan";
+const soundRow = (e: FixtureEvent | SoundEvent): string => `${e.frame}:${e.kind === "pan" ? "pan" : "se"}:${e.id}:${e.pan}`;
 
 const appTracePath = "../tools/compare/appTrace.ts";
 const { APP_STAGES } = (await import(/* @vite-ignore */ appTracePath)) as {
@@ -60,6 +64,8 @@ interface Spec {
   delta: number;
   /** ROM move SEs we do not emit (frame:id:pan), each named. */
   romOnly?: readonly string[];
+  /** The window is cut at this ROM frame on both sides: a later, gated part of the script, or the next move's body (its own residual). */
+  romOnlyFrom?: number;
 }
 
 // Fade family (the frame model, docs section 7.1): Mach Punch (BG_HIGHSPEED, SE after waitbgfadein) is frame-exact in both sides; the other
@@ -71,6 +77,19 @@ const FADE_SPECS: Record<string, Spec> = {
   "machpunch-player": { delta: 0 },
   "hyperfang-player": { delta: 2 },
   "crunch-player": { delta: 2, romOnly: ["135:161:63"] },
+};
+
+// Every row of a window is shifted by the same named per-move offset (ISSUES #198: the ROM script start vs the live adapter's body clock; the
+// shape, ids, pans and the relative frames are exact): Flamethrower is a moves-with-unknown-idle-lead body (LIVE_MOVE_NO_PRE_ROW_SIDES) at +5 on
+// both sides, the status bodies Metal Sound / Sweet Scent sit before the generic clock (-2 / -3, aud242a's -4 class), Icy Wind's opening SE is +2.
+// The later gated rows (Icy Wind's panse after sprite waits; the next move's SEs) are the ROM-only part. Metal Sound is cut at ROM frame 121: the ROM
+// loses two wall-clock frames there (121 / 122 have no pan call, a VBlank overrun like the BG load lag; its rows after 111 are noop calls anyway).
+const PAN_SPECS: Record<string, Spec> = {
+  "flamethrower-opponent": { delta: 5 },
+  "flamethrower-player": { delta: 5 },
+  "metalsound-opponent": { delta: -2, romOnlyFrom: 121 },
+  "sweetscent-player": { delta: -3, romOnlyFrom: 400 },
+  "icywind-opponent": { delta: 2, romOnlyFrom: 100 },
 };
 
 describe("move-animation SEs after background fades (aud242c)", () => {
@@ -86,9 +105,59 @@ describe("move-animation SEs after background fades (aud242c)", () => {
     });
   }
 
+  for (const [name, spec] of Object.entries(PAN_SPECS)) {
+    it(`${name}: SE and pan-change rows equal the ROM${spec.delta === 0 ? "" : ` at a named +${spec.delta} frame residual`}`, () => {
+      const rom = fixture(name);
+      // The ROM's SE12PanpotControl calls on a stopped SE player (the SE ended before its pan task did) are flagged noop by the probe (m4a RAM
+      // unchanged; presentation ignores them). The engine does not model m4a state, so it emits the whole call stream while the live body runs:
+      // the effective ROM rows must all be ours, in order, and every other row of ours must be one of the ROM's noop calls.
+      const romOnly = (e: FixtureEvent): boolean => (spec.romOnlyFrom !== undefined && e.frame >= spec.romOnlyFrom) || (spec.romOnly ?? []).includes(soundRow(e));
+      const inWindow = rom.events.filter((e) => isMoveSound(e) && !romOnly(e));
+      const effective = inWindow.filter((e) => e.noop !== true).map(soundRow);
+      const noop = new Set(inWindow.filter((e) => e.noop === true).map(soundRow));
+      const ours = ourEvents(rom).filter(isMoveSound).map((e) => ({ ...e, frame: e.frame + spec.delta })).filter((e) => spec.romOnlyFrom === undefined || e.frame < spec.romOnlyFrom).map(soundRow);
+      expect(ours.filter((r) => !noop.has(r))).toEqual(effective);
+      expect(ours.filter((r) => noop.has(r)).length).toBe(ours.length - effective.length);
+      expect(effective.length).toBeGreaterThan(0);
+    });
+  }
+
   it("Scene OFF emits no move-animation SE (the animation is skipped)", () => {
     const rom = fixture("machpunch-opponent");
     const off = { ...rom, trace: { ...rom.trace, battleScene: "off" as const, appStage: { id: "aud242b-dragonrage-opponent-off", frame: 0 } } };
     expect(ourEvents(off).filter(isMoveSe).map(row)).toEqual([]);
+  });
+
+  // Cmd_panse_adjustnone (raw pans, raw signed increment, Sunny Day +1), Cmd_panse_adjustall (AdjustPanning2 on all three, Wish -3 on an opponent
+  // attacker flips every sign) and framesToWait > 0 (Task_PanFromInitialToTarget acts every w + 1 iterations): no window reaches these gated ops.
+  describe("panse variants (source arithmetic)", () => {
+    const player = { attackerSide: "player", targetSide: "opponent" } as const;
+    const opponent = { attackerSide: "opponent", targetSide: "player" } as const;
+    const rows = (op: Partial<TimedOp> & Pick<TimedOp, "op">, context: typeof player | typeof opponent) =>
+      moveAnimOpRows({ frame: 0, id: 241, pan: -64, target: 63, inc: 1, wait: 0, ...op }, context).map((r) => `${r.offset}:${r.emission.kind}:${r.emission.pan}`);
+
+    it("panse_adjustnone keeps the raw pans on either side and ends exactly at the target", () => {
+      for (const context of [player, opponent]) {
+        const out = rows({ op: "panse_adjustnone" }, context);
+        expect(out[0]).toBe("0:se:-64");
+        expect(out[1]).toBe("0:pan:-63");
+        expect(out.at(-1)).toBe("126:pan:63");
+        expect(out).toHaveLength(2 + 126);
+      }
+    });
+    it("panse_adjustall negates pans and the increment for an opponent attacker (AdjustPanning2)", () => {
+      const out = rows({ op: "panse_adjustall", id: 273, pan: 63, target: -64, inc: -3 }, opponent);
+      expect(out[0]).toBe("0:se:-63");
+      expect(out[1]).toBe("0:pan:-60");
+      expect(out.at(-1)).toBe("42:pan:64");
+      expect(rows({ op: "panse_adjustall", id: 273, pan: 63, target: -64, inc: -3 }, player)[0]).toBe("0:se:63");
+    });
+    it("framesToWait w acts every w + 1 iterations starting at iteration w", () => {
+      const out = rows({ op: "panse", pan: -64, target: 63, inc: 60, wait: 2 }, player);
+      expect(out).toEqual(["0:se:-64", "2:pan:-4", "5:pan:56", "8:pan:63"]);
+    });
+    it("a zero increment writes the target once", () => {
+      expect(rows({ op: "panse", pan: 63, target: 63, inc: 2, wait: 0 }, player)).toEqual(["0:se:63", "0:pan:63"]);
+    });
   });
 });

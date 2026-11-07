@@ -251,3 +251,37 @@ opponent window was silent before), Hyper Fang 115 SE192 now emitted (+2, same a
 109 emitted (+2). Mega Punch SE123 moved from +1 to exact (closer to the ROM; aud242b spec `extra` removed).
 Two later move bodies became audible and are named in the aud242a / aud242b specs (`rowDelta`): Seismic
 Toss's opening SE238 after Swords Dance / Haze (+1 / +2 short of the ROM).
+
+### 7.2 `panse` / `panse_adjustnone` / `panse_adjustall` / `setpan` (commit 2)
+
+New sound-event kind `"pan"` (`src/audio/soundEvents.ts`): `SE12PanpotControl(pan)`, `id` null, `pan` the new m4a pan
+(the probe already logged it as `pan`). Ported from `battle_anim.c` (`Cmd_setpan`, `Cmd_panse*`,
+`Task_PanFromInitialToTarget`, `CalculatePanIncrement`) into the table (`target`, `inc`, `wait` = framesToWait) and
+`moveAnimOpRows` in `src/engine/moveAnimSounds.ts`:
+
+- the script step plays `PlaySE12WithPanning(song, currentPan)` (a plain SE row) and creates a priority 1 task; the task's first
+  row runs in the **same iteration's** `RunTasks` (ROM: the SE row and the first `pan` row share a frame), then every
+  `framesToWait + 1` iterations; it adds the increment, and on reaching the target (or at once for a zero increment) writes
+  the target pan and ends. Per iteration the order is: script rows, then task rows in creation order (Metal Sound's four
+  overlapping tasks, ROM-verified).
+- `panse` runs both pans through `BattleAnimAdjustPanning` and the increment through `CalculatePanIncrement` (sign from
+  the direction); `panse_adjustnone` uses all three raw; `panse_adjustall` runs all three through `BattleAnimAdjustPanning2`
+  (an opponent attacker negates the increment too). `setpan` is one pan row, `BattleAnimAdjustPanning`.
+- The sound task count only gates `Cmd_end` (`waitforvisualfinish` counts visual tasks alone), so no wait changes.
+- noop rows: the ROM keeps calling `SE12PanpotControl` after the SE it pans has ended (Metal Sound: every row from frame 112);
+  the probe flags those `noop` (m4a RAM unchanged). The engine does not model m4a state, so it emits the whole call
+  stream while the live body runs and presentation ignores a pan with no SE playing. The test checks both halves: every
+  effective ROM row is ours in order, every other row of ours is a ROM noop call.
+
+Counts (turn 0, player attacker table): 20 ops newly emitted (18 `panse`, 2 `setpan`), each `panse` expanding to 1 SE row +
+the task's pan rows (Flamethrower: 63 rows opponent / 64 player; in general `ceil(|target - start| / increment)`); 662 resolved ops in
+total in that table. 7 of the 25 script
+command sites stay unemitted: Icy Wind, Sing, Grass Whistle, Blizzard (`BlizzardContinue`), Powder Snow, Sunny Day (the only
+`panse_adjustnone`) and Wish (the only `panse_adjustall`) sit behind a `waitforvisualfinish` on a sprite or visual task whose
+lifetime is not modelled (aud242b `unmodelled-lifetime`; aud242d). The two adjust variants therefore have **no ROM window**; their
+arithmetic is tested against hand-derived source values (`panse variants`), not the ROM.
+
+ROM windows (`aud242c-*.json`, both sides): Flamethrower opponent + player (63 / 64 pan rows, frame-exact relative to the SE, +5 per-move
+offset: its idle lead is unknown, `LIVE_MOVE_NO_PRE_ROW_SIDES`), Metal Sound opponent (4 overlapping tasks, 252 pan calls; -2, status
+class; cut at ROM frame 121, where the ROM loses two wall-clock frames, noop rows), Sweet Scent player (`setpan` 0 at 94, 63 at 141; -3, status
+class), Icy Wind opponent (opening SE; its `panse` after sprite waits is the gated ROM-only part).

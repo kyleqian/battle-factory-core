@@ -70,10 +70,14 @@ const moveTable: string[] = [];
 }
 
 interface SoundOp {
-  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan";
+  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan";
   frame: number;
-  id: number;
+  id: number | null;
+  /** The pan argument as written (the starting pan of a panse*; the only one of a setpan). */
   pan: number | null;
+  /** panse*: the target pan argument and the increment argument as written; `wait` is framesToWait. */
+  target?: number;
+  inc?: number;
   wait?: number;
   times?: number;
   line: number;
@@ -261,6 +265,17 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         else events.push(base);
         break;
       }
+      // Cmd_panse / _adjustnone / _adjustall: PlaySE12WithPanning now + a priority 1 Task_PanFromInitialToTarget created in the same step (its first
+      // row runs in this iteration's RunTasks, then every framesToWait + 1); Cmd_setpan: one SE12PanpotControl. Neither blocks the script, and
+      // waitforvisualfinish counts only gAnimVisualTaskCount (the sound task count gates Cmd_end), so no lifetime is pushed.
+      case "panse": case "panse_adjustnone": case "panse_adjustall":
+        if (frame === null) { gate(); break; }
+        events.push({ op, frame: frame + shiftAt(frame), id: value(args[0]!), pan: value(args[1]!), target: value(args[2]!), inc: value(args[3]!), wait: value(args[4]!), line });
+        break;
+      case "setpan":
+        if (frame === null) { gate(); break; }
+        events.push({ op, frame: frame + shiftAt(frame), id: null, pan: value(args[0]!), line });
+        break;
       default: break;
     }
   }
