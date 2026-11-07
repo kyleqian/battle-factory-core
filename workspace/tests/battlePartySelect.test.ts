@@ -507,6 +507,46 @@ describe("voluntary battle party selector", () => {
     expect(px(190, 140)).toEqual([181, 66, 0]);
   });
 
+  it("ignores every key until the open palette fade finishes (Task_HandleChooseMonInput needs !gPaletteFade.active, party_menu.c:1259-1261)", () => {
+    const { request, rulesContext } = liveSelectorParts();
+    let state = createBattlePartySelectState(request, rulesContext);
+    const fresh = state;
+    for (let i = 0; i < PARTY_SELECT_OPEN_TOTAL_FRAMES; i += 1) {
+      for (const key of ["DOWN", "UP", "A", "B", "RIGHT"] as const) {
+        const pressed = advanceBattlePartySelect(state, new Set([key]));
+        expect(pressed.cursor).toBe(fresh.cursor);
+        expect(pressed.submenuOpen).toBe(false);
+        expect(pressed.outcome).toBeNull();
+      }
+      state = advanceBattlePartySelect(state, new Set(["DOWN"]));
+    }
+    expect(state.openElapsed).toBe(PARTY_SELECT_OPEN_TOTAL_FRAMES);
+    expect(state.cursor).toBe(fresh.cursor);
+    expect(advanceBattlePartySelect(state, new Set(["UP"])).cursor).toBe("cancel");
+  });
+
+  it("keeps a refusal message up until the printer is done and a press lands (TextPrinterWait, text.c:884-899)", () => {
+    let state = liveSelector();
+    const active = state.rows.findIndex((row) => row.active) as 0 | 1 | 2;
+    while (state.cursor !== active) state = advanceBattlePartySelect(state, new Set(["DOWN"]));
+    state = advanceBattlePartySelect(state, new Set(["A"]));
+    state = advanceBattlePartySelect(state, new Set(["A"]));
+    const message = state.message!;
+    expect(message).not.toBeNull();
+    const printed = message.replaceAll("\n", "").length;
+    for (let i = 0; i < printed; i += 1) {
+      state = advanceBattlePartySelect(state, new Set([i % 2 === 0 ? "A" : "B"]));
+      expect(state.message).toBe(message);
+    }
+    state = advanceBattlePartySelect(state, new Set(["B"]));
+    for (let i = 0; i < 3; i += 1) {
+      state = advanceBattlePartySelect(state, new Set());
+      expect(state.message).toBe(message);
+    }
+    state = advanceBattlePartySelect(state, new Set());
+    expect(state.message).toBeNull();
+  });
+
   it("follows the source single-layout cursor edges, including Cancel", () => {
     let state = liveSelector();
     state = advanceBattlePartySelect(state, new Set(["UP"]));
