@@ -40,6 +40,7 @@ export function contain213BattleToEnd(
     }
   }
   let forcedFrames = 0;
+  let pendingDown = false;
   for (let i = 0; state.postwin === null; i++) {
     if (i >= budget) throw new Error(`contain213 battle stalled at frame ${state.frame}`);
     const orchestrator = state.factoryRoundBattleOrchestrator;
@@ -50,10 +51,20 @@ export function contain213BattleToEnd(
       // Walk the cursor off a fainted slot now and then; A otherwise (pick, then SEND OUT). The DOWN only lands while the list owns
       // the input: inside the SEND OUT / SUMMARY / CANCEL window it would move the action cursor onto SUMMARY (sum241) and the next
       // A would open the summary instead of sending out -- before sum241 that DOWN was a no-op there, which this keeps.
-      step(forcedFrames % 4 !== 0 ? [] : forcedFrames % 48 === 0 ? (forced.submenuOpen || forced.message !== null ? [] : ["DOWN"]) : ["A"]);
+      // A DOWN due while the window or a refusal message owns the input waits for the list's next press slot: since flw252 the
+      // refusal prints for ~37 frames before its A lands, which put every 48th frame inside the window / message and the
+      // A-pick / SEND OUT / refusal loop never left the fainted slot (a driver livelock; a player just presses DOWN).
+      if (forcedFrames % 48 === 0) pendingDown = true;
+      const listOwnsInput = !forced.submenuOpen && forced.message === null;
+      if (forcedFrames % 4 !== 0) step();
+      else if (pendingDown && listOwnsInput) {
+        pendingDown = false;
+        step(["DOWN"]);
+      } else step(forcedFrames % 48 === 0 ? [] : ["A"]);
       continue;
     }
     forcedFrames = 0;
+    pendingDown = false;
     const command = orchestrator?.battleCommandPresentation;
     if (command?.lifecycle.phase === "fight-menu" && i % 2 === 0) {
       // The first move slot with PP left.
