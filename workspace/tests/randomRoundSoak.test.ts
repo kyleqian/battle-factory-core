@@ -414,7 +414,10 @@ describe("random round soak driver (green milestone pin)", () => {
       // rep203 (docs/fnt201-faint-timing.md): fnt201 (the faint script lead: playfaintcry + pause, the player slide, the pre-cry rows) frames
       // 37_467 -> 39_117, renderCalls 2_674 -> 2_782; hpb202 (the Q24.8 bar port, maxHp < 48) adds 0 here (measured with lsd194SoakPins.ts on
       // a6f9cbdb1 / 420b14c21 / the union c7d8eab9a: 39_117 / 2_782 on both fnt201-only and the union). Same battle 7, turn 3, end state.
-      frames: 39_117,
+      // obr251 (docs/obr251-opponent-party-summary.md; the draw hold on each opponent faint replacement): frames only + render calls,
+      // 39_117 -> 40_796, renderCalls 2_782 -> 2_891; same battle 7, turn 3, end state, outcome (re-pinned by cln242 from the failing
+      // full-suite shard; frame-only delta).
+      frames: 40_796,
       battle: 7,
       turn: 3,
       diagnostics: {
@@ -426,7 +429,7 @@ describe("random round soak driver (green milestone pin)", () => {
         terminalOutcome: "roundWon",
         terminalRecordMenuInputReadyReached: true,
         terminalRecordChoice: null,
-        renderCalls: 2_782,
+        renderCalls: 2_891,
       },
     });
     expect(second).toEqual(first);
@@ -868,7 +871,9 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // A-close sites undone the old pin passes again.
       // frf250a (BAG prints its message, RUN opens the forfeit prompt; the exploring policy presses both, so a new trajectory
       // as at fsw235): 43417 / turn 39 -> 39078 / turn 25; same battle 2 / roundLost / depth 1.
-      frames: 39078,
+      // obr251 (the opponent faint-replacement party-summary draw hold): frames only, 39078 -> 39466; same battle 2 / roundLost / depth 1 / turn 25
+      // (re-pinned by cln242 from the failing full-suite shard).
+      frames: 39466,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 1,
@@ -886,12 +891,15 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // pmo239: a new exploring trajectory (see seed 0): 38842 / battle 2 turn 33 -> 17862 / battle 1 turn 31.
       // vis243a (see seed 0): 17862 / turn 31 -> 21359 / turn 37; same battle 1 / roundLost / depth 0.
       // frf250a (see seed 0): 21359 / battle 1 turn 37 -> 58240 / battle 3 turn 25; roundLost, depth 2.
-      frames: 58240,
+      // obr251 (the opponent faint-replacement party-summary draw hold; the exploring policy reads presentation state, so a new trajectory,
+      // see seed 0): 58240 / battle 3 turn 25 / depth 2 -> 36610 / battle 2 turn 23 / depth 1; roundLost. Re-pinned by cln242 from the
+      // failing full-suite shard (the supervisor should confirm the trajectory change).
+      frames: 36610,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 2,
-      battle: 3,
-      turn: 25,
+      maxBattleDepth: 1,
+      battle: 2,
+      turn: 23,
     });
   });
 
