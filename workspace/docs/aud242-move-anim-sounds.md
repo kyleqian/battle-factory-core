@@ -339,3 +339,18 @@ Counts (turn 0, player attacker table): resolved ops 662 -> 734, unresolved 427 
 other 64 were behind a `simple_palette_blend` wait; 721 ops in 294 variants over all turns / sides). All 8 task sites are emitted
 on both sides. Remaining unresolved ops in the table: 347 `unmodelled-lifetime` (sprite / visual-task lifetimes: aud242b), 11 `waitsound`, 5
 `unresolved-branch`. In the whole script 7 `panse*` sites and the PlaySE*WithPanning visual tasks stay silent for those reasons.
+
+### 7.4 Acceptance receipt (aud242c)
+
+Tested code: commit `b134ef8af9c1264b7309710848210432a5c7926b`, tree `68e51f33d45e81b552eb775e85294573a6fb09c4` (the later commit only adds this section).
+Per `ANIMATION_VERIFICATION.md` production code changed (`src/engine/moveAnimSounds.ts`, `src/data/gen/anim-sound-timing.json`); the brief for this step excluded the full
+`npm test`, so the scoped set ran instead:
+
+- `npm run typecheck`: clean. `npm run build`: built. `npm run build:lib`: both configs built.
+- `npm run test:gate`: 362 files, 2,835 tests passed.
+- Every test importing a changed module (18 files incl. `aud242a/b/c`, `audioProbeFixtures`, `audioSinkNeutral`, `audioHeadlessBoundary`, `audioSinkPlumbing`,
+  `audioAnimSoundPan`, `aud240*`, `aud241*`, `obr251OpponentPartySummary`, `frf250a/b`): 738 passed, 18 skipped (the skips are the probe-fixture tests that
+  need a live oracle).
+- `npm run compare:differential` vs the step's parent `11a497622`, 22 traces (8 Scene ON move-animation traces: `turn13-dragonbreath-faint`,
+  `turn2-dragonbreath-projectiles`, `battle2-turn1-rockslide`, `turn13-sandattack`, `turn14-fly-miss`, `turn15-fly-strike`, `presentation-rng-playable-live-bodies{,-seeded}-on`;
+  14 menu / battle-flow traces): **4,181 / 4,181 captures byte-identical** (1,432 + 2,749).
