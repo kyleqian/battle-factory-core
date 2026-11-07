@@ -144,6 +144,11 @@ top entry of `PROGRESS.md` — uncommitted work is lost work.
   commit message), and only the ~3 most recent live here; move older ones to
   `docs/archive/PROGRESS-archive.md` (git keeps the full history regardless). The top entry
   is the only load-bearing one.
+- **Evidence stays out of git (finish plan Cleanup 7, 2026-11-07):** write receipts, changemaps, dense-state
+  dumps, raw RGB, probe / census / compare outputs and step reports under `.integration/` (ignored; e.g.
+  `.integration/evidence/<step>/`) and cite that path. Commit only a small fixture that a test, tool or `src`
+  module actually reads, plus the doc that explains it. Do not add new files under `tools/compare/evidence/`
+  or new unreferenced dumps under `tools/integration/fixtures/` or `docs/probes/` (`docs/cln7-scout.md`).
 - **Keep `ISSUES.md` pruned:** when you fix an entry, **delete it** (or trim a
   partial fix to its still-open remainder) in the same docs commit that records
   the fix in `PROGRESS.md` — never leave it marked CLOSED/FIXED in place. Git
