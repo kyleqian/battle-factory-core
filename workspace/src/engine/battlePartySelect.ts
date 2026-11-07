@@ -49,6 +49,7 @@ import { movePartyMenuCursor, partyMenuDirection, type PartyMenuCursor } from ".
 import { playSelectSe } from "./screenSounds.ts";
 import type { RgbColor } from "./bg.ts";
 import { blendComponentToBlack } from "./paletteFade.ts";
+import { PARTY_MESSAGE_CLOCK_START, partyMessageLines, stepPartyMessage } from "./partyMenuMessage.ts";
 import { fillFramebuffer, setPixel } from "./framebuffer.ts";
 import { drawText, drawGlyphCodes, codeForChar, type FontData } from "./font.ts";
 import {
@@ -188,6 +189,9 @@ export type BattlePartySelectState = Readonly<{
    */
   summary: SummaryScreenState | null;
   message: string | null;
+  /** Print / dismiss clock of `message` (partyMenuMessage.ts); meaningless while `message` is null. */
+  messageElapsed: number;
+  messageDismissElapsed: number | null;
   outcome:
     | null
     | Readonly<{ kind: "cancel" }>
@@ -457,6 +461,8 @@ export function battlePartySelectStateForForcedParty(
     summaryMons: forced.summaryMons,
     summary: forced.summary,
     message: forced.message,
+    messageElapsed: forced.messageElapsed,
+    messageDismissElapsed: forced.messageDismissElapsed,
     outcome: null,
     elapsed: forced.elapsed,
     openElapsed: 0,
@@ -561,6 +567,7 @@ export function createBattlePartySelectState(
       : buildBattlePartySummaryMons(rows, records, (partyIndex) => liveSummaryViewFromPartyMember(rules.party.player[partyIndex]!)),
     summary: null,
     message: null,
+    ...PARTY_MESSAGE_CLOCK_START,
     outcome: null,
     elapsed: 0,
     openElapsed: 0,
@@ -633,13 +640,14 @@ export function advanceBattlePartySelect(
     return Object.freeze({ ...next, summary });
   }
   // Task_HandleChooseMonInput / Task_HandleSelectionMenuInput run only once the open palette fade has settled
-  // (!gPaletteFade.active): an earlier press moves our cursor silently, the ROM ignores it.
+  // (!gPaletteFade.active, party_menu.c:1261): every earlier press is ignored.
   const inputLive = state.openElapsed >= PARTY_SELECT_OPEN_TOTAL_FRAMES;
+  if (!inputLive) return next;
   if (state.message !== null) {
-    if (!newKeys.has("A") && !newKeys.has("B")) return next;
-    // TextPrinterWait (text.c:884-899): the refusal message's A / B press.
-    if (inputLive) playSelectSe();
-    return Object.freeze({ ...next, message: null });
+    // TextPrinterWait (text.c:884-899): the refusal message's A / B press, read only once the printer is done.
+    const step = stepPartyMessage(state.message, state, newKeys.has("A") || newKeys.has("B"));
+    if (step.accepted) playSelectSe();
+    return Object.freeze({ ...next, ...step.clock, message: step.cleared ? null : state.message });
   }
   if (state.submenuOpen) {
     // Task_HandleSelectionMenuInput (party_menu.c:2740-2768) over the three-row window, Menu_ProcessInputNoWrapAround_other's
@@ -648,7 +656,7 @@ export function advanceBattlePartySelect(
       if (state.cursor === "cancel") return next;
       // The window is InitMenuInUpperLeftCorner(..., APressMuted = TRUE): menu.c plays nothing, so each CursorCb_* is the
       // one SE_SELECT of an A (CancelCb1, Summary, SendMon; SendMon plays it before TrySwitchInPokemon's refusals).
-      if (inputLive) playSelectSe();
+      playSelectSe();
       if (state.actionCursor === PARTY_ACTION_CANCEL) return closeActionWindow(next);
       if (state.actionCursor === PARTY_ACTION_SUMMARY) {
         // CursorCb_Summary -> CB2_ShowPokemonSummaryScreen on this battle-order row.
@@ -659,6 +667,7 @@ export function advanceBattlePartySelect(
       if (row.fainted) {
         return Object.freeze({
           ...closeActionWindow(next),
+          ...PARTY_MESSAGE_CLOCK_START,
           message: battlePartyNoEnergyMessage(row),
         });
       }
@@ -669,6 +678,7 @@ export function advanceBattlePartySelect(
         // no-energy refusal (fsw235; this was a silent no-op).
         return Object.freeze({
           ...closeActionWindow(next),
+          ...PARTY_MESSAGE_CLOCK_START,
           message: battlePartyAlreadyInBattleMessage(row),
         });
       }
@@ -685,22 +695,20 @@ export function advanceBattlePartySelect(
     }
     if (newKeys.has("B")) {
       // Task_HandleSelectionMenuInput's MENU_B_PRESSED SE, then CursorCb_Cancel1's.
-      if (inputLive) {
-        playSelectSe();
-        playSelectSe();
-      }
+      playSelectSe();
+      playSelectSe();
       return closeActionWindow(next);
     }
     const actionDirection = partyActionWindowDirection(newKeys);
     if (actionDirection === undefined) return next;
     const actionCursor = movePartyActionCursor(state.actionCursor, actionDirection);
     // Menu_ProcessInputNoWrapAround_other sounds only when the cursor moved.
-    if (inputLive && actionCursor !== state.actionCursor) playSelectSe();
+    if (actionCursor !== state.actionCursor) playSelectSe();
     return Object.freeze({ ...next, actionCursor });
   }
   if (newKeys.has("B") || (newKeys.has("A") && state.cursor === "cancel")) {
     // HandleChooseMonCancel, default action (PARTY_ACTION_CHOOSE_MON): SE_SELECT, no yes/no for the in-battle menu, close.
-    if (inputLive) playSelectSe();
+    playSelectSe();
     return Object.freeze({
       ...next,
       outcome: Object.freeze({ kind: "cancel" }),
@@ -709,7 +717,7 @@ export function advanceBattlePartySelect(
   }
   if (newKeys.has("A")) {
     // HandleChooseMonSelection default branch: SE_SELECT, then Task_TryCreateSelectionWindow.
-    if (inputLive) playSelectSe();
+    playSelectSe();
     // DisplaySelectionWindow: InitMenuInUpperLeftCorner(..., cursorPos 0, ...) -- the window always opens on its first row.
     return Object.freeze({ ...next, submenuOpen: true, submenuOpened: true, actionCursor: 0 });
   }
@@ -717,7 +725,7 @@ export function advanceBattlePartySelect(
   if (direction === undefined) return next;
   const moved = Object.freeze({ ...next, ...movePartyMenuCursor(state, direction) });
   // UpdateCurrentPartySelection sounds only when the slot changed (a LEFT / RIGHT that cannot move is silent).
-  if (inputLive && moved.cursor !== state.cursor) playSelectSe();
+  if (moved.cursor !== state.cursor) playSelectSe();
   // AnimatePartySlot(newSlotId, 1): the moved-to slot starts bouncing on this
   // edge, so its bounce phase resets at the new elapsed.
   return moved.cursor === state.cursor
@@ -1327,7 +1335,9 @@ function drawCancelPokeball(fb: Uint8Array, open: boolean): void {
  * pre-open state -- wide "Choose a POKéMON." window + CANCEL button.
  */
 function submenuWindowVisible(state: BattlePartySelectState): boolean {
-  return state.submenuOpen
+  // A refusal closes the window on its setting tick, but the ROM's first capture of the refusal still shows it.
+  const refusalTick = state.message !== null && state.messageElapsed === 0;
+  return (state.submenuOpen || refusalTick)
     && state.submenuOpenElapsed >= SUBMENU_OPEN_VISUAL_DELAY
     && (state.closeElapsed === null || state.closeElapsed === 0);
 }
@@ -1339,7 +1349,7 @@ function submenuWindowVisible(state: BattlePartySelectState): boolean {
  * the submenu window at the 926 pop edge; from the close it stays swapped.
  */
 function messageWindowSwappedFor(state: BattlePartySelectState): boolean {
-  return (state.submenuOpen && submenuWindowVisible(state))
+  return submenuWindowVisible(state)
     || state.closeElapsed !== null;
 }
 
@@ -1450,10 +1460,12 @@ function drawPartySelectBgLayer(fb: Uint8Array, state: BattlePartySelectState): 
     // behind the standard frame (DrawStdFrameWithCustomTileAndPalette(WIN_MSG, FALSE, 0x4F, 13)): two text rows over the
     // "Choose a POKéMON." box and the CANCEL button, the same drawing the canonical forced route uses
     // (battleScene.ts drawTurn15PartySelectList). The 21x2 box clipped the second line.
-    drawStandardWindowFrame(fb, 0, 112, 28, 4);
-    const [line1, line2] = state.message.split("\n");
-    drawStandardWindowText(fb, line1!, 8, 121);
-    if (line2) drawStandardWindowText(fb, line2, 8, 137);
+    const lines = partyMessageLines(state.message, state.messageElapsed);
+    if (lines !== null) {
+      drawStandardWindowFrame(fb, 0, 112, 28, 4);
+      drawStandardWindowText(fb, lines[0], 8, 121);
+      if (lines[1]) drawStandardWindowText(fb, lines[1], 8, 137);
+    }
   }
 }
 
@@ -1486,7 +1498,8 @@ function drawPartySelectObjLayer(fb: Uint8Array, state: BattlePartySelectState):
   // The SHIFT submenu window replaces the CANCEL pokeball button while visible
   // (including its confirm-tick frame, closeElapsed 0); during the 3-frame
   // pre-open hold and from the close the button is drawn again.
-  if (!submenuWindowVisible(state)) {
+  const messageShown = state.message !== null && partyMessageLines(state.message, state.messageElapsed) !== null;
+  if (!submenuWindowVisible(state) && !messageShown) {
     drawCancelPokeball(fb, state.cursor === "cancel");
   }
 }

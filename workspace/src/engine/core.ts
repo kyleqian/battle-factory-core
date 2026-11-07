@@ -1718,12 +1718,12 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // MULTI_YESNO (script_menu.c Task_HandleMultichoiceInput -> Menu_ProcessInputNoWrap, JOY_NEW):
       // UP/DOWN sound only when the cursor moved; A plays one SE_SELECT either way (menu.c:1060).
       const beforeQuestion = nextPostwin;
-      if (newAndRepeatedKeys.has("UP")) {
+      if (newKeys.has("UP")) {
         nextPostwin = movePostwinQuestionCursor(nextPostwin, -1);
-        if (newKeys.has("UP") && nextPostwin.questionCursorPos !== beforeQuestion.questionCursorPos) playSelectSe();
-      } else if (newAndRepeatedKeys.has("DOWN")) {
+        if (nextPostwin.questionCursorPos !== beforeQuestion.questionCursorPos) playSelectSe();
+      } else if (newKeys.has("DOWN")) {
         nextPostwin = movePostwinQuestionCursor(nextPostwin, 1);
-        if (newKeys.has("DOWN") && nextPostwin.questionCursorPos !== beforeQuestion.questionCursorPos) playSelectSe();
+        if (nextPostwin.questionCursorPos !== beforeQuestion.questionCursorPos) playSelectSe();
       } else if (newKeys.has("A")) {
         if (nextPostwin.questionCursorPos === 0) {
           nextPostwin = acceptPostwinQuestionYes(nextPostwin);
@@ -1754,12 +1754,12 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // so B is silent): JOY_NEW. Four entries wrap (Menu_ProcessInput: SE on every press); three do not
       // (Menu_ProcessInputNoWrap: SE only when the cursor moved). A plays SE_SELECT on any entry.
       const beforeContinuationMove = nextPostwin;
-      if (newAndRepeatedKeys.has("DOWN")) {
+      if (newKeys.has("DOWN")) {
         nextPostwin = movePostwinContinuationCursor(nextPostwin, 1);
-        if (newKeys.has("DOWN") && continuationMoveSounds(beforeContinuationMove, nextPostwin, 1)) playSelectSe();
-      } else if (newAndRepeatedKeys.has("UP")) {
+        if (continuationMoveSounds(beforeContinuationMove, nextPostwin, 1)) playSelectSe();
+      } else if (newKeys.has("UP")) {
         nextPostwin = movePostwinContinuationCursor(nextPostwin, -1);
-        if (newKeys.has("UP") && continuationMoveSounds(beforeContinuationMove, nextPostwin, -1)) playSelectSe();
+        if (continuationMoveSounds(beforeContinuationMove, nextPostwin, -1)) playSelectSe();
       } else if (newKeys.has("A")) {
         const beforeContinuation = nextPostwin;
         if (
@@ -1828,12 +1828,12 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       // UP/DOWN sound only when the cursor moved; A plays SE_SELECT in menu.c and, on NO, once more in
       // Task_HandleYesNoInput (case 1).
       const beforeSwapCursor = nextPostwin.swapCursorPos;
-      if (newAndRepeatedKeys.has("DOWN")) {
+      if (newKeys.has("DOWN")) {
         nextPostwin = movePostwinSwapCursor(nextPostwin, 1);
-        if (newKeys.has("DOWN") && beforeSwapCursor !== null && nextPostwin.swapCursorPos !== beforeSwapCursor) playSelectSe();
-      } else if (newAndRepeatedKeys.has("UP")) {
+        if (beforeSwapCursor !== null && nextPostwin.swapCursorPos !== beforeSwapCursor) playSelectSe();
+      } else if (newKeys.has("UP")) {
         nextPostwin = movePostwinSwapCursor(nextPostwin, -1);
-        if (newKeys.has("UP") && beforeSwapCursor !== null && nextPostwin.swapCursorPos !== beforeSwapCursor) playSelectSe();
+        if (beforeSwapCursor !== null && nextPostwin.swapCursorPos !== beforeSwapCursor) playSelectSe();
       } else if (newKeys.has("A")) {
         if (beforeSwapCursor !== null) {
           playSelectSe();

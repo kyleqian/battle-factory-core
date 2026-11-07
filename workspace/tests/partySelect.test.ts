@@ -374,8 +374,11 @@ describe("forced party menu: the ROM's three-slot + CANCEL cursor (party_menu.c 
   });
 
   it("prints both lines of the refusal for the fainted slot and draws the second line (WIN_MSG, 28x4)", () => {
-    const refused = step(ready, "A", "A");
-    expect(refused.message).toBe("ONIX has no energy\nleft to battle!");
+    const justRefused = step(ready, "A", "A");
+    expect(justRefused.message).toBe("ONIX has no energy\nleft to battle!");
+    // The printer draws one glyph per frame (party_menu.c PrintMessage); let both lines finish.
+    let refused = justRefused;
+    for (let i = 0; i < 40; i += 1) refused = advancePartySelect(refused, new Set());
     const withMessage = createFramebuffer();
     renderBattlePartySelect(withMessage, battlePartySelectStateForForcedParty(refused));
     const dismissed = createFramebuffer();
@@ -392,7 +395,9 @@ describe("forced party menu: the ROM's three-slot + CANCEL cursor (party_menu.c 
     expect(rowDiffers(121, 133)).toBe(true);
     expect(rowDiffers(137, 149)).toBe(true);
     // The message window is dismissed by A or B and the menu stays.
-    expect(step(refused, "B")).toMatchObject({ message: null, cursor: 0, sendOutElapsed: null });
+    let pressed = advancePartySelect(refused, new Set(["B"]));
+    for (let i = 0; i < 4; i += 1) pressed = advancePartySelect(pressed, new Set());
+    expect(pressed).toMatchObject({ message: null, cursor: 0, sendOutElapsed: null });
   });
 
   it("opens on slot 0 even when the fainted Pokémon sits in slot 1 (InitPartyMenu keepCursorPos=FALSE)", () => {
