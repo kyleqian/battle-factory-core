@@ -100,8 +100,14 @@ export async function engineBuildDefine(command: string): Promise<Record<string,
   return { [ENGINE_BUILD_DEFINE]: JSON.stringify(value) };
 }
 
-export default defineConfig(async ({ command }) => ({
+export default defineConfig(async ({ command, mode }) => ({
   root: ".",
+  // Vitest only (the app / lib builds keep vite's default JSON handling): emit each generated JSON module as
+  // `export default JSON.parse("...")` instead of an object literal plus per-key named exports. The ~46 MB of generated
+  // JSON under src/ is otherwise parsed, transformed and sourcemapped as JavaScript in the vitest parent and re-evaluated
+  // in every fork; measured on one file: transform 49 s -> 9 s, collect 77 s -> 15 s, parent peak RSS 4.5 -> 0.6 GB
+  // (docs/cln242-suite-speed.md). No test, tool or src module imports a JSON file by name (default imports only).
+  json: mode === "test" ? { stringify: true } : undefined,
   define: {
     __POKEBENCH_BUILD_STAMP__: JSON.stringify(buildStamp()),
     ...(await engineBuildDefine(command)),
