@@ -74,7 +74,7 @@ never brief those here. One worker at a time; each run folds the next audio step
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
    proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05. aud242a DONE 2026-11-06** (generic script-op
    emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07.** Next: **aud242d**
-   (sprite / visual-task lifetimes for the still-gated ops, the C sprite-callback sites, cry tasks), an alignment audit of the ISSUES
+   (palette-blend family + instant tasks, then aud242e fixed-length sprites; ranked blockers and slice plan in `docs/aud242d-scout.md`), an alignment audit of the ISSUES
    #198 per-move offsets; then aud243 (census column + ROM replays). Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) DONE (cln240 + cln242; optional: speed up `dive.ts` for the slowest files); (4) DONE (cln241);

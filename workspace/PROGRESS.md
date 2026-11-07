@@ -54,7 +54,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Gates** (`gates/`, final src): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**;
   vanilla 0:20 default **20 / 20**, Scene ON **20 / 20** (all `budget`); play:random 2 min / scene (seed 7): ON 5 battles / 2 swaps,
   OFF 16 / 8; 0 page errors / console errors / overlays / contained. The 0:60 gates were not run (hours each here).
-- **Next:** handoff "Next work": aud242d (sprite / visual-task lifetimes, C sprite-callback sites, cry tasks), Cleanup 7 (evidence out of
+- **Scout:** aud242d read-only scout (`docs/aud242d-scout.md`, unverified): 268 Level-50 ops sit behind unmodelled waits; slices
+  aud242d (palette blends + instant tasks, ~+45), aud242e (fixed-length sprites, ~+49), Roar cries (36 sets).
+- **Next:** handoff "Next work": aud242d per the scout, Cleanup 7 (evidence out of
   git), bundle hygiene, ISSUES #196 / #197 / #198 / #199 / #200.
 - **Housekeeping:** evidence `sv-20261103` deleted (older than the last three runs) and obr251 scratch; ~20 GB free.
 - **Notes:** no DEFERRED items. No push. Worker branches (all merged, deleted): integration-20261106-213056 (aud242b),
