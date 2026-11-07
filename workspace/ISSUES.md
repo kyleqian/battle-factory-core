@@ -13,6 +13,15 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
+
+`docs/obr251-opponent-party-summary.md`: bar slide / hold / fade / SE are ROM-timed and the bar frames 527..546 are exact
+(`obr251-opponent-faint-on`). Remaining: (a) Scene ON drops the faint-text `▾` cursor at A, the ROM keeps it until the "sent out"
+first glyph (37 px, bbox 61,141-67,147); (b) Scene OFF: the ROM clears the message box at A+1, ours keeps the text (608 px), mechanism
+unproven; (c) `ballDisplay.states` fainted / status labels are swapped relative to the ROM tile order (healthy 0, empty 1, status 2,
+fainted 3) in the intro tray, `drawTypedPartyStatusSummary` and the opponent exit path (left alone to keep the aud241a pins);
+(d) the fade is not drawn across a presentation segment boundary.
+
 ## #199 — BAG / RUN / forfeit presentation residuals (frf250a / frf250b, 2026-11-06)
 
 Rules and text are ROM-exact; cosmetic frames remain. frf250a compares: `frf250a-bag-off` 152 / 171, `frf250a-run-no-on` 166 / 181

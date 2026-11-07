@@ -14,8 +14,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   lifetimes 351, bg fade 134). ROM windows pinned (`tests/aud242bMoveAnimSounds.test.ts`, 8 tests): Dragon Rage +3, Mega Punch +1, Haze
   -6, Hyper Fang +2 (ISSUES #198). Worker: typecheck, build, build:lib 0; test:gate 362 / 362; differential 20 traces 3,540 identical.
   Supervisor: regenerated table byte-identical; aud242a / aud242b / audioSinkNeutral 24 / 24.
-- **Running:** obr251 (handoff 4b(e) opponent replacement ball bar; integration lane).
-- **Next:** cln242 (Cleanup 5 second half, suite speed), then an aud242 fade / lifetime model or aud242c.
+- **Folded:** obr251 (handoff 4b(e), Kyle's ball bar; branch `worker/integration-20261106-222122`, 100 min;
+  `docs/obr251-opponent-party-summary.md`): the opponent mid-battle party summary holds 100 frames (+23-frame lead after a faint) to
+  the "sent out" first glyph, slides in by `OPP_BAR_X2` over 20 frames, mirrors the balls (`states[5-index]`), fades over 16 steps
+  after the hide, and plays SE_BALL_TRAY_ENTER pan 0 both scenes (`src/engine/midBattleOpponentPartySummary*.ts`; battleScene.ts only
+  delegates). Presentation only. Worker: typecheck, build, build:lib 0; test:gate 362 / 362; census 0..999 both scenes vs `87e9366af`:
+  digest / error / type sequence 1000 / 1000, only the opponent party-summary duration moved (1,583 commands +122, 99 +99, ON = OFF);
+  differential 26 traces, only the 2 new obr251 traces moved. Re-pins: sc106 three anchors +122, party-summary view shape. Supervisor:
+  5 files 73 / 73; compare `obr251-opponent-faint-on` 520..560: bar exact, only the 37 px `▾` cursor (ISSUES #200).
+- **Fixed by the supervisor:** aud242b's 18 fixtures failed `tests/audioProbeFixtures.test.ts` (file list, "pan" kind, no call log);
+  test updated, 459 + 18 skipped.
+- **Running:** cln242 (Cleanup 5 second half, suite speed). **Next:** an aud242 fade / lifetime model or aud242c.
 
 ---
 
