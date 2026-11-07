@@ -285,3 +285,50 @@ ROM windows (`aud242c-*.json`, both sides): Flamethrower opponent + player (63 /
 offset: its idle lead is unknown, `LIVE_MOVE_NO_PRE_ROW_SIDES`), Metal Sound opponent (4 overlapping tasks, 252 pan calls; -2, status
 class; cut at ROM frame 121, where the ROM loses two wall-clock frames, noop rows), Sweet Scent player (`setpan` 0 at 94, 63 at 141; -3, status
 class), Icy Wind opponent (opening SE; its `panse` after sprite waits is the gated ROM-only part).
+
+### 7.3 `createsoundtask` and the `simple_palette_blend` lifetime (commit 3)
+
+`Cmd_createsoundtask` (`battle_anim.c`) is `CreateTask(func, 1); func(taskId); gAnimSoundTaskCount++`: the task function runs once at
+once, inside the script step, and from then on in `RunTasks` (the same iteration's, so the iteration of creation holds two
+calls). It gates `Cmd_end` / `Cmd_waitsound` only. The script has **8 `createsoundtask` sites, in 8 moves**, and only two task
+functions are used: `SoundTask_LoopSEAdjustPanning` (Ice Beam, Psybeam, Aurora Beam, Hyper Beam, Psywave, Tri Attack, Shadow Ball)
+and `SoundTask_FireBlast` (Fire Blast). They are table ops `soundtask_loopse` / `soundtask_fireblast`
+(`step`, `gap`, `times`, `id2` on top of the pan fields) and rows in `loopSeRows` / `fireBlastRows` of `src/engine/moveAnimSounds.ts`:
+
+- LoopSEAdjustPanning(song, srcPan, tgtPan, panInc, plays r10, pan-step interval r7, play gap r9): the play counter starts at
+  r9, so call 0 (the script step) plays at once; later plays every r9 + 1 calls. The pan steps by the increment every r7 + 1
+  calls, **after** the play of that call (a play sees the steps of the calls before it); the call that plays the last SE destroys
+  the task first. Call n >= 1 is `RunTasks` of iteration n - 1, so offsets are 0, r9, 2 r9 + 1, ... (Hyper Beam: 0, 5, 11, ... with
+  pan +6 per row, ROM 174, 179 ...).
+- FireBlast(loop SE, end SE): no immediate call, so call n runs in iteration n. Step1 (calls 0..109) plays the loop SE when
+  its counter wraps (call 0, then every 11) at the current pan and adds the signed increment 2 every call; call 110 switches to
+  Step2, whose counter plays the end SE at the target pan at calls 111 and 117, then ends. 10 + 2 SEs.
+- The other `battle_anim_sound_tasks.c` tasks (`SoundTask_PlaySE1WithPanning`, `PlaySE2WithPanning`, `AdjustPanningVar`, the cry /
+  echo tasks) are **not** `createsoundtask` sites: the script spells them `createvisualtask` (a visual task that plays and
+  destroys itself in the creation step; 47 `PlaySE1/2WithPanning` sites of 58 `createvisualtask SoundTask_*` lines, e.g. Luster Purge's `SE_M_HYPER_BEAM` series, Sky Uppercut, Mega Kick, Earthquake
+  with pan 0) or they are called from C. They are left to aud242d / the visual-task slice; no claim here.
+
+`simple_palette_blend` (a `gSimplePaletteBlendSpriteTemplate` sprite) is what Hyper Beam and Ice Beam wait on before their sound
+task, so this family needed its lifetime (`simplePaletteBlendLength` in the extractor, from `AnimSimplePaletteBlend` and
+`palette.c` `BeginNormalPaletteFade` / `UpdateNormalPaletteFade`): `BeginNormalPaletteFade` runs in the sprite's first callback
+(`AnimateSprites` precedes `UpdatePaletteFade` in `BattleMainCB2`) and updates once; each y step is two update calls (BG half, OBJ half)
+plus `delay` waiting calls (a negative delay raises deltaY to 2 - delay instead); the pair whose y equals the target starts the
+five-call finishing count, the fifth call clears `active`, the sprite's step destroys it in the next `AnimateSprites` and the
+script's wait passes one iteration later. Hyper Beam (delay 4, 0 -> 16) is 55 ticks, Ice Beam's first blend (delay 1, 0 -> 7) 19 ticks. The
+ROM confirms the model: Hyper Beam's opening SE_M_HYPER_BEAM and the whole SE247 series are frame-exact on both sides (delta 0),
+which a wrong wait length would break (every later row shifts with it).
+
+ROM windows (`aud242c-*.json`; each (frame, kind, id, pan) equal after a per-move constant, same rows and pans):
+Hyper Beam player + opponent (SE215, SE247 x 15 with pan -64 -> 63 / 63 -> -64: **0**), Aurora Beam player (SE182 + SE183 x 6: +2),
+Psybeam player (SE189 + SE200 x 4 at pans -64 / -16 / 32 / 63: +2), Ice Beam opponent (SE183 x 4: +1; its seven SE137 rows, ROM 176..212,
+sit behind ice-crystal sprite waits: ROM-only), Fire Blast player (SE144 x 10 with pan -64 -> 63 in steps of 22, SE145 x 2: +2). Both attacker
+sides are covered across the families (Flamethrower, Hyper Beam, Metal Sound opponent; Mach Punch, Sweet Scent, Fire Blast player).
+The +2 is the aud242a idle-lead class (ISSUES #198), Hyper Beam's 0 and Ice Beam's +1 are named per-move constants, not derived.
+Shadow Ball's opponent-side lab never plays its animation SE in the ROM window (no SE168 in 822 frames: not diagnosed), so Shadow Ball,
+Psywave and Tri Attack are table ops without a ROM window of their own (same task arithmetic).
+aud242a's Psybeam row moved: its four SE200 rows used to be ROM-only and are now emitted frame-exact (+2), closer to the ROM.
+
+Counts (turn 0, player attacker table): resolved ops 662 -> 734, unresolved 427 -> 363 over this commit (8 are the new task ops, the
+other 64 were behind a `simple_palette_blend` wait; 721 ops in 294 variants over all turns / sides). All 8 task sites are emitted
+on both sides. Remaining unresolved ops in the table: 347 `unmodelled-lifetime` (sprite / visual-task lifetimes: aud242b), 11 `waitsound`, 5
+`unresolved-branch`. In the whole script 7 `panse*` sites and the PlaySE*WithPanning visual tasks stay silent for those reasons.

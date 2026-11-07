@@ -70,7 +70,7 @@ const moveTable: string[] = [];
 }
 
 interface SoundOp {
-  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan";
+  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast";
   frame: number;
   id: number | null;
   /** The pan argument as written (the starting pan of a panse*; the only one of a setpan). */
@@ -80,6 +80,10 @@ interface SoundOp {
   inc?: number;
   wait?: number;
   times?: number;
+  /** soundtask_loopse: pan step interval (r7) and play interval (r9) as written; `times` is r10 (the play count). soundtask_fireblast: `id2` is the ending SE. */
+  step?: number;
+  gap?: number;
+  id2?: number;
   line: number;
 }
 type Reason = "bg-fade" | "unmodelled-lifetime" | "waitsound" | "unresolved-branch" | "after-unresolved-branch";
@@ -104,8 +108,33 @@ function shakeMonLength(x: number, y: number, numTimes: number, delay: number): 
     length += 1;
   }
 }
+// AnimSimplePaletteBlend (battle_anim_normal.c): BeginNormalPaletteFade in the sprite's first callback (AnimateSprites, which precedes UpdatePaletteFade in
+// BattleMainCB2) runs UpdateNormalPaletteFade once (update call 1, iteration F); every later iteration's UpdatePaletteFade is one more call (call n = iteration
+// F + n - 1). A y step is two calls (BG half, OBJ half; palette.c:430-464) plus `delay` waiting calls before the next pair (a negative delay raises deltaY
+// to 2 - delay instead); the pair whose y equals the target sets softwareFadeFinishing, then five calls count 0..4 and the fifth clears `active`
+// (IsSoftwarePaletteFadeFinishing). The sprite's Step sees !active in the next AnimateSprites and destroys itself; the script's waitforvisualfinish
+// passes one iteration after that: n calls = the sprite is gone `n` ticks after the creation tick.
+function simplePaletteBlendLength(delay: number, startY: number, targetY: number): number {
+  const deltaY = delay < 0 ? 2 - delay : 2;
+  const wait = delay < 0 ? 0 : delay;
+  let [y, calls, waits] = [startY, 0, 0];
+  for (;;) {
+    calls += 2;
+    if (y === targetY) break;
+    y = startY < targetY ? Math.min(y + deltaY, targetY) : Math.max(y - deltaY, targetY);
+    calls += wait;
+    waits += wait;
+  }
+  return calls + 5;
+}
 function lifetimeOf(cmd: Command): Lifetime {
   const { op, args } = cmd;
+  if (op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate")) {
+    const parts = op === "simple_palette_blend" ? [args.find((a) => a.startsWith("delay=")), args.find((a) => a.startsWith("initial_blend_y=")), args.find((a) => a.startsWith("target_blend_y="))] : [args[4], args[5], args[6]];
+    const [delay, startY, targetY] = parts.map(intArg);
+    if (delay === null || startY === null || targetY === null || delay === undefined) return null;
+    return { exact: simplePaletteBlendLength(delay!, startY!, targetY!) };
+  }
   if (op === "createvisualtask" && (args[0] === "AnimTask_ShakeMon" || args[0] === "AnimTask_ShakeMon2")) {
     const [x, y, numTimes, delay] = [intArg(args[3]), intArg(args[4]), intArg(args[5]), intArg(args[6])];
     if (x === null || y === null || numTimes === null || delay === null || numTimes < 1) return null;
@@ -272,6 +301,17 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         if (frame === null) { gate(); break; }
         events.push({ op, frame: frame + shiftAt(frame), id: value(args[0]!), pan: value(args[1]!), target: value(args[2]!), inc: value(args[3]!), wait: value(args[4]!), line });
         break;
+      // Cmd_createsoundtask: CreateTask(func, 1), func(taskId) at once, gAnimSoundTaskCount++ (it gates only Cmd_end / Cmd_waitsound). Only the two
+      // script-referenced tasks of battle_anim_sound_tasks.c are createsoundtask sites; the PlaySE1/2WithPanning / cry tasks are createvisualtask.
+      case "createsoundtask": {
+        const task = args[0];
+        if (task !== "SoundTask_LoopSEAdjustPanning" && task !== "SoundTask_FireBlast") break;
+        if (frame === null) { gate(); break; }
+        const at = frame + shiftAt(frame);
+        if (task === "SoundTask_FireBlast") events.push({ op: "soundtask_fireblast", frame: at, id: value(args[1]!), id2: value(args[2]!), pan: null, line });
+        else events.push({ op: "soundtask_loopse", frame: at, id: value(args[1]!), pan: value(args[2]!), target: value(args[3]!), inc: value(args[4]!), times: value(args[5]!), step: value(args[6]!), gap: value(args[7]!), line });
+        break;
+      }
       case "setpan":
         if (frame === null) { gate(); break; }
         events.push({ op, frame: frame + shiftAt(frame), id: null, pan: value(args[0]!), line });

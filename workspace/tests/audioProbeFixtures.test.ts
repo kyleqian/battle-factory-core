@@ -70,6 +70,7 @@ describe("audio probe fixtures", () => {
       "aud242b-thunderbolt-player.json",
       "aud242c-aurorabeam-player.json",
       "aud242c-crunch-player.json",
+      "aud242c-fireblast-player.json",
       "aud242c-flamethrower-opponent.json",
       "aud242c-flamethrower-player.json",
       "aud242c-hyperbeam-opponent.json",

@@ -92,8 +92,21 @@ const PAN_SPECS: Record<string, Spec> = {
   "icywind-opponent": { delta: 2, romOnlyFrom: 100 },
 };
 
+// Sound-task family (docs section 7.3): SoundTask_LoopSEAdjustPanning plays and pan steps ported from battle_anim_sound_tasks.c. Hyper Beam waits on a
+// simple_palette_blend sprite (palette fade length from palette.c, frame-exact on both sides: delta 0); Aurora Beam / Psybeam keep the +2 idle-lead class
+// of the aud242a bodies, Fire Blast (SoundTask_FireBlast, 10 loop SEs + 2 ending SEs: the whole task) is +2, Ice Beam sits at +1 (after the same palette-blend wait). Ice Beam's seven SE_M_ICE_BEAM-end rows (SE137, ROM 176..212) sit behind
+// ice-crystal sprite lifetimes (aud242b unmodelled, aud242d).
+const TASK_SPECS: Record<string, Spec> = {
+  "hyperbeam-opponent": { delta: 0 },
+  "hyperbeam-player": { delta: 0 },
+  "aurorabeam-player": { delta: 2 },
+  "icebeam-opponent": { delta: 1, romOnly: ["176:137:-63", "182:137:-63", "188:137:-63", "194:137:-63", "200:137:-63", "206:137:-63", "212:137:-63"] },
+  "psybeam-player": { delta: 2 },
+  "fireblast-player": { delta: 2 },
+};
+
 describe("move-animation SEs after background fades (aud242c)", () => {
-  for (const [name, spec] of Object.entries(FADE_SPECS)) {
+  for (const [name, spec] of Object.entries({ ...FADE_SPECS, ...TASK_SPECS })) {
     it(`${name}: (frame, kind, id, pan) equals the ROM${spec.delta === 0 ? "" : ` at a named +${spec.delta} frame residual`}`, () => {
       const rom = fixture(name);
       const ours = ourEvents(rom).filter(isMoveSe);
@@ -158,6 +171,49 @@ describe("move-animation SEs after background fades (aud242c)", () => {
     });
     it("a zero increment writes the target once", () => {
       expect(rows({ op: "panse", pan: 63, target: 63, inc: 2, wait: 0 }, player)).toEqual(["0:se:63", "0:pan:63"]);
+    });
+  });
+
+  // createsoundtask arithmetic beyond the ROM windows (Hyper Beam / Psybeam / Aurora Beam / Ice Beam: pan step interval r7 = 0 or > 0, gap r9 = 0..5; Fire Blast).
+  describe("sound tasks (source arithmetic)", () => {
+    const player = { attackerSide: "player", targetSide: "opponent" } as const;
+    const opponent = { attackerSide: "opponent", targetSide: "player" } as const;
+    const loop = (args: { pan: number; target: number; inc: number; times: number; step: number; gap: number }, context: typeof player | typeof opponent) =>
+      moveAnimOpRows({ op: "soundtask_loopse", frame: 0, id: 168, ...args }, context).map((r) => `${r.offset}:${r.emission.pan}${r.task === true ? "t" : ""}`);
+
+    it("LoopSEAdjustPanning plays at once in the script step, then every gap + 1 calls (offsets gap, 2 gap + 1, ...)", () => {
+      expect(loop({ pan: -64, target: 63, inc: 1, times: 3, step: 0, gap: 5 }, player)).toEqual(["0:-64", "5:-58t", "11:-52t"]);
+    });
+    it("a pan step every step + 1 calls, the last play ends the task before its pan step", () => {
+      // Mist: 5 plays, step interval 5, gap 5 (plays 6 calls apart, pan stepping every 6 calls: each play sees one more step)
+      expect(loop({ pan: -64, target: 63, inc: 20, times: 4, step: 5, gap: 5 }, player)).toEqual(["0:-64", "5:-44t", "11:-24t", "17:-4t"]);
+    });
+    it("gap 0 plays every call (offset 0 twice: the script step and RunTasks of the same iteration)", () => {
+      expect(loop({ pan: 0, target: 63, inc: 4, times: 3, step: 0, gap: 0 }, player)).toEqual(["0:0", "0:4t", "1:8t"]);
+    });
+    it("an opponent attacker flips the pans and the increment follows the adjusted target", () => {
+      const out = loop({ pan: -64, target: 63, inc: 1, times: 2, step: 0, gap: 5 }, opponent);
+      expect(out).toEqual(["0:63", "5:57t"]);
+    });
+    it("the pan stays in range", () => {
+      expect(loop({ pan: -64, target: 63, inc: 100, times: 3, step: 0, gap: 0 }, player)).toEqual(["0:-64", "0:36t", "1:63t"]);
+    });
+
+    const fire = (context: typeof player | typeof opponent) =>
+      moveAnimOpRows({ op: "soundtask_fireblast", frame: 0, id: 144, id2: 145, pan: null }, context).map((r) => `${r.offset}:${r.emission.id}:${r.emission.pan}`);
+    it("FireBlast: ten loop SEs every 11 calls from call 0 (pan +2 per call), two ending SEs at calls 111 and 117 at the target pan", () => {
+      const out = fire(player);
+      expect(out).toHaveLength(12);
+      expect(out[0]).toBe("0:144:-64");
+      expect(out[1]).toBe("11:144:-42");
+      expect(out[9]).toBe("99:144:63");
+      expect(out.slice(10)).toEqual(["111:145:63", "117:145:63"]);
+    });
+    it("FireBlast from an opponent attacker sweeps the other way", () => {
+      const out = fire(opponent);
+      expect(out[0]).toBe("0:144:63");
+      expect(out[1]).toBe("11:144:41");
+      expect(out.slice(10)).toEqual(["111:145:-63", "117:145:-63"]);
     });
   });
 });
