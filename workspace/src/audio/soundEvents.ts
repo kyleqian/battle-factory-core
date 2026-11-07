@@ -10,11 +10,11 @@
  * (tools/audio/soundEventProbe.py): an event produced while the k-th advance runs reports k, i.e.
  * the same value `FactorySession.frame` has once that tick returns, and the first frame whose capture
  * can show the effect. `id` is the m4a song number for se / bgm / fanfare / stop / fade / duck and the
- * species for a cry (null for a song-less stop). `pan` is the m4a pan (-64 hard left .. 63 hard right) or null when the call has none.
+ * species for a cry (null for a song-less stop and for a pan change). `pan` is the m4a pan (-64 hard left .. 63 hard right) or null when the call has none.
  */
 export interface SoundEvent {
   readonly frame: number;
-  readonly kind: "se" | "bgm" | "fanfare" | "cry" | "stop" | "fade" | "duck" | "continue";
+  readonly kind: "se" | "bgm" | "fanfare" | "cry" | "stop" | "fade" | "duck" | "continue" | "pan";
   readonly id: number | null;
   readonly pan: number | null;
   /** Cry mode (PlayCry_ByMode), cries only. */
@@ -28,6 +28,8 @@ export interface SoundEvent {
   /** m4aMPlayFadeOut speed argument, fades only (`FadeOutBGM(5)`). */
   readonly speed?: number;
 }
+
+// kind "pan" = SE12PanpotControl (a running SE's pan changed: Cmd_setpan, Task_PanFromInitialToTarget), `pan` the new m4a pan, `id` null.
 
 /** Write-only: a sink receives events and nothing reads them back into the game. */
 export interface SoundSink {

@@ -1,19 +1,24 @@
-// S11 aud242a/b: the script-level move-animation SEs (playsewithpan / playse / waitplaysewithpan / loopsewithpan) of a live Scene ON move
+// S11 aud242a/b/c: the script-level move-animation SEs (playsewithpan / playse / waitplaysewithpan / loopsewithpan / panse* / setpan) of a live Scene ON move
 // animation, at the frame the decoded script command executes. Write-only presentation (src/audio/soundEvents.ts): reads the resolution
 // presentation, never changes it. Data: src/data/gen/anim-sound-timing.json (tools/extract/extract-anim-sound-timing.ts). docs/aud242-move-anim-sounds.md.
 import timingData from "../data/gen/anim-sound-timing.json" with { type: "json" };
-import { animSoundPan, emitSound } from "../audio/soundEvents.ts";
+import { animSoundPan, animSoundPan2, calculatePanIncrement, emitSound, keepPanInRange, type AnimPanContext, type SoundEmission } from "../audio/soundEvents.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "./battleScriptSourceConstants.ts";
 import type { BattleResolutionPresentationState } from "./battleResolutionPresentation.ts";
 import { liveMoveSourceAge } from "./battleResolutionPresentationRender.ts";
 
-interface TimedOp {
-  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan";
+export interface TimedOp {
+  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
   readonly frame: number;
-  readonly id: number;
+  readonly id: number | null;
   readonly pan: number | null;
+  readonly target?: number;
+  readonly inc?: number;
   readonly wait?: number;
   readonly times?: number;
+  readonly step?: number;
+  readonly gap?: number;
+  readonly id2?: number;
 }
 interface TimingTable {
   readonly turns: number;
@@ -28,13 +33,116 @@ const FIRST_COMMAND_AGE = 1;
 /** Scene ON controller lag between the script's sound call and the session tick (the ROM windows, tests/aud242aMoveAnimSounds.test.ts; same 7 as battleHitSounds SCENE_ON_LAG). */
 const AGE_TO_SOUND_ROWS = 7;
 
-/** The script frames (relative to the script start) at which an op plays: loopsewithpan is t0, t0 + wait, then every wait + 1 frames. */
-function playFrames(op: TimedOp): readonly number[] {
-  if (op.op !== "loopsewithpan") return [op.frame];
+/** One sound row of an op and its offset (script frames) from the op's own frame. */
+export interface OpRow { readonly offset: number; readonly emission: SoundEmission; /** Written by a pan task (RunTasks, after the script step of the same iteration), not by the script command. */ readonly task?: true }
+
+/** loopsewithpan is t0, t0 + wait, then every wait + 1 frames. */
+function loopOffsets(op: TimedOp): readonly number[] {
   const wait = op.wait ?? 0;
-  const frames: number[] = [];
-  for (let play = 0; play < (op.times ?? 1); play += 1) frames.push(play === 0 ? op.frame : op.frame + wait + (play - 1) * (wait + 1));
-  return frames;
+  const offsets: number[] = [];
+  for (let play = 0; play < (op.times ?? 1); play += 1) offsets.push(play === 0 ? 0 : wait + (play - 1) * (wait + 1));
+  return offsets;
+}
+
+/**
+ * Cmd_panse / _adjustnone / _adjustall: PlaySE12WithPanning(currentPan) in the script step, then Task_PanFromInitialToTarget (battle_anim.c:1408-1448)
+ * runs from the same iteration's RunTasks: it acts when its counter reaches framesToWait (rows at 0, w + 1, 2 (w + 1), ...), adds the increment,
+ * and on reaching the target (or at once for a zero increment) writes the target and ends.
+ */
+function panRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
+  const arg = (n: number | null | undefined): number => n ?? 0;
+  let current: number, target: number, increment: number;
+  if (op.op === "panse") {
+    current = animSoundPan(arg(op.pan), context);
+    target = animSoundPan(arg(op.target), context);
+    increment = calculatePanIncrement(current, target, arg(op.inc));
+  } else if (op.op === "panse_adjustall") {
+    [current, target, increment] = [animSoundPan2(arg(op.pan), context), animSoundPan2(arg(op.target), context), animSoundPan2(arg(op.inc), context)];
+  } else {
+    [current, target, increment] = [arg(op.pan), arg(op.target), arg(op.inc)];
+  }
+  const wait = arg(op.wait);
+  const rows: OpRow[] = [{ offset: 0, emission: { kind: "se", id: op.id, pan: current } }];
+  const initial = current;
+  let pan = current;
+  for (let step = 0; step < 512; step += 1) {
+    pan += increment;
+    const done = increment === 0 || (initial < target ? pan >= target : pan <= target);
+    rows.push({ offset: wait + step * (wait + 1), emission: { kind: "pan", id: null, pan: done ? target : pan }, task: true });
+    if (done) break;
+  }
+  return rows;
+}
+
+/**
+ * SoundTask_LoopSEAdjustPanning (battle_anim_sound_tasks.c): Cmd_createsoundtask calls the Step once in the script step, and RunTasks runs it again in the
+ * same iteration and every iteration after. It plays when its play counter (starting at r9 = `gap`) reaches r9, then every gap + 1 calls, with the pan
+ * as it stood before this call's pan step; the pan steps by the increment every step + 1 calls (the call that plays its last SE ends the task first).
+ * Call 0 is the script step (offset 0); call n >= 1 is RunTasks of iteration n - 1.
+ */
+function loopSeRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
+  const arg = (n: number | null | undefined): number => n ?? 0;
+  const source = animSoundPan(arg(op.pan), context);
+  const target = animSoundPan(arg(op.target), context);
+  const increment = calculatePanIncrement(source, target, arg(op.inc));
+  const step = arg(op.step);
+  const gap = arg(op.gap);
+  let playsLeft = arg(op.times);
+  let playCounter = gap;
+  let panCounter = 0;
+  let pan = source;
+  const rows: OpRow[] = [];
+  for (let call = 0; playsLeft > 0 && call < 4096; call += 1) {
+    const offset = call === 0 ? 0 : call - 1;
+    if (playCounter++ === gap) {
+      playCounter = 0;
+      rows.push(call === 0 ? { offset, emission: { kind: "se", id: op.id, pan } } : { offset, emission: { kind: "se", id: op.id, pan }, task: true });
+      playsLeft -= 1;
+      if (playsLeft === 0) break;
+    }
+    if (panCounter++ === step) {
+      panCounter = 0;
+      pan = keepPanInRange(pan + increment);
+    }
+  }
+  return rows;
+}
+
+/**
+ * SoundTask_FireBlast: no immediate call, so call n runs in RunTasks of iteration n. Step1 (calls 0..109) plays the loop SE when its counter wraps (call 0,
+ * then every 11) with the current pan and then adds the increment (2, signed toward the target); call 110 switches to Step2, which plays the ending SE
+ * at the target pan twice, 6 calls apart (calls 111 and 117), and ends.
+ */
+function fireBlastRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
+  const source = animSoundPan(-64, context);
+  const target = animSoundPan(63, context);
+  const increment = calculatePanIncrement(source, target, 2);
+  const rows: OpRow[] = [];
+  let pan = source;
+  let counter = 10;
+  for (let call = 0; call < 110; call += 1) {
+    if (++counter === 11) {
+      counter = 0;
+      rows.push({ offset: call, emission: { kind: "se", id: op.id, pan }, task: true });
+    }
+    pan = keepPanInRange(pan + increment);
+  }
+  for (const call of [111, 117]) rows.push({ offset: call, emission: { kind: "se", id: op.id2 ?? null, pan: target }, task: true });
+  return rows;
+}
+
+/** Exported for tests/aud242cMoveAnimSounds.test.ts (the panse_adjustnone / _adjustall / framesToWait arithmetic has no ROM window). */
+export function moveAnimOpRows(op: TimedOp, context: AnimPanContext): readonly OpRow[] {
+  switch (op.op) {
+    case "loopsewithpan": return loopOffsets(op).map((offset) => ({ offset, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }));
+    case "playse": return [{ offset: 0, emission: { kind: "se", id: op.id, pan: null } }];
+    case "setpan": return [{ offset: 0, emission: { kind: "pan", id: null, pan: animSoundPan(op.pan ?? 0, context) } }];
+    case "panse": case "panse_adjustnone": case "panse_adjustall": return panRows(op, context);
+    case "soundtask_se1": case "soundtask_se2": return [{ offset: 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context), player: op.op === "soundtask_se1" ? "SE1" : "SE2" } }];
+    case "soundtask_loopse": return loopSeRows(op, context);
+    case "soundtask_fireblast": return fireBlastRows(op, context);
+    default: return [{ offset: 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }];
+  }
 }
 
 /** The resolved ops of the move's (turn, attacker side) walk: variant index = turn * sides + side (the side-dependent jumpret* branches resolve from the request). */
@@ -57,10 +165,13 @@ export function emitMoveAnimSounds(after: BattleResolutionPresentationState | nu
     attackerSide: request.attacker === 0 ? "player" : "opponent",
     targetSide: request.target === 0 ? "player" : "opponent",
   } as const;
+  const due: OpRow[] = [];
   for (const op of variantOf(request.moveId, request.turn, request.attacker === 0 ? 0 : 1)) {
-    for (const frame of playFrames(op)) {
-      if (age !== frame + FIRST_COMMAND_AGE + AGE_TO_SOUND_ROWS) continue;
-      emitSound({ kind: "se", id: op.id, pan: op.pan === null ? null : animSoundPan(op.pan, context) });
-    }
+    const base = age - FIRST_COMMAND_AGE - AGE_TO_SOUND_ROWS - op.frame;
+    if (base < 0) continue;
+    for (const row of moveAnimOpRows(op, context)) if (row.offset === base) due.push(row);
   }
+  // Per iteration the script step runs before RunTasks: every command's row, then the pan tasks' rows in creation order.
+  for (const row of due) if (row.task !== true) emitSound(row.emission);
+  for (const row of due) if (row.task === true) emitSound(row.emission);
 }

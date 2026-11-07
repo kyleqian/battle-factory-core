@@ -1852,6 +1852,17 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242b-haze-player-on": (state) => aud241bStage(state, "aud242b-haze-player-on", "on", 50, 12, 114, undefined, false, 69),
   "aud242b-hijumpkick-opponent-on": (state) => aud241bStage(state, "aud242b-hijumpkick-opponent-on", "on", 12, 50, 69, undefined, false, 136),
   "aud242b-hijumpkick-player-on": (state) => aud241bStage(state, "aud242b-hijumpkick-player-on", "on", 50, 12, 136, undefined, false, 69),
+  // aud242c: the other attacker side of the fade / pan / sound-task windows (docs/aud242-move-anim-sounds.md section 7).
+  "aud242b-machpunch-player-on": (state) => aud241bStage(state, "aud242b-machpunch-player-on", "on", 50, 12, 183, undefined, false, 69),
+  "aud242b-flamethrower-player-on": (state) => aud241bStage(state, "aud242b-flamethrower-player-on", "on", 50, 12, 53, undefined, false, 69),
+  "aud242b-hyperbeam-opponent-on": (state) => aud241bStage(state, "aud242b-hyperbeam-opponent-on", "on", 12, 50, 69, undefined, false, 63),
+  "aud242b-sweetscent-player-on": (state) => aud241bStage(state, "aud242b-sweetscent-player-on", "on", 50, 12, 230, undefined, false, 69),
+  "aud242b-metalsound-opponent-on": (state) => aud241bStage(state, "aud242b-metalsound-opponent-on", "on", 12, 50, 69, undefined, false, 319),
+  "aud242b-fireblast-player-on": (state) => aud241bStage(state, "aud242b-fireblast-player-on", "on", 50, 12, 126, undefined, false, 69),
+  "aud242b-dragonclaw-opponent-on": (state) => aud241bStage(state, "aud242b-dragonclaw-opponent-on", "on", 12, 50, 69, undefined, false, 337),
+  "aud242b-cosmicpower-player-on": (state) => aud241bStage(state, "aud242b-cosmicpower-player-on", "on", 50, 12, 322, undefined, false, 69),
+  "aud242b-flatter-player-on": (state) => aud241bStage(state, "aud242b-flatter-player-on", "on", 50, 12, 260, undefined, false, 69),
+  "aud242b-superpower-player-on": (state) => aud241bStage(state, "aud242b-superpower-player-on", "on", 50, 12, 276, undefined, false, 69),
   "aud242b-dragonrage-opponent-off": (state) => aud241bStage(state, "aud242b-dragonrage-opponent-off", "off", 12, 50, 69, undefined, false, 82),
   // frf250a: BAG / RUN on the action menu (two Level-50 Rattata, both scenes; tools/battle-lab/frf250a-*.json).
   "frf250a-bagrun-on": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-on", "on", 50, 50), 27),

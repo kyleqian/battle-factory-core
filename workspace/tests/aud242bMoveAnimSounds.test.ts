@@ -60,6 +60,8 @@ interface Spec {
   romOnly?: readonly string[];
   /** Extra ROM frames on top of `delta` for named emitted SEs, keyed by our `frame:id:pan`. */
   extra?: Readonly<Record<string, number>>;
+  /** ROM frame minus our frame for named emitted SEs of a later move body of the window (keyed by our `frame:id:pan`), replacing `delta`. */
+  rowDelta?: Readonly<Record<string, number>>;
 }
 
 // Wait resolver (src/data/gen/anim-sound-timing.json, tools/extract/extract-anim-sound-timing.ts): the script frame of an op after a wait is
@@ -69,19 +71,19 @@ interface Spec {
 //  - Mega Punch: the SE 123 inside call SetImpactBackground (IsTargetPlayerSide branch) is +1 after the generic clock in both sides:
 //    unattributed (changebg's LoadMoveBg decompression is the candidate; no script wait is involved).
 //  - Hi Jump Kick: the second SE (123, after the jump-kick sprite wait) is not emitted (gSlideMon* + gJumpKickSpriteTemplate lifetime unmodelled).
-//  - Haze: status body, the ROM SE is 6 frames before the generic clock (aud242a's Agility / Swords Dance -4 class); the later SEs are the
-//    next round's move bodies (declined, aud242a).
-//  - Hyper Fang: the jumpret* branch resolves (IsContest false, IsTargetPlayerSide) but SE_M_LEER sits after waitbgfadeout / waitbgfadein
-//    (hardware palette fade, not modelled); the opening SE keeps aud242a's idle-lead +2.
+//  - Haze: status body, the ROM SE is 6 frames before the generic clock (aud242a's Agility / Swords Dance -4 class); Seismic Toss's opening
+//    SE 238 (after a background fade, aud242c) now emits, 2 frames short of the ROM (rowDelta); the later SEs 214 / 131 are declined (aud242a).
+//  - Hyper Fang: SE_M_LEER sits after waitbgfadeout / waitbgfadein (aud242c models the palette fade, docs section 7): it emits at the
+//    same +2 as the opening SE (idle-lead class), the BG_IMPACT LoadMoveBg lag (+1) being in the table.
 const SPECS: Record<string, Spec> = {
   "dragonrage-opponent": { delta: 3 },
   "dragonrage-player": { delta: 3 },
-  "megapunch-player": { delta: 0, extra: { "133:123:63": 1 } },
-  "megapunch-opponent": { delta: 0, extra: { "137:123:-63": 1 } },
+  "megapunch-player": { delta: 0 },
+  "megapunch-opponent": { delta: 0 },
   "hijumpkick-player": { delta: 0, romOnly: ["113:123:63"] },
   "hijumpkick-opponent": { delta: 0, romOnly: ["117:123:-63"] },
-  "haze-player": { delta: -6, romOnly: ["435:238:0", "555:214:-63", "573:131:-63"] },
-  "hyperfang-player": { delta: 2, romOnly: ["115:192:63"] },
+  "haze-player": { delta: -6, romOnly: ["555:214:-63", "573:131:-63"], rowDelta: { "433:238:0": 2 } },
+  "hyperfang-player": { delta: 2 },
 };
 
 describe("move-animation SEs after waits / inside branches (aud242b)", () => {
@@ -94,7 +96,7 @@ describe("move-animation SEs after waits / inside branches (aud242b)", () => {
       const matched = theirs.filter((e) => !romOnly.has(row(e)));
       expect(theirs.filter((e) => romOnly.has(row(e))).map(row)).toEqual([...romOnly]);
       expect(ours.length).toBeGreaterThan(0);
-      expect(ours.map((e) => `${e.frame + spec.delta + (spec.extra?.[`${e.frame}:${e.id}:${e.pan}`] ?? 0)}:${e.id}:${e.pan}`)).toEqual(matched.map(row));
+      expect(ours.map((e) => `${e.frame + (spec.rowDelta?.[`${e.frame}:${e.id}:${e.pan}`] ?? spec.delta + (spec.extra?.[`${e.frame}:${e.id}:${e.pan}`] ?? 0))}:${e.id}:${e.pan}`)).toEqual(matched.map(row));
     });
   }
 

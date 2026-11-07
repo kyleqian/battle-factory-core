@@ -70,12 +70,20 @@ const moveTable: string[] = [];
 }
 
 interface SoundOp {
-  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan";
+  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
   frame: number;
-  id: number;
+  id: number | null;
+  /** The pan argument as written (the starting pan of a panse*; the only one of a setpan). */
   pan: number | null;
+  /** panse*: the target pan argument and the increment argument as written; `wait` is framesToWait. */
+  target?: number;
+  inc?: number;
   wait?: number;
   times?: number;
+  /** soundtask_loopse: pan step interval (r7) and play interval (r9) as written; `times` is r10 (the play count). soundtask_fireblast: `id2` is the ending SE. */
+  step?: number;
+  gap?: number;
+  id2?: number;
   line: number;
 }
 type Reason = "bg-fade" | "unmodelled-lifetime" | "waitsound" | "unresolved-branch" | "after-unresolved-branch";
@@ -100,13 +108,40 @@ function shakeMonLength(x: number, y: number, numTimes: number, delay: number): 
     length += 1;
   }
 }
+// AnimSimplePaletteBlend (battle_anim_normal.c): BeginNormalPaletteFade in the sprite's first callback (AnimateSprites, which precedes UpdatePaletteFade in
+// BattleMainCB2) runs UpdateNormalPaletteFade once (update call 1, iteration F); every later iteration's UpdatePaletteFade is one more call (call n = iteration
+// F + n - 1). A y step is two calls (BG half, OBJ half; palette.c:430-464) plus `delay` waiting calls before the next pair (a negative delay raises deltaY
+// to 2 - delay instead); the pair whose y equals the target sets softwareFadeFinishing, then five calls count 0..4 and the fifth clears `active`
+// (IsSoftwarePaletteFadeFinishing). The sprite's Step sees !active in the next AnimateSprites and destroys itself; the script's waitforvisualfinish
+// passes one iteration after that: n calls = the sprite is gone `n` ticks after the creation tick.
+function simplePaletteBlendLength(delay: number, startY: number, targetY: number): number {
+  const deltaY = delay < 0 ? 2 - delay : 2;
+  const wait = delay < 0 ? 0 : delay;
+  let [y, calls, waits] = [startY, 0, 0];
+  for (;;) {
+    calls += 2;
+    if (y === targetY) break;
+    y = startY < targetY ? Math.min(y + deltaY, targetY) : Math.max(y - deltaY, targetY);
+    calls += wait;
+    waits += wait;
+  }
+  return calls + 5;
+}
 function lifetimeOf(cmd: Command): Lifetime {
   const { op, args } = cmd;
+  if (op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate")) {
+    const parts = op === "simple_palette_blend" ? [args.find((a) => a.startsWith("delay=")), args.find((a) => a.startsWith("initial_blend_y=")), args.find((a) => a.startsWith("target_blend_y="))] : [args[4], args[5], args[6]];
+    const [delay, startY, targetY] = parts.map(intArg);
+    if (delay === null || startY === null || targetY === null || delay === undefined) return null;
+    return { exact: simplePaletteBlendLength(delay!, startY!, targetY!) };
+  }
   if (op === "createvisualtask" && (args[0] === "AnimTask_ShakeMon" || args[0] === "AnimTask_ShakeMon2")) {
     const [x, y, numTimes, delay] = [intArg(args[3]), intArg(args[4]), intArg(args[5]), intArg(args[6])];
     if (x === null || y === null || numTimes === null || delay === null || numTimes < 1) return null;
     return { exact: shakeMonLength(x, y, numTimes, delay) - 2 };
   }
+  // SoundTask_PlaySE1/2WithPanning plays and DestroyAnimVisualTask(taskId)s inside the creating script step: gone before any wait.
+  if (op === "createvisualtask" && (args[0] === "SoundTask_PlaySE1WithPanning" || args[0] === "SoundTask_PlaySE2WithPanning")) return { exact: -1 };
   if (op === "createsprite" && args[0] === "gSlideMonToOffsetSpriteTemplate") { const d = intArg(args[7]); return d === null ? null : { exact: d + 1 }; }
   if (op === "createsprite" && args[0] === "gSlideMonToOriginalPosSpriteTemplate") { const d = intArg(args[5]); return d === null ? null : { exact: d }; }
   if (op === "create_dragon_rage_fire_spit_sprite") { const d = intArg(args.find((a) => a.startsWith("duration="))); return d === null ? null : { exact: d + 1 }; }
@@ -140,6 +175,20 @@ function returnValue(task: string, attackerSide: number): number | null {
   }
 }
 
+/** Iterations after the fadetobg / restorebg step at which waitbgfadeout / waitbgfadein pass (Task_FadeToBg + UpdateHardwarePaletteFade, derived above). */
+const FADE_OUT_DONE = 19;
+const FADE_IN_DONE = 38;
+
+/**
+ * Wall-clock lag frames after LoadMoveBg (LZDecompressVram of the tilemap and the image + LoadCompressedPalette) overruns VBlank: the iteration after
+ * the load never runs UpdatePaletteFade / the script. The decompress cost is data dependent, so this is a measured table, not derived: the missing
+ * UpdatePaletteFade frame in the stepped ROM probe windows (tools/audio/fixtures/aud242c-*.json, docs/aud242-move-anim-sounds.md section 7):
+ * BG_IMPACT_* 1 (Hyper Fang fadetobg, Mega Punch changebg, both sides), BG_HIGHSPEED_OPPONENT 0 (Mach Punch), BG_DARK 0 (Crunch).
+ * Unmeasured backgrounds count 0 (a named residual); restorebg's LoadDefaultBg (a 1 or 2 frame, phase dependent overrun) is not modelled.
+ */
+const BG_LOAD_LAG: Readonly<Record<string, number>> = { BG_IMPACT_OPPONENT: 1, BG_IMPACT_PLAYER: 1, BG_IMPACT_CONTESTS: 1, BG_HIGHSPEED_OPPONENT: 0, BG_HIGHSPEED_PLAYER: 0, BG_DARK: 0 };
+const bgLoadLag = (bg: string | undefined): number => BG_LOAD_LAG[bg ?? ""] ?? 0;
+
 const blockers: Record<string, number> = {};
 function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
   const events: SoundOp[] = [];
@@ -150,6 +199,10 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
   let gated = 0;
   let pending: Array<{ at: number; life: Lifetime; name: string }> = [];
   let ret: number | null = null;
+  let fade: number | null = null;
+  // Wall-clock frames the ROM spends in a VBlank-overrun lag (no main-loop iteration): ops at iteration > `after` play `frames` later.
+  const lags: Array<{ after: number; frames: number }> = [];  // `after`: first affected iteration - 1 (fractional .5 = from the same iteration)
+  const shiftAt = (iteration: number): number => lags.reduce((n, l) => (iteration > l.after ? n + l.frames : n), 0);
   const finish = (end: string): Walk => ({ events, end, frame, gated, reasons });
   const unresolved = (reason: Reason): void => { frame = null; why ??= reason; };
   const gate = (): void => { gated += 1; const reason = why ?? "unresolved-branch"; reasons[reason] = (reasons[reason] ?? 0) + 1; };
@@ -193,7 +246,36 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         pending = [];
         break;
       }
-      case "waitbgfadein": case "waitbgfadeout": unresolved("bg-fade"); pending = []; break;
+      // battle_anim.c Cmd_fadetobg / Cmd_restorebg create Task_FadeToBg (priority 5) in the script step of frame F and set sAnimBackgroundFadeState = 1.
+      // Per main-loop iteration the order is CB1 (script), then CB2 (UpdatePaletteFade, RunTasks), then VBlank (TransferPlttBuffer -> UpdateBlendRegisters):
+      //   F      task state 0: BeginHardwarePaletteFade(0xE8, 0, 0, 16, 0), VBlank writes BLDY 0
+      //   F+1..16  UpdateHardwarePaletteFade y 1..16 (one step per iteration, delay 0)
+      //   F+17   y++ = 17 > 16: hardwareFadeFinishing; VBlank clears `active` (UpdateBlendRegisters)
+      //   F+18   task state 1 (active clear): state 2, sAnimBackgroundFadeState = 2
+      //   F+19   CB1: waitbgfadeout passes (state == 2); task state 2: LoadMoveBg / LoadDefaultBg, BeginHardwarePaletteFade(0xE8, 0, 16, 0, 1)
+      //   F+20..35 y 15..0;  F+36 y-1 < 0: finishing, VBlank clears `active`;  F+37 task state 3: DestroyTask, sAnimBackgroundFadeState = 0
+      //   F+38   CB1: waitbgfadein passes (state == 0)
+      // The waits do not install WaitAnimFrameCount: they re-poll every iteration (a failed poll sets sAnimFramesToWait = 1, the callback stays
+      // RunAnimScriptCommand), so a wait resumes at max(poll frame, threshold) with no 3-frame quantisation. waitbgfadeout needs state == 2, which holds
+      // for F+19..F+37 (a later poll would never pass); waitbgfadein needs 0 (also true when no fade ran).
+      case "fadetobg": case "fadetobgfromset": case "restorebg":
+        if (frame === null) break;
+        if (fade !== null && frame < fade + FADE_IN_DONE) { unresolved("bg-fade"); break; }
+        fade = frame;
+        if (op === "fadetobg") lags.push({ after: frame + FADE_OUT_DONE, frames: bgLoadLag(args[0]) });
+        else if (op === "fadetobgfromset") lags.push({ after: frame + FADE_OUT_DONE, frames: bgLoadLag(args[1 + (attackerSide === 0 ? 0 : 1)]) });
+        break;
+      // changebg: LoadMoveBg runs inside the script step itself, so the commands that follow in the same iteration already sit after the overrun.
+      case "changebg": if (frame !== null) lags.push({ after: frame - 0.5, frames: bgLoadLag(args[0]) }); break;
+      case "waitbgfadeout":
+        if (frame === null) break;
+        if (fade === null || frame >= fade + FADE_IN_DONE) { unresolved("bg-fade"); break; }
+        if (frame < fade + FADE_OUT_DONE) frame = fade + FADE_OUT_DONE;
+        break;
+      case "waitbgfadein":
+        if (frame === null) break;
+        if (fade !== null && frame < fade + FADE_IN_DONE) frame = fade + FADE_IN_DONE;
+        break;
       case "waitsound": unresolved("waitsound"); pending = []; break;
       case "jumpifmoveturn": if (value(args[0]!) === turn) pc = [args[1]!, 0]; break;
       case "choosetwoturnanim": pc = [args[(turn & 1) === 1 ? 1 : 0]!, 0]; break;
@@ -208,12 +290,41 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       case "playsewithpan": case "playse": case "waitplaysewithpan": case "loopsewithpan": {
         if (frame === null) { gate(); break; }
         const at = op === "waitplaysewithpan" ? frame + value(args[2]!) : frame;
-        const base = { op, frame: at, id: value(args[0]!), pan: op === "playse" ? null : value(args[1]!), line };
+        const base = { op, frame: at + shiftAt(at), id: value(args[0]!), pan: op === "playse" ? null : value(args[1]!), line };
         if (op === "waitplaysewithpan") events.push({ ...base, wait: value(args[2]!) });
         else if (op === "loopsewithpan") events.push({ ...base, wait: value(args[2]!), times: value(args[3]!) });
         else events.push(base);
         break;
       }
+      // Cmd_panse / _adjustnone / _adjustall: PlaySE12WithPanning now + a priority 1 Task_PanFromInitialToTarget created in the same step (its first
+      // row runs in this iteration's RunTasks, then every framesToWait + 1); Cmd_setpan: one SE12PanpotControl. Neither blocks the script, and
+      // waitforvisualfinish counts only gAnimVisualTaskCount (the sound task count gates Cmd_end), so no lifetime is pushed.
+      case "panse": case "panse_adjustnone": case "panse_adjustall":
+        if (frame === null) { gate(); break; }
+        events.push({ op, frame: frame + shiftAt(frame), id: value(args[0]!), pan: value(args[1]!), target: value(args[2]!), inc: value(args[3]!), wait: value(args[4]!), line });
+        break;
+      // Cmd_createsoundtask: CreateTask(func, 1), func(taskId) at once, gAnimSoundTaskCount++ (it gates only Cmd_end / Cmd_waitsound). Only the two
+      // script-referenced tasks of battle_anim_sound_tasks.c are createsoundtask sites; the PlaySE1/2WithPanning / cry tasks are createvisualtask.
+      case "createsoundtask": {
+        const task = args[0];
+        if (task !== "SoundTask_LoopSEAdjustPanning" && task !== "SoundTask_FireBlast") break;
+        if (frame === null) { gate(); break; }
+        const at = frame + shiftAt(frame);
+        if (task === "SoundTask_FireBlast") events.push({ op: "soundtask_fireblast", frame: at, id: value(args[1]!), id2: value(args[2]!), pan: null, line });
+        else events.push({ op: "soundtask_loopse", frame: at, id: value(args[1]!), pan: value(args[2]!), target: value(args[3]!), inc: value(args[4]!), times: value(args[5]!), step: value(args[6]!), gap: value(args[7]!), line });
+        break;
+      }
+      // Cmd_createvisualtask runs the task function at once; the PlaySE1/2WithPanning tasks play with BattleAnimAdjustPanning(arg 1) in that step.
+      case "createvisualtask": {
+        if (args[0] !== "SoundTask_PlaySE1WithPanning" && args[0] !== "SoundTask_PlaySE2WithPanning") break;
+        if (frame === null) { gate(); break; }
+        events.push({ op: args[0] === "SoundTask_PlaySE1WithPanning" ? "soundtask_se1" : "soundtask_se2", frame: frame + shiftAt(frame), id: value(args[2]!), pan: value(args[3]!), line });
+        break;
+      }
+      case "setpan":
+        if (frame === null) { gate(); break; }
+        events.push({ op, frame: frame + shiftAt(frame), id: null, pan: value(args[0]!), line });
+        break;
       default: break;
     }
   }
