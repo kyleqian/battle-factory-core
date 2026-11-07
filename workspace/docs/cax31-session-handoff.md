@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-06)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-07)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-06 wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-07 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
   `worker/lib-v2-mac` is folded up to `851ee1f4c`; if the Mac moves that branch again, merge the new tip the same way
@@ -39,10 +39,17 @@ kept and is long-tail.
 - **Audio step 6 (aud242) first slice DONE (2026-11-06):** aud242a `src/engine/moveAnimSounds.ts` plays the decoded script
   `playsewithpan` / `playse` / `waitplaysewithpan` / `loopsewithpan` (Scene ON only) from `src/data/gen/anim-sound-timing.json`
   (`npm run extract:anim-sound-timing`) at body age `f + 1 + 7`; `docs/aud242-move-anim-sounds.md` has the age map, op inventory
-  and slice plan; residuals and unemitted families ISSUES #198.
+  and slice plan; residuals and unemitted families ISSUES #198. **aud242b / aud242c DONE (2026-11-07):** the extractor resolves
+  `waitforvisualfinish` (known task / sprite / `simple_palette_blend` lifetimes), `waitbgfade*` (Task_FadeToBg model + measured BG load
+  lag for IMPACT / HIGHSPEED / DARK), side branches; `panse*` / `setpan` emit the new `pan` SoundEvent kind; createsoundtask
+  LoopSEAdjustPanning / FireBlast and PlaySE1/2WithPanning ported (doc sections 6-7; 739 ops resolved). Remaining (aud242d): sprite /
+  visual-task lifetimes (most of the still-gated ops), the C sprite-callback sites, the cry tasks, more BG load lags.
 - **Cleanup:** steps 1, 2, 3 (cln239), 4 (cln241, 2026-11-06: `core-rs/` removed from master, `docs/cln241-core-rs-removal.md`;
   local branch `core-rs-archive` `26ce8d051` keeps it, the user pushes it to its own repo) and 6 are done. Step 5 first half DONE
-  (cln240: `npm run test:gate`, now 362 files, ~218 s here, `docs/cln240-test-gate.md`). No wasm artifact is needed any more.
+  (cln240: `npm run test:gate`, `docs/cln240-test-gate.md`). **Step 5 second half DONE (cln242, 2026-11-07, `docs/cln242-suite-speed.md`):**
+  vitest `json.stringify` in test mode; test:gate ~97 s; the full suite runs at `POKEBENCH_VITEST_MAX_WORKERS=5` in ~21 min when
+  nothing else runs (peak <= 11 GB); census-superseded sc106 / sgl138 route pins deleted. Next lever: `src/animation/dive.ts` re-simulates
+  from tick 0 per row. No wasm artifact is needed any more.
 - **4b(g) DONE (2026-11-06):** frf250a BAG prints "Items can't be used now." and RUN opens the forfeit prompt (NO / B back to the
   menu), ROM-measured both scenes (`tests/frf250aBagRunMenu.test.ts`, traces `frf250a-*`); frf250b YES prints "<PLAYER> forfeited
   the match!" and ends the battle as a loss through the normal lost-battle return (`src/engine/battleForfeit.ts`,
@@ -50,8 +57,11 @@ kept and is long-tail.
 - **User reports:** 4b(b) also covers Quick Attack / Aerial Ace now (qak248 / qak249). 4b(a) fully fixed (vis243a mid-battle send-in; go246 battle-start "Go!" intro waits for both species
   animations in Scene ON, `docs/go246-intro-wait.md`; Kyle's SPOINK was cut short by 137 frames, now exact); 4b(b) Agility
   clip fixed (agi245); 4b(c) rate check permanent (`tests/rng244OutcomeRates.test.ts`).
-- Census baseline for the next delta: `.integration/validation/sv-20261104/frs247-evidence/census/{on,off}-87e9366af` (frs247's
-  tree; 1000 / 1000 identical to `sv-20261103/go246-evidence/census/`, which stays valid too).
+- **4b(e) DONE (obr251, 2026-11-07, `docs/obr251-opponent-party-summary.md`):** the opponent faint-replacement ball bar slides, holds
+  100 frames, fades, mirrors its balls and plays SE_BALL_TRAY_ENTER; residuals ISSUES #200. **#195 / #191 fixed (flw252):** party menu
+  input waits for the open fade, refusal text for its printer; postwin multichoices step on new presses only.
+- Census baseline for the next delta: `.integration/validation/sv-20261106/obr251-evidence/{on,off}-50285b9d9` (obr251's tree; its
+  delta vs `sv-20261104/frs247-evidence/census/{on,off}-87e9366af` moved only the opponent party-summary durations).
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
@@ -63,13 +73,12 @@ never brief those here. One worker at a time; each run folds the next audio step
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
    proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05. aud242a DONE 2026-11-06** (generic script-op
-   emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). Next: **aud242b** (a wait resolver for ops after
-   `waitforvisualfinish` / `waitbgfade*`, then `jumpret*` / `jumpargeq` runs), **aud242c** (`panse*`, `setpan`, `createsoundtask`
-   families, the C-side sites), an alignment audit of the ISSUES #198 per-move offsets; then aud243 (census column + ROM replays). Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
+   emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07.** Next: **aud242d**
+   (sprite / visual-task lifetimes for the still-gated ops, the C sprite-callback sites, cry tasks), an alignment audit of the ISSUES
+   #198 per-move offsets; then aud243 (census column + ROM replays). Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
-   (5) `npm run test:gate` <= 5 min for workers and drop frame-pin tests the census supersedes, full suite nightly (the full
-   suite is ~75 min here and lost one fork beside a worker twice on 2026-11-03: rerun the unreported file);
-   (4) DONE (cln241); (7) evidence stops going into git.
+   (5) DONE (cln240 + cln242; optional: speed up `dive.ts` for the slowest files); (4) DONE (cln241);
+   (7) evidence stops going into git (next cleanup step).
 3. **Bundle hygiene** (scout: `docs/bnd-scout.md`): test-only JSON out of `src/`, sprite pixels out of the headless graph
    (`battleCommandFieldArt`, 11.8 MB chunk), lazy-loaded sprite sheets and large tables, gamepad input through `press` / `release`.
 4. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
@@ -113,7 +122,7 @@ never brief those here. One worker at a time; each run folds the next audio step
        "skip player side" (`battle_controllers.c:1509`). Likely class: the faint-replacement path reuses an intro / send-out
        presentation (white fade + player bar) instead of the reshow. ROM lab:
        `tools/battle-lab/playerfaint-slot2-sunnyday.json` (pfr185).
-     - **(e) NEXT (scouted 2026-11-05, `docs/obr248-scout.md`, unverified: ROM slides in over 20 frames, holds 100 frames to the
+     - **(e) DONE 2026-11-07 (obr251; ISSUES #200 residuals). Original scout (2026-11-05, `docs/obr248-scout.md`, unverified: ROM slides in over 20 frames, holds 100 frames to the
        first glyph, BLDALPHA-fades out over 16, one SE_BALL_TRAY_ENTER; ours is static for 26 frames; balls must be mirrored
        `states[5-index]`; presentation-only but adds ~99 app frames per opponent replacement, so frame-anchored pins move, kernel
        digest unchanged; new code must stay out of `battleScene.ts`, split-eligibility ratchet).** Opponent replacement ball bar pops in and out. After "Foe PARASECT fainted!" the 6-ball bar appears whole in one
@@ -182,7 +191,7 @@ rewrite "State at restart" and "Next work" above, keep the daily-runs section.
 ## Host budget
 
 Source `/etc/pokebench-runner.env`: two Vitest workers, four build/Cargo jobs,
-16 GiB RAM and 8 GiB swap. Full suite ~48 minutes. Serialize typecheck, full
+16 GiB RAM and 8 GiB swap. Full suite ~21 minutes at 5 workers when run alone (cln242), else ~50 at 2. Serialize typecheck, full
 suite, build, census and soak fan-outs; use retained PID/log/status files for
 long jobs and keep polling in bounded calls. Do not kill/retry a job just
 because its shell tool yielded. Read CAX31 `PAPERCUTS.md`; bound any soak
