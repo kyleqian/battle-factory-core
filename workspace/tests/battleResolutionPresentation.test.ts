@@ -1256,6 +1256,8 @@ describe("battle resolution presentation receipt ownership", () => {
     expect(summaryView.partySummary).toEqual({
       battler: 1,
       states: ["healthy", "healthy", "empty", "empty", "empty", "empty"],
+      createAge: 0,
+      fadeAge: null,
     });
     const incomingView = createBattleResolutionPresentationRenderView({
       ...summaryState,

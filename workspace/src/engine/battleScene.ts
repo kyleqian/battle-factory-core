@@ -851,6 +851,7 @@ import {
   type MidBattleSwitchOutView,
 } from "./battleResolutionPresentationRender.ts";
 import type { MidBattleSwitchParticle } from "./battleResolutionPresentationRender.ts";
+import { drawOpponentPartySummary } from "./midBattleOpponentPartySummary.ts";
 import type {
   BattleResolutionDisplayedField,
   BattleStatName,
@@ -55501,11 +55502,8 @@ export function renderBattleResolutionSceneOffView(
     );
   }
   if (view.partySummary) {
-    drawTypedPartyStatusSummary(
-      fb,
-      view.partySummary.battler,
-      view.partySummary.states,
-    );
+    if (view.partySummary.battler === 1) drawOpponentPartySummary(fb, view.partySummary);
+    else drawTypedPartyStatusSummary(fb, view.partySummary.battler, view.partySummary.states);
   }
   if (view.trainerSlide !== null && view.trainerSlide.picSymbol !== null) {
     // Generic terminal-seam trainer slide-in/out (any trainer, any outcome

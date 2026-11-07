@@ -2,6 +2,7 @@ import type { LiveMovePaletteInput } from "./liveMoveAnimationPalette.ts";
 import type { LiveMoveSpriteAllocatorInput, LiveMoveSpriteOrderInput } from "./liveMoveSpriteAllocator.ts";
 import type { LiveBattlerX2History, LiveMoveBattlerX2Input } from "./liveBattlerX2History.ts";
 import { battleMoveAnimationRequest, type BattleMoveAnimationRequest } from "./battleMoveAnimation.ts";
+import { opponentPartySummaryDrawTiming } from "./midBattleOpponentPartySummaryTiming.ts";
 import {
   battleCommandFieldBattlerFromPartyMember,
   createBattleCommandDisplayedField,
@@ -483,7 +484,7 @@ export type BattleResolutionPresentationCommand =
        * "Go!" printstring (1119-1125) is 7 frames. Absent on every other
        * (non-voluntary-switch) path, where the default 1-frame receipt stands.
        */
-      timing?: Readonly<{ minimumFrames: number }>;
+      timing?: Readonly<{ minimumFrames: number; leadFrames?: number }>;
     }>
   | Readonly<{
       type: "switch-in";
@@ -4912,8 +4913,10 @@ export function projectBattleResolutionCommands(
         battler,
         visible: payload.kind === "draw-party-status-summary",
         states: partyBallStates(afterRules, battler),
-        timing: payload.kind === "draw-party-status-summary" && battler === 0
-          ? PARTY_SUMMARY_DRAW_TIMING
+        timing: payload.kind === "draw-party-status-summary"
+          ? battler === 0
+            ? PARTY_SUMMARY_DRAW_TIMING
+            : opponentPartySummaryDrawTiming(lastFaintBattler === 1)
           : undefined,
       }));
       continue;
