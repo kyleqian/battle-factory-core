@@ -50,7 +50,7 @@ export function contain213BattleToEnd(
       // Walk the cursor off a fainted slot now and then; A otherwise (pick, then SEND OUT). The DOWN only lands while the list owns
       // the input: inside the SEND OUT / SUMMARY / CANCEL window it would move the action cursor onto SUMMARY (sum241) and the next
       // A would open the summary instead of sending out -- before sum241 that DOWN was a no-op there, which this keeps.
-      step(forcedFrames % 4 !== 0 ? [] : forcedFrames % 48 === 0 ? (forced.submenuOpen ? [] : ["DOWN"]) : ["A"]);
+      step(forcedFrames % 4 !== 0 ? [] : forcedFrames % 48 === 0 ? (forced.submenuOpen || forced.message !== null ? [] : ["DOWN"]) : ["A"]);
       continue;
     }
     forcedFrames = 0;
