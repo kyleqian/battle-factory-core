@@ -40,7 +40,13 @@ measured as visual onset, not script start; an alignment audit is the lead). Not
 are silent. **aud242b (2026-11-06)** added a wait resolver (`docs/aud242-move-anim-sounds.md` section 6) but it emits only 4 more
 ops: 501 stay unresolved (unmodelled sprite / palette lifetimes 351, `waitbgfade*` 134 -- needs a frame model of `Task_FadeToBg`,
 `waitsound` 11, branch 5). Its ROM windows: Dragon Rage +3 constant, Mega Punch SE123 +1 (inside `call SetImpactBackground`), Haze -6,
-Hyper Fang +2. The ROM reaches pan +64 on `SE_M_STAT_INCREASE` vs an opponent target (check `BattleAnimAdjustPanning2`).
+Hyper Fang +2. **aud242c (2026-11-07)** resolved fades / panse / setpan / createsoundtask / PlaySE1/2WithPanning (739 ops resolved):
+measured constant offsets Flamethrower +5, Ice Beam +1, Fire Blast / Aurora Beam / Psybeam / Superpower / Icy Wind +2, Metal Sound -2,
+Sweet Scent / Flatter -3, Cosmic Power -5 (Hyper Beam, Dragon Claw, Mach Punch exact). Open: BG load lag measured for IMPACT /
+HIGHSPEED / DARK only (`restorebg` lag unmodelled); 7 `panse*` and 42 PlaySE*WithPanning sites behind sprite / visual-task lifetimes;
+cry tasks (PlayCryHighPitch, PlayDoubleCry, CryWithEcho, WaitForCry) not ported; Ice Beam's 7 SE137 rows, Crunch's 2nd SE ROM-only;
+the ROM keeps calling SE12PanpotControl after its SE ends (probe `noop`), ours emits them: playback must ignore a pan with no SE.
+The ROM reaches pan +64 on `SE_M_STAT_INCREASE` vs an opponent target (check `BattleAnimAdjustPanning2`).
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 
