@@ -56,6 +56,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   OFF 16 / 8; 0 page errors / console errors / overlays / contained. The 0:60 gates were not run (hours each here).
 - **Scout:** aud242d read-only scout (`docs/aud242d-scout.md`, unverified): 268 Level-50 ops sit behind unmodelled waits; slices
   aud242d (palette blends + instant tasks, ~+45), aud242e (fixed-length sprites, ~+49), Roar cries (36 sets).
+  Cleanup 7 read-only scout (`docs/cln7-scout.md`): ~590 MB tracked evidence likely write-only; no R2 remote on this host.
 - **Next:** handoff "Next work": aud242d per the scout, Cleanup 7 (evidence out of
   git), bundle hygiene, ISSUES #196 / #197 / #198 / #199 / #200.
 - **Housekeeping:** evidence `sv-20261103` deleted (older than the last three runs) and obr251 scratch; ~20 GB free.
