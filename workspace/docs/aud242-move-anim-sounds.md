@@ -335,9 +335,9 @@ Shadow Ball's opponent-side lab never plays its animation SE in the ROM window (
 Psywave and Tri Attack are table ops without a ROM window of their own (same task arithmetic).
 aud242a's Psybeam row moved: its four SE200 rows used to be ROM-only and are now emitted frame-exact (+2), closer to the ROM.
 
-Counts (turn 0, player attacker table): resolved ops 662 -> 734, unresolved 427 -> 363 over this commit (8 are the new task ops, the
+Counts (turn 0, player attacker table): resolved ops 662 -> 734, unresolved 427 -> 373 over this commit (8 are the new task ops, the
 other 64 were behind a `simple_palette_blend` wait; 721 ops in 294 variants over all turns / sides). All 8 task sites are emitted
-on both sides. Remaining unresolved ops in the table: 347 `unmodelled-lifetime` (sprite / visual-task lifetimes: aud242b), 11 `waitsound`, 5
+on both sides. Remaining unresolved ops in the table: 357 `unmodelled-lifetime` (sprite / visual-task lifetimes: aud242b), 11 `waitsound`, 5
 `unresolved-branch`. In the whole script 7 `panse*` sites and the PlaySE*WithPanning visual tasks stay silent for those reasons.
 
 ### 7.4 Acceptance receipt (aud242c)
@@ -354,3 +354,82 @@ Per `ANIMATION_VERIFICATION.md` production code changed (`src/engine/moveAnimSou
 - `npm run compare:differential` vs the step's parent `11a497622`, 22 traces (8 Scene ON move-animation traces: `turn13-dragonbreath-faint`,
   `turn2-dragonbreath-projectiles`, `battle2-turn1-rockslide`, `turn13-sandattack`, `turn14-fly-miss`, `turn15-fly-strike`, `presentation-rng-playable-live-bodies{,-seeded}-on`;
   14 menu / battle-flow traces): **4,181 / 4,181 captures byte-identical** (1,432 + 2,749).
+
+## 8. aud242d: instant tasks and the palette-family lifetimes (Scene ON)
+
+Fixtures: `tools/audio/fixtures/aud242d-*.json` (step mode, 822 frames, call log **plus the `BlendPalette` hook**: `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`
+in `tools/audio/soundEventProbe.py` logs every `BlendPalette(offset, count, y, color)` call with r0..r3, which gives the exact blend schedule of a palette task),
+test `tests/aud242dMoveAnimSounds.test.ts`. New labs `tools/battle-lab/aud242b-{hail,sunnyday,doubleedge,calmmind,metalclaw,steelwing}-player-on.json`, stages
+`APP_STAGES["aud242b-*-on"]`; Thunderbolt / Icy Wind reuse the aud242b labs.
+
+### 8.1 Audited instant visual-task table
+
+`Cmd_createvisualtask` runs `taskFunc(taskId)` before `gAnimVisualTaskCount++` (battle_anim.c:437-439) and `DestroyAnimVisualTask` decrements it
+(:274-277), so an entry function that is straight-line code ending in `DestroyAnimVisualTask(taskId)` nets 0 in the creating step: a following
+`waitforvisualfinish` never waits for it (lifetime `{exact: -1}`). Sprites such a task makes through `CreateSprite` / `CreateTask` are not counted by the
+script's counter. The table in the extractor (`INSTANT_STRAIGHT_LINE`, 42 names; `INSTANT_HAND_AUDITED`, 11 names read by hand, some with an if / else that
+destroys in both arms) is **re-checked mechanically at extraction** (`auditInstantTasks`: the C body has no `return`, no `func =` assignment, and one trailing
+destroy; the strict list also has no loop, `gTasks` state, `Random` or `CreateTask`); a task that fails the audit stops the extractor. Anything not provably
+instant stays out (e.g. every task that sets `gTasks[].func`). Result: Level-50 emitted ops 550 -> 563 (all moves, turn 0, player: 739 -> 752 resolved).
+
+### 8.2 `AnimTask_BlendBattleAnimPal` / `...Exclude` / `AnimTask_BlendParticle`
+
+battle_anim_utility_funcs.c:156-198 (`StartBlendAnimSpriteColor`, `AnimTask_BlendSpriteColor_Step2`): the task blends when `data[9] == delay`, counting
+`data[9]` up otherwise, steps y by one toward the target and destroys itself in the call whose y equals the target (after that call's blend). Call 0 is the script
+step, call k >= 1 is `RunTasks` of iteration F + k - 1; blends are at calls d, 2d + 1, ..., the last at call d + |D|(d + 1). The task is gone **d + |D|(d + 1) - 1**
+ticks after the creation tick (`blendAnimPalLength`). The scout's `|D|(d + 1) - 1` is wrong for d > 0 (it is the same for d = 0: that is why Thunderbolt's d = 0
+matched first).
+
+ROM check (the `BlendPalette` call log, independent of any per-move offset: the wait resumes the iteration after the last blend):
+
+| window | blends (palette 16) | formula | next SE |
+|---|---|---|---|
+| Thunderbolt (d 0, y 0 -> 6) | frames 76..81 | last blend = F + 5 | SE118 at 94 = 81 + 1 + 12 (`delay 10`) |
+| Hail (d 3, 0 -> 6) | 62, 66, ..., 86 (every 4) | first blend F + 2 (F = 60), last F + 26 | SE242 at 87 = 86 + 1 |
+| Sunny Day (d 1, 0 -> 6) | 65, 67, ..., 77 | F = 65, last F + 12 | SE202 at 78 = 77 + 1 |
+| Calm Mind (Exclude, d 0, 0 -> 16) | 64..79 | last F + 15 | SE184 at 80 = 79 + 1 |
+
+Result: Level-50 563 -> 583. The engine's emitted frames equal the ROM's at a named constant per move (Thunderbolt +2 with Icy Wind, Double-Edge, Metal Claw and Steel Wing: the
+aud242a idle-lead class; the status bodies Hail -4, Sunny Day -4, Calm Mind -5: aud242a's status class -4..-6; ISSUES #198), asserted by the test.
+
+### 8.3 `complex_palette_blend` (`gComplexPaletteBlendSpriteTemplate`)
+
+battle_anim_normal.c:344-398. The sprite's init callback blends y1 in the script step and `Step1` runs from the same iteration's `AnimateSprites`: `delay` countdown calls
+(F .. F + d - 1), a blend at F + d (y2 first, then y1, ...), the timer reloads to `delay`, so blends are d + 1 iterations apart; after `numBlends` blends one more countdown, a call
+moving to `Step2`, and `Step2` (when `gPaletteFade.active` is clear) blends 0 / 0 and destroys the sprite: gone **(n + 1)(d + 1)** ticks after F. ROM: Double-Edge (d 4, n 2)
+logs `BlendPalette` at 70 (init), 74, 79, 85: 15 ticks; the next SE (after `delay 10`) is at 98 = 85 + 1 + 12, and the engine's pair 68 -> 96 has the same 28-frame spacing
+(+2 on all three rows, plus SE_M_SWAGGER's second row at +8). The model does not track a concurrent `gPaletteFade.active` (a hardware / normal fade running at the same time would
+stall `Step1`); I did not check the 30 table sites for that overlap.
+
+### 8.4 `metallic_shine` (`AnimTask_MetallicShine`, battle_anim_dark.c:822-882 init, :896-935 step)
+
+The step adds 4 to `data[10]` per call and wraps every 128 (32 calls); the third wrap (96 calls) destroys the task: gone **95** ticks after the creation tick
+(`METALLIC_SHINE_LENGTH`). Its init decompresses a tilemap, an image and a palette in the creating step: the ROM loses wall-clock frames there (a VBlank overrun, like `BG_LOAD_LAG`).
+Measured on two moves that agree (Metal Claw, Steel Wing): **4** wall frames between the creation step and the first op after the wait (`METALLIC_SHINE_LOAD_LAG`); 2 of them are
+localised, because `loopsewithpan SE_M_HARDEN, ..., 28, 2` is a `Task_LoopAndPlaySE` call counter (iterations) and its second SE is 2 wall frames late (ROM 69 -> 99, engine 67 -> 95
+at +28); the other 2 are not (somewhere in the 96-call shine or its destroy, which clears the BG tilemap). The model shifts every later op by 4, so the loop's second SE is the
+named residual (+2, `extra` in the test). Metal Claw: SE120 x 2 then SE136 x 2 (ROM 173 / 187); Steel Wing: SE120 x 2, SE157 x 2 (175 / 195), SE136 (220), all +2 once the shine
+is accounted for.
+
+### 8.5 Counts (turn 0, player attacker)
+
+| step | Level-50 emitted / gated (276 moves) | all moves resolved / unresolved | variants / ops |
+|---|---|---|---|
+| fb2d3ae88 (before) | 550 / 284 | 739 / 373 | 295 / 726 |
+| instant-task table | 563 | 752 | |
+| BlendBattleAnimPal / Exclude / BlendParticle | 583 | 774 | 312 / 765 |
+| complex_palette_blend + metallic_shine | **592 / 242** | **783 / 329** | **314 / 776** |
+
+Gain +42 Level-50 ops against the scout's ~+45 (the `blend_color_cycle` and `HardwarePaletteFade` shares are not in it, see below).
+
+### 8.6 Residuals and what is not done
+
+- **Thunderbolt**: SE215 (ROM 172) and SE119 (239, 258) need `AnimTask_ElectricBolt` (a task with sprite-driven lifetime, aud242e): ROM-only rows in the test.
+  After the third `playsewithpan` the ROM's SE215 lands one frame later than the delay arithmetic predicts (171 vs 172); not diagnosed (its wait is unmodelled anyway).
+- **Double-Edge**: SE141 (ROM 136) sits behind `AnimTask_TranslateMonEllipticalRespectSide` (task lifetime, aud242e): ROM-only.
+- **Sunny Day** / **Hail**: the ROM rows after the window cut (Sunny Day SE202 at 763; Hail SE242 x 7 at 767..821, 9 frames apart) are not emitted and not diagnosed (the cut of the
+  test is the next move's body at 380 / 390 for Hail / Sunny Day).
+- **Not ported** (no source-proven, ROM-checked lifetime yet): `AnimTask_BlendColorCycle` (`BeginNormalPaletteFade` chains: the task polls `gPaletteFade.active` once per iteration, so each
+  fade's tail interleaves with the task's own call order and needs its own ROM windows) and `AnimTask_HardwarePaletteFade`. Both stay `unmodelled-lifetime`.
+- A live adapter is not whole-playable arbitrary-history exactness: the windows pin the move body inside the replay staged by each lab.
+

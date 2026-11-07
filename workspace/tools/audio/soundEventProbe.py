@@ -17,7 +17,7 @@ first frame whose capture can show its effect. `lab` replays a battle-lab reques
 saved pre-frame state) only when the m4a RAM signature changed during it. Plain stepping
 is the reference; tools/audio/compareProbe.py proves a hybrid log equal to a stepping log.
 """
-import bisect, json, re, sys, time
+import bisect, json, os, re, sys, time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -65,7 +65,7 @@ def main():
     oracle = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap" / bootstrap)
     syms = sorted((a, n) for n, a in oracle.symbols.items() if a)
     addrs = [a for a, _ in syms]
-    hooks = [n for n in HOOKS if oracle.symbols.get(n)]
+    hooks = [n for n in HOOKS + [h for h in os.environ.get("AUDIO_PROBE_EXTRA_HOOKS", "").split(",") if h] if oracle.symbols.get(n)]  # extra non-audio call-log hooks (e.g. BlendPalette)
     entry = {oracle.symbols[n] + 2: n for n in hooks}
     songs = load_defines(REF / "include/constants/songs.h", r"(?:SE|MUS)_")
     species = load_defines(REF / "include/constants/species.h", r"SPECIES_")
@@ -89,6 +89,8 @@ def main():
         n_events = len(events)
         via = caller(g_lr())
         row = {"frame": state["frame"], "fn": name, "via": via, "r0": g[0], "r1": g[1]}
+        if name not in HOOKS:
+            row["r2"], row["r3"] = g[2], g[3]
         if name == "PlayCryInternal":
             sp = int(cpu.gprs[13]) & 0xFFFFFFFF
             m = oracle.read_u8(sp)

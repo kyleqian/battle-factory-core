@@ -11,7 +11,7 @@
 // (or `npm run extract:anim-sound-timing`). Never imported at runtime.
 
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -127,8 +127,90 @@ function simplePaletteBlendLength(delay: number, startY: number, targetY: number
   }
   return calls + 5;
 }
+// AnimComplexPaletteBlend (battle_anim_normal.c:344-398): the sprite's callback runs once in the script step (init: BlendPalettes y1) and Step1 runs from the
+// same iteration's AnimateSprites. Step1 counts `delay` calls down (iterations F .. F+d-1), blends at F+d (y2 first, then y1, ...) and reloads the timer to
+// `delay` (so every blend is d + 1 iterations apart: F+d, F+2d+1, ...), after `numBlends` blends one more countdown, a call that moves to Step2, and
+// Step2 (gPaletteFade.active clear) destroys the sprite: iteration F + (n + 1)(d + 1). ROM-checked on Double-Edge (BlendPalette calls at 70, 74, 79, 85 for
+// d = 4, n = 2: 15 ticks; the next SE lands exactly 28 frames after the sprite's SE).
+function complexPaletteBlendLength(delay: number, numBlends: number): number {
+  return (numBlends + 1) * (delay + 1);
+}
+const METALLIC_SHINE_LENGTH = 95;
+// Measured on two moves, both agreeing (docs section 8): 4 wall-clock frames between the shine's creation and the first op after its wait. The first 2 are
+// localised (Metal Claw's SE_M_HARDEN loop task, counted in iterations, plays its second SE exactly 2 wall frames late: 28 -> 30); the other 2 are not
+// (somewhere in the 96-call shine or its destroy, which clears the BG tilemap). The shift is applied to every later op; the loop's own second play is the named residual.
+const METALLIC_SHINE_LOAD_LAG = 4;
+// ---- Instant visual tasks (aud242d). Cmd_createvisualtask runs `taskFunc(taskId)` BEFORE `gAnimVisualTaskCount++` (battle_anim.c:437-439), and an
+// entry function whose every path is straight-line code ending in `DestroyAnimVisualTask(taskId)` (-> `gAnimVisualTaskCount--`, battle_anim.c:274-277)
+// nets to 0 in the creating step: a following waitforvisualfinish never waits for it (lifetime -1, like the PlaySE1/2WithPanning tasks). Sprites a task
+// makes with CreateSprite / CreateTask (not the script's createsprite) are not counted by gAnimVisualTaskCount either. The list is audited against the
+// C source (docs/aud242-move-anim-sounds.md section 8.1) and re-checked mechanically at extraction time (`auditInstantTasks`): INSTANT_STRAIGHT_LINE
+// entries must be one `{ ... DestroyAnimVisualTask(taskId); }` body with no return / loop / func assignment / gTasks state / Random / CreateTask;
+// INSTANT_HAND_AUDITED entries (fixed-count loops over tables, a non-counted CreateTask, AnimTask_SporeDoubleBattle's two destroying branches) were read line by line; the check there is only no return / func and a trailing Destroy (or an if / else).
+const INSTANT_STRAIGHT_LINE: readonly string[] = [
+  "AnimTask_AllocBackupPalBuffer", "AnimTask_BlendBackground", "AnimTask_CastformGfxDataChange", "AnimTask_CreateSpotlight",
+  "AnimTask_FreeBackupPalBuffer", "AnimTask_FreeBallGfx", "AnimTask_FreeHealthboxPalsForLevelUp", "AnimTask_FreePokeblockGfx",
+  "AnimTask_GetAttackerSide", "AnimTask_GetBattleEnvironment", "AnimTask_GetBattlersFromArg", "AnimTask_GetFrustrationPowerLevel",
+  "AnimTask_GetFuryCutterHitCount", "AnimTask_GetIceBallCounter", "AnimTask_GetReturnPowerLevel", "AnimTask_GetSeismicTossDamageLevel",
+  "AnimTask_GetTargetIsAttackerPartner", "AnimTask_GetTargetSide", "AnimTask_GetTrappedMoveAnimId", "AnimTask_GetWeather",
+  "AnimTask_InitAttackerFadeFromInvisible", "AnimTask_InitMementoShadow", "AnimTask_IsAttackerBehindSubstitute", "AnimTask_IsBallBlockedByTrainer",
+  "AnimTask_IsContest", "AnimTask_IsFuryCutterHitRight", "AnimTask_IsHealingMove", "AnimTask_IsMonInvisible", "AnimTask_IsPowerOver99",
+  "AnimTask_IsTargetPlayerSide", "AnimTask_IsTargetSameSide", "AnimTask_LoadBallGfx", "AnimTask_LoadHealthboxPalsForLevelUp",
+  "AnimTask_LoadPokeblockGfx", "AnimTask_MementoHandleBg", "AnimTask_RemoveSpotlight", "AnimTask_SetAnimAttackerAndTargetForEffectAtk",
+  "AnimTask_SetAnimAttackerAndTargetForEffectTgt", "AnimTask_SetAnimTargetToBattlerTarget", "AnimTask_SetAttackerTargetLeftPos",
+  "AnimTask_SetTargetToEffectBattler", "AnimTask_SmokescreenImpact",
+];
+const INSTANT_HAND_AUDITED: readonly string[] = [
+  "AnimTask_CopyPalFadedToUnfaded", "AnimTask_CopyPalUnfadedFromBackup", "AnimTask_CopyPalUnfadedToBackup", "AnimTask_FreeMusicNotesPals",
+  "AnimTask_LoadMusicNotesPals", "AnimTask_MusicNotesClearRainbowBlend", "AnimTask_MusicNotesRainbowBlend", "AnimTask_SetAllNonAttackersInvisiblity",
+  "AnimTask_SporeDoubleBattle", "AnimTask_StartSlidingBg", "AnimTask_PositionFissureBgOnBattler",
+];
+const INSTANT_TASKS = new Set<string>([...INSTANT_STRAIGHT_LINE, ...INSTANT_HAND_AUDITED]);
+function auditInstantTasks(): void {
+  const sources = new Map<string, string>();
+  for (const file of readdirSync(join(REF, "src"))) if (/^battle_anim.*\.c$/.test(file)) sources.set(file, readFileSync(join(REF, "src", file), "utf8"));
+  for (const [list, strict] of [[INSTANT_STRAIGHT_LINE, true], [INSTANT_HAND_AUDITED, false]] as const) {
+    for (const name of list) {
+      let body: string | null = null;
+      for (const text of sources.values()) {
+        const start = new RegExp(`^void ${name}\\(u8 taskId\\)\\n\\{`, "m").exec(text);
+        if (start !== null) { body = text.slice(start.index, text.indexOf("\n}\n", start.index) + 3); break; }
+      }
+      if (body === null) throw new Error(`instant task ${name}: entry function not found`);
+      const statements = body.split("\n").map((l) => l.trim()).filter((l) => l !== "");
+      const destroys = (body.match(/DestroyAnimVisualTask/g) ?? []).length;
+      const tail = statements[statements.length - 2] === "DestroyAnimVisualTask(taskId);";
+      const ok = !/\breturn\b|\bfunc\s*=/.test(body) && (strict ? destroys === 1 && tail && !/\bwhile\b|\bfor\b|gTasks|Random|CreateTask/.test(body) : (destroys === 1 && tail) || body.includes("else"));
+      if (!ok) throw new Error(`instant task ${name}: body is not a straight-line task ending in one DestroyAnimVisualTask`);
+    }
+  }
+}
+auditInstantTasks();
+// AnimTask_BlendSpriteColor_Step2 (battle_anim_utility_funcs.c:169-198), shared by AnimTask_BlendBattleAnimPal / ...Exclude / AnimTask_BlendParticle through
+// StartBlendAnimSpriteColor (:156-167, which runs Step2 once inside the creating script step). data[9] starts at 0: calls 0..d-1 only count it up, call d blends
+// at y = start and resets it, then every d + 1 calls the y moves one toward the target; the call that blends AT the target destroys the task (:190-192).
+// Call 0 is the script step (iteration F), call k >= 1 is RunTasks of iteration F + k - 1 (the script's CB1 runs first), so the destroy call is
+// K = d + |target - start| * (d + 1) and a waitforvisualfinish polling in CB1 passes at iteration F + K: exact = K - 1 (-1 = already gone in the creating step).
+function blendAnimPalLength(delay: number, startY: number, targetY: number): number {
+  return delay + Math.abs(targetY - startY) * (delay + 1) - 1;
+}
 function lifetimeOf(cmd: Command): Lifetime {
   const { op, args } = cmd;
+  if (op === "createvisualtask" && (args[0] === "AnimTask_BlendBattleAnimPal" || args[0] === "AnimTask_BlendBattleAnimPalExclude" || args[0] === "AnimTask_BlendParticle")) {
+    const [delay, startY, targetY] = [intArg(args[3]), intArg(args[4]), intArg(args[5])];
+    if (delay === null || startY === null || targetY === null || delay < 0) return null;
+    return { exact: blendAnimPalLength(delay, startY, targetY) };
+  }
+  if (op === "complex_palette_blend" || (op === "createsprite" && args[0] === "gComplexPaletteBlendSpriteTemplate")) {
+    const named = (key: string): string | undefined => args.find((a) => a.startsWith(`${key}=`));
+    const [delay, numBlends] = op === "complex_palette_blend" ? [intArg(named("delay")), intArg(named("num_blends"))] : [intArg(args[4]), intArg(args[5])];
+    if (delay === null || numBlends === null || delay < 0 || numBlends < 0) return null;
+    return { exact: complexPaletteBlendLength(delay, numBlends) };
+  }
+  // AnimTask_MetallicShine (battle_anim_dark.c:822-882, step :896-935): the step adds 4 to data[10] per call; every 128 (32 calls) data[11]++, and the third
+  // wrap (96 calls) runs DestroyAnimVisualTask. Call 0 is the script step, call k >= 1 is RunTasks of iteration F + k - 1: gone 95 ticks after the creation tick.
+  if (op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) return { exact: METALLIC_SHINE_LENGTH };
+  if (op === "createvisualtask" && INSTANT_TASKS.has(args[0] ?? "")) return { exact: -1 };
   if (op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate")) {
     const parts = op === "simple_palette_blend" ? [args.find((a) => a.startsWith("delay=")), args.find((a) => a.startsWith("initial_blend_y=")), args.find((a) => a.startsWith("target_blend_y="))] : [args[4], args[5], args[6]];
     const [delay, startY, targetY] = parts.map(intArg);
@@ -222,6 +304,9 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
     const { op, args, line } = cmd;
     pc = [label, index + 1];
     if (isCreation(op)) {
+      // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
+      // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
+      if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
       if (frame !== null) pending.push({ at: frame, life: lifetimeOf(cmd), name: args[0] ?? op });
       const known = returnValue(args[0] ?? "", attackerSide);
       ret = op === "createvisualtask" ? known : ret;
