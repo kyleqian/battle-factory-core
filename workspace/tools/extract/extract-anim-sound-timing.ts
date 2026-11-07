@@ -11,7 +11,7 @@
 // (or `npm run extract:anim-sound-timing`). Never imported at runtime.
 
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -127,8 +127,55 @@ function simplePaletteBlendLength(delay: number, startY: number, targetY: number
   }
   return calls + 5;
 }
+// ---- Instant visual tasks (aud242d). Cmd_createvisualtask runs `taskFunc(taskId)` BEFORE `gAnimVisualTaskCount++` (battle_anim.c:437-439), and an
+// entry function whose every path is straight-line code ending in `DestroyAnimVisualTask(taskId)` (-> `gAnimVisualTaskCount--`, battle_anim.c:274-277)
+// nets to 0 in the creating step: a following waitforvisualfinish never waits for it (lifetime -1, like the PlaySE1/2WithPanning tasks). Sprites a task
+// makes with CreateSprite / CreateTask (not the script's createsprite) are not counted by gAnimVisualTaskCount either. The list is audited against the
+// C source (docs/aud242-move-anim-sounds.md section 8.1) and re-checked mechanically at extraction time (`auditInstantTasks`): INSTANT_STRAIGHT_LINE
+// entries must be one `{ ... DestroyAnimVisualTask(taskId); }` body with no return / loop / func assignment / gTasks state / Random / CreateTask;
+// INSTANT_HAND_AUDITED entries (fixed-count loops over tables, a non-counted CreateTask, AnimTask_SporeDoubleBattle's two destroying branches) were read line by line; the check there is only no return / func and a trailing Destroy (or an if / else).
+const INSTANT_STRAIGHT_LINE: readonly string[] = [
+  "AnimTask_AllocBackupPalBuffer", "AnimTask_BlendBackground", "AnimTask_CastformGfxDataChange", "AnimTask_CreateSpotlight",
+  "AnimTask_FreeBackupPalBuffer", "AnimTask_FreeBallGfx", "AnimTask_FreeHealthboxPalsForLevelUp", "AnimTask_FreePokeblockGfx",
+  "AnimTask_GetAttackerSide", "AnimTask_GetBattleEnvironment", "AnimTask_GetBattlersFromArg", "AnimTask_GetFrustrationPowerLevel",
+  "AnimTask_GetFuryCutterHitCount", "AnimTask_GetIceBallCounter", "AnimTask_GetReturnPowerLevel", "AnimTask_GetSeismicTossDamageLevel",
+  "AnimTask_GetTargetIsAttackerPartner", "AnimTask_GetTargetSide", "AnimTask_GetTrappedMoveAnimId", "AnimTask_GetWeather",
+  "AnimTask_InitAttackerFadeFromInvisible", "AnimTask_InitMementoShadow", "AnimTask_IsAttackerBehindSubstitute", "AnimTask_IsBallBlockedByTrainer",
+  "AnimTask_IsContest", "AnimTask_IsFuryCutterHitRight", "AnimTask_IsHealingMove", "AnimTask_IsMonInvisible", "AnimTask_IsPowerOver99",
+  "AnimTask_IsTargetPlayerSide", "AnimTask_IsTargetSameSide", "AnimTask_LoadBallGfx", "AnimTask_LoadHealthboxPalsForLevelUp",
+  "AnimTask_LoadPokeblockGfx", "AnimTask_MementoHandleBg", "AnimTask_RemoveSpotlight", "AnimTask_SetAnimAttackerAndTargetForEffectAtk",
+  "AnimTask_SetAnimAttackerAndTargetForEffectTgt", "AnimTask_SetAnimTargetToBattlerTarget", "AnimTask_SetAttackerTargetLeftPos",
+  "AnimTask_SetTargetToEffectBattler", "AnimTask_SmokescreenImpact",
+];
+const INSTANT_HAND_AUDITED: readonly string[] = [
+  "AnimTask_CopyPalFadedToUnfaded", "AnimTask_CopyPalUnfadedFromBackup", "AnimTask_CopyPalUnfadedToBackup", "AnimTask_FreeMusicNotesPals",
+  "AnimTask_LoadMusicNotesPals", "AnimTask_MusicNotesClearRainbowBlend", "AnimTask_MusicNotesRainbowBlend", "AnimTask_SetAllNonAttackersInvisiblity",
+  "AnimTask_SporeDoubleBattle", "AnimTask_StartSlidingBg", "AnimTask_PositionFissureBgOnBattler",
+];
+const INSTANT_TASKS = new Set<string>([...INSTANT_STRAIGHT_LINE, ...INSTANT_HAND_AUDITED]);
+function auditInstantTasks(): void {
+  const sources = new Map<string, string>();
+  for (const file of readdirSync(join(REF, "src"))) if (/^battle_anim.*\.c$/.test(file)) sources.set(file, readFileSync(join(REF, "src", file), "utf8"));
+  for (const [list, strict] of [[INSTANT_STRAIGHT_LINE, true], [INSTANT_HAND_AUDITED, false]] as const) {
+    for (const name of list) {
+      let body: string | null = null;
+      for (const text of sources.values()) {
+        const start = new RegExp(`^void ${name}\\(u8 taskId\\)\\n\\{`, "m").exec(text);
+        if (start !== null) { body = text.slice(start.index, text.indexOf("\n}\n", start.index) + 3); break; }
+      }
+      if (body === null) throw new Error(`instant task ${name}: entry function not found`);
+      const statements = body.split("\n").map((l) => l.trim()).filter((l) => l !== "");
+      const destroys = (body.match(/DestroyAnimVisualTask/g) ?? []).length;
+      const tail = statements[statements.length - 2] === "DestroyAnimVisualTask(taskId);";
+      const ok = !/\breturn\b|\bfunc\s*=/.test(body) && (strict ? destroys === 1 && tail && !/\bwhile\b|\bfor\b|gTasks|Random|CreateTask/.test(body) : (destroys === 1 && tail) || body.includes("else"));
+      if (!ok) throw new Error(`instant task ${name}: body is not a straight-line task ending in one DestroyAnimVisualTask`);
+    }
+  }
+}
+auditInstantTasks();
 function lifetimeOf(cmd: Command): Lifetime {
   const { op, args } = cmd;
+  if (op === "createvisualtask" && INSTANT_TASKS.has(args[0] ?? "")) return { exact: -1 };
   if (op === "simple_palette_blend" || (op === "createsprite" && args[0] === "gSimplePaletteBlendSpriteTemplate")) {
     const parts = op === "simple_palette_blend" ? [args.find((a) => a.startsWith("delay=")), args.find((a) => a.startsWith("initial_blend_y=")), args.find((a) => a.startsWith("target_blend_y="))] : [args[4], args[5], args[6]];
     const [delay, startY, targetY] = parts.map(intArg);
