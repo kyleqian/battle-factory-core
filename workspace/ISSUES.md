@@ -70,12 +70,6 @@ timing residuals (finish plan item 6). A fix re-pins the deltas to 0.
 an opposing switch-in inside the forced-selector prefix gets no sound; a Baton Pass hidden-attacker recall is not
 distinguished from a plain recall. Unproven by ROM window: Brain 471, WEAK send-out cry, Scene ON voluntary / opponent mid-battle.
 
-## #195 — aud240c flow gaps on the battle party menus (2026-11-03)
-
-`docs/aud240c-party-menu-sounds.md`: (a) the voluntary menu moves its cursor on keys pressed during the open palette fade
-(the ROM ignores input until `!gPaletteFade.active`; only the sound is gated in ours); (b) refusal messages dismiss on the
-first A / B even while the text is still printing (the ROM waits for the printer). Source-proven flow fixes; prove on the ON oracle.
-
 ## #192 — Summary screen flow gaps vs the ROM (aud240b, 2026-11-03)
 
 Found while proving summary sounds (`docs/aud240b-summary-sounds.md` "Gaps"): (a) after the draft summary closes, our draft
@@ -90,14 +84,6 @@ state, gated on `soundCollecting()`; it should be owned by the session's sound c
 share it. WEAK cry length is measured for ONIX only (78 frames; other species emit no BGM restore). BGM ids are constants
 (469 draft / swap, 476 battle) until a BGM state exists (aud241). The first draft mon-change cry is 1 frame late vs the ROM
 (f149 vs f148; every other change matches +21).
-
-## #191 — Dialog-menu cursors move on held-key repeat (aud240a, 2026-11-02)
-
-`Menu_ProcessInput` / `Menu_ProcessInputNoWrap` (menu.c, used by the postwin question, continuation and swap-offer
-multichoices) read D-pad `JOY_NEW` only; our postwin cursor reducers also move on `newAndRepeatedKeys`, so a held UP/DOWN
-keeps stepping the cursor (silently since aud240a: SEs are gated on new presses, matching the ROM). Not ROM-probed with a
-held key yet. Fix: gate those reducers on new keys only; prove with a held-DOWN window on the ON oracle. The draft and swap
-handlers use `JOY_REPEAT` in the ROM, so they are correct. `docs/aud240a-screen-sounds.md` "Divergences".
 
 ## #189 — RETIRE-YES Lobby path residuals (ret218, 2026-10-28)
 

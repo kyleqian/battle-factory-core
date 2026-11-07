@@ -57,6 +57,12 @@ history.
   (2026-10-30 pfb228) `bso225Dense.ts` auto-delta search is bounded at +4 and silently picks the boundary (caused the bso225 "-4..+3
   offset" misdiagnosis, ~20 min); no PIL on the host (hand-written PNG writer, ~5 min); MEW has no player battle pic in
   `fieldArtBattler` (throws, ~2 min); `pkill -f` killed the worker's own shell again (~3 min).
+  (2026-11-06/07 supervisor, from 5 workers) `pkill -f` killed the worker's own shell twice more (aud242b ~5 min, cln242
+  ~5 min: use `[n]ode` / kill your own PID); 120 s / 600 s auto-backgrounding again (aud242b, aud242c, obr251 ~3 min each);
+  `compare:differential` says "requests no captureFrames; nothing to compare" without naming `--capture-range` (~2 min);
+  `soundEventProbe.py` leaves a stray `.json.log`, omits the replay `trace` key (patched by hand per fixture, ~15 min) and reads a
+  stale output file; aud242b saved fixtures without the call log and never listed them in `audioProbeFixtures.test.ts` (one red
+  file, not in the gate); `lsd194Census.sh` final merge step did not run (obr251 concatenated the shards by hand).
   (2026-10-30 cff230) `tools/compare/run.ts` cannot take mechanicLab custom parties and `apx223OracleCheck` cannot stage an "at"-role
   key when the weather setter must be the Castform (~20 min); `tsc` rejects `import "pngjs"` in tools files a test imports (no type
   declarations, ~10 min); the worker believed `reference/pokeemerald` was absent although the worktree link resolves (~25 min).

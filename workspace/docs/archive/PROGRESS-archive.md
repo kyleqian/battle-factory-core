@@ -1,3 +1,73 @@
+## 2026-11-03 / 04 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud240c / cln239 / aud240d / go246 / qak248 / qak249 folded
+
+- **State:** master `07123061b`+ clean, src == qak248 fix `127def5d4` (suite + build green on it; the soak / play gates ran on src `710424ca8` = go246 merge). Evidence `.integration/validation/sv-20261103/`.
+- **Folded:** aud240c (S11 step 4c; `docs/aud240c-party-menu-sounds.md`; branch `worker/integration-20261103-213048`): voluntary +
+  forced battle party menus emit SE_SELECT on row moves (only when the slot changes), A on a mon, action-window cursor (NoWrap,
+  silent at the ends), action-window A (**one** SE: `party_menu.c:2560` passes `APressMuted = TRUE`, supervisor-read; the scout's
+  double SE was wrong), action-window B (two SEs, ROM-confirmed), voluntary cancel, refusal dismiss; SE_FAILURE (32) on forced B /
+  A-on-CANCEL. Voluntary SEs gated until the open fade ends (the ROM ignores input then; our cursor still moves, recorded). 3 step-mode
+  ROM fixtures (forced 25 events on `turn15-party-select`, voluntary 25 via a lab request, SUMMARY entry 9). Supervisor re-probed the
+  forced window on the ON oracle: 25 / 25 events equal. Worker: differential 211 traces 38,532 / 38,532 identical; typecheck, build,
+  build:lib 0; 28 importing test files pass. Supervisor: 4 audio test files 117 / 117; **full suite on `30360d7cf`: 1,741 passed +
+  44 skipped, 0 failed, 14,465 tests**; one fork died beside a worker (`randomRoundSoakParallel` not reported), rerun 6 / 6.
+- **Folded:** cln239 (cleanup step 3; `docs/cln239-launchers.md`): `run-supervisor.sh` / `tools/run-subagent.sh` are Claude only;
+  Codex / DeepSeek / OpenCode paths, max mode, the animation / rust lanes and supervisors, `tools/autonomy` campaign scripts deleted
+  (supervisor checked each deleted file had only Codex / lane users); 8 ANIMATION_* / RUST_* ledgers to `docs/archive/`
+  (ANIMATION_COVERAGE.json, ANIMATION_LATCHES.md, ANIMATION_INTEGRATION_* and ANIMATION_VERIFICATION.md stay: read by tools / tests).
+  Supervisor: both `--print-config` forms incl. the cron form exit 0, `-S codex` / `--lane animation` rejected,
+  `tools/test_run_claude_supervisor.py` 11 OK, `tests/launcherProfiles.test.ts` 19 / 19, lane dir unchanged; aud240d launched with
+  the new launcher. The worker briefly committed docs on master in the main checkout and reset it itself (reflog `178aed1d9`; PAPERCUTS).
+- **Folded:** aud240d (S11 step 4d, last screens slice; `docs/aud240d-script-sounds.md`; branch `worker/integration-20261104-000400`):
+  extractor follows std msgbox scripts + shared call targets (adds MUS_OBTAIN_B_POINTS 459, SaveBattle SE_SAVE; regeneration test
+  passes); write-only emitters for the post-win heal (MUS_HEAL fanfare + BGM stop / continue — new SoundEvent kind `continue`),
+  PreBattleRoom record SE_SELECT / SE_SAVE, Lobby loss / won terminals (page SEs, BP fanfare, SE_SAVE), Brain heal SE_POKENAV_CALL
+  (pinned as a 163-tick spacing only, absolute frame unmeasured). 5 fixtures: heal ON, record / loss / seventh-win OFF lab, Brain
+  setup spacing. Supervisor re-probed `heal-window` on the ON oracle: 3 / 3 events equal. Not emitted (unmeasured):
+  MUS_OBTAIN_SYMBOL, PauseChallenge SE_SAVE; battle-return BGM / SE_EXIT measured and left to aud241. Worker: typecheck, build,
+  build:lib 0; differential 905 / 905 identical (3 standard + 2 lobby traces); importers 362 tests. Supervisor: 5 audio files 151 / 151.
+- **Folded:** go246 (handoff 4b(a) remainder, Kyle's SPOINK; `docs/go246-intro-wait.md`; Opus worker, branch
+  `worker/integration-20261104-013811`): the Scene ON battle-start intro now waits for the opponent's front animation before
+  "Go!" and the player's back animation before the first menu (`generatedIntroOpponentAnimHold` / `generatedIntroPlayerAnimHold`
+  in `battleResolutionPresentationRender.ts`, intro-local holds, no canonical-tick constant changed); Scene OFF holds are 0
+  (OFF oracle: cry-only timeline). SPOINK was cut short by 137 frames; its window (seed 8, GRIMER vs SPOINK, ON oracle) went
+  318,460 / 585,343 -> **132 / 0 px** (opponent / player mon) — supervisor reran it: 132 / 0 / 8,273. bso226 WAILMER / SPINDA
+  need no fitted lag any more. Census 0..999 both scenes vs `vis243a` baseline: 0 bad, 1000 / 1000 identical (rows start after the
+  intro; 918 ON battles get a hold, +53,941 frames). Differential 211 traces identical. bso226 harness restored from `4f6fa87e4^`.
+  The worker reported "no pins re-pinned"; the wind-down suite found 2 (below).
+- **Fixed by the supervisor (`f40d5cea6`):** the wind-down suite failed only `sc106StatsChangeCommand` (4) and `sgl138SeGateLive`
+  (4), each by exactly the route battle's intro hold computed per seed with the two helpers (sc106 seeds 0 / 6 / 10 / 13: +106 /
+  +61 (+1 parity) / +65 / +118; sgl138 receipt regenerated: 0-on +106, 9-on +86, 19-on +12, 808-on +88; anchors, OFF and summary
+  unchanged). Both files green (11 / 11, 6 / 6).
+- **Scout saved:** `docs/aud241-scout.md` (battle controller sound map + proposed split; read-only worker report, unverified).
+- **Wind-down gates** (`sv-20261103/gates-final/`, src `710424ca8`): typecheck 0; build 0; **full suite 1,787 files: 1,741 passed +
+  44 skipped, 2 failed (the re-pins above)**, 14,458 tests passed; play:random 4 min / scene: ON 23 battles / 9 swaps, OFF 35 / 16
+  (max win streak 7); `--lobby-new-challenge` 2 min / scene: 1 + 3 new challenges; **0 page errors / overlays / contained /
+  divergences**; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla
+  0:20 Scene ON **20 / 20**, Scene OFF **20 / 20** (all `budget`); Scene ON full vary-rng 0:16 `--render-every 8` **16 / 16** (all
+  `budget`); Scene ON winning first-round 0:6 `--render-every 1` **6 / 6**. The 0:60 gates were not run (hours each here).
+- **Evidence:** qak247 (`docs/qak247-clip-sweep.md`, evidence-only worker): opponent Quick Attack / Aerial Ace used the PIDGEOTTO
+  74-row clip on the live field; the ROM has none (trace clone is a plain OBJ, `battle_anim_utility_funcs.c:243-246`,
+  supervisor-read); 160 = 0 px on 87 / 88 runs (worst at 74: SLAKING AA 175 px, TROPIUS 124, RAIKOU QA 106). New ISSUES #194
+  (RATTATA QA residual above the clip row, not the clip), #195 (aud240c's two party-menu flow gaps).
+- **Fixed by the supervisor:** qak248 (`127def5d4`): the two live clips are 160 (staged path unchanged). Typecheck 0; Quick Attack /
+  Aerial Ace / fast-contact / sceneOn / Agility-clip / later58 tests 64 / 64; supervisor rendered SLAKING / TROPIUS AA vs qak247's
+  ROM frames: 0 px (were 175 / 124). Render-only: the soaks above (logic) are unaffected; full suite + build on `127def5d4`:
+  build 0, **1,787 files: 1,742 passed + 44 skipped, 1 failed** = `substituteDollDefenderLive` now finds `prep38-quick-attack-opponent`
+  row 9 exact (its documented 1 px PERSIAN residual was this clip; residual dropped, file 60 / 60). No standard trace or census change expected (no hermetic receipt added yet: follow-up).
+- **Folded:** qak249 (test-only): hermetic ROM receipts `tools/compare/fixtures/{aerial-ace-opponent-slaking,quick-attack-opponent-raikou}-player-onix.json`
+  (two fresh probes each, identical) + `tests/animation/quickAttackAerialAceOpponentClip.test.ts`. Supervisor: 4 / 4; with the 74 clip
+  restored 2 fail (9 rows each, = qak247); smoke 448 / 448 on master.
+- **Next:** handoff "Next work": aud241 (scout `docs/aud241-scout.md`), cleanup step 5 / 4, bundle hygiene, ISSUES #194 / #195.
+- **Housekeeping:** evidence `sv-20261031` deleted (older than the last three runs; 2.8 GB); 27 GB free. No R2 remote on this host,
+  so `tools/backup-logs-to-r2.sh` was not run.
+- **Notes:** no DEFERRED items. No push. Worker refs (merged; names moved to `refs/archive/worker-merged-20261104/`, restore with
+  `git branch <name> refs/archive/worker-merged-20261104/<name>`): integration-20261103-213048 (aud240c), -224443 (cln239),
+  -20261104-000400 (aud240d), -013811 (go246), -044203 (qak247), -062420 (qak249); -032754 (aud241 scout, no commits, deleted).
+
+---
+
+---
+
 ## 2026-11-02 / 03 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Mac 851ee1f4c / aud240a / aud240b / vis243a / agi245 / rng244 / cln238 / cleanup 6 folded
 
 - **State:** master `54aafa87d`+ (final src == agi245 merge `c88d897f2`); the long soak / play gates ran on src `5d39f2c79`; agi245
