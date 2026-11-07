@@ -160,6 +160,11 @@ put the seed 1 exploring policy on a new trajectory (58,240 / battle 3 / turn 25
 Re-pinned with provenance comments; 64 / 64 pass. The seed 1 trajectory change is a policy-reads-presentation effect like the earlier
 fsw235 / pmo239 ones, but nobody has confirmed it: supervisor, please look at that one pin.
 
+## Final tally
+
+Four shards at 5 workers on the final tree (shard 4 re-run after the sgl138 / randomRoundSoak fixes, 244 s): 1,781 files, **14,016 tests
+passed, 241 skipped, 0 failed** (3,043 + 4,271 + 3,672 + 3,030 passed). `npm run typecheck` and `npm run build` green.
+
 ## Gate
 
 `tools/test/test-gate.list` was not regenerated: no generator input changed (durations file, `tests/` import graph of the selected files).
