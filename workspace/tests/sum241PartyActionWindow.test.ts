@@ -7,6 +7,7 @@ import {
   advanceBattlePartySelect,
   battlePartySelectStateForForcedParty,
   createBattlePartySelectState,
+  PARTY_SELECT_OPEN_TOTAL_FRAMES,
   renderBattlePartySelect,
   SUBMENU_OPEN_VISUAL_DELAY,
   type BattlePartySelectState,
@@ -114,6 +115,9 @@ const settleReturn = <S extends { summary: SummaryScreenState | null }>(
   return next;
 };
 
+/** Idles the menu through its open palette fade: input is ignored until it ends (party_menu.c:1259-1261). */
+const settleOpenFade = (state: BattlePartySelectState): BattlePartySelectState => idle(voluntaryStep, state, PARTY_SELECT_OPEN_TOTAL_FRAMES);
+
 /** A live selector whose party has been through a 0 -> 2 switch (rows MACHAMP / HARIYAMA / GRANBULL), with live battle values. */
 function switchedVoluntarySelector() {
   const { request, rulesContext } = liveSelectorParts();
@@ -131,7 +135,7 @@ function switchedVoluntarySelector() {
     ]) as typeof rulesContext.battlers,
   });
   const order = switchPartyOrder(IDENTITY_BATTLE_PARTY_ORDER, 0, 2);
-  return { state: createBattlePartySelectState(request, switched, order, RECORDS), rulesContext: switched };
+  return { state: settleOpenFade(createBattlePartySelectState(request, switched, order, RECORDS)), rulesContext: switched };
 }
 
 const voluntaryStep = (state: BattlePartySelectState, keys: ReadonlySet<Key>) => advanceBattlePartySelect(state, keys);
@@ -176,7 +180,7 @@ describe("sum241: the action window's cursor (Menu_ProcessInputNoWrapAround_othe
     expect(shifted.outcome).toEqual({ kind: "select", partyIndex: 1 });
     // On the unswitched live menu row 0 is the active GRANBULL: "is already in battle!" closes the window with the message.
     const { request, rulesContext } = liveSelectorParts();
-    const identity = createBattlePartySelectState(request, rulesContext, IDENTITY_BATTLE_PARTY_ORDER, RECORDS);
+    const identity = settleOpenFade(createBattlePartySelectState(request, rulesContext, IDENTITY_BATTLE_PARTY_ORDER, RECORDS));
     expect(identity.rows[0]).toMatchObject({ active: true, legal: false, name: "GRANBULL" });
     const refused = press(voluntaryStep, identity, "A", "DOWN", "UP", "A");
     expect(refused).toMatchObject({ submenuOpen: false, actionCursor: 0, message: "GRANBULL is already\nin battle!" });
@@ -323,7 +327,7 @@ describe("sum241: SUMMARY from the voluntary menu", () => {
 
   it("throws on SUMMARY when the menu was built without rental records", () => {
     const { request, rulesContext } = liveSelectorParts();
-    const state = createBattlePartySelectState(request, rulesContext);
+    const state = settleOpenFade(createBattlePartySelectState(request, rulesContext));
     expect(state.summaryMons).toBeNull();
     expect(() => press(voluntaryStep, state, "A", "DOWN", "A")).toThrow(/rental records/);
   });

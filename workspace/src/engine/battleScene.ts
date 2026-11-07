@@ -1,3 +1,4 @@
+import { partyMessageLines } from "./partyMenuMessage.ts";
 import {
   LIVE_MOVE_NO_HIDDEN_SIDES, liveMoveAnimationPresentation, liveMoveHiddenSides, liveMoveOpponentShadowRow, liveMoveOpponentShadowReturn,
   type LiveMoveHiddenSides,
@@ -13687,11 +13688,11 @@ export function drawTurn15PartySelectList(fb: Uint8Array, state: import("./party
   } else {
     drawTurn15PartyStatus(fb, layers.status === "magby" ? partyMenuStatusOverlayMagby : partyMenuStatusOverlay);
   }
-  if (state.message !== null) {
+  const messageLines = state.message === null ? null : partyMessageLines(state.message, state.messageElapsed);
+  if (messageLines !== null) {
     drawStandardWindowFrame(fb, 0, 112, 28, 4);
-    const [line1, line2] = state.message.split("\n");
-    drawStandardWindowText(fb, line1!, 8, 121);
-    if (line2) drawStandardWindowText(fb, line2, 8, 137);
+    drawStandardWindowText(fb, messageLines[0], 8, 121);
+    if (messageLines[1]) drawStandardWindowText(fb, messageLines[1], 8, 137);
   }
 }
 

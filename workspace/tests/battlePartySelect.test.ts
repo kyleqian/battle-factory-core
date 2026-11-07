@@ -82,9 +82,16 @@ function liveSelectorParts() {
   return { request, rulesContext: battle.rules.rulesContext };
 }
 
+/** Idles the menu through its open palette fade: input is ignored until it ends (party_menu.c:1259-1261). */
+function settleOpenFade(state: BattlePartySelectState): BattlePartySelectState {
+  let next = state;
+  for (let i = 0; i < PARTY_SELECT_OPEN_TOTAL_FRAMES; i += 1) next = advanceBattlePartySelect(next, new Set());
+  return next;
+}
+
 function liveSelector() {
   const { request, rulesContext } = liveSelectorParts();
-  return createBattlePartySelectState(request, rulesContext);
+  return settleOpenFade(createBattlePartySelectState(request, rulesContext));
 }
 
 describe("voluntary battle party selector", () => {
@@ -123,7 +130,7 @@ describe("voluntary battle party selector", () => {
       ]) as typeof rulesContext.battlers,
     });
     const order = switchPartyOrder(IDENTITY_BATTLE_PARTY_ORDER, 0, 2);
-    const state = createBattlePartySelectState(request, switched, order);
+    const state = settleOpenFade(createBattlePartySelectState(request, switched, order));
     expect(state.cursor).toBe(0);
     expect(state.rows.map((row) => [row.partyIndex, row.slot, row.active])).toEqual([[2, 0, true], [1, 1, false], [0, 2, false]]);
     expect(state.rows.map((row) => row.speciesKey)).toEqual(["SPECIES_MACHAMP", "SPECIES_HARIYAMA", "SPECIES_GRANBULL"]);
@@ -486,10 +493,10 @@ describe("voluntary battle party selector", () => {
     // advances every tick. Rendering without assets (forced snapshots) must
     // keep drawing the settled menu, never the open animation.
     const base = liveSelector();
-    expect(base.openElapsed).toBe(0);
+    expect(base.openElapsed).toBe(PARTY_SELECT_OPEN_TOTAL_FRAMES);
     const advanced = advanceBattlePartySelect(base, new Set());
-    expect(advanced.elapsed).toBe(1);
-    expect(advanced.openElapsed).toBe(1);
+    expect(advanced.elapsed).toBe(base.elapsed + 1);
+    expect(advanced.openElapsed).toBe(base.openElapsed + 1);
     const fb = createFramebuffer();
     renderBattlePartySelect(fb, { ...base, openElapsed: 10 });
     // No assets supplied: the settled menu renders (open animation skipped).
@@ -531,7 +538,12 @@ describe("voluntary battle party selector", () => {
     state = advanceBattlePartySelect(state, new Set(["A"]));
     const name = state.rows[active].name;
     expect(state).toMatchObject({ submenuOpen: false, outcome: null, message: `${name} is already\nin battle!` });
-    expect(advanceBattlePartySelect(state, new Set(["A"]))).toMatchObject({ message: null, cursor: active, outcome: null });
+    // TextPrinterWait ignores A until the last glyph is out, then the window clears 4 frames after the accepted press.
+    expect(advanceBattlePartySelect(state, new Set(["A"]))).toMatchObject({ message: `${name} is already\nin battle!` });
+    for (let i = 0; i < 40; i += 1) state = advanceBattlePartySelect(state, new Set());
+    state = advanceBattlePartySelect(state, new Set(["A"]));
+    for (let i = 0; i < 4; i += 1) state = advanceBattlePartySelect(state, new Set());
+    expect(state).toMatchObject({ message: null, cursor: active, outcome: null });
   });
 
   it("right-aligns the current HP in a three-character field (DisplayPartyPokemonHP, STR_CONV_MODE_RIGHT_ALIGN 3): one slash, never two", () => {

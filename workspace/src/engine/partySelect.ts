@@ -1,5 +1,6 @@
 // Forced player-switch party menu state.  Rendering is intentionally kept
 // separate: this reducer only owns the button-gated cursor/action sequence.
+import { PARTY_MESSAGE_CLOCK_START, stepPartyMessage } from "./partyMenuMessage.ts";
 import anchorStateData from "../data/gen/anchor-state.json" with { type: "json" };
 import type { GbaButton } from "../input.ts";
 import type {
@@ -94,6 +95,9 @@ export interface PartySelectState {
   sendOutElapsed: number | null;
   /** Source party-menu refusal text; null during ordinary list/submenu input. */
   message: string | null;
+  /** Print / dismiss clock of `message` (partyMenuMessage.ts); meaningless while `message` is null. */
+  messageElapsed: number;
+  messageDismissElapsed: number | null;
   /** Immutable kernel request whose selection this presentation owns. */
   request: BattleForcedSwitchRequest;
   /**
@@ -289,6 +293,7 @@ export function createPartySelectStateFromForcedSwitch(
     summary: null,
     sendOutElapsed: null,
     message: null,
+    ...PARTY_MESSAGE_CLOCK_START,
     request,
     party,
   };
@@ -347,6 +352,7 @@ export const INITIAL_PARTY_SELECT_STATE: PartySelectState = {
   summary: null,
   sendOutElapsed: null,
   message: null,
+  ...PARTY_MESSAGE_CLOCK_START,
   request: CANONICAL_FORCED_SWITCH_REQUEST,
   party: CANONICAL_PARTY_ROWS,
 };
@@ -609,10 +615,10 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
     return { ...next, summary };
   }
   if (next.message !== null) {
-    if (!newKeys.has("A") && !newKeys.has("B")) return next;
-    // TextPrinterWait (text.c:884-899): the refusal message's A / B press.
-    playSelectSe();
-    return { ...next, message: null };
+    // TextPrinterWait (text.c:884-899): the refusal message's A / B press, read only once the printer is done.
+    const step = stepPartyMessage(next.message, next, newKeys.has("A") || newKeys.has("B"));
+    if (step.accepted) playSelectSe();
+    return { ...next, ...step.clock, message: step.cleared ? null : next.message };
   }
   if (next.submenuOpen) {
     // The SEND OUT / SUMMARY / CANCEL window (Task_TryCreateSelectionWindow -> Task_HandleSelectionMenuInput,
@@ -638,6 +644,7 @@ export function advancePartySelect(state: PartySelectState, newKeys: ReadonlySet
           ...next,
           submenuOpen: false,
           actionCursor: 0,
+          ...PARTY_MESSAGE_CLOCK_START,
           message: selected.hp === 0
             ? `${selected.species} has no energy\nleft to battle!`
             : `${selected.species} is already\nin battle!`,

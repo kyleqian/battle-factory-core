@@ -194,6 +194,8 @@ function cardState(speciesId: number, speciesKey: string, name: string, gender: 
     summaryMons: null,
     summary: null,
     message: null,
+    messageElapsed: 0,
+    messageDismissElapsed: null,
     outcome: null,
     elapsed: 0,
     openElapsed: 0,
