@@ -47,6 +47,10 @@ HIGHSPEED / DARK only (`restorebg` lag unmodelled); 7 `panse*` and 42 PlaySE*Wit
 cry tasks (PlayCryHighPitch, PlayDoubleCry, CryWithEcho, WaitForCry) not ported; Ice Beam's 7 SE137 rows, Crunch's 2nd SE ROM-only;
 the ROM keeps calling SE12PanpotControl after its SE ends (probe `noop`), ours emits them: playback must ignore a pan with no SE.
 The ROM reaches pan +64 on `SE_M_STAT_INCREASE` vs an opponent target (check `BattleAnimAdjustPanning2`).
+**aud242d (2026-11-07)** instant tasks + BlendBattleAnimPal / Exclude / BlendParticle / complex_palette_blend / metallic_shine
+(L50 emitted 550 -> 592, all 783 resolved): Thunderbolt / Icy Wind / Double-Edge / Metal Claw / Steel Wing +2, Hail / Sunny Day -4,
+Calm Mind -5; `AnimTask_MetallicShine` loses 4 wall frames at creation (2 localised), the SE_M_HARDEN loop's 2nd SE +2 extra. Open:
+`blend_color_cycle`, `HardwarePaletteFade`, Thunderbolt SE215 one frame late, Hail / Sunny Day rows after 760 not emitted.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 
