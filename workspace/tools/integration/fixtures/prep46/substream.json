@@ -1,8 +1,0 @@
-{
- "schema": "prep46-substream/v1",
- "schedules": 40,
- "moveBodies": 320,
- "substreamAllMoveWordsIdentical": 40,
- "consumingAllMoveWordsIdentical": 0,
- "consumingMovedBodies": 240
-}

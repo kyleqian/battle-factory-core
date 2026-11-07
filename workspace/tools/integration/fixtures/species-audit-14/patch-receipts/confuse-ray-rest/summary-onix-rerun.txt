@@ -1,3 +1,0 @@
-s14plain-onix-confuse-ray-opponent plain opponent CONFUSE_RAY rows=270 presented=False cell=True px=0/0 identical=True exact=270 bad= max=0 tail - dig=318e91229ebb3407
-s14plain-onix-confuse-ray-opponent plain opponent CONFUSE_RAY rows=270 presented=False cell=True px=0/0 identical=True exact=270 bad= max=0 tail - dig=318e91229ebb3407
-windows=2 identical=2 nonzero=0

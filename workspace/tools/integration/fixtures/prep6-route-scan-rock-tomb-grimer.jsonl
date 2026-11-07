@@ -1,3 +1,0 @@
-{"name":"ROCK_TOMB","seed":0,"streak":0,"idx":1,"species":"SPECIES_GRIMER","setId":110,"requested":false,"all":[[91,1]]}
-{"name":"ROCK_TOMB","seed":41,"streak":0,"idx":1,"species":"SPECIES_GRIMER","setId":110,"requested":true,"frame":814,"field":{"player":{"name":"GRIMER","hp":157,"maxHP":162,"species":88},"opponent":{"name":"ONIX","hp":117,"maxHP":117,"species":95}},"all":[[20,1],[317,0]]}
-{"name":"ROCK_TOMB","seed":149,"streak":0,"idx":1,"species":"SPECIES_GRIMER","setId":110,"requested":true,"frame":530,"field":{"player":{"name":"GRIMER","hp":162,"maxHP":162,"species":88},"opponent":{"name":"ARON","hp":143,"maxHP":143,"species":382}},"all":[[317,0],[46,1]]}

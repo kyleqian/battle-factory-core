@@ -1,5 +1,0 @@
-{
-  "sourceFixture": "tools/compare/fixtures/thunder-punch-player-onix-opponent-murkrow.json",
-  "move": "THUNDER_PUNCH",
-  "fieldProfile": { "playerHp": 117, "playerMaxHp": 117, "opponentHp": 142, "opponentMaxHp": 142, "playerStatus": "none", "playerGender": "female", "opponentGender": "male" }
-}

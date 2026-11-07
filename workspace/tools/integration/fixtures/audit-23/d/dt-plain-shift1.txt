@@ -1,2 +1,0 @@
-audit23-self-double-team-opponent-sneasel-magcargo DOUBLE_TEAM opponent body0 SNEASEL->MAGCARGO act 77 romBody 158 shift 1 rows 230 px 0/0 exact 230/230 bad 
-audit23-self-double-team-opponent-yanma-snorlax DOUBLE_TEAM opponent body0 YANMA->SNORLAX act 75 romBody 158 shift 1 rows 230 px 0/0 exact 230/230 bad 

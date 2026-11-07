@@ -1,2 +1,0 @@
-Test Files  43 passed | 1 skipped (44)
-Tests  1522 passed | 80 skipped (1602)

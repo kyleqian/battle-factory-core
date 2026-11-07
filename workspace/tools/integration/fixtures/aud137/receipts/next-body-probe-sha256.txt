@@ -1,8 +1,0 @@
-f8e99e0678075a399b5bbd2690a76d95beb493d1baf92f23c027854cf4f74e4f  r1/aud137-brn-ply-haunter-onix-on.json
-dbfb2ae67ec331b961b6839035b3a003af2a2c15c1f3a43136d51e84ddc24d70  r1/aud137-conf-ply-haunter-onix-on.json
-2f161270c1de141b72503ad8038769470eba553cf44f59b197291d8c517f528c  r1/aud137-psn-ply-crobat-onix-on.json
-990d5b1384aa199b146e64824f4614242ccd23e88e0db1da6ba9529f084c58d8  r1/aud137-slp-ply-parasect-onix-on.json
-f8e99e0678075a399b5bbd2690a76d95beb493d1baf92f23c027854cf4f74e4f  r2/aud137-brn-ply-haunter-onix-on.json
-dbfb2ae67ec331b961b6839035b3a003af2a2c15c1f3a43136d51e84ddc24d70  r2/aud137-conf-ply-haunter-onix-on.json
-2f161270c1de141b72503ad8038769470eba553cf44f59b197291d8c517f528c  r2/aud137-psn-ply-crobat-onix-on.json
-990d5b1384aa199b146e64824f4614242ccd23e88e0db1da6ba9529f084c58d8  r2/aud137-slp-ply-parasect-onix-on.json

@@ -1,8 +1,0 @@
-{
-  "sourceFixture": "tools/compare/fixtures/growth-opponent-ivysaur-player-onix.json",
-  "move": "GROWTH",
-  "fieldProfile": {
-    "playerHp": 110, "playerMaxHp": 110, "playerGender": "male",
-    "opponentHp": 123, "opponentMaxHp": 135, "opponentGender": "male"
-  }
-}

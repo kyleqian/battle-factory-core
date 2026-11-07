@@ -1,3 +1,0 @@
-{"scenario":"tools/battle-lab/mechanic-pursuit-switchout-opponent-beedrill-player-shuckle.json","probeRunsIdentical":true,"runsSha1":"251e62e903d2","callers":{"RfuMain1+0x10":127},"random2Draws":0,
- "body":{"activationFrame":360,"rows":103,"activationValue":1444920832,"activationEqualsCorpusRow0":true,"planEqualsCorpusPerRow":true,"lagAges":[61,62,83],"corpus":"tools/compare/evidence/pursuit-switchout-opponent-dense-state.json.gz","corpusFirstFrame":360,"offset":0},
- "note":"switchout branch (choosetwoturnanim PursuitOnSwitchout): same no-draw plan and lag ages as the normal branch"}

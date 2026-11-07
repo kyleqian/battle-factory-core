@@ -1,2 +1,0 @@
-base commands 29843 patched commands 29842 | patched keys == base prefix True | base tail [(1, 'move', 165, 'opponent', 'SHUCKLE', 'CRADILY')]
-records (seed, streak, end, turns, frames): {'base': [(0, 0, 'terminal', 29, 20366), (881, 38, 'stalled', 25546, 20000001)], 'patched': [(0, 0, 'terminal', 29, 20366), (881, 38, 'stalled', 25545, 20000001)]}

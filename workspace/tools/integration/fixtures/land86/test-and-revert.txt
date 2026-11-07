@@ -1,7 +1,0 @@
-
- Test Files  1 passed (1)
-      Tests  4 passed (4)
-   Start at  20:54:11
-   Duration  22.15s (transform 12.83s, setup 9ms, collect 21.20s, tests 532ms, environment 0ms, prepare 35ms)
-
-revert experiment: all three src hunks reverted -> 4/4 tests fail (membership, plan==ROM 'liveFlatterWordsPostFree is not a function', marker species, KO-chain lends)

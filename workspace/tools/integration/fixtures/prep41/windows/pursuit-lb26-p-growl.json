@@ -1,9 +1,0 @@
-{
- "sourceFixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-p-growl.json",
- "denseWindow": {
-  "startFrame": 342,
-  "endFrame": 443
- },
- "timingPhase": "no-event",
- "timingEvidence": "pursuit-counters.json: body 0 lag ages [60, 61] (102 rows), counters r0 == r1 True"
-}

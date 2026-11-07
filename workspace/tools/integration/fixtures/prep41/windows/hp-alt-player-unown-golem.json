@@ -1,9 +1,0 @@
-{
- "sourceFixture": "tools/integration/fixtures/prep13-live/hidden-power-alt-player-unown-golem.json",
- "denseWindow": {
-  "startFrame": 77,
-  "endFrame": 256
- },
- "timingPhase": "no-event",
- "timingEvidence": "hidden-power-counters.json: body 0 lag ages [118] (180 rows), counters r0 == r1 True"
-}

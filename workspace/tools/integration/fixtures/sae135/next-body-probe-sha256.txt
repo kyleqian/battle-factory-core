@@ -1,8 +1,0 @@
-0347dfe7bd1f38e17247022b26deb120bd60d688f100730f1ca5a060afdce5f3  r1/stq132-attract-ply-primeape-onix-on.json
-3eb67d7fbe4862a60ec69959bbd1eb23972facc51430711ead507553a8c865c6  r1/stq132-spore-opp-primeape-onix-on.json
-a1bd459a3acb8983d9f6228787f356ed5e6fe89add57b288f76293b3e70b7fcc  r1/stq132-spore-ply-primeape-onix-on.json
-3e6b1cea5e409d8b356a4b228cb74121c4dccf0f9b083b5954298d987f8dae9f  r1/stq132-will-o-wisp-ply-primeape-onix-on.json
-0347dfe7bd1f38e17247022b26deb120bd60d688f100730f1ca5a060afdce5f3  r2/stq132-attract-ply-primeape-onix-on.json
-3eb67d7fbe4862a60ec69959bbd1eb23972facc51430711ead507553a8c865c6  r2/stq132-spore-opp-primeape-onix-on.json
-a1bd459a3acb8983d9f6228787f356ed5e6fe89add57b288f76293b3e70b7fcc  r2/stq132-spore-ply-primeape-onix-on.json
-3e6b1cea5e409d8b356a4b228cb74121c4dccf0f9b083b5954298d987f8dae9f  r2/stq132-will-o-wisp-ply-primeape-onix-on.json

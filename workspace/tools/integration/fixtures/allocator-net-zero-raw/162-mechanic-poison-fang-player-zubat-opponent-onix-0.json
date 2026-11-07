@@ -1,1 +1,0 @@
-{"schema":"allocator-net-zero-raw/v1","move":162,"scenario":"tools/battle-lab/mechanic-poison-fang-player-zubat-opponent-onix.json","profile":"battle-scene-on","toolSha256":"1fc87ca651fe23a8beea555d8c88b94d583e7bb1d242c6b6e828b8710d24135d","framesRun":734,"activationSequence":[{"move":305,"start":76,"end":188},{"move":33,"start":367,"end":408}],"bodies":[]}

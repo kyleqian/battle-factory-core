@@ -1,6 +1,0 @@
-age 111 frame 188: 0 px bbox x999--1 y999--1
-
-age 112 frame 189: 200 px bbox x160-191 y65-72
-   200 526b63<-live bdbd9c
-age 113 frame 190: 200 px bbox x160-191 y65-72
-   200 526b63<-live bdbd9c

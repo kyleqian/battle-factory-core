@@ -1,2 +1,0 @@
-audit23-self-double-team-opponent-sneasel-magcargo DOUBLE_TEAM opponent body0 SNEASEL->MAGCARGO act 77 romBody 158 shift 0 rows 230 px 269791/269791 exact 58/230 bad 2,6,12,14,16..24,26,28..42,45..54
-audit23-self-double-team-opponent-yanma-snorlax DOUBLE_TEAM opponent body0 YANMA->SNORLAX act 75 romBody 158 shift 0 rows 230 px 288808/288808 exact 55/230 bad 0,2,6,12,14,16..24,26,28..42

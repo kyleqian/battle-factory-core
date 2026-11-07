@@ -1,5 +1,0 @@
-{
- "schema": "idle98-miss-seeds/v1",
- "how": "idle98Stage.py --miss-search: Dynamic Punch 223 (MACHAMP vs SNORLAX), seeds 305419897 + k (k = 0..7) per side, one Scene ON probe each (idle94Probe.py); a miss = no gAnimScriptActive rise with gCurrentMove 223 and the attacker's battler. Misses: player k0; opponent k1, k5. Hits: the other 13. The lowest miss seed per side is staged.",
- "missSeed": {"player": 305419897, "opponent": 305419898}
-}

@@ -1,9 +1,0 @@
-{
- "sourceFixture": "tools/integration/fixtures/oam1-live/pursuit-alt2-opponent-sneasel-player-snorlax.json",
- "denseWindow": {
-  "startFrame": 76,
-  "endFrame": 178
- },
- "timingPhase": "event",
- "timingEvidence": "pursuit-counters.json: body 0 lag ages [60, 61, 82] (103 rows), counters r0 == r1 True"
-}

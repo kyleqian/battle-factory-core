@@ -1,5 +1,0 @@
-{
-  "schema": "physical-batch-live-adapter/v1",
-  "sourceFixture": "tools/compare/fixtures/mega-kick-player-sudowoodo-opponent-onix.json",
-  "move": "MEGA_KICK"
-}

@@ -1,4 +1,0 @@
-age 40 frame 262: 1 px bbox x92-92 y97-97
-   1 cecec6<-live 6b6b6b
-age 79 frame 301: 1 px bbox x92-92 y97-97
-   1 cecec6<-live 6b6b6b

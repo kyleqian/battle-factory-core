@@ -1,3 +1,0 @@
-age+1 windows 34 verdicts ['FAIL']
-no-fade windows 34 verdicts ['FAIL']
-no-x2 windows 34 verdicts ['FAIL', 'policy-exact']

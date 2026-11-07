@@ -1,7 +1,0 @@
-+0 switch-in battler 0 [0,"player",false,null,false,null]
-+3 switch-in battler 0 [3,"player",true,"closed",false,null]
-+45 switch-in battler 0 [45,"player",false,null,false,null]
-+48 switch-in battler 0 [48,"player",false,null,true,null]
-+66 switch-in battler 0 [66,"player",false,null,true,110]
-+102 message battler undefined null
-+126 move-animation battler 1 null

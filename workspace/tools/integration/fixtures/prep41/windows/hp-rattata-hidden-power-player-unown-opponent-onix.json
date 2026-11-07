@@ -1,9 +1,0 @@
-{
- "sourceFixture": "tools/integration/fixtures/species-audit-3/derived/rattata-hidden-power-player-unown-opponent-onix.json",
- "denseWindow": {
-  "startFrame": 235,
-  "endFrame": 414
- },
- "timingPhase": "no-event",
- "timingEvidence": "hidden-power-counters.json: body 0 lag ages [118] (180 rows), counters r0 == r1 True"
-}

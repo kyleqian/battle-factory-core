@@ -1,9 +1,0 @@
-{
- "sourceFixture": "tools/integration/fixtures/later-bodies-lb26/pursuit-o-psychic.json",
- "denseWindow": {
-  "startFrame": 339,
-  "endFrame": 441
- },
- "timingPhase": "event",
- "timingEvidence": "pursuit-counters.json: body 0 lag ages [60, 61, 82] (103 rows), counters r0 == r1 True"
-}

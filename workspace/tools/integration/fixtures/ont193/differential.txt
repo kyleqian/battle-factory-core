@@ -1,7 +1,0 @@
-> pokeemerald-factory-run@0.1.0 compare:differential
-> node --experimental-strip-types tools/compare/app-differential.ts fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 42695ae16
-app-differential: HEAD da8c5d3e vs base 42695ae1 (3 traces)
-fight-submenu: 235/235 captures byte-identical
-battle1-postwin-next-prompt: 216/216 captures byte-identical
-presentation-rng-playable-live-bodies-seeded-on: 190/190 captures byte-identical
-app-differential: PASS — 641 captures byte-identical across 3 traces

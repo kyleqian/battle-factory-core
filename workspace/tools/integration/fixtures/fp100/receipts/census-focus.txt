@@ -1,9 +1,0 @@
-commands 27515 -> 27515
-command key mismatches: 0
-Focus Punch 264 commands (side, status base -> final, frames base -> final, decline base / final): count
-  opponent fallback -> fallback  32 -> 32  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS) / attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS): 9
-  opponent fallback -> fallback  32 -> 32  defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS) / defender doll: unproven body cell (LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS): 2
-  opponent live -> live  154 -> 155  - / -: 19
-  player   fallback -> fallback  32 -> 32  attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS) / attacker doll: swap body cell unproven (LIVE_SUBSTITUTE_SWAP_BODY_CELLS): 1
-  player   live -> live  155 -> 155  - / -: 8
-other commands with a status / frames / duration change: 0

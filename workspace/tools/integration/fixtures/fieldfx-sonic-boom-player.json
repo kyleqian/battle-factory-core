@@ -1,1 +1,0 @@
-{"schema": "fieldfx-live-adapter/v1", "sourceFixture": "tools/compare/fixtures/sonic-boom-player-magneton-opponent-onix.json", "move": "SONIC_BOOM", "fieldProfile": {"playerHp": 125, "playerMaxHp": 125, "opponentHp": 110, "opponentMaxHp": 110, "opponentGender": "male", "playerGender": "none"}}

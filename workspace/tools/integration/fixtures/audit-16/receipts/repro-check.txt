@@ -1,3 +1,0 @@
-audit16Run.sh from scratch, twice (2026-10-09 16:20 on 220 windows; 16:30 on 236 windows): stage == committed, derive == committed;
-every window's chain + entry digests and px identical to the committed receipts/main (4 fresh probe runs agree per window). The 3 INFATUATION
-windows (added 16:39) ran once in two fresh processes (r1 == r2). r1 == r2 in 239 / 239.

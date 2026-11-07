@@ -1,6 +1,0 @@
-{"name":"ROCK_TOMB","seed":0,"streak":0,"idx":1,"species":"SPECIES_GRIMER","setId":110,"requested":false,"all":[[91,1]]}
-{"name":"ROCK_TOMB","seed":1,"streak":14,"idx":1,"species":"SPECIES_DUNSPARCE","setId":305,"requested":false,"all":[]}
-{"name":"ROCK_TOMB","seed":5,"streak":14,"idx":1,"species":"SPECIES_PRIMEAPE","setId":337,"requested":true,"frame":555,"field":{"player":{"name":"PRIMEAPE","hp":150,"maxHP":150,"species":57},"opponent":{"name":"SEALEO","hp":183,"maxHP":183,"species":342}},"all":[[317,0],[58,1]]}
-{"name":"ROCK_TOMB","seed":5,"streak":21,"idx":1,"species":"SPECIES_RHYDON","setId":403,"requested":false,"all":[[44,1]]}
-{"name":"ROCK_TOMB","seed":14,"streak":0,"idx":1,"species":"SPECIES_MACHOKE","setId":178,"requested":true,"frame":738,"field":{"player":{"name":"MACHOKE","hp":173,"maxHP":173,"species":67},"opponent":{"name":"LEDIAN","hp":116,"maxHP":116,"species":166}},"all":[[14,1],[317,0]]}
-{"name":"ROCK_TOMB","seed":18,"streak":7,"idx":2,"species":"SPECIES_POLIWRATH","setId":262,"requested":true,"frame":868,"field":{"player":{"name":"POLIWRATH","hp":177,"maxHP":184,"species":62},"opponent":{"name":"GLIGAR","hp":158,"maxHP":158,"species":207}},"all":[[232,1],[317,0]]}

@@ -1,2 +1,0 @@
-ON  {'E': 350, 'battlerFreed': 4, 'pidxChange': 7, 'ballSpawn': 10, 'particles': (28, 43, 15), 'healthboxSlideStart': 88, 'textStart': 114}
-OFF {'E': 350, 'battlerFreed': 4, 'pidxChange': 7, 'ballSpawn': 10, 'particles': (28, 43, 15), 'healthboxSlideStart': 88, 'textStart': 114}
