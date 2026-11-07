@@ -70,7 +70,7 @@ const moveTable: string[] = [];
 }
 
 interface SoundOp {
-  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast";
+  op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
   frame: number;
   id: number | null;
   /** The pan argument as written (the starting pan of a panse*; the only one of a setpan). */
@@ -140,6 +140,8 @@ function lifetimeOf(cmd: Command): Lifetime {
     if (x === null || y === null || numTimes === null || delay === null || numTimes < 1) return null;
     return { exact: shakeMonLength(x, y, numTimes, delay) - 2 };
   }
+  // SoundTask_PlaySE1/2WithPanning plays and DestroyAnimVisualTask(taskId)s inside the creating script step: gone before any wait.
+  if (op === "createvisualtask" && (args[0] === "SoundTask_PlaySE1WithPanning" || args[0] === "SoundTask_PlaySE2WithPanning")) return { exact: -1 };
   if (op === "createsprite" && args[0] === "gSlideMonToOffsetSpriteTemplate") { const d = intArg(args[7]); return d === null ? null : { exact: d + 1 }; }
   if (op === "createsprite" && args[0] === "gSlideMonToOriginalPosSpriteTemplate") { const d = intArg(args[5]); return d === null ? null : { exact: d }; }
   if (op === "create_dragon_rage_fire_spit_sprite") { const d = intArg(args.find((a) => a.startsWith("duration="))); return d === null ? null : { exact: d + 1 }; }
@@ -310,6 +312,13 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
         const at = frame + shiftAt(frame);
         if (task === "SoundTask_FireBlast") events.push({ op: "soundtask_fireblast", frame: at, id: value(args[1]!), id2: value(args[2]!), pan: null, line });
         else events.push({ op: "soundtask_loopse", frame: at, id: value(args[1]!), pan: value(args[2]!), target: value(args[3]!), inc: value(args[4]!), times: value(args[5]!), step: value(args[6]!), gap: value(args[7]!), line });
+        break;
+      }
+      // Cmd_createvisualtask runs the task function at once; the PlaySE1/2WithPanning tasks play with BattleAnimAdjustPanning(arg 1) in that step.
+      case "createvisualtask": {
+        if (args[0] !== "SoundTask_PlaySE1WithPanning" && args[0] !== "SoundTask_PlaySE2WithPanning") break;
+        if (frame === null) { gate(); break; }
+        events.push({ op: args[0] === "SoundTask_PlaySE1WithPanning" ? "soundtask_se1" : "soundtask_se2", frame: frame + shiftAt(frame), id: value(args[2]!), pan: value(args[3]!), line });
         break;
       }
       case "setpan":

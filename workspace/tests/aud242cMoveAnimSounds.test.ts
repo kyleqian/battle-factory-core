@@ -96,6 +96,9 @@ const PAN_SPECS: Record<string, Spec> = {
 // simple_palette_blend sprite (palette fade length from palette.c, frame-exact on both sides: delta 0); Aurora Beam / Psybeam keep the +2 idle-lead class
 // of the aud242a bodies, Fire Blast (SoundTask_FireBlast, 10 loop SEs + 2 ending SEs: the whole task) is +2, Ice Beam sits at +1 (after the same palette-blend wait). Ice Beam's seven SE_M_ICE_BEAM-end rows (SE137, ROM 176..212) sit behind
 // ice-crystal sprite lifetimes (aud242b unmodelled, aud242d).
+// PlaySE1/2WithPanning visual tasks (createvisualtask, played and destroyed in the creation step): Dragon Claw's two SE_M_SCRATCH rows after the
+// opening SE are frame-exact on an opponent attacker (pan -63, the AdjustPanning flip); Superpower (physical) is the +2 class, the status bodies
+// Flatter / Cosmic Power are -3 / -5 (aud242a's status class -4 +-1: per-move constants). The windows are cut where the other gated rows start.
 const TASK_SPECS: Record<string, Spec> = {
   "hyperbeam-opponent": { delta: 0 },
   "hyperbeam-player": { delta: 0 },
@@ -103,6 +106,10 @@ const TASK_SPECS: Record<string, Spec> = {
   "icebeam-opponent": { delta: 1, romOnly: ["176:137:-63", "182:137:-63", "188:137:-63", "194:137:-63", "200:137:-63", "206:137:-63", "212:137:-63"] },
   "psybeam-player": { delta: 2 },
   "fireblast-player": { delta: 2 },
+  "dragonclaw-opponent": { delta: 0, romOnlyFrom: 200 },
+  "cosmicpower-player": { delta: -5, romOnlyFrom: 150 },
+  "flatter-player": { delta: -3, romOnlyFrom: 100 },
+  "superpower-player": { delta: 2, romOnlyFrom: 150 },
 };
 
 describe("move-animation SEs after background fades (aud242c)", () => {
@@ -112,9 +119,10 @@ describe("move-animation SEs after background fades (aud242c)", () => {
       const ours = ourEvents(rom).filter(isMoveSe);
       const theirs = rom.events.filter((e) => e.noop !== true && isMoveSe(e));
       const romOnly = new Set(spec.romOnly ?? []);
+      const cut = (e: FixtureEvent): boolean => spec.romOnlyFrom === undefined || e.frame < spec.romOnlyFrom;
       expect(theirs.filter((e) => romOnly.has(row(e))).map(row)).toEqual([...romOnly]);
       expect(ours.length).toBeGreaterThan(0);
-      expect(ours.map((e) => `${e.frame + spec.delta}:${e.id}:${e.pan}`)).toEqual(theirs.filter((e) => !romOnly.has(row(e))).map(row));
+      expect(ours.map((e) => `${e.frame + spec.delta}:${e.id}:${e.pan}`).filter((r) => spec.romOnlyFrom === undefined || Number(r.split(":")[0]) < spec.romOnlyFrom)).toEqual(theirs.filter((e) => cut(e) && !romOnly.has(row(e))).map(row));
     });
   }
 

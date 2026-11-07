@@ -303,10 +303,15 @@ and `SoundTask_FireBlast` (Fire Blast). They are table ops `soundtask_loopse` / 
 - FireBlast(loop SE, end SE): no immediate call, so call n runs in iteration n. Step1 (calls 0..109) plays the loop SE when
   its counter wraps (call 0, then every 11) at the current pan and adds the signed increment 2 every call; call 110 switches to
   Step2, whose counter plays the end SE at the target pan at calls 111 and 117, then ends. 10 + 2 SEs.
-- The other `battle_anim_sound_tasks.c` tasks (`SoundTask_PlaySE1WithPanning`, `PlaySE2WithPanning`, `AdjustPanningVar`, the cry /
-  echo tasks) are **not** `createsoundtask` sites: the script spells them `createvisualtask` (a visual task that plays and
-  destroys itself in the creation step; 47 `PlaySE1/2WithPanning` sites of 58 `createvisualtask SoundTask_*` lines, e.g. Luster Purge's `SE_M_HYPER_BEAM` series, Sky Uppercut, Mega Kick, Earthquake
-  with pan 0) or they are called from C. They are left to aud242d / the visual-task slice; no claim here.
+- `SoundTask_PlaySE1WithPanning` / `PlaySE2WithPanning` are **not** `createsoundtask` sites: the script spells them `createvisualtask`
+  (47 sites of the 58 `createvisualtask SoundTask_*` lines: Cosmic Power, Dragon Claw, Encore, Flatter, Luster Purge, Superpower, the
+  Return power labels, Sky Attack, ...). `Cmd_createvisualtask` runs the function at once and the task plays with
+  `BattleAnimAdjustPanning(arg 1)` and `DestroyAnimVisualTask`s itself in that step, so they are table ops `soundtask_se1` / `soundtask_se2`
+  (one se row, `player` "SE1" / "SE2") with lifetime "gone before any wait" in the extractor. Emitted in the turn 0 / player table:
+  **5 ops** (Dragon Claw 2 of 2, Flatter 1 of 3, Cosmic Power 1 of 2, Superpower 1 of 1; resolved ops 734 -> 739). The other 42 sites
+  (Luster Purge, Return, Sky Attack, Encore and the later sites of the moves above) sit behind sprite / visual-task waits (aud242b / aud242d).
+  The cry tasks (`PlayCryHighPitch`, `PlayDoubleCry`, `CryWithEcho`, `WaitForCry`) and `AdjustPanningVar` (no sound) are not in this slice: a
+  cry is a `cry` event of another class (species and pitch from the battler), not ported here.
 
 `simple_palette_blend` (a `gSimplePaletteBlendSpriteTemplate` sprite) is what Hyper Beam and Ice Beam wait on before their sound
 task, so this family needed its lifetime (`simplePaletteBlendLength` in the extractor, from `AnimSimplePaletteBlend` and
@@ -321,7 +326,9 @@ which a wrong wait length would break (every later row shifts with it).
 ROM windows (`aud242c-*.json`; each (frame, kind, id, pan) equal after a per-move constant, same rows and pans):
 Hyper Beam player + opponent (SE215, SE247 x 15 with pan -64 -> 63 / 63 -> -64: **0**), Aurora Beam player (SE182 + SE183 x 6: +2),
 Psybeam player (SE189 + SE200 x 4 at pans -64 / -16 / 32 / 63: +2), Ice Beam opponent (SE183 x 4: +1; its seven SE137 rows, ROM 176..212,
-sit behind ice-crystal sprite waits: ROM-only), Fire Blast player (SE144 x 10 with pan -64 -> 63 in steps of 22, SE145 x 2: +2). Both attacker
+sit behind ice-crystal sprite waits: ROM-only), Fire Blast player (SE144 x 10 with pan -64 -> 63 in steps of 22, SE145 x 2: +2).
+PlaySE1/2WithPanning: Dragon Claw opponent (SE150 + SE136 x 2 at pan -63: **0**), Superpower player (SE140 + SE234 at pan 0: +2), Flatter player (SE223: -3),
+Cosmic Power player (SE243 x 2 at one frame, one of them the SE2 task: -5); each window cut where its later, gated rows begin. Both attacker
 sides are covered across the families (Flamethrower, Hyper Beam, Metal Sound opponent; Mach Punch, Sweet Scent, Fire Blast player).
 The +2 is the aud242a idle-lead class (ISSUES #198), Hyper Beam's 0 and Ice Beam's +1 are named per-move constants, not derived.
 Shadow Ball's opponent-side lab never plays its animation SE in the ROM window (no SE168 in 822 frames: not diagnosed), so Shadow Ball,

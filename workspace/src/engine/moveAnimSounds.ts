@@ -8,7 +8,7 @@ import type { BattleResolutionPresentationState } from "./battleResolutionPresen
 import { liveMoveSourceAge } from "./battleResolutionPresentationRender.ts";
 
 export interface TimedOp {
-  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast";
+  readonly op: "playsewithpan" | "playse" | "waitplaysewithpan" | "loopsewithpan" | "panse" | "panse_adjustnone" | "panse_adjustall" | "setpan" | "soundtask_loopse" | "soundtask_fireblast" | "soundtask_se1" | "soundtask_se2";
   readonly frame: number;
   readonly id: number | null;
   readonly pan: number | null;
@@ -138,6 +138,7 @@ export function moveAnimOpRows(op: TimedOp, context: AnimPanContext): readonly O
     case "playse": return [{ offset: 0, emission: { kind: "se", id: op.id, pan: null } }];
     case "setpan": return [{ offset: 0, emission: { kind: "pan", id: null, pan: animSoundPan(op.pan ?? 0, context) } }];
     case "panse": case "panse_adjustnone": case "panse_adjustall": return panRows(op, context);
+    case "soundtask_se1": case "soundtask_se2": return [{ offset: 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context), player: op.op === "soundtask_se1" ? "SE1" : "SE2" } }];
     case "soundtask_loopse": return loopSeRows(op, context);
     case "soundtask_fireblast": return fireBlastRows(op, context);
     default: return [{ offset: 0, emission: { kind: "se", id: op.id, pan: animSoundPan(op.pan ?? 0, context) } }];
