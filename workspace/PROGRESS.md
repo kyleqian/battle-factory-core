@@ -24,7 +24,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   5 files 73 / 73; compare `obr251-opponent-faint-on` 520..560: bar exact, only the 37 px `▾` cursor (ISSUES #200).
 - **Fixed by the supervisor:** aud242b's 18 fixtures failed `tests/audioProbeFixtures.test.ts` (file list, "pan" kind, no call log);
   test updated, 459 + 18 skipped.
-- **Running:** cln242 (Cleanup 5 second half, suite speed). **Next:** an aud242 fade / lifetime model or aud242c.
+- **Folded:** cln242 (Cleanup 5 second half; side branch `worker/side-20261107-000929`, 96 min; `docs/cln242-suite-speed.md`): vitest
+  `json: { stringify: true }` in test mode only (generated JSON loads via JSON.parse: collect 77 -> 15 s, vitest parent RSS 4.5 -> 0.6 GB),
+  which lets the full suite run at **5 workers in ~21 min** (4 shards 1,242 s, peaks <= 10.9 GB; was ~49-75 min at 2); test:gate 218 ->
+  97 s. Deleted census-superseded route-frame pins: sc106 six cases (11 -> 5), sgl138 whole-route receipt equality (red since obr251);
+  all other cln240 candidates kept (ROM receipts; reasons in the doc). Re-pinned randomRoundSoak (obr251 moved seed 21 / 0 frames and
+  put the seed-1 exploring policy on a new trajectory). Full suite on the final tree (src == obr251 fold): **1,781 files, 14,016 passed,
+  241 skipped, 0 failed**; typecheck, build 0. Next lever: `src/animation/dive.ts` re-simulates from tick 0 per row (liveDiveAttackAdapter
+  203 s). Supervisor: no named JSON imports anywhere; sc106 / sgl138 / randomRoundSoak 75 / 75.
+- **Running:** aud242c (fade waits, panse / setpan, createsoundtask). **Next:** an aud242 fade / lifetime model or aud242c.
 
 ---
 
