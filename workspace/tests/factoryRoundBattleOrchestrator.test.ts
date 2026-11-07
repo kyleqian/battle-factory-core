@@ -9,7 +9,7 @@ import {
   type BattleSubmittedDecision,
 } from "../src/engine/battleDecisionBoundary.ts";
 import { createBattleCommandPresentation } from "../src/engine/battleCommandPresentation.ts";
-import { PARTY_SELECT_CLOSE_MENU_FRAMES } from "../src/engine/battlePartySelect.ts";
+import { PARTY_SELECT_CLOSE_MENU_FRAMES, PARTY_SELECT_OPEN_TOTAL_FRAMES } from "../src/engine/battlePartySelect.ts";
 import { createFactoryAiBattleHistory } from "../src/engine/factoryAiLiveDriver.ts";
 import {
   createBattleResolutionPresentation,
@@ -1750,6 +1750,14 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     });
   });
 
+  function settlePartyOpenFade(state: FactoryRoundBattleOrchestratorState): FactoryRoundBattleOrchestratorState {
+    let next = state;
+    while (next.battlePartySelect !== null && next.battlePartySelect.openElapsed < PARTY_SELECT_OPEN_TOTAL_FRAMES) {
+      next = advanceFactoryRoundBattleCommand(next, new Set());
+    }
+    return next;
+  }
+
   it("cancels POKéMON back to the same action request and cursor", () => {
     let state = createStartedGeneratedBattle(RNG_SEED);
     state = advanceCommandToPhase(state, "action-menu");
@@ -1759,6 +1767,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
     expect(state.battleCommandPresentation?.lifecycle.phase).toBe("party-handoff");
     expect(state.battlePartySelect).not.toBeNull();
+    // flw252: the party menu ignores input until its open palette fade settles (party_menu.c:1259-1261).
+    state = settlePartyOpenFade(state);
     state = advanceFactoryRoundBattleCommand(state, new Set(["B"]));
     expect(state.battlePartySelect).toBeNull();
     expect(state.battleCommandPresentation?.lifecycle.phase).toBe("action-menu");
@@ -1771,6 +1781,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     state = advanceCommandToPhase(state, "action-menu");
     state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
     state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+    state = settlePartyOpenFade(state);
     state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
     state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
     expect(state.battlePartySelect?.cursor).toBe(2);

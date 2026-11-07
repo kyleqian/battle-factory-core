@@ -29,6 +29,7 @@ import {
   PARTY_SELECT_CLOSE_FIELD_HOLD_FRAMES,
   PARTY_SELECT_CLOSE_FIELD_REVEAL_FRAMES,
   PARTY_SELECT_CLOSE_MENU_FRAMES,
+  PARTY_SELECT_OPEN_TOTAL_FRAMES,
   PARTY_SELECT_CLOSE_MENU_FADE_FRAMES,
   PARTY_SELECT_CLOSE_MENU_HOLD_FRAMES,
   PARTY_SELECT_CLOSE_TOTAL_FRAMES,
@@ -114,6 +115,14 @@ function commandToActionMenu(state: FactoryRoundBattleOrchestratorState) {
   return next;
 }
 
+function settlePartyOpenFade(state: FactoryRoundBattleOrchestratorState): FactoryRoundBattleOrchestratorState {
+  let next = state;
+  while (next.battlePartySelect !== null && next.battlePartySelect.openElapsed < PARTY_SELECT_OPEN_TOTAL_FRAMES) {
+    next = advanceFactoryRoundBattleCommand(next, new Set());
+  }
+  return next;
+}
+
 /**
  * Drives the live orchestrator to a confirmed voluntary party-menu switch and
  * then through the ISSUES #78 close cadence, returning the state with the
@@ -125,6 +134,8 @@ function confirmVoluntarySwitchThroughClose(
   let state = commandToActionMenu(createStartedBattle());
   state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
   state = advanceFactoryRoundBattleCommand(state, new Set(["A"]));
+  // flw252: the party menu ignores input until its open palette fade settles (party_menu.c:1259-1261).
+  state = settlePartyOpenFade(state);
   for (let index = 0; index < cursorDowns; index += 1) {
     state = advanceFactoryRoundBattleCommand(state, new Set(["DOWN"]));
   }
