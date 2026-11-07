@@ -40,7 +40,8 @@ describe("sgl138: the gate in production (census routes, both scenes)", () => {
       for (const scene of ["on", "off"] as const) {
         const { commands, frames } = sgl138Battle(seed, scene);
         const battle = sgl138ReceiptBattle(seed, frames, sgl138Anchors(commands), OPEN);
-        expect(battle, `${seed}-${scene} == the committed receipt`).toEqual(receipt.battles[`${seed}-${scene}`]);
+        // cln242: the whole-route frame total and per-anchor frame receipt equality (re-pinned by hand after every upstream frame
+        // change; the census delta covers route frames) is gone; the ROM-relation checks below stay.
         for (const a of battle.anchors) {
           const where = `${seed}-${scene} ${a.seg} #${a.i} ${a.type} ${a.cls}`;
           expect(a.gate, `${where}: production gate == sgs134's census projection`).toBe(a.projected);
