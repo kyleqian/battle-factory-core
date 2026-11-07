@@ -873,12 +873,15 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // as at fsw235): 43417 / turn 39 -> 39078 / turn 25; same battle 2 / roundLost / depth 1.
       // obr251 (the opponent faint-replacement party-summary draw hold): frames only, 39078 -> 39466; same battle 2 / roundLost / depth 1 / turn 25
       // (re-pinned by cln242 from the failing full-suite shard).
-      frames: 39466,
+      // flw252 (the party menu ignores input until its open fade settles; refusal messages wait for their printer): the exploring
+      // policy's party-menu walks / message dismisses now spend different presses, so a new trajectory as at fsw235:
+      // 39466 / battle 2 turn 25 / depth 1 -> 18446 / battle 1 turn 23 / depth 0; roundLost. Pre-flw252 tree (cd9e82b25^) still gives 39466.
+      frames: 18446,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 1,
-      battle: 2,
-      turn: 25,
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 23,
     });
     expect(runSeed(1, options)).toMatchObject({
       // msg175: 26878 -> 26810 (shorter used prints); trn178 (the Scene OFF action-transition pause): 26810 -> 27058; same battle / turn / end state.
@@ -894,12 +897,13 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // obr251 (the opponent faint-replacement party-summary draw hold; the exploring policy reads presentation state, so a new trajectory,
       // see seed 0): 58240 / battle 3 turn 25 / depth 2 -> 36610 / battle 2 turn 23 / depth 1; roundLost. Re-pinned by cln242 from the
       // failing full-suite shard (the supervisor should confirm the trajectory change).
-      frames: 36610,
+      // flw252 (see seed 0): 36610 / battle 2 turn 23 / depth 1 -> 21881 / battle 1 turn 35 / depth 0; roundLost. Pre-flw252 tree gives 36610.
+      frames: 21881,
       outcome: "OK",
       endState: "roundLost",
-      maxBattleDepth: 1,
-      battle: 2,
-      turn: 23,
+      maxBattleDepth: 0,
+      battle: 1,
+      turn: 35,
     });
   });
 

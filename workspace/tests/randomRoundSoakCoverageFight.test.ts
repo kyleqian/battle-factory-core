@@ -129,7 +129,9 @@ describe("coverage-fight policy wiring", () => {
     const notes: string[] = [];
     runSeed(0, {
       policy: "coverage-fight",
-      maxFrames: 60_000,
+      // flw252 (party menu input gated on the open fade, refusals on their printer) moved this exploring trajectory: battle 1 now
+      // lasts to turn 93 and the first swap offer comes at frame 76621 (was 37569 / turn 26), so 60_000 no longer reaches one.
+      maxFrames: 90_000,
       renderEvery: 0,
       onNote: (entry) => notes.push(entry.what),
     });
