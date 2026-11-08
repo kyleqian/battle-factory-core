@@ -277,6 +277,24 @@ function lifetimeOf(cmd: Command): Lifetime {
   // AnimTask_ElectricBolt (battle_anim_electric.c:685-724): the entry only sets func; the step's data[10] counts calls 1.. and call 11 (data[10] == 10) destroys.
   // The five segment sprites are CreateSprite'd by the task, which gAnimVisualTaskCount does not count.
   if (op === "createvisualtask" && args[0] === "AnimTask_ElectricBolt") return { exact: 10 };
+  // ---- aud242f (docs section 10). Call numbering as above: sprite callback call 0 = init (script step), call k >= 1 = AnimateSprites of iteration F + k - 1; a
+  // sprite destroyed at call K is gone K - 1 ticks after F. SetCallbackToStoredInData6 / `sprite->callback = x` only install: x first runs in the NEXT call.
+  // AnimBowMon (battle_anim_effects_1.c:4400-4496, arg 0 = step kind): kind 0 = Step1 (call 1 sets data[0] = 6 and TranslateSpriteLinearById; calls 2..7 translate,
+  // call 8 installs Step1_Callback, calls 9..12 (++data[0] > 3 at call 12), Step4 destroys at call 13) = 12; kind 1 = Step2 (call 1 data[0] = 4, calls 2..5, call 6
+  // installs Step4, call 7 destroys) = 6; kind 2 = Step3 (++data[0] > 8 at call 9, Step3_Callback calls 10..12 (++data[0] > 2 at call 12), Step4 at 13) = 12;
+  // any other kind: Step4 at call 1 = 0.
+  if (sprite("gBowMonSpriteTemplate")) { const kind = intArg(args[3]); return kind === null ? null : { exact: kind === 0 || kind === 2 ? 12 : kind === 1 ? 6 : 0 }; }
+  // AnimHornHit (battle_anim_effects_1.c:5108-5163): duration D = clamp(arg 2, 2, 127), `--data[1] == 0` at call D.
+  if (sprite("gHornHitSpriteTemplate")) { const d = intArg(args[5]); return d === null ? null : { exact: Math.min(Math.max(d, 2), 0x7f) - 1 }; }
+  // AnimIceBeamParticle (battle_anim_ice.c:610-624) -> StartAnimLinearTranslation / AnimTranslateLinear_WithFollowup (battle_anim_mons.c:1093-1100, 1111-1145): call 1
+  // initialises and translates once (calls 1..D translate, data[0] = D -> 0), call D + 1 returns TRUE and installs DestroyAnimSprite, call D + 2 destroys = D + 1.
+  if (sprite("gIceBeamOuterCrystalSpriteTemplate") || sprite("gIceBeamInnerCrystalSpriteTemplate")) { const d = intArg(args[7]); return d === null || d < 1 ? null : { exact: d + 1 }; }
+  // AnimIcePunchSwirlingParticle (battle_anim_ice.c:592-602): sDuration = 30, the init call runs TranslateSpriteInGrowingCircle once (30 -> 29), calls 1..29 finish the
+  // count, call 30 installs DestroyAnimSprite (battle_anim_mons.c:468-486), call 31 destroys = 30.
+  if (sprite("gIceCrystalSpiralInwardSmall") || sprite("gIceCrystalSpiralInwardLarge")) return { exact: 30 };
+  // AnimBasicFistOrFoot (battle_anim_fight.c:452-464, create_fist_sprite): data[0] = duration, WaitAnimForDuration (battle_anim_mons.c:551-557) counts it down in calls
+  // 1..D, call D + 1 installs DestroyAnimSprite, call D + 2 destroys = D + 1.
+  if (op === "create_fist_sprite" || sprite("gFistFootSpriteTemplate")) { const d = op === "create_fist_sprite" ? intNamed("duration") : intArg(args[5]); return d === null || d < 0 ? null : { exact: d + 1 }; }
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
   return null;
 }

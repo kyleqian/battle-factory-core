@@ -94,8 +94,8 @@ const PAN_SPECS: Record<string, Spec> = {
 
 // Sound-task family (docs section 7.3): SoundTask_LoopSEAdjustPanning plays and pan steps ported from battle_anim_sound_tasks.c. Hyper Beam waits on a
 // simple_palette_blend sprite (palette fade length from palette.c: the sprite is gone n - 1 ticks after the creation tick, aud242e; delta +1); Aurora Beam / Psybeam keep the +2 idle-lead class
-// of the aud242a bodies, Fire Blast (SoundTask_FireBlast, 10 loop SEs + 2 ending SEs: the whole task) is +2, Ice Beam sits at +2 (after the same palette-blend wait). Ice Beam's seven SE_M_ICE_BEAM-end rows (SE137, ROM 176..212) sit behind
-// ice-crystal sprite lifetimes (aud242b unmodelled, aud242d).
+// of the aud242a bodies, Fire Blast (SoundTask_FireBlast, 10 loop SEs + 2 ending SEs: the whole task) is +2, Ice Beam sits at +2 (after the same palette-blend wait). Ice Beam's seven SE137 rows (ROM 176..212) were ROM-only here until aud242f modelled the
+// ice-crystal sprite lifetimes; they are emitted now at the same +2 (re-pinned in aud242f: the ROM log has the rows, the model now matches them).
 // PlaySE1/2WithPanning visual tasks (createvisualtask, played and destroyed in the creation step): Dragon Claw's two SE_M_SCRATCH rows after the
 // opening SE are frame-exact on an opponent attacker (pan -63, the AdjustPanning flip); Superpower (physical) is the +2 class, the status bodies
 // Flatter / Cosmic Power are -3 / -5 (aud242a's status class -4 +-1: per-move constants). The windows are cut where the other gated rows start.
@@ -103,7 +103,7 @@ const TASK_SPECS: Record<string, Spec> = {
   "hyperbeam-opponent": { delta: 1 },
   "hyperbeam-player": { delta: 1 },
   "aurorabeam-player": { delta: 2 },
-  "icebeam-opponent": { delta: 2, romOnly: ["176:137:-63", "182:137:-63", "188:137:-63", "194:137:-63", "200:137:-63", "206:137:-63", "212:137:-63"] },
+  "icebeam-opponent": { delta: 2 },
   "psybeam-player": { delta: 2 },
   "fireblast-player": { delta: 2 },
   "dragonclaw-opponent": { delta: 0, romOnlyFrom: 200 },
