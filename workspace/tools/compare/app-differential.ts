@@ -12,6 +12,12 @@
 // scratch worktree, a one-off driver script, a hand-rolled compare loop),
 // which routinely leaked orphaned worktrees into /tmp.
 //
+// `--harness-from-head` overlays this tree's tools/ harness (appTrace.ts and its
+// tools/ import closure; never anything under src/) onto the base checkout, so
+// a trace using appTrace stage ids newer than the base still renders there: the
+// base ENGINE (src/), rendered by the HEAD harness. If the overlaid harness
+// cannot link against the base src/, the run fails naming the missing export.
+//
 // What it does NOT do: touch the oracle. This is app-vs-app. Use
 // `npm run compare` for app-vs-oracle correctness. A green differential means
 // "I changed nothing visible", not "I am correct".
@@ -20,9 +26,11 @@
 // self-contained file, so both sides replay the identical script even when
 // the trace is new in this tree. Capture lists are never thinned.
 
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import {
+  copyFileSync,
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   readdirSync,
@@ -31,20 +39,29 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { renderAppTrace } from "./appTrace.ts";
 import { withCaptureRange } from "./cli.ts";
+import {
+  loadToolsImportGraph,
+  parseHarnessImportFailure,
+  planHarnessOverlay,
+} from "./harnessOverlay.ts";
 import { resolveCompareTracePath } from "./paths.ts";
 import { loadCompareTrace } from "./traceFile.ts";
 
 const USAGE =
   "usage: npm run compare:differential -- <trace...> --base REF\n" +
-  "         [--capture-range START:END] [--keep] [--summary]\n" +
+  "         [--capture-range START:END] [--keep] [--summary] [--harness-from-head]\n" +
   "\n" +
   "  --base REF         commit to replay against (e.g. HEAD^, a slice parent)\n" +
   "  --capture-range    narrow every trace to START:END instead of its own list\n" +
   "  --keep             keep the base worktree for inspection instead of removing it\n" +
-  "  --summary          print one line per trace instead of per-frame detail";
+  "  --summary          print one line per trace instead of per-frame detail\n" +
+  "  --harness-from-head  copy this tree's tools/compare/appTrace.ts and its tools/ import\n" +
+  "                     closure (never src/) into the base worktree before replaying, so the\n" +
+  "                     base engine renders traces whose appTrace stage ids are newer than\n" +
+  "                     the base; fails naming the missing export if the harness cannot link";
 
 interface Options {
   readonly tracePaths: readonly string[];
@@ -52,6 +69,7 @@ interface Options {
   readonly captureRange?: readonly [start: number, end: number];
   readonly keep: boolean;
   readonly summary: boolean;
+  readonly harnessFromHead: boolean;
 }
 
 function parseCaptureRange(value: string): readonly [number, number] {
@@ -71,11 +89,13 @@ function parseArgs(args: readonly string[]): Options {
   let captureRange: readonly [number, number] | undefined;
   let keep = false;
   let summary = false;
+  let harnessFromHead = false;
 
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index]!;
     if (argument === "--keep") { keep = true; continue; }
     if (argument === "--summary" || argument === "--quiet") { summary = true; continue; }
+    if (argument === "--harness-from-head") { harnessFromHead = true; continue; }
     if (argument === "--base") {
       base = args[index + 1];
       if (!base) throw new Error("--base needs a git ref");
@@ -106,6 +126,7 @@ function parseArgs(args: readonly string[]): Options {
     ...(captureRange ? { captureRange } : {}),
     keep,
     summary,
+    harnessFromHead,
   };
 }
 
@@ -207,6 +228,41 @@ function differingPixels(a: Uint8Array, b: Uint8Array): number {
   return pixels;
 }
 
+const HARNESS_ENTRY = "tools/compare/appTrace.ts";
+
+/** Copy this tree's harness closure over the base's and prove it links against the base src/. */
+function overlayHarness(baseWorkspaceTree: string): void {
+  const plan = planHarnessOverlay(HARNESS_ENTRY, loadToolsImportGraph(HARNESS_ENTRY, process.cwd()));
+  for (const file of plan.files) {
+    const target = join(baseWorkspaceTree, file);
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(join(process.cwd(), file), target);
+  }
+  console.log(
+    `app-differential: --harness-from-head overlaid ${plan.files.length} tools/ file(s) ` +
+    `onto base ${baseSha.slice(0, 8)} (src/ untouched):`,
+  );
+  for (const file of plan.files) console.log(`  ${file}`);
+
+  const probe = spawnSync(
+    process.execPath,
+    [
+      "--experimental-strip-types", "--no-warnings", "--input-type=module",
+      "-e", `await import(${JSON.stringify(`./${HARNESS_ENTRY}`)});`,
+    ],
+    { cwd: baseWorkspaceTree, encoding: "utf8" },
+  );
+  if (probe.status !== 0) {
+    const failure = parseHarnessImportFailure(probe.stderr ?? "");
+    throw new Error(
+      `the HEAD harness (${HARNESS_ENTRY}) does not import against the base src/ at ` +
+      `${baseSha.slice(0, 8)}: ` +
+      (failure ? failure.detail : "see the node error below") +
+      `. Pick a newer --base, or drop --harness-from-head.\n${probe.stderr ?? ""}`,
+    );
+  }
+}
+
 let options: Options;
 try {
   options = parseArgs(process.argv.slice(2));
@@ -262,6 +318,7 @@ const scratchRoot = mkdtempSync(join(tmpdir(), "app-differential-"));
 const baseTree = join(scratchRoot, "base");
 let worktreeAdded = false;
 let failures = 0;
+let overlayFailed = false;
 let comparisons = 0;
 
 try {
@@ -279,7 +336,18 @@ try {
   const driverPath = join(baseWorkspaceTree, "app-differential-driver.mts");
   writeFileSync(driverPath, BASE_DRIVER);
 
-  for (const { input, trace, frames } of traces) {
+  if (options.harnessFromHead) {
+    try {
+      overlayHarness(baseWorkspaceTree);
+    } catch (error) {
+      console.error(
+        `app-differential: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      overlayFailed = true;
+    }
+  }
+
+  for (const { input, trace, frames } of overlayFailed ? [] : traces) {
     const traceJsonPath = join(scratchRoot, "trace.json");
     const baseOutDir = join(scratchRoot, "base-frames");
     rmSync(baseOutDir, { recursive: true, force: true });
@@ -375,6 +443,10 @@ try {
   }
 }
 
+if (overlayFailed) {
+  console.log("app-differential: FAIL — harness overlay did not link against the base src/ (no replay run)");
+  process.exit(2);
+}
 if (failures === 0) {
   console.log(
     `app-differential: PASS — ${comparisons} captures byte-identical across ` +
