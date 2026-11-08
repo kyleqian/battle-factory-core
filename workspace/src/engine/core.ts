@@ -720,11 +720,8 @@ import {
   scheduleSummaryOpenCry,
   scheduleSummaryStepSounds,
 } from "./screenSounds.ts";
-import { emitBattleEndSounds, emitForfeitEndSounds } from "./battleEndSounds.ts";
-import { emitBattleHitSounds } from "./battleHitSounds.ts";
-import { emitMoveAnimSounds } from "./moveAnimSounds.ts";
-import { emitBattleStartBgm, emitBattleStartIntroSounds, emitMidBattleSwitchSounds, emitPartySendOutSounds } from "./battleStartSounds.ts";
-import { playerFaintReplacementSendOutTimingOfSegment } from "./battleResolutionPresentationRender.ts";
+import { emitBattleStartBgm } from "./battleStartSounds.ts";
+import { emitTickSounds } from "./tickSounds.ts";
 import { advanceForfeitTerminalAge, forfeitFrozenSceneView } from "./battleForfeit.ts";
 import { soundCollecting } from "../audio/soundEvents.ts";
 
@@ -1036,56 +1033,7 @@ export function createInitialState(
 export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): EngineState {
   beginScreenSoundTick(state.frame + 1);
   const next = tickEngineState(state, buttons);
-  const introBefore = state.factoryRoundBattleOrchestrator?.battleStartIntro ?? null;
-  if (introBefore !== null && soundCollecting()) {
-    emitBattleStartIntroSounds(introBefore, next.factoryRoundBattleOrchestrator?.battleStartIntro ?? null);
-  }
-  if (soundCollecting()) {
-    emitPartySendOutSounds(
-      state.battleScene?.resolutionOwner?.forcedPartySelect ?? null,
-      next.battleScene?.resolutionOwner?.forcedPartySelect ?? null,
-      null,
-      false,
-    );
-    const orchestratorAfter = next.factoryRoundBattleOrchestrator;
-    if (orchestratorAfter?.battleForcedPartySelect) {
-      const resolution = orchestratorAfter.battleResolutionPresentation;
-      emitPartySendOutSounds(
-        state.factoryRoundBattleOrchestrator?.battleForcedPartySelect ?? null,
-        orchestratorAfter.battleForcedPartySelect,
-        resolution ? playerFaintReplacementSendOutTimingOfSegment(resolution.segments[resolution.segmentIndex]!) : null,
-        orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
-      );
-    }
-    if (orchestratorAfter?.battleResolutionPresentation) {
-      emitMidBattleSwitchSounds(
-        state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,
-        orchestratorAfter.battleResolutionPresentation,
-        orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
-      );
-    }
-    if (orchestratorAfter?.battleResolutionPresentation) {
-      emitBattleHitSounds(
-        state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null,
-        orchestratorAfter.battleResolutionPresentation,
-        orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
-      );
-    }
-    if (orchestratorAfter?.battleResolutionPresentation) emitMoveAnimSounds(orchestratorAfter.battleResolutionPresentation);
-    emitForfeitEndSounds(
-      state.factoryRoundBattleOrchestrator?.battleCommandPresentation?.lifecycle.phase ?? null,
-      orchestratorAfter !== null && orchestratorAfter !== undefined && orchestratorAfter.battle === null,
-      orchestratorAfter?.round.rules.currentOpponent.frontierBrain !== undefined,
-    );
-    const resolutionBefore = state.factoryRoundBattleOrchestrator?.battleResolutionPresentation ?? null;
-    if (resolutionBefore !== null && orchestratorAfter !== null && orchestratorAfter !== undefined) {
-      emitBattleEndSounds(
-        resolutionBefore,
-        orchestratorAfter.battleResolutionPresentation ?? null,
-        orchestratorAfter.round.rules.currentOpponent.frontierBrain !== undefined,
-      );
-    }
-  }
+  emitTickSounds(state, next);
   runScheduledScreenSounds();
   // Presentation seam, after the logical frame: one Random2 step per presented battle frame
   // (presentationRngHost.ts). Reads only the battle's identity edge, never gameplay RNG values.
