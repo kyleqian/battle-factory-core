@@ -73,6 +73,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Scout:** aud243 read-only (`docs/aud243-scout.md`, unverified): the census never calls `tick()`, so the diff-based sound emitters
   (`core.ts` post-tick block) must move into one exported function both use; T1 is partly circular; ROM T2 needs RNG alignment +
   an input recorder (make-or-break); split aud243a (census column + T1 delta) / aud243b (T2 replay).
+  bnd-c read-only (`docs/bnd-c-scout.md`): pixel provider design (lazy `pic.tileset` / `frame2` getters, the transform branch is the one
+  eager tick read), install points (lib.ts gated start, a vitest setup file, appTrace.ts), proof plan; choose static vs dynamic install.
+  #198 alignment read-only (`docs/al198-scout.md`): no single rule explains the classes (idle-lead hypothesis falsified); one narrow rule
+  (`liveMoveSourceAge` subtracts the 3 pre rows even for `LIVE_MOVE_NO_PRE_ROW_SIDES`: Flamethrower +5 -> +2) is a bounded step.
 - **Final full suite** (`gates/`, HEAD `23a641cb4` == final src): **1,789 files: 1,745 passed + 44 skipped, 0 failed; 14,361 tests
   passed**; typecheck, build, build:lib 0.
 - **Gates** (`gates/`, final src): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**;
