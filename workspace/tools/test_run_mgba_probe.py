@@ -98,6 +98,31 @@ class RunMgbaProbeTests(unittest.TestCase):
             self.assertEqual(result.returncode, 128 + signal.SIGSEGV)
             self.assertFalse(output.exists())
 
+    def test_rm_log_on_success_removes_log_only_when_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "result.json"
+            write = (
+                "import json, pathlib, sys; "
+                "pathlib.Path(sys.argv[1]).write_text(json.dumps({'ok': True}))"
+            )
+            ok = subprocess.run(
+                [sys.executable, str(WRAPPER), "--rm-log-on-success", str(output),
+                 "--", sys.executable, "-c", write, str(output)],
+                capture_output=True, check=False, text=True, timeout=5,
+            )
+            self.assertEqual(ok.returncode, 0)
+            self.assertTrue(output.exists())
+            self.assertFalse(Path(f"{output}.log").exists())
+
+            failed = Path(temp_dir) / "failed.json"
+            bad = subprocess.run(
+                [sys.executable, str(WRAPPER), "--rm-log-on-success", str(failed),
+                 "--", sys.executable, "-c", "print('boom'); raise SystemExit(3)"],
+                capture_output=True, check=False, text=True, timeout=5,
+            )
+            self.assertEqual(bad.returncode, 3)
+            self.assertTrue(Path(f"{failed}.log").exists())
+
     def test_refuses_stale_output_without_running_command(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             output = Path(temp_dir) / "result.json"

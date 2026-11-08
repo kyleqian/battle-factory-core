@@ -172,6 +172,11 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--rm-log-on-success",
+        action="store_true",
+        help="delete the log once the output is accepted (a failed run keeps it)",
+    )
+    parser.add_argument(
         "--mgba-python",
         type=Path,
         help=(
@@ -225,14 +230,16 @@ def main() -> int:
     status = normalized_status(returncode)
     segfaulted = returncode == -signal.SIGSEGV or status == 128 + signal.SIGSEGV
 
-    if returncode == 0 and valid_output:
-        print(f"mGBA probe wrote valid JSON: {output} (log: {log_path})")
-        return 0
-    if segfaulted and valid_output:
-        print(
-            f"mGBA probe wrote valid JSON before known teardown SIGSEGV: "
-            f"{output} (log: {log_path})"
-        )
+    if (returncode == 0 or segfaulted) and valid_output:
+        if returncode == 0:
+            note = "mGBA probe wrote valid JSON"
+        else:
+            note = "mGBA probe wrote valid JSON before known teardown SIGSEGV"
+        if args.rm_log_on_success:
+            log_path.unlink(missing_ok=True)
+            print(f"{note}: {output}")
+        else:
+            print(f"{note}: {output} (log: {log_path})")
         return 0
 
     reason = "output is missing or invalid JSON" if not valid_output else "probe failed"

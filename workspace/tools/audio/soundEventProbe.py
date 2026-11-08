@@ -5,13 +5,16 @@ debugger, so "breakpoints" are a single-step loop that compares the Thumb PC wit
 function entries (PC == symbol + 2 is the first instruction, r0..r3 still hold
 the arguments) -- the same technique as tools/probe/trace-factory-construction-rng.py.
 
-  python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json draft [--frames N] [--profile on|off] [--fast]
+  python3 tools/run-mgba-probe.py [--rm-log-on-success] OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json draft [--frames N] [--profile on|off] [--fast]
   python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json lab REQUEST.json [--frames N] [--log-setup] [--profile on|off] [--fast]
   python3 tools/run-mgba-probe.py OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json trace TRACE.json [--from N] [--frames N] [--profile on|off] [--fast]
 
 `frame` is 1-based: an event during the k-th advance is reported at frame k, the
 first frame whose capture can show its effect. `lab` replays a battle-lab request
 (mechanicLab / factoryLegal) and logs only its trace window unless --log-setup.
+`lab` output carries the replay `trace` key (route / battleScene / appStage id = request file stem / segments) that the aud24* tests replay.
+OUT.json must not exist (the probe and the wrapper both refuse a stale path); --rm-log-on-success drops the wrapper's OUT.json.log.
+--compact writes the committed-fixture form (one line, no spaces, trailing newline); AUDIO_PROBE_EXTRA_HOOKS=BlendPalette adds the aud242d+ call-log hook.
 --profile selects the Scene ON (default) or Scene OFF oracle bootstrap.
 --fast is the hybrid mode: frames run at full speed and a frame is re-stepped (from the
 saved pre-frame state) only when the m4a RAM signature changed during it. Plain stepping
@@ -56,8 +59,16 @@ def load_defines(path, prefix_re):
     return names
 
 
+def lab_replay_trace(request_path, profile, segments):
+    """The `trace` key the aud24* / audioProbeFixtures tests replay: a lab request's trace window staged by its own request id."""
+    return {"route": "generated-orchestrator", "battleScene": "on" if profile == "battle-scene-on" else "off",
+            "appStage": {"id": Path(request_path).stem, "frame": 0}, "segments": segments}
+
+
 def main():
     out, mode, rest = Path(sys.argv[1]), sys.argv[2], sys.argv[3:]
+    if out.exists():
+        raise SystemExit(f"soundEventProbe: refusing stale output path (delete it first): {out}")
     frames_cap = int(rest[rest.index("--frames") + 1]) if "--frames" in rest else None
     profile, bootstrap = PROFILES[rest[rest.index("--profile") + 1] if "--profile" in rest else "on"]
     fast = "--fast" in rest
@@ -224,6 +235,7 @@ def main():
                                "fast": [post[i] for i in diff[:32]], "stepped_pc": hex(step_pc), "stepped_sp": hex(step_sp), "fast_pc": hex(fast_pc), "fast_sp": hex(fast_sp),
                                "catchup_steps": caught, "residual_bytes_after_catchup": None if residual is None else len(residual)})
 
+    replay_trace = None
     t0 = time.time()
     if fast:
         advance = hybrid_advance
@@ -278,6 +290,7 @@ def main():
         state["log"] = True
         state["frame"] = 0
         segments = request["trace"]["segments"]
+        replay_trace = lab_replay_trace(rest[0], profile, segments)
     t_window = time.time()
     done = 0
     for seg in segments:
@@ -292,13 +305,16 @@ def main():
             done += 1
     if fast:  # the fast path cannot see no-op calls; a no-op that shares a re-stepped frame is dropped too, so the log is "effective rows only"
         events, calls = [e for e in events if not e.get("noop")], [c for c in calls if not c.get("noop")]
-    out.write_text(json.dumps({
+    result = {
         "schema": "audio-sound-events/v1", "window": label, "profile": profile, "frames": done - skip_to,
         "hooks": {n: f"0x{oracle.symbols[n]:08x}" for n in hooks}, "mode": "hybrid" if fast else "step",
         "steps": state["steps"], "hybrid": {**{k: state[k] for k in ("fast", "restepped", "state_mismatch")}, "mismatches": mismatches},
         "seconds": round(time.time() - t0, 1), "windowSeconds": round(time.time() - t_window, 1),
         "events": events, "calls": calls,
-    }, indent=1))
+    }
+    if replay_trace is not None:
+        result["trace"] = replay_trace
+    out.write_text(json.dumps(result, separators=(",", ":")) + "\n" if "--compact" in rest else json.dumps(result, indent=1))
 
 
 main()
