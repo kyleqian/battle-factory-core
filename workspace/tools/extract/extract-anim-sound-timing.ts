@@ -295,6 +295,15 @@ function lifetimeOf(cmd: Command): Lifetime {
   // AnimBasicFistOrFoot (battle_anim_fight.c:452-464, create_fist_sprite): data[0] = duration, WaitAnimForDuration (battle_anim_mons.c:551-557) counts it down in calls
   // 1..D, call D + 1 installs DestroyAnimSprite, call D + 2 destroys = D + 1.
   if (op === "create_fist_sprite" || sprite("gFistFootSpriteTemplate")) { const d = op === "create_fist_sprite" ? intNamed("duration") : intArg(args[5]); return d === null || d < 0 ? null : { exact: d + 1 }; }
+  // AnimTask_ScaleMonAndRestore (battle_anim_mon_movement.c:823-865): the entry only sets func; the step (call 1..) counts data[2] = gBattleAnimArgs[2] down to 0, then repeats
+  // once for data[3] = gBattleAnimArgs[2] (> 0) with the deltas negated, then destroys on that second 0: call 2 * duration, gone 2 * duration - 1 ticks after F (duration = script args[4]: args[1] is the priority).
+  if (op === "createvisualtask" && args[0] === "AnimTask_ScaleMonAndRestore") { const d = intArg(args[4]); return d === null || d < 1 ? null : { exact: 2 * d - 1 }; }
+  // AnimTask_GrowAndShrink (battle_anim_effects_2.c:2235-2248 with gGrowAndShrinkAffineAnimCmds :543-549, RunAffineAnimFromTaskData battle_anim_mons.c:1800-1862): the entry
+  // only sets func; frames of duration 12, 24, 12 take calls 1..48 and the END command on call 49 returns FALSE and destroys: gone 48 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_GrowAndShrink") return { exact: 48 };
+  // AnimBreathPuff (battle_anim_effects_2.c:2250-2272): call 0 sets data[0] = 52 and installs TranslateSpriteLinearFixedPoint; calls 1..52 decrement (battle_anim_mons.c:607-621),
+  // call 53 stores DestroyAnimSprite (SetCallbackToStoredInData6), call 54 destroys: gone 53 ticks after F.
+  if (sprite("gBreathPuffSpriteTemplate")) return { exact: 53 };
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
   return null;
 }

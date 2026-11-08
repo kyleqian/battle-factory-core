@@ -1903,6 +1903,7 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242f-headbutt-player-on": (state) => aud241bStage(state, "aud242f-headbutt-player-on", "on", 50, 12, 29, undefined, false, 69),
   "aud242f-attract-player-on": (state) => aud241bStage(state, "aud242f-attract-player-on", "on", 50, 12, 213, undefined, false, 69),
   "aud242f-spark-player-on": (state) => aud241bStage(state, "aud242f-spark-player-on", "on", 50, 12, 209, undefined, false, 69),
+  "aud242f-hiddenpower-player-on": (state) => aud241bStage(state, "aud242f-hiddenpower-player-on", "on", 50, 12, 237, undefined, false, 69),
   // frf250a: BAG / RUN on the action menu (two Level-50 Rattata, both scenes; tools/battle-lab/frf250a-*.json).
   "frf250a-bagrun-on": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-on", "on", 50, 50), 27),
   "frf250a-bagrun-off": (state) => frf250aStage(aud241bStage(state, "frf250a-bagrun-off", "off", 50, 50), 34),

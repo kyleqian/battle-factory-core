@@ -70,6 +70,9 @@ const SPECS: Record<string, Spec> = {
   "headbutt-player": { delta: 2, romOnlyFrom: 120 },
   "icepunch-player": { delta: 2 },
   "icebeam-player": { delta: 2 },
+  "swagger-player": { delta: -3, romOnlyFrom: 300 },
+  "hiddenpower-player": { delta: 2 },
+  "growth-player": { delta: -4, romOnly: ["90:152:-64"], romOnlyFrom: 300 },
 };
 
 describe("move-animation SEs after the aud242f sprite lifetime waits", () => {
