@@ -59,6 +59,7 @@ describe("contain209 gameplay throw", () => {
         },
       };
     });
+    await import("../src/engine/monPicPixelsInstall.ts"); // fresh module graph after resetModules: reinstall the sprite pixels (bnd256c)
     const core = await import("../src/engine/core.ts");
     const containment = await import("../src/engine/presentationContainment.ts");
     containment.clearContainedPresentationErrors();
