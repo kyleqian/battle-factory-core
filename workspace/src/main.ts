@@ -6,6 +6,7 @@
 // ?pokebench=1.
 
 import { buttonForKey, type GbaButton } from "./input.ts";
+import { connectGamepad } from "./gamepad.ts";
 import { FRAME_HZ, mountFactoryGameInternal, SCREEN_HEIGHT, SCREEN_WIDTH } from "./lib.ts";
 import type { FactorySession } from "./factorySession.ts";
 import type { SessionContainedError, SessionTrace } from "./sessionRecorder.ts";
@@ -119,6 +120,9 @@ window.addEventListener("keyup", (event) => {
   const button = buttonForKey(event.key);
   if (button) game.release(button as GbaButton);
 });
+
+// Dev-shell opt-in: the library mount never polls the gamepad itself.
+connectGamepad(game);
 
 // The session trace is always exportable, not just on a crash: when a played
 // moment merely LOOKS wrong, `__POKEBENCH_SESSION__()` in the console yields

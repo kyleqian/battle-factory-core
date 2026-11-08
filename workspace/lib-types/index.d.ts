@@ -48,8 +48,35 @@ export interface FactoryGame {
   destroy(): void;
 }
 
+/** What connectGamepad drives; a FactoryGame fits. */
+export interface GamepadTarget {
+  press(button: GbaButton): void;
+  release(button: GbaButton): void;
+}
+/** The part of a W3C Gamepad the helper reads. */
+export interface GamepadLike {
+  readonly connected: boolean;
+  readonly buttons: ReadonlyArray<{ readonly pressed: boolean }>;
+  readonly axes: readonly number[];
+}
+export interface GamepadOptions {
+  /** Left-stick dead zone, 0..1; an axis counts as a direction past it. Default 0.5. */
+  deadZone?: number;
+  /** Returns the current pads; default `navigator.getGamepads()`. */
+  getGamepads?: () => ArrayLike<GamepadLike | null | undefined>;
+  /** Schedules the next poll and returns a cancel function; default requestAnimationFrame. */
+  schedule?: (poll: () => void) => () => void;
+}
+
 export declare const ENGINE_BUILD: string;
 export declare const SCREEN_WIDTH: 240;
 export declare const SCREEN_HEIGHT: 160;
 export declare const FRAME_HZ: number;
 export declare function mountFactoryGame(options: FactoryGameOptions): FactoryGame;
+/**
+ * Opt-in gamepad input (the mount never polls by itself): polls the first connected W3C Standard
+ * Gamepad once per animation frame and calls game.press / game.release on edges only
+ * (0 A, 1 B, 4 L, 5 R, 8 SELECT, 9 START, 12-15 d-pad, left stick past the dead zone as the d-pad).
+ * Returns a disconnect function; it, or the pad disappearing, releases everything pressed.
+ */
+export declare function connectGamepad(game: GamepadTarget, options?: GamepadOptions): () => void;
