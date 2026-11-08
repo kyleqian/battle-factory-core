@@ -5,6 +5,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): in progress
+
+- **State:** master at the aud243a merge; bnd256c (bnd-c) running on a side worktree. Evidence `.integration/validation/sv-20261108/`.
+  Baseline: src unchanged since the last full suite (`23a641cb4`), so its receipts were reused; oracles fresh.
+- **Folded:** aud243a (S11 step 7 first half; branch `worker/integration-20261108-213051`, 102 min; `docs/aud243a-sound-census.md`):
+  `tick()`'s post-tick sound block moved verbatim into `emitTickSounds` (`src/engine/tickSounds.ts`); `lsd194Census.ts` writes per-seed
+  `sound` / `soundDigest` / `soundAnim` (null on older trees); `tools/integration/soundCensusDelta.py` (arm-vs-arm and `--t1`). T1 0..999
+  Scene ON (self-consistency, NOT ROM parity): exact 236,527, missing-gated 14,353, cry-task 240, other 400, extra 0, unclassified 0;
+  Scene OFF 0 move-anim sounds. ENGINE_BUILD `eb-7b7399877f107136` -> `eb-808efc83d08831db`. Worker: typecheck / build / build:lib 0,
+  full suite (8 shards) 1,746 passed + 44 skipped, 0 failed; 40-seed old-vs-new rows identical once the 3 new fields drop. Supervisor:
+  `rst197CensusDelta.py` vs `sv-20261106/obr251-evidence` 1000 / 1000 identical both scenes (ON 322,634 / OFF 317,269 commands); the
+  `core.ts` diff is a verbatim move. New census baseline: `sv-20261108/aud243a/full/{on,off}-858ea0343`.
+
+---
+
 ## 2026-11-07 / 08 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242d / cln243 / aud242e / bnd253a / aud242f / bnd254b / bnd255f / dif256 / sep257 / pc258 folded
 
 - **State:** master clean, no active workers; final src == bnd255f merge `23a641cb4` (later commits: docs, dif256 / sep257 / pc258 tools). Evidence
@@ -158,47 +173,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-05 / 06 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242a / cln241 / frf250a / frf250b folded
-
-- **State:** master `cd7d6165d`+ clean, no active workers; final src == frf250b `70abc1dd3` (later commits are tests / docs).
-  Evidence `.integration/validation/sv-20261105/`. Final gates: see the last bullet.
-- **Folded:** aud242a (S11 step 6, first slice; `docs/aud242-move-anim-sounds.md`; branch `worker/integration-20261105-213057`):
-  `src/engine/moveAnimSounds.ts` (tick() hook behind `soundCollecting()`, Scene ON only) plays the decoded script `playsewithpan` /
-  `playse` / `waitplaysewithpan` / `loopsewithpan` from `src/data/gen/anim-sound-timing.json` (`npm run extract:anim-sound-timing`,
-  356 moves) at body age `f + 1 + 7`, pan by `animSoundPan`. ROM step-mode windows: Slam, Razor Leaf, Swift, Slash exact; Ember / Psybeam
-  +2, Agility / Swords Dance -4 (named; ISSUES #198). Worker: typecheck, build, build:lib 0; test:gate 364 / 364; full suite in 8 shards
-  0 failed; differential 24 traces 4,658 identical. Supervisor: 3 audio files 356 / 356.
-- **Folded:** cln241 (finish plan Cleanup 4, second half; `docs/cln241-core-rs-removal.md`; branch `worker/side-20261106-000539`):
-  `core-rs/` removed (535 files), its TS wasm adapters, the 18 Rust<->TS parity tests (TS-only literal pins kept in
-  `tests/tsEngineRetainedPins.test.ts`), wasm seeding in `run-subagent.sh`, cargo step in `verify-runner.sh`; gate list regenerated
-  (362 files). Archive: local branch `core-rs-archive` `26ce8d051` (unchanged). Worker: typecheck, build, build:lib 0; test:gate
-  362 / 362; full suite 1,777 files: 1,733 passed + 44 skipped, 0 failed; dist bytes unchanged. Supervisor: archive ref, `bash -n`
-  launcher, retained pins 11 / 11. Untracked `core-rs/target` (5 GB) deleted. **Cleanup 4 done.**
-- **Folded:** frf250a (handoff 4b(g) step 1, live-site bug; branch `worker/integration-20261106-012510`, worker hit its 170-min cap
-  before its report; the supervisor committed its last test edit and verified): A on BAG prints "Items can't be used now." and returns;
-  A on RUN opens "Would you like to forfeit the match and quit now?" + yes/no box (`battle-yesno-frame.json` extracted from
-  `graphics/text_window/1.png`); NO / B return to the menu; SE_SELECT fixtures both scenes. `tests/frf250aBagRunMenu.test.ts`, traces
-  `frf250a-*` (cosmetic residuals ISSUES #199). Supervisor: 5 files 429 / 429; test:gate 362 / 362; typecheck 0; compare
-  `frf250a-run-no-on` prompt frames equal the ROM; differential 32 traces 4,690 identical vs `58771d3c2`.
-- **Folded:** frf250b (4b(g) step 2; main tree; `docs/frf250b-forfeit.md`): YES prints "<PLAYER> forfeited the match!", ends the battle
-  as a loss through the normal lost-battle return (`src/engine/battleForfeit.ts`; no RNG; library battle-end + challenge-end loss;
-  `replayChallenge` replays it), ROM loss-tail sounds. `tests/frf250bForfeit.test.ts`. Worker: typecheck, build, build:lib 0; test:gate
-  362 / 362; differential 24 traces identical; vanilla 0:20 20 / 20. Supervisor stopped it at minute ~80 (it was re-running soaks and
-  had not started the full suite; all work committed). Supervisor: compare `frf250b-run-yes-off` **250 / 250** vs the ROM (forfeit
-  text through the Lobby loss pages); differential 36 traces 5,280 identical vs `3fb56c975`. Scene ON gaps in ISSUES #199.
-  **Handoff 4b(g) done.**
-- **Fixed by the supervisor (`cd7d6165d`):** the final full suite failed 3 trajectory pins in `tests/randomRoundSoak.test.ts` (the
-  exploring policy now sees real BAG / RUN screens, as at fsw235 / vis243a): Baton Pass pin seed 30 -> 32 (re-scan 0..35), swap-offer
-  seed set 0..7, full-policy (c) frames / turn. The 3 tests pass.
-- **Gates** (`sv-20261105/gates/`, src `3fb56c975` = frf250a; frf250b leaves every soak policy unchanged, `forfeitRate` null):
-  varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON
-  **20 / 20**, Scene OFF **20 / 20** (all `budget`). **Final full suite** (`final-suite/`, HEAD `4a9d7392d`, src == final): 1,778 files: 1,733 passed + 44 skipped, 1 failed
-  (`randomRoundSoak`, the 3 pins re-pinned in `cd7d6165d`), 13,908 tests passed; one fork died (low memory beside a supervisor scan): the
-  unreported `battlesceneSplitEligibility` + the re-pinned `randomRoundSoak` rerun on `cd7d6165d` **75 / 75**. Build: the worker's
-  `npm run build` / `build:lib` 0 on `70abc1dd3` (final src).
-  play:random 2 min / scene (seed 7): ON 7 battles / 3 swaps, OFF 17 / 6; 0 page errors / overlays / contained. The 0:60 gates were not run (hours each here).
-- **Next:** handoff "Next work": aud242b (wait resolver) / aud242c (panse / createsoundtask), 4b(e) opponent replacement ball bar
-  (`docs/obr248-scout.md`), cleanup 5 second half or 7, ISSUES #196 / #197 / #198 / #199.
-- **Housekeeping:** evidence `sv-20261102` deleted (older than the last three runs); ~23 GB free.
-- **Notes:** no DEFERRED items. No push. Worker branches (all merged, deleted): integration-20261105-213057 (aud242a),
-  side-20261106-000539 (cln241), integration-20261106-012510 (frf250a); frf250b ran in the main tree. `core-rs-archive` kept for the user.

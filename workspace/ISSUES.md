@@ -61,6 +61,10 @@ next blockers hyper beam orb (52 ops), Hydro Pump orb (44), Fire Spin (42), auro
 (L50 674 emitted, 160 gated; all 868 resolved): Horn Drill 0; Headbutt / Ice Punch / Ice Beam (its 7 SE137 rows now emitted) / Hidden
 Power +2; Swagger -3, Growth -4 (2nd SE152 behind `blend_color_cycle`). Blizzard's snowball ends off-screen (per-species pic offset:
 needs a species-aware model, doc 10.5); Tri Attack, Bubblebeam, Luster Purge, ExtremeSpeed, Psychic, Curse, Spark, Attract unmodelled.
+**aud243a (2026-11-08)** census T1 over 0..999 Scene ON (`docs/aud243a-sound-census.md`): 14,353 gated op sites (13,796 `end`, 557
+`unresolved-branch`; top Sludge Bomb, Bubblebeam, Struggle, Blizzard, Thunderbolt, Psychic, Tri Attack, Dream Eater), 240 cry-task sites
+(Roar 208, Hyper Voice 24, Howl 8), 400 pan rows after the body ends (Signal Beam 350, Mud Shot 50: task SEs outlive the body). The
+offsets above are invisible to T1 (known-offset 0); they need the ROM replay (aud243b).
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 
