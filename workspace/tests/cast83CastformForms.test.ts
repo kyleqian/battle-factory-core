@@ -84,8 +84,11 @@ const fieldOf = (player: number, opponent: number, forms: [number?, number?] = [
 describe("cast83: the field art draws the CASTFORM form", () => {
   it("normal form / other species: byte-identical to the species art (no castformForm on the art)", () => {
     const plain = createBattleCommandFieldArtView(fieldOf(SPECIES.CASTFORM, SPECIES.CASTFORM));
-    expect(plain.player.pic).toBe((backSprites as Record<string, unknown>).CASTFORM);
-    expect(plain.opponent.pic).toBe((frontSprites as Record<string, unknown>).CASTFORM);
+    // bnd254b: the pic's palette comes from battle-sprite-palettes.json (equal values), its pixels are the sprite table's own object.
+    expect(plain.player.pic).toEqual((backSprites as Record<string, unknown>).CASTFORM);
+    expect(plain.opponent.pic).toEqual((frontSprites as Record<string, unknown>).CASTFORM);
+    expect(plain.player.pic.tileset).toBe((backSprites as Record<string, { tileset: unknown }>).CASTFORM!.tileset);
+    expect(plain.opponent.pic.tileset).toBe((frontSprites as Record<string, { tileset: unknown }>).CASTFORM!.tileset);
     expect([plain.player.castformForm, plain.opponent.castformForm]).toEqual([undefined, undefined]);
     expect(battleCommandFieldSpriteOrigin(plain.opponent, "opponent")).toEqual({ x: 144, y: 12 }); // 8 + 17 - 13 (castform-art-diagnosis)
     expect(battleCommandFieldSpriteOrigin(plain.player, "player")).toEqual({ x: 40, y: 48 });
