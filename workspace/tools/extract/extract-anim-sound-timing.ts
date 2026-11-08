@@ -125,7 +125,10 @@ function simplePaletteBlendLength(delay: number, startY: number, targetY: number
     calls += wait;
     waits += wait;
   }
-  return calls + 5;
+  // aud242e: BeginNormalPaletteFade runs inside the sprite's init (the script step, update call 1) and the same iteration's UpdatePaletteFade is call 2, so call n
+  // is iteration F + n - 2; the fifth finishing call (n) clears `active`, the sprite's step destroys it in iteration F + n - 1 and the script's poll passes at F + n:
+  // gone n - 1 ticks after the creation tick (Overheat's BlendPalette log: first call 73, SE171 89 + 6 = 95 for n = 16; Double-Edge: 129 -> SE141 136 for n = 7).
+  return calls + 4;
 }
 // AnimComplexPaletteBlend (battle_anim_normal.c:344-398): the sprite's callback runs once in the script step (init: BlendPalettes y1) and Step1 runs from the
 // same iteration's AnimateSprites. Step1 counts `delay` calls down (iterations F .. F+d-1), blends at F+d (y2 first, then y1, ...) and reloads the timer to
@@ -228,6 +231,52 @@ function lifetimeOf(cmd: Command): Lifetime {
   if (op === "createsprite" && args[0] === "gSlideMonToOriginalPosSpriteTemplate") { const d = intArg(args[5]); return d === null ? null : { exact: d }; }
   if (op === "create_dragon_rage_fire_spit_sprite") { const d = intArg(args.find((a) => a.startsWith("duration="))); return d === null ? null : { exact: d + 1 }; }
   if (op === "create_dragon_rage_fire_plume_sprite") return { exact: 26 };
+  // ---- aud242e: fixed-length sprite and mon-task lifetimes (docs/aud242-move-anim-sounds.md section 9 cites every C line). A script createsprite runs
+  // CreateSpriteAndAnimate (sprite.c:591-616): callback call 0 (init) and the first AnimateSprite in the script step; call k >= 1 is the AnimateSprites of
+  // iteration F + k - 1, so a sprite whose callback destroys at call K is gone K - 1 ticks after the creation tick (animEnded callbacks: the anim's frame
+  // durations sum T, animEnded at call T, destroy at call T + 1: exact T). A task entry that runs its step once itself (call 0) and destroys at step call
+  // N - 1 is gone N - 2 ticks after; one that only sets `func` (ElectricBolt) destroys at call K = the first RunTasks, exact K - 1.
+  const intNamed = (key: string): number | null => intArg(args.find((a) => a.startsWith(`${key}=`)));
+  const sprite = (template: string): boolean => op === "createsprite" && args[0] === template;
+  const arc = (index: number): Lifetime => { const d = intArg(args[index]); return d === null ? null : { exact: d }; };
+  // AnimSpriteOnMonPos (battle_anim_mons.c:1515-1536): init call, then animEnded of sAnim_ToxicBubble (battle_anim_poison.c:16-23: 4 x 5 = 20).
+  if (sprite("gToxicBubbleSpriteTemplate")) return { exact: 20 };
+  // AnimFang (battle_anim_effects_3.c:1515-1519): gFangAnimCmds (:321-328) 8 + 16 + 4 + 4 = 32.
+  if (sprite("gFangSpriteTemplate")) return { exact: 32 };
+  // Arc sprites (InitAnimArcTranslation + TranslateAnimHorizontalArc, battle_anim_mons.c:785-801, AnimTranslateLinear :1111): data[0] = duration D; D calls
+  // translate, call D + 1 destroys.
+  if (sprite("gSludgeProjectileSpriteTemplate")) return arc(5);
+  if (sprite("gWaterGunProjectileSpriteTemplate")) return arc(7);
+  if (op === "create_absorption_orb_sprite") { const d = intNamed("wave_period"); return d === null ? null : { exact: d }; }
+  // AnimOverheatFlame_Step (battle_anim_dragon.c:443-452): ++data[0] > duration at call duration + 1.
+  if (op === "create_overheat_flame_sprite") { const d = intNamed("duration"); return d === null ? null : { exact: d }; }
+  // AnimWaterPulseBubble_Step (battle_anim_water.c:1508-1516): --data[3] == 0 at call A5; AnimWaterPulseRing_Step (:1541-1556): data[0] counts 0.. from call 1,
+  // destroys when it equals data[3] = A2 (call A2 + 1).
+  if (sprite("gWaterPulseBubbleSpriteTemplate")) { const d = intArg(args[8]); return d === null || d < 1 ? null : { exact: d - 1 }; }
+  if (sprite("gWaterPulseRingSpriteTemplate")) return arc(5);
+  // DoHorizontalLunge / ReverseHorizontalLungeDirection (battle_anim_mon_movement.c:427-445, battle_anim_mons.c:651-663): A0 translating calls, a call that only
+  // swaps the callback, the reverse call, A0 translating calls, a swap call, the destroy call 2 * A0 + 4.
+  if (sprite("gHorizontalLungeSpriteTemplate")) { const d = intArg(args[3]); return d === null ? null : { exact: 2 * d + 3 }; }
+  // AnimTask_ShakeBattlePlatforms (battle_anim_normal.c:957-993): the entry runs the step once; a shake takes delay + 1 calls, `shakes` shakes, the last
+  // call (index shakes * (delay + 1) - 1) destroys.
+  if (op === "shake_battle_platforms" || (op === "createvisualtask" && args[0] === "AnimTask_ShakeBattlePlatforms")) {
+    const [shakes, delay] = op === "shake_battle_platforms" ? [intNamed("shakes"), intNamed("delay")] : [intArg(args[4]), intArg(args[5])];
+    if (shakes === null || delay === null || shakes < 1 || delay < 0) return null;
+    return { exact: shakes * (delay + 1) - 2 };
+  }
+  // AnimTask_TranslateMonElliptical(RespectSide) (battle_anim_mon_movement.c:358-402): the entry runs the step once, data[5] += wavePeriod (1 << min(speed, 5))
+  // per call, loops decrement on every wrap to 0; the call that reaches 0 loops destroys.
+  if (op === "createvisualtask" && (args[0] === "AnimTask_TranslateMonElliptical" || args[0] === "AnimTask_TranslateMonEllipticalRespectSide")) {
+    const [loops, speed] = [intArg(args[5]), intArg(args[6])];
+    if (loops === null || speed === null || loops < 1 || speed < 0) return null;
+    const period = 1 << Math.min(speed, 5);
+    let [phase, remaining, calls] = [0, loops, 0];
+    do { calls += 1; phase = (phase + period) & 0xff; if (phase === 0) remaining -= 1; } while (remaining > 0);
+    return { exact: calls - 2 };
+  }
+  // AnimTask_ElectricBolt (battle_anim_electric.c:685-724): the entry only sets func; the step's data[10] counts calls 1.. and call 11 (data[10] == 10) destroys.
+  // The five segment sprites are CreateSprite'd by the task, which gAnimVisualTaskCount does not count.
+  if (op === "createvisualtask" && args[0] === "AnimTask_ElectricBolt") return { exact: 10 };
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
   return null;
 }
@@ -307,7 +356,7 @@ function walk(bodyLabel: string, turn: number, attackerSide: number): Walk {
       // AnimTask_MetallicShine decompresses its tilemap and image and loads a palette in the creating step (battle_anim_dark.c:866-870): a measured
       // VBlank overrun (METALLIC_SHINE_LOAD_LAG; Metal Claw and Steel Wing, aud242d), like BG_LOAD_LAG.
       if ((op === "metallic_shine" || (op === "createvisualtask" && args[0] === "AnimTask_MetallicShine")) && frame !== null) lags.push({ after: frame, frames: METALLIC_SHINE_LOAD_LAG });
-      if (frame !== null) pending.push({ at: frame, life: lifetimeOf(cmd), name: args[0] ?? op });
+      if (frame !== null) pending.push({ at: frame, life: lifetimeOf(cmd), name: op === "createsprite" || op === "createvisualtask" ? args[0] ?? op : op });
       const known = returnValue(args[0] ?? "", attackerSide);
       ret = op === "createvisualtask" ? known : ret;
       if (op === "createvisualtask" && known === null && /^AnimTask_(Is|Get)\w*(Side|Contest|Environment|Partner|Power|Count|Hit|Right)/.test(args[0] ?? "")) ret = null;

@@ -67,15 +67,16 @@ interface Spec {
 
 // Per-move offsets (ISSUES #198: the ROM script start vs the live adapter's body clock; shape, ids, pans and relative frames are exact):
 // Thunderbolt / Double-Edge / Icy Wind / Metal Claw / Steel Wing are the +2 idle-lead class; the status bodies Hail / Sunny Day / Calm Mind are -4 / -4 / -5
-// (aud242a's -4 class +-1: per-move constants). The ROM-only rows: Thunderbolt's AnimTask_ElectricBolt SEs (a task with sprite-driven lifetime,
-// aud242e), Double-Edge's SE_M_MEGA_KICK2 behind AnimTask_TranslateMonEllipticalRespectSide (task lifetime, aud242e), and the next move's body (cut).
+// (aud242a's -4 class +-1: per-move constants). The ROM-only rows: Thunderbolt's two SE_M_THUNDERBOLT2 rows behind the unmodelled ElectricityEffect waits, and the next move's body (cut).
+// aud242e models the elliptical task (Double-Edge's SE_M_MEGA_KICK2, +2 like the rest) and the sprite waits before Thunderbolt's SE_M_HYPER_BEAM, which lands 1 frame
+// later than the +2 class (named extra +1, undiagnosed: the ROM's blend log matches the table to the frame up to that row).
 // Metal Claw / Steel Wing: SE_M_HARDEN's second play is a Task_LoopAndPlaySE call counter (28 iterations) that spans the shine's creation, where the ROM
 // loses 2 wall frames (VBlank overrun of the tilemap / image decompress): the model shifts only ops after the creation step (METALLIC_SHINE_LOAD_LAG),
 // so that one row carries the named +2.
 const SPECS: Record<string, Spec> = {
-  "thunderbolt-player": { delta: 2, romOnly: ["172:215:63", "239:119:63", "258:119:63"] },
+  "thunderbolt-player": { delta: 2, romOnly: ["239:119:63", "258:119:63"], extra: { "169:215:63": 1 } },
   "icywind-opponent": { delta: 2 },
-  "doubleedge-player": { delta: 2, romOnly: ["136:141:63"] },
+  "doubleedge-player": { delta: 2 },
   "calmmind-player": { delta: -5, romOnlyFrom: 500 },
   "hail-player": { delta: -4, romOnlyFrom: 380 },
   "sunnyday-player": { delta: -4, romOnlyFrom: 390 },
