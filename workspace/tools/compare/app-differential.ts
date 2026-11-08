@@ -302,7 +302,11 @@ try {
     const trace = withCaptureRange(loadCompareTrace(path), options.captureRange);
     const frames = trace.captureFrames ?? [];
     if (frames.length === 0) {
-      throw new Error(`trace ${path} requests no captureFrames; nothing to compare`);
+      throw new Error(
+        `trace ${path} requests no captureFrames; nothing to compare. ` +
+        "Pass --capture-range START:END to choose the frames to render and compare " +
+        "(e.g. --capture-range 100:140).",
+      );
     }
     return { input, path, trace, frames };
   });

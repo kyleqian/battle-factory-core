@@ -6,6 +6,9 @@
 set -eu
 T=tools/integration
 ROOT=$1; shift
+# Final merge (always reached, including a pure-resume call with no jobs left): after the job pool drains, each shard whose parts p0..p(SPLIT-1) all exist is concatenated into r<i>.jsonl; if any shard in LSD194_SHARDS is still unmerged (a "FAIL" line above, or the call was killed before this point -- e.g. a tool timeout during xargs)
+# the script prints "INCOMPLETE", exits 1 and keeps the trees even with LSD194_FINAL=1; re-invoke with the same root, the same LSD194_SPLIT and LSD194_SHARD_SEEDS to resume (a finished shard is never re-run, the merge always re-runs).
+# LSD194_SHARD_SEEDS=2 (default 100, must be divisible by LSD194_SPLIT) shrinks a shard for smoke runs: LSD194_SHARDS=0 LSD194_SHARD_SEEDS=2 covers seeds 0..1.
 # LSD194_SHARDS="0 1 2" runs only those 100-seed shards (default all ten); re-invoke with the same root to resume (LSD194_FINAL=1 on the last call removes the trees).
 SHARDS=${LSD194_SHARDS:-0 1 2 3 4 5 6 7 8 9}
 mkdir -p "$ROOT"; ROOT=$(cd "$ROOT" && pwd); WS=$PWD
@@ -27,18 +30,27 @@ for arm in "$@"; do
   done
 done
 SPLIT=${LSD194_SPLIT:-1}
-export SPLIT
-xargs -P "${LSD194_CENSUS_JOBS:-4}" -L 1 sh -c 'w=$((100 / SPLIT)); a=$(($1 * 100 + $3 * w)); b=$((a + w - 1)); cd "$0/tree" && node --max-old-space-size=4096 \
+SEEDS=${LSD194_SHARD_SEEDS:-100}
+[ $((SEEDS % SPLIT)) = 0 ] || { echo "lsd194Census: LSD194_SHARD_SEEDS=$SEEDS is not divisible by LSD194_SPLIT=$SPLIT" >&2; exit 2; }
+export SPLIT SEEDS
+# An empty job list must skip xargs: GNU xargs still runs the command once with no arguments, exits 123, and set -e then aborted the script before the merge/cleanup below (the "final merge did not run" papercut).
+[ ! -s "$ROOT/jobs" ] || xargs -P "${LSD194_CENSUS_JOBS:-4}" -L 1 sh -c 'w=$((SEEDS / SPLIT)); a=$(($1 * SEEDS + $3 * w)); b=$((a + w - 1)); cd "$0/tree" && node --max-old-space-size=4096 \
   --experimental-strip-types --no-warnings tools/integration/lsd194Census.ts --seeds=$a..$b --scene="$2" \
   --out="$0/r$1.p$3.jsonl" > "$0/r$1.p$3.log" 2>&1 || echo "FAIL $0 r$1 p$3"' < "$ROOT/jobs"
+MISSING=0
 for arm in "$@"; do
   REV=${arm%:*}; SCENE=${arm##*:}; OUT="$ROOT/$SCENE-$(git rev-parse --short "$REV")"
   for i in $SHARDS; do
     [ -s "$OUT/r$i.jsonl" ] && continue
     ok=1; for j in $(seq 0 $((SPLIT - 1))); do [ -s "$OUT/r$i.p$j.jsonl" ] || ok=0; done
-    [ $ok = 1 ] && for j in $(seq 0 $((SPLIT - 1))); do cat "$OUT/r$i.p$j.jsonl"; done > "$OUT/r$i.jsonl"
+    if [ $ok = 1 ]; then
+      for j in $(seq 0 $((SPLIT - 1))); do cat "$OUT/r$i.p$j.jsonl"; done > "$OUT/r$i.jsonl.tmp" && mv "$OUT/r$i.jsonl.tmp" "$OUT/r$i.jsonl"
+    else
+      MISSING=$((MISSING + 1)); echo "lsd194Census: $OUT shard $i has missing parts (see $OUT/r$i.p*.log)" >&2
+    fi
   done
 done
+if [ "$MISSING" != 0 ]; then echo "INCOMPLETE: $MISSING shard(s) unmerged; trees kept; re-invoke with the same root/LSD194_SPLIT/LSD194_SHARD_SEEDS to resume" >&2; exit 1; fi
 if [ "${LSD194_FINAL:-0}" = 1 ]; then
   for arm in "$@"; do
     REV=${arm%:*}; SCENE=${arm##*:}; OUT="$ROOT/$SCENE-$(git rev-parse --short "$REV")"
