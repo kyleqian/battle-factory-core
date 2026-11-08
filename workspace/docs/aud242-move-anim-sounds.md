@@ -454,7 +454,7 @@ iteration F + k - 1 (script CB1 first). Sprites that a task makes with `CreateSp
 | `gFangSpriteTemplate` | 32 | `AnimFang` battle_anim_effects_3.c:1515-1519, `gFangAnimCmds` :321-328 (8 + 16 + 4 + 4) |
 | `gSludgeProjectileSpriteTemplate` (args[5]), `gWaterGunProjectileSpriteTemplate` (args[7]), `gWaterPulseRingSpriteTemplate` (args[5]) | D (the arc duration) | `InitAnimArcTranslation` + `TranslateAnimHorizontalArc` battle_anim_mons.c:785-801, `AnimTranslateLinear` :1111; data[0] = D, D translating calls, call D + 1 destroys; ring `AnimWaterPulseRing_Step` battle_anim_water.c:1541-1556 |
 | `gWaterPulseBubbleSpriteTemplate` | args[8] - 1 | `AnimWaterPulseBubble_Step` battle_anim_water.c:1508-1516 (`--data[3] == 0` at call A8) |
-| `create_absorption_orb_sprite` | `wave_period` | the orb's wave counter step (the arc duration is the period) |
+| `create_absorption_orb_sprite` | `wave_period` | the orb's wave counter step (period = `wave_period`; proven by the Giga Drain / Mega Drain / Absorb ROM windows, not re-cited line by line) |
 | `create_overheat_flame_sprite` | `duration` | `AnimOverheatFlame_Step` battle_anim_dragon.c:443-452 (`++data[0] > duration` at call duration + 1) |
 | `gHorizontalLungeSpriteTemplate` | 2 * args[3] + 3 | `DoHorizontalLunge` / `ReverseHorizontalLungeDirection` battle_anim_mon_movement.c:427-445, battle_anim_mons.c:651-663 (N translating calls, a swap call, the reverse call, N calls, a swap call, destroy at 2N + 4) |
 | `shake_battle_platforms` / `AnimTask_ShakeBattlePlatforms` | shakes * (delay + 1) - 2 | battle_anim_normal.c:957-993: the entry runs the step once; a shake takes delay + 1 calls; the call index shakes * (delay + 1) - 1 destroys |
@@ -473,8 +473,8 @@ and Ice Beam into the +2 idle-lead class (delta 1 -> 2); the aud242c test specs 
 | Toxic | +3 | 14 | window cut at ROM 280 (the opponent's body) |
 | Rock Tomb | +2 | 5 | proves the platform shake `shakes * (delay + 1) - 2` (the scout's "one call earlier" is not supported) |
 | Overheat | +2 | 2 + 4 | the four SE147 flame rows carry a named +3 (below) |
-| Counter | -16 | 4 | Counter is used second; the ROM's opponent body (SE214 / SE131) is ROM-only; the relative SE122 -> SE123 gap of 21 proves the elliptical (loops 1, exact 14) |
-| Giga Drain / Mega Drain / Absorb | -1 | 12 / 11 / 10 | absorb moves start 1 frame before ours |
+| Counter | -16 | 5 | Counter is used second; the ROM's opponent body (SE214 / SE131) is ROM-only; the relative SE122 -> SE123 gap of 21 proves the elliptical (loops 1, exact 14) |
+| Giga Drain / Mega Drain / Absorb | -1 | 10 / 10 / 11 | absorb moves start 1 frame before ours |
 | Thunderbolt | +2 | 4 | SE215 (ROM 172) carries a named +1; SE119 (239, 258) ROM-only |
 | Sludge / Poison Fang / Water Pulse / Rolling Kick / Double-Edge | +2 | all | Double-Edge's SE141 (ROM 136) is now emitted: the elliptical (loops 2, exact 30) created at 98 resumes the script at 129, where the ROM's BG `BlendPalette` starts (test) |
 | Water Gun | 0 | 4 | |
