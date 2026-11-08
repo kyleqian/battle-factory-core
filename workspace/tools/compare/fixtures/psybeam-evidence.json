@@ -20,9 +20,9 @@
     "verifier": "tools/compare/psybeamEvidence.ts",
     "verifierSha256": "fa84171af32074c95c86be60291b26e4c84850d3ae15caa76eab2c0e8d46cecf",
     "framebufferVerifier": "tools/compare/psybeamFramebuffer.ts",
-    "framebufferVerifierSha256": "1f4fed75bc5228f37bffc6ad1ed328fc203e247c38082d29034845e60fad005f",
+    "framebufferVerifierSha256": "f31fbedd42b8afa6e4e4469918547c86805a47544cb0435c2ed50d62b59710fd",
     "freshFramebufferVerifier": "tools/compare/psybeamFreshFramebuffer.ts",
-    "freshFramebufferVerifierSha256": "10c30fdcc5eb2c575a3090ee14bfb0360ba5b03b4360b928afd836bbb31ab1fc"
+    "freshFramebufferVerifierSha256": "b2366851fc29fedc85624538e130449921f678e155dead059d10ae95e173c192"
   },
   "orientations": {
     "player-back": {

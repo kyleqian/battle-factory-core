@@ -25,7 +25,7 @@
     "reducerVerifier": "tools/compare/verifyFireBlastReducer.ts",
     "reducerVerifierSha256": "b2a83db8585d26d6180e651a354aeff0220161e351a1075647aac3c51aa750f5",
     "framebufferVerifier": "tools/compare/fireBlastFramebuffer.ts",
-    "framebufferVerifierSha256": "f986979c9062c1db7dfa5047f3cbd244153f42cd92808bfa6a212d5a35e89fbb",
+    "framebufferVerifierSha256": "db4dc8a96f18f62f79bff9e5ab028b368d75f8bfd77d242833aeea04e984c019",
     "smallEmberAsset": "src/assets/gen/battle-anim-small-ember.json",
     "smallEmberAssetSha256": "63f1fc4381673f60ccfd660d75089026e8df5113da4e8bba852f61b50d4262db",
     "stagingFixture": "tests/fixtures/fire-blast-animation-source-staging.json",
