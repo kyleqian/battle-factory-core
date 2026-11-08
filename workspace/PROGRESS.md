@@ -41,7 +41,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   resolved 833 -> 868. 7 ROM windows (offsets ISSUES #198); aud242c Ice Beam's 7 SE137 rows now emitted (romOnly list dropped). Worker:
   typecheck / build / build:lib 0, test:gate 362 / 362, differential 16 traces 1,536 identical. Supervisor: table byte-identical; 22 audio
   files 939 passed + 18 skipped.
-- **Next:** bnd254b (pic geometry table, bundle hygiene bnd-b), then wind-down gates.
+- **Folded:** bnd254b (bundle hygiene "bnd-b"; side branch `worker/side-20261108-023543`, 45 min; `docs/bnd254b-pic-geometry.md`):
+  generated `src/assets/gen/battle-pic-geometry.json` (`npm run extract:battle-pic-geometry`; columns / rows / topRow per species and
+  side, doll, Castform forms); faint timing, the Extrasensory gate and `pic.palette` (now from `battle-sprite-palettes.json`) no longer
+  read the sprite pixel JSON. Exhaustive old-read == new-read test over 752 sheets (`tests/bnd254bPicGeometry.test.ts`). ENGINE_BUILD
+  `eb-f5ed6a9418d226b7` -> `eb-7b7399877f107136` (tell the website); headless +37 KB until bnd-c drops the sprite chunk. Worker:
+  typecheck / build / build:lib 0; full suite (6 shards) 1,744 passed + 44 skipped, 0 failed. Supervisor: `compare:differential` 4 faint
+  traces (obr251 on / off, turn13-dragonbreath-faint, turn5-faint) vs `7b899a9`: 863 captures byte-identical.
+- **Next:** bnd255f (gamepad helper), then wind-down gates; later bnd-c (pixel provider + dynamic import).
 
 ---
 

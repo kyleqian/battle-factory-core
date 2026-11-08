@@ -82,7 +82,7 @@ never brief those here. One worker at a time; each run folds the next audio step
    `docs/cln243-evidence-untrack.md`; the ~593 MB rest of `tools/compare/evidence` is read by tests; remaining per `docs/cln7-scout.md`: ~590 MB of tracked evidence looks write-only;
    first a policy + new-output default to the ignored `.integration/evidence/`, then `git rm --cached` only after a moved-aside full
    suite; no rclone / R2 remote exists on this host, so off-host backup needs the user's setup -- keep evidence local meanwhile).
-3. **Bundle hygiene** (scout: `docs/bnd-scout.md`; **bnd-a DONE 2026-11-08** as bnd253a, `docs/bnd253a-test-json.md`; next bnd-b / bnd-c): test-only JSON out of `src/`, sprite pixels out of the headless graph
+3. **Bundle hygiene** (scout: `docs/bnd-scout.md`; **bnd-a DONE 2026-11-08** as bnd253a, `docs/bnd253a-test-json.md`; **bnd-b DONE** as bnd254b, `docs/bnd254b-pic-geometry.md`; next bnd-c): test-only JSON out of `src/`, sprite pixels out of the headless graph
    (`battleCommandFieldArt`, 11.8 MB chunk), lazy-loaded sprite sheets and large tables, gamepad input through `press` / `release`.
 4. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
    `--lobby-new-challenge` run); Scene ON soak `--render-every 8` 0:16..0:30 plus a `--render-every 1` sample; varied-RNG sweeps;
