@@ -1,3 +1,8 @@
+// aud243a (docs/aud243a-sound-census.md): two more fields per seed, `sound` = every sound event of the battle as [frame, kind, id, pan] (+ mode for a cry; frame = 1-based census step, the value
+// FactorySession.frame has after the tick) and `soundDigest` (sha256[:16] of `sound`), plus `soundAnim` = one row per move-animation command that presented, [command index into `commands`, moveId, turn,
+// attacker battler, target battler, first presenting frame, last presenting frame, frame of body age 0 (null: no live body), 1 when the segment is HITMARKER_NO_ANIMATIONS] (the T1 attribution input of
+// soundCensusDelta.py). Events come from the same emitters tick() calls (emitTickSounds on the orchestrator before/after each step, battleScene null) between beginScreenSoundTick and runScheduledScreenSounds
+// inside collectSoundTick; menu SEs fire inside the advance functions and are collected too. A tree without those modules writes sound / soundDigest / soundAnim = null. No existing field changes.
 // apx210 (finish plan Phase 2, liveMovePlayback.ts): trailing field [21] = a move-animation's playback class ("live", "static:<reason>",
 // later "approx:<reason>", "pause" = no body request; null otherwise). Set from (command, field before it) when the segment is seen, then
 // refined on the command's first presenting row from the production render view (the presentation gates). Fields [0..20] are unchanged.
@@ -40,6 +45,15 @@ import { createBattleResolutionPresentationRenderView } from "../../src/engine/b
 
 // apx210: optional so the file still runs on a tree without the classifier.
 const playback = await import("../../src/engine/liveMovePlayback.ts").catch(() => null);
+// aud243a: optional sound modules (null on a tree that predates them: sound = null).
+const [soundEvents, screenSounds, tickSounds, render, scriptConstants] = await Promise.all([
+  import("../../src/audio/soundEvents.ts").catch(() => null),
+  import("../../src/engine/screenSounds.ts").catch(() => null),
+  import("../../src/engine/tickSounds.ts").catch(() => null),
+  import("../../src/engine/battleResolutionPresentationRender.ts").catch(() => null),
+  import("../../src/engine/battleScriptSourceConstants.ts").catch(() => null),
+]);
+const soundOn = Boolean(soundEvents && screenSounds && tickSounds);
 
 function nextPrintU(events: readonly any[], sequence: number): number | string {
   const at = events.findIndex((e) => e.sequence === sequence);
@@ -65,13 +79,27 @@ for (let seed = from!; seed <= to!; seed += 1) {
   }));
   let rng = createPresentationRngSession();
   let frame = 0; let ended = false; let error: string | null = null;
+  const sound: unknown[][] = []; const animRows = new Map<unknown, number[]>(); const cmdIndex = new Map<unknown, number>();
   const seen = new Set<unknown>(); const rows = new Map<unknown, unknown[]>(); const classified = new Set<unknown>(); const slotUses = [0, 0, 0, 0]; let lastUsed: string | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
     if (++frame > 200000) throw new Error("frame budget");
-    if (state.battleStartIntro) state = advanceFactoryRoundBattleStartIntro(state, new Set(buttons) as never);
-    else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons) as never);
-    else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons) as never);
+    const advance = () => {
+      if (state.battleStartIntro) state = advanceFactoryRoundBattleStartIntro(state, new Set(buttons) as never);
+      else if (state.battleResolutionPresentation) state = advanceFactoryRoundBattleResolution(state, new Set(buttons) as never);
+      else if (state.battleCommandPresentation) state = advanceFactoryRoundBattleCommand(state, new Set(buttons) as never);
+    };
+    if (soundOn) {
+      // The same order as tick(): begin, advance, the diff emitters (orchestrator before / after, no canonical battleScene), scheduled sounds; one collected tick per step.
+      const before = state;
+      const { events } = soundEvents!.collectSoundTick(frame, () => {
+        screenSounds!.beginScreenSoundTick(frame);
+        advance();
+        tickSounds!.emitTickSounds({ battleScene: null, factoryRoundBattleOrchestrator: before } as never, { battleScene: null, factoryRoundBattleOrchestrator: state } as never);
+        screenSounds!.runScheduledScreenSounds();
+      });
+      for (const e of events) sound.push(e.mode === undefined ? [e.frame, e.kind, e.id, e.pan] : [e.frame, e.kind, e.id, e.pan, e.mode]);
+    } else advance();
     rng = tickLiveMovePresentationRngSession(rng, state, liveMoveRandom2PlanContextAt);
     const r = state.battleResolutionPresentation as any;
     if (r) {
@@ -99,6 +127,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
           const cls = playback?.liveMovePlaybackClassification(c, battleResolutionFieldBeforeCommand(s.field, s.commands, i)) ?? null;
           row.push(cls === null ? null : playback!.liveMovePlaybackCode(cls));
           rows.set(c, row);
+          cmdIndex.set(c, commands.length);
           commands.push(row);
         });
       }
@@ -112,6 +141,20 @@ for (let seed = from!; seed <= to!; seed += 1) {
         const cls = playback.liveMovePlaybackClassification(c, battleResolutionFieldBeforeCommand(s.field, s.commands, r.commandIndex),
           createBattleResolutionPresentationRenderView(r, rng.host));
         row[21] = cls === null ? null : playback.liveMovePlaybackCode(cls);
+      }
+    }
+    if (soundOn && r?.lifecycle.phase === "presenting") {
+      const s = r.segments[r.segmentIndex]; const c = s?.commands[r.commandIndex];
+      if (c?.type === "move-animation") {
+        let a = animRows.get(c);
+        if (!a) {
+          const q = c.animation;
+          a = [cmdIndex.get(c)!, q?.moveId ?? null, q?.turn ?? null, q?.attacker ?? null, q?.target ?? null, frame, frame, null,
+            (s.beforeRules.rulesContext.hitMarker & (scriptConstants?.BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS ?? 128)) !== 0 ? 1 : 0] as never;
+          animRows.set(c, a);
+        }
+        a[6] = frame;
+        if (a[7] === null && render?.liveMoveSourceAge) { const src = render.liveMoveSourceAge(r); if (src && src.age === 0) a[7] = frame; }
       }
     }
     if (!owned()) ended = true;
@@ -157,6 +200,9 @@ for (let seed = from!; seed <= to!; seed += 1) {
       until(() => phase() === "action-menu");
     }
   } catch (e) { error = String(e); }
-  lines.push(JSON.stringify({ seed, scene, error, eventsDigest: events.digest("hex").slice(0, 16), commands }));
+  const extra = soundOn
+    ? { sound, soundDigest: createHash("sha256").update(JSON.stringify(sound)).digest("hex").slice(0, 16), soundAnim: [...animRows.values()] }
+    : { sound: null, soundDigest: null, soundAnim: null };
+  lines.push(JSON.stringify({ seed, scene, error, eventsDigest: events.digest("hex").slice(0, 16), commands, ...extra }));
 }
 writeFileSync(arg("out")!, lines.join("\n") + "\n");
