@@ -1,3 +1,79 @@
+## 2026-11-04 / 05 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud241a / aud241b / frs247 / cln240 / aud241c-fx / aud241c folded
+
+- **State:** master `f3440331d`+ (final src == aud241c merge). Tree clean, no active workers. Evidence `.integration/validation/sv-20261104/`.
+  The long gates below ran on src `fef00b6c5`; the final src adds only the ratchet move `bc74a02d3` and aud241c (write-only sound),
+  covered by the final full suite + build in `sv-20261104/final-suite/` on `f3440331d`: **1,793 files: 1,749 passed + 44 skipped,
+  0 failed** (14,724 tests); build 0; build:lib 0.
+- **Folded:** aud241a (S11 step 5, first slice; `docs/aud241a-battle-start-sounds.md`; branch `worker/integration-20261104-213051`):
+  `src/engine/battleStartSounds.ts` emits from `tick()` (guarded by `soundCollecting()`) the battle BGM (476, Brain 471) with
+  `m4aMPlayAllStop`, the ball tray ENTER / BALL / EXIT SEs (per-side pans, SE player field), SE_BALL_OPEN and the send-out cries
+  (pan +-25, NORMAL / WEAK, duck) for the intro, mid-battle recall / send-in and the forced party-menu send-out. ROM windows (step
+  mode): intro YOSHI / MAGNETON both scenes + canonical intro, Scene OFF voluntary switch, opponent replacement OFF, canonical forced
+  send-out ON. Not ROM-proven (synthetic tests only): Brain 471, WEAK send-out cry, Scene ON voluntary / opponent mid-battle.
+  Flow mismatches listed in the doc (MAGNETON ON player side 1 frame early; BGM-to-tray gap 348..374 across labs, engine 359).
+  Worker: typecheck, build, build:lib 0; smoke 448; 17 files 233 tests; differential 28 traces 7,175 identical. Supervisor: 4 audio
+  files 197 / 197.
+  Supervisor differential over all 211 traces vs `de7557c52`: **38,532 / 38,532 identical**.
+- **Folded:** aud241b (S11 step 5, second slice; `docs/aud241b-battle-sounds.md`; branch `worker/integration-20261104-231007`):
+  `src/engine/battleHitSounds.ts` emits effectiveness SEs 12 / 13 / 14 (pan by target side), SE_FAINT, the FAINT-mode cry (duck +
+  restore; restore length measured for 15 species, fitted for the rest, `src/data/faintCryFrames.ts`) and the low-HP loop
+  (SE 90 start on a red bar, real stop on faint). ROM windows (step mode, ON + OFF): opponent / player faint (all deltas 0),
+  super-effective, low-HP, low-HP then faint, 14 faint-cry lengths. Deltas recorded, not fixed: ISSUES #197. Not proven: the
+  `battle-window{,-off}` RHYDON / GOLBAT fixtures (no engine staging; ROM facts pinned only), switch-in low-HP call, non-hit hp.
+  Worker: typecheck, build, build:lib 0; 22 files 887 tests + 7 appTrace importers 90; differential 28 traces identical.
+  Supervisor: 4 audio files 316 / 316; differential 211 traces vs `ccdfe68d3` **38,532 / 38,532 identical**.
+- **Folded:** frs247 (handoff 4b(d), Kyle's white flash; `docs/frs247-faint-replacement-reshow.md`; branch
+  `worker/integration-20261105-005010`): `renderBattleResolutionForcedPartySelect` blended the reshow toward white and drew the
+  player ball tray; the ROM reshow is a brightness DECREASE (`BeginHardwarePaletteFade(0xFF,0,16,0,1)`) and flags 1 skip the player
+  summary. Now `mgbaDarkenColor` with the same BLDY ramp, tray removed (`PARTY_SENDOUT_SUMMARY_TRAY_END`, view `partyStates` gone).
+  ROM dense frames, 9 species x 2 scenes + a two-faint battle: the 15 fade rows (e56..70) went 576,000 px -> 0 in every window;
+  later residuals unchanged (OFF ball / release ~300k px, pfr192). Fixture `tools/integration/fixtures/frs247/rom-frames.json` +
+  `tests/frs247FaintReplacementReshow.test.ts` (10 / 12 fail on the parent). Re-pinned `battleResolutionPresentation.test.ts`
+  (view shape). Worker: differential 211 traces identical (no trace covers this return); census 0..999 both scenes 1000 / 1000
+  identical vs go246 baseline; 183 importing files 2,660 tests; typecheck, build, build:lib 0. Supervisor: the 2 files 51 / 51.
+- **Folded:** cln240 (finish plan Cleanup 5, first half; `docs/cln240-test-gate.md`; side branch `worker/side-20261105-022936`):
+  `npm run test:gate` = `vitest.gate.config.ts` over `tools/test/test-gate.list` (364 files, 2,928 tests: all of test:smoke, named
+  families, the cheapest importer of every src dir / large module, then a greedy coverage fill under 160 s summed test time),
+  generated deterministically by `tools/test/generateTestGate.ts` from `tools/test/gate-durations.tsv` (`--check`), pinned by
+  `tests/testGateSelection.test.ts`; `npm test` unchanged; AGENTS.md test tiers updated. Worker: 2 runs 218 / 217 s wall.
+  Supervisor: 364 / 364 in 217 s, and again on `bc74a02d3`. Frame-pin deletion candidates listed in the doc (unverified; a later step).
+- **Fixed by the supervisor (`bc74a02d3`):** the wind-down suite failed only `battlesceneSplitEligibility` (function-kind eligible
+  pool 1, pinned 0): aud241a's pure `ballTraySoundTicks` in `battleScene.ts`. Moved to `battleStartSounds.ts` (the four tray tables
+  exported). Split / aud241a / aud241b / sink / battleScene tests 361 / 361; typecheck, build, build:lib 0; test:gate 364 / 364.
+- **Cleanup step 4, first half (supervisor):** `git subtree split -P workspace/core-rs -b core-rs-archive` -> local branch
+  `core-rs-archive` `26ce8d051` (194 commits; tree `f35070e69` == `master:workspace/core-rs`). No tree change. The user pushes it
+  to its own repo; the `git rm -r core-rs` half is next.
+- **Scouts saved (read-only, unverified):** `docs/obr248-scout.md` (handoff 4b(e): ROM bar slides in 20 f, holds 100 f to the
+  first glyph, fades 16 f, one SE_BALL_TRAY_ENTER, mirrored ball order; ours static 26 f; fix adds ~99 app frames per opponent
+  replacement, kernel digest unchanged), `docs/aud241c-scout.md` (battle-end sounds map).
+- **Folded:** aud241c-fx (evidence only; `docs/aud241c-fixtures.md`): six step-mode ROM fixtures
+  `tools/audio/fixtures/aud241c-{win,loss,brain}-{on,off}-window.json` + labs `tools/battle-lab/aud241c-*`. Win: BGM 412 at
+  dismiss+22, fade P+6, BGM 469 P+53, SE_EXIT P+79, heal P+201; loss: fade 476 P+6, same tail; Brain: 354, 469 at P+52, no
+  SE_EXIT, fanfare 466 P+219; ON == OFF from the dismiss on. Supervisor: audioProbeFixtures + testGateSelection 306 / 306.
+- **Folded:** aud241c (S11 step 5, last slice; `docs/aud241c-battle-end-sounds.md`; branch `worker/integration-20261105-050415`):
+  `src/engine/battleEndSounds.ts` (tick() hook): SE_SELECT on each "fainted!" / terminal box dismiss, win victory BGM 412 (Brain 354)
+  at dismiss+22 with the low-HP stop if playing, end fade P+6, BGM 469 P+53 (Brain P+52), SE_EXIT P+79 (none for Brain); loss
+  SE_BALL_OPEN dismiss+24, fade 476 P+6, same tail. All six aud241c ROM windows: every delta 0. Generated-orchestrator route only
+  (canonical battleScene route not wired). Gaps in the doc: our "fainted!" box is dismissable at F+30 vs ROM F+43 / F+46; the
+  Explosion self-faint +18 victory gap; Brain loss unmeasured. Worker: typecheck, build, build:lib 0; test:gate 364 / 364; 66
+  importing files 1,106 tests; differential 26 traces 9,615 identical. **S11 step 5 (aud241) is complete.**
+- **Wind-down gates** (`sv-20261104/gates-final/`, src `fef00b6c5` = final src minus the move above): typecheck 0; build 0;
+  **full suite 1,792 files: 1,747 passed + 44 skipped, 1 failed (the ratchet above)**, 14,685 tests passed; play:random 4 min /
+  scene: ON 23 battles / 9 swaps, OFF 35 / 16 (max streak 7); `--lobby-new-challenge` 2 min / scene: 0 page errors / overlays /
+  contained / divergences; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON
+  **20 / 20**, Scene OFF **20 / 20** (all `budget`); Scene ON full vary-rng 0:16 `--render-every 8` **16 / 16** (all `budget`); Scene ON
+  winning first-round 0:6 `--render-every 1` **6 / 6**. The 0:60 gates were not run (hours each here).
+
+- **Next:** handoff "Next work": aud242 (move-animation SEs) is the next audio step; 4b(e) opponent replacement ball bar
+  (`docs/obr248-scout.md`); cleanup 4 second half (`git rm -r core-rs`); ISSUES #196 / #197.
+- **Housekeeping:** evidence `sv-20261101` deleted (older than the last three runs); ~25 GB free. No R2 remote on this host.
+- **Notes:** no DEFERRED items. No push. Worker branches (all merged, deleted; commits reachable from master):
+  integration-20261104-213051 (aud241a), -231007 (aud241b), -20261105-005010 (frs247), side-20261105-022936 (cln240),
+  integration-20261105-045548 (aud241c-fx), -050415 (aud241c); two read-only scouts (no commits). New local branch
+  `core-rs-archive` (keep; for the user to push to its own repo).
+
+---
+
 ## 2026-11-03 / 04 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud240c / cln239 / aud240d / go246 / qak248 / qak249 folded
 
 - **State:** master `07123061b`+ clean, src == qak248 fix `127def5d4` (suite + build green on it; the soak / play gates ran on src `710424ca8` = go246 merge). Evidence `.integration/validation/sv-20261103/`.

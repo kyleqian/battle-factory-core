@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-07)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-08)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-07 wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-08 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
   `worker/lib-v2-mac` is folded up to `851ee1f4c`; if the Mac moves that branch again, merge the new tip the same way
@@ -42,8 +42,11 @@ kept and is long-tail.
   and slice plan; residuals and unemitted families ISSUES #198. **aud242b / aud242c DONE (2026-11-07):** the extractor resolves
   `waitforvisualfinish` (known task / sprite / `simple_palette_blend` lifetimes), `waitbgfade*` (Task_FadeToBg model + measured BG load
   lag for IMPACT / HIGHSPEED / DARK), side branches; `panse*` / `setpan` emit the new `pan` SoundEvent kind; createsoundtask
-  LoopSEAdjustPanning / FireBlast and PlaySE1/2WithPanning ported (doc sections 6-7; 739 ops resolved). Remaining (aud242d): sprite /
-  visual-task lifetimes (most of the still-gated ops), the C sprite-callback sites, the cry tasks, more BG load lags.
+  LoopSEAdjustPanning / FireBlast and PlaySE1/2WithPanning ported (doc sections 6-7; 739 ops resolved). **aud242d / e / f DONE
+  (2026-11-07 / 08, doc sections 8-10):** instant-task table, palette-blend family, fixed-length sprite and mon-task lifetimes; Level-50
+  emitted 550 -> 674 (160 still gated), all resolved 868. Per-move offsets ISSUES #198. Remaining: Blizzard (per-species off-screen
+  lifetime), Tri Attack / Bubblebeam / Luster Purge / ExtremeSpeed / Psychic / Curse / Spark / Attract, `blend_color_cycle`,
+  `HardwarePaletteFade`, cry tasks (Roar 36 sets), the waitsound SE-length table, the #198 alignment audit (most moves sit at +2).
 - **Cleanup:** steps 1, 2, 3 (cln239), 4 (cln241, 2026-11-06: `core-rs/` removed from master, `docs/cln241-core-rs-removal.md`;
   local branch `core-rs-archive` `26ce8d051` keeps it, the user pushes it to its own repo) and 6 are done. Step 5 first half DONE
   (cln240: `npm run test:gate`, `docs/cln240-test-gate.md`). **Step 5 second half DONE (cln242, 2026-11-07, `docs/cln242-suite-speed.md`):**
@@ -73,9 +76,10 @@ never brief those here. One worker at a time; each run folds the next audio step
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
    proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05. aud242a DONE 2026-11-06** (generic script-op
-   emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07.** Next: **aud242d**
-   (palette-blend family + instant tasks, then aud242e fixed-length sprites; ranked blockers and slice plan in `docs/aud242d-scout.md`), an alignment audit of the ISSUES
-   #198 per-move offsets; then aud243 (census column + ROM replays). Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
+   emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07; aud242d / e / f DONE
+   2026-11-08.** Next: **aud243a** (census sound column + T1 delta; read-only scout `docs/aud243-scout.md`: the census never calls
+   `tick()`, so first move the post-tick sound emitters of `core.ts` into one exported function), then aud243b (ROM T2 replay; RNG
+   alignment is the risk); remaining aud242 lifetimes and the #198 alignment audit can interleave. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) DONE (cln240 + cln242; optional: speed up `dive.ts` for the slowest files); (4) DONE (cln241);
    (7) evidence stops going into git (policy line in AGENTS.md DONE 2026-11-07; cln243 DONE 2026-11-07, 11,691 files / 204 MB untracked,
