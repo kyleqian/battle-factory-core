@@ -26,6 +26,7 @@ assertSame<Same<Src.GbaButton, HeadlessTypes.GbaButton>>();
 assertSame<Same<Src.TraceSegment, HeadlessTypes.TraceSegment>>();
 assertSame<Same<typeof lib.mountFactoryGame, typeof BrowserTypes.mountFactoryGame>>();
 assertSame<Same<typeof headless.replayChallenge, typeof HeadlessTypes.replayChallenge>>();
+assertSame<Same<typeof lib.connectGamepad, typeof BrowserTypes.connectGamepad>>();
 assertSame<Same<typeof lib.ENGINE_BUILD, typeof BrowserTypes.ENGINE_BUILD>>();
 assertSame<Same<typeof headless.ENGINE_BUILD, typeof HeadlessTypes.ENGINE_BUILD>>();
 
@@ -38,7 +39,7 @@ function declaredValues(file: string): string[] {
 describe("lib-types match the sources", () => {
   it("browser entry: declared values are exactly the public runtime exports", () => {
     const declared = declaredValues("lib-types/index.d.ts");
-    expect(declared).toEqual(["ENGINE_BUILD", "FRAME_HZ", "SCREEN_HEIGHT", "SCREEN_WIDTH", "mountFactoryGame"]);
+    expect(declared).toEqual(["ENGINE_BUILD", "FRAME_HZ", "SCREEN_HEIGHT", "SCREEN_WIDTH", "connectGamepad", "mountFactoryGame"]);
     expect(Object.keys(lib).filter((name) => declared.includes(name)).sort()).toEqual(declared);
     expect(lib.SCREEN_WIDTH).toBe(240);
     expect(lib.SCREEN_HEIGHT).toBe(160);

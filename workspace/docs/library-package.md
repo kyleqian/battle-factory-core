@@ -69,6 +69,22 @@ palettes alone; it now reads `src/assets/gen/battle-sprite-palettes.json`
   resolution segment's kernel events in order, hex, 16 chars, exactly what
   `tools/integration/*Census.ts` compute.
 
+## Gamepad
+
+`connectGamepad(game, options?)` (`src/gamepad.ts`, exported from `@pokebench/factory`,
+declared in `lib-types/index.d.ts`) is opt-in: the mount never polls a gamepad
+(the website owns the input UI). It polls `navigator.getGamepads()` once per
+animation frame, maps the W3C Standard Gamepad layout (0 A, 1 B, 4 L, 5 R,
+8 SELECT, 9 START, 12-15 d-pad UP/DOWN/LEFT/RIGHT; the left stick past the dead
+zone, default 0.5, counts as the d-pad) and calls `game.press` / `game.release`
+on edges only, so the trace is what the same presses would have recorded. Only
+the first connected pad (lowest index) is read. It returns a disconnect function;
+that, or the pad going away, releases everything it pressed. `getGamepads` and
+`schedule` options inject the pad source and the frame scheduler for tests. The
+dev shell (`src/main.ts`) opts in; `src/headless.ts` does not import it, so
+`ENGINE_BUILD` is unaffected. Pinned by `tests/bnd255Gamepad.test.ts`, including
+equality of the input stream with direct `press` / `release`.
+
 ## Tests
 
 `tests/factoryLibrary.test.ts` drives the real engine with the soak's

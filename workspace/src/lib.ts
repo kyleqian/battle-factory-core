@@ -17,6 +17,8 @@ export type {
   GbaButton,
   TraceSegment,
 } from "./factoryContract.ts";
+export { connectGamepad } from "./gamepad.ts";
+export type { GamepadLike, GamepadOptions, GamepadTarget } from "./gamepad.ts";
 export { ENGINE_BUILD, SCREEN_HEIGHT, SCREEN_WIDTH };
 
 // GBA video: 280896 cycles/frame at 2^24 Hz.
