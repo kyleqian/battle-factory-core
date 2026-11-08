@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { createSceneOnMovePresentation, type SceneOnMementoConfig, type SceneOnMoveConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { battlerConfig, productionConfig } from "./prep34MementoLib.ts";
 
 const digest = (config: SceneOnMoveConfig, ages: number) => {

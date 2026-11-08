@@ -4,6 +4,7 @@
 // sha256 of that row (both fresh probe runs agree). Pixel counts need the probe RGB: tools/integration/prep38Check.ts --probes.
 //   node --experimental-strip-types --no-warnings tools/integration/dolldefLiveCheck.ts [--out=<receipt.json>] fixture.json...
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync, writeFileSync } from "node:fs";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";

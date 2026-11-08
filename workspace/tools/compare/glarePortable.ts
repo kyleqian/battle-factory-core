@@ -21,6 +21,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 
 interface Fixture {
   readonly schema: string;

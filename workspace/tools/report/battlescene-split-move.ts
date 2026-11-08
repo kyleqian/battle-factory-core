@@ -9,6 +9,7 @@
  * ...` declarations (both names must be listed; the whole statement moves).
  */
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 

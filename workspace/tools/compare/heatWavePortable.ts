@@ -10,6 +10,7 @@ import {
   type SceneOnHeatWaveConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 
 interface Fixture extends SceneOnHeatWaveConfig {
   readonly schema: "heat-wave-portable-evidence/v1";

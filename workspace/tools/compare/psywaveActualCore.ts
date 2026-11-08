@@ -7,6 +7,7 @@ import { createSceneOnMovePresentation, sceneOnPsywaveView,
   type SceneOnPsywaveConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { psywaveAtAge, psywaveDisplayPlan } from "../../src/animation/psywave.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { psywaveConfigFor, psywaveInputsFor, psywaveRowsFor,
   verifyPsywaveReducer, type PsywaveWindow } from "./verifyPsywaveReducer.ts";

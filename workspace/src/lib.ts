@@ -3,6 +3,7 @@
 // turns button presses into the recorded input trace, fast-forwards a resumed
 // trace, and reports the challenge's events. The dev shell (src/main.ts) uses
 // mountFactoryGameInternal for its test ABI; hosts use mountFactoryGame.
+import "./engine/monPicPixelsInstall.ts";
 import { render, SCREEN_HEIGHT, SCREEN_WIDTH } from "./engine/core.ts";
 import type { FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
 import { ENGINE_BUILD, FactorySession } from "./factorySession.ts";

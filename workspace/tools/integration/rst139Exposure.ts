@@ -7,6 +7,7 @@
 // battle loop unchanged (battle i: seed i, streak i * 11 % 49, least-used legal slot). Read-only use of production.
 //   node --experimental-strip-types --no-warnings tools/integration/rst139Exposure.ts --seeds=0..99 --out=file.jsonl
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleStartIntro, advanceFactoryRoundBattleCommand,

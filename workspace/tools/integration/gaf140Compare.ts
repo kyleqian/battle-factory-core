@@ -15,6 +15,7 @@
 //   node --experimental-strip-types --no-warnings tools/integration/gaf140Compare.ts <rom.json> <raw-dir> <out.json>
 //     [--neg=prefix|gate-1|gate+1]   (controls; must fail: prefix = the pre-fix command, no seGateFrames: the effect at age a)
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { sar131HistoryBefore } from "./sar131History.ts";

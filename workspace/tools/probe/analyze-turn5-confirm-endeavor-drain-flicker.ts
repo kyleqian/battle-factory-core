@@ -31,6 +31,7 @@
  * Run: node --experimental-strip-types tools/probe/analyze-turn5-confirm-endeavor-drain-flicker.ts
  */
 import { endeavorHp } from "../../src/engine/battleMenu.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   TURN2_OFF_ENDEAVOR_HP_DRAIN_START_DELAY,
   TURN2_OFF_ENDEAVOR_FLICKER_START,

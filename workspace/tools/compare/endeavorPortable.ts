@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { PNG } from "pngjs";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   createSceneOnMovePresentation,
   ONIX_TO_GROVYLE_ENDEAVOR_PROFILE,

@@ -1,6 +1,7 @@
 // BG-register history: ordered presented move-animation bodies of ordinary generated routes (x2TrackerRouteReplay.ts capture, bodies only; Scene ON, production orchestrator).
 // usage: node --experimental-strip-types --no-warnings tools/integration/bgHistoryRouteBodies.ts <out.json> <seed>...
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { generatedCommandAnimationReplay } from "./generatedCommandAnimationReplay.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { liveMoveAnimationDuration } from "../../src/engine/liveMoveAnimation.ts";

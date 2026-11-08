@@ -7,6 +7,7 @@
 // rows, rows that differ from the static hold, a sha256 over every rendered row.
 //   node --experimental-strip-types --no-warnings tools/integration/apx215SubstituteDollStrips.ts --seed=17 --move=153 --attacker=0 --out=x.png
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync } from "node:fs";
 import { crc32, deflateSync } from "node:zlib";
 import {

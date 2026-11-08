@@ -11,6 +11,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { nightmareAtAge } from "../../src/animation/nightmare.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import {
   nightmareConfigFor,

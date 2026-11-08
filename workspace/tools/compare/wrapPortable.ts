@@ -9,6 +9,7 @@ import {
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import type { WrapAnimationProfile } from "../../src/animation/wrap.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 

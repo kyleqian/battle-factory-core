@@ -7,6 +7,7 @@
 // production's createBattleResolutionPresentationRenderView + renderBattleResolutionLiveView (Scene ON, the app's drawScene). `zeroed`
 // = the production x2 tracker's sides before the window (null = no x2 input).
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleResolutionPresentationRenderView, type BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";

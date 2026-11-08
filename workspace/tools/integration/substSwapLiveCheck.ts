@@ -10,6 +10,7 @@
  *   [--out=<receipt.json>] [--plain] [--attribute] [--neg=lag1|noIdle]   (negative controls must FAIL)
  */
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import { inflateSync } from "node:zlib";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };

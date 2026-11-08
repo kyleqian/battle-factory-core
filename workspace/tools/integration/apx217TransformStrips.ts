@@ -8,6 +8,7 @@
 // --list prints every move-animation command's (index, moveId, attacker, code) of the battle instead.
 //   node --experimental-strip-types --no-warnings tools/integration/apx217TransformStrips.ts --seed=197 --move=61 --attacker=1 --out=x.png
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync } from "node:fs";
 import { crc32, deflateSync } from "node:zlib";
 import {

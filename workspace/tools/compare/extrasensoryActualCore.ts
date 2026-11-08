@@ -7,6 +7,7 @@ import { createSceneOnMovePresentation, sceneOnExtrasensoryView,
   type SceneOnExtrasensoryConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { extrasensoryAtAge, extrasensoryDisplayPlan } from "../../src/animation/extrasensory.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { extrasensoryConfigFor, extrasensoryInputsFor, extrasensoryRowsFor,
   verifyExtrasensoryReducer, type ExtrasensoryWindow } from "./verifyExtrasensoryReducer.ts";

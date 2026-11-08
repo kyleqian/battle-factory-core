@@ -22,6 +22,7 @@
 // through a different edge first) is the same order
 // `tools/probe/verify-turn11.ts` already uses successfully.
 import { rockSlideDrawOrder, rockSlideRockState, rockSlideBg3Y } from "../../src/engine/battleMenu.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { TURN5_ROCKSLIDE_PRESS_TICK } from "../../src/engine/battleScene.ts";
 
 const argTicks = process.argv.slice(2).map((s) => Number.parseInt(s, 10)).filter((n) => Number.isFinite(n));

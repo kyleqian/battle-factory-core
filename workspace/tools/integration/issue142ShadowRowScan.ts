@@ -9,6 +9,7 @@
  * Writes tools/integration/fixtures/issue142-shadow-row-scan.json by default.
  */
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { liveView } from "./liveAdapterFramebuffer.ts";

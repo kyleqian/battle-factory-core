@@ -4,6 +4,7 @@
  * Substitute body), the field art rebuilt from it. Row sha256 = the probe's format (240x160 RGB888).
  */
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync } from "node:fs";
 import { applySubstituteDollCommand } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";

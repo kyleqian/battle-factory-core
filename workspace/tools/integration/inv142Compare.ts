@@ -14,6 +14,7 @@
 // (A "battler drawn visible" control cannot fail under the transplant -- the reference draws the battler too; the ROM's gSprites
 // invisible bit on every active row (rom-r1.json battlerInvisibleRows) is that evidence.)
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";

@@ -7,6 +7,7 @@
 //            the control's recall first glyph (ROM) - turn-order row = K, so a card's command 0 = its turn-order row + K.
 //   node --experimental-strip-types --no-warnings tools/integration/fpc177Compare.ts [--json] [--rows]
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import speciesTypes from "../../src/data/gen/species-types.json" with { type: "json" };
 import { createBattleState } from "../../src/engine/battleDecisionBoundary.ts";

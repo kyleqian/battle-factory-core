@@ -7,6 +7,7 @@ import {
   type SceneOnReflectConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture extends SceneOnReflectConfig {

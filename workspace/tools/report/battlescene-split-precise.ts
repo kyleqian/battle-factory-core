@@ -20,6 +20,7 @@
  * Sheet, ...) blocks the move.
  */
 import { readFileSync, readdirSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { execFileSync } from "node:child_process";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";

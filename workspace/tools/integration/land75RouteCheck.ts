@@ -5,6 +5,7 @@
 // dense ROM comparison of the same body histories is fixtures/land75/check-*.json (audit18Check.ts on the land75 lab fixtures).
 //   node --experimental-strip-types --no-warnings tools/integration/land75RouteCheck.ts [--out=file.json]
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { liveMoveAnimationPresentation, liveMoveHiddenSides } from "../../src/engine/liveMoveAnimation.ts";
 import { generatedCommandAnimationReplay } from "./generatedCommandAnimationReplay.ts";

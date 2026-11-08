@@ -2,6 +2,7 @@
 // words46: find ordinary generated-rental routes (generatedCommandAnimationReplay, production presentation seam ticked as core.ts does) where a
 // live consumer's order lend resolves through a RAIN_CONTINUES / words marker (presentation faithfulRandomHistory).
 import { createBattleResolutionPresentationRenderView, liveMoveRandom2PlanContextAt } from "../../src/engine/battleResolutionPresentationRender.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { liveMoveAnimationPresentation } from "../../src/engine/liveMoveAnimation.ts";
 import { tickLiveMovePresentationRngSession } from "../../src/engine/liveMovePresentationRng.ts";
 import { createPresentationRngSession } from "../../src/engine/presentationRngHost.ts";

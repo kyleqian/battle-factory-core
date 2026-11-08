@@ -12,6 +12,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import type { RazorWindBody, RazorWindEffect } from "../../src/animation/razorWind.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 const root = resolve(import.meta.dirname, "../..");

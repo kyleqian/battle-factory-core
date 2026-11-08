@@ -19,6 +19,7 @@
 // ROM's free order at the activation frame. AUDIT20_NO_HIDE=1: render with no hide. AUDIT20_MASK: see below.
 // AUDIT20_TRACE=1: the host's free order after every history event on stderr. AUDIT20_MISS_RULE_ALL_TURNS=1: audit 18's missed-strike rule also in the consumer's own (truncated) turn (the ablation).
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

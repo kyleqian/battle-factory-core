@@ -5,6 +5,7 @@
 //   python3 tools/integration/tl204RomRows.py tools/integration/fixtures/tl204/rom/*-r1.json > tools/integration/fixtures/tl204/rom-rows.json
 //   node --experimental-strip-types --no-warnings tools/integration/tl204Compare.ts tools/integration/fixtures/tl204/rom-rows.json tools/integration/fixtures/tl204/production-vs-rom.json
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { MONS, lsd194Production } from "./lsd194Production.ts";
 import { liveMoveScriptTailFrames, liveMoveUniversalRows } from "../../src/engine/battleResolutionPresentationRender.ts";
 

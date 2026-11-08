@@ -6,6 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
 import { createSceneOnMovePresentation, type SceneOnDragonDanceConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 type Orientation = "player-back" | "opponent-front";

@@ -5,6 +5,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { createSceneOnMovePresentation, type SceneOnSpitUpConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { spitUpConfigFor, spitUpRowsFor, verifySpitUpProduction,
   type SpitUpWindow } from "./spitUpProduction.ts";

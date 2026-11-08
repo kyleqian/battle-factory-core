@@ -19,6 +19,7 @@
 //
 //   node --experimental-strip-types --no-warnings tools/integration/trn176Predict.ts [--json] [--scene=off|on] [--fixtures=a,b] [--only=name]
 import { readFileSync, existsSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesTypes from "../../src/data/gen/species-types.json" with { type: "json" };
 import { createFactoryFullTurnBattleState, submitFactoryFullTurnDecision } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { projectBattleResolutionCommands } from "../../src/engine/battleResolutionPresentation.ts";

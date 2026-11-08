@@ -8,6 +8,7 @@ import {
   type SceneOnMirrorCoatConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { mirrorCoatScenario } from "./mirrorCoatScenario.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { semanticReceiptSha256 } from "./semanticReceipt.ts";

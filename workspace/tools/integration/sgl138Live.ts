@@ -7,6 +7,7 @@
 // path). Read-only use of production.
 //   node --experimental-strip-types --no-warnings tools/integration/sgl138Live.ts --out=<receipt.json>
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync, writeFileSync } from "node:fs";
 import {
   advanceFactoryRoundBattleCommand,

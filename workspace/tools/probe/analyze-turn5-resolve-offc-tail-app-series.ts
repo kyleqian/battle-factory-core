@@ -30,6 +30,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { createInitialState, tick, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { traceAdvances } from "../compare/traceReplay.ts";
 import type { Trace } from "../compare/oracleClient.ts";
 import {

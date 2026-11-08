@@ -2,6 +2,7 @@
 // lab scenario's parties.  Shared by frs247Dense.ts (ROM comparison) and tests/frs247FaintReplacementReshow.test.ts.
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../../src/engine/battleScriptSourceConstants.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { renderBattleResolutionForcedPartySelect, renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { BATTLE_RESOLUTION_NEXT_COMMAND_HANDOFF_FRAMES, playerFaintReplacementSendOutTimingOfSegment } from "../../src/engine/battleResolutionPresentationRender.ts";

@@ -35,6 +35,7 @@ import {
   containedPresentationErrorCount,
   containedPresentationErrors,
 } from "../../src/engine/presentationContainment.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   createInitialState,
   render,

@@ -9,6 +9,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import type { RainDanceProfile } from "../../src/animation/rainDance.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 const fixture = JSON.parse(readFileSync(

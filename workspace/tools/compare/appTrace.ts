@@ -8,6 +8,7 @@
 
 import type { Trace } from "./oracleClient.ts";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { presentationRngFromTrace } from "../../src/engine/presentationRngHost.ts";
 import type { EngineState } from "../../src/engine/core.ts";
 import { traceAdvances } from "./traceReplay.ts";

@@ -5,6 +5,7 @@ import { gunzipSync } from "node:zlib";
 import { icyWindAtAge, icyWindEffectOamOrderAtAge, icyWindSnowballStep2State } from "../../src/animation/icyWind.ts";
 import { createSceneOnMovePresentation, sceneOnIcyWindView, type SceneOnPresentationBattler } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 
 const sha256 = (value: Buffer | string): string => createHash("sha256").update(value).digest("hex");
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);

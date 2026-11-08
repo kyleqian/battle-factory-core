@@ -1,5 +1,6 @@
 /** Strict dev-time authoritative-source audit for unsupported MOVE_SAND_TOMB. */
 import { execFileSync } from "node:child_process";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";

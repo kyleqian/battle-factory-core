@@ -3,6 +3,7 @@
 // with each command's start / duration (battleResolutionCommandDuration) on the turn's timeline.
 //   node --experimental-strip-types --no-warnings tools/integration/lsd186Production.ts <out.json> [--seed=N] [--seeds=a..b]
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createFactoryFullTurnBattleState, submitFactoryFullTurnDecision } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { projectBattleResolutionCommands } from "../../src/engine/battleResolutionPresentation.ts";
 import { battleResolutionCommandDuration } from "../../src/engine/battleResolutionPresentationRender.ts";

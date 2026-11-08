@@ -7,6 +7,7 @@ import { gunzipSync } from "node:zlib";
 import { createSceneOnMovePresentation, sceneOnSilverWindView, type SceneOnSilverWindConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { silverWindAtAge } from "../../src/animation/silverWind.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { silverWindConfigFor, silverWindInputsFor, verifySilverWindReducer, type SilverWindOrientation } from "./verifySilverWindReducer.ts";
 

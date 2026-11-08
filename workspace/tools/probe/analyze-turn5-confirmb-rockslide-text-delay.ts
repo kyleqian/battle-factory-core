@@ -26,6 +26,7 @@
  * Run: node --experimental-strip-types tools/probe/analyze-turn5-confirmb-rockslide-text-delay.ts
  */
 import { createInitialState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { rockSlideTextVisibleChars } from "../../src/engine/battleMenu.ts";
 import { TURN5_ROCKSLIDE_PRESS_TICK, TURN5_OFF_ROCKSLIDE_TEXT_DELAY } from "../../src/engine/battleSceneCanonical.ts";
 

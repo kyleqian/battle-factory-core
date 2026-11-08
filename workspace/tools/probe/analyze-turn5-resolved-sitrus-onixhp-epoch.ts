@@ -29,6 +29,7 @@
  * Run: node --experimental-strip-types tools/probe/analyze-turn5-resolved-sitrus-onixhp-epoch.ts
  */
 import { createInitialState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { turn5SitrusHealTextVisibleChars, turn5SitrusOnixHp, TURN5_SITRUS_HEAL_LINE1, TURN5_SITRUS_HEAL_LINE2 } from "../../src/engine/battleScene.ts";
 import { TURN5_OFF_SITRUS_HEAL_TEXT_START_TICK, TURN5_SITRUS_HEAL_HP_START, TURN5_SITRUS_HEAL_HP_END } from "../../src/engine/battleSceneCanonical.ts";
 

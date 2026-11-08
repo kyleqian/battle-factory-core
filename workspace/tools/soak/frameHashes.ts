@@ -16,6 +16,7 @@ import { createHash } from "node:crypto";
 import { writeFileSync } from "node:fs";
 
 import { render, tick } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   ActionLog,
   createStartCarryState,

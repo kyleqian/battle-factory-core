@@ -10,6 +10,7 @@ import {
   type SceneOnSpiderWebConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 type Json = Record<string, any>;

@@ -10,6 +10,7 @@
  * Run: node --experimental-strip-types tools/probe/analyze-turn5-resolve-grovyle-hp-formula.ts
  */
 import { createInitialState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { rockSlideOpponentHp } from "../../src/engine/battleMenu.ts";
 import { faintSinkRowsAndY2 } from "../../src/engine/battleSceneCanonical.ts";
 import {

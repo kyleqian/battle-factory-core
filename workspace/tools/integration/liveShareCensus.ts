@@ -14,6 +14,7 @@
 // (ids, streaks) of one --seeds=0..999 run; without it every shard restarts i at 0 and plays a DIFFERENT battle set (hist73 / cf78 /
 // st76 used private copies with this flag, 2026-10-10).
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,

@@ -5,6 +5,7 @@
 // `liveAfter` = liveBefore && !gate. The audit-19 verdict (verdicts.txt) is carried for the px column.
 //   node --experimental-strip-types --no-warnings tools/integration/cf78Audit19Windows.ts > out.jsonl
 import { readdirSync, readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   applyLiveCastformFormEvents, LIVE_CASTFORM_FORMS_NORMAL, withLiveCastformForms,
 } from "../../src/engine/battleResolutionPresentationRender.ts";

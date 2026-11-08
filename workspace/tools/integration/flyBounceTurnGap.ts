@@ -9,6 +9,7 @@
 // last age to the frame before the strike body's age 0. The attacker region is the player battler box x 40..103, y 40..111
 // (above the text window; the healthboxes, opponent and its shadow lie outside it).
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync } from "node:fs";
 import { generatedCommandAnimationReplay } from "./generatedCommandAnimationReplay.ts";
 import { createBattleResolutionPresentationRenderView, renderBattleResolutionPresentation } from "../../src/engine/battleResolutionPresentationRender.ts";

@@ -9,6 +9,7 @@
 // (speeds ordered as the ROM's first use); projectBattleResolutionCommands builds the commands, battleResolutionCommandDuration times them.
 //   node --experimental-strip-types --no-warnings tools/integration/msg175Anchors.ts [--json]
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesTypes from "../../src/data/gen/species-types.json" with { type: "json" };
 import { createFactoryFullTurnBattleState, submitFactoryFullTurnDecision } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { projectBattleResolutionCommands } from "../../src/engine/battleResolutionPresentation.ts";

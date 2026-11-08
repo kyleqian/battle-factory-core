@@ -3,6 +3,7 @@
 // scratch RGB dumps after reading them.
 //   node --experimental-strip-types --no-warnings tools/integration/random2R5/receipt.ts <testedCodeCommit> <testedSrcTree>
 import { createHash } from "node:crypto";
+import "../../../src/engine/monPicPixelsInstall.ts";
 import { readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { verifyLiveAdapterFramebuffer, liveView, type Fixture } from "../liveAdapterFramebuffer.ts";
 import { random2Route } from "../random2R1/routeHarness.ts";

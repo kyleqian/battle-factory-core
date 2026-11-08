@@ -7,6 +7,7 @@
 //     --repo /path/to/checkout --start 60 --end 140 --transitions
 
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 

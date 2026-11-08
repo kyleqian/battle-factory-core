@@ -5,6 +5,7 @@
  * faithful-random body: key, activation, ages, adapter-active per age, words + provenance, per-frame RGBA digests.
  */
 import { createHash } from "node:crypto";
+import "../../../src/engine/monPicPixelsInstall.ts";
 import { generatedCommandAnimationReplay } from "../generatedCommandAnimationReplay.ts";
 import {
   createBattleResolutionPresentationRenderView, liveMoveRandom2PlanContextAt,

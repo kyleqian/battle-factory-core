@@ -8,6 +8,7 @@
 // (tools/probe/receipts/rcp143-r4-focuspunch-prepass.json).
 //   node --experimental-strip-types --no-warnings tools/integration/fpp150Anchors.ts [--json]
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import speciesTypes from "../../src/data/gen/species-types.json" with { type: "json" };
 import { createFactoryFullTurnBattleState, submitFactoryFullTurnDecision } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";

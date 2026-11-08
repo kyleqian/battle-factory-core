@@ -7,6 +7,7 @@ import { createSceneOnMovePresentation, sceneOnReturnDisplayPlan, sceneOnReturnV
   type SceneOnReturnConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { returnAtAge } from "../../src/animation/return.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { returnConfigFor, returnInputsFor, returnRowsFor, verifyReturnReducer,
   type ReturnBranch, type ReturnOrientation } from "./verifyReturnReducer.ts";

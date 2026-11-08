@@ -3,6 +3,7 @@ import {
   advanceFactoryRoundBattleStartIntro, advanceFactoryRoundBattleCommand,
   advanceFactoryRoundBattleResolution,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import {

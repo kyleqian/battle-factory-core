@@ -7,6 +7,7 @@
 // createBattleResolutionPresentationRenderView + renderBattleResolutionLiveView (Scene ON). FRZ inflicted after Ice Beam (ROM E 115)
 // puts the battler's status command right before the status-animation command, as sa125 SA3 projects it.
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleResolutionPresentationRenderView, type BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";

@@ -10,6 +10,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { softBoiledAtAge, type SoftBoiledSide } from "../../src/animation/softBoiled.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 type Json = Record<string, any>;

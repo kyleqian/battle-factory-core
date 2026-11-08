@@ -22,6 +22,7 @@
 //
 // Usage: node --experimental-strip-types tools/probe/verify-turn13.ts
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { PNG } from "pngjs";
 import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
 import { drawText, measureText, type FontData } from "../../src/engine/font.ts";

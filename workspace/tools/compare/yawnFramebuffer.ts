@@ -8,6 +8,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { yawnAtAge } from "../../src/animation/yawn.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 const entries: ReadonlyArray<Readonly<{

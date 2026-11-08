@@ -5,6 +5,7 @@
 // the rel of the next command's start and of the first following message's start (its first glyph). Read-only; no oracle.
 //   node --experimental-strip-types --no-warnings tools/integration/scf117Align.ts --seeds=A..B --scene=on|off --out=file.jsonl
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleStartIntro, advanceFactoryRoundBattleCommand,
