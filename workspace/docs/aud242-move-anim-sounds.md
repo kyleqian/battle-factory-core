@@ -433,3 +433,77 @@ Gain +42 Level-50 ops against the scout's ~+45 (the `blend_color_cycle` and `Har
   fade's tail interleaves with the task's own call order and needs its own ROM windows) and `AnimTask_HardwarePaletteFade`. Both stay `unmodelled-lifetime`.
 - A live adapter is not whole-playable arbitrary-history exactness: the windows pin the move body inside the replay staged by each lab.
 
+
+## 9. aud242e: fixed-length sprite and mon-task lifetimes (Scene ON)
+
+Fixtures: `tools/audio/fixtures/aud242e-*.json` (15 moves, player attacker, Level 50, 822 frames, step mode with the call log and `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`),
+cut by `tools/audio/soundEventProbe.py ... lab LAB.json --frames 822 --profile on` over labs `tools/battle-lab/aud242e-*-player-on.json` (made by `tools/audio/makeAud242bLabs.py`,
+prefix via `AUD242_LAB_PREFIX`) and stages `aud242e-*-player-on` in `tools/compare/appTrace.ts`. Test `tests/aud242eMoveAnimSounds.test.ts`; the fixtures are also listed in
+`tests/audioProbeFixtures.test.ts`. Every lifetime below is read from the C step code; the ported reducers were only a cross-check.
+
+### 9.1 The lifetime model
+
+`exact` is the number of ticks after the creation tick at which the thing is gone (the wait resumes at `max(at + exact) + 1`). Call numbering: a script `createsprite` runs
+`CreateSpriteAndAnimate` (sprite.c:591-616), so the sprite's callback call 0 and the first `AnimateSprite` happen in the script step; call k >= 1 is the `AnimateSprites` of
+iteration F + k - 1. A sprite that destroys itself at callback call K is gone **K - 1** ticks after F. A task entry is call 0 of the script step; call k >= 1 is `RunTasks` of
+iteration F + k - 1 (script CB1 first). Sprites that a task makes with `CreateSprite` / `CreateTask` are not counted by `gAnimVisualTaskCount`, so only the task's own life gates the wait.
+
+| op | exact | C source |
+|---|---|---|
+| `gToxicBubbleSpriteTemplate` | 20 | `AnimSpriteOnMonPos` battle_anim_mons.c:1515-1536, then `animEnded` of `sAnim_ToxicBubble` battle_anim_poison.c:16-23 (4 frames x 5) |
+| `gFangSpriteTemplate` | 32 | `AnimFang` battle_anim_effects_3.c:1515-1519, `gFangAnimCmds` :321-328 (8 + 16 + 4 + 4) |
+| `gSludgeProjectileSpriteTemplate` (args[5]), `gWaterGunProjectileSpriteTemplate` (args[7]), `gWaterPulseRingSpriteTemplate` (args[5]) | D (the arc duration) | `InitAnimArcTranslation` + `TranslateAnimHorizontalArc` battle_anim_mons.c:785-801, `AnimTranslateLinear` :1111; data[0] = D, D translating calls, call D + 1 destroys; ring `AnimWaterPulseRing_Step` battle_anim_water.c:1541-1556 |
+| `gWaterPulseBubbleSpriteTemplate` | args[8] - 1 | `AnimWaterPulseBubble_Step` battle_anim_water.c:1508-1516 (`--data[3] == 0` at call A8) |
+| `create_absorption_orb_sprite` | `wave_period` | the orb's wave counter step (the arc duration is the period) |
+| `create_overheat_flame_sprite` | `duration` | `AnimOverheatFlame_Step` battle_anim_dragon.c:443-452 (`++data[0] > duration` at call duration + 1) |
+| `gHorizontalLungeSpriteTemplate` | 2 * args[3] + 3 | `DoHorizontalLunge` / `ReverseHorizontalLungeDirection` battle_anim_mon_movement.c:427-445, battle_anim_mons.c:651-663 (N translating calls, a swap call, the reverse call, N calls, a swap call, destroy at 2N + 4) |
+| `shake_battle_platforms` / `AnimTask_ShakeBattlePlatforms` | shakes * (delay + 1) - 2 | battle_anim_normal.c:957-993: the entry runs the step once; a shake takes delay + 1 calls; the call index shakes * (delay + 1) - 1 destroys |
+| `AnimTask_TranslateMonElliptical` / `...RespectSide` | calls - 2 | battle_anim_mon_movement.c:358-402: the entry runs the step once; `data[5]` += `1 << min(speed, 5)` per call (wraps at 256), `loops` decrements on every wrap to 0, that call destroys; simulated in the extractor |
+| `AnimTask_ElectricBolt` | 10 | battle_anim_electric.c:685-724: the entry only sets `func`; `data[10]` counts calls 1.. and call 11 destroys; the five segment sprites are `CreateSprite`'d by the task |
+
+Correction to section 7.3 (found by two independent ROM logs, Overheat's and Double-Edge's `BlendPalette` calls): a `simple_palette_blend` (palette.c `BeginNormalPaletteFade` /
+`UpdateNormalPaletteFade`) runs update call 1 in the script step and call 2 in the same iteration's CB2, so call n is iteration F + n - 2; the sprite is destroyed at F + n - 1 and
+the wait passes at F + n: **exact = n - 1** (the old model used n). `simplePaletteBlendLength` now returns `calls + 4`. This moves Hyper Beam by +1 (`aud242c` delta 0 -> +1, both attackers)
+and Ice Beam into the +2 idle-lead class (delta 1 -> 2); the aud242c test specs say so.
+
+### 9.2 ROM windows (ROM minus ours, constant over every row of a window)
+
+| window | delta | rows | note |
+|---|---|---|---|
+| Toxic | +3 | 14 | window cut at ROM 280 (the opponent's body) |
+| Rock Tomb | +2 | 5 | proves the platform shake `shakes * (delay + 1) - 2` (the scout's "one call earlier" is not supported) |
+| Overheat | +2 | 2 + 4 | the four SE147 flame rows carry a named +3 (below) |
+| Counter | -16 | 4 | Counter is used second; the ROM's opponent body (SE214 / SE131) is ROM-only; the relative SE122 -> SE123 gap of 21 proves the elliptical (loops 1, exact 14) |
+| Giga Drain / Mega Drain / Absorb | -1 | 12 / 11 / 10 | absorb moves start 1 frame before ours |
+| Thunderbolt | +2 | 4 | SE215 (ROM 172) carries a named +1; SE119 (239, 258) ROM-only |
+| Sludge / Poison Fang / Water Pulse / Rolling Kick / Double-Edge | +2 | all | Double-Edge's SE141 (ROM 136) is now emitted: the elliptical (loops 2, exact 30) created at 98 resumes the script at 129, where the ROM's BG `BlendPalette` starts (test) |
+| Water Gun | 0 | 4 | |
+| Poison Tail | +2 | 9 | later rows carry a named +2 (below) |
+
+### 9.3 Counts (turn 0, player attacker)
+
+| step | Level-50 emitted / gated (276 moves) | all moves resolved / unresolved | variants / ops |
+|---|---|---|---|
+| aud242d | 592 / 242 | 783 / 329 | 314 / 776 |
+| **aud242e** | **640 / 194** | **833 / 279** | **315 / 826** |
+
++48 Level-50 ops against the scout's estimate. Remaining unresolved reasons: `unmodelled-lifetime` 262, `waitsound` 11, `unresolved-branch` 6.
+The largest remaining blockers are the hyper beam orb (52), Hydro Pump orb (44), Fire Spin (42), aurora ring (40), air wave (40), power absorption orb (35) and
+`blend_color_cycle` (32). Moves whose rows did not change: Quick Attack, Agility, Iron Tail, Metal Claw, Brick Break, Knock Off (blocked by another unmodelled lifetime).
+
+### 9.4 Residuals (named, not hidden)
+
+- **Overheat flame**: the four SE147 rows land 3 frames later in the ROM than modelled (ROM 170, 178, 188, 198 vs ours 165, 173, 183, 193 plus the +2). The creation step makes eight flame
+  sprites; a VBlank-overrun (like `BG_LOAD_LAG`) is the hypothesis (Thunderbolt's nine-sprite step shows +1), but the flame lifetime itself was not independently proven. Named `extra` +3.
+- **Poison Tail**: the first SE120 / SE123 / first SE148 are +2, the later SE148 x 5 and the second SE120 are +4. Undiagnosed; named `extra` +2 on those rows. Order and count are exact.
+- **Thunderbolt** SE215: ROM 172 against 171 from the delay arithmetic (aud242d note); the same one-frame lag appears after a nine-sprite creation step. SE119 x 2 (239, 258) stay behind `ElectricityEffect` waits (ROM-only).
+- **Counter**: the opponent's body before ours (SE214 at ROM 221, SE131 at 239) is ROM-only; our body starts 16 frames after the ROM's (turn-order offset of the live adapter, ISSUES #198 class).
+- Not done (out of scope): `blend_color_cycle` / `HardwarePaletteFade`, cry tasks, the waitsound SE-length table, the census column (aud243).
+
+### 9.5 Acceptance receipt (aud242e)
+
+- `npm run extract:anim-sound-timing` regenerates the committed table byte-identically (`cmp` of the committed file against the regenerated one: identical).
+- `npm run typecheck`, `npm run build`, `npm run build:lib`: each exit 0 (separate commands).
+- `npm run test:gate`: 362 files, 2,835 tests passed. aud24* + audio* + frf250* + obr251* in one vitest call: 21 files, 896 passed, 18 skipped (probe tests that need a live oracle).
+- `npm run compare:differential` over the 15 aud242e Scene ON move traces (97 captures each, frames 60..821 step 8; every one has changed table rows) against `3ecd1a6b9` plus the
+  aud242e stage definitions only (so the base can build the new stages): **1,455 / 1,455 captures byte-identical, 0 pixel diffs**.
