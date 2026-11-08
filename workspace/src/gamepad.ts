@@ -66,7 +66,8 @@ export function gamepadButtons(pad: GamepadLike, deadZone = DEFAULT_GAMEPAD_DEAD
  */
 export function connectGamepad(game: GamepadTarget, options: GamepadOptions = {}): () => void {
   const deadZone = options.deadZone ?? DEFAULT_GAMEPAD_DEAD_ZONE;
-  const getGamepads = options.getGamepads ?? (() => navigator.getGamepads());
+  // No Gamepad API (insecure context, old browser, non-browser host): behave as if no pad is connected.
+  const getGamepads = options.getGamepads ?? (() => (typeof navigator !== "undefined" && navigator.getGamepads ? navigator.getGamepads() : []));
   const schedule =
     options.schedule ??
     ((poll: () => void) => {

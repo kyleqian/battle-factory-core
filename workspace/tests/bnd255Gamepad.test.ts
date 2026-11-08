@@ -339,3 +339,25 @@ describe("gamepad input equals press / release on the mount", () => {
     expect([...buttons].sort()).toEqual(["A", "B", "DOWN", "L", "R", "RIGHT", "SELECT", "START", "UP", "LEFT"].sort());
   });
 });
+
+describe("bnd255 gamepad: no Gamepad API", () => {
+  it("treats a missing navigator.getGamepads as no pad connected", () => {
+    const g = globalThis as { navigator?: unknown };
+    const saved = Object.getOwnPropertyDescriptor(g, "navigator");
+    Object.defineProperty(g, "navigator", { value: {}, configurable: true });
+    try {
+      const calls: string[] = [];
+      let next: (() => void) | null = null;
+      const stop = connectGamepad(
+        { press: (b) => calls.push(`+${b}`), release: (b) => calls.push(`-${b}`) },
+        { schedule: (poll) => ((next = poll), () => (next = null)) },
+      );
+      expect(() => next?.()).not.toThrow();
+      stop();
+      expect(calls).toEqual([]);
+    } finally {
+      if (saved) Object.defineProperty(g, "navigator", saved);
+      else delete g.navigator;
+    }
+  });
+});
