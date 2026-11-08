@@ -24,7 +24,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   1,784 files, 1,740 passed + 44 skipped, 0 failed; typecheck, build 0. Supervisor: deleted set confined to the three dirs, no runtime
   path in src / tests (4 tests only cite receipts in comments); `git ls-files -ci --exclude-standard` empty; test:gate on the merged
   master 362 / 362. Local copy of the untracked files: `.integration/validation/sv-20261107/cln243-untracked-evidence.tar.gz`.
-- **Next:** aud242e (fixed-length sprite lifetimes), bundle hygiene bnd-a.
+- **Folded:** aud242e (S11 step 6, fifth slice; branch `worker/integration-20261107-235532`, 44 min; doc section 9): lifetimes from C
+  for Toxic bubble, Fang, Sludge / WaterGun / WaterPulse sprites, platform shake, elliptical mon task, Overheat flame, horizontal
+  lunge, ElectricBolt, absorption orb (ROM-proved, no C line); `simple_palette_blend` one tick shorter (ROM logs; aud242c / d specs
+  re-pinned: Hyper Beam +1, Ice Beam +2). Level-50 emitted 592 -> 640, all resolved 783 -> 833. 15 step-mode ROM windows; offsets ISSUES
+  #198. Worker: typecheck / build / build:lib 0, test:gate 362 / 362, differential 15 traces 1,455 identical. Supervisor: table
+  byte-identical; 21 audio files 896 passed + 18 skipped.
+- **Next:** bundle hygiene bnd253a (test-only JSON out of `src/`), then aud242f (orb / ring sprites, blend_color_cycle).
 
 ---
 

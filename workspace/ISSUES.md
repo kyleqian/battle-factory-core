@@ -51,6 +51,12 @@ The ROM reaches pan +64 on `SE_M_STAT_INCREASE` vs an opponent target (check `Ba
 (L50 emitted 550 -> 592, all 783 resolved): Thunderbolt / Icy Wind / Double-Edge / Metal Claw / Steel Wing +2, Hail / Sunny Day -4,
 Calm Mind -5; `AnimTask_MetallicShine` loses 4 wall frames at creation (2 localised), the SE_M_HARDEN loop's 2nd SE +2 extra. Open:
 `blend_color_cycle`, `HardwarePaletteFade`, Thunderbolt SE215 one frame late, Hail / Sunny Day rows after 760 not emitted.
+**aud242e (2026-11-08)** sprite / mon-task lifetimes (L50 640 emitted, 194 gated; all 833 resolved): Toxic +3; Rock Tomb / Sludge /
+Poison Fang / Water Pulse / Rolling Kick / Double-Edge / Overheat +2; Water Gun 0; Absorb / Mega Drain / Giga Drain -1; Counter -16 (used
+second). `simple_palette_blend` corrected one tick shorter from ROM BlendPalette logs, so Hyper Beam 0 -> +1 and Ice Beam +1 -> +2 (toward
+the +2 class: the alignment audit is the lead). Open: Overheat SE147 rows +3 more, Poison Tail later rows +4, Thunderbolt SE215 +1;
+next blockers hyper beam orb (52 ops), Hydro Pump orb (44), Fire Spin (42), aurora ring (40), air wave (40), power absorption orb (35),
+`blend_color_cycle` (32).
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 
