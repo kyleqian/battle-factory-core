@@ -5,6 +5,9 @@ import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "jso
 import substituteDollAsset from "../animation/assets/substitute.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import castformFormsData from "../assets/gen/castform-forms.json" with { type: "json" };
+import spritePalettesData from "../assets/gen/battle-sprite-palettes.json" with { type: "json" };
+import picGeometryData from "../assets/gen/battle-pic-geometry.json" with { type: "json" };
+import type { MonPicGeometry } from "./monPicGeometry.ts";
 import type { BattleCommandPresentationState } from "./battleCommandPresentation.ts";
 import type { RgbColor } from "./bg.ts";
 
@@ -29,6 +32,11 @@ export type BattleCommandFieldArtBattler = Readonly<{
   species: number;
   speciesSymbol: string;
   pic: BattleCommandMonPic;
+  /**
+   * Columns / rows / first opaque row of `pic.tileset`, from src/assets/gen/battle-pic-geometry.json (bnd254b). Tick-path code
+   * (faint timing, the Extrasensory gate) reads this, never the sprite pixels in `pic.tileset`, which only renderers read.
+   */
+  picGeometry: MonPicGeometry;
   coords: BattleCommandMonPicCoords;
   /** Unelevated canvas origin; use battleCommandFieldSpriteOrigin for scanout. */
   origin: Readonly<{ x: number; y: number }>;
@@ -73,6 +81,28 @@ const speciesSymbolById = new Map(
 );
 const backSprites = backSpritesData as Readonly<Record<string, BattleCommandMonPic>>;
 const frontSprites = frontSpritesData as Readonly<Record<string, BattleCommandMonPic>>;
+const spritePalettes = spritePalettesData as unknown as Readonly<Record<"back" | "front", Readonly<Record<string, readonly RgbColor[]>>>>;
+const picGeometry = picGeometryData as unknown as Readonly<{
+  back: Readonly<Record<string, MonPicGeometry>>;
+  front: Readonly<Record<string, MonPicGeometry>>;
+  substituteDoll: Readonly<Record<"player" | "opponent", MonPicGeometry>>;
+  castform: readonly Readonly<Record<"player" | "opponent", MonPicGeometry>>[];
+}>;
+// The battler's pic: the sprite table's pixels (render-only) with the palette from battle-sprite-palettes.json, so the palette reads on
+// the tick path (liveMoveAnimation, liveMovePaletteComposite) never touch the pixel table. Cached: the pic object stays stable per species.
+const picCache = new Map<string, BattleCommandMonPic>();
+function speciesPic(side: "player" | "opponent", speciesSymbol: string): BattleCommandMonPic | undefined {
+  const key = `${side}/${speciesSymbol}`;
+  let pic = picCache.get(key);
+  if (pic === undefined) {
+    const sheet = (side === "player" ? backSprites : frontSprites)[speciesSymbol];
+    const palette = spritePalettes[side === "player" ? "back" : "front"][speciesSymbol];
+    if (sheet === undefined || palette === undefined) return undefined;
+    pic = { ...sheet, palette };
+    picCache.set(key, pic);
+  }
+  return pic;
+}
 const coords = monPicCoordsData as CoordsAsset;
 
 /** GetBattlerYDelta (battle_anim_mons.c:208-210) returns sCastformBackSpriteYCoords[gBattleMonForms]
@@ -163,13 +193,12 @@ function fieldArtBattler(
   if (speciesSymbol === undefined) {
     throw new Error(`battle-command field art: unknown species id ${species}`);
   }
-  const pic = side === "player"
-    ? backSprites[speciesSymbol]
-    : frontSprites[speciesSymbol];
+  const pic = speciesPic(side, speciesSymbol);
+  const geometry = picGeometry[side === "player" ? "back" : "front"][speciesSymbol];
   const picCoords = side === "player"
     ? coords.back[speciesSymbol]
     : coords.front[speciesSymbol];
-  if (pic === undefined || picCoords === undefined) {
+  if (pic === undefined || geometry === undefined || picCoords === undefined) {
     throw new Error(
       `battle-command field art: missing ${side} battle pic for SPECIES_${speciesSymbol}`,
     );
@@ -178,7 +207,7 @@ function fieldArtBattler(
   const form = castformFieldArtForm(speciesSymbol, castformForm);
   if (doll) {
     return Object.freeze({
-      species, speciesSymbol, pic: SUBSTITUTE_DOLL_PIC[side], coords: picCoords, origin: SUBSTITUTE_DOLL_ORIGIN[side],
+      species, speciesSymbol, pic: SUBSTITUTE_DOLL_PIC[side], picGeometry: picGeometry.substituteDoll[side], coords: picCoords, origin: SUBSTITUTE_DOLL_ORIGIN[side],
       substituteDoll: true as const, ...(form === undefined ? {} : { castformForm: form.form }),
     });
   }
@@ -191,6 +220,7 @@ function fieldArtBattler(
       species,
       speciesSymbol,
       pic: side === "player" ? form.back : form.front,
+      picGeometry: picGeometry.castform[form.form]![side],
       coords: formCoords,
       origin: Object.freeze({ x: side === "player" ? 40 : 144, y: side === "player" ? 48 + form.backYDelta : 8 + form.frontCoords.yOffset }),
       castformForm: form.form,
@@ -203,6 +233,7 @@ function fieldArtBattler(
     species,
     speciesSymbol,
     pic,
+    picGeometry: geometry,
     coords: picCoords,
     origin: Object.freeze({
       x: side === "player" ? 40 : 144,

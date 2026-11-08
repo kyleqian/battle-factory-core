@@ -4911,13 +4911,8 @@ function liveDiveWordsPlan(
  * asl155 (docs/asl155-astonish-extrasensory-live.md): the first screen line with an opaque pixel of a field battler's pic at its unelevated
  * origin (the target's first visible monbg line in Extrasensory's distortion window; SHUCKLE 27 and GOLEM 18 as measured, prep30 s1.4).
  */
-export function liveFieldArtTopLine(battler: Readonly<{ pic: { tileset: { columns: number; rows: number; tiles: readonly (readonly number[])[] } };
-  origin: Readonly<{ y: number }> }>): number {
-  const { columns, rows, tiles } = battler.pic.tileset;
-  for (let y = 0; y < rows * 8; y++) {
-    for (let x = 0; x < columns * 8; x++) if (tiles[(y >> 3) * columns + (x >> 3)]![(y & 7) * 8 + (x & 7)] !== 0) return battler.origin.y + y;
-  }
-  return Number.POSITIVE_INFINITY;
+export function liveFieldArtTopLine(battler: Readonly<{ picGeometry: Readonly<{ topRow: number | null }>; origin: Readonly<{ y: number }> }>): number {
+  return battler.picGeometry.topRow === null ? Number.POSITIVE_INFINITY : battler.origin.y + battler.picGeometry.topRow;
 }
 /**
  * asl155: a player attacker's later Extrasensory body is live only for a target whose first visible monbg line is at least this line: there
