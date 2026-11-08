@@ -30,7 +30,13 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   re-pinned: Hyper Beam +1, Ice Beam +2). Level-50 emitted 592 -> 640, all resolved 783 -> 833. 15 step-mode ROM windows; offsets ISSUES
   #198. Worker: typecheck / build / build:lib 0, test:gate 362 / 362, differential 15 traces 1,455 identical. Supervisor: table
   byte-identical; 21 audio files 896 passed + 18 skipped.
-- **Next:** bundle hygiene bnd253a (test-only JSON out of `src/`), then aud242f (orb / ring sprites, blend_color_cycle).
+- **Folded:** bnd253a (bundle hygiene "bnd-a"; side branch `worker/side-20261108-004221`, 74 min; `docs/bnd253a-test-json.md`): 97
+  unshipped test / tool-only JSON moved `src/` -> `tests/fixtures/data/` with importers and extractor outputs (`src/` 108.95 -> 45.79 MB;
+  2 unshipped left on a shrink-only allowlist); ratchet `tests/bnd253SrcJsonShipped.test.ts` + full-graph checker
+  `tools/build/srcJsonShipped.ts`. ENGINE_BUILD `eb-22fc0e2bc29aaff3` unchanged, every `dist-lib` file identical. Worker: typecheck /
+  build / build:lib 0; full suite (6 shards) 1,742 files passed + 44 skipped, 0 failed; 4 extractors rewrite byte-identical.
+  Supervisor: src `.ts` edits are comment-only; ENGINE_BUILD recomputed on both trees; test:gate 362 / 362; ratchet 3 / 3.
+- **Next:** aud242f (orb / ring sprites, blend_color_cycle), then bnd-b (pic geometry table).
 
 ---
 
