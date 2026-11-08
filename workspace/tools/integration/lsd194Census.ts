@@ -1,6 +1,6 @@
 // aud243a (docs/aud243a-sound-census.md): two more fields per seed, `sound` = every sound event of the battle as [frame, kind, id, pan] (+ mode for a cry; frame = 1-based census step, the value
 // FactorySession.frame has after the tick) and `soundDigest` (sha256[:16] of `sound`), plus `soundAnim` = one row per move-animation command that presented, [command index into `commands`, moveId, turn,
-// attacker battler, target battler, first presenting frame, last presenting frame, frame of body age 0 (null: no live body), 1 when the segment is HITMARKER_NO_ANIMATIONS] (the T1 attribution input of
+// attacker battler, target battler, first presenting frame, last presenting frame, frame of body age 0 (null: no live body), 1 when the segment is HITMARKER_NO_ANIMATIONS, 1 for the Scene ON action-transition pause (command.actionTransition)] (the T1 attribution input of
 // soundCensusDelta.py). Events come from the same emitters tick() calls (emitTickSounds on the orchestrator before/after each step, battleScene null) between beginScreenSoundTick and runScheduledScreenSounds
 // inside collectSoundTick; menu SEs fire inside the advance functions and are collected too. A tree without those modules writes sound / soundDigest / soundAnim = null. No existing field changes.
 // apx210 (finish plan Phase 2, liveMovePlayback.ts): trailing field [21] = a move-animation's playback class ("live", "static:<reason>",
@@ -150,7 +150,7 @@ for (let seed = from!; seed <= to!; seed += 1) {
         if (!a) {
           const q = c.animation;
           a = [cmdIndex.get(c)!, q?.moveId ?? null, q?.turn ?? null, q?.attacker ?? null, q?.target ?? null, frame, frame, null,
-            (s.beforeRules.rulesContext.hitMarker & (scriptConstants?.BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS ?? 128)) !== 0 ? 1 : 0] as never;
+            (s.beforeRules.rulesContext.hitMarker & (scriptConstants?.BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS ?? 128)) !== 0 ? 1 : 0, c.actionTransition ? 1 : 0] as never;
           animRows.set(c, a);
         }
         a[6] = frame;

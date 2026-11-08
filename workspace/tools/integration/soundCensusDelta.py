@@ -87,18 +87,7 @@ def t1(arm, json_out):
     timing = json.load(open("src/data/gen/anim-sound-timing.json"))
     label_of = {m["move"]: m["label"] for m in timing["moves"]}
     cry = cry_sites()
-    norm = lambda t: re.sub(r"[^A-Z0-9]", "", t.upper())
-    id_of = {norm(m["label"][5:]): m["move"] for m in timing["moves"] if m["label"].startswith("Move_")}
-    def body_less(r, a):
-        """A command with no body request (the live adapter / classifier declines it, class "pause"): the move comes from the latest "<mon> used <MOVE>!" print, side from "Foe"; turn 0."""
-        m = re.match(r"^(Foe )?.* used\s+(.+?)!?$", (r["commands"][a[0]][10] or "").replace("\n", " "))
-        mv = id_of.get(norm(m.group(2))) if m else None
-        if mv is None: return None
-        att = 1 if m.group(1) else 0
-        return (mv, 0, att, 1 - att)
-    keys = {(a[1], a[2], a[3], a[4]) for r in A.values() for a in r["soundAnim"] if a[1] is not None}
-    keys |= {k for r in A.values() for a in r["soundAnim"] if a[1] is None and not a[8] and (k := body_less(r, a)) is not None}
-    keys = sorted(keys)
+    keys = sorted({(a[1], a[2], a[3], a[4]) for r in A.values() for a in r["soundAnim"] if a[1] is not None})
     with tempfile.TemporaryDirectory() as td:
         kp, ep = os.path.join(td, "keys.json"), os.path.join(td, "expected.json")
         json.dump(keys, open(kp, "w"))
@@ -115,7 +104,7 @@ def t1(arm, json_out):
         if r["sound"] is None: sys.exit("arm has no sound column")
         windows = []; inwin = lambda f: any(w[5] <= f <= w[6] for w in r["soundAnim"])
         for a in r["soundAnim"]:
-            idx, move, turn, att, tgt, first, last, zero, noanim = a
+            idx, move, turn, att, tgt, first, last, zero, noanim = a[:9]
             cmds["move-animation commands"] += 1
             ev = [e for e in r["sound"] if first <= e[0] <= last and e[1] in ("se", "pan") and not (e[1] == "se" and e[2] in CONTROLLER_IDS)]
             if noanim:
@@ -123,16 +112,10 @@ def t1(arm, json_out):
                 for e in ev: put("extra", 1, s, move, e)
                 continue
             if move is None:
-                cmds["no body request (pause)"] += 1
-                k = body_less(r, a)
-                if r["commands"][idx][10] is None:
-                    cmds["  of which before any move was used (not a move body)"] += 1
-                elif k is None:
-                    cmds["  of which move name unresolved"] += 1; put("unclassified", 1, s, None, "unresolved name " + repr(r["commands"][idx][10]))
+                if len(a) > 9 and a[9]:
+                    cmds["Scene ON action-transition pause (no body by design)"] += 1
                 else:
-                    exp = E[f"{k[0]},{k[1]},{k[2]},{k[3]}"]; cmds["  of which move with table entry"] += 1
-                    put("missing-declined", len(exp["rows"]), s, k[0])
-                    if cry.get(label_of.get(k[0], ""), 0): put("missing-cry-task", cry[label_of[k[0]]], s, k[0])
+                    cmds["no body request, not a transition"] += 1; put("unclassified", 1, s, None, "animation-less non-transition command " + str(idx))
                 for e in ev: put("extra", 1, s, move, e)
                 continue
             exp = E.get(f"{move},{turn},{att},{tgt}")
