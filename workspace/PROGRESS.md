@@ -77,6 +77,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   eager tick read), install points (lib.ts gated start, a vitest setup file, appTrace.ts), proof plan; choose static vs dynamic install.
   #198 alignment read-only (`docs/al198-scout.md`): no single rule explains the classes (idle-lead hypothesis falsified); one narrow rule
   (`liveMoveSourceAge` subtracts the 3 pre rows even for `LIVE_MOVE_NO_PRE_ROW_SIDES`: Flamethrower +5 -> +2) is a bounded step.
+  aud242g read-only (`docs/aud242g-scout.md`): Level-50 blockers re-ranked (SetPsychicBackground is an instant task, +9 measured;
+  Tri Attack, Bubblebeam next; Sludge Bomb needs an SE-length table + pending-preserving waitsound; Blizzard / cries / branches are
+  model changes, not table rows).
 - **Final full suite** (`gates/`, HEAD `23a641cb4` == final src): **1,789 files: 1,745 passed + 44 skipped, 0 failed; 14,361 tests
   passed**; typecheck, build, build:lib 0.
 - **Gates** (`gates/`, final src): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**;

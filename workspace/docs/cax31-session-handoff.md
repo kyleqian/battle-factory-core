@@ -80,7 +80,7 @@ never brief those here. One worker at a time; each run folds the next audio step
    emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07; aud242d / e / f DONE
    2026-11-08.** Next: **aud243a** (census sound column + T1 delta; read-only scout `docs/aud243-scout.md`: the census never calls
    `tick()`, so first move the post-tick sound emitters of `core.ts` into one exported function), then aud243b (ROM T2 replay; RNG
-   alignment is the risk); remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
+   alignment is the risk); remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave; next lifetimes ranked in `docs/aud242g-scout.md`. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) DONE (cln240 + cln242; optional: speed up `dive.ts` for the slowest files); (4) DONE (cln241);
    (7) evidence stops going into git (policy line in AGENTS.md DONE 2026-11-07; cln243 DONE 2026-11-07, 11,691 files / 204 MB untracked,
