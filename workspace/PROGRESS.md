@@ -5,9 +5,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-07 / 08 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242d / cln243 / aud242e / bnd253a / aud242f / bnd254b / bnd255f folded
+## 2026-11-07 / 08 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242d / cln243 / aud242e / bnd253a / aud242f / bnd254b / bnd255f / dif256 folded
 
-- **State:** master clean, no active workers; final src == bnd255f merge `23a641cb4` (later commits: docs / tools). Evidence
+- **State:** master clean, no active workers; final src == bnd255f merge `23a641cb4` (later commits: docs, dif256 tools). Evidence
   `.integration/validation/sv-20261107/`. Final gates in the last bullets. No DEFERRED items. No push.
 - **Folded:** aud242d (S11 step 6, fourth slice; branch `worker/integration-20261107-213054`, 38 min; doc section 8): audited
   instant visual-task table (55 tasks, re-checked against C at extraction), BlendBattleAnimPal / Exclude / BlendParticle lifetime
@@ -54,6 +54,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `lib-types`; the dev shell opts in; the mount never polls; not in the headless graph. 11 Tier-1 tests incl. helper == direct press
   trace equality. ENGINE_BUILD unchanged. The worker's full suite did not finish (shards timed out); the supervisor added a
   missing-`navigator.getGamepads` guard + test (the default would have thrown every frame in insecure contexts).
+- **Folded:** dif256 (tooling papercut; side branch `worker/side-20261108-051640`, 31 min; tools + one test, no src): `npm run
+  compare:differential -- <traces> --base REF --harness-from-head` overlays the working tree's `appTrace.ts` closure (7 tools/ files,
+  never src/) onto the base, so traces with newer stage ids replay against an older engine; clear exit-2 message when the harness needs
+  missing src/ exports (`tools/compare/harnessOverlay.ts`, `tests/dif256HarnessOverlay.test.ts`). Supervisor: 21 / 21 tests; aud242f
+  Ice Beam trace vs `5418684` with the flag 96 / 96 identical (without it: "unknown app stage"). SUPERVISOR.md recipe updated.
 - **Scout:** aud243 read-only (`docs/aud243-scout.md`, unverified): the census never calls `tick()`, so the diff-based sound emitters
   (`core.ts` post-tick block) must move into one exported function both use; T1 is partly circular; ROM T2 needs RNG alignment +
   an input recorder (make-or-break); split aud243a (census column + T1 delta) / aud243b (T2 replay).
@@ -69,7 +74,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   #196 / #197 / #198 / #199 / #200.
 - **Notes:** ENGINE_BUILD moved this run (aud242e/f audio tables, bnd254b): tell the website. Worker branches (all merged, deleted):
   integration-20261107-213054 (aud242d), side-20261107-221123 (cln243), integration-20261107-235532 (aud242e), side-20261108-004221
-  (bnd253a), integration-20261108-015833 (aud242f), side-20261108-023543 (bnd254b), side-20261108-032210 (bnd255f).
+  (bnd253a), integration-20261108-015833 (aud242f), side-20261108-023543 (bnd254b), side-20261108-032210 (bnd255f),
+  side-20261108-051640 (dif256).
 ---
 
 ## 2026-11-06 / 07 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242b / obr251 / cln242 / aud242c / flw252 folded

@@ -178,7 +178,10 @@ edit.
      `npm run compare:differential -- <traces...> --base <clean parent>`:
      it replays each trace's captureFrames against both this tree and a clean
      checkout of the parent and byte-compares the raw RGBA, removing its own
-     worktree afterwards. Brief the exact command and trace list rather than
+     worktree afterwards. If the slice added `appTrace` stage ids, add
+     `--harness-from-head` (dif256): it overlays the working tree's
+     `tools/compare/appTrace.ts` closure (tools/ only, never src/) onto the base;
+     it fails naming the export if the new stages need new src/ exports. Brief the exact command and trace list rather than
      letting each worker rebuild the recipe by hand — that ad-hoc version was
      a standing papercut and leaked orphaned worktrees for weeks. A green
      differential means "nothing visible changed", NOT "correct" — pair it

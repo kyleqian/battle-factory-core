@@ -57,7 +57,8 @@ history.
   (2026-10-30 pfb228) `bso225Dense.ts` auto-delta search is bounded at +4 and silently picks the boundary (caused the bso225 "-4..+3
   offset" misdiagnosis, ~20 min); no PIL on the host (hand-written PNG writer, ~5 min); MEW has no player battle pic in
   `fieldArtBattler` (throws, ~2 min); `pkill -f` killed the worker's own shell again (~3 min).
-  (2026-11-08 aud242e, also aud242d) `compare:differential --base` cannot build a base lacking new `appTrace` stage ids; workers hand-build a scratch base (~10 min).
+  (2026-11-08 aud242e, also aud242d) `compare:differential --base` could not build a base lacking new `appTrace` stage ids (~10 min each);
+  fixed by dif256 `--harness-from-head`.
   (2026-11-07 cln243) a 5-worker full suite (~21 min) cannot run as one foreground call; workers shard it `--shard=i/6` by hand.
   (2026-11-07 aud242d) chaining `typecheck && build && build:lib` in one foreground call passes 600 s and auto-backgrounds (~10 min).
   (2026-11-06/07 supervisor, from 5 workers) `pkill -f` killed the worker's own shell twice more (aud242b ~5 min, cln242
