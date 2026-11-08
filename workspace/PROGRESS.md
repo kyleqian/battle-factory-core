@@ -36,7 +36,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `tools/build/srcJsonShipped.ts`. ENGINE_BUILD `eb-22fc0e2bc29aaff3` unchanged, every `dist-lib` file identical. Worker: typecheck /
   build / build:lib 0; full suite (6 shards) 1,742 files passed + 44 skipped, 0 failed; 4 extractors rewrite byte-identical.
   Supervisor: src `.ts` edits are comment-only; ENGINE_BUILD recomputed on both trees; test:gate 362 / 362; ratchet 3 / 3.
-- **Next:** aud242f (orb / ring sprites, blend_color_cycle), then bnd-b (pic geometry table).
+- **Folded:** aud242f (S11 step 6, sixth slice; branch `worker/integration-20261108-015833`, 35 min; doc section 10): BowMon / HornHit /
+  ice crystal / fist / BreathPuff sprite and ScaleMonAndRestore / GrowAndShrink task lifetimes (C-cited). Level-50 emitted 640 -> 674, all
+  resolved 833 -> 868. 7 ROM windows (offsets ISSUES #198); aud242c Ice Beam's 7 SE137 rows now emitted (romOnly list dropped). Worker:
+  typecheck / build / build:lib 0, test:gate 362 / 362, differential 16 traces 1,536 identical. Supervisor: table byte-identical; 22 audio
+  files 939 passed + 18 skipped.
+- **Next:** bnd254b (pic geometry table, bundle hygiene bnd-b), then wind-down gates.
 
 ---
 

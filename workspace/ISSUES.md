@@ -57,6 +57,10 @@ second). `simple_palette_blend` corrected one tick shorter from ROM BlendPalette
 the +2 class: the alignment audit is the lead). Open: Overheat SE147 rows +3 more, Poison Tail later rows +4, Thunderbolt SE215 +1;
 next blockers hyper beam orb (52 ops), Hydro Pump orb (44), Fire Spin (42), aurora ring (40), air wave (40), power absorption orb (35),
 `blend_color_cycle` (32).
+**aud242f (2026-11-08)** BowMon / HornHit / Ice Beam + Ice Punch crystals / fist / BreathPuff sprites, ScaleMonAndRestore / GrowAndShrink
+(L50 674 emitted, 160 gated; all 868 resolved): Horn Drill 0; Headbutt / Ice Punch / Ice Beam (its 7 SE137 rows now emitted) / Hidden
+Power +2; Swagger -3, Growth -4 (2nd SE152 behind `blend_color_cycle`). Blizzard's snowball ends off-screen (per-species pic offset:
+needs a species-aware model, doc 10.5); Tri Attack, Bubblebeam, Luster Purge, ExtremeSpeed, Psychic, Curse, Spark, Attract unmodelled.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 
