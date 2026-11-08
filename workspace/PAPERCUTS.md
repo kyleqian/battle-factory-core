@@ -8,6 +8,13 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Census / worktree friction, 2026-11-08 / 09 run
+
+- **Integration worktrees cannot see the main checkout's `.integration/` evidence** (baseline census arms live there; aud243a, ~3 min).
+  Briefs should name the absolute path `/srv/pokebench/pokeemerald-factory-core/workspace/.integration/...`.
+- **Long foreground commands (typecheck, census, full suite) are auto-backgrounded at the tool timeout, and a `pgrep -f` poll matches
+  its own shell** (aud243a, ~10 min). Use `nohup ... & echo $! > pid` and poll `kill -0 $(cat pid)`.
+
 ## Audio-window and verification friction, 2026-11-04 / 05 run
 
 - **What / cost:** (1) No repo tool replays a trace / lab stage and prints our sound events next to a probe fixture; aud241a kept
