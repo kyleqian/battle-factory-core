@@ -3,7 +3,7 @@
 `tools/compare/traces/turn4-doubleteam.json`, docs/battle-turn-notes.md §22).
 Pure analysis over five already-committed RAM dumps (no mGBA needed - plain
 `python3`), one per turn's own kickoff-text-gate window
-(`src/data/gen/turn{1,2,3,4,5}-{kickoff,endeavor,doubleteam}-textgate-watch-
+(`tests/fixtures/data/turn{1,2,3,4,5}-{kickoff,endeavor,doubleteam}-textgate-watch-
 probe.json`), each watching `gBattlerControllerFuncs[1]` (the opponent/
 Grovyle battler's own controller function pointer),
 `gBattleControllerExecFlags`, and `gBattle_BG0_Y` around that turn's own
@@ -41,7 +41,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 WORKTREE_ROOT = HERE.parent.parent
-GEN = WORKTREE_ROOT / "src" / "data" / "gen"
+GEN = WORKTREE_ROOT / "tests" / "fixtures" / "data"
 
 # (turn label, probe file, pressTick, move family, is turn 4's own DOUBLE_TEAM window?)
 TURNS = [

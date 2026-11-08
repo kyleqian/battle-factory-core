@@ -19,13 +19,13 @@ const RUN_ROOT = join(HERE, "..", "..");
 const REF = join(RUN_ROOT, "reference", "pokeemerald");
 const COMMAND_FILE = "src/battle_script_commands.c";
 const CONSTANTS_FILE = "include/constants/battle_script_commands.h";
-const OBSERVATIONS_FILE = "src/data/gen/battle-script-opcode-observations.json";
-const HANDLERS_FILE = "src/data/gen/battle-script-command-handlers.json";
+const OBSERVATIONS_FILE = "tests/fixtures/data/battle-script-opcode-observations.json";
+const HANDLERS_FILE = "tests/fixtures/data/battle-script-command-handlers.json";
 const outDirIndex = process.argv.indexOf("--out-dir");
 const outDirArg = outDirIndex < 0 ? undefined : process.argv[outDirIndex + 1];
 if (outDirIndex >= 0 && !outDirArg) throw new Error("--out-dir requires a directory");
 const OUT_DIR = outDirArg === undefined
-  ? join(RUN_ROOT, "src", "data", "gen")
+  ? join(RUN_ROOT, "tests", "fixtures", "data")
   : isAbsolute(outDirArg) ? outDirArg : join(RUN_ROOT, outDirArg);
 
 type OpcodeObservation = Readonly<{

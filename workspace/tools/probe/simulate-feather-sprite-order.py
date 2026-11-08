@@ -28,9 +28,9 @@ import json
 import os
 
 TURNS = [
-    ("turn6", "src/data/gen/turn6-feather-sprites-probe.json", 7557, (7421, 7549)),
-    ("turn7", "src/data/gen/turn7-feather-sprites-probe.json", 8591, (8455, 8583)),
-    ("turn8", "src/data/gen/turn8-feather-sprites-probe.json", 9637, (9501, 9629)),
+    ("turn6", "tests/fixtures/data/turn6-feather-sprites-probe.json", 7557, (7421, 7549)),
+    ("turn7", "tests/fixtures/data/turn7-feather-sprites-probe.json", 8591, (8455, 8583)),
+    ("turn8", "tests/fixtures/data/turn8-feather-sprites-probe.json", 9637, (9501, 9629)),
 ]
 
 DISPLAY_HEIGHT = 160

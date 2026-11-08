@@ -34,7 +34,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 WORKTREE_ROOT = HERE.parent.parent
-PROBE_PATH = WORKTREE_ROOT / "src" / "data" / "gen" / "turn5-menu-bouncer-raw-probe.json"
+PROBE_PATH = WORKTREE_ROOT / "tests" / "fixtures" / "data" / "turn5-menu-bouncer-raw-probe.json"
 TRACE_PATH = WORKTREE_ROOT / "tools" / "compare" / "traces" / "turn5-menu.json"
 
 GBA_SINE_TABLE_256 = [

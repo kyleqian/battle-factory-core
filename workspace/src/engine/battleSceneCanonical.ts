@@ -991,7 +991,7 @@ export const DRAGONBREATH_HIT_FLASH_OFFSET = DRAGONBREATH_HIT_FLASH_ANCHOR_DELAY
  * would break them.
  *
  * Exported for a direct Tier-1 pin against the committed RAM pointer-chase
- * dump (`src/data/gen/turn3-menu-bouncer-raw-probe.json`,
+ * dump (`tests/fixtures/data/turn3-menu-bouncer-raw-probe.json`,
  * `tools/probe/verify-turn3-menu-bounce-rule.py`'s own source).
  */
 export function turn3SubmenuBounceTickFromPresentationEpochAge(
@@ -1516,7 +1516,7 @@ export function turn13MurkrowFrame(continuationElapsed: number): 0 | 1 {
  * branch (the pre-confirm idle regime, one line above this function's
  * only call site) already applies - both regimes drive the SAME live
  * `DoBounceEffect` cycle, RAM-confirmed continuous across the press
- * (receipt: `src/data/gen/turn5-6-reopen-bounce-probe.json`, raw sine
+ * (receipt: `tests/fixtures/data/turn5-6-reopen-bounce-probe.json`, raw sine
  * index step of 7/tick with zero discontinuity at the press tick).
  */
 export function turn6KickoffBounceTick(t: number, pressTick: number): number {
@@ -2506,7 +2506,7 @@ export const TURN5_SITRUS_HEAL_HP_END = TURN5_SITRUS.hp.to;
  * ISSUES #26 (docs/faint-switch-notes.md §16): the Sitrus proc's expanding
  * THIN_RING (`gThinRingExpandingSpriteTemplate`, `gSprites[4]`,
  * `matrixNum=2`) - RAM ground truth from the dedicated probe
- * (`src/data/gen/turn5-sitrus-ring-probe.json`, twice-run byte-identical,
+ * (`tests/fixtures/data/turn5-sitrus-ring-probe.json`, twice-run byte-identical,
  * all 32 live ticks match this closed form with zero mismatches). Unlike
  * `onixSitrusRotateMatrix` above, this matrix is a pure isotropic scale
  * (`b=c=0` always, `a=d` always) - never a rotation - so it does NOT

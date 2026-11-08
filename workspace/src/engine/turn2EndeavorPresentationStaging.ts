@@ -24,7 +24,7 @@
  * real level-50 battle stats, byte-identical to every other staging module
  * in this file family (`tests/damageCalc.test.ts`'s own RAM-pinned `ONIX`/
  * `GROVYLE` blocks). Both HP endpoints are this window's own real anchors,
- * read fresh this session from `src/data/gen/battle1-turn2-ram-dump.json`'s
+ * read fresh this session from `tests/fixtures/data/battle1-turn2-ram-dump.json`'s
  * own committed `battlerSnapshots`: Onix (target) starts at 117 --
  * `before_turn2.battler0.hp` (`battleScene.ts`'s own `anchorPlayerBattler.hp`
  * literal read) -- and Grovyle (attacker) sits at 101 for this entire

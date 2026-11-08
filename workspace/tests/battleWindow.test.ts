@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import battleWindow from "../src/assets/gen/battle-window.json" with { type: "json" };
-import templates from "../src/data/gen/battle-window-templates.json" with { type: "json" };
+import templates from "./fixtures/data/battle-window-templates.json" with { type: "json" };
 
 // Oracle cross-check (docs/battle-bringup-notes.md's first-action-menu
 // scene, scratch trace): rendering this tileset+tilemap+palette reproduces

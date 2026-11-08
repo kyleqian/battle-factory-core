@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import fixtureJson from "../src/data/gen/battle1-swap-rentalmons-dump.json" with { type: "json" };
+import fixtureJson from "./fixtures/data/battle1-swap-rentalmons-dump.json" with { type: "json" };
 import type { BattleMon } from "../src/engine/battleScenario.ts";
 import {
   acknowledgeFactorySwapPresentation,

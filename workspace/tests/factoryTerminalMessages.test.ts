@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import terminal from "../src/data/gen/factory-terminal-messages.json" with { type: "json" };
+import terminal from "./fixtures/data/factory-terminal-messages.json" with { type: "json" };
 
 describe("Factory terminal field-message extraction", () => {
   it("pins ordinary field chrome, every regular terminal template, and the record prompt contract", () => {
@@ -85,6 +85,6 @@ describe("Factory terminal field-message extraction", () => {
   it("reproduces the generated data byte-for-byte through --out-dir", () => {
     const directory = mkdtempSync(join(tmpdir(), "factory-terminal-messages-"));
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/extract/extract-factory-terminal-messages.ts", "--out-dir", directory], { stdio: "pipe" });
-    expect(readFileSync(join(directory, "factory-terminal-messages.json"))).toEqual(readFileSync("src/data/gen/factory-terminal-messages.json"));
+    expect(readFileSync(join(directory, "factory-terminal-messages.json"))).toEqual(readFileSync("tests/fixtures/data/factory-terminal-messages.json"));
   });
 });

@@ -4,10 +4,10 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import auditData from "../src/data/gen/battle-script-command-candidate-audit.json" with { type: "json" };
-import commandHandlersData from "../src/data/gen/battle-script-command-handlers.json" with { type: "json" };
-import lexicalFactsData from "../src/data/gen/battle-script-handler-lexical-facts.json" with { type: "json" };
-import observationsData from "../src/data/gen/battle-script-opcode-observations.json" with { type: "json" };
+import auditData from "./fixtures/data/battle-script-command-candidate-audit.json" with { type: "json" };
+import commandHandlersData from "./fixtures/data/battle-script-command-handlers.json" with { type: "json" };
+import lexicalFactsData from "./fixtures/data/battle-script-handler-lexical-facts.json" with { type: "json" };
+import observationsData from "./fixtures/data/battle-script-opcode-observations.json" with { type: "json" };
 
 type Start = { index: number; opcode: { id: number; name: string } };
 type PointerReference = { operation: string; lineRaw: string };
@@ -62,7 +62,7 @@ describe("Battle Script command-family candidate audit", () => {
     run("tools/extract/extract-battle-script-opcode-observations.ts");
     run("tools/extract/extract-battle-script-command-candidate-audit.ts");
     expect(readFileSync(join(outputDirectory, "battle-script-command-candidate-audit.json"), "utf8")).toBe(
-      readFileSync("src/data/gen/battle-script-command-candidate-audit.json", "utf8"),
+      readFileSync("tests/fixtures/data/battle-script-command-candidate-audit.json", "utf8"),
     );
   });
 
@@ -131,9 +131,9 @@ describe("Battle Script command-family candidate audit", () => {
       pauseCounters: expect.arrayContaining([expect.objectContaining({ token: "gPauseCounterBattle" })]),
     });
     expect(audit.source.files).toEqual([
-      { file: "src/data/gen/battle-script-command-handlers.json", sha256: sha256(readFileSync("src/data/gen/battle-script-command-handlers.json", "utf8")), schema: commandHandlers.schema },
-      { file: "src/data/gen/battle-script-handler-lexical-facts.json", sha256: sha256(readFileSync("src/data/gen/battle-script-handler-lexical-facts.json", "utf8")), schema: lexicalFacts.schema },
-      { file: "src/data/gen/battle-script-opcode-observations.json", sha256: sha256(readFileSync("src/data/gen/battle-script-opcode-observations.json", "utf8")), schema: observations.schema },
+      { file: "tests/fixtures/data/battle-script-command-handlers.json", sha256: sha256(readFileSync("tests/fixtures/data/battle-script-command-handlers.json", "utf8")), schema: commandHandlers.schema },
+      { file: "tests/fixtures/data/battle-script-handler-lexical-facts.json", sha256: sha256(readFileSync("tests/fixtures/data/battle-script-handler-lexical-facts.json", "utf8")), schema: lexicalFacts.schema },
+      { file: "tests/fixtures/data/battle-script-opcode-observations.json", sha256: sha256(readFileSync("tests/fixtures/data/battle-script-opcode-observations.json", "utf8")), schema: observations.schema },
     ]);
     expect(audit.source.note).toContain("does not establish an operand width");
   });

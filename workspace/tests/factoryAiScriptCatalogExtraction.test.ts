@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import catalogData from "../src/data/gen/factory-ai-script-catalog.json" with { type: "json" };
+import catalogData from "./fixtures/data/factory-ai-script-catalog.json" with { type: "json" };
 import policyData from "../src/data/gen/factory-ai-policy.json" with { type: "json" };
 
 type Opcode = { value: number; hex: string; handler: string };
@@ -34,7 +34,7 @@ describe("Battle Factory AI script catalogue extraction", () => {
     const output = join(directory, "catalog.json");
     try {
       execFileSync(process.execPath, [...extractor, "--out", output], { stdio: "pipe" });
-      expect(readFileSync(output, "utf8")).toBe(readFileSync("src/data/gen/factory-ai-script-catalog.json", "utf8"));
+      expect(readFileSync(output, "utf8")).toBe(readFileSync("tests/fixtures/data/factory-ai-script-catalog.json", "utf8"));
     } finally {
       rmSync(directory, { recursive: true, force: true });
     }

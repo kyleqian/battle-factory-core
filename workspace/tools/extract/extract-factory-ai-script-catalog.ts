@@ -24,7 +24,7 @@ const sourcePath = argument("--source", join(REF, "data", "battle_ai_scripts.s")
 const macroPath = argument("--macro-source", join(REF, "asm", "macros", "battle_ai_script.inc"));
 const commandPath = argument("--command-source", join(REF, "src", "battle_ai_script_commands.c"));
 const policyPath = argument("--policy", join(ROOT, "src", "data", "gen", "factory-ai-policy.json"));
-const outputPath = argument("--out", join(ROOT, "src", "data", "gen", "factory-ai-script-catalog.json"));
+const outputPath = argument("--out", join(ROOT, "tests", "fixtures", "data", "factory-ai-script-catalog.json"));
 
 type Macro = { name: string; line: number; parameters: string[]; opcodes: number[] };
 type Instruction = { line: number; macro: string; operands: string[]; opcodes: number[] };

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import playerProbe from "../../src/data/gen/dragonrage-full-probe-player-attacker.json" with { type: "json" };
-import opponentProbe from "../../src/data/gen/dragonrage-full-probe-opponent-attacker.json" with { type: "json" };
+import playerProbe from "../fixtures/data/dragonrage-full-probe-player-attacker.json" with { type: "json" };
+import opponentProbe from "../fixtures/data/dragonrage-full-probe-opponent-attacker.json" with { type: "json" };
 import {
   createSceneOnMovePresentation,
   sceneOnDragonRageView,

@@ -35,7 +35,7 @@ function findHarnessRoot(start: string): string {
 const HARNESS_ROOT = findHarnessRoot(ROOT);
 const outIndex = process.argv.indexOf("--out-dir");
 if (outIndex !== -1 && !process.argv[outIndex + 1]) throw new Error("--out-dir needs a directory");
-const OUT_DIR = outIndex === -1 ? join(ROOT, "src", "data", "gen") : resolve(process.argv[outIndex + 1]!);
+const OUT_DIR = outIndex === -1 ? join(ROOT, "tests", "fixtures", "data") : resolve(process.argv[outIndex + 1]!);
 
 function source(...parts: string[]): string {
   return readFileSync(join(REF, ...parts), "utf8");

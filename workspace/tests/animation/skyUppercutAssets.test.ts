@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import asset from "../../src/animation/assets/sky-uppercut.json" with {
+import asset from "../fixtures/data/sky-uppercut.json" with {
   type: "json",
 };
 
@@ -37,7 +37,7 @@ describe("MOVE_SKY_UPPERCUT source presentation assets", () => {
       output,
     ]);
     expect(readFileSync(output)).toEqual(
-      readFileSync(resolve("src/animation/assets/sky-uppercut.json")),
+      readFileSync(resolve("tests/fixtures/data/sky-uppercut.json")),
     );
   });
 });

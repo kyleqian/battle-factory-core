@@ -15,7 +15,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const outAt = process.argv.indexOf("--out");
 const out = outAt >= 0 && process.argv[outAt + 1]
   ? resolve(process.argv[outAt + 1]!)
-  : join(root, "src/animation/assets/sky-uppercut.json");
+  : join(root, "tests/fixtures/data/sky-uppercut.json");
 
 const scriptPath = join(root, "reference/pokeemerald/data/battle_anim_scripts.s");
 const script = readFileSync(scriptPath, "utf8");

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { runTurn1RngLedger, TURN1_RNG_STEPS, TURN1_RNG_TOTAL_STEPS } from "../src/engine/turnRng.ts";
-import ramDump from "../src/data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
+import ramDump from "./fixtures/data/battle1-turn1-ram-dump.json" with { type: "json" };
 
-// The committed ground truth: src/data/gen/battle1-turn1-ram-dump.json's
+// The committed ground truth: tests/fixtures/data/battle1-turn1-ram-dump.json's
 // own rngLedger array (7 entries, RAM-verified fromValue/toValue/steps per
 // docs/battle-turn-notes.md §3/§9's "RESOLVED" cluster mapping).
 const DUMP_LEDGER = ramDump.rngLedger;

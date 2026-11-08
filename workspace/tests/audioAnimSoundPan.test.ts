@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import data from "../src/data/gen/audio-sound-sources.json" with { type: "json" };
+import data from "./fixtures/data/audio-sound-sources.json" with { type: "json" };
 import {
   animSoundPan,
   animSoundPan2,

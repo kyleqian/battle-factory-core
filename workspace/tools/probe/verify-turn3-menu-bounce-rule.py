@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Family B root-cause verification (docs/turn3-residual-probe-notes.md,
 "the named pointer-chase"). Pure analysis over the already-committed
-`src/data/gen/turn3-menu-bouncer-raw-probe.json` RAM dump (no mGBA needed -
+`tests/fixtures/data/turn3-menu-bouncer-raw-probe.json` RAM dump (no mGBA needed -
 plain `python3` is fine here, unlike `ram-probe.py` itself). Derives and
 computationally verifies the exact rule that produces the hardware's
 1-tick-late plateau transition at ticks 3879 (onix/BOUNCE_MON region) and
@@ -19,7 +19,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 WORKTREE_ROOT = HERE.parent.parent
-PROBE_PATH = WORKTREE_ROOT / "src" / "data" / "gen" / "turn3-menu-bouncer-raw-probe.json"
+PROBE_PATH = WORKTREE_ROOT / "tests" / "fixtures" / "data" / "turn3-menu-bouncer-raw-probe.json"
 TRACE_PATH = WORKTREE_ROOT / "tools" / "compare" / "traces" / "turn3-menu.json"
 
 # `GBA_SINE_TABLE_256` (src/engine/battleMenu.ts), copied verbatim - the

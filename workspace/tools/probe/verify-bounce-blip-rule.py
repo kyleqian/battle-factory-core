@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ISSUES #28 root-cause probe (S7 worktree, oracle/RAM only - no engine
 changes). Pure analysis over the two committed RAM dumps
-(`src/data/gen/turn6-bounce-blip-probe.json`, `turn8-bounce-blip-probe.json`,
+(`tests/fixtures/data/turn6-bounce-blip-probe.json`, `turn8-bounce-blip-probe.json`,
 both from `tools/probe/ram-probe.py` reusing `turn6-menu.json`'s/
 `turn8-menu.json`'s own committed segments verbatim + `turn5-menu-bouncer-
 raw.json`'s own watch list verbatim). See `docs/bounce-blip-notes.md` for the
@@ -96,7 +96,7 @@ TURN8_EXCLUDED_PAIRS = [(9383, 9384), (9392, 9393), (9402, 9403), (9411, 9412), 
 
 
 def load_rows(name: str) -> dict:
-    probe = json.loads((WORKTREE_ROOT / "src" / "data" / "gen" / name).read_text())
+    probe = json.loads((WORKTREE_ROOT / "tests" / "fixtures" / "data" / name).read_text())
     return {r["tick"]: r for r in probe["ticks"]}
 
 

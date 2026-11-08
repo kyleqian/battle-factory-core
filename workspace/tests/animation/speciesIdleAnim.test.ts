@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
-import probe from "../../src/data/gen/onix-front-idle-probe.json" with { type: "json" };
+import probe from "../fixtures/data/onix-front-idle-probe.json" with { type: "json" };
 import { GBA_SINE_TABLE_256 } from "../../src/engine/battleMenu.ts";
 import {
   bounceRotateToSidesFrameAtTick,

@@ -11,7 +11,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const outFlag = process.argv.indexOf("--out");
 const out = outFlag >= 0 && process.argv[outFlag + 1]
   ? resolve(process.argv[outFlag + 1]!)
-  : join(root, "src/animation/assets/blend-particle-small-bubbles.json");
+  : join(root, "tests/fixtures/data/blend-particle-small-bubbles.json");
 const image = decodeIndexedPng(join(
   root, "reference/pokeemerald/graphics/battle_anims/sprites/small_bubbles.png",
 ));

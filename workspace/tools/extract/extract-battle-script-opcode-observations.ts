@@ -20,6 +20,8 @@ if (outDirIndex >= 0 && !outDirArg) throw new Error("--out-dir requires a direct
 const DATA_GEN = outDirArg === undefined
   ? join(RUN_ROOT, "src", "data", "gen")
   : isAbsolute(outDirArg) ? outDirArg : join(RUN_ROOT, outDirArg);
+// The command-handlers input and this output live under tests/fixtures/data (not shipped); --out-dir still redirects both.
+const MOVED_DIR = outDirArg === undefined ? join(RUN_ROOT, "tests", "fixtures", "data") : DATA_GEN;
 
 type Opcode = { id: number; opcode: string; dispatcher: string };
 type CommandSlot = {
@@ -49,7 +51,7 @@ type ProgramStatement = {
 };
 
 const topology = JSON.parse(readFileSync(join(DATA_GEN, "battle-script-topology.json"), "utf8")) as { opcodes: Opcode[] };
-const commandHandlers = JSON.parse(readFileSync(join(DATA_GEN, "battle-script-command-handlers.json"), "utf8")) as { slots: CommandSlot[] };
+const commandHandlers = JSON.parse(readFileSync(join(MOVED_DIR, "battle-script-command-handlers.json"), "utf8")) as { slots: CommandSlot[] };
 const program = JSON.parse(readFileSync(join(DATA_GEN, "battle-script-program.json"), "utf8")) as {
   counts: { opcodeReferences: number; topologyOpcodes: number; topologyOpcodesCovered: number; topologyOpcodesUnreferenced: number };
   blocks: Array<{ statements: ProgramStatement[] }>;
@@ -187,7 +189,7 @@ const catalog = {
   source: {
     files: [
       "src/data/gen/battle-script-topology.json",
-      "src/data/gen/battle-script-command-handlers.json",
+      "tests/fixtures/data/battle-script-command-handlers.json",
       "src/data/gen/battle-script-program.json",
     ],
     note: "Observation catalog only. Each instruction start is a concrete macro-expanded source emission linked to its topology/table handler slot. Operand widths are ordered observed directive widths, expressions and invocation/wrapper provenance remain source text, and zero uses mean only that no concrete start was observed in this source program; no canonical schema, semantics, control category, side effect, or support status is inferred.",
@@ -202,7 +204,7 @@ const catalog = {
   instructionStarts,
 };
 
-mkdirSync(DATA_GEN, { recursive: true });
-const output = join(DATA_GEN, "battle-script-opcode-observations.json");
+mkdirSync(MOVED_DIR, { recursive: true });
+const output = join(MOVED_DIR, "battle-script-opcode-observations.json");
 writeFileSync(output, `${JSON.stringify(catalog)}\n`);
 console.log(`wrote ${output} (${catalog.counts.topologySlots} slots, ${catalog.counts.concreteTypedOpcodeStarts} concrete starts, ${catalog.counts.usedOpcodes} used)`);

@@ -22,7 +22,7 @@ const outDirIndex = process.argv.indexOf("--out-dir");
 const outDirArg = outDirIndex < 0 ? undefined : process.argv[outDirIndex + 1];
 if (outDirIndex >= 0 && !outDirArg) throw new Error("--out-dir requires a directory");
 const OUTPUT_DIR = outDirArg === undefined
-  ? join(RUN_ROOT, "src", "data", "gen")
+  ? join(RUN_ROOT, "tests", "fixtures", "data")
   : isAbsolute(outDirArg) ? outDirArg : join(RUN_ROOT, outDirArg);
 const readJson = <T>(name: string): T => JSON.parse(readFileSync(join(RUN_ROOT, "src", "data", "gen", name), "utf8")) as T;
 

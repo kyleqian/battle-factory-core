@@ -4,9 +4,9 @@ import {
   turn7FeatherSprites,
   turn8FeatherSprites,
 } from "../src/animation/featherDance.ts";
-import turn6FeatherProbe from "../src/data/gen/turn6-feather-sprites-probe.json" with { type: "json" };
-import turn7FeatherProbe from "../src/data/gen/turn7-feather-sprites-probe.json" with { type: "json" };
-import turn8FeatherProbe from "../src/data/gen/turn8-feather-sprites-probe.json" with { type: "json" };
+import turn6FeatherProbe from "./fixtures/data/turn6-feather-sprites-probe.json" with { type: "json" };
+import turn7FeatherProbe from "./fixtures/data/turn7-feather-sprites-probe.json" with { type: "json" };
+import turn8FeatherProbe from "./fixtures/data/turn8-feather-sprites-probe.json" with { type: "json" };
 
 // These three RAM-probe JSONs (twice-run byte-identical, i.e. real hardware
 // state) are the falsification target for ANIMATION_PROGRESS.md's 2026-07-24

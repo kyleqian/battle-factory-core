@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import data from "../src/data/gen/level50-move-parameterization.json" with { type: "json" };
+import data from "./fixtures/data/level50-move-parameterization.json" with { type: "json" };
 import frontierMons from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import movesData from "../src/data/gen/moves.json" with { type: "json" };
 import topologyData from "../src/data/gen/battle-script-topology.json" with { type: "json" };
@@ -365,7 +365,7 @@ describe("Level-50 move parameterization manifest", () => {
     const outputDirectory = mkdtempSync(join(tmpdir(), "pokeemerald-factory-level50-move-parameterization-"));
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/extract/extract-level50-move-parameterization.ts", "--out-dir", outputDirectory], { stdio: "pipe" });
     expect(readFileSync(join(outputDirectory, "level50-move-parameterization.json"), "utf8")).toBe(
-      readFileSync("src/data/gen/level50-move-parameterization.json", "utf8"),
+      readFileSync("tests/fixtures/data/level50-move-parameterization.json", "utf8"),
     );
   });
 

@@ -19,7 +19,7 @@ const outIndex = process.argv.indexOf("--out-dir");
 const outArg = outIndex < 0 ? undefined : process.argv[outIndex + 1];
 if (outIndex >= 0 && !outArg) throw new Error("--out-dir requires a directory");
 const OUT_DIR = outArg === undefined
-  ? join(RUN_ROOT, "src", "data", "gen")
+  ? join(RUN_ROOT, "tests", "fixtures", "data")
   : isAbsolute(outArg) ? outArg : join(RUN_ROOT, outArg);
 
 type SourceLine = { line: number; raw: string };

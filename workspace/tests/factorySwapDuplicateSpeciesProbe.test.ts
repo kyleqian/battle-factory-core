@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import fixture from "../src/data/gen/battle1-swap-duplicate-species-off.json" with { type: "json" };
+import fixture from "./fixtures/data/battle1-swap-duplicate-species-off.json" with { type: "json" };
 
 type Row = {
   tick: number;

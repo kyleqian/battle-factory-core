@@ -23,7 +23,7 @@
  *    `sprite->callback` to `DestroyAnimSprite` - the actual destroy fires on
  *    the FOLLOWING tick's dispatch. `SlideMonToOriginalPos_Step`'s finish
  *    branch calls `DestroyAnimSprite` directly, same tick. RAM-probed against
- *    a real MOVE_DRAGON_RAGE window (`src/data/gen/dragonrage-slide-probe.json`,
+ *    a real MOVE_DRAGON_RAGE window (`tests/fixtures/data/dragonrage-slide-probe.json`,
  *    CHARMELEON_2 vs ONIX, `tools/battle-lab/
  *    mechanic-dragon-rage-charmeleon-onix.json`): for a 4-tick duration, the
  *    offset-slide dummy sprite is alive for 5 ticks (168-172, the last one a

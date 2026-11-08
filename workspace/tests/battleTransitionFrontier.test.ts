@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import logo from "../src/assets/gen/battle-transition-frontier-logo.json" with { type: "json" };
-import squares from "../src/assets/gen/battle-transition-frontier-squares.json" with { type: "json" };
+import squares from "./fixtures/data/battle-transition-frontier-squares.json" with { type: "json" };
 import circles from "../src/assets/gen/battle-transition-frontier-circles.json" with { type: "json" };
 import meta from "../src/data/gen/battle-transitions-frontier.json" with { type: "json" };
 import { advanceRngValue } from "../src/engine/rng.ts";

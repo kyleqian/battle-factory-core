@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { resolveBattle1PresentationHpValues } from "../src/engine/battle1PresentationHpStaging.ts";
-import turn1Dump from "../src/data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
-import turn2Dump from "../src/data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
-import faintDump from "../src/data/gen/battle1-grovyle-faint-ram-dump.json" with { type: "json" };
+import turn1Dump from "./fixtures/data/battle1-turn1-ram-dump.json" with { type: "json" };
+import turn2Dump from "./fixtures/data/battle1-turn2-ram-dump.json" with { type: "json" };
+import faintDump from "./fixtures/data/battle1-grovyle-faint-ram-dump.json" with { type: "json" };
 
 describe("Battle 1 presentation HP staging", () => {
   it("matches every RAM-recording field formerly consumed by battleScene.ts", () => {

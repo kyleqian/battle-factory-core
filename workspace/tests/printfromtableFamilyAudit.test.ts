@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import audit from "../src/data/gen/printfromtable-family-audit.json" with { type: "json" };
+import audit from "./fixtures/data/printfromtable-family-audit.json" with { type: "json" };
 
 describe("Cmd_printfromtable family audit", () => {
   it("pins the complete source pointer universe and finite table shapes", () => {
@@ -42,7 +42,7 @@ describe("Cmd_printfromtable family audit", () => {
       { stdio: "pipe" },
     );
     expect(readFileSync(output, "utf8")).toBe(
-      readFileSync("src/data/gen/printfromtable-family-audit.json", "utf8"),
+      readFileSync("tests/fixtures/data/printfromtable-family-audit.json", "utf8"),
     );
   });
 

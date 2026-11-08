@@ -7,14 +7,14 @@ import {
   emberSpritesInDrawOrder,
   type EmberGeometry,
 } from "../../src/animation/ember.ts";
-import emberProbe from "../../src/data/gen/ember-sprite-probe.json" with { type: "json" };
-import emberProbeOpponent from "../../src/data/gen/ember-sprite-probe-opponent.json" with { type: "json" };
+import emberProbe from "../fixtures/data/ember-sprite-probe.json" with { type: "json" };
+import emberProbeOpponent from "../fixtures/data/ember-sprite-probe-opponent.json" with { type: "json" };
 
 // RAM-probe evidence (`tools/probe/run-battle-lab-rgb.py` extended with
 // `gEmberSpriteTemplate`/`gEmberFlareSpriteTemplate` capture, staged via
 // `tools/battle-lab/mechanic-ember-player-onix-opponent-murkrow.json`,
 // MOVE_EMBER cast player ONIX -> opponent MURKROW): every real RAM tick both
-// sprite families are alive, trimmed to `src/data/gen/ember-sprite-probe.json`.
+// sprite families are alive, trimmed to `tests/fixtures/data/ember-sprite-probe.json`.
 // This is dev-time-only test evidence (the executable-frontier ratchet
 // forbids production imports of `*-probe.json`); `src/animation/ember.ts`
 // derives every field from the ported `TranslateAnimSpriteToTargetMonLocation`/

@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RUN_ROOT = join(HERE, "..", "..");
 const REF = join(RUN_ROOT, "reference", "pokeemerald");
-const DEFAULT_OUT = join(RUN_ROOT, "src", "data", "gen", "printfromtable-family-audit.json");
+const DEFAULT_OUT = join(RUN_ROOT, "tests", "fixtures", "data", "printfromtable-family-audit.json");
 
 export type Scope =
   | "ordinary-factory-l50-singles"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import bugCatcher from "../src/assets/gen/trainer-pic-bug-catcher.json" with { type: "json" };
+import bugCatcher from "./fixtures/data/trainer-pic-bug-catcher.json" with { type: "json" };
 import brendanBack from "../src/assets/gen/trainer-pic-brendan-back.json" with { type: "json" };
 
 // Oracle cross-check (docs/battle-bringup-notes.md's transition-end/intro

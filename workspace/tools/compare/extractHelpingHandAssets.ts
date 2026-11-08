@@ -10,7 +10,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const outIndex = process.argv.indexOf("--out");
 const output = outIndex >= 0 && process.argv[outIndex + 1]
   ? resolve(process.argv[outIndex + 1]!)
-  : resolve(root, "src/animation/assets/helping-hand-tag-hand.json");
+  : resolve(root, "tests/fixtures/data/helping-hand-tag-hand.json");
 const sourcePath = resolve(root, "reference/pokeemerald/graphics/battle_anims/sprites/tag_hand.png");
 const source = readFileSync(sourcePath);
 const image = decodeIndexedPng(sourcePath);

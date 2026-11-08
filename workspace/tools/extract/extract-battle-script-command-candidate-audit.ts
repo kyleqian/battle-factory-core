@@ -23,7 +23,7 @@ const outDirIndex = process.argv.indexOf("--out-dir");
 const outDirArg = outDirIndex < 0 ? undefined : process.argv[outDirIndex + 1];
 if (outDirIndex >= 0 && !outDirArg) throw new Error("--out-dir requires a directory");
 const DATA_GEN = outDirArg === undefined
-  ? join(RUN_ROOT, "src", "data", "gen")
+  ? join(RUN_ROOT, "tests", "fixtures", "data")
   : isAbsolute(outDirArg) ? outDirArg : join(RUN_ROOT, outDirArg);
 
 const COMMAND_HANDLERS_FILE = "battle-script-command-handlers.json";
@@ -203,9 +203,9 @@ const audit = {
   schema: "battle-script-command-candidate-audit/v1",
   source: {
     files: [
-      { file: `src/data/gen/${COMMAND_HANDLERS_FILE}`, sha256: sha256(commandHandlersInput.text), schema: commandHandlers.schema },
-      { file: `src/data/gen/${LEXICAL_FACTS_FILE}`, sha256: sha256(lexicalFactsInput.text), schema: lexicalFacts.schema },
-      { file: `src/data/gen/${OBSERVATIONS_FILE}`, sha256: sha256(observationsInput.text), schema: observations.schema },
+      { file: `tests/fixtures/data/${COMMAND_HANDLERS_FILE}`, sha256: sha256(commandHandlersInput.text), schema: commandHandlers.schema },
+      { file: `tests/fixtures/data/${LEXICAL_FACTS_FILE}`, sha256: sha256(lexicalFactsInput.text), schema: lexicalFacts.schema },
+      { file: `tests/fixtures/data/${OBSERVATIONS_FILE}`, sha256: sha256(observationsInput.text), schema: observations.schema },
     ],
     note: "Lossless source-catalog join. Concrete opcode starts, raw handler lines, lexical pointer facts, identifier references, and call candidates are retained as source evidence. A fixed-width-advance candidate is an intentionally narrow lexical classification only; it does not establish an operand width, alias relationship, runtime behavior, or implementation safety.",
   },
