@@ -14,7 +14,7 @@ first frame whose capture can show its effect. `lab` replays a battle-lab reques
 (mechanicLab / factoryLegal) and logs only its trace window unless --log-setup.
 `lab` output carries the replay `trace` key (route / battleScene / appStage id = request file stem / segments) that the aud24* tests replay.
 OUT.json must not exist (the probe and the wrapper both refuse a stale path); --rm-log-on-success drops the wrapper's OUT.json.log.
---compact writes the committed-fixture form (one line, no spaces, trailing newline); AUDIO_PROBE_EXTRA_HOOKS=BlendPalette adds the aud242d+ call-log hook.
+--compact writes the committed-fixture form (one line, no spaces, trailing newline); --extra-hooks NAME[,NAME] (or AUDIO_PROBE_EXTRA_HOOKS=NAME[,NAME]; both are merged) adds non-audio call-log hooks, e.g. BlendPalette for the aud242d+ fixtures.
 --profile selects the Scene ON (default) or Scene OFF oracle bootstrap.
 --fast is the hybrid mode: frames run at full speed and a frame is re-stepped (from the
 saved pre-frame state) only when the m4a RAM signature changed during it. Plain stepping
@@ -65,6 +65,19 @@ def lab_replay_trace(request_path, profile, segments):
             "appStage": {"id": Path(request_path).stem, "frame": 0}, "segments": segments}
 
 
+def extra_hook_names(rest, environ):
+    """Names from `--extra-hooks A,B` (flag or --extra-hooks=A,B) plus AUDIO_PROBE_EXTRA_HOOKS, in order, deduplicated."""
+    raw = [environ.get("AUDIO_PROBE_EXTRA_HOOKS", "")]
+    for i, a in enumerate(rest):
+        if a == "--extra-hooks":
+            if i + 1 >= len(rest):
+                raise SystemExit("soundEventProbe: --extra-hooks needs NAME[,NAME]")
+            raw.append(rest[i + 1])
+        elif a.startswith("--extra-hooks="):
+            raw.append(a.split("=", 1)[1])
+    return list(dict.fromkeys(n.strip() for r in raw for n in r.split(",") if n.strip()))
+
+
 def main():
     out, mode, rest = Path(sys.argv[1]), sys.argv[2], sys.argv[3:]
     if out.exists():
@@ -76,7 +89,7 @@ def main():
     oracle = EmeraldOracle(REF / "pokeemerald.gba", REF / "pokeemerald.map", HARNESS / "oracle/bootstrap" / bootstrap)
     syms = sorted((a, n) for n, a in oracle.symbols.items() if a)
     addrs = [a for a, _ in syms]
-    hooks = [n for n in HOOKS + [h for h in os.environ.get("AUDIO_PROBE_EXTRA_HOOKS", "").split(",") if h] if oracle.symbols.get(n)]  # extra non-audio call-log hooks (e.g. BlendPalette)
+    hooks = [n for n in HOOKS + extra_hook_names(rest, os.environ) if oracle.symbols.get(n)]  # extra non-audio call-log hooks (e.g. BlendPalette)
     entry = {oracle.symbols[n] + 2: n for n in hooks}
     songs = load_defines(REF / "include/constants/songs.h", r"(?:SE|MUS)_")
     species = load_defines(REF / "include/constants/species.h", r"SPECIES_")
@@ -317,4 +330,5 @@ def main():
     out.write_text(json.dumps(result, separators=(",", ":")) + "\n" if "--compact" in rest else json.dumps(result, indent=1))
 
 
-main()
+if __name__ == "__main__":
+    main()
