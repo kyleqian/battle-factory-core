@@ -507,3 +507,62 @@ The largest remaining blockers are the hyper beam orb (52), Hydro Pump orb (44),
 - `npm run test:gate`: 362 files, 2,835 tests passed. aud24* + audio* + frf250* + obr251* in one vitest call: 21 files, 896 passed, 18 skipped (probe tests that need a live oracle).
 - `npm run compare:differential` over the 15 aud242e Scene ON move traces (97 captures each, frames 60..821 step 8; every one has changed table rows) against `3ecd1a6b9` plus the
   aud242e stage definitions only (so the base can build the new stages): **1,455 / 1,455 captures byte-identical, 0 pixel diffs**.
+
+## 10. aud242f: BowMon / HornHit, Ice Beam / Ice Punch crystals, fist sprite, mon scale / grow tasks (Scene ON)
+
+aud242f models the next lifetimes in `tools/extract/extract-anim-sound-timing.ts` (`lifetimeOf`, the `aud242f` block). Same call numbering as section 9.1 (sprite call 0 = the script-step
+init, call k >= 1 = AnimateSprites of iteration F + k - 1; destroyed at call K = gone K - 1 ticks after F; task entry call 0 = script step, step call k = RunTasks of iteration F + k - 1).
+
+### 10.1 Re-rank (L50 scope = `factory-animation-inventory.json`, turn 0, player attacker)
+
+The aud242e headline blockers (Overheat flame, elliptical mon task, ...) have 0 gated L50 ops. The real L50 blockers, by gated ops behind each lifetime (`.integration/evidence/aud242f/rank.txt`):
+Horn Drill (BowMon, 12 ops), Headbutt / Horn Attack / Drill Peck (BowMon, 1 each), Blizzard (11), Tri Attack (9), Ice Punch (7), Ice Beam, Bubblebeam, Luster Purge, Extremespeed, Psychic, Curse (4), Swagger (3), Spark, Attract, Growth.
+
+### 10.2 Lifetimes derived (C step code; citations are also in the extractor comments)
+
+| lifetime | C | exact (ticks after F) | ops freed (L50) |
+|---|---|---|---|
+| `gBowMonSpriteTemplate` (AnimBowMon, arg 0 = kind) | battle_anim_effects_1.c:4400-4496 | kind 0 / 2: 12, kind 1: 6, other: 0 | Horn Drill (12 gated ops), Headbutt, Horn Attack, Drill Peck (1 each) |
+| `gHornHitSpriteTemplate` (AnimHornHit) | battle_anim_effects_1.c:5108-5163 | clamp(duration, 2, 127) - 1 | none yet (Fury Attack stays gated by `AnimTask_RotateMonSpriteToSide`); modelled because the C is fixed-length |
+| Ice Beam outer / inner crystal (AnimIceBeamParticle) | battle_anim_ice.c:610-624, battle_anim_mons.c:1093-1145 | D + 1 | Ice Beam (7 SE137 rows) |
+| `gIceCrystalSpiralInwardSmall` / `Large` (AnimIcePunchSwirlingParticle) | battle_anim_ice.c:592-602, battle_anim_mons.c:468-486 | 30 | Ice Punch |
+| fist / foot sprite (`create_fist_sprite`, `gFistFootSpriteTemplate`, AnimBasicFistOrFoot) | battle_anim_fight.c:452-464, battle_anim_mons.c:551-557 | duration + 1 | Ice Punch, the fist family |
+| `AnimTask_ScaleMonAndRestore` | battle_anim_mon_movement.c:823-865 | 2 * duration - 1 (duration = script args[4]; args[1] is the priority) | Hidden Power (+2 ops; Growth / Bind etc. are still gated by other waits) |
+| `AnimTask_GrowAndShrink` (affine frames 12 + 24 + 12, END on call 49) | battle_anim_effects_2.c:543-549, 2235-2248, battle_anim_mons.c:1787-1862 | 48 | Swagger, Bulk Up |
+| `gBreathPuffSpriteTemplate` (AnimBreathPuff, data[0] = 52) | battle_anim_effects_2.c:2250-2272, battle_anim_mons.c:607-621 | 53 | Swagger, Bulk Up |
+
+### 10.3 ROM windows (probe STEP mode, call log + BlendPalette hook; ROM minus ours, constant over every row)
+
+Fixtures `tools/audio/fixtures/aud242f-*.json`, labs `tools/battle-lab/aud242f-*.json`, stages `aud242f-<move>-player-on`, test `tests/aud242fMoveAnimSounds.test.ts`.
+
+| window | delta | notes |
+|---|---|---|
+| Horn Drill | 0 | frame-exact (same class as Water Gun) |
+| Headbutt | +2 | idle-lead class; cut at ROM frame 120 (the next move's body) |
+| Ice Punch | +2 | every row of the window |
+| Ice Beam | +2 | the seven SE137 rows (ROM 176..212 in aud242c's opponent window) now match too |
+| Hidden Power | +2 | three rows: pins ScaleMonAndRestore (exact 21 before the 30-frame delay) |
+| Swagger | -3 | status class; five rows incl. the GrowAndShrink (48) and BreathPuff (53) waits; the twelve later SE176 rows are the next move's body (cut at 300) |
+| Growth | -4 | first SE152 only; the second SE152 (ROM 90) stays ROM-only behind `blend_color_cycle` |
+
+Re-pin of an older window: `tests/aud242cMoveAnimSounds.test.ts` `icebeam-opponent` listed the seven SE137 rows (ROM 176, 182, ..., 212) as ROM-only; the ROM log has them
+and the model now emits them at the same +2 as the rest of the window, so the `romOnly` list was removed (no frame changed; rows were added). No other aud242* window changes.
+
+### 10.4 Counts (turn 0, player attacker)
+
+| | before (`d20fdd641`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved | 833 / 279 | 868 / 244 |
+| L50 (276 moves): emitted / gated | 640 / 194 | 674 / 160 |
+| table: distinct variants / ops | 315 / 826 | 317 / 863 |
+
+Moves whose rows changed: Ice Punch, Headbutt, Horn Attack, Horn Drill, Ice Beam, Drill Peck, Swagger, Hidden Power, Bulk Up (all 12 variants each).
+
+### 10.5 Residuals and what is not done
+
+- **Blizzard (11 ops), Tri Attack (9), Bubblebeam, Luster Purge, Extremespeed, Psychic, Curse, Spark, Attract, Growth's blend_color_cycle** stay unresolved. Blizzard's snowball /
+  crystal lifetimes (AnimSwirlingSnowball, AnimMoveParticleBeyondTarget, battle_anim_ice.c:666-830) end when the sprite leaves the screen along a fixed-point line whose slope
+  depends on `BATTLER_COORD_Y_PIC_OFFSET` of the attacker and target species, so the lifetime is per-species and not a per-move constant; it needs a species-aware table
+  (not a table row) and is left for a later slice.
+- Hidden Power uses the move-id script (type-independent); the three rows are pinned by the one window.
+- Growth, Swagger delta are the -4 / -3 status class (ISSUES #198), unchanged by this slice.
