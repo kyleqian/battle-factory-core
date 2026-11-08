@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import data from "../src/data/gen/audio-sound-sources.json" with { type: "json" };
+import data from "./fixtures/data/audio-sound-sources.json" with { type: "json" };
 
 // Pins for the S11 audio sound-source table (aud238): every sound op in the
 // move-animation scripts, the C-side PlaySE/PlayCry sites, the battle
@@ -232,10 +232,10 @@ describe("audio sound-source table regeneration", () => {
         { stdio: "pipe" },
       );
       const regenerated = readFileSync(join(outputDirectory, "audio-sound-sources.json"), "utf8");
-      const committed = readFileSync("src/data/gen/audio-sound-sources.json", "utf8");
+      const committed = readFileSync("tests/fixtures/data/audio-sound-sources.json", "utf8");
       expect(
         regenerated === committed,
-        "src/data/gen/audio-sound-sources.json is stale — rerun `npm run extract:audio-sound-sources` and commit the result",
+        "tests/fixtures/data/audio-sound-sources.json is stale — rerun `npm run extract:audio-sound-sources` and commit the result",
       ).toBe(true);
     } finally {
       rmSync(outputDirectory, { recursive: true, force: true });

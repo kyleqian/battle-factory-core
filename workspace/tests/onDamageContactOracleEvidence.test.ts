@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import parameterization from "../src/data/gen/level50-move-parameterization.json" with { type: "json" };
+import parameterization from "./fixtures/data/level50-move-parameterization.json" with { type: "json" };
 import fixture from "../tools/battle-lab/mechanic-on-damage-static-off.json" with { type: "json" };
 import receipt from "../tools/probe/receipts/on-damage-static-off.json" with { type: "json" };
 

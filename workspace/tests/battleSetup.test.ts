@@ -32,7 +32,7 @@ import { resolveTurn2LatestCompletedCommandHandoff } from "../src/engine/turn2Re
 import { resolveTurn6LatestCompletedCommandHandoff } from "../src/engine/turn6ResolutionAdapter.ts";
 import { buildFightMoveset, drawFightSubmenuText } from "../src/engine/fightSubmenuText.ts";
 import fightSubmenuWindowAsset from "../src/assets/gen/fight-submenu-window.json" with { type: "json" };
-import battlerDump from "../src/data/gen/battle2-turn1-battler-dump.json" with { type: "json" };
+import battlerDump from "./fixtures/data/battle2-turn1-battler-dump.json" with { type: "json" };
 
 const fightSubmenuWindow = fightSubmenuWindowAsset as { x: number; y: number; width: number; height: number; slots: Record<string, number[]> };
 

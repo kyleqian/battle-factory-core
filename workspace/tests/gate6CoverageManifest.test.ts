@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import topologyData from "../src/data/gen/battle-script-topology.json" with { type: "json" };
-import parameterizationData from "../src/data/gen/level50-move-parameterization.json" with { type: "json" };
+import parameterizationData from "./fixtures/data/level50-move-parameterization.json" with { type: "json" };
 import trainersData from "../src/data/gen/battle-frontier-trainers.json" with { type: "json" };
 import monsData from "../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import hooksData from "../src/data/gen/ability-item-hooks.json" with { type: "json" };
@@ -809,7 +809,7 @@ function assertPerMoveHookJoinContract(manifest: JsonObject): void {
       }
       const locator = `moves:${sourceMove.move}.hooks.${axis}`;
       const sourceArtifact = record(row.sourceArtifact);
-      if (sourceArtifact.path !== "src/data/gen/level50-move-parameterization.json" || sourceArtifact.locator !== locator) {
+      if (sourceArtifact.path !== "tests/fixtures/data/level50-move-parameterization.json" || sourceArtifact.locator !== locator) {
         throw new Error(`${axis} hook-join row for ${sourceMove.move} lost its source artifact locator`);
       }
       if (!array(row.evidence).some((item) => {

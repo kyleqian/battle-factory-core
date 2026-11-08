@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import commandHandlerData from "../src/data/gen/battle-script-command-handlers.json" with { type: "json" };
-import lexicalFactData from "../src/data/gen/battle-script-handler-lexical-facts.json" with { type: "json" };
-import observationData from "../src/data/gen/battle-script-opcode-observations.json" with { type: "json" };
+import commandHandlerData from "./fixtures/data/battle-script-command-handlers.json" with { type: "json" };
+import lexicalFactData from "./fixtures/data/battle-script-handler-lexical-facts.json" with { type: "json" };
+import observationData from "./fixtures/data/battle-script-opcode-observations.json" with { type: "json" };
 import {
   acknowledgeBattleScriptController,
   createBattleScriptControlHandlers,

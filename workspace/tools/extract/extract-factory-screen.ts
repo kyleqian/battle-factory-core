@@ -128,7 +128,7 @@ function writeJson(path: string, data: unknown): void {
   // Extracted anyway for asset-extraction completeness per the roadmap brief.
   const unusedBallImage = decodeIndexedPng(join(factoryScreenDir, "pokeball.png"));
   const unusedBallTiles = sliceTiles(unusedBallImage);
-  writeJson(join(ASSETS_GEN, "unused-pokeball-source.json"), {
+  writeJson(join(RUN_ROOT, "tests", "fixtures", "data", "unused-pokeball-source.json"), {
     tileset: { columns: unusedBallTiles.columns, rows: unusedBallTiles.rows, tiles: unusedBallTiles.tiles.map((t) => [...t.pixels]) },
   });
 

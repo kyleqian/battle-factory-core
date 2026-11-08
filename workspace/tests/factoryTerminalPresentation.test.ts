@@ -42,7 +42,7 @@ import { renderFactoryTerminalField, renderFactoryTerminalPresentation } from ".
 import { createFramebuffer } from "../src/engine/framebuffer.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 import charmapData from "../src/data/gen/charmap.json" with { type: "json" };
-import terminalMessages from "../src/data/gen/factory-terminal-messages.json" with { type: "json" };
+import terminalMessages from "./fixtures/data/factory-terminal-messages.json" with { type: "json" };
 
 const terminalCharmap = new Map<string, number>(
   (charmapData as { entries: [string, number][] }).entries,

@@ -97,5 +97,5 @@ function writeJson(path: string, data: unknown): void {
   for (const name of wanted) {
     if (!templates[name]) throw new Error(`sStandardBattleWindowTemplates missing ${name}`);
   }
-  writeJson(join(DATA_GEN, "battle-window-templates.json"), templates);
+  writeJson(join(RUN_ROOT, "tests", "fixtures", "data", "battle-window-templates.json"), templates);
 }

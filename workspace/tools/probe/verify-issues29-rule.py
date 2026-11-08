@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ISSUES #29 root-cause probe (S7 worktree, oracle/RAM only - no engine
 changes). Pure analysis over three committed RAM dumps
-(`src/data/gen/turn6-bounce-blip-probe.json` / `turn8-bounce-blip-probe.json`,
+(`tests/fixtures/data/turn6-bounce-blip-probe.json` / `turn8-bounce-blip-probe.json`,
 already committed by the #28 probe; `turn7-bounce-blip-probe.json`, freshly
 probed this session from a new spec, `tools/probe/specs/turn7-bounce-blip-
 raw.json`, twice-run byte-identical). See `docs/bounce-blip-notes.md`'s "S7
@@ -56,7 +56,7 @@ TURN7_KICKOFF_FROZEN_ANCHOR = vbr.TURN6_ROCKSLIDE_PRESS_TICK + vbr.TURN6_ROCKSLI
 
 
 def load_rows(name: str) -> dict:
-    probe = json.loads((WORKTREE_ROOT / "src" / "data" / "gen" / name).read_text())
+    probe = json.loads((WORKTREE_ROOT / "tests" / "fixtures" / "data" / name).read_text())
     return {r["tick"]: r for r in probe["ticks"]}
 
 

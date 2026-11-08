@@ -1,5 +1,5 @@
 {
-  "_comment": "S7 groundwork: watch spec for tools/probe/ram-probe.py, reproduces src/data/gen/battle1-turn1-ram-dump.json's rng/hp/turnOrder/move/attacker/target/crit/damage columns (not the healthbar columns - those need tools/probe/dump-battle-bars.py's double-indirection read). segments = tools/compare/traces-groundtruth/battle1-turn1.json's own segments array (copy it in verbatim before running - kept out of this file to avoid duplicating 1886+4 committed segments).",
+  "_comment": "S7 groundwork: watch spec for tools/probe/ram-probe.py, reproduces tests/fixtures/data/battle1-turn1-ram-dump.json's rng/hp/turnOrder/move/attacker/target/crit/damage columns (not the healthbar columns - those need tools/probe/dump-battle-bars.py's double-indirection read). segments = tools/compare/traces-groundtruth/battle1-turn1.json's own segments array (copy it in verbatim before running - kept out of this file to avoid duplicating 1886+4 committed segments).",
   "watch": [
     { "name": "rng", "addr": "gRngValue", "size": 4 },
     { "name": "hp0", "addr": "gBattleMons+0x28", "size": 2 },

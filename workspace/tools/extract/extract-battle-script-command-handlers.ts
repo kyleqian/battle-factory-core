@@ -23,7 +23,7 @@ const outDirIndex = process.argv.indexOf("--out-dir");
 const outDirArg = outDirIndex < 0 ? undefined : process.argv[outDirIndex + 1];
 if (outDirIndex >= 0 && !outDirArg) throw new Error("--out-dir requires a directory");
 const DATA_GEN = outDirArg === undefined
-  ? join(RUN_ROOT, "src", "data", "gen")
+  ? join(RUN_ROOT, "tests", "fixtures", "data")
   : isAbsolute(outDirArg) ? outDirArg : join(RUN_ROOT, outDirArg);
 
 const enumSource = readFileSync(join(REF, ENUM_FILE), "utf8");

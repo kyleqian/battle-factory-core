@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import receiptData from "../src/data/gen/battle-script-move-end-delegates.json" with { type: "json" };
+import receiptData from "./fixtures/data/battle-script-move-end-delegates.json" with { type: "json" };
 
 const requestedModes = [
   { helper: "AbilityBattleEffects", mode: "ABILITYEFFECT_SYNCHRONIZE" },
@@ -72,7 +72,7 @@ describe("Cmd_moveend ability/item delegate source receipt", () => {
       { stdio: "pipe" },
     );
     expect(readFileSync(join(outputDirectory, "battle-script-move-end-delegates.json"), "utf8"))
-      .toBe(readFileSync("src/data/gen/battle-script-move-end-delegates.json", "utf8"));
+      .toBe(readFileSync("tests/fixtures/data/battle-script-move-end-delegates.json", "utf8"));
   });
 
   it("pins the six and only six Cmd_moveend-selected helper modes", () => {

@@ -38,7 +38,7 @@ import { runOracleTrace, type Trace } from "../compare/oracleClient.ts";
 import { drawSpriteSheetAffineRotate } from "../../src/engine/battleScene.ts";
 import { compareFeatherDrawOrder, turn6FeatherSprites, type FeatherRenderSprite } from "../../src/animation/featherDance.ts";
 import battleAnimWhiteFeatherAsset from "../../src/assets/gen/battle-anim-white-feather.json" with { type: "json" };
-import turn6FeatherProbeRaw from "../../src/data/gen/turn6-feather-sprites-probe.json" with { type: "json" };
+import turn6FeatherProbeRaw from "../../tests/fixtures/data/turn6-feather-sprites-probe.json" with { type: "json" };
 
 interface Tileset {
   columns: number;

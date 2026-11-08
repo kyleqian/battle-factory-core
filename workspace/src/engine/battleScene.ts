@@ -8982,7 +8982,7 @@ const ENDEAVOR_DROPLET_BASE = { x: 176, y: 40 };
  * (batch index 0 below) spawns the LOWER/+20 batch and `tTimer==18` (batch
  * index 1) spawns the UPPER/-20 batch - the OPPOSITE of the JSON's own
  * "tTimer==6 -> upper/-20, tTimer==18 -> lower/+20" summary
- * (`src/data/gen/battle-move-anim-tables.json`'s `endeavor.sweatDroplets`,
+ * (`tests/fixtures/data/battle-move-anim-tables.json`'s `endeavor.sweatDroplets`,
  * not corrected in-place since that file documents the ORIGINAL source
  * reading verbatim - this doc comment is the authoritative correction).
  * RAM-confirmed against `tools/probe/dump-endeavor-droplets.py`: all 8
@@ -9191,7 +9191,7 @@ function endeavorShakeX2(t: number, pressTick: number, stalePower: number): numb
  * (`battle_anim_normal.c:147-152`), so it pops once and HOLDS for 8 ticks
  * before the sprite is destroyed outright (no fade-back), correcting this
  * run's own earlier banked asset doc summary ("ramps back to neutral over 8
- * ticks", `src/data/gen/battle-move-anim-tables.json`'s `endeavor.hitSplat`
+ * ticks", `tests/fixtures/data/battle-move-anim-tables.json`'s `endeavor.hitSplat`
  * - not edited in place, same "doc comment here is the authoritative
  * correction" convention `ENDEAVOR_DROPLET_BATCH_OFFSETS`'s own doc uses).
  * Visible window RAM-confirmed at 10 ticks/round (creation tick's own
@@ -9726,7 +9726,7 @@ const DRAGON_BREATH_BLEND_COLOR: RgbColor = { r: 248, g: 0, b: 0 }; // RGB_RED (
  * button script, last frame of its final 2-frame `A` hold, same "last frame
  * of the hold" convention `TURN1/2/3/4_CONFIRM_PRESS_TICK` already
  * established). A REAL press, not a synthetic anchor - a fresh `tools/probe/
- * ram-probe.py` run this session (`src/data/gen/turn5-endeavor-watch-probe.json`)
+ * ram-probe.py` run this session (`tests/fixtures/data/turn5-endeavor-watch-probe.json`)
  * confirms `gCurrentMove`->283 (ENDEAVOR) at RAM tick 5965
  * (`TURN5_CONFIRM_PRESS_TICK`+6, matching every prior turn's own identical
  * +6 ENDEAVOR/DOUBLE_TEAM `gCurrentMove`-write offset).

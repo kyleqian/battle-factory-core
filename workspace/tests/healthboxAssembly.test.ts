@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { battleHealthBarAnimationFrames, battleHealthBarValueAtFrame, calcBarFilledPixels, composeOpponentHealthbox, composePlayerHealthbox, composePlayerHealthboxHpOverlay, HEALTHBOX_FRAME_ORIGIN, HP_BAR_FULL_TILES, pickHpBarBand, PLAYER_HEALTHBOX_FRAME_ORIGIN, rightAlign3GlyphCodes } from "../src/engine/healthboxAssembly.ts";
 import { CHAR_SPACER } from "../src/engine/battleMenu.ts";
 import battleHealthbox from "../src/assets/gen/battle-healthbox.json" with { type: "json" };
-import harvested from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
+import harvested from "./fixtures/data/sendout-healthbox-opponent.json" with { type: "json" };
 import playerHarvested from "../src/assets/gen/menu-healthbox-player.json" with { type: "json" };
 
 // ISSUES #16 - see docs/healthbox-assembly-notes.md for the full root-cause

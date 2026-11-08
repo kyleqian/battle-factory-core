@@ -244,14 +244,14 @@ import {
 import { composeOpponentHealthbox, HEALTHBOX_FRAME_ORIGIN } from "../src/engine/healthboxAssembly.ts";
 import { createInitialState, tick, type EngineState } from "../src/engine/core.ts";
 import grovyleFrontSpritesAsset from "../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
-import sendOutHealthboxOpponentAsset from "../src/assets/gen/sendout-healthbox-opponent.json" with { type: "json" };
+import sendOutHealthboxOpponentAsset from "./fixtures/data/sendout-healthbox-opponent.json" with { type: "json" };
 import battleHealthboxAsset from "../src/assets/gen/battle-healthbox.json" with { type: "json" };
-import ramDump from "../src/data/gen/battle1-turn1-ram-dump.json" with { type: "json" };
+import ramDump from "./fixtures/data/battle1-turn1-ram-dump.json" with { type: "json" };
 import speciesNames from "../src/data/gen/species-names.json" with { type: "json" };
-import turn3MenuBouncerRawProbe from "../src/data/gen/turn3-menu-bouncer-raw-probe.json" with { type: "json" };
-import turn6BounceBlipProbe from "../src/data/gen/turn6-bounce-blip-probe.json" with { type: "json" };
-import turn7BounceBlipProbe from "../src/data/gen/turn7-bounce-blip-probe.json" with { type: "json" };
-import turn8BounceBlipProbe from "../src/data/gen/turn8-bounce-blip-probe.json" with { type: "json" };
+import turn3MenuBouncerRawProbe from "./fixtures/data/turn3-menu-bouncer-raw-probe.json" with { type: "json" };
+import turn6BounceBlipProbe from "./fixtures/data/turn6-bounce-blip-probe.json" with { type: "json" };
+import turn7BounceBlipProbe from "./fixtures/data/turn7-bounce-blip-probe.json" with { type: "json" };
+import turn8BounceBlipProbe from "./fixtures/data/turn8-bounce-blip-probe.json" with { type: "json" };
 import { turn6FeatherSprites, turn7FeatherSprites, turn8FeatherSprites, compareFeatherDrawOrder } from "../src/animation/featherDance.ts";
 
 const TURN1_LATEST_HANDOFF = resolveTurn1LatestCompletedCommandHandoff(1308);
@@ -2355,7 +2355,7 @@ describe("docs/turn5-confirmb-resolved-residuals.md §9.3/§9.4 (2026-08-18, ISS
   });
 });
 
-describe("S7 slice N-3: drawSpriteSheetAffineRotate against FEATHER_DANCE's own real per-tick matrix (docs/turn6-notes.md §6, src/data/gen/turn6-feather-sprites-probe.json tick 7404 slot 3, a=225,b=-120,c=120,d=225) - the generic 2x2-matrix blit this slice's 8 independently-rotating feather sprites reuse, over a MULTI-TILE (2x2, 16x16) sheet (the sitrus tests above only ever exercise a single 8x8 tile)", () => {
+describe("S7 slice N-3: drawSpriteSheetAffineRotate against FEATHER_DANCE's own real per-tick matrix (docs/turn6-notes.md §6, tests/fixtures/data/turn6-feather-sprites-probe.json tick 7404 slot 3, a=225,b=-120,c=120,d=225) - the generic 2x2-matrix blit this slice's 8 independently-rotating feather sprites reuse, over a MULTI-TILE (2x2, 16x16) sheet (the sitrus tests above only ever exercise a single 8x8 tile)", () => {
   // 2x2 tiles (16x16), two marked texels in DIFFERENT tiles: absolute sprite
   // pixel (col=10,row=3) -> tile(1,0) pixel(2,3) = palette index 1; absolute
   // (col=3,row=12) -> tile(0,1) pixel(3,4) = palette index 2.
@@ -2451,7 +2451,7 @@ describe("S7 engine slice Q rungs (b)/(c) (docs/battle-turn-notes.md §34): turn
 
 describe("S7 engine slice Q rung (a) (docs/battle-turn-notes.md §29/§34): compareFeatherDrawOrder - real per-tick same-priority overlap from the 7421-7549 residual window (RAM tick 7428, render 7429), lower slot drawn LAST (on top)", () => {
   it("sorts the base-priority group at render tick 7429 (4 overlapping same-priority feathers) with the lowest slot drawn last (on top)", () => {
-    // src/data/gen/turn6-feather-sprites-probe.json tick 7428: slots 4/7/8/10
+    // tests/fixtures/data/turn6-feather-sprites-probe.json tick 7428: slots 4/7/8/10
     // are all priority 2 and overlap on-screen by render tick 7429 (+1 lag) -
     // this is the group whose draw order this session's oracle bisection
     // (battle-turn-notes.md §29/§34) found flips the residual's worst frames
@@ -2551,7 +2551,7 @@ describe("S7 slice M-5 (docs/faint-switch-notes.md §15): Onix's own Sitrus tint
   });
 });
 
-describe("ISSUES #26 (docs/faint-switch-notes.md §16): turn5SitrusRingMatrix - the Sitrus proc's THIN_RING, a pure isotropic scale (a=d=floor(4096/n), b=c=0) RAM-pinned against the committed probe (src/data/gen/turn5-sitrus-ring-probe.json), ordinary +1 render lag (NOT onixSitrusRotateMatrix's +2 rotation-matrix class)", () => {
+describe("ISSUES #26 (docs/faint-switch-notes.md §16): turn5SitrusRingMatrix - the Sitrus proc's THIN_RING, a pure isotropic scale (a=d=floor(4096/n), b=c=0) RAM-pinned against the committed probe (tests/fixtures/data/turn5-sitrus-ring-probe.json), ordinary +1 render lag (NOT onixSitrusRotateMatrix's +2 rotation-matrix class)", () => {
   it("is null outside the ring's own live render window (renders 7041-7072, RAM 7040-7071)", () => {
     expect(turn5SitrusRingMatrix(7040)).toBeNull(); // render 7040 -> RAM 7039, before the sprite exists
     expect(turn5SitrusRingMatrix(7073)).toBeNull(); // render 7073 -> RAM 7072, destroyed the RAM tick after 7071

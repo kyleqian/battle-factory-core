@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import fixture from '../src/data/gen/factory-seventh-win-timeline-off.json';
+import fixture from './fixtures/data/factory-seventh-win-timeline-off.json';
 
 describe('Factory seventh-win OFF fixture', () => {
   it('keeps the source-relative award, restore, RNG, and default-NO boundaries consumable', () => {

@@ -24,7 +24,7 @@
 // extracted as src/assets/gen/battle-opponent-front-sprites.json (GROVYLE
 // key, prior session). The clone's darkened/translucent look comes from a
 // palette blend + OBJ_BLEND OAM flag, not new art - see
-// src/data/gen/battle-move-anim-tables.json's `doubleTeam` entry for those
+// tests/fixtures/data/battle-move-anim-tables.json's `doubleTeam` entry for those
 // constants, extracted alongside the shared hit-flash timing.
 //
 // Run with:
@@ -644,7 +644,7 @@ function writeJson(path: string, data: unknown): void {
     { op: "createvisualtask", task: "AnimTask_AttackerPunchWithTrace", priority: 2, args: ["RGB_BLACK", 13], decoded: "THE unproven component (src/battle_anim_mons.c:2392-2496, NOT battle_anim_fight.c). Slides the attacker's own sprite x2 out 5 ticks then back 4, spawning one darkened+translucent CloneBattlerSpriteWithBlend afterimage per tick (9 total, each self-destroying 8 ticks after its own creation) - see shadowPunch.ts for the RAM-probed derivation, including the real vanilla `x2 -= spriteId` quirk applied once at task creation.", source: "battle_anim_scripts.s:4315" },
     { op: "playsewithpan", args: { se: "SE_M_JUMP_KICK", pan: "SOUND_PAN_ATTACKER" }, source: "battle_anim_scripts.s:4316" },
     { op: "delay", frames: 6, source: "battle_anim_scripts.s:4317" },
-    { op: "create_basic_hitsplat_sprite", expandsTo: "createsprite gBasicHitSplatSpriteTemplate, ANIM_TARGET, 3, 0, 0, ANIM_TARGET, 1", note: "same template/affine shape as FIRE_PUNCH's own (already-proven) hitsplat - src/data/gen/battle-move-anim-tables.json's endeavor.hitSplat table", source: "battle_anim_scripts.s:4318" },
+    { op: "create_basic_hitsplat_sprite", expandsTo: "createsprite gBasicHitSplatSpriteTemplate, ANIM_TARGET, 3, 0, 0, ANIM_TARGET, 1", note: "same template/affine shape as FIRE_PUNCH's own (already-proven) hitsplat - tests/fixtures/data/battle-move-anim-tables.json's endeavor.hitSplat table", source: "battle_anim_scripts.s:4318" },
     { op: "create_fist_sprite", expandsTo: "createsprite gFistFootSpriteTemplate, ANIM_TARGET, 4, 0, 0, 8, ANIM_TARGET, 0", note: "same template/frame(0)/duration(8) shape as FIRE_PUNCH's own (already-proven) fist", source: "battle_anim_scripts.s:4319" },
     { op: "playsewithpan", args: { se: "SE_M_COMET_PUNCH", pan: "SOUND_PAN_TARGET" }, source: "battle_anim_scripts.s:4320" },
     { op: "createvisualtask", task: "AnimTask_ShakeMon", priority: 2, args: ["ANIM_TARGET", 3, 0, 6, 1], decoded: "already-ported primitive (shakeMon.ts) - toggles the TARGET's x2 between 0 and 3 every tick, 6 times.", source: "battle_anim_scripts.s:4321" },
@@ -715,7 +715,7 @@ function writeJson(path: string, data: unknown): void {
 // common to every damaging move's script - see the doc for the full
 // BattleScript_EffectHit/EffectFlinchHit citation).
 {
-  writeJson(join(DATA_GEN, "battle-move-anim-tables.json"), {
+  writeJson(join(RUN_ROOT, "tests", "fixtures", "data", "battle-move-anim-tables.json"), {
     fallingRock: {
       source: "src/battle_anim_rock.c:297-333 (AnimFallingRock, AnimFallingRock_Step, both driving TranslateSpriteInEllipse, src/battle_anim_mons.c:516-531)",
       decoded:

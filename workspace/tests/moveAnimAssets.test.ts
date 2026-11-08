@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import firePlume from "../src/assets/gen/battle-anim-fire-plume.json" with { type: "json" };
 import rocks from "../src/assets/gen/battle-anim-rocks.json" with { type: "json" };
 import scripts from "../src/data/gen/battle-move-anim-scripts.json" with { type: "json" };
-import tables from "../src/data/gen/battle-move-anim-tables.json" with { type: "json" };
+import tables from "./fixtures/data/battle-move-anim-tables.json" with { type: "json" };
 
 describe("battle-anim-rocks.json (S7 groundwork: ROCK_SLIDE's gFallingRockSpriteTemplate art)", () => {
   it("pins rocks.png's tileset shape (4x24 tiles = 96, matching the compiled 0x0C00-byte sheet)", () => {

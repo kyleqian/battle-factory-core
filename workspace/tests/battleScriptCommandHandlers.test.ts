@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import catalogData from "../src/data/gen/battle-script-command-handlers.json" with { type: "json" };
+import catalogData from "./fixtures/data/battle-script-command-handlers.json" with { type: "json" };
 import topologyData from "../src/data/gen/battle-script-topology.json" with { type: "json" };
 
 type Definition = { symbol: string; file: string; startLine: number; openingBraceLine: number; endLine: number; signatureLine: number; signatureRaw: string };
@@ -33,7 +33,7 @@ describe("Battle Script command-handler catalog", () => {
     const outputDirectory = mkdtempSync(join(tmpdir(), "pokeemerald-factory-battle-script-command-handlers-"));
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/extract/extract-battle-script-command-handlers.ts", "--out-dir", outputDirectory], { stdio: "pipe" });
     expect(readFileSync(join(outputDirectory, "battle-script-command-handlers.json"), "utf8")).toBe(
-      readFileSync("src/data/gen/battle-script-command-handlers.json", "utf8"),
+      readFileSync("tests/fixtures/data/battle-script-command-handlers.json", "utf8"),
     );
   });
 

@@ -137,7 +137,7 @@ function tilesetOf(pngPath: string) {
   const TEXT_COLOR = { TEXT_COLOR_TRANSPARENT: 0, TEXT_COLOR_WHITE: 1, TEXT_COLOR_DARK_GRAY: 2, TEXT_COLOR_LIGHT_GRAY: 3, TEXT_COLOR_RED: 4, TEXT_COLOR_GREEN: 5, TEXT_COLOR_BLUE: 6 } as Record<string, number>;
   const parseColorList = (s: string) => s.split(",").map((t) => t.trim()).filter(Boolean).map((t) => TEXT_COLOR[t] ?? Number(t));
 
-  writeJson(join(DATA_GEN, "swap-screen-windows.json"), {
+  writeJson(join(RUN_ROOT, "tests", "fixtures", "data", "swap-screen-windows.json"), {
     bgTemplates,
     windowTemplates,
     menuOptionsTextColors: parseColorList(menuColorsMatch[1]!),

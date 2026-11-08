@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import data from "../src/data/gen/level50-move-parameterization.json" with { type: "json" };
+import data from "./fixtures/data/level50-move-parameterization.json" with { type: "json" };
 
 type Row = Record<string, any>;
 const manifest = data as unknown as Row;

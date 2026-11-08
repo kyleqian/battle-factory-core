@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import fixture from '../src/data/gen/factory-brain-silver-terminal-off.json';
+import fixture from './fixtures/data/factory-brain-silver-terminal-off.json';
 
 describe('Factory brain (Noland silver) seventh-win OFF fixture', () => {
   it('live-pins the +10 brain BP bonus, the silver symbol flag, and the default-NO boundaries', () => {

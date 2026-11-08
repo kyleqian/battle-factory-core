@@ -3,8 +3,8 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import commandHandlersData from "../src/data/gen/battle-script-command-handlers.json" with { type: "json" };
-import observationsData from "../src/data/gen/battle-script-opcode-observations.json" with { type: "json" };
+import commandHandlersData from "./fixtures/data/battle-script-command-handlers.json" with { type: "json" };
+import observationsData from "./fixtures/data/battle-script-opcode-observations.json" with { type: "json" };
 import programData from "../src/data/gen/battle-script-program.json" with { type: "json" };
 import topologyData from "../src/data/gen/battle-script-topology.json" with { type: "json" };
 
@@ -101,7 +101,7 @@ describe("Battle Script opcode-use observations", () => {
     run("tools/extract/extract-battle-script-program.ts");
     run("tools/extract/extract-battle-script-opcode-observations.ts");
     expect(readFileSync(join(outputDirectory, "battle-script-opcode-observations.json"), "utf8")).toBe(
-      readFileSync("src/data/gen/battle-script-opcode-observations.json", "utf8"),
+      readFileSync("tests/fixtures/data/battle-script-opcode-observations.json", "utf8"),
     );
   });
 

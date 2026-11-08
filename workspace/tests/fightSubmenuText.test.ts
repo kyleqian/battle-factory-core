@@ -15,7 +15,7 @@
 //    SetPPNumbersPaletteInMoveSelection reads at render time) matches a
 //    FRESH re-parse of text_pp.pal, independent of the committed literal.
 // 3. Generality - a wholly different, real moveset (KABUTO's, S8 battle 2 -
-//    src/data/gen/battle2-turn1-battler-dump.json's own RAM-dumped
+//    tests/fixtures/data/battle2-turn1-battler-dump.json's own RAM-dumped
 //    moves/pp) renders through the exact same path without throwing, and
 //    each of the 4 PP-color states it can hit is independently re-rendered
 //    (via drawText/drawGlyphCodes with colors sourced fresh from

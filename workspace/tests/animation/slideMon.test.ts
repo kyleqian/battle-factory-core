@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import probe from "../../src/data/gen/dragonrage-slide-probe.json" with { type: "json" };
+import probe from "../fixtures/data/dragonrage-slide-probe.json" with { type: "json" };
 import {
   slideMonToOffsetAtTick,
   slideMonToOffsetDestroyTick,

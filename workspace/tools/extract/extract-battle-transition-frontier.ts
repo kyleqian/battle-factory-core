@@ -164,7 +164,7 @@ function assertTilemapInRange(name: string, tilemap: Tilemap, tilesetLen: number
     throw new Error(`sFrontierSquaresScroll_Positions: expected 64 entries, got ${scrollPositions.length}`);
   }
 
-  writeJson(join(ASSETS_GEN, "battle-transition-frontier-squares.json"), {
+  writeJson(join(RUN_ROOT, "tests", "fixtures", "data", "battle-transition-frontier-squares.json"), {
     palette: blank.image.palette,
     tileset: tilesets,
     tilemap,

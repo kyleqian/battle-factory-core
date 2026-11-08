@@ -5,7 +5,7 @@ import {
   resolveTurn2EndeavorWindowContent,
   stageTurn2EndeavorHitChain,
 } from "../src/engine/turn2EndeavorPresentationStaging.ts";
-import turn2RamDumpAsset from "../src/data/gen/battle1-turn2-ram-dump.json" with { type: "json" };
+import turn2RamDumpAsset from "./fixtures/data/battle1-turn2-ram-dump.json" with { type: "json" };
 import { advanceRngValue } from "../src/engine/rng.ts";
 
 /**

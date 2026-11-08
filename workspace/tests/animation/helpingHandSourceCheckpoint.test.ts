@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import asset from "../../src/animation/assets/helping-hand-tag-hand.json" with { type: "json" };
+import asset from "../fixtures/data/helping-hand-tag-hand.json" with { type: "json" };
 import { createScratchDir } from "../../tools/lib/scratch.ts";
 
 const root = resolve(new URL("../..", import.meta.url).pathname);
@@ -34,7 +34,7 @@ describe("MOVE_HELPING_HAND source/asset/legal-staging checkpoint", () => {
     const scratch = createScratchDir("helping-hand-assets-");
     const output = join(scratch, "tag-hand.json");
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/compare/extractHelpingHandAssets.ts", "--out", output], { cwd: root });
-    expect(readFileSync(output)).toEqual(readFileSync(join(root, "src/animation/assets/helping-hand-tag-hand.json")));
+    expect(readFileSync(output)).toEqual(readFileSync(join(root, "tests/fixtures/data/helping-hand-tag-hand.json")));
     expect(createHash("sha256").update(readFileSync(output)).digest("hex"))
       .toBe("89d0bca0c96fe3c3bb55e8b1d948415902731eef64d12bdce9531966899cc068");
     expect(asset).toMatchObject({ dimensions: { widthPixels: 32, heightPixels: 64, tiles: 32 },

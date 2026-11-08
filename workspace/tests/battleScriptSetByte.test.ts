@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import lexicalFactsData from "../src/data/gen/battle-script-handler-lexical-facts.json" with { type: "json" };
-import opcodeObservationsData from "../src/data/gen/battle-script-opcode-observations.json" with { type: "json" };
+import lexicalFactsData from "./fixtures/data/battle-script-handler-lexical-facts.json" with { type: "json" };
+import opcodeObservationsData from "./fixtures/data/battle-script-opcode-observations.json" with { type: "json" };
 import {
   createBattleScriptMachine,
   stepBattleScriptMachine,

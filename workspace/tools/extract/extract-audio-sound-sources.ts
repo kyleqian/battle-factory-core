@@ -3,7 +3,7 @@
 // census (aud243) applies to executed kernel commands. Data extraction only; no
 // runtime module imports the output.
 //
-// Sections written to src/data/gen/audio-sound-sources.json:
+// Sections written to tests/fixtures/data/audio-sound-sources.json:
 //   (a) animScripts   - data/battle_anim_scripts.s sound ops + label flow + entry tables
 //   (b) cAnimSites    - PlaySE / PlaySE*WithPanning / PlayCry* call sites in src/battle_anim*.c
 //   (c) sites         - screen / controller / battle-script / pokeball / interface call sites,
@@ -28,7 +28,7 @@ const REF = join(RUN_ROOT, "reference", "pokeemerald");
 const outDirIndex = process.argv.indexOf("--out-dir");
 const outDirArg = outDirIndex < 0 ? undefined : process.argv[outDirIndex + 1];
 if (outDirIndex >= 0 && !outDirArg) throw new Error("--out-dir requires a directory");
-const OUT_DIR = outDirArg === undefined ? join(RUN_ROOT, "src", "data", "gen") : isAbsolute(outDirArg) ? outDirArg : join(RUN_ROOT, outDirArg);
+const OUT_DIR = outDirArg === undefined ? join(RUN_ROOT, "tests", "fixtures", "data") : isAbsolute(outDirArg) ? outDirArg : join(RUN_ROOT, outDirArg);
 const OUT_FILE = join(OUT_DIR, "audio-sound-sources.json");
 
 // ---------------------------------------------------------------------------

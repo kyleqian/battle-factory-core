@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import rentalFixture from "../src/data/gen/battle1-swap-rentalmons-dump.json" with { type: "json" };
-import rngFixture from "../src/data/gen/battle1-swapyes-rng-dump.json" with { type: "json" };
-import swapWindows from "../src/data/gen/swap-screen-windows.json" with { type: "json" };
+import rentalFixture from "./fixtures/data/battle1-swap-rentalmons-dump.json" with { type: "json" };
+import rngFixture from "./fixtures/data/battle1-swapyes-rng-dump.json" with { type: "json" };
+import swapWindows from "./fixtures/data/swap-screen-windows.json" with { type: "json" };
 
 type RentalMon = { monId: number; personality: number; ivs: number; abilityNum: number };
 type RentalTick = { rentalMons: RentalMon[] };

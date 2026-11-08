@@ -6,7 +6,7 @@
 // Byte checks (NOT pixel/sha - this needs no oracle round trip and no
 // mgba-venv interpreter at verify time; the RAM/VRAM read itself was a
 // one-off `tools/probe/dump-turn13-frame2-vram.py` run, banked verbatim
-// into `src/data/gen/turn13-murkrow-frame2-vram-dump.json`). Each banked
+// into `tests/fixtures/data/turn13-murkrow-frame2-vram-dump.json`). Each banked
 // tick is a full 64-tile OBJ VRAM dump of battler 1's live sprite (the
 // same `gBattlerSpriteIds+1`/`gSprites`/1D-obj-mapping/4bpp addressing
 // `dump-turn13-murkrow-materialize.py` and `probe_grovyle_vram.py`
@@ -29,7 +29,7 @@
 // after the window closes (17035-17069) it should show `tileset`.
 //
 // Usage: node --experimental-strip-types tools/probe/verify-turn13-frame2.ts
-import turn13MurkrowFrame2VramDump from "../../src/data/gen/turn13-murkrow-frame2-vram-dump.json" with { type: "json" };
+import turn13MurkrowFrame2VramDump from "../../tests/fixtures/data/turn13-murkrow-frame2-vram-dump.json" with { type: "json" };
 import opponentFrontSprites from "../../src/assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 
 interface VramTick {

@@ -41,7 +41,7 @@ import { renderAppTrace } from "../compare/appTrace.ts";
 import type { Trace } from "../compare/oracleClient.ts";
 
 const BASELINE_DIR = "tools/compare/out/sendout-baseline";
-const OUT_PATH = "src/assets/gen/sendout-healthbox-opponent.json";
+const OUT_PATH = "tests/fixtures/data/sendout-healthbox-opponent.json";
 
 // Pixel-derived bounding box (this session): the full diff between the
 // oracle's tick-1555 capture and the engine's pure-background render,

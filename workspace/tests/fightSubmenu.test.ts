@@ -1166,7 +1166,7 @@ describe("battleMenu/battleScene: turn 5's FIGHT-submenu reopen (S7 slice J, doc
   it("ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): window A's composed correction - the 3-tick freeze plus a shared +109 raw-sine-index offset plus a t-1 display-basis shift - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 5927-5957, with ZERO exceptions (the former §8d/§9e residual was itself the same one-`sDelta`-step offset excess, not a separate hardware rounding rule)", () => {
     const pressTick = 5927; // same live-confirmed openElapsed press tick as the freeze test above
     // Real hardware's displayed (onixY2, healthboxY2) at screen ticks 5927-5957
-    // (src/data/gen/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
+    // (tests/fixtures/data/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
     // §9c display-basis finding: displayed(T) = RAM(T-1)).
     const displayed: Record<number, { onixY2: number; healthboxY2: number }> = {
       5927: { onixY2: 1, healthboxY2: 1 },
@@ -1391,7 +1391,7 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
   it("ISSUES #97-B (docs/bounce-peak-rounding-fix-spec.md §7): window B's composed correction - a shared +60 raw-sine-index offset plus a local display-basis t-1 shift, composed with rung 1's freeze - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 7305-7317, with ZERO exceptions (the former §8d/§9e residual at {7306,7317} was the same one-sDelta-step offset excess, not a separate hardware rounding rule)", () => {
     const pressTick = 7313; // same live-confirmed openElapsed press tick as the rung-1 test above
     // Real hardware's displayed (onixY2, healthboxY2) at screen ticks 7305-7317
-    // (src/data/gen/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
+    // (tests/fixtures/data/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
     // §7a display-basis finding: displayed(T) = RAM(T-1)).
     const displayed: Record<number, { onixY2: number; healthboxY2: number }> = {
       7305: { onixY2: 1, healthboxY2: 0 },
@@ -1446,7 +1446,7 @@ describe("battleMenu/battleScene: turn 6's FIGHT-submenu reopen (S7 slice N rung
   it("ISSUES #97 (docs/turn5-bounce-recalibration-probe.md §10b/§10e, docs/turn6-reopen-endstate-spec.md's dated addendum - supervisor overturn of that spec's own §2/§3 rejection): the post-reveal span's composed correction - the idle-else regime AND turn6KickoffBounceTick's own raw regime now share window B's +60 offset + t-1 display basis (the raw regime via its own missing -FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT term, §10b), while the frozen regime stays untouched - reproduces oracle's RAM-ground-truth (onixY2,healthboxY2) at every displayed tick 7318-7350, with ZERO exceptions", () => {
     const pressTick = 7345; // same live-confirmed confirmElapsed press tick as this describe block's own PRESS_TICK
     // Real hardware's displayed (onixY2, healthboxY2) at screen ticks 7318-7350
-    // (src/data/gen/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
+    // (tests/fixtures/data/turn5-6-reopen-bounce-probe.json, shifted -1 tick per the
     // §7a display-basis finding: displayed(T) = RAM(T-1)).
     const displayed: Record<number, { onixY2: number; healthboxY2: number }> = {
       7318: { onixY2: 1, healthboxY2: 2 },

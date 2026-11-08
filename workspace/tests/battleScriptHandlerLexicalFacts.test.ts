@@ -4,8 +4,8 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import factsData from "../src/data/gen/battle-script-handler-lexical-facts.json" with { type: "json" };
-import commandHandlersData from "../src/data/gen/battle-script-command-handlers.json" with { type: "json" };
+import factsData from "./fixtures/data/battle-script-handler-lexical-facts.json" with { type: "json" };
+import commandHandlersData from "./fixtures/data/battle-script-command-handlers.json" with { type: "json" };
 
 type Handler = {
   slot: { index: number; opcode: string; tableRowIndex: number };
@@ -41,7 +41,7 @@ describe("Battle Script raw command-handler lexical facts", () => {
     const outputDirectory = mkdtempSync(join(tmpdir(), "pokeemerald-factory-battle-script-handler-lexical-facts-"));
     execFileSync(process.execPath, ["--experimental-strip-types", "tools/extract/extract-battle-script-handler-lexical-facts.ts", "--out-dir", outputDirectory], { stdio: "pipe" });
     expect(readFileSync(join(outputDirectory, "battle-script-handler-lexical-facts.json"), "utf8")).toBe(
-      readFileSync("src/data/gen/battle-script-handler-lexical-facts.json", "utf8"),
+      readFileSync("tests/fixtures/data/battle-script-handler-lexical-facts.json", "utf8"),
     );
   });
 

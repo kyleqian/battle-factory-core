@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import factsData from "../src/data/gen/battle-script-move-end-facts.json" with { type: "json" };
+import factsData from "./fixtures/data/battle-script-move-end-facts.json" with { type: "json" };
 
 type MoveEndCase = {
   state: { name: string; value: number };
@@ -75,7 +75,7 @@ describe("Cmd_moveend source/dependency receipt", () => {
     );
     expect(
       readFileSync(join(outputDirectory, "battle-script-move-end-facts.json"), "utf8"),
-    ).toBe(readFileSync("src/data/gen/battle-script-move-end-facts.json", "utf8"));
+    ).toBe(readFileSync("tests/fixtures/data/battle-script-move-end-facts.json", "utf8"));
   });
 
   it("pins the exact source span, contiguous 0..16 states, and sentinel 17", () => {

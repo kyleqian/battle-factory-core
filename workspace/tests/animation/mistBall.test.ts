@@ -6,7 +6,7 @@ import {
   mistBallAtAge,
   mistBallSpritePosition,
 } from "../../src/animation/mistBall.ts";
-import mistBallProbe from "../../src/data/gen/mist-ball-sprite-probe.json" with { type: "json" };
+import mistBallProbe from "../fixtures/data/mist-ball-sprite-probe.json" with { type: "json" };
 
 // RAM-probe evidence (`tools/probe/dump-mist-ball-sprite.py` against
 // `tools/battle-lab/mechanic-mist-ball-latias-onix.json`, MOVE_MIST_BALL

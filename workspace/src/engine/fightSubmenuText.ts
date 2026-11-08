@@ -78,7 +78,7 @@ export const TYPE_DISPLAY_NAMES: Record<string, string> = {
 /**
  * Builds a `FightMoveset` from `gBattleMons[].moves`-style numeric move ids
  * (the RAM-native representation - see e.g.
- * `src/data/gen/battle2-turn1-battler-dump.json`'s own `moves`/`pp` fields)
+ * `tests/fixtures/data/battle2-turn1-battler-dump.json`'s own `moves`/`pp` fields)
  * plus the battler's live per-slot current PP. `maxPP` applies the active
  * battler's packed two-bit PP Up fields with `CalculatePPWithBonus`'s source
  * formula. Existing callers omit `ppBonuses` because Factory rentals have

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState, tick } from "../src/engine/core.ts";
 import { CATEGORY_BY_SPECIES } from "../src/engine/factorySwapRender.ts";
-import rentalFixture from "../src/data/gen/battle1-swap-rentalmons-dump.json" with { type: "json" };
+import rentalFixture from "./fixtures/data/battle1-swap-rentalmons-dump.json" with { type: "json" };
 import {
   CANONICAL_FACTORY_RENTAL_ROSTER,
   CANONICAL_SWAP_ENEMY_PARTY,

@@ -107,7 +107,7 @@ const output = {
 
 writeFileSync(join(DATA_GEN, "type-effectiveness.json"), `${JSON.stringify({ typeEffectiveness: output.typeEffectiveness }, null, 0)}\n`);
 writeFileSync(
-  join(DATA_GEN, "damage-formula-constants.json"),
+  join(RUN_ROOT, "tests", "fixtures", "data", "damage-formula-constants.json"),
   `${JSON.stringify(
     {
       criticalHitChanceOneIn: output.criticalHitChanceOneIn,

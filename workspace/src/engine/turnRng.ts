@@ -1,5 +1,5 @@
 // The turn-1 RNG-consumption model: the exact 12-step ledger RAM-verified
-// in src/data/gen/battle1-turn1-ram-dump.json and documented in
+// in tests/fixtures/data/battle1-turn1-ram-dump.json and documented in
 // docs/battle-turn-notes.md §3/§9. Reuses the S3 gen-3 LCG (GbaRng) rather
 // than duplicating it - this module only names and orders the steps.
 //

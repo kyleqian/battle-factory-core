@@ -2,7 +2,7 @@
 """Turn 5 reopen root-cause probe, part 1 of 2 (docs/turn3-residual-probe-
 notes.md's own "Family B, continued" precedent, re-anchored to turn 5's own
 reopen window). Pure analysis over the already-committed
-`src/data/gen/turn5-menu-bouncer-raw-probe.json` RAM dump (no mGBA needed -
+`tests/fixtures/data/turn5-menu-bouncer-raw-probe.json` RAM dump (no mGBA needed -
 plain `python3`). Establishes the raw RAM facts around tick 5927 (the reopen
 press's own registering tick, `tools/compare/traces/turn5-menu.json`'s own
 excluded single-tick residual): sprite-slot addressing sanity, a genuine
@@ -25,7 +25,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 WORKTREE_ROOT = HERE.parent.parent
-PROBE_PATH = WORKTREE_ROOT / "src" / "data" / "gen" / "turn5-menu-bouncer-raw-probe.json"
+PROBE_PATH = WORKTREE_ROOT / "tests" / "fixtures" / "data" / "turn5-menu-bouncer-raw-probe.json"
 TRACE_PATH = WORKTREE_ROOT / "tools" / "compare" / "traces" / "turn5-menu.json"
 
 # `GBA_SINE_TABLE_256` (src/engine/battleMenu.ts), copied verbatim - same
