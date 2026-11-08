@@ -2566,7 +2566,7 @@ export function createBattleResolutionPresentationRenderView(
           && !(
             playerFaint?.sink.type === "player-pixel-rows"
             && playerFaint.sink.skipPixelRows
-              >= fieldArt.player.pic.tileset.rows * 8
+              >= fieldArt.player.picGeometry.rows * 8
           ),
         healthbox: !fainted.has(0)
           && (playerFaint?.healthboxVisible ?? true)

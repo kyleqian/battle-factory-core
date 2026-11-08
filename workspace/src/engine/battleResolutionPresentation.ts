@@ -4877,7 +4877,7 @@ export function projectBattleResolutionCommands(
             });
           })()
         : (() => {
-            const spriteRows = fieldArt.player.pic.tileset.rows * 8;
+            const spriteRows = fieldArt.player.picGeometry.rows * 8;
             // PlayerHandleFaintAnimation: sSpeedY 5 per frame from the sprite's y (GetBattlerSpriteDefault_Y = 80 + the back pic
             // y_offset, battle_anim_mons.c:112-170, :269-292) until FreeMonSpriteAfterFaintAnim sees y + y2 > DISPLAY_HEIGHT (160)
             // and frees it with the healthbox: floor((80 - y_offset) / 5) + 1 callback frames, + 1 controller-completion row
