@@ -130,4 +130,12 @@ describe("app-differential CLI guards", () => {
     expect(result.status).toBe(2);
     expect(result.stderr).toContain("trace not found");
   });
+
+  it("names --capture-range when a trace requests no captureFrames", () => {
+    const path = writeTrace(traceDir(), "no-frames.json", { segments: [{ frames: 10 }] });
+    const result = runDifferential([path, "--base", "HEAD^"]);
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain("requests no captureFrames; nothing to compare");
+    expect(result.stderr).toContain("--capture-range START:END");
+  });
 });
