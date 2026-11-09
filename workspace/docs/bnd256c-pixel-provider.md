@@ -21,6 +21,11 @@ and removes the JSON import from the headless graph.
   and `tools/browser/*` drive the built page, which is covered by `lib.ts`. `tools/compare/appTrace.ts` installs through a guarded
   dynamic import that tolerates only a missing module, so `app-differential --harness-from-head` can overlay it on a base checkout
   from before this step.
+- Side effects of editing tools: six retained framebuffer verifiers (`fire-blast`, `hail`, `heal-bell`, `psybeam` x2, `rock-blast`
+  `*Framebuffer.ts`) have their sha256 pinned in `tools/compare/fixtures/*-evidence.json` (and `fireBlast`'s fixture sha in
+  `tests/animation/dragonFireProjectileTrack.test.ts`); those pins were re-computed after the one-line import (their tests re-run the
+  verifiers and still report the same exact-row counts). `sandTombSourceAudit.ts` only reads source text and was left untouched. Six
+  `contain209*` / `contain213*` tests call `vi.resetModules()` and re-import `core.ts`; they now also re-import the install module.
 - `headless.ts` does not import the install module (pinned by `tests/bnd256cPixelProvider.test.ts`). `battleScene.ts`,
   `monPicRender.ts` and `summaryInfoPage.ts` still import the JSON statically; Rollup tree-shakes them out of the headless build
   (confirmed below), so they stay for `bnd-d`.
