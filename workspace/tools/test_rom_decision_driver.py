@@ -205,5 +205,20 @@ class DriveLabTest(unittest.TestCase):
         self.assertEqual(result["frames"], 20)
 
 
+class SegmentDiffTest(unittest.TestCase):
+    def test_segments_compare_ordered_lists_and_ignore_menu_se(self):
+        import soundSegmentDiff as sd
+        engine = {"decisions": [{"menuOpenFrame": 0, "commitFrame": 5}, {"menuOpenFrame": 20, "commitFrame": 25}],
+                  "sound": [[6, "se", 171, 63], [7, "se", 13, 63], [26, "se", 15, None]]}
+        drive = {"drive": {"anchors": [{"menuOpenFrame": 0, "commitFrame": 50}, {"menuOpenFrame": 200, "commitFrame": 250}]}}
+        rom = {"events": [{"frame": 2, "kind": "se", "id": 5, "pan": None}, {"frame": 60, "kind": "se", "id": 171, "pan": 63},
+                          {"frame": 90, "kind": "se", "id": 13, "pan": 63}, {"frame": 260, "kind": "se", "id": 152, "pan": 63}]}
+        out = sd.diff(engine, drive, rom, {"se", "cry"}, {5})
+        by = {s["segment"]: s for s in out["segments"]}
+        self.assertTrue(by["menu0"]["same"] and by["res0"]["same"] and by["menu1"]["same"])
+        self.assertEqual(by["res1"]["firstDiff"], {"index": 0, "engine": ("se", 15, None), "rom": ("se", 152, 63)})
+        self.assertEqual(out["firstDiffering"], "res1")
+
+
 if __name__ == "__main__":
     unittest.main()
