@@ -131,11 +131,13 @@ const rulesWithoutSceneMarker = (v: { rules: any }) => {
   return { ...v.rules, rulesContext: { ...rc, hitMarker: rc.hitMarker & ~0x80 } };
 };
 
+// sub260 (ISSUES #201): Cmd_datahpupdate now clears HITMARKER_IGNORE_SUBSTITUTE, so the old seed 243 route (whose turn-2 Thunderbolt
+// bypassed the doll) breaks the Substitute before Toxic. Seed 862 keeps the doll up at Toxic (tools/integration/substituteToxicRouteScan.ts).
 describe("ordinary route: a subbed attacker's framed Toxic with the swaps", () => {
-  it("SHUCKLE 243/35 [Substitute, Attract, Toxic, Double Team]: framed composite, tail-row latch, next prompt, Scene ON/OFF parity", () => {
+  it("SHUCKLE 862/35 [Substitute, Attract, Toxic, Double Team]: framed composite, tail-row latch, next prompt, Scene ON/OFF parity", () => {
     const seen = { ages: 0, duration: null as number | null, kinds: new Set<string>(), bodyAges: [] as number[], tail: [] as number[] };
     let after: { side: "player"; settledX: number } | null = null;
-    const on = generatedCommandAnimationReplay(243, "on", [0, 2], 35, true, true, (state) => {
+    const on = generatedCommandAnimationReplay(862, "on", [0, 2], 35, true, true, (state) => {
       const r = state.battleResolutionPresentation;
       if (r?.lifecycle.phase !== "presenting") return;
       const command = r.segments[r.segmentIndex]!.commands[r.commandIndex];
@@ -156,7 +158,7 @@ describe("ordinary route: a subbed attacker's framed Toxic with the swaps", () =
         seen.tail.push(view.fieldArt.player.origin.x - after.settledX);
       }
     });
-    const off = generatedCommandAnimationReplay(243, "off", [0, 2], 35, true, true);
+    const off = generatedCommandAnimationReplay(862, "off", [0, 2], 35, true, true);
     // Toxic's ROM body (activation .. first inactive) 231 rows + the player swaps 85 = 316 (the adapter alone is 219 rows).
     expect(seen.duration).toBe(316);
     expect(seen.ages).toBe(316);
