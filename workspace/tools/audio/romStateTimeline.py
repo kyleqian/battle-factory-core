@@ -26,7 +26,7 @@ def main():
 
     def read():
         return (oracle.read_u16(sym["gCurrentMove"]), oracle.read_u16(mons + 0x28), oracle.read_u16(mons + 0x58 + 0x28),
-                oracle.read_u32(sym["gRngValue"]))
+                oracle.read_u32(sym["gRngValue"]), oracle.read_u16(sym["gLastMoves"]), oracle.read_u16(sym["gLastMoves"] + 2))
 
     rows, last, frame = [], read(), 0
     rows.append([0, *last])
