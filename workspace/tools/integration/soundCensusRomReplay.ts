@@ -3,7 +3,7 @@
 //     the census battle of seed N (same orchestrator config and policy as lsd194Census.ts) run to its first action menu; writes the factoryLegal battle-lab request of its trainer / set ids.
 //   replay: ... replay --seed=N --scene=on|off --setup=setup.json --out=engine.json
 //     setup.json = `soundEventProbe.py lab REQ --setup-out` (the ROM's action-menu gRngValue, both parties). The engine battle is rebuilt FROM THE ROM (player rentals and opponent
-//     personalities read back, battle RNG = the ROM's gRngValue at the action menu) and played with the census policy; writes the per-frame inputs (run-length encoded, frame 1 = the
+//     personalities read back, battle RNG aligned on the ROM's gRandomTurnNumber, i.e. the ROM's gRngValue before the opponent's pre-menu AI draws; aud243c) and played with the census policy; writes the per-frame inputs (run-length encoded, frame 1 = the
 //     first step after the action menu appeared) and the sound rows relative to that frame.
 //   compare: ... compare --seed=N --scene=on|off --engine=engine.json --rom=timeline.json [--out=F]  (aud243c) engine states (hp, rng, last moves) found in order in the ROM timeline.
 //   native: ... native --seed=N --scene=on|off --out=engine.json  the census orchestrator itself (no ROM), same output shape: the drift check against the census row's sound column.
