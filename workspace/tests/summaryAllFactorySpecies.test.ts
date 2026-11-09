@@ -144,7 +144,7 @@ describe("MOVE_NONE slots (12 Level 50 / Open sets: CATERPIE, DITTO, UNOWN, ...)
       for (let i = 0; i < ticks; i += 1) state = advanceSummaryScreen(state);
       return state;
     };
-    let state = run(openSummaryScreen(0), 59);
+    let state = run(openSummaryScreen(0), 63);
     for (let i = 0; i < 2; i += 1) state = run(requestSummaryPageChange(state, "right"), SUMMARY_PAGE_TRANSITION_TICKS);
     state = run(requestSummaryMoveSelect(state), 12);
     const ditto = [true, false, false, false]; // set 54: TRANSFORM, -, -, -
