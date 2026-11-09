@@ -320,6 +320,11 @@ function lifetimeOf(cmd: Command): Lifetime {
   // call D + 11 runs the stored Step3, call D + 12 runs Step3 (data[0] = 10, WaitAnimForDuration), calls D + 13..D + 22 count it down, call D + 23 installs DestroySpriteAndMatrix,
   // call D + 24 destroys: gone D + 23 ticks after F (73 for the Bubblebeam bubbles). The invisible helper sprite is DestroySprite'd without the visual-task decrement.
   if (sprite("gWaterBubbleProjectileSpriteTemplate")) { const d = intArg(args[9]); return d === null || d < 1 || d > 255 ? null : { exact: d + 23 }; }
+  // AnimThunderboltOrb (battle_anim_electric.c:605-627): the init only stores data[3] = args[3] and installs _Step; call k >= 1 destroys when data[3]-- <= 0, i.e. at call max(d, 0) + 1:
+  // gone max(d, 0) ticks after F. AnimSparkElectricityFlashing (:629-666): the init runs the step itself in call 0 (data[0] = args[6] is checked, then decremented), call k checks d - k;
+  // destroyed at call max(d, 0), gone max(d, 0) - 1 ticks after F (the data[4] = args[10] & 0x7FFF modulus never affects the lifetime).
+  if (sprite("gThunderboltOrbSpriteTemplate")) { const d = intArg(args[3]); return d === null ? null : { exact: Math.max(d, 0) }; }
+  if (sprite("gSparkElectricityFlashingSpriteTemplate")) { const d = intArg(args[6]); return d === null ? null : { exact: Math.max(d, 0) - 1 }; }
   // AnimTask_SwayMon (battle_anim_mon_movement.c:751-815): the entry only sets func (data[11] = 0, data[12] = 1); the step's call k adds `period` (script args[4], as a u16) to the
   // sine index, waveIndex = index >> 8, and a half-wave crossing (waveIndex >= 0x80 while data[12] == 1, or < 0x7f while data[12] == 0) flips the state and decrements the
   // sway count (args[5]); the call that reaches 0 destroys the task: call K, gone K - 1 ticks after F.
