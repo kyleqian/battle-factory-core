@@ -304,6 +304,15 @@ function lifetimeOf(cmd: Command): Lifetime {
   // AnimBreathPuff (battle_anim_effects_2.c:2250-2272): call 0 sets data[0] = 52 and installs TranslateSpriteLinearFixedPoint; calls 1..52 decrement (battle_anim_mons.c:607-621),
   // call 53 stores DestroyAnimSprite (SetCallbackToStoredInData6), call 54 destroys: gone 53 ticks after F.
   if (sprite("gBreathPuffSpriteTemplate")) return { exact: 53 };
+  // ---- aud242g (docs section 11). AnimTask_SetPsychicBackground (battle_anim_effects_3.c:1372-1376): the entry installs SetPsychicBackground_Step and does
+  // gAnimVisualTaskCount--; Cmd_createvisualtask runs the entry before its own gAnimVisualTaskCount++ (battle_anim.c:439-441), so the net count is 0 and a following
+  // waitforvisualfinish never waits for it (the step only rotates palette entries until the script sets arg 7 = 0xFFFF).
+  if (op === "createvisualtask" && args[0] === "AnimTask_SetPsychicBackground") return { exact: -1 };
+  // AnimTriAttackTriangle (battle_anim_effects_3.c:2015-2046): call 0 (script step) inits and counts data[0] 0 -> 1, call k has data[0] = k + 1, so call 60 reaches 61:
+  // it stores DestroyAnimSprite in data[6], sets data[0] = 20 and installs StartAnimLinearTranslation (battle_anim_mons.c:1093-1101), which first runs in call 61
+  // and translates at once (AnimTranslateLinear, :1111-1139: 20 -> 0 over calls 61..80); call 81 sees data[0] == 0, SetCallbackToStoredInData6 (:1141-1146) installs
+  // DestroyAnimSprite and call 82 destroys: gone 81 ticks after F. Args only move the start position.
+  if (sprite("gTriAttackTriangleSpriteTemplate")) return { exact: 81 };
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
   return null;
 }

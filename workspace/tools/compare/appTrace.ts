@@ -1903,6 +1903,18 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242f-psychic-player-on": (state) => aud241bStage(state, "aud242f-psychic-player-on", "on", 50, 12, 94, undefined, false, 69),
   "aud242f-growth-player-on": (state) => aud241bStage(state, "aud242f-growth-player-on", "on", 50, 12, 74, undefined, false, 69),
   "aud242f-swagger-player-on": (state) => aud241bStage(state, "aud242f-swagger-player-on", "on", 50, 12, 207, undefined, false, 69),
+  // aud242g: SetPsychicBackground / Tri Attack triangle lifetimes (docs/aud242-move-anim-sounds.md section 11).
+  "aud242g-dreameater-player-on": (state) => aud241bStage(state, "aud242g-dreameater-player-on", "on", 50, 12, 138, undefined, false, 69),
+  "aud242g-triattack-player-on": (state) => aud241bStage(state, "aud242g-triattack-player-on", "on", 50, 12, 161, undefined, false, 69),
+  // Dream Eater needs a sleeping target: turn 1 Spore (slot 0), turn 2 Dream Eater (slot 1).
+  "aud242g-dreameater-sleep-player-on": (state) =>
+    midBattleSwitchStage(state, "aud242g-dreameater-sleep-player-on", [RATTATA_LV50_BENCH, RATTATA_LV50_BENCH], [105, 105], {
+      battleScene: "on",
+      player: Object.freeze({ ...rattataAtLevel(50, 147), moves: [147, 138, 138, 138] as const }),
+      trainer: rattataAtLevel(12, 69),
+      usedMessageHoldFrames: 0,
+      sceneOffNoAnimations: false,
+    }),
   "aud242f-lusterpurge-player-on": (state) => aud241bStage(state, "aud242f-lusterpurge-player-on", "on", 50, 12, 295, undefined, false, 69),
   "aud242f-curse-player-on": (state) => aud241bStage(state, "aud242f-curse-player-on", "on", 50, 12, 174, undefined, false, 69),
   "aud242f-extremespeed-player-on": (state) => aud241bStage(state, "aud242f-extremespeed-player-on", "on", 50, 12, 245, undefined, false, 69),

@@ -117,6 +117,8 @@ describe("audio probe fixtures", () => {
       "aud242f-icebeam-player.json",
       "aud242f-icepunch-player.json",
       "aud242f-swagger-player.json",
+      "aud242g-dreameater-player.json",
+      "aud242g-triattack-player.json",
       "battle-intro-window-off.json",
       "battle-intro-window.json",
       "battle-window-off.json",
