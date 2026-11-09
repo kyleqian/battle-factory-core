@@ -209,6 +209,7 @@ const ABILITY_VITAL_SPIRIT = 72;
 const ABILITY_INSOMNIA = 15;
 /** battleScriptDamagingWeatherOpcode.ts's own established `WEATHER_HAS_EFFECT` precedent (Cloud Nine only; Air Lock is Rayquaza-only and Frontier-absent, docs/screens-weather-ground-truth.md §2). */
 const ABILITY_CLOUD_NINE = 13;
+const ABILITY_AIR_LOCK = 77;
 /** battleScriptStatBuffs.ts's own STAT_SPEED/MAX_STAT_STAGE convention. */
 const STAT_SPEED = 3;
 /** include/constants/moves.h MOVE_NONE; include/constants/battle.h B_ACTION_USE_MOVE. */
@@ -1106,11 +1107,15 @@ type ItemsTickOutcome =
   | TickOutcome
   | Readonly<{ kind: "case-barrier"; state: MachineState; detail: string }>;
 
-/** `WEATHER_HAS_EFFECT` (include/battle_util.h:47), modeled the same as `battleScriptDamagingWeatherOpcode.ts`'s own `battlerCarriesCloudNine` precedent. */
+/**
+ * `WEATHER_HAS_EFFECT` (include/battle_util.h:47): `ABILITY_ON_FIELD` is `ABILITYEFFECT_CHECK_ON_FIELD`
+ * (`battle_util.c:3140-3149`), which counts a battler only while `hp != 0`, for Cloud Nine and Air Lock.
+ */
 export function weatherHasEffect(rulesContext: BattleScriptRulesContext): boolean {
   const count = rulesContext.battleTopology.battlersCount;
   for (let i = 0; i < count; i += 1) {
-    if (rulesContext.battlers[i]!.ability === ABILITY_CLOUD_NINE) return false;
+    const battler = rulesContext.battlers[i]!;
+    if (battler.hp !== 0 && (battler.ability === ABILITY_CLOUD_NINE || battler.ability === ABILITY_AIR_LOCK)) return false;
   }
   return true;
 }
@@ -2116,8 +2121,7 @@ export function movePriority(moveId: number): number {
 
 /**
  * `GetWhoStrikesFirst`'s WEATHER_HAS_EFFECT branch (`battle_main.c:4604-4622`).
- * The shared Frontier precedent suppresses weather for Cloud Nine; Air Lock
- * has no legal Frontier carrier.
+ * Weather is suppressed by a live Cloud Nine / Air Lock battler.
  */
 export function turnOrderWeather(rulesContext: BattleScriptRulesContext): WeatherState {
   if (!weatherHasEffect(rulesContext)) return {};

@@ -6,6 +6,7 @@
  * reimplement the accuracy math.
  */
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import { abilityNameOrNull } from "./abilityNameById.ts";
 import {
   recordBattleScriptAbilityReveal,
   recordBattleScriptItemEffectReveal,
@@ -152,12 +153,6 @@ const ABILITY_SHELL_ARMOR = 75;
 const ABILITY_VOLT_ABSORB = 10;
 const ABILITY_WATER_ABSORB = 11;
 const ABILITY_FLASH_FIRE = 18;
-const ABILITY_NAME_BY_ID: Readonly<Record<number, string>> = Object.freeze({
-  8: "ABILITY_SAND_VEIL",
-  14: "ABILITY_COMPOUND_EYES",
-  55: "ABILITY_HUSTLE",
-  62: "ABILITY_GUTS",
-});
 
 const SPECIES_FARFETCHD = 83;
 const SPECIES_CHANSEY = 113;
@@ -1236,8 +1231,8 @@ export const accuracycheckOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptR
     attackerAccuracyStage: attackerBattler.statStages[6],
     targetEvasionStage: targetBattler.statStages[7],
     targetHasForesight: (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0,
-    attackerAbility: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
-    targetAbility: ABILITY_NAME_BY_ID[targetBattler.ability] ?? null,
+    attackerAbility: abilityNameOrNull(attackerBattler.ability),
+    targetAbility: abilityNameOrNull(targetBattler.ability),
     isSandstorm: effectiveWeather && (rulesContext.weather & ((1 << 3) | (1 << 4))) !== 0,
     moveType,
     targetHoldEffect,
@@ -1555,7 +1550,7 @@ export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
       hasStatus1: attackerBattler.status1 !== 0,
       hp: attackerBattler.hp,
       maxHP: attackerBattler.maxHP,
-      ability: ABILITY_NAME_BY_ID[attackerBattler.ability] ?? null,
+      ability: abilityNameOrNull(attackerBattler.ability),
       species: attackerBattler.species,
       holdEffect: HOLD_EFFECT_NAME_BY_ID[attackerHoldEffectId] ?? null,
       holdEffectParam: resolveBattleScriptBattlerHoldEffectParam(rulesContext, attacker),
@@ -1569,7 +1564,7 @@ export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
       types: targetBattler.types,
       statStages: toDamageCalcStatStages(targetBattler),
       hasStatus1: targetBattler.status1 !== 0,
-      ability: ABILITY_NAME_BY_ID[targetBattler.ability] ?? null,
+      ability: abilityNameOrNull(targetBattler.ability),
       species: targetBattler.species,
       holdEffect: HOLD_EFFECT_NAME_BY_ID[defenderHoldEffectId] ?? null,
     },
@@ -1580,7 +1575,7 @@ export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
     weather: rulesContext.weather,
     weatherHasEffect: weatherHasEffectForBaseDamage(rulesContext),
     currentMove: rulesContext.currentMove,
-    activeBattlerAbilities: activeBattlers.map((b) => ABILITY_NAME_BY_ID[b.ability] ?? null),
+    activeBattlerAbilities: activeBattlers.map((b) => abilityNameOrNull(b.ability)),
     isFrontierBattle: (rulesContext.battleTopology.battleTypeFlags & BATTLE_TYPE_FRONTIER) !== 0,
     flashFireBoosted: attackerBattler.flashFireBoosted === 1,
   });

@@ -25,6 +25,7 @@
  * byte-lvalue universe `battleScriptSetByte.ts` owns -- see each handler's own
  * doc comment for the exact spellings this now covers vs. still rejects.
  */
+import { abilityPresentOnField } from "./battleScriptJumpifabilitypresentOpcode.ts";
 import {
   resolveBattleScriptLabel,
   type BattleScriptProgram,
@@ -63,6 +64,7 @@ const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
 const B_WEATHER_HAIL = 1 << 7;
 /** include/abilities.h. */
 const ABILITY_CLOUD_NINE = 13;
+const ABILITY_AIR_LOCK = 77;
 const ABILITY_SAND_VEIL = 8;
 
 function requireAttacker(rules: BattleScriptRulesContext): 0 | 1 | 2 | 3 {
@@ -174,20 +176,15 @@ function createCopyarraywithindexHandler(): BattleScriptOpcodeHandler<BattleScri
 /**
  * `Cmd_weatherdamage` (`battle_script_commands.c:7602-7649`, zero `Random(`
  * call sites). `WEATHER_HAS_EFFECT` (`include/battle_util.h:47`) is modeled
- * as "no battler on the field carries Cloud Nine" -- Air Lock is
- * Rayquaza-only and confirmed absent from the Frontier catalog
- * (docs/screens-weather-ground-truth.md §2), so it is not checked here.
+ * as ABILITY_ON_FIELD for Cloud Nine / Air Lock (`battle_util.c:3140-3149`:
+ * live battlers only, hp != 0).
  * Sandstorm immunity: ROCK/GROUND/STEEL typing, ABILITY_SAND_VEIL, or
  * underground/underwater. Hail immunity: ICE typing or underground/
  * underwater (no ability exemption exists in Gen 3). Both branches floor
  * `maxHP/16`, minimum 1 -- doc §3b/§3e's live-verified formula.
  */
 function battlerCarriesCloudNine(rules: BattleScriptRulesContext): boolean {
-  const count = rules.battleTopology.battlersCount;
-  for (let i = 0; i < count; i += 1) {
-    if (rules.battlers[i]!.ability === ABILITY_CLOUD_NINE) return true;
-  }
-  return false;
+  return abilityPresentOnField(rules, ABILITY_CLOUD_NINE) || abilityPresentOnField(rules, ABILITY_AIR_LOCK);
 }
 
 function isSandstormImmune(battler: BattleScriptRulesContext["battlers"][number]): boolean {

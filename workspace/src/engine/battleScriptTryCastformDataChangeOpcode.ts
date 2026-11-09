@@ -26,12 +26,9 @@
  *     for them is "advance."
  *   - `:2401-2404` -- a live Forecast Castform with weather nullified
  *     (`WEATHER_HAS_EFFECT` false) and not already `TYPE_NORMAL` reverts to
- *     Normal. `WEATHER_HAS_EFFECT` (`include/battle_util.h:47`) is modeled
- *     the same way `battleScriptDamagingWeatherOpcode.ts`'s
- *     `battlerCarriesCloudNine` already established: "no battler on the
- *     field carries Cloud Nine" -- Air Lock is Rayquaza-only and confirmed
- *     absent from the Frontier catalog (docs/screens-weather-ground-truth.md
- *     §2), so it is not checked here.
+ *     Normal. `WEATHER_HAS_EFFECT` (`include/battle_util.h:47`) is
+ *     ABILITY_ON_FIELD for Cloud Nine / Air Lock (`battle_util.c:3140-3149`,
+ *     live battlers only, hp != 0).
  *   - `:2406-2407` -- weather nullified and already Normal: 0, no change.
  *   - `:2408-2427` -- weather has effect: a cascading re-derivation against
  *     the active weather bit (none/Sandstorm -> Normal, Sun -> Fire,
@@ -59,6 +56,7 @@ import {
 } from "./battleScriptMachine.ts";
 import { resolveBattleScriptLabel, type BattleScriptProgram } from "./battleScriptProgram.ts";
 import { withBattler } from "./battleScriptHitChainOpcode.ts";
+import { abilityPresentOnField } from "./battleScriptJumpifabilitypresentOpcode.ts";
 import type { BattleScriptControllerIdlePort } from "./battleScriptSourceCommands.ts";
 import type {
   BattleScriptRulesBattlerState,
@@ -72,6 +70,7 @@ const SPECIES_CASTFORM = 385;
 const ABILITY_FORECAST = 59;
 /** include/constants/abilities.h -- battleScriptDamagingWeatherOpcode.ts's own WEATHER_HAS_EFFECT modeling. */
 const ABILITY_CLOUD_NINE = 13;
+const ABILITY_AIR_LOCK = 77;
 /** include/constants/battle.h:333. */
 const CASTFORM_SUBSTITUTE = 1 << 7;
 
@@ -102,11 +101,7 @@ function isBattlerOfType(battler: BattleScriptRulesBattlerState, type: string): 
 
 /** include/battle_util.h:47's WEATHER_HAS_EFFECT, negated (true == some battler nullifies weather). */
 function weatherIsNullified(rules: BattleScriptRulesContext): boolean {
-  const count = rules.battleTopology.battlersCount;
-  for (let i = 0; i < count; i += 1) {
-    if (rules.battlers[i]!.ability === ABILITY_CLOUD_NINE) return true;
-  }
-  return false;
+  return abilityPresentOnField(rules, ABILITY_CLOUD_NINE) || abilityPresentOnField(rules, ABILITY_AIR_LOCK);
 }
 
 export interface CastformTypeChange {

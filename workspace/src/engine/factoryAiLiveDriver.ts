@@ -17,7 +17,7 @@
  * functions without changing the driver/view ABI.
  */
 
-import abilityItemHooksData from "../data/gen/ability-item-hooks.json" with { type: "json" };
+import { ABILITY_NAME_BY_ID } from "./abilityNameById.ts";
 import {
   createBattleCommandRequest,
   submitBattleDecision,
@@ -84,11 +84,6 @@ const B_WEATHER_SANDSTORM = (1 << 3) | (1 << 4);
 const B_WEATHER_SUN = (1 << 5) | (1 << 6);
 const B_WEATHER_HAIL = 1 << 7;
 
-type SymbolIdRow = Readonly<{ name: string; id: number }>;
-const ABILITY_NAME_BY_ID = new Map(
-  (abilityItemHooksData as { universes: { abilities: SymbolIdRow[] } })
-    .universes.abilities.map((row) => [row.id, row.name]),
-);
 
 export type FactoryAiBattleHistory = Readonly<{
   usedMoves: readonly [

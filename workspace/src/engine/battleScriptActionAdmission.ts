@@ -1,4 +1,5 @@
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import { abilityNameOrNull } from "./abilityNameById.ts";
 import {
   BATTLE_SCRIPT_HOLD_EFFECT_CHOICE_BAND,
   resolveBattleScriptBattlerHoldEffect,
@@ -2974,6 +2975,12 @@ export function advanceBattleScriptAttackCancelerConfused(
           throw new Error("confusionDamage level, attack, and defense must be nonzero");
         }
         nextTarget = attacker;
+        // battle_util.c:2157-2175 passes the live record as both attacker and defender, so
+        // pokemon.c:3158-3213 sees its real ability and status1; a staged override only carries Guts.
+        const confusionAbility = sourceBattler.confusionDamage === undefined
+          ? abilityNameOrNull(sourceBattler.ability)
+          : (damage.hasGuts ? "ABILITY_GUTS" : null);
+        const confusionHasStatus1 = sourceBattler.confusionDamage === undefined && sourceBattler.status1 !== 0;
         nextDamage = calculateBaseDamage({
           attacker: {
             level: damage.level,
@@ -2988,7 +2995,8 @@ export function advanceBattleScriptAttackCancelerConfused(
               def: damage.defenseStage,
             },
             isBurned: damage.isBurned,
-            ability: damage.hasGuts ? "ABILITY_GUTS" : null,
+            hasStatus1: confusionHasStatus1,
+            ability: confusionAbility,
           },
           defender: {
             level: damage.level,
@@ -3002,6 +3010,8 @@ export function advanceBattleScriptAttackCancelerConfused(
               atk: damage.attackStage,
               def: damage.defenseStage,
             },
+            hasStatus1: confusionHasStatus1,
+            ability: confusionAbility,
           },
           movePower: 40,
           moveType: "TYPE_NORMAL",
