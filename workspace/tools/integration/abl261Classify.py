@@ -7,7 +7,7 @@ import glob, json, sys
 from collections import Counter
 sha = sys.argv[1]
 BASE = ".integration/validation/sv-20261108/sub260/census"; EV = ".integration/evidence/abl261"
-ABILITY = {13: "CLOUD_NINE", 37: "HUGE_POWER", 74: "PURE_POWER", 47: "THICK_FAT", 57: "PLUS", 58: "MINUS", 63: "MARVEL_SCALE", 65: "OVERGROW", 66: "BLAZE", 67: "TORRENT", 68: "SWARM", 77: "AIR_LOCK"}
+ABILITY = {13: "CLOUD_NINE", 55: "HUSTLE", 62: "GUTS", 37: "HUGE_POWER", 74: "PURE_POWER", 47: "THICK_FAT", 57: "PLUS", 58: "MINUS", 63: "MARVEL_SCALE", 65: "OVERGROW", 66: "BLAZE", 67: "TORRENT", 68: "SWARM", 77: "AIR_LOCK"}
 def load(paths):
     d = {}
     for p in paths:
