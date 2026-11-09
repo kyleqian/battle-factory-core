@@ -13,7 +13,7 @@
 
 import { describe, expect, it } from "vitest";
 import { createInitialState, render, type EngineState } from "../src/engine/core.ts";
-import { openSummaryScreen, requestSummaryScreenExit, advanceSummaryScreen, type SummaryScreenState } from "../src/engine/summaryScreen.ts";
+import { openSummaryScreen, requestSummaryScreenExit, advanceSummaryScreen, SUMMARY_INPUT_READY_TICKS, type SummaryScreenState } from "../src/engine/summaryScreen.ts";
 import { renderFactoryDraftScreenFaded } from "../src/engine/factoryDraftScreen.ts";
 import { renderSummaryInfoPageFaded } from "../src/engine/summaryInfoPage.ts";
 import { bgFadeY, objFadeY, ENTRY_FADE_OUT, EXIT_FADE_OUT, FADE_IN } from "../src/engine/paletteFade.ts";
@@ -61,7 +61,7 @@ describe("render() dispatch: entry (toSummary) transition", () => {
 
 describe("render() dispatch: exit (toDraft, B on the settled Info page) transition", () => {
   function afterB(slot: number, extraTicks: number): EngineState {
-    const settled = run(openSummaryScreen(slot), 59);
+    const settled = run(openSummaryScreen(slot), SUMMARY_INPUT_READY_TICKS);
     const exiting = requestSummaryScreenExit(settled);
     return withSummary(run(exiting, extraTicks));
   }
@@ -98,7 +98,7 @@ describe("render() dispatch: exit (toDraft, B on the settled Info page) transiti
   });
 
   it("settles back to the plain (unfaded) draft screen render, matching the pre-entry screen", () => {
-    const settled = withSummary(run(requestSummaryScreenExit(run(openSummaryScreen(1), 59)), 53));
+    const settled = withSummary(run(requestSummaryScreenExit(run(openSummaryScreen(1), SUMMARY_INPUT_READY_TICKS)), 53));
     expect(settled.summaryScreen.transition).toBeNull();
     expect(render(settled)).toEqual(renderFactoryDraftScreenFaded(settled.draftScreen, 0, 0));
   });

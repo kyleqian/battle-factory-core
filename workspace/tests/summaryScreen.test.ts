@@ -15,6 +15,8 @@ import {
   requestSummaryMoveSelectionChange,
   requestSummaryScreenExit,
   requestSummaryPageChange,
+  SUMMARY_FADE_FINISH_TICKS,
+  SUMMARY_INPUT_READY_TICKS,
   SUMMARY_MOVE_SELECT_CLOSE_TICKS,
   SUMMARY_MOVE_SELECT_INSTALL_TICKS,
   SUMMARY_PAGE_TRANSITION_TICKS,
@@ -90,11 +92,26 @@ describe("summaryScreen: entry (A on SUMMARY)", () => {
     expect(state.onInfoPage).toBe(true);
     expect(state.selectedSlot).toBe(1);
   });
+
+  it("ignores every key until P+63: gPaletteFade.active outlives the visible fade-in by SUMMARY_FADE_FINISH_TICKS", () => {
+    expect(SUMMARY_INPUT_READY_TICKS).toBe(63);
+    const visible = run(openSummaryScreen(1), 59);
+    expect(visible.inputLockTicks).toBe(SUMMARY_FADE_FINISH_TICKS);
+    for (let lag = 0; lag < SUMMARY_FADE_FINISH_TICKS; lag += 1) {
+      const state = run(openSummaryScreen(1), 59 + lag);
+      expect(requestSummaryScreenExit(state)).toBe(state);
+      expect(requestSummaryMonChange(state, "down")).toBe(state);
+      expect(requestSummaryPageChange(state, "right")).toBe(state);
+    }
+    const ready = run(openSummaryScreen(1), SUMMARY_INPUT_READY_TICKS);
+    expect(ready.inputLockTicks).toBe(0);
+    expect(requestSummaryScreenExit(ready).transition).toMatchObject({ direction: "toDraft", phase: "fadingOut" });
+  });
 });
 
 describe("summaryScreen: generic page navigation", () => {
   function settled(slot = 0): SummaryScreenState {
-    return run(openSummaryScreen(slot), 59);
+    return run(openSummaryScreen(slot), SUMMARY_INPUT_READY_TICKS);
   }
 
   it("RIGHT immediately transfers page ownership while preserving the selected slot", () => {
@@ -389,7 +406,7 @@ describe("summaryScreen: generic page navigation", () => {
 
 describe("summaryScreen: LOCK_MOVES Battle Moves selector", () => {
   function battleMoves(slot = 0): SummaryScreenState {
-    const info = run(openSummaryScreen(slot), 59);
+    const info = run(openSummaryScreen(slot), SUMMARY_INPUT_READY_TICKS);
     const skills = run(
       requestSummaryPageChange(info, "right"),
       SUMMARY_PAGE_TRANSITION_TICKS,
@@ -507,7 +524,7 @@ describe("summaryScreen: LOCK_MOVES Battle Moves selector", () => {
 
 describe("summaryScreen: shared LOCK_MOVES Contest Moves selector", () => {
   function contestMoves(slot = 0): SummaryScreenState {
-    let page = run(openSummaryScreen(slot), 59);
+    let page = run(openSummaryScreen(slot), SUMMARY_INPUT_READY_TICKS);
     for (let i = 0; i < 3; i += 1) {
       page = run(
         requestSummaryPageChange(page, "right"),
@@ -595,7 +612,7 @@ describe("summaryScreen: shared LOCK_MOVES Contest Moves selector", () => {
 
 describe("summaryScreen: slot-relative Info-page mon switching", () => {
   function settled(slot = 0): SummaryScreenState {
-    return run(openSummaryScreen(slot), 59);
+    return run(openSummaryScreen(slot), SUMMARY_INPUT_READY_TICKS);
   }
 
   it("DOWN transfers selected-slot ownership to the relative destination and records direction", () => {
@@ -801,7 +818,7 @@ describe("summaryScreen: slot-relative Info-page mon switching", () => {
 
 describe("summaryScreen: exit (B on the settled Info page)", () => {
   function settledOnInfoPage(slot: number): SummaryScreenState {
-    return run(openSummaryScreen(slot), 59);
+    return run(openSummaryScreen(slot), SUMMARY_INPUT_READY_TICKS);
   }
 
   it("B is a no-op while a transition is still in flight", () => {
@@ -841,7 +858,7 @@ describe("summaryScreen: exit (B on the settled Info page)", () => {
         mode: "SUMMARY_MODE_NORMAL",
         returnTarget: "factorySwap",
       }),
-      59,
+      SUMMARY_INPUT_READY_TICKS,
     );
     const afterB = requestSummaryScreenExit(opened);
     const before = run(afterB, 57);

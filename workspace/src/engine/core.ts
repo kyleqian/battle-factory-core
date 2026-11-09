@@ -1407,15 +1407,11 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         nextFactorySwap = null;
       }
       if (nextFactorySwap?.controller.phase === "summaryFade") {
-        if (
-          summaryScreen.onInfoPage &&
-          nextFactorySwap.phaseElapsed >= 63 &&
-          (newKeys.has("B") || newKeys.has("A"))
-        ) {
+        if (summaryScreen.onInfoPage && (newKeys.has("B") || newKeys.has("A"))) {
           const summaryBefore = summaryScreen;
           summaryScreen = requestSummaryScreenExit(summaryScreen);
           scheduleSummaryStepSounds(summaryBefore, summaryScreen, draftSummarySoundContext(state.draftScreen));
-          nextFactorySwap = beginFactorySwapSummaryReturn(nextFactorySwap);
+          if (summaryScreen !== summaryBefore) nextFactorySwap = beginFactorySwapSummaryReturn(nextFactorySwap);
         }
       } else if (
         nextFactorySwap !== null &&

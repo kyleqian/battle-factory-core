@@ -35,3 +35,16 @@ describe("draft summary return cursor (gLastViewedMonIndex)", () => {
     expect(replay(noChange).draftScreen.cursorPos).toBe(0);
   });
 });
+
+describe("summary input readiness (open + 63)", () => {
+  // B pressed k frames after the accepted A: the ROM ignores it before P+63 (gPaletteFade.active), closes the summary from P+63.
+  for (const [k, closes] of [[60, false], [62, false], [63, true]] as const) {
+    it(`B at open+${k} ${closes ? "closes" : "is ignored"}`, () => {
+      const { segments } = trace(`sum259-input-ready-b${k}`);
+      const bFrame = 43 + k;
+      const state = replay(segments, bFrame + 1);
+      expect(state.summaryScreen.transition?.direction === "toDraft").toBe(closes);
+      expect(state.summaryScreen.isOpen).toBe(!closes);
+    });
+  }
+});

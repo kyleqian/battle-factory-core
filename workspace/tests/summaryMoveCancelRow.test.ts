@@ -22,6 +22,7 @@ import {
   summaryMovePanelPresentation,
   summaryMoveSelectorRow,
   type SummaryScreenState,
+  SUMMARY_INPUT_READY_TICKS,
 } from "../src/engine/summaryScreen.ts";
 import { renderSummaryBattleMoveSelectPage } from "../src/engine/summaryInfoPage.ts";
 import { ANCHOR_DRAFT_SCREEN_STATE } from "../src/engine/factoryDraftScreen.ts";
@@ -33,7 +34,7 @@ function run(state: SummaryScreenState, ticks: number): SummaryScreenState {
 }
 
 function movesPage(page: "battleMoves" | "contestMoves"): SummaryScreenState {
-  let state = run(openSummaryScreen(0), 59);
+  let state = run(openSummaryScreen(0), SUMMARY_INPUT_READY_TICKS);
   const turns = page === "battleMoves" ? 2 : 3;
   for (let i = 0; i < turns; i += 1) {
     state = run(requestSummaryPageChange(state, "right"), SUMMARY_PAGE_TRANSITION_TICKS);

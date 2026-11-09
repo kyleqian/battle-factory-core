@@ -99,7 +99,7 @@ const settleSummary = <S extends { summary: SummaryScreenState | null }>(
   state: S,
 ): S => {
   let next = state;
-  for (let i = 0; i < 200 && !(next.summary?.isOpen && next.summary.transition === null && next.summary.monTransition === null && next.summary.pageTransition === null); i += 1) {
+  for (let i = 0; i < 200 && !(next.summary?.isOpen && next.summary.transition === null && next.summary.inputLockTicks === 0 && next.summary.monTransition === null && next.summary.pageTransition === null); i += 1) {
     next = step(next, new Set());
   }
   if (!next.summary?.isOpen) throw new Error("summary never settled");
@@ -392,7 +392,7 @@ describe("sum241: SUMMARY from the forced menu", () => {
 describe("sum241: the summary's mon bound and ailment", () => {
   it("clamps the mon change at the given maxSlot", () => {
     const base: SummaryScreenState = {
-      transition: null, isOpen: true, onInfoPage: true, pageTransition: null, monTransition: null, moveSelect: null,
+      transition: null, isOpen: true, onInfoPage: true, pageTransition: null, monTransition: null, moveSelect: null, inputLockTicks: 0,
       openElapsed: 70, monAnimClock: null, selectedSlot: BATTLE_PARTY_SUMMARY_MAX_SLOT, page: "info",
       mode: "SUMMARY_MODE_LOCK_MOVES", returnTarget: "battleParty",
     };

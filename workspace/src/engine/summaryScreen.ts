@@ -21,6 +21,18 @@ import {
 } from "./paletteFade.ts";
 import { playSelectSe } from "./screenSounds.ts";
 
+/**
+ * pokemon_summary_screen.c Task_HandleInput (:1534) and SpriteCB_Pokemon (:3998) wait for !gPaletteFade.active. palette.c
+ * UpdateNormalPaletteFade clears `active` only after the last blend: that call sets softwareFadeFinishing, then
+ * IsSoftwarePaletteFadeFinishing spends 5 more UpdatePaletteFade calls (counter 0..4) before `active = FALSE`, and the task
+ * (RunTasks precedes UpdatePaletteFade in MainCB2) sees it the frame after. FADE_IN_TICKS ends at the visible OBJ settle, so
+ * the keys stay ignored this many more ticks; ROM measured: input and the open cry both at P+63 = 20 + 24 + 15 + 4.
+ */
+export const SUMMARY_FADE_FINISH_TICKS = 4;
+/** Ticks from the accepted A (open) to the first tick Task_HandleInput reads keys: P+63. */
+export const SUMMARY_INPUT_READY_TICKS =
+  ENTRY_FADE_OUT_TICKS + ENTRY_BLACK_HOLD_TICKS + FADE_IN_TICKS + SUMMARY_FADE_FINISH_TICKS;
+
 export type SummaryPhase = "fadingOut" | "black" | "fadingIn";
 
 /** SUMMARY_MODE_LOCK_MOVES's reachable pages (pokemon_summary_screen.c:1121). */
@@ -254,6 +266,11 @@ export interface SummaryScreenState {
   monTransition: SummaryMonTransition | null;
   /** Non-null while the Moves-page selector or its close slide owns presentation. */
   moveSelect: SummaryMoveSelectState | null;
+  /**
+   * Ticks of gPaletteFade.active still to run after the entry fade-in is visibly done (SUMMARY_FADE_FINISH_TICKS);
+   * Task_HandleInput ignores every key until it reaches 0.
+   */
+  inputLockTicks: number;
   /** Ticks since the entry fade settled; presentation-only, page changes do not reset it. */
   openElapsed: number;
   /** Replacement-local front-sprite clock; null before the first mon switch. */
@@ -274,6 +291,7 @@ export const CLOSED_SUMMARY_SCREEN_STATE: SummaryScreenState = {
   pageTransition: null,
   monTransition: null,
   moveSelect: null,
+  inputLockTicks: 0,
   openElapsed: 0,
   monAnimClock: null,
   selectedSlot: 0,
@@ -305,6 +323,7 @@ export function openSummaryScreen(
     pageTransition: null,
     monTransition: null,
     moveSelect: null,
+    inputLockTicks: 0,
     openElapsed: 0,
     monAnimClock: null,
     selectedSlot: cursorPos,
@@ -316,7 +335,7 @@ export function openSummaryScreen(
 
 /** pokemon_summary_screen.c's close path, triggered by B on the (unlocked, per SUMMARY_MODE_LOCK_MOVES) Info page. */
 export function requestSummaryScreenExit(state: SummaryScreenState): SummaryScreenState {
-  if (!state.isOpen || state.pageTransition || state.monTransition || state.moveSelect) return state;
+  if (!state.isOpen || state.inputLockTicks > 0 || state.pageTransition || state.monTransition || state.moveSelect) return state;
   playSelectSe(); // pokemon_summary_screen.c:1559 / :1572
   return {
     ...state,
@@ -333,7 +352,7 @@ export function requestSummaryPageChange(
   state: SummaryScreenState,
   direction: SummaryPageDirection,
 ): SummaryScreenState {
-  if (!state.isOpen || state.transition || state.pageTransition || state.monTransition || state.moveSelect) return state;
+  if (!state.isOpen || state.inputLockTicks > 0 || state.transition || state.pageTransition || state.monTransition || state.moveSelect) return state;
   const fromIndex = PAGE_ORDER.indexOf(state.page);
   const delta = direction === "right" ? 1 : -1;
   const toPage = PAGE_ORDER[fromIndex + delta];
@@ -368,6 +387,7 @@ export function requestSummaryMonChange(
 ): SummaryScreenState {
   if (
     !state.isOpen ||
+    state.inputLockTicks > 0 ||
     state.transition ||
     state.pageTransition ||
     state.monTransition ||
@@ -395,6 +415,7 @@ export function requestSummaryMonChange(
 export function requestSummaryMoveSelect(state: SummaryScreenState): SummaryScreenState {
   if (
     !state.isOpen ||
+    state.inputLockTicks > 0 ||
     state.transition ||
     state.pageTransition ||
     state.monTransition ||
@@ -583,6 +604,7 @@ export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenSt
     return state.isOpen
       ? {
           ...state,
+          inputLockTicks: Math.max(0, state.inputLockTicks - 1),
           openElapsed: state.openElapsed + 1,
           monAnimClock: state.monAnimClock === null ? null : state.monAnimClock + 1,
         }
@@ -619,6 +641,7 @@ export function advanceSummaryScreen(state: SummaryScreenState): SummaryScreenSt
       transition: null,
       isOpen,
       onInfoPage: isOpen && state.page === "info",
+      inputLockTicks: isOpen ? SUMMARY_FADE_FINISH_TICKS : 0,
     };
   }
   return { ...state, transition: { ...t, elapsed } };
