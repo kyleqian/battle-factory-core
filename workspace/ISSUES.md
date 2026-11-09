@@ -13,6 +13,22 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #203 — AI CHECK_BAD_MOVE never sees the user's usable party count (aud243d, 2026-11-09)
+
+`runCbmBatonPass` (`src/engine/factoryAiCheckBadMove.ts` ~3098) reads `input.attacker.usablePartyMons ?? 0`; nothing in `src/` fills
+`usablePartyMons` on the live AI view (`factoryAiDecisionPolicy.ts` ~610 says the live driver does not model the party), so Baton Pass
+(and the Explosion / Memento branches, ~2300 / ~2563) always score -10. ROM: `AI_CBM_BatonPass` (`data/battle_ai_scripts.s:485-488`) with
+`Cmd_count_usable_party_mons` (`battle_ai_script_commands.c:1292-1334`). Census seed 2 ON (aud243d): engine tie pool 3 moves vs the ROM's 4,
+different turn-1 move. Fix: compute the count per side on the live view.
+
+## #202 — Damage calc ignores most attacker / defender abilities (aud243d, 2026-11-09)
+
+`ABILITY_NAME_BY_ID` in `src/engine/battleScriptHitChainOpcode.ts:155` maps only ids 8 / 14 / 55 / 62 (Sand Veil, Compound Eyes,
+Hustle, Guts), and the damage-calc / accuracy inputs (~1239, ~1558, ~1572, ~1583) pass `null` for every other id. So Huge Power / Pure
+Power, Thick Fat, Plus / Minus, Marvel Scale and the Overgrow / Blaze / Torrent / Swarm pinch boost (`pokemon.c:3219-3226`,
+`damageCalc.ts` ~310-405) never apply; Cloud Nine / Air Lock in `activeBattlerAbilities` likely too. Census seeds 6 and 8 ON (aud243d
+ROM driver): ROM 108 vs engine 72 damage (Blaze). A scratch map with the missing ids made both seeds match the ROM to battle end.
+
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 
 `docs/obr251-opponent-party-summary.md`: bar slide / hold / fade / SE are ROM-timed and the bar frames 527..546 are exact
