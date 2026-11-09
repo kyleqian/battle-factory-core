@@ -1035,6 +1035,8 @@ export function factorySwapDuplicateReturnMonPicVisual(
 /** Accepted normal-summary B: CloseSummaryScreen will call CB2_InitSwapScreen. */
 export function beginFactorySwapSummaryReturn(
   state: FactorySwapPresentationState,
+  /** gLastViewedMonIndex (pokemon_summary_screen.c:1519): CB2_InitSwapScreen restores cursorPos from it (battle_factory_screen.c:3353). */
+  lastViewedSlot: 0 | 1 | 2 = state.controller.cursor as 0 | 1 | 2,
 ): FactorySwapPresentationState {
   if (
     state.controller.phase !== "summaryFade" ||
@@ -1046,7 +1048,12 @@ export function beginFactorySwapSummaryReturn(
       ...state.controller,
       phase: "summaryReturn",
       inputReady: false,
+      cursor: lastViewedSlot,
+      infoCursor: lastViewedSlot,
+      displayCursor: lastViewedSlot,
+      arrowCursor: lastViewedSlot,
     },
+    selectedBallIndex: lastViewedSlot,
     phaseElapsed: 0,
     summaryCallback: "CloseSummaryScreen",
     summaryReturnClock: 0,

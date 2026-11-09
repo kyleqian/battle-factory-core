@@ -48,3 +48,31 @@ describe("summary input readiness (open + 63)", () => {
     });
   }
 });
+
+describe("swap summary UP / DOWN mon change (3 mons, no wrap)", () => {
+  const swapSegments = (): Segments => {
+    const derived = trace("sum259-swap-summary-mon-change") as unknown as { sourceSegmentCount: number; appendSegments: Segments };
+    const source = JSON.parse(readFileSync(new URL("../tools/compare/traces-groundtruth/battle1-swapyes-a.json", import.meta.url), "utf8")) as { segments: Segments };
+    return [...source.segments.slice(0, derived.sourceSegmentCount), ...derived.appendSegments];
+  };
+  const run = (stopAfter = Infinity): EngineState => {
+    let state = createInitialState({ appRoute: "canonical-recorded", battleScene: "off" });
+    for (const advance of traceAdvances(swapSegments())) {
+      if (advance.frame > stopAfter) break;
+      state = tick(state, advance.buttons);
+    }
+    return state;
+  };
+
+  it("DOWN at open+63 moves the summary slot; DOWN again reaches slot 2; UP, B return on slot 1", () => {
+    // A at 29760; DOWN at 29760 + 63 = 29823; second DOWN +36; UP +36.
+    expect(run(29822).summaryScreen.selectedSlot).toBe(0);
+    expect(run(29824).summaryScreen.monTransition).not.toBeNull();
+    expect(run(29860).summaryScreen.selectedSlot).toBe(2);
+    expect(run(29896).summaryScreen.selectedSlot).toBe(1);
+    const returned = run();
+    expect(returned.summaryScreen.isOpen).toBe(false);
+    expect(returned.factorySwap?.controller.cursor).toBe(1);
+    expect(returned.factorySwap?.selectedBallIndex).toBe(1);
+  });
+});

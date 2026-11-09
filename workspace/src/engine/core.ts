@@ -1046,6 +1046,9 @@ export function tick(state: EngineState, buttons: ReadonlySet<GbaButton>): Engin
   return next.presentationRng === presentationRng ? next : { ...next, presentationRng };
 }
 
+/** FRONTIER_PARTY_SIZE - 1: battle_factory_screen.c:2404 ShowPokemonSummaryScreen(..., gPlayerParty, cursorPos, FRONTIER_PARTY_SIZE - 1, ...). */
+const FACTORY_SWAP_SUMMARY_MAX_SLOT = 2;
+
 function draftSummarySoundContext(draftScreen: EngineState["draftScreen"]) {
   return { bgm: BGM_DRAFT, monFor: (slot: number) => draftScreen.rentals[slot] };
 }
@@ -1407,12 +1410,17 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
         nextFactorySwap = null;
       }
       if (nextFactorySwap?.controller.phase === "summaryFade") {
-        if (summaryScreen.onInfoPage && (newKeys.has("B") || newKeys.has("A"))) {
-          const summaryBefore = summaryScreen;
+        const summaryBefore = summaryScreen;
+        // Task_HandleInput: UP / DOWN (ChangeSummaryPokemon over gPlayerParty, maxMonIndex FRONTIER_PARTY_SIZE - 1) precede A / B.
+        if (newKeys.has("UP")) summaryScreen = requestSummaryMonChange(summaryScreen, "up", FACTORY_SWAP_SUMMARY_MAX_SLOT);
+        else if (newKeys.has("DOWN")) summaryScreen = requestSummaryMonChange(summaryScreen, "down", FACTORY_SWAP_SUMMARY_MAX_SLOT);
+        else if (summaryScreen.onInfoPage && (newKeys.has("B") || newKeys.has("A"))) {
           summaryScreen = requestSummaryScreenExit(summaryScreen);
-          scheduleSummaryStepSounds(summaryBefore, summaryScreen, draftSummarySoundContext(state.draftScreen));
-          if (summaryScreen !== summaryBefore) nextFactorySwap = beginFactorySwapSummaryReturn(nextFactorySwap);
+          if (summaryScreen !== summaryBefore) {
+            nextFactorySwap = beginFactorySwapSummaryReturn(nextFactorySwap, summaryScreen.selectedSlot as 0 | 1 | 2);
+          }
         }
+        scheduleSummaryStepSounds(summaryBefore, summaryScreen, draftSummarySoundContext(state.draftScreen));
       } else if (
         nextFactorySwap !== null &&
         nextFactorySwap.controller.phase !== "summaryReturn"
