@@ -86,7 +86,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_DRIZZLE | zero-carrier | 0 (0) | 0 | ON_SWITCHIN | 0 | 0 | 2 |
 | ABILITY_SAND_STREAM | zero-carrier | 0 (0) | 10 | ON_SWITCHIN | 0 | 0 | 2 |
 | ABILITY_DROUGHT | zero-carrier | 0 (0) | 0 | ON_SWITCHIN | 0 | 0 | 2 |
-| ABILITY_AIR_LOCK | zero-carrier | 0 (0) | 0 | ON_SWITCHIN | 1 | 0 | 12 |
+| ABILITY_AIR_LOCK | zero-carrier | 0 (0) | 0 | ON_SWITCHIN | 1 | 0 | 18 |
 | ABILITY_ILLUMINATE | no-battle-hooks | 16 (0) | 16 | — | 0 | 0 | 0 |
 | ABILITY_PICKUP | no-battle-hooks | 7 (6) | 7 | — | 0 | 0 | 0 |
 | ABILITY_STENCH | no-battle-hooks | 5 (0) | 5 | — | 0 | 0 | 0 |
