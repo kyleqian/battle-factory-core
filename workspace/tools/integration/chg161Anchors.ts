@@ -6,6 +6,7 @@
 // G = the print's release row - 2). Checked: the charge message's first glyph and the foe's "used" first glyph, relative to it.
 //   node --experimental-strip-types --no-warnings tools/integration/chg161Anchors.ts [--json] [--rows]
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesTypes from "../../src/data/gen/species-types.json" with { type: "json" };
 import { createFactoryFullTurnBattleState, submitFactoryFullTurnDecision } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { projectBattleResolutionCommands } from "../../src/engine/battleResolutionPresentation.ts";

@@ -14,6 +14,7 @@
  * Run: node --experimental-strip-types tools/probe/analyze-turn5-resolve-dispatch-app-series.ts
  */
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createInitialState, tick, type EngineState } from "../../src/engine/core.ts";
 import { traceAdvances } from "../compare/traceReplay.ts";
 import type { Trace } from "../compare/oracleClient.ts";

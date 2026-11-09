@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { writeFileSync } from "node:fs";
 import { createSceneOnMovePresentation } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { curseConfigFor, curseRowsFor, type CurseWindow } from "../compare/curseProduction.ts";
 
 const out: Record<string, { rows: number; sha256: string }> = {};

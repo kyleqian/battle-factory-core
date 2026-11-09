@@ -24,7 +24,7 @@
     "assets": "src/animation/assets/heal-bell.json",
     "assetsSha256": "2ef4094980a7440d9fd171665721bc01aa6d32053cc8522c89dc4432e0adee2c",
     "framebufferVerifier": "tools/compare/healBellFramebuffer.ts",
-    "framebufferVerifierSha256": "0e7b21d9cbdcf3dbe6d505079a1e18ab5e3bb4204b763bf4c8a0b8e60e2b66a9"
+    "framebufferVerifierSha256": "261fde57f5ab95087ee43c2c249153791172b8b7319ab75e4a572e95dc62c7ca"
   },
   "acceptance": {
     "sourceRows": 522,

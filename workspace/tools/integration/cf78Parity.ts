@@ -8,6 +8,7 @@
 //   battle 603 (seed 603, streak 18): the player's CASTFORM in rain (13 live bodies on c68111480).
 //   node --experimental-strip-types --no-warnings tools/integration/cf78Parity.ts [--seed=950] [--streak=13] [--out=file.json]
 import assert from "node:assert/strict";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";

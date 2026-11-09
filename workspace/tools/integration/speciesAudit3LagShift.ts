@@ -1,6 +1,7 @@
 /** speciesAudit3: lag-frame confirmation. For each age, full-frame residual px between live(age) and the retained ROM frame firstFrame+age+delta for delta in -1,0,+1
  *  (a ROM lag frame makes ROM frame f+1 show the animation state live shows at age f). usage: npx vite-node speciesAudit3LagShift.ts <fixture.json> <evidenceRunDir> <firstFrame> <age>... */
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { join, resolve } from "node:path";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";

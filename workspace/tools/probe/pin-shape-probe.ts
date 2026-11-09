@@ -1,4 +1,5 @@
 import { createBattleResolutionPresentation } from "../../src/engine/battleResolutionPresentation.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createBattleCommandPresentation } from "../../src/engine/battleCommandPresentation.ts";
 import { createBattleState, type BattleKernelSemanticEvent } from "../../src/engine/battleDecisionBoundary.ts";
 import { createFactoryFullTurnBattleState } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";

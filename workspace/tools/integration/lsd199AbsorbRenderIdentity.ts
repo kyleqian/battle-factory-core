@@ -2,6 +2,7 @@
 // LOMBRE/ONIX and VENUSAUR/ONIX, as one sha256 per case plus an all-case digest. Run on two trees: equal output = the ordinary Absorb pixels did not move, so the
 // prep9 dense zero-residual proof still describes them.   node --experimental-strip-types --no-warnings tools/integration/lsd199AbsorbRenderIdentity.ts
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createBattleCommandFieldArtView } from "../../src/engine/battleCommandFieldArt.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };

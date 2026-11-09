@@ -2,6 +2,7 @@
  *  [live(age-1) scanlines 0..N-1] + [live(age) scanlines N..159] for every N in 0..160; prints the N values that give 0 px (N=0 is the plain row compare).
  *  usage: npx vite-node issue151Tear.ts <fixture.json> <evidenceRunDir> <startFrame> <age>... */
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { join, resolve } from "node:path";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";

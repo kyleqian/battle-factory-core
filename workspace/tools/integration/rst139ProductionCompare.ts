@@ -11,6 +11,7 @@
 // fieldArt.opponent.origin (drawBattle2ActionMenuWindow), so the ordinary render stands for it in the opponent rect.
 //   node --experimental-strip-types --no-warnings tools/integration/rst139ProductionCompare.ts <raw-dir> <out.json>
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";

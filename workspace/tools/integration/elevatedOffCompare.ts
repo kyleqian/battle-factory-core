@@ -4,6 +4,7 @@
 // copy (EP_PATCHED=src/engine/battleScene.patched.ts). A frame is "field-like" when one of the two renderers matches the ROM exactly.
 //   node --experimental-strip-types tools/integration/elevatedOffCompare.ts <rgb-dir> <fixture.json> [out.json]
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";
 import { renderBattleResolutionSceneOffView } from "../../src/engine/battleScene.ts";
 

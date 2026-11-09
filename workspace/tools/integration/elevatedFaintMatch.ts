@@ -3,6 +3,7 @@
 // the matching candidates per run of identical results (opponent-sprite window x136-215 y0-72).
 //   node --experimental-strip-types tools/integration/elevatedFaintMatch.ts <rgb-dir> <fixture.json (same opponent species)>
 import { readFileSync, readdirSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 const { renderBattleResolutionLiveView } = await import("../../src/engine/battleScene.ts");
 const { liveView } = await import("./liveAdapterFramebuffer.ts");
 const [dir, fixture] = process.argv.slice(2);

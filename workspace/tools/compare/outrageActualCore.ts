@@ -11,6 +11,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { outrageAtAge } from "../../src/animation/outrage.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import {
   outrageConfigFor,

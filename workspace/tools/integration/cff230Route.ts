@@ -5,6 +5,7 @@ import {
   advanceFactoryRoundBattleCommand, advanceFactoryRoundBattleResolution, advanceFactoryRoundBattleStartIntro,
   beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createBattleResolutionPresentationRenderView, liveMoveRandom2PlanContextAt } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createPresentationRngSession } from "../../src/engine/presentationRngHost.ts";

@@ -136,7 +136,7 @@ export default defineConfig(async ({ command, mode }) => ({
     // the suite's ~200 `mkdtempSync(join(tmpdir(), ...))` sites stop leaking
     // scratch directories that macOS only sweeps on reboot. See the file
     // header for the measurement behind this.
-    setupFiles: ["tests/setup/scratchSandbox.ts"],
+    setupFiles: ["tests/setup/scratchSandbox.ts", "tests/setup/monPicPixels.ts"],
     globalSetup: ["tests/setup/scratchSandboxGlobal.ts"],
     // See resolveMaxWorkers() above — solo runs stay full-width, concurrent
     // ones back off so 4 sessions cannot each claim the whole machine.

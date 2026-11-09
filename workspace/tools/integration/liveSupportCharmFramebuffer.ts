@@ -5,6 +5,7 @@
  * production live field adapter against the source-owned Charm body.
  */
 import { spawnSync } from "node:child_process";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";

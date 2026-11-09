@@ -1,6 +1,4 @@
 import enemyElevations from "../data/gen/enemy-mon-elevations.json" with { type: "json" };
-import backSpritesData from "../assets/gen/battle-back-sprites.json" with { type: "json" };
-import frontSpritesData from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import monPicCoordsData from "../data/gen/mon-pic-coords.json" with { type: "json" };
 import substituteDollAsset from "../animation/assets/substitute.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
@@ -8,6 +6,7 @@ import castformFormsData from "../assets/gen/castform-forms.json" with { type: "
 import spritePalettesData from "../assets/gen/battle-sprite-palettes.json" with { type: "json" };
 import picGeometryData from "../assets/gen/battle-pic-geometry.json" with { type: "json" };
 import type { MonPicGeometry } from "./monPicGeometry.ts";
+import { backPixels, frontPixels } from "./monPicPixels.ts";
 import type { BattleCommandPresentationState } from "./battleCommandPresentation.ts";
 import type { RgbColor } from "./bg.ts";
 
@@ -79,8 +78,6 @@ const speciesSymbolById = new Map(
     name.replace(/^SPECIES_/, ""),
   ]),
 );
-const backSprites = backSpritesData as Readonly<Record<string, BattleCommandMonPic>>;
-const frontSprites = frontSpritesData as Readonly<Record<string, BattleCommandMonPic>>;
 const spritePalettes = spritePalettesData as unknown as Readonly<Record<"back" | "front", Readonly<Record<string, readonly RgbColor[]>>>>;
 const picGeometry = picGeometryData as unknown as Readonly<{
   back: Readonly<Record<string, MonPicGeometry>>;
@@ -88,17 +85,21 @@ const picGeometry = picGeometryData as unknown as Readonly<{
   substituteDoll: Readonly<Record<"player" | "opponent", MonPicGeometry>>;
   castform: readonly Readonly<Record<"player" | "opponent", MonPicGeometry>>[];
 }>;
-// The battler's pic: the sprite table's pixels (render-only) with the palette from battle-sprite-palettes.json, so the palette reads on
-// the tick path (liveMoveAnimation, liveMovePaletteComposite) never touch the pixel table. Cached: the pic object stays stable per species.
+// The battler's pic: `palette` from battle-sprite-palettes.json (tick-path reads: liveMoveAnimation, liveMovePaletteComposite), and `tileset` /
+// `frame2` as lazy getters over the pixel provider (monPicPixels.ts, installed by renderers only), so building a view never reads pixels and
+// the headless graph carries no sprite JSON (bnd256c). Cached: the pic object stays stable per species.
 const picCache = new Map<string, BattleCommandMonPic>();
 function speciesPic(side: "player" | "opponent", speciesSymbol: string): BattleCommandMonPic | undefined {
   const key = `${side}/${speciesSymbol}`;
   let pic = picCache.get(key);
   if (pic === undefined) {
-    const sheet = (side === "player" ? backSprites : frontSprites)[speciesSymbol];
     const palette = spritePalettes[side === "player" ? "back" : "front"][speciesSymbol];
-    if (sheet === undefined || palette === undefined) return undefined;
-    pic = { ...sheet, palette };
+    if (palette === undefined) return undefined;
+    const pixels = side === "player" ? backPixels : frontPixels;
+    const lazy = { palette } as { palette: readonly RgbColor[] };
+    Object.defineProperty(lazy, "tileset", { enumerable: true, get: () => pixels(speciesSymbol)!.tileset });
+    if (side === "opponent") Object.defineProperty(lazy, "frame2", { enumerable: true, get: () => pixels(speciesSymbol)!.frame2 });
+    pic = Object.freeze(lazy) as BattleCommandMonPic;
     picCache.set(key, pic);
   }
   return pic;
@@ -185,7 +186,7 @@ function fieldArtBattler(
       transformPaletteCache.set(key, palette);
     }
     return Object.freeze({
-      ...shown, pic: Object.freeze({ tileset: shown.pic.tileset, palette }),
+      ...shown, pic: Object.freeze({ get tileset() { return shown.pic.tileset; }, palette }),
       ...(own === undefined ? {} : { restSpeciesSymbol: own }),
     });
   }

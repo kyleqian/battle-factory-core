@@ -26,6 +26,7 @@ import {
   FIGHT_SUBMENU_OPEN_BOUNCE_SHIFT,
   MENU_IDLE_BLANK_END_TICK,
 } from "../../src/engine/battleMenu.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   turn5SitrusResettledBounceTick,
   TURN9_REGIME4_TO_REGIME1_SHIFT,

@@ -9,6 +9,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createSceneOnMovePresentation } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { returnConfigFor } from "../compare/verifyReturnReducer.ts";
 import { assembleReturnHardwareOam } from "./prep24ReturnAssembler.ts";

@@ -12,6 +12,7 @@
 //     [--scratch=<dir>] [--commands=<file.jsonl>]
 // Battles / input policy / presentation seam: exactly liveShareCensus.ts (battle i: seed = from + i, streak = (i * 11) % 49).
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import {

@@ -13,6 +13,7 @@
  * Modes: (default) orchestrate; `render <jobs.json> <out.json>` child.
  */
 import { spawn } from "node:child_process";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync, writeFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";

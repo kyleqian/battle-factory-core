@@ -11,6 +11,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import { bonemerangAtAge } from "../../src/animation/bonemerang.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import {
   bonemerangConfigFor,

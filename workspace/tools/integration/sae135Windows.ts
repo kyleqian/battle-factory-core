@@ -9,6 +9,7 @@
 // on row rel -1 (`zeroed` = ["opponent"] when the ROM shows it at 0 where the species' idle rest is not 0; the tracker's own rows for
 // these three are `keep`, checked by sae135NextBodyX2.ts).
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { createBattleResolutionPresentationRenderView, type BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";

@@ -8,6 +8,7 @@
 // they must be identical across all runs; the faithful-random consumer frames (rendered framebuffer digests) must be identical between
 // the two fresh seed-A runs. Exit 1 otherwise.
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,

@@ -42,6 +42,7 @@
 // Read-only: no `src/`/`tools/compare/` writes, no oracle HTTP calls.
 
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 

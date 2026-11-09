@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { spawnSync } from "node:child_process";
 import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";

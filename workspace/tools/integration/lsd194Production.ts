@@ -2,6 +2,7 @@
 // scenario through the real kernel, either scene. Generalises lsd186Production.ts (a Leech Seed drain) to the short-print classes of msg189.
 //   node --experimental-strip-types --no-warnings tools/integration/lsd194Production.ts <class> <scene on|off> [--seed=N]   (prints the command rows)
 import { createFactoryFullTurnBattleState, submitFactoryFullTurnDecision } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { projectBattleResolutionCommands } from "../../src/engine/battleResolutionPresentation.ts";
 import { battleResolutionCommandDuration } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { BATTLE_SCRIPT_HITMARKER_NO_ANIMATIONS } from "../../src/engine/battleScriptSourceConstants.ts";

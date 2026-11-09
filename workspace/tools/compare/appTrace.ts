@@ -98,6 +98,12 @@ import {
   generatedRoundBattle7NolandSilverSpeechPage8HeldStage,
 } from "./factoryRoundIntroGeneralizationStage.ts";
 
+// bnd256c: install the sprite pixels for render(). Optional so app-differential --harness-from-head can overlay this file on a base checkout
+// from before the provider existed (that engine reads the sprite JSON itself); any other load failure still throws.
+await import("../../src/engine/monPicPixelsInstall.ts").catch((error: { code?: string }) => {
+  if (error?.code !== "ERR_MODULE_NOT_FOUND" && !/Failed to load url|Cannot find module/.test(String(error))) throw error;
+});
+
 export interface AppCapture {
   frame: number;
   /** Raw RGBA pixels, 240*160*4 bytes. */

@@ -5,6 +5,7 @@
  *   npx vite-node tools/integration/curseLiveCheck.ts <fixture.json>:<corpus.json[.gz]>:<rgbDir|tar=path> ... [--out=receipt.json]
  */
 import { execFileSync } from "node:child_process";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";

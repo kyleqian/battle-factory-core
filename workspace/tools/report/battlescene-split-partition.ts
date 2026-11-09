@@ -42,6 +42,7 @@
  * Output: stdout report (see README-style block at the end of this header).
  */
 import { readdirSync, readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 

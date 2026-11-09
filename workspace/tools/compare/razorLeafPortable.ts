@@ -12,6 +12,7 @@ import {
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { PNG } from "pngjs";
 import { createScratchDir } from "../lib/scratch.ts";
 

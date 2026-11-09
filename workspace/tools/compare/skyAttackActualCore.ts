@@ -8,6 +8,7 @@ import { createSceneOnMovePresentation, sceneOnSkyAttackView,
   type SceneOnSkyAttackConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { skyAttackAtAge, type SkyAttackBody } from "../../src/animation/skyAttack.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { skyAttackConfigFor, skyAttackInputsFor, verifySkyAttackReducer,
   type SkyAttackOrientation } from "./verifySkyAttackReducer.ts";

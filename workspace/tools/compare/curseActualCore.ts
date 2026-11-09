@@ -5,6 +5,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { createSceneOnMovePresentation, type SceneOnCurseConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { curseConfigFor, curseRowsFor, verifyCurseProduction, type CurseWindow } from "./curseProduction.ts";
 type Json = Record<string, any>;

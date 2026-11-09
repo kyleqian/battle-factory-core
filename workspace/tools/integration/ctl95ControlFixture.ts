@@ -4,6 +4,7 @@
  * the probe's format (240x160 RGB888).
  */
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { readFileSync } from "node:fs";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";

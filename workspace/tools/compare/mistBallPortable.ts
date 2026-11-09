@@ -10,6 +10,7 @@ import {
   type SceneOnMistBallConfig,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 
 type Fixture = SceneOnMistBallConfig & {
   schema: "mist-ball-portable-evidence/v1"; oracleProfile: "battle-scene-on";

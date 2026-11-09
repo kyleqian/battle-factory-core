@@ -15,6 +15,7 @@
 // AUDIT18_NO_HIDE=1: render with no hide (the checker-artifact control). AUDIT18_PROMPT_ALWAYS=1: audit 17's promptShown = true control.
 // AUDIT18_NO_MISS_RULE=1: audit 17's missed-strike inference only (the ablation of the per-turn rule below).
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

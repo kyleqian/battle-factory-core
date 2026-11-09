@@ -30,6 +30,7 @@
  * the window; defaults to `tools/compare/out/latest` if omitted.)
  */
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { join } from "node:path";
 import { PNG } from "pngjs";
 import { turn5MaterializeCoeff } from "../../src/engine/battleScene.ts";

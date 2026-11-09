@@ -6,6 +6,7 @@
  * field inputs; it never imports the retained state or RGB archives.
  */
 import { spawnSync } from "node:child_process";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";

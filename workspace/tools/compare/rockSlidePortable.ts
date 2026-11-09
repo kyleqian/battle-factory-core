@@ -3,6 +3,7 @@ import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   createSceneOnMovePresentation,
   GROVYLE_TO_ONIX_ROCK_SLIDE_PROFILE,

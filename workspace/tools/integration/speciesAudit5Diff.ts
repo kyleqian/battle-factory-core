@@ -1,5 +1,6 @@
 /** speciesAudit5: bbox + top colour pairs (ROM<-live) per age. usage: npx vite-node speciesAudit5Diff.ts <fixture.json> <evidenceRunDir> <firstFrame> <age>... */
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { join, resolve } from "node:path";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";

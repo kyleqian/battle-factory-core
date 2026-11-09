@@ -4,6 +4,7 @@
 // elevated. Run the SAME file inside a base and a patched archive copy; shadow105RouteCheck.py compares them.
 //   node --experimental-strip-types --no-warnings tools/integration/shadow105RouteRender.ts --seed=N --streak=N --move=M --side=player|opponent --out=f.json
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleStartIntro, advanceFactoryRoundBattleCommand,

@@ -7,6 +7,7 @@ import {
   type SceneOnPresentationBattler,
 } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import hardenAsset from "../../src/animation/assets/harden.json" with { type: "json" };
 import { createScratchDir } from "../lib/scratch.ts";
 

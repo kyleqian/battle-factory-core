@@ -4,6 +4,7 @@
  * per-frame host/config. Ordinary command selection is tested independently.
  */
 import { applyLiveScanlineHistoryEvent, type LiveScanlineHistory } from "../../src/engine/liveScanlineHistory.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";

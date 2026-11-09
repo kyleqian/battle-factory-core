@@ -19,6 +19,7 @@
 // history from the same precedingTurns) with ONLY the order / allocator lends replaced.
 //   node --experimental-strip-types --no-warnings tools/integration/audit16Check.ts <fixture-dir> <scenario-name> <out.json>
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

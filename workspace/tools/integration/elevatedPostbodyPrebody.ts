@@ -1,6 +1,7 @@
 // Pre-body counterpart: the ordinary field (no live effect) vs the ROM frames S-1..S-n before the body's first accepted row S
 // (message / idle rows the ordinary queue owns). usage: elevatedPostbodyPrebody.ts <evidence-dir> <n> <opp window fixture>...
 import { readFileSync, existsSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { basename, join } from "node:path";
 const { renderBattleResolutionLiveView, patchProof } = await import(`../../src/engine/${process.env.EP_RENDERER ?? "battleScene.ts"}`);
 import { liveView, type Fixture } from "./liveAdapterFramebuffer.ts";

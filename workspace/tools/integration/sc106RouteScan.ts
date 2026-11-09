@@ -5,6 +5,7 @@
 // route has crossed (76 / 90 per played animation). Read-only use of production; no oracle.
 //   node --experimental-strip-types --no-warnings tools/integration/sc106RouteScan.ts --seeds=0..20 --slots=0,1,2,3 --scene=on --out=f.json
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { generatedCommandAnimationReplay } from "./generatedCommandAnimationReplay.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 

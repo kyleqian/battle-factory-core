@@ -73,6 +73,7 @@
  * script's output against the known batch-5/6 exclusion set.
  */
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { execFileSync } from "node:child_process";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";

@@ -13,6 +13,7 @@
 //     [--streak-mul=N] [--out=report.json] [--commands=commands.jsonl]
 // Battle i (0-based) uses seed = from + i * seedStep and streak = (i * streakMul) % 49 (streaks 0..48, challenges 0..6).
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createHash } from "node:crypto";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,

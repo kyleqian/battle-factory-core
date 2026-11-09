@@ -6,6 +6,7 @@
 // rel >= addedRows + 1 the next command's frames. Scene ON draws with renderBattleResolutionLiveView (the app's drawScene), Scene OFF
 // with renderBattleResolutionSceneOffView; `zeroed` is the production x2 tracker's state before the window (Scene ON only).
 import { readFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView, renderBattleResolutionSceneOffView } from "../../src/engine/battleScene.ts";
 import { createBattleResolutionPresentationRenderView, type BattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";

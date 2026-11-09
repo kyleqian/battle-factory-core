@@ -5,6 +5,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { rolePlayAtAge } from "../../src/animation/rolePlay.ts";
 import { createSceneOnMovePresentation, sceneOnRolePlayView, type SceneOnRolePlayConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import {
   decodeSoftwareMatrices,

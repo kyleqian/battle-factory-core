@@ -7,6 +7,7 @@ import { writeFileSync } from "node:fs";
 import { shockWaveAtAge, shockWaveFirstInactiveAge, shockWaveTimingFor } from "../../src/animation/shockWave.ts";
 import { createSceneOnMovePresentation } from "../../src/animation/sceneOnPresentation.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { shockWaveConfigFor, shockWaveInputsFor, type ShockWaveOrientation } from "../compare/verifyShockWaveReducer.ts";
 
 const hash = (v: string | Uint8Array) => createHash("sha256").update(v).digest("hex");

@@ -10,7 +10,7 @@
     "probe": "tools/compare/hailProbe.py", "probeSha256": "a8deea64c0370941434de5259066bdbb4b7a5a394551443e0373c99df4488f71",
     "evidenceReplay": "tools/compare/hailEvidence.ts",
     "assetExtractor": "tools/compare/extractHailAssets.ts", "assetExtractorSha256": "487792a828343cc9a5cf90b8af422027f69c81a416c74449fb1b28d90811691a",
-    "framebufferVerifier": "tools/compare/hailFramebuffer.ts", "framebufferVerifierSha256": "5ac255b717395f9081476fb343b01884e7da70d1cb0446e9997ed64fa93ff8f9",
+    "framebufferVerifier": "tools/compare/hailFramebuffer.ts", "framebufferVerifierSha256": "108a9fcb9705f73dbf0c879a5ceaf633d01144e91e5186c7f605b3cdaa7b1cbc",
     "freshFramebufferVerifier": "tools/compare/hailFreshFramebuffer.ts", "freshFramebufferVerifierSha256": "67987566dda172186411e3ab0fd0a7f8e7371beade9d681d017d79887d1ac49c"
   },
   "evidenceScope": {

@@ -7,6 +7,7 @@ import { gunzipSync } from "node:zlib";
 import { createSceneOnMovePresentation, sceneOnOverheatView, type SceneOnOverheatConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { overheatAtAge } from "../../src/animation/overheat.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { overheatConfigFor, overheatInputsFor, verifyOverheatReducer, type OverheatOrientation } from "./verifyOverheatReducer.ts";
 

@@ -4,6 +4,7 @@
 // idle94RenderCheck.py compares them (patched rows 0..N-1 == base row 0; patched row N+k == base row k; next-command rows equal).
 //   node --experimental-strip-types --no-warnings tools/integration/idle94RouteRender.ts --seed=N --streak=N --move=M --side=player|opponent --out=f.json
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleStartIntro, advanceFactoryRoundBattleCommand,

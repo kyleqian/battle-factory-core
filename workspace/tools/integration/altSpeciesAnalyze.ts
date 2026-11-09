@@ -7,6 +7,7 @@
  * source | live | diff PNG for the first residual row.
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { deflateSync } from "node:zlib";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";

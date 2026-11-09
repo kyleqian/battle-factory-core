@@ -5,6 +5,7 @@
 //   gMonBackPicCoords y_offset 13 -> sCastformBackSpriteYCoords[CASTFORM_NORMAL] = 0 (battle_anim_mons.c:73-79, :208-210),
 //   gEnemyMonElevation[CASTFORM] 16 -> sCastformElevations[CASTFORM_NORMAL] = 13 (battle_anim_mons.c:62-68, :256-258).
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { join, resolve } from "node:path";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import monPicCoords from "../../src/data/gen/mon-pic-coords.json" with { type: "json" };

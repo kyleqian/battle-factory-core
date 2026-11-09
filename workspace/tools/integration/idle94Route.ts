@@ -5,6 +5,7 @@
 // two shared anchors can be compared ON vs OFF (idle94Compare.py). Read-only use of production; no oracle.
 //   node --experimental-strip-types --no-warnings tools/integration/idle94Route.ts --seed=N --streak=N --scene=on|off --out=file.json
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleStartIntro, advanceFactoryRoundBattleCommand,

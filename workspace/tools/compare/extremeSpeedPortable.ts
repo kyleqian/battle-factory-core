@@ -3,6 +3,7 @@ import { readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { PNG } from "pngjs";
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createSceneOnMovePresentation } from "../../src/animation/sceneOnPresentation.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 

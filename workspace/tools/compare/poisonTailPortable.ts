@@ -13,6 +13,7 @@ import {
 } from "../../src/animation/sceneOnPresentation.ts";
 import poisonTailAsset from "../../src/animation/assets/poisonTail.json" with { type: "json" };
 import { createInitialState, render, type EngineState } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 
 interface Fixture {

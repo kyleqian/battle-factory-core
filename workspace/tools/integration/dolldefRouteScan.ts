@@ -4,6 +4,7 @@
 // next prompt still shows the doll. Never picks by live output (gameplay state only).
 //   node --experimental-strip-types --no-warnings tools/integration/dolldefRouteScan.ts [maxHits] [maxSeed]
 import { generateInitialFactoryRentals } from "../../src/engine/factoryRentalGeneration.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import { createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";
 import { LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS } from "../../src/engine/liveMoveAnimation.ts";

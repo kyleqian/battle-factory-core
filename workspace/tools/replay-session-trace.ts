@@ -14,6 +14,7 @@
 
 import { readFileSync } from "node:fs";
 import { createInitialState, render, tick } from "../src/engine/core.ts";
+import "../src/engine/monPicPixelsInstall.ts";
 import { presentationRngFromTrace } from "../src/engine/presentationRngHost.ts";
 import { normalizeButtons, type GbaButton } from "../src/input.ts";
 import type { RecordedSegment, SessionTrace } from "../src/sessionRecorder.ts";

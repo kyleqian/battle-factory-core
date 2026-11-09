@@ -48,7 +48,7 @@
     "reducer": "tools/compare/rockBlastReducer.ts",
     "reducerSha256": "11e6b59c37a2ac512a038b6a1b2a45a690b9967a11a0fd58c84ae17ed2c0467a",
     "framebuffer": "tools/compare/rockBlastFramebuffer.ts",
-    "framebufferSha256": "88aa5cf8aa716794332c7b485b5c046aef25cfcdd97bcc588552ee94a4bbbe17"
+    "framebufferSha256": "1098e6f3307786985d09e789002fe7c50d6d144fae05b97f19d3cf760a65b840"
   },
   "orientations": {
     "player-back": {

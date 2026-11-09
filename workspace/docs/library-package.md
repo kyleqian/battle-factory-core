@@ -136,16 +136,23 @@ raw / gzip, readable (unminified) output:
 
 | Entry | Files | Total | Largest file |
 | --- | --- | --- | --- |
-| headless (`dist-lib/headless.js` + `chunks-headless/`) | 6 | 22.3 MB / 2.03 MB | `assets-sprites` 11.8 MB / 0.90 MB |
+| headless (`dist-lib/headless.js` + `chunks-headless/`) | 6 | 10.7 MB / 1.19 MB (bnd256c; was 22.5 MB / 2.14 MB) | `data-battle-script` 3.7 MB / 0.24 MB |
 | browser (`dist-lib/index.js` + `chunks/`) | 6 | 40.2 MB / 3.41 MB | `assets-sprites` 14.5 MB / 1.04 MB |
 
-The headless graph still carries sprite pixels (`battleCommandFieldArt`, 11.8
-MB of its 22.3 MB): the bundle-hygiene item, not yet done. The tarball
-(`npm pack`) is 5.4 MB.
+The headless graph no longer carries sprite pixels (bnd256c,
+`docs/bnd256c-pixel-provider.md`): the battle sprite sheets are reached through
+an installable provider (`src/engine/monPicPixels.ts`), and only the browser
+entry installs it (`src/lib.ts` statically imports `monPicPixelsInstall.ts`).
+`chunks-headless/` keeps a 1-byte empty `assets-sprites-*.js` stub that nothing
+imports. The browser entry is unchanged (its sprite chunk is split in a later
+step, `bnd-d`). The tarball (`npm pack`) was 5.4 MB before bnd256c and has not
+been re-measured.
 
 A consumer's own bundler concatenates the package's static chunk imports, so a
 default Vite build of an app that imports only `mountFactoryGame` emits ONE
-33 MB file (importing both entries: 52 MB; headless only: 19 MB). Split it in
+33 MB file (importing both entries: 52 MB; headless only: 19 MB; these three
+figures predate bnd256c and were not re-measured; headless-only shrinks by the
+sprite chunk). Split it in
 the consumer's `vite.config` (verified in a scratch app: largest file 12.2 MB):
 
 ```js
@@ -157,4 +164,4 @@ build: { rollupOptions: { output: { manualChunks(id) {
 
 The headless entry runs under plain node (`replayChallenge` of a 500-frame
 trace: ~5-10 ms) and is meant for the server; do not ship it to the browser
-page that mounts the game (the pixel data would be duplicated).
+page that mounts the game (the engine code and data tables would be duplicated).

@@ -7,6 +7,7 @@ import { createSceneOnMovePresentation, sceneOnWillOWispView,
   type SceneOnWillOWispConfig } from "../../src/animation/sceneOnPresentation.ts";
 import { willOWispAtAge, willOWispDisplayPlan } from "../../src/animation/willOWisp.ts";
 import { createInitialState, render } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createScratchDir } from "../lib/scratch.ts";
 import { willOWispConfigFor, willOWispInputsFor, willOWispRowsFor,
   verifyWillOWispReducer, type WillOWispWindow } from "./verifyWillOWispReducer.ts";

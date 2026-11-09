@@ -7,6 +7,7 @@
 // (type, timing minimumFrames / holdFrames). Read-only use of production; no oracle.
 //   node --experimental-strip-types --no-warnings tools/integration/off108Route.ts --seeds=A..B --scene=on|off --out=file.jsonl [--moves=1,2]
 import { writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import {
   createFactoryRoundBattleOrchestrator, beginFactoryRoundBattleStartIntro,
   advanceFactoryRoundBattleStartIntro, advanceFactoryRoundBattleCommand,

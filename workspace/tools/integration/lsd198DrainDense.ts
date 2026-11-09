@@ -6,6 +6,7 @@
 //   node --experimental-strip-types --no-warnings tools/integration/lsd198DrainDense.ts <rom-runs.json> <rom.json-name> <rom.rgb.gz> <out.json> --side=player|opponent --seed=N
 //        [--onixMove=33] [--scan=a,a,..  (best ROM frame offset per drain command age)] [--dump=t,t,..]
 import { readFileSync, writeFileSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { crc32, deflateSync, gunzipSync } from "node:zlib";
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";
 import { battleResolutionCommandDuration, createBattleResolutionPresentationRenderView } from "../../src/engine/battleResolutionPresentationRender.ts";

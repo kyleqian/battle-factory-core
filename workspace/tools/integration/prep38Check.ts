@@ -11,6 +11,7 @@
 // put age 0 a move-specific number of rows after gAnimScriptActive (e.g. Bite 26-row windows vs 41 script rows); the TEST body of the same
 // scenario uses its control's shift (the anim script is the same; the doll does not change its timing).
 import { createHash } from "node:crypto";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { createRequire } from "node:module";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";

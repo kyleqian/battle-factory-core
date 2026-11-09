@@ -16,6 +16,7 @@
 //   node --experimental-strip-types --no-warnings tools/integration/snd182Compare.ts <scenario.json> <rom-png-dir> <out.json>
 //     [--base]   (the pre-snd182 Scene ON player send-in: slide 66, 91 + 11)   [--slide=N] [--duration=N] [--visual-delay=N]  (controls)
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import "../../src/engine/monPicPixelsInstall.ts";
 import { inflateSync } from "node:zlib";
 import speciesStats from "../../src/data/gen/species-stats.json" with { type: "json" };
 import { renderBattleResolutionLiveView } from "../../src/engine/battleScene.ts";

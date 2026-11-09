@@ -8,6 +8,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { PNG } from "pngjs";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
+import "../../src/engine/monPicPixelsInstall.ts";
 import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
