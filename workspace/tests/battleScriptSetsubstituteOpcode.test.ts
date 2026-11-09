@@ -294,8 +294,9 @@ describe("BattleScript_EffectSubstitute genuine terminal routes", () => {
       status2: BATTLE_SCRIPT_STATUS2_MASKS.STATUS2_SUBSTITUTE,
       substituteHP: 38,
     });
-    expect(state.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_IGNORE_SUBSTITUTE)
-      .toBe(BATTLE_SCRIPT_HITMARKER_IGNORE_SUBSTITUTE);
+    // Cmd_setsubstitute sets the bit (:7829) so the script's own `datahpupdate BS_ATTACKER` debits real HP; that
+    // handler's else branch then clears it (:1895; sub260 / ISSUES #201), so it does not leak into the next action.
+    expect(state.rulesContext.hitMarker & BATTLE_SCRIPT_HITMARKER_IGNORE_SUBSTITUTE).toBe(0);
     expect(messageIds(state)).toEqual([
       "STRINGID_USEDMOVE",
       "STRINGID_PKMNMADESUBSTITUTE",

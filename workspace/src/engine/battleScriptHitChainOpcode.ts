@@ -2553,13 +2553,17 @@ function createDatahpupdateOpcodeHandler(
       );
     }
 
+    // :1895 `gHitMarker &= ~HITMARKER_IGNORE_SUBSTITUTE` opens the non-substitute branch, so an
+    // `orword ... IGNORE_SUBSTITUTE` heal/damage script cannot leak the bit into the next action (ISSUES #201).
+    const hitMarkerAfterIgnoreSubstituteClear = (rulesContext.hitMarker & ~HITMARKER_IGNORE_SUBSTITUTE) >>> 0;
+
     if (damage < 0) {
       // Negative damage is HP gain (:1899-1903) -- no bide/shellBell/physical-special
       // bookkeeping on this branch at all in source, just the HP write itself,
       // clamped at maxHP (docs/ingrain-leechseed-wrap-ground-truth.md §2a/§2b).
       const currentHp = battlerState.hp;
       const healedHp = Math.min(currentHp - damage, battlerState.maxHP);
-      const nextHitMarker = (rulesContext.hitMarker & ~HITMARKER_PASSIVE_HP_UPDATE) >>> 0;
+      const nextHitMarker = (hitMarkerAfterIgnoreSubstituteClear & ~HITMARKER_PASSIVE_HP_UPDATE) >>> 0;
       const nextRulesContext = withBattler(
         Object.freeze({
           ...rulesContext,
@@ -2581,7 +2585,7 @@ function createDatahpupdateOpcodeHandler(
       );
     }
 
-    let hitMarker = rulesContext.hitMarker;
+    let hitMarker = hitMarkerAfterIgnoreSubstituteClear;
     const ignoreBide = (hitMarker & HITMARKER_IGNORE_BIDE) !== 0;
     if (ignoreBide) {
       hitMarker = (hitMarker & ~HITMARKER_IGNORE_BIDE) >>> 0;
