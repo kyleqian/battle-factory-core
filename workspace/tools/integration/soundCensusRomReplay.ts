@@ -97,10 +97,13 @@ function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
 }
 
 type Segment = { frames: number; buttons: string[] };
+type Decision = { kind: "move" | "switch"; slot?: number; partyIndex?: number; menuOpenFrame: number; fightMenuFrame?: number; commitFrame: number | null };
 function play(initial: any, record: boolean, patchRng: number | null = null) {
   let state = initial; let frame = 0; let ended = false; let error: string | null = null; let frame0: number | null = null;
   const sound: unknown[][] = []; const inputs: Segment[] = []; const slotUses = [0, 0, 0, 0];
   let actionMenuRng: number | null = null; let randomTurnNumber: number | null = null; const timeline: number[][] = []; let lastTl = "";
+  // aud243d: the engine's DECISIONS (absolute engine frames; result() makes them frame0-relative) for the ROM-side semantic driver (tools/audio/soundEventProbe.py lab --drive).
+  const decisions: Decision[] = []; let openSwitch: Decision | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
     if (++frame > 200000) throw new Error("frame budget");
@@ -123,19 +126,24 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
       const row = [rc.currentMove, rc.battlers[0].hp, rc.battlers[1].hp, state.battle.rng.value, rc.moveHistory.lastMoves[0], rc.moveHistory.lastMoves[1]];
       if (row.join() !== lastTl) { lastTl = row.join(); timeline.push([frame - frame0, ...row]); }
     }
+    if (openSwitch && !forcedSelector()) { openSwitch.commitFrame = frame; openSwitch = null; }
     if (!owned()) ended = true;
   };
   const phase = () => state.battleCommandPresentation?.lifecycle.phase;
   const pulse = (b: string) => { step(); if (!ended) step([b]); if (!ended) step(); };
-  const forcedSelector = () => {
+  function forcedSelector() {
     const s = state.battleForcedPartySelect;
     return s && s.sendOutElapsed === null && s.elapsed >= PARTY_LIST_INPUT_ELAPSED ? s : null;
-  };
+  }
   const until = (p: () => boolean) => {
     while (!ended && !p()) {
       const s = forcedSelector();
       if (s) {
         const target = typeof s.cursor === "number" ? s.party.findIndex((r: any) => r.legal && r.partyIndex === Math.min(...s.party.filter((m: any) => m.legal).map((m: any) => m.partyIndex))) : -1;
+        if (!openSwitch && frame0 !== null) {
+          openSwitch = { kind: "switch", partyIndex: Math.min(...s.party.filter((m: any) => m.legal).map((m: any) => m.partyIndex)), menuOpenFrame: frame, commitFrame: null };
+          decisions.push(openSwitch);
+        }
         pulse(s.message !== null ? "A" : (!s.submenuOpen && (typeof s.cursor === "number" ? s.cursor !== target : (s.cursor as string) !== "magby")) ? "DOWN" : "A");
         continue;
       }
@@ -147,11 +155,13 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
     until(() => phase() === "action-menu");
     frame0 = frame; actionMenuRng = state.battle?.rng.value ?? null; randomTurnNumber = (state.battle?.rules.rulesContext as any)?.randomTurnNumber ?? null;
     if (patchRng !== null && state.battle) state = { ...state, battle: { ...state.battle, rng: { ...state.battle.rng, value: patchRng } } };
-    if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline };
+    if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions };
     while (!ended) {
+      const actionMenuFrame = frame;
       pulse("A");
       until(() => phase() === "fight-menu");
       if (ended) break;
+      const fightMenuFrame = frame;
       const menu = state.battleCommandPresentation!;
       const legal = ([0, 1, 2, 3] as const).filter((s) => menu.legalMoveBySlot[s] !== null);
       const slot = legal.length === 0 ? 0 : legal.reduce((best, s) => (slotUses[s]! < slotUses[best]! ? s : best), legal[0]!);
@@ -161,15 +171,18 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
         if (cursor === slot) break;
         pulse((cursor & 1) !== (slot & 1) ? ((slot & 1) ? "RIGHT" : "LEFT") : ((slot & 2) ? "DOWN" : "UP"));
       }
+      decisions.push({ kind: "move", slot, menuOpenFrame: actionMenuFrame, fightMenuFrame, commitFrame: frame + 2 }); // pulse("A") presses A on its 2nd step
       pulse("A");
       until(() => !state.battleCommandPresentation);
       until(() => phase() === "action-menu");
     }
   } catch (e) { error = String(e); }
-  return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline };
+  return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions };
 }
 
+const rel = (r: ReturnType<typeof play>, v: number | null | undefined) => (v === null || v === undefined ? v : v - (r.frame0 ?? 0));
 const result = (r: ReturnType<typeof play>, extra: object = {}) => ({
+  decisions: r.decisions.map((d) => ({ ...d, menuOpenFrame: rel(r, d.menuOpenFrame), fightMenuFrame: rel(r, d.fightMenuFrame), commitFrame: rel(r, d.commitFrame) })),
   seed, scene, error: r.error, frame0: r.frame0, actionMenuRng: r.actionMenuRng, randomTurnNumber: r.randomTurnNumber, frames: r.frames,
   sound: r.sound.map((e) => [(e[0] as number) - (r.frame0 ?? 0), ...e.slice(1)]), inputs: r.inputs, timeline: r.timeline, ...extra,
 });
