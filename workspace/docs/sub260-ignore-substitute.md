@@ -44,10 +44,12 @@ picked Attract, A presses landing before the menu opened), so the lab request ca
 | turn | ROM | engine before fix | engine after fix |
 |---|---|---|---|
 | T1 | 6 / 165, RNG 1970019264, [164 Substitute, 57 Surf] | same | same |
-| T2 Shadow Ball (crit) | Substitute absorbs it; player HP stays 6; Leftovers heals to 11; opp 165; RNG 2525390639 | player KO (HP 0) | **6 -> 11 / 165, RNG 2525390639** |
+| T2 Shadow Ball (crit) | Substitute absorbs it; player HP 6 -> 11 after Leftovers; opp 165; RNG 2525390639; last moves [213 Attract, 247 Shadow Ball] | player KO (HP 0), RNG 185369341 | **11 / 165, RNG 2525390639, last moves [213, 247]** |
 
-`compare`: 3 engine timeline states matched in order among the ROM states (T1, T2 after the absorbed Shadow Ball, T2 after Leftovers), with equal HP, RNG and last moves.
-The after-fix T2 events show `STRINGID_CRITICALHIT`, `STRINGID_SUBSTITUTEDAMAGED`, no `STRINGID_TARGETFAINTED`.
+`compare` (`cmp-shift.json`): 3 engine timeline states match in order among the 50 ROM states: T1 (engine frame 9 -> ROM 772, 6 / 165, RNG 1970019264), T2 end (778 -> 2615,
+11 / 165, RNG 2525390639, last moves [213, 247]) and the turn-3 KO (1573 -> 4191, 0 / 165, RNG 2144907480). HP, RNG and last moves are equal in every matched row.
+The first unmatched engine row (frame 2093) is after the ROM input trace is exhausted. The engine-side Substitute absorb itself is asserted by
+`tests/sub260IgnoreSubstitute.test.ts` (STRINGID_SUBSTITUTEDAMAGED, HP unchanged), not read from the ROM timeline.
 
 ## 5. Census delta, seeds 0..999, both scenes
 
