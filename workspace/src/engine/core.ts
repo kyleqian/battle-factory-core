@@ -2715,6 +2715,10 @@ function tickEngineState(state: EngineState, buttons: ReadonlySet<GbaButton>): E
       summaryScreen = summaryScreen.page === "info" ? requestSummaryScreenExit(summaryScreen) : requestSummaryMoveSelect(summaryScreen);
     } else if (newKeys.has("B")) summaryScreen = requestSummaryScreenExit(summaryScreen);
     scheduleSummaryStepSounds(summaryBefore, summaryScreen, draftSummarySoundContext(draftScreen));
+    if (summaryScreen.transition?.direction === "toDraft" && summaryScreen.returnTarget === "draft") {
+      // CloseSummaryScreen stores gLastViewedMonIndex (:1519); CB2_InitSelectScreen restores cursorPos from it (battle_factory_screen.c:1242).
+      draftScreen = { ...draftScreen, cursorPos: summaryScreen.selectedSlot };
+    }
   } else {
     let monPic = advanceMonPic(draftScreen.monPic);
     let cursorRedraw = advanceCursorRedraw(draftScreen.cursorRedraw);
