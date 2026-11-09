@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master at the aud243c merge `d3de48542`; sub260 (Substitute hit-marker fix, ts lane) running in the main tree. Evidence `.integration/validation/sv-20261108/`.
+- **State:** master at sub260b `c85b5891d`; sum259 (#192 summary flow) running in the main tree. Evidence `.integration/validation/sv-20261108/`.
   Baseline: src unchanged since the last full suite (`23a641cb4`), so its receipts were reused; oracles fresh.
 - **Folded:** aud243a (S11 step 7 first half; branch `worker/integration-20261108-213051`, 102 min; `docs/aud243a-sound-census.md`):
   `tick()`'s post-tick sound block moved verbatim into `emitTickSounds` (`src/engine/tickSounds.ts`); `lsd194Census.ts` writes per-seed
@@ -53,6 +53,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   (`battle_script_commands.c:1895`), so after Leftovers (`BattleScript_ItemHealHP_Ret` orword, `battle_scripts_1.s:4381`) the next turn's
   first attack bypasses Substitute. Supervisor checked both C sites and the engine handler (only IGNORE_BIDE / PASSIVE_HP_UPDATE cleared).
   ISSUES #201; fix briefed as sub260.
+- **Landed:** sub260 (ts lane, authorized gameplay correction, ISSUES #201 removed; 117 min; `docs/sub260-ignore-substitute.md`):
+  `Cmd_datahpupdate` clears HITMARKER_IGNORE_SUBSTITUTE in its no-substitute branch (`battle_script_commands.c:1895`); audit of every C set /
+  clear site found no other wrong one. **Census 0..999: the same 13 seeds change in ON and OFF** (26, 164, 177, 186, 221, 391, 418, 506, 564,
+  587, 649, 881, 961), each one exactly a stale-bit hit on a Substitute holder (origins Leftovers 12, Leech Seed 1), 0 unexplained; an unfixed
+  instrumented tree reproduces the baseline 1000 / 1000. ROM proof seed 177 ON: turn 2 now 11 / 165, RNG 2525390639, last moves [213, 247] ==
+  ROM (was a player KO). `tests/sub260IgnoreSubstitute.test.ts` (6; 4 fail unfixed); `battleScriptSetsubstituteOpcode` re-pinned (bit 0 after
+  the script's own datahpupdate). ENGINE_BUILD -> `eb-12d5aa7535f49c46` (tell the website). Worker: typecheck / build / build:lib 0,
+  test:gate 0, vanilla 0:20 20 / 20, full suite 6 shards green except `substituteSwapAttdollCells` (its route relied on the bug).
+  **sub260b** (10 min) re-pinned that test to seed 862 / streak 35 (scan of 0..999 x 7 streaks, `tools/integration/substituteToxicRouteScan.ts`);
+  every assertion unchanged. Supervisor: C sites read; sub260 + setsubstitute tests 16 / 16; census classifier output read (both scenes).
+  New census baseline: `sv-20261108/sub260/census`.
 
 ---
 

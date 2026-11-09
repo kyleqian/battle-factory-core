@@ -13,13 +13,6 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #201 — Cmd_datahpupdate keeps HITMARKER_IGNORE_SUBSTITUTE (aud243c, 2026-11-09)
-
-The C no-substitute branch clears the bit (`battle_script_commands.c:1895`); `src/engine/battleScriptHitChainOpcode.ts`'s handler does
-not. An end-of-turn `orword gHitMarker, HITMARKER_IGNORE_SUBSTITUTE` script (Leftovers `BattleScript_ItemHealHP_Ret`, poison / burn ticks,
-Leech Seed, Ingrain, Rain Dish, Wish...) leaks the bit into the next turn, whose first attack then bypasses a Substitute. No RNG count change.
-ROM route: census seed 177 Scene ON turn 2 (`docs/aud243c-alignment.md` section 4).
-
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 
 `docs/obr251-opponent-party-summary.md`: bar slide / hold / fade / SE are ROM-timed and the bar frames 527..546 are exact
