@@ -212,7 +212,7 @@ describe("abl261 confusion self-hit (battle_util.c:2157-2175: CalculateBaseDamag
     });
     for (let seed = 1; seed < 64; seed += 1) {
       const result = advanceBattleScriptAttackCancelerConfused(source, 0x1234, seed);
-      if (result.reason === "confusion-self-hit") return result.rulesContext.battleMoveDamage;
+      if ("reason" in result && result.reason === "confusion-self-hit") return result.rulesContext.battleMoveDamage;
     }
     throw new Error("no self-hit seed");
   }
