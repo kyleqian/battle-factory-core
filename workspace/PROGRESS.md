@@ -85,6 +85,8 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   differential 5 battle traces vs `3ce21fcd6` (pre-sum259) 1,078 identical; typecheck, build, build:lib 0. The 0:60 gates were not run.
 - **Final full suite** (`gates/suite2.log`, HEAD `1613c285a` == final src): **1,795 files: 1,751 passed + 44 skipped, 0 failed; 14,418 tests
   passed**, 17.3 min at 5 workers.
+- **Scout:** aud243d read-only (`docs/aud243d-scout.md`, unverified): a closed-loop Python driver in the lab reads `gBattlerControllerFuncs[0]`
+  (ELF-only local handler addresses) to detect the action / move / party menus, freezes the executed segments as the trace; 2-hour plan.
 - **Next:** handoff "Next work": aud243d (ROM-side semantic input driver for the census replay, then the K >= 20 sound diff; each HP / RNG
   mismatch is a gameplay lead, as #201 was), more aud242 lifetimes (`docs/aud242g-scout.md`), al198a (`docs/al198-scout.md`), bnd-d,
   ISSUES #192 / #196..#200.

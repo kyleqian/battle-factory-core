@@ -93,7 +93,7 @@ never brief those here. One worker at a time; each run folds the next audio step
    emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07; aud242d / e / f DONE
    2026-11-08; aud242g, aud243a / b / c DONE 2026-11-09.** Next: **aud243d**, a ROM-side semantic input driver for the census replay
    (drive the ROM by menu state — pick the engine's move / switch when the ROM's menu opens — instead of frame-timed inputs, which drift
-   after the first faint; `docs/aud243c-alignment.md` section 3), then the sound diff over K >= 20 seeds per scene (each ROM-vs-engine
+   after the first faint; `docs/aud243c-alignment.md` section 3; design scout `docs/aud243d-scout.md`), then the sound diff over K >= 20 seeds per scene (each ROM-vs-engine
    mismatch in HP / RNG is a gameplay bug lead, as #201 was); remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave; next lifetimes ranked in `docs/aud242g-scout.md`. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) DONE (cln240 + cln242 + cln244 Dive; optional: `summaryAllFactorySpecies` 134 s and `substituteDollDefenderLive` 80 s for < 15 min); (4) DONE (cln241);
