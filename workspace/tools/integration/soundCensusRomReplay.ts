@@ -103,6 +103,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
   const sound: unknown[][] = []; const inputs: Segment[] = []; const slotUses = [0, 0, 0, 0];
   let actionMenuRng: number | null = null; let randomTurnNumber: number | null = null; const timeline: number[][] = []; let lastTl = "";
   // aud243d: the engine's DECISIONS (absolute engine frames; result() makes them frame0-relative) for the ROM-side semantic driver (tools/audio/soundEventProbe.py lab --drive).
+  const traceEvents = arg("events") !== undefined; const turnEvents: unknown[] = [];
   const decisions: Decision[] = []; let openSwitch: Decision | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
@@ -127,6 +128,10 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
       if (row.join() !== lastTl) { lastTl = row.join(); timeline.push([frame - frame0, ...row]); }
     }
     if (openSwitch && !forcedSelector()) { openSwitch.commitFrame = frame; openSwitch = null; }
+    if (traceEvents && frame0 !== null && state.battleResolutionPresentation && !before.battleResolutionPresentation) {
+      const res: any = state.battleResolutionPresentation;
+      turnEvents.push({ frame: frame - frame0, battlersBefore: JSON.parse(JSON.stringify((before.battle?.rules.rulesContext as any)?.battlers ?? null)), events: (res.segments ?? []).flatMap((seg: any) => seg.events ?? []).map((e: any) => ({ seq: e.sequence, ...e.payload, label: e.provenance?.sourceLabel })) });
+    }
     if (!owned()) ended = true;
   };
   const phase = () => state.battleCommandPresentation?.lifecycle.phase;
@@ -155,7 +160,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
     until(() => phase() === "action-menu");
     frame0 = frame; actionMenuRng = state.battle?.rng.value ?? null; randomTurnNumber = (state.battle?.rules.rulesContext as any)?.randomTurnNumber ?? null;
     if (patchRng !== null && state.battle) state = { ...state, battle: { ...state.battle, rng: { ...state.battle.rng, value: patchRng } } };
-    if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions };
+    if (!record) return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents };
     while (!ended) {
       const actionMenuFrame = frame;
       pulse("A");
@@ -177,11 +182,12 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
       until(() => phase() === "action-menu");
     }
   } catch (e) { error = String(e); }
-  return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions };
+  return { frame0, actionMenuRng, randomTurnNumber, state, sound, inputs, error, frames: frame, timeline, decisions, turnEvents };
 }
 
 const rel = (r: ReturnType<typeof play>, v: number | null | undefined) => (v === null || v === undefined ? v : v - (r.frame0 ?? 0));
 const result = (r: ReturnType<typeof play>, extra: object = {}) => ({
+  ...(r.turnEvents.length ? { turnEvents: r.turnEvents } : {}),
   decisions: r.decisions.map((d) => ({ ...d, menuOpenFrame: rel(r, d.menuOpenFrame), fightMenuFrame: rel(r, d.fightMenuFrame), commitFrame: rel(r, d.commitFrame) })),
   seed, scene, error: r.error, frame0: r.frame0, actionMenuRng: r.actionMenuRng, randomTurnNumber: r.randomTurnNumber, frames: r.frames,
   sound: r.sound.map((e) => [(e[0] as number) - (r.frame0 ?? 0), ...e.slice(1)]), inputs: r.inputs, timeline: r.timeline, ...extra,
