@@ -65,6 +65,10 @@ needs a species-aware model, doc 10.5); Tri Attack, Bubblebeam, Luster Purge, Ex
 `unresolved-branch`; top Sludge Bomb, Bubblebeam, Struggle, Blizzard, Thunderbolt, Psychic, Tri Attack, Dream Eater), 240 cry-task sites
 (Roar 208, Hyper Voice 24, Howl 8), 400 pan rows after the body ends (Signal Beam 350, Mud Shot 50: task SEs outlive the body). The
 offsets above are invisible to T1 (known-offset 0); they need the ROM replay (aud243b).
+**aud242g (2026-11-09)** (L50 692 emitted, 142 gated; all 894 resolved): Dream Eater +1, Tri Attack / Bubblebeam / Thunderbolt +2; Thunderbolt's
+three rows after the nine-sprite step (SE_M_HYPER_BEAM, both SE_M_THUNDERBOLT2) +1 more, undiagnosed. Dream Eater's two SE197 sleep rows
+(ROM 272, 565) not emitted. Still gated: Tri Attack's `gLargeFlameScatterSpriteTemplate` / `AnimTask_ShakeTargetInPattern`, the
+`ElectricityEffect` wait ending Thunderbolt / Spark.
 
 ## #194 — Opponent RATTATA Quick Attack differs above the clip row (qak247, 2026-11-04)
 
