@@ -577,7 +577,7 @@ Every lifetime below is derived from the C; the only measured constant in the sl
 
 | lifetime | C | exact (ticks after F) | ops freed (L50) |
 |---|---|---|---|
-| `AnimTask_SetPsychicBackground` (instant: sets the BG, destroys itself in the entry) | battle_anim_effects_3.c:1372-1376 | -1 | Dream Eater +9 (plus Extrasensory / Confusion rows) |
+| `AnimTask_SetPsychicBackground` (instant: sets the BG, destroys itself in the entry) | battle_anim_effects_3.c:1372-1376 | -1 | Dream Eater +9 |
 | `gTriAttackTriangleSpriteTemplate` (AnimTriAttackTriangle) | battle_anim_effects_3.c:2015-2046, battle_anim_mons.c:1093-1101, 1111-1146 | 81 | Tri Attack +1 (`gLargeFlameScatterSpriteTemplate` and `AnimTask_ShakeTargetInPattern` still gate the rest) |
 | `gWaterBubbleProjectileSpriteTemplate` (arg 6 = D) | battle_anim_water.c:529-607, :101-107 | D + 23 (73 for Bubblebeam) | Bubblebeam |
 | `AnimTask_SwayMon` (simulated: index += period, half-wave crossings counted) | battle_anim_mon_movement.c:751-815 | call K - 1 of the simulated crossing | Bubblebeam |
