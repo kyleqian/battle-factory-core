@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master at the aud243a merge; bnd256c (bnd-c) running on a side worktree. Evidence `.integration/validation/sv-20261108/`.
+- **State:** master at the bnd256c merge `fe84c07e4`; aud242g running on an integration worktree. Evidence `.integration/validation/sv-20261108/`.
   Baseline: src unchanged since the last full suite (`23a641cb4`), so its receipts were reused; oracles fresh.
 - **Folded:** aud243a (S11 step 7 first half; branch `worker/integration-20261108-213051`, 102 min; `docs/aud243a-sound-census.md`):
   `tick()`'s post-tick sound block moved verbatim into `emitTickSounds` (`src/engine/tickSounds.ts`); `lsd194Census.ts` writes per-seed
@@ -17,6 +17,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   full suite (8 shards) 1,746 passed + 44 skipped, 0 failed; 40-seed old-vs-new rows identical once the 3 new fields drop. Supervisor:
   `rst197CensusDelta.py` vs `sv-20261106/obr251-evidence` 1000 / 1000 identical both scenes (ON 322,634 / OFF 317,269 commands); the
   `core.ts` diff is a verbatim move. New census baseline: `sv-20261108/aud243a/full/{on,off}-858ea0343`.
+- **Folded:** bnd256c (bundle hygiene bnd-c; side branch `worker/side-20261108-231401`, 69 min; `docs/bnd256c-pixel-provider.md`): sprite
+  pixels leave the headless graph through a provider (`src/engine/monPicPixels.ts`; `monPicPixelsInstall.ts` statically imported by `lib.ts`
+  only, plus `tests/setup/monPicPixels.ts` and 290 render tools); `speciesPic` / the Transform branch read `tileset` / `frame2` lazily.
+  `dist-lib` headless 22.5 -> 10.7 MB raw (2.14 -> 1.19 MB gzip), `assets-sprites` an empty 1-byte stub; browser unchanged (chunk split =
+  bnd-d). ENGINE_BUILD -> `eb-01603ce9f24e6eec` (tell the website). Worker: typecheck / build / build:lib 0; full suite (6 shards) 1,747
+  passed + 44 skipped, 0 failed; built-headless replays of 4 battle traces digest-identical; differential 38 traces 7,561 / 7,561 identical.
+  Six verifier source-hash pins re-pinned for the import line. Supervisor: `chunks-headless` 7.59 MB measured; census seeds 0..19 both
+  scenes with the install line stripped (no pixels at all): 40 / 40 rows identical to the aud243a arms, 0 errors.
 
 ---
 
