@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master at the aud243b merge `fdc8307`; aud243c (Opus, T2 alignment diagnosis) running on an integration worktree. Evidence `.integration/validation/sv-20261108/`.
+- **State:** master at the aud243c merge `d3de48542`; sub260 (Substitute hit-marker fix, ts lane) running in the main tree. Evidence `.integration/validation/sv-20261108/`.
   Baseline: src unchanged since the last full suite (`23a641cb4`), so its receipts were reused; oracles fresh.
 - **Folded:** aud243a (S11 step 7 first half; branch `worker/integration-20261108-213051`, 102 min; `docs/aud243a-sound-census.md`):
   `tick()`'s post-tick sound block moved verbatim into `emitTickSounds` (`src/engine/tickSounds.ts`); `lsd194Census.ts` writes per-seed
@@ -44,6 +44,15 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   move differs (ROM Scary Face, engine a damaging move); ROM `gRandomTurnNumber` sits 7 draws before the menu (engine 0) on 4 seed / scene
   runs. Supervisor's lead: the lab stages streak `challengeNum*7` (14 -> AI_SCRIPT_CHECK_BAD_MOVE) while the replay engine may build at streak
   0 (mask 0). Diagnosis rebriefed to Opus as aud243c (no src/ change allowed in that step).
+- **Folded:** aud243c (Opus; branch `worker/integration-20261109-020226`, 18 min; `docs/aud243c-alignment.md`): **the census ROM replay
+  aligns.** The ROM's action-menu `gRngValue` is post-AI (turn number, 2 ShouldSwitch, 4 simulatedRNG, 1 tie-break draws run while the menu
+  is open; the engine spends the same 7 at commit, outcome-neutral). Mask hypothesis refuted (both sides mask 1 / 7). Replay now aligns on
+  `gRandomTurnNumber`; turn 1 matches (HP + RNG) on 224 ON / OFF, 552 ON, 177 ON; 224 / 552 through turn 2 and the forced switch; frame-timed
+  inputs drift after the first faint (next: a ROM-side semantic input driver). New tool `tools/audio/romAiDecision.py`, `compare` mode.
+  **Found an engine bug** (seed 177 turn 2): `Cmd_datahpupdate` does not clear HITMARKER_IGNORE_SUBSTITUTE in its no-substitute branch
+  (`battle_script_commands.c:1895`), so after Leftovers (`BattleScript_ItemHealHP_Ret` orword, `battle_scripts_1.s:4381`) the next turn's
+  first attack bypasses Substitute. Supervisor checked both C sites and the engine handler (only IGNORE_BIDE / PASSIVE_HP_UPDATE cleared).
+  ISSUES #201; fix briefed as sub260.
 
 ---
 
