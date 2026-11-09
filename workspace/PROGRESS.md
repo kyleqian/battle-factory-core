@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master at the cln244 merge `ee06694f9`; aud243b (ROM T2 replay) running on an integration worktree. Evidence `.integration/validation/sv-20261108/`.
+- **State:** master at the aud243b merge `fdc8307`; aud243c (Opus, T2 alignment diagnosis) running on an integration worktree. Evidence `.integration/validation/sv-20261108/`.
   Baseline: src unchanged since the last full suite (`23a641cb4`), so its receipts were reused; oracles fresh.
 - **Folded:** aud243a (S11 step 7 first half; branch `worker/integration-20261108-213051`, 102 min; `docs/aud243a-sound-census.md`):
   `tick()`'s post-tick sound block moved verbatim into `emitTickSounds` (`src/engine/tickSounds.ts`); `lsd194Census.ts` writes per-seed
@@ -38,6 +38,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `substituteDollDefenderLive` 80 s, spread over shared sprite-order code). ENGINE_BUILD unchanged. Worker: reference test vs a verbatim
   copy of the old code (40 configs, all ages, random order); census r0 100 / 100 both scenes; differential 3 traces 827 identical.
   Supervisor: reference + both Dive adapters 20 / 20.
+- **Folded:** aud243b (S11 step 7 second half, Phase 1 gate; branch `worker/integration-20261109-014605`, 15 min; `docs/aud243b-rom-replay.md`):
+  **gate FAILED, stopped as briefed.** Tools committed (`soundEventProbe.py lab --setup-out`, `soundCensusRomReplay.ts` request / replay /
+  scan, `romStateTimeline.py`, `romTurnNumber.py`). Seed 224 ON: parties and the first action-menu `gRngValue` align, but the first opponent
+  move differs (ROM Scary Face, engine a damaging move); ROM `gRandomTurnNumber` sits 7 draws before the menu (engine 0) on 4 seed / scene
+  runs. Supervisor's lead: the lab stages streak `challengeNum*7` (14 -> AI_SCRIPT_CHECK_BAD_MOVE) while the replay engine may build at streak
+  0 (mask 0). Diagnosis rebriefed to Opus as aud243c (no src/ change allowed in that step).
 
 ---
 
