@@ -298,6 +298,42 @@ function allocatedSlots(body: DiveBody, profile: Readonly<DiveProfile>): number[
   ])];
 }
 
+interface DiveOrderTrack {
+  readonly firstAllocationAge: number;
+  order: number[];
+  /** `results[k]` is the live hardware order at source age `firstAllocationAge + k`. */
+  readonly results: (readonly number[])[];
+}
+
+const DIVE_ORDER_TRACK_LIMIT = 32;
+const diveOrderTracks = new Map<string, DiveOrderTrack>();
+
+// The order at age N is a pure fold over the raw frames of ages first..N, and those frames depend only on (body, side, geometry, profile),
+// all plain data, so the JSON digest is a complete key. Extending a track by one age costs one raw frame + one sort.
+function diveOrderTrack(body: DiveBody, attackerSide: DiveSide, geometry: Readonly<DiveGeometry>,
+  profile: Readonly<DiveProfile>): DiveOrderTrack {
+  const key = JSON.stringify([body, attackerSide, geometry, profile]);
+  const cached = diveOrderTracks.get(key);
+  if (cached) {
+    diveOrderTracks.delete(key);
+    diveOrderTracks.set(key, cached);
+    return cached;
+  }
+  const slots = allocatedSlots(body, profile);
+  if (profile.spriteOrderSeed.length !== slots.length
+    || new Set(profile.spriteOrderSeed).size !== slots.length
+    || slots.some((slot) => !profile.spriteOrderSeed.includes(slot))) {
+    throw new Error("Dive sprite-order seed must permute every live allocation slot");
+  }
+  const track: DiveOrderTrack = { firstAllocationAge: body === "setup" ? 10 : 16,
+    order: profile.spriteOrderSeed.slice(), results: [] };
+  diveOrderTracks.set(key, track);
+  if (diveOrderTracks.size > DIVE_ORDER_TRACK_LIMIT) {
+    diveOrderTracks.delete(diveOrderTracks.keys().next().value!);
+  }
+  return track;
+}
+
 /**
  * Replay Emerald's persistent `sSpriteOrder` rather than using a sprite's
  * creation-row rank forever. Moving equal-subpriority objects are stably
@@ -306,30 +342,23 @@ function allocatedSlots(body: DiveBody, profile: Readonly<DiveProfile>): number[
  */
 function hardwareOrderAtAge(age: number, body: DiveBody, attackerSide: DiveSide,
   geometry: Readonly<DiveGeometry>, profile: Readonly<DiveProfile>): readonly number[] {
-  const slots = allocatedSlots(body, profile);
-  if (profile.spriteOrderSeed.length !== slots.length
-    || new Set(profile.spriteOrderSeed).size !== slots.length
-    || slots.some((slot) => !profile.spriteOrderSeed.includes(slot))) {
-    throw new Error("Dive sprite-order seed must permute every live allocation slot");
-  }
-  const firstAllocationAge = body === "setup" ? 10 : 16;
-  let order = profile.spriteOrderSeed.slice();
-  let currentSlots = new Set<number>();
-  for (let sourceAge = firstAllocationAge; sourceAge <= age; sourceAge += 1) {
+  const track = diveOrderTrack(body, attackerSide, geometry, profile);
+  for (let sourceAge = track.firstAllocationAge + track.results.length; sourceAge <= age; sourceAge += 1) {
     const frame = diveAtAgeRaw(sourceAge, body, attackerSide, geometry, profile);
     const sprites = [frame.ball, frame.splash, ...frame.droplets, ...frame.impacts,
       ...frame.bubbles].filter((sprite): sprite is NonNullable<typeof sprite> => sprite !== null);
     const bySlot = new Map(sprites.map((sprite) => [sprite.slot, sprite] as const));
-    currentSlots = new Set(bySlot.keys());
-    const keys: GbaSpriteOrderKey[] = order.map((slot) => {
+    const keys: GbaSpriteOrderKey[] = track.order.map((slot) => {
       const sprite = bySlot.get(slot);
       return sprite ? { slot, priority: 2, subpriority: sprite.subpriority,
         y: spriteTop(sprite) }
         : { slot, priority: 3, subpriority: 255, y: -96 };
     });
-    order = sortGbaSpriteOrder(order, keys);
+    track.order = sortGbaSpriteOrder(track.order, keys);
+    track.results.push(track.order.filter((slot) => bySlot.has(slot)));
   }
-  return order.filter((slot) => currentSlots.has(slot));
+  const result = track.results[Math.floor(age) - track.firstAllocationAge];
+  return result ? result.slice() : [];
 }
 
 export function diveAtAge(age: number, body: DiveBody, attackerSide: DiveSide,
