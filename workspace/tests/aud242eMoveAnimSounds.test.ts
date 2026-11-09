@@ -67,7 +67,7 @@ interface Spec {
 
 // Per-move offsets (ISSUES #198: the ROM script start vs the live adapter's body clock; shape, ids, pans and relative frames are exact):
 // Thunderbolt / Double-Edge / Icy Wind / Metal Claw / Steel Wing are the +2 idle-lead class; the status bodies Hail / Sunny Day / Calm Mind are -4 / -4 / -5
-// (aud242a's -4 class +-1: per-move constants). The ROM-only rows: Thunderbolt's two SE_M_THUNDERBOLT2 rows behind the unmodelled ElectricityEffect waits, and the next move's body (cut).
+// (aud242a's -4 class +-1: per-move constants). Thunderbolt's two SE_M_THUNDERBOLT2 rows (behind the wait on gThunderboltOrb / gSparkElectricityFlashing, aud242g) carry the same named +1 as its SE_M_HYPER_BEAM row.
 // aud242e models the elliptical task (Double-Edge's SE_M_MEGA_KICK2, +2 like the rest) and the sprite waits before Thunderbolt's SE_M_HYPER_BEAM, which lands 1 frame
 // later than the +2 class (named extra +1, undiagnosed: the ROM's blend log matches the table to the frame up to that row).
 // Metal Claw / Steel Wing: SE_M_HARDEN's second play is a Task_LoopAndPlaySE call counter (28 iterations) that spans the shine's creation, where the ROM
@@ -87,7 +87,7 @@ const SPECS: Record<string, Spec> = {
   "overheat-player": { delta: 2, extra: { "165:147:63": 3, "173:147:63": 3, "183:147:63": 3, "193:147:63": 3 } },
   "counter-player": { delta: -16, romOnly: ["221:214:-63", "239:131:-63"], extra: { "101:238:0": 16 } },
   "gigadrain-player": { delta: -1 },
-  "thunderbolt-player": { delta: 2, romOnly: ["239:119:63", "258:119:63"], extra: { "169:215:63": 1 } },
+  "thunderbolt-player": { delta: 2, extra: { "169:215:63": 1, "236:119:63": 1, "255:119:63": 1 } },
   "sludge-player": { delta: 2 },
   "poisonfang-player": { delta: 2 },
   "watergun-player": { delta: 0 },

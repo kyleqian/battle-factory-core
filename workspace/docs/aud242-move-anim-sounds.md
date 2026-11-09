@@ -566,3 +566,58 @@ Moves whose rows changed: Ice Punch, Headbutt, Horn Attack, Horn Drill, Ice Beam
   (not a table row) and is left for a later slice.
 - Hidden Power uses the move-id script (type-independent); the three rows are pinned by the one window.
 - Growth, Swagger delta are the -4 / -3 status class (ISSUES #198), unchanged by this slice.
+
+## 11. aud242g: Psychic background, Tri Attack triangle, Bubblebeam bubbles / SwayMon, Thunderbolt electricity sprites (Scene ON)
+
+Seventh slice of the move-animation SE lifetimes (`tools/extract/extract-anim-sound-timing.ts`, `lifetimeOf`). The same call numbering as sections 8-10: call 0 is the
+creation in the script step, call k >= 1 is iteration F + k - 1; a thing destroyed at call K is gone K - 1 ticks after F; `waitforvisualfinish` resumes at max(F + exact) + 1.
+Every lifetime below is derived from the C; the only measured constant in the slice is the BG load lag (the existing `BG_LOAD_LAG` method), which turned out to be 0 for BG_PSYCHIC.
+
+### 11.1 Lifetimes derived
+
+| lifetime | C | exact (ticks after F) | ops freed (L50) |
+|---|---|---|---|
+| `AnimTask_SetPsychicBackground` (instant: sets the BG, destroys itself in the entry) | battle_anim_effects_3.c:1372-1376 | -1 | Dream Eater +9 |
+| `gTriAttackTriangleSpriteTemplate` (AnimTriAttackTriangle) | battle_anim_effects_3.c:2015-2046, battle_anim_mons.c:1093-1101, 1111-1146 | 81 | Tri Attack +1 (`gLargeFlameScatterSpriteTemplate` and `AnimTask_ShakeTargetInPattern` still gate the rest) |
+| `gWaterBubbleProjectileSpriteTemplate` (arg 6 = D) | battle_anim_water.c:529-607, :101-107 | D + 23 (73 for Bubblebeam) | Bubblebeam |
+| `AnimTask_SwayMon` (simulated: index += period, half-wave crossings counted) | battle_anim_mon_movement.c:751-815 | call K - 1 of the simulated crossing | Bubblebeam |
+| `gThunderboltOrbSpriteTemplate` (AnimThunderboltOrb, d = arg 0) | battle_anim_electric.c:605-627 | max(d, 0) (44) | Thunderbolt +2 (the two SE_M_THUNDERBOLT2 rows) |
+| `gSparkElectricityFlashingSpriteTemplate` (the init runs the step in call 0; d = arg 3) | battle_anim_electric.c:629-666 | max(d, 0) - 1 (43) | none yet (Spark ends in an unmodelled `ElectricityEffect` wait); modelled because the C is fixed-length |
+
+### 11.2 ROM windows (probe STEP mode with the call log and `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette`; ROM minus ours)
+
+Fixtures `tools/audio/fixtures/aud242g-*.json`, labs `tools/battle-lab/aud242g-*.json` (Bubblebeam reuses `aud242f-bubblebeam-player-on.json`), stages `aud242g-*-player-on`,
+test `tests/aud242gMoveAnimSounds.test.ts`. Recipe: `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette python3 tools/run-mgba-probe.py --rm-log-on-success OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json lab <lab>.json --frames N --profile on --compact`.
+
+| window | delta | notes |
+|---|---|---|
+| Dream Eater | +1 | two-turn lab (Spore, then Dream Eater: the move fails on an awake target and the ROM plays no animation); window from ROM 700; Spore's SE169 rows are frame-exact (delta 0); BG_PSYCHIC load lag 0 |
+| Tri Attack | +2 | the 81-tick triangle is also confirmed by the ROM's BlendPalette log (first call at ROM 151 = 69 + 82); the ROM-only rows are behind the still-gated flame scatter / shake |
+| Bubblebeam | +2 | 24 rows; the SE126 rows (ROM 237..277) keep the +2 of the first rows, which confirms both the 73 and 85 lifetimes |
+| Thunderbolt | +2, +1 named extra on the three rows after the nine-sprite step | the ROM-only rows 239 / 258 (aud242d / e) are now emitted at the same constant as the SE_M_HYPER_BEAM row |
+
+Re-pin of older windows: `tests/aud242dMoveAnimSounds.test.ts` and `aud242eMoveAnimSounds.test.ts` `thunderbolt-player` listed `239:119:63` / `258:119:63` as ROM-only; the model now emits
+them (ours 236 / 255, ROM minus ours 3 = the +2 class plus the named +1) so the `romOnly` entry became two `extra` entries. No frame of an existing row changed.
+
+### 11.3 Counts (turn 0, player attacker)
+
+| | before (`fe84c07e4`) | after |
+|---|---|---|
+| all moves: ops resolved / unresolved | 868 / 244 | 894 / 218 |
+| L50 (276 moves): emitted / gated | 674 / 160 | 692 / 142 |
+
+### 11.4 Residuals
+
+- Not done (out of scope): Blizzard, cry tasks, the waitsound SE-length table, unresolved branches, `ElectricityEffect` (Thunderbolt / Spark tails), `blend_color_cycle`.
+- The per-window offsets (+2 idle-lead, +1 / +3 named extras) are recorded, not fixed (ISSUES #198).
+- A live adapter is not whole-playable arbitrary-history exactness: the windows pin the move body inside the replay staged by each lab.
+
+### 11.5 Acceptance receipt (aud242g)
+
+Tested code commit `36fa6328e` (tree `HEAD^{tree}` at that commit; the later commits of this slice touch only docs).
+
+- `npm run extract:anim-sound-timing` run twice: byte-identical (sha256 `6cd5bdd2...1039f35`), equal to the committed table.
+- `npm run typecheck`, `npm run build`, `npm run build:lib`: each exit 0. `npm run test:gate`: 362 files, 2,835 tests passed. `tests/aud24*.test.ts` + `tests/audio*.test.ts` (incl. audioSinkNeutral): 20 files, 935 passed, 18 skipped (live-oracle probe tests).
+- `npm run compare:differential` (`--harness-from-head`, base `fe84c07e4`) over 10 Scene ON move traces (aud242g Dream Eater / Tri Attack / Bubblebeam, aud242e Thunderbolt, aud242f Psychic / Swagger / Ice Beam / Growth / Luster Purge / Curse; frames 60..821 step 8, Dream Eater 60..1519): **1,047 / 1,047 captures byte-identical**.
+- ENGINE_BUILD (headless graph; the table is in it): `eb-01603ce9f24e6eec` (`fe84c07e4`) -> `eb-52789eb6d9c84998`.
+- Census (`LSD194_SHARDS=0`, seeds 0..99 Scene ON, `soundCensusDelta.py --t1`) vs the aud243a arm `on-858ea0343` shard r0: exact 24,430 -> 24,616 (+186), missing-other 237 -> 51 (the 186 `inside the command` rows are gone: Bubble Beam 78, Thunderbolt 56, Dream Eater 27, Curse 22, Tri Attack 3), missing-gated 1,052 -> 1,052 (unchanged), missing-cry-task 16, extra 0, unclassified 0.
