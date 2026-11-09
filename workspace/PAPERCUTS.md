@@ -10,6 +10,10 @@ history.
 
 ## Census / worktree friction, 2026-11-08 / 09 run
 
+- **`package.json` `"sideEffects": false` silently drops bare side-effect imports from vite bundles** (bnd256c shipped a browser build
+  with no sprite pixels; only `play:random` caught it, vitest / node never bundle). Install-style modules must export a function the host
+  calls. Any bundle-shape step must run `npm run build && npm run play:random -- --minutes 2 --scene both` before it is called green.
+- **The vanilla soak runs past the 10-minute tool limit** (OFF ~27 min, ON ~40 min here); workers lost it to auto-backgrounding (sum259).
 - **Integration worktrees cannot see the main checkout's `.integration/` evidence** (baseline census arms live there; aud243a, ~3 min).
   Briefs should name the absolute path `/srv/pokebench/pokeemerald-factory-core/workspace/.integration/...`.
 - **Long foreground commands (typecheck, census, full suite) are auto-backgrounded at the tool timeout, and a `pgrep -f` poll matches

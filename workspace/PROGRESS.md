@@ -5,10 +5,11 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): in progress
+## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud243a / bnd256c / aud242g / cln244 / aud243b / aud243c / sub260 / sum259 folded
 
-- **State:** master at sum259 `4a7ccad9f` (final src); wind-down gates in the last bullets. Evidence `.integration/validation/sv-20261108/`.
-  Baseline: src unchanged since the last full suite (`23a641cb4`), so its receipts were reused; oracles fresh.
+- **State:** master clean, no active workers; final src == `1613c285a` (bnd256c install fix). Evidence `.integration/validation/sv-20261108/`
+  (gates in `gates/`). No DEFERRED items. No push. ENGINE_BUILD at the final src `eb-b885d2de87ddf075` (moved this run: aud243a, bnd256c,
+  aud242g, sub260, sum259; tell the website). Baseline at start: src unchanged since the last full suite (`23a641cb4`), receipts reused.
 - **Folded:** aud243a (S11 step 7 first half; branch `worker/integration-20261108-213051`, 102 min; `docs/aud243a-sound-census.md`):
   `tick()`'s post-tick sound block moved verbatim into `emitTickSounds` (`src/engine/tickSounds.ts`); `lsd194Census.ts` writes per-seed
   `sound` / `soundDigest` / `soundAnim` (null on older trees); `tools/integration/soundCensusDelta.py` (arm-vs-arm and `--t1`). T1 0..999
@@ -72,6 +73,24 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   non-zero-cursor return; ISSUES #192). Worker: typecheck / build / build:lib 0, test:gate 362 / 362; differential 24 summary / party / swap
   traces vs `3ce21fcd6` 2,576 identical (before (c)). Soak canary, factoryLibrary and the battle differential were left to the supervisor
   (below).
+- **Supervisor fixes at wind-down:** (1) the full suite on `4a7ccad9f` had 2 sum259 failures (1,749 passed + 44 skipped, 2 failed): five new
+  draft traces lacked `appRoute` (added `generated-orchestrator`, the default they replay on; `sum259-input-ready-b60` still 84 / 84 vs the
+  ROM) and `summaryAllFactorySpecies` MOVE_NONE settled at 59 ticks instead of the new open+63 gate (`b55a293ad`). (2) **bnd256c broke the
+  browser build:** `package.json` `"sideEffects": false` let vite drop `lib.ts`'s bare `import "./engine/monPicPixelsInstall.ts"`, so
+  play:random hit pageerror "mon pic pixels not installed" in both scenes (vitest / node run unbundled and never saw it). `lib.ts` now calls
+  `installBundledMonPicPixels()` in `mountFactoryGameInternal`; ratchet updated (`1613c285a`). headless chunks still 7.59 MB.
+- **Gates** (`gates/`): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100** (on `b55a293ad`,
+  engine src == final except `lib.ts`); vanilla 0:20 Scene OFF **20 / 20**, Scene ON **20 / 20** (all `budget`); play:random 2 min /
+  scene seed 7 after the fix: ON 6 battles / 2 swaps, OFF 16 / 8, 0 page errors / console errors / overlays / contained / divergences;
+  differential 5 battle traces vs `3ce21fcd6` (pre-sum259) 1,078 identical; typecheck, build, build:lib 0. The 0:60 gates were not run.
+- **Final full suite** (`gates/suite2.log`, HEAD `1613c285a` == final src): **1,795 files: 1,751 passed + 44 skipped, 0 failed; 14,418 tests
+  passed**, 17.3 min at 5 workers.
+- **Next:** handoff "Next work": aud243d (ROM-side semantic input driver for the census replay, then the K >= 20 sound diff; each HP / RNG
+  mismatch is a gameplay lead, as #201 was), more aud242 lifetimes (`docs/aud242g-scout.md`), al198a (`docs/al198-scout.md`), bnd-d,
+  ISSUES #192 / #196..#200.
+- **Notes:** worker branches (all merged, deleted): integration-20261108-213051 (aud243a), side-20261108-231401 (bnd256c),
+  integration-20261109-002442 (aud242g), side-20261109-010053 (cln244), integration-20261109-014605 (aud243b), integration-20261109-020226
+  (aud243c); sub260 / sub260b / sum259 ran in the main tree. Deleted evidence `sv-20261105`.
 
 ---
 

@@ -59,7 +59,7 @@ kept and is long-tail.
   HITMARKER_IGNORE_SUBSTITUTE; 13 / 1000 census seeds change, identical in both scenes, all explained.
 - **sum259 DONE (2026-11-09, `docs/sum259-summary-flow.md`):** #192 (a) draft return cursor, (b) open+63 summary input gate (ROM-exact),
   (c) swap summary UP / DOWN (residuals in #192).
-- **Bundle:** bnd256c DONE (`docs/bnd256c-pixel-provider.md`): headless 22.5 -> 10.7 MB. **Cleanup 5:** cln244 DONE (Dive reducer
+- **Bundle:** bnd256c DONE (`docs/bnd256c-pixel-provider.md`): headless 22.5 -> 10.7 MB. `lib.ts` must CALL `installBundledMonPicPixels()` (`"sideEffects": false` drops bare imports; fixed at wind-down). **Cleanup 5:** cln244 DONE (Dive reducer
   incremental, full suite 17.1 min at 5 workers; `docs/cln244-dive-incremental.md`). ENGINE_BUILD moved this run (tell the website).
 - **Cleanup:** steps 1, 2, 3 (cln239), 4 (cln241, 2026-11-06: `core-rs/` removed from master, `docs/cln241-core-rs-removal.md`;
   local branch `core-rs-archive` `26ce8d051` keeps it, the user pushes it to its own repo) and 6 are done. Step 5 first half DONE
