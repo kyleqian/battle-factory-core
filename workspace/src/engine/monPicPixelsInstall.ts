@@ -4,4 +4,13 @@ import backSpritesData from "../assets/gen/battle-back-sprites.json" with { type
 import frontSpritesData from "../assets/gen/battle-opponent-front-sprites.json" with { type: "json" };
 import { installMonPicPixels, type MonPicPixelTables } from "./monPicPixels.ts";
 
-installMonPicPixels({ back: backSpritesData, front: frontSpritesData } as unknown as MonPicPixelTables);
+/**
+ * Installs the tables. Bundled hosts must CALL this: package.json declares `"sideEffects": false`, so a bundler drops a bare
+ * `import "./monPicPixelsInstall.ts"` (the browser build shipped uninstalled once: play:random pageerror "mon pic pixels not installed").
+ */
+export function installBundledMonPicPixels(): void {
+  installMonPicPixels({ back: backSpritesData, front: frontSpritesData } as unknown as MonPicPixelTables);
+}
+
+// Unbundled importers (vitest setup, node tools) still install by importing the module.
+installBundledMonPicPixels();

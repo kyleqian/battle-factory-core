@@ -3,7 +3,7 @@
 // turns button presses into the recorded input trace, fast-forwards a resumed
 // trace, and reports the challenge's events. The dev shell (src/main.ts) uses
 // mountFactoryGameInternal for its test ABI; hosts use mountFactoryGame.
-import "./engine/monPicPixelsInstall.ts";
+import { installBundledMonPicPixels } from "./engine/monPicPixelsInstall.ts";
 import { render, SCREEN_HEIGHT, SCREEN_WIDTH } from "./engine/core.ts";
 import type { FactoryEvent, FactoryGame, FactoryGameOptions, TraceSegment } from "./factoryContract.ts";
 import { ENGINE_BUILD, FactorySession } from "./factorySession.ts";
@@ -63,6 +63,8 @@ export function mountFactoryGame(options: FactoryGameOptions): FactoryGame {
 }
 
 export function mountFactoryGameInternal(options: MountInternalOptions): FactoryGameInternal {
+  // A call, not a bare side-effect import: `"sideEffects": false` lets the bundler drop the latter (bnd256c follow-up).
+  installBundledMonPicPixels();
   const { canvas } = options;
   canvas.width = SCREEN_WIDTH;
   canvas.height = SCREEN_HEIGHT;
