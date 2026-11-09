@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-08)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-09)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-08 wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-09 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
   `worker/lib-v2-mac` is folded up to `851ee1f4c`; if the Mac moves that branch again, merge the new tip the same way
@@ -48,6 +48,19 @@ kept and is long-tail.
   emitted 550 -> 674 (160 still gated), all resolved 868. Per-move offsets ISSUES #198. Remaining: Blizzard (per-species off-screen
   lifetime), Tri Attack / Bubblebeam / Luster Purge / ExtremeSpeed / Psychic / Curse / Spark / Attract, `blend_color_cycle`,
   `HardwarePaletteFade`, cry tasks (Roar 36 sets), the waitsound SE-length table, the #198 alignment audit (most moves sit at +2).
+  **aud242g DONE (2026-11-09, doc section 11):** SetPsychicBackground, Tri Attack, Bubblebeam (SwayMon simulated), Thunderbolt orb, Spark;
+  Level-50 emitted 692 (142 gated), all resolved 894.
+- **Audio step 7 (census parity):** aud243a DONE (`docs/aud243a-sound-census.md`): `emitTickSounds` (`src/engine/tickSounds.ts`) shared by
+  `tick()` and the census; census rows carry `sound` / `soundDigest` / `soundAnim`; `soundCensusDelta.py` (arm-vs-arm, `--t1`; T1 is
+  self-consistency only). aud243b (gate failed) + aud243c DONE (`docs/aud243c-alignment.md`): the ROM menu RNG is post-AI, the replay
+  (`tools/integration/soundCensusRomReplay.ts`) aligns on `gRandomTurnNumber`; turn 1-2 match on 4 runs; frame-timed inputs drift after the
+  first faint. It found ISSUES #201 (fixed by sub260, below).
+- **sub260 DONE (2026-11-09, `docs/sub260-ignore-substitute.md`):** source-proven gameplay fix, `Cmd_datahpupdate` clears
+  HITMARKER_IGNORE_SUBSTITUTE; 13 / 1000 census seeds change, identical in both scenes, all explained.
+- **sum259 DONE (2026-11-09, `docs/sum259-summary-flow.md`):** #192 (a) draft return cursor, (b) open+63 summary input gate (ROM-exact),
+  (c) swap summary UP / DOWN (residuals in #192).
+- **Bundle:** bnd256c DONE (`docs/bnd256c-pixel-provider.md`): headless 22.5 -> 10.7 MB. **Cleanup 5:** cln244 DONE (Dive reducer
+  incremental, full suite 17.1 min at 5 workers; `docs/cln244-dive-incremental.md`). ENGINE_BUILD moved this run (tell the website).
 - **Cleanup:** steps 1, 2, 3 (cln239), 4 (cln241, 2026-11-06: `core-rs/` removed from master, `docs/cln241-core-rs-removal.md`;
   local branch `core-rs-archive` `26ce8d051` keeps it, the user pushes it to its own repo) and 6 are done. Step 5 first half DONE
   (cln240: `npm run test:gate`, `docs/cln240-test-gate.md`). **Step 5 second half DONE (cln242, 2026-11-07, `docs/cln242-suite-speed.md`):**
@@ -64,8 +77,8 @@ kept and is long-tail.
 - **4b(e) DONE (obr251, 2026-11-07, `docs/obr251-opponent-party-summary.md`):** the opponent faint-replacement ball bar slides, holds
   100 frames, fades, mirrors its balls and plays SE_BALL_TRAY_ENTER; residuals ISSUES #200. **#195 / #191 fixed (flw252):** party menu
   input waits for the open fade, refusal text for its printer; postwin multichoices step on new presses only.
-- Census baseline for the next delta: `.integration/validation/sv-20261106/obr251-evidence/{on,off}-50285b9d9` (obr251's tree; its
-  delta vs `sv-20261104/frs247-evidence/census/{on,off}-87e9366af` moved only the opponent party-summary durations).
+- Census baseline for the next delta: `.integration/validation/sv-20261108/sub260/census/{on,off}-9b4332163` (sub260's tree, with the
+  sound column; sum259 touches only pre-battle screens, which the census does not run). Previous: `sv-20261108/aud243a/full/{on,off}-858ea0343`.
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
@@ -78,16 +91,17 @@ never brief those here. One worker at a time; each run folds the next audio step
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
    proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05. aud242a DONE 2026-11-06** (generic script-op
    emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07; aud242d / e / f DONE
-   2026-11-08.** Next: **aud243a** (census sound column + T1 delta; read-only scout `docs/aud243-scout.md`: the census never calls
-   `tick()`, so first move the post-tick sound emitters of `core.ts` into one exported function), then aud243b (ROM T2 replay; RNG
-   alignment is the risk); remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave; next lifetimes ranked in `docs/aud242g-scout.md`. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
+   2026-11-08; aud242g, aud243a / b / c DONE 2026-11-09.** Next: **aud243d**, a ROM-side semantic input driver for the census replay
+   (drive the ROM by menu state — pick the engine's move / switch when the ROM's menu opens — instead of frame-timed inputs, which drift
+   after the first faint; `docs/aud243c-alignment.md` section 3), then the sound diff over K >= 20 seeds per scene (each ROM-vs-engine
+   mismatch in HP / RNG is a gameplay bug lead, as #201 was); remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave; next lifetimes ranked in `docs/aud242g-scout.md`. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
-   (5) DONE (cln240 + cln242; optional: speed up `dive.ts` for the slowest files); (4) DONE (cln241);
+   (5) DONE (cln240 + cln242 + cln244 Dive; optional: `summaryAllFactorySpecies` 134 s and `substituteDollDefenderLive` 80 s for < 15 min); (4) DONE (cln241);
    (7) evidence stops going into git (policy line in AGENTS.md DONE 2026-11-07; cln243 DONE 2026-11-07, 11,691 files / 204 MB untracked,
    `docs/cln243-evidence-untrack.md`; the ~593 MB rest of `tools/compare/evidence` is read by tests; remaining per `docs/cln7-scout.md`: ~590 MB of tracked evidence looks write-only;
    first a policy + new-output default to the ignored `.integration/evidence/`, then `git rm --cached` only after a moved-aside full
    suite; no rclone / R2 remote exists on this host, so off-host backup needs the user's setup -- keep evidence local meanwhile).
-3. **Bundle hygiene** (scout: `docs/bnd-scout.md`; **bnd-a DONE 2026-11-08** as bnd253a, `docs/bnd253a-test-json.md`; **bnd-b DONE** as bnd254b, `docs/bnd254b-pic-geometry.md`; gamepad DONE as bnd255f (`connectGamepad`, `docs/library-package.md`); next bnd-c, scout `docs/bnd-c-scout.md`): test-only JSON out of `src/`, sprite pixels out of the headless graph
+3. **Bundle hygiene** (scout: `docs/bnd-scout.md`; **bnd-a DONE 2026-11-08** as bnd253a, `docs/bnd253a-test-json.md`; **bnd-b DONE** as bnd254b, `docs/bnd254b-pic-geometry.md`; gamepad DONE as bnd255f (`connectGamepad`, `docs/library-package.md`); bnd-c DONE as bnd256c, `docs/bnd256c-pixel-provider.md`; next bnd-d: browser chunk split / lazy sprite sheets, `battleScene.ts` / `monPicRender.ts` / `summaryInfoPage.ts` still import the pixel JSON statically): test-only JSON out of `src/`, sprite pixels out of the headless graph
    (`battleCommandFieldArt`, 11.8 MB chunk), lazy-loaded sprite sheets and large tables, gamepad input through `press` / `release`.
 4. **Crashes, nightly (unchanged):** `npm run build && npm run play:random -- --minutes 10 --scene both` (plus a
    `--lobby-new-challenge` run); Scene ON soak `--render-every 8` 0:16..0:30 plus a `--render-every 1` sample; varied-RNG sweeps;
