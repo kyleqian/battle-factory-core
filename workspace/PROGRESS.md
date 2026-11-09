@@ -7,7 +7,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
-- **State:** master at sub260b `c85b5891d`; sum259 (#192 summary flow) running in the main tree. Evidence `.integration/validation/sv-20261108/`.
+- **State:** master at sum259 `4a7ccad9f` (final src); wind-down gates in the last bullets. Evidence `.integration/validation/sv-20261108/`.
   Baseline: src unchanged since the last full suite (`23a641cb4`), so its receipts were reused; oracles fresh.
 - **Folded:** aud243a (S11 step 7 first half; branch `worker/integration-20261108-213051`, 102 min; `docs/aud243a-sound-census.md`):
   `tick()`'s post-tick sound block moved verbatim into `emitTickSounds` (`src/engine/tickSounds.ts`); `lsd194Census.ts` writes per-seed
@@ -64,6 +64,14 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   **sub260b** (10 min) re-pinned that test to seed 862 / streak 35 (scan of 0..999 x 7 streaks, `tools/integration/substituteToxicRouteScan.ts`);
   every assertion unchanged. Supervisor: C sites read; sub260 + setsubstitute tests 16 / 16; census classifier output read (both scenes).
   New census baseline: `sv-20261108/sub260/census`.
+- **Landed:** sum259 (ts lane, ISSUES #192, 63 min; `docs/sum259-summary-flow.md`): (a) the draft cursor follows `gLastViewedMonIndex`
+  after the summary closes (`sum259-draft-return-cursor` 113 / 113, `-reopen-after-return` 73 / 73 exact); (b) summary input ignored until
+  open+63 (`gPaletteFade.active` outlives the visible fade by 4 ticks; B at +60 / +62 ignored, +63 closes, all three traces exact; test helpers
+  settle at 63 instead of 59); (c) the swap summary does UP / DOWN over its 3 mons (clamp) and returns on the last viewed mon
+  (`sum259-swap-summary-mon-change` 208 / 242: #188-class sprite frames, two frames of 18 / 68 px, ball shading 30036..30056 after a
+  non-zero-cursor return; ISSUES #192). Worker: typecheck / build / build:lib 0, test:gate 362 / 362; differential 24 summary / party / swap
+  traces vs `3ce21fcd6` 2,576 identical (before (c)). Soak canary, factoryLibrary and the battle differential were left to the supervisor
+  (below).
 
 ---
 

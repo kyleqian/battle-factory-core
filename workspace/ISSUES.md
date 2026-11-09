@@ -92,12 +92,12 @@ timing residuals (finish plan item 6). A fix re-pins the deltas to 0.
 an opposing switch-in inside the forced-selector prefix gets no sound; a Baton Pass hidden-attacker recall is not
 distinguished from a plain recall. Unproven by ROM window: Brain 471, WEAK send-out cry, Scene ON voluntary / opponent mid-battle.
 
-## #192 — Summary screen flow gaps vs the ROM (aud240b, 2026-11-03)
+## #192 — Summary screen flow gaps vs the ROM: swap-summary residuals (aud240b 2026-11-03; (a) / (b) FIXED sum259 2026-11-09)
 
-Found while proving summary sounds (`docs/aud240b-summary-sounds.md` "Gaps"): (a) after the draft summary closes, our draft
-cursor does not move to `gLastViewedMonIndex` (the ROM re-opens on the last viewed mon; ours on the old slot); (b) summary
-input is accepted from open+59 in ours, open+63 in the ROM, so a B at open+59..62 closes ours and is ignored by the ROM; (c) the
-swap's summary has no mon change (UP/DOWN) in ours. All three are source-proven flow fixes; prove each on the ON oracle.
+(c) swap summary UP / DOWN landed in sum259 (`docs/sum259-summary-flow.md`), `sum259-swap-summary-mon-change` 208 / 242 vs the ROM:
+29878, 29880..29897 mon-change sprite area (#188 class); 29842 / 29914 (18 / 68 px, undiagnosed); 30036..30043, 30052..30056 the two ball
+sprites' shading after returning on cursor 1 (cause unknown; ball roll / epoch for a non-zero cursor is a guess). Swap mon-change sounds not
+compared against ROM audio.
 
 ## #193 — Summary sound scheduler debt (aud240b, 2026-11-03)
 
