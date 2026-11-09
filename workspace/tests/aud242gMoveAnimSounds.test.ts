@@ -72,6 +72,8 @@ const SPECS: Record<string, Spec> = {
   // Both psychic-background rows (SE204 after the fade) and the eight SE193 / SE179 rows behind it are exact at the one +1 residual: BG_PSYCHIC has no measured load lag.
   "dreameater-player": { delta: 1, romFrom: 700 },
   // SE221 (after the flame scatter wait) and the seven ice crystal SE137 rows (after the AnimTask_ShakeTargetInPattern waits) stay ROM-only.
+  // 18 SE124 rows (three bubble volleys) then six SE126 rows behind the 18 projectile (D + 23 = 73) and SwayMon (85) waits; the lab is aud242f's.
+  "bubblebeam-player": { delta: 2 },
   "triattack-player": { delta: 2, romOnly: ["223:221:63", "273:137:63", "279:137:63", "285:137:63", "291:137:63", "297:137:63", "303:137:63", "309:137:63"] },
 };
 

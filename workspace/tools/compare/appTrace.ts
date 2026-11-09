@@ -1904,7 +1904,6 @@ export const APP_STAGES: Readonly<Record<string, AppStage>> = {
   "aud242f-growth-player-on": (state) => aud241bStage(state, "aud242f-growth-player-on", "on", 50, 12, 74, undefined, false, 69),
   "aud242f-swagger-player-on": (state) => aud241bStage(state, "aud242f-swagger-player-on", "on", 50, 12, 207, undefined, false, 69),
   // aud242g: SetPsychicBackground / Tri Attack triangle lifetimes (docs/aud242-move-anim-sounds.md section 11).
-  "aud242g-dreameater-player-on": (state) => aud241bStage(state, "aud242g-dreameater-player-on", "on", 50, 12, 138, undefined, false, 69),
   "aud242g-triattack-player-on": (state) => aud241bStage(state, "aud242g-triattack-player-on", "on", 50, 12, 161, undefined, false, 69),
   // Dream Eater needs a sleeping target: turn 1 Spore (slot 0), turn 2 Dream Eater (slot 1).
   "aud242g-dreameater-sleep-player-on": (state) =>

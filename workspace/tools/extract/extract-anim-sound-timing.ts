@@ -313,6 +313,31 @@ function lifetimeOf(cmd: Command): Lifetime {
   // and translates at once (AnimTranslateLinear, :1111-1139: 20 -> 0 over calls 61..80); call 81 sees data[0] == 0, SetCallbackToStoredInData6 (:1141-1146) installs
   // DestroyAnimSprite and call 82 destroys: gone 81 ticks after F. Args only move the start position.
   if (sprite("gTriAttackTriangleSpriteTemplate")) return { exact: 81 };
+  // AnimWaterBubbleProjectile (battle_anim_water.c:529-607; D = gBattleAnimArgs[6] = script args[9], the timer): call 0 (script step) is the init plus Step1's first run
+  // (timer D -> D - 1; the sprite is animPaused with its anim at frame 0, delay counter 0); Step1 runs in calls 0..D - 1 and the call D - 1 that reaches --timer == 0 installs Step2;
+  // Step2 (call D) un-pauses and installs RunStoredCallbackWhenAnimEnds (+ Step3); sAnim_WaterBubbleProjectile (:101-107, frames 1 / 5 / 5) then moves to frame 1 in call D
+  // (AnimateSprite follows the callback, sprite.c:308-323, ContinueAnim :942-960), counts its 4 delay calls D + 1..D + 4, frame 2 at call D + 5 (4 more calls), END (animEnded) at call D + 10;
+  // call D + 11 runs the stored Step3, call D + 12 runs Step3 (data[0] = 10, WaitAnimForDuration), calls D + 13..D + 22 count it down, call D + 23 installs DestroySpriteAndMatrix,
+  // call D + 24 destroys: gone D + 23 ticks after F (73 for the Bubblebeam bubbles). The invisible helper sprite is DestroySprite'd without the visual-task decrement.
+  if (sprite("gWaterBubbleProjectileSpriteTemplate")) { const d = intArg(args[9]); return d === null || d < 1 || d > 255 ? null : { exact: d + 23 }; }
+  // AnimTask_SwayMon (battle_anim_mon_movement.c:751-815): the entry only sets func (data[11] = 0, data[12] = 1); the step's call k adds `period` (script args[4], as a u16) to the
+  // sine index, waveIndex = index >> 8, and a half-wave crossing (waveIndex >= 0x80 while data[12] == 1, or < 0x7f while data[12] == 0) flips the state and decrements the
+  // sway count (args[5]); the call that reaches 0 destroys the task: call K, gone K - 1 ticks after F.
+  if (op === "createvisualtask" && args[0] === "AnimTask_SwayMon") {
+    const [period, sways] = [intArg(args[4]), intArg(args[5])];
+    if (period === null || sways === null || sways < 1) return null;
+    let [index, remaining, high] = [0, sways, false];
+    for (let call = 1; call <= 100000; call += 1) {
+      index = (index + period) & 0xffff;
+      const wave = index >> 8;
+      if ((!high && wave >= 0x80) || (high && wave < 0x7f)) {
+        high = !high;
+        remaining -= 1;
+        if (remaining === 0) return { exact: call - 1 };
+      }
+    }
+    return null;
+  }
   if (op === "create_basic_hitsplat_sprite") return { bound: 10 };
   return null;
 }
