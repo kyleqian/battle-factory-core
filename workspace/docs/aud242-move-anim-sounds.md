@@ -611,3 +611,13 @@ them (ours 236 / 255, ROM minus ours 3 = the +2 class plus the named +1) so the 
 - Not done (out of scope): Blizzard, cry tasks, the waitsound SE-length table, unresolved branches, `ElectricityEffect` (Thunderbolt / Spark tails), `blend_color_cycle`.
 - The per-window offsets (+2 idle-lead, +1 / +3 named extras) are recorded, not fixed (ISSUES #198).
 - A live adapter is not whole-playable arbitrary-history exactness: the windows pin the move body inside the replay staged by each lab.
+
+### 11.5 Acceptance receipt (aud242g)
+
+Tested code commit `36fa6328e` (tree `HEAD^{tree}` at that commit; the later commits of this slice touch only docs).
+
+- `npm run extract:anim-sound-timing` run twice: byte-identical (sha256 `6cd5bdd2...1039f35`), equal to the committed table.
+- `npm run typecheck`, `npm run build`, `npm run build:lib`: each exit 0. `npm run test:gate`: 362 files, 2,835 tests passed. `tests/aud24*.test.ts` + `tests/audio*.test.ts` (incl. audioSinkNeutral): 20 files, 935 passed, 18 skipped (live-oracle probe tests).
+- `npm run compare:differential` (`--harness-from-head`, base `fe84c07e4`) over 10 Scene ON move traces (aud242g Dream Eater / Tri Attack / Bubblebeam, aud242e Thunderbolt, aud242f Psychic / Swagger / Ice Beam / Growth / Luster Purge / Curse; frames 60..821 step 8, Dream Eater 60..1519): **1,047 / 1,047 captures byte-identical**.
+- ENGINE_BUILD (headless graph; the table is in it): `eb-01603ce9f24e6eec` (`fe84c07e4`) -> `eb-52789eb6d9c84998`.
+- Census (`LSD194_SHARDS=0`, seeds 0..99 Scene ON, `soundCensusDelta.py --t1`) vs the aud243a arm `on-858ea0343` shard r0: exact 24,430 -> 24,616 (+186), missing-other 237 -> 51 (the 186 `inside the command` rows are gone: Bubble Beam 78, Thunderbolt 56, Dream Eater 27, Curse 22, Tri Attack 3), missing-gated 1,052 -> 1,052 (unchanged), missing-cry-task 16, extra 0, unclassified 0.
