@@ -17,6 +17,10 @@ OUT.json must not exist (the probe and the wrapper both refuse a stale path); --
 --compact writes the committed-fixture form (one line, no spaces, trailing newline); --extra-hooks NAME[,NAME] (or AUDIO_PROBE_EXTRA_HOOKS=NAME[,NAME]; both are merged) adds non-audio call-log hooks, e.g. BlendPalette for the aud242d+ fixtures.
 --setup-out FILE (lab mode, aud243b) writes {descriptor, snapshot, randomTurnNumber, opponentReply} of the staged action-menu state (gRngValue, both parties, battlers; aud243c: gRandomTurnNumber and the
 opponent controller reply gBattleBufferB[1][0..3]) before the window runs.
+--drive DECISIONS.json (lab mode, aud243d) replaces the request's static trace by the closed-loop ROM driver (tools/audio/romDecisionDriver.py): it consumes the engine's decision list
+(soundCensusRomReplay.ts `decisions`) by menu state until gBattleOutcome != 0 (or --frames N, or the no-progress watchdog, which aborts with a state dump), at full speed with no sound hooks. The result's `drive` key
+carries the executed run-length segments, per-decision ROM anchors, the ROM state timeline and the stop reason; --drive-out FILE also writes the request with trace.segments = the executed segments (the frozen,
+open-loop trace for romStateTimeline.py / a sound pass of `lab`).
 --profile selects the Scene ON (default) or Scene OFF oracle bootstrap.
 --fast is the hybrid mode: frames run at full speed and a frame is re-stepped (from the
 saved pre-frame state) only when the m4a RAM signature changed during it. Plain stepping
@@ -31,6 +35,8 @@ sys.path.insert(0, str(HARNESS / "oracle"))
 from emerald_core import EmeraldOracle  # noqa: E402
 from battle_lab import BattleLab, validate_request  # noqa: E402
 from mgba import ffi  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import romDecisionDriver  # noqa: E402
 
 REF = (ROOT / "reference/pokeemerald").resolve()
 HOOKS = ["m4aSongNumStart", "m4aSongNumStop", "PlayCryInternal", "PlaySE12WithPanning", "PlaySE1WithPanning",
@@ -78,6 +84,56 @@ def extra_hook_names(rest, environ):
         elif a.startswith("--extra-hooks="):
             raw.append(a.split("=", 1)[1])
     return list(dict.fromkeys(n.strip() for r in raw for n in r.split(",") if n.strip()))
+
+
+DRIVE_FRAME_CAP = 80000
+
+
+def drive_lab(oracle, funcs, decisions, cap=None):
+    """Closed-loop run of the staged lab battle (aud243d): returns the executed segments, anchors, ROM timeline (romStateTimeline.py row shape) and stop reason."""
+    sym = oracle.symbols
+    mons, tasks = sym["gBattleMons"], sym["gTasks"]
+    driver = romDecisionDriver.RomDriver(decisions, funcs)
+
+    def hp_row():
+        return (oracle.read_u16(sym["gCurrentMove"]), oracle.read_u16(mons + 0x28), oracle.read_u16(mons + 0x58 + 0x28),
+                oracle.read_u32(sym["gRngValue"]), oracle.read_u16(sym["gLastMoves"]), oracle.read_u16(sym["gLastMoves"] + 2))
+
+    def observe(row):
+        func = oracle.read_u32(sym["gBattlerControllerFuncs"])
+        live = [oracle.read_u32(tasks + i * 40) & ~1 for i in range(16) if oracle.read_u8(tasks + i * 40 + 4)]
+        slot = oracle.read_u8(sym["gPartyMenu"] + 9)
+        return {"func": func, "actionCursor": oracle.read_u8(sym["gActionSelectionCursor"]), "moveCursor": oracle.read_u8(sym["gMoveSelectionCursor"]),
+                "slotId": slot - 256 if slot & 0x80 else slot, "partyTasks": live, "outcome": oracle.read_u8(sym["gBattleOutcome"]),
+                "sig": (func, row[1], row[2], row[3], oracle.read_u32(sym["gBattlescriptCurrInstr"]), oracle.read_u32(sym["gBattleMainFunc"]),
+                        oracle.read_u32(sym["gBattleControllerExecFlags"]), oracle.read_u32(sym["gBattlerControllerFuncs"] + 4), tuple(live))}
+
+    frames, timeline, stop, error = [], [], "outcome", None
+    row = hp_row()
+    timeline.append([0, *row])
+    limit = DRIVE_FRAME_CAP if cap is None else cap
+    while True:
+        obs = observe(row)
+        try:
+            buttons = driver.step(obs)
+        except romDecisionDriver.DriverError as e:
+            stop, error = e.reason, e.dump
+            break
+        if buttons is None:
+            break
+        if len(frames) >= limit:
+            stop = "frame-cap"
+            break
+        oracle.advance(buttons)
+        frames.append(buttons)
+        driver.advanced()
+        cur = hp_row()
+        if cur != row:
+            timeline.append([len(frames), *cur])
+            row = cur
+    return {"stop": stop, "error": error, "frames": len(frames), "decisionsConsumed": driver.index, "decisionsTotal": len(decisions),
+            "segments": romDecisionDriver.rle(frames), "anchors": driver.anchors, "timeline": timeline, "outcome": oracle.read_u8(sym["gBattleOutcome"]),
+            "transitions": driver.trace, "lastObs": {k: v for k, v in obs.items() if k != "sig"}}
 
 
 def main():
@@ -251,6 +307,13 @@ def main():
                                "catchup_steps": caught, "residual_bytes_after_catchup": None if residual is None else len(residual)})
 
     replay_trace = None
+    def run_drive(oracle, path, cap):
+        return drive_lab(oracle, romDecisionDriver.resolve_funcs(REF), romDecisionDriver.load_decisions(path), cap)
+
+    drive_path = rest[rest.index("--drive") + 1] if "--drive" in rest else None
+    drive_out = Path(rest[rest.index("--drive-out") + 1]) if "--drive-out" in rest else None
+    if drive_path is not None and mode != "lab":
+        raise SystemExit("soundEventProbe: --drive needs lab mode")
     t0 = time.time()
     if fast:
         advance = hybrid_advance
@@ -312,6 +375,13 @@ def main():
                  # aud243c: the opponent's turn-1 decision is already made at the menu (gRngValue is post-AI); the replay aligns on gRandomTurnNumber instead.
                  "randomTurnNumber": oracle.read_u16(oracle.symbols["gRandomTurnNumber"]),
                  "opponentReply": [oracle.read_u8(oracle.symbols["gBattleBufferB"] + 0x200 + i) for i in range(4)]}, separators=(",", ":")))
+    drive_result = None
+    if drive_path is not None:
+        drive_result = run_drive(oracle, drive_path, frames_cap)
+        segments = []
+        replay_trace["segments"] = drive_result["segments"]
+        if drive_out is not None:
+            drive_out.write_text(json.dumps({**request, "trace": {"segments": drive_result["segments"], "captureFrames": [0]}}, indent=1))
     t_window = time.time()
     done = 0
     for seg in segments:
@@ -335,6 +405,8 @@ def main():
     }
     if replay_trace is not None:
         result["trace"] = replay_trace
+    if drive_result is not None:
+        result["drive"] = drive_result
     out.write_text(json.dumps(result, separators=(",", ":")) + "\n" if "--compact" in rest else json.dumps(result, indent=1))
 
 
