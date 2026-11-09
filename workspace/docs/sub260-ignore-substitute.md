@@ -84,3 +84,13 @@ plus a log of every healthbarupdate that sees the IGNORE_SUBSTITUTE bit set on a
 ## 6. Gates
 
 ENGINE_BUILD `eb-52789eb6d9c84998` -> `eb-12d5aa7535f49c46` (before = tree at 5ee298893 built with the same headless config; after = this tree). Tell the website.
+ENGINE_BUILD above is the headless-config hash of both trees. typecheck / build / build:lib 0; `npm run test:gate` 0 (362 files, 2835 tests); soak vanilla 0:20 20/20 OK;
+full suite in 6 foreground shards (`POKEBENCH_VITEST_MAX_WORKERS=5 npm test -- --shard=i/6`): shards 1, 2, 4, 5, 6 green, shard 3 has ONE failure (below).
+
+## 7. Open: tests/substituteSwapAttdollCells.test.ts (shard 3), not re-pinned
+
+"SHUCKLE 243/35 [Substitute, Attract, Toxic, Double Team]" fails at line 144 (`view.field.player.substituteDoll` undefined at Toxic). Cause (boundary dump, `generatedCommandAnimationReplay(243,"on",[0,2],35,...)`):
+requests are identical before and after the fix (86:1->0 164:0->0 85:1->0 92:0->1). Before: Leftovers leaked hitMarker 256 into turn 2, so the opponent's Thunderbolt bypassed the Substitute
+(player 73 -> 51, sub stays 22) and the doll was still up at Toxic. After: Thunderbolt hits the Substitute and breaks it (sub 22 -> 0, player HP 73 -> 78 from Leftovers), so there is no doll at Toxic.
+That is the source-correct outcome, so the staged premise (a live Substitute during Toxic) no longer holds on this seed. It needs a route where the Substitute survives turn 2
+(different seed / streak with the same 316-row / tail assertions); a scan of seeds 0..85 and 244..~400 (streak 35, inputs [0,2]) found none. Left failing, unweakened.
