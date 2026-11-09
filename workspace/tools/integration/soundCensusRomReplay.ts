@@ -5,6 +5,7 @@
 //     setup.json = `soundEventProbe.py lab REQ --setup-out` (the ROM's action-menu gRngValue, both parties). The engine battle is rebuilt FROM THE ROM (player rentals and opponent
 //     personalities read back, battle RNG = the ROM's gRngValue at the action menu) and played with the census policy; writes the per-frame inputs (run-length encoded, frame 1 = the
 //     first step after the action menu appeared) and the sound rows relative to that frame.
+//   compare: ... compare --seed=N --scene=on|off --engine=engine.json --rom=timeline.json [--out=F]  (aud243c) engine states (hp, rng, last moves) found in order in the ROM timeline.
 //   native: ... native --seed=N --scene=on|off --out=engine.json  the census orchestrator itself (no ROM), same output shape: the drift check against the census row's sound column.
 import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync, readFileSync } from "node:fs";
@@ -119,7 +120,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
     for (const e of events) sound.push(e.mode === undefined ? [e.frame, e.kind, e.id, e.pan] : [e.frame, e.kind, e.id, e.pan, e.mode]);
     if (frame0 !== null && state.battle) {
       const rc = state.battle.rules.rulesContext;
-      const row = [rc.currentMove, rc.battlers[0].hp, rc.battlers[1].hp, state.battle.rng.value];
+      const row = [rc.currentMove, rc.battlers[0].hp, rc.battlers[1].hp, state.battle.rng.value, rc.moveHistory.lastMoves[0], rc.moveHistory.lastMoves[1]];
       if (row.join() !== lastTl) { lastTl = row.join(); timeline.push([frame - frame0, ...row]); }
     }
     if (!owned()) ended = true;
@@ -189,18 +190,42 @@ if (mode === "request") {
 } else if (mode === "native") {
   writeFileSync(arg("out")!, JSON.stringify(result(play(nativeOrchestrator(), true))));
 } else if (mode === "replay") {
+  // aud243c: the ROM's menu gRngValue is POST-AI. The opponent controller answers CHOOSE_ACTION (AI_TrySwitchOrUseItem, battle_controller_opponent.c:1540) and CHOOSE_MOVE
+  // (BattleAI_SetupAIData + BattleAI_ChooseMoveOrAction, :1566) while the player's action menu is still up, so its draws precede the menu; the engine spends them at the
+  // turn's commit. Align on gRandomTurnNumber (setup.randomTurnNumber, or --turn-number=N for pre-aud243c setups) and require the engine's menu value to be
+  // LCG^-j(ROM menu) for some j (j = the ROM opponent's pre-menu decision draws); k = the engine's own draws before its menu.
   const setup = JSON.parse(readFileSync(arg("setup")!, "utf8"));
   const target = setup.snapshot.rngValue >>> 0;
-  // The engine's battle init spends k draws (turn-order Random(), tie draw) before the first command; start k draws before the ROM's action-menu value.
-  let k = Number(arg("draws") ?? "-1"); let attempt: ReturnType<typeof play> | null = null;
-  for (const tryK of k >= 0 ? [k] : [0, 1, 2, 3, 4]) {
+  const turnNumber = setup.randomTurnNumber ?? (arg("turn-number") === undefined ? undefined : Number(arg("turn-number")));
+  if (turnNumber === undefined) throw new Error("setup has no randomTurnNumber (re-run soundEventProbe --setup-out) and no --turn-number=N");
+  const behind = new Map<number, number>(); for (let j = 0, x = target; j <= 32; j += 1, x = lcgInverse(x)) behind.set(x, j);
+  let attempt: ReturnType<typeof play> | null = null; let k = -1; let j = -1;
+  for (let tryK = 0; tryK <= 48 && attempt === null; tryK += 1) {
     let fresh = target; for (let i = 0; i < tryK; i += 1) fresh = lcgInverse(fresh);
     const probe = play(adoptedOrchestrator(setup, fresh), false);
-    if (probe.actionMenuRng === target) { k = tryK; attempt = play(adoptedOrchestrator(setup, fresh), true); break; }
-    k = -2;
+    if (probe.randomTurnNumber === turnNumber && probe.actionMenuRng !== null && behind.has(probe.actionMenuRng)) {
+      k = tryK; j = behind.get(probe.actionMenuRng)!; attempt = play(adoptedOrchestrator(setup, fresh), true);
+    }
   }
-  if (attempt === null) throw new Error(`no draw count aligns the engine's action-menu RNG with the ROM's ${target}`);
-  writeFileSync(arg("out")!, JSON.stringify(result(attempt, { romRngAtActionMenu: target, engineDrawsBeforeActionMenu: k })));
+  if (attempt === null) throw new Error(`no draw count gives the ROM's gRandomTurnNumber ${turnNumber} with a menu RNG at most 32 draws before the ROM's ${target}`);
+  writeFileSync(arg("out")!, JSON.stringify(result(attempt, {
+    romRngAtActionMenu: target, romRandomTurnNumber: turnNumber, romOpponentReply: setup.opponentReply ?? null,
+    engineDrawsBeforeActionMenu: k, romOpponentDrawsBeforeActionMenu: j,
+  })));
+} else if (mode === "compare") {
+  // aud243c: engine timeline rows [frame, currentMove, hp0, hp1, rng, last0, last1] against romStateTimeline.py rows of the same shape. The engine resolves a turn at its
+  // commit, so each engine state (hp0, hp1, rng, last0, last1) must appear among the ROM's states in order; the first that does not is the divergence.
+  const engine = JSON.parse(readFileSync(arg("engine")!, "utf8")); const rom = JSON.parse(readFileSync(arg("rom")!, "utf8")).rows as number[][];
+  const key = (r: number[]) => r.slice(2, 7).join();
+  let at = 0; const matched: unknown[] = []; let divergence: unknown = null;
+  // Row 0 is the engine's action-menu state, whose RNG is the ROM's pre-AI value by construction (see replay); compare from the first committed turn.
+  for (const row of (engine.timeline as number[][]).slice(1)) {
+    const found = rom.findIndex((r, i) => i >= at && key(r) === key(row));
+    if (found < 0) { divergence = { engine: row, romAfter: rom.slice(at, at + 6) }; break; }
+    matched.push({ engineFrame: row[0], romFrame: rom[found]![0], hp: [row[2], row[3]], rng: row[4], lastMoves: [row[5], row[6]] }); at = found;
+  }
+  const out = { seed, scene, matched: matched.length, engineRows: engine.timeline.length, romRows: rom.length, rows: matched, divergence };
+  console.log(JSON.stringify(out)); if (arg("out")) writeFileSync(arg("out")!, JSON.stringify(out));
 } else if (mode === "scan") {
   const setup = JSON.parse(readFileSync(arg("setup")!, "utf8")); const target = setup.snapshot.rngValue >>> 0;
   const only = arg("draws");
@@ -209,4 +234,4 @@ if (mode === "request") {
     let fresh = target; for (let i = 0; i < tryK; i += 1) fresh = lcgInverse(fresh);
     try { const pr = play(adoptedOrchestrator(setup, fresh), only !== undefined, arg("patch") ? target : null); console.log(tryK, pr.randomTurnNumber, pr.actionMenuRng, pr.actionMenuRng === target, pr.error); if (only !== undefined) console.log(JSON.stringify(pr.timeline.slice(0, 8))); } catch (e) { console.log(tryK, String(e).slice(0, 80)); }
   }
-} else throw new Error("mode: request | native | replay");
+} else throw new Error("mode: request | native | replay | compare | scan");

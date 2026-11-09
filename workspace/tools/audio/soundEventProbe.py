@@ -15,7 +15,8 @@ first frame whose capture can show its effect. `lab` replays a battle-lab reques
 `lab` output carries the replay `trace` key (route / battleScene / appStage id = request file stem / segments) that the aud24* tests replay.
 OUT.json must not exist (the probe and the wrapper both refuse a stale path); --rm-log-on-success drops the wrapper's OUT.json.log.
 --compact writes the committed-fixture form (one line, no spaces, trailing newline); --extra-hooks NAME[,NAME] (or AUDIO_PROBE_EXTRA_HOOKS=NAME[,NAME]; both are merged) adds non-audio call-log hooks, e.g. BlendPalette for the aud242d+ fixtures.
---setup-out FILE (lab mode, aud243b) writes {descriptor, snapshot} of the staged action-menu state (gRngValue, both parties, battlers) before the window runs.
+--setup-out FILE (lab mode, aud243b) writes {descriptor, snapshot, randomTurnNumber, opponentReply} of the staged action-menu state (gRngValue, both parties, battlers; aud243c: gRandomTurnNumber and the
+opponent controller reply gBattleBufferB[1][0..3]) before the window runs.
 --profile selects the Scene ON (default) or Scene OFF oracle bootstrap.
 --fast is the hybrid mode: frames run at full speed and a frame is re-stepped (from the
 saved pre-frame state) only when the m4a RAM signature changed during it. Plain stepping
@@ -307,7 +308,10 @@ def main():
         replay_trace = lab_replay_trace(rest[0], profile, segments)
         if "--setup-out" in rest:  # aud243b: the action-menu state (RNG, both parties) of this lab staging, for the engine side of a ROM replay
             Path(rest[rest.index("--setup-out") + 1]).write_text(json.dumps(
-                {"descriptor": {k: v for k, v in descriptor.items() if k != "preCheckpointCaptures"}, "snapshot": lab.snapshot()}, separators=(",", ":")))
+                {"descriptor": {k: v for k, v in descriptor.items() if k != "preCheckpointCaptures"}, "snapshot": lab.snapshot(),
+                 # aud243c: the opponent's turn-1 decision is already made at the menu (gRngValue is post-AI); the replay aligns on gRandomTurnNumber instead.
+                 "randomTurnNumber": oracle.read_u16(oracle.symbols["gRandomTurnNumber"]),
+                 "opponentReply": [oracle.read_u8(oracle.symbols["gBattleBufferB"] + 0x200 + i) for i in range(4)]}, separators=(",", ":")))
     t_window = time.time()
     done = 0
     for seg in segments:
