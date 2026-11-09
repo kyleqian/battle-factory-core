@@ -25,3 +25,60 @@ Result: one wrong engine site (datahpupdate), fixed. No other site needed a chan
 
 `tests/sub260IgnoreSubstitute.test.ts` (6 tests). Without the fix 4 fail (the heal, damage and substitute-bit-set handler tests, and the staged
 Leftovers -> Tackle test); the Substitute-absorb and MOVE_RESULT_NO_EFFECT tests pass on both sides, as they should.
+
+## 3. Fix
+
+`battleScriptHitChainOpcode.ts` Cmd_datahpupdate: after the `substituteActive` branch, `hitMarkerAfterIgnoreSubstituteClear = hitMarker & ~HITMARKER_IGNORE_SUBSTITUTE`
+feeds both the negative-damage (heal) and the damage branch, as :1895 does. MOVE_RESULT_NO_EFFECT still skips the whole block. No Random() draw changes.
+
+Re-pinned (one): `tests/battleScriptSetsubstituteOpcode.test.ts` "success spends PP ...". It asserted `hitMarker & IGNORE_SUBSTITUTE` stayed 256 after
+BattleScript_EffectSubstitute. In C the script's own `datahpupdate BS_ATTACKER` runs the :1895 clear, so the bit is 0 afterwards. Re-pinned to 0 with the reason in a comment;
+no assertion weakened (the same field is still asserted, to the source value).
+
+## 4. ROM proof: seed 177 Scene ON (turn 2 now matches)
+
+Evidence (ignored): `.integration/validation/sv-20261108/sub260/rom177/`. Same staging as aud243c section 3 (`setup.json` from `soundEventProbe.py lab --setup-out`, replay
+with `soundCensusRomReplay.ts`, ROM timeline from `romStateTimeline.py`, `compare`). The unshifted aud243c request drifts on input timing (the ROM picked Toxic where the engine
+picked Attract, A presses landing before the menu opened), so the lab request carries a +30 frame delay on the idle segment. That is a request-only change; no driver change.
+
+| turn | ROM | engine before fix | engine after fix |
+|---|---|---|---|
+| T1 | 6 / 165, RNG 1970019264, [164 Substitute, 57 Surf] | same | same |
+| T2 Shadow Ball (crit) | Substitute absorbs it; player HP stays 6; Leftovers heals to 11; opp 165; RNG 2525390639 | player KO (HP 0) | **6 -> 11 / 165, RNG 2525390639** |
+
+`compare`: 3 engine timeline states matched in order among the ROM states (T1, T2 after the absorbed Shadow Ball, T2 after Leftovers), with equal HP, RNG and last moves.
+The after-fix T2 events show `STRINGID_CRITICALHIT`, `STRINGID_SUBSTITUTEDAMAGED`, no `STRINGID_TARGETFAINTED`.
+
+## 5. Census delta, seeds 0..999, both scenes
+
+Arms: baseline = the aud243a full arms (commit 858ea0343, `.integration/validation/sv-20261108/aud243a/full/`); fixed = `.../sub260/census/{on,off}-9b4332163`
+(lsd194Census, LSD194_SPLIT=4, 25-seed parts). Classifier: `tools/integration/sub260Classify.py`, instrumented tree: `sub260Instrument.py` (the UNFIXED code
+plus a log of every healthbarupdate that sees the IGNORE_SUBSTITUTE bit set on a Substitute holder while the running script is not the one that did the `orword`).
+
+* Instrumented unfixed tree reproduces the baseline digests 1000/1000 in both scenes, so the instrumentation is observation only.
+* Changed seeds (digest differs from baseline), **ON == OFF, 13 each**: **26, 164, 177, 186, 221, 391, 418, 506, 564, 587, 649, 881, 961**.
+* Leak-event seeds (stale bit hit a Substitute holder) = the same 13 seeds. Only-changed [], only-leak []. **Unexplained: 0.**
+* Origin script of the stale bit: BattleScript_ItemHealHP_Ret 12 (Leftovers), BattleScript_LeechSeedTurnPrintAndUpdateHp 1 (seed 649).
+  Consuming script: BattleScript_HitFromAtkAnimation 11, BattleScript_DoHitAllWithUndergroundBonus 1 (seed 221, Earthquake), BattleScript_EffectAbsorb 1 (seed 506, Giga Drain).
+* Every one is a hit on a Substitute holder in the turn after an end-of-turn HP-change script. The first divergent command in the fixed arm is the Substitute absorb
+  (ON: hit-animation, OFF: move-animation event ordering) in the same attacker/target slot as the leak.
+
+| seed | consumer (first leak) | origin | target sub HP |
+|---|---|---|---|
+| 26 | HitFromAtkAnimation, move 53 | ItemHealHP_Ret | 20 |
+| 164 | HitFromAtkAnimation, move 32 | ItemHealHP_Ret | 36 |
+| 177 | HitFromAtkAnimation, move 57 | ItemHealHP_Ret | 22 |
+| 186 | HitFromAtkAnimation, move 231 | ItemHealHP_Ret | 39 |
+| 221 | DoHitAllWithUndergroundBonus, move 89 | ItemHealHP_Ret | 40 |
+| 391 | HitFromAtkAnimation, move 58 | ItemHealHP_Ret | 22 |
+| 418 | HitFromAtkAnimation, move 211 | ItemHealHP_Ret | 39 |
+| 506 | EffectAbsorb, move 202 | ItemHealHP_Ret | 79 |
+| 564 | HitFromAtkAnimation, move 348 | ItemHealHP_Ret | 80 |
+| 587 | HitFromAtkAnimation, move 188 | ItemHealHP_Ret | 36 |
+| 649 | HitFromAtkAnimation, move 56 | LeechSeedTurnPrintAndUpdateHp | 40 |
+| 881 | HitFromAtkAnimation, move 76 | ItemHealHP_Ret | 20 |
+| 961 | HitFromAtkAnimation, move 56 | ItemHealHP_Ret | 39 |
+
+## 6. Gates
+
+ENGINE_BUILD `eb-52789eb6d9c84998` -> `eb-12d5aa7535f49c46` (before = tree at 5ee298893 built with the same headless config; after = this tree). Tell the website.
