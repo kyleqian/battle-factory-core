@@ -93081,6 +93081,10 @@
             "kind": "source-state-symbol"
           },
           {
+            "path": "tests/aiv266AiViewFields.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/battleScriptStatusPrimaryOpcode.test.ts",
             "kind": "tier-1-test"
           },
@@ -93102,6 +93106,10 @@
             "path": "src/engine/battleEndTurnOrchestration.ts",
             "locator": "line:287",
             "kind": "source-state-symbol"
+          },
+          {
+            "path": "tests/aiv266AiViewFields.test.ts",
+            "kind": "tier-1-test"
           },
           {
             "path": "tests/battleScriptScreensWeatherOrchestration.test.ts",
