@@ -13,13 +13,25 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #203 — AI CHECK_BAD_MOVE never sees the user's usable party count (aud243d, 2026-11-09)
+## #207 — Confusion self-hit calc still lacks hold-item inputs (abl261 §7, seen again by aip262 seed 20, 2026-11-10)
 
-`runCbmBatonPass` (`src/engine/factoryAiCheckBadMove.ts` ~3098) reads `input.attacker.usablePartyMons ?? 0`; nothing in `src/` fills
-`usablePartyMons` on the live AI view (`factoryAiDecisionPolicy.ts` ~610 says the live driver does not model the party), so Baton Pass
-(and the Explosion / Memento branches, ~2300 / ~2563) always score -10. ROM: `AI_CBM_BatonPass` (`data/battle_ai_scripts.s:485-488`) with
-`Cmd_count_usable_party_mons` (`battle_ai_script_commands.c:1292-1334`). Census seed 2 ON (aud243d): engine tie pool 3 moves vs the ROM's 4,
-different turn-1 move. Fix: compute the count per side on the live view.
+ROM seed 20 (ON and OFF): AI confusion self-hit damage 35 vs engine 18. C passes the live `gBattlerMons` record, so `holdEffect` reaches `CalculateBaseDamage`
+(`battle_util.c:2157-2175`); the engine branch (`battleScriptActionAdmission.ts`) has no hold-item inputs. Fix: feed holdEffect / holdEffectParam.
+
+## #206 — Fire Punch damage 1 lower than the ROM on one route (aip262 seed 13, 2026-11-10)
+
+ROM 46 vs engine 45 for Alakazam -> Torterra (ON and OFF); AI picks, RNG and totals are identical up to that hit, so it is not AI. Cause unclassified (damage formula
+modifier order or a type / item input); `romDriveSeed.sh 13 on|off`.
+
+## #205 — Roar / forced switch: engine keeps party indexes, the ROM permutes them (aip262 seed 11, 2026-11-10)
+
+`Cmd_forcerandomswitch` -> `SwitchPartyOrder` (`battle_script_commands.c:7364`) swaps party slots; the engine keeps the original party indexes, so the ROM driver's
+"switch partyIndex 0" selects a fainted slot and the run stalls to the 80000-frame cap (7/20 matched, ON and OFF). Visible only now that the AI scores Roar on real counts.
+
+## #204 — The live AI view leaves 16 declared fields unfilled, incl. `gender` (aip262 seed 17, 2026-11-10)
+
+`AI_CBM_Attract` (`battle_ai_scripts.s:456-470`) reads `Cmd_get_gender` (`battle_ai_script_commands.c:2088`); the view never fills `gender`, so Attract always scores -10
+(ROM 100 vs engine 90, seed 17 turn 1, ON and OFF: 0/19 matched, "party menu without a switch decision"). Audit the other unfilled view fields the same way.
 
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 
