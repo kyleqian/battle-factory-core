@@ -358,6 +358,7 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         isFirstTurn: 2,
         hp: 135,
         maxHp: 135,
+        usablePartyMons: 0, // no party staged: nothing usable (aip262)
         ability: "ABILITY_NONE",
         battleTurnCount: 7,
         lightScreenUp: false,
@@ -377,6 +378,7 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         isFirstTurn: 2,
         hp: 135,
         maxHp: 135,
+        usablePartyMons: 0,
         lastUsedMoveId: 0,
         isToxicPoisoned: false,
         isLeechSeeded: false,
