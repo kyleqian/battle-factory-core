@@ -104,7 +104,7 @@ def drive_lab(oracle, funcs, decisions, cap=None):
         live = [oracle.read_u32(tasks + i * 40) & ~1 for i in range(16) if oracle.read_u8(tasks + i * 40 + 4)]
         slot = oracle.read_u8(sym["gPartyMenu"] + 9)
         return {"func": func, "actionCursor": oracle.read_u8(sym["gActionSelectionCursor"]), "moveCursor": oracle.read_u8(sym["gMoveSelectionCursor"]),
-                "slotId": slot - 256 if slot & 0x80 else slot, "partyTasks": live, "outcome": oracle.read_u8(sym["gBattleOutcome"]),
+                "slotId": slot - 256 if slot & 0x80 else slot, "partyOrder": [oracle.read_u8(sym["gBattlePartyCurrentOrder"] + i) for i in range(3)], "partyTasks": live, "outcome": oracle.read_u8(sym["gBattleOutcome"]),
                 "sig": (func, row[1], row[2], row[3], oracle.read_u32(sym["gBattlescriptCurrInstr"]), oracle.read_u32(sym["gBattleMainFunc"]),
                         oracle.read_u32(sym["gBattleControllerExecFlags"]), oracle.read_u32(sym["gBattlerControllerFuncs"] + 4), tuple(live))}
 

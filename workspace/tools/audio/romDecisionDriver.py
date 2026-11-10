@@ -77,6 +77,15 @@ def load_decisions(path_or_obj):
     return decisions
 
 
+def menu_slot_for_party_id(order, party_index):
+    """Party-menu slot showing battle party id `party_index` (party_menu.c GetPartyIdFromBattlePartyId): `order` is gBattlePartyCurrentOrder, three bytes of two
+    nibbles (high = even slot). Roar / forced switches permute it (SwitchPartyOrder, battle_main.c:4086) while gameplay stays in party-id space. No order -> identity."""
+    if not order:
+        return party_index
+    nibbles = [n for b in order for n in (b >> 4, b & 0xF)]
+    return nibbles.index(party_index) if party_index in nibbles else party_index
+
+
 class DriverError(Exception):
     def __init__(self, reason, dump):
         super().__init__(reason)
@@ -84,7 +93,7 @@ class DriverError(Exception):
 
 
 class RomDriver:
-    """obs: {func, actionCursor, moveCursor, slotId, partyTasks: [task func addresses of live tasks], outcome, sig}; `frame` = advances done so far."""
+    """obs: {func, actionCursor, moveCursor, slotId, [partyOrder: gBattlePartyCurrentOrder bytes], partyTasks: [task func addresses of live tasks], outcome, sig}; `frame` = advances done so far."""
 
     def __init__(self, decisions, funcs, watchdog=WATCHDOG_FRAMES):
         self.decisions, self.funcs, self.watchdog = list(decisions), dict(funcs), watchdog
@@ -171,7 +180,7 @@ class RomDriver:
             if want is None or want["kind"] != "switch":
                 raise DriverError("party menu without a switch decision", self.dump(obs, "unplanned-party-menu"))
             self.open_anchor(want, "menuOpenFrame")
-            slot, target = obs["slotId"], want["partyIndex"]
+            slot, target = obs["slotId"], menu_slot_for_party_id(obs.get("partyOrder"), want["partyIndex"])
             if slot != target:
                 return self.press("DOWN" if slot < target else "UP")
             self.close_anchor()

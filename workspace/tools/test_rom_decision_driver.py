@@ -27,8 +27,8 @@ NM = """08057458 t HandleInputChooseAction
 """
 
 
-def obs(func="other", action=0, move=0, slot=0, tasks=(), outcome=0, sig=0):
-    return {"func": {"action": 0x1001, "move": 0x2001, "party": 0x3001}.get(func, 0x9001), "actionCursor": action, "moveCursor": move,
+def obs(func="other", action=0, move=0, slot=0, tasks=(), outcome=0, sig=0, order=None):
+    return {**({} if order is None else {"partyOrder": order}), "func": {"action": 0x1001, "move": 0x2001, "party": 0x3001}.get(func, 0x9001), "actionCursor": action, "moveCursor": move,
             "slotId": slot, "partyTasks": [0x4000] if tasks else [], "outcome": outcome, "sig": sig}
 
 
@@ -124,6 +124,17 @@ class RomDriverTest(unittest.TestCase):
         up = rd.RomDriver([{"kind": "switch", "partyIndex": 1}], FUNCS)
         self.assertEqual(up.step(obs("party", slot=3, tasks=True)), ["UP"])
 
+    def test_menu_slot_follows_gBattlePartyCurrentOrder_after_a_roar(self):
+        order = [0x10, 0x23, 0x45]  # seed 11: Roar swapped battle slots 0 and 1 (SwitchPartyOrder); party id 0 now sits in menu slot 1
+        self.assertEqual([rd.menu_slot_for_party_id(order, i) for i in range(6)], [1, 0, 2, 3, 4, 5])
+        self.assertEqual([rd.menu_slot_for_party_id([0x01, 0x23, 0x45], i) for i in range(6)], list(range(6)))
+        self.assertEqual([rd.menu_slot_for_party_id(None, i) for i in range(3)], [0, 1, 2])
+        d = rd.RomDriver([{"kind": "switch", "partyIndex": 0}], FUNCS)
+        self.assertEqual(d.step(obs("party", slot=0, tasks=True, order=order)), ["DOWN"])  # not the fainted slot 0
+        d.advanced(); d.step(obs("party", slot=0, tasks=True, order=order)); d.advanced()
+        self.assertEqual(d.step(obs("party", slot=1, tasks=True, order=order)), ["A"])
+        self.assertEqual(d.anchors[0]["kind"], "switch")
+
     def test_party_submenu_and_message_waits_pulse_a_with_a_17_frame_period(self):
         d = rd.RomDriver([{"kind": "switch", "partyIndex": 1}], FUNCS)
         presses = [i for i, b in enumerate(run(d, [obs("other", sig=i) for i in range(40)])) if b == ["A"]]
@@ -162,7 +173,7 @@ class FakeOracle:
     def __init__(self):
         self.symbols = {k: 0x1000 * (i + 1) for i, k in enumerate(
             ["gBattleMons", "gTasks", "gCurrentMove", "gRngValue", "gLastMoves", "gPartyMenu", "gBattlerControllerFuncs", "gActionSelectionCursor",
-             "gMoveSelectionCursor", "gBattleOutcome", "gBattlescriptCurrInstr", "gBattleMainFunc", "gBattleControllerExecFlags"])}
+             "gMoveSelectionCursor", "gBattlePartyCurrentOrder", "gBattleOutcome", "gBattlescriptCurrInstr", "gBattleMainFunc", "gBattleControllerExecFlags"])}
         self.frame, self.outcome, self.log = 0, 0, []
 
     def read_u8(self, addr):
@@ -198,6 +209,10 @@ class DriveLabTest(unittest.TestCase):
         self.assertEqual(result["segments"][-1]["buttons"], ["A"])
         self.assertEqual(result["anchors"][0]["kind"], "move")
         self.assertEqual(result["timeline"][0][0], 0)
+
+    def test_observation_carries_the_party_order_bytes(self):
+        result = self.probe.drive_lab(FakeOracle(), FUNCS, [{"kind": "move", "slot": 0}])
+        self.assertEqual(result["lastObs"]["partyOrder"], [0, 0, 0])
 
     def test_frame_cap_stops_a_run_that_never_ends(self):
         result = self.probe.drive_lab(FakeOracle(), FUNCS, [{"kind": "move", "slot": 1}, {"kind": "move", "slot": 0}], cap=20)
