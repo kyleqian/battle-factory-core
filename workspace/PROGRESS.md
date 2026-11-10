@@ -20,8 +20,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Unmerged, kept for the next run: dmg264** (#206 type-table row order + #208 Reflect / Light Screen; branch `worker/side-20261110-045211` `aba497135`, base
   `336e03b3b`; `docs/dmg264-type-order-screens.md` on the branch; evidence `sv-20261109/dmg264/`). Killed at its 95-min cap: ROM seeds 13 / 28 now match to battle
   end and the aligned set still matches; census 0 unexplained, BUT changed sets differ by scene (ON 190 vs OFF 181; earlier fixes were identical) -- explain this
-  first: the 9 ON-only seeds (61, 182, 189, 190, 434, 477, 756, 821, 899) are flagged in both scenes; check whether only presentation / sound
-  rows differ (HP / RNG equal across scenes) before folding. Its last full suite had a Razor Wind census-seed test with no unchanged re-stage seed found (reverted, unresolved); build / build:lib / soak not run.
+  first: the 9 ON-only seeds (61, 182, 189, 190, 434, 477, 756, 821, 899) are flagged in both scenes; supervisor check: their census `commands`
+  lists are byte-identical base vs dmg264 (HP rows too); only `eventsDigest` differs in Scene ON. Name that event field (likely typecalc move-result flags feeding
+  presentation) before folding. Its last full suite had a Razor Wind census-seed test with no unchanged re-stage seed found (reverted, unresolved); build / build:lib / soak not run.
   Next run: rebase or merge onto master, resolve the scene difference and that test, full suite + build, then fold.
 - **Gates** (on aip262's src): build / build:lib 0; play:random 2 min / scene: ON 8 battles / 6 swaps, OFF 15 / 6, 0 page errors / console errors / overlays;
   vanilla 0:20 OFF **20 / 20**, ON **20 / 20** (all `budget`); 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60**; varied-RNG first-round winning
