@@ -5,6 +5,33 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-09 / 10 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud243d / abl261 / aip262 / dia263 folded
+
+- **State:** master clean; final engine src == aip262 (`344dbf234`; later commits are docs / tools only). Evidence `.integration/validation/sv-20261109/`
+  (gates in `gates/`). No DEFERRED items. No push. ENGINE_BUILD at the final src `eb-16ee24851bfb26a3` (moved this run: abl261, aip262; tell the website).
+- **Folded:** aud243d (integration, ~50 min; `docs/aud243d-rom-driver.md`): closed-loop ROM driver (`tools/audio/romDecisionDriver.py`, `soundEventProbe.py lab
+  --drive`, `romDriveSeed.sh`) replays the engine's decision list on the ROM by menu state to battle end; first sound segment diff (`soundSegmentDiff.py`).
+  Supervisor reran seed 8 ON (6 / 9, same divergence frame) and read the ability map (4 ids). Found #202 / #203.
+- **Folded:** abl261 and aip262 (entries below; supervisor full suites on each final tree, `gates/suite1.log` 1,752 passed and `gates/suite2.log` **1,753 files passed
+  + 44 skipped, 0 failed, 14,433 tests**).
+- **Folded:** dia263 (integration, diagnosis only, 65 min; `docs/dia263-leads.md`): #205 was a driver bug (party-menu slot through `gBattlePartyCurrentOrder`, fixed in
+  tools); #206 root cause (type table row order); #204 ranked (`gender` first); new #208 (Reflect / Light Screen not passed to the live damage calc). Supervisor read
+  both src sites (`applyTypeEffectiveness` loops defender types; screens only on the Future Sight path). Seeds 21..40: 11 full match, 8 diverge (per issue in the doc).
+- **Unmerged, kept for the next run: dmg264** (#206 type-table row order + #208 Reflect / Light Screen; branch `worker/side-20261110-045211` `aba497135`, base
+  `336e03b3b`; `docs/dmg264-type-order-screens.md` on the branch; evidence `sv-20261109/dmg264/`). Killed at its 95-min cap: ROM seeds 13 / 28 now match to battle
+  end and the aligned set still matches; census 0 unexplained, BUT changed sets differ by scene (ON 190 vs OFF 181; earlier fixes were identical) -- explain this
+  first. Its last full suite had a Razor Wind census-seed test with no unchanged re-stage seed found (reverted, unresolved); build / build:lib / soak not run.
+  Next run: rebase or merge onto master, resolve the scene difference and that test, full suite + build, then fold.
+- **Gates** (on aip262's src): build / build:lib 0; play:random 2 min / scene: ON 8 battles / 6 swaps, OFF 15 / 6, 0 page errors / console errors / overlays;
+  vanilla 0:20 OFF **20 / 20**, ON **20 / 20** (all `budget`); 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60**; varied-RNG first-round winning
+  carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
+- **Next:** handoff "Next work" 1: the ROM-driver gameplay fixes (finish dmg264 #206 + #208 from its branch, then #204 `gender`, #207), then seeds 41..80, then the sound segment diff.
+  Bundle bnd257d (lazy sprite chunk; brief ready in the handoff's bnd-d line, scout `docs/bnd-d-scout.md`) and Cleanup 7 did not fit this run.
+- **Coverage notes:** abl261 dropped 3 sag130 classes and aip262 the apx222 Peck 64 row (no unchanged census seed carries them; regenerate seg127 `exposure.json`
+  from the new census to restore). One Castform body in battle 950 now declines (cf78 comment).
+
+---
+
 ## 2026-11-10 — aip262 (ts lane worker): live AI view fills `usablePartyMons`; ISSUES #203 fixed (removed)
 
 - **State:** committed on master (not pushed). ENGINE_BUILD `eb-43a8872b3b6234fe` -> `eb-16ee24851bfb26a3` (tell the website). `docs/aip262-usable-party-mons.md`.
@@ -12,7 +39,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   `tests/aip262UsablePartyMons.test.ts` (6; fail unfixed). ROM: seed 2 ON 23/23, aligned set still full, fresh seeds 9..20: 8 match fully, 4 lead divergences (not this bug). Census 0..999: 97 changed seeds,
   identical ON / OFF, 0 unexplained (`aip262Instrument.py` / `aip262Classify.py`). 9 re-pins (coverage loss: apx222 Peck 64 row). Gates: typecheck / build / build:lib 0, soak vanilla 0:20 OFF 20/20; full suite in 6 shards on the final tree 14,433 passed, 0 failed.
 - **Next:** ISSUES #204 (unfilled AI view fields, gender), #205 (Roar `SwitchPartyOrder`), #206 (Fire Punch 46 vs 45), #207 (confusion self-hit hold items).
-- **Notes:** **scene-ON soak (`--scene on`) NOT done**: one run hit the 590 s timeout and the 170-minute cap left no time to rerun (rerun as 0:10 + 10:20).
+- **Notes:** the worker's scene-ON soak timed out; the supervisor ran it on this tree: vanilla 0:20 ON 20 / 20 (session entry above).
 
 ---
 
@@ -120,159 +147,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Notes:** worker branches (all merged, deleted): integration-20261108-213051 (aud243a), side-20261108-231401 (bnd256c),
   integration-20261109-002442 (aud242g), side-20261109-010053 (cln244), integration-20261109-014605 (aud243b), integration-20261109-020226
   (aud243c); sub260 / sub260b / sum259 ran in the main tree. Deleted evidence `sv-20261105`.
-
----
-
-## 2026-11-07 / 08 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242d / cln243 / aud242e / bnd253a / aud242f / bnd254b / bnd255f / dif256 / sep257 / pc258 folded
-
-- **State:** master clean, no active workers; final src == bnd255f merge `23a641cb4` (later commits: docs, dif256 / sep257 / pc258 tools). Evidence
-  `.integration/validation/sv-20261107/`. Final gates in the last bullets. No DEFERRED items. No push.
-- **Folded:** aud242d (S11 step 6, fourth slice; branch `worker/integration-20261107-213054`, 38 min; doc section 8): audited
-  instant visual-task table (55 tasks, re-checked against C at extraction), BlendBattleAnimPal / Exclude / BlendParticle lifetime
-  `d + |delta|(d+1) - 1` (the scout's formula was wrong for d > 0; ROM BlendPalette call log), complex_palette_blend `(n+1)(d+1)`,
-  metallic_shine 95 + 4-frame load lag. Level-50 emitted 550 -> 592, all resolved 739 -> 783. 8 step-mode ROM windows
-  (`tools/audio/fixtures/aud242d-*`, `tests/aud242dMoveAnimSounds.test.ts`); offsets in ISSUES #198. Worker: typecheck / build /
-  build:lib 0, test:gate 362 / 362, differential 16 Scene ON traces 2,104 identical. Supervisor: table regenerated byte-identical;
-  20 audio importer files 802 passed + 18 skipped. Not done: `blend_color_cycle`, `HardwarePaletteFade`.
-- **Folded:** cln243 (finish plan Cleanup 7; side branch `worker/side-20261107-221123`, 100 min; `docs/cln243-evidence-untrack.md`):
-  `git rm --cached` of 11,691 write-only evidence files, 204 MB (`tools/integration/fixtures` 11,364, `docs/probes` 290,
-  `tools/compare/evidence` 37) + `.gitignore` entries; spdefup generator defaults to `.integration/evidence/`. The scout's 590 MB did
-  not hold: tests read ~593 MB of `tools/compare/evidence` (changemaps via readFileSync / tar / spawned runners), which stays tracked.
-  Proof: 12,712 candidates moved aside, full suite under an fs / child_process access hook (lazy restore) until 0 restores / 0 accesses:
-  1,784 files, 1,740 passed + 44 skipped, 0 failed; typecheck, build 0. Supervisor: deleted set confined to the three dirs, no runtime
-  path in src / tests (4 tests only cite receipts in comments); `git ls-files -ci --exclude-standard` empty; test:gate on the merged
-  master 362 / 362. Local copy of the untracked files: `.integration/validation/sv-20261107/cln243-untracked-evidence.tar.gz`.
-- **Folded:** aud242e (S11 step 6, fifth slice; branch `worker/integration-20261107-235532`, 44 min; doc section 9): lifetimes from C
-  for Toxic bubble, Fang, Sludge / WaterGun / WaterPulse sprites, platform shake, elliptical mon task, Overheat flame, horizontal
-  lunge, ElectricBolt, absorption orb (ROM-proved, no C line); `simple_palette_blend` one tick shorter (ROM logs; aud242c / d specs
-  re-pinned: Hyper Beam +1, Ice Beam +2). Level-50 emitted 592 -> 640, all resolved 783 -> 833. 15 step-mode ROM windows; offsets ISSUES
-  #198. Worker: typecheck / build / build:lib 0, test:gate 362 / 362, differential 15 traces 1,455 identical. Supervisor: table
-  byte-identical; 21 audio files 896 passed + 18 skipped.
-- **Folded:** bnd253a (bundle hygiene "bnd-a"; side branch `worker/side-20261108-004221`, 74 min; `docs/bnd253a-test-json.md`): 97
-  unshipped test / tool-only JSON moved `src/` -> `tests/fixtures/data/` with importers and extractor outputs (`src/` 108.95 -> 45.79 MB;
-  2 unshipped left on a shrink-only allowlist); ratchet `tests/bnd253SrcJsonShipped.test.ts` + full-graph checker
-  `tools/build/srcJsonShipped.ts`. ENGINE_BUILD `eb-22fc0e2bc29aaff3` unchanged, every `dist-lib` file identical. Worker: typecheck /
-  build / build:lib 0; full suite (6 shards) 1,742 files passed + 44 skipped, 0 failed; 4 extractors rewrite byte-identical.
-  Supervisor: src `.ts` edits are comment-only; ENGINE_BUILD recomputed on both trees; test:gate 362 / 362; ratchet 3 / 3.
-- **Folded:** aud242f (S11 step 6, sixth slice; branch `worker/integration-20261108-015833`, 35 min; doc section 10): BowMon / HornHit /
-  ice crystal / fist / BreathPuff sprite and ScaleMonAndRestore / GrowAndShrink task lifetimes (C-cited). Level-50 emitted 640 -> 674, all
-  resolved 833 -> 868. 7 ROM windows (offsets ISSUES #198); aud242c Ice Beam's 7 SE137 rows now emitted (romOnly list dropped). Worker:
-  typecheck / build / build:lib 0, test:gate 362 / 362, differential 16 traces 1,536 identical. Supervisor: table byte-identical; 22 audio
-  files 939 passed + 18 skipped.
-- **Folded:** bnd254b (bundle hygiene "bnd-b"; side branch `worker/side-20261108-023543`, 45 min; `docs/bnd254b-pic-geometry.md`):
-  generated `src/assets/gen/battle-pic-geometry.json` (`npm run extract:battle-pic-geometry`; columns / rows / topRow per species and
-  side, doll, Castform forms); faint timing, the Extrasensory gate and `pic.palette` (now from `battle-sprite-palettes.json`) no longer
-  read the sprite pixel JSON. Exhaustive old-read == new-read test over 752 sheets (`tests/bnd254bPicGeometry.test.ts`). ENGINE_BUILD
-  `eb-f5ed6a9418d226b7` -> `eb-7b7399877f107136` (tell the website); headless +37 KB until bnd-c drops the sprite chunk. Worker:
-  typecheck / build / build:lib 0; full suite (6 shards) 1,744 passed + 44 skipped, 0 failed. Supervisor: `compare:differential` 4 faint
-  traces (obr251 on / off, turn13-dragonbreath-faint, turn5-faint) vs `7b899a9`: 863 captures byte-identical.
-- **Folded:** bnd255f (finish plan "gamepad input through press / release"; side branch `worker/side-20261108-032210`, 61 min;
-  `docs/library-package.md` "Gamepad"): opt-in `connectGamepad(game, opts?)` in `src/gamepad.ts` (Standard layout, left stick past a
-  0.5 dead zone as the d-pad, edge-only press / release, first connected pad, releases on disconnect), exported from `src/lib.ts` +
-  `lib-types`; the dev shell opts in; the mount never polls; not in the headless graph. 11 Tier-1 tests incl. helper == direct press
-  trace equality. ENGINE_BUILD unchanged. The worker's full suite did not finish (shards timed out); the supervisor added a
-  missing-`navigator.getGamepads` guard + test (the default would have thrown every frame in insecure contexts).
-- **Folded:** dif256 (tooling papercut; side branch `worker/side-20261108-051640`, 31 min; tools + one test, no src): `npm run
-  compare:differential -- <traces> --base REF --harness-from-head` overlays the working tree's `appTrace.ts` closure (7 tools/ files,
-  never src/) onto the base, so traces with newer stage ids replay against an older engine; clear exit-2 message when the harness needs
-  missing src/ exports (`tools/compare/harnessOverlay.ts`, `tests/dif256HarnessOverlay.test.ts`). Supervisor: 21 / 21 tests; aud242f
-  Ice Beam trace vs `5418684` with the flag 96 / 96 identical (without it: "unknown app stage"). SUPERVISOR.md recipe updated.
-- **Folded:** sep257 (tooling papercuts; side branch `worker/side-20261108-054917`, 39 min; tools only): `soundEventProbe.py` lab mode
-  writes the replay `trace` key and `--compact` (the committed fixture form) and refuses a stale output path;
-  `run-mgba-probe.py --rm-log-on-success`. One command now makes a fixture: `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette python3
-  tools/run-mgba-probe.py --rm-log-on-success OUT.json -- python3 tools/audio/soundEventProbe.py OUT.json lab <req>-on.json --frames 822
-  --profile on --compact`. Supervisor: python tests 9 / 9; the regenerated `aud242f-headbutt-player` equals the committed fixture except
-  `seconds` / `windowSeconds`.
-- **Folded:** pc258 (three papercuts; side branch `worker/side-20261108-062932`, 8 min; tools only): the differential's no-captureFrames
-  error names `--capture-range START:END`; `soundEventProbe.py --extra-hooks NAME[,NAME]` (env var still merged; `main()` guarded,
-  `tools/test_sound_event_probe_args.py`); `lsd194Census.sh` now merges / cleans up on a resume with no jobs left (GNU xargs ran once
-  on an empty list and `set -e` aborted, exit 123), prints INCOMPLETE if a shard is unmerged, and gains `LSD194_SHARD_SEEDS` for smoke
-  runs. Supervisor: python tests OK (9 + new), worker's appDifferential 11 / 11, typecheck 0.
-- **Scout:** aud243 read-only (`docs/aud243-scout.md`, unverified): the census never calls `tick()`, so the diff-based sound emitters
-  (`core.ts` post-tick block) must move into one exported function both use; T1 is partly circular; ROM T2 needs RNG alignment +
-  an input recorder (make-or-break); split aud243a (census column + T1 delta) / aud243b (T2 replay).
-  bnd-c read-only (`docs/bnd-c-scout.md`): pixel provider design (lazy `pic.tileset` / `frame2` getters, the transform branch is the one
-  eager tick read), install points (lib.ts gated start, a vitest setup file, appTrace.ts), proof plan; choose static vs dynamic install.
-  #198 alignment read-only (`docs/al198-scout.md`): no single rule explains the classes (idle-lead hypothesis falsified); one narrow rule
-  (`liveMoveSourceAge` subtracts the 3 pre rows even for `LIVE_MOVE_NO_PRE_ROW_SIDES`: Flamethrower +5 -> +2) is a bounded step.
-  aud242g read-only (`docs/aud242g-scout.md`): Level-50 blockers re-ranked (SetPsychicBackground is an instant task, +9 measured;
-  Tri Attack, Bubblebeam next; Sludge Bomb needs an SE-length table + pending-preserving waitsound; Blizzard / cries / branches are
-  model changes, not table rows).
-- **Final full suite** (`gates/`, HEAD `23a641cb4` == final src): **1,789 files: 1,745 passed + 44 skipped, 0 failed; 14,361 tests
-  passed**; typecheck, build, build:lib 0.
-- **Gates** (`gates/`, final src): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**;
-  vanilla 0:20 Scene OFF **20 / 20**, Scene ON **20 / 20** (all `budget`); play:random 2 min / scene (seed 7): ON 5 battles / 2 swaps, OFF
-  16 / 8; 0 page errors / console errors / overlays / contained / divergences. The 0:60 gates were not run (hours each here).
-- **Housekeeping:** `/tmp` had 108 GB of stale worker scratch (disk at the daily launcher's 15 GB floor): deleted Vite SSR / dead vitest
-  temp dirs older than 1 day and every `/tmp` entry untouched for 7+ days (514 entries, ~85 GB), plus evidence `sv-20261104`; 101 GB free.
-- **Next:** handoff "Next work": aud243a (census sound column, `docs/aud243-scout.md`), more aud242 lifetimes (Blizzard per-species,
-  Tri Attack, Psychic, blend_color_cycle, cry tasks), bnd-c (sprite pixel provider + dynamic import: headless ~22 -> ~11 MB), ISSUES
-  #196 / #197 / #198 / #199 / #200.
-- **Notes:** ENGINE_BUILD moved this run (aud242e/f audio tables, bnd254b): tell the website. Worker branches (all merged, deleted):
-  integration-20261107-213054 (aud242d), side-20261107-221123 (cln243), integration-20261107-235532 (aud242e), side-20261108-004221
-  (bnd253a), integration-20261108-015833 (aud242f), side-20261108-023543 (bnd254b), side-20261108-032210 (bnd255f),
-  side-20261108-051640 (dif256), side-20261108-054917 (sep257),
-  side-20261108-062932 (pc258).
----
-
-## 2026-11-06 / 07 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242b / obr251 / cln242 / aud242c / flw252 folded
-
-- **State:** master clean, no active workers; final src == flw252 merge `453b5633b` (later commits: tests / docs). Evidence
-  `.integration/validation/sv-20261106/`. Final gates in the last bullets.
-- **Folded:** aud242b (S11 step 6, second slice; branch `worker/integration-20261106-213056`, 46 min): extractor wait resolver
-  (`waitforvisualfinish` from known task / sprite lifetimes, `jumpret*` / `jumpargeq` side branches; table schema v2, variants by turn x
-  attacker side), `docs/aud242-move-anim-sounds.md` section 6. Thin: only 4 more ops emitted; 501 stay unresolved (sprite / palette
-  lifetimes 351, bg fade 134). ROM windows pinned (`tests/aud242bMoveAnimSounds.test.ts`, 8 tests): Dragon Rage +3, Mega Punch +1, Haze
-  -6, Hyper Fang +2 (ISSUES #198). Worker: typecheck, build, build:lib 0; test:gate 362 / 362; differential 20 traces 3,540 identical.
-  Supervisor: regenerated table byte-identical; aud242a / aud242b / audioSinkNeutral 24 / 24.
-- **Folded:** obr251 (handoff 4b(e), Kyle's ball bar; branch `worker/integration-20261106-222122`, 100 min;
-  `docs/obr251-opponent-party-summary.md`): the opponent mid-battle party summary holds 100 frames (+23-frame lead after a faint) to
-  the "sent out" first glyph, slides in by `OPP_BAR_X2` over 20 frames, mirrors the balls (`states[5-index]`), fades over 16 steps
-  after the hide, and plays SE_BALL_TRAY_ENTER pan 0 both scenes (`src/engine/midBattleOpponentPartySummary*.ts`; battleScene.ts only
-  delegates). Presentation only. Worker: typecheck, build, build:lib 0; test:gate 362 / 362; census 0..999 both scenes vs `87e9366af`:
-  digest / error / type sequence 1000 / 1000, only the opponent party-summary duration moved (1,583 commands +122, 99 +99, ON = OFF);
-  differential 26 traces, only the 2 new obr251 traces moved. Re-pins: sc106 three anchors +122, party-summary view shape. Supervisor:
-  5 files 73 / 73; compare `obr251-opponent-faint-on` 520..560: bar exact, only the 37 px `▾` cursor (ISSUES #200).
-- **Fixed by the supervisor:** aud242b's 18 fixtures failed `tests/audioProbeFixtures.test.ts` (file list, "pan" kind, no call log);
-  test updated, 459 + 18 skipped.
-- **Folded:** cln242 (Cleanup 5 second half; side branch `worker/side-20261107-000929`, 96 min; `docs/cln242-suite-speed.md`): vitest
-  `json: { stringify: true }` in test mode only (generated JSON loads via JSON.parse: collect 77 -> 15 s, vitest parent RSS 4.5 -> 0.6 GB),
-  which lets the full suite run at **5 workers in ~21 min** (4 shards 1,242 s, peaks <= 10.9 GB; was ~49-75 min at 2); test:gate 218 ->
-  97 s. Deleted census-superseded route-frame pins: sc106 six cases (11 -> 5), sgl138 whole-route receipt equality (red since obr251);
-  all other cln240 candidates kept (ROM receipts; reasons in the doc). Re-pinned randomRoundSoak (obr251 moved seed 21 / 0 frames and
-  put the seed-1 exploring policy on a new trajectory). Full suite on the final tree (src == obr251 fold): **1,781 files, 14,016 passed,
-  241 skipped, 0 failed**; typecheck, build 0. Next lever: `src/animation/dive.ts` re-simulates from tick 0 per row (liveDiveAttackAdapter
-  203 s). Supervisor: no named JSON imports anywhere; sc106 / sgl138 / randomRoundSoak 75 / 75.
-- **Folded:** aud242c (S11 step 6, third slice; branch `worker/integration-20261107-014717`, 75 min; doc section 7): `waitbgfade*`
-  modelled from Task_FadeToBg / palette fade (F+19 / F+38; BG load lag measured for IMPACT / HIGHSPEED / DARK only), `panse*` / `setpan`
-  as a new `pan` SoundEvent kind (SE12PanpotControl, Task_PanFromInitialToTarget), createsoundtask LoopSEAdjustPanning / FireBlast,
-  `simple_palette_blend` lifetime, PlaySE1/2WithPanning visual-task sites. Resolved ops 562 -> 739. 23 ROM fixtures (step mode, call
-  log): Hyper Beam both sides, Dragon Claw, Mach Punch both sides and the fade rows exact; others a constant per-move offset (ISSUES
-  #198). Worker: typecheck, build, build:lib 0; test:gate 362 / 362; 18 importing files 738 + 18 skipped; differential 22 traces 4,181
-  identical. Supervisor: table regenerated byte-identical; aud242a/b/c + audioProbeFixtures + audioSinkNeutral 609 + 18 skipped.
-- **Folded:** flw252 (ISSUES #195 / #191; branch `worker/integration-20261107-030349`, hit its 80-min cap in its importer run; the
-  supervisor committed its helper edit and dropped its probe-only labs): the battle party menu ignores input until the open fade ends
-  (party_menu.c:1259-1261), refusal messages read A / B only after the printer finishes (text.c:884-899), the postwin multichoices step
-  on JOY_NEW only (menu.c). Tier-1 `tests/flw252InputGating.test.ts`; compare `flw252-held-question-down` **142 / 142** (base 97 / 142),
-  `flw252-party-fade-on` 261 / 340 (the misses are open-fade frames 87..102 and a 489 px slot-bounce phase, not the cursor). The supervisor
-  full suite then failed 10 tests in 6 files; **flw252-fix** (Opus, main tree, 30 min) classified all as test-side: seam / orchestrator
-  tests pressed during the open fade (now settle it), the contain213 driver livelocked on the printer-paced refusal loop (DOWN deferred),
-  and the exploring soak trajectories moved (re-pinned; old pins reproduce on the pre-flw252 tree). No src change. ISSUES #195 / #191
-  removed.
-- **Final full suite** (`final-suite2/`, HEAD `1ee2d5d49`, src == final): **1,783 files: 1,739 passed + 44 skipped, 0 failed**; 14,150
-  tests passed; 1,114 s wall at 5 workers. Build 0, build:lib 0 (`gates/`).
-- **Gates** (`gates/`, final src): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**;
-  vanilla 0:20 default **20 / 20**, Scene ON **20 / 20** (all `budget`); play:random 2 min / scene (seed 7): ON 5 battles / 2 swaps,
-  OFF 16 / 8; 0 page errors / console errors / overlays / contained. The 0:60 gates were not run (hours each here).
-- **Scout:** aud242d read-only scout (`docs/aud242d-scout.md`, unverified): 268 Level-50 ops sit behind unmodelled waits; slices
-  aud242d (palette blends + instant tasks, ~+45), aud242e (fixed-length sprites, ~+49), Roar cries (36 sets).
-  Cleanup 7 read-only scout (`docs/cln7-scout.md`): ~590 MB tracked evidence likely write-only; no R2 remote on this host.
-  Supervisor landed its first part: the AGENTS.md policy line (new evidence under ignored `.integration/`).
-- **Next:** handoff "Next work": aud242d per the scout, Cleanup 7 (evidence out of
-  git), bundle hygiene, ISSUES #196 / #197 / #198 / #199 / #200.
-- **Housekeeping:** evidence `sv-20261103` deleted (older than the last three runs) and obr251 scratch; ~20 GB free.
-- **Notes:** no DEFERRED items. No push. Worker branches (all merged, deleted): integration-20261106-213056 (aud242b),
-  -222122 (obr251), side-20261107-000929 (cln242), integration-20261107-014717 (aud242c), -030349 (flw252); flw252-fix ran in the main tree. Census baseline for the next delta: `sv-20261106/obr251-evidence/{on,off}-50285b9d9`.
-
----
-
