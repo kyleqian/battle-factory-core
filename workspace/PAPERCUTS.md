@@ -8,6 +8,22 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Worker gate friction, 2026-11-09 / 10 run
+
+- **`pgrep` / `pkill -f <pattern>` kills the caller's own shell** when the pattern also appears in that shell's command line (abl261, 2x, ~8 min). Kill
+  only retained PIDs. Hits: 1 (plus the 2026-08-25 soak entry).
+- **Workers hit the 120 s default Bash timeout on typecheck / build (~4-5 min each) and the harness auto-backgrounds >10 min commands** (census,
+  full suite), so workers lose 5-15 min polling (abl261, aip262). Briefs should say: timeout 600000 on typecheck / build, nohup + exit file for
+  census / suite. Hits: 2.
+- **The Scene ON vanilla soak 0:20 takes ~10-15 min with `--parallel 2-4` on a loaded host**; a 590 s timeout loses the result (aip262). Run it
+  under nohup with an exit file.
+- **Supervisor gate scripts: `cmd > log; echo $? > exit &` backgrounds only the `echo`** (the gates then ran serially, ~10 min lost). Wrap each gate
+  as `( cmd > log 2>&1; echo $? > exit ) &`.
+- **`| tail` hides a failing exit code** (`test:smoke`), so a stale pin got committed once (abl261, ~10 min). Use `set -o pipefail` or an exit file.
+- **Census-seed tests lose coverage on every gameplay fix:** each fix re-stages pinned census seeds to "unchanged" ones and some classes have none
+  (abl261: 3 sag130 classes; aip262: apx222 Peck 64; dmg264: Razor Wind, no seed found before the cap). Regenerate seg127 `exposure.json` /
+  derived seed lists from the current census instead of hand re-staging. Hits: 3.
+
 ## Census / worktree friction, 2026-11-08 / 09 run
 
 - **`package.json` `"sideEffects": false` silently drops bare side-effect imports from vite bundles** (bnd256c shipped a browser build
