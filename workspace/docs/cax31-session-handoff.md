@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-09)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-10)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-09 wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-10 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
   `worker/lib-v2-mac` is folded up to `851ee1f4c`; if the Mac moves that branch again, merge the new tip the same way
@@ -77,8 +77,15 @@ kept and is long-tail.
 - **4b(e) DONE (obr251, 2026-11-07, `docs/obr251-opponent-party-summary.md`):** the opponent faint-replacement ball bar slides, holds
   100 frames, fades, mirrors its balls and plays SE_BALL_TRAY_ENTER; residuals ISSUES #200. **#195 / #191 fixed (flw252):** party menu
   input waits for the open fade, refusal text for its printer; postwin multichoices step on new presses only.
-- Census baseline for the next delta: `.integration/validation/sv-20261108/sub260/census/{on,off}-9b4332163` (sub260's tree, with the
-  sound column; sum259 touches only pre-battle screens, which the census does not run). Previous: `sv-20261108/aud243a/full/{on,off}-858ea0343`.
+- **2026-11-10 run: the census ROM replay became a gameplay-bug finder.** aud243d (`docs/aud243d-rom-driver.md`): closed-loop ROM driver
+  (`tools/audio/romDriveSeed.sh SEED on|off DIR`, one JSON line per seed; driver `tools/audio/romDecisionDriver.py`) replays the engine's decision list on the
+  ROM by menu state to battle end and compares HP / RNG / last moves per state. Fixes it found and landed: **abl261** (#202, abilities in the damage calc,
+  179 / 1000 census seeds change, `docs/abl261-ability-damage.md`), **aip262** (#203, AI usable party count, 97 / 1000, `docs/aip262-usable-party-mons.md`).
+  **dia263** (`docs/dia263-leads.md`) fixed the driver's party-slot mapping and root-caused the rest: ISSUES #204 (16 unfilled AI-view fields, `gender`
+  first), #206 (type-effectiveness row order), #207 (confusion self-hit hold items), #208 (Reflect / Light Screen). Seeds 0..40: fully matching
+  1-10, 12, 14-16, 18-21, 23-25, 29, 34-38, 40, 177, 224, 552; diverging seeds are listed per issue in the dia263 doc.
+- Census baseline for the next delta: see PROGRESS.md top entry (the last folded engine tree's arms under `.integration/validation/sv-20261109/`).
+  Previous: `sv-20261109/aip262/census/{on,off}-e2e0b17b5`, `sv-20261109/abl261/census/{on,off}-6dce29c5d`.
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
@@ -91,10 +98,10 @@ never brief those here. One worker at a time; each run folds the next audio step
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
    proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05. aud242a DONE 2026-11-06** (generic script-op
    emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07; aud242d / e / f DONE
-   2026-11-08; aud242g, aud243a / b / c DONE 2026-11-09.** Next: **aud243d**, a ROM-side semantic input driver for the census replay
-   (drive the ROM by menu state — pick the engine's move / switch when the ROM's menu opens — instead of frame-timed inputs, which drift
-   after the first faint; `docs/aud243c-alignment.md` section 3; design scout `docs/aud243d-scout.md`), then the sound diff over K >= 20 seeds per scene (each ROM-vs-engine
-   mismatch in HP / RNG is a gameplay bug lead, as #201 was); remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave; next lifetimes ranked in `docs/aud242g-scout.md`. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
+   2026-11-08; aud242g, aud243a / b / c DONE 2026-11-09.** **aud243d DONE 2026-11-10** (ROM driver). **Next, before more audio: the ROM-driver gameplay fixes**, one ts-lane step each with the
+   abl261 / aip262 proof shape (tests, re-drive seeds, census attribution, full suite): ISSUES #206 + #208 (see PROGRESS: dmg264 may have landed them), then #204
+   (`gender` first, then by dia263's rank; re-drive 11 / 17 / 26), #207; then drive seeds 41..80 for new leads. After that, the sound segment diff
+   (`tools/audio/soundSegmentDiff.py`, aud243d section 5: missing move-animation SE streams and stat-change SEs) over K >= 20 aligned seeds per scene; remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave; next lifetimes ranked in `docs/aud242g-scout.md`. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) DONE (cln240 + cln242 + cln244 Dive; optional: `summaryAllFactorySpecies` 134 s and `substituteDollDefenderLive` 80 s for < 15 min); (4) DONE (cln241);
    (7) evidence stops going into git (policy line in AGENTS.md DONE 2026-11-07; cln243 DONE 2026-11-07, 11,691 files / 204 MB untracked,
