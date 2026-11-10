@@ -68,8 +68,9 @@ const MOVES = [
       alternate: "tools/integration/fixtures/random2-r1/thrash-alt-player-snorlax-opponent-golem.json",
     },
     probe: "thrash-opponent",
-    // 26/21 TAUROS: two chosen Thrash turns lock in for 2 + 3 consecutive bodies (one per lock-in segment).
-    route: { seed: 26, streak: 21, slot: 1 as const, turns: 2, bodies: 5 },
+    // 26/21 TAUROS: two chosen Thrash turns lock in for 2 + 2 consecutive bodies (one per lock-in segment). aip262: the live AI view fills
+    // usablePartyMons, which moved this trajectory's lock-in draws (was 2 + 3 = 5 bodies); no scanned seed 0..399 at streak 21 kept 5.
+    route: { seed: 26, streak: 21, slot: 1 as const, turns: 2, bodies: 4 },
   },
   {
     name: "flail", id: 175,

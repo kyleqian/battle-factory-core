@@ -268,7 +268,9 @@ function assertBrainRoundOutcome(
 // rule re-applies: SILVER_SEED 2 -> 6, again the lowest seed in 1..40 that
 // wins six ordinary battles under BOTH symbol counts. ROM receipt:
 // tools/probe/receipts/issue140-getmovetarget-off.json.
-const SILVER_SEED = 6;
+// aip262 (live AI view fills usablePartyMons: Roar / Baton Pass / Explosion / Memento now score on the real bench counts): SILVER_SEED 6 -> 4, again the
+// lowest seed in 1..40 that wins six ordinary battles under BOTH symbol counts.
+const SILVER_SEED = 4;
 const SILVER_STREAK = 14;
 // Gold: entering factoryWinStreak 35 (challenge index 5), symbols 1 —
 // battleIndex 6's effective streak is 41, the gold threshold.

@@ -195,7 +195,8 @@ describe("olnd113: Scene OFF no-hit pause, per class on production routes", () =
     const cases = [
       { move: 339, seed: 154, romGlyph: 121, romA: 40, message: 121 },
       { move: 104, seed: 2, romGlyph: 119, romA: 41, message: 119 },
-      { move: 28, seed: 2, romGlyph: 119, romA: 41, message: 119 },
+      // aip262: Sand-Attack seed 2 -> 9 (seed 2 is a changed census seed and no longer reaches a no-hit Sand-Attack; seed 9 is unchanged).
+      { move: 28, seed: 9, romGlyph: 119, romA: 41, message: 119 },
     ];
     for (const c of cases) {
       const uses = battleUses(c.seed, "off").filter((u) => u.move === c.move && u.attack !== null && !u.hit

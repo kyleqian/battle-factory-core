@@ -153,13 +153,18 @@ describe("ISSUES #128 receipt: the slot-0 record removes the AI's get_ability dr
     return { history, decision, getAbilityDraws };
   }
 
-  it("CONTROL arm: 8 get_ability draws against the two-ability player lead", () => {
+  // aip262: the live view now fills usablePartyMons, so AI_CBM_Roar (battle_ai_scripts.s:334-339) passes its
+  // `count_usable_party_mons AI_TARGET == 0` gate against the benched player party and reads Suction Cups (one more
+  // Cmd_get_ability draw, "slot-2-check-bad-move-roar-ability"; Set 20 carries Roar). The ROM receipt's 8 is the
+  // fixture's Roar-less moveset; the engine set here has 8 + that one Roar read.
+  const CONTROL_DRAWS = 9;
+
+  it("CONTROL arm: 9 get_ability draws against the two-ability player lead (8 receipt reads + Roar's Suction Cups read)", () => {
     const { history, getAbilityDraws } = firstAiDecision(SET_POOCHYENA);
     // Nothing recorded on slot 0, so Cmd_get_ability falls through to the
-    // `Random() & 1` guess: 2 reads per scored move slot x 4 slots.
-    // ROM: 8 Cmd_get_ability draws in the AI decision window.
+    // `Random() & 1` guess: 2 reads per scored move slot x 4 slots (ROM receipt: 8), plus Roar's read.
     expect(history.knownAbilities[0]).toBeNull();
-    expect(getAbilityDraws).toBe(8);
+    expect(getAbilityDraws).toBe(CONTROL_DRAWS);
   });
 
   it("INTIMIDATE arm: 0 get_ability draws — the false slot-0 record short-circuits every read", () => {
@@ -176,12 +181,12 @@ describe("ISSUES #128 receipt: the slot-0 record removes the AI's get_ability dr
     expect(getAbilityDraws).toBe(0);
   });
 
-  it("the arms differ by exactly the 8 draws the ROM receipt attributed to Cmd_get_ability", () => {
+  it("the arms differ by exactly the Cmd_get_ability draws the false slot-0 record removes (the receipt's 8 + Roar's read)", () => {
     const control = firstAiDecision(SET_POOCHYENA);
     const intimidate = firstAiDecision(SET_MIGHTYENA);
     const trace = firstAiDecision(SET_GARDEVOIR, 1);
-    expect(control.getAbilityDraws - intimidate.getAbilityDraws).toBe(8);
-    expect(control.getAbilityDraws - trace.getAbilityDraws).toBe(8);
+    expect(control.getAbilityDraws - intimidate.getAbilityDraws).toBe(CONTROL_DRAWS);
+    expect(control.getAbilityDraws - trace.getAbilityDraws).toBe(CONTROL_DRAWS);
   });
 });
 
