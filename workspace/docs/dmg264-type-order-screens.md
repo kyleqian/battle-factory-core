@@ -78,6 +78,6 @@ Test re-pins / re-stages on the fixed tree (no engine change; no assertion weake
 Gates (worktree `worker/side-20261110-213051`, evidence ignored `.integration/evidence/dmg264b/`):
 
 - `npm run typecheck`: 0.
-- Full suite as 8 sequential `npm test -- --shard=i/8` runs (4 workers, one vitest at a time): all exit 0, **1,754 files / 14,443 tests passed**, 0 failed (skipped 56 files / 242 tests, as before).
+- Full suite as 8 sequential `npm test -- --shard=i/8` runs (4 workers, one vitest at a time): all exit 0, **1,754 files / 14,443 tests passed**, 0 failed (44 files / 242 tests skipped).
 - `npm run build`: 0. `npm run build:lib`: 0.
 - `npm run soak -- --policy vanilla --seeds 0:20`: **OK 20, CRASH 0, HANG 0**. Same with `--scene on`: **OK 20, CRASH 0, HANG 0**.
