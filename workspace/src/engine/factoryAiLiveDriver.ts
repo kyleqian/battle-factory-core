@@ -29,21 +29,32 @@ import {
   type BattleState,
 } from "./battleDecisionBoundary.ts";
 import {
+  BATTLE_SCRIPT_STATUS1_BURN,
+  BATTLE_SCRIPT_STATUS1_FREEZE,
+  BATTLE_SCRIPT_STATUS1_PARALYSIS,
+  BATTLE_SCRIPT_STATUS1_POISON,
   BATTLE_SCRIPT_STATUS1_REFRESH_CURE_MASK,
   BATTLE_SCRIPT_STATUS1_SLEEP,
   BATTLE_SCRIPT_STATUS1_TOXIC_POISON,
   BATTLE_SCRIPT_STATUS2_FORESIGHT,
   BATTLE_SCRIPT_STATUS2_FOCUS_ENERGY,
   BATTLE_SCRIPT_STATUS2_MASKS,
+  BATTLE_SCRIPT_STATUS3_IMPRISONED_OTHERS,
   BATTLE_SCRIPT_STATUS3_LEECHSEED,
   BATTLE_SCRIPT_STATUS3_PERISH_SONG,
   BATTLE_SCRIPT_STATUS3_ROOTED,
   BATTLE_SCRIPT_STATUS3_YAWN,
 } from "./battleScriptSourceConstants.ts";
-import type {
-  BattleScriptPartyState,
-  BattleScriptRulesContext,
+import {
+  resolveBattleScriptItemHoldEffect,
+  type BattleScriptPartyState,
+  type BattleScriptRulesContext,
 } from "./battleScriptRulesContext.ts";
+import {
+  BATTLE_SCRIPT_STATUS3_MUDSPORT,
+  BATTLE_SCRIPT_STATUS3_WATERSPORT,
+} from "./battleScriptChargeSportOpcode.ts";
+import { resolveBattleScriptMonGender } from "./battleScriptGender.ts";
 import {
   chooseFactoryAiMaskZeroDecision,
   chooseFactoryAiScoredDecision,
@@ -57,7 +68,9 @@ import {
   AI_WEATHER_RAIN,
   AI_WEATHER_SANDSTORM,
   AI_WEATHER_SUN,
+  speciesAbilityNames,
   type AiWeatherValue,
+  type FactoryAiMonGender,
 } from "./factoryAiCheckBadMove.ts";
 import {
   FACTORY_BATTLE_MODE_SINGLES,
@@ -79,6 +92,7 @@ const MOVE_NONE = 0;
 const SIDE_STATUS_REFLECT = 1 << 0;
 const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 const SIDE_STATUS_SAFEGUARD = 1 << 5;
+const SIDE_STATUS_MIST = 1 << 8;
 const SIDE_STATUS_SPIKES = 1 << 4;
 const SIDE_STATUS_FUTUREATTACK = 1 << 6;
 const STATUS2_ESCAPE_PREVENTION = 1 << 26;
@@ -285,6 +299,31 @@ export function countUsablePartyMons(
   return count;
 }
 
+/** `Cmd_get_gender` (`battle_ai_script_commands.c:2088-2099`): `GetGenderFromSpeciesAndPersonality` on the live battler record. */
+function aiGender(battler: BattleScriptRulesContext["battlers"][number]): FactoryAiMonGender {
+  const gender = resolveBattleScriptMonGender(battler.species, battler.personality);
+  return gender === "male" ? "MON_MALE" : gender === "female" ? "MON_FEMALE" : "MON_GENDERLESS";
+}
+
+/**
+ * `Cmd_if_status_in_party` (`battle_ai_script_commands.c:1568-1598`) with `STATUS1_ANY`: any party slot with a
+ * species, not an egg, `hp != 0` and a status word EXACTLY equal to the full `STATUS1_ANY` mask (`==`, not `&`).
+ */
+const STATUS1_ANY = (
+  BATTLE_SCRIPT_STATUS1_SLEEP
+  | BATTLE_SCRIPT_STATUS1_POISON
+  | BATTLE_SCRIPT_STATUS1_BURN
+  | BATTLE_SCRIPT_STATUS1_FREEZE
+  | BATTLE_SCRIPT_STATUS1_PARALYSIS
+  | BATTLE_SCRIPT_STATUS1_TOXIC_POISON
+) >>> 0;
+
+export function partyHasStatusEqualToAny(party: BattleScriptPartyState): boolean {
+  return party.some((member) =>
+    member.species !== 0 && !member.isEgg && member.hp !== 0 && (member.status1 >>> 0) === STATUS1_ANY
+  );
+}
+
 function statStages(battler: BattleScriptRulesContext["battlers"][number]) {
   return Object.freeze({
     atk: battler.statStages[1],
@@ -376,6 +415,18 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         ? { hasPerishSong: true }
         : {}),
       ...(attacker.protectUses !== 0 ? { protectUses: attacker.protectUses } : {}),
+      gender: aiGender(attacker),
+      // `Cmd_get_hold_effect AI_USER` (`:2044-2056`): gActiveBattler == the AI battler -> GetItemHoldEffect(gBattleMons[].item).
+      holdEffect: resolveBattleScriptItemHoldEffect(attacker.item),
+      stockpileCount: attacker.stockpileCounter,
+      // `Cmd_get_used_held_item` (`:2137-2149`) reads the low byte of gBattleStruct->usedHeldItems[battler].
+      usedHeldItemId: input.rulesContext.usedHeldItems[1]! & 0xff,
+      ...((input.rulesContext.sideStatuses[1] & SIDE_STATUS_MIST) !== 0 ? { mistUp: true } : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_IMPRISONED_OTHERS) !== 0
+        ? { imprisonedOthers: true }
+        : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_MUDSPORT) !== 0 ? { mudSportUp: true } : {}),
+      ...((attacker.status3 & BATTLE_SCRIPT_STATUS3_WATERSPORT) !== 0 ? { waterSportUp: true } : {}),
     }),
     target: Object.freeze({
       species: target.species,
@@ -428,6 +479,23 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         ? { hasPerishSong: true }
         : {}),
       ability: abilityName(target.ability),
+      speciesAbilities: speciesAbilityNames(target.species),
+      gender: aiGender(target),
+      // `Cmd_get_hold_effect AI_TARGET`: gActiveBattler != target -> GetItemHoldEffect(BATTLE_HISTORY->itemEffects[target])
+      // (`battle_ai_script_commands.c:2052-2053`; the recorded effect id is looked up as an item id, as in the source).
+      holdEffect: resolveBattleScriptItemHoldEffect(input.history.knownItemEffects[0]),
+      // `Cmd_if_status AI_TARGET` / `Cmd_if_not_status AI_TARGET` (AI_CV_Facade's kept @BUG, AI_CV_SmellingSalt).
+      ...((target.status1 & BATTLE_SCRIPT_STATUS1_POISON) !== 0 ? { isPoisoned: true } : {}),
+      ...((target.status1 & BATTLE_SCRIPT_STATUS1_BURN) !== 0 ? { isBurned: true } : {}),
+      ...((target.status1 & BATTLE_SCRIPT_STATUS1_PARALYSIS) !== 0 ? { isParalyzed: true } : {}),
+      // `Cmd_if_any_move_disabled_or_encored AI_TARGET` (`:1973-1996`).
+      ...(target.disabledMove !== 0 ? { anyMoveDisabled: true } : {}),
+      ...(target.encoredMove !== 0 ? { anyMoveEncored: true } : {}),
+      // `Cmd_if_side_affecting AI_TARGET` (`:881-896`): the target's own side.
+      ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_REFLECT) !== 0
+        ? { targetSideReflectUp: true }
+        : {}),
+      ...(partyHasStatusEqualToAny(input.rulesContext.party.player) ? { targetPartyStatusEqualsAny: true } : {}),
       knownAbility: input.history.knownAbilities[0],
       knownItemEffect: input.history.knownItemEffects[0],
       ...(input.history.usedMoves[0].length > 0

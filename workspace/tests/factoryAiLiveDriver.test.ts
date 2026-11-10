@@ -364,6 +364,10 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         lightScreenUp: false,
         reflectUp: false,
         isRooted: false,
+        gender: "MON_FEMALE", // Alakazam ratio 63 > personality byte 0 (aiv266)
+        holdEffect: 0,
+        stockpileCount: 0,
+        usedHeldItemId: 0,
       },
       target: {
         species: 105,
@@ -384,6 +388,9 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         isLeechSeeded: false,
         isCursed: false,
         ability: "ABILITY_ROCK_HEAD",
+        speciesAbilities: ["ABILITY_ROCK_HEAD", "ABILITY_LIGHTNING_ROD"],
+        gender: "MON_FEMALE", // Marowak ratio 127 > personality byte 0 (aiv266)
+        holdEffect: 0,
         knownAbility: null,
         knownItemEffect: 0,
       },

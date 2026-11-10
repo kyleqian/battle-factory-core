@@ -132,6 +132,13 @@ const SPECIES_BY_ID: ReadonlyMap<number, SpeciesRow> = new Map(
   (speciesStatsData.species as unknown as readonly SpeciesRow[]).map((row) => [row.id, row]),
 );
 
+/** `gSpeciesInfo[species].abilities` (`Cmd_get_ability`, `battle_ai_script_commands.c:1382-1396`). */
+export function speciesAbilityNames(species: number): readonly [string, string] {
+  const row = SPECIES_BY_ID.get(species);
+  if (!row) throw new Error(`factory-ai: unknown species ${species}`);
+  return row.abilities;
+}
+
 export const TYPE_EFFECTIVENESS = typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[];
 
 /**

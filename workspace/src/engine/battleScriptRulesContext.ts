@@ -1676,6 +1676,15 @@ export function resolveBattleScriptBattlerHoldEffect(
 }
 
 /**
+ * `GetItemHoldEffect(itemId)` (`item.c:889-892`): `gItems[SanitizeItemId(itemId)].holdEffect`
+ * with no Enigma Berry special case (that lives in `GetBattlerHoldEffect`).
+ */
+export function resolveBattleScriptItemHoldEffect(itemId: number): number {
+  if (itemId >= BATTLE_SCRIPT_ITEMS_COUNT) return 0;
+  return GENERATED_ITEM_HOLD_EFFECTS.get(itemId) ?? 0;
+}
+
+/**
  * `GetBattlerHoldEffectParam`'s source-shaped branch
  * (`battle_script_commands.c:1160-1169`, backed by `BattleEnigmaBerry` in
  * `global.berry.h:55-61`) -- Enigma Berry reads its per-battler EWRAM slot;
