@@ -10,9 +10,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **State:** committed on master (not pushed). ENGINE_BUILD `eb-43a8872b3b6234fe` -> `eb-16ee24851bfb26a3` (tell the website). `docs/aip262-usable-party-mons.md`.
 - **Did:** `countUsablePartyMons` (`factoryAiLiveDriver.ts`, C `battle_ai_script_commands.c:1292-1334`) fills both AI views, so Baton Pass / Explosion / Memento / Roar score on real counts.
   `tests/aip262UsablePartyMons.test.ts` (6; fail unfixed). ROM: seed 2 ON 23/23, aligned set still full, fresh seeds 9..20: 8 match fully, 4 lead divergences (not this bug). Census 0..999: 97 changed seeds,
-  identical ON / OFF, 0 unexplained (`aip262Instrument.py` / `aip262Classify.py`). 9 re-pins (coverage loss: apx222 Peck 64 row). Gates: typecheck / build / build:lib 0, soak vanilla 0:20 OFF 20/20.
+  identical ON / OFF, 0 unexplained (`aip262Instrument.py` / `aip262Classify.py`). 9 re-pins (coverage loss: apx222 Peck 64 row). Gates: typecheck / build / build:lib 0, soak vanilla 0:20 OFF 20/20; full suite in 6 shards on the final tree 14,433 passed, 0 failed.
 - **Next:** ISSUES #204 (unfilled AI view fields, gender), #205 (Roar `SwitchPartyOrder`), #206 (Fire Punch 46 vs 45), #207 (confusion self-hit hold items).
-- **Notes:** the 170-minute cap ran out before the scene-ON soak finished (it exceeded 590 s once; not rerun) and before all 6 suite shards were rerun on the final tree; see the worker's final message for exactly which ran.
+- **Notes:** **scene-ON soak (`--scene on`) NOT done**: one run hit the 590 s timeout and the 170-minute cap left no time to rerun (rerun as 0:10 + 10:20).
 
 ---
 
