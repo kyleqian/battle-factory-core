@@ -2790,13 +2790,13 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     [4, 1525, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1809 -> 1525
     [5, 1694, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1658 -> 1694
     [6, 1417, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1675 -> 1417
-    [7, 1884, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1269 -> 1884
+    [7, 1857, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1269 -> 1884; abl261 (#202, full ability resolver applies; the old 4-id map reproduces 1884): 1884 -> 1857
     [8, 2058, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1922 -> 2058
     [11, 1625, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1745 -> 1625
     [13, 2553, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 2221 -> 2553
     [14, 1897, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1921 -> 1897
     [15, 1503, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1551 -> 1503
-    [16, 1294, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1523 -> 1315; rng146 F1 Petal Dance lock-in re-run: 1315 -> 1294
+    [16, 1786, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1523 -> 1315; rng146 F1 Petal Dance lock-in re-run: 1315 -> 1294; abl261 (#202, full ability resolver applies; the old 4-id map reproduces 1294): 1294 -> 1786
     [18, 1775, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1948 -> 1775
     [19, 1116, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1938 -> 1116
     [20, 1644, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1999 -> 1644

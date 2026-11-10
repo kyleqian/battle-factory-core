@@ -93,14 +93,14 @@ describe("cf78: census route 950 through the production orchestrator, Scene ON /
   it("battle 950 (seed 950, streak 13): the player's CASTFORM in hail; the ROM-proven bodies with it transformed are live (cast83)", () => {
     const r = cf78Parity(950, 13);
     expect(r.rngEqual && r.rulesEqual && r.boundaryEqual && r.facilityEqual).toBe(true);
-    expect(r.castformBodiesOn).toBe(19);
+    expect(r.castformBodiesOn).toBe(21); // abl261 (ISSUES #202): battle 950 is a census seed the full ability resolver changes (ON 304 -> 480 commands); 19 -> 21
     // cast83: Shock Wave / Icy Wind / Water Pulse by the ice-form CASTFORM (351 / 196 / 352 :by:3) are live; Ember (residual), Rest,
     // Hail, Ice Ball and Fly at it still decline (docs/cast83-castform-forms.md).
     // apx219: + the ice-form Water Pulse 352 after an unknown order history (census seed 950), drawn approximately (known-entry order).
     // apx221: every other Castform body is drawn approximately with the displayed form's art (castform-form), 19 of 19.
-    expect(r.castformLiveBodiesOn).toBe(19);
+    expect(r.castformLiveBodiesOn).toBe(20); // abl261: 19 -> 20 of 21 (the other Castform body keeps declining; reported in docs/abl261-ability-damage.md)
     // Every other body keeps its decision: the 9 live on c68111480 (census battle 950, docs/cf78-castform-needle-arm.md).
-    expect(r.liveBodiesOn - r.castformLiveBodiesOn).toBe(9);
+    expect(r.liveBodiesOn - r.castformLiveBodiesOn).toBe(22); // abl261: 9 -> 22 (the changed battle is longer, same decisions)
     // The form at every one of them: hail (3), on the player's slot (SEALEO's Hail from turn 6).
     expect(new Set(r.bodies.flatMap((b) => b.castformForm[0] !== 0 || b.castformForm[1] !== 0 ? [b.castformForm.join(",")] : [])))
       .toEqual(new Set(["3,0"]));

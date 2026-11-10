@@ -30,7 +30,12 @@ const ROM = JSON.parse(readFileSync("tools/integration/fixtures/seg127/receipts/
   { scenarios: Record<string, { class: string; statusAnimations: { label: string; gate: number; controllerRows: number; activeRows: number }[] }> };
 
 // The first census seed of each gated class x animation x side of the projection (exposure.json openReceipts with gate > 0).
-const SEEDS = [3, 27, 206, 209, 230, 264, 294, 296, 348, 440, 446, 664, 705, 802, 931];
+// abl261 (ISSUES #202) re-stage: the full ability resolver changes census seeds 206 / 230 / 264 / 294 / 348 / 440 / 931 (both scenes), so seg127's
+// exposure.json projection (derived from the old census) no longer describes them. Classes re-staged to the first UNCHANGED seed carrying them:
+// yawn|SLP|player 230 -> 965, CONFUSION|opponent 294 -> 388, CONFUSION|player 348 -> 437, FRZ|opponent 440 -> 547. No unchanged census seed carries
+// hit-secondary|BRN|player (206), yawn|SLP|opponent (264) or hit-secondary|PSN|opponent (931): those three drop out of the census anchors (ROM
+// receipts of the rule itself stay in the second test; regenerating exposure.json is a follow-up).
+const SEEDS = [3, 27, 209, 296, 388, 437, 446, 547, 664, 705, 802, 965];
 
 const FRAME_BUDGET = 200000;
 
@@ -203,10 +208,10 @@ describe("sag130: the IsBattleSEPlaying gate in production (census routes, Scene
       + [...covered].sort().map(([k, g]) => `${k}=${g.join("/")}`).join(" "));
     expect(unanchoredTotal).toBeLessThan(total / 5);
     for (const k of [
-      "hit-secondary|FRZ|player", "hit-secondary|FRZ|opponent", "hit-secondary|BRN|player", "hit-secondary|CONFUSION|player",
+      "hit-secondary|FRZ|player", "hit-secondary|FRZ|opponent", "hit-secondary|CONFUSION|player",
       "hit-secondary|CONFUSION|opponent", "hit-secondary|PRZ|player", "hit-secondary|PRZ|opponent", "hit-secondary|PSN|player",
-      "hit-secondary|PSN|opponent", "contact-ability|BRN|opponent", "contact-ability|PRZ|opponent", "contact-ability|PSN|opponent",
-      "yawn|SLP|player", "yawn|SLP|opponent", "thrash-fatigue|CONFUSION|opponent",
+      "contact-ability|BRN|opponent", "contact-ability|PRZ|opponent", "contact-ability|PSN|opponent",
+      "yawn|SLP|player", "thrash-fatigue|CONFUSION|opponent",
     ]) expect(covered.has(k), k).toBe(true);
   }, 600_000);
 
