@@ -55,3 +55,41 @@ Random factor 98 verified by the LCG (rng 3233736231 -> 613564686, 9362 % 16 -> 
 
 Notes: (1) CBM's `get_ability AI_TARGET` heuristic does NOT depend on `speciesAbilities` (`factoryAiCheckBadMove.ts:715-760` reads the species table itself); only the Viability `ChangeSelfAbility` handler (`factoryAiCheckViability.ts:8446`) reads the field, defaulting to `[NONE, NONE]`, which skips the `Random() & 1` guess draw the ROM makes. (2) Factory mons always hold an item, so the `holdEffect` default of 0 is wrong whenever Thief/Trick scoring is reached, not just a rare edge. (3) The source `AI_CV_Facade` reads target status 1 (`@BUG` kept), so `isPoisoned`/`isBurned`/`isParalyzed` are target-only.
 Fix plan: fill each from `rulesContext` where the data exists (status1 masks; `status3` IMPRISONED_OTHERS / MUDSPORT / WATERSPORT; `sideStatuses` MIST / REFLECT; `disableStructs` disabled / encored move; `gBattleStruct->usedHeldItems`; stockpile counter; species gender via `GetGenderFromSpeciesAndPersonality`; held item effect; `SPECIES_BY_ID` abilities; target party status scan). Order by rank; gender first (a live divergence). One test per field comparing the live view against hand-computed `rulesContext`, plus a re-drive of seeds 11 and 17.
+
+## New lead (seed 28): Reflect / Light Screen never reduce live damage
+
+- Seed 28 (15/17, ON and OFF): engine Sludge Bomb (turn 12) does 65 and KOs a 57-HP target; ROM does 34. The defender used Reflect at turn 10 (`sideStatuses [0,1]`).
+- ROM single-step: `CalculateBaseDamage` is called with `sideStatus` carrying `SIDE_STATUS_REFLECT`, halves the damage (`pokemon.c:3267`, Light Screen `:3318`, both only when `gCritMultiplier == 1`; x2/3 in doubles with two alive), base 24 -> STAB 36 -> 94% = 34.
+- Engine: `damagecalcOpcodeHandler` (`src/engine/battleScriptHitChainOpcode.ts` ~1600-1630) -> `calculateBattleScriptBaseDamageWithPowerForCurrentMove` (:1509) never passes `sideStatusReflect` / `sideStatusLightScreen`. Its doc comment says they are "not modeled anywhere in this engine yet". `src/engine/damageCalc.ts:130,425,~445` already supports them; only `battleScriptTrysetfutureattackOpcode.ts:120` passes them. The AI view does read `rulesContext.sideStatuses`, so AI and damage disagree.
+- Fix plan: pass `(rulesContext.sideStatuses[defenderSide] & SIDE_STATUS_REFLECT) !== 0` / `LIGHTSCREEN` into the base-damage input in the damagecalc path (and AI damage sims if they bypass it). Test idea: physical hit on a Reflect-up defender is halved, a crit is not, Light Screen for special; then re-drive seed 28 (expect past 15/17).
+
+## Seeds 21..40 (scene ON and OFF; matched / engine states)
+
+ON and OFF gave identical results on every seed. Seed 13 (7/15) was driven ON only; seed 11 (10/20) both scenes, after the #205 driver fix.
+
+| seed | ON | OFF | classification |
+|---|---|---|---|
+| 21 | 10/10 | 10/10 | full match |
+| 23 | 27/27 | 27/27 | full match |
+| 24 | 10/10 | 10/10 | full match |
+| 25 | 26/26 | 26/26 | full match |
+| 29 | 13/13 | 13/13 | full match |
+| 34 | 15/15 | 15/15 | full match |
+| 35 | 8/8 | 8/8 | full match |
+| 36 | 17/17 | 17/17 | full match |
+| 37 | 10/10 | 10/10 | full match |
+| 38 | 16/16 | 16/16 | full match |
+| 40 | 20/20 | 20/20 | full match |
+| 33 | n/a | n/a | not drivable: Frontier Brain `trainerId` 1022, lab `validate_request` allows 0..299 (lab limit, not a divergence) |
+| 26 | 8/16 | 8/16 | known #204 (gender): ROM scores [100,100,100,90] vs engine [100,90,100,90]; Attract 100 vs 90 |
+| 28 | 15/17 | 15/17 | NEW: Reflect/Light Screen not applied (above) |
+| 22 | 8/20 | 8/20 | NEW (unconfirmed cause): AI scoring. ROM scores [101,99,100,99] vs engine [100,89,100,99] (Explosion +1, Earthquake -10 on the engine); ROM Forretress picks Explosion, engine Rock Slide. Not one of the 16 fields |
+| 30 | 6/11 | 6/11 | NEW (unconfirmed cause): AI scoring. Same Giga Drain pick but RNG differs after; ROM [90,92,99,100] vs engine [90,95,99,102]; Attract slot equal, so not gender |
+| 31 | 1/34 | 1/34 | unclassified: mask 7, turn 2 ROM picks Ice Beam, engine Dragon Claw (AI choice or damage; not examined) |
+| 32 | 22/23 | 22/23 | unclassified: mask 0 (random pick), last turn only: engine KOs the player (Petal Dance), ROM leaves it at 164 HP |
+| 27 | 3/20 | 3/20 | unclassified: mask 0 random pick, ROM Rock Slide vs engine Dragon Breath; ROM driver stopped "action menu without a move decision" |
+| 39 | 9/11 | 9/11 | unclassified: ROM scores [104,104,98,104] vs engine [104,99,98,99]; ROM Brick Break vs engine Earthquake (possibly `targetSideReflectUp`, #204 rank 10) |
+| 11 | 10/20 | 10/20 | known #204 (gender), Attract at turn 8 |
+| 13 | 7/15 | not run | #206 type-multiplier order |
+
+ROM `aiFlags` reads after turn 1 were inconsistent with the engine mask (flags 0/3 seen where the engine uses 7), so ROM `score[]` comparisons were used instead of ROM flags.
