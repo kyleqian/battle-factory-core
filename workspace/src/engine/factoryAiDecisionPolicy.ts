@@ -608,9 +608,9 @@ export type FactoryAiScoredBattlerView = Readonly<{
   /**
    * Alive, non-empty, non-Egg bench count produced by
    * `count_usable_party_mons AI_USER`, excluding the active party index --
-   * `AI_CBM_Explosion`/`AI_CBM_BatonPass`'s own AI_USER count gate. Optional
-   * (the live driver does not yet model either side's party), defaulting to
-   * the CBM layer's conservative zero-member default.
+   * `AI_CBM_Explosion`/`AI_CBM_BatonPass`/`AI_CBM_Memento`'s own AI_USER count
+   * gate. The live driver fills it (`countUsablePartyMons`); optional for
+   * hand-built views, defaulting to the CBM layer's zero-member default.
    */
   usablePartyMons?: number;
   /** `gBattleMons[].status2 & STATUS2_SUBSTITUTE` -- `AI_CBM_Substitute`'s own first gate (attacker's own copy only). Optional, defaulting to `false`. */

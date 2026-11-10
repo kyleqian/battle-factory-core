@@ -40,7 +40,10 @@ import {
   BATTLE_SCRIPT_STATUS3_ROOTED,
   BATTLE_SCRIPT_STATUS3_YAWN,
 } from "./battleScriptSourceConstants.ts";
-import type { BattleScriptRulesContext } from "./battleScriptRulesContext.ts";
+import type {
+  BattleScriptPartyState,
+  BattleScriptRulesContext,
+} from "./battleScriptRulesContext.ts";
 import {
   chooseFactoryAiMaskZeroDecision,
   chooseFactoryAiScoredDecision,
@@ -262,6 +265,26 @@ function currentWeather(weather: number): AiWeatherValue | undefined {
   return undefined;
 }
 
+/**
+ * `Cmd_count_usable_party_mons` (`battle_ai_script_commands.c:1292-1334`) in
+ * singles: party slots other than the battler's own `gBattlerPartyIndexes`
+ * entry (`battlerOnField1 == battlerOnField2` outside doubles, :1311-1320)
+ * with `hp != 0`, species not NONE and not EGG (:1322-1329). AI_USER counts
+ * the AI side's party, AI_TARGET the other side's (:1301-1309).
+ */
+export function countUsablePartyMons(
+  party: BattleScriptPartyState,
+  activePartyIndex: number,
+): number {
+  let count = 0;
+  for (const [index, member] of party.entries()) {
+    if (index !== activePartyIndex && member.hp !== 0 && member.species !== 0 && !member.isEgg) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
 function statStages(battler: BattleScriptRulesContext["battlers"][number]) {
   return Object.freeze({
     atk: battler.statStages[1],
@@ -307,6 +330,7 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       isFirstTurn: attacker.isFirstTurn,
       hp: attacker.hp,
       maxHp: attacker.maxHP,
+      usablePartyMons: countUsablePartyMons(input.rulesContext.party.opponent, attacker.partyIndex),
       ability: abilityName(attacker.ability),
       battleTurnCount: input.challenge.battleTurnCount ?? 0,
       lightScreenUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_LIGHTSCREEN) !== 0,
@@ -366,6 +390,7 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       isFirstTurn: target.isFirstTurn,
       hp: target.hp,
       maxHp: target.maxHP,
+      usablePartyMons: countUsablePartyMons(input.rulesContext.party.player, target.partyIndex),
       lastUsedMoveId: input.rulesContext.moveHistory.lastMoves[0],
       ...(target.status1 !== 0 ? { hasAnyStatus: true } : {}),
       ...((target.status1 & BATTLE_SCRIPT_STATUS1_SLEEP) !== 0
