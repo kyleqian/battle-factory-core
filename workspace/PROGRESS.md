@@ -5,6 +5,19 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-10 — abl261 (ts lane worker): one full ability id->name resolver; ISSUES #202 fixed (removed)
+
+- **State:** committed on master (not pushed). ENGINE_BUILD `eb-b885d2de87ddf075` -> `eb-43a8872b3b6234fe` (tell the website). `docs/abl261-ability-damage.md`.
+- **Did:** `src/engine/abilityNameById.ts` (from `ability-item-hooks.json`) replaces the 4-id map in the hit chain; Huge / Pure Power, Thick Fat, Plus / Minus, Marvel Scale and the
+  Overgrow / Blaze / Torrent / Swarm pinch now reach CalculateBaseDamage; confusion self-hit sees the live ability; WEATHER_HAS_EFFECT counts Cloud Nine + Air Lock with the hp test.
+  `tests/abl261AbilityDamage.test.ts` (10; 7 fail unfixed). ROM: seeds 6 / 8 ON now 16/16 / 9/9, the 14-run aligned set still full. Census 0..999: 179 seeds change in
+  both scenes (same set), 0 unexplained against the unfixed observation tree (`abl261Instrument.py` / `abl261Classify.py`). Gates: build / build:lib 0, soak vanilla 0:20 ON and OFF 20/20,
+  full suite in 6 shards green after 5 re-pins (scene parity 467 -> 466, orchestrator seeds 7 / 16, cf78 battle 950, sag130 re-staged with a 3-class coverage gap).
+- **Next:** ISSUES #203 (AI usable party count). Follow-ups: regenerate seg127 `exposure.json` from the new census (restores 3 sag130 classes); one Castform body in battle 950 declines.
+- **Notes:** report-only: confusion self-hit calc has no hold-item inputs; Future Sight's Plus / Minus field list has an hp filter C lacks.
+
+---
+
 ## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud243a / bnd256c / aud242g / cln244 / aud243b / aud243c / sub260 / sum259 folded
 
 - **State:** master clean, no active workers; final src == `1613c285a` (bnd256c install fix). Evidence `.integration/validation/sv-20261108/`

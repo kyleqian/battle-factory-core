@@ -21,14 +21,6 @@ exclusions are superseded. Unrelated expansions stay parked.
 `Cmd_count_usable_party_mons` (`battle_ai_script_commands.c:1292-1334`). Census seed 2 ON (aud243d): engine tie pool 3 moves vs the ROM's 4,
 different turn-1 move. Fix: compute the count per side on the live view.
 
-## #202 — Damage calc ignores most attacker / defender abilities (aud243d, 2026-11-09)
-
-`ABILITY_NAME_BY_ID` in `src/engine/battleScriptHitChainOpcode.ts:155` maps only ids 8 / 14 / 55 / 62 (Sand Veil, Compound Eyes,
-Hustle, Guts), and the damage-calc / accuracy inputs (~1239, ~1558, ~1572, ~1583) pass `null` for every other id. So Huge Power / Pure
-Power, Thick Fat, Plus / Minus, Marvel Scale and the Overgrow / Blaze / Torrent / Swarm pinch boost (`pokemon.c:3219-3226`,
-`damageCalc.ts` ~310-405) never apply; Cloud Nine / Air Lock in `activeBattlerAbilities` likely too. Census seeds 6 and 8 ON (aud243d
-ROM driver): ROM 108 vs engine 72 damage (Blaze). A scratch map with the missing ids made both seeds match the ROM to battle end.
-
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 
 `docs/obr251-opponent-party-summary.md`: bar slide / hold / fade / SE are ROM-timed and the bar frames 527..546 are exact

@@ -72,15 +72,27 @@ The 4 flagged-but-unchanged seeds (109, 354, 361, 992; Thick Fat) reach the calc
 (`battleScriptOpenPartyScreenOpcode.ts`, `GetMostSuitableMonToSwitchInto` damage fallback), where the changed damage did not change the chosen mon.
 Errors: the same two `frame budget` seeds (434, 796) in both arms; seed 881 (frame budget in the baseline) now finishes.
 
-## 5. Re-pins
+## 5. Re-pins (every one tied to an ability now applying)
 
-- `tools/report/ability-item-parity-census.ts` line pins `battleScriptActionAdmission.ts:2991 -> :2982` (`ABILITY_GUTS`) and `battleScriptHitChainOpcode.ts:1229 -> :1224` (`HOLD_EFFECT_EVASION_UP`), `docs/ability-item-parity-census.md` regenerated (the Air Lock row now has 18 sites instead of 12). Reason: the literal-comparison sites moved because the local 4-entry map was replaced and the Air Lock checks were added; no census content changed.
-- Test pins: see the final gate list in PROGRESS.md (none moved at the time of writing, see section 6).
+The scene-parity pin passes on the unfixed parent `e67db450a`; for it and the two orchestrator seeds, restricting `abilityNameOrNull` to the old ids 8 / 14 / 55 / 62 on the fixed tree
+reproduces the old value. cf78 (battle 950) and sag130 (seeds) are tied through the census: those seeds are in the changed set and flagged by the instrumented tree.
+
+- `tests/playableAnimationLifecycle.test.ts` `verifySceneModeParity()` 467 -> 466 (40 generated Scene ON matchups; damage calc abilities).
+- `tests/factoryRoundBattleOrchestrator.test.ts` generated round census `facilityRngCalls`: seed 7 1884 -> 1857, seed 16 1294 -> 1786 (battles with pinch / Thick Fat / Huge Power mons).
+- `tests/cf78CastformForm.test.ts` battle 950 (a changed census seed, ON 304 -> 480 commands): Castform bodies 19 -> 21, live Castform bodies 19 -> 20 (one Castform body keeps
+  declining in the new trajectory; the apx221 "19 of 19" no longer holds, a presentation follow-up), other live bodies 9 -> 22.
+- `tests/sag130StatusSeGate.test.ts`, **re-staged like sub260b**: seg127's `exposure.json` projection was derived from the old census, so the changed seeds no longer match it. Seeds
+  206 / 230 / 264 / 294 / 348 / 440 / 931 are replaced by the first unchanged seed of the same class (230 -> 965, 294 -> 388, 348 -> 437, 440 -> 547). **Coverage gap:** no unchanged
+  census seed carries `hit-secondary|BRN|player`, `yawn|SLP|opponent` or `hit-secondary|PSN|opponent`, so those three classes leave the census anchors (12 of the 15 classes remain; 16 gated
+  anchors / 125 gate frames, was 19 / 167). The ROM receipts of the rule itself (second test) are unchanged. Follow-up: regenerate `exposure.json` from the new census.
+- `tools/report/ability-item-parity-census.ts` line pins `battleScriptActionAdmission.ts:2991 -> :2982` and `battleScriptHitChainOpcode.ts:1229 -> :1224`, `docs/ability-item-parity-census.md`
+  regenerated (the Air Lock row 12 -> 18 sites); `docs/gate6-coverage-manifest.{json,md}` regenerated (derived from that census doc; `battleEndTurnOrchestration.ts` anchors +1 line).
 
 ## 6. Gates
 
-ENGINE_BUILD `eb-b885d2de87ddf075` -> `eb-43a8872b3b6234fe` (tell the website). typecheck / `npm run build` (runs `tsc -b`) / `npm run build:lib` 0.
-Soak and full-suite results: PROGRESS.md top entry.
+ENGINE_BUILD `eb-b885d2de87ddf075` -> `eb-43a8872b3b6234fe` (tell the website). `npm run build` (runs `tsc -b`) and `npm run build:lib` 0. `npm run soak -- --policy vanilla --seeds 0:20 --parallel 4`
+20/20 OK, and the same with `--scene on` 20/20 OK. Full suite in 6 vitest shards (`--shard=i/6`, same flags as `npm test`): the only failures were the five pins above, all re-pinned and re-run green;
+the other shards passed unchanged.
 
 ## 7. Report-only findings (not fixed)
 
