@@ -93058,6 +93058,10 @@
             "kind": "tier-1-test"
           },
           {
+            "path": "tests/dmg264TypeOrderScreens.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/gate6ScreenExpiryOrderReceipt.test.ts",
             "kind": "tier-1-test"
           }
@@ -93101,6 +93105,10 @@
           },
           {
             "path": "tests/battleScriptScreensWeatherOrchestration.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/dmg264TypeOrderScreens.test.ts",
             "kind": "tier-1-test"
           },
           {
