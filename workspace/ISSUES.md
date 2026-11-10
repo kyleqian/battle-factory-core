@@ -13,26 +13,31 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #208 — Reflect / Light Screen never halve damage in the live hit chain (dia263 seed 28, 2026-11-10)
+
+`damagecalcOpcodeHandler` (`battleScriptHitChainOpcode.ts`) does not pass `sideStatusReflect` / `sideStatusLightScreen` into CalculateBaseDamage's input (only
+the Future Sight path does, `battleScriptTrysetfutureattackOpcode.ts:120`); `damageCalc.ts` ~425 / ~444 already implements the halving (`pokemon.c:3267`, `:3318`,
+non-crit only). ROM Sludge Bomb through Reflect 34, engine 65 (seed 28, `docs/dia263-leads.md`). Fix: pass the defender side's flags; test; re-drive seed 28.
+
 ## #207 — Confusion self-hit calc still lacks hold-item inputs (abl261 §7, seen again by aip262 seed 20, 2026-11-10)
 
 ROM seed 20 (ON and OFF): AI confusion self-hit damage 35 vs engine 18. C passes the live `gBattlerMons` record, so `holdEffect` reaches `CalculateBaseDamage`
 (`battle_util.c:2157-2175`); the engine branch (`battleScriptActionAdmission.ts`) has no hold-item inputs. Fix: feed holdEffect / holdEffectParam.
 
-## #206 — Fire Punch damage 1 lower than the ROM on one route (aip262 seed 13, 2026-11-10)
+## #206 — Type effectiveness applied in defender-type order, not table order (aip262 seed 13; root cause dia263, 2026-11-10)
 
-ROM 46 vs engine 45 for Alakazam -> Torterra (ON and OFF); AI picks, RNG and totals are identical up to that hit, so it is not AI. Cause unclassified (damage formula
-modifier order or a type / item input); `romDriveSeed.sh 13 on|off`.
+ROM `Cmd_typecalc` walks `gTypeEffectiveness` in ROW order and truncates after each matching row (`battle_script_commands.c:1321`, `:1355-1415`); the engine
+applies the defender's type1 then type2 (`applyTypeEffectiveness`, `src/engine/damageCalc.ts` ~556, and `typecalcOpcodeHandler`,
+`battleScriptHitChainOpcode.ts` ~1655-1740). Fire Punch on Rock/Grass: ROM 47 -> 94 -> 47 -> 46, engine 47 -> 23 -> 46 -> 45. The AI's
+`computeAiEffectiveness` already uses table order. Fix both sites; test `applyTypeEffectiveness(47, FIRE, [ROCK, GRASS])` and `[GRASS, ROCK]` = 46;
+re-drive seed 13 (`docs/dia263-leads.md`).
+## #204 — The live AI view leaves 16 declared fields unfilled, incl. `gender` (aip262 seed 17; ranked by dia263, 2026-11-10)
 
-## #205 — Roar / forced switch: engine keeps party indexes, the ROM permutes them (aip262 seed 11, 2026-11-10)
-
-`Cmd_forcerandomswitch` -> `SwitchPartyOrder` (`battle_script_commands.c:7364`) swaps party slots; the engine keeps the original party indexes, so the ROM driver's
-"switch partyIndex 0" selects a fainted slot and the run stalls to the 80000-frame cap (7/20 matched, ON and OFF). Visible only now that the AI scores Roar on real counts.
-
-## #204 — The live AI view leaves 16 declared fields unfilled, incl. `gender` (aip262 seed 17, 2026-11-10)
-
-`AI_CBM_Attract` (`battle_ai_scripts.s:456-470`) reads `Cmd_get_gender` (`battle_ai_script_commands.c:2088`); the view never fills `gender`, so Attract always scores -10
-(ROM 100 vs engine 90, seed 17 turn 1, ON and OFF: 0/19 matched, "party menu without a switch decision"). Audit the other unfilled view fields the same way.
-
+`createFactoryAiViewFromLiveRules` never fills `anyMoveDisabled`, `anyMoveEncored`, `gender`, `holdEffect`, `imprisonedOthers`, `isBurned`, `isParalyzed`,
+`isPoisoned`, `mistUp`, `mudSportUp`, `speciesAbilities`, `stockpileCount`, `targetPartyStatusEqualsAny`, `targetSideReflectUp`, `usedHeldItemId`, `waterSportUp`.
+`gender` first: `AI_CBM_Attract` (`battle_ai_scripts.s:456-470`, `Cmd_get_gender` `battle_ai_script_commands.c:2088`) runs under flag 1 from challenge 2 up and
+54 pool mons know Attract; seeds 11 / 17 / 26 diverge on it (ROM 100 vs engine 90). Ranked table and fix order: `docs/dia263-leads.md`. Unclassified AI
+divergences (seeds 22, 30, 31, 39; random-pick seeds 27, 32) may be other fields here.
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 
 `docs/obr251-opponent-party-summary.md`: bar slide / hold / fade / SE are ROM-timed and the bar frames 527..546 are exact
