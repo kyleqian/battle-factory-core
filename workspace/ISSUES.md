@@ -29,7 +29,7 @@ ROM seed 20 (ON and OFF): AI confusion self-hit damage 35 vs engine 18. C passes
 ROM `Cmd_typecalc` walks `gTypeEffectiveness` in ROW order and truncates after each matching row (`battle_script_commands.c:1321`, `:1355-1415`); the engine
 applies the defender's type1 then type2 (`applyTypeEffectiveness`, `src/engine/damageCalc.ts` ~556, and `typecalcOpcodeHandler`,
 `battleScriptHitChainOpcode.ts` ~1655-1740). Fire Punch on Rock/Grass: ROM 47 -> 94 -> 47 -> 46, engine 47 -> 23 -> 46 -> 45. The AI's
-`computeAiEffectiveness` already uses table order. Fix both sites; test `applyTypeEffectiveness(47, FIRE, [ROCK, GRASS])` and `[GRASS, ROCK]` = 46;
+`computeAiEffectiveness` already uses table order. Fix both sites; test `applyTypeEffectiveness(47, FIRE, [ROCK, GRASS])` and `[GRASS, ROCK]` = 47 (table order: x2 then x0.5);
 re-drive seed 13 (`docs/dia263-leads.md`).
 ## #204 — The live AI view leaves 16 declared fields unfilled, incl. `gender` (aip262 seed 17; ranked by dia263, 2026-11-10)
 
