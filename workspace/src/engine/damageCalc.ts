@@ -546,25 +546,56 @@ export interface TypeEffectivenessEntry {
 }
 
 /**
+ * The gTypeEffectiveness rows a defender matches, in ROM ROW order (not
+ * defender-type order): the shared loop of Cmd_typecalc (battle_script_commands.c:1355-1415),
+ * TypeCalc (:1536-1591), Cmd_typecalc2 (:4500) and AI_TypeCalc (:1594). A row applies when its
+ * attacking type is `moveType` and its defending type is type1, or type2 when
+ * type1 != type2. The TYPE_FORESIGHT sentinel row is skipped, or ends the walk
+ * when the defender has Foresight (only the Normal / Fighting -> Ghost rows follow it).
+ */
+export function matchingTypeEffectivenessRows(
+  moveType: string,
+  defenderTypes: readonly [string, string],
+  table: readonly TypeEffectivenessEntry[],
+  hasForesight = false,
+): TypeEffectivenessEntry[] {
+  const rows: TypeEffectivenessEntry[] = [];
+  for (const row of table) {
+    if (row.attackingType === "TYPE_FORESIGHT") {
+      if (hasForesight) break;
+      continue;
+    }
+    if (row.attackingType !== moveType) continue;
+    if (
+      row.defendingType === defenderTypes[0]
+      || (row.defendingType === defenderTypes[1] && defenderTypes[0] !== defenderTypes[1])
+    ) {
+      rows.push(row);
+    }
+  }
+  return rows;
+}
+
+/**
  * ModulateDmgByType (battle_script_commands.c:1321-1326) applied once per
- * distinct defender type that has a table entry for moveType (Cmd_typecalc,
- * :1385-1404) - a dual-type defender can have the multiplier applied twice
- * (e.g. 4x for a double-weak matchup). Missing table entry = neutral (1x),
- * matching src/data/gen/type-effectiveness.json's own convention (only
- * non-1x matchups are listed).
+ * matching gTypeEffectiveness ROW, in table order, truncating after every step
+ * (Cmd_typecalc, :1385-1404) - a dual-type defender can have the multiplier
+ * applied twice (e.g. 4x for a double-weak matchup), and the order changes the
+ * truncation (Fire Punch 47 on Rock/Grass: Grass x2 then Rock x0.5 = 47, not
+ * 46; ISSUES #206). Missing table entry = neutral (1x), matching
+ * src/data/gen/type-effectiveness.json's own convention (only non-1x
+ * matchups are listed).
  */
 export function applyTypeEffectiveness(
   damage: number,
   moveType: string,
   defenderTypes: readonly [string, string],
   table: readonly TypeEffectivenessEntry[],
+  hasForesight = false,
 ): { damage: number; multiplierTenths: number } {
   let result = damage;
   let totalMultiplierTenths = 10;
-  const distinctTypes = defenderTypes[0] === defenderTypes[1] ? [defenderTypes[0]] : defenderTypes;
-  for (const defType of distinctTypes) {
-    const entry = table.find((e) => e.attackingType === moveType && e.defendingType === defType);
-    if (!entry) continue;
+  for (const entry of matchingTypeEffectivenessRows(moveType, defenderTypes, table, hasForesight)) {
     totalMultiplierTenths = Math.trunc((totalMultiplierTenths * entry.multiplierTenths) / 10);
     result = Math.trunc((result * entry.multiplierTenths) / 10);
     if (result === 0 && entry.multiplierTenths !== 0) result = 1;

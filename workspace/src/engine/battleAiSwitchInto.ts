@@ -16,7 +16,7 @@
  */
 import movesData from "../data/gen/moves.json" with { type: "json" };
 import typeEffectivenessData from "../data/gen/type-effectiveness.json" with { type: "json" };
-import type { TypeEffectivenessEntry } from "./damageCalc.ts";
+import { matchingTypeEffectivenessRows, type TypeEffectivenessEntry } from "./damageCalc.ts";
 import type { BattleScriptPartyMemberMoves } from "./battleScriptRulesContext.ts";
 
 type MoveTypeRow = Readonly<{ id: number; type: string; power: number }>;
@@ -162,18 +162,10 @@ function typeCalcCandidateDamage(
     return damage;
   }
 
-  const distinctDefendingTypes = fallback.opposingTypes[0] === fallback.opposingTypes[1]
-    ? [fallback.opposingTypes[0]]
-    : fallback.opposingTypes;
-  for (const defendingType of distinctDefendingTypes) {
-    const foresightSkipsImmunity =
-      (fallback.opposingStatus2 & STATUS2_FORESIGHT) !== 0
-      && defendingType === "TYPE_GHOST"
-      && (move.type === "TYPE_NORMAL" || move.type === "TYPE_FIGHTING");
-    if (foresightSkipsImmunity) continue;
-    const multiplier = typeMultiplierTenths(move.type, defendingType);
-    damage = Math.trunc((damage * multiplier) / 10);
-    if (damage === 0 && multiplier !== 0) damage = 1;
+  const hasForesight = (fallback.opposingStatus2 & STATUS2_FORESIGHT) !== 0;
+  for (const row of matchingTypeEffectivenessRows(move.type, fallback.opposingTypes, TYPE_EFFECTIVENESS, hasForesight)) {
+    damage = Math.trunc((damage * row.multiplierTenths) / 10);
+    if (damage === 0 && row.multiplierTenths !== 0) damage = 1;
   }
   return damage;
 }
