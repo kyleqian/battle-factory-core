@@ -152,6 +152,11 @@ const matching = (row: ClassRow, uses: Use[]) =>
     && startOfN(u, row.prod!.N[2], row.prod!.N[3], row.prod!.att) !== null);
 /** The landed anchor: off108's romAnchor encodes lead(STATS_CHANGE) = 0; the stats-change command starts one row later. */
 const anchorOf = (row: ClassRow) => row.rule!.romAnchor + (row.prod!.N[1] === "STATS_CHANGE" ? 1 : 0);
+/** dmg264: Razor Wind's off108 example seed 201 is a changed census seed (the corrected type walk / screens move its battle) and no longer reaches the
+ * charge. The anchor is a per-class source-timing claim (ROM scenario off108-razor-wind-ply-primeape-snorlax: N's command at G + 1 + 42), not seed
+ * history, so the class re-stages to seed 353 (3 charge uses, all start 42; seeds 250 / 265 / 375 also carry one). */
+const EXAMPLE_SEED_OVERRIDE: Record<number, number> = { 13: 353 };
+const exampleSeedOf = (row: ClassRow) => EXAMPLE_SEED_OVERRIDE[row.move] ?? row.prod!.exampleSeed;
 const NO_HIT = CLASSES.filter((r) => r.prod && r.rule && r.prod.att !== null);
 const HOLDS = CLASSES.filter((r) => r.prod && r.rule && r.prod.att === null);
 
@@ -166,7 +171,7 @@ describe("olnd113: Scene OFF no-hit pause, per class on production routes", () =
   });
 
   it.each(NO_HIT.map((r) => [r.class, r] as const))("%s: N's command starts on the ROM anchor (0-frame residual)", (_name, row) => {
-    const uses = matching(row, battleUses(row.prod!.exampleSeed, "off"));
+    const uses = matching(row, battleUses(exampleSeedOf(row), "off"));
     expect(uses.length).toBeGreaterThan(0);
     for (const use of uses) {
       expect(startOfN(use, row.prod!.N[2], row.prod!.N[3], row.prod!.att)).toBe(anchorOf(row));

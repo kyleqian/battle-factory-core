@@ -35,7 +35,9 @@ const ROM = JSON.parse(readFileSync("tools/integration/fixtures/seg127/receipts/
 // yawn|SLP|player 230 -> 965, CONFUSION|opponent 294 -> 388, CONFUSION|player 348 -> 437, FRZ|opponent 440 -> 547. No unchanged census seed carries
 // hit-secondary|BRN|player (206), yawn|SLP|opponent (264) or hit-secondary|PSN|opponent (931): those three drop out of the census anchors (ROM
 // receipts of the rule itself stay in the second test; regenerating exposure.json is a follow-up).
-const SEEDS = [3, 27, 209, 296, 388, 437, 446, 547, 664, 705, 802, 965];
+// dmg264 re-stage: the corrected type walk / screens change census seed 437 (its CONFUSION|player battle no longer matches the projection), so
+// CONFUSION|player 437 -> 856 (the next projected carrier; the per-open-receipt animation / side / path / gate equality below holds on it).
+const SEEDS = [3, 27, 209, 296, 388, 856, 446, 547, 664, 705, 802, 965];
 
 const FRAME_BUDGET = 200000;
 

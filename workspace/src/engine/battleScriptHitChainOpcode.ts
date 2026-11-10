@@ -92,6 +92,7 @@ import {
   calculateBaseDamageWithPower,
   getCriticalHitChanceStage,
   isTypePhysical,
+  matchingTypeEffectivenessRows,
   rollAccuracyHits,
   rollIsCriticalHit,
   type TypeEffectivenessEntry,
@@ -706,6 +707,8 @@ function stringOperand(expression: string, sourceMacroLine: number): BattleScrip
 }
 
 const HOLD_EFFECT_EVASION_UP_ID = 22;
+const SIDE_STATUS_REFLECT = 1 << 0;
+const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 
 const TYPE_EFFECTIVENESS = (typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[]);
 
@@ -1536,6 +1539,7 @@ export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
   }
   const attackerHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, attacker);
   const defenderHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
+  const targetSideStatus = rulesContext.sideStatuses[targetBattler.side];
 
   return calculateBaseDamageWithPower({
     attacker: {
@@ -1571,6 +1575,8 @@ export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
     movePower,
     moveType,
     isCriticalHit: rulesContext.critMultiplier === 2,
+    sideStatusReflect: (targetSideStatus & SIDE_STATUS_REFLECT) !== 0,
+    sideStatusLightScreen: (targetSideStatus & SIDE_STATUS_LIGHTSCREEN) !== 0,
     moveEffect: moveRow.effect,
     weather: rulesContext.weather,
     weatherHasEffect: weatherHasEffectForBaseDamage(rulesContext),
@@ -1589,17 +1595,16 @@ export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
  * inside calculateBaseDamage itself (docs/hit-chain-ground-truth.md's crit
  * scenario). Source `gDynamicBasePower` carries Low Kick/Flail/Triple
  * Kick-style power overrides; zero selects `gBattleMoves[move].power`.
+ * The sideStatus argument is `gSideStatuses[GET_BATTLER_SIDE(gBattlerTarget)]` (`:1288`), so
+ * the defender side's Reflect / Light Screen reach `CalculateBaseDamage` (ISSUES #208).
  * `CalculateBaseDamage`'s own `powerOverride` parameter (`pokemon.c:3119-3122`,
  * `if (!powerOverride) gBattleMovePower = gBattleMoves[move].power; else
  * gBattleMovePower = powerOverride;`) is source-generic: Triple Kick's own
  * `copyhword gDynamicBasePower, sTRIPLE_KICK_POWER` (already-modeled scratch
  * state, `rules.tripleKickPower`) copies into `rules.dynamicBasePower`;
  * Cmd_remaininghptopower writes the same source field directly. Reading that
- * single source-shaped destination needs no per-effect branch. Side Reflect/Light Screen and
- * double-battle spread scaling are not modeled anywhere in this engine yet
- * (consistent with damageCalc.ts's own documented scope) -- both are
- * structurally always their C default (0/false) since no side-condition or
- * doubles subsystem exists to set them.
+ * single source-shaped destination needs no per-effect branch. Double-battle spread scaling is
+ * not modeled (this engine is singles-only), so it stays at its C default (false).
  */
 export const damagecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesContext> = (
   context,
@@ -1683,17 +1688,7 @@ export const typecalcOpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRulesC
     missType = B_MSG_GROUND_MISS;
   } else {
     const hasForesight = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0;
-    const distinctTypes = targetBattler.types[0] === targetBattler.types[1]
-      ? [targetBattler.types[0]]
-      : targetBattler.types;
-    for (const defType of distinctTypes) {
-      if (hasForesight && defType === "TYPE_GHOST" && (moveType === "TYPE_NORMAL" || moveType === "TYPE_FIGHTING")) {
-        continue;
-      }
-      const entry = TYPE_EFFECTIVENESS.find(
-        (candidate) => candidate.attackingType === moveType && candidate.defendingType === defType,
-      );
-      if (!entry) continue;
+    for (const entry of matchingTypeEffectivenessRows(moveType, targetBattler.types, TYPE_EFFECTIVENESS, hasForesight)) {
       damage = Math.trunc((damage * entry.multiplierTenths) / 10);
       if (damage === 0 && entry.multiplierTenths !== 0) damage = 1;
       if (entry.multiplierTenths === 0) {
@@ -1844,17 +1839,7 @@ export const typecalc2OpcodeHandler: BattleScriptOpcodeHandler<BattleScriptRules
     missType = B_MSG_GROUND_MISS;
   } else {
     const hasForesight = (targetBattler.status2 & BATTLE_SCRIPT_STATUS2_FORESIGHT) !== 0;
-    const distinctTypes = targetBattler.types[0] === targetBattler.types[1]
-      ? [targetBattler.types[0]]
-      : targetBattler.types;
-    for (const defType of distinctTypes) {
-      if (hasForesight && defType === "TYPE_GHOST" && (moveType === "TYPE_NORMAL" || moveType === "TYPE_FIGHTING")) {
-        continue;
-      }
-      const entry = TYPE_EFFECTIVENESS.find(
-        (candidate) => candidate.attackingType === moveType && candidate.defendingType === defType,
-      );
-      if (!entry) continue;
+    for (const entry of matchingTypeEffectivenessRows(moveType, targetBattler.types, TYPE_EFFECTIVENESS, hasForesight)) {
       if (entry.multiplierTenths === 0) {
         moveResultFlags = (moveResultFlags | BATTLE_SCRIPT_MOVE_RESULT_DOESNT_AFFECT_FOE) >>> 0;
         break;
