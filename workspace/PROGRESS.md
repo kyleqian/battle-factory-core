@@ -15,6 +15,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   full suite in 6 shards green after 5 re-pins (scene parity 467 -> 466, orchestrator seeds 7 / 16, cf78 battle 950, sag130 re-staged with a 3-class coverage gap).
 - **Next:** ISSUES #203 (AI usable party count). Follow-ups: regenerate seg127 `exposure.json` from the new census (restores 3 sag130 classes); one Castform body in battle 950 declines.
 - **Notes:** report-only: confusion self-hit calc has no hold-item inputs; Future Sight's Plus / Minus field list has an hp filter C lacks.
+- **Supervisor verify:** reran `romDriveSeed.sh 8 on` before the fix (6 / 9, same divergence frame); read the classifier report (179 / 179 changed, 0 unexplained);
+  re-pin diffs read; ONE full suite on the final tree `2e5b0cc13` (`sv-20261109/gates/suite1.log`): **1,752 passed + 44 skipped, 0 failed; 14,428 tests**. New census
+  baseline: `sv-20261109/abl261/census/{on,off}-6dce29c5d` (src unchanged to HEAD).
 
 ---
 
