@@ -8,6 +8,13 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Worker friction, 2026-11-10 / 11 run
+
+- **`randomRoundSoak.ts --help` is not a flag: it starts a real default soak** (seeds 0:50) that must be killed by PID (dmg264b, ~10 min).
+  Read the flags from the source header instead.
+- **A foreground Bash call over 600 s is silently moved to a background task**: multi-shard suite loops need per-call budgets under 10 min
+  (dmg264b, ~10 min waiting on a shard).
+
 ## Worker gate friction, 2026-11-09 / 10 run
 
 - **`pgrep` / `pkill -f <pattern>` kills the caller's own shell** when the pattern also appears in that shell's command line (abl261, 2x, ~8 min). Kill
