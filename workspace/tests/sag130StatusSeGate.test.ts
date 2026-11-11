@@ -30,18 +30,12 @@ const ROM = JSON.parse(readFileSync("tools/integration/fixtures/seg127/receipts/
   { scenarios: Record<string, { class: string; statusAnimations: { label: string; gate: number; controllerRows: number; activeRows: number }[] }> };
 
 // The first census seed of each gated class x animation x side of the projection (exposure.json openReceipts with gate > 0).
-// abl261 (ISSUES #202) re-stage: the full ability resolver changes census seeds 206 / 230 / 264 / 294 / 348 / 440 / 931 (both scenes), so seg127's
-// exposure.json projection (derived from the old census) no longer describes them. Classes re-staged to the first UNCHANGED seed carrying them:
-// yawn|SLP|player 230 -> 965, CONFUSION|opponent 294 -> 388, CONFUSION|player 348 -> 437, FRZ|opponent 440 -> 547. No unchanged census seed carries
-// hit-secondary|BRN|player (206), yawn|SLP|opponent (264) or hit-secondary|PSN|opponent (931): those three drop out of the census anchors (ROM
-// receipts of the rule itself stay in the second test; regenerating exposure.json is a follow-up).
-// dmg264 re-stage: the corrected type walk / screens change census seed 437 (its CONFUSION|player battle no longer matches the projection), so
-// CONFUSION|player 437 -> 856 (the next projected carrier; the per-open-receipt animation / side / path / gate equality below holds on it).
-// aiv266 coverage gap: the live AI view fields (gender, hold effect, target status, ...) change census seed 965 (both scenes), so its yawn|SLP|player
-// anchors no longer match the projection; the other projected carriers (230, 381, 804) were already moved by abl261 / dmg264. No unchanged census
-// seed carries yawn|SLP|player any more: that class drops out of the census anchors (ROM receipts of the rule itself stay in the second test;
-// regenerating exposure.json from the new census restores it).
-const SEEDS = [3, 27, 209, 296, 388, 856, 446, 547, 664, 705, 802];
+// seg268: exposure.json regenerated on the current kernel (seeds 0..999 Scene ON), which re-anchors every class to its first projected carrier and
+// restores hit-secondary|BRN|player, hit-secondary|PSN|opponent and yawn|SLP|player (dropped by abl261 / dmg264 / aiv266 census changes; their
+// re-stage notes are gone). Two classes the old projection lacked are now carried too (contact-ability|PRZ|player 933, hit-secondary|BRN|opponent 103).
+// Named gap: yawn|SLP|opponent has no gated carrier in 0..999 on the current kernel (5 open receipts, all gate 0); the ROM receipts of the rule
+// itself stay in the second test.
+const SEEDS = [3, 26, 27, 103, 209, 230, 294, 296, 446, 468, 553, 664, 705, 802, 931, 933];
 
 const FRAME_BUDGET = 200000;
 
@@ -217,7 +211,8 @@ describe("sag130: the IsBattleSEPlaying gate in production (census routes, Scene
       "hit-secondary|FRZ|player", "hit-secondary|FRZ|opponent", "hit-secondary|CONFUSION|player",
       "hit-secondary|CONFUSION|opponent", "hit-secondary|PRZ|player", "hit-secondary|PRZ|opponent", "hit-secondary|PSN|player",
       "contact-ability|BRN|opponent", "contact-ability|PRZ|opponent", "contact-ability|PSN|opponent",
-      "thrash-fatigue|CONFUSION|opponent", // aiv266: yawn|SLP|player dropped (coverage gap named above the SEEDS list)
+      "thrash-fatigue|CONFUSION|opponent", "yawn|SLP|player", "hit-secondary|BRN|player", "hit-secondary|PSN|opponent", // seg268: restored
+      "contact-ability|PRZ|player", "hit-secondary|BRN|opponent", // seg268: new carriers (yawn|SLP|opponent stays a named gap)
     ]) expect(covered.has(k), k).toBe(true);
   }, 600_000);
 
