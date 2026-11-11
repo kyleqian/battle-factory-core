@@ -119,7 +119,7 @@ import {
 import type { BattleRngState } from "./battleDecisionBoundary.ts";
 import { applyStab, applyTypeEffectiveness, DEFAULT_STAT_STAGE } from "./damageCalc.ts";
 import { advanceRngValue } from "./rng.ts";
-import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler } from "./turnOrder.ts";
+import { effectiveSpeed, getWhoStrikesFirst, type TurnOrderBattler, type WeatherState } from "./turnOrder.ts";
 
 const U16_MAX = 0xffff;
 
@@ -227,6 +227,36 @@ export const AI_CHECK_VIABILITY_TABLE_EFFECTS: ReadonlySet<string> = new Set([
   "EFFECT_COSMIC_POWER", "EFFECT_BULK_UP", "EFFECT_POISON_TAIL", "EFFECT_WATER_SPORT",
   "EFFECT_CALM_MIND", "EFFECT_DRAGON_DANCE",
 ]);
+
+function toTurnOrderBattler(battler: FactoryAiCheckViabilityBattler): TurnOrderBattler {
+  return {
+    speed: battler.speed,
+    speedStage: battler.speedStage,
+    movePriority: 0,
+    ability: battler.turnOrderAbility ?? null,
+    holdEffect: battler.turnOrderHoldEffect ?? null,
+    holdEffectParam: battler.turnOrderHoldEffectParam ?? 0,
+    isParalyzed: battler.isParalyzed === true,
+  };
+}
+
+/**
+ * `if_target_faster` / `if_user_faster` (`Cmd_if_target_faster` /
+ * `Cmd_if_user_faster`): `GetWhoStrikesFirst(user, target, TRUE)` over the TRUE
+ * battle state of BOTH battlers -- paralysis, Macho Brace, Quick Claw, Swift
+ * Swim / Chlorophyll weather and Speed stage -- converted by one helper so no
+ * AI handler can drift from the others.
+ */
+export function aiTurnOrder(
+  input: Readonly<{ attacker: FactoryAiCheckViabilityBattler; target: FactoryAiCheckViabilityBattler }>,
+): Readonly<{ attacker: TurnOrderBattler; target: TurnOrderBattler; weather: WeatherState; randomTurnNumber: number }> {
+  return {
+    attacker: toTurnOrderBattler(input.attacker),
+    target: toTurnOrderBattler(input.target),
+    weather: input.attacker.turnOrderWeather ?? {},
+    randomTurnNumber: input.attacker.randomTurnNumber ?? 0xffff,
+  };
+}
 
 /**
  * Everything every ported `AI_CV_*` handler body needs from a battler:
@@ -372,8 +402,30 @@ export type FactoryAiCheckViabilityBattler = Readonly<{
   isPoisoned?: boolean;
   /** STATUS1_BURN, read by AI_CV_Facade's status1 mask. */
   isBurned?: boolean;
-  /** STATUS1_PARALYSIS, read by AI_CV_Facade's status1 mask. */
+  /** STATUS1_PARALYSIS, read by AI_CV_Facade's status1 mask (target) and `GetWhoStrikesFirst`'s speed/4 (both sides). */
   isParalyzed?: boolean;
+  /**
+   * `GetWhoStrikesFirst`'s Swift Swim / Chlorophyll term: the battler's TRUE
+   * `gBattleMons[].ability` name. Distinct from `ability` (AI_USER-only real
+   * ability for specific handlers); the target's is never passed there.
+   */
+  turnOrderAbility?: string | null;
+  /**
+   * `GetWhoStrikesFirst`'s hold-effect term (`battle_main.c:4624-4692`): the TRUE
+   * `GetBattlerHoldEffect` name ("HOLD_EFFECT_MACHO_BRACE" / "HOLD_EFFECT_QUICK_CLAW"),
+   * not the AI-known `holdEffect`. Optional, defaulting to none.
+   */
+  turnOrderHoldEffect?: string | null;
+  /** `GetBattlerHoldEffectParam`, the Quick Claw percentage. Optional, defaulting to 0. */
+  turnOrderHoldEffectParam?: number;
+  /**
+   * `GetWhoStrikesFirst`'s WEATHER_HAS_EFFECT-gated Swift Swim / Chlorophyll
+   * input (`battle_main.c:4604-4622`; already false under Cloud Nine / Air Lock).
+   * AI_USER's copy only is read. Optional, defaulting to no weather.
+   */
+  turnOrderWeather?: WeatherState;
+  /** `gRandomTurnNumber`, Quick Claw's roll. AI_USER's copy only is read. Optional, defaulting to 0xffff (never procs). */
+  randomTurnNumber?: number;
   /** STATUS2_SUBSTITUTE, read by AI_CV_FocusPunch's FocusPunch3 tail. */
   hasSubstitute?: boolean;
   /**
@@ -1388,18 +1440,19 @@ function runCvSpeedDown(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -1504,18 +1557,19 @@ function runCvSpeedUp(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -1595,26 +1649,19 @@ function runCvRest(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = {
-    speed: input.attacker.speed,
-    speedStage: input.attacker.speedStage,
-    movePriority: 0,
-  };
-  const target: TurnOrderBattler = {
-    speed: input.target.speed,
-    speedStage: input.target.speedStage,
-    movePriority: 0,
-  };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -1942,18 +1989,19 @@ function runCvHealBody(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -2268,8 +2316,8 @@ function runCvSemiInvulnerable(input: Readonly<{
     scoreDelta: number;
     funcResultAfter: AiWeatherValue | undefined;
   }> {
-    const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-    const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+    const turnOrder = aiTurnOrder(input);
+    const { attacker, target } = turnOrder;
 
     const draws: FactoryAiCheckViabilityDraw[] = [];
     let rng = input.rng;
@@ -2277,13 +2325,14 @@ function runCvSemiInvulnerable(input: Readonly<{
 
     let tieRoll = 0;
     let tieDraw: ReturnType<typeof nextDraw> | null = null;
-    if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+    if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
       tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
       rng = tieDraw.after;
       tieRoll = tieDraw.randomValue;
       ordinal += 1;
     }
-    const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+    const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
     if (tieDraw) {
       draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
     }
@@ -2496,18 +2545,19 @@ function runCvRecharge(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -2575,18 +2625,19 @@ function runCvFlail(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -2666,18 +2717,19 @@ function runCvDestinyBond(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -2787,18 +2839,19 @@ function runCvSelfKO(input: Readonly<{
 
   const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -3080,18 +3133,19 @@ function runCvVitalThrow(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -4592,18 +4646,19 @@ function runCvRainDance(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-user-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "user-faster-tie" as const, strikesFirst }));
   }
@@ -4791,18 +4846,19 @@ function runCvOverheat(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -5257,18 +5313,19 @@ function runCvDragonDance(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -5363,18 +5420,19 @@ function runCvBatonPass(input: Readonly<{
     || input.attacker.spDefStage > threshold
     || input.attacker.evasionStage > threshold;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -7370,27 +7428,20 @@ function runCvParalyze(input: Readonly<{
   const draws: FactoryAiCheckViabilityDraw[] = [];
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
-  const attacker: TurnOrderBattler = {
-    speed: input.attacker.speed,
-    speedStage: input.attacker.speedStage,
-    movePriority: 0,
-  };
-  const target: TurnOrderBattler = {
-    speed: input.target.speed,
-    speedStage: input.target.speedStage,
-    movePriority: 0,
-  };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
 
   let tieRoll = 0;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     const tie = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tie.after;
     ordinal += 1;
     tieRoll = tie.randomValue;
-    const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+    const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
     draws.push(Object.freeze({ ...tie, kind: "target-faster-tie" as const, strikesFirst }));
   }
-  const targetFaster = getWhoStrikesFirst(attacker, target, tieRoll) === 1;
+  const targetFaster = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber) === 1;
   if (targetFaster) {
     const roll = nextDraw(rng, ordinal, `${input.reasonPrefix}-paralyze-roll`);
     const jumpedToEnd = roll.randomValue % 256 < 20;
@@ -7716,17 +7767,18 @@ function runCvSuperpower(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -7928,17 +7980,18 @@ function runCvEndeavor(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -8038,17 +8091,18 @@ function runCvEncore(input: Readonly<{
     });
   }
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -8208,17 +8262,18 @@ function runCvSubstitute(input: Readonly<{
     if (!rollSubstitute("substitute-roll-3")) score -= 1;
   }
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -8592,17 +8647,18 @@ function runCvDisable(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -8672,17 +8728,18 @@ function runCvPainSplit(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -8774,17 +8831,18 @@ function runCvEruption(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -1 });
   }
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -9319,17 +9377,18 @@ function runCvMirrorMove(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }
@@ -9508,17 +9567,18 @@ function runCvSnatch(input: Readonly<{
     return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: score, funcResultAfter });
   }
 
-  const attacker: TurnOrderBattler = { speed: input.attacker.speed, speedStage: input.attacker.speedStage, movePriority: 0 };
-  const target: TurnOrderBattler = { speed: input.target.speed, speedStage: input.target.speedStage, movePriority: 0 };
+  const turnOrder = aiTurnOrder(input);
+  const { attacker, target } = turnOrder;
   let tieRoll = 0;
   let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker) === effectiveSpeed(target)) {
+  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
     tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
     rng = tieDraw.after;
     tieRoll = tieDraw.randomValue;
     ordinal += 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll);
+  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
   if (tieDraw) {
     draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
   }

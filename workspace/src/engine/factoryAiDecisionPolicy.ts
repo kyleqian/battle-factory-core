@@ -45,6 +45,7 @@ import {
   type FactoryAiCheckViabilityBattler,
   type FactoryAiCheckViabilityDraw,
 } from "./factoryAiCheckViability.ts";
+import type { WeatherState } from "./turnOrder.ts";
 
 const U16_MAX = 0xffff;
 const U32_MAX = 0xffff_ffff;
@@ -551,7 +552,7 @@ export type FactoryAiScoredBattlerView = Readonly<{
   isPoisoned?: boolean;
   /** `gBattleMons[].status1 & STATUS1_BURN` -- same `AI_CV_Facade` target-status1 mask. Optional, defaulting to `false`. */
   isBurned?: boolean;
-  /** `gBattleMons[].status1 & STATUS1_PARALYSIS` -- same `AI_CV_Facade` target-status1 mask. Optional, defaulting to `false`. */
+  /** `gBattleMons[].status1 & STATUS1_PARALYSIS` -- `AI_CV_Facade`'s target-status1 mask and `GetWhoStrikesFirst`'s speed/4 (both battlers). Optional, defaulting to `false`. */
   isParalyzed?: boolean;
   /** `gBattleMons[].status2 & STATUS2_CURSED` -- source-required for `AI_CV_AccuracyDown`'s Gate G (target only, doc §19.1). Optional, defaulting to `false`. */
   isCursed?: boolean;
@@ -596,6 +597,14 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * Optional, defaulting to `"ABILITY_NONE"`.
    */
   ability?: string;
+  /** `GetWhoStrikesFirst` inputs (true battle state, both sides): see `FactoryAiCheckViabilityBattler.turnOrder*`. */
+  turnOrderAbility?: string | null;
+  turnOrderHoldEffect?: string | null;
+  turnOrderHoldEffectParam?: number;
+  /** AI_USER's copy only is read. */
+  turnOrderWeather?: WeatherState;
+  /** `gRandomTurnNumber`; AI_USER's copy only is read. */
+  randomTurnNumber?: number;
   /**
    * `GetItemHoldEffect(gBattleMons[battler].item)` -- the battler's held
    * item's HOLD_EFFECT_* id, source-required for `AI_CV_Trick`'s
@@ -1209,6 +1218,12 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           isCursed: view.attacker.isCursed,
           hasPerishSong: view.attacker.hasPerishSong,
           protectUses: view.attacker.protectUses,
+          turnOrderAbility: view.attacker.turnOrderAbility,
+          turnOrderHoldEffect: view.attacker.turnOrderHoldEffect,
+          turnOrderHoldEffectParam: view.attacker.turnOrderHoldEffectParam,
+          turnOrderWeather: view.attacker.turnOrderWeather,
+          randomTurnNumber: view.attacker.randomTurnNumber,
+          ...(view.attacker.isParalyzed === true ? { isParalyzed: true } : {}),
           ...(view.attacker.isAsleep === true ? { isAsleep: true } : {}),
           ...(view.attacker.hasSubstitute === true ? { hasSubstitute: true } : {}),
           ...(view.attacker.holdEffect === undefined ? {} : { holdEffect: view.attacker.holdEffect }),
@@ -1247,6 +1262,9 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           ...(view.target.targetPartyStatusEqualsAny === true ? { targetPartyStatusEqualsAny: true } : {}),
           ...(view.target.holdEffect === undefined ? {} : { holdEffect: view.target.holdEffect }),
           ...(view.target.speciesAbilities === undefined ? {} : { speciesAbilities: view.target.speciesAbilities }),
+          turnOrderAbility: view.target.turnOrderAbility,
+          turnOrderHoldEffect: view.target.turnOrderHoldEffect,
+          turnOrderHoldEffectParam: view.target.turnOrderHoldEffectParam,
           knownAbility: view.target.knownAbility,
         },
         staleFuncResultFallback,

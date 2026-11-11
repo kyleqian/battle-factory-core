@@ -18,6 +18,7 @@
  */
 
 import { ABILITY_NAME_BY_ID } from "./abilityNameById.ts";
+import { turnOrderBattlerInputs, turnOrderWeather } from "./battleEndTurnOrchestration.ts";
 import {
   createBattleCommandRequest,
   submitBattleDecision,
@@ -350,6 +351,10 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
     trainerOpponentId: input.challenge.trainerOpponentId,
   });
   const weather = currentWeather(input.rulesContext.weather);
+  // `Cmd_if_target_faster` / `Cmd_if_user_faster` -> GetWhoStrikesFirst(user, target, TRUE) reads the TRUE
+  // gBattleMons state of BOTH battlers; priority is ignored (ignoreChosenMoves), so the chosen move is MOVE_NONE.
+  const attackerTurnOrder = turnOrderBattlerInputs(input.rulesContext, 1, 0);
+  const targetTurnOrder = turnOrderBattlerInputs(input.rulesContext, 0, 0);
 
   return Object.freeze({
     schema: "factory-ai-scored-view/v1",
@@ -371,6 +376,12 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       maxHp: attacker.maxHP,
       usablePartyMons: countUsablePartyMons(input.rulesContext.party.opponent, attacker.partyIndex),
       ability: abilityName(attacker.ability),
+      turnOrderAbility: attackerTurnOrder.ability ?? null,
+      turnOrderHoldEffect: attackerTurnOrder.holdEffect ?? null,
+      turnOrderHoldEffectParam: attackerTurnOrder.holdEffectParam ?? 0,
+      turnOrderWeather: turnOrderWeather(input.rulesContext),
+      randomTurnNumber: input.rulesContext.randomTurnNumber,
+      ...((attacker.status1 & BATTLE_SCRIPT_STATUS1_PARALYSIS) !== 0 ? { isParalyzed: true } : {}),
       battleTurnCount: input.challenge.battleTurnCount ?? 0,
       lightScreenUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_LIGHTSCREEN) !== 0,
       reflectUp: (input.rulesContext.sideStatuses[1] & SIDE_STATUS_REFLECT) !== 0,
@@ -479,6 +490,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
         ? { hasPerishSong: true }
         : {}),
       ability: abilityName(target.ability),
+      turnOrderAbility: targetTurnOrder.ability ?? null,
+      turnOrderHoldEffect: targetTurnOrder.holdEffect ?? null,
+      turnOrderHoldEffectParam: targetTurnOrder.holdEffectParam ?? 0,
       speciesAbilities: speciesAbilityNames(target.species),
       gender: aiGender(target),
       // `Cmd_get_hold_effect AI_TARGET`: gActiveBattler != target -> GetItemHoldEffect(BATTLE_HISTORY->itemEffects[target])

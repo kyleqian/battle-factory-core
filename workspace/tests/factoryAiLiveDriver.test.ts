@@ -368,6 +368,12 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         holdEffect: 0,
         stockpileCount: 0,
         usedHeldItemId: 0,
+        // aiv270 B: GetWhoStrikesFirst inputs for if_target_faster / if_user_faster (no paralysis, item or weather here).
+        turnOrderAbility: "ABILITY_NONE",
+        turnOrderHoldEffect: null,
+        turnOrderHoldEffectParam: 0,
+        turnOrderWeather: { isRaining: false, isSunny: false },
+        randomTurnNumber: 0xffff,
       },
       target: {
         species: 105,
@@ -393,6 +399,9 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         holdEffect: 0,
         knownAbility: null,
         knownItemEffect: 0,
+        turnOrderAbility: "ABILITY_ROCK_HEAD",
+        turnOrderHoldEffect: null,
+        turnOrderHoldEffectParam: 0,
       },
     };
 

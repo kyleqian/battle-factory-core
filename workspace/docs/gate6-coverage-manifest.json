@@ -92179,6 +92179,10 @@
             "kind": "source-state-symbol"
           },
           {
+            "path": "tests/aiv270AiTurnOrder.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/battleEndTurnAbilities.test.ts",
             "kind": "tier-1-test"
           },
@@ -92204,10 +92208,6 @@
           },
           {
             "path": "tests/battleScriptScreensWeatherOrchestration.test.ts",
-            "kind": "tier-1-test"
-          },
-          {
-            "path": "tests/battleScriptTryCastformDataChangeOpcode.test.ts",
             "kind": "tier-1-test"
           }
         ],
