@@ -13,7 +13,14 @@ history.
 - **`randomRoundSoak.ts --help` is not a flag: it starts a real default soak** (seeds 0:50) that must be killed by PID (dmg264b, ~10 min).
   Read the flags from the source header instead.
 - **A foreground Bash call over 600 s is silently moved to a background task**: multi-shard suite loops need per-call budgets under 10 min
-  (dmg264b, ~10 min waiting on a shard).
+  (dmg264b, ~10 min waiting on a shard). The same bites `npm run typecheck` (> 120 s default timeout; aiv266 ~5 min), `npm run soak --scene both
+  --parallel 4` (prints nothing until the end, so a 570 s cap loses the run; aiv266 ~10 min) and `lsd194Census.sh` over 1000 seeds (several
+  re-invocations; aiv267 ~10 min).
+- **`tools/report/ability-item-parity-census.ts` pins engine LINE numbers**: any insertion in `factoryAiCheckBadMove.ts` / the hit chain fails a
+  shard until the pins move (aiv266 ~6 min, aiv267 again).
+- **`git archive` pathspecs are cwd-relative while the toplevel is the parent of `workspace/`**; `git apply -R` wants toplevel paths (aiv267 ~5 min).
+- **`romDriveSeed.sh`'s divergence tuple `[frame, gCurrentMove, hp0, hp1, rng, lastMove0, lastMove1]` is undocumented in its output** (read
+  `romStateTimeline.py`; aiv267).
 
 ## Worker gate friction, 2026-11-09 / 10 run
 

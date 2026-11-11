@@ -8,7 +8,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ## 2026-11-10 / 11 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
 - **State:** master has dmg264 folded (merge `32c671d17`); evidence `.integration/validation/sv-20261110/`. No DEFERRED items. No push. ENGINE_BUILD moved
-  (dmg264, aiv266: now `eb-6e0938c0ec978db5`; tell the website).
+  (dmg264, aiv266, aiv267: now `eb-9d34d28f1b19ef3d`; tell the website).
 - **Folded: dmg264 + dmg264b** (ISSUES #206 type effectiveness in ROM row order, #208 defender Reflect / Light Screen in the live damage calc; both removed;
   `docs/dmg264-type-order-screens.md`). Census 0..999 vs `sv-20261109/aip262/census/*-e2e0b17b5`: ON 190 / OFF 181 changed, 0 unexplained; the 9 ON-only seeds
   differ only in the Scene ON `MOVE_ANIMATION` stale-damage argument (evd265, presentation-only, ROM-correct). ROM: seeds 13 / 28 now match to battle end.
@@ -19,8 +19,9 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **New census baseline:** `sv-20261109/dmg264/census/{on,off}-9dddc1aa2` (src identical to master after this fold).
 - **Folded: aiv266** (ts lane, 146 min; entry below). Supervisor: touched files 3 / 3 (31 tests); `romDriveSeed.sh` 17 off 16 / 16 and 31 off 34 / 34 (the worker
   drove 31 ON only), divergence null; field semantics spot-read against C (`Cmd_if_status_in_party` exact `==`, target-side screens, user-side Mist).
-- **Census baseline now:** `.integration/evidence/aiv266/census/{on,off}-40447d9de`.
-- **Next:** aiv267: #204 residual (1) AI damage sims get Reflect / Light Screen (the Attract lead is refuted) + #207 confusion self-hit hold items; then seeds 41..80.
+- **Folded: aiv267** (ts lane, 164 min; entry below). Supervisor: `romDriveSeed.sh 20 off` 15 / 15, divergence null; aiv267 / aiv266 / orchestrator tests
+  91 / 91; re-pin diffs read (orchestrator cursors, causally fix B). The aiv266 "Attract female user -10" lead was refuted by the supervisor (ISSUES #204).
+- **Census baseline now:** `.integration/evidence/aiv267/census/{on,off}-5682cd341`; src final for this run at `5682cd341`.
 
 ---
 
