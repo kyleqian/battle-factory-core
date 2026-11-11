@@ -5,10 +5,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
-## 2026-11-10 / 11 — CAX31 daily run (supervisor, Opus 5.5): in progress
+## 2026-11-10 / 11 — CAX31 daily run (supervisor, Opus 5.5): wind-down: dmg264 / aiv266 / aiv267 / seg268 folded
 
-- **State:** master has dmg264 folded (merge `32c671d17`); evidence `.integration/validation/sv-20261110/`. No DEFERRED items. No push. ENGINE_BUILD moved
-  (dmg264, aiv266, aiv267: now `eb-9d34d28f1b19ef3d`; tell the website).
+- **State:** master clean, no active workers; final src == aiv267 `5682cd341` (later commits: tests / fixtures / tools / docs). Evidence `.integration/validation/sv-20261110/`
+  (gates in `gates/`). No DEFERRED items. No push. ENGINE_BUILD at the final src `eb-9d34d28f1b19ef3d` (read from dist; moved this run: dmg264, aiv266, aiv267; tell the website).
 - **Folded: dmg264 + dmg264b** (ISSUES #206 type effectiveness in ROM row order, #208 defender Reflect / Light Screen in the live damage calc; both removed;
   `docs/dmg264-type-order-screens.md`). Census 0..999 vs `sv-20261109/aip262/census/*-e2e0b17b5`: ON 190 / OFF 181 changed, 0 unexplained; the 9 ON-only seeds
   differ only in the Scene ON `MOVE_ANIMATION` stale-damage argument (evd265, presentation-only, ROM-correct). ROM: seeds 13 / 28 now match to battle end.
@@ -16,7 +16,6 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   437 -> 856; both new seeds are changed seeds, the assertions are unchanged and hold on the corrected tree. Worker gates on the same src/tests: typecheck 0,
   full suite (8 shards) **1,754 files / 14,443 tests passed, 0 failed**, build / build:lib 0, soak vanilla 0:20 OFF 20 / 20, ON 20 / 20.
   Supervisor: touched files 4 / 4 (45 tests) on the merged tree; `romDriveSeed.sh 28 off` 19 / 19, divergence null. AI damage-sim screens left to #204 (noted there).
-- **New census baseline:** `sv-20261109/dmg264/census/{on,off}-9dddc1aa2` (src identical to master after this fold).
 - **Folded: aiv266** (ts lane, 146 min; entry below). Supervisor: touched files 3 / 3 (31 tests); `romDriveSeed.sh` 17 off 16 / 16 and 31 off 34 / 34 (the worker
   drove 31 ON only), divergence null; field semantics spot-read against C (`Cmd_if_status_in_party` exact `==`, target-side screens, user-side Mist).
 - **Folded: aiv267** (ts lane, 164 min; entry below). Supervisor: `romDriveSeed.sh 20 off` 15 / 15, divergence null; aiv267 / aiv266 / orchestrator tests
@@ -26,6 +25,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   from `4f6fa87e4^`, regenerated `fixtures/seg127/exposure.json` on the current kernel (0..999 Scene ON; receipts 8080 -> 8023, gated 72, frames 729 -> 745, 0 unclassified);
   sag130 re-anchored to the first projected carriers: restores hit-secondary|BRN|player, hit-secondary|PSN|opponent, yawn|SLP|player, adds contact-ability|PRZ|player and
   hit-secondary|BRN|opponent; named gap yawn|SLP|opponent (no gated carrier). Worker: consumer tests + test:gate 362 / 362. Supervisor: diff read; covered by the wind-down full suite.
+
+- **Gates** (final tree `576565e44`, src == `5682cd341`): full suite (3 workers, beside the soaks) **1,756 files passed + 44 skipped, 0 failed; 14,479 tests**; build / build:lib 0;
+  vanilla 0:20 OFF **20 / 20**, ON **20 / 20** (all `budget`); 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60**; varied-RNG first-round winning
+  carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; play:random 10 min / scene: ON 36 battles / 15 swaps, OFF 64 / 28, 0 page errors / console errors / overlays.
+- **Next:** handoff "Next work" 1: a read-only diagnosis of the remaining ROM-driver divergences (seeds 22 / 30 / 39, ISSUES #204; 42 / 50 / 53 / 57 / 60, aiv267 doc
+  section 7), then fixes by rank, then drive seeds 61..100; then the sound segment diff. Bundle bnd257d and Cleanup 7 did not fit this run (no cleanup step besides seg268's coverage restore).
 
 ---
 
