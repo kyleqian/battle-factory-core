@@ -397,7 +397,7 @@ for (const hit of droppedStringHits) {
   recoveredStringSites.push(`${hit.file}:${hit.line} ${member}`);
 }
 const EXPECTED_RECOVERED_STRING_SITES = [
-  "src/engine/battleScriptActionAdmission.ts:2982 ABILITY_GUTS",
+  "src/engine/battleScriptActionAdmission.ts:2984 ABILITY_GUTS",
   "src/engine/battleScriptHealpartystatusOpcode.ts:76 ABILITY_SOUNDPROOF",
   "src/engine/battleScriptHitChainOpcode.ts:1227 HOLD_EFFECT_EVASION_UP",
   "src/engine/battleScriptTrysetfutureattackOpcode.ts:111 ABILITY_GUTS",
@@ -417,8 +417,8 @@ const EXPECTED_RECOVERED_STRING_SITES = [
   "src/engine/factoryAiCheckViability.ts:4648 ABILITY_RAIN_DISH",
   "src/engine/factoryAiCheckViability.ts:8450 ABILITY_NONE",
   "src/engine/factoryAiCheckViability.ts:8456 ABILITY_NONE",
-  "src/engine/factoryAiTryToFaint.ts:133 ABILITY_LEVITATE",
-  "src/engine/factoryAiTryToFaint.ts:161 ABILITY_LEVITATE",
+  "src/engine/factoryAiTryToFaint.ts:141 ABILITY_LEVITATE",
+  "src/engine/factoryAiTryToFaint.ts:169 ABILITY_LEVITATE",
   "src/engine/factorySwapPresentation.ts:130 ABILITY_NONE",
 ].sort();
 check(

@@ -141,6 +141,7 @@ const PROBE_ATTACKER: Required<FactoryAiScoredBattlerView> = Object.freeze({
   isBurned: true,
   isParalyzed: true,
   targetSideReflectUp: true,
+  targetSideLightScreenUp: true,
   targetPartyStatusEqualsAny: true,
   ability: "ABILITY_PRESSURE",
   holdEffect: 1,
@@ -324,6 +325,8 @@ const TTF_TARGET_SAMPLE: Required<FactoryAiTryToFaintTarget> = Object.freeze({
   ...TTF_BATTLER_SAMPLE,
   hp: 1,
   ability: "ABILITY_NONE",
+  targetSideReflectUp: true,
+  targetSideLightScreenUp: true,
 });
 
 function keysOf<T extends object>(sample: T): readonly string[] {

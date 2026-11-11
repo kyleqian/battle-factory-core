@@ -574,6 +574,11 @@ export type FactoryAiScoredBattlerView = Readonly<{
    */
   targetSideReflectUp?: boolean;
   /**
+   * `gSideStatuses[side] & SIDE_STATUS_LIGHTSCREEN` on the TARGET's own side. No AI script reads it; the AI damage sims
+   * (`factoryAiTryToFaint.ts`) pass it as `AI_CalcDmg`'s `sideStatus` (`battle_script_commands.c:1306-1309`). Optional, default false.
+   */
+  targetSideLightScreenUp?: boolean;
+  /**
    * `Cmd_if_status_in_party`'s exact-`==` party scan on the TARGET's OWN side
    * (`battle_ai_script_commands.c:1568-1598`) -- source-required for
    * `AI_CV_HealBell`'s second gate (`data/battle_ai_scripts.s:1843`). True

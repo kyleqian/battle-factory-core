@@ -57,6 +57,12 @@ export type FactoryAiTryToFaintTarget = FactoryAiTryToFaintBattler & Readonly<{
   hp: number;
   /** Real (not guessed) ability -- TypeCalc reads live battle state, not an AI_TARGET guess. */
   ability: string;
+  /**
+   * `gSideStatuses[GET_BATTLER_SIDE(defender)]` as `AI_CalcDmg` passes it to `CalculateBaseDamage`
+   * (`battle_script_commands.c:1306-1309`): the TARGET's own side screens. Optional, default false.
+   */
+  targetSideReflectUp?: boolean;
+  targetSideLightScreenUp?: boolean;
 }>;
 
 export type FactoryAiTryToFaintDraw = Readonly<{
@@ -128,6 +134,8 @@ function estimateDamage(
     movePower: move.power,
     moveType: move.type,
     isCriticalHit: false,
+    sideStatusReflect: defender.targetSideReflectUp === true,
+    sideStatusLightScreen: defender.targetSideLightScreenUp === true,
   });
   damage = applyStab(damage, attacker.types, move.type);
   if (!(defender.ability === "ABILITY_LEVITATE" && move.type === "TYPE_GROUND")) {

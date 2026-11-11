@@ -3,6 +3,7 @@ import { abilityNameOrNull } from "./abilityNameById.ts";
 import {
   BATTLE_SCRIPT_HOLD_EFFECT_CHOICE_BAND,
   resolveBattleScriptBattlerHoldEffect,
+  resolveBattleScriptBattlerHoldEffectParam,
   resolveBattleScriptCurrentMoveEffect,
   resolveBattleScriptCurrentMovePower,
   type BattleScriptRulesContext,
@@ -11,6 +12,7 @@ import {
   cancelBattleScriptMultiTurnMoves,
   type BattleScriptCancelMultiTurnMovesReceipt,
 } from "./battleScriptMultiTurnCancellation.ts";
+import { BATTLE_TYPE_FRONTIER, HOLD_EFFECT_NAME_BY_ID } from "./battleScriptHitChainOpcode.ts";
 import { advanceRngValue } from "./rng.ts";
 import {
   calculateBaseDamage,
@@ -2981,6 +2983,16 @@ export function advanceBattleScriptAttackCancelerConfused(
           ? abilityNameOrNull(sourceBattler.ability)
           : (damage.hasGuts ? "ABILITY_GUTS" : null);
         const confusionHasStatus1 = sourceBattler.confusionDamage === undefined && sourceBattler.status1 !== 0;
+        // The same live record is both roles, so its item reaches pokemon.c:3132-3201 as attacker AND defender
+        // hold effect (Choice Band, Normal-type boost, Thick Club, Light Ball, Metal Powder, ...); staged overrides carry none.
+        const confusionLive = sourceBattler.confusionDamage === undefined;
+        const confusionHoldEffect = confusionLive
+          ? HOLD_EFFECT_NAME_BY_ID[resolveBattleScriptBattlerHoldEffect(rulesContext, attacker)] ?? null
+          : null;
+        const confusionHoldEffectParam = confusionLive
+          ? resolveBattleScriptBattlerHoldEffectParam(rulesContext, attacker)
+          : 0;
+        const confusionSpecies = confusionLive ? sourceBattler.species : undefined;
         nextDamage = calculateBaseDamage({
           attacker: {
             level: damage.level,
@@ -2997,6 +3009,9 @@ export function advanceBattleScriptAttackCancelerConfused(
             isBurned: damage.isBurned,
             hasStatus1: confusionHasStatus1,
             ability: confusionAbility,
+            species: confusionSpecies,
+            holdEffect: confusionHoldEffect,
+            holdEffectParam: confusionHoldEffectParam,
           },
           defender: {
             level: damage.level,
@@ -3012,10 +3027,14 @@ export function advanceBattleScriptAttackCancelerConfused(
             },
             hasStatus1: confusionHasStatus1,
             ability: confusionAbility,
+            species: confusionSpecies,
+            holdEffect: confusionHoldEffect,
+            holdEffectParam: confusionHoldEffectParam,
           },
           movePower: 40,
           moveType: "TYPE_NORMAL",
           isCriticalHit: false,
+          isFrontierBattle: (rulesContext.battleTopology.battleTypeFlags & BATTLE_TYPE_FRONTIER) !== 0,
         });
         nextSelfDmg = 1;
         nextBattleMovePower = 40; // W4: this CalculateBaseDamage (power 40, Normal) leaves the register at 40 (presentation-only).

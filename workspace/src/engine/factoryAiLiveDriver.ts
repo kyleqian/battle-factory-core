@@ -495,6 +495,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_REFLECT) !== 0
         ? { targetSideReflectUp: true }
         : {}),
+      ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_LIGHTSCREEN) !== 0
+        ? { targetSideLightScreenUp: true }
+        : {}),
       ...(partyHasStatusEqualToAny(input.rulesContext.party.player) ? { targetPartyStatusEqualsAny: true } : {}),
       knownAbility: input.history.knownAbilities[0],
       knownItemEffect: input.history.knownItemEffects[0],
