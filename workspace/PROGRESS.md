@@ -19,6 +19,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **New census baseline:** `sv-20261109/dmg264/census/{on,off}-9dddc1aa2` (src identical to master after this fold).
 - **Next:** #204 AI view fields (aiv266, gender first), then #207, then drive seeds 41..80.
 
+
+---
+
+## 2026-11-11 — aiv266 (ts lane worker): live AI view fills all 16 declared fields; ISSUES #204 trimmed
+
+- **State:** committed on master (not pushed). ENGINE_BUILD `eb-16ee24851bfb26a3` -> `eb-6e0938c0ec978db5` (tell the website). `docs/aiv266-ai-view-fields.md`.
+- **Did:** `createFactoryAiViewFromLiveRules` fills `gender`, `anyMoveDisabled` / `anyMoveEncored`, target `isParalyzed` / `isPoisoned` / `isBurned`, `holdEffect` (user live item, target
+  via battle history as in C), `targetSideReflectUp`, `mistUp`, `stockpileCount`, `speciesAbilities`, `targetPartyStatusEqualsAny` (exact `==` STATUS1_ANY), `usedHeldItemId`,
+  `imprisonedOthers`, `mudSportUp`, `waterSportUp`, each with a C cite. `tests/aiv266AiViewFields.test.ts` (22; 20 fail unfixed, incl. all 3 gender tests). ROM: seeds 11 / 17 / 26 now
+  18/18, 16/16, 16/16 in both scenes (were 10/20, 0/19, 8/16); bonus 31 ON 34/34 (1/34), 27 ON 20/20 (3/20), 32 ON 23/23 (22/23); 22 / 30 / 39 unchanged; the 10-seed regression set still full.
+  Census 0..999: 57 changed seeds per scene, identical sets and command lists ON / OFF, 0 unexplained (`aiv266Instrument.py` / `aiv266Classify.py`). 4 re-pins (land75 533 count 64 -> 68,
+  sag130 drops `yawn|SLP|player`, parity-census lines +7, gate6 manifest regenerated). Gates: typecheck / build / build:lib 0; 8-shard suite 14,466 passed, 0 failed; soak vanilla 0:20 OFF 20/20, ON 20/20.
+- **Next:** ISSUES #204 residuals (AI damage sims ignore Reflect / Light Screen; Attract female-user -10; unclassified seeds 22 / 30 / 39), #207, then seeds 41..80.
+- **Notes:** new census baseline `.integration/evidence/aiv266/census/{on,off}-40447d9de` (src identical to HEAD). Coverage loss: sag130 `yawn|SLP|player` (regenerate seg127 `exposure.json`).
+
+
 ---
 
 ## 2026-11-09 / 10 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud243d / abl261 / aip262 / dia263 folded
@@ -48,14 +64,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Bundle bnd257d (lazy sprite chunk; brief ready in the handoff's bnd-d line, scout `docs/bnd-d-scout.md`) and Cleanup 7 did not fit this run.
 - **Coverage notes:** abl261 dropped 3 sag130 classes and aip262 the apx222 Peck 64 row (no unchanged census seed carries them; regenerate seg127 `exposure.json`
   from the new census to restore). One Castform body in battle 950 now declines (cf78 comment).
-
----
-
-## 2026-11-10 — aip262 (ts lane worker): live AI view fills `usablePartyMons`; ISSUES #203 fixed (removed)
-
-- **State:** committed on master (not pushed). ENGINE_BUILD `eb-43a8872b3b6234fe` -> `eb-16ee24851bfb26a3` (tell the website). `docs/aip262-usable-party-mons.md`.
-- **Did:** `countUsablePartyMons` (`factoryAiLiveDriver.ts`, C `battle_ai_script_commands.c:1292-1334`) fills both AI views, so Baton Pass / Explosion / Memento / Roar score on real counts.
-  `tests/aip262UsablePartyMons.test.ts` (6; fail unfixed). ROM: seed 2 ON 23/23, aligned set still full, fresh seeds 9..20: 8 match fully, 4 lead divergences (not this bug). Census 0..999: 97 changed seeds,
-  identical ON / OFF, 0 unexplained (`aip262Instrument.py` / `aip262Classify.py`). 9 re-pins (coverage loss: apx222 Peck 64 row). Gates: typecheck / build / build:lib 0, soak vanilla 0:20 OFF 20/20; full suite in 6 shards on the final tree 14,433 passed, 0 failed.
-- **Next:** ISSUES #204 (unfilled AI view fields, gender), #205 (Roar `SwitchPartyOrder`), #206 (Fire Punch 46 vs 45), #207 (confusion self-hit hold items).
-- **Notes:** the worker's scene-ON soak timed out; the supervisor ran it on this tree: vanilla 0:20 ON 20 / 20 (session entry above).

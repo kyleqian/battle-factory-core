@@ -1,3 +1,12 @@
+## 2026-11-10 — aip262 (ts lane worker): live AI view fills `usablePartyMons`; ISSUES #203 fixed (removed)
+
+- **State:** committed on master (not pushed). ENGINE_BUILD `eb-43a8872b3b6234fe` -> `eb-16ee24851bfb26a3` (tell the website). `docs/aip262-usable-party-mons.md`.
+- **Did:** `countUsablePartyMons` (`factoryAiLiveDriver.ts`, C `battle_ai_script_commands.c:1292-1334`) fills both AI views, so Baton Pass / Explosion / Memento / Roar score on real counts.
+  `tests/aip262UsablePartyMons.test.ts` (6; fail unfixed). ROM: seed 2 ON 23/23, aligned set still full, fresh seeds 9..20: 8 match fully, 4 lead divergences (not this bug). Census 0..999: 97 changed seeds,
+  identical ON / OFF, 0 unexplained (`aip262Instrument.py` / `aip262Classify.py`). 9 re-pins (coverage loss: apx222 Peck 64 row). Gates: typecheck / build / build:lib 0, soak vanilla 0:20 OFF 20/20; full suite in 6 shards on the final tree 14,433 passed, 0 failed.
+- **Next:** ISSUES #204 (unfilled AI view fields, gender), #205 (Roar `SwitchPartyOrder`), #206 (Fire Punch 46 vs 45), #207 (confusion self-hit hold items).
+- **Notes:** the worker's scene-ON soak timed out; the supervisor ran it on this tree: vanilla 0:20 ON 20 / 20 (session entry above).
+
 ## 2026-11-10 — abl261 (ts lane worker): one full ability id->name resolver; ISSUES #202 fixed (removed)
 
 - **State:** committed on master (not pushed). ENGINE_BUILD `eb-b885d2de87ddf075` -> `eb-43a8872b3b6234fe` (tell the website). `docs/abl261-ability-damage.md`.

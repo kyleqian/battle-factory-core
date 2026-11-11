@@ -18,15 +18,14 @@ exclusions are superseded. Unrelated expansions stay parked.
 ROM seed 20 (ON and OFF): AI confusion self-hit damage 35 vs engine 18. C passes the live `gBattlerMons` record, so `holdEffect` reaches `CalculateBaseDamage`
 (`battle_util.c:2157-2175`); the engine branch (`battleScriptActionAdmission.ts`) has no hold-item inputs. Fix: feed holdEffect / holdEffectParam.
 
-## #204 — The live AI view leaves 16 declared fields unfilled, incl. `gender` (aip262 seed 17; ranked by dia263, 2026-11-10)
+## #204 — AI residuals after the view fill (aiv266: all 16 fields filled; remaining items, 2026-11-11)
 
-`createFactoryAiViewFromLiveRules` never fills `anyMoveDisabled`, `anyMoveEncored`, `gender`, `holdEffect`, `imprisonedOthers`, `isBurned`, `isParalyzed`,
-`isPoisoned`, `mistUp`, `mudSportUp`, `speciesAbilities`, `stockpileCount`, `targetPartyStatusEqualsAny`, `targetSideReflectUp`, `usedHeldItemId`, `waterSportUp`.
-`gender` first: `AI_CBM_Attract` (`battle_ai_scripts.s:456-470`, `Cmd_get_gender` `battle_ai_script_commands.c:2088`) runs under flag 1 from challenge 2 up and
-54 pool mons know Attract; seeds 11 / 17 / 26 diverge on it (ROM 100 vs engine 90). Ranked table and fix order: `docs/dia263-leads.md`. Unclassified AI
-divergences (seeds 22, 30, 31, 39; random-pick seeds 27, 32) may be other fields here. Also (dmg264): the AI damage sims
-(`factoryAiTryToFaint.ts` `calculateBaseDamage`; C `AI_CalcDmg` passes the target side's status) still get no Reflect / Light Screen: fill
-`targetSideReflectUp` / the user-side `reflectUp` fields and pass them.
+`docs/aiv266-ai-view-fields.md`. (1) The AI damage sims (`factoryAiTryToFaint.ts` `calculateBaseDamage`; C `AI_CalcDmg` passes the target side's status) still get no
+Reflect / Light Screen: the view fields exist now (`targetSideReflectUp`, attacker `reflectUp` / `lightScreenUp`) but the sim does not read them. (2) Unclassified ROM
+divergences, none of them a view field: seed 22 ON (8/20, ROM Explosion +1 / engine Earthquake -10), 30 ON (6/11, RNG differs after the same Giga Drain pick), 39 ON
+(9/11, ROM Brick Break vs engine Earthquake; the Reflect field is filled and did not fix it). (3) `runCbmAttract` (`factoryAiCheckBadMove.ts` ~3558) scores a FEMALE
+user 0 against a male target; the script (`battle_ai_scripts.s:507-508`, `if_equal FALSE, Score_Minus10` with MON_MALE == 0) gives every female user -10. Source-proven, not
+applied (no ROM seed exercises it; it would move census seeds). Patch idea: return -10 in the female branch.
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 
 `docs/obr251-opponent-party-summary.md`: bar slide / hold / fade / SE are ROM-timed and the bar frames 527..546 are exact
