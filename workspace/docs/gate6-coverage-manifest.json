@@ -93054,6 +93054,10 @@
             "kind": "source-state-symbol"
           },
           {
+            "path": "tests/aiv267AiScreensSelfHit.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
             "path": "tests/battleScriptScreensWeatherOrchestration.test.ts",
             "kind": "tier-1-test"
           },
@@ -93109,6 +93113,10 @@
           },
           {
             "path": "tests/aiv266AiViewFields.test.ts",
+            "kind": "tier-1-test"
+          },
+          {
+            "path": "tests/aiv267AiScreensSelfHit.test.ts",
             "kind": "tier-1-test"
           },
           {
