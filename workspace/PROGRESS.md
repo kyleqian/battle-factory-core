@@ -8,7 +8,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 ## 2026-11-10 / 11 — CAX31 daily run (supervisor, Opus 5.5): in progress
 
 - **State:** master has dmg264 folded (merge `32c671d17`); evidence `.integration/validation/sv-20261110/`. No DEFERRED items. No push. ENGINE_BUILD moved
-  (src changed: dmg264; value recorded at wind-down; tell the website).
+  (dmg264, aiv266: now `eb-6e0938c0ec978db5`; tell the website).
 - **Folded: dmg264 + dmg264b** (ISSUES #206 type effectiveness in ROM row order, #208 defender Reflect / Light Screen in the live damage calc; both removed;
   `docs/dmg264-type-order-screens.md`). Census 0..999 vs `sv-20261109/aip262/census/*-e2e0b17b5`: ON 190 / OFF 181 changed, 0 unexplained; the 9 ON-only seeds
   differ only in the Scene ON `MOVE_ANIMATION` stale-damage argument (evd265, presentation-only, ROM-correct). ROM: seeds 13 / 28 now match to battle end.
@@ -17,8 +17,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   full suite (8 shards) **1,754 files / 14,443 tests passed, 0 failed**, build / build:lib 0, soak vanilla 0:20 OFF 20 / 20, ON 20 / 20.
   Supervisor: touched files 4 / 4 (45 tests) on the merged tree; `romDriveSeed.sh 28 off` 19 / 19, divergence null. AI damage-sim screens left to #204 (noted there).
 - **New census baseline:** `sv-20261109/dmg264/census/{on,off}-9dddc1aa2` (src identical to master after this fold).
-- **Next:** #204 AI view fields (aiv266, gender first), then #207, then drive seeds 41..80.
-
+- **Folded: aiv266** (ts lane, 146 min; entry below). Supervisor: touched files 3 / 3 (31 tests); `romDriveSeed.sh` 17 off 16 / 16 and 31 off 34 / 34 (the worker
+  drove 31 ON only), divergence null; field semantics spot-read against C (`Cmd_if_status_in_party` exact `==`, target-side screens, user-side Mist).
+- **Census baseline now:** `.integration/evidence/aiv266/census/{on,off}-40447d9de`.
+- **Next:** aiv267: #204 residuals (Attract female user -10, AI damage sims get Reflect / Light Screen) + #207 confusion self-hit hold items; then seeds 41..80.
 
 ---
 
