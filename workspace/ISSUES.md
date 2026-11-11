@@ -23,9 +23,8 @@ ROM seed 20 (ON and OFF): AI confusion self-hit damage 35 vs engine 18. C passes
 `docs/aiv266-ai-view-fields.md`. (1) The AI damage sims (`factoryAiTryToFaint.ts` `calculateBaseDamage`; C `AI_CalcDmg` passes the target side's status) still get no
 Reflect / Light Screen: the view fields exist now (`targetSideReflectUp`, attacker `reflectUp` / `lightScreenUp`) but the sim does not read them. (2) Unclassified ROM
 divergences, none of them a view field: seed 22 ON (8/20, ROM Explosion +1 / engine Earthquake -10), 30 ON (6/11, RNG differs after the same Giga Drain pick), 39 ON
-(9/11, ROM Brick Break vs engine Earthquake; the Reflect field is filled and did not fix it). (3) `runCbmAttract` (`factoryAiCheckBadMove.ts` ~3558) scores a FEMALE
-user 0 against a male target; the script (`battle_ai_scripts.s:507-508`, `if_equal FALSE, Score_Minus10` with MON_MALE == 0) gives every female user -10. Source-proven, not
-applied (no ROM seed exercises it; it would move census seeds). Patch idea: return -10 in the female branch.
+(9/11, ROM Brick Break vs engine Earthquake; the Reflect field is filled and did not fix it). (3) (aiv266's "Attract female user -10" lead was checked by the supervisor and is NOT a bug: `battle_ai_scripts.s:456-476` sends a
+female user to `AI_CBM_Attract_CheckIfTargetIsMale`, `MON_FEMALE` 0xFE fits the `if_equal` byte; the cited lines 507-508 are `AI_CBM_FakeOut`.)
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 
 `docs/obr251-opponent-party-summary.md`: bar slide / hold / fade / SE are ROM-timed and the bar frames 527..546 are exact

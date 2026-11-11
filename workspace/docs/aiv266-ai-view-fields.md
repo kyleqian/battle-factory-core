@@ -89,7 +89,7 @@ Full suite as 8 sequential `npm test -- --shard=i/8` runs on the final tree: 152
 
 ## 6. Report-only findings (not fixed)
 
-- **Attract, female user (ISSUES #204 (3)):** `AI_CBM_Attract_End` is `if_equal FALSE, Score_Minus10` and `MON_MALE == 0 == FALSE` (`battle_ai_scripts.s:507-508`), so a female user scores -10 against every
-  target; `runCbmAttract` (`factoryAiCheckBadMove.ts` ~3558) returns 0 for a female user against a male target. No ROM seed exercises it (11 / 17 / 26 match without it); it would move census seeds. Patch kept out of the tree.
+- **Attract, female user:** REFUTED by the supervisor (2026-11-11): `AI_CBM_Attract` (`battle_ai_scripts.s:456-476`) routes a female user to
+  `AI_CBM_Attract_CheckIfTargetIsMale` (`MON_FEMALE` 0xFE fits the `if_equal` byte); lines 507-508 are `AI_CBM_FakeOut`. `runCbmAttract` is correct.
 - **AI damage sims** still ignore Reflect / Light Screen (view fields are filled, `factoryAiTryToFaint.ts` does not read them).
 - **Seeds 22, 30, 39 ON** still diverge (AI scoring, not view fields).

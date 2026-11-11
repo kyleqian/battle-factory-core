@@ -20,7 +20,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Folded: aiv266** (ts lane, 146 min; entry below). Supervisor: touched files 3 / 3 (31 tests); `romDriveSeed.sh` 17 off 16 / 16 and 31 off 34 / 34 (the worker
   drove 31 ON only), divergence null; field semantics spot-read against C (`Cmd_if_status_in_party` exact `==`, target-side screens, user-side Mist).
 - **Census baseline now:** `.integration/evidence/aiv266/census/{on,off}-40447d9de`.
-- **Next:** aiv267: #204 residuals (Attract female user -10, AI damage sims get Reflect / Light Screen) + #207 confusion self-hit hold items; then seeds 41..80.
+- **Next:** aiv267: #204 residual (1) AI damage sims get Reflect / Light Screen (the Attract lead is refuted) + #207 confusion self-hit hold items; then seeds 41..80.
 
 ---
 
@@ -33,7 +33,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   18/18, 16/16, 16/16 in both scenes (were 10/20, 0/19, 8/16); bonus 31 ON 34/34 (1/34), 27 ON 20/20 (3/20), 32 ON 23/23 (22/23); 22 / 30 / 39 unchanged; the 10-seed regression set still full.
   Census 0..999: 57 changed seeds per scene, identical sets and command lists ON / OFF, 0 unexplained (`aiv266Instrument.py` / `aiv266Classify.py`). 4 re-pins (land75 533 count 64 -> 68,
   sag130 drops `yawn|SLP|player`, parity-census lines +7, gate6 manifest regenerated). Gates: typecheck / build / build:lib 0; 8-shard suite 14,466 passed, 0 failed; soak vanilla 0:20 OFF 20/20, ON 20/20.
-- **Next:** ISSUES #204 residuals (AI damage sims ignore Reflect / Light Screen; Attract female-user -10; unclassified seeds 22 / 30 / 39), #207, then seeds 41..80.
+- **Next:** ISSUES #204 residuals (AI damage sims ignore Reflect / Light Screen; unclassified seeds 22 / 30 / 39), #207, then seeds 41..80.
 - **Notes:** new census baseline `.integration/evidence/aiv266/census/{on,off}-40447d9de` (src identical to HEAD). Coverage loss: sag130 `yawn|SLP|player` (regenerate seg127 `exposure.json`).
 
 
