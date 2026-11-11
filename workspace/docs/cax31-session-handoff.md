@@ -1,4 +1,4 @@
-# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-10)
+# CAX31 session handoff — 2026-10-26 (finish plan; state updated 2026-11-11)
 
 The user approved `docs/finish-plan.md` on 2026-10-26 and restarted the
 running CAX31 session on it. Run on CAX31's `master` at
@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-10 wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-11 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
   `worker/lib-v2-mac` is folded up to `851ee1f4c`; if the Mac moves that branch again, merge the new tip the same way
@@ -84,8 +84,12 @@ kept and is long-tail.
   **dia263** (`docs/dia263-leads.md`) fixed the driver's party-slot mapping and root-caused the rest: ISSUES #204 (16 unfilled AI-view fields, `gender`
   first), #206 (type-effectiveness row order), #207 (confusion self-hit hold items), #208 (Reflect / Light Screen). Seeds 0..40: fully matching
   1-10, 12, 14-16, 18-21, 23-25, 29, 34-38, 40, 177, 224, 552; diverging seeds are listed per issue in the dia263 doc.
-- Census baseline for the next delta: see PROGRESS.md top entry (the last folded engine tree's arms under `.integration/validation/sv-20261109/`).
-  Previous: `sv-20261109/aip262/census/{on,off}-e2e0b17b5`, `sv-20261109/abl261/census/{on,off}-6dce29c5d`.
+- **2026-11-11 run: three more ROM-driver gameplay fix steps folded.** dmg264 (#206 type-table row order, #208 Reflect / Light Screen in the live calc,
+  `docs/dmg264-type-order-screens.md`), aiv266 (#204: all 16 live AI-view fields filled, `docs/aiv266-ai-view-fields.md`), aiv267 (AI damage sims see the
+  target's screens; #207 confusion self-hit hold items, `docs/aiv267-ai-screens-self-hit.md`). Seeds 1..60 ON (0 unchecked) now match the ROM to battle end except
+  22, 30, 39 (#204 remainder, AI scoring, not view fields) and 42, 50, 53, 57, 60 (aiv267 doc section 7, first-row classes only, not root-caused); 33 is
+  not drivable (Brain trainer id). The aiv266 "Attract female user" lead was refuted (ISSUES #204).
+- Census baseline for the next delta: `.integration/evidence/aiv267/census/{on,off}-5682cd341` (src identical to master at the 2026-11-11 wind-down).
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
@@ -98,9 +102,9 @@ never brief those here. One worker at a time; each run folds the next audio step
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
    proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05. aud242a DONE 2026-11-06** (generic script-op
    emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07; aud242d / e / f DONE
-   2026-11-08; aud242g, aud243a / b / c DONE 2026-11-09.** **aud243d DONE 2026-11-10** (ROM driver). **Next, before more audio: the ROM-driver gameplay fixes**, one ts-lane step each with the
-   abl261 / aip262 proof shape (tests, re-drive seeds, census attribution, full suite): ISSUES #206 + #208 = **dmg264, unmerged on `worker/side-20261110-045211`** (PROGRESS top entry: the ON 190 / OFF 181 difference is explained and presentation-only; remaining: the Razor Wind census-seed re-stage, then full suite, build, soaks and fold), then #204
-   (`gender` first, then by dia263's rank; re-drive 11 / 17 / 26), #207; then drive seeds 41..80 for new leads. After that, the sound segment diff
+   2026-11-08; aud242g, aud243a / b / c DONE 2026-11-09.** **aud243d DONE 2026-11-10** (ROM driver). **Next, before more audio: the ROM-driver gameplay fixes** (dmg264, aiv266, aiv267 DONE 2026-11-11), one ts-lane step each with the
+   abl261 / aip262 / aiv267 proof shape (tests, re-drive seeds, census attribution, full suite): root-cause seeds 42 / 50 / 53 / 57 / 60 (aiv267 doc section 7) and
+   22 / 30 / 39 (ISSUES #204) with a read-only diagnosis step like dia263 first, then fix by rank; then drive seeds 61..100 for new leads. After that, the sound segment diff
    (`tools/audio/soundSegmentDiff.py`, aud243d section 5: missing move-animation SE streams and stat-change SEs) over K >= 20 aligned seeds per scene; remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave; next lifetimes ranked in `docs/aud242g-scout.md`. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
 2. **Cleanup (one commit per step, verified by typecheck + full suite + build), in this order:** (1), (2), (3), (6) DONE;
    (5) DONE (cln240 + cln242 + cln244 Dive; optional: `summaryAllFactorySpecies` 134 s and `substituteDollDefenderLive` 80 s for < 15 min); (4) DONE (cln241);
