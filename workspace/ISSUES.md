@@ -13,12 +13,23 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #204 — AI residuals after the view fill (aiv266 filled all 16 view fields; aiv267 fixed the damage-sim screens; remaining item, 2026-11-11)
+## #204 — AI residuals after the view fill (aiv266 / aiv267; causes root-caused by dia269, 2026-11-11)
 
-`docs/aiv266-ai-view-fields.md`, `docs/aiv267-ai-screens-self-hit.md`. Unclassified ROM divergences, none of them a view field or the damage-sim screens (aiv267 changed
-none of these seeds): seed 22 ON (8/20, ROM Explosion +1 / engine Earthquake -10), 30 ON (6/11, RNG differs after the same Giga Drain pick), 39 ON (9/11, ROM Brick Break vs
-engine Earthquake; the Reflect field is filled, and the sim now reads it, and neither fixed it). The aiv266 "Attract female user -10" lead was refuted (`AI_CBM_Attract` routes a female user to
-`AI_CBM_Attract_CheckIfTargetIsMale`; the cited lines 507-508 are `AI_CBM_FakeOut`).
+`docs/dia269-leads.md` (each fix confirmed in a scratch tree to make its seed match to battle end; not applied): (A) seed 22: `AI_CBM_CheckIfNegatesType`
+uses the true type multiplier, but C `Cmd_if_type_effectiveness` (`battle_ai_script_commands.c:1515-1557`) never sees MOVE_RESULT_DOESNT_AFFECT_FOE (the
+"dual non-immunity" glitch), engine `factoryAiCheckBadMove.ts` ~1308. (B) seed 30: the AI's "target is faster" checks ignore paralysis in the turn-order
+speed (`factoryAiCheckViability.ts` ~7359 and ~11 sibling sites; C `battle_main.c` ~4605-4660). (C) seed 39: the AI damage estimate drops species /
+hold-effect / hold-effect-param (`factoryAiTryToFaint.ts:122-155`; C `battle_ai_script_commands.c:1174-1236`). Seed 57 unconfirmed (AI damage or
+draw-to-slot mapping; needs a ROM per-move AI damage readout). Fix A / B / C as one ts step each with the aiv267 proof shape.
+
+## #209 — Stale MOVE_EFFECT_BYTE leaks across turns (dia269 seed 53, 2026-11-11)
+
+Engine applies BattleScript_DoRecoil after an Aerial Ace KO that the ROM does not: `battleEndTurnOrchestration.ts:2431` / `:2443` keep a previous turn's
+move-effect byte; C clears it (`battle_script_commands.c:2917-2937`). High confidence from code + draw log; not re-driven with a patch. `docs/dia269-leads.md`.
+
+## #210 — RNG draw count / order around the speed tie and the per-turn random draw (dia269 seed 42, 2026-11-11)
+
+Medium-high confidence: `battleEndTurnOrchestration.ts:2762-2785` vs C `battle_main.c:3956-3975`. Seeds 50 / 60 not isolated. `docs/dia269-leads.md`.
 
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 

@@ -29,8 +29,12 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Gates** (final tree `576565e44`, src == `5682cd341`): full suite (3 workers, beside the soaks) **1,756 files passed + 44 skipped, 0 failed; 14,479 tests**; build / build:lib 0;
   vanilla 0:20 OFF **20 / 20**, ON **20 / 20** (all `budget`); 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60**; varied-RNG first-round winning
   carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; play:random 10 min / scene: ON 36 battles / 15 swaps, OFF 64 / 28, 0 page errors / console errors / overlays.
-- **Next:** handoff "Next work" 1: a read-only diagnosis of the remaining ROM-driver divergences (seeds 22 / 30 / 39, ISSUES #204; 42 / 50 / 53 / 57 / 60, aiv267 doc
-  section 7), then fixes by rank, then drive seeds 61..100; then the sound segment diff. Bundle bnd257d and Cleanup 7 did not fit this run (no cleanup step besides seg268's coverage restore).
+- **Folded: dia269** (side lane, diagnosis only, 38 min; `docs/dia269-leads.md`): root causes for the remaining ROM-driver divergences. High confidence, each scratch-fixed
+  to a full seed match: seed 22 AI "negates type" ignores the C dual-non-immunity glitch, 30 AI speed checks ignore paralysis, 39 AI damage estimate drops species /
+  hold-effect terms (all ISSUES #204, rewritten); 53 stale MOVE_EFFECT_BYTE (new #209, high, not re-driven); 42 RNG draw order (new #210, medium-high); 50 / 57 / 60 open.
+  Supervisor read C `Cmd_if_type_effectiveness` (`battle_ai_script_commands.c:1515-1557`): the glitch comment confirms lead A.
+- **Next:** handoff "Next work" 1: fix #204 A / B / C, #209, #210 as ts steps with the aiv267 proof shape (dia269 has the sites and test ideas), then drive seeds 61..100;
+  then the sound segment diff. Bundle bnd257d and Cleanup 7 did not fit this run (the only cleanup-type step was seg268's coverage restore).
 
 ---
 
