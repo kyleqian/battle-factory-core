@@ -101,8 +101,9 @@ describe("seg127 IsBattleSEPlaying status-animation gate", () => {
     expect(seg127StatusSeGateRows({ songId: 13, seAgeRows: 73 })).toBe(0);
   });
 
-  it("replays every open census receipt through the event-level form (seeds 0..999: 72 gated, 729 frames)", () => {
-    expect(exposure.receipts).toBe(8080);
+  it("replays every open census receipt through the event-level form (seeds 0..999: 72 gated, 745 frames)", () => {
+    // seg268: exposure.json regenerated on the current kernel; receipts were 8080 (cfe4e26ca), frames 729 (gated stays 72).
+    expect(exposure.receipts).toBe(8023);
     expect(exposure.unclassified).toBe(0);
     let frames = 0;
     let gated = 0;
@@ -126,7 +127,7 @@ describe("seg127 IsBattleSEPlaying status-animation gate", () => {
       gated += got!.gate > 0 ? 1 : 0;
     }
     expect({ gated, frames }).toEqual({ gated: exposure.projectionTotal.gated, frames: exposure.projectionTotal.frames });
-    expect({ gated, frames }).toEqual({ gated: 72, frames: 729 });
+    expect({ gated, frames }).toEqual({ gated: 72, frames: 745 });
   });
 
   it("is 0 once a message follows the SE, and without any SE", () => {
