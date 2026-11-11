@@ -19,6 +19,8 @@ history.
 - **`tools/report/ability-item-parity-census.ts` pins engine LINE numbers**: any insertion in `factoryAiCheckBadMove.ts` / the hit chain fails a
   shard until the pins move (aiv266 ~6 min, aiv267 again).
 - **`git archive` pathspecs are cwd-relative while the toplevel is the parent of `workspace/`**; `git apply -R` wants toplevel paths (aiv267 ~5 min).
+- **`npm run build` takes > 500 s while the soak gates run beside it** (seg268 ~8 min); the seg127 exposure census is single-threaded per
+  shard (~2.4 s / battle).
 - **`romDriveSeed.sh`'s divergence tuple `[frame, gCurrentMove, hp0, hp1, rng, lastMove0, lastMove1]` is undocumented in its output** (read
   `romStateTimeline.py`; aiv267).
 

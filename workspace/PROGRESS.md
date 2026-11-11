@@ -22,6 +22,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 - **Folded: aiv267** (ts lane, 164 min; entry below). Supervisor: `romDriveSeed.sh 20 off` 15 / 15, divergence null; aiv267 / aiv266 / orchestrator tests
   91 / 91; re-pin diffs read (orchestrator cursors, causally fix B). The aiv266 "Attract female user -10" lead was refuted by the supervisor (ISSUES #204).
 - **Census baseline now:** `.integration/evidence/aiv267/census/{on,off}-5682cd341`; src final for this run at `5682cd341`.
+- **Folded: seg268** (side lane, 36 min, tests / fixtures / tools only; `docs/seg268-exposure-regen.md`): revived `seg127Exposure.ts` / `seg127ExposureSummary.py`
+  from `4f6fa87e4^`, regenerated `fixtures/seg127/exposure.json` on the current kernel (0..999 Scene ON; receipts 8080 -> 8023, gated 72, frames 729 -> 745, 0 unclassified);
+  sag130 re-anchored to the first projected carriers: restores hit-secondary|BRN|player, hit-secondary|PSN|opponent, yawn|SLP|player, adds contact-ability|PRZ|player and
+  hit-secondary|BRN|opponent; named gap yawn|SLP|opponent (no gated carrier). Worker: consumer tests + test:gate 362 / 362. Supervisor: diff read; covered by the wind-down full suite.
 
 ---
 
