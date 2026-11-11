@@ -96,3 +96,33 @@ ENGINE_BUILD `eb-6e0938c0ec978db5` -> `eb-9d34d28f1b19ef3d` (read from dist; tel
 Full suite as 8 sequential `npm test -- --shard=i/8` runs on the final src (one shard-4 failure set and one shard-3 gate6-manifest failure were re-pinned / regenerated, then re-run green; the tests that read
 ISSUES.md / PROGRESS.md / docs were re-run after the final doc edits, 13 files / 614 tests): 1523 + 1548 + 1741 + 2577 + 2298 + 1674 + 1506 + 1612 = **14,479 passed, 0 failed** (1,756 files).
 `npm run soak -- --policy vanilla --seeds 0:20 --parallel 4`: scene OFF **20 / 20**, scene ON **20 / 20** (run as 0:10 and 10:20), all `budget`.
+
+## 7. Seeds 41..60 ON (diagnosis only, no src changes; `tools/audio/romDriveSeed.sh SEED on`, evidence `.integration/evidence/aiv267/rom41/`)
+
+Matched / engine states; divergence null in every full-match row, engineError null everywhere. Row tuple = `[frame, gCurrentMove, hp0, hp1, rng, lastMove0, lastMove1]`; the class is read from the
+first diverging row only and is NOT root-caused (new ISSUES leads, not fixes).
+
+| seed | matched / total | first divergence class |
+|---|---|---|
+| 41 | 43/43 | full match |
+| 42 | 9/16 | RNG differs at equal HP and equal last moves ([0,89]): engine rng 2269102690 vs ROM 2191460427 after an AI Earthquake (89) KO of the player mon; stream already shifted (candidate: a missing / extra draw earlier in the turn) |
+| 43 | 27/27 | full match |
+| 44 | 11/11 | full match |
+| 45 | 25/25 | full match |
+| 46 | 27/27 | full match |
+| 47 | 42/42 | full match |
+| 48 | 21/21 | full match |
+| 49 | 12/12 | full match |
+| 50 | 18/25 | HP differs: engine [169, 144] vs ROM [159, 25] (the ROM's opponent mon took far more damage; last moves [80, 0] vs [80, 35]): a damage / move-result class |
+| 51 | 10/10 | full match |
+| 52 | 11/11 | full match |
+| 53 | 4/9 | outcome differs on Aerial Ace (332): engine KOs the player mon (hp [0, 85]), ROM does not (hp [35, 96]): hit / crit / damage class |
+| 54 | 8/8 | full match |
+| 55 | 18/18 | full match |
+| 56 | 9/9 | full match |
+| 57 | 6/11 | last moves differ (engine [329, 280] vs ROM [0, 157]) with player hp 63 vs 201: an earlier move-pick / active-mon difference (AI pick class) |
+| 58 | 27/27 | full match |
+| 59 | 33/33 | full match |
+| 60 | 36/82 | decision-shape: the ROM asks for a switch the engine did not issue (drive stops "party menu without a switch decision" after 57 of 82 decisions); last moves differ ([92, 165] vs [135, 79]) at equal hp [321, 177] |
+
+15 of 20 seeds match to battle end (41, 43..49, 51, 52, 54..56, 58, 59), 5 diverge (42, 50, 53, 57, 60). None involves a confusion self-hit or a Reflect / Light Screen row in its first diverging row.
