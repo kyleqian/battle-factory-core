@@ -27,7 +27,7 @@ describe("land75: hidden battler faint / reshow (hist73 Part B)", () => {
 
   it("battle 533 (seed 533, streak 32): the airborne Fly charger's Toxic KO keeps the order host; Scene ON/OFF parity", () => {
     const r = land75Parity(533, 32);
-    expect(r.turnBoundariesCompared).toBe(64);
+    expect(r.turnBoundariesCompared).toBe(68); // aiv266: 64 before the live AI view fields (seed 533 is a changed census seed; the AI now picks differently, +4 boundaries); every other assertion is unchanged
     expect(r.orderStopsOn).not.toContain("faint-animation of a hidden battler");
     // the next opponent's Dig x20 and Double Team x6 (hist73's 26 declined bodies) now carry a known order and allocator history
     const after = r.bodies.filter((b) => b.side === 1 && (b.moveId === 91 || b.moveId === 104));
