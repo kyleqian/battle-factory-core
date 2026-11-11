@@ -1255,6 +1255,9 @@ function runCbmSandstorm(currentWeather: AiWeatherValue | undefined, staleAbilit
   return runCbmWeatherSetter(currentWeather, staleAbilityGuess, AI_WEATHER_SANDSTORM);
 }
 
+const AI_EFFECTIVENESS_X2 = 80;
+
+/** True type multiplier for real damage only; AI `if_type_effectiveness` gates use `computeAiEffectiveness`. */
 export function typeMultiplierTenths(attackingType: string, defendingTypes: readonly [string, string]): number {
   const distinct = defendingTypes[0] === defendingTypes[1] ? [defendingTypes[0]] : defendingTypes;
   let mult = 10;
@@ -1304,9 +1307,10 @@ export function runCheckBadMovePreamble(input: Readonly<{
   let reachedCheckEffect = false;
 
   if (!isMovePowerOther) {
-    // AI_CBM_CheckIfNegatesType
-    const effectivenessTenths = typeMultiplierTenths(move.type, target.types);
-    if (effectivenessTenths === 0) {
+    // AI_CBM_CheckIfNegatesType: `if_type_effectiveness AI_EFFECTIVENESS_x0` is the AI probe
+    // (dual non-immunity glitch), not the true multiplier.
+    const aiEffectiveness = computeAiEffectiveness(move.type, target.types);
+    if (aiEffectiveness === 0) {
       return Object.freeze({ kind: "scored", rng, draws: Object.freeze(draws), scoreDelta: -10 });
     }
 
@@ -1328,7 +1332,7 @@ export function runCheckBadMovePreamble(input: Readonly<{
       }
       negated = true;
     } else if (guessed === NEGATING_ABILITIES.wonderGuard) {
-      if (effectivenessTenths !== 20) {
+      if (aiEffectiveness !== AI_EFFECTIVENESS_X2) {
         return Object.freeze({ kind: "scored", rng, draws: Object.freeze(draws), scoreDelta: -10 });
       }
       negated = true;
@@ -2705,8 +2709,8 @@ function runCbmHighRiskForDamage(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  const effectivenessTenths = typeMultiplierTenths(moveType, target.types);
-  if (effectivenessTenths === 0) {
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
+  if (aiEffectiveness === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
@@ -2715,7 +2719,7 @@ function runCbmHighRiskForDamage(
     rng: ability.rng,
     draws: Object.freeze(draws),
     scoreDelta: ability.ability === "ABILITY_WONDER_GUARD"
-      && effectivenessTenths !== 20
+      && aiEffectiveness !== AI_EFFECTIVENESS_X2
       ? -10
       : 0,
   });
