@@ -228,7 +228,8 @@ ending flows, with the same evidence discipline as the animations:
    ROM does at the same frame for the census seeds (a `(frame, kind, id)`
    column next to the animation census); misses become fix steps like
    animation declines did.
-3. **Playback:** the recorded assets play on the events; a muted default,
+3. **Playback** (user 2026-11-11: start now, in parallel with step 2's
+   remaining parity work; missing events stay silent until filled): the recorded assets play on the events; a muted default,
    a user-facing toggle through the library API, no pixel change anywhere
    (frame hashes identical with audio on and off).
 

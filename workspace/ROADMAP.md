@@ -33,7 +33,10 @@ The core never knows about accounts or servers; it exposes one small
 mount / event / save API (finish plan Phase 3, "Core library API"). Title
 screen, login, streak storage and the on-screen pad UI are the website's.
 **Audio (S11) is back in scope** from 2026-10-31 (user decision); the
-2026-08-10 out-of-scope note is superseded.
+2026-08-10 out-of-scope note is superseded. **2026-11-11 (user): start sound
+playback now** (design steps 8-9, aud244 recorder + assets, aud245 player)
+alongside the ROM-driver gameplay fixes, one of each per run; playback no
+longer waits for census parity (handoff "Next work" item 0).
 
 1. **Core library API** — **DONE 2026-11-01** (`f88653929`; `docs/library-package.md`). (finish plan Phase 3, first): `src/lib.ts` +
    `mountFactoryGame` with the exact contract in `docs/finish-plan.md`, a Vite

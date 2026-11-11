@@ -97,12 +97,36 @@ kept and is long-tail.
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
 
+0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
+   fixes.**
+   - **Pace:** every run folds at least one playback step and one gameplay-fix step from item 1, one worker at a time as usual.
+   - **No more waiting:** playback no longer waits for census parity (0 missing / 0 extra, design step 7) or for the remaining
+     aud242 lifetimes. A sound we don't emit yet just stays silent and gets filled in as parity improves.
+   - **aud244, recorder + assets** (design section 5 / step 8). It may split into cries / SEs / music.
+     - A python recorder over mGBA `core.get_audio_channels()`.
+     - Asset list: the distinct `(kind, id, pan | species, mode)` tuples in the ROM logs so far, plus every Factory species'
+       cry in NORMAL / WEAK / FAINT. The register-poke driver is allowed for recording only.
+     - BGM / fanfares get their ROM loop points from `sound/songs/midi/*.s`.
+     - Output: OGG plus `manifest.json` under `src/assets/gen/audio/`. Report the sizes. The headless graph stays free of audio.
+   - **aud245, player** (design section 6 / step 9).
+     - `src/audio/player.ts`: WebAudio, loaded by dynamic import. It models m4a's SE1/2/3 priority, the BGM duck under cries,
+       fanfare pause / continue, and fades.
+     - API: `FactoryGameOptions.audio`, `setAudio` / `getAudio`, a `?audio=1` dev shell, `lib-types` and
+       `docs/library-package.md`. Muted by default.
+     - Accept:
+       - frame hashes identical with audio on and off;
+       - full suite + build + build:lib;
+       - browser play with audio audible;
+       - Safari decode checked, with an AAC fallback.
+   - **Hosting:** the Nintendo-derived audio follows the user's existing decision on the art. `options.audio.baseUrl` lets the
+     website serve the files.
+   - **Website:** the mute button is the Mac's job. Name the API change and the new ENGINE_BUILD in PROGRESS when aud245 lands.
 1. **Audio (S11)** — the main program for several runs: `docs/s11-audio-design.md` section 7. Next: **aud241** battle
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
    proposed split: `docs/aud241-scout.md`. **aud241a / b / c DONE 2026-11-05. aud242a DONE 2026-11-06** (generic script-op
    emitter, `docs/aud242-move-anim-sounds.md` section 4 is the slice plan). **aud242b / c DONE 2026-11-07; aud242d / e / f DONE
-   2026-11-08; aud242g, aud243a / b / c DONE 2026-11-09.** **aud243d DONE 2026-11-10** (ROM driver). **Next, before more audio: the ROM-driver gameplay fixes** (dmg264, aiv266, aiv267 DONE 2026-11-11), one ts-lane step each with the
+   2026-11-08; aud242g, aud243a / b / c DONE 2026-11-09.** **aud243d DONE 2026-11-10** (ROM driver). **Next, before more audio event work (playback is item 0 and runs alongside): the ROM-driver gameplay fixes** (dmg264, aiv266, aiv267 DONE 2026-11-11), one ts-lane step each with the
    abl261 / aip262 / aiv267 proof shape (tests, re-drive seeds, census attribution, full suite): the causes are in `docs/dia269-leads.md` (2026-11-11): fix ISSUES #204 A
    (seed 22), B (30), C (39), #209 (53), #210 (42) one step each, then seeds 50 / 57 / 60 (unconfirmed), then drive seeds 61..100 for new leads. After that, the sound segment diff
    (`tools/audio/soundSegmentDiff.py`, aud243d section 5: missing move-animation SE streams and stat-change SEs) over K >= 20 aligned seeds per scene; remaining aud242 lifetimes and the #198 alignment audit (`docs/al198-scout.md`) can interleave; next lifetimes ranked in `docs/aud242g-scout.md`. Open aud241 gaps: ISSUES #196 / #197, the canonical battleScene route plays no end sounds.
