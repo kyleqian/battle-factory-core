@@ -125,4 +125,4 @@ first diverging row only and is NOT root-caused (new ISSUES leads, not fixes).
 | 59 | 33/33 | full match |
 | 60 | 36/82 | decision-shape: the ROM asks for a switch the engine did not issue (drive stops "party menu without a switch decision" after 57 of 82 decisions); last moves differ ([92, 165] vs [135, 79]) at equal hp [321, 177] |
 
-15 of 20 seeds match to battle end (41, 43..49, 51, 52, 54..56, 58, 59), 5 diverge (42, 50, 53, 57, 60). None involves a confusion self-hit or a Reflect / Light Screen row in its first diverging row.
+15 of 20 seeds match to battle end (41, 43..49, 51, 52, 54..56, 58, 59), 5 diverge (42, 50, 53, 57, 60). Whether any of the five involves a confusion self-hit or a screen was not checked.
