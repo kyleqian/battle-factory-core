@@ -2309,41 +2309,43 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // moves 3978301197 -> 1188296587, and every challenge-2 value seeded from
     // it moves with it. Shape (two contiguous segments, rank-1 rentals)
     // unchanged. Regenerated from the engine.
-    expect(completed.round.rules.rngValue).toBe(1188296587);
+    // aiv267 (#207 confusion self-hit hold item): challenge 1 terminal cursor 1188296587 -> 1931463501.
+    expect(completed.round.rules.rngValue).toBe(1931463501);
     expect(next.initialRentalGeneration?.rentalRank).toBe(1);
     expect(next.rngSegments).toEqual([
       {
         kind: "initial-rentals",
         battleIndex: 0,
         callStart: 0,
-        callEnd: 329,
-        rngBefore: 1188296587,
-        rngAfter: 1928923178,
+        callEnd: 279,
+        rngBefore: 1931463501,
+        rngAfter: 827694810,
       },
       {
         kind: "opponent-generation",
         battleIndex: 0,
-        callStart: 329,
-        callEnd: 573,
-        rngBefore: 1928923178,
-        rngAfter: 1344913182,
+        callStart: 279,
+        callEnd: 459,
+        rngBefore: 827694810,
+        rngAfter: 2671237774,
       },
     ]);
     expect(next.initialRentalGeneration?.rentals.map((rental) => rental.setId))
-      .toEqual([335, 162, 220, 244, 196, 230]); // #140: [273, 175, 206, 265, 218, 257] -> this
+      .toEqual([343, 191, 194, 256, 224, 214]); // #140: [273, 175, 206, 265, 218, 257] -> [335, 162, 220, 244, 196, 230]; aiv267 (#207): -> this
     expect(next.opponentGenerations[0]).toMatchObject({
       // #140: trainerId 82 -> 113, opponents [248, 221, 163] -> [259, 265, 234].
-      trainerId: 113,
+      // aiv267 (#207): trainerId 113 -> 87, opponents -> [245, 212, 248].
+      trainerId: 87,
       generation: {
         opponents: [
-          { setId: 259 },
-          { setId: 265 },
-          { setId: 234 },
+          { setId: 245 },
+          { setId: 212 },
+          { setId: 248 },
         ],
       },
     });
-    expect(next.facilityRngCalls).toBe(573); // #140: 627 -> 573
-    expect(next.round.rules.rngValue).toBe(1344913182); // #140: 1540047030 -> 1344913182
+    expect(next.facilityRngCalls).toBe(459); // #140: 627 -> 573; aiv267 (#207): -> 459
+    expect(next.round.rules.rngValue).toBe(2671237774); // #140: 1540047030 -> 1344913182; aiv267 (#207): -> 2671237774
   });
 
   it("owns battle 0 win through decline and battle 1's fresh command on one RNG cursor", () => {
@@ -2715,7 +2717,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // per-turn re-sort and its speed-tie Random() net-add draws here.
     // ISSUES #140 (GetMoveTarget's MOVE_TARGET_SELECTED draw loop on the four
     // HandleAction_UseMove re-target branches): 2076 -> 1738.
-    expect(state.facilityRngCalls).toBe(1738);
+    // aiv267 (#207: the confusion self-hit sees the hold item): 1738 -> 1824.
+    expect(state.facilityRngCalls).toBe(1824);
     expect(firstReplacement).toEqual({
       callsBefore: 2,
       callsAfter: 16,
@@ -2787,7 +2790,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // Each row is the whole-round facility RNG cursor plus its complete
     // downstream trajectory (generation, moves, damage, turn lengths), not a
     // direct draw-count delta. Values regenerated from the union engine.
-    [4, 1525, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1809 -> 1525
+    [4, 1590, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1809 -> 1525; aiv267 (#207 confusion self-hit sees the hold item): 1525 -> 1590
     [5, 1694, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1658 -> 1694
     [6, 1417, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1675 -> 1417
     [7, 1857, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1269 -> 1884; abl261 (#202, full ability resolver applies; the old 4-id map reproduces 1884): 1884 -> 1857
@@ -2804,8 +2807,8 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     [22, 1671, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1517 -> 1671
     [23, 2191, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 2330 -> 2191
     [24, 1479, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1473 -> 1623; rng146 F1 Petal Dance lock-in re-run: 1623 -> 1479
-    [26, 1669, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1672 -> 1669
-    [29, 1506, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1832 -> 1506
+    [26, 1483, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1672 -> 1669; aiv267 (#207): 1669 -> 1483
+    [29, 1478, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1832 -> 1506; aiv267 (#207): 1506 -> 1478
     [30, 1737, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1366 -> 1737
   ])("seed %i pins the post-ShouldSwitch round census", (
     seed,
