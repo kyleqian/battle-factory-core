@@ -43,7 +43,8 @@ const ROM_GLYPH: Readonly<Record<number, readonly [string, number, number]>> = {
   // move: [failure message, ROM glyph, census example seed (ret88 / off108Route battle i = seed i)]
   // 182 was battle 11 until aip262 (changed census seed: the live AI view fills usablePartyMons); battle 12 is unchanged and carries the same glyph-40 Protect failure.
   // 113 was battle 32 until thr153 (ISSUES #141a's THRASH lock-in re-run removes battle 32's failed Light Screen); battle 41 is unmoved.
-  113: ["STRINGID_BUTITFAILED", 41, 41], 115: ["STRINGID_BUTITFAILED", 40, 33], 219: ["STRINGID_BUTITFAILED", 41, 41],
+  // 115 was battle 33 until aiv270 (changed census seed: the AI turn-order / effectiveness view change moves its fight); battle 176 is unchanged and carries the same glyph-40 failure (verified: start = glyph - 1).
+  113: ["STRINGID_BUTITFAILED", 41, 41], 115: ["STRINGID_BUTITFAILED", 40, 176], 219: ["STRINGID_BUTITFAILED", 41, 41],
   240: ["STRINGID_BUTITFAILED", 40, 0], 241: ["STRINGID_BUTITFAILED", 41, 60], 201: ["STRINGID_BUTITFAILED", 41, 18],
   258: ["STRINGID_BUTITFAILED", 41, 41], 182: ["STRINGID_BUTITFAILED", 40, 12], 197: ["STRINGID_BUTITFAILED", 40, 46],
   203: ["STRINGID_BUTITFAILED", 40, 213], 254: ["STRINGID_PKMNCANTSTOCKPILE", 40, 620], 73: ["STRINGID_PKMNEVADEDATTACK", 74, 7],

@@ -131,7 +131,7 @@ const bodiesOf = (uses: Use[], move: number) => uses.filter((u) => u.move === mo
 // (case, census seed, move, attacker side, body uses in that battle)
 const CASES = [
   ["Substitute (opponent attacker)", 17, MOVE_SUBSTITUTE, 1, 2],
-  ["Substitute (player attacker)", 74, MOVE_SUBSTITUTE, 0, 2],
+  ["Substitute (player attacker)", 373, MOVE_SUBSTITUTE, 0, 2],
   ["Transform (player DITTO)", 197, MOVE_TRANSFORM, 0, 1],
 ] as const;
 
@@ -167,7 +167,7 @@ describe("sub157: Scene OFF Substitute / Transform keep the controller move anim
   });
 
   it("control: every other move's OFF body keeps BattleScript_Pausex20 (SCENE_OFF_ATTACK_PAUSE; no move-animation request)", () => {
-    for (const seed of [17, 74, 197]) {
+    for (const seed of [17, 373, 197]) {
       const others = battleUses(seed, "off").filter((u) => u.attack !== null && u.move !== MOVE_SUBSTITUTE && u.move !== MOVE_TRANSFORM);
       expect(others.length).toBeGreaterThan(0);
       for (const use of others) {
@@ -180,7 +180,7 @@ describe("sub157: Scene OFF Substitute / Transform keep the controller move anim
 
   it("Scene OFF bodies read both battlers at x2 {0,0} (no front animation); every other OFF command keeps no x2 input", () => {
     expect(liveTrackedFrontIdleRest("opponent", { x2: 1, y2: 0 }, LIVE_BATTLER_X2_SCENE_OFF_INPUT)).toEqual({ x2: 0, y2: 0 });
-    for (const seed of [17, 74, 197]) {
+    for (const seed of [17, 373, 197]) {
       battleUses(seed, "off");
       const frames = framesCache.get(`${seed}-off`)!;
       const bodies = frames.filter((f) => f.type === "move-animation" && f.moveId !== null);
