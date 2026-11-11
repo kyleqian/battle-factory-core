@@ -13,18 +13,13 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #207 — Confusion self-hit calc still lacks hold-item inputs (abl261 §7, seen again by aip262 seed 20, 2026-11-10)
+## #204 — AI residuals after the view fill (aiv266 filled all 16 view fields; aiv267 fixed the damage-sim screens; remaining item, 2026-11-11)
 
-ROM seed 20 (ON and OFF): AI confusion self-hit damage 35 vs engine 18. C passes the live `gBattlerMons` record, so `holdEffect` reaches `CalculateBaseDamage`
-(`battle_util.c:2157-2175`); the engine branch (`battleScriptActionAdmission.ts`) has no hold-item inputs. Fix: feed holdEffect / holdEffectParam.
+`docs/aiv266-ai-view-fields.md`, `docs/aiv267-ai-screens-self-hit.md`. Unclassified ROM divergences, none of them a view field or the damage-sim screens (aiv267 changed
+none of these seeds): seed 22 ON (8/20, ROM Explosion +1 / engine Earthquake -10), 30 ON (6/11, RNG differs after the same Giga Drain pick), 39 ON (9/11, ROM Brick Break vs
+engine Earthquake; the Reflect field is filled, and the sim now reads it, and neither fixed it). The aiv266 "Attract female user -10" lead was refuted (`AI_CBM_Attract` routes a female user to
+`AI_CBM_Attract_CheckIfTargetIsMale`; the cited lines 507-508 are `AI_CBM_FakeOut`).
 
-## #204 — AI residuals after the view fill (aiv266: all 16 fields filled; remaining items, 2026-11-11)
-
-`docs/aiv266-ai-view-fields.md`. (1) The AI damage sims (`factoryAiTryToFaint.ts` `calculateBaseDamage`; C `AI_CalcDmg` passes the target side's status) still get no
-Reflect / Light Screen: the view fields exist now (`targetSideReflectUp`, attacker `reflectUp` / `lightScreenUp`) but the sim does not read them. (2) Unclassified ROM
-divergences, none of them a view field: seed 22 ON (8/20, ROM Explosion +1 / engine Earthquake -10), 30 ON (6/11, RNG differs after the same Giga Drain pick), 39 ON
-(9/11, ROM Brick Break vs engine Earthquake; the Reflect field is filled and did not fix it). (3) (aiv266's "Attract female user -10" lead was checked by the supervisor and is NOT a bug: `battle_ai_scripts.s:456-476` sends a
-female user to `AI_CBM_Attract_CheckIfTargetIsMale`, `MON_FEMALE` 0xFE fits the `if_equal` byte; the cited lines 507-508 are `AI_CBM_FakeOut`.)
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 
 `docs/obr251-opponent-party-summary.md`: bar slide / hold / fade / SE are ROM-timed and the bar frames 527..546 are exact

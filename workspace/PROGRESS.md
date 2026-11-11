@@ -24,6 +24,21 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-11 — aiv267 (ts lane worker): AI damage sims see the target's screens; confusion self-hit sees the hold item; ISSUES #207 deleted, #204 trimmed
+
+- **State:** committed on master (not pushed). ENGINE_BUILD `eb-6e0938c0ec978db5` -> `eb-9d34d28f1b19ef3d` (tell the website). `docs/aiv267-ai-screens-self-hit.md`.
+- **Did:** (A) `factoryAiTryToFaint.ts` passes the target side's Reflect / Light Screen into `calculateBaseDamage` (C `AI_CalcDmg`, `battle_script_commands.c:1306-1309`); new view field
+  `targetSideLightScreenUp` from `sideStatuses[0]`. (B) the confusion self-hit (`battle_util.c:2157-2175`) gets the live battler's `holdEffect` / `holdEffectParam` / species in BOTH roles
+  (+ Frontier flag for Soul Dew). `tests/aiv267AiScreensSelfHit.test.ts` 13 tests, 9 fail unfixed. ROM: seed 20 ON / OFF now 15/15 (was the self-hit divergence 35 vs 18); 22 / 30 / 39 ON
+  unchanged (8/20, 6/11, 9/11); the 14-seed regression set (1 3 4 5 6 8 11 13 17 26 28 31 224 552) still matches fully. Census 0..999: 8 changed seeds per scene (245 379 682 743 816 829 911 946),
+  all fix B (Silk Scarf / Thick Club / Choice Band self-hits), identical sets and command-list changes ON / OFF, 0 unexplained (`aiv267Instrument.py` / `aiv267Classify.py`); fix A touches
+  46 seeds' decisions but changes one score (377) and no pick. Re-pins: `factoryRoundBattleOrchestrator` seeds 4 / 17 / 26 / 29 + challenge-2 chain (fix B only), parity-census lines, gate6
+  manifest. Gates: typecheck / build / build:lib 0; 8-shard suite 14,479 passed, 0 failed (1,756 files); soak vanilla 0:20 OFF 20/20, ON 20/20.
+- **Next:** ISSUES #204 item (seeds 22 / 30 / 39 ON), then seeds 41..80 ROM drives.
+- **Notes:** new census baseline `.integration/evidence/aiv267/census/{on,off}-5682cd341` (src identical to HEAD). No coverage loss.
+
+---
+
 ## 2026-11-11 — aiv266 (ts lane worker): live AI view fills all 16 declared fields; ISSUES #204 trimmed
 
 - **State:** committed on master (not pushed). ENGINE_BUILD `eb-16ee24851bfb26a3` -> `eb-6e0938c0ec978db5` (tell the website). `docs/aiv266-ai-view-fields.md`.
