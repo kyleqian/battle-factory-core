@@ -403,9 +403,11 @@ remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 =
          starts on a turn where the player switched.
        - **Verified when:** a test replays the trace and finds the player's box in every frame of app 19364..21017 where the
          ROM draws it (ROM lab: a player switch into Ice Ball, then two more turns), plus one other locked move.
-       - **Repro note:** the frames above hold on engine `eb-9d34d28f1b19ef3d` (master `e2cd1f1cd`, before the fold of
-         `mac/parity-mac`). After the fold the trace diverges at app 17134 (see (h)), and its Ice Ball then starts on a turn
-         with no player switch. Reproduce at `e2cd1f1cd`, or stage it: the player switches on the turn the opponent starts a
+       - **Repro note:** the frames above were measured on master `e2cd1f1cd` (before the fold of `mac/parity-mac`). The
+         website itself ran an older build (`worker/lib-v2-mac` 18329ff0f, stamp `eb-9d34d28f1b19ef3d`, 63 commits behind
+         that master); the trace plays the battle Kyle described on both, with different kernel digests (the fixture lists
+         both). After the fold the trace diverges at app 17134 (see (h)), and its Ice Ball then starts on a turn with no
+         player switch. Reproduce at `e2cd1f1cd`, or stage it: the player switches on the turn the opponent starts a
          locked move.
 5. **Timing / visible residuals** last, never while items 1–3 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
    compare-harness maxHP bug + `factoryCorpusParty.ts:291`, ISSUES #146 shd234; CASTFORM message region on the faint path,
