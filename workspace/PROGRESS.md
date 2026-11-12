@@ -15,7 +15,7 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   ROM windows `tools/compare/traces/lbra-*.json`: loss OFF **2258 / 2258**; forfeit OFF 896 / 1050, ON 766 / 1050; retire OFF 1315 / 1554 (all residuals named in the doc).
   SE_SAVE: forfeit OFF 895 (ROM = app); ROM loss OFF 4007 / retire OFF 7503, app emits none there (audio lane).
 - **Next:** lbr-b attendant conversation, lbr-c challenge-request event, lbr-d 7-win Lobby return; a closed-loop Scene ON loss / retire lab (unmeasured).
-- **Notes:** `play:random --minutes 2 --scene both` was NOT run (worker time cap reached); run it before folding. The next draft after a loss now uses the live Lobby vblank cursor (ROM-faithful), not the old chain's cursor. Evidence `.integration/evidence/lbra/`.
+- **Notes:** play:random 2 min / scene both: 0 page errors / console errors / overlays (ON 7 battles, OFF 16, new challenges from the Lobby 1 / 3). The next draft after a loss now uses the live Lobby vblank cursor (ROM-faithful), not the old chain's cursor. Evidence `.integration/evidence/lbra/`.
 
 ---
 
