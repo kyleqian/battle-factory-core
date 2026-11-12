@@ -20,7 +20,7 @@ decision. The run that was killed on 2026-10-26 (`cax31-20261026.jsonl`, exs207
 worker on `worker/integration-20261026-213055`) was timing work; its branch is
 kept and is long-tail.
 
-## State at restart (written at the 2026-11-11 wind-down; PROGRESS.md top entry has details)
+## State at restart (written at the 2026-11-12 wind-down; PROGRESS.md top entry has details)
 
 - Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
   `worker/lib-v2-mac` is folded up to `851ee1f4c`; if the Mac moves that branch again, merge the new tip the same way
@@ -89,13 +89,26 @@ kept and is long-tail.
   target's screens; #207 confusion self-hit hold items, `docs/aiv267-ai-screens-self-hit.md`). Seeds 1..60 ON (0 unchecked) now match the ROM to battle end except
   22, 30, 39 (#204 remainder, AI scoring, not view fields) and 42, 50, 53, 57, 60 (aiv267 doc section 7, first-row classes only, not root-caused); 33 is
   not drivable (Brain trainer id). The aiv266 "Attract female user" lead was refuted (ISSUES #204).
-- Census baseline for the next delta: `.integration/evidence/aiv267/census/{on,off}-5682cd341` (src identical to master at the 2026-11-11 wind-down).
+- **2026-11-12 run: five gameplay fixes, the first sound assets, the Lobby return, the PLAYER name.** aiv270 (#204 A type-effectiveness probe quirk, B full
+  GetWhoStrikesFirst speed in the AI), aiv271 (#204 C: AI damage sims use the real hit chain's `battleScriptDamageTerms`), fix274 (#209 MOVE_EFFECT_BYTE cleared
+  per action, #210 `chosenMovePositions` written at selection); seeds 22 / 30 / 39 / 42 / 50 / 53 / 57 now match (dia272 `docs/dia272-leads.md` proved 42 / 50 / 53
+  and leads seed 60: forced-Struggle turn runs the AI chooser, scratch 36 / 82 -> 73 / 82). aud244a recorder + 6.14 MB OGG cries / SEs
+  (`docs/aud244a-recorder-assets.md`). lbr-a (`docs/lbra-lobby-return.md`): loss / forfeit / retire end in the walkable Lobby; soak / play:random walk to the
+  attendant. pnm273: `PLAYER_NAME` (`docs/pnm273-player-name.md`; compare harness renders MEMORY).
+- Census baseline for the next delta: `.integration/evidence/fix274/census/{on,off}-237ee0e5e` (the fix274 fixed arms; src == master's final engine src at the 2026-11-12 wind-down
+  except pnm273's name strings, which the pnm273 0..49 census showed digest-neutral).
 - **4b(d) DONE** (frs247, `docs/frs247-faint-replacement-reshow.md`): the faint-replacement return rises from black, no player bar.
 
 ## Next work (in order) — see `docs/finish-plan.md` for acceptance
 
 This repo is the **game core library**; the website repo (Mac) owns login, streaks, menus, the on-screen pad and hosting —
 never brief those here. One worker at a time; each run folds the next audio step(s) plus at least one cleanup step.
+
+**Status at the 2026-11-12 wind-down:** item 0: aud244a DONE (cries + SEs); next aud244b (BGM / fanfares with ROM loops, the looping SE_LOW_HEALTH / SE_M_GUST),
+then aud245 player. Item 0b: lbr-a DONE; next lbr-b (attendant conversation), then lbr-c, lbr-d; open from lbr-a: no Scene ON loss / retire ROM lab, the app emits
+no SE_SAVE on the loss / retire result script (ROM 4007 / 7503 in the lbra windows). Item 0c DONE (pnm273). Item 0d: #204 C / #209 / #210 DONE; next in the
+gameplay queue: seed 60 (dia272 lead), triage the twenty divergent seeds 75..159, audit A2 / A3 (switch-in scorer), A4 (pass-2 base damage 0, = ISSUES #204
+remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / Flash Fire now come from the real builder); re-check its rows on a seed.
 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
    fixes.**
