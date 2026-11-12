@@ -90,11 +90,13 @@ import {
   applyStab,
   calculateAccuracy,
   calculateBaseDamageWithPower,
+  damageCalcInputForMove,
   getCriticalHitChanceStage,
   isTypePhysical,
   matchingTypeEffectivenessRows,
   rollAccuracyHits,
   rollIsCriticalHit,
+  type DamageCalcTerms,
   type TypeEffectivenessEntry,
 } from "./damageCalc.ts";
 import movesData from "../data/gen/moves.json" with { type: "json" };
@@ -707,8 +709,6 @@ function stringOperand(expression: string, sourceMacroLine: number): BattleScrip
 }
 
 const HOLD_EFFECT_EVASION_UP_ID = 22;
-const SIDE_STATUS_REFLECT = 1 << 0;
-const SIDE_STATUS_LIGHTSCREEN = 1 << 1;
 
 const TYPE_EFFECTIVENESS = (typeEffectivenessData.typeEffectiveness as readonly TypeEffectivenessEntry[]);
 
@@ -1508,41 +1508,22 @@ export function calculateBattleScriptBaseDamageForCurrentMove(
   return calculateBattleScriptBaseDamageWithPowerForCurrentMove(rulesContext).damage;
 }
 
-/** Same call, also returning the source gBattleMovePower (presentation-only). */
-export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
+/** `CalculateBaseDamage`'s live-state terms (`DamageCalcTerms`, damageCalc.ts), shared by the hit chain and the AI sims. */
+export function battleScriptDamageTerms(
   rulesContext: BattleScriptRulesContext,
-): { readonly damage: number; readonly movePower: number } {
-  const attacker = requireBattlerRole(rulesContext, "attacker");
-  const target = requireBattlerRole(rulesContext, "target");
+  attacker: BattleScriptBattlerId,
+  target: BattleScriptBattlerId,
+): DamageCalcTerms {
   const attackerBattler = rulesContext.battlers[attacker];
   const targetBattler = rulesContext.battlers[target];
-  const moveRow = requireMoveRow(rulesContext.currentMove);
-  const moveType = resolveMoveTypeName(rulesContext, rulesContext.currentMove);
-  let movePower = rulesContext.dynamicBasePower !== 0
-    ? rulesContext.dynamicBasePower
-    : moveRow.power;
   const activeBattlers = rulesContext.battlers.slice(
     0,
     rulesContext.battleTopology.battlersCount,
   );
-  if (
-    moveType === "TYPE_ELECTRIC"
-    && activeBattlers.some(({ status3 }) => (status3 & (1 << 16)) !== 0)
-  ) {
-    movePower = Math.trunc(movePower / 2);
-  }
-  if (
-    moveType === "TYPE_FIRE"
-    && activeBattlers.some(({ status3 }) => (status3 & (1 << 17)) !== 0)
-  ) {
-    movePower = Math.trunc(movePower / 2);
-  }
   const attackerHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, attacker);
   const defenderHoldEffectId = resolveBattleScriptBattlerHoldEffect(rulesContext, target);
-  const targetSideStatus = rulesContext.sideStatuses[targetBattler.side];
-
-  return calculateBaseDamageWithPower({
-    attacker: {
+  return Object.freeze({
+    attacker: Object.freeze({
       attack: attackerBattler.attack,
       defense: attackerBattler.defense,
       spAttack: attackerBattler.spAttack,
@@ -1558,8 +1539,8 @@ export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
       species: attackerBattler.species,
       holdEffect: HOLD_EFFECT_NAME_BY_ID[attackerHoldEffectId] ?? null,
       holdEffectParam: resolveBattleScriptBattlerHoldEffectParam(rulesContext, attacker),
-    },
-    defender: {
+    }),
+    defender: Object.freeze({
       attack: targetBattler.attack,
       defense: targetBattler.defense,
       spAttack: targetBattler.spAttack,
@@ -1571,20 +1552,38 @@ export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
       ability: abilityNameOrNull(targetBattler.ability),
       species: targetBattler.species,
       holdEffect: HOLD_EFFECT_NAME_BY_ID[defenderHoldEffectId] ?? null,
-    },
-    movePower,
-    moveType,
-    isCriticalHit: rulesContext.critMultiplier === 2,
-    sideStatusReflect: (targetSideStatus & SIDE_STATUS_REFLECT) !== 0,
-    sideStatusLightScreen: (targetSideStatus & SIDE_STATUS_LIGHTSCREEN) !== 0,
-    moveEffect: moveRow.effect,
+    }),
     weather: rulesContext.weather,
     weatherHasEffect: weatherHasEffectForBaseDamage(rulesContext),
-    currentMove: rulesContext.currentMove,
-    activeBattlerAbilities: activeBattlers.map((b) => abilityNameOrNull(b.ability)),
+    activeBattlerAbilities: Object.freeze(activeBattlers.map((b) => abilityNameOrNull(b.ability))),
     isFrontierBattle: (rulesContext.battleTopology.battleTypeFlags & BATTLE_TYPE_FRONTIER) !== 0,
     flashFireBoosted: attackerBattler.flashFireBoosted === 1,
+    mudSportActive: activeBattlers.some(({ status3 }) => (status3 & (1 << 16)) !== 0),
+    waterSportActive: activeBattlers.some(({ status3 }) => (status3 & (1 << 17)) !== 0),
   });
+}
+
+/** Same call, also returning the source gBattleMovePower (presentation-only). */
+export function calculateBattleScriptBaseDamageWithPowerForCurrentMove(
+  rulesContext: BattleScriptRulesContext,
+): { readonly damage: number; readonly movePower: number } {
+  const attacker = requireBattlerRole(rulesContext, "attacker");
+  const target = requireBattlerRole(rulesContext, "target");
+  const moveRow = requireMoveRow(rulesContext.currentMove);
+  return calculateBaseDamageWithPower(
+    damageCalcInputForMove(
+      battleScriptDamageTerms(rulesContext, attacker, target),
+      {
+        id: rulesContext.currentMove,
+        power: moveRow.power,
+        type: resolveMoveTypeName(rulesContext, rulesContext.currentMove),
+        effect: moveRow.effect,
+      },
+      rulesContext.dynamicBasePower,
+      rulesContext.sideStatuses[rulesContext.battlers[target].side],
+      rulesContext.critMultiplier === 2,
+    ),
+  );
 }
 
 /**
