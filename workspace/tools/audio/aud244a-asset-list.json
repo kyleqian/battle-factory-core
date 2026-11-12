@@ -1,0 +1,9903 @@
+{
+ "schema": "aud244a-asset-list/1",
+ "source": "tools/audio/audioAssetList.py: ROM sound logs (tools/audio/fixtures + extra) and battle-frontier-mons.json",
+ "logFiles": {
+  "fixtures": 147,
+  "extra": 4
+ },
+ "se": [
+  {
+   "id": 5,
+   "name": "SE_SELECT",
+   "pan": null,
+   "vias": [
+    "PlaySE"
+   ],
+   "uses": 562,
+   "logs": 150
+  },
+  {
+   "id": 9,
+   "name": "SE_EXIT",
+   "pan": null,
+   "vias": [
+    "PlaySE"
+   ],
+   "uses": 8,
+   "logs": 8
+  },
+  {
+   "id": 12,
+   "name": "SE_NOT_EFFECTIVE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 4
+  },
+  {
+   "id": 12,
+   "name": "SE_NOT_EFFECTIVE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 5,
+   "logs": 5
+  },
+  {
+   "id": 13,
+   "name": "SE_EFFECTIVE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 39,
+   "logs": 34
+  },
+  {
+   "id": 13,
+   "name": "SE_EFFECTIVE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 72,
+   "logs": 72
+  },
+  {
+   "id": 14,
+   "name": "SE_SUPER_EFFECTIVE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 10,
+   "logs": 6
+  },
+  {
+   "id": 14,
+   "name": "SE_SUPER_EFFECTIVE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 7,
+   "logs": 7
+  },
+  {
+   "id": 15,
+   "name": "SE_BALL_OPEN",
+   "pan": null,
+   "vias": [
+    "PlaySE"
+   ],
+   "uses": 31,
+   "logs": 18
+  },
+  {
+   "id": 16,
+   "name": "SE_FAINT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 33,
+   "logs": 27
+  },
+  {
+   "id": 16,
+   "name": "SE_FAINT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 73,
+   "logs": 73
+  },
+  {
+   "id": 20,
+   "name": "SE_BANG",
+   "pan": null,
+   "vias": [
+    "PlaySE"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 32,
+   "name": "SE_FAILURE",
+   "pan": null,
+   "vias": [
+    "PlaySE"
+   ],
+   "uses": 2,
+   "logs": 1
+  },
+  {
+   "id": 55,
+   "name": "SE_SAVE",
+   "pan": null,
+   "vias": [
+    "PlaySE"
+   ],
+   "uses": 4,
+   "logs": 3
+  },
+  {
+   "id": 90,
+   "name": "SE_LOW_HEALTH",
+   "pan": null,
+   "vias": [
+    "PlaySE"
+   ],
+   "uses": 7,
+   "logs": 7
+  },
+  {
+   "id": 102,
+   "name": "SE_SHINY",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 102,
+   "name": "SE_SHINY",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 114,
+   "name": "SE_BALL_TRAY_ENTER",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 19,
+   "logs": 12
+  },
+  {
+   "id": 115,
+   "name": "SE_BALL_TRAY_BALL",
+   "pan": -64,
+   "vias": [
+    "PlaySE1WithPanning"
+   ],
+   "uses": 21,
+   "logs": 7
+  },
+  {
+   "id": 115,
+   "name": "SE_BALL_TRAY_BALL",
+   "pan": 63,
+   "vias": [
+    "PlaySE1WithPanning"
+   ],
+   "uses": 21,
+   "logs": 7
+  },
+  {
+   "id": 116,
+   "name": "SE_BALL_TRAY_EXIT",
+   "pan": -64,
+   "vias": [
+    "PlaySE2WithPanning"
+   ],
+   "uses": 21,
+   "logs": 7
+  },
+  {
+   "id": 116,
+   "name": "SE_BALL_TRAY_EXIT",
+   "pan": 63,
+   "vias": [
+    "PlaySE2WithPanning"
+   ],
+   "uses": 21,
+   "logs": 7
+  },
+  {
+   "id": 118,
+   "name": "SE_M_THUNDERBOLT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 9,
+   "logs": 3
+  },
+  {
+   "id": 119,
+   "name": "SE_M_THUNDERBOLT2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 6,
+   "logs": 3
+  },
+  {
+   "id": 120,
+   "name": "SE_M_HARDEN",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 6,
+   "logs": 3
+  },
+  {
+   "id": 122,
+   "name": "SE_M_VITAL_THROW",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 123,
+   "name": "SE_M_VITAL_THROW2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 3
+  },
+  {
+   "id": 123,
+   "name": "SE_M_VITAL_THROW2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 8,
+   "logs": 6
+  },
+  {
+   "id": 124,
+   "name": "SE_M_BUBBLE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 19,
+   "logs": 2
+  },
+  {
+   "id": 126,
+   "name": "SE_M_BUBBLE3",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 22,
+   "logs": 4
+  },
+  {
+   "id": 126,
+   "name": "SE_M_BUBBLE3",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 15,
+   "logs": 3
+  },
+  {
+   "id": 129,
+   "name": "SE_M_STRING_SHOT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 130,
+   "name": "SE_M_STRING_SHOT2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 131,
+   "name": "SE_M_ROCK_THROW",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 51,
+   "logs": 16
+  },
+  {
+   "id": 131,
+   "name": "SE_M_ROCK_THROW",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 6,
+   "logs": 6
+  },
+  {
+   "id": 132,
+   "name": "SE_M_GUST",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 3
+  },
+  {
+   "id": 133,
+   "name": "SE_M_GUST2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 3
+  },
+  {
+   "id": 135,
+   "name": "SE_M_DOUBLE_TEAM",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 7,
+   "logs": 2
+  },
+  {
+   "id": 135,
+   "name": "SE_M_DOUBLE_TEAM",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 136,
+   "name": "SE_M_RAZOR_WIND",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning",
+    "PlaySE1WithPanning"
+   ],
+   "uses": 6,
+   "logs": 3
+  },
+  {
+   "id": 136,
+   "name": "SE_M_RAZOR_WIND",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 5,
+   "logs": 4
+  },
+  {
+   "id": 137,
+   "name": "SE_M_ICY_WIND",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 26,
+   "logs": 5
+  },
+  {
+   "id": 137,
+   "name": "SE_M_ICY_WIND",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 3
+  },
+  {
+   "id": 137,
+   "name": "SE_M_ICY_WIND",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 21,
+   "logs": 3
+  },
+  {
+   "id": 138,
+   "name": "SE_M_THUNDER_WAVE",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 1
+  },
+  {
+   "id": 139,
+   "name": "SE_M_COMET_PUNCH",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 139,
+   "name": "SE_M_COMET_PUNCH",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 4
+  },
+  {
+   "id": 139,
+   "name": "SE_M_COMET_PUNCH",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 3
+  },
+  {
+   "id": 140,
+   "name": "SE_M_MEGA_KICK",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 140,
+   "name": "SE_M_MEGA_KICK",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 140,
+   "name": "SE_M_MEGA_KICK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 141,
+   "name": "SE_M_MEGA_KICK2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 6,
+   "logs": 6
+  },
+  {
+   "id": 142,
+   "name": "SE_M_CRABHAMMER",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 11,
+   "logs": 2
+  },
+  {
+   "id": 143,
+   "name": "SE_M_JUMP_KICK",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 143,
+   "name": "SE_M_JUMP_KICK",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 143,
+   "name": "SE_M_JUMP_KICK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 3
+  },
+  {
+   "id": 144,
+   "name": "SE_M_FLAME_WHEEL",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 144,
+   "name": "SE_M_FLAME_WHEEL",
+   "pan": -42,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 144,
+   "name": "SE_M_FLAME_WHEEL",
+   "pan": -20,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 144,
+   "name": "SE_M_FLAME_WHEEL",
+   "pan": 2,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 144,
+   "name": "SE_M_FLAME_WHEEL",
+   "pan": 24,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 144,
+   "name": "SE_M_FLAME_WHEEL",
+   "pan": 46,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 144,
+   "name": "SE_M_FLAME_WHEEL",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 5,
+   "logs": 2
+  },
+  {
+   "id": 145,
+   "name": "SE_M_FLAME_WHEEL2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 145,
+   "name": "SE_M_FLAME_WHEEL2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 1
+  },
+  {
+   "id": 145,
+   "name": "SE_M_FLAME_WHEEL2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 6,
+   "logs": 3
+  },
+  {
+   "id": 146,
+   "name": "SE_M_FLAMETHROWER",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 146,
+   "name": "SE_M_FLAMETHROWER",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 147,
+   "name": "SE_M_FIRE_PUNCH",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 1
+  },
+  {
+   "id": 148,
+   "name": "SE_M_TOXIC",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 98,
+   "logs": 6
+  },
+  {
+   "id": 150,
+   "name": "SE_M_SACRED_FIRE2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 151,
+   "name": "SE_M_EMBER",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 1
+  },
+  {
+   "id": 152,
+   "name": "SE_M_TAKE_DOWN",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 6,
+   "logs": 3
+  },
+  {
+   "id": 152,
+   "name": "SE_M_TAKE_DOWN",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 1
+  },
+  {
+   "id": 156,
+   "name": "SE_M_VICEGRIP",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 2
+  },
+  {
+   "id": 156,
+   "name": "SE_M_VICEGRIP",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 157,
+   "name": "SE_M_WING_ATTACK",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 1
+  },
+  {
+   "id": 160,
+   "name": "SE_M_RAZOR_WIND2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 160,
+   "name": "SE_M_RAZOR_WIND2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 161,
+   "name": "SE_M_BITE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 7,
+   "logs": 5
+  },
+  {
+   "id": 162,
+   "name": "SE_M_HEADBUTT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 3
+  },
+  {
+   "id": 166,
+   "name": "SE_M_HORN_ATTACK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 11,
+   "logs": 1
+  },
+  {
+   "id": 169,
+   "name": "SE_M_POISON_POWDER",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 5,
+   "logs": 1
+  },
+  {
+   "id": 169,
+   "name": "SE_M_POISON_POWDER",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 11,
+   "logs": 1
+  },
+  {
+   "id": 171,
+   "name": "SE_M_DRAGON_RAGE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 4
+  },
+  {
+   "id": 171,
+   "name": "SE_M_DRAGON_RAGE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 5,
+   "logs": 2
+  },
+  {
+   "id": 175,
+   "name": "SE_M_DIG",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 6,
+   "logs": 2
+  },
+  {
+   "id": 176,
+   "name": "SE_M_DIZZY_PUNCH",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 24,
+   "logs": 2
+  },
+  {
+   "id": 178,
+   "name": "SE_M_EXPLOSION",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 6,
+   "logs": 2
+  },
+  {
+   "id": 179,
+   "name": "SE_M_ABSORB_2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 4
+  },
+  {
+   "id": 180,
+   "name": "SE_M_ABSORB",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 3
+  },
+  {
+   "id": 181,
+   "name": "SE_M_SCREECH",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 1
+  },
+  {
+   "id": 182,
+   "name": "SE_M_BUBBLE_BEAM",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 183,
+   "name": "SE_M_BUBBLE_BEAM2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 5,
+   "logs": 5
+  },
+  {
+   "id": 183,
+   "name": "SE_M_BUBBLE_BEAM2",
+   "pan": -31,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 183,
+   "name": "SE_M_BUBBLE_BEAM2",
+   "pan": -25,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 183,
+   "name": "SE_M_BUBBLE_BEAM2",
+   "pan": -20,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 183,
+   "name": "SE_M_BUBBLE_BEAM2",
+   "pan": 2,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 183,
+   "name": "SE_M_BUBBLE_BEAM2",
+   "pan": 19,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 183,
+   "name": "SE_M_BUBBLE_BEAM2",
+   "pan": 24,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 183,
+   "name": "SE_M_BUBBLE_BEAM2",
+   "pan": 35,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 183,
+   "name": "SE_M_BUBBLE_BEAM2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 7,
+   "logs": 5
+  },
+  {
+   "id": 184,
+   "name": "SE_M_SUPERSONIC",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 1
+  },
+  {
+   "id": 189,
+   "name": "SE_M_PSYBEAM",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 3
+  },
+  {
+   "id": 189,
+   "name": "SE_M_PSYBEAM",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 191,
+   "name": "SE_M_SWORDS_DANCE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 191,
+   "name": "SE_M_SWORDS_DANCE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 192,
+   "name": "SE_M_LEER",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 4
+  },
+  {
+   "id": 193,
+   "name": "SE_M_SWAGGER",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 8,
+   "logs": 4
+  },
+  {
+   "id": 193,
+   "name": "SE_M_SWAGGER",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 8,
+   "logs": 1
+  },
+  {
+   "id": 194,
+   "name": "SE_M_SWAGGER2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 1
+  },
+  {
+   "id": 197,
+   "name": "SE_M_SNORE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 1
+  },
+  {
+   "id": 199,
+   "name": "SE_M_GIGA_DRAIN",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 1
+  },
+  {
+   "id": 199,
+   "name": "SE_M_GIGA_DRAIN",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 8,
+   "logs": 1
+  },
+  {
+   "id": 200,
+   "name": "SE_M_PSYBEAM2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 200,
+   "name": "SE_M_PSYBEAM2",
+   "pan": -16,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 200,
+   "name": "SE_M_PSYBEAM2",
+   "pan": 32,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 200,
+   "name": "SE_M_PSYBEAM2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 202,
+   "name": "SE_M_PETAL_DANCE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 1
+  },
+  {
+   "id": 204,
+   "name": "SE_M_MINIMIZE",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 206,
+   "name": "SE_M_SWIFT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 206,
+   "name": "SE_M_SWIFT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 5,
+   "logs": 1
+  },
+  {
+   "id": 207,
+   "name": "SE_M_REFLECT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 209,
+   "name": "SE_M_DETECT",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 214,
+   "name": "SE_M_STRENGTH",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 19,
+   "logs": 14
+  },
+  {
+   "id": 214,
+   "name": "SE_M_STRENGTH",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 12,
+   "logs": 7
+  },
+  {
+   "id": 215,
+   "name": "SE_M_HYPER_BEAM",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 215,
+   "name": "SE_M_HYPER_BEAM",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 5,
+   "logs": 5
+  },
+  {
+   "id": 217,
+   "name": "SE_M_REVERSAL",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 217,
+   "name": "SE_M_REVERSAL",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 220,
+   "name": "SE_M_TRI_ATTACK",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 3,
+   "logs": 1
+  },
+  {
+   "id": 220,
+   "name": "SE_M_TRI_ATTACK",
+   "pan": -24,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 220,
+   "name": "SE_M_TRI_ATTACK",
+   "pan": 16,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 220,
+   "name": "SE_M_TRI_ATTACK",
+   "pan": 56,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 220,
+   "name": "SE_M_TRI_ATTACK",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 1
+  },
+  {
+   "id": 221,
+   "name": "SE_M_TRI_ATTACK2",
+   "pan": -63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 221,
+   "name": "SE_M_TRI_ATTACK2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 223,
+   "name": "SE_M_ENCORE2",
+   "pan": 63,
+   "vias": [
+    "PlaySE2WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 228,
+   "name": "SE_M_MORNING_SUN",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning",
+    "PlaySE1WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 228,
+   "name": "SE_M_MORNING_SUN",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 229,
+   "name": "SE_M_FLATTER",
+   "pan": -64,
+   "vias": [
+    "PlaySE1WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 229,
+   "name": "SE_M_FLATTER",
+   "pan": 63,
+   "vias": [
+    "PlaySE1WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 234,
+   "name": "SE_M_EARTHQUAKE",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning",
+    "PlaySE2WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 236,
+   "name": "SE_M_SWEET_SCENT",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 238,
+   "name": "SE_M_SKY_UPPERCUT",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 21,
+   "logs": 18
+  },
+  {
+   "id": 239,
+   "name": "SE_M_STAT_INCREASE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 10,
+   "logs": 8
+  },
+  {
+   "id": 239,
+   "name": "SE_M_STAT_INCREASE",
+   "pan": 64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 4,
+   "logs": 4
+  },
+  {
+   "id": 242,
+   "name": "SE_M_HAIL",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 17,
+   "logs": 1
+  },
+  {
+   "id": 243,
+   "name": "SE_M_COSMIC_POWER",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning",
+    "PlaySE2WithPanning"
+   ],
+   "uses": 2,
+   "logs": 1
+  },
+  {
+   "id": 245,
+   "name": "SE_M_STAT_DECREASE",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 6,
+   "logs": 6
+  },
+  {
+   "id": 245,
+   "name": "SE_M_STAT_DECREASE",
+   "pan": 64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 246,
+   "name": "SE_M_HAZE",
+   "pan": 0,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -64,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -58,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -52,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -46,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -40,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -34,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -28,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -22,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -21,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -16,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -15,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -10,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -9,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -4,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": -3,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 2,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 3,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 8,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 9,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 14,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 15,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 20,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 2,
+   "logs": 2
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 21,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 27,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 33,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 39,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 45,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 51,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 57,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 247,
+   "name": "SE_M_HYPER_BEAM2",
+   "pan": 63,
+   "vias": [
+    "PlaySE12WithPanning"
+   ],
+   "uses": 1,
+   "logs": 1
+  },
+  {
+   "id": 263,
+   "name": "SE_POKENAV_CALL",
+   "pan": null,
+   "vias": [
+    "PlaySE"
+   ],
+   "uses": 1,
+   "logs": 1
+  }
+ ],
+ "cry": [
+  {
+   "species": 1,
+   "name": "SPECIES_BULBASAUR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 1,
+   "name": "SPECIES_BULBASAUR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 1,
+   "name": "SPECIES_BULBASAUR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 2,
+   "name": "SPECIES_IVYSAUR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 2,
+   "name": "SPECIES_IVYSAUR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 2,
+   "name": "SPECIES_IVYSAUR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 3,
+   "name": "SPECIES_VENUSAUR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 3,
+   "name": "SPECIES_VENUSAUR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 3,
+   "name": "SPECIES_VENUSAUR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 4,
+   "name": "SPECIES_CHARMANDER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 4,
+   "name": "SPECIES_CHARMANDER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 4,
+   "name": "SPECIES_CHARMANDER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 5,
+   "name": "SPECIES_CHARMELEON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 5,
+   "name": "SPECIES_CHARMELEON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 5,
+   "name": "SPECIES_CHARMELEON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 6,
+   "name": "SPECIES_CHARIZARD",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 6,
+   "name": "SPECIES_CHARIZARD",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 6,
+   "name": "SPECIES_CHARIZARD",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 7,
+   "name": "SPECIES_SQUIRTLE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 7,
+   "name": "SPECIES_SQUIRTLE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 7,
+   "name": "SPECIES_SQUIRTLE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 8,
+   "name": "SPECIES_WARTORTLE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 8,
+   "name": "SPECIES_WARTORTLE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 8,
+   "name": "SPECIES_WARTORTLE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 9,
+   "name": "SPECIES_BLASTOISE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 9,
+   "name": "SPECIES_BLASTOISE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 9,
+   "name": "SPECIES_BLASTOISE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 10,
+   "name": "SPECIES_CATERPIE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 10,
+   "name": "SPECIES_CATERPIE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 10,
+   "name": "SPECIES_CATERPIE",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 11,
+   "name": "SPECIES_METAPOD",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 11,
+   "name": "SPECIES_METAPOD",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 11,
+   "name": "SPECIES_METAPOD",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 12,
+   "name": "SPECIES_BUTTERFREE",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    0
+   ]
+  },
+  {
+   "species": 12,
+   "name": "SPECIES_BUTTERFREE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 12,
+   "name": "SPECIES_BUTTERFREE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 13,
+   "name": "SPECIES_WEEDLE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 13,
+   "name": "SPECIES_WEEDLE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 13,
+   "name": "SPECIES_WEEDLE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 14,
+   "name": "SPECIES_KAKUNA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 14,
+   "name": "SPECIES_KAKUNA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 14,
+   "name": "SPECIES_KAKUNA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 15,
+   "name": "SPECIES_BEEDRILL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 15,
+   "name": "SPECIES_BEEDRILL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 15,
+   "name": "SPECIES_BEEDRILL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 16,
+   "name": "SPECIES_PIDGEY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 16,
+   "name": "SPECIES_PIDGEY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 16,
+   "name": "SPECIES_PIDGEY",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 17,
+   "name": "SPECIES_PIDGEOTTO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 17,
+   "name": "SPECIES_PIDGEOTTO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 17,
+   "name": "SPECIES_PIDGEOTTO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 18,
+   "name": "SPECIES_PIDGEOT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 18,
+   "name": "SPECIES_PIDGEOT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 18,
+   "name": "SPECIES_PIDGEOT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 19,
+   "name": "SPECIES_RATTATA",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25,
+    25
+   ]
+  },
+  {
+   "species": 19,
+   "name": "SPECIES_RATTATA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 19,
+   "name": "SPECIES_RATTATA",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    -25,
+    25
+   ]
+  },
+  {
+   "species": 20,
+   "name": "SPECIES_RATICATE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 20,
+   "name": "SPECIES_RATICATE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 20,
+   "name": "SPECIES_RATICATE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 21,
+   "name": "SPECIES_SPEAROW",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 21,
+   "name": "SPECIES_SPEAROW",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 21,
+   "name": "SPECIES_SPEAROW",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 22,
+   "name": "SPECIES_FEAROW",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 22,
+   "name": "SPECIES_FEAROW",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 22,
+   "name": "SPECIES_FEAROW",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 23,
+   "name": "SPECIES_EKANS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 23,
+   "name": "SPECIES_EKANS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 23,
+   "name": "SPECIES_EKANS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 24,
+   "name": "SPECIES_ARBOK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 24,
+   "name": "SPECIES_ARBOK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 24,
+   "name": "SPECIES_ARBOK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 25,
+   "name": "SPECIES_PIKACHU",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 25,
+   "name": "SPECIES_PIKACHU",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 25,
+   "name": "SPECIES_PIKACHU",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 26,
+   "name": "SPECIES_RAICHU",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 26,
+   "name": "SPECIES_RAICHU",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 26,
+   "name": "SPECIES_RAICHU",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 27,
+   "name": "SPECIES_SANDSHREW",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 27,
+   "name": "SPECIES_SANDSHREW",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 27,
+   "name": "SPECIES_SANDSHREW",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 28,
+   "name": "SPECIES_SANDSLASH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 28,
+   "name": "SPECIES_SANDSLASH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 28,
+   "name": "SPECIES_SANDSLASH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 29,
+   "name": "SPECIES_NIDORAN_F",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 29,
+   "name": "SPECIES_NIDORAN_F",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 29,
+   "name": "SPECIES_NIDORAN_F",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 30,
+   "name": "SPECIES_NIDORINA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 30,
+   "name": "SPECIES_NIDORINA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 30,
+   "name": "SPECIES_NIDORINA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 31,
+   "name": "SPECIES_NIDOQUEEN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 31,
+   "name": "SPECIES_NIDOQUEEN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 31,
+   "name": "SPECIES_NIDOQUEEN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 32,
+   "name": "SPECIES_NIDORAN_M",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 32,
+   "name": "SPECIES_NIDORAN_M",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 32,
+   "name": "SPECIES_NIDORAN_M",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 33,
+   "name": "SPECIES_NIDORINO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 33,
+   "name": "SPECIES_NIDORINO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 33,
+   "name": "SPECIES_NIDORINO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 34,
+   "name": "SPECIES_NIDOKING",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 34,
+   "name": "SPECIES_NIDOKING",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 34,
+   "name": "SPECIES_NIDOKING",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 35,
+   "name": "SPECIES_CLEFAIRY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 35,
+   "name": "SPECIES_CLEFAIRY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 35,
+   "name": "SPECIES_CLEFAIRY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 36,
+   "name": "SPECIES_CLEFABLE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 36,
+   "name": "SPECIES_CLEFABLE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 36,
+   "name": "SPECIES_CLEFABLE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 37,
+   "name": "SPECIES_VULPIX",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 37,
+   "name": "SPECIES_VULPIX",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 37,
+   "name": "SPECIES_VULPIX",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 38,
+   "name": "SPECIES_NINETALES",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 38,
+   "name": "SPECIES_NINETALES",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 38,
+   "name": "SPECIES_NINETALES",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 39,
+   "name": "SPECIES_JIGGLYPUFF",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 39,
+   "name": "SPECIES_JIGGLYPUFF",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 39,
+   "name": "SPECIES_JIGGLYPUFF",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 40,
+   "name": "SPECIES_WIGGLYTUFF",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 40,
+   "name": "SPECIES_WIGGLYTUFF",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 40,
+   "name": "SPECIES_WIGGLYTUFF",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 41,
+   "name": "SPECIES_ZUBAT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 41,
+   "name": "SPECIES_ZUBAT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 41,
+   "name": "SPECIES_ZUBAT",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 42,
+   "name": "SPECIES_GOLBAT",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 42,
+   "name": "SPECIES_GOLBAT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 42,
+   "name": "SPECIES_GOLBAT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 43,
+   "name": "SPECIES_ODDISH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 43,
+   "name": "SPECIES_ODDISH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 43,
+   "name": "SPECIES_ODDISH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 44,
+   "name": "SPECIES_GLOOM",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 44,
+   "name": "SPECIES_GLOOM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 44,
+   "name": "SPECIES_GLOOM",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 45,
+   "name": "SPECIES_VILEPLUME",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 45,
+   "name": "SPECIES_VILEPLUME",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 45,
+   "name": "SPECIES_VILEPLUME",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 46,
+   "name": "SPECIES_PARAS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 46,
+   "name": "SPECIES_PARAS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 46,
+   "name": "SPECIES_PARAS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 47,
+   "name": "SPECIES_PARASECT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 47,
+   "name": "SPECIES_PARASECT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 47,
+   "name": "SPECIES_PARASECT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 48,
+   "name": "SPECIES_VENONAT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 48,
+   "name": "SPECIES_VENONAT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 48,
+   "name": "SPECIES_VENONAT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 49,
+   "name": "SPECIES_VENOMOTH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 49,
+   "name": "SPECIES_VENOMOTH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 49,
+   "name": "SPECIES_VENOMOTH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 50,
+   "name": "SPECIES_DIGLETT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 50,
+   "name": "SPECIES_DIGLETT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 50,
+   "name": "SPECIES_DIGLETT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 51,
+   "name": "SPECIES_DUGTRIO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 51,
+   "name": "SPECIES_DUGTRIO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 51,
+   "name": "SPECIES_DUGTRIO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 52,
+   "name": "SPECIES_MEOWTH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 52,
+   "name": "SPECIES_MEOWTH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 52,
+   "name": "SPECIES_MEOWTH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 53,
+   "name": "SPECIES_PERSIAN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 53,
+   "name": "SPECIES_PERSIAN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 53,
+   "name": "SPECIES_PERSIAN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 54,
+   "name": "SPECIES_PSYDUCK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 54,
+   "name": "SPECIES_PSYDUCK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 54,
+   "name": "SPECIES_PSYDUCK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 55,
+   "name": "SPECIES_GOLDUCK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 55,
+   "name": "SPECIES_GOLDUCK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 55,
+   "name": "SPECIES_GOLDUCK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 56,
+   "name": "SPECIES_MANKEY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 56,
+   "name": "SPECIES_MANKEY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 56,
+   "name": "SPECIES_MANKEY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 57,
+   "name": "SPECIES_PRIMEAPE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 57,
+   "name": "SPECIES_PRIMEAPE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 57,
+   "name": "SPECIES_PRIMEAPE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 58,
+   "name": "SPECIES_GROWLITHE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 58,
+   "name": "SPECIES_GROWLITHE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 58,
+   "name": "SPECIES_GROWLITHE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 59,
+   "name": "SPECIES_ARCANINE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 59,
+   "name": "SPECIES_ARCANINE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 59,
+   "name": "SPECIES_ARCANINE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 60,
+   "name": "SPECIES_POLIWAG",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 60,
+   "name": "SPECIES_POLIWAG",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 60,
+   "name": "SPECIES_POLIWAG",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 61,
+   "name": "SPECIES_POLIWHIRL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 61,
+   "name": "SPECIES_POLIWHIRL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 61,
+   "name": "SPECIES_POLIWHIRL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 62,
+   "name": "SPECIES_POLIWRATH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 62,
+   "name": "SPECIES_POLIWRATH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 62,
+   "name": "SPECIES_POLIWRATH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 63,
+   "name": "SPECIES_ABRA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 63,
+   "name": "SPECIES_ABRA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 63,
+   "name": "SPECIES_ABRA",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 64,
+   "name": "SPECIES_KADABRA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 64,
+   "name": "SPECIES_KADABRA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 64,
+   "name": "SPECIES_KADABRA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 65,
+   "name": "SPECIES_ALAKAZAM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 65,
+   "name": "SPECIES_ALAKAZAM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 65,
+   "name": "SPECIES_ALAKAZAM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 66,
+   "name": "SPECIES_MACHOP",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 66,
+   "name": "SPECIES_MACHOP",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 66,
+   "name": "SPECIES_MACHOP",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 67,
+   "name": "SPECIES_MACHOKE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 67,
+   "name": "SPECIES_MACHOKE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 67,
+   "name": "SPECIES_MACHOKE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 68,
+   "name": "SPECIES_MACHAMP",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 68,
+   "name": "SPECIES_MACHAMP",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 68,
+   "name": "SPECIES_MACHAMP",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 69,
+   "name": "SPECIES_BELLSPROUT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 69,
+   "name": "SPECIES_BELLSPROUT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 69,
+   "name": "SPECIES_BELLSPROUT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 70,
+   "name": "SPECIES_WEEPINBELL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 70,
+   "name": "SPECIES_WEEPINBELL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 70,
+   "name": "SPECIES_WEEPINBELL",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 71,
+   "name": "SPECIES_VICTREEBEL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 71,
+   "name": "SPECIES_VICTREEBEL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 71,
+   "name": "SPECIES_VICTREEBEL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 72,
+   "name": "SPECIES_TENTACOOL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 72,
+   "name": "SPECIES_TENTACOOL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 72,
+   "name": "SPECIES_TENTACOOL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 73,
+   "name": "SPECIES_TENTACRUEL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 73,
+   "name": "SPECIES_TENTACRUEL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 73,
+   "name": "SPECIES_TENTACRUEL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 74,
+   "name": "SPECIES_GEODUDE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 74,
+   "name": "SPECIES_GEODUDE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 74,
+   "name": "SPECIES_GEODUDE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 75,
+   "name": "SPECIES_GRAVELER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 75,
+   "name": "SPECIES_GRAVELER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 75,
+   "name": "SPECIES_GRAVELER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 76,
+   "name": "SPECIES_GOLEM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 76,
+   "name": "SPECIES_GOLEM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 76,
+   "name": "SPECIES_GOLEM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 77,
+   "name": "SPECIES_PONYTA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 77,
+   "name": "SPECIES_PONYTA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 77,
+   "name": "SPECIES_PONYTA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 78,
+   "name": "SPECIES_RAPIDASH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 78,
+   "name": "SPECIES_RAPIDASH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 78,
+   "name": "SPECIES_RAPIDASH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 79,
+   "name": "SPECIES_SLOWPOKE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 79,
+   "name": "SPECIES_SLOWPOKE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 79,
+   "name": "SPECIES_SLOWPOKE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 80,
+   "name": "SPECIES_SLOWBRO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 80,
+   "name": "SPECIES_SLOWBRO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 80,
+   "name": "SPECIES_SLOWBRO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 81,
+   "name": "SPECIES_MAGNEMITE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 81,
+   "name": "SPECIES_MAGNEMITE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 81,
+   "name": "SPECIES_MAGNEMITE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 82,
+   "name": "SPECIES_MAGNETON",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 82,
+   "name": "SPECIES_MAGNETON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 82,
+   "name": "SPECIES_MAGNETON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 83,
+   "name": "SPECIES_FARFETCHD",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 83,
+   "name": "SPECIES_FARFETCHD",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 83,
+   "name": "SPECIES_FARFETCHD",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 84,
+   "name": "SPECIES_DODUO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 84,
+   "name": "SPECIES_DODUO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 84,
+   "name": "SPECIES_DODUO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 85,
+   "name": "SPECIES_DODRIO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 85,
+   "name": "SPECIES_DODRIO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 85,
+   "name": "SPECIES_DODRIO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 86,
+   "name": "SPECIES_SEEL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 86,
+   "name": "SPECIES_SEEL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 86,
+   "name": "SPECIES_SEEL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 87,
+   "name": "SPECIES_DEWGONG",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 87,
+   "name": "SPECIES_DEWGONG",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 87,
+   "name": "SPECIES_DEWGONG",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 88,
+   "name": "SPECIES_GRIMER",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 88,
+   "name": "SPECIES_GRIMER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 88,
+   "name": "SPECIES_GRIMER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 89,
+   "name": "SPECIES_MUK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 89,
+   "name": "SPECIES_MUK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 89,
+   "name": "SPECIES_MUK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 90,
+   "name": "SPECIES_SHELLDER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 90,
+   "name": "SPECIES_SHELLDER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 90,
+   "name": "SPECIES_SHELLDER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 91,
+   "name": "SPECIES_CLOYSTER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 91,
+   "name": "SPECIES_CLOYSTER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 91,
+   "name": "SPECIES_CLOYSTER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 92,
+   "name": "SPECIES_GASTLY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 92,
+   "name": "SPECIES_GASTLY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 92,
+   "name": "SPECIES_GASTLY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 93,
+   "name": "SPECIES_HAUNTER",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    0
+   ]
+  },
+  {
+   "species": 93,
+   "name": "SPECIES_HAUNTER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 93,
+   "name": "SPECIES_HAUNTER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 94,
+   "name": "SPECIES_GENGAR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 94,
+   "name": "SPECIES_GENGAR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 94,
+   "name": "SPECIES_GENGAR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 95,
+   "name": "SPECIES_ONIX",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    0
+   ]
+  },
+  {
+   "species": 95,
+   "name": "SPECIES_ONIX",
+   "mode": "WEAK",
+   "inLogs": true,
+   "logPans": [
+    0
+   ]
+  },
+  {
+   "species": 95,
+   "name": "SPECIES_ONIX",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 96,
+   "name": "SPECIES_DROWZEE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 96,
+   "name": "SPECIES_DROWZEE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 96,
+   "name": "SPECIES_DROWZEE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 97,
+   "name": "SPECIES_HYPNO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 97,
+   "name": "SPECIES_HYPNO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 97,
+   "name": "SPECIES_HYPNO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 98,
+   "name": "SPECIES_KRABBY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 98,
+   "name": "SPECIES_KRABBY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 98,
+   "name": "SPECIES_KRABBY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 99,
+   "name": "SPECIES_KINGLER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 99,
+   "name": "SPECIES_KINGLER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 99,
+   "name": "SPECIES_KINGLER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 100,
+   "name": "SPECIES_VOLTORB",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 100,
+   "name": "SPECIES_VOLTORB",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 100,
+   "name": "SPECIES_VOLTORB",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 101,
+   "name": "SPECIES_ELECTRODE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 101,
+   "name": "SPECIES_ELECTRODE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 101,
+   "name": "SPECIES_ELECTRODE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 102,
+   "name": "SPECIES_EXEGGCUTE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 102,
+   "name": "SPECIES_EXEGGCUTE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 102,
+   "name": "SPECIES_EXEGGCUTE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 103,
+   "name": "SPECIES_EXEGGUTOR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 103,
+   "name": "SPECIES_EXEGGUTOR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 103,
+   "name": "SPECIES_EXEGGUTOR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 104,
+   "name": "SPECIES_CUBONE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 104,
+   "name": "SPECIES_CUBONE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 104,
+   "name": "SPECIES_CUBONE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 105,
+   "name": "SPECIES_MAROWAK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 105,
+   "name": "SPECIES_MAROWAK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 105,
+   "name": "SPECIES_MAROWAK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 106,
+   "name": "SPECIES_HITMONLEE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 106,
+   "name": "SPECIES_HITMONLEE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 106,
+   "name": "SPECIES_HITMONLEE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 107,
+   "name": "SPECIES_HITMONCHAN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 107,
+   "name": "SPECIES_HITMONCHAN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 107,
+   "name": "SPECIES_HITMONCHAN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 108,
+   "name": "SPECIES_LICKITUNG",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 108,
+   "name": "SPECIES_LICKITUNG",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 108,
+   "name": "SPECIES_LICKITUNG",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 109,
+   "name": "SPECIES_KOFFING",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 109,
+   "name": "SPECIES_KOFFING",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 109,
+   "name": "SPECIES_KOFFING",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 110,
+   "name": "SPECIES_WEEZING",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 110,
+   "name": "SPECIES_WEEZING",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 110,
+   "name": "SPECIES_WEEZING",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 111,
+   "name": "SPECIES_RHYHORN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 111,
+   "name": "SPECIES_RHYHORN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 111,
+   "name": "SPECIES_RHYHORN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 112,
+   "name": "SPECIES_RHYDON",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 112,
+   "name": "SPECIES_RHYDON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 112,
+   "name": "SPECIES_RHYDON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 113,
+   "name": "SPECIES_CHANSEY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 113,
+   "name": "SPECIES_CHANSEY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 113,
+   "name": "SPECIES_CHANSEY",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 114,
+   "name": "SPECIES_TANGELA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 114,
+   "name": "SPECIES_TANGELA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 114,
+   "name": "SPECIES_TANGELA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 115,
+   "name": "SPECIES_KANGASKHAN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 115,
+   "name": "SPECIES_KANGASKHAN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 115,
+   "name": "SPECIES_KANGASKHAN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 116,
+   "name": "SPECIES_HORSEA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 116,
+   "name": "SPECIES_HORSEA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 116,
+   "name": "SPECIES_HORSEA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 117,
+   "name": "SPECIES_SEADRA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 117,
+   "name": "SPECIES_SEADRA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 117,
+   "name": "SPECIES_SEADRA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 118,
+   "name": "SPECIES_GOLDEEN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 118,
+   "name": "SPECIES_GOLDEEN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 118,
+   "name": "SPECIES_GOLDEEN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 119,
+   "name": "SPECIES_SEAKING",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 119,
+   "name": "SPECIES_SEAKING",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 119,
+   "name": "SPECIES_SEAKING",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 120,
+   "name": "SPECIES_STARYU",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 120,
+   "name": "SPECIES_STARYU",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 120,
+   "name": "SPECIES_STARYU",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 121,
+   "name": "SPECIES_STARMIE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 121,
+   "name": "SPECIES_STARMIE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 121,
+   "name": "SPECIES_STARMIE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 122,
+   "name": "SPECIES_MR_MIME",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 122,
+   "name": "SPECIES_MR_MIME",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 122,
+   "name": "SPECIES_MR_MIME",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 123,
+   "name": "SPECIES_SCYTHER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 123,
+   "name": "SPECIES_SCYTHER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 123,
+   "name": "SPECIES_SCYTHER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 124,
+   "name": "SPECIES_JYNX",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 124,
+   "name": "SPECIES_JYNX",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 124,
+   "name": "SPECIES_JYNX",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 125,
+   "name": "SPECIES_ELECTABUZZ",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 125,
+   "name": "SPECIES_ELECTABUZZ",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 125,
+   "name": "SPECIES_ELECTABUZZ",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 126,
+   "name": "SPECIES_MAGMAR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 126,
+   "name": "SPECIES_MAGMAR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 126,
+   "name": "SPECIES_MAGMAR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 127,
+   "name": "SPECIES_PINSIR",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 127,
+   "name": "SPECIES_PINSIR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 127,
+   "name": "SPECIES_PINSIR",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 128,
+   "name": "SPECIES_TAUROS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 128,
+   "name": "SPECIES_TAUROS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 128,
+   "name": "SPECIES_TAUROS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 129,
+   "name": "SPECIES_MAGIKARP",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 129,
+   "name": "SPECIES_MAGIKARP",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 129,
+   "name": "SPECIES_MAGIKARP",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 130,
+   "name": "SPECIES_GYARADOS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 130,
+   "name": "SPECIES_GYARADOS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 130,
+   "name": "SPECIES_GYARADOS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 131,
+   "name": "SPECIES_LAPRAS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 131,
+   "name": "SPECIES_LAPRAS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 131,
+   "name": "SPECIES_LAPRAS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 132,
+   "name": "SPECIES_DITTO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 132,
+   "name": "SPECIES_DITTO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 132,
+   "name": "SPECIES_DITTO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 133,
+   "name": "SPECIES_EEVEE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 133,
+   "name": "SPECIES_EEVEE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 133,
+   "name": "SPECIES_EEVEE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 134,
+   "name": "SPECIES_VAPOREON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 134,
+   "name": "SPECIES_VAPOREON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 134,
+   "name": "SPECIES_VAPOREON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 135,
+   "name": "SPECIES_JOLTEON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 135,
+   "name": "SPECIES_JOLTEON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 135,
+   "name": "SPECIES_JOLTEON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 136,
+   "name": "SPECIES_FLAREON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 136,
+   "name": "SPECIES_FLAREON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 136,
+   "name": "SPECIES_FLAREON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 137,
+   "name": "SPECIES_PORYGON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 137,
+   "name": "SPECIES_PORYGON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 137,
+   "name": "SPECIES_PORYGON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 138,
+   "name": "SPECIES_OMANYTE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 138,
+   "name": "SPECIES_OMANYTE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 138,
+   "name": "SPECIES_OMANYTE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 139,
+   "name": "SPECIES_OMASTAR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 139,
+   "name": "SPECIES_OMASTAR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 139,
+   "name": "SPECIES_OMASTAR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 140,
+   "name": "SPECIES_KABUTO",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 140,
+   "name": "SPECIES_KABUTO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 140,
+   "name": "SPECIES_KABUTO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 141,
+   "name": "SPECIES_KABUTOPS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 141,
+   "name": "SPECIES_KABUTOPS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 141,
+   "name": "SPECIES_KABUTOPS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 142,
+   "name": "SPECIES_AERODACTYL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 142,
+   "name": "SPECIES_AERODACTYL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 142,
+   "name": "SPECIES_AERODACTYL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 143,
+   "name": "SPECIES_SNORLAX",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 143,
+   "name": "SPECIES_SNORLAX",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 143,
+   "name": "SPECIES_SNORLAX",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 144,
+   "name": "SPECIES_ARTICUNO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 144,
+   "name": "SPECIES_ARTICUNO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 144,
+   "name": "SPECIES_ARTICUNO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 145,
+   "name": "SPECIES_ZAPDOS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 145,
+   "name": "SPECIES_ZAPDOS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 145,
+   "name": "SPECIES_ZAPDOS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 146,
+   "name": "SPECIES_MOLTRES",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 146,
+   "name": "SPECIES_MOLTRES",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 146,
+   "name": "SPECIES_MOLTRES",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 147,
+   "name": "SPECIES_DRATINI",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 147,
+   "name": "SPECIES_DRATINI",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 147,
+   "name": "SPECIES_DRATINI",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 148,
+   "name": "SPECIES_DRAGONAIR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 148,
+   "name": "SPECIES_DRAGONAIR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 148,
+   "name": "SPECIES_DRAGONAIR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 149,
+   "name": "SPECIES_DRAGONITE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 149,
+   "name": "SPECIES_DRAGONITE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 149,
+   "name": "SPECIES_DRAGONITE",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 152,
+   "name": "SPECIES_CHIKORITA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 152,
+   "name": "SPECIES_CHIKORITA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 152,
+   "name": "SPECIES_CHIKORITA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 153,
+   "name": "SPECIES_BAYLEEF",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    0
+   ]
+  },
+  {
+   "species": 153,
+   "name": "SPECIES_BAYLEEF",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 153,
+   "name": "SPECIES_BAYLEEF",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 154,
+   "name": "SPECIES_MEGANIUM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 154,
+   "name": "SPECIES_MEGANIUM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 154,
+   "name": "SPECIES_MEGANIUM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 155,
+   "name": "SPECIES_CYNDAQUIL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 155,
+   "name": "SPECIES_CYNDAQUIL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 155,
+   "name": "SPECIES_CYNDAQUIL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 156,
+   "name": "SPECIES_QUILAVA",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    0
+   ]
+  },
+  {
+   "species": 156,
+   "name": "SPECIES_QUILAVA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 156,
+   "name": "SPECIES_QUILAVA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 157,
+   "name": "SPECIES_TYPHLOSION",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 157,
+   "name": "SPECIES_TYPHLOSION",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 157,
+   "name": "SPECIES_TYPHLOSION",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 158,
+   "name": "SPECIES_TOTODILE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 158,
+   "name": "SPECIES_TOTODILE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 158,
+   "name": "SPECIES_TOTODILE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 159,
+   "name": "SPECIES_CROCONAW",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 159,
+   "name": "SPECIES_CROCONAW",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 159,
+   "name": "SPECIES_CROCONAW",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 160,
+   "name": "SPECIES_FERALIGATR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 160,
+   "name": "SPECIES_FERALIGATR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 160,
+   "name": "SPECIES_FERALIGATR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 161,
+   "name": "SPECIES_SENTRET",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 161,
+   "name": "SPECIES_SENTRET",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 161,
+   "name": "SPECIES_SENTRET",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 162,
+   "name": "SPECIES_FURRET",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 162,
+   "name": "SPECIES_FURRET",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 162,
+   "name": "SPECIES_FURRET",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 163,
+   "name": "SPECIES_HOOTHOOT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 163,
+   "name": "SPECIES_HOOTHOOT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 163,
+   "name": "SPECIES_HOOTHOOT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 164,
+   "name": "SPECIES_NOCTOWL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 164,
+   "name": "SPECIES_NOCTOWL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 164,
+   "name": "SPECIES_NOCTOWL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 165,
+   "name": "SPECIES_LEDYBA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 165,
+   "name": "SPECIES_LEDYBA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 165,
+   "name": "SPECIES_LEDYBA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 166,
+   "name": "SPECIES_LEDIAN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 166,
+   "name": "SPECIES_LEDIAN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 166,
+   "name": "SPECIES_LEDIAN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 167,
+   "name": "SPECIES_SPINARAK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 167,
+   "name": "SPECIES_SPINARAK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 167,
+   "name": "SPECIES_SPINARAK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 168,
+   "name": "SPECIES_ARIADOS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 168,
+   "name": "SPECIES_ARIADOS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 168,
+   "name": "SPECIES_ARIADOS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 169,
+   "name": "SPECIES_CROBAT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 169,
+   "name": "SPECIES_CROBAT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 169,
+   "name": "SPECIES_CROBAT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 170,
+   "name": "SPECIES_CHINCHOU",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 170,
+   "name": "SPECIES_CHINCHOU",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 170,
+   "name": "SPECIES_CHINCHOU",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 171,
+   "name": "SPECIES_LANTURN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 171,
+   "name": "SPECIES_LANTURN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 171,
+   "name": "SPECIES_LANTURN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 172,
+   "name": "SPECIES_PICHU",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 172,
+   "name": "SPECIES_PICHU",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 172,
+   "name": "SPECIES_PICHU",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 173,
+   "name": "SPECIES_CLEFFA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 173,
+   "name": "SPECIES_CLEFFA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 173,
+   "name": "SPECIES_CLEFFA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 174,
+   "name": "SPECIES_IGGLYBUFF",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 174,
+   "name": "SPECIES_IGGLYBUFF",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 174,
+   "name": "SPECIES_IGGLYBUFF",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 175,
+   "name": "SPECIES_TOGEPI",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 175,
+   "name": "SPECIES_TOGEPI",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 175,
+   "name": "SPECIES_TOGEPI",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 176,
+   "name": "SPECIES_TOGETIC",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 176,
+   "name": "SPECIES_TOGETIC",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 176,
+   "name": "SPECIES_TOGETIC",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 177,
+   "name": "SPECIES_NATU",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 177,
+   "name": "SPECIES_NATU",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 177,
+   "name": "SPECIES_NATU",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 178,
+   "name": "SPECIES_XATU",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 178,
+   "name": "SPECIES_XATU",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 178,
+   "name": "SPECIES_XATU",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 179,
+   "name": "SPECIES_MAREEP",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 179,
+   "name": "SPECIES_MAREEP",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 179,
+   "name": "SPECIES_MAREEP",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 180,
+   "name": "SPECIES_FLAAFFY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 180,
+   "name": "SPECIES_FLAAFFY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 180,
+   "name": "SPECIES_FLAAFFY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 181,
+   "name": "SPECIES_AMPHAROS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 181,
+   "name": "SPECIES_AMPHAROS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 181,
+   "name": "SPECIES_AMPHAROS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 182,
+   "name": "SPECIES_BELLOSSOM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 182,
+   "name": "SPECIES_BELLOSSOM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 182,
+   "name": "SPECIES_BELLOSSOM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 183,
+   "name": "SPECIES_MARILL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 183,
+   "name": "SPECIES_MARILL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 183,
+   "name": "SPECIES_MARILL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 184,
+   "name": "SPECIES_AZUMARILL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 184,
+   "name": "SPECIES_AZUMARILL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 184,
+   "name": "SPECIES_AZUMARILL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 185,
+   "name": "SPECIES_SUDOWOODO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 185,
+   "name": "SPECIES_SUDOWOODO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 185,
+   "name": "SPECIES_SUDOWOODO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 186,
+   "name": "SPECIES_POLITOED",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 186,
+   "name": "SPECIES_POLITOED",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 186,
+   "name": "SPECIES_POLITOED",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 187,
+   "name": "SPECIES_HOPPIP",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 187,
+   "name": "SPECIES_HOPPIP",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 187,
+   "name": "SPECIES_HOPPIP",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 188,
+   "name": "SPECIES_SKIPLOOM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 188,
+   "name": "SPECIES_SKIPLOOM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 188,
+   "name": "SPECIES_SKIPLOOM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 189,
+   "name": "SPECIES_JUMPLUFF",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 189,
+   "name": "SPECIES_JUMPLUFF",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 189,
+   "name": "SPECIES_JUMPLUFF",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 190,
+   "name": "SPECIES_AIPOM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 190,
+   "name": "SPECIES_AIPOM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 190,
+   "name": "SPECIES_AIPOM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 191,
+   "name": "SPECIES_SUNKERN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 191,
+   "name": "SPECIES_SUNKERN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 191,
+   "name": "SPECIES_SUNKERN",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 192,
+   "name": "SPECIES_SUNFLORA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 192,
+   "name": "SPECIES_SUNFLORA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 192,
+   "name": "SPECIES_SUNFLORA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 193,
+   "name": "SPECIES_YANMA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 193,
+   "name": "SPECIES_YANMA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 193,
+   "name": "SPECIES_YANMA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 194,
+   "name": "SPECIES_WOOPER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 194,
+   "name": "SPECIES_WOOPER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 194,
+   "name": "SPECIES_WOOPER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 195,
+   "name": "SPECIES_QUAGSIRE",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 195,
+   "name": "SPECIES_QUAGSIRE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 195,
+   "name": "SPECIES_QUAGSIRE",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 196,
+   "name": "SPECIES_ESPEON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 196,
+   "name": "SPECIES_ESPEON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 196,
+   "name": "SPECIES_ESPEON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 197,
+   "name": "SPECIES_UMBREON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 197,
+   "name": "SPECIES_UMBREON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 197,
+   "name": "SPECIES_UMBREON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 198,
+   "name": "SPECIES_MURKROW",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 198,
+   "name": "SPECIES_MURKROW",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 198,
+   "name": "SPECIES_MURKROW",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 199,
+   "name": "SPECIES_SLOWKING",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 199,
+   "name": "SPECIES_SLOWKING",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 199,
+   "name": "SPECIES_SLOWKING",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 200,
+   "name": "SPECIES_MISDREAVUS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 200,
+   "name": "SPECIES_MISDREAVUS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 200,
+   "name": "SPECIES_MISDREAVUS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 201,
+   "name": "SPECIES_UNOWN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 201,
+   "name": "SPECIES_UNOWN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 201,
+   "name": "SPECIES_UNOWN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 202,
+   "name": "SPECIES_WOBBUFFET",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 202,
+   "name": "SPECIES_WOBBUFFET",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 202,
+   "name": "SPECIES_WOBBUFFET",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 203,
+   "name": "SPECIES_GIRAFARIG",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 203,
+   "name": "SPECIES_GIRAFARIG",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 203,
+   "name": "SPECIES_GIRAFARIG",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 204,
+   "name": "SPECIES_PINECO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 204,
+   "name": "SPECIES_PINECO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 204,
+   "name": "SPECIES_PINECO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 205,
+   "name": "SPECIES_FORRETRESS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 205,
+   "name": "SPECIES_FORRETRESS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 205,
+   "name": "SPECIES_FORRETRESS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 206,
+   "name": "SPECIES_DUNSPARCE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 206,
+   "name": "SPECIES_DUNSPARCE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 206,
+   "name": "SPECIES_DUNSPARCE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 207,
+   "name": "SPECIES_GLIGAR",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 207,
+   "name": "SPECIES_GLIGAR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 207,
+   "name": "SPECIES_GLIGAR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 208,
+   "name": "SPECIES_STEELIX",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 208,
+   "name": "SPECIES_STEELIX",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 208,
+   "name": "SPECIES_STEELIX",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 209,
+   "name": "SPECIES_SNUBBULL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 209,
+   "name": "SPECIES_SNUBBULL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 209,
+   "name": "SPECIES_SNUBBULL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 210,
+   "name": "SPECIES_GRANBULL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 210,
+   "name": "SPECIES_GRANBULL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 210,
+   "name": "SPECIES_GRANBULL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 211,
+   "name": "SPECIES_QWILFISH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 211,
+   "name": "SPECIES_QWILFISH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 211,
+   "name": "SPECIES_QWILFISH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 212,
+   "name": "SPECIES_SCIZOR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 212,
+   "name": "SPECIES_SCIZOR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 212,
+   "name": "SPECIES_SCIZOR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 213,
+   "name": "SPECIES_SHUCKLE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 213,
+   "name": "SPECIES_SHUCKLE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 213,
+   "name": "SPECIES_SHUCKLE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 214,
+   "name": "SPECIES_HERACROSS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 214,
+   "name": "SPECIES_HERACROSS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 214,
+   "name": "SPECIES_HERACROSS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 215,
+   "name": "SPECIES_SNEASEL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 215,
+   "name": "SPECIES_SNEASEL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 215,
+   "name": "SPECIES_SNEASEL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 216,
+   "name": "SPECIES_TEDDIURSA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 216,
+   "name": "SPECIES_TEDDIURSA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 216,
+   "name": "SPECIES_TEDDIURSA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 217,
+   "name": "SPECIES_URSARING",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 217,
+   "name": "SPECIES_URSARING",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 217,
+   "name": "SPECIES_URSARING",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 218,
+   "name": "SPECIES_SLUGMA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 218,
+   "name": "SPECIES_SLUGMA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 218,
+   "name": "SPECIES_SLUGMA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 219,
+   "name": "SPECIES_MAGCARGO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 219,
+   "name": "SPECIES_MAGCARGO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 219,
+   "name": "SPECIES_MAGCARGO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 220,
+   "name": "SPECIES_SWINUB",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 220,
+   "name": "SPECIES_SWINUB",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 220,
+   "name": "SPECIES_SWINUB",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 221,
+   "name": "SPECIES_PILOSWINE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 221,
+   "name": "SPECIES_PILOSWINE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 221,
+   "name": "SPECIES_PILOSWINE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 222,
+   "name": "SPECIES_CORSOLA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 222,
+   "name": "SPECIES_CORSOLA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 222,
+   "name": "SPECIES_CORSOLA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 223,
+   "name": "SPECIES_REMORAID",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 223,
+   "name": "SPECIES_REMORAID",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 223,
+   "name": "SPECIES_REMORAID",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 224,
+   "name": "SPECIES_OCTILLERY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 224,
+   "name": "SPECIES_OCTILLERY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 224,
+   "name": "SPECIES_OCTILLERY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 225,
+   "name": "SPECIES_DELIBIRD",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 225,
+   "name": "SPECIES_DELIBIRD",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 225,
+   "name": "SPECIES_DELIBIRD",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 226,
+   "name": "SPECIES_MANTINE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 226,
+   "name": "SPECIES_MANTINE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 226,
+   "name": "SPECIES_MANTINE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 227,
+   "name": "SPECIES_SKARMORY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 227,
+   "name": "SPECIES_SKARMORY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 227,
+   "name": "SPECIES_SKARMORY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 228,
+   "name": "SPECIES_HOUNDOUR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 228,
+   "name": "SPECIES_HOUNDOUR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 228,
+   "name": "SPECIES_HOUNDOUR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 229,
+   "name": "SPECIES_HOUNDOOM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 229,
+   "name": "SPECIES_HOUNDOOM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 229,
+   "name": "SPECIES_HOUNDOOM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 230,
+   "name": "SPECIES_KINGDRA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 230,
+   "name": "SPECIES_KINGDRA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 230,
+   "name": "SPECIES_KINGDRA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 231,
+   "name": "SPECIES_PHANPY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 231,
+   "name": "SPECIES_PHANPY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 231,
+   "name": "SPECIES_PHANPY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 232,
+   "name": "SPECIES_DONPHAN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 232,
+   "name": "SPECIES_DONPHAN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 232,
+   "name": "SPECIES_DONPHAN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 233,
+   "name": "SPECIES_PORYGON2",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 233,
+   "name": "SPECIES_PORYGON2",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 233,
+   "name": "SPECIES_PORYGON2",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 234,
+   "name": "SPECIES_STANTLER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 234,
+   "name": "SPECIES_STANTLER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 234,
+   "name": "SPECIES_STANTLER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 235,
+   "name": "SPECIES_SMEARGLE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 235,
+   "name": "SPECIES_SMEARGLE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 235,
+   "name": "SPECIES_SMEARGLE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 236,
+   "name": "SPECIES_TYROGUE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 236,
+   "name": "SPECIES_TYROGUE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 236,
+   "name": "SPECIES_TYROGUE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 237,
+   "name": "SPECIES_HITMONTOP",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 237,
+   "name": "SPECIES_HITMONTOP",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 237,
+   "name": "SPECIES_HITMONTOP",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 238,
+   "name": "SPECIES_SMOOCHUM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 238,
+   "name": "SPECIES_SMOOCHUM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 238,
+   "name": "SPECIES_SMOOCHUM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 239,
+   "name": "SPECIES_ELEKID",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 239,
+   "name": "SPECIES_ELEKID",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 239,
+   "name": "SPECIES_ELEKID",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 240,
+   "name": "SPECIES_MAGBY",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25,
+    0
+   ]
+  },
+  {
+   "species": 240,
+   "name": "SPECIES_MAGBY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 240,
+   "name": "SPECIES_MAGBY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 241,
+   "name": "SPECIES_MILTANK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 241,
+   "name": "SPECIES_MILTANK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 241,
+   "name": "SPECIES_MILTANK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 242,
+   "name": "SPECIES_BLISSEY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 242,
+   "name": "SPECIES_BLISSEY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 242,
+   "name": "SPECIES_BLISSEY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 243,
+   "name": "SPECIES_RAIKOU",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 243,
+   "name": "SPECIES_RAIKOU",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 243,
+   "name": "SPECIES_RAIKOU",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 244,
+   "name": "SPECIES_ENTEI",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 244,
+   "name": "SPECIES_ENTEI",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 244,
+   "name": "SPECIES_ENTEI",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 245,
+   "name": "SPECIES_SUICUNE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 245,
+   "name": "SPECIES_SUICUNE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 245,
+   "name": "SPECIES_SUICUNE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 246,
+   "name": "SPECIES_LARVITAR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 246,
+   "name": "SPECIES_LARVITAR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 246,
+   "name": "SPECIES_LARVITAR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 247,
+   "name": "SPECIES_PUPITAR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 247,
+   "name": "SPECIES_PUPITAR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 247,
+   "name": "SPECIES_PUPITAR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 248,
+   "name": "SPECIES_TYRANITAR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 248,
+   "name": "SPECIES_TYRANITAR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 248,
+   "name": "SPECIES_TYRANITAR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 277,
+   "name": "SPECIES_TREECKO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 277,
+   "name": "SPECIES_TREECKO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 277,
+   "name": "SPECIES_TREECKO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 278,
+   "name": "SPECIES_GROVYLE",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 278,
+   "name": "SPECIES_GROVYLE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 278,
+   "name": "SPECIES_GROVYLE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 279,
+   "name": "SPECIES_SCEPTILE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 279,
+   "name": "SPECIES_SCEPTILE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 279,
+   "name": "SPECIES_SCEPTILE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 280,
+   "name": "SPECIES_TORCHIC",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 280,
+   "name": "SPECIES_TORCHIC",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 280,
+   "name": "SPECIES_TORCHIC",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 281,
+   "name": "SPECIES_COMBUSKEN",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 281,
+   "name": "SPECIES_COMBUSKEN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 281,
+   "name": "SPECIES_COMBUSKEN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 282,
+   "name": "SPECIES_BLAZIKEN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 282,
+   "name": "SPECIES_BLAZIKEN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 282,
+   "name": "SPECIES_BLAZIKEN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 283,
+   "name": "SPECIES_MUDKIP",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 283,
+   "name": "SPECIES_MUDKIP",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 283,
+   "name": "SPECIES_MUDKIP",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 284,
+   "name": "SPECIES_MARSHTOMP",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 284,
+   "name": "SPECIES_MARSHTOMP",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 284,
+   "name": "SPECIES_MARSHTOMP",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 285,
+   "name": "SPECIES_SWAMPERT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 285,
+   "name": "SPECIES_SWAMPERT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 285,
+   "name": "SPECIES_SWAMPERT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 286,
+   "name": "SPECIES_POOCHYENA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 286,
+   "name": "SPECIES_POOCHYENA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 286,
+   "name": "SPECIES_POOCHYENA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 287,
+   "name": "SPECIES_MIGHTYENA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 287,
+   "name": "SPECIES_MIGHTYENA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 287,
+   "name": "SPECIES_MIGHTYENA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 288,
+   "name": "SPECIES_ZIGZAGOON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 288,
+   "name": "SPECIES_ZIGZAGOON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 288,
+   "name": "SPECIES_ZIGZAGOON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 289,
+   "name": "SPECIES_LINOONE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 289,
+   "name": "SPECIES_LINOONE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 289,
+   "name": "SPECIES_LINOONE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 290,
+   "name": "SPECIES_WURMPLE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 290,
+   "name": "SPECIES_WURMPLE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 290,
+   "name": "SPECIES_WURMPLE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 291,
+   "name": "SPECIES_SILCOON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 291,
+   "name": "SPECIES_SILCOON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 291,
+   "name": "SPECIES_SILCOON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 292,
+   "name": "SPECIES_BEAUTIFLY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 292,
+   "name": "SPECIES_BEAUTIFLY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 292,
+   "name": "SPECIES_BEAUTIFLY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 293,
+   "name": "SPECIES_CASCOON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 293,
+   "name": "SPECIES_CASCOON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 293,
+   "name": "SPECIES_CASCOON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 294,
+   "name": "SPECIES_DUSTOX",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 294,
+   "name": "SPECIES_DUSTOX",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 294,
+   "name": "SPECIES_DUSTOX",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 295,
+   "name": "SPECIES_LOTAD",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 295,
+   "name": "SPECIES_LOTAD",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 295,
+   "name": "SPECIES_LOTAD",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 296,
+   "name": "SPECIES_LOMBRE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 296,
+   "name": "SPECIES_LOMBRE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 296,
+   "name": "SPECIES_LOMBRE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 297,
+   "name": "SPECIES_LUDICOLO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 297,
+   "name": "SPECIES_LUDICOLO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 297,
+   "name": "SPECIES_LUDICOLO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 298,
+   "name": "SPECIES_SEEDOT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 298,
+   "name": "SPECIES_SEEDOT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 298,
+   "name": "SPECIES_SEEDOT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 299,
+   "name": "SPECIES_NUZLEAF",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 299,
+   "name": "SPECIES_NUZLEAF",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 299,
+   "name": "SPECIES_NUZLEAF",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 300,
+   "name": "SPECIES_SHIFTRY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 300,
+   "name": "SPECIES_SHIFTRY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 300,
+   "name": "SPECIES_SHIFTRY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 301,
+   "name": "SPECIES_NINCADA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 301,
+   "name": "SPECIES_NINCADA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 301,
+   "name": "SPECIES_NINCADA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 302,
+   "name": "SPECIES_NINJASK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 302,
+   "name": "SPECIES_NINJASK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 302,
+   "name": "SPECIES_NINJASK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 303,
+   "name": "SPECIES_SHEDINJA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 303,
+   "name": "SPECIES_SHEDINJA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 303,
+   "name": "SPECIES_SHEDINJA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 304,
+   "name": "SPECIES_TAILLOW",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 304,
+   "name": "SPECIES_TAILLOW",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 304,
+   "name": "SPECIES_TAILLOW",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 305,
+   "name": "SPECIES_SWELLOW",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 305,
+   "name": "SPECIES_SWELLOW",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 305,
+   "name": "SPECIES_SWELLOW",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 306,
+   "name": "SPECIES_SHROOMISH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 306,
+   "name": "SPECIES_SHROOMISH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 306,
+   "name": "SPECIES_SHROOMISH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 307,
+   "name": "SPECIES_BRELOOM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 307,
+   "name": "SPECIES_BRELOOM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 307,
+   "name": "SPECIES_BRELOOM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 308,
+   "name": "SPECIES_SPINDA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 308,
+   "name": "SPECIES_SPINDA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 308,
+   "name": "SPECIES_SPINDA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 309,
+   "name": "SPECIES_WINGULL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 309,
+   "name": "SPECIES_WINGULL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 309,
+   "name": "SPECIES_WINGULL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 310,
+   "name": "SPECIES_PELIPPER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 310,
+   "name": "SPECIES_PELIPPER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 310,
+   "name": "SPECIES_PELIPPER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 311,
+   "name": "SPECIES_SURSKIT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 311,
+   "name": "SPECIES_SURSKIT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 311,
+   "name": "SPECIES_SURSKIT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 312,
+   "name": "SPECIES_MASQUERAIN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 312,
+   "name": "SPECIES_MASQUERAIN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 312,
+   "name": "SPECIES_MASQUERAIN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 313,
+   "name": "SPECIES_WAILMER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 313,
+   "name": "SPECIES_WAILMER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 313,
+   "name": "SPECIES_WAILMER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 314,
+   "name": "SPECIES_WAILORD",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 314,
+   "name": "SPECIES_WAILORD",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 314,
+   "name": "SPECIES_WAILORD",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 315,
+   "name": "SPECIES_SKITTY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 315,
+   "name": "SPECIES_SKITTY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 315,
+   "name": "SPECIES_SKITTY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 316,
+   "name": "SPECIES_DELCATTY",
+   "mode": "NORMAL",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 316,
+   "name": "SPECIES_DELCATTY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 316,
+   "name": "SPECIES_DELCATTY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 317,
+   "name": "SPECIES_KECLEON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 317,
+   "name": "SPECIES_KECLEON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 317,
+   "name": "SPECIES_KECLEON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 318,
+   "name": "SPECIES_BALTOY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 318,
+   "name": "SPECIES_BALTOY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 318,
+   "name": "SPECIES_BALTOY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 319,
+   "name": "SPECIES_CLAYDOL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 319,
+   "name": "SPECIES_CLAYDOL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 319,
+   "name": "SPECIES_CLAYDOL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 320,
+   "name": "SPECIES_NOSEPASS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 320,
+   "name": "SPECIES_NOSEPASS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 320,
+   "name": "SPECIES_NOSEPASS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 321,
+   "name": "SPECIES_TORKOAL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 321,
+   "name": "SPECIES_TORKOAL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 321,
+   "name": "SPECIES_TORKOAL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 322,
+   "name": "SPECIES_SABLEYE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 322,
+   "name": "SPECIES_SABLEYE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 322,
+   "name": "SPECIES_SABLEYE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 323,
+   "name": "SPECIES_BARBOACH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 323,
+   "name": "SPECIES_BARBOACH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 323,
+   "name": "SPECIES_BARBOACH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 324,
+   "name": "SPECIES_WHISCASH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 324,
+   "name": "SPECIES_WHISCASH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 324,
+   "name": "SPECIES_WHISCASH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 325,
+   "name": "SPECIES_LUVDISC",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 325,
+   "name": "SPECIES_LUVDISC",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 325,
+   "name": "SPECIES_LUVDISC",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 326,
+   "name": "SPECIES_CORPHISH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 326,
+   "name": "SPECIES_CORPHISH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 326,
+   "name": "SPECIES_CORPHISH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 327,
+   "name": "SPECIES_CRAWDAUNT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 327,
+   "name": "SPECIES_CRAWDAUNT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 327,
+   "name": "SPECIES_CRAWDAUNT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 328,
+   "name": "SPECIES_FEEBAS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 328,
+   "name": "SPECIES_FEEBAS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 328,
+   "name": "SPECIES_FEEBAS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 329,
+   "name": "SPECIES_MILOTIC",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 329,
+   "name": "SPECIES_MILOTIC",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 329,
+   "name": "SPECIES_MILOTIC",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 330,
+   "name": "SPECIES_CARVANHA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 330,
+   "name": "SPECIES_CARVANHA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 330,
+   "name": "SPECIES_CARVANHA",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 331,
+   "name": "SPECIES_SHARPEDO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 331,
+   "name": "SPECIES_SHARPEDO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 331,
+   "name": "SPECIES_SHARPEDO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 332,
+   "name": "SPECIES_TRAPINCH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 332,
+   "name": "SPECIES_TRAPINCH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 332,
+   "name": "SPECIES_TRAPINCH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 333,
+   "name": "SPECIES_VIBRAVA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 333,
+   "name": "SPECIES_VIBRAVA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 333,
+   "name": "SPECIES_VIBRAVA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 334,
+   "name": "SPECIES_FLYGON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 334,
+   "name": "SPECIES_FLYGON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 334,
+   "name": "SPECIES_FLYGON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 335,
+   "name": "SPECIES_MAKUHITA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 335,
+   "name": "SPECIES_MAKUHITA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 335,
+   "name": "SPECIES_MAKUHITA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 336,
+   "name": "SPECIES_HARIYAMA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 336,
+   "name": "SPECIES_HARIYAMA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 336,
+   "name": "SPECIES_HARIYAMA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 337,
+   "name": "SPECIES_ELECTRIKE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 337,
+   "name": "SPECIES_ELECTRIKE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 337,
+   "name": "SPECIES_ELECTRIKE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 338,
+   "name": "SPECIES_MANECTRIC",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 338,
+   "name": "SPECIES_MANECTRIC",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 338,
+   "name": "SPECIES_MANECTRIC",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 339,
+   "name": "SPECIES_NUMEL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 339,
+   "name": "SPECIES_NUMEL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 339,
+   "name": "SPECIES_NUMEL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 340,
+   "name": "SPECIES_CAMERUPT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 340,
+   "name": "SPECIES_CAMERUPT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 340,
+   "name": "SPECIES_CAMERUPT",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 341,
+   "name": "SPECIES_SPHEAL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 341,
+   "name": "SPECIES_SPHEAL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 341,
+   "name": "SPECIES_SPHEAL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 342,
+   "name": "SPECIES_SEALEO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 342,
+   "name": "SPECIES_SEALEO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 342,
+   "name": "SPECIES_SEALEO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 343,
+   "name": "SPECIES_WALREIN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 343,
+   "name": "SPECIES_WALREIN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 343,
+   "name": "SPECIES_WALREIN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 344,
+   "name": "SPECIES_CACNEA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 344,
+   "name": "SPECIES_CACNEA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 344,
+   "name": "SPECIES_CACNEA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 345,
+   "name": "SPECIES_CACTURNE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 345,
+   "name": "SPECIES_CACTURNE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 345,
+   "name": "SPECIES_CACTURNE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 346,
+   "name": "SPECIES_SNORUNT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 346,
+   "name": "SPECIES_SNORUNT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 346,
+   "name": "SPECIES_SNORUNT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 347,
+   "name": "SPECIES_GLALIE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 347,
+   "name": "SPECIES_GLALIE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 347,
+   "name": "SPECIES_GLALIE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 348,
+   "name": "SPECIES_LUNATONE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 348,
+   "name": "SPECIES_LUNATONE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 348,
+   "name": "SPECIES_LUNATONE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 349,
+   "name": "SPECIES_SOLROCK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 349,
+   "name": "SPECIES_SOLROCK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 349,
+   "name": "SPECIES_SOLROCK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 350,
+   "name": "SPECIES_AZURILL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 350,
+   "name": "SPECIES_AZURILL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 350,
+   "name": "SPECIES_AZURILL",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 351,
+   "name": "SPECIES_SPOINK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 351,
+   "name": "SPECIES_SPOINK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 351,
+   "name": "SPECIES_SPOINK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 352,
+   "name": "SPECIES_GRUMPIG",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 352,
+   "name": "SPECIES_GRUMPIG",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 352,
+   "name": "SPECIES_GRUMPIG",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 353,
+   "name": "SPECIES_PLUSLE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 353,
+   "name": "SPECIES_PLUSLE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 353,
+   "name": "SPECIES_PLUSLE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 354,
+   "name": "SPECIES_MINUN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 354,
+   "name": "SPECIES_MINUN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 354,
+   "name": "SPECIES_MINUN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 355,
+   "name": "SPECIES_MAWILE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 355,
+   "name": "SPECIES_MAWILE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 355,
+   "name": "SPECIES_MAWILE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 356,
+   "name": "SPECIES_MEDITITE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 356,
+   "name": "SPECIES_MEDITITE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 356,
+   "name": "SPECIES_MEDITITE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 357,
+   "name": "SPECIES_MEDICHAM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 357,
+   "name": "SPECIES_MEDICHAM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 357,
+   "name": "SPECIES_MEDICHAM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 358,
+   "name": "SPECIES_SWABLU",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 358,
+   "name": "SPECIES_SWABLU",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 358,
+   "name": "SPECIES_SWABLU",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 359,
+   "name": "SPECIES_ALTARIA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 359,
+   "name": "SPECIES_ALTARIA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 359,
+   "name": "SPECIES_ALTARIA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 360,
+   "name": "SPECIES_WYNAUT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 360,
+   "name": "SPECIES_WYNAUT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 360,
+   "name": "SPECIES_WYNAUT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 361,
+   "name": "SPECIES_DUSKULL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 361,
+   "name": "SPECIES_DUSKULL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 361,
+   "name": "SPECIES_DUSKULL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 362,
+   "name": "SPECIES_DUSCLOPS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 362,
+   "name": "SPECIES_DUSCLOPS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 362,
+   "name": "SPECIES_DUSCLOPS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 363,
+   "name": "SPECIES_ROSELIA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 363,
+   "name": "SPECIES_ROSELIA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 363,
+   "name": "SPECIES_ROSELIA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 364,
+   "name": "SPECIES_SLAKOTH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 364,
+   "name": "SPECIES_SLAKOTH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 364,
+   "name": "SPECIES_SLAKOTH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 365,
+   "name": "SPECIES_VIGOROTH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 365,
+   "name": "SPECIES_VIGOROTH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 365,
+   "name": "SPECIES_VIGOROTH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 366,
+   "name": "SPECIES_SLAKING",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 366,
+   "name": "SPECIES_SLAKING",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 366,
+   "name": "SPECIES_SLAKING",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 367,
+   "name": "SPECIES_GULPIN",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 367,
+   "name": "SPECIES_GULPIN",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 367,
+   "name": "SPECIES_GULPIN",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 368,
+   "name": "SPECIES_SWALOT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 368,
+   "name": "SPECIES_SWALOT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 368,
+   "name": "SPECIES_SWALOT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 369,
+   "name": "SPECIES_TROPIUS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 369,
+   "name": "SPECIES_TROPIUS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 369,
+   "name": "SPECIES_TROPIUS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 370,
+   "name": "SPECIES_WHISMUR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 370,
+   "name": "SPECIES_WHISMUR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 370,
+   "name": "SPECIES_WHISMUR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 371,
+   "name": "SPECIES_LOUDRED",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 371,
+   "name": "SPECIES_LOUDRED",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 371,
+   "name": "SPECIES_LOUDRED",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 372,
+   "name": "SPECIES_EXPLOUD",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 372,
+   "name": "SPECIES_EXPLOUD",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 372,
+   "name": "SPECIES_EXPLOUD",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    -25
+   ]
+  },
+  {
+   "species": 373,
+   "name": "SPECIES_CLAMPERL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 373,
+   "name": "SPECIES_CLAMPERL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 373,
+   "name": "SPECIES_CLAMPERL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 374,
+   "name": "SPECIES_HUNTAIL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 374,
+   "name": "SPECIES_HUNTAIL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 374,
+   "name": "SPECIES_HUNTAIL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 375,
+   "name": "SPECIES_GOREBYSS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 375,
+   "name": "SPECIES_GOREBYSS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 375,
+   "name": "SPECIES_GOREBYSS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 376,
+   "name": "SPECIES_ABSOL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 376,
+   "name": "SPECIES_ABSOL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 376,
+   "name": "SPECIES_ABSOL",
+   "mode": "FAINT",
+   "inLogs": true,
+   "logPans": [
+    25
+   ]
+  },
+  {
+   "species": 377,
+   "name": "SPECIES_SHUPPET",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 377,
+   "name": "SPECIES_SHUPPET",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 377,
+   "name": "SPECIES_SHUPPET",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 378,
+   "name": "SPECIES_BANETTE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 378,
+   "name": "SPECIES_BANETTE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 378,
+   "name": "SPECIES_BANETTE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 379,
+   "name": "SPECIES_SEVIPER",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 379,
+   "name": "SPECIES_SEVIPER",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 379,
+   "name": "SPECIES_SEVIPER",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 380,
+   "name": "SPECIES_ZANGOOSE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 380,
+   "name": "SPECIES_ZANGOOSE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 380,
+   "name": "SPECIES_ZANGOOSE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 381,
+   "name": "SPECIES_RELICANTH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 381,
+   "name": "SPECIES_RELICANTH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 381,
+   "name": "SPECIES_RELICANTH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 382,
+   "name": "SPECIES_ARON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 382,
+   "name": "SPECIES_ARON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 382,
+   "name": "SPECIES_ARON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 383,
+   "name": "SPECIES_LAIRON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 383,
+   "name": "SPECIES_LAIRON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 383,
+   "name": "SPECIES_LAIRON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 384,
+   "name": "SPECIES_AGGRON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 384,
+   "name": "SPECIES_AGGRON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 384,
+   "name": "SPECIES_AGGRON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 385,
+   "name": "SPECIES_CASTFORM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 385,
+   "name": "SPECIES_CASTFORM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 385,
+   "name": "SPECIES_CASTFORM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 386,
+   "name": "SPECIES_VOLBEAT",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 386,
+   "name": "SPECIES_VOLBEAT",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 386,
+   "name": "SPECIES_VOLBEAT",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 387,
+   "name": "SPECIES_ILLUMISE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 387,
+   "name": "SPECIES_ILLUMISE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 387,
+   "name": "SPECIES_ILLUMISE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 388,
+   "name": "SPECIES_LILEEP",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 388,
+   "name": "SPECIES_LILEEP",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 388,
+   "name": "SPECIES_LILEEP",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 389,
+   "name": "SPECIES_CRADILY",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 389,
+   "name": "SPECIES_CRADILY",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 389,
+   "name": "SPECIES_CRADILY",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 390,
+   "name": "SPECIES_ANORITH",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 390,
+   "name": "SPECIES_ANORITH",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 390,
+   "name": "SPECIES_ANORITH",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 391,
+   "name": "SPECIES_ARMALDO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 391,
+   "name": "SPECIES_ARMALDO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 391,
+   "name": "SPECIES_ARMALDO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 392,
+   "name": "SPECIES_RALTS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 392,
+   "name": "SPECIES_RALTS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 392,
+   "name": "SPECIES_RALTS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 393,
+   "name": "SPECIES_KIRLIA",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 393,
+   "name": "SPECIES_KIRLIA",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 393,
+   "name": "SPECIES_KIRLIA",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 394,
+   "name": "SPECIES_GARDEVOIR",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 394,
+   "name": "SPECIES_GARDEVOIR",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 394,
+   "name": "SPECIES_GARDEVOIR",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 395,
+   "name": "SPECIES_BAGON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 395,
+   "name": "SPECIES_BAGON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 395,
+   "name": "SPECIES_BAGON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 396,
+   "name": "SPECIES_SHELGON",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 396,
+   "name": "SPECIES_SHELGON",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 396,
+   "name": "SPECIES_SHELGON",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 397,
+   "name": "SPECIES_SALAMENCE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 397,
+   "name": "SPECIES_SALAMENCE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 397,
+   "name": "SPECIES_SALAMENCE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 398,
+   "name": "SPECIES_BELDUM",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 398,
+   "name": "SPECIES_BELDUM",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 398,
+   "name": "SPECIES_BELDUM",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 399,
+   "name": "SPECIES_METANG",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 399,
+   "name": "SPECIES_METANG",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 399,
+   "name": "SPECIES_METANG",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 400,
+   "name": "SPECIES_METAGROSS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 400,
+   "name": "SPECIES_METAGROSS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 400,
+   "name": "SPECIES_METAGROSS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 401,
+   "name": "SPECIES_REGIROCK",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 401,
+   "name": "SPECIES_REGIROCK",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 401,
+   "name": "SPECIES_REGIROCK",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 402,
+   "name": "SPECIES_REGICE",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 402,
+   "name": "SPECIES_REGICE",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 402,
+   "name": "SPECIES_REGICE",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 403,
+   "name": "SPECIES_REGISTEEL",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 403,
+   "name": "SPECIES_REGISTEEL",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 403,
+   "name": "SPECIES_REGISTEEL",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 407,
+   "name": "SPECIES_LATIAS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 407,
+   "name": "SPECIES_LATIAS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 407,
+   "name": "SPECIES_LATIAS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 408,
+   "name": "SPECIES_LATIOS",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 408,
+   "name": "SPECIES_LATIOS",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 408,
+   "name": "SPECIES_LATIOS",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 411,
+   "name": "SPECIES_CHIMECHO",
+   "mode": "NORMAL",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 411,
+   "name": "SPECIES_CHIMECHO",
+   "mode": "WEAK",
+   "inLogs": false,
+   "logPans": []
+  },
+  {
+   "species": 411,
+   "name": "SPECIES_CHIMECHO",
+   "mode": "FAINT",
+   "inLogs": false,
+   "logPans": []
+  }
+ ],
+ "songs": [
+  {
+   "kind": "bgm",
+   "id": 354,
+   "name": "MUS_VICTORY_GYM_LEADER",
+   "via": [
+    "PlayBGM"
+   ],
+   "logs": 2
+  },
+  {
+   "kind": "bgm",
+   "id": 412,
+   "name": "MUS_VICTORY_TRAINER",
+   "via": [
+    "PlayBGM"
+   ],
+   "logs": 2
+  },
+  {
+   "kind": "bgm",
+   "id": 469,
+   "name": "MUS_B_FACTORY",
+   "via": [
+    "PlayBGM"
+   ],
+   "logs": 7
+  },
+  {
+   "kind": "bgm",
+   "id": 476,
+   "name": "MUS_VS_TRAINER",
+   "via": [
+    "PlayBGM"
+   ],
+   "logs": 3
+  },
+  {
+   "kind": "fanfare",
+   "id": 368,
+   "name": "MUS_HEAL",
+   "via": [
+    "PlayFanfareByFanfareNum"
+   ],
+   "logs": 5
+  },
+  {
+   "kind": "fanfare",
+   "id": 459,
+   "name": "MUS_OBTAIN_B_POINTS",
+   "via": [
+    "PlayFanfareByFanfareNum"
+   ],
+   "logs": 1
+  },
+  {
+   "kind": "fanfare",
+   "id": 466,
+   "name": "MUS_OBTAIN_SYMBOL",
+   "via": [
+    "PlayFanfareByFanfareNum"
+   ],
+   "logs": 2
+  }
+ ],
+ "logCriesOutsideFactorySet": []
+}
