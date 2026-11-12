@@ -25,8 +25,10 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   winning-swap carry 0 **100 / 100**; play:random 5 min / scene: ON 22 battles / 9 swaps, OFF 36 / 17, 0 page errors / console errors / overlays.
 - **ROM replay (item 0d wind-down):** the 40-seed permanent list on `78c2ef2bc`, Scene OFF: **24 / 40 match** to battle end; newly matching 22 30 39 42 50 53 57 (this run) and 75 88 110 155 158;
   still diverging 60 + 15 seeds from 79 up (ISSUES #211). New ISSUES #212 lists the audit rows. Created `docs/replay-ledger.md` (`docs/replay-ledger.md`).
-- **Next:** handoff "Next work" status block: gameplay queue first (seed 60 forced-Struggle lead in `docs/dia272-leads.md`, triage seeds 75..159, audit A2 / A3 /
-  A4 / B1 / B2), then aud244b, lbr-b; the replay runs once at run start (item 0d).
+- **Folded: dia275** (side lane, diagnosis only, 14 min; `docs/dia275-triage.md`): #211 seeds 109 / 107 / 79 share audit row A2 (switch-in scorer counts
+  power-0 moves as super-effective; one-line fix, isolated check flips all three); 123 = A4 (pass-2 base damage 0); 95 / 114 = AI draw count (not located).
+- **Next:** gameplay queue first: A2 fix (re-drive 109 / 107 / 79), A4 (123), seed 60 (dia272 forced-Struggle lead), then the rest of #211 / #212;
+  then aud244b, lbr-b. The replay runs once at run start (item 0d).
 
 ---
 

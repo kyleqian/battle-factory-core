@@ -107,8 +107,8 @@ never brief those here. One worker at a time; each run folds the next audio step
 **Status at the 2026-11-12 wind-down:** item 0: aud244a DONE (cries + SEs); next aud244b (BGM / fanfares with ROM loops, the looping SE_LOW_HEALTH / SE_M_GUST),
 then aud245 player. Item 0b: lbr-a DONE; next lbr-b (attendant conversation), then lbr-c, lbr-d; open from lbr-a: no Scene ON loss / retire ROM lab, the app emits
 no SE_SAVE on the loss / retire result script (ROM 4007 / 7503 in the lbra windows). Item 0c DONE (pnm273). Item 0d: #204 C / #209 / #210 DONE; next in the
-gameplay queue: seed 60 (dia272 lead), triage the twenty divergent seeds 75..159, audit A2 / A3 (switch-in scorer), A4 (pass-2 base damage 0, = ISSUES #204
-remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / Flash Fire now come from the real builder); re-check its rows on a seed.
+gameplay queue: audit A2 (switch-in scorer power gate; `docs/dia275-triage.md`: seeds 109 / 107 / 79), A4 (pass-2 base damage 0, = ISSUES #204
+remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 = AI draw count) and #212 (A3, B1, B2, ...). A1 is mostly covered by aiv271 (status1 / pinch / weather / Flash Fire now come from the real builder); re-check its rows on a seed.
 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
    fixes.**
