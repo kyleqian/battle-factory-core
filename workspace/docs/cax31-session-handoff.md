@@ -363,6 +363,50 @@ remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 =
        every message lasts about 4× longer, so he may be comparing against a MID emulator. Asked him. If he wants a text-speed
        option, that is a feature: the print term scales by `sTextSpeedFrameDelays`, the holds do not
        (`docs/battle-message-hold-cadence-ground-truth.md`).
+   - **New, Kyle 2026-11-12** (website, game build `eb-9d34d28f1b19ef3d`), reproduced on the Mac from his trace
+     `b476b7edd9fd8260b28760d96abd8ffe` (seeds 4025223145 / 3542704685, Scene ON, 22,641 frames) through
+     `FactorySession.replayStep` + `render()`. The trace is in the repo: `tests/fixtures/user-sessions/2026-11-12-b476b7ed.trace.json`
+     (app frame N below = the session frame after N steps). Kyle: not the highest priority, but queued, fixed and VERIFIED.
+     One step per run each, after that run's audio step. Prove each against the ROM, then fix the family:
+     - **(h) Pursuit on a switching target draws no animation. LOW priority: the switch in this trace was itself an engine
+       error, already fixed on `worker/parity-mac` (see the last bullet).** App 17134: the opponent LOMBRE (6 / 153 HP) chose to switch,
+       BEEDRILL's Pursuit caught it (`BattleScript_PursuitDmgOnSwitchOut`, `battle_scripts_1.s:3123`) and it fainted. The
+       `move-animation` command (moveId 228, `turn: 1`, `multihit: 1`) holds 32 frames (17164..17195) and draws nothing. The
+       ordinary Pursuit one turn later (app 17840, `turn: 0`) plays 106 frames (17870..17975). Cause, known and left on
+       purpose: `liveMoveAnimation.ts:1589` declines the switch-interception body (`request.turn & 1`). ROM:
+       `Cmd_jumpifnopursuitswitchdmg` sets `gBattleScripting.animTurn = 1` (`battle_script_commands.c:8758`), and `Move_PURSUIT`
+       runs `choosetwoturnanim PursuitNormal, PursuitOnSwitchout` (`battle_anim_scripts.s:1273-1280`). Needed: the
+       `PursuitOnSwitchout` body, live.
+       - **Check in the same step (lead, not ROM-proven):** the ROM prints the withdraw line first (`BattleScript_ActionSwitch`,
+         `battle_scripts_1.s:3088-3090`: `printstring STRINGID_RETURNMON`) and only then runs the Pursuit loop. In the trace the
+         turn's first event is the Pursuit `STRINGID_USEDMOVE` (sequence 42, straight after 41): no RETURNMON event and no
+         command for it. If the ROM lab confirms it, a message is missing in both scenes.
+       - **Verified when:** a ROM capture of a genuine Pursuit interception matches the engine like the other live bodies.
+       - **Top layer, later the same day (Kyle doubted the switch, and he was right):** on the fixed engine (`worker/parity-mac`
+         960f65235) the same trace has the same RNG up to this turn (1808560935 after 26 calls), but the opponent does NOT
+         switch: Pursuit is an ordinary hit (`BattleScript_HitFromAtkString`, `turn: 0`, the normal animation), LOMBRE faints
+         (`BattleScript_FaintedMonSendOutNew`), and the recording diverges from there. Cause: fix 8 of that lane
+         (`docs/parity-mac/ai-resist-switch-battlerin1.md`): the ROM's bench scan skips the opponent's slot 2 (DELIBIRD)
+         because the player's active BEEDRILL is in the player's slot 2, after slot 1 (LEDIAN) resisted Twineedle. So what
+         Kyle saw goes away with the fold of `mac/parity-mac` and a site redeploy. What stays open here is only the genuine
+         interception (rare) and the withdraw-line lead.
+     - **(i) The player's HP box disappears during the locked turns of Ice Ball.** App 18609: Kyle switched BEEDRILL ->
+       WARTORTLE and DELIBIRD used Ice Ball on that turn. In the next two turns (DELIBIRD is locked into Ice Ball; the player
+       chose Water Pulse) the player's HP box is not drawn in app 19364..19389, 19469..19662, 19826..19948, 19987..20012,
+       20092..20308 and 20472..21017 (through "Foe DELIBIRD fainted!" and LEDIAN's send-out). It is drawn during Water Pulse's
+       own animation and on the action menu, and it is back for good at 21018. The opponent's box is not affected.
+       - **Lead:** the two locked turns are appended as segments 2 and 3 to the SAME resolution presentation
+         (`retainedLockedActionPresentationOwner`, `factoryRoundBattleOrchestrator.ts:1833` / `:3059`). Its `sourceDecision`
+         is still the earlier `{kind: "switch", partyIndex: 0}`, and a player switch hides the player's box between the recall
+         and the send-in. Check whether the box-visibility pass treats every retained segment as part of that switch. If it
+         does, the family is every locked multi-turn move (Ice Ball, Rollout, Outrage, Petal Dance, Thrash, Uproar) that
+         starts on a turn where the player switched.
+       - **Verified when:** a test replays the trace and finds the player's box in every frame of app 19364..21017 where the
+         ROM draws it (ROM lab: a player switch into Ice Ball, then two more turns), plus one other locked move.
+       - **Repro note:** the frames above hold on engine `eb-9d34d28f1b19ef3d` (master `e2cd1f1cd`, before the fold of
+         `mac/parity-mac`). After the fold the trace diverges at app 17134 (see (h)), and its Ice Ball then starts on a turn
+         with no player switch. Reproduce at `e2cd1f1cd`, or stage it: the player switches on the turn the opponent starts a
+         locked move.
 5. **Timing / visible residuals** last, never while items 1–3 have ready work: #146 / #143 remainders (SHEDINJA healthbox =
    compare-harness maxHP bug + `factoryCorpusParty.ts:291`, ISSUES #146 shd234; CASTFORM message region on the faint path,
    ENTEI / KINGDRA glow-lag frame, bso226 ONIX intro window, Castform "at"-role keys, Flamethrower +7 alignment, revert /
