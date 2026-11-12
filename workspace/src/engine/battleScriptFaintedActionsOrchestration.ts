@@ -61,6 +61,7 @@ import {
   type BattleScriptProgram,
 } from "./battleScriptProgram.ts";
 import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
+import { computeCastformTypeChange } from "./battleScriptTryCastformDataChangeOpcode.ts";
 import {
   type BattleScriptRulesBattlers,
   type BattleScriptRulesContext,
@@ -405,7 +406,11 @@ function requireCompletedPendingScript(
   return result.state;
 }
 
-/** `HandleFaintedMonActions` state 6: pending Intimidate, Trace, then the reachable White Herb item pass. */
+/** include/constants/abilities.h ABILITY_FORECAST. */
+const ABILITY_FORECAST = 59;
+const CASTFORM_CHANGE_LABEL = "BattleScript_CastformChange";
+
+/** `HandleFaintedMonActions` state 6: pending Intimidate, Trace, the reachable White Herb item pass, then Forecast. */
 function runPendingSwitchinEffects(
   program: BattleScriptProgram,
   handlers: BattleScriptOpcodeHandlers<BattleScriptRulesContext>,
@@ -487,6 +492,25 @@ function runPendingSwitchinEffects(
       haltReason: null,
       rulesContext: Object.freeze({ ...rules, scriptingBattler: 0 }),
     }), WHITE_HERB_END2_LABEL);
+  }
+  // `AbilityBattleEffects(ABILITYEFFECT_FORECAST, ...)`, the last term of state 6 (`battle_util.c:1962`, body
+  // `:2955-2972`): every Forecast battler whose form no longer fits the weather runs `CastformDataTypeChange`
+  // (`:2396-2429`, SET_BATTLER_TYPE at once) and `BattleScript_CastformChange`. Source returns at the first one and
+  // re-enters state 6 on the next HandleFaintedMonActions call, which is this loop in battler order. This is the
+  // ONLY place a Castform reverts when the weather ends: the "rain stopped" scripts do not call
+  // `trycastformdatachange` (ROM seed 643; docs/parity-mac/castform-reverts-with-weather.md).
+  for (let battler = 0; battler < state.rulesContext.battleTopology.battlersCount; battler += 1) {
+    const id = battler as BattleScriptBattlerId;
+    const active = state.rulesContext.battlers[id];
+    if (active.ability !== ABILITY_FORECAST) continue;
+    const change = computeCastformTypeChange(state.rulesContext, active);
+    if (change.form === 0) continue;
+    const rules = replaceBattler(state.rulesContext, id, { types: change.types });
+    state = requireCompletedPendingScript(program, handlers, Object.freeze({
+      ...state,
+      haltReason: null,
+      rulesContext: Object.freeze({ ...rules, scriptingBattler: id, formToChangeInto: change.form - 1 }),
+    }), CASTFORM_CHANGE_LABEL);
   }
   return state;
 }

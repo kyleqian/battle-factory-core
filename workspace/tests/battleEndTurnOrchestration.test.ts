@@ -699,6 +699,29 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(turn.state.rulesContext.hitMarker).toBe(NO_ANIMATIONS); // unfixed: all four bits survive
   });
 
+  it("a Forecast Castform reverts to Normal once the weather is gone: HandleFaintedMonActions state 6 runs ABILITYEFFECT_FORECAST (battle_util.c:1962)", () => {
+    // docs/parity-mac/castform-reverts-with-weather.md (ROM seed 643: after the rain ended Giga Drain hit Castform for 109, x1;
+    // the engine still had it Water-typed and it took x2). CASTFORM 385, Forecast 59, still Water / Water, weather 0.
+    const rc = context({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, species: 385, ability: 59, types: ["TYPE_WATER", "TYPE_WATER"], partyIndex: 2 }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      weather: 0,
+    });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const turn = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    if (turn.kind !== "next-turn") throw new Error(`expected next-turn, got ${turn.kind}`);
+    expect(turn.state.rulesContext.battlers[1]!.types).toEqual(["TYPE_NORMAL", "TYPE_NORMAL"]); // unfixed: still Water
+    expect(turn.state.rng.calls).toBe(0);
+    // A Castform that already fits the weather is left alone.
+    const settled = runBattleEndTurnOrchestration(program, handlers, turn.state);
+    if (settled.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(settled.state.rulesContext.battlers[1]!.types).toEqual(["TYPE_NORMAL", "TYPE_NORMAL"]);
+  });
+
   it("(c) Ingrain heal ticks floor(maxHP/16) capped at maxHP -- doc's live 159 -> 161 ledger (docs/ingrain-leechseed-wrap-ground-truth.md §2a), zero RNG", () => {
     const rc = context({
       battlers: [
