@@ -120,6 +120,8 @@ export type FactoryAiBattleHistory = Readonly<{
   ];
   knownItemEffects: readonly [number, number, number, number];
   partyIndexes: readonly [number, number, number, number];
+  /** The rules context's `aiHistoryClears` at the last sync: a changed count means the slot was re-entered since. */
+  clears: readonly [number, number, number, number];
 }>;
 
 export type FactoryAiChallengePolicy = Readonly<{
@@ -163,6 +165,7 @@ export function createFactoryAiBattleHistory(
       FactoryAiBattleHistory["knownItemEffects"],
     partyIndexes: Object.freeze(rulesContext.battlers.map((battler) => battler.partyIndex)) as
       FactoryAiBattleHistory["partyIndexes"],
+    clears: Object.freeze([...rulesContext.aiHistoryClears]) as unknown as FactoryAiBattleHistory["clears"],
   });
 }
 
@@ -217,8 +220,12 @@ export function syncFactoryAiBattleHistory(
     rulesContext.battlers.map((battler) => battler.partyIndex),
   ) as FactoryAiBattleHistory["partyIndexes"];
 
+  // SwitchInClearSetData clears both histories on EVERY switch-in (battle_main.c:3260-3261). A changed party index
+  // catches a different Pokemon; the clear count also catches a slot that went A -> B -> A between two AI decisions
+  // (the AI was locked into a multi-turn move and made none): the game has forgotten A's moves and ability.
+  const clears = Object.freeze([...rulesContext.aiHistoryClears]) as unknown as FactoryAiBattleHistory["clears"];
   for (let battler = 0; battler < 4; battler += 1) {
-    if (partyIndexes[battler] !== history.partyIndexes[battler]) {
+    if (partyIndexes[battler] !== history.partyIndexes[battler] || clears[battler] !== history.clears[battler]) {
       usedMoves = replaceAt(usedMoves, battler, Object.freeze([])) as
         FactoryAiBattleHistory["usedMoves"];
       knownAbilities = replaceAt(knownAbilities, battler, null) as
@@ -246,6 +253,7 @@ export function syncFactoryAiBattleHistory(
     knownAbilities,
     knownItemEffects,
     partyIndexes,
+    clears,
   });
   for (let battler = 0; battler < 4; battler += 1) {
     const abilityId = rulesContext.aiObservedAbilityIds[battler]!;

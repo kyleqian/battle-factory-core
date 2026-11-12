@@ -689,6 +689,10 @@ function createSwitchindataupdateOpcodeHandler(
         index === battler ? 0 : abilityId
       ),
     ) as BattleScriptRulesContext["aiObservedAbilityIds"];
+    // The same two source calls, counted for the AI history kept outside the kernel (see `aiHistoryClears`).
+    const aiHistoryClears = Object.freeze(
+      rules.aiHistoryClears.map((count, index) => index === battler ? (count + 1) & 0xff : count),
+    ) as BattleScriptRulesContext["aiHistoryClears"];
     const choicedMove = Object.freeze(
       rules.choicedMove.map((move, index) => index === battler ? 0 : move),
     ) as BattleScriptRulesContext["choicedMove"];
@@ -705,6 +709,7 @@ function createSwitchindataupdateOpcodeHandler(
       currentMove: 0,
       choicedMove,
       aiObservedAbilityIds,
+      aiHistoryClears,
       rolloutTimerStartValues,
       moveHistory: Object.freeze({
         ...rules.moveHistory,

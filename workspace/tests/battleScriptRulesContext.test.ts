@@ -188,6 +188,7 @@ describe("source-shaped Battle Script rules context", () => {
       // Pursuit user's turn-order slot to B_ACTION_TRY_FINISH so its own
       // move action never dispatches.
       "actionsByTurnOrder",
+      "aiHistoryClears",
       "aiObservedAbilityIds",
       "aiObservedItemEffects",
       "alreadyStatusedMoveAttempt",

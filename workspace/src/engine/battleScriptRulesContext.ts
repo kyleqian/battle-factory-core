@@ -701,6 +701,13 @@ export type BattleScriptRulesContext = Readonly<
     aiObservedAbilityIds: BattleScriptMoveEndBytes;
     /** BattleHistory reveal handoff populated only at source RecordItemEffectBattle-equivalent activation sites. */
     aiObservedItemEffects: BattleScriptMoveEndBytes;
+    /**
+     * Per battler slot, how many times SwitchInClearSetData ran ClearBattlerMoveHistory / ClearBattlerAbilityHistory
+     * (battle_main.c:3260-3261), modulo 256. The AI history lives outside the kernel and is synced only at an AI
+     * decision; a slot that changed and changed back between two decisions (the AI was move-locked) shows the same
+     * party index, so the sync compares this count as well (docs/parity-mac/ai-history-reentry.md).
+     */
+    aiHistoryClears: BattleScriptMoveEndBytes;
     /** Source u16 gPaydayMoney. */
     paydayMoney: number;
     /** Source u8 gBattleStruct->moneyMultiplier. */
@@ -968,6 +975,7 @@ export type BattleScriptRulesContextInput = Readonly<{
   lastUsedItem?: number;
   aiObservedAbilityIds?: readonly number[];
   aiObservedItemEffects?: readonly number[];
+  aiHistoryClears?: readonly number[];
   paydayMoney?: number;
   moneyMultiplier?: number;
   playerMoney?: number;
@@ -2652,6 +2660,11 @@ export function createBattleScriptRulesContext(
     0xff,
     "aiObservedItemEffects",
   ) as BattleScriptMoveEndBytes;
+  const aiHistoryClears = createMoveEndArray(
+    input.aiHistoryClears,
+    0xff,
+    "aiHistoryClears",
+  ) as BattleScriptMoveEndBytes;
   const battleTopology = createBattleScriptBattleTopology(input.battleTopology);
   const party = createBattleScriptPartyBySide(input.party);
   return Object.freeze({
@@ -2686,6 +2699,7 @@ export function createBattleScriptRulesContext(
     lastUsedItem: requireUnsigned(input.lastUsedItem ?? 0, 0xffff, "lastUsedItem"),
     aiObservedAbilityIds,
     aiObservedItemEffects,
+    aiHistoryClears,
     paydayMoney: requireUnsigned(input.paydayMoney ?? 0, 0xffff, "paydayMoney"),
     moneyMultiplier: requireUnsigned(input.moneyMultiplier ?? 1, 0xff, "moneyMultiplier"),
     playerMoney: requireUnsigned(input.playerMoney ?? 0, 999_999, "playerMoney"),

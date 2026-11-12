@@ -28,7 +28,8 @@ function config(): FactoryFullTurnConfig {
     trainer: {
       species: SPECIES_WOBBUFFET, moveId: BATON_PASS,
       attack: 100, defense: 100, spAttack: 100, spDefense: 100, speed: 200, hp: 300,
-      statStages: [6, 6, 4, 6, 6, 6, 6, 6], // Defense -2, handed over by Baton Pass
+      // Defense -2, handed over by Baton Pass
+      statStages: [6, 6, 4, 6, 6, 6, 6, 6] as [number, number, number, number, number, number, number, number],
     },
     trainerBenchHp: [200, 0] as [number, number],
     trainerBenchOverride: [{

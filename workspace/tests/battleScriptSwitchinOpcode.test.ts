@@ -504,6 +504,8 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     expect(rules.moveResultFlags).toBe(0);
     expect(rules.choicedMove).toEqual([70, 0, 72, 73]);
     expect(rules.aiObservedAbilityIds).toEqual([ABILITY_INTIMIDATE, 0, ABILITY_TRACE, ABILITY_DRIZZLE]);
+    // parity-mac: the same switch-in is counted for the AI history kept outside the kernel (ai-history-reentry.md).
+    expect(rules.aiHistoryClears).toEqual([0, 1, 0, 0]);
     // SwitchInClearSetData does not call ClearBattlerItemEffectHistory.
     expect(rules.aiObservedItemEffects).toEqual([10, 20, 30, 40]);
     expect(rules.moveHistory).toMatchObject({

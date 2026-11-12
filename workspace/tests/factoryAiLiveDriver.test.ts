@@ -564,6 +564,28 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     expect(history.knownItemEffects[0]).toBe(29);
   });
 
+  it("forgets a Pokemon that left and came back between two AI decisions (same party index, slot re-entered)", () => {
+    // docs/parity-mac/ai-history-reentry.md. SwitchInClearSetData clears the move and ability history on every switch-in
+    // (battle_main.c:3260-3261). The history is synced only at an AI decision; while the AI is locked into a multi-turn
+    // move the player can switch A -> B -> A, and the party index is the same again. Unfixed: both facts were kept.
+    const initialRules = liveRules(70);
+    let history = syncFactoryAiBattleHistory(createFactoryAiBattleHistory(initialRules), initialRules);
+    history = recordFactoryAiKnownAbility(history, 0, "ABILITY_ROCK_HEAD");
+    history = recordFactoryAiKnownItemEffect(history, 0, 29);
+    expect(history.usedMoves[0]).toEqual([70]);
+    // Two switch-ins of slot 0 later the same Pokemon is back and has not moved yet (gLastMoves 0).
+    const reentered = Object.freeze({ ...liveRules(0), aiHistoryClears: Object.freeze([2, 0, 0, 0]) }) as ReturnType<typeof liveRules>;
+    history = syncFactoryAiBattleHistory(history, reentered);
+    expect(history.usedMoves[0]).toEqual([]);
+    expect(history.knownAbilities[0]).toBeNull();
+    expect(history.knownItemEffects[0]).toBe(29); // item-effect history is not cleared by a switch-in
+    // No further re-entry: nothing is cleared again.
+    history = recordFactoryAiKnownAbility(history, 0, "ABILITY_ROCK_HEAD");
+    history = syncFactoryAiBattleHistory(history, Object.freeze({ ...liveRules(89), aiHistoryClears: Object.freeze([2, 0, 0, 0]) }) as ReturnType<typeof liveRules>);
+    expect(history.usedMoves[0]).toEqual([89]);
+    expect(history.knownAbilities[0]).toBe("ABILITY_ROCK_HEAD");
+  });
+
   it("sync consumes production reveal handoffs and projects known ability/item facts into the trainer view", () => {
     const rules = liveRules(0, 0, {
       abilityIds: [9, 0, 0, 0],
