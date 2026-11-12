@@ -14,6 +14,9 @@ import {
 } from "./battleScriptMultiTurnCancellation.ts";
 import { BATTLE_TYPE_FRONTIER, HOLD_EFFECT_NAME_BY_ID } from "./battleScriptHitChainOpcode.ts";
 import { advanceRngValue } from "./rng.ts";
+
+/** include/constants/battle_move_effects.h EFFECT_EXPLOSION (Explosion and Selfdestruct). */
+const EFFECT_EXPLOSION = 7;
 import {
   calculateBaseDamage,
   NEUTRAL_STAT_STAGES,
@@ -3033,6 +3036,11 @@ export function advanceBattleScriptAttackCancelerConfused(
           },
           movePower: 40,
           moveType: "TYPE_NORMAL",
+          // pokemon.c:3229 reads the GLOBAL gBattleMoves[gCurrentMove].effect, not the `move` argument
+          // (MOVE_POUND here, battle_util.c:2173): a confused battler whose CHOSEN move is Explosion /
+          // Selfdestruct hits itself against half its Defense (ROM seed 218: 31, not 16;
+          // docs/parity-mac/confusion-self-hit-explosion.md).
+          moveEffect: rulesContext.currentMoveEffect === EFFECT_EXPLOSION ? "EFFECT_EXPLOSION" : undefined,
           isCriticalHit: false,
           isFrontierBattle: (rulesContext.battleTopology.battleTypeFlags & BATTLE_TYPE_FRONTIER) !== 0,
         });

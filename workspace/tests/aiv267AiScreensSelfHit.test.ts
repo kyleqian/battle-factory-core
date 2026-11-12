@@ -304,3 +304,28 @@ describe("fix B: the confusion self-hit calc sees the confused battler's own hol
     expect(result.rulesContext.battleMoveDamage).toBe(19);
   });
 });
+
+// parity-mac (docs/parity-mac/confusion-self-hit-explosion.md): pokemon.c:3229 halves the defender's Defense when the GLOBAL
+// gBattleMoves[gCurrentMove].effect is EFFECT_EXPLOSION; the confusion call passes MOVE_POUND as `move` (battle_util.c:2173) but
+// gCurrentMove is still the move the confused battler chose. ROM seed 218: Forretress, Explosion chosen, self-hit 31 (engine 16).
+describe("confusion self-hit halves Defense when the chosen move is Explosion / Selfdestruct", () => {
+  const selfHitWithChosenMove = (currentMove: number) => {
+    const context = createBattleScriptRulesContext({ ...rules({ confusedUser: true }), currentMove });
+    const result = advanceBattleScriptAttackCancelerConfused(context, 0x1234_5678, 0);
+    if (result.kind === "not-at-source-phase") throw new Error("not at the confused canceler phase");
+    expect(result.reason).toBe("confusion-self-hit");
+    return result.rulesContext.battleMoveDamage;
+  };
+
+  it("Tackle chosen: Pound 40 vs 100 / 100 = 19 (control)", () => {
+    expect(selfHitWithChosenMove(MOVE_TACKLE)).toBe(19);
+  });
+
+  it("Explosion (153) chosen: Defense 100 / 2 -> 100 * 40 * 22 / 50 / 50 + 2 = 37", () => {
+    expect(selfHitWithChosenMove(153)).toBe(37); // fails unfixed (19)
+  });
+
+  it("Selfdestruct (120) chosen: the same EFFECT_EXPLOSION halving", () => {
+    expect(selfHitWithChosenMove(120)).toBe(37); // fails unfixed (19)
+  });
+});
