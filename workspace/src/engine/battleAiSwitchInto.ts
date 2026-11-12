@@ -87,20 +87,27 @@ function typeMultiplierTenths(attackingType: string, defendingType: string): num
 }
 
 /**
- * `ModulateByTypeEffectiveness` (`battle_ai_switch_items.c:605-624`): the
+ * `ModulateByTypeEffectiveness` (`battle_ai_switch_items.c:605-627`): the
  * real `*var = (*var * mult) / 10` truncating in-out accumulator, checking
- * defType2 only when it differs from defType1. No floor-to-1 protection --
- * that belongs to `Cmd_typecalc`'s own final-damage domain
- * (`damageCalc.ts`'s `applyTypeEffectiveness`), not this AI-scoring one.
+ * defType2 only when it differs from defType1. The loop walks
+ * `gTypeEffectiveness` and applies each matching ROW as it comes, so the
+ * steps run in TABLE order, not in type1-then-type2 order, and the u8
+ * truncation depends on that order: Rock into Bug/Fighting meets
+ * `ROCK, FIGHTING, x0.5` (battle_main.c:422) before `ROCK, BUG, x2` (:425),
+ * 5 -> 2 -> 4, where type order gives 5 -> 10 -> 5 (ROM seed 1414,
+ * docs/parity-mac/replacement-type-score-table-order.md). The TYPE_FORESIGHT
+ * marker row is skipped and the rows after it still apply (`:611-615`). No
+ * floor-to-1 protection -- that belongs to `Cmd_typecalc`'s own final-damage
+ * domain (`damageCalc.ts`'s `applyTypeEffectiveness`), not this AI-scoring one.
  */
 function modulateByTypeEffectiveness(
   attackingType: string,
   defendingTypes: BattleAiSwitchTypes,
   runningVar: number,
 ): number {
-  let v = Math.trunc((runningVar * typeMultiplierTenths(attackingType, defendingTypes[0])) / 10);
-  if (defendingTypes[1] !== defendingTypes[0]) {
-    v = Math.trunc((v * typeMultiplierTenths(attackingType, defendingTypes[1])) / 10);
+  let v = runningVar;
+  for (const row of matchingTypeEffectivenessRows(attackingType, defendingTypes, TYPE_EFFECTIVENESS)) {
+    v = Math.trunc((v * row.multiplierTenths) / 10);
   }
   return v;
 }

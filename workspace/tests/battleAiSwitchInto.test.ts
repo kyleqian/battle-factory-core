@@ -175,6 +175,24 @@ describe("GetMostSuitableMonToSwitchInto pass 1 reads TypeCalc's flags (power ga
     throw new Error("AI_CalcDmg must not run when pass 1 resolves");
   };
 
+  it("seed 1414: the type score applies gTypeEffectiveness rows in TABLE order (Rock into Bug/Fighting = 5 -> 2 -> 4, not 5) -- ROM sends MACHAMP, not HERACROSS", () => {
+    // docs/parity-mac/replacement-type-score-table-order.md. Player RHYDON (Ground/Rock). HERACROSS (Bug/Fighting): Ground x0.5 on Bug
+    // = 5, then `ROCK, FIGHTING, x0.5` (battle_main.c:422) = 2, then `ROCK, BUG, x2` (:425) = 4. MACHAMP (Fighting): 5. The higher
+    // score wins (battle_ai_switch_items.c:704), so MACHAMP; in type1-then-type2 order HERACROSS also scored 5 and won as the first slot.
+    const RHYDON_TYPES = ["TYPE_GROUND", "TYPE_ROCK"] as const;
+    const result = getMostSuitableMonToSwitchInto(
+      bench([
+        { species: 384, hp: 0 }, // AGGRON, fainted active
+        { species: 214, hp: 146, types: ["TYPE_BUG", "TYPE_FIGHTING"], moves: [224, 280, 317, 68] }, // Megahorn, Brick Break, Rock Tomb, Counter
+        { species: 68, hp: 187, types: ["TYPE_FIGHTING", "TYPE_FIGHTING"], moves: [238, 157, 68, 184] }, // Cross Chop, Rock Slide, Counter, Scary Face
+      ]),
+      0,
+      RHYDON_TYPES,
+      { baseDamage: neverPass2, activeTypes: ["TYPE_STEEL", "TYPE_ROCK"], opposingTypes: RHYDON_TYPES, opposingAbility: 69, opposingStatus2: 0 },
+    );
+    expect(result).toEqual({ kind: "resolved", partyIndex: 2 });
+  });
+
   it("seed 332: a status move of a super-effective type (Rain Dance into Steel/Rock) is not a super effective move -- ROM sends SLOWKING (Brick Break), not AMPHAROS", () => {
     const result = getMostSuitableMonToSwitchInto(
       bench([
