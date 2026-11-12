@@ -1989,6 +1989,12 @@ function runCvHealBody(input: Readonly<{
   let rng = input.rng;
   let ordinal = input.drawOrdinalStart;
 
+  // `if_hp_equal AI_USER, 100, AI_CV_Heal3` (:1325) comes BEFORE `if_target_faster` (:1326): at full HP the script
+  // scores -3 with no speed check, so no tie draw (docs/parity-mac/ai-speed-tie-draw-order.md).
+  if (Math.floor((100 * input.attacker.hp) / input.attacker.maxHp) === 100) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -3 });
+  }
+
   const turnOrder = aiTurnOrder(input);
   const { attacker, target } = turnOrder;
 
@@ -2839,23 +2845,27 @@ function runCvSelfKO(input: Readonly<{
 
   const hpPercent = Math.floor((100 * input.attacker.hp) / input.attacker.maxHp);
 
-  const turnOrder = aiTurnOrder(input);
-  const { attacker, target } = turnOrder;
-
-  let tieRoll = 0;
-  let tieDraw: ReturnType<typeof nextDraw> | null = null;
-  if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
-    === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
-    tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
-    rng = tieDraw.after;
-    tieRoll = tieDraw.randomValue;
-    ordinal += 1;
+  // `if_hp_less_than AI_USER, 80, AI_CV_SelfKO_Encourage2` (:807) jumps PAST `if_target_faster` (:808): below 80% HP
+  // the speed check never runs and its tie draw is never spent (ROM seed 114; docs/parity-mac/ai-speed-tie-draw-order.md).
+  let targetFaster = false;
+  if (hpPercent >= 80) {
+    const turnOrder = aiTurnOrder(input);
+    const { attacker, target } = turnOrder;
+    let tieRoll = 0;
+    let tieDraw: ReturnType<typeof nextDraw> | null = null;
+    if (effectiveSpeed(attacker, turnOrder.weather, turnOrder.randomTurnNumber)
+      === effectiveSpeed(target, turnOrder.weather, turnOrder.randomTurnNumber)) {
+      tieDraw = nextDraw(rng, ordinal, `${input.reasonPrefix}-target-faster-tie`);
+      rng = tieDraw.after;
+      tieRoll = tieDraw.randomValue;
+      ordinal += 1;
+    }
+    const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
+    if (tieDraw) {
+      draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
+    }
+    targetFaster = strikesFirst === 1;
   }
-  const strikesFirst = getWhoStrikesFirst(attacker, target, tieRoll, turnOrder.weather, turnOrder.randomTurnNumber);
-  if (tieDraw) {
-    draws.push(Object.freeze({ ...tieDraw, kind: "target-faster-tie" as const, strikesFirst }));
-  }
-  const targetFaster = strikesFirst === 1;
 
   // Encourage1: HP < 80 or target faster -> Encourage2.
   if (hpPercent < 80 || targetFaster) {
@@ -5419,6 +5429,13 @@ function runCvBatonPass(input: Readonly<{
     || (input.attacker.spAtkStage ?? DEFAULT_STAT_STAGE) > threshold
     || input.attacker.spDefStage > threshold
     || input.attacker.evasionStage > threshold;
+
+  // BatonPass5 (:1999-2004): with no stat above stage 7 the script goes straight to ScoreDown2. `if_target_faster`
+  // exists only at BatonPass2 (:1987, some stat > 8) and BatonPass7 (:2007, some stat > 7), so the ordinary unboosted
+  // Baton Pass spends no tie draw (docs/parity-mac/ai-speed-tie-draw-order.md).
+  if (!userAnyStatAbove(7)) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: -2 });
+  }
 
   const turnOrder = aiTurnOrder(input);
   const { attacker, target } = turnOrder;
@@ -9407,6 +9424,12 @@ function runCvMirrorMove(input: Readonly<{
       scoreDelta: jumped ? 0 : 2,
       funcResultAfter,
     });
+  }
+
+  // MirrorMove2 (:846-850): `if_in_hwords ..._EncouragedMovesToMirror, AI_CV_MirrorMove_End` (:848) ends with no roll
+  // when the last move is encouraged, which on this label means the target was faster.
+  if (encouraged) {
+    return Object.freeze({ rng, draws: Object.freeze(draws), scoreDelta: 0, funcResultAfter });
   }
 
   // MirrorMove2: <80 roll, -1 on fall-through.
