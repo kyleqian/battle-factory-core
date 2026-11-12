@@ -2302,6 +2302,12 @@ const PROTECT_STRUCT_CLEAR: Partial<BattleScriptRulesBattlerState> = Object.free
   protectSpecialBattlerId: 0,
 });
 
+/** `TurnValuesCleanUp(TRUE)`'s two fields (`battle_main.c:4866-4867`). */
+const ENTER_TURN_PROTECT_CLEAR: Partial<BattleScriptRulesBattlerState> = Object.freeze({
+  protected: 0,
+  endured: 0,
+});
+
 function clearProtectStructsForNextTurn(rulesContext: BattleScriptRulesContext): BattleScriptRulesContext {
   let next = rulesContext;
   for (let i = 0; i < next.battleTopology.battlersCount; i += 1) {
@@ -2416,15 +2422,28 @@ function syncSubstituteStatus2(
 
 /**
  * `TurnValuesCleanUp(TRUE)` at `BattleTurnPassed`'s entry (`battle_main.c:3960`):
- * only the both-branch statements -- the substitute sync and the side-global
- * Follow Me clear -- plus the `protected`/`endured` pair the `TRUE` branch
- * owns (audit FINDING 4; no modeled end-turn reader, left to the tail memset).
+ * the `protected`/`endured` pair the `TRUE` branch owns (`:4864-4868`), then
+ * the both-branch statements -- the substitute sync and the side-global
+ * Follow Me clear. `endured` has an end-turn reader: the delayed Future Sight
+ * / Doom Desire hit runs `adjustnormaldamage2` (battle_scripts_1.s:3517),
+ * whose Endure clamp reads `gProtectStructs[gBattlerTarget].endured`
+ * (`battle_script_commands.c:1726-1730`). With the flag left to the tail
+ * memset, a Pokemon that used Endure survived a Future Sight landing the same
+ * turn at 1 HP; the game lets it faint (ROM seed 2215,
+ * docs/parity-mac/endure-future-sight.md).
  */
 function enterTurnValuesCleanUp(
   rulesContext: BattleScriptRulesContext,
 ): BattleScriptRulesContext {
+  let next = rulesContext;
+  for (let i = 0; i < next.battleTopology.battlersCount; i += 1) {
+    const battler = next.battlers[i]!;
+    if (battler.protected === 1 || battler.endured === 1) {
+      next = withBattler(next, i as BattleScriptBattlerId, ENTER_TURN_PROTECT_CLEAR);
+    }
+  }
   return clearFollowMeTimersForTurnValuesCleanUp(
-    syncSubstituteStatus2(rulesContext),
+    syncSubstituteStatus2(next),
   );
 }
 
@@ -2877,14 +2896,13 @@ function clearEndTurnFlinchAndSleepLocks(
  * point) and before the next turn's decision boundary is computed.
  *
  * `TurnValuesCleanUp(TRUE)` (top of `BattleTurnPassed`, source `var0=TRUE`)
- * clears `protected`/`endured` plus both Follow Me timers. The timers are
+ * clears `protected`/`endured` plus both Follow Me timers. All three are
  * cleared literally at entry below, before any field/battler/faint/delayed
- * work can return a resumable barrier. The full `ProtectStruct` memset
- * remains modeled once at `TurnValuesCleanUp(FALSE)`'s tail call
- * (`battle_main.c:3974`, doc §1.3/§2.4); no modeled reader currently needs
- * its `TRUE`/`FALSE` mid-pass split (see
- * `docs/counter-retaliation-design.md` §2.2). That tail calls the same timer
- * helper again, matching source and making the clear idempotent. The
+ * work can return a resumable barrier (the delayed Future Sight hit reads
+ * `endured`). The full `ProtectStruct` memset is modeled at
+ * `TurnValuesCleanUp(FALSE)`'s tail call (`battle_main.c:3974`, doc
+ * §1.3/§2.4). That tail calls the same timer helper again, matching source
+ * and making the clear idempotent. The
  * post-faint positional Future Sight/Doom Desire phase is applied below;
  * The post-faint positional Future Sight/Doom Desire and Perish Song phases
  * are both applied below in their source order.

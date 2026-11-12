@@ -67,6 +67,7 @@ function battler(changes: Partial<BattleScriptRulesBattler> = {}): BattleScriptR
     friendship: changes.friendship ?? 70,
     partyIndex: changes.partyIndex ?? 0,
     protected: changes.protected,
+    endured: changes.endured,
   } as BattleScriptRulesBattler;
 }
 
@@ -394,6 +395,30 @@ describe("positional delayed Future Sight resolution", () => {
     expect(result.kind).toBe("next-turn");
     // [target, attacker]: the delayed hit lands (140 -> 101), the Shell Bell holder stays at 100.
     expect([result.state.rulesContext.battlers[1].hp, result.state.rulesContext.battlers[0].hp]).toEqual([101, 100]);
+  });
+
+  it("Endure used this turn does not hold against the delayed hit: TurnValuesCleanUp(TRUE) cleared it (battle_main.c:4867)", () => {
+    // docs/parity-mac/endure-future-sight.md (ROM seed 2215: Ninjask at 30 HP used Endure, the Future Sight landed that turn
+    // and it fainted; the engine left it at 1 HP with "endured the hit"). Target (battler 1) at 30 HP, the hit is worth 40.
+    const delayed = rules({
+      battlers: [
+        battler({ side: 0 }),
+        battler({ side: 1, species: 135, types: ["TYPE_ELECTRIC", "TYPE_ELECTRIC"], hp: 30, endured: 1 }),
+        battler({ side: 0, hp: 0 }), battler({ side: 1, hp: 0 }),
+      ],
+      party: {
+        player: [{ species: 64, hp: 140 }, {}, {}, {}, {}, {}],
+        opponent: [{ species: 135, hp: 30 }, {}, {}, {}, {}, {}],
+      },
+      sideStatuses: [0, SIDE_STATUS_FUTUREATTACK],
+      futureSightCounter: [0, 1, 0, 0],
+      futureSightMove: [0, FUTURE_SIGHT, 0, 0],
+      futureSightAttacker: [0, 0, 0, 0],
+      futureSightDmg: [0, 40, 0, 0],
+    });
+    const result = endTurn(delayed);
+    const context = (result as { state: { rulesContext: { battlers: readonly { hp: number; endured?: number }[] } } }).state.rulesContext;
+    expect(context.battlers[1]!.hp).toBe(0); // unfixed: 1
   });
 
   it("routes Doom Desire through the same positional timer with its own accuracy and hit animation", () => {
