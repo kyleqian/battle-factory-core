@@ -238,7 +238,7 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
      - A new divergence joins the open list with its seed, scene and first diverging row. One ISSUES entry per CAUSE, not per seed.
      - Not drivable until replay upgrade 3: 24 Brain seeds (33, 82, 131 and 21 in section 7's batch).
    - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
-     the highest seed driven (1160 now) and the consecutive-clean count. A seed is driven as "new" once only.
+     the highest seed driven (1160 now; a Mac session is driving 1161..10000 from 2026-11-12, so new seeds on the box start at 10001, and its results land in `docs/replay-batches/` on branch `worker/replay-batch-mac`) and the consecutive-clean count. A seed is driven as "new" once only.
    - **Two machines (Kyle, 2026-11-12, last decision of the day: "Sure, let's try that"). This replaces the earlier
      "battle-rule fixes are the MAIN program of every box run" pace of the same day.**
      - **The Mac lane owns battle-rule diagnosis and fixes.** It is a separate session on the Mac working on branch
