@@ -17,16 +17,7 @@ exclusions are superseded. Unrelated expansions stay parked.
 
 Causes A / B (aiv270) and C (aiv271, `docs/aiv271-ai-damage-terms.md`: AI damage sims take the real hit chain's `battleScriptDamageTerms`) are
 fixed; seeds 22 / 30 / 39 match both scenes and 57 ON matches. Open: the AI switch-into scorer (`battle_ai_switch_items.c:778`) still uses a
-`baseDamage: 0` stub in `battleAiSwitchInto.ts` (unaudited). Seed 60's forced-Struggle AI lead (`docs/dia272-leads.md`) is the next AI item.
-
-## #209 — Stale MOVE_EFFECT_BYTE leaks across turns (dia269 seed 53, 2026-11-11)
-
-Engine applies BattleScript_DoRecoil after an Aerial Ace KO that the ROM does not: `battleEndTurnOrchestration.ts:2431` / `:2443` keep a previous turn's
-move-effect byte; C clears it (`battle_script_commands.c:2917-2937`). High confidence from code + draw log; not re-driven with a patch. `docs/dia269-leads.md`.
-
-## #210 — RNG draw count / order around the speed tie and the per-turn random draw (dia269 seed 42, 2026-11-11)
-
-Medium-high confidence: `battleEndTurnOrchestration.ts:2762-2785` vs C `battle_main.c:3956-3975`. Seeds 50 / 60 not isolated. `docs/dia269-leads.md`.
+`baseDamage: 0` stub in `battleAiSwitchInto.ts` (unaudited). Seed 60's forced-Struggle AI lead (`docs/dia272-leads.md`, scratch 36 / 82 -> 73 / 82 OFF) and seed 50 ON (not driven) are the next items.
 
 ## #200 — Opponent faint-replacement party summary residuals (obr251, 2026-11-07)
 

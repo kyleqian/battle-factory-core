@@ -12,6 +12,13 @@ history.
 
 - **mGBA python `StereoBuffer.read()` returns a slice that does not keep its buffer alive**: alternate frames read garbage, which looks
   like emulator nondeterminism (aud244a, ~90 min). Drain with `read_into` on your own buffer (`tools/audio/soundRecorder.py`).
+- **`romDriveSeed.sh` on a scratch / worktree copy needs `POKEBENCH_MGBA_PYTHON` and an `oracle` symlink** (undocumented; dia272 ~6 min,
+  fix274 ~2 min). The engine replay timeline omits the mid-turn forced-switch turn, so engine / ROM rows are aligned by hand (dia272 ~5 min).
+- **`npm run typecheck` takes ~4-4.5 min** and auto-backgrounds at the 120 s default tool timeout; one worker then started a SECOND typecheck
+  beside it (2 x 5-7 GB, the host hit 1 GB free; supervisor killed the duplicate). Wait on the first one's exit (aiv271 ~10 min, lbra ~15 min, fix274).
+- **`lsd194Census.sh` merges its shards by re-resolving `HEAD` / `HEAD~1`**: a supervisor merge mid-run makes it report INCOMPLETE with every
+  part on disk (pnm273 ~3 min). Pass explicit SHAs.
+- **No compare-ready Scene ON loss / retire lab** for the Lobby return windows (lbra ~30 min).
 - **A worker's full suite dies with the worker** when the 10-min Bash limit backgrounds it and the worker ends its turn (aud244a); a
   worker that must report a suite has to poll it to the exit file before finishing. Bumps the 2026-11-10 / 11 "over 600 s" entry below.
 

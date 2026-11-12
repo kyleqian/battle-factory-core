@@ -10,8 +10,9 @@
  * Source-owned fields not represented by the rules context are deliberately
  * not guessed:
  * - `gCurrentActionFuncId` and `gActionsByTurnOrder[]`;
- * - `gBattleCommunication[3]` and `[4]` (only slots 0/1 exist in the current
- *   context);
+ * - `gBattleCommunication[4]` (slots 0/1 and the MOVE_EFFECT_BYTE slot 3,
+ *   `moveEffectByte`, are represented; `[3]` is cleared below, `[0]`/`[1]` are
+ *   not cleared by this function in source either);
  * - `SpecialStatus::{statLowered,intimidatedMon,traced,
  *   faintedHasReplacement,physicalBattlerId,
  *   specialBattlerId}`. The represented `lightningRodRedirected`,
@@ -154,6 +155,7 @@ export function handleBattleActionFinished(
       dynamicBasePower: 0,
       battleMovePowerWritten: false,
       moveendState: 0,
+      moveEffectByte: 0,
       multiHitEffect: 0,
     }),
   });
