@@ -90,9 +90,12 @@ describe("Factory full-turn infatuation immobilization", () => {
         opcodeName: "B_SCR_OP_PRINTSTRING",
       },
     });
+    // The immobilized battler acted LAST, so the canceller's HITMARKER_UNABLE_TO_USE_MOVE is still set when the
+    // action ends; BattleTurnPassed then clears it (battle_main.c:3976) before the next turn's request is
+    // published. This line used to pin the leaked bit (docs/parity-mac/turn-passed-hitmarker-clear.md).
     expect(
       rules.hitMarker & BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE
-    ).toBe(BATTLE_SCRIPT_HITMARKER_UNABLE_TO_USE_MOVE);
+    ).toBe(0);
     expect(rules.currentMove).toBe(0);
   });
 });
