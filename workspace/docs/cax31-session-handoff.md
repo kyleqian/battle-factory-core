@@ -186,6 +186,54 @@ never brief those here. One worker at a time; each run folds the next audio step
      and nothing is needed for it today.
    - **Website:** ENGINE_BUILD moves. Open site challenges finish on the build they started on (the site archives every
      build), so nothing strands.
+0d. **User decision 2026-11-12 (Kyle): the real-game replay becomes THE gameplay check, and it must not slow development
+   down. He left the schedule to the top layer; the schedule below is that choice.**
+   - **Why:** `docs/gameplay-parity-audit-2026-11-12.md`. Soak, census, pins and the coverage docs never compared a live
+     battle number with the ROM; only `tools/audio/romDriveSeed.sh` does. Kyle's goal is sound core battle logic with complete
+     parity. His constraint: the check must not bog the work down, and it need not be exhaustive, only probabilistically sound.
+   - **First batch (top layer, Mac, tree `69241cf85`, seeds 61..160 OFF; audit doc section 6):** 78 full match, **20 diverge**,
+     2 not drivable (Brain). 279 s wall at 8 lanes on the Mac.
+   - **Claim rule (now):** report gameplay status only from replay results: seeds driven, matched, consecutive clean, and what
+     the replay cannot reach yet (audit doc section 5). Do not call battle logic complete or parity-verified from soak, census,
+     pins, "engine-referenced" or message-count coverage.
+   - **When the replay runs. This is all of it; nothing runs per code change:**
+     1. **Once per run, at run start, in the background.** `nohup`, `nice -n 19`, 2 lanes, a hard 60-minute wall cap, on the
+        tree as it stands at run start. The permanent list first, then new seeds upward from the highest seed ever driven,
+        Scene OFF (ON and OFF gave the same result on every seed so far; also drive every tenth new seed ON). Do not wait for
+        it: dispatch the first worker as usual and read the result when it ends. Use 1 lane if it starves a full suite.
+     2. **Gameplay-fix steps, as today:** the worker re-drives the seed(s) it fixes and the permanent list. No new seeds in
+        worker steps.
+     3. **Wind-down:** the permanent list on the final tree, only if an engine gameplay change landed in the run.
+     - Audio, presentation and cleanup steps never run the replay. No existing gate is removed: the soaks still cover deep
+       rounds and swaps, which the replay does not reach yet.
+   - **Permanent list** = every seed that ever diverged, kept forever: 2 6 8 11 13 17 20 22 26 27 28 30 31 32 39 42 50 53 57 60
+     75 79 87 88 89 90 94 95 107 109 110 114 119 123 137 138 152 155 158 159. Open on `69241cf85`: 39 42 50 53 57 60 and the
+     twenty from 75 up. A new divergence joins the list and gets an ISSUES entry (seed, scene, first diverging row).
+   - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
+     the highest seed driven (160 now) and the consecutive-clean count. A seed is driven as "new" once only.
+   - **Fix pace:** unchanged (item 0: at least one gameplay-fix step per run). Order of the gameplay queue:
+     1. open replay divergences: #204 C, #209, #210, then triage the twenty new seeds by first diverging row (many will share
+        a cause; diagnosis-only steps like dia263 / dia269 are the proven shape);
+     2. the audit doc's section 2 rows by reach. A1 is the same function as #204 C: fix them as one step with the section 4
+        shape. A2 / A3 run on every opponent faint replacement. Then B1 (Toxic counter), B2 (Encore).
+     - Every audit row is source-read only. Confirm it on the ROM with the fix (a seed, or a Mechanic Lab `overrides.parties`
+       scenario). File ISSUES entries from the audit doc at your next ISSUES edit; the top layer did not touch `ISSUES.md`.
+   - **Replay upgrades (tools only; at most one per run, when the run has room after its audio and gameplay-fix steps; in
+     this order):**
+     1. **One pass and a batch runner.** Read the state timeline during the drive (`romStateTimeline.py` re-runs the ROM
+        today), fewer process starts per seed, and a `--jobs N --minutes M` runner that writes the ledger rows. Mac: 18 s per
+        seed alone (audit doc section 5). Report the CAX31 per-seed time before and after.
+     2. **A random player.** A seeded random legal action each turn, voluntary switches included (the driver already drives the
+        party menu for forced switches). Without it B1 / B2 / Pursuit / trapping / Natural Cure never occur at any seed count.
+     3. **Reach.** Later battles of a round, Open Level, the Brain (the lab accepts `trainerId` 0..299 only; seeds 33 / 82 / 131).
+     4. **Wider compare.** Per turn also status1 / status2, stat stages, PP, side statuses and timers, weather. The lab `state`
+        capture already exposes them.
+     5. **Tally and steering.** Count, per move effect / ability / hold effect, how often it took effect in a fully matched
+        battle (not "named in source", not "printed a message"). Steer new battles toward the zero rows with Mechanic Lab
+        `overrides.parties` teams.
+   - **Finish line for "battle logic is done":** 3,000 consecutive clean new seeds with the random player across Level 50,
+     Open Level and the Brain, and no zero row in the tally without a source proof that it cannot occur in the Factory.
+
 1. **Audio (S11)** — the main program for several runs: `docs/s11-audio-design.md` section 7. Next: **aud241** battle
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
