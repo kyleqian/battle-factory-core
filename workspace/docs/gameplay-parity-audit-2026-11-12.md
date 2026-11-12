@@ -148,3 +148,46 @@ Evidence was written to a session scratch directory and is not kept; every row r
 
 Reading: 20 of 98 drivable new battles (20 %) still leave the ROM's line on the aiv270 tree. Several will share a cause
 (the open #204 C / #209 / #210 and the section 2 A rows change AI picks, which shows up as a menu the engine did not plan).
+
+## 7. Second batch: 1,000 new seeds on the Mac (seeds 161..1160, Scene OFF), sorted by signature
+
+Tree `69241cf85` (engine source identical through `f3ca2c797`), 12 lanes, 34 min wall (2,044 s for 987 seeds after a 13-seed start).
+Then every mismatched seed was re-driven on `8481a3e20` (the box's mid-run master with aiv271 + pnm273, merged with the ops commits).
+
+| | seeds |
+|---|---|
+| full match on `69241cf85` | 840 |
+| mismatched on `69241cf85` | 139 (one is the known frame-budget engine error, seed 796) |
+| not drivable (Brain, `trainerId` 1022) | 21 |
+| of the 139, match on `8481a3e20` | 20 |
+| **still mismatched on `8481a3e20`** | **119** |
+
+Signature = what the engine's diverging turn contains (messages, moves, battler state from `replay --events=1`) and how the ROM rows differ.
+**A signature is not a proven cause.** Start each group with a diagnosis step on 2 or 3 of its seeds (dia263 / dia269 shape). A seed can carry several signatures; the count column is seeds not already counted in a row above.
+
+| signature | seeds (new) | what it is | lead | seeds |
+|---|---|---|---|---|
+| OPP-REPLACEMENT-DIFFERS | 21 (21) | after an opponent faint the ROM sends in a different mon (engine's new opponent HP != the ROM's) | A2 / A3 / A4; ISSUES #204 remainder (switch-into scorer) | 165 183 284 332 343 491 566 573 675 715 830 839 857 867 899 900 904 907 926 986 1017 |
+| STRUGGLE-RECOIL | 17 (17) | a battler uses Struggle and the turn carries the recoil message | new; not diagnosed | 225 265 345 417 492 529 542 577 737 804 862 897 973 1095 1112 1125 1157 |
+| STRUGGLE | 7 (7) | Struggle in the diverging turn (engine or ROM), no recoil message | new; not diagnosed | 292 444 702 705 796 813 929 |
+| ENCORE | 10 (10) | Encore just landed or is active; the ROM opens the action menu, the engine plays the turn with no decision | B2 | 161 193 203 228 522 553 631 758 992 1021 |
+| INFATUATION | 8 (4) | `PKMNINLOVE` in the diverging turn | new; not diagnosed | 265 298 444 492 547 564 566 613 |
+| RECOIL-ON-NON-RECOIL-MOVE | 7 (6) | `PKMNHITWITHRECOIL` in a turn whose moves have no recoil effect | ISSUES #209 (stale MOVE_EFFECT_BYTE) | 198 279 298 521 530 665 971 |
+| CONFUSION-SELF-HIT | 5 (4) | `ITHURTCONFUSION` in the diverging turn | B6 where the chosen move is Explosion / Selfdestruct (seed 218: ROM 31, engine 16); the rest not diagnosed | 218 457 616 838 986 |
+| rest: (none) | 16 | no named signature above | not diagnosed | 260 342 392 426 440 483 484 651 898 906 959 1005 1014 1083 1117 1134 |
+| rest: OPP-HOLDS-DAMAGE-ITEM | 16 | no named signature above | not diagnosed | 454 576 707 783 881 905 918 965 968 996 1031 1032 1066 1072 1081 1153 |
+| rest: AFTER-PLAYER-FAINT | 6 | no named signature above | not diagnosed | 202 475 499 769 912 1030 |
+| rest: RECOIL-MOVE | 5 | no named signature above | not diagnosed | 366 459 543 614 999 |
+| rest: AFTER-OPP-FAINT (rom replacement not seen) | 3 | no named signature above | not diagnosed | 236 643 799 |
+| rest: AFTER-OPP-FAINT (same replacement hp) | 3 | no named signature above | not diagnosed | 525 591 848 |
+| rest: SLEEP-TURN | 1 | no named signature above | not diagnosed | 872 |
+
+The named signatures cover 69 of the 119 still-mismatched seeds.
+
+Now matching on `8481a3e20` (join the regression list): 190 235 248 311 435 555 596 619 650 698 761 770 841 846 894 1001 1011 1028 1103 1118.
+
+Older lists re-driven on `8481a3e20`: regression 2 6 8 11 13 17 20 22 26 27 28 30 31 32 all match; of the older open seeds, 39 57 75 88 110 155 now match;
+42 50 53 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 158 159 still diverge.
+
+Totals on `8481a3e20`, seeds 1..1160 plus 224 / 552 / 177 history: **139 open seeds** (20 older + 119), **40 regression seeds** (14 + 6 + 20), 24 Brain seeds not drivable, highest seed driven 1160.
+The sorter is a scratch script (first unmatched engine row -> the `--events=1` turn at that frame -> message / move / state signatures); rebuild it as a tool with replay upgrade 1.

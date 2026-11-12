@@ -195,12 +195,20 @@ never brief those here. One worker at a time; each run folds the next audio step
      parity. His constraint: the check must not bog the work down, and it need not be exhaustive, only probabilistically sound.
    - **First batch (top layer, Mac, tree `69241cf85`, seeds 61..160 OFF; audit doc section 6):** 78 full match, **20 diverge**,
      2 not drivable (Brain). 279 s wall at 8 lanes on the Mac.
+   - **Second batch (top layer, Mac, seeds 161..1160 OFF; audit doc section 7):** 840 full match, **139 diverge**, 21 Brain.
+     34 min wall at 12 lanes. Re-driven on `8481a3e20` (with your aiv271): 20 of the 139 now match, **119 still diverge**.
+     They are sorted by signature in section 7; six signatures cover 69 of the 119.
+   - **Division of labour (Kyle, 2026-11-12: "keep the nightly job lean; harvest in bulk on the Mac"):** bulk discovery is the
+     Mac top layer's job (1,000 new seeds in about 34 minutes there), and it re-drives the open list after fixes land and
+     updates the lists in the audit doc. The box's nightly job stays small (below). The box does not need to hunt for new
+     mismatches: there are 139 open seeds waiting.
    - **Claim rule (now):** report gameplay status only from replay results: seeds driven, matched, consecutive clean, and what
      the replay cannot reach yet (audit doc section 5). Do not call battle logic complete or parity-verified from soak, census,
      pins, "engine-referenced" or message-count coverage.
    - **When the replay runs. This is all of it; nothing runs per code change:**
      1. **Once per run, at run start, in the background.** `nohup`, `nice -n 19`, 2 lanes, a hard 60-minute wall cap, on the
-        tree as it stands at run start. The permanent list first, then new seeds upward from the highest seed ever driven,
+        tree as it stands at run start. The regression list first (it must stay matching), then new seeds upward from
+        the highest seed ever driven if time is left. Open seeds are NOT re-driven nightly: they are known failures.
         Scene OFF (ON and OFF gave the same result on every seed so far; also drive every tenth new seed ON). Do not wait for
         it: dispatch the first worker as usual and read the result when it ends. Use 1 lane if it starves a full suite.
      2. **Gameplay-fix steps, as today:** the worker re-drives the seed(s) it fixes and the permanent list. No new seeds in
@@ -208,20 +216,29 @@ never brief those here. One worker at a time; each run folds the next audio step
      3. **Wind-down:** the permanent list on the final tree, only if an engine gameplay change landed in the run.
      - Audio, presentation and cleanup steps never run the replay. No existing gate is removed: the soaks still cover deep
        rounds and swaps, which the replay does not reach yet.
-   - **Permanent list** = every seed that ever diverged, kept forever: 2 6 8 11 13 17 20 22 26 27 28 30 31 32 39 42 50 53 57 60
-     75 79 87 88 89 90 94 95 107 109 110 114 119 123 137 138 152 155 158 159. Open on `69241cf85`: 39 42 50 53 57 60 and the
-     twenty from 75 up. A new divergence joins the list and gets an ISSUES entry (seed, scene, first diverging row).
+   - **Two lists (state on `8481a3e20`; "the permanent list" in this item means the regression list):**
+     - **Regression list** = seeds that diverged once and match now; they must keep matching (40): 2 6 8 11 13 17 20 22 26 27
+       28 30 31 32 39 57 75 88 110 155 190 235 248 311 435 555 596 619 650 698 761 770 841 846 894 1001 1011 1028 1103 1118.
+     - **Open list** = seeds that still diverge (139): 42 50 53 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 158 159
+       and the 119 in audit doc section 7. A seed moves from open to regression when a fix makes it match to battle end.
+     - A new divergence joins the open list with its seed, scene and first diverging row. One ISSUES entry per CAUSE, not per seed.
+     - Not drivable until replay upgrade 3: 24 Brain seeds (33, 82, 131 and 21 in section 7's batch).
    - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
-     the highest seed driven (160 now) and the consecutive-clean count. A seed is driven as "new" once only.
+     the highest seed driven (1160 now) and the consecutive-clean count. A seed is driven as "new" once only.
    - **Fix pace (Kyle, later on 2026-11-12: "stop de-prio the battle fixes. they're important"):** battle-rule fixes are now
      the MAIN program of every run. Take them first and fold as many as fit, one worker at a time (the 16 GiB host note
      stands), in the queue order below. Sound keeps moving with at least one playback step per run, because Kyle wants
      both; cleanup takes what is left. This supersedes the "one gameplay-fix step" pace in item 0 and the "main program"
      wording in item 1. Order of the gameplay queue:
-     1. open replay divergences: #204 C, #209, #210, then triage the twenty new seeds by first diverging row (many will share
-        a cause; diagnosis-only steps like dia263 / dia269 are the proven shape);
-     2. the audit doc's section 2 rows by reach. A1 is the same function as #204 C: fix them as one step with the section 4
-        shape. A2 / A3 run on every opponent faint replacement. Then B1 (Toxic counter), B2 (Encore).
+     1. the signature groups of audit doc section 7, largest first. A signature is not a proven cause: open each group with
+        a diagnosis step on 2 or 3 of its seeds (dia263 / dia269 shape), then fix, then re-drive the whole group:
+        (a) the ROM sends in a different opponent after a faint, 21 seeds (leads A2 / A3 / A4; your #204 remainder
+        "switch-into scorer stub"); (b) Struggle, 24 seeds (new, not diagnosed); (c) Encore: the ROM opens the action menu,
+        10 seeds (lead B2; this also lets the replay continue past any Encore); (d) recoil on a move with no recoil, 7 seeds
+        (#209); (e) infatuation, 8 seeds (new); (f) confusion self-hit, 5 seeds (lead B6, seed 218 shows ROM 31 vs engine 16);
+     2. #210 and the older open seeds (42 50 53 60 and 79..159), then section 7's unsigned rest (50 seeds);
+     3. the audit doc's section 2 rows that the replay cannot show yet, by reach: the rest of A1 (aiv271 fixed the #204 C
+        part; check burn / pinch `maxHp` / Guts / weather / Flash Fire against it), A5-A7, B1 (Toxic counter), B3-B8.
      - Every audit row is source-read only. Confirm it on the ROM with the fix (a seed, or a Mechanic Lab `overrides.parties`
        scenario). File ISSUES entries from the audit doc at your next ISSUES edit; the top layer did not touch `ISSUES.md`.
    - **Replay upgrades (tools only; at most one per run, when the run has room after its audio and gameplay-fix steps; in
