@@ -171,6 +171,21 @@ never brief those here. One worker at a time; each run folds the next audio step
      4. **lbr-d, 7 wins:** return to the Lobby inside the same mount and trace (BP, save, record, farewell), then the
         attendant continues the streak in-game. That is the same server challenge, so no host hand-off and no
         `challenge-request`; `round-end` stays where it is.
+0c. **User decision 2026-11-12 (Kyle): the player's name defaults to "PLAYER", not the oracle save's "MEMORY".**
+   - **Scope:** one small step, first free slot.
+   - **Where MEMORY is baked in today:** `FORFEIT_MESSAGE_PLAYER_NAME` (`battleCommandPresentation.ts:324`), the record
+     messages (`factoryTerminalPresentation.ts:207`, `:270`, `postwin.ts:808`), the BP award (`factoryTerminalPresentation.ts:292`),
+     and 5 test files. Grep the rest of the tree, the generated data included, before you trust that list.
+   - **Shape:** one constant, `PLAYER_NAME = "PLAYER"`, in one module, used by every site.
+   - **Timing:** both names are 6 characters and the text prints 1 frame per glyph, so frame timing is unchanged. Prove it:
+     a differential over the census traces must show only those message boxes' pixels changing, and the kernel digest must
+     not change.
+   - **ROM comparisons:** the oracle save stays "MEMORY". Any ROM-pixel comparison over those boxes passes "MEMORY"
+     through a harness-only override, or masks the name. Never change the oracle save.
+   - **Later, not now:** a per-player name. That would be a `playerName` mount option stored with the server challenge,
+     and nothing is needed for it today.
+   - **Website:** ENGINE_BUILD moves. Open site challenges finish on the build they started on (the site archives every
+     build), so nothing strands.
 1. **Audio (S11)** — the main program for several runs: `docs/s11-audio-design.md` section 7. Next: **aud241** battle
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
