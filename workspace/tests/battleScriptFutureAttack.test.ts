@@ -370,6 +370,32 @@ describe("positional delayed Future Sight resolution", () => {
     expect(result.state.rng.calls).toBe(2);
   });
 
+  it("the attacker's Shell Bell does not heal off the delayed hit: the target's shellBellDmg is IGNORE_SHELL_BELL (battle_util.c:1816)", () => {
+    // docs/parity-mac/shell-bell-future-sight.md (ROM seed 475: Whiscash's Future Sight lands for 45, its Shell Bell does nothing;
+    // the engine healed 5). Attacker (battler 0) at 100 / 140 holding Shell Bell 219; the hit lands for 40.
+    const delayed = rules({
+      battlers: [
+        battler({ side: 0, hp: 100, item: 219 }),
+        battler({ side: 1, species: 135, types: ["TYPE_ELECTRIC", "TYPE_ELECTRIC"] }),
+        battler({ side: 0, hp: 0 }), battler({ side: 1, hp: 0 }),
+      ],
+      party: {
+        player: [{ species: 64, hp: 100 }, {}, {}, {}, {}, {}],
+        opponent: [{ species: 135, hp: 140 }, {}, {}, {}, {}, {}],
+      },
+      sideStatuses: [0, SIDE_STATUS_FUTUREATTACK],
+      futureSightCounter: [0, 1, 0, 0],
+      futureSightMove: [0, FUTURE_SIGHT, 0, 0],
+      futureSightAttacker: [0, 0, 0, 0],
+      futureSightDmg: [0, 40, 0, 0],
+    });
+    const result = endTurn(delayed);
+    if (result.kind === "non-terminal-barrier") throw new Error(`barrier ${result.instruction.opcodeName}`);
+    expect(result.kind).toBe("next-turn");
+    // [target, attacker]: the delayed hit lands (140 -> 101), the Shell Bell holder stays at 100.
+    expect([result.state.rulesContext.battlers[1].hp, result.state.rulesContext.battlers[0].hp]).toEqual([101, 100]);
+  });
+
   it("routes Doom Desire through the same positional timer with its own accuracy and hit animation", () => {
     const result = endTurn(rules({
       currentMove: TACKLE,

@@ -2448,6 +2448,9 @@ function enterTurnValuesCleanUp(
  * battle_scripts_1.s:780 / 1066 / 1813 / 1909 / 1975): ROM seed 342, Solar
  * Beam (docs/parity-mac/turn-passed-hitmarker-clear.md).
  */
+/** include/battle.h IGNORE_SHELL_BELL. */
+const FUTURE_ATTACK_IGNORE_SHELL_BELL = 0xffff;
+
 const BATTLE_TURN_PASSED_HITMARKER_CLEAR_MASK = ((1 << 9) | (1 << 19) | (1 << 22)) >>> 0;
 
 function finishTurnValuesCleanUp(
@@ -2684,6 +2687,17 @@ function runFutureAttacksAfterFaints(
     if (counters[battler] === 0 && counters[partner] === 0) {
       sideStatuses[rc.battlers[battler].side] &= ~SIDE_STATUS_FUTUREATTACK;
     }
+    // `gSpecialStatuses[gBattlerTarget].shellBellDmg = IGNORE_SHELL_BELL` (battle_util.c:1816): the delayed hit's
+    // datahpupdate then leaves the marker alone (battle_script_commands.c:1932-1933 writes only a 0 cell), so
+    // MOVEEND_KINGSROCK_SHELLBELL (battle_util.c:3789-3790), which BattleScript_FutureAttackEnd's moveendfromto
+    // reaches, does not heal the attacker's Shell Bell off Future Sight / Doom Desire. ROM seed 475
+    // (docs/parity-mac/shell-bell-future-sight.md).
+    rc = withBattler(rc, battler, {
+      specialStatus: Object.freeze({
+        ...rc.battlers[battler].specialStatus,
+        shellBellDmg: FUTURE_ATTACK_IGNORE_SHELL_BELL,
+      }),
+    });
     rc = Object.freeze({
       ...rc,
       battleMoveDamage: rc.futureSightDmg[battler],
