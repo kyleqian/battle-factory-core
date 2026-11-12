@@ -58,6 +58,8 @@ describe("FactorySession events (contract v2)", () => {
     const session = new FactorySession({ battleScene: "off" });
     const player = soakPlayer(1, "winning");
     player.retireRate = 1;
+    // lbra: the soak player now walks on from the Lobby by default; this test plays the Lobby idle (the digest covers every observed frame).
+    player.newChallengeFromLobby = false;
     const census = new CensusDigest();
     const events: FactoryEvent[] = [];
     for (let frame = 1; frame <= 20_000 && session.ended === null; frame += 1) {

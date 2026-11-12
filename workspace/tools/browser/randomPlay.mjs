@@ -29,8 +29,9 @@
  *        --render-every N (goal mode: the page draws every Nth frame, default 1 = every frame, like the real loop)
  *        --minutes N (per scene, default 10) --scene on|off|both (default both) --seed N|0xHEX (default 1)
  *        --out DIR (default .integration/random-play/<timestamp>) --dist DIR (default dist)
- *        --lobby-new-challenge (goal mode, nch231: after a loss / RETIRE-YES the director wanders the Lobby, walks back to
- *          the singles attendant and presses A, so the SAME page plays the next challenge; default off: a lobby ends the page)
+ *        --lobby-new-challenge (goal mode, nch231: after a loss / forfeit / RETIRE-YES the director wanders the Lobby, walks back to
+ *          the singles attendant and presses A, so the SAME page plays the next challenge (lbra: always, since every loss ends in
+ *          the Lobby); the flag additionally makes the continuation menu RETIRE half the time)
  *        --no-replay-stats (skip the offline engine replay that counts battles) --headed
  * The browser-side input is wall-clock timed, so a run is not bit-reproducible; the saved session JSON is
  * (tools/replay-session-trace.ts). Battles reached are derived by replaying the session traces in node.
@@ -401,7 +402,7 @@ async function runSceneGoal(browser, port, scene, options, outDir, log) {
   };
 
   const newDirector = () =>
-    new GoalPlayDirector({ seed: options.seed, scene, challenge, presentationSeed: (options.seed + challenge) >>> 0, mixRate: options.mixRate, newChallengeFromLobby: options.lobbyNewChallenge });
+    new GoalPlayDirector({ seed: options.seed, scene, challenge, presentationSeed: (options.seed + challenge) >>> 0, mixRate: options.mixRate, retireFromLobby: options.lobbyNewChallenge });
 
   await open();
   let director = newDirector();

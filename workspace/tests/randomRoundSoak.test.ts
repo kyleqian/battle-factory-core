@@ -590,16 +590,23 @@ describe("random round soak driver (green milestone pin)", () => {
         if (outgoing !== undefined && !outgoing.fainted) haltFrame = state.frame;
       },
     };
-    const result = runSeed(32, {
+    //
+    // lbra (every loss now ends in the walkable Lobby, as the ROM does, and the soak walks back to the attendant instead of the
+    // old loss -> new-draft chain; the next challenge's RNG is the live vblank-advanced cursor, so every exploring seed re-rolled
+    // again, and `stopAtFirstRoundDecision` now stops AT the Lobby, before any later round): the pin is re-found with a full-policy scan
+    // of seeds 0..39 (80,000 frames, default options, scratch .integration/evidence/lbra/scan.ts). Hits (Baton Pass commit followed by a
+    // forced-selector halt on a still-living outgoing slot): 11, 21, 24, 37. Seed 11 is the pin (commit 49491, halt 49531, after
+    // two Lobby new challenges); the run plays on through the Lobby to the frame budget.
+    const result = runSeed(11, {
       maxFrames: 80_000,
       renderEvery: 0,
-      stopAtFirstRoundDecision: true,
       coverage: observer as never,
     });
     expect(result.errorMessage ?? "").not.toMatch(/openpartyscreen|machine-barrier/i);
     expect(batonPassCommitFrame).not.toBeNull();
     expect(haltFrame).not.toBeNull();
-    expect(result).toMatchObject({ outcome: "OK", endState: "roundLost", battle: 1 });
+    expect(result.outcome).toBe("OK");
+    expect(result.lobbyNewChallenges ?? 0).toBeGreaterThanOrEqual(1);
   });
 
   // ISSUES #86's original concern (a forced replacement's terminal weather
@@ -693,10 +700,14 @@ describe("ISSUES #99 (soak driver swap-offer misroute) — swap offer answered b
   // and full/winning accepted ~85% instead of a 50/50 roll.
   it("vanilla policy always declines the swap offer and never enters the swap screen", () => {
     const notes: string[] = [];
-    // Seed 0 wins battle 1 and reaches the swap-offer menu by frame ~28,645
+    // Seed 1 wins a battle and reaches the swap-offer menu inside 32,000 frames
     // under this policy's always-GO-ON continuation; capped well short of
-    // vanilla's 600,000-frame default full-round budget.
-    runSeed(0, {
+    // vanilla's 600,000-frame default full-round budget. (lbra: seed 0 used to
+    // get there through the old loss -> new-draft chain; its first challenge
+    // is a battle-1 loss, so its second challenge now starts from the Lobby with
+    // a different RNG and does not reach a swap offer in 32,000 frames. Scan of
+    // vanilla seeds 0..11: 1..11 all reach one, every offer "NO".)
+    runSeed(1, {
       policy: "vanilla",
       maxFrames: 32_000,
       renderEvery: 0,
@@ -876,7 +887,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // flw252 (the party menu ignores input until its open fade settles; refusal messages wait for their printer): the exploring
       // policy's party-menu walks / message dismisses now spend different presses, so a new trajectory as at fsw235:
       // 39466 / battle 2 turn 25 / depth 1 -> 18446 / battle 1 turn 23 / depth 0; roundLost. Pre-flw252 tree (cd9e82b25^) still gives 39466.
-      frames: 18446,
+      // lbra: frames only, 18446 -> 18523; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +77 frames) instead of at the old chain; same battle / turn / end state.
+      frames: 18523,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -898,7 +910,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // see seed 0): 58240 / battle 3 turn 25 / depth 2 -> 36610 / battle 2 turn 23 / depth 1; roundLost. Re-pinned by cln242 from the
       // failing full-suite shard (the supervisor should confirm the trajectory change).
       // flw252 (see seed 0): 36610 / battle 2 turn 23 / depth 1 -> 21881 / battle 1 turn 35 / depth 0; roundLost. Pre-flw252 tree gives 36610.
-      frames: 21881,
+      // lbra: frames only, 21881 -> 21940; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +59 frames) instead of at the old chain; same battle / turn / end state.
+      frames: 21940,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -932,7 +945,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // rep203: fnt201 (the faint script lead) 8895 -> 9140; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
       // fsw235 (the forced party menu opens on slot 0, so a slot-0 replacement needs no DOWN and a slot-2 one needs two): frames
       // only, 9140 -> 9134; decision notes identical apart from the menu presses; same battle / turn / end state.
-      frames: 9134,
+      // lbra: frames only, 9134 -> 9185; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +51 frames) instead of at the old chain; same battle / turn / end state.
+      frames: 9185,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,
@@ -954,7 +968,8 @@ describe("Milestone M-B step 2: effectiveness-aware winning policy", () => {
       // lsd194: the floor drop alone: 8979 -> 8920; same battle / turn / end state.
       // rep203: fnt201 (the faint script lead) 8920 -> 9190; hpb202 adds 0 (lsd194SoakPins.ts on a6f9cbdb1 / 420b14c21 / c7d8eab9a); same battle / turn / end state.
       // fsw235: frames only (the menu presses), 9190 -> 9186; same battle / turn / end state.
-      frames: 9186,
+      // lbra: frames only, 9186 -> 9233; the snapshot is now taken when the walkable Lobby opens (the loss's record answer plays the ROM farewell first, +47 frames) instead of at the old chain; same battle / turn / end state.
+      frames: 9233,
       outcome: "OK",
       endState: "roundLost",
       maxBattleDepth: 0,

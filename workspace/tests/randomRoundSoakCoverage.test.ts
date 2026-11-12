@@ -19,6 +19,8 @@ function driveShortSeed(): SoakCoverageCollector {
     policy: "vanilla",
     maxFrames: 30_000,
     renderEvery: 0,
+    // lbra: stay in the first challenge (the old loss -> new-draft chain is gone; the Lobby walk-back would add a second challenge).
+    newChallengeFromLobby: false,
     coverage,
   });
   return coverage;

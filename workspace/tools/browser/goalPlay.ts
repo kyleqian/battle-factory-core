@@ -27,7 +27,7 @@ export const CHALLENGE_BUDGET_FRAMES = 120_000;
 const MIN_TAP_FRAMES = 2;
 const MAX_TAP_FRAMES = 4;
 
-/** With newChallengeFromLobby the continuation menu picks RETIRE this often (a loss auto-chains past the lobby, so only RETIRE-YES reaches it). */
+/** With retireFromLobby the continuation menu picks RETIRE this often (RETIRE-YES, like every loss and forfeit, ends in the lobby). */
 const LOBBY_RETIRE_RATE = 0.5;
 
 /** One policy per challenge, cycled: mostly the swap-reaching winner, with the plain winner and the random "full" explorer. */
@@ -53,11 +53,14 @@ export interface GoalPlayOptions {
   /** Frames this challenge may run before it asks for a restart; defaults to CHALLENGE_BUDGET_FRAMES. */
   budgetFrames?: number;
   /**
-   * nch231: after wandering the lobby for `lobbyWanderFrames`, walk back to the singles attendant and press A so the
-   * same page starts another challenge (no restart). Off by default: the lobby then ends the challenge as before, and
-   * the wander never presses A while facing the attendant (that press would otherwise start a new challenge).
+   * nch231 / lbra (default true): every loss, forfeit and RETIRE-YES ends in the lobby like the ROM, so after wandering it for
+   * `lobbyWanderFrames` the director walks back to the singles attendant and presses A: the same page starts another
+   * challenge (no restart). `false`: the lobby ends the challenge with a "lobby" restart, and the wander never presses A
+   * while facing the attendant (that press would start a new challenge).
    */
   newChallengeFromLobby?: boolean;
+  /** Opt-in: the continuation menu picks RETIRE (and answers YES) `LOBBY_RETIRE_RATE` of the time, so the lobby is also reached from a win run. */
+  retireFromLobby?: boolean;
   /** Frames of random lobby wandering before the walk back (newChallengeFromLobby only); default 120. */
   lobbyWanderFrames?: number;
   /** Test seam: start from this state instead of the anchor draft. */
@@ -133,8 +136,8 @@ export class GoalPlayDirector {
     this.generator = createInputGenerator(streamSeed ^ 0x5eed);
     this.mixRate = options.mixRate ?? 0.04;
     this.budgetFrames = options.budgetFrames ?? CHALLENGE_BUDGET_FRAMES;
-    this.newChallengeFromLobby = options.newChallengeFromLobby ?? false;
-    if (this.newChallengeFromLobby) this.player.retireRate = LOBBY_RETIRE_RATE;
+    this.newChallengeFromLobby = options.newChallengeFromLobby ?? true;
+    if (options.retireFromLobby === true) this.player.retireRate = LOBBY_RETIRE_RATE;
     this.lobbyWanderFrames = options.lobbyWanderFrames ?? 120;
     this.state =
       options.initialState ??

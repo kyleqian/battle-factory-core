@@ -75,9 +75,9 @@ describe("goal-directed browser play (tools/browser/goalPlay.ts)", () => {
     expect(director.stats.randomPresses).toBeGreaterThan(0);
   });
 
-  it("wanders the free-roam lobby, then asks for a fresh challenge", () => {
+  it("wanders the free-roam lobby, then asks for a fresh challenge (newChallengeFromLobby: false; lbra made the walk-back the default)", () => {
     const initialState = { ...createInitialState({ battleScene: "off" }), lobbyFreeRoam: createFactoryLobbyFreeRoamState() };
-    const director = new GoalPlayDirector({ seed: 2, scene: "off", initialState });
+    const director = new GoalPlayDirector({ seed: 2, scene: "off", initialState, newChallengeFromLobby: false });
     const segments: FrameSegment[] = [];
     for (let i = 0; i < 20 && !director.done; i += 1) for (const segment of director.runFrames(60)) segments.push(segment);
     expect(director.restart).toBe("lobby");
@@ -87,6 +87,15 @@ describe("goal-directed browser play (tools/browser/goalPlay.ts)", () => {
     const used = new Set(segments.flatMap((s) => s.buttons));
     expect([...used].every((b) => ["UP", "DOWN", "LEFT", "RIGHT", "A", "B"].includes(b))).toBe(true);
     expect(director.stats.lobbyPresses).toBeGreaterThan(5);
+  });
+
+  it("lbra: the walk-back is the default (a loss ends in the Lobby, so the page must go on from it)", () => {
+    const initialState: EngineState = { ...createInitialState({ battleScene: "off" }), lobbyFreeRoam: createFactoryLobbyFreeRoamState() };
+    const director = new GoalPlayDirector({ seed: 2, scene: "off", initialState, lobbyWanderFrames: 200 });
+    for (let i = 0; i < 60 && director.state.lobbyFreeRoam !== null && !director.done; i += 1) director.runFrames(60);
+    expect(director.restart).toBeNull();
+    expect(director.state.lobbyFreeRoam).toBeNull();
+    expect(director.state.pendingGeneratedRound).not.toBeNull();
   });
 
   it("nch231: with newChallengeFromLobby the director walks back to the attendant and the same page starts another challenge", () => {
@@ -121,6 +130,7 @@ describe("goal-directed browser play (tools/browser/goalPlay.ts)", () => {
       seed: 1,
       scene: "off",
       budgetFrames: 1,
+      newChallengeFromLobby: false,
       initialState: { ...createInitialState({ battleScene: "off" }), lobbyFreeRoam: createFactoryLobbyFreeRoamState() },
     });
     for (let i = 0; i < 20 && !lobby.done; i += 1) lobby.runFrames(60);

@@ -1272,7 +1272,7 @@ export type SoakScene = "on" | "off";
 export type SeedResult = {
   seed: number;
   outcome: SeedOutcome;
-  /** Only with `newChallengeFromLobby`: challenges started from the Lobby attendant. */
+  /** Challenges started from the Lobby attendant (absent with `newChallengeFromLobby: false`). */
   lobbyNewChallenges?: number;
   /**
    * OK sub-outcome: "budget" (frame budget reached while still making
@@ -1567,8 +1567,8 @@ type DraftPlan = {
 };
 
 export class RandomPlayer {
-  /** nch231 (opt-in): in the free-roam Lobby press A at the singles attendant, starting the next challenge. */
-  public newChallengeFromLobby = false;
+  /** nch231 / lbra: in the free-roam Lobby press A at the singles attendant, starting the next challenge. */
+  public newChallengeFromLobby = true;
   /** Opt-in (goal play with the lobby option): chance the continuation menu picks RETIRE (and answers YES). null = the normal rolls. */
   public retireRate: number | null = null;
   /** frf250b: null (every soak policy) answers the forfeit prompt NO; a rate makes that share of action menus pick RUN and answer YES. Tests only. */
@@ -1721,7 +1721,7 @@ export class RandomPlayer {
     if (orch?.battleStartIntro) return this.onIntro(state);
     if (orch?.battleCommandPresentation) return this.onCommand(state);
     if (state.lobbyFreeRoam) {
-      // Terminal unless newChallengeFromLobby — then the runner keeps going and A at the attendant starts the next challenge.
+      // lbra: every loss / forfeit / retire ends in the Lobby; A at the attendant starts the next challenge (terminal only with `newChallengeFromLobby: false`).
       return this.newChallengeFromLobby && isFactoryLobbyFacingSinglesAttendant(state.lobbyFreeRoam)
         ? A_BUTTON
         : NO_BUTTONS;
@@ -2837,9 +2837,9 @@ export type RunOptions = {
    */
   maxRounds?: number;
   /**
-   * nch231 (default false, so existing soak results do not move): a run that reaches the free-roam Lobby (RETIRE-YES)
-   * presses A at the singles attendant and plays the next challenge instead of finishing OK at the Lobby. The result
-   * then carries `lobbyNewChallenges`.
+   * nch231 / lbra (default true): a run that reaches the free-roam Lobby (every loss, forfeit and RETIRE-YES end there, as
+   * the ROM does) presses A at the singles attendant and plays the next challenge. The result carries `lobbyNewChallenges`.
+   * `false` finishes OK at the first Lobby instead.
    */
   newChallengeFromLobby?: boolean;
   /** Test-only opt-in observer for every action-log note, independent of `verbose`. */
@@ -2939,7 +2939,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
   coverage?.beginSeed(seed);
   const player = new RandomPlayer(rng, log, options.testPolicy ?? options.policy, coverage);
   player.summaryExplore = options.summaryExplore === true;
-  player.newChallengeFromLobby = options.newChallengeFromLobby === true;
+  player.newChallengeFromLobby = options.newChallengeFromLobby !== false;
   let lobbyNewChallenges = 0;
   let state = options.stateFactory?.(seed)
     ?? createInitialState(options.scene !== undefined ? { battleScene: options.scene } : {});
@@ -3148,7 +3148,7 @@ export function runSeed(seed: number, optionsIn: Partial<RunOptions> = {}): Seed
     }
 
     if (state.lobbyFreeRoam !== null) {
-      if (options.newChallengeFromLobby !== true) return finish("OK", { endState: end ?? "roundLost" });
+      if (options.newChallengeFromLobby === false) return finish("OK", { endState: end ?? "roundLost" });
       lobbySeen = true;
     } else if (lobbySeen) {
       lobbySeen = false;
