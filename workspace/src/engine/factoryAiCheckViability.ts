@@ -2071,7 +2071,8 @@ function runCvHealBody(input: Readonly<{
  * `Cmd_get_weather` (`battle_ai_script_commands.c:1644-1665`): it writes
  * `funcResult` ONLY when a real weather bit is set, so the exit value is the
  * stale-fallback formula `currentWeather ?? staleCarry` (same shape
- * `weatherSetterCvScore` uses). The Heal body writes nothing further.
+ * `weatherSetterCvScore` uses), and that value is also what the weather gate
+ * itself tests. The Heal body writes nothing further.
  */
 function runCvHealWeather(input: Readonly<{
   rng: BattleRngState;
@@ -2082,8 +2083,13 @@ function runCvHealWeather(input: Readonly<{
   reasonPrefix: string;
 }>): Readonly<{ rng: BattleRngState; draws: readonly FactoryAiCheckViabilityDraw[]; scoreDelta: number; funcResultAfter: AiWeatherValue | undefined }> {
   const funcResultAfter = input.attacker.currentWeather ?? input.staleFuncResultFallback;
-  const weatherPenalty = input.attacker.currentWeather !== undefined
-    && input.attacker.currentWeather !== AI_WEATHER_SUN
+  // docs/parity-mac/ai-heal-weather-stale-register.md: the three `if_equal` (:1317-1319) test `funcResult`, not the weather.
+  // With clear weather `get_weather` wrote nothing, so they test the carried value: AI_TryToFaint's last
+  // `get_how_powerful_move_is` leaves 2 (most powerful) or 1 (not most powerful), which read as sandstorm / rain and
+  // cost the heal 2 points (ROM seed 7922, Noland's Tropius: Synthesis 100 instead of 102, Body Slam wins the tie).
+  // The penalty read only the real weather, so a carried value never applied; `weatherSetterCvScore` already reads the
+  // register. An unknown carry (`undefined`) stays without a penalty, as there.
+  const weatherPenalty = funcResultAfter !== undefined && funcResultAfter !== AI_WEATHER_SUN
     ? -2
     : 0;
   const body = runCvHealBody({
