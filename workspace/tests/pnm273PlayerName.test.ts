@@ -28,6 +28,13 @@ describe("pnm273: the player's name is one constant, default PLAYER", () => {
     expect(PLAYER_NAME.length).toBe("MEMORY".length);
   });
 
+  it("importing the compare harness under vitest does not override the name (the suite shares one process: isolate:false)", async () => {
+    const { HARNESS_PLAYER_NAME } = await import("../tools/compare/harnessPlayerName.ts");
+    expect(HARNESS_PLAYER_NAME).toBeUndefined();
+    expect((globalThis as { __POKEBENCH_PLAYER_NAME__?: unknown }).__POKEBENCH_PLAYER_NAME__).toBeUndefined();
+    expect(PLAYER_NAME).toBe("PLAYER");
+  });
+
   it("no hand-typed MEMORY name remains in src/ (ts, json data and assets)", () => {
     const offenders: string[] = [];
     for (const file of listTs("src")) {
