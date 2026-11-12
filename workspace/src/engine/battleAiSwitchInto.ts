@@ -4,7 +4,9 @@
  * `OpponentHandleChoosePokemon` calls synchronously to pick the AI's
  * replacement mon (`docs/forced-switch-ground-truth.md` §1b/§2).
  *
- * Both singles passes are modeled. Pass 2 (`:748-789`) deliberately preserves
+ * Both singles passes are modeled. Pass 1's super-effective-move test is
+ * `TypeCalc`'s FLAG result, which needs the move's power and the opposing
+ * battler's ability / status2 (`docs/parity-mac/opponent-replacement-pass1.md`). Pass 2 (`:748-789`) deliberately preserves
  * the source quirks: `AI_CalcDmg` uses the current active battler and global
  * `gCurrentMove` for every candidate, while `TypeCalc` applies the candidate
  * move only for STAB/type scaling; the non-BUGFIX build's `bestDmg` assignment
@@ -56,8 +58,14 @@ export type BattleAiSwitchIntoResult =
   | Readonly<{ kind: "damage-fallback-needed" }>;
 
 export type BattleAiSwitchDamageFallback = Readonly<{
-  /** `AI_CalcDmg(gActiveBattler, opposingBattler)` before candidate `TypeCalc`. */
-  baseDamage: number;
+  /**
+   * `AI_CalcDmg(gActiveBattler, opposingBattler)` before candidate `TypeCalc`.
+   * A thunk is evaluated once, and only when pass 2 is reached (C calls
+   * `AI_CalcDmg` inside the pass-2 loop only, `:776`), so a caller can hand
+   * over the whole opposing-battler context up front: pass 1's `TypeCalc`
+   * needs `opposingAbility` / `opposingStatus2` too.
+   */
+  baseDamage: number | (() => number);
   activeTypes: BattleAiSwitchTypes;
   opposingTypes: BattleAiSwitchTypes;
   /** Numeric ABILITY_* value on the opposing active battler. */
@@ -114,16 +122,26 @@ function computeTypeMatchupScore(
   return v;
 }
 
-/** `TypeCalc(move, gActiveBattler, opposingBattler) & MOVE_RESULT_SUPER_EFFECTIVE` (`:723`). */
+/**
+ * `TypeCalc(move, gActiveBattler, opposingBattler) & MOVE_RESULT_SUPER_EFFECTIVE`
+ * (`battle_ai_switch_items.c:733`). `TypeCalc` (`battle_script_commands.c:1536-1591`)
+ * returns 0 for MOVE_STRUGGLE, sets only MISSED | DOESNT_AFFECT_FOE for a
+ * Ground move into Levitate (`:1554`), and its `ModulateDmgByType2` raises
+ * MOVE_RESULT_SUPER_EFFECTIVE only `if (gBattleMoves[move].power ...)`
+ * (`:1524`): a status move of a super-effective TYPE (Sand-Attack into Rock,
+ * Will-O-Wisp into Steel, Rain Dance into Rock) is never "a super effective
+ * move". Variable-power moves carry power 1 and do count (Counter into Rock).
+ */
 function moveIsSuperEffectiveAgainst(
   moveId: number,
   opposingTypes: BattleAiSwitchTypes,
   opposingAbility?: number,
   opposingStatus2 = 0,
 ): boolean {
-  if (moveId === MOVE_NONE) return false;
+  if (moveId === MOVE_NONE || moveId === MOVE_STRUGGLE) return false;
   const move = MOVES_BY_ID.get(moveId);
   if (!move) return false;
+  if (move.power === 0) return false;
   if (opposingAbility === LEVITATE_ID && move.type === "TYPE_GROUND") return false;
   let multiplier = TYPE_MUL_NORMAL;
   const distinctTypes = opposingTypes[0] === opposingTypes[1] ? [opposingTypes[0]] : opposingTypes;
@@ -150,11 +168,12 @@ function moveIsSuperEffectiveAgainst(
 function typeCalcCandidateDamage(
   moveId: number,
   fallback: BattleAiSwitchDamageFallback,
+  baseDamage: number,
 ): number {
   const move = MOVES_BY_ID.get(moveId);
-  if (!move || moveId === MOVE_STRUGGLE) return fallback.baseDamage;
+  if (!move || moveId === MOVE_STRUGGLE) return baseDamage;
 
-  let damage = fallback.baseDamage;
+  let damage = baseDamage;
   if (fallback.activeTypes[0] === move.type || fallback.activeTypes[1] === move.type) {
     damage = Math.trunc((damage * 15) / 10);
   }
@@ -230,6 +249,7 @@ export function getMostSuitableMonToSwitchInto(
   // it, but a successful assignment truncates the signed damage back to u8.
   let bestDmg = 0;
   let bestMonId = PARTY_SIZE;
+  let baseDamage: number | null = null;
   for (let i = 0; i < PARTY_SIZE; i += 1) {
     const member = bench[i]!;
     if (member.species === 0 || member.hp === 0 || i === activePartyIndex) continue;
@@ -238,7 +258,11 @@ export function getMostSuitableMonToSwitchInto(
       const move = MOVES_BY_ID.get(moveId);
       let damage = 0;
       if (moveId !== MOVE_NONE && move?.power !== 1) {
-        damage = typeCalcCandidateDamage(moveId, damageFallback);
+        // AI_CalcDmg reads only the active battler and gCurrentMove, so every call returns the same value.
+        baseDamage ??= typeof damageFallback.baseDamage === "function"
+          ? damageFallback.baseDamage()
+          : damageFallback.baseDamage;
+        damage = typeCalcCandidateDamage(moveId, damageFallback, baseDamage);
       }
       if (bestDmg < damage) {
         bestDmg = damage & 0xff;

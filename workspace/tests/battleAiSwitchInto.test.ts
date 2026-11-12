@@ -161,3 +161,84 @@ describe("GetMostSuitableMonToSwitchInto pass 2 (source-quirked damage fallback)
     expect(result).toEqual({ kind: "resolved", partyIndex: 2 });
   });
 });
+
+/**
+ * docs/parity-mac/opponent-replacement-pass1.md: pass 1's "has a super effective move" is TypeCalc's FLAG
+ * (battle_ai_switch_items.c:733 -> battle_script_commands.c:1536-1591), not a type-chart multiplier.
+ * Fixtures are the benches of ROM-replayed census seeds (romDriveSeed.sh SEED off).
+ */
+describe("GetMostSuitableMonToSwitchInto pass 1 reads TypeCalc's flags (power gate, Levitate)", () => {
+  const AGGRON_TYPES = ["TYPE_STEEL", "TYPE_ROCK"] as const;
+  const RELICANTH_TYPES = ["TYPE_WATER", "TYPE_ROCK"] as const;
+  const WEEZING_TYPES = ["TYPE_POISON", "TYPE_POISON"] as const;
+  const neverPass2 = () => {
+    throw new Error("AI_CalcDmg must not run when pass 1 resolves");
+  };
+
+  it("seed 332: a status move of a super-effective type (Rain Dance into Steel/Rock) is not a super effective move -- ROM sends SLOWKING (Brick Break), not AMPHAROS", () => {
+    const result = getMostSuitableMonToSwitchInto(
+      bench([
+        { species: 213, hp: 0 }, // SHUCKLE, fainted active
+        { species: 181, hp: 187, types: ["TYPE_ELECTRIC", "TYPE_ELECTRIC"], moves: [87, 240, 86, 213] }, // Thunder, Rain Dance, Thunder Wave, Attract
+        { species: 199, hp: 192, types: ["TYPE_WATER", "TYPE_PSYCHIC"], moves: [94, 280, 133, 213] }, // Psychic, Brick Break, Amnesia, Attract
+      ]),
+      0,
+      AGGRON_TYPES,
+      { baseDamage: neverPass2, activeTypes: ["TYPE_BUG", "TYPE_ROCK"], opposingTypes: AGGRON_TYPES, opposingAbility: 5, opposingStatus2: 0 },
+    );
+    expect(result).toEqual({ kind: "resolved", partyIndex: 2 });
+  });
+
+  it("seed 491: Sand-Attack (Ground, power 0) does not count, Counter (Fighting, power 1) does -- ROM sends WOBBUFFET, not LINOONE", () => {
+    const result = getMostSuitableMonToSwitchInto(
+      bench([
+        { species: 28, hp: 0 }, // SANDSLASH, fainted active
+        { species: 289, hp: 172, types: ["TYPE_NORMAL", "TYPE_NORMAL"], moves: [290, 28, 343, 321] }, // Secret Power, Sand-Attack, Covet, Tickle
+        { species: 202, hp: 274, types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"], moves: [68, 243, 204, 219] }, // Counter, Mirror Coat, Charm, Safeguard
+      ]),
+      0,
+      RELICANTH_TYPES,
+      { baseDamage: neverPass2, activeTypes: ["TYPE_GROUND", "TYPE_GROUND"], opposingTypes: RELICANTH_TYPES, opposingAbility: 69, opposingStatus2: 0 },
+    );
+    expect(result).toEqual({ kind: "resolved", partyIndex: 2 });
+  });
+
+  it("seed 284: Earthquake into a Levitate target is not super effective in pass 1, and pass 2 scores Rest (Psychic, power 0) x2 -- ROM AI_CalcDmg 64, Rest 128, sends WHISCASH", () => {
+    let calcDmgCalls = 0;
+    const result = getMostSuitableMonToSwitchInto(
+      bench([
+        { species: 78, hp: 0 }, // RAPIDASH, fainted active
+        { species: 195, hp: 165, types: ["TYPE_WATER", "TYPE_GROUND"], moves: [89, 188, 38, 174] }, // Earthquake, Sludge Bomb, Double-Edge, Curse
+        { species: 324, hp: 180, types: ["TYPE_WATER", "TYPE_GROUND"], moves: [214, 156, 57, 90] }, // Sleep Talk, Rest, Surf, Fissure
+      ]),
+      0,
+      WEEZING_TYPES,
+      {
+        baseDamage: () => {
+          calcDmgCalls += 1;
+          return 64;
+        },
+        activeTypes: ["TYPE_FIRE", "TYPE_FIRE"],
+        opposingTypes: WEEZING_TYPES,
+        opposingAbility: 26, // ABILITY_LEVITATE
+        opposingStatus2: 0,
+      },
+    );
+    expect(result).toEqual({ kind: "resolved", partyIndex: 2 });
+    expect(calcDmgCalls).toBe(1);
+  });
+
+  it("the same bench against a target WITHOUT Levitate resolves in pass 1 on Earthquake (QUAGSIRE) and never runs AI_CalcDmg", () => {
+    const result = getMostSuitableMonToSwitchInto(
+      bench([
+        { species: 78, hp: 0 },
+        { species: 195, hp: 165, types: ["TYPE_WATER", "TYPE_GROUND"], moves: [89, 188, 38, 174] },
+        { species: 324, hp: 180, types: ["TYPE_WATER", "TYPE_GROUND"], moves: [214, 156, 57, 90] },
+      ]),
+      0,
+      WEEZING_TYPES,
+      { baseDamage: neverPass2, activeTypes: ["TYPE_FIRE", "TYPE_FIRE"], opposingTypes: WEEZING_TYPES, opposingAbility: 0, opposingStatus2: 0 },
+    );
+    expect(result).toEqual({ kind: "resolved", partyIndex: 1 });
+  });
+});

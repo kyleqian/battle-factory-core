@@ -260,30 +260,32 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     // and OpponentHandleChoosePokemon (battle_controller_opponent.c:1621-1675) unconditionally
     // calls GetMostSuitableMonToSwitchInto() at line 1627 -- always the scorer, then the
     // PARTY_SIZE fallback below, never a shortcut on how many slots are legal.
-    let scored = getMostSuitableMonToSwitchInto(bench, activePartyIndex, opposingTypes);
-    if (scored.kind === "damage-fallback-needed") {
-      let baseDamage = calculateBattleScriptBaseDamageForCurrentMove(damageRules);
-      const active = rules.battlers[battler];
-      if (
-        (active.status3 & (1 << 9)) !== 0
-        && resolveBattleScriptMoveTypeName(rules.currentMove, 0) === "TYPE_ELECTRIC"
-      ) {
-        baseDamage *= 2;
-      }
-      if (active.helpingHand === 1) baseDamage = Math.trunc((baseDamage * 15) / 10);
-      scored = getMostSuitableMonToSwitchInto(
-        bench,
-        activePartyIndex,
+    // One call, both passes. Pass 1's TypeCalc (battle_ai_switch_items.c:733) reads the opposing battler's
+    // ability (Levitate, battle_script_commands.c:1554) and status2 (Foresight), so the whole context goes in up
+    // front; AI_CalcDmg (:776) is a thunk because C reaches it only in pass 2.
+    const active = rules.battlers[battler];
+    const scored = getMostSuitableMonToSwitchInto(
+      bench,
+      activePartyIndex,
+      opposingTypes,
+      Object.freeze({
+        baseDamage: () => {
+          let baseDamage = calculateBattleScriptBaseDamageForCurrentMove(damageRules);
+          if (
+            (active.status3 & (1 << 9)) !== 0
+            && resolveBattleScriptMoveTypeName(rules.currentMove, 0) === "TYPE_ELECTRIC"
+          ) {
+            baseDamage *= 2;
+          }
+          if (active.helpingHand === 1) baseDamage = Math.trunc((baseDamage * 15) / 10);
+          return baseDamage;
+        },
+        activeTypes: active.types,
         opposingTypes,
-        Object.freeze({
-          baseDamage,
-          activeTypes: active.types,
-          opposingTypes,
-          opposingAbility: rules.battlers[opposingBattlerId].ability,
-          opposingStatus2: rules.battlers[opposingBattlerId].status2,
-        }),
-      );
-    }
+        opposingAbility: rules.battlers[opposingBattlerId].ability,
+        opposingStatus2: rules.battlers[opposingBattlerId].status2,
+      }),
+    );
     if (scored.kind === "damage-fallback-needed") {
       throw new Error("Cmd_openpartyscreen: damage fallback context was supplied but selector did not resolve");
     }
