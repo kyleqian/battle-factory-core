@@ -11,6 +11,11 @@ import re, subprocess
 from pathlib import Path
 
 FUNC_NAMES = ("HandleInputChooseAction", "HandleInputChooseMove", "WaitForMonSelection", "Task_HandleChooseMonInput")
+END_FUNC_NAMES = ("HandleEndTurn_BattleWon", "HandleEndTurn_BattleLost")
+# parity-mac: gBattleOutcome is set inside the script that decides the battle (checkteamslost), but the turn is not over: the rest of
+# that script and BattleTurnPassed's HandleFaintedMonActions / HandleWishPerishSongOnTurnEnd still run (a pending Future Sight still
+# rolls accuracy, ROM seed 1181) before gBattleMainFunc becomes sEndTurnFuncsTable[outcome]. The drive goes on until then.
+POST_OUTCOME_FRAME_CAP = 3000
 PLAYER_OBJ = "src/battle_controller_player.o"
 WATCHDOG_FRAMES = 600
 PULSE_PERIOD = 16  # the lab / engine idiom for message waits: A for one frame every 16 frames
@@ -47,6 +52,10 @@ def pick_funcs(nm, text_range):
             funcs[name] = inside[0]
         else:
             raise SystemExit(f"romDecisionDriver: cannot resolve {name}: {[hex(a) for a in addrs]} (player range {hex(lo)}-{hex(hi)})")
+    for name in END_FUNC_NAMES:  # optional: without them the drive stops at the outcome, as before
+        addrs = nm.get(name, [])
+        if len(addrs) == 1:
+            funcs[name] = addrs[0]
     return funcs
 
 
@@ -107,6 +116,7 @@ class RomDriver:
         self.last_state = "other"
         self.trace = []  # (frame, state) transitions, for the dump
         self.pulse_phase = 0
+        self.outcome_frame = None  # first frame gBattleOutcome was seen non-zero
 
     def classify(self, obs):
         f = obs["func"] & ~1
@@ -132,7 +142,17 @@ class RomDriver:
     def step(self, obs):
         """Buttons for the next frame, or None when the battle outcome is set. Raises DriverError on a no-progress stall or an unplanned menu."""
         if obs["outcome"]:
-            return None
+            if self.outcome_frame is None:
+                self.outcome_frame = self.frame
+            end_funcs = {self.funcs[n] for n in END_FUNC_NAMES if n in self.funcs}
+            main = obs.get("mainFunc")
+            if (main is None or not end_funcs or (main & ~1) in end_funcs
+                    or self.frame - self.outcome_frame > POST_OUTCOME_FRAME_CAP):
+                return None
+            if self.hold:
+                self.hold = False
+                return []
+            return self.pulse()  # the deciding turn is still running: its messages need A
         state = self.classify(obs)
         kind = state.split("-")[0]
         if self.block and kind != self.block:

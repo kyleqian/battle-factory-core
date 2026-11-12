@@ -161,6 +161,21 @@ class RomDriverTest(unittest.TestCase):
         d = rd.RomDriver([{"kind": "move", "slot": 0}], FUNCS)
         self.assertIsNone(d.step(obs("move", outcome=2)))
 
+    def test_after_the_outcome_the_drive_runs_on_until_the_end_turn_handler(self):
+        # parity-mac: the deciding turn is still running when gBattleOutcome is set (ROM seed 1181: a pending Future Sight rolls after it)
+        funcs = {**FUNCS, "HandleEndTurn_BattleWon": 0x7000, "HandleEndTurn_BattleLost": 0x7100}
+        d = rd.RomDriver([], funcs)
+        running = {**obs("other", outcome=1), "mainFunc": 0x5001}
+        out = []
+        for _ in range(20):
+            out.append(d.step(running))
+            d.advanced()
+        self.assertNotIn(None, out)  # still driving
+        self.assertIn(["A"], out)  # and pulsing A for the remaining messages
+        self.assertIsNone(d.step({**obs("other", outcome=1), "mainFunc": 0x7001}))  # Thumb bit masked: the handler started
+        # an observation without mainFunc (older probes) keeps the old behaviour
+        self.assertIsNone(rd.RomDriver([], funcs).step(obs("other", outcome=1)))
+
     def test_unplanned_menus_raise(self):
         with self.assertRaises(rd.DriverError) as cm:
             rd.RomDriver([], FUNCS).step(obs("action"))

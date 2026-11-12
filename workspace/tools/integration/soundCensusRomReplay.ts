@@ -220,22 +220,45 @@ if (mode === "request") {
   // turn's commit. Align on gRandomTurnNumber (setup.randomTurnNumber, or --turn-number=N for pre-aud243c setups) and require the engine's menu value to be
   // LCG^-j(ROM menu) for some j (j = the ROM opponent's pre-menu decision draws); k = the engine's own draws before its menu.
   const setup = JSON.parse(readFileSync(arg("setup")!, "utf8"));
+  // parity-mac: the lab's intro acknowledgement (oracle/battle_lab.py _finish_intro_to_action_menu: 120 idle frames, then A for 2) can land its A on the
+  // first action menu, pick FIGHT + slot 0 and play turn 1 before the snapshot (ROM seed 3623: the "setup" is turn 2, Graveler at 26 HP). The engine side
+  // starts at turn 1, so such a staging cannot be replayed: fail here instead of reporting a mismatch at engine state 0.
+  const stagedBattlers = [setup.snapshot.battlers.player, setup.snapshot.battlers.opponent];
+  if ((setup.lastMoves as number[] | undefined)?.some((m) => m !== 0) || stagedBattlers.some((b: any) => b.hp !== b.maxHp || b.status1 !== 0)) {
+    throw new Error(`the lab staging already played a turn (lastMoves ${JSON.stringify(setup.lastMoves ?? null)}, hp ${stagedBattlers.map((b: any) => `${b.hp}/${b.maxHp}`).join(" ")}); not replayable`);
+  }
   const target = setup.snapshot.rngValue >>> 0;
   const turnNumber = setup.randomTurnNumber ?? (arg("turn-number") === undefined ? undefined : Number(arg("turn-number")));
   if (turnNumber === undefined) throw new Error("setup has no randomTurnNumber (re-run soundEventProbe --setup-out) and no --turn-number=N");
   const behind = new Map<number, number>(); for (let j = 0, x = target; j <= 32; j += 1, x = lcgInverse(x)) behind.set(x, j);
-  let attempt: ReturnType<typeof play> | null = null; let k = -1; let j = -1;
-  for (let tryK = 0; tryK <= 48 && attempt === null; tryK += 1) {
+  // parity-mac: a 16-bit turn number repeats by chance inside the 48-draw window about once in 4,000 seeds (ROM seed 1816: the value sits 2 and 15 draws
+  // behind the menu), and the first hit was taken. When the opponent's reply is a move (byte 1 = 10, B_ACTION_EXEC_SCRIPT), BattleAI_SetupAIData ran before the
+  // menu and its four `100 - Random() % 16` are in setup.opponentAiSimulatedRng: a candidate is verified when four consecutive draws among the ROM opponent's
+  // j pre-menu draws give exactly those values. The first verified candidate wins; with none (older setups, a turn-1 AI switch) the first hit, as before.
+  const sim: number[] | null = Array.isArray(setup.opponentAiSimulatedRng) && setup.opponentReply?.[1] === 10 ? setup.opponentAiSimulatedRng : null;
+  const simVerified = (menuRng: number, draws: number) => {
+    if (sim === null) return false;
+    const values: number[] = []; for (let i = 0, x = menuRng; i < draws; i += 1) { x = advanceRngValue(x); values.push(100 - ((x >>> 16) % 16)); }
+    for (let at = 0; at + 4 <= values.length; at += 1) if (sim.every((v, i) => values[at + i] === v)) return true;
+    return false;
+  };
+  const candidates: { k: number; j: number; fresh: number; verified: boolean }[] = [];
+  for (let tryK = 0; tryK <= 48; tryK += 1) {
     let fresh = target; for (let i = 0; i < tryK; i += 1) fresh = lcgInverse(fresh);
     const probe = play(adoptedOrchestrator(setup, fresh), false);
     if (probe.randomTurnNumber === turnNumber && probe.actionMenuRng !== null && behind.has(probe.actionMenuRng)) {
-      k = tryK; j = behind.get(probe.actionMenuRng)!; attempt = play(adoptedOrchestrator(setup, fresh), true);
+      const draws = behind.get(probe.actionMenuRng)!;
+      candidates.push({ k: tryK, j: draws, fresh, verified: simVerified(probe.actionMenuRng, draws) });
+      if (candidates.at(-1)!.verified || sim === null) break;
     }
   }
-  if (attempt === null) throw new Error(`no draw count gives the ROM's gRandomTurnNumber ${turnNumber} with a menu RNG at most 32 draws before the ROM's ${target}`);
+  const chosen = candidates.find((c) => c.verified) ?? candidates[0];
+  if (chosen === undefined) throw new Error(`no draw count gives the ROM's gRandomTurnNumber ${turnNumber} with a menu RNG at most 32 draws before the ROM's ${target}`);
+  const attempt = play(adoptedOrchestrator(setup, chosen.fresh), true);
   writeFileSync(arg("out")!, JSON.stringify(result(attempt, {
     romRngAtActionMenu: target, romRandomTurnNumber: turnNumber, romOpponentReply: setup.opponentReply ?? null,
-    engineDrawsBeforeActionMenu: k, romOpponentDrawsBeforeActionMenu: j,
+    engineDrawsBeforeActionMenu: chosen.k, romOpponentDrawsBeforeActionMenu: chosen.j,
+    alignment: { candidates: candidates.map(({ k, j, verified }) => ({ k, j, verified })), simulatedRngVerified: chosen.verified },
   })));
 } else if (mode === "compare") {
   // aud243c: engine timeline rows [frame, currentMove, hp0, hp1, rng, last0, last1] against romStateTimeline.py rows of the same shape. The engine resolves a turn at its
