@@ -67,3 +67,50 @@ describe("AI_CV_HealWeather tests the carried funcResult when the weather is cle
     expect(run(105, 2)).toEqual({ scoreDelta: 2, kinds: ["heal-roll-3"], funcResultAfter: 2 });
   });
 });
+
+// AI_CV_SemiInvulnerable (data/battle_ai_scripts.s:2197-2241, Fly / Dig / Dive / Bounce) reads the weather the same way (:2208-2216, non-BUGFIX: hail ->
+// CheckSandstormTypes, sandstorm -> CheckIceType). Mechanic Lab ROM run (challenge 4, base request of seed 1816, `overrides.parties`): opponent Lapras
+// (Water / Ice, speed 80) with Dive, Dive, Dive, Ice Beam against Meganium (speed 100, four Splash), clear weather. Ice Beam is the most powerful move, so the
+// register holds 2 when the first Dive is scored: it reads "sandstorm", the user's second type is Ice, and the script goes straight to TryEncourage (one roll,
+// +1). The ROM's scores are 100 / 99 / 99 / 100 and its AI spends 8 draws (2 switch checks, 4 set-up, that roll, the tie draw). With Tackle in slot 3 (register 1)
+// they are 100 / 99 / 99 / 99 with no roll. The engine tested the real weather, so the first Dive went to SemiInvulnerable5 and left at `if_target_faster`.
+function semi(moveId: number, types: readonly [string, string], staleFuncResultFallback: 0 | 1 | 2 | 3 | undefined, currentWeather?: 0 | 1 | 2 | 3) {
+  const result = runCheckViability({
+    rng: { value: 1, calls: 0 },
+    moveId,
+    attacker: { ...BASE, speed: 80, types, moves: [moveId, TACKLE, TACKLE, TACKLE] as const, ...(currentWeather === undefined ? {} : { currentWeather }) },
+    target: { ...BASE, speed: 100 },
+    staleFuncResultFallback,
+    drawOrdinalStart: 1,
+    reasonPrefix: "probe",
+  });
+  if (result.kind !== "scored") throw new Error(`expected a scored result, got ${result.kind}`);
+  return { scoreDelta: result.scoreDelta, kinds: result.draws.map((draw) => draw.kind), funcResultAfter: result.funcResultAfter };
+}
+
+describe("AI_CV_SemiInvulnerable tests the carried funcResult when the weather is clear", () => {
+  const DIVE = 291;
+  const DIG = 91;
+  it("a carried 2 reads as sandstorm: an Ice-type user goes to TryEncourage (the Lapras lab run)", () => {
+    // rng value 1: the roll is 198, not below 80, so +1. Unfixed: no draw, score 0, the carried 2 survives.
+    expect(semi(DIVE, ["TYPE_WATER", "TYPE_ICE"], 2)).toEqual({ scoreDelta: 1, kinds: ["semi-invulnerable-roll"], funcResultAfter: undefined });
+    // A carried 1 (the lab's control run) or 0 takes no weather branch; the faster target ends the script.
+    expect(semi(DIVE, ["TYPE_WATER", "TYPE_ICE"], 1)).toEqual({ scoreDelta: 0, kinds: [], funcResultAfter: 1 });
+    expect(semi(DIVE, ["TYPE_WATER", "TYPE_ICE"], 0)).toEqual({ scoreDelta: 0, kinds: [], funcResultAfter: 0 });
+  });
+
+  it("a carried 3 reads as hail: a Ground / Rock / Steel user goes to TryEncourage", () => {
+    expect(semi(DIG, ["TYPE_WATER", "TYPE_GROUND"], 3)).toEqual({ scoreDelta: 1, kinds: ["semi-invulnerable-roll"], funcResultAfter: undefined });
+    expect(semi(DIG, ["TYPE_WATER", "TYPE_GROUND"], 2)).toEqual({ scoreDelta: 0, kinds: [], funcResultAfter: undefined });
+  });
+
+  it("a user of neither kind still reads its types: the register leaves as its second type, not as the carried value", () => {
+    // Unfixed: funcResultAfter 2 (the carried value) in both.
+    expect(semi(DIVE, ["TYPE_WATER", "TYPE_WATER"], 2)).toEqual({ scoreDelta: 0, kinds: [], funcResultAfter: undefined });
+    expect(semi(19, ["TYPE_NORMAL", "TYPE_FLYING"], 3)).toEqual({ scoreDelta: 0, kinds: [], funcResultAfter: 2 }); // Fly; TYPE_FLYING is id 2
+  });
+
+  it("real weather overwrites the carried value", () => {
+    expect(semi(DIVE, ["TYPE_WATER", "TYPE_ICE"], 2, 1)).toEqual({ scoreDelta: 0, kinds: [], funcResultAfter: 1 }); // rain
+  });
+});

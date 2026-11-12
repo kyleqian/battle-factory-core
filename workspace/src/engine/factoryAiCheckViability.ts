@@ -2294,7 +2294,12 @@ function runCvSemiInvulnerable(input: Readonly<{
   const userType1 = input.attacker.types[0];
   const userType2 = input.attacker.types[1];
 
-  if (weather === AI_WEATHER_HAIL) {
+  // docs/parity-mac/ai-heal-weather-stale-register.md: the two `if_equal` after `get_weather` test `funcResult`, i.e.
+  // `weatherWrite`, not the weather. In clear weather a carried 3 / 2 (after AI_TryToFaint, 2 = "most powerful") takes
+  // the hail / sandstorm branch. Mechanic Lab ROM proof: Lapras (Water / Ice) with Dive in slot 0 and Ice Beam, its
+  // most powerful move, in slot 3 against a faster target: slot 0 gets the TryEncourage roll and +1, slots 1 and 2 (the
+  // register then holds TYPE_ICE) do not. These branches tested `weather`, so a carried value never took them.
+  if (weatherWrite === AI_WEATHER_HAIL) {
     // Non-BUGFIX: Hail -> CheckSandstormTypes (Ground/Rock/Steel resist).
     if (AI_CV_SANDSTORM_RESISTANT_TYPES.has(userType1)) {
       return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));
@@ -2306,7 +2311,7 @@ function runCvSemiInvulnerable(input: Readonly<{
     return semiInvulnerable5(typeFuncResultCollision(userType2));
   }
 
-  if (weather === AI_WEATHER_SANDSTORM) {
+  if (weatherWrite === AI_WEATHER_SANDSTORM) {
     // Non-BUGFIX: Sandstorm -> CheckIceType (Ice type resist).
     if (userType1 === "TYPE_ICE") {
       return tryEncourage(input.rng, input.drawOrdinalStart, typeFuncResultCollision(userType1));
