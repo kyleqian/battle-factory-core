@@ -50,7 +50,6 @@ import type { BattleCommandDecision, BattleCommandRequest } from "../src/engine/
  * stays fatal for them because they should never actually be reached.
  */
 
-const SPLASH = 150;
 const RAGE = 99;
 const POUND = 1;
 const GROWTH = 74;

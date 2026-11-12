@@ -2173,12 +2173,16 @@ export function turnOrderBattlerInputs(
  * `BattleTurnPassed` does not reset them until its closing block
  * (`battle_main.c:4001-4004`), i.e. after every end-turn effect.
  *
- * KNOWN GAP: source substitutes MOVE_STRUGGLE when
- * `gProtectStructs[battler].noValidMoves` is set (`:4700`); this engine has
- * no `noValidMoves` cell, so a forced-Struggle battler contributes its
- * unusable slot's own priority instead of Struggle's 0. Reachable only when
- * every slot of a battler is unusable AND one of them has a non-zero
- * priority bracket.
+ * Source substitutes MOVE_STRUGGLE when `gProtectStructs[battler].noValidMoves`
+ * is set (`:4700`), but by the time this sort runs the cell is FALSE again:
+ * `HandleAction_UseMove` clears it when the forced Struggle starts
+ * (`battle_util.c:100-102`). So a battler that Struggled this turn sorts with
+ * the priority of the slot its cursor still points at -- the read below --
+ * not with Struggle's 0. ROM proof (Mechanic Lab, docs/parity-mac/
+ * endturn-order-forced-struggle.md): a slow Shuckle out of Protect PP
+ * Struggles after a faster Blissey's Tackle, and Shuckle's Leftovers heals
+ * FIRST at end of turn (Protect's +3). Not modeled: a battler whose forced
+ * Struggle never started (its action was skipped) keeps the cell set.
  */
 function endTurnChosenMove(
   rulesContext: BattleScriptRulesContext,
