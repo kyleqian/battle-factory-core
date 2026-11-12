@@ -12,7 +12,6 @@ mGBA oracle running a source-built Emerald ROM.
 .                      ← TOP: humans and planning. Nothing here is edited
 │                        by autonomous agents.
 ├── README.md            this file
-├── NOTES.md             the human's planning notebook
 ├── oracle/              shared oracle service (ground truth; mGBA + ROM)
 ├── bin/oracle           human-facing oracle CLI (see BATTLE_LAB.md)
 ├── tools/probe/receipts harness-level probe receipts
