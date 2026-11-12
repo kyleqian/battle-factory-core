@@ -13,12 +13,11 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #204 — AI residuals after the view fill (aiv266 / aiv267 / aiv270; causes root-caused by dia269, 2026-11-11)
+## #204 — AI residuals after the view fill (aiv266 / aiv267 / aiv270 / aiv271)
 
-Causes A (type-effectiveness probe quirk, seed 22) and B (full GetWhoStrikesFirst speed, seed 30) fixed by aiv270
-(`docs/aiv270-ai-effectiveness-paralysis.md`). Open: (C) seed 39: the AI damage estimate drops species / hold-effect / hold-effect-param
-(`factoryAiTryToFaint.ts:122-155`; C `battle_ai_script_commands.c:1174-1236`; `docs/dia269-leads.md` section C). Seed 57 unconfirmed
-(AI damage or draw-to-slot mapping; needs a ROM per-move AI damage readout; re-drive after C).
+Causes A / B (aiv270) and C (aiv271, `docs/aiv271-ai-damage-terms.md`: AI damage sims take the real hit chain's `battleScriptDamageTerms`) are
+fixed; seeds 22 / 30 / 39 match both scenes and 57 ON matches. Open: the AI switch-into scorer (`battle_ai_switch_items.c:778`) still uses a
+`baseDamage: 0` stub in `battleAiSwitchInto.ts` (unaudited). Seed 60's forced-Struggle AI lead (`docs/dia272-leads.md`) is the next AI item.
 
 ## #209 — Stale MOVE_EFFECT_BYTE leaks across turns (dia269 seed 53, 2026-11-11)
 

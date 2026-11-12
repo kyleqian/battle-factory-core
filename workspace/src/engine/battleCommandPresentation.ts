@@ -1,3 +1,4 @@
+import { PLAYER_NAME } from "./playerName.ts";
 import speciesNamesData from "../data/gen/species-names.json" with { type: "json" };
 import speciesStatsData from "../data/gen/species-stats.json" with { type: "json" };
 import type { GbaButton } from "../input.ts";
@@ -321,7 +322,7 @@ export const FORFEIT_CLOSING_RETURN_AT = 7;
  */
 export const FORFEIT_MESSAGE_FIRST_GLYPH_AT = 10;
 export const FORFEIT_MESSAGE_END_AT = 98;
-export const FORFEIT_MESSAGE_PLAYER_NAME = "MEMORY";
+export const FORFEIT_MESSAGE_PLAYER_NAME = PLAYER_NAME;
 export const FORFEIT_MESSAGE_TEXT = `${FORFEIT_MESSAGE_PLAYER_NAME} forfeited the match!`;
 
 export function moveBattleCommandActionCursor(

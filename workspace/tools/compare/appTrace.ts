@@ -6,6 +6,7 @@
 // Frame/input numbering is shared with the oracle contract; see
 // docs/oracle-frame-semantics.md and traceReplay.ts.
 
+import "./harnessPlayerName.ts";
 import type { Trace } from "./oracleClient.ts";
 import { createInitialState, render, tick } from "../../src/engine/core.ts";
 import { presentationRngFromTrace } from "../../src/engine/presentationRngHost.ts";

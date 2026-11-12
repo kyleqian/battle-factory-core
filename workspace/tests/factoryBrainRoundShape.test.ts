@@ -274,7 +274,9 @@ const SILVER_SEED = 4;
 const SILVER_STREAK = 14;
 // Gold: entering factoryWinStreak 35 (challenge index 5), symbols 1 —
 // battleIndex 6's effective streak is 41, the gold threshold.
-const GOLD_SEED = 8;
+// aiv271 (AI damage sims take the real CalculateBaseDamage terms: held-item / species / status / pinch / weather, so the AI now picks the move the ROM picks):
+// GOLD_SEED 8 -> 24, the lowest seed in 1..40 whose move-slot-0 policy still wins six ordinary battles (seeds 1..23 lose before the sixth win).
+const GOLD_SEED = 24;
 const GOLD_STREAK = 35;
 
 describe("Frontier Brain round shape: real seven-battle rounds (Noland rung 2c)", () => {

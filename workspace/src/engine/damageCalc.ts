@@ -294,6 +294,62 @@ export function calculateBaseDamage(input: DamageCalcInput): number {
 }
 
 /**
+ * Everything `CalculateBaseDamage` reads from live battle state apart from the move itself
+ * (`pokemon.c:3115-3371`): both battler records, the weather and its Cloud Nine / Air Lock gate, the field-wide
+ * ability scan, the Frontier flag, Flash Fire and the Mud / Water Sport bits. The real hit chain
+ * (`Cmd_damagecalc`) and the AI damage simulations (`AI_CalcDmg`, `battle_script_commands.c:1303-1318`, the same
+ * `CalculateBaseDamage` call on `gBattleMons`) both take it from `battleScriptDamageTerms`, so they cannot drift.
+ */
+export type DamageCalcTerms = Readonly<{
+  attacker: DamageBattler;
+  defender: DamageBattler;
+  weather: number;
+  weatherHasEffect: boolean;
+  activeBattlerAbilities: ReadonlyArray<string | null>;
+  isFrontierBattle: boolean;
+  flashFireBoosted: boolean;
+  mudSportActive: boolean;
+  waterSportActive: boolean;
+}>;
+
+const SIDE_STATUS_REFLECT_BIT = 1 << 0;
+const SIDE_STATUS_LIGHTSCREEN_BIT = 1 << 1;
+
+/**
+ * The move-specific half of the `CalculateBaseDamage` call over `DamageCalcTerms` (Mud / Water Sport on the move
+ * power `pokemon.c:3216-3219`, Explosion `:3228`, Solar Beam `:3331`). `targetSideStatus` is
+ * `gSideStatuses[GET_BATTLER_SIDE(defender)]`; `powerOverride` 0 selects the move's own power.
+ */
+export function damageCalcInputForMove(
+  terms: DamageCalcTerms,
+  move: Readonly<{ id: number; power: number; type: string; effect: string }>,
+  powerOverride: number,
+  targetSideStatus: number,
+  isCriticalHit: boolean,
+): DamageCalcInput {
+  let movePower = powerOverride !== 0 ? powerOverride : move.power;
+  if (move.type === "TYPE_ELECTRIC" && terms.mudSportActive) movePower = Math.trunc(movePower / 2);
+  if (move.type === "TYPE_FIRE" && terms.waterSportActive) movePower = Math.trunc(movePower / 2);
+  return {
+    attacker: terms.attacker,
+    defender: terms.defender,
+    movePower,
+    moveType: move.type,
+    isCriticalHit,
+    sideStatusReflect: (targetSideStatus & SIDE_STATUS_REFLECT_BIT) !== 0,
+    sideStatusLightScreen: (targetSideStatus & SIDE_STATUS_LIGHTSCREEN_BIT) !== 0,
+    moveEffect: move.effect,
+    weather: terms.weather,
+    weatherHasEffect: terms.weatherHasEffect,
+    currentMove: move.id,
+    activeBattlerAbilities: terms.activeBattlerAbilities,
+    isFrontierBattle: terms.isFrontierBattle,
+    flashFireBoosted: terms.flashFireBoosted,
+  };
+}
+
+
+/**
  * `calculateBaseDamage` plus the final `gBattleMovePower` it computed (after the
  * pinch-ability boost; presentation-only, never read by gameplay).
  */

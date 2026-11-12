@@ -18,6 +18,7 @@
  */
 
 import { ABILITY_NAME_BY_ID } from "./abilityNameById.ts";
+import { battleScriptDamageTerms } from "./battleScriptHitChainOpcode.ts";
 import { turnOrderBattlerInputs, turnOrderWeather } from "./battleEndTurnOrchestration.ts";
 import {
   createBattleCommandRequest,
@@ -512,6 +513,9 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       ...((input.rulesContext.sideStatuses[0] & SIDE_STATUS_LIGHTSCREEN) !== 0
         ? { targetSideLightScreenUp: true }
         : {}),
+      // `AI_CalcDmg` -> `CalculateBaseDamage(&gBattleMons[ai], &gBattleMons[target], ...)` reads the TRUE records (and the
+      // defender's real item, not the battle-history view): the same builder the real hit chain uses.
+      damageTerms: battleScriptDamageTerms(input.rulesContext, 1, 0),
       ...(partyHasStatusEqualToAny(input.rulesContext.party.player) ? { targetPartyStatusEqualsAny: true } : {}),
       knownAbility: input.history.knownAbilities[0],
       knownItemEffect: input.history.knownItemEffects[0],

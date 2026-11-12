@@ -114,11 +114,10 @@ describe("ISSUES #104: record prompt reducer -- YES/B-cancel continue like NO", 
     // The "battle was recorded" message (EventScript_SaveBattle's own msgbox,
     // BattleFrontier_BattleTowerLobby/scripts.inc:132-138) is the active page
     // -- not the shared farewell -- right after the confirm, showing the
-    // exact source text (`{PLAYER}` -> "MEMORY", the fixed save-name every
-    // other terminal message in this profile already uses).
+    // exact source text (`{PLAYER}` -> PLAYER_NAME, "PLAYER" by default; pnm273).
     expect(factoryTerminalRecordSavedMessageActive(terminal)).toBe(true);
     expect(terminal.profile.recordSavedMessage).toEqual([
-      "MEMORY’s battle was recorded",
+      "PLAYER’s battle was recorded",
       "on the FRONTIER PASS.",
     ]);
     expect(factoryTerminalRecordSavedBoxClearAge(terminal)).toBe(1757 + 21);

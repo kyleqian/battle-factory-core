@@ -46,6 +46,7 @@ import {
   type FactoryAiCheckViabilityDraw,
 } from "./factoryAiCheckViability.ts";
 import type { WeatherState } from "./turnOrder.ts";
+import type { DamageCalcTerms } from "./damageCalc.ts";
 
 const U16_MAX = 0xffff;
 const U32_MAX = 0xffff_ffff;
@@ -579,6 +580,8 @@ export type FactoryAiScoredBattlerView = Readonly<{
    * (`factoryAiTryToFaint.ts`) pass it as `AI_CalcDmg`'s `sideStatus` (`battle_script_commands.c:1306-1309`). Optional, default false.
    */
   targetSideLightScreenUp?: boolean;
+  /** The live `CalculateBaseDamage` terms for the AI damage sims (`FactoryAiTryToFaintTarget.damageTerms`). Optional. */
+  damageTerms?: DamageCalcTerms;
   /**
    * `Cmd_if_status_in_party`'s exact-`==` party scan on the TARGET's OWN side
    * (`battle_ai_script_commands.c:1568-1598`) -- source-required for
