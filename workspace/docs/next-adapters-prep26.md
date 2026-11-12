@@ -128,7 +128,7 @@ python3 -I tools/integration/prep26Summary.py tools/integration/fixtures/prep26/
 npx vite-node tools/integration/prep26IceBallCheck.ts <alt.json>:player|opponent ... [--out=out.json] [--neg=lag|words|palette]
 npx vite-node tools/integration/prep26IceBallPixels.ts <alt.json>:<rgbDir>:player|opponent:ATT,TGT ... [--neg=oam|palette|registers|words]
 ```
-Probes need `PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py` and the vendor venv (set in the scripts; the shell prints segfaults on exit: mGBA teardown, outputs are complete).
+Probes need `PYTHONPATH=../../vendor/libmgba-py` and the vendor venv (set in the scripts; the shell prints segfaults on exit: mGBA teardown, outputs are complete).
 
 ## 8. Papercuts
 

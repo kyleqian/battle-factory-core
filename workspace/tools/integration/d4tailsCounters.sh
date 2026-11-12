@@ -4,8 +4,8 @@
 # rows (activation .. last active) and the lag frames (playTime pass delta 0) as body ages, and r0 == r1.
 # usage: d4tailsCounters.sh <outDir> <parallel> <out.json> <scenario.json>...
 cd "$(dirname "$0")/../.." || exit 1
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
-VPY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
+VPY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 OUT=$1; P=$2; JSON=$3; shift 3; mkdir -p "$OUT"
 for scen in "$@"; do
   stem=$(basename "$scen" .json)

@@ -18,7 +18,7 @@ group's high byte (+1). `struct OamMatrix` (a,b,c,d, each s16) is 8 bytes;
 `gOamMatrices[n]` at `gOamMatrices + 8*n`.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-switchin-materialize-affine.py \
         tools/probe/specs/switchin-pidgeotto-tint.json <output.json> \
         <startTick> <endTick>

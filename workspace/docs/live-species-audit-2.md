@@ -120,7 +120,7 @@ One fresh run to triage, two for every verdict. Results (`dense/golbat2*/summary
 ## 5. Reproduce (workspace root; direct mGBA only)
 
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=../../vendor/libmgba-py PY=../../vendor/mgba-venv/bin/python
 # dense x2 fresh with retained evidence, several fixtures in parallel
 tools/integration/speciesAudit2Dense.sh tools/integration/fixtures/species-audit/derived-golbat /tmp/s2/ev /tmp/s2/out light-screen-live-slowpoke-player prep2-future-sight-player prep4-smelling-salt-player prep5-aromatherapy-player
 tools/integration/speciesAudit2Dense.sh tools/integration/fixtures/species-audit/derived-golbat2 /tmp/s2/ev2 /tmp/s2/out2 order-consumer-rock-throw-player foresight-player-foresight-player-machoke-opponent-onix

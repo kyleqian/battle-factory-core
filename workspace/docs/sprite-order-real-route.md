@@ -102,7 +102,7 @@ Not occurring in these histories (so still "from the doc, unverified here"): Con
 Raw sha1 (two identical fresh runs each): turn17 `37ae5144c0e46d16757f494d2a0018b3f48528c9`, switch `b9bf1ecf8efca56ac0289a6bca75d1527e415b6e`, turn2-dragonbreath `fc66a4e52bf63e9cbf0db675f28288fc7e3f0171`, grovyle-faint `22cf46c77540bb360c8550be1fb013be8110ece9`, victory `9e65d9ec61eef4a5f944ee9b58a9e398b1d114d9`.
 
 ```
-V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py
+V=../../vendor; export PYTHONPATH=$V/libmgba-py
 for t in battle1-turn17-dense battle1-switch battle1-turn2-dragonbreath battle1-grovyle-faint battle1-victory; do
   python3 tools/compare/spriteOrderRealRouteProbe.py tools/compare/traces-groundtruth/$t.json tools/integration/fixtures/sprite-order-real-route/raw/$t-0.json   # ~80 s each, direct mGBA
 done

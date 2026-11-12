@@ -10,8 +10,8 @@ from pathlib import Path
 
 out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
 scen = [Path(p) for p in sys.argv[2:]] or sorted(Path("tools/integration/fixtures/audit-17/scenarios").glob("*.json"))
-py = os.environ.get("PY", "/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python")
-env = {**os.environ, "PYTHONPATH": os.environ.get("PYTHONPATH", "/Users/kyle/Developer/pokebench/vendor/libmgba-py")}
+py = os.environ.get("PY", os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/mgba-venv/bin/python")
+env = {**os.environ, "PYTHONPATH": os.environ.get("PYTHONPATH", os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/libmgba-py")}
 
 
 def one(s: Path) -> str:

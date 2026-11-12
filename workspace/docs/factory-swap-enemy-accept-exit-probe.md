@@ -21,7 +21,7 @@ do
   bin/oracle --profile battle-scene-off run "$taskdir/$scenario.json" \
     -o "$taskdir/$scenario-oracle"
   python3 tools/run-mgba-probe.py "$taskdir/$scenario-ram.json" -- \
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
     tools/probe/dump-swap-enemy-picker.py "$taskdir/$scenario.json" \
     "$taskdir/$scenario-ram.json" 29970 30100
 done

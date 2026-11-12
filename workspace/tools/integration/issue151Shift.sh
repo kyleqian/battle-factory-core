@@ -3,7 +3,7 @@
 # residual of live(age) vs ROM frame start+age+d, d in -1,0,+1 (speciesAudit3LagShift.ts) and bbox / top ROM<-live colour pairs (speciesAudit5Diff.ts).
 # Prints the shift table of each run and whether the two runs' tables are identical. usage: issue151Shift.sh <outDir> <ages> <fixture.json>...   (ages: "170 171 ...")
 cd "$(dirname "$0")/../.." || exit 1
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
 OUT=$1; AGES=$2; shift 2; mkdir -p "$OUT"
 for fx in "$@"; do
   stem=$(basename "$fx" .json); first=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['denseWindow']['startFrame'])" "$fx")

@@ -8,7 +8,7 @@ That lets a later renderer distinguish a genuine sprite-state transition from
 a framebuffer/OAM/VRAM timing artifact without fitting pixels.
 
 Usage (use the mGBA virtualenv, not system Python):
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
     tools/probe/dump-turn13-murkrow-boundaries.py \
     tools/probe/specs/turn13-b1-sprite.json /tmp/murkrow-boundaries.json \
     17017 17018 17019 17020 17032 17033 17034 17035

@@ -27,7 +27,7 @@ express:
    generic hit-flash effect instead.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-ai-and-hitmarker.py <trace.json> <output.json> [startTick]
 
 <trace.json> is any oracle trace file with a top-level "segments" array.

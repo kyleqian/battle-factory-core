@@ -10,8 +10,8 @@ OUT=${1:?usage: hist73Run.sh <fresh-out-dir>}
 if [ -e "$OUT" ] && [ -n "$(ls -A "$OUT" 2>/dev/null)" ]; then echo "refusing: $OUT exists and is not empty"; exit 1; fi
 mkdir -p "$OUT/rec"; OUT=$(cd "$OUT" && pwd)
 WS=$(pwd); T=tools/integration; F=$T/fixtures/hist73; N="node --experimental-strip-types --no-warnings"
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
-PY=${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
+PY=${PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
 test -z "$(git status --short src)" || { echo "src is not clean"; exit 1; }
 REC=$OUT/rec
 IDS=$(python3 -c "import json; print(','.join(str(u['key']) for u in sorted(json.load(open('$F/net-zero-audit.json'))['units'], key=lambda u: u['key'])))")

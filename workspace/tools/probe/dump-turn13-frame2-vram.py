@@ -21,7 +21,7 @@ directly diffable against `battle-opponent-front-sprites.json`'s
 `frame2.tiles` byte-for-byte (see `verify-turn13-frame2.ts`).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn13-frame2-vram.py \
         tools/probe/specs/turn13-b1-sprite.json <output.json> 17040 17050
 

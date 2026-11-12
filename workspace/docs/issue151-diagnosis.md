@@ -39,7 +39,7 @@ schedule patched it is 207,290 = 190 x 1,091. `flygonA` / `golbatA` keep 200 px 
 
 ## 3. Reproduce (workspace root; direct mGBA only; ~1.5 min each step at 12 parallel)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; D=tools/integration/fixtures/species-audit-7/derived; F=tools/integration/fixtures/issue151
+export PYTHONPATH=../../vendor/libmgba-py; D=tools/integration/fixtures/species-audit-7/derived; F=tools/integration/fixtures/issue151
 tools/integration/issue151Counters.sh /tmp/i151/sc 12 tools/integration/fixtures/sheer-cold-live/sheer-cold-*.json $D/*sheer-cold*.json      # lag ages, 2 fresh runs
 tools/integration/issue151Counters.sh /tmp/i151/hv 12 tools/integration/fixtures/q2-live/hyper-voice-*.json $D/*hyper-voice*.json
 tools/integration/issue151Shift.sh /tmp/i151/sh "170 171 172 173 174 180 188 189 190" $D/pichuA-sheer-cold-player-dewgong-opponent-chansey.json

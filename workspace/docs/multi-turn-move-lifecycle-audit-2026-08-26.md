@@ -473,7 +473,7 @@ boundary (`STATUS2_MULTIPLETURNS` / `LOCK_CONFUSE` / `UPROAR` / `BIDE` /
 
 ```sh
 # the reference/ symlink: rg over it returns ZERO hits silently, always resolve it first
-REF=$(cd reference/pokeemerald && pwd -P)   # -> /Users/kyle/Developer/pokebench/vendor/pokeemerald
+REF=$(cd reference/pokeemerald && pwd -P)   # -> ../../vendor/pokeemerald
 
 # every cell, whole tree, never one file
 grep -rn "gLockedMoves\|CancelMultiTurnMoves\|gBideDmg\|gBideTarget" $REF/src $REF/include

@@ -1,7 +1,7 @@
 {
   "appRoute": "canonical-recorded",
   "oracleProfile": "battle-scene-off",
-  "_comment": "derived from /Users/kyle/Developer/pokebench/pokeemerald-factory/runs/20260717-004950_warm-bison/tools/compare/traces-groundtruth/battle1-swapyes-a.json (player-b-yes); short player-origin quit acceptance window",
+  "_comment": "derived from ../pokeemerald-factory/runs/20260717-004950_warm-bison/tools/compare/traces-groundtruth/battle1-swapyes-a.json (player-b-yes); short player-origin quit acceptance window",
   "segments": [
     {
       "frames": 2,

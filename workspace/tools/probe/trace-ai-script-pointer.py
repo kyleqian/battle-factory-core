@@ -8,7 +8,7 @@ AI script commands execute for each moveset slot. Adapted from
 
 Run through the teardown-tolerant wrapper with the harness's mGBA python:
     python3 tools/run-mgba-probe.py /tmp/traj.json -- \\
-        /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \\
+        ../../vendor/mgba-venv/bin/python \\
         tools/probe/trace-ai-script-pointer.py <fixture.json> /tmp/traj.json
 """
 

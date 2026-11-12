@@ -19,7 +19,7 @@ probe in this directory uses (`include/sprite.h`, `include/gba/types.h`):
   + 0x3F: flags byte (bit0 = hFlip)
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-feather-dance-sprites.py \
         tools/probe/specs/turn6-feathers.json <output.json> \
         <startTick> <endTick>

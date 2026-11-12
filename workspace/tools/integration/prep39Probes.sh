@@ -3,7 +3,7 @@
 # usage: OUT=<fresh dir> sh tools/integration/prep39Probes.sh [scenario-basename ...]
 set -e
 [ -n "$OUT" ] || { echo "OUT=<dir> required"; exit 2; }
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 mkdir -p "$OUT"
 ALL="prep37-on-player-persian-slowbro prep37-on-opponent-persian-slowbro prep37-off-player-persian-slowbro prep37-on-opponent-golbat-slowbro prep39-on-player-persian-onix prep39-on-opponent-rattata-slowbro"
 for s in ${*:-$ALL}; do

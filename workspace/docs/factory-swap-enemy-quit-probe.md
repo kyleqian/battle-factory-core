@@ -23,7 +23,7 @@ do
 done
 
 python3 tools/run-mgba-probe.py "$taskdir/b-yes-ram.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/dump-swap-enemy-quit.py "$taskdir/enemy-b-yes.json" \
   "$taskdir/b-yes-ram.json" 29935,29936,29961,29967,29975,29976,29977,29978,29979,30000
 ```

@@ -115,7 +115,7 @@ Everything below comes from grep and read only, with no edits. The worktree is c
   - the S11 body (2385-2406), replaced by a pointer to `docs/s11-audio-design.md`
   - the Domain-notes bullets not kept above (colour pipeline, draft-screen timings, input-ready lag, rented-ball RNG, draft candidates)
 - **Keep the heading text** `## Domain notes`. About 15 probe and extract scripts, `src/engine/rng.ts:5,48`, `src/engine/ballAnim.ts:12`, `tests/rng.test.ts:5` and `tests/ballAnim.test.ts:4` cite it in comments.
-- **Fix the Mac path** `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python` in the recipe. The handoff says to use the host helpers instead.
+- **Fix the Mac path** `../../vendor/mgba-venv/bin/python` in the recipe. The handoff says to use the host helpers instead.
 - **Suggested ISSUES.md target:** about 150 lines. The old file goes to `docs/archive/ISSUES-pre-cln238.md`.
   - The header is rewritten: no #70, no `ROADMAP:NNN` cites, and a pointer to the settled exceptions in ROADMAP.
   - Each remainder entry keeps only its still-open lines.

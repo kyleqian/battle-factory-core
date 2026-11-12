@@ -10,7 +10,7 @@ separate ones since all three need the SAME per-tick replay of the SAME
 button streams) under the `factory-battle-scene-off.json` bootstrap.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn9-hitanim-off.py <trace.json> <output.json> <startTick> <endTick>
 """
 

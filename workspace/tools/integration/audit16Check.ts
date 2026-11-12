@@ -95,9 +95,9 @@ const variants = fixtures.map(({ name, f }) => {
 const runs: Json[] = [];
 for (let run = 0; run < 2; run++) {
   const tmp = mkdtempSync(join(tmpdir(), "audit16-"));
-  const r = spawnSync("python3", ["tools/run-mgba-probe.py", join(tmp, "p.json"), "--", "/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python",
+  const r = spawnSync("python3", ["tools/run-mgba-probe.py", join(tmp, "p.json"), "--", `${process.env.POKEBENCH_VENDOR_DIR ?? "../../vendor"}/mgba-venv/bin/python`,
     "tools/integration/prep48Probe.py", fixtures[0]!.f.scenario, join(tmp, "p.json"), join(tmp, "rgb")], { encoding: "utf8",
-    env: { ...process.env, PYTHONPATH: process.env.PYTHONPATH ?? "/Users/kyle/Developer/pokebench/vendor/libmgba-py" } });
+    env: { ...process.env, PYTHONPATH: process.env.PYTHONPATH ?? `${process.env.POKEBENCH_VENDOR_DIR ?? "../../vendor"}/libmgba-py` } });
   const probe = JSON.parse(readFileSync(join(tmp, "p.json"), "utf8")) as Json;
   const perFixture: Json = {};
   for (const v of variants) {

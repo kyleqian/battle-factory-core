@@ -19,7 +19,7 @@ answer for this exact tick.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3), via:
     python3 tools/run-mgba-probe.py <output.json> -- \
-        /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+        ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-dragonrage-oam.py <scenario.json> <output.json> <startTick> <endTick>
 """
 

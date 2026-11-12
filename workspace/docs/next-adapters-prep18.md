@@ -127,7 +127,7 @@ Alternate activation-state (BG registers, hardware scroll, software matrices, sc
 # Random2 probes + allocator probes x2 (fresh processes, cmp'd); stage 1 ~2 min, 2 ~30 s, 3 ~30 s on 16 cores
 STAGE=1 JOBS=16 sh tools/integration/prep18Run.sh; STAGE=2 JOBS=16 sh tools/integration/prep18Run.sh; STAGE=3 JOBS=8 sh tools/integration/prep18Run.sh
 python3 tools/integration/prep18AltOpponent.py          # then the same probes for prep18-*-altopp-* (prep14Probes.sh, prep13Probe.py, prep18Probe.py)
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=../../vendor/libmgba-py PY=../../vendor/mgba-venv/bin/python
 $PY tools/integration/prep18Probe.py tools/battle-lab/<scenario>.json /tmp/p18c/r1/<scenario>.json   # activation state (BG regs, scroll, matrices, scanline), x2
 python3 tools/integration/prep18Analyze.py /tmp/p18a/r1                      # corpus cross-check (per body windows)
 python3 tools/integration/prep18Plans.py /tmp/p18 tools/integration/fixtures/prep18/plans.json

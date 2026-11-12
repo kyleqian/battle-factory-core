@@ -33,8 +33,8 @@ mkdir -p "$OUT/att" "$OUT/att-rec"
 for n in stf115-ply-tsub-95-135 stf115-opp-tsub-143-95; do
   cp "$OUT/sc0/$n.json" "$OUT/final/tools/integration/fixtures/prep40/scenarios/$n.json"
   for r in 1 2; do
-    (cd "$OUT/final" && PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py python3 tools/run-mgba-probe.py "$OUT/att/$n-r$r.json" -- \
-      /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/integration/prep40Probe.py tools/integration/fixtures/prep40/scenarios/$n.json \
+    (cd "$OUT/final" && PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py python3 tools/run-mgba-probe.py "$OUT/att/$n-r$r.json" -- \
+      ${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python tools/integration/prep40Probe.py tools/integration/fixtures/prep40/scenarios/$n.json \
       "$OUT/att/$n-r$r.json" "$OUT/att/$n-r$r-rgb" > "$OUT/att/$n-r$r.out" 2>&1) || echo "probe exit $n r$r"
   done
   if cmp -s "$OUT/att/$n-r1.json" "$OUT/att/$n-r2.json"; then echo "r1 == r2 $n"; else echo "R1 != R2 $n"; fi

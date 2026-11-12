@@ -38,7 +38,7 @@ Every row in `receipts/` (stem `<species>[A|T]-<fixture>`: `A` = attacker swap, 
 
 ## 2. Reproduce (workspace root; direct mGBA only)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; W=tools/integration/fixtures/species-audit-7
+export PYTHONPATH=../../vendor/libmgba-py; W=tools/integration/fixtures/species-audit-7
 tools/integration/speciesAudit7Stage.sh                                    # list*.tsv + scenarios/
 cat $W/list*.tsv > /tmp/s7all.tsv; JOBS=10 tools/integration/speciesAudit5Probes.sh /tmp/s7all.tsv /tmp/s7/probes
 python3 tools/integration/speciesAudit6Derive.py /tmp/s7all.tsv /tmp/s7/probes $W/derived > $W/derive.txt   # delete REORDERED rows' fixtures

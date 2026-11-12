@@ -1,8 +1,8 @@
 #!/bin/sh
 # Census activation probes (direct mGBA, Scene ON, one fresh run per scenario; no shared oracle). Run from workspace root.
 # usage: censusActivation.sh [scenario-name ...]   (default: the first recommended batch's scenarios)
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
-PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py
+PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 OUT=tools/integration/fixtures/census-activation
 mkdir -p $OUT
 if [ $# -eq 0 ]; then set -- aerial-ace-pidgeotto-onix aerial-ace-player-pidgeotto-onix quick-attack-pidgeotto-onix quick-attack-player-pidgeotto-onix \

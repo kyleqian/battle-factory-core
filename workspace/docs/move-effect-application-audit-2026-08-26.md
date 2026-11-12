@@ -200,7 +200,7 @@ Source `battle_script_commands.c:2522-2903`; port `battleScriptHitChainOpcode.ts
 
 ```sh
 # the reference/ symlink: rg over it returns ZERO hits silently, always resolve it first
-REF=$(cd reference/pokeemerald && pwd -P)          # -> /Users/kyle/Developer/pokebench/vendor/pokeemerald
+REF=$(cd reference/pokeemerald && pwd -P)          # -> ../../vendor/pokeemerald
 
 # source: the three commands and the whole of SetMoveEffect
 grep -n "Cmd_seteffectwithchance\|Cmd_seteffectprimary\|Cmd_seteffectsecondary\|void SetMoveEffect" $REF/src/battle_script_commands.c

@@ -19,7 +19,7 @@ construction while proper arbitrary scenario compilation remains unimplemented.
 Run via the validation wrapper (from repository root):
 
   python3 tools/run-mgba-probe.py /tmp/fire-punch-onix-grovyle.json -- \
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
     tools/probe/stage-fire-punch-portable-on.py /tmp/fire-punch-onix-grovyle.json
 
 The output includes raw-RGB frame hashes and RAM snapshots sufficient to

@@ -51,7 +51,7 @@ mechanism below states its own lag evidence, not a copy of another's.
 
 ```sh
 # RAM: cutting-slice sprite slot/OAM/x2y2/VRAM tiles/palette at any render ticks
-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+../../vendor/mgba-venv/bin/python \
   tools/probe/dump-cuttingslice-vram.py \
   tools/compare/traces-groundtruth/battle1-turn10-dense.json \
   /tmp/cuttingslice-full.json 12360 12361 ... 12383

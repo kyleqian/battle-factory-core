@@ -1,8 +1,8 @@
 #!/bin/sh
 # prep9: run prep9PaletteProbe.py (direct mGBA, fresh process each) over every scenario of fixtures/prep9-scenarios/manifest.json.
 # usage (workspace root): sh tools/integration/prep9Probes.sh <runTag> [filterSubstring]   outputs: fixtures/prep9-probes/<runTag>/<name>.json
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
-export PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py
+export PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 export RUN=${1:-r1} FILT=${2:-}
 FX=tools/integration/fixtures
 mkdir -p $FX/prep9-probes/$RUN

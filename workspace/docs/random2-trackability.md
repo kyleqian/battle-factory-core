@@ -256,7 +256,7 @@ approved surrogate implementation.
 ## 9. Reproduce
 
 ```sh
-PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+PY=../../vendor/mgba-venv/bin/python
 python3 tools/run-mgba-probe.py /tmp/route.json -- $PY tools/integration/random2RouteProbe.py \
   tools/compare/traces-groundtruth/battle1-postwin-dense.json /tmp/route.json --step-sample 2 --step-anim   # ~5 min
 python3 tools/run-mgba-probe.py /tmp/route-c.json -- $PY tools/integration/random2RouteProbe.py \

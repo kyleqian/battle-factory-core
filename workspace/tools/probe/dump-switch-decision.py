@@ -55,7 +55,7 @@ for why this doesn't fully resolve the puzzle (tick-level sampling can't
 rule out same-frame writes-then-reverts).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-switch-decision.py <trace.json> <output.json> \
         <partyStatsTick> <ledgerStartTick> <ledgerEndTick>
 """

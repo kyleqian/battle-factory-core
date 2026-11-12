@@ -72,7 +72,7 @@ Measured: the Overheat bodies themselves are 0 px with nothing but the lend; the
 ## Reproduce
 
 ```
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=../../vendor/libmgba-py PY=../../vendor/mgba-venv/bin/python
 python3 tools/integration/lb21Scenarios.py
 ls tools/battle-lab/lb21-*.json | xargs -n1 basename | sed 's/lb21-//;s/.json//' | xargs -P 8 -n 1 sh -c 'sh tools/integration/lb21Probe.sh a $0; python3 tools/run-mgba-probe.py /tmp/lb21/h/lb21-$0.json -- $PY tools/integration/bgHistoryProbe.py tools/battle-lab/lb21-$0.json /tmp/lb21/h/lb21-$0.json >/dev/null 2>&1'   # mkdir -p /tmp/lb21/h first
 python3 tools/integration/lb21Fixtures.py /tmp/lb21/a /tmp/lb21/h

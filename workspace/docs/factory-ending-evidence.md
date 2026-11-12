@@ -106,7 +106,7 @@ wrapper (with a new staging trace/spec, never a stale output):
 ```sh
 scratch_dir=$(mktemp -d)
 python3 tools/run-mgba-probe.py "$scratch_dir/ending.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/ram-probe.py <terminal-off-spec.json> "$scratch_dir/ending.json"
 ```
 

@@ -7,7 +7,7 @@ Fast source/fixture check:
 Live Battle Scene OFF check:
     out_dir="$(mktemp -d /tmp/on-damage-static-verify.XXXXXX)"
     python3 tools/run-mgba-probe.py "$out_dir/result.json" -- \
-      /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+      ../../vendor/mgba-venv/bin/python \
       tools/probe/verify-on-damage-static.py "$out_dir/result.json"
 """
 

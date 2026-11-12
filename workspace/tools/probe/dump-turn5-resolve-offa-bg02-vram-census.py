@@ -45,7 +45,7 @@ the traces start at different pressTicks; diff by d-offset / role instead
 Run with the harness's mGBA-enabled interpreter (NOT system python3), or via
 the tools/run-mgba-probe.py wrapper (segfaults at teardown after writing
 valid JSON are expected and benign - see that wrapper's own docstring):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn5-resolve-offa-bg02-vram-census.py \
         tools/compare/traces/turn5-resolve-off-a.json <output.json> 6258 6259
 """

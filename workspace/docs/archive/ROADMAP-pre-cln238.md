@@ -2417,7 +2417,7 @@ earlier-stage interface.
   `gRngValue = 0xd2ddeec8` (RAM-verified).
 - **Dev-time RAM inspection recipe** (sanctioned ground-truth channel;
   never at runtime): run a script with
-  `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python`, put
+  `../../vendor/mgba-venv/bin/python`, put
   `<harness>/oracle/` on `sys.path`, instantiate
   `emerald_core.EmeraldOracle(rom, map, bootstrap/factory.json)` — replay
   reproduces the canonical anchor byte-exactly (sha verified) — then

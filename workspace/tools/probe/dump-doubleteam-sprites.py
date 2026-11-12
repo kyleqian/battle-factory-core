@@ -19,7 +19,7 @@ is `static`, so its address needs `nm`, not `bin/oracle symbols`:
     # 08102b3c t AnimDoubleTeam  (thumb bit +1 added below)
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-doubleteam-sprites.py <trace.json> <output.json> \
         <startTick> <endTick>
 

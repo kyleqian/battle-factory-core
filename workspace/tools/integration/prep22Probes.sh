@@ -1,7 +1,7 @@
 #!/bin/sh
 # prep22: run prep22Probe.py on scenarios (tools/battle-lab/<key>.json) x REPS fresh processes in parallel (workspace root). usage: prep22Probes.sh OUTDIR REPS key...
-PY=${MGBA_PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
+PY=${MGBA_PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
 OUT=$1; REPS=$2; shift 2; mkdir -p "$OUT"
 # tools/run-mgba-probe.py refuses to overwrite an existing output (silently, stderr is discarded below): clear stale outputs first
 for k in "$@"; do rm -f "$OUT/$k"-r*.json "$OUT/$k"-r*.json.log; done

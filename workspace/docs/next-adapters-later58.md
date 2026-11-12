@@ -93,7 +93,7 @@ later body) would be a policy change. That is out of this grant, and the policie
 
 ## Reproduce
 
-    export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
+    export PYTHONPATH=../../vendor/libmgba-py
     python3 tools/integration/later58Scenarios.py                                  # scenarios (byte-identical to the committed ones)
     OUT=/tmp/l58 JOBS=12 sh tools/integration/later58Probes.sh                      # 166 scenarios x2 fresh (~3 min)
     python3 tools/integration/later58Fixtures.py /tmp/l58/r1 /tmp/l58/live          # == fixtures/later58/live

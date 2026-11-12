@@ -6,8 +6,8 @@
 # The src experiment is applied from the committed .diff (it adds src/engine/liveWordsOrderCarry.ts) and ALWAYS reverted.
 set -e
 : "${OUT:?set OUT=<scratch dir>}"; : "${REC:?set REC=<receipt dir>}"
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
-PY=${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
+PY=${PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
 T=tools/integration; F=$T/fixtures/prep46; N="node --experimental-strip-types --no-warnings"
 NEW=src/engine/liveWordsOrderCarry.ts
 mkdir -p "$OUT" "$REC"

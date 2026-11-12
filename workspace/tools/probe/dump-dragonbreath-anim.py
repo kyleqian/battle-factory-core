@@ -29,7 +29,7 @@ pokeemerald.elf`, this run's pinned reference build):
   SpriteCB_HitAnimHealthoxEffect = 0x08076a38 (code, thumb bit set at runtime)
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-dragonbreath-anim.py <trace.json> \
         <output.json> <startTick> <endTick>
 """

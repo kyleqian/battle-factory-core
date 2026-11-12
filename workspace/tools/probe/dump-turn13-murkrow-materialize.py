@@ -21,7 +21,7 @@ the canonical anchor and reach past render 17722, comfortably covering
 this window).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn13-murkrow-materialize.py \
         tools/probe/specs/turn13-b1-sprite.json <output.json> \
         <startTick> <endTick>

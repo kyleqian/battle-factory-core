@@ -47,7 +47,7 @@ TryToFaint + CheckViability) flag loop — not a silent "unresolved" bucket.
 Run with the harness's mGBA-enabled interpreter (NOT system python3), through
 the teardown-segfault-tolerant wrapper:
     python3 tools/run-mgba-probe.py /tmp/cv-defenseup-physicallastmove.json -- \\
-        /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \\
+        ../../vendor/mgba-venv/bin/python \\
         tools/probe/attribute-factory-ai-cv-drawsite-callers.py \\
         tools/battle-lab/mechanic-factory-ai-cv-defenseup-physicallastmove-off.json \\
         /tmp/cv-defenseup-physicallastmove.json \\

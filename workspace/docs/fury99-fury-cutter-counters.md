@@ -119,7 +119,7 @@ RAM shows this, and the model copies from the blended OBJ bank. Every other pred
 
 ## Reproduce
 
-    export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
+    export PYTHONPATH=../../vendor/libmgba-py
     sh tools/integration/fury99Run.sh .integration/validation/fury99-rerun            # scenarios .. receipt + test, each SAME / DIFF
     sh tools/integration/fury99Run.sh .integration/validation/fury99-rerun2 --census  # + census 0..999 (base 46d64a860 vs HEAD)
     node --experimental-strip-types --no-warnings tools/integration/fury99Parity.ts --seed=45 --streak=5

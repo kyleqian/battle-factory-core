@@ -115,7 +115,7 @@ That order is wrong too: ReturnWeak is `Cf;D0;Cf;Cf;D2;D1`, measured in §3.
 ## 5. Reproduction (from workspace/; direct mGBA only)
 
 ```
-PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+PYTHONPATH=../../vendor/libmgba-py ../../vendor/mgba-venv/bin/python \
   tools/integration/ret80Probe.py <fresh> --jobs 12
 python3 tools/integration/ret80Extract.py <fresh> <fresh>/units.json        # == fixtures/ret80/units.json
 node --experimental-strip-types tools/integration/ret80Check.ts <fresh>/units.json <fresh>/check.json   # == check.json

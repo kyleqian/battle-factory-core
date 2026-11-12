@@ -25,7 +25,7 @@ Two DISTINCT mechanisms found, neither assumed going in:
    reusing the attacker's own `BlendPalette`-style yellow blend, was wrong).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-endeavor-tail.py <trace.json> \
         <output.json> <startTick> <endTick>
 """

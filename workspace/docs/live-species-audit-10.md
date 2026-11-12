@@ -76,7 +76,7 @@ Accepted pairs in both orientations: Shock Wave FLAAFFY -> CORSOLA, Superpower N
 
 ## 3. Reproduce (workspace root; direct mGBA only)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; W=tools/integration/fixtures/species-audit-10
+export PYTHONPATH=../../vendor/libmgba-py; W=tools/integration/fixtures/species-audit-10
 bash tools/integration/speciesAudit10Stage.sh                                  # list-<move>.tsv + scenarios/ (fixes the gender papercut)
 JOBS=14 sh tools/integration/speciesAudit9Probes.sh /tmp/s10/probes $W/list-*.tsv           # 2 fresh prep22Probe runs per swapped scenario (~3.5 min)
 python3 tools/integration/speciesAudit10Fixtures.py /tmp/s10/probes $W/derived $W/list-*.tsv > $W/derive.txt

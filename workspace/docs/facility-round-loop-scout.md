@@ -428,7 +428,7 @@ Run it only through:
 ```sh
 probe_dir="$(mktemp -d /tmp/factory-start-rng.XXXXXX)"
 python3 tools/run-mgba-probe.py "$probe_dir/result.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/verify-factory-battle-start-rng.py "$probe_dir/result.json"
 ```
 

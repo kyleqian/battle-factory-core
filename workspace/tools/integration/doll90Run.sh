@@ -13,7 +13,7 @@ set -e
 OUT=${1:?usage: doll90Run.sh <fresh-out-dir> [--census]}; [ ! -e "$OUT" ] || { echo "$OUT exists (need a fresh dir)"; exit 2; }
 BASE=d46cdfff1; WS=$PWD; FX=$WS/tools/integration/fixtures/doll90; D81=$WS/tools/integration/fixtures/doll81/scenarios
 mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd); PR=$OUT/probes; REC=$OUT/rec
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py; PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 NODE="node --experimental-strip-types --no-warnings"
 echo "code $(git rev-parse HEAD) src $(git rev-parse HEAD:workspace/src) dirty-src $(git status --short src | wc -l | tr -d ' ')"
 DEF="doll81-def-psych-up-player doll81-def-psych-up-player-gengar doll81-def-psych-up-opponent doll81-def-psych-up-opponent-golbat"

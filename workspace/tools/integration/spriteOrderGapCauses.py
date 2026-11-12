@@ -16,7 +16,7 @@ SCEN = ROOT / "tools/integration/fixtures/gap-cause-scenarios"
 OUT = Path(os.environ.get("OUT", "/tmp/gapcalls"))
 BASE = ROOT / "tools/battle-lab/mechanic-night-shade-opponent-ariados-player-onix.json"
 PROBE = ROOT / "tools/compare/spriteOrderGapCallProbe.py"
-PY = os.environ.get("PY", "/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python")
+PY = os.environ.get("PY", os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/mgba-venv/bin/python")
 
 # name: (player species, player move, opponent species, opponent move, seed, frames)
 VARIANTS = {
@@ -78,7 +78,7 @@ def scenario_path(name: str) -> Path:
 
 def run(names: list[str]) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    env = dict(os.environ, PYTHONPATH="/Users/kyle/Developer/pokebench/vendor/libmgba-py")
+    env = dict(os.environ, PYTHONPATH=os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/libmgba-py")
     for n in names:
         r = subprocess.run([PY, str(PROBE), str(scenario_path(n)), str(OUT / f"{n}.json")], env=env,
                            capture_output=True, text=True)

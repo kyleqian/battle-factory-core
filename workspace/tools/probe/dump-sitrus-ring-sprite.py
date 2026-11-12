@@ -25,7 +25,7 @@ session), so the slot is discovered empirically rather than assumed.
   + 0x3F: flags byte (bit3 affineAnimBeginning, bit5 affineAnimEnded)
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-sitrus-ring-sprite.py \
         tools/probe/specs/turn5-sitrus-ring.json <output.json> \
         <startTick> <endTick>

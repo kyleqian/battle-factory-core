@@ -56,7 +56,7 @@ for environments that can run the whole matrix together.
 scratch_dir=$(mktemp -d /tmp/pokebench-factory-terminal-boundaries-XXXXXX)
 FACTORY_TERMINAL_PROBE_SCOPE=seventhWin FACTORY_TERMINAL_PROBE_CONTROL=idle \
   python3 tools/run-mgba-probe.py "$scratch_dir/win-idle.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/stage-factory-terminal-boundaries-off.py "$scratch_dir/win-idle.json"
 ```
 

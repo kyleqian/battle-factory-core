@@ -2,8 +2,8 @@
 # issue151: main-loop pass counters (speciesAudit2Counters.py) for fixtures, 2 fresh direct-mGBA processes each; prints digest equality and lag frames
 # (playTime pass delta 0) inside each fixture's dense window, as ages. usage: issue151Counters.sh <outDir> <parallel> <fixture.json>...
 cd "$(dirname "$0")/../.." || exit 1
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
-VPY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
+VPY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 OUT=$1; P=$2; shift 2; mkdir -p "$OUT"
 for fx in "$@"; do
   scen=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['scenario'])" "$fx"); stem=$(basename "$fx" .json)

@@ -73,7 +73,7 @@ lists every row (activation, old -> new pinned rng2, body lengths). Random2 pins
 
 ## 4. Reproduce (workspace root; direct mGBA only)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
+export PYTHONPATH=../../vendor/libmgba-py
 W=tools/integration/fixtures/species-audit-3
 tools/integration/speciesAudit3Stage.sh && tools/integration/speciesAudit3Probes.sh $W/list.tsv /tmp/s3/probes && python3 tools/integration/speciesAudit3Derive.py $W/list.tsv /tmp/s3/probes $W/derived
 tools/integration/speciesAudit3StageAttacker.sh && tools/integration/speciesAudit3Probes.sh $W/listA.tsv /tmp/s3/probes && python3 tools/integration/speciesAudit3Derive.py $W/listA.tsv /tmp/s3/probes $W/derived

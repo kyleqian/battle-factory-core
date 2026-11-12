@@ -22,7 +22,7 @@ mkdir -p "$OUT"
 OUT=$(cd "$OUT" && pwd)
 case "$OUT" in "$(cd .. && pwd)"/*) ;; *) echo "refusing: $OUT is outside the repo"; exit 2;; esac
 F=tools/integration/fixtures/idle94
-PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 fail=0
 check() { if cmp -s "$1" "$2"; then echo "SAME $3"; else echo "DIFF $3"; fail=1; fi; }
 

@@ -121,4 +121,4 @@ sh tools/integration/prep23Probes.sh                      # 10 mGBA processes, e
 sh tools/integration/prep23Run.sh                         # checks + pixels + receipts into tools/integration/fixtures/prep23/
 REC=/tmp/x sh tools/integration/prep23Run.sh              # second run; cmp the receipts
 ```
-Alternates need `PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py` and the vendor venv (set in the scripts). Probe outputs: `/tmp/p23/` (not committed; 13 MB each).
+Alternates need `PYTHONPATH=../../vendor/libmgba-py` and the vendor venv (set in the scripts). Probe outputs: `/tmp/p23/` (not committed; 13 MB each).

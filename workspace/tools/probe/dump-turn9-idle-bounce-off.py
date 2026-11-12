@@ -14,7 +14,7 @@ the exact trace this step's assigned brief cites (177/233 matched, all 56
 misses in ticks 10818-10873).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn9-idle-bounce-off.py \
         tools/compare/traces/turn9-quickattack-off.json <output.json> <startTick> <endTick>
 

@@ -661,7 +661,7 @@
  },
  {
   "case": "blizzard-opponent-baltoy-huntail",
-  "skipped": "RuntimeError: run-mgba-probe: output is missing or invalid JSON; exit 139; log: /Users/kyle/Developer/pokebench/pokeemerald-factory-core/workspace/.worktrees/integration-20261009-120456/workspace/.integration/valid"
+  "skipped": "RuntimeError: run-mgba-probe: output is missing or invalid JSON; exit 139; log: <repo>/workspace/.worktrees/integration-20261009-120456/workspace/.integration/valid"
  },
  {
   "case": "blizzard-opponent-aron-azurill",

@@ -4,7 +4,7 @@
 # usage (from workspace/): OUT=<fresh dir> sh tools/integration/prep40Probes.sh [scenario-stem ...]   (JOBS=<n>, default 16)
 set -e
 [ -n "$OUT" ] || { echo "OUT=<dir> required"; exit 2; }
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 SC=tools/integration/fixtures/prep40/scenarios
 mkdir -p "$OUT"
 ALL=$(cut -f1 "$SC/list.tsv")

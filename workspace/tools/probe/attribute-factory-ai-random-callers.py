@@ -39,7 +39,7 @@ it's an exact, already-instrumented counter one memory read away).
 Run with the harness's mGBA-enabled interpreter (NOT system python3), through
 the teardown-segfault-tolerant wrapper:
     python3 tools/run-mgba-probe.py /tmp/factory-ai-callers-unambiguous.json -- \\
-        /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \\
+        ../../vendor/mgba-venv/bin/python \\
         tools/probe/attribute-factory-ai-random-callers.py \\
         tools/battle-lab/mechanic-factory-ai-unambiguous-off.json \\
         /tmp/factory-ai-callers-unambiguous.json

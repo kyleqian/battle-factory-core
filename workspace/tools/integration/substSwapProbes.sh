@@ -4,7 +4,7 @@
 # usage (from workspace/): OUT=<fresh dir> sh tools/integration/substSwapProbes.sh [scenario-basename ...]
 set -e
 [ -n "$OUT" ] || { echo "OUT=<dir> required"; exit 2; }
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 mkdir -p "$OUT"
 ALL="subswap-ctrl-player-golem-onix-headbutt subswap-on-opponent-golbat-slowbro-bodyslam subswap-on-opponent-golem-onix-headbutt subswap-on-opponent-onix-golem-headbutt subswap-on-opponent-persian-slowbro-bodyslam subswap-on-opponent-persian-slowbro-leechseed subswap-on-opponent-persian-slowbro-seismictoss subswap-on-player-golem-onix-headbutt subswap-on-player-persian-golbat-bodyslam subswap-on-player-persian-slowbro-bodyslam subswap-on-player-persian-slowbro-leechseed subswap-on-player-persian-slowbro-seismictoss subswap-on-player-zigzagoon-onix-headbutt"
 for s in ${*:-$ALL}; do

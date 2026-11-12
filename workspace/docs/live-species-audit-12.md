@@ -85,7 +85,7 @@ Accepted pairs, both orientations: Substitute GOLEM <-> ONIX, Skill Swap GIRAFAR
 
 ## 3. Reproduce (workspace root; direct mGBA only)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; W=tools/integration/fixtures/species-audit-12
+export PYTHONPATH=../../vendor/libmgba-py; W=tools/integration/fixtures/species-audit-12
 bash tools/integration/speciesAudit12Stage.sh $W                                  # list-<move>.tsv + scenarios/ (gender fix: genderless / female-only / male-only)
 JOBS=14 sh tools/integration/speciesAudit9Probes.sh /tmp/s12/probes $W/list-*.tsv   # 2 fresh prep22Probe runs per swapped scenario (~2 min)
 python3 tools/integration/speciesAudit12Fixtures.py /tmp/s12/probes $W/derived $W/list-*.tsv > $W/derive.txt

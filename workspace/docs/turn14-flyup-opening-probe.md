@@ -26,7 +26,7 @@ trace is **213/213** with frames 17781-17787 restored.
 1. RAM/OAM/OBJ transfer:
 
    ```sh
-   /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+   ../../vendor/mgba-venv/bin/python \
      tools/probe/dump-fly-anim.py tools/compare/traces/turn14-fly-miss.json \
      /tmp/fly.json 17780 17787
    ```

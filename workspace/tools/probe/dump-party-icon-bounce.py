@@ -22,7 +22,7 @@ only its "segments" array is consumed here, same precedent as
 `dump-turn14-bounce-driver.py`.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-party-icon-bounce.py <output.json> <startTick> <endTick>
 """
 

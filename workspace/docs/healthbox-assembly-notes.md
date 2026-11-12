@@ -383,7 +383,7 @@ in isolation.
 ## Reproduce the RAM/VRAM ground truth
 
 ```sh
-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+../../vendor/mgba-venv/bin/python \
   tools/probe/dump-healthbox-vram.py tools/compare/traces/sendout.json 1555 1 /tmp/healthbox-probe.json
 ```
 

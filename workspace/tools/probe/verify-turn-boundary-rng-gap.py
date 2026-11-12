@@ -6,7 +6,7 @@ Fast, hermetic check:
 
 Optional Battle Scene OFF fixture check (run through the teardown wrapper):
     python3 tools/run-mgba-probe.py /tmp/fresh/result.json -- \
-      /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+      ../../vendor/mgba-venv/bin/python \
       tools/probe/verify-turn-boundary-rng-gap.py /tmp/fresh/result.json
 """
 

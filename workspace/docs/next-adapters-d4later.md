@@ -65,7 +65,7 @@ Sky Attack 143 moves from scoped exact to faithful timing: out of `LIVE_MOVE_ANI
 
 ## Reproduce
 
-    export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
+    export PYTHONPATH=../../vendor/libmgba-py
     L=tools/integration/fixtures/later58/scenarios
     sh tools/integration/d4laterCounters.sh /tmp/d4l 14 /tmp/d4l/counters.json $L/sheer-cold-*.json $L/extrasensory-*.json $L/sky-attack-*.json \
       tools/battle-lab/{prep25,prep30}-extrasensory-alt-*.json tools/battle-lab/mechanic-extrasensory-*.json <the 8 q2-live strike scenarios>

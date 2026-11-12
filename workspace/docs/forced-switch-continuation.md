@@ -188,7 +188,7 @@ for a live body; (e) species-keyed slide/message start against the sweep fixture
 4. What drives the opponent healthbox delay is the species front animation (callback-dummy gate); a source-derived table (animation lengths) would replace the sweep table.
 5. Alternate geometry (player VAPOREON / BEAUTIFLY attackers) equals the base geometry for the continuation (same k offsets; healthbox slide start depends on the *target replacement species* only).
 
-## 8. Reproduction (workspace root, mgba venv; PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python)
+## 8. Reproduction (workspace root, mgba venv; PY=../../vendor/mgba-venv/bin/python)
 
 ```
 sh tools/integration/forcedSwitchRomRuns.sh r1; sh tools/integration/forcedSwitchRomRuns.sh r2        # then cmp the two dirs (/tmp/fs/r1, /tmp/fs/r2)

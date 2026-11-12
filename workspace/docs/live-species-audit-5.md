@@ -62,7 +62,7 @@ Staging fix: genderless species (SHEDINJA) need `gender: genderless` (the lab re
 
 ## 3. Reproduce (workspace root; direct mGBA only)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
+export PYTHONPATH=../../vendor/libmgba-py
 W=tools/integration/fixtures/species-audit-5
 tools/integration/speciesAudit5Stage.sh                                  # list.tsv listA.tsv listC.tsv listD.tsv + scenarios/
 cat $W/list*.tsv > /tmp/s5all.tsv; JOBS=10 tools/integration/speciesAudit5Probes.sh /tmp/s5all.tsv /tmp/s5/probes   # prep14Probe segfaults at exit are harmless (outputs are written)

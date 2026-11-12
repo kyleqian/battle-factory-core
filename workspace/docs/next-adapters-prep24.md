@@ -118,7 +118,7 @@ npx vite-node tools/integration/prep24MegahornCheck.ts <alt.json>:player|opponen
 npx vite-node tools/integration/prep24MegahornPixels.ts <alt.json>:<rgbDir>:player|opponent:ATT,TGT ... [--neg=registers|palette|phase]
 npx vite-node tools/integration/prep24ReturnCheck.ts <alt.json>:player|opponent ... ; prep24ReturnPixels.ts <alt.json>:<rgbDir>:player|opponent ...
 ```
-Alternates need `PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py` and the vendor venv (set in the scripts; the shell prints segfaults on exit: mGBA teardown, outputs are complete).
+Alternates need `PYTHONPATH=../../vendor/libmgba-py` and the vendor venv (set in the scripts; the shell prints segfaults on exit: mGBA teardown, outputs are complete).
 
 ## 6. Papercuts
 

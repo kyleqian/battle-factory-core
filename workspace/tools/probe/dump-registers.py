@@ -8,7 +8,7 @@ whole-trace scope because this is meant to be run at stride 1 across a short
 window (e.g. 2340-2370) rather than the full trace.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-registers.py <trace.json> <output.json> <startTick> [endTick]
 
 <trace.json> is any oracle trace file with a top-level "segments" array

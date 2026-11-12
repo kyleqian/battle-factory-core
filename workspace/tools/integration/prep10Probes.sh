@@ -1,8 +1,8 @@
 #!/bin/sh
 # prep10: run prep10Probe.py (direct mGBA, fresh process each) over the BattleLab scenarios of the prep10 moves.
 # usage (workspace root): sh tools/integration/prep10Probes.sh <runTag> [filterSubstring]   outputs: tools/integration/fixtures/prep10-probes/<runTag>/<scenario>.json
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
-export PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py
+export PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 RUN=${1:-r1}; FILT=${2:-}
 export FX=tools/integration/fixtures/prep10-probes/$RUN; mkdir -p $FX
 ls tools/battle-lab/mechanic-*.json tools/integration/fixtures/prep10-scenarios/*.json 2>/dev/null | grep -E "magnitude|reversal|flail|pain-split|spark|fire-punch|endeavor|rock-blast|razor-wind" | grep -F -- "$FILT" \

@@ -16,7 +16,7 @@ drive), and `gAnimVisualTaskCount` (the `waitforvisualfinish`/`end` gate -
 `DestroyAnimVisualTask`-family decrement it, src/battle_anim.c).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-sandattack-anim.py <trace.json> <output.json> <startTick> <endTick>
 """
 

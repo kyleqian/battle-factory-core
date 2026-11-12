@@ -23,7 +23,7 @@ symbols gAnimMovePower`) every tick to settle whether ENDEAVOR's own value is
 0 or a nonzero placeholder.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-endeavor-hitsplat-shake.py <trace.json> \
         <output.json> <startTick> <endTick>
 """

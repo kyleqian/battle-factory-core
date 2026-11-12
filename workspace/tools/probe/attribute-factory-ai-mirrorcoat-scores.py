@@ -12,7 +12,7 @@ and `ai` is field offset 20 (`battle.h:229`).
 
 Run through the teardown-tolerant wrapper with the harness's mGBA python:
     python3 tools/run-mgba-probe.py /tmp/scores.json -- \\
-        /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \\
+        ../../vendor/mgba-venv/bin/python \\
         tools/probe/attribute-factory-ai-mirrorcoat-scores.py \\
         <fixture.json> /tmp/scores.json
 """

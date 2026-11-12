@@ -144,8 +144,8 @@ seed A) twice fresh, ON with seed B, and OFF.
 
 ## Reproduce
 
-    export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/integration/plans54Probe.py /tmp/p54 --jobs 8 [--only BODY210,...]
+    export PYTHONPATH=../../vendor/libmgba-py
+    ../../vendor/mgba-venv/bin/python tools/integration/plans54Probe.py /tmp/p54 --jobs 8 [--only BODY210,...]
     python3 tools/integration/plans54Extract.py /tmp/p54 /tmp/p54-units.json
     node --experimental-strip-types tools/integration/plans54Check.ts /tmp/check.json tools/integration/fixtures/plans51/units.json tools/integration/fixtures/plans54/units.json
     node --experimental-strip-types tools/integration/plans54PlanRows.ts tools/integration/fixtures/plans54/check.json /tmp/rows.json

@@ -8,7 +8,7 @@ action menu. This is a characterization handoff, not an engine change.
 
 ```sh
 node --experimental-strip-types tools/probe/verify-turn15-sendout.ts
-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+../../vendor/mgba-venv/bin/python \
   tools/probe/dump-turn15-sendout.py \
   tools/compare/traces-groundtruth/battle1-turn15-dense.json \
   /tmp/turn15-sendout.json 20245 20560
@@ -109,7 +109,7 @@ Reproduce with the checked-in direct probe (mGBA diagnostics can be safely
 discarded):
 
 ```sh
-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+../../vendor/mgba-venv/bin/python \
   tools/probe/dump-turn15-sendout.py \
   tools/compare/traces/turn15-party-select.json \
   /tmp/turn15-rung1-palette-oam.json 20248 20302

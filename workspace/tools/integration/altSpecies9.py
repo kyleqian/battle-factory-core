@@ -7,12 +7,13 @@ scenario: the alt scenario is the Knock Off battle-lab scenario with the player'
 the accepted +4 (window 2344 vs activation 2340, prep6 s2.4). The live twin keeps the accepted fixture's ageOffset.
 usage: altSpecies9.py [case...]   # derive + write fixtures (tools/compare/fixtures/altspecies3-<case>.json and live twin)
 """
+import os
 import json, subprocess, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import altSpecies3Stage as st
 ROOT = st.ROOT
-VENV = Path("/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python")
+VENV = Path(os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/mgba-venv/bin/python")
 RAW = ROOT / ".integration/validation/altspecies9"; RAW.mkdir(parents=True, exist_ok=True)
 FX = "tools/integration/fixtures"
 FA_BASE_SCEN = ROOT / FX / "altspecies3-scenarios/_prep6-faint-attack-base.json"

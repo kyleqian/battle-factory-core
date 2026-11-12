@@ -541,7 +541,7 @@ a brute-force `inUse`/`x`/`y` scan over all 65 `gSprites[]` slots, since the
 ball-prop and item-effect sprites aren't tracked by any battler-indexed
 global). Both run against the already-committed `battle1-grovyle-faint.json`
 button script (same 66 segments as the dense traces) via
-`/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+`../../vendor/mgba-venv/bin/python
 tools/probe/ram-probe.py <spec> <out.json>`, twice-run each, **byte-identical
 across both runs** (deterministic, no rerun diffs). Outputs committed at
 `src/data/gen/battle1-switchin-b1-sprite-probe.json` (853 ticks, 6460-7312)

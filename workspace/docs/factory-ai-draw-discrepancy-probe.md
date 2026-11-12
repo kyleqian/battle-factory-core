@@ -119,7 +119,7 @@ this repo):
 
 ```sh
 python3 tools/run-mgba-probe.py /tmp/out.json -- \
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
     tools/probe/attribute-factory-ai-cv-drawsite-callers.py \
     tools/battle-lab/mechanic-factory-ai-cv-defenseup-physicallastmove-off.json \
     /tmp/out.json \
@@ -317,7 +317,7 @@ moves on") will need updating alongside the fix — they currently encode the
 
 ```sh
 python3 tools/run-mgba-probe.py /tmp/out.json -- \
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
     tools/probe/attribute-factory-ai-cv-drawsite-callers.py \
     <fixture.json> /tmp/out.json 0 732
 ```

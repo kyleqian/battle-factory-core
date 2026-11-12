@@ -8,7 +8,7 @@ PAPERCUTS.md so the next chase (ISSUES #12/#13 or anything else needing
 tick-by-tick ground truth) doesn't have to rebuild this from scratch.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/ram-probe.py <spec.json> <output.json>
 
 <spec.json> shape:

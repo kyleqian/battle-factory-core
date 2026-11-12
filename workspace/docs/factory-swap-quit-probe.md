@@ -17,7 +17,7 @@ image data and captures at most 256 frames per run.
 taskdir=$(mktemp -d)
 node tools/probe/derive-swap-quit-trace.mjs player-b-yes > "$taskdir/yes.json"
 python3 tools/run-mgba-probe.py "$taskdir/yes-ram.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/dump-swap-quit.py "$taskdir/yes.json" \
   "$taskdir/yes-ram.json" 29696 29900
 ```

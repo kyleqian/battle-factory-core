@@ -48,7 +48,7 @@ Reused the existing instrumentation verbatim, no new tooling needed:
   `turn8-menu.json` (same script the green traces themselves replay),
   `startTick` 7300 / 9375 (covers 3+ ticks either side of every named pair
   in each turn).
-- Run via `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+- Run via `../../vendor/mgba-venv/bin/python
   tools/probe/ram-probe.py <spec> <out>`, **twice independently, byte-
   identical both times** (`diff`, 0 bytes) — committed:
   `src/data/gen/turn6-bounce-blip-probe.json` (1047 ticks, 7300-8346),
@@ -340,7 +340,7 @@ Same discipline as the #28 probe:
   green trace itself replays), `watch` list copied verbatim from
   `turn6-bounce-blip-raw.json` (the same dynamic driver-resolving spec both
   #28 probes already used), `startTick: 8370`. Run via
-  `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+  `../../vendor/mgba-venv/bin/python
   tools/probe/ram-probe.py tools/probe/specs/turn7-bounce-blip-raw.json
   <out>`, **twice independently, byte-identical both times** (`diff`, 0
   bytes) — committed: `src/data/gen/turn7-bounce-blip-probe.json` (1011

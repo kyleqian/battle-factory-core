@@ -168,7 +168,7 @@ scenarios beyond the BattleLab ordinary-singles entry.
 
 ## 5. Reproduction
 
-    V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
+    V=../../vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
     $PY tools/integration/spriteOrderEventBatch.py                      # 22 scenarios x 2 fresh runs (~45 s)
     $PY tools/compare/lightScreenAllocatorCallProbe.py tools/battle-lab/mechanic-<scenario>.json <out.json>   # call streams
     $PY tools/integration/spriteOrderEventExtraBatch.py /tmp/ev-extra   # 221 more scenarios, single run (~6 min)

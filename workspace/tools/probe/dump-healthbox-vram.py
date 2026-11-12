@@ -6,7 +6,7 @@ INTERNAL tile assembly): dumps the three sprites that make up a healthbox
 allocated tile ranges and the OBJ palette RAM, at a given trace tick.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-healthbox-vram.py <trace.json> <tick> <battler> <output.json>
 
 <trace.json> uses its top-level "segments" array only (captureFrames ignored).

@@ -176,6 +176,6 @@ the order verdicts replaced by the measured ones. `denseWindow.ageOffset` is the
 `docs/order-consumer-prep.md`; scripts `tools/integration/orderConsumer{EventBatch.py,Seeds.py,Observed.py,Truth.mjs,SeedSensitivity.mjs,Pins.mjs,Activation.sh,Routes.ts,Draft.py}`;
 fixtures `tools/integration/fixtures/order-consumer-{seeds,observed,truth,seed-sensitivity,pins,routes,summary}.json`, `order-consumer-raw/*.json` (14 new raw event-probe runs: Ember, Dragon Rage, Heal Bell, Perish Song, Leaf Blade, Magnitude ×4),
 `order-consumer-activation/mechanic-*.json` (28), `order-consumer-<move>-{player,opponent}.json` (24 drafts: 12 moves × 2).
-Reproduce (from `workspace/`, mGBA venv `V=/Users/kyle/Developer/pokebench/vendor; PYTHONPATH=$V/libmgba-py`): `$V/mgba-venv/bin/python tools/integration/orderConsumerEventBatch.py` (15 s),
+Reproduce (from `workspace/`, mGBA venv `V=../../vendor; PYTHONPATH=$V/libmgba-py`): `$V/mgba-venv/bin/python tools/integration/orderConsumerEventBatch.py` (15 s),
 `sh tools/integration/orderConsumerActivation.sh` (26 s), then pure: `python3 tools/integration/orderConsumerSeeds.py --write; python3 tools/integration/orderConsumerObserved.py;`
 `node --experimental-strip-types tools/integration/orderConsumerTruth.mjs > …/order-consumer-truth.json; … orderConsumerSeedSensitivity.mjs > …/order-consumer-seed-sensitivity.json; … orderConsumerPins.mjs > …/order-consumer-pins.json; … orderConsumerRoutes.ts > …/order-consumer-routes.json; python3 tools/integration/orderConsumerDraft.py`.

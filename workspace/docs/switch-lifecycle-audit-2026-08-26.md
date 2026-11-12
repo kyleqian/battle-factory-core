@@ -25,7 +25,7 @@ Reading the port, three code paths converge on the *same* switch-in chain, and e
 
 The single most load-bearing fact for §3: **`SwitchInClearSetData` lives in `battle_main.c:3152-3262`, not `battle_util.c`.** A one-file grep of `battle_util.c` returns nothing and silently invites a false DIVERGENT.
 
-Second load-bearing fact: `rg` over `reference/` returns **zero hits** (symlink). Every source cite in this doc was taken from `$(cd reference/pokeemerald && pwd -P)` = `/Users/kyle/Developer/pokebench/vendor/pokeemerald`.
+Second load-bearing fact: `rg` over `reference/` returns **zero hits** (symlink). Every source cite in this doc was taken from `$(cd reference/pokeemerald && pwd -P)` = `../../vendor/pokeemerald`.
 
 ## §1. Where a switch action sits in turn order
 

@@ -907,7 +907,7 @@ pd` registers, `x2/y2`, `animNum/animCmdIndex`, and `data[3..6]` — one row
 per RAM tick, combining what the two Pidgeotto-era probes each did
 separately since this mission needs both the affine-identity check AND the
 wobble table in the same pass. Run:
-`/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+`../../vendor/mgba-venv/bin/python
 tools/probe/dump-turn13-murkrow-materialize.py
 tools/probe/specs/turn13-b1-sprite.json <out.json> 16980 17080` (that spec's
 own 108 segments are byte-identical to `battle1-turn13-dense-a.json`'s own,

@@ -6,7 +6,7 @@ watches) and dump-battle-bars.py (healthbar internals) for the "before/after"
 snapshot half of a turn's ground truth - see docs/battle-turn-notes.md.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-battler-snapshot.py <trace.json> <output.json> <tick1,tick2,...>
 """
 

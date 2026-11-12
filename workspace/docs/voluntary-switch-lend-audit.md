@@ -207,7 +207,7 @@ Tests to add, all hermetic and built from this step's fixtures:
 ## 6. Reproduce
 
 ```
-V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py
+V=../../vendor; export PYTHONPATH=$V/libmgba-py
 python3 tools/integration/voluntaryScenarios.py /tmp/vol     # base parties + stager plans (prints the plans)
 $V/mgba-venv/bin/python tools/integration/voluntaryStage.py /tmp/vol/base-cancel-slot1.json tools/battle-lab/voluntary-cancel-slot1.json \
   '{"turns":[{"cancel":true},0,{"switch":1},0,1],"frames":5200}'   # already committed; re-running rewrites the same segments

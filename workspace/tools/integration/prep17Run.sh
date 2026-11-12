@@ -1,7 +1,7 @@
 #!/bin/sh
 # prep17: direct-mGBA probes (fresh process each; run twice with different TAGs and compare via prep17MeteorReceipt.py).
 # usage (workspace root): sh tools/integration/prep17Run.sh TAG [meteor|mud|sand ...]   -> /tmp/p17/TAG/*.json (raw, not committed). mGBA exits with a segfault AFTER the output is written (known, harmless).
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 TAG=${1:-r1}; shift; WHAT=${*:-meteor}
 export OUT=/tmp/p17/$TAG; mkdir -p $OUT
 S=tools/integration/fixtures/prep17/scenarios; L=tools/battle-lab

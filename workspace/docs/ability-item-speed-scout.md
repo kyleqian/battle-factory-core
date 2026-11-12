@@ -630,7 +630,7 @@ python3 tools/probe/verify-quick-claw-turn-boundary.py
 
 out_dir="$(mktemp -d /tmp/quick-claw-verify.XXXXXX)"
 python3 tools/run-mgba-probe.py "$out_dir/result.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/verify-quick-claw-turn-boundary.py "$out_dir/result.json"
 ```
 

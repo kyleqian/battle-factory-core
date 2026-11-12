@@ -1,6 +1,6 @@
 # Local Factory workspace
 
-The canonical checkout is `/Users/kyle/Developer/pokebench/pokeemerald-factory-core`,
+The canonical checkout is `<repo>`,
 branch `master`. Work in its `workspace/` directory. The user's 2026-10-02
 migration instruction replaces the historical hcloud-only execution policy.
 Do not restart remote workers or provision a replacement server.
@@ -19,7 +19,7 @@ The local preview is served at <http://127.0.0.1:5191/> with Battle Scene ON.
 After restarting the computer, build and start it with:
 
 ```sh
-cd /Users/kyle/Developer/pokebench/pokeemerald-factory-core/workspace
+cd <repo>/workspace
 bash tools/integration/start-local-preview.sh
 ```
 
@@ -80,7 +80,7 @@ the archived reference build, including the ELF's debug/build metadata.
 
 ## Recovery and history
 
-Private recovery folder: `/Users/kyle/Developer/pokebench/hcloud-archive-20261002`.
+Private recovery folder: `../hcloud-archive-20261002`.
 Its `README.md` explains restoration; `history/index.html` searches 4,625 raw
 Codex/Claude transcripts from the Mac and server. Launcher logs are also copied.
 The full server filesystem archive preserves all worktrees, ignored evidence,

@@ -175,7 +175,7 @@ NET-ZERO also needs at least one known-entry instance on each battler side, exce
 
 ## Reproduce
 
-    export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+    export PYTHONPATH=../../vendor/libmgba-py PY=../../vendor/mgba-venv/bin/python
     $PY tools/integration/aud56Probe.py <out> --jobs 10            # ~70 s, 186 runs
     python3 tools/integration/aud56Extract.py <out> <out>/audit.json  # == fixtures/aud56-net-zero-audit.json except raw sha / paths
     node --experimental-strip-types --no-warnings tools/integration/aud56ExposureCensus.ts --seeds=0..299 --out=<x>.json --commands=<x>.jsonl

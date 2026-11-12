@@ -22,8 +22,8 @@ ls $W/fixtures/*.json | sed 's/-cu*[0-9]*\.json$//' | sort -u | xargs -n 1 -P "$
   node --experimental-strip-types --no-warnings tools/integration/audit17Check.ts $W/fixtures "$n" "$REC/check-$n.json" > "$T/check-$n.log" 2>&1 \
     || echo "FAILED $n (see $T/check-$n.log)"'
 python3 tools/integration/audit16Summary.py "$REC" > "$REC/summary.txt"
-PY=${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
+PY=${PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
 for s in $W/scenarios/dt-*.json; do
   $PY tools/integration/dt60Probe.py "$s" "$T/ram/$(basename "$s")" 2 > /dev/null 2>&1 || [ -s "$T/ram/$(basename "$s")" ]  # exit 139 teardown
 done

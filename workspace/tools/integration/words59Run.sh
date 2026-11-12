@@ -4,8 +4,8 @@
 # Writes receipts into $REC; the loop at the end prints same/DIFF against tools/integration/fixtures/words59/.
 set -e
 : "${OUT:?set OUT=<scratch dir>}"; : "${REC:?set REC=<receipt dir>}"
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
-PY=${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
+PY=${PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
 T=tools/integration; F=$T/fixtures/words59; N="node --experimental-strip-types --no-warnings"
 mkdir -p "$OUT" "$REC"
 if [ -z "$SKIP_PROBES" ]; then $PY $T/words59Probe.py "$OUT" | tee "$REC/probes.txt"; fi

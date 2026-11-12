@@ -4,8 +4,8 @@
 # run-mgba-probe.py may exit 138/139 on a teardown SIGBUS with complete output; the JSON is validated by the wrapper. RGB dirs are removed.
 # AUDIT16_JOBS (default 12) probes run at once.
 OUT=$1; shift; mkdir -p "$OUT"
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
-export PY=${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python} OUT
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
+export PY=${PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python} OUT
 SC=${*:-$(ls tools/integration/fixtures/audit-16/scenarios/*.json)}
 for s in $SC; do echo "$s"; done | xargs -n 1 -P "${AUDIT16_JOBS:-12}" sh -c '
   n=$(basename "$0" .json)

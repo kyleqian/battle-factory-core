@@ -6,7 +6,7 @@ call-stream/raw-row evidence file and a pokeemerald source line. All probe runs 
 
 Reproduce:
 ```
-V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py
+V=../../vendor; export PYTHONPATH=$V/libmgba-py
 python3 tools/integration/spriteOrderGapCauses.py gen            # targeted scenarios -> tools/integration/fixtures/gap-cause-scenarios/
 python3 tools/integration/spriteOrderGapCauses.py run [names]    # probe -> $OUT (/tmp/gapcalls); ~15 s each, direct mGBA
 python3 tools/integration/spriteOrderGapCauses.py blips|anims|intimidate|entrysplit   # corpus joins (event table x call streams)

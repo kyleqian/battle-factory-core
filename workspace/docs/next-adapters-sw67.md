@@ -169,7 +169,7 @@ deterministic. The individual steps:
     node --experimental-strip-types tools/integration/sw67ShockWaveFit.ts /tmp/sw67/fit-plans48.json        # == fixtures/sw67/fit-plans48.json
     node --experimental-strip-types tools/integration/sw67Classes.ts /tmp/sw67/classes.json                 # == classes.json
     node --experimental-strip-types tools/integration/sw67Predict.ts /tmp/sw67/predictions.json             # == predictions.json
-    PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    PYTHONPATH=../../vendor/libmgba-py ../../vendor/mgba-venv/bin/python \
       tools/integration/sw67Probe.py /tmp/sw67/probe --jobs 12
     python3 tools/integration/sw67Extract.py /tmp/sw67/probe /tmp/sw67/units.json                           # == units.json
     node --experimental-strip-types tools/integration/sw67ShockWaveFit.ts /tmp/sw67/grid-check.json --units=/tmp/sw67/units.json \

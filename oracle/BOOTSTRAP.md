@@ -171,16 +171,16 @@ v3-specific mechanics:
 ## How to re-verify / extend
 
 Fresh-process pattern (run TWICE and diff for determinism). Use the venv
-python: `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python`.
+python: `../../vendor/mgba-venv/bin/python`.
 
 ```python
 import sys, hashlib
-sys.path.insert(0, "/Users/kyle/Developer/pokebench/pokeemerald-factory/oracle")
+sys.path.insert(0, "../pokeemerald-factory/oracle")
 from emerald_core import EmeraldOracle
 o = EmeraldOracle(
-    rom_path="/Users/kyle/Developer/pokebench/vendor/pokeemerald/pokeemerald.gba",
-    map_path="/Users/kyle/Developer/pokebench/vendor/pokeemerald/pokeemerald.map",
-    bootstrap_path="/Users/kyle/Developer/pokebench/pokeemerald-factory/oracle/bootstrap/factory.json",
+    rom_path="../../vendor/pokeemerald/pokeemerald.gba",
+    map_path="../../vendor/pokeemerald/pokeemerald.map",
+    bootstrap_path="../pokeemerald-factory/oracle/bootstrap/factory.json",
 )
 print(o._bootstrap_frames, o.canonical_screen_sha256)  # 6970 9c89c741...
 def pos():

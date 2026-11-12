@@ -25,7 +25,7 @@ do
   node tools/probe/derive-swap-summary-return-trace.mjs "$scenario" \
     > "$taskdir/$scenario.json"
   python3 tools/run-mgba-probe.py "$taskdir/$scenario-ram.json" -- \
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
     tools/probe/dump-swap-summary-return.py "$taskdir/$scenario.json" \
     "$taskdir/$scenario-ram.json" 29750 29900
 done

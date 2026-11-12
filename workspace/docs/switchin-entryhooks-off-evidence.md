@@ -57,7 +57,7 @@ with the read-only `tools/probe/audit-switchin-entryhooks-off.py` through the
 required wrapper:
 
 ```sh
-PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+PY=../../vendor/mgba-venv/bin/python
 $PY tools/run-mgba-probe.py /tmp/switchin.json -- \
   $PY tools/probe/audit-switchin-entryhooks-off.py \
   tools/battle-lab/mechanic-switchin-trace-off.json /tmp/switchin.json

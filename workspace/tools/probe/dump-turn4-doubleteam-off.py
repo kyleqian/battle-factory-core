@@ -12,7 +12,7 @@ attacker); battler 1 is Foe GROVYLE (DOUBLE_TEAM's user, ROCK_SLIDE's
 target) - same slot assignment turn 1's own probe used.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn4-doubleteam-off.py <trace.json> <output.json> <startTick> <endTick>
 """
 

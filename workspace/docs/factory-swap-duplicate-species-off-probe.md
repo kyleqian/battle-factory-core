@@ -8,7 +8,7 @@ teardown-safe probe below.
 ```sh
 taskdir=$(mktemp -d)
 python3 tools/run-mgba-probe.py "$taskdir/duplicate.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/stage-swap-duplicate-species-off.py "$taskdir/duplicate.json"
 ```
 

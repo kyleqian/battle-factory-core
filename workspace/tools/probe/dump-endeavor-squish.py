@@ -30,7 +30,7 @@ anim SCRIPT's own cmd-index/timer, not needed here since the matrix values
 themselves are the ground truth being sought).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-endeavor-squish.py <trace.json> <output.json> \
         <startTick> <endTick>
 

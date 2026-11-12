@@ -36,7 +36,7 @@ CPU-timing class: none observed in these two moves (no residual row on any non-s
 
 ## 2. Reproduce (workspace root; direct mGBA only; use bash for the stage scripts: zsh does not word-split `set -- $sp`)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; W=tools/integration/fixtures/species-audit-8
+export PYTHONPATH=../../vendor/libmgba-py; W=tools/integration/fixtures/species-audit-8
 tools/integration/speciesAudit8Stage.sh                                  # list1/3/6/8.tsv + scenarios/
 python3 tools/integration/speciesAudit8EndeavorHp.py $W $W/list1.tsv > $W/list4.tsv
 tools/integration/speciesAudit8FirePunch.sh                              # list7.tsv

@@ -2,8 +2,8 @@
 # prep41: main-loop pass counters (speciesAudit2Counters.py) for the 8 Ghost Curse scenarios, 2 fresh direct-mGBA runs each (activation
 # frame and lag ages of the CurseGhost body). usage: prep41CurseCounters.sh <outDir>
 cd "$(dirname "$0")/../.." || exit 1
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
-VPY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
+VPY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 O=$1; mkdir -p "$O"
 S="tools/battle-lab/mechanic-curse-ghost-player-haunter-opponent-magikarp.json tools/battle-lab/mechanic-curse-ghost-opponent-haunter-player-magikarp.json
 tools/battle-lab/prep14-curse-ghost-alt-gengar-golem.json tools/battle-lab/prep23-curse-ghost-altopp-gengar-golem.json

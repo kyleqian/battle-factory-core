@@ -3,7 +3,7 @@
 # the frame series (incl. every RGB sha256) of r1 and r2 are cmp'd. usage: OUT=<fresh dir> [JOBS=n] sh tools/integration/prep38Probes.sh [stem ...]
 set -e
 [ -n "$OUT" ] || { echo "OUT=<dir> required"; exit 2; }
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python OUT
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python OUT
 SC=tools/integration/fixtures/prep38/scenarios
 mkdir -p "$OUT"
 STEMS=${*:-$(cut -f1 $SC/list.tsv)}

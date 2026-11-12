@@ -56,7 +56,7 @@ python3 tools/integration/audit19Summary.py "$REC/ablation" > "$REC/ablation/sum
 # the Needle Arm 302 latent defect: sSpriteOrder per frame through both Needle Arm bodies (two fresh runs; receipt only when r1 == r2)
 mkdir -p "$REC/needle"
 for k in 1 2; do
-  python3 tools/run-mgba-probe.py "$T/naf$k.json" -- "${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}" tools/integration/audit19NeedleFrames.py \
+  python3 tools/run-mgba-probe.py "$T/naf$k.json" -- "${PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}" tools/integration/audit19NeedleFrames.py \
     $W/scenarios/needle-cacnea-water-pulse-opp.json "$T/naf$k.json" > /dev/null 2>&1 || true
   python3 tools/integration/audit19NeedleFrames.py --summary "$T/naf$k.json" > "$T/naf$k.txt"
 done

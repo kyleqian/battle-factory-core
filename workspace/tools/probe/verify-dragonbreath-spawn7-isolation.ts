@@ -7,7 +7,7 @@
 // Usage:
 //   probe_dir=$(mktemp -d /tmp/dragonbreath-isolation.XXXXXX)
 //   python3 tools/run-mgba-probe.py "$probe_dir/ram.json" -- \
-//     /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+//     ../../vendor/mgba-venv/bin/python \
 //     tools/probe/dump-dragonbreath-anim.py \
 //     tools/compare/traces/turn2-dragonbreath-projectiles.json \
 //     "$probe_dir/ram.json" 3168 3234

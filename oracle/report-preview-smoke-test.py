@@ -12,7 +12,7 @@ new_session() inside preview_report() — the same reuse pattern the HTTP
 smoke test gets for free from its one long-running server process.
 
 Run with the venv python:
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
     oracle/report-preview-smoke-test.py
 """
 

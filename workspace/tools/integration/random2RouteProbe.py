@@ -14,7 +14,7 @@ tools/probe/attribute-factory-ai-random-callers.py) with its LR, plus any
 gRng2Value change that happens outside Random2 (should be none).
 
 usage (harness mGBA interpreter):
-  python3 tools/run-mgba-probe.py OUT.json -- /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  python3 tools/run-mgba-probe.py OUT.json -- ../../vendor/mgba-venv/bin/python \
       tools/integration/random2RouteProbe.py <trace.json|lab.json> OUT.json \
       [--bootstrap factory.json] [--lab] [--frames N] [--step-sample K]
 """

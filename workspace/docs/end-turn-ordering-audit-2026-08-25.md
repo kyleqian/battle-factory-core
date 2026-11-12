@@ -339,7 +339,7 @@ Every DIVERGENT claim below was checked twice: both cited files re-opened at the
 
 ```sh
 # the reference/ symlink: rg over it returns ZERO hits silently, always resolve it first
-REF=$(cd reference/pokeemerald && pwd -P)          # -> /Users/kyle/Developer/pokebench/vendor/pokeemerald
+REF=$(cd reference/pokeemerald && pwd -P)          # -> ../../vendor/pokeemerald
 
 # source: the outer chain and the two enums
 grep -n "DoFieldEndTurnEffects\|DoBattlerEndTurnEffects\|HandleWishPerishSongOnTurnEnd\|HandleFaintedMonActions\|TurnValuesCleanUp\|SpecialStatusesClear\|HandleEndTurn_" $REF/src/*.c

@@ -2,8 +2,8 @@
 # dive70: fresh direct-mGBA prep22Probe.py runs (bodies, activation state incl. sSpriteOrder, rng2Series) of Dive scenarios, REPS fresh
 # processes each, in parallel (workspace root; never the HTTP oracles). usage: dive70Probes.sh OUTDIR REPS scenario.json...
 # Output: OUTDIR/<scenario basename>-r<k>.json
-PY=${MGBA_PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
+PY=${MGBA_PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
 OUT=$1; REPS=$2; shift 2; mkdir -p "$OUT"
 for s in "$@"; do k=$(basename "$s" .json); rm -f "$OUT/$k"-r*.json "$OUT/$k"-r*.json.log; done
 for s in "$@"; do r=1; while [ $r -le $REPS ]; do echo "$s $r"; r=$((r+1)); done; done | xargs -P ${JOBS:-8} -n 2 sh -c \

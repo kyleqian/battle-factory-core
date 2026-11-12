@@ -8,7 +8,7 @@ tile covering screen (164-167,42-43) match the statically-extracted
 battle-opponent-front-sprites.json["GROVYLE"].tileset.tiles[26]?
 
 Run with the harness's mGBA-enabled interpreter:
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/compare/scratch/probe_grovyle_vram.py tools/compare/traces/sendout.json out.json
 """
 

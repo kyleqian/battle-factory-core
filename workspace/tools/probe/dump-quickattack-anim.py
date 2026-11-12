@@ -10,7 +10,7 @@ addresses 0x04000050/0x04000052) to solve the afterimage's own blend coeffs
 directly from RAM rather than pixel-guessing.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-quickattack-anim.py <trace.json> <output.json> <startTick> <endTick>
 """
 

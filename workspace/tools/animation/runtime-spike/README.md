@@ -29,7 +29,7 @@ For fresh Splash observations, choose a new output path (the wrapper refuses
 stale output). `POKEBENCH_MGBA_PYTHON` points to the existing harness interpreter:
 
 ```sh
-POKEBENCH_MGBA_PYTHON=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+POKEBENCH_MGBA_PYTHON=../../vendor/mgba-venv/bin/python \
 python3 tools/run-mgba-probe.py /tmp/runtime-splash-fresh.json -- python3 \
   tools/animation/runtime-spike/capture.py /tmp/runtime-splash-fresh.json \
   tools/animation/runtime-spike/splash-player-fixture.json \

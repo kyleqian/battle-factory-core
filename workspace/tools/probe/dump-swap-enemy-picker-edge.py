@@ -28,7 +28,7 @@ Run through the teardown-safe wrapper, e.g.:
       JSON.stringify(loadCompareTrace('tools/compare/traces/battle1-swap-enemy-picker.json')));
   "
   python3 tools/run-mgba-probe.py /tmp/edge-out.json -- \\
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \\
+    ../../vendor/mgba-venv/bin/python \\
     tools/probe/dump-swap-enemy-picker-edge.py \\
     /tmp/resolved.json /tmp/edge-out.json 29835 29841
 """

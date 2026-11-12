@@ -315,7 +315,7 @@ as *first* actions or after EXACT predecessors they are fine.
 - `tools/integration/fixtures/sprite-order-body-plans.json` (plans, verdicts, group classes, gap shapes, prompt cycle, replay counts and per-target edges).
 
 ```
-V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
+V=../../vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
 $PY tools/integration/spriteOrderEventExtraBatch.py /tmp/ev-extra                       # 221 scenarios (~3.5 min)
 $PY tools/integration/spriteOrderBodyPlansCoverageBatch.py /tmp/ev-live 52,215,195,348,82,325   # live ids outside the audits (+ order-dependent predecessors)
 python3 tools/integration/spriteOrderBodyPlans.py --extra /tmp/ev-extra,/tmp/ev-live --write      # table + plans + replay

@@ -5,8 +5,8 @@
 # Writes <out-dir>/r{1,2}/<name>/p.json + rgb/%05d.rgb and <out-dir>/done ("probes r1 == r2: n / t" over the per-frame sha256 lists).
 set -u
 OUT=$1; shift
-PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
-export PYTHONPATH="${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}"
+PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
+export PYTHONPATH="${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}"
 job() {
   d="$OUT/$1/$(basename "$2" .json)"; rm -rf "$d"; mkdir -p "$d"
   python3 tools/run-mgba-probe.py "$d/p.json" -- "$PY" tools/integration/tmr136Probe.py "$2" "$d/p.json" "$d/rgb" > "$d/log.txt" 2>&1 \

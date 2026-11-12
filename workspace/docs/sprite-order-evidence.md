@@ -38,7 +38,7 @@ every order change in the window, and a self-check `order[f] == one SortSprites 
 (jobs: all 235 audited net-zero manifest scenarios plus the "needs order" scenarios of 19 moves).
 `tools/integration/spriteOrderAnalyze.py` (pure python) builds the receipt.
 
-    V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
+    V=../../vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
     $PY tools/integration/spriteOrderBatch.py --shard 0/2; $PY tools/integration/spriteOrderBatch.py --shard 1/2
     python3 tools/integration/spriteOrderAnalyze.py        # rewrites sprite-order-evidence.json
 

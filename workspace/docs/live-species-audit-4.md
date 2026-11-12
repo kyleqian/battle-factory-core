@@ -52,7 +52,7 @@ a gendered species is set to `gender: male` (the lab otherwise rejects it).
 
 ## 3. Reproduce (workspace root; direct mGBA only)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
+export PYTHONPATH=../../vendor/libmgba-py
 W=tools/integration/fixtures/species-audit-4
 tools/integration/speciesAudit4Stage.sh          # list.tsv / listA.tsv / listB.tsv + scenarios/
 cat $W/list*.tsv > /tmp/s4all.tsv; tools/integration/speciesAudit4Probes.sh /tmp/s4all.tsv /tmp/s4/probes

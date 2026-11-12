@@ -24,15 +24,15 @@ do
 done
 
 python3 tools/run-mgba-probe.py "$taskdir/rejected-ram.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/dump-swap-enemy-return.py "$taskdir/rejected.json" \
   "$taskdir/rejected-ram.json" 29935
 python3 tools/run-mgba-probe.py "$taskdir/accepted-ram.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/dump-swap-enemy-return.py "$taskdir/accepted.json" \
   "$taskdir/accepted-ram.json" 29935,29936,29938,29963,29969,29977,30009,30010,30047
 python3 tools/run-mgba-probe.py "$taskdir/player-accepted-ram.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/dump-swap-enemy-return.py "$taskdir/first-player-input.json" \
   "$taskdir/player-accepted-ram.json" 30047,30048
 

@@ -6,8 +6,8 @@
 set -e
 OUT=${1:?usage: ice72Run.sh <fresh-out-dir>}
 [ ! -e "$OUT" ] || { echo "out dir exists: $OUT" >&2; exit 2; }
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
-PY=${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
+PY=${PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
 T=tools/integration; F=$T/fixtures/ice72; N="node --experimental-strip-types --no-warnings"
 for r in r1 r2; do
   mkdir -p "$OUT/$r"

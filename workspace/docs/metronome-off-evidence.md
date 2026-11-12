@@ -91,8 +91,8 @@ draw from the ROM's pre-draw LCG state, records `sRandCount`, move globals,
 PP slots, and all four move-history arrays.  Run either with:
 
 ```sh
-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/metronome.json -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/probe/audit-metronome-off.py \
+../../vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/metronome.json -- \
+  ../../vendor/mgba-venv/bin/python tools/probe/audit-metronome-off.py \
   tools/battle-lab/mechanic-metronome-clefable-off.json /tmp/metronome.json
 ```
 

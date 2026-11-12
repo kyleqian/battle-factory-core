@@ -266,7 +266,7 @@ Two chains reach the machine; which one applies is decided by which `end` opcode
 
 ```sh
 # reference/ is a symlink: bare `rg` over it returns ZERO hits silently. Always resolve first.
-REF=$(cd reference/pokeemerald && pwd -P)          # -> /Users/kyle/Developer/pokebench/vendor/pokeemerald
+REF=$(cd reference/pokeemerald && pwd -P)          # -> ../../vendor/pokeemerald
 
 # §1 faint detection
 sed -n '2965,3060p'  $REF/src/battle_script_commands.c   # Cmd_tryfaintmon (both modes)

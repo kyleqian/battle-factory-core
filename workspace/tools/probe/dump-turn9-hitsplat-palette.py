@@ -31,7 +31,7 @@ colors) - `dump-endeavor-squish-blend-ext.py`'s own already-validated
 addressing, reused unmodified.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn9-hitsplat-palette.py <trace.json> \
         <output.json> <startTick> <endTick>
 

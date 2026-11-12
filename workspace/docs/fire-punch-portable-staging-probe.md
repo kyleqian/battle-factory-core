@@ -68,7 +68,7 @@ Use a fresh output location (the wrapper intentionally rejects stale output):
 ```sh
 scratch_dir=$(mktemp -d /tmp/pokebench-fire-punch-XXXXXX)
 python3 tools/run-mgba-probe.py "$scratch_dir/fire-punch-onix-grovyle.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/stage-fire-punch-portable-on.py "$scratch_dir/fire-punch-onix-grovyle.json"
 ```
 
@@ -79,7 +79,7 @@ the `opponent` route:
 scratch_dir=$(mktemp -d /tmp/pokebench-fire-punch-opponent-XXXXXX)
 mkdir "$scratch_dir/rgb"
 python3 tools/run-mgba-probe.py "$scratch_dir/fire-punch-grovyle-onix.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/stage-fire-punch-portable-on.py \
   "$scratch_dir/fire-punch-grovyle-onix.json" "$scratch_dir/rgb" opponent
 ```

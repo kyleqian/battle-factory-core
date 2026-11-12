@@ -30,8 +30,8 @@ Fixture: `tools/battle-lab/mechanic-transform-ditto-off.json`; raw probe
 ledger: `docs/fixtures-transform-ditto-off.json`.
 
 ```sh
-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/transform.json -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/probe/audit-frontier-tail-off.py \
+../../vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/transform.json -- \
+  ../../vendor/mgba-venv/bin/python tools/probe/audit-frontier-tail-off.py \
   tools/battle-lab/mechanic-transform-ditto-off.json /tmp/transform.json
 ```
 

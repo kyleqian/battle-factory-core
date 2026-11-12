@@ -32,7 +32,7 @@ script code owns all terminal rendering and input.
 ```sh
 scratch_dir=$(mktemp -d /tmp/pokebench-factory-loss-XXXXXX)
 python3 tools/run-mgba-probe.py "$scratch_dir/factory-loss-ending-off.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/stage-factory-loss-ending-off.py "$scratch_dir/factory-loss-ending-off.json"
 ```
 

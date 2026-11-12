@@ -79,7 +79,7 @@ Elevated opponents FLYGON (7) exact as target and attacker for Fire Punch, Curse
 
 ## 2. Reproduce (workspace root; direct mGBA only)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
+export PYTHONPATH=../../vendor/libmgba-py
 W=tools/integration/fixtures/species-audit-6
 tools/integration/speciesAudit6Stage.sh                       # list*.tsv + scenarios/   (reuses speciesAudit5Probes.sh)
 cat $W/list1.tsv $W/list2.tsv $W/list3.tsv > /tmp/s6all.tsv; JOBS=10 tools/integration/speciesAudit5Probes.sh /tmp/s6all.tsv /tmp/s6/probes

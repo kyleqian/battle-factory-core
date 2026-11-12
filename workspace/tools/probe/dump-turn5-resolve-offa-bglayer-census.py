@@ -17,7 +17,7 @@ registers, since a turn5-specific KO/faint screen effect could mask or tint
 the shifted background without touching BG3VOFS at all.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn5-resolve-offa-bglayer-census.py <trace.json> <output.json> <startTick> [endTick]
 """
 

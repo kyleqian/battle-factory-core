@@ -416,7 +416,7 @@ the AI's).
 
 ```sh
 # the reference/ symlink: rg over it returns ZERO hits silently, always resolve it first
-REF=$(cd reference/pokeemerald && pwd -P)          # -> /Users/kyle/Developer/pokebench/vendor/pokeemerald
+REF=$(cd reference/pokeemerald && pwd -P)          # -> ../../vendor/pokeemerald
 
 # §1 battle start
 grep -n "^static void TryDoEventsBeforeFirstTurn\|^static void HandleTurnActionSelectionState\|^static void SetActionsAndBattlersTurnOrder\|^u8 GetWhoStrikesFirst\|^static void RunTurnActionsFunctions\|^static void TurnValuesCleanUp\|^static void CheckFocusPunch" $REF/src/battle_main.c

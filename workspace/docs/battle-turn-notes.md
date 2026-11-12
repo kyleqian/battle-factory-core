@@ -6927,7 +6927,7 @@ Per the brief's mandatory first step, both `tools/probe/verify-turn10-rockslide.
 Rung (a) (this entry) consumed this session's own bounded window. §42's own two named AERIAL_ACE gaps are untouched and still exactly as described there:
 
 1. **Mechanism 3's residual** (renders 12363-12366, shrinking 666->29px): bisect the LUNGE table's own early entries first (indices 0-2), per §42's own handoff - not attempted, no code touched.
-2. **Mechanism 4**: re-derive the live BG palette BANK NUMBER via a direct RAM read (`dump-aerialace-anim.py` precedent, `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python`) before re-attempting the darken render - not attempted, no code touched (`darken` stays hardcoded `false`, exactly as §42 left it).
+2. **Mechanism 4**: re-derive the live BG palette BANK NUMBER via a direct RAM read (`dump-aerialace-anim.py` precedent, `../../vendor/mgba-venv/bin/python`) before re-attempting the darken render - not attempted, no code touched (`darken` stays hardcoded `false`, exactly as §42 left it).
 3. Once both close, extend `turn10-aerialace.json` past 12362 through the dossier's own 12389 settle boundary - blocked on 1/2 above, unchanged.
 
 No `src/` code for mechanisms 3/4 was touched this session (no partial render to revert) - only the ROCK_SLIDE-half wiring (rung (a)) and its own prerequisite AERIAL_ACE-aftermath plumbing (Onix's drain + notVeryEffective text) landed, both fully 0-diff. No PAPERCUTS beyond the standing mgba-venv-teardown one.

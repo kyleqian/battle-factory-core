@@ -15,7 +15,7 @@ tick-by-tick from there, rather than assuming the QUICK_ATTACK call site's
 calibration transfers.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-fly-shakemon-tasks.py <scenario.json> <output.json> <startTick> <endTick>
 """
 

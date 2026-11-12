@@ -5,7 +5,7 @@
 # twice in fresh processes (idle94Probe.py, 6 parallel); r1 == r2 byte for byte and == off108's committed probe-sha256.json.
 set -eu
 OUT=${1:?usage: chg161Run.sh <out-dir>}
-PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 mkdir -p "$OUT/r1" "$OUT/r2"
 for r in r1 r2; do for m in on off; do for s in dig-ply-primeape-snorlax razor-wind-ply-primeape-snorlax solar-beam-ply-primeape-snorlax; do
   echo "$OUT/$r/off108-$s-$m.json $m tools/integration/fixtures/off108/scenarios/off108-$s.json"

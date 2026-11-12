@@ -84,7 +84,7 @@ sprite at the same priority), and treat Protect later-body evidence as thin (onl
 
 ## Reproduce
 
-    V=/Users/kyle/Developer/pokebench/vendor; export PY=$V/mgba-venv/bin/python PYTHONPATH=$V/libmgba-py
+    V=../../vendor; export PY=$V/mgba-venv/bin/python PYTHONPATH=$V/libmgba-py
     python3 tools/integration/allocatorConsumerTieAudit.py stage
     python3 tools/integration/allocatorConsumerTieAudit.py run [name-substr ...]   # work raw in $TIE_WORK (/tmp/tie-work)
     python3 tools/integration/allocatorConsumerTieAudit.py receipt

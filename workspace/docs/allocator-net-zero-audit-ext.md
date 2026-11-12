@@ -69,8 +69,8 @@ re-measures it explicitly labelled `opponent` (move 154 activations at 87 and 20
 
 ## Reproduce
 
-    export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
-    PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+    export PYTHONPATH=../../vendor/libmgba-py
+    PY=../../vendor/mgba-venv/bin/python
     python3 tools/integration/allocatorNetZeroExtStage.py
     python3 tools/integration/allocatorNetZeroExtManifest.py > tools/integration/fixtures/allocator-net-zero-ext-manifest.json
     $PY tools/integration/allocatorNetZeroExtBatch.py tools/integration/fixtures/allocator-net-zero-ext-manifest.json [move-id ...]

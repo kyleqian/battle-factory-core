@@ -10,7 +10,7 @@ Run it only through the mGBA wrapper, with a fresh path:
 
 ```sh
 scratch=$(mktemp -d)
-py=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python3
+py=../../vendor/mgba-venv/bin/python3
 "$py" tools/run-mgba-probe.py "$scratch/seventh-win.json" -- \
   "$py" tools/probe/stage-factory-seventh-win-timeline-off.py "$scratch/seventh-win.json"
 ```

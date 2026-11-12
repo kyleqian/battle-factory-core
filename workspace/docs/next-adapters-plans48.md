@@ -172,8 +172,8 @@ New tests:
 
 ## Reproduce
 
-    export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/integration/plans48Probe.py /tmp/p48/probe --jobs 12   # ~4 min
+    export PYTHONPATH=../../vendor/libmgba-py
+    ../../vendor/mgba-venv/bin/python tools/integration/plans48Probe.py /tmp/p48/probe --jobs 12   # ~4 min
     python3 tools/integration/plans48Extract.py /tmp/p48/probe /tmp/p48/units.json            # == fixtures/plans48/units.json
     node --experimental-strip-types tools/integration/plans48Check.ts /tmp/p48/units.json /tmp/p48/check.json   # == check.json
     node --experimental-strip-types tools/integration/plans48PlanRows.ts tools/integration/fixtures/plans48/check.json /tmp/rows.json

@@ -3,7 +3,7 @@
 Bounded-worker probe session, per the supervisor's brief: ground-truth the
 window right after rung (c1)'s own lunge (RAM ticks ~10930-11092) so rungs
 c3/c4 land first-try. **No `src/` changes.** All facts below are re-derived
-fresh this session (fresh `/Users/kyle/Developer/pokebench/vendor/mgba-venv/
+fresh this session (fresh `../../vendor/mgba-venv/
 bin/python` RAM probes + fresh `bin/oracle run` pixel captures over HTTP) —
 `docs/turn9-notes.md`'s own prose ranges were treated as leads, not truth,
 per the standing rule.

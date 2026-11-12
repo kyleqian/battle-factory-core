@@ -11,7 +11,7 @@ BG/OBJ palette colors to empirically confirm the blend is a 2-step palette
 RAM write, not a smooth per-tick ramp.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-aerialace-anim.py <trace.json> <output.json> <startTick> <endTick>
 """
 

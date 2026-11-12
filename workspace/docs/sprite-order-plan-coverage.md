@@ -314,7 +314,7 @@ TABLE/PLANS to a temp union table, adds per-body `provenance` = committed / ext 
 (before/after tables), fixtures `sprite-order-body-events-ext.json`, `sprite-order-body-plans-ext.json`, `plan-coverage-scenarios/`.
 
 ```
-V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
+V=../../vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
 python3 tools/integration/spriteOrderPlanCoverageScenarios.py [--force]                       # generic scenarios for uncovered pairs
 $PY tools/integration/spriteOrderPlanCoverageProbe.py /tmp/ev-ext  --repeat 2                  # pass 1 (committed plans decide the pairs)
 $PY tools/integration/spriteOrderPlanCoverageProbe.py /tmp/ev-ext3 --plans tools/integration/fixtures/sprite-order-body-plans-ext.json --repeat 2 --max-per-pair 3   # later passes

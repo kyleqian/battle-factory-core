@@ -10,7 +10,7 @@ boundaries reproducible without harvesting any framebuffer data.
 Run through the teardown-safe wrapper, for example:
 
   python3 tools/run-mgba-probe.py /tmp/swap-picker.json -- \\
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \\
+    ../../vendor/mgba-venv/bin/python \\
     tools/probe/dump-swap-enemy-picker.py \\
     tools/compare/traces-groundtruth/battle1-swapyes-b.json \\
     /tmp/swap-picker.json 29780 30200

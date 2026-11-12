@@ -20,7 +20,7 @@ precedent as `dump-turn13-bounce-driver.py` reusing a trace/spec file's own
 segments.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn14-bounce-driver.py \
         tools/compare/traces/turn14-fly-miss.json <output.json> \
         <startTick> <endTick>

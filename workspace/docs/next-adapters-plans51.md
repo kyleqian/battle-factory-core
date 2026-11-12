@@ -182,8 +182,8 @@ appended-rows merge list gains `plans51/plan-rows.json`. No other sprite-order /
 
 ## Reproduce
 
-    export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/integration/plans51Probe.py /tmp/p51/probe --jobs 12   # ~2 min
+    export PYTHONPATH=../../vendor/libmgba-py
+    ../../vendor/mgba-venv/bin/python tools/integration/plans51Probe.py /tmp/p51/probe --jobs 12   # ~2 min
     python3 tools/integration/plans51Extract.py /tmp/p51/probe /tmp/p51/units.json          # == fixtures/plans51/units.json
     node --experimental-strip-types tools/integration/plans51Check.ts /tmp/p51/units.json /tmp/p51/check.json   # == check.json
     node --experimental-strip-types tools/integration/plans51PlanRows.ts tools/integration/fixtures/plans51/check.json /tmp/rows.json

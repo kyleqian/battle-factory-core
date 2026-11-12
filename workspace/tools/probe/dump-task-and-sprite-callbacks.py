@@ -22,7 +22,7 @@ since the exact addresses are toolchain/build-specific enough not to bake
 into a committed script.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-task-and-sprite-callbacks.py <trace.json> <output.json> [startTick]
 
 <trace.json> is any oracle trace file with a top-level "segments" array

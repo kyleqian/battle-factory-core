@@ -3,8 +3,8 @@
 #   sh tools/integration/audit15Probes.sh <out-dir> [scenario.json ...]   (default: every tools/integration/fixtures/audit-15/scenarios/*.json)
 # run-mgba-probe.py may exit 138/139 on a teardown SIGBUS with complete output; the JSON is validated by the wrapper. RGB dirs are removed.
 OUT=$1; shift; mkdir -p "$OUT"
-export PYTHONPATH=${PYTHONPATH:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
-PY=${PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
+export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
+PY=${PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
 SC=${*:-$(ls tools/integration/fixtures/audit-15/scenarios/*.json)}
 for s in $SC; do
   n=$(basename "$s" .json)

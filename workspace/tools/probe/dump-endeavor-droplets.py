@@ -20,7 +20,7 @@ this exact static callback.
 (`battle_anim_effects_3.c:3733-3737`).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-endeavor-droplets.py <trace.json> <output.json> \
         <startTick> <endTick>
 

@@ -184,7 +184,7 @@ protect-player, rock-slide-opponent, sunny-day-player, dragon-dance-player, fire
 ## 6. Reproduce
 
 ```
-V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py
+V=../../vendor; export PYTHONPATH=$V/libmgba-py
 for n in flamethrower-doubleteam rocktomb-thunderbolt doubleteam-swift-gigadrain doubleteam-swift lightscreen-protect-rockslide rockslide-opponent sunnyday-dragondance-fireblast fireblast-player; do
   for r in a b; do python3 tools/run-mgba-probe.py /tmp/pk-$n-$r.json -- $V/mgba-venv/bin/python tools/integration/postkoStateProbe.py tools/battle-lab/postko-$n.json /tmp/pk-$n-$r.json /tmp/pk-$n-$r-rgb; done
   cmp /tmp/pk-$n-a.json /tmp/pk-$n-b.json   # ~5-10 s per run; RGB dirs ~0.5 GB each in /tmp

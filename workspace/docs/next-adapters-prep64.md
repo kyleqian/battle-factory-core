@@ -44,7 +44,7 @@ only (Battle Scene ON and OFF bootstraps); the shared HTTP oracles were not used
   - Those units only fire because the host was already unknown after the fade. Once the fade is planned the host stays known and
     they never fire, so the 9 are a predictor artefact, not a miss.
 
-## (1) Trigger condition (source, pokeemerald `/Users/kyle/Desktop/pokeemerald`)
+## (1) Trigger condition (source, pokeemerald `../../vendor/pokeemerald`)
 
 1. **`Cmd_datahpupdate`** (`src/battle_script_commands.c:1844`, the Substitute branch ~:1865-1891). The target has
    `STATUS2_SUBSTITUTE`, `substituteHP != 0` and no `HITMARKER_IGNORE_SUBSTITUTE`, so the damage goes to the doll.

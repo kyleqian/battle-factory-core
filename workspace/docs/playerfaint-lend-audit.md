@@ -197,7 +197,7 @@ Tests to add, all hermetic and built from this step's fixtures:
 ## 6. Reproduce
 
 ```
-V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py
+V=../../vendor; export PYTHONPATH=$V/libmgba-py
 # staging (already committed; re-running rewrites the same segments): base party JSON = the scenario with its trace replaced
 $V/mgba-venv/bin/python tools/integration/playerfaintStage.py <base.json> tools/battle-lab/playerfaint-sunnyday-dragondance-swift.json '{"turns":[0,0,1,2],"menuDown":1,"frames":4200}'
 #   (twice-sunnyday: '{"turns":[0,0,0],"menuDown":[1,2],"frames":3000}'; slot2-sunnyday: menuDown 2)

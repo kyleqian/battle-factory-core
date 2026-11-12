@@ -8,8 +8,8 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 fx_dir, out = Path(sys.argv[1]), Path(sys.argv[2]); out.mkdir(parents=True, exist_ok=True)
-py = os.environ.get("PY", "/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python")
-env = {**os.environ, "PYTHONPATH": os.environ.get("PYTHONPATH", "/Users/kyle/Developer/pokebench/vendor/libmgba-py")}
+py = os.environ.get("PY", os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/mgba-venv/bin/python")
+env = {**os.environ, "PYTHONPATH": os.environ.get("PYTHONPATH", os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/libmgba-py")}
 fixtures = {p.stem: json.loads(p.read_text()) for p in sorted(fx_dir.glob("*.json"))}
 scenarios = sorted({f["scenario"] for f in fixtures.values()})
 

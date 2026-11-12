@@ -260,7 +260,7 @@ sprites via `sWhich`, per `battle_main.c:2899-2938`): the driver sprite's own
 it drives), `sWhich`, plus the target's own resultant `y2` (same
 `gSprites[6]`/`gSprites[0]` addressing the prior session already
 established). Run twice independently
-(`/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+(`../../vendor/mgba-venv/bin/python
 tools/probe/ram-probe.py ...`), **byte-identical both times** (`diff`, 0
 bytes). Committed: `src/data/gen/turn3-menu-bouncer-raw-probe.json`.
 

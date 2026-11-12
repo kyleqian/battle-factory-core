@@ -12,7 +12,7 @@ mon sprite is hidden immediately (`gSprites[...].invisible = TRUE`) the
 same tick the ball sprite spawns - two different sprites, not one.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-fly-anim.py <trace.json> <output.json> <startTick> <endTick>
 """
 

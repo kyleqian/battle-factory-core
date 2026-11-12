@@ -17,7 +17,7 @@ set -e
 OUT=${1:?usage: ctl95Run.sh <fresh-out-dir> [--census]}; [ ! -e "$OUT" ] || { echo "$OUT exists (need a fresh dir)"; exit 2; }
 BASE=d46da5755; WS=$PWD; FX=$WS/tools/integration/fixtures/ctl95; D90=$WS/tools/integration/fixtures/doll90/scenarios; D81=$WS/tools/integration/fixtures/doll81/scenarios
 mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd); PR=$OUT/probes; REC=$OUT/rec; mkdir -p "$PR" "$OUT/pers" "$REC/ctl" "$REC/att" "$OUT/scenarios"
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py; PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 NODE="node --experimental-strip-types --no-warnings"
 echo "code $(git rev-parse HEAD) src $(git rev-parse HEAD:workspace/src) dirty-src $(git status --short src | wc -l | tr -d ' ')"
 python3 tools/integration/ctl95Scenarios.py "$OUT/scenarios" > /dev/null

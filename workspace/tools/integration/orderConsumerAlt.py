@@ -7,10 +7,11 @@ interval probe, Scene ON direct mGBA) + the accepted fixture's own (window start
 the altSpecies8.py convention; ageOffset is the accepted fixture's. HP/gender come from the source probe rows' battler RAM.
 usage: orderConsumerAlt.py   # writes tools/integration/fixtures/altspecies9-<case>.json (live fixtures) + altspecies9-derivation.json
 """
+import os
 import json, subprocess
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
-VENV = Path("/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python")
+VENV = Path(os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/mgba-venv/bin/python")
 RAW = ROOT / ".integration/validation/altspecies9"; RAW.mkdir(parents=True, exist_ok=True)
 SCN = ROOT / "tools/integration/fixtures/altspecies9-scenarios"; SCN.mkdir(exist_ok=True)
 SPECIES = {r["id"]: r for r in json.loads((ROOT / "src/data/gen/species-stats.json").read_text())["species"]}

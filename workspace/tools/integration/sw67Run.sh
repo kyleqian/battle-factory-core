@@ -21,8 +21,8 @@ done
 mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd)
 FX=tools/integration/fixtures/sw67
 NODE="node --experimental-strip-types --no-warnings"
-MGBA_PY=${MGBA_PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
-LIBMGBA_PY=${LIBMGBA_PY:-/Users/kyle/Developer/pokebench/vendor/libmgba-py}
+MGBA_PY=${MGBA_PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
+LIBMGBA_PY=${LIBMGBA_PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
 same() { if cmp -s "$1" "$2"; then echo "  == $2"; else echo "  DIFFERS from $2" >&2; exit 1; fi; }
 
 echo "[1] fit: plans48's 8 ROM receipts through the seam"

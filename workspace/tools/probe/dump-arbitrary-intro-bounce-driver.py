@@ -27,7 +27,7 @@ own `oracleBattleLab.preCheckpointFrameOffset` maps to app-relative frames
 Run with the harness's mGBA-enabled interpreter, through the standard SIGSEGV-
 tolerant wrapper:
     python3 tools/run-mgba-probe.py <output.json> -- \\
-        /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \\
+        ../../vendor/mgba-venv/bin/python \\
         tools/probe/dump-arbitrary-intro-bounce-driver.py <output.json> \\
         <fixture.json> <startAbsFrame> <endAbsFrame>
 """

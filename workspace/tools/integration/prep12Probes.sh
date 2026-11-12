@@ -2,7 +2,7 @@
 # prep12: direct-mGBA Random2 attribution probe of each C-only move's accepted staged (player-side) scenario, run twice from fresh
 # processes and cmp'd. usage: tools/integration/prep12Probes.sh OUTDIR [move ...]   (run from workspace/)
 set -e
-PY=${MGBA_PY:-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python}
+PY=${MGBA_PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
 OUT=${1:-/tmp/p12}; shift || true
 mkdir -p "$OUT"
 LAB=tools/battle-lab

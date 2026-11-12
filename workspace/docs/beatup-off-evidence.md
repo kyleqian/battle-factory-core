@@ -30,8 +30,8 @@ acts before Sneasel. The first turn genuinely poisons Sneasel
 one statused record.
 
 ```sh
-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/beatup.json -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/probe/audit-frontier-tail-off.py \
+../../vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/beatup.json -- \
+  ../../vendor/mgba-venv/bin/python tools/probe/audit-frontier-tail-off.py \
   tools/battle-lab/mechanic-beat-up-statused-off.json /tmp/beatup.json
 ```
 

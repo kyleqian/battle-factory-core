@@ -12,7 +12,7 @@ Same `struct OamData`/`struct OamMatrix` layout §12's own
 of battler 1 (`gBattlerSpriteIds + 0`, not `+ 1`).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-onix-sitrus-rotate-matrix.py \
         tools/probe/specs/switchin-b0-sprite.json <output.json> \
         <startTick> <endTick>

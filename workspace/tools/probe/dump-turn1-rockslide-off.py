@@ -9,7 +9,7 @@ two BG scroll registers (`gBattle_BG3_Y`, ROCK_SLIDE's own camera shake;
 QUICK_ATTACK/ROCK_SLIDE pair needed.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn1-rockslide-off.py <trace.json> <output.json> <startTick> <endTick>
 """
 

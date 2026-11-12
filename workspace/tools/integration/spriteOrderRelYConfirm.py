@@ -25,7 +25,7 @@ TPL = {"player": FIX / "sprite-order-policy-gaps/scenarios/endeavor-player-onix-
 GEOMS = [("dragonair-chansey", 148, 113), ("diglett-chansey", 50, 113), ("onix-pidgeotto", 95, 17)]
 NEW_GEOMS = GEOMS
 SEEDS = (11, 22, 33, 44, 55, 66)  # `retry`: alternate battle seeds for cells whose first scenarios produced no body (accuracy misses)
-PY = "/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python"
+PY = os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/mgba-venv/bin/python"
 SKIP = {0: "unattributed"}
 
 
@@ -72,7 +72,7 @@ def gen(rows, seed=None, only=None):
 
 
 def probe(rows, jobs, limit):
-    env = dict(os.environ, PYTHONPATH="/Users/kyle/Developer/pokebench/vendor/libmgba-py")
+    env = dict(os.environ, PYTHONPATH=os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/libmgba-py")
     OUT.mkdir(parents=True, exist_ok=True)
     work = []
     for r in rows[:limit]:

@@ -38,7 +38,7 @@ not a claim of application pixel parity.
 ```sh
 scratch_dir=$(mktemp -d /tmp/pokebench-factory-seventh-win-XXXXXX)
 python3 tools/run-mgba-probe.py "$scratch_dir/factory-seventh-win-ending-off.json" -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+  ../../vendor/mgba-venv/bin/python \
   tools/probe/stage-factory-seventh-win-ending-off.py \
   "$scratch_dir/factory-seventh-win-ending-off.json"
 ```

@@ -82,7 +82,7 @@ history.
   trf174 added a job-limited pool (`trf174Census.sh`, `TRF174_CENSUS_JOBS`) (~15 min). (4) `pkill -f <pattern>` killed the
   worker's own shell (~3 min; same class as the mgba entry below). (5) `run-subagent.sh` prints
   `[claude-code:unrecognized_model] claude-sonnet-5-5` at launch; harmless (the worker initializes on that model).
-  (6) `off108Run.sh` / `off148Run.sh` hard-code the Mac mGBA venv path (`/Users/kyle/...`); CAX31 uses
+  (6) `off108Run.sh` / `off148Run.sh` hard-code the Mac mGBA venv path (`<home>/...`); CAX31 uses
   `/srv/pokebench/vendor/mgba-venv/bin/python` (~10 min; `trn176Run.sh` takes `TRN176_PY`).
   (Fixed this session: `check-oracle-freshness.sh` used BSD-only `date` flags and compared against every game commit.)
   (7, 2026-10-15 fpc180) A new test that imports a `tools/` file puts it under `tsc -b`; a typecheck run before the test existed
@@ -163,7 +163,7 @@ history.
 - **Hits:** 6 sessions (2026-10-14, 2026-10-15/16, 2026-10-16/17, 2026-10-23, 2026-10-27/28, 2026-10-31/11-01), ~4.5 h total.
 - **Fix:** a host-aware gate runner (`nohup`, per-seed-range fan-out sized to free memory, summary file) shared by workers
   and the supervisor; census job limit from `/etc/pokebench-runner.env`. Vendor paths: 155 `tools/**/*.sh` hard-code
-  `/Users/kyle/Developer/pokebench/vendor`; replace with `${POKEBENCH_VENDOR_DIR:-…}` and export it from the runner env (one sweep +
+  `../../vendor`; replace with `${POKEBENCH_VENDOR_DIR:-…}` and export it from the runner env (one sweep +
   spot-run a few probes on each host).
 
 ## Tooling gaps hit on 2026-10-11 (S10A afternoon)

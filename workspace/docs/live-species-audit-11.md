@@ -82,7 +82,7 @@ Every Ice Ball row measured counter 0 at 76 rows, the policy no-event phase. No 
 
 ## 3. Reproduce (workspace root; direct mGBA only)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; W=tools/integration/fixtures/species-audit-11
+export PYTHONPATH=../../vendor/libmgba-py; W=tools/integration/fixtures/species-audit-11
 bash tools/integration/speciesAudit11Stage.sh                                   # list-<move>.tsv + scenarios/ (genderless fix for SHEDINJA / SUICUNE)
 JOBS=14 sh tools/integration/speciesAudit9Probes.sh /tmp/s11/probes $W/list-*.tsv   # 2 fresh prep22Probe runs per swapped scenario (~3 min)
 python3 tools/integration/speciesAudit11Fixtures.py /tmp/s11/probes $W/derived $W/list-*.tsv > $W/derive.txt

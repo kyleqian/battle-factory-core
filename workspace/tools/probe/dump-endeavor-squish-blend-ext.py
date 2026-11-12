@@ -18,7 +18,7 @@ colors (32 bytes) each - `PLTT_ID(paletteNum)` = `0x100 + paletteNum` in
 16-bit-color units, `*2` for the byte address.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-endeavor-squish-blend-ext.py <trace.json> \
         <output.json> <startTick> <endTick>
 """

@@ -4,12 +4,13 @@ from source: alt activation (tools/integration/altSpecies3Activation.py on the s
 + the accepted fixture's own (window start - accepted-scenario activation) offset. Never chosen from live output.
 usage: altSpecies7.py            # derive + write fixtures (tools/compare/fixtures/altspecies3-<case>.json and live twin)
 """
+import os
 import json, subprocess, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import altSpecies3Stage as st
 ROOT = st.ROOT
-VENV = Path("/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python")
+VENV = Path(os.environ.get("POKEBENCH_VENDOR_DIR", "../../vendor") + "/mgba-venv/bin/python")
 RAW = ROOT / ".integration/validation/altspecies7"; RAW.mkdir(parents=True, exist_ok=True)
 CASES = [
   {"name": "ingrain-player-lileep-opponent-onix", "baseSource": "tools/integration/fixtures/prep4-ingrain-player.json",

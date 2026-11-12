@@ -28,7 +28,7 @@ dump (thumb bit added: nm reports the even function address, the runtime
 pointer value has bit 0 set for Thumb code).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-rockslide-sprites.py <trace.json> <output.json> \
         <startTick> <endTick> [targetBattler]
 

@@ -22,7 +22,7 @@ state" concern) - the real array's current permutation already encodes
 that history exactly, whatever it is.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-rockslide-slot-order.py <trace.json> <output.json> \
         <startTick> <endTick>
 

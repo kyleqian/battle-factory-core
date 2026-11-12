@@ -15,7 +15,7 @@ set -e
 OUT=${1:?usage: fp100Run.sh <fresh-out-dir> [--census | --census-only]}; [ ! -e "$OUT" ] || { echo "$OUT exists (need a fresh dir)"; exit 2; }
 BASE=406bfc999; WS=$PWD; FX=$WS/tools/integration/fixtures
 mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd); PR=$OUT/probes; REC=$OUT/rec; mkdir -p "$PR" "$REC" "$OUT/scenarios"
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py; PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 echo "code $(git rev-parse HEAD) src $(git rev-parse HEAD:workspace/src) dirty-src $(git status --short src | wc -l | tr -d ' ')"
 if [ "$2" != --census-only ]; then
   python3 tools/integration/fp100Scenarios.py "$OUT/scenarios" > /dev/null

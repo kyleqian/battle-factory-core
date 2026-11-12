@@ -131,7 +131,7 @@ Tests to add (all derivable from this step's fixtures): `tests/liveSpriteOrderHo
 Raw sha1 (A == B fresh runs): lab rows/calls identical for all 12 scenarios x (rows, calls); `spriteOrderUncoveredLabProbe.py` outputs sha1 in `/tmp` only (re-run to reproduce). Route: turn17 `37ae5144…`, switch `b9bf1ecf…`, dragonbreath `fc66a4e5…`, grovyle-faint `22cf46c7…`, victory `9e65d9ec…` (equal to `sprite-order-real-route/raw`).
 
 ```
-V=/Users/kyle/Developer/pokebench/vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
+V=../../vendor; export PYTHONPATH=$V/libmgba-py; PY=$V/mgba-venv/bin/python
 for n in forced-switch-player-choice forced-switch-ai-choice hit-chain-ko gate6-ohko-hit destiny-bond-ko issue129-noitem-ohko endturn-toxic-ko issue131-endturn-order-switch factory-ai-switch-receipt-a issue135-pursuit-switch-intercept gate6-ohko-sturdy issue129-shellbell-ko-heal; do
   $PY tools/integration/spriteOrderUncoveredLabProbe.py tools/integration/fixtures/sprite-order-uncovered/scenarios/$n.json /tmp/lab-$n.json   # ~20 s each, direct mGBA, copy to fixtures/.../raw/$n.json
   $PY tools/integration/spriteOrderUncoveredAffineProbe.py lab 0 tools/integration/fixtures/sprite-order-uncovered/scenarios/$n.json /tmp/aff-$n.json   # affine/task rows (7 of them committed)

@@ -691,7 +691,7 @@ Probe: `tools/probe/attribute-factory-ai-random-callers.py`. Invocation
 (one fixture; swap the filename for the other two):
 ```
 python3 tools/run-mgba-probe.py /tmp/factory-ai-callers-unambiguous.json -- \
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
     tools/probe/attribute-factory-ai-random-callers.py \
     tools/battle-lab/mechanic-factory-ai-unambiguous-off.json \
     /tmp/factory-ai-callers-unambiguous.json

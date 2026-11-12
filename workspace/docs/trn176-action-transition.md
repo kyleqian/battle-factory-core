@@ -102,7 +102,7 @@ exactly what the rule removes), then take ON as a separate step so the -3..-6 bo
 - Print lengths: "But it failed!" (+9), Dig's "dug a hole!" (+3), the Dynamic Punch ply miss print (+1), Toxic interior (-2).
 - Hit-path confirmation on the real-stat route; fainting targets (out of scope), switches, end-of-turn, and pre-move (paralysis,
   confusion, sleep) prints are not covered.
-- Papercut: `off108Run.sh`/`off148Run.sh` hardcode the Mac venv path `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python`; here
+- Papercut: `off108Run.sh`/`off148Run.sh` hardcode the Mac venv path `../../vendor/mgba-venv/bin/python`; here
   `/srv/pokebench/vendor/mgba-venv/bin/python` (`trn176Run.sh` takes `TRN176_PY`).
 
 Reproduce: `node --experimental-strip-types --no-warnings tools/integration/trn176Predict.ts [--scene=off|on] [--fixtures=...] [--json]`;

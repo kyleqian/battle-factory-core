@@ -32,8 +32,8 @@ Fixture: `tools/battle-lab/mechanic-assist-order-off.json`; raw probe ledger:
 Run:
 
 ```sh
-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/assist.json -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/probe/audit-frontier-tail-off.py \
+../../vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/assist.json -- \
+  ../../vendor/mgba-venv/bin/python tools/probe/audit-frontier-tail-off.py \
   tools/battle-lab/mechanic-assist-order-off.json /tmp/assist.json
 ```
 

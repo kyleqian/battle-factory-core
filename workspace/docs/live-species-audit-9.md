@@ -62,7 +62,7 @@ Cell legend: `ok` = 0 px; `TP(16r,max)` = other phase, documented rows only; `X(
 
 ## 2. Reproduce (workspace root; direct mGBA only; run the stage script with bash)
 ```sh
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py; W=tools/integration/fixtures/species-audit-9
+export PYTHONPATH=../../vendor/libmgba-py; W=tools/integration/fixtures/species-audit-9
 bash tools/integration/speciesAudit9Stage.sh                               # list-<move>.tsv + scenarios/
 JOBS=12 sh tools/integration/speciesAudit9Probes.sh /tmp/s9/probes $W/list-*.tsv            # 2 fresh prep22Probe runs per swapped scenario (~2.5 min)
 python3 tools/integration/speciesAudit9Fixtures.py /tmp/s9/probes $W/derived $W/list-*.tsv > $W/derive.txt

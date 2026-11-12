@@ -3309,7 +3309,7 @@ directly at the pixel level, not just by position.
 bytes behind BOTH candidate sprites before touching any code
 (`tools/compare/scratch/probe_grovyle_vram.py` +
 `probe_grovyle_palette.py` + `probe_bar_vram.py`, all committed,
-per-tile/per-tick, `/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/
+per-tile/per-tick, `../../vendor/mgba-venv/bin/
 python`):
 - **Grovyle's own materialize tile (VRAM tile 26, the one under the
   residual) is BYTE-IDENTICAL to the static `battle-opponent-front-sprites.

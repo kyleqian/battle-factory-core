@@ -5,7 +5,7 @@
 # r1 == r2 (cmp) on non-empty JSON.
 # usage: OUT=<fresh dir> [JOBS=n] sh tools/integration/doll81Probes.sh [stem ...]
 [ -n "$OUT" ] || { echo "OUT=<dir> required"; exit 2; }
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py PY=/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python OUT
+export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python OUT
 SC=tools/integration/fixtures/doll81/scenarios; export SC
 mkdir -p "$OUT"
 STEMS=${*:-$(cut -f1 $SC/list.tsv)}

@@ -20,7 +20,7 @@ default tick range differ (slots 3/4/5 here, the clone/real trio per
 context/cross-check even though Onix/the hitsplat sit far from this bbox).
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn9-clone-oam.py <trace.json> \
         <output.json> <startTick> <endTick>
 """

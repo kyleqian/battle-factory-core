@@ -38,8 +38,8 @@ mechanicLab parties; Magneton uses Lock On, then Zap Cannon on the selected
 second slot). Read it with:
 
 ```sh
-/Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/lockon.json -- \
-  /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python tools/probe/audit-frontier-tail-off.py \
+../../vendor/mgba-venv/bin/python tools/run-mgba-probe.py /tmp/lockon.json -- \
+  ../../vendor/mgba-venv/bin/python tools/probe/audit-frontier-tail-off.py \
   tools/battle-lab/mechanic-lock-on-consume-off.json /tmp/lockon.json
 ```
 

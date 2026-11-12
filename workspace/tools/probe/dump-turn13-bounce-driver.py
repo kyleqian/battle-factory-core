@@ -22,7 +22,7 @@ this window) - only its `"segments"` array is consumed, same as
 `dump-turn13-murkrow-materialize.py`'s own precedent.
 
 Run with the harness's mGBA-enabled interpreter (NOT system python3):
-    /Users/kyle/Developer/pokebench/vendor/mgba-venv/bin/python \
+    ../../vendor/mgba-venv/bin/python \
         tools/probe/dump-turn13-bounce-driver.py \
         tools/probe/specs/turn13-b1-sprite.json <output.json> \
         <startTick> <endTick>

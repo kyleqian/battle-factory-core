@@ -33,7 +33,7 @@ See `docs/factory-finish-scope.md`. The main/ts lane is authorized to fix #165,
 still own presentation only. This supersedes the S10A-wide mechanics exclusion.
 Historical remote-only instructions and isolated cloud branches are superseded.
 
-Canonical checkout: `/Users/kyle/Developer/pokebench/pokeemerald-factory-core`,
+Canonical checkout: `<repo>`,
 branch `master`; run commands in `workspace/`. Read `LOCAL_SETUP.md` and
 `ANIMATION_INTEGRATION_PROGRESS.md`. Launch this lane with:
 

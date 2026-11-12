@@ -123,7 +123,7 @@ treat it as a no-op) — and the model reproduces every frame exactly (0 misses)
 ## Reproduce
 
 ```
-export PYTHONPATH=/Users/kyle/Developer/pokebench/vendor/libmgba-py
+export PYTHONPATH=../../vendor/libmgba-py
 python3 tools/integration/statusAnimationSpriteBatch.py /tmp/sa/final --runs 2      # 52 probe runs, <=4 concurrent, ~80 s
 python3 tools/integration/statusAnimationSpriteReceipt.py /tmp/sa/final --write      # rewrites the receipt + window raw
 python3 tools/integration/statusAnimationSpriteBatch.py /tmp/sa/sweep --runs 1 --only frz-ice-beam-by-player --seeds 305419955:40   # freeze seed sweep
