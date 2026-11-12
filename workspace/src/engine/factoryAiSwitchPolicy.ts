@@ -33,6 +33,7 @@ import {
   BATTLE_SCRIPT_STATUS3_PERISH_SONG,
   BATTLE_SCRIPT_STATUS3_ROOTED,
 } from "./battleScriptSourceConstants.ts";
+import { calculateAiSwitchIntoBaseDamage } from "./battleScriptOpenPartyScreenOpcode.ts";
 import { ABILITY_SYMBOLS } from "./battleScriptSwitchinOpcode.ts";
 import { advanceRngValue } from "./rng.ts";
 import type { TypeEffectivenessEntry } from "./damageCalc.ts";
@@ -670,7 +671,13 @@ export function evaluateFactoryAiSwitchPolicy(
       activePartyIndex,
       target.types,
       input.suitableDamageFallback ?? {
-        baseDamage: 0,
+        // AI_TrySwitchOrUseItem reaches the SAME GetMostSuitableMonToSwitchInto as the faint replacement
+        // (battle_ai_switch_items.c:547), so pass 2's AI_CalcDmg is real here too: gCurrentMove from the
+        // AI's active battler into the opposing one. At action selection gCurrentMove is normally MOVE_NONE
+        // (HandleAction_ActionFinished, battle_util.c:670), whose CalculateBaseDamage is 3, not 0: a 0 scored
+        // every candidate 0 and fell to the first legal slot (ROM seed 123, Perish Song switch;
+        // docs/parity-mac/opponent-replacement-pass1.md).
+        baseDamage: () => calculateAiSwitchIntoBaseDamage(rules, 1, 0),
         activeTypes: active.types,
         opposingTypes: target.types,
         opposingAbility: target.ability,

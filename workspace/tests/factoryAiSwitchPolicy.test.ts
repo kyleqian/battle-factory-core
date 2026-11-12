@@ -217,6 +217,28 @@ describe("Factory AI ShouldSwitch policy", () => {
     ]);
   });
 
+  it("Perish Song sentinel, pass 2: AI_CalcDmg of MOVE_NONE is 3, not 0 -- ROM seed 123 sends ALAKAZAM (party 2), not the first legal slot", () => {
+    // docs/parity-mac/opponent-replacement-pass1.md (audit lead A4). Player ALTARIA (Dragon / Flying); the AI's SNORLAX has
+    // Perish count 0. Bench 1 SWAMPERT (Surf x0.5, Earthquake x0, Counter / Mirror Coat power 1), bench 2 ALAKAZAM (Psychic x1,
+    // Calm Mind, Thunder Wave, Recover). No bench mon passes pass 1. Pass 2 from base 3: Surf 1, Psychic 3 -> party 2.
+    const result = evaluate(rules({
+      target: { side: 0, species: 359, ability: 30, types: ["TYPE_DRAGON", "TYPE_FLYING"] },
+      active: {
+        side: 1,
+        species: 143,
+        ability: 47,
+        types: ["TYPE_NORMAL", "TYPE_NORMAL"],
+        status3: BATTLE_SCRIPT_STATUS3_PERISH_SONG,
+        perishSongTimer: 0,
+      },
+      bench: [partyMember(285, [57, 89, 68, 243]), partyMember(65, [94, 347, 86, 105])],
+    }));
+    expect(result.choice).toEqual({ kind: "sentinel" });
+    expect(result.selectedPartyIndex).toBe(2); // unfixed: 1 (base damage 0 -> PARTY_SIZE -> first legal slot)
+    expect(result.draws).toEqual([]);
+    expect(result.branches.at(-1)).toMatchObject({ branch: "suitable-selector", outcome: "selected", partyIndex: 2 });
+  });
+
   it("selects the first Wonder Guard candidate in party-major/move-major order with one draw", () => {
     const result = evaluate(rules({
       target: {

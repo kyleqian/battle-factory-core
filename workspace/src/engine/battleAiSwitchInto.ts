@@ -61,7 +61,7 @@ export type BattleAiSwitchDamageFallback = Readonly<{
   /**
    * `AI_CalcDmg(gActiveBattler, opposingBattler)` before candidate `TypeCalc`.
    * A thunk is evaluated once, and only when pass 2 is reached (C calls
-   * `AI_CalcDmg` inside the pass-2 loop only, `:776`), so a caller can hand
+   * `AI_CalcDmg` inside the pass-2 loop only, `:778`), so a caller can hand
    * over the whole opposing-battler context up front: pass 1's `TypeCalc`
    * needs `opposingAbility` / `opposingStatus2` too.
    */
@@ -128,7 +128,7 @@ function computeTypeMatchupScore(
  * returns 0 for MOVE_STRUGGLE, sets only MISSED | DOESNT_AFFECT_FOE for a
  * Ground move into Levitate (`:1554`), and its `ModulateDmgByType2` raises
  * MOVE_RESULT_SUPER_EFFECTIVE only `if (gBattleMoves[move].power ...)`
- * (`:1524`): a status move of a super-effective TYPE (Sand-Attack into Rock,
+ * (`:1525`): a status move of a super-effective TYPE (Sand-Attack into Rock,
  * Will-O-Wisp into Steel, Rain Dance into Rock) is never "a super effective
  * move". Variable-power moves carry power 1 and do count (Counter into Rock).
  */

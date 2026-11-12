@@ -36,6 +36,7 @@ import {
   type BattleScriptOpcodeHandlers,
 } from "./battleScriptMachine.ts";
 import type { BattleScriptProgram } from "./battleScriptProgram.ts";
+import type { BattleScriptBattlerId } from "./battleScriptEvents.ts";
 import {
   resolveBattleScriptBattlerAtPosition,
   resolveBattleScriptBattlerPosition,
@@ -64,6 +65,48 @@ const SPECIES_TYPES_ROWS = speciesTypesData.species as unknown as readonly Speci
 function resolveSpeciesTypes(species: number): BattleAiSwitchTypes | null {
   const row = SPECIES_TYPES_ROWS[species - 1];
   return row ? row.types : null;
+}
+
+/**
+ * Pass 2's `AI_CalcDmg(gActiveBattler, opposingBattler)` (`battle_ai_switch_items.c:778`,
+ * `battle_script_commands.c:1306-1319`) after `GetMostSuitableMonToSwitchInto`'s own
+ * resets (`:748-752`: gDynamicBasePower 0, dynamicMoveType 0, dmgMultiplier 1,
+ * gCritMultiplier 1): `CalculateBaseDamage` of the GLOBAL gCurrentMove from the
+ * battler being replaced into the opposing battler, then Charge x2 for an
+ * Electric gCurrentMove and Helping Hand x1.5. Shared by the faint replacement
+ * (`Cmd_openpartyscreen`) and the AI's voluntary switch
+ * (`AI_TrySwitchOrUseItem` -> `factoryAiSwitchPolicy.ts`), which both reach the
+ * same function. gCurrentMove is whatever the last action left: the move that
+ * caused the faint mid-action, or MOVE_NONE after `HandleAction_ActionFinished`
+ * (`battle_util.c:670`), for which the physical "at least 1" floor + 2 gives 3.
+ */
+export function calculateAiSwitchIntoBaseDamage(
+  rules: BattleScriptRulesContext,
+  battler: BattleScriptBattlerId,
+  opposingBattler: BattleScriptBattlerId,
+): number {
+  const damageRules = Object.freeze({
+    ...rules,
+    selectorRoles: Object.freeze({
+      ...rules.selectorRoles,
+      attacker: battler,
+      target: opposingBattler,
+    }),
+    dynamicBasePower: 0,
+    dynamicMoveType: 0,
+    critMultiplier: 1,
+    dmgMultiplier: 1,
+  });
+  const active = rules.battlers[battler];
+  let baseDamage = calculateBattleScriptBaseDamageForCurrentMove(damageRules);
+  if (
+    (active.status3 & (1 << 9)) !== 0
+    && resolveBattleScriptMoveTypeName(rules.currentMove, 0) === "TYPE_ELECTRIC"
+  ) {
+    baseDamage *= 2;
+  }
+  if (active.helpingHand === 1) baseDamage = Math.trunc((baseDamage * 15) / 10);
+  return baseDamage;
 }
 
 function partyStateToBench(party: BattleScriptPartyState): BattleAiSwitchBench | null {
@@ -242,18 +285,6 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
       );
     }
 
-    const damageRules = Object.freeze({
-      ...rules,
-      selectorRoles: Object.freeze({
-        ...rules.selectorRoles,
-        attacker: battler,
-        target: opposingBattlerId,
-      }),
-      dynamicBasePower: 0,
-      dynamicMoveType: 0,
-      critMultiplier: 1,
-      dmgMultiplier: 1,
-    });
     // ISSUES #110: no legal-bench-count special case here, mirroring source exactly --
     // Cmd_openpartyscreen's own plain-battler branch (battle_script_commands.c:5113-5148)
     // unconditionally emits BtlController_EmitChoosePokemon regardless of candidate count,
@@ -262,24 +293,14 @@ function createOpenPartyScreenOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
     // PARTY_SIZE fallback below, never a shortcut on how many slots are legal.
     // One call, both passes. Pass 1's TypeCalc (battle_ai_switch_items.c:733) reads the opposing battler's
     // ability (Levitate, battle_script_commands.c:1554) and status2 (Foresight), so the whole context goes in up
-    // front; AI_CalcDmg (:776) is a thunk because C reaches it only in pass 2.
+    // front; AI_CalcDmg (:778) is a thunk because C reaches it only in pass 2.
     const active = rules.battlers[battler];
     const scored = getMostSuitableMonToSwitchInto(
       bench,
       activePartyIndex,
       opposingTypes,
       Object.freeze({
-        baseDamage: () => {
-          let baseDamage = calculateBattleScriptBaseDamageForCurrentMove(damageRules);
-          if (
-            (active.status3 & (1 << 9)) !== 0
-            && resolveBattleScriptMoveTypeName(rules.currentMove, 0) === "TYPE_ELECTRIC"
-          ) {
-            baseDamage *= 2;
-          }
-          if (active.helpingHand === 1) baseDamage = Math.trunc((baseDamage * 15) / 10);
-          return baseDamage;
-        },
+        baseDamage: () => calculateAiSwitchIntoBaseDamage(rules, battler, opposingBattlerId),
         activeTypes: active.types,
         opposingTypes,
         opposingAbility: rules.battlers[opposingBattlerId].ability,
