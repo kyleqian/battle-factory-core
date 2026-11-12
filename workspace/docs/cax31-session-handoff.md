@@ -121,6 +121,56 @@ never brief those here. One worker at a time; each run folds the next audio step
    - **Hosting:** the Nintendo-derived audio follows the user's existing decision on the art. `options.audio.baseUrl` lets the
      website serve the files.
    - **Website:** the mute button is the Mac's job. Name the API change and the new ENGINE_BUILD in PROGRESS when aud245 lands.
+0b. **User decision 2026-11-12 (Kyle approved the top layer's recommendation): every challenge end returns to the Lobby,
+   as in the ROM, and a new challenge starts in-game at the attendant.**
+   - **Pace:** one step per run, alongside item 0 and the gameplay fixes.
+   - **Why:** the website used to freeze the game at `challenge-end`. It will now let the game run on (the Mac's job), so
+     whatever the engine does after the end is now on screen.
+   - **ROM flow** (read-only scout 2026-11-12, top layer, verified in the decomp; re-check each line before you build on it).
+     Every end type warps to the Lobby (BattleRoom:86-90, 104-111, 222-227) and then runs the Lobby `OnFrame` result script:
+     - **Loss / retire / forfeit:** `LostChallenge`, Lobby:65-75, text 370-375. The streak flag is cleared (:71), then
+       `factory_save 0` (`SaveGameFrontier`, battle_factory.c:269-275) with SE_SAVE (:72-74).
+     - **Record question:** asked if allowed, YES/NO with NO preselected (:76-85). A forfeit sets `disableRecordBattle` and
+       skips it (battle_main.c:5058-5062, Lobby:77-78). Then the farewell (:89-94) and free control.
+     - **7 wins:** the won script, Lobby:40-59. Congratulations, the BP award, the exchange, save, record, farewell. The
+       streak flag is kept, so the next attendant start continues the streak (battle_factory.c:208-212). The Brain
+       variants are at Lobby:48-50.
+     - **Starting again** (singles attendant at (4,7), Lobby:108-172):
+       1. welcome, then CHALLENGE / INFO / EXIT;
+       2. "Level 50 or Open Level?";
+       3. "I need to save the game. Is that okay?";
+       4. YES runs `factory_init`, then the full save dialog (:159);
+       5. "Please step this way.", the door walk and warp, then the PreBattleRoom and the draft.
+   - **What our engine does today** (`core.ts:1270-1300`, `docs/nch231-new-challenge.md`):
+     - After a loss, and after a 7-win, the record answer chains straight into a new draft (`enterChainedFactoryChallenge`).
+       Only RETIRE-YES reaches the farewell and the walkable Lobby.
+     - In the Lobby, A at the attendant deals a draft at once, with none of the dialogue above (`core.ts:1204-1221`).
+     - Probably also a bug: after a forfeit we still ask the record question (`factoryTerminalPresentation.ts:395-417`,
+       inferred, not run).
+   - **Steps:**
+     1. **lbr-a.** Loss, forfeit and retire all play the ROM result script, then the farewell, then the walkable Lobby;
+        delete the loss -> new-draft chaining on the production route. Fix the forfeit record-question skip. ROM windows for
+        each, both scenes.
+     2. **lbr-b.** The attendant conversation (ROM text and menus, ROM-measured):
+        - CHALLENGE / INFO / EXIT;
+        - the level menu: Open Level shown but unselectable, the same treatment as REST (deliberate divergence; only Lv50
+          is modelled; record it in the scope doc);
+        - the save prompt, then the save dialog.
+     3. **lbr-c, the library contract change (additive):**
+        - When the player confirms the save at the attendant after a challenge ended, emit a new event
+          `{ type: "challenge-request", frame }` at the moment the ROM's save dialog starts.
+        - The game then holds on that screen (no input, keeps drawing) until the host destroys the mount.
+        - The host creates the next server challenge (it prefetches one at `challenge-end`) and mounts it. That new mount
+          starts at the draft, as today.
+        - `challenge-end` stays exactly where it fires now: the trace and the anti-cheat stay one challenge per mount, and
+          nothing after the end is uploaded.
+        - Also add a mount option `start: "after-save"` that begins at "Please step this way." / the door walk, so the
+          cut is short; it is optional, and can follow later.
+        - Document it in `docs/library-package.md` and `lib-types`, and name the event plus the new ENGINE_BUILD in
+          PROGRESS so the Mac wires the site.
+     4. **lbr-d, 7 wins:** return to the Lobby inside the same mount and trace (BP, save, record, farewell), then the
+        attendant continues the streak in-game. That is the same server challenge, so no host hand-off and no
+        `challenge-request`; `round-end` stays where it is.
 1. **Audio (S11)** — the main program for several runs: `docs/s11-audio-design.md` section 7. Next: **aud241** battle
    controller family (effectiveness, SE_FAINT, faint / send-out cries with mode + pan, ball / tray / low-HP, battle BGM start /
    fade / victory, the battle-return BGM / SE_EXIT that aud240d measured: fade P+6, BGM 469 P+53, SE_EXIT P+79). Map and
