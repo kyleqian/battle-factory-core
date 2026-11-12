@@ -6,7 +6,7 @@
  "gameplaySeed": 4025223145,
  "presentationSeed": 3542704685,
  "frames": 22641,
- "kernelDigestAtEnd": "a52c058d2d1e6236",
+ "kernelDigestAtEnd": {"master e2cd1f1cd (src/headless.ts replayChallenge)": "a52c058d2d1e6236", "website build eb-9d34d28f1b19ef3d (worker/lib-v2-mac 18329ff0f, 63 commits behind that master)": "9338e7cd2b48a528"},
  "segments": [
   {"frames":600,"buttons":[],"t":21},
   {"frames":600,"buttons":[],"t":10071},
