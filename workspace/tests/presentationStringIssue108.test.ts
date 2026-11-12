@@ -51,6 +51,7 @@ import type { BattleCommandDecision, BattleCommandRequest } from "../src/engine/
  */
 
 const SPLASH = 150;
+const RAGE = 99;
 const POUND = 1;
 const GROWTH = 74;
 const SNATCH = 289;
@@ -135,9 +136,12 @@ describe("presentation-string ISSUES #108 -- Rage's STRINGID_PKMNRAGEBUILDING", 
       requestId: 1,
       rngSeed: 1,
       player: wobbuffetConfig(POUND, { speed: 200 }),
-      trainer: wobbuffetConfig(SPLASH, { speed: 1, status2: STATUS2_RAGE, hp: 300, maxHp: 300 }),
+      // parity-mac: the holder must have CHOSEN Rage this turn. TryClearRageStatuses (battle_util.c:1973-1981) drops a staged
+      // STATUS2_RAGE before the first action when the chosen move is anything else (docs/parity-mac/rage-status-clear.md);
+      // this trainer used to hold Splash.
+      trainer: wobbuffetConfig(RAGE, { speed: 1, status2: STATUS2_RAGE, hp: 300, maxHp: 300 }),
     });
-    const { messageIds, lines, field } = runFullTurn(config, AT(1), AT(1));
+    const { messageIds, lines, field } = runFullTurn(config, AT(1), AT(0));
     expect(messageIds).toContain("STRINGID_PKMNRAGEBUILDING");
     expect(lines).toContainEqual([`Foe ${field.opponent.name}’s RAGE`, "is building!"]);
   });
