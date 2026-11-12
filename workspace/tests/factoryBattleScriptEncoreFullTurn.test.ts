@@ -58,9 +58,20 @@ describe("Factory full-turn Encore shared choice/execution seams", () => {
     expect(kinds.indexOf("message:STRINGID_PKMNGOTENCORE"))
       .toBeGreaterThan(kinds.indexOf("set-battler-pp-data"));
 
-    const secondPlayer = submitFactoryFullTurnDecision(first.state, {
+    const secondPlayerChoice = submitFactoryFullTurnDecision(first.state, {
       requestId: 3, side: "player",
       decision: { kind: "use-move", moveSlot: 0, targetBattler: 1 },
+    });
+    // battle_main.c:4166-4170: the Encored trainer still gets ChooseAction (AI_TrySwitchOrUseItem);
+    // only the MOVE is fixed (:4192-4196), so its request lists exactly the encored slot.
+    if (secondPlayerChoice.kind !== "decision-required") throw new Error("encored trainer request expected");
+    expect(secondPlayerChoice.nextRequest).toMatchObject({
+      side: "trainer", requestId: 4,
+      legalDecisions: [{ kind: "use-move", moveSlot: 1, targetBattler: 0 }],
+    });
+    const secondPlayer = submitFactoryFullTurnDecision(secondPlayerChoice.state, {
+      requestId: 4, side: "trainer",
+      decision: { kind: "use-move", moveSlot: 1, targetBattler: 0 },
     });
     if (secondPlayer.kind !== "decision-required") throw new Error("next player request expected");
     expect(secondPlayer.state.rules.rulesContext.battlers[0].pp[0]).toBe(3);
@@ -68,7 +79,7 @@ describe("Factory full-turn Encore shared choice/execution seams", () => {
     expect(secondPlayer.state.rules.rulesContext.battlers[1].pp[1]).toBe(33);
   });
 
-  it("auto-confirms a player Encore choice and consumes the encored slot PP", () => {
+  it("an Encored player still chooses the ACTION (battle_main.c:4166-4170); FIGHT is the encored slot only and consumes its PP", () => {
     const seeded = config(TACKLE, ENCORE);
     const initial = createFactoryFullTurnBattleState({
       ...seeded,
@@ -84,10 +95,19 @@ describe("Factory full-turn Encore shared choice/execution seams", () => {
       requestId: 2, side: "trainer",
       decision: { kind: "use-move", moveSlot: 2, targetBattler: 0 },
     });
-    if (applied.kind !== "decision-required") throw new Error("trainer-only request expected");
-    expect(applied.nextRequest).toMatchObject({ side: "trainer", requestId: 3 });
-    const next = submitFactoryFullTurnDecision(applied.state, {
-      requestId: 3, side: "trainer",
+    if (applied.kind !== "decision-required") throw new Error("player request expected");
+    // Unfixed: the kernel auto-confirmed the encored move and published a trainer-only request.
+    expect(applied.nextRequest).toMatchObject({
+      side: "player", requestId: 3,
+      legalDecisions: [{ kind: "use-move", moveSlot: 2, targetBattler: 1 }],
+    });
+    const chosen = submitFactoryFullTurnDecision(applied.state, {
+      requestId: 3, side: "player",
+      decision: { kind: "use-move", moveSlot: 2, targetBattler: 1 },
+    });
+    if (chosen.kind !== "decision-required") throw new Error("trainer request expected");
+    const next = submitFactoryFullTurnDecision(chosen.state, {
+      requestId: 4, side: "trainer",
       decision: { kind: "use-move", moveSlot: 1, targetBattler: 0 },
     });
     if (next.kind !== "decision-required") throw new Error("next boundary expected");
@@ -103,9 +123,19 @@ describe("Factory full-turn Encore shared choice/execution seams", () => {
         encoreTimerStartValue: 4,
       },
     });
-    const afterPlayer = submitFactoryFullTurnDecision(initial, {
+    const playerChoice = submitFactoryFullTurnDecision(initial, {
       requestId: 1, side: "player",
       decision: { kind: "use-move", moveSlot: 1, targetBattler: 0 },
+    });
+    if (playerChoice.kind !== "decision-required") throw new Error("encored trainer request expected");
+    expect(playerChoice.nextRequest).toMatchObject({
+      side: "trainer", requestId: 2,
+      legalDecisions: [{ kind: "use-move", moveSlot: 0 }],
+    });
+    if (playerChoice.nextRequest.kind !== "command") throw new Error("command request expected");
+    const afterPlayer = submitFactoryFullTurnDecision(playerChoice.state, {
+      requestId: 2, side: "trainer",
+      decision: playerChoice.nextRequest.legalDecisions[0]!,
     });
     if (afterPlayer.kind !== "decision-required") throw new Error("next boundary expected");
     expect(afterPlayer.state.rules.rulesContext.battlers[1]).toMatchObject({

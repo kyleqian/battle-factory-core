@@ -2373,9 +2373,13 @@ function isVoluntarySwitchTrapped(
 
 /**
  * Publishes the legal Factory-singles command surface for either battler.
- * Locked actions remain move-only. Trainer switching uses ShouldSwitch's
- * source-specific hard precheck (not the player party-menu gate: notably,
- * the AI's Arena Trap check has no Flying/Levitate exception).
+ * STATUS2_MULTIPLETURNS / RECHARGE actions remain move-only (source never
+ * asks the controller, `battle_main.c:4160-4165`). An Encored battler DOES
+ * get `BtlController_EmitChooseAction` (`:4166-4170`): its move is fixed but
+ * it may still switch (docs/parity-mac/encore-struggle-selection.md).
+ * Trainer switching uses ShouldSwitch's source-specific hard precheck (not
+ * the player party-menu gate: notably, the AI's Arena Trap check has no
+ * Flying/Levitate exception).
  */
 function legalCommandDecisions(
   rulesContext: BattleScriptRulesContext,
@@ -2383,7 +2387,7 @@ function legalCommandDecisions(
 ): readonly BattleCommandDecision[] {
   const moves = legalMoveDecisions(rulesContext, battler);
   if (
-    lockedMoveDecision(rulesContext, battler) !== null
+    battlerStatusMoveLock(rulesContext, battler) !== 0
     || (
       battler === 0
         ? isVoluntarySwitchTrapped(rulesContext, battler)
@@ -2460,6 +2464,44 @@ function battlerHasNoUsableMoveSlot(
   return (
     checkBattleScriptMoveLimitations(rulesContext, battler) & 0x0f
   ) === 0x0f;
+}
+
+/**
+ * `HandleTurnActionSelectionState`'s B_ACTION_USE_MOVE case
+ * (`battle_main.c:4182-4197`): the controller is asked for a MOVE
+ * (`BtlController_EmitChooseMove`, `:4199-4219`) only when neither
+ * `AreAllMovesUnusable()` (`:4184`, forced Struggle) nor
+ * `gDisableStructs[b].encoredMove != 0` (`:4192`) holds. In both of those
+ * cases the action itself WAS chosen by the controller (the player's action
+ * menu; the opponent's `AI_TrySwitchOrUseItem`,
+ * `battle_controller_opponent.c:1540`), but `OpponentHandleChooseMove`
+ * (`:1551-1567`, `BattleAI_SetupAIData` + `BattleAI_ChooseMoveOrAction`) never
+ * runs: zero AI move-chooser draws. False for a STATUS2 lock, which never
+ * reaches a controller at all.
+ */
+export function battlerMoveSelectionIsForced(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): boolean {
+  if (battlerStatusMoveLock(rulesContext, battler) !== 0) return false;
+  if (battlerHasNoUsableMoveSlot(rulesContext, battler)) return true;
+  const battlerState = rulesContext.battlers[battler]!;
+  return battlerState.encoreTimer !== 0 && battlerState.encoredMove !== 0;
+}
+
+/**
+ * The auto-confirmed action of a STATUS2_MULTIPLETURNS / RECHARGE battler
+ * (`battle_main.c:4160-4165`: B_ACTION_USE_MOVE with no controller request),
+ * or null. The Encore branch of `lockedMoveDecision` is deliberately not
+ * included: source still emits ChooseAction for an Encored battler.
+ */
+function statusLockedMoveDecision(
+  rulesContext: BattleScriptRulesContext,
+  battler: BattleSinglesBattler,
+): BattleMoveDecision | null {
+  return battlerStatusMoveLock(rulesContext, battler) === 0
+    ? null
+    : lockedMoveDecision(rulesContext, battler);
 }
 
 /**
@@ -2697,8 +2739,8 @@ function runEndTurnTail(
 
   // HandleTurnActionSelectionState auto-confirms a multi-turn player's
   // B_ACTION_USE_MOVE, so only the trainer command remains to collect.
-  const lockedPlayerDecision = lockedMoveDecision(continuingState.rulesContext, 0);
-  const lockedTrainerDecision = lockedMoveDecision(continuingState.rulesContext, 1);
+  const lockedPlayerDecision = statusLockedMoveDecision(continuingState.rulesContext, 0);
+  const lockedTrainerDecision = statusLockedMoveDecision(continuingState.rulesContext, 1);
   if (lockedPlayerDecision !== null && lockedTrainerDecision !== null) {
     // Source auto-confirms both locked B_ACTION_USE_MOVE entries without
     // exposing either controller command. Resolve the next turn inside this
@@ -3196,7 +3238,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
       "awaiting-trainer-command",
       ctx.decision,
     );
-    const lockedTrainerDecision = lockedMoveDecision(rules.rulesContext, 1);
+    const lockedTrainerDecision = statusLockedMoveDecision(rules.rulesContext, 1);
     if (lockedTrainerDecision !== null) {
       // HandleTurnActionSelectionState has already auto-confirmed the
       // trainer's locked action, so the player's submitted command completes

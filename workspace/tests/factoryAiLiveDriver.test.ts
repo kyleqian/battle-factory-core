@@ -296,6 +296,41 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     expect(result.transition.state.rng).toEqual(result.rng);
   });
 
+  // docs/parity-mac/encore-struggle-selection.md. battle_main.c:4184-4197: AreAllMovesUnusable() and encoredMove != 0
+  // both leave action selection without BtlController_EmitChooseMove, so OpponentHandleChooseMove
+  // (battle_controller_opponent.c:1551-1567) never runs. AI_TrySwitchOrUseItem (:1540) still does.
+  for (const forced of [
+    { name: "forced Struggle (all PP 0)", changes: { pp: [0, 0, 0, 0] as const } },
+    { name: "Encore", changes: { encoreTimer: 3, encoredMove: BODY_SLAM, encoredMovePos: 0, encoreTimerStartValue: 3 } },
+  ]) {
+    it(`${forced.name}: the switch precheck runs, the move chooser does not (0 chooser draws)`, () => {
+      const base = liveRules(0, 0, {}, {
+        trainerMoves: [BODY_SLAM, SURF, ROCK_SLIDE, THUNDERBOLT],
+        opponentBench: [{ species: 132, moves: [BODY_SLAM, 0, 0, 0] }],
+      });
+      const rulesContext = createBattleScriptRulesContext({
+        ...base,
+        battlers: base.battlers.map((b, index) => index === 1 ? { ...b, ...forced.changes } : b),
+      } as never);
+      const forcedRequest = createBattleCommandRequest({
+        ...request,
+        legalDecisions: [{ kind: "use-move", moveSlot: 0, targetBattler: 0 }, { kind: "switch", partyIndex: 1 }],
+      });
+      const result = submitLiveFactoryAiDecision(
+        createBattleState({ rules: { rulesContext } as FactoryAiLiveRules, rngSeed: 919694434, request: forcedRequest }),
+        createFactoryAiBattleHistory(rulesContext),
+        { factoryWinStreak: 28, trainerOpponentId: 222 },
+        terminalReducer(),
+      );
+      // Unfixed: phase "move" with the scored chooser's draws appended.
+      expect(result.phase).toBe("forced-move");
+      expect(result.submission.decision).toEqual({ kind: "use-move", moveSlot: 0, targetBattler: 0 });
+      expect(result.rng).toEqual(result.switchPolicy.rng);
+      expect(result.rng.calls).toBe(result.switchPolicy.draws.length);
+      expect(result.transition.state.rng).toEqual(result.rng);
+    });
+  }
+
   it("preserves the 13-draw all-Surf scoring carrier after the failed precheck prefix", () => {
     const rulesContext = liveRules(0, 0, {}, {
       trainerMoves: [SURF, SURF, SURF, SURF],

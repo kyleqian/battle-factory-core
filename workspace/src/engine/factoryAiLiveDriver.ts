@@ -84,6 +84,7 @@ import {
   evaluateFactoryAiSwitchPolicy,
   type FactoryAiSwitchPolicyResult,
 } from "./factoryAiSwitchPolicy.ts";
+import { battlerMoveSelectionIsForced } from "./factoryBattleScriptFullTurnDecision.ts";
 import {
   factoryAiLastCalcMovePower,
   type FactoryAiTryToFaintBattler,
@@ -556,6 +557,18 @@ export type FactoryAiLiveTransition<RulesState extends FactoryAiLiveRules> =
       rng: BattleRngState;
       transition: ReturnType<typeof submitBattleDecision<RulesState>>;
     }>
+    | Readonly<{
+      /**
+       * AI_TrySwitchOrUseItem answered B_ACTION_USE_MOVE and source then sends
+       * no ChooseMove (forced Struggle or Encore, battle_main.c:4184-4197):
+       * the move chooser never ran, so there is no scoring trace and no draw
+       * beyond the switch precheck's.
+       */
+      phase: "forced-move";
+      submission: BattleDecisionSubmission;
+      rng: BattleRngState;
+      transition: ReturnType<typeof submitBattleDecision<RulesState>>;
+    }>
   );
 
 type RecordedAiDraw = Readonly<{
@@ -650,6 +663,37 @@ export function submitLiveFactoryAiDecision<
   );
   if (moveDecisions.length === 0) {
     throw new Error("Factory AI switch precheck declined but no legal move remains");
+  }
+  if (battlerMoveSelectionIsForced(state.rules.rulesContext, 1)) {
+    // battle_main.c:4184-4197: AreAllMovesUnusable() (Struggle) and
+    // encoredMove != 0 both leave STATE_WAIT_ACTION_CHOSEN without
+    // BtlController_EmitChooseMove, so OpponentHandleChooseMove
+    // (battle_controller_opponent.c:1551-1567: BattleAI_SetupAIData +
+    // BattleAI_ChooseMoveOrAction) never runs. Zero chooser draws; the W2
+    // gBattleMovePower register is not touched either (no AI_CalcDmg).
+    if (moveDecisions.length !== 1) {
+      throw new Error("Factory AI forced move selection must publish exactly one move decision");
+    }
+    const submission = Object.freeze({
+      requestId: state.boundary.request.requestId,
+      side: state.boundary.request.side,
+      decision: moveDecisions[0]!,
+    });
+    const transition = submitBattleDecision(
+      state,
+      submission,
+      replayAiDraws(switchPolicy.draws, reducer),
+    );
+    return Object.freeze({
+      phase: "forced-move",
+      submission,
+      rng: switchPolicy.rng,
+      transition,
+      history: syncedHistory,
+      view,
+      switchPolicy,
+      actionGate: FACTORY_AI_ACTION_GATE,
+    }) as FactoryAiLiveTransition<RulesState>;
   }
   const policyRequest: BattleCommandRequest = createBattleCommandRequest({
     ...state.boundary.request,

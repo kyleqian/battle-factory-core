@@ -14,6 +14,7 @@ import {
   beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import { adoptFactoryOpponentSchedule } from "../../src/engine/factoryOpponentGeneration.ts";
+import { battlerMoveSelectionIsForced } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
 import { collectSoundTick } from "../../src/audio/soundEvents.ts";
@@ -97,7 +98,8 @@ function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
 }
 
 type Segment = { frames: number; buttons: string[] };
-type Decision = { kind: "move" | "switch"; slot?: number; partyIndex?: number; menuOpenFrame: number; fightMenuFrame?: number; commitFrame: number | null };
+// forced (parity-mac): the ROM asks no move for this turn (forced Struggle / Encore, battle_main.c:4184-4197): FIGHT at the action menu commits it, the move menu never opens.
+type Decision = { kind: "move" | "switch"; slot?: number; partyIndex?: number; forced?: true; menuOpenFrame: number; fightMenuFrame?: number; commitFrame: number | null };
 function play(initial: any, record: boolean, patchRng: number | null = null) {
   let state = initial; let frame = 0; let ended = false; let error: string | null = null; let frame0: number | null = null;
   const sound: unknown[][] = []; const inputs: Segment[] = []; const slotUses = [0, 0, 0, 0];
@@ -176,7 +178,8 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
         if (cursor === slot) break;
         pulse((cursor & 1) !== (slot & 1) ? ((slot & 1) ? "RIGHT" : "LEFT") : ((slot & 2) ? "DOWN" : "UP"));
       }
-      decisions.push({ kind: "move", slot, menuOpenFrame: actionMenuFrame, fightMenuFrame, commitFrame: frame + 2 }); // pulse("A") presses A on its 2nd step
+      const forced = battlerMoveSelectionIsForced(state.battle!.rules.rulesContext as never, 0);
+      decisions.push({ kind: "move", slot, ...(forced ? { forced: true as const } : {}), menuOpenFrame: actionMenuFrame, fightMenuFrame, commitFrame: frame + 2 }); // pulse("A") presses A on its 2nd step
       pulse("A");
       until(() => !state.battleCommandPresentation);
       until(() => phase() === "action-menu");

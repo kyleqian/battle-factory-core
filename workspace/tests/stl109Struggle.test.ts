@@ -169,7 +169,10 @@ describe("stl109: Struggle gates", () => {
 const ROUTES = [
   { name: "opponent (VENUSAUR, turn 45)", seed: 60, streak: 23, slots: [...Array.from({ length: 44 }, (_, i) => i % 4), 0], attackers: [1] },
   { name: "opponent first, then the player (turn 58)", seed: 60, streak: 23,
-    slots: [...Array.from({ length: 48 }, (_, i) => i % 4), 1, 2, 1, 2, 1, 2, 1, 2, 1, 1], attackers: [1, 1, 0] },
+    // parity-mac re-pin (docs/parity-mac/encore-struggle-selection.md): a forced-Struggle AI turn no longer runs the move chooser
+    // (0 draws, as on the ROM), so this battle's RNG line changed after the opponent's first Struggle: same slots, the opponent now
+    // Struggles four times before the player's first (was two).
+    slots: [...Array.from({ length: 48 }, (_, i) => i % 4), 1, 2, 1, 2, 1, 2, 1, 2, 1, 1], attackers: [1, 1, 1, 1, 0] },
 ] as const;
 const rulesWithoutSceneMarker = (v: { rules: any }) => {
   const rc = v.rules.rulesContext;

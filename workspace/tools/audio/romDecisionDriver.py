@@ -160,6 +160,9 @@ class RomDriver:
             if cursor & 2:
                 return self.press("UP")
             self.block = "action"
+            if want.get("forced"):
+                # Forced Struggle / Encore (battle_main.c:4184-4197): FIGHT commits the turn, no move menu follows.
+                self.close_anchor()
             return self.press("A")
         if state == "move":
             if want is None or want["kind"] != "move":
