@@ -100,6 +100,8 @@ never brief those here. One worker at a time; each run folds the next audio step
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
    fixes.**
    - **Pace:** every run folds at least one playback step and one gameplay-fix step from item 1, one worker at a time as usual.
+     **Superseded 2026-11-12 (item 0d, "Fix pace"): battle-rule fixes come first and take as many steps as fit; sound keeps
+     at least one playback step per run.**
    - **No more waiting:** playback no longer waits for census parity (0 missing / 0 extra, design step 7) or for the remaining
      aud242 lifetimes. A sound we don't emit yet just stays silent and gets filled in as parity improves.
    - **aud244, recorder + assets** (design section 5 / step 8). It may split into cries / SEs / music.
@@ -211,7 +213,11 @@ never brief those here. One worker at a time; each run folds the next audio step
      twenty from 75 up. A new divergence joins the list and gets an ISSUES entry (seed, scene, first diverging row).
    - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
      the highest seed driven (160 now) and the consecutive-clean count. A seed is driven as "new" once only.
-   - **Fix pace:** unchanged (item 0: at least one gameplay-fix step per run). Order of the gameplay queue:
+   - **Fix pace (Kyle, later on 2026-11-12: "stop de-prio the battle fixes. they're important"):** battle-rule fixes are now
+     the MAIN program of every run. Take them first and fold as many as fit, one worker at a time (the 16 GiB host note
+     stands), in the queue order below. Sound keeps moving with at least one playback step per run, because Kyle wants
+     both; cleanup takes what is left. This supersedes the "one gameplay-fix step" pace in item 0 and the "main program"
+     wording in item 1. Order of the gameplay queue:
      1. open replay divergences: #204 C, #209, #210, then triage the twenty new seeds by first diverging row (many will share
         a cause; diagnosis-only steps like dia263 / dia269 are the proven shape);
      2. the audit doc's section 2 rows by reach. A1 is the same function as #204 C: fix them as one step with the section 4
