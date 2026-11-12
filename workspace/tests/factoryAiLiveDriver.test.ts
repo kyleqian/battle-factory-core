@@ -331,6 +331,54 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
     });
   }
 
+  // docs/parity-mac/ai-scripts-unusable-slots.md. BattleAI_DoAIProcessing (battle_ai_script_commands.c:582-589) blanks
+  // moveConsidered only for a 0-PP slot; a slot masked by CheckMoveLimitations for another reason (Choice lock, Disable, Taunt,
+  // Torment) is still scripted. ROM seed 95: Choice Band Absol, 2 get_ability draws on each of the two locked-out slots.
+  it("scripts every slot that still has PP, even when only one is selectable; a 0-PP slot is not scripted", () => {
+    const rulesContext = liveRules(0, 0, {}, {
+      opponentBench: [{ species: 132, moves: [BODY_SLAM, 0, 0, 0] }],
+    });
+    const challenge = { factoryWinStreak: 28, trainerOpponentId: 222 };
+    const drive = (context: BattleScriptRulesContext, legalSlots: readonly (0 | 1 | 2 | 3)[]) => {
+      const result = submitLiveFactoryAiDecision(
+        createBattleState({
+          rules: { rulesContext: context } as FactoryAiLiveRules,
+          rngSeed: 919694434,
+          request: createBattleCommandRequest({
+            ...request,
+            legalDecisions: [
+              ...legalSlots.map((moveSlot) => ({ kind: "use-move" as const, moveSlot, targetBattler: 0 as const })),
+              { kind: "switch" as const, partyIndex: 1 as const },
+            ],
+          }),
+        }),
+        createFactoryAiBattleHistory(context),
+        challenge,
+        terminalReducer(),
+      );
+      if (result.phase !== "move" || result.trace.mask === 0) throw new Error("expected a scored move phase");
+      return result;
+    };
+
+    const scripted = (result: ReturnType<typeof drive>) =>
+      result.trace.slotScores.map((slot) => "checkBadMoveDelta" in slot && slot.checkBadMoveDelta !== null);
+    const allSelectable = drive(rulesContext, [0, 1, 2, 3]);
+    const locked = drive(rulesContext, [2]);
+    // Same scripts on the same four slots, so the same draws; only the pool differs. Unfixed: the locked run draws fewer.
+    expect(locked.trace.draws).toEqual(allSelectable.trace.draws);
+    expect(scripted(locked)).toEqual([true, true, true, true]);
+    expect(locked.trace.bestMoveSlots).toEqual([2]);
+    expect(locked.submission.decision).toEqual({ kind: "use-move", moveSlot: 2, targetBattler: 0 });
+
+    const emptySlot = createBattleScriptRulesContext({
+      ...rulesContext,
+      battlers: rulesContext.battlers.map((b, index) => index === 1 ? { ...b, pp: [10, 0, 10, 10] } : b),
+    } as never);
+    const withEmpty = drive(emptySlot, [0, 2, 3]);
+    expect(scripted(withEmpty)).toEqual([true, false, true, true]);
+    expect(withEmpty.trace.draws.every((draw) => !("moveSlot" in draw) || draw.kind === "setup-simulated-rng" || draw.moveSlot !== 1)).toBe(true);
+  });
+
   it("preserves the 13-draw all-Surf scoring carrier after the failed precheck prefix", () => {
     const rulesContext = liveRules(0, 0, {}, {
       trainerMoves: [SURF, SURF, SURF, SURF],
@@ -394,6 +442,7 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         hp: 135,
         maxHp: 135,
         usablePartyMons: 0, // no party staged: nothing usable (aip262)
+        movePp: [10, 10, 10, 10], // parity-mac: which slots the scoring scripts run on (pp != 0)
         ability: "ABILITY_NONE",
         battleTurnCount: 7,
         lightScreenUp: false,

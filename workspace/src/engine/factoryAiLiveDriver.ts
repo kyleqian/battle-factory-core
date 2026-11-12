@@ -377,6 +377,7 @@ export function createFactoryAiViewFromLiveRules(input: Readonly<{
       hp: attacker.hp,
       maxHp: attacker.maxHP,
       usablePartyMons: countUsablePartyMons(input.rulesContext.party.opponent, attacker.partyIndex),
+      movePp: Object.freeze([attacker.pp[0] ?? 0, attacker.pp[1] ?? 0, attacker.pp[2] ?? 0, attacker.pp[3] ?? 0]) as unknown as readonly [number, number, number, number],
       ability: abilityName(attacker.ability),
       turnOrderAbility: attackerTurnOrder.ability ?? null,
       turnOrderHoldEffect: attackerTurnOrder.holdEffect ?? null,

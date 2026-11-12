@@ -173,6 +173,7 @@ const PROBE_ATTACKER: Required<FactoryAiScoredBattlerView> = Object.freeze({
   holdEffect: 1,
   currentWeather: AI_WEATHER_SUN as AiWeatherValue,
   usablePartyMons: 1,
+  movePp: [1, 1, 1, 1] as const, // read by the policy itself (which slots are scripted), not handed to a scorer
   hasSubstitute: true,
   anyMoveDisabled: true,
   anyMoveEncored: true,
