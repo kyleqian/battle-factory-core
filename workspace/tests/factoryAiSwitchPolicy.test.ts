@@ -239,6 +239,30 @@ describe("Factory AI ShouldSwitch policy", () => {
     expect(result.branches.at(-1)).toMatchObject({ branch: "suitable-selector", outcome: "selected", partyIndex: 2 });
   });
 
+  it("resistant-switch search: once a bench mon resists, the slot numbered like the OPPOSING active party index is skipped -- ROM seed 152: no switch, no draw", () => {
+    // docs/parity-mac/ai-resist-switch-battlerin1.md. FindMonWithFlagsAndSuperEffective (battle_ai_switch_items.c:378-424)
+    // reassigns battlerIn1 = gLastHitBy[gActiveBattler] (:407) inside the loop; its exclusion tests (:389-396) then read the
+    // PLAYER's gBattlerPartyIndexes. Player ARON (Steel / Rock) hit PORYGON with Metal Claw. AI bench: party 1 MAWILE (resists,
+    // no super effective move), party 2 CROCONAW (resists, Water Pulse x2 into Rock).
+    const stage = (playerPartyIndex: number) => rules({
+      target: { side: 0, species: 382, ability: 5, types: ["TYPE_STEEL", "TYPE_ROCK"], partyIndex: playerPartyIndex },
+      active: { side: 1, species: 137, ability: 36, types: ["TYPE_NORMAL", "TYPE_NORMAL"], moves: [60, 196, 278, 97] },
+      bench: [partyMember(355, [242, 313, 334, 226], { abilityNum: 1 }), partyMember(159, [163, 352, 44, 184])],
+      lastLandedMove: 232,
+      lastHitBy: 0,
+    });
+    // ARON is the player's party slot 2: after MAWILE matched, AI party slot 2 is skipped. Unfixed: one draw on CROCONAW.
+    const skipped = evaluate(stage(2));
+    expect(skipped.choice).toEqual({ kind: "no-switch" });
+    expect(skipped.selectedPartyIndex).toBeNull();
+    expect(skipped.draws).toEqual([]);
+    // Control: with the player's active mon in slot 0, CROCONAW is examined and its Water Pulse rolls Random() % 3.
+    const examined = evaluate(stage(0), [{ modulus: 3, remainder: 1 }]);
+    expect(examined.draws.map(({ partyIndex, moveSlot, modulus }) => ({ partyIndex, moveSlot, modulus })))
+      .toEqual([{ partyIndex: 2, moveSlot: 1, modulus: 3 }]);
+    expect(examined.selectedPartyIndex).toBeNull();
+  });
+
   it("selects the first Wonder Guard candidate in party-major/move-major order with one draw", () => {
     const result = evaluate(rules({
       target: {
