@@ -113,8 +113,8 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
    fixes.**
    - **Pace:** every run folds at least one playback step and one gameplay-fix step from item 1, one worker at a time as usual.
-     **Superseded 2026-11-12 (item 0d, "Fix pace"): battle-rule fixes come first and take as many steps as fit; sound keeps
-     at least one playback step per run.**
+     **Superseded 2026-11-12 (item 0d, "Two machines"): battle-rule fixes moved to the Mac lane (`worker/parity-mac`); the
+     box folds that branch at run start and gives its own steps to sound, cleanup and the Lobby work.**
    - **No more waiting:** playback no longer waits for census parity (0 missing / 0 extra, design step 7) or for the remaining
      aud242 lifetimes. A sound we don't emit yet just stays silent and gets filled in as parity improves.
    - **aud244, recorder + assets** (design section 5 / step 8). It may split into cries / SEs / music.
@@ -239,11 +239,25 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
      - Not drivable until replay upgrade 3: 24 Brain seeds (33, 82, 131 and 21 in section 7's batch).
    - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
      the highest seed driven (1160 now) and the consecutive-clean count. A seed is driven as "new" once only.
-   - **Fix pace (Kyle, later on 2026-11-12: "stop de-prio the battle fixes. they're important"):** battle-rule fixes are now
-     the MAIN program of every run. Take them first and fold as many as fit, one worker at a time (the 16 GiB host note
-     stands), in the queue order below. Sound keeps moving with at least one playback step per run, because Kyle wants
-     both; cleanup takes what is left. This supersedes the "one gameplay-fix step" pace in item 0 and the "main program"
-     wording in item 1. Order of the gameplay queue:
+   - **Two machines (Kyle, 2026-11-12, last decision of the day: "Sure, let's try that"). This replaces the earlier
+     "battle-rule fixes are the MAIN program of every box run" pace of the same day.**
+     - **The Mac lane owns battle-rule diagnosis and fixes.** It is a separate session on the Mac working on branch
+       `worker/parity-mac` (real-ROM replay is about 5x faster there). It turns the open seeds into bug reports and fixes,
+       one cause group at a time, in the queue order below. Its records are new files under `docs/parity-mac/`
+       (`STATUS.md` first); it does not touch PROGRESS / ISSUES / ROADMAP / this handoff.
+     - **It ships its branch to this box as `refs/remotes/mac/parity-mac`** (fetch-only; it never touches your working tree,
+       `master` or processes).
+     - **Your part, at run start, before the first worker:** if `mac/parity-mac` moved, fold it: `git merge mac/parity-mac`,
+       typecheck, its touched tests, full suite, build, re-pin any sound / census anchor the gameplay change moves, then write
+       the PROGRESS and ISSUES entries from its `docs/parity-mac/*.md`. Each Mac fix arrives with its own ROM proof (group
+       seeds + the regression list); do not redo the census-attribution step for it.
+     - **Sound is your main program again** (item 0 / item 1), with cleanup and the Lobby work as before. Do not start
+       battle-rule fixes of your own while the Mac lane is active: two lanes on the same rules collide on the engine and
+       on the census-anchored pins. If you find a gameplay bug, file it in ISSUES; the Mac lane reads ISSUES.
+     - **Fallback:** if `mac/parity-mac` has not moved for two runs in a row, the Mac lane has stalled: resume the queue
+       below on the box, battle-rule fixes first, and say so in PROGRESS.
+     - Kyle wants both sound and battle parity finished; the split exists so neither waits for the other.
+     Order of the gameplay queue (the Mac lane's, and yours under the fallback):
      1. the signature groups of audit doc section 7, largest first. A signature is not a proven cause: open each group with
         a diagnosis step on 2 or 3 of its seeds (dia263 / dia269 shape), then fix, then re-drive the whole group:
         (a) the ROM sends in a different opponent after a faint, 21 seeds (leads A2 / A3 / A4; your #204 remainder
