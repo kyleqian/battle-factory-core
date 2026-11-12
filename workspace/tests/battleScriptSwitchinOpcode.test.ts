@@ -1554,6 +1554,48 @@ describe("production forced-switch tail opcodes (SWITCHHANDLEORDER/GETSWITCHEDMO
     },
   );
 
+  it("switchineffects: a White Herb holder that enters with a lowered stage (Baton Pass) restores it at once and the script ends there", () => {
+    // docs/parity-mac/white-herb-baton-pass.md. ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN) (battle_util.c:3305-3330) runs
+    // BattleScriptExecute(BattleScript_WhiteHerbEnd2): the running script is replaced and `end2` finishes the action.
+    // ROM (Mechanic Lab): Baton Pass hands Attack -1 to a White Herb Snorlax; stage and item are reset before the foe moves.
+    // Unfixed: the opcode advanced with the stage still lowered and the herb still held.
+    const WHITE_HERB = 180;
+    const SIDE_STATUS_SPIKES_DAMAGED = 1 << 7;
+    const rc = context({
+      battlers: [
+        battler({ side: 0, species: URSARING, types: ["TYPE_NORMAL", "TYPE_NORMAL"] }),
+        battler({
+          side: 1, species: SUNKERN, hp: 100, types: ["TYPE_GRASS", "TYPE_GRASS"], partyIndex: 0,
+          item: WHITE_HERB, statStages: [6, 5, 6, 4, 6, 6, 6, 7],
+        }),
+        battler({ side: 0 }),
+        battler({ side: 1 }),
+      ],
+      sideStatuses: [0, SIDE_STATUS_SPIKES_DAMAGED],
+    });
+    const { execution, result } = stepAtProgramCounter(SWITCHINEFFECTS_PC, rc);
+    if (result.kind !== "advanced") throw new Error(`expected a jump into the item script, got ${result.kind}`);
+    expect(result.state.programCounter).not.toBe(SWITCHINEFFECTS_PC + 1);
+    expect(result.state.rulesContext.battlers[1].statStages).toEqual([6, 6, 6, 6, 6, 6, 6, 7]);
+    // Run the item script out: it prints, removes the herb and ends the action without coming back to the opcode.
+    let state = result.state;
+    let halted = false;
+    for (let guard = 0; guard < 200 && !halted; guard += 1) {
+      const stepped = stepBattleScriptMachine(program, state, execution.handlers);
+      if (stepped.kind === "unsupported") throw new Error(`unsupported ${JSON.stringify(stepped.state.haltReason)}`);
+      halted = stepped.kind === "halted";
+      state = stepped.state;
+      for (const pending of state.scheduler.pendingControllerBattlers) state = acknowledgeBattleScriptMachineController(state, pending);
+    }
+    expect(state.haltReason).toMatchObject({ kind: "terminal", opcodeName: "B_SCR_OP_END2" });
+    const after = state.rulesContext;
+    expect(after.battlers[1].item).toBe(0);
+    expect(state.events.flatMap((event) => (event.kind === "message" ? [event.messageId] : [])))
+      .toContain("STRINGID_PKMNSITEMRESTOREDSTATUS");
+    // The opcode's tail did not run: SPIKES_DAMAGED is still set (battle_script_commands.c:5268 is inside the skipped body).
+    expect(after.sideStatuses[1] & SIDE_STATUS_SPIKES_DAMAGED).toBe(SIDE_STATUS_SPIKES_DAMAGED);
+  });
+
   it.each([
     ["Intimidate", ABILITY_INTIMIDATE, 1 << 19],
     ["Trace", ABILITY_TRACE, 1 << 20],

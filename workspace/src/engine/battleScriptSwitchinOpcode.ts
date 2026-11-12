@@ -83,6 +83,8 @@ const ABILITY_RUN_AWAY = 50;
 const ABILITY_ARENA_TRAP = 71;
 /** include/constants/hold_effects.h:41. */
 const HOLD_EFFECT_CAN_ALWAYS_RUN = 37;
+/** include/constants/hold_effects.h HOLD_EFFECT_RESTORE_STATS (White Herb). */
+const HOLD_EFFECT_RESTORE_STATS = 23;
 /** include/constants/battle.h:339-341. */
 const BATTLE_RUN_SUCCESS = 0;
 const BATTLE_RUN_FORBIDDEN = 1;
@@ -1168,12 +1170,10 @@ function createVariousOpcodeHandler(
  * clears the guard before normal switch-in hooks. The Truant switch-in hack
  * and grouped `AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN)` dispatch are
  * source-ported here; callbacks return to this opcode before its item/tail
- * seam. `ItemBattleEffects
- * (ITEMEFFECT_ON_SWITCH_IN)` needs no barrier at all -- its only two cases
- * are `HOLD_EFFECT_RESTORE_STATS` (unreachable: stat stages are always reset
- * to the neutral default by `switchindataupdate` just before this opcode
- * runs) and `HOLD_EFFECT_DOUBLE_PRIZE` (writes the untracked, unread
- * `gBattleStruct->moneyMultiplier`).
+ * seam. `ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN)` has two cases:
+ * `HOLD_EFFECT_RESTORE_STATS` (White Herb; reachable when Baton Pass hands
+ * over a lowered stage, handled in the body) and `HOLD_EFFECT_DOUBLE_PRIZE`
+ * (writes the untracked, unread `gBattleStruct->moneyMultiplier`).
  */
 function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleScriptRulesContext> {
   return (context) => {
@@ -1335,6 +1335,44 @@ function createSwitchineffectsOpcodeHandler(): BattleScriptOpcodeHandler<BattleS
           ),
         );
       }
+    }
+    // `ItemBattleEffects(ITEMEFFECT_ON_SWITCH_IN, gActiveBattler, FALSE)` (`battle_script_commands.c:5266`,
+    // body `battle_util.c:3305-3330`), evaluated once the ability hook has returned 0. HOLD_EFFECT_RESTORE_STATS
+    // (White Herb): every stage below the default is reset and `BattleScriptExecute(BattleScript_WhiteHerbEnd2)`
+    // runs. Reachable through Baton Pass only -- `switchindataupdate` hands the passer's stages to the new
+    // battler (`:4648-4653`); every other switch-in starts at the default. BattleScriptExecute REPLACES the
+    // running script (no pushed cursor) and its `end2` finishes the action (B_ACTION_TRY_FINISH, `:3963`), so
+    // this opcode's own tail (SPIKES_DAMAGED clear, the turn-order slot, hpOnSwitchout) and the rest of the
+    // Baton Pass script are not run: a jump, not a call. ROM proof and scenario:
+    // docs/parity-mac/white-herb-baton-pass.md.
+    const itemActive = nextRules.battlers[battler as BattleScriptBattlerId];
+    if (
+      resolveBattleScriptBattlerHoldEffect(nextRules, battler as BattleScriptBattlerId) === HOLD_EFFECT_RESTORE_STATS
+      && itemActive.statStages.some((stage) => stage < DEFAULT_STAT_STAGE)
+    ) {
+      const script = resolveBattleScriptLabel(context.program, "BattleScript_WhiteHerbEnd2");
+      if (!script) throw new Error("committed Battle Script program has no BattleScript_WhiteHerbEnd2");
+      const battlers = nextRules.battlers.map((candidate, index) =>
+        index === battler
+          ? Object.freeze({
+            ...candidate,
+            statStages: Object.freeze(candidate.statStages.map((stage) => (stage < DEFAULT_STAT_STAGE ? DEFAULT_STAT_STAGE : stage))),
+          })
+          : candidate
+      ) as unknown as BattleScriptRulesBattlers;
+      return transitionBattleScriptCommand(
+        context,
+        Object.freeze({ kind: "jump", programCounter: script.programCounter }),
+        {
+          rulesContext: Object.freeze({
+            ...nextRules,
+            battlers: Object.freeze(battlers),
+            // battle_util.c:3323-3325: gBattleScripting.battler = gActiveBattler = gBattlerAttacker = battler.
+            scriptingBattler: battler as BattleScriptBattlerId,
+            selectorRoles: Object.freeze({ ...nextRules.selectorRoles, attacker: battler as BattleScriptBattlerId }),
+          }),
+        },
+      );
     }
     // `battle_script_commands.c:5268` + `:5296` -- the one `if (!Ability && !Item)`
     // body. `nextRules` already carries the unconditional HITMARKER_FAINTED clear.
