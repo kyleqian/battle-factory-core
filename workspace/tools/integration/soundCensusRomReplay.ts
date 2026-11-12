@@ -6,6 +6,7 @@
 //     personalities read back, battle RNG aligned on the ROM's gRandomTurnNumber, i.e. the ROM's gRngValue before the opponent's pre-menu AI draws; aud243c) and played with the census policy; writes the per-frame inputs (run-length encoded, frame 1 = the
 //     first step after the action menu appeared) and the sound rows relative to that frame.
 //   compare: ... compare --seed=N --scene=on|off --engine=engine.json --rom=timeline.json [--out=F]  (aud243c) engine states (hp, rng, last moves) found in order in the ROM timeline.
+//   replay / native take --frame-budget=N (default 200000 engine frames) for very long battles.
 //   native: ... native --seed=N --scene=on|off --out=engine.json  the census orchestrator itself (no ROM), same output shape: the drift check against the census row's sound column.
 import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync, readFileSync } from "node:fs";
@@ -29,6 +30,8 @@ const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`
 const seed = Number(arg("seed"));
 const scene = (arg("scene") ?? "on") as "on" | "off";
 const streak = (seed * 11) % 49;
+// parity-mac: very long battles (PP stall into Struggle on both sides) pass the default; --frame-budget=N raises it for one run.
+const frameBudget = Number(arg("frame-budget") ?? 200000);
 
 // The lab stages the Tower streak at challengeNum * 7 (the stock bug reads it for opponent IVs); the census engine uses 0. Equal for challengeNum 0 (streak < 7).
 const towerStreak = Math.floor(streak / 7) * 7;
@@ -109,7 +112,7 @@ function play(initial: any, record: boolean, patchRng: number | null = null) {
   const decisions: Decision[] = []; let openSwitch: Decision | null = null;
   const owned = () => Boolean(state.battleStartIntro || state.battleResolutionPresentation || state.battleCommandPresentation);
   const step = (buttons: readonly string[] = []) => {
-    if (++frame > 200000) throw new Error("frame budget");
+    if (++frame > frameBudget) throw new Error("frame budget");
     if (frame0 !== null) {
       const last = inputs.at(-1);
       if (last && last.buttons.join() === buttons.join()) last.frames += 1; else inputs.push({ frames: 1, buttons: [...buttons] });
