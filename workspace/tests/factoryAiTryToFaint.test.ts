@@ -143,6 +143,20 @@ describe("AI_TryToFaint (docs/factory-ai-ground-truth.md §1.3/§4 item 3)", () 
     expect(result.draws[0]).toMatchObject({ kind: "double-super-effective", succeeded: false });
   });
 
+  it("a x4 move that is NOT the strongest scores -1 and ends: `if_equal MOVE_NOT_MOST_POWERFUL, Score_Minus1` (:2620) never reaches the x4 roll (:2621)", () => {
+    // docs/parity-mac/ai-try-to-faint-not-strongest.md (ROM seed 236: Cross Chop x4 into Steel / Rock, not the strongest:
+    // -1, no Random()). Icy Wind 196 (55, Ice) next to Ice Beam (95, Ice) into Grass / Flying. Unfixed: one roll, -1 or +1.
+    const result = run({
+      moveId: 196,
+      moveset: [196, MOVE_ICE_BEAM, 0, 0],
+      movesetIndex: 0,
+      rng: { value: 1, calls: 0 },
+      targetOverrides: { hp: 999, types: ["TYPE_GRASS", "TYPE_FLYING"] },
+    });
+    expect(result).toMatchObject({ canFaint: false, mostPowerful: "not-most-powerful", scoreDelta: -1, draws: [] });
+    expect(result.rng.calls).toBe(0);
+  });
+
   it("does not draw when cannot-faint and not x4 effective (neutral matchup)", () => {
     const result = run({ moveId: MOVE_POUND, targetOverrides: { hp: 999 } });
     expect(result.draws).toHaveLength(0);
