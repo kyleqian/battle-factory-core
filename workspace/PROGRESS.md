@@ -5,6 +5,22 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-12 — CAX31 daily run (supervisor, Opus 5.5): in progress; aiv270 folded
+
+- **State:** master has aiv270 (`746d19464` A, `01ad01f2a` B, `4a19e49fd` classifier, `f396c0f8d` re-pins, `8cf0d8bba` docs). ENGINE_BUILD
+  `eb-9d34d28f1b19ef3d` -> `eb-551744f3a2c9b7ed` (read from dist; tell the website). Evidence `.integration/evidence/aiv270/`, supervisor checks
+  `.integration/validation/sv-20261111/`. Running: aud244a (recorder + assets, main tree, user decision 2026-11-11 item 0) and aiv271 (#204 C, side lane).
+- **Folded: aiv270** (ts lane, killed at its 200-min cap while writing the doc; supervisor wrote `docs/aiv270-ai-effectiveness-paralysis.md` and trimmed
+  ISSUES #204 to C + seed 57). A: AI x0 / Wonder Guard gates use the `Cmd_if_type_effectiveness` quirk; B: AI speed checks use the full
+  GetWhoStrikesFirst inputs of both battlers (paralysis, Macho Brace, Quick Claw, Swift Swim / Chlorophyll) via the real turn-order builder.
+  ROM: seeds 22 / 30 match to battle end in both scenes; the 15-seed regression set still full. Census 0..999: 77 changed seeds per scene, 0 unexplained,
+  ON / OFF sets identical. Worker full suite on the final src **1,758 files / 14,499 tests, 0 failed**. Supervisor: build / build:lib 0; vanilla 0:20
+  OFF **20 / 20**, ON **20 / 20**; re-drove seed 30 ON 11 / 11; read both src diffs against C (STAB does not change any tested AI value).
+- **Census baseline now:** `.integration/evidence/aiv270/census/{on,off}-01ad01f2a`.
+- **Next:** fold aud244a and aiv271; then #209 (seed 53), #210 (seed 42); aud245 player after aud244.
+
+---
+
 ## 2026-11-10 / 11 — CAX31 daily run (supervisor, Opus 5.5): wind-down: dmg264 / aiv266 / aiv267 / seg268 folded
 
 - **State:** master clean, no active workers; final src == aiv267 `5682cd341` (later commits: tests / fixtures / tools / docs). Evidence `.integration/validation/sv-20261110/`
