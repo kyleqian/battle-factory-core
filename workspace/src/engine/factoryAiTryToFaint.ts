@@ -36,6 +36,9 @@ import {
   applyTypeEffectiveness,
   calculateBaseDamage,
   calculateBaseDamageWithPower,
+  damageCalcInputForMove,
+  type DamageCalcInput,
+  type DamageCalcTerms,
   type StatStages,
 } from "./damageCalc.ts";
 
@@ -63,6 +66,15 @@ export type FactoryAiTryToFaintTarget = FactoryAiTryToFaintBattler & Readonly<{
    */
   targetSideReflectUp?: boolean;
   targetSideLightScreenUp?: boolean;
+  /**
+   * The live `CalculateBaseDamage` terms for (AI battler -> target) from `battleScriptDamageTerms`, the SAME builder
+   * the real hit chain uses: species, hold effect and param (Choice Band, type-boost items, Thick Club, Light Ball,
+   * Deep Sea Tooth / Scale, Soul Dew, Metal Powder) and status1 / burn / pinch HP for both battlers, plus weather,
+   * Mud / Water Sport, Flash Fire. `AI_CalcDmg` reads the TRUE `gBattleMons[]` of both sides, including the
+   * defender's real item (not the battle-history item view the AI scripts use). When absent (hermetic tests) the
+   * flat stat fields above are used with no item terms.
+   */
+  damageTerms?: DamageCalcTerms;
 }>;
 
 export type FactoryAiTryToFaintDraw = Readonly<{
@@ -111,6 +123,27 @@ function nextDraw(
   });
 }
 
+/** `AI_CalcDmg`'s `CalculateBaseDamage` call: `gCurrentMove` = the move, no power override, no crit. */
+function aiDamageCalcInput(
+  attacker: FactoryAiTryToFaintBattler,
+  defender: FactoryAiTryToFaintTarget,
+  move: Readonly<{ id: number; power: number; type: string; effect: string }>,
+): DamageCalcInput {
+  const sideStatus = (defender.targetSideReflectUp === true ? 1 : 0) | (defender.targetSideLightScreenUp === true ? 2 : 0);
+  if (defender.damageTerms !== undefined) {
+    return damageCalcInputForMove(defender.damageTerms, move, 0, sideStatus, false);
+  }
+  return {
+    attacker: { ...attacker },
+    defender: { ...defender },
+    movePower: move.power,
+    moveType: move.type,
+    isCriticalHit: false,
+    sideStatusReflect: defender.targetSideReflectUp === true,
+    sideStatusLightScreen: defender.targetSideLightScreenUp === true,
+  };
+}
+
 /**
  * `AI_CalcDmg` + `TypeCalc` + the caller's own
  * `* simulatedRNG[slot] / 100` variance step and zero-floor
@@ -128,15 +161,7 @@ function estimateDamage(
   const move = MOVES_BY_ID.get(moveId);
   if (!move) throw new Error(`factory-ai-try-to-faint: unknown move ${moveId}`);
 
-  let damage = calculateBaseDamage({
-    attacker: { ...attacker },
-    defender: { ...defender },
-    movePower: move.power,
-    moveType: move.type,
-    isCriticalHit: false,
-    sideStatusReflect: defender.targetSideReflectUp === true,
-    sideStatusLightScreen: defender.targetSideLightScreenUp === true,
-  });
+  let damage = calculateBaseDamage(aiDamageCalcInput(attacker, defender, move));
   damage = applyStab(damage, attacker.types, move.type);
   if (!(defender.ability === "ABILITY_LEVITATE" && move.type === "TYPE_GROUND")) {
     damage = applyTypeEffectiveness(damage, move.type, defender.types, TYPE_EFFECTIVENESS).damage;
@@ -300,13 +325,7 @@ export function factoryAiLastCalcMovePower(
     const move = moveset[slot] === 0 ? undefined : MOVES_BY_ID.get(moveset[slot]!);
     if (move === undefined || move.power <= 1) continue;
     if (!fullFlags && IGNORED_POWERFUL_MOVE_EFFECTS.has(move.effect)) continue;
-    return calculateBaseDamageWithPower({
-      attacker: { ...attacker },
-      defender: { ...defender },
-      movePower: move.power,
-      moveType: move.type,
-      isCriticalHit: false,
-    }).movePower;
+    return calculateBaseDamageWithPower(aiDamageCalcInput(attacker, defender, MOVES_BY_ID.get(moveset[slot]!)!)).movePower;
   }
   return null;
 }
