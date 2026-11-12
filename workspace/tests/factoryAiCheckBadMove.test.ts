@@ -2542,9 +2542,9 @@ describe("AI_CBM_AttackUp / AI_CBM_DefenseUp / AI_CBM_BulkUp (docs/factory-ai-ch
     expect(result.draws).toHaveLength(0);
   });
 
-  it("AI_CBM_BulkUp: scores -18 (both gates fire independently, -10 + -8) when both ATK and DEF are already MAX_STAT_STAGE", () => {
+  it("AI_CBM_BulkUp: scores -10 (the first gate jumps to Score_Minus10 / end; parity-mac, ROM seed 898) when both ATK and DEF are already MAX_STAT_STAGE", () => {
     const result = run(MOVE_BULK_UP, SHUCKLE, undefined, withAttacker(12, 12));
-    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result.draws).toHaveLength(0);
   });
@@ -2588,9 +2588,9 @@ describe("AI_CBM_Curse (data/battle_ai_scripts.s:434-437, BulkUp-identical body)
     return Object.freeze({ atkStage, defStage });
   }
 
-  it("scores -18 (both gates fire independently, -10 + -8) when both ATK and DEF are already MAX_STAT_STAGE", () => {
+  it("scores -10 (the first gate jumps to Score_Minus10 / end; parity-mac, ROM seed 898) when both ATK and DEF are already MAX_STAT_STAGE", () => {
     const result = run(MOVE_CURSE, SHUCKLE, undefined, withAttacker(12, 12));
-    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result.draws).toHaveLength(0);
   });
@@ -2770,9 +2770,9 @@ describe("AI_CBM_CosmicPower / AI_CBM_CalmMind (docs/factory-ai-checkviability-g
     return Object.freeze({ atkStage: 6, defStage: 6, spAtkStage, spDefStage });
   }
 
-  it("AI_CBM_CosmicPower: scores -18 (both gates fire independently, -10 + -8) when both DEF and SPDEF are already MAX_STAT_STAGE", () => {
+  it("AI_CBM_CosmicPower: scores -10 (the first gate jumps to Score_Minus10 / end; parity-mac, ROM seed 898) when both DEF and SPDEF are already MAX_STAT_STAGE", () => {
     const result = run(MOVE_COSMIC_POWER, SHUCKLE, undefined, withCosmicPowerAttacker(12, 12));
-    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result.draws).toHaveLength(0);
   });
@@ -2799,9 +2799,9 @@ describe("AI_CBM_CosmicPower / AI_CBM_CalmMind (docs/factory-ai-checkviability-g
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
   });
 
-  it("AI_CBM_CalmMind: scores -18 (both gates fire independently, -10 + -8) when both SPATK and SPDEF are already MAX_STAT_STAGE", () => {
+  it("AI_CBM_CalmMind: scores -10 (the first gate jumps to Score_Minus10 / end; parity-mac, ROM seed 898) when both SPATK and SPDEF are already MAX_STAT_STAGE", () => {
     const result = run(MOVE_CALM_MIND, SHUCKLE, undefined, withCalmMindAttacker(12, 12));
-    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result.draws).toHaveLength(0);
   });
@@ -2847,14 +2847,14 @@ describe("AI_CBM_DragonDance (docs/factory-ai-checkviability-ground-truth.md §3
     spDefStage: 6,
   });
 
-  it("scores -18 (both gates fire independently, -10 + -8) when both ATK and SPEED are already MAX_STAT_STAGE", () => {
+  it("scores -10 (the first gate jumps to Score_Minus10 / end; parity-mac, ROM seed 898) when both ATK and SPEED are already MAX_STAT_STAGE", () => {
     const result = run(
       MOVE_DRAGON_DANCE,
       SHUCKLE,
       undefined,
       Object.freeze({ atkStage: 12, defStage: 6, speedStage: 12 }),
     );
-    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18 });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10 });
     if (result.kind !== "scored") throw new Error("unreachable");
     expect(result.draws).toHaveLength(0);
   });
@@ -3935,9 +3935,9 @@ describe("AI_CBM_Tickle (data/battle_ai_scripts.s:571-574, EFFECT_TICKLE)", () =
     expect(result).toMatchObject({ kind: "scored", scoreDelta: -8, draws: [] });
   });
 
-  it("both stages at floor score -18 (two sequential gates, additive)", () => {
+  it("both stages at floor score -10 (the first gate jumps to Score_Minus10 / end; parity-mac, docs/parity-mac/ai-dual-stat-penalty.md)", () => {
     const result = run(MOVE_TICKLE, target({ atkStage: 0, defStage: 0 }));
-    expect(result).toMatchObject({ kind: "scored", scoreDelta: -18, draws: [] });
+    expect(result).toMatchObject({ kind: "scored", scoreDelta: -10, draws: [] });
   });
 
   it("neither stat at floor FALLS THROUGH to end at zero", () => {

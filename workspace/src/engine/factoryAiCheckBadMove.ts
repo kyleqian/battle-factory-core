@@ -996,15 +996,17 @@ function runCbmDefenseUp(attackerDefStage: number): number {
  *     end
  * ```
  *
- * `AI_CBM_AttackUp`'s own gate applied a second time for STAT_DEF at a
- * different penalty (-8, not -10), sequentially, no interaction between the
- * two checks -- a separate, third handler `EFFECT_BULK_UP` reaches on the
+ * `AI_CBM_AttackUp`'s own gate, then (only when it did not jump to
+ * `Score_Minus10` / `end`) a second gate for STAT_DEF at -8 -- a separate, third handler `EFFECT_BULK_UP` reaches on the
  * CBM side ONLY (`:210`); its CV side (`:771`) instead dispatches straight
  * to `AI_CV_DefenseUp`, shared with `DEFENSE_UP`/`DEFENSE_UP_2` (doc
  * §17.1/§18.1).
  */
 function runCbmBulkUp(attackerAtkStage: number, attackerDefStage: number): number {
-  return runCbmAttackUp(attackerAtkStage) + (attackerDefStage === MAX_STAT_STAGE ? -8 : 0);
+  // `if_stat_level_equal ..., Score_Minus10` JUMPS to `Score_Minus10` (`score -10` / `end`, :628-630), so the second
+  // gate is reached only when the first did not fire: one penalty at most (ROM seed 898: Curse with Attack AND Defense
+  // at +6 scores 90, not 82; docs/parity-mac/ai-dual-stat-penalty.md).
+  return attackerAtkStage === MAX_STAT_STAGE ? -10 : attackerDefStage === MAX_STAT_STAGE ? -8 : 0;
 }
 
 /**
@@ -1046,7 +1048,7 @@ function runCbmSpAtkUp(attackerSpAtkStage: number): number {
  * `runCbmBulkUp` composes `runCbmAttackUp` above.
  */
 function runCbmCosmicPower(attackerDefStage: number, attackerSpDefStage: number): number {
-  return runCbmDefenseUp(attackerDefStage) + (attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0);
+  return attackerDefStage === MAX_STAT_STAGE ? -10 : attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0; // first gate jumps to Score_Minus10 / end
 }
 
 /**
@@ -1056,7 +1058,7 @@ function runCbmCosmicPower(attackerDefStage: number, attackerSpDefStage: number)
  * `runCbmSpAtkUp` for the first check.
  */
 function runCbmCalmMind(attackerSpAtkStage: number, attackerSpDefStage: number): number {
-  return runCbmSpAtkUp(attackerSpAtkStage) + (attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0);
+  return attackerSpAtkStage === MAX_STAT_STAGE ? -10 : attackerSpDefStage === MAX_STAT_STAGE ? -8 : 0; // first gate jumps to Score_Minus10 / end
 }
 
 /**
@@ -1075,7 +1077,7 @@ function runCbmCalmMind(attackerSpAtkStage: number, attackerSpDefStage: number):
  * check exactly as `runCbmBulkUp` does.
  */
 function runCbmDragonDance(attackerAtkStage: number, attackerSpeedStage: number): number {
-  return runCbmAttackUp(attackerAtkStage) + (attackerSpeedStage === MAX_STAT_STAGE ? -8 : 0);
+  return attackerAtkStage === MAX_STAT_STAGE ? -10 : attackerSpeedStage === MAX_STAT_STAGE ? -8 : 0; // first gate jumps to Score_Minus10 / end
 }
 
 /**
@@ -3332,12 +3334,12 @@ function runCbmBellyDrum(attacker: FactoryAiCheckBadMoveAttacker): number {
  *
  * The same dual-stat shape as `AI_CBM_BulkUp`/`AI_CBM_Curse` with the gates
  * flipped to the target's own ATK then DEF at MIN_STAT_STAGE (the stats
- * Tickle lowers), sequentially, no interaction -- so both stages at floor
- * score -18. Zero ability/type reads.
+ * Tickle lowers): the first gate jumps to `Score_Minus10` / `end`, so both
+ * stages at the floor score -10. Zero ability/type reads.
  */
 function runCbmTickle(targetAtkStage: number, targetDefStage: number): number {
-  return (targetAtkStage === MIN_STAT_STAGE ? -10 : 0)
-    + (targetDefStage === MIN_STAT_STAGE ? -8 : 0);
+  // The first gate JUMPS to Score_Minus10 (`score -10` / `end`): both stages at the floor score -10, not -18.
+  return targetAtkStage === MIN_STAT_STAGE ? -10 : targetDefStage === MIN_STAT_STAGE ? -8 : 0;
 }
 
 /**
