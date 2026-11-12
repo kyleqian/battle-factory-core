@@ -43,6 +43,7 @@
     "extract:ability-item-hooks": "node --experimental-strip-types tools/extract/extract-ability-item-hooks.ts",
     "animation:components": "node --experimental-strip-types tools/extract/extract-battle-animation-components.ts",
     "extract:level50-move-parameterization": "node --experimental-strip-types tools/extract/extract-level50-move-parameterization.ts",
+    "extract:audio": "node --experimental-strip-types tools/extract/extract-audio.ts",
     "extract:audio-sound-sources": "node --experimental-strip-types tools/extract/extract-audio-sound-sources.ts",
     "extract:anim-sound-timing": "node --experimental-strip-types tools/extract/extract-anim-sound-timing.ts",
     "extract:frontier-trainers": "node --experimental-strip-types tools/extract/extract-battle-frontier-trainers.ts",

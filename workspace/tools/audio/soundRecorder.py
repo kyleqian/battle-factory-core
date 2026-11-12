@@ -44,7 +44,7 @@ DEFAULT_RATE = 26758
 SILENT_FRAMES = 12   # frames of |sample| <= SILENT_PEAK required after the last channel stops (covers the mixer DMA ring)
 SILENT_PEAK = 2
 MAX_FRAMES = 1500    # 25 s hard cap; a sound still active here is flagged `capped`
-LOAD_WARMUP = 4      # silent frames discarded after each state load
+LOAD_WARMUP = 24     # frames discarded after each state load: the output keeps a x0.42/frame decaying residual of the previous recording
 STEP_CAP = 4_000_000
 RETURN_SENTINEL = 0x08001000
 SOUND_CHANNEL_ON = 0xC7
@@ -158,8 +158,8 @@ class Recorder:
         self.audio.set_rate(self.rate)
         for _ in range(LOAD_WARMUP):  # the first frames after a state load carry mixer/blip leftovers
             pcm = self.frame()
-        if max((abs(x) for x in array.array("h", pcm)), default=0) > SILENT_PEAK:
-            raise RuntimeError("clean state not silent after warm-up")
+        if max((abs(x) for x in array.array("h", pcm)), default=0) != 0:
+            raise RuntimeError("clean state not digitally silent after warm-up")
 
     # -- one recording --------------------------------------------------------------------------------------------------
     def record(self, start, players=True, max_frames=MAX_FRAMES):
@@ -268,13 +268,13 @@ def main():
                     variants.append((via, (lambda via=via, pan=pan: rec.call(via, (row["id"], pan & 0xFF)))))
         else:
             variants.append(("PlayCryInternal", lambda: rec.call("PlayCryInternal", (row["species"], 0, CRY_VOLUME, CRY_PRIORITY), (CRY_MODE_ID[row["mode"]],))))
-        for vi, (via, start) in enumerate(variants):
+        for vi, (via, start) in enumerate(variants[:1]):  # wrapper variants of one (id, pan) tuple render the same audio
             vstem = stem if vi == 0 else f"{stem}-via{via}"
             if (out / f"{vstem}.json").exists() and not a.force:
                 continue
             data, frame_samples, first_inactive, capped = rec.record(start, players=kind == "se")
             trimmed, onset = trim_tail(data)
-            meta = {"key": key if vi == 0 else f"{key}:{via}", "kind": kind, "via": via, "file": f"{vstem}.wav", "rate": a.rate,
+            meta = {"key": key, "kind": kind, "via": via, "viasInLogs": [v for v, _ in variants], "file": f"{vstem}.wav", "rate": a.rate,
                     "framesRecorded": len(frame_samples), "lengthFrames": first_inactive, "capped": capped,
                     "lengthSamples": len(trimmed) // 2, "onsetSamples": onset, "samplesPerFrame": frame_samples[:8]}
             if kind == "se":

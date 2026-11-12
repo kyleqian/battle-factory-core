@@ -5,6 +5,18 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-12 — aud244a (ts lane worker): sound recorder + first asset set (cries x 3 modes, SEs) committed; S11 audio design step 8, slice 1
+
+- **State:** committed on master (not pushed). No `src/*.ts` change: ENGINE_BUILD unchanged `eb-551744f3a2c9b7ed`, dist / dist-lib sizes byte-identical. `docs/aud244a-recorder-assets.md`.
+- **Did:** `tools/audio/soundRecorder.py` (register-poke `PlaySE*` / `PlayCryInternal` into a silenced oracle state, real mixed mGBA output, trim, exact lengths in frames / samples; deterministic),
+  `audioAssetList.py` (183 SE `(id, pan)` tuples from 151 ROM logs + 376 Factory species x NORMAL / WEAK / FAINT), `tools/extract/extract-audio.ts` (`npm run extract:audio`, wasm-media-encoders OGG
+  Vorbis q -0.1, byte-reproducible), `validateAudioAssets.py`, `tests/aud244aAudioManifest.test.ts` (8). Assets `src/assets/gen/audio`: **6.14 MB** = SEs 1.59 MB (181 files, 26758 Hz stereo) + cries
+  4.55 MB (376 per-species files, 13379 Hz mono; ~1.5 MB over the 3 MB design estimate: flat-spectrum 8-bit noise). Cry length vs ROM log: 120 / 128 pairs within 2 frames; decoded corr 0.95-0.997.
+- **Next:** aud244b (BGM / fanfares with ROM-derived loops, plus the two looping SEs SE_LOW_HEALTH 90 and SE_M_GUST 132 excluded here), then aud245 (WebAudio player).
+- **Notes:** mGBA `StereoBuffer.read()` returns a dangling slice (use `read_into`); after `load_raw_state` the output keeps a decaying residual (24 warm-up frames). Raw WAVs (88 MB) stay in `.integration/evidence/aud244a/raw`.
+
+---
+
 ## 2026-11-12 — CAX31 daily run (supervisor, Opus 5.5): in progress; aiv270 folded
 
 - **State:** master has aiv270 (`746d19464` A, `01ad01f2a` B, `4a19e49fd` classifier, `f396c0f8d` re-pins, `8cf0d8bba` docs). ENGINE_BUILD
@@ -51,63 +63,3 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
   Supervisor read C `Cmd_if_type_effectiveness` (`battle_ai_script_commands.c:1515-1557`): the glitch comment confirms lead A.
 - **Next:** handoff "Next work" 1: fix #204 A / B / C, #209, #210 as ts steps with the aiv267 proof shape (dia269 has the sites and test ideas), then drive seeds 61..100;
   then the sound segment diff. Bundle bnd257d and Cleanup 7 did not fit this run (the only cleanup-type step was seg268's coverage restore).
-
----
-
-## 2026-11-11 — aiv267 (ts lane worker): AI damage sims see the target's screens; confusion self-hit sees the hold item; ISSUES #207 deleted, #204 trimmed
-
-- **State:** committed on master (not pushed). ENGINE_BUILD `eb-6e0938c0ec978db5` -> `eb-9d34d28f1b19ef3d` (tell the website). `docs/aiv267-ai-screens-self-hit.md`.
-- **Did:** (A) `factoryAiTryToFaint.ts` passes the target side's Reflect / Light Screen into `calculateBaseDamage` (C `AI_CalcDmg`, `battle_script_commands.c:1306-1309`); new view field
-  `targetSideLightScreenUp` from `sideStatuses[0]`. (B) the confusion self-hit (`battle_util.c:2157-2175`) gets the live battler's `holdEffect` / `holdEffectParam` / species in BOTH roles
-  (+ Frontier flag for Soul Dew). `tests/aiv267AiScreensSelfHit.test.ts` 13 tests, 9 fail unfixed. ROM: seed 20 ON / OFF now 15/15 (was the self-hit divergence 35 vs 18); 22 / 30 / 39 ON
-  unchanged (8/20, 6/11, 9/11); the 14-seed regression set (1 3 4 5 6 8 11 13 17 26 28 31 224 552) still matches fully. Census 0..999: 8 changed seeds per scene (245 379 682 743 816 829 911 946),
-  all fix B (Silk Scarf / Thick Club / Choice Band self-hits), identical sets and command-list changes ON / OFF, 0 unexplained (`aiv267Instrument.py` / `aiv267Classify.py`); fix A touches
-  46 seeds' decisions but changes one score (377) and no pick. Re-pins: `factoryRoundBattleOrchestrator` seeds 4 / 17 / 26 / 29 + challenge-2 chain (fix B only), parity-census lines, gate6
-  manifest. Gates: typecheck / build / build:lib 0; 8-shard suite 14,479 passed, 0 failed (1,756 files); soak vanilla 0:20 OFF 20/20, ON 20/20.
-- **Next:** ISSUES #204 item (seeds 22 / 30 / 39 ON), then seeds 41..80 ROM drives.
-- **Notes:** new census baseline `.integration/evidence/aiv267/census/{on,off}-5682cd341` (src identical to HEAD). No coverage loss.
-
----
-
-## 2026-11-11 — aiv266 (ts lane worker): live AI view fills all 16 declared fields; ISSUES #204 trimmed
-
-- **State:** committed on master (not pushed). ENGINE_BUILD `eb-16ee24851bfb26a3` -> `eb-6e0938c0ec978db5` (tell the website). `docs/aiv266-ai-view-fields.md`.
-- **Did:** `createFactoryAiViewFromLiveRules` fills `gender`, `anyMoveDisabled` / `anyMoveEncored`, target `isParalyzed` / `isPoisoned` / `isBurned`, `holdEffect` (user live item, target
-  via battle history as in C), `targetSideReflectUp`, `mistUp`, `stockpileCount`, `speciesAbilities`, `targetPartyStatusEqualsAny` (exact `==` STATUS1_ANY), `usedHeldItemId`,
-  `imprisonedOthers`, `mudSportUp`, `waterSportUp`, each with a C cite. `tests/aiv266AiViewFields.test.ts` (22; 20 fail unfixed, incl. all 3 gender tests). ROM: seeds 11 / 17 / 26 now
-  18/18, 16/16, 16/16 in both scenes (were 10/20, 0/19, 8/16); bonus 31 ON 34/34 (1/34), 27 ON 20/20 (3/20), 32 ON 23/23 (22/23); 22 / 30 / 39 unchanged; the 10-seed regression set still full.
-  Census 0..999: 57 changed seeds per scene, identical sets and command lists ON / OFF, 0 unexplained (`aiv266Instrument.py` / `aiv266Classify.py`). 4 re-pins (land75 533 count 64 -> 68,
-  sag130 drops `yawn|SLP|player`, parity-census lines +7, gate6 manifest regenerated). Gates: typecheck / build / build:lib 0; 8-shard suite 14,466 passed, 0 failed; soak vanilla 0:20 OFF 20/20, ON 20/20.
-- **Next:** ISSUES #204 residuals (AI damage sims ignore Reflect / Light Screen; unclassified seeds 22 / 30 / 39), #207, then seeds 41..80.
-- **Notes:** new census baseline `.integration/evidence/aiv266/census/{on,off}-40447d9de` (src identical to HEAD). Coverage loss: sag130 `yawn|SLP|player` (regenerate seg127 `exposure.json`).
-
-
----
-
-## 2026-11-09 / 10 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud243d / abl261 / aip262 / dia263 folded
-
-- **State:** master clean; final engine src == aip262 (`344dbf234`; later commits are docs / tools only). Evidence `.integration/validation/sv-20261109/`
-  (gates in `gates/`). No DEFERRED items. No push. ENGINE_BUILD at the final src `eb-16ee24851bfb26a3` (moved this run: abl261, aip262; tell the website).
-- **Folded:** aud243d (integration, ~50 min; `docs/aud243d-rom-driver.md`): closed-loop ROM driver (`tools/audio/romDecisionDriver.py`, `soundEventProbe.py lab
-  --drive`, `romDriveSeed.sh`) replays the engine's decision list on the ROM by menu state to battle end; first sound segment diff (`soundSegmentDiff.py`).
-  Supervisor reran seed 8 ON (6 / 9, same divergence frame) and read the ability map (4 ids). Found #202 / #203.
-- **Folded:** abl261 and aip262 (entries below; supervisor full suites on each final tree, `gates/suite1.log` 1,752 passed and `gates/suite2.log` **1,753 files passed
-  + 44 skipped, 0 failed, 14,433 tests**).
-- **Folded:** dia263 (integration, diagnosis only, 65 min; `docs/dia263-leads.md`): #205 was a driver bug (party-menu slot through `gBattlePartyCurrentOrder`, fixed in
-  tools); #206 root cause (type table row order); #204 ranked (`gender` first); new #208 (Reflect / Light Screen not passed to the live damage calc). Supervisor read
-  both src sites (`applyTypeEffectiveness` loops defender types; screens only on the Future Sight path). Seeds 21..40: 11 full match, 8 diverge (per issue in the doc).
-- **Unmerged, kept for the next run: dmg264** (#206 type-table row order + #208 Reflect / Light Screen; branch `worker/side-20261110-045211` `aba497135`, base
-  `336e03b3b`; `docs/dmg264-type-order-screens.md` on the branch; evidence `sv-20261109/dmg264/`). Killed at its 95-min cap: ROM seeds 13 / 28 now match to battle
-  end and the aligned set still matches; census 0 unexplained, BUT changed sets differ by scene (ON 190 vs OFF 181; earlier fixes were identical) -- explain this
-  first: the 9 ON-only seeds (61, 182, 189, 190, 434, 477, 756, 821, 899) are flagged in both scenes; supervisor check: their census `commands`
-  lists are byte-identical base vs dmg264 (HP rows too); only `eventsDigest` differs in Scene ON. **Explained by read-only scout evd265:** the only differing
-  field is `MOVE_ANIMATION` `arguments[3]` (the stale `gBattleMoveDamage`, floored to 1 per typecalc row) on Thunder Wave / Stun Spore; Scene OFF emits the
-  attack pause with no arguments; presentation-only and ROM-correct (`Cmd_typecalc` `:1386-1406`, `ModulateDmgByType` `:1321-1325`). Its last full suite had a Razor Wind census-seed test with no unchanged re-stage seed found (reverted, unresolved); build / build:lib / soak not run.
-  Next run: rebase or merge onto master, resolve the scene difference and that test, full suite + build, then fold.
-- **Gates** (on aip262's src): build / build:lib 0; play:random 2 min / scene: ON 8 battles / 6 swaps, OFF 15 / 6, 0 page errors / console errors / overlays;
-  vanilla 0:20 OFF **20 / 20**, ON **20 / 20** (all `budget`); 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60**; varied-RNG first-round winning
-  carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
-- **Next:** handoff "Next work" 1: the ROM-driver gameplay fixes (finish dmg264 #206 + #208 from its branch, then #204 `gender`, #207), then seeds 41..80, then the sound segment diff.
-  Bundle bnd257d (lazy sprite chunk; brief ready in the handoff's bnd-d line, scout `docs/bnd-d-scout.md`) and Cleanup 7 did not fit this run.
-- **Coverage notes:** abl261 dropped 3 sag130 classes and aip262 the apx222 Peck 64 row (no unchanged census seed carries them; regenerate seg127 `exposure.json`
-  from the new census to restore). One Castform body in battle 950 now declines (cf78 comment).
