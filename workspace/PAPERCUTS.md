@@ -8,6 +8,13 @@ report `PAPERCUT: <what>, ~<minutes lost>` in their final message.
 Delete an entry when its underlying friction is fixed; git preserves its
 history.
 
+## Worker friction, 2026-11-12 run
+
+- **mGBA python `StereoBuffer.read()` returns a slice that does not keep its buffer alive**: alternate frames read garbage, which looks
+  like emulator nondeterminism (aud244a, ~90 min). Drain with `read_into` on your own buffer (`tools/audio/soundRecorder.py`).
+- **A worker's full suite dies with the worker** when the 10-min Bash limit backgrounds it and the worker ends its turn (aud244a); a
+  worker that must report a suite has to poll it to the exit file before finishing. Bumps the 2026-11-10 / 11 "over 600 s" entry below.
+
 ## Worker friction, 2026-11-10 / 11 run
 
 - **`randomRoundSoak.ts --help` is not a flag: it starts a real default soak** (seeds 0:50) that must be killed by PID (dmg264b, ~10 min).
