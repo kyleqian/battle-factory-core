@@ -5,6 +5,48 @@ Branch `worker/parity-mac`. Method: every seed is played by the engine and repla
 "matches" when every engine state is found in order on the ROM to battle end. Lists and decision: `docs/cax31-session-handoff.md`
 item 0d, `docs/gameplay-parity-audit-2026-11-12.md` sections 7 and 8. Evidence is kept outside git; every row re-derives from the seed.
 
+## Third pass (2026-11-12): Frontier Brain (Noland) battles
+
+Noland battles can now be replayed on the real ROM like any other battle (`brain-replay-seam.md`). Before this pass no
+Brain battle had ever been compared with the ROM (the bulk batch counted them as "rc 12, not drivable").
+
+| | silver Noland (challenge 2, streak 20) | gold Noland (challenge 5, streak 41) |
+|---|---|---|
+| seeds | 204: every seed with seed % 49 == 33 in 1..10000 | 204: every seed with seed % 49 == 26 in 1..10000, driven with `ROM_REPLAY_SYMBOLS=1` |
+| staged by the lab and driven | 204 | 203 |
+| **match to battle end** | **204** (203 with the stock chain, 9098 with higher caps) | **203** (202 with the stock chain, 6347 with higher caps) |
+| engine mismatch | **0** (first drive: 1, seed 7922, fixed by fix 27) | **0** |
+| the long one (both sides Struggle, Leftovers) | 9098: 1,823 / 1,823 states, 1,212,712 ROM frames | 6347: 2,043 / 2,043 states, 1,526,588 ROM frames |
+| not drivable | 0 | 1 (seed 1447: the lab does not reach the action menu; see "Still open") |
+
+How the counts were made:
+
+- Silver, first drive on engine `af798050e` (the seam, before any fix of this pass): 202 match, 7922 does not, 9098 hits
+  the stock frame caps. 7922 was the only rule difference in the 407 staged Brain battles; it is fix 27 below.
+- Gold, first drive on the engine with fix 27: 202 match, 6347 hits the stock frame caps, 1447 fails in the lab.
+- 9098 and 6347 were then driven on the final engine with the engine budget at 2,000,000 frames and the ROM drive cap
+  at 1,500,000 / 1,900,000 frames: both reach the battle's end on the ROM and every state matches.
+- Fixes 27 and 28 change two AI move scripts only (Synthesis / Morning Sun / Moonlight; Fly / Dig / Dive / Bounce). A
+  battle whose opponent has none of those seven moves plays the same on every engine of this pass. So after the fixes
+  the seeds whose Brain party has one of them were re-driven on the final engine `24ad564bd`: silver 54 seeds (53 match
+  with the stock chain, among them 7922 with 16 / 16 states; the 54th is 9098), gold 19 seeds (19 match).
+- Every member of every Brain party was checked against the ROM read-back before its battle was played (species, level,
+  personality, OT id, nature, ability, item, moves, PP, IVs, EVs, friendship, HP, stats; silver IV 15, gold IV 31). No
+  seed failed that check.
+- Census "battle 1 at streak 20" against the lab's "battle 7 of challenge 2": no battle input depends on the
+  difference (`brain-replay-seam.md`, last section), and 407 matching battles agree.
+
+Ordinary battles on the final engine `24ad564bd` (one fresh batch per list):
+
+| list | result |
+|---|---|
+| regression list (handoff 0d) | **64 / 64** |
+| every earlier seed of this lane whose opponent runs the full AI and has one of the seven moves (49 of 1,114 seeds) | **49 / 49** (47 stock chain; 2658 and 3504 with the long caps) |
+| random sample of 120 other seeds from the earlier lists, on the engine with fix 27 | **120 / 120** |
+
+For the bulk replay session: the engine to re-drive against is this tip. Only seeds whose opponent has one of the seven
+moves above and runs all three AI scripts (streak 28 and up, or Noland) can differ from `680b907f3`.
+
 ## Where it stands (2026-11-12, second pass)
 
 | | seeds |
@@ -57,6 +99,12 @@ The 98 seeds after that (6023-7056), all on the final engine: 95 match with the 
 new cause.
 
 ### Seeds for the regression list
+
+Brain battles (new in the third pass), stock chain:
+
+- silver Noland: every seed with seed % 49 == 33 in 1..10000 (33, 82, 131, ... 9980) except 9098: 203 seeds;
+- gold Noland, driven with `ROM_REPLAY_SYMBOLS=1`: every seed with seed % 49 == 26 in 1..10000 (26, 75, 124, ... 9973)
+  except 1447 and 6347: 202 seeds.
 
 The 516 new seeds that match to battle end with the stock chain (old-engine mismatches of the bulk batch, seeds 1161-7056):
 
@@ -114,6 +162,8 @@ late may also need the earlier ones).
 | 24 | The AI's move scoring did not see the player's Sp. Atk stage (Roar, Psych Up) or a trapping ability (Skill Swap, Role Play), and spent a different number of random draws. | A6, A7 | `ai-cv-target-ability-spatk.md` | Mechanic Lab |
 | 25 | White Herb did nothing when a lowered stat was Baton Passed to its holder; the game uses it at once. | suspected | `white-herb-baton-pass.md` | Mechanic Lab |
 | 26 | The AI kept its memory of a Pokémon that left and came back while the AI was locked into a multi-turn move. | suspected | `ai-history-reentry.md` | source only |
+| 27 | Full AI (Noland; ordinary trainers from challenge 4): in clear weather the game's weather check for Synthesis / Morning Sun / Moonlight reads a leftover value, and when the opponent's last move is its strongest that value reads "sandstorm" and costs the heal 2 points. The engine never applied it, so the opponent healed where the game attacks. | new (Brain replay) | `ai-heal-weather-stale-register.md` | 7922 (silver Noland) |
+| 28 | The same leftover read in the Fly / Dig / Dive / Bounce script: an Ice-type opponent (or a Ground / Rock / Steel one when the leftover reads "hail") makes one extra roll for +1 in clear weather. The engine skipped the roll, so every later random number differed. | new (source read after fix 27) | same doc, second part | Mechanic Lab |
 
 Group view against the handoff's queue (a seed can sit in two groups):
 
@@ -159,11 +209,13 @@ New source-read leads found on the way (no ROM seed yet):
 | seed | state | next step |
 |---|---|---|
 | 796, 1986, 2297, 2716, 2907, 3009, 3807, 4560, 4924, 5464, 5632, 6430 | Both sides are out of PP and trade Struggle while Leftovers heals; the battle does not end. Driven with the engine budget at 2,000,000 frames and the ROM drive at 600,000 frames: 720 to 943 engine states match in order and no mismatch appears (796: 894). | none: they cannot be driven "to battle end" in practical time. Keep them off the regression list; they are long-run checks, not open rule bugs. |
+| 1447 with `ROM_REPLAY_SYMBOLS=1` (gold Noland; request `factoryBrain`, challenge 5, player sets 569 649 605, seed 1447) | The lab fails before the battle is staged: `RuntimeError: battle lab route did not reach the player action menu` (`oracle/battle_lab.py` `_finish_intro_to_action_menu`). Same message as bulk seed 6048. | top layer (lab code; this lane does not edit `oracle/`). |
 | 3623, 5736 | The lab staging itself plays turn 1 before the snapshot (an A press of the intro acknowledgement lands on the first action menu; `oracle/battle_lab.py` `_finish_intro_to_action_menu`). The replay now refuses such a setup (rc 13) instead of reporting a mismatch. | top layer: make the staging stop pressing A once the action menu is up. |
 
 Long battles that do end need higher caps than the stock chain (engine 200,000 frames, ROM drive 80,000): 705 (82,835 ROM
 frames), 1338, 1904, 2546 (426,522), 2658, 2742, 3504 (398,092), 3589, 3789, 4485, 5437, 5950 (144,657), 6720, 6765.
-All match to the end. The staging race is rare (2 of about 6,000 seeds).
+All match to the end. The staging race is rare (2 of about 6,000 seeds). Brain battles: 9098 (silver, 1,212,712 ROM
+frames) and 6347 (gold, 1,526,588) need the ROM cap above those values; both match to the end.
 
 ## Known gap left on purpose (presentation, not battle rules)
 
@@ -196,20 +248,26 @@ Commits "re-pin the census-anchored tests ..." and "re-pins for the Castform rev
 | `presentationStringIssue108` | the staged Rage holder now chooses Rage | fix 19 drops a staged Rage flag when another move is chosen |
 | `tools/integration/sst200Compare.ts` (used by `sst200SecondStatRows`) | the player's Curse decision targets the user | fix 20; the Curse stat rows still equal the ROM's in both scenes |
 | `battleScriptRulesContext` key list | + `battleTurnCounter`, `aiHistoryClears` | fixes 23, 26 |
+| `tools/report/ability-item-parity-census.ts` | five pinned `factoryAiCheckViability.ts` lines + 6, then + 5 | fixes 27, 28 added lines above them; the census doc and the gate-6 manifest regenerate byte-identical |
 
 One presentation lead seen while re-pinning and not looked at: census battle 32 trips `sa125`'s ON - OFF row check on a
 CONFUSION anchor (139 vs 100).
 
 ## Gates
 
-Typecheck, full suite and build are run on a clean checkout of the branch tip. Second pass, engine tip `e05bdf321`:
-typecheck ok, build ok, 14,592 tests pass. The full suite's only failures are five animation evidence tests that fail on
-box master `43b0b22e5` itself (hash re-point commit: `hyperVoiceEvidenceCheckpoint`, `hyperVoiceReducer`,
-`hyperVoiceActualCore`, `overheatEvidenceCheckpoint`, `psychUpEvidenceCheckpoint`); this lane did not touch them.
+Typecheck, full suite and build are run on a clean checkout of the branch tip (a separate gate worktree).
 
-Replay on the same engine, one fresh batch (stock chain): regression 64 / 64; the eight seeds fixed in this pass 8 / 8;
-old open list 113 / 115 (705 and 796 are the two long ones); the 290 list 267 / 267 of its stock-chain seeds; the 154
-list 146 / 146 of its stock-chain seeds; the 98 list 95 / 95; a random sample of 400 seeds that matched on the old
-engine 400 / 400. The long battles that end (705 and the thirteen of the new lists) were driven on this engine too and
-match to the end; the endless ones of the 290 list were driven on engine `462d6429d` (before fixes 22-26), the later
-ones on this engine.
+Third pass, engine tip `24ad564bd` (with box master `1e4019b9c` merged in): typecheck ok, build ok, **14,612 tests pass,
+0 fail**. The five animation evidence tests that failed on the older master `43b0b22e5` were fixed on master
+(`1e4019b9c`, three digest re-pins) and pass here.
+
+Replay on that engine: see the third-pass section at the top (regression 64 / 64, the 49 seeds the two AI fixes can
+touch 49 / 49, Brain silver 204 / 204 and gold 203 / 203 of the staged battles).
+
+Second pass, engine tip `e05bdf321`: typecheck ok, build ok, 14,592 tests passed; the only failures were those five
+animation evidence tests, which failed on the master of that day. Replay on that engine, one fresh batch (stock chain):
+regression 64 / 64; the eight seeds fixed in that pass 8 / 8; old open list 113 / 115 (705 and 796 are the two long
+ones); the 290 list 267 / 267 of its stock-chain seeds; the 154 list 146 / 146 of its stock-chain seeds; the 98 list
+95 / 95; a random sample of 400 seeds that matched on the old engine 400 / 400. The long battles that end (705 and the
+thirteen of the new lists) were driven on that engine too and match to the end; the endless ones of the 290 list were
+driven on engine `462d6429d` (before fixes 22-26), the later ones on `e05bdf321`.
