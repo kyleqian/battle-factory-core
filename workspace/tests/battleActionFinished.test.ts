@@ -111,7 +111,7 @@ describe("HandleAction_ActionFinished source boundary", () => {
       dynamicBasePower: 0,
       moveendState: 0,
       multiHitEffect: 0,
-      // Source clears communication slots 3/4, which are not represented;
+      // Source clears communication slots 3 (moveEffectByte, below) and 4 (not represented);
       // the modeled slots 0/1 are unrelated and must survive.
       battleCommunication0: 3,
       battleCommunication1: 4,
