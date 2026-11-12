@@ -152,7 +152,7 @@ function aiDamageCalcInput(
  * loop (`battle_script_commands.c:1553-1556`) -- the multiplier step is
  * skipped entirely, not zeroed.
  */
-function estimateDamage(
+export function estimateDamage(
   attacker: FactoryAiTryToFaintBattler,
   defender: FactoryAiTryToFaintTarget,
   moveId: number,
