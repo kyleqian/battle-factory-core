@@ -388,7 +388,10 @@ def main():
         segments = []
         replay_trace["segments"] = drive_result["segments"]
         if drive_out is not None:
-            drive_out.write_text(json.dumps({**request, "trace": {"segments": drive_result["segments"], "captureFrames": [0]}}, indent=1))
+            # parity-mac: the validated request of a factoryBrain staging carries the fields the lab filled in itself (battleNum 6, trainerId 1022, opponentSetIds []),
+            # and validate_request refuses them on input: drop them so the frozen request can be staged again (romStateTimeline.py).
+            frozen = {k: v for k, v in request.items() if not (request["mode"] == "factoryBrain" and k in ("battleNum", "trainerId", "opponentSetIds"))}
+            drive_out.write_text(json.dumps({**frozen, "trace": {"segments": drive_result["segments"], "captureFrames": [0]}}, indent=1))
     t_window = time.time()
     done = 0
     for seg in segments:

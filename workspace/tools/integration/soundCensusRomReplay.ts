@@ -8,6 +8,10 @@
 //   compare: ... compare --seed=N --scene=on|off --engine=engine.json --rom=timeline.json [--out=F]  (aud243c) engine states (hp, rng, last moves) found in order in the ROM timeline.
 //   replay / native take --frame-budget=N (default 200000 engine frames) for very long battles.
 //   native: ... native --seed=N --scene=on|off --out=engine.json  the census orchestrator itself (no ROM), same output shape: the drift check against the census row's sound column.
+//   Frontier Brain battles (parity-mac, docs/parity-mac/brain-replay-seam.md): a census battle whose first opponent is Noland (streak 20; streak 41 with --symbols=1 on
+//     `request` / `native`) gives a `factoryBrain` lab request (no trainer / set ids: the ROM's own FillFactoryBrainParty rolls his party). `replay` then recovers the ROM's
+//     RNG cursor before that roll from the first Brain Pokemon's personality, lets the engine's production generation re-roll the party from it, and checks every member
+//     against the ROM read-back.
 import "../../src/engine/monPicPixelsInstall.ts";
 import { writeFileSync, readFileSync } from "node:fs";
 import {
@@ -15,6 +19,8 @@ import {
   beginFactoryRoundBattleStartIntro, createFactoryRoundBattleOrchestrator,
 } from "../../src/engine/factoryRoundBattleOrchestrator.ts";
 import { adoptFactoryOpponentSchedule } from "../../src/engine/factoryOpponentGeneration.ts";
+import { adoptFactoryBrainOpponentSchedule } from "../../src/engine/factoryBrainOpponentGeneration.ts";
+import { getLevel50FactoryRentalRange } from "../../src/engine/factoryRentalGeneration.ts";
 import { battlerMoveSelectionIsForced } from "../../src/engine/factoryBattleScriptFullTurnDecision.ts";
 import { createFactoryCorpusPartyMember } from "../../src/engine/factoryCorpusParty.ts";
 import { PARTY_LIST_INPUT_ELAPSED } from "../../src/engine/partySelect.ts";
@@ -24,6 +30,9 @@ import { emitTickSounds } from "../../src/engine/tickSounds.ts";
 import { advanceRngValue } from "../../src/engine/rng.ts";
 import frontierMonsData from "../../src/data/gen/battle-frontier-mons.json" with { type: "json" };
 import naturesData from "../../src/data/gen/natures.json" with { type: "json" };
+import frontierHeldItemsData from "../../src/data/gen/battle-frontier-held-items.json" with { type: "json" };
+import movesData from "../../src/data/gen/moves.json" with { type: "json" };
+import speciesNamesData from "../../src/data/gen/species-names.json" with { type: "json" };
 
 const [mode] = process.argv.slice(2);
 const arg = (name: string) => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
@@ -32,16 +41,22 @@ const scene = (arg("scene") ?? "on") as "on" | "off";
 const streak = (seed * 11) % 49;
 // parity-mac: very long battles (PP stall into Struggle on both sides) pass the default; --frame-budget=N raises it for one run.
 const frameBudget = Number(arg("frame-budget") ?? 200000);
+// parity-mac: the player's Factory symbols for `request` / `native` (GetPlayerSymbolCountForFacility, frontier_util.c:1657-1698). 0 = the census config: streak 20 is the
+// silver Noland battle. 1 = streak 41 is the gold one (the lab sets the silver symbol itself for a challenge-5 factoryBrain request). `replay` reads the tier from the setup.
+// The environment variable ROM_REPLAY_SYMBOLS gives the same through an unchanged chain script (tools/audio/romDriveSeed.sh).
+const symbols = Number(arg("symbols") ?? process.env.ROM_REPLAY_SYMBOLS ?? 0);
+if (symbols !== 0 && symbols !== 1) throw new Error("--symbols / ROM_REPLAY_SYMBOLS must be 0 or 1");
 
 // The lab stages the Tower streak at challengeNum * 7 (the stock bug reads it for opponent IVs); the census engine uses 0. Equal for challengeNum 0 (streak < 7).
 const towerStreak = Math.floor(streak / 7) * 7;
 const LCG_INV = 0xeeb9eb65;
 const lcgInverse = (x: number) => Math.imul((x - 0x6073) >>> 0, LCG_INV | 0) >>> 0;
 const natureByName = new Map(naturesData.natures.map((row) => [row.name, row.index]));
+const heldItemByTableId = new Map<number, number>((frontierHeldItemsData as any).entries.map((row: any) => [row.itemTableId, row.itemId]));
 
 const nativeOrchestrator = () => beginFactoryRoundBattleStartIntro(createFactoryRoundBattleOrchestrator({
   id: `live-share-census-${seed}-${streak}`, rngValue: seed, battleScene: scene,
-  factoryWinStreak: streak, playerTrainerId: 416049562,
+  factoryWinStreak: streak, playerTrainerId: 416049562, factorySymbolsCount: symbols,
   battleTowerLevel50WinStreak: 0, facilityState: { rentsCount: 0 },
   rentals: { type: "generateInitial", selectedRentalIndexes: [0, 1, 2] },
 }));
@@ -63,7 +78,72 @@ function constructionCursor(personality: number): number {
   throw new Error(`no RNG cursor produces personality ${personality}`);
 }
 
+// parity-mac (docs/parity-mac/brain-replay-seam.md). The lab's Brain descriptor has no set ids (the ROM's FillFactoryBrainParty rolled the party): find each member's
+// Frontier set in the challenge's GetFactoryMonId range by what the ROM built (species, the four moves with SetMonMoveAvoidReturn's Return -> Frustration, held item,
+// nature). Exactly one set must fit.
+const MOVE_RETURN = 216; const MOVE_FRUSTRATION = 218;
+const moveIdByName = new Map<string, number>((movesData as any).moves.map((m: any) => [m.move, m.id]));
+const speciesIdByName = new Map<string, number>((speciesNamesData as any).species.map((r: any, i: number) => [r.species, i]));
+function brainSetId(mon: any, challengeNum: number): number {
+  const range = getLevel50FactoryRentalRange(challengeNum, false); const rows = (frontierMonsData as any).entries as any[]; const hits: number[] = [];
+  for (let id = range.start; id <= range.end; id += 1) {
+    const row = rows[id];
+    const moves = (row.moves as string[]).map((name) => { const m = name === "MOVE_NONE" ? 0 : moveIdByName.get(name); if (m === undefined) throw new Error(`unknown move ${name}`); return m === MOVE_RETURN ? MOVE_FRUSTRATION : m; });
+    if (speciesIdByName.get(row.species) === mon.species && natureByName.get(row.nature) === mon.nature && heldItemByTableId.get(row.itemTableId) === mon.item
+      && moves.join() === (mon.moves as number[]).join()) hits.push(id);
+  }
+  if (hits.length !== 1) throw new Error(`ROM Brain member species ${mon.species} moves ${mon.moves} item ${mon.item} nature ${mon.nature} fits ${hits.length} Frontier sets in ${range.start}..${range.end}`);
+  return hits[0]!;
+}
+
+const IV_KEYS = ["hp", "attack", "defense", "speed", "spAttack", "spDefense"] as const;
+// Everything the engine derived for one Brain member, in the ROM read-back's field names (battle_lab._party_mon).
+const brainMemberFacts = (m: any, otId: number) => ({
+  species: m.species, level: m.level, personality: m.personality >>> 0, otId: otId >>> 0, nature: m.nature, abilitySlot: m.abilitySlot, ability: m.ability, item: m.item,
+  moves: [...m.moves], pp: [...m.pp], ivs: IV_KEYS.map((k) => m.ivs[k]), evs: IV_KEYS.map((k) => m.evs[k]), friendship: m.friendship,
+  maxHp: m.maxHP ?? m.maxHp, hp: m.hp, stats: [m.attack ?? m.stats.attack, m.defense ?? m.stats.defense, m.speed ?? m.stats.speed, m.spAttack ?? m.stats.spAttack, m.spDefense ?? m.stats.spDefense],
+});
+
+function brainOrchestrator(setup: any, freshBattleRngValue: number) {
+  const { descriptor, snapshot } = setup;
+  const player = snapshot.parties.player as any[]; const opponent = snapshot.parties.opponent as any[];
+  const brainStreak = descriptor.challengeNum * 7 + descriptor.battleNum;
+  if (brainStreak !== streak) throw new Error(`the lab staged Factory streak ${brainStreak}; census seed ${seed} is streak ${streak}`);
+  const playerRecords = descriptor.player.map((p: any, i: number) => ({ setId: p.setId, ...romRecord(player[i]) }));
+  const fillers = descriptor.rentalFillers.map((f: any) => {
+    const nature = natureByName.get((frontierMonsData as any).entries[f.setId].nature)!;
+    const input = { setId: f.setId, personality: nature, fixedIv: playerRecords[0].fixedIv, abilitySlot: 0 as const, otId: playerRecords[0].otId };
+    return Object.freeze({ ...input, abilitySlot: createFactoryCorpusPartyMember(input).abilitySlot });
+  });
+  const player3 = playerRecords.map((r: any) => Object.freeze({ ...r, abilitySlot: createFactoryCorpusPartyMember(r).abilitySlot })) as any;
+  const saved = [...player3, ...fillers];
+  const playerTrainerId = playerRecords[0].otId as number;
+  // The dice taken from the ROM: which three sets, and each member's personality (as the cursor of its accepted Random32 pair). The ROM's roll is not one clean
+  // cursor: VBlankIntr's Random() (main.c:365-366) lands between FillFactoryBrainParty's draws (8 and 10 such draws between the members of ROM seed 1209).
+  const generation = adoptFactoryBrainOpponentSchedule({
+    factoryWinStreak: brainStreak, playerRentalSetIds: saved.map((r: any) => r.setId), playerTrainerId,
+    setIds: opponent.slice(0, 3).map((m) => brainSetId(m, descriptor.challengeNum)) as [number, number, number],
+    constructionRngValues: opponent.slice(0, 3).map((m) => constructionCursor(m.personality >>> 0)) as [number, number, number],
+  });
+  // The lab sets the silver symbol for a challenge-5 request and none for challenge 2 (oracle/battle_lab.py prepare).
+  const state = createFactoryRoundBattleOrchestrator({
+    id: `rom-replay-${seed}`, rngValue: 0, battleScene: scene, factoryWinStreak: brainStreak, factorySymbolsCount: descriptor.challengeNum === 5 ? 1 : 0,
+    playerTrainerId, battleTowerLevel50WinStreak: brainStreak, facilityState: { rentsCount: 0 },
+    rentals: { type: "currentRecords", playerRentalRecords: player3, savedRentalRecords: saved as any },
+    adoptedInitialBrainOpponent: { generation, freshBattleRngValue, preCommandRngCalls: 0 },
+  });
+  const scheduled = state.opponentGenerations[0]!;
+  if (scheduled.kind !== "frontier-brain") throw new Error(`the engine scheduled an ordinary trainer at streak ${brainStreak}, the ROM staged the Frontier Brain`);
+  if (scheduled.generation.fixedIv !== descriptor.fixedIv) throw new Error(`Brain fixed IV: engine ${scheduled.generation.fixedIv} != lab ${descriptor.fixedIv}`);
+  scheduled.generation.opponents.forEach((o, i) => {
+    const engine = JSON.stringify(brainMemberFacts({ ...o.member, abilitySlot: o.abilitySlot }, o.otId)); const rom = JSON.stringify(brainMemberFacts(opponent[i], opponent[i].otId));
+    if (engine !== rom) throw new Error(`Brain opponent ${i}: engine ${engine} != ROM ${rom}`);
+  });
+  return beginFactoryRoundBattleStartIntro(state);
+}
+
 function adoptedOrchestrator(setup: any, freshBattleRngValue: number) {
+  if (setup.descriptor.mode === "factoryBrain") return brainOrchestrator(setup, freshBattleRngValue);
   const { descriptor, snapshot } = setup;
   const player = snapshot.parties.player as any[]; const opponent = snapshot.parties.opponent as any[];
   const playerRecords = descriptor.player.map((p: any, i: number) => ({ setId: p.setId, ...romRecord(player[i]) }));
@@ -206,9 +286,13 @@ if (mode === "request") {
   const setIds = (g.generation.opponents as any[]).map((x) => x.setId);
   const playerSetIds = r.state.config.rentals.type === "generateInitial" ? (r.state.initialRentalGeneration!.rentals as any[]).slice(0, 3).map((x) => x.setId) : [];
   void rentals;
-  writeFileSync(arg("out")!, JSON.stringify({
-    schemaVersion: 1, mode: "factoryLegal", profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50,
-    challengeNum: Math.floor(streak / 7), battleNum: 0, trainerId: g.trainerId, rentalSwapCount: 0,
+  const common = { schemaVersion: 1, profile: scene === "on" ? "battle-scene-on" : "battle-scene-off", level: 50, challengeNum: Math.floor(streak / 7), rentalSwapCount: 0 };
+  // parity-mac: Noland. The lab's factoryBrain mode takes no trainer / battle number / opponent sets (challenge 2 = silver, 5 = gold, always battle 7).
+  writeFileSync(arg("out")!, JSON.stringify(g.kind === "frontier-brain" ? {
+    ...common, mode: "factoryBrain", playerSetIds, seed,
+    trace: { segments: [{ frames: 1, buttons: [] }], captureFrames: [0] },
+  } : {
+    ...common, mode: "factoryLegal", battleNum: 0, trainerId: g.trainerId,
     playerSetIds, opponentSetIds: setIds, seed,
     trace: { segments: [{ frames: 1, buttons: [] }], captureFrames: [0] },
   }, null, 1));
