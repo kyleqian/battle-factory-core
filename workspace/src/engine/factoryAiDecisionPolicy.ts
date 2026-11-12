@@ -1261,6 +1261,12 @@ export function chooseFactoryAiScoredDecision(input: Readonly<{
           accStage: view.target.statStages.acc,
           atkStage: view.target.statStages.atk,
           defStage: view.target.statStages.def,
+          // docs/parity-mac/ai-cv-target-ability-spatk.md (audit leads A6, A7): both were only on the ATTACKER literal, so the
+          // handlers' target reads fell to their defaults. `spAtkStage`: AI_CV_PsychUp / the phazing script test the TARGET's
+          // SPATK stage (data/battle_ai_scripts.s:1293, :2089). `ability`: Cmd_get_ability AI_TARGET returns the real ability
+          // without a guess for Shadow Tag / Magnet Pull / Arena Trap (battle_ai_script_commands.c, the trapper branch).
+          spAtkStage: view.target.statStages.spAtk,
+          ability: view.target.ability,
           spDefStage: view.target.statStages.spDef,
           hp: view.target.hp,
           maxHp: view.target.maxHp,
