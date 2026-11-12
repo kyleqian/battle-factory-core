@@ -292,6 +292,40 @@ describe("fresh Factory battle initializer (Gate-5 rungs 2-3)", () => {
     expect(first.state.rng.calls).toBe(2);
   });
 
+  it("runs an OPPONENT lead's ON_SWITCHIN hook on the opponent: Drought starts the sun (battle_main.c:3869-3879)", () => {
+    // docs/parity-mac/battle-start-switchin-battler.md. The dispatch used Baton Pass's `switchineffects BS_ATTACKER`, and the
+    // fresh attacker role is 0, so an opponent lead's hook ran on the player's lead and did nothing. Unfixed: weather 0.
+    const groudonParty = Object.freeze([
+      Object.freeze({ ...member(300), species: 405, abilityNum: 0 as const, speed: 120 }),
+      ...party(300).slice(1),
+    ]) as unknown as BattleScriptPartyState;
+    const result = requireInitialized(initializeFreshFactoryBattle({
+      requestId: 1,
+      rngSeed: 3,
+      battleScene: "on",
+      playerParty: party(300),
+      opponentParty: groudonParty,
+    }));
+    expect(result.state.rules.rulesContext.weather).toBe((1 << 5) | (1 << 6));
+    expect(result.events.flatMap(({ payload }) => payload.kind === "message" ? [payload.messageId] : []))
+      .toContain("STRINGID_PKMNSXINTENSIFIEDSUN");
+  });
+
+  it("a lead Truant Pokemon is free on turn 1 when the opponent's lead has a hook ability (ROM seed 3704: Slaking vs Cloud Nine Golduck)", () => {
+    // TryDoEventsBeforeFirstTurn never runs Cmd_switchineffects' `truantCounter = 1` (battle_script_commands.c:5260-5261).
+    // Unfixed: the opponent Golduck's dispatch ran the opcode on battler 0 and Slaking loafed on turn 1 (truantCounter 1).
+    const result = requireInitialized(initializeFreshFactoryBattle({
+      requestId: 1,
+      rngSeed: 3,
+      battleScene: "off",
+      playerParty: party(467, 0), // Slaking: Truant
+      opponentParty: party(418, 1), // Golduck, ability slot 1 = Cloud Nine
+    }));
+    const [slaking, golduck] = result.state.rules.rulesContext.battlers;
+    expect([slaking.ability, golduck.ability]).toEqual([54, 13]);
+    expect(slaking.truantCounter).toBe(0);
+  });
+
   it("resolves a real Level-50 Porygon2 Trace carrier after ON_SWITCHIN hooks without extra draws", () => {
     const result = requireInitialized(initializeFreshFactoryBattle({
       requestId: 1,

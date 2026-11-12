@@ -53,11 +53,18 @@ const TRACE_ID = 36;
 const STATUS3_INTIMIDATE_POKES = 1 << 19;
 const STATUS3_TRACE = 1 << 20;
 const program = loadBattleScriptProgram();
+// `switchineffects BS_FAINTED` (BattleScript_FaintedMonSendOutNew, battle_scripts_1.s:2893): the dispatch below names its
+// battler through the `fainted` selector role. The program's FIRST switchineffects is Baton Pass's `BS_ATTACKER` one
+// (:1713), and the fresh context's attacker role is 0 (BattleStartClearSetData), so picking it ran every dispatch on the
+// player's lead: an opponent lead's hook ability did nothing, and the opcode's own Truant line (`truantCounter = 1`,
+// battle_script_commands.c:5260-5261, which TryDoEventsBeforeFirstTurn never runs) hit the player's lead instead --
+// a lead Slaking loafed on turn 1 against a Cloud Nine lead (ROM seed 3704, docs/parity-mac/battle-start-switchin-battler.md).
 const switchineffectsProgramCounter = program.instructions.find(
-  (instruction) => instruction.opcodeName === "B_SCR_OP_SWITCHINEFFECTS",
+  (instruction) => instruction.opcodeName === "B_SCR_OP_SWITCHINEFFECTS"
+    && instruction.operands[0]?.expression === "BS_FAINTED",
 )?.programCounter;
 if (switchineffectsProgramCounter === undefined) {
-  throw new Error("committed Battle Script program has no B_SCR_OP_SWITCHINEFFECTS");
+  throw new Error("committed Battle Script program has no B_SCR_OP_SWITCHINEFFECTS BS_FAINTED");
 }
 const SWITCHINEFFECTS_PC: number = switchineffectsProgramCounter;
 
