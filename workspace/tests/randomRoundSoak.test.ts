@@ -1464,7 +1464,9 @@ describe("ISSUES #104 (driver): continuous-play outcome semantics retuned -- OK 
     // round wins, so the lowest (3) is pinned.
     // pmo239 (the party menus list rows in the ROM's battle order, so the soak's UI-faithful row walks pick different mons): seed 3
     // now carries 7; re-scanned seeds 0..12: only seed 2 chains two round wins (carry 14), so it is pinned.
-    const result = runSeed(2, {
+    // parity-mac (docs/parity-mac/STATUS.md "Re-pins"): the battle-rule fixes of that lane move every trajectory; seed 2 now carries 7.
+    // Re-scanned seeds 0..30 under the same options: seeds 0, 10, 16, 17 and 19 chain two round wins, so the lowest (0) is pinned.
+    const result = runSeed(0, {
       policy: "winning",
       maxRounds: 3,
       renderEvery: 0,

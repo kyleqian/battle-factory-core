@@ -35,7 +35,9 @@ type Replay = ReturnType<typeof generatedCommandAnimationReplay>;
 // mismatches); without them compared / hostKnown stay 882 / 788, declines and laterAfter unchanged.
 // wth236: + the sweep's 3 Scene ON weather-continues command edges (no known host), each equal to the pure transform (0 mismatches);
 // without them compared stays 895, hostKnown / declines / laterAfter unchanged.
-const SWEEP_PIN = { compared: 898, hostKnown: 798, declines: 0, laterAfter: 72 };
+// parity-mac re-pin (docs/parity-mac/STATUS.md "Re-pins"): the 20 sweep battles changed with the AI / replacement fixes (they are
+// shorter in bodies): compared 898 -> 840, hostKnown 798 -> 740, laterAfter 72 -> 65; declines 0 and 0 mismatches unchanged.
+const SWEEP_PIN = { compared: 840, hostKnown: 740, declines: 0, laterAfter: 65 };
 const bodies = (run: Replay) => run.commands.filter(row => row.type === "move-animation");
 
 function expectRulesEqual(on: Replay, off: Replay): void {
@@ -124,7 +126,10 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     // laterKnown 58 -> 64, postKoLent 10 -> 12: prep47 (A), the bodies after a retained opponent locked-action continuation
     // (the player's prompt cycle at the turn boundary) now lend (same pure prediction).
     // laterKnown 64 -> 68: plans48 (the bodies after an Attract now lend; same pure prediction). 68 -> 71: plans48 Present / Struggle.
-    expect({ later, laterKnown, postKoLent }).toEqual({ later: 80, laterKnown: 71, postKoLent: 12 });
+    // parity-mac re-pin (docs/parity-mac/STATUS.md "Re-pins"): the 20 battles themselves changed (the opponent's replacement
+    // after a faint and the AI's draws now follow the ROM), so they hold fewer later bodies: later 80 -> 73, laterKnown 71 -> 64,
+    // postKoLent 12 -> 5. The invariant (host == pure prediction, 0 mismatches below) is unchanged.
+    expect({ later, laterKnown, postKoLent }).toEqual({ later: 73, laterKnown: 64, postKoLent: 5 });
     expect(laterUnknownAfterKnown).toBeGreaterThan(0);
     expect(invalidatedBattles).toBeGreaterThan(0);
   }, 120000);
@@ -153,7 +158,8 @@ describe("live sprite-order seam (presentation-only, tracked across modelled bod
     }
     // laterBefore 35 -> 47: prep43 plans (same pure prediction, 0 mismatches). 47 -> 49: prep45 plans + TURN_TRAP / Solar Beam keys.
     // 49 -> 53: plans48 plans (the bodies after an Attract; same pure prediction, 0 mismatches). 53 -> 56: plans48 Present / Struggle.
-    expect({ mismatches, later, laterBefore }).toEqual({ mismatches: 0, later: 80, laterBefore: 56 });
+    // parity-mac re-pin: later 80 -> 73 (the battles changed, see above); laterBefore and 0 mismatches as before.
+    expect({ mismatches, later, laterBefore }).toEqual({ mismatches: 0, later: 73, laterBefore: 56 });
     expect({ compared, hostKnown, declines, laterAfter }).toEqual(SWEEP_PIN);
   }, 120000);
 

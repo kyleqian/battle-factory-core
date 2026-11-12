@@ -313,8 +313,11 @@ describe("factory round chaining (tick() scenario)", () => {
     // again and seed 0's hop-4 round now loses: 0 -> 1, again the first seed in 0..60 that chains four wins deep. The carry arithmetic below is unchanged.
     // fix274 (#209 effect byte / #210 chosen position) moved every trajectory again and seed 1's hop-3 round now loses: 1 -> 5,
     // the first seed in 0..60 that chains four wins deep (0, 2, 3, 4 lose). The carry arithmetic below is unchanged.
+    // parity-mac (docs/parity-mac/STATUS.md "Re-pins": AI draw counts, the opponent's replacement, Encore / Struggle selection, Toxic
+    // counter) moved every trajectory again and seed 5's hop-3 round now loses: 5 -> 9, the first seed in 0..30 that chains four wins
+    // deep (0..8 lose). The carry arithmetic below is unchanged.
     const carry0 = createInitialFactoryCarry(PLAYER_TRAINER_ID);
-    const round1 = driveGeneratedRoundToCompletion(carry0, 5);
+    const round1 = driveGeneratedRoundToCompletion(carry0, 9);
     expect(round1.round.rules.phase).toBe("roundComplete");
     const chained1 = driveTerminalToNextDraft(stateAtDecidedRound(round1, carry0));
     const carry1 = chained1.factoryCarry;

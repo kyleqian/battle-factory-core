@@ -1314,8 +1314,11 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     expect(active.hp).toBeLessThan(before.hp);
     expect(active.status1 & 0xff).toBe(1 << 7);
     expect(active.status1).toBe((1 << 7) | (1 << 8));
+    // battle_util.c:1542-1543 bumps the Toxic counter on gBattleMons only: no SetMonData follows, so the party
+    // record keeps the word written at infliction (docs/parity-mac/toxic-counter-switch.md). This line used to
+    // assert the opposite ("source syncs the counter").
     expect(resolution.pendingBattle.rules.rulesContext.party.opponent[0]!.status1)
-      .toBe(active.status1); // source syncs the counter; the icon remains PSN.
+      .toBe(1 << 7);
     expect(resolution.segments.flatMap(({ events }) => events).some(({ payload }) =>
       payload.kind === "hp-change"
       && payload.battler === 1
@@ -2791,14 +2794,14 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // downstream trajectory (generation, moves, damage, turn lengths), not a
     // direct draw-count delta. Values regenerated from the union engine.
     [4, 1471, "roundComplete", 6, "win"], // fix274 (#209 effect byte / #210 chosen position): 1590 -> 1471; aiv267 1525 -> 1590; #140 GetMoveTarget draw loop: 1809 -> 1525; aiv267 (#207 confusion self-hit sees the hold item): 1525 -> 1590
-    [5, 1694, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1658 -> 1694
+    [5, 1493, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1658 -> 1694; parity-mac (docs/parity-mac/STATUS.md re-pins): 1694 -> 1493
     [6, 1417, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1675 -> 1417
     [7, 1857, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1269 -> 1884; abl261 (#202, full ability resolver applies; the old 4-id map reproduces 1884): 1884 -> 1857
     [8, 2058, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1922 -> 2058
     [11, 1625, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1745 -> 1625
     [13, 2553, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 2221 -> 2553
     [14, 1897, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1921 -> 1897
-    [15, 1503, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1551 -> 1503
+    [15, 1672, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1551 -> 1503; parity-mac (docs/parity-mac/STATUS.md re-pins): 1503 -> 1672
     [16, 1786, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1523 -> 1315; rng146 F1 Petal Dance lock-in re-run: 1315 -> 1294; abl261 (#202, full ability resolver applies; the old 4-id map reproduces 1294): 1294 -> 1786
     [18, 1775, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1948 -> 1775
     [19, 1116, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1938 -> 1116

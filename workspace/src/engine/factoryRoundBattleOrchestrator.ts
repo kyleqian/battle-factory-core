@@ -2235,7 +2235,8 @@ function settledCommandForResolutionHandoff(
       || boundary.displayedHp !== field.hp
       // `status1` is not itself a display identity: toxic's source-owned
       // turn counter lives in bits 8..11 of gBattleMons.status1, advances at
-      // end turn, and is synced into the party record despite remaining absent
+      // end turn on the battler only (battle_util.c:1542-1543; the party
+      // record keeps the word written at infliction) and is absent
       // from the healthbox icon. Compare the controller-committed icon
       // semantics while retaining the fatal check for a genuinely stale icon.
       || battleCommandUiStatusFromStatus1(boundary.displayedStatus1)

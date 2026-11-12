@@ -7,12 +7,15 @@ import { apx217Strip } from "../tools/integration/apx217TransformStrips.ts";
 describe("apx222: one staged command per class / new body draws non-static rows, classifies approx, deterministic on replay", () => {
   it.each([
     // [name, census seed, moveId, attacker, code, presented rows (the body's own live duration)]
-    ["hidden-target: Light Screen 113 by the player at a hidden opponent", 41, 113, 0, "approx:hidden-target", 97],
+    // parity-mac re-pin (docs/parity-mac/STATUS.md "Re-pins"): census battles 41 and 138 changed (AI draws / replacement fixes) and no
+    // longer hold these commands; battle 50 (player Light Screen at a hidden opponent) and battle 133 (opponent Ghost Curse) do,
+    // with the same row counts.
+    ["hidden-target: Light Screen 113 by the player at a hidden opponent", 50, 113, 0, "approx:hidden-target", 97],
     ["hidden-target: Sky Uppercut 327 by the opponent at a hidden player", 81, 327, 1, "approx:hidden-target", 191],
     // turn-0: Curse's Ghost branch (CURSE_GHOST, Move_CURSE / CurseGhost): the black field, the nail's three scratches, the rising ghost
     // apx227: Ghost Curse is 21 rows longer (window fade-in, nail 4 ticks later, black held longer, 8-step restore).
     ["turn-0: Curse 174 (Ghost branch) by the player", 231, 174, 0, "approx:turn-0", 374],
-    ["turn-0: Curse 174 (Ghost branch) by the opponent", 138, 174, 1, "approx:turn-0", 374],
+    ["turn-0: Curse 174 (Ghost branch) by the opponent", 133, 174, 1, "approx:turn-0", 374],
     // no-adapter: each body is built from its source script (src/animation/approxScript.ts); [rows] is its own duration
     // aip262: the Peck 64 row (census seed 51) left: seed 51 is a changed seed and no unchanged census seed 0..999 carries an opponent Peck.
     ["no-adapter: Odor Sleuth 316 by the player (Move_ODOR_SLEUTH)", 705, 316, 0, "approx:no-adapter", 85],
