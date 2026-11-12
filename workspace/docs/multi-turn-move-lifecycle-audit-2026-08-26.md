@@ -4,7 +4,7 @@
 
 | field | value |
 | --- | --- |
-| Tree hash (HEAD at audit start) | `dc6653bbc9c7476d82743080435e3b63d1f94bb2` (commit `d0846750`) |
+| Tree hash (HEAD at audit start) | `dc6653bbc9c7476d82743080435e3b63d1f94bb2` (commit `f647383d`) |
 | Date / clock | 2026-08-26, start `Wed Aug 26 04:28:51 PDT 2026` |
 | Lane / oracle | side worktree `worker/side-20260826-042843`, Battle Scene OFF (`http://127.0.0.1:8014`) — oracle NOT run; static audit |
 | Scope | The turn-by-turn LIFECYCLE of every multi-turn move family in Level-50 singles, both sides: which counter/lock/stored-damage cell each family writes (`gDisableStructs[]`, `gBattleMons[].status2` timers, `gLockedMoves[]`, `gBideDmg`/`gBideTarget`, `gBattleStruct->wrappedMove`/`wrappedBy`, `gProtectStructs`, `gHitMarker` bits), WHERE each is read/decremented (`AtkCanceler_UnableToUseMove` phases, the move's own opcodes, `DoBattlerEndTurnEffects` cases, `HandleAction_UseMove`'s lock), and the exact turn-by-turn ORDER including every `Random()`. Docs-only step — no engine/test/tool/data edits. |

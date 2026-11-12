@@ -53,7 +53,7 @@ The first unmatched engine row (frame 2093) is after the ROM input trace is exha
 
 ## 5. Census delta, seeds 0..999, both scenes
 
-Arms: baseline = the aud243a full arms (commit 858ea0343, `.integration/validation/sv-20261108/aud243a/full/`); fixed = `.../sub260/census/{on,off}-9b4332163`
+Arms: baseline = the aud243a full arms (commit 28394735e, `.integration/validation/sv-20261108/aud243a/full/`); fixed = `.../sub260/census/{on,off}-9b4332163`
 (lsd194Census, LSD194_SPLIT=4, 25-seed parts). Classifier: `tools/integration/sub260Classify.py`, instrumented tree: `sub260Instrument.py` (the UNFIXED code
 plus a log of every healthbarupdate that sees the IGNORE_SUBSTITUTE bit set on a Substitute holder while the running script is not the one that did the `orword`).
 
@@ -83,7 +83,7 @@ plus a log of every healthbarupdate that sees the IGNORE_SUBSTITUTE bit set on a
 
 ## 6. Gates
 
-ENGINE_BUILD `eb-52789eb6d9c84998` -> `eb-12d5aa7535f49c46` (before = tree at 5ee298893 built with the same headless config; after = this tree). Tell the website.
+ENGINE_BUILD `eb-52789eb6d9c84998` -> `eb-12d5aa7535f49c46` (before = tree at a73be6deb built with the same headless config; after = this tree). Tell the website.
 ENGINE_BUILD above is the headless-config hash of both trees. typecheck / build / build:lib 0; `npm run test:gate` 0 (362 files, 2835 tests); soak vanilla 0:20 20/20 OK;
 full suite in 6 foreground shards (`POKEBENCH_VITEST_MAX_WORKERS=5 npm test -- --shard=i/6`): shards 1, 2, 4, 5, 6 green, shard 3 has ONE failure (below).
 

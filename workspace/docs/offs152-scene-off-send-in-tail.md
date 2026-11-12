@@ -1,8 +1,8 @@
 # offs152 — Scene OFF forced switch-out + send-in tail; Scene ON genderless tail; SOLROCK matrix (S10A, ISSUES #146 items 4/5 + remainder)
 
 Presentation timing only: no rules / RNG / damage / turn-order / facility change (route-census kernel receipts identical, ON census
-digests identical, soak decisions identical). Base `16ae4522e` (src `f920bfe0`; snd145 + fra151 merged). Code commits
-`ad120a846` (R0), `1eb4db819` (R1–R3), `c62732eef` (R5 + R6); tooling / receipts / doc after.
+digests identical, soak decisions identical). Base `e82297739` (src `f920bfe0`; snd145 + fra151 merged). Code commits
+`0d74fa76e` (R0), `2132484b0` (R1–R3), `b11a1ab76` (R5 + R6); tooling / receipts / doc after.
 
 ## Results first
 
@@ -52,23 +52,23 @@ Named residuals (outside this step's acceptance; none is new):
 
 | check | result |
 | --- | --- |
-| Scene ON census 0..999 (`sar131Census.sh`, base `16ae4522e` vs R3 `1eb4db819`) | **30 / 30 shard files byte-identical** (R0–R3 are Scene OFF only). |
-| Scene ON census, base vs final `c62732eef` (R5 + R6) | move records (`r*.jsonl`) and `battleDigestExcludingFrames` identical in 10 / 10 shards; 22,587 segments, **17 changed: only `switch-in` commands**, deltas = the R5 corrections (METAGROSS +7 ×5, LUNATONE +18 ×4, SOLROCK +45 ×6, STARYU +80 ×2; +537 frames), 0 type-sequence / other changes (`fixtures/offs152/census-on-delta.json`). Live share unchanged 27,071 / 27,261 commands, 4,143,452 / 4,160,878 frames. |
+| Scene ON census 0..999 (`sar131Census.sh`, base `e82297739` vs R3 `2132484b0`) | **30 / 30 shard files byte-identical** (R0–R3 are Scene OFF only). |
+| Scene ON census, base vs final `b11a1ab76` (R5 + R6) | move records (`r*.jsonl`) and `battleDigestExcludingFrames` identical in 10 / 10 shards; 22,587 segments, **17 changed: only `switch-in` commands**, deltas = the R5 corrections (METAGROSS +7 ×5, LUNATONE +18 ×4, SOLROCK +45 ×6, STARYU +80 ×2; +537 frames), 0 type-sequence / other changes (`fixtures/offs152/census-on-delta.json`). Live share unchanged 27,071 / 27,261 commands, 4,143,452 / 4,160,878 frames. |
 | Scene OFF route census 0..999 (`off108Route.ts --scene=off`, 5 shards per tree) | 37,739 move uses, **kernel receipts identical on every use** (gameplay / RNG unchanged); 144 changed uses = the Roar (104) / Whirlwind (25) / Baton Pass (15) bodies gaining the pause (41 / 41 / 40) + forced hold; nothing else (`fixtures/offs152/route-census-off-delta.json`). Opponent faint-replacement send-ins sit outside this tool's per-use window (their timing is pinned by the R3 windows / tests). |
 | Soak vanilla 0:20 `--parallel 5`, both trees (Scene OFF) | **20 / 20 OK** on both; max carry 7 / depth 9 identical; all budget-ended (600,000 frames), and the final tree ends 1–3 turns further on every seed (the OFF send-ins are shorter), so end positions / frame stamps legitimately move (`offs152SoakCompare.py`: SAME under that claim; receipts `fixtures/offs152/soak-vanilla-{base,final}.json`). |
-| `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 16ae4522e` | **641 / 641 byte-identical** (235 + 216 + 190) at R3 and again at the final commit. These traces default to Scene OFF (`createInitialState` battleScene "off") and did not move; whether their opponent send-ins run through this switch-in command (or fall outside the captured frames' timeline) was not traced — no move, so no re-pin and nothing to investigate against the oracle. |
-| Full-suite pins moved (attributed, re-pinned in `fe9e4759c`) | `randomRoundSoak.test.ts`: seven-wins frames 37,645 → 37,332, renderCalls 2,697 → 2,667 (same battle 7 / turn 3 / diagnostics); exploring seeds 17,557 → 17,423 and 26,869 → 26,878 (same battle / turn / end state). `sgl138-live-receipt.json`: only the total frames of Scene OFF battles 0 / 9 / 19 (−26 / −38 / −56); every anchor and every Scene ON battle identical. `liveRoarWhirlwindMoveAdapters.test.ts`: its OFF-parity assertion now expects the forced hold. |
+| `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base e82297739` | **641 / 641 byte-identical** (235 + 216 + 190) at R3 and again at the final commit. These traces default to Scene OFF (`createInitialState` battleScene "off") and did not move; whether their opponent send-ins run through this switch-in command (or fall outside the captured frames' timeline) was not traced — no move, so no re-pin and nothing to investigate against the oracle. |
+| Full-suite pins moved (attributed, re-pinned in `632fa1035`) | `randomRoundSoak.test.ts`: seven-wins frames 37,645 → 37,332, renderCalls 2,697 → 2,667 (same battle 7 / turn 3 / diagnostics); exploring seeds 17,557 → 17,423 and 26,869 → 26,878 (same battle / turn / end state). `sgl138-live-receipt.json`: only the total frames of Scene OFF battles 0 / 9 / 19 (−26 / −38 / −56); every anchor and every Scene ON battle identical. `liveRoarWhirlwindMoveAdapters.test.ts`: its OFF-parity assertion now expects the forced hold. |
 
 ## Gates
 
-Production src `14e6203f` (= `c62732eef`; later commits are tests / tools / receipts / doc). Commits `ad120a846` (R0), `1eb4db819`
-(R1–R3), `c62732eef` (R5 + R6), `19d20e832` (R4 receipts + runner), `fe9e4759c` (attributed re-pins), doc commit after.
+Production src `14e6203f` (= `b11a1ab76`; later commits are tests / tools / receipts / doc). Commits `0d74fa76e` (R0), `2132484b0`
+(R1–R3), `b11a1ab76` (R5 + R6), `419de6ded` (R4 receipts + runner), `632fa1035` (attributed re-pins), doc commit after.
 
 - `npm run typecheck` OK (on the R1–R3 tree + the R5 / R6 tree's test files; no type change after).
-- Full `npm test` on `c62732eef`: 1,710 files, **13,838 passed, 9 failed, 223 skipped**; the 9 failures (3 files) are the Scene OFF frame pins
-  above, re-pinned with attribution in `fe9e4759c`; those 3 files rerun green (75 + 64 tests). The full suite was **not** rerun after the
+- Full `npm test` on `b11a1ab76`: 1,710 files, **13,838 passed, 9 failed, 223 skipped**; the 9 failures (3 files) are the Scene OFF frame pins
+  above, re-pinned with attribution in `632fa1035`; those 3 files rerun green (75 + 64 tests). The full suite was **not** rerun after the
   re-pin (time cap; machine load ~160 from sibling sessions made the single run take 24 min).
-- `npm run test:smoke` 448 / 448 on `fe9e4759c`; `npm run build` OK on `fe9e4759c`; `git diff --check` clean.
+- `npm run test:smoke` 448 / 448 on `632fa1035`; `npm run build` OK on `632fa1035`; `git diff --check` clean.
 - Affected: `offs152SceneOffForcedSwitch`, `offs152SendInTailOff`, `sendInTail`, `off148SceneOffPauses`, `fra151FrontSendIn`, forced-switch
   / switch / Baton Pass suites (136 tests) green.
 
@@ -87,12 +87,12 @@ its R1 table check (R5 regenerated the table) and its OFF control windows (the O
 
 ## Reproduce
 
-Run on `fe9e4759c`: `sh tools/integration/offs152Run.sh <fresh> --no-sweeps` -> **ALL SAME** (tables, tests, 16 windows twice fresh ==
+Run on `632fa1035`: `sh tools/integration/offs152Run.sh <fresh> --no-sweeps` -> **ALL SAME** (tables, tests, 16 windows twice fresh ==
 the committed digests, production compares r1 == r2 == the summary, SOLROCK 0 px). The 8 sweeps were each run twice fresh during the
 step (r1 == r2 byte-identical, committed); the full runner (with sweeps, ~20 min) and `--census --soak` were not rerun end to end.
 
 ```sh
 sh tools/integration/offs152Run.sh <fresh-dir>                    # R0-R3, R5, R6 (sweeps x8, 16 windows x2, tests): ALL SAME
 sh tools/integration/offs152Run.sh <fresh-dir> --census --soak    # + R4 Scene ON census both trees + vanilla soak 0:20 both trees
-npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 16ae4522e
+npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base e82297739
 ```

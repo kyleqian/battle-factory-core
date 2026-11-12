@@ -2,8 +2,8 @@
 
 Presentation timing / order only. Kernel events, damage, RNG, AI, turn order and facility state are unchanged (census kernel-event
 digests identical for all 1,000 battles in both scenes). Evidence and the exact rules: `docs/fpc177-focus-punch-edges.md` (twelve
-twice-fresh ROM cards, Scene OFF / ON). Base `a641cc285` (src tree `b53d46f547fdba03d08b989c9389283d60abe047`); production commit
-`b96c086f2`, fixed up in `9f9be3f4a` (src tree `a126ced00b95a9ecd7a55c16c968ce6b199a9dd9`; every later commit is tests, tools,
+twice-fresh ROM cards, Scene OFF / ON). Base `a01b965c0` (src tree `b53d46f547fdba03d08b989c9389283d60abe047`); production commit
+`5cc88dcc7`, fixed up in `929c178d4` (src tree `a126ced00b95a9ecd7a55c16c968ce6b199a9dd9`; every later commit is tests, tools,
 fixtures or this doc only).
 
 ## What changed (`src/engine/battleResolutionPresentation.ts`)
@@ -61,7 +61,7 @@ i.e. +2 over the u = 4 lead); a PP update between the focus print and the used p
 
 ### 3. Census 0..999 (`fpc180Census.sh` / `fpc180Census.ts` / `fpc180CensusDelta.py`; `fixtures/fpc180/census-delta-{off,on}.json`, shard hashes `census-sha256.txt`)
 
-`a641cc285` vs `9f9be3f4a` (same src as the final production), 7 jobs (16 GiB host). Per scene: 1,000 battles, **kernel-event digests identical**,
+`a01b965c0` vs `929c178d4` (same src as the final production), 7 jobs (16 GiB host). Per scene: 1,000 battles, **kernel-event digests identical**,
 no error mismatch (the three budget-stalled battles 434 / 796 / 881 are stalled in both trees, no tail difference). OFF 316,756 commands
 and ON 307,633 commands in both trees. 100 pre-pass focus prints per scene (u = 2: 35, 3: 15, 4: 3, 5: 7, 6: 20, 7: 2, 11: 3; 15 followed
 by a non-USEDMOVE print); **65 changed commands in 24 battles per scene** (976 battles byte-identical), every one a focus print's
@@ -69,7 +69,7 @@ by a non-USEDMOVE print); **65 changed commands in 24 battles per scene** (976 b
 **0 unattributed**. The census player never switches voluntarily and never meets two Focus Punch users, so the order / start / next-pre-pass
 rules are covered by the ROM cards and Tier-1 only.
 
-### 4. `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base a641cc285`
+### 4. `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base a01b965c0`
 
 **PASS, 641 / 641 byte-identical** (235 + 216 + 190; `fixtures/fpc180/differential.txt`); none of the captured frames crosses a Focus Punch pre-pass.
 
@@ -80,12 +80,12 @@ None. No existing frame expectation moved (the full suite had no failure on the 
 
 ### 6. Gates
 
-Code commit with the production change `9f9be3f4a` (src tree `a126ced00b95a9ecd7a55c16c968ce6b199a9dd9`):
+Code commit with the production change `929c178d4` (src tree `a126ced00b95a9ecd7a55c16c968ce6b199a9dd9`):
 
 | Gate | Result |
 |---|---|
 | `npm run test:smoke` | 448 / 448 |
-| full `npm test` (nohup, `POKEBENCH_VITEST_MAX_WORKERS=2`, `/tmp/fpc180-run/full.{log,exit}`), run on `7cd674eea` (same src tree as `9f9be3f4a`; the commits after it are census tooling, receipts and the compare tool) | **exit 0: 1,679 files passed / 44 skipped, 13,926 tests passed / 223 skipped, 0 failed** (2,861 s) = the base's 13,918 + the 8 new |
+| full `npm test` (nohup, `POKEBENCH_VITEST_MAX_WORKERS=2`, `/tmp/fpc180-run/full.{log,exit}`), run on `0bf67e39f` (same src tree as `929c178d4`; the commits after it are census tooling, receipts and the compare tool) | **exit 0: 1,679 files passed / 44 skipped, 13,926 tests passed / 223 skipped, 0 failed** (2,861 s) = the base's 13,918 + the 8 new |
 | `npm run typecheck` / `npm run build` | exit 0 / exit 0 on the final tool fix (the first build failed on type errors in `fpc180Compare.ts`, which `tsc -b` checks through the new test; fixed, output byte-identical, test 8 / 8 re-run) |
 
 ## Remainder
@@ -103,8 +103,8 @@ Code commit with the production change `9f9be3f4a` (src tree `a126ced00b95a9ecd7
 ```sh
 node --experimental-strip-types --no-warnings tools/integration/fpc180Compare.ts [--json] [--rows]     # == fixtures/fpc180/compare-after.*
 npx vitest run tests/fpc180FocusPunchLive.test.ts
-FPC180_CENSUS_JOBS=6 FPC180_FINAL=1 sh tools/integration/fpc180Census.sh <fresh-dir> a641cc285:off 9f9be3f4a:off a641cc285:on 9f9be3f4a:on
+FPC180_CENSUS_JOBS=6 FPC180_FINAL=1 sh tools/integration/fpc180Census.sh <fresh-dir> a01b965c0:off 929c178d4:off a01b965c0:on 929c178d4:on
 #   FPC180_SHARDS="0 1 2" runs only those 100-seed shards; re-invoke with the same root to resume (FPC180_FINAL=1 on the last call)
 python3 tools/integration/fpc180CensusDelta.py <dir>/off-a641cc285 <dir>/off-9f9be3f4a out.json     # == fixtures/fpc180/census-delta-off.json
-npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base a641cc285
+npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base a01b965c0
 ```

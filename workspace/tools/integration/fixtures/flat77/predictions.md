@@ -1,7 +1,7 @@
 # flat77 predictions (committed BEFORE any probe)
 
-Base: master `dd00bdd6e` (production src `d73cf1af`). The production hosts' lends come from `predict.txt`: `flat77Fixtures.py --predict` fixtures
-(the PREDICTED turn-0 history of each staging) run through `flat77Check.ts` with `FLAT77_PREDICT=1` in a git-archive copy of `dd00bdd6e`.
+Base: master `ee8cbc024` (production src `d73cf1af`). The production hosts' lends come from `predict.txt`: `flat77Fixtures.py --predict` fixtures
+(the PREDICTED turn-0 history of each staging) run through `flat77Check.ts` with `FLAT77_PREDICT=1` in a git-archive copy of `ee8cbc024`.
 
 ## Source reads at a Flatter activation (Move_FLATTER, data/battle_anim_scripts.s)
 

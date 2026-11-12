@@ -2,7 +2,7 @@
 
 No file under `src/` and no existing test changed. Tool: `tools/integration/btl188Rows.ts` (read-only; output committed as
 `tools/integration/fixtures/btl188/rows.txt`). Inputs are only committed receipts (`fixtures/off108/receipts/rom-r1.json`, ON runs) and
-production's own commands / kernel events (`trn176Predict.ts`'s `trn176Production`); no fresh mGBA probe was needed. Base `f8c4e65b6`.
+production's own commands / kernel events (`trn176Predict.ts`'s `trn176Production`); no fresh mGBA probe was needed. Base `91de4951d`.
 
 ## Result
 

@@ -1,6 +1,6 @@
 # stat101 (S10A, ISSUES #166 prep): General_StatsChange: ROM ground truth, consumer map, bounded slices
 
-Base: master `a36a956ac` (production src `e3c8092c`). Evidence only, new files only, no production change. Direct mGBA only (never the shared
+Base: master `93f14257b` (production src `e3c8092c`). Evidence only, new files only, no production change. Direct mGBA only (never the shared
 HTTP oracles). Explicit lab seed `305419897` in every scenario. Every probe job ran twice in fresh processes: r1 == r2 byte for byte (22 / 22
 outputs). Production was read only in a git-archive copy of the base. Files: `tools/integration/stat101*.{py,ts,sh}`,
 `tools/integration/fixtures/stat101/` (source table, scenarios, receipts, exposure).
@@ -146,7 +146,7 @@ liveShareCensus delta, and ANIMATION_VERIFICATION claims (one general animation,
 ## 6. Reproduction (from workspace/)
 
 ```
-sh tools/integration/stat101Run.sh <fresh-out-dir-inside-the-repo>            # archive copy of a36a956ac, re-stage (== committed), 22 probe jobs x2
+sh tools/integration/stat101Run.sh <fresh-out-dir-inside-the-repo>            # archive copy of 93f14257b, re-stage (== committed), 22 probe jobs x2
                                                                                 # (r1 == r2, == receipts/probe-sha256.txt), receipts == committed,
                                                                                 # prototype (r1 dumps -> stat101ProtoCompare.ts) == proto-compare.json
 sh tools/integration/stat101Run.sh <fresh-out-dir-inside-the-repo> --census   # + the census exposure (seeds 0..999, 10 shards) == exposure.json
@@ -162,6 +162,6 @@ node --experimental-strip-types --no-warnings tools/integration/stat101ProtoComp
 
 Gates run: `sh tools/integration/stat101Run.sh <fresh> --census` ALL SAME twice (02:13 -> 02:15 without the prototype step, 02:17 -> 02:19
 with it). `git diff --check` clean and `git status --short` = only new stat101 files at every commit (explicit paths). `npm test` in a git-archive copy
-of `b9f874c14` (its own two-commit git repo): **1,624 files / 13,343 tests passed** (44 / 223 skipped), 0 failed (02:20 -> 02:31). `npm run build`
+of `ae7bac232` (its own two-commit git repo): **1,624 files / 13,343 tests passed** (44 / 223 skipped), 0 failed (02:20 -> 02:31). `npm run build`
 in the same copy: **green** (exit 0). The new tools live under `tools/` (outside the tsconfig `src` / `tests` graph), so they cannot affect
 either gate. The later commits only touch this doc.

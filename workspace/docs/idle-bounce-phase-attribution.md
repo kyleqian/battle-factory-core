@@ -257,7 +257,7 @@ flat raw-sine-index offsets on `menuIdleBounce`, each independently
 RAM-probed via `tools/probe/dump-turn9-idle-bounce-off.py` against that
 turn's own OFF trace:
 
-- **turn9-quickattack-off 177/233 -> 233/233** (`62a36f66`). Two
+- **turn9-quickattack-off 177/233 -> 233/233** (`4c5cd974`). Two
   corrections sharing one real oscillator: `drawTurn8BindWindow`'s own
   redraw branch (ticks 10818-10826, turn 9's own
   `FightSubmenuState.openElapsed` not yet registered so turn 8's own
@@ -269,14 +269,14 @@ turn's own OFF trace:
   (`TURN9_FIGHT_SUBMENU_BOUNCE_FREEZE_TICK=10829`) for the mid-window stray
   cursor-reject press — the same freeze-then-permanent-lag shape ISSUES
   #97-B's turn6-reopen fix already established.
-- **turn11-featherdance-off 189/191 -> 191/191** (`511c8c7f`). The
+- **turn11-featherdance-off 189/191 -> 191/191** (`be1b29a4`). The
   FEATHER_DANCE kickoff window's early (not-yet-frozen)
   `turn11KickoffBounceTick` branch carries a flat **+114** raw-index offset
   off the existing formula — RAM-receipt-exact, zero exceptions across 32
   consecutive ticks (13310-13341). No freeze needed: the residual window
   sits well after the last driver hold, right before
   `turn11KickoffBounceTick`'s own existing freeze takes over.
-- **turn12-aerialace-off 246/247 -> 247/247** (`eb0be62b`, salvaged from
+- **turn12-aerialace-off 246/247 -> 247/247** (`b7f27fcb`, salvaged from
   the cap-killed round-7 worker's verified working state). A scoped
   **+237** raw sine-index offset (`TURN12_KICKOFF_BOUNCE_INDEX_OFFSET`),
   RAM-receipt-exact across 31 probed ticks (14344-14374), applied only

@@ -100,7 +100,7 @@ describe("ordinary resolution field: elevated opponents (ISSUES #147)", () => {
     const fb = render(view);
     expect(shadowPixels(fb)).toBe(0);
     expect(Buffer.from(render({ ...view, postBodyShadowHidden: true })).equals(Buffer.from(fb))).toBe(true);
-    // sha256 of the same frame rendered by master 64d84ba36 (before the fix).
+    // sha256 of the same frame rendered by master 4254d9708 (before the fix).
     expect(createHash("sha256").update(fb).digest("hex")).toBe("1222820d5014ed3cf36bb789cad71df7ebacf2ce159f12a5b3d9f26ca230ac35");
   });
 });

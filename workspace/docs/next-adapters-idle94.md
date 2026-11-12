@@ -1,6 +1,6 @@
 # idle94 (S10A timing fidelity, 2026-10-11): the "accepted window starts after the ROM activation" convention, quantified and banked
 
-Base: master `3a76cb3e6` (production src `081a0570`). Evidence only, new files only. The production change is a TEMP PATCH
+Base: master `e3af65432` (production src `081a0570`). Evidence only, new files only. The production change is a TEMP PATCH
 (`tools/integration/fixtures/idle94/idle94-lead-rows.diff`). It was applied only to git-archive copies of the base under the gitignored
 scratch dir. Direct mGBA only (no shared oracle), with an explicit lab seed in every scenario. Every probe job ran twice in fresh
 processes, r1 == r2 byte for byte (138 / 138 outputs, `receipts/probe-sha256.json`).
@@ -12,7 +12,7 @@ processes, r1 == r2 byte for byte (138 / 138 outputs, `receipts/probe-sha256.jso
 | How many live adapters start their accepted window after the activation? | **lead N > 0 on 100 of 552 adapter-sides (51 moves; Double Team and Faint Attack on their one known side), N = 1..19. The census covers them with 5,124 live commands and 29,798 lead frames.** N = 0 on 447. N < 0 on 2 (Bind -2, 26 commands). Unknown on 3 (no ledger row: Double Team opp, Rock Slide ply, Faint Attack opp; the other side is known: 1 / 0 / 4) | `fixtures/idle94/table/` (table.tsv: one row per adapter x side, with the source of every number) |
 | Trail (ROM first inactive minus production end) | **-1 on 257 / 353 known sides**: production's last row IS the ROM's first inactive (cleanup) frame. 0 on 15. Other values on the rest (variants, multi-body ledgers, census-mode durations). 199 sides have no ROM first-inactive frame in any committed receipt | same |
 | What does the ROM show on the N lead rows? | **The idle field with the fully printed "X used Y!" text, byte-identical to the frame before the activation and to window row 0 (production age 0), on 20 / 20 scenarios.** The ROM writes OAM / palette / IO during the lead rows (sprite gfx and palette loads, affine mode, blend setup), but none of it is visible. Bulk Up 3 / 2 / 3 rows, Taunt 9 / 8 / 9, Swagger 6 / 5 / 0..6, Scary Face 3 / 2 / 3, the lead-0 controls none | `receipts/compare-r1.json` (`leadRows`, `leadOamChanged` / `leadPalChanged` / `leadIoChanged`) |
-| Does ordinary play keep the frame AFTER the body aligned? | **No. Each body loses L = pre + N + trail + post frames.** pre = activation - attackanimation = 3 and post = waitanimation release - first inactive = 2 on 20 / 20. Production starts the command where the ROM reaches `attackanimation`, and the next command starts D frames later. **Bulk Up 8, Swagger 12, Taunt 14, Scary Face 22, the lead-0 controls (Swords Dance, Agility) 4** (both sides, 2 species pairs, r1 == r2). Predictions matched 16 / 20. Scary Face was predicted 8: the ROM keeps the script active 14 more rows after production's last row, and they are static | `predictions.json` (committed `34c55a883` / `62ef829be` before the probes), `receipts/compare-r1.json` |
+| Does ordinary play keep the frame AFTER the body aligned? | **No. Each body loses L = pre + N + trail + post frames.** pre = activation - attackanimation = 3 and post = waitanimation release - first inactive = 2 on 20 / 20. Production starts the command where the ROM reaches `attackanimation`, and the next command starts D frames later. **Bulk Up 8, Swagger 12, Taunt 14, Scary Face 22, the lead-0 controls (Swords Dance, Agility) 4** (both sides, 2 species pairs, r1 == r2). Predictions matched 16 / 20. Scary Face was predicted 8: the ROM keeps the script active 14 more rows after production's last row, and they are static | `predictions.json` (committed `8452a157a` / `80f5c9700` before the probes), `receipts/compare-r1.json` |
 | Are the lead rows reproducible from inputs production already has? | **Yes, for 40 of the 49 lead moves.** Their lead rows equal production's own age-0 frame (the ROM row it is accepted on), on both sides. Flamethrower's are NOT static (first change at A+8 of N = 15). 8 moves had no body in the template scenario (Recover / Milk Drink / Synthesis fail at full HP, Encore with no prior move, Thunder Punch / Spark vs a Ground target, Supersonic / Dynamic Punch missed): unproven, left out | `lead-scan/check-r1.json` (98 scenarios x2) |
 | **BANKED temp patch** | `liveMoveIdleLeadRows` + `LIVE_MOVE_IDLE_LEAD_ROWS` (40 ids). A live move-animation command lasts D + N, and its effect age is max(0, elapsed - N): rows 0..N-1 show the age-0 frame, then the unchanged body. A Substitute-swap composite keeps 0 | `idle94-lead-rows.diff` (1 file, +25 / -5) |
 | Patch proof | **Routes 8 / 8** (Bulk Up / Swagger / Taunt / Scary Face x player / opponent, census battles 154 / 398 / 3 / 6 / 286 / 165 / 6 / 24). Patched lead rows equal the base age-0 framebuffer (live, age 0). Patched row N+k equals base row k (sha, age, live) for every k. The next command's first row is equal. r1 == r2 in both trees. With the ROM's lead row == window row 0 (above) and that row's accepted 0 px dense proof, **the lead rows are 0 px by transitivity**. This is not a direct dense ROM-vs-production diff of the lab scenarios | `receipts/render-check.json` |
@@ -70,7 +70,7 @@ ROM rows after production's last row up to F_after: static (equal to production'
 
 ## 4. Pins the patch moves
 
-Patched copy (`git archive 3a76cb3e6` + the diff), `npm test`: **17 files / 31 tests failed, 1,604 files / 13,277 tests passed**
+Patched copy (`git archive e3af65432` + the diff), `npm test`: **17 files / 31 tests failed, 1,604 files / 13,277 tests passed**
 (44 / 223 skipped). Each of the 30 pins asserts a lead move's ordinary-route per-row age sequence `[0..D-1]` (or its row count).
 After the fold they become `[0 x (N+1), 1..D-1]` (N + D rows). They are listed in `tools/integration/fixtures/idle94/pins.json`, which
 also gives each assertion's first line:
@@ -98,8 +98,8 @@ The plain HEAD archive copy passes it.
 
 ## 4b. Gates (evidence only)
 
-- `npm test` in a git-archive copy of `804523481`: **1,621 files / 13,308 tests passed** (44 / 223 skipped), 0 failed. `npm run build` is
-  green in an archive copy of `a51f9a9c5`; later commits change only docs and fixtures. `git diff --check` is clean at every commit.
+- `npm test` in a git-archive copy of `68d402eac`: **1,621 files / 13,308 tests passed** (44 / 223 skipped), 0 failed. `npm run build` is
+  green in an archive copy of `cbea478da`; later commits change only docs and fixtures. `git diff --check` is clean at every commit.
   `git status --short` listed only the new idle94 files.
 - `sh tools/integration/idle94Run.sh <fresh>` (no census) in a fresh dir: **ALL SAME** (scenarios, scenario index, lead-scan scenarios,
   table lead column, 40 / 40 + 98 / 98 probe jobs r1 == r2, 138 / 138 outputs == the committed sha256, compare, lead-scan check, 8 / 8
@@ -108,7 +108,7 @@ The plain HEAD archive copy passes it.
   `HEAD^` exists). Scratch copies live inside the main repo's tree, so without that, git discovery climbs to the LIVE repo.
   `tests/codexLauncherProfiles.test.ts` (it drives the launchers with `cwd: process.cwd()`) then created a nested
   `workspace/.git` in the live checkout at 00:31:48. That turned every git command in workspace/ into a one-commit `main` repo. idle94
-  removed it right away (it held only idle94's own pins commit, which was redone on master as `804523481`). The isolated rerun left the
+  removed it right away (it held only idle94's own pins commit, which was redone on master as `68d402eac`). The isolated rerun left the
   checkout untouched.
 
 ## 5. Reproduction (from workspace/)

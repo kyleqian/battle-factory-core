@@ -1,7 +1,7 @@
 # S10A words57: the words-deferred sprite-order replay past a faint, a recall and a forced switch-out
 
-Worker step (integration lane, base master `843f6bafd`, production src tree `93d0f033`). Final production src tree `10cb692e`
-(commit `b1ce24f94`). Tools / receipts: `tools/integration/words57*.{py,ts,sh}`, `tools/integration/fixtures/words57/`, receipt
+Worker step (integration lane, base master `841d54df4`, production src tree `93d0f033`). Final production src tree `10cb692e`
+(commit `1f4083d8b`). Tools / receipts: `tools/integration/words57*.{py,ts,sh}`, `tools/integration/fixtures/words57/`, receipt
 `tools/integration/fixtures/words57-live-receipt.json`; test `tests/words57DeferredBattleUnits.test.ts`.
 
 ## Results
@@ -18,7 +18,7 @@ which the word-free marker does not hold: below), so the measured gain on the ce
   Factory AI's recall `switch-out {opponent}`, `forced-switch-out` of either side and `switch-in-start` / `-finish` of either side. A player
   faint, the player's recall, party menus / reshows, invalidations, the win slide and Ice Ball markers still decline. The carry learns
   whether a send-out / switch-in followed its body; the words carry (`liveWordsOrderDeferredCarry`) then declines Sand-Attack / Mud-Slap.
-- **Census seeds 0..299 (`liveShareCensus.ts`, 843f6bafd vs final):** live **7,510 → 7,524 commands (94.23 % → 94.40 %)**, **1,114,736 →
+- **Census seeds 0..299 (`liveShareCensus.ts`, 841d54df4 vs final):** live **7,510 → 7,524 commands (94.23 % → 94.40 %)**, **1,114,736 →
   1,117,704 frames (95.42 % → 95.68 %)**: **+14 commands / +2,968 frames, 0 live → fallback regressions, 0 pairing mismatches**, identical
   command sequence (battle, move, side, battlers, frames, duration; only status / liveFrames of the 14 and gate line numbers of 348 declines
   differ) and battle digest `0fd00eae2078…`. Faithful-random history (D3, per command): **153 / 25,599 → 172 / 29,188** (+19 / +3,589): the
@@ -28,7 +28,7 @@ which the word-free marker does not hold: below), so the measured gain on the ce
 - **gates53 instrument rerun (seeds 0..299):** row A **80 / 12,941 → 67 / 10,051 (−13 commands / −2,890 frames)**, the same 2,890 frames
   the census delta reports for the case-local bucket; row B unchanged (12 / 2,071); case-local bucket 102 / 16,630 → 89 / 13,740;
   fidelity 1,167,283 calls / 0 mismatches both runs. **Seeds 0..999: row A 258 / 42,054 → 208 / 32,186 (−50 / −9,868)**, row B unchanged
-  (30 / 4,770), case-local 320 / 53,117 → 270 / 43,249, fidelity 3,937,417 calls / 0 mismatches both runs (843f6bafd's row A is larger
+  (30 / 4,770), case-local 320 / 53,117 → 270 / 43,249, fidelity 3,937,417 calls / 0 mismatches both runs (841d54df4's row A is larger
   than gates53's 247 / 41,104 on `d71d9924`: alloc52 landed in between).
 - **Dense production windows (twice fresh, RAM words pinned, 0 px):** Swift after Rain Dance + RAIN_CONTINUES + an opponent KO + summary +
   send-out (+ SUN_CONTINUES), two species pairs (Snorlax → Lickitung, Slowpoke → Onix), and Swift after RAIN_CONTINUES + the Factory AI's

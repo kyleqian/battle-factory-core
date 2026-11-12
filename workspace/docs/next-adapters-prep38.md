@@ -1,6 +1,6 @@
 # prep38 — live adapters whose DEFENDER is shown as the Substitute doll (evidence only)
 
-Side lane, new files only. Master bb4dc2558 (production src e1a47502). Every scenario was probed with direct mGBA only (no shared oracle),
+Side lane, new files only. Master 1ee47efd6 (production src e1a47502). Every scenario was probed with direct mGBA only (no shared oracle),
 twice from fresh processes, and the two frame series (every RGB sha256) were compared. All **669** receipts are `identical: true` over the
 two fresh runs. A second checker pass over the same probes is **byte-identical** (`diff -r`). The temporary src patches are kept as
 `tools/integration/fixtures/prep38/*.diff`. They were reverted after every use, and `git status src` was clean at every commit.
@@ -140,7 +140,7 @@ anchors in the v1 shape (species hit anchor, doll rest 0) are what made these ro
 - `PREP38_DOLL_REST=species` gives the doll the species idle rest instead of 0. It breaks FAINT_ATTACK MURKROW -> ONIX (32,452 px, rows 0..90;
   ONIX rests at x2 = +1). Every other pair rests at 0, so they do not exercise this input (prep37's caveat).
 
-## 3. The patch shape (file:line at master bb4dc2558)
+## 3. The patch shape (file:line at master 1ee47efd6)
 
 `defender-doll-art-env.diff` (v1; the batch needs only this):
 - `src/engine/liveMoveAnimation.ts:740` `liveMoveSubstituteDollDeclines`: keep only `side(request.attacker).substituteDoll === true` (the

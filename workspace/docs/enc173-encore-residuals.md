@@ -2,7 +2,7 @@
 
 ## 1. Results
 
-**No engine change was needed.** Both residuals PASS at the base commit `5e78e4030` (`git diff 5e78e4030 HEAD -- src` is empty).
+**No engine change was needed.** Both residuals PASS at the base commit `9a133b0a3` (`git diff 9a133b0a3 HEAD -- src` is empty).
 The deliverable is the evidence: three new ROM receipts, a pinning test, and a source argument that case (a) cannot reach a turn start.
 
 | Item | Result |

@@ -8,9 +8,9 @@ that doc says: C1 at turn 1 index 2, C1f by dispatch count only, C2 and C2u at t
 
 | fix | site | change | receipts | commit |
 |---|---|---|---|---|
-| F1 #169 | `battleScriptSwitchinOpcode.ts` (`Cmd_switchineffects` no-ability/no-item arm) | writes `actionsByTurnOrder[slot] = 12` (B_ACTION_CANCEL_PARTNER == B_ACTION_FINISHED, `include/battle.h:39-40`) for the switched-in battler's turn-order slot (`battle_script_commands.c:5270-5274`) | C1, C1f PASS | `021cbae40` |
+| F1 #169 | `battleScriptSwitchinOpcode.ts` (`Cmd_switchineffects` no-ability/no-item arm) | writes `actionsByTurnOrder[slot] = 12` (B_ACTION_CANCEL_PARTNER == B_ACTION_FINISHED, `include/battle.h:39-40`) for the switched-in battler's turn-order slot (`battle_script_commands.c:5270-5274`) | C1, C1f PASS | `d4e6bafa2` |
 | | `factoryBattleScriptFullTurnDecision.ts` | action 2 is skipped on 12 as well as on Pursuit's TRY_FINISH. New `withTurnStartActions` models `SetActionsAndBattlersTurnOrder` (`battle_main.c:4816-4850`): it rewrites slots 0-1 from the chosen actions every turn. The port never reset this array, so without the reset an end-of-turn replacement's 12 (or a Pursuit TRY_FINISH) would cancel the next turn's action 2 | | |
-| F2 #170 | `factoryBattleScriptFullTurnDecision.ts` `runMoveAction` + new `actionEncoreArm` | both Encore arms (`battle_util.c:111-117` match, `:119-128` overwritten) are evaluated on the action-time battler. They come after the noValidMoves arm (`forcedStruggle`) and the MULTIPLETURNS/RECHARGE lock, and before `:130-134`. The executed move, `currentMovePosition` (ppreduce / no-PP canceler) and the `GetMoveTarget` retarget come from `encoredMovePos`. `chosenMovePositions[attacker]` keeps the selected slot, as in source, where only the globals `gCurrMovePos` / `gChosenMovePos` are written (Grudge reads `chosenMovePositions`). For a turn-start Encore this is the same move, slot and retarget as before | C2, C2u PASS | `5ccc4f035` |
+| F2 #170 | `factoryBattleScriptFullTurnDecision.ts` `runMoveAction` + new `actionEncoreArm` | both Encore arms (`battle_util.c:111-117` match, `:119-128` overwritten) are evaluated on the action-time battler. They come after the noValidMoves arm (`forcedStruggle`) and the MULTIPLETURNS/RECHARGE lock, and before `:130-134`. The executed move, `currentMovePosition` (ppreduce / no-PP canceler) and the `GetMoveTarget` retarget come from `encoredMovePos`. `chosenMovePositions[attacker]` keeps the selected slot, as in source, where only the globals `gCurrMovePos` / `gChosenMovePos` are written (Grudge reads `chosenMovePositions`). For a turn-start Encore this is the same move, slot and retarget as before | C2, C2u PASS | `e9be78e9b` |
 
 The switch-in ability path is unchanged. Intimidate and Trace mark `status3` and fall into the cancel arm, as in source,
 where `AbilityBattleEffects` returns 0. Drizzle, Sand Stream, Drought, Forecast and Spikes return to `switchineffects`
@@ -30,13 +30,13 @@ output byte-identical to base. `issue140GetMoveTargetReceipt` (forced Struggle /
 ## Ripple
 
 **Census 0..999** (`liveShareCensus.ts`, 10 `--index-from` shards). The baseline is `thr153/census-master`, which has the
-same `workspace/src` tree as this branch's base `c4a28fff1` (`7dc3a7fc`); its numbers equal rng146's landed census.
+same `workspace/src` tree as this branch's base `7f4a9326e` (`7dc3a7fc`); its numbers equal rng146's landed census.
 
 | tree | commands | live | by count | frames (live) | by frames | battle frames | player turns | changed battles |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
 | base | 27,271 | 27,090 | 99.34 % | 4,158,655 (4,142,021) | 99.60 % | 15,964,011 | 20,381 | — |
-| F1 `021cbae40` | 27,271 | 27,090 | 99.34 % | 4,158,655 (4,142,021) | 99.60 % | 15,963,861 | 20,381 | 1: battle 811 (F1) |
-| F1+F2 `5ccc4f035` | 27,336 | 27,145 | 99.30 % | 4,167,745 (4,150,338) | 99.58 % | 15,986,885 | 20,422 | +11 vs F1, all F2 |
+| F1 `d4e6bafa2` | 27,271 | 27,090 | 99.34 % | 4,158,655 (4,142,021) | 99.60 % | 15,963,861 | 20,381 | 1: battle 811 (F1) |
+| F1+F2 `e9be78e9b` | 27,336 | 27,145 | 99.30 % | 4,167,745 (4,150,338) | 99.58 % | 15,986,885 | 20,422 | +11 vs F1, all F2 |
 
 - **F1.** The command keys and `battleDigestExcludingFrames` are identical to base. Only battle **811** moved: 22,984 →
   22,834 frames (−150). This is exactly the C1f shape. Player BEAUTIFLY's faster WHIRLWIND drags in GLOOM before RHYHORN's

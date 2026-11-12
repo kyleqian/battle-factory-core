@@ -1,6 +1,6 @@
 # `winning-swap` 0:120 first sweep (2026-08-22, main worker)
 
-Tree: master `7f89b708` (this session's `winning-swap` policy commit), render off, default
+Tree: master `255d682c` (this session's `winning-swap` policy commit), render off, default
 per-policy budget (`DEFAULT_MAX_FRAMES_BY_POLICY["winning-swap"]` = 1,000,000 frames, same as
 `winning`). Command: `node --experimental-strip-types tools/soak/randomRoundSoak.ts --policy
 winning-swap --seeds A:B --render-every 0`.

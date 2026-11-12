@@ -1,7 +1,7 @@
 # cln239 — Claude-only launchers
 
 Plan Cleanup step 3. The repo now has one supervisor script and one worker
-launcher, both Claude only. Parent of this step (recovery base): `30360d7cf`.
+launcher, both Claude only. Parent of this step (recovery base): `56f4bbb0a`.
 
 ## Kept
 
@@ -90,7 +90,7 @@ scout docs):
 ## Recovery
 
 Everything is in git at the parent. Restore any removed or moved path with
-`git checkout 30360d7cf -- <path>` (for moves, restore the old root path; the
+`git checkout 56f4bbb0a -- <path>` (for moves, restore the old root path; the
 archived copy stays). Revert a whole commit of this step with `git revert`.
 
 ## Verification

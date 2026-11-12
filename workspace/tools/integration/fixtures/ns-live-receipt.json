@@ -1,6 +1,6 @@
 {
  "schema": "ns-live-receipt/v1",
- "testedCommit": "31a5e2e54cafc7e7b6b66ac612f2d50eefe15daf",
+ "testedCommit": "bea583faafa014c95701a92e74ea097a869a59b5",
  "testedSrcTree": "0fa8e76bb4a595691b4477094218de91973c006b",
  "dirty": false,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
@@ -1367,8 +1367,8 @@
   "change": "src/animation/shockWave.ts shockWaveTimingFor derives the timing from the geometry when the input sets derivedTiming (the live builder); absent = the accepted side tables; shockWaveSourceAtAge takes the derived shakeStart",
   "stagedDigest": {
    "tool": "npx vite-node tools/integration/shockWaveStagedDigest.ts OUT.json",
-   "beforeCommit": "f61cffc66",
-   "afterCommit": "31a5e2e54cafc7e7b6b66ac612f2d50eefe15daf",
+   "beforeCommit": "bd5ee762e",
+   "afterCommit": "bea583faafa014c95701a92e74ea097a869a59b5",
    "byteIdentical": true,
    "digests": {
     "player-back": {

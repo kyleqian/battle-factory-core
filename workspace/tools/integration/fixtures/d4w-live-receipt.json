@@ -1136,17 +1136,17 @@
   }
  ],
  "gates": {
-  "testedCodeCommit": "12776f80614c482e07e7921277ab3bcbc9778a09",
+  "testedCodeCommit": "f976d1c27e475d866e007fa21be469c96920b707",
   "srcTree": "15be9e2a9fd19ccad58e27650fe9451cb1f0d04a",
-  "base": "e25fa104c (src 9a1e8a70)",
+  "base": "1f6057c54 (src 9a1e8a70)",
   "targeted": "24 files / 401 tests passed (4 workers): new liveD4wWidening / liveSpeciesAudit14Fixes + touched adapters (oam1, prep13, Skill Swap / Flatter, Bite, Confuse Ray, Substitute fade / doll / swap) + healthbox + liveShadowRows + liveStatusImplementedCount + factoryAnimationInventory + animationBoundaryRatchet + playableAnimationIntegration + liveFaithfulTimingAdapters + liveMoveTimingPolicy + liveSpriteAllocator + liveIssue151Timing + liveSpeciesAudit13Fixes + pursuitReducer",
   "typecheck": "pass",
   "smoke": "8 files / 448 tests passed",
   "fullSuite": "1570 files passed / 44 skipped, 12936 tests passed / 223 skipped, 467.5 s (POKEBENCH_VITEST_MAX_WORKERS=4, --maxWorkers=4)",
   "build": "pass",
-  "differential": "fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base e25fa104c: 624 / 624 captures byte-identical",
+  "differential": "fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 1f6057c54: 624 / 624 captures byte-identical",
   "d4aRegressionAll": "204 fixtures (incl. the 43 d4w windows), 0 nonzero exits, 0 violations; 153 selected-phase windows all 0 px; 51 other-phase windows only on documented rows; every window's 2 fresh runs identical",
-  "diffCheck": "git diff --check e25fa104c..HEAD clean",
+  "diffCheck": "git diff --check 1f6057c54..HEAD clean",
   "census": "245+13+18+0+0=276 (docs/remaining-adapters-census.md)"
  }
 }

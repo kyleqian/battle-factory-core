@@ -1,6 +1,6 @@
 {
  "schema": "d4d2-live-receipt/v1",
- "testedCommit": "e3a3f346cbc5c1ab7dfa7c17d7923bc9d67ae425",
+ "testedCommit": "3627faa75bbdc68c95be621abb685f0a3fb462ed",
  "testedSrcTree": "797960f7fc8d85f206c17ed940a95716c8e0ad08",
  "dirty": false,
  "policyVersion": "live-move-timing.v1.dominant-measured-phase.tie-no-optional-event",
@@ -2772,6 +2772,6 @@
  ],
  "part0": {
   "change": "d4aTimingCheck.ts: an other-phase window whose move has no documented ages is documented-empty (any nonzero residual fails)",
-  "rerun": "55 d4a-live fixtures, 55/55 exit 0, 0 violations (commit 0d844a26b)"
+  "rerun": "55 d4a-live fixtures, 55/55 exit 0, 0 violations (commit 91145fd70)"
  }
 }

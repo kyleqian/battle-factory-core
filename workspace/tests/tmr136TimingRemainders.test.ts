@@ -140,7 +140,7 @@ describe("tmr136 (B): Smokescreen 108's use-keyed D4 policy (the battle's first 
     const on = generatedCommandAnimationReplay(4, "on", Array(8).fill(1), 0, true, true);
     const off = generatedCommandAnimationReplay(4, "off", Array(8).fill(1), 0, true, true);
     const bodies = on.animations.filter((a) => a.moveId === 108);
-    // base 439575012: 130 / 130 / 130 rows (3 universal pre + 125 + 2 post); tmr136: 3 + 124 + 2 for the battle's first Smokescreen.
+    // base 5c170e32f: 130 / 130 / 130 rows (3 universal pre + 125 + 2 post); tmr136: 3 + 124 + 2 for the battle's first Smokescreen.
     expect(bodies.map((b) => b.ages.length)).toEqual([132, 133, 133]); // ont193: + the Smokescreen (108) Scene ON script tail, 3 rows per body
     expect(bodies.every((b) => b.adapterActive.every(Boolean))).toBe(true);
     expect(on.stalled).toBe(off.stalled);

@@ -3,8 +3,8 @@
 prep43 (`docs/next-adapters-prep43.md`) left the Giga Drain body BLOCKED: its majority plan matched 9 / 10 probes, a DIGLETT
 opponent attacker flipped one same-frame orb pair (window 18, `D9,7` vs `D7,9`). This step proves the mechanism, models it from
 the renderer's own orb arithmetic, and lets the production order host apply the computed plan. Mega Drain (72), the same orb
-family, had no production plan either and gets the same treatment. Base master `3092cf05f` (src tree `df965113`); final
-production code `5dacde419` (src tree `6d17aa72`). Receipts: `tools/integration/fixtures/gdgeo/`, summary
+family, had no production plan either and gets the same treatment. Base master `a556f6cdf` (src tree `df965113`); final
+production code `aacedbdc6` (src tree `6d17aa72`). Receipts: `tools/integration/fixtures/gdgeo/`, summary
 `tools/integration/fixtures/gdgeo-live-receipt.json`.
 
 ## Mechanism (verdict: CONFIRMED, from source and RAM)
@@ -108,16 +108,16 @@ exactly the two classes per move and side; the plan never differs from the major
 ## Production effect
 
 - **Corpus replay** (`prep43CorpusReplay.ts`, turn-keyed; geometry from each scenario's lead species; "before" = the same tool
-  on the `3092cf05f` src, which ignores the field): corpus 1366 edges, known 1136 → 1136 (its two Giga Drain and two Mega Drain
+  on the `a556f6cdf` src, which ignores the field): corpus 1366 edges, known 1136 → 1136 (its two Giga Drain and two Mega Drain
   bodies are each scenario's last body: no edge follows), prep43 probes known 151 → 155, gdgeo Giga Drain grid 32 → 40, Mega
   Drain grid 17 → 23; **0 mismatches** everywhere.
-- **Census** seeds 0..299 (`liveShareCensus.ts`, `prep43CensusDelta.py`), `3092cf05f` vs `5dacde419`: live by count
+- **Census** seeds 0..299 (`liveShareCensus.ts`, `prep43CensusDelta.py`), `a556f6cdf` vs `aacedbdc6`: live by count
   **82.48 → 83.10 %** (6574 → 6623 of 7970, +49), by presented frames **80.87 → 81.76 %** (944805 → 955124 of 1168273, +10319);
   **0 live → fallback regressions**, 0 pairing mismatches (identical command sequence), battle digest identical
   (`bb30f572…`); render sanity 9847 sampled live frames, 0 throws. Before-reason attribution: body 202 player 24 / 33 commands
   became live, 202 opponent 15 / 42, 72 opponent 8 / 18, 72 player 2 / 8; the rest stop at the next unplanned unit (next-mon
   summary, bodies 56 / 291 / 28, WISH_HEAL, later-body gates). No order-host state `body 202` / `body 72` remains. Report
-  sha256: before `c4d8255e…`, after `e60c33e7…` (full hashes in the receipt; the `3d6827b72` run differed only in the cited
+  sha256: before `c4d8255e…`, after `e60c33e7…` (full hashes in the receipt; the `8e5c778cf` run differed only in the cited
   `liveMoveAnimation.ts` gate line numbers).
 
 ## Tests

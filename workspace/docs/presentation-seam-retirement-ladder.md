@@ -171,9 +171,9 @@ neither is a re-proposal of anything in §0/§2.
 
 ### Slice 1 — LANDED 2026-08-19: re-time the turns 9-12 Scene-OFF residuals
 
-**Final state (main lane, three commits + finisher):** `62a36f66`
-(turn9-quickattack-off 177/233 -> 233/233), `511c8c7f`
-(turn11-featherdance-off 189/191 -> 191/191), `eb0be62b`
+**Final state (main lane, three commits + finisher):** `4c5cd974`
+(turn9-quickattack-off 177/233 -> 233/233), `be1b29a4`
+(turn11-featherdance-off 189/191 -> 191/191), `b7f27fcb`
 (turn12-aerialace-off 246/247 -> 247/247, salvaged from a cap-killed
 worker). All three now carry red-verified Tier-1 pins
 (`tests/battleScene.test.ts`, "ISSUES #39 rank-5 slice 1 (<sha>)" blocks)
@@ -181,7 +181,7 @@ directly against the fixed `menuIdleBounce` closed form, each paired with a
 pre-fix (offset 0) mismatch proof. Differential guard
 (`compare:differential -- turn10-aerialace-off turn10-rockslide-off
 turn10-menu-off turn9-rockslide-off turn11-rockslide-off
-turn12-rockslide-miss-off --base c4441e8e --summary`) is byte-identical
+turn12-rockslide-miss-off --base 59a1d2d4 --summary`) is byte-identical
 (1312 captures). Spot-guards `turn5-resolve-off-a` 196/196 and
 `turn5-confirm-off-a` 132/132 unaffected. `npm test`/`npm run
 build`/`npm run typecheck` green. Landed addendum:
@@ -259,7 +259,7 @@ any window outside turns 9-12.
 
 ### Slice 2 (second — mechanical, no semantic risk): continue the `battleScene.ts` → `battleSceneCanonical.ts` split
 
-**Progress (2026-08-19, main worker session 10, `f15cb254`):** batch 5 landed
+**Progress (2026-08-19, main worker session 10, `9ccc9cbc`):** batch 5 landed
 12 more symbols (CANONICAL 226 → 214, bucket-acyclicity stays CLEAN,
 differential 1241/1241 byte-identical). The remaining 214 are NOT all
 equally blocked: this session found the partition script's CLEAN acyclicity
@@ -276,7 +276,7 @@ resolution. The two `let` caches (`turn10OnixDarkPaletteCache`,
 #39's named obstacle — their consumers reassign them, impossible across an
 ES import binding).
 
-**Progress (2026-08-19, main worker session 11, `74f3c1c2`):** batch 6
+**Progress (2026-08-19, main worker session 11, `ce8e3892`):** batch 6
 landed 41 more symbols under ISSUES #39's newly-authorized decision (a)
 (CANONICAL 214 → 173, bucket-acyclicity stays CLEAN, differential
 1241/1241 byte-identical, full `npm test` 10,114/10,114). All 41 are
@@ -292,7 +292,7 @@ it eagerly — moving it would make battleScene.ts itself eagerly read an
 imported binding, the reverse-direction version of slice 1's TDZ hazard)
 and 6 more turned out to import `src/animation/*` identifiers
 
-**Progress (2026-08-19, main worker session 12, `75b73fab`):** batch 8
+**Progress (2026-08-19, main worker session 12, `a2a57e91`):** batch 8
 landed 47 more symbols (CANONICAL 123 → 76, bucket-acyclicity CLEAN,
 differential 1241/1241 byte-identical, full `npm test` 10,123/10,123).
 Found a real gap in the eligibility scanner's let-cache hazard class: it

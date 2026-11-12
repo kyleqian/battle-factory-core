@@ -1,6 +1,6 @@
 # S10A prep61: the semi-invulnerable two-turn units (Fly 19, Bounce 340, Dive 291)
 
-Side lane, evidence only, new files only. Method: prep45 / plans48 / plans51 / plans54. Base: master `be45be555` (production src tree
+Side lane, evidence only, new files only. Method: prep45 / plans48 / plans51 / plans54. Base: master `395f619dd` (production src tree
 `b13260d0`). No tracked file was changed. The production experiment is `tools/integration/fixtures/prep61/prep61-temp-src.diff`, applied
 and reverted by `prep61Run.sh`. Receipts are in `tools/integration/fixtures/prep61/`. Every probe was run twice in fresh direct-mGBA
 processes; the shared HTTP oracles were never touched.
@@ -39,7 +39,7 @@ allocation window, and created / destroyed / F must equal the ROM):
 
 | | live by count | live by frames |
 |---|---|---|
-| `be45be555` | 7710 / 7970 = 96.74 % | 1144356 = 97.96 % |
+| `395f619dd` | 7710 / 7970 = 96.74 % | 1144356 = 97.96 % |
 | prep61 patch | **7721 = 96.88 % (+11)** | **1145747 = 98.08 % (+1391)** |
 
 Gains by first stop:
@@ -64,7 +64,7 @@ Chain predictor (`prep45Chains.py --cleared "body 19 FLY|body 340 BOUNCE" --afte
 Its order is now proven to be a function of RAM-read words through the accepted reducer (below). The words57 / words59 deferred lend
 does **not** cover it yet; see "Dive and the deferred words lend".
 
-## (1) Ranking (`be45be555`, seeds 0..299)
+## (1) Ranking (`395f619dd`, seeds 0..299)
 
 `prep61OrderCensus.ts` is prep45OrderCensus.ts verbatim, plus `--events`: every semantic event the production order host consumed, with
 the host state after its step. Its report is byte-identical to prep45's. `prep61Rank.py` reads the event log. Receipts:

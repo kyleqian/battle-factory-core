@@ -2,14 +2,14 @@
 
 Sweeps the `winning`-policy depth reachable with the union of everything
 landed since the 2026-08-19 baseline: the ISSUES #99 fix (soak driver
-finally answers its own post-win swap offer, `9ca4a8c9`/`6fb82d47`,
+finally answers its own post-win swap offer, `ed783b57`/`c13b8aea`,
 PROGRESS 1358), the ISSUES #100 fix (`{B_CURRENT_MOVE}` resolver for
 `STRINGID_NATUREPOWERTURNEDINTO` + the sibling `STRINGID_PKMNWASDEFROSTEDBY`
-gap, `633ca816`, PROGRESS 1360), and M-B step 2a (`pickWinningFightSlot` —
+gap, `b8868647`, PROGRESS 1360), and M-B step 2a (`pickWinningFightSlot` —
 `winning` now picks fight moves by power × type-effectiveness × STAB,
-`ff5e84d6`, folded at `82580f0f`, PROGRESS 1359). None of that union had
+`286f2938`, folded at `ae1f24eb`, PROGRESS 1359). None of that union had
 been swept before this session. Master HEAD at the start of this session:
-`3be9bae5`. Measurement + triage only — no `src/`/`tests/` change this
+`e0f9137f`. Measurement + triage only — no `src/`/`tests/` change this
 session (two new crash signatures found are filed as ISSUES entries, not
 fixed, per the standing convention).
 

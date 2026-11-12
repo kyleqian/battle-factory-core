@@ -1,7 +1,7 @@
 // cf78: audit 19's 599 consumer windows under the cf78 Castform gate. Per window: the slot forms at its body through PRODUCTION's
 // applyLiveCastformFormEvents over the fixture history (every event strictly before the window's own body event), the field through
 // withLiveCastformForms, and the gate liveCastformFormDeclines (liveMoveAnimationPresentation returns null on it before reading any
-// lend / words / plan). `liveBefore` = the committed audit-19 lends.txt flag (production on c68111480 with the audit's lend replay);
+// lend / words / plan). `liveBefore` = the committed audit-19 lends.txt flag (production on 9115d5ec3 with the audit's lend replay);
 // `liveAfter` = liveBefore && !gate. The audit-19 verdict (verdicts.txt) is carried for the px column.
 //   node --experimental-strip-types --no-warnings tools/integration/cf78Audit19Windows.ts > out.jsonl
 import { readdirSync, readFileSync } from "node:fs";

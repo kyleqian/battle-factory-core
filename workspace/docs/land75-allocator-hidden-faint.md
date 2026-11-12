@@ -1,21 +1,21 @@
 # S10A land75: hist73 folded (allocator history for 37 bodies, a hidden battler's faint / reshow)
 
-Integration lane. Base master `dc173666b` (src `e6f98bf9`). Tested code `bcc550911` (src `8e543d91`, unchanged since `eb7b4796f`).
+Integration lane. Base master `ce51c7444` (src `e6f98bf9`). Tested code `c472ed58b` (src `8e543d91`, unchanged since `aa2f21f4a`).
 Receipt: `tools/integration/fixtures/land75-live-receipt.json`. Evidence: `docs/next-adapters-hist73.md` (direct-mGBA probes, folded here).
 
 ## 1. Results
 
 | | live by count | live by frames | gain |
 |---|---|---|---|
-| master `dc173666b` | 25,784 / 27,518 = **93.70 %** | 3,859,021 / 3,952,274 = **97.64 %** | |
-| + Part A (`01497ab0e`) | 25,903 = **94.13 %** | 3,871,271 = **97.95 %** | **+119 / +12,250** |
-| + Part B (`eb7b4796f`, final) | 25,938 = **94.26 %** | 3,876,277 = **98.08 %** | **+154 / +17,256** |
+| master `ce51c7444` | 25,784 / 27,518 = **93.70 %** | 3,859,021 / 3,952,274 = **97.64 %** | |
+| + Part A (`4b2e0fe17`) | 25,903 = **94.13 %** | 3,871,271 = **97.95 %** | **+119 / +12,250** |
+| + Part B (`aa2f21f4a`, final) | 25,938 = **94.26 %** | 3,876,277 = **98.08 %** | **+154 / +17,256** |
 
 Census: seeds 0..999, 10 `--index-from` shards (they concatenate to one `--seeds=0..999` run; `hist73LiveShareCensus.ts` =
 `liveShareCensus.ts` + `--index-from`). Both deltas: same command count, KEY sequence (battle, kind, moveId, side, attacker, target),
 frames per command, battle digest `11b30db7a344` and KEY digest; **0 live -> fallback regressions** (`census/keycheck-*.txt`).
-The final gain equals hist73's measurement on `ff4baec48` exactly. hist73's chain predictor, re-run on `dc173666b` (179 allocator
-declines / 18,144 frames; ice72 cleared one chain since `ff4baec48`), predicts Part A at 119 / 12,250 = measured. Part B adds 35 / 5,006:
+The final gain equals hist73's measurement on `a7904fcc0` exactly. hist73's chain predictor, re-run on `ce51c7444` (179 allocator
+declines / 18,144 frames; ice72 cleared one chain since `a7904fcc0`), predicts Part A at 119 / 12,250 = measured. Part B adds 35 / 5,006:
 the 26 / 4,010 faint-of-hidden bodies and the 4 / 616 reshow-with-hidden bodies, 3 / 228 allocator declines in battle 713 (the forced
 switch-in reseeds), and 2 / 152 bodies where the Part B reseed keeps the allocator known into bodies that the Part A ids no longer
 invalidate. Residual: allocator history unknown 55 / 5,514 (hist73's post-KO order-host reseed blockers, out of scope).
@@ -60,16 +60,16 @@ at a reshow == the shown reshow; hidden player still invalid). **Not in hist73's
 route seed 84 `[3, 3]`, which flips to exact (Silver Wind 318) and is dense-checked above. New: `tests/land75WallRoutes.test.ts`, and
 `tests/land75HiddenBattler.test.ts` (`hidden-battler-audit.json` `allSame` / `allIdenticalAB`; battles 533 / 713 route pins with parity).
 
-Gates on `bcc550911`: hist73 related sets (A: 35 files / 485 on the Part A code; B + land75: 65 / 701), inventory + playable + land75
+Gates on `c472ed58b`: hist73 related sets (A: 35 files / 485 on the Part A code; B + land75: 65 / 701), inventory + playable + land75
 15 / 15, typecheck, smoke 448, full suite as two shards **1,609 files / 13,231 tests**, build, differential 624 / 624 byte-identical vs
-`dc173666b`, `git diff --check`.
+`ce51c7444`, `git diff --check`.
 
 ## 2. Reproduction (from workspace/)
 
 ```
 sh tools/integration/land75Run.sh <fresh-dir>      # restage, probe, re-derive, audit18Check x5 (2 fresh probes each), route check; same / DIFF
 node --experimental-strip-types --no-warnings tools/integration/land75Parity.ts --seed=533 --streak=32   # and --seed=713 --streak=3
-# census: 10 shards per tree (base = git archive dc173666b), then
+# census: 10 shards per tree (base = git archive ce51c7444), then
 #   hist73Merge.py <shard-dir> <out.json> <out.jsonl>; hist73KeyCheck.py / prep43CensusDelta.py <base.json> <base.jsonl> <after.json> <after.jsonl>
 #   predictor: hist73AllocatorCensus.ts shards on the base -> hist73Merge.py -> hist73Chains.py <jsonl> <out> --cleared <the 37 ids>
 python3 tools/integration/land75Receipt.py <tested-commit> <src-tree> [gates.json]

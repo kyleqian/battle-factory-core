@@ -1,7 +1,7 @@
 # Soak depth re-measurement — 2026-08-20 (post-ISSUES #99 fix)
 
 Re-measures play depth for all three soak policies after the ISSUES #99
-fix (`9ca4a8c9`, pinned `6fb82d47`): the soak driver's `onPostwin` used to
+fix (`ed783b57`, pinned `c13b8aea`): the soak driver's `onPostwin` used to
 answer the dialogue-page-4 swap offer through the frozen continuation-menu
 branch instead of its own branch, so `vanilla` accepted **every** swap
 despite its own "declined" doc comment, and `full`/`winning` accepted

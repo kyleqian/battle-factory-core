@@ -180,7 +180,7 @@ history.
   runner fails outright on a tree where the patch is already landed (fix114 on the Struggle union) (~3-10 min x 6). (2)
   `land82CensusCheck.py`'s `liveFramePctAfter` divides the final arm's live frames by the BASE arm's frame total; when live bodies grow
   the timeline (Struggle 112 rows vs ~32 fallback) it over-reports (sdl119 / stf115 published 99.44 % for a true 99.31 %; supervisor
-  correction `33306f735`) — use the merged report's own percentages. (3) `prep43CensusDelta.py` / `ret88Census.sh compare` assert equal
+  correction `5ea7126dc`) — use the merged report's own percentages. (3) `prep43CensusDelta.py` / `ret88Census.sh compare` assert equal
   command counts and abort on any budget-stalled tail (seeds 434 / 796 / 881) (~2-5 min x 3). (4) The serial wind-down vanilla soak
   gate runs ~44 min (every seed to the 600k budget); workers and the supervisor use `--parallel 5` (~10 min). (5) `liveShareCensus.ts`
   is Scene ON only; Scene OFF timing changes need off108Route.ts / olnd113 tools (~5 min). (6) `audit20Check.ts` aborts a whole
@@ -519,7 +519,7 @@ history.
   paths, zero `oracle/` commits — disproved in ~3 min via
   `git log --name-only --since`, kept both services, no restart.)
   (2026-08-18 orient: both ports FAILed; only non-workspace
-  commit since the 8014 start was `3e29880b`, whose own message says it was
+  commit since the 8014 start was `4dac4a35`, whose own message says it was
   verified against these restarted services — kept, no restart, ~4 min.)
   (2026-08-16: FAILed because services started 09:45:59 on the
   new working tree, 6 min before the commit was recorded at 09:51:59 — the
@@ -533,7 +533,7 @@ history.
 - **Workaround:** before believing a FAIL, run
   `git -C ../.. log --oneline --since=<process start date> -- oracle/`. Empty
   output means the process is current and the failure is spurious. Since
-  3e29880b there is also a positive probe: `/v1/info`'s
+  4dac4a35 there is also a positive probe: `/v1/info`'s
   `capabilities.battleLab` block (e.g. `factoryBrainWalkup: true`) proves
   which schema the live process serves.
 - **Real fix:** compare the process start time against the last commit that
@@ -561,7 +561,7 @@ history.
   brief error). **2026-08-20 (ESCALATED): a side worker `cd`'d to the main
   tree's absolute `.../workspace` path, COMMITTED its test file to master
   (`ffc839db`), noticed via `git branch --show-current`, then ran
-  `git reset --hard a97d3b19` IN THE MAIN TREE while a main-lane worker was
+  `git reset --hard 2e656f84` IN THE MAIN TREE while a main-lane worker was
   live** — harmless only because that worker had no tracked edits yet (its
   untracked sweep log survived). Both trees end in `workspace/`, which is
   why the absolute-path slip keeps recurring. Every side brief now carries:
@@ -699,10 +699,10 @@ history.
   auto-derive the line in the generator.
 - **Hits:** 3. 2026-08-20 ×2: the #101/#103 worker hit it (5 pinned
   `factoryAiCheckViability.ts:NNNN` sites, "opaque throw", ~5 min), then the
-  SUPERVISOR's own comment-only follow-up commit (`226ecfd5`, +5 lines in the
+  SUPERVISOR's own comment-only follow-up commit (`95064eb7`, +5 lines in the
   same file) shifted the freshly re-pinned five again and left master's
   smoke at 443/444 for ~25 min until the next worker flagged it (re-pinned in
-  `a97d3b19`). Rule now: ANY edit to a file named in
+  `2e656f84`). Rule now: ANY edit to a file named in
   `EXPECTED_RECOVERED_STRING_SITES` — comments included — runs
   `tests/abilityItemParityCensus.test.ts` before commit.
 

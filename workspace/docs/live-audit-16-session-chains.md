@@ -2,13 +2,13 @@
 
 This audit renders a consumer's complete dense window (activation through cleanup) after a UNIT that today's folds made lend a known
 allocator / order host, and compares every row with fresh ROM frames. The folds are:
-- `0a74c111a` alloc50 + `a860ded6a` alloc52: status animations SLP / CONFUSION / PSN / PRZ / BRN / FRZ / INFATUATION / CURSED / NIGHTMARE
+- `8e72343a7` alloc50 + `2fb7ccc62` alloc52: status animations SLP / CONFUSION / PSN / PRZ / BRN / FRZ / INFATUATION / CURSED / NIGHTMARE
   no longer invalidate the allocator, and 40 more move bodies are allocator net-zero (Seismic Toss, Ice Ball, Future Sight + its delayed
   hit, Pursuit, Perish Song, ...);
-- `b8b169745` plans51: Outrage 200 and FOCUS_BAND (+ its carried slide sprite) are EXACT order units;
-- `b986bb5b2` later58: Signal Beam / Bonemerang / Outrage (and others) render at LATER bodies when both idle rests are {0,0}.
+- `f038cc861` plans51: Outrage 200 and FOCUS_BAND (+ its carried slide sprite) are EXACT order units;
+- `8f2a2974f` later58: Signal Beam / Bonemerang / Outrage (and others) render at LATER bodies when both idle rests are {0,0}.
 
-Master is b986bb5b2 (production src tree 64e91f1d). Every run was direct mGBA (`prep48Probe.py`); no shared oracle was touched. No src
+Master is 8f2a2974f (production src tree 64e91f1d). Every run was direct mGBA (`prep48Probe.py`); no shared oracle was touched. No src
 edit was made (no DEFECT needed a patch proof). Evidence is in `tools/integration/fixtures/audit-16/`.
 
 **Totals.** 122 scenarios (120 with a consumer window), **239 consumer windows**, 239 live, 0 declined. Every window ran in two fresh probe processes with identical
@@ -34,7 +34,7 @@ two more fresh runs) gave the same digests and px on 236 windows (the 3 INFATUAT
 | Consumer | Windows / rows | Counter evidence | Verdict |
 |---|---|---|---|
 | **Light Screen 113, PLAYER attacker** (CHANSEY -> SNORLAX) | **3 windows, 2,473 px on one row each** (bbox x 91..132 y 48..111): CONFUSION chain (Confuse Ray + 2 x Status_Confusion + self-hit) row 59; Future Sight setup chain row 59; PRZ chain (Thunder Wave + 2 x Status_Paralysis) **row 19**. The entry-lend control has the same 2,473 px on the same row (the lend is not involved). | `audit15VblankProbe.py` IO vs buffered BLDALPHA: in all 3 residual windows the residual row is exactly the frame whose BLDALPHA write was **buffered** (row 59: IO 0x0709, buffer 0x0808, waiting [0x52]; row 19: IO 0x060a, buffer 0x050b, waiting [0x52]). The 0-px player windows measured (no-unit control rows 19 + 59; SLP chain rows 19 + 59) write directly (IO == buffer, list empty). Lag ages are [68, 69] in all 5 windows measured (so it is not a lag frame). | **TIMING-PHASE** (D4 VBlank-write class of audit 15 / lsbz). New facts: the PLAYER side has the hold phase too (audit 15 measured it direct in 3 / 3), and at a second step (row 19). Player-side production renders the direct phase (dominant: 15 / 20 player Light Screen windows over both pairs are 0 px). |
-| **Light Screen 113, OPPONENT attacker** | SNORLAX / CHANSEY no-unit control: 2,658 px row 59. EXEGGCUTE / ONIX (the accepted pair): Future Sight and Seismic Toss chains 2,658 px row 59; the CONFUSION chain (Confuse Ray + Status_Confusion + the berry's HELD_ITEM_EFFECT) **5,343 px = row 19 (2,685) + row 59 (2,658)** | Every residual row is buffered (row 59: IO 0x0709 / buffer 0x0808; row 19: IO 0x060a / buffer 0x050b; waiting [0x52]); the 0-px EXEGGCUTE / ONIX control is direct on rows 19 and 59; the SNORLAX / CHANSEY CONFUSION chain is direct on row 59. Opponent Light Screen: 10 / 14 windows direct and 0 px | **TIMING-PHASE**: lsbz's D4 policy (`bb0415c82`, no hold) renders the dominant direct phase; the hold appears on the first body of one pair and after some units of the other, so it is not keyed on the history |
+| **Light Screen 113, OPPONENT attacker** | SNORLAX / CHANSEY no-unit control: 2,658 px row 59. EXEGGCUTE / ONIX (the accepted pair): Future Sight and Seismic Toss chains 2,658 px row 59; the CONFUSION chain (Confuse Ray + Status_Confusion + the berry's HELD_ITEM_EFFECT) **5,343 px = row 19 (2,685) + row 59 (2,658)** | Every residual row is buffered (row 59: IO 0x0709 / buffer 0x0808; row 19: IO 0x060a / buffer 0x050b; waiting [0x52]); the 0-px EXEGGCUTE / ONIX control is direct on rows 19 and 59; the SNORLAX / CHANSEY CONFUSION chain is direct on row 59. Opponent Light Screen: 10 / 14 windows direct and 0 px | **TIMING-PHASE**: lsbz's D4 policy (`28f1f1ee4`, no hold) renders the dominant direct phase; the hold appears on the first body of one pair and after some units of the other, so it is not keyed on the history |
 | **Light Screen 113, PLAYER attacker, EXEGGCUTE / ONIX** | no-unit control and the SLP chain: 2,571 px on row 59 | Row 59 buffered in both; the PRZ chain's row 59 direct (0 px) | **TIMING-PHASE** (same class; player Light Screen over both pairs: 15 / 20 windows direct and 0 px) |
 
 ### Non-defect table

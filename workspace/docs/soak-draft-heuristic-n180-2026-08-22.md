@@ -18,12 +18,12 @@ like-for-like comparison; it is not reproduced here.
 
 1. Rebased `wip/mb-step2b-draft-heuristic`'s three commits (`04f57634` feat,
    `33290378` test rebase, `18222b3a` §6 doc) onto this worktree's base
-   (master `01ec975a`). The rebase was conflict-free: `git rebase --onto`
+   (master `96a64a8e`). The rebase was conflict-free: `git rebase --onto`
    auto-merged the feature/test commits against the round-identity reset in
    `trackProgress` and the new ISSUES #104 pins because the two diffs touch
    disjoint regions of `randomRoundSoakDriver.ts` / `randomRoundSoak.test.ts`.
    The third commit (`18222b3a`, the §6 doc text) dropped as "already
-   upstream" — that content is already on master via `7b53b7a2`.
+   upstream" — that content is already on master via `4a9b2636`.
    `npm run test:smoke` (444/444) and the full `tests/randomRoundSoak.test.ts`
    (38/38) both green post-rebase, landing as `6487ecff` (feat) and
    `b7b89e1c` (test fix) on `worker/side-20260822-135030`.
@@ -147,7 +147,7 @@ the supervisor's call.**
 
 ## Baseline arm + verdict (supervisor, 2026-08-22 14:20)
 
-Baseline = master `01ec975a` WITHOUT the heuristic, same seeds 0:180, same budgets, run in a
+Baseline = master `96a64a8e` WITHOUT the heuristic, same seeds 0:180, same budgets, run in a
 clean worktree concurrently with the heuristic arm (4 × 45-seed chunks):
 
 | arm | OK | CRASH | HANG | carry ≥ 7 | ≥ 14 | ≥ 21 | ≥ 28 |

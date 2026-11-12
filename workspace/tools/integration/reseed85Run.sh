@@ -1,7 +1,7 @@
 #!/bin/sh
 # reseed85 reproduction (docs/next-adapters-reseed85.md). Run from workspace/ of a checkout whose src/ is clean; direct mGBA processes only
 # (never the shared HTTP oracles). Everything is written under the FRESH <out-dir> (refused if it exists and is non-empty); nothing is
-# removed outside it. The temp src patch is applied ONLY to a git-archive copy of the FIXED base aeaa33dff under <out-dir>; the checkout never
+# removed outside it. The temp src patch is applied ONLY to a git-archive copy of the FIXED base 005101dfc under <out-dir>; the checkout never
 # changes. The copies get this checkout's reseed85 tools + scenarios and symlinks to node_modules / reference (the probes read the ROM there).
 #   sh tools/integration/reseed85Run.sh <fresh-out-dir>                 # probes (13 x 2 probes x 2 runs) + windows (base + patched) + 5 parity routes
 #   RESEED85_CENSUS=1 sh tools/integration/reseed85Run.sh <dir>         # + the seeds 0..999 censuses (base / patched, allocator chains)
@@ -10,7 +10,7 @@ set -e
 OUT=${1:?usage: reseed85Run.sh <fresh-out-dir>}
 if [ -e "$OUT" ] && [ -n "$(ls -A "$OUT" 2>/dev/null)" ]; then echo "refusing: $OUT exists and is not empty"; exit 1; fi
 mkdir -p "$OUT/rec"; OUT=$(cd "$OUT" && pwd)
-WS=$(pwd); T=tools/integration; F=$T/fixtures/reseed85; N="node --experimental-strip-types --no-warnings"; BASE=aeaa33dff
+WS=$(pwd); T=tools/integration; F=$T/fixtures/reseed85; N="node --experimental-strip-types --no-warnings"; BASE=005101dfc
 export PYTHONPATH=${PYTHONPATH:-${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py}
 PY=${PY:-${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python}
 test -z "$(git status --short src)" || { echo "src is not clean"; exit 1; }

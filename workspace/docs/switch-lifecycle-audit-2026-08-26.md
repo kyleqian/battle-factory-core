@@ -4,7 +4,7 @@
 
 | field | value |
 | --- | --- |
-| Tree hash (HEAD at audit time) | `299c48ebb558630a5774b7a825f45e2fecc0e183` (commit `12d32d2f`) |
+| Tree hash (HEAD at audit time) | `299c48ebb558630a5774b7a825f45e2fecc0e183` (commit `2eb5e4d9`) |
 | Date | 2026-08-26, started 00:32:31 PDT |
 | Lane / oracle | side worktree `worker/side-20260826-003223`, Battle Scene OFF (`http://127.0.0.1:8014`). Static audit — the oracle was **not** run. |
 | Scope | A **mid-battle switch**, both sides, from the moment the action is dispatched to the moment the incoming battler is fully set up and the turn continues. Covers: where a switch action sits in turn order (`SetActionsAndBattlersTurnOrder` / `GetWhoStrikesFirst`); `BattleScript_ActionSwitch` opcode by opcode; `SwitchInClearSetData` (`battle_main.c`) field by field; `Cmd_switchineffects` ordering for a voluntary switch-in; the forced-switch entries (`EFFECT_ROAR` / `EFFECT_BATON_PASS`); and multi-turn move state on the leaver and on the stayer. Level-50 Factory singles. Docs-only step — no engine/test/tool/data edits. |

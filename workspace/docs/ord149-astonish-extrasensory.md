@@ -1,7 +1,7 @@
 # ord149 (S10A side lane, 2026-10-13): Astonish 310 player order (words law + banked words-unit patch) and the Extrasensory 326 player later-body scanout split (precise negative)
 
-Base: master `d019cd6b4` (Return is Frustration; census numbers re-attributed on this base). Evidence and banked patches, new files only:
-no tracked file was edited. Every tree is a git-archive copy of `d019cd6b4`. The patched copy also gets
+Base: master `1c801184b` (Return is Frustration; census numbers re-attributed on this base). Evidence and banked patches, new files only:
+no tracked file was edited. Every tree is a git-archive copy of `1c801184b`. The patched copy also gets
 `tools/integration/fixtures/ord149/ord149-astonish-words-unit.diff`. Direct mGBA only. The lab seed is pinned in every job.
 Runner: `sh tools/integration/ord149Run.sh <fresh-out-dir>` (§4). Two fresh runs reproduced every receipt (**ALL SAME**).
 
@@ -9,7 +9,7 @@ Runner: `sh tools/integration/ord149Run.sh <fresh-out-dir>` (§4). Two fresh run
 
 | Part | Result | Receipts (`tools/integration/fixtures/ord149/`) |
 |---|---|---|
-| **A1** Astonish 310 law (predicted from source, committed first in `3a39a0ca2`) | The two droplets die in one frame and free in **ascending rise** order. Ties keep the lend order. The rise is `sum_{j<30} ((d1 - 32 j) >> 8)`, with `d1 = 896 +/- v2` (`v2 = word & 0x7f`). Plan text: `Cf;D0;Cff;D1,2/P<rise1>,<rise2>`. **ROM: exact per allocation window on 36 / 36 bodies** (18 player, 18 opponent; 6 first / 12 later per side; one rise tie). All 8 source rise classes {22..48} were observed on both sides. Two fresh batches gave units r1 == r2, and A == B on all 18 jobs. | `ord149-prediction.md`, `ord149-units.json`, `ord149-check.json` |
+| **A1** Astonish 310 law (predicted from source, committed first in `cf06f8e1e`) | The two droplets die in one frame and free in **ascending rise** order. Ties keep the lend order. The rise is `sum_{j<30} ((d1 - 32 j) >> 8)`, with `d1 = 896 +/- v2` (`v2 = word & 0x7f`). Plan text: `Cf;D0;Cff;D1,2/P<rise1>,<rise2>`. **ROM: exact per allocation window on 36 / 36 bodies** (18 player, 18 opponent; 6 first / 12 later per side; one rise tie). All 8 source rise classes {22..48} were observed on both sides. Two fresh batches gave units r1 == r2, and A == B on all 18 jobs. | `ord149-prediction.md`, `ord149-units.json`, `ord149-check.json` |
 | A1 controls | Static `D1,2`: 15 / 36. Static `D2,1`: 21 / 36. Reversed words: 1 / 36 (only the tie). **The production row `310:opponent` (`D1,2/P537,537`, tied) is exact on only 8 / 18 opponent bodies** (pre-existing; see §1.4). | `ord149-check.json` `controlsExact` |
 | **A2** banked patch | Astonish becomes a words unit (Dive / Flatter pattern), 2 files, +34 / -1: `WORDS_ORDER_UNIT_MOVE_IDS` += 310, and `liveAstonishWordsPlanText` / `liveAstonishWordsPostFree` (carry branch). No table row: `310:player` has none, so its marker starts. `310:opponent` keeps its row, so its marker drops. The patched copy typechecks. One existing pin moves (`ord149-fold-test-pins.diff`, land87). | `ord149-astonish-words-unit.diff`, `ord149-fold-test-pins.diff` |
 | A2 windows after the bodies | 6 routes (Harden / Mega Punch defenders, both sides), 26 windows. **CHAIN lend == ROM `sSpriteOrder`: patched 26 / 26** (base 20 / 26: the 6 player after-Astonish windows have an unknown lend). audit21Check: 26 live, 23 at 0 px in both copies, r1 == r2 26 / 26. The player after-Astonish windows are 6 / 6 at 0 px. The 3 non-zero windows are byte-identical in base and patched: two Golbat Mega Punch first windows (270,496 / 17,984 px, the ord124 §3 FINDING class) and one opponent Astonish window (9 px). | `ord149-windows-*.txt`, `ord149-windows-lends-*.jsonl`, `ord149-windows-derive.txt` |
@@ -161,7 +161,7 @@ ORD149_PARTS="census" sh tools/integration/ord149Run.sh .integration/validation/
 ORD149_TYPECHECK=1 ...                                                                    # + npm run typecheck in the patched copy
 ```
 
-Each run builds git-archive copies of `d019cd6b4` (base, and base + the diff), then:
+Each run builds git-archive copies of `1c801184b` (base, and base + the diff), then:
 - A1: probes x2 (`same units`), then the check;
 - census: x2 copies, attribution, `ord149CensusDelta.py`, `land82CensusCheck.py`;
 - windows: `ord149Stage.py`, audit20Probes x2, lends in both copies (r1 == r2), aud110Align, audit21Check / stf115Summary;

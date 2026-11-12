@@ -1,6 +1,6 @@
 # fpp150 (main/ts lane, ISSUES #139): the Focus Punch "tightening its focus" pre-pass — kernel + both scene modes
 
-User-authorized gameplay-order fix (`docs/factory-finish-scope.md`): a new end2 script before action 1, no RNG. Base `c94a282bd`.
+User-authorized gameplay-order fix (`docs/factory-finish-scope.md`): a new end2 script before action 1, no RNG. Base `3b02b4f84`.
 
 ## 1. Results first
 
@@ -12,7 +12,7 @@ User-authorized gameplay-order fix (`docs/factory-finish-scope.md`): a new end2 
 | fps147's 7 dense Scene ON windows **through the production render** (`tools/integration/fpp150ProductionCompare.ts`) | **0 px on 7 / 7** (rel -1 .. 122 full screen, 124 rows each, incl. the elevated GOLBAT shadow window); rel 123 .. 128 0 px outside the message band. Controls age+1 / wrong-side / no-effect: 0 / 7 clean. `fixtures/fpp150/production-compare*.json` |
 | Census 0..999 (Scene ON, `ret88Census.sh`) | command keys + `battleDigestExcludingFrames` **identical**, live 27,016 / 27,196 unchanged; **36 battles** changed frames only (+20,848), **36 / 36 attributed** (§3) |
 | Soak vanilla 0:20 `--parallel 5` | **20 / 20 OK**; every per-seed line (`b4 t0`, budget, carry <= 7, depth <= 9) identical to thr153's: no seed changed |
-| `compare:differential` fight-submenu / battle1-postwin-next-prompt / presentation-rng-playable-live-bodies-seeded-on vs `c94a282bd` | **PASS, 641 / 641 captures byte-identical** (no Focus Punch in those traces) |
+| `compare:differential` fight-submenu / battle1-postwin-next-prompt / presentation-rng-playable-live-bodies-seeded-on vs `3b02b4f84` | **PASS, 641 / 641 captures byte-identical** (no Focus Punch in those traces) |
 | Full `npm test` | mid-step: 1 failure, the deliberate fps147 "is unwired" pin (flipped: only `battleScene.ts` imports the reducer). Final tree (4 shards): **1,663 files / 13,822 tests passed, 0 failed** (44 / 223 skipped); typecheck 0; smoke 448; build OK |
 
 ## 2. What changed

@@ -9,7 +9,7 @@
 | `enc160-fpenc` (control: Focus Punch, no lock) | PASS → PASS. It takes the `:111-117` Encore arm and pays `GetMoveTarget` either way |
 | rcp154 C1 / C1f / C2 / C2u; rcp143 R1 / R2 / R3 / R3-control; R4 (`verify-rcp143-r4.ts`) | all PASS |
 | ROM receipts | rebuilt from fresh Scene OFF runs, twice per card, byte-identical. Every ROM / evidence field equals audit aud159's receipt; only the card path, and so the probe-output sha, differ |
-| Census 0..999 (Scene ON, `ret88Census.sh`), base `sub157/census-base-on` @ `bbd9c6748` | **1 battle changed: 771**. Commands 27,261 → 27,207, all from 771 (99 → 45). Played / terminal / stalled / errors / renderThrows identical (1000 / 997 / 3 / 0 / 0); only shard 7's digest moved |
+| Census 0..999 (Scene ON, `ret88Census.sh`), base `sub157/census-base-on` @ `83cd6e96a` | **1 battle changed: 771**. Commands 27,261 → 27,207, all from 771 (99 → 45). Played / terminal / stalled / errors / renderThrows identical (1000 / 997 / 3 / 0 / 0); only shard 7's digest moved |
 | Soak vanilla 0:20 `--parallel 10` | **20 / 20 OK** (0 crash / 0 hang, all budget). Every seed's endpoint (`b3 t16` / `b4 t0`, carry ≤ 7, depth ≤ 9) equals the base soak (`sub157/soak-base-lines.txt`) |
 | Tests | `tests/enc160Receipts.test.ts`, 11 tests. Without the guard, 3 fail (the hbenc / c2ice replays and the staged lock test) |
 
@@ -76,6 +76,6 @@ python3 tools/run-mgba-probe.py /tmp/hb1.json -- python3 tools/probe/probe-rcp15
   $C/enc160-hbenc-hyperbeam-recharge-encore-off.json /tmp/hb1.json --slot-plan 0 --attribute 0:2404   # twice -> hb2
 python3 tools/probe/build-rcp154-receipt.py $C/enc160-hbenc-spec.json /tmp/hb1.json /tmp/hb2.json $R/enc160-hbenc-hyperbeam-recharge-encore-off.json
 node --experimental-strip-types tools/probe/verify-rcp154.ts $R/enc160-hbenc-hyperbeam-recharge-encore-off.json [--write]
-sh tools/integration/ret88Census.sh shards <fresh-dir> HEAD     # base: .integration/validation/sub157/census-base-on (bbd9c6748)
+sh tools/integration/ret88Census.sh shards <fresh-dir> HEAD     # base: .integration/validation/sub157/census-base-on (83cd6e96a)
 npx vitest run tests/enc160Receipts.test.ts tests/rcp154Receipts.test.ts tests/act156ActionTimeFixes.test.ts tests/rcp143Receipts.test.ts
 ```

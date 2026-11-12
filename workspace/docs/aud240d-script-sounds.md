@@ -1,6 +1,6 @@
 # aud240d: Lobby / PreBattleRoom / BattleRoom script sounds, fanfares and the map BGM
 
-S11 audio step 4, last slice. Part 1 (`63a2f7334`) taught the aud238 extractor to follow `msgbox`/std scripts and
+S11 audio step 4, last slice. Part 1 (`e460bd654`) taught the aud238 extractor to follow `msgbox`/std scripts and
 shared `call` targets (adds `MUS_OBTAIN_B_POINTS` 459 and SaveBattle's `SE_SAVE`; see `docs/aud238-sound-sources.md`).
 Part 2 adds write-only `emitSound` calls (`src/engine/screenSounds.ts`, wired from `src/engine/core.ts`) in the same
 branch as the ROM sound. Nothing here changes engine state, RNG, kernel FactoryEvents, frame hashes or pixels:
@@ -97,13 +97,13 @@ map BGM start/restore after a fanfare is covered by the `continue` event, which 
 
 ## Verification record
 
-Tested at HEAD `faecbd347` (tree `71507e9ed1582595c5034ab72770c739491a6db9`), parent `065046720`:
+Tested at HEAD `0bad756c1` (tree `71507e9ed1582595c5034ab72770c739491a6db9`), parent `39fb9d187`:
 
 - `npm run typecheck` 0; `npm run build` 0; `npm run build:lib` 0.
 - `npm run test:smoke`: 8 files / 448 tests pass.
 - Audio importers and fixtures (aud240a/b/c/d, audioAnimSoundPan, audioHeadlessBoundary, audioSinkNeutral, audioSinkPlumbing, audioProbeFixtures, audioSoundSources): 10 files / 184 tests pass.
 - Terminal / postwin / orchestrator importers (engineBuildHash, factoryLobbyTerminal, factoryLobbyFreeRoam, factoryTerminalPresentation, factoryTerminalMessages, factoryTerminalRecord*Issue*, libTypesParity, newChallengeFromLobby, postwin, factoryRoundBattleOrchestrator): 11 files / 178 tests pass.
 - `gate6CoverageManifest` with `NODE_OPTIONS=--max-old-space-size=8192`: 7 tests pass.
-- `npm run compare:differential -- ... --base 065046720 --summary`: fight-submenu 235/235, battle1-postwin-next-prompt 216/216,
+- `npm run compare:differential -- ... --base 39fb9d187 --summary`: fight-submenu 235/235, battle1-postwin-next-prompt 216/216,
   presentation-rng-playable-live-bodies-seeded-on 190/190 (the standard three), plus factory-brain-silver-walkup-callscene-01-off 131/131
   and loss-terminal-record-yes-off 133/133: 905/905 captures byte-identical.

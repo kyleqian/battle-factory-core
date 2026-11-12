@@ -1,6 +1,6 @@
 # scf117 (S10A, ISSUES #166 slices (e) + (f)): General_StatsChange finished — post-stats-change alignment, the Growl x2 row, the order host, accounting
 
-Base: master `681da5c10` (production src `e00a22788`). Final production src: **`d4988e089`** (unchanged since rung 3, `39d2bde2a`).
+Base: master `c1ddccc74` (production src `e00a22788`). Final production src: **`d4988e089`** (unchanged since rung 3, `fba37d68a`).
 Presentation only: no kernel, RNG, damage, turn order or facility change. A live adapter is not whole-playable arbitrary-history
 exactness.
 
@@ -9,7 +9,7 @@ exactness.
 | Rung | Result | Evidence |
 |---|---|---|
 | **1 — post-stats-change alignment (both scenes)** | **Landed, 0 residual on every path.** After a presented stats-change command, the command now holds `holdFrames` more rows (present only when > 0): the following print shows its first glyph on rel 77 / 91 + (Δ(print) − Δ(STATS_CHANGE) − 1) + 1, less the `stat` commands in between (they draw nothing; their 2 frames are subtracted, the off108 pause convention). olnd113's joint target moves **−2 / −1 / −1 → 0 / 0 / 0** (Bulk Up G+121, Double Team and Sand-Attack G+119, Scene OFF). **Deviation from olnd113's literal formula, measured:** anchoring on the next *receipt* with lead(stat) = 1 is exact everywhere except AllStatsUp (Silver Wind / AncientPower: `statbuffchange` → `printfromtable`, no `jumpifbyte`), where it would be **+1 late**. issue69's dense ROM frames show that path's write on 283 and the box clear on 285 (print + 1), so the print-anchored rule is the uniform one. With lead(stat) = 0 instead, Bulk Up / Calm Mind / Cosmic Power would be −1 | `battleResolutionPresentation.ts statsChangeNextReceiptHoldFrames`, table 1a, `tests/scf117StatsChangeFinish.test.ts` |
-| **2 — the x2 tracker gap (Growl)** | **Landed.** `LIVE_BATTLER_X2_SOURCE_ZEROED` (source-derived, consulted after #148's measured table, before the fallback). Target role: Growl 45, Will-O-Wisp 261, Trick 271. Attacker role: Screech 103, Soft-Boiled 135, Belly Drum 187, Trick 271. Each is an unmeasured power-0 move (fallback "keep"), and its script's last write to that battler's x2 / y2 is an absolute reset (every task listed ends `x2 = 0; y2 = 0`). **scd112's comparator through production: 20 / 20 windows 0 px** (was 19 / 20), r1 == r2; Growl ON corner 144 == ROM (tracker `zeroed: [opponent]`). **Dense live bodies after a Growl** (`liveAdapterFramebuffer.ts`, fresh direct-mGBA source probes twice per fixture): opponent ONIX (rest +1) Fury Cutter bodies 0 / 1 / 3 → 43 / 43 rows 0 px; player SCYTHER (Growl target, pla-scyther-golem-growl-2) and opponent GROVYLE (opp-grovyle-blissey-growl-2) stay 0 px; r1 == r2 on all 5. **Base control**: the post-Growl ONIX body 1 is **19 / 43 rows, 70,910 px** on `681da5c10`; the pre-Growl body 0 is 0 px on both | `liveBattlerX2History.ts`, `fixtures/scf117/x2-live.json`, section 3 |
+| **2 — the x2 tracker gap (Growl)** | **Landed.** `LIVE_BATTLER_X2_SOURCE_ZEROED` (source-derived, consulted after #148's measured table, before the fallback). Target role: Growl 45, Will-O-Wisp 261, Trick 271. Attacker role: Screech 103, Soft-Boiled 135, Belly Drum 187, Trick 271. Each is an unmeasured power-0 move (fallback "keep"), and its script's last write to that battler's x2 / y2 is an absolute reset (every task listed ends `x2 = 0; y2 = 0`). **scd112's comparator through production: 20 / 20 windows 0 px** (was 19 / 20), r1 == r2; Growl ON corner 144 == ROM (tracker `zeroed: [opponent]`). **Dense live bodies after a Growl** (`liveAdapterFramebuffer.ts`, fresh direct-mGBA source probes twice per fixture): opponent ONIX (rest +1) Fury Cutter bodies 0 / 1 / 3 → 43 / 43 rows 0 px; player SCYTHER (Growl target, pla-scyther-golem-growl-2) and opponent GROVYLE (opp-grovyle-blissey-growl-2) stay 0 px; r1 == r2 on all 5. **Base control**: the post-Growl ONIX body 1 is **19 / 43 rows, 70,910 px** on `c1ddccc74`; the pre-Growl body 0 is 0 px on both | `liveBattlerX2History.ts`, `fixtures/scf117/x2-live.json`, section 3 |
 | **3 — order host / allocator** | **Binding: no change needed (proved).** The order host is event-driven (`factoryRoundBattleOrchestrator.ts`): at a command it applies the events strictly before the command's sequence, lends to a body, then applies the command's own event. The stats-change command carries the STATS_CHANGE event's sequence, so since sc106 the unit is applied at the stats-change command, never at the `stat` command. The order state is read only at a body's activation edge, and no body runs inside the command's rows, so the unit-granular plan is exact for every later body. **Plan: 56 / 58 → class 2** (`spriteOrderStatAnimationPlan`; was null = order invalidated). stat101's Memento rows (slot 3 from rel 2, freed rel 89, inUse 9 → 10 → 9) equal Screech's (47, class 2) row for row. **Allocator: no change**: `LIVE_SPRITE_ALLOCATOR_NET_ZERO_GENERAL_ANIMATIONS` lists STATS_CHANGE for every argument, and the copy is freed inside the unit (rel 67 / 89 ≤ E) | `spriteOrderEventTransform.ts`, `tests/spriteOrderEventTransform.test.ts`, test "rung 3" |
 | **4 — accounting** | General_StatsChange is reported on its own line, NOT folded into the move-animation share (section 4) | `docs/animation-integration-live-status.json` `generalAnimations`, `docs/live-share-census.md` |
 
@@ -89,7 +89,7 @@ choice). Per-scene numbers from `scf117Align.ts` 0..999 (residual 0 on all 22 pa
 presented stats-change rows (302,540). Accounting: `docs/animation-integration-live-status.json` `generalAnimations.STATS_CHANGE`
 (live, both scenes, evidence chain stat101 → stat102 → sc106 → scd112 → olnd113 → scf117) and the `docs/live-share-census.md` line.
 
-**Census delta (base `681da5c10` vs final, sc106LiveShareCensus.ts, 10 `--index-from` shards each, hist73Merge.py + scf117CensusDelta.py):**
+**Census delta (base `c1ddccc74` vs final, sc106LiveShareCensus.ts, 10 `--index-from` shards each, hist73Merge.py + scf117CensusDelta.py):**
 
 - Move-animation commands 27,429 / 27,429, live 27,099 / 27,099 (**98.80 % / 99.27 %** in both trees). **0 status changes**: no rung-2
   or rung-3 lift on these seeds (no live body sat behind a 56 / 58 order invalidation or depended on a post-Growl rest change in a
@@ -109,7 +109,7 @@ Receipt: `tools/integration/fixtures/scf117-live-receipt.json` (keyed on src `d4
 
 ## 5. Gates
 
-Final code = commit `5f09fc1b5` (production src `d4988e089`, unchanged since rung 3 `39d2bde2a`; later commits are tests / tools / docs).
+Final code = commit `57c570c59` (production src `d4988e089`, unchanged since rung 3 `fba37d68a`; later commits are tests / tools / docs).
 
 - Targeted (4 workers): scf117StatsChangeFinish, olnd113SceneOffPauses, sc106StatsChangeCommand, battleTurnPortability,
   spriteOrderEventTransform, scd112StatsChangeRender, statsChangeReducer, liveSpriteOrderHost, animation/factoryAnimationInventory,
@@ -118,14 +118,14 @@ Final code = commit `5f09fc1b5` (production src `d4988e089`, unchanged since run
 - `npm run typecheck`: green. `npm run test:smoke`: **448 / 448**.
 - Full suite (4 workers per shard): first pass shard 1 817 / 7,030 passed; shard 2 **3 failed** (randomRoundSoak frame pins: full seed 1
   27,061 → 27,052, vanilla seed 0 9,143 → 9,145, seven-win renderCalls 2,727 → 2,728; `soak111Decoupling.ts` decision AND canonical
-  logs SAME vs 681da5c10 on full / vanilla seeds 0 / 1, same battle / turn / endState) → pins moved (`5f09fc1b5`). Rerun of BOTH
+  logs SAME vs c1ddccc74 on full / vanilla seeds 0 / 1, same battle / turn / endState) → pins moved (`57c570c59`). Rerun of BOTH
   shards (run side by side, 4 workers each): shard 1 **817 files / 7,030 tests passed** (22 / 119 skipped), shard 2 **816 files /
   6,442 tests passed** (22 / 104 skipped), 0 failed.
 - `npm run build`: green.
-- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 681da5c10`:
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base c1ddccc74`:
   **PASS, 624 / 624 captures byte-identical**; both canonical railroad traces byte-identical; no capture moved (none falls on a
   stats-change command or after a Growl / source-row move).
-- `git diff --check 681da5c10`: clean.
+- `git diff --check c1ddccc74`: clean.
 - Not run: `scf117Run.sh` end to end (its pieces ran individually: align, stat102 ROM frames ALL SAME, the comparator r1 == r2, the
   dense x2 bodies, the census, align / exposure 0..999, the receipt).
 

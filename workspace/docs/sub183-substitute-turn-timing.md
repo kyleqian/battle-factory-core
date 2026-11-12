@@ -1,7 +1,7 @@
 # sub183 — Substitute turn timing (ISSUES #153)
 
 Integration lane, 2026-10-15. Presentation only: no rule, RNG, damage, AI or turn-order change (census kernel digests identical).
-Base `ecf277b0e`. G = the final glyph row of the "X used Y!" print (off108Rom.py / aud118); production's next command starts at G+1.
+Base `e0f3dd6ac`. G = the final glyph row of the "X used Y!" print (off108Rom.py / aud118); production's next command starts at G+1.
 
 ## Results
 
@@ -16,8 +16,8 @@ Base `ecf277b0e`. G = the final glyph row of the "X used Y!" print (off108Rom.py
 | Dense ROM window across the Substitute turn through production (`renderBattleResolutionLiveView`; used print → body → HP bar → next print → next action's used print, 291 rows each) | **4 / 4 windows, 291 / 291 rows exact, 0 px** (1,164 rows). Before: 142 / 291 and 135 / 291 rows exact, 62,123 and 64,930 px (OFF == ON in both) | `dense-*.json` |
 | Second HP profile (GOLEM 187 HP → 141, ONIX opponent, OFF both sides) | ROM: datahpupdate run **48** rows from G+97, first glyph G+147. Production: HP 47 + 3 tail = 50 frames → next print at G+97+50 = G+147. Structure only (no dense window); the persian windows are the pixel evidence | `fixtures/sub183/rom-runs-golem-onix.json` |
 | Tier-1 tests | `tests/sub183SubstituteTurnTiming.test.ts` (5): command timeline for the four cases (lead 4, body 96, HP start 123 / 119, tail 3, print start 170 / 166) plus a Tackle control (no lead / tail anywhere, HP durations unchanged) | — |
-| Census 0..999, Scene ON and OFF (`sub183Census.sh`, base `ecf277b0e` vs final) | Both scenes: **1000 battles, kernel digests identical, 0 unattributed**. 47 Substitute bodies (26 battles) gain `scriptLeadFrames` 4 (+6 frames each: 4 lead + 2 post rows; all 47 live), and 47 following HP commands gain `tailFrames` 3 (+3 each): 94 changed commands per scene, +423 frames per scene. 320,378 (ON) / 316,756 (OFF) commands, 974 battles byte-identical. Budget-stalled 434 / 796 / 881 are pre-existing in both trees (no change before their budget) | `fixtures/sub183/delta-{on,off}.json`, `.integration/validation/sub183/census/` |
-| Differential (`fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base ecf277b0e`) | **641 / 641 captures byte-identical** (no difference to attribute) | `.integration/validation/sub183/differential.log` |
+| Census 0..999, Scene ON and OFF (`sub183Census.sh`, base `e0f3dd6ac` vs final) | Both scenes: **1000 battles, kernel digests identical, 0 unattributed**. 47 Substitute bodies (26 battles) gain `scriptLeadFrames` 4 (+6 frames each: 4 lead + 2 post rows; all 47 live), and 47 following HP commands gain `tailFrames` 3 (+3 each): 94 changed commands per scene, +423 frames per scene. 320,378 (ON) / 316,756 (OFF) commands, 974 battles byte-identical. Budget-stalled 434 / 796 / 881 are pre-existing in both trees (no change before their budget) | `fixtures/sub183/delta-{on,off}.json`, `.integration/validation/sub183/census/` |
+| Differential (`fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base e0f3dd6ac`) | **641 / 641 captures byte-identical** (no difference to attribute) | `.integration/validation/sub183/differential.log` |
 
 ## ROM mechanism (aud118 convention; fresh direct-mGBA probes, each scenario twice from fresh processes, r1 == r2 rows and RGB)
 
@@ -80,7 +80,7 @@ node --experimental-strip-types --no-warnings tools/integration/sub183Dense.ts <
 SUB183_CENSUS_JOBS=6 sh tools/integration/sub183Census.sh <fresh-root> <base>:on <base>:off <final>:on <final>:off   # resume with SUB183_SHARDS="n .."
 python3 tools/integration/sub183CensusDelta.py <base-arm> <final-arm> [out.json]
 node --experimental-strip-types --no-warnings tools/integration/sub157Timing.ts --seeds=17,74 --scene=on|off
-npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base ecf277b0e
+npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base e0f3dd6ac
 ```
 
 `sub157Timing.ts` (production, ON seeds 17 / 74, OFF the same): body 90 → 96 frames, HP command at +90 → +96 from the body start, next
@@ -89,7 +89,7 @@ print at +130 / +133 → +139 / +142.
 ## Gates
 
 - `npm run typecheck` 0 (re-run after the tests importing `tools/` files), `npm run test:smoke` 448 / 448, `npm run build` OK, on the final tree.
-- Full `npm test` (nohup, `POKEBENCH_VITEST_MAX_WORKERS=2`, one process, 48 min) on `6a01829c0`: 1,726 files / 14,163 tests, **1 failure**:
-  `tests/animation/liveSubstituteBodyAdapter.test.ts` route 11/35 JYNX (the body command's row sequence 92 -> 96). Re-pinned in `122a5b69a`
+- Full `npm test` (nohup, `POKEBENCH_VITEST_MAX_WORKERS=2`, one process, 48 min) on `bb11e4064`: 1,726 files / 14,163 tests, **1 failure**:
+  `tests/animation/liveSubstituteBodyAdapter.test.ts` route 11/35 JYNX (the body command's row sequence 92 -> 96). Re-pinned in `a3337807a`
   (test file only; the file passes alone, 4 / 4). Every other file ran against the identical source and tests, and the final commits differ
-  from `6a01829c0` in that one test file (plus this doc). A second full run did not fit the 140-minute cap.
+  from `bb11e4064` in that one test file (plus this doc). A second full run did not fit the 140-minute cap.

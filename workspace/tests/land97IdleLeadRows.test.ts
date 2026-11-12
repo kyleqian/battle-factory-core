@@ -74,7 +74,7 @@ describe("land97 idle lead rows", () => {
     expect(swapped).toBeGreaterThan(0);
   });
 
-  // The committed base rows are production at 64f0ae997 (no lead). The route is rendered by the current code through production's
+  // The committed base rows are production at 16d0b355b (no lead). The route is rendered by the current code through production's
   // renderBattleResolutionLiveView (tools/integration/idle94RouteRender.ts).
   it("Bulk Up (battle 154, player): rows 0..N-1 equal the age-0 frame, row N+k equals the unpatched row k", () => {
     const fx = "tools/integration/fixtures/land97/base-b154-339-player.json";

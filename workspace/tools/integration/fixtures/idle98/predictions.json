@@ -1,7 +1,7 @@
 {
  "schema": "idle98-predictions/v1",
  "writtenBefore": "any idle98 probe (committed before the first probe job; the Dynamic Punch miss-seed search is staging, not a measurement)",
- "base": "3dd2b74b9 (production src 2e5b1d7c)",
+ "base": "b42cb1a64 (production src 2e5b1d7c)",
  "definitions": {
   "G": "ROM: last screen change before F_att (the final glyph of 'X used Y!' or, for a later multi-hit body, the last change of the previous hit)",
   "F_att / A / E / F_after": "idle94Compare.py anchors: first frame on the attackanimation byte X, gAnimScriptActive rise, first inactive frame, first frame on X+2",

@@ -1,13 +1,13 @@
 # sgs134 (S10A timeline fidelity): the IsBattleSEPlaying gate on the OTHER controller requests — stats-change and multi-hit
 
 Evidence + a BANKED patch (`tools/integration/fixtures/sgs134/sgs134-gate.diff`, applied only to git-archive copies). **No production
-change**, no existing file edited. FIXED evidence base: master `4f790c9d3` (production src `7dbc34ab4`), git-archive copies only; direct
+change**, no existing file edited. FIXED evidence base: master `b9669e7d8` (production src `7dbc34ab4`), git-archive copies only; direct
 mGBA only (seg127's `seg127Probe.py`), explicit lab seeds, every probe job twice in fresh processes (**40 / 40 r1 == r2**, ROM analyses
 r2 == r1). Rule and SE lengths: `docs/seg127-status-se-gate.md` (§1: `gate = clamp(seRows[songId] - seAge, 0, 29)`, 18 / 73 / 88 rows).
 
 ## 1. Results first
 
-| class (request) | ROM gate (both sides) | production today (4f790c9d3) | verdict | patch |
+| class (request) | ROM gate (both sides) | production today (b9669e7d8) | verdict | patch |
 |---|---|---|---|---|
 | **stat-change secondary on the target** (`playanimation` B_ANIM_STATS_CHANGE in BattleScript_StatDown; HandleBattleAnimation) — Mud-Slap ACC−1, Icy Wind SPD−1 | **seGate = clamp(73 − (44 + drain))**: ply 19 / 18, 18 / 17; opp 17 / 15, 17 / 15; controller rows = gate + 76 on every receipt; **Scene OFF identical** (same rows, both sides) | the `stats-change` command presents its own 76 / 90 + hold whatever the gate: ON 733 / 733, OFF 917 / 917 commands (seeds 0..199) | **SHORT by exactly the gate, both scenes** | gated: `seGateFrames` lead |
 | **stat-change secondary on the attacker** (BattleScript_StatUp) — Meteor Mash ATK+1 | ply 23 / 21, opp 22 / 19 (fixed 44, ctl = gate + 76; OFF identical) | same (3 gated in seeds 0..199, both scenes) | **SHORT by exactly the gate, both scenes** | gated |
@@ -32,7 +32,7 @@ r2 == r1). Rule and SE lengths: `docs/seg127-status-se-gate.md` (§1: `gate = cl
   `tests/sc106StatsChangeCommand.test.ts` route seed 0 slot 2 `route.frames` 6,722 → 6,739 = + the route's two gated Icy Wind
   secondaries (gates 8 + 9; its anchors' stats-change frames 84 / 85 vs 76). The full suite was NOT run on the patched copy (time cap).
 
-### 1a. Census exposure 0..999 (`fixtures/sgs134/exposure.json`; Scene ON production kernel of 4f790c9d3; seg127's battle loop)
+### 1a. Census exposure 0..999 (`fixtures/sgs134/exposure.json`; Scene ON production kernel of b9669e7d8; seg127's battle loop)
 
 "open" = an effectivenesssound earlier in the segment and, between it and the request, no print but the multi-hit loop's
 `printstring STRINGID_EMPTYSTRING3` + `waitmessage 1` and no animation script (its `Cmd_end` waits until IsSEPlaying is FALSE,
@@ -106,7 +106,7 @@ request → A gap.
 
 ### 3a. Landing recipe (exact)
 
-1. `git apply tools/integration/fixtures/sgs134/sgs134-gate.diff` on master (it applies to `4f790c9d3`; the two touched files are unchanged
+1. `git apply tools/integration/fixtures/sgs134/sgs134-gate.diff` on master (it applies to `b9669e7d8`; the two touched files are unchanged
    since then on this base).
 2. Re-pin `tests/sc106StatsChangeCommand.test.ts:64` (`route.frames`): `+ 8 + 9` with a comment "sgs134: the route's two gated Icy Wind
    secondaries (IsBattleSEPlaying, docs/sgs134-se-gate-other-requests.md)" → 6,739. Then run the full suite (two shards) and re-pin any
@@ -119,7 +119,7 @@ request → A gap.
 ## 4. Reproduction (from workspace/)
 
 ```
-sh tools/integration/sgs134Run.sh <fresh-out-dir-inside-the-repo> [--delta]    # archive of 4f790c9d3 + sgs134 files of HEAD; ALL SAME expected
+sh tools/integration/sgs134Run.sh <fresh-out-dir-inside-the-repo> [--delta]    # archive of b9669e7d8 + sgs134 files of HEAD; ALL SAME expected
 python3 tools/integration/sgs134Stage.py <dir>/scenarios
 python3 tools/run-mgba-probe.py <o.json> -- <mgba-venv python> tools/integration/seg127Probe.py <scenario> on|off <o.json>
 python3 tools/integration/sgs134Rom.py <probe-dir> tools/integration/fixtures/sgs134/scenario-index.json <rom.json> [on|off]
@@ -136,13 +136,13 @@ base-vs-patched census (~8 minutes on 16 cores).
 
 ## 5. Gates (this step: new files only, production untouched)
 
-- `sh tools/integration/sgs134Run.sh .integration/validation/sgs134-20261012/worker-scratch/run1 --delta` (archive of `4f790c9d3` + the
-  sgs134 files of `439575012`): **ALL SAME** — scenarios 10 / index SAME; probes ON 10 / 10 and OFF 10 / 10 r1 == r2, 40 / 40 ==
+- `sh tools/integration/sgs134Run.sh .integration/validation/sgs134-20261012/worker-scratch/run1 --delta` (archive of `b9669e7d8` + the
+  sgs134 files of `5c170e32f`): **ALL SAME** — scenarios 10 / index SAME; probes ON 10 / 10 and OFF 10 / 10 r1 == r2, 40 / 40 ==
   committed sha256 per scene; rom-r1 / rom-off-r1 SAME, r2 == r1; exposure.json SAME; production-on / -off SAME; patch applies;
   census-delta.json SAME (ALL TRUE).
 - `npm test -- tests/sgs134SeGateOtherRequests.test.ts`: 1 file / 9 tests passed; `npm run typecheck`: green; `npm run test:smoke`:
   448 / 448; `git diff --check`: clean; `git status`: no modified tracked file.
-- Patched copy (`4f790c9d3` + the diff): `npm run typecheck` green; 205 targeted test files 2,829 / 2,830 (the one sc106 route pin, §1).
-- Full suite on the main checkout at `6c3f68fa6` (not required for new files only; run anyway): `npm test -- --shard=1/2` 824 files /
+- Patched copy (`b9669e7d8` + the diff): `npm run typecheck` green; 205 targeted test files 2,829 / 2,830 (the one sc106 route pin, §1).
+- Full suite on the main checkout at `b1631da09` (not required for new files only; run anyway): `npm test -- --shard=1/2` 824 files /
   7,145 tests passed, `--shard=2/2` 823 files / 6,513 tests passed = **1,647 files / 13,658 tests, 0 failed** (44 / 223 skipped);
   `npm run build`: green.

@@ -1,6 +1,6 @@
 // Live audit 17: audit16Check.ts (unchanged method: the production hosts fed AS THE ORCHESTRATOR DOES TODAY, CHAIN + ENTRY lends, two
 // FRESH direct-mGBA prep48Probe.py processes per scenario, r1 == r2 per-row digests) with the species ids read from species-stats.json
-// (any Factory species: the dt60 grid) instead of audit 16's fixed map. Master f49522289 (src d7f24b03).
+// (any Factory species: the dt60 grid) instead of audit 16's fixed map. Master 6e533d4b6 (src d7f24b03).
 // fly63: the view also carries production's presentation-only semi-invulnerable hide (battleResolutionPresentationRender.ts
 // applyLiveSemiInvulnerableCommand, fed one move-animation command per MOVE_ANIMATION of the history before the consumer: a Fly / Bounce
 // charge body hides its attacker until that battler's next body) as visibility.<side>.sprite = false. audit16Check.ts's view never hides
@@ -8,7 +8,7 @@
 //   node --experimental-strip-types --no-warnings tools/integration/audit17Check.ts <fixture-dir> <scenario-name> <out.json>
 // Live audit 16: every consumer fixture of ONE scenario (audit16Fixtures.py) through the production hosts AS THE ORCHESTRATOR FEEDS THEM
 // TODAY, compared row by row with two FRESH direct-mGBA prep48Probe.py processes of that scenario (r1 == r2 per-row digests required).
-// The lend replay follows factoryRoundBattleOrchestrator.ts (master b986bb5b2): beginLiveSpriteOrderTurn per action prompt,
+// The lend replay follows factoryRoundBattleOrchestrator.ts (master 8f2a2974f): beginLiveSpriteOrderTurn per action prompt,
 // advanceLiveSpriteOrderHost before / after each event WITH the geometry-plan callback (liveSpriteOrderBodyPlanAt ->
 // liveMoveGeometrySpriteOrderPlanText at the displayed species), prepareLiveMoveSpriteAllocator per body, and the allocator invalidated
 // ONLY by a status animation outside LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS (alloc50 / alloc52) or a general animation that is not

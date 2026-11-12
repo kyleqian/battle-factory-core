@@ -1,7 +1,7 @@
 # hide66 (S10A integration, 2026-10-10): live bodies leave a hidden (semi-invulnerable) battler out — ISSUES #159 — and fly63 re-landed
 
-Base `b50c4dabd` (src `06b791ff`). Tested code `af71b4546` (commits: rung 1 `a406c4362`, fly63 re-land `6e9b98c52`, audit evidence
-`30112cda9`, parity `fca66619e`, repair `af71b4546`). Receipt: `tools/integration/fixtures/hide66-live-receipt.json`. Direct mGBA only;
+Base `82690e775` (src `06b791ff`). Tested code `69eb65b71` (commits: rung 1 `79d5e82e1`, fly63 re-land `a9b53261b`, audit evidence
+`30cebd7f4`, parity `785682fa8`, repair `69eb65b71`). Receipt: `tools/integration/fixtures/hide66-live-receipt.json`. Direct mGBA only;
 no shared oracle was touched.
 
 ## 1. Results first
@@ -28,7 +28,7 @@ no shared oracle was touched.
   `liveMoveAnimationPresentation(..., hiddenSides)` and `renderSceneOnMovePresentation(fb, presentation, true, hiddenSides)`. Inside the
   renderer the hidden side's sheets are drawn transparent (palette index 0) whether a branch reads `liveSceneOnBattlerArt` or its own
   back / front species map (both are hide-aware locals); the opponent shadow is not armed for a hidden opponent.
-- **Previously wrong live bodies (census seeds 0..999, master `b50c4dabd`, `hide66Census.ts`):** 104 move bodies played while the other
+- **Previously wrong live bodies (census seeds 0..999, master `82690e775`, `hide66Census.ts`):** 104 move bodies played while the other
   battler was hidden; **90 live commands / 12,744 live frames drew the hidden battler** (every live frame of them). After hide66: 0 / 0
   (also 0 / 0 with fly63 re-landed: 98 live hidden-span commands / 14,252 frames, none drawing it). "Drawing" is checked per frame: the
   production render vs the same render with the hidden species' sheet blanked at its source. Top movers: Wish 9, Bulk Up 6, Dig bodies of the
@@ -49,8 +49,8 @@ no shared oracle was touched.
 ## 2. Audit-17 windows, production (no patch), after the fly63 re-land
 
 `sh tools/integration/audit17Run.sh tools/integration/fixtures/hide66-audit17 <fresh scratch>`: stage == committed, derive ==
-committed, two fresh direct-mGBA runs per window; **104 / 104 r1 == r2** (chain and entry). Receipts from `6e9b98c52`; a fresh
-rerun on the final `af71b4546` gave 104 / 104 identical digests and px. The 67 windows that were 0 px stay 0 px;
+committed, two fresh direct-mGBA runs per window; **104 / 104 r1 == r2** (chain and entry). Receipts from `a9b53261b`; a fresh
+rerun on the final `69eb65b71` gave 104 / 104 identical digests and px. The 67 windows that were 0 px stay 0 px;
 **86 / 104 are 0 px now** (`hide66-windows.txt`).
 
 | Windows | Rows | Chain px before -> after (r1 == r2) |
@@ -61,11 +61,11 @@ rerun on the final `af71b4546` gave 104 / 104 identical digests and px. The 67 w
 | Sky Uppercut at a hidden target (fly ply c0 c2, opp c0 c2 c4 c6; bounce ply c0, opp c0 c2 c4) | 187 / 186 | live 832,606..989,702 -> **fallback** (3.42..3.48 M, branch (b)) |
 | every other window (Thunderbolt, Ice Beam, Heal Bell / Double Team / Sky Uppercut after the strike, dt60 16) | | unchanged (74 identical digests) |
 
-## 3. Gates (af71b4546)
+## 3. Gates (69eb65b71)
 
 Targeted 31 files / 220 tests; the 13 files the first full run failed (field-only fixture views have no `visibility`; the split parser's
 inline generic) rerun alone green after the repair; typecheck; smoke 8 / 448; full suite in two foreground shards (4 workers):
-1,599 files / 13,163 tests passed, 0 failed; build; `compare:differential` 624 / 624 byte-identical vs `b50c4dabd`; `git diff --check`.
+1,599 files / 13,163 tests passed, 0 failed; build; `compare:differential` 624 / 624 byte-identical vs `82690e775`; `git diff --check`.
 `liveMoveTimingPolicy.ts` untouched (no d4a run).
 
 ## 4. Open points
@@ -82,7 +82,7 @@ inline generic) rerun alone green after the repair; typecheck; smoke 8 / 448; fu
 npx vitest run tests/hide66HiddenBattler.test.ts tests/spriteOrderFly63.test.ts
 sh tools/integration/audit17Run.sh <fresh-receipt-dir> <fresh-scratch-dir>
 python3 tools/integration/hide66Audit17Table.py <fresh-receipt-dir>
-node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=0..299 --out=a.json --commands=a.jsonl   # base: same in a b50c4dabd worktree
+node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=0..299 --out=a.json --commands=a.jsonl   # base: same in a 82690e775 worktree
 python3 tools/integration/hide66CensusDelta.py base.json base.jsonl a.json a.jsonl
 for k in 0 1 2 3; do node --experimental-strip-types --no-warnings tools/integration/hide66Census.ts --seeds=$((k*250))..$((k*250+249)) --index-from=$((k*250)) --commands=h$k.jsonl --out=h$k.json & done; wait
 cat h0.jsonl h1.jsonl h2.jsonl h3.jsonl > h.jsonl; node tools/integration/hide66CensusSummary.mjs h.jsonl

@@ -38,7 +38,7 @@ playback now** (design steps 8-9, aud244 recorder + assets, aud245 player)
 alongside the ROM-driver gameplay fixes, one of each per run; playback no
 longer waits for census parity (handoff "Next work" item 0).
 
-1. **Core library API** — **DONE 2026-11-01** (`f88653929`; `docs/library-package.md`). (finish plan Phase 3, first): `src/lib.ts` +
+1. **Core library API** — **DONE 2026-11-01** (`062a82a3f`; `docs/library-package.md`). (finish plan Phase 3, first): `src/lib.ts` +
    `mountFactoryGame` with the exact contract in `docs/finish-plan.md`, a Vite
    lib build and `package.json` `exports`; `src/main.ts` becomes a thin shell
    over it (the test ABI, `?battleScene=`, `?pokebench=1` and the crash

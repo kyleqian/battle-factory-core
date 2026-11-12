@@ -3,7 +3,7 @@
 Evidence (ignored): `.integration/evidence/dia263/` (`11-{on,off}.*`, `13-on.*`, `step13.json`, `ram11.json`, `declared.txt`, `build.txt`).
 Recipe: `tools/audio/romDriveSeed.sh SEED on|off .integration/evidence/dia263`.
 
-## #205 (seed 11): verdict (a), DRIVER mapping bug only; fixed in `tools/` (e93bec400)
+## #205 (seed 11): verdict (a), DRIVER mapping bug only; fixed in `tools/` (da57e0f93)
 
 - ROM: `Cmd_forcerandomswitch` -> `SwitchPartyOrder` (`battle_main.c:4086`) permutes only `gBattleStruct->battlerPartyOrders` / `gBattlePartyCurrentOrder` (3 bytes, 2 nibbles each, high nibble = even menu slot); `UpdatePartyToFieldOrder` / `UpdatePartyToBattleOrder` (`party_menu.c:5854-5855`, `:6051-6089`) reorder `gPlayerParty` only while the menu is open. Gameplay stays in party-id space, which is what the engine's `partyIndex` is.
 - Driver bug: it moved the party-menu cursor to `slot == partyIndex`; after Roar menu slot != party id, so it picked the wrong (fainted) slot and stalled to the 80000-frame cap.

@@ -1,7 +1,7 @@
 {
  "schema": "flybounce-live-receipt/v1",
  "oracle": "battle-scene-on (direct mGBA, fresh process per run; shared HTTP oracles not contacted)",
- "codeCommit": "885bc9dec7a0688e0c8af108ef8a869119669f33",
+ "codeCommit": "ef6e2d9482d00c95e0954e42f19261a56e66eb8b",
  "srcTree": "b8565b2299a89d53a27312471440f87326e63d3d",
  "design": {
   "state": "presentation-only semi-invulnerable hide; LiveSemiInvulnerableHidden [player, opponent]",
@@ -350,7 +350,7 @@
   "npx vitest run tests/animation/liveFlyBounce.test.ts"
  ],
  "gates": {
-  "testedCommit": "4a05ac0a2 (src tree b8565b2299a89d53a27312471440f87326e63d3d, unchanged since 885bc9dec)",
+  "testedCommit": "2c79a3e19 (src tree b8565b2299a89d53a27312471440f87326e63d3d, unchanged since ef6e2d948)",
   "targeted": "npx vitest run tests/animation/liveFlyBounce.test.ts tests/animation/livePrep11MoveAdapters.test.ts tests/animation/fly.test.ts tests/animation/bounce.test.ts tests/playableAnimationIntegration.test.ts tests/liveShadowRows.test.ts tests/liveStatusImplementedCount.test.ts tests/liveSpriteOrderHost.test.ts tests/animation/animationBoundaryRatchet.test.ts tests/animation/factoryAnimationInventory.test.ts --maxWorkers=4: 10 files / 147 tests passed",
   "animationCoverage": "pass",
   "animationAudit": "pass",

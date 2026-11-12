@@ -1,6 +1,6 @@
 # sa125 (S10A, ISSUES #168 slices SA1 + SA3): the Scene ON `status-animation` command (ROM durations) and the `status` stand-in cleanup
 
-Base: master `cfe4e26ca` (production src `b4befa039`). Design pack: `docs/sta123-status-animations-design.md` (§4 row model, §5 SA1 / SA3).
+Base: master `9a184dfa6` (production src `b4befa039`). Design pack: `docs/sta123-status-animations-design.md` (§4 row model, §5 SA1 / SA3).
 Production change: `src/engine/battleResolutionPresentation.ts` (the projection, `STATUS_ANIMATION_ADDED_ROWS`, `sceneOnStatusFrames`),
 `battleResolutionPresentationRender.ts` (duration case; field unchanged), `sceneOffPresentation.ts` (the legacy compat projection ignores
 the command like the other typed animation commands). **Timing only: no pixels** (renderers are SA4..SA8); the IsBattleSEPlaying gate
@@ -17,7 +17,7 @@ is SA2 (flagged here, not modelled). No kernel, RNG, damage, turn order or facil
 | Gate (SA2) flags | **511** inflicted-path receipts after a damaging hit since "X used Y!" (census 0..999): PRZ 198, PSN 94, CONFUSION 71, BRN 66, FRZ 43, SLP 36, INFATUATION 3 — each presents the table's rows with gate 0; the ROM adds the IsBattleSEPlaying wait (measured only for FRZ after Ice Beam: +16 / +17 frames short here). In the route test: 5 of 212 anchored. | |
 | Pins moved | 5 pins in 5 files (`tools/integration/fixtures/sa125/pins.json`; + 1 environmental failure of the archive copy): off121's Scene ON guard (SA3 itself), stl109's turn-58 route budget (+3,298 − 1,044 frames: 27,992 -> 30,246 > the replay's 30,000 budget), liveBattlerX2History's body key (+1 command index), liveSpriteOrderHost's sweep (+13 status-animation edges, 0 mismatches), sc106's Tickle route total (+478 − 30 = 9,177 -> 9,625). **No soak pin moved** (the soak plays Scene OFF). |
 | Census 0..999 | Kernel receipts **8,080** (== sta123 `exposure.json` per animation). Inserted commands **7,894** = one per receipt on every untruncated battle (per animation equal; the 3 budget-truncated battles 434 / 796 / 881 carry 174 INFATUATION + 12 SLP receipts in the base, 157 + 12 in the shorter final prefix), **+650,788 frames** (= Σ rows). SA3 **−85,797 frames**. 0 move status changes; untruncated live numerators identical (26,435 commands / 4,044,349 frames; all battles 98.95 % / 99.32 % both trees); segment command keys without status-animation identical; per-shard digests identical; Scene OFF census **10 / 10 shards byte-identical**. | |
-| Differential | `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base cfe4e26ca`: **PASS, 624 / 624 captures byte-identical** (no capture moved). |
+| Differential | `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 9a184dfa6`: **PASS, 624 / 624 captures byte-identical** (no capture moved). |
 
 ## 2. The rule
 
@@ -92,7 +92,7 @@ stand-in stays wherever the ROM plays no status animation; those classes are a s
 
 ## 5. Pins moved (`tools/integration/fixtures/sa125/pins.json`, `tools/integration/sa125Pins.py`)
 
-Patched copy (git archive `a67a38741` = final production src `9e124ee2f`, pins not yet moved; reference/ linked, artifacts/ copied), full
+Patched copy (git archive `8990da5ed` = final production src `9e124ee2f`, pins not yet moved; reference/ linked, artifacts/ copied), full
 suite two shards, 4 workers: shard 1 **3 failed / 817 passed files** (7,052 tests passed, 3 failed), shard 2 **3 failed / 817 passed**
 (6,483 passed, 3 failed). The 6 failures:
 
@@ -108,7 +108,7 @@ suite two shards, 4 workers: shard 1 **3 failed / 817 passed files** (7,052 test
 No soak pin moved: `randomRoundSoak` plays Scene OFF (`battleSceneMode` default "off"), where sa125 changes nothing; its decision logs
 are therefore identical by construction (and the Scene OFF census is byte-identical).
 
-## 6. Census 0..999 (base `cfe4e26ca` vs final, sa125LiveShareCensus.ts ten shards per tree + hist73Merge; off108Route.ts --scene=off)
+## 6. Census 0..999 (base `9a184dfa6` vs final, sa125LiveShareCensus.ts ten shards per tree + hist73Merge; off108Route.ts --scene=off)
 
 Receipt: `tools/integration/fixtures/sa125-live-receipt.json` (sa125Receipt.py; every verdict true). Delta: `sa125CensusDelta.py`.
 
@@ -150,7 +150,7 @@ the base's. Scene OFF (off108Route.ts --scene=off, 37,941 rows): 10 / 10 shards 
 - `sh tools/integration/sta123Run.sh <fresh>`: **ALL SAME** (scenarios 18, probes 36 / 36 r1 == r2, 72 / 72 == committed sha256,
   rom-r1 SAME, r2 == r1).
 - `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base
-  cfe4e26ca`: **PASS, 624 / 624 captures byte-identical** (both canonical traces and the app-only presentation-rng trace).
+  9a184dfa6`: **PASS, 624 / 624 captures byte-identical** (both canonical traces and the app-only presentation-rng trace).
 - `git diff --check`: clean.
 - Not serialized: build, the differential and sta123Run.sh ran while the census was running (deterministic outputs).
 
@@ -171,7 +171,7 @@ the base's. Scene OFF (off108Route.ts --scene=off, 37,941 rows): 10 / 10 shards 
 ## 8. Reproduction (from workspace/)
 
 ```
-sh tools/integration/sa125Run.sh <fresh-out-dir-inside-the-repo>   # archives cfe4e26ca + HEAD, the test, ON census x2 + delta,
+sh tools/integration/sa125Run.sh <fresh-out-dir-inside-the-repo>   # archives 9a184dfa6 + HEAD, the test, ON census x2 + delta,
                                                                     # OFF census x2 (byte-identical), receipt == committed
 npx vitest run tests/sa125StatusAnimationCommand.test.ts
 node --experimental-strip-types --no-warnings tools/integration/sa125LiveShareCensus.ts --seeds=0..99 --index-from=0 --out=r0.json --commands=r0.jsonl --stats=s0.jsonl

@@ -1,4 +1,4 @@
-// hist73: liveShareCensus.ts (master ff4baec48) verbatim except --index-from=N (hide66Census.ts's rule: battle i = N + local index,
+// hist73: liveShareCensus.ts (master a7904fcc0) verbatim except --index-from=N (hide66Census.ts's rule: battle i = N + local index,
 // streak (i * streakMul) % 49), so parallel shards 0..99 / 100..199 / ... concatenate to exactly one --seeds=0..999 run, and the
 // report schema name. Used for the PART A census delta (master vs a git-archive copy with fixtures/hist73/*.diff applied).
 // S10A ORDINARY-PLAY LIVE-SHARE CENSUS: how often real Factory play (Scene ON) presents a move body through a live adapter vs

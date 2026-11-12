@@ -1,7 +1,7 @@
 # fix122: live audit 26's two defects, landed (S10A main lane, 2026-10-11)
 
-Live audit 26 (`docs/aud118-live-audit-26.md`) banked two presentation defects with patches. fix122 lands both on master `d6444bd53`
-(production src `530600bb1`). The final production code is `20ce9ee3f` (src `649b374d9`). Both changes are presentation-only: the census
+Live audit 26 (`docs/aud118-live-audit-26.md`) banked two presentation defects with patches. fix122 lands both on master `ac2f2b7ee`
+(production src `530600bb1`). The final production code is `f35e9ac87` (src `649b374d9`). Both changes are presentation-only: the census
 shows 0 status changes, identical command KEYs and an identical battleDigestExcludingFrames.
 
 ## 1. Results
@@ -9,9 +9,9 @@ shows 0 status changes, identical command KEYs and an identical battleDigestExcl
 ### DEFECT A: Struggle 165's target keeps its x2 (`liveBattlerX2History.ts`)
 
 aud118's Struggle scenarios (`aud118Stage.py`) were re-probed fresh (direct mGBA, r1 == r2 on every window) and checked through production
-(`fix122Patched.sh` = aud118Patched.sh with the rev as a parameter), on base `d6444bd53` and on base + the 165 `keep` row:
+(`fix122Patched.sh` = aud118Patched.sh with the rev as a parameter), on base `ac2f2b7ee` and on base + the 165 `keep` row:
 
-| Window | Base d6444bd53 | Final |
+| Window | Base ac2f2b7ee | Final |
 |---|---|---|
 | `pb-aud118-ply-50-95-c2` (opp ONIX Taunt after the player's Struggle) | 136,375 px | **0 px** |
 | `pb-aud118-ply-65-19-c2` (opp RATTATA Taunt after the player's Struggle) | 50,661 px | **0 px** |
@@ -63,7 +63,7 @@ residual on the same anchor corroborates it. For every other class G = the final
   allowlist keeps unmeasured sites (e.g. a no-effect damaging move, whose first message comes later anyway) out by construction.
 - Scene OFF: the OFF attack receipt (SCENE_OFF_ATTACK_PAUSE) stops the scan first, so nothing changes there.
 
-## 3. Census (Scene ON, `ret88Census.sh shards`, seeds 0..999, base d6444bd53 vs final 20ce9ee3f; `land82CensusCheck.py`)
+## 3. Census (Scene ON, `ret88Census.sh shards`, seeds 0..999, base ac2f2b7ee vs final f35e9ac87; `land82CensusCheck.py`)
 
 | | base | final |
 |---|---|---|
@@ -90,10 +90,10 @@ aud118's `hold-exposure.json` for the generic patch.
 experiment (the hold line removed): **12 / 12 class tests fail** (start 0), and the OFF row still passes. **No existing pin moved**: no other test pins a Scene ON failure-message
 start of the covered classes.
 
-Gates (final code 20ce9ee3f + docs / tools): the targeted files (fix122, olnd113, x2-history x5, stl109, sdl119) passed before the commit.
+Gates (final code f35e9ac87 + docs / tools): the targeted files (fix122, olnd113, x2-history x5, stl109, sdl119) passed before the commit.
 `npm run typecheck` green. `npm run test:smoke` 8 files / 448 passed. Full suite (4 workers, shards one after the other): 1/2 819 files
 passed / 22 skipped (7,035 tests), 2/2 818 / 22 (6,474 tests). `npm run build` green. `npm run compare:differential -- fight-submenu
-battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base d6444bd53`: PASS, 624 / 624 captures byte-identical.
+battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base ac2f2b7ee`: PASS, 624 / 624 captures byte-identical.
 `git diff --check` clean. Because of the cap, build and differential ran during the shards (not serialized). Reproduction: the receipts
 come from the pieces of `fix122Run.sh` (the same tools / copies). The runner itself was not rerun end to end inside the cap.
 

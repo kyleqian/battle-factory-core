@@ -1,16 +1,16 @@
 # S10A plans48 — the tail of the sprite-order host stops: EXACT / KEYED / GEOMETRY-KEYED order plans
 
-Integration lane, evidence + production in one step, with the prep43 / prep45 / gdgeo method. Base: master `2dcdd5883` (src tree
-`1fb74f37`). Tested code: `1315d861b` (src tree `f34f016f`); later commits touch tools, tests and docs only.
+Integration lane, evidence + production in one step, with the prep43 / prep45 / gdgeo method. Base: master `768ef4961` (src tree
+`1fb74f37`). Tested code: `5b8c5a5ec` (src tree `f34f016f`); later commits touch tools, tests and docs only.
 
 ## Results
 
-**Census, seeds 0..299** (`liveShareCensus.ts`, paired by `prep43CensusDelta.py`). Base `2dcdd5883` against the tested code. 7970
+**Census, seeds 0..299** (`liveShareCensus.ts`, paired by `prep43CensusDelta.py`). Base `768ef4961` against the tested code. 7970
 commands, 0 pairing mismatches, identical command sequence, identical battle digest (`bb30f572…`), **0 live → fallback regressions**.
 
 | | live by count | live by frames |
 |---|---|---|
-| `2dcdd5883` | 7101 / 7970 = **89.10 %** | 1048614 / 1168273 = **89.76 %** |
+| `768ef4961` | 7101 / 7970 = **89.10 %** | 1048614 / 1168273 = **89.76 %** |
 | plans48 | **7186 = 90.16 % (+85)** | **1065629 = 91.21 % (+17015)** |
 
 Report sha256: before `e6e8af04…bac7`, after `0238a463…a54f`. Command jsonl: before `71b32e7c…3813`, after `004d9e04…4463`. All in
@@ -49,7 +49,7 @@ with damage ≤ 0 → 20217. This is a presentation key over an existing event a
 mirrors the key. The corpus replays have no damage argument, so they read the branch from the body's allocation count (PresentDamage
 creates 6 sprites).
 
-**Attract (prediction recorded before the grid, `attract-prediction.json`, commit `0d6974fbf`).** prep45 called Attract
+**Attract (prediction recorded before the grid, `attract-prediction.json`, commit `40346b0cf`).** prep45 called Attract
 geometry-keyed: 2 plans in 4 instances. The grid refutes that key.
 - The projectile flight schedule is identical in every pair (1 distinct schedule).
 - The two plans differ only in whether 1 or 2 of the 8 rising hearts are seen before the probe's frame boundary at ~f+160/161. Those
@@ -60,7 +60,7 @@ geometry-keyed: 2 plans in 4 instances. The grid refutes that key.
 
 The host only exposes unit-boundary states, so plan A is exact for the host in every instance. All three predictions held.
 
-**Dream Eater (prediction recorded before the grid, `dream-eater-prediction.json`, commit `fee618c89`).**
+**Dream Eater (prediction recorded before the grid, `dream-eater-prediction.json`, commit `4870519d6`).**
 - `dreamEater.ts dreamEaterSpriteOrderPlanText` feeds the renderer's own timeline through the shared
   `absorptionOrbSpriteOrderPlan.ts`, as Giga Drain and Mega Drain do. The timeline is DreamEaterAbsorb's orbs (Giga Drain's eight
   triples) plus HealingEffect's stars. There is no hitsplat and no palette-controller sprite.
@@ -85,7 +85,7 @@ The host only exposes unit-boundary states, so plan A is exact for the host in e
 - **TURN_TRAP Clamp**: not in this census's ranking (0 frames). Not attempted.
 - Out of scope (owned by other steps): Dive, Mud-Slap, Ice Ball, return to ball, battle-start seeds.
 
-## Ranking (base `2dcdd5883`, seeds 0..299)
+## Ranking (base `768ef4961`, seeds 0..299)
 
 `prep47OrderCensus.ts` + `prep45Chains.py`, in `chains-before-seeds0-299.json`. 325 order-lend-unknown declines / 52188 frames.
 Greedy gain over the non-excluded units:
@@ -187,7 +187,7 @@ Caveats:
 - `fz-opp-s27` lost its run A (teardown), so it is not in the receipts. The FRZ sweep counts 159 jobs.
 - The receipts come from one probe directory whose jobs were re-run as batches were added. Each job's A/B pair is from one batch.
 
-## Gates (tested commit `0344cf6ff`, src tree `f34f016f`; serialized, 4 Vitest workers)
+## Gates (tested commit `5c3fd4847`, src tree `f34f016f`; serialized, 4 Vitest workers)
 
 | gate | result |
 |---|---|
@@ -196,7 +196,7 @@ Caveats:
 | `npm run test:smoke` | 448 / 448 |
 | full `npm test -- --maxWorkers=4` | 1580 files passed (44 skipped), 13008 tests passed (223 skipped), first run, no reruns |
 | `npm run build` | pass |
-| `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 2dcdd5883` | PASS, 624 / 624 byte-identical |
+| `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 768ef4961` | PASS, 624 / 624 byte-identical |
 | `git diff --check` | clean |
 
 **Fresh reproduction** (after the gates, `/tmp/p48-repro`, all 292 jobs × 2 fresh processes, 0 A/B differ): every one of the 291

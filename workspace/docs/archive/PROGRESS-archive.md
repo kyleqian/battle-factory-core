@@ -11,7 +11,7 @@
 ---
 ## 2026-11-10 / 11 — CAX31 daily run (supervisor, Opus 5.5): wind-down: dmg264 / aiv266 / aiv267 / seg268 folded
 
-- **State:** master clean, no active workers; final src == aiv267 `5682cd341` (later commits: tests / fixtures / tools / docs). Evidence `.integration/validation/sv-20261110/`
+- **State:** master clean, no active workers; final src == aiv267 `6fd1817ee` (later commits: tests / fixtures / tools / docs). Evidence `.integration/validation/sv-20261110/`
   (gates in `gates/`). No DEFERRED items. No push. ENGINE_BUILD at the final src `eb-9d34d28f1b19ef3d` (read from dist; moved this run: dmg264, aiv266, aiv267; tell the website).
 - **Folded: dmg264 + dmg264b** (ISSUES #206 type effectiveness in ROM row order, #208 defender Reflect / Light Screen in the live damage calc; both removed;
   `docs/dmg264-type-order-screens.md`). Census 0..999 vs `sv-20261109/aip262/census/*-e2e0b17b5`: ON 190 / OFF 181 changed, 0 unexplained; the 9 ON-only seeds
@@ -24,13 +24,13 @@
   drove 31 ON only), divergence null; field semantics spot-read against C (`Cmd_if_status_in_party` exact `==`, target-side screens, user-side Mist).
 - **Folded: aiv267** (ts lane, 164 min; entry below). Supervisor: `romDriveSeed.sh 20 off` 15 / 15, divergence null; aiv267 / aiv266 / orchestrator tests
   91 / 91; re-pin diffs read (orchestrator cursors, causally fix B). The aiv266 "Attract female user -10" lead was refuted by the supervisor (ISSUES #204).
-- **Census baseline now:** `.integration/evidence/aiv267/census/{on,off}-5682cd341`; src final for this run at `5682cd341`.
+- **Census baseline now:** `.integration/evidence/aiv267/census/{on,off}-5682cd341`; src final for this run at `6fd1817ee`.
 - **Folded: seg268** (side lane, 36 min, tests / fixtures / tools only; `docs/seg268-exposure-regen.md`): revived `seg127Exposure.ts` / `seg127ExposureSummary.py`
-  from `4f6fa87e4^`, regenerated `fixtures/seg127/exposure.json` on the current kernel (0..999 Scene ON; receipts 8080 -> 8023, gated 72, frames 729 -> 745, 0 unclassified);
+  from `54c5686f0^`, regenerated `fixtures/seg127/exposure.json` on the current kernel (0..999 Scene ON; receipts 8080 -> 8023, gated 72, frames 729 -> 745, 0 unclassified);
   sag130 re-anchored to the first projected carriers: restores hit-secondary|BRN|player, hit-secondary|PSN|opponent, yawn|SLP|player, adds contact-ability|PRZ|player and
   hit-secondary|BRN|opponent; named gap yawn|SLP|opponent (no gated carrier). Worker: consumer tests + test:gate 362 / 362. Supervisor: diff read; covered by the wind-down full suite.
 
-- **Gates** (final tree `576565e44`, src == `5682cd341`): full suite (3 workers, beside the soaks) **1,756 files passed + 44 skipped, 0 failed; 14,479 tests**; build / build:lib 0;
+- **Gates** (final tree `4c411d217`, src == `6fd1817ee`): full suite (3 workers, beside the soaks) **1,756 files passed + 44 skipped, 0 failed; 14,479 tests**; build / build:lib 0;
   vanilla 0:20 OFF **20 / 20**, ON **20 / 20** (all `budget`); 0:60 default **60 / 60**, winning **60 / 60**, winning-swap **60 / 60**; varied-RNG first-round winning
   carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; play:random 10 min / scene: ON 36 battles / 15 swaps, OFF 64 / 28, 0 page errors / console errors / overlays.
 - **Folded: dia269** (side lane, diagnosis only, 38 min; `docs/dia269-leads.md`): root causes for the remaining ROM-driver divergences. High confidence, each scratch-fixed
@@ -74,7 +74,7 @@
 
 ## 2026-11-09 / 10 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud243d / abl261 / aip262 / dia263 folded
 
-- **State:** master clean; final engine src == aip262 (`344dbf234`; later commits are docs / tools only). Evidence `.integration/validation/sv-20261109/`
+- **State:** master clean; final engine src == aip262 (`c0bdb2411`; later commits are docs / tools only). Evidence `.integration/validation/sv-20261109/`
   (gates in `gates/`). No DEFERRED items. No push. ENGINE_BUILD at the final src `eb-16ee24851bfb26a3` (moved this run: abl261, aip262; tell the website).
 - **Folded:** aud243d (integration, ~50 min; `docs/aud243d-rom-driver.md`): closed-loop ROM driver (`tools/audio/romDecisionDriver.py`, `soundEventProbe.py lab
   --drive`, `romDriveSeed.sh`) replays the engine's decision list on the ROM by menu state to battle end; first sound segment diff (`soundSegmentDiff.py`).
@@ -84,8 +84,8 @@
 - **Folded:** dia263 (integration, diagnosis only, 65 min; `docs/dia263-leads.md`): #205 was a driver bug (party-menu slot through `gBattlePartyCurrentOrder`, fixed in
   tools); #206 root cause (type table row order); #204 ranked (`gender` first); new #208 (Reflect / Light Screen not passed to the live damage calc). Supervisor read
   both src sites (`applyTypeEffectiveness` loops defender types; screens only on the Future Sight path). Seeds 21..40: 11 full match, 8 diverge (per issue in the doc).
-- **Unmerged, kept for the next run: dmg264** (#206 type-table row order + #208 Reflect / Light Screen; branch `worker/side-20261110-045211` `aba497135`, base
-  `336e03b3b`; `docs/dmg264-type-order-screens.md` on the branch; evidence `sv-20261109/dmg264/`). Killed at its 95-min cap: ROM seeds 13 / 28 now match to battle
+- **Unmerged, kept for the next run: dmg264** (#206 type-table row order + #208 Reflect / Light Screen; branch `worker/side-20261110-045211` `7a2e4f900`, base
+  `a18ca324b`; `docs/dmg264-type-order-screens.md` on the branch; evidence `sv-20261109/dmg264/`). Killed at its 95-min cap: ROM seeds 13 / 28 now match to battle
   end and the aligned set still matches; census 0 unexplained, BUT changed sets differ by scene (ON 190 vs OFF 181; earlier fixes were identical) -- explain this
   first: the 9 ON-only seeds (61, 182, 189, 190, 434, 477, 756, 821, 899) are flagged in both scenes; supervisor check: their census `commands`
   lists are byte-identical base vs dmg264 (HP rows too); only `eventsDigest` differs in Scene ON. **Explained by read-only scout evd265:** the only differing
@@ -122,16 +122,16 @@
 - **Next:** ISSUES #203 (AI usable party count). Follow-ups: regenerate seg127 `exposure.json` from the new census (restores 3 sag130 classes); one Castform body in battle 950 declines.
 - **Notes:** report-only: confusion self-hit calc has no hold-item inputs; Future Sight's Plus / Minus field list has an hp filter C lacks.
 - **Supervisor verify:** reran `romDriveSeed.sh 8 on` before the fix (6 / 9, same divergence frame); read the classifier report (179 / 179 changed, 0 unexplained);
-  re-pin diffs read; ONE full suite on the final tree `2e5b0cc13` (`sv-20261109/gates/suite1.log`): **1,752 passed + 44 skipped, 0 failed; 14,428 tests**. New census
+  re-pin diffs read; ONE full suite on the final tree `f0b8a59f1` (`sv-20261109/gates/suite1.log`): **1,752 passed + 44 skipped, 0 failed; 14,428 tests**. New census
   baseline: `sv-20261109/abl261/census/{on,off}-6dce29c5d` (src unchanged to HEAD).
 
 ---
 
 ## 2026-11-08 / 09 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud243a / bnd256c / aud242g / cln244 / aud243b / aud243c / sub260 / sum259 folded
 
-- **State:** master clean, no active workers; final src == `1613c285a` (bnd256c install fix). Evidence `.integration/validation/sv-20261108/`
+- **State:** master clean, no active workers; final src == `8ea5adf59` (bnd256c install fix). Evidence `.integration/validation/sv-20261108/`
   (gates in `gates/`). No DEFERRED items. No push. ENGINE_BUILD at the final src `eb-b885d2de87ddf075` (moved this run: aud243a, bnd256c,
-  aud242g, sub260, sum259; tell the website). Baseline at start: src unchanged since the last full suite (`23a641cb4`), receipts reused.
+  aud242g, sub260, sum259; tell the website). Baseline at start: src unchanged since the last full suite (`062cbf0db`), receipts reused.
 - **Folded:** aud243a (S11 step 7 first half; branch `worker/integration-20261108-213051`, 102 min; `docs/aud243a-sound-census.md`):
   `tick()`'s post-tick sound block moved verbatim into `emitTickSounds` (`src/engine/tickSounds.ts`); `lsd194Census.ts` writes per-seed
   `sound` / `soundDigest` / `soundAnim` (null on older trees); `tools/integration/soundCensusDelta.py` (arm-vs-arm and `--t1`). T1 0..999
@@ -193,19 +193,19 @@
   settle at 63 instead of 59); (c) the swap summary does UP / DOWN over its 3 mons (clamp) and returns on the last viewed mon
   (`sum259-swap-summary-mon-change` 208 / 242: #188-class sprite frames, two frames of 18 / 68 px, ball shading 30036..30056 after a
   non-zero-cursor return; ISSUES #192). Worker: typecheck / build / build:lib 0, test:gate 362 / 362; differential 24 summary / party / swap
-  traces vs `3ce21fcd6` 2,576 identical (before (c)). Soak canary, factoryLibrary and the battle differential were left to the supervisor
+  traces vs `86a44d616` 2,576 identical (before (c)). Soak canary, factoryLibrary and the battle differential were left to the supervisor
   (below).
-- **Supervisor fixes at wind-down:** (1) the full suite on `4a7ccad9f` had 2 sum259 failures (1,749 passed + 44 skipped, 2 failed): five new
+- **Supervisor fixes at wind-down:** (1) the full suite on `b8a172ab4` had 2 sum259 failures (1,749 passed + 44 skipped, 2 failed): five new
   draft traces lacked `appRoute` (added `generated-orchestrator`, the default they replay on; `sum259-input-ready-b60` still 84 / 84 vs the
-  ROM) and `summaryAllFactorySpecies` MOVE_NONE settled at 59 ticks instead of the new open+63 gate (`b55a293ad`). (2) **bnd256c broke the
+  ROM) and `summaryAllFactorySpecies` MOVE_NONE settled at 59 ticks instead of the new open+63 gate (`1f2e227cc`). (2) **bnd256c broke the
   browser build:** `package.json` `"sideEffects": false` let vite drop `lib.ts`'s bare `import "./engine/monPicPixelsInstall.ts"`, so
   play:random hit pageerror "mon pic pixels not installed" in both scenes (vitest / node run unbundled and never saw it). `lib.ts` now calls
-  `installBundledMonPicPixels()` in `mountFactoryGameInternal`; ratchet updated (`1613c285a`). headless chunks still 7.59 MB.
-- **Gates** (`gates/`): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100** (on `b55a293ad`,
+  `installBundledMonPicPixels()` in `mountFactoryGameInternal`; ratchet updated (`8ea5adf59`). headless chunks still 7.59 MB.
+- **Gates** (`gates/`): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100** (on `1f2e227cc`,
   engine src == final except `lib.ts`); vanilla 0:20 Scene OFF **20 / 20**, Scene ON **20 / 20** (all `budget`); play:random 2 min /
   scene seed 7 after the fix: ON 6 battles / 2 swaps, OFF 16 / 8, 0 page errors / console errors / overlays / contained / divergences;
-  differential 5 battle traces vs `3ce21fcd6` (pre-sum259) 1,078 identical; typecheck, build, build:lib 0. The 0:60 gates were not run.
-- **Final full suite** (`gates/suite2.log`, HEAD `1613c285a` == final src): **1,795 files: 1,751 passed + 44 skipped, 0 failed; 14,418 tests
+  differential 5 battle traces vs `86a44d616` (pre-sum259) 1,078 identical; typecheck, build, build:lib 0. The 0:60 gates were not run.
+- **Final full suite** (`gates/suite2.log`, HEAD `8ea5adf59` == final src): **1,795 files: 1,751 passed + 44 skipped, 0 failed; 14,418 tests
   passed**, 17.3 min at 5 workers.
 - **Scout:** aud243d read-only (`docs/aud243d-scout.md`, unverified): a closed-loop Python driver in the lab reads `gBattlerControllerFuncs[0]`
   (ELF-only local handler addresses) to detect the action / move / party menus, freezes the executed segments as the trace; 2-hour plan.
@@ -220,7 +220,7 @@
 
 ## 2026-11-07 / 08 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242d / cln243 / aud242e / bnd253a / aud242f / bnd254b / bnd255f / dif256 / sep257 / pc258 folded
 
-- **State:** master clean, no active workers; final src == bnd255f merge `23a641cb4` (later commits: docs, dif256 / sep257 / pc258 tools). Evidence
+- **State:** master clean, no active workers; final src == bnd255f merge `062cbf0db` (later commits: docs, dif256 / sep257 / pc258 tools). Evidence
   `.integration/validation/sv-20261107/`. Final gates in the last bullets. No DEFERRED items. No push.
 - **Folded:** aud242d (S11 step 6, fourth slice; branch `worker/integration-20261107-213054`, 38 min; doc section 8): audited
   instant visual-task table (55 tasks, re-checked against C at extraction), BlendBattleAnimPal / Exclude / BlendParticle lifetime
@@ -260,7 +260,7 @@
   read the sprite pixel JSON. Exhaustive old-read == new-read test over 752 sheets (`tests/bnd254bPicGeometry.test.ts`). ENGINE_BUILD
   `eb-f5ed6a9418d226b7` -> `eb-7b7399877f107136` (tell the website); headless +37 KB until bnd-c drops the sprite chunk. Worker:
   typecheck / build / build:lib 0; full suite (6 shards) 1,744 passed + 44 skipped, 0 failed. Supervisor: `compare:differential` 4 faint
-  traces (obr251 on / off, turn13-dragonbreath-faint, turn5-faint) vs `7b899a9`: 863 captures byte-identical.
+  traces (obr251 on / off, turn13-dragonbreath-faint, turn5-faint) vs `b460b28`: 863 captures byte-identical.
 - **Folded:** bnd255f (finish plan "gamepad input through press / release"; side branch `worker/side-20261108-032210`, 61 min;
   `docs/library-package.md` "Gamepad"): opt-in `connectGamepad(game, opts?)` in `src/gamepad.ts` (Standard layout, left stick past a
   0.5 dead zone as the d-pad, edge-only press / release, first connected pad, releases on disconnect), exported from `src/lib.ts` +
@@ -271,7 +271,7 @@
   compare:differential -- <traces> --base REF --harness-from-head` overlays the working tree's `appTrace.ts` closure (7 tools/ files,
   never src/) onto the base, so traces with newer stage ids replay against an older engine; clear exit-2 message when the harness needs
   missing src/ exports (`tools/compare/harnessOverlay.ts`, `tests/dif256HarnessOverlay.test.ts`). Supervisor: 21 / 21 tests; aud242f
-  Ice Beam trace vs `5418684` with the flag 96 / 96 identical (without it: "unknown app stage"). SUPERVISOR.md recipe updated.
+  Ice Beam trace vs `661cc75` with the flag 96 / 96 identical (without it: "unknown app stage"). SUPERVISOR.md recipe updated.
 - **Folded:** sep257 (tooling papercuts; side branch `worker/side-20261108-054917`, 39 min; tools only): `soundEventProbe.py` lab mode
   writes the replay `trace` key and `--compact` (the committed fixture form) and refuses a stale output path;
   `run-mgba-probe.py --rm-log-on-success`. One command now makes a fixture: `AUDIO_PROBE_EXTRA_HOOKS=BlendPalette python3
@@ -293,7 +293,7 @@
   aud242g read-only (`docs/aud242g-scout.md`): Level-50 blockers re-ranked (SetPsychicBackground is an instant task, +9 measured;
   Tri Attack, Bubblebeam next; Sludge Bomb needs an SE-length table + pending-preserving waitsound; Blizzard / cries / branches are
   model changes, not table rows).
-- **Final full suite** (`gates/`, HEAD `23a641cb4` == final src): **1,789 files: 1,745 passed + 44 skipped, 0 failed; 14,361 tests
+- **Final full suite** (`gates/`, HEAD `062cbf0db` == final src): **1,789 files: 1,745 passed + 44 skipped, 0 failed; 14,361 tests
   passed**; typecheck, build, build:lib 0.
 - **Gates** (`gates/`, final src): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**;
   vanilla 0:20 Scene OFF **20 / 20**, Scene ON **20 / 20** (all `budget`); play:random 2 min / scene (seed 7): ON 5 battles / 2 swaps, OFF
@@ -312,7 +312,7 @@
 
 ## 2026-11-06 / 07 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242b / obr251 / cln242 / aud242c / flw252 folded
 
-- **State:** master clean, no active workers; final src == flw252 merge `453b5633b` (later commits: tests / docs). Evidence
+- **State:** master clean, no active workers; final src == flw252 merge `7e943d65f` (later commits: tests / docs). Evidence
   `.integration/validation/sv-20261106/`. Final gates in the last bullets.
 - **Folded:** aud242b (S11 step 6, second slice; branch `worker/integration-20261106-213056`, 46 min): extractor wait resolver
   (`waitforvisualfinish` from known task / sprite lifetimes, `jumpret*` / `jumpargeq` side branches; table schema v2, variants by turn x
@@ -324,7 +324,7 @@
   `docs/obr251-opponent-party-summary.md`): the opponent mid-battle party summary holds 100 frames (+23-frame lead after a faint) to
   the "sent out" first glyph, slides in by `OPP_BAR_X2` over 20 frames, mirrors the balls (`states[5-index]`), fades over 16 steps
   after the hide, and plays SE_BALL_TRAY_ENTER pan 0 both scenes (`src/engine/midBattleOpponentPartySummary*.ts`; battleScene.ts only
-  delegates). Presentation only. Worker: typecheck, build, build:lib 0; test:gate 362 / 362; census 0..999 both scenes vs `87e9366af`:
+  delegates). Presentation only. Worker: typecheck, build, build:lib 0; test:gate 362 / 362; census 0..999 both scenes vs `d0a193215`:
   digest / error / type sequence 1000 / 1000, only the opponent party-summary duration moved (1,583 commands +122, 99 +99, ON = OFF);
   differential 26 traces, only the 2 new obr251 traces moved. Re-pins: sc106 three anchors +122, party-summary view shape. Supervisor:
   5 files 73 / 73; compare `obr251-opponent-faint-on` 520..560: bar exact, only the 37 px `▾` cursor (ISSUES #200).
@@ -354,7 +354,7 @@
   tests pressed during the open fade (now settle it), the contain213 driver livelocked on the printer-paced refusal loop (DOWN deferred),
   and the exploring soak trajectories moved (re-pinned; old pins reproduce on the pre-flw252 tree). No src change. ISSUES #195 / #191
   removed.
-- **Final full suite** (`final-suite2/`, HEAD `1ee2d5d49`, src == final): **1,783 files: 1,739 passed + 44 skipped, 0 failed**; 14,150
+- **Final full suite** (`final-suite2/`, HEAD `e08ed3af8`, src == final): **1,783 files: 1,739 passed + 44 skipped, 0 failed**; 14,150
   tests passed; 1,114 s wall at 5 workers. Build 0, build:lib 0 (`gates/`).
 - **Gates** (`gates/`, final src): varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**;
   vanilla 0:20 default **20 / 20**, Scene ON **20 / 20** (all `budget`); play:random 2 min / scene (seed 7): ON 5 battles / 2 swaps,
@@ -375,9 +375,9 @@
 
 ## 2026-11-04 / 05 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud241a / aud241b / frs247 / cln240 / aud241c-fx / aud241c folded
 
-- **State:** master `f3440331d`+ (final src == aud241c merge). Tree clean, no active workers. Evidence `.integration/validation/sv-20261104/`.
-  The long gates below ran on src `fef00b6c5`; the final src adds only the ratchet move `bc74a02d3` and aud241c (write-only sound),
-  covered by the final full suite + build in `sv-20261104/final-suite/` on `f3440331d`: **1,793 files: 1,749 passed + 44 skipped,
+- **State:** master `7e0eb2d26`+ (final src == aud241c merge). Tree clean, no active workers. Evidence `.integration/validation/sv-20261104/`.
+  The long gates below ran on src `5805c5e7f`; the final src adds only the ratchet move `50878ad84` and aud241c (write-only sound),
+  covered by the final full suite + build in `sv-20261104/final-suite/` on `7e0eb2d26`: **1,793 files: 1,749 passed + 44 skipped,
   0 failed** (14,724 tests); build 0; build:lib 0.
 - **Folded:** aud241a (S11 step 5, first slice; `docs/aud241a-battle-start-sounds.md`; branch `worker/integration-20261104-213051`):
   `src/engine/battleStartSounds.ts` emits from `tick()` (guarded by `soundCollecting()`) the battle BGM (476, Brain 471) with
@@ -388,7 +388,7 @@
   Flow mismatches listed in the doc (MAGNETON ON player side 1 frame early; BGM-to-tray gap 348..374 across labs, engine 359).
   Worker: typecheck, build, build:lib 0; smoke 448; 17 files 233 tests; differential 28 traces 7,175 identical. Supervisor: 4 audio
   files 197 / 197.
-  Supervisor differential over all 211 traces vs `de7557c52`: **38,532 / 38,532 identical**.
+  Supervisor differential over all 211 traces vs `48b70939e`: **38,532 / 38,532 identical**.
 - **Folded:** aud241b (S11 step 5, second slice; `docs/aud241b-battle-sounds.md`; branch `worker/integration-20261104-231007`):
   `src/engine/battleHitSounds.ts` emits effectiveness SEs 12 / 13 / 14 (pan by target side), SE_FAINT, the FAINT-mode cry (duck +
   restore; restore length measured for 15 species, fitted for the rest, `src/data/faintCryFrames.ts`) and the low-HP loop
@@ -396,7 +396,7 @@
   super-effective, low-HP, low-HP then faint, 14 faint-cry lengths. Deltas recorded, not fixed: ISSUES #197. Not proven: the
   `battle-window{,-off}` RHYDON / GOLBAT fixtures (no engine staging; ROM facts pinned only), switch-in low-HP call, non-hit hp.
   Worker: typecheck, build, build:lib 0; 22 files 887 tests + 7 appTrace importers 90; differential 28 traces identical.
-  Supervisor: 4 audio files 316 / 316; differential 211 traces vs `ccdfe68d3` **38,532 / 38,532 identical**.
+  Supervisor: 4 audio files 316 / 316; differential 211 traces vs `e1da175dc` **38,532 / 38,532 identical**.
 - **Folded:** frs247 (handoff 4b(d), Kyle's white flash; `docs/frs247-faint-replacement-reshow.md`; branch
   `worker/integration-20261105-005010`): `renderBattleResolutionForcedPartySelect` blended the reshow toward white and drew the
   player ball tray; the ROM reshow is a brightness DECREASE (`BeginHardwarePaletteFade(0xFF,0,16,0,1)`) and flags 1 skip the player
@@ -411,12 +411,12 @@
   families, the cheapest importer of every src dir / large module, then a greedy coverage fill under 160 s summed test time),
   generated deterministically by `tools/test/generateTestGate.ts` from `tools/test/gate-durations.tsv` (`--check`), pinned by
   `tests/testGateSelection.test.ts`; `npm test` unchanged; AGENTS.md test tiers updated. Worker: 2 runs 218 / 217 s wall.
-  Supervisor: 364 / 364 in 217 s, and again on `bc74a02d3`. Frame-pin deletion candidates listed in the doc (unverified; a later step).
-- **Fixed by the supervisor (`bc74a02d3`):** the wind-down suite failed only `battlesceneSplitEligibility` (function-kind eligible
+  Supervisor: 364 / 364 in 217 s, and again on `50878ad84`. Frame-pin deletion candidates listed in the doc (unverified; a later step).
+- **Fixed by the supervisor (`50878ad84`):** the wind-down suite failed only `battlesceneSplitEligibility` (function-kind eligible
   pool 1, pinned 0): aud241a's pure `ballTraySoundTicks` in `battleScene.ts`. Moved to `battleStartSounds.ts` (the four tray tables
   exported). Split / aud241a / aud241b / sink / battleScene tests 361 / 361; typecheck, build, build:lib 0; test:gate 364 / 364.
 - **Cleanup step 4, first half (supervisor):** `git subtree split -P workspace/core-rs -b core-rs-archive` -> local branch
-  `core-rs-archive` `26ce8d051` (194 commits; tree `f35070e69` == `master:workspace/core-rs`). No tree change. The user pushes it
+  `core-rs-archive` `4b2a07d67` (194 commits; tree `f35070e69` == `master:workspace/core-rs`). No tree change. The user pushes it
   to its own repo; the `git rm -r core-rs` half is next.
 - **Scouts saved (read-only, unverified):** `docs/obr248-scout.md` (handoff 4b(e): ROM bar slides in 20 f, holds 100 f to the
   first glyph, fades 16 f, one SE_BALL_TRAY_ENTER, mirrored ball order; ours static 26 f; fix adds ~99 app frames per opponent
@@ -432,7 +432,7 @@
   (canonical battleScene route not wired). Gaps in the doc: our "fainted!" box is dismissable at F+30 vs ROM F+43 / F+46; the
   Explosion self-faint +18 victory gap; Brain loss unmeasured. Worker: typecheck, build, build:lib 0; test:gate 364 / 364; 66
   importing files 1,106 tests; differential 26 traces 9,615 identical. **S11 step 5 (aud241) is complete.**
-- **Wind-down gates** (`sv-20261104/gates-final/`, src `fef00b6c5` = final src minus the move above): typecheck 0; build 0;
+- **Wind-down gates** (`sv-20261104/gates-final/`, src `5805c5e7f` = final src minus the move above): typecheck 0; build 0;
   **full suite 1,792 files: 1,747 passed + 44 skipped, 1 failed (the ratchet above)**, 14,685 tests passed; play:random 4 min /
   scene: ON 23 battles / 9 swaps, OFF 35 / 16 (max streak 7); `--lobby-new-challenge` 2 min / scene: 0 page errors / overlays /
   contained / divergences; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON
@@ -451,7 +451,7 @@
 
 ## 2026-11-05 / 06 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud242a / cln241 / frf250a / frf250b folded
 
-- **State:** master `cd7d6165d`+ clean, no active workers; final src == frf250b `70abc1dd3` (later commits are tests / docs).
+- **State:** master `fc4485046`+ clean, no active workers; final src == frf250b `87eade038` (later commits are tests / docs).
   Evidence `.integration/validation/sv-20261105/`. Final gates: see the last bullet.
 - **Folded:** aud242a (S11 step 6, first slice; `docs/aud242-move-anim-sounds.md`; branch `worker/integration-20261105-213057`):
   `src/engine/moveAnimSounds.ts` (tick() hook behind `soundCollecting()`, Scene ON only) plays the decoded script `playsewithpan` /
@@ -462,7 +462,7 @@
 - **Folded:** cln241 (finish plan Cleanup 4, second half; `docs/cln241-core-rs-removal.md`; branch `worker/side-20261106-000539`):
   `core-rs/` removed (535 files), its TS wasm adapters, the 18 Rust<->TS parity tests (TS-only literal pins kept in
   `tests/tsEngineRetainedPins.test.ts`), wasm seeding in `run-subagent.sh`, cargo step in `verify-runner.sh`; gate list regenerated
-  (362 files). Archive: local branch `core-rs-archive` `26ce8d051` (unchanged). Worker: typecheck, build, build:lib 0; test:gate
+  (362 files). Archive: local branch `core-rs-archive` `4b2a07d67` (unchanged). Worker: typecheck, build, build:lib 0; test:gate
   362 / 362; full suite 1,777 files: 1,733 passed + 44 skipped, 0 failed; dist bytes unchanged. Supervisor: archive ref, `bash -n`
   launcher, retained pins 11 / 11. Untracked `core-rs/target` (5 GB) deleted. **Cleanup 4 done.**
 - **Folded:** frf250a (handoff 4b(g) step 1, live-site bug; branch `worker/integration-20261106-012510`, worker hit its 170-min cap
@@ -470,23 +470,23 @@
   A on RUN opens "Would you like to forfeit the match and quit now?" + yes/no box (`battle-yesno-frame.json` extracted from
   `graphics/text_window/1.png`); NO / B return to the menu; SE_SELECT fixtures both scenes. `tests/frf250aBagRunMenu.test.ts`, traces
   `frf250a-*` (cosmetic residuals ISSUES #199). Supervisor: 5 files 429 / 429; test:gate 362 / 362; typecheck 0; compare
-  `frf250a-run-no-on` prompt frames equal the ROM; differential 32 traces 4,690 identical vs `58771d3c2`.
+  `frf250a-run-no-on` prompt frames equal the ROM; differential 32 traces 4,690 identical vs `6548d75f7`.
 - **Folded:** frf250b (4b(g) step 2; main tree; `docs/frf250b-forfeit.md`): YES prints "<PLAYER> forfeited the match!", ends the battle
   as a loss through the normal lost-battle return (`src/engine/battleForfeit.ts`; no RNG; library battle-end + challenge-end loss;
   `replayChallenge` replays it), ROM loss-tail sounds. `tests/frf250bForfeit.test.ts`. Worker: typecheck, build, build:lib 0; test:gate
   362 / 362; differential 24 traces identical; vanilla 0:20 20 / 20. Supervisor stopped it at minute ~80 (it was re-running soaks and
   had not started the full suite; all work committed). Supervisor: compare `frf250b-run-yes-off` **250 / 250** vs the ROM (forfeit
-  text through the Lobby loss pages); differential 36 traces 5,280 identical vs `3fb56c975`. Scene ON gaps in ISSUES #199.
+  text through the Lobby loss pages); differential 36 traces 5,280 identical vs `896651d7a`. Scene ON gaps in ISSUES #199.
   **Handoff 4b(g) done.**
-- **Fixed by the supervisor (`cd7d6165d`):** the final full suite failed 3 trajectory pins in `tests/randomRoundSoak.test.ts` (the
+- **Fixed by the supervisor (`fc4485046`):** the final full suite failed 3 trajectory pins in `tests/randomRoundSoak.test.ts` (the
   exploring policy now sees real BAG / RUN screens, as at fsw235 / vis243a): Baton Pass pin seed 30 -> 32 (re-scan 0..35), swap-offer
   seed set 0..7, full-policy (c) frames / turn. The 3 tests pass.
-- **Gates** (`sv-20261105/gates/`, src `3fb56c975` = frf250a; frf250b leaves every soak policy unchanged, `forfeitRate` null):
+- **Gates** (`sv-20261105/gates/`, src `896651d7a` = frf250a; frf250b leaves every soak policy unchanged, `forfeitRate` null):
   varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON
-  **20 / 20**, Scene OFF **20 / 20** (all `budget`). **Final full suite** (`final-suite/`, HEAD `4a9d7392d`, src == final): 1,778 files: 1,733 passed + 44 skipped, 1 failed
-  (`randomRoundSoak`, the 3 pins re-pinned in `cd7d6165d`), 13,908 tests passed; one fork died (low memory beside a supervisor scan): the
-  unreported `battlesceneSplitEligibility` + the re-pinned `randomRoundSoak` rerun on `cd7d6165d` **75 / 75**. Build: the worker's
-  `npm run build` / `build:lib` 0 on `70abc1dd3` (final src).
+  **20 / 20**, Scene OFF **20 / 20** (all `budget`). **Final full suite** (`final-suite/`, HEAD `fd211b63c`, src == final): 1,778 files: 1,733 passed + 44 skipped, 1 failed
+  (`randomRoundSoak`, the 3 pins re-pinned in `fc4485046`), 13,908 tests passed; one fork died (low memory beside a supervisor scan): the
+  unreported `battlesceneSplitEligibility` + the re-pinned `randomRoundSoak` rerun on `fc4485046` **75 / 75**. Build: the worker's
+  `npm run build` / `build:lib` 0 on `87eade038` (final src).
   play:random 2 min / scene (seed 7): ON 7 battles / 3 swaps, OFF 17 / 6; 0 page errors / overlays / contained. The 0:60 gates were not run (hours each here).
 - **Next:** handoff "Next work": aud242b (wait resolver) / aud242c (panse / createsoundtask), 4b(e) opponent replacement ball bar
   (`docs/obr248-scout.md`), cleanup 5 second half or 7, ISSUES #196 / #197 / #198 / #199.
@@ -497,7 +497,7 @@
 
 ## 2026-11-03 / 04 — CAX31 daily run (supervisor, Opus 5.5): wind-down: aud240c / cln239 / aud240d / go246 / qak248 / qak249 folded
 
-- **State:** master `07123061b`+ clean, src == qak248 fix `127def5d4` (suite + build green on it; the soak / play gates ran on src `710424ca8` = go246 merge). Evidence `.integration/validation/sv-20261103/`.
+- **State:** master `8764402c6`+ clean, src == qak248 fix `f5ab0f107` (suite + build green on it; the soak / play gates ran on src `8658fed15` = go246 merge). Evidence `.integration/validation/sv-20261103/`.
 - **Folded:** aud240c (S11 step 4c; `docs/aud240c-party-menu-sounds.md`; branch `worker/integration-20261103-213048`): voluntary +
   forced battle party menus emit SE_SELECT on row moves (only when the slot changes), A on a mon, action-window cursor (NoWrap,
   silent at the ends), action-window A (**one** SE: `party_menu.c:2560` passes `APressMuted = TRUE`, supervisor-read; the scout's
@@ -505,7 +505,7 @@
   A-on-CANCEL. Voluntary SEs gated until the open fade ends (the ROM ignores input then; our cursor still moves, recorded). 3 step-mode
   ROM fixtures (forced 25 events on `turn15-party-select`, voluntary 25 via a lab request, SUMMARY entry 9). Supervisor re-probed the
   forced window on the ON oracle: 25 / 25 events equal. Worker: differential 211 traces 38,532 / 38,532 identical; typecheck, build,
-  build:lib 0; 28 importing test files pass. Supervisor: 4 audio test files 117 / 117; **full suite on `30360d7cf`: 1,741 passed +
+  build:lib 0; 28 importing test files pass. Supervisor: 4 audio test files 117 / 117; **full suite on `56f4bbb0a`: 1,741 passed +
   44 skipped, 0 failed, 14,465 tests**; one fork died beside a worker (`randomRoundSoakParallel` not reported), rerun 6 / 6.
 - **Folded:** cln239 (cleanup step 3; `docs/cln239-launchers.md`): `run-supervisor.sh` / `tools/run-subagent.sh` are Claude only;
   Codex / DeepSeek / OpenCode paths, max mode, the animation / rust lanes and supervisors, `tools/autonomy` campaign scripts deleted
@@ -529,14 +529,14 @@
   (OFF oracle: cry-only timeline). SPOINK was cut short by 137 frames; its window (seed 8, GRIMER vs SPOINK, ON oracle) went
   318,460 / 585,343 -> **132 / 0 px** (opponent / player mon) — supervisor reran it: 132 / 0 / 8,273. bso226 WAILMER / SPINDA
   need no fitted lag any more. Census 0..999 both scenes vs `vis243a` baseline: 0 bad, 1000 / 1000 identical (rows start after the
-  intro; 918 ON battles get a hold, +53,941 frames). Differential 211 traces identical. bso226 harness restored from `4f6fa87e4^`.
+  intro; 918 ON battles get a hold, +53,941 frames). Differential 211 traces identical. bso226 harness restored from `54c5686f0^`.
   The worker reported "no pins re-pinned"; the wind-down suite found 2 (below).
-- **Fixed by the supervisor (`f40d5cea6`):** the wind-down suite failed only `sc106StatsChangeCommand` (4) and `sgl138SeGateLive`
+- **Fixed by the supervisor (`04c8ea71e`):** the wind-down suite failed only `sc106StatsChangeCommand` (4) and `sgl138SeGateLive`
   (4), each by exactly the route battle's intro hold computed per seed with the two helpers (sc106 seeds 0 / 6 / 10 / 13: +106 /
   +61 (+1 parity) / +65 / +118; sgl138 receipt regenerated: 0-on +106, 9-on +86, 19-on +12, 808-on +88; anchors, OFF and summary
   unchanged). Both files green (11 / 11, 6 / 6).
 - **Scout saved:** `docs/aud241-scout.md` (battle controller sound map + proposed split; read-only worker report, unverified).
-- **Wind-down gates** (`sv-20261103/gates-final/`, src `710424ca8`): typecheck 0; build 0; **full suite 1,787 files: 1,741 passed +
+- **Wind-down gates** (`sv-20261103/gates-final/`, src `8658fed15`): typecheck 0; build 0; **full suite 1,787 files: 1,741 passed +
   44 skipped, 2 failed (the re-pins above)**, 14,458 tests passed; play:random 4 min / scene: ON 23 battles / 9 swaps, OFF 35 / 16
   (max win streak 7); `--lobby-new-challenge` 2 min / scene: 1 + 3 new challenges; **0 page errors / overlays / contained /
   divergences**; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla
@@ -546,9 +546,9 @@
   74-row clip on the live field; the ROM has none (trace clone is a plain OBJ, `battle_anim_utility_funcs.c:243-246`,
   supervisor-read); 160 = 0 px on 87 / 88 runs (worst at 74: SLAKING AA 175 px, TROPIUS 124, RAIKOU QA 106). New ISSUES #194
   (RATTATA QA residual above the clip row, not the clip), #195 (aud240c's two party-menu flow gaps).
-- **Fixed by the supervisor:** qak248 (`127def5d4`): the two live clips are 160 (staged path unchanged). Typecheck 0; Quick Attack /
+- **Fixed by the supervisor:** qak248 (`f5ab0f107`): the two live clips are 160 (staged path unchanged). Typecheck 0; Quick Attack /
   Aerial Ace / fast-contact / sceneOn / Agility-clip / later58 tests 64 / 64; supervisor rendered SLAKING / TROPIUS AA vs qak247's
-  ROM frames: 0 px (were 175 / 124). Render-only: the soaks above (logic) are unaffected; full suite + build on `127def5d4`:
+  ROM frames: 0 px (were 175 / 124). Render-only: the soaks above (logic) are unaffected; full suite + build on `f5ab0f107`:
   build 0, **1,787 files: 1,742 passed + 44 skipped, 1 failed** = `substituteDollDefenderLive` now finds `prep38-quick-attack-opponent`
   row 9 exact (its documented 1 px PERSIAN residual was this clip; residual dropped, file 60 / 60). No standard trace or census change expected (no hermetic receipt added yet: follow-up).
 - **Folded:** qak249 (test-only): hermetic ROM receipts `tools/compare/fixtures/{aerial-ace-opponent-slaking,quick-attack-opponent-raikou}-player-onix.json`
@@ -565,16 +565,16 @@
 
 ---
 
-## 2026-11-02 / 03 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Mac 851ee1f4c / aud240a / aud240b / vis243a / agi245 / rng244 / cln238 / cleanup 6 folded
+## 2026-11-02 / 03 — CAX31 daily run (supervisor, Opus 5.5): wind-down: Mac 90c6684d5 / aud240a / aud240b / vis243a / agi245 / rng244 / cln238 / cleanup 6 folded
 
-- **State:** master `54aafa87d`+ (final src == agi245 merge `c88d897f2`); the long soak / play gates ran on src `5d39f2c79`; agi245
+- **State:** master `fe9514fd1`+ (final src == agi245 merge `f4a1cd6c8`); the long soak / play gates ran on src `57d6c3594`; agi245
   (one render line) got its own full suite + build + Scene ON render checks (below). Tree clean, no active workers.
-- **Folded:** Mac `worker/lib-v2-mac` tip `851ee1f4c` (sum241 battle party action window + SUMMARY; spn242 species names keep
-  apostrophes / periods / gender symbols, summary portraits keyed by SPECIES_) as merge `0f39a60`. master had only .md changes since
-  the Mac base `c5b7861e0`, so the merged non-docs tree == `851ee1f4c` (checked by `git diff`); the Mac's full suite 14,363 / 0
+- **Folded:** Mac `worker/lib-v2-mac` tip `90c6684d5` (sum241 battle party action window + SUMMARY; spn242 species names keep
+  apostrophes / periods / gender symbols, summary portraits keyed by SPECIES_) as merge `a5329d5`. master had only .md changes since
+  the Mac base `70b4b16e2`, so the merged non-docs tree == `90c6684d5` (checked by `git diff`); the Mac's full suite 14,363 / 0
   (re-run by the top layer) is reused. Supervisor: typecheck 0; touched tests (sum241, spn242, inbattlePartyMenuVisualBind,
   contain213 helper users) 85 / 85.
-- **Folded:** cln238a (cleanup step 2, first half, `ee189a74a`, supervisor): 8 root ledgers nothing reads moved unchanged to
+- **Folded:** cln238a (cleanup step 2, first half, `a89f1e669`, supervisor): 8 root ledgers nothing reads moved unchanged to
   `docs/archive/` (git grep: no test / tool / launcher / coverage-JSON reference). ANIMATION_COVERAGE.json + ANIMATION_LATCHES.md
   stay (evidence paths), launcher-named lane files wait for cleanup step 3, ROADMAP / ISSUES rewrite = cln238b.
 - **Folded:** aud240a (S11 step 4a; `docs/aud240a-screen-sounds.md`; branch `worker/integration-20261102-213642`):
@@ -617,21 +617,21 @@
   `/tmp/app-differential-*` worktree removed.
 - **Fixed by the supervisor:** the wind-down suite failed 1 pin (M-B (c) full seed 0): aud240b's A-on-Info close moves the
   exploring trajectory (38,729 / t28 -> 43,417 / t39, same battle / end state); with both A-close sites undone the old pin passes.
-  Re-pinned (`5d39f2c79`), file 64 / 64.
+  Re-pinned (`57d6c3594`), file 64 / 64.
 - **Folded:** agi245 (handoff 4b(b), Kyle's "Agility clips the lower rows"; scout `docs/agi245-scout.md`; branch
   `worker/integration-20261103-050850`): `battleScene.ts:21369` the live opponent-attacker Agility clip is now 160 (the healthbox
   covers the feet, as in the ROM); `corner.y + 55` stays only on the staged path. ROM 87-frame window 0 px for AIPOM, FEAROW,
   CROBAT, DRAGONITE, LEDYBA, SUNKERN (before: AIPOM 62 frames / 14,833 px); new fixture `agility-opponent-aipom-player-onix` +
   `tests/animation/agilityOpponentClip.test.ts` (supervisor: fails with the fix undone); differential 641 / 641 identical;
   Agility / ont193 / scd112 tests 26 / 26. Quick Attack / Aerial Ace keep the 74 clip (LEDYBA-like species unverified, follow-up).
-  **agi245 gates** (`sv-20261102/gates-agi245/`, tree `c88d897f2`): typecheck 0; full suite 1,785 files, 14,441 passed, 1 failed =
-  gate6 manifest missing rng244's new test (regenerated `54aafa87d`, rerun 7 / 7); build 0; play:random 3 min / scene: ON 16
+  **agi245 gates** (`sv-20261102/gates-agi245/`, tree `f4a1cd6c8`): typecheck 0; full suite 1,785 files, 14,441 passed, 1 failed =
+  gate6 manifest missing rng244's new test (regenerated `fe9514fd1`, rerun 7 / 7); build 0; play:random 3 min / scene: ON 16
   battles / 9 swaps, OFF 26 / 10, 0 page errors / overlays / contained / divergences; Scene ON full vary-rng 0:8 `--render-every 8`
   **8 / 8** (all `budget`).
 - **Scout:** agi245 (`docs/agi245-scout.md`, read-only): Kyle's Agility clip is ours, not the ROM's — the live path still uses a
   LEDYBA-calibrated clip row `corner.y + 55` (`battleScene.ts:21369`, supervisor-read), cutting 257 opponent species; a 160 clip
   gives 0 px on 6 species vs the ROM.
-- **Wind-down gates** (`sv-20261102/gates-final/`, src `7717b55a4` == `5d39f2c79` src): typecheck 0; **independent full suite
+- **Wind-down gates** (`sv-20261102/gates-final/`, src `6d40ee2df` == `57d6c3594` src): typecheck 0; **independent full suite
   1,783 files: 1,738 passed + 44 skipped, 1 failed (the pin above, fixed)**, 14,427 tests passed; build 0; play:random 4 min / scene:
   ON 22 battles / 9 swaps, OFF 34 / 16 (max win streak 7); `--lobby-new-challenge` 2 min / scene: 1 + 3 new challenges; **0 page
   errors / overlays / contained / divergences**; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap
@@ -650,9 +650,9 @@
 
 ## 2026-11-01 / 02 — CAX31 daily run (supervisor, Opus 5.5): wind-down: pmn238 / aud238 / cln237 / aud239 / pmf240 folded
 
-- **State:** master `c5b7861e0`+ (final src == gates commit `530e835ba`; after it only the audioSinkPlumbing test fix `ffeb4b2c4` + docs).
-- **Folded:** Mac `worker/lib-v2-mac` tip `059579e32` (pmn238: the attendant's "The Nth match is next!" follows the battle number;
-  7th match = "Finally, the 7th match is next!", +9 frames) as merge `d59e36b68`. Supervisor: typecheck 0; postwin +
+- **State:** master `70b4b16e2`+ (final src == gates commit `5171c45aa`; after it only the audioSinkPlumbing test fix `90eec50fd` + docs).
+- **Folded:** Mac `worker/lib-v2-mac` tip `14b78e92a` (pmn238: the attendant's "The Nth match is next!" follows the battle number;
+  7th match = "Finally, the 7th match is next!", +9 frames) as merge `7f7cf40a8`. Supervisor: typecheck 0; postwin +
   interactiveRouting 69 / 69; full suite 0 failed (one fork died beside the aud238 worker; the missing file reran 2 / 2).
 - **Folded:** aud238 (S11 step 2; `docs/aud238-sound-sources.md`): `tools/extract/extract-audio-sound-sources.ts` ->
   `src/data/gen/audio-sound-sources.json` (559 KB, not imported by src): 1,042 anim sound ops (873 / 97 / 48 / 2 / 22, exact),
@@ -662,7 +662,7 @@
   supervisor grep matches the op counts and 122.
 - **Folded:** cln237 (cleanup step 1; `docs/cleanup-cln237-manifest.md`, list `docs/archive/cln237-deleted.txt`, tool
   `tools/cleanup/keepClosure.ts`): 2,103 of 28,419 files under tools/integration + tools/compare deleted (189,684 lines); kept tests
-  read most fixtures by name, so the rest stays. Recovery: `git checkout 72c9d264c -- workspace/<path>`. Worker on the exact tree:
+  read most fixtures by name, so the rest stays. Recovery: `git checkout 196174f6b -- workspace/<path>`. Worker on the exact tree:
   full suite 1,774 files / 14,316 passed, 0 failed; build 0; differential 641 / 641; census both scenes 0..999 — supervisor `cmp`
   20 / 20 shards byte-identical to `pmo239-evidence/census/{on,off}-7f06071c8`. Deleted names survive in src only inside comments.
 - **Folded:** aud239 (S11 step 3; `docs/aud239-sound-events.md`): `src/audio/soundEvents.ts` (SoundEvent, write-only SoundSink,
@@ -677,8 +677,8 @@
   to the ROM status order (`inbattlePartyMenuVisualBind`). `battle1-postwin-next-prompt` is not ROM-aligned near f25800.
 - **Fixed by the supervisor:** the gate suite failed 2 tests in `tests/audioSinkPlumbing.test.ts` (aud239): with `isolate: false`
   an earlier file in the fork had loaded the real core, so the hoisted `vi.mock` never applied. Reproduced (snatch test first,
-  `--no-isolate --maxWorkers=1`), fixed with `vi.resetModules` + `vi.doMock` undone in `afterAll` (`ffeb4b2c4`), 10 / 10 in the same run.
-- **Wind-down gates on `530e835ba`** (`sv-20261101/gates-final/`): typecheck 0; **independent full suite 1,778 files: 1,733 passed +
+  `--no-isolate --maxWorkers=1`), fixed with `vi.resetModules` + `vi.doMock` undone in `afterAll` (`90eec50fd`), 10 / 10 in the same run.
+- **Wind-down gates on `5171c45aa`** (`sv-20261101/gates-final/`): typecheck 0; **independent full suite 1,778 files: 1,733 passed +
   44 skipped, 1 failed (the 2 audioSinkPlumbing tests above, fixed and rerun)**, 14,339 passed; build 0; play:random 4 min / scene: ON
   21 battles / 8 swaps, OFF 35 / 17 (max win streak 7); `--lobby-new-challenge` 2 min / scene: 4 + 2 new challenges; **0 page errors /
   overlays / contained / divergences**; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0
@@ -696,10 +696,10 @@
 
 ## 2026-10-31 / 11-01 — CAX31 daily run (supervisor, Opus 5.5): wind-down: library package / pmo239 / audio design + probe folded
 
-- **State:** master `b8cf38262`+ (src == `da19bc407` pmo239 merge; later commits are docs + `tools/audio` + one hermetic test). Library fold `f88653929` (fast-forward of `fold238`): core library package (contract v2) + the Mac's `worker/lib-v2-mac`
-  tip `b7e7dc345` (fsw235 forced party menu three-slot cursor + WIN_MSG refusals, wth236 Scene ON end-of-turn weather animations,
+- **State:** master `248c67a35`+ (src == `fa52c5269` pmo239 merge; later commits are docs + `tools/audio` + one hermetic test). Library fold `062a82a3f` (fast-forward of `fold238`): core library package (contract v2) + the Mac's `worker/lib-v2-mac`
+  tip `4dfc9d509` (fsw235 forced party menu three-slot cursor + WIN_MSG refusals, wth236 Scene ON end-of-turn weather animations,
   the 11 re-pins, pmd237 party-card HP / fainted palettes / CANCEL highlight). Handoff "Next work" item 1 is DONE.
-- **lib235** (branch `worker/integration-20261031-214213`, tip `60e816c2a`; `.integration/validation/sv-20261031/lib235-evidence/`):
+- **lib235** (branch `worker/integration-20261031-214213`, tip `71a9abbd5`; `.integration/validation/sv-20261031/lib235-evidence/`):
   ENGINE_BUILD is a content hash of an in-memory headless build (`eb-<16 hex>`, `"dev"` outside builds; stable across rebuilds and
   docs / test / renderer-only edits, moves on a headless-graph change; `tests/engineBuildHash.test.ts`); lib-types parity test;
   contract audit: no mismatch (extras additive; `trace()` returns finished runs only, documented). Sizes: headless 22.3 MB raw /
@@ -708,7 +708,7 @@
   Vite app: both entries import, `replayChallenge` runs in node, Chromium mount gets `ready`. Soaks: winning vary-rng carry 0
   0:100 **100 / 100**; Scene ON full vary-rng 0:16 render-8 **16 / 16** (budget). A first lib235 launch was stopped at 21:50 when the
   Mac moved its branch; fsw237 (a fix step for the then-red suite) was stopped at 00:27 when the Mac pushed the same fixes — no edits.
-- **Supervisor gates on the exact folded tree `f88653929`** (`sv-20261031/fold238-evidence/`): typecheck 0; census 0..999 both scenes
+- **Supervisor gates on the exact folded tree `062a82a3f`** (`sv-20261031/fold238-evidence/`): typecheck 0; census 0..999 both scenes
   byte-identical to lib235's; lib235's census vs master `snd233` baseline: OFF 10 / 10 shards identical, ON 997 / 1,000 digests
   identical, 330 battles pure insertions of 1,986 weather `general-animation` commands, seeds 434 / 796 / 881 budget-truncated
   (prefix of master's stream minus the weather commands, supervisor-verified); differential vs master: fight-submenu +
@@ -717,7 +717,7 @@
   was OOM-killed beside a worker's vitest; rerun clean); build 0; build:lib 0; play:random 3 min / scene: ON 8 battles / 6 swaps,
   OFF 27 / 10, **0 page errors / overlays / contained / divergences**.
 - **New:** ISSUES #190 (party cards print "Lv50" where the ROM shows the FNT / status icon).
-- **Folded:** pmo239 (merge `da19bc407`; branch `worker/integration-20261101-002825`; `sv-20261031/pmo239-evidence/`): party menus
+- **Folded:** pmo239 (merge `fa52c5269`; branch `worker/integration-20261101-002825`; `sv-20261031/pmo239-evidence/`): party menus
   list rows in the ROM's battle order (SwitchPartyOrder on every player switch-in: voluntary, forced send-out, Roar / Whirlwind;
   battle start = active first, then ascending), both menus and scenes; the cursor opens on row 0 (the active mon / the fainted mon).
   Kernel keeps raw indexes. Post-battle party / swap screens stay in raw order (source-read only). Oracle: voluntary 0 -> 2 switch
@@ -725,28 +725,28 @@
   class); the forced case is ROM-observed (SHEDINJA probe) + Tier-1, no pixel proof (harness maxHP, ISSUES #146 shd234). Census both
   scenes identical 1,000 / 1,000 (commands + digests; supervisor-verified); differential: only battle1-postwin's second forced menu
   (216 frames, now MAGBY / ONIX / BAYLEEF = ROM [1,0,2]; eyeballed). Worker: typecheck 0; full suite 8 shards 14,276 passed / 0
-  failed (shards 1-6 on `7f06071c8`, 7-8 on `ecf05802b`; the 12 soak-importing files rerun on `ecf05802b`); build 0; play:random 3 min /
+  failed (shards 1-6 on `5d5a26cea`, 7-8 on `362e01153`; the 12 soak-importing files rerun on `362e01153`); build 0; play:random 3 min /
   scene 0 errors; open-on-active replay check 192 voluntary + 44 forced menus, 0 problems. Soak pins re-rolled: #89 Baton Pass halt
   seed 739 -> 19 (pin weakened: `frames > haltFrame` bound dropped, every hit now halts in the post-decision grace window), M-B (c)
   seeds 0 / 1 new frames, #104 (b) winning seed 3 -> 2. Supervisor on master: 6 focused files 111 / 111.
 - **Folded:** aud236 (S11 audio design, `docs/s11-audio-design.md`; accepted, open questions decided in its last section) and aud237
-  (probe step 1, `b8cf38262`): `tools/audio/soundEventProbe.py` logs `(frame, kind, id, pan)` per sound by single-stepping the PC onto
+  (probe step 1, `248c67a35`): `tools/audio/soundEventProbe.py` logs `(frame, kind, id, pan)` per sound by single-stepping the PC onto
   `m4aSongNumStart` / `PlayCryInternal` / the SE / BGM / fanfare wrappers + fade / volume / stop / continue hooks (libmgba-py has no
   debugger); fixtures draft, battle ON / OFF, intro ON / OFF; Scene OFF drops only the move-animation SEs and is its own timeline;
   hybrid fast mode (RAM signature, re-step changed frames) byte-equal to stepping on all 5 fixtures, 11-13x vs the new 2.9x-faster
   stepper (32-38x vs the original; the 20x target vs the new stepper is NOT met); one unexplained 5-byte RAM mismatch at f2096 on
-  the full battle-1 trace, then EXPLAINED by aud238a (`a29d8df38`): CPU-stack bytes 0x03007d40..4c (above linked IWRAM end
+  the full battle-1 trace, then EXPLAINED by aud238a (`2fbe63e00`): CPU-stack bytes 0x03007d40..4c (above linked IWRAM end
   0x030078ac, supervisor-checked in the map) from `run_frame` vs stepping stopping 1-2 instructions apart mid-`push`; one-instruction
   catch-up leaves 0 bytes; the probe now records the catch-up proof. Hybrid judged census-grade for effective events.
   `tests/audioProbeFixtures.test.ts` 27 / 27 (supervisor on master).
-- **Wind-down gates on `a3c1e1642`** (src == final; `sv-20261031/gates-final/`): **independent full suite 1,728 files / 14,276 tests,
+- **Wind-down gates on `a5e84056a`** (src == final; `sv-20261031/gates-final/`): **independent full suite 1,728 files / 14,276 tests,
   0 failed**; build 0; play:random 4 min / scene: ON 20 battles / 8 swaps, OFF 36 / 17; `--lobby-new-challenge` 2 min / scene: 4 + 2
   new challenges from the Lobby; **0 page errors / overlays / contained / divergences**; varied-RNG first-round winning carry 0 / 14 /
   28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 Scene ON **20 / 20**, Scene OFF **20 / 20** (all `budget`);
   Scene ON winning first-round 0:6 `--render-every 1` **6 / 6**; Scene ON full vary-rng 0:16 `--render-every 8` **16 / 16** (all `budget`, 1,535 s). The 0:60
   full / winning / winning-swap gates were not run (hours each here; same practice as earlier sessions).
 - **Housekeeping:** evidence `sv-20261027`, `sv-20261028`, `apx215-census` deleted (older than the last three runs; 6 GB). Branch
-  `worker/lib-v2-mac` is fully merged at `b7e7dc345`.
+  `worker/lib-v2-mac` is fully merged at `4dfc9d509`.
 - **Next:** handoff "Next work": audio step aud238 (the sound-source table; the f2096 mismatch is explained), a cleanup step
   (cln237 brief ready), #190.
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261031-214213` (lib235), `-20261101-002825` (pmo239),
@@ -756,8 +756,8 @@
 
 ## 2026-10-30 / 31 — CAX31 daily run (supervisor, Opus 5.5): wind-down: cff230 / nch231 / cff232 / snd233 folded
 
-- **State:** master `9670f00cc`+ (cff230 fast-forward; nch231 / cff232 / snd233 merges; src + tests == snd233 worker-tested `2cdc0b36d`).
-- **Gate carried over from the last run, on `8d7916813` (src == pfb229 merge;
+- **State:** master `25abe428f`+ (cff230 fast-forward; nch231 / cff232 / snd233 merges; src + tests == snd233 worker-tested `ca3e1ca1a`).
+- **Gate carried over from the last run, on `ce2c80139` (src == pfb229 merge;
   `.integration/validation/sv-20261030/gates-8d7916813/`):** Scene ON `--policy full --vary-rng` 0:30 `--render-every 8` **30 / 30**
   (all `budget`); build 0; browser goal play 10 min / scene (seed 1): ON 30 battles / 13 swap screens, OFF 44 / 22, **0 page errors,
   0 overlays, 0 contained, 0 divergences**.
@@ -770,7 +770,7 @@
   eventsDigest + error identical 1,000 / 1,000, only battles 603 / 643 / 651 / 950 changed (one morph command each; live 26,957 ->
   26,960); 3 touched test files 24 / 24 on master; rain strip eyeballed (ROM == ours). Found: the ROM plays the morph in Scene OFF
   too; ours does not (ISSUES #143 open line).
-- **Folded:** nch231 (merge `6af3a1505`; branch `worker/integration-20261030-233859`; `docs/nch231-new-challenge.md`): in the free-roam
+- **Folded:** nch231 (merge `6ae435fbf`; branch `worker/integration-20261030-233859`; `docs/nch231-new-challenge.md`): in the free-roam
   Lobby, A facing the singles attendant ((4,8) facing north) starts a new challenge: fresh draft from the LIVE gameplay RNG cursor,
   presentation seed / scene / recorder kept, streak + rents reset per `InitFactoryChallenge` (battle_factory.c:208-212; a retire
   does not keep the streak either). Attendant dialogue / save prompt / door walk are skipped (documented divergence, untimed).
@@ -780,8 +780,8 @@
   (supervisor `cmp` 20 / 20 shards); differential 641 + 3,713 lobby / terminal captures identical; play:random flagged 4 min /
   scene: 2 new challenges each, 0 page errors; full suite **1,718 files / 14,208 tests, 0 failed**; build 0. Supervisor: the 3
   touched test files 21 / 21 on master.
-- **Varied-RNG sweeps on `6af3a1505` (`gates-6af3a1505/`):** winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
-- **Folded:** cff232 (merge `0a222a6c4`; branch `worker/integration-20261031-015154`; "Scene OFF" section of
+- **Varied-RNG sweeps on `6ae435fbf` (`gates-6af3a1505/`):** winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**.
+- **Folded:** cff232 (merge `027941dc0`; branch `worker/integration-20261031-015154`; "Scene OFF" section of
   `docs/cff230-castform-forms.md`): the ROM plays the CASTFORM_CHANGE morph in Scene OFF too (no NO_ANIMATIONS gate); OFF now builds
   the same command and body. ROM finding: a battler-1 change after a weather print starts 3 rows later
   (`BattleScript_WeatherFormChanges` loops battler 0 then 1; OFF command 120 rows). OFF ROM windows, Castform box / text box before ->
@@ -789,8 +789,8 @@
   14,213 tests, 0 failed**; build 0; differential 641 / 641. Supervisor: ON census shards byte-identical to nch231's; OFF eventsDigest +
   error identical 1,000 / 1,000, only 603 / 643 / 651 / 950 changed (+1 general-animation each, 117 / 120 rows); 2 touched test files
   14 / 14 on master; hail strip eyeballed. Scene ON keeps the 3-row battler-1 shortfall (snd233 part A).
-- **Vanilla Scene OFF 0:20 on `0a222a6c4`** (cff232's OFF change; `gates-0a222a6c4/`): **20 / 20** (all `budget`).
-- **Folded:** snd233 (merge `9670f00cc`; branch `worker/integration-20261031-031746`; `docs/snd233-scene-on-send-in-fixes.md`): (A) Scene
+- **Vanilla Scene OFF 0:20 on `027941dc0`** (cff232's OFF change; `gates-0a222a6c4/`): **20 / 20** (all `budget`).
+- **Folded:** snd233 (merge `25abe428f`; branch `worker/integration-20261031-031746`; `docs/snd233-scene-on-send-in-fixes.md`): (A) Scene
   ON gets the +3 battler-1 weather-loop rows (rain / opponent lab text box 1,253 px -> 0); (B) the "opponent Roar ball path 6,718 px"
   line was stale (bso225 / pfb229 already route it through the species-keyed arc); the real residual was the ball after landing for
   monY 80..84 species (landing ticks, closed ball, 5 open + 6 open-final rows above the terrain clip row), now drawn
@@ -798,17 +798,17 @@
   SHEDINJA 16 -> 0, ENTEI 2,079 -> 2,063 (glow-lag); the faint-replacement path shares it (CASTFORM 278 -> 13). Worker: typecheck 0;
   full suite **1,720 files / 14,219 tests, 0 failed**; build 0; differential 641 / 641. Supervisor: OFF shards byte-identical to
   cff232's; ON eventsDigest + error identical 1,000 / 1,000, only battle 651 changed (117 -> 120 rows); ONIX strip eyeballed.
-- **Wind-down gates on `9670f00cc` (`.integration/validation/sv-20261030/gates-final/`):** **independent full suite 1,720 files / 14,219 tests,
+- **Wind-down gates on `25abe428f` (`.integration/validation/sv-20261030/gates-final/`):** **independent full suite 1,720 files / 14,219 tests,
   0 failed**; build 0; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla
-  0:20 `--scene on` **20 / 20** (all `budget`; OFF 20 / 20 on `0a222a6c4`, src since then Scene ON only); Scene ON winning first-round
+  0:20 `--scene on` **20 / 20** (all `budget`; OFF 20 / 20 on `027941dc0`, src since then Scene ON only); Scene ON winning first-round
   0:6 `--render-every 1` **6 / 6**; browser goal play `--lobby-new-challenge` 3 min / scene: ON 8 battles, OFF 17, 2 new challenges
   from the Lobby each, **0 page errors / overlays / contained / divergences**. The 0:60 full / winning / winning-swap gates were not
   run (hours each here; same practice as earlier sessions).
-  Extra: Scene ON `--policy full --vary-rng` 0:16 `--render-every 8` on `9670f00cc` **16 / 16** (all `budget`).
+  Extra: Scene ON `--policy full --vary-rng` 0:16 `--render-every 8` on `25abe428f` **16 / 16** (all `budget`).
 - **Scout:** shd234 (read-only, 06:32): the SHEDINJA send-in healthbox residual is a compare-harness maxHP bug (no SHEDINJA max-HP-1
   rule), not the renderer; `factoryCorpusParty.ts:291` has the same omission, unverified downstream (ISSUES #146). Launched before I
   saw the user's mid-session re-aim; it made no edits.
-- **User re-aim landed mid-session** (ops commits `736bdc78b`, `c038fad08`, `ed7f141c4`, `ea0e200ca`, docs only, already under the
+- **User re-aim landed mid-session** (ops commits `a96b7a89b`, `e4378d814`, `41a36b5c4`, `f31a57bd5`, docs only, already under the
   gates above): next run starts with the core library API (contract v2; fold `worker/lib-v2-mac` if present — absent on this box at
   wind-down), then audio (S11) and cleanup; #146 / send-out residuals are timing-class now.
 - **Next:** handoff "Next work" item 1.
@@ -819,9 +819,9 @@
 
 ## 2026-10-29 / 30 — CAX31 daily run wind-down (supervisor, Opus 5.5): bso225 / bso226 / apx227 / pfb228 / pfb229 folded
 
-- **State:** master `bb9029a37`+ (pfb229 merge); final src + tests == pfb229 worker-tested `c3a9fc037`.
+- **State:** master `bf1132980`+ (pfb229 merge); final src + tests == pfb229 worker-tested `a08b0e8d0`.
 
-- **Folded:** bso225 (`633d97700`, fast-forward; branch `worker/integration-20261029-213114`): Scene ON player BACK send-out
+- **Folded:** bso225 (`21f638d26`, fast-forward; branch `worker/integration-20261029-213114`): Scene ON player BACK send-out
   animation on the mid-battle switch-in (voluntary + Roar / Whirlwind "dragged out"); banked back reducers, selector species +
   `personality % 25`, reducer tick 0 at view elapsed 66; 625 / 625 Factory (species, nature) pairs have a reducer. 5 ROM windows
   (SHEDINJA, SKARMORY, ALAKAZAM, ONIX, ENTEI) exact from elapsed 88 (was 8–186k px); ball / emerge / sparkle residual before e 88
@@ -830,7 +830,7 @@
   0 failed**, build 0, differential 641 / 641. Supervisor: OFF census shards byte-identical to `off-bad3db32c`; ON eventsDigest +
   error identical on 1,000 / 1,000 (3 changed = the known apx224 rows); new test 6 / 6; ENTEI strip eyeballed.
   Not wired: faint-replacement send-in (path B; the pfr192 emerge route is not pixel-aligned yet), battle-start player (path C).
-- **Folded:** bso226 (merge `5a9cb0fc5`; branch `worker/integration-20261029-233450`, src == tested `ebe23c6bb`): the Scene ON
+- **Folded:** bso226 (merge `d1d538eee`; branch `worker/integration-20261029-233450`, src == tested `02849247b`): the Scene ON
   battle-start intro plays the opponent FRONT and player BACK species animations (banked reducers; new presentation-only
   `sceneOn` on the intro state; the ONIX-only settle hand-fit is replaced by the dispatcher in Scene ON, kept in OFF). 5 ROM windows,
   differing px opp / player before -> after: yoshi 106,807 / 16,697 -> 12 / 0; wailmer 24,840 / 62,540 -> 132 / 7,903 (ball +
@@ -841,7 +841,7 @@
   full suite (12 shards) **1,714 files / 14,180 tests, 0 failed**; build 0; differential 641 / 641 (the committed ON traces capture
   after the intro). Supervisor: census OFF + ON vs bso225: eventsDigest + error identical 1,000 / 1,000 each; merged src ==
   tested src; bso225 + bso226 tests 13 / 13; SPINDA strip eyeballed.
-- **Folded:** apx227 (merge `fa622452c`; branch `worker/integration-20261030-023040`, src == suite-tested `885f2deba`):
+- **Folded:** apx227 (merge `a0e9f08e5`; branch `worker/integration-20261030-023040`, src == suite-tested `f00350f3c`):
   **#157 fixed** — the only reader of the weather-continues event battler was the Scene ON x2 history (`liveBattlerX2History.ts`);
   sandstorm / hail continues (WEATHER_VAR 12 / 13) with battler 1 erased the opponent's zeroed rest pose; the seam now takes battler
   0 (kernel event unchanged). Seed 27 window: 2,166 frames move (opponent ONIX pose); 6 other opponent-weather seeds identical; seed
@@ -849,34 +849,34 @@
   median 3,253 -> 119 px. Ghost Curse (stretching black window, later nail, longer hold): median 47 -> 0, exact frames 144 -> 228;
   ghost icon palette not changed (cause not isolated). Worker: typecheck 0; census ON eventsDigest + error 1,000 / 1,000 identical
   (supervisor re-checked), static 0, 7 battles changed as expected; OFF not reachable (x2 host and approx bodies are Scene ON only;
-  supervisor read the diff); differential 641 / 641; full suite on `885f2deba` 1,713 / 1,714 files, 1 stale Curse row pin ->
-  re-pinned test-only (`1a5ecb4ab`); build 0 on the tip. Supervisor: the 3 re-pinned files 43 / 43 on master.
-- **Merged:** pfb228 (`d4b136a80`, fast-forward; evidence / tools only, no src / tests diff — checked): the Scene ON faint-replacement
+  supervisor read the diff); differential 641 / 641; full suite on `f00350f3c` 1,713 / 1,714 files, 1 stale Curse row pin ->
+  re-pinned test-only (`cf57e06fd`); build 0 on the tip. Supervisor: the 3 re-pinned files 43 / 43 on master.
+- **Merged:** pfb228 (`d6002c698`, fast-forward; evidence / tools only, no src / tests diff — checked): the Scene ON faint-replacement
   send-in already starts ball / release / emerge on the ROM's ticks (B = 91 + name length; the bso225 "-4..+3" offset was a
   delta-search boundary artifact); the gap is content (generic release, one-species ball arc, fixed particle y). Recipe + RAM
   schedules in `docs/pfb228-faint-replacement-emerge.md`; scratch prototype predicts 7 windows 110k–325k px -> 16–2,079 px.
-- **Wind-down gates on src `fa622452c` (`.integration/validation/sv-20261029/gates-fa622452c/`):** build 0; varied-RNG first-round
+- **Wind-down gates on src `a0e9f08e5` (`.integration/validation/sv-20261029/gates-fa622452c/`):** build 0; varied-RNG first-round
   winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 `--scene both` **ON 20 / 20, OFF
   20 / 20** (all `budget`); Scene ON `--policy full --vary-rng` 0:30 `--render-every 8` **30 / 30**; Scene ON winning first-round 0:6
   `--render-every 1` **6 / 6**; browser goal play 10 min / scene (seed 13): ON 24 battles / 11 swap screens, OFF 41 / 14, **0 page
   errors, 0 overlays, 0 contained, 0 divergences**. Full suite: no independent supervisor rerun (one worker + one suite at a time on
   this host; pfb229's gates ran then) — covered by apx227's full suite on the same src plus the supervisor's rerun of the re-pinned
   files. The 0:60 full / winning / winning-swap gates were not run (hours each here; same practice as earlier sessions).
-- **Folded at 06:46:** pfb229 (merge `bb9029a37`; branch `worker/integration-20261030-050141`): the pfb228 recipe — Scene ON
+- **Folded at 06:46:** pfb229 (merge `bf1132980`; branch `worker/integration-20261030-050141`): the pfb228 recipe — Scene ON
   faint-replacement player send-in drawn with the path-A composition (bso225 back animation at B+66), `playerSendOutBallArc(monY)`,
   particle y = final ball y2 + 59 (monY 93 reproduces the old table). 7 ROM windows mon px before -> after: SKARMORY 110,236 -> 74,
   ALAKAZAM 129,564 -> 33, ONIX 124,807 -> 272, ENTEI 324,706 -> 2,079, SHEDINJA 120,589 -> 16, KINGDRA 263,209 -> 1,493, CASTFORM
   153,995 -> 278 (= the prototype's prediction); healthbox residual 0 in 6. No row / digest change. Worker on the exact tree:
   typecheck 0; census OFF shards byte-identical, ON eventsDigest + error 1,000 / 1,000 (supervisor re-checked both); static 0;
   differential 641 / 641; full suite (12 shards) **1,715 files / 14,187 tests, 0 failed**; build 0. Supervisor short gates on the
-  merge: see the line below. **Not run on this src:** the 0:30 Scene ON render-8 soak (45 min); green on the parent `fa622452c`
+  merge: see the line below. **Not run on this src:** the 0:30 Scene ON render-8 soak (45 min); green on the parent `a0e9f08e5`
   above, and pfb229 changes only Scene ON forced-send-in drawing. Next run: run it first.
-- **Short gates on the pfb229 merge `bb9029a37` (`.integration/validation/sv-20261029/gates-bb9029a37/`):** build 0; varied-RNG
+- **Short gates on the pfb229 merge `bf1132980` (`.integration/validation/sv-20261029/gates-bb9029a37/`):** build 0; varied-RNG
   first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; Scene ON winning first-round 0:6
   `--render-every 1` **6 / 6**; browser goal play Scene ON 3 min (seed 17): 8 battles / 6 swap screens, 0 page errors / overlays /
   divergences; vanilla 0:20 `--scene on` (`--parallel 5`, 606 s) **20 / 20** (all `budget`; OFF unaffected by this Scene ON-only
   change, 20 / 20 on the parent).
-- **Next:** handoff "Next work" 1 (the Scene ON render-8 soak on `bb9029a37`+, then the #146 remainder), 2 Castform form changes.
+- **Next:** handoff "Next work" 1 (the Scene ON render-8 soak on `bf1132980`+, then the #146 remainder), 2 Castform form changes.
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/integration-20261029-213114` (bso225), `-20261029-233450`
   (bso226), `-20261030-023040` (apx227), `-20261030-042229` (pfb228), `-20261030-050141` (pfb229). Evidence `.integration/validation/sv-20261029/`. No push.
 ---
@@ -885,7 +885,7 @@
 
 ## 2026-10-28 / 29 — CAX31 daily run wind-down (supervisor, Opus 5.5): apx219-224 folded; Scene ON static 0
 
-- **State:** master `c7d99ba26`+ (apx219-222 fast-forward; apx223 / apx224 merges; final src == apx224 worker-tested tree `25e824041`).
+- **State:** master `baac89442`+ (apx219-222 fast-forward; apx223 / apx224 merges; final src == apx224 worker-tested tree `ff345e9d6`).
 - **Folded:** apx219 + apx220 (sprite-order-unknown 26 + allocator-unknown 3 -> approximate, known-entry first-action input).
   Worker (Sonnet, branch `worker/integration-20261028-213053`): clean merge of master; typecheck 0; full suite 1,754 files: 1,708
   passed / 2 failed -> both re-pinned (liveDiveSetupAdapter, liveWallMoveAdapters: decline pins now read
@@ -893,44 +893,44 @@
   **byte-identical** to `census-apx215/off-1d25251b6` (the `lsd194CensusDelta.py` OFF FAIL is a tool misfire on identical data);
   ON delta vs `census-apx217/on-cfa1242c0`: 10 battles changed, **bad 0**, only field [21]; the 3 touched test files 30 / 30;
   Sand-Attack strip eyeballed. **Scene ON static 102 -> 73**, approximate 134. Evidence `.integration/validation/sv-20261028/`.
-- **Folded:** apx221 (`c55913015`, fast-forward; branch `worker/integration-20261028-225012`): castform-form 18 (form art the field
+- **Folded:** apx221 (`c6bc23c3f`, fast-forward; branch `worker/integration-20261028-225012`): castform-form 18 (form art the field
   shows), extrasensory player-later target 17 (later-body branch regardless of top line), endeavor-power 12 (`request.power`),
   later-body idle rest 4 (current rest offsets), seismic-toss damage branch 1 (nearest 33..65) -> approximate. Worker: typecheck 0;
-  full suite on `e2aab6d79` (src == tip) 1,710 / 1,711 files, 1 failed (cf78NeedleArmTie: census-gate needles; fixed tools-only,
+  full suite on `2ef41e137` (src == tip) 1,710 / 1,711 files, 1 failed (cf78NeedleArmTie: census-gate needles; fixed tools-only,
   rerun with the 24 dependent files green); build 0; differential 641 / 641; 8 tests re-pinned (listed in the commit range).
   Supervisor: OFF shards **byte-identical** to `off-a21dd5f89`; ON delta 27 changed, **bad 0**, field [21] only; census src == tip
   src; apx221 + cf78 tests 15 / 15; Castform Icy Wind strip eyeballed. **Scene ON static 73 -> 21** (no-adapter 11, turn-0 7,
   hidden-target 3), approximate 186.
-- **Folded:** apx222 (`f07c843af`, fast-forward; branch `worker/integration-20261029-012954`): hidden-target 3 (body drawn, hidden
+- **Folded:** apx222 (`297031518`, fast-forward; branch `worker/integration-20261029-012954`): hidden-target 3 (body drawn, hidden
   battler kept hidden), turn-0 7 (= Ghost-type Curse, a new `CurseGhost` body; its black stretching window is not drawn) and the 7
   no-adapter moves (Peck, Odor Sleuth, False Swipe, Gust, Pay Day, Barrage, Conversion 2: new bodies built from their `Move_*`
   scripts in `src/animation/approxScript.ts`, assets `src/assets/gen/battle-anim-apx222.json`) -> approximate. A no-case move without
-  a script body is `static:other:no-adapter-unscripted` (none in 0..999). Worker: full suite on `bad3db32c` (src == tip) 1,711 /
+  a script body is `static:other:no-adapter-unscripted` (none in 0..999). Worker: full suite on `fcd699055` (src == tip) 1,711 /
   1,712 files, 2 tests failed in liveCurseStatsAdapter -> re-pinned, 7 / 7; build 0; differential 641 / 641; boundary ratchet
   untouched. Supervisor: OFF shards byte-identical to `off-04dc4e102`; ON delta 15 changed, bad 0; **eventsDigest + error identical
   on all 1,000 ON battles** (the new bodies lengthen those commands, fields [16][18]); Ghost Curse + Pay Day strips eyeballed.
 - **Scene ON census 0..999 on master: static 0** (finish plan Phase 2 census bar met), approximate 207, live 26,956, pause 12,941.
-- **Wind-down gates on src `f07c843af` (`.integration/validation/sv-20261028/gates-f07c843af/`):** full suite **1,712 files /
+- **Wind-down gates on src `297031518` (`.integration/validation/sv-20261028/gates-f07c843af/`):** full suite **1,712 files /
   14,167 tests, 0 failed**; build 0; varied-RNG first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0
   **100 / 100**; vanilla 0:20 `--scene both` **ON 20 / 20, OFF 20 / 20** (all `budget`). The 0:60 full / winning / winning-swap
   gates were not run (hours each here; same practice as earlier sessions).
-- **Merged:** apx223 (evidence only, no src; `4b30bb883`): `docs/apx223-approximate-oracle-check.md` compares the 8 apx222 bodies
+- **Merged:** apx223 (evidence only, no src; `db11e5f5d`): `docs/apx223-approximate-oracle-check.md` compares the 8 apx222 bodies
   with Scene ON ROM windows (`tools/integration/apx223OracleCheck.ts`, PNGs `tools/integration/fixtures/approximate/oracle-check/`).
   Ghost Curse / False Swipe middles near-exact; Gust (funnel ~15 px low, no target shake), Barrage (ball too fast), Odor Sleuth
   (duplicate target), Conversion 2 (no white blend) clearly wrong; every ROM body has 7–15 idle lead-in frames ours skips. The 4
   importing approximate tests 31 / 31 after the merge; Gust PNG eyeballed (confirms the funnel offset).
-- **Folded:** apx224 (`c7d99ba26`; src `src/animation/approxScript.ts` + the apx222 test threshold 0.4 -> 0.3 for idle lead-in
+- **Folded:** apx224 (`baac89442`; src `src/animation/approxScript.ts` + the apx222 test threshold 0.4 -> 0.3 for idle lead-in
   rows): Gust funnel 16 px higher, Odor Sleuth clone blink order, Barrage ball rotation / aim, Peck (exact over its staged visible
   body), Pay Day and False Swipe lead-ins; table in `docs/apx223-approximate-oracle-check.md` ("after apx224"). Conversion 2 and
   Ghost Curse not touched. Worker: full suite on the final src **1,712 files / 14,167 tests, 0 failed**; build 0; differential
   641 / 641. Supervisor: census ON vs `apx222-evidence/on-bad3db32c` 3 battles changed (Peck / False Swipe / Pay Day row counts),
   bad 0, **eventsDigest + error identical on all 1,000**; static still 0. (The wind-down soaks / browser play below ran on
-  `f07c843af`; apx224 changes only Scene ON approximate-body pixels / lengths, which `--render-every 0` soaks do not draw.)
+  `297031518`; apx224 changes only Scene ON approximate-body pixels / lengths, which `--render-every 0` soaks do not draw.)
 - **Next:** handoff "Next work" 1 (send-out intros in Scene ON, #157, Conversion 2 / Ghost Curse body fixes).
 - **Notes:** no DEFERRED items. Worker refs kept (merged): `worker/animation-20261028-040709` (apx219),
   `worker/integration-20261028-213053` (apx220), `-20261028-225012` (apx221), `-20261029-012954` (apx222), `-045744` (apx223),
   `-052326` (apx224). Evidence `.integration/validation/sv-20261028/`. No push.
-- **Browser goal play on build `f07c843af` (10 min / scene, seed 11):** ON 17 battles / 7 swap screens, OFF 47 / 23; 0 page errors,
+- **Browser goal play on build `297031518` (10 min / scene, seed 11):** ON 17 battles / 7 swap screens, OFF 47 / 23; 0 page errors,
   0 overlays, 0 contained, 0 divergences.
 ---
 
@@ -938,15 +938,15 @@
 
 ## 2026-10-27 / 28 — CAX31 daily run wind-down (supervisor, Opus 5.5): sfa214, apx215, play216, apx217, ret218 folded; apx219 unfolded
 
-- **State:** master `3f6754b25`+ (final src = apx217 + ret218 union `6201dc8e9`). **Final gates on `9fb159322` (same src): typecheck 0;
+- **State:** master `516a2f19b`+ (final src = apx217 + ret218 union `6b39b4664`). **Final gates on `e7f8f80d7` (same src): typecheck 0;
   build 0; full suite 1,709 files / 14,141 tests, 0 failed** (`.integration/validation/sv-20261027/final-9fb159322/`).
 - **Folded:** sfa214 (Summary-screen crashes found by browser random play). Supervisor finished the cut-off branch: merged
-  master, added `appRoute` to its 5 new compare traces (the only red test). Gates on `b28ebe50a`: typecheck 0; full suite
+  master, added `appRoute` to its 5 new compare traces (the only red test). Gates on `c6f12b75f`: typecheck 0; full suite
   **1,705 files / 14,121 tests, 0 failed**; build 0; the 18 saved random-play sessions replay clean with `--render`;
   differential 641 / 641; census 0..999 ON + OFF vs contain213 **1,000 / 1,000 identical**; anchor Summary traces exact.
   Open: QUILAVA V_STRETCH replacement 48 / 91, 137 species frame-program-only motion -> ISSUES #188 (non-crash).
 - **Folded:** apx215 (first approximate class): unproven Substitute-doll cells draw the body (subbed attacker: doll slides off,
-  mon in, body, doll back; defender doll: body on the doll). Gates on the union `1d25251b6`: typecheck 0; full suite 1,706 files
+  mon in, body, doll back; defender doll: body on the doll). Gates on the union `b7071ab67`: typecheck 0; full suite 1,706 files
   / 14,125 tests 0 failed (one vitest fork OOM-killed under a parallel worker; its file `liveR2GatesRoutes` rerun alone 8 / 8);
   build 0; census vs sfa214: OFF **1,000 / 1,000 identical**; ON 982 identical, 16 changed only in the 74 substitute commands'
   fields [16][18][21] + later timing; 796 / 881 (frame-budget stalemates) partial digests moved because bodies are longer
@@ -955,29 +955,29 @@
 - **Folded:** play216 (tools): `npm run play:random` goal mode is the default — a node mirror engine runs the soak policies and
   feeds the page through `__POKEBENCH__.advance` (lockstep, canvas-hash checked); supervisor made the page draw every frame
   (`--render-every`, default 1). ON seed 3, 6 min: 14 battles, 8 swap screens, 0 errors / 0 divergences; worker 7 min / scene:
-  ON 34 battles, OFF 53, 0 errors. Uniform key fuzz on `ce7e3b7ab` (10 min / scene): 0 errors but never left the draft.
+  ON 34 battles, OFF 53, 0 errors. Uniform key fuzz on `b4c7bcf78` (10 min / scene): 0 errors but never left the draft.
   Playwright must be installed in `.integration/browser/node_modules` (ignored; reinstalled this run with `npm install playwright`).
 - **Found:** RETIRE -> YES after a win draws the Lobby arrival but the state never leaves the post-win question (no
   `factoryTerminal`, never `lobbyFreeRoam`): a player hang. Brief `.integration/validation/sv-20261027/ret218.txt` queued.
-- **Soak (Scene ON, `--policy full --vary-rng`, seeds 0:30, render every 8, on `ee22a664f`):** **30 / 30 OK**, 0 CRASH / 0 HANG.
+- **Soak (Scene ON, `--policy full --vary-rng`, seeds 0:30, render every 8, on `8dcd5ed1d`):** **30 / 30 OK**, 0 CRASH / 0 HANG.
 - **Folded:** apx217: the 13 unattributed static gates named (Sand-Attack / Hyper Beam / Curse / Water Pulse -> sprite-order-unknown,
   Seismic Toss -> other:seismic-toss-damage-branch, Fury Cutter -> other:later-body-idle-rest); bodies with a transformed battler
-  draw from the copied species' art (approximate). Worker on `d8ebb1239`: full suite 1,707 files / 14,130 tests 0 failed, build 0,
-  differential 641 / 641, census OFF 1,000 / 1,000. Supervisor (union `cfa1242c0`, same src): typecheck 0, build 0, new tests;
+  draw from the copied species' art (approximate). Worker on `2a831d000`: full suite 1,707 files / 14,130 tests 0 failed, build 0,
+  differential 641 / 641, census OFF 1,000 / 1,000. Supervisor (union `c2419b0f4`, same src): typecheck 0, build 0, new tests;
   independent census ON: 7 battles changed, 0 digest / error mismatch. **Scene ON static 133 -> 102 (sprite-order-unknown 26,
   castform 18, extrasensory 17, endeavor 12, no-adapter 11, turn-0 7, idle-rest 4, hidden 3, allocator 3, seismic 1);
   approximate 105 (substitute 74, transform 31); unnamed 0.** Magic Coat x2 in seed 197 moved transform -> allocator-unknown.
-- **Browser goal play on `91984abfe` (10 min / scene, seed 7):** ON 29 battles / 16 swap screens, OFF 46 / 19, 0 errors.
+- **Browser goal play on `92b31552e` (10 min / scene, seed 7):** ON 29 battles / 16 swap screens, OFF 46 / 19, 0 errors.
 - **Folded:** ret218: RETIRE-YES after a win hands off to the loss `factoryTerminal` at the warp's Lobby-arrival frame (was a
-  permanent hang); source: WarpToLobbyLost == the loss script. Worker on `edc45e88f`: full suite 1,708 / 14,136 0 failed, build 0,
+  permanent hang); source: WarpToLobbyLost == the loss script. Worker on `49b13036f`: full suite 1,708 / 14,136 0 failed, build 0,
   differential 641 / 641, winning-swap 0:10 per-seed identical, every postwin-* / loss-terminal-* trace unchanged; new
   `retire-yes-lobby-freeroam-off` 1243 / 1482 (ISSUES #189). Supervisor on the union: typecheck 0, new test 2 / 2, the four
   compares rerun. (Supervisor full suite + build on the union were OOM-killed beside apx219; covered by the final gates below.)
 - **NOT folded — apx219** (sprite-order-unknown 26 + allocator-unknown 3 -> approximate; branch `worker/animation-20261028-040709`,
-  7 commits; stopped by the supervisor at 06:05 to keep the final gates safe). Census on `c7f8a558a`: ON 10 changed / 0 bad, OFF
+  7 commits; stopped by the supervisor at 06:05 to keep the final gates safe). Census on `921a29d81`: ON 10 changed / 0 bad, OFF
   1,000 / 1,000; **static 102 -> 73**. Full suite unfinished (many gate-pin tests re-pinned to `liveMoveAnimationPresentationProven`);
   no strips yet. Handoff "Next work" 1 has the fold recipe.
-- **Wind-down soak gates on src `f5f8c945e` (= final src minus ret218's retire-only branch, which no soak reaches):** varied-RNG
+- **Wind-down soak gates on src `09ee5cd4c` (= final src minus ret218's retire-only branch, which no soak reaches):** varied-RNG
   first-round winning carry 0 / 14 / 28 **100 / 100** each, winning-swap carry 0 **100 / 100**; vanilla 0:20 `--scene both`
   **ON 20 / 20, OFF 20 / 20** (all `budget`). The 0:60 full / winning / winning-swap gates were not run (hours each here).
 - **Host:** two workers at once (separate lanes) OOM-killed a supervisor full suite and two builds; keep one worker at a time.
@@ -987,35 +987,35 @@
 ---
 ## 2026-10-26 / 27 — CAX31 session wind-down (supervisor, Opus 5.5): finish plan Phase 1 tooling + containment; Phase 2 plumbing
 
-- **State:** master `31ba4d4ec`+; production src tree `c7bb4e59d` (contain209 + perf211 + apx210 + contain213).
+- **State:** master `10f7461fa`+; production src tree `c7bb4e59d` (contain209 + perf211 + apx210 + contain213).
 - **Light gates on src `21f22b324` (reused + one rerun):** census 0..999 both scenes already existed twice for this exact src
-  (tl205 union `875695e43`, exs207 base `ef511e03d`); delta between them 1,000 / 1,000 battles identical, 0 digest / 0 error
+  (tl205 union `f6909534c`, exs207 base `a5876f3bd`); delta between them 1,000 / 1,000 battles identical, 0 digest / 0 error
   mismatch, 0 unattributed. Differential (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on,
-  base `f5d66d068`) **641 / 641 identical** (`.integration/validation/sv-20261026b/diff-21f22b324/`).
+  base `bccd97904`) **641 / 641 identical** (`.integration/validation/sv-20261026b/diff-21f22b324/`).
 - **Folded:** soakscene208 (Phase 1a): `npm run soak -- --scene on|off|both`; Scene ON states for fresh / --start-carry /
   --vary-rng; per-scene lines + summary; parallel parity; render throws are CRASH with `errorPhase: "render"`. Tools / tests only.
-  Supervisor reran the 3 soak test files (one 5 s timeout under load raised to 120 s, `1f576d35f`). Smoke ON 3 / 3 OK.
+  Supervisor reran the 3 soak test files (one 5 s timeout under load raised to 120 s, `a63b291c5`). Smoke ON 3 / 3 OK.
 - **Sizing:** `--render-every 1` costs ~3 ms / frame here (ON ~1.25x OFF): a first-round seed takes 1.5–5 min. Scene mode changes
   frame counts, so the random player's press RNG gives different ON / OFF trajectories for the same seed.
 - **Also:** `ANIMATION_VERIFICATION.md` gained the approximate-playback contract (Phase 2). Removed the three stopped exs207
   worktrees (clean; branches kept) and killed an orphan `tsc -b` (7 GB) left in one of them.
-- **Folded:** contain209 (Phase 1c, `1d8fa9bb8`, src tree `5355decad`): new `src/engine/presentationContainment.ts`; a throw in
+- **Folded:** contain209 (Phase 1c, `bca290c1b`, src tree `5355decad`): new `src/engine/presentationContainment.ts`; a throw in
   live adapter selection or command duration degrades that command to the decline hold (decline length); a Scene ON / OFF draw
   throw draws the static field from that row on, keeping the scheduled length (render never feeds tick). Sticky per frozen
   command (WeakMap), deduped bounded log (32), `console.error` once, `__POKEBENCH_SESSION__().containedErrors`, bench
   `__POKEBENCH__.containedErrors()`, soak `CONTAINED n` per seed + summary. Gameplay throws still reach the overlay. Worker gates
   on the tip: typecheck 0, full suite 1,697 files / 14,082 tests 0 failed, build 0. Supervisor reran the 4 new test files (6 / 6)
-  and the differential vs `8b0c936e3` (641 / 641 identical); merged src tree = tested tree. **Not contained (open):** render-view
+  and the differential vs `47db95656` (641 / 641 identical); merged src tree = tested tree. **Not contained (open):** render-view
   field reads inside `tick()` (`core.ts:1041/1046`, `factoryRoundBattleOrchestrator.ts:2769/2952`), `createBattleResolutionPresentation`
   command building, order-host updates (`withResolutionLifecycle`, `commitCompletedResolutionCommand`).
 - **Scene ON sweeps (render every frame, `--vary-rng --first-round`, 0:30, `--parallel 3`):** winning carry 0 **30 / 30 OK**
   (37 battles, 2,242 s); carry 14 **30 / 30 OK** (32 battles, 2,041 s). 0 CRASH / 0 HANG. At ~1 battle / min the 3,000-battle
   nightly bar is out of reach on this host; perf211 (renderer profiling, pixel-neutral) is the response.
   Carry 28 **30 / 30 OK** (1,947 s); winning-swap carry 0 **30 / 30 OK** (2,797 s). 0 CONTAINED in all four.
-- **Folded:** perf211 (`5dd00cd59`, src tree `369a7ad85`): pixel-neutral render caches (`tileBgCache.ts` palette-independent tile
+- **Folded:** perf211 (`2c9c941fe`, src tree `369a7ad85`): pixel-neutral render caches (`tileBgCache.ts` palette-independent tile
   BG compile, memoized healthbox compose + run blits, `opaqueDrawMemo.ts` for room tile layers). Worker gates on the tip:
   typecheck 0, full suite 1,698 files / 14,089 tests 0 failed, build 0, differential 641 / 641. Supervisor reran
-  `tools/soak/frameHashes.ts` (new, kept) on unseen seeds 7:9, 40,000 frames each, base `1d8fa9bb8` vs tip: ON and OFF
+  `tools/soak/frameHashes.ts` (new, kept) on unseen seeds 7:9, 40,000 frames each, base `bca290c1b` vs tip: ON and OFF
   80,000 / 80,000 frame hashes identical; ON 2.98 -> 0.79 ms / frame, OFF 2.70 -> 0.46 (`.integration/validation/sv-20261026b/perf211-hash/`).
 - **Nightly sizing decision (reversible):** rendering is the soak's whole cost (tick alone ~0.015 ms / frame); a seed spends
   most frames outside battle (~60–70k frames per first-round seed, ~1.2 battles). 3,000 battles at `--render-every 1` is still
@@ -1023,40 +1023,40 @@
   change) and a smaller `--render-every 1` sample rides beside it.
 - **Scene ON sweep on perf211 code:** winning carry 0 `--vary-rng --first-round --render-every 1` seeds 30:130 **100 / 100 OK**
   (3,593 s at `--parallel 3`). Soak RSS plateaus at ~1.2–1.4 GB per process (render caches bounded).
-- **Folded:** apx210 (`6a021c074`, src `71e610860`): `src/engine/liveMovePlayback.ts` reason codes + `LIVE_MOVE_APPROXIMATE_POLICY`
+- **Folded:** apx210 (`9e723a57f`, src `71e610860`): `src/engine/liveMovePlayback.ts` reason codes + `LIVE_MOVE_APPROXIMATE_POLICY`
   (all static); every move-animation decline names a reason (`return declined(sink, reason)`); census field [21]
   (`live` / `approx:<r>` / `static:<r>` / `pause`), `tools/integration/apx210CensusSummary.py`. Worker: census ON 0..199
   fields [0..20] identical to master's arm, 7,716 move animations = 5,196 live / 51 static / 2,469 pause (no body request);
   static = transform 33, substitute-doll 9, extrasensory-player-later 3, hidden-target 3, no-adapter 2, turn-0 1.
-  Supervisor union gate (apx210 + master, `dc8241bcd`): full suite 1 failed / 1,698 passed — `cf78NeedleArmTie` via
-  `tools/integration/liveShareCensusGates.ts`, a source-text gate parser that only knew `return null`; fixed (`ac33930e2`), the
+  Supervisor union gate (apx210 + master, `109987b2c`): full suite 1 failed / 1,698 passed — `cf78NeedleArmTie` via
+  `tools/integration/liveShareCensusGates.ts`, a source-text gate parser that only knew `return null`; fixed (`43a13db64`), the
   parsed gate set now differs from master only by the 4 compound gates split into 2 equivalent ifs; cf78 4 / 4; build 0.
 - **Browser random play (play212, branch `worker/integration-20261027-044651`, not folded yet):** `npm run play:random`
   (`tools/browser/randomPlay.mjs`). Chromium needed 9 missing system libraries; supervisor unpacked their Ubuntu .debs without
   root into the ignored `.integration/browser/syslibs/root` (run with `LD_LIBRARY_PATH=<that>/usr/lib/aarch64-linux-gnu`).
   Self-test catches + saves a planted page error; 2 min per scene: ~60 fps, 0 page errors, but no battle reached (too short).
-- **Scene ON census 0..999 on `6a021c074` (field [21], ~7 min at 4 jobs):** 40,110 move-animation commands = 26,959 live /
+- **Scene ON census 0..999 on `9e723a57f` (field [21], ~7 min at 4 jobs):** 40,110 move-animation commands = 26,959 live /
   0 approximate / **207 static** / 12,944 pause. Static: substitute-doll 74, transform 33, castform-form 18,
   extrasensory-player-later 17, sprite-order-unknown 16, endeavor-power 12, no-adapter 11, turn-0 7, hidden-target 3,
   later-body-idle-rest 2, allocator-unknown 1, **13 from unnamed gates** (moves 63, 174, 28, 210, 69, 352). Errors: the 3 known
   frame-budget stalemates (434 / 796 / 881), unchanged. `.integration/validation/sv-20261026b/census-6a021c074/`.
-- **Folded:** play212 (`3fd2b9601`, tools only; supervisor added auto `LD_LIBRARY_PATH` for the unpacked libraries and the
+- **Folded:** play212 (`4b5bedfa7`, tools only; supervisor added auto `LD_LIBRARY_PATH` for the unpacked libraries and the
   overlay's crash message in incidents). `npm run build && npm run play:random -- --minutes 10 --scene both`.
-- **NEW CRASHES (browser random play, 10 min per scene on build `6b6e803e9`):** Scene ON 9 overlays, OFF 8, all on the draft
+- **NEW CRASHES (browser random play, 10 min per scene on build `987d69b08`):** Scene ON 9 overlays, OFF 8, all on the draft
   rental **Summary** screen (the soak never opens it), never reaching a battle: (a) "missing summary front animation for
   BUTTERFREE / BAYLEEF" — `src/data/gen/summary-front-animation.json` covers only the 6 S9 anchor species; (b) "Cannot read
   properties of undefined (reading 'power')" at `summaryInfoPage.ts:791` (`pageRental.moves[powerMoveIndex]`, Battle Moves
   detail). Reproduced headlessly by tick + render replay of the saved sessions
   (`.integration/validation/sv-20261026b/random-play/2026-10-27T05-22-17-450Z/`). Brief sfa214 queued.
-- **Folded:** contain213 (`31ba4d4ec`, src `c7bb4e59d`): tick-side render-view field reads fall back (last good field ->
+- **Folded:** contain213 (`10f7461fa`, src `c7bb4e59d`): tick-side render-view field reads fall back (last good field ->
   segment field with completed commands -> frozen scene `null` = black hold); command projection throws -> a minimal command
   list from the kernel's post-turn state (send-in message + switch-in, or HP bar + status icon, then turn-end; the projector
   function itself still fails closed); `prepareResolutionPalette` throws -> palette / allocator / order / x2 hosts unknown.
   **Loosened on purpose:** a malformed kernel receipt inside the resolution builder is now a recorded `commands` error, not
-  fatal. Worker: full suite 1,701 passed / 1 failed (that fail-closed pin, re-pinned `5644b2414`), build 0. Supervisor: 7 files
-  / 50 tests, differential 641 / 641, census 0..999 ON and OFF vs `6a021c074` **1,000 / 1,000 identical**, 0 digest mismatch.
-- **Scene ON vanilla 0:20 (`--render-every 1`, on `31ba4d4ec`):** **20 / 20 OK** (all `budget`, 4,613 s).
-- **Wind-down gates on `f3a62945c` (= final src `c7bb4e59d`):** vanilla 0:20 **20 / 20 OK** (all `budget`); varied-RNG first-round
+  fatal. Worker: full suite 1,701 passed / 1 failed (that fail-closed pin, re-pinned `7a0fcd1af`), build 0. Supervisor: 7 files
+  / 50 tests, differential 641 / 641, census 0..999 ON and OFF vs `9e723a57f` **1,000 / 1,000 identical**, 0 digest mismatch.
+- **Scene ON vanilla 0:20 (`--render-every 1`, on `10f7461fa`):** **20 / 20 OK** (all `budget`, 4,613 s).
+- **Wind-down gates on `0be8ab660` (= final src `c7bb4e59d`):** vanilla 0:20 **20 / 20 OK** (all `budget`); varied-RNG first-round
   winning carry 0 / 14 / 28 **100 / 100** each; winning-swap carry 0 **100 / 100**
   (`.integration/validation/sv-20261026b/gates-f3a62945c/`). The 0:60 full / winning / winning-swap gates were not run (hours
   each here; same practice as the last sessions).
@@ -1080,8 +1080,8 @@
 
 ## 2026-10-26 — User decision: finish plan approved; CAX31 run restarted on it (top layer, docs only)
 
-- **State:** master `ef511e03d` + these docs commits; production src tree `21f22b324` (tl205 + tl206 folded below, supervisor gates
-  typecheck / full suite 1,691 files 14,065 tests 0 failed / build on `80c0a8c56`). No open DEFERRED items. Phase 0's tl206 item is done.
+- **State:** master `a5876f3bd` + these docs commits; production src tree `21f22b324` (tl205 + tl206 folded below, supervisor gates
+  typecheck / full suite 1,691 files 14,065 tests 0 failed / build on `5c51c229b`). No open DEFERRED items. Phase 0's tl206 item is done.
 - **Did:** top-layer audit → `docs/finish-plan.md` (approved): crashes first (Scene ON soaks with rendering on; in-app containment),
   then every animation plays (new **approximate** claim class replaces the static-field hold; 177 / 27,261 census commands fall back
   today, all with existing bodies), then production + cleanup interleaved, timing last. ROADMAP "Current execution priority" rewritten;
@@ -1094,9 +1094,9 @@
 
 ## 2026-10-26 — CAX31 session (supervisor, Opus 5.5): tl205 + tl206 folded; stopped by the user at 22:40 UTC for the finish-plan restart (entry above)
 
-- **State:** master `80c0a8c56` (src tree `21f22b324`). Presentation only so far.
+- **State:** master `5c51c229b` (src tree `21f22b324`). Presentation only so far.
 - **Folded:** tl205 + tl206 (Scene ON script tail, trail -1, for the 9 tl204-measured zero-tail moves; 13 tail-aware test re-pins).
-  Supervisor gates on the exact merged code `80c0a8c56`: typecheck 0; full suite 1,691 files / 14,065 tests passed, 0 failed; build 0
+  Supervisor gates on the exact merged code `5c51c229b`: typecheck 0; full suite 1,691 files / 14,065 tests passed, 0 failed; build 0
   (`.integration/validation/sv-20261026/tl206/`). Census / tl204Compare were run on the union in the 2026-10-23 session (unchanged src).
 - **Stopped mid-step:** exs207 (Explosion-breaks-Substitute faint, ROM rows both scenes): refs `worker/integration-20261026-213055`,
   `worker/integration-20261026-223044`, `worker/union-exs207` kept; not folded, no gates. Timing work: long tail under the finish plan.
@@ -1105,7 +1105,7 @@
 
 ## 2026-10-23 — CAX31 session (supervisor, Opus 5.5): lsd194/196 + rst197, lsd198/199, sst200, fnt201 + hpb202, tl204 folded
 
-- **State:** master `f5d66d068`+ (production src tree `d8fda5802`, tested on `f96e8e805`). Presentation only; kernel digests identical
+- **State:** master `bccd97904`+ (production src tree `d8fda5802`, tested on `0231f622e`). Presentation only; kernel digests identical
   in every census. One playable crash fixed (Shedinja KO health bar). No open DEFERRED items.
 - **Folded (each with supervisor final-code gates on the exact code):** (1) the saved lsd194 / lsd196 branch + rst197 (print floor drop,
   Leech Seed drain rows, second-stat rows, Rest's OFF pause from the status icon; 15 / 15 Rest bodies -3 -> 0). (2) lsd198 + lsd199:
@@ -1117,17 +1117,17 @@
   641 / 641; full suite 1,690 files / 14,051 tests, 0 failed; build; soak vanilla 0:20 **20 / 20 OK**; varied-RNG first-round winning
   carry 0 / 14 / 28 and winning-swap carry 0 **100 / 100** each. The 0:60 soak profiles were not run (~7.5 h each here). Logs
   `.integration/validation/sv-20261022/`.
-- **tl205 NOT folded (gates ran, suite red):** branch `worker/integration-20261023-060455` (tip `8dddfc698`, worker capped after committing),
-  union with master `worker/union-tl205` (`875695e43`). It extends ont193's measured-trail table (trail -1) for the 9 tl204-measured
+- **tl205 NOT folded (gates ran, suite red):** branch `worker/integration-20261023-060455` (tip `a81dc570e`, worker capped after committing),
+  union with master `worker/union-tl205` (`f6909534c`). It extends ont193's measured-trail table (trail -1) for the 9 tl204-measured
   zero-tail moves (Fake Tears held out). Supervisor checks on the union: typecheck 0; `tl204Compare.ts` Double Team / Rain Dance / Sunny
   Day / Hail / Leech Seed 0, Calm Mind -4, Charm -1, Scary Face -14, Light Screen +2, Fake Tears -1 (all |residual| improved or equal);
   census ON digests identical, only those 9 moves' move-animation tails +5 / +6 / +39; OFF 1000 / 1000 identical. Full suite: 13 failures
   in 8 files (`.integration/validation/sv-20261022/tl205/failing-files.txt`): live route tests assert "adapter active every age" over the
   whole command (now incl. the tail rows: liveDoubleTeamSides, liveLsbzTiming, liveNext5 / Prep9 / Prep11 / Random2R4 adapters,
-  playableAnimationIntegration) and sgl138's route totals. tl206 (`worker/integration-20261023-080938`, tip `ea0846220`, on top of
+  playableAnimationIntegration) and sgl138's route totals. tl206 (`worker/integration-20261023-080938`, tip `a67e93d3e`, on top of
   `worker/union-tl205`, tests / fixtures only) fixed all 13 (each file alone passes; the adapter holds the last body age through the tail,
   so the `every` assertions stay; shared helper `tests/helpers/iu120Rows.ts` ont193ScriptTail gained the nine moves; sgl138 ON route totals
-  +18 / +20 / +12 / +10). Next: full suite + build on `ea0846220` (also covers liveWallMoveAdapters / tl204ZeroTailRows, not rerun), fold.
+  +18 / +20 / +12 / +10). Next: full suite + build on `a67e93d3e` (also covers liveWallMoveAdapters / tl204ZeroTailRows, not rerun), fold.
 - **Next after tl205:** tl204's body-window remainders and the other 14 zero-tail moves; the Explosion-breaks-Substitute faint (+135,
   unmeasured); msg175 residuals (Toxic, Roar, Baton Pass, Snore); #146 non-MAGBY forced send-in visuals.
 - **Notes:** worker refs kept (merged): `worker/integration-20261022-230803`, `-20261023-{000807,010407,014655,021547,034106,045023,052730}`,
@@ -1138,7 +1138,7 @@
 
 - **Restart 2026-10-22:** user authorized another 10-hour run. Master and retained lsd194/lsd196 refs, logs and briefs imported
   to the Mac. Updated `docs/cax31-session-handoff.md`: Rest repair, isolated final-code validation, then fold and draw the drain.
-- **State:** master clean; production src tree `9e7ac718f` (= ont193 tip `6b6d1d128`; later commits docs only). Presentation timing
+- **State:** master clean; production src tree `9e7ac718f` (= ont193 tip `1d22dddc7`; later commits docs only). Presentation timing
   only this session (kernel digests identical in every census); no gameplay / RNG change. No open DEFERRED items.
 - **Folded:** pfr192 (#146 player faint-replacement send-in): SEND OUT clock keyed on species / nickname / nature / scene (ball
   B = 91 + len(name), prompt B + D + 17; turn-end 8 + handoff 6 inside the ROM span). Supervisor reran `pfr192Prod.ts`: 24 / 24 ROM
@@ -1146,16 +1146,16 @@
   unattributed; differential 641 / 641. ont193 (#167 btl188 Scene ON no-hit script tail; #139 fpo187 Focus Punch menu-SE wait
   127 / 125): supervisor reran `btl188Rows.ts` (Protect / Detect / Sand-Attack short 0). Census ON 5,830 changed commands, 0
   unattributed; differential 641 / 641. Both docs: `docs/pfr192-*.md`, `docs/ont193-scene-on-tails.md`.
-- **Gates (supervisor):** full suite on `740eb2938` (pfr192) 13,948 / 0 failed; on `6b6d1d128` (= final src) 1,684 files / 13,955
-  passed / 0 failed; build OK on the final src; vanilla soak 0:20 `--parallel 4` on `73fe07e4f` (= final src) **20 / 20 OK** (all
+- **Gates (supervisor):** full suite on `5cbf4112f` (pfr192) 13,948 / 0 failed; on `1d22dddc7` (= final src) 1,684 files / 13,955
+  passed / 0 failed; build OK on the final src; vanilla soak 0:20 `--parallel 4` on `a6eb7b518` (= final src) **20 / 20 OK** (all
   `budget`); varied-RNG first-round sweeps on the final src: winning carry 0 / 14 / 28 and winning-swap carry 0 **100 / 100** each.
   The 0:60 full / winning / winning-swap gates were not run (~7.5 h each here; presentation-only session). Logs
   `.integration/validation/sv-20261016b/{pfr192,ont193,soak-73fe07e4f,final}/`.
 - **Not folded:** lsd194 (msg189 floor drop + lsd186 Leech Seed drain rows, both scenes; branch `worker/integration-20261017-013328`,
-  tip `66e89d36e`). Capped mid re-pin; triage `docs/lsd195-lsd194-triage.md`: everything is a legitimate pin except the Scene OFF Bulk
+  tip `028e909a4`). Capped mid re-pin; triage `docs/lsd195-lsd194-triage.md`: everything is a legitimate pin except the Scene OFF Bulk
   Up anchor 0 -> -3 (the second stat's 4 script rows before DEFENSE's print are unpriced once the 24 floor stops masking them;
   extend `statsChangeNextReceiptHoldFrames` to the second stat) and the off148 Rest pause hidden by a `proxyFrames` 24.
-- **lsd196 (late, unfolded):** branch `worker/integration-20261017-041629` (tip `d057453ab`, on top of lsd194) adds the second-stat rule
+- **lsd196 (late, unfolded):** branch `worker/integration-20261017-041629` (tip `a50031688`, on top of lsd194) adds the second-stat rule
   (a `stat` between two prints presents `exec(print2) - exec(print1) - hold + 1` rows, floor 2): Bulk Up -3 -> 0 both scenes, chg161 pins
   to the ROM, Curse / Agility 0; 11 touched files pass alone. Typecheck (OOM in the worker), build, census, full suite NOT run.
 - **Next:** (1) finish lsd194 + lsd196 from `worker/integration-20261017-041629`: Rest P from real print lengths (drop off148's
@@ -1170,7 +1170,7 @@
 
 - **Restart 2026-10-16:** user authorized another 10-hour CAX31 run. Finished commits/worker refs and logs imported to the Mac;
   `docs/cax31-session-handoff.md` now starts with pfr185 production, banked timing fixes and remaining visuals. Launch prep is docs-only.
-- **State:** master clean; production src tree `0eee3727b` (= union `a4b477dc1`; later commits docs / tools only). No open DEFERRED
+- **State:** master clean; production src tree `0eee3727b` (= union `fc0517c39`; later commits docs / tools only). No open DEFERRED
   items. All changes this session are presentation timing (kernel digests identical in every census); no gameplay / RNG change.
 - **Folded (each independently verified):** trn178 (#167 (a') Scene OFF action-transition pause; predictor rows reproduced), snd179
   (#146 evidence; 4 fresh ROM probes), fpc180 (#139 Focus Punch recall order / switch hold 7 / leads 5 and 5 + u; every OFF card 0),
@@ -1202,14 +1202,14 @@
 
 ## 2026-10-15 — repair headless supervisor waiting; prepare fresh 10-hour recovery
 
-- **State:** master game code remains `0c8e67acc` / production `3937ecad0`; no game edits in this repair. Prior supervisor exited
+- **State:** master game code remains `31895460a` / production `9a674c455`; no game edits in this repair. Prior supervisor exited
   while waiting for notifications; trn178 and snd179 finished on worker branches, not merged. Both refs/logs/briefs backed up locally.
 - **Did:** `run-claude-supervisor.py` owns the original deadline, waits on scoped worker PIDs and resumes the same Claude session
   after a premature turn exit. Notification waiting disabled; clean completion requires an explicit stop record. Errors/account
   limits do not retry; deadline/cancellation terminate owned model/worker groups. Launcher profile checks 62 / 62; controller
   lifecycle cases 11 / 11 locally and on ARM; live Opus stop + same-session resume smoke passed. No full game-suite rerun for tooling only.
-- **Next:** start the authorized fresh 10-hour CAX31 run. Verify/fold `worker/integration-20261015-041827` (`4a8a25431`, trn178,
-  Scene OFF transition; worker 13,918 tests / 0 failed + build) and `worker/side-20261015-041923` (`84b46c795`, snd179 evidence only).
+- **Next:** start the authorized fresh 10-hour CAX31 run. Verify/fold `worker/integration-20261015-041827` (`d9ebff43b`, trn178,
+  Scene OFF transition; worker 13,918 tests / 0 failed + build) and `worker/side-20261015-041923` (`eb266b432`, snd179 evidence only).
   Then Focus Punch corrections, Scene ON transition, Substitute HP timing and remaining Factory finish-up. Mac stays stopped.
 - **Notes:** `docs/cax31-session-handoff.md` records recovery, acceptance and the stop protocol. Prior evidence remains on CAX31;
   copied refs/logs/briefs are in `.integration/validation/cax31-session-20261015/`. No timers or automatic push.
@@ -1221,7 +1221,7 @@
 - **Restart handoff:** user authorized commit + push + next CAX31 session. Finished commits/worker refs and logs imported to the Mac;
   updated `docs/cax31-session-handoff.md` for the trn176 / fpc177 implementation queue. This checkpoint changes documentation only.
 
-- **State:** master `7ddbfbb7a`, clean; production src == `3937ecad0` (later commits: tests / tools / docs only). No open DEFERRED items.
+- **State:** master `c3a3b82a4`, clean; production src == `9a674c455` (later commits: tests / tools / docs only). No open DEFERRED items.
   Worker refs retained: `worker/side-20261013-160913` (enc160), `worker/integration-20261013-163536` (plr162),
   `worker/side-20261014-062550` (enc173), `worker/integration-20261014-074723` (trf174), `worker/integration-20261014-104448` (msg175),
   `worker/side-20261014-131640` (trn176), `worker/side-20261014-133659` (fpc177); all merged. Worker logs `.codex-logs/workers/`,
@@ -1233,11 +1233,11 @@
   Scene OFF Wish pause; supervisor reproduced anchors + a fresh Wish probe). Census digests identical for every presentation fold.
 - **Evidence for next steps:** trn176 (#167 (a') action-transition rule P = d + 6 + u, 21 / 22 OFF + 12 / 12 ON receipts) and
   fpc177 (#139 Focus Punch edges: order, leads 7 -> 5, action lead 5 + u; 12 cards both scenes). Both reproduced by the supervisor.
-- **Gates:** union `5e78e4030` (enc160 + plr162): typecheck, smoke 448, full suite 13,895 / 0 failed, build, all five gameplay gates
+- **Gates:** union `9a133b0a3` (enc160 + plr162): typecheck, smoke 448, full suite 13,895 / 0 failed, build, all five gameplay gates
   (vanilla 20 / 20; full / winning / winning-swap 0:60 **60 / 60** each on the frozen engine tree; varied-RNG 4 x **100 / 100**).
-  Final `3937ecad0`: typecheck 0, smoke 448, build OK, soak vanilla 0:20 **20 / 20**; full suite 1,676 files / 13,908 passed,
+  Final `9a674c455`: typecheck 0, smoke 448, build OK, soak vanilla 0:20 **20 / 20**; full suite 1,676 files / 13,908 passed,
   4 failed = msg175 frame-position pins in `sc106StatsChangeCommand.test.ts` (durations / anchors unchanged), re-pinned with cause in
-  `aec6435e8`, file 11 / 11 after, typecheck 0.
+  `bfe32ecd7`, file 11 / 11 after, typecheck 0.
 - **Next:** (1) land trn176's transition hold (#167 (a'), both scenes; re-pin OFF frames with cause); (2) land fpc177's three Focus
   Punch fixes (#139); (3) Substitute HP timing -6 (#153); (4) Transform inventory accounting + other bodies over a transformed
   battler; (5) #146 Scene ON forced player send-in message. Budget gates for this host: full suite ~47 min, vanilla soak ~45 min,
@@ -1247,8 +1247,8 @@
 
 ## 2026-10-13 — CAX31 next-session handoff (infrastructure only)
 
-- **State:** separate `codex/cax31-arm-setup` branch from game snapshot `b3e988d67`,
-  plus the Mac's committed charge-turn test re-pins `36b23e98c`; no new game code.
+- **State:** separate `codex/cax31-arm-setup` branch from game snapshot `036b9ed2b`,
+  plus the Mac's committed charge-turn test re-pins `11c7591a0`; no new game code.
   Helsinki CAX31 validated; user authorized commit + push + the next remote main
   session. Remote `master` is assigned; the Mac supervisor is stopped at its
   previous 10-hour cap and must stay stopped until remote results are imported.
@@ -1262,7 +1262,7 @@
   Opus 5.5 and Sonnet 5.5 no-tools inference probes passed. Prepared the host
   assignment, portable supervisor prompt and `docs/cax31-session-handoff.md`.
 - **Next:** remote supervisor first verifies/folds enc160 `worker/side-20261013-160913`
-  (`09589b431`) and plr162 `worker/integration-20261013-163536` (`ca658cd6f`),
+  (`2d924ffce`) and plr162 `worker/integration-20261013-163536` (`5718c0505`),
   runs required union gates, then continues the authorized Factory finish-up.
   Launch: Opus / Sonnet, headless tmux, 10-hour cap; no timers or automatic push.
 - **Notes:** `docs/cax31-arm-runner.md` records access, validation and limits;
@@ -1272,7 +1272,7 @@
 
 ## 2026-10-13 — sub157: #153 Scene OFF plays the Substitute / Transform attack animations (main/ts, presentation only)
 
-- **State:** local master `62b8de71f`, production src `ca4ea3618` (kernel) + `eec0aca08` (OFF x2). 5 / 5 dense Scene OFF Substitute ROM windows
+- **State:** local master `20b130252`, production src `41dec7733` (kernel) + `4ec6cf080` (OFF x2). 5 / 5 dense Scene OFF Substitute ROM windows
   (PERSIAN<->SLOWBRO, GOLEM<->ONIX both sides, prep37 OFF) **87 / 87 rows 0 px** through production `renderBattleResolutionLiveView`.
 - **Did:** `Cmd_attackanimation` exempts Transform / Substitute from HITMARKER_NO_ANIMATIONS (`:1748`). OFF command streams now == ON
   (30 / 30 uses, seeds 0..399). OFF bodies / fades read x2 {0,0} (no front animation in OFF, `pokemon.c:6805`; GOLEM -> ONIX was
@@ -1283,7 +1283,7 @@
 - **Next:** #153 remainder (both scenes): Substitute HP command −6 vs ROM (Scene ON route timing); Transform has no live adapter
   (ROM 108 rows, production 32 undrawn); unmeasured OFF fade window and doll <-> mon swaps.
 - **Notes:** gates: typecheck 0, smoke 448, build OK; soak vanilla 0:20 --parallel 10 20 / 20 OK, per-seed lines identical to a base
-  (`bbd9c6748`) run; full `npm test` (4 shards) 1,667 files / 13,851 tests,
+  (`83cd6e96a`) run; full `npm test` (4 shards) 1,667 files / 13,851 tests,
   0 failing after one attributed re-pin (`substituteDollFieldState` BLISSEY 60/28 asserted the old OFF doll-from-prompt; its file 7 / 7).
   Docs
   `docs/sub157-scene-off-substitute.md`; receipt `tools/integration/fixtures/sub157/receipt.json`; scratch `.integration/validation/sub157/`.
@@ -1292,7 +1292,7 @@
 
 ## 2026-10-13 — fpp150: #139 Focus Punch pre-pass — kernel + Scene OFF / ON timing + drawn general animation (main/ts)
 
-- **State:** local master, production src `d44b83144` (kernel) + `49c6c7c7b` (presentation / render). verify-rcp143-r4 **PASS**
+- **State:** local master, production src `9f58fcc13` (kernel) + `83b1a9bf4` (presentation / render). verify-rcp143-r4 **PASS**
   (pin flipped). R4 anchors == ROM in both scenes (empty box 72; focus glyph 109 / 199; foe's glyph 215 / 305). fps147's 7 Scene ON
   windows **0 px through the production render** (controls 0 / 7). Census 0..999 27,196 / 27,016 live (unchanged).
 - **Did:** the kernel runs BattleScript_FocusPunchSetUp before action 1 (index order; sleep / Truant guards; no RNG). The presentation
@@ -1311,7 +1311,7 @@
 
 ## 2026-10-13 — thr153: #141a THRASH / OUTRAGE / PETAL DANCE lock-in re-run RE-LANDED (ISSUES #141 FIXED; main/ts gameplay)
 
-- **State:** local master; F1 `0f9b5301e` re-applied (cherry-pick) + 8 attributed re-pins. verify-rcp143 R1 / R2 / R3 /
+- **State:** local master; F1 `c920b3837` re-applied (cherry-pick) + 8 attributed re-pins. verify-rcp143 R1 / R2 / R3 /
   R3-control all PASS. Census 0..999 **27,196 / 27,016 live** (99.34 % / 99.60 %); vanilla soak 0:20 20 / 20 OK, every seed `b4 t0`.
 - **Did:** R1 pin flipped (rng146 test + rcp143). Re-pins (only diff vs master is F1; F1-off toggle restores every old value):
   orchestrator seed 16 1315 -> 1294, seed 24 1623 -> 1479, scene parity 470 -> 467 (one Petal Dance lock-in each); rentsCount
@@ -1329,7 +1329,7 @@
 
 ## 2026-10-13 — rng146: #141b Sticky Hold + #140 `:133` RNG draws FIXED; #141a THRASH fix built but deferred (main/ts gameplay)
 
-- **State:** local master; production src `e8843465a` (F2 `8726675ec` + F3) with F1 `0f9b5301e` reverted in `52340a10e`.
+- **State:** local master; production src `3325f0b92` (F2 `1f47e9a91` + F3) with F1 `c920b3837` reverted in `1ac657200`.
   verify-rcp143 R2 / R3 / R3-control PASS, R1 FAIL (deferred). Census 0..999 27,271 / 27,090 live (99.34 % / 99.60 %).
 - **Did:** F2: STEAL_ITEM Sticky Hold arm `"call-current"` (BattleScriptPushCursor). F3: the rules-context cell
   `chosenMoveByBattler` (gChosenMoveByBattler, threaded with chosenActionByBattler), banked at selection and reset at
@@ -1339,16 +1339,16 @@
 - **Ripple (landed tree):** tests moved: none beyond the receipt pins. Census vs ret165: 2 battles changed, both F3
   (269 Solar Beam slept by GrassWhistle; 811 a Whirlwind-dragged GLOOM now runs its own slot move instead of ROAR;
   this route was not anticipated and has no ROM receipt yet). Soak vanilla 0:20 20 / 20 OK, per-seed lines identical.
-- **Next:** re-land #141a: cherry-pick `0f9b5301e` + the 8 re-pins listed in ISSUES #141 (expect census 45 battles,
+- **Next:** re-land #141a: cherry-pick `c920b3837` + the 8 re-pins listed in ISSUES #141 (expect census 45 battles,
   vanilla soak b2 t16 -> b4 t0). Optional ROM card for the 811 phazing route. Then #139 (reuses the F3 bank).
-- **Notes:** gates on `299f35e0e`: typecheck 0, full `npm test` (2 shards) 1,657 files / 13,747 tests passed, 0 failed
+- **Notes:** gates on `0539e85ce`: typecheck 0, full `npm test` (2 shards) 1,657 files / 13,747 tests passed, 0 failed
   (44 / 223 skipped), build OK; smoke 448 earlier. ISSUES #140 removed; #141 trimmed to #141a. Scratch: `.integration/validation/rng146/`.
 
 ---
 
 ## 2026-10-13 — ret165: Factory parties turn Return into Frustration (ISSUES #165 FIXED; main/ts gameplay correction)
 
-- **State:** local master; production src changed by `cd99c8073` (helper + tests + attributed re-pins); ROM receipt `98f4f8a05`.
+- **State:** local master; production src changed by `15c1740a8` (helper + tests + attributed re-pins); ROM receipt `8b21f7f8e`.
   Full suite / build: see Notes. Census 0..999 99.34 % / 99.60 % live (27,075 / 27,256 commands), Return 84 -> **0**, Frustration 90 -> 154.
 - **Did:** `setMonMoveAvoidReturn` (battle_factory.c:913-919) in `createFactoryCorpusPartyMember`, the shared builder behind every
   source call site (kernel parties both sides, generated / Brain opponents, swap rebuild, draft SUMMARY data); the opponent battle-style
@@ -1361,7 +1361,7 @@
   Soak vanilla 0:20 20 / 20 OK, per-seed lines identical to soak-gates-20261012.
 - **Next:** #141 (rampage / Sticky Hold RNG draws), #140, #139 per ROADMAP S10A item 0; the other gameplay gates (full / winning /
   winning-swap 0:60, fifth gate) were not run by this step. The live Return adapter stays (Metronome can call Return).
-- **Notes:** gates on the tested tree (`e0b518d9a` + the test-only type fix in the next commit): typecheck 0 errors, smoke 448,
+- **Notes:** gates on the tested tree (`2aa687f64` + the test-only type fix in the next commit): typecheck 0 errors, smoke 448,
   full `npm test` (2 vitest shards) 1,655 files / 13,725 tests passed, 0 failed (44 files / 223 tests skipped), build OK. Draft SUMMARY
   ROM capture not done (no cheap staged draft with a Return set); source-cited + Tier-1. Scratch: `.integration/validation/ret165-20261013/`.
 
@@ -1369,7 +1369,7 @@
 
 ## 2026-10-13 — User scope update: all remaining Factory correctness work is authorized
 
-- **State:** scope/instructions checkpoint on local master; production src `65a45fcc` and the green final receipt on `c4d38e1f3`
+- **State:** scope/instructions checkpoint on local master; production src `65a45fcc` and the green final receipt on `12e9ea2d7`
   are unchanged. Move-animation coverage remains 99.34% of commands / 99.60% of frames; no fix is credited by this scope change.
 - **Did:** recorded `docs/factory-finish-scope.md` and updated the roadmap, lane/supervisor instructions and launch prompt. All
   remaining animation variants, presentation corrections and source-proven battle-engine bugs are authorized. Main-lane changes
@@ -1384,12 +1384,12 @@
 
 ## 2026-10-12 (evening) .. 2026-10-13 — S10A: Scene ON status-condition animations DONE (#168: timed + all nine drawn), sound-effect waits, Double Team / Smokescreen timing, ordinary-row idle rest; live share 0..999 98.95 -> 99.34 % of commands (99.32 -> 99.60 % of frames)
 
-- **State:** local master `63f6850b2` (production src == union `c4d38e1f3`). Supervisor FINAL gates on that union: typecheck, smoke 448,
-  full suite 1,653 files / 13,710 tests 0 failed, build; differential vs session start `cfe4e26ca`: both canonical railroad traces
+- **State:** local master `159c9e694` (production src == union `12e9ea2d7`). Supervisor FINAL gates on that union: typecheck, smoke 448,
+  full suite 1,653 files / 13,710 tests 0 failed, build; differential vs session start `9a184dfa6`: both canonical railroad traces
   byte-identical (235 + 216), the app-only presentation-rng trace 172 / 173 (Double Team's intended +9 tail). Census 0..999: **99.34 % /
   99.60 %** live (27,221 / 27,402 commands), 0 render throws. Catalogue `236+13+27+0+0=276` + Struggle (Smokescreen -> faithful timing).
-  Preview <http://127.0.0.1:5191/> serves `63f6850b2` (4 samples hash-equal, export + ON -> OFF restart passed, no browser errors).
-  Soak on `74cbec2b8` (last Scene OFF change): vanilla 0:20 20 / 20, full 0:60 60 / 60, winning 0:60 60 / 60, winning-swap 0:60 60 / 60;
+  Preview <http://127.0.0.1:5191/> serves `159c9e694` (4 samples hash-equal, export + ON -> OFF restart passed, no browser errors).
+  Soak on `361829128` (last Scene OFF change): vanilla 0:20 20 / 20, full 0:60 60 / 60, winning 0:60 60 / 60, winning-swap 0:60 60 / 60;
   fifth gate 100 / 100 x 4.
 - **Did (production; every worker runner re-run by the supervisor into a fresh dir, ALL SAME; unions gated in detached worktrees):**
   ordl126 (ord124 order plans: +106 commands live), sa125 (#168 SA1 + SA3: the status-animation command with ROM controller rows, the
@@ -1405,7 +1405,7 @@
   resolution); tmr136 x sgl138 render conflict + one route-total re-pin (seed 9: 3 live Double Teams).
 - **Next:** ROADMAP S10A "Next (2026-10-13)": land inv142 (banked); FRZ 115 / 116 frozen-turn phase (aud137, D4); #167 remainders; Hyper
   Beam / Astonish / Extrasensory / doll-cell fallbacks; a live audit after every batch. (The app-only differential traces were
-  regenerated on the final timeline, `bba4d9dc6`: 173 -> 190 captures; differential 831 / 831 byte-identical, smoke 448.)
+  regenerated on the final timeline, `d6ecfd654`: 173 -> 190 captures; differential 831 / 831 byte-identical, smoke 448.)
 - **Notes:** no DEFERRED entries. ISSUES: #168 trimmed to inv142's remainder, #166 removed (fixed). Worker branches merged, worktrees
   removed (scratch under `.integration/validation/*-2026101[23]/`, transcripts `.codex-logs/workers/`).
 
@@ -1413,13 +1413,13 @@
 
 ## 2026-10-11 (afternoon / evening) — S10A: Struggle LIVE, General_StatsChange LIVE (both scenes), timeline fixes, 2 audits -> 4 live defects fixed; live share 0..999 95.38 -> 98.95 % of commands (98.72 -> 99.32 % of frames)
 
-- **State:** local master; production src `b4befa039` (code `2131feda7`; later commits are docs, receipts, new evidence tools and one soak
+- **State:** local master; production src `b4befa039` (code `01811d964`; later commits are docs, receipts, new evidence tools and one soak
   driver fix). Adapter census `237+13+26+0+0=276` (Shadow Punch -> faithful timing) **+ Struggle 165 live** (the one additional required
-  body; `additionalRequiredBodies.MOVE_STRUGGLE`). Supervisor FINAL gates on `2131feda7`: typecheck, full suite 1,639 files / 13,532 tests
-  0 failed, build; differential vs session start `52c181d54`: the two canonical railroad traces byte-identical (235 + 216), the app-only
+  body; `additionalRequiredBodies.MOVE_STRUGGLE`). Supervisor FINAL gates on `01811d964`: typecheck, full suite 1,639 files / 13,532 tests
+  0 failed, build; differential vs session start `bddc3d69c`: the two canonical railroad traces byte-identical (235 + 216), the app-only
   `presentation-rng-playable-live-bodies-seeded-on` 131 / 173 captures moved by today's intended timing (shp116 / iu120: regenerate its
   capture frames). Census 0..999: **98.95 % / 99.32 %** live (27,139 / 27,426 commands, 0 render throws; session start 95.38 / 98.72).
-  General_StatsChange (separate line): Scene ON 3,667 / OFF 4,529 commands. Preview <http://127.0.0.1:5191/> serves `8d815e080` (src
+  General_StatsChange (separate line): Scene ON 3,667 / OFF 4,529 commands. Preview <http://127.0.0.1:5191/> serves `d7e4f4792` (src
   `b4befa039`; 4 samples hash-equal, export + ON -> OFF restart passed, no browser errors; `playable-preview-8d815e080-receipt.json`).
 - **Did (production, each supervisor-reproduced from the worker's runner into a fresh dir; union gates after every fold):** Struggle
   (stg107 -> stl109 -> stf115 -> sdl119: 15 / 15 + 11 doll windows 0 px; 895 / 1,001 census Struggle commands live); ISSUES #166
@@ -1429,10 +1429,10 @@
   audits 25 / 26: Taunt marks, Harden idle rest, Swagger picture height, Struggle target x2, Scene ON "But it failed!" hold — 12 classes).
 - **Did (tooling):** soak111 decoupled the soak player's press stream from its decisions (presentation length no longer re-rolls soak
   games; ISSUES #89 pin -> seed 226). Its sticky post-win roll hung 5 wind-down soak seeds on the no-op RECORD / REST choices -> fixed
-  `7d04d2686` + `bd7780162` (all 5 seeds OK; soak tests 70 / 70).
+  `09954ab3f` + `b22c2a61e` (all 5 seeds OK; soak tests 70 / 70).
 - **Soak gates (S10A scoped policy does not require them; run because the soak driver changed):** vanilla 0:20 **20 / 20 OK**; on the
   pre-fix driver full 0:60 59 / 60, winning 57 / 60, winning-swap 59 / 60 (all HANGs = the driver bug above; each rerun OK on the fix);
-  confirmation on the fixed driver `bd7780162`: full 0:60 **60 / 60**, winning 0:60 **60 / 60**, winning-swap 0:60 **60 / 60** OK (all
+  confirmation on the fixed driver `b22c2a61e`: full 0:60 **60 / 60**, winning 0:60 **60 / 60**, winning-swap 0:60 **60 / 60** OK (all
   budget-ended); varied-RNG fifth gate on the fixed driver: winning carry 0 / 14 / 28
   **100 / 100 each**, winning-swap carry 0 **100 / 100**.
 - **Next:** ROADMAP S10A resume points — land the BANKED ord124 order plans (+106 commands -> 99.34 / 99.60 %; then audit its Mega Punch
@@ -1461,15 +1461,15 @@
 ---
 ## 2026-10-10 (night) — S10A: 12 production folds + 4 live audits; live share 0..999 93.79 -> 95.38 % of commands (97.37 -> 98.72 % of frames; 99.32 / 99.59 % excluding Struggle); 238 + 13 + 25
 
-- **State:** local master, production src `14d1be15` (gated on `4bf782115`; later commits are docs / receipts / evidence). Adapter census
+- **State:** local master, production src `14d1be15` (gated on `758cd54cf`; later commits are docs / receipts / evidence). Adapter census
   `238+13+25+0+0=276` (Focus Punch scoped exact -> faithful timing under the standing D4 approval). Supervisor FINAL gates: typecheck,
-  full suite 1,627 files / 13,387 tests, build; differential vs session start `b05d384ca`: the two canonical railroad traces byte-identical,
+  full suite 1,627 files / 13,387 tests, build; differential vs session start `f49b7d03f`: the two canonical railroad traces byte-identical,
   the app-only `presentation-rng-playable-live-bodies-seeded-on` 163 / 173 captures shifted by land97's intended Shadow Punch lead rows.
   Census seeds 0..999 (two runs byte-identical): **95.38 % of move-animation commands / 98.72 % of frames** (start 93.79 / 97.37; +436
   commands, 0 live -> fallback, 0 errors, gameplay keys identical); seeds 0..299 99.12 / 99.68 %; seeds 50000..50999 96.67 / 98.84 % (start 95.20 / 97.18).
-  Preview <http://127.0.0.1:5191/> serves `66dbf4973` (src `14d1be15`; 4 samples hash-equal, export + ON -> OFF restart passed, no errors).
+  Preview <http://127.0.0.1:5191/> serves `f9a1ef162` (src `14d1be15`; 4 samples hash-equal, export + ON -> OFF restart passed, no errors).
 - **Did (production, each supervisor-reproduced by census on the worker tree + an evidence rerun):** land82 (13 Substitute-doll cells,
-  +77), cast83 (#143 per-form Castform art, +32), land86 (Flatter words unit, +44), union fix `302e39bdb` (land86 x cast83 semantic break,
+  +77), cast83 (#143 per-form Castform art, +32), land86 (Flatter words unit, +44), union fix `b78274e56` (land86 x cast83 semantic break,
   caught by the union census), ret88 (Return at the kernel's friendship 0: 37 wrong ReturnStrongest claims corrected, then ReturnWeak live,
   +123), land87 (post-KO reseed through a words-unit occupancy shadow, +58), qa91 (Quick Attack target offset from the tracked rest: 144
   live bodies per 1,000 battles were 1 px off; 3 Castform keys), doll90 (Psych Up / Double Team / Sing doll cells, +37), land96 (scanline
@@ -1490,13 +1490,13 @@
 
 ## 2026-10-10 (day) — S10A: ISSUES #159 fixed, 12 production folds, 3 live audits; live share 0..999 91.89 -> 93.79 % of commands (95.82 -> 97.37 % of frames); 239 + 13 + 24
 
-- **State:** local master, production src `4c4fe4c7` (`bf082c6e1`). Census `239+13+24+0+0=276` (no adapter-count change: today widened
+- **State:** local master, production src `4c4fe4c7` (`4265d81c8`). Census `239+13+24+0+0=276` (no adapter-count change: today widened
   histories and fixed live claims). Supervisor FINAL gates on that code: typecheck, full suite 1,614 files / 13,258 tests, build,
-  differential 624 / 624 vs `b50c4dabd` (session start), census seeds 0..299 97.98 % / 98.40 % (start 96.98 / 97.99), seeds 0..999
+  differential 624 / 624 vs `82690e775` (session start), census seeds 0..299 97.98 % / 98.40 % (start 96.98 / 97.99), seeds 0..999
   **93.79 % of move-animation commands / 97.37 % of frames live** (start 91.89 / 95.82; two runs byte-identical), seeds 50000.. 95.20 / 97.18
-  (start 93.07 / 95.47); gameplay command key sequence + battle digest identical at every fold; soak gates on `bf082c6e1` (a kernel file changed: Speed Boost animArg1): vanilla 0:20 20 / 20 OK, full 0:60 60 / 60, winning
+  (start 93.07 / 95.47); gameplay command key sequence + battle digest identical at every fold; soak gates on `4265d81c8` (a kernel file changed: Speed Boost animArg1): vanilla 0:20 20 / 20 OK, full 0:60 60 / 60, winning
   0:60 60 / 60, winning-swap 0:60 60 / 60 (all budget-ended = OK; the varied-RNG fifth gate was not run). Preview
-  <http://127.0.0.1:5191/> serves `20023b861` (src `4c4fe4c7`; 4 samples
+  <http://127.0.0.1:5191/> serves `ac9e518e9` (src `4c4fe4c7`; 4 samples
   hash-equal, session export + ON -> OFF restart passed, no browser errors; `playable-preview-20023b861-receipt.json`).
 - **Did (production, each re-proved by the supervisor from fresh probes / reruns):** hide66 (ISSUES #159: live bodies drew a hidden
   Fly / Bounce / Dig / Dive charger — 90 wrong live commands on 0..999 -> 0) + fly63 re-landed; sw67 (Shock Wave geometry-keyed order plan);
@@ -1523,12 +1523,12 @@
 
 ## 2026-10-09 (day) — S10A: histories + live-claim fixes; ordinary-play live share 87.95 -> 91.89 % of commands (92.09 -> 95.82 % of frames); 239 + 13 + 24
 
-- **State:** local master, production src tree `06b791ff` (fly63 REVERTED in `1a0f6e214` after live audit 17 found live bodies drawing the
+- **State:** local master, production src tree `06b791ff` (fly63 REVERTED in `5bda030cd` after live audit 17 found live bodies drawing the
   hidden Fly / Bounce charger — ISSUES #159). Census `239+13+24+0+0=276` (Light Screen and Sky Attack moved scoped exact -> faithful
   timing by counter-evidenced D4 accounting). Supervisor FINAL gates on the reverted tree: typecheck, full suite 1,597 files / 13,153 tests,
-  build, differential 624/624 vs `ccc4774c4`, census seeds 0..299 96.98 % / 97.99 % (start 92.66 / 94.12, 0 regressions). Census seeds 0..999 **91.89 % of move
+  build, differential 624/624 vs `92ef1f6f9`, census seeds 0..299 96.98 % / 97.99 % (start 92.66 / 94.12, 0 regressions). Census seeds 0..999 **91.89 % of move
   animations live by count / 95.82 % by frames** (start 87.95 / 92.09), seeds 50000.. 93.07 / 95.47
-  (`final-supervisor-gates-20261009-day.json`). Gameplay command key sequence identical at every fold. Preview <http://127.0.0.1:5191/> serves `897a18dd6` (src `06b791ff`; 4
+  (`final-supervisor-gates-20261009-day.json`). Gameplay command key sequence identical at every fold. Preview <http://127.0.0.1:5191/> serves `7497593b0` (src `06b791ff`; 4
   samples hash-equal, session export + ON->OFF restart passed, no errors; `playable-preview-897a18dd6-receipt.json`).
 - **Did (12 production folds, 11 kept + fly63 reverted; each re-proved by the supervisor from fresh probes / check reruns / census reruns):**
   allocator carries across audited status animations (alloc50, alloc52: SLP / CONFUSION / PSN / PRZ / BRN / FRZ / INFATUATION / CURSED /
@@ -1558,11 +1558,11 @@
 
 ## 2026-10-09 (overnight) — S10A: host histories widened; ordinary-play live share 77.7 -> 87.2 % of commands (91.1 % of frames); 241 + 13 + 22
 
-- **State:** local master, production src tree `dde58985` (`c99a40a0a`). Census `241+13+22+0+0=276` (Icy Wind, Blizzard, Confuse
-  Ray, Faint Attack moved scoped exact -> faithful timing with counter evidence). Supervisor final gates on that code: typecheck, full suite 1,583 files / 13,039 tests, build, differential 624/624 vs `3fbe30cf7`, census seeds 0..299 92.66 % / 94.12 % (`final-supervisor-gates-20261009.json`).
+- **State:** local master, production src tree `dde58985` (`c26e134bb`). Census `241+13+22+0+0=276` (Icy Wind, Blizzard, Confuse
+  Ray, Faint Attack moved scoped exact -> faithful timing with counter evidence). Supervisor final gates on that code: typecheck, full suite 1,583 files / 13,039 tests, build, differential 624/624 vs `eb3ae0163`, census seeds 0..299 92.66 % / 94.12 % (`final-supervisor-gates-20261009.json`).
   Ordinary-play census seeds 0..999 (src `f7cf9a74`, before the last two folds: Faint Attack timing, prep49 +52 / +8,685 on seeds 0..299): **87.23 % of move animations
   live by count, 91.13 % by frames** (session start 77.68 / 78.76), faithful-random history 1.54 % / 1.81 %; seeds 50000..: 88.38
-  / 90.47; gameplay command sequence and battle digest identical at every fold. Preview <http://127.0.0.1:5191/> serves `96aaaebbe` (4 samples hash-equal, session export + ON->OFF restart, no errors; `playable-preview-96aaaebbe-receipt.json`).
+  / 90.47; gameplay command sequence and battle digest identical at every fold. Preview <http://127.0.0.1:5191/> serves `dc4c31b53` (4 samples hash-equal, session export + ON->OFF restart, no errors; `playable-preview-96aaaebbe-receipt.json`).
 - **Did (11 production folds, each re-proved by the supervisor from fresh probes / census reruns):** allocator NET-ZERO ids
   (prep44); order plans (prep45: BRN, TURN_TRAP by wrapped move, heals, Hydro Pump, Solar Beam by turn, ...; plans48: FRZ,
   NIGHTMARE, Knock Off item, Ice Punch, Attract, Present, Razor Wind, ...); GEOMETRY-KEYED order from the renderers' timelines
@@ -1583,11 +1583,11 @@
 
 ## 2026-10-08 (overnight) — S10A: Substitute presentation, deferred order lend, live-share census, order plans; 245 + 13 + 18
 
-- **State:** local master, production src tree `e3fc2240` (`65dec33c2`): 245 scoped-exact + 13 faithful-random +
+- **State:** local master, production src tree `e3fc2240` (`660b67f7c`): 245 scoped-exact + 13 faithful-random +
   18 faithful-timing (census `245+13+18+0+0=276`; exact fell from 250 only by honest D4 reclassification of Crunch,
   Psychic, Extreme Speed, Pursuit, Hidden Power). Supervisor final gates on that code: typecheck, 1,573 files / 12,958
   tests, build 874, differential 624/624 (`final-supervisor-gates-20261008.json`). Preview <http://127.0.0.1:5191/>
-  serves `a7896ad37` (4 samples hash-equal, export + restart, no errors; `playable-preview-a7896ad37-receipt.json`).
+  serves `396d1648c` (4 samples hash-equal, export + restart, no errors; `playable-preview-a7896ad37-receipt.json`).
   Ordinary-play live share (new census, 1000 battles): 77.7 % of move animations by count, 78.8 % by frames
   (72.6 / 75.2 % at src `d15bc413` mid-session); gameplay command sequence identical (200 battles, 5,334 commands).
 - **Did (production, 9 folds, each re-proved from fresh probes):** Substitute swaps live around 53 subbed-attacker
@@ -1609,10 +1609,10 @@
 
 ## 2026-10-07 (day) — S10A finish run: D4 implemented; census COMPLETE 250 + 13 + 13 + 0 = 276
 
-- **State:** local master, production src tree `e1a47502` (`46319b2d9`): 250 scoped-exact + 13 faithful-random +
+- **State:** local master, production src tree `e1a47502` (`e3a68d289`): 250 scoped-exact + 13 faithful-random +
   13 faithful-timing live adapters; 0 accepted Factory bodies without a live adapter (census `250+13+13+0+0=276`).
   Final independent gates on that code: typecheck, 1,562 files / 12,816 tests, build 872, differential 624/624
-  (`final-supervisor-gates-20261007-evening.json`). Preview <http://127.0.0.1:5191/> serves `2a3f8398c` (4 samples
+  (`final-supervisor-gates-20261007-evening.json`). Preview <http://127.0.0.1:5191/> serves `f3ccf44ed` (4 samples
   hash-equal, session export + ON->OFF restart passed, no errors; `playable-preview-2a3f8398c-receipt.json`).
 - **Did:** D4 faithful timing (`src/engine/liveMoveTimingPolicy.ts`, disjoint accounting, checker that fails on
   undocumented residuals / missing phase labels). New adapters: timing — Mach Punch, Megahorn, Revenge, Meteor Mash
@@ -1662,7 +1662,7 @@
 - **State:** S10A, local master; production src tree `1efb1872` (prep29 R1 merge): 246 scoped-exact + 12
   faithful-random live adapters, 18 accepted bodies remain (census `246+12+0+18=276`). Supervisor final gates on
   that code: typecheck, 1,548 files / 12,665 tests, build 862 (`final-supervisor-gates-20261007.json`). Preview <http://127.0.0.1:5191/> refreshed on this src at wind-down (receipt
-  `playable-preview-d01f11d1e-receipt.json`; serves `d01f11d1e`: 4 samples hash-equal, export + mode restart, no errors).
+  `playable-preview-d01f11d1e-receipt.json`; serves `d71d755b0`: 4 samples hash-equal, export + mode restart, no errors).
   Opus 5.5 supervisor; Opus / Sonnet 5.5 workers; 11 integration folds + 14 evidence merges, all re-proved by the
   supervisor (dense reruns twice fresh, differential on 2-3 traces, reruns of every evidence script).
 - **Did (production):** hardware-OAM provider + Will-O-Wisp / Pursuit / Fury Cutter / Return; source models for
@@ -1684,10 +1684,10 @@
 
 ## 2026-10-06 (day) — S10A wind-down: D3 implemented; 218 -> 226 exact + 10 faithful-random live adapters
 
-- **State:** S10A, local master; production `7e7816b98` (src tree `c41c4949`): 226 scoped-exact + 10
+- **State:** S10A, local master; production `98e17cd42` (src tree `c41c4949`): 226 scoped-exact + 10
   faithful-random live adapters, 40 accepted bodies remain (6.1% of Factory move uses; census
   `226+10+0+40=276`). Supervisor final gates on that code: typecheck, 1,536 files / 12,472 tests, build
-  857 (`final-supervisor-gates-20261006.json`). Preview <http://127.0.0.1:5191/> serves `10ad8606c`
+  857 (`final-supervisor-gates-20261006.json`). Preview <http://127.0.0.1:5191/> serves `a501d1a9e`
   (same src; 4 samples hash-equal, export + mode restart pass, no errors). Opus 5.5 supervisor;
   Opus/Sonnet 5.5 workers; 8 integration folds + 12 evidence merges, all re-proved by the supervisor.
 - **Did (production):** D3 option (a): presentation-only Random2 host (`docs/presentation-rng.md`; seed +
@@ -1716,7 +1716,7 @@
 
 ## 2026-10-06 — D3 approved; next run implements faithful random animations
 
-- **State:** D3 answered with option (a). Production remains `24df8af5e`:
+- **State:** D3 answered with option (a). Production remains `d1044f128`:
   218 live adapters, 58 remaining (52 Random2); no surrogate adapter credit yet.
 - **Did:** recorded the user's approval, removed the open D3 launcher block,
   and aligned ROADMAP S10A, worker instructions and verification. The next
@@ -1737,9 +1737,9 @@
 
 ## 2026-10-05 (day) — S10A wind-down: 198 -> 218 live adapters; lends across faints/switches; 8 species fixes; elevated renderer
 
-- **State:** S10A, local master; production `24df8af5e` (218 live adapters, 58 accepted bodies
+- **State:** S10A, local master; production `d1044f128` (218 live adapters, 58 accepted bodies
   remain: 52 Random2 + 6 others). Supervisor final gates on that code: typecheck, 1,525 files / 12,317 tests, build 851 (`final-supervisor-gates-20261005-day.json`). Preview
-  <http://127.0.0.1:5191/> serves `24df8af5e` (four hashes, export, ON->OFF, no errors) (receipt in `tools/integration/fixtures/`). Opus 5.5
+  <http://127.0.0.1:5191/> serves `d1044f128` (four hashes, export, ON->OFF, no errors) (receipt in `tools/integration/fixtures/`). Opus 5.5
   supervisor; Opus/Sonnet 5.5 workers; 13 integration folds + 15 evidence merges, all re-proved.
 - **Did (production):** sprite-order tracker kept and LENT across opponent KOs (entry-label relabel),
   player faints + forced switch-in and voluntary switches / cancelled menus (role relabel), Roar /
@@ -1768,7 +1768,7 @@
 
 ## 2026-10-05 (night) — S10A wind-down: 144 -> 198 live adapters, sprite order live
 
-- **State:** S10A, local master; production `782822914` (198 live adapters, 78
+- **State:** S10A, local master; production `a6b7b3cdf` (198 live adapters, 78
   accepted bodies remain). Supervisor final gates on the final code: see the
   Notes line. Preview verified at the final checkpoint (receipt in
   `tools/integration/fixtures/`). Opus 5.5 supervisor; Sonnet 5.5 workers (Opus
@@ -1793,15 +1793,15 @@
   integration work (SUPERVISOR.md: ANIMATION_VERIFICATION scoped policy); not run.
   Oracle freshness FAIL at orient was the known false positive. All worker
   branches merged and worktrees removed; evidence copied to `.integration/validation/`.
-  Final gates on `782822914`: typecheck, 1,509 files / 12,178 tests, build 851
+  Final gates on `a6b7b3cdf`: typecheck, 1,509 files / 12,178 tests, build 851
   (`final-supervisor-gates-20261005.json`).
 
 ---
 
 ## 2026-10-04 (evening) — S10A wind-down: 131 -> 144 live adapters
 
-- **State:** S10A, local master; production `1a68bb532`; 144 live adapters,
-  132 accepted bodies remain. Supervisor final gates on `1a68bb532`: 1,495
+- **State:** S10A, local master; production `a50dec3ee`; 144 live adapters,
+  132 accepted bodies remain. Supervisor final gates on `a50dec3ee`: 1,495
   files / 11,996 tests, build 847 (`final-supervisor-gates-20261004-evening.json`).
   Wound down early at the user's request. Opus 5.5 supervisor, Sonnet 5.5 workers.
 - **Did (integration, 2 folds, no move dropped):** next5 — Scary Face,
@@ -1832,10 +1832,10 @@
 
 ## 2026-10-04 — S10A session wind-down: 79 -> 131 live adapters, #142 fixed
 
-- **State:** S10A, local master `d935baca4`; 131 live adapters, 145 accepted
-  bodies remain. Supervisor final gates on `d935baca4`: 1,493 files / 11,963
+- **State:** S10A, local master `1ad102b5f`; 131 live adapters, 145 accepted
+  bodies remain. Supervisor final gates on `1ad102b5f`: 1,493 files / 11,963
   tests, build 847 (`final-supervisor-gates-20261004.json`); preview
-  <http://127.0.0.1:5191/> serves `d935baca4`, four exact canvas/PNG hashes,
+  <http://127.0.0.1:5191/> serves `1ad102b5f`, four exact canvas/PNG hashes,
   export, ON->OFF restart, no errors. Opus 5.5 supervisor, Sonnet 5.5 workers.
 - **Did (integration lane, 12 folds, each independently re-proved twice fresh
   with zero residual + ordinary ON/OFF routes):** Light Screen guard repair;
@@ -1864,11 +1864,11 @@
 
 ## 2026-10-04 (night, checkpoint 2) — S10A: 166 live adapters, sprite order live
 
-- **State:** production `72610e111` (166 live adapters). Folds since
+- **State:** production `a1c7c408e` (166 live adapters). Folds since
   checkpoint 1 each re-proved by the supervisor (dense twice fresh, zero
   residual; routes all PASS) with worker full suites (latest 1,500 files /
   12,081 tests) plus supervisor typecheck/smoke/affected on each union.
-  Preview serves `bb0e1e021`, verified (four hashes, export, ON->OFF, no errors).
+  Preview serves `10c705ac0`, verified (four hashes, export, ON->OFF, no errors).
 - **Did:** prep5 batch (6); sprite-order provider wired into production for
   the battle's first move body + Grudge; order-consumer batch (Ember, Dragon
   Rage, Flamethrower always; Heal Bell, Leaf Blade, Rock Throw, Blaze Kick,
@@ -1882,9 +1882,9 @@
 
 ## 2026-10-04 (night, checkpoint 1) — S10A: 151 live adapters + sprite-order provider
 
-- **State:** S10A, local master; production `5fd7ea33b` (151 live adapters).
-  Supervisor union gates on `5fd7ea33b`: 1,497 files / 12,029 tests, build
-  passed. Preview serves `d8d96846c`: four hashes equal to earlier previews,
+- **State:** S10A, local master; production `852506e76` (151 live adapters).
+  Supervisor union gates on `852506e76`: 1,497 files / 12,029 tests, build
+  passed. Preview serves `2c9a20ec8`: four hashes equal to earlier previews,
   export, ON->OFF restart, no errors (`playable-preview-d8d96846c-receipt.json`).
   Opus 5.5 supervisor, Sonnet 5.5 workers.
 - **Did:** H_BUFFER S1 batch (Mean Look, Smelling Salt, Defense Curl, Ingrain,
@@ -1912,7 +1912,7 @@
 - **Checks:** shell syntax and both resolved configs pass; three affected
   launcher/boundary/inventory files, 71 tests pass; coverage/asset audit and
   diff checks pass. Launcher tooling only; accepted production unchanged.
-- **Next:** review preserved Light Screen candidate `84f2e5264` in
+- **Next:** review preserved Light Screen candidate `6e411ef18` in
   `.worktrees/integration-20261003-085057`; repair its allocator-history guard
   before independent proof and merge. Brief remains in
   `.codex-logs/s10a-lightscreen-guard-repair-20261003.txt`.
@@ -1926,7 +1926,7 @@
 ## 2026-10-03 — Source-derived sprite allocator provider accepted
 
 - **State:** S10A, local master; 79 adapters, 197 accepted moves remain.
-  Production helper `277834353` accepted; no Light Screen registration yet.
+  Production helper `f242ca815` accepted; no Light Screen registration yet.
 - **Did:** ported semantic healthbox/trainer/summary/battler/ball/controller
   allocation/free procedures. Independent six fresh exact-call witnesses
   (82/82/82/82/84/84 calls) and canonical prompt spot check agree.
@@ -1937,7 +1937,7 @@
   clocks, preserve completed text; full body/cleanup/following display twice
   bilateral plus complete Slowpoke, real routes and ON/OFF parity.
 - **Notes:** unknown later entry/status/switch/summary histories stay unknown.
-  Preview `e3f60734c` verified: four canvas/PNG hashes, replay/export/mode restart,
+  Preview `66afe3ed2` verified: four canvas/PNG hashes, replay/export/mode restart,
   no errors. Raw evidence, worker ref/logs preserved. No deferred decision.
 
 ---
@@ -1945,7 +1945,7 @@
 ## 2026-10-03 — Light Screen allocator lifecycle independently verified
 
 - **State:** S10A on local master; 79 adapters, 197 accepted bodies remain.
-  Source/tool checkpoint `f9bdab222` accepted; production remains `695e10751`.
+  Source/tool checkpoint `2b7fff229` accepted; production remains `bb8f6d315`.
 - **Did:** reproduced six fresh intro-through-Light-Screen allocator traces,
   both Exeggcute sides twice plus Slowpoke twice. Observed wall3 and sparkle
   4/5/7 lifetimes; script cleanup388/298/391. Same-frame replacements remain
@@ -1972,7 +1972,7 @@
   with the same roadmap, worker setup and six-hour cap.
 - **Checks:** shell syntax, 4 affected files / 73 tests, boundary/inventory,
   coverage/asset audit and diff checks pass. No production change; reuse final
-  `695e10751` receipt: 1,482 files / 11,754 tests, build 844 modules.
+  `bb8f6d315` receipt: 1,482 files / 11,754 tests, build 844 modules.
 - **Next:** resume latest `ANIMATION_INTEGRATION_PROGRESS.md`: 79 adapters,
   197 accepted moves remaining; Light Screen source allocator/intro ownership
   and full displayed-frame proof. This setup change starts no new work session.
@@ -2038,7 +2038,7 @@
 ## 1401 — [ts worker, 2026-08-25 ~16:47] **ISSUES #128 CLOSED both halves: stock-ROM receipt first (Intimidate/Trace DO write `BATTLE_HISTORY->abilities[0]`, the PLAYER's slot, costing the AI 8 `Cmd_get_ability` draws), then the three-site fix + the history-before-trapper order**
 
 - **State:** #128 is fully landed and deleted from `ISSUES.md`. Receipt
-  `bf1a5484`, fix `fdc21ede`, trajectory re-pins `c2fd533c`. Green at HEAD:
+  `b78c8e44`, fix `d94469e7`, trajectory re-pins `52ad5b36`. Green at HEAD:
   `npm test` **1,143 files / 10,563 passed / 223 skipped / 0 failed**,
   `npm run build` green, `npm run typecheck` green,
   `npm test -- tests/factoryAi` 32 files / 1,432 tests green.
@@ -2085,7 +2085,7 @@
 - **Notes:** no existing test pinned the holder index, so nothing needed
   re-pinning there; the AI parity suites were green before and after. Three
   Tier-1 **trajectory** tests did move and were re-pinned in their own commit
-  (`c2fd533c`), all self-authored curated-seed scenarios, none an
+  (`52ad5b36`), all self-authored curated-seed scenarios, none an
   oracle-verified ROM trajectory: `factoryWholeBattle` (Granbull/Intimidate vs
   Azurill/two-ability — #128's exact shape: 12 → 13 AI decisions, cursor 196 →
   199), `factoryBrainRoundShape` (SILVER_SEED 4 → 1, GOLD_SEED 2 → 8; the
@@ -2102,7 +2102,7 @@
 
 ## 1398 — [supervisor wind-down, 2026-08-25 ~14:00] **Instrument + census day: premise-throw audit (50/50 classified; its top finding refuted by supervisor), #127 found+fixed with a stock-ROM receipt, #125 CLOSED (2 levers + a trap-gate regression), soak `--coverage-json` / `--policy coverage-fight` / `--parallel N` landed; ~2,400 varied chains and boot rounds 0 CRASH / 0 HANG; move+effect universe 276/276 + 166/166 executed; all five gates green on the final tree**
 
-- **Final gates on THIS tree (`679b3ade`, supervisor's own runs, all
+- **Final gates on THIS tree (`eec0c3fd`, supervisor's own runs, all
   `--parallel`):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning
   0:60 **60/60**, winning-swap 0:60 **60/60**; fifth gate — winning
   `--vary-rng --first-round` carry 0 **500/500**, carry 14 **500/500**,
@@ -2116,22 +2116,22 @@
   rounds (0 failed steps; 2 cap-kills and 1 sibling-kill salvaged with the
   work committed).
 - **Wind-down folds (after both sibling caps ended 14:48; final tree
-  `72a4777a` = this docs commit's parent):** `animation-main` (23 commits,
+  `d17cd85f` = this docs commit's parent):** `animation-main` (23 commits,
   Level-50 exact 208→211/276 + Scene-ON `battleScene.ts` draw cases +
-  evidence tooling) merged `60ba74d1`; `rust-main` (10 commits: ORWORD,
+  evidence tooling) merged `a7e340ca`; `rust-main` (10 commits: ORWORD,
   CheckViability tie-receipt = **#124 mirror**, Encore, field-ability scan,
-  Helping Hand ports) merged `72a4777a`; both clean. Union verification
+  Helping Hand ports) merged `d17cd85f`; both clean. Union verification
   (my own runs): `cargo test` **1,068 passed / 0 failed**; wasm rebuilt
   (506,009 B, sha256 `de2fdfdf…`); the 20 `*Parity*` suites under
   `POKEBENCH_ENGINE=wasm` **924/924** (the #124 case now runs, was 1
   skipped); full `npm test` **1,140 files / 10,542 passed / 223 skipped**;
   `npm run build` green. Neither branch touches the Scene-OFF engine, so
-  the five gates above (on `679b3ade`) stand for this tree. **#124
+  the five gates above (on `eec0c3fd`) stand for this tree. **#124
   deleted.** Both sibling ledgers' top entries carry no "For the main
   program" ask.
 - **Round 12 (bonus, after the folds):** `tools/probe/premise-census.py` +
-  `tools/test_premise_census.py` (ts sonnet, 8 min; `835ece9f`, worker
-  ledger note folded here from its own `f7bb5514`): reproducible
+  `tools/test_premise_census.py` (ts sonnet, 8 min; `df9a9ee5`, worker
+  ledger note folded here from its own `f02a4356`): reproducible
   premise-throw census — reassembles wrapped `throw new <X>Error(...)`
   messages, attributes the enclosing function, TSV + `--only/--premise/
   --summary/--exclude-unsupported-branch`; 5/5 tests, ~1.3 s. On this tree
@@ -2140,8 +2140,8 @@
   different word list). Weakness to know: exported arrow/const functions
   attribute as `<anonymous>` (e.g. the Bide canceler site). PAPERCUTS entry
   deleted. Docs-only + Python; the gates and suites above stand.
-- **Orient state:** master = `dbe18b3d` = `animation-main` tip. The live animation
-  supervisor merged master `33592cba` into its branch at 08:48; my fold then
+- **Orient state:** master = `ef193b7f` = `animation-main` tip. The live animation
+  supervisor merged master `c78b8d15` into its branch at 08:48; my fold then
   fast-forwarded master onto that merge — one commit, both branches converge
   (4 animation commits folded: Screech Scene-ON exact + ratchets). `rust-main`
   had 0 commits to fold. Union `npm test` **1,125 files / 10,467 passed / 224
@@ -2164,8 +2164,8 @@
   `factoryBattleScriptFullTurnDecision.ts:2564`; the #119 dance path already
   republishes the same halt) and a #121 lead (two more `monToSwitchIntoId`
   lifecycle writes). (2) **#125 lever 1** (side sonnet, cap-killed at 45
-  min under load ~40 with the work committed: `a030faf9` → merge
-  `3b96ceb6`): maxed-stat-stage status slots skipped in the winning-like
+  min under load ~40 with the work committed: `f5538669` → merge
+  `bc3711e5`): maxed-stat-stage status slots skipped in the winning-like
   fallback, 3 pins mutation-checked, carry-14 fifth gate 500/500 (`budget`
   2, unchanged) — necessary, not sufficient: seed 116's transcript shows
   FIGHT → Struggle for 1,700 turns with every slot at 0 PP; #125 trimmed to
@@ -2173,17 +2173,17 @@
   full-chain sweeps, `--render-every 64`, 0:100 each — winning-swap c14/c28,
   winning-coverage c0/c14, full c0/c14): in flight, 0 CRASH / 0 HANG so far.
 - **Did (rounds 4-5):** (4) **#127 FIXED** (ts opus, 48 min, $5.1;
-  `f018c5b8` fix + 3 mutation-checked pins + lab scenario, `6f1d4717`
+  `7cf7ea4f` fix + 3 mutation-checked pins + lab scenario, `25fe06ec`
   ground truth): the stock ROM DOES open the party screen twice inside one
   Baton Pass action (`playerControllerCommand` 22 at frames 880 and 2220,
   no turn boundary; recipe: Aipom Swords Dance → Cloyster SPIKES ×4 → Baton
   Pass to Shedinja, whose 1 max HP makes any layer lethal — real damage
   only); the #89 resume now republishes the second forced switch like the
   #119 dance path; passed stages do NOT chain past the KO; second switch
-  spends no RNG. Full suite 1,126 / 10,473 / 224 on `f018c5b8`, build green.
+  spends no RNG. Full suite 1,126 / 10,473 / 224 on `7cf7ea4f`, build green.
   **#127 deleted.** (5) **Soak coverage instrument** (side opus, killed by
   a sibling's pattern kill — see below — with the work committed
-  `91938de7` → merge `4aa81ff5`): `--coverage-json` aggregates executed
+  `caecfb23` → merge `c5757468`): `--coverage-json` aggregates executed
   moves/effects (from `STRINGID_USEDMOVE` resolution receipts, both sides),
   species seen, abilities/items PRESENT at battle start, vs the L50 corpus
   (740 sets: 276 moves / 166 effects / 264 species / 71 abilities / 40
@@ -2191,34 +2191,34 @@
   169/276, effects 110/166, species 134/264; 5 `winning` full chains →
   **223/276 moves, 139/166 effects, 155/264 species, 64/71 abilities, 36/40
   items**. One tsc error in its test (vitest does not typecheck) fixed by me
-  (`ba325c4b`).
+  (`a668b20d`).
 - **Incident:** the #127 worker ran `pkill -f "randomRoundSoak"` three
   times (10:08/10:23/10:33) to stop its own over-long gates; the pattern
   killed all ten in-flight census sweeps AND the coverage worker (its brief
   text matched; SIGTERM 143 at 23 of 50 min). Batch A's four winning-like
   sweeps stood at 83/100 each, 0 CRASH / 0 HANG; batch B at 12-20 seeds.
   Relaunched from the last completed seed at 10:37; three PAPERCUTS entries
-  (`bfc91c90`); briefs now forbid pattern kills and cap soak runs at ~3 min.
+  (`0bb4afc0`); briefs now forbid pattern kills and cap soak runs at ~3 min.
 - **Did (rounds 6-7):** (6) **#125 lever 2** (side sonnet, 19.7 min,
-  $1.4; `54ad24a7` → merge `4dbe8fe9`): the winning-like switch path
+  $1.4; `394f22df` → merge `20953ec8`): the winning-like switch path
   (`pickWinningSwitchRow` C2) now also fires on forced Struggle (every slot
   0 PP) whenever a bench mon has a usable non-immune damaging move; 3
   mutation-checked pins; seeds 116/418 (`winning --vary-rng --first-round`
   c14) and 755 (`winning-combined` c28) go `budget` → `roundLost` (my
   rerun agrees); carry-14 first-round 0:100 **100/100, budget 0** (was 2).
   **#125 deleted.** Trajectory re-baseline → all gates rerun at wind-down.
-  (7) **`--parallel N` seed fan-out** (ts opus, 20.7 min, $2.8; `b16e9009`):
+  (7) **`--parallel N` seed fan-out** (ts opus, 20.7 min, $2.8; `0772c45c`):
   `randomRoundSoak.ts` spawns N contiguous-slice children, prints per-seed
   lines in seed order, merges `--json`/`--coverage-json`
   (`mergeCoverageReports`), summary lifted into `printSoakSummary`; 6+4
   pins incl. serial-vs-parallel deep-equality (mutation-checked); default 1
   byte-identical. Measured 38.0 s → 21.6 s at `--parallel 4` under load 62
-  (contended floor); full suite 1,128 / 10,487 / 224 on `b16e9009`.
+  (contended floor); full suite 1,128 / 10,487 / 224 on `0772c45c`.
   Census batch A COMPLETE: **600/600 varied full chains, 0 CRASH / 0 HANG**
   (winning-swap c14/c28, winning-coverage c0/c14, full c0/c14; 83:100
   tails rerun after the pattern kill).
 - **Did (rounds 8-9):** (8) **`--policy coverage-fight`** (side opus, 41.6
-  min, $3.9; `77db3504` → merge `f6c98cf0`, one conflict in
+  min, $3.9; `5807a229` → merge `32da724d`, one conflict in
   `randomRoundSoak.ts` resolved by me: fan-out kept + policy added to the
   validation list): winning-coverage's draft, `winning`'s switch/swap
   rules, FIGHT = least-used legal move (run-wide tally, ties → lowest slot);
@@ -2229,21 +2229,21 @@
   c28 **300/300 each** (c14 `budget` 2 = trapped + out-of-PP Struggle, the
   accepted #125 residual) + full chains c0/c28 **20/20 each** — 0 CRASH /
   0 HANG. (9) **Lever-2 regression fixed** (side sonnet, 29 min, $2.8;
-  `c8c94f5c`): my carry-14 gate diagnostic found seed 406 ping-ponging
+  `0fc42e29`): my carry-14 gate diagnostic found seed 406 ping-ponging
   "switch row 1" ↔ "party: cancel" for the whole budget — the engine's
   `legalCommandDecisions` never publishes a switch while the player is
   trapped (`factoryBattleScriptFullTurnDecision.ts:2085-2153`; Shadow Tag
   here) and lever 2 ignored trapping; the driver now mirrors the trap gate
   (`isPlayerVoluntarySwitchTrapped`, 12 pins) → seed 406 `roundLost`,
   116/418/755 still resolve, carry-14 first-round 0:500 **500/500 budget 0**.
-- **Mid-session gates on `4dbe8fe9`+ (with `--parallel`):** vanilla 0:20
+- **Mid-session gates on `20953ec8`+ (with `--parallel`):** vanilla 0:20
   **20/20**, full 0:60 **60/60**, fifth gate **500/500 ×4** (c14 `budget`
   1 = seed 406, fixed above); winning/winning-swap 0:60 still running.
 - **Did (round 10):** census batch B COMPLETE and clean (winning c0/c14/
   c28 + winning-swap c0 at 113:200, winning-coverage c28 13:100, full c28
   21:100 — **0 CRASH / 0 HANG**; with batch A that is ~1,200 varied full
   chains + 900 coverage-fight boot rounds today, all clean).
-  **Coverage baseline** (ts opus, 19 min, $2.8; `3e19fd17`, two new files:
+  **Coverage baseline** (ts opus, 19 min, $2.8; `55ca0e90`, two new files:
   `docs/soak-coverage-baseline-2026-08-25.md` +
   `tools/soak/mergeCoverageReports.ts` CLI, my rerun agrees): union of 15
   coverage JSONs (1,522 seeds, 57,378 battles, 910k turns) — **moves
@@ -2254,7 +2254,7 @@
   40/40. `full` is dominated on every dimension — retire it from census
   duty (gates unchanged).
 - **Did (round 11):** **activation coverage** (side opus, 18.8 min, $4.7;
-  `3a445bc3` → merge `4638ff98`): the instrument now also counts ability
+  `82aab3f9` → merge `d15c833b`): the instrument now also counts ability
   and held-item ACTIVATIONS (announced message buffers + typed holder
   receipts; silent-by-construction classes listed in the module header);
   12 pins. The brief's "activated ⊆ present" clause was empirically FALSE
@@ -2262,7 +2262,7 @@
   unseen) — the worker pinned the true relations and documented it rather
   than force it. 30 coverage-fight boot rounds: abilities 41/71 present ·
   **12/71 activated**, items 22/40 present · **11/40 activated**. Docs
-  (`4871e189`): SUPERVISOR.md gate text gains `--parallel` + the
+  (`5559d1f6`): SUPERVISOR.md gate text gains `--parallel` + the
   no-pattern-kill rule; `docs/soak-crash-catalog.md` entry for today.
 - **Carry-49 sweep** (coverage-fight first-round 0:300): **300/300 OK**
   (1 `budget`); union coverage over all 16 reports → species **263/264**
@@ -2362,14 +2362,14 @@
 
 ## 1397 — [supervisor wind-down, 2026-08-25 ~02:35] **Mission queue CLOSED + two bonus finds fixed: #122 (check-viability recorder dropped a speed-tie draw), #123 NOT-A-BUG (source-faithful Struggle stalemate), Refresh Rust port folded (cargo 1,036 + wasm parity), fifth varied-RNG gate PINNED (2,000/2,000 baseline), `--first-round` HANG-at-budget mislabel fixed, #126 (Bide ignored end-turn `HITMARKER_IGNORE_BIDE`) found by the first varied full-chain census and fixed; animation folded twice; all five gates green on the final tree**
 
-- **Final gates on THIS tree (`dae00750` = engine tree of the five gates; final tree `94da116c` = animation fold #3 on top (Scene-ON only), full suite + build rerun there` + this docs commit; supervisor's own runs,
+- **Final gates on THIS tree (`961378b1` = engine tree of the five gates; final tree `18e3b771` = animation fold #3 on top (Scene-ON only), full suite + build rerun there` + this docs commit; supervisor's own runs,
   all eight sweeps concurrent under `nohup`):** vanilla 0:20 **20/20**,
   full 0:60 **60/60**, winning 0:60 **60/60**, winning-swap 0:60
   **60/60**; fifth gate — winning `--vary-rng --first-round` carry 0
   **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0
-  **100/100**. Full `npm test` **1,116 files / 10,442 passed / 224 skipped on `dae00750`; 1,121 / 10,456 / 224 on the final `94da116c`**; `npm run build` green.
-  DEFERRED.md: no open entries. `animation-main` folded three times: `4a8eec58`
-  (fast-forward), `dae00750` (4 commits), `94da116c` (7 commits, 66 files —
+  **100/100**. Full `npm test` **1,116 files / 10,442 passed / 224 skipped on `961378b1`; 1,121 / 10,456 / 224 on the final `18e3b771`**; `npm run build` green.
+  DEFERRED.md: no open entries. `animation-main` folded three times: `8ec35984`
+  (fast-forward), `961378b1` (4 commits), `18e3b771` (7 commits, 66 files —
   Scene-ON draw cases in `battleScene.ts` + animation-lane files); its Codex
   supervisor was live all session — anything it lands after 02:35
   folds at the next orient.
@@ -2378,28 +2378,28 @@
   `GetWhoStrikesFirst`'s speed-tie `Random()` (`battle_main.c:4745` via
   `battle_ai_script_commands.c:1268-1274`) but returned only `tryEncourage`'s
   fresh one-item list — recording one draw short of the cursor. One-line
-  carry `fa06db1c` + 7-case mutation-checked pin; seed 681 `OK b1 t12
+  carry `d668d46c` + 7-case mutation-checked pin; seed 681 `OK b1 t12
   roundLost`. **#124 filed** (Rust mirror has the same drop; one ts/wasm
   case `it.skip`ped — Rust lane). (2) **#123** side opus 63 min: PP 15→0,
   `legalMoveBySlot` nulls 0-PP, forced Struggle at selection 16
   (`battle_util.c:99-106`, `:1125-1140`); "456 uses" = 15 + 441 Struggles;
   +6/+6 Struggle (33%/29%) vs Leftovers/Ingrain regen never ends, no Gen-3
   turn cap → `OK … budget`. Pin `factoryBattleScriptNoPpStruggleFullTurn`
-  (3× mutation-checked) + forced-Struggle transcript label `1dd081df`;
+  (3× mutation-checked) + forced-Struggle transcript label `aca324a4`;
   **#123 deleted, #125 filed** (soak-policy debt, filler). (3) **Refresh
-  fold** `d6753f0b` (`81609f44`, in neither `rust-main` nor master): union
+  fold** `94960914` (`d9d88714`, in neither `rust-main` nor master): union
   `cargo test` 1,036/0, wasm rebuilt (511,638 B `72b84af1…`), 20 `*Parity*`
   suites under `POKEBENCH_ENGINE=wasm` 923 passed / 1 skipped. (4)
-  **`--first-round` semantics** side opus 19 min `359505a9`: the branch
+  **`--first-round` semantics** side opus 19 min `d1178e8d`: the branch
   returned HANG at budget unconditionally, mislabelling the #125 stalemate
   (seeds 116/418 at carry 14); now in-loop stall check + `OK … budget`,
-  summary prints `budget n`, 3 pins. (5) **Fifth gate pinned** `acb59111`
+  summary prints `budget n`, 3 pins. (5) **Fifth gate pinned** `2e3287a8`
   (SUPERVISOR.md + ROADMAP S10 block): baseline 0:500 per sweep on
-  `1dd081df` — winning c0 500/500, c14 500/500 (2 `budget`), c28 500/500,
+  `aca324a4` — winning c0 500/500, c14 500/500 (2 `budget`), c28 500/500,
   winning-swap c0 500/500; ~1 s/seed. (6) **First varied FULL-chain census**
   (`--vary-rng`, 0:100 × {winning c0/c14/c28, winning-swap c0}): 399/400 —
   the one CRASH was **#126**: Metronome→Bide, release `throw` "gBideTarget
-  must be the opposing slot" — a premise. ts opus 32 min `ab9c158b`:
+  must be the opposing slot" — a premise. ts opus 32 min `5ec603f3`:
   `DoBattlerEndTurnEffects` raises `HITMARKER_GRUDGE|IGNORE_BIDE` at every
   entry (`battle_util.c:1468`), so Bide never stores end-turn damage;
   oracle-staged (Shelgon Bide vs Poison Powder: `gBideDmg` 0, release =
@@ -2423,7 +2423,7 @@
   services; the pokered-pewter Codex supervisor also ran all night (load
   ~20 on 16 cores; soak ~1.5-2× slower). Traps: a side worktree's root is
   the REPO root (`<wt>/workspace` for tests/paths); `git branch --list`
-  prefixes worktree-checked-out branches with `+`. Reduced soak canary rerun on the final `94da116c` (03:01): vanilla 0:20 **20/20**, fifth gate **100/100 × 4** (the three 0:60 deep gates stand on `dae00750`; the fold between them is Scene-ON-only). At close `animation-main` is 4 commits ahead again (its supervisor was still live) — fold at the next orient.
+  prefixes worktree-checked-out branches with `+`. Reduced soak canary rerun on the final `18e3b771` (03:01): vanilla 0:20 **20/20**, fifth gate **100/100 × 4** (the three 0:60 deep gates stand on `961378b1`; the fold between them is Scene-ON-only). At close `animation-main` is 4 commits ahead again (its supervisor was still live) — fold at the next orient.
 
 ---
 
@@ -2443,7 +2443,7 @@
   2026-08-24; the supervisor defines the exact shape (carry tiers × seed
   count) AFTER #122/#123 are fixed and pins it in SUPERVISOR.md next to the
   four existing gates (which stay unvaried). (3) **Found: orphaned worker
-  commit** — `worker/rust-20260822-123947` (`81609f44`, "Port Refresh
+  commit** — `worker/rust-20260822-123947` (`d9d88714`, "Port Refresh
   battle script opcode to Rust": impl + 36k-line vectors + tests, Codex
   sol/high, 2026-08-22 12:49) is in NEITHER `rust-main` NOR master; it
   predates that day's night session and was never folded.
@@ -2469,8 +2469,8 @@
 
 ## 1395 — [interactive session, 2026-08-23] **Combined draft lever (4'') built + measured on a NEW honest instrument — challenge 4 was never unbeatable (winning 5.8%, combined 7.7% at n=1,000/arm); two policy/instrument bugs fixed, two engine finds filed (#122 crash, #123 endless battle)**
 
-- **State:** master = this docs commit (4 code commits under it: `a8445d42`
-  swap-decline fix, `83fa52af` `--policy winning-combined`, `679d1744`
+- **State:** master = this docs commit (4 code commits under it: `38c81e8c`
+  swap-decline fix, `9c2cbf65` `--policy winning-combined`, `183e2647`
   `--vary-rng`/`--first-round` instruments, plus this entry). Full gates on
   this tree: vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60
   **60/60**, winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); `npm test`
@@ -2519,12 +2519,12 @@
 
 ## 1394 — [supervisor final wind-down, 2026-08-23 03:10] **Bonus round closed: both remaining challenge-4 levers measured NEGATIVE at carry 28 (`oracle-strength` 0/30, `winning-coverage` 0/30); final tree re-gated green — entry 1392 is the full session record**
 
-- **Final gates on THIS tree (`b1480863` + this docs commit; supervisor-independent):**
+- **Final gates on THIS tree (`ba667172` + this docs commit; supervisor-independent):**
   vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**,
   winning-swap 0:60 **60/60** (0 CRASH / 0 HANG); full `npm test`
   **1,106 files / 10,396 passed / 223 skipped**; `npm run build` green.
-  (Gates were also green at `0cabb82b`, `a5b06cfb`, and — vanilla/winning —
-  `77f4db64`; see 1392.)
+  (Gates were also green at `001b456c`, `da7ed156`, and — vanilla/winning —
+  `c6af4927`; see 1392.)
 - **Did since 1392:** worker J landed opt-in `--policy winning-coverage`
   (1393): 0/30 rounds won at carry 28 (29 lost at b1 — coverage-first starves
   bulk, the mirror of the withheld bulk+STAB heuristic), anchor 0:120 carry
@@ -2543,8 +2543,8 @@
   make that measurement cheap. Open ISSUES: #121 (dormant note), #109/#114
   (doubles-era), #71/#73/#39/#55 (parked/filler). DEFERRED.md: none open.
 - **Notes:** `animation-main` ahead of master at close: 7 commits (its
-  supervisor was live all night; folded twice this session at `3a8b58d7` +
-  `77f4db64`; the remainder folds at the next orient). `rust-main` ahead: 0.
+  supervisor was live all night; folded twice this session at `05cb1980` +
+  `c6af4927`; the remainder folds at the next orient). `rust-main` ahead: 0.
   11 worker rounds total (6 ts opus, 5 side), 0 failed steps, 0 cap-kills,
   0 regressions folded. Trap of the hour: an UNQUOTED heredoc fed ledger
   prose to zsh, which executed its backticked `npm test` — quote heredocs
@@ -2554,13 +2554,13 @@
 
 ## 1393 — [main worker, 2026-08-23] **Scout lever 4' built and measured: `--policy winning-coverage` (coverage-first 3-of-6 draft) wins 0/30 rounds at carry 28 — challenge 4 stays unbeaten — but reaches carry >= 28 in 10/120 at the anchor vs `winning`'s 18/480**
 
-- **State:** master `2ea18c0b` + this docs commit. `npm test` **1,106 files
+- **State:** master `188cbb93` + this docs commit. `npm test` **1,106 files
   / 10,396 passed / 223 skipped** (this step adds 1 file / 4 tests; the rest
   of the delta over 1392's 1,105 / 10,392 came in with that entry's own
   animation fold), `npm run build` + typecheck green. New opt-in soak policy
   only — `winning` / `winning-swap` / `full` / `vanilla` / `oracle-strength`
   untouched (all their pins still pass); zero `src/engine` edits.
-- **Did (`b00f7e60` policy+pins, `2ea18c0b` measurement):**
+- **Did (`1a0c3d09` policy+pins, `188cbb93` measurement):**
   `--policy winning-coverage` = `winning` except the draft, which rents the
   3-of-6 maximising lexicographic (offensive coverage weighted by the six
   offers' own types, defensive diversity − shared 4x weaknesses, BST as a
@@ -2585,14 +2585,14 @@
   seeds are independent per `runSeed`, so the unions are the requested
   `0:20` / `0:120`. Tree clean, no foreign animation strays this session.
 
-## 1392 — [supervisor wind-down, 2026-08-23 ~02:15] **#118 CLOSED end to end (Rust `5b51eac5` → lockstep TS+wasm `0cb8aa26` → wire format `47a8db42`), #120 found by audit + fixed, #121 probed not-a-divergence, `oracle-strength` soak policy built and measured NEGATIVE; every gate green on the final tree; animation folded twice**
+## 1392 — [supervisor wind-down, 2026-08-23 ~02:15] **#118 CLOSED end to end (Rust `5a367754` → lockstep TS+wasm `e57bcc30` → wire format `2726aaa9`), #120 found by audit + fixed, #121 probed not-a-divergence, `oracle-strength` soak policy built and measured NEGATIVE; every gate green on the final tree; animation folded twice**
 
-- **Final gates (supervisor-independent):** on `a5b06cfb` (engine-final):
+- **Final gates (supervisor-independent):** on `da7ed156` (engine-final):
   vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**,
   winning-swap 0:60 **60/60** (0 CRASH / 0 HANG each; the same four gates
-  also ran 20/60/60/60 on `0cabb82b` before the soak-policy commits); full
+  also ran 20/60/60/60 on `001b456c` before the soak-policy commits); full
   `npm test` **1,103 files / 10,381 passed / 223 skipped** + build green on
-  `a5b06cfb`; after the second animation fold (`77f4db64`, Teeter Dance,
+  `da7ed156`; after the second animation fold (`c6af4927`, Teeter Dance,
   Scene-ON renderer branch only) union **1,105 / 10,392 / 223** + build
   green, re-run vanilla 0:20 + winning 0:60 on that tree: vanilla **20/20**, winning **60/60**.
   Insurance: full 60:240 **180/180**, winning 60:240 **180/180** (so 0:240 =
@@ -2606,10 +2606,10 @@
   challengeNum 8 drafts real; former crash seeds 2/32/49 clean). Audit of
   the 1386 burn-down fixes → **#120** CONFIRMED (rentsCount paid once per
   completed challenge vs retail's per-swap-then-win; the existing test pinned
-  the bug as correct) → fixed `664de9ee`/`64ad9f4e` with 5 pins; #121 filed →
+  the bug as correct) → fixed `96a88d1c`/`99be536d` with 5 pins; #121 filed →
   probed UNREACHABLE (`docs/issue121-ai-mon-to-switch-into-probe.md`), trimmed
   to a dormant coupled-pair note; audit of #118's TS-only halves → CLEAN +
-  `healFactoryKernelParty` six-IV guard `0cabb82b`. Scout
+  `healFactoryKernelParty` six-IV guard `001b456c`. Scout
   `docs/soak-policy-strength-scout-2026-08-23.md`: the wall is challengeNum 4
   ALONE (winning@35 wins 5/30, @28 0/30, 22/30 lost at b1); lever 2
   (`--policy oracle-strength`, the engine's own scorer for the player) built
@@ -2636,9 +2636,9 @@
   false positive (no harness commit touched `oracle/`), both services kept.
   Two lessons filed in PAPERCUTS: a supervisor ISSUES commit mid-worker was
   clobbered by the worker's stale-snapshot rewrite (caught + restored by the
-  worker `6daf244d`); the #120 side worker edited the main tree by absolute
+  worker `e9cddbd6`); the #120 side worker edited the main tree by absolute
   path (hit 5 — my side brief lacked the standing clause). `animation-main`
-  delta at close: folded `3a8b58d7` (Spikes) + `77f4db64` (Teeter Dance);
+  delta at close: folded `05cb1980` (Spikes) + `c6af4927` (Teeter Dance);
   its supervisor was live all session. `rust-main` delta 0.
 
 ---
@@ -2648,7 +2648,7 @@
 
 ## 1391 — [main worker, 2026-08-23] **Scout lever 2 built and measured: `--policy oracle-strength` (the engine's own Factory AI scorer driving the PLAYER) wins 0/30 rounds at carry 28 — a clean NEGATIVE result that retires in-battle move choice as the challenge-4 lever**
 
-- **State:** master `180a7e20` + this docs commit. `npm test` **1,103 files
+- **State:** master `16cba3b6` + this docs commit. `npm test` **1,103 files
   / 10,381 passed / 223 skipped** (this step adds 1 file / 4 tests; the rest
   of the delta over 1390's 1,099 / 10,360 came in with the side-lane merges
   under this tree), `npm run build` green, typecheck green. New opt-in soak policy only — `winning` /
@@ -2681,7 +2681,7 @@
 
 ## 1390 — [main worker, 2026-08-22] **ISSUES #118 CLOSED: the wasm draft-selection wire format now carries a rental's six-IV spread, so an `ivs`-bearing instance round-trips intact**
 
-- **State:** master `47a8db42` + this docs commit. `npm test` **1,099 files
+- **State:** master `2726aaa9` + this docs commit. `npm test` **1,099 files
   / 10,360 passed / 223 skipped** (was 10,359), `npm run build` green,
   cargo **79 blocks / 1,029 passed / 0 failed** (was 1,027), `fmt --check` +
   `clippy -- -D warnings` clean, typecheck green. `POKEBENCH_ENGINE=wasm`
@@ -2713,7 +2713,7 @@
 
 ## 1389 — [main worker, 2026-08-22] **ISSUES #118 commit 2/2 landed: the `sFixedIVTable[8]` overread is now ported end to end — TS + adapter + rebuilt wasm in lockstep; the challenge-8 crash repro goes clean**
 
-- **State:** master `0cb8aa26` + this docs commit. `npm test` **1,099 files
+- **State:** master `e57bcc30` + this docs commit. `npm test` **1,099 files
   / 10,359 passed / 223 skipped** (was 10,242), `npm run build` green,
   `POKEBENCH_ENGINE=wasm` parity **6 files / 559 passed, none skipped**
   (factoryRentalParity 387, factoryPartyMember 89, draftSelection 4, swap 3,
@@ -2745,7 +2745,7 @@
 
 ## 1388 — [main worker, 2026-08-22] **ISSUES #118 commit 1/2 landed: the retail `sFixedIVTable[8]` overread + `CreateBoxMon`'s two random-IV draws are ported in core-rs; TS untouched and still green**
 
-- **State:** master `5b51eac5` + this docs commit. `npm test` **10,242
+- **State:** master `5a367754` + this docs commit. `npm test` **10,242
   passed / 1,099 files**, build green, **zero TS edits**
   (`factoryRentalParity.test.ts` 290/290 as committed); cargo **1,027
   passed / 0 failed** (was 1,020), `fmt --check` + `clippy -- -D warnings`
@@ -2769,7 +2769,7 @@
 
 ## 1387 — [top-layer session, 2026-08-22] **User decisions recorded + next supervisor session set up: #116 RESOLVED (keep `vanilla` as the rigid canary; wind-down gates extended to four — `winning 0:60` + `winning-swap 0:60` added), #118 confirmed as the next session's first work item with a two-commit landing ladder written into its ISSUES entry**
 
-- **State:** docs-only commit on the 1386 final tree (`99429dc9` parent; no
+- **State:** docs-only commit on the 1386 final tree (`9a133dc2` parent; no
   engine/`src` touch, no suites due).
 - **Did (all user-approved this session):** (1) **#116 resolved and
   deleted** — decision: keep `vanilla 0:20` unchanged as a deliberate
@@ -2792,20 +2792,20 @@
 
 ---
 
-## 1386 — [supervisor wind-down, 2026-08-22 17:10] **Post-M-B crash burn-down: 14 worker rounds, queue to zero; final engine sweeps `full` 0:480 + `winning` 0:480 + `vanilla` 0:240 all clean; two new opt-in soak instruments (`winning-swap`, `--start-carry`) opened the swap screen and challenge 5-8 tiers to soak — #119 (swapped-party forced switch) fixed same session (`d41bc58c`), #118 remainder is a TS+Rust coupled port; animation + rust lanes folded**
+## 1386 — [supervisor wind-down, 2026-08-22 17:10] **Post-M-B crash burn-down: 14 worker rounds, queue to zero; final engine sweeps `full` 0:480 + `winning` 0:480 + `vanilla` 0:240 all clean; two new opt-in soak instruments (`winning-swap`, `--start-carry`) opened the swap screen and challenge 5-8 tiers to soak — #119 (swapped-party forced switch) fixed same session (`dbf6f64a`), #118 remainder is a TS+Rust coupled port; animation + rust lanes folded**
 
-- **Final gates (supervisor-independent, final tree `2dc691ae` + this docs commit):** full `npm test`
+- **Final gates (supervisor-independent, final tree `70236e03` + this docs commit):** full `npm test`
   **1,099 files / 10,242 passed / 223 skipped**; `npm run build` green; rust fold: cargo 79/79 result blocks (1,020 tests, exit 0; a first pass's exit code was the pipe's, re-run properly), wasm rebuilt
   (`build-wasm.sh`, 505,163 B, sha 6c59da9e…), `POKEBENCH_ENGINE=wasm` parity 18 files **803/803**; animation
-  fold `b2e453c4` (+2, Hail exact, coverage 201/276); soak gates on the final
+  fold `5996f154` (+2, Hail exact, coverage 201/276); soak gates on the final
   tree: vanilla 0:20 **20/20 OK**, full 0:60 **60/60 OK** (+ winning-swap 0:20 20/20). Session-scale sweeps
   (`docs/soak-final-tree-sweeps-2026-08-22.md`): full 0:480 **480/480**,
   winning 0:480 **480/480** (carry ≥ 28 18/480 = 3.75%), vanilla 0:240
   240/240, winning-swap 0:360 359/360 (#119), --start-carry 28/35/42 sweeps
   157/160 (3 × #118).
 - **Closed this session (each red-verified pin + supervisor re-run):** #102
-  (both halves: PARTY_SIZE switch-in fallback `5cc52595`; Future Sight/Perish
-  Song cursor `a6deb814` — new shared fields `wishPerishSongState/BattlerId`),
+  (both halves: PARTY_SIZE switch-in fallback `3a5fed10`; Future Sight/Perish
+  Song cursor `6584bf9d` — new shared fields `wishPerishSongState/BattlerId`),
   #104 (YES-branch message, trace 133/133), #106/#107/#108 (string-resolver
   class closed by census), #110, #111 (rentsCount reset on loss), #112
   (forced send-out display resume), #113 (`Cmd_getexp` writes
@@ -2813,7 +2813,7 @@
   Filed: #109, #114 (doubles-era), #116 (`vanilla` is one trajectory — gate
   semantics are the user's call), #118 (retail `sFixedIVTable[8]` = {110,0}
   pinned from ROM; port blocked on the wasm parity coupling — needs a
-  coordinated TS + Rust step, see the entry), #119 was found by the new `winning-swap` instrument (seed 130) and CLOSED the same hour (`d41bc58c`: `BattleScript_HandleFaintedMon` may ask the player twice in one script run — replacement faints to its own side's Spikes, `battle_scripts_1.s:3427-3431`; pin `tests/forcedSwitchSecondChoiceIssue119.test.ts`).
+  coordinated TS + Rust step, see the entry), #119 was found by the new `winning-swap` instrument (seed 130) and CLOSED the same hour (`dbf6f64a`: `BattleScript_HandleFaintedMon` may ask the player twice in one script run — replacement faints to its own side's Spikes, `battle_scripts_1.s:3427-3431`; pin `tests/forcedSwitchSecondChoiceIssue119.test.ts`).
 - **Findings:** the carry-28 ceiling is the challenge-5 AI tier, not an
   instrument cap (4M-frame probe; but from a carry-42 boot `winning` DOES win
   rounds — the wall is the challenge-4/5 rental-vs-opponent matchup, worth a
@@ -2833,7 +2833,7 @@
   brief (#71 Slice C was already done — grep the archive for the slice name
   first), 0 regressions folded. `check-oracle-freshness.sh` FAIL judged
   client-only (PAPERCUTS hit 8). Both sibling supervisors were live all
-  session; `animation-main`/`rust-main` delta at close: 0 / 0 (both folded: `b2e453c4` animation +2 Hail exact; `2945bc78` rust +6 core-rs leaves).
+  session; `animation-main`/`rust-main` delta at close: 0 / 0 (both folded: `5996f154` animation +2 Hail exact; `914431e5` rust +6 core-rs leaves).
   DEFERRED.md: none open. **Addendum 17:40:** two more discovery sweeps on
   the final tree — `winning --start-carry 28` 60:150 **90/90 OK** (90 more
   challenge-5 boots), `winning-swap` 360:520 **160/160 OK** — no new signature.
@@ -2842,7 +2842,7 @@
 
 ## 1385 — [main worker, 2026-08-22] **ISSUES #118 half-landed: `sFixedIVTable`'s retail one-past-the-end row is now pinned ROM data (`{110, 0}`); the engine port itself is blocked on a core-rs/factory-wasm lockstep change and is NOT in**
 
-- **State:** master `9aaf1997` + this docs commit. `npm test` 1093/1140
+- **State:** master `65665986` + this docs commit. `npm test` 1093/1140
   files, 10232/10458 passed (3 animation source-staging fixtures re-pinned
   to the new policy-JSON sha256), build green, smoke 444/444, frontier
   ratchet unchanged (no pin moved).
@@ -2869,7 +2869,7 @@
 
 ## 1384 — [main worker, 2026-08-22] **new opt-in `--start-carry` soak option boots the first chained round at a carried win streak — 0:160 across 3 sweeps, ISSUES #118 filed (challengeNum 8 draft-generation throw, real 2-round-win-from-42 state)**
 
-- **State:** master `f04c6227` + this docs commit. `npm test` 1095/1139
+- **State:** master `c89e3087` + this docs commit. `npm test` 1095/1139
   files, 10231/10454 passed, build green, smoke 444/444, ratchet unchanged
   (no `src/` touch — the carry is injected entirely from already-public
   `src/engine` exports via the existing `stateFactory` seam).
@@ -2899,7 +2899,7 @@
 
 ## 1383 — [main worker, 2026-08-22] **new opt-in `winning-swap` soak policy exercises the Factory swap screen at real carried-streak depth for the first time — 0:120 sweep clean, 0 CRASH/HANG**
 
-- **State:** master `7f89b708` + this docs commit. `npm test` 1095/10227
+- **State:** master `255d682c` + this docs commit. `npm test` 1095/10227
   passed, build green, smoke 444/444, ratchet unchanged (no `src/` touch).
 - **Did:** `winning-swap`: identical to `winning` except it accepts every
   swap offer then scores rentals/opponent mons and swaps the worst rental
@@ -2916,14 +2916,14 @@
 
 ---
 
-## 1382 — [supervisor fold, 2026-08-22 15:00] **#117 FIXED + folded (`521ae499`: record-menu arrow redraw lags the cursor flip by one tick; `loss-terminal-record-cursor-off` 80/80, yes-path 133/133 re-run by the supervisor); #71 Slice C found already done (1381, stale ISSUES text); final-tree `full` 0:240 → 240/240 OK**
+## 1382 — [supervisor fold, 2026-08-22 15:00] **#117 FIXED + folded (`fdb0d18d`: record-menu arrow redraw lags the cursor flip by one tick; `loss-terminal-record-cursor-off` 80/80, yes-path 133/133 re-run by the supervisor); #71 Slice C found already done (1381, stale ISSUES text); final-tree `full` 0:240 → 240/240 OK**
 
 - **State:** master = 1381 + merge of `worker/side-20260822-141940`. Merged-
   tree checks: both terminal compares exact, pins 7/7+, smoke 444. ISSUES −#117.
   PAPERCUTS +1 (obsolete `loss-terminal-decline-continuation-off` trace,
   50/155 by design since entry 1313 — bisected across the #104 commits
   before the archive answered; not a regression).
-- **Sweeps on the final engine (`adf633e9`, clean worktree):** `full` 0:240
+- **Sweeps on the final engine (`3ab975e7`, clean worktree):** `full` 0:240
   **240/240 OK, 0 CRASH, 0 HANG** (session start: 236/240); `winning`
   0:240 in flight (0 crashes at 30%); `full` 240:480 crash-discovery next.
 - **Queue state:** every bounded ISSUES item is closed or filed for a later
@@ -2935,7 +2935,7 @@
 
 ## 1381 — [main worker, 2026-08-22] **ISSUES #71 Slice C re-verified DONE, no code change needed (guards were already landed at entries 891/894-895) — stale "remainder" sentence trimmed**
 
-- **State:** master `adf633e9` + this docs-only commit. Read both back
+- **State:** master `3ab975e7` + this docs-only commit. Read both back
   hand-fits (`magbySendOut.ts` MAGBY/Docile, `battleMenu.ts` ONIX-back
   `PLAYER_SETTLE_WOBBLE_Y2_TABLE`) and all their call sites: all 3
   consumers already guarded — `drawPlayerMaterializeSettle` (legacy ONIX
@@ -2948,7 +2948,7 @@
   the brief's own fallback branch. All pinned:
   `tests/battleScene.test.ts` 306/306,
   `tests/generatedPlayerMaterializeSettleSpecies.test.ts` 7/7.
-- **Did:** no `src/`/`tests/` edit (confirmed `git diff --stat adf633e9 --
+- **Did:** no `src/`/`tests/` edit (confirmed `git diff --stat 3ab975e7 --
   src/ tests/ tools/` empty). Trimmed ISSUES #71's stale
   2026-08-07 "what remains is Slice C" sentence (pre-dated by the
   2026-08-03 entries that closed it) to point at the completion instead.
@@ -2963,7 +2963,7 @@
 
 ---
 
-## 1380 — [supervisor fold, 2026-08-22 14:35] **#115 FIXED + folded (`ade427f7`, salvaged: post-switch-in messages name the slot's CURRENT occupant); #110 + richer switch-in throws (1379); draft heuristic WITHHELD for good at n=180 (≥21: 40 vs 7); session depth number on the fixed tree: `winning` 0:180 → 180/180 OK, carry ≥ 28 in 4/180**
+## 1380 — [supervisor fold, 2026-08-22 14:35] **#115 FIXED + folded (`a9514790`, salvaged: post-switch-in messages name the slot's CURRENT occupant); #110 + richer switch-in throws (1379); draft heuristic WITHHELD for good at n=180 (≥21: 40 vs 7); session depth number on the fixed tree: `winning` 0:180 → 180/180 OK, carry ≥ 28 in 4/180**
 
 - **State:** master = 1379 + merge of `worker/side-20260822-130450` (#115;
   its cap-killed worker had run the full suite at 10,212 before the kill;
@@ -2985,7 +2985,7 @@
 
 ## 1379 — [main worker, 2026-08-22] **ISSUES #110 fixed (Cmd_openpartyscreen always scores via the AI selector, no legal-count shortcut); PAPERCUTS "switchhandleorder/getswitchedmondata throws" closed (richer diagnostics)**
 
-- **State:** master `890a8593` + this docs commit. `npm test` **1,093
+- **State:** master `05f53234` + this docs commit. `npm test` **1,093
   files / 10,219 passed / 223 skipped**, `npm run build` green, smoke
   444/444, `executableFrontierRatchet.test.ts` unchanged.
 - **Did:** removed the `legalBenchIndexes.length === 1` shortcut (source:
@@ -3002,10 +3002,10 @@
 
 ---
 
-## 1378 — [supervisor fold, 2026-08-22 13:55] **#112 + #113 FIXED + folded (`3c6e192a` `Cmd_getexp` republishes `gBattlerFainted`; `6f810a51` forced send-out resumes at the SELECTED switch-in — 12 display commands were being dropped); #104 CLOSED (1377, YES-path trace 133/133 re-run by the supervisor); #116 filed: `vanilla` is seed-invariant**
+## 1378 — [supervisor fold, 2026-08-22 13:55] **#112 + #113 FIXED + folded (`24492fd8` `Cmd_getexp` republishes `gBattlerFainted`; `aca661c2` forced send-out resumes at the SELECTED switch-in — 12 display commands were being dropped); #104 CLOSED (1377, YES-path trace 133/133 re-run by the supervisor); #116 filed: `vanilla` is seed-invariant**
 
-- **State:** master `4837a062`+docs. Merged-tree checks: #104 compare
-  **133/133**, pins 15/15, smoke 444 (union full suite at `05311bbf`:
+- **State:** master `16783c14`+docs. Merged-tree checks: #104 compare
+  **133/133**, pins 15/15, smoke 444 (union full suite at `0cb69163`:
   **1,091 files / 10,208 passed / 223 skipped**, build green; the #104 and
   #112/#113 workers each ran full suites at their commits — 10,208 / 10,211).
   `full` seeds 108 + 192 now OK; `full` 100:120 20/20; vanilla 0:20 20/20.
@@ -3015,7 +3015,7 @@
   single-trajectory smoke ×20 — user-facing gate semantics, recorded with
   options, not changed. #117 (1-frame record-cursor timing, from the #104
   trace). #115 (post-forced-switch messages name the PRE-switch mon — side
-  worker on it now, base `6f810a51`). PAPERCUTS +2 (#104 worker).
+  worker on it now, base `aca661c2`). PAPERCUTS +2 (#104 worker).
 - **Next:** fold #115; main = #110 cleanup + richer switch-in throws
   (PAPERCUTS); side after #115 = draft heuristic n ≥ 180 measurement; final
   `winning` 0:240 depth number on the fully-fixed tree + wind-down gates
@@ -3026,11 +3026,11 @@
 ## 1377 — [main worker, 2026-08-22] **ISSUES #104 CLOSED: YES branch now shows EventScript_SaveBattle's own "battle was recorded" message before the shared farewell**
 
 - **State:** `src/engine/factoryTerminalPresentation.ts` +
-  `src/engine/factoryTerminalRender.ts` (fix, `f04519bd`/`e72292fe`),
+  `src/engine/factoryTerminalRender.ts` (fix, `3f73392e`/`f64cda75`),
   `tests/factoryTerminalRecordIssue104.test.ts` (YES sub-test rewritten, red
   paste in the commit body), new trace
   `tools/compare/traces/loss-terminal-record-yes-off.json` +
-  `tools/battle-lab/scratch-loss-record-yes-probe.json` (`fa7d5215`), new
+  `tools/battle-lab/scratch-loss-record-yes-probe.json` (`f9195bf0`), new
   doc `docs/factory-terminal-record-yes-ground-truth.md`. `npm test`
   **10,208 passed / 223 skipped**, `npm run build` green, smoke 444/444,
   `executableFrontierRatchet.test.ts` unchanged.
@@ -3053,10 +3053,10 @@
 
 ---
 
-## 1376 — [supervisor fold, 2026-08-22 13:10] **End-turn cursor fix folded (`a6deb814`: Future Sight/Perish Song pass no longer rescans from 0 after a faint pause — timers were double-counted); #102 CLOSED (crash half fixed, end-turn lead refuted twice, adjacent cursor bug fixed); #111 fixed; driver round-identity reset salvaged; `full`/`vanilla` 0:240 re-swept — #112/#113 filed as ≤9 s live repros**
+## 1376 — [supervisor fold, 2026-08-22 13:10] **End-turn cursor fix folded (`6584bf9d`: Future Sight/Perish Song pass no longer rescans from 0 after a faint pause — timers were double-counted); #102 CLOSED (crash half fixed, end-turn lead refuted twice, adjacent cursor bug fixed); #111 fixed; driver round-identity reset salvaged; `full`/`vanilla` 0:240 re-swept — #112/#113 filed as ≤9 s live repros**
 
 - **State:** master = merge of `worker/side-20260822-114356` (end-turn
-  cursor, Opus) + `005d290f` (#111: loss zeroes `rentsCount`) + the salvaged
+  cursor, Opus) + `fe06c4ae` (#111: loss zeroes `rentsCount`) + the salvaged
   driver reset (cap-killed worker, Part B verified by the supervisor: pin
   43/43, smoke 444, vanilla 0:20 below). **New shared-state fields
   (recorded per the boundary rule):** `BattleScriptRulesContext.wishPerishSongState`
@@ -3113,13 +3113,13 @@
 
 ---
 
-## 1374 — [supervisor fold, 2026-08-22 12:05] **#102 crash half FIXED + folded (`5cc52595`: `OpponentHandleChoosePokemon` PARTY_SIZE fallback; seed 138 OK); #106/#107 fixed (1373); 4M-frame depth probe: 7/7 OK, carry ceiling 28 = challenge-5 AI tier, NOT an instrument cap; #109–#111 filed**
+## 1374 — [supervisor fold, 2026-08-22 12:05] **#102 crash half FIXED + folded (`3a5fed10`: `OpponentHandleChoosePokemon` PARTY_SIZE fallback; seed 138 OK); #106/#107 fixed (1373); 4M-frame depth probe: 7/7 OK, carry ceiling 28 = challenge-5 AI tier, NOT an instrument cap; #109–#111 filed**
 
-- **State:** master `41866a9c`+docs. Merged-tree checks: the four string/#102
-  pins 7/7, smoke 444/444 (full suite: worker-run 10,198 at `880a8bb8`
-  + side-run 10,200 at `5cc52595`; supervisor full suite at wind-down).
+- **State:** master `faf1158b`+docs. Merged-tree checks: the four string/#102
+  pins 7/7, smoke 444/444 (full suite: worker-run 10,198 at `1e1bdb6d`
+  + side-run 10,200 at `3a5fed10`; supervisor full suite at wind-down).
   ISSUES: #102 trimmed to its open end-turn half (side lane, in flight on
-  Opus, base `5cc52595`); #108 (5 reachable string gaps) filed by 1373 →
+  Opus, base `3a5fed10`); #108 (5 reachable string gaps) filed by 1373 →
   next ts brief; #109/#110 (side worker findings) and #111 (`rentsCount`
   not reset on loss — source `battle_factory.c:208-212`) filed. PAPERCUTS +2
   (driver reset-on-battleIndex; thin switch-in throws) + freshness bump.
@@ -3132,7 +3132,7 @@
   drafts from the pinned anchor pool, so "carry ≥ 7 100%" is anchor-biased.
   Determinism re-checked (seed 63, four ways, identical).
 - **In flight:** `full` + `vanilla` 0:240 re-sweeps on the new semantics
-  (clean `df60c00a` worktree, background); side = #102 end-turn cursor.
+  (clean `cd59eeec` worktree, background); side = #102 end-turn cursor.
 - **Next:** ts = #108; then #111 (+ the driver papercut) as one small side
   step; #104 remainder; draft heuristic n ≥ 180 if time.
 
@@ -3145,7 +3145,7 @@
   `tests/presentationStringIssue106.test.ts` +
   `tests/presentationStringIssue107.test.ts` (new, both red-verified via
   `git stash`), `ISSUES.md` (#106/#107 deleted; #108 filed with the sibling
-  census). Commits `e0995774`, `880a8bb8`. `npm test` **1,088 files / 10,198
+  census). Commits `268bbc2f`, `1e1bdb6d`. `npm test` **1,088 files / 10,198
   passed / 223 skipped**, `npm run build` green (the build's `tsc -b` caught
   two tuple-widening typecheck errors vitest's untyped run missed — fixed in
   the second commit, no behavior change). `executableFrontierRatchet.test.ts`
@@ -3195,15 +3195,15 @@
 
 ---
 
-## 1372 — [supervisor orient, 2026-08-22 11:25] **`animation-main` folded (fast-forward to `df60c00a`, +16: Lovely Kiss + Octazooka exact, Hail evidence; coverage 200/276 Level-50 exact); baseline green on the union; `rust-main` 0 ahead**
+## 1372 — [supervisor orient, 2026-08-22 11:25] **`animation-main` folded (fast-forward to `cd59eeec`, +16: Lovely Kiss + Octazooka exact, Hail evidence; coverage 200/276 Level-50 exact); baseline green on the union; `rust-main` 0 ahead**
 
-- **State:** master = `df60c00a` = `animation-main` tip (their supervisor had
+- **State:** master = `cd59eeec` = `animation-main` tip (their supervisor had
   just merged master, so the fold was a fast-forward; no net change to
   `src/engine/**`). Supervisor-independent baseline on the union: full
   `npm test` **1,086 files / 10,196 passed / 223 skipped**, `npm run build`
   green. Both sibling supervisors (animation, rust) are LIVE this session —
   fold again at wind-down. `check-oracle-freshness.sh` FAILs both ports, but
-  the only oracle-side commit since 8014 started (`3e29880b`, 08-15 09:51,
+  the only oracle-side commit since 8014 started (`4dac4a35`, 08-15 09:51,
   walk-up staging) was committed 6 min after that process started from the
   same working tree and the walk-up program has run against it since —
   judged client-only (same verdict as entry 821); not restarting shared
@@ -3219,7 +3219,7 @@
 ## 1371 — [supervisor close, 2026-08-20 16:00] **Bonus round folded: final-tree `winning` 0:240 (1370) reaches carry ≥ 28 in 7/240 (2.9%), ≥ 21 20.0%, ≥ 14 90.8% — deepest seeds hit the 1M-frame budget mid-round-5 (instrument ceiling, not a wall); draft heuristic re-measured n=30 (neutral, stays withheld on `wip/mb-step2b-draft-heuristic` @ `18222b3a`); #106 + #107 filed; #102 re-reproduced live (seed 138)**
 
 - **State:** docs-only since 1369's gates; tree clean. Cherry-picked the side
-  §6 measurement doc (`18222b3a` → `7b53b7a2`) onto master; ISSUES **#107**
+  §6 measurement doc (`18222b3a` → `4a9b2636`) onto master; ISSUES **#107**
   filed (STRINGID_PKMNSUBSTITUTEFADED `{B_DEF_NAME_WITH_PREFIX}` resolver;
   seeds 27/29 on the wip branch). `animation-main` is **+5 unfolded** at
   close (sibling session live until 18:00) — fold at next orient;
@@ -3295,29 +3295,29 @@
 
 ## 1369 — [supervisor wind-down, 2026-08-20] **Milestone M-B bar AND stretch met: `winning` reaches carry ≥ 28 by play (seed 24, challenge-4 AI tier) once #104 (terminal record-YES dead end + cumulative soak grace) was found and fixed; soak OK/HANG redefined for continuous play; rust + animation lanes folded; #105 filed at the new depth**
 
-- **Final gates (supervisor-independent, at the FINAL tree `2f527dcb` (code) / this docs commit`):**
-  full `npm test` **1,079 files / 10,176 passed / 223 skipped** (at `bcfa69d4`-era tree incl. both lane folds; the later #105 fix `1df9dcb6` re-ran the suite itself: 1,080 files / 10,177 passed — PROGRESS 1368; supervisor reran its pin + census ratchet + seeds 40/50 → OK); `npm run build` green; soak vanilla 0:20
-  **20/20 OK** (all `budget`; carry ≥ 7 20/20, ≥ 14 0/20); soak full 0:60 **60/60 OK** (all `budget`; carry ≥ 7 3/60) — both with rendering on the pre-#105 tree `e3176a05` (#105 is a carry-21 string case `full`/`vanilla` never reach; NEW semantics:
+- **Final gates (supervisor-independent, at the FINAL tree `751c8569` (code) / this docs commit`):**
+  full `npm test` **1,079 files / 10,176 passed / 223 skipped** (at `4891a575`-era tree incl. both lane folds; the later #105 fix `00e2e209` re-ran the suite itself: 1,080 files / 10,177 passed — PROGRESS 1368; supervisor reran its pin + census ratchet + seeds 40/50 → OK); `npm run build` green; soak vanilla 0:20
+  **20/20 OK** (all `budget`; carry ≥ 7 20/20, ≥ 14 0/20); soak full 0:60 **60/60 OK** (all `budget`; carry ≥ 7 3/60) — both with rendering on the pre-#105 tree `96e7b516` (#105 is a carry-21 string case `full`/`vanilla` never reach; NEW semantics:
   OK = frame budget reached while still progressing / HANG = 30k frames of
-  no progress); `winning` 0:60 depth (render off, `e3176a05`): **carry ≥ 7 60/60, ≥ 14 56/60, ≥ 21 13/60, ≥ 28 1/60 (seed 24, depth 28)**; 58 OK(budget) / 2 CRASH (seeds 40+50 = #105) / 0 HANG. Rust fold:
-  cargo 75/75 result blocks ok, wasm rebuilt (`build-wasm.sh`, 492,691 B, sha 61f39cfe…), `POKEBENCH_ENGINE=wasm` parity suites **18 files / 803 tests green** (run from the workspace root — a core-rs cwd finds no tests). Animation fold `bcfa69d4` (10 commits, additive:
+  no progress); `winning` 0:60 depth (render off, `96e7b516`): **carry ≥ 7 60/60, ≥ 14 56/60, ≥ 21 13/60, ≥ 28 1/60 (seed 24, depth 28)**; 58 OK(budget) / 2 CRASH (seeds 40+50 = #105) / 0 HANG. Rust fold:
+  cargo 75/75 result blocks ok, wasm rebuilt (`build-wasm.sh`, 492,691 B, sha 61f39cfe…), `POKEBENCH_ENGINE=wasm` parity suites **18 files / 803 tests green** (run from the workspace root — a core-rs cwd finds no tests). Animation fold `4891a575` (10 commits, additive:
   Psybeam + Rain Dance; their session was LIVE — at 15:25 `animation-main`
   is **+2 unfolded** again; fold next session). DEFERRED.md: none open.
 - **Did (9 main rounds + 7 side rounds, 2 cap-kills salvaged, 0 regressions
   folded):** M-B step 1 (1357, verdict (a)); #99 found (side scout) + fixed
   (1358); step 2 levers: type-aware move choice (1359), swap decline
-  (`781c8827`), true-immunity switch + HP gate (`3fa78a98`); withheld:
+  (`3064e24e`), true-immunity switch + HP gate (`e4fd9786`); withheld:
   draft-by-strength (`wip/mb-step2b-draft-heuristic`) and the loose switch
   rule (both measured worse at n=60); #100/#101/#103 fixed (1360/1363; #103
   ROM-byte-verified by the supervisor); #102 non-repro, its end-turn lead
   REFUTED by a pin; sweeps 0:240 (1361) and 0:480 (1365) reached carry ≥ 21
   (seed 99 first; 5/480); supervisor probe then showed the carry-21 "wall"
-  was #104 (1366); #104 fixed in both halves (1367 driver, `fd30ee13`
+  was #104 (1366); #104 fixed in both halves (1367 driver, `4ca688b7`
   engine) and the soak's OK/HANG semantics redefined for continuous play
-  (`f931241a`: stallFrames/--max-rounds; the pre-#104 "OK" was a cumulative-
+  (`7621f810`: stallFrames/--max-rounds; the pre-#104 "OK" was a cumulative-
   grace artifact since M-A); #105 (Conversion/Camouflage type-name string,
   surfaced at carry 21 by the supervisor's depth run) fixed same hour
-  (`1df9dcb6`, 1368).
+  (`00e2e209`, 1368).
 - **Next:** (1) re-measure depth at scale on the new semantics — `winning`
   0:240+ with `--max-rounds` or the 1M budget — to learn whether carry ≥ 28
   (challenge-4 AI tier) is reached by play; this is M-B step 3 re-run, the
@@ -3343,12 +3343,12 @@
 
 ---
 
-## 1368 — [main worker, 2026-08-20] **#105 FIXED: STRINGID_PKMNCHANGEDTYPE `messageLines` case added (Conversion/Conversion 2/Camouflage); soak seed 40 now runs to an honest OK (`1df9dcb6`)**
+## 1368 — [main worker, 2026-08-20] **#105 FIXED: STRINGID_PKMNCHANGEDTYPE `messageLines` case added (Conversion/Conversion 2/Camouflage); soak seed 40 now runs to an honest OK (`00e2e209`)**
 
 - **State:** `src/engine/battleResolutionPresentation.ts` +
   `src/engine/factoryBattleScriptFullTurnDecision.ts` (fix),
   `tests/presentationStringIssue105.test.ts` (new), `ISSUES.md` (#105
-  deleted, fully fixed). Commit `1df9dcb6`. `npm test` 1080 files/10177
+  deleted, fully fixed). Commit `00e2e209`. `npm test` 1080 files/10177
   passed (44/223 skipped, unchanged), `npm run build` and `npm run
   typecheck` green.
 - **Did:** `BattleScript_EffectConversion`/`Conversion2`/`Camouflage`
@@ -3390,10 +3390,10 @@
 
 ---
 
-## 1367 — [main worker, 2026-08-20] **#104 driver half FIXED: per-round grace re-arm + honest HANG reporting; unmasked finding — the terminal record-YES/cancel dead end is near-universal, not a deep-chain rarity (`428ba1c4`)**
+## 1367 — [main worker, 2026-08-20] **#104 driver half FIXED: per-round grace re-arm + honest HANG reporting; unmasked finding — the terminal record-YES/cancel dead end is near-universal, not a deep-chain rarity (`31d852a1`)**
 
 - **State:** `tools/soak/randomRoundSoakDriver.ts`/`randomRoundSoak.ts` +
-  `tests/randomRoundSoak.test.ts` changed (`428ba1c4`); no `src/`. `npm test`
+  `tests/randomRoundSoak.test.ts` changed (`31d852a1`); no `src/`. `npm test`
   10152/10152 (223 skipped), `npm run build`, `npm run typecheck` all green.
 - **Did:** `terminalGrace` now re-arms on every `graceActive` falling edge (a
   genuine re-chain) instead of counting down a single cumulative 9,000-frame
@@ -3443,14 +3443,14 @@
 
 ---
 
-## 1366 — [supervisor fold, 2026-08-20] **Carry-21 "wall" is a driver-masked engine dead end (#104: terminal record-YES/cancel never continues; soak grace cumulative + expiry reported OK) — found by supervisor probe; switch lever C2 + #104-refutation test folded (`3fa78a98`)**
+## 1366 — [supervisor fold, 2026-08-20] **Carry-21 "wall" is a driver-masked engine dead end (#104: terminal record-YES/cancel never continues; soak grace cumulative + expiry reported OK) — found by supervisor probe; switch lever C2 + #104-refutation test folded (`e4fd9786`)**
 
-- **State:** master = 1365 sweep docs + side C2 (`5b31b1ea`: `winning`
+- **State:** master = 1365 sweep docs + side C2 (`3538f219`: `winning`
   switches only out of a true-immunity wall with a ≥50%-HP bench answer;
   38/13/2 of 60 vs 36/10/0 decline-only, 30 switches) + side refutation
-  pin (`bc8acc23`, end-turn skip claim REFUTED, later battler keeps its
+  pin (`5d6f5126`, end-turn skip claim REFUTED, later battler keeps its
   tick). Union: soak file + new test 33/33, smoke 444/444. PAPERCUTS bumped
-  (`fdf46ebb`: absolute-path commit on master + reset --hard by a side
+  (`0b3fc84b`: absolute-path commit on master + reset --hard by a side
   worker; pinned-line census citations, incl. the supervisor's own hit).
 - **Finding:** all three deepest 0:480 seeds (125/328/409) stop at
   `roundComplete carry<=21`. Probe (scratch print at grace expiry, reverted):
@@ -3481,7 +3481,7 @@ Older entries: see `PROGRESS-archive.md`.
   crash/hang signatures, so there was nothing to triage or fix.
 - **Did:** swept `winning` seeds 0:480 (24×20-seed chunks, `--render-every
   0`, six batches of 4 parallel foreground processes) at master HEAD
-  `a97d3b19` — the completed M-B tree (step 2a, swap-decline `781c8827`,
+  `2e656f84` — the completed M-B tree (step 2a, swap-decline `3064e24e`,
   #99/#100/#101/#103 fixes all folded). **480/480 OK, 0 CRASH, 0 HANG** (vs.
   238/240 OK, 2 CRASH in the 0:240 sweep that found #101/#103 — both fixes
   hold at double the range). carry≥7 205/480 (42.71%), carry≥14 54/480
@@ -3538,7 +3538,7 @@ Older entries: see `PROGRESS-archive.md`.
   `tools/report/ability-item-parity-census.ts` (5-line-citation ratchet
   moved +15 to track #103's inserted comments — doc output unchanged, diffed
   byte-identical), `ISSUES.md` (#101, #103 deleted, fully fixed, no
-  remainder), this entry. Commits `ed66e000` (#101), `1403f462` (#103).
+  remainder), this entry. Commits `f9f13a9b` (#101), `c4f3c74d` (#103).
 - **Did — #101:** `STRINGID_PKMNTOOKAIM` (`BattleScript_EffectLockOn`,
   `data/battle_scripts_1.s:1286-1297`) had no `messageLines` case.
   Confirmed `Cmd_setalwayshitflag` is already ported
@@ -3549,7 +3549,7 @@ Older entries: see `PROGRESS-archive.md`.
   entry's "zero references" claim was about the string only. Added the case
   (`B_ATK_NAME_WITH_PREFIX`/`B_DEF_NAME_WITH_PREFIX`, unchanged roles).
   Red-verified via `git stash`. Soak seed 90 no longer reaches the original
-  crash frame at all (the intervening `781c8827`/`db5b2b27` swap-decline
+  crash frame at all (the intervening `3064e24e`/`a0c12662` swap-decline
   fold diverged its RNG path before that point) — pinned directly with a
   real LOCK ON turn instead; fix is unconditional regardless of seed 90's
   new trajectory.
@@ -3642,9 +3642,9 @@ Older entries: see `PROGRESS-archive.md`.
 
 ---
 
-## 1362 — [supervisor fold, 2026-08-20] **M-B bar REACHED (sweep 1361: carry ≥ 21 by play, seed 99); swap-decline lever folded (`781c8827`); draft heuristic WITHHELD; #103 filed; ROADMAP M-B status written**
+## 1362 — [supervisor fold, 2026-08-20] **M-B bar REACHED (sweep 1361: carry ≥ 21 by play, seed 99); swap-decline lever folded (`3064e24e`); draft heuristic WITHHELD; #103 filed; ROADMAP M-B status written**
 
-- **State:** master = sweep docs (1361) + side part-B rung 1 (`db5b2b27`,
+- **State:** master = sweep docs (1361) + side part-B rung 1 (`a0c12662`,
   `winning` declines every swap; union soak file 23/23, smoke 444/444).
   Supervisor independently reran seed 99 at HEAD: `roundLost carry<=21
   depth<=25` — the milestone's acceptance seed reproduces.
@@ -3775,7 +3775,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ---
 
-## 1359 — [supervisor fold, 2026-08-20] **M-B step 2a folded: `winning` picks fight moves by power × type-effectiveness × STAB (side `ff5e84d6`, merge `82580f0f`) — first-ever carry ≥ 21 seed observed**
+## 1359 — [supervisor fold, 2026-08-20] **M-B step 2a folded: `winning` picks fight moves by power × type-effectiveness × STAB (side `286f2938`, merge `ae1f24eb`) — first-ever carry ≥ 21 seed observed**
 
 - **State:** union of the #99 fix (1358) + side step 2a. Both-sides-additive
   conflict in `tests/randomRoundSoak.test.ts` resolved by keeping both
@@ -3787,14 +3787,14 @@ Older entries: see `PROGRESS-archive.md`.
   measurement in the worktree (pre-#99-fix tree, like-for-like): `winning`
   0:60 **25/9/1** at carry ≥ 7/14/21, deepest battle-depth **24** — exact
   match to the worker's table (before: 26/2/0, deepest 6). Scout doc
-  `docs/soak-winning-loss-analysis-2026-08-20.md` (fold `7f5a9b66`) holds
+  `docs/soak-winning-loss-analysis-2026-08-20.md` (fold `8cd40ab2`) holds
   the loss census that motivated it (48.4% of losses ended on a
   resisted/immune move).
 - **Next:** the union (#99 + #100 + 2a) has not been swept yet — M-B step 3
   sweep next on main; side lane is landing two more `winning` levers
   (decline swaps, draft by strength) for a second sweep after.
 - **Notes:** no PAPERCUT. Parallel-lane note: side round 2 launched mid-main-
-  round on `--base 0dd3f36c` and merged only after the main worker exited
+  round on `--base 4243b4b1` and merged only after the main worker exited
   (code branches never merge under a live main worker).
 
 ---
@@ -3915,7 +3915,7 @@ Older entries: see `PROGRESS-archive.md`.
   (swap-offer YES/NO never answered by its own branch; every policy incl.
   `vanilla` accepts the swap and random-mashes the swap screen). So "swap
   accept not responsible" is withdrawn; re-measured post-fix in 1358.
-  Side scout (`9b538b73`, folded) independently found #99 and measured
+  Side scout (`54f2f9d8`, folded) independently found #99 and measured
   `winning`'s losses: 48.4% end on a resisted/immune move; type-aware move
   choice moved carry>=14 4%→15% (60 seeds) — M-B step 2's first lever.
 
@@ -3970,7 +3970,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 - **Final gates (SUPERSEDED line below — rerun after #39 batch 9 landed
   late-session; both runs supervisor-independent):** at the FINAL tree
-  (`0a9caeda` + this docs commit): full `npm test` **1,068 files /
+  (`362dbdea` + this docs commit): full `npm test` **1,068 files /
   10,126 passed / 223 skipped**; `npm run build` green; soak vanilla
   0:20 **20/20 OK**; soak full 0:60 **60/60 OK** — and the full-0:60
   depth block byte-matches the sweep doc's same-range numbers
@@ -3988,12 +3988,12 @@ Older entries: see `PROGRESS-archive.md`.
 - **Did (4 worker rounds + 1 read-only scout, 2 lanes):** (1) M-A step 1
   (entry 1354 below, supervisor-verified incl. a seed-0 diagnostics
   trajectory audit). (2) Side: scanner **H3-let-write** hazard
-  (`e99c3511`, fold `79a0c6ad`) — batch-8's two hand-exclusions now
+  (`ca3d58b9`, fold `bb891d75`) — batch-8's two hand-exclusions now
   auto-blocked, `playerHealthboxHpOverlayForHp` correctly still eligible
   (pool = 1 function-kind); union checks 26/26 + smoke 444/444; a stray
   main-tree copy of the edit (absolute-path papercut, hit #3) was
-  byte-identical and discarded. (3) M-A steps 2-3 (`78f11bee`,
-  `a395d436`, `1e654c62`): winning 0:180 + vanilla 0:60 + full 0:60,
+  byte-identical and discarded. (3) M-A steps 2-3 (`2510cf16`,
+  `eeca9c45`, `2cfde297`): winning 0:180 + vanilla 0:60 + full 0:60,
   **all 300 seeds OK**, distributions + per-seed lines committed
   (`docs/soak-depth-measure-2026-08-19.{md,log}`); supervisor recounted
   winning carry≥7 from raw lines (64/180 exact match). Worker cap-killed
@@ -4004,8 +4004,8 @@ Older entries: see `PROGRESS-archive.md`.
   entries 1280/1296/1307/1308 (walk-up program fully COMPLETE per 1317);
   scout live-reverified 02+03 both 256/256, differential 563/563, full
   suite green, and correctly committed nothing. ROADMAP walk-up line
-  corrected twice (`b1fd9734` — itself still stale-based — then
-  `477e7570` program-COMPLETE).
+  corrected twice (`545e8987` — itself still stale-based — then
+  `9e24127d` program-COMPLETE).
 - **The M-A number** (full table in the doc): winning 64/180 (35.6%)
   carry≥7, 10/180 (5.6%) carry≥14, 0/180 carry≥21; vanilla 16/60 /
   3/60 / 0/60, deepest anywhere = vanilla seed 24 at battle-depth 20
@@ -4013,8 +4013,8 @@ Older entries: see `PROGRESS-archive.md`.
   round. ROADMAP M-A block updated with the result; the block's two
   pre-recorded outcomes bracket it, so the scope call goes to D2.
 - **Next:** user resolves D2 (mechanically blocks the next supervisor
-  session). #39 batch 9 landed same-day (`2f8edef2` move+reconnect,
-  `dc89b145` test-pin fix): moved `playerHealthboxHpOverlayForHp`,
+  session). #39 batch 9 landed same-day (`13b13be4` move+reconnect,
+  `35543a85` test-pin fix): moved `playerHealthboxHpOverlayForHp`,
   scanner CANONICAL 76→75, function-kind eligible pool 1→0 (none left).
   Available filler regardless: the non-function/topological CANONICAL
   remainder (5 eligible non-function symbols + the ~70 hazard-blocked
@@ -4039,8 +4039,8 @@ Older entries: see `PROGRESS-archive.md`.
   re-chained carry-0 round lost at battle 2, which is where `b2` comes
   from; `opponentGenerationCount 2` confirms). Depth convention for step 3
   reports: during battle N of a carry-C round, `maxBattleDepth` = C+(N-1)
-  (0-based ladder position). **Side-lane fold `79a0c6ad`:** scanner
-  H3-let-write hazard (`e99c3511`) — both batch-8 hand-exclusions now
+  (0-based ladder position). **Side-lane fold `bb891d75`:** scanner
+  H3-let-write hazard (`ca3d58b9`) — both batch-8 hand-exclusions now
   auto-blocked, `playerHealthboxHpOverlayForHp` stays eligible (pool = 1);
   verified in-worktree (11/11 + live scanner run) and on the union
   (26/26 touched tests + smoke 444/444). A stray main-tree copy of the
@@ -4049,7 +4049,7 @@ Older entries: see `PROGRESS-archive.md`.
   false-positive #7. PAPERCUTS bumped ×2, ISSUES #39 scanner-gap note
   trimmed to CLOSED.
 
-- **State:** two green commits (`4570aa11` driver+test, `ecb2e5de` CLI).
+- **State:** two green commits (`f6f3cc57` driver+test, `2b966ab9` CLI).
   Full `npm test` **1,068 files / 10,124 passed / 223 skipped**; `npm run
   build`/`npm run typecheck` clean.
 - **Did:** added `SeedResult.maxCarriedWinStreak` (max over the run of
@@ -4118,10 +4118,10 @@ Older entries: see `PROGRESS-archive.md`.
      distribution-parity breadth" had been carried as unstarted since
      2026-08-14 and was reported to the user that way. All three dispatchable
      steps of `docs/chained-round-distribution-parity-plan.md` §4 had in fact
-     landed on 2026-08-16/17 — step 1 `96e1dd4b` (4-hop chaining test,
+     landed on 2026-08-16/17 — step 1 `bceaf1d1` (4-hop chaining test,
      silver Brain reached at hop 3 by real carry), step 2
      `factoryRentalGeneration.ts:229-239` (challengeNum-8 retail-OOB
-     rationale), step 3 `6366ee33` + sweeps `6d92ddf1` (`winning` policy;
+     rationale), step 3 `772ca3e0` + sweeps `7da11036` (`winning` policy;
      standing coverage `vanilla` 0:60 / `full` 0:180 / `winning` 0:180, all
      green) — with step 4 already marked SATISFIED inline. Corrected to the
      user in-session.
@@ -4161,7 +4161,7 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1352 — [main worker, 2026-08-19] **ladder Slice 2 batch 8: canonical split 123→76 under decision (a), scanner gap found (functions writing to a let-cache elsewhere)**
 
-- **Supervisor final-gates RERUN at this final tree (`82122cc3` + this
+- **Supervisor final-gates RERUN at this final tree (`4d79458a` + this
   amend), independent of the worker's own run:** full npm test **1,068
   files / 10,123 passed / 223 skipped**; `npm run build` green; soak
   vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**. Entry 1351's
@@ -4171,7 +4171,7 @@ Older entries: see `PROGRESS-archive.md`.
   (`playerHealthboxHpOverlayForHp`); the 4 canonical entry points remain
   the reserved final slice.
 
-- **State:** two green commits (`75b73fab` move+reconnect, `b1fef20c` test-pin fix). Full
+- **State:** two green commits (`a2a57e91` move+reconnect, `6ea60c67` test-pin fix). Full
   `npm test` **1,068 files / 10,123 passed / 223 skipped**; `npm run build` green;
   `npm run typecheck` clean; `tests/animation/animationBoundaryRatchet.test.ts` untouched, 3/3.
 - **Did:** eligibility scanner listed 50 function-kind ELIGIBLE symbols; excluded 2
@@ -4188,7 +4188,7 @@ Older entries: see `PROGRESS-archive.md`.
 - **Result:** eligibility scanner CANONICAL 123→**76** (matches batch size), partition
   bucket-acyclicity CLEAN; differential (`turn5-resolve-off-a turn5-confirm-off-a
   turn9-quickattack-off turn11-featherdance-off turn12-aerialace-off turn13-switchin --base
-  bfd60da8 --summary`): **1241/1241 byte-identical**; `battleScene.ts` loads standalone, no
+  6cafded4 --summary`): **1241/1241 byte-identical**; `battleScene.ts` loads standalone, no
   TDZ crash. `tests/battlesceneSplitEligibility.test.ts`'s pinned ">20 eligible" floor went
   stale (live pool dropped to 3) — lowered to ">0", not a scanner regression (full suite
   verified green both before and after).
@@ -4211,7 +4211,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1351 — [supervisor wind-down, 2026-08-19] **#97 SETTLED (resolve-off-a 60→196/196 + confirm-off-a 128→132/132 CLOSED, park/accept endgame for the last 4 frames) + seam ladder authored + Slice 1 CLOSED (turns 9/11/12 full bars) + canonical split 226→123 under newly authorized decision (a) — 10 worker rounds + 2 cap-kill salvages, all supervisor-verified**
 
-- **Final gates (at `e6b4ab1c` + this docs commit):** full npm test
+- **Final gates (at `88e4a86a` + this docs commit):** full npm test
   **1,068 files / 10,123 passed / 223 skipped**; `npm run build` green;
   soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**.
   animation-main and rust-main EMPTY at orient AND wind-down. DEFERRED.md
@@ -4245,13 +4245,13 @@ Older entries: see `PROGRESS-archive.md`.
   `tools/report/battlescene-split-eligibility.ts` (H1-eval-read/
   H2-animation-import hazard detection, Tier-1 self-check 9/9). Batch 7's
   full gates were run by the supervisor after the round-10 cap-kill:
-  differential **1241/1241 byte-identical** vs `2e984787`, full suite
-  green; salvage commit `e6b4ab1c` (scanner folds the partition's
+  differential **1241/1241 byte-identical** vs `5924f595`, full suite
+  green; salvage commit `88e4a86a` (scanner folds the partition's
   residual-unreachable block into CANONICAL — required after any batch
   whose move orphans a symbol's internal referrer).
 - **Two cap-kills, both salvaged:** r7 (turn12 fix verified+committed
-  `eb0be62b`, 35-min finisher worker added pins/docs) and r10 (scanner
-  fix `e6b4ab1c`); this entry carries round 10's unwritten docs record.
+  `b7f27fcb`, 35-min finisher worker added pins/docs) and r10 (scanner
+  fix `88e4a86a`); this entry carries round 10's unwritten docs record.
 - **Open (ordered for next session):** (a) Slice 2 batches 8+ — ~100
   eligible function-kind symbols of the 123 remain (scanner-selected; the
   4 canonical entry points are the reserved FINAL slice); (b) ladder
@@ -4267,7 +4267,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1350 — [main worker, 2026-08-19 session 11] **ladder Slice 2: canonical split batch 6 landed under decision (a), 41 symbols (`battleScene.ts` CANONICAL 214 -> 173)**
 
-- **State:** one green commit (`74f3c1c2`). `npm test` **1,067 files /
+- **State:** one green commit (`ce8e3892`). `npm test` **1,067 files /
   10,114 passed / 223 skipped** (unchanged from baseline); `npm run
   build`/`npm run typecheck` green; `tests/animation/
   animationBoundaryRatchet.test.ts` untouched, reran green 3/3.
@@ -4309,7 +4309,7 @@ Older entries: see `PROGRESS-archive.md`.
   baseline), `npm run build` green. Differential
   (`compare:differential -- turn5-resolve-off-a turn5-confirm-off-a
   turn9-quickattack-off turn11-featherdance-off turn12-aerialace-off
-  turn13-switchin --base 8033103c --summary`): **1241/1241 captures
+  turn13-switchin --base 7c6914bf --summary`): **1241/1241 captures
   byte-identical**.
 - **Next:** ladder Slice 2 continues at 173 remaining canonical-only
   symbols. Skipped this round, still open for a future batch: (1) the
@@ -4341,7 +4341,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1349 — [main worker, 2026-08-19 session 10] **ladder Slice 2: canonical split batch 5 landed, 12 symbols (`battleScene.ts` CANONICAL 226 -> 214)**
 
-- **State:** one green commit (`f15cb254`). `npm test` **1,067 files / 10,114
+- **State:** one green commit (`9ccc9cbc`). `npm test` **1,067 files / 10,114
   passed / 223 skipped** (unchanged from baseline); `npm run build`/
   `npm run typecheck` green; `tests/animation/animationBoundaryRatchet.test.ts`
   untouched (`git status` confirms, reran green: 3/3).
@@ -4371,7 +4371,7 @@ Older entries: see `PROGRESS-archive.md`.
   lines, bucket-acyclicity stays CLEAN. Differential (`compare:differential --
   turn5-resolve-off-a turn5-confirm-off-a turn9-quickattack-off
   turn11-featherdance-off turn12-aerialace-off turn13-switchin --base
-  8bee19a0 --summary`): **1241/1241 captures byte-identical**.
+  47df8061 --summary`): **1241/1241 captures byte-identical**.
 - **Next:** ladder Slice 2 continues — re-run the eligibility scan against
   the next batch of the remaining 214 canonical symbols (same transitive
   SHARED/LIVE + animation-import + module-eval-guard checks this session
@@ -4388,10 +4388,10 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1348 — [main worker, 2026-08-19 session 9] **ladder Slice 1 CLOSED: turns 9/11/12 idle-bounce residuals all full bars (finisher for 3 salvaged fixes, one docs+pins commit)**
 
-- **State:** one green commit (`7a914770`, Tier-1 pins) plus this docs
+- **State:** one green commit (`659c99bf`, Tier-1 pins) plus this docs
   commit. `npm test` **1,067 files / 10,114 passed (+30 new pin
   assertions) / 223 skipped**; `npm run build`/`npm run typecheck` green.
-  The three fixes themselves (`62a36f66`/`511c8c7f`/`eb0be62b`) were landed
+  The three fixes themselves (`4c5cd974`/`be1b29a4`/`b7f27fcb`) were landed
   and supervisor-verified by a prior, cap-killed worker; this session was
   the finisher only (pins + docs + differential), no fix logic touched.
 - **Did:** added 4 "ISSUES #39 rank-5 slice 1 (`<sha>`)" describe blocks to
@@ -4408,7 +4408,7 @@ Older entries: see `PROGRESS-archive.md`.
   **191/191**, `turn12-aerialace-off` **247/247** — all three CLOSED (full
   bars). Differential guard (`compare:differential -- turn10-aerialace-off
   turn10-rockslide-off turn10-menu-off turn9-rockslide-off
-  turn11-rockslide-off turn12-rockslide-miss-off --base c4441e8e --summary`)
+  turn11-rockslide-off turn12-rockslide-miss-off --base 59a1d2d4 --summary`)
   **1312/1312 captures byte-identical**. Spot-guards `turn5-resolve-off-a`
   196/196, `turn5-confirm-off-a` 132/132 (both #97-family, unaffected).
   Docs: dated landed-addendum in `docs/idle-bounce-phase-attribution.md`;
@@ -4427,7 +4427,7 @@ Older entries: see `PROGRESS-archive.md`.
 - **Notes:** no PAPERCUT.
 ## 1347 — [main worker, 2026-08-19 session 8] **ISSUES #97: `turn5-resolve-off-a` CLOSED 193/196 -> 196/196 — §20.1/§20.2's two decisively-pinned one-liners (two commits, all green)**
 
-- **State:** two green commits (`58eafbd8` Fix 1, `adf15be1` Fix 2) plus
+- **State:** two green commits (`57ca167d` Fix 1, `f059a0c4` Fix 2) plus
   this docs commit. `npm test` **1,067 files / 10,103 passed (+2 new pin
   blocks) / 223 skipped**; `npm run build`/`npm run typecheck` green.
 - **Did (Fix 1, §20.1):** `rockSlideOpponentHp(t + 2, ...)` at
@@ -4464,7 +4464,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1346 — [main worker, 2026-08-19 session 7] **ISSUES #97: `turn5-confirm-off-a` CLOSED 128/132 -> 132/132 — §9.5's one-liner + §9.6's derived live-bounce correction (two commits, all green)**
 
-- **State:** two green commits (`54c87516` step 1, `0c5a1e6f` step 2)
+- **State:** two green commits (`0c81b971` step 1, `7ef1c67b` step 2)
   plus this docs commit. `npm test` **1,067 files / 10,099 passed (+4
   new pin blocks) / 223 skipped**; `npm run build`/`npm run typecheck`
   green.
@@ -4510,7 +4510,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1345 — [main worker, 2026-08-18 session 6] **ISSUES #97: `drawTurn5RockSlideWindow`'s fainted-text dispatch gate + glyph reveal (§19.1's named next probe) LANDED — `resolve-off-a` 175/196 -> 193/196 (one commit, green)**
 
-- **State:** one green commit (`98fe3385` fix + 2 Tier-1 pins) plus this
+- **State:** one green commit (`6c890c97` fix + 2 Tier-1 pins) plus this
   docs commit. `npm test` **1,067 files / 10,096 passed (+3) / 223
   skipped**; `npm run build`/`npm run typecheck` green.
 - **Did:** per §19.1's own named next probe, a dense oracle pixel sweep
@@ -4557,8 +4557,8 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1344 — [main worker, 2026-08-18 session 5] **ISSUES #97: `drawTurn5RockSlideAttack`'s three §17/§5-named mechanisms LANDED — `resolve-off-a` 60/196 -> 175/196 (three commits, all green)**
 
-- **State:** three green commits (`9ec92966` phantom rock-prop drop,
-  `1e8096fc` sink+healthbox-vanish 2-tick fix, plus this docs commit).
+- **State:** three green commits (`a6b3a7e3` phantom rock-prop drop,
+  `71666b6f` sink+healthbox-vanish 2-tick fix, plus this docs commit).
   `npm test` **1,067 files / 10,093 passed (+5 new pin blocks) / 223
   skipped**; `npm run build`/`npm run typecheck` green.
 - **Did (step 1, §17.4):** dropped `drawTurn5RockSlideAttack`'s
@@ -4665,8 +4665,8 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1342 — [supervisor wind-down, 2026-08-18 session 2] **#97 near-CLOSED in one instrument→fix assembly line (10 fix + 8 instrument worker rounds): `resolve-off-b` 196/196 + both turn6 windows CLOSED, every trace verified after every round, zero guard decreases all session; one supervisor overturn (ON/OFF oracle-profile proof) unlocked turn6**
 
-- **Final gates (run TWICE — at `758107d9` after the last pre-wind-down
-  engine fold, and RERUN at the final tree `cc51b13e` after the bonus
+- **Final gates (run TWICE — at `ade5afbd` after the last pre-wind-down
+  engine fold, and RERUN at the final tree `c66c8aff` after the bonus
   round's engine fix below):** full npm test **1,067 files / 10,088
   passed / 223 skipped** (final rerun; 10,086 at the first pass, +2 =
   the bonus round's pin); `npm run build` green both times; soak
@@ -4685,7 +4685,7 @@ Older entries: see `PROGRESS-archive.md`.
   `turn5-action-off` 32/32, turn4 pair 256/256, `turn13-switchin`
   242/242) never moved.
 - **Supervisor decision (evidence-backed, recorded in
-  `docs/turn6-reopen-endstate-spec.md` §6 + commit `cb7cbee3`):**
+  `docs/turn6-reopen-endstate-spec.md` §6 + commit `08757434`):**
   overturned that spec's rejection of the turn6 [7318,1350] fix. Its
   guard trace `turn6-menu.json` is a legacy Battle Scene ON trace with
   byte-identical inputs to `turn6-reopen-off` (OFF); the two ORACLES'
@@ -4716,7 +4716,7 @@ Older entries: see `PROGRESS-archive.md`.
   lane's rung-4 back dispatcher. (d) #73/#55 unchanged. No deferred
   questions; no blockers.
 - **Post-wind-down bonus round [main worker, 2026-08-18 session 3,
-  commit `e07e1813`]:** landed §15.3's fix
+  commit `9eda4b5e`]:** landed §15.3's fix
   (`docs/turn5-resolve-ab-pools-diagnosis.md`, corrected-bootstrap RAM
   proof that `REG_BG3VOFS` never leaves 0 anywhere in turn 5's
   6100-6376 window under Battle Scene Off) — `drawTurn5RockSlideAttack`
@@ -4753,11 +4753,11 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1341 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-d`'s three §9-named fix shapes (star suppression + text-clear/menu-redraw retiming) LANDED — 159/196→194/196, exactly matching §9.5's own prediction**
 
-- **State:** one green commit (`7448000c` fix+Tier-1 pins) plus this docs
+- **State:** one green commit (`9583cf9a` fix+Tier-1 pins) plus this docs
   commit. `npm test` **1,067 files / 10,086 passed (+7, six new pin
   blocks + `pressTick` cleanup) / 223 skipped**; `npm run build`/
   `npm run typecheck` green.
-- **Did:** read §9 fully (committed at `1ff264ee`, the side worker's own
+- **Did:** read §9 fully (committed at `9501d96d`, the side worker's own
   two-instrument follow-up) and landed all three of its named fix shapes
   together (they share one call chain and interact, so landing separately
   would re-derive the same evidence twice): (1) `suppressSitrusStars`,
@@ -4819,7 +4819,7 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1340 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-b`'s fainted-cursor dismiss+freeze LANDED per `docs/turn5-resolve-ab-pools-diagnosis.md` §11.1 — 88/196→196/196 (CLOSED); `-a` 56/196→58/196; `-c` unchanged 195/196**
 
-- **State:** one green commit (`f4b43eec` fix+Tier-1 pins) plus this docs
+- **State:** one green commit (`c80e9a32` fix+Tier-1 pins) plus this docs
   commit. `npm test` **1,067 files / 10,079 passed (+4, updated 2 stale
   pins + 2 new describe blocks) / 223 skipped**; `npm run build`/
   `npm run typecheck` green.
@@ -4888,12 +4888,12 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1339 — [main worker, 2026-08-18] **ISSUES #97 remainder: `confirm-off-a`/`-b`'s squish-drop + drain-delay mechanisms LANDED, plus `resolve-off-d`'s Onix Sitrus HP display-climb LANDED — 60/132→128/132, 37/132→131/132, 142/196→159/196**
 
-- **State:** two green commits (`02b82685` primary + `37a901db`
+- **State:** two green commits (`9f74675d` primary + `3be01783`
   secondary, each fix+Tier-1 pins) plus this docs commit. `npm test`
   **1,067 files / 10,075 passed (+7 total, 2 new describe blocks + 1
   rewritten) / 223 skipped**; `npm run build`/`npm run typecheck` green.
 - **Did:** read `docs/turn5-confirm-pools-diagnosis.md` (committed
-  `6366f91a`) and `docs/turn5-confirmb-resolved-residuals.md` §8 in full.
+  `5b4a7315`) and `docs/turn5-confirmb-resolved-residuals.md` §8 in full.
   **Primary, both classes landed byte-for-byte per the doc's own diffs:**
   `drawTurn5EndeavorText` was the last remaining caller of
   `drawEndeavorSquish` (turn 2/3 already dropped it, ISSUES #39, zero RAM
@@ -4953,11 +4953,11 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1338 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-a`'s Class A rock-slide hit-flash profile LANDED — 44/196→56/196; Class C reverted (hard-guard regression); Class B unresolved (new residual found)**
 
-- **State:** one green commit (`8372b6ab` fix+Tier-1 pins) plus this docs
+- **State:** one green commit (`ad45d2fb` fix+Tier-1 pins) plus this docs
   commit. `npm test` **1,067 files / 10,068 passed (+3, one new pin
   block) / 223 skipped**; `npm run build`/`npm run typecheck` green.
 - **Did:** read `docs/turn5-resolve-ab-pools-diagnosis.md` (committed at
-  `89d3f065`) in full and worked its three named classes in order.
+  `1d1b709e`) in full and worked its three named classes in order.
   **Class A landed**: `drawTurn5RockSlideAttack` was the one sibling
   turn (1/3/4/9/10/11 already have their own scoped profile) still
   calling the shared hit-reaction helpers with no override — added
@@ -5039,7 +5039,7 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1337 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s fourth mechanism and `resolve-off-d`'s spurious ONIX rotation LANDED — 173/196→195/196 and 66/196→142/196**
 
-- **State:** one green commit (`8949e4c5` fix+Tier-1 pins) plus this docs
+- **State:** one green commit (`d53e1f57` fix+Tier-1 pins) plus this docs
   commit. `npm test` **1,067 files / 10,065 passed (+7, three new pin
   blocks) / 223 skipped**; `npm run build`/`npm run typecheck` green.
 - **Did:** read `docs/turn5-resolve-offc-tail-diagnosis.md` §13 (13a-13j)
@@ -5101,7 +5101,7 @@ Older entries: see `PROGRESS-archive.md`.
 - **State:** one green commit (fix+Tier-1 pin) plus this docs commit.
   `npm test` **1,067 files / 10,058 passed (+2, one new Tier-1 describe
   block) / 223 skipped**; `npm run build`/`npm run typecheck` green.
-- **Did:** read §11 fully (committed today at `b3497e0f`) and landed its
+- **Did:** read §11 fully (committed today at `3111caf4`) and landed its
   named fix: dropped `drawTurn5PidgeottoMaterialize`'s `TURN5_STRETCH_
   TICK` branch split (`battleScene.ts`) — the tinted-blend formula now
   runs unconditionally for the whole materialize window instead of
@@ -5155,11 +5155,11 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1335 — [main worker, 2026-08-18] **ISSUES #97 remainder: `confirm-off-b`'s rockslide-text-delay fix and `resolve-off-d`'s two Sitrus epoch fixes LANDED per `docs/turn5-confirmb-resolved-residuals.md` — 0/132→37/132 and 0/196→50/196**
 
-- **State:** one green commit (`90edc2a6` fix+Tier-1 pins) plus this docs
+- **State:** one green commit (`c87c99dd` fix+Tier-1 pins) plus this docs
   commit. `npm test` **1,067 files / 10,056 passed (+7, new pins for both
   fix shapes) / 223 skipped**; `npm run build`/`npm run typecheck` green.
 - **Did:** read `docs/turn5-confirmb-resolved-residuals.md` (committed at
-  `257fa559`) in full and landed both fix-ready mechanisms it pinned: (A)
+  `a3d05141`) in full and landed both fix-ready mechanisms it pinned: (A)
   `drawTurn5RockSlideWindow`'s attack/text branch was calling
   `rockSlideTextVisibleChars(t, pressTick)` with no `delay` argument,
   silently defaulting to the shared 393-tick delay instead of this
@@ -5213,8 +5213,8 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1334 — [main worker, 2026-08-18] **ISSUES #97 remainder: `resolve-off-c`'s two named tail mechanisms FIXED per `docs/turn5-resolve-offc-tail-diagnosis.md` — count holds at 149/196, blocked by a third, newly-confirmed, out-of-scope mechanism**
 
-- **State:** three green commits (`6b9f1a12` fix+Tier-1 pins,
-  `18d8d23c` probe re-point) plus this docs commit. `npm test` **1,067
+- **State:** three green commits (`b18a5bd7` fix+Tier-1 pins,
+  `c81459ef` probe re-point) plus this docs commit. `npm test` **1,067
   files / 10,049 passed (+5, two new pin blocks) / 223 skipped**; `npm
   run build`/`npm run typecheck` green throughout.
 - **Did:** landed both fixes the fresh diagnosis doc specified: (i)
@@ -5274,7 +5274,7 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1333 — [main worker, 2026-08-18] **ISSUES #97 CLOSED: turn6 [7318,7347] bounce correction lands under a supervisor overturn of `turn6-reopen-endstate-spec.md`'s §2/§3 rejection — `turn6-reopen-off` 22/46→46/46, `turn6-menu-off` 23/47→47/47, both FULL**
 
-- **State:** one green commit (`cb7cbee3` fix+Tier-1 pin) plus this docs
+- **State:** one green commit (`08757434` fix+Tier-1 pin) plus this docs
   commit. `npm test` **1,067 files / 10,045 passed (+1, the new
   [7318,7350] composed-model pin) / 223 skipped**; `npm run build` green.
 - **Did:** per a supervisor decision overturning `docs/turn6-reopen-
@@ -5330,7 +5330,7 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1332 — [main worker, 2026-08-18] **ISSUES #97 §17 item 5 landed: HP-overlay gate's turn4 arm closes turn5-confirm-off-a's frozen-HP frames (15→60/132), zero decreases across the guard family**
 
-- **State:** two green commits (`e7657a86` fix+Tier-1 pin, `0ac71a47`
+- **State:** two green commits (`501c6c14` fix+Tier-1 pin, `60c3d32d`
   docs) plus this docs commit. `npm test` **1,067 files / 10,044 passed
   (+1, the new turn-4-arm pin) / 223 skipped**; `npm run build`/
   `npm run typecheck` green.
@@ -5383,7 +5383,7 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1331 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement COMPLETE: Rungs 7-8 land the final 25 sites, closes 119/119 in-scope `battleScene.ts` call sites, zero FINDINGs across all 9 rungs**
 
-- **State:** two green commits (`a57d281b` Rung 7, `f70b6e67` Rung 8) plus
+- **State:** two green commits (`44b317e2` Rung 7, `124d2b83` Rung 8) plus
   this docs commit. `npm test` **1,067 files / 10,043 passed / 223
   skipped** (unchanged — neither rung needed a new pin, unlike Rung 5's
   HARDEN) after each commit; `npm run build`/`npm run typecheck` green
@@ -5448,15 +5448,15 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1330 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement Rungs 5-6 landed (30 more sites, 94/119 in-scope), corrects prior ledger's site-count arithmetic: HARDEN's zero-coverage gap pinned first, zero FINDINGs, zero regressions**
 
-- **State:** three green commits (`606ca03d` HARDEN pin test, `efa62046`
-  Rung 5, `e7f31260` Rung 6). `src/engine/battleScene.ts` only edited in
+- **State:** three green commits (`6ec45845` HARDEN pin test, `96c2a248`
+  Rung 5, `9c4480bf` Rung 6). `src/engine/battleScene.ts` only edited in
   the two rung commits; `tests/animation/harden.test.ts` new. `npm test`
   **1,067 files / 10,043 passed (+1 file/+3 tests, exactly the HARDEN
   pin) / 223 skipped** after every commit; `npm run build`/
   `npm run typecheck` green throughout.
 - **Did:** followed `docs/sendout-1e-retirement-design.md` §5 Rungs 5-6
   exactly, re-grepping every move's current line number first (doc's own
-  drift warning — lines had shifted from the doc's `8863ecbc` cites) and
+  drift warning — lines had shifted from the doc's `eba3e73f` cites) and
   confirming every per-move Tier-1 test filename with `find` before
   scoping. **Rung 5 caveat honored**: HARDEN (`renderSceneOnMovePresentation`
   `:34080-34185`) had zero Tier-1 coverage — no `harden*.test.ts`, no test
@@ -5483,7 +5483,7 @@ Older entries: see `PROGRESS-archive.md`.
   proved.
 - **Result — corrects a site-count error in entries 1326/1329:** those
   entries logged rungs 0-4 as landing "94/121" sites; this session's
-  fresh `grep -c` at the pre-session sha (`77ce70ea`) shows that was
+  fresh `grep -c` at the pre-session sha (`5a73bfe5`) shows that was
   wrong. Ground truth (self-consistent at every commit, verified against
   the actual file, not against any prior doc/ledger claim):
   `speciesFrontIdleRestOffset(` raw-count + `speciesFrontIdleRestOffsetOrZero(`
@@ -5511,7 +5511,7 @@ Older entries: see `PROGRESS-archive.md`.
 ## 1329 — [supervisor wind-down, 2026-08-18, amended after two bonus rounds] **18 worker steps, two lanes: #96 CLOSED (swap family 19/19 exact), #97 mechanism RESOLVED via an 8-probe instrument chain (turn5-action-off CLOSED 32/32; five root causes landed), #71 §1e ladder COMPLETE (119/119 in-scope sites) — all final gates green**
 
 - **Final gates (run independently AFTER the last merge, twice — at
-  `37b2818d` and again at the final tree `d7bc0fae`):** full npm
+  `ff57af3b` and again at the final tree `14de3f49`):** full npm
   **1,067 files / 10,043 passed / 223 skipped**; `npm run build` green;
   soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**.
   Fold status: animation-main and rust-main both EMPTY at orient AND at
@@ -5554,7 +5554,7 @@ Older entries: see `PROGRESS-archive.md`.
   (hand-fit swap-over) remains, blocked on the animation lane's rung-4
   back dispatcher.
 - **Ops notes:** freshness-check false positive #5 at orient (kept
-  services; `3e29880b` proves schema currency) — PAPERCUTS bumped. NEW
+  services; `4dac4a35` proves schema currency) — PAPERCUTS bumped. NEW
   papercut: side-worktree ROOT has no package.json, `npm run` silently
   escapes to the main checkout (~15 min lost once). Six-deep stacked
   side-worktree instrument chain worked cleanly; merged as two chain
@@ -5624,7 +5624,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1327 — [main worker, 2026-08-18] **ISSUES #97-B turn5-resolve anchor cluster: §17 items 1-3 landed (2 RAM sweeps + 3 scoped anchor fixes) — resolve-off-a 7→25/196, resolve-off-b 71→88/196, zero decreases**
 
-- **State:** one green commit (`4c49776d`, src+test+probe-script fix) plus
+- **State:** one green commit (`41b75607`, src+test+probe-script fix) plus
   this docs commit. `npm test` **1,066 files / 10,040 passed (+2, two
   re-pinned tests) / 223 skipped**, `npm run build` green.
 - **Did:** followed `docs/turn5-family-class3-diagnosis.md` §17's ordered
@@ -5677,7 +5677,7 @@ Older entries: see `PROGRESS-archive.md`.
 ## 1326 — [main worker, 2026-08-18] **ISSUES #71 §1e retirement Rungs 2-4 landed: 50 more sites converted (94 of 121 total), zero FINDINGs, zero regressions**
 
 - **State:** three green commits, one per rung, each independently
-  verified (`d02ed8d9` Rung 2, `c9ce2d14` Rung 3, `0bd6b34e` Rung 4 —
+  verified (`144feb09` Rung 2, `336ef6d0` Rung 3, `455dade7` Rung 4 —
   the stretch goal). `src/engine/battleScene.ts` only edited each time.
   `npm test` **1,066 files / 10,040 passed / 223 skipped** after every
   commit — byte-for-byte identical to session start, matching entry
@@ -5741,8 +5741,8 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1325 — [main worker, 2026-08-18] **ISSUES #97-B closed: PP-digit confound root-caused and fixed, rung 3 reapplied — turn5-action-off 1/32 → 26/32, zero regressions**
 
-- **State:** three green commits this session (`1a70ec69` PP fix,
-  `5c21df81` rung-3 reapply, plus this docs commit). `npm test` **1,066
+- **State:** three green commits this session (`bd9e6425` PP fix,
+  `4a555d90` rung-3 reapply, plus this docs commit). `npm test` **1,066
   files / 10,040 passed (+2 vs 1323's 10,038, both new Tier-1 pins) / 223
   skipped**, `npm run build`/`npm run typecheck` green after each commit.
 - **Did — Goal A (PP confound):** established ground truth with two
@@ -5929,11 +5929,11 @@ Older entries: see `PROGRESS-archive.md`.
 
 - **State:** `src/animation/speciesIdleAnim.ts`, `src/engine/battleScene.ts`,
   `tests/animation/speciesIdleAnim.test.ts` edited across two commits
-  (`7a08eede` Rung 0, `a6f80a1b` Rung 1). `npm test` **1,066 files /
+  (`a3bf9051` Rung 0, `2a334729` Rung 1). `npm test` **1,066 files /
   10,037 passed (+4 vs 1320's 10,033, all from Rung 0's new unit tests) /
   223 skipped**, `npm run build` and `npm run typecheck` green after each
   commit. `compare:differential -- battle-command-generated-off.json
-  --base 7a08eede --summary` (Rung 1 vs its parent): **128/128
+  --base a3bf9051 --summary` (Rung 1 vs its parent): **128/128
   byte-identical**, confirming the OFF-profile route is untouched.
 - **Did:** followed `docs/sendout-1e-retirement-design.md` §5 exactly.
   **Rung 0:** added `speciesFrontIdleRestOffsetOrZero` next to
@@ -6070,7 +6070,7 @@ Older entries: see `PROGRESS-archive.md`.
 ## 1319 — [main worker, 2026-08-17] **ISSUES #96 remainder fixed: enemy-picker ball-roll sliver — battle1-swap family now 19/19 EXACT, ISSUES #96 fully closed**
 
 - **State:** `src/engine/factorySwapPresentation.ts` +
-  `tests/factorySwapPresentation.test.ts` edited (`68235a08`). `npm test`
+  `tests/factorySwapPresentation.test.ts` edited (`b89471a5`). `npm test`
   **1,066 files / 10,033 passed (+2) / 223 skipped**, `npm run build`
   green, `tests/factorySwapPresentation.test.ts` + `tests/ballAnim.test.ts`
   green in isolation too.
@@ -6123,7 +6123,7 @@ Older entries: see `PROGRESS-archive.md`.
 ## 1318 — [main worker, 2026-08-17] **ISSUES #96(a) fixed: swap-screen quit-return ball-slot-0 display stall — both player-quit traces 61/67 → 67/67, zero regressions across the 19-trace battle1-swap family**
 
 - **State:** `src/engine/factorySwapPresentation.ts` +
-  `tests/factorySwapPresentation.test.ts` edited (`bcab2e9e`). `npm test`
+  `tests/factorySwapPresentation.test.ts` edited (`79a17eeb`). `npm test`
   **1,066 files / 10,031 passed (+1) / 223 skipped**, `npm run build`
   green, `tests/ballAnim.test.ts` (draft-screen checkpoints) green.
 - **Did:** the diagnosed fix shape from 1317 (thread `i === 0` + a
@@ -6163,7 +6163,7 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1317 — [supervisor wind-down, 2026-08-17] **13 worker steps + 4 probes/audits, two lanes: EVERY open walk-up window closed to its full bar (6 windows to exact), #98 found→designed→CLOSED same-session, fixture-estate audit filed+fixed #96/#97 — all final gates green**
 
-- **Final gates (tree `829b299b`, run independently AFTER the last merge):**
+- **Final gates (tree `bee1142d`, run independently AFTER the last merge):**
   full npm **1,066 files / 10,030 passed / 223 skipped**; `npm run build`
   green; soak vanilla 0:20 **20/20 OK**; soak full 0:60 **60/60 OK**
   (30+30). Fold status: animation-main and rust-main both EMPTY at orient
@@ -6194,7 +6194,7 @@ Older entries: see `PROGRESS-archive.md`.
   cursor untouched) — both windows closed, 2 latent S1 renderer bugs
   found at first pixel contact and fixed.
 - **Fixture-estate work:** exhaustive 201-trace sweep
-  (`docs/fixture-sweep-2026-08-17.md`) + b229076a baseline check proved
+  (`docs/fixture-sweep-2026-08-17.md`) + 38f2cbe0 baseline check proved
   ALL 26 deviations pre-existing (today: zero regressions). #96 filed →
   appRoute fix landed same-session (14/17 restored exactly; 3-trace
   remainder trimmed into #96). #97 filed → diagnosed: loss-terminal bar
@@ -6338,7 +6338,7 @@ Older entries: see `PROGRESS-archive.md`.
   real at the time (not fabricated; too well cross-checked to doubt), but
   is not reproducible today, most likely because the 8014 oracle process
   now running has only been up since ~2026-08-15 (a restart mentioned in
-  an unrelated oracle-side commit `3e29880b`'s message), replacing
+  an unrelated oracle-side commit `4dac4a35`'s message), replacing
   whatever instance served the original verification — though the actual
   code diff in that restart's commits only touches the separate
   battle-lab endpoint, not plain `/v1/run`, so the mechanism of any shift
@@ -6378,7 +6378,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ---
 ---
-## 1313 — [main worker, 2026-08-17] **#97 split and closed: loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended `b7ae30de` continuous-play chaining, not a bug); turn5/turn6 bounce-tick drift mechanism identified, bisect recipe written (needs `c5563c72..HEAD`, 2697 commits)**
+## 1313 — [main worker, 2026-08-17] **#97 split and closed: loss-terminal-decline-continuation-off's 155/155 bar is OBSOLETE (intended `da5bc8b7` continuous-play chaining, not a bug); turn5/turn6 bounce-tick drift mechanism identified, bisect recipe written (needs `c5563c72..HEAD`, 2697 commits)**
 
 - **State:** Docs-only, no `src/` edit (one scratch `console.error` added
   and removed during diagnosis; `git diff src/` is empty). `npm test`
@@ -6392,9 +6392,9 @@ Older entries: see `PROGRESS-archive.md`.
   the app jumps straight to a fresh rental-draft screen at frame 4989.
   Root cause: `core.ts:821-882`'s "continuous-play chaining" branch
   (`state.appRoute === "generated-orchestrator" && recordChoice
-  newly "no"`), landed deliberately in `b7ae30de` (2026-08-14,
+  newly "no"`), landed deliberately in `da5bc8b7` (2026-08-14,
   supervisor-approved per `ROADMAP.md`'s 2026-08-14 planning-session
-  decision) — an ancestor of the `b229076a` baseline. Verdict: the old
+  decision) — an ancestor of the `38f2cbe0` baseline. Verdict: the old
   bar is obsolete, not regressed; the farewell/Lobby pixels are
   unreachable by design under this route. Closed as documented (not
   fixed — fixing would mean reverting a deliberate feature); honest
@@ -6413,7 +6413,7 @@ Older entries: see `PROGRESS-archive.md`.
   heavily-tuned formula surface + 2697-commit-wide unknown window is too
   large/risky for this session's remaining budget). Full mechanism,
   ruled-out leads, and an executable `git bisect run` recipe (isolated
-  worktree, known-good `c5563c72`, known-bad `b229076a`) are written into
+  worktree, known-good `c5563c72`, known-bad `38f2cbe0`) are written into
   `ISSUES.md #97`.
 - **Result:** `ISSUES.md #97` rewritten with both findings (old leads that
   died are trimmed). Guards reverified fresh: `turn5-reset-off` 256/256,
@@ -6835,16 +6835,16 @@ Older entries: see `PROGRESS-archive.md`.
 ---
 ## 1304 — [supervisor fold, 2026-08-17] **Rounds 1-2: gold-pages 175/177 + callscene-02 CLOSED 199/199 + soak 120:180 clean + silver box-2 fixture banked — later-`\p` one-tick model is now a two-window converged mechanism**
 
-- **State:** master `16cc1a14`, tree clean. Union after both folds: smoke
+- **State:** master `5e074117`, tree clean. Union after both folds: smoke
   375/375, callscene-02 **199/199**, callscene-01 131/131, swapask-no
   194/194, gold-pages 175/177, silver box-2 63/100 (expected, open
   mechanism below) — all supervisor-rerun live. Both workers ran full
   `npm test` (1065 files / 10010 passed / 223 skipped) + build +
   typecheck green on their own commits.
-- **Folds this session:** side `16aaa7fa` (soak part 5: full+winning
+- **Folds this session:** side `44a5f161` (soak part 5: full+winning
   120:180 both 60/60 OK, zero signatures; vanilla 20:60 + longer-chain
   probe not attempted, ready-to-run commands in
-  `docs/soak-sweep-2026-08-17-part5.md`) and side `5243b45a` (dense
+  `docs/soak-sweep-2026-08-17-part5.md`) and side `cb6c001c` (dense
   silver box-2 fixture 63/100 + stage/registration; cursor Fix B
   confirmed tier-general — all 54 non-blip hold frames byte-exact).
   animation-main/rust-main: nothing to fold at orient (both empty).
@@ -6978,7 +6978,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1301 — [supervisor wind-down, 2026-08-16] **Nine worker steps + one salvage, two lanes: every open walk-up window advanced (two to exact/near-exact), two latent engine crashes found+fixed, soak coverage 0:120 green — all final gates green**
 
-- **Final gates (tree `f63ff8d3`, the animation Soft Boiled fold —
+- **Final gates (tree `e8489c5c`, the animation Soft Boiled fold —
   run AFTER every merge):** full npm **1,065 files / 10,010 passed /
   223 skipped**; build green; soak vanilla 0:20 **20/20 OK**; soak
   full 0:60 **60/60 OK** (30+30 chunks). Fold status: animation-main
@@ -7013,7 +7013,7 @@ Older entries: see `PROGRESS-archive.md`.
   entries. Soak coverage: winning 0:120 + full 0:120 + vanilla 0:20
   all green post-fix (parts 1-4 docs).
 - **Ops notes:** gold speech worker cap-killed at final gates —
-  salvaged after independent verification (commit `138b779d`), ~20 min
+  salvaged after independent verification (commit `75966708`), ~20 min
   recovery per the standing recipe. Side-worktree absolute-path
   Edit/Write trap recurred with the mechanism identified — new
   PAPERCUTS entry (2 hits). Freshness-check false positive hit 3.
@@ -7195,14 +7195,14 @@ Older entries: see `PROGRESS-archive.md`.
   **#94** (slice boundary not a player command request,
   orchestrator:1830) and **#95** (move/hit provenance ordering,
   battleResolutionPresentation.ts:3190) with the discriminator
-  evidence; part-3 report merged (`414a040c`). An opus fix worker is
+  evidence; part-3 report merged (`8ec197c4`). An opus fix worker is
   dispatched on both (single-root-cause hypothesis first); #93 itself
   stays — its pin + seed 109 remain the guard.
 - **Gold speech ((b), cap-killed at final gates):** worker exit 143
   with 3 uncommitted files; supervisor salvaged after independent
   verification (gold windows 58/256 · **53/177** (was 20/177) ·
   58/126; entrance-03 242/256 + cry-held 74/74 rerun clean; typecheck
-  + full npm 1,056/9,982/223 + build green) — committed `138b779d`.
+  + full npm 1,056/9,982/223 + build green) — committed `75966708`.
   Transcript shows an open-window attempt reaching 91/256 that
   regressed entrance-03 and was correctly reverted: the park-phase
   lever as tried TRADES against entrance-03 — next attempt needs a
@@ -7217,7 +7217,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1296 — [supervisor, 2026-08-16] **B1c folded: entrance-03 162→242/256 (render clock, not OAM latch); #93 fix verified; side absolute-path trap recurred — papercut filed**
 
-- **State:** B1c branch merged (worker `0efe8e15`); union checks green
+- **State:** B1c branch merged (worker `2ebf5e3b`); union checks green
   (smoke 375/375, orchestrator+soak pins 65/65, new B1c pin 15/15,
   build; entrance-03 re-confirmed **242/256** on the merged tree).
   Mechanism: `brainMoving`'s render clock ran ONE TICK AHEAD of
@@ -7321,7 +7321,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1294 — [supervisor, 2026-08-16] **Side lane folded: winning-policy soak swept 0:120, seed-49 HANG closed by per-policy frame budget, seed-109 engine crash filed as #93**
 
-- **State:** Both side branches merged (`96d51c3f`, `84170428`); union
+- **State:** Both side branches merged (`d42531e2`, `be9080ce`); union
   smoke 375/375 + soak pin 14/14 + build green. Sweep results: 0:60
   **59/60** (1 HANG), 60:100 **40/40**, 100:120 **19/20** (1 CRASH).
   The HANG (seed 49) was a budget artifact — completes `roundLost` at
@@ -7355,7 +7355,7 @@ Older entries: see `PROGRESS-archive.md`.
   walk-away is pixel-exact with 8-then-7, walk-back stays pixel-exact with
   the literal 7-then-8. Made the lead leg a per-direction parameter.
   callscene-01 dense compare **119/131 → 131/131** (was 89/131 pre-1292).
-  Commit `7214005d`.
+  Commit `7b7997d9`.
 - **Did (Goal 2, page-turn press re-derivation — ADVANCED, not exact):**
   found the callscene-02 residual was not purely a fixture press-frame
   issue as 1292 concluded — a second, independent render bug:
@@ -7405,7 +7405,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 - **State:** Landed and green. `npm test` **1,056 files / 9,978 passed /
   223 skipped**, `npm run build` + `npm run typecheck` green. Committed at
-  `56b18bac` (code) + this docs commit.
+  `6cc897cb` (code) + this docs commit.
 - **Did (the mechanism, per the step's prerequisite):** `core.tick` advances
   the postwin state *first* and gates input on the advanced state, so a
   ready boundary that crosses a fixture's fixed 2-frame press edge swallows
@@ -7442,9 +7442,9 @@ Older entries: see `PROGRESS-archive.md`.
 
 ---
 
-## 1291 — [supervisor orient, 2026-08-16] **Fold: animation-main → master (ff `f44eabff`) — Heal Bell + Fire Blast exact, coverage 194/276; union gates green**
+## 1291 — [supervisor orient, 2026-08-16] **Fold: animation-main → master (ff `2f3e7640`) — Heal Bell + Fire Blast exact, coverage 194/276; union gates green**
 
-- **State:** master fast-forwarded to animation-main's head `f44eabff`
+- **State:** master fast-forwarded to animation-main's head `2f3e7640`
   (29 lane commits: Heal Bell 192→193 and Fire Blast 193→194/276
   Level-50 exact, unsupported 84→82; the animation supervisor had
   already merged master in at its own 11:24 session start, so the fold
@@ -7452,7 +7452,7 @@ Older entries: see `PROGRESS-archive.md`.
   unfolded commits at wind-down). Union gates: full npm **1,056 files /
   9,978 passed / 223 skipped**; build green. rust-main: nothing to
   fold. DEFERRED.md empty. Oracle freshness FAIL re-disproved (live
-  8014 serves `factoryBrainWalkup` — the 3e29880b schema; PAPERCUTS
+  8014 serves `factoryBrainWalkup` — the 4dac4a35 schema; PAPERCUTS
   freshness entry bumped to hit 3; services NOT restarted, 8012 carries
   the live animation lane).
 - **Next:** the 1288 queue minus (d): dispatching **(a) call-scene
@@ -7473,10 +7473,10 @@ Older entries: see `PROGRESS-archive.md`.
   frames — 1289 records the pixel measurements; the fix needs core.ts's
   per-tick accept semantics, not more constant guesses. Ground-truth
   doc box-1 hold row corrected (typewriter completes at 894, not 850).
-- **Final gates (tree `ccd92136`, re-run AFTER M9 — supersede 1288's):**
+- **Final gates (tree `e79a45bd`, re-run AFTER M9 — supersede 1288's):**
   full npm **1,045 files / 9,950 passed / 223 skipped**; build green;
   soak vanilla **20/20 OK**; soak full 0:60 **60/60 OK**. Differential
-  PASS 563/563 (base `56ef0edf`); regression bars re-verified
+  PASS 563/563 (base `1696b732`); regression bars re-verified
   (askready-menu 21/21, swapask-no 194/194, entrance-02 256/256,
   silver reveal 690/701).
 - **Next:** unchanged from 1288's ordered list, minus (d) which M9
@@ -7492,8 +7492,8 @@ Older entries: see `PROGRESS-archive.md`.
 
 - **State:** Landed and green. `npm test` **1045 files / 9950 passed /
   223 skipped**, `npm run build` + `npm run typecheck` green.
-  Differential PASS (563/563 byte-identical, `--base 56ef0edf`).
-  Committed at `6ab494fc`. **Note for the supervisor:** the wind-down
+  Differential PASS (563/563 byte-identical, `--base 1696b732`).
+  Committed at `35214a6d`. **Note for the supervisor:** the wind-down
   gates in 1288 predate this step — re-run them at the next fold.
 - **Did (goal 3, RECORD/RETIRE traces):** added
   `tools/compare/traces/factory-brain-silver-walkup-askready-menu-
@@ -7563,7 +7563,7 @@ Older entries: see `PROGRESS-archive.md`.
 ## 1288 — [supervisor wind-down, 2026-08-16] **Walk-up step A BUILT + calibrated end-to-end, gold post-fix program executed (reveal 0/701→690/701, tier-aware 4-page speech), B1c cadence largely closed, #91 found+fixed — 12 worker steps, 2 lanes, all gates green**
 
 - **State:** The 1279 queue is fully advanced on the fixed oracle
-  (harness `3e29880b`, walkup staging + gold symbol flag — services
+  (harness `4dac4a35`, walkup staging + gold symbol flag — services
   verified current via `/v1/info` capability probe; the freshness
   check's FAIL was a timestamp false positive, PAPERCUTS hit 2).
   DEFERRED.md still EMPTY. Orient fold: animation-main (Pain Split
@@ -7607,11 +7607,11 @@ Older entries: see `PROGRESS-archive.md`.
   byte-identical (existing pin unchanged), staged/soak config fixed,
   new Tier-1 pin reproduces the pre-fix throw. ISSUES #91 removed.
   (Natural play cannot hit it: streak at round start ≡ 0 mod 7.)
-- **Also:** parity-plan step 4 retired (satisfied by `3e29880b` —
+- **Also:** parity-plan step 4 retired (satisfied by `4dac4a35` —
   recorded in the plan doc); ROADMAP walk-up annotation updated;
   PAPERCUTS +2 (walkup input-swallow trap; freshness-check hit 2 with
   the `/v1/info` capability-probe workaround).
-- **Wind-down gates (final tree `c2c5b898`+ledger):** full npm
+- **Wind-down gates (final tree `a8cc9a07`+ledger):** full npm
   **1,045 files / 9,950 passed / 223 skipped**; build green; soak vanilla **20/20**; soak full 0:60
   **60/60**. (Cargo/wasm gates ran at the orient fold; no rust
   changes since — rust-main fully folded.)
@@ -7700,7 +7700,7 @@ Older entries: see `PROGRESS-archive.md`.
   **done with honestly-characterized bounded residuals**, not full
   closure — see Acceptance numbers. Full `npm test` **1044 files / 9949
   passed / 223 skipped**, `npm run build` green. Differential PASS
-  (563/563 byte-identical, `--base 2d73d3c8`, the commit before this
+  (563/563 byte-identical, `--base 2a0401ec`, the commit before this
   step's first change).
 - **Did:** `battleRoom.ts`: parsed `goldFirstEncounter`/`goldRepeat` from
   the walkup JSON into `GOLD_*_SPEECH_BOXES` (4 pages, no `\l` scroll →
@@ -7778,8 +7778,8 @@ Older entries: see `PROGRESS-archive.md`.
   walk-back (box 2→3, `Movement_AttendantReturnToPlayer`) instead of an
   instant box-to-box cut — the residual PROGRESS 1283 left open. Full
   `npm test` **1044 files / 9940 passed / 223 skipped**, `npm run build`
-  green. Differential PASS (563/563 byte-identical, `--base 704e685a`,
-  the commit before this step). Committed at `5dcff9fd`.
+  green. Differential PASS (563/563 byte-identical, `--base 8b96e564`,
+  the commit before this step). Committed at `7a705383`.
 - **Did:** Pixel-probed the attendant's own hair-color marker frame by
   frame against dense (stride-1) re-fetches of both committed fixtures
   (not the ground-truth doc's own coarser per-box table, which folds the
@@ -7855,8 +7855,8 @@ Older entries: see `PROGRESS-archive.md`.
   started** — the goal-1 root cause took the whole session to pin down
   correctly (see Did). `npm test` **1044 files / 9939 passed / 223
   skipped**, `npm run build` green, differential PASS (563/563
-  byte-identical, `--base 2cf29e81`, the merge before this step's first
-  change). Committed at `2790e02b`.
+  byte-identical, `--base c6b74f76`, the merge before this step's first
+  change). Committed at `934863d2`.
 - **Did:** The "~142f hold" in the brief's framing turned out to be
   **emergent, not a hardcoded duration** — the gold pic-reveal box
   (`FACTORY HEAD NOLAND would like to battle!♥`) is a genuine
@@ -7865,7 +7865,7 @@ Older entries: see `PROGRESS-archive.md`.
   function of *when* the A-press arrives — both in the app (from the
   compare trace's scripted `segments`) and in the oracle (from the
   battle-lab's internal `prepare()` auto-navigator, whose own press
-  timing shifted once `3e29880b` shortened gold's walk-up). Root cause
+  timing shifted once `4dac4a35` shortened gold's walk-up). Root cause
   was two independently-stale calibrations, not one: (1) the compare
   trace's own A-press position (`tools/compare/traces/factory-round-
   battle7-noland-gold-reveal-off.json`) was tuned against the *old*
@@ -7941,7 +7941,7 @@ Older entries: see `PROGRESS-archive.md`.
   (`docs/walkup-call-scene-ground-truth.md`) live against
   `http://127.0.0.1:8014`. Full `npm test` **1044 files / 9939 passed /
   223 skipped**, `npm run build` green. Differential PASS (563/563
-  byte-identical, `--base 1fd9b21c`, the commit before this step).
+  byte-identical, `--base ecf066e9`, the commit before this step).
 - **Did:** (1) `generatedRoundBattle7NolandPostwinCallSceneStartStage`
   parks `postwin` at `elapsed: POSTWIN_COUNTER_ROOM_FIRST_AGE` (115),
   `frontierBrain: true` — the first tick of the already-pinned
@@ -8012,7 +8012,7 @@ Older entries: see `PROGRESS-archive.md`.
   passes unmodified, plus 4 new tests (47 total). Full `npm test`
   **1044 files / 9939 passed / 223 skipped**, `npm run build`, and
   `npm run typecheck` green. Differential PASS (563/563 byte-identical,
-  `--base 74013f83`, the merge before this step's first change).
+  `--base d36c0872`, the merge before this step's first change).
 - **Did:** (1) `postwin.ts`: new `POSTWIN_BRAIN_CANT_TELL_TEXT`
   (pulled from `askSwapBeforeHead` in the walkup-script JSON, never
   retyped) plus a structural "+2-after-settle" accept-ready delay
@@ -8154,7 +8154,7 @@ Older entries: see `PROGRESS-archive.md`.
   (explicitly out of scope per memo §3); dense oracle pixel calibration
   of the call-scene/menu window (blocked on the same `BattleLab.
   prepare()` staging gap the memo's §4 flagged, now fixed per harness
-  commit 3e29880b — reachable, but calibrating against it is scoped to
+  commit 4dac4a35 — reachable, but calibrating against it is scoped to
   a later step, not this one).
 - **Next:** Brief 2 (`AskSwapBeforeHead` short path + soak driver
   update); dense-oracle calibration of step A's brain-specific timing
@@ -8304,7 +8304,7 @@ Older entries: see `PROGRESS-archive.md`.
   (`tools/compare/factoryRoundIntroGeneralizationStage.ts`) — the same
   seed-70/challenge-2 Battle-7 staging `generatedRoundRevealProofStage`
   uses, stopped at the real `battleRoomStateForOpponent()` seam
-  (core.ts's postwin→prebattleRoom→battleRoom handoff, d60ca1b3)
+  (core.ts's postwin→prebattleRoom→battleRoom handoff, c4e963f0)
   instead of jumping past the room. A synthetic `postwin` parked in
   `postwinPhase`'s terminal "counterRoom" bucket with
   `rightThisWayDismissElapsed` set satisfies `renderPostwinState`'s own
@@ -8391,7 +8391,7 @@ Older entries: see `PROGRESS-archive.md`.
   `brainSettled` seam. (5) `npm run compare:differential` on 3 committed
   ordinary traces crossing the BattleRoom entrance (`room-entry.json`,
   `battle2-room-a.json`, `s6-acceptance.json`) vs. parent commit
-  `2d2c2c81`: **PASS, 563/563 captures byte-identical** — the ordinary
+  `f5b17a7c`: **PASS, 563/563 captures byte-identical** — the ordinary
   path did not move a pixel.
 - **Not done — honest residual (acceptance item 2, oracle dense
   compare):** the existing staging tool
@@ -8448,7 +8448,7 @@ Older entries: see `PROGRESS-archive.md`.
   seeds now complete. NOTE: both #89 workers hit their caps
   pre-commit/pre-docs; supervisor salvaged, verified (typecheck, smoke,
   full suite — zero existing pins moved — vanilla soak, 9 seeds), and
-  committed `61b0a3c1` + finished docs. The original #86 sandstorm
+  committed `37215f97` + finished docs. The original #86 sandstorm
   fixture is unreachable post-fix (RNG trajectory diverges); a ~3,700-
   trial search found no fresh terminal-boundary repro — documented
   inline in the pin, 3 sibling #86 pins still cover non-terminal.
@@ -8596,7 +8596,7 @@ Older entries: see `PROGRESS-archive.md`.
 ## 1271 — [main worker, 2026-08-14] **Continuous-play step 1: generated-draft round entry + in-session chaining WIRED; blocked green by newly-exposed #88**
 
 - **State:** Round-chaining wiring (ROADMAP "User decisions 2026-08-14" #2)
-  is implemented and committed (`b7ae30de`), green under typecheck,
+  is implemented and committed (`da5bc8b7`), green under typecheck,
   `test:smoke`, `npm run build`, and 8 new Tier-1 scenario tests
   (`tests/factoryRoundChaining.test.ts`). Running it end-to-end via
   `npm run soak` surfaced a genuine pre-existing engine bug (**new #88**)
@@ -8704,7 +8704,7 @@ Older entries: see `PROGRESS-archive.md`.
   (ii)/(iii) from 1267/1268 remain untouched/parallel-lane.
 - **Notes:** Investigating seed 27's pinned test (documented in the old
   #88 entry as crashing with #88's own signature) revealed that claim was
-  stale: on the actual starting commit (`da55e159`, pre-fix), seed 27
+  stale: on the actual starting commit (`a4497fbd`, pre-fix), seed 27
   crashes with an UNRELATED, pre-existing "full"-policy bug (Baton Pass ->
   `openpartyscreen` -> `machine-barrier`, unhandled by
   `driveTrainerBoundary`) at round 1 battle 1 turn 10 — well before #88 or
@@ -8819,7 +8819,7 @@ Older entries: see `PROGRESS-archive.md`.
   objective; both recorded in ROADMAP.md's "User decisions (2026-08-14,
   planning session)" block.
 - **Did:** (1) Verified the Brain program's remaining-list status:
-  (a) harness lab mode LIVE (top-layer `33354440`; §5.2 consumers per
+  (a) harness lab mode LIVE (top-layer `5cffdf5e`; §5.2 consumers per
   1266) and (c) presentation ran end-to-end — only (b) post-battle
   consequences remains. (2) Queued, in order: (i) consequences — steps
   1-3 of `docs/noland-brain-post-battle-audit.md` §5 (BP award table +
@@ -9193,7 +9193,7 @@ Older entries: see `PROGRESS-archive.md`.
   (2) the walk-up dialogue's app-side surface (still entirely unattempted,
   out of scope every step so far); (3) the GOLD Brain window (owned by a
   concurrent side-lane scout, still out of scope here).
-- **Notes:** own commit `04a8e31d`, tree green (`npm run typecheck` +
+- **Notes:** own commit `b4eec47f`, tree green (`npm run typecheck` +
   `test:smoke` 375/375 between edits). No regression: Lukas compare
   (`factory-round-battle6-lukas-reveal-off`, the other direct consumer of
   the edited `factoryRoundIntroGeneralizationStage.ts`) still **154/154**;
@@ -9270,7 +9270,7 @@ Older entries: see `PROGRESS-archive.md`.
 - **Notes:** each rung its own commit (`feat: ... data`, `feat: ... wiring`,
   `test: ... rung C`), tree green at each; `npm run typecheck` +
   `test:smoke` between rungs. Finish gate: full `npm test` **1,014 files /
-  9,764 passed, 44 skipped** (the gated CGB4 family per merge `dc57b7c3` —
+  9,764 passed, 44 skipped** (the gated CGB4 family per merge `62146106` —
   not a regression) in ~2 min; `npm run build` green (669 modules, +1 for
   the new brain-pic asset/test module). No `unsupported-branch` barrier
   moved. Nothing outside `workspace/` touched; no oracle service restarted;
@@ -9283,7 +9283,7 @@ Older entries: see `PROGRESS-archive.md`.
 - **State:** supervisor session, deadline 17:54. Baseline re-verified at
   orient (build green; full suite 1056 files / 9934 passed / 1 skipped,
   1147 s — CGB4-dominated). Both round-1 steps are on master (merge
-  `dc57b7c3`).
+  `62146106`).
 - **Did:** (1) Verified the MAIN worker's 1257 result — reran
   `tools/probe/verify-factory-brain-lab.ts` live myself: **82/82**. (2)
   SIDE lane: CGB4 gating came back complete but uncommitted (worker
@@ -9294,7 +9294,7 @@ Older entries: see `PROGRESS-archive.md`.
   green; full default suite green after restoring the gitignored
   `artifacts/wasm/factory_wasm.wasm` `7e23d1bf` — the 6-file/19-test
   failure class in a fresh worktree is that missing artifact, not the
-  change), committed `a2fe03c9` with provenance, merged, union smoke
+  change), committed `3f51ee15` with provenance, merged, union smoke
   375/375 + gate/digest spot-check green, worktree cleaned.
 - **Next:** round 2 (dispatched): MAIN — Brain presentation seam
   (`getFactoryTrainerPresentation` 1022 entry from `gTrainers
@@ -9304,7 +9304,7 @@ Older entries: see `PROGRESS-archive.md`.
   table, verify script) off the silver fixture.
 - **Notes:** `check-oracle-freshness.sh` FAILs both ports; :8014 is a
   false positive (started from the edited tree 48 s before commit
-  `33354440`; it advertises `factoryBrain` — verified) and :8012 is the
+  `5cffdf5e`; it advertises `factoryBrain` — verified) and :8012 is the
   animation lane's to restart by design. Animation and rust supervisors
   are live this session (their lane branches are ahead of master); folds
   happen at wind-down. Default `npm test` no longer runs the 44-file CGB4
@@ -9393,7 +9393,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 - **State:** the 1255 USER handoff (a) is done: the oracle harness accepts
   `mode: "factoryBrain"` (design §5.1 items 1-7 complete, commit
-  `33354440`), so Brain presentation ground truth is now reachable through
+  `5cffdf5e`), so Brain presentation ground truth is now reachable through
   the lab. The refreshed battle-scene-off service on **:8014** advertises
   the mode; **:8012 still runs pre-change code** by design (the animation
   lane restarts it at its own orient, per its standard freshness flow).
@@ -9564,8 +9564,8 @@ Older entries: see `PROGRESS-archive.md`.
   `FillFactoryBrainParty` with pool/rules/odds receipts, then the
   battles-21/42 round-loop branch and the Brain staging representation.
 - **Did:** folded `animation-main` (Memento source-checkpoint test
-  strengthening, `f22e828e`) and `rust-main` (M14-class battler-position
-  resolver port, `d46ec3ec`) into master. Union verification: cargo native
+  strengthening, `0ad2d97d`) and `rust-main` (M14-class battler-position
+  resolver port, `632ceb76`) into master. Union verification: cargo native
   green; wasm artifact rebuilt **507,847 B** `4e540a35…`; forced-WASM
   parity **18 files / 803 tests**; full npm **1,047 files / 9,864 passed /
   1 skipped**; build green. Both sibling supervisors (animation, rust) were
@@ -9576,7 +9576,7 @@ Older entries: see `PROGRESS-archive.md`.
   ledgers (silver challengeNum 2; gold 5 if cap permits). Then rung 2: the
   differential structure check consuming both.
 - **Notes:** oracle 8014/8012 left untouched (coarse freshness failure is
-  the recorded docs-only false positive; 39ca5d64 + these folds change no
+  the recorded docs-only false positive; 2d354a8f + these folds change no
   harness contract). Wind-down must re-check both lane branches for new
   sibling commits.
 
@@ -9807,9 +9807,9 @@ Older entries: see `PROGRESS-archive.md`.
   M9b's pure Factory swap mutation/state/cursor leaves; animation remains
   **180/276 exact** after source-only Blizzard and Icy Wind checkpoints.
 - **Did:** independently regenerated v37 byte-for-byte and audited its exact-key
-  containment; folded `rust-main` through M8i/M8j and M9a–M9b (`43a09122`),
+  containment; folded `rust-main` through M8i/M8j and M9a–M9b (`e8393e7c`),
   ran native Rust **733**, rebuilt WASM, and forced all **16 parity files / 797
-  tests** through it. Folded Blizzard (`089518e2`) and Icy Wind (`8cc21769`),
+  tests** through it. Folded Blizzard (`33b6e9a4`) and Icy Wind (`824b7fc5`),
   then reran their focused **9/9**, source audit, coverage, smoke, build, and
   both production soaks. Final union full npm is green: **1,035 files / 9,804
   passed / 1 skipped**.
@@ -9894,7 +9894,7 @@ Older entries: see `PROGRESS-archive.md`.
   moves; Rust M8f/M8g replay and live chooser bridge are folded. Both
   persistent lane tips are contained.
 - **Did:** independently reran v34 **5/5**, folded animation through
-  `90e24dc4` and Rust through `2b1b276e`, audited both lane ledgers, ran native
+  `46579a9b` and Rust through `7ba96d50`, audited both lane ledgers, ran native
   Rust, rebuilt WASM, forced every established parity suite through WASM, and
   verified the full TypeScript union.
 - **Next:** capture/source-close only the third-track `_081DDA62` decrement/
@@ -9913,7 +9913,7 @@ Older entries: see `PROGRESS-archive.md`.
   live-view constructor boundary are folded; both persistent lane tips are
   contained.
 - **Did:** independently reran v31 **8/8**, then folded animation through
-  `25bca32b` and Rust through `b2423e2a`. Audited the Rust ABI, ran native
+  `c8cd9d29` and Rust through `1346aaa2`. Audited the Rust ABI, ran native
   Rust, rebuilt the WASM artifact, forced every parity suite through WASM, and
   verified the full TypeScript union.
 - **Next:** source-close only the observed second-track non-exit continuation
@@ -9994,7 +9994,7 @@ Older entries: see `PROGRESS-archive.md`.
   adapter, and both persistent lane tips are contained.
 - **Did:** audited v22's exact six-byte ROM body, frozen three-row join,
   IWRAM access classes, and first-unpriced `strh`. Folded `rust-main` through
-  `4790707c`, rebuilt the WASM artifact, forced every boundary-bearing parity
+  `a05dc9d9`, rebuilt the WASM artifact, forced every boundary-bearing parity
   suite, and verified the complete union.
 - **Next:** capture only the address-free tempo discriminator needed to price
   the bounded `_081DD9BC` store/compare/branch slice for the same three rows.
@@ -10015,7 +10015,7 @@ Older entries: see `PROGRESS-archive.md`.
   body, five-halfword count, IWRAM accesses, and three taken refills. Added an
   explicit fail-closed source/ELF pin for the sixth player's
   `gPokemonCryMusicPlayers` IWRAM storage. Folded animation through
-  `2e976eed` and Rust through `0740592c`, then verified the union.
+  `beacbb83` and Rust through `22a7c63f`, then verified the union.
 - **Next:** source-close one bounded selected successor, preferably the fixed
   nonzero-r4 status/tempo prefix beginning at `_081DD9B6`. Keep the four
   EXIST-set rows, tempo discriminator/body beyond the new boundary, complete
@@ -10036,7 +10036,7 @@ Older entries: see `PROGRESS-archive.md`.
   contained.
 - **Did:** audited v20's frozen joins, r6 preservation, selected-row nulls,
   and fixed Thumb timing (**10 × 3 = 30**). Folded animation through
-  `991dbd5f` and Rust through `992d6bed`, rebuilt WASM, and verified the
+  `f34046de` and Rust through `293070bb`, rebuilt WASM, and verified the
   complete post-fold union.
 - **Next:** capture one address-free decision needed to source-close a
   bounded successor: preferably the accumulated-channel r4 zero/nonzero
@@ -10098,7 +10098,7 @@ Older entries: see `PROGRESS-archive.md`.
   milestone.
 - **Did:** independently audited v11's fixed **44-cycle** caller tail and
   verified both IWRAM POP classes against a temporary Scene-OFF instruction
-  probe before removing the hooks. Folded Rust M5d-5 through merge `6253143b`:
+  probe before removing the hooks. Folded Rust M5d-5 through merge `0248872c`:
   all remaining **28** effects plus 97 TS-generated vector rows; the native
   barrier is dry. Animation-main remains contained.
 - **Next:** source-close one separately bounded post-`ply_note` dispatcher/
@@ -10119,7 +10119,7 @@ Older entries: see `PROGRESS-archive.md`.
 - **Did:** independently reviewed and corrected v10's instruction/refill
   census plus `gNoiseTable[59]` result; regenerated focused v3-v10 **31/31**.
   Folded Rust M5d-4's **22** charge-up/status-cure/screen/Substitute
-  `CheckViability` effects through merge `262ad551`; **28** table effects
+  `CheckViability` effects through merge `3ae636b5`; **28** table effects
   remain behind the native barrier. Animation-main is contained.
 - **Next:** source-close the straight-line post-helper caller tail through
   `ply_note` return if fully provable, stopping before any unresolved state.
@@ -10162,7 +10162,7 @@ Older entries: see `PROGRESS-archive.md`.
 - **Did:** independently regenerated/audited v9's twice-fresh `pan_sweep=0`
   route (**34 each / 238 aggregate**) and its strict dynamic-helper boundary.
   Folded Rust M5d-3's **30** weather/heal/damage/status/Counter
-  `CheckViability` effects through merge `84789fbb`; **50** table effects
+  `CheckViability` effects through merge `1160ad03`; **50** table effects
   remain behind the native barrier. Animation-main is contained.
 - **Next:** source-close one coherent dynamic `call_r3`/
   `MidiKeyToCgbFreq` helper slice, stopping before its first unresolved
@@ -10224,9 +10224,9 @@ Older entries: see `PROGRESS-archive.md`.
   allocation body for **7/82** callbacks. Complete MPlay remains **5 exact /
   108 null** and the construction clock stays unwired.
 - **Did:** independently audited the reducer and fixed its generated prose to
-  derive the correct **825-cycle** body total (`68afcb84`). Folded Meteor
-  Mash bilateral Scene-ON evidence through `ee1b5eaa`, then Rust
-  `CheckBadMove` M5b-2/M5b-3 through `48ef0a5f` and `ba63c1ca`.
+  derive the correct **825-cycle** body total (`d97ae995`). Folded Meteor
+  Mash bilateral Scene-ON evidence through `240df33c`, then Rust
+  `CheckBadMove` M5b-2/M5b-3 through `f6529e12` and `e62779d0`.
 - **Next:** source-close the observed zero-LFO `TrkVolPitSet` helper route.
   Keep `clear_modM`, later fields, the other 75 post-selection callbacks,
   complete callback/glue, service, arbitration, and clock wiring null.
@@ -10241,7 +10241,7 @@ Older entries: see `PROGRESS-archive.md`.
   mutable allocation decision for **7/82** callbacks. Complete MPlay remains
   **5 exact / 108 null**; #55 and `runFactoryConstructionClock` stay unwired.
 - **Did:** independently regenerated the CGB4 v2 receipt **17/17**, then folded
-  rust-main M5b-1 through merge `b9268dc2`: native `CheckBadMove` now covers a
+  rust-main M5b-1 through merge `2a079451`: native `CheckBadMove` now covers a
   first batch of 32 effects with TS-generated vectors.
 - **Next:** source-close one bounded observed CGB4 allocation-body route or
   another post-selection note family. Preserve complete callback, glue,
@@ -10274,7 +10274,7 @@ Older entries: see `PROGRESS-archive.md`.
   **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
   #55 stays unwired and LUKAS remains **8/50**.
 - **Did:** independently regenerated BEND **4/4**, then folded rust-main's
-  documentation-only M5b `CheckBadMove` batching scout through `9c5c927c`.
+  documentation-only M5b `CheckBadMove` batching scout through `baaa48ba`.
   The merge added exactly `RUST_PROGRESS.md` plus the scout receipt; native
   Rust remains **145/145**.
 - **Next:** source-close `ply_pan`, the next-smallest live family at 13 census
@@ -10289,7 +10289,7 @@ Older entries: see `PROGRESS-archive.md`.
   and **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
   #55 stays unwired and LUKAS remains **8/50**.
 - **Did:** independently regenerated VOICE **4/4**, then folded rust-main M5a
-  AI mask selection plus generated move data through `a33deba6`. Native Rust is
+  AI mask selection plus generated move data through `e40185e6`. Native Rust is
   **145/145** with fmt/clippy clean; rebuilt WASM is 80,342 bytes and all five
   adapter suites are **660/660** in default and forced-WASM modes.
 - **Next:** source-close `ply_bend`, the next-smallest live #55 callback family
@@ -10322,7 +10322,7 @@ Older entries: see `PROGRESS-archive.md`.
   LUKAS remains **8/50**.
 - **Did:** reviewed the address-free `_081DD874` packets and instruction-count
   reducer, confirmed its null-path discipline, and folded animation-main's
-  Guillotine acceptance through merge `1cc225e2`; rust-main was already folded.
+  Guillotine acceptance through merge `e81346b0`; rust-main was already folded.
 - **Next:** capture `ClearChain` entry track/previous/next link state and
   source-reduce its 39-row route. Do not price later wait/LFO/callback work or
   wire `runFactoryConstructionClock` until those paths close honestly.
@@ -10456,11 +10456,11 @@ Older entries: see `PROGRESS-archive.md`.
 ## 1141 — [supervisor, 2026-08-11] **Summary seam verified; animation/Rust folds green**
 
 - **State:** `master` is green with the generic status-summary/message boundary,
-  Metal Sound through `ee46ddac`, and Rust mon-construction groundwork through
-  `798ee1c1`. S8 remains closed; canonical Battle 2 remains stopped at 33331.
+  Metal Sound through `175c75f1`, and Rust mon-construction groundwork through
+  `a91197aa`. S8 remains closed; canonical Battle 2 remains stopped at 33331.
 - **Did:** independently reverified the complete OFF summary assembly **65/65**
   and focused **79/79**. Folded `animation-main` and `rust-main` as merges
-  `5ff73ca8` and `e57f3c41`.
+  `74675cb5` and `7e9665f0`.
 - **Next:** own one complete source-defined post-acknowledgement summary-exit /
   trainer handoff after the unbounded hold at 11775 and before exact send-out
   starts at 13385. Do not accept the idle hold or submit a Battle-2 action.
@@ -10504,11 +10504,11 @@ Older entries: see `PROGRESS-archive.md`.
 ## 1143 — [supervisor, 2026-08-11] **Post-ack checkpoint verified; final lane folds green**
 
 - **State:** `master` is green with the generic hold-clock fix, exact Metal
-  Sound through `7b303713`, and Rust M3d party construction through
-  `169c522b`. The 13384 display tail remains #56, not an accepted frame.
+  Sound through `02c2fb3f`, and Rust M3d party construction through
+  `1b800452`. The 13384 display tail remains #56, not an accepted frame.
 - **Did:** independently reverified the diagnostic **69/70** with only the
   known 18-pixel 13384 tail and focused **56/56**. Folded `animation-main`
-  and `rust-main` as merges `fcd928b1` and `325e27ab`.
+  and `rust-main` as merges `426abed2` and `b8c9b0c7`.
 - **Next:** bypass #56 and prove a complete already-owned intro phase against
   a noncanonical legal Factory trainer/round identity through the generic
   controller and presentation seam. Do not resume the Battle-2 action march.
@@ -10536,7 +10536,7 @@ Older entries: see `PROGRESS-archive.md`.
 
 ## 1138 — [MAIN worker, 2026-08-11] **Generated BattleIntroSlide3 reveal exact**
 
-- **State:** implementation `5bb791b6` owns LOGO_WAVE's source-relative
+- **State:** implementation `7fac986e` owns LOGO_WAVE's source-relative
   retained-black callback and the complete generated scene reveal is exact.
   S8 stays closed; Battle 2 remains stopped at tick 33331.
 - **Did:** committed `win-go-on-battle2-scene-assembly-reveal-off`
@@ -10555,7 +10555,7 @@ Older entries: see `PROGRESS-archive.md`.
 ## 1137 — [supervisor, 2026-08-11] **Transition verified; Rust M1/M2 folded**
 
 - **State:** `master` is green with the generic nonzero-index LOGO_WAVE seam
-  and `rust-main` through `303a8a4a`. S8 remains closed; the canonical
+  and `rust-main` through `06297033`. S8 remains closed; the canonical
   Battle-2 march remains stopped at tick 33331.
 - **Did:** independently reverified the new complete OFF transition at
   **249/249**, focused **72/72**, and smoke **375/375**. Folded Rust M1/M2:
@@ -11849,7 +11849,7 @@ Older entries: see `PROGRESS-archive.md`.
 - **Did:** independently audited v23's frozen digest join, exact one-scalar
   packet schema, twice-fresh identity, 12-cycle taken route, 14-cycle
   source-general non-taken route, and all retained null boundaries. Folded
-  animation through `64ec9f90` and Rust through `30641085`, rebuilt WASM,
+  animation through `6e95db94` and Rust through `fb46b892`, rebuilt WASM,
   forced all boundary parity suites, and verified the complete union.
 - **Next:** source-close only the fixed two-instruction `_081DD9C4` successor
   prefix for the same three rows, stopping before `_081DD9C8` reads track
@@ -12470,7 +12470,7 @@ Older entries: see `PROGRESS-archive.md`.
   CGB4 prefix. Ancient Power's bounded bilateral evidence checkpoint is
   folded without promotion; both persistent lane tips are contained.
 - **Did:** independently reran v35 **8/8**, folded animation through
-  `a359d9a3`, verified the final union, and ran both generic seven-battle soak
+  `0d3cba13`, verified the final union, and ran both generic seven-battle soak
   policies after all production-source folds.
 - **Next:** source-close only the observed third-track non-exit continuation
   through `bgt _081DD9C8`, stopping before the fourth flags read. Keep actual
@@ -51673,11 +51673,11 @@ git; the current live ledger keeps the three load-bearing entries only.
   the animation lane continues in TS by user decision.
 ## 1135 — [supervisor, 2026-08-11] **Animation tail folded; generic transition seam next**
 
-- **State:** `master` includes `animation-main` through `5123b455`; `rust-main`
+- **State:** `master` includes `animation-main` through `b5b15c43`; `rust-main`
   had no unmatched commit. The union is green and both oracle profiles are
   fresh. S8 remains closed; the canonical Battle-2 march stays stopped at
   tick 33331.
-- **Did:** folded the Metal Sound evidence tail (`a95c8e49`) and independently
+- **Did:** folded the Metal Sound evidence tail (`a3e0bf2e`) and independently
   verified the union: `npm test` **947 files / 8,683 passed / 1 skipped** and
   production build **642 modules**. Restarted both stale post-fold oracle
   processes; freshness and OFF `bin/oracle info` pass.
@@ -51689,7 +51689,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   No material decision is deferred.
 ## 1136 — [MAIN worker, 2026-08-11] **Generic RNG-selected Frontier transition exact**
 
-- **State:** implementation `422e4e29` owns the live Factory transition draw
+- **State:** implementation `94b39039` owns the live Factory transition draw
   and renders its source-selected LOGO_WAVE; the tree is fully green. S8
   remains closed and Battle 2 stays stopped at tick 33331.
 - **Did:** committed dense `win-go-on-battle2-transition-complete-off`
@@ -51707,7 +51707,7 @@ git; the current live ledger keeps the three load-bearing entries only.
 ## 1139 — [supervisor, 2026-08-11] **Scene reveal verified; Rust M3 folded**
 
 - **State:** `master` is green with the generic LOGO_WAVE→BattleIntroSlide3
-  reveal and `rust-main` through `420eb58d`. S8 remains closed; canonical
+  reveal and `rust-main` through `0ee10a59`. S8 remains closed; canonical
   Battle 2 remains stopped at tick 33331.
 - **Did:** independently reverified the new generated reveal **154/154** and
   focused **33/33**. Folded Rust M3 rental generation, its ABI/decoder, and
@@ -51741,7 +51741,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   retired Battle-2 march remain untouched.
 - **Did:** reviewed the acknowledgement/source-clock receipt and independently
   confirmed the twice-fresh residual bounds. Folded animation-main's LEER
-  Scene-ON acceptance through merge `113015b9`; rust-main was already folded.
+  Scene-ON acceptance through merge `377fc7f9`; rust-main was already folded.
 - **Next:** take one source-proven #55 construction-clock increment toward the
   legal LUKAS set-270 personality, then rerun app 462–511 without party,
   renderer, or fixture-specific overrides. Do not submit a battle action.
@@ -51839,7 +51839,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   108 null**; #55 stays unwired and LUKAS remains **8/50**.
 - **Did:** reviewed and regenerated the address-free PEND receipt **4/4**, then
   folded rust-main M4a (`damage_calc` plus **1,129** TS-pinned vectors) through
-  merge `75e234ee`. Native Rust is **82/82** with fmt/clippy clean; rebuilt WASM
+  merge `d64a5d5d`. Native Rust is **82/82** with fmt/clippy clean; rebuilt WASM
   is 62,344 bytes and adapter parity is **440/440** in both default and forced
   WASM modes.
 - **Next:** source-capture and instruction-count one remaining smallest live
@@ -51872,8 +51872,8 @@ git; the current live ledger keeps the three load-bearing entries only.
   family now has a WASM ABI, adapter, and differential parity suite. Main #55
   remains unchanged at PEND **108/108**, complete MPlay **5 exact / 108 null**,
   construction clock unwired, and LUKAS **8/50**.
-- **Did:** folded rust-main M4b through merge `f522820b` and its verified lane
-  ledger through `982b6221`; independently reran native Rust **91/91** after
+- **Did:** folded rust-main M4b through merge `7d272ac9` and its verified lane
+  ledger through `cef05418`; independently reran native Rust **91/91** after
   each fold, with fmt/clippy, rebuilt the 68,963-byte WASM artifact, and proved
   the four adapter suites **454/454** in both default and forced-WASM modes.
 - **Next:** source-close one remaining smallest live #55 callback family. Keep
@@ -51888,8 +51888,8 @@ git; the current live ledger keeps the three load-bearing entries only.
   **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
   #55 stays unwired and LUKAS remains **8/50**.
 - **Did:** independently regenerated PATT **4/4**, folded animation-main Fury
-  Swipes through `d58ccfbb`, and folded rust-main M4c turn-order/turn-RNG plus
-  WASM adapter parity through `e4f11a78`. Native Rust is **126/126** with
+  Swipes through `f62315fc`, and folded rust-main M4c turn-order/turn-RNG plus
+  WASM adapter parity through `e9107dd8`. Native Rust is **126/126** with
   fmt/clippy clean; rebuilt WASM is 80,342 bytes and all five adapter suites
   are **660/660** in both default and forced-WASM modes.
 - **Next:** source-close one remaining #55 command/callback family. Keep every
@@ -51948,7 +51948,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   and **108/108** one-pass rows. Complete MPlay remains **5 exact / 108 null**;
   #55 stays unwired and LUKAS remains **8/50**.
 - **Did:** independently regenerated the address-free VOL receipt **4/4**, then
-  folded rust-main's native `CheckBadMove` preamble through merge `2529c1b4`.
+  folded rust-main's native `CheckBadMove` preamble through merge `2e88d86e`.
   Native Rust is **175/175** with fmt/clippy clean; rebuilt WASM is **100,143
   bytes**, and all five adapter suites are **660/660** in default and
   forced-WASM modes.
@@ -51982,7 +51982,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   unwired and LUKAS remains **8/50**.
 - **Did:** independently regenerated the address-free note receipt **4/4** and
   reviewed its pinned-song, parameter, MIDI-key, and nested-tone fail-closed
-  checks. Folded rust-main's M5b-0 ledger through merge `5567a3a6`; native
+  checks. Folded rust-main's M5b-0 ledger through merge `f3850a72`; native
   Rust remains **175/175**.
 - **Next:** source-close the 57-callback inline selector prefix or one honest
   subroute. Preserve nulls for post-selection note bodies, command dispatch,
@@ -52033,7 +52033,7 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Next:** source-close one bounded post-selection `ply_note` body subroute.
   Preserve nulls for keysplit, complete notes, post-callback glue, all complete
   one-pass MPlay totals, and the construction clock.
-- **Notes:** implementation commit `8f72b6a6`; focused **15/15**, smoke
+- **Notes:** implementation commit `8cabf69b`; focused **15/15**, smoke
   **375/375**, typecheck, full **972 files / 9,423 passed / 1 skipped**, and
   build **651 modules** are green. No oracle capture, duration fit, pointer
   identity, unsupported barrier, gameplay/pixel/Rust/#56 change.
@@ -52048,7 +52048,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   entire dependent MPlay group **15/15**. Verified **99 waits / 82 notes / 37
   table callbacks**, six costs from **63–93 cycles**, and normalized
   source/state/target mutation guards.
-- **Notes:** implementation commit `8f72b6a6`; focused **15/15**, smoke
+- **Notes:** implementation commit `8cabf69b`; focused **15/15**, smoke
   **375/375**, typecheck, full **972 files / 9,423 passed / 1 skipped**, and
   build **651 modules** were green. No oracle capture, duration fit, pointer
   identity, unsupported barrier, gameplay/pixel/Rust/#56 change.
@@ -52059,7 +52059,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   and `runFactoryConstructionClock` stay unwired; S8 remains closed at 33331.
 - **Did:** independently regenerated the CGB4 receipt byte-identically and
   reran its dependent note group, then folded animation-main's presentation-
-  only Meteor Mash checkpoint and ledger through merge `d7d9c089`. Rust-main
+  only Meteor Mash checkpoint and ledger through merge `4f902304`. Rust-main
   is fully contained.
 - **Next:** capture per-callback mutable CGB channel state before extending the
   remaining 75 post-selection note routes. Preserve complete callback,
@@ -52130,7 +52130,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   arbitration, and clock null for the next bounded step.
 - **Notes:** focused dependent group **15/15**, smoke **375/375**, typecheck,
   full **979 files / 9,445 passed / 1 skipped**, and build **653 modules** are
-  green. Commits `f70f0a9c` and `754cb27e`; no production src, gameplay,
+  green. Commits `7331548d` and `ef17c00e`; no production src, gameplay,
   renderer, animation, Rust, ROADMAP, canonical Battle-2, or unsupported-
   barrier change.
 
@@ -52141,9 +52141,9 @@ git; the current live ledger keeps the three load-bearing entries only.
   **7/82** callbacks. Complete MPlay stays **5 exact / 108 null** and the
   construction clock remains unwired.
 - **Did:** corrected the worker receipt so the caller BL/helper prologue gap
-  cannot masquerade as a contiguous prefix (`892ac754`). Folded Meteor Mash's
-  target compositor through `470cc12b`, Rust M5c's Factory-AI WASM adapter
-  through `dc02abcc`, and the M5d CheckViability scout through `efd083b6`.
+  cannot masquerade as a contiguous prefix (`9eb86ab1`). Folded Meteor Mash's
+  target compositor through `962f8e1c`, Rust M5c's Factory-AI WASM adapter
+  through `5e23cc9e`, and the M5d CheckViability scout through `b37b8774`.
 - **Next:** source-close the exact CGB4 caller-BL/helper-prologue gap, stopping
   at a coherent join. Keep later allocation fields, unobserved helper routes,
   the other 75 note callbacks, complete note/glue/MPlay totals, service,
@@ -52174,7 +52174,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   build **653 modules** are green. Receipts are
   `docs/issue55-m4a-note-body-cgb4-v5.md` and
   `tests/fixtures/factory-m4a-note-body-cgb4-evidence-v5.json`; commits
-  `704d9aa6`, `5f221715`.
+  `325e9983`, `2e9b5c1f`.
 ## 1186 — [supervisor, 2026-08-12] **CGB4 prefix verified; animation and Rust lanes folded**
 
 - **State:** #55 is source-exact for **2,081 contiguous cycles** through
@@ -52183,8 +52183,8 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Did:** independently regenerated v5 byte-for-byte (`9a36fadb…`) and
   audited the disassembly: caller argument setup + BL is **14** cycles and
   the helper push is **2** per callback. Folded Meteor Mash framebuffer
-  closure through `85fcf7e0` and Rust M5d-0 viability infrastructure through
-  `b1ea599a`.
+  closure through `24b9cff5` and Rust M5d-0 viability infrastructure through
+  `e4e7df02`.
 - **Next:** source-close one coherent observed post-helper allocation-field
   slice. Preserve `clear_modM`, nonzero-LFO/unobserved routes, the other 75
   note callbacks, complete note/glue/MPlay costs, service/arbitration, and
@@ -52213,7 +52213,7 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Notes:** v6 receipt SHA256 is
   `341be83906b17cd9ad972886a11e6f91270fc1eb3d66dc7cad4ff644daec468f` and
   doc SHA256 is `21227e6a766c9eff565e006e314369049853fbb47c042581534e18f0e7b70ad5`.
-  Checkpoints are `c0c6b368` and `8c1efe17`. No oracle rerun, production
+  Checkpoints are `c72a2b80` and `250ea70e`. No oracle rerun, production
   engine change, unsupported barrier, or canonical Battle-2 extension.
 ## 1188 — [supervisor, 2026-08-12] **CGB4 field slice verified; Rust M5d-1 folded**
 
@@ -52223,7 +52223,7 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Did:** independently regenerated v6 byte-for-byte (`341be839…`) and
   audited its **44** field-copy + **10** BL-edge cycles per callback. Folded
   Rust M5d-1's first **13** native `CheckViability` effects through merge
-  `e59b520a`; animation-main remains contained.
+  `05973f9c`; animation-main remains contained.
 - **Next:** source-close one bounded observed `ChnVolSetAsm` body route. Stop
   before any unresolved branch/state input; preserve later fields, the other
   75 callbacks, complete note/glue/MPlay costs, service/arbitration, and clock
@@ -52242,7 +52242,7 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Did:** audited the four-scalar entry packets and exact both-unclamped
   helper route, including **2** multiply-internal premium cycles per callback;
   regenerated v3-v7 **19/19**. Folded Rust M5d-2's **29** stat/screen
-  `CheckViability` effects through merge `fa09a5b0`; animation-main is
+  `CheckViability` effects through merge `9c99626c`; animation-main is
   contained.
 - **Next:** source-close one coherent post-helper caller-field slice, stopping
   before its first unresolved branch. Preserve unobserved clamp/nonzero-LFO
@@ -52389,7 +52389,7 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Notes:** worker red-first; supervisor independently regenerated v17 and
   reran focused v16/v17 **7/7** plus smoke **8 files / 375 passed**. Worker
   typecheck and build **653 modules** are green. Folded animation-main's exact
-  Meteor Mash promotion (`2ca00a35`); the union passes **994 files / 9,595
+  Meteor Mash promotion (`620c8091`); the union passes **994 files / 9,595
   passed / 1 skipped** and build **653 modules**. Rust remains contained. No
   production battle logic, unsupported barrier, recording import, canonical
   Battle-2, or absolute-tick change.
@@ -52422,8 +52422,8 @@ git; the current live ledger keeps the three load-bearing entries only.
   boundary are folded into master; both persistent lane tips are contained.
 - **Did:** audited v18's fixed 4-halfword route: three sequential Thumb
   instructions plus the unconditional-branch refill are **14 cycles/row**, so
-  **14 × 7 = 98** and **5,394 + 98 = 5,492**. Folded animation at `29cd94ac`
-  and Rust at `4e0db2d3`; rebuilt the WASM artifact and verified the complete
+  **14 × 7 = 98** and **5,394 + 98 = 5,492**. Folded animation at `132ba554`
+  and Rust at `d1678aa2`; rebuilt the WASM artifact and verified the complete
   post-fold union.
 - **Next:** capture only the next-track flag read/decision at `_081DD87C`
   for the frozen seven rows, then source-close one bounded route. Keep track
@@ -52541,7 +52541,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   prefix. Fissure's source-derived staged Scene-ON presentation and Rust's
   complete native Factory-AI switch policy are folded; both persistent lane
   tips are contained.
-- **Did:** folded animation through `27d1f5c7` and Rust through `41302ee3`.
+- **Did:** folded animation through `cd295f6e` and Rust through `2dcef89e`.
   Audited M6b's corrected canonical battle-type constants/corpus ratchets,
   folded its final lane ledger, then reran native Rust, rebuilt the main-tree
   WASM artifact, forced every boundary parity suite, and verified the full
@@ -52561,8 +52561,8 @@ git; the current live ledger keeps the three load-bearing entries only.
   and Rust M6's switch-policy WASM boundary are folded; both persistent lane
   tips are contained.
 - **Did:** independently recovered and audited the timed-out v25 worker's
-  finished evidence, committed `7570a564`, then folded animation through
-  `ef4118ea` and Rust through `a6ade760`. The first post-Rust full suite
+  finished evidence, committed `29869d01`, then folded animation through
+  `4a2c23db` and Rust through `09c179ff`. The first post-Rust full suite
   correctly exposed a stale WASM artifact missing the new switch exports; I
   rebuilt it before forcing all boundary parity suites and rerunning the full
   union.
@@ -52582,7 +52582,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   folded; both persistent lane tips are contained.
 - **Did:** independently audited v26's frozen hashes, exact six ROM bytes,
   mask arithmetic, refill accounting, exact-key strip-back, and regeneration.
-  Folded animation through `7b088576` and Rust through `9832a7d9`, including
+  Folded animation through `94ec50a0` and Rust through `18005b0d`, including
   both lane ledgers; rebuilt the WASM artifact and forced every boundary suite
   after the trainer-schedule ABI landed.
 - **Next:** capture only the address-free `r2` value at `_081DDA62` needed to
@@ -52625,7 +52625,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   persistent lane tips are contained.
 - **Did:** audited v27's twice-fresh exact-key packets, `r2=10` result, exact
   ROM bytes, branch-halfword timing, fail-closed exit route, and byte-stable
-  regeneration. Folded Rust through `e500d74f`, reran native Rust, rebuilt
+  regeneration. Folded Rust through `be069077`, reran native Rust, rebuilt
   WASM, forced all existing boundary suites, and verified the full union.
 - **Next:** source-close only the observed non-exit continuation `movs r0,
   MusicPlayerTrack_size; adds r5,r0; bgt _081DD9C8` for the same three frozen
@@ -52645,8 +52645,8 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Did:** v29 captured two fresh byte-identical OFF packet sets retaining only
   `sourceStateDigest` and `secondTrackFlags`; all three flags are `0x80`, so
   EXIST is set and `beq` is not taken at **8×3 = 24** cycles. Audited exact-key
-  containment and regeneration, folded animation through `a0482cbf` and Rust
-  through `151e5dba`, and reran every union gate.
+  containment and regeneration, folded animation through `b8a51cc3` and Rust
+  through `a348d830`, and reran every union gate.
 - **Next:** separately capture/source-close only the second track's
   volume/pitch-mask decision beginning at `_081DD9D0`. Keep actual pointer,
   count/index/identity/channel, wider body, service/arbitration, and
@@ -52665,8 +52665,8 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Did:** recovered and audited v28 after its worker hit the cap, proving the
   fixed 80-byte IWRAM track stride, signed-positive taken `bgt`, exact six ROM
   bytes, **12×3 = 36** cycles, fail-closed strip-back, and byte-stable
-  regeneration. Folded animation through `3197fca5` and Rust through
-  `796f546d`; rebuilt WASM and forced every boundary suite.
+  regeneration. Folded animation through `52cbd596` and Rust through
+  `3df4635c`; rebuilt WASM and forced every boundary suite.
 - **Next:** capture only the address-free next-track flags at `_081DD9C8`
   needed to classify the second loop iteration for the same three frozen v28
   rows. Keep actual pointer/count/index/identity/channel, wider body,
@@ -52769,7 +52769,7 @@ git; the current live ledger keeps the three load-bearing entries only.
   boundary.
 - **Did:** independently audited v41 containment and accepted the fifth-track
   EXIST-set route for flags `0x83/0x80/0x80` (**8x3 = 24** cycles,
-  **6,172 -> 6,196**). Folded Rust M10c (`d608104f`), ran native Rust,
+  **6,172 -> 6,196**). Folded Rust M10c (`43460263`), ran native Rust,
   rebuilt WASM, and forced every parity suite through the artifact.
 - **Next:** continue #55 in a separate bounded step at only the fifth-track
   volume/pitch-mask decision. Stop before either body. Keep wider
@@ -52833,23 +52833,23 @@ git; the current live ledger keeps the three load-bearing entries only.
 
 ## 1404 — [supervisor wind-down, 2026-08-26 ~04:10] **Lifecycle-audit day 2: three ordering audits (switch lifecycle 141 rows, faint replacement 116, turn machinery 133) → #134-#140 FOUND, six of the seven FIXED SAME SESSION with stock-ROM receipts (#134 switchineffects clears, #135 Pursuit ×2, #136 protectUses on switch-in, #137 AI_CV_Protect rungs + core-rs lockstep, #138 Encore-before-Struggle, #140 GetMoveTarget draw loop on 3 of 4 branches); Shell Bell live KO-heal arm; Gate-6 registry +8 receipted rows; animation-main folded (11); all five gates green on the final engine tree**
 
-- **Final gates on THIS tree (engine-final `f23ded2e` = `3db45ea3` minus the docs/tooling manifest flip `3a4c0251`, which the soak does not load; supervisor's own runs, all `--parallel` per the pinned commands):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60** (carry ≥28 6/60), winning-swap 0:60 **60/60** (carry ≥28 2/60); fifth gate — winning `--vary-rng --first-round` carry 0 **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0 **100/100** — **`budget` 0 on all four**. Full `npm test` on `3db45ea3` **1,163 files / 10,683 passed / 223 skipped** (03:10-03:15, concurrent with the gates); `npm run build` green; `cargo test` 696/0 in factory-core. DEFERRED.md: no open entries. Gate timing: 03:02-04:03 (61 min, eight sweeps concurrent under `nohup`, load 14-46; the animation Codex supervisor was live 00:24-06:24). The vanilla canary's TRAJECTORY moved by design (#140's forced-Struggle draws, #134/#136 switch-in state); the gate is the count.
-- **Orient:** master `a5970da4`; oracle freshness FAIL = the standing false positive (`3e29880b` committed 6 min after 8014's 2026-08-15 restart; no restart, the animation supervisor shares the services). **animation-main folded (11 commits, Eruption launch/falling-rock/shake/audio reducers + `tools/compare` audits, nothing under the Scene-OFF engine)** → union `npm test` **1,157 files / 10,624 passed / 223 skipped**, build green (`12d32d2f`); rust-main 0 ahead.
-- **Did (N worker steps, all Opus):** (1-2) two parallel read-only lifecycle audits, 25 min each with explicit pacing (both finished every row early): `docs/switch-lifecycle-audit-2026-08-26.md` (141 rows: 103 SAME / 24 SAME-ORDER / 2 DIVERGENT / 3 benign / 8 unreachable / 2 UNVERIFIED) and `docs/faint-replacement-audit-2026-08-26.md` (116 rows: 5 DIVERGENT rows = 1 root cause / 0 UNVERIFIED). Findings, each re-opened by me at both cited sites before filing: **#134** `Cmd_switchineffects`' Intimidate/Trace branches skip the `HITMARKER_FAINTED` + `SIDE_STATUS_SPIKES_DAMAGED` clears (source's ON_SWITCHIN cases `break` without `effect++`, so the clearing body runs; the stale faint bit also blocks `gLastHitBy` updates in `Cmd_moveend`); **#135** Pursuit's ×2 interception multiplier dropped (`stageVoluntarySwitchRules` staged `dmgMultiplier: 1` and entered past `setbyte sDMG_MULTIPLIER, 2`); **#136** `switchindataupdate` omits `protectUses`/`rolloutTimerStartValue` from its reset list (source memsets the whole DisableStruct; the AI's `AI_CV_Protect4` draws on a stale count); **#137** `runCvProtect` lacks the `get_protect_count > 1 → −2/end` rung and the user toxic/cursed/perish routes to `AI_CV_Protect3` (adjacent gap the audit flagged). (3) **#135 receipt-then-fix** (`f3fcaca6`/`87e86f05`, 23 min): PERSIAN all-Pursuit vs SANDSHREW switching — the ROM's `gBattleScripting.dmgMultiplier` (offset +14) goes 1→2 at `BattleScript_ActionSwitch+11`, damage 62→54 after variance, party HP 125→71; un-fixed kernel 27/98; control arm 30/95 both. Fix + 3 pins + `tests/issue135PursuitSwitchReceipt.test.ts`; no trajectory pin moved. (4) **#134 receipt-then-fix + #136 fix** (side, 26 min, `04cf2b8d`/`469fc497`/`438f97d3`): Spikes + Intimidate two-switch fixture — the ROM damages the third entrant (Torkoal 185→155 at 2 layers) where the un-fixed kernel left it untouched; Intimidate/Trace branches now fall through to the opcode's two clears; `protectUses`/`rolloutTimerStartValue` zeroed on switch-in (BP too); DisableStruct enumeration confirms nothing else is missing; full suite 1,158/10,634, no pin moved. (5) **#137 receipt-then-fix** (ts, 66 min incl. lockstep, `c847e462`/`6d25d278`/`d1742366`/`8bb06134`/`0a7d9120`): cursed AI user takes `AI_CV_Protect3` on the ROM (5 decision draws vs the control's 7, 3 seeds × 2 byte-identical runs; engine 7 on both pre-fix); `runCvProtect` gains the `> 1` rung (writes-never funcResult) + toxic/cursed/perish routes; the live TS↔Rust AI parity trio forced a **core-rs lockstep mirror + wasm rebuild** (precedent `0cb8aa26`) — verified by me: wasm-mode parity trio + focused 653/653, then **`cargo test` was RED** (7 native call sites left on the old 4-arg signature + one fixture at `protect_uses 3`) → repaired by me (`cab779fb`, 696/0). **For the rust program:** `factory_ai_check_viability.rs` `run_cv_protect` now takes `stale_func_result_fallback: Option<u8>`, `factory_ai_live_view.rs` carries the attacker's toxic/cursed/perish bools, ABI v1 attacker section gained three optional bools after `has_yawn` — merge master before the next rust step. (6) **Gate-6 registry join** (side, 15 min, `d4fe3bb3`/`6ebea0fe`): 7 hook rows → `oracle-receipted-hook` (Water Veil, Arena Trap, Sturdy, Damp, Trace, Leppa/RESTORE_PP, King's Rock/FLINCH; 76→69 / 31→38), Intimidate/Speed Boost/Shell Bell evidence-only, scout-evidence line generalised to R-ids. (7) **turn-machinery audit** (side, 26 min, `docs/turn-machinery-audit-2026-08-26.md`, 133 rows: 3 DIVERGENT / 1 UNVERIFIED) → **#138** Encore auto-confirm precedes `AreAllMovesUnusable` (ROM Struggles, port fails the disabled locked move), **#139** Focus Punch pre-pass unported (message order), **#140** `GetMoveTarget`'s SELECTED draw loop skipped on the four forced-move branches (RNG-affecting; `sourceMoveTarget`'s docstring was wrong) — all three re-opened by me at source. (8) **Shell Bell live KO-heal arm** (ts, 18 min, `af3ef8bb`/`74a91286`): the 1402 gap closed — ROM heal **+15 = floor(125/8)** at moveend state 12 on a KO (94→109), item-0 control 0 (state 11→17 in one frame), non-KO +5 = floor(44/8); 0 draws; kernel equal on all three; mutation-checked (`/4` fails two arms). (9) **#140 receipt-then-fix** (side, 44 min, `9c886479`/`3361e0c4`/`a3a5642e`, merged `0ba047be`): Wobbuffet Encores Crobat's Pound; the ROM's Encore/Struggle-forced opponent actions draw **1, 2, 1, 1, 3** `Random()`s inside `HandleAction_UseMove` (geometric, p=½), all eight ordinary prologues 0; port now runs the modeled `MOVE_TARGET_SELECTED` do/while (shared `drawBattleScriptSelectedMoveTarget`, Follow Me short-circuit) on the Struggle/Encore/overwritten-Encore branches; the Mimic/Transform `:133` branch stays open as #140's trimmed remainder (needs the `gChosenMoveByBattler` bank). Curated-seed pins moved with attribution (round-orchestrator census calls, soak seed-21 frames 37,239→37,260, SILVER_SEED 2→6, chaining hop-1 seed 6→0); **the vanilla canary trajectory moves by design** (forced-Struggle draws). (10) **#138 receipt-then-fix** (ts, 32 min, `bc00a527`/`8d36862f`/`e21ca61e`): Dewgong Encore→Disable on Jolteon's Tackle — the ROM's turn 3 is `MOVE_STRUGGLE` (`BattleScript_NoMovesLeft`, `HITMARKER_NO_PPDEDUCT`, Dewgong 139→102, Jolteon recoil 140→131, PP unchanged) where the pre-fix kernel auto-confirmed the Disabled Tackle; selection now evaluates `AreAllMovesUnusable` before the Encore auto-confirm (`lockedMoveDecision` returns null when all four slots are masked); no pin moved. (11) **Shell Bell manifest flip** (side, 10 min, `3a4c0251`): HOLD_EFFECT_SHELL_BELL → `oracle-receipted-hook` (68/39). ISSUES: #134-#138 deleted, #140 trimmed, #139 open (message order only).
-- **Sibling folds:** animation-main 11 at orient (above, `12d32d2f`); **at close animation-main is 9 ahead again (Eruption presentation complete + Ice Beam evidence; touches `src/engine/battleScene.ts` +160 / `core.ts` +16, Scene-ON seam only per its ledger) — deliberately left unfolded: its Codex supervisor was still live (cap 06:24) and a `core.ts` fold after the gates would have voided them; the next orient's fold MUST rerun all five gates, not just the suite.** rust-main 0 ahead; **master now carries a core-rs change (#137 lockstep, `d1742366` + `cab779fb`) — the rust supervisor should merge master before its next step.**
+- **Final gates on THIS tree (engine-final `3cd97bb2` = `fd7754d2` minus the docs/tooling manifest flip `a7e60ae7`, which the soak does not load; supervisor's own runs, all `--parallel` per the pinned commands):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60** (carry ≥28 6/60), winning-swap 0:60 **60/60** (carry ≥28 2/60); fifth gate — winning `--vary-rng --first-round` carry 0 **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0 **100/100** — **`budget` 0 on all four**. Full `npm test` on `fd7754d2` **1,163 files / 10,683 passed / 223 skipped** (03:10-03:15, concurrent with the gates); `npm run build` green; `cargo test` 696/0 in factory-core. DEFERRED.md: no open entries. Gate timing: 03:02-04:03 (61 min, eight sweeps concurrent under `nohup`, load 14-46; the animation Codex supervisor was live 00:24-06:24). The vanilla canary's TRAJECTORY moved by design (#140's forced-Struggle draws, #134/#136 switch-in state); the gate is the count.
+- **Orient:** master `5d9c3f51`; oracle freshness FAIL = the standing false positive (`4dac4a35` committed 6 min after 8014's 2026-08-15 restart; no restart, the animation supervisor shares the services). **animation-main folded (11 commits, Eruption launch/falling-rock/shake/audio reducers + `tools/compare` audits, nothing under the Scene-OFF engine)** → union `npm test` **1,157 files / 10,624 passed / 223 skipped**, build green (`2eb5e4d9`); rust-main 0 ahead.
+- **Did (N worker steps, all Opus):** (1-2) two parallel read-only lifecycle audits, 25 min each with explicit pacing (both finished every row early): `docs/switch-lifecycle-audit-2026-08-26.md` (141 rows: 103 SAME / 24 SAME-ORDER / 2 DIVERGENT / 3 benign / 8 unreachable / 2 UNVERIFIED) and `docs/faint-replacement-audit-2026-08-26.md` (116 rows: 5 DIVERGENT rows = 1 root cause / 0 UNVERIFIED). Findings, each re-opened by me at both cited sites before filing: **#134** `Cmd_switchineffects`' Intimidate/Trace branches skip the `HITMARKER_FAINTED` + `SIDE_STATUS_SPIKES_DAMAGED` clears (source's ON_SWITCHIN cases `break` without `effect++`, so the clearing body runs; the stale faint bit also blocks `gLastHitBy` updates in `Cmd_moveend`); **#135** Pursuit's ×2 interception multiplier dropped (`stageVoluntarySwitchRules` staged `dmgMultiplier: 1` and entered past `setbyte sDMG_MULTIPLIER, 2`); **#136** `switchindataupdate` omits `protectUses`/`rolloutTimerStartValue` from its reset list (source memsets the whole DisableStruct; the AI's `AI_CV_Protect4` draws on a stale count); **#137** `runCvProtect` lacks the `get_protect_count > 1 → −2/end` rung and the user toxic/cursed/perish routes to `AI_CV_Protect3` (adjacent gap the audit flagged). (3) **#135 receipt-then-fix** (`d5c10101`/`ae0e4c15`, 23 min): PERSIAN all-Pursuit vs SANDSHREW switching — the ROM's `gBattleScripting.dmgMultiplier` (offset +14) goes 1→2 at `BattleScript_ActionSwitch+11`, damage 62→54 after variance, party HP 125→71; un-fixed kernel 27/98; control arm 30/95 both. Fix + 3 pins + `tests/issue135PursuitSwitchReceipt.test.ts`; no trajectory pin moved. (4) **#134 receipt-then-fix + #136 fix** (side, 26 min, `e011e2d1`/`f4107a9c`/`4aea1718`): Spikes + Intimidate two-switch fixture — the ROM damages the third entrant (Torkoal 185→155 at 2 layers) where the un-fixed kernel left it untouched; Intimidate/Trace branches now fall through to the opcode's two clears; `protectUses`/`rolloutTimerStartValue` zeroed on switch-in (BP too); DisableStruct enumeration confirms nothing else is missing; full suite 1,158/10,634, no pin moved. (5) **#137 receipt-then-fix** (ts, 66 min incl. lockstep, `d9aefaae`/`86ee8e27`/`b2036af7`/`5ad6c5e9`/`4b9ad7ad`): cursed AI user takes `AI_CV_Protect3` on the ROM (5 decision draws vs the control's 7, 3 seeds × 2 byte-identical runs; engine 7 on both pre-fix); `runCvProtect` gains the `> 1` rung (writes-never funcResult) + toxic/cursed/perish routes; the live TS↔Rust AI parity trio forced a **core-rs lockstep mirror + wasm rebuild** (precedent `e57bcc30`) — verified by me: wasm-mode parity trio + focused 653/653, then **`cargo test` was RED** (7 native call sites left on the old 4-arg signature + one fixture at `protect_uses 3`) → repaired by me (`f416e23b`, 696/0). **For the rust program:** `factory_ai_check_viability.rs` `run_cv_protect` now takes `stale_func_result_fallback: Option<u8>`, `factory_ai_live_view.rs` carries the attacker's toxic/cursed/perish bools, ABI v1 attacker section gained three optional bools after `has_yawn` — merge master before the next rust step. (6) **Gate-6 registry join** (side, 15 min, `a02f0133`/`8b72f005`): 7 hook rows → `oracle-receipted-hook` (Water Veil, Arena Trap, Sturdy, Damp, Trace, Leppa/RESTORE_PP, King's Rock/FLINCH; 76→69 / 31→38), Intimidate/Speed Boost/Shell Bell evidence-only, scout-evidence line generalised to R-ids. (7) **turn-machinery audit** (side, 26 min, `docs/turn-machinery-audit-2026-08-26.md`, 133 rows: 3 DIVERGENT / 1 UNVERIFIED) → **#138** Encore auto-confirm precedes `AreAllMovesUnusable` (ROM Struggles, port fails the disabled locked move), **#139** Focus Punch pre-pass unported (message order), **#140** `GetMoveTarget`'s SELECTED draw loop skipped on the four forced-move branches (RNG-affecting; `sourceMoveTarget`'s docstring was wrong) — all three re-opened by me at source. (8) **Shell Bell live KO-heal arm** (ts, 18 min, `3b45eb16`/`87361f15`): the 1402 gap closed — ROM heal **+15 = floor(125/8)** at moveend state 12 on a KO (94→109), item-0 control 0 (state 11→17 in one frame), non-KO +5 = floor(44/8); 0 draws; kernel equal on all three; mutation-checked (`/4` fails two arms). (9) **#140 receipt-then-fix** (side, 44 min, `2881d67c`/`d2ece425`/`e1bf593e`, merged `5aa8c480`): Wobbuffet Encores Crobat's Pound; the ROM's Encore/Struggle-forced opponent actions draw **1, 2, 1, 1, 3** `Random()`s inside `HandleAction_UseMove` (geometric, p=½), all eight ordinary prologues 0; port now runs the modeled `MOVE_TARGET_SELECTED` do/while (shared `drawBattleScriptSelectedMoveTarget`, Follow Me short-circuit) on the Struggle/Encore/overwritten-Encore branches; the Mimic/Transform `:133` branch stays open as #140's trimmed remainder (needs the `gChosenMoveByBattler` bank). Curated-seed pins moved with attribution (round-orchestrator census calls, soak seed-21 frames 37,239→37,260, SILVER_SEED 2→6, chaining hop-1 seed 6→0); **the vanilla canary trajectory moves by design** (forced-Struggle draws). (10) **#138 receipt-then-fix** (ts, 32 min, `20106745`/`6dee06ef`/`b165a720`): Dewgong Encore→Disable on Jolteon's Tackle — the ROM's turn 3 is `MOVE_STRUGGLE` (`BattleScript_NoMovesLeft`, `HITMARKER_NO_PPDEDUCT`, Dewgong 139→102, Jolteon recoil 140→131, PP unchanged) where the pre-fix kernel auto-confirmed the Disabled Tackle; selection now evaluates `AreAllMovesUnusable` before the Encore auto-confirm (`lockedMoveDecision` returns null when all four slots are masked); no pin moved. (11) **Shell Bell manifest flip** (side, 10 min, `a7e60ae7`): HOLD_EFFECT_SHELL_BELL → `oracle-receipted-hook` (68/39). ISSUES: #134-#138 deleted, #140 trimmed, #139 open (message order only).
+- **Sibling folds:** animation-main 11 at orient (above, `2eb5e4d9`); **at close animation-main is 9 ahead again (Eruption presentation complete + Ice Beam evidence; touches `src/engine/battleScene.ts` +160 / `core.ts` +16, Scene-ON seam only per its ledger) — deliberately left unfolded: its Codex supervisor was still live (cap 06:24) and a `core.ts` fold after the gates would have voided them; the next orient's fold MUST rerun all five gates, not just the suite.** rust-main 0 ahead; **master now carries a core-rs change (#137 lockstep, `b2036af7` + `f416e23b`) — the rust supervisor should merge master before its next step.**
 - **Next:** (1) **#139** Focus Punch pre-pass (message order; fixture in ISSUES) and **#140's remainder** (Mimic/Transform `:133` needs the `gChosenMoveByBattler` bank) — both small; (2) the turn-machinery audit's one UNVERIFIED sub-claim (§5 row 5.6 `HandleAction_ActionFinished`'s attacker-vs-turn-order indexing) and audit A's two (Pursuit damage chain past `tryfaintmon`; `hpOnSwitchout` liveness); (3) next unaudited ordering machines: `SetMoveEffect` status application (Shield Dust/Synchronize/Safeguard/Substitute gates), `Cmd_attackcanceler` multi-turn state (Bide/Uproar/Thrash/Rollout across turns), string/message ordering inside a move; (4) Rust lane: absorb the #137 ABI change; (5) parked #71/#73/#39/#55; dormant #121; doubles-era #109/#114.
-- **Notes:** PAPERCUTS +1 bump (battle-lab checkpoint: frame 0 IS the turn-1 action menu) +2 new (the `switchindataupdate` double cast hides unknown battler fields from typecheck; bare `npx vitest` OOMs — 3 workers). Audit C merged `4122d398`. Opus audit workers with the pacing clause finished ALL rows in ~25 min of 50-min caps (no early-stop). Reading committed audit sections mid-run let the supervisor verify findings before the workers exited.
-- **Post-close addendum (04:05-04:45, docs-only — no engine change after the gates):** a fourth ordering audit, **move-effect application** (`Cmd_seteffectwithchance`/`seteffectprimary`/`seteffectsecondary` → `SetMoveEffect`; side lane, Opus, ~20 min; `docs/move-effect-application-audit-2026-08-26.md`, merged `124c60b4`): 2 DIVERGENT / 4 benign, both DIVERGENT rows supervisor-verified at source and port and filed as **#141** — the THRASH lock-in `break`s without advancing the cursor and Thief/Covet-vs-Sticky-Hold uses `BattleScriptPushCursor()`, so the ROM re-runs `seteffectwithchance`, whose `Random() % 100` is the FIRST conjunct of its `else if` and is spent even with the byte already 0; the port `advance`s / `"call"`s (the machine already has `"call-current"`). RNG-affecting (one-draw offset at every rampage start; 9 rental carriers + Sticky Hold targets); left for the next session because a fix would need the gates rerun (61 min) past the deadline. Open at close: **#139, #140-remainder, #141** (all with receipt recipes), dormant #121, doubles-era #109/#114, parked #71/#73/#39/#55.
-- **Post-close addendum 2 (04:29-05:00, docs-only):** a fifth ordering audit, **multi-turn move lifecycle across turns** (Bide/Uproar/Rollout+Fury Cutter/Wrap family/rampage+recharge+two-turn/shared reads; side lane, Opus, ~25 min; `docs/multi-turn-move-lifecycle-audit-2026-08-26.md`, merged `e892a7a3`): its single DIVERGENT (the sleeping-multi-turner `CancelMultiTurnMoves` in `HandleEndTurn_ContinueBattle` "has no port site") was **REFUTED by me** — it is `clearEndTurnFlinchAndSleepLocks` (`battleEndTurnOrchestration.ts:2804-2825`, wired `:2860`, landed with #133 yesterday, pinned by `endTurnFlinchClearIssue133.test.ts`); the audit grepped for `STATUS1_SLEEP` and missed the `BATTLE_SCRIPT_` prefix. Correction appended to the doc; 4 benign rows stand. Two-day tally: 6 audits, 13 first-pass DIVERGENT claims, **4 refuted at source/port by the supervisor, 9 real (#130-#141)** — always re-open both cited lines before filing.
+- **Notes:** PAPERCUTS +1 bump (battle-lab checkpoint: frame 0 IS the turn-1 action menu) +2 new (the `switchindataupdate` double cast hides unknown battler fields from typecheck; bare `npx vitest` OOMs — 3 workers). Audit C merged `9746afcf`. Opus audit workers with the pacing clause finished ALL rows in ~25 min of 50-min caps (no early-stop). Reading committed audit sections mid-run let the supervisor verify findings before the workers exited.
+- **Post-close addendum (04:05-04:45, docs-only — no engine change after the gates):** a fourth ordering audit, **move-effect application** (`Cmd_seteffectwithchance`/`seteffectprimary`/`seteffectsecondary` → `SetMoveEffect`; side lane, Opus, ~20 min; `docs/move-effect-application-audit-2026-08-26.md`, merged `5b4418e2`): 2 DIVERGENT / 4 benign, both DIVERGENT rows supervisor-verified at source and port and filed as **#141** — the THRASH lock-in `break`s without advancing the cursor and Thief/Covet-vs-Sticky-Hold uses `BattleScriptPushCursor()`, so the ROM re-runs `seteffectwithchance`, whose `Random() % 100` is the FIRST conjunct of its `else if` and is spent even with the byte already 0; the port `advance`s / `"call"`s (the machine already has `"call-current"`). RNG-affecting (one-draw offset at every rampage start; 9 rental carriers + Sticky Hold targets); left for the next session because a fix would need the gates rerun (61 min) past the deadline. Open at close: **#139, #140-remainder, #141** (all with receipt recipes), dormant #121, doubles-era #109/#114, parked #71/#73/#39/#55.
+- **Post-close addendum 2 (04:29-05:00, docs-only):** a fifth ordering audit, **multi-turn move lifecycle across turns** (Bide/Uproar/Rollout+Fury Cutter/Wrap family/rampage+recharge+two-turn/shared reads; side lane, Opus, ~25 min; `docs/multi-turn-move-lifecycle-audit-2026-08-26.md`, merged `faeb9b76`): its single DIVERGENT (the sleeping-multi-turner `CancelMultiTurnMoves` in `HandleEndTurn_ContinueBattle` "has no port site") was **REFUTED by me** — it is `clearEndTurnFlinchAndSleepLocks` (`battleEndTurnOrchestration.ts:2804-2825`, wired `:2860`, landed with #133 yesterday, pinned by `endTurnFlinchClearIssue133.test.ts`); the audit grepped for `STATUS1_SLEEP` and missed the `BATTLE_SCRIPT_` prefix. Correction appended to the doc; 4 benign rows stand. Two-day tally: 6 audits, 13 first-pass DIVERGENT claims, **4 refuted at source/port by the supervisor, 9 real (#130-#141)** — always re-open both cited lines before filing.
 
 ---
 
 ## 1403 — [supervisor wind-down, 2026-08-25 ~20:20] **Audit + receipt day: three source-vs-port audits (ability 38/38, held-item 38/38, end-turn ordering 40/47 rows) → #128 FOUND+FIXED (Intimidate/Trace record onto the player's AI-history slot: 8 AI draws), #130-#133 FOUND+FIXED (isFirstTurn decay, ENDTURN_ORDER recompute + tie draw, case-major field loop, end-turn flinch clear), #129 filed then NOT-A-BUG (trace stalled at the faint prompt); activation census (1,216 seeds, 0 CRASH/0 HANG) → every announcing hole receipted (Water Veil, Arena Trap, Leppa) + OHKO/Sturdy pack; 3 of 4 first-pass DIVERGENT audit claims refuted at source; all five gates on the final tree**
 
-- **Final gates on THIS tree (`9302e76b`, supervisor's own runs, all `--parallel`):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**, winning-swap 0:60 **60/60**; fifth gate — winning `--vary-rng --first-round` carry 0 **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0 **100/100** — **`budget` 0 on all four** (gates ran 18:57-20:08 under load 25-53: the animation Codex supervisor was live all session). Full `npm test` on `9302e76b` **1,150 files / 10,605 passed / 223 skipped**; `npm run build` green. DEFERRED.md: no open entries. The vanilla canary's TRAJECTORY differs from 1398 by design: #128 removed source-required AI draws and #130/#131/#133 change end-turn order/draws; the gate is the count, and each engine change carries a byte-identical stock-ROM receipt.
-- **Orient:** master `2a84050e`, both lane branches folded (0 ahead); oracle freshness FAIL = the standing false positive (only oracle-side commit since 8014's restart is that session's own `3e29880b`, 6 min later); animation Codex supervisor live 15:16-21:16 on the shared services, so no restart. Baseline smoke 444/444 + build green.
-- **Did (12 worker steps, all Opus, ~$95):** (1-2) ability audit ×2 (9+24 min): **38/38 SOURCE-EXACT**; its first pass's 3 DIVERGENT rows (Magnet Pull/Plus/Minus `ABILITY_ON_FIELD2` history write) **refuted by me** — `ABILITYEFFECT_CHECK_OTHER_SIDE` is 12, so the `RecordAbilityBattle` tail never runs for FIELD_SPORT (14); real finding = #128. (3) held-item audit (10.5 min): 31 exact + 1 DIVERGENT **refuted** (`SwitchInClearSetData` is `battle_main.c:3253`, Choice Band IS cleared on switch-in) + 6 UNVERIFIED cure-berry rows **resolved by me** as unreachable in singles (ITEMS2 cures before fainted-actions polls) → 38/38. `docs/ability-activation-audit-2026-08-25.md`, `docs/held-item-activation-audit-2026-08-25.md`. (4) **activation census** `docs/soak-activation-census-2026-08-25.md`: 8 sweeps, 55/71 abilities + 35/40 items ACTIVATED; announcing holes = Water Veil / Arena Trap / Leppa; Damp/Trace already evidenced; Truant/Trace instrument-blind. (5-6) receipt packs `gate6-water-veil`, `gate6-leppa-berry` (`36169f29`/`6d3c2837`), `gate6-arena-trap`, `gate6-ohko` (`6f123019`/`37ed4aff`) — all byte-identical twice, engine pins agree (Arena Trap: the refusal is a PARTY-MENU refusal from `HandleTurnActionSelectionState`, not `Cmd_jumpifcantswitch`). (7) **#128** receipt-then-fix (`bf1a5484`/`fdc21ede`/`c2fd533c`): `abilities[0] = [INTIMIDATE,0,0,0]` on the ROM, 8 `Cmd_get_ability` draws removed vs control; three-site fix + history-before-trapper order; 3 curated trajectory pins re-pinned. (8) **#129** (`9e4f86de`…`c9219630`): the OHKO trace had stalled at the faint prompt before `moveend`; with A pulses the ROM draws King's Rock exactly where the engine does — engine source-exact, 4 arms + Shell Bell KO heal pinned, #129 deleted. (9) **end-turn ordering audit** (26 min, `docs/end-turn-ordering-audit-2026-08-25.md`): 40 SAME-ORDER / 7 DIVERGENT rows (4 root causes) / 0 UNVERIFIED → #130-#133 filed, all supervisor-verified at source. (10) **#130/#132/#133 fixes** (side, 45 min, cap-killed with 12 trajectory pins red but all code + receipts committed): `gate6-first-turn-decay` (Fake Out `But it failed!` on turn 2; Speed Boost gated on the switch-in turn) + `gate6-screen-expiry-order` (foe's Reflect before Light Screen) receipts, `e56b4862`/`8c394142`/`69125042`. (11) **#131 fix** (ts, cap-killed mid-suite; salvaged `7b671ae1`): `issue131-endturn-order-off` receipt (order recomputed inside `BattleTurnPassed`; a speed tie costs exactly one extra draw and can swap), port `03a919c7`. (12) **union re-pin** (side, cap-killed after committing everything but its final suite): master merged, every moved curated pin attributed to one of the four fixes (whole-battle's first divergence = #131's tie draw), manifest regenerated; my own full suite on the union is the verification above.
-- **Sibling folds:** animation-main 4 commits (Eruption dense-latch evidence + `tools/compare` extractor; nothing under the Scene-OFF engine, so the gates above stand for the union) merged `c429f628` while its Codex supervisor was still live (cap 21:16); **at close `animation-main` is 7 commits ahead again — deliberately left unfolded (no time for another union suite before the deadline); fold at the next orient**; post-fold union `npm test` **1,153 files / 10,614 passed / 223 skipped** on `9632271c`; `npm run build` green; rust-main 0 ahead.
+- **Final gates on THIS tree (`ad062f30`, supervisor's own runs, all `--parallel`):** vanilla 0:20 **20/20**, full 0:60 **60/60**, winning 0:60 **60/60**, winning-swap 0:60 **60/60**; fifth gate — winning `--vary-rng --first-round` carry 0 **100/100**, carry 14 **100/100**, carry 28 **100/100**, winning-swap carry 0 **100/100** — **`budget` 0 on all four** (gates ran 18:57-20:08 under load 25-53: the animation Codex supervisor was live all session). Full `npm test` on `ad062f30` **1,150 files / 10,605 passed / 223 skipped**; `npm run build` green. DEFERRED.md: no open entries. The vanilla canary's TRAJECTORY differs from 1398 by design: #128 removed source-required AI draws and #130/#131/#133 change end-turn order/draws; the gate is the count, and each engine change carries a byte-identical stock-ROM receipt.
+- **Orient:** master `a2e72119`, both lane branches folded (0 ahead); oracle freshness FAIL = the standing false positive (only oracle-side commit since 8014's restart is that session's own `4dac4a35`, 6 min later); animation Codex supervisor live 15:16-21:16 on the shared services, so no restart. Baseline smoke 444/444 + build green.
+- **Did (12 worker steps, all Opus, ~$95):** (1-2) ability audit ×2 (9+24 min): **38/38 SOURCE-EXACT**; its first pass's 3 DIVERGENT rows (Magnet Pull/Plus/Minus `ABILITY_ON_FIELD2` history write) **refuted by me** — `ABILITYEFFECT_CHECK_OTHER_SIDE` is 12, so the `RecordAbilityBattle` tail never runs for FIELD_SPORT (14); real finding = #128. (3) held-item audit (10.5 min): 31 exact + 1 DIVERGENT **refuted** (`SwitchInClearSetData` is `battle_main.c:3253`, Choice Band IS cleared on switch-in) + 6 UNVERIFIED cure-berry rows **resolved by me** as unreachable in singles (ITEMS2 cures before fainted-actions polls) → 38/38. `docs/ability-activation-audit-2026-08-25.md`, `docs/held-item-activation-audit-2026-08-25.md`. (4) **activation census** `docs/soak-activation-census-2026-08-25.md`: 8 sweeps, 55/71 abilities + 35/40 items ACTIVATED; announcing holes = Water Veil / Arena Trap / Leppa; Damp/Trace already evidenced; Truant/Trace instrument-blind. (5-6) receipt packs `gate6-water-veil`, `gate6-leppa-berry` (`c6b21c19`/`dedbf40c`), `gate6-arena-trap`, `gate6-ohko` (`a631fdd3`/`6df55959`) — all byte-identical twice, engine pins agree (Arena Trap: the refusal is a PARTY-MENU refusal from `HandleTurnActionSelectionState`, not `Cmd_jumpifcantswitch`). (7) **#128** receipt-then-fix (`b78c8e44`/`d94469e7`/`52ad5b36`): `abilities[0] = [INTIMIDATE,0,0,0]` on the ROM, 8 `Cmd_get_ability` draws removed vs control; three-site fix + history-before-trapper order; 3 curated trajectory pins re-pinned. (8) **#129** (`e5c5c012`…`3c5a762c`): the OHKO trace had stalled at the faint prompt before `moveend`; with A pulses the ROM draws King's Rock exactly where the engine does — engine source-exact, 4 arms + Shell Bell KO heal pinned, #129 deleted. (9) **end-turn ordering audit** (26 min, `docs/end-turn-ordering-audit-2026-08-25.md`): 40 SAME-ORDER / 7 DIVERGENT rows (4 root causes) / 0 UNVERIFIED → #130-#133 filed, all supervisor-verified at source. (10) **#130/#132/#133 fixes** (side, 45 min, cap-killed with 12 trajectory pins red but all code + receipts committed): `gate6-first-turn-decay` (Fake Out `But it failed!` on turn 2; Speed Boost gated on the switch-in turn) + `gate6-screen-expiry-order` (foe's Reflect before Light Screen) receipts, `ea4c0be6`/`f2638dde`/`5a6ddb34`. (11) **#131 fix** (ts, cap-killed mid-suite; salvaged `be742e01`): `issue131-endturn-order-off` receipt (order recomputed inside `BattleTurnPassed`; a speed tie costs exactly one extra draw and can swap), port `3e170a59`. (12) **union re-pin** (side, cap-killed after committing everything but its final suite): master merged, every moved curated pin attributed to one of the four fixes (whole-battle's first divergence = #131's tie draw), manifest regenerated; my own full suite on the union is the verification above.
+- **Sibling folds:** animation-main 4 commits (Eruption dense-latch evidence + `tools/compare` extractor; nothing under the Scene-OFF engine, so the gates above stand for the union) merged `e09658e3` while its Codex supervisor was still live (cap 21:16); **at close `animation-main` is 7 commits ahead again — deliberately left unfolded (no time for another union suite before the deadline); fold at the next orient**; post-fold union `npm test` **1,153 files / 10,614 passed / 223 skipped** on `a36ff08a`; `npm run build` green; rust-main 0 ahead.
 - **Next:** (1) join today's receipts into the Gate-6 manifest's hand-coded `hookReceiptInfo` registry (Water Veil, Arena Trap, Sturdy, Leppa, Damp, Trace, #128, #130-#133 rows still read `engine-referenced-no-oracle-receipt`) — brief drafted; (2) a live ROM arm for Shell Bell's heal on a KO (two-turn fixture; kernel-pinned only today); (3) activation-census instrument filler: attribute `STRINGID_PKMNLOAFING`/`PKMNTRACED`, split "named in an item-manipulation message" from "fired"; (4) more lifecycle/ordering audits — they out-found site-by-site audits today (end-turn 4 real findings vs ability 1); candidates: switch-in hook ordering across both sides, faint-replacement sequencing, multi-turn move state across switches; (5) parked #71/#73/#39/#55; dormant #121; doubles-era #109/#114.
 - **Notes:** PAPERCUTS +3 (`rg` over the `reference/` symlink returns zero hits silently; battle-lab checkpoint is past turn 1's AI decision — window turn 2; traces ending on a faint prompt stall before `moveend`). Opus audit/staging workers early-stopped at 9-16 min of 45-50-min caps until briefs carried explicit pacing (then 24-45 min, complete). Three cap-kills today all salvaged with zero code loss (commit-per-rung discipline).
 
@@ -52860,7 +52860,7 @@ git; the current live ledger keeps the three load-bearing entries only.
 - **Supervisor setup:** local integration now uses `./run-supervisor.sh --lane integration --headless`, default supervisor `gpt-6.1-sol/high`, temporary integration workers and unchanged worker model routing. Guide: `ANIMATION_INTEGRATION_SUPERVISOR.md`. Tooling checks pass (72 affected tests, typecheck, shell syntax, coverage/audit); unchanged production gates below are reusable.
 - **State:** canonical primary checkout `<repo>`, `master`; all verified animation/integration/Rust branches and runtime research consolidated. Factory **276/277 accepted**, **65 playable adapters**, 211 accepted bodies still need wiring. Only one Git worktree remains.
 - **Did:** all 407 remote refs verified and archived locally; full server filesystem, ignored evidence, unfinished work and retired local worktrees preserved. Searchable export of **4,625** Codex/Claude transcripts. Server **164080634**, both primary IPs and dedicated firewall deleted; post-delete resource lists empty. Archive: `../hcloud-archive-20261002` (private, outside Git).
-- **Local fixes / checks:** ordinary party entry/cancel invalidates stale palette ownership; two duplicate-symbol source audits now select animation Cmd_end portably. Production checkpoint **b4befb4f7** passes typecheck/build, **1,477 files / 11,708 JS tests**, **1,832 Rust tests**, rebuilt WASM, both local oracles and fresh Rest/source controls. Local browser preview **http://127.0.0.1:5191/** passes four screenshot hashes, replay/export and scene-mode restart after server deletion.
+- **Local fixes / checks:** ordinary party entry/cancel invalidates stale palette ownership; two duplicate-symbol source audits now select animation Cmd_end portably. Production checkpoint **e433b295d** passes typecheck/build, **1,477 files / 11,708 JS tests**, **1,832 Rust tests**, rebuilt WASM, both local oracles and fresh Rest/source controls. Local browser preview **http://127.0.0.1:5191/** passes four screenshot hashes, replay/export and scene-mode restart after server deletion.
 - **Next:** continue locally from `ANIMATION_INTEGRATION_PROGRESS.md`; review recovered physical2 work, implement remaining live adapters and complete graphics ownership across party/switch histories. `LOCAL_SETUP.md` has startup/recovery instructions. Historical hcloud-only requirements are superseded. This migration adds no whole-playable exactness claim; prior mechanics issues below remain separate backlog.
 
 ---
@@ -52869,7 +52869,7 @@ git; the current live ledger keeps the three load-bearing entries only.
 
 ## 2026-10-13 — chg161: #167 (d) charge-turn EMPTYSTRING3 box per scene (main/ts, presentation only)
 
-- **State:** local master, production src `b048842dc` (+ pins `8ac2edd8f`). off108's Dig / Razor Wind / Solar Beam windows re-probed fresh
+- **State:** local master, production src `46d8198d8` (+ pins `c1e60173f`). off108's Dig / Razor Wind / Solar Beam windows re-probed fresh
   (6 / 6 r1 == r2 == off108). Charge print's first glyph vs ROM: OFF **0 / 0 / 0** (was +24), ON **0 / -1 / 0** (was +16 / +15 / +16;
   Razor Wind -1 = its 48-frame live adapter vs the 49-row ROM run).
 - **Did:** `chargeTurnEmptyBoxTiming` (BattleScriptFirstChargingTurn's box, every two-turn move): OFF 1 row (the off108 pause counts it,

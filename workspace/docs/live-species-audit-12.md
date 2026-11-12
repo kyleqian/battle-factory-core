@@ -2,7 +2,7 @@
 
 This audit uses the method of `docs/live-species-audit-11.md`, `-10.md` and `-9.md`. Each row swaps the species in an accepted s10a-live scenario, then compares the production live view against fresh direct mGBA. The verifier uses display names.
 The window, HP, gender, personality, status, preceding bodies, the Flatter activation gRng2Value (the D3 presentation words are pinned at each swapped scenario's own activation value, as the s10a-live fixtures pin them) and the Skill Swap optional-lag phase all come from the swapped scenario's **own** two fresh `prep22Probe.py` runs. Those runs must agree (`speciesAudit12Fixtures.py`). The check is `d4aTimingCheck.ts` (via `speciesAudit9Run.sh`).
-Master was 060e4729a (production src tree 7d28da92). All runs used direct mGBA only. No shared oracle was touched. Source patches were applied by `issue151Patch.sh` and always reverted, and `git status src` was clean at every commit.
+Master was 5e3f82dc9 (production src tree 7d28da92). All runs used direct mGBA only. No shared oracle was touched. Source patches were applied by `issue151Patch.sh` and always reverted, and `git status src` was clean at every commit.
 Evidence is in `tools/integration/fixtures/species-audit-12/`: `receipts/` (182 compact receipts), `run.log`, `coverage-grid.txt`, `residuals.tsv`, `derive.txt`, `derived/`, `scenarios/`, `list-*.tsv`, `counters.txt`, `patch-receipts/{p-shiny,p-nidoran,gate-lift,p-flshadow}/` (each with `summary.txt`), and the patches `subst-shiny-palette-env.diff`, `nidoran-gender-symbol-env.diff`, `gate-lift-env.diff` and `flatter-elevated-shadow-env.diff`.
 
 **182 rows. Every receipt is `identical true` over 2 fresh mGBA runs (0 non-identical).**
@@ -104,4 +104,4 @@ sh tools/integration/issue151Counters.sh /tmp/s12/counters 10 $D/alakazamA-skill
 ```
 
 ## 4. Gates
-`npm test` passed on 1107ded23: 1562 files passed / 44 skipped, 12,815 tests passed / 223 skipped, 410.9 s. `npm run build` passed. `git diff --check 060e4729a..HEAD` is clean. The commit range adds new files only, and `git status src` was clean at every commit.
+`npm test` passed on 5b9e65274: 1562 files passed / 44 skipped, 12,815 tests passed / 223 skipped, 410.9 s. `npm run build` passed. `git diff --check 5e3f82dc9..HEAD` is clean. The commit range adds new files only, and `git status src` was clean at every commit.

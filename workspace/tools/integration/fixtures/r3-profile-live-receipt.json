@@ -616,7 +616,7 @@
   }
  ],
  "testedCode": {
-  "commit": "da497d02da25c48435a1a8ff0a742aea2a2ceae3",
+  "commit": "409cdd83fa745428e22221f4795c1594e2480525",
   "srcTree": "19fc9fb7a0b0327fcc871a1e21cda7209a06b7fe",
   "note": "dense receipt run on this code (src unchanged by the receipt commit)"
  },
@@ -664,7 +664,7 @@
  "gates": {
   "fullSuite": "1541 files passed / 44 skipped, 12574 tests passed / 223 skipped",
   "build": "passed",
-  "differential": "fight-submenu + battle1-postwin-next-prompt + presentation-rng-playable-live-bodies-seeded-on: 624 captures byte-identical vs 187980f3d",
+  "differential": "fight-submenu + battle1-postwin-next-prompt + presentation-rng-playable-live-bodies-seeded-on: 624 captures byte-identical vs ef5e800d8",
   "shadowScan": "513 rows / 0 mismatches",
   "census": "234+11+0+31=276"
  }

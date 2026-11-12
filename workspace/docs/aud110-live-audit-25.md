@@ -1,6 +1,6 @@
 # aud110 — live audit 25 (S10A main lane, 2026-10-11): the Taunt / Harden windows stg107 flagged, re-checked with aligned windows
 
-Evidence only, new files only (`aud110*` prefix). Fixed base **master `5c050b765`** (production src `14d1be159`). Every production number is
+Evidence only, new files only (`aud110*` prefix). Fixed base **master `80bb333bd`** (production src `14d1be159`). Every production number is
 the PRODUCTION live renderer (`renderBattleResolutionLiveView` through audit20Check.ts / audit21Check.ts) on a git-archive copy of the base
 (+ stg107's Struggle diff so later Struggle bodies have adapters; the flagged bodies precede any Struggle). Direct mGBA only, lab seed
 305420349, species are internal ids, every probe = two fresh mGBA processes (r1 == r2), windows aligned with `aud110Align.py`
@@ -12,7 +12,7 @@ the PRODUCTION live renderer (`renderBattleResolutionLiveView` through audit20Ch
 The widened sweep then found **three real DEFECTS** (new, none in stg107's routes' flagged first bodies); each has a source mechanism and a
 banked patch proven 0 px on every flagged and widened window.
 
-| # | Window class | Unaligned (stg107's view) | Aligned, base 5c050b765 | Verdict | Aligned + patches |
+| # | Window class | Unaligned (stg107's view) | Aligned, base 80bb333bd | Verdict | Aligned + patches |
 |---|---|---|---|---|---|
 | 1 | Taunt 269, stg107 routes, player Taunter (6 windows: Snorlax / Onix / Golbat / Jolteon -> Snorlax / Onix / Shedinja / Golbat) | 29.5k..29.9k px, ages 0..48, 16..19 exact rows of 135 | 125 / 125 rows, **0 px** | **ARTIFACT** | 0 px |
 | 2 | Taunt 269, stg107 routes, opponent Taunter, 3 windows (Shedinja -> Snorlax, Snorlax -> Shuckle x2: first + later body) | 29.5k..29.7k px | **0 px** | **ARTIFACT** | 0 px |
@@ -73,7 +73,7 @@ squash differs.
 
 No TIMING-PHASE (D4-class) verdict anywhere: in all 69 windows the aligned rows are exact or the residual is a drawn-shape residual above.
 
-## 3. Census exposure (base 5c050b765, seeds 0..999, `ret88Census.sh shards`: 27,515 commands; `fixtures/aud110/exposure-base-5c050b765.json`)
+## 3. Census exposure (base 80bb333bd, seeds 0..999, `ret88Census.sh shards`: 27,515 commands; `fixtures/aud110/exposure-base-5c050b765.json`)
 
 The census counts every one of these bodies as **live** today (live = by status, not px-exact).
 
@@ -87,7 +87,7 @@ The census counts every one of these bodies as **live** today (live = by status,
 The census was not re-run on a patched tree: a patch is banked, but each is presentation-only and the budget was spent on the windows; a land step should run
 `ret88Census.sh compare` as usual (frames and keys cannot move; the three patches change no timing).
 
-## 4. Banked patches (apply to a git-archive copy of `5c050b765`; nothing is applied to the live tree)
+## 4. Banked patches (apply to a git-archive copy of `80bb333bd`; nothing is applied to the live tree)
 
 | Patch | Defect | Scope |
 |---|---|---|

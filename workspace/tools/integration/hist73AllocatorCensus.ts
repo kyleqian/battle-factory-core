@@ -1,4 +1,4 @@
-// hist73: a copy of prep52AllocatorCensus.ts re-run on master ff4baec48 (production src tree 5cd1b684), brought up to today's
+// hist73: a copy of prep52AllocatorCensus.ts re-run on master a7904fcc0 (production src tree 5cd1b684), brought up to today's
 // liveShareCensus.ts driver (hiddenSides passed to liveMoveAnimationPresentation / classifyPresentationDecline, hide66) and today's
 // allocator rules: factoryRoundBattleOrchestrator.ts prepareResolutionPalette scanThrough ~:2339-2357 also invalidates on a
 // kernel `animation` event (general / hit / stat) outside liveMoveSpriteAllocator.ts LIVE_SPRITE_ALLOCATOR_NET_ZERO_GENERAL_ANIMATIONS
@@ -6,13 +6,13 @@
 // refs: ball/summary commands ~:2427-2437, the send-out reseed ~:2446-2448, the crossed invalidate ~:2449, the forced switch-in
 // ~:2247-2316. --reseed-detail is always on (new tool, no prior receipts): each allocator decline carries the last switch-in reseed
 // record that left the host unknown (allocatorLastFailedReseed, with the order host's invalidReason).
-// prep52: a copy of prep50AllocatorCensus.ts re-run on master b8b169745 (production src tree dae0a8b9). prep50's status set is
+// prep52: a copy of prep50AllocatorCensus.ts re-run on master f038cc861 (production src tree dae0a8b9). prep50's status set is
 // now PRODUCTION (liveMoveSpriteAllocator.ts LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS; factoryRoundBattleOrchestrator.ts
 // prepareResolutionPalette scanThrough ~:2319-2334 sets crossedAllocatorUnknown only for a status animation outside the set, the
 // invalidate ~:2424); the shadow below reads the same export directly. Line refs otherwise: ball/summary commands ~:2403-2412, the
 // send-out reseed ~:2418-2423, the forced switch-in ~:2240-2295. The rules are otherwise unchanged since prep50.
 // prep50: a copy of prep44AllocatorCensus.ts (liveShareCensus.ts's battle driver; neither exports anything) re-run on master
-// 3fbe30cf7 (production src tree f1f2de08); the allocator rules it shadows are unchanged since prep44, only line numbers moved
+// eb3ae0163 (production src tree f1f2de08); the allocator rules it shadows are unchanged since prep44, only line numbers moved
 // (factoryRoundBattleOrchestrator.ts prepareResolutionPalette ~:2296-2420: status-animation scan ~:2315-2333 and the invalidate
 // ~:2416, ball/summary commands ~:2394-2400, the send-out reseed ~:2413-2415; the forced switch-in ~:2236-2290). Added: every
 // switch-in command activation and every forced switch-in entry records the allocator host before -> after and the order
@@ -63,7 +63,7 @@ import { spriteOrderStatusAnimationName, spriteOrderTrackerRoleIsomorphic } from
 // liveMoveSpriteAllocator.ts PLANS keys (not exported): the six audited wall-family plans.
 const ALLOCATOR_PLAN_IDS = new Set([112, 113, 115, 182, 243, 277]);
 const ALLOCATOR_NET_ZERO = new Set(liveMoveSpriteAllocator.LIVE_SPRITE_ALLOCATOR_NET_ZERO_MOVE_IDS);
-// prep50 status set (production since 0a74c111a); a prep52 temporary patch may widen it.
+// prep50 status set (production since 8e72343a7); a prep52 temporary patch may widen it.
 const ALLOCATOR_NET_ZERO_STATUS: ReadonlySet<string> = (liveMoveSpriteAllocator as { LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS?: ReadonlySet<string> })
   .LIVE_SPRITE_ALLOCATOR_NET_ZERO_STATUS_ANIMATIONS ?? new Set<string>();
 const statusInvalidates = (p: { isStatus2: number; status: number }) =>

@@ -1,11 +1,11 @@
 # Fixture sweep — 2026-08-17 (SIDE lane insurance pass)
 
-**Provenance:** this worktree is pinned to `1d22c07c` (Docs: brainSpeech
+**Provenance:** this worktree is pinned to `33fcda01` (Docs: brainSpeech
 real-close edge fix write-up, PROGRESS ledger update) — the tip of the six
 engine steps landed today (brainSpeech accept model + real-close edge,
 call-scene page/dismiss gates, boundary-family render fixes, gold transition
 te re-basing). A main-lane sibling is landing transition-overlay changes on
-`master` concurrently; **every number below describes the `1d22c07c` tree
+`master` concurrently; **every number below describes the `33fcda01` tree
 only**, not whatever `master` looks like by the time this is read. No source,
 tooling, trace, or doc file was edited to produce this report — it is a
 read-only evidence sweep (NO-CODE-CHANGE step). Oracle: Battle Scene OFF at
@@ -13,7 +13,7 @@ read-only evidence sweep (NO-CODE-CHANGE step). Oracle: Battle Scene OFF at
 
 ## Headline verdict
 
-**NOT all-EXACT.** Two real, reproducible deviation clusters on `1d22c07c`,
+**NOT all-EXACT.** Two real, reproducible deviation clusters on `33fcda01`,
 both confirmed by an immediate individual re-run (not sweep flukes):
 
 1. **`battle1-swap-*` family (17 of 18 traces) collapse to ~0/N** — whole-frame
@@ -246,10 +246,10 @@ policy are unexercised by this sweep.
   built in 6.52s (pre-existing >500kB single-chunk warning, unrelated to
   this sweep, not investigated).
 
-All three finish-line checks are green on `1d22c07c` **despite** the 26
+All three finish-line checks are green on `33fcda01` **despite** the 26
 DEVIATION rows above — those are `tools/compare/` (Tier 2, not part of
 `npm test`) fixtures the standing Tier-1 suite does not cover. Nothing in
-this sweep touched a file; the tree is byte-identical to `1d22c07c`.
+this sweep touched a file; the tree is byte-identical to `33fcda01`.
 
 ## #96 fix verification (2026-08-17)
 

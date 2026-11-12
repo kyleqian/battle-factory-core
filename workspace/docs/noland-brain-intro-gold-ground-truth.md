@@ -2,11 +2,11 @@
 
 Side-lane scout deliverable, gold sibling of
 `docs/noland-brain-intro-ground-truth.md` (silver, challenge 2, merge
-`a3db4cb1`). New files only — no `src/`, no `tools/compare/`.
+`a156cfa8`). New files only — no `src/`, no `tools/compare/`.
 
 ## REFRESH (2026-08-16): everything below §0 pre-2026-08-16 is stale
 
-Top-layer oracle commit `3e29880b` (2026-08-15) fixed gold Frontier-Brain
+Top-layer oracle commit `4dac4a35` (2026-08-15) fixed gold Frontier-Brain
 staging: `challengeNum 5` now sets `FLAG_SYS_FACTORY_SILVER` (0x8CC) so
 `GetFrontierBrainStatus` reads READY instead of NOT_READY. Before the fix,
 gold *battles* were genuinely the Brain's (`FillFactoryBrainParty` keys on
@@ -247,7 +247,7 @@ through `app-00700.png`, hashed the same way) sha-match the oracle frame at
 anchored inside the final black-flash hold (2722–2766) — confirmed by the
 app's own black hold lasting exactly 35 frames (0–34) and 2732+35 = 2767,
 the oracle's first post-black-flash frame. This also matches the fixture's
-prior history (`426a8535`): the old `preCheckpointFrameOffset: 1151` was
+prior history (`382473e9`): the old `preCheckpointFrameOffset: 1151` was
 likewise anchored inside that scenario's own final black-flash hold, not
 an arbitrary tick.
 
@@ -259,7 +259,7 @@ span) match **byte-for-byte**. The mismatch begins sharply at app frame 334
 like to battle!♥" (PNG-identical to app frame 333) while the fresh oracle
 has already moved on to the box-clearing transition. Root cause, pinned by
 direct frame-content inspection of the fresh self-diff: the **pic-reveal
-hold's own duration changed** as a side effect of the `3e29880b` fix, not
+hold's own duration changed** as a side effect of the `4dac4a35` fix, not
 just its absolute position. For this scenario the fresh oracle's hold
 (`c465f0`/`e7694d`/`a4c9ba` cycling) runs **82 frames** (2984–3065, 9
 sub-phases) before the transition-out begins at 3066; the app renders **142
@@ -1191,7 +1191,7 @@ now only the first turn keeps that; every later turn asserts `chars: 1`).
 ## Appendix: pre-fix (stale, oracle bug: missing gold Frontier-Brain symbol flag) history — captured 2026-08-14
 
 Everything below this line is the **original, unedited** capture from one
-day before the `3e29880b` fix landed. It is preserved for forensic/history
+day before the `4dac4a35` fix landed. It is preserved for forensic/history
 purposes and as a case study of the staging bug — **do not treat any
 frame number, sha, or wording claim below as current ground truth**; see
 the refresh above for the corrected reading. Original framing note (now

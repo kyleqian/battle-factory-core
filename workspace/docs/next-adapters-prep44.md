@@ -3,7 +3,7 @@
 Evidence only (side lane, new files only). Question: for each "sprite allocator history unknown" decline (Protect, Light Screen,
 Reflect, Barrier, Magic Coat, Mirror Coat; gate `liveMoveAnimation.ts` `if (!spriteAllocatorInput?.historyKnown) return null`),
 which earlier unit invalidated the production allocator host, and does a PLAN or a NET-ZERO proof exist for it? Measured with a
-TEMPORARY production patch (kept as `.diff`, reverted before every commit). Master `6c3406699` (src tree `e3fc2240`).
+TEMPORARY production patch (kept as `.diff`, reverted before every commit). Master `c99c8c6bd` (src tree `e3fc2240`).
 
 ## Results
 

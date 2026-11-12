@@ -1,9 +1,9 @@
 # Soak activation census — 2026-08-25 (supervisor, session 2)
 
 The first census taken with the ACTIVATION dimension of `--coverage-json`
-(landed `3a445bc3`, PROGRESS 1398 round 11) across enough seeds to read the
+(landed `82aab3f9`, PROGRESS 1398 round 11) across enough seeds to read the
 "never activated" complement as a worklist rather than as sampling noise.
-Everything below is from the supervisor's own runs on master `2a84050e`
+Everything below is from the supervisor's own runs on master `a2e72119`
 (engine tree unchanged since the 1398 gates).
 
 ## Inputs (8 reports, 1,216 seeds, 5,316 battles, 76k executed move actions)
@@ -54,7 +54,7 @@ Thin but non-zero: MAGNET_PULL 1, PRESSURE 1, PLUS 1, FORECAST 1, LIQUID_OOZE 1,
 
 Instrument caveat found here: silent items DO show "activations" (Scope Lens 31, BrightPowder 16, SilverPowder 14, Hard Stone 10, Quick Claw 5 …) because the `{B_LAST_ITEM}` buffer of Knock Off / Trick / Covet / Thief messages names the item. Read a silent item's activation count as "was named in an item-manipulation message", not as "its effect fired".
 
-## §4 Outcome counts (all eight sweeps, supervisor's own runs on `2a84050e`)
+## §4 Outcome counts (all eight sweeps, supervisor's own runs on `a2e72119`)
 
 | Sweep | OK | CRASH | HANG | breakdown |
 | --- | --- | --- | --- | --- |

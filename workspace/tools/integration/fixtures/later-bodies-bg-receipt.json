@@ -1,6 +1,6 @@
 {
  "schema": "later-bodies-bg-receipt/v1",
- "testedCodeCommit": "074276a0e8357717416bdf508660cf9c32961926",
+ "testedCodeCommit": "a7621fcc45c547d7bca12f61ca0677f8c34fed5b",
  "testedSrcTree": "c41c494992d376d29a9560423518366661d96c38",
  "scope": "MOVE_SILVER_WIND 318 (both sides) and MOVE_PSYCH_UP 244 (player attacker) on LATER bodies with a known production order lend (known-entry occupancy), !shiny. MOVE_OVERHEAT 315 stays first body. Live adapter, scoped exact; not whole-playable arbitrary-history exactness.",
  "gate": "src/engine/liveMoveAnimation.ts case 244/315/318: 315 requires spriteOrderInput.firstBody; 244/318 require spriteOrderInput.known (Psych Up and Silver Wind: spriteOrderWithOccupiedPrefix(free, KNOWN_ENTRY_OCCUPIED_SPRITE_ORDER) non-null).",

@@ -13,7 +13,7 @@ import {
 
 // seg127 (docs/seg127-status-se-gate.md): the banked IsBattleSEPlaying gate rule against every direct-mGBA receipt
 // (tools/integration/fixtures/seg127/receipts/rom-r1.json, 32 scenarios, r1 == r2) and the census projection on seeds 0..999
-// (fixtures/seg127/exposure.json, seg127Exposure.ts on the cfe4e26ca production kernel).
+// (fixtures/seg127/exposure.json, seg127Exposure.ts on the 9a184dfa6 production kernel).
 
 const FIX = "tools/integration/fixtures/seg127";
 const SONG_ID: Readonly<Record<string, number>> = { se_not_effective: 12, se_effective: 13, se_super_effective: 14 };
@@ -102,7 +102,7 @@ describe("seg127 IsBattleSEPlaying status-animation gate", () => {
   });
 
   it("replays every open census receipt through the event-level form (seeds 0..999: 72 gated, 745 frames)", () => {
-    // seg268: exposure.json regenerated on the current kernel; receipts were 8080 (cfe4e26ca), frames 729 (gated stays 72).
+    // seg268: exposure.json regenerated on the current kernel; receipts were 8080 (9a184dfa6), frames 729 (gated stays 72).
     expect(exposure.receipts).toBe(8023);
     expect(exposure.unclassified).toBe(0);
     let frames = 0;

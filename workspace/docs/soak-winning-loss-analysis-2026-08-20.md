@@ -294,7 +294,7 @@ all-immune scenario). `full`/`vanilla` byte-identical pins verified green
 unmodified; no `src/` change.
 
 **Like-for-like measurement, `--policy winning --seeds 0:60 --render-every
-0`, this worktree (based on side `0c60483b`, which sits on the same
+0`, this worktree (based on side `ec212ae0`, which sits on the same
 crash-fixed master as part C's own measurement — see note below):**
 
 | | OK | CRASH | HANG | carry>=7 | carry>=14 | carry>=21 | deepest carry | deepest depth | switches |
@@ -336,7 +336,7 @@ number; landing it as `winning`'s default remains the supervisor's call.
 ## 6. Draft heuristic (rung 2) re-measured on the #104-fixed tree (2026-08-20, side lane)
 
 Re-measures §3.5's withheld draft heuristic (`wip/mb-step2b-draft-heuristic`
-`e9a415a7`, cherry-picked onto this branch on top of master `f7ccbc5b` --
+`e9a415a7`, cherry-picked onto this branch on top of master `ef9723c9` --
 i.e. on top of rung 1 swap-decline, part C2's 0x-immune+50%-HP-gate switch,
 and the ISSUES #104 OK/HANG semantics retune, all of which post-date the
 branch this heuristic was cut from). Conflicts in `tests/randomRoundSoak.test.ts`
@@ -363,7 +363,7 @@ tools/soak/randomRoundSoakDriver.ts`, then restored; two concurrent
 
 | | OK | CRASH | HANG | carry>=7 | carry>=14 | carry>=21 | carry>=28 | deepest carry | deepest depth |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Baseline (master `f7ccbc5b`, no draft heuristic) | 30/30 | 0 | 0 | 30/30 (100%) | 27/30 (90.0%) | 3/30 (10.0%) | 1/30 (3.3%) | 28 | 28 |
+| Baseline (master `ef9723c9`, no draft heuristic) | 30/30 | 0 | 0 | 30/30 (100%) | 27/30 (90.0%) | 3/30 (10.0%) | 1/30 (3.3%) | 28 | 28 |
 | + rung 2 draft heuristic (`e9a415a7` cherry-picked) | 28/30 | 2 | 0 | 30/30 (100%) | 30/30 (100%) | 4/30 (13.3%) | 0/30 (0%) | 21 | 23 |
 
 The 2 heuristic-row crashes (seeds 27 and 29, both battle 3 turn 7, frames

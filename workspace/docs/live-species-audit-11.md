@@ -2,7 +2,7 @@
 
 This audit uses the method of `docs/live-species-audit-10.md` and `-9.md`. Each row swaps the species in an accepted s10a-live scenario, then compares the production live view against fresh direct mGBA. The verifier uses display names.
 The window, HP, gender, personality, status, preceding bodies, the activation gRng2Value (D3 presentation words; Dive `messageLines` pinned to the s10a-live `["", ""]`, Ice Ball `requestFields` `{turn 0, power 30, rolloutCounter 1}`) and the measured optional-lag phase all come from the swapped scenario's **own** two fresh `prep22Probe.py` runs, and those runs must agree (`speciesAudit11Fixtures.py`). The check is `d4aTimingCheck.ts` (via `speciesAudit9Run.sh`).
-Skill Swap 285 and Flatter 260 were **not on master** at the start (no `sf-live-receipt.json`; master 9e4eecfe6), so they are not audited.
+Skill Swap 285 and Flatter 260 were **not on master** at the start (no `sf-live-receipt.json`; master 463de1bac), so they are not audited.
 All runs used direct mGBA only. No shared oracle was touched. Source patches were applied by `issue151Patch.sh` and always reverted, and `git status src` was clean at every commit.
 Evidence is in `tools/integration/fixtures/species-audit-11/`: `receipts/` (176 compact receipts), `run.log`, `coverage-grid.txt`, `residuals.tsv`, `derive.txt`, `derived/`, `derived-measured/` + `receipts-measured/`, `scenarios/`, `list-*.tsv`, `counters.txt`, `patch-receipts/{p-dive,p-dive2,p-dive3,p-row68,gate-lift}/` (each with `summary.txt`), and the patches `dive-setup-length.diff`, `dive-setup-length-words.diff`, `dive-setup-length-words-row68.diff` (the full fix) `dive-row68-source-env.diff` (the phase probe) and `gate-lift-env.diff`.
 

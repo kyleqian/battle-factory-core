@@ -15,7 +15,7 @@ I ran one census seed (seed 3, Scene ON) to measure the baseline. No tests, soak
   - `beginScreenSoundTick` resets module state when the frame goes backwards (`screenSounds.ts:90-96`). Seed boundaries therefore reset it, but a worker should confirm this.
 - **Three files named in the design have moved or gone.**
   - `src/data/gen/audio-sound-sources.json` no longer exists. It is now `tests/fixtures/data/audio-sound-sources.json` (aud238, moved by cleanup).
-  - `tools/integration/lsd194CensusDelta.py` was deleted in cln237 (`4f6fa87e4`). The live delta model is `rst197CensusDelta.py:1-31`. It loads `r[0-9].jsonl` from two arm dirs keyed by seed and compares `eventsDigest` plus the commands.
+  - `tools/integration/lsd194CensusDelta.py` was deleted in cln237 (`54c5686f0`). The live delta model is `rst197CensusDelta.py:1-31`. It loads `r[0-9].jsonl` from two arm dirs keyed by seed and compares `eventsDigest` plus the commands.
   - `src/data/gen/anim-sound-timing.json` does exist, and it is the real engine-side table.
 
 ## 1. T1 / T2 concretely, and the census column

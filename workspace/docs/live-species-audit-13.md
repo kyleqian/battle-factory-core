@@ -1,6 +1,6 @@
 # Live adapter species audit 13 (S10A side lane, 2026-10-08): the defender doll, the attacker doll swaps, Ice Ball counters 1..4
 
-This audit swaps species in the evidence scenarios of the three Substitute-era features merged at master 5b131e7d5 (production src tree
+This audit swaps species in the evidence scenarios of the three Substitute-era features merged at master 821cdc031 (production src tree
 ccde138a), then compares the PRODUCTION live view with fresh direct-mGBA frames. The features are:
 - the DEFENDER shown as the doll (`LIVE_SUBSTITUTE_DOLL_DEFENDER_CELLS`, prep38 / dolldef-live);
 - the ATTACKER doll swaps (`LIVE_SUBSTITUTE_SWAP_BODY_IDS` = Headbutt 29, Body Slam 34, Leech Seed 73);
@@ -152,4 +152,4 @@ sh tools/integration/speciesAudit13IceBallRun.sh /tmp/s13/ibrec 10 /tmp/s13/ibde
 Timings: about 8 min for the 620 defender probes (15 jobs), 70 s per defender checker pass, 3 min for the swap probes and 1.5 min for the Ice Ball windows.
 
 ## 4. Gates
-`npm test` passed on 5713d177e: 1565 files passed / 44 skipped, 12,888 tests passed / 223 skipped, 569.7 s. `npm run build` passed. `git diff --check 5b131e7d5..HEAD` is clean. The commit range adds new files only (`git diff --diff-filter=AM --name-status` = A only). `git status src` was clean at every commit.
+`npm test` passed on 535fbe268: 1565 files passed / 44 skipped, 12,888 tests passed / 223 skipped, 569.7 s. `npm run build` passed. `git diff --check 821cdc031..HEAD` is clean. The commit range adds new files only (`git diff --diff-filter=AM --name-status` = A only). `git status src` was clean at every commit.

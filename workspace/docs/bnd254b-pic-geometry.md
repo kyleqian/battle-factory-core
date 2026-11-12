@@ -17,7 +17,7 @@ headless size does not shrink yet; after this step every remaining headless use 
 - `fieldArtBattler` builds `pic` as `{...spriteTableEntry, palette}` with `palette` from `battle-sprite-palettes.json` (cached per side /
   species, so `pic` identity stays stable). `pic.tileset` / `pic.frame2` are still the sprite table's own objects (render input).
 
-## Read inventory (before, on `7b899a9d6`)
+## Read inventory (before, on `b460b28c3`)
 
 | Read | Where | What it read | Now |
 | --- | --- | --- | --- |
@@ -50,7 +50,7 @@ the only failures were the three tests that render frames, and their stack was `
 
 ## Acceptance
 
-| | Before (`7b899a9d6`) | After |
+| | Before (`b460b28c3`) | After |
 | --- | --- | --- |
 | `ENGINE_BUILD` (`tools/build/engineBuildCheck.ts`) | `eb-f5ed6a9418d226b7` | `eb-7b7399877f107136` (expected: emitted code and a new 34 KB table) |
 | headless.js / chunks-headless | not re-measured on this base; the `bnd253a` baseline was 3,163,907 / 19,315,139 B | 3,164,714 / 19,351,586 B (+37 KB: the table; the 11.77 MB `assets-sprites` chunk is still there until `bnd-c`) |

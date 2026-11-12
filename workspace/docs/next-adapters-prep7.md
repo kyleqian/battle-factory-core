@@ -4,7 +4,7 @@ Evidence/design only; **new files only**, no tracked file edited, no production 
 slot/order audits, generated-rental routes, drafted fixtures) for the ten `docs/remaining-adapters-census.md` READY-NOW moves: AERIAL_ACE (332), QUICK_ATTACK (98), ICE_PUNCH (8), FAKE_TEARS (313), SLEEP_TALK (214),
 FEATHER_DANCE (297), then the order consumers FIRE_BLAST (126), DRAGON_DANCE (349), DOUBLE_TEAM (104), ROCK_SLIDE (157).
 All emulator frames are ROM frames from **direct, independent mGBA runs** (Scene ON, one fresh run per scenario; no shared oracle service was contacted). Not run: `npm test`/build/typecheck (no production file, test or `src/` type changed; `tools/` is outside
-`tsconfig`), any harness. Drafted fixtures are unverified until an adapter exists. Source = `reference/pokeemerald`; production paths are repo-relative at this branch's base (`2add7576e` + census ledger).
+`tsconfig`), any harness. Drafted fixtures are unverified until an adapter exists. Source = `reference/pokeemerald`; production paths are repo-relative at this branch's base (`c6990c1cc` + census ledger).
 
 ## 0. Verdicts
 

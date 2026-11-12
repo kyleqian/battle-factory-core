@@ -1,6 +1,6 @@
 # lsd186 — Leech Seed turn-end drain: HP → print timing, both scenes (sub183 residual; ISSUES #153 / #167 family)
 
-Side lane, 2026-10-16. **Evidence only** (no `src/` or test change). Base `0de537182`. Convention as sub183 / aud118: a "run" is consecutive
+Side lane, 2026-10-16. **Evidence only** (no `src/` or test change). Base `516670b9c`. Convention as sub183 / aud118: a "run" is consecutive
 frames on one `gBattlescriptCurrInstr`; "first glyph" is the first screen change inside the print's `waitmessage` run (= production's message
 command row 0). Receipts: `tools/integration/fixtures/lsd186/`.
 

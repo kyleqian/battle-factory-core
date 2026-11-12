@@ -1,6 +1,6 @@
 # obr251 -- the opponent faint-replacement party-status bar (hold, slide, mirrored balls, fade, SE)
 
-Base `efa890c0b`, branch `worker/integration-20261106-222122`. Presentation only: no kernel event, RNG draw, HP value or turn order changes.
+Base `0042829f8`, branch `worker/integration-20261106-222122`. Presentation only: no kernel event, RNG draw, HP value or turn order changes.
 Code: `src/engine/midBattleOpponentPartySummaryTiming.ts` (numbers), `src/engine/midBattleOpponentPartySummary.ts` (draw + SE),
 `battleResolutionPresentation.ts` (draw command timing), `battleResolutionPresentationRender.ts` (age fields on the view),
 `battleStartSounds.ts` (SE hook). `battleScene.ts` only delegates the opponent branch. Tests: `tests/obr251OpponentPartySummary.test.ts`.

@@ -1,8 +1,8 @@
 # trf174 — live Move_TRANSFORM body + transformed field (ISSUES #153 remainder)
 
 INTEGRATION lane, 2026-10-14. Presentation only: no kernel event, damage, RNG, turn-order or facility change.
-Production commit `64cf938b4` (src tree `9f2269bce9b6`); tests / tools / receipts in later commits on
-`worker/integration-20261014-074723` (base `78e61e8c1`).
+Production commit `33e29db0b` (src tree `9f2269bce9b6`); tests / tools / receipts in later commits on
+`worker/integration-20261014-074723` (base `0d6ec248e`).
 
 ## Results
 
@@ -14,9 +14,9 @@ Production commit `64cf938b4` (src tree `9f2269bce9b6`); tests / tools / receipt
 | Post-body field (`trf174Field.ts`: rows y < 112 from the first row after the window, 140 rows or up to the next script) | **8 / 8 windows, 140 / 140 rows 0 px**: the copied species' picture, the transform palette, its corner, an elevated GOLBAT's elevation and enemy shadow (opponent DITTO), DITTO's own idle rest. Controls: the untransformed DITTO field 0 / 140 rows (242,060–292,320 px), the copied species with its raw palette 0 / 140 (183,400–285,740 px) | `tools/integration/fixtures/trf174/field.json` |
 | Tier-1 (`tests/trf174Transform.test.ts`, 5 tests) | all 8 x 109 ROM rows sha256-exact through the live renderer; the mosaic law; field art (pic, blend, elevation, own rest); ledger set on completion / reverted by a switch-in; declines | — |
 | Ordinary route, census seed 197 (`trf174Route.ts`, production only), both scenes | the Transform command (CHANSEY via Metronome -> MANTINE) is **live: 112 frames = 3 pre rows (age 0) + 109 body rows (ages 0..108)**, then every view of the rest of the battle (12,498 ON / 11,771 OFF frames: messages, menus, HP, hits, stats-change, status animations, switch-ins of the other side, faint) shows the battler as MANTINE | `tools/integration/fixtures/trf174/route-seed197-{on,off}.jsonl` |
-| Census 0..999, both scenes (`trf174Census.sh`, base `78e61e8c1` vs head `11fefbbd5`, src == `64cf938b4`) | **Command KEY sequences and `battleDigestExcludingFrames` identical** in both scenes; played / terminal / stalled 1000 / 997 / 3 unchanged. Every change is in **battle 197** (the census's only Transform: CHANSEY's Metronome -> Transform copying MANTINE). ON: 34 records — the Transform 32-frame fallback -> **live 112 frames**, and 33 later bodies of that battle (Aerial Ace 6, BubbleBeam 10, Confuse Ray 3, Future Sight 1, Icy Wind 6, Magic Coat 2, Psybeam 2, Rain Dance 3) now decline with "transformed battler: no body proven on the copied picture" (31 were live: they drew CHANSEY where the ROM shows MANTINE; 2 Magic Coat were already presentation fallbacks with an 81-frame live duration). Live 27,030 -> 27,000 commands (99.35 -> 99.24 %), 4,139,338 -> 4,133,093 frames. OFF: 1 record — the Transform 32 -> live 112 (live 82 -> 83) | `tools/integration/fixtures/trf174/census-{on,off}-{check,delta,keycheck}.txt`, `census-attribution.txt` |
-| Differential (`fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 78e61e8c1`) | **641 / 641 captures byte-identical** (235 + 216 + 190) | `tools/integration/fixtures/trf174/differential.log` |
-| Gates on `55310d1a3` (tree `0f4223bc5699`, src `9f2269bce9b6` == production commit `64cf938b4`) | typecheck 0; smoke 448 / 448 (on `64cf938b4`); **full `npm test` 1,676 files passed / 44 skipped, 13,909 tests passed / 223 skipped, 0 failed** (2,978 s, `POKEBENCH_VITEST_MAX_WORKERS=2`); **`npm run build` OK**; soak vanilla 0:20 `--parallel 2`: **NOT COMPLETED** — started 09:57 after the build, still running (no result line) at the 10:44 session cap; rerun required | `.integration/validation/trf174/gates/` |
+| Census 0..999, both scenes (`trf174Census.sh`, base `0d6ec248e` vs head `d27b4bcaf`, src == `33e29db0b`) | **Command KEY sequences and `battleDigestExcludingFrames` identical** in both scenes; played / terminal / stalled 1000 / 997 / 3 unchanged. Every change is in **battle 197** (the census's only Transform: CHANSEY's Metronome -> Transform copying MANTINE). ON: 34 records — the Transform 32-frame fallback -> **live 112 frames**, and 33 later bodies of that battle (Aerial Ace 6, BubbleBeam 10, Confuse Ray 3, Future Sight 1, Icy Wind 6, Magic Coat 2, Psybeam 2, Rain Dance 3) now decline with "transformed battler: no body proven on the copied picture" (31 were live: they drew CHANSEY where the ROM shows MANTINE; 2 Magic Coat were already presentation fallbacks with an 81-frame live duration). Live 27,030 -> 27,000 commands (99.35 -> 99.24 %), 4,139,338 -> 4,133,093 frames. OFF: 1 record — the Transform 32 -> live 112 (live 82 -> 83) | `tools/integration/fixtures/trf174/census-{on,off}-{check,delta,keycheck}.txt`, `census-attribution.txt` |
+| Differential (`fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 0d6ec248e`) | **641 / 641 captures byte-identical** (235 + 216 + 190) | `tools/integration/fixtures/trf174/differential.log` |
+| Gates on `f11ef79b3` (tree `0f4223bc5699`, src `9f2269bce9b6` == production commit `33e29db0b`) | typecheck 0; smoke 448 / 448 (on `33e29db0b`); **full `npm test` 1,676 files passed / 44 skipped, 13,909 tests passed / 223 skipped, 0 failed** (2,978 s, `POKEBENCH_VITEST_MAX_WORKERS=2`); **`npm run build` OK**; soak vanilla 0:20 `--parallel 2`: **NOT COMPLETED** — started 09:57 after the build, still running (no result line) at the 10:44 session cap; rerun required | `.integration/validation/trf174/gates/` |
 
 ## Source and measured law
 
@@ -81,7 +81,7 @@ TRF174_AGE_SHIFT=1 node --experimental-strip-types --no-warnings tools/integrati
 TRF174_FIELD_OUT=field.json node --experimental-strip-types --no-warnings tools/integration/trf174Field.ts <OUT> tools/integration/fixtures/trf174/trf174-*.json
 POKEBENCH_LIVE_PROBE_SHARE=1 node --experimental-strip-types --no-warnings tools/integration/liveFixtureDriver.ts on.json tools/integration/fixtures/trf174/trf174-on-*.json
 node --experimental-strip-types --no-warnings tools/integration/trf174Route.ts --seeds=197 --scene=on|off
-TRF174_CENSUS_JOBS=7 sh tools/integration/trf174Census.sh <fresh> 78e61e8c1:on 64cf938b4:on 78e61e8c1:off 64cf938b4:off
+TRF174_CENSUS_JOBS=7 sh tools/integration/trf174Census.sh <fresh> 0d6ec248e:on 33e29db0b:on 0d6ec248e:off 33e29db0b:off
 sh tools/integration/ret88Census.sh compare <fresh>/on-78e61e8c1 <fresh>/on-64cf938b4 <out-on>   # and off
 npx vitest run tests/trf174Transform.test.ts
 ```

@@ -4,7 +4,7 @@
 
 | field | value |
 | --- | --- |
-| Tree hash (HEAD at audit time) | `299c48ebb558630a5774b7a825f45e2fecc0e183` (commit `12d32d2f`) |
+| Tree hash (HEAD at audit time) | `299c48ebb558630a5774b7a825f45e2fecc0e183` (commit `2eb5e4d9`) |
 | Date | 2026-08-26, worker start `Wed Aug 26 00:33:39 PDT 2026` |
 | Lane / oracle | ts (main) lane, Battle Scene OFF (`http://127.0.0.1:8014`). Static audit — the oracle was **not** run. |
 | Scope | From a battler's HP reaching 0 to its replacement's first eligible action, BOTH sides, Level-50 **singles**: `Cmd_tryfaintmon` (both callers), `BattleScript_FaintTarget`/`_FaintAttacker`, `gHitMarker` faint bits, `Cmd_checkteamslost`, `Cmd_getexp`'s Frontier early exit, `HandleFaintedMonActions` state by state, `BattleScript_FaintedMonChooseAnother`/`_FaintedMonTryChoose` opcode by opcode, `Cmd_openpartyscreen`, `Cmd_switchineffects` on the REPLACEMENT path, the sequencing combinations, and the terminal seam. Docs-only step — no engine/test/tool/data edits. |

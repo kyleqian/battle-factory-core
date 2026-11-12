@@ -3,7 +3,7 @@
 Evidence only (side lane, new files only). Question: for every "sprite-order lend unknown" decline (gate `liveMoveAnimation.ts`
 `if (!spriteOrderInput?.known) return null`), which units took the production order host from known to unknown, which later units
 kept it unknown, and which of them can get an EXACT plan? Measured with a TEMPORARY production patch (kept as `.diff`, reverted
-before every commit). Census baseline: master `2d29f058e` (production src tree `e3fc2240`). A sibling integration worker is landing
+before every commit). Census baseline: master `5779aa253` (production src tree `e3fc2240`). A sibling integration worker is landing
 prep44's allocator ids. This census does not include that work.
 
 ## Results

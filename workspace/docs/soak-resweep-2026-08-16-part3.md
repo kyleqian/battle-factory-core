@@ -4,7 +4,7 @@ Two goals from the supervisor step brief:
 
 1. Re-sweep `--policy winning --seeds 0:60` now that #93 (forced-switch
    handoff preempting a fainted battler's trailing `Cmd_moveend` commands,
-   `0a11132f`) is fixed — the part-1/part-2 winning sweeps
+   `3fdd610c`) is fixed — the part-1/part-2 winning sweeps
    (`docs/soak-winning-sweep-2026-08-16.md`,
    `docs/soak-winning-sweep-2026-08-16-part2.md`) both predate the fix, and
    #93 legitimately changes presentation-frame timing (and, because

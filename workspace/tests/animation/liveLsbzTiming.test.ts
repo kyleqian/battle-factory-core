@@ -73,7 +73,7 @@ describe("lsbz: Light Screen (113) opponent row-59 BLDALPHA write phase", () => 
 });
 
 // lsbz ordinary routes (live-share census seeds 0..299, liveShareCensus.ts streak = i * 11 % 49): the opponent's Light Screen (policy phase, no
-// hold) and the opponent's impact-198 Blizzard (WALREIN -> JYNX: fallback 361 rows on 0a74c111a, live 362 = impact + 164 now) through the
+// hold) and the opponent's impact-198 Blizzard (WALREIN -> JYNX: fallback 361 rows on 8e72343a7, live 362 = impact + 164 now) through the
 // generated route, the following prompt reached, Scene ON/OFF gameplay / RNG / facility parity.
 describe("lsbz ordinary routes", () => {
   const rulesWithoutSceneMarker = (v: { rules: any }) => {

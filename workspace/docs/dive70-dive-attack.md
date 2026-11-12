@@ -1,6 +1,6 @@
 # dive70 (S10A integration, 2026-10-10): the Dive 291 ATTACK body plays live
 
-Base `67a38e3f8` (src `afcf8175`). Tested code: `16802a1c6` (src tree `77c81b59`). The only production change is
+Base `889a5baf6` (src `afcf8175`). Tested code: `8f8a21fb6` (src tree `77c81b59`). The only production change is
 `src/engine/liveMoveAnimation.ts`. Receipt: `tools/integration/fixtures/dive70-live-receipt.json`. Only direct mGBA processes were used; the
 shared HTTP oracles were not touched.
 
@@ -69,7 +69,7 @@ window has 4 / 4 identical runs.
 
 ### Census, Scene ON/OFF parity, ordinary route
 
-**Census seeds 0..299** (`liveShareCensus.ts`, base `67a38e3f8` vs final; `fixtures/dive70-census-seeds0-299.json`):
+**Census seeds 0..299** (`liveShareCensus.ts`, base `889a5baf6` vs final; `fixtures/dive70-census-seeds0-299.json`):
 
 - **+15 live commands / +1,395 live frames.**
 - Live share: 7,794 → 7,809 by count (97.79 % → **97.98 %**), and 1,157,616 → 1,159,011 by frames (98.94 % → **99.06 %**).
@@ -163,7 +163,7 @@ Receipts: `fixtures/dive70-parity-seed{68,162}.json`.
 - An elevated opponent diver declines. The census Dive users (CHINCHOU, CLAMPERL, CLOYSTER, POLITOED, LUVDISC) are not elevated
   (`enemy-mon-elevations.json`), so the gate has no census cost.
 
-## 4. Gates (final code `16802a1c6`, src `77c81b59`)
+## 4. Gates (final code `8f8a21fb6`, src `77c81b59`)
 
 - New tests in `tests/animation/liveDiveAttackAdapter.test.ts` (5 tests):
   - the receipt;
@@ -171,7 +171,7 @@ Receipts: `fixtures/dive70-parity-seed{68,162}.json`.
   - the gates;
   - render purity;
   - ordinary route + export replay.
-- **Revert experiment:** with `liveMoveAnimation.ts` reverted to `67a38e3f8`, 4 / 5 fail. Only the static receipt test passes.
+- **Revert experiment:** with `liveMoveAnimation.ts` reverted to `889a5baf6`, 4 / 5 fail. Only the static receipt test passes.
 - Pins moved:
   - `liveDiveSetupAdapter`: attack 93 rows; the seed 111 attack is live.
   - `wordsOrderDeferredLend`: seed 19 rain frames are setup 0..114 then attack 0..92.
@@ -185,7 +185,7 @@ Receipts: `fixtures/dive70-parity-seed{68,162}.json`.
   - The first shard-1 run failed one pin: `liveStatusImplementedCount` fixes the faithful-timing entry's field set, and the new `bodies`
     field broke it. The field was removed, that file was rerun alone, and both shards were rerun.
 - `npm run build`: OK (881 modules).
-- `compare:differential` (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs `67a38e3f8`:
+- `compare:differential` (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs `889a5baf6`:
   **624 / 624 byte-identical**.
 - `git diff --check`: clean. `battleScene.ts` is untouched, so the split-eligibility test is unaffected; it passes in the suite.
 
@@ -207,7 +207,7 @@ ls tools/integration/fixtures/dive70/*.json | xargs -P 5 -n 1 sh -c 'POKEBENCH_L
 JOBS=12 sh tools/integration/dive70Probes.sh <PP> 2 tools/integration/fixtures/dive70/scenarios/protect-*.json
 python3 tools/integration/dive70Receipt.py <FB> check.jsonl <PP> receipt.json <E>          # == fixtures/dive70-live-receipt.json
 npx vitest run tests/animation/liveDiveAttackAdapter.test.ts tests/animation/liveDiveSetupAdapter.test.ts tests/wordsOrderDeferredLend.test.ts
-# census (base: git archive 67a38e3f8 workspace/src workspace/tools ... into a scratch dir, node_modules symlinked, this census tool copied in)
+# census (base: git archive 889a5baf6 workspace/src workspace/tools ... into a scratch dir, node_modules symlinked, this census tool copied in)
 node --experimental-strip-types --no-warnings tools/integration/liveShareCensus.ts --seeds=0..299 --out=a.json --commands=a.jsonl
 python3 tools/integration/prep43CensusDelta.py base.json base.jsonl a.json a.jsonl delta.json
 node --experimental-strip-types --no-warnings tools/integration/hide66Parity.ts --seed=68 --streak=13 --moves=291

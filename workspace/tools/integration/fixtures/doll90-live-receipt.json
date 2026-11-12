@@ -1,10 +1,10 @@
 {
  "schema": "doll90-live-receipt/v1",
- "base": "d46cdfff1 (src 8150be72)",
+ "base": "28c610da8 (src 8150be72)",
  "testedCode": {
-  "commit": "c89c27a0d952997c39f91a280c2b8b1b1db2cf55",
+  "commit": "3066bc4dd32f4975225a60e1737c8320f41d66a9",
   "srcTree": "d3e66c8b15527e89ac080d625f53a159681d484b",
-  "note": "production code final at c89c27a0d; later commits are docs / receipts only"
+  "note": "production code final at 3066bc4dd; later commits are docs / receipts only"
  },
  "method": "fresh direct mGBA (never the shared HTTP oracles), explicit lab seed 305419897, every scenario twice (r1 == r2 byte-identical); production live renderer through attdollLiveCheck.ts (speciesAudit14SwapCheck.ts, --personalities = doll90Personality.py RAM reads) and prep38Check.ts; tools/integration/doll90Run.sh",
  "landed": [
@@ -104,8 +104,8 @@
  ],
  "census": {
   "seeds": "0..999 (10 --index-from shards each, hist73Merge.py + land82CensusCheck.py)",
-  "base": "d46cdfff1",
-  "final": "c89c27a0d (identical receipts on d3cc27427)",
+  "base": "28c610da8",
+  "final": "3066bc4dd (identical receipts on a6dbe3bb4)",
   "check": [
    "live count 25962 -> 25999 (94.35 % -> 94.49 %), live frames 3880093 -> 3888853 (97.77 % -> 98.0 %)",
    "stalled in both runs: [(434, 21), (796, 34), (881, 38)] | truncated tails: []",
@@ -177,6 +177,6 @@
    "shard2": "809 files passed / 22 skipped; 6361 tests passed / 104 skipped"
   },
   "build": "exit 0",
-  "differential": "PASS 624 / 624 captures byte-identical (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs d46cdfff1"
+  "differential": "PASS 624 / 624 captures byte-identical (fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on) vs 28c610da8"
  }
 }

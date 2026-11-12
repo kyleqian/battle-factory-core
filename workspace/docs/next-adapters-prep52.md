@@ -1,8 +1,8 @@
 # S10A prep52 — sprite ALLOCATOR tail after prep50: every remaining body / status invalidator audited
 
-Evidence only (side lane, new files only). Question: after prep50's status set landed (`0a74c111a`), which units still leave the
+Evidence only (side lane, new files only). Question: after prep50's status set landed (`8e72343a7`), which units still leave the
 production allocator host unknown, are they net-zero, and what does clearing them buy? Measured with a TEMPORARY production patch
-(kept as `.diff`, reverted before every commit). Master `b8b169745` (production src tree `dae0a8b9`).
+(kept as `.diff`, reverted before every commit). Master `f038cc861` (production src tree `dae0a8b9`).
 
 ## Results
 
@@ -12,7 +12,7 @@ prep50's). The chain predictor ("live iff chain ⊆ cleared set") predicted exac
 
 | src | live by count | live by frames | allocator-unknown declines |
 |---|---|---|---|
-| master `b8b169745` | 7445 / 7970 = **93.41 %** | 1106914 / 1168196 = **94.75 %** | 89 cmds / 9153 frames |
+| master `f038cc861` | 7445 / 7970 = **93.41 %** | 1106914 / 1168196 = **94.75 %** | 89 cmds / 9153 frames |
 | + prep52 patch (`fixtures/prep52/prep52-temp-src.diff`) | **7505 = 94.17 % (+60)** | **1112926 = 95.27 % (+6012)** | 29 / 3141 (−66 %) |
 
 After the patch the allocator residual is **entirely order-host scope**. Every one of the 29 remaining declines has the chain

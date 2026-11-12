@@ -1,10 +1,10 @@
 # idle98 (S10A timing fidelity, 2026-10-11): the universal pre / post rows on damaging moves, a temp patch, and the two larger timeline gaps
 
-Base: master `3dd2b74b9` (production src `2e5b1d7c`). Evidence only, new files only. The production change is a TEMP PATCH
+Base: master `b42cb1a64` (production src `2e5b1d7c`). Evidence only, new files only. The production change is a TEMP PATCH
 (`tools/integration/fixtures/idle98/idle98-universal-rows.diff`). It was applied only to git-archive copies of the base under the gitignored
 scratch dir. Direct mGBA only (no shared oracle), with an explicit lab seed in every scenario. Every probe job ran twice in fresh
 processes, r1 == r2 byte for byte (36 / 36 scenario outputs + 8 / 8 STATS_CHANGE outputs). Predictions were committed before any probe
-(`9e8a6982d`, `fixtures/idle98/predictions.json`).
+(`aa36ebfb4`, `fixtures/idle98/predictions.json`).
 
 ## 1. Results first
 
@@ -45,7 +45,7 @@ Scene OFF: hit-path L_OFF = 0. A no-hit body has no OFF command: L_OFF = (attG -
 
 1. On a tree WITHOUT land97: apply `tools/integration/fixtures/idle98/idle98-universal-rows.diff` from the repo top (`patch -p1 < workspace/tools/...diff`;
    `git apply` run from inside the tree silently skips it). Rerun `sh tools/integration/idle98Run.sh <fresh-out-dir> --census` on the fold's base: every
-   receipt must be SAME (the runner's archive base is 3dd2b74b9; on a newer base expect only the census and route sha columns to move).
+   receipt must be SAME (the runner's archive base is b42cb1a64; on a newer base expect only the census and route sha columns to move).
 2. On a tree WITH land97 (idle94 lead rows): the pre rows come before the lead rows. Fold both into one hold: duration = P + N + D + T, and
    age = clamp(elapsed - P - N, 0, D - 1). Use `liveMoveIdleLeadRows` for N and keep this patch's masks for P / T. The 13 masked moves are
    exactly the leads land97 does not cover (Thunder Punch, Bind, Supersonic, Flamethrower, Double Team, Recover, Rock Slide ply, Faint Attack,
@@ -65,7 +65,7 @@ Scene OFF: hit-path L_OFF = 0. A no-hit body has no OFF command: L_OFF = (attG -
 
 ## 4. Pins the patch moves
 
-Patched copy (`git archive 3dd2b74b9` + the diff, its own two-commit git repo), `npm test`: **65 files / 273 tests failed, 1,557 files /
+Patched copy (`git archive b42cb1a64` + the diff, its own two-commit git repo), `npm test`: **65 files / 273 tests failed, 1,557 files /
 13,042 tests passed** (44 / 223 skipped). 0 non-timing failures. Each pin asserts a live body's ordinary-route row count, age sequence or command
 duration. Each moves by P + T (+3 or +5) per live body on its route. `tools/integration/fixtures/idle98/pins.json` lists all 273 with each assertion's first
 line. Per file:
@@ -173,7 +173,7 @@ pause was not anchored here (it needs the message command's first-glyph frame). 
   32 / 32 routes == committed sha256, class table json + tsv, and 14 / 14 render routes x2 x2 == the committed render check.
 - `sh tools/integration/idle98Run.sh <fresh> --census` (01:32 -> 01:42, after the doc commits): **ALL SAME**. That covers everything above plus
   both censuses -> census-delta.json and the exposure run -> exposure.json, byte-identical to the hand-run receipts.
-- `npm test` in a git-archive copy of `ca0add97f` (its own two-commit git repo; HEAD also carries the supervisor's interleaved ctl95 merge):
+- `npm test` in a git-archive copy of `03b5b6c7e` (its own two-commit git repo; HEAD also carries the supervisor's interleaved ctl95 merge):
   **1,623 files / 13,335 tests passed** (44 / 223 skipped), 0 failed. `npm run build` in the same copy: **green** (exit 0). Later commits add only `pins.json`, `idle98Pins.py` and this doc (no TypeScript).
 - `git diff --check` is clean at every commit. `git status --short` listed only new idle98 files, staged by explicit path. The live checkout's git
   still resolves to the repo top (no nested `.git` was created).

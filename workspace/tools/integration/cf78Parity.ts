@@ -4,8 +4,8 @@
 // (liveSubstituteSwapView, then liveMoveAnimationPresentation with liveMoveHiddenSides). Controller = land75Parity.ts's (the census
 // controller: FIGHT + least-used legal slot, forced replacement answered with the first healthy member). At every action-menu arrival
 // the battle RNG, rules context (hitMarker bit 128 masked) and boundary must be equal ON vs OFF.
-//   battle 950 (seed 950, streak 13): the player's CASTFORM in SEALEO's hail, then against SWELLOW (18 of its 19 bodies live on c68111480);
-//   battle 603 (seed 603, streak 18): the player's CASTFORM in rain (13 live bodies on c68111480).
+//   battle 950 (seed 950, streak 13): the player's CASTFORM in SEALEO's hail, then against SWELLOW (18 of its 19 bodies live on 9115d5ec3);
+//   battle 603 (seed 603, streak 18): the player's CASTFORM in rain (13 live bodies on 9115d5ec3).
 //   node --experimental-strip-types --no-warnings tools/integration/cf78Parity.ts [--seed=950] [--streak=13] [--out=file.json]
 import assert from "node:assert/strict";
 import "../../src/engine/monPicPixelsInstall.ts";

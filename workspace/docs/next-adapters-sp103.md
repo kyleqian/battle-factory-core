@@ -1,6 +1,6 @@
 # sp103 — Shadow Punch 325: the age-90 restore lag, a D4 phase census (evidence only)
 
-Side lane, evidence only, new files only. Base master `3cc8381ce` (production src `dc6c756a`). No tracked file is modified. The D4 entry
+Side lane, evidence only, new files only. Base master `4b5d16e70` (production src `dc6c756a`). No tracked file is modified. The D4 entry
 is a temp patch (`tools/integration/fixtures/sp103/sp103-shadow-punch-d4.diff`), applied ONLY to a git-archive copy. Presentation only:
 no gameplay, RNG, damage, turn order or facility state is touched. It follows fp100 (`docs/fp100-focus-punch-d4.md`, Focus Punch 264).
 Live audit 24 first found this lag (`docs/live-audit-24.md`, "TIMING-PHASE").
@@ -126,7 +126,7 @@ reference inputs). **4 tests move because of the patch**, all intentional:
   - Fix shape: draw the return for the opponent battler whenever its field-art elevation is > 0, at `101 + deferrals`, attacker or
     target.
 - **land97 row 0, also for an elevated opponent TARGET.** On the same windows, lead row 0 is 200 px (`receipts/lead-head.json`,
-  `audit24LeadCheck.ts`): player HAUNTER -> CROBAT, 8 / 8 bodies, both phases. df4afda75 gated only an elevated opponent ATTACKER. Shadow
+  `audit24LeadCheck.ts`): player HAUNTER -> CROBAT, 8 / 8 bodies, both phases. 86d983b80 gated only an elevated opponent ATTACKER. Shadow
   Punch's age-0 image also hides an elevated TARGET's shadow, while the ROM's activation row still shows it.
 - **ARTIFACT (pre-existing): the player window's last row is E+5.** Live audit 24 found it in the no-lag phase (SKARMORY ply row 113).
   Here it is CROBAT-slow b3 age 105 on HEAD, and with the patch STEELIX / CROBAT age 106 (1,440 / ~1,409 px, the opponent healthbox).

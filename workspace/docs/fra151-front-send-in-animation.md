@@ -2,8 +2,8 @@
 
 Presentation only: no rules / RNG / damage / turn-order / timing / facility change (census 0..999 battle, frame and command digests
 identical; 3,554 switch-in commands unchanged). Scene OFF is unchanged: OFF takes SKIP_FRONT_ANIM (`pokemon.c:6803`, ISSUES #71
-Slice-D) and production passes no species to the OFF send-in. Base `877580fde`. Code commits `54b8e73bf` (R1), `c9cd71564` (R1/R2
-refinements), tests `b232e6a99` / `fd149ae38` (ratchet), tooling + receipts `4737c65d2`.
+Slice-D) and production passes no species to the OFF send-in. Base `84335c25a`. Code commits `e88816487` (R1), `0080847ba` (R1/R2
+refinements), tests `c80c58ad5` / `d17b7a34e` (ratchet), tooling + receipts `63548a073`.
 
 ## Results first
 
@@ -14,8 +14,8 @@ refinements), tests `b232e6a99` / `fd149ae38` (ratchet), tooling + receipts `473
 | R2 breadth | **57 sibling Roar windows** (Scene ON, direct mGBA, twice fresh), 51 front animIds incl. affine rotation (SPIN, TWIST, SWING_*, BOUNCE_ROTATE_*, ROTATE_UP_*, H_PIVOT, TIP_MOVE_FORWARD, FRONT_FLIP), affine scale / stretch (V_STRETCH, V_SQUISH_*, SHRINK_GROW, GROW_*, LUNGE_GROW, CIRCLE_INTO_BG, H_JUMPS_V_STRETCH*, CIRCULAR_STRETCH_TWICE), palette (GLOW_BLACK / BLUE / ORANGE, FLASH_YELLOW), FLICKER_INCREASING, and 13 delayed species (delay 10..70): **56 / 57 windows 0 px on every compared row** (all regions); PONYTA 1 row (below). With R1: 56 of the 62 Factory front animIds, 364 / 376 Factory species by animId. |
 | R2 extra (r1 only, not in the runner) | The 6 animIds without a runner window, staged once (genderless species with `gender: genderless`): QUAGSIRE (H_STRETCH) and REGICE (FOUR_PETAL) **0 px**; LUNATONE (SWING_CONVEX_FAST), MAGNEMITE (TUMBLING_FRONT_FLIP_TWICE), STARYU (TWIST_TWICE) opp 0 px except STARYU rows 123..125 (2,319 px, past production's command end); SOLROCK (ROTATE_TO_SIDES_TWICE) 110 rows / 170,860 px (remainder 2). LUNATONE / MAGNEMITE / STARYU / SOLROCK also show 29 hb + msg rows: snd145's species tail is wrong for these genderless species (remainder 3). |
 | R3 rest | The send-in's terminal state equals `speciesFrontIdleRestOffset` (what the live move renderers and rst139's ordinary rows read through `liveBattlerX2History`'s send-in → `idle`) **and** the ROM rest receipt `fixtures/x2-history/species-rest-x2.json` for all **376** Factory species (frame 0, no matrix, no blend) — `tests/fra151FrontSendIn.test.ts`. ONIX Roar window through el 230: 0 px opponent sprite incl. the +1 rest rows after the send-in. Live bodies after an ONIX send-in: ROM x2 +1 at activation = tracker prediction (existing receipt `fixtures/x2-history/faint-sendin-receipt.json`); the move-body renderers are untouched by fra151 (census move records identical). No new pixel window of a live body after a send-in was staged (time). |
-| R3 census | `sar131Census.sh` seeds 0..999 Scene ON, base `877580fde` vs `c9cd71564`: **27,271 move records, 0 key / frame / live-frame / decline / status changes**, live 27,055 / 27,236, all 10 shards' `battleDigest`, `battleDigestExcludingFrames`, `battleFrames`, `commandDigest` identical; `snd145CensusDelta.py`: 22,583 segments, 0 changed, **3,554 switch-in commands, 0 changed** (`fixtures/fra151/census-*.json`). |
-| R3 differential | `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 877580fde`: **235 / 235, 216 / 216, 190 / 190 byte-identical** (PASS, 641). The seeded-on trace's one opponent send-in capture (3965, MURKROW el ~107) is past its animation; dense `--capture-range 3850:3970`: frames **3891..3940 differ** (418 .. 1,134 px) = MURKROW's V_SQUISH_AND_BOUNCE on the real production route (faint replacement from 3858). App-only route (the oracle cannot replay it); BRELOOM / DEWGONG windows (same / sibling animId) are its ROM proof. The canonical two did not move, so no `npm run compare` was needed. |
+| R3 census | `sar131Census.sh` seeds 0..999 Scene ON, base `84335c25a` vs `0080847ba`: **27,271 move records, 0 key / frame / live-frame / decline / status changes**, live 27,055 / 27,236, all 10 shards' `battleDigest`, `battleDigestExcludingFrames`, `battleFrames`, `commandDigest` identical; `snd145CensusDelta.py`: 22,583 segments, 0 changed, **3,554 switch-in commands, 0 changed** (`fixtures/fra151/census-*.json`). |
+| R3 differential | `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 84335c25a`: **235 / 235, 216 / 216, 190 / 190 byte-identical** (PASS, 641). The seeded-on trace's one opponent send-in capture (3965, MURKROW el ~107) is past its animation; dense `--capture-range 3850:3970`: frames **3891..3940 differ** (418 .. 1,134 px) = MURKROW's V_SQUISH_AND_BOUNCE on the real production route (faint replacement from 3858). App-only route (the oracle cannot replay it); BRELOOM / DEWGONG windows (same / sibling animId) are its ROM proof. The canonical two did not move, so no `npm run compare` was needed. |
 
 ### R1 windows (opponent sprite region x >= 120, y < 64; rows = switch-in el 0 .. message + 2 / end of the faint hold)
 
@@ -72,9 +72,9 @@ refinements), tests `b232e6a99` / `fd149ae38` (ratchet), tooling + receipts `473
 Affected: `tests/fra151FrontSendIn.test.ts` 8 / 8 (anchors, delay, ONIX +1, affine identity / persistence / V_STRETCH sign,
 install-only ticks, glow / flicker, the 376-species rest pin), `battleResolutionPresentation`, `midBattleSwitchBallFade`, `sendInTail`,
 `forcedSwitchContinuation`, `kabutoSendOut` 89 / 89; `npm run typecheck` OK; `npm run test:smoke` 448 / 448. Full `npm test` on
-`4737c65d2` (tree `dbd29961`, src `59146bc0`): 1,659 files / 13,789 tests passed, **1 failed** = `animationBoundaryRatchet` (the two
+`63548a073` (tree `dbd29961`, src `59146bc0`): 1,659 files / 13,789 tests passed, **1 failed** = `animationBoundaryRatchet` (the two
 new `src/animation` imports of `battleResolutionPresentationRender.ts`); the ratchet admits that module with its justification in
-`fd149ae38` (3 / 3). Final full suite / build: see the worker report.
+`d17b7a34e` (3 / 3). Final full suite / build: see the worker report.
 
 ## Files
 
@@ -89,6 +89,6 @@ hold, `midBattleSwitchInPalette`), `src/engine/battleScene.ts` (`drawMidBattleSw
 
 ```sh
 sh tools/integration/fra151Run.sh <fresh-dir>            # R1 + R2 (69 windows x2 fresh) + R3 tests (~8-15 min, oracle load): ALL SAME
-sh tools/integration/fra151Run.sh <fresh-dir> --census   # + census base 877580fde vs HEAD (~8 min)
-npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 877580fde
+sh tools/integration/fra151Run.sh <fresh-dir> --census   # + census base 84335c25a vs HEAD (~8 min)
+npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 84335c25a
 ```

@@ -1,5 +1,5 @@
 // Live audit 18: audit17Check.ts (the production hosts fed AS THE ORCHESTRATOR DOES, CHAIN + ENTRY lends, two FRESH direct-mGBA probe
-// processes per scenario, r1 == r2 per-row digests) on master b7da8aa34 (src afcf8175), extended to this morning's folds:
+// processes per scenario, r1 == r2 per-row digests) on master 3dd7835fd (src afcf8175), extended to this morning's folds:
 //  - turns come from the ROM (fixture precedingTurns by gBattleResults.battleTurnCounter) and each turn begins with
 //    beginLiveSpriteOrderTurn(host, t + 1, promptShown[t]) — false for a PLAYER-locked strike turn, exactly the orchestrator's
 //    beginOrderTurn(!playerLocked) (audit 17 grouped turns by prompt cycle and always passed true);

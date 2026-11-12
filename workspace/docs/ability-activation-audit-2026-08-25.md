@@ -1,6 +1,6 @@
 # Ability activation-path audit — source vs port (2026-08-25)
 
-**Tree at audit start:** `86d7b62b26d3e71275477335da5d5dff5ad8d78b` (HEAD `2a84050e`).
+**Tree at audit start:** `86d7b62b26d3e71275477335da5d5dff5ad8d78b` (HEAD `a2e72119`).
 **Scope:** the 38 abilities that `docs/gate6-coverage-manifest.md`
 §"Held-effect and ability hook universes" → "Abilities" marks
 `engine-referenced-no-oracle-receipt` **and** that have ≥1 Level-50 Factory

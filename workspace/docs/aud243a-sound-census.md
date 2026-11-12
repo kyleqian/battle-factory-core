@@ -9,7 +9,7 @@ Nothing here changes an emitted sound id or frame.
 
 1. `src/engine/tickSounds.ts` `emitTickSounds(state, next)`: the post-`tickEngineState` sound block of `tick()` (intro, forced-party send-out, mid-battle switch, hit / effectiveness, `emitMoveAnimSounds`, forfeit end, battle end), moved verbatim, same order.
    It reads only `battleScene` (canonical route: `resolutionOwner.forcedPartySelect`) and `factoryRoundBattleOrchestrator` of the before / after state (`TickSoundState`). `tick()` keeps `beginScreenSoundTick` before and `runScheduledScreenSounds` after it.
-   **ENGINE_BUILD moved:** `eb-7b7399877f107136` (parent `0b793e387`) -> `eb-808efc83d08831db` (the headless graph gained a module).
+   **ENGINE_BUILD moved:** `eb-7b7399877f107136` (parent `0430eb85b`) -> `eb-808efc83d08831db` (the headless graph gained a module).
 2. `tools/integration/lsd194Census.ts` adds three fields per seed; no existing field changes (proof below):
    - `sound`: `[[frame, kind, id, pan(, mode)]...]`, `frame` = 1-based census step (= `FactorySession.frame` after that tick), `mode` only for cries. Per step: `collectSoundTick(frame, () => { beginScreenSoundTick(frame); advance; emitTickSounds({battleScene: null, factoryRoundBattleOrchestrator: before}, {.. after}); runScheduledScreenSounds(); })`.
      The census has no `EngineState`, so the before / after shape is the minimal `{ battleScene: null, factoryRoundBattleOrchestrator }` (the census never uses the canonical `battleScene` route). Menu SEs fire inside the advance functions and are collected too.
@@ -32,9 +32,9 @@ python3 tools/integration/soundCensusDelta.py BASE FINAL                    # so
 python3 tools/integration/soundCensusDelta.py --t1 <arm> [--json out.json]  # T1 class table
 ```
 
-## Neutrality proof (final src tree `6b314e07`, commit `858ea0343`, parent `0b793e387`)
+## Neutrality proof (final src tree `6b314e07`, commit `28394735e`, parent `0430eb85b`)
 
-- Seeds 0..39, both scenes, `HEAD` vs `0b793e387` (the base arm runs the same new `lsd194Census.ts` and writes `sound: null`): after dropping `sound` / `soundDigest` / `soundAnim`, 40 / 40 rows byte-identical (JSON re-serialised) on ON and on OFF.
+- Seeds 0..39, both scenes, `HEAD` vs `0430eb85b` (the base arm runs the same new `lsd194Census.ts` and writes `sound: null`): after dropping `sound` / `soundDigest` / `soundAnim`, 40 / 40 rows byte-identical (JSON re-serialised) on ON and on OFF.
 - Seeds 0..999, both scenes, vs the obr251 baseline arms `on|off-50285b9d9`: `rst197CensusDelta.py` reports 1000 battles, 322634 (ON) / 317269 (OFF) commands, 1000 identical, `bad 0` (digest, error and every command field equal). 3 seeds per scene end with an `error`, identically in the baseline.
 - 326594 (ON) / 90141 (OFF) sound events over 1000 seeds.
 

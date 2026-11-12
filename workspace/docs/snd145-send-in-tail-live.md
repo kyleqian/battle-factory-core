@@ -1,8 +1,8 @@
 # snd145 — species-keyed opponent send-in tail + send-in ball-open fade / particles (S10A, ISSUES #146 open remainder)
 
 Presentation only: no rules / RNG / damage / turn-order / facility change (census `battleDigestExcludingFrames` identical, soak decisions
-identical). Base `9f97eab40` (src `65a45fcc`); code commits `97523d757` (R1) .. `385423830` (last src change), tooling / receipts
-through `96a258766` (src `364e0849`). Design: `docs/send-in-tail-model.md` §1.
+identical). Base `1ee686507` (src `65a45fcc`); code commits `d7d3a0342` (R1) .. `31c4b2bfd` (last src change), tooling / receipts
+through `33490fa0b` (src `364e0849`). Design: `docs/send-in-tail-model.md` §1.
 
 ## Results first
 
@@ -14,9 +14,9 @@ through `96a258766` (src `364e0849`). Design: `docs/send-in-tail-model.md` §1.
 | R3 fade / particles | The send-in half of the ball-open white fade + 16 particles is keyed to the current `switch-in` command's elapsed for **every** send-in, both scene modes (`SpriteCB_ReleaseMonFromBall` -> `LaunchBallFadeMonTask(…, 14, …)` fades BG palettes 1-3 whichever side sends). Opponent: white in from el 19, 8-frame plateau (no slide stolen tick), particles spawned from el 17 at the opponent ball (`PARTICLE_ORIGIN`, no terrain clip), `obj` 0 (its tint stays the sprite's own). Player: the voluntary fixture's windows at trace 1140 + el (pinned identical to the old fadeTick clock for el 0..101). Recall half unchanged (voluntary-switch fadeTick clock). Voluntary ground truth unchanged: `mid-battle-switch-dense-a-off` 377 / 395 and `mid-battle-switch-pacing-b-off` 91 / 153 with identical mismatch lists before / after. |
 | R4 proof | 14 dense oracle windows, every one **twice fresh byte-identical** (`fixtures/snd145/rom-sha.json`), rendered through the production path (`snd145Compare.ts`: `createBattleResolutionPresentationRenderView` + `renderBattleResolutionLiveView`). **Scene ON Roar: 6 / 6 species, every healthbox and message row 0 px** from send-in start through the first "dragged out!" glyph + 2. Scene ON faint replacement: healthbox rows 0 px except TYPHLOSION's slide-start lag frame; one message row per species (the blank, see below). Table below. |
 | R4 prompt | Faint replacement (real production routes, `snd145RouteProbe.ts` seeds 0..5): message box blanks at tail + 11, action menu at **tail + 17 = the ROM's + 17** on 5 / 5 measured species (ROM blank + 10, CASTFORM + 11). |
-| R5 census | Seeds 0..999 Scene ON, base `9f97eab40` vs final: 27,402 move records, **0 key / frame / status / decline changes**, live share identical **27,186 / 27,367 (99.34 %), 4,146,057 / 4,162,691 frames (99.60 %)**, 8,063 status animations, `battleDigestExcludingFrames` + `commandDigest` identical in all 10 shards. Segment changes: **only `switch-in` commands** (1,783 of 3,550; the rest are player-side), 0 command-type sequence changes; battle frames 15,926,929 -> 16,015,559 (+88,630 = +75,870 switch-in spans + ~1,160 faint-replacement holds × 11 + ±1-2 frames per battle of input-cadence realignment). |
+| R5 census | Seeds 0..999 Scene ON, base `1ee686507` vs final: 27,402 move records, **0 key / frame / status / decline changes**, live share identical **27,186 / 27,367 (99.34 %), 4,146,057 / 4,162,691 frames (99.60 %)**, 8,063 status animations, `battleDigestExcludingFrames` + `commandDigest` identical in all 10 shards. Segment changes: **only `switch-in` commands** (1,783 of 3,550; the rest are player-side), 0 command-type sequence changes; battle frames 15,926,929 -> 16,015,559 (+88,630 = +75,870 switch-in spans + ~1,160 faint-replacement holds × 11 + ±1-2 frames per battle of input-cadence realignment). |
 | R5 soak | `npm run soak -- --policy vanilla --seeds 0:20` (run as `--parallel 8`, base and final trees): **20 / 20 OK** both, all budget-ended; per-seed outcome / battle / turn / carry / depth / last actions **byte-identical incl. frames** (the soak plays the default Scene OFF, whose timing snd145 leaves unchanged; R3 is render-only). |
-| R5 differential | `--base 9f97eab40`: fight-submenu **235 / 235**, battle1-postwin-next-prompt **216 / 216** byte-identical; presentation-rng-playable-live-bodies-seeded-on **189 / 190** — frame 3965 (6,659 px). Dense `--capture-range 3700:4150`: differing frames 3876..3965 (the trace's end) = an **opponent faint-replacement send-in** (BUG CATCHER DESTIN -> MURKROW 198, switch-in from 3858): the new el-18 fade / particles and the species slide (el 86 instead of 33). App-only generated route: the oracle cannot replay it (0 / 116 on the final tree), so the ROM check is the dense lab windows; no pin regenerated (the capture list is still valid). |
+| R5 differential | `--base 1ee686507`: fight-submenu **235 / 235**, battle1-postwin-next-prompt **216 / 216** byte-identical; presentation-rng-playable-live-bodies-seeded-on **189 / 190** — frame 3965 (6,659 px). Dense `--capture-range 3700:4150`: differing frames 3876..3965 (the trace's end) = an **opponent faint-replacement send-in** (BUG CATCHER DESTIN -> MURKROW 198, switch-in from 3858): the new el-18 fade / particles and the species slide (el 86 instead of 33). App-only generated route: the oracle cannot replay it (0 / 116 on the final tree), so the ROM check is the dense lab windows; no pin regenerated (the capture list is still valid). |
 
 ### R4 dense windows (Scene ON oracle 8012, OFF 8014 control; rows = switch-in elapsed 0 .. message + 2, faint: .. end of hold)
 
@@ -57,13 +57,13 @@ ROM: opponent slide el 36 constant (front animation skipped), message slide + 26
 (the cry starts at release and `SwitchIn_HandleSoundAndEnd` waits for it). Production OFF: slide 33, span 91 + 11 (unchanged by snd145).
 Measured OFF residual on the two windows: 68 hb + msg rows each. A fix needs the per-species cry end (m4a lengths) for the message.
 
-## Gates (tested commit `1bc2ae511`, tree `b71c6340`, src `364e0849`)
+## Gates (tested commit `28fccc4b9`, tree `b71c6340`, src `364e0849`)
 
 Full `npm test` **1,655 files / 13,724 tests passed, 0 failed** (44 files / 223 tests skipped); `npm run build` OK; `npm run typecheck` OK;
-`npm run test:smoke` OK; `git diff --check` clean. A first full run (tree of `96a258766`) failed 7 tests in 2 files that pin absolute
+`npm run test:smoke` OK; `git diff --check` clean. A first full run (tree of `33490fa0b`) failed 7 tests in 2 files that pin absolute
 Scene ON route frames (`tests/sc106StatsChangeCommand.test.ts` 3, `tests/sgl138SeGateLive.test.ts` 4); all 7 moves were attributed to
 opponent send-ins (sgl138 totals == the census per-battle deltas; sc106 WOBBUFFET / GROWLITHE / NIDORINA send-ins) and re-pinned in
-`1bc2ae511`. `snd145Run.sh` twice into fresh dirs: run2 ALL SAME.
+`28fccc4b9`. `snd145Run.sh` twice into fresh dirs: run2 ALL SAME.
 
 ## Files
 
@@ -81,5 +81,5 @@ Tools: `snd145GenTable.py`, `snd145Stage.py`, `snd145Compare.ts`, `snd145Summary
 sh tools/integration/snd145Run.sh <fresh-dir>              # R1 + R4 (~4 min): ALL SAME (supervisor-style rerun: run2 ALL SAME)
 sh tools/integration/snd145Run.sh <fresh-dir> --census     # + R5 census both arms (~6 min)
 sh tools/integration/snd145Run.sh <fresh-dir> --soak       # + R5 vanilla soak 0:20 both trees (~7 min)
-npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 9f97eab40
+npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 1ee686507
 ```

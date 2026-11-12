@@ -3,7 +3,7 @@
 Evidence only (side lane, new files only). Question: for each order-host unit of `docs/live-share-census.md`'s order-host table
 (the host's `invalidReason` at lend-unknown bodies), does a constant EXACT plan exist in the tracker's plan format, does the order
 depend on Random2 words, or on something else? Measured with a TEMPORARY production patch (kept as `.diff`, reverted before every
-commit) through the existing corpus replay and the live-share census on the same seeds. Master `ad32f4adf` (src tree `9a1e8a70`).
+commit) through the existing corpus replay and the live-share census on the same seeds. Master `e13dd8db0` (src tree `9a1e8a70`).
 
 ## Results
 

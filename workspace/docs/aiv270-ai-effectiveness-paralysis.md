@@ -7,7 +7,7 @@ supervisor wrote from its commits and evidence (`.integration/evidence/aiv270/`,
 
 ## 1. Fixes
 
-- **A** (`746d19464`, seed 22): `factoryAiCheckBadMove.ts` `runCheckBadMovePreamble` (`AI_CBM_CheckIfNegatesType`,
+- **A** (`9ad62911f`, seed 22): `factoryAiCheckBadMove.ts` `runCheckBadMovePreamble` (`AI_CBM_CheckIfNegatesType`,
   `data/battle_ai_scripts.s:57-65`) and `runCbmHighRiskForDamage` test `if_type_effectiveness AI_EFFECTIVENESS_x0` /
   the Wonder Guard `AI_EFFECTIVENESS_x2` gate with `computeAiEffectiveness` (table-order modulation, 0 lifted to 1 by a later
   non-zero row), not the true multiplier. C: `Cmd_if_type_effectiveness` (`battle_ai_script_commands.c:1515-1557`) never copies
@@ -15,7 +15,7 @@ supervisor wrote from its commits and evidence (`.integration/evidence/aiv270/`,
   is not x0 to the AI and the two `get_ability` draws are consumed. `typeMultiplierTenths` is now documented as real-damage only.
   STAB is not modelled in `computeAiEffectiveness`; checked by the supervisor: TypeCalc's x1.5 STAB maps 120 / 240 / 30 / 15 back
   to x2 / x4 / x0.5 / x0.25, so every value the scripts test (x0, x0.25, x0.5, x2, x4) is the same with or without STAB.
-- **B** (`01ad01f2a`, seed 30): `Cmd_if_target_faster` / `Cmd_if_user_faster` -> `GetWhoStrikesFirst(user, target, TRUE)`
+- **B** (`60282bba8`, seed 30): `Cmd_if_target_faster` / `Cmd_if_user_faster` -> `GetWhoStrikesFirst(user, target, TRUE)`
   (`battle_main.c` ~4604-4692) read the TRUE battle state of both battlers. One helper `aiTurnOrder` / `toTurnOrderBattler`
   in `factoryAiCheckViability.ts` replaces every hand-built `TurnOrderBattler` literal; `factoryAiLiveDriver.ts` fills the new
   view fields from the same `turnOrderBattlerInputs` / `turnOrderWeather` the real turn order uses
@@ -44,7 +44,7 @@ A: 69 outcome-differing decisions in 23 seeds; B: 227 decisions in 78 seeds (cau
 Quick Claw ~60, Swift Swim 8, ...). ON / OFF command-list changed sets identical. 22 seeds see an outcome-differing decision but
 the battle is unchanged. One seed errors in both arms (pre-existing, unchanged).
 
-## 5. Re-pins (`f396c0f8d`)
+## 5. Re-pins (`36898bb11`)
 
 - `tests/fix122AuditDefects.test.ts`: move 115 glyph-40 case, census battle 33 -> 176 (unchanged seed, start = glyph - 1).
 - `tests/sub157SceneOffSubstitute.test.ts`: player-attacker Substitute x2, seed 74 -> 373 (unchanged seed, same attacker / count).
@@ -53,5 +53,5 @@ No coverage loss.
 
 ## 6. Gates
 
-Full suite on `f396c0f8d` (src == final): **1,758 files passed + 44 skipped, 14,499 tests, 0 failed**
+Full suite on `36898bb11` (src == final): **1,758 files passed + 44 skipped, 14,499 tests, 0 failed**
 (`.integration/evidence/aiv270/gates/test.log`). Build / build:lib and vanilla 0:20 soaks: supervisor run, see PROGRESS.

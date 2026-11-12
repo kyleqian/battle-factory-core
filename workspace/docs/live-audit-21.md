@@ -26,7 +26,7 @@ attacker from reducer age 58 (live age 14). That constant was fitted on prep7's 
 - Sunny Day under sandstorm.
 
 Method:
-- Base: master `5af9bdb51` (production src `e7a4775e`), unpatched. No shared oracle was touched; direct mGBA only.
+- Base: master `3033719c6` (production src `e7a4775e`), unpatched. No shared oracle was touched; direct mGBA only.
 - Castform / Quick Attack / form-change families: live audits 18 / 19 / 20's method (`audit21Check.ts` = `cast83Check.ts` = `audit19Check.ts`
   + the slot form).
   - Battle-lab scenarios with the explicit lab seed 305420349 (ISSUES #154).
@@ -144,8 +144,8 @@ Doll notes:
 Gates (evidence only):
 - `npm test`: 1,616 files / 13,272 tests passed, 44 files / 223 tests skipped, 0 failed (concurrent with run C);
 - `npm run build`: green;
-- `git diff --check 5af9bdb51..HEAD`: clean;
-- every change since `5af9bdb51` is an added file in the audit21 set; no existing tracked file is modified.
+- `git diff --check 3033719c6..HEAD`: clean;
+- every change since `3033719c6` is an added file in the audit21 set; no existing tracked file is modified.
 
 ## 3. Reproduction (from workspace/; direct mGBA only; production src is never patched)
 

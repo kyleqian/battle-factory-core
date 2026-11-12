@@ -5,7 +5,7 @@ rental POKéMON, too!", accepting into `SILVER_CRY_BOX` — "Shake out every
 last bit of your knowledge and bring it on!" — via `brainSpeechClosing`) was
 fixtured in this step as the second-tier verification target for the
 just-landed gold twin (`docs/speech-close-edge-evidence.md`,
-commit `fbb8a516`). `brainSpeechClosing` is shared tier-general code, so this
+commit `ea36151c`). `brainSpeechClosing` is shared tier-general code, so this
 fixture bounds the same edge on silver's own box indices/timing.
 
 ## 1. Onset derivation (frame-diff on an already-committed dense probe)

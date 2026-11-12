@@ -2,7 +2,7 @@
   "schema": "order-cross-body-live-receipt/v1",
   "claim": "Production tracks the free-slot sSpriteOrder across bodies from the known entry while every unit since is modelled (docs/sprite-order-gap-causes.md section 2); order consumers render as later bodies whenever the tracked order is known and decline otherwise. Presentation-only: rules/RNG/turn order/facility state unchanged. Not whole-playable arbitrary-history framebuffer exactness.",
   "testedCode": {
-    "commit": "35c7f902fe689b77486233f6532105e14155dabe",
+    "commit": "72880ce1a336515f563b9f9c54d4002aff2b0d1f",
     "srcTree": "4d63d17928289a452bf034e2ffb161cf0c494f90"
   },
   "api": {
@@ -34,13 +34,13 @@
   },
   "bundle": {
     "baseline": {
-      "commit": "72610e111",
+      "commit": "a1c7c408e",
       "jsBytes": 31973755,
       "viteKB": "31,973.76 kB",
       "viteGzipKB": "2,827.52 kB"
     },
     "final": {
-      "commit": "35c7f902f",
+      "commit": "72880ce1a",
       "jsBytes": 31997193,
       "viteKB": "31,997.19 kB",
       "viteGzipKB": "2,833.70 kB"
@@ -719,7 +719,7 @@
       "duration": "398.54s"
     },
     "build": "npm run build exit 0",
-    "diffCheck": "git diff --check clean (worktree and 72610e111..HEAD)",
+    "diffCheck": "git diff --check clean (worktree and a1c7c408e..HEAD)",
     "logs": ".integration/validation/order-cross-body/gates/"
   },
   "commands": [

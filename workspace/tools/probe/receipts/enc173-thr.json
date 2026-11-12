@@ -68,7 +68,7 @@
    "verdict": "PASS"
   }
  },
- "fixShape": "None needed: PASS at base commit 5e78e4030 (no engine change); the case is shown not to diverge.",
+ "fixShape": "None needed: PASS at base commit 9a133b0a3 (no engine change); the case is shown not to diverge.",
  "oracleProfile": "battle-scene-off",
  "seed": 305419897,
  "runs": 2,

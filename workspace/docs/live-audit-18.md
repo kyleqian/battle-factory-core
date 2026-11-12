@@ -8,7 +8,7 @@ view with the CHAIN lend and the ENTRY lend against two more fresh direct-mGBA p
 host pinned at the RAM `gRng2Value` of each Dive activation (prep65's method), Random2 consumers (Wish / Water Pulse) pinned the same way,
 the Substitute doll, the orchestrator's geometry-plan callback with the displayed field + lent order, production's hide in
 `view.visibility` checked against the ROM's own battler-sprite `invisible` flags at every activation, and production's decline reason for
-every non-live window. Master `b7da8aa34` (src `afcf8175`), unpatched. No shared oracle was touched. Evidence:
+every non-live window. Master `3dd7835fd` (src `afcf8175`), unpatched. No shared oracle was touched. Evidence:
 `tools/integration/fixtures/audit-18/`.
 
 ## 1. Results first
@@ -86,16 +86,16 @@ The only hidden-vs-visible phase change is the Light Screen one (named above); t
 
 ### Target 3: census battle 713 (`receipts/c713/`)
 
-`audit18Census713.ts` (liveShareCensus + the orchestrator's host state per command) on master and on `b50c4dabd` (git archive):
+`audit18Census713.ts` (liveShareCensus + the orchestrator's host state per command) on master and on `82690e775` (git archive):
 
 - Command 11: SPOINK's Bounce SETUP (opponent hidden). Before its strike, CLAMPERL faints and DROWZEE is sent out: the player's forced
   switch-in reshows the battle with SPOINK still semi-invulnerable.
 - **Master:** the order host carries the hidden battler (fly63 re-land / hide66) and its reshow invalidates on it
   (`liveSpriteOrderHost.ts:228` "reshow with a hidden battler"); `liveSpriteAllocatorReseedable` then fails, the allocator stays
   unknown from command 12 on, and the allocator-plan consumers **14 BARRIER (player) / 15 MAGIC COAT (opponent)** decline "sprite
-  allocator history unknown". **b50c4dabd:** the order host did not know the hide, modelled an ordinary reshow (order `known`), re-seeded
+  allocator history unknown". **82690e775:** the order host did not know the hide, modelled an ordinary reshow (order `known`), re-seeded
   the allocator (`alloc true`) and rendered both live. The only other status change is command 9 (Double Team, fallback -> live).
-- **Was b50c4dabd's live render right?** Source says yes for the allocator model: the reshow re-creates every present battler's sprite
+- **Was 82690e775's live render right?** Source says yes for the allocator model: the reshow re-creates every present battler's sprite
   (`reshow_battle_screen.c` `CreateBattlerSprite`) and sets `invisible = battlerData[b].invisible` (`:272`), which Scene ON never sets
   (hide66 §1), so the ROM shows SPOINK again after the reshow with the ordinary occupancy; production's view also shows both
   (`spriteShown [true, true]` at 12..17 on both trees). So master's invalidation is fail-closed (a lost-live, not a hidden defect class).
@@ -132,7 +132,7 @@ Gates on the final tree: `npm test` 1,602 files / 13,180 tests passed (44 files 
 
 ```
 sh tools/integration/audit18Run.sh <fresh-receipt-dir> <fresh-scratch-dir>   # ~13 min: stage == committed -> probe -> derive == committed
-    # -> check (2 fresh runs / scenario) -> summary / verdicts -> lag counters -> Dive lends -> ablations -> battle 713 (master + b50c4dabd)
+    # -> check (2 fresh runs / scenario) -> summary / verdicts -> lag counters -> Dive lends -> ablations -> battle 713 (master + 82690e775)
     # -> audit18Compare.py vs tools/integration/fixtures/audit-18/receipts
 AUDIT18_LENDS_ONLY=1 node --experimental-strip-types --no-warnings tools/integration/audit18Check.ts tools/integration/fixtures/audit-18/fixtures dive-snorlax-light-screen-ply /dev/null
 node --experimental-strip-types --no-warnings tools/integration/audit18Check.ts tools/integration/fixtures/audit-18/fixtures dive-snorlax-light-screen-ply <out.json>

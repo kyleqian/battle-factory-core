@@ -1,6 +1,6 @@
 # flat84 predictions (committed BEFORE any comparison with the ROM endOrder / activation free orders)
 
-Base: master `b05d384ca` (production src `4c4fe4c7`). The temp patch `flat84-temp-src.diff` (3 files) applies to git-archive copies only.
+Base: master `f49b7d03f` (production src `4c4fe4c7`). The temp patch `flat84-temp-src.diff` (3 files) applies to git-archive copies only.
 
 ## Source derivation (Move_FLATTER, data/battle_anim_scripts.s:8412; AnimFlatterConfetti, battle_anim_effects_3.c:3033-3084)
 

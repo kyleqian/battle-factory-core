@@ -4,7 +4,7 @@ Side-lane scoping deliverable, read-only otherwise (per this session's step
 brief). Builds on `docs/noland-walkup-dialogue-scoping.md` (ground truth +
 the 2026-08-14-eve FAITHFUL decision), `docs/noland-silver-walkup-
 presentation-map.md` (oracle reachability), and the just-landed walk-up
-build step B1 (`92a7a3cc`/`d60ca1b3`, the BattleRoom-entrance brain branch).
+build step B1 (`1ba2e101`/`c4e963f0`, the BattleRoom-entrance brain branch).
 No `src/` or test changes in this step; the design below is a plan for the
 worker(s) who build it.
 

@@ -1,6 +1,6 @@
 # S10A gates53: the census's "case-local" consumer gates, by exact condition
 
-Worker step (integration lane, base master `bb0415c82`, production src tree `d71d9924`). Instrument: `tools/integration/gates53GateCensus.ts`;
+Worker step (integration lane, base master `28f1f1ee4`, production src tree `d71d9924`). Instrument: `tools/integration/gates53GateCensus.ts`;
 reports `tools/integration/fixtures/gates53-gate-census-seeds0-{299,999}.json`; receipt `tools/integration/fixtures/gates53-live-receipt.json`.
 
 ## Results
@@ -42,7 +42,7 @@ stays.
 
 ### Census before / after (seeds 0..299, `tools/integration/liveShareCensus.ts` + `prep43CensusDelta.py`)
 
-The final code has the same `src/` as `bb0415c82`; `git diff bb0415c82 -- src` is empty. I ran the census twice on the final tree, and
+The final code has the same `src/` as `28f1f1ee4`; `git diff 28f1f1ee4 -- src` is empty. I ran the census twice on the final tree, and
 the two reports are byte-identical (report sha256 `ced10f10`, commands jsonl sha256 `a88f3020`):
 
 - **7,970 commands, 7,450 live: 93.48 % by count; 1,108,724 / 1,168,201 frames live: 94.91 % by frames.**

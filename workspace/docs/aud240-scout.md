@@ -1,6 +1,6 @@
 # aud240 scout (read-only, 2026-11-02, Sonnet worker; supervisor-saved, unverified mapping)
 
-Input to the aud240 brief. Line numbers are as read on master `26e1fd654`; re-check before wiring.
+Input to the aud240 brief. Line numbers are as read on master `9bfafe083`; re-check before wiring.
 
 **aud240 scout is done: read-only, no edits or commits, and `git status` is clean.**
 

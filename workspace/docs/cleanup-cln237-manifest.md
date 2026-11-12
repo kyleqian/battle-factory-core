@@ -3,8 +3,8 @@
 One reversible deletion commit; git history is not rewritten. The deleted step tools and
 fixtures live in the parent commit and in every earlier commit:
 
-    git checkout 72c9d264c5bf7758dc07aaaa9699b7a413d89b3d -- workspace/<path>   # parent of the deletion commit
-    # (master 0120db503 also has every deleted file)
+    git checkout 196174f6b6e06ee06ba8d029d280d4da09dabd88 -- workspace/<path>   # parent of the deletion commit
+    # (master f5509d2ae also has every deleted file)
 
 The full deleted list (2,103 repo-relative paths, workspace-relative) is `docs/archive/cln237-deleted.txt`.
 Deleted step tools are at the parent commit; docs and ledgers that cite them keep pointing at git history.

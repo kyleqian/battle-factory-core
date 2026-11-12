@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Classifies seg127Exposure.ts output into tools/integration/fixtures/seg127/exposure.json (seg268: restored from 4f6fa87e4^; run seg127Exposure.ts first).
+# Classifies seg127Exposure.ts output into tools/integration/fixtures/seg127/exposure.json (seg268: restored from 54c5686f0^; run seg127Exposure.ts first).
 """seg127: classify every census status-animation receipt (seg127Exposure.ts output) by WHAT PRECEDES IT in its resolution segment
 (docs/seg127-status-se-gate.md §2) and project the IsBattleSEPlaying gate (seg127 rule, fixtures/seg127/rule.json) onto it.
 

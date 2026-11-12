@@ -35,7 +35,7 @@ screen, login, streak storage and the on-screen pad UI are the website's.
 **Audio (S11) is back in scope** from 2026-10-31 (user decision); the
 2026-08-10 out-of-scope note is superseded.
 
-1. **Core library API** — **DONE 2026-11-01** (`f88653929`; `docs/library-package.md`). (finish plan Phase 3, first): `src/lib.ts` +
+1. **Core library API** — **DONE 2026-11-01** (`062a82a3f`; `docs/library-package.md`). (finish plan Phase 3, first): `src/lib.ts` +
    `mountFactoryGame` with the exact contract in `docs/finish-plan.md`, a Vite
    lib build and `package.json` `exports`; `src/main.ts` becomes a thin shell
    over it (the test ABI, `?battleScene=`, `?pokebench=1` and the crash
@@ -1146,7 +1146,7 @@ which waits on (a) for its oracle ground truth.
 **User decisions (2026-08-14, planning session — the post-Brain queue):**
 
 Status update to the remaining-list above: (a) the harness-side lab mode
-is LIVE (top-layer commit `33354440`; workspace §5.2 consumers landed per
+is LIVE (top-layer commit `5cffdf5e`; workspace §5.2 consumers landed per
 PROGRESS 1266) and (c) the brain-battle presentation program ran
 end-to-end (silver 648/701, gold 700/701 dense live compares; the
 residual is ISSUES #87). Only (b) remains.
@@ -1219,7 +1219,7 @@ picks from PROGRESS 1273):**
    + in-session heard-flag + handoff BUILT (B2, four speech windows
    exact). **UPDATE (2026-08-16 supervisor session):** the top-layer
    `BattleLab.prepare()` staging gap is FIXED (harness commit
-   `3e29880b`, `factoryBrain` + `walkup: true` + gold symbol flag;
+   `4dac4a35`, `factoryBrain` + `walkup: true` + gold symbol flag;
    services serve it) — oracle acceptance for the call-scene + gold is
    UNBLOCKED. brainMoving cadence largely closed by B1c (fixture 03
    43/256 → 162/256; bounded ~1px mid-ramp residual honestly flagged
@@ -1266,7 +1266,7 @@ reported to the user as untouched. It is **not** unstarted — all three
 dispatchable steps of `docs/chained-round-distribution-parity-plan.md` §4
 landed on 2026-08-16/17 and no one updated this line:
 
-- **Step 1 DONE** (`96e1dd4b`): `tests/factoryRoundChaining.test.ts`'s
+- **Step 1 DONE** (`bceaf1d1`): `tests/factoryRoundChaining.test.ts`'s
   "(b)" case drives four consecutive completed rounds through the real
   `tick()` path, asserting streak 7/14/21/28 and `generation.challengeNum`
   at every hop, and reaching a genuine `TRAINER_FRONTIER_BRAIN` silver
@@ -1274,13 +1274,13 @@ landed on 2026-08-16/17 and no one updated this line:
 - **Step 2 DONE**: `factoryRentalGeneration.ts:229-239` carries the
   challengeNum-8 retail-OOB rationale, citing `config.h:48` +
   `Makefile:6` (claim C6).
-- **Step 3 DONE** (`6366ee33`; swept, `6d92ddf1`): the opt-in `winning`
+- **Step 3 DONE** (`772ca3e0`; swept, `7da11036`): the opt-in `winning`
   `SoakPolicy` exists and has been swept wide. Standing coverage
   `vanilla` 0:60, `full` 0:180, `winning` 0:180 — **all green, zero
   crashes** (`docs/soak-winning-sweep-2026-08-16{,-part2}.md`,
   `docs/soak-resweep-2026-08-16-part{3,4}.md`,
   `docs/soak-sweep-2026-08-17-part{5,6}.md`).
-- **Step 4** was already marked SATISFIED by harness commit `3e29880b`.
+- **Step 4** was already marked SATISFIED by harness commit `4dac4a35`.
 
 **The gap those steps left — and why it is the milestone.** Every sweep
 above reports *whether a seed crashed*. **None reports how deep it
@@ -1302,9 +1302,9 @@ and never by play.
 before committing worker weeks.
 
 **M-A MEASUREMENT COMPLETE (2026-08-19, same-day): all 3 steps landed
-and verified** — step 1 `4570aa11`+`ecb2e5de` (real running-max fields
+and verified** — step 1 `f6f3cc57`+`2b966ab9` (real running-max fields
 + CLI distribution, red-verified test; PROGRESS 1354), steps 2-3
-`78f11bee`/`a395d436`/`1e654c62` (`docs/soak-depth-measure-2026-08-19
+`2510cf16`/`eeca9c45`/`2cfde297` (`docs/soak-depth-measure-2026-08-19
 .md` + committed 300-line per-seed log). **The number: play gets past
 challenge 1 regularly but never deep.** `winning` 0:180 — 64/180
 (35.6%) reach carry ≥ 7, 10/180 (5.6%) reach carry ≥ 14, 0/180 reach
@@ -1406,7 +1406,7 @@ progress.** Step 1 DONE (PROGRESS 1357: verdict (a), `full` is honest bad
 play). Driver defect ISSUES #99 found+fixed on the way (1358: the swap
 offer was never answered by its own branch; every policy accepted swaps).
 Step 2 landed opt-in in `winning`: type-effectiveness × STAB move choice
-(1359) and swap-offer decline (fold `781c8827`); draft-by-strength measured
+(1359) and swap-offer decline (fold `3064e24e`); draft-by-strength measured
 worse on 60 seeds and is WITHHELD on branch `worker/side-20260820-113153`
 (`e9a415a7`) pending a larger sample; a walled-matchup switch heuristic is
 in flight. Step 3 sweep `docs/soak-deep-sweep-2026-08-20.{md,log}`:
@@ -1429,14 +1429,14 @@ instrument had therefore been capped at ~3 re-chains since M-A; whether the
 challenge-4 AI tier (carry ≥ 28) is reachable by play is UNMEASURED until
 both halves land and a sweep is re-run. Levers folded into `winning` today:
 type-effectiveness × STAB move choice (1359), swap-offer decline
-(`781c8827`), true-immunity walled-matchup switch with a ≥50%-HP bench gate
-(`3fa78a98`). Withheld on `wip/mb-step2b-draft-heuristic` (`e9a415a7`):
+(`3064e24e`), true-immunity walled-matchup switch with a ≥50%-HP bench gate
+(`e4fd9786`). Withheld on `wip/mb-step2b-draft-heuristic` (`e9a415a7`):
 draft-by-strength (measured worse at n=60; re-measure at n ≥ 180 on the
 fixed tree before deciding). Refuted and pinned: the #102-derived
 end-turn-skip lead (`tests/endTurnFaintResumeIssue104.test.ts`).
 
 **M-B RESULT on the #104-fixed tree (2026-08-20 15:05, supervisor's own
-run, `winning` 0:60 `--render-every 0`, master `e3176a05`):** carry ≥ 7
+run, `winning` 0:60 `--render-every 0`, master `96e7b516`):** carry ≥ 7
 **60/60**, ≥ 14 **56/60**, ≥ 21 **13/60**, **≥ 28 1/60 (seed 24, battle-depth
 28 = challenge 4, the full `CHECK_BAD_MOVE`+triad AI tier, reached by
 play)**; 58 OK (`budget`) / 2 CRASH (seeds 40 + 50, both ISSUES #105, the
@@ -1562,7 +1562,7 @@ behavior changed). The seed-diverse deep coverage comes from the two gates
 added by the same decision: `winning 0:60` and `winning-swap 0:60` (the only
 policies that win rounds and exercise the post-win swap screen). Baseline on
 the 2026-08-22 tree: winning 0:480 = 480/480, winning-swap 0:360 = 359/360
-(the one crash was #119, fixed at `d41bc58c`), so both 0:60 gates start
+(the one crash was #119, fixed at `dbf6f64a`), so both 0:60 gates start
 green. `vanilla` itself stays unchanged (option (b)'s seed-backed draft was
 declined).
 
@@ -2327,7 +2327,7 @@ commands / 99.60 % of frames live** (session start 98.95 / 99.32). Live audits 2
 3. Timeline remainders: #167 (Rest's OFF attack pause, sprite-visibility / stat-stage-change next receipts, the charge-turn EMPTYSTRING3
    print), #153 (Scene OFF skips the Substitute body), idle94's unproven lead moves / per-move tails; the SE gate's unmeasured paths
    (Overheat / Superpower / AncientPower self-drops, Yawn after a hit, Thrash after sandstorm: sgs134 / sag130 docs).
-4. DONE 2026-10-13 (`bba4d9dc6`): the app-only presentation-rng differential traces were regenerated on the current timeline
+4. DONE 2026-10-13 (`d6ecfd654`): the app-only presentation-rng differential traces were regenerated on the current timeline
    (173 -> 190 captures); regenerate again with tools/integration/presentationRngTraces.ts after timeline-moving folds.
 5. A live audit after every batch (audits 21..28 tools; ALWAYS on production accepted windows: tools/integration/audit21Align.py).
 Struggle is required by the 2026-10-11 user decision; its adapter is live since 2026-10-11 (stl109), with the remaining declines above.

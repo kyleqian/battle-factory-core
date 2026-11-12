@@ -22,8 +22,8 @@ kept and is long-tail.
 
 ## State at restart (written at the 2026-11-12 wind-down; PROGRESS.md top entry has details)
 
-- Phases 1 and 2 met (finish plan). Core library package folded (`f88653929`, `docs/library-package.md`). The Mac's
-  `worker/lib-v2-mac` is folded up to `851ee1f4c`; if the Mac moves that branch again, merge the new tip the same way
+- Phases 1 and 2 met (finish plan). Core library package folded (`062a82a3f`, `docs/library-package.md`). The Mac's
+  `worker/lib-v2-mac` is folded up to `90c6684d5`; if the Mac moves that branch again, merge the new tip the same way
   (typecheck, its touched tests, full suite).
 - **Audio (S11):** design accepted (`docs/s11-audio-design.md`); steps 1-3 folded; **step 4 (screens) DONE**: aud240a (draft /
   swap / dialogs), aud240b (summary), aud240c (battle party menus, `docs/aud240c-party-menu-sounds.md`), aud240d (Lobby /
@@ -62,7 +62,7 @@ kept and is long-tail.
 - **Bundle:** bnd256c DONE (`docs/bnd256c-pixel-provider.md`): headless 22.5 -> 10.7 MB. `lib.ts` must CALL `installBundledMonPicPixels()` (`"sideEffects": false` drops bare imports; fixed at wind-down). **Cleanup 5:** cln244 DONE (Dive reducer
   incremental, full suite 17.1 min at 5 workers; `docs/cln244-dive-incremental.md`). ENGINE_BUILD moved this run (tell the website).
 - **Cleanup:** steps 1, 2, 3 (cln239), 4 (cln241, 2026-11-06: `core-rs/` removed from master, `docs/cln241-core-rs-removal.md`;
-  local branch `core-rs-archive` `26ce8d051` keeps it, the user pushes it to its own repo) and 6 are done. Step 5 first half DONE
+  local branch `core-rs-archive` `4b2a07d67` keeps it, the user pushes it to its own repo) and 6 are done. Step 5 first half DONE
   (cln240: `npm run test:gate`, `docs/cln240-test-gate.md`). **Step 5 second half DONE (cln242, 2026-11-07, `docs/cln242-suite-speed.md`):**
   vitest `json.stringify` in test mode; test:gate ~97 s; the full suite runs at `POKEBENCH_VITEST_MAX_WORKERS=5` in ~21 min when
   nothing else runs (peak <= 11 GB); census-superseded sc106 / sgl138 route pins deleted. Next lever: `src/animation/dive.ts` re-simulates
@@ -206,10 +206,10 @@ remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 =
    - **Why:** `docs/gameplay-parity-audit-2026-11-12.md`. Soak, census, pins and the coverage docs never compared a live
      battle number with the ROM; only `tools/audio/romDriveSeed.sh` does. Kyle's goal is sound core battle logic with complete
      parity. His constraint: the check must not bog the work down, and it need not be exhaustive, only probabilistically sound.
-   - **First batch (top layer, Mac, tree `69241cf85`, seeds 61..160 OFF; audit doc section 6):** 78 full match, **20 diverge**,
+   - **First batch (top layer, Mac, tree `389a7985a`, seeds 61..160 OFF; audit doc section 6):** 78 full match, **20 diverge**,
      2 not drivable (Brain). 279 s wall at 8 lanes on the Mac.
    - **Second batch (top layer, Mac, seeds 161..1160 OFF; audit doc section 7):** 840 full match, **139 diverge**, 21 Brain.
-     34 min wall at 12 lanes. Re-driven on `5750e868c` (with your aiv271 and fix274): **115 seeds are open in total**
+     34 min wall at 12 lanes. Re-driven on `46b01b7ce` (with your aiv271 and fix274): **115 seeds are open in total**
      (audit doc section 8). They are sorted by signature in sections 7 / 8.
    - **Division of labour (Kyle, 2026-11-12: "keep the nightly job lean; harvest in bulk on the Mac"):** bulk discovery is the
      Mac top layer's job (1,000 new seeds in about 34 minutes there), and it re-drives the open list after fixes land and
@@ -229,7 +229,7 @@ remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 =
      3. **Wind-down:** the permanent list on the final tree, only if an engine gameplay change landed in the run.
      - Audio, presentation and cleanup steps never run the replay. No existing gate is removed: the soaks still cover deep
        rounds and swaps, which the replay does not reach yet.
-   - **Two lists (state on `5750e868c`, your 2026-11-12 wind-down engine, re-driven on the Mac; "the permanent list" in this
+   - **Two lists (state on `46b01b7ce`, your 2026-11-12 wind-down engine, re-driven on the Mac; "the permanent list" in this
      item means the regression list):**
      - **Regression list** = seeds that diverged once and match now; they must keep matching (64):
        2 6 8 11 13 17 20 22 26 27 28 30 31 32 39 42 50 53 57 75 88 110 155 158 190 198 202 235 248 260 279 298 311 366 435 440 459 521 530 543 555 564 591 596 613 619 650 665 698 761 770 841 846 872 894 971 999 1001 1011 1028 1031 1103 1118 1134.
@@ -314,7 +314,7 @@ remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 =
    - Flow gaps: ISSUES #191 (dialog cursors move on held repeat), #192 (summary flow gaps), #195 (party menu: cursor moves during the
      open fade; refusal text dismisses before it finishes printing).
    - **(g) DONE 2026-11-06 (frf250a / frf250b; see State at restart). Next in 4b: (e) below.** Original report:
-     not visual (found 2026-11-05 by the top layer's live-site play-test on fb5516bc0): BAG and RUN do
+     not visual (found 2026-11-05 by the top layer's live-site play-test on 6bdb3c6c1): BAG and RUN do
      nothing in battle.** On the action menu, A on BAG or RUN is ignored: `battleCommandPresentation.ts:638-646` handles only
      FIGHT (0) and POKéMON (2), and returns the state unchanged otherwise. No sound, no text, the cursor stays. In a site trace
      (`437157099938d5e9c8cb6da1ee5c0a58`, test player) A on RUN at app 110024 / 110064 / 110092 changes nothing. The ROM:
@@ -332,7 +332,7 @@ remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 =
        healthbox / fade gap there.
      - **Proofs:** ROM labs for both prompts and the forfeit text window. Measure the SE_SELECT on A and the frames from A to
        the first glyph.
-   - **New, Kyle 2026-11-04** (website on 851ee1f4c), reproduced on the Mac from his trace `47192107276c654fbcdc1d038304aa0e`
+   - **New, Kyle 2026-11-04** (website on 90c6684d5), reproduced on the Mac from his trace `47192107276c654fbcdc1d038304aa0e`
      (seeds 2513123525 / 2478499883) through `FactorySession.replayStep` + `render()`. Prove each against the ROM, then fix the family:
      - **(d) DONE 2026-11-05 (frs247).** White flash after a faint replacement. After the forced party menu's SEND OUT, the screen is black for about 37 frames
        (app 17400..17437). Then the battle appears fully drawn but washed toward white (mean brightness 246 vs about 200 at rest)

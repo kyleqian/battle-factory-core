@@ -7,7 +7,7 @@ the ROM's (44 / 44). Statused Meteor Mash / Dive bodies, and the consumers after
 **One latent finding outside the folds:** Return 216's sprite-order plan. The order lent after a Return body differs from the ROM's
 on 15 / 15 windows, at the battle entry and after a KO, and is 0 px in every observed window. Details in section 1.3.
 
-Method = live audits 18 / 19 (`audit19Check.ts` header), on master `c68111480` (src `d73cf1af`), unpatched:
+Method = live audits 18 / 19 (`audit19Check.ts` header), on master `9115d5ec3` (src `d73cf1af`), unpatched:
 - battle-lab scenarios with an explicit lab seed (ISSUES #154);
 - one probe to derive the consumer fixtures;
 - a check that replays the history through the production hosts as the orchestrator does (order host + plans + words lends,
@@ -140,8 +140,8 @@ By the number of Part A bodies in the history:
 Gates (evidence only):
 - `npm test`: 1,610 files / 13,235 tests passed, 44 files / 223 tests skipped, 0 failed;
 - `npm run build`: green;
-- `git diff --check c68111480..HEAD`: clean;
-- every change since `c68111480` is an added file in the audit20 set (755 files), with no existing tracked file modified.
+- `git diff --check 9115d5ec3..HEAD`: clean;
+- every change since `9115d5ec3` is an added file in the audit20 set (755 files), with no existing tracked file modified.
 - No TypeScript was added under `tests/`; `tools/` is outside the `tsc` include.
 
 ## 3. Reproduction (from workspace/; direct mGBA only; production src is never patched)

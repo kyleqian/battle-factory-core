@@ -1,6 +1,6 @@
 # ISSUES #97 remainder: `turn5-confirm-off-b` and `turn5-resolve-off-d`'s untraced residuals
 
-Side-lane instrument session, Battle Scene OFF oracle, at commit `f139b934`
+Side-lane instrument session, Battle Scene OFF oracle, at commit `b48e3e90`
 (the same commit ISSUES.md's §17 item-5 addendum and `docs/turn5-family-
 class3-diagnosis.md` §19 landed on). Analysis only — `git diff -- src/` is
 empty throughout; the two new probe scripts under `tools/probe/` and this
@@ -430,7 +430,7 @@ npm run compare -- turn5-resolve-off-c --summary   # regression guard, expect un
 npm run compare -- turn5-reset-off --summary        # regression guard (control), expect unchanged 256/256
 ```
 
-## 3. Baselines (measured fresh this session, commit `f139b934`)
+## 3. Baselines (measured fresh this session, commit `b48e3e90`)
 
 | trace | before | this session |
 |---|---|---|
@@ -486,7 +486,7 @@ recorded here as new evidence, not a contradiction of prior work.
 ## 5. Landed addendum (2026-08-18, bounded MAIN worker)
 
 Both fix shapes above landed exactly as this doc specified, commit
-`90edc2a6`. (A)'s `battleScene.ts:14888`-era one-line change (current line
+`c87c99dd`. (A)'s `battleScene.ts:14888`-era one-line change (current line
 drifted with the file, re-grepped fresh) landed verbatim:
 `rockSlideTextVisibleChars(t - 1, pressTick, TURN5_OFF_ROCKSLIDE_TEXT_
 DELAY)`. (B)'s two new turn5-off-scoped siblings landed as §2.2/§2.3

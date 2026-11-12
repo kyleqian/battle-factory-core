@@ -142,7 +142,7 @@ describe("iu120 composition", () => {
   });
 });
 
-// Committed base rows: production at 9d23a17c4 (land97 lead rows + shp116's preActivationRow, no universal rows), rendered through
+// Committed base rows: production at 61e1128ab (land97 lead rows + shp116's preActivationRow, no universal rows), rendered through
 // renderBattleResolutionLiveView by the same tool (tools/integration/fixtures/iu120/base-*.json).
 describe("iu120 routes: pre rows == base row 0, body rows unchanged, post rows == base last row, next command equal", () => {
   // tail: ont193 (docs/ont193-scene-on-tails.md) script-tail rows after the post rows; they repeat the last body row.

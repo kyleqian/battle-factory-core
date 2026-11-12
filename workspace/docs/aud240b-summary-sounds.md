@@ -54,7 +54,7 @@ The first mon change in the draft window starts its Info-page cry at P+20 in the
 
 A on the Info page now closes on the draft and swap screens (`requestSummaryScreenExit`). Elsewhere A still enters move select.
 
-- `npm run compare:differential` vs the parent `88c1d309e`: PASS, **2064 / 2064** across 24 traces (`summary-*`, `draft-*`, `turn15-party-select*`) and **2313 / 2313** across 24 traces (`battle1-swap-*`, `battle1-postwin-*`): no standard trace presses A on Info.
+- `npm run compare:differential` vs the parent `6e9811fba`: PASS, **2064 / 2064** across 24 traces (`summary-*`, `draft-*`, `turn15-party-select*`) and **2313 / 2313** across 24 traces (`battle1-swap-*`, `battle1-postwin-*`): no standard trace presses A on Info.
 - A scratch trace (draft open, then A on Info, not committed) differs from the parent from frame 130 on (9 of 11 captures): the summary closes (transition) where the parent stayed open. That is the intended change.
 
 ## Gaps found, not fixed (outside this step)
@@ -70,7 +70,7 @@ A on the Info page now closes on the draft and swap screens (`requestSummaryScre
 
 ## Verification
 
-Tested code commit `7b4ebe41f` (tree `dcdcad4a4`); later commits only add this document and a verification note.
+Tested code commit `c23a6357f` (tree `dcdcad4a4`); later commits only add this document and a verification note.
 
 - `npm run typecheck` 0.
 - `npm run test:smoke` 0 (8 files, 448 tests).

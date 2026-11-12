@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ISSUES #97 side-lane instrument (fourth), the precise next instrument named
 in docs/turn5-resolve-ab-pools-diagnosis.md's §14.4 (the VRAM-census section
-committed at 8127921e): a raw-hardware OAM census over ALL 128 OAM slots
+committed at 64a13b1d): a raw-hardware OAM census over ALL 128 OAM slots
 (not just the app-level `gSprites[]` bookkeeping table §11.2's own prior
 sprite census read) intersected against screen rows 0/10 - §13.3's own
 proven-exactly-static rows - PLUS a direct BG3 tilemap/tile-pixel dump at

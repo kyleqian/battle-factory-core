@@ -14,7 +14,7 @@ scenario) before or with the fix. The top layer re-read five rows at source; the
 The formulas were right. The errors were in the adapters that turn live battle state into formula inputs (an id-to-name
 map, side statuses, the AI view builder). Every ROM comparison stopped before that adapter.
 
-| Layer (before aud243d, `ffa6c9e5c`) | Reference | What it asserts |
+| Layer (before aud243d, `3d8d565ab`) | Reference | What it asserts |
 |---|---|---|
 | `tests/damageCalc.test.ts` and the pure-helper tests | hand-computed / one Battle-1 RAM dump | the pure helper, called with string ability names; no TS test contained `sideStatusReflect` |
 | live opcode tests (`tests/battleScript*.test.ts`) | hand-derived | kernel state; ability ids 37 / 63 / 66 / 68 / 74 never staged |
@@ -114,7 +114,7 @@ So B1, B2, Pursuit, the trapping abilities and Natural Cure on a voluntary switc
 Measured on the Mac (M-series, one seed alone): seed 224 OFF whole chain 18 s (request 1.3, setup 3.6, engine 1.5, drive 5.3 for
 5,487 frames, timeline 5.0, compare 1.3); seed 7 ON 25.5 s (17,808 frames). The timeline stage re-runs the ROM a second time.
 
-## 6. First batch of new seeds (top layer, Mac, tree `69241cf85`, seeds 61..160, Scene OFF)
+## 6. First batch of new seeds (top layer, Mac, tree `389a7985a`, seeds 61..160, Scene OFF)
 
 `tools/audio/romDriveSeed.sh SEED off DIR`, 8 at a time (`xargs -P 8`), 279 s wall for the 100 seeds (1.06 M ROM frames).
 Evidence was written to a session scratch directory and is not kept; every row re-derives from the seed.
@@ -151,16 +151,16 @@ Reading: 20 of 98 drivable new battles (20 %) still leave the ROM's line on the 
 
 ## 7. Second batch: 1,000 new seeds on the Mac (seeds 161..1160, Scene OFF), sorted by signature
 
-Tree `69241cf85` (engine source identical through `f3ca2c797`), 12 lanes, 34 min wall (2,044 s for 987 seeds after a 13-seed start).
-Then every mismatched seed was re-driven on `8481a3e20` (the box's mid-run master with aiv271 + pnm273, merged with the ops commits).
+Tree `389a7985a` (engine source identical through `0de8cde5f`), 12 lanes, 34 min wall (2,044 s for 987 seeds after a 13-seed start).
+Then every mismatched seed was re-driven on `d6f041dca` (the box's mid-run master with aiv271 + pnm273, merged with the ops commits).
 
 | | seeds |
 |---|---|
-| full match on `69241cf85` | 840 |
-| mismatched on `69241cf85` | 139 (one is the known frame-budget engine error, seed 796) |
+| full match on `389a7985a` | 840 |
+| mismatched on `389a7985a` | 139 (one is the known frame-budget engine error, seed 796) |
 | not drivable (Brain, `trainerId` 1022) | 21 |
-| of the 139, match on `8481a3e20` | 20 |
-| **still mismatched on `8481a3e20`** | **119** |
+| of the 139, match on `d6f041dca` | 20 |
+| **still mismatched on `d6f041dca`** | **119** |
 
 Signature = what the engine's diverging turn contains (messages, moves, battler state from `replay --events=1`) and how the ROM rows differ.
 **A signature is not a proven cause.** Start each group with a diagnosis step on 2 or 3 of its seeds (dia263 / dia269 shape). A seed can carry several signatures; the count column is seeds not already counted in a row above.
@@ -184,19 +184,19 @@ Signature = what the engine's diverging turn contains (messages, moves, battler 
 
 The named signatures cover 69 of the 119 still-mismatched seeds.
 
-Now matching on `8481a3e20` (join the regression list): 190 235 248 311 435 555 596 619 650 698 761 770 841 846 894 1001 1011 1028 1103 1118.
+Now matching on `d6f041dca` (join the regression list): 190 235 248 311 435 555 596 619 650 698 761 770 841 846 894 1001 1011 1028 1103 1118.
 
-Older lists re-driven on `8481a3e20`: regression 2 6 8 11 13 17 20 22 26 27 28 30 31 32 all match; of the older open seeds, 39 57 75 88 110 155 now match;
+Older lists re-driven on `d6f041dca`: regression 2 6 8 11 13 17 20 22 26 27 28 30 31 32 all match; of the older open seeds, 39 57 75 88 110 155 now match;
 42 50 53 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 158 159 still diverge.
 
-Totals on `8481a3e20`, seeds 1..1160 plus 224 / 552 / 177 history: **139 open seeds** (20 older + 119), **40 regression seeds** (14 + 6 + 20), 24 Brain seeds not drivable, highest seed driven 1160.
+Totals on `d6f041dca`, seeds 1..1160 plus 224 / 552 / 177 history: **139 open seeds** (20 older + 119), **40 regression seeds** (14 + 6 + 20), 24 Brain seeds not drivable, highest seed driven 1160.
 The sorter is a scratch script (first unmatched engine row -> the `--events=1` turn at that frame -> message / move / state signatures); rebuild it as a tool with replay upgrade 1.
 
-## 8. Open list re-driven on `5750e868c` (the box's 2026-11-12 wind-down engine: aiv271 + fix274)
+## 8. Open list re-driven on `46b01b7ce` (the box's 2026-11-12 wind-down engine: aiv271 + fix274)
 
 All 139 open seeds and all 40 regression seeds were re-driven on the Mac. **24 open seeds now match, 115 stay open; the regression list is 40 / 40.**
 
-| signature (section 7) | seeds on `8481a3e20` | still open on `5750e868c` |
+| signature (section 7) | seeds on `d6f041dca` | still open on `46b01b7ce` |
 |---|---|---|
 | the ROM sends in a different opponent after a faint | 21 | 21: 165 183 284 332 343 491 566 573 675 715 830 839 857 867 899 900 904 907 926 986 1017 |
 | Struggle with the recoil message | 17 | 17: 225 265 345 417 492 529 542 577 737 804 862 897 973 1095 1112 1125 1157 |
@@ -209,4 +209,4 @@ All 139 open seeds and all 40 regression seeds were re-driven on the Mac. **24 o
 
 The recoil-on-a-non-recoil-move signature went 7 -> 0 with fix274's #209 fix, so that signature named its cause correctly. The other signatures are still leads.
 Newly matching (now on the regression list): 42 50 53 158 198 202 260 279 298 366 440 459 521 530 543 564 591 613 665 872 971 999 1031 1134.
-Lists on `5750e868c`: **open 115**, **regression 64**, Brain not drivable 24, highest seed driven 1160.
+Lists on `46b01b7ce`: **open 115**, **regression 64**, Brain not drivable 24, highest seed driven 1160.

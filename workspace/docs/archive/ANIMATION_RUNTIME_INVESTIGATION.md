@@ -18,7 +18,7 @@ establish that porting all animation infrastructure upfront would finish this
 backlog sooner. No battle-engine rewrite is needed for this presentation work.
 
 This branch is `codex/animation-runtime-investigation`, based on animation-main
-`899b3c034`. It runs locally in a separate worktree. Nothing is wired into the
+`e92d70b81`. It runs locally in a separate worktree. Nothing is wired into the
 production renderer or campaign, and no coverage status has been promoted.
 Do not merge this experiment into the campaign or restart its services.
 
@@ -206,7 +206,7 @@ The user subsequently asked to build this now using spare capacity and clarified
 that execution should be on hcloud. On 2026-09-22 at 05:25 UTC, a separate bounded
 implementation run was launched as `pokebench-animation-runtime.service` on
 95.216.222.140. Its parent branch is `codex/animation-runtime-hcloud`, setup
-commit `32f423c09`, based on this research's `d7c8493bb`.
+commit `623fdc52b`, based on this research's `ac3d4243e`.
 
 Remote parent workspace:
 `/srv/pokebench/pokeemerald-factory-core/workspace/.worktrees/animation-runtime/workspace`.

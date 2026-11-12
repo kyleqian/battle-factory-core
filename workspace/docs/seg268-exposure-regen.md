@@ -1,7 +1,7 @@
 # seg268: seg127 census exposure regenerated on the current kernel
 
-`tools/integration/fixtures/seg127/exposure.json` (docs/seg127-status-se-gate.md §1b) was computed on the old kernel `cfe4e26ca`; abl261 / dmg264 /
-aiv266 changed census battles, so sag130 lost 4 anchor classes. seg268 restores the generator deleted in cln237 (`4f6fa87e4^`:
+`tools/integration/fixtures/seg127/exposure.json` (docs/seg127-status-se-gate.md §1b) was computed on the old kernel `9a184dfa6`; abl261 / dmg264 /
+aiv266 changed census battles, so sag130 lost 4 anchor classes. seg268 restores the generator deleted in cln237 (`54c5686f0^`:
 `tools/integration/seg127Exposure.ts`, `seg127ExposureSummary.py`; no edits beyond a one-line header each, both still run against the current
 tree) and regenerates the file: Scene ON, census seeds 0..999 (battle i = seed i, streak i * 11 % 49), 7 shards, no src/ change.
 
@@ -13,7 +13,7 @@ python3 tools/integration/seg127ExposureSummary.py <dir> tools/integration/fixtu
 Seed 796 hits the 200,000-frame budget (known since abl261, `docs/abl261-ability-damage.md`; it also did before, seed 434 now finishes); its 12 receipts
 so far are kept. 999 / 1000 battles end terminal. 0 unclassified.
 
-| | old (cfe4e26ca) | new |
+| | old (9a184dfa6) | new |
 | --- | --- | --- |
 | receipts | 8080 | 8023 |
 | by class: turn-start / end-turn / status-move | 4629 / 1298 / 1529 | 4566 / 1295 / 1532 |

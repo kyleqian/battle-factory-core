@@ -3,7 +3,7 @@
 Newest entry on top. Keep only ~3 entries here; archive the rest to
 `docs/archive/RUST_PROGRESS-archive.md`. Every entry: State / Did / Next / Notes.
 
-**Local consolidation, 2026-10-02:** verified Rust tip `5691a4ef4` (through R100 / M97)
+**Local consolidation, 2026-10-02:** verified Rust tip `83ef3adc1` (through R100 / M97)
 is merged into primary local master. WASM rebuild and all 1,832 native Rust tests
 pass on the Mac. Retired worktree/history and original refs are archived locally;
 hcloud is deleted. Resume from the R100 next action below using `LOCAL_SETUP.md`.
@@ -14,9 +14,9 @@ hcloud is deleted. Resume from the R100 next action below using `LOCAL_SETUP.md`
 ## R100 — [supervised session wind-down (FINAL), 2026-09-12 03:06-~06:15 UTC, unattended] **M97 HEALTHBARUPDATE folded; session close (FIVE green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + five verified
-  Sonnet worker folds this session — `0af6724cc` M93 machine-control
-  family, `9bcbce5cf` M94 PPREDUCE, `cdbbc7775` M95 ATTACKSTRING,
-  `c236931bd` M96 hit-feedback family, `cd0276d39` M97 HEALTHBARUPDATE —
+  Sonnet worker folds this session — `49f385d2c` M93 machine-control
+  family, `768f47323` M94 PPREDUCE, `70c35b94c` M95 ATTACKSTRING,
+  `7156a06a8` M96 hit-feedback family, `b9b7ea73e` M97 HEALTHBARUPDATE —
   each followed by its ledger commit and a successful `backup-refs.sh`
   push. Tree clean, committed, green; no worker worktree or branch left
   behind. Core-only all session: no ABI, adapter, canonical TS, or npm
@@ -67,9 +67,9 @@ hcloud is deleted. Resume from the R100 next action below using `LOCAL_SETUP.md`
 ## R99 — [supervised session wind-down (final), 2026-09-12 03:06-~05:50 UTC, unattended] **M96 hit-feedback family folded; session close (FOUR green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + four verified
-  Sonnet worker folds this session — `0af6724cc` M93 machine-control
-  family, `9bcbce5cf` M94 PPREDUCE, `cdbbc7775` M95 ATTACKSTRING,
-  `c236931bd` M96 HITANIMATION/EFFECTIVENESSSOUND — each followed by its
+  Sonnet worker folds this session — `49f385d2c` M93 machine-control
+  family, `768f47323` M94 PPREDUCE, `70c35b94c` M95 ATTACKSTRING,
+  `7156a06a8` M96 HITANIMATION/EFFECTIVENESSSOUND — each followed by its
   ledger commit and a successful `backup-refs.sh` push. Tree clean,
   committed, green; no worker worktree or branch left behind. Core-only
   all session: no ABI, adapter, canonical TS, or npm file touched, so
@@ -121,8 +121,8 @@ hcloud is deleted. Resume from the R100 next action below using `LOCAL_SETUP.md`
 ## R98 — [supervised session wind-down (final), 2026-09-12 03:06-~05:10 UTC, unattended] **M95 ATTACKSTRING folded; session close (three green folds)**
 
 - **State:** `rust-main` = master (no-op merge at orient) + three verified
-  Sonnet worker folds this session — `0af6724cc` M93 machine-control
-  family, `9bcbce5cf` M94 PPREDUCE, `cdbbc7775` M95 ATTACKSTRING — each
+  Sonnet worker folds this session — `49f385d2c` M93 machine-control
+  family, `768f47323` M94 PPREDUCE, `70c35b94c` M95 ATTACKSTRING — each
   followed by its ledger commit and a successful `backup-refs.sh` push.
   Tree clean, committed, green; no worker worktree or branch left
   behind. Core-only all session: no ABI, adapter, canonical TS, or npm

@@ -3,7 +3,7 @@
 Evidence/design only; **new files only** (plus the regenerated census: `tools/integration/remainingAdaptersCensus.mjs`, `docs/remaining-adapters-census.md`, `tools/integration/fixtures/remaining-adapters-census.json`). No production code, test or `src/` file changed.
 Moves: MAGNITUDE (222), REVERSAL (179), FLAIL (175, X-POWER part only), PAIN_SPLIT (220), SPARK (209), FIRE_PUNCH (7), ENDEAVOR (283), ROCK_BLAST (350), RAZOR_WIND (13).
 All emulator numbers are ROM frames from **direct, independent mGBA runs** (Scene ON, fresh process per scenario; every relied-on receipt was produced twice and is byte-identical: 38 lab scenarios + 4 staged runs, `cmp` over `prep10-probes/r1` vs `r2` and `stage-r1` vs `stage-r2`). The shared HTTP oracles were never contacted.
-Production line numbers are at this branch's base `43c82096c`; a sibling lane may be editing `src/engine/*`: re-grep before editing. Drafted fixtures are **unverified until an adapter exists** (`consumedByTest: false`).
+Production line numbers are at this branch's base `901845ed5`; a sibling lane may be editing `src/engine/*`: re-grep before editing. Drafted fixtures are **unverified until an adapter exists** (`consumedByTest: false`).
 Not run: `npm test` / build (no production file changed); `npm run typecheck` passed (the new `.ts` tools are inside `tsc -b`).
 
 ## 0. Results

@@ -1,8 +1,8 @@
 # S10A sw67 — Shock Wave 351: an allocation-faithful timeline and a geometry-keyed sprite-order plan
 
 Side lane, evidence + production in one step, using the plans48 / plans51 / plans54 method.
-- Base: master `b50c4dabd` (src tree `06b791ff`).
-- Tested code: `7dacd4141` (src tree `c3ab72f5`). Later commits touch tests, tools, fixtures and docs only.
+- Base: master `82690e775` (src tree `06b791ff`).
+- Tested code: `abbefec90` (src tree `c3ab72f5`). Later commits touch tests, tools, fixtures and docs only.
 - Receipt: `tools/integration/fixtures/sw67-live-receipt.json`. Fixtures: `tools/integration/fixtures/sw67/`.
 
 ## Results
@@ -70,7 +70,7 @@ is the generator alone.
 | opponent | 79 | MAGNEMITE, PICHU, FLAAFFY, NOSEPASS |
 | opponent | 86 | MAGNETON, MAREEP, CASTFORM |
 
-The predictions were committed in `65ed34c58` before any probe ran (`fixtures/sw67/predictions.json`, written by `sw67Predict.ts`).
+The predictions were committed in `59598c128` before any probe ran (`fixtures/sw67/predictions.json`, written by `sw67Predict.ts`).
 - 9 NEW (attacker, target) pairs per side, covering every class.
 - None is a plans48 pair. No target is Ground-type or has Volt Absorb, so the move animates.
 - The 102 / 104 player classes (MAGNEMITE, CASTFORM) had no ROM receipt before.
@@ -106,14 +106,14 @@ The grid was probed with `sw67Probe.py`: direct mGBA, never the HTTP oracles.
 `F0`.
 
 **Rung 3: live-share census, seeds 0..299.**
-- Run with `liveShareCensus.ts` on `b50c4dabd` and on the tested code, paired by `prep43CensusDelta.py`.
+- Run with `liveShareCensus.ts` on `82690e775` and on the tested code, paired by `prep43CensusDelta.py`.
 - 7970 commands, 0 pairing mismatches, **identical command key sequence** (battle, kind, moveId, side, attacker, target).
 - Battle digest identical: `e3603a84…03e4`.
 - **0 live → fallback regressions.** Render sanity: 0 throws.
 
 | | live by count | live by frames |
 |---|---|---|
-| `b50c4dabd` | 7729 / 7970 = **96.98 %** | 1146541 = **97.99 %** |
+| `82690e775` | 7729 / 7970 = **96.98 %** | 1146541 = **97.99 %** |
 | sw67 | **7733 = 97.03 % (+4)** | **1147322 = 98.06 % (+781)** |
 
 Gained commands:
@@ -126,12 +126,12 @@ Gained commands:
 Not gained, unchanged from before: battle 205's 2nd / 3rd opponent Shock Wave. The case-351 gate fires on a lend whose occupied set is
 not the known entry. The plan fails closed on the same condition.
 
-Chain predictor (`prep61OrderCensus.ts` on `b50c4dabd`, then `prep45Chains.py --cleared "body 351 SHOCK_WAVE" --after`):
+Chain predictor (`prep61OrderCensus.ts` on `82690e775`, then `prep45Chains.py --cleared "body 351 SHOCK_WAVE" --after`):
 - predicted 3 commands / 693 frames;
 - measured predicted & live 3 / 693, predicted & not live 0, not predicted & live 0.
 
 **Scene ON/OFF parity.** `tests/spriteOrderSw67.test.ts` runs route 7 / streak 7 with CASTFORM using Shock Wave twice (slots [2, 2]).
-- Both bodies are live with this change; the second fell back on `b50c4dabd`.
+- Both bodies are live with this change; the second fell back on `82690e775`.
 - Scene ON and OFF have equal boundaries, rules, RNG, facility state and final rngValue.
 
 ## Production change
@@ -160,7 +160,7 @@ Chain predictor (`prep61OrderCensus.ts` on `b50c4dabd`, then `prep45Chains.py --
 
 ## Reproduce
 
-    tools/integration/sw67Run.sh <fresh-out-dir> [--base b50c4dabd] [--skip-classes] [--skip-probe] [--skip-census]
+    tools/integration/sw67Run.sh <fresh-out-dir> [--base 82690e775] [--skip-classes] [--skip-probe] [--skip-census]
 
 It runs fit → classes (~2 min) → predictions → grid probes (~20 s) + extract + grid check → census before / after (~3 min, parallel) +
 delta + key / digest check → chain predictor (~3 min). Each step's output is compared byte for byte with `fixtures/sw67/` where it is
@@ -180,5 +180,5 @@ deterministic. The individual steps:
 
 Caveats:
 - Battle-lab species are internal ids. MAGNEMITE / MAGNETON / BLISSEY / KANGASKHAN leads get their forced gender.
-- The base census ran from a `git archive` of `b50c4dabd`'s `workspace/src` (tree `06b791ff`), not a checkout. Its 0..299 numbers
+- The base census ran from a `git archive` of `82690e775`'s `workspace/src` (tree `06b791ff`), not a checkout. Its 0..299 numbers
   equal `docs/live-share-census.md` "Latest".

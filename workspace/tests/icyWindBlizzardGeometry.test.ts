@@ -11,7 +11,7 @@ import { RETAINED_BLIZZARD_SLOTS, RETAINED_ICY_WIND_SLOTS, geoiceGeometry } from
 
 // S10A geoice (docs/icy-wind-blizzard-geometry.md): Icy Wind (196) / Blizzard (59) derive their effect OAM slots and order from the
 // reducers' own CreateSprite / DestroySprite / SortSprites replay at the displayed geometry. Dense pairs = species pairs the retained
-// slot table did not cover at 5e0b86a42; ROM rows = fresh direct-mGBA probes (two runs, equal), receipt geoice-live-receipt.json.
+// slot table did not cover at 7da7bbfa3; ROM rows = fresh direct-mGBA probes (two runs, equal), receipt geoice-live-receipt.json.
 const DIR = "tools/integration/fixtures/geoice";
 const ROM = JSON.parse(readFileSync(`${DIR}/rom-rows.json`, "utf8")) as {
   cases: Record<string, { startFrame: number; rows: number; romRowsSha256?: string[] }>;

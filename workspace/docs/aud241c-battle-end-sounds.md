@@ -69,10 +69,10 @@ The loss lobby SE_SELECT is aud240d's terminal emitter (the test presses the thi
 
 ## Verification
 
-Tested code commit `a70c70fce0bd8310b687549842bb817b0eaf612d` (tree `40de2a03008b7f0eef557032c7a164acf5876195`; parent of the ledger-free docs commit that adds this block, so `src/`, `tools/` and `tests/` are identical to it).
+Tested code commit `010e552554efbfcea722acd7f37cc5d36d495173` (tree `40de2a03008b7f0eef557032c7a164acf5876195`; parent of the ledger-free docs commit that adds this block, so `src/`, `tools/` and `tests/` are identical to it).
 
 - `tests/aud241cBattleEndSounds.test.ts`: 8 tests pass (six ROM windows, all frame deltas 0; write-only state check; `stopLowHpSound`).
-- `npm run compare:differential` vs base `3e8a43178`: 26 traces, 9,615 captures, byte-identical pixels (PASS), run at the commit that introduced the Brain stage (no `src/` change since).
+- `npm run compare:differential` vs base `a302659de`: 26 traces, 9,615 captures, byte-identical pixels (PASS), run at the commit that introduced the Brain stage (no `src/` change since).
 - `npm run typecheck`: exit 0.
 - Importers batch (every `tests/*.test.ts` importing `appTrace`, `audio/soundEvents`, `engine/screenSounds`, `engine/core.ts` or `battleEndSounds`, plus `battlesceneSplitEligibility`), `NODE_OPTIONS=--max-old-space-size=8192`: 66 files / 1106 tests pass.
 - `npm run test:gate`: exit 0, 364 files / 2928 tests pass.

@@ -1,6 +1,6 @@
 # ordl126 (S10A side lane, 2026-10-12): the banked ord124 order plans for Odor Sleuth 316 + False Swipe 206 are LIVE
 
-Base: master `cfe4e26ca` (production src `b4befa039`). Production change: the generated `src/engine/spriteOrderProductionPlans.ts`
+Base: master `9a184dfa6` (production src `b4befa039`). Production change: the generated `src/engine/spriteOrderProductionPlans.ts`
 (+3 plans, +4 keys) via the one fixture line added to `tools/integration/spriteOrderProductionTable.ts`, plus the table-length pins in
 `tests/spriteOrderEventTransform.test.ts`. Presentation only. Evidence and method: `docs/ord124-order-plans.md`.
 
@@ -12,7 +12,7 @@ Base: master `cfe4e26ca` (production src `b4befa039`). Production change: the ge
 | ROM units (committed receipts, plans69 + ord124) | `316:player` 29 / 29, `316:opponent` 22 / 22, `206:player` 9 / 9, `206:opponent` 9 / 9 exact per allocation window. |
 | Revert experiment (static `D0,1`, no `/P552,552` / `/P542,542` words) | Fails **exactly the 21** `[4, 3, ...]` lend-class instances (13 player + 8 opponent) and passes the 30 `[3, 4, ...]` ones. Recorded as a test. |
 | Windows after the bodies (landed tree, direct mGBA, two fresh probe batches) | 12 windows: CHAIN lend == ROM `sSpriteOrder` **12 / 12**, r1 == r2 **12 / 12**, **10 / 10 after-body windows live at 0 px** on every row (Harden 101 / 101 rows, Mega Punch 160 / 160). The other 2 are the pre-existing Golbat Mega Punch first windows (17,984 px / 287,402 px class in ord124 §3 FINDING; unchanged, not this landing). |
-| Census 0..999 (`stg107Census.sh` x2, `hist73Merge.py`; percentages from the merged reports) | base `cfe4e26ca`: 27,139 / 27,426 live (**98.95 %**), 4,132,330 / 4,160,787 frames (**99.32 %**). Landed: 27,245 / 27,426 (**99.34 %**), 4,144,162 / 4,160,787 (**99.60 %**). **+106 commands / +11,832 frames**, all battle 705 (Struggle `165:player` 83, `165:opponent` 18, Swallow `254:opponent` 5). 0 other status changes; KEY sequence, per-command frames, `battleDigest`, `commandKeyDigest` and shard digests identical; `land82CensusCheck`: 0 pairing mismatches, 0 regressions. |
+| Census 0..999 (`stg107Census.sh` x2, `hist73Merge.py`; percentages from the merged reports) | base `9a184dfa6`: 27,139 / 27,426 live (**98.95 %**), 4,132,330 / 4,160,787 frames (**99.32 %**). Landed: 27,245 / 27,426 (**99.34 %**), 4,144,162 / 4,160,787 (**99.60 %**). **+106 commands / +11,832 frames**, all battle 705 (Struggle `165:player` 83, `165:opponent` 18, Swallow `254:opponent` 5). 0 other status changes; KEY sequence, per-command frames, `battleDigest`, `commandKeyDigest` and shard digests identical; `land82CensusCheck`: 0 pairing mismatches, 0 regressions. |
 | Lend unknown | 125 / 15,490 -> **19 / 3,658** commands / frames (`ord124Attribution.py` on the landed merged jsonl, byte-identical to ord124's patched attribution). |
 
 Receipt: `tools/integration/fixtures/ordl126-live-receipt.json`. Tests: `tests/ordl126OrderPlans.test.ts`.

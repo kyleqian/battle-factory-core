@@ -1,6 +1,6 @@
 # S10A prep65: Dive 291 as a Random2-words order unit (setup + unleash)
 
-Integration lane, evidence only, new files only. Base: master `00c57d08d` (production src tree `d7f24b03`). No tracked file was
+Integration lane, evidence only, new files only. Base: master `83ac6aa75` (production src tree `d7f24b03`). No tracked file was
 changed. The production experiment is `tools/integration/fixtures/prep65/prep65-temp-src.diff` (206 lines). `prep65Run.sh` applies it
 and always reverts it. Receipts are in `tools/integration/fixtures/prep65/`. Every probe ran twice in fresh direct-mGBA processes with the
 jobs' explicit lab seeds. The shared HTTP oracles were never touched.
@@ -46,7 +46,7 @@ sequence and an identical battle digest.
   - The nested unleash marker (activation = the setup marker, turn 1) **lends the ROM free order after the unleash body in 7 / 7**
     (the next unit's `F0`).
   - Control: a species-free Dive marker declines in 7 / 7.
-- **(3) Census seeds 0..299, identical seeds** (`liveShareCensus.ts` and `prep61OrderCensus.ts`, base `00c57d08d` vs the patch).
+- **(3) Census seeds 0..299, identical seeds** (`liveShareCensus.ts` and `prep61OrderCensus.ts`, base `83ac6aa75` vs the patch).
 
   | | live by count | live by frames | faithful-random history (D3) |
   |---|---|---|---|

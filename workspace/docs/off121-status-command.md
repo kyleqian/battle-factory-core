@@ -1,6 +1,6 @@
 # off121 (S10A timeline fidelity): the Scene OFF `status` command length, and the Scene ON status-animation evidence
 
-Base: master `9d23a17c4` (production src `530600bb1`). Production change: `src/engine/battleResolutionPresentation.ts` only (the
+Base: master `61e1128ab` (production src `530600bb1`). Production change: `src/engine/battleResolutionPresentation.ts` only (the
 `status` command's Scene OFF timing, `sceneOffStatusFrames`; `BattleStatusTiming` widened to `number`). Scene ON untouched.
 Presentation only: no kernel, RNG, damage, turn order or facility change. Direct mGBA only (no shared oracle), explicit lab seed
 305419897 in every scenario, every probe job twice in fresh processes: **18 / 18 outputs r1 == r2** (9 scenarios x ON / OFF).
@@ -81,7 +81,7 @@ The status command before "X went to sleep!" is now exact in Scene OFF (message 
 receipt AFTER "went to sleep!" + `waitmessage` + the status icon (off108 §1 "Open") is **not landed and not re-measured** here
 (time): no pause is emitted there, as before.
 
-## 2. Census 0..999 (base 9d23a17c4 vs final)
+## 2. Census 0..999 (base 61e1128ab vs final)
 
 - **Scene ON** (liveShareCensus, 10 shards `--seeds=a..b --index-from=a` + hist73Merge): **22 / 22 files byte-identical** (10 r<k>.json,
   10 r<k>.jsonl, merged.json, merged.jsonl): 0 live / fallback status changes, 0 per-command frame changes, battleDigestExcludingFrames
@@ -97,19 +97,19 @@ receipt AFTER "went to sleep!" + `waitmessage` + the status icon (off108 §1 "Op
 
 `tests/randomRoundSoak.test.ts`: seven wins (seed 21) frames 38,358 → 37,645, renderCalls 2,728 → 2,697 (same battle 7, turn 3,
 seven wins, every other diagnostic identical); M-B (c) full seeds 0 / 1: 17,591 → 17,557, 27,052 → 26,869; vanilla 9,145 → 9,130,
-9,205 → 9,033. soak111Decoupling.ts: **decision and canonical logs SAME** vs 9d23a17c4 for full and vanilla seeds 0 / 1; same battle /
+9,205 → 9,033. soak111Decoupling.ts: **decision and canonical logs SAME** vs 61e1128ab for full and vanilla seeds 0 / 1; same battle /
 turn / endState.
 
 ## 4. Test
 
 `tests/off121StatusCommand.test.ts`, 13 tests: the ROM receipts per class (8 rows + sleep / wake / cure + every OFF statusanimation
 skipped), the production rule on census seeds 7 / 11 / 12 / 13 per class, the absolute Toxic / Thunder Wave / Rest anchors, Scene ON
-stays 32. **Revert experiment** (production file = 9d23a17c4's, in a git-archive copy): **2 / 13 fail** (the two production-rule
+stays 32. **Revert experiment** (production file = 61e1128ab's, in a git-archive copy): **2 / 13 fail** (the two production-rule
 tests); the 10 ROM-receipt tests and the Scene ON guard pass.
 
 ## 5. Gates
 
-Final code = production src `4642cfcba` (commit e34c93caa; later commits add tools / receipt / doc only).
+Final code = production src `4642cfcba` (commit 4170dd954; later commits add tools / receipt / doc only).
 
 - Targeted (4 workers, before the soak re-pin): olnd113SceneOffPauses, sc106StatsChangeCommand, battleResolutionPresentation,
   randomRoundSoak, playableAnimationIntegration, factoryRoundBattleOrchestrator: 6 files, 199 passed / 3 failed = exactly the three soak
@@ -119,7 +119,7 @@ Final code = production src `4642cfcba` (commit e34c93caa; later commits add too
   0 failed. Shard 2 **818 files / 6,460 tests passed** (22 / 104 skipped), 0 failed.
 - `npm run build`: green.
 - `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base
-  9d23a17c4`: **PASS, 624 / 624 captures byte-identical** (the canonical traces are Scene ON).
+  61e1128ab`: **PASS, 624 / 624 captures byte-identical** (the canonical traces are Scene ON).
 - `npm run soak -- --policy vanilla --seeds 0:20 --parallel 5`: **OK 20, CRASH 0, HANG 0** (budget 20).
 - `git diff --check`: clean.
 - Not serialized (the 80-minute cap left no room): build and differential ran during full-suite shard 1, smoke and the soak during

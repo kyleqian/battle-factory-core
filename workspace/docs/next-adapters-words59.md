@@ -1,7 +1,7 @@
 # S10A words59: the dirt words-deferred carry at the body's displayed species; RAIN_CONTINUES words after the last command
 
-Worker step (integration lane, base master `108aae871`, production src tree `8d3b44bb`). Production commits `76bbb9f0a` (marker /
-carry) and `fde2885cc` (tick seam). Final production src tree **`7c49e0c3`**; later commits change tools / tests / fixtures / docs
+Worker step (integration lane, base master `b3160da57`, production src tree `8d3b44bb`). Production commits `12a0131e7` (marker /
+carry) and `df21b6464` (tick seam). Final production src tree **`7c49e0c3`**; later commits change tools / tests / fixtures / docs
 only. Receipt: `tools/integration/fixtures/words59-live-receipt.json`. Tests: `tests/words59DeferredBodySpecies.test.ts` and
 `tests/words59RainTrailingWords.test.ts`.
 
@@ -43,14 +43,14 @@ event of its resolution. It is fixed render-pure.**
   the per-frame step only). Trailing events of an earlier segment keep the next segment's first command, so no existing word moves. In
   the seven affected battles, 54/54 rain events are now recorded (before: 2 missing). Census 0..299 "no recorded presentation words":
   15 / 2,737 frames → 0. Revert experiment: `tests/words59RainTrailingWords.test.ts` fails 1 of 2.
-- **Census seeds 0..299 (`liveShareCensus.ts`, 108aae871 vs final).**
+- **Census seeds 0..299 (`liveShareCensus.ts`, b3160da57 vs final).**
   - **Live:** 7,524 → 7,581 commands (**94.40 % → 95.12 %**) and 1,117,704 → 1,126,402 frames (**95.68 % → 96.42 %**), i.e.
     **+57 commands / +8,698 frames**.
   - **0 live → fallback regressions**, 0 pairing mismatches, identical command sequence, battle digest `0fd00eae2078…`. The only other
     differences are gate line numbers in 334 decline records.
   - **Faithful-random history (D3): 172 / 29,188 → 237 / 38,898 (+65 / +9,710).** That is the 57 new live commands plus 8 that were
     already live and now read the resolved lend: Flamethrower ×4, Rock Slide ×4, both documented order-independent by words57.
-  - Marker only (`76bbb9f0a`): +42 / +5,961. The tick-seam fix adds +15 / +2,737.
+  - Marker only (`12a0131e7`): +42 / +5,961. The tick-seam fix adds +15 / +2,737.
   - The before report sha256 `8477f8ca…` equals words57's committed "after".
 - **gates53 row A** (words57's definition; it reproduces words57's committed 67 / 10,051 and 208 / 32,186):
   - **seeds 0..299:** 67 / 10,051 → **12 / 1,509**. Row B unchanged (12 / 2,071). Case-local 89 / 13,740 → 34 / 5,198.
@@ -82,11 +82,11 @@ event of its resolution. It is fixed render-pure.**
   In both, the snapshots are identical across Scene ON seed A, ON seed A again, ON seed `0xfeed0042` and Scene OFF, and final RNG /
   facility state is identical. Faithful-random frames (681 / 691) are identical between the fresh seed-A runs and differ under seed B.
 - **Gates (final code).**
-  - Full suite on `fde2885cc` (src `7c49e0c3`): 1,592 files passed / 44 skipped, 13,101 tests passed / 223 skipped.
+  - Full suite on `df21b6464` (src `7c49e0c3`): 1,592 files passed / 44 skipped, 13,101 tests passed / 223 skipped.
   - Targeted: 22 files / 152 tests.
   - Tests importing the touched fixture harness: 34 files / 464 tests.
   - Smoke 448 passed; typecheck, build and `git diff --check` clean.
-  - `compare:differential` (base 108aae871): PASS, 624 captures byte-identical across 3 traces.
+  - `compare:differential` (base b3160da57): PASS, 624 captures byte-identical across 3 traces.
 
 ## Notes
 

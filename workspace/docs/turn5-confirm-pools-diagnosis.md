@@ -1,6 +1,6 @@
 # ISSUES #97 remainder: `turn5-confirm-off-a`/`-b`'s unattributed pools, class-censused and mechanism-diagnosed
 
-Side-lane instrument session, Battle Scene OFF oracle, at commit `540db2ab`
+Side-lane instrument session, Battle Scene OFF oracle, at commit `a031f77f`
 (the HP-overlay gate fix and the rockslide-text-delay/heal-text fixes have
 both landed; per the brief, neither confirm window has been class-censused
 since). Analysis only — `git diff -- src/` is empty throughout; the new
@@ -26,7 +26,7 @@ throughout.
 
 ## 0. Census — every mismatched frame accounted for
 
-Fresh baselines (commit `540db2ab`, re-confirmed this session):
+Fresh baselines (commit `a031f77f`, re-confirmed this session):
 `turn5-confirm-off-a` **60/132** (72 unattributed), `turn5-confirm-off-b`
 **37/132** (95 unattributed). Both traces share the same 76-segment button
 script as the rest of the turn5-off family (byte-identical

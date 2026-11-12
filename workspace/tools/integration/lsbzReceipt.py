@@ -62,7 +62,7 @@ receipt = {
                    "optional restore lag at impact + 139, the fixed pair impact + 160 / + 161) is relative to it (blizzard.ts scriptOffsetAtAge / "
                    "backgroundBlendY / cleanupAge = impact + 163), so the body is impact + 164 rows in the lag phase (impact + 163 without). Player "
                    "geometries are all impact 208 (372 rows, unchanged); opponent 194..206 (358..370)."),
-        "grid": "tools/integration/fixtures/lsbz/blizzard-grid-predictions.json (25 pairs, predictions committed in a5bc9b8e6 before any probe)",
+        "grid": "tools/integration/fixtures/lsbz/blizzard-grid-predictions.json (25 pairs, predictions committed in 05cce9037 before any probe)",
         "counters": "tools/integration/fixtures/lsbz/blizzard-counters.json (24 pairs x 2 fresh direct-mGBA runs, r0 == r1; lag 16 : none 8, every pair the predicted shape)",
         "summary": summary([w for w in windows if w["move"] == "BLIZZARD"]),
         "excluded": ["blizzard-opponent-baltoy-huntail (impact 205): the staging activation probe crashed (run-mgba-probe exit 139, no output); not staged",

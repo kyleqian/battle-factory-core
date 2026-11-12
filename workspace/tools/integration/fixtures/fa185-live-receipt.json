@@ -396,9 +396,9 @@
   "otherPhase": 59,
   "method": "every receipt window with selectedPhase (tools/integration/fixtures/**/*receipt*.json) + fa185/windows, one d4aTimingCheck process per fixture (two fresh runs each), P=12, on tested src tree f1f2de0887db2a64c12b651a68c7d541a40f185f"
  },
- "testedCommit": "518f0c7f2",
+ "testedCommit": "0d8875ed0",
  "gates": {
-  "testedSrcTree": "f1f2de0887db2a64c12b651a68c7d541a40f185f (HEAD 44e220ec6: same src tree)",
+  "testedSrcTree": "f1f2de0887db2a64c12b651a68c7d541a40f185f (HEAD 2118370c5: same src tree)",
   "fa185TimingCheck": "10 fixtures x 2 invocations (one process per fixture, 2 fresh runs each): 0 violations; 8 policy-phase 0 px; digests identical across 4 runs; a third pass inside the all-fixture regression on the committed tree",
   "d4aRegressionAll": "243 timing fixtures, one d4aTimingCheck process per fixture, P=12: nonzero-exit 0, violations 0 (184 policy phase, 59 other phase)",
   "targetedTests": "liveFa185Timing, liveD4tailsTiming, liveStatusImplementedCount, factoryAnimationInventory, liveFaithfulTimingAdapters, faintAttack, liveFaintAttackSides, livePrep6MoveAdapters (incl. Scene ON/OFF parity on the Faint Attack route seed 0 / streak 7), playableAnimationIntegration, sceneOnPresentation: 10 files / 120 tests passed",
@@ -406,8 +406,8 @@
   "smoke": "npm run test:smoke: 8 files / 448 tests passed",
   "fullSuite": "PATH=$PWD/tools/autonomy/bin:$PATH POKEBENCH_VITEST_MAX_WORKERS=4 npm test -- --maxWorkers=4: 1,583 files passed | 44 skipped; 13,031 tests passed | 223 skipped (465 s)",
   "build": "npm run build: exit 0 (876 modules)",
-  "differential": "npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base be1b07196: PASS, 624 captures byte-identical",
+  "differential": "npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 19044da7f: PASS, 624 captures byte-identical",
   "census": "node tools/integration/remainingAdaptersCensus.mjs --write --doc: 241+13+22+0+0=276",
-  "diffCheck": "git diff --check be1b07196 HEAD: clean"
+  "diffCheck": "git diff --check 19044da7f HEAD: clean"
  }
 }

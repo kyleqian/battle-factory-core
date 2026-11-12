@@ -5,7 +5,7 @@
 - **Field art is form-aware.** A CASTFORM in a weather form now draws its form in the field view: the form's frame and
   `castformPalette[form]`. The opponent uses `gCastformFrontSpriteCoords[form]` (size + y_offset) and `sCastformElevations[form]`;
   the player uses `sCastformBackSpriteYCoords[form]` (0). The live renderer's species sheets and palette banks read the same form.
-  The normal form is byte-identical: differential **624 / 624** vs `b05d384ca`.
+  The normal form is byte-identical: differential **624 / 624** vs `f49b7d03f`.
 - **ROM ground truth** comes from direct mGBA, lab seed 305420349, Scene ON, two fresh probe processes per scenario, r1 == r2.
   - Scenarios: audit 19's 16 `cast-*` scenarios plus 42 new `c83-*` ones.
   - Opposing species: CHANSEY, LAPRAS, MANTINE, SHARPEDO, and the elevated CROBAT / GOLBAT / PELIPPER.
@@ -85,7 +85,7 @@ Castform is allowed only when its `moveId:role:form` key is in `LIVE_CASTFORM_FO
   - **Substitute swap composite:** `liveSubstituteSwap.ts` calls the gate without a request. Swap composites with a weather-form
     Castform are not measured.
 
-**Census 0..999.** Base `b05d384ca` (the supervisor's 10 shards) vs final `62921ae2e`. Final src then differs only by two `export`
+**Census 0..999.** Base `f49b7d03f` (the supervisor's 10 shards) vs final `03bee8e77`. Final src then differs only by two `export`
 keywords.
 
 - **+32 commands / +6,521 frames live.** Live share goes from 93.79 % / 97.37 % to **93.91 % / 97.54 %**.

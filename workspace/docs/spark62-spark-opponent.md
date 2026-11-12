@@ -11,7 +11,7 @@
   `[1,0,..]`, player `[0,..]` (CPU timing, varies with species). That iteration is a lag frame (byte-identical `screen(c+1) == screen(c)`
   on all 8 rows), which the renderer already encodes (`view(-1)` for the effect sprites at reducer age 43); the spriteAge-0 state where
   the advance lives is never displayed, so every advance in {0,1} renders identically.
-- **Prediction vs grid:** prediction (committed in `2b102b1bf` before the grid) held on every row: all-zero vectors -> 0 px on the 6 opponent
+- **Prediction vs grid:** prediction (committed in `562cd8b48` before the grid) held on every row: all-zero vectors -> 0 px on the 6 opponent
   pairs and 5 player controls; the accepted `[1,1,0..]/[1,0..]`, the VOLTORB `[1,0..]` and an all-ones vector render identical frames on all
   115 rows (test, 3 pairs); an advance of 2 changes exactly row 44 (non-vacuity control). Tie order: not derived; known-order lend gate kept.
 - **Dense windows (production live renderer, `liveAdapterFramebuffer.ts`, two fresh direct-mGBA runs each, lab seed 12):**
@@ -28,9 +28,9 @@
   | player CHINCHOU -> SHUCKLE (spark62) | 115 | 0, 0 |
   | player MINUN / PLUSLE / CHINCHOU -> SHUCKLE (prep10-live, unchanged) | 3 x 115 | 0, 0 each |
 
-  1,265 rows per run, 11 / 11 fixtures 0 px twice. Pre-change control (`d78b936f3`'s `liveMoveAnimation.ts`, VOLTORB -> SNORLAX):
+  1,265 rows per run, 11 / 11 fixtures 0 px twice. Pre-change control (`5184ed234`'s `liveMoveAnimation.ts`, VOLTORB -> SNORLAX):
   `Error: No live adapter for SPARK`. New test `tests/animation/spark62SparkOpponent.test.ts`: 4 / 6 fail without the change.
-- **Census seeds 0..299 (`d78b936f3` vs final):** live 7710 -> 7729 commands (96.74 % -> 96.98 %), live frames 1,144,356 -> 1,146,541
+- **Census seeds 0..299 (`5184ed234` vs final):** live 7710 -> 7729 commands (96.74 % -> 96.98 %), live frames 1,144,356 -> 1,146,541
   (**+2,185 = 19 x 115**; share by frames 97.96 % -> 97.99 % of the new 1,170,031 presented frames); **0 live -> fallback regressions**;
   command key sequence identical. The 22 opponent Sparks ("duration: no opponent-attacker adapter", 704 fallback frames): **19 live**
   (CHINCHOU, PLUSLE, VOLTORB, MINUN attackers), 3 (battle 107 CHINCHOU) still decline at the known-order gate (`order host: no EXACT plan:

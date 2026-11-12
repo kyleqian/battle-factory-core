@@ -2,12 +2,12 @@
 # sw67 rerun (docs/next-adapters-sw67.md): Shock Wave 351 fit + geometry classes + predictions + direct-mGBA grid + live-share census
 # into a FRESH output dir, each step compared with the committed fixtures (tools/integration/fixtures/sw67/).
 # usage (from workspace/): tools/integration/sw67Run.sh <fresh-out-dir> [--base <commit>] [--skip-classes] [--skip-probe] [--skip-census]
-#   --base: the census / chain baseline (default b50c4dabd); its workspace/src + census tools are extracted with git archive into
+#   --base: the census / chain baseline (default 82690e775); its workspace/src + census tools are extracted with git archive into
 #   <out>/base (node_modules symlinked), never checked out. Probes: direct mGBA (MGBA_PY / LIBMGBA_PY below), never the HTTP oracles.
 set -eu
 [ $# -ge 1 ] || { echo "usage: $0 <fresh-out-dir> [--base <commit>] [--skip-classes] [--skip-probe] [--skip-census]" >&2; exit 2; }
 OUT=$1; shift
-BASE=b50c4dabd; CLASSES=1; PROBE=1; CENSUS=1
+BASE=82690e775; CLASSES=1; PROBE=1; CENSUS=1
 while [ $# -gt 0 ]; do
   case $1 in
     --base) BASE=$2; shift 2 ;;

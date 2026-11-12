@@ -1,6 +1,6 @@
 {
  "schema": "fade-live-receipt/v1",
- "codeCommit": "fe1c66343",
+ "codeCommit": "0a17f2f17",
  "srcTree": "d15bc413",
  "method": "fresh direct-mGBA prep39 probes (prep39Probes.sh: every scenario twice from fresh processes, json + rgb cmp'd), then tools/integration/fadeLiveCheck.ts twice (production createBattleResolutionPresentationRenderView + renderBattleResolutionLiveView, every row of every fade window: script rows + first inactive row + 2-row OAM tail)",
  "claim": "pixels outside the wait-cursor footprint (the queue presents STRINGID_SUBSTITUTEDMG as an automatic message: the ROM's frozen cursor is the message host's, reported as cursorBoxPx)",
@@ -844,14 +844,14 @@
   }
  ],
  "gates": {
-  "testedCommit": "65d73130b",
+  "testedCommit": "514bd2d0f",
   "srcTree": "d15bc413",
   "targeted": "14 files / 253 tests (substituteFadePresentation, substituteSwapPresentation, substituteDollFieldState, substituteDollAdapterDecline, substituteDollDefenderLive, liveShadowRows, liveStatusImplementedCount, animation/factoryAnimationInventory, animation/animationBoundaryRatchet, playableAnimationIntegration, battleResolutionAdapter, battleResolutionAdapterIntegration, battleResolutionPresentation, substituteSwapAttdollCells)",
   "typecheck": "pass",
   "smoke": "8 files / 448 tests",
   "fullSuite": "1567 files passed, 44 skipped / 12902 tests passed, 223 skipped (four workers)",
   "build": "pass, 874 modules (+1: src/engine/liveSubstituteFade.ts)",
-  "differential": "624 / 624 captures byte-identical across fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on vs 3d3873a57",
+  "differential": "624 / 624 captures byte-identical across fight-submenu, battle1-postwin-next-prompt, presentation-rng-playable-live-bodies-seeded-on vs 431ad3147",
   "d4aRegression": "161 fixtures, 0 violations, 0 nonzero exits",
   "substSwap": "substSwapRun.sh fresh: probes r1 == r2 (13 scenarios); 21 exact windows x2 runs residual 0; GOLEM-player swap rows 0, body == control; negatives fail",
   "dolldef": "dolldefLiveCheck over tools/integration/fixtures/dolldef-live (53): 50 every row exact, the other 3 exactly the documented non-doll residuals (HAUNTER -> KADABRA age -5, Quick Attack opponent age 9, Shadow Ball player 44 ages 64..147)",

@@ -26,7 +26,7 @@ sourcemapped) in the vitest parent, shipped to every fork and re-evaluated there
 `export default JSON.parse("...")`. Safe here because nothing imports a JSON file by name (checked with grep over `src tests tools`:
 default imports only; `tests/battleIntroStrings.test.ts` uses `.default` of a dynamic import). Evidence: `tests/sc106StatsChangeCommand.test.ts`
 (5 passed both ways) `collect 76.6 s -> 15.0 s, transform 49.3 s -> 9.3 s, parent max RSS 4.49 GB -> 0.59 GB`; both full-suite shard
-passes with it (4 shards, 1,781 files) were green except two files that were already red on `fc5825d9e` without this change (below).
+passes with it (4 shards, 1,781 files) were green except two files that were already red on `f73aafbda` without this change (below).
 
 ## Worker count and memory (this host)
 
@@ -140,7 +140,7 @@ delta would not move if both the code and the expectation drifted together.
 
 | File | Decision | Reason |
 |---|---|---|
-| `sc106StatsChangeCommand` (11 -> 5 tests, 37.4 s -> 20.4 s) | **split: deleted the 6 "ordinary routes" cases** | They were literal frames "pinned on 52c181d54" plus a dozen hand-added per-step shifts (iu120, chg161, trn181, ont193, lsd194, go246, obr251 ...) for command / following-print frames and whole-route totals on seeds 0, 3, 6, 10, 13: exactly what the census delta covers (stats-change command frames, following command, route frames). Kept: the 76 / 90 reducer duration, both Substitute / Double Team rules on production segments (which also pin the Double Team 239 / 244 window), the Scene ON / OFF parity cases. `tools/integration/sc106RouteScan.ts` stays (docs cite it). |
+| `sc106StatsChangeCommand` (11 -> 5 tests, 37.4 s -> 20.4 s) | **split: deleted the 6 "ordinary routes" cases** | They were literal frames "pinned on bddc3d69c" plus a dozen hand-added per-step shifts (iu120, chg161, trn181, ont193, lsd194, go246, obr251 ...) for command / following-print frames and whole-route totals on seeds 0, 3, 6, 10, 13: exactly what the census delta covers (stats-change command frames, following command, route frames). Kept: the 76 / 90 reducer duration, both Substitute / Double Team rules on production segments (which also pin the Double Team 239 / 244 window), the Scene ON / OFF parity cases. `tools/integration/sc106RouteScan.ts` stays (docs cite it). |
 | `sgl138SeGateLive` (6 tests, 4 failed -> 6 pass) | **split: deleted the whole-route receipt equality** (`expect(battle).toEqual(receipt.battles[...])`) | It pinned route frame totals + per-anchor frames in `sgl138-live-receipt.json`; it was red on master since obr251 (e.g. seed 0: 25,166 -> 25,410). Kept every ROM-relation assertion (gate == sgs134 projection, banner on row gate, glyph at gate + rows + hold, later-hit shift == gate, gate rows == previous frame) and the receipt summary pin: all hold on the current frames. |
 | `sa125StatusAnimationCommand` | **kept** | The "production routes" cases assert `length == gate + ROWS`, `on - off == ROM controllerRows`, SA3 delta == off121 Scene OFF frames: ROM-relation checks, no literals to supersede. |
 | `wth236WeatherContinues` | **kept** | Asserts the weather body is drawn on every continuing turn (Scene ON) / nothing (OFF) and eventsDigest unchanged: behaviour, not a frame pin. |
@@ -154,7 +154,7 @@ predicted, deletion alone cannot reach the target.
 
 ## Pre-existing reds found by the full run (fixed here, one commit)
 
-`tests/randomRoundSoak.test.ts` was red on `fc5825d9e` (checked on the old `vite.config.ts` as well): obr251's party-summary draw hold moved
+`tests/randomRoundSoak.test.ts` was red on `f73aafbda` (checked on the old `vite.config.ts` as well): obr251's party-summary draw hold moved
 the seed 21 strong-route round (frames 39,117 -> 40,796, renderCalls 2,782 -> 2,891), the seed 0 exploring run (39,078 -> 39,466), and
 put the seed 1 exploring policy on a new trajectory (58,240 / battle 3 / turn 25 / depth 2 -> 36,610 / battle 2 / turn 23 / depth 1).
 Re-pinned with provenance comments; 64 / 64 pass. The seed 1 trajectory change is a policy-reads-presentation effect like the earlier

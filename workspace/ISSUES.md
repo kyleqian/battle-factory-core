@@ -15,7 +15,7 @@ exclusions are superseded. Unrelated expansions stay parked.
 
 ## #211 — ROM replay divergences, seeds 61..160 batch (top layer 2026-11-12; re-driven at the 2026-11-12 CAX31 wind-down)
 
-Scene OFF, `78c2ef2bc`: 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 still diverge (first diverging row per seed in `docs/replay-ledger.md`;
+Scene OFF, `f55e68f8e`: 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 still diverge (first diverging row per seed in `docs/replay-ledger.md`;
 75 88 110 155 158 now match). Not diagnosed; triage by first diverging row (dia263 / dia269 / dia272 shape). Seed 60 is the dia272 forced-Struggle lead (#204).
 
 ## #212 — Gameplay audit rows, source-read only (`docs/gameplay-parity-audit-2026-11-12.md` section 2)
@@ -143,7 +143,7 @@ trace is 108 / 121 (2-8 px affine-edge residual on 13 frames). Anchor Summary tr
 ## #168 — remainder: FRZ frozen-turn timing phase (S10A; #168 otherwise DONE 2026-10-13)
 
 All nine B_ANIM_STATUS_* animations are timed and drawn (88 + 16 dense ROM windows 0 px; live audit 28 clean), and since inl144
-(2026-10-13, merged `d019cd6b4`) a status animation over an INVISIBLE battler draws its sprites while the battler stays hidden (inv142's
+(2026-10-13, merged `1c801184b`) a status animation over an INVISIBLE battler draws its sprites while the battler stays hidden (inv142's
 banked patch landed; inv142Run.sh ALL SAME). Open (D4 class, aud137): FRZ's frozen-turn active rows are 115 vs production's 116 on 4 / 10
 windows (the next message one frame late); cause named, not proven.
 
@@ -295,7 +295,7 @@ arrive, with a Tier-1 pin.
 
 ## #114 — `runFutureAttacksAfterFaints` fires a delayed hit inline and keeps looping where source returns per effect (doubles-era divergence)
 
-**Found 2026-08-22** (side worker, #102 end-turn cursor fix `a6deb814`). Source
+**Found 2026-08-22** (side worker, #102 end-turn cursor fix `6584bf9d`). Source
 `HandleWishPerishSongOnTurnEnd` (`battle_util.c:1785-1888`) `return TRUE`s after
 each Future Sight/Perish Song script and re-enters via `BattleTurnPassed`,
 so a second delayed KO in the same turn takes its own `HandleFaintedMonActions`

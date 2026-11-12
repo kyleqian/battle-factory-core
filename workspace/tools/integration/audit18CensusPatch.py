@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Live audit 18 target 3: writes audit18Census713.ts = the given tree's liveShareCensus.ts + a per-command `hosts` record (the
 orchestrator's allocator history / order host state at the command's first frame, the view's sprite-allocator input, the battler sprites
-shown). tools/integration/audit18Census713.ts is this applied to master b7da8aa34's census; audit18Run.sh applies it to b50c4dabd's.
+shown). tools/integration/audit18Census713.ts is this applied to master 3dd7835fd's census; audit18Run.sh applies it to 82690e775's.
 usage: audit18CensusPatch.py <liveShareCensus.ts> <out.ts>"""
 import sys
 from pathlib import Path

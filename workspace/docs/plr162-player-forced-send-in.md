@@ -1,7 +1,7 @@
 # plr162 — the PLAYER send-in after a FORCED switch (Roar / Whirlwind on the player), ISSUES #146
 
 Presentation timing only: no rules / RNG / damage / turn-order / facility change (census kernel-event digests identical on 2,000
-battles, soak 20 / 20 OK). Base `9483a2551` (src `cc58816f`). Production commit `a8e3a5b86` (src `a5161d37`, unchanged after);
+battles, soak 20 / 20 OK). Base `0af818603` (src `cc58816f`). Production commit `3e2b452d0` (src `a5161d37`, unchanged after);
 receipts / census / doc after.
 
 ## Results first
@@ -13,7 +13,7 @@ receipts / census / doc after.
 | Production | `src/engine/switchInTail.ts` `sceneOffPlayerForcedSwitchIn{VisualDelay,HealthboxSlideElapsed,Duration}`; `battleResolutionPresentation.ts`: a Scene OFF `returntoball BS_TARGET` removal marks the battler; its next player `switch-in` gets `healthboxSlideElapsed` 65 (+shift), `sendInVisualDelay` −1 (+shift) and `switchInTiming(0, species, false, name, forcedPlayer)` = duration − 11 (the 11-frame settle hold stays, so the whole command = the ROM's print row). Voluntary player switches, player faint replacements, Baton Pass and every Scene ON player send-in keep 66 / 91 + 11 (`SWITCH_IN_TIMING`). |
 | Dense ROM windows (Scene OFF, 5 species, twice fresh) | `plr162Stage.py` (offs152's player-target sweep scenario `mechanic-roar-opponent-houndour-player-onix`, captures 150..489) + `plr162Compare.ts` (production render path; the opponent half transplanted from the ROM — HOUNDOUR's HP is Tackle-damaged). r1 == r2 byte-identical for all 5 (`fixtures/plr162/rom-sha-off.json`); compare r1 == r2 (`fixtures/plr162/compare-summary-off.json`). **Player healthbox + message rows 0 px on PIDGEY (slide-bound, 91), BUTTERFREE (10-glyph name, cry-bound 95), BULBASAUR (113), TYPHLOSION (174)**; CASTFORM (shift, 103): 2 px total, one pixel at (120, 111) on e 76 / 84 = the edge of the player sprite (region boundary, mon residual), message 0 px. **ROM next text == production duration 5 / 5**; pre-send-in rows (pause, hold, removal) **0 px 5 / 5**. Base controls (PIDGEY / TYPHLOSION, 66 / 102): 14 / 4 healthbox + message rows nonzero, print 11 frames late / 72 frames early. |
 | Census, both scenes (`plr162Census.ts`, 0..999 × on / off, base vs final, same tool file) | 2,000 battles, **kernel-event digests identical on every battle**, 0 command-type-sequence changes; 612,024 commands, **32 changed: exactly the 32 Scene OFF forced player switch-ins** (27 species; 91 + 11 → max(91, cry + 66) + 11, slide 65, visual delay −1; net +404 frames); the **32 Scene ON** forced player switch-ins unchanged. 3 seeds (434 / 796 / 881) hit the tool's 200k-frame input-loop budget identically in both trees and both scenes (pre-existing; reported, not a change). `fixtures/plr162/census-delta.json`. |
-| `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 9483a2551` | **PASS, 641 / 641 captures byte-identical** (3 traces). |
+| `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 0af818603` | **PASS, 641 / 641 captures byte-identical** (3 traces). |
 | Soak vanilla 0:20 `--parallel 10` (final tree) | **20 / 20 OK** (all budget-ended; deepest carry 7, battle depth 9 — the same as offs152's receipts). `fixtures/plr162/soak-vanilla-final.json`. |
 
 ## Not landed (named)
@@ -34,11 +34,11 @@ receipts / census / doc after.
 
 - `npx vitest run tests/plr162PlayerForcedSendIn.test.ts`: 6 / 6 (model 339 / 339; `switchInTiming` split; census seeds 23 (Roar) /
   76 (Whirlwind) on the player: Scene OFF forced send-ins carry the tail, every other player send-in keeps 91 / no slide; Scene ON unchanged).
-- `npm run typecheck` OK (on `a8e3a5b86`); `npm run test:smoke` 448 / 448; `git diff --check 9483a2551 HEAD` clean.
-- Full `npm test` on `4ffdba6f5` (src `a5161d37` = the production commit; later commits are doc / receipts only): **1,672 files passed,
+- `npm run typecheck` OK (on `3e2b452d0`); `npm run test:smoke` 448 / 448; `git diff --check 0af818603 HEAD` clean.
+- Full `npm test` on `77eea4cda` (src `a5161d37` = the production commit; later commits are doc / receipts only): **1,672 files passed,
   44 skipped; 13,881 tests passed, 0 failed, 223 skipped** (1,318 s). No existing pin moved (census / soak / differential pins do not
   stage a Scene OFF Roar on the player).
-- `npm run build` OK on `09817391e` (same src).
+- `npm run build` OK on `23286f115` (same src).
 
 ## Reproduce
 

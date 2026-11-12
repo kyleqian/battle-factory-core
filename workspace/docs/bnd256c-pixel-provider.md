@@ -32,7 +32,7 @@ and removes the JSON import from the headless graph.
 
 ## Sizes (`npm run build:lib`, readable output)
 
-| | Before (`086ef7f36`) | After |
+| | Before (`33d93e25c`) | After |
 | --- | --- | --- |
 | `ENGINE_BUILD` | `eb-808efc83d08831db` | `eb-01603ce9f24e6eec` (expected: emitted code changed; tick outputs did not) |
 | `dist-lib/headless.js` | 3,164,786 B | 3,165,063 B (about +0.3 KB) |
@@ -50,7 +50,7 @@ Manual check: `ls -l dist-lib/chunks-headless` has no `assets-sprites` chunk abo
   `RandomPlayer`: win + retire seed 1, loss seed 0, two wins `gameplaySeed 7`, one win Scene ON `gameplaySeed 42`): `frames`, `streak`, `ended`,
   `battles` and `digest` are identical before and after (digests `6dfdeb88acbb5d01`, `854ad54a31a0af3a`, `d07cde1f034d2876`,
   `b217d85f3168bd89`) and no "not installed" error. Only `ENGINE_BUILD` differs.
-- `npm run compare:differential -- <38 traces> --base 086ef7f36 --harness-from-head`: 7,561 / 7,561 captures byte-identical (draft menu /
+- `npm run compare:differential -- <38 traces> --base 33d93e25c --harness-from-head`: 7,561 / 7,561 captures byte-identical (draft menu /
   cursor / slot 6, Kabuto and other opponent front sprites with `frame2`, send-outs, doubleteam clone anim, summary Magby front animation,
   Scene ON and OFF battles). No committed trace stages a Substitute doll, CASTFORM or a Transform user; those renders are pinned by
   `tests/doll90DollCells`, `cast83CastformForms`, `trf174Transform` and the live Substitute tests, which pass through the real pixel path.

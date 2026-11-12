@@ -1,7 +1,7 @@
 {
  "schema": "playerfaint-lend-receipt/v1",
  "scope": "S10A presentation-only: sprite-order lend + allocator re-seed after a player faint + forced party menu + reshowPlayerGone + forced switch-in (docs/playerfaint-lend-audit.md \u00a74). Gameplay, RNG, damage, turn order and facility state untouched (ON/OFF parity on routes). The voluntary switch (reshowBoth / recall) still declines. Not whole-playable arbitrary-history exactness.",
- "productionCodeCommit": "28bea5f9c",
+ "productionCodeCommit": "30d7278b1",
  "srcTree": "3172ec9ff8827a221d5f8c63161e269df7bc9f7c",
  "api": {
   "SpriteOrderTracker.occupantRoles": "{ healthboxMain: {player, opponent}, shadow } | null: entry 0/1/2 (KNOWN_ENTRY_OCCUPANT_ROLES); null after party-menu-reset, reshowBoth and the provisional recall; reshowPlayerGone sets them from its survivors n1 / n4 / n7 (ROM 1 / 2 / 3); faint, summary, send-out, switch-in and bodies keep them",
@@ -259,7 +259,7 @@
   }
  },
  "routes": {
-  "command": "npx vite-node tools/integration/playerfaintRoutes.ts -- <seed>:<slot> ... (generatedCommandAnimationReplay answerForcedSwitch: first healthy member); master-vs-branch = same tools on a scratch copy of src with the 3 changed files at c77025880",
+  "command": "npx vite-node tools/integration/playerfaintRoutes.ts -- <seed>:<slot> ... (generatedCommandAnimationReplay answerForcedSwitch: first healthy member); master-vs-branch = same tools on a scratch copy of src with the 3 changed files at 33ecbabd7",
   "rows": [
    {
     "spec": "69:0",
@@ -1047,9 +1047,9 @@
   ]
  },
  "gates": {
-  "testedCommit": "581503753",
+  "testedCommit": "50710de1e",
   "srcTree": "3172ec9ff8827a221d5f8c63161e269df7bc9f7c",
-  "note": "src unchanged since 28bea5f9c (later commits: tools/tests/fixtures/docs only)",
+  "note": "src unchanged since 30d7278b1 (later commits: tools/tests/fixtures/docs only)",
   "spriteOrderGateFiles": "12 files / 105 tests passed (sprite-order 8 + liveOrderConsumerMoveAdapters + liveSpriteAllocator + playableAnimationIntegration + playerfaintLend; --maxWorkers=4)",
   "typecheck": "passed",
   "smoke": "8 files / 448 tests passed",

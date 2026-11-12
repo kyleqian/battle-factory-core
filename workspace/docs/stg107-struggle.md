@@ -1,7 +1,7 @@
 # stg107 (S10A side lane, 2026-10-11): Struggle 165 — ROM ground truth, real forced-Struggle routes, banked live adapter
 
 Scope: `docs/struggle-integration-scope.md` (the user's 2026-10-11 decision). Evidence + banked patch, new files only; base master
-`52c181d54` (production src `14d1be159`). Direct mGBA only (never the shared HTTP oracles), lab seed pinned 305420349.
+`bddc3d69c` (production src `14d1be159`). Direct mGBA only (never the shared HTTP oracles), lab seed pinned 305420349.
 
 ## Results
 
@@ -18,7 +18,7 @@ Scope: `docs/struggle-integration-scope.md` (the user's 2026-10-11 decision). Ev
   (r1 == r2). Scene OFF controls (same routes, OFF bootstrap): no body, identical gameplay; on the Taunt routes every Struggle body's
   turn is exactly 81 frames shorter OFF from the body on (HP / recoil / faint / turn-end frames), r1 == r2 (§2).
 - **Rung 3 — banked patch: done.** `tools/integration/fixtures/stg107/stg107-struggle.diff` (applied only to a git-archive copy of
-  `52c181d54`) makes Struggle a live body through the normal seam. Through the PRODUCTION live renderer (`stg107Patched.sh`:
+  `bddc3d69c`) makes Struggle a live body through the normal seam. Through the PRODUCTION live renderer (`stg107Patched.sh`:
   audit20Probes → audit20Fixtures → audit20Check in the patched copy, two fresh probes each): **15 / 15 live Struggle windows are
   0 px on all 112 rows, chain and entry lends, r1 == r2**, both orientations, every pair above (elevated Golbat attacker and target,
   big-picture Snorlax, KO target, recoil faint, first and repeated bodies, both routes). 4 windows fail closed with named gates (§3.3).
@@ -172,7 +172,7 @@ separate step that would lift later bodies.
 - Shiny battlers decline (no shiny evidence).
 - Not observed in 19 windows: any CPU-phase (D4) variation. Not reachable: Random (D3) — none in the body.
 
-### 3.4 Gates run on the patched copy (`.integration/validation/stg107-pt/copy` = 52c181d54 + the diff)
+### 3.4 Gates run on the patched copy (`.integration/validation/stg107-pt/copy` = bddc3d69c + the diff)
 
 - `npm run typecheck`: pass.
 - `npx vitest run` on tests/liveShadowRows, animation/animationBoundaryRatchet, animation/factoryAnimationInventory,
@@ -184,13 +184,13 @@ separate step that would lift later bodies.
 
 ### 3.5 Census 0..999 on the patched copy
 
-Census 0..999, 10 `--index-from` shards per arm, merged with hist73Merge.py. Base = `ret88Census.sh shards <dir> 52c181d54`; patched =
+Census 0..999, 10 `--index-from` shards per arm, merged with hist73Merge.py. Base = `ret88Census.sh shards <dir> bddc3d69c`; patched =
 `stg107Census.sh <dir> <patched copy>`. Receipt: `fixtures/stg107/census-summary.json` (`stg107CensusSummary.py`) plus
 land82CensusCheck.py.
 
 | Arm | Commands | Live (count) | Live frames | Struggle commands | Struggle live | Struggle live frames |
 |---|---|---|---|---|---|---|
-| base 52c181d54 (== the S10A night report) | 27,515 | 26,245 (95.38 %) | 3,932,860 of 3,983,929 (98.72 %) | 1,089 | 0 | 0 of 34,817 |
+| base bddc3d69c (== the S10A night report) | 27,515 | 26,245 (95.38 %) | 3,932,860 of 3,983,929 (98.72 %) | 1,089 | 0 | 0 of 34,817 |
 | patched copy | 27,459 | 27,129 (98.80 %) | 4,031,868 of 4,061,368 (99.27 %) | 1,033 | **884** | 99,008 of 112,256 |
 
 - **0 non-Struggle status changes** on the aligned command prefixes. land82CensusCheck: command keys identical outside the
@@ -229,7 +229,7 @@ land82CensusCheck.py.
 ```
 sh tools/integration/stg107Run.sh .integration/validation/<fresh>                 # ON windows x2 + OFF timing x2: r1 == r2, same / DIFF vs fixtures
 STG107_PATCH=1 sh tools/integration/stg107Run.sh .integration/validation/<fresh>  # + the banked patch through the production renderer (~3 min)
-sh tools/integration/ret88Census.sh shards .integration/validation/<base> 52c181d54                    # census, base arm (~5 min)
+sh tools/integration/ret88Census.sh shards .integration/validation/<base> bddc3d69c                    # census, base arm (~5 min)
 sh tools/integration/stg107Census.sh .integration/validation/<patched> .integration/validation/<fresh>/patched/copy
 sh tools/integration/ret88Census.sh compare .integration/validation/<base> .integration/validation/<patched> .integration/validation/<cmp>
 ```

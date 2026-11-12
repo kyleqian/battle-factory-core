@@ -1,6 +1,6 @@
 # Next adapters prep 41: D4 widening readiness — Pursuit later bodies, Hidden Power GOLBAT lag, Ghost-type Curse (S10A, side lane)
 
-Evidence only, **new files only**. Master `1d1b7cd3f` (production src tree `4af0870a`). Every emulator number comes from an independent direct
+Evidence only, **new files only**. Master `97be86427` (production src tree `4af0870a`). Every emulator number comes from an independent direct
 mGBA run (shared HTTP oracles never contacted); every relied-on probe ran twice from fresh processes with identical output. The
 temporary production patch `tools/integration/fixtures/prep41/prep41-d4-widening.diff` was applied for the live-renderer runs and
 reverted (typecheck green with it applied). The D4 rule applied is `liveMoveTimingPolicy.ts`'s: dominant = most measured across all
@@ -67,7 +67,7 @@ lb26 / audit-5 numbers.
     "tools/integration/fixtures/species-audit-5/counters/tyranitar-pursuit-lag.txt", "docs/later-bodies-curse-oam.md (lb26: 8 of 12 103-row bodies)"] }] },
 ```
 
-### 1.4 Patch shape (`prep41-d4-widening.diff`, against `1d1b7cd3f`)
+### 1.4 Patch shape (`prep41-d4-widening.diff`, against `97be86427`)
 
 - `src/engine/liveMoveTimingPolicy.ts:138` — the entry above (before Megahorn); `:441` — append `228` to `LIVE_FAITHFUL_TIMING_MOVE_ANIMATION_IDS`.
 - `src/engine/liveMoveAnimation.ts:239` — drop `228` from `LIVE_MOVE_ANIMATION_IDS` (`261, 210,`); `:110` — drop the now-unused

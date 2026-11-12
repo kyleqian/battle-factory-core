@@ -1,6 +1,6 @@
 # S10A prep64 — SUBSTITUTE_FADE: trigger, staging, EXACT (empty) plan, allocator NET-ZERO, census
 
-Side lane, evidence only (new files only). Master `00c57d08d` (production src tree `d7f24b03`). Oracle: direct mGBA processes
+Side lane, evidence only (new files only). Master `83ac6aa75` (production src tree `d7f24b03`). Oracle: direct mGBA processes
 only (Battle Scene ON and OFF bootstraps); the shared HTTP oracles were not used.
 
 ## Results

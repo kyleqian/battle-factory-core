@@ -7,7 +7,7 @@
   Durations are unchanged.
   - **audit 19:** 599 windows, live 404 -> 360. The 44 live Castform windows are now fallback. The 4 Shock Wave fallbacks are
     unchanged, and the gate fires on none of the other 551 windows (`fixtures/cf78/audit19-windows.jsonl`).
-  - **census 0..999** (base `c68111480` vs `9ef2534a0`): **54 commands / 9,587 live frames go live -> fallback.** They are exactly the
+  - **census 0..999** (base `9115d5ec3` vs `0ffa52e6b`): **54 commands / 9,587 live frames go live -> fallback.** They are exactly the
     commands drawn with a transformed Castform (battles 603, 643, 651, 950). After the fix, 0 live frames show a transformed Castform.
     0 other changes; the key sequence, frames per command and `battleDigestExcludingFrames` are identical. Live share goes from
     94.37 % / 98.18 % to **94.17 % / 97.94 %** (commands / frames).
@@ -24,13 +24,13 @@
   | 950 | hail | 20 | 19 | 0 (18) |
   | 603 | rain | 15 | 16 | 0 (13) |
 
-- **Gates on `9ef2534a0`:**
+- **Gates on `0ffa52e6b`:**
   - related set: 199 files (every CASTFORM / 302 / 311 / spriteOrder test, plus the inventory and playable tests). Only the two
     plan pins failed, and both are updated (below).
   - typecheck; smoke 448.
   - full suite as two shards: **1,612 files / 13,245 tests, 0 failed**.
   - build.
-  - differential **624 / 624 byte-identical** vs `c68111480`.
+  - differential **624 / 624 byte-identical** vs `9115d5ec3`.
 - **Revert experiments:**
   - with the gate removed, `tests/cf78CastformForm.test.ts` fails 2 of 6;
   - with the old 302 text, `tests/cf78NeedleArmTie.test.ts` fails 3 of 4.
@@ -102,7 +102,7 @@ node --experimental-strip-types --no-warnings tools/integration/cf78Audit19Windo
 for n in $(ls tools/integration/fixtures/audit-19/fixtures/*.json | sed 's/-c[0-9]*\.json$//' | sort -u | xargs -n 1 basename); do
   AUDIT19_LENDS_ONLY=1 node --experimental-strip-types --no-warnings tools/integration/audit19Check.ts tools/integration/fixtures/audit-19/fixtures "$n" /dev/null
 done > lends.txt
-# census: git archive of each tree (base c68111480 with tools/integration/cf78LiveShareCensus.ts copied in), 10 shards each:
+# census: git archive of each tree (base 9115d5ec3 with tools/integration/cf78LiveShareCensus.ts copied in), 10 shards each:
 node --experimental-strip-types --no-warnings tools/integration/cf78LiveShareCensus.ts --seeds=<a>..<a+99> --index-from=<a> --out=s<k>.json --commands=s<k>.jsonl
 python3 tools/integration/cf78Receipt.py <base-dir> <final-dir> windows.jsonl lends.txt p950.json p603.json gates.json <commit> <src-tree> receipt.json
 ```

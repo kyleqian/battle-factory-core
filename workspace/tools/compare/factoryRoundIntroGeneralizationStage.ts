@@ -209,7 +209,7 @@ const ROOM_ENTRANCE_INERT_POSTWIN_RIGHT_THIS_WAY_ELAPSED = 0;
  * Walk-up build step B1b: stages the SAME seed-70/challenge-2 Battle-7
  * (Noland, silver) round `generatedRoundRevealProofStage` reaches, but stops
  * at the real `battleRoom` construction seam (`core.ts`'s postwin ->
- * prebattleRoom -> battleRoom chained-round handoff, wired in d60ca1b3) --
+ * prebattleRoom -> battleRoom chained-round handoff, wired in c4e963f0) --
  * `battleRoomStateForOpponent`, the SAME call core.ts itself makes -- rather
  * than jumping straight past the room into `beginFactoryRoundBattleStartIntro`
  * the way the reveal stage above does. `prebattleRoom: null` and a

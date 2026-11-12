@@ -2,7 +2,7 @@
 
 Evidence + an UNWIRED pure reducer only. The one existing tracked file edited is `src/animation/statusConditionAnimations.ts`
 (additions only: stp128's four animations give byte-identical outputs, and `tests/stp128StatusConditionReducer.test.ts` still passes
-unchanged, 37 / 37). No production module imports the module. Base: master `a5e585119` (production src `38eb696fb`). Evidence is direct
+unchanged, 37 / 37). No production module imports the module. Base: master `0c84ed68f` (production src `38eb696fb`). Evidence is direct
 mGBA only (Scene ON, `factory.json` bootstrap, explicit lab seeds), never the shared HTTP oracles. Every probe job ran twice in fresh
 processes. Design inputs: docs/sta123-status-animations-design.md §1 / §2a, docs/status-animation-sprite-audit.md, and
 docs/stp128-status-condition-render-prep.md (the pattern, the API and the landing recipe that this doc extends).
@@ -219,13 +219,13 @@ Fixtures (`tools/integration/fixtures/stq132/`): `scenarios/` (13), `scenario-in
 
 | gate | result |
 |---|---|
-| `sh tools/integration/stq132Run.sh .integration/validation/stq132-run1` (on `965ece3bd`; rerun on the final commit, see the session report) | **ALL SAME** (13 / 13 r1 == r2, 26 / 26 sha256, rom-windows SAME, tests 77 / 77, 37 / 37 windows 0 px, compare.json SAME), ~2 min |
+| `sh tools/integration/stq132Run.sh .integration/validation/stq132-run1` (on `9aa4f9905`; rerun on the final commit, see the session report) | **ALL SAME** (13 / 13 r1 == r2, 26 / 26 sha256, rom-windows SAME, tests 77 / 77, 37 / 37 windows 0 px, compare.json SAME), ~2 min |
 | `python3 tools/integration/stq132Perturb.py tools/integration/fixtures/stq132/perturbation.json <raw>` | 24 / 24 mutations fail the pin test; file restored byte-for-byte |
 | `npm test -- tests/stq132StatusConditionReducer.test.ts tests/stp128StatusConditionReducer.test.ts tests/animation/factoryAnimationInventory.test.ts tests/animation/animationBoundaryRatchet.test.ts` | 4 files / 88 tests passed |
 | `npm run typecheck` | green |
 | `npm run test:smoke` | 448 / 448 |
 | full `npm test`, four shards (`npm test -- --shard=k/4`) | **1,643 files / 13,621 tests passed** (44 / 223 skipped), 0 failed |
 | `npm run build` | green |
-| `git diff --check a5e585119 HEAD` | clean |
+| `git diff --check 0c84ed68f HEAD` | clean |
 
 One tracked file is modified (`src/animation/statusConditionAnimations.ts`, additions + the widened template union); everything else is new.

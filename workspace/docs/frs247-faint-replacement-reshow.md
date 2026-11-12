@@ -71,18 +71,18 @@ frames each) plus the ROM per-frame mean brightness for e17..70 (zero for e17..5
 
 ## Differential and census
 
-* `npm run compare:differential` over all 211 `tools/compare/traces/*.json` against the parent `0b4fb3341`: 38,532 captures,
+* `npm run compare:differential` over all 211 `tools/compare/traces/*.json` against the parent `461052053`: 38,532 captures,
   all byte-identical, 0 changed. No existing trace contains a generic faint-replacement return, so no capture is expected to move; the
   changed frames are only covered by the new hermetic test and the dense harness. (Run in seven batches of 20-54 traces because of the
   10-minute tool limit.)
-* `lsd194Census.sh` (`LSD194_CENSUS_JOBS=4 LSD194_SPLIT=4`, seeds 0..999) at `87e9366af`, both scenes, against
-  `.integration/validation/sv-20261103/go246-evidence/census/` (`d34e3b650`) via `rst197CensusDelta.py`:
+* `lsd194Census.sh` (`LSD194_CENSUS_JOBS=4 LSD194_SPLIT=4`, seeds 0..999) at `d0a193215`, both scenes, against
+  `.integration/validation/sv-20261103/go246-evidence/census/` (`397c73eda`) via `rst197CensusDelta.py`:
   ON 1000/1000 battles identical, 322,634 commands, `bad 0`; OFF 1000/1000 identical, 317,269 commands, `bad 0`. 0 logical or command changes.
 
 ## Tests
 
 * New `tests/frs247FaintReplacementReshow.test.ts` (12 tests): per-frame full-frame sha256 against the ROM fixture, monotone rise and ROM mean
-  brightness over e56..71, ROM black for e17..55, `BLDY = 71 - e`. With the three source files restored to `0b4fb3341`, 10 of the 12 fail.
+  brightness over e56..71, ROM black for e17..55, `BLDY = 71 - e`. With the three source files restored to `461052053`, 10 of the 12 fail.
 * Re-pinned: `tests/battleResolutionPresentation.test.ts`, whose `switchIn` view pin carried `partyStates` (the tray data the ROM does not
   draw).
 * Gates: typecheck 0; the smoke files plus all 176 test files that import `battleScene`, `partySelect` or `battleResolutionPresentationRender`
@@ -102,5 +102,5 @@ frame builder shared by the harness, fixture generator and test), `frs247Dense.t
 
 ## Receipts
 
-Tested source tree: commit `87e9366af6895d5705d7d040123ec74d276696aa`, tree `b77d7c3c7e280f0fc18bb01fb0e21ef5bbe94768` (the doc commit
+Tested source tree: commit `d0a193215d3a39e60e53bde51c3ab2cd117598a9`, tree `b77d7c3c7e280f0fc18bb01fb0e21ef5bbe94768` (the doc commit
 that follows changes only this file).

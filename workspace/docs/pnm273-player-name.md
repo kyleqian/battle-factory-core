@@ -22,13 +22,13 @@ Other engine importers (the site, the library, the portable probes that do not i
 
 ## Evidence (`.integration/evidence/pnm273/`)
 
-- Production-mode differential (`POKEBENCH_HARNESS_PLAYER_NAME=PLAYER npm run compare:differential -- ... --base HEAD~1`, base `c0c79c74`):
+- Production-mode differential (`POKEBENCH_HARNESS_PLAYER_NAME=PLAYER npm run compare:differential -- ... --base HEAD~1`, base `53ddba6d`):
   frf250b-run-yes-off 123 / 250 frames differ, loss-terminal-record-yes-off 73 / 133 differ; both only inside **x17-51, y124-133** (the six name glyphs of
   the message box line; 5011..5083 and 161..283). win-terminal-window-off 3590, loss-terminal-record-cursor-off 80, factory-brain-silver-walkup-askready-menu-record-off 178 byte-identical.
 - Harness-default differential (override = MEMORY), 6 traces, 4412 captures: **byte-identical** to the base.
 - ROM compares (`npm run compare -- <trace> --summary`): frf250b-run-yes-off **250 / 250**, loss-terminal-record-yes-off **133 / 133**, factory-brain-silver-walkup-askready-menu-record-off **178 / 178**.
 - BP award box: no compare trace reaches it; an app-side render of the round-won terminal (ages 2200..2700) PLAYER vs MEMORY differs in 316 / 501 frames, only in x17-51, y124-133.
-- Census (`lsd194Census.ts`, seeds 0..49, both scenes, base `c0c79c74` vs the pnm273 commit): all 100 jsonl lines byte-identical (`eventsDigest` = kernel digest, command lists, sound digests); also identical to the aiv270 baseline `census/{off,on}-01ad01f2a/r0.jsonl` first 50 lines.
+- Census (`lsd194Census.ts`, seeds 0..49, both scenes, base `53ddba6d` vs the pnm273 commit): all 100 jsonl lines byte-identical (`eventsDigest` = kernel digest, command lists, sound digests); also identical to the aiv270 baseline `census/{off,on}-01ad01f2a/r0.jsonl` first 50 lines.
 
 ## Tests
 

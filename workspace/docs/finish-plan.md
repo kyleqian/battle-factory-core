@@ -1,7 +1,7 @@
 # Finish plan — approved by the user 2026-10-26
 
 The mission for every run until its definition of done is met. Written after
-a top-layer audit of master `5d6f7d521`. Timing exactness is demoted to a
+a top-layer audit of master `daa09af06`. Timing exactness is demoted to a
 long-tail lane; what players notice comes first.
 
 ## Status 2026-10-31 (user re-aim)

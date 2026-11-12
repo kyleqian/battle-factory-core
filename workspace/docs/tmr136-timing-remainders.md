@@ -1,6 +1,6 @@
 # tmr136 (S10A, integration): two Scene ON timing remainders — the live Double Team stats-change tail (ISSUES #166) and Smokescreen's first-use phase (D4)
 
-Base: `439575012` (production src `58fa6ec74`). Presentation only: no kernel, RNG, damage, turn order or facility change; the status-animation
+Base: `5c170e32f` (production src `58fa6ec74`). Presentation only: no kernel, RNG, damage, turn order or facility change; the status-animation
 plumbing, the order host and the allocator are untouched. A live adapter is not whole-playable arbitrary-history exactness.
 
 ## 1. Results
@@ -33,7 +33,7 @@ plumbing, the order host and the allocator are untouched. A live adapter is not 
   duration and the universal-row clamp; `liveMoveAnimationPresentation` maps age >= 49 to age + 1 in the no-lag phase.
 - Other-phase windows (D4: retained, quantified): `pb-aud129-wide-109-108-169-103-c1` (first use, ROM 125 rows) and
   `pb-aud129-phase-smokescreen-opp-s1-c3` (second use, ROM 124 rows): rows 49..122 only, 83,292 px each.
-- Census exposure (aud129, seeds 0..999 on `1352d2130`): 66 first-use live Smokescreen commands / 8,580 frames were in the minority phase.
+- Census exposure (aud129, seeds 0..999 on `a4ab64cb9`): 66 first-use live Smokescreen commands / 8,580 frames were in the minority phase.
 
 ## 4. Pins moved (all timing, each exactly explained)
 
@@ -48,7 +48,7 @@ plumbing, the order host and the allocator are untouched. A live adapter is not 
 
 Pins were enumerated on the final tree (the DT / Smokescreen / accounting test sets first, then the full suite, §5).
 
-## 5. Gates (final production code `ee9a55430`; later commits are docs / runner / receipt only)
+## 5. Gates (final production code `af0fa717e`; later commits are docs / runner / receipt only)
 
 Receipt: `tools/integration/fixtures/tmr136-live-receipt.json` (commit / src tree and every outcome).
 
@@ -56,16 +56,16 @@ Receipt: `tools/integration/fixtures/tmr136-live-receipt.json` (commit / src tre
   `tests/tmr136TimingRemainders.test.ts` 9 / 9. `npm run typecheck` green; `npm run test:smoke` 448 / 448.
 - Full suite, four shards x 4 workers: **1,648 files / 13,667 tests passed, 0 failed** (413 + 411 + 410 + 414 files; 44 files / 223 tests skipped).
 - `npm run build`: green (887 modules).
-- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 439575012`:
+- `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 5c170e32f`:
   fight-submenu 235 / 235 and battle1-postwin-next-prompt 216 / 216 **byte-identical** (canonical); the app-only presentation-rng trace 172 / 173:
-  **one moved capture, frame 3622 (673 px)**. Against `506abb5e1` (A only) the same trace is 173 / 173, so the moved capture is (A)'s Double Team
+  **one moved capture, frame 3622 (673 px)**. Against `d83d10655` (A only) the same trace is 173 / 173, so the moved capture is (A)'s Double Team
   window (B moves none). Its exact command was not localized inside the cap.
 - **Census 0..999 base vs final: NOT RUN (time cap).** Expected from the evidence: every live DT command + 9 frames (the window), every first-use
   Smokescreen command - 1 frame (aud129: 66 commands / 66 frames on 0..999), 0 status changes, Scene OFF byte-identical (no live body in OFF).
-  Command: `sh tools/integration/sar131Census.sh shards <fresh-base> 439575012` and `... <fresh-final> <final-commit>`, then
+  Command: `sh tools/integration/sar131Census.sh shards <fresh-base> 5c170e32f` and `... <fresh-final> <final-commit>`, then
   `python3 tools/integration/sar131CensusDelta.py <base> <final> <out.json>`.
 - `git diff --check`: clean.
-- `tmr136Run.sh` from a fresh git-archive copy of `d91a131e0`: probes r1 == r2 6 / 6, **ALL `same`** (6 DT tail receipts, smoke-derive / smoke-final / smoke-revert).
+- `tmr136Run.sh` from a fresh git-archive copy of `a4cc57772`: probes r1 == r2 6 / 6, **ALL `same`** (6 DT tail receipts, smoke-derive / smoke-final / smoke-revert).
 
 ## 6. Reproduction (from workspace/)
 

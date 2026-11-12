@@ -1,4 +1,4 @@
-/** Verbatim copy of src/animation/dive.ts as of 460cd3548 (the O(age^2) re-simulation); test-only reference for cln244. */
+/** Verbatim copy of src/animation/dive.ts as of 1d8203125 (the O(age^2) re-simulation); test-only reference for cln244. */
 
 import { sortGbaSpriteOrder, type GbaSpriteOrderKey } from "../../src/animation/gbaObjCompositor.ts";
 

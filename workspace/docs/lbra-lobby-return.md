@@ -64,7 +64,7 @@ and by the soak / play:random gates, not by ROM pixels. Follow-up candidate.
 
 ## Old-chain re-pins
 
-Only tests that pinned the loss -> new-draft chain were re-pinned (each explained in its own commit `465564c5f`): `randomRoundSoak`,
+Only tests that pinned the loss -> new-draft chain were re-pinned (each explained in its own commit `7b0806799`): `randomRoundSoak`,
 `randomRoundSoakCoverage`, `goalPlay`, `soakLobbyNewChallenge`, `factoryLibrary` (idle Lobby so the digest covers every frame). The soak driver
 keeps its OK semantics by walking back to the attendant and pressing A.
 

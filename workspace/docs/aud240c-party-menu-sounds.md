@@ -39,10 +39,10 @@ Constants: `SE_SELECT` 5, `SE_FAILURE` 32 (`include/constants/songs.h`).
 
 ## Verification
 
-- Tested code commit `b3dbecbd4d1bbbb88d58ac11507bb5072198cfc2`, tree `23306007db8ada2318ccf90f5f99bf5a79eda341` (parent `d11b22e2a`; this doc is committed after it and changes no code).
+- Tested code commit `4d072bf504f31438293ff2cc56bed92e483400e2`, tree `23306007db8ada2318ccf90f5f99bf5a79eda341` (parent `4ac161278`; this doc is committed after it and changes no code).
 - `npm run typecheck`: 0.
 - `tests/aud240cPartyMenuSounds.test.ts` (14 tests) and `tests/audioProbeFixtures.test.ts`: pass.
 - `npm run test:smoke`: 8 files, 448 tests, pass. Every test importing `battlePartySelect` / `partySelect` / `screenSounds` (28 files, 389 tests, plus `randomRoundSoakOracleStrength`, 4 tests) and `audioSinkNeutral` / `audioHeadlessBoundary`: pass. `tests/gate6CoverageManifest.test.ts`: pass (run with `NODE_OPTIONS=--max-old-space-size=8192`).
 - Gate-6 manifest regenerated with `tools/report/gate6-coverage-manifest.ts`: byte-identical, so no new file is listed (it only lists mechanics evidence tests, not audio tests).
 - `npm run build`: 0. `npm run build:lib`: 0.
-- `npm run compare:differential` vs the parent `d11b22e2a`, all 211 standard traces (run as five chunks to fit the 10-minute command limit): **PASS, 38,532 / 38,532 captures byte-identical**.
+- `npm run compare:differential` vs the parent `4ac161278`, all 211 standard traces (run as five chunks to fit the 10-minute command limit): **PASS, 38,532 / 38,532 captures byte-identical**.

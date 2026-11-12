@@ -1,7 +1,7 @@
 # S10A flat77: Flatter 260 at LATER bodies (evidence + temp patch; the landing is the next step)
 
-Bounded main-lane worker, evidence only, new files only. Base: master `dd00bdd6e` (production src `d73cf1af`). Every measurement ran on
-git-archive copies of `dd00bdd6e` in the scratch dir: `base`, and `patched` = base + `tools/integration/fixtures/flat77/flat77-temp-src.diff`.
+Bounded main-lane worker, evidence only, new files only. Base: master `ee8cbc024` (production src `d73cf1af`). Every measurement ran on
+git-archive copies of `ee8cbc024` in the scratch dir: `base`, and `patched` = base + `tools/integration/fixtures/flat77/flat77-temp-src.diff`.
 The checkout's tracked files never changed. Direct mGBA only (Scene ON, `flat77Probe.py` via `tools/run-mgba-probe.py`), never the shared
 HTTP oracles. Every scenario pins lab seed 305420349 (ISSUES #154), and every probe ran twice fresh in one batch.
 Receipts: `tools/integration/fixtures/flat77/`. Runner: `tools/integration/flat77Run.sh <fresh-out-dir>`.
@@ -48,9 +48,9 @@ Receipts: `tools/integration/fixtures/flat77/`. Runner: `tools/integration/flat7
   - Every new check passes.
   - `git diff --check` is clean, and `git status` shows no modified tracked file at any commit (new files only).
   - Typecheck is not needed: no TypeScript under `tests/`, and `tools/` is outside `tsc -b`.
-  - Checkout `npm test` (HEAD `104156249`, src `d73cf1af`): **1,610 files passed / 44 skipped; 13,235 tests passed, 0 failed**. `npm run build`: passed.
+  - Checkout `npm test` (HEAD `9b5031d2a`, src `d73cf1af`): **1,610 files passed / 44 skipped; 13,235 tests passed, 0 failed**. `npm run build`: passed.
   - Differential (`differential.txt`): **624 / 624 captures byte-identical** for both the checkout and a scratch repo holding the temp
-    patch, each vs `dd00bdd6e`.
+    patch, each vs `ee8cbc024`.
   - Runner (`flat77Run.sh` into a fresh dir, census included): **50 / 50 receipts byte-identical** (`runner-run1.txt`). It re-staged and re-probed (fresh mGBA), re-derived, re-checked in a fresh patched copy, re-ran parity and both censuses.
 
 ### Windows (`check/`, `summary.txt`: 64 windows, 34 live, 34 / 34 live windows 0 px and r1 == r2; chain lend = the production hosts fed as the orchestrator feeds them)
@@ -81,7 +81,7 @@ Receipts: `tools/integration/fixtures/flat77/`. Runner: `tools/integration/flat7
   battle_anim.c:260). The temp patch feeds that base (`registersFor(false)`), so row 0 is exact. Without it, row 0 would carry 240 / 161,
   which is also display-neutral (WININ == WINOUT == 0x3f3f).
 
-### Predictions vs probes (`predictions.md`: batch 1 committed before any probe in `a89c17dda`; batch 2 in `794b5d824`; batch 3 in `657c7d208`)
+### Predictions vs probes (`predictions.md`: batch 1 committed before any probe in `c304fad3a`; batch 2 in `e302342fc`; batch 3 in `fcdc8b3c0`)
 
 | prediction | probe |
 |---|---|
@@ -127,8 +127,8 @@ are unchanged.
 ## FOLD INSTRUCTIONS (next session)
 
 1. **The patch.** `git apply tools/integration/fixtures/flat77/flat77-temp-src.diff` (3 files, +22 / -8). It was cut against
-   `dd00bdd6e` src `d73cf1af`. First check that
-   `git diff dd00bdd6e -- src/engine/liveMoveAnimation.ts src/engine/liveOamMoves.ts src/engine/liveMoveSpriteAllocator.ts` is empty.
+   `ee8cbc024` src `d73cf1af`. First check that
+   `git diff ee8cbc024 -- src/engine/liveMoveAnimation.ts src/engine/liveOamMoves.ts src/engine/liveMoveSpriteAllocator.ts` is empty.
 2. **The pins: none move.**
    - The 44 related test files (`tests-related-files.txt`, every test naming Flatter / the allocator seam / `spriteAllocatorInput`) pass
      on the patched copy: 43 files passed, 1 skipped (factoryAiCheckBadMoveParity, which needs the core-rs wasm build); 1,522 tests,
@@ -148,7 +148,7 @@ are unchanged.
      `check-ex-mud-slap-*.json` (or ROM RGB sha256 rows, the later58 test style).
    - The test must fail without the src hunks.
 4. **Census expectation** (seeds 0..999 on the fold's base; `liveShareCensus.ts` + `prep43CensusDelta.py` + `flat77KeyCheck.py`):
-   **+17 commands / +3,723 frames** relative to a base whose Flatter rows equal `dd00bdd6e`'s. Expect 0 regressions, the key sequence and
+   **+17 commands / +3,723 frames** relative to a base whose Flatter rows equal `ee8cbc024`'s. Expect 0 regressions, the key sequence and
    both battle digests identical. `census/flatter-commands.txt` lists the 17 lifted commands; their battles are the parity candidates.
 5. **Gates**: smoke, full `npm test`, `npm run build`, typecheck, the differential, the census, and ON / OFF parity on the lifted routes
    (`flat77Parity.ts --seed=539 --streak=0` and `--seed=437 --streak=5`, == `parity-*.json`).

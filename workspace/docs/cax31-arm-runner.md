@@ -16,9 +16,9 @@ and stays stopped while the remote main writer runs.
   exposed publicly. Password SSH login is disabled.
 - Checkout: `/srv/pokebench/pokeemerald-factory-core/workspace`, branch
   `master` for the assigned session (`codex/cax31-arm-setup` preserves setup);
-  game snapshot `b3e988d675cd0d107a906d298bd91e1936d2d24d`.
-  The Mac's later charge-turn test re-pins `36b23e98c` are included as
-  `f9c90600d`; production game code is unchanged from the initial snapshot.
+  game snapshot `036b9ed2b721b2e8a0ee24e41844281eaefc63de`.
+  The Mac's later charge-turn test re-pins `11c7591a0` are included as
+  `bf3b9242a`; production game code is unchanged from the initial snapshot.
 - The requested remote session uses tmux with a 10-hour cap. No campaign timer
   or automatic push is enabled. The launch checkpoint and saved worker branches
   are pushed from the Mac; preserve/import remote results through local bundles
@@ -34,7 +34,7 @@ known-hosts file. Without the alias, pass
 
 ## Native setup and proof
 
-Setup commit `42bced813` adds native ARM support to the Ubuntu bootstrap.
+Setup commit `ba1ba6835` adds native ARM support to the Ubuntu bootstrap.
 Node 22.22.3 ARM64 is checked against its published SHA256. Codex 0.160.0,
 Claude Code 2.1.280 and Rust 1.97.1 are installed. mGBA 0.10.5 and the pinned
 libmgba-py fork are compiled natively, with a generated build-path shim only.

@@ -1,6 +1,6 @@
 # Next adapters prep 34: close the evidence gaps of MOVE_EXTREME_SPEED (245, X-AGE) and MOVE_MEMENTO (262, D-SCAN) (S10A, side lane)
 
-Evidence only; **new files only** (no tracked file edited; no `src/`, adapter, `PROGRESS.md` / `ISSUES.md` / ledger change). Method = `docs/next-adapters-prep24.md` / `prep26.md` / `prep31.md` (full per-age model checked field by field, then fed to the **unchanged** renderer) and `prep29.md` / `prep30.md` (activation scanline state). Every emulator number is a ROM frame from an **independent direct mGBA run** (shared HTTP oracles never contacted). Base `1edfcb3dc` (production src tree `58b592bc`).
+Evidence only; **new files only** (no tracked file edited; no `src/`, adapter, `PROGRESS.md` / `ISSUES.md` / ledger change). Method = `docs/next-adapters-prep24.md` / `prep26.md` / `prep31.md` (full per-age model checked field by field, then fed to the **unchanged** renderer) and `prep29.md` / `prep30.md` (activation scanline state). Every emulator number is a ROM frame from an **independent direct mGBA run** (shared HTTP oracles never contacted). Base `2c96f1a00` (production src tree `58b592bc`).
 
 Reproduce: `OUT=<fresh probe dir> REC=<fresh receipt dir> sh tools/integration/prep34Run.sh` (probes each scenario twice from fresh processes and `cmp`s them, then every checker, pixel run and negative control; `STAGES="es"` / `"memento"` for one move; `SKIP_PROBES=1` for a second checker pass over existing probes). Committed receipts: `tools/integration/fixtures/prep34/`.
 

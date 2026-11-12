@@ -2,9 +2,9 @@
  "schema": "random2-r4-live-receipt/v1",
  "lane": "S10A integration worker/integration-20261006-114652 (prep14: Rain Dance + Water Pulse faithful-random, Hail exact)",
  "testedCode": {
-  "commit": "58d6d8d43",
+  "commit": "aaa093aac",
   "srcTreeAtReceipt": "e5a8c9aa1147ace02eceace51141c6802e9cad3d",
-  "note": "src/ unchanged since commit 58d6d8d43; later commits are tests/tooling/receipt only"
+  "note": "src/ unchanged since commit aaa093aac; later commits are tests/tooling/receipt only"
  },
  "policy": "presentation-rng.v1.frame-step.no-lag.battle-stride-2^20",
  "promoted": {

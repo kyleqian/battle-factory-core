@@ -13,7 +13,7 @@ launched by this audit.
 
 ## Verified state
 
-- At 14:59 UTC, hcloud `animation-main` was `9efa9d232`; main was `3f76b234d`.
+- At 14:59 UTC, hcloud `animation-main` was `3be232845`; main was `d5f22d28d`.
   `git rev-list --left-right --count master...animation-main` returned `0 761`.
   That counts all commits, including tests/docs; it is not a feature count.
   The animation supervisor owns inbound main merges; outbound folds into main
@@ -63,8 +63,8 @@ launched by this audit.
   produces all that state. Inventory and implement the missing host adapters
   before claiming all accepted animations work in arbitrary playable battles.
 
-Local source references above use animation snapshot `899b3c034`; the key route,
-command, and ownership facts were separately confirmed on hcloud `9efa9d232`.
+Local source references above use animation snapshot `e92d70b81`; the key route,
+command, and ownership facts were separately confirmed on hcloud `3be232845`.
 The old roadmap explicitly deferred the browser ON/OFF selector and kept the
 playable route OFF. That explains the separation; it is not a reason to treat
 future integration as impossible or require the new experimental runtime.

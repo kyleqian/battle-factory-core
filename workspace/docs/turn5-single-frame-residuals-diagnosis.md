@@ -1024,7 +1024,7 @@ closes exactly, zero new mismatches). New Tier-1 pin
 (`pixelAtTurn5Confirm`, `tests/battleScene.test.ts`) red-verified against
 pre-fix code via `git stash -- src/engine/battleScene.ts`. Full guard
 family reran with zero decreases (see 10.4). Committed
-(`54c87516`) before starting step 2.
+(`0c81b971`) before starting step 2.
 
 ### 10.2 Step 2 (§9.6's own named probe): the real re-seed tick is turn 1's own `MENU_BOUNCE_RAM_SETUP_TICK` - there is no turn-5-specific reseed
 

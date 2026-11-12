@@ -9,7 +9,7 @@ with `fixedIv == ivs.attack`, and wasm export
 ability_slot, ot_id)` — **without** rebuilding the shipped `.wasm`. This doc
 maps every TS-side site commit 2 (the lockstep TS + adapter + rebuild
 commit) must touch or explicitly leave alone. All line numbers re-read via
-`rg` this session (2026-08-22), tree at `511d4911`.
+`rg` this session (2026-08-22), tree at `7fc89e3e`.
 
 ## 1. Consumer inventory
 
@@ -58,7 +58,7 @@ commit) must touch or explicitly leave alone. All line numbers re-read via
 | `tests/factoryRentalGeneration.test.ts` | `:71-118` (drawLedger length/phase-count pins for several challenge/rank configs), `:239-244` (uniform-IV construction assertion, all six `BattleScriptIvs` fields `=== rental.fixedIv`) | Pins ledger length and uniform IVs for declared rows only; no challenge-8 case exists (it currently throws, untested here). | Existing pins are for declared rows (0-7) — unaffected. **Add** a new case at `factoryWinStreak` in `[56,62]` (challengeNum 8) asserting: ledger includes 2 extra `random-ivs` entries per row-8 rental slot, `rentals[i].ivs` is defined and non-uniform-in-general, `rentals[i].fixedIv === rentals[i].ivs.attack`. |
 | `tests/factoryBrainOpponentGeneration.test.ts` | `:50-52` | `getLevel50FactoryBrainFixedIv(6)` throws `/not portable/`. | **Must flip** — challenge 6 must now succeed; add a case asserting the random-IV branch + `ivs.attack === fixedIv`. |
 | `tests/factoryOpponentGeneration.test.ts` | no throw test found (`rg` for `not portable`/`toThrow` returned nothing) | N/A — argument 8 not reachable today (§1a). | No pin to flip; optionally add a direct unit test of `getLevel50FactoryOpponentFixedIv(56, ...)` for symmetry/coverage since the underlying function is changing, even though no production call site reaches it. |
-| `tests/factoryFixedIvTableRomBytes.test.ts` | whole file (4 pins, from `9aaf1997`) | Pins the raw ROM bytes for row 8 (`{110,0}`) and its `retailOverread` flag in `factory-round-policy.json`. | **Unaffected** — this is the data pin commit 2 builds on, not touched by the port itself. |
+| `tests/factoryFixedIvTableRomBytes.test.ts` | whole file (4 pins, from `65665986`) | Pins the raw ROM bytes for row 8 (`{110,0}`) and its `retailOverread` flag in `factory-round-policy.json`. | **Unaffected** — this is the data pin commit 2 builds on, not touched by the port itself. |
 | `tests/factoryPartyMemberParity.test.ts` | wasm-mode parity for `createFactoryCorpusPartyMember` (uses `wasmFactoryEngine`) | Presumably compares TS vs wasm member construction for declared-row `fixedIv` inputs only. | Must gain a case exercising `instance.ivs` (six-IV input) → both engines must route to `fw_create_factory_party_member_with_ivs` / the new TS branch and agree byte-for-byte. Re-read this file before landing; not opened this session (time-bounded). |
 | `tests/factoryDraftSelectionParity.test.ts`, `tests/factorySwapParity.test.ts`, `tests/factoryTrainerScheduleParity.test.ts` | wasm-mode parity suites (found via `rg -l wasmFactoryEngine\|POKEBENCH_ENGINE tests`) | Not opened this session. | Must be re-run under `POKEBENCH_ENGINE=wasm` as part of acceptance (§4); if `factoryDraftSelectionEngine.ts`'s serializer (§1a) needs the `ivs` field added, `factoryDraftSelectionParity.test.ts` is where that would be pinned. |
 | `tests/rngEngineParity.test.ts` | general wasm/TS RNG parity harness | Not opened. | Should be unaffected (no RNG algorithm change, only new draw call sites) — run as a smoke check. |

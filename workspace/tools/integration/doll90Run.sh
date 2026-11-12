@@ -11,7 +11,7 @@
 # The out dir must be INSIDE the repo (the probe tools find ../oracle from there). usage: sh tools/integration/doll90Run.sh <fresh-out-dir> [--census]
 set -e
 OUT=${1:?usage: doll90Run.sh <fresh-out-dir> [--census]}; [ ! -e "$OUT" ] || { echo "$OUT exists (need a fresh dir)"; exit 2; }
-BASE=d46cdfff1; WS=$PWD; FX=$WS/tools/integration/fixtures/doll90; D81=$WS/tools/integration/fixtures/doll81/scenarios
+BASE=28c610da8; WS=$PWD; FX=$WS/tools/integration/fixtures/doll90; D81=$WS/tools/integration/fixtures/doll81/scenarios
 mkdir -p "$OUT"; OUT=$(cd "$OUT" && pwd); PR=$OUT/probes; REC=$OUT/rec
 export PYTHONPATH=${POKEBENCH_VENDOR_DIR:-../../vendor}/libmgba-py; PY=${POKEBENCH_VENDOR_DIR:-../../vendor}/mgba-venv/bin/python
 NODE="node --experimental-strip-types --no-warnings"

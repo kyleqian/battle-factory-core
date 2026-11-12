@@ -4,7 +4,7 @@
 
 | field | value |
 | --- | --- |
-| Tree hash (HEAD at audit time) | `401c43b76bb64a30f13d1c64fcecf60ae1e27396` (commit `e6386fa2`) |
+| Tree hash (HEAD at audit time) | `401c43b76bb64a30f13d1c64fcecf60ae1e27396` (commit `36fcc0ce`) |
 | Date | 2026-08-26, started 04:05:42 PDT |
 | Lane / oracle | side worktree `worker/side-20260826-040533`, Battle Scene OFF (`http://127.0.0.1:8014`) — static audit, oracle **not** run |
 | Scope | Every gate and draw between a hit landing and its secondary effect being applied: `Cmd_seteffectwithchance` / `Cmd_seteffectprimary` / `Cmd_seteffectsecondary` (`reference/pokeemerald/src/battle_script_commands.c:2908-2949`) and the whole of `SetMoveEffect` (`:2234-2906`) — the prologue's four early-outs, the family-A (status1) per-effect immunity ladders and their shared write tail, the family-B (status2/misc) shared gate and its 24 switch cases, and the reset/return tails. Level-50 singles, both sides. Docs-only step — no engine/test/tool/data edits. |

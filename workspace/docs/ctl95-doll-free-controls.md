@@ -1,6 +1,6 @@
 # ctl95 — the doll labs' doll-free control residuals, classified
 
-Integration lane, base master `d46da5755` (production src `081a0570`). Final production code `0473845bc` (src tree `26b82677`).
+Integration lane, base master `fed91f2de` (production src `081a0570`). Final production code `375660655` (src tree `26b82677`).
 Presentation only: no gameplay, RNG, damage, turn order or facility state changed.
 
 ## Results first
@@ -8,7 +8,7 @@ Presentation only: no gameplay, RNG, damage, turn order or facility state change
 | move (census live cmds, base) | verdict | mechanism | evidence (fresh direct mGBA, r1 == r2, every row of every window) | px before -> after |
 |---|---|---|---|---|
 | **Recover 105** (opp 92 + ply 75) | **ARTIFACT** (window alignment). Production is correct. Doll cell added both sides | Production's accepted age 0 is the **first orb** = activation + 10, as in the accepted KADABRA fixture (window 615 = its first orb). doll81 / doll90 framed age 0 at the activation, and their shift scans went -16..0, never +10 | `recoverProbe.py` RAM: first orb 1747 vs activation 1737 (GOLBAT 1746 / 1736). The orb anchor (139, 37) vs the accepted (139, 35) is the attacker's own y (47 vs 45). BLDCNT `3f40` / BLDALPHA `080c` and the attacker palette steps start on the first-orb row in both labs | doll90 controls PERSIAN / GOLBAT opp (6 bodies): 178,714 / 185,849 px per 169 rows at shift 0 -> **0 / 0** at shift 10. ctl95 player PERSIAN (3 bodies) / GOLBAT (4): 231,855 / 223,407 -> **0 / 0**. Personality irrelevant (0 / 0 with and without) |
-| **GrassWhistle 320** (opp 20 + ply 9) | **DEFECT, fixed**, source-derived. Doll cell widened to the opponent | The BG restore `simple_palette_blend` follows `waitforvisualfinish` on the **last wavy note**, so it is created at the last on-screen note body age + 2, not at a per-side constant (163 / 166). The elevated-opponent shadow returns one row after the 220-row script, inside the 225-row window | BG(5,5) colour steps at restore + 6 / + 12: accepted ROSELIA->ONIX opp 172 / 178 (L 164), ply 169 / 175 (L 161); controls PERSIAN opp 165 / 171 (L 157), GOLBAT opp 167 / 173 (L 159), on first and later bodies. **Predicted before probing** (`receipts/gw-predictions.txt`, committed `e4e949e71`): GENGAR opp 163 / 169, CROBAT opp 154 / 160, PERSIAN / GENGAR ply 169 / 175. All four measured exactly so | doll90 controls PERSIAN / GOLBAT opp: 228,007 / 181,850 px (rows 165..177 whole field; GOLBAT also 221..224 shadow 200 px/row) -> **0 / 0** (4 bodies x 225 rows). The 4 predicted pairs: 8 bodies **0 / 0** |
+| **GrassWhistle 320** (opp 20 + ply 9) | **DEFECT, fixed**, source-derived. Doll cell widened to the opponent | The BG restore `simple_palette_blend` follows `waitforvisualfinish` on the **last wavy note**, so it is created at the last on-screen note body age + 2, not at a per-side constant (163 / 166). The elevated-opponent shadow returns one row after the 220-row script, inside the 225-row window | BG(5,5) colour steps at restore + 6 / + 12: accepted ROSELIA->ONIX opp 172 / 178 (L 164), ply 169 / 175 (L 161); controls PERSIAN opp 165 / 171 (L 157), GOLBAT opp 167 / 173 (L 159), on first and later bodies. **Predicted before probing** (`receipts/gw-predictions.txt`, committed `207f4bdd1`): GENGAR opp 163 / 169, CROBAT opp 154 / 160, PERSIAN / GENGAR ply 169 / 175. All four measured exactly so | doll90 controls PERSIAN / GOLBAT opp: 228,007 / 181,850 px (rows 165..177 whole field; GOLBAT also 221..224 shadow 200 px/row) -> **0 / 0** (4 bodies x 225 rows). The 4 predicted pairs: 8 bodies **0 / 0** |
 | **Focus Punch 264** (opp 19 + ply 8) | **DEFECT, CPU-phase class. Not changed: the remedy is a policy decision outside this grant** (below) | The restore fade-in after `restorebg` starts at age 132 or 133 depending on an **optional lag frame at age 131** in `Task_FadeToBg` (`LoadDefaultBg` decompression). Production keys it on the target side (opponent attacker 132 / 153 rows, player attacker 133 / 154). In the ROM it varies **with lab history on both sides, for the same pair** | RAM: `gRng2Value` repeats between rows 130 and 131 (62398, 62398) in every 154-row body, and never in a 153-row body. Clean ctl95 labs, same pair different bodies: opp PERSIAN 154, 154, 154, 153; GOLBAT 154, 154, 153; the **accepted pair** BRELOOM->STARMIE 154, 154, 154 (its accepted lab: 153); ply PERSIAN / GENGAR 154, 154, 153, 153 | Opponent: production exact on 3 / 13 measured bodies (16 whole-field rows 132..147, 17,539..18,272 px/row otherwise). Player: exact on 5 / 9 |
 | **Iron Tail 231** (opp 21 + ply 40) | **DEFECT, fixed**, source-derived | The metallic-shine strip shows through the attacker's OBJ-window copy, so the attacker's own opaque pixels decide where it appears. Production gated the band to `data10 >= 28`, which is AZUMARILL's extent. Wider sprites show it from `data10` 16..24 | Clean ctl95 labs + doll81 def controls, constant over first and later bodies (species-dependent, not history) | PERSIAN opp 38, GOLBAT opp 162, PERSIAN ply 244, GENGAR ply 8 px (ages 9..12 / 41..44) -> **0 / 0** on all 14 bodies |
 
@@ -27,7 +27,7 @@ Accepted comparators of the changed moves stay exact. `liveAdapterFramebuffer.ts
   - Tail k+1 is 0, except GENGAR player at 200 px. That is doll90's pre-existing GENGAR-player tail, outside the composite.
   - doll81's "never 0 at shifts -16..0" was not reproduced at -10 on this code.
 
-**Census** (seeds 0..999, base `d46da5755` vs final `0473845bc`; 10 `--index-from` shards each, `hist73Merge.py`, `land82CensusCheck.py`, `prep43CensusDelta.py`):
+**Census** (seeds 0..999, base `fed91f2de` vs final `375660655`; 10 `--index-from` shards each, `hist73Merge.py`, `land82CensusCheck.py`, `prep43CensusDelta.py`):
 - live **26,181 -> 26,205 commands (+24)**, live frames **3,905,536 -> 3,912,315 (+6,779)**;
 - gained cells:
   - 320 opponent: 11 commands / 3,322 frames;
@@ -35,7 +35,7 @@ Accepted comparators of the changed moves stay exact. `liveAdapterFramebuffer.ts
   - 105 player: 3 / 807;
 - **0 live -> fallback**;
 - Substitute-doll declines 141 / 4,512 frames -> 117 / 3,744;
-- GrassWhistle (29 live commands) and Iron Tail (61) change pixels only. The census on `e4e949e71` (both fixes, before the doll cells) was identical to base in every count, `battleDigest` `f6d738925c8a` both.
+- GrassWhistle (29 live commands) and Iron Tail (61) change pixels only. The census on `207f4bdd1` (both fixes, before the doll cells) was identical to base in every count, `battleDigest` `f6d738925c8a` both.
 - **Command KEY sequence identical outside stalled tails** (`land82CensusCheck.py`). `ctl95CensusPair.py` + `prep43CensusDelta.py` pair 27,515 commands with 0 key mismatches. The 25 frame mismatches are:
   - the 24 newly live commands (32-frame fallback -> 265 / 269 / 302-frame composites);
   - stalled seed 881's last command (32 -> 25, cut by the frame budget).
@@ -123,18 +123,18 @@ Accepted comparators of the changed moves stay exact. `liveAdapterFramebuffer.ts
 
 ## Gates (final code)
 
-Tested code `640b0bdbe` (production `0473845bc`, src tree `26b82677`); the docs / receipt commit changes no code.
+Tested code `e52054bd4` (production `375660655`, src tree `26b82677`); the docs / receipt commit changes no code.
 
 - **Targeted**: 235 files, 4,070 tests passed. The brief's grep (Recover / GrassWhistle / Focus Punch / Iron Tail / substitute / doll) plus `factoryAnimationInventory`, `playableAnimationIntegration`, `liveShadowRows`, `elevatedRendererPostBody`, `ctl95DollFreeControls`.
 - `npm run typecheck`: exit 0.
 - `npm run test:smoke`: 448 / 448.
 - **Full suite**, two foreground shards (no census running): 811 files, 6,955 passed / 119 skipped; and 811 files, 6,373 passed / 104 skipped. 0 failed.
 - `npm run build`: exit 0.
-- `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base d46da5755`: **PASS, 624 / 624 captures byte-identical**.
+- `compare:differential fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base fed91f2de`: **PASS, 624 / 624 captures byte-identical**.
 - `git diff --check`: clean.
 - **Runner** `ctl95Run.sh`, run twice into fresh dirs on src `26b82677`, each time: same scenarios, 30 scenarios r1 == r2.
-  - Run 1 (`640b0bdbe`) produced `receipts/summary.tsv`.
-  - Run 2 (`0bc6e2516`, after the receipts were committed) printed **same summary.tsv**.
+  - Run 1 (`e52054bd4`) produced `receipts/summary.tsv`.
+  - Run 2 (`5bdeba375`, after the receipts were committed) printed **same summary.tsv**.
 
 ## Reproduce
 

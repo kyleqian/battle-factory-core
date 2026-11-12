@@ -1,7 +1,7 @@
 # ord124 (S10A side lane, 2026-10-11): the `sprite-order lend unknown` / `later-body` buckets — Odor Sleuth 316 computed, False Swipe 206, Hyper Beam 63
 
-Base: FIXED master `b1c4c8300` (production src `b4befa039`). Evidence and a banked patch, new files only. Every tree is a git-archive
-copy of `b1c4c8300`; the patched copy also gets `tools/integration/fixtures/ord124/ord124-order-plans.diff`. Direct mGBA only, with the lab
+Base: FIXED master `2daafd503` (production src `b4befa039`). Evidence and a banked patch, new files only. Every tree is a git-archive
+copy of `2daafd503`; the patched copy also gets `tools/integration/fixtures/ord124/ord124-order-plans.diff`. Direct mGBA only, with the lab
 seed pinned in every job. Runner: `sh tools/integration/ord124Run.sh <fresh-out-dir>` (§5).
 
 ## Results
@@ -16,7 +16,7 @@ Census 0..999 headline (`stg107Census.sh`: 10 `--seeds=a..b --index-from=a` shar
 
 | tree | commands | live | live frames | lend unknown | later-body |
 |---|---:|---:|---:|---:|---:|
-| base `b1c4c8300` | 27,426 | 27,139 (98.95 %) | 4,132,330 / 4,160,787 (99.32 %) | 125 / 15,490 | 23 / 3,772 |
+| base `2daafd503` | 27,426 | 27,139 (98.95 %) | 4,132,330 / 4,160,787 (99.32 %) | 125 / 15,490 | 23 / 3,772 |
 | + `ord124-order-plans.diff` | 27,426 | **27,245 (99.34 %)** | **4,144,162 (99.60 %)** | **19 / 3,658** | 23 / 3,772 |
 
 - All 106 lifted commands are in battle 705 (CHANSEY vs WOBBUFFET): Struggle `165:player` 83, Struggle `165:opponent` 18,
@@ -54,7 +54,7 @@ The later-body bucket is not an order-plan problem. A player attacker's later Ex
 
 ## 2. Rung 2: prediction from source, then ROM RAM
 
-### Odor Sleuth 316 (computed; `ord124-prediction.md`, committed in `5d38ba8f2` before the check)
+### Odor Sleuth 316 (computed; `ord124-prediction.md`, committed in `5e965bbd6` before the check)
 
 Sources: `AnimTask_OdorSleuthMovement` / `MoveOdorSleuthClone` (battle_anim_effects_3.c:4955-5058), `CloneBattlerSpriteWithBlend`
 (battle_anim_mons.c:1626), and `UpdateOamCoords` / `BuildSpritePriorities` / `SortSprites` (sprite.c:339-440).
@@ -187,7 +187,7 @@ ORD124_TESTS=1 sh tools/integration/ord124Run.sh .integration/validation/<fresh>
 ```
 
 Steps:
-1. git-archive copies of `b1c4c8300` (base) and base + diff (patched). Checks that the table regenerates byte-identically.
+1. git-archive copies of `2daafd503` (base) and base + diff (patched). Checks that the table regenerates byte-identically.
 2. Census 0..999 in both copies, then attribution, census pair and land82CensusCheck.
 3. `ord124Probe.py` x2 (fresh batches; A / B per job): `units` r1 == r2, then `ord124Check.ts`.
 4. `ord124Stage.py` routes: audit20Probes x2, lends in both copies (r1 == r2), aud110Align, then audit21Check / stf115Summary in both

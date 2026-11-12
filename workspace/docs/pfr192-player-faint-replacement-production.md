@@ -116,7 +116,7 @@ does not move OFF); CASTFORM (ball shift 3, release extra 1, 219 / 274, blank 21
 
 ### 4. Census 0..999, both scenes (`tools/integration/pfr192Census.{ts,sh}`, `pfr192CensusDelta.py`, `fixtures/pfr192/census-delta-{on,off}.json`)
 
-Base `4aaf090be` vs final `b1694ccd4` (src tree `002bf2b23df54f824201e353e3b588bb5f51fa26`), seeds
+Base `95d148066` vs final `5353c166f` (src tree `002bf2b23df54f824201e353e3b588bb5f51fa26`), seeds
 0..999, 6 jobs (10 shards x 4 arms, resumable). The census drives each battle through the real orchestrator, presses the message dismiss
 phase-relative, and records per battle the kernel-event digest, every presentation command row, and for every PLAYER replacement
 `[species, name length, personality, frames confirm -> action menu, readyAt, expected prompt (91 + name + D + 17), trailing command types]`.
@@ -144,7 +144,7 @@ allowance added to the driver (a move animation after a send-in runs on the fram
 and the send-in still open at battle end (seeds 183 / 702) recorded. Both census arms' `src` trees are `002bf2b23df...` for the final side, identical
 to the tested code tree.
 
-### 5. `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 4aaf090be`
+### 5. `npm run compare:differential -- fight-submenu battle1-postwin-next-prompt presentation-rng-playable-live-bodies-seeded-on --base 95d148066`
 
 PASS: fight-submenu 235 / 235, battle1-postwin-next-prompt 216 / 216, presentation-rng-playable-live-bodies-seeded-on 190 / 190 captures
 byte-identical (641 / 641, 0 differences). Expected: all three traces use the canonical MAGBY send-in paths (default timing).
@@ -152,26 +152,26 @@ byte-identical (641 / 641, 0 differences). Expected: all three traces use the ca
 ### 6. Re-pins
 
 Canonical-path pins needed none: `tests/partySelect.test.ts` (:259-271), `tests/fightSubmenu.test.ts` (:364-371), `tests/battleSceneResolutionOwner.test.ts` (:64) and
-`tests/battle2ActionMenu.test.ts` (`ACTION_MENU_BLANK_START_OFFSET`) pass unchanged: they drive the canonical (default-timing) path. The route/census-driven pins that DO move are listed in section 7 (re-pinned in `ec6a1ca85`).
+`tests/battle2ActionMenu.test.ts` (`ACTION_MENU_BLANK_START_OFFSET`) pass unchanged: they drive the canonical (default-timing) path. The route/census-driven pins that DO move are listed in section 7 (re-pinned in `97ef54882`).
 
 ### 7. Gates
 
-Tested code identity: `src` tree `002bf2b23df54f824201e353e3b588bb5f51fa26` is identical at every commit from a4c01d663 through the final commit
-(`git diff a4c01d663 HEAD -- src` empty); every later commit changes only tools, tests, fixtures and this doc.
+Tested code identity: `src` tree `002bf2b23df54f824201e353e3b588bb5f51fa26` is identical at every commit from 081c79b60 through the final commit
+(`git diff 081c79b60 HEAD -- src` empty); every later commit changes only tools, tests, fixtures and this doc.
 
-- `npm run typecheck`: exit 0 (at 0b8ef511a and again at the final commit `ec6a1ca85`).
-- `npm run test:smoke`: 8 files / 448 tests passed (at 0b8ef511a, same src tree).
+- `npm run typecheck`: exit 0 (at 8677a35f0 and again at the final commit `97ef54882`).
+- `npm run test:smoke`: 8 files / 448 tests passed (at 8677a35f0, same src tree).
 - `npm run build`: exit 0 (same src tree).
-- Full `npm test` (nohup, `POKEBENCH_VITEST_MAX_WORKERS=2`, log + exit file) at **9117f4ad1** (tree `06e72c0b0...`, src tree as above):
+- Full `npm test` (nohup, `POKEBENCH_VITEST_MAX_WORKERS=2`, log + exit file) at **05a10c040** (tree `06e72c0b0...`, src tree as above):
   **10 failed in 4 files** / 13,938 passed / 223 skipped (1,727 files, 3,006 s). NOT zero. All 10 are downstream of the keyed clock:
   `battleResolutionPresentation` (view shape gained `switchIn.timing`), `randomRoundSoak` x3 (frames of seed 21 / full / vanilla), `sc106StatsChangeCommand` x2,
   `sgl138SeGateLive` x4 (census-route receipts). Attribution: with the keyed clock disabled by a temporary env hook (reverted, never committed) the
-  9 frame pins pass unchanged and only the view-shape pin fails, so the clock alone moves them. Re-pinned in `ec6a1ca85` with per-pin numbers in the
+  9 frame pins pass unchanged and only the view-shape pin fails, so the clock alone moves them. Re-pinned in `97ef54882` with per-pin numbers in the
   commit message (sc106 seed 0: -100 = -99 (one send-in, readyAt 212) -1 dismissal parity; sgl138 receipts -194 / -218 / -162 / -214 / -118 / -168 /
   -184 / -186 vs census sums -195 / -220 / -163 / -213 / -118 / -170 / -185 / -185, +-2 frames of those drivers' absolute-frame dismissal parity).
 - After the re-pins, only the 5 affected files were re-run (`randomRoundSoak` 64 / 64, `sc106StatsChangeCommand`, `sgl138SeGateLive`,
   `battleResolutionPresentation`, `pfr192PlayerFaintSendInClock`: all pass). **The full suite was not re-run end to end on the final commit**: it takes
-  ~50 min and the 170-min cap did not leave room. The remaining 1,722 other files passed at 9117f4ad1 and are unaffected by test-only re-pins.
+  ~50 min and the 170-min cap did not leave room. The remaining 1,722 other files passed at 05a10c040 and are unaffected by test-only re-pins.
 
 ## Residuals / not done
 

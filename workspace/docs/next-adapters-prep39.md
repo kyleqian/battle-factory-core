@@ -3,7 +3,7 @@
 Side-lane evidence only (new files; no src change). Direct mGBA runs only, every probe twice from fresh processes and
 byte-identical (JSON + per-frame RGB, `tools/integration/fixtures/prep39/probes.json`, 8 scenarios, 14 fade windows).
 Checker receipts byte-identical across two passes. Reproduce with `OUT=<fresh dir> REC=<dir> sh tools/integration/prep39Run.sh`.
-Measured at master `6cff53f40` (production src tree `70fd1474`).
+Measured at master `f065514fa` (production src tree `70fd1474`).
 
 ## Results first
 
