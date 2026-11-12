@@ -258,7 +258,7 @@ CONFUSION anchor (139 vs 100).
 Typecheck, full suite and build are run on a clean checkout of the branch tip (a separate gate worktree).
 
 Third pass, engine tip `24ad564bd` (with box master `1e4019b9c` merged in): typecheck ok, build ok, **14,612 tests pass,
-0 fail**. The five animation evidence tests that failed on the older master `43b0b22e5` were fixed on master
+0 fail**. Run again after merging box master `b6d633f83` (handoff text and one trace fixture), on `ced53f33e`: the same. The five animation evidence tests that failed on the older master `43b0b22e5` were fixed on master
 (`1e4019b9c`, three digest re-pins) and pass here.
 
 Replay on that engine: see the third-pass section at the top (regression 64 / 64, the 49 seeds the two AI fixes can
