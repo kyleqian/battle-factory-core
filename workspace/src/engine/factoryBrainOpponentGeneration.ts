@@ -216,6 +216,218 @@ function freezeLedger(
   })));
 }
 
+/**
+ * `FillFactoryBrainParty`'s five rejection rules for one `GetFactoryMonId`
+ * candidate, in source order (`battle_factory.c:781-808`). This DIFFERS from
+ * `GenerateOpponentMons`' order, which checks saved-rental species before
+ * the high-tier guard: unown, high-tier, saved-rental set id, duplicate
+ * species, duplicate item. Each rejection is after GetFactoryMonId's sole
+ * draw and performs no additional Random() call before the next loop
+ * iteration.
+ */
+function brainSetSelectionOutcome(
+  setId: number,
+  candidate: FrontierMonRow,
+  itemId: number,
+  playerRentalSetIds: ReadonlySet<number>,
+  chosenSpeciesNames: readonly string[],
+  chosenItemIds: readonly number[],
+): "accepted" | FactoryBrainOpponentSetRejection {
+  if (candidate.species === "SPECIES_UNOWN") {
+    return "unown"; // battle_factory.c:781-782
+  }
+  if (setId > POLICY.rentalSelection.highTierLastIndex) {
+    // Source-real (`:783-784`) but unreachable: every valid Level-50
+    // GetFactoryMonId range tops out at or below 849 (proven in
+    // tests/factoryBrainOpponentGeneration.test.ts, matching the sibling
+    // proof in factoryOpponentGeneration.test.ts).
+    return "level50-high-tier";
+  }
+  if (playerRentalSetIds.has(setId)) {
+    return "saved-rental-set-id"; // battle_factory.c:786-792; exact set-id equality
+  }
+  if (chosenSpeciesNames.includes(candidate.species)) {
+    return "duplicate-species"; // battle_factory.c:794-800
+  }
+  if (chosenItemIds.some((existing) => existing !== 0 && existing === itemId)) {
+    return "duplicate-item"; // battle_factory.c:802-808; ITEM_NONE is exempt
+  }
+  return "accepted";
+}
+
+function heldItemIdOf(candidate: FrontierMonRow): number {
+  const itemId = HELD_ITEM_BY_TABLE_ID.get(candidate.itemTableId);
+  if (itemId === undefined) {
+    throw new Error(`Factory set ${candidate.index} has missing held item ${candidate.itemTableId}`);
+  }
+  return itemId;
+}
+
+/**
+ * One accepted member's `CreateMonWithEVSpreadNatureOTID` call
+ * (`battle_factory.c:812-818`, `pokemon.c:2562-2593`): the nature-rejection
+ * personality loop from `rngValue`, the random-IV words when the fixed-IV
+ * argument asks for them, and the derived party member. Shared by the
+ * single-cursor generation and the per-member adoption so both build a
+ * member with the same code.
+ */
+function constructBrainMember(
+  ledger: FactoryBrainOpponentDrawLedgerEntry[],
+  startRngValue: number,
+  candidate: FrontierMonRow,
+  itemId: number,
+  fixedIvArgument: number,
+  otId: number,
+  opponentIndex: number,
+  selectionDrawPosition: number,
+): { readonly record: FactoryBrainOpponentRecord; readonly rngValue: number } {
+  let rngValue = startRngValue;
+  const setId = candidate.index;
+  const targetNature = NATURE_BY_NAME.get(candidate.nature);
+  if (targetNature === undefined) {
+    throw new Error(`Factory set ${candidate.index} has unknown nature ${candidate.nature}`);
+  }
+
+  // CreateMonWithEVSpreadNatureOTID's nature-rejection loop runs
+  // immediately, on the same cursor, before the next GetFactoryMonId draw
+  // (pokemon.c:2562-2593) — selection and construction are not separate
+  // epochs here, unlike the ordinary opponent's room-handoff split.
+  let personality: number;
+  let lowPosition: number;
+  let highPosition: number;
+  do {
+    lowPosition = ledger.length;
+    const lowBefore = rngValue;
+    const low = randomU16(rngValue);
+    rngValue = low.rngValue;
+    highPosition = lowPosition + 1;
+    const highBefore = rngValue;
+    const high = randomU16(rngValue);
+    rngValue = high.rngValue;
+    personality = (low.value | (high.value << 16)) >>> 0;
+    const personalityOutcome = natureFromPersonality(personality) === targetNature
+      ? "accepted"
+      : "wrong-nature";
+    const shared = { personality, personalityOutcome, opponentIndex } as const;
+    ledger.push({
+      position: lowPosition,
+      phase: "personality",
+      purpose: "personality-low",
+      rngBefore: lowBefore,
+      rngAfter: low.rngValue,
+      randomU16: low.value,
+      ...shared,
+    }, {
+      position: highPosition,
+      phase: "personality",
+      purpose: "personality-high",
+      rngBefore: highBefore,
+      rngAfter: high.rngValue,
+      randomU16: high.value,
+      ...shared,
+    });
+  } while (natureFromPersonality(personality) !== targetNature);
+
+  let ivs: BattleScriptIvs;
+  if (fixedIvArgument < USE_RANDOM_IVS) {
+    ivs = uniformBattleScriptIvs(fixedIvArgument);
+  } else {
+    // pokemon.c:2277-2293, immediately after this member's accepted
+    // personality pair: the personality is passed in and OT_ID_PRESET
+    // reads fixedOtId, so neither costs a draw before these two words.
+    const lowIvPosition = ledger.length;
+    const lowIvBefore = rngValue;
+    const lowIv = randomU16(rngValue);
+    rngValue = lowIv.rngValue;
+    ledger.push({
+      position: lowIvPosition,
+      phase: "random-ivs",
+      purpose: "random-ivs-low",
+      rngBefore: lowIvBefore,
+      rngAfter: lowIv.rngValue,
+      randomU16: lowIv.value,
+      opponentIndex,
+    });
+    const highIvPosition = ledger.length;
+    const highIvBefore = rngValue;
+    const highIv = randomU16(rngValue);
+    rngValue = highIv.rngValue;
+    ledger.push({
+      position: highIvPosition,
+      phase: "random-ivs",
+      purpose: "random-ivs-high",
+      rngBefore: highIvBefore,
+      rngAfter: highIv.rngValue,
+      randomU16: highIv.value,
+      opponentIndex,
+    });
+    ivs = battleScriptIvsFromRandomWords(lowIv.value, highIv.value);
+  }
+
+  const instance: FactoryCorpusPartyInstance = {
+    setId,
+    personality,
+    // battle_factory_screen.c:1824's rule: the saved IV byte is the ATK IV.
+    fixedIv: ivs.attack,
+    ivs,
+    // CreateBoxMon derives the ability bit from personality; the corpus
+    // adapter collapses this to slot 0 for single-ability species.
+    abilitySlot: (personality & 1) as 0 | 1,
+    otId,
+  };
+  const member = createFactoryCorpusPartyMember(instance);
+  return {
+    record: Object.freeze({
+      ...instance,
+      abilitySlot: member.abilitySlot,
+      otId,
+      speciesName: candidate.species,
+      itemId,
+      nature: targetNature,
+      selectionDrawPosition,
+      personalityDrawPositions: Object.freeze([lowPosition, highPosition] as const),
+      member,
+    }),
+    rngValue,
+  };
+}
+
+function brainGenerationResult(
+  challengeNum: number,
+  fixedIvArgument: number,
+  opponents: FactoryBrainOpponentRecord[],
+  rngValue: number,
+  ledger: FactoryBrainOpponentDrawLedgerEntry[],
+): FactoryBrainOpponentGenerationResult {
+  const tuple = opponents as [
+    FactoryBrainOpponentRecord,
+    FactoryBrainOpponentRecord,
+    FactoryBrainOpponentRecord,
+  ];
+  const party = opponents.map((opponent) => opponent.member) as [
+    FactoryCorpusPartyMemberState,
+    FactoryCorpusPartyMemberState,
+    FactoryCorpusPartyMemberState,
+  ];
+  return Object.freeze({
+    challengeNum,
+    fixedIv: fixedIvArgument,
+    opponents: Object.freeze(tuple),
+    party: Object.freeze(party),
+    rngValue,
+    drawLedger: freezeLedger(ledger),
+  });
+}
+
+function requirePlayerRentalSetIds(playerRentalSetIds: readonly number[]): ReadonlySet<number> {
+  if (playerRentalSetIds.length !== PLAYER_RENTAL_COUNT) {
+    throw new Error(`playerRentalSetIds must contain exactly ${PLAYER_RENTAL_COUNT} source records`);
+  }
+  return new Set(
+    playerRentalSetIds.map((setId, index) => setRow(setId, `playerRentalSetIds[${index}]`).index),
+  );
+}
+
 export function generateFactoryBrainOpponent(
   input: FactoryBrainOpponentGenerationInput,
 ): FactoryBrainOpponentGenerationResult {
@@ -223,12 +435,7 @@ export function generateFactoryBrainOpponent(
   const factoryWinStreak = requireNonnegativeInteger(input.factoryWinStreak, "factoryWinStreak");
   const challengeNum = Math.floor(factoryWinStreak / STAGES_PER_CHALLENGE);
   const otId = requireU32(input.playerTrainerId, "playerTrainerId");
-  if (input.playerRentalSetIds.length !== PLAYER_RENTAL_COUNT) {
-    throw new Error(`playerRentalSetIds must contain exactly ${PLAYER_RENTAL_COUNT} source records`);
-  }
-  const playerRentalSetIds = new Set(
-    input.playerRentalSetIds.map((setId, index) => setRow(setId, `playerRentalSetIds[${index}]`).index),
-  );
+  const playerRentalSetIds = requirePlayerRentalSetIds(input.playerRentalSetIds);
   // The whole party shares one GetFactoryMonFixedIV argument; when that
   // argument is the >= USE_RANDOM_IVS overread row, each member still rolls
   // its OWN spread (CreateBoxMon runs per mon).
@@ -248,32 +455,10 @@ export function generateFactoryBrainOpponent(
     rngValue = draw.rngValue;
     const setId = range.start + (draw.value % (range.end - range.start + 1));
     const candidate = setRow(setId, "generated set id");
-    const itemId = HELD_ITEM_BY_TABLE_ID.get(candidate.itemTableId);
-    if (itemId === undefined) {
-      throw new Error(`Factory set ${setId} has missing held item ${candidate.itemTableId}`);
-    }
-
-    let outcome: "accepted" | FactoryBrainOpponentSetRejection = "accepted";
-    // Source order (this DIFFERS from GenerateOpponentMons' order, which
-    // checks saved-rental species before the high-tier guard): unown,
-    // high-tier, saved-rental set id, duplicate species, duplicate item.
-    // Each rejection is after GetFactoryMonId's sole draw and performs no
-    // additional Random() call before the next loop iteration.
-    if (candidate.species === "SPECIES_UNOWN") {
-      outcome = "unown"; // battle_factory.c:781-782
-    } else if (setId > POLICY.rentalSelection.highTierLastIndex) {
-      // Source-real (`:783-784`) but unreachable: every valid Level-50
-      // GetFactoryMonId range tops out at or below 849 (proven in
-      // tests/factoryBrainOpponentGeneration.test.ts, matching the sibling
-      // proof in factoryOpponentGeneration.test.ts).
-      outcome = "level50-high-tier";
-    } else if (playerRentalSetIds.has(setId)) {
-      outcome = "saved-rental-set-id"; // battle_factory.c:786-792; exact set-id equality
-    } else if (chosenSpeciesNames.includes(candidate.species)) {
-      outcome = "duplicate-species"; // battle_factory.c:794-800
-    } else if (chosenItemIds.some((existing) => existing !== 0 && existing === itemId)) {
-      outcome = "duplicate-item"; // battle_factory.c:802-808; ITEM_NONE is exempt
-    }
+    const itemId = heldItemIdOf(candidate);
+    const outcome = brainSetSelectionOutcome(
+      setId, candidate, itemId, playerRentalSetIds, chosenSpeciesNames, chosenItemIds,
+    );
 
     ledger.push({
       position,
@@ -293,129 +478,98 @@ export function generateFactoryBrainOpponent(
 
     chosenSpeciesNames.push(candidate.species);
     chosenItemIds.push(itemId);
-
-    const targetNature = NATURE_BY_NAME.get(candidate.nature);
-    if (targetNature === undefined) {
-      throw new Error(`Factory set ${candidate.index} has unknown nature ${candidate.nature}`);
-    }
-
-    // CreateMonWithEVSpreadNatureOTID's nature-rejection loop runs
-    // immediately, on the same cursor, before the next GetFactoryMonId draw
-    // (pokemon.c:2562-2593) — selection and construction are not separate
-    // epochs here, unlike the ordinary opponent's room-handoff split.
-    let personality: number;
-    let lowPosition: number;
-    let highPosition: number;
-    do {
-      lowPosition = ledger.length;
-      const lowBefore = rngValue;
-      const low = randomU16(rngValue);
-      rngValue = low.rngValue;
-      highPosition = lowPosition + 1;
-      const highBefore = rngValue;
-      const high = randomU16(rngValue);
-      rngValue = high.rngValue;
-      personality = (low.value | (high.value << 16)) >>> 0;
-      const personalityOutcome = natureFromPersonality(personality) === targetNature
-        ? "accepted"
-        : "wrong-nature";
-      const shared = { personality, personalityOutcome, opponentIndex } as const;
-      ledger.push({
-        position: lowPosition,
-        phase: "personality",
-        purpose: "personality-low",
-        rngBefore: lowBefore,
-        rngAfter: low.rngValue,
-        randomU16: low.value,
-        ...shared,
-      }, {
-        position: highPosition,
-        phase: "personality",
-        purpose: "personality-high",
-        rngBefore: highBefore,
-        rngAfter: high.rngValue,
-        randomU16: high.value,
-        ...shared,
-      });
-    } while (natureFromPersonality(personality) !== targetNature);
-
-    let ivs: BattleScriptIvs;
-    if (fixedIvArgument < USE_RANDOM_IVS) {
-      ivs = uniformBattleScriptIvs(fixedIvArgument);
-    } else {
-      // pokemon.c:2277-2293, immediately after this member's accepted
-      // personality pair: the personality is passed in and OT_ID_PRESET
-      // reads fixedOtId, so neither costs a draw before these two words.
-      const lowIvPosition = ledger.length;
-      const lowIvBefore = rngValue;
-      const lowIv = randomU16(rngValue);
-      rngValue = lowIv.rngValue;
-      ledger.push({
-        position: lowIvPosition,
-        phase: "random-ivs",
-        purpose: "random-ivs-low",
-        rngBefore: lowIvBefore,
-        rngAfter: lowIv.rngValue,
-        randomU16: lowIv.value,
-        opponentIndex,
-      });
-      const highIvPosition = ledger.length;
-      const highIvBefore = rngValue;
-      const highIv = randomU16(rngValue);
-      rngValue = highIv.rngValue;
-      ledger.push({
-        position: highIvPosition,
-        phase: "random-ivs",
-        purpose: "random-ivs-high",
-        rngBefore: highIvBefore,
-        rngAfter: highIv.rngValue,
-        randomU16: highIv.value,
-        opponentIndex,
-      });
-      ivs = battleScriptIvsFromRandomWords(lowIv.value, highIv.value);
-    }
-
-    const instance: FactoryCorpusPartyInstance = {
-      setId,
-      personality,
-      // battle_factory_screen.c:1824's rule: the saved IV byte is the ATK IV.
-      fixedIv: ivs.attack,
-      ivs,
-      // CreateBoxMon derives the ability bit from personality; the corpus
-      // adapter collapses this to slot 0 for single-ability species.
-      abilitySlot: (personality & 1) as 0 | 1,
-      otId,
-    };
-    const member = createFactoryCorpusPartyMember(instance);
-    opponents.push(Object.freeze({
-      ...instance,
-      abilitySlot: member.abilitySlot,
-      otId,
-      speciesName: candidate.species,
-      itemId,
-      nature: targetNature,
-      selectionDrawPosition: position,
-      personalityDrawPositions: Object.freeze([lowPosition, highPosition] as const),
-      member,
-    }));
+    const constructed = constructBrainMember(
+      ledger, rngValue, candidate, itemId, fixedIvArgument, otId, opponentIndex, position,
+    );
+    rngValue = constructed.rngValue;
+    opponents.push(constructed.record);
   }
 
-  const tuple = opponents as [
-    FactoryBrainOpponentRecord,
-    FactoryBrainOpponentRecord,
-    FactoryBrainOpponentRecord,
-  ];
-  const party = opponents.map((opponent) => opponent.member) as [
-    FactoryCorpusPartyMemberState,
-    FactoryCorpusPartyMemberState,
-    FactoryCorpusPartyMemberState,
-  ];
-  return Object.freeze({
-    challengeNum,
-    fixedIv: fixedIvArgument,
-    opponents: Object.freeze(tuple),
-    party: Object.freeze(party),
-    rngValue,
-    drawLedger: freezeLedger(ledger),
-  });
+  return brainGenerationResult(challengeNum, fixedIvArgument, opponents, rngValue, ledger);
+}
+
+export type FactoryBrainAdoptedOpponentScheduleInput = Readonly<{
+  /** As `FactoryBrainOpponentGenerationInput.factoryWinStreak`. */
+  factoryWinStreak: number;
+  /** As `FactoryBrainOpponentGenerationInput.playerRentalSetIds`. */
+  playerRentalSetIds: readonly number[];
+  /** As `FactoryBrainOpponentGenerationInput.playerTrainerId`. */
+  playerTrainerId: number;
+  /** The three sets `FillFactoryBrainParty` accepted, in party order. */
+  setIds: readonly [number, number, number];
+  /**
+   * Per member, the cursor its `CreateMonWithEVSpreadNatureOTID` personality
+   * loop reads from (the accepted `Random32` pair, or an earlier pair of the
+   * same loop).
+   */
+  constructionRngValues: readonly [number, number, number];
+}>;
+
+/**
+ * Adopt a Brain party the source already rolled (the real-ROM replay seam,
+ * `docs/parity-mac/brain-replay-seam.md`): the dice, i.e. the three accepted
+ * set ids and each member's personality cursor, are given; everything
+ * derived is built by the same code as `generateFactoryBrainOpponent`.
+ *
+ * Why not one cursor: on hardware `FillFactoryBrainParty` runs for about 28
+ * frames with `gMain.inBattle` still clear, so `VBlankIntr`'s own `Random()`
+ * (`main.c:365-366`) lands between the function's draws (30 / 31 such calls
+ * in the two receipts of `tests/factoryBrainOpponentRomReceipts.test.ts`).
+ * The Brain analogue of `adoptFactoryOpponentSchedule`'s per-member
+ * construction cursors.
+ *
+ * Each adopted set must be one the source rules accept at its position
+ * (range, then `brainSetSelectionOutcome` against the earlier members), so a
+ * set this port would have rejected is an error, not a silent adoption. The
+ * returned ledger holds the construction draws only; there is no selection
+ * draw to record, and `selectionDrawPosition` is -1 on every member.
+ * `rngValue` is the cursor after the third member's construction.
+ */
+export function adoptFactoryBrainOpponentSchedule(
+  input: FactoryBrainAdoptedOpponentScheduleInput,
+): FactoryBrainOpponentGenerationResult {
+  const factoryWinStreak = requireNonnegativeInteger(input.factoryWinStreak, "factoryWinStreak");
+  const challengeNum = Math.floor(factoryWinStreak / STAGES_PER_CHALLENGE);
+  const otId = requireU32(input.playerTrainerId, "playerTrainerId");
+  const playerRentalSetIds = requirePlayerRentalSetIds(input.playerRentalSetIds);
+  const fixedIvArgument = getLevel50FactoryBrainFixedIv(challengeNum);
+  const range = getLevel50FactoryRentalRange(challengeNum, false);
+  if (input.setIds.length !== FRONTIER_PARTY_SIZE || input.constructionRngValues.length !== FRONTIER_PARTY_SIZE) {
+    throw new Error(`an adopted Brain schedule needs exactly ${FRONTIER_PARTY_SIZE} set ids and construction cursors`);
+  }
+
+  const ledger: FactoryBrainOpponentDrawLedgerEntry[] = [];
+  const opponents: FactoryBrainOpponentRecord[] = [];
+  const chosenSpeciesNames: string[] = [];
+  const chosenItemIds: number[] = [];
+  let rngValue = 0;
+
+  for (let opponentIndex = 0; opponentIndex < FRONTIER_PARTY_SIZE; opponentIndex += 1) {
+    const setId = input.setIds[opponentIndex]!;
+    const candidate = setRow(setId, `setIds[${opponentIndex}]`);
+    if (setId < range.start || setId > range.end) {
+      throw new Error(
+        `adopted Brain set ${setId} is outside the challenge ${challengeNum} `
+        + `GetFactoryMonId range ${range.start}..${range.end}`,
+      );
+    }
+    const itemId = heldItemIdOf(candidate);
+    const outcome = brainSetSelectionOutcome(
+      setId, candidate, itemId, playerRentalSetIds, chosenSpeciesNames, chosenItemIds,
+    );
+    if (outcome !== "accepted") {
+      throw new Error(`adopted Brain set ${setId} (member ${opponentIndex}) is one the source rules reject: ${outcome}`);
+    }
+    chosenSpeciesNames.push(candidate.species);
+    chosenItemIds.push(itemId);
+    const constructed = constructBrainMember(
+      ledger,
+      requireU32(input.constructionRngValues[opponentIndex]!, `constructionRngValues[${opponentIndex}]`),
+      candidate, itemId, fixedIvArgument, otId, opponentIndex, -1,
+    );
+    rngValue = constructed.rngValue;
+    opponents.push(constructed.record);
+  }
+
+  return brainGenerationResult(challengeNum, fixedIvArgument, opponents, rngValue, ledger);
 }
