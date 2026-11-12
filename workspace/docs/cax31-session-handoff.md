@@ -220,9 +220,9 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
      pins, "engine-referenced" or message-count coverage.
    - **When the replay runs. This is all of it; nothing runs per code change:**
      1. **Once per run, at run start, in the background.** `nohup`, `nice -n 19`, 2 lanes, a hard 60-minute wall cap, on the
-        tree as it stands at run start. The regression list first (it must stay matching), then new seeds upward from
-        the highest seed ever driven if time is left. Open seeds are NOT re-driven nightly: they are known failures.
-        Scene OFF (ON and OFF gave the same result on every seed so far; also drive every tenth new seed ON). Do not wait for
+        tree as it stands at run start. **The regression list only** (it must stay matching): its job is to catch a fixed
+        battle that the box's own work or a merge broke. No new seeds on the box (Kyle, 2026-11-12: discovery is the Mac's
+        job) and no open seeds (they are known failures). Scene OFF, and every tenth regression seed ON as well. Do not wait for
         it: dispatch the first worker as usual and read the result when it ends. Use 1 lane if it starves a full suite.
      2. **Gameplay-fix steps, as today:** the worker re-drives the seed(s) it fixes and the permanent list. No new seeds in
         worker steps.
@@ -238,7 +238,7 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
      - A new divergence joins the open list with its seed, scene and first diverging row. One ISSUES entry per CAUSE, not per seed.
      - Not drivable until replay upgrade 3: 24 Brain seeds (33, 82, 131 and 21 in section 7's batch).
    - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
-     the highest seed driven (1160 now; a Mac session is driving 1161..10000 from 2026-11-12, so new seeds on the box start at 10001, and its results land in `docs/replay-batches/` on branch `worker/replay-batch-mac`) and the consecutive-clean count. A seed is driven as "new" once only.
+     the highest seed driven (1160 now; a Mac session is driving 1161..10000 from 2026-11-12, the box drives no new seeds, and the Mac's results land in `docs/replay-batches/` on branch `worker/replay-batch-mac`) and the consecutive-clean count. A seed is driven as "new" once only.
    - **Two machines (Kyle, 2026-11-12, last decision of the day: "Sure, let's try that"). This replaces the earlier
      "battle-rule fixes are the MAIN program of every box run" pace of the same day.**
      - **The Mac lane owns battle-rule diagnosis and fixes.** It is a separate session on the Mac working on branch
