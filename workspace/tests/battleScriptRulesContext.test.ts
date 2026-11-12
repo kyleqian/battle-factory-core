@@ -213,6 +213,7 @@ describe("source-shaped Battle Script rules context", () => {
       "battleTextBuff2ByteNumber",
       "battleTextBuff2Item",
       "battleTopology",
+      "battleTurnCounter",
       "battlerByTurnOrder",
       "battlerWithAbility",
       "battlers",
