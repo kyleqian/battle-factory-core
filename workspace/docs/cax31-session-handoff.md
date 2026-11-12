@@ -107,14 +107,14 @@ never brief those here. One worker at a time; each run folds the next audio step
 **Status at the 2026-11-12 wind-down:** item 0: aud244a DONE (cries + SEs); next aud244b (BGM / fanfares with ROM loops, the looping SE_LOW_HEALTH / SE_M_GUST),
 then aud245 player. Item 0b: lbr-a DONE; next lbr-b (attendant conversation), then lbr-c, lbr-d; open from lbr-a: no Scene ON loss / retire ROM lab, the app emits
 no SE_SAVE on the loss / retire result script (ROM 4007 / 7503 in the lbra windows). Item 0c DONE (pnm273). Item 0d: #204 C / #209 / #210 DONE; next in the
-gameplay queue: seed 60 (dia272 lead), triage the twenty divergent seeds 75..159, audit A2 / A3 (switch-in scorer), A4 (pass-2 base damage 0, = ISSUES #204
-remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / Flash Fire now come from the real builder); re-check its rows on a seed.
+gameplay queue: audit A2 (switch-in scorer power gate; `docs/dia275-triage.md`: seeds 109 / 107 / 79), A4 (pass-2 base damage 0, = ISSUES #204
+remainder; seed 123), seed 60 (dia272 lead), the rest of ISSUES #211 (95 / 114 = AI draw count) and #212 (A3, B1, B2, ...). A1 is mostly covered by aiv271 (status1 / pinch / weather / Flash Fire now come from the real builder); re-check its rows on a seed.
 
 0. **User decision 2026-11-11 (Kyle, "Yes, start sound"): start sound PLAYBACK now, alongside the ROM-driver gameplay
    fixes.**
    - **Pace:** every run folds at least one playback step and one gameplay-fix step from item 1, one worker at a time as usual.
-     **Superseded 2026-11-12 (item 0d, "Fix pace"): battle-rule fixes come first and take as many steps as fit; sound keeps
-     at least one playback step per run.**
+     **Superseded 2026-11-12 (item 0d, "Two machines"): battle-rule fixes moved to the Mac lane (`worker/parity-mac`); the
+     box folds that branch at run start and gives its own steps to sound, cleanup and the Lobby work.**
    - **No more waiting:** playback no longer waits for census parity (0 missing / 0 extra, design step 7) or for the remaining
      aud242 lifetimes. A sound we don't emit yet just stays silent and gets filled in as parity improves.
    - **aud244, recorder + assets** (design section 5 / step 8). It may split into cries / SEs / music.
@@ -220,9 +220,9 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
      pins, "engine-referenced" or message-count coverage.
    - **When the replay runs. This is all of it; nothing runs per code change:**
      1. **Once per run, at run start, in the background.** `nohup`, `nice -n 19`, 2 lanes, a hard 60-minute wall cap, on the
-        tree as it stands at run start. The regression list first (it must stay matching), then new seeds upward from
-        the highest seed ever driven if time is left. Open seeds are NOT re-driven nightly: they are known failures.
-        Scene OFF (ON and OFF gave the same result on every seed so far; also drive every tenth new seed ON). Do not wait for
+        tree as it stands at run start. **The regression list only** (it must stay matching): its job is to catch a fixed
+        battle that the box's own work or a merge broke. No new seeds on the box (Kyle, 2026-11-12: discovery is the Mac's
+        job) and no open seeds (they are known failures). Scene OFF, and every tenth regression seed ON as well. Do not wait for
         it: dispatch the first worker as usual and read the result when it ends. Use 1 lane if it starves a full suite.
      2. **Gameplay-fix steps, as today:** the worker re-drives the seed(s) it fixes and the permanent list. No new seeds in
         worker steps.
@@ -238,12 +238,26 @@ remainder), B1, B2. A1 is mostly covered by aiv271 (status1 / pinch / weather / 
      - A new divergence joins the open list with its seed, scene and first diverging row. One ISSUES entry per CAUSE, not per seed.
      - Not drivable until replay upgrade 3: 24 Brain seeds (33, 82, 131 and 21 in section 7's batch).
    - **Ledger:** create and keep `docs/replay-ledger.md`: per run the commit, seed range, matched / driven, new divergent seeds,
-     the highest seed driven (1160 now) and the consecutive-clean count. A seed is driven as "new" once only.
-   - **Fix pace (Kyle, later on 2026-11-12: "stop de-prio the battle fixes. they're important"):** battle-rule fixes are now
-     the MAIN program of every run. Take them first and fold as many as fit, one worker at a time (the 16 GiB host note
-     stands), in the queue order below. Sound keeps moving with at least one playback step per run, because Kyle wants
-     both; cleanup takes what is left. This supersedes the "one gameplay-fix step" pace in item 0 and the "main program"
-     wording in item 1. Order of the gameplay queue:
+     the highest seed driven (1160 now; a Mac session is driving 1161..10000 from 2026-11-12, the box drives no new seeds, and the Mac's results land in `docs/replay-batches/` on branch `worker/replay-batch-mac`) and the consecutive-clean count. A seed is driven as "new" once only.
+   - **Two machines (Kyle, 2026-11-12, last decision of the day: "Sure, let's try that"). This replaces the earlier
+     "battle-rule fixes are the MAIN program of every box run" pace of the same day.**
+     - **The Mac lane owns battle-rule diagnosis and fixes.** It is a separate session on the Mac working on branch
+       `worker/parity-mac` (real-ROM replay is about 5x faster there). It turns the open seeds into bug reports and fixes,
+       one cause group at a time, in the queue order below. Its records are new files under `docs/parity-mac/`
+       (`STATUS.md` first); it does not touch PROGRESS / ISSUES / ROADMAP / this handoff.
+     - **It ships its branch to this box as `refs/remotes/mac/parity-mac`** (fetch-only; it never touches your working tree,
+       `master` or processes).
+     - **Your part, at run start, before the first worker:** if `mac/parity-mac` moved, fold it: `git merge mac/parity-mac`,
+       typecheck, its touched tests, full suite, build, re-pin any sound / census anchor the gameplay change moves, then write
+       the PROGRESS and ISSUES entries from its `docs/parity-mac/*.md`. Each Mac fix arrives with its own ROM proof (group
+       seeds + the regression list); do not redo the census-attribution step for it.
+     - **Sound is your main program again** (item 0 / item 1), with cleanup and the Lobby work as before. Do not start
+       battle-rule fixes of your own while the Mac lane is active: two lanes on the same rules collide on the engine and
+       on the census-anchored pins. If you find a gameplay bug, file it in ISSUES; the Mac lane reads ISSUES.
+     - **Fallback:** if `mac/parity-mac` has not moved for two runs in a row, the Mac lane has stalled: resume the queue
+       below on the box, battle-rule fixes first, and say so in PROGRESS.
+     - Kyle wants both sound and battle parity finished; the split exists so neither waits for the other.
+     Order of the gameplay queue (the Mac lane's, and yours under the fallback):
      1. the signature groups of audit doc section 7, largest first. A signature is not a proven cause: open each group with
         a diagnosis step on 2 or 3 of its seeds (dia263 / dia269 shape), then fix, then re-drive the whole group:
         (a) the ROM sends in a different opponent after a faint, 21 seeds (leads A2 / A3 / A4; your #204 remainder

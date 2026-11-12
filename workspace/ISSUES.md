@@ -13,6 +13,18 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
+## #211 — ROM replay divergences, seeds 61..160 batch (top layer 2026-11-12; re-driven at the 2026-11-12 CAX31 wind-down)
+
+Scene OFF, `78c2ef2bc`: 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 still diverge (first diverging row per seed in `docs/replay-ledger.md`;
+75 88 110 155 158 now match). Not diagnosed; triage by first diverging row (dia263 / dia269 / dia272 shape). Seed 60 is the dia272 forced-Struggle lead (#204).
+
+## #212 — Gameplay audit rows, source-read only (`docs/gameplay-parity-audit-2026-11-12.md` section 2)
+
+Open until confirmed on the ROM with the fix: A2 / A3 (switch-in scorer: no power gate, no Levitate), A4 (pass-2 base damage 0, = the #204 remainder),
+A5 (AI turn counter 0), A6 / A7 (CheckViability target drops ability / Sp. Atk stage), B1 (Toxic counter survives a switch), B2 (Encore auto-confirms),
+B3 (Endure vs Future Sight), B4 (Shell Bell on Future Sight), B5 (Castform revert), B6 (confusion self-hit Explosion halving), B7 (Pain Split as physical),
+B8 (Hidden Power physicality). A1 is mostly covered by aiv271 (re-check its rows on a seed).
+
 ## #204 — AI residuals after the view fill (aiv266 / aiv267 / aiv270 / aiv271)
 
 Causes A / B (aiv270) and C (aiv271, `docs/aiv271-ai-damage-terms.md`: AI damage sims take the real hit chain's `battleScriptDamageTerms`) are
