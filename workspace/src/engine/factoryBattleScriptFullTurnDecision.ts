@@ -3240,12 +3240,25 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
     throw new Error("factory full-turn decision requires the trainer's staged singles command");
   }
 
-  const rc0 = clearOverwrittenEncoreAtAction(
+  const rc0Encore = clearOverwrittenEncoreAtAction(
     clearOverwrittenEncoreAtAction(rules.rulesContext, 0),
     1,
   );
   const playerSwitch = rules.pendingPlayerDecision.kind === "switch";
   const trainerSwitch = ctx.decision.kind === "switch";
+  // battle_main.c:4398: selecting a move writes gBattleStruct->chosenMovePositions
+  // for BOTH battlers, before any action runs. A battler that faints before it
+  // acts never reaches buildActionContext's write, yet ENDTURN_ORDER's
+  // GetWhoStrikesFirst (battle_main.c:4702-4714) still reads its slot.
+  const rc0 = createBattleScriptRulesContext({
+    ...rc0Encore,
+    chosenMovePositions: Object.freeze([
+      playerSwitch ? rc0Encore.chosenMovePositions[0] : rules.pendingPlayerDecision.moveSlot,
+      trainerSwitch ? rc0Encore.chosenMovePositions[1] : ctx.decision.moveSlot,
+      rc0Encore.chosenMovePositions[2],
+      rc0Encore.chosenMovePositions[3],
+    ]) as unknown as BattleScriptRulesContext["chosenMovePositions"],
+  });
   const playerSwitchPartyIndex = playerSwitch
     ? rules.pendingPlayerDecision.partyIndex
     : null;

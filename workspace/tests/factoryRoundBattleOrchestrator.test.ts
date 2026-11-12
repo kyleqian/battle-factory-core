@@ -2790,7 +2790,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     // Each row is the whole-round facility RNG cursor plus its complete
     // downstream trajectory (generation, moves, damage, turn lengths), not a
     // direct draw-count delta. Values regenerated from the union engine.
-    [4, 1590, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1809 -> 1525; aiv267 (#207 confusion self-hit sees the hold item): 1525 -> 1590
+    [4, 1471, "roundComplete", 6, "win"], // fix274 (#209 effect byte / #210 chosen position): 1590 -> 1471; aiv267 1525 -> 1590; #140 GetMoveTarget draw loop: 1809 -> 1525; aiv267 (#207 confusion self-hit sees the hold item): 1525 -> 1590
     [5, 1694, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1658 -> 1694
     [6, 1417, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1675 -> 1417
     [7, 1857, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1269 -> 1884; abl261 (#202, full ability resolver applies; the old 4-id map reproduces 1884): 1884 -> 1857
@@ -2802,7 +2802,7 @@ describe("generated Factory round battle orchestrator (Gate-5 rung 11)", () => {
     [16, 1786, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1523 -> 1315; rng146 F1 Petal Dance lock-in re-run: 1315 -> 1294; abl261 (#202, full ability resolver applies; the old 4-id map reproduces 1294): 1294 -> 1786
     [18, 1775, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1948 -> 1775
     [19, 1116, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1938 -> 1116
-    [20, 1644, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1999 -> 1644
+    [20, 1555, "roundComplete", 6, "win"], // fix274 (#209 effect byte / #210 chosen position): 1644 -> 1555; #140 GetMoveTarget draw loop: 1999 -> 1644
     [21, 1559, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1476 -> 1559
     [22, 1671, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 1517 -> 1671
     [23, 2191, "roundComplete", 6, "win"], // #140 GetMoveTarget draw loop: 2330 -> 2191
