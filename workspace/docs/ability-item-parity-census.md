@@ -80,7 +80,7 @@ Mirrors the executable-frontier move census for the last two enumerable battle-v
 | ABILITY_COLOR_CHANGE | engine-referenced | 2 (2) | 2 | ON_DAMAGE | 0 | 0 | 3 |
 | ABILITY_PLUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |
 | ABILITY_MINUS | engine-referenced | 2 (2) | 2 | — | 2 | 0 | 3 |
-| ABILITY_FORECAST | engine-referenced | 2 (2) | 2 | ON_SWITCHIN, FORECAST | 1 | 0 | 5 |
+| ABILITY_FORECAST | engine-referenced | 2 (2) | 2 | ON_SWITCHIN, FORECAST | 1 | 0 | 7 |
 | ABILITY_WHITE_SMOKE | engine-referenced | 2 (2) | 2 | — | 3 | 0 | 12 |
 | ABILITY_WONDER_GUARD | engine-referenced | 1 (1) | 1 | — | 12 | 1 | 11 |
 | ABILITY_DRIZZLE | zero-carrier | 0 (0) | 0 | ON_SWITCHIN | 0 | 0 | 2 |

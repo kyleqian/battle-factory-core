@@ -22,7 +22,9 @@ describe("apx221: one staged command per class draws non-static rows, classifies
   it.each([
     // [name, census seed, moveId, attacker, code, presented rows (the body's own live duration)]
     ["castform-form: Icy Wind 196 by the player's rain-form CASTFORM (residual key 196:by:2)", 651, 196, 0, "approx:castform-form", 290],
-    ["castform-form: Fly 19 by the opponent at a hail-form CASTFORM (19:at:3 not proven)", 950, 19, 1, "approx:castform-form", 46],
+    // parity-mac (docs/parity-mac/castform-reverts-with-weather.md): the "Fly 19 by the opponent at a hail-form CASTFORM" row (census
+    // seed 950) left: CASTFORM now reverts when the hail ends, so that Fly lands on a Normal-form CASTFORM, and no census seed 0..999
+    // carries an opponent Fly at a transformed CASTFORM on the fixed engine.
     ["extrasensory-player-later-target: Extrasensory 326 by the player's later body (target top line < 27 / scanline history unknown)", 19, 326, 0,
       "approx:other:extrasensory-player-later-target", 165],
     ["endeavor-power: Endeavor 283 with the stale battleMovePower register unknown (census seed 415)", 415, 283, 0, "approx:endeavor-power", 73],
