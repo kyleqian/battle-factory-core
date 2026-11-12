@@ -99,6 +99,27 @@ const MOVE_SPLASH = 150; // EFFECT_SPLASH -- no CBM or CV table entry, so every 
 // conditional spread in the adapter's pass literals fires and the captured
 // objects carry the full populated set. `Required<...>` makes this
 // compile-time-exhaustive: a new view field forces this object to grow.
+const DAMAGE_BATTLER_SAMPLE = Object.freeze({
+  attack: 1,
+  defense: 1,
+  spAttack: 1,
+  spDefense: 1,
+  level: 50,
+  types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
+  statStages: { atk: 6, def: 6, spAtk: 6, spDef: 6 },
+});
+const DAMAGE_TERMS_SAMPLE = Object.freeze({
+  attacker: DAMAGE_BATTLER_SAMPLE,
+  defender: DAMAGE_BATTLER_SAMPLE,
+  weather: 0,
+  weatherHasEffect: true,
+  activeBattlerAbilities: Object.freeze([null, null]),
+  isFrontierBattle: true,
+  flashFireBoosted: false,
+  mudSportActive: false,
+  waterSportActive: false,
+});
+
 const PROBE_ATTACKER: Required<FactoryAiScoredBattlerView> = Object.freeze({
   types: ["TYPE_NORMAL", "TYPE_NORMAL"] as const,
   attack: 1,
@@ -162,6 +183,7 @@ const PROBE_ATTACKER: Required<FactoryAiScoredBattlerView> = Object.freeze({
   waterSportUp: true,
   usedHeldItemId: 1,
   stockpileCount: 1,
+  damageTerms: DAMAGE_TERMS_SAMPLE,
 });
 
 const PROBE_TARGET: Required<FactoryAiScoredTargetView> = Object.freeze({
@@ -337,6 +359,7 @@ const TTF_TARGET_SAMPLE: Required<FactoryAiTryToFaintTarget> = Object.freeze({
   ability: "ABILITY_NONE",
   targetSideReflectUp: true,
   targetSideLightScreenUp: true,
+  damageTerms: DAMAGE_TERMS_SAMPLE,
 });
 
 function keysOf<T extends object>(sample: T): readonly string[] {

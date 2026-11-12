@@ -402,6 +402,29 @@ describe("live Factory AI rules adapter (Gate-5 rung 6)", () => {
         turnOrderAbility: "ABILITY_ROCK_HEAD",
         turnOrderHoldEffect: null,
         turnOrderHoldEffectParam: 0,
+        // aiv271: the AI damage sim's CalculateBaseDamage terms, from the same builder as the real hit chain.
+        damageTerms: {
+          attacker: {
+            attack: 55, defense: 65, spAttack: 135, spDefense: 105, level: 50,
+            types: ["TYPE_PSYCHIC", "TYPE_PSYCHIC"],
+            statStages: { atk: 6, def: 6, spAtk: 6, spDef: 6 },
+            isBurned: false, hasStatus1: false, hp: 135, maxHP: 135, ability: "ABILITY_NONE", species: 65,
+            holdEffect: null, holdEffectParam: 0,
+          },
+          defender: {
+            attack: 130, defense: 130, spAttack: 55, spDefense: 70, level: 50,
+            types: ["TYPE_GROUND", "TYPE_GROUND"],
+            statStages: { atk: 6, def: 6, spAtk: 6, spDef: 6 },
+            hasStatus1: false, ability: "ABILITY_ROCK_HEAD", species: 105, holdEffect: null,
+          },
+          weather: 0,
+          weatherHasEffect: true,
+          activeBattlerAbilities: ["ABILITY_ROCK_HEAD", "ABILITY_NONE"],
+          isFrontierBattle: true,
+          flashFireBoosted: false,
+          mudSportActive: false,
+          waterSportActive: false,
+        },
       },
     };
 
