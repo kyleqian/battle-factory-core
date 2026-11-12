@@ -26,7 +26,7 @@
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/psych-up-staging-receipt.json",
-    "stagingReceiptSha256": "68eb4fab31fd663951d7954783cc3614d40cfd1247fb94ede641c3be8dc98499",
+    "stagingReceiptSha256": "ba0c33c3690feeba81a50a42fa7d4219e78870e73f493de786f26889a4b98141",
     "pointerOwnedRoot": { "start": "0x082caaea", "endExclusive": "0x082cab5c", "observedParities": [0, 1] }
   },
   "orientations": {

@@ -25,7 +25,7 @@
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/hyper-voice-staging-receipt.json",
-    "stagingReceiptSha256": "e0925784ac1947e4683785c4ef8df6704914c32d429d9dbe20cab6f0333b9ebf",
+    "stagingReceiptSha256": "dfef1d0669a4ed2856e41d5bf2c15b3f4f096ce9b85f9e5014293650a061912f",
     "pointerOwnedRoot": { "start": "0x082d50d6", "endExclusive": "0x082d516a", "observedParities": [0, 1] }
   },
   "orientations": {
