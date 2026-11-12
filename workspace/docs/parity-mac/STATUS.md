@@ -10,13 +10,13 @@ item 0d, `docs/gameplay-parity-audit-2026-11-12.md` sections 7 and 8. Evidence i
 | | seeds |
 |---|---|
 | open list at the start (audit doc section 8) | 115 |
-| **now matching to battle end** | **113** |
-| still open | 2 (705, 796: see "Still open") |
+| **now matching to battle end** | **114** (113 with the stock chain, 705 with a higher driver frame cap) |
+| not drivable to its end | 1 (796: see "Still open") |
 | regression list (handoff 0d), must keep matching | **64 / 64** |
 
-Now matching (113), to join the regression list:
+Now matching (114), to join the regression list (705 needs `--frames` above 82,835 on the ROM drive):
 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 161 165 183 193 203 218 225 228 236 265 284 292 332 342 343 345 392 417
-426 444 454 457 475 483 484 491 492 499 522 525 529 542 547 553 566 573 576 577 614 616 631 643 651 675 702 707 715 737 758 769
+426 444 454 457 475 483 484 491 492 499 522 525 529 542 547 553 566 573 576 577 614 616 631 643 651 675 702 705 707 715 737 758 769
 783 799 804 813 830 838 839 848 857 862 867 881 897 898 899 900 904 905 906 907 912 918 926 929 959 965 968 973 986 992 996 1005
 1014 1017 1021 1030 1032 1066 1072 1081 1083 1095 1112 1117 1125 1153 1157.
 
@@ -49,7 +49,7 @@ Group view against the handoff's queue (a seed can sit in two groups):
 | group (handoff 0d) | seeds | now matching | still open |
 |---|---|---|---|
 | (a) the ROM sends in a different opponent | 21 | 21 | - |
-| (b) Struggle | 24 | 22 | 705 796 |
+| (b) Struggle | 24 | 23 | 796 |
 | (c) Encore | 10 | 10 | - |
 | (d) confusion self-hit | 5 | 5 | - |
 | (e) infatuation | 5 | 5 | - |
@@ -80,8 +80,10 @@ New source-read leads found on the way (no ROM seed yet):
 
 | seed | state | next step |
 |---|---|---|
-| 705 | 181 of 188 engine states match; the ROM drive stops at the driver's 80,000-frame cap, not at a mismatch | drive with a higher cap (`soundEventProbe.py lab --drive ... --frames N`) |
-| 796 | 124 of 333 match; the engine replay stops at its own 200,000-frame budget ("frame budget"), the ROM drive at the 80,000 cap | `soundCensusRomReplay.ts replay --frame-budget=N` (added in this lane) plus the higher ROM cap |
+| 796 | Both sides are out of PP and trade Struggle while Leftovers heals; the battle does not end. With the engine budget raised to 2,000,000 frames (3,323 decisions, still not over) and the ROM drive to 600,000 frames (891 decisions), **894 engine states match in order and no mismatch appears** (it was 124 of 333 at the default limits). | none: it cannot be driven "to battle end" in practical time. Keep it off the regression list; it is a long-run check, not an open rule bug. |
+
+Seed 705 was the same kind of limit and nothing else: it ends after 82,835 ROM frames, just past the driver's default 80,000-frame
+cap (`soundEventProbe.py lab --drive ... --frames N`), and matches 188 / 188.
 
 ## Known gap left on purpose (presentation, not battle rules)
 
