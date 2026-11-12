@@ -13,14 +13,12 @@ defects are all authorized in the finish-up mission (`docs/factory-finish-scope.
 gameplay / RNG when proved against source; use main-lane ownership and gameplay gates. Historical presentation-only
 exclusions are superseded. Unrelated expansions stay parked.
 
-## #204 — AI residuals after the view fill (aiv266 / aiv267; causes root-caused by dia269, 2026-11-11)
+## #204 — AI residuals after the view fill (aiv266 / aiv267 / aiv270; causes root-caused by dia269, 2026-11-11)
 
-`docs/dia269-leads.md` (each fix confirmed in a scratch tree to make its seed match to battle end; not applied): (A) seed 22: `AI_CBM_CheckIfNegatesType`
-uses the true type multiplier, but C `Cmd_if_type_effectiveness` (`battle_ai_script_commands.c:1515-1557`) never sees MOVE_RESULT_DOESNT_AFFECT_FOE (the
-"dual non-immunity" glitch), engine `factoryAiCheckBadMove.ts` ~1308. (B) seed 30: the AI's "target is faster" checks ignore paralysis in the turn-order
-speed (`factoryAiCheckViability.ts` ~7359 and ~11 sibling sites; C `battle_main.c` ~4605-4660). (C) seed 39: the AI damage estimate drops species /
-hold-effect / hold-effect-param (`factoryAiTryToFaint.ts:122-155`; C `battle_ai_script_commands.c:1174-1236`). Seed 57 unconfirmed (AI damage or
-draw-to-slot mapping; needs a ROM per-move AI damage readout). Fix A / B / C as one ts step each with the aiv267 proof shape.
+Causes A (type-effectiveness probe quirk, seed 22) and B (full GetWhoStrikesFirst speed, seed 30) fixed by aiv270
+(`docs/aiv270-ai-effectiveness-paralysis.md`). Open: (C) seed 39: the AI damage estimate drops species / hold-effect / hold-effect-param
+(`factoryAiTryToFaint.ts:122-155`; C `battle_ai_script_commands.c:1174-1236`; `docs/dia269-leads.md` section C). Seed 57 unconfirmed
+(AI damage or draw-to-slot mapping; needs a ROM per-move AI damage readout; re-drive after C).
 
 ## #209 — Stale MOVE_EFFECT_BYTE leaks across turns (dia269 seed 53, 2026-11-11)
 
