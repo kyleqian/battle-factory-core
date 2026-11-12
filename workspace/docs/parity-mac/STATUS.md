@@ -5,7 +5,7 @@ Branch `worker/parity-mac`. Method: every seed is played by the engine and repla
 "matches" when every engine state is found in order on the ROM to battle end. Lists and decision: `docs/cax31-session-handoff.md`
 item 0d, `docs/gameplay-parity-audit-2026-11-12.md` sections 7 and 8. Evidence is kept outside git; every row re-derives from the seed.
 
-## Where it stands (2026-11-12)
+## Where it stands (2026-11-12, second pass)
 
 | | seeds |
 |---|---|
@@ -13,12 +13,30 @@ item 0d, `docs/gameplay-parity-audit-2026-11-12.md` sections 7 and 8. Evidence i
 | **now matching to battle end** | **114** (113 with the stock chain, 705 with a higher driver frame cap) |
 | not drivable to its end | 1 (796: see "Still open") |
 | regression list (handoff 0d), must keep matching | **64 / 64** |
+| new seeds 1161-4341 that did not match on the old engine (bulk replay batch) | 290 |
+| of those, now matching to battle end | **283** (275 with the stock chain, 8 long battles with higher caps) |
+| of those, endless battles with every state matching up to the cap | 6 |
+| of those, not replayable (lab staging, not the engine) | 1 (3623) |
+
+The bulk batch (another session, engine `a86909863e`) had replayed 3,194 new seeds when this pass started: 2,839 matched,
+290 did not, 65 are Brain battles. The 290 were re-driven here. No seed in either list shows an engine mismatch now.
 
 Now matching (114), to join the regression list (705 needs `--frames` above 82,835 on the ROM drive):
 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 161 165 183 193 203 218 225 228 236 265 284 292 332 342 343 345 392 417
 426 444 454 457 475 483 484 491 492 499 522 525 529 542 547 553 566 573 576 577 614 616 631 643 651 675 702 705 707 715 737 758 769
 783 799 804 813 830 838 839 848 857 862 867 881 897 898 899 900 904 905 906 907 912 918 926 929 959 965 968 973 986 992 996 1005
 1014 1017 1021 1030 1032 1066 1072 1081 1083 1095 1112 1117 1125 1153 1157.
+
+New seeds, by what made them match:
+
+| what | seeds |
+|---|---|
+| already matched on the first-pass engine (fixes 1-16) | 267 |
+| fixes 17-21 below, stock chain | 1414 2215 3375 3704 |
+| replay tool false alarms (`replay-tool-fixes.md`), stock chain | 1181 1816 2722 4270 |
+| long battles, match to the end with engine `--frame-budget=2000000` and ROM `--frames 600000` | 1338 (154 states) 1904 (155; needs fix 19) 2546 (588) 2658 (127) 2742 (171) 3504 (642) 3589 (125) 3789 (162) |
+| endless Struggle / Leftovers stalls: every state matches up to the 600,000-frame ROM cap, no mismatch | 1986 (720 states) 2297 (943) 2716 (941) 2907 (817) 3009 (821) 3807 (929) |
+| lab staging played a turn before the snapshot; cannot be replayed | 3623 |
 
 ## Fixes (one commit each, C-cited, each with a test that fails without it)
 
@@ -43,6 +61,16 @@ late may also need the earlier ones).
 | 14 | A second Intimidate (or Trace) Pokémon entering the same field slot before any action finished still activated. | new | `intimidate-once-per-slot.md` | 1083 |
 | 15 | The AI's "no effect" check ignored Foresight on its target. | new | `ai-effectiveness-foresight.md` | 959 |
 | 16 | AI penalty for two-stat moves when both stats are maxed: -10 only, not -18 (Curse, Bulk Up, Cosmic Power, Calm Mind, Dragon Dance, Tickle). | new | `ai-dual-stat-penalty.md` | 898 |
+| 17 | A Pokémon that used Endure survived a Future Sight landing the same turn. The game lets it faint. | B3 | `endure-future-sight.md` | 2215 |
+| 18 | After a faint the engine sometimes sent in the wrong replacement when a bench Pokémon had two types: the type score was multiplied in the wrong order (the game follows its type table and rounds down after every step). | new | `replacement-type-score-table-order.md` | 1414 |
+| 19 | Rage never ended: once used, every later hit raised Attack. The game drops Rage as soon as another move is chosen. | new | `rage-status-clear.md` | 1904 |
+| 20 | The player's Curse (non-Ghost) lost 2 PP against Pressure. The game takes 1 (the opponent's Curse does lose 2). | new | `curse-player-target.md` | 3375 |
+| 21 | A player's lead Slaking loafed on turn 1 when the opponent's lead had Cloud Nine or Forecast; an opponent lead's weather ability did nothing at battle start. | new | `battle-start-switchin-battler.md` | 3704 |
+| 22 | Hidden Power of a special type could be answered by Mirror Coat and not by Counter. In the game it is always Counter. | B8 | `hidden-power-damage-record.md` | Mechanic Lab |
+| 23 | The opponent AI's turn count was always 0 (Swagger with Psych Up kept its first-turn bonus). | A5 | `ai-turn-counter.md` | source only |
+| 24 | The AI's move scoring did not see the player's Sp. Atk stage (Roar, Psych Up) or a trapping ability (Skill Swap, Role Play), and spent a different number of random draws. | A6, A7 | `ai-cv-target-ability-spatk.md` | Mechanic Lab |
+| 25 | White Herb did nothing when a lowered stat was Baton Passed to its holder; the game uses it at once. | suspected | `white-herb-baton-pass.md` | Mechanic Lab |
+| 26 | The AI kept its memory of a Pokémon that left and came back while the AI was locked into a multi-turn move. | suspected | `ai-history-reentry.md` | source only |
 
 Group view against the handoff's queue (a seed can sit in two groups):
 
@@ -63,27 +91,35 @@ were fixes 2, 5 and 10, and the unsigned rest was almost entirely the opponent A
 
 | lead | state |
 |---|---|
+| A1 | fixed on box master (`aiv271`: the AI damage sims take the real hit chain's terms); nothing left for this lane |
 | A2, A3, A4 | fixed (fixes 2, 3), ROM seeds 332 / 284 / 123 |
+| A5 | fixed (fix 23), source only: the lab cannot stage a target already at -3 Attack |
+| A6, A7 | fixed (fix 24), Mechanic Lab ROM proof |
 | B1, B2, B4, B5, B6, B7 | fixed (fixes 1, 5, 11, 13, 4, 12), each with a ROM seed |
-| A1 (rest: attacker burn, pinch `maxHp`, Guts, weather, Flash Fire in the AI damage estimate) | open, no ROM seed among the 115; needs a Mechanic Lab scenario |
-| A5 (AI turn counter), A6, A7 (CheckViability target drops `ability` / `spAtkStage`) | open, no ROM seed |
-| B3 (Endure vs a same-turn Future Sight), B8 (Hidden Power damage record) | open, no ROM seed |
-| suspected: cure berries after Pursuit-on-switch (state 6 item pass is the player's White Herb only), AI history on a swap during a move lock, White Herb on Baton Pass, end-turn re-sort priority on forced Struggle | open |
+| B3 | fixed (fix 17), ROM seed 2215 |
+| B8 | fixed (fix 22), Mechanic Lab ROM proof |
+| suspected: White Herb on Baton Pass | fixed (fix 25), Mechanic Lab ROM proof |
+| suspected: AI history on a swap during a move lock | fixed (fix 26), source only |
+| suspected: end-turn re-sort priority on a forced Struggle | **not a bug.** The ROM does what the engine did (`endturn-order-forced-struggle.md`); the wrong "known gap" comment is replaced and a test pins the ROM order |
+| suspected: cure berries after Pursuit-on-switch | open, low value: `HandleFaintedMonActions` state 6 runs the item pass for the player's battler (`ItemBattleEffects(ITEMEFFECT_NORMAL, 0, TRUE)`); the engine ports only White Herb there. A status berry would cure a few steps earlier than the engine's end-of-turn pass. The only rule effect found by reading: a paralysis cured before the end-turn speed re-sort |
 
 New source-read leads found on the way (no ROM seed yet):
 
 - AI try-to-faint and check-viability type checks do not take Foresight (`ai-effectiveness-foresight.md`).
 - AI final pick: a slot masked by a Choice lock / Disable can only win if every usable slot falls to its score;
   each `score` command clamps at 0 in C and the engine does not clamp (`ai-scripts-unusable-slots.md`).
+- After White Herb on a Baton Pass switch-in the game skips the rest of `switchineffects`; the "Spikes already damaged"
+  flag then stays set for that side (modeled by fix 25, never seen on the ROM).
 
 ## Still open
 
 | seed | state | next step |
 |---|---|---|
-| 796 | Both sides are out of PP and trade Struggle while Leftovers heals; the battle does not end. With the engine budget raised to 2,000,000 frames (3,323 decisions, still not over) and the ROM drive to 600,000 frames (891 decisions), **894 engine states match in order and no mismatch appears** (it was 124 of 333 at the default limits). | none: it cannot be driven "to battle end" in practical time. Keep it off the regression list; it is a long-run check, not an open rule bug. |
+| 796, 1986, 2297, 2716, 2907, 3009, 3807 | Both sides are out of PP and trade Struggle while Leftovers heals; the battle does not end. Driven with the engine budget at 2,000,000 frames and the ROM drive at 600,000 frames: 720 to 943 engine states match in order and no mismatch appears (796: 894). | none: they cannot be driven "to battle end" in practical time. Keep them off the regression list; they are long-run checks, not open rule bugs. |
+| 3623 | The lab staging itself plays turn 1 before the snapshot (an A press of the intro acknowledgement lands on the first action menu; `oracle/battle_lab.py` `_finish_intro_to_action_menu`). The replay now refuses such a setup (rc 13) instead of reporting a mismatch. | top layer: make the staging stop pressing A once the action menu is up. |
 
-Seed 705 was the same kind of limit and nothing else: it ends after 82,835 ROM frames, just past the driver's default 80,000-frame
-cap (`soundEventProbe.py lab --drive ... --frames N`), and matches 188 / 188.
+Long battles that do end need higher caps than the stock chain (engine 200,000 frames, ROM drive 80,000): 705 (82,835 ROM
+frames), 1338, 1904, 2546 (426,522), 2658, 2742, 3504 (398,092), 3589, 3789. All match to the end.
 
 ## Known gap left on purpose (presentation, not battle rules)
 
@@ -113,13 +149,18 @@ Commits "re-pin the census-anchored tests ..." and "re-pins for the Castform rev
 | `factoryBattleScriptEncoreFullTurn`, `issue138EncoreDisableReceipt` control arm | the Encored side gets its request | fix 5 |
 | `factoryAiCheckBadMove` six "both at the limit" cases, `factoryAiCheckViability` Mirror Move case | -10; no roll | they pinned the wrong rule (fixes 16, 7) |
 | `tools/report/ability-item-parity-census.ts`, `docs/ability-item-parity-census.md`, `docs/gate6-coverage-manifest.json` | pinned source lines moved | edits above them |
+| `presentationStringIssue108` | the staged Rage holder now chooses Rage | fix 19 drops a staged Rage flag when another move is chosen |
+| `tools/integration/sst200Compare.ts` (used by `sst200SecondStatRows`) | the player's Curse decision targets the user | fix 20; the Curse stat rows still equal the ROM's in both scenes |
+| `battleScriptRulesContext` key list | + `battleTurnCounter`, `aiHistoryClears` | fixes 23, 26 |
 
 One presentation lead seen while re-pinning and not looked at: census battle 32 trips `sa125`'s ON - OFF row check on a
 CONFUSION anchor (139 vs 100).
 
 ## Gates
 
-Typecheck, full suite and build are run on a clean checkout of the branch tip. The full suite's only failures are five
-animation evidence tests that fail on box master `43b0b22e5` itself (hash re-point commit: `hyperVoiceEvidenceCheckpoint`,
-`hyperVoiceReducer`, `hyperVoiceActualCore`, `overheatEvidenceCheckpoint`, `psychUpEvidenceCheckpoint`); this lane did not
-touch them.
+Typecheck, full suite and build are run on a clean checkout of the branch tip. Second pass, engine tip `e05bdf321`:
+typecheck ok, build ok, 14,592 tests pass. The full suite's only failures are five animation evidence tests that fail on
+box master `43b0b22e5` itself (hash re-point commit: `hyperVoiceEvidenceCheckpoint`, `hyperVoiceReducer`,
+`hyperVoiceActualCore`, `overheatEvidenceCheckpoint`, `psychUpEvidenceCheckpoint`); this lane did not touch them.
+
+Replay on the same engine: regression 64 / 64, the eight seeds fixed in this pass 8 / 8 (stock chain).
