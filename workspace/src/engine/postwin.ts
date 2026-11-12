@@ -1,3 +1,4 @@
+import { PLAYER_NAME } from "./playerName.ts";
 // Battle Factory Battle 1 return-to-counter flow, relative to the real
 // DESTIN loss-quote dismiss edge.  The timing is oracle/RAM-pinned in
 // docs/postwin-notes.md's S8 engine-evidence addendum.
@@ -805,7 +806,7 @@ export const POSTWIN_QUESTION_WINDOW_CLEAR_DELAY = 2;
 /** RECORD: box clears at +23; the save-SE hold keeps the question up to then. */
 export const POSTWIN_RECORDED_BOX_CLEAR_DELAY = 23;
 export const POSTWIN_RECORDED_TEXT: readonly [string, string] = [
-  "MEMORY\u2019s battle was recorded",
+  `${PLAYER_NAME}\u2019s battle was recorded`,
   "on the FRONTIER PASS.",
 ] as const;
 export const POSTWIN_RECORDED_TEXT_TOTAL =

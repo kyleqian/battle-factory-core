@@ -1,3 +1,4 @@
+import { PLAYER_NAME } from "./playerName.ts";
 import type {
   BattlePresentationCommand,
   BattlePresentationCompletion,
@@ -210,7 +211,7 @@ export const FACTORY_LOSS_TERMINAL_PROFILE: FactoryTerminalLossProfile =
     recordSavedTextFirstDelay: 22,
     recordSavedInputDelay: 70,
     recordSavedMessage: Object.freeze([
-      "MEMORY’s battle was recorded",
+      `${PLAYER_NAME}’s battle was recorded`,
       "on the FRONTIER PASS.",
     ] as const),
     recordDisabledFarewellEdgeFromRestore: 166,
@@ -274,7 +275,7 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
     recordSavedTextFirstDelay: 22,
     recordSavedInputDelay: 70,
     recordSavedMessage: Object.freeze([
-      "MEMORY’s battle was recorded",
+      `${PLAYER_NAME}’s battle was recorded`,
       "on the FRONTIER PASS.",
     ] as const),
     recordDisabledFarewellEdgeFromRestore: 166,
@@ -297,7 +298,7 @@ export const FACTORY_ROUND_WON_TERMINAL_PROFILE: FactoryTerminalRoundWonProfile 
       "we award you these Battle Point(s).",
     ] as const),
     getPoints: Object.freeze([
-      "MEMORY obtained 3 Battle Point(s).",
+      `${PLAYER_NAME} obtained 3 Battle Point(s).`,
       "",
     ] as const),
     exchange: Object.freeze([

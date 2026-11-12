@@ -74,7 +74,7 @@ describe("RUN -> YES on the ROM-measured lab window (Scene OFF)", () => {
     expect({ first: FORFEIT_MESSAGE_FIRST_GLYPH_AT, end: FORFEIT_MESSAGE_END_AT, text: FORFEIT_MESSAGE_TEXT }).toEqual({
       first: 10,
       end: 98,
-      text: "MEMORY forfeited the match!",
+      text: "PLAYER forfeited the match!",
     });
   });
 

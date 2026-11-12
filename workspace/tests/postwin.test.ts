@@ -1252,7 +1252,7 @@ describe("S8 Battle-1 postwin transition", () => {
       expect(no.questionDismissElapsed).toBe(holdAge - 1);
       expect(no.questionYesElapsed).toBeNull();
       // The recorded message mirrors the oracle's string exactly.
-      expect(POSTWIN_RECORDED_TEXT[0]).toBe("MEMORY\u2019s battle was recorded");
+      expect(POSTWIN_RECORDED_TEXT[0]).toBe("PLAYER\u2019s battle was recorded");
       expect(POSTWIN_RECORDED_TEXT[1]).toBe("on the FRONTIER PASS.");
     });
 
