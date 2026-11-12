@@ -132,7 +132,7 @@ for (const scene of ["off", "on"] as const) {
 }
 
 describe("lbra: a new challenge from the attendant after a loss", () => {
-  // nch231 (docs/nch231-lobby-new-challenge.md): the ROM Lobby runs on the free-running per-VBlank RNG, so A at the attendant seeds the next
+  // nch231 (docs/nch231-new-challenge.md): the ROM Lobby runs on the free-running per-VBlank RNG, so A at the attendant seeds the next
   // draft from the cursor the Lobby advanced -- not from the battle orchestrator's end cursor the removed chain used. Pins the live cursor.
   it.each(["on", "off"] as const)("deals from the live vblank cursor, with the loss carry (scene %s)", (scene) => {
     const run = play("loss", scene);
