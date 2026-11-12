@@ -1309,7 +1309,7 @@ export function runCheckBadMovePreamble(input: Readonly<{
   if (!isMovePowerOther) {
     // AI_CBM_CheckIfNegatesType: `if_type_effectiveness AI_EFFECTIVENESS_x0` is the AI probe
     // (dual non-immunity glitch), not the true multiplier.
-    const aiEffectiveness = computeAiEffectiveness(move.type, target.types);
+    const aiEffectiveness = computeAiEffectiveness(move.type, target.types, target.isForesighted ?? false);
     if (aiEffectiveness === 0) {
       return Object.freeze({ kind: "scored", rng, draws: Object.freeze(draws), scoreDelta: -10 });
     }
@@ -2709,7 +2709,7 @@ function runCbmHighRiskForDamage(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false);
   if (aiEffectiveness === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
@@ -2774,9 +2774,16 @@ function runCbmSleep(
  * Ground/Flying is 1 here, not x0 (battle_ai_script_commands.c:1515-1557;
  * battle_script_commands.c:1502-1506,1536-1591).
  */
-function computeAiEffectiveness(moveType: string, types: readonly [string, string]): number {
+function computeAiEffectiveness(moveType: string, types: readonly [string, string], targetHasForesight = false): number {
   let aiEffectiveness = 40;
   for (const entry of TYPE_EFFECTIVENESS) {
+    // TypeCalc (battle_script_commands.c:1560-1566): at the TYPE_FORESIGHT sentinel row the walk BREAKS when the
+    // defender has STATUS2_FORESIGHT, so the Normal / Fighting -> Ghost immunity rows behind it are never applied.
+    // `Cmd_if_type_effectiveness` calls that same TypeCalc (ROM seed 959; docs/parity-mac/ai-effectiveness-foresight.md).
+    if (entry.attackingType === "TYPE_FORESIGHT") {
+      if (targetHasForesight) break;
+      continue;
+    }
     if (entry.attackingType !== moveType || !types.includes(entry.defendingType)) continue;
     aiEffectiveness = Math.trunc((aiEffectiveness * entry.multiplierTenths) / 10);
     if (aiEffectiveness === 0 && entry.multiplierTenths !== 0) aiEffectiveness = 1;
@@ -2801,7 +2808,7 @@ function runCbmParalyze(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false);
   if (aiEffectiveness === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
@@ -2875,7 +2882,7 @@ function runCbmOneHitKO(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  if (computeAiEffectiveness(moveType, target.types) === 0) {
+  if (computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false) === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
@@ -2971,7 +2978,7 @@ function runCbmWillOWisp(
   scoreDelta: number;
 }> {
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
-  const aiEffectiveness = computeAiEffectiveness(moveType, target.types);
+  const aiEffectiveness = computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false);
   const blocked = ability.ability === ABILITY_WATER_VEIL
     || (target.hasAnyStatus ?? false)
     || aiEffectiveness === 0
@@ -3085,7 +3092,7 @@ function runCbmExplosion(
   draws: readonly FactoryAiCheckBadMoveDraw[];
   scoreDelta: number;
 }> {
-  if (computeAiEffectiveness(moveType, target.types) === 0) {
+  if (computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false) === 0) {
     return Object.freeze({ rng, draws: Object.freeze([]), scoreDelta: -10 });
   }
   const ability = nextGetAbilityDraw(rng, ordinal, `${reason}-ability`, target);
@@ -3147,7 +3154,7 @@ function runCbmDreamEater(
   if (!(target.isAsleep ?? false)) {
     return -8;
   }
-  return computeAiEffectiveness(moveType, target.types) === 0 ? -10 : 0;
+  return computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false) === 0 ? -10 : 0;
 }
 
 /**
@@ -3629,7 +3636,7 @@ function runCbmSpitUpAndSwallow(
   target: FactoryAiCheckBadMoveTarget,
   attackerStockpileCount: number,
 ): number {
-  if (computeAiEffectiveness(moveType, target.types) === 0) {
+  if (computeAiEffectiveness(moveType, target.types, target.isForesighted ?? false) === 0) {
     return -10;
   }
   return attackerStockpileCount === 0 ? -10 : 0;

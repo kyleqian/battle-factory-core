@@ -69,3 +69,34 @@ describe("aiv270 A: AI x0 probe is the Cmd_if_type_effectiveness quirk, not the 
     expect(result.draws.map((d) => d.reason)).toEqual(["slot-soundproof"]);
   });
 });
+
+// parity-mac (docs/parity-mac/ai-effectiveness-foresight.md). TypeCalc breaks at the TYPE_FORESIGHT sentinel row when the defender has
+// STATUS2_FORESIGHT (battle_script_commands.c:1560-1566), so Normal / Fighting moves are not x0 into a Foresighted Ghost for
+// `if_type_effectiveness AI_EFFECTIVENESS_x0`. ROM seed 959: Hitmonlee keeps Mega Kick and Brick Break at 100 against a Foresighted
+// Sableye (the engine scored both -10 and was left with Rock Tomb only).
+describe("AI effectiveness honors Foresight on the target", () => {
+  const BRICK_BREAK = 280; // Fighting, power 75
+  const MEGA_KICK = 25; // Normal, power 120
+  const probe = (moveId: number, isForesighted: boolean) => {
+    const result = runCheckBadMovePreamble({
+      rng: { value: 249_678_687, calls: 0 },
+      moveId,
+      target: { ...MAROWAK_TWO_ABILITIES, types: ["TYPE_DARK", "TYPE_GHOST"], ...(isForesighted ? { isForesighted: true } : {}) },
+      attacker: { atkStage: 6, defStage: 6 },
+      drawOrdinalStart: 1,
+      reasonPrefix: "slot",
+    });
+    if (result.kind !== "scored") throw new Error("expected a scored result");
+    return result.scoreDelta;
+  };
+
+  it("without Foresight a Normal / Fighting move into a Ghost is x0: Score_Minus10", () => {
+    expect(probe(BRICK_BREAK, false)).toBe(-10);
+    expect(probe(MEGA_KICK, false)).toBe(-10);
+  });
+
+  it("with Foresight the Ghost immunity rows are skipped: no penalty", () => {
+    expect(probe(BRICK_BREAK, true)).toBe(0); // fails unfixed (-10)
+    expect(probe(MEGA_KICK, true)).toBe(0); // fails unfixed (-10)
+  });
+});
