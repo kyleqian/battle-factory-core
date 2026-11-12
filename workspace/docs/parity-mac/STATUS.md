@@ -13,13 +13,15 @@ item 0d, `docs/gameplay-parity-audit-2026-11-12.md` sections 7 and 8. Evidence i
 | **now matching to battle end** | **114** (113 with the stock chain, 705 with a higher driver frame cap) |
 | not drivable to its end | 1 (796: see "Still open") |
 | regression list (handoff 0d), must keep matching | **64 / 64** |
-| new seeds 1161-4341 that did not match on the old engine (bulk replay batch) | 290 |
-| of those, now matching to battle end | **283** (275 with the stock chain, 8 long battles with higher caps) |
-| of those, endless battles with every state matching up to the cap | 6 |
-| of those, not replayable (lab staging, not the engine) | 1 (3623) |
+| new seeds 1161-6014 that did not match on the old engine (bulk replay batch) | 444 (290 up to 4341, 154 after) |
+| of those, now matching to battle end | **432** (421 with the stock chain, 11 long battles with higher caps) |
+| of those, endless battles with every state matching up to the cap | 10 |
+| of those, not replayable (lab staging, not the engine) | 2 (3623, 5736) |
 
-The bulk batch (another session, engine `a86909863e`) had replayed 3,194 new seeds when this pass started: 2,839 matched,
-290 did not, 65 are Brain battles. The 290 were re-driven here. No seed in either list shows an engine mismatch now.
+The bulk batch (another session, engine `a86909863e`) had replayed seeds 1161 to about 6020 when this pass ended: 4,316
+matched, 444 did not, 99 are Brain battles. The 444 were re-driven here on this branch. **No seed in any list shows an
+engine mismatch now.** Not re-driven here: the 4,316 seeds that already matched on the old engine (the 64 regression
+seeds stand in for them; the bulk session should re-drive them on this engine).
 
 Now matching (114), to join the regression list (705 needs `--frames` above 82,835 on the ROM drive):
 60 79 87 89 90 94 95 107 109 114 119 123 137 138 152 159 161 165 183 193 203 218 225 228 236 265 284 292 332 342 343 345 392 417
@@ -37,6 +39,39 @@ New seeds, by what made them match:
 | long battles, match to the end with engine `--frame-budget=2000000` and ROM `--frames 600000` | 1338 (154 states) 1904 (155; needs fix 19) 2546 (588) 2658 (127) 2742 (171) 3504 (642) 3589 (125) 3789 (162) |
 | endless Struggle / Leftovers stalls: every state matches up to the 600,000-frame ROM cap, no mismatch | 1986 (720 states) 2297 (943) 2716 (941) 2907 (817) 3009 (821) 3807 (929) |
 | lab staging played a turn before the snapshot; cannot be replayed | 3623 |
+
+The 154 later seeds (4342-6014), all on the final engine:
+
+| what | seeds |
+|---|---|
+| match with the stock chain | 146 |
+| long battles, match to the end with the higher caps | 4485 (139 states) 5437 (161) 5950 (260) |
+| endless stalls, every state matches up to the 600,000-frame ROM cap | 4560 (876 states) 4924 (894) 5464 (770) 5632 (913) |
+| lab staging played a turn before the snapshot | 5736 |
+
+No new cause was needed for them: fixes 1-26 and the tool fixes cover all 154.
+
+### Seeds for the regression list
+
+The 421 new seeds that match to battle end with the stock chain (old-engine mismatches of the bulk batch, seeds 1161-6014):
+
+1164 1174 1181 1184 1185 1193 1194 1215 1225 1233 1234 1243 1267 1274 1277 1280 1302 1321 1350 1368 1389 1400 1414 1415 1420 1437
+1440 1448 1461 1467 1469 1473 1478 1499 1507 1522 1545 1585 1602 1618 1629 1684 1687 1692 1705 1714 1724 1745 1750 1757 1759 1779
+1787 1811 1816 1822 1842 1843 1851 1859 1862 1880 1884 1890 1914 1928 1937 1939 1940 1951 1958 1959 1964 1966 1967 1976 1988 1994
+2000 2004 2006 2015 2016 2025 2027 2035 2039 2049 2061 2071 2082 2097 2108 2118 2121 2127 2132 2134 2173 2178 2182 2188 2193 2200
+2203 2215 2230 2235 2250 2265 2270 2274 2275 2303 2311 2318 2324 2347 2349 2355 2358 2363 2380 2416 2421 2430 2440 2459 2475 2484
+2510 2513 2542 2554 2575 2583 2613 2634 2641 2653 2664 2699 2713 2722 2738 2741 2783 2797 2800 2801 2804 2812 2834 2846 2850 2851
+2871 2873 2918 2922 2944 2947 2955 2965 2967 2984 3011 3020 3023 3025 3027 3033 3041 3044 3067 3088 3089 3096 3097 3102 3103 3131
+3134 3152 3158 3162 3173 3209 3231 3240 3262 3305 3330 3335 3344 3356 3375 3377 3379 3387 3388 3397 3420 3455 3461 3465 3478 3493
+3495 3501 3534 3539 3540 3547 3573 3590 3591 3602 3671 3672 3689 3704 3706 3710 3738 3741 3745 3772 3775 3776 3784 3787 3788 3792
+3804 3825 3832 3839 3843 3849 3867 3887 3892 3901 3914 3923 3931 3934 3945 3959 4001 4009 4020 4072 4073 4108 4111 4179 4191 4194
+4204 4206 4214 4222 4235 4237 4243 4266 4268 4270 4284 4306 4322 4331 4341 4357 4360 4369 4373 4401 4408 4410 4412 4413 4419 4447
+4457 4498 4509 4513 4526 4533 4534 4535 4540 4564 4576 4608 4612 4636 4651 4666 4667 4671 4686 4689 4690 4698 4707 4732 4734 4742
+4743 4748 4764 4767 4777 4787 4804 4809 4814 4850 4863 4888 4895 4896 4919 4925 4927 4932 4934 4964 4965 4974 4975 4988 4992 5001
+5005 5010 5039 5055 5056 5060 5063 5077 5088 5104 5113 5120 5128 5198 5210 5226 5233 5245 5250 5254 5272 5281 5282 5287 5290 5295
+5297 5309 5313 5378 5382 5400 5420 5436 5461 5474 5482 5486 5488 5489 5491 5493 5526 5540 5549 5569 5583 5584 5607 5612 5614 5623
+5641 5647 5660 5676 5682 5684 5686 5709 5721 5731 5753 5756 5761 5811 5822 5823 5837 5883 5903 5907 5908 5918 5919 5922 5923 5928
+5951 5966 5981 6003 6014.
 
 ## Fixes (one commit each, C-cited, each with a test that fails without it)
 
@@ -115,11 +150,12 @@ New source-read leads found on the way (no ROM seed yet):
 
 | seed | state | next step |
 |---|---|---|
-| 796, 1986, 2297, 2716, 2907, 3009, 3807 | Both sides are out of PP and trade Struggle while Leftovers heals; the battle does not end. Driven with the engine budget at 2,000,000 frames and the ROM drive at 600,000 frames: 720 to 943 engine states match in order and no mismatch appears (796: 894). | none: they cannot be driven "to battle end" in practical time. Keep them off the regression list; they are long-run checks, not open rule bugs. |
-| 3623 | The lab staging itself plays turn 1 before the snapshot (an A press of the intro acknowledgement lands on the first action menu; `oracle/battle_lab.py` `_finish_intro_to_action_menu`). The replay now refuses such a setup (rc 13) instead of reporting a mismatch. | top layer: make the staging stop pressing A once the action menu is up. |
+| 796, 1986, 2297, 2716, 2907, 3009, 3807, 4560, 4924, 5464, 5632 | Both sides are out of PP and trade Struggle while Leftovers heals; the battle does not end. Driven with the engine budget at 2,000,000 frames and the ROM drive at 600,000 frames: 720 to 943 engine states match in order and no mismatch appears (796: 894). | none: they cannot be driven "to battle end" in practical time. Keep them off the regression list; they are long-run checks, not open rule bugs. |
+| 3623, 5736 | The lab staging itself plays turn 1 before the snapshot (an A press of the intro acknowledgement lands on the first action menu; `oracle/battle_lab.py` `_finish_intro_to_action_menu`). The replay now refuses such a setup (rc 13) instead of reporting a mismatch. | top layer: make the staging stop pressing A once the action menu is up. |
 
 Long battles that do end need higher caps than the stock chain (engine 200,000 frames, ROM drive 80,000): 705 (82,835 ROM
-frames), 1338, 1904, 2546 (426,522), 2658, 2742, 3504 (398,092), 3589, 3789. All match to the end.
+frames), 1338, 1904, 2546 (426,522), 2658, 2742, 3504 (398,092), 3589, 3789, 4485, 5437, 5950 (144,657). All match to
+the end. The staging race is rare (2 of about 4,900 seeds).
 
 ## Known gap left on purpose (presentation, not battle rules)
 
@@ -163,4 +199,8 @@ typecheck ok, build ok, 14,592 tests pass. The full suite's only failures are fi
 box master `43b0b22e5` itself (hash re-point commit: `hyperVoiceEvidenceCheckpoint`, `hyperVoiceReducer`,
 `hyperVoiceActualCore`, `overheatEvidenceCheckpoint`, `psychUpEvidenceCheckpoint`); this lane did not touch them.
 
-Replay on the same engine: regression 64 / 64, the eight seeds fixed in this pass 8 / 8 (stock chain).
+Replay on the same engine, one fresh batch (stock chain): regression 64 / 64; the eight seeds fixed in this pass 8 / 8;
+old open list 113 / 115 (705 and 796 are the two long ones); the 290 list 267 / 267 of its stock-chain seeds; the 154
+list 146 / 146 of its stock-chain seeds. The long battles that end (705 and the eleven of the two new lists) were driven
+on this engine too and match to the end; the endless ones of the 290 list were driven on engine `462d6429d` (before
+fixes 22-26), those of the 154 list on this engine.
