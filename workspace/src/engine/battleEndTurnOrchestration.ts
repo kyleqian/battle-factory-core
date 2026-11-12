@@ -2434,16 +2434,34 @@ function enterTurnValuesCleanUp(
  * `isFirstTurn`/`rechargeTimer` decrements, then the both-branch substitute
  * sync, then the two side-global Follow Me timers.
  */
+/**
+ * `BattleTurnPassed`'s three gHitMarker clears right after `TurnValuesCleanUp(FALSE)`
+ * (`battle_main.c:3974-3977`): HITMARKER_NO_ATTACKSTRING (1 << 9),
+ * HITMARKER_UNABLE_TO_USE_MOVE (1 << 19), HITMARKER_PLAYER_FAINTED (1 << 22).
+ * `RunTurnActionsFunctions` clears the first two only BETWEEN actions
+ * (`:4949-4954`, the reducer's own between-actions clear); what the LAST
+ * action of a turn sets survives until here. Without this, a last mover that
+ * stayed "frozen solid" (CANCELER_FROZEN sets NO_ATTACKSTRING,
+ * `battle_util.c:2067`) made the next turn's first action skip its attack
+ * string and PP deduction and take the SECOND-turn branch of a two-turn move
+ * (`jumpifword CMP_COMMON_BITS, gHitMarker, HITMARKER_NO_ATTACKSTRING`,
+ * battle_scripts_1.s:780 / 1066 / 1813 / 1909 / 1975): ROM seed 342, Solar
+ * Beam (docs/parity-mac/turn-passed-hitmarker-clear.md).
+ */
+const BATTLE_TURN_PASSED_HITMARKER_CLEAR_MASK = ((1 << 9) | (1 << 19) | (1 << 22)) >>> 0;
+
 function finishTurnValuesCleanUp(
   rulesContext: BattleScriptRulesContext,
 ): BattleScriptRulesContext {
-  return clearFollowMeTimersForTurnValuesCleanUp(
+  const cleaned = clearFollowMeTimersForTurnValuesCleanUp(
     syncSubstituteStatus2(
       decrementDisableStructTurnTimers(
         clearProtectStructsForNextTurn(rulesContext),
       ),
     ),
   );
+  const hitMarker = (cleaned.hitMarker & ~BATTLE_TURN_PASSED_HITMARKER_CLEAR_MASK) >>> 0;
+  return hitMarker === cleaned.hitMarker ? cleaned : Object.freeze({ ...cleaned, hitMarker });
 }
 
 function mapFaintedActionsResult(result: BattleScriptFaintedActionsResult): BattleEndTurnResult {

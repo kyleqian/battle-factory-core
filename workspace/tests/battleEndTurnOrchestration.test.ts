@@ -685,6 +685,20 @@ describe("runBattleEndTurnOrchestration (BattleTurnPassed equivalent)", () => {
     expect(turn2.state.rulesContext.party.opponent[2]!.hp).toBe(814);
   });
 
+  it("BattleTurnPassed clears HITMARKER_NO_ATTACKSTRING / UNABLE_TO_USE_MOVE / PLAYER_FAINTED (battle_main.c:3975-3977) and keeps the other bits", () => {
+    // docs/parity-mac/turn-passed-hitmarker-clear.md: what the LAST action of a turn set (a mon that stayed frozen sets
+    // NO_ATTACKSTRING, battle_util.c:2067) must not reach the next turn's first action (ROM seed 342: Solar Beam fired at once).
+    const NO_ATTACKSTRING = 1 << 9;
+    const UNABLE_TO_USE_MOVE = 1 << 19;
+    const PLAYER_FAINTED = 1 << 22;
+    const NO_ANIMATIONS = 1 << 7;
+    const rc = context({ hitMarker: NO_ATTACKSTRING | UNABLE_TO_USE_MOVE | PLAYER_FAINTED | NO_ANIMATIONS });
+    const handlers = createBattleScriptStatusRulesHandlers(program, externalPorts(1));
+    const turn = runBattleEndTurnOrchestration(program, handlers, scratchState(rc, 1));
+    if (turn.kind !== "next-turn") throw new Error("expected next-turn");
+    expect(turn.state.rulesContext.hitMarker).toBe(NO_ANIMATIONS); // unfixed: all four bits survive
+  });
+
   it("(c) Ingrain heal ticks floor(maxHP/16) capped at maxHP -- doc's live 159 -> 161 ledger (docs/ingrain-leechseed-wrap-ground-truth.md §2a), zero RNG", () => {
     const rc = context({
       battlers: [
