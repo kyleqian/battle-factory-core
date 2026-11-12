@@ -5,6 +5,17 @@ Newest entry on top. Keep only ~3 entries here; archive the rest to
 
 ---
 
+## 2026-11-12 — pnm273 (ts lane worker): the player's name defaults to "PLAYER" (handoff item 0c)
+
+- **State:** committed on master (not pushed). ENGINE_BUILD `eb-8838f1fea2958ffc` -> `eb-952d7267a01bd728` (read from dist, includes the fix274 merge that landed meanwhile; tell the website). `docs/pnm273-player-name.md`.
+  typecheck 0; test:gate 362 / 362 (2836 tests; it ran before the last merge); touched tests (103 files importing the three modules + the appTrace importers) green; build / build:lib 0. Full suite not run (supervisor).
+- **Did:** `PLAYER_NAME` in `src/engine/playerName.ts`, used by the forfeit, both record and the BP messages; harness `tools/compare/harnessPlayerName.ts` renders "MEMORY" for compare traces (no-op under vitest: `isolate:false` leaked it).
+  Production differential: only x17-51 y124-133 changes (123 / 250 frf250b, 73 / 133 record-yes); with the override 6 traces / 4412 captures byte-identical; ROM compares 250 / 250, 133 / 133, 178 / 178; census seeds 0..49 both scenes 100 / 100 lines identical (kernel digest unchanged).
+  Tests: `tests/pnm273PlayerName.test.ts` (8), 3 files re-pinned; `factoryTerminalMessages.test.ts` keeps MEMORY (it pins the oracle-save extractor).
+- **Next:** per-player name (`playerName` mount option) when wanted; no compare trace reaches the BP award box (app-side render checked only).
+
+---
+
 ## 2026-11-12 — lbra / lbr-a (ts lane worker): loss / forfeit / retire end in the walkable Lobby (no new-draft chain); handoff item 0b step 1
 
 - **State:** committed on master (not pushed). ENGINE_BUILD `eb-551744f3a2c9b7ed` -> `eb-8838f1fea2958ffc` (read from dist; tell the website). `docs/lbra-lobby-return.md`.
