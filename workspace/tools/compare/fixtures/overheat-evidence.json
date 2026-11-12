@@ -14,7 +14,7 @@
     "sharedProbe": "tools/compare/sweetScentProbe.py",
     "sharedProbeSha256": "8befca84351af4be5adf3051269e605cbc0524a2e5b0f4a9f60a480d78abf3fd",
     "stagingReceipt": "tools/compare/fixtures/overheat-staging-receipt.json",
-    "stagingReceiptSha256": "4cb023216abb6647d63f9e70a88c226d9a96eaf7ea5068cd54d3a8cb707aefd2",
+    "stagingReceiptSha256": "249cdf35034ae21decd3179097c7ca90dab2097c8a260664e17bf903734d39ea",
     "pointerOwnedRoot": { "start": "0x082d6694", "endExclusive": "0x082d6986", "observedParities": [0,1] }
   },
   "freshness": { "check": "tools/check-oracle-freshness.sh", "exitCode": 2, "sharedOracleCaptureUsed": false, "localMgbaWrapper": "tools/run-mgba-probe.py" },
