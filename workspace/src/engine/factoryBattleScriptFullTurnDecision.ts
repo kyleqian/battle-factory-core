@@ -1717,6 +1717,35 @@ function runFocusPunchSetUpPrePass(handlers: Handlers, priorState: MachineState)
   return Object.freeze({ kind: "terminal", state });
 }
 
+/** include/constants/moves.h MOVE_RAGE. */
+const MOVE_RAGE = 99;
+/** include/constants/battle.h STATUS2_RAGE. */
+const STATUS2_RAGE = 1 << 23;
+
+/**
+ * `TryClearRageStatuses` (`battle_util.c:1973-1981`), which
+ * `CheckFocusPunch_ClearVarsBeforeTurnStarts` calls once the Focus Punch
+ * set-up loop is done and before action 1 (`battle_main.c:4925`): a battler
+ * with STATUS2_RAGE whose banked gChosenMoveByBattler is not MOVE_RAGE loses
+ * the flag. The bank is MOVE_NONE for a switch, a locked move and a forced
+ * Struggle (`:4004` resets it every turn), and Metronome / Sleep Talk / Mirror
+ * Move calling Rage bank the CALLING move, so that Rage lasts one turn. Without
+ * this the flag was never dropped and every later hit kept raising Attack
+ * (ROM seed 1904: Clefable's Metronome called Rage, docs/parity-mac/rage-status-clear.md).
+ */
+function tryClearRageStatuses(state: MachineState): MachineState {
+  let rules = state.rulesContext;
+  for (const battler of [0, 1] as const) {
+    const mon = rules.battlers[battler]!;
+    if ((mon.status2 & STATUS2_RAGE) === 0) continue;
+    if (rules.chosenMoveByBattler[battler] === MOVE_RAGE) continue;
+    rules = withBattler(rules, battler, {
+      status2: (mon.status2 & ~STATUS2_RAGE) >>> 0,
+    });
+  }
+  return rules === state.rulesContext ? state : Object.freeze({ ...state, rulesContext: rules });
+}
+
 /**
  * `HandleAction_UseMove`'s two Encore arms (`battle_util.c:111-117` and
  * `:119-128`), evaluated on the rules context at this battler's OWN action
@@ -3435,7 +3464,7 @@ export const reduceFactoryFullTurnDecision: BattleDecisionReducer<FactoryFullTur
   if (prePass.kind === "player-choice") {
     throw new Error("BattleScript_FocusPunchSetUp has no openpartyscreen");
   }
-  const actionsInitialState = prePass.state;
+  const actionsInitialState = tryClearRageStatuses(prePass.state);
 
   const action1 = mover1SwitchPartyIndex !== null
     ? runVoluntarySwitchAction(
